@@ -3,10 +3,13 @@ package com.cmsr.onebase.module.infra.build.security;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.module.infra.api.security.SecurityConfigApi;
+import com.cmsr.onebase.module.infra.api.security.dto.LoginFailureResultDTO;
 import com.cmsr.onebase.module.infra.api.security.dto.PasswordExpiryCheckDTO;
 import com.cmsr.onebase.module.infra.dal.database.SecurityRecordDataRepository;
 import com.cmsr.onebase.module.infra.dal.dataobject.security.SecurityRecordDO;
 import com.cmsr.onebase.module.infra.enums.security.SecurityRecordTypeEnum;
+import com.cmsr.onebase.module.infra.service.security.AntiBruteForceService;
+import com.cmsr.onebase.module.infra.service.security.dto.LoginFailureResult;
 import com.cmsr.onebase.module.infra.service.security.manager.PasswordPolicyManager;
 import com.cmsr.onebase.module.infra.service.security.validator.PasswordValidator;
 import com.cmsr.onebase.module.infra.service.security.validator.config.PasswordPolicyConfig;
@@ -45,6 +48,9 @@ import static com.cmsr.onebase.module.infra.enums.ErrorCodeConstants.PASSWORD_IN
 
         @Resource
         private PasswordEncoder passwordEncoder;
+
+        @Resource
+        private AntiBruteForceService antiBruteForceService;
 
         private final PasswordValidator passwordValidator = new PasswordValidator();
 
@@ -99,9 +105,6 @@ import static com.cmsr.onebase.module.infra.enums.ErrorCodeConstants.PASSWORD_IN
                                                           @RequestParam("encodedPassword") String encodedPassword) {
             // 获取当前租户ID
             Long tenantId = TenantContextHolder.getTenantId();
-
-            // 获取租户的密码策略配置
-            PasswordPolicyConfig config = passwordPolicyManager.getPolicyConfig();
 
             // 创建新的历史记录
             SecurityRecordDO newRecord = SecurityRecordDO.builder()
@@ -167,5 +170,49 @@ import static com.cmsr.onebase.module.infra.enums.ErrorCodeConstants.PASSWORD_IN
                         .message("密码有效")
                         .build());
             }
+        }
+
+        @Override
+        @Operation(summary = "检查账号是否被锁定")
+        public CommonResult<Long> checkAccountLocked(@RequestParam("userId") Long userId) {
+            // 获取当前租户ID
+            Long tenantId = TenantContextHolder.getTenantId();
+
+            // 检查账号锁定状态
+            Long remainingLockSeconds = antiBruteForceService.checkAccountLocked(tenantId, userId);
+
+            return success(remainingLockSeconds);
+        }
+
+        @Override
+        @Operation(summary = "记录登录失败")
+        public CommonResult<LoginFailureResultDTO> recordLoginFailure(@RequestParam("userId") Long userId) {
+            // 获取当前租户ID
+            Long tenantId = TenantContextHolder.getTenantId();
+
+            // 记录登录失败
+            LoginFailureResult internalResult = antiBruteForceService.recordLoginFailure(tenantId, userId);
+
+            // 转换为API DTO
+            LoginFailureResultDTO result = LoginFailureResultDTO.builder()
+                    .locked(internalResult.getLocked())
+                    .remainingAttempts(internalResult.getRemainingAttempts())
+                    .remainingLockSeconds(internalResult.getRemainingLockSeconds())
+                    .message(internalResult.getMessage())
+                    .build();
+
+            return success(result);
+        }
+
+        @Override
+        @Operation(summary = "清除登录失败记录")
+        public CommonResult<Boolean> clearLoginFailureRecord(@RequestParam("userId") Long userId) {
+            // 获取当前租户ID
+            Long tenantId = TenantContextHolder.getTenantId();
+
+            // 清除失败记录
+            antiBruteForceService.clearLoginFailureRecord(tenantId, userId);
+
+            return success(Boolean.TRUE);
         }
     }
