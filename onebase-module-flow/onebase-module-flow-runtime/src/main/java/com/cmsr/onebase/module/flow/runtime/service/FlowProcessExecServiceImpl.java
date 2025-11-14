@@ -175,7 +175,6 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
     private Map<String, Object> convertInputParamsToResult(Map<Long, String> inputParams,
                                                            Map<Long, EntityFieldJdbcTypeRespDTO> fieldInfoMap) {
         Map<String, Object> result = new HashMap<>();
-
         for (Map.Entry<Long, String> entry : inputParams.entrySet()) {
             Long fieldId = entry.getKey();
             String inputValue = entry.getValue();
@@ -185,7 +184,7 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
                 throw new IllegalArgumentException("找不到字段ID为 " + fieldId + " 的字段信息");
             }
             Object convertedValue = convertFieldValue(fieldId, fieldInfo, inputValue);
-            result.put(fieldInfo.getFieldName(), convertedValue);
+            result.put(String.valueOf(fieldInfo.getFieldId()), convertedValue);
         }
         return result;
     }
