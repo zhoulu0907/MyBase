@@ -23,5 +23,5 @@ public interface AppVersionService {
 
     void deleteApplicationVersion(Long versionId);
 
-    Map<Long, VersionDO> findDevelopStatusMap(List<Long> appIds);
+    Map<Long, VersionDO> findVersionMapByAppIds(List<Long> appIds);
 }

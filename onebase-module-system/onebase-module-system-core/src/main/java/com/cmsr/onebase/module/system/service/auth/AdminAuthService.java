@@ -98,4 +98,6 @@ public interface AdminAuthService {
      * @return 登录结果
      */
     AuthLoginRespVO corpLogin(@Valid CorpAuthLoginReqVO reqVO);
+
+    AuthLoginRespVO mobileLogin(@Valid MobleLoginReqVO reqVO);
 }

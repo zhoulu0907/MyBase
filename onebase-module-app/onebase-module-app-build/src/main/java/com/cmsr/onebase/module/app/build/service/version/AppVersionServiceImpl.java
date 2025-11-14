@@ -220,7 +220,7 @@ public class AppVersionServiceImpl implements AppVersionService {
     }
 
     @Override
-    public Map<Long, VersionDO> findDevelopStatusMap(List<Long> appIds) {
+    public Map<Long, VersionDO> findVersionMapByAppIds(List<Long> appIds) {
         List<VersionDO>  allVersions= versionRepository.findVersionList(appIds);
         Map<Long, VersionDO> latestVersionMap = allVersions.stream()
                 .sorted(Comparator.comparing(VersionDO::getUpdateTime).reversed())

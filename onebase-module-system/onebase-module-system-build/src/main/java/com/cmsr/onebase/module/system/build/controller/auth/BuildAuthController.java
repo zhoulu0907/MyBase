@@ -80,6 +80,13 @@ public class BuildAuthController {
         return success(authService.login(reqVO));
     }
 
+    @PostMapping("/mobile-login")
+    @PermitAll
+    @Operation(summary = "使用手机号密码登录")
+    public CommonResult<AuthLoginRespVO> mobileLogin(@RequestBody @Valid MobleLoginReqVO reqVO) {
+        return success(authService.mobileLogin(reqVO));
+    }
+
     @PostMapping("/corp-login")
     @PermitAll
     @Operation(summary = "使用账号密码登录")

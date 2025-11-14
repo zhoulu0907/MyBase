@@ -40,9 +40,13 @@ public class AppApplicationRepository extends DataRepository<ApplicationDO> {
         if (pageReqVO.getStatus() != null) {
             configs.and(Compare.EQUAL, ApplicationDO.APP_STATUS, pageReqVO.getStatus());
         }
-        if(pageReqVO.getOwnerTag()!=null && pageReqVO.getOwnerTag().equals(OwnerTagEnum.MY.getValue())){
+
+        if (StringUtils.isNotBlank(pageReqVO.getPublishModel())) {
+            configs.and(Compare.EQUAL, ApplicationDO.PUBLISH_MODEL, pageReqVO.getPublishModel());
+        }
+        if (pageReqVO.getOwnerTag() != null && pageReqVO.getOwnerTag().equals(OwnerTagEnum.MY.getValue())) {
             LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
-            if(loginUser!=null){
+            if (loginUser != null) {
                 configs.and(Compare.EQUAL, ApplicationDO.CREATOR, loginUser.getId());
             }
         }
@@ -97,7 +101,7 @@ public class AppApplicationRepository extends DataRepository<ApplicationDO> {
     public List<ApplicationDO> findAppApplicationByAppName(String appName) {
         ConfigStore configStore = new DefaultConfigStore();
         if (StringUtils.isNotBlank(appName)) {
-            configStore.and(Compare.LIKE, ApplicationDO.APP_NAME,  appName);
+            configStore.and(Compare.LIKE, ApplicationDO.APP_NAME, appName);
         }
         configStore.order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
         return findAllByConfig(configStore);
@@ -112,7 +116,7 @@ public class AppApplicationRepository extends DataRepository<ApplicationDO> {
     public List<ApplicationDO> findAppApplicationByAppIds(Collection<Long> appIds) {
         ConfigStore configStore = new DefaultConfigStore();
         if (CollectionUtils.isNotEmpty(appIds)) {
-            configStore.in(ApplicationDO.ID,  appIds);
+            configStore.in(ApplicationDO.ID, appIds);
         }
         configStore.order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
         return findAllByConfig(configStore);
@@ -121,10 +125,10 @@ public class AppApplicationRepository extends DataRepository<ApplicationDO> {
     public List<ApplicationDO> findMyAppApplicationByAppName(String appName) {
         ConfigStore configStore = new DefaultConfigStore();
         if (StringUtils.isNotBlank(appName)) {
-            configStore.and(Compare.LIKE, ApplicationDO.APP_NAME,  appName);
+            configStore.and(Compare.LIKE, ApplicationDO.APP_NAME, appName);
         }
         LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
-        if(loginUser==null){
+        if (loginUser == null) {
             throw exception(AppErrorCodeConstants.NOT_LOGIN);
         }
         configStore.and(Compare.EQUAL, ApplicationDO.CREATOR, loginUser.getId());

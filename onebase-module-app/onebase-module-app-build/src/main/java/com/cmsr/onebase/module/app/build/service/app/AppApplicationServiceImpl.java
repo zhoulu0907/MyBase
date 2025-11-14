@@ -114,7 +114,7 @@ public class AppApplicationServiceImpl implements AppApplicationService {
                 .map(ApplicationDO::getId)
                 .collect(Collectors.toList());
          Map<Long,List<UserPhotoDTO>> userListMap=appSqlQueryRepository.findUserPhotoList(appIds);
-        Map<Long, VersionDO> developStatusMap=appVersionService.findDevelopStatusMap(appIds);
+        Map<Long, VersionDO> developStatusMap=appVersionService.findVersionMapByAppIds(appIds);
 
         List<ApplicationRespVO> respVOS = pageResult.getList().stream()
                 .map(v -> {
@@ -126,7 +126,7 @@ public class AppApplicationServiceImpl implements AppApplicationService {
                     bean.setUserPhotoList(userListMap.get(v.getId()));
                     if(developStatusMap.get(v.getId()) != null) {
                         VersionDO versionDO = developStatusMap.get(v.getId());
-                        bean.setDevelopStatus(setDevelopStatus(v, versionDO));
+                        bean.setDevelopStatus(getDevelopStatus(v, versionDO));
                     }
                     return bean;
                 })
@@ -139,13 +139,14 @@ public class AppApplicationServiceImpl implements AppApplicationService {
      * @param applicationDO 应用对象
      * @param versionDO 版本对象
      */
-    private String setDevelopStatus(ApplicationDO applicationDO, VersionDO versionDO) {
+    private String getDevelopStatus(ApplicationDO applicationDO, VersionDO versionDO) {
        String text="";
         if (versionDO != null) {
             LocalDateTime verUpdate = versionDO.getUpdateTime();
             LocalDateTime appUpdate = applicationDO.getUpdateTime();
             if (appUpdate.isAfter(verUpdate)) {
-              text= DevelopStatusEnum.ITERATE.getName();
+                // 修改code,前端处理显示名称
+              text= DevelopStatusEnum.ITERATE.getCode();
             }
         }
         return text;

@@ -12,6 +12,7 @@ import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
 import org.anyline.entity.Order;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
@@ -119,10 +120,9 @@ public class AdminUserDataRepository extends DataRepository<AdminUserDO> {
      */
     public List<AdminUserDO> findAllByStatus(Integer status, String userNickName) {
         DefaultConfigStore configStore = CorpDeptUserHelper.getCorpConfigStore(AdminUserDO.USER_TYPE);
-        if (userNickName != null) {
+        if (StringUtils.isNotBlank(userNickName)) {
             configStore.like(AdminUserDO.NICKNAME, userNickName);
         }
-
         configStore.eq(AdminUserDO.STATUS, status)
                 .order(AdminUserDO.ADMIN_TYPE, Order.TYPE.ASC)
                 .order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
@@ -250,5 +250,4 @@ public class AdminUserDataRepository extends DataRepository<AdminUserDO> {
                 .order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
         return findAllByConfig(configStore);
     }
-
 }
