@@ -31,6 +31,10 @@ interface PreviewRenderProps {
 
   refresh?: number;
   pageType?: string;
+
+  // 自定义视图规则
+
+  cpState?: any;
 }
 
 const PreviewRender: React.FC<PreviewRenderProps> = ({
@@ -41,7 +45,8 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
   detailMode,
   showFromPageData,
   refresh,
-  pageType
+  pageType,
+  cpState
 }) => {
   // 获取组件配置
   const componentConfig = getComponentConfig(pageComponentSchema, cpType);
@@ -51,7 +56,14 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
     switch (cpType) {
       case FORM_COMPONENT_TYPES.INPUT_TEXT:
         return (
-          <FormComp.XInputText cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} />
+          <FormComp.XInputText
+            cpName={cpId}
+            id={cpId}
+            {...componentConfig}
+            runtime={runtime}
+            detailMode={detailMode}
+            cpState={cpState}
+          />
         );
       case FORM_COMPONENT_TYPES.INPUT_TEXTAREA:
         return (
@@ -233,7 +245,14 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
         );
       case FORM_COMPONENT_TYPES.SUB_TABLE:
         return (
-          <FormComp.XSubTable cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} pageType={pageType} />
+          <FormComp.XSubTable
+            cpName={cpId}
+            id={cpId}
+            {...componentConfig}
+            runtime={runtime}
+            detailMode={detailMode}
+            pageType={pageType}
+          />
         );
       case FORM_COMPONENT_TYPES.DATA_SELECT:
         return (

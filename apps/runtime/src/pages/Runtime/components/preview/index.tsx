@@ -378,12 +378,16 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     setDetailMode(false);
   };
 
-  const handleFormValuesChange = (value: Partial<any>, values: Partial<any>) => {
-    initInteractionRule(
+  const [cpStates, setCpStates] = useState<Record<string, any>>({});
+
+  const handleFormValuesChange = async (value: Partial<any>, values: Partial<any>) => {
+    const states = await initInteractionRule(
       values,
       pageViews.value[curViewId.value]?.interactionRules,
       useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value
     );
+
+    setCpStates(states);
   };
 
   return (
@@ -443,6 +447,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                       showFromPageData={() => {
                         setPageType(EDITOR_TYPES.FORM_EDITOR);
                       }}
+                      cpState={cpStates[cp.id]}
                     />
                   </div>
                 )}
