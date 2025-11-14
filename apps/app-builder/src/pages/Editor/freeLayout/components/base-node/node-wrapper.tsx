@@ -67,6 +67,7 @@ export const NodeWrapper: React.FC<NodeWrapperProps> = (props) => {
   const copyNode = useCallback(() => {
     console.log('复制节点');
   }, [node]);
+
   return (
     <>
       {(isHover || selected) &&
@@ -84,7 +85,9 @@ export const NodeWrapper: React.FC<NodeWrapperProps> = (props) => {
           </div>
         )}
       <NodeWrapperStyle
-        className={`${selected && !readonly ? 'selected' : ''} ${readonly && nodeRender.data.status + 'Border'}`}
+        className={`${selected && !readonly ? 'selected' : ''} 
+        ${readonly && nodeRender.data.status + 'Border'} 
+        ${nodeRender.id.includes('branch') && 'branchNode'}`}
         ref={nodeRef}
         draggable
         onMouseOver={onMouseOver}
