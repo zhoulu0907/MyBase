@@ -1,5 +1,4 @@
 import { InteractionActionType, OPERATOR_MAP, type InteractionRule } from '@onebase/app';
-import { STATUS_OPTIONS, STATUS_VALUES } from '@onebase/ui-kit';
 import { Jexl } from '@pawel-up/jexl';
 
 /**
@@ -76,9 +75,8 @@ export async function initInteractionRule(
 
   // 遍历 cpActions 对象，输出每个 cpId 及对应的动作数组
   Object.entries(cpActions).forEach(([cpId, actions]) => {
-    console.log(`组件ID: ${cpId}，动作:`, actions);
-    let hidden = pageComponentSchemas[cpId].config.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN];
-    let readonly = pageComponentSchemas[cpId].config.status === STATUS_VALUES[STATUS_OPTIONS.READONLY];
+    // let hidden = pageComponentSchemas[cpId].config.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN];
+    // let readonly = pageComponentSchemas[cpId].config.status === STATUS_VALUES[STATUS_OPTIONS.READONLY];
 
     let hiddenAssigned = false; // 标记 hidden 是否已经被赋值
     let readonlyAssigned = false; // 标记 readonly 是否已经被赋值

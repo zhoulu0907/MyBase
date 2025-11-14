@@ -1,8 +1,8 @@
-import { memo, useEffect, useState } from 'react';
 import { Form, Input } from '@arco-design/web-react';
-import { useFormEditorSignal } from 'src/signals/page_editor';
 import { useSignals } from '@preact/signals-react/runtime';
+import { memo } from 'react';
 import { FORM_COMPONENT_TYPES, FormComp } from 'src/components/Materials';
+import { useFormEditorSignal } from 'src/signals/page_editor';
 import './index.css';
 
 interface TableSearchConfig {
@@ -21,9 +21,9 @@ const TableSearch = memo((props: TableSearchConfig) => {
   const renderSearchItem = (item: any) => {
     if (componentSchemasKeys.length) {
       // 当前组件配置的key
-      const cpId = componentSchemasKeys.find((ele) =>
-        fromPageComponentSchemas.value[ele].config.dataField.includes(item.value)
-      );
+      const cpId = componentSchemasKeys.find((ele) => {
+        return fromPageComponentSchemas.value[ele]?.config?.dataField?.includes(item.value);
+      });
       if (cpId) {
         // 当前组件配置
         const currentComponentSchemas = fromPageComponentSchemas.value[cpId];
