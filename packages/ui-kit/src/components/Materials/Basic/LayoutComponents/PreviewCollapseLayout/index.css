@@ -1,6 +1,11 @@
 .XPreviewCollapseLayout {
   width: 100%;
   border: 1px solid #d4d4d4 !important;
+  overflow: visible !important;
+
+  .arco-collapse-item-content {
+    overflow: visible !important;
+  }
 
   .item {
     min-height: 200px;
