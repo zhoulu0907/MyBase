@@ -34,27 +34,18 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
     }
   }, [dataField]);
 
-  const getPopupContainer = (node?: HTMLElement): HTMLElement => {
-    return (
-      (node?.closest('.arco-form-item') as HTMLElement) ||
-      node?.parentNode as HTMLElement ||
-      document.body
-    );
-  };
-
   return (
     <div className="formWrapper">
       <Cell
         label={label.display && label.text}
         showArrow
-        // onClick={() => {setSingleVisible(true);}}
+        onClick={() => { setSingleVisible(true) }}
       />
       <Picker
         cascade={false}
         data={defaultValue}
         visible={singleVisible}
-        maskClosable={true}
-        getContainer={getPopupContainer}
+        maskClosable
         contentStyle={{
           width: '100%',
           pointerEvents: runtime ? 'unset' : 'none'
@@ -64,7 +55,7 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
           setSingleVisible(false);
         }}
         onPickerChange={(value, index, data) => {
-            console.info('-----demo onPickerChange', value, index, data);
+          console.info('-----demo onPickerChange', value, index, data);
         }}
       />
       {/* <Form.Item
@@ -96,7 +87,6 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
             }}
             allowClear
             options={defaultValue}
-            getPopupContainer={getPopupContainer}
             style={{
               width: '100%',
               pointerEvents: runtime ? 'unset' : 'none'

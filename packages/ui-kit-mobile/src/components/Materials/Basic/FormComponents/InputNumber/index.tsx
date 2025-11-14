@@ -56,7 +56,7 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
   };
 
   return (
-    <div className="formWrapper">
+    <div className="formWrapper inputTextWrapper">
       <Input
         label={label.display && label.text}
         type="number"
@@ -70,7 +70,7 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
         }}
         suffix={showUnit ? unitValue : ''}
       />
-      
+
       {/* <Form.Item
         label={label.display && label.text}
         field={

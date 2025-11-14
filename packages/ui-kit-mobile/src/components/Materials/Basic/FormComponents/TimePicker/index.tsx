@@ -7,28 +7,40 @@ import dayjs from 'dayjs';
 
 const XTimePicker = memo((props: XInputTimePickerConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const { label, tooltip, status, defaultValue, verify, layout, labelColSpan = 0, runtime = true } = props;
-  const [pickerVisible, setPickerVisible] = useState(false);
   const [pickerCurrentTs, setPickerCurrentTs] = useState(defaultValue ? dayjs(defaultValue).valueOf() : new Date().getTime());
+
+  const onPickerChange = (timestamp: number | [number, number]) => {
+    setPickerCurrentTs(timestamp);
+  }
 
   return (
     <div className="formWrapper">
-      <Cell
-        showArrow
-        label={label.display && label.text}
-        // onClick={() => {setPickerVisible(true);}}
-      >
-        <DatePicker
-          currentTs={pickerCurrentTs}
-          mode={"time"}
-          visible={pickerVisible}
-          onHide={() => setPickerVisible(false)}
-          onOk={() => setPickerVisible(false)}
-          contentStyle={{
-            width: '100%',
-            pointerEvents: runtime ? 'unset' : 'none'
-          }}
-        />
-      </Cell>
+      <DatePicker
+        mode={"time"}
+        title={label.text}
+        currentTs={pickerCurrentTs}
+        contentStyle={{
+          width: '100%',
+          pointerEvents: runtime ? 'unset' : 'none'
+        }}
+        renderLinkedContainer={(_, data) => (
+          <Cell
+            label={label.display && label.text}
+            showArrow
+            bordered={false}
+          >{dayjs(pickerCurrentTs).format('HH:mm:ss')}</Cell>
+        )}
+        formatter={(value, type) => {
+          if (type === 'hour') {
+            return `${value}时`;
+          } else if (type === 'minute') {
+            return `${value}分`;
+          } else if (type === 'second') {
+            return `${value}秒`;
+          }
+        }}
+        onChange={onPickerChange}
+      />
       {/* <Form.Item
         label={label.display && label.text}
         layout={layout}

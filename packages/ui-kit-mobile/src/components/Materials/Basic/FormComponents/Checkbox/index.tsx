@@ -23,11 +23,7 @@ const XCheckbox = memo((props: XInputCheckboxConfig & { runtime?: boolean; detai
     detailMode
   } = props;
 
-  // const { form } = Form.useFormContext();
-
   const fieldId = dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.SELECT_MUTIPLE}_${nanoid()}`
-
-  // const fieldValue = Form.useWatch(fieldId, form);
 
   return (
     <div className="formWrapper">
@@ -44,7 +40,7 @@ const XCheckbox = memo((props: XInputCheckboxConfig & { runtime?: boolean; detai
           }}
         />
       </Cell>
-      
+
       {/* <Form.Item
         label={label.display && label.text}
         field={fieldId}

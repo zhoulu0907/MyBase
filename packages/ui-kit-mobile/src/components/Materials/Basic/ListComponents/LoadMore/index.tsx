@@ -1,12 +1,13 @@
 import {
-    Dialog,
-    Sticky,
-    Ellipsis,
-    Input,
-    SearchBar,
-    Toast,
-    Button,
-    LoadMore
+  Dialog,
+  Sticky,
+  Ellipsis,
+  Input,
+  SearchBar,
+  Toast,
+  Button,
+  LoadMore,
+  Dropdown,
 } from '@arco-design/mobile-react';
 import { useForm } from '@arco-design/mobile-react/esm/form';
 import { memo, useEffect, useState } from 'react';
@@ -80,7 +81,7 @@ const XLoadMore = memo(
       showHeader,
       stripe,
       pagePosition,
-      pageSize,
+      pageSize = 10,
       showTotal,
       showOpearate,
       fixedOpearate,
@@ -107,6 +108,7 @@ const XLoadMore = memo(
     const [tableTotal, setTableTotal] = useState<number>(0);
     const [tablePageNo, setTablePageNo] = useState<number>(1);
     const [loading, setLoading] = useState<boolean>(false);
+    const [showDropdown, setShowDropdown] = useState(false);
 
     const onReachBottom = (cb: Function) => {
       console.log('onReachBottom', tablePageNo);
@@ -194,7 +196,7 @@ const XLoadMore = memo(
         menuId: curMenu.value?.id,
         entityId: metaData,
         pageNo: tablePageNo,
-        pageSize: pageSize || 10,
+        pageSize: pageSize,
         filters: queryData
       };
 
@@ -321,7 +323,7 @@ const XLoadMore = memo(
     const [form] = useForm();
 
     const noEdit = advancedButtonPermission === BUTTON_VALUES[BUTTON_OPTIONS.HIDDEN] && !hasOperationPermission
-        || advancedButtonPermission === BUTTON_VALUES[BUTTON_OPTIONS.DISABLED] && !hasOperationPermission;
+      || advancedButtonPermission === BUTTON_VALUES[BUTTON_OPTIONS.DISABLED] && !hasOperationPermission;
     const getItemBtns = (item: any) => {
       if (noEdit) return;
       return (
@@ -336,44 +338,119 @@ const XLoadMore = memo(
       )
     }
 
+    const [value, setValue] = useState([]);
+
+    const filterDropdown = () => {
+      return (
+        <Dropdown
+          showDropdown={showDropdown}
+          onCancel={() => setShowDropdown(false)}
+        >
+          <div className="demo-dropdown-option-desc">Group 1</div>
+          <Dropdown.Options
+            useColumn={3}
+            multiple={true}
+            selectedValue={value[0] || []}
+            onOptionClick={() => { console.info('click 1'); }}
+            onOptionChange={(val, item) => {
+              console.info('change 1', val, item);
+              setValue((oldValue) => {
+                oldValue[0] = val;
+                return [...oldValue];
+              });
+            }}
+            options={[
+              {
+                label: 'Option 1',
+                value: 0,
+                disabled: false,
+              },
+              {
+                label: 'Option 2',
+                value: 1,
+              },
+              {
+                label: 'Option 3',
+                value: 2,
+                disabled: true,
+              },
+              {
+                label: 'Option 4',
+                value: 3,
+              }
+            ]}
+          ></Dropdown.Options>
+          <div className="demo-dropdown-option-desc">Group 2</div>
+          <Dropdown.Options
+            useColumn={3}
+            multiple={true}
+            selectedValue={value[1] || []}
+            onOptionClick={() => { console.info('click 2'); }}
+            onOptionChange={(val, item) => {
+              console.info('change 2', val, item);
+              setValue((oldValue) => {
+                oldValue[1] = val;
+                return [...oldValue];
+              });
+            }}
+            options={[
+              {
+                label: 'Option 5',
+                value: 0,
+                disabled: false,
+              },
+              {
+                label: 'Option 6',
+                value: 1,
+              }]}
+          ></Dropdown.Options>
+          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: '0.16rem' }}>
+            <Button type='ghost' style={{ marginRight: "0.08rem", flex: 1 }}>重置</Button>
+            <Button style={{ flex: 1 }}>确定</Button>
+          </div>
+        </Dropdown>
+      )
+    }
+
     return (
       <div className="loadmore-list-wrapper">
-        <Sticky topOffset={0.46 * window.ROOT_FONT_SIZE} className="list-search-header">
+        <Sticky topOffset={0.44 * window.ROOT_FONT_SIZE} className="list-search-header">
           {searchItems?.length ? (
-              <SearchBar actionButton={null} placeholder={`请输入${searchItems[0].label}`} />
-            ) : null}
-            <img className="filter-icon" src={filterIcon} alt="" />
+            <SearchBar actionButton={null} placeholder={`请输入${searchItems[0].label}`} />
+          ) : null}
+          <img className="filter-icon" src={filterIcon} alt="" onClick={() => setShowDropdown(true)} />
+          {filterDropdown()}
         </Sticky>
         {showAddBtn && (
-              <div className="list-create-btn" onClick={handleCreate}>
+          <div className="list-create-btn" onClick={handleCreate}>
+          </div>
+        )}
+        <div className="list-body-wrapper">
+          {
+            tableData.map((item) => (
+              <div key={item.key} className="list-body-item-wrapper" onClick={() => handleRowClick(item)}>
+                {finalColumns?.map((col, index) => {
+                  return <div className="list-body-item-element" key={col.dataIndex}>
+                    <Ellipsis className="list-body-item-title" text={col.title} />
+                    {index ? '' : '：'}
+                    <Ellipsis className="list-body-item-content" text={item[col.dataIndex]} />
+                  </div>
+                })}
+                {getItemBtns(item)}
               </div>
-            )}
-            <div className="list-body-wrapper">
-                {
-                  tableData.map((item) => (
-                    <div key={item.key} className="list-body-item-wrapper" onClick={() => handleRowClick(item)}>
-                      {finalColumns?.map((col, index) => {
-                        return <div className="list-body-item-element" key={col.dataIndex}>
-                          <Ellipsis className="list-body-item-title" text={col.title} />
-                          { index ? '' : '：'}
-                          <Ellipsis className="list-body-item-content" text={item[col.dataIndex]} />
-                        </div>
-                      })}
-                      {getItemBtns(item)}
-                    </div>
-                  ))
-                }
-              {
-                loading || tablePageNo * pageSize >= (tableTotal || Number.MAX_SAFE_INTEGER) ? null : <LoadMore
-                  getData={onReachBottom}
-                  getDataAtFirst={false}
-                  threshold={200}
-                  blockWhenLoading={false}
-                  trigger={manuClick ? 'click' : 'scroll'}
-                  throttle={300}
-                />
-              }
-            </div>
+            ))
+          }
+          {
+            loading || tablePageNo * pageSize >= (tableTotal || Number.MAX_SAFE_INTEGER) ? null : <LoadMore
+              getData={onReachBottom}
+              getDataAtFirst={false}
+              threshold={200}
+              blockWhenLoading={false}
+              trigger={manuClick ? 'click' : 'scroll'}
+              throttle={300}
+            />
+          }
+        </div>
       </div>
     );
   }

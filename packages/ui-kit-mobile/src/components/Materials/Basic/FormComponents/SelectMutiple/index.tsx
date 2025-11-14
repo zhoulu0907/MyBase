@@ -1,10 +1,10 @@
-import { Cell, Picker } from '@arco-design/mobile-react';
+import { Cell, Checkbox, Dropdown } from '@arco-design/mobile-react';
 import { memo, useEffect, useState } from 'react';
 // import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 // import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 // import { nanoid } from 'nanoid';
-import '../index.css';
 import type { XInputSelectMutipleConfig } from './schema';
+import '../index.css';
 
 const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const {
@@ -16,16 +16,14 @@ const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: bool
     layout,
     labelColSpan = 0,
     showSearch,
-    defaultValue,
+    defaultOptions,
     runtime = true,
     detailMode
   } = props;
 
-  // const { form } = Form.useFormContext();
   const [fieldId, setFieldId] = useState('');
-  const [multipleVisible, setMultipleVisible] = useState(false);
-
-  // const fieldValue = Form.useWatch(fieldId, form);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [selected, setSelected] = useState<string[]>([]);
 
   useEffect(() => {
     if (dataField.length > 0) {
@@ -33,40 +31,36 @@ const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: bool
     }
   }, [dataField]);
 
-  const getPopupContainer = (node?: HTMLElement): HTMLElement => {
-    return (
-      (node?.closest('.arco-form-item') as HTMLElement) ||
-      node?.parentNode as HTMLElement ||
-      document.body
-    );
-  };
+  const options = defaultOptions?.map(({ label, value }: { label: string; value: string | number }) => ({ label, value }));
 
   return (
     <div className="formWrapper">
       <Cell
         label={label.display && label.text}
         showArrow
-        // onClick={() => {setMultipleVisible(true);}}
-      />
-      <Picker
-        data={defaultValue}
-        visible={multipleVisible}
-        getContainer={getPopupContainer}
-        cascade={false}
-        maskClosable={true}
-        contentStyle={{
+        onClick={() => { setShowDropdown(true); }}
+        children={selected.map((key) => options.find((o) => o.value === key)?.label).join(', ') || '请选择'}
+        style={{
           width: '100%',
           pointerEvents: runtime ? 'unset' : 'none'
         }}
-        onHide={() => setMultipleVisible(false)}
-        onOk={(val, data) => {
-          setMultipleVisible(false);
-        }}
-        onPickerChange={(value, index, data) => {
-            console.info('-----demo onPickerChange', value, index, data);
-        }}
       />
-          
+      <Dropdown
+        useColumn={3}
+        multiple={true}
+        showDropdown={showDropdown}
+        onCancel={() => setShowDropdown(false)}
+      >
+        <Checkbox.Group
+          layout='block'
+          defaultValue={selected}
+          options={options}
+          onChange={(value: any[]) => {
+            setSelected(value);
+          }}
+        />
+      </Dropdown>
+
       {/* <Form.Item
         label={label.display && label.text}
         field={
@@ -96,7 +90,6 @@ const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: bool
             mode="multiple"
             allowClear
             showSearch={showSearch}
-            getPopupContainer={getPopupContainer}
             filterOption={(input, option) => {
               return option?.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0;
             }}

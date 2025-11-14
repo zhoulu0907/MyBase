@@ -1,5 +1,5 @@
 import ExecuteFlows from '@/utils/flow';
-import { Button, PopupSwiper, Form, Toast, Sticky } from '@arco-design/mobile-react';
+import { Button, PopupSwiper, Form, Toast } from '@arco-design/mobile-react';
 import { useForm } from '@arco-design/mobile-react/esm/form';
 
 import {
@@ -51,6 +51,7 @@ import { fetchSubmitInstance } from '@onebase/app/src/services/app_runtime';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { Fragment, useEffect, useState } from 'react';
 import styles from './index.module.less';
+import CustomNav from '@/pages/components/Nav';
 
 interface PreviewProps {
   menuId: string;
@@ -218,7 +219,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       setDrawerVisible(false);
       setRefresh(Date.now());
     } else {
-      
+
       try {
         let res = null;
         if (curPage?.value?.pageSetType === PageType.BPM) {
@@ -371,10 +372,12 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   console.warn('xx-d==', useEditorSignalMap.get(editPageViewId.value)?.components.value)
   return (
     <div className={styles.previewPage}>
-      
-      <Sticky topOffset={0} className={styles.previewTitle}>
+
+      {/* <Sticky topOffset={0} className={styles.previewTitle}>
         {curFormPage.slice(0, curFormPage.length - 3)}
-      </Sticky>
+      </Sticky> */}
+      <CustomNav title={curFormPage.slice(0, curFormPage.length - 3)} style={{ background: '#fff' }} />
+
       <div className={styles.content}>
         {pageType === EDITOR_TYPES.LIST_EDITOR &&
           listComponents.value.map((cp: GridItem) => (
@@ -406,24 +409,24 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
               <Fragment key={cp.id} >
                 {useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id].config.status !==
                   STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
-                  <div
-                    key={cp.id}
-                    className={styles.componentItem}
-                    style={{ width: '100%' }}
-                  >
-                    <PreviewRender
-                      cpId={cp.id}
-                      cpType={cp.type}
-                      pageComponentSchema={
-                        useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id]
-                      }
-                      runtime={true}
-                      showFromPageData={() => {
-                        setPageType(EDITOR_TYPES.FORM_EDITOR);
-                      }}
-                    />
-                  </div>
-                )}
+                    <div
+                      key={cp.id}
+                      className={styles.componentItem}
+                      style={{ width: '100%' }}
+                    >
+                      <PreviewRender
+                        cpId={cp.id}
+                        cpType={cp.type}
+                        pageComponentSchema={
+                          useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id]
+                        }
+                        runtime={true}
+                        showFromPageData={() => {
+                          setPageType(EDITOR_TYPES.FORM_EDITOR);
+                        }}
+                      />
+                    </div>
+                  )}
               </Fragment>
             ))}
 
@@ -440,49 +443,47 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
         {/* 右侧详情抽屉 */}
         <PopupSwiper
-          title={
-            <div className={styles.drawerTitle}>
-              <div>详情</div>
-              {/* {detailMode && (
-                <Button type="primary" onClick={() => toEditMode()}>
-                  编辑
-                </Button>
-              )} */}
-            </div>
-          }
+          // title={
+          //   <div className={styles.drawerTitle}>
+          //     <div>详情</div>
+          //     {/* {detailMode && (
+          //       <Button type="primary" onClick={() => toEditMode()}>
+          //         编辑
+          //       </Button>
+          //     )} */}
+          //   </div>
+          // }
           visible={drawerVisible.value}
-          placement="right"
-          onCancel={() => setDrawerVisible(false)}
-          footer={null}
+          close={() => { setDrawerVisible(false) }}
         >
           <div className={styles.content}>
-            <Form layout="inline" form={form} requiredSymbol={{ position: 'end' }}>
+            <Form layout="inline" form={form}>
               {useEditorSignalMap.get(detailPageViewId.value)?.components.value.map((cp: GridItem) => (
                 <Fragment key={cp.id}>
                   {useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id].config.status !==
                     STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
-                    <div
-                      key={cp.id}
-                      className={styles.componentItem}
-                      style={{
-                        width: getComponentWidth(
-                          useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id],
-                          cp.type
-                        )
-                      }}
-                    >
-                      <PreviewRender
-                        cpId={cp.id}
-                        cpType={cp.type}
-                        pageComponentSchema={
-                          useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id]
-                        }
-                        runtime={true}
-                        detailMode={detailMode}
-                        showFromPageData={() => {}}
-                      />
-                    </div>
-                  )}
+                      <div
+                        key={cp.id}
+                        className={styles.componentItem}
+                        style={{
+                          width: getComponentWidth(
+                            useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id],
+                            cp.type
+                          )
+                        }}
+                      >
+                        <PreviewRender
+                          cpId={cp.id}
+                          cpType={cp.type}
+                          pageComponentSchema={
+                            useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id]
+                          }
+                          runtime={true}
+                          detailMode={detailMode}
+                          showFromPageData={() => { }}
+                        />
+                      </div>
+                    )}
                 </Fragment>
               ))}
 

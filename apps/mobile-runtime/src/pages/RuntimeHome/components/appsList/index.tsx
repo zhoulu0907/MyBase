@@ -49,7 +49,7 @@ const AppsList: React.FC<{ treeData: TreeNode[] }> = ({ treeData }) => {
   }
 
   const GridLayout = ({ data }: { data: TreeNode[] }) => {
-    const renderData = data.map((item) => ({
+    const renderData = data.filter((node) => node.isPage).map((item) => ({
       img: <DynamicIcon
         IconComponent={menuIconList.find((icon) => icon.code === item.icon)?.icon}
         theme="outline"
@@ -93,6 +93,7 @@ const AppsList: React.FC<{ treeData: TreeNode[] }> = ({ treeData }) => {
         <Tabs
           className={styles.tabs}
           tabs={tabData}
+          tabBarArrange={"start"}
           tabBarHasDivider={false}
         >
           {

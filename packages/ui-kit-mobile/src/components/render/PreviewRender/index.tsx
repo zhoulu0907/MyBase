@@ -49,15 +49,15 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
   const componentConfig = getComponentConfig(pageComponentSchema, cpType);
 
   console.warn('b11=======111====', {
-  cpId,
-  cpType,
-  pageComponentSchema,
-  runtime,
-  detailMode,
-  showFromPageData,
-  refresh
-})
-console.warn('b11=======222====', componentConfig)
+    cpId,
+    cpType,
+    pageComponentSchema,
+    runtime,
+    detailMode,
+    showFromPageData,
+    refresh
+  })
+  console.warn('b11=======222====', componentConfig)
   // 渲染对应的组件
   const renderComponent = () => {
     switch (cpType) {
@@ -173,35 +173,35 @@ console.warn('b11=======222====', componentConfig)
           />
         );
       case FORM_COMPONENT_TYPES.USER_SELECT:
-        // return (
-        //   <FormComp.XUserSelect
-        //     cpName={cpId}
-        //     id={cpId}
-        //     {...componentConfig}
-        //     runtime={runtime}
-        //     detailMode={detailMode}
-        //   />
-        // );
+      // return (
+      //   <FormComp.XUserSelect
+      //     cpName={cpId}
+      //     id={cpId}
+      //     {...componentConfig}
+      //     runtime={runtime}
+      //     detailMode={detailMode}
+      //   />
+      // );
       case FORM_COMPONENT_TYPES.DEPT_SELECT:
-        // return (
-        //   <FormComp.XDeptSelect
-        //     cpName={cpId}
-        //     id={cpId}
-        //     {...componentConfig}
-        //     runtime={runtime}
-        //     detailMode={detailMode}
-        //   />
-        // );
+        return (
+          <FormComp.XDeptSelect
+            cpName={cpId}
+            id={cpId}
+            {...componentConfig}
+            runtime={runtime}
+            detailMode={detailMode}
+          />
+        );
       case FORM_COMPONENT_TYPES.FILE_UPLOAD:
-        // return (
-        //   <FormComp.XFileUpload
-        //     cpName={cpId}
-        //     id={cpId}
-        //     {...componentConfig}
-        //     runtime={runtime}
-        //     detailMode={detailMode}
-        //   />
-        // );
+      // return (
+      //   <FormComp.XFileUpload
+      //     cpName={cpId}
+      //     id={cpId}
+      //     {...componentConfig}
+      //     runtime={runtime}
+      //     detailMode={detailMode}
+      //   />
+      // );
       case FORM_COMPONENT_TYPES.IMG_UPLOAD:
         return (
           <FormComp.XImgUpload cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} />
@@ -211,29 +211,29 @@ console.warn('b11=======222====', componentConfig)
           <FormComp.XAutoCode cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} />
         );
       case FORM_COMPONENT_TYPES.RELATED_FORM:
-        // return (
-        //   <FormComp.XRelatedForm
-        //     cpName={cpId}
-        //     id={cpId}
-        //     {...componentConfig}
-        //     runtime={runtime}
-        //     detailMode={detailMode}
-        //   />
-        // );
+      // return (
+      //   <FormComp.XRelatedForm
+      //     cpName={cpId}
+      //     id={cpId}
+      //     {...componentConfig}
+      //     runtime={runtime}
+      //     detailMode={detailMode}
+      //   />
+      // );
       case FORM_COMPONENT_TYPES.STATIC_TEXT:
-        // return (
-        //   <FormComp.XStaticText
-        //     cpName={cpId}
-        //     id={cpId}
-        //     {...componentConfig}
-        //     runtime={runtime}
-        //     detailMode={detailMode}
-        //   />
-        // );
+      // return (
+      //   <FormComp.XStaticText
+      //     cpName={cpId}
+      //     id={cpId}
+      //     {...componentConfig}
+      //     runtime={runtime}
+      //     detailMode={detailMode}
+      //   />
+      // );
       case FORM_COMPONENT_TYPES.RICH_TEXT:
-        // return (
-        //   <FormComp.XRichText cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} />
-        // );
+      // return (
+      //   <FormComp.XRichText cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} />
+      // );
       case FORM_COMPONENT_TYPES.CAROUSEL_FORM:
         return (
           <FormComp.XCarouselForm
@@ -245,68 +245,68 @@ console.warn('b11=======222====', componentConfig)
           />
         );
       case FORM_COMPONENT_TYPES.SUB_TABLE:
-        // return (
-        //   <FormComp.XSubTable cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} />
-        // );
+      // return (
+      //   <FormComp.XSubTable cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} />
+      // );
       case FORM_COMPONENT_TYPES.DATA_SELECT:
-        // return (
-        //   <FormComp.XDataSelect
-        //     cpName={cpId}
-        //     id={cpId}
-        //     {...componentConfig}
-        //     runtime={runtime}
-        //     detailMode={detailMode}
-        //   />
-        // );
+      // return (
+      //   <FormComp.XDataSelect
+      //     cpName={cpId}
+      //     id={cpId}
+      //     {...componentConfig}
+      //     runtime={runtime}
+      //     detailMode={detailMode}
+      //   />
+      // );
 
       //  布局组件
       case LAYOUT_COMPONENT_TYPES.COLUMN_LAYOUT:
-        // return <LayoutComp.XPreviewColumnLayout {...componentConfig} cpName={cpId} id={cpId} />;
+      // return <LayoutComp.XPreviewColumnLayout {...componentConfig} cpName={cpId} id={cpId} />;
       case LAYOUT_COMPONENT_TYPES.TABS_LAYOUT:
-        // return <LayoutComp.XPreviewTabsLayout {...componentConfig} cpName={cpId} id={cpId} />;
+      // return <LayoutComp.XPreviewTabsLayout {...componentConfig} cpName={cpId} id={cpId} />;
       case LAYOUT_COMPONENT_TYPES.COLLAPSE_LAYOUT:
         // return <LayoutComp.XPreviewCollapseLayout {...componentConfig} cpName={cpId} id={cpId} />;
         return <div>todo: LayoutComp</div>
       //  列表组件
       case LIST_COMPONENT_TYPES.TABLE:
         return <ListComp.XLoadMore cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} showFromPageData={showFromPageData} />;
-        // return (
-        //   <ListComp.XTable
-        //     cpName={cpId}
-        //     id={cpId}
-        //     {...componentConfig}
-        //     runtime={runtime}
-        //     showFromPageData={showFromPageData}
-        //     refresh={refresh}
-        //   />
-        // );
+      // return (
+      //   <ListComp.XTable
+      //     cpName={cpId}
+      //     id={cpId}
+      //     {...componentConfig}
+      //     runtime={runtime}
+      //     showFromPageData={showFromPageData}
+      //     refresh={refresh}
+      //   />
+      // );
       case LIST_COMPONENT_TYPES.CALENDAR:
-        // return <ListComp.XCalendar cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      // return <ListComp.XCalendar cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case LIST_COMPONENT_TYPES.TIMELINE:
-        // return <ListComp.XTimeline cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      // return <ListComp.XTimeline cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case LIST_COMPONENT_TYPES.CAROUSEL:
-        // return <ListComp.XCarousel cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      // return <ListComp.XCarousel cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case LIST_COMPONENT_TYPES.LIST:
-        // return <ListComp.XList cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      // return <ListComp.XList cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case LIST_COMPONENT_TYPES.COLLAPSE:
         // return <ListComp.XCollapse cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
         return <div>todo: ListComp</div>
 
       //  展示组件
       case SHOW_COMPONENT_TYPES.INFO_NOTICE:
-        // return <ShowComp.XInfoNotice cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      // return <ShowComp.XInfoNotice cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case SHOW_COMPONENT_TYPES.IMAGE:
-        // return <ShowComp.XImage cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      // return <ShowComp.XImage cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case SHOW_COMPONENT_TYPES.FILE:
-        // return <ShowComp.XFile cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      // return <ShowComp.XFile cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case SHOW_COMPONENT_TYPES.TEXT:
-       //  return <ShowComp.XText cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      //  return <ShowComp.XText cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case SHOW_COMPONENT_TYPES.WEB_VIEW:
-        // return <ShowComp.XWebView cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      // return <ShowComp.XWebView cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case SHOW_COMPONENT_TYPES.DIVIDER:
-        // return <ShowComp.XDivider cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      // return <ShowComp.XDivider cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case SHOW_COMPONENT_TYPES.PLACEHOLDER:
-        // return <ShowComp.XPlaceholder cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      // return <ShowComp.XPlaceholder cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
 
       default:
         return <div>未知组件类型: {cpType}</div>;

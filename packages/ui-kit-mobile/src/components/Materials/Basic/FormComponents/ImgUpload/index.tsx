@@ -1,4 +1,4 @@
-import { Uploader, Progress, Toast, ImagePreview, Loading } from '@arco-design/mobile-react';
+import { Uploader, Progress, Toast, ImagePreview, Loading, ImagePicker, Cell } from '@arco-design/mobile-react';
 import { IconDelete, IconClose, IconDownload, IconEyeVisible } from '@arco-design/mobile-react/esm/icon';
 import { uploadFile } from '@onebase/platform-center';
 // import { downloadFileByUrl } from 'src/utils/downloadFile';
@@ -38,27 +38,25 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
 
   const [filesList, setFilesList] = useState<FileItem[]>([]);
 
-  const handleUpload = async (file: File, onProgress?: (percent: number, event?: ProgressEvent) => void) => {
+  const handleUpload = async (file: File) => {
     const formData = new FormData();
     formData.append('file', file);
 
-    const progressAdapter = onProgress
-      ? (progressEvent: ProgressEvent) => {
-        if (progressEvent.lengthComputable) {
-          const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          onProgress(percent, progressEvent);
-        }
-      }
-      : undefined;
+    // const progressAdapter = onProgress
+    //   ? (progressEvent: ProgressEvent) => {
+    //     if (progressEvent.lengthComputable) {
+    //       const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+    //       onProgress(percent, progressEvent);
+    //     }
+    //   }
+    //   : undefined;
 
-    const res = await uploadFile(formData, progressAdapter);
+    const res = await uploadFile(formData);
     return res;
   };
-  // const { form } = Form.useFormContext();
 
   const fieldId =
     dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.IMG_UPLOAD}_${nanoid()}`;
-  // const fieldValue = Form.useWatch(fieldId, form);
 
   // useEffect(() => {
   //   let flag = false;
@@ -98,7 +96,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
                       if (url) {
                         ImagePreview.open({
                           openIndex: 0,
-                          images: [{src: url}]
+                          images: [{ src: url }]
                         });
                       }
                     }}
@@ -172,43 +170,47 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
     return <></>;
   };
 
-  const renderUploadArea = () => {
-    return (
-      <div className="uplaodTrigger">
-        {uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT] && (
-          <div className="uplaodTriggerText">
-            <div className="uplaodTriggerText-content">
-              <span></span>
-              <span className="uplaodTriggerText-tips">图片上传</span>
-            </div>
-          </div>
-        )}
-        {uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.LIST] && (
-          <div className="uplaodTriggerList">
-            <div className="uplaodTriggerList-content">
-              <div className="uplaodTriggerList-tips">点击或拖拽文件到此处上传</div>
-              <div className="uplaodTriggerList-describe">
-                最多可上传{verify?.maxCount && verify?.maxCount > 0 ? verify?.maxCount : 1}
-                张图片，单张图片大小不超过{verify?.maxSize || 10}MB
-              </div>
-            </div>
-          </div>
-        )}
-        {uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.CARD] && (
-          <div className="uplaodTriggerPicture">
-            <div className="uplaodTriggerPicture-content">
-              <div className="uplaodTriggerPicture-tips">图片上传</div>
-            </div>
-          </div>
-        )}
-      </div>
-    )
-  }
+  const [images, setImages] = useState([
+    { url: require('@/assets/images/filter.svg') }
+  ]);
 
   return (
     <div className="formWrapper">
       {/* TODO 预览态下显示情况，及上传接口调用需要修改 */}
-      <Uploader
+      <Cell
+        label={label.display && label.text}
+        bordered={false}
+        onClick={() => { }}
+        append={
+          <ImagePicker
+            accept="image/*"
+            limit={verify?.maxCount === -1 ? undefined : verify?.maxCount}
+            images={images}
+            maxSize={verify.maxSize * 1024}
+            upload={handleUpload}
+            onChange={setImages}
+            onMaxSizeExceed={(file) => {
+              Toast.toast({
+                content: '文件大小超出限制',
+                duration: 2000
+              })
+            }}
+            onLimitExceed={(file) =>
+              Toast.toast({
+                content: '文件数量超出限制',
+                duration: 2000
+              })}
+            style={{
+              width: '100%',
+              pointerEvents: runtime ? 'unset' : 'none'
+            }}
+          />
+        }
+        style={{ paddingBottom: '0.12rem' }}
+      />
+
+
+      {/* <Uploader
         accept="image/*"
         files={filesList}
         limit={verify?.maxCount === -1 ? undefined : verify?.maxCount}
@@ -224,7 +226,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
         }}
         renderFileList={renderUploadList}
         renderUploadArea={renderUploadArea}
-      />
+      /> */}
     </div>
   );
 });

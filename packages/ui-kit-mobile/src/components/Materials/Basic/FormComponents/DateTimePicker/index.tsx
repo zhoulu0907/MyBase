@@ -34,25 +34,16 @@ const XDateTimePicker = memo((props: XInputDateTimePickerConfig & { runtime?: bo
     }
   }, [dataField]);
 
-  const getPopupContainer = (node?: HTMLElement): HTMLElement => {
-    return (
-      (node?.closest('.arco-form-item') as HTMLElement) ||
-      node?.parentNode as HTMLElement ||
-      document.body
-    );
-  };
-
   return (
     <div className="formWrapper">
       <Cell
-          showArrow
-          label={label.display && label.text}
-          // onClick={() => {setPickerVisible(true);}}
-        />
+        showArrow
+        label={label.display && label.text}
+        onClick={() => { setPickerVisible(true); }}
+      />
       <DatePicker
         currentTs={pickerCurrentTs}
         typeArr={['year', 'month', 'date', 'hour', 'minute']}
-        getContainer={getPopupContainer}
         visible={pickerVisible}
         onHide={() => setPickerVisible(false)}
         onOk={() => setPickerVisible(false)}
@@ -82,7 +73,6 @@ const XDateTimePicker = memo((props: XInputDateTimePickerConfig & { runtime?: bo
           <DatePicker
             showTime
             defaultValue={defaultValue}
-            getPopupContainer={getPopupContainer}
             style={{
               width: '100%',
               pointerEvents: runtime ? 'unset' : 'none'

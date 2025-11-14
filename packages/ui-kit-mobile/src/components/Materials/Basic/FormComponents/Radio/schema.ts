@@ -96,7 +96,7 @@ export interface XInputRadioConfig extends ICommonBaseType {
   /**
    * 默认值
    */
-  defaultValue: { label: string; value: any; [property: string]: any }[];
+  defaultOptions: { label: string; value: any;[property: string]: any }[];
 
   /**
    * 字段宽度
@@ -174,7 +174,7 @@ const XRadio: XInputRadioSchema = {
     tooltip: '',
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
-    defaultValue: [
+    defaultOptions: [
       {
         label: '选项一',
         value: '选项一'

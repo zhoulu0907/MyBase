@@ -31,7 +31,7 @@ export default defineConfig({
         javascriptEnabled: true,
         modifyVars: {
           '@primary-color': '#009E9E',
-          '@font-size-base': '100px',
+          '@base-font-size': '100px',
         },
       },
     },

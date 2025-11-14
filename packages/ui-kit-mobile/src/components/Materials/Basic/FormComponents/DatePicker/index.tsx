@@ -6,6 +6,7 @@ import { DATE_OPTIONS, DATE_VALUES } from '../../../constants';
 import '../index.css';
 import type { XInputDatePickerConfig } from './schema';
 import dayjs from 'dayjs';
+import { ItemType } from '@arco-design/mobile-react/cjs/date-picker';
 
 const XDatePicker = memo((props: XInputDatePickerConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const {
@@ -39,55 +40,63 @@ const XDatePicker = memo((props: XInputDatePickerConfig & { runtime?: boolean; d
 
   // 根据日期类型渲染对应的日期选择器
   const renderDatePicker = () => {
-    const getPopupContainer = (node?: HTMLElement): HTMLElement => {
-      return (
-        (node?.closest('.arco-form-item') as HTMLElement) ||
-        node?.parentNode as HTMLElement ||
-        document.body
-      );
-    };
-
-    let mode: string | undefined;
-
+    let mode: ItemType[];
+    let formatterText = '';
     switch (currentDateType) {
       case DATE_VALUES[DATE_OPTIONS.YEAR]:
-        mode = 'year';
+        mode = ['year'];
+        formatterText = 'YYYY';
         break;
       case DATE_VALUES[DATE_OPTIONS.MONTH]:
-        mode = 'month';
+        mode = ['year', 'month'];
+        formatterText = 'YYYY/MM';
         break;
       case DATE_VALUES[DATE_OPTIONS.DATE]:
-        mode = 'date';
+        mode = ['year', 'month', 'date'];
+        formatterText = 'YYYY/MM/DD';
         break;
       case DATE_VALUES[DATE_OPTIONS.FULL]:
-        mode = 'date';
+        mode = ['year', 'month', 'month', 'hour', 'minute', 'second'];
+        formatterText = 'YYYY/MM/DD HH:mm:ss';
         break;
       default:
-        mode = 'date';
+        mode = ['date'];
     }
 
     const onPickerChange = (timestamp: number | [number, number]) => {
-      // setPickerCurrentTs(timestamp);
+      setPickerCurrentTs(timestamp);
     }
 
-
     return (
-      <>
-        <Cell
-          showArrow
-          label={label.display && label.text}
-          // onClick={() => {setPickerVisible(true);}} // 预览或运行态
-        />
-        <DatePicker
-          currentTs={pickerCurrentTs}
-          mode={mode as any}
-          getContainer={getPopupContainer}
-          visible={pickerVisible}
-          onHide={() => setPickerVisible(false)}
-          onOk={() => setPickerVisible(false)}
-          onChange={onPickerChange}
-        />
-      </>
+      <DatePicker
+        title={label.text}
+        typeArr={mode}
+        currentTs={pickerCurrentTs}
+        maskClosable
+        renderLinkedContainer={(_, data) => (
+          <Cell
+            label={label.display && label.text}
+            showArrow
+            bordered={false}
+          >{dayjs(pickerCurrentTs).format(formatterText)}</Cell>
+        )}
+        formatter={(value, type) => {
+          if (type === 'year') {
+            return `${value}年`;
+          } else if (type === 'month') {
+            return `${value}月`;
+          } else if (type === 'date') {
+            return `${value}日`;
+          } else if (type === 'hour') {
+            return `${value}时`;
+          } else if (type === 'minute') {
+            return `${value}分`;
+          } else if (type === 'second') {
+            return `${value}秒`;
+          }
+        }}
+        onChange={onPickerChange}
+      />
     )
   };
 

@@ -1,4 +1,4 @@
-import { Cell, Cell, DatePicker } from '@arco-design/mobile-react';
+import { Cell, DatePicker } from '@arco-design/mobile-react';
 import dayjs from 'dayjs';
 import { nanoid } from 'nanoid';
 import { memo, useEffect, useState } from 'react';
@@ -26,7 +26,7 @@ const XDateRangePicker = memo((props: XInputDateRangePickerConfig & { runtime?: 
 
   // const { form } = Form.useFormContext();
   const [fieldId, setFieldId] = useState('');
-  const [pickerVisible, setPickerVisible] = useState(false);
+  const [pickerCurrentTs, setPickerCurrentTs] = useState<number[]>(startTime && endTime ? [dayjs(startTime).valueOf(), dayjs(endTime).valueOf()] : []);
 
   // const fieldValue = Form.useWatch(fieldId, form);
 
@@ -36,34 +36,30 @@ const XDateRangePicker = memo((props: XInputDateRangePickerConfig & { runtime?: 
     }
   }, [dataField]);
 
-  const getPopupContainer = (node?: HTMLElement): HTMLElement => {
-    return (
-      (node?.closest('.arco-form-item') as HTMLElement) ||
-      node?.parentNode as HTMLElement ||
-      document.body
-    );
-  };
-
   const currentDateType = (dateType !== DATE_VALUES[DATE_OPTIONS.FULL] && dateType) || DATE_VALUES[DATE_OPTIONS.DATE];
-  const validStartTime = startTime && dayjs(startTime).valueOf();
-  const validEndTime = endTime && dayjs(endTime).valueOf();
+  const validStartTime = startTime && dayjs(startTime).valueOf() || Date.now();
+  const validEndTime = endTime && dayjs(endTime).valueOf() || Date.now();
+
+  const onPickerChange = (timestamp: number | [number, number]) => {
+    setPickerCurrentTs(timestamp);
+  }
 
   return (
     <div className="formWrapper">
-      <Cell 
-        showArrow
-        label={label.display && label.text} 
-        // onClick={() => {setPickerVisible(true);}}
-      />
       <DatePicker
         mode={"date"}
-        visible={pickerVisible}
+        title={label.text}
+        maskClosable
         currentTs={[validStartTime, validEndTime]}
-        getContainer={getPopupContainer}
-        onHide={() => setPickerVisible(false)}
-        onOk={() => setPickerVisible(false)}
+        onChange={onPickerChange}
+        renderLinkedContainer={(_, data) => (
+          <Cell
+            label={label.display && label.text}
+            showArrow
+            bordered={false}
+          >{pickerCurrentTs.map(t => dayjs(t).format('YYYY/MM/DD')).join(' - ')}</Cell>
+        )}
       />
-
 
       {/* <Form.Item
         label={label.display && label.text}
@@ -94,7 +90,6 @@ const XDateRangePicker = memo((props: XInputDateRangePickerConfig & { runtime?: 
             mode={currentDateType}
             defaultValue={[validStartTime, validEndTime]}
             showTime={dateType === DATE_VALUES[DATE_OPTIONS.FULL]}
-            getPopupContainer={getPopupContainer}
             style={{
               width: '100%',
               pointerEvents: runtime ? 'unset' : 'none'

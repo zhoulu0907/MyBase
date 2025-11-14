@@ -97,12 +97,12 @@ const XDeptSelect = memo((props: XInputDeptSelectConfig & { runtime?: boolean; d
 
   return (
     <div className="formWrapper">
-      <Cell label={label?.text} 
-        showArrow 
-        // onClick={() => setVisible(true)}  // 预览或运行时
+      <Cell label={label?.text}
+        showArrow
+        onClick={() => setVisible(true)}  // 预览或运行时
       />
       <PopupSwiper visible={visible} close={() => setVisible(false)} direction={popupDirection}>
-        <div style={{ height: 420, width: 320, background: '#fff' }}>
+        <div style={{ height: '100vh', width: '100vw', background: '#fff' }}>
           <div className={styles.popupHeader}>
             <IconArrowBack onClick={() => setVisible(false)} />
             <span>{label?.text}</span>

@@ -36,7 +36,7 @@ const XInputPhone = memo((props: XInputPhoneConfig & { runtime?: boolean; detail
   }, [dataField]);
 
   return (
-    <div className="formWrapper">
+    <div className="formWrapper inputTextWrapper">
       <Input
         label={label.display && label.text}
         type="tel"
@@ -50,7 +50,7 @@ const XInputPhone = memo((props: XInputPhoneConfig & { runtime?: boolean; detail
         }}
         placeholder={placeholder}
       />
-      
+
       {/* <Form.Item
         label={label.display && label.text}
         field={

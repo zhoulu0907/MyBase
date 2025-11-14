@@ -36,10 +36,10 @@ const XInputEmail = memo((props: XInputEmailConfig & { runtime?: boolean; detail
   }, [dataField]);
 
   return (
-    <div className="formWrapper">
+    <div className="formWrapper inputTextWrapper">
       <Input
         label={label.display && label.text}
-        type="text"
+        type="email"
         defaultValue={defaultValue}
         style={{
           width: '100%',

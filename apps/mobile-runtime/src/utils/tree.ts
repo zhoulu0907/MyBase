@@ -4,6 +4,7 @@ export interface TreeNode {
   id?: string;
   icon?: string;
   isVisible?: number;
+  isPage?: boolean;
   children?: TreeNode[];
   [key: string]: any;
 }
@@ -128,7 +129,9 @@ export const flattenChildren = (nodes: TreeNode[]): TreeNode[] => {
    */
   const dfs = (arr: TreeNode[]) => {
     arr.forEach((node) => {
-      result.push(node);
+      if (node.isPage) {
+        result.push(node);
+      }
 
       if (node.children && node.children.length > 0) {
         dfs(node.children);
@@ -150,6 +153,6 @@ export const splitAndFlatten = (treeData: TreeNode[]) => {
     .filter((node) => node.children && node.children.length > 0)
     .map(({ children, ...rest }) => ({
       ...rest,
-      children: flattenChildren(children!),
+      children: children ? flattenChildren(children) : [],
     }));
 };

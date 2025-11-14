@@ -14,7 +14,7 @@ const XRadio = memo((props: XInputRadioConfig & { runtime?: boolean; detailMode?
     dataField,
     tooltip,
     status,
-    defaultValue,
+    defaultOptions,
     verify,
     layout,
     labelColSpan = 0,
@@ -25,18 +25,17 @@ const XRadio = memo((props: XInputRadioConfig & { runtime?: boolean; detailMode?
   return (
     <div className="formWrapper">
       <Cell
-        label={label.display && label.text}
+        label={label.display && label.text + 1}
         className={styles.radioCell}
       >
         <RadioGroup
-          options={defaultValue}
-          defaultValue={defaultValue?.find((op) => op.chosen)?.value}
+          options={defaultOptions}
+          defaultValue={defaultOptions?.find((op) => op.chosen)?.value}
           style={{
             pointerEvents: runtime ? 'unset' : 'none'
           }}
         />
       </Cell>
-      
 
 
       {/* <Form.Item
