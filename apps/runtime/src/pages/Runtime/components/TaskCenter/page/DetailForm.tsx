@@ -185,15 +185,11 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
         {newCompents &&
           useEditorSignalMap.get(editPageViewId.value)?.components.value.map((cp: GridItem) => (
             <Fragment key={cp.id}>
-              {useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id].config.status !==
-                STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+              {newCompents && newCompents[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
                 <div
                   key={cp.id}
                   style={{
-                    width: getComponentWidth(
-                      useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id],
-                      cp.type
-                    )
+                    width: getComponentWidth(newCompents && newCompents[cp.id], cp.type)
                   }}
                 >
                   <PreviewRender
