@@ -32,11 +32,11 @@ const DynamicTimeFormatConfig: React.FC<DynamicTimeFormatConfigProps> = ({
   }, [configs[dateFormatKey]]);
 
   return (
-    <Form.Item layout="vertical" label={'时间格式'} className={styles.formItem}>
+    <Form.Item layout="vertical" label={item.name || '时间格式'} className={styles.formItem}>
       <Select
         value={dateFormat}
         onChange={(value) => handlePropsChange(dateFormatKey, value)}
-        options={options}
+        options={item.range || options}
       ></Select>
     </Form.Item>
   );

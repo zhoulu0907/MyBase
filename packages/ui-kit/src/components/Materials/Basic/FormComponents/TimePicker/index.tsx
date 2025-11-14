@@ -1,12 +1,12 @@
 import { Form, TimePicker } from '@arco-design/web-react';
 import { memo } from 'react';
-import { STATUS_OPTIONS, STATUS_VALUES, TIME_FORMAT } from '../../../constants';
+import { STATUS_OPTIONS, STATUS_VALUES, TIME_FORMAT, DEFAULT_VALUE_TYPES } from '../../../constants';
 import '../index.css';
 import type { XInputTimePickerConfig } from './schema';
 import { getPopupContainer } from '@/utils';
 
 const XTimePicker = memo((props: XInputTimePickerConfig & { runtime?: boolean; detailMode?: boolean }) => {
-  const { label, tooltip, status, defaultValue,dateType, verify, layout, labelColSpan = 0, runtime = true } = props;
+  const { label, tooltip, status, defaultValueConfig, timeRange, dateType, verify, layout, runtime = true } = props;
 
   return (
     <div className="formWrapper">
@@ -17,9 +17,6 @@ const XTimePicker = memo((props: XInputTimePickerConfig & { runtime?: boolean; d
         }
         layout={layout}
         tooltip={tooltip}
-        labelCol={{
-          style: { width: labelColSpan, flex: 'unset' }
-        }}
         wrapperCol={{ style: { flex: 1 } }}
         rules={[{ required: verify?.required }]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
@@ -27,10 +24,10 @@ const XTimePicker = memo((props: XInputTimePickerConfig & { runtime?: boolean; d
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
-        initialValue={defaultValue}
+        initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : ''}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? (
-          <div>{defaultValue || '--'}</div>
+          <div>{defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue || '--' : '--' }</div>
         ) : (
           <TimePicker
             format={TIME_FORMAT[dateType]}

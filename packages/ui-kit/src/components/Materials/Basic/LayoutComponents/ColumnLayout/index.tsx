@@ -14,9 +14,9 @@ import { usePageEditorSignal } from 'src/hooks/useSignal';
 import { useAppEntityStore } from 'src/signals/store_entity';
 import { COMPONENT_GROUP_NAME, type GridItem } from 'src/utils/const';
 import { v4 as uuidv4 } from 'uuid';
-import { ALL_COMPONENT_TYPES, ENTITY_COMPONENT_TYPES, FORM_COMPONENT_TYPES } from '../../../componentTypes';
+import { ENTITY_COMPONENT_TYPES, ALL_COMPONENT_TYPES, FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { COMPONENT_MAP } from '../../../componentsMap';
-import { STATUS_OPTIONS, STATUS_VALUES, WIDTH_OPTIONS, WIDTH_VALUES } from '../../../constants';
+import { STATUS_OPTIONS, STATUS_VALUES, WIDTH_VALUES, WIDTH_OPTIONS, COLOR_MODE_TYPES,DEFAULT_OPTIONS_TYPE } from '../../../constants';
 import { getComponentSchema } from '../../../schema';
 import './index.css';
 import { type XColumnLayoutConfig } from './schema';
@@ -306,7 +306,8 @@ const XColumnLayout = (props: XColumnLayoutConfig & { runtime?: boolean; detailM
                     // 数据长度 dataLength
                     // 小数位数 decimalPlaces
                     // 默认值 defaultValue
-                    subSchema.config.defaultValue = ele.defaultValue;
+                    const defaultValueConfig = { ...subSchema.config.defaultValue, customValue: ele.defaultValue };
+                    subSchema.config.defaultValueConfig = defaultValueConfig;
                     // 字段描述 description
                     subSchema.config.tooltip = ele.description;
                     subSchema.config.verify = {
@@ -325,14 +326,31 @@ const XColumnLayout = (props: XColumnLayoutConfig & { runtime?: boolean; detailM
                         const dictDataList = res?.type ? await getDictDataListByType(res.type) : [];
                         const dictOptions = dictDataList?.filter((e: any) => e.status === 1); // 只显示启用状态的字典数据
                         if (dictOptions.length) {
-                          schema.config.defaultOptions = dictOptions;
+                          const newDefaultOptionsConfig = {
+                            type: DEFAULT_OPTIONS_TYPE.CUSTOM,
+                            disabled: true,
+                            dictTypeId: ele.dictTypeId,
+                            colorMode: true,
+                            colorModeType: COLOR_MODE_TYPES.POINT,
+                            defaultOptions: dictOptions
+                          };
+                          subSchema.config.defaultOptionsConfig = {
+                            ...subSchema.config.defaultOptionsConfig,
+                            ...newDefaultOptionsConfig
+                          };
                         }
                       } else if (ele.options?.length) {
-                        subSchema.config.defaultOptions = ele.options.map((e: any) => ({
-                          chosen: ele.defaultValue && e.optionValue === ele.defaultValue,
-                          label: e.optionLabel,
-                          value: e.optionValue
-                        }));
+                        const newDefaultOptionsConfig = {
+                          defaultOptions: ele.options.map((e: any) => ({
+                            label: e.optionLabel,
+                            value: e.optionValue
+                          }))
+                        };
+                        subSchema.config.defaultOptionsConfig = {
+                          ...subSchema.config.defaultOptionsConfig,
+                          disabled: true,
+                          ...newDefaultOptionsConfig
+                        };
                       }
                     }
                     // 字段约束配置（长度/正则） constraints

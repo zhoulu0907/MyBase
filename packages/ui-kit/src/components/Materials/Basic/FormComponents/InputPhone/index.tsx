@@ -2,7 +2,7 @@ import { Form, Input } from '@arco-design/web-react';
 import { nanoid } from 'nanoid';
 import { memo, useEffect, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
-import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES, PHONE_TYPE } from '../../../constants';
 import '../index.css';
 import type { XInputPhoneConfig } from './schema';
 
@@ -13,13 +13,11 @@ const XInputPhone = memo((props: XInputPhoneConfig & { runtime?: boolean; detail
     placeholder,
     tooltip,
     status,
-    defaultValue,
+    defaultValueConfig,
     verify,
+    phoneType,
     align,
     layout,
-    color,
-    bgColor,
-    labelColSpan = 0,
     runtime = true,
     detailMode
   } = props;
@@ -47,33 +45,34 @@ const XInputPhone = memo((props: XInputPhoneConfig & { runtime?: boolean; detail
         }
         layout={layout}
         tooltip={tooltip}
-        labelCol={{
-          style: { width: labelColSpan, flex: 'unset' }
-        }}
         wrapperCol={{ style: { flex: 1 } }}
         rules={[
           { required: verify?.required },
           {
-            match: /^1[3-9]\d{9}$/,
-            message: '请输入有效的11位中国大陆手机号'
-          }
+            validator: (value, callback) => {
+              if (phoneType === PHONE_TYPE.MOBILE) {
+                if (!(/^1[3-9]\d{9}$/).test(value)) {
+                  callback(`请输入有效的11位中国大陆手机号`);
+                }
+              }
+            }
+          },
         ]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
-        initialValue={defaultValue}
+        initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : ''}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
           <div>{fieldValue || '--'}</div>
         ) : (
           <Input
+            prefix={phoneType === PHONE_TYPE.MOBILE ? '+86' : null}
             style={{
               width: '100%',
-              color,
               textAlign: align,
-              backgroundColor: bgColor,
               pointerEvents: runtime ? 'unset' : 'none'
             }}
             placeholder={placeholder}

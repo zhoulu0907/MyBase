@@ -2,7 +2,7 @@ import { Checkbox, Form, Space, Tag } from '@arco-design/web-react';
 import { nanoid } from 'nanoid';
 import { memo, useEffect, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
-import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { STATUS_OPTIONS, STATUS_VALUES, COLOR_MODE_TYPES } from '../../../constants';
 import '../index.css';
 import type { XInputCheckboxConfig } from './schema';
 
@@ -14,13 +14,10 @@ const XCheckbox = memo((props: XInputCheckboxConfig & { runtime?: boolean; detai
     dataField,
     tooltip,
     status,
-    defaultValue,
-    defaultOptions,
+    defaultOptionsConfig,
     verify,
     layout,
     direction,
-    labelColSpan = 0,
-    // allChecked,
     runtime = true,
     detailMode
   } = props;
@@ -41,9 +38,6 @@ const XCheckbox = memo((props: XInputCheckboxConfig & { runtime?: boolean; detai
         field={fieldId}
         layout={layout}
         tooltip={tooltip}
-        labelCol={{
-          style: { width: labelColSpan, flex: 'unset' }
-        }}
         wrapperCol={{ style: { flex: 1 } }}
         rules={[{ required: verify?.required }]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
@@ -51,23 +45,43 @@ const XCheckbox = memo((props: XInputCheckboxConfig & { runtime?: boolean; detai
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
-        initialValue={defaultValue}
+        initialValue={defaultOptionsConfig?.defaultOptions.filter(ele => ele.isChosen)?.map(ele => ele.value) || []}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
           <Space wrap>
-            {fieldValue && defaultOptions && fieldValue.map((ele: any, index: number) => <Tag key={index}>
-              {defaultOptions.find((e: any) => e.value === ele)?.label}
+            {fieldValue && defaultOptionsConfig?.defaultOptions && fieldValue.map((ele: any, index: number) => <Tag key={index}>
+              {defaultOptionsConfig?.defaultOptions.find((e: any) => e.value === ele)?.label}
             </Tag>)}
           </Space>
         ) : (
           <CheckboxGroup
-            options={defaultOptions}
             direction={direction}
             style={{
               width: '100%',
               pointerEvents: runtime ? 'unset' : 'none'
             }}
-          />
+          >
+            {defaultOptionsConfig?.defaultOptions.map((ele, index: number) => (
+              <Checkbox key={index} value={ele.value}>
+                {defaultOptionsConfig.colorMode ? <>
+                  {defaultOptionsConfig.colorModeType === COLOR_MODE_TYPES.TAG ?
+                    <Tag color={ele.colorType || "rgb(var(--primary-7))"}>{ele.label}</Tag> : <>
+                      <span
+                        style={{
+                          width: '8px',
+                          height: '8px',
+                          borderRadius: '50%',
+                          background: ele.colorType || "rgb(var(--primary-7))",
+                          display: 'inline-block',
+                          marginRight: '8px'
+                        }}
+                      ></span>
+                      <span>{ele.label}</span>
+                    </>}
+                </> : <>{ele.label}</>}
+              </Checkbox>
+            ))}
+          </CheckboxGroup>
         )}
       </Form.Item>
     </div>
