@@ -26,8 +26,6 @@ type OptionItem = {
   [key: string]: unknown;
 };
 
-const toClonedOptions = (items?: OptionItem[]): OptionItem[] => (items ? items.map((item) => ({ ...item })) : []);
-
 const DEFAULT_OPTIONS: OptionItem[] = [
   { optionLabel: '选项1', optionValue: '选项1' },
   { optionLabel: '选项2', optionValue: '选项2' },
@@ -50,8 +48,8 @@ export const PicklistOptionConfig: React.FC<PicklistOptionConfigProps> = ({
     initialDictTypeId
       ? [] // 有字典ID时，初始为空，通过dictTypeId加载字典数据
       : initialOptions && initialOptions.length > 0
-        ? toClonedOptions(initialOptions as OptionItem[])
-        : toClonedOptions(DEFAULT_OPTIONS)
+        ? initialOptions
+        : DEFAULT_OPTIONS
   );
   const [optionType, setOptionType] = useState<typeof CONFIG_TYPE.CUSTOM | typeof CONFIG_TYPE.DICT>(
     initialDictTypeId ? CONFIG_TYPE.DICT : CONFIG_TYPE.CUSTOM
@@ -174,9 +172,9 @@ export const PicklistOptionConfig: React.FC<PicklistOptionConfigProps> = ({
     setOptionType(newType);
     if (newType === CONFIG_TYPE.CUSTOM) {
       if (!initialOptions || initialOptions.length === 0) {
-        setOptions(toClonedOptions(DEFAULT_OPTIONS));
+        setOptions(DEFAULT_OPTIONS);
       } else {
-        setOptions(toClonedOptions(initialOptions as OptionItem[]));
+        setOptions(initialOptions);
       }
       setSelectDict(null);
     }
