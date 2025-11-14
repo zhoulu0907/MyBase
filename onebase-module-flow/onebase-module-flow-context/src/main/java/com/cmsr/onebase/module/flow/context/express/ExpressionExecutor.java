@@ -50,7 +50,7 @@ public class ExpressionExecutor implements Serializable {
             Object result = expression.evaluate(jc);
             return result instanceof Boolean ? (Boolean) result : Boolean.FALSE;
         } catch (Exception e) {
-            String msg = "表达式执行异常: 执行表达式:(" + orExpression + "), 输入条件:(" + vars + ")";
+            String msg = "表达式执行异常, 执行表达式:" + orExpression + ", 输入条件:" + vars + "";
             throw new RuntimeException(msg, e);
         }
     }
