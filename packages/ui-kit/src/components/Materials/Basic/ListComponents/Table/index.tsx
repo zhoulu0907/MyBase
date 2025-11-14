@@ -54,7 +54,7 @@ const XTable = memo(
     }
   ) => {
     useSignals();
-    const { pageComponentSchemas: fromPageComponentSchemas, layoutSubComponents: fromLayoutSubComponents, components } = useFormEditorSignal;
+    const { pageComponentSchemas: fromPageComponentSchemas, components } = useFormEditorSignal;
 
     const { setDrawerVisible, setDrawerPageId, setDetailPageViewId } = pagesRuntimeSignal;
     const { runtime = true, showFromPageData, showAddBtn = true } = props;
@@ -231,11 +231,6 @@ const XTable = memo(
             render: (_text: string, _record: any, index: number) => {
               const componentSchemasKeys = Object.keys(fromPageComponentSchemas.value || {});
               const cpId = componentSchemasKeys.find((ele) => {
-                return fromPageComponentSchemas.value[ele]?.config?.dataField?.includes(column.id);
-              });
-              const layoutSubSchemasKeys = Object.keys(fromLayoutSubComponents.value || {});
-
-              const layoutSubCpId = componentSchemasKeys.find((ele) => {
                 return fromPageComponentSchemas.value[ele]?.config?.dataField?.includes(column.id);
               });
               if (cpId) {
