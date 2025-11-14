@@ -6,6 +6,8 @@ export interface DictItem {
   status: number; // 字典状态
   remark?: string; // 备注
   readonly createTime: string; // 创建时间
+  dictOwnerType?: string;
+  dictOwnerId?: string;
 }
 
 // 字典数据

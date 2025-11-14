@@ -11,11 +11,14 @@ const IDone: FC = ({ appId }: any) => {
   const columns: TableColumnProps[] = [
     {
       title: '流程标题',
-      dataIndex: 'processTitle'
+      dataIndex: 'processTitle',
+      width: 250,
+      ellipsis: true
     },
     {
       title: '发起人',
       dataIndex: 'initiator',
+      ellipsis: true,
       render: (obj: any) => (
         <span className="flex-bw-center">
           <div className="photo-img">{obj?.avatar && <img src={obj?.avatar} />}</div>
