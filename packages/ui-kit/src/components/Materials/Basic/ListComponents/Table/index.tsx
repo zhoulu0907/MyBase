@@ -28,6 +28,7 @@ import './index.css';
 import type { XTableConfig } from './schema';
 import TableSearch from './tableSerach';
 import { useFormEditorSignal } from 'src/signals/page_editor';
+import PreviewRender from 'src/components/render/PreviewRender';
 
 const leftPanelWidth = 318;
 const rightPanelWidth = 310;
@@ -59,6 +60,7 @@ const XTable = memo(
     const hasOperationPermission = true;
 
     const {
+      id,
       label,
       status,
       defaultValue,
@@ -88,6 +90,7 @@ const XTable = memo(
     } = props;
 
     const { curMenu } = menuSignal;
+    const [tableForm] = Form.useForm();
 
     const [finalColumns, setFinalColumns] = useState<any[]>();
     // 实际查询用的参数
@@ -205,20 +208,67 @@ const XTable = memo(
     }, [refresh]);
 
     useEffect(() => {
+      getFinalColumns()
+    }, [showOpearate, columns, fixedOpearate, props?.xTableSelectProps?.selectedDataId]);
+
+    useEffect(() => {
+      if (finalColumns && metaData) {
+        handlePage();
+      }
+    }, [finalColumns, tablePageNo, metaData, sortByObject]);
+
+    const getFinalColumns = async () => {
       let newColumns: any[] = [];
       if (Object.keys(columns as any).length) {
-        newColumns = (columns || []).map((v) => {
+        const mainMetaData = await getEntityFieldsWithChildren(metaData);
+        newColumns = (columns || []).map((column) => {
           return {
-            ...v,
+            ...column,
             ellipsis: true,
-            width: v.width + 'px',
-            render: (_text: any) => {
+            width: column.width + 'px',
+            render: (_text: string, _record: any, index: number) => {
               const componentSchemasKeys = Object.keys(fromPageComponentSchemas.value || {});
               const cpId = componentSchemasKeys.find((ele) => {
-                return fromPageComponentSchemas.value[ele]?.config?.dataField?.includes(v.id);
+                return fromPageComponentSchemas.value[ele]?.config?.dataField?.includes(column.id);
               });
-              if(cpId){
-                
+              if (cpId) {
+                // 组件类型
+                const cpType = components.value?.find((ele) => ele.id === cpId)?.type;
+                // 当前组件配置
+                const currentComponentSchemas = fromPageComponentSchemas.value[cpId];
+                // 覆盖配置
+                let dataField: string[] = [];
+                if (Array.isArray(mainMetaData?.parentFields)) {
+                  const dataFieldInfo = mainMetaData.parentFields.find(
+                    (field: AppEntityField) => field.fieldId === column.id
+                  );
+                  if (dataFieldInfo && _record[dataFieldInfo.fieldName]) {
+                    dataField = [`${id}.${index}.${dataFieldInfo.fieldName}`]
+                  }
+                }
+                const componentConfig = {
+                  ...currentComponentSchemas,
+                  config: {
+                    ...currentComponentSchemas.config,
+                    dataField: dataField?.length > 0 ? dataField : [`${id}.${index}.${column.id}`],
+                    label: {
+                      display: false,
+                      text: '',
+                    },
+                    verify: { required: false },
+                    tooltip: ''
+                  }
+                };
+
+                return (
+                  <PreviewRender
+                    cpId={column.id}
+                    cpType={cpType}
+                    detailMode={true}
+                    pageComponentSchema={componentConfig}
+                    runtime={true}
+                  />
+                );
               }
               return <span>{_text}</span>
             }
@@ -249,13 +299,7 @@ const XTable = memo(
         newColumns = [checkboxColumnRender, ...newColumns]
       }
       setFinalColumns(newColumns);
-    }, [showOpearate, columns, fixedOpearate, props?.xTableSelectProps?.selectedDataId]);
-
-    useEffect(() => {
-      if (finalColumns && metaData) {
-        handlePage();
-      }
-    }, [finalColumns, tablePageNo, metaData, sortByObject]);
+    }
 
     const handleCreate = () => {
       console.log('点击新增');
@@ -361,9 +405,9 @@ const XTable = memo(
           key: item.data.id
         };
       });
-      console.log('newTableData: ', newTableData);
 
       setTableData(newTableData);
+      tableForm.setFieldsValue({ [id]: newTableData });
       setTableTotal(total);
     };
 
@@ -456,48 +500,37 @@ const XTable = memo(
           </div>
         </div>
         <div>
-          <Form.Item
-            className="tableFormItem"
-            label={label.display && label.text}
-            layout={'vertical'}
-            style={{
-              width: '100%',
-              maxWidth: runtime ? '100%' : `calc(100vw - ${componentMaxWidth}px)`,
-              pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset'
-            }}
-          >
-            <div style={{ width: '100%' }}>
-              <Table
-                scroll={{
-                  x: 'max-content'
-                }}
-                onRow={(record, index) => {
-                  return {
-                    onClick: (event) => {
-                      handleRowClick(record);
-                    }
-                  };
-                }}
-                border={border}
-                borderCell={borderCell}
-                showHeader={showHeader}
-                stripe={stripe}
-                hover={hover}
-                columns={finalColumns}
-                data={tableData}
-                pagePosition={pagePosition}
-                pagination={{
-                  pageSize,
-                  showTotal,
-                  current: tablePageNo,
-                  total: tableTotal,
-                  onChange: (pageNo: number) => {
-                    setTablePageNo(pageNo);
+          <Form form={tableForm}>
+            <Table
+              scroll={{
+                x: 'max-content'
+              }}
+              onRow={(record, index) => {
+                return {
+                  onClick: (event) => {
+                    handleRowClick(record);
                   }
-                }}
-              />
-            </div>
-          </Form.Item>
+                };
+              }}
+              border={border}
+              borderCell={borderCell}
+              showHeader={showHeader}
+              stripe={stripe}
+              hover={hover}
+              columns={finalColumns}
+              data={tableData}
+              pagePosition={pagePosition}
+              pagination={{
+                pageSize,
+                showTotal,
+                current: tablePageNo,
+                total: tableTotal,
+                onChange: (pageNo: number) => {
+                  setTablePageNo(pageNo);
+                }
+              }}
+            />
+          </Form>
         </div>
       </div>
     );
