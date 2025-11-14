@@ -49,10 +49,10 @@ import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 @Slf4j
 public class DeptServiceImpl implements DeptService {
 
-    public static final int LOOP_COUNT_LIMIT = 30;
-    public static final int LOOP_INIT = 0;
+    public static final int                LOOP_COUNT_LIMIT = 30;
+    public static final int                LOOP_INIT        = 0;
     @Resource
-    private DeptDataRepository deptDataRepository;
+    private             DeptDataRepository deptDataRepository;
 
     @Lazy
     @Resource
@@ -79,15 +79,11 @@ public class DeptServiceImpl implements DeptService {
         DeptDO dept = BeanUtils.toBean(createReqVO, DeptDO.class);
         dept.setStatus(CommonStatusEnum.ENABLE.getStatus());
 
-        String  fromSceneType = WebFrameworkUtils.getXFromSceneType();
-        if(XFromSceneTypeEnum.TENANT.getCode().equals(fromSceneType)){
-            dept.setDeptType(fromSceneType);
-        }else {
-            dept.setDeptType(fromSceneType);
+        String fromSceneType = WebFrameworkUtils.getXFromSceneType();
+        dept.setDeptType(fromSceneType);
+        if (XFromSceneTypeEnum.CORP.getCode().equals(fromSceneType)) {
             LoginUser user = SecurityFrameworkUtils.getLoginUser();
-            if(null !=user){
-                dept.setCorpId(user.getCorpId());
-            }
+            dept.setCorpId(user.getCorpId());
         }
 
         deptDataRepository.insert(dept);
@@ -458,7 +454,6 @@ public class DeptServiceImpl implements DeptService {
     }
 
 
-
     private List<DeptDO> getParentDeptsList(Long deptId) {
         List<DeptDO> parentDepts = new ArrayList<>();
         if (deptId == null) {
@@ -487,11 +482,11 @@ public class DeptServiceImpl implements DeptService {
     @Override
     public void updateAdminOrDirector(UserAdminOrDirectorUpdateReqVO reqVO) {
 
-        if(reqVO.getUpdateType().equals(CorpConstant.LEADER_USER_ID)){
+        if (reqVO.getUpdateType().equals(CorpConstant.LEADER_USER_ID)) {
             DataRow row = new DataRow();
             row.put(DeptDO.LEADER_USER_ID, reqVO.getUserId());
             deptDataRepository.updateByConfig(row, new DefaultConfigStore().eq(DeptDO.ID, reqVO.getDeptId()));
-        }else{
+        } else {
             DataRow row = new DataRow();
             row.put(DeptDO.DEPT_DIRECTOR_ID, reqVO.getUserId());
             deptDataRepository.updateByConfig(row, new DefaultConfigStore().eq(DeptDO.ID, reqVO.getDeptId()));
