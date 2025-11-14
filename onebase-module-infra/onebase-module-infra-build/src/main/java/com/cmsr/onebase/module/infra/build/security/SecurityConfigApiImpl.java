@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.infra.build.security;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.module.infra.api.security.SecurityConfigApi;
+import com.cmsr.onebase.module.infra.api.security.dto.PasswordExpiryCheckDTO;
 import com.cmsr.onebase.module.infra.dal.database.SecurityRecordDataRepository;
 import com.cmsr.onebase.module.infra.dal.dataobject.security.SecurityRecordDO;
 import com.cmsr.onebase.module.infra.enums.security.SecurityRecordTypeEnum;
@@ -16,6 +17,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -110,5 +113,59 @@ import static com.cmsr.onebase.module.infra.enums.ErrorCodeConstants.PASSWORD_IN
             securityRecordDataRepository.insert(newRecord);
 
             return success(Boolean.TRUE);
+        }
+
+        @Override
+        @Operation(summary = "检查密码有效期")
+        public CommonResult<PasswordExpiryCheckDTO> checkPasswordExpiry(@RequestParam("userId") Long userId) {
+            // 获取租户的密码策略配置
+            PasswordPolicyConfig config = passwordPolicyManager.getPolicyConfig();
+            Integer expiryDays = config.getExpiryDays();
+
+            // 如果expiryDays为null或0，不进行有效期检查
+            if (expiryDays == null || expiryDays == 0) {
+                return success(PasswordExpiryCheckDTO.builder()
+                        .type("valid")
+                        .message("密码有效期检查未启用")
+                        .build());
+            }
+
+            // 查询用户最近一次密码记录
+            SecurityRecordDO latestRecord = securityRecordDataRepository.findLatestByUserIdAndType(
+                    userId, SecurityRecordTypeEnum.PASSWORD_HISTORY.getCode());
+
+            // 如果没有密码历史记录，说明是新用户或从未修改过密码，视为密码有效
+            if (latestRecord == null) {
+                return success(PasswordExpiryCheckDTO.builder()
+                        .type("valid")
+                        .message("未找到密码历史记录")
+                        .build());
+            }
+
+            // 计算密码年龄（天数）
+            LocalDateTime passwordCreateTime = latestRecord.getCreateTime();
+            LocalDateTime now = LocalDateTime.now();
+            long passwordAge = ChronoUnit.DAYS.between(passwordCreateTime, now);
+
+            // 判断密码是否过期
+            if (passwordAge >= expiryDays) {
+                // 密码已过期
+                int daysExpired = (int) (passwordAge - expiryDays);
+                return success(PasswordExpiryCheckDTO.builder()
+                        .type("expired")
+                        .daysExpired(daysExpired)
+                        .passwordAge((int) passwordAge)
+                        .expiryDays(expiryDays)
+                        .message(String.format("您的密码已过期%d天，请尽快修改密码", daysExpired))
+                        .build());
+            } else {
+                // 密码未过期
+                return success(PasswordExpiryCheckDTO.builder()
+                        .type("valid")
+                        .passwordAge((int) passwordAge)
+                        .expiryDays(expiryDays)
+                        .message("密码有效")
+                        .build());
+            }
         }
     }

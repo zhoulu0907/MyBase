@@ -8,6 +8,8 @@ import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import cn.hutool.core.util.ObjUtil;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
+import com.cmsr.onebase.module.infra.api.security.SecurityConfigApi;
+import com.cmsr.onebase.module.infra.api.security.dto.PasswordExpiryCheckDTO;
 import com.cmsr.onebase.module.system.api.logger.dto.LoginLogCreateReqDTO;
 import com.cmsr.onebase.module.system.api.sms.SmsCodeApi;
 import com.cmsr.onebase.module.system.convert.auth.AuthConvert;
@@ -82,6 +84,8 @@ public class AdminAuthServiceImpl implements AdminAuthService {
     private TenantService tenantService;
     @Resource
     private PermissionService permissionService;
+    @Resource
+    private SecurityConfigApi securityConfigApi;
 
     @Override
     public AdminUserDO authenticate(String username, String password) {
@@ -249,7 +253,13 @@ public class AdminAuthServiceImpl implements AdminAuthService {
 
         TenantDO tennantDO = tenantService.getTenant(accessTokenDO.getTenantId());
         // 构建返回结果
-        return AuthConvert.INSTANCE.convert(accessTokenDO, tennantDO);
+        AuthLoginRespVO respVO = AuthConvert.INSTANCE.convert(accessTokenDO, tennantDO);
+        
+        // 检查密码有效期
+        PasswordExpiryCheckDTO expiryCheckResult = securityConfigApi.checkPasswordExpiry(userId).getData();
+        respVO.setPasswordExpiryInfo(expiryCheckResult);
+        
+        return respVO;
     }
 
     @Override

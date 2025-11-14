@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.infra.api.security;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.module.infra.api.security.dto.PasswordExpiryCheckDTO;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -61,5 +62,17 @@ public interface SecurityConfigApi {
     @PostMapping("/save-history")
     CommonResult<Boolean> savePasswordHistory(@RequestParam("userId") Long userId,
                                                @RequestParam("encodedPassword") String encodedPassword);
+
+    /**
+     * 检查密码有效期
+     * 
+     * 查询用户最近一次密码记录的创建时间，计算密码年龄
+     * 与租户配置的expiryDays比较，判断密码是否已过期
+     *
+     * @param userId 用户ID
+     * @return 检查结果DTO，包含type(expired/valid)、过期天数、提示信息等
+     */
+    @PostMapping("/check-expiry")
+    CommonResult<PasswordExpiryCheckDTO> checkPasswordExpiry(@RequestParam("userId") Long userId);
 
 }
