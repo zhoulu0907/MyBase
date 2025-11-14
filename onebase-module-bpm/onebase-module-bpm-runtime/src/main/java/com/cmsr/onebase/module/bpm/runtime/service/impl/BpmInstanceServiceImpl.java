@@ -14,6 +14,7 @@ import com.cmsr.onebase.module.bpm.core.dto.node.NodePermFlagDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
 import com.cmsr.onebase.module.bpm.core.enums.*;
 import com.cmsr.onebase.module.bpm.core.service.BpmEngineDefExtService;
+import com.cmsr.onebase.module.bpm.core.utils.BpmUtil;
 import com.cmsr.onebase.module.bpm.core.vo.UserBasicInfoVO;
 import com.cmsr.onebase.module.bpm.core.vo.design.BpmDefJsonVO;
 import com.cmsr.onebase.module.bpm.core.vo.design.node.base.BaseEdgeVO;
@@ -117,50 +118,6 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
 
     @Resource
     protected MetadataEntityFieldApi metadataEntityFieldApi;
-
-    /**
-     * 根据节点编码获取节点扩展DTO
-     *
-     * @param nodeCode 节点编码
-     * @param defJsonStr 流程定义JSON字符串
-     * @return 节点扩展DTO，如果不存在则返回null
-     */
-    private BaseNodeExtDTO getNodeExtDTOByNodeCode(String nodeCode, String defJsonStr) {
-        if (StringUtils.isBlank(defJsonStr)) {
-            return null;
-        }
-
-        DefJson defJson = JsonUtils.parseObject(defJsonStr, DefJson.class);
-        return getNodeExtDTOByNodeCode(nodeCode, defJson);
-    }
-
-    /**
-     * 根据节点编码获取节点扩展DTO
-     *
-     * @param nodeCode 节点编码
-     * @param defJson 流程定义JSON对象
-     * @return 节点扩展DTO，如果不存在则返回null
-     */
-    private BaseNodeExtDTO getNodeExtDTOByNodeCode(String nodeCode, DefJson defJson) {
-        if (defJson == null || defJson.getNodeList() == null) {
-            return null;
-        }
-
-        NodeJson currNodeJson = null;
-
-        for (NodeJson nodeJson : defJson.getNodeList()) {
-            if (Objects.equals(nodeJson.getNodeCode(), nodeCode)) {
-                currNodeJson = nodeJson;
-                break;
-            }
-        }
-
-        if (currNodeJson == null) {
-            return null;
-        }
-
-        return JsonUtils.parseObject(currNodeJson.getExt(), BaseNodeExtDTO.class);
-    }
 
     private String buildFormSummary(EntityVO entityVO, BpmDefinitionExtDTO defExtDTO) {
         StringBuilder sb = new StringBuilder();
@@ -372,6 +329,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
     @Override
     public void execTask(ExecTaskReqVO reqVO) {
         String taskId = reqVO.getTaskId();
+        User matchedUser = null;
 
         BpmActionButtonEnum buttonEnum = BpmActionButtonEnum.getByCode(reqVO.getButtonType());
         if (buttonEnum == null) {
@@ -402,7 +360,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         }
 
         String taskNodeCode = task.getNodeCode();
-        BaseNodeExtDTO extDTO = getNodeExtDTOByNodeCode(taskNodeCode, instance.getDefJson());
+        BaseNodeExtDTO extDTO = BpmUtil.getNodeExtDTOByNodeCode(taskNodeCode, instance.getDefJson());
 
         if (extDTO == null) {
             throw exception(ErrorCodeConstants.FLOW_NODE_NOT_EXISTS);
@@ -424,7 +382,8 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         List<User> users = userService.getByAssociateds(List.of(task.getId()),
                 BpmUserTypeEnum.APPROVAL.getCode(),
                 BpmUserTypeEnum.TRANSFER.getCode(),
-                BpmUserTypeEnum.DEPUTE.getCode());
+                BpmUserTypeEnum.DEPUTE.getCode(),
+                BpmUserTypeEnum.AGENT.getCode());
         Long loginUserId = WebFrameworkUtils.getLoginUserId();
         boolean hasPermission = false;
 
@@ -432,6 +391,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
             if (user.getProcessedBy().equals(String.valueOf(loginUserId))) {
                 // 说明是当前登录用户拥有权限
                 hasPermission = true;
+                matchedUser = user;
                 break;
             }
         }
@@ -441,7 +401,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         }
 
         // 执行
-        execTaskStrategyManager.execute(task, extDTO, reqVO);
+        execTaskStrategyManager.execute(matchedUser, task, extDTO, reqVO);
     }
 
     @Override
@@ -658,7 +618,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
 
         // 获取节点配置
         String nodeCode = instance.getNodeCode();
-        BaseNodeExtDTO nodeExtDTO = getNodeExtDTOByNodeCode(nodeCode, instance.getDefJson());
+        BaseNodeExtDTO nodeExtDTO = BpmUtil.getNodeExtDTOByNodeCode(nodeCode, instance.getDefJson());
 
         // 使用策略处理节点类型相关的逻辑（按钮配置、字段权限配置）
         if (nodeExtDTO != null) {

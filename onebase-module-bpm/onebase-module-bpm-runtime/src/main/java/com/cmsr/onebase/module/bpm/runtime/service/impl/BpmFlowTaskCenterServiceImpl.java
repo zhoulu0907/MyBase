@@ -14,6 +14,7 @@ import com.cmsr.onebase.module.bpm.core.dto.BpmInstanceDTO;
 import com.cmsr.onebase.module.bpm.core.dto.BpmTodoTaskDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
 import com.cmsr.onebase.module.bpm.core.enums.BpmBusinessStatusEnum;
+import com.cmsr.onebase.module.bpm.core.enums.BpmUserTypeEnum;
 import com.cmsr.onebase.module.bpm.core.service.BpmEngineDefExtService;
 import com.cmsr.onebase.module.bpm.core.vo.*;
 import com.cmsr.onebase.module.bpm.runtime.service.BpmFlowTaskCenterService;
@@ -34,6 +35,7 @@ import org.anyline.entity.Compare;
 import org.anyline.entity.DefaultPageNavi;
 import org.anyline.entity.PageNavi;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.warm.flow.core.dto.DefJson;
 import org.dromara.warm.flow.core.dto.NodeJson;
@@ -230,7 +232,12 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         fillTimeRange(condition, "submit_time", reqVO.getSubmitTimeStart(), reqVO.getSubmitTimeEnd());
 
         // 填充处理人条件
-        condition.and(Compare.EQUAL, "approver", userId);
+        ConfigStore handlerCondition = new DefaultConfigStore();
+
+        handlerCondition.or(Compare.EQUAL, "approver", userId);
+        handlerCondition.or(Compare.EQUAL, "collaborator", userId);
+
+        condition.and(handlerCondition);
 
         // 排序
         fillOrder(condition, "update_time", reqVO.getSortType());
@@ -308,6 +315,11 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         todoTaskVO.setArrivalTime(flowTaskExt.getCreateTime());
         todoTaskVO.setBusinessId(flowTaskExt.getBindingViewId());
 
+        // todo 确定代理人展示形式
+        if (Objects.equals(flowTaskExt.getUserType(), BpmUserTypeEnum.AGENT.getCode())) {
+            todoTaskVO.setProcessTitle("代理审批：" + flowTaskExt.getBpmTitle());
+        }
+
         todoTaskVO.setInitiator(new UserBasicInfoVO());
         todoTaskVO.getInitiator().setUserId(flowTaskExt.getInitiatorId());
         todoTaskVO.getInitiator().setName(flowTaskExt.getInitiatorName());
@@ -340,7 +352,8 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         List<BpmFlowDoneTaskVO> doneTaskList = new ArrayList<>();
         for (BpmDoneTaskDTO flowHisTaskExt : pageResult.getList()) {
             BpmFlowDoneTaskVO doneTaskVO = new BpmFlowDoneTaskVO();
-            doneTaskVO.setTaskId(flowHisTaskExt.getId());
+            doneTaskVO.setTaskId(flowHisTaskExt.getTaskId());
+            doneTaskVO.setHisTaskId(flowHisTaskExt.getId());
             doneTaskVO.setInstanceId(flowHisTaskExt.getInstanceId());
             doneTaskVO.setProcessTitle(flowHisTaskExt.getBpmTitle());
             doneTaskVO.setFormSummary(flowHisTaskExt.getFormSummary());
@@ -354,6 +367,24 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
             doneTaskVO.getInitiator().setAvatar(flowHisTaskExt.getInitiatorAvatar());
 
             doneTaskList.add(doneTaskVO);
+
+            // 判断下是否为代理执行
+            if (StringUtils.isNotBlank(flowHisTaskExt.getCollaborator()) && StringUtils.isNotBlank(flowHisTaskExt.getExt())) {
+                String hisExt = flowHisTaskExt.getExt();
+
+                Map<String, Object> extMap = JsonUtils.parseObject(hisExt, Map.class);
+
+                if (extMap == null) {
+                    continue;
+                }
+
+                String agentId = MapUtils.getString(extMap, "agentId");
+
+                // 只判断是否有值
+                if (Objects.equals(agentId, String.valueOf(loginUserId))) {
+                    doneTaskVO.setProcessTitle("代理审批：" + flowHisTaskExt.getBpmTitle());
+                }
+            }
         }
 
         return new PageResult<>(doneTaskList, pageResult.getTotal());
