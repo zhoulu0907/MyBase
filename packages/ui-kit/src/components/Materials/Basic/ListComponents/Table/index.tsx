@@ -126,16 +126,16 @@ const XTable = memo(
                       <>
                         {(operationButtonShowType === TableOperationButtonStyle.ICON ||
                           operationButtonShowType === TableOperationButtonStyle.ALL) && (
-                          <DynamicIcon
-                            IconComponent={iconMap[opearate.buttonIcon as keyof typeof iconMap]}
-                            theme="outline"
-                            size="16"
-                            fill={opearate.iconColor}
-                            style={{
-                              marginRight: 4
-                            }}
-                          />
-                        )}
+                            <DynamicIcon
+                              IconComponent={iconMap[opearate.buttonIcon as keyof typeof iconMap]}
+                              theme="outline"
+                              size="16"
+                              fill={opearate.iconColor}
+                              style={{
+                                marginRight: 4
+                              }}
+                            />
+                          )}
                         {(operationButtonShowType === TableOperationButtonStyle.TEXT ||
                           operationButtonShowType === TableOperationButtonStyle.ALL) &&
                           opearate.buttonName}
@@ -173,16 +173,16 @@ const XTable = memo(
                     >
                       {(operationButtonShowType === TableOperationButtonStyle.ICON ||
                         operationButtonShowType === TableOperationButtonStyle.ALL) && (
-                        <DynamicIcon
-                          IconComponent={iconMap[opearate.buttonIcon as keyof typeof iconMap]}
-                          theme="outline"
-                          size="16"
-                          fill={opearate.iconColor}
-                          style={{
-                            marginRight: 4
-                          }}
-                        />
-                      )}
+                          <DynamicIcon
+                            IconComponent={iconMap[opearate.buttonIcon as keyof typeof iconMap]}
+                            theme="outline"
+                            size="16"
+                            fill={opearate.iconColor}
+                            style={{
+                              marginRight: 4
+                            }}
+                          />
+                        )}
                       {(operationButtonShowType === TableOperationButtonStyle.TEXT ||
                         operationButtonShowType === TableOperationButtonStyle.ALL) &&
                         opearate.buttonName}
@@ -203,20 +203,24 @@ const XTable = memo(
     }, [refresh]);
 
     useEffect(() => {
+      let newColumns: any[] = [];
       if (Object.keys(columns as any).length) {
-        columns?.map((v) => {
+        newColumns = (columns || []).map((v) => {
           return {
             ...v,
             ellipsis: true,
-            width: v.width + 'px'
+            width: v.width + 'px',
+            render: (_text: any) => {
+              return <span>{_text}</span>
+            }
           };
         });
       }
       if (showOpearate) {
         opearate.fixed = fixedOpearate ? 'right' : null;
-        setFinalColumns([...(columns as any), opearate]);
+        newColumns.push(opearate)
       } else {
-        setFinalColumns(() => columns?.filter((v) => v.dataIndex !== 'op'));
+        newColumns = newColumns.filter((v) => v.dataIndex !== 'op')
       }
 
       if (props?.xTableSelectProps?.showSelect && runtime) {
@@ -233,8 +237,9 @@ const XTable = memo(
             />
           )
         };
-        setFinalColumns([checkboxColumnRender, ...(columns as any)]);
+        newColumns = [checkboxColumnRender, ...newColumns]
       }
+      setFinalColumns(newColumns);
     }, [showOpearate, columns, fixedOpearate, props?.xTableSelectProps?.selectedDataId]);
 
     useEffect(() => {
