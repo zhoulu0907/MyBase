@@ -81,4 +81,10 @@ public class BpmTodoTaskDTO extends FlowTask {
      */
     @Column(name = "binding_view_id", length = 100)
     private String bindingViewId;
+
+    /**
+     * 用户类型
+     */
+    @Column(name = "user_type")
+    private String userType;
 }
