@@ -9,11 +9,23 @@ import lombok.Data;
 @Data
 public class FieldPermissionItem {
 
+    /**
+     * 字段ID
+     */
     private Long fieldId;
 
+    /**
+     * 可读
+     */
     private boolean canRead;
 
+    /**
+     * 可编辑
+     */
     private boolean canEdit;
 
+    /**
+     * 可下载
+     */
     private boolean canDownload;
 }
