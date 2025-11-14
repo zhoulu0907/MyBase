@@ -344,6 +344,7 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
 
     /**
      * 为表名添加双引号以处理PostgreSQL的大小写敏感性
+     * 注意：达梦数据库不需要双引号，否则会导致大小写敏感问题
      */
     public String quoteTableName(String tableName) {
         if (tableName == null || tableName.trim().isEmpty()) {
@@ -353,8 +354,9 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
         if (tableName.startsWith("\"") && tableName.endsWith("\"")) {
             return tableName;
         }
-        // 为表名添加双引号
-        return "\"" + tableName + "\"";
+        // 暂时不添加双引号，避免达梦数据库大小写匹配问题
+        // TODO: 后续根据数据库类型动态决定是否添加双引号
+        return tableName;
     }
 
     // ========== 抽象方法定义 ==========
