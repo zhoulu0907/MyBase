@@ -7,7 +7,7 @@ import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 @Schema(description = "管理后台 - 手机密码登录 Request VO")
 @Data
-public class MobleLoginReqVO extends CaptchaVerificationReqVO {
+public class MobileLoginReqVO extends CaptchaVerificationReqVO {
 
     @Schema(description = "手机号", requiredMode = Schema.RequiredMode.REQUIRED, example = "")
     @NotEmpty(message = "登录手机号不能为空")
