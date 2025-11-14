@@ -14,6 +14,7 @@ import org.apache.flink.table.catalog.Column;
 import org.apache.flink.types.Row;
 import org.apache.flink.util.CloseableIterator;
 
+import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,8 +32,21 @@ public class WorkFlowExecutor {
     private TableEnvironment tableEnv;
 
     public WorkFlowExecutor(InputArgs inputArgs) throws Exception {
+        this(inputArgs, null);
+    }
+
+    public WorkFlowExecutor(InputArgs inputArgs, DataSource dataSource) throws Exception {
         this.inputArgs = inputArgs;
-        try (BeanManager beanManager = new BeanManager(inputArgs)) {
+        initializeWorkflowGraph(dataSource);
+        EnvironmentSettings settings =
+                EnvironmentSettings.newInstance().inBatchMode().build();
+        this.tableEnv = TableEnvironment.create(settings);
+    }
+
+    private void initializeWorkflowGraph(DataSource dataSource) throws Exception {
+        try (BeanManager beanManager = dataSource == null ?
+                new BeanManager(inputArgs) :
+                new BeanManager(inputArgs, dataSource)) {
             WorkflowProvider workflowProvider = beanManager.getWorkflowDao();
             if (inputArgs.getWorkflowId() != null) {
                 workflowGraph = workflowProvider.getWorkflowGraph(inputArgs.getWorkflowId());
@@ -42,9 +56,6 @@ public class WorkFlowExecutor {
                 workflowGraph = workflowProvider.getWorkflowGraph(subgraph);
             }
         }
-        EnvironmentSettings settings =
-                EnvironmentSettings.newInstance().inBatchMode().build();
-        this.tableEnv = TableEnvironment.create(settings);
     }
 
     public void execute() throws Exception {
