@@ -597,7 +597,7 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
     protected void storeData(ProcessContext context) {
 
         //处理子表逻辑
-        if (CollectionUtils.isNotEmpty(context.getSubEntities())) {
+        if (CollectionUtils.isNotEmpty(context.getSubEntities()) || MetadataDataMethodOpEnum.DELETE == context.getOperationType()) {
             handleSubEntities(context);
         }
 
@@ -680,6 +680,13 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
                     break;
                 }
             }
+        }
+
+        // 值为null的字段也放到参数里，触发流程时需要全量的字段信息
+        for (MetadataEntityFieldDO field : targetfields) {
+            if(!map.keySet().contains(field.getFieldName())){
+                newData.put(field.getId(), null);
+            };
         }
         return newData;
     }

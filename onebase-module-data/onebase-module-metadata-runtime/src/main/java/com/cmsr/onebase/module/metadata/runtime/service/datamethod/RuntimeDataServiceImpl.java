@@ -429,7 +429,8 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
                 sortField,
                 reqVO.getSortDirection(),
                 filtersByName,
-                reqVO.getMethodCode()
+                reqVO.getMethodCode(),
+                reqVO.getMenuId()
         );
 
         // 转换为VO
