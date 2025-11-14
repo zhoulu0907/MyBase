@@ -48,6 +48,7 @@ const PreviewDataSelectModal: React.FC<PreviewDataSelectModalProps> = ({ visible
       field.dataValue = data ? data[field.value] : null;
     });
     form.setFieldValue(fieldName, data ? {selectID: data.id, dataFields: displayFields} : '');
+    if(data) onCancel();
   };
     
   return (
@@ -55,7 +56,7 @@ const PreviewDataSelectModal: React.FC<PreviewDataSelectModalProps> = ({ visible
         className="filterDataModal"
         getPopupContainer={() => document.querySelector('[class*="previewPage"]') || document.body}
         style={{top: 50, width: '900px'}}
-        title={<span className="modalTitleLeft">选择数据</span>} 
+        title={<span className="modalTitleLeft">数据选择</span>} 
         visible={visible}
         onCancel={onCancel}
         footer={null}
