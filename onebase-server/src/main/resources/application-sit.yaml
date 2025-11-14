@@ -3,6 +3,7 @@ server:
 
 --- #################### 数据库相关配置 ####################
 spring:
+  # 数据源配置项
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://10.0.104.50:5432/onebase_cloud_v3
@@ -22,6 +23,23 @@ spring:
           connectionMinimumIdleSize: 2
           connectionPoolSize: 5
           database: 0
+  # Redis 配置。Redisson 默认的配置足够使用，一般不需要进行调优
+  data:
+    redis:
+      host: 10.0.104.50 # 地址
+      #host: 127.0.0.1 # 地址
+      port: 6379 # 端口
+      database: 0 # 数据库索引
+      #    password: dev # 密码，建议生产环境开启
+      timeout: 30000ms # 超时时间
+      connect-timeout: 30000 # 连接超时时间
+      lettuce:
+        pool:
+          max-active: 24    # 最大连接数，与错误信息中的24保持一致
+          max-idle: 2      # 最大空闲连接
+          min-idle: 2       # 最小空闲连接
+          max-wait: 10000ms # 最大等待时间
+          time-between-eviction-runs: 30s # 空闲连接检查间隔
 
 --- #################### 服务保障相关配置 ####################
 
@@ -43,8 +61,20 @@ debug: false
 onebase:
   captcha:
     enable: false # 本地环境，暂时关闭图片验证码，方便登录等接口的测试；
+  platform-tenant:
+    enable-create-app: true # 测试环境，暂时允许平台租户创建应用，方便登录接口测试；
   security:
     mock-enable: false
+    permit-all-urls: # 显式放行认证、注册、刷新、验证码、以及必要静态资源/健康检查，避免 @PermitAll 被覆盖导致 401
+      - /platform/system/auth/**
+      - /runtime/system/auth/**
+      - /admin-api/system/auth/**
+      - /platform/system/captcha/**
+      - /runtime/system/captcha/**
+      - /admin-api/system/captcha/**
+      - /actuator/health
+      - /swagger-ui/**
+      - /v3/api-docs/**
   access-log: # 访问日志的配置项
     enable: false
   web:
@@ -85,10 +115,5 @@ wx:
 
 liteflow:
   enable: true
-  print-banner: true
 rocketmq:
   endpoints: 10.0.104.50:8081
-
-metadata:
-  runtime:
-    enable-auth-check: true
