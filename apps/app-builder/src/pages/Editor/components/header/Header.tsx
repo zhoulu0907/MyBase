@@ -177,8 +177,6 @@ export default function EditorHeader() {
     });
   };
   const getVersonList = () => {
-    console.log('到这里了', selectRef.current);
-
     selectRef.current && selectRef.current.getVersionMgmtData();
   };
 

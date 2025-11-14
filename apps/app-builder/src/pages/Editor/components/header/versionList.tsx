@@ -19,11 +19,8 @@ export const VersionListSelect = forwardRef(
 
     // 获取版本信息列表
     const getVersionMgmtData = async () => {
-      console.log('进来查询了');
       const params = { businessId: pageSetId, sortType: 'create_time' };
       const { list } = await getVersionMgmt(params);
-      console.log(list);
-      
       setVersionList(list);
     };
 
