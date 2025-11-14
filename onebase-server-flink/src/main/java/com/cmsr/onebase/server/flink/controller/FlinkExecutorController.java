@@ -27,17 +27,25 @@ public class FlinkExecutorController {
     private DataSource dataSource;
 
     @PostMapping("/execute")
-    public ResponseEntity<Map> runFlow(@RequestBody InputArgs inputArgs) throws Exception {
-        WorkFlowExecutor executor = new WorkFlowExecutor(inputArgs, dataSource);
-        executor.execute();
-        return ResponseEntity.ok(Map.of("result", "success"));
+    public ResponseEntity<Map> runFlow(@RequestBody InputArgs inputArgs) {
+        try {
+            WorkFlowExecutor executor = new WorkFlowExecutor(inputArgs, dataSource);
+            executor.execute();
+            return ResponseEntity.ok(Map.of("result", "success"));
+        } catch (Exception e) {
+            return ResponseEntity.ok(Map.of("result", "fail", "message", e.getMessage()));
+        }
     }
 
     @PostMapping("/preview")
-    public ResponseEntity<DataPreview> preview(@RequestBody InputArgs inputArgs) throws Exception {
-        WorkFlowExecutor executor = new WorkFlowExecutor(inputArgs, dataSource);
-        DataPreview preview = executor.preview();
-        return ResponseEntity.ok(preview);
+    public ResponseEntity<Object> preview(@RequestBody InputArgs inputArgs) {
+        try {
+            WorkFlowExecutor executor = new WorkFlowExecutor(inputArgs, dataSource);
+            DataPreview preview = executor.preview();
+            return ResponseEntity.ok(preview);
+        } catch (Exception e) {
+            return ResponseEntity.ok(Map.of("result", "fail", "message", e.getMessage()));
+        }
     }
 
 }

@@ -22,11 +22,14 @@ public class BeanManager implements Closeable {
 
     private DataSource dataSource;
 
+    private boolean needCloseDataSource = true;
+
     private QueryProvider queryProvider;
 
     public BeanManager(InputArgs inputArgs, DataSource dataSource) {
         this.inputArgs = inputArgs;
         this.dataSource = dataSource;
+        this.needCloseDataSource = false;
         this.queryProvider = new QueryProvider(dataSource);
         this.workflowProvider = new WorkflowProvider();
         this.workflowProvider.setQueryProvider(queryProvider);
@@ -36,6 +39,7 @@ public class BeanManager implements Closeable {
     public BeanManager(InputArgs inputArgs) {
         this.inputArgs = inputArgs;
         this.dataSource = DataSourceUtil.createDataSource(inputArgs);
+        this.needCloseDataSource = true;
         this.queryProvider = new QueryProvider(dataSource);
         this.workflowProvider = new WorkflowProvider();
         this.workflowProvider.setQueryProvider(queryProvider);
@@ -45,9 +49,13 @@ public class BeanManager implements Closeable {
         return workflowProvider;
     }
 
+    public QueryProvider getQueryProvider() {
+        return queryProvider;
+    }
+
     @Override
     public void close() {
-        if (dataSource != null && dataSource instanceof Closeable dsCloseable) {
+        if (dataSource != null && needCloseDataSource && dataSource instanceof Closeable dsCloseable) {
             try {
                 dsCloseable.close();
             } catch (IOException e) {
