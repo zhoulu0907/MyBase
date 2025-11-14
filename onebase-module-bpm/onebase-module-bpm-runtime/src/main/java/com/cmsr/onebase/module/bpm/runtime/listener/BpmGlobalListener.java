@@ -1,22 +1,28 @@
 package com.cmsr.onebase.module.bpm.runtime.listener;
 
+import cn.hutool.core.map.MapUtil;
+import com.cmsr.onebase.framework.common.util.json.JsonUtils;
+import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowAgentRepository;
+import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowAgentDO;
+import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
 import com.cmsr.onebase.module.bpm.core.enums.BpmBusinessStatusEnum;
+import com.cmsr.onebase.module.bpm.core.enums.BpmNodeTypeEnum;
+import com.cmsr.onebase.module.bpm.core.enums.BpmUserTypeEnum;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.dromara.warm.flow.core.entity.Definition;
-import org.dromara.warm.flow.core.entity.Instance;
-import org.dromara.warm.flow.core.entity.Node;
-import org.dromara.warm.flow.core.entity.Task;
+import org.dromara.warm.flow.core.dto.FlowParams;
+import org.dromara.warm.flow.core.entity.*;
 import org.dromara.warm.flow.core.listener.GlobalListener;
 import org.dromara.warm.flow.core.listener.ListenerVariable;
 import org.dromara.warm.flow.core.service.InsService;
 import org.dromara.warm.flow.core.service.NodeService;
 import org.dromara.warm.flow.core.service.TaskService;
+import org.dromara.warm.flow.core.service.UserService;
+import org.dromara.warm.flow.core.service.impl.BpmConstants;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author liyang
@@ -32,6 +38,12 @@ public class BpmGlobalListener implements GlobalListener {
 
     @Resource
     private NodeService nodeService;
+
+    @Resource
+    private UserService userService;
+
+    @Resource
+    private BpmFlowAgentRepository agentRepository;
 
     @Override
     public void start(ListenerVariable listenerVariable) {
@@ -92,6 +104,77 @@ public class BpmGlobalListener implements GlobalListener {
         // 获取节点ext信息
         String ext = listenerVariable.getNode().getExt();
         log.info("开始创建任务，节点ext信息：{}", ext);
+
+        // 此处为nextTask创建的地方，此处加上代理人的信息
+        handleAgent(listenerVariable);
+    }
+
+    /**
+     * 处理代理人的业务逻辑
+     */
+    private void handleAgent(ListenerVariable listenerVariable) {
+        FlowParams flowParams = listenerVariable.getFlowParams();
+        Map<String, Object> variable = flowParams.getVariable();
+        Task task = listenerVariable.getTask();
+
+        // 判断节点类型，只处理审批节点
+        String nodeExt = listenerVariable.getNode().getExt();
+        BaseNodeExtDTO nodeExtDTO = JsonUtils.parseObject(nodeExt, BaseNodeExtDTO.class);
+
+        if (nodeExtDTO == null) {
+            return;
+        }
+
+        // 只处理审批节点和执行节点
+        if (!Objects.equals(nodeExtDTO.getNodeType(), BpmNodeTypeEnum.APPROVER.getCode())
+            && !Objects.equals(nodeExtDTO.getNodeType(), BpmNodeTypeEnum.EXECUTOR.getCode())) {
+            return;
+        }
+
+        Set<Long> approvalUserIds = new HashSet<>();
+
+        for (User user : task.getUserList()) {
+            // 只处理审批人类型的用户
+            if (!Objects.equals(user.getType(), BpmUserTypeEnum.APPROVAL.getCode())) {
+               continue;
+            }
+
+            approvalUserIds.add(Long.valueOf(user.getProcessedBy()));
+        }
+
+        // 如果没有审批人类型的用户，则直接返回
+        if (CollectionUtils.isEmpty(approvalUserIds)) {
+            return;
+        }
+
+        // todo：确保appId不为空
+        Long appId = MapUtil.getLong(variable, BpmConstants.VAR_APP_ID_KEY);
+
+        if (appId == null) {
+            return;
+        }
+
+        List<BpmFlowAgentDO> activeAgents = agentRepository.findAllActiveAgent(appId, approvalUserIds);
+        
+        if (CollectionUtils.isEmpty(activeAgents)) {
+            return;
+        }
+
+        List<User> agentUsers = new ArrayList<>();
+
+        // 增加代理人信息
+        for (BpmFlowAgentDO agent : activeAgents) {
+            User user = userService.structureUser(
+                    task.getId(),
+                    String.valueOf(agent.getAgentId()),
+                    BpmUserTypeEnum.AGENT.getCode(),
+                    String.valueOf(agent.getPrincipalId())
+            );
+            agentUsers.add(user);
+        }
+
+        // 保存代理用户
+        userService.saveBatch(agentUsers);
     }
 }
 

@@ -7,6 +7,7 @@ import jakarta.annotation.Resource;
 import lombok.Getter;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.entity.DataSet;
+import org.dromara.warm.flow.core.enums.NodeType;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -35,7 +36,7 @@ public class BpmHisTaskExtRepository {
     }
 
     private String buildBaseSql() {
-        return """
+        return String.format("""
                 select * from (
                     select
                         t3.app_id,
@@ -50,8 +51,11 @@ public class BpmHisTaskExtRepository {
                         t3.form_name,
                         t3.binding_view_id,
                         t.id,
+                        t.task_id,
                         t.instance_id,
                         t.approver,
+                        t.collaborator,
+                        t.ext,
                         t.flow_status as task_flow_status,
                         t.create_time,
                         t.update_time,
@@ -64,9 +68,13 @@ public class BpmHisTaskExtRepository {
                     t1.deleted = 0
                     and t.deleted = 0
                     and t3.deleted = 0
-                    and t.node_type in ('1','3','4')
+                    and t.node_type in ('%d','%d','%d')
                 ) tf
-                """;
+                """,
+                NodeType.BETWEEN.getKey(),
+                NodeType.SERIAL.getKey(),
+                NodeType.PARALLEL.getKey()
+        );
     }
 }
 
