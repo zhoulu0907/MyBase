@@ -207,7 +207,7 @@ public class AdminAuthServiceImpl implements AdminAuthService {
             createLoginLog(null, reqVO.getMobile(), LoginLogTypeEnum.LOGIN_USERNAME, LoginResultEnum.CAPTCHA_CODE_ERROR);
             throw exception(AUTH_LOGIN_CAPTCHA_CODE_ERROR, response.getRepMsg());
         }
-        // 2. 使用账号密码，进行登录
+        // 2. 使用手机和密码，进行登录
         AdminUserDO user = mobileAuthenticate(reqVO.getMobile(), reqVO.getPassword());
         return createCorpAfterLoginSuccess(reqVO.getCorpId(), user.getId(), reqVO.getMobile(), LoginLogTypeEnum.LOGIN_MOBILE);
     }
