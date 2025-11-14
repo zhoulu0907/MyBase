@@ -8,12 +8,12 @@ import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.etl.build.service.DatasourceFactory;
 import com.cmsr.onebase.module.etl.build.service.collector.MetadataCollector;
 import com.cmsr.onebase.module.etl.build.service.collector.MetadataManager;
-import com.cmsr.onebase.module.etl.build.service.datasource.vo.ColumnDefine;
+import com.cmsr.onebase.module.etl.common.preview.ColumnDefine;
 import com.cmsr.onebase.module.etl.build.service.datasource.vo.ETLDatasourceCreateReqVO;
 import com.cmsr.onebase.module.etl.build.service.datasource.vo.ETLDatasourceUpdateReqVO;
 import com.cmsr.onebase.module.etl.build.service.datasource.vo.TestConnectionVO;
 import com.cmsr.onebase.module.etl.build.service.preview.DataInspectService;
-import com.cmsr.onebase.module.etl.build.service.preview.vo.DataPreviewVO;
+import com.cmsr.onebase.module.etl.common.preview.DataPreview;
 import com.cmsr.onebase.module.etl.build.service.preview.vo.TablePreviewVO;
 import com.cmsr.onebase.module.etl.common.entity.CatalogData;
 import com.cmsr.onebase.module.etl.common.entity.ColumnData;
@@ -220,7 +220,7 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
     }
 
     @Override
-    public DataPreviewVO previewTable(TablePreviewVO tablePreviewVO) {
+    public DataPreview previewTable(TablePreviewVO tablePreviewVO) {
         return dataInspectService.previewData(tablePreviewVO);
     }
 

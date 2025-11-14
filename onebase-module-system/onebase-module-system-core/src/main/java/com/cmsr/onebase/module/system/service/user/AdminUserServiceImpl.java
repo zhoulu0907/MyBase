@@ -348,10 +348,14 @@ public class AdminUserServiceImpl implements AdminUserService {
         validateOldPassword(id, reqVO.getOldPassword());
         // 弱密码校验
         securityConfigApi.validatePassword(reqVO.getNewPassword());
+        // 历史密码校验
+        securityConfigApi.validatePasswordHistory(id, reqVO.getNewPassword());
         // 执行更新
         AdminUserDO updateObj = new AdminUserDO().setId(id);
         updateObj.setPassword(encodePassword(reqVO.getNewPassword())); // 加密密码
         adminUserDataRepository.update(updateObj);
+        // 保存密码历史
+        securityConfigApi.savePasswordHistory(id, updateObj.getPassword());
     }
 
     @Override

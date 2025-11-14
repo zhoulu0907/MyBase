@@ -49,7 +49,7 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
             EntityTriggerRespDTO respDTO = new EntityTriggerRespDTO(reqDTO.getTraceId());
             respDTO.setSuccess(true);
             respDTO.setTriggered(false);
-            respDTO.setMessage("未找到匹配的流程.");
+            respDTO.setMessage("实体未配置流程:" + reqDTO.getEntityId());
             return respDTO;
         }
         List<EntityTriggerRespDTO> respDTOS = new ArrayList<>();

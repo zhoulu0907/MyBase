@@ -45,11 +45,13 @@ public class ExpressionExecutor implements Serializable {
         try {
             String fullExpression = buildConditionExpression(orExpression);
             JexlExpression expression = jexlEngine.createExpression(fullExpression);
-            MapContext jc = new MapContext(formatMapContextKey(vars));
+            Map<String, Object> expressionContext = formatMapContextKey(vars);
+            MapContext jc = new MapContext(expressionContext);
             Object result = expression.evaluate(jc);
             return result instanceof Boolean ? (Boolean) result : Boolean.FALSE;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            String msg = "表达式执行异常: 执行表达式:(" + orExpression + "), 输入条件:(" + vars + ")";
+            throw new RuntimeException(msg, e);
         }
     }
 
