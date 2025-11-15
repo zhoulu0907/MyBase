@@ -2607,9 +2607,18 @@ COMMENT ON COLUMN "public"."system_login_log"."update_time" IS '更新时间';
 COMMENT ON COLUMN "public"."system_login_log"."deleted" IS '是否删除';
 COMMENT ON COLUMN "public"."system_login_log"."tenant_id" IS '租户编号';
 
+-- Sequence Definition (为UID生成器创建序列)
+CREATE SEQUENCE IF NOT EXISTS "public"."seq_system_uid_worker_node"
+    START WITH 1
+    INCREMENT BY 1
+    MINVALUE 1
+    MAXVALUE 2147483647
+    CACHE 1
+    NO CYCLE;
+
 -- Table Definition
 CREATE TABLE "public"."system_uid_worker_node" (
-    "id" int4 GENERATED ALWAYS AS IDENTITY NOT NULL,
+    "id" int4 NOT NULL DEFAULT nextval('seq_system_uid_worker_node'),
     "worker_host" varchar(64),
     "worker_port" varchar(64),
     "node_type" int2,
