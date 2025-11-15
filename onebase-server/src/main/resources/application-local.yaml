@@ -87,6 +87,8 @@ onebase:
     flow-url: http://s25029301301.dev.internal.virtueit.net:81/v1-snapshot/onebaseserverruntime/flow/remote-call/trigger
     etl-project: 155572154738048
     tenant: root
+  flink:
+    address: http://localhost:58080
 
 justauth:
   enabled: true
