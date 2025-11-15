@@ -20,6 +20,11 @@ interface PreviewProps {
   detailData: any;
 }
 
+enum ViewModeMap {
+    edit='default',
+    detail='readonly'
+}
+
 const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref) => {
   // 启用 signal 的响应式更新
   useSignals();
@@ -59,7 +64,7 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
       Object.keys(pageComponentSchemas).forEach((key) => {
         const originalItem = pageComponentSchemas[key];
         const secondDataField = originalItem.config.dataField[1];
-        const newStatus = fieldPerm?.[secondDataField] || originalItem.config.status;
+        const newStatus = fieldPerm?.[secondDataField] || ViewModeMap[detailData?.pageView?.viewMode as keyof typeof ViewModeMap];
         updatedData[key] = {
           ...originalItem,
           config: {
