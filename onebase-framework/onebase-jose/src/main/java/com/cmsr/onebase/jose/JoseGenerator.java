@@ -17,9 +17,7 @@ public class JoseGenerator {
 
     private static final String PUBLIC_KEY_PEM = "/public-key.json";
 
-    private static int expireSeconds = 30;
-
-    public static String generateToken() throws Exception {
+    public static String generateToken(int expireSeconds) throws Exception {
         try (InputStream resourceInputStream = JoseGenerator.class.getResourceAsStream(PUBLIC_KEY_PEM)) {
             String json = IOUtils.readInputStreamToString(resourceInputStream);
             RSAKey rsaJWK = RSAKey.parse(json);
@@ -44,7 +42,11 @@ public class JoseGenerator {
     }
 
     public static void main(String[] args) throws Exception {
-        String token = generateToken();
+        int expireSeconds = 30;
+        if (args.length >= 1) {
+            expireSeconds = Integer.parseInt(args[0]);
+        }
+        String token = generateToken(expireSeconds);
         System.out.println("${setValue(accessToken=" + token + ")}");
     }
 }

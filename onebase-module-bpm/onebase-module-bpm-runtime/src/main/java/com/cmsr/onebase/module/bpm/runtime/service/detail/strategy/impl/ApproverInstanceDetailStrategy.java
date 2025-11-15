@@ -6,7 +6,7 @@ import com.cmsr.onebase.module.bpm.core.dto.node.base.FieldPermCfgDTO;
 import com.cmsr.onebase.module.bpm.core.enums.BpmNodeTypeEnum;
 import com.cmsr.onebase.module.bpm.core.enums.FieldPermTypeEnum;
 import com.cmsr.onebase.module.bpm.core.enums.FieldUiShowModeEnum;
-import com.cmsr.onebase.module.bpm.runtime.vo.BpmFlowTaskDetailVO;
+import com.cmsr.onebase.module.bpm.runtime.vo.BpmTaskDetailRespVO;
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldQueryReqDTO;
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldRespDTO;
 import org.apache.commons.collections4.CollectionUtils;
@@ -29,7 +29,7 @@ public class ApproverInstanceDetailStrategy extends AbstractInstanceDetailStrate
     }
 
     @Override
-    protected void fillFieldPermConfig(BpmFlowTaskDetailVO vo, ApproverNodeExtDTO extDTO, Long entityId) {
+    protected void fillFieldPermConfig(BpmTaskDetailRespVO vo, ApproverNodeExtDTO extDTO, Long entityId, boolean isTodo) {
         FieldPermCfgDTO fieldPermConfig = extDTO.getFieldPermConfig();
 
         // 审批节点未配置字段权限，或未开启节点配置，则返回，使用表单默认权限
@@ -82,7 +82,12 @@ public class ApproverInstanceDetailStrategy extends AbstractInstanceDetailStrate
             } else if (Objects.equals(FieldPermTypeEnum.READ.getCode(), fieldConfig.getFieldPermType())) {
                 fieldPermMap.put(fieldConfig.getFieldId(), FieldUiShowModeEnum.READ.getCode());
             } else if (Objects.equals(FieldPermTypeEnum.WRITE.getCode(), fieldConfig.getFieldPermType())) {
-                fieldPermMap.put(fieldConfig.getFieldId(), FieldUiShowModeEnum.WRITE.getCode());
+                if (isTodo) {
+                    fieldPermMap.put(fieldConfig.getFieldId(), FieldUiShowModeEnum.WRITE.getCode());
+                } else {
+                    // 非待办的情况下，都是只读
+                    fieldPermMap.put(fieldConfig.getFieldId(), FieldUiShowModeEnum.READ.getCode());
+                }
             }
         }
 
@@ -97,7 +102,7 @@ public class ApproverInstanceDetailStrategy extends AbstractInstanceDetailStrate
     }
 
     @Override
-    protected void fillButtonConfigs(BpmFlowTaskDetailVO vo, ApproverNodeExtDTO extDTO) {
+    protected void fillButtonConfigs(BpmTaskDetailRespVO vo, ApproverNodeExtDTO extDTO) {
         for (ApproverNodeBtnCfgDTO buttonConfig : extDTO.getButtonConfigs()) {
             if (!buttonConfig.getEnabled()) {
                continue;

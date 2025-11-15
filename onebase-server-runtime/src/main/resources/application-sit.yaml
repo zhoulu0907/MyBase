@@ -92,3 +92,5 @@ rocketmq:
 metadata:
   runtime:
     enable-auth-check: false
+
+

@@ -7,6 +7,7 @@ import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.*;
 import com.cmsr.onebase.module.metadata.build.service.entity.vo.EntityFieldQueryVO;
 import com.cmsr.onebase.module.metadata.build.service.number.AutoNumberRuleBuildService;
 import com.cmsr.onebase.module.metadata.build.service.component.MetadataComponentFieldTypeBuildService;
+import com.cmsr.onebase.module.metadata.build.service.relationship.MetadataEntityRelationshipBuildService;
 import com.cmsr.onebase.module.metadata.build.service.validation.MetadataPermitRefOtftBuildService;
 import com.cmsr.onebase.module.metadata.build.service.validation.MetadataValidationTypeBuildService;
 import com.cmsr.onebase.module.metadata.build.service.validation.MetadataValidationRequiredBuildService;
@@ -95,6 +96,8 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
     @Resource
     private MetadataEntityFieldRepository metadataEntityFieldRepository;
+    @Resource
+    private MetadataEntityRelationshipBuildService metadataEntityRelationshipBuildService;
     @Resource
     private TemporaryDatasourceService temporaryDatasourceService;
     @Resource
@@ -636,6 +639,9 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                         validationRequiredService.deleteByFieldId(existing.getId());
                         validationUniqueService.deleteByFieldId(existing.getId());
                         validationLengthService.deleteByFieldId(existing.getId());
+
+                        // 删除实体间关联关系
+                        metadataEntityRelationshipBuildService.deleteRelationShipByFieldId(Long.valueOf(item.getId()));
                     } catch (Exception ignore) {}
                 }
 

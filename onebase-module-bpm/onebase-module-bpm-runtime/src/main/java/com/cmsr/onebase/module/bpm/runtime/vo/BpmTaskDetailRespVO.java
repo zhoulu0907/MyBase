@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.bpm.runtime.vo;
 
+import com.cmsr.onebase.module.bpm.core.dto.PageViewDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeBtnCfgDTO;
 import com.cmsr.onebase.module.bpm.core.vo.UserBasicInfoVO;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -9,9 +10,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
-@Schema(description = "流程详情VO")
+@Schema(description = "流程详情响应VO")
 @Data
-public class BpmFlowTaskDetailVO {
+public class BpmTaskDetailRespVO {
     @Schema(description = "当前状态")
     private String currentStatus;
 
@@ -52,4 +53,7 @@ public class BpmFlowTaskDetailVO {
 
     @Schema(description = "form信息")
     private Map<String, Object> formData;
+
+    @Schema(description = "页面视图信息")
+    private PageViewDTO pageView;
 }

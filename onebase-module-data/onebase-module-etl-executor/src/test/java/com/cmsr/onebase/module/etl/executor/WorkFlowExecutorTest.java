@@ -1,12 +1,14 @@
 package com.cmsr.onebase.module.etl.executor;
 
+import org.junit.jupiter.api.Test;
+
 /**
  * @Author：huangjie
  * @Date：2025/11/9 8:29
  */
 class WorkFlowExecutorTest {
 
-    @org.junit.jupiter.api.Test
+    @Test
     void execute() throws Exception {
         InputArgs inputArgs = new InputArgs();
         inputArgs.setJdbcDriverClass("org.postgresql.Driver");

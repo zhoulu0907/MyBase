@@ -25,4 +25,7 @@ public class ConditionDTO {
     @Schema(description = "条件值")
     private List<String> fieldValue;
 
+    @Schema(description = "主条件/子条件 mainCondition/subCondition")
+    private String conditionType;
+
 }
