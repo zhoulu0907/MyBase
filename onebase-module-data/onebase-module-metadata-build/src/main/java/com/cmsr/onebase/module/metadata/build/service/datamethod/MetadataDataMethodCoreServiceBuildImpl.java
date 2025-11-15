@@ -32,7 +32,7 @@ import java.util.Map;
 @Service
 @Slf4j
 @ConditionalOnMissingBean(name = "metadataDataMethodCoreServiceImpl")
-public class MetadataDataMethodCoreServiceBuildImpl extends AbstractMetadataDataMethodCoreService 
+public class MetadataDataMethodCoreServiceBuildImpl extends AbstractMetadataDataMethodCoreService
         implements MetadataDataMethodCoreService {
 
     /**
@@ -117,7 +117,7 @@ public class MetadataDataMethodCoreServiceBuildImpl extends AbstractMetadataData
     @Override
     public PageResult<Map<String, Object>> getDataPage(Long entityId, Integer pageNo, Integer pageSize,
                                                         String sortField, String sortDirection,
-                                                        Map<String, Object> filters, String methodCode) {
+                                                        Map<String, Object> filters, String methodCode, Long menuId) {
         log.info("编辑态分页查询 - entityId: {}, pageNo: {}, pageSize: {}", entityId, pageNo, pageSize);
         
         // 编辑态暂不支持分页查询，返回空结果
