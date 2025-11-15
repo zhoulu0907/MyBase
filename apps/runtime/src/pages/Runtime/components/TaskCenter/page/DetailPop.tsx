@@ -13,7 +13,7 @@ const Row = Grid.Row;
 const Col = Grid.Col;
 
 enum PageTypeMap {
-  willdo='todo',
+  willdo = 'todo',
   idone = 'done',
   icreated = 'created',
   icopied = 'cc'
