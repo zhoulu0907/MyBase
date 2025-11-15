@@ -83,6 +83,8 @@ onebase:
     flow-token: 0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c
     etl-project: 155572154738048
     tenant: root
+  flink:
+    address: http://10.0.104.50:58080
 
 justauth:
   enabled: true
