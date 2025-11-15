@@ -31,9 +31,6 @@ public class JobClient {
     @Value("${onebase.scheduler.flow-url}")
     private String flowUrl;
 
-    @Value("${onebase.scheduler.flow-token}")
-    private String flowToken;
-
     @Autowired
     private DolphinSchedulerClient dolphinSchedulerClient;
 

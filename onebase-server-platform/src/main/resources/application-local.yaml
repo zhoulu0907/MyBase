@@ -75,7 +75,6 @@ onebase:
     env: 154612656767296
     flow-project: 154702155517248
     flow-url: http://bing.com
-    flow-token: 0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c
     etl-project: 155572154738048
     tenant: root
 

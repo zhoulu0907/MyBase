@@ -24,6 +24,7 @@ import org.anyline.entity.DataSet;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.service.AnylineService;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -308,7 +309,10 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
                     String fieldName = field.getFieldName();
 
                     // 如果用户没有提供值，则生成自动编号
-                    if (!processedData.containsKey(fieldName) || processedData.get(fieldName) == null) {
+                    if (!processedData.containsKey(fieldName)
+                            || processedData.get(fieldName) == null
+                    || (processedData.get(fieldName) instanceof String && StringUtils.isBlank((String) processedData.get(fieldName)))
+                    ) {
                         // 准备上下文数据，将当前的processedData作为上下文传递
                         Map<String, Object> contextData = new HashMap<>(processedData);
 

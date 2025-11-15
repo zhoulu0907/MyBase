@@ -37,7 +37,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Component
 @Conditional(FlowRuntimeCondition.class)
-public class FlowJobHandler {
+public class FlowTimeJobHandler {
 
     @Setter
     @Autowired
@@ -59,13 +59,12 @@ public class FlowJobHandler {
     @Autowired
     private RedissonClient redissonClient;
 
-    public void initAllProcess() {
+    public void initAllJob() {
         //TODO 这里要用 TenantUtils.executeIgnore 去查询，但这个没有拆分出来，会导致依赖问题。
         List<FlowProcessDO> flowProcessDOS = flowProcessRepository.findAllByEnableStatus(FlowEnableStatusEnum.ENABLE.getStatus());
         for (FlowProcessDO flowProcessDO : flowProcessDOS) {
             try {
                 startJob(flowProcessDO);
-                log.info("加载flowProcess流程成功：{}", flowProcessDO.getId());
             } catch (Exception e) {
                 log.error("初始化flowProcessDO异常：{}, {}", flowProcessDO, e.getMessage(), e);
             }
@@ -136,6 +135,7 @@ public class FlowJobHandler {
             flowProcessTimeDO.setJobStatus(FlowJobStatusEnum.DEPLOYED.getStatus());
             flowProcessTimeRepository.update(flowProcessTimeDO);
         }
+        log.info("加载flowProcess流程成功：{}", flowProcessDO.getId());
     }
 
 
