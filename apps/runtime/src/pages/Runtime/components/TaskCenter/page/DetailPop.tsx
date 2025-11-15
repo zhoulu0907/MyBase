@@ -12,6 +12,13 @@ import PreviewContainer from './DetailForm';
 const Row = Grid.Row;
 const Col = Grid.Col;
 
+enum PageTypeMap {
+  willdo = 'todo',
+  idone = 'done',
+  icreated = 'created',
+  icopied = 'cc'
+}
+
 interface PageProps {
   detailPopVisible: boolean;
   setPopVisible: (visible: boolean) => void;
@@ -147,7 +154,11 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
     setStepData(res);
   };
   const fetchDetailData = async () => {
-    const res = await getFormDetail({ instanceId: rowData?.instanceId, taskId: detailData?.taskId });
+    const res = await getFormDetail({
+      instanceId: rowData?.instanceId,
+      taskId: rowData?.taskId,
+      from: PageTypeMap[listType as keyof typeof PageTypeMap]
+    });
     setDetailData(res);
   };
 

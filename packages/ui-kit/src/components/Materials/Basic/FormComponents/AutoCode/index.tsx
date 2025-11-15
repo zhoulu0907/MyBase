@@ -1,20 +1,13 @@
+import { FORM_COMPONENT_TYPES } from '@/components/Materials/componentTypes';
 import { Form, Input } from '@arco-design/web-react';
+import { nanoid } from 'nanoid';
 import { memo, useEffect, useState } from 'react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import '../index.css';
 import { type XautoCodeConfig } from './schema';
 
 const XautoCode = memo((props: XautoCodeConfig & { runtime?: boolean; detailMode?: boolean }) => {
-  const {
-    label,
-    dataField,
-    tooltip,
-    placeholder,
-    status,
-    layout,
-    runtime = true,
-    detailMode
-  } = props;
+  const { label, dataField, tooltip, placeholder, status, layout, runtime = true, detailMode } = props;
 
   const { form } = Form.useFormContext();
   const [fieldId, setFieldId] = useState('');
@@ -37,6 +30,7 @@ const XautoCode = memo((props: XautoCodeConfig & { runtime?: boolean; detailMode
         layout={layout}
         tooltip={tooltip}
         wrapperCol={{ style: { flex: 1 } }}
+        field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.AUTO_CODE}_${nanoid()}`}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           margin: 0,
