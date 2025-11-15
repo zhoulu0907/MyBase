@@ -1,8 +1,7 @@
 package com.cmsr.onebase.module.etl.executor.provider;
 
-import com.cmsr.onebase.module.etl.executor.provider.dao.EtlDataSource;
-import com.cmsr.onebase.module.etl.executor.provider.dao.EtlFlinkMapping;
-import com.cmsr.onebase.module.etl.executor.provider.dao.EtlTable;
+import com.cmsr.onebase.module.etl.executor.provider.dao.*;
+import com.github.f4b6a3.tsid.TsidCreator;
 import org.apache.commons.dbutils.QueryRunner;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
@@ -23,8 +22,12 @@ public class QueryProvider {
         this.runner = new QueryRunner(dataSource);
     }
 
-    public String findWorkflowConfig(Long workflowId) throws Exception {
-        var query = context.select(DSL.field("config", String.class))
+    public EtlWorkflow findWorkflowConfig(Long workflowId) throws Exception {
+        var query = context.select(
+                        DSL.field("id", Long.class),
+                        DSL.field("application_id", Long.class),
+                        DSL.field("config", String.class)
+                )
                 .from(DSL.table("etl_workflow"))
                 .where(DSL.and(
                         DSL.field("id").eq(workflowId),
@@ -32,7 +35,11 @@ public class QueryProvider {
                 ));
         return runner.query(query.getSQL(ParamType.INDEXED), resultSet -> {
             if (resultSet.next()) {
-                return resultSet.getString(1);
+                EtlWorkflow etlWorkflow = new EtlWorkflow();
+                etlWorkflow.setWorkflowId(resultSet.getLong("id"));
+                etlWorkflow.setApplicationId(resultSet.getLong("application_id"));
+                etlWorkflow.setConfig(resultSet.getString("config"));
+                return etlWorkflow;
             }
             return null;
         }, query.getBindValues().toArray());
@@ -110,6 +117,36 @@ public class QueryProvider {
                     return etlFlinkMappings;
                 },
                 query.getBindValues().toArray());
+    }
+
+    public void insertEtlExecutionLog(EtlExecutionLog etlExecutionLog) throws Exception {
+        long tsid = TsidCreator.getTsid().toLong();
+        etlExecutionLog.setId(tsid);
+        var query = context.insertInto(DSL.table("etl_execution_log"),
+                        DSL.field("id"),
+                        DSL.field("application_id"),
+                        DSL.field("workflow_id"),
+                        DSL.field("start_time"),
+                        DSL.field("end_time"),
+                        DSL.field("duration_time"),
+                        DSL.field("trigger_type"),
+                        DSL.field("trigger_user"),
+                        DSL.field("task_status"),
+                        DSL.field("error_message")
+                )
+                .values(
+                        etlExecutionLog.getId(),
+                        etlExecutionLog.getApplicationId(),
+                        etlExecutionLog.getWorkflowId(),
+                        etlExecutionLog.getStartTime(),
+                        etlExecutionLog.getEndTime(),
+                        etlExecutionLog.getDurationTime(),
+                        etlExecutionLog.getTriggerType(),
+                        etlExecutionLog.getTriggerUser(),
+                        etlExecutionLog.getTaskStatus(),
+                        etlExecutionLog.getErrorMessage()
+                );
+        runner.execute(query.getSQL(ParamType.INDEXED), query.getBindValues().toArray());
     }
 
 }

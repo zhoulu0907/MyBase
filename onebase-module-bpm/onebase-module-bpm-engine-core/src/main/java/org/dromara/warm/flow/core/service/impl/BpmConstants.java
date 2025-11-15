@@ -16,4 +16,19 @@ public interface BpmConstants {
 
     /**  flow variable 中appId的key */
     String VAR_APP_ID_KEY = "appId";
+
+    /**  flow variable 中entityId的key */
+    String VAR_ENTITY_ID_KEY = "entityId";
+
+    /**  flow variable 中editPageView的key */
+    String VAR_EDIT_PAGE_VIEW_KEY = "editPageView";
+
+    /**  flow variable 中detailPageView的key */
+    String VAR_DETAIL_PAGE_VIEW_KEY = "detailPageView";
+
+    /**  flow variable 中bindingViewId的key */
+    String VAR_BINDING_VIEW_ID_KEY = "bindingViewId";
+
+    /**  flow variable 中detailPageView的key */
+    String VAR_PAGE_VIEW_GROUP_KEY = "pageViewGroup";
 }
