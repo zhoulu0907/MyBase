@@ -2631,6 +2631,11 @@ CREATE TABLE "public"."system_uid_worker_node" (
     PRIMARY KEY ("id")
 );
 
+-- Reset sequence to avoid primary key conflicts (重置序列避免主键冲突)
+-- This should be executed after any data import to sync the sequence with existing data
+-- 如果表中已有数据,需要在数据导入后执行此语句以同步序列
+SELECT setval('seq_system_uid_worker_node', (SELECT COALESCE(MAX(id), 0) + 1 FROM system_uid_worker_node), false);
+
 -- Table Definition
 CREATE TABLE "public"."system_mail_log" (
     "id" int8 NOT NULL,
