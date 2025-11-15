@@ -1,23 +1,19 @@
 package com.cmsr.onebase.framework.ds.model.task;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class TaskLocation {
 
     private Long taskCode;
 
-    private int x;
+    private int x = 100;
 
-    private int y;
+    private int y = 100;
 
     public static TaskLocation singleton(Long taskCode) {
         TaskLocation taskLocation = new TaskLocation();
@@ -25,6 +21,15 @@ public class TaskLocation {
         taskLocation.setX(100);
         taskLocation.setY(100);
         return taskLocation;
+    }
+
+    public TaskLocation() {
+    }
+
+    public TaskLocation(Long taskCode, int x, int y) {
+        this.taskCode = taskCode;
+        this.x = x;
+        this.y = y;
     }
 
     @Override
