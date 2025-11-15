@@ -102,8 +102,6 @@ const XTable = memo(
     const [tableTotal, setTableTotal] = useState<number>(0);
     const [tablePageNo, setTablePageNo] = useState<number>(1);
 
-
-
     const opearate: any = {
       title: '操作',
       dataIndex: 'op',

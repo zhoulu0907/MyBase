@@ -1,4 +1,4 @@
-import { Form, Input, Button } from '@arco-design/web-react';
+import { Button, Form, Input } from '@arco-design/web-react';
 import { IconSearch, IconSync } from '@arco-design/web-react/icon';
 import { useSignals } from '@preact/signals-react/runtime';
 import { memo } from 'react';
@@ -37,7 +37,7 @@ const TableSearch = memo((props: TableSearchConfig) => {
         const cpType = components.value?.find((ele) => ele.id === cpId)?.type;
 
         //TODO: zhoumingji, 后续增加在搜索框的配置
-        const placeholderOverride = cpType === FORM_COMPONENT_TYPES.INPUT_NUMBER ? '请输入' : undefined;
+        const placeholderOverride = cpType === FORM_COMPONENT_TYPES.AUTO_CODE ? '请输入' : undefined;
 
         const componentConfig = {
           ...currentComponentSchemas.config,
@@ -269,10 +269,14 @@ const TableSearch = memo((props: TableSearchConfig) => {
             <Form.Item label={<span className={'labelText'}></span>}>
               <div className="actionsInner formWrapper">
                 {onSearch && (
-                  <Button type="primary" onClick={onSearch} icon={<IconSearch />}>查询</Button>
+                  <Button type="primary" onClick={onSearch} icon={<IconSearch />}>
+                    查询
+                  </Button>
                 )}
                 {onReset && (
-                  <Button type="default" onClick={onReset} icon={<IconSync />}>重置</Button>
+                  <Button type="default" onClick={onReset} icon={<IconSync />}>
+                    重置
+                  </Button>
                 )}
               </div>
             </Form.Item>
