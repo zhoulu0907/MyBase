@@ -1,5 +1,6 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useState } from 'react';
 import { Button, Drawer, Form } from '@arco-design/web-react';
+import { IconFullscreen, IconFullscreenExit, IconEdit } from '@arco-design/web-react/icon';
 import { useSignals } from '@preact/signals-react/runtime';
 import { pagesRuntimeSignal } from '@onebase/common';
 import { getComponentWidth, PreviewRender, STATUS_OPTIONS, STATUS_VALUES, useEditorSignalMap, type GridItem } from '@onebase/ui-kit';
@@ -12,15 +13,39 @@ interface DetailRuntimeProps {
   detailMode: boolean;
   onUpdate: () => void;
   onCancelUpdate: () => void;
+  showFromPageData: (id: string, toFormPage?: boolean) => void;
+  editTargetId: string;
 }
 
-const DetailRuntime: React.FC<DetailRuntimeProps> = ({ visible, onCancel, form, detailMode, onUpdate, onCancelUpdate }) => {
+const DetailRuntime: React.FC<DetailRuntimeProps> = ({ visible, onCancel, form, detailMode, onUpdate, onCancelUpdate, showFromPageData, editTargetId }) => {
   useSignals();
 
   const { detailPageViewId } = pagesRuntimeSignal;
 
+  const [fullScreen, setFullScreen] = useState(false);
+
   return (
-    <Drawer width={'60vw'} title={<div className={styles.drawerTitle}><div>详情</div></div>} visible={visible} placement="right" onCancel={onCancel} footer={null}>
+    <Drawer
+      width={fullScreen ? '98vw' : '60vw'}
+      title={
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div className="predictTitle">详情</div>
+          <div className={styles.titleDetailIconArea}>
+            <IconEdit className={styles.fullscreenIcon} onClick={() => showFromPageData(editTargetId, true)} />
+            {fullScreen ? (
+              <IconFullscreenExit className={styles.fullscreenIcon} onClick={() => setFullScreen(false)} />
+            ) : (
+              <IconFullscreen className={styles.fullscreenIcon} onClick={() => setFullScreen(true)} />
+            )}
+          </div>
+        </div>
+      }
+      visible={visible}
+      placement="right"
+      onCancel={onCancel}
+      footer={null}
+      className={fullScreen ? 'detail-drawer detail-drawer-fullscreen' : 'detail-drawer'}
+    >
       <div className={styles.content}>
         <Form layout="inline" form={form} requiredSymbol={{ position: 'end' }}>
           {useEditorSignalMap.get(detailPageViewId.value)?.components.value.map((cp: GridItem) => (
@@ -44,7 +69,7 @@ const DetailRuntime: React.FC<DetailRuntimeProps> = ({ visible, onCancel, form, 
                     pageComponentSchema={useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id]}
                     runtime={true}
                     detailMode={detailMode}
-                    showFromPageData={() => {}}
+                    showFromPageData={showFromPageData}
                   />
                 </div>
               )}

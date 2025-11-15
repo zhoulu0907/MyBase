@@ -369,6 +369,17 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       <div className={styles.content}>
         <ListRuntime pageSetId={pageSetId} runtime={runtime} showFromPageData={showFromPageData} refresh={refresh} />
 
+        <DetailRuntime
+          visible={drawerVisible.value}
+          onCancel={() => setDrawerVisible(false)}
+          form={form}
+          detailMode={detailMode}
+          onUpdate={() => submitForm()}
+          onCancelUpdate={cancelSubmitForm}
+          showFromPageData={showFromPageData}
+          editTargetId={editTargetId}
+        />
+
         {pageType == EDITOR_TYPES.FORM_EDITOR && (
           <EditRuntime
             form={form}
@@ -380,14 +391,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
           />
         )}
 
-        <DetailRuntime
-          visible={drawerVisible.value}
-          onCancel={() => setDrawerVisible(false)}
-          form={form}
-          detailMode={detailMode}
-          onUpdate={() => submitForm()}
-          onCancelUpdate={cancelSubmitForm}
-        />
       </div>
 
       {/* 信息收集弹窗 */}
