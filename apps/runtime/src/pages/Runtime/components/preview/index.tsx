@@ -33,7 +33,7 @@ import {
   type GridItem
 } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import FlowPredict from './flowPredict';
 import styles from './index.module.less';
 import { initInteractionRule } from './interaction_rule';
@@ -264,6 +264,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
     setPageType(EDITOR_TYPES.LIST_EDITOR);
     setDetailMode(true);
+    form.resetFields();
+    setCpStates({});
   };
 
   const showFromPageData = (id: string, toFormPage: boolean = false) => {
@@ -390,13 +392,32 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     setCpStates(states);
   };
 
+  const hiddenState = useCallback(
+    (cpId: string) => {
+      if (cpStates[cpId]?.status !== undefined) {
+        return cpStates[cpId].status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN];
+      } else {
+        if (pageType === EDITOR_TYPES.LIST_EDITOR) {
+          return listPageComponentSchemas.value[cpId].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN];
+        } else if (pageType === EDITOR_TYPES.FORM_EDITOR) {
+          return (
+            useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cpId].config.status !==
+            STATUS_VALUES[STATUS_OPTIONS.HIDDEN]
+          );
+        }
+      }
+    },
+    [cpStates, pageType, editPageViewId.value]
+  );
+
   return (
     <div className={styles.previewPage}>
       <div className={styles.content}>
         {pageType === EDITOR_TYPES.LIST_EDITOR &&
           listComponents.value.map((cp: GridItem) => (
             <Fragment key={cp.id}>
-              {listPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+              {/* {listPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && ( */}
+              {hiddenState(cp.id) && (
                 <div
                   key={cp.id}
                   className={styles.componentItem}
@@ -413,6 +434,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                     runtime={runtime}
                     showFromPageData={showFromPageData}
                     refresh={refresh}
+                    cpState={cpStates[cp.id]}
                   />
                 </div>
               )}
@@ -423,8 +445,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
           <Form layout="inline" form={form} onValuesChange={handleFormValuesChange}>
             {useEditorSignalMap.get(editPageViewId.value)?.components.value.map((cp: GridItem) => (
               <Fragment key={cp.id}>
-                {useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id].config.status !==
-                  STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+                {/* {useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id].config.status !==
+                  STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && ( */}
+                {hiddenState(cp.id) && (
                   <div
                     key={cp.id}
                     className={styles.componentItem}
