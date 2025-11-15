@@ -1,15 +1,15 @@
-import React, { Fragment, useEffect } from 'react';
-import { useSignals } from '@preact/signals-react/runtime';
 import {
   EDITOR_TYPES,
-  STATUS_OPTIONS,
-  STATUS_VALUES,
   getComponentWidth,
   PreviewRender,
   startLoadPageSet,
+  STATUS_OPTIONS,
+  STATUS_VALUES,
   useListEditorSignal,
   type GridItem
 } from '@onebase/ui-kit';
+import { useSignals } from '@preact/signals-react/runtime';
+import React, { Fragment, useEffect } from 'react';
 import styles from './index.module.less';
 
 interface ListRuntimeProps {

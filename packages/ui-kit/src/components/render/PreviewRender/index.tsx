@@ -360,7 +360,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
       default:
         return <div>未知组件类型: {cpType}</div>;
     }
-  }, [componentConfig]);
+  }, [componentConfig, refresh]);
 
   return <>{renderComponent()}</>;
 };

@@ -189,7 +189,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       }
       setEditTargetId('');
       setDrawerVisible(false);
-      setTimeout(() => setRefresh(Date.now()), 1000);
+      setTimeout(() => setRefresh(Date.now()), 150);
 
       setSubmitLoading(false);
 
@@ -234,7 +234,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
           Message.success('创建成功');
           cancelSubmitForm();
         }
-        setTimeout(() => setRefresh(Date.now()), 1000);
+        setTimeout(() => setRefresh(Date.now()), 150);
         setSubmitLoading(false);
       } catch (error) {
         Message.error('创建失败');
