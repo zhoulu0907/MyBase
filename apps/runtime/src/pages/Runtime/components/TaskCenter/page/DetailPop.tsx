@@ -156,7 +156,7 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
   const fetchDetailData = async () => {
     const res = await getFormDetail({
       instanceId: rowData?.instanceId,
-      taskId: detailData?.taskId,
+      taskId: rowData?.taskId,
       from: PageTypeMap[listType as keyof typeof PageTypeMap]
     });
     setDetailData(res);
