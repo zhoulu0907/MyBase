@@ -76,9 +76,6 @@ public class DolphinSchedulerClient {
     @Value("${onebase.scheduler.worker-group:default}")
     private String workerGroup;
 
-    @Value("${onebase.scheduler.jose:onebase-ds/default/resources/onebase-jose.jar}")
-    private String joseJar;
-
     private DolphinschedulerClientStub dsClientStub;
 
     @PostConstruct
