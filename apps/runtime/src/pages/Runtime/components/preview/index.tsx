@@ -416,7 +416,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
         {pageType === EDITOR_TYPES.LIST_EDITOR &&
           listComponents.value.map((cp: GridItem) => (
             <Fragment key={cp.id}>
-              {/* {listPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && ( */}
               {hiddenState(cp.id) && (
                 <div
                   key={cp.id}
@@ -445,8 +444,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
           <Form layout="inline" form={form} onValuesChange={handleFormValuesChange}>
             {useEditorSignalMap.get(editPageViewId.value)?.components.value.map((cp: GridItem) => (
               <Fragment key={cp.id}>
-                {/* {useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id].config.status !==
-                  STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && ( */}
                 {hiddenState(cp.id) && (
                   <div
                     key={cp.id}

@@ -53,15 +53,11 @@ export async function initInteractionRule(
         }
       });
 
-      //   console.log('expression: ', expression);
-      //   console.log('fieldMap: ', fieldMap);
-
       const jexl = new Jexl();
       const result = await jexl.eval(expression, fieldMap);
 
-      console.log('result: ', result);
+      console.log('jexl eval result: ', result);
 
-      console.log('rule.formAction: ', rule.formAction);
       if (result) {
         for (const action of rule.formAction) {
           if (action.cpIds) {
