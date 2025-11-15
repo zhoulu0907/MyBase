@@ -53,6 +53,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   const [mainMetaData, setMainMetaData] = useState<string>('');
   const [mainMetaDataFields, setMainMetaDataFields] = useState<AppEntityField[]>([]);
   const [editTargetId, setEditTargetId] = useState('');
+  const preview = true;
 
   useEffect(() => {
     const appId = getHashQueryParam('appId');
@@ -237,6 +238,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                     cpType={cp.type}
                     pageComponentSchema={listPageComponentSchemas.value[cp.id]}
                     runtime={runtime}
+                    preview={preview}
                     showFromPageData={showFromPageData}
                   />
                 </div>
@@ -270,6 +272,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                         useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id]
                       }
                       runtime={runtime}
+                      preview={preview}
                       showFromPageData={() => {
                         setPageType(EDITOR_TYPES.FORM_EDITOR);
                       }}
@@ -280,7 +283,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
             ))}
 
             <div className={styles.footer}>
-              <Button type="primary" onClick={submitForm}>
+              <Button type="primary" disabled={preview} onClick={submitForm}>
                 提交
               </Button>
               <Button type="default" onClick={cancelSubmitForm}>
