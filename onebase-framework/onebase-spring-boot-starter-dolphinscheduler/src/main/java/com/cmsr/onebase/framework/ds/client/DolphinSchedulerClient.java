@@ -37,6 +37,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -87,7 +88,10 @@ public class DolphinSchedulerClient {
                     .build();
             return chain.proceed(request);
         });
-        OkHttpClient httpClient = httpClientBuilder.build();
+        OkHttpClient httpClient = httpClientBuilder
+                .connectTimeout(Duration.ofSeconds(15))
+                .retryOnConnectionFailure(false)
+                .build();
 
         Retrofit.Builder retrofitBuilder = new Retrofit.Builder();
         retrofitBuilder.client(httpClient);
