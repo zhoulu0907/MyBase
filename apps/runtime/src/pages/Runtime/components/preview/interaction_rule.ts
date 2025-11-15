@@ -56,7 +56,7 @@ export async function initInteractionRule(
       const jexl = new Jexl();
       const result = await jexl.eval(expression, fieldMap);
 
-      console.log('jexl eval result: ', result);
+      //   console.log('jexl eval result: ', result);
 
       if (result) {
         for (const action of rule.formAction) {
@@ -81,7 +81,7 @@ export async function initInteractionRule(
     }
   }
 
-  console.log(cpActions);
+  //   console.log(cpActions);
 
   let cpActionsResult: Record<string, any> = {};
 
@@ -154,7 +154,7 @@ export async function initInteractionRule(
     cpActionsResult[cpId] = targetAction;
   });
 
-  console.log('cpActionsResult: ', cpActionsResult);
+  //   console.log('cpActionsResult: ', cpActionsResult);
 
   return cpActionsResult;
 }
