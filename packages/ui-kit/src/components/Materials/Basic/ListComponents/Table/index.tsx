@@ -23,13 +23,13 @@ import {
 } from '@onebase/app';
 import { pagesRuntimeSignal } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
+import PreviewRender from 'src/components/render/PreviewRender';
+import { useFormEditorSignal } from 'src/signals/page_editor';
 import { ENTITY_FIELD_TYPE } from '../../../../DataFactory/const';
 import { RedirectMethod } from '../../../constants';
 import './index.css';
 import type { XTableConfig } from './schema';
 import TableSearch from './tableSerach';
-import { useFormEditorSignal } from 'src/signals/page_editor';
-import PreviewRender from 'src/components/render/PreviewRender';
 
 const leftPanelWidth = 318;
 const rightPanelWidth = 310;
@@ -47,6 +47,7 @@ const XTable = memo(
   (
     props: XTableConfig & {
       runtime?: boolean;
+      preview?: boolean;
       showFromPageData?: Function;
       showAddBtn?: boolean;
       refresh?: number;
@@ -57,7 +58,7 @@ const XTable = memo(
     const { pageComponentSchemas: fromPageComponentSchemas, components } = useFormEditorSignal;
 
     const { setDrawerVisible, setDrawerPageId, setDetailPageViewId } = pagesRuntimeSignal;
-    const { runtime = true, showFromPageData, showAddBtn = true } = props;
+    const { runtime = true, showFromPageData, showAddBtn = true, preview } = props;
     const hasOperationPermission = true;
 
     const {
@@ -115,39 +116,35 @@ const XTable = memo(
             {operationButton?.map((opearate, index) => (
               <Tooltip content={!hasOperationPermission && '无操作权限'} key={index}>
                 {opearate.type === TableOperationButton.EDIT && opearate.display && (
-                  <div
-                    style={{
-                      whiteSpace: 'nowrap',
-                      opacity: isDisabled ? 0.5 : 1,
-                      cursor: isDisabled ? 'not-allowed' : 'pointer',
-                      pointerEvents: isDisabled ? 'none' : 'auto',
-                      zIndex: 10
-                    }}
+                  <Button
+                    type="text"
+                    size="small"
+                    disabled={preview}
                     onClick={(event) => {
                       event.stopPropagation();
                       handleEdit(record.id, true);
                     }}
-                  >
-                    {
-                      <>
-                        {(operationButtonShowType === TableOperationButtonStyle.ICON ||
-                          operationButtonShowType === TableOperationButtonStyle.ALL) && (
-                            <DynamicIcon
-                              IconComponent={iconMap[opearate.buttonIcon as keyof typeof iconMap]}
-                              theme="outline"
-                              size="16"
-                              fill={opearate.iconColor}
-                              style={{
-                                marginRight: 4
-                              }}
-                            />
-                          )}
-                        {(operationButtonShowType === TableOperationButtonStyle.TEXT ||
-                          operationButtonShowType === TableOperationButtonStyle.ALL) &&
-                          opearate.buttonName}
-                      </>
+                    icon={
+                      (operationButtonShowType === TableOperationButtonStyle.ICON ||
+                        operationButtonShowType === TableOperationButtonStyle.ALL) && (
+                        <DynamicIcon
+                          IconComponent={iconMap[opearate.buttonIcon as keyof typeof iconMap]}
+                          theme="outline"
+                          size="16"
+                          fill={opearate.iconColor}
+                          style={{
+                            marginRight: 4
+                          }}
+                        />
+                      )
                     }
-                  </div>
+                  >
+                    <>
+                      {(operationButtonShowType === TableOperationButtonStyle.TEXT ||
+                        operationButtonShowType === TableOperationButtonStyle.ALL) &&
+                        opearate.buttonName}
+                    </>
+                  </Button>
                 )}
 
                 {opearate.type === TableOperationButton.DELETE && opearate.display && (
@@ -167,6 +164,7 @@ const XTable = memo(
                       focusLock
                       title="确认删除"
                       content={opearate.confirmText}
+                      disabled={preview}
                       onOk={(event) => {
                         event.stopPropagation();
                         handleDelete(record.id);
@@ -177,8 +175,16 @@ const XTable = memo(
                         // }
                       }}
                     >
-                      {(operationButtonShowType === TableOperationButtonStyle.ICON ||
-                        operationButtonShowType === TableOperationButtonStyle.ALL) && (
+                      <Button
+                        type="text"
+                        size="small"
+                        disabled={preview}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          //   handleDelete(record.id);
+                        }}
+                        status={'danger'}
+                        icon={
                           <DynamicIcon
                             IconComponent={iconMap[opearate.buttonIcon as keyof typeof iconMap]}
                             theme="outline"
@@ -188,10 +194,12 @@ const XTable = memo(
                               marginRight: 4
                             }}
                           />
-                        )}
-                      {(operationButtonShowType === TableOperationButtonStyle.TEXT ||
-                        operationButtonShowType === TableOperationButtonStyle.ALL) &&
-                        opearate.buttonName}
+                        }
+                      >
+                        {(operationButtonShowType === TableOperationButtonStyle.TEXT ||
+                          operationButtonShowType === TableOperationButtonStyle.ALL) &&
+                          opearate.buttonName}
+                      </Button>
                     </Popconfirm>
                   </div>
                 )}
@@ -209,7 +217,7 @@ const XTable = memo(
     }, [refresh]);
 
     useEffect(() => {
-      getFinalColumns()
+      getFinalColumns();
     }, [showOpearate, columns, fixedOpearate, props?.xTableSelectProps?.selectedDataId]);
 
     useEffect(() => {
@@ -245,7 +253,7 @@ const XTable = memo(
                     (field: AppEntityField) => field.fieldId === column.id
                   );
                   if (dataFieldInfo && _record[dataFieldInfo.fieldName]) {
-                    dataField = [`${id}.${index}.${dataFieldInfo.fieldName}`]
+                    dataField = [`${id}.${index}.${dataFieldInfo.fieldName}`];
                   }
                 }
                 const componentConfig = {
@@ -255,14 +263,14 @@ const XTable = memo(
                     dataField: dataField?.length > 0 ? dataField : [`${id}.${index}.${column.id}`],
                     label: {
                       display: false,
-                      text: '',
+                      text: ''
                     },
                     verify: { required: false },
                     tooltip: ''
                   }
                 };
-                if(!cpType){
-                  return <span>{_text}</span>
+                if (!cpType) {
+                  return <span>{_text}</span>;
                 }
 
                 return (
@@ -275,16 +283,16 @@ const XTable = memo(
                   />
                 );
               }
-              return <span>{_text}</span>
+              return <span>{_text}</span>;
             }
           };
         });
       }
       if (showOpearate) {
         opearate.fixed = fixedOpearate ? 'right' : null;
-        newColumns.push(opearate)
+        newColumns.push(opearate);
       } else {
-        newColumns = newColumns.filter((v) => v.dataIndex !== 'op')
+        newColumns = newColumns.filter((v) => v.dataIndex !== 'op');
       }
 
       if (props?.xTableSelectProps?.showSelect && runtime) {
@@ -301,10 +309,10 @@ const XTable = memo(
             />
           )
         };
-        newColumns = [checkboxColumnRender, ...newColumns]
+        newColumns = [checkboxColumnRender, ...newColumns];
       }
       setFinalColumns(newColumns);
-    }
+    };
 
     const handleCreate = () => {
       console.log('点击新增');
@@ -475,7 +483,13 @@ const XTable = memo(
       >
         <div className="tableHeader">
           <div className="searchGroup">
-            <Form form={form} layout="horizontal" labelAlign="right" className="searchItems">
+            <Form
+              form={form}
+              layout="horizontal"
+              labelAlign="right"
+              className="searchItems"
+              labelCol={{ span: labelColSpan }}
+            >
               <TableSearch searchItems={searchItems} labelColSpan={labelColSpan} runtime={runtime} />
             </Form>
 

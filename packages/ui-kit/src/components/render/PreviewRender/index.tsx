@@ -22,7 +22,11 @@ interface PreviewRenderProps {
   /** 组件schema映射 */
   pageComponentSchema: any;
 
+  /** 运行状态 */
   runtime: boolean;
+
+  /** 预览状态 */
+  preview?: boolean;
 
   // 详情视图
   detailMode?: boolean;
@@ -42,6 +46,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
   cpType,
   pageComponentSchema,
   runtime,
+  preview,
   detailMode,
   showFromPageData,
   refresh,
@@ -281,6 +286,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
             id={cpId}
             {...componentConfig}
             runtime={runtime}
+            preview={preview}
             showFromPageData={showFromPageData}
             refresh={refresh}
           />
