@@ -84,8 +84,7 @@ onebase:
     token: 85806d2d33502cef3036fb30b320e5f5
     env: 154612656767296
     flow-project: 154702155517248
-    flow-url: http://bing.com
-    flow-token: 0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c
+    flow-url: http://s25029301301.dev.internal.virtueit.net:81/v1-snapshot/onebaseserverruntime/flow/remote-call/trigger
     etl-project: 155572154738048
     tenant: root
 
