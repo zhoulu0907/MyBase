@@ -330,6 +330,7 @@ const XTable = memo(
       } else {
         newColumns = [indexColumn, ...newColumns];
       }
+
       setFinalColumns(newColumns);
     };
 
@@ -416,7 +417,7 @@ const XTable = memo(
             );
             if (userSelectField && newItem[key]) {
               if (newItem[key]) {
-                newItem[key] = newItem[key]?.userName || '';
+                // newItem[key] = newItem[key]?.userName || '';
               }
             }
 
@@ -440,6 +441,8 @@ const XTable = memo(
       });
 
       setTableData(newTableData);
+      console.log('finalColumns: ', finalColumns);
+      console.log('newTableData: ', newTableData);
       tableForm.setFieldsValue({ [id]: newTableData });
       setTableTotal(total);
     };
