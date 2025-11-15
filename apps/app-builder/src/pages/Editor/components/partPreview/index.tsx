@@ -25,6 +25,7 @@ interface PartPreviewProps {
 const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType }) => {
   const { components: formComponents, pageComponentSchemas: formPageComponentSchemas } = useFormEditorSignal;
   const { components: listComponents, pageComponentSchemas: listPageComponentSchemas } = useListEditorSignal;
+  const preview = true;
 
   return (
     <Drawer
@@ -57,6 +58,7 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
                       cpType={cp.type}
                       pageComponentSchema={listPageComponentSchemas.value[cp.id]}
                       runtime={true}
+                      preview={preview}
                     />
                   </div>
                 )}
@@ -83,6 +85,7 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
                             cpType={cp.type}
                             pageComponentSchema={formPageComponentSchemas.value[cp.id]}
                             runtime={true}
+                            preview={preview}
                           />
                         </div>
                       )}
@@ -92,7 +95,9 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
               </div>
               <div className={styles.footer}>
                 <Button type="default">取消</Button>
-                <Button type="primary">提交</Button>
+                <Button disabled={preview} type="primary">
+                  提交
+                </Button>
               </div>
             </div>
           )}
