@@ -239,6 +239,25 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
   const [subTableData, setSubTableData] = useState<any[]>([]);
   const [subTableColumns, setSubTableColumns] = useState<any[]>([]);
   const { form } = Form.useFormContext();
+  
+  /**
+   * 子表单元格配置覆盖
+   */
+  const applySubTableCellOverrides = (cfg: any, type: string) => {
+    if (type === FORM_COMPONENT_TYPES.INPUT_TEXTAREA) {
+      return { ...cfg, minRows: 1 };
+    }
+    return cfg;
+  };
+
+  const refreshSubTableData = () => {
+    const len = subTableDataLength.value[id] || 0;
+    const newData: any[] = [];
+    for (let i = 0; i < len; i++) {
+      newData.push({ key: `${i}` });
+    }
+    setSubTableData(newData);
+  };
 
   useEffect(() => {
     getTableColumns();
@@ -275,7 +294,8 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
             ...pageComponentSchemas[column.id].config,
             dataField: [`${id}.${index}.${pageComponentSchemas[column.id].config?.dataField?.[1] || column.id}`]
           };
-          const pageSchema = { ...pageComponentSchemas[column.id], config };
+          const finalConfig = applySubTableCellOverrides(config, column.type);
+          const pageSchema = { ...pageComponentSchemas[column.id], config: finalConfig };
           return (
             <PreviewRender
               cpId={column.id}
@@ -293,16 +313,20 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
       tableColumns.push({
         title: '操作',
         dataIndex: 'action',
-        width: 100,
+        width: 64,
+        align: 'center',
+        headerCellStyle: { textAlign: 'center' },
+        bodyCellStyle: { padding: '0 4px', textAlign: 'center' },
         fixed: 'right',
         render: (_col: any, _record: any, index: number) => {
           return (
-            <Button type="text" status="danger" icon={<IconDelete />} onClick={() => handleDelete(index)}></Button>
+            <Button type="text" size="small" status="danger" style={{ padding: '0 4px' }} icon={<IconDelete />} onClick={() => handleDelete(index)}></Button>
           );
         }
       });
     }
     setSubTableColumns(tableColumns);
+    setTimeout(() => refreshSubTableData(), 300);
   };
 
   // 新增
@@ -335,7 +359,16 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
       <Form.Item
         label={
           label.display &&
-          label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
+          label.text && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+              <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
+              {!detailMode && (
+                <Button type="outline" size="small" icon={<IconPlus />} style={{ pointerEvents: runtime ? 'unset' : 'none' }} onClick={handleAdd}>
+                  新增一项
+                </Button>
+              )}
+            </div>
+          )
         }
         layout="vertical"
         rules={[{ required: verify?.required }]}
@@ -365,18 +398,6 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                 rowKey="id"
                 pagination={false}
               />
-            </div>
-            <div className="subTableFooter">
-              {!detailMode && (
-                <Button
-                  type="outline"
-                  icon={<IconPlus />}
-                  style={{ pointerEvents: runtime ? 'unset' : 'none', marginTop: 10 }}
-                  onClick={handleAdd}
-                >
-                  新增一项
-                </Button>
-              )}
             </div>
           </>
         ) : (

@@ -40,7 +40,7 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
   useEffect(() => {
     if (runtime === true && fieldValue) {
       setInitialSelectedId(fieldValue.selectID);
-      setSelectFieldValue(fieldValue.dataFields[0]?.dataValue);
+      setSelectFieldValue(fieldValue.displayValue);
       // const map = new Map<string, string>();
       // for (const s of fieldValue.dataFields) {
       //     if (s.value != null && s.dataValue !== undefined) map.set(s.value, s.dataValue);
@@ -100,8 +100,11 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
           type="secondary"
           long
           style={{
-            pointerEvents: 'none'
-          }}
+              pointerEvents: runtime ? 'unset' : 'none',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}
         >
           {selectFieldValue || defaultValue}
         </Button>
@@ -135,6 +138,9 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
             long
             style={{
               pointerEvents: runtime ? 'unset' : 'none',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
             }}
             onClick={() => setPreviewDataSelectVisible(true)}
           >
