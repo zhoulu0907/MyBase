@@ -215,6 +215,7 @@ const XTable = memo(
     };
 
     useEffect(() => {
+      console.log('refreshxxx: ', refresh);
       if (refresh) {
         handlePage();
       }
