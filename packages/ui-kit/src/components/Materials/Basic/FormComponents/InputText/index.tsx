@@ -2,7 +2,7 @@ import { Form, Input } from '@arco-design/web-react';
 import { nanoid } from 'nanoid';
 import { memo, useEffect, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
-import { STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES } from '../../../constants';
+import { DEFAULT_VALUE_TYPES, STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import '../index.css';
 import { type XInputTextConfig } from './schema';
 
@@ -22,6 +22,7 @@ const XInputText = memo((props: XInputTextConfig & { runtime?: boolean; detailMo
     cpState
   } = props;
 
+  //   const { required: cpStateRecquired } = cpState;
   const { form } = Form.useFormContext();
   const [fieldId, setFieldId] = useState('');
 
@@ -45,6 +46,7 @@ const XInputText = memo((props: XInputTextConfig & { runtime?: boolean; detailMo
         tooltip={tooltip}
         wrapperCol={{ style: { flex: 1 } }}
         rules={[
+          //   { required: cpStateRecquired ? cpStateRecquired : verify?.required },
           { required: verify?.required },
           {
             validator: (value, callback) => {

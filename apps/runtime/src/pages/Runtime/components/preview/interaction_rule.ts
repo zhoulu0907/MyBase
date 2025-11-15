@@ -9,9 +9,9 @@ export async function initInteractionRule(
   rules: InteractionRule[],
   pageComponentSchemas: any
 ) {
-  console.log('formValues: ', formValues);
-  console.log('rules: ', rules);
-  console.log('pageComponentSchemas: ', pageComponentSchemas);
+  //   console.log('formValues: ', formValues);
+  //   console.log('rules: ', rules);
+  //   console.log('pageComponentSchemas: ', pageComponentSchemas);
 
   // 初始化一个map，用于后续交互规则处理
   const fieldMap: Record<string, any> = {};
@@ -23,7 +23,7 @@ export async function initInteractionRule(
     }
   });
 
-  console.log('fieldMap: ', fieldMap);
+  //   console.log('fieldMap: ', fieldMap);
 
   let cpActions: Record<string, InteractionActionType[]> = {};
 
