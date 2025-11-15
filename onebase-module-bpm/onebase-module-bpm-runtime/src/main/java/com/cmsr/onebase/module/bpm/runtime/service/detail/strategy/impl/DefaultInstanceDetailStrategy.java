@@ -19,7 +19,7 @@ public class DefaultInstanceDetailStrategy  extends AbstractInstanceDetailStrate
         Long pageSetId = getPageSetId(instance);
 
         // 默认详情视图
-        fillPageViewInfo(vo, instance, pageSetId);
+        fillPageViewInfo(vo, instance, pageSetId, false);
     }
 
     @Override
