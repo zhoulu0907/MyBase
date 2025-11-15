@@ -441,8 +441,6 @@ const XTable = memo(
       });
 
       setTableData(newTableData);
-      console.log('finalColumns: ', finalColumns);
-      console.log('newTableData: ', newTableData);
       tableForm.setFieldsValue({ [id]: newTableData });
       setTableTotal(total);
     };
