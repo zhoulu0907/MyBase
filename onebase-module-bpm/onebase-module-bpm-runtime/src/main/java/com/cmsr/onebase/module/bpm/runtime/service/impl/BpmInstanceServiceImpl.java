@@ -238,9 +238,8 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         BpmDefinitionExtDTO extDto = JsonUtils.parseObject(def.getExt(), BpmDefinitionExtDTO.class);
         variables.put(BpmConstants.VAR_APP_ID_KEY, extDto.getAppId());
         variables.put(BpmConstants.VAR_ENTITY_ID_KEY, entityId);
-        variables.put(BpmConstants.VAR_EDIT_PAGE_VIEW_KEY, pageViewGroupDTO.getEditPageView());
-        variables.put(BpmConstants.VAR_DETAIL_PAGE_VIEW_KEY, pageViewGroupDTO.getDetailPageView());
         variables.put(BpmConstants.VAR_BINDING_VIEW_ID_KEY, reqVO.getBusinessId());
+        variables.put(BpmConstants.VAR_PAGE_VIEW_GROUP_KEY, JsonUtils.toJsonString(pageViewGroupDTO));
 
         entityVO.getData().forEach((key, value) -> variables.put(String.valueOf(key), value));
 
@@ -603,9 +602,10 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
     }
 
     @Override
-    public BpmTaskDetailRespVO getFormDetail(Long instanceId) {
-        BpmTaskDetailRespVO vo = new BpmTaskDetailRespVO();
+    public BpmTaskDetailRespVO getFormDetail(BpmTaskDetailReqVO reqVO) {
+        BpmTaskDetailRespVO respVO = new BpmTaskDetailRespVO();
         Long loginUserId = WebFrameworkUtils.getLoginUserId();
+        Long instanceId = reqVO.getInstanceId();
 
         // 查询流程实例
         Instance instance = insService.getById(instanceId);
@@ -614,8 +614,8 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         }
 
         // 设置流程状态
-        vo.setCurrentStatus(instance.getFlowStatus());
-        vo.setInstanceId(instanceId);
+        respVO.setCurrentStatus(instance.getFlowStatus());
+        respVO.setInstanceId(instanceId);
 
         // 获取实体ID
         Long entityId = MapUtils.getLong(instance.getVariableMap(), BpmConstants.VAR_ENTITY_ID_KEY);
@@ -624,23 +624,15 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         }
 
         // 填充业务扩展信息（与节点类型无关的通用逻辑）
-        fillBpmBizExt(vo, instanceId);
+        fillBpmBizExt(respVO, instanceId);
 
         // 填充表单数据（与节点类型无关的通用逻辑）
-        fillFormData(vo, instance, entityId);
+        fillFormData(respVO, instance, entityId);
 
-        // 获取节点配置
-        String nodeCode = instance.getNodeCode();
-        BaseNodeExtDTO nodeExtDTO = BpmUtil.getNodeExtDTOByNodeCode(nodeCode, instance.getDefJson());
+        // 填充其他流程详情
+        instanceDetailStrategyManager.processInstanceDetail(respVO, reqVO, instance, loginUserId);
 
-        // 使用策略处理节点类型相关的逻辑（按钮配置、字段权限配置）
-        if (nodeExtDTO != null) {
-            instanceDetailStrategyManager.processInstanceDetail(vo, nodeExtDTO, instance, loginUserId);
-        } else {
-            log.warn("未找到节点配置，nodeCode: {}", nodeCode);
-        }
-
-        return vo;
+        return respVO;
     }
 
     /**

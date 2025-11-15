@@ -54,9 +54,9 @@ public class BpmInstanceController {
     }
 
     @GetMapping("/get-form-detail")
-    public CommonResult<BpmTaskDetailRespVO> getFormDetail(@RequestParam("instanceId") Long instanceId) {
-        log.info("获取流程详情: {}", instanceId);
-        return CommonResult.success(bpmExecService.getFormDetail(instanceId));
+    public CommonResult<BpmTaskDetailRespVO> getFormDetail(@Valid BpmTaskDetailReqVO reqVO) {
+        log.info("获取流程详情: {}", reqVO);
+        return CommonResult.success(bpmExecService.getFormDetail(reqVO));
     }
 
     /**

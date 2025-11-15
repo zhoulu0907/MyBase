@@ -28,4 +28,7 @@ public interface BpmConstants {
 
     /**  flow variable 中bindingViewId的key */
     String VAR_BINDING_VIEW_ID_KEY = "bindingViewId";
+
+    /**  flow variable 中detailPageView的key */
+    String VAR_PAGE_VIEW_GROUP_KEY = "pageViewGroup";
 }

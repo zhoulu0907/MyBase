@@ -1,9 +1,9 @@
 package com.cmsr.onebase.module.bpm.runtime.service.detail.strategy.impl;
 
+import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowInsBizExtRepository;
 import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowInsBizExtDO;
-import com.cmsr.onebase.module.bpm.core.dto.PageViewDTO;
 import com.cmsr.onebase.module.bpm.core.dto.PageViewGroupDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
 import com.cmsr.onebase.module.bpm.runtime.service.detail.strategy.InstanceDetailStrategy;
@@ -14,6 +14,7 @@ import jakarta.annotation.Resource;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.dromara.warm.flow.core.entity.Instance;
 import org.dromara.warm.flow.core.entity.Task;
 import org.dromara.warm.flow.core.service.impl.BpmConstants;
@@ -53,7 +54,7 @@ public abstract class AbstractInstanceDetailStrategy<T extends BaseNodeExtDTO> i
      * @param extDTO 节点扩展信息
      * @param entityId 实体ID
      */
-    protected void fillFieldPermConfig(BpmTaskDetailRespVO vo, T extDTO, Long entityId) {
+    protected void fillFieldPermConfig(BpmTaskDetailRespVO vo, T extDTO, Long entityId, boolean isTodo) {
         // 由子类实现，默认什么都不做
     }
 
@@ -72,14 +73,10 @@ public abstract class AbstractInstanceDetailStrategy<T extends BaseNodeExtDTO> i
     protected PageViewGroupDTO getPageViewGroupDTO(Instance instance, Long pageSetId) {
         PageViewGroupDTO viewGroupDTO;
 
-        PageViewDTO detailPageView = (PageViewDTO) MapUtils.getObject(instance.getVariableMap(), BpmConstants.VAR_DETAIL_PAGE_VIEW_KEY);
-        PageViewDTO editPageView = (PageViewDTO) MapUtils.getObject(instance.getVariableMap(), BpmConstants.VAR_EDIT_PAGE_VIEW_KEY);
+        String pageViewGroupJsonStr = MapUtils.getString(instance.getVariableMap(), BpmConstants.VAR_PAGE_VIEW_GROUP_KEY);
 
-        if (detailPageView != null && editPageView != null) {
-            viewGroupDTO = new PageViewGroupDTO();
-            viewGroupDTO.setDetailPageView(detailPageView);
-            viewGroupDTO.setEditPageView(editPageView);
-            return viewGroupDTO;
+        if (StringUtils.isNotBlank(pageViewGroupJsonStr)) {
+            return JsonUtils.parseObject(pageViewGroupJsonStr, PageViewGroupDTO.class);
         }
 
         // todo: 此处为了兼容旧数据，尝试获取最新页面视图，理论上应该是从实例里获取
@@ -92,22 +89,7 @@ public abstract class AbstractInstanceDetailStrategy<T extends BaseNodeExtDTO> i
         return viewGroupDTO;
     }
 
-    /**
-     * 填充详情（只处理节点类型相关的逻辑）
-     *
-     * @param vo 详情VO
-     * @param extDTO 节点扩展信息
-     * @param task 待办任务（可能为null）
-     * @param instance 流程实例
-     * @param loginUserId 登录用户ID
-     */
-    @Override
-    public void fillDetail(BpmTaskDetailRespVO vo, T extDTO, Task task, Instance instance, Long loginUserId) {
-        Long entityId = MapUtils.getLong(instance.getVariableMap(), BpmConstants.VAR_ENTITY_ID_KEY);
-        if (entityId == null) {
-            throw exception(ErrorCodeConstants.FLOW_NOT_BIND_ENTITY_ID);
-        }
-
+    protected Long getPageSetId(Instance instance) {
         Long pageSetId = MapUtils.getLong(instance.getVariableMap(), BpmConstants.VAR_BINDING_VIEW_ID_KEY);
         if (pageSetId == null) {
             // 兼容旧数据，再去查一次instanceExt表
@@ -124,11 +106,35 @@ public abstract class AbstractInstanceDetailStrategy<T extends BaseNodeExtDTO> i
             throw exception(ErrorCodeConstants.MISSING_BINDING_VIEW_ID);
         }
 
+        return pageSetId;
+    }
+
+    /**
+     * 填充详情（只处理节点类型相关的逻辑）
+     *
+     * @param vo 详情VO
+     * @param extDTO 节点扩展信息
+     * @param currTask 待办任务（可能为null）
+     * @param instance 流程实例
+     * @param loginUserId 登录用户ID
+     */
+    @Override
+    public void fillDetail(BpmTaskDetailRespVO vo, T extDTO, Task currTask, Instance instance, Long loginUserId) {
+        Long entityId = MapUtils.getLong(instance.getVariableMap(), BpmConstants.VAR_ENTITY_ID_KEY);
+        if (entityId == null) {
+            throw exception(ErrorCodeConstants.FLOW_NOT_BIND_ENTITY_ID);
+        }
+
+        Long pageSetId = getPageSetId(instance);
+
         // 非当前待办，则没有按钮，且字段权限全部为只读
-        if (task == null) {
+        if (currTask == null) {
             // 设置详情视图，详情视图的默认策略就是只读
             PageViewGroupDTO viewGroupDTO = getPageViewGroupDTO(instance, pageSetId);
             vo.setPageView(viewGroupDTO.getDetailPageView());
+
+            // 填充字段权限信息（节点类型相关）
+            fillFieldPermConfig(vo, extDTO, entityId, false);
         } else {
             // 填充按钮信息（节点类型相关）
             fillButtonConfigs(vo, extDTO);
@@ -137,9 +143,9 @@ public abstract class AbstractInstanceDetailStrategy<T extends BaseNodeExtDTO> i
             fillPageViewInfo(vo, instance, pageSetId);
 
             // 填充字段权限信息（节点类型相关）
-            fillFieldPermConfig(vo, extDTO, entityId);
+            fillFieldPermConfig(vo, extDTO, entityId, true);
 
-            vo.setTaskId(task.getId());
+            vo.setTaskId(currTask.getId());
         }
     }
 }
