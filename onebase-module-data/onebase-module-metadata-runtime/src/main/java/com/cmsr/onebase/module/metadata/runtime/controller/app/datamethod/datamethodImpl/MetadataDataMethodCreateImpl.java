@@ -18,6 +18,7 @@ import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodSubE
 import com.cmsr.onebase.module.metadata.core.domain.query.ProcessContext;
 import com.cmsr.onebase.module.metadata.core.enums.BooleanStatusEnum;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.AbstractMetadataDataMethodCoreService;
+import com.cmsr.onebase.module.metadata.core.service.datamethod.strategy.FieldValueTransformMode;
 import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.vo.ProcessedSubEntityVo;
 import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.vo.SubEntityVo;
 import jakarta.annotation.Resource;
@@ -296,6 +297,8 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
         Long entityId = context.getEntityId();
         List<MetadataEntityFieldDO> fields = context.getFields();
 
+        applyFieldStorageStrategies(processedData, fields, FieldValueTransformMode.STORE);
+
         // 5. 获取临时数据源服务
         MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
         if (datasource == null) {
@@ -363,6 +366,7 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
             }
 
             Map<String, Object> resultData = queryDataByIdWithService(temporaryService, quoteTableName(entity.getTableName()), primaryKeyValue, fields);
+            applyFieldStorageStrategies(resultData, fields, FieldValueTransformMode.READ);
 
             // 9. 构建响应（移除多表写入逻辑，直接返回结果）
             return buildDataResponse(entity, resultData, fields);

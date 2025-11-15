@@ -208,6 +208,8 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
         AnylineService<?> temporaryService = context.getTemporaryService();
         Object id = context.getId();
 
+        applyFieldStorageStrategies(processedData, fields);
+
         TenantUtils.executeIgnore(() -> {
             // 1. 校验数据存在
             validateDataExistsWithService(temporaryService, quoteTableName(entity.getTableName()), id, fields);
