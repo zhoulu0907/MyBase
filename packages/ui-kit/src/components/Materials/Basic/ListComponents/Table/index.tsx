@@ -119,7 +119,7 @@ const XTable = memo(
                   <Button
                     type="text"
                     size="small"
-                    disabled={!runtime}
+                    disabled={preview}
                     onClick={(event) => {
                       event.stopPropagation();
                       handleEdit(record.id, true);
@@ -145,39 +145,6 @@ const XTable = memo(
                         opearate.buttonName}
                     </>
                   </Button>
-                  //   <div
-                  //     style={{
-                  //       whiteSpace: 'nowrap',
-                  //       opacity: isDisabled ? 0.5 : 1,
-                  //       cursor: isDisabled ? 'not-allowed' : 'pointer',
-                  //       pointerEvents: isDisabled ? 'none' : 'auto',
-                  //       zIndex: 10
-                  //     }}
-                  //     onClick={(event) => {
-                  //       event.stopPropagation();
-                  //       handleEdit(record.id, true);
-                  //     }}
-                  //   >
-                  //     {
-                  //       <>
-                  //         {(operationButtonShowType === TableOperationButtonStyle.ICON ||
-                  //           operationButtonShowType === TableOperationButtonStyle.ALL) && (
-                  //           <DynamicIcon
-                  //             IconComponent={iconMap[opearate.buttonIcon as keyof typeof iconMap]}
-                  //             theme="outline"
-                  //             size="16"
-                  //             fill={opearate.iconColor}
-                  //             style={{
-                  //               marginRight: 4
-                  //             }}
-                  //           />
-                  //         )}
-                  //         {(operationButtonShowType === TableOperationButtonStyle.TEXT ||
-                  //           operationButtonShowType === TableOperationButtonStyle.ALL) &&
-                  //           opearate.buttonName}
-                  //       </>
-                  //     }
-                  //   </div>
                 )}
 
                 {opearate.type === TableOperationButton.DELETE && opearate.display && (
