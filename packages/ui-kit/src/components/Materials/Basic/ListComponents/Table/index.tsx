@@ -11,7 +11,7 @@ import {
 
 import DynamicIcon from '@/components/DynamicIcon';
 import { iconMap } from '@/utils/const';
-import { IconPlus, IconRefresh, IconSearch } from '@arco-design/web-react/icon';
+import { IconPlus, IconRefresh } from '@arco-design/web-react/icon';
 import {
   dataMethodDelete,
   dataMethodPage,
@@ -102,23 +102,29 @@ const XTable = memo(
     const [tableTotal, setTableTotal] = useState<number>(0);
     const [tablePageNo, setTablePageNo] = useState<number>(1);
 
+
+
     const opearate: any = {
       title: '操作',
       dataIndex: 'op',
       fixed: null,
-      width: '110px',
+      width: '80px',
+      headerCellStyle: { textAlign: 'center' },
+      //TODO: zhoumingji ,基础组件上不要写这种样式，最好能放到样式文件里
+      bodyCellStyle: { padding: '0 8px', textAlign: 'center' },
       render: (_: any, record: any) => {
         if (advancedButtonPermission === BUTTON_VALUES[BUTTON_OPTIONS.HIDDEN] && !hasOperationPermission) return;
         const isDisabled =
           advancedButtonPermission === BUTTON_VALUES[BUTTON_OPTIONS.DISABLED] && !hasOperationPermission;
         return (
-          <Space>
+          <Space size={4}>
             {operationButton?.map((opearate, index) => (
               <Tooltip content={!hasOperationPermission && '无操作权限'} key={index}>
                 {opearate.type === TableOperationButton.EDIT && opearate.display && (
                   <Button
                     type="text"
                     size="small"
+                    style={{ padding: '0 8px' }}
                     onClick={(event) => {
                       event.stopPropagation();
                       handleEdit(record.id, true);
@@ -132,7 +138,7 @@ const XTable = memo(
                           size="16"
                           fill={opearate.iconColor}
                           style={{
-                            marginRight: 4
+                            marginRight: 2
                           }}
                         />
                       )
@@ -178,6 +184,7 @@ const XTable = memo(
                         type="text"
                         size="small"
                         disabled={preview}
+                        style={{ padding: '0 4px' }}
                         onClick={(event) => {
                           event.stopPropagation();
                           //   handleDelete(record.id);
@@ -190,7 +197,7 @@ const XTable = memo(
                             size="16"
                             fill={opearate.iconColor}
                             style={{
-                              marginRight: 4
+                              marginRight: 2
                             }}
                           />
                         }
@@ -234,7 +241,8 @@ const XTable = memo(
             ...column,
             ellipsis: true,
             width: column.width + 'px',
-            bodyCellStyle: { padding: '0 10px 0 0', textAlign: 'center' },
+            // TODO: zhoumingji ,基础组件上不要写这种样式，最好能放到样式文件里
+            bodyCellStyle: { padding: '0 12px' },
             render: (_text: string, _record: any, index: number) => {
               const componentSchemasKeys = Object.keys(fromPageComponentSchemas.value || {});
               const cpId = componentSchemasKeys.find((ele) => {
@@ -287,6 +295,18 @@ const XTable = memo(
           };
         });
       }
+      const indexColumn = {
+        title: '序号',
+        dataIndex: 'index',
+        width: '56px',
+        align: 'center',
+        headerCellStyle: { textAlign: 'center' },
+        bodyCellStyle: { padding: '0 4px', textAlign: 'center' },
+        render: (_: any, __: any, idx: number) => {
+          const size = pageSize || 10;
+          return (tablePageNo - 1) * size + idx + 1;
+        }
+      };
       if (showOpearate) {
         opearate.fixed = fixedOpearate ? 'right' : null;
         newColumns.push(opearate);
@@ -308,7 +328,9 @@ const XTable = memo(
             />
           )
         };
-        newColumns = [checkboxColumnRender, ...newColumns];
+        newColumns = [checkboxColumnRender, indexColumn, ...newColumns];
+      } else {
+        newColumns = [indexColumn, ...newColumns];
       }
       setFinalColumns(newColumns);
     };
@@ -481,36 +503,28 @@ const XTable = memo(
         }}
       >
         <div className="tableHeader">
-          <div className="searchGroup">
-            <Form
-              form={form}
-              layout="horizontal"
-              labelAlign="right"
-              className="searchItems"
-              labelCol={{ span: labelColSpan }}
-            >
-              <TableSearch searchItems={searchItems} labelColSpan={labelColSpan} runtime={runtime} />
-            </Form>
-
-            <div className="searchBtns">
-              {searchItems?.length ? (
-                <>
-                  <Button type="primary" onClick={handleSearch} icon={<IconSearch />}>
-                    查询
-                  </Button>
-                  <Button type="default" onClick={handleReset} icon={<IconRefresh />}>
-                    重置
-                  </Button>
-                </>
-              ) : null}
+          {searchItems?.length ? (
+            <div className="searchGroup">
+              <Form form={form} layout="vertical" className="searchItems">
+                <TableSearch
+                  searchItems={searchItems}
+                  labelColSpan={labelColSpan}
+                  runtime={runtime}
+                  onSearch={handleSearch}
+                  onReset={handleReset}
+                />
+              </Form>
             </div>
-          </div>
-          <div className="addButton">
-            {showAddBtn && (
-              <Button type="primary" onClick={handleCreate} icon={<IconPlus />}>
-                添加数据
-              </Button>
-            )}
+          ) : null}
+          <div className="headerActions">
+            <div className="addButton">
+              {showAddBtn && (
+                <Button type="primary" onClick={handleCreate} icon={<IconPlus />}>
+                  添加数据
+                </Button>
+              )}
+            </div>
+            <Button type="text" onClick={() => handlePage()} icon={<IconRefresh />}></Button>
           </div>
         </div>
         <div>
@@ -523,6 +537,11 @@ const XTable = memo(
                 return {
                   onClick: (event) => {
                     handleRowClick(record);
+                  },
+                  onDoubleClick: () => {
+                    if (props?.xTableSelectProps?.showSelect && props?.xTableSelectProps?.setSelectData) {
+                      props.xTableSelectProps.setSelectData(record);
+                    }
                   }
                 };
               }}

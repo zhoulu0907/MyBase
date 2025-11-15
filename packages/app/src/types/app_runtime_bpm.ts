@@ -19,6 +19,7 @@ export interface FetchExecTaskReq {
 export interface GetFormDetailReq {
   taskId?: string;
   instanceId?: string;
+  from?: 'todo' | 'done' | 'created' | 'cc';
 }
 export interface GetDonePageList {
   appId?: string;

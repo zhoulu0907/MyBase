@@ -1,4 +1,5 @@
-import { Form, Input } from '@arco-design/web-react';
+import { Form, Input, Button } from '@arco-design/web-react';
+import { IconSearch, IconSync } from '@arco-design/web-react/icon';
 import { useSignals } from '@preact/signals-react/runtime';
 import { memo } from 'react';
 import { FORM_COMPONENT_TYPES, FormComp } from 'src/components/Materials';
@@ -9,12 +10,17 @@ interface TableSearchConfig {
   searchItems?: any[];
   labelColSpan?: number;
   runtime: boolean;
+  onSearch?: () => void;
+  onReset?: () => void;
 }
 
 const TableSearch = memo((props: TableSearchConfig) => {
   useSignals();
 
-  const { searchItems, labelColSpan, runtime } = props;
+  const { searchItems, labelColSpan, runtime, onSearch, onReset } = props;
+  const count = searchItems?.length || 0;
+  const remainder = count % 4;
+  const placeholderCount = remainder === 0 ? 3 : 4 - remainder - 1;
   const { pageComponentSchemas: fromPageComponentSchemas, components } = useFormEditorSignal;
   const componentSchemasKeys = Object.keys(fromPageComponentSchemas.value || {});
 
@@ -26,19 +32,23 @@ const TableSearch = memo((props: TableSearchConfig) => {
       });
 
       if (cpId) {
-        // 当前组件配置
         const currentComponentSchemas = fromPageComponentSchemas.value[cpId];
-        // 覆盖配置
+        // 组件类型
+        const cpType = components.value?.find((ele) => ele.id === cpId)?.type;
+
+        //TODO: zhoumingji, 后续增加在搜索框的配置
+        const placeholderOverride = cpType === FORM_COMPONENT_TYPES.INPUT_NUMBER ? '请输入' : undefined;
+
         const componentConfig = {
           ...currentComponentSchemas.config,
-          layout: 'horizontal',
+          layout: 'vertical',
           labelColSpan,
           defaultValue: undefined,
           verify: { required: false },
-          tooltip: ''
+          tooltip: '',
+          placeholder: placeholderOverride ?? currentComponentSchemas.config?.placeholder
         };
-        // 组件类型
-        const cpType = components.value?.find((ele) => ele.id === cpId)?.type;
+
         const detailMode = false;
         switch (cpType) {
           case FORM_COMPONENT_TYPES.INPUT_TEXT:
@@ -236,15 +246,7 @@ const TableSearch = memo((props: TableSearchConfig) => {
 
     return (
       <div className="formWrapper">
-        <Form.Item
-          field={item.value}
-          label={<span className={'labelText'}>{item.label}</span>}
-          labelCol={{
-            style: { width: labelColSpan, flex: 'unset' }
-          }}
-          wrapperCol={{ style: { flex: 1 } }}
-          labelAlign="right"
-        >
+        <Form.Item field={item.value} label={<span className={'labelText'}>{item.label}</span>}>
           <Input placeholder={`请输入${item.label}`} />
         </Form.Item>
       </div>
@@ -258,6 +260,25 @@ const TableSearch = memo((props: TableSearchConfig) => {
           {renderSearchItem(item)}
         </div>
       ))}
+      {(onSearch || onReset) && (
+        <>
+          {Array.from({ length: placeholderCount }).map((_, i) => (
+            <div key={`placeholder-${i}`} className="searchItem placeholder" />
+          ))}
+          <div className={`searchItem searchActions ${placeholderCount === 3 ? 'searchActions-alone' : ''}`}>
+            <Form.Item label={<span className={'labelText'}></span>}>
+              <div className="actionsInner formWrapper">
+                {onSearch && (
+                  <Button type="primary" onClick={onSearch} icon={<IconSearch />}>查询</Button>
+                )}
+                {onReset && (
+                  <Button type="default" onClick={onReset} icon={<IconSync />}>重置</Button>
+                )}
+              </div>
+            </Form.Item>
+          </div>
+        </>
+      )}
     </>
   );
 });

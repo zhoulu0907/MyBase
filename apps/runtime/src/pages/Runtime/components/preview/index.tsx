@@ -1,5 +1,5 @@
 import ExecuteFlows from '@/utils/flow';
-import { Button, Drawer, Form, Message, Modal } from '@arco-design/web-react';
+import { Form, Message, Modal } from '@arco-design/web-react';
 import {
   CATEGORY_TYPE,
   dataMethodData,
@@ -19,24 +19,14 @@ import {
 } from '@onebase/app';
 import { fetchSubmitInstance } from '@onebase/app/src/services/app_runtime';
 import { pagesRuntimeSignal } from '@onebase/common';
-import {
-  EDITOR_TYPES,
-  FORM_COMPONENT_TYPES,
-  getComponentWidth,
-  PreviewRender,
-  startLoadPageSet,
-  STATUS_OPTIONS,
-  STATUS_VALUES,
-  useEditorSignalMap,
-  useListEditorSignal,
-  usePageViewEditorSignal,
-  type GridItem
-} from '@onebase/ui-kit';
+import { EDITOR_TYPES, FORM_COMPONENT_TYPES, useEditorSignalMap } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
-import React, { Fragment, useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import DetailRuntime from './DetailRuntime';
+import EditRuntime from './EditRuntime';
 import FlowPredict from './flowPredict';
 import styles from './index.module.less';
-import { initInteractionRule } from './interaction_rule';
+import ListRuntime from './ListRuntime';
 
 interface PreviewProps {
   menuId: string;
@@ -47,8 +37,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   useSignals();
 
   const [form] = Form.useForm();
-
-  const { components: listComponents, pageComponentSchemas: listPageComponentSchemas } = useListEditorSignal;
 
   const {
     curPage,
@@ -61,8 +49,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     subEntities,
     setSubEntities
   } = pagesRuntimeSignal;
-
-  const { pageViews, curViewId } = usePageViewEditorSignal;
 
   const [pageSetId, setPageSetId] = useState('');
   const [pageType, setPageType] = useState('');
@@ -111,10 +97,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
   useEffect(() => {
     if (pageSetId) {
-      startLoadPageSet({ pageSetId: pageSetId });
       getMainMetaData(pageSetId);
     }
-    // 优先切换到列表页
     setPageType(EDITOR_TYPES.LIST_EDITOR);
   }, [pageSetId]);
 
@@ -205,7 +189,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       }
       setEditTargetId('');
       setDrawerVisible(false);
-      setRefresh(Date.now());
+      setTimeout(() => setRefresh(Date.now()), 150);
 
       setSubmitLoading(false);
 
@@ -249,6 +233,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
         if (res) {
           Message.success('创建成功');
           cancelSubmitForm();
+          setTimeout(() => setRefresh(Date.now()), 150);
         }
         setSubmitLoading(false);
       } catch (error) {
@@ -265,7 +250,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     setPageType(EDITOR_TYPES.LIST_EDITOR);
     setDetailMode(true);
     form.resetFields();
-    setCpStates({});
   };
 
   const showFromPageData = (id: string, toFormPage: boolean = false) => {
@@ -380,179 +364,30 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     setDetailMode(false);
   };
 
-  const [cpStates, setCpStates] = useState<Record<string, any>>({});
-
-  const handleFormValuesChange = async (value: Partial<any>, values: Partial<any>) => {
-    const states = await initInteractionRule(
-      values,
-      pageViews.value[curViewId.value]?.interactionRules,
-      useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value
-    );
-
-    setCpStates(states);
-  };
-
-  const hiddenState = useCallback(
-    (cpId: string) => {
-      if (cpStates[cpId]?.status !== undefined) {
-        return cpStates[cpId].status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN];
-      } else {
-        if (pageType === EDITOR_TYPES.LIST_EDITOR) {
-          return listPageComponentSchemas.value[cpId].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN];
-        } else if (pageType === EDITOR_TYPES.FORM_EDITOR) {
-          return (
-            useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cpId].config.status !==
-            STATUS_VALUES[STATUS_OPTIONS.HIDDEN]
-          );
-        }
-      }
-    },
-    [cpStates, pageType, editPageViewId.value]
-  );
-
   return (
-    <div className={styles.previewPage}>
+    <div className={`${styles.previewPage} runtime-preview-formpage`}>
       <div className={styles.content}>
-        {pageType === EDITOR_TYPES.LIST_EDITOR &&
-          listComponents.value.map((cp: GridItem) => (
-            <Fragment key={cp.id}>
-              {hiddenState(cp.id) && (
-                <div
-                  key={cp.id}
-                  className={styles.componentItem}
-                  style={{
-                    width: `calc(${getComponentWidth(listPageComponentSchemas.value[cp.id], cp.type)} - 8px)`,
-                    margin: '4px'
-                  }}
-                >
-                  <PreviewRender
-                    cpId={cp.id}
-                    cpType={cp.type}
-                    pageType={pageType}
-                    pageComponentSchema={listPageComponentSchemas.value[cp.id]}
-                    runtime={runtime}
-                    showFromPageData={showFromPageData}
-                    refresh={refresh}
-                    cpState={cpStates[cp.id]}
-                  />
-                </div>
-              )}
-            </Fragment>
-          ))}
+        <ListRuntime pageSetId={pageSetId} runtime={runtime} showFromPageData={showFromPageData} refresh={refresh} />
 
         {pageType == EDITOR_TYPES.FORM_EDITOR && (
-          <Form layout="inline" form={form} onValuesChange={handleFormValuesChange}>
-            {useEditorSignalMap.get(editPageViewId.value)?.components.value.map((cp: GridItem) => (
-              <Fragment key={cp.id}>
-                {hiddenState(cp.id) && (
-                  <div
-                    key={cp.id}
-                    className={styles.componentItem}
-                    style={{
-                      width: `calc(${getComponentWidth(
-                        useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id],
-                        cp.type
-                      )} - 8px)`,
-                      margin: '4px'
-                    }}
-                  >
-                    <PreviewRender
-                      cpId={cp.id}
-                      cpType={cp.type}
-                      pageType={pageType}
-                      pageComponentSchema={
-                        useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id]
-                      }
-                      runtime={true}
-                      showFromPageData={() => {
-                        setPageType(EDITOR_TYPES.FORM_EDITOR);
-                      }}
-                      cpState={cpStates[cp.id]}
-                    />
-                  </div>
-                )}
-              </Fragment>
-            ))}
-
-            <div className={styles.footer}>
-              {curPage?.value?.pageSetType === PageType.BPM && isAdd && (
-                <Button type="primary" onClick={onSaveSubmit} loading={submitLoading}>
-                  保存
-                </Button>
-              )}
-              <Button type="primary" onClick={onSubmit} loading={submitLoading}>
-                提交
-              </Button>
-              <Button type="default" onClick={cancelSubmitForm}>
-                取消
-              </Button>
-            </div>
-          </Form>
+          <EditRuntime
+            form={form}
+            isAdd={isAdd}
+            submitLoading={submitLoading}
+            onSubmit={onSubmit}
+            onSaveSubmit={onSaveSubmit}
+            onCancel={cancelSubmitForm}
+          />
         )}
 
-        {/* 右侧详情抽屉 */}
-        <Drawer
-          width={'60vw'}
-          title={
-            <div className={styles.drawerTitle}>
-              <div>详情</div>
-              {/* {detailMode && (
-                <Button type="primary" onClick={() => toEditMode()}>
-                  编辑
-                </Button>
-              )} */}
-            </div>
-          }
+        <DetailRuntime
           visible={drawerVisible.value}
-          placement="right"
           onCancel={() => setDrawerVisible(false)}
-          footer={null}
-        >
-          <div className={styles.content}>
-            <Form layout="inline" form={form} requiredSymbol={{ position: 'end' }}>
-              {useEditorSignalMap.get(detailPageViewId.value)?.components.value.map((cp: GridItem) => (
-                <Fragment key={cp.id}>
-                  {useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id].config.status !==
-                    STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
-                    <div
-                      key={cp.id}
-                      className={styles.componentItem}
-                      style={{
-                        width: `calc(${getComponentWidth(
-                          useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id],
-                          cp.type
-                        )} - 8px)`,
-                        margin: '4px'
-                      }}
-                    >
-                      <PreviewRender
-                        cpId={cp.id}
-                        cpType={cp.type}
-                        pageComponentSchema={
-                          useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id]
-                        }
-                        runtime={true}
-                        detailMode={detailMode}
-                        showFromPageData={() => {}}
-                      />
-                    </div>
-                  )}
-                </Fragment>
-              ))}
-
-              {!detailMode && (
-                <div className={styles.footer}>
-                  <Button type="primary" onClick={() => submitForm()}>
-                    更新
-                  </Button>
-                  <Button type="default" onClick={cancelSubmitForm}>
-                    取消
-                  </Button>
-                </div>
-              )}
-            </Form>
-          </div>
-        </Drawer>
+          form={form}
+          detailMode={detailMode}
+          onUpdate={() => submitForm()}
+          onCancelUpdate={cancelSubmitForm}
+        />
       </div>
 
       {/* 信息收集弹窗 */}
