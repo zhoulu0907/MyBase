@@ -18,11 +18,9 @@ const XInputText = memo((props: XInputTextConfig & { runtime?: boolean; detailMo
     align,
     layout,
     runtime = true,
-    detailMode,
-    cpState
+    detailMode
   } = props;
 
-  //   const { required: cpStateRecquired } = cpState;
   const { form } = Form.useFormContext();
   const [fieldId, setFieldId] = useState('');
 
@@ -46,7 +44,6 @@ const XInputText = memo((props: XInputTextConfig & { runtime?: boolean; detailMo
         tooltip={tooltip}
         wrapperCol={{ style: { flex: 1 } }}
         rules={[
-          //   { required: cpStateRecquired ? cpStateRecquired : verify?.required },
           { required: verify?.required },
           {
             validator: (value, callback) => {

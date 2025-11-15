@@ -1,8 +1,6 @@
-import React, { Fragment, useState } from 'react';
 import { Button, Form, Modal } from '@arco-design/web-react';
-import { useSignals } from '@preact/signals-react/runtime';
-import { pagesRuntimeSignal } from '@onebase/common';
 import { PageType } from '@onebase/app';
+import { pagesRuntimeSignal } from '@onebase/common';
 import {
   EDITOR_TYPES,
   getComponentWidth,
@@ -13,6 +11,8 @@ import {
   usePageViewEditorSignal,
   type GridItem
 } from '@onebase/ui-kit';
+import { useSignals } from '@preact/signals-react/runtime';
+import React, { Fragment, useCallback, useState } from 'react';
 import styles from './index.module.less';
 import { initInteractionRule } from './interaction_rule';
 
@@ -42,6 +42,20 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({ form, isAdd, submitLoading, o
     setCpStates(states);
   };
 
+  const hiddenState = useCallback(
+    (cpId: string) => {
+      if (cpStates[cpId]?.status !== undefined) {
+        return cpStates[cpId].status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN];
+      } else {
+        return (
+          useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cpId].config.status !==
+          STATUS_VALUES[STATUS_OPTIONS.HIDDEN]
+        );
+      }
+    },
+    [cpStates, editPageViewId.value]
+  );
+
   const [fullScreen, setFullScreen] = useState(false);
 
   return (
@@ -50,9 +64,9 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({ form, isAdd, submitLoading, o
       title={
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>表单信息</div>
-          <Button type="text" onClick={() => setFullScreen(!fullScreen)}>
+          {/* <Button type="text" onClick={() => setFullScreen(!fullScreen)}>
             {fullScreen ? '退出全屏' : '全屏'}
-          </Button>
+          </Button> */}
         </div>
       }
       visible
@@ -66,7 +80,13 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({ form, isAdd, submitLoading, o
           <Button type="primary" onClick={onSubmit} loading={submitLoading}>
             提交
           </Button>
-          <Button type="default" onClick={onCancel}>
+          <Button
+            type="default"
+            onClick={() => {
+              setCpStates({});
+              onCancel();
+            }}
+          >
             取消
           </Button>
         </div>
@@ -74,7 +94,7 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({ form, isAdd, submitLoading, o
       onCancel={onCancel}
       autoFocus={false}
       focusLock={true}
-      style={{ width: fullScreen ? '98vw' : '60vw'}}
+      style={{ width: fullScreen ? '98vw' : '60vw' }}
       alignCenter
       wrapClassName={fullScreen ? 'edit-modal edit-modal-fullscreen' : 'edit-modal'}
     >
@@ -82,8 +102,9 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({ form, isAdd, submitLoading, o
         <Form layout="inline" form={form} onValuesChange={handleFormValuesChange}>
           {useEditorSignalMap.get(editPageViewId.value)?.components.value.map((cp: GridItem) => (
             <Fragment key={cp.id}>
-              {useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id].config.status !==
-                STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+              {hiddenState(cp.id) && (
+                //   {useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id].config.status !==
+                //     STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
                 <div
                   key={cp.id}
                   className={styles.componentItem}

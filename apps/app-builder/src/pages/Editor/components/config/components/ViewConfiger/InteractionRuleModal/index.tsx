@@ -44,8 +44,8 @@ const formActionOptions = [
     value: InteractionActionType.Required
   },
   {
-    label: '只读所有字段',
-    value: InteractionActionType.ReadonlyAll
+    label: '非必填',
+    value: InteractionActionType.NoRequired
   },
   {
     label: '设置字段值',
@@ -488,14 +488,7 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
                                 <div key={item.key}>
                                   <div className={styles.items}>
                                     <Grid.Row key={item.key} gutter={8} align="center">
-                                      <Grid.Col
-                                        span={
-                                          form.getFieldValue(item.field + '.action') ==
-                                          InteractionActionType.ReadonlyAll
-                                            ? 23
-                                            : 4
-                                        }
-                                      >
+                                      <Grid.Col span={4}>
                                         <Form.Item field={item.field + '.action'}>
                                           <Select
                                             className={styles.itemSelect}
@@ -507,14 +500,14 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
                                         </Form.Item>
                                       </Grid.Col>
 
-                                      {![
-                                        InteractionActionType.SetFieldValue,
-                                        InteractionActionType.ReadonlyAll
-                                      ].includes(form.getFieldValue(item.field + '.action')) && (
+                                      {![InteractionActionType.SetFieldValue].includes(
+                                        form.getFieldValue(item.field + '.action')
+                                      ) && (
                                         <>
                                           <Grid.Col span={19}>
-                                            <Form.Item field={item.field + '.cpId'}>
+                                            <Form.Item field={item.field + '.cpIds'}>
                                               <Select
+                                                mode="multiple"
                                                 className={styles.itemSelect}
                                                 options={cpOptions}
                                                 onChange={(_value) => {}}

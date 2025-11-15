@@ -22,10 +22,10 @@ import { pagesRuntimeSignal } from '@onebase/common';
 import { EDITOR_TYPES, FORM_COMPONENT_TYPES, useEditorSignalMap } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
+import DetailRuntime from './DetailRuntime';
+import EditRuntime from './EditRuntime';
 import FlowPredict from './flowPredict';
 import styles from './index.module.less';
-import EditRuntime from './EditRuntime';
-import DetailRuntime from './DetailRuntime';
 import ListRuntime from './ListRuntime';
 
 interface PreviewProps {
@@ -38,8 +38,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
   const [form] = Form.useForm();
 
-  
-
   const {
     curPage,
     drawerVisible,
@@ -51,8 +49,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     subEntities,
     setSubEntities
   } = pagesRuntimeSignal;
-
-  
 
   const [pageSetId, setPageSetId] = useState('');
   const [pageType, setPageType] = useState('');
@@ -253,6 +249,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
     setPageType(EDITOR_TYPES.LIST_EDITOR);
     setDetailMode(true);
+    form.resetFields();
   };
 
   const showFromPageData = (id: string, toFormPage: boolean = false) => {
@@ -366,8 +363,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   const toEditMode = () => {
     setDetailMode(false);
   };
-
-  
 
   return (
     <div className={`${styles.previewPage} runtime-preview-formpage`}>
