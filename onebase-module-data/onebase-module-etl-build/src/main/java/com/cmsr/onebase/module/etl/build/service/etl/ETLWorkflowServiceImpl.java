@@ -39,7 +39,7 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
     private Long etlProjectCode;
 
     // TODO: localhost cannot be default value, delete it after test
-    @Value("${onebase.flink.address:localhost}")
+    @Value("${onebase.flink.address}")
     private String flinkServerUrl;
 
     @Resource
