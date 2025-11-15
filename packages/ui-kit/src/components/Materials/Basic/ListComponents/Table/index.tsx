@@ -119,7 +119,6 @@ const XTable = memo(
                   <Button
                     type="text"
                     size="small"
-                    disabled={preview}
                     onClick={(event) => {
                       event.stopPropagation();
                       handleEdit(record.id, true);

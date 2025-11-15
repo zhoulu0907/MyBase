@@ -9,7 +9,7 @@ import {
   useListEditorSignal,
   type GridItem
 } from '@onebase/ui-kit';
-import React, { Fragment } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import styles from './index.module.less';
 
 interface PartPreviewProps {
@@ -27,6 +27,18 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
   const { components: listComponents, pageComponentSchemas: listPageComponentSchemas } = useListEditorSignal;
   const preview = true;
 
+  const [previewPageType, setPreviewPageType] = useState(pageType);
+
+  useEffect(() => {
+    setPreviewPageType(pageType);
+  }, [pageType]);
+
+  const cancelSubmitForm = () => {
+    console.log('取消提交');
+
+    setPreviewPageType(EDITOR_TYPES.LIST_EDITOR);
+  };
+
   return (
     <Drawer
       placement="bottom"
@@ -41,7 +53,7 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
     >
       <div className={styles.previewPage}>
         <div className={styles.content}>
-          {pageType == EDITOR_TYPES.LIST_EDITOR &&
+          {previewPageType == EDITOR_TYPES.LIST_EDITOR &&
             listComponents.value.map((cp: GridItem) => (
               <Fragment key={cp.id}>
                 {listPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
@@ -59,13 +71,16 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
                       pageComponentSchema={listPageComponentSchemas.value[cp.id]}
                       runtime={true}
                       preview={preview}
+                      showFromPageData={() => {
+                        setPreviewPageType(EDITOR_TYPES.FORM_EDITOR);
+                      }}
                     />
                   </div>
                 )}
               </Fragment>
             ))}
 
-          {pageType == EDITOR_TYPES.FORM_EDITOR && (
+          {previewPageType == EDITOR_TYPES.FORM_EDITOR && (
             <div className={styles.fromContain}>
               <div className={styles.previewForm}>
                 <Form layout="inline">
@@ -85,6 +100,9 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
                             cpType={cp.type}
                             pageComponentSchema={formPageComponentSchemas.value[cp.id]}
                             runtime={true}
+                            showFromPageData={() => {
+                              setPreviewPageType(EDITOR_TYPES.FORM_EDITOR);
+                            }}
                             preview={preview}
                           />
                         </div>
@@ -94,7 +112,9 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
                 </Form>
               </div>
               <div className={styles.footer}>
-                <Button type="default">取消</Button>
+                <Button type="default" onClick={cancelSubmitForm}>
+                  取消
+                </Button>
                 <Button disabled={preview} type="primary">
                   提交
                 </Button>
