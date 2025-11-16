@@ -270,7 +270,116 @@
             </tr>
         </tbody>
     </table>
-   
+
+    <!-- 三、密码有效期功能应用状况 -->
+    <h2 class="phase-section">三、密码有效期功能应用状况</h2>
+    
+    <div class="summary">
+        <p class="summary-title">总体情况：</p>
+        <p>密码有效期功能已成功应用到所有用户创建场景和登录场景。系统在用户创建时保存初始密码历史记录，登录时检查密码是否过期。密码过期后允许登录，但返回过期信息给前端，前端强制跳转修改密码页面。该功能与弱密码校验、历史密码限制功能协同工作，构成完整的密码安全管理体系。当前阶段应用于6个核心业务场景。</p>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Java类</th>
+                <th>方法名</th>
+                <th>是否修改</th>
+                <th>初始密码保存</th>
+                <th>过期检查</th>
+                <th>路径</th>
+                <th>备注说明</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- AdminUserServiceImpl 类 - 用户创建场景 -->
+            <tr class="class-header">
+                <td rowspan="5">AdminUserServiceImpl</td>
+                <td>createUser()</td>
+                <td class="modified">已修改</td>
+                <td class="checked">已保存</td>
+                <td class="not-checked">不适用</td>
+                <td>/system/user/create</td>
+                <td>创建用户后保存初始密码历史记录到infra_security_record表，为后续密码有效期检查提供基准时间</td>
+            </tr>
+            <tr>
+                <td>createCorpAdminUser()</td>
+                <td class="modified">已修改</td>
+                <td class="checked">已保存</td>
+                <td class="not-checked">不适用</td>
+                <td>/system/corp/create</td>
+                <td>创建企业管理员后保存初始密码历史记录（随机密码生成）</td>
+            </tr>
+            <tr>
+                <td>createPlatformUser()</td>
+                <td class="modified">已修改</td>
+                <td class="checked">已保存</td>
+                <td class="not-checked">不适用</td>
+                <td>/system/platform/admin/create</td>
+                <td>创建平台管理员后保存初始密码历史记录</td>
+            </tr>
+            <tr>
+                <td>registerUser()</td>
+                <td class="modified">已修改</td>
+                <td class="checked">已保存</td>
+                <td class="not-checked">不适用</td>
+                <td>/system/auth/register</td>
+                <td>用户注册后保存初始密码历史记录</td>
+            </tr>
+            <tr>
+                <td>importUserList()</td>
+                <td class="modified">已修改</td>
+                <td class="checked">已保存</td>
+                <td class="not-checked">不适用</td>
+                <td>/system/user/import</td>
+                <td>批量导入用户时，仅对新创建用户保存初始密码历史记录，更新操作不保存</td>
+            </tr>
+            
+            <!-- AdminAuthServiceImpl 类 - 登录场景 -->
+            <tr class="class-header">
+                <td rowspan="1">AdminAuthServiceImpl</td>
+                <td>createTokenAfterLoginSuccess()</td>
+                <td class="modified">已修改</td>
+                <td class="not-checked">不适用</td>
+                <td class="checked">已检查</td>
+                <td>/system/auth/admin-login</td>
+                <td>登录成功后调用SecurityConfigApi.checkPasswordExpiry()检查密码有效期，将结果（type/daysExpired/passwordAge/expiryDays/message）附加到AuthLoginRespVO的passwordExpiryInfo字段返回给前端。前端根据type="expired"强制跳转修改密码页面</td>
+            </tr>
+            
+            <!-- TenantServiceImpl 类 - 间接支持 -->
+            <tr class="class-header">
+                <td rowspan="1">TenantServiceImpl</td>
+                <td>createSystemUser()</td>
+                <td class="not-modified">无需修改</td>
+                <td class="checked">已保存</td>
+                <td class="not-checked">不适用</td>
+                <td>-</td>
+                <td>通过调用AdminUserServiceImpl.createUser()自动支持初始密码保存</td>
+            </tr>
+            
+            <!-- CorpServiceImpl 类 - 间接支持 -->
+            <tr class="class-header">
+                <td rowspan="1">CorpServiceImpl</td>
+                <td>createAdminUser()</td>
+                <td class="not-modified">无需修改</td>
+                <td class="checked">已保存</td>
+                <td class="not-checked">不适用</td>
+                <td>-</td>
+                <td>通过调用AdminUserServiceImpl.createCorpAdminUser()自动支持初始密码保存</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="summary" style="margin-top: 30px; background-color: #e8f4f8; border-left: 4px solid #3498db;">
+        <p class="summary-title" style="color: #3498db;">密码有效期功能技术实现要点：</p>
+        <ul style="margin-top: 10px;">
+            <li><strong>配置灵活</strong>：expiryDays配置项默认180天，设置0表示禁用密码有效期功能</li>          
+            <li><strong>时间计算</strong>：使用ChronoUnit.DAYS.between()精确计算密码年龄（天数）</li>
+            <li><strong>数据存储</strong>：密码历史记录存储在infra_security_record表，record_type='password_history'</li>
+            <li><strong>查询优化</strong>：新增findLatestByUserIdAndType()方法，查询用户最近一次密码记录</li>
+            <li><strong>不阻塞登录</strong>：密码过期后允许登录，返回token + 过期信息。前端根据type="expired"强制跳转修改密码页面</li>
+        </ul>
+    </div>
 
 </body>
 </html>

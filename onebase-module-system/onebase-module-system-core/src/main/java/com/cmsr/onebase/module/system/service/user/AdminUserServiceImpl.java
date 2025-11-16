@@ -145,6 +145,9 @@ public class AdminUserServiceImpl implements AdminUserService {
         // adminUserDataRepository.insert(user);
         user.setId(createReqVO.getId());
 
+        // 2.1.1 保存初始密码历史记录
+        securityConfigApi.savePasswordHistory(user.getId(), user.getPassword());
+
         // 2.2 插入关联岗位
         if (CollUtil.isNotEmpty(user.getPostIds())) {
             userPostDataRepository.insertBatch(convertList(user.getPostIds(),
@@ -176,6 +179,10 @@ public class AdminUserServiceImpl implements AdminUserService {
         }
 
         AdminUserDO adminUserDO= adminUserDataRepository.insert(userDO);
+
+        // 保存初始密码历史记录
+        securityConfigApi.savePasswordHistory(adminUserDO.getId(), adminUserDO.getPassword());
+
         Long roleId=createCoreAdminRole();
         permissionService.assignUserRoles(adminUserDO.getId(), singleton(roleId));
        return adminUserDO.getId();
@@ -213,6 +220,9 @@ public class AdminUserServiceImpl implements AdminUserService {
         }
         adminUserDataRepository.insert(user);
 
+        // 保存初始密码历史记录
+        securityConfigApi.savePasswordHistory(user.getId(), user.getPassword());
+
         // 赋予平台管理员角色
         RoleDO roleDO = roleService.getRoleIdsByCode(RoleCodeEnum.SUPER_ADMIN.getCode());
         Set<Long> roleIds = new HashSet<>();
@@ -249,6 +259,10 @@ public class AdminUserServiceImpl implements AdminUserService {
         user.setStatus(CommonStatusEnum.ENABLE.getStatus()); // 默认开启
         user.setPassword(encodePassword(registerReqVO.getPassword())); //
         adminUserDataRepository.insert(user);
+
+        // 2.1 保存初始密码历史记录
+        securityConfigApi.savePasswordHistory(user.getId(), user.getPassword());
+
         return user.getId();
     }
 
@@ -683,8 +697,11 @@ public class AdminUserServiceImpl implements AdminUserService {
             // 2.2.1 判断如果不存在，在进行插入
             AdminUserDO existUser = adminUserDataRepository.findByUsername(importUser.getUsername());
             if (existUser == null) {
-                adminUserDataRepository.insert(BeanUtils.toBean(importUser, AdminUserDO.class)
-                        .setPassword(encodePassword(initPassword)).setPostIds(new HashSet<>()));
+                AdminUserDO newUser = BeanUtils.toBean(importUser, AdminUserDO.class)
+                        .setPassword(encodePassword(initPassword)).setPostIds(new HashSet<>());
+                adminUserDataRepository.insert(newUser);
+                // 保存初始密码历史记录
+                securityConfigApi.savePasswordHistory(newUser.getId(), newUser.getPassword());
                 respVO.getCreateUsernames().add(importUser.getUsername());
                 return;
             }
