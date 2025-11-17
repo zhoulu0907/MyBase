@@ -25,8 +25,9 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   const userPermissionInfo = UserPermissionManager.getUserPermissionInfo();
 
   // 登出处理
-  const handleLogout = () => {
-    // 清除 token
+  const handleLogout = async () => {
+    // TODO(mickey): 联调后打开
+    // await systemLogout();
     TokenManager.clearToken();
     // 跳转到登录页
     navigate('/login', { replace: true });

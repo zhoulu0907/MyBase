@@ -54,7 +54,9 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   };
 
   // 登出处理
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    // TODO(mickey): 联调后打开
+    // await systemLogout();
     // 清除 token
     TokenManager.clearToken();
     UserPermissionManager.clearUserPermissionInfo();

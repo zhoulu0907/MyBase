@@ -5,7 +5,6 @@ import TabFirstSelectBgSVG from '@/assets/images/tab_first_select_bg.svg';
 import TabLastSelectBgSVG from '@/assets/images/tab_last_select_bg.svg';
 import TabMiddleSelectBgSVG from '@/assets/images/tab_select_bg.svg';
 import VisitIconSVG from '@/assets/images/visit.svg';
-import { appIconMap } from '@onebase/ui-kit';
 import DynamicIcon from '@/components/DynamicIcon';
 import { useI18n } from '@/hooks/useI18n';
 import { useAppStore } from '@/store/store_app';
@@ -13,6 +12,7 @@ import { UserPermissionManager } from '@/utils/permission';
 import { Button, Layout, Menu, Tabs } from '@arco-design/web-react';
 import { AppStatus, getApplication, type GetApplicationReq } from '@onebase/app';
 import { getRuntimeURL, TokenManager } from '@onebase/common';
+import { appIconMap } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styles from './header.module.less';
@@ -74,8 +74,9 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   };
 
   // 登出处理
-  const handleLogout = () => {
-    // 清除 token
+  const handleLogout = async () => {
+    // TODO(mickey): 联调后打开
+    // await systemLogout();
     TokenManager.clearToken();
     UserPermissionManager.clearUserPermissionInfo();
     // 跳转到登录页

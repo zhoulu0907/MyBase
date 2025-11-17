@@ -12,7 +12,7 @@ import {
   type ListApplicationMenuReq
 } from '@onebase/app';
 import { TokenManager } from '@onebase/common';
-import { getPermissionInfo } from '@onebase/platform-center';
+import { getPermissionInfo, runtimeLogout } from '@onebase/platform-center';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -158,8 +158,9 @@ const Runtime: React.FC = () => {
   };
 
   // 登出处理
-  const handleLogout = () => {
+  const handleLogout = async () => {
     // 清除 token
+    await runtimeLogout();
     TokenManager.clearToken();
     UserPermissionManager.clearUserPermissionInfo();
     // 跳转到登录页

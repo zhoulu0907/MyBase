@@ -4,7 +4,7 @@ import { IconUpload } from '@arco-design/web-react/icon';
 import { TokenManager } from '@onebase/common';
 import {
   addPlatformTenantApi,
-  getSimpleUserList,
+  getPlatformTenantAdminListApi,
   PlatformTenantPublishMode,
   PlatformTenantStatus,
   uploadFile,
@@ -50,7 +50,8 @@ const CreateSpace = () => {
   // 获取管理员列表
   const getPlatformAdminList = async () => {
     try {
-      const adminListResp = await getSimpleUserList();
+      //   const adminListResp = await getSimpleUserList();
+      const adminListResp = await getPlatformTenantAdminListApi();
       console.log('adminListResp: ', adminListResp);
       setAdminList(adminListResp);
     } catch (error) {

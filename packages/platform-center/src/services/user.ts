@@ -1,5 +1,5 @@
 import { type PageParam, PageResult } from '../types/common';
-import type { UserVO, UserProfileRespVO, UserProfileUpdateReq, UserProfileUpdatePwdReq } from '../types/user';
+import type { UserProfileRespVO, UserProfileUpdatePwdReq, UserProfileUpdateReq, UserVO } from '../types/user';
 import { systemService } from './clients';
 
 // 查询用户管理列表

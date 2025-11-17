@@ -17,7 +17,7 @@ import {
 import { IconCopy, IconUpload } from '@arco-design/web-react/icon';
 import {
   getPlatformTenantAdminInfoApi,
-  getSimpleUserList,
+  getPlatformTenantAdminListApi,
   PlatformTenantPublishMode,
   updatePlatformTenantApi,
   uploadFile,
@@ -81,7 +81,8 @@ const EditTenant = () => {
   // 获取用户列表
   const getPlatformAdminList = async () => {
     try {
-      const adminListResp = await getSimpleUserList();
+      //   const adminListResp = await getSimpleUserList();
+      const adminListResp = await getPlatformTenantAdminListApi();
       console.log('adminListResp: ', adminListResp);
       setAdminList(adminListResp);
     } catch (error) {
