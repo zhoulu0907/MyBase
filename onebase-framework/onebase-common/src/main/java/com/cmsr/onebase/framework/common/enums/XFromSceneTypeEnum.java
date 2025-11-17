@@ -7,6 +7,10 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum XFromSceneTypeEnum {
     /**
+     * 平台
+     */
+    PLATFORM("platform", "平台"),
+    /**
      * 空间
      */
     TENANT("tenant", "空间"),
