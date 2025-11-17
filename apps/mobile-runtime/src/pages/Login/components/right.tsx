@@ -1,13 +1,12 @@
 import { Button, Checkbox, Form, Input, Toast } from '@arco-design/mobile-react';
 import { useForm } from '@arco-design/mobile-react/esm/form';
-import IconCheck from '@arco-design/mobile-react/esm/icon/IconCheck';
 import IconSquareChecked from '@arco-design/mobile-react/esm/icon/IconSquareChecked';
 import IconSquareUnchecked from '@arco-design/mobile-react/esm/icon/IconSquareUnchecked';
 import IconSquareDisabled from '@arco-design/mobile-react/esm/icon/IconSquareDisabled';
-import { getHashQueryParam, SliderCaptcha, TokenManager, type SliderCaptchaRef } from '@onebase/common';
+import { getHashQueryParam, TokenManager, type SliderCaptchaRef } from '@onebase/common';
+import { SliderCaptcha } from './Captcha';
 import { checkCaptchaApi, getCaptchaApi, login, type LoginRequest, type LoginResponse } from '@onebase/platform-center';
 import { getApplication } from '@onebase/app';
-import { appIconMap } from '@onebase/ui-kit';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useI18n } from '../../../hooks/useI18n';
@@ -194,42 +193,42 @@ const Right: React.FC = () => {
   const rules = {
     password: [
       {
-            type: ValidatorType.Custom,
-            validator: (val: string, callback: (error?: string) => void) => {
-                if (!val) {
-                    callback('请输入密码');
-                } else if (val.length < 6) {
-                    callback('密码至少6个字符');
-                } else {
-                    callback();
-                }
-            },
+        type: ValidatorType.Custom,
+        validator: (val: string, callback: (error?: string) => void) => {
+          if (!val) {
+            callback('请输入密码');
+          } else if (val.length < 6) {
+            callback('密码至少6个字符');
+          } else {
+            callback();
+          }
         },
+      },
     ],
     username: [
-        {
-            type: ValidatorType.Custom,
-            validator: (val: string, callback: (error?: string) => void) => {
-                if (!val) {
-                    callback('请输入账号');
-                } else if (val.length < 3) {
-                    callback('账号至少3个字符');
-                } else {
-                    callback();
-                }
-            },
+      {
+        type: ValidatorType.Custom,
+        validator: (val: string, callback: (error?: string) => void) => {
+          if (!val) {
+            callback('请输入账号');
+          } else if (val.length < 3) {
+            callback('账号至少3个字符');
+          } else {
+            callback();
+          }
         },
+      },
     ],
   }
   const toSubmit = () => {
-        form.submit();
-    };
-    const squareIcon = {
-        normal: <IconSquareUnchecked />,
-        active: <IconSquareChecked />,
-        disabled: <IconSquareDisabled />,
-        activeDisabled: <IconSquareChecked />,
-    }
+    form.submit();
+  };
+  const squareIcon = {
+    normal: <IconSquareUnchecked />,
+    active: <IconSquareChecked />,
+    disabled: <IconSquareDisabled />,
+    activeDisabled: <IconSquareChecked />,
+  }
   return (
     <div className={styles.loginPageRight}>
       <div className={styles.titleContainer}>
@@ -263,14 +262,19 @@ const Right: React.FC = () => {
             <Input type="password" placeholder={t('auth.password')} clearable />
           </Form.Item>
           <div className={styles.rememberMeContainer}>
-              <Checkbox value={rememberMe ? 2 : 1} checked={rememberMe} onChange={handleRememberMeChange} icons={squareIcon}>
-                {t('auth.rememberMe')}
-              </Checkbox>
-              <div className={styles.forgotPassword}> {t('auth.forgotPassword')}</div>
+            <Checkbox
+              value={rememberMe ? 2 : 1}
+              checked={rememberMe}
+              defaultCheck={true}
+              style={{ display: 'flex' }}
+              icons={squareIcon}
+              onChange={handleRememberMeChange}
+            >{t('auth.rememberMe')}</Checkbox>
+            <div className={styles.forgotPassword}> {t('auth.forgotPassword')}</div>
           </div>
-            <Button type="primary" onClick={toSubmit} loading={loading} size="large" className={styles.loginButton}>
-              {t('auth.loginButton')}
-            </Button>
+          <Button type="primary" onClick={toSubmit} loading={loading} size="large" className={styles.loginButton}>
+            {t('auth.loginButton')}
+          </Button>
         </Form>
       </div>
 
