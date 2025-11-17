@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.app.build.service.menu;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.app.build.service.AppCommonService;
 import com.cmsr.onebase.module.app.build.service.appresource.PageSetService;
 import com.cmsr.onebase.module.app.build.vo.menu.*;
@@ -43,6 +44,9 @@ public class AppMenuServiceImpl implements AppMenuService {
 
     @Resource
     private PageSetService pageSetService;
+
+    @Resource
+    private AppApplicationApi appApplicationApi;
 
     @Override
     public List<MenuListRespVO> listApplicationMenu(Long applicationId, String name) {
@@ -187,6 +191,9 @@ public class AppMenuServiceImpl implements AppMenuService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public MenuCreateRespVO createApplicationMenu(MenuCreateReqVO createReqVO) {
+        // 修改企业主表更新时间
+        appApplicationApi.updateAppTimeById(createReqVO.getApplicationId());
+
         // 菜单类型校验
         MenuTypeEnum.validate(createReqVO.getMenuType());
         ApplicationDO applicationDO = appCommonService.validateApplicationExist(createReqVO.getApplicationId());

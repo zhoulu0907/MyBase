@@ -144,11 +144,6 @@ public class AdminUserDO extends TenantBaseDO {
     private Integer adminType;
 
     /**
-     * 企业状态
-     */
-    private String statusDesc;
-
-    /**
      * 归属企业ID
      */
     @Column(name = CORP_ID)
