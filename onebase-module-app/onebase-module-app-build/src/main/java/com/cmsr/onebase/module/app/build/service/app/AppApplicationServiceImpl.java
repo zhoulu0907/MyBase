@@ -6,7 +6,6 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.uid.UidGenerator;
-import com.cmsr.onebase.module.app.api.app.dto.UserPhotoDTO;
 import com.cmsr.onebase.module.app.build.service.AppCommonService;
 import com.cmsr.onebase.module.app.build.service.auth.AppAuthRoleService;
 import com.cmsr.onebase.module.app.build.service.version.AppVersionService;
@@ -28,6 +27,7 @@ import com.cmsr.onebase.module.app.core.dal.database.version.AppVersionResourceR
 import com.cmsr.onebase.module.app.core.dal.dataobject.app.ApplicationDO;
 import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.core.enums.app.ApplicationStatusEnum;
+import com.cmsr.onebase.module.app.core.vo.app.AppUserPhotoDTO;
 import com.cmsr.onebase.module.app.core.vo.app.ApplicationPageReqVO;
 import com.cmsr.onebase.module.metadata.api.datasource.MetadataDatasourceApi;
 import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceCreateDefaultReqDTO;
@@ -107,7 +107,7 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         List<Long> appIds = pageResult.getList().stream()
                 .map(ApplicationDO::getId)
                 .collect(Collectors.toList());
-        Map<Long, List<UserPhotoDTO>> userListMap = appSqlQueryRepository.findUserPhotoList(appIds);
+        Map<Long, List<AppUserPhotoDTO>> userListMap = appSqlQueryRepository.findUserPhotoList(appIds);
 
         List<ApplicationRespVO> respVOS = pageResult.getList().stream()
                 .map(v -> {
