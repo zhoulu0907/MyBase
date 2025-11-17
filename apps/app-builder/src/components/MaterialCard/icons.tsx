@@ -107,7 +107,7 @@ export const ICON_Map: Record<string, React.ReactNode> = {
   'todo_center_cp.svg': <img src={TodoCenterIcon} alt="XTodoCenter" />,
   'todo_list_cp.svg': <img src={TodoListIcon} alt="XTodoList" />,
   'welcome_card_cp.svg': <img src={WelcomeCardIcon} alt="XWelcomeCard" />,
-  'infomation_list_cp.svg': <img src={InformationListIcon} alt="XTodoCenter" />
+  'infomation_list_cp.svg': <img src={InformationListIcon} alt="XInformationList" />
 };
 
 // TODO 图标更新
@@ -169,5 +169,5 @@ export const ICON_Map_By_Type: Record<string, React.ReactNode> = {
   XTodoCenter: <img src={TodoCenterIcon} alt="XTodoCenter" />,
   XTodoList: <img src={TodoListIcon} alt="XTodoList" />,
   XWelcomeCard: <img src={WelcomeCardIcon} alt="XWelcomeCard" />,
-  XTodoCenter: <img src={InformationListIcon} alt="XTodoCenter" />
+  XInformationList: <img src={InformationListIcon} alt="XInformationList" />
 };
