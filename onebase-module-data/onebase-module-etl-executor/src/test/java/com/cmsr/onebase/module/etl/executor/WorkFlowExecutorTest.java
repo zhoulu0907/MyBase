@@ -18,6 +18,7 @@ class WorkFlowExecutorTest {
         inputArgs.setWorkflowId(131802582152183808L);
         WorkFlowExecutor executor = new WorkFlowExecutor(inputArgs);
         executor.execute();
+        executor.close();
     }
 
 }

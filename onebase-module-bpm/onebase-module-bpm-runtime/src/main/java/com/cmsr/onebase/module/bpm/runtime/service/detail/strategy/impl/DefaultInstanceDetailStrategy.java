@@ -3,7 +3,6 @@ package com.cmsr.onebase.module.bpm.runtime.service.detail.strategy.impl;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmTaskDetailRespVO;
 import org.dromara.warm.flow.core.entity.Instance;
-import org.dromara.warm.flow.core.entity.Task;
 import org.springframework.stereotype.Component;
 
 /**
@@ -15,11 +14,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class DefaultInstanceDetailStrategy  extends AbstractInstanceDetailStrategy<BaseNodeExtDTO> {
     @Override
-    public void fillDetail(BpmTaskDetailRespVO vo, BaseNodeExtDTO extDTO, Task currTask, Instance instance, Long loginUserId) {
+    public void fillDetail(BpmTaskDetailRespVO vo, BaseNodeExtDTO extDTO, Instance instance, Long loginUserId, boolean isTodo) {
         Long pageSetId = getPageSetId(instance);
 
-        // 默认详情视图
-        fillPageViewInfo(vo, instance, pageSetId);
+        // 默认策略始终返回详情视图
+        fillPageViewInfo(vo, instance, pageSetId, false);
     }
 
     @Override

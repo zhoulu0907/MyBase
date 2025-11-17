@@ -25,6 +25,7 @@ import lombok.Data;
         @JsonSubTypes.Type(value = StartNodeVO.class, name = "start"),
         @JsonSubTypes.Type(value = EndNodeVO.class, name = "end"),
         @JsonSubTypes.Type(value = InitiationNodeVO.class, name = "initiation"),
+        @JsonSubTypes.Type(value = CcNodeVO.class, name = "cc"),
         @JsonSubTypes.Type(value = CondNodeVO.class, name = "condition")
         // 需要添加更多类型
 })

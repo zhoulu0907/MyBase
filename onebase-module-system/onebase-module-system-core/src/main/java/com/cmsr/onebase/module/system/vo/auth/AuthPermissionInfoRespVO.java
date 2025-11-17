@@ -53,6 +53,8 @@ public class AuthPermissionInfoRespVO {
         @Schema(description = "用户邮箱", example = "onebase@aaa.com")
         private String email;
 
+        @Schema(description = "手机号", example = "156")
+        private String mobile;
     }
 
     @Schema(description = "管理后台 - 登录用户的菜单信息 Response VO")
