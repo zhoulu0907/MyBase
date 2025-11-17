@@ -2,14 +2,12 @@ package com.cmsr.onebase.module.bpm.runtime.controller;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.module.bpm.core.vo.BpmCopyTaskPageReqVO;
 import com.cmsr.onebase.module.bpm.core.vo.BpmDoneTaskPageReqVO;
 import com.cmsr.onebase.module.bpm.core.vo.BpmMyCreatedPageReqVO;
 import com.cmsr.onebase.module.bpm.core.vo.BpmTodoTaskPageReqVO;
 import com.cmsr.onebase.module.bpm.runtime.service.BpmFlowTaskCenterService;
-import com.cmsr.onebase.module.bpm.runtime.vo.BpmFlowDoneTaskVO;
-import com.cmsr.onebase.module.bpm.runtime.vo.BpmFlowTodoTaskVO;
-import com.cmsr.onebase.module.bpm.runtime.vo.BpmMyCreatedVO;
-import com.cmsr.onebase.module.bpm.runtime.vo.ListNodesRespVO;
+import com.cmsr.onebase.module.bpm.runtime.vo.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
@@ -65,5 +63,12 @@ public class BpmFlowTaskCenterController {
         log.info("查询节点列表信息: {}", bindingViewId);
         List<ListNodesRespVO.NodeVO> nodes = flowTaskCenterService.listNodes(bindingViewId);
         return success(nodes);
+    }
+    @GetMapping("/copy/page")
+    @Operation(summary = "分页查询抄送我的信息")
+    public CommonResult<PageResult<BpmCopyTaskPageResVO>> copy(@Valid BpmCopyTaskPageReqVO reqVO) {
+        log.info("分页查询抄送我的信息: {}", reqVO);
+        PageResult<BpmCopyTaskPageResVO> pageResult = flowTaskCenterService.getCopyPage(reqVO);
+        return success(pageResult);
     }
 }

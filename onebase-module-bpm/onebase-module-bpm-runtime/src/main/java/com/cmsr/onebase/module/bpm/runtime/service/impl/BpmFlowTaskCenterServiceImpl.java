@@ -6,9 +6,11 @@ import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowInsBizExtRepository;
+import com.cmsr.onebase.module.bpm.core.dal.database.ext.BpmFlowCcRecordExtRepository;
 import com.cmsr.onebase.module.bpm.core.dal.database.ext.BpmHisTaskExtRepository;
 import com.cmsr.onebase.module.bpm.core.dal.database.ext.BpmInstanceExtRepository;
 import com.cmsr.onebase.module.bpm.core.dal.database.ext.BpmTaskExtRepository;
+import com.cmsr.onebase.module.bpm.core.dto.BpmCcRecordDTO;
 import com.cmsr.onebase.module.bpm.core.dto.BpmDoneTaskDTO;
 import com.cmsr.onebase.module.bpm.core.dto.BpmInstanceDTO;
 import com.cmsr.onebase.module.bpm.core.dto.BpmTodoTaskDTO;
@@ -18,10 +20,7 @@ import com.cmsr.onebase.module.bpm.core.enums.BpmUserTypeEnum;
 import com.cmsr.onebase.module.bpm.core.service.BpmEngineDefExtService;
 import com.cmsr.onebase.module.bpm.core.vo.*;
 import com.cmsr.onebase.module.bpm.runtime.service.BpmFlowTaskCenterService;
-import com.cmsr.onebase.module.bpm.runtime.vo.BpmFlowDoneTaskVO;
-import com.cmsr.onebase.module.bpm.runtime.vo.BpmFlowTodoTaskVO;
-import com.cmsr.onebase.module.bpm.runtime.vo.BpmMyCreatedVO;
-import com.cmsr.onebase.module.bpm.runtime.vo.ListNodesRespVO;
+import com.cmsr.onebase.module.bpm.runtime.vo.*;
 import com.cmsr.onebase.module.engine.orm.anyline.repository.FlowHisTaskRepository;
 import com.cmsr.onebase.module.engine.orm.anyline.repository.FlowInstanceRepository;
 import com.cmsr.onebase.module.engine.orm.anyline.repository.FlowTaskRepository;
@@ -104,6 +103,9 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
 
     @Resource
     private DefService defService;
+
+    @Resource
+    private BpmFlowCcRecordExtRepository bpmFlowCcRecordExtRepository;
 
     private List<String> splitToList(String str) {
         if (StringUtils.isBlank(str)) {
@@ -481,4 +483,74 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
 
         return nodeVOs;
     }
+    /**
+     * 获取流程抄送分页
+     *
+     * @param pageReqVO
+     * @return
+     */
+    @Override
+    public PageResult<BpmCopyTaskPageResVO> getCopyPage(BpmCopyTaskPageReqVO pageReqVO) {
+        Long loginUserId = WebFrameworkUtils.getLoginUserId();
+        // 处理节点编码参数
+        pageReqVO.setNodeCodeList(splitToList(pageReqVO.getNodeCode()));
+
+        // 处理流程状态参数
+        pageReqVO.setFlowStatusList(splitToFlowStatusList(pageReqVO.getFlowStatus()));
+
+        // 构建查询条件
+        ConfigStore condition = buildDynamicCondition(pageReqVO, String.valueOf(loginUserId));
+
+        PageResult<BpmCcRecordDTO> pageResult = bpmFlowCcRecordExtRepository.getCopyPage(condition);
+        // 转换 BpmCcRecordDTO 列表为 BpmCopyTaskPageResVO 列表
+        List<BpmCopyTaskPageResVO> copyTaskList = pageResult.getList().stream()
+                .map(this::convertToCopyTaskVO)
+                .collect(Collectors.toList());
+
+        return new PageResult<>(copyTaskList, pageResult.getTotal());
+
+    }
+
+    private ConfigStore buildDynamicCondition(BpmCopyTaskPageReqVO reqVO, String userId) {
+        DefaultConfigStore condition = new DefaultConfigStore();
+
+        // 设置分页参数
+        fillPageNavi(condition, reqVO.getPageNo(), reqVO.getPageSize());
+
+        // 填充流程实例条件
+        fillInsCondition(condition, reqVO);
+
+        // 填充时间范围条件
+        fillTimeRange(condition, "submit_time", reqVO.getSubmitTimeStart(), reqVO.getSubmitTimeEnd());
+
+        // 填充处理人条件
+        condition.and(Compare.EQUAL, "processed_by", userId);
+
+        // 排序
+        fillOrder(condition, "create_time", reqVO.getSortType());
+
+        return condition;
+    }
+    private BpmCopyTaskPageResVO convertToCopyTaskVO(BpmCcRecordDTO ccRecord) {
+        BpmCopyTaskPageResVO vo = new BpmCopyTaskPageResVO();
+
+        // 基本字段映射
+        vo.setId(ccRecord.getId());
+        vo.setProcessTitle(ccRecord.getBpmTitle());
+        vo.setFlowStatus(ccRecord.getFlowStatus());
+        vo.setArrivalTime(ccRecord.getCreateTime());
+        vo.setTaskId(ccRecord.getTaskId());
+        vo.setInstanceId(ccRecord.getInstanceId());
+        vo.setBusinessId(ccRecord.getBindingViewId());
+
+        // 设置发起人信息
+        UserBasicInfoVO initiator = new UserBasicInfoVO();
+        initiator.setUserId(ccRecord.getInitiatorId());
+        initiator.setName(ccRecord.getInitiatorName());
+        initiator.setAvatar(ccRecord.getInitiatorAvatar());
+        vo.setInitiator(initiator);
+
+        return vo;
+    }
+
 }
