@@ -272,7 +272,6 @@ export default function ApproverBtnConfig({ setApprovalConfigData, buttonConfigs
       title: '启用按钮',
       dataIndex: 'enabled',
       render: (val: any, row: any) => {
-        // 根据buttonType
         if (row?.key === '4') {
           return (
             <div className="back-settings">
