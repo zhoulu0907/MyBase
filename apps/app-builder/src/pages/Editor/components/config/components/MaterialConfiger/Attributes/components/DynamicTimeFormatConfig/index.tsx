@@ -1,6 +1,6 @@
 import { Form, Select } from '@arco-design/web-react';
 import { useEffect, useState } from 'react';
-import { TIME_OPTIONS, TIME_VALUES } from '@onebase/ui-kit';
+import { TIME_OPTIONS, TIME_VALUES, getPopupContainer } from '@onebase/ui-kit';
 import styles from '../../index.module.less';
 
 export interface DynamicTimeFormatConfigProps {
@@ -34,6 +34,7 @@ const DynamicTimeFormatConfig: React.FC<DynamicTimeFormatConfigProps> = ({
   return (
     <Form.Item layout="vertical" label={item.name || '时间格式'} className={styles.formItem}>
       <Select
+        getPopupContainer={getPopupContainer}
         value={dateFormat}
         onChange={(value) => handlePropsChange(dateFormatKey, value)}
         options={item.range || options}

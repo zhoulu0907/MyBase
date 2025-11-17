@@ -222,7 +222,7 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({
               <Select
                 disabled={configs[autoCodeDisabledKey]}
                 value={rule.format}
-                style={{marginBottom:'4px'}}
+                style={{ marginBottom: '4px' }}
                 onChange={(value) => updateRule(index, value)}
                 options={dataOptions}
                 getPopupContainer={getPopupContainer}
@@ -279,6 +279,7 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({
               animation
               value={findFieldPath(rule.format, entityTree)}
               onChange={(value) => updateRule(index, value?.[1] || '')}
+              getPopupContainer={getPopupContainer}
             />
           </>
         );
@@ -297,7 +298,7 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({
       <Form.Item layout="vertical" label={'编号规则配置'} className={styles.formItem}>
         <ReactSortable
           list={rules}
-          setList={() => {}}
+          setList={() => { }}
           sort={!configs[autoCodeDisabledKey]}
           handle=".autocode-item-handle"
           forceFallback={true}
@@ -360,6 +361,7 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({
         {!configs[autoCodeDisabledKey] && (
           <Dropdown
             trigger="click"
+            getPopupContainer={getPopupContainer}
             droplist={
               <Menu>
                 <Menu.Item

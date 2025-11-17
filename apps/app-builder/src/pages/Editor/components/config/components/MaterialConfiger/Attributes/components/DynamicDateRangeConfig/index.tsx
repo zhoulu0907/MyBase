@@ -1,6 +1,6 @@
 import { Form, Grid, Checkbox, Select, DatePicker, Message } from '@arco-design/web-react';
 import { useEffect, useState } from 'react';
-import { WEEK_OPTIONS, WEEK_OPTIONS_LABEL, DATE_EXTREME_TYPE, DATE_DYNAMIC_TYPE } from '@onebase/ui-kit';
+import { WEEK_OPTIONS, WEEK_OPTIONS_LABEL, DATE_EXTREME_TYPE, DATE_DYNAMIC_TYPE, getPopupContainer } from '@onebase/ui-kit';
 import styles from '../../index.module.less';
 
 export interface DynamicDateRangeConfigProps {
@@ -92,6 +92,7 @@ const DynamicDateRangeConfig: React.FC<DynamicDateRangeConfigProps> = ({ handleP
               style={{ margin: '8px 0' }}
               placeholder="请选择"
               mode="multiple"
+              getPopupContainer={getPopupContainer}
               value={configs[dateRangeKey]['week']}
               options={weekOptions}
               onChange={(value) => {
@@ -125,6 +126,7 @@ const DynamicDateRangeConfig: React.FC<DynamicDateRangeConfigProps> = ({ handleP
             <Grid.Row gutter={8} style={{ marginTop: '8px', marginBottom: '8px' }}>
               <Grid.Col span={8}>
                 <Select
+                  getPopupContainer={getPopupContainer}
                   placeholder="请选择"
                   value={configs[dateRangeKey]['earliestType']}
                   options={extremeOptions}
@@ -157,6 +159,7 @@ const DynamicDateRangeConfig: React.FC<DynamicDateRangeConfigProps> = ({ handleP
                 {/* 动态值 */}
                 {configs[dateRangeKey]['earliestType'] === DATE_EXTREME_TYPE.DYNAMIC && (
                   <Select
+                    getPopupContainer={getPopupContainer}
                     value={configs[dateRangeKey]['earliestDynamicValue']}
                     options={dynamicOptions}
                     onChange={(value) => {
@@ -182,6 +185,7 @@ const DynamicDateRangeConfig: React.FC<DynamicDateRangeConfigProps> = ({ handleP
             <Grid.Row gutter={8} style={{ marginTop: '8px', marginBottom: '8px' }}>
               <Grid.Col span={8}>
                 <Select
+                  getPopupContainer={getPopupContainer}
                   placeholder="请选择"
                   value={configs[dateRangeKey]['latestType']}
                   options={extremeOptions}
@@ -214,6 +218,7 @@ const DynamicDateRangeConfig: React.FC<DynamicDateRangeConfigProps> = ({ handleP
                 {/* 动态值 */}
                 {configs[dateRangeKey]['latestType'] === DATE_EXTREME_TYPE.DYNAMIC && (
                   <Select
+                    getPopupContainer={getPopupContainer}
                     value={configs[dateRangeKey]['latestDynamicValue']}
                     options={dynamicOptions}
                     onChange={(value) => {
