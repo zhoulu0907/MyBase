@@ -1,8 +1,11 @@
 package com.cmsr.onebase.module.metadata.runtime;
 
+import com.alibaba.fastjson.JSONObject;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.security.runtime.RTSecurityContext;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.vo.DynamicDataDeleteReqVO;
+import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.vo.DynamicDataPageReqVO;
 import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.vo.DynamicDataRespVO;
 import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.vo.DynamicDataUpdateReqVO;
 import com.cmsr.onebase.module.metadata.runtime.service.datamethod.RuntimeDataService;
@@ -64,6 +67,25 @@ public class DataRuntimeTest {
         RTSecurityContext.mockLoginUser(123957446409093120L, 123944716126027776L);
         DynamicDataRespVO dynamicDataRespVO = runtimeDataService.updateData(reqVO);
         System.out.println(dynamicDataRespVO);
+    }
+
+    // 测试数据查询
+    @Test
+    public void queryData() {
+        System.out.println(1);
+        DynamicDataPageReqVO reqVO = new DynamicDataPageReqVO();
+        reqVO.setMenuId(123950969598410752L);
+        reqVO.setEntityId(123945626659094528L);
+        reqVO.setPageNo(1);
+        reqVO.setPageSize(10);
+
+        TenantContextHolder.setIgnore(true);
+        RTSecurityContext.mockLoginUser(123957446409093120L, 123944716126027776L);
+        PageResult<DynamicDataRespVO> dataPage = runtimeDataService.getDataPage(reqVO);
+        for (DynamicDataRespVO dynamicDataRespVO : dataPage.getList()){
+            System.out.println(dynamicDataRespVO);
+        }
+        System.out.println("=================结束===================");
     }
 
 

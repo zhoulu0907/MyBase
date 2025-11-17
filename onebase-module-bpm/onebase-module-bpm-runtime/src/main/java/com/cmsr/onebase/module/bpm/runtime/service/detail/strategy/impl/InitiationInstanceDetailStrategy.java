@@ -1,9 +1,11 @@
 package com.cmsr.onebase.module.bpm.runtime.service.detail.strategy.impl;
 
+import com.cmsr.onebase.module.bpm.core.dto.PageViewGroupDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.InitiationNodeExtDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeBtnCfgDTO;
 import com.cmsr.onebase.module.bpm.core.enums.BpmNodeTypeEnum;
-import com.cmsr.onebase.module.bpm.runtime.vo.BpmFlowTaskDetailVO;
+import com.cmsr.onebase.module.bpm.runtime.vo.BpmTaskDetailRespVO;
+import org.dromara.warm.flow.core.entity.Instance;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -22,8 +24,20 @@ public class InitiationInstanceDetailStrategy extends AbstractInstanceDetailStra
         return BpmNodeTypeEnum.INITIATION.getCode().equals(bizNodeType);
     }
 
+    /**
+     * 填充视图页面信息
+     *
+     * @param instance 流程实例
+     */
+    protected void fillPageViewInfo(BpmTaskDetailRespVO vo, Instance instance, Long pageSetId) {
+        PageViewGroupDTO viewGroupDTO = getPageViewGroupDTO(instance, pageSetId);
+
+        // 发起节点比较特殊，会返回编辑视图
+        vo.setPageView(viewGroupDTO.getEditPageView());
+    }
+
     @Override
-    protected void fillButtonConfigs(BpmFlowTaskDetailVO vo, InitiationNodeExtDTO extDTO) {
+    protected void fillButtonConfigs(BpmTaskDetailRespVO vo, InitiationNodeExtDTO extDTO) {
         for (BaseNodeBtnCfgDTO buttonConfig : extDTO.getButtonConfigs()) {
             if (!buttonConfig.getEnabled()) {
                 continue;

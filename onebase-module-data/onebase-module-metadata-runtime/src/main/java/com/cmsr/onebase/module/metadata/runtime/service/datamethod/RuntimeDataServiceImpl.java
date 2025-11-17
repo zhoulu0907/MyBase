@@ -88,6 +88,8 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
         methodCoreContext.setEntityId(reqVO.getEntityId());
         methodCoreContext.setData(dataByName);
         methodCoreContext.setMethodCode(reqVO.getMethodCode());
+    // 运行时请求需要传递 menuId 给 core 层用于权限校验
+    methodCoreContext.setMenuId(reqVO.getMenuId());
         methodCoreContext.setTraceId(reqVO.getTraceId());
         methodCoreContext.setMetadataDataMethodOpEnum(MetadataDataMethodOpEnum.CREATE);
 
@@ -427,7 +429,8 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
                 sortField,
                 reqVO.getSortDirection(),
                 filtersByName,
-                reqVO.getMethodCode()
+                reqVO.getMethodCode(),
+                reqVO.getMenuId()
         );
 
         // 转换为VO

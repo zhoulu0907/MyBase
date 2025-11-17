@@ -3,27 +3,43 @@ package com.cmsr.onebase.module.etl.executor;
 import com.cmsr.onebase.module.etl.executor.provider.QueryProvider;
 import com.cmsr.onebase.module.etl.executor.provider.WorkflowProvider;
 import com.cmsr.onebase.module.etl.executor.util.DataSourceUtil;
-import com.zaxxer.hikari.HikariDataSource;
+import lombok.extern.slf4j.Slf4j;
 
+import javax.sql.DataSource;
 import java.io.Closeable;
+import java.io.IOException;
 
 /**
  * @Author：huangjie
  * @Date：2025/11/6 11:58
  */
+@Slf4j
 public class BeanManager implements Closeable {
 
     private InputArgs inputArgs;
 
     private WorkflowProvider workflowProvider;
 
-    private HikariDataSource dataSource;
+    private DataSource dataSource;
+
+    private boolean needCloseDataSource = true;
 
     private QueryProvider queryProvider;
+
+    public BeanManager(InputArgs inputArgs, DataSource dataSource) {
+        this.inputArgs = inputArgs;
+        this.dataSource = dataSource;
+        this.needCloseDataSource = false;
+        this.queryProvider = new QueryProvider(dataSource);
+        this.workflowProvider = new WorkflowProvider();
+        this.workflowProvider.setQueryProvider(queryProvider);
+    }
+
 
     public BeanManager(InputArgs inputArgs) {
         this.inputArgs = inputArgs;
         this.dataSource = DataSourceUtil.createDataSource(inputArgs);
+        this.needCloseDataSource = true;
         this.queryProvider = new QueryProvider(dataSource);
         this.workflowProvider = new WorkflowProvider();
         this.workflowProvider.setQueryProvider(queryProvider);
@@ -33,10 +49,18 @@ public class BeanManager implements Closeable {
         return workflowProvider;
     }
 
+    public QueryProvider getQueryProvider() {
+        return queryProvider;
+    }
+
     @Override
     public void close() {
-        if (dataSource != null) {
-            dataSource.close();
+        if (dataSource != null && needCloseDataSource && dataSource instanceof Closeable dsCloseable) {
+            try {
+                dsCloseable.close();
+            } catch (IOException e) {
+                log.warn("关闭数据源时发生异常: {}", e.getMessage());
+            }
         }
     }
 }

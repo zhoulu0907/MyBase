@@ -3,7 +3,6 @@ package com.cmsr.onebase.module.metadata.core.service.datamethod;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.framework.uid.UidGenerator;
-import com.cmsr.onebase.module.app.api.security.bo.DataPermission;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
@@ -25,11 +24,10 @@ import org.anyline.entity.DataSet;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.service.AnylineService;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -311,7 +309,10 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
                     String fieldName = field.getFieldName();
 
                     // 如果用户没有提供值，则生成自动编号
-                    if (!processedData.containsKey(fieldName) || processedData.get(fieldName) == null) {
+                    if (!processedData.containsKey(fieldName)
+                            || processedData.get(fieldName) == null
+                    || (processedData.get(fieldName) instanceof String && StringUtils.isBlank((String) processedData.get(fieldName)))
+                    ) {
                         // 准备上下文数据，将当前的processedData作为上下文传递
                         Map<String, Object> contextData = new HashMap<>(processedData);
 
@@ -344,6 +345,7 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
 
     /**
      * 为表名添加双引号以处理PostgreSQL的大小写敏感性
+     * 注意：达梦数据库不需要双引号，否则会导致大小写敏感问题
      */
     public String quoteTableName(String tableName) {
         if (tableName == null || tableName.trim().isEmpty()) {
@@ -353,8 +355,9 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
         if (tableName.startsWith("\"") && tableName.endsWith("\"")) {
             return tableName;
         }
-        // 为表名添加双引号
-        return "\"" + tableName + "\"";
+        // 暂时不添加双引号，避免达梦数据库大小写匹配问题
+        // TODO: 后续根据数据库类型动态决定是否添加双引号
+        return tableName;
     }
 
     // ========== 抽象方法定义 ==========
@@ -595,7 +598,7 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
     protected void storeData(ProcessContext context) {
 
         //处理子表逻辑
-        if (CollectionUtils.isNotEmpty(context.getSubEntities())) {
+        if (CollectionUtils.isNotEmpty(context.getSubEntities()) || MetadataDataMethodOpEnum.DELETE == context.getOperationType()) {
             handleSubEntities(context);
         }
 
@@ -678,6 +681,13 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
                     break;
                 }
             }
+        }
+
+        // 值为null的字段也放到参数里，触发流程时需要全量的字段信息
+        for (MetadataEntityFieldDO field : targetfields) {
+            if(!map.keySet().contains(field.getFieldName())){
+                newData.put(field.getId(), null);
+            };
         }
         return newData;
     }

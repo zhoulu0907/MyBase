@@ -101,6 +101,9 @@ public interface ErrorCodeConstants {
 
     ErrorCode AGENT_USER_NOT_EXISTS = new ErrorCode(1_009_002_025, "代理人不存在");
 
+    ErrorCode MISSING_EDIT_OR_DETAIL_PAGE_VIEW = new ErrorCode(1_009_002_026, "缺少编辑或详情视图页面");
+
+    ErrorCode MISSING_BINDING_VIEW_ID = new ErrorCode(1_009_002_027, "流程实例缺少绑定视图ID");
 
 
     // ============= 系统相关错误 =============
