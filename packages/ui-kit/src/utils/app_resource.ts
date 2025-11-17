@@ -375,6 +375,7 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
       setFormComponents(useEditorSignalMap.get(newCurViewId)!.components.value);
       loadFormPageComponentSchemas(useEditorSignalMap.get(newCurViewId)!.pageComponentSchemas.value);
       loadFormLayoutSubComponents(useEditorSignalMap.get(newCurViewId)!.layoutSubComponents.value);
+      loadFormSubTableComponents(useEditorSignalMap.get(newCurViewId)!.subTableComponents.value);
     }
 
     // 规则string转对象
