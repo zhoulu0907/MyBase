@@ -121,7 +121,7 @@ export default function ApproverBtnConfig({ setApprovalConfigData, buttonConfigs
       defaultApprovalComment: '同意',
       approvalCommentRequired: false,
       batchApproval: false,
-      enabled: false
+      enabled: true
     },
     {
       key: '2',
@@ -130,9 +130,9 @@ export default function ApproverBtnConfig({ setApprovalConfigData, buttonConfigs
       displayName: '拒绝',
       name: '拒绝',
       defaultApprovalComment: '拒绝',
-      approvalCommentRequired: false,
+      approvalCommentRequired: true,
       batchApproval: false,
-      enabled: false
+      enabled: true
     },
     {
       key: '3',
@@ -169,7 +169,7 @@ export default function ApproverBtnConfig({ setApprovalConfigData, buttonConfigs
       displayName: '退回',
       name: '退回',
       defaultApprovalComment: '退回',
-      approvalCommentRequired: false,
+      approvalCommentRequired: true,
       batchApproval: false,
       enabled: false
     },
@@ -189,7 +189,7 @@ export default function ApproverBtnConfig({ setApprovalConfigData, buttonConfigs
       displayName: '弃权',
       name: '弃权',
       defaultApprovalComment: '弃权',
-      approvalCommentRequired: false,
+      approvalCommentRequired: true,
       batchApproval: false,
       enabled: false
     }
@@ -272,6 +272,7 @@ export default function ApproverBtnConfig({ setApprovalConfigData, buttonConfigs
       title: '启用按钮',
       dataIndex: 'enabled',
       render: (val: any, row: any) => {
+        // 根据buttonType
         if (row?.key === '4') {
           return (
             <div className="back-settings">
