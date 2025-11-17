@@ -41,8 +41,8 @@ const XTimePicker = memo((props: XInputTimePickerConfig & { runtime?: boolean; d
         return i;
       })
       disabledHours = [...disabledHours, ...minDisabledHours]
-
     }
+
     if (timeRange.latestLimit && timeRange.latestValue) {
       const time = timeRange.latestValue.split(':');
       const maxHour = Number(time[0]);
@@ -51,6 +51,7 @@ const XTimePicker = memo((props: XInputTimePickerConfig & { runtime?: boolean; d
       })
       disabledHours = [...disabledHours, ...maxDisabledHours]
     }
+
     return disabledHours;
   }
   // 禁用的部分分钟选项	0-59
@@ -113,8 +114,6 @@ const XTimePicker = memo((props: XInputTimePickerConfig & { runtime?: boolean; d
         disabledSeconds = [...disabledSeconds, ...maxDisabledSeconds]
       }
     }
-    console.log('selectedHour', selectedHour)
-    console.log('selectedMinute', selectedMinute)
     return disabledSeconds;
   }
 
