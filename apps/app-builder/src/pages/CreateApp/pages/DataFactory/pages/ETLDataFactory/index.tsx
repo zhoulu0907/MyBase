@@ -1,12 +1,20 @@
 import { useAppStore } from '@/store';
-import { Button, Input, Pagination, Spin, Tabs } from '@arco-design/web-react';
+import { Button, Input, Message, Pagination, Spin, Tabs } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
-import { ETL_SCHEDULE_STRATEGY, pageETLFlow, type ETLFlowMgmt } from '@onebase/app';
+import {
+  deleteETLFlow,
+  ETL_SCHEDULE_STRATEGY,
+  getETLFlowScheduleInfo,
+  pageETLFlow,
+  updateETLFlowScheduleInfo,
+  type ETLFlowMgmt,
+  type UpdateWorkflowScheduleInfoReq
+} from '@onebase/app';
 import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ETLFlowCard from './components/card';
-import CreateModal from './components/createModal';
+import EditModal from './components/editModal';
 import styles from './index.module.less';
 
 const TabPane = Tabs.TabPane;
@@ -26,7 +34,8 @@ const EtlDataFactoryPage: React.FC = () => {
 
   const { curAppId } = useAppStore();
 
-  const [createModalVisible, setCreateModalVisible] = useState(false);
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [curFlowStrategyInfo, setCurFlowStrategyInfo] = useState<any>(null);
 
   const debouncedSearch = useCallback(
     debounce(() => {
@@ -50,23 +59,33 @@ const EtlDataFactoryPage: React.FC = () => {
       pageNo,
       pageSize
     });
-    console.log('handleGetETLFlowList res: ', res);
     setEltFlowList(res.list);
     setTotal(res.total);
     setLoading(false);
   };
 
   const handleCreateFlow = () => {
-    // setCreateModalVisible(true);
     handleToEditor();
   };
 
-  const handleCreateETLFlow = () => {
-    setCreateModalVisible(false);
+  const handleEditFlow = async (flowId: string) => {
+    const res = await getETLFlowScheduleInfo(flowId);
+    setCurFlowStrategyInfo(res);
+    setEditModalVisible(true);
   };
 
-  const handleCancelCreateETLFlow = () => {
-    setCreateModalVisible(false);
+  const handleUpdateETLFlow = async (req: UpdateWorkflowScheduleInfoReq) => {
+    const res = await updateETLFlowScheduleInfo(req);
+    if (res) {
+      Message.success('更新成功');
+    }
+
+    setEditModalVisible(false);
+    handleGetETLFlowList();
+  };
+
+  const handleCancelUpdateETLFlow = () => {
+    setEditModalVisible(false);
   };
 
   const handleToEditor = (flowId?: string) => {
@@ -75,6 +94,15 @@ const EtlDataFactoryPage: React.FC = () => {
       return;
     }
     navigate(`/onebase/etl_editor?appId=${curAppId}`);
+  };
+
+  const handleDeleteFlow = async (flowId: string) => {
+    const res = await deleteETLFlow(flowId);
+    console.log('handleDeleteFlow res: ', res);
+    if (res) {
+      Message.success('删除成功');
+      handleGetETLFlowList();
+    }
   };
 
   return (
@@ -116,8 +144,11 @@ const EtlDataFactoryPage: React.FC = () => {
                 {eltFlowList?.map((item, index) => (
                   <ETLFlowCard
                     key={`elt-flow-${index}`}
-                    handleEdit={() => {}}
-                    handleDelete={() => {}}
+                    handleEdit={() => {
+                      handleEditFlow(item.id);
+                    }}
+                    handleDelete={handleDeleteFlow}
+                    handlePage={handleGetETLFlowList}
                     toFlowEditor={handleToEditor}
                     data={item}
                   />
@@ -140,7 +171,12 @@ const EtlDataFactoryPage: React.FC = () => {
         </div>
       </div>
 
-      <CreateModal visible={createModalVisible} onOk={handleCreateETLFlow} onCancel={handleCancelCreateETLFlow} />
+      <EditModal
+        initData={curFlowStrategyInfo || {}}
+        visible={editModalVisible}
+        onOk={handleUpdateETLFlow}
+        onCancel={handleCancelUpdateETLFlow}
+      />
     </div>
   );
 };
