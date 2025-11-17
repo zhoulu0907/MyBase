@@ -1,13 +1,25 @@
-import React, { useEffect, useState } from 'react';
-import { Avatar, Spin, Typography, Message, Grid, Tooltip, Upload, Image, Form, Modal, Input } from '@arco-design/web-react';
-import type { CorpDetailResponse, DictData } from '@onebase/platform-center';
-import { getDetailsApi, updateCorpApi, getDictDataByType, uploadFile } from '@onebase/platform-center';
 import PlaceholderPanel from '@/components/PlaceholderPanel';
-import { hasPermission } from '@/utils/permission';
 import { TENANT_INFO_PERMISSION as ACTIONS } from '@/constants/permission';
+import { hasPermission } from '@/utils/permission';
+import {
+  Avatar,
+  Form,
+  Grid,
+  Image,
+  Input,
+  Message,
+  Modal,
+  Spin,
+  Tooltip,
+  Typography,
+  Upload
+} from '@arco-design/web-react';
 import { IconCamera, IconEdit } from '@arco-design/web-react/icon';
-import styles from './index.module.less';
 import { TokenManager } from '@onebase/common';
+import type { CorpDetailResponse, DictData } from '@onebase/platform-center';
+import { getDetailsApi, getDictDataByType, updateCorpApi, uploadFile } from '@onebase/platform-center';
+import React, { useEffect, useState } from 'react';
+import styles from './index.module.less';
 
 const { Col, Row } = Grid;
 const { Text } = Typography;
@@ -26,7 +38,7 @@ const SpaceInfo: React.FC = () => {
 
   useEffect(() => {
     corpInfo?.corpId && fetchEnterpriseInfo(+corpInfo.corpId);
-  }, []);
+  }, [corpInfo]);
 
   const fetchEnterpriseInfo = async (id: number) => {
     try {
@@ -70,7 +82,7 @@ const SpaceInfo: React.FC = () => {
         status: enterpriseInfo.status,
         address: enterpriseInfo.address!,
         userLimit: enterpriseInfo.userLimit!
-      })
+      });
 
       setEnterpriseInfo({
         ...enterpriseInfo,
@@ -91,11 +103,11 @@ const SpaceInfo: React.FC = () => {
 
     const progressAdapter = onProgress
       ? (progressEvent: ProgressEvent) => {
-        if (progressEvent.lengthComputable) {
-          const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          onProgress(percent, progressEvent);
+          if (progressEvent.lengthComputable) {
+            const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            onProgress(percent, progressEvent);
+          }
         }
-      }
       : undefined;
 
     const res = await uploadFile(formData, progressAdapter);
@@ -124,13 +136,12 @@ const SpaceInfo: React.FC = () => {
     );
   }
 
-  const getIndustryTypeName = industryDict?.find(data => data.id === enterpriseInfo.industryType)?.label || '-';
+  const getIndustryTypeName = industryDict?.find((data) => data.id === enterpriseInfo.industryType)?.label || '-';
 
   return (
     <PlaceholderPanel hasPermission={hasPermission(ACTIONS.QUERY)} isLoading={loading}>
       <div className={styles.enterprisePage}>
         <div className={styles.enterprisePageMain}>
-
           <div className={`${styles.infoCard} ${styles.infoCardPrimary}`}>
             <div className={styles.blockHeader}>基本信息</div>
 
@@ -170,22 +181,30 @@ const SpaceInfo: React.FC = () => {
                           width={160}
                           height={80}
                           preview={false}
-                          actions={[
-                            <IconCamera />
-                          ]}
+                          actions={[<IconCamera />]}
                         />
-                      </Upload>) :
-                      <Avatar shape="square" style={{ width: 160, height: 80, backgroundColor: '#F7F8FA', borderRadius: 12 }}>
+                      </Upload>
+                    ) : (
+                      <Avatar
+                        shape="square"
+                        style={{ width: 160, height: 80, backgroundColor: '#F7F8FA', borderRadius: 12 }}
+                      >
                         <span className={styles.avatarText}>{enterpriseInfo.corpName?.slice(0, 6)}</span>
-                      </Avatar>}
+                      </Avatar>
+                    )}
                   </Tooltip>
                 </div>
                 {/* 名称 & ID */}
                 <div className={styles.section}>
                   <div className={styles.enterpriseName}>
-                    {enterpriseInfo.corpName} {hasPermission(ACTIONS.UPDATE) && <IconEdit onClick={() => setRenameVisible(true)} style={{ cursor: 'pointer' }} />}
+                    {enterpriseInfo.corpName}{' '}
+                    {hasPermission(ACTIONS.UPDATE) && (
+                      <IconEdit onClick={() => setRenameVisible(true)} style={{ cursor: 'pointer' }} />
+                    )}
                   </div>
-                  <div className={styles.enterpriseId}>企业ID：<Text copyable>{enterpriseInfo.id}</Text></div>
+                  <div className={styles.enterpriseId}>
+                    企业ID：<Text copyable>{enterpriseInfo.id}</Text>
+                  </div>
                 </div>
               </div>
 
@@ -193,9 +212,7 @@ const SpaceInfo: React.FC = () => {
               <div className={styles.statsSection}>
                 <div className={styles.statCard}>
                   <div className={styles.statLabel}>用户人数(个)</div>
-                  <div className={styles.statValue}>
-                    {enterpriseInfo.userCount || 0}
-                  </div>
+                  <div className={styles.statValue}>{enterpriseInfo.userCount || 0}</div>
                 </div>
                 <div className={styles.statCard}>
                   <div className={styles.statLabel}>应用数量(个)</div>
@@ -260,9 +277,14 @@ const SpaceInfo: React.FC = () => {
       </div>
 
       {/* 修改企业名称 */}
-      <Modal title="修改企业名称" visible={renameVisible} onOk={handleRenameSubmit} onCancel={() => setRenameVisible(false)}>
+      <Modal
+        title="修改企业名称"
+        visible={renameVisible}
+        onOk={handleRenameSubmit}
+        onCancel={() => setRenameVisible(false)}
+      >
         <Form form={form} layout="vertical">
-          <Form.Item label="新的企业名称" field="newName" rules={[{ required: true, message: "请输入新的企业名称" }]}>
+          <Form.Item label="新的企业名称" field="newName" rules={[{ required: true, message: '请输入新的企业名称' }]}>
             <Input placeholder="请输入新的企业名称" />
           </Form.Item>
         </Form>

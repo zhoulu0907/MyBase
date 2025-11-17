@@ -18,10 +18,12 @@ import { IconCopy, IconUpload } from '@arco-design/web-react/icon';
 import {
   getPlatformTenantAdminInfoApi,
   getSimpleUserList,
+  PlatformTenantPublishMode,
   updatePlatformTenantApi,
   uploadFile,
-  PlatformTenantPublishMode,
-  type UpdateTenantParams
+  type TenantAdminUserResVO,
+  type UpdateTenantParams,
+  type UserVO
 } from '@onebase/platform-center';
 import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
@@ -38,7 +40,7 @@ const EditTenant = () => {
 
   const [isEdit, setIsEdit] = useState(false);
   const [tenantInfo, setTenantInfo] = useState<any>();
-  const [adminList, setAdminList] = useState<{ id: string; nickname: string; username: string; mobile: string }[]>([]);
+  const [adminList, setAdminList] = useState<UserVO[]>([]);
   const [logoUrl, setLogoUrl] = useState<string>();
 
   const domainPrefix = getDomainPrefix();
@@ -56,13 +58,14 @@ const EditTenant = () => {
 
   useEffect(() => {
     if (tenantInfo) {
+      console.log('tenantInfo: ', tenantInfo);
       const initialValues = {
         id: tenantInfo.id,
         name: tenantInfo.name,
         website: tenantInfo.website,
         status: tenantInfo.status === 1,
         accountCount: tenantInfo.accountCount,
-        tenantAdminUserList: tenantInfo.tenantAdminUserList.map(ten => ten.id),
+        tenantAdminUserList: tenantInfo.tenantAdminUserList.map((ten: TenantAdminUserResVO) => ten.adminUserId),
         publishModel: tenantInfo.publishModel === PlatformTenantPublishMode.saas
       };
       setLogoUrl(tenantInfo.logoUrl);
@@ -79,6 +82,7 @@ const EditTenant = () => {
   const getPlatformAdminList = async () => {
     try {
       const adminListResp = await getSimpleUserList();
+      console.log('adminListResp: ', adminListResp);
       setAdminList(adminListResp);
     } catch (error) {
       console.error('Error fetching adminList:', error);
@@ -96,7 +100,7 @@ const EditTenant = () => {
       // 构建更新参数
       if (tenantInfo?.id) {
         const formattedAdmin = values.tenantAdminUserList.map((id: string) => {
-          const user = adminList.find(u => u.id === id);
+          const user = adminList.find((u) => u.id === id);
           return {
             adminNickName: user?.nickname || '',
             adminUserName: user?.username || '',
@@ -113,7 +117,7 @@ const EditTenant = () => {
           website: values.website,
           publishModel: values.publishModel ? PlatformTenantPublishMode.saas : PlatformTenantPublishMode.inner,
           tenantAdminUserUpdateReqVOSList: formattedAdmin,
-          logoUrl,
+          logoUrl
         };
         // 调用 updatePlatformTenantApi
         await updatePlatformTenantApi(updateParams);
@@ -135,11 +139,11 @@ const EditTenant = () => {
 
     const progressAdapter = onProgress
       ? (progressEvent: ProgressEvent) => {
-        if (progressEvent.lengthComputable) {
-          const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          onProgress(percent, progressEvent);
+          if (progressEvent.lengthComputable) {
+            const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            onProgress(percent, progressEvent);
+          }
         }
-      }
       : undefined;
 
     const res = await uploadFile(formData, progressAdapter);
@@ -149,81 +153,87 @@ const EditTenant = () => {
   /* 获取当前管理员集合 */
   const findMatchingItemsById = (arrA: any[], targetArr: any[]) => {
     if (!Array.isArray(targetArr)) return;
-    const cutAdminList = targetArr.map(item => item.adminUserId);
-    const result = arrA.filter(item => cutAdminList.includes(item.id));
+    const cutAdminList = targetArr.map((item) => item.adminUserId);
+    const result = arrA.filter((item) => cutAdminList.includes(item.id));
 
     return result;
-  }
+  };
 
   return (
     <div className={styles.editPage}>
       <Tabs defaultActiveTab="1" destroyOnHide={false} style={{ width: '100%' }}>
         <Tabs.TabPane key="1" title="基本信息">
-          <Form
-            form={form}
-            layout="horizontal"
-            autoComplete="off"
-            labelCol={{ span: 2 }}
-            wrapperCol={{ span: 22 }}
-          >
-            <Form.Item
-              label="空间名称"
-              field="name"
-              rules={[{ required: isEdit, message: '请输入空间名称' }]}
-            >
+          <Form form={form} layout="horizontal" autoComplete="off" labelCol={{ span: 2 }} wrapperCol={{ span: 22 }}>
+            <Form.Item label="空间名称" field="name" rules={[{ required: isEdit, message: '请输入空间名称' }]}>
               {isEdit ? <Input placeholder="输入空间名称" /> : <span>{tenantInfo?.name}</span>}
             </Form.Item>
 
             <Form.Item label="空间 Logo" field="logoUrl">
               <Space direction="vertical">
-                {isEdit ? <>
-                  <Upload
-                    ref={uploadRef}
-                    limit={1}
-                    imagePreview
-                    accept="image/*"
-                    listType="picture-card"
-                    fileList={[
-                      {
-                        uid: '1',
-                        name: 'logo',
-                        url: logoUrl,
-                        status: 'done'
-                      }
-                    ]}
-                    customRequest={async (option) => {
-                      const { onProgress, onError, onSuccess, file } = option;
-                      try {
-                        const uploadImgUrl = await handleUpload(file, onProgress);
-                        if (uploadImgUrl !== '') {
-                          setLogoUrl(uploadImgUrl);
-                          onSuccess(uploadImgUrl);
-                        } else {
+                {isEdit ? (
+                  <>
+                    <Upload
+                      ref={uploadRef}
+                      limit={1}
+                      imagePreview
+                      accept="image/*"
+                      listType="picture-card"
+                      fileList={[
+                        {
+                          uid: '1',
+                          name: 'logo',
+                          url: logoUrl,
+                          status: 'done'
+                        }
+                      ]}
+                      customRequest={async (option) => {
+                        const { onProgress, onError, onSuccess, file } = option;
+                        try {
+                          const uploadImgUrl = await handleUpload(file, onProgress);
+                          if (uploadImgUrl !== '') {
+                            setLogoUrl(uploadImgUrl);
+                            onSuccess(uploadImgUrl);
+                          } else {
+                            onError({
+                              status: 'error',
+                              msg: '上传失败'
+                            });
+                          }
+                        } catch (error) {
                           onError({
                             status: 'error',
                             msg: '上传失败'
                           });
                         }
-                      } catch (error) {
-                        onError({
-                          status: 'error',
-                          msg: '上传失败'
-                        });
-                      }
-                    }}
-                    style={{
-                      display: 'none'
-                    }}
-                  />
-                  {isEdit && (
-                    <Space>
-                      <Button type='outline' icon={<IconUpload />} onClick={() => {
-                        uploadRef.current?.getRootDOMNode()?.querySelector('input[type="file"]').click();
-                      }}>上传图片</Button>
-                      <div style={{ color: '#999', marginTop: 4 }}>建议比例 2:1</div></Space>
-                  )
-                  }
-                </> : <>{logoUrl ? <Image className={styles.tenantLogo} preview width={160} height={80} src={logoUrl} /> : <div className={styles.tenantLogo}>{tenantInfo?.name.slice(0, 6)}</div>}</>}
+                      }}
+                      style={{
+                        display: 'none'
+                      }}
+                    />
+                    {isEdit && (
+                      <Space>
+                        <Button
+                          type="outline"
+                          icon={<IconUpload />}
+                          onClick={() => {
+                            uploadRef.current?.getRootDOMNode()?.querySelector('input[type="file"]').click();
+                          }}
+                        >
+                          上传图片
+                        </Button>
+                        <div style={{ color: '#999', marginTop: 4 }}>建议比例 2:1</div>
+                      </Space>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    {logoUrl ? (
+                      <Image className={styles.tenantLogo} preview width={160} height={80} src={logoUrl} />
+                    ) : (
+                      <div className={styles.tenantLogo}>{tenantInfo?.name.slice(0, 6)}</div>
+                    )}
+                  </>
+                )}
               </Space>
             </Form.Item>
 
@@ -237,18 +247,19 @@ const EditTenant = () => {
               rules={[{ required: isEdit, message: '请输入访问地址' }]}
               validateTrigger={['onBlur']}
             >
-              {isEdit ? <Input addBefore={getDomainPrefix()} placeholder="www.onebase.com/" /> :
+              {isEdit ? (
+                <Input addBefore={getDomainPrefix()} placeholder="www.onebase.com/" />
+              ) : (
                 <div className={styles.urlWrapper}>
-                  <Tooltip content={displayUrl}><span className={styles.url}>{displayUrl}</span></Tooltip>
+                  <Tooltip content={displayUrl}>
+                    <span className={styles.url}>{displayUrl}</span>
+                  </Tooltip>
                   <IconCopy className={styles.copyIcon} onClick={() => copyToClipboard(fullUrl)} />
-                </div>}
+                </div>
+              )}
             </Form.Item>
 
-            <Form.Item
-              label="用户上限"
-              field="accountCount"
-              rules={[{ required: isEdit, message: '请输入用户上限' }]}
-            >
+            <Form.Item label="用户上限" field="accountCount" rules={[{ required: isEdit, message: '请输入用户上限' }]}>
               {isEdit ? <Input type="number" /> : <span>{tenantInfo?.accountCount}</span>}
             </Form.Item>
 
@@ -256,39 +267,43 @@ const EditTenant = () => {
               label="管理员"
               field="tenantAdminUserList"
               rules={[{ required: isEdit, message: '请选择管理员' }]}
-              extra={isEdit && "当前用户将作为空间所有者"}
+              extra={isEdit && '当前用户将作为空间所有者'}
             >
-              {isEdit ? <Select
-                placeholder="选择管理员"
-                mode="multiple"
-                allowClear
-                style={{ width: '100%' }}
-                options={adminList.map(u => ({
-                  label: u.nickname || u.username,
-                  value: u.id
-                }))}
-              >
-              </Select> :
+              {isEdit ? (
+                <Select
+                  placeholder="选择管理员"
+                  mode="multiple"
+                  allowClear
+                  style={{ width: '100%' }}
+                  options={adminList.map((u) => ({
+                    label: u.nickname || u.username,
+                    value: u.id
+                  }))}
+                ></Select>
+              ) : (
                 <div className={styles.tagWrapper}>
                   {findMatchingItemsById(adminList, tenantInfo?.tenantAdminUserList)?.map((tag, index) => (
-                    <Tag className={styles.adminTag} key={index} size='large' style={{ borderRadius: 16 }}>
-                      <Avatar size={24} style={{ marginRight: 4 }}>{tag.nickname.slice(0, 1)}</Avatar>{tag.nickname}
+                    <Tag className={styles.adminTag} key={index} size="large" style={{ borderRadius: 16 }}>
+                      <Avatar size={24} style={{ marginRight: 4 }}>
+                        {tag.nickname.slice(0, 1)}
+                      </Avatar>
+                      {tag.nickname}
                     </Tag>
                   ))}
-                </div>}
+                </div>
+              )}
             </Form.Item>
 
             <Form.Item label="状态" field="status" triggerPropName="checked" rules={[{ required: isEdit }]}>
               {isEdit ? <Checkbox>启用</Checkbox> : <span>{tenantInfo?.status ? '已启用' : '未启用'}</span>}
             </Form.Item>
 
-            <Form.Item
-              label="SaaS 功能"
-              field="publishModel"
-              triggerPropName="checked"
-              rules={[{ required: isEdit }]}
-            >
-              {isEdit ? <Checkbox>启用</Checkbox> : <span>{tenantInfo?.publishModel === PlatformTenantPublishMode.saas ? '已启用' : '未启用'}</span>}
+            <Form.Item label="SaaS 功能" field="publishModel" triggerPropName="checked" rules={[{ required: isEdit }]}>
+              {isEdit ? (
+                <Checkbox>启用</Checkbox>
+              ) : (
+                <span>{tenantInfo?.publishModel === PlatformTenantPublishMode.saas ? '已启用' : '未启用'}</span>
+              )}
             </Form.Item>
 
             <Form.Item wrapperCol={{ offset: 5 }}>
@@ -307,7 +322,7 @@ const EditTenant = () => {
           <WorkspaceSecurity />
         </Tabs.TabPane>
       </Tabs>
-    </div >
+    </div>
   );
 };
 

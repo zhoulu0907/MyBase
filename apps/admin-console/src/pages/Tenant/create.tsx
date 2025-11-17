@@ -8,7 +8,8 @@ import {
   PlatformTenantPublishMode,
   PlatformTenantStatus,
   uploadFile,
-  type CreateTenantParams
+  type CreateTenantParams,
+  type UserVO
 } from '@onebase/platform-center';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -18,7 +19,7 @@ const CreateSpace = () => {
   const [form] = Form.useForm();
   const nav = useNavigate();
 
-  const [adminList, setAdminList] = useState<any[]>([]);
+  const [adminList, setAdminList] = useState<UserVO[]>([]);
   const [logoUrl, setLogoUrl] = useState<string>(); // logo
 
   const tokenInfo = TokenManager.getTokenInfo();
@@ -35,6 +36,7 @@ const CreateSpace = () => {
     form.setFieldsValue({
       status: PlatformTenantStatus.enabled,
       publishModel: false,
+      accountCount: 5000,
       tenantAdminUserList: adminList.some((u) => u.id === tokenInfo?.userId) ? [tokenInfo?.userId] : []
     });
   }, [adminList]);
@@ -49,6 +51,7 @@ const CreateSpace = () => {
   const getPlatformAdminList = async () => {
     try {
       const adminListResp = await getSimpleUserList();
+      console.log('adminListResp: ', adminListResp);
       setAdminList(adminListResp);
     } catch (error) {
       console.error('Error fetching adminList:', error);

@@ -4,15 +4,13 @@
  */
 
 export interface TokenInfo {
-  userId: number; // 用户ID
+  userId: string; // 用户ID
   accessToken: string; // 访问令牌
   refreshToken: string; // 刷新令牌
   expiresTime: number; // 令牌过期时间（时间戳，毫秒）
   tenantId?: string; // 租户id
   corpId?: string; // 企业id
 }
-
-
 
 export class TokenManager {
   private static readonly TOKEN_KEY = 'onebase_token';
@@ -38,7 +36,7 @@ export class TokenManager {
         if (tokenInfo.tenantId) {
           localStorage.setItem(this.TENANT_ID, tokenInfo.tenantId);
         }
-        if(tokenInfo.corpId) {
+        if (tokenInfo.corpId) {
           localStorage.setItem(this.CORP_ID, tokenInfo.corpId);
         }
       } else {
@@ -49,7 +47,7 @@ export class TokenManager {
         if (tokenInfo.tenantId) {
           sessionStorage.setItem(this.TENANT_ID, tokenInfo.tenantId);
         }
-        if(tokenInfo.corpId) {
+        if (tokenInfo.corpId) {
           sessionStorage.setItem(this.CORP_ID, tokenInfo.corpId);
         }
       }
@@ -190,7 +188,7 @@ export class TokenManager {
     return token ? `Bearer ${token}` : '';
   }
 
-   /**
+  /**
    * 获取 tenant 信息
    * @returns tenantInfo 信息或 null
    */

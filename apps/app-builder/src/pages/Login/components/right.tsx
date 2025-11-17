@@ -2,7 +2,13 @@ import LogoSVG from '@/assets/images/ob_logo.svg';
 import { Button, Checkbox, Form, Input, Message, Space, Typography } from '@arco-design/web-react';
 import { IconLock, IconUser } from '@arco-design/web-react/icon';
 import { getHashQueryParam, SliderCaptcha, TokenManager, type SliderCaptchaRef } from '@onebase/common';
-import { checkCaptchaApi, getCaptchaApi, login, type LoginRequest, type LoginResponse } from '@onebase/platform-center';
+import {
+  checkCaptchaApi,
+  getCaptchaApi,
+  tenantLogin,
+  type LoginRequest,
+  type TenantLoginResponse
+} from '@onebase/platform-center';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useI18n } from '../../../hooks/useI18n';
@@ -74,10 +80,11 @@ const Right: React.FC = () => {
         captchaVerification: captchaVerification
       };
 
-      const response: LoginResponse = await login(loginData, headers);
+      const response: TenantLoginResponse = await tenantLogin(loginData, headers);
 
       if (response.accessToken) {
         // 使用 TokenManager 存储 token 信息
+        console.log('response: ', response);
         TokenManager.setToken(
           {
             userId: response.userId,
@@ -152,7 +159,7 @@ const Right: React.FC = () => {
     <div className={styles.loginPageRight}>
       <div className={styles.loginFormContainer}>
         <img src={LogoSVG} alt="logo" />
-        <h1 className={styles.title}>欢迎登录数智化底座</h1>
+        <h1 className={styles.title}>欢迎登录空间管理系统</h1>
 
         <Form
           form={accountForm}

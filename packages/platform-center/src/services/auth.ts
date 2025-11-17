@@ -1,9 +1,13 @@
 import { type Captcha, type CaptchaCheck } from '@onebase/common';
-import { Headers, LoginRequest } from '../types';
+import { Headers, LoginRequest, TenantLoginRequest } from '../types';
 import { systemService } from './clients';
 
 export const login = (req: LoginRequest, headers: Headers) => {
   return systemService.post('/auth/login', req, { headers });
+};
+
+export const tenantLogin = (req: TenantLoginRequest, headers: Headers) => {
+  return systemService.post('/auth/tenant-login', req, { headers });
 };
 
 export const getPermissionInfo = () => {

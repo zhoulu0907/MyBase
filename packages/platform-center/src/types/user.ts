@@ -1,6 +1,6 @@
 import { SimpleRoleVO } from './role';
 export interface UserVO {
-  id: number;
+  id: string;
   username: string;
   nickname: string;
   deptId: number;
@@ -21,9 +21,8 @@ export interface UserVO {
 
 export enum UserType {
   SYSTEM = 1, // 系统预置用户
-  CUSTOM = 2, // 自定义用户
+  CUSTOM = 2 // 自定义用户
 }
-
 
 /**
  * 返回数据
