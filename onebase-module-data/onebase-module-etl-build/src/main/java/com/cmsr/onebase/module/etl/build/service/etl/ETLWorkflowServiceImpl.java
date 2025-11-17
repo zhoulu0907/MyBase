@@ -12,6 +12,7 @@ import com.cmsr.onebase.module.etl.common.graph.WorkflowGraph;
 import com.cmsr.onebase.module.etl.common.graph.conf.JdbcInputConfig;
 import com.cmsr.onebase.module.etl.common.graph.conf.JdbcOutputConfig;
 import com.cmsr.onebase.module.etl.core.dal.database.*;
+import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLExecutionLogDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLScheduleJobDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLWorkflowDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLWorkflowTableDO;
@@ -40,7 +41,6 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
     @Value("${onebase.scheduler.etl-project}")
     private Long etlProjectCode;
 
-    // TODO: localhost cannot be default value, delete it after test
     @Value("${onebase.flink.address}")
     private String flinkServerUrl;
 
@@ -320,22 +320,38 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
     @Override
     public void startWorkflowManually(Long workflowId) {
         // 必须是已启用的ETL
-        ETLWorkflowDO workflowDO = getOperableWorkflow(workflowId);
+        ETLWorkflowDO workflowDO = getWorkflowById(workflowId);
+        if (workflowDO.getIsEnabled() == 0) {
+            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.WORKFLOW_DISABLED);
+        }
         Long applicationId = workflowDO.getApplicationId();
         ETLScheduleJobDO scheduleJobDO = scheduleJobRepository.findByApplicationIdAndWorkflowId(applicationId, workflowId);
         if (scheduleJobDO == null) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.WORKFLOW_ALREADY_OFFLINE);
         }
         Long jobId = Long.parseLong(scheduleJobDO.getJobId());
-        // TODO: 添加记录到数据库？
-        //      etl_execution_log <applicationId, workflowId, businessDate, startTime, triggerType, triggerUser, taskStatus>
         dolphinSchedulerClient.runWorkflowManually(etlProjectCode, jobId, null, null);
     }
 
     @Override
-    public PageResult<ExecutionLogVO> getWorkflowExecutionLogs(Long workflowId) {
-        // TODO:
-        return null;
+    public PageResult<ExecutionLogVO> getWorkflowExecutionLogs(Long applicationId, Long workflowId, Integer pageNo, Integer pageSize) {
+        PageResult<ETLExecutionLogDO> executionLogResult = executionLogRepository.queryPage(applicationId, workflowId, pageNo, pageSize);
+        List<ExecutionLogVO> logVOList = new ArrayList<>();
+        for (ETLExecutionLogDO logDO : executionLogResult.getList()) {
+            ExecutionLogVO executionLogVO = new ExecutionLogVO();
+            executionLogVO.setApplicationId(logDO.getApplicationId());
+            executionLogVO.setWorkflowId(logDO.getWorkflowId());
+            executionLogVO.setBusinessDate(logDO.getBussinessDate());
+            executionLogVO.setStartTime(logDO.getStartTime());
+            executionLogVO.setEndTime(logDO.getEndTime());
+            executionLogVO.setDuration(logDO.getDurationTime());
+            executionLogVO.setTriggerType(logDO.getTriggerType());
+            executionLogVO.setTriggerUser(String.valueOf(logDO.getTriggerUser()));
+            executionLogVO.setTaskStatus(logDO.getTaskStatus());
+
+            logVOList.add(executionLogVO);
+        }
+        return new PageResult<>(logVOList, executionLogResult.getTotal());
     }
 
     @Override
