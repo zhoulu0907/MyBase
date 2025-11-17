@@ -17,6 +17,8 @@ import org.apache.flink.types.Row;
 import org.apache.flink.util.CloseableIterator;
 
 import javax.sql.DataSource;
+import java.io.Closeable;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +28,7 @@ import java.util.List;
  * @Date：2025/11/6 9:44
  */
 @Slf4j
-public class WorkFlowExecutor {
+public class WorkFlowExecutor implements Closeable {
 
     private InputArgs inputArgs;
 
@@ -94,7 +96,6 @@ public class WorkFlowExecutor {
             executionLog.setEndTime(LocalDateTime.now());
             executionLog.calcDurationTime();
             beanManager.getQueryProvider().insertEtlExecutionLog(executionLog);
-            beanManager.close();
         }
     }
 
@@ -116,19 +117,15 @@ public class WorkFlowExecutor {
 
 
     public DataPreview preview() throws Exception {
-        try {
-            for (Node node : workflowGraph.getNodes()) {
-                doAction(node);
-                if (node.getId().equals(inputArgs.getPreviewNodeId())) {
-                    Table table = tableEnv.from(node.getId());
-                    TableResult tableResult = table.execute();
-                    return tableResultToDataPreview(tableResult);
-                }
+        for (Node node : workflowGraph.getNodes()) {
+            doAction(node);
+            if (node.getId().equals(inputArgs.getPreviewNodeId())) {
+                Table table = tableEnv.from(node.getId());
+                TableResult tableResult = table.execute();
+                return tableResultToDataPreview(tableResult);
             }
-            throw new Exception("未找到预览节点");
-        } finally {
-            beanManager.close();
         }
+        throw new Exception("未找到预览节点");
     }
 
 
@@ -160,4 +157,8 @@ public class WorkFlowExecutor {
         return list;
     }
 
+    @Override
+    public void close() throws IOException {
+        beanManager.close();
+    }
 }
