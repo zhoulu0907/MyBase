@@ -110,6 +110,7 @@ public class AdminAuthServiceImpl implements AdminAuthService {
             createLoginLog(null, account, logTypeEnum, LoginResultEnum.BAD_CREDENTIALS);
             throw exception(AUTH_LOGIN_BAD_CREDENTIALS);
         }
+        
         Long userId = user.getId();
 
         // 检查账号是否被防暴力破解锁定
@@ -120,7 +121,7 @@ public class AdminAuthServiceImpl implements AdminAuthService {
         if (!passwordMatched) {
             // 密码错误，记录失败次数并获取返回结果
             LoginFailureResultDTO failureResult = securityConfigApi.recordLoginFailure(userId).getData();
-            createLoginLog(userId, username, logTypeEnum, LoginResultEnum.BAD_CREDENTIALS);
+            createLoginLog(userId, account, logTypeEnum, LoginResultEnum.BAD_CREDENTIALS);
             // 使用失败记录中的提示信息作为错误信息参数
             throw exception(AUTH_LOGIN_BAD_CREDENTIALS, failureResult.getMessage());
         }
@@ -130,7 +131,7 @@ public class AdminAuthServiceImpl implements AdminAuthService {
 
         // 校验是否禁用
         if (CommonStatusEnum.isDisable(user.getStatus())) {
-            createLoginLog(userId, username, logTypeEnum, LoginResultEnum.USER_DISABLED);
+            createLoginLog(userId, account, logTypeEnum, LoginResultEnum.USER_DISABLED);
             throw exception(AUTH_LOGIN_USER_DISABLED);
         }
     }
