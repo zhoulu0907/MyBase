@@ -96,9 +96,13 @@
     }
   }
 
+  .arco-drawer-mask:has(+ .detail-drawer) {
+    z-index: 101;
+  }
+
   .detail-drawer {
     transition: width 0.15s ease-in-out;
-    z-index: 100;
+    z-index: 102;
 
     .arco-drawer-header {
 
@@ -106,6 +110,7 @@
         flex: 1;
       }
     }
+  
   }
 }
 
@@ -117,8 +122,8 @@
 }
 
 .titleDetailIconArea {
-  margin-right: 24px;
+  margin-right: 28px;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
 }

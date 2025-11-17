@@ -61,7 +61,6 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({ form, isAdd, submitLoading, o
 
   return (
     <Modal
-      getPopupContainer={() => document.querySelector('[class*="previewPage"]') || document.body}
       title={
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>表单信息</div>

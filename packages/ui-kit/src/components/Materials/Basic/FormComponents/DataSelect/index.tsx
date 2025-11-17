@@ -1,5 +1,5 @@
 // ===== 导入 begin =====
-import { Button, Form } from '@arco-design/web-react';
+import { Form, Input } from '@arco-design/web-react';
 import { memo, useEffect, useState } from 'react';
 
 import { FORM_COMPONENT_TYPES } from '@/components/Materials/componentTypes';
@@ -9,6 +9,8 @@ import { XDataSelectConfig } from './schema';
 import { IconClose } from '@arco-design/web-react/icon';
 
 import { useFormField } from '../useFormField';
+
+import './index.css';
 // ===== 导入 end =====
 
 
@@ -38,130 +40,140 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
   );
   // ===== 表单上下文与字段名与值读取 end =====
 
-  // ===== 内部状态 begin =====
-  const [previewDataSelectVisible, setPreviewDataSelectVisible] = useState(false); // 预览数据选择弹窗
-  const [compValue, setCompValue] = useState<any>('');
-  // ===== 内部状态 end =====
+  // ===== 外部事件：选择数据 begin =====
+  
+  // ===== 外部事件：选择数据 end =====
 
-  // ===== 回显 effect begin =====
+  // ===== 内部状态 & 回显begin =====
+  const [uiState, setUiState] = useState<{ previewVisible: boolean }>({ previewVisible: false });
+  const [dataState, setDataState] = useState<any>('');
+
   useEffect(() => {
-    if (runtime === true && formFieldValue) {
-      setCompValue(formFieldValue);
-    } else {
-      setCompValue('');
+    if (!runtime) {
+      setDataState('');
+      return;
     }
-  }, [formFieldValue, runtime]);
-  // ===== 回显 effect end =====
-
-  // ===== 双向同步 effect begin =====
-  useEffect(() => {
-    if (!runtime) return;
-    const current = form.getFieldValue(fieldName);
-    if (compValue && typeof compValue === 'object') {
-      if (!current || current.displayValue !== compValue.displayValue || current.selectID !== compValue.selectID) {
-        form.setFieldValue(fieldName, compValue);
+    const normalize = (data: any) => {
+      if (!data) return '';
+      if (typeof data === 'object') {
+        if (typeof data.id !== 'undefined' || typeof data.name !== 'undefined') {
+          return { id: data.id ?? '', name: data.name ?? '' };
+        }
+        if (typeof data.selectID !== 'undefined' || typeof data.displayValue !== 'undefined') {
+          return { id: data.selectID ?? '', name: data.displayValue ?? '' };
+        }
       }
-    } else if (current) {
-      form.setFieldValue(fieldName, '');
-    }
-  }, [runtime, compValue, fieldName, form]);
-  // ===== 双向同步 effect end =====
+      return '';
+    };
+    setDataState(normalize(formFieldValue));
+  }, [formFieldValue, runtime]);
+  // =====  内部状态 & 回显 end =====
 
-  // ===== 事件：清除 begin =====
-  const handleClear = (e: React.MouseEvent) => {
-    // 阻止冒泡，避免触发按钮的 onClick（打开弹窗）
-    e.stopPropagation();
-    resetDisplayValue();
-    if (runtime) {
-      form.setFieldValue(fieldName, '');
+
+  // ===== 内部事件 =====
+  const internalEvents = {
+    openPreview: () => setUiState((prev) => ({ ...prev, previewVisible: true })),
+    closePreview: () => setUiState((prev) => ({ ...prev, previewVisible: false })),
+    clear: (e: React.MouseEvent) => {
+      e.stopPropagation();
+      setDataState('');
+      if (runtime) {
+        form.setFieldValue(fieldName, '');
+      }
+    },
+    selectData: (data: any) => {
+      const lastKey = (displayFields || []).length ? displayFields[displayFields.length - 1]?.value : undefined;
+      const name = lastKey ? data?.[lastKey] : '';
+      const nextValue = data ? { id: data.id, name } : '';
+      setDataState(nextValue);
+      if (runtime) {
+        form.setFieldValue(fieldName, nextValue);
+      }
+      if ((props as any).onSelect) {
+        (props as any).onSelect({ id: data?.id, name });
+      }
     }
   };
-  // ===== 事件：清除 end =====
+  // ===== 内部事件 =====
 
-  // ===== 事件：重置显示值 begin =====
-  const resetDisplayValue = () => {
-    setCompValue('');
-  }
-  // ===== 事件：重置显示值 end =====
+  // ===== 方法：帮助方法 begin =====
+  const helpers = {
+    getDisplayText: (v: any) => (v && typeof v === 'object' ? (v.name ?? '') : ''),
+    getSelectedId: (v: any) => (v && typeof v === 'object' ? (v.id ?? null) : null)
+  };
+  // ===== 方法：帮助方法 end =====
 
-  // ===== 事件：选择数据 begin =====
-  const handleSelect = (data: any) => {
-    const fieldsWithValue = (displayFields || []).map((field: any) => ({
-      ...field,
-      dataValue: data ? data[field.value] : null
-    }));
-    const lastKey = (displayFields || []).length ? displayFields[displayFields.length - 1]?.value : undefined;
-    const raw = lastKey ? data?.[lastKey] : '';
-    const nextValue = data ? { selectID: data.id, dataFields: fieldsWithValue, displayValue: raw } : '';
-    setCompValue(nextValue);
-    if (runtime) {
-      form.setFieldValue(fieldName, nextValue);
-    }
-    if ((props as any).onSelect) {
-      (props as any).onSelect({ id: data?.id, displayValue: raw, fields: fieldsWithValue });
-    }
-  }
-  // ===== 事件：选择数据 end =====
-
-  return (
-    <div className="formWrapper">
-      {/* ===== 渲染：表单项 begin ===== */}
-      <Form.Item
-        label={
-          label.display &&
-          label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
+  const renderInteractiveContent = () => (
+    <div className="dataSelectTrigger" onClick={() => internalEvents.openPreview()}>
+      <Input
+        readOnly
+        placeholder={defaultValue}
+        value={helpers.getDisplayText(dataState)}
+        suffix={
+          !!helpers.getDisplayText(dataState) ? (
+            <span className="dataSelectClearIcon" onClick={(e) => internalEvents.clear(e as any)} title="清除">
+              <IconClose style={{ fontSize: 12 }} />
+            </span>
+          ) : undefined
         }
+      />
+    </div>
+  );
+
+  const renderReadonlyContent = () => {
+    const fieldValue = helpers.getDisplayText(dataState);
+    return <div className="dataSelectReadonly">{fieldValue || '--'}</div>;
+  };
+
+  const renderRuntime = (interactive: boolean) => (
+    <>
+      <Form.Item
+        label={label.display && label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>}
         field={fieldName}
         layout={layout}
         tooltip={tooltip}
-        labelCol={{
-          style: { width: labelColSpan, flex: 'unset' }
-        }}
+        labelCol={{ style: { width: labelColSpan, flex: 'unset' } }}
         wrapperCol={{ style: { flex: 1 } }}
         rules={[{ required: verify?.required }]}
-        hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
-        style={{
-          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
-          margin: '0px'
-        }}
+        hidden={status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
       >
-        {(() => {
-          // ===== 渲染：主按钮 begin =====
-          const interactive = runtime && status !== STATUS_VALUES[STATUS_OPTIONS.READONLY] && !detailMode;
-          const showClear = interactive && !!(compValue && typeof compValue === 'object' && compValue.displayValue);
-          return (
-            <Button
-              type="secondary"
-              long
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                pointerEvents: interactive ? 'unset' : 'none'
-              }}
-              onClick={() => interactive && setPreviewDataSelectVisible(true)}
-            >
-              <span style={{ pointerEvents: 'none' }}>{(compValue && typeof compValue === 'object' ? compValue.displayValue : '') || <span style={{ color: '#999' }}>{defaultValue}</span>}</span>
-              {showClear ? (
-                <span onClick={handleClear} style={{ cursor: 'pointer' }} title="清除">
-                  <IconClose style={{ fontSize: 12 }} />
-                </span>
-              ) : null}
-            </Button>
-          );
-          // ===== 渲染：主按钮 end =====
-        })()}
+        {interactive ? renderInteractiveContent() : renderReadonlyContent()}
       </Form.Item>
-      {/* ===== 渲染：表单项 end ===== */}
-      {/* ===== 渲染：预览弹窗 begin ===== */}
-      <PreviewDataSelectModal
-          visible={previewDataSelectVisible}
-          onCancel={() => setPreviewDataSelectVisible(false)}
+      {interactive && (
+        <PreviewDataSelectModal
+          visible={uiState.previewVisible}
+          onCancel={internalEvents.closePreview}
           tableConfig={props.dynamicTableConfig}
-          onSelect={handleSelect}
+          defaultSelectedId={helpers.getSelectedId(dataState)}
+          onSelect={internalEvents.selectData}
         />
-      {/* ===== 渲染：预览弹窗 end ===== */}
-      
+      )}
+    </>
+  );
+
+  const renderBuilder = () => (
+    <Form.Item
+      label={label.display && label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>}
+      field={fieldName}
+      layout={layout}
+      tooltip={tooltip}
+      labelCol={{ style: { width: labelColSpan, flex: 'unset' } }}
+      wrapperCol={{ style: { flex: 1 } }}
+      rules={[{ required: verify?.required }]}
+      hidden={false}
+    >
+      <Input
+        readOnly
+        placeholder={defaultValue}
+        value={helpers.getDisplayText(dataState)}
+      />
+    </Form.Item>
+  );
+
+  const isInteractive = runtime && status !== STATUS_VALUES[STATUS_OPTIONS.READONLY] && !detailMode;
+  return (
+    <div className="formWrapper">
+      {runtime ? renderRuntime(isInteractive!) : renderBuilder()}
     </div>
   );
 });

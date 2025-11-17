@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Modal } from '@arco-design/web-react';
+import { Modal, Button } from '@arco-design/web-react';
 
 import './index.css';
 import XTable from '../../ListComponents/Table';
@@ -10,15 +10,19 @@ interface PreviewDataSelectModalProps {
   onCancel: any;
   tableConfig: XTableConfig;
   onSelect: (data: any) => void;
+  defaultSelectedId?: string | number | null;
 }
 
-const PreviewDataSelectModal: React.FC<PreviewDataSelectModalProps> = ({ visible, onCancel, tableConfig, onSelect }) => {
-  const [selectedId, setSelectedId] = useState<string | null>('');
+const PreviewDataSelectModal: React.FC<PreviewDataSelectModalProps> = ({ visible, onCancel, tableConfig, onSelect, defaultSelectedId }) => {
+  const [selectedRow, setSelectedRow] = useState<any>(null);
 
-  const handleSelectData = (data: any) => {
-    setSelectedId(data ? data.id : null);
-    onSelect(data);
-    if (data) onCancel();
+  const handleSelectData = (record: any | null, fromDoubleClick?: boolean) => {
+    const next = record || null;
+    setSelectedRow(next);
+    onSelect(next);
+    if (fromDoubleClick) {
+      onCancel();
+    }
   };
 
   return (
@@ -28,16 +32,23 @@ const PreviewDataSelectModal: React.FC<PreviewDataSelectModalProps> = ({ visible
       title={<span className="modalTitleLeft">数据选择</span>}
       visible={visible}
       onCancel={onCancel}
-      footer={null}
+      footer={
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+          <Button onClick={onCancel}>取消</Button>
+          <Button type="primary" disabled={!selectedRow} onClick={() => { onCancel(); }}>确认</Button>
+        </div>
+      }
       maskClosable={false}
     >
       <div className="popupContainer">
         <div className="rightFlexTable">
-          <XTable
-            {...tableConfig}
-            showAddBtn={false}
-            xTableSelectProps={{ showSelect: true, selectedDataId: selectedId, setSelectData: handleSelectData }}
-          />
+          {visible && (
+            <XTable
+              {...tableConfig}
+              showAddBtn={false}
+              xTableSelectProps={{ showSelect: true, defaultSelectedId, onSelectedChange: handleSelectData }}
+            />
+          )}
         </div>
       </div>
     </Modal>

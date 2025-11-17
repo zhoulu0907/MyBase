@@ -30,6 +30,7 @@ import { RedirectMethod } from '../../../constants';
 import './index.css';
 import type { XTableConfig } from './schema';
 import TableSearch from './tableSerach';
+import { Record } from '@icon-park/react';
 
 const leftPanelWidth = 318;
 const rightPanelWidth = 310;
@@ -39,9 +40,22 @@ const componentMaxWidth = leftPanelWidth + rightPanelWidth + canvasPaddingWidth 
 
 type XTableSelectProps = {
   showSelect: boolean;
-  selectedDataId: string | null;
-  setSelectData: (value: any) => void;
+  defaultSelectedId?: string | number | null;
+  onSelectedChange?: (value: any | null, fromDoubleClick?: boolean) => void;
+  refreshAfterSelect?: boolean;
 };
+
+//TODO: 优化元数据的显示内容，根据不同的类型在此显示不同的内容
+const renderCellText = (v: any) => {
+  if (v === null || v === undefined) return '';
+  if (typeof v === 'object') {
+    if ('displayValue' in v && typeof (v as any).displayValue !== 'undefined') return (v as any).displayValue;
+    if ('userName' in v && typeof (v as any).userName !== 'undefined') return (v as any).userName as any;
+    return '';
+  }
+  return v as any;
+};
+
 
 const XTable = memo(
   (
@@ -101,6 +115,10 @@ const XTable = memo(
     const [tableData, setTableData] = useState<any[]>([]);
     const [tableTotal, setTableTotal] = useState<number>(0);
     const [tablePageNo, setTablePageNo] = useState<number>(1);
+    const [initialPageLoaded, setInitialPageLoaded] = useState(false);
+    const [selectedRowId, setSelectedRowId] = useState<string | number | null>(
+      props?.xTableSelectProps?.defaultSelectedId ?? null
+    );
 
     const opearate: any = {
       title: '操作',
@@ -222,13 +240,21 @@ const XTable = memo(
 
     useEffect(() => {
       getFinalColumns();
-    }, [showOpearate, columns, fixedOpearate, props?.xTableSelectProps?.selectedDataId]);
+    }, [showOpearate, columns, fixedOpearate, selectedRowId]);
 
     useEffect(() => {
       if (finalColumns && metaData) {
         handlePage();
       }
-    }, [finalColumns, tablePageNo, metaData, sortByObject]);
+    // finalColumns 改变不应该刷新
+    }, [tablePageNo, metaData, sortByObject]);
+
+    useEffect(() => {
+      if (!initialPageLoaded && finalColumns && metaData) {
+        handlePage();
+        setInitialPageLoaded(true);
+      }
+    }, [finalColumns, metaData, initialPageLoaded]);
 
     const getFinalColumns = async () => {
       let newColumns: any[] = [];
@@ -275,7 +301,7 @@ const XTable = memo(
                   }
                 };
                 if (!cpType) {
-                  return <span>{_text}</span>;
+                  return <span>{renderCellText(_text)}</span>;
                 }
 
                 return (
@@ -288,7 +314,7 @@ const XTable = memo(
                   />
                 );
               }
-              return <span>{_text}</span>;
+              return <span>{renderCellText(_text)}</span>;
             }
           };
         });
@@ -319,9 +345,14 @@ const XTable = memo(
           width: 48,
           render: (_: any, record: any) => (
             <Checkbox
-              checked={props?.xTableSelectProps?.selectedDataId === record.id}
-              onChange={(checked: boolean) => {
-                props?.xTableSelectProps?.setSelectData(checked ? record : null);
+              checked={String(selectedRowId ?? '') === String(record.id)}
+              onChange={(checked: boolean, event) => {
+                if (event && typeof event.stopPropagation === 'function') event.stopPropagation();
+                setSelectedRowId(checked ? record.id : null);
+                props?.xTableSelectProps?.onSelectedChange?.(checked ? record : null);
+                if (props?.xTableSelectProps?.refreshAfterSelect) {
+                  handlePage();
+                }
               }}
             />
           )
@@ -330,6 +361,7 @@ const XTable = memo(
       } else {
         newColumns = [indexColumn, ...newColumns];
       }
+
       setFinalColumns(newColumns);
     };
 
@@ -416,7 +448,7 @@ const XTable = memo(
             );
             if (userSelectField && newItem[key]) {
               if (newItem[key]) {
-                newItem[key] = newItem[key]?.userName || '';
+                // newItem[key] = newItem[key]?.userName || '';
               }
             }
 
@@ -433,9 +465,11 @@ const XTable = memo(
           }
         });
 
+        const rowId = (item && item.id) || (item?.data && item.data.id);
         return {
+          id: rowId,
           ...newItem,
-          key: item.data.id
+          key: rowId
         };
       });
 
@@ -493,6 +527,7 @@ const XTable = memo(
 
     const [form] = Form.useForm();
 
+
     return (
       <div
         style={{
@@ -537,8 +572,12 @@ const XTable = memo(
                     handleRowClick(record);
                   },
                   onDoubleClick: () => {
-                    if (props?.xTableSelectProps?.showSelect && props?.xTableSelectProps?.setSelectData) {
-                      props.xTableSelectProps.setSelectData(record);
+                    if (props?.xTableSelectProps?.showSelect) {
+                      setSelectedRowId(record.id);
+                      props?.xTableSelectProps?.onSelectedChange?.(record, true);
+                      if (props?.xTableSelectProps?.refreshAfterSelect) {
+                        handlePage();
+                      }
                     }
                   }
                 };
@@ -565,7 +604,8 @@ const XTable = memo(
         </div>
       </div>
     );
-  }
-);
+  });
 
 export default XTable;
+
+    
