@@ -105,6 +105,7 @@ export interface XInputTimePickerConfig extends ICommonBaseType {
 
   // 时间格式
   dateType: TTimeTypeSelectKeyType;
+  timeType?: boolean;
 
   // 可选范围
   timeRange: {
@@ -225,6 +226,7 @@ const XTimePicker: XInputTimePickerSchema = {
       customValue: ''
     },
     dateType: TIME_VALUES[TIME_OPTIONS.SECOND],
+    timeType: true,
     timeRange: {
       earliestLimit: false,
       earliestValue: '',
