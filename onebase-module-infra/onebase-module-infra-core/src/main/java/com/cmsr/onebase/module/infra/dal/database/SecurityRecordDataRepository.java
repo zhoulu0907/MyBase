@@ -41,4 +41,21 @@ public class SecurityRecordDataRepository extends DataRepository<SecurityRecordD
         return findAllByConfig(configStore);
     }
 
+    /**
+     * 查询用户最近一次密码记录
+     *
+     * @param userId     用户ID
+     * @param recordType 记录类型
+     * @return 最近一次密码记录，如果不存在则返回null
+     */
+    public SecurityRecordDO findLatestByUserIdAndType(Long userId, String recordType) {
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.eq(SecurityRecordDO.USER_ID, userId);
+        configStore.eq(SecurityRecordDO.RECORD_TYPE, recordType);
+        configStore.order(BaseDO.CREATE_TIME, "DESC");
+        configStore.limit(1);
+        List<SecurityRecordDO> records = findAllByConfig(configStore);
+        return records.isEmpty() ? null : records.get(0);
+    }
+
 }

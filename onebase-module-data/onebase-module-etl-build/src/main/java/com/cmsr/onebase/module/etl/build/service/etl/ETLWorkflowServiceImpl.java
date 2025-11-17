@@ -5,7 +5,7 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.ds.client.DolphinSchedulerClient;
 import com.cmsr.onebase.framework.ds.model.schedule.sub.Schedule;
-import com.cmsr.onebase.framework.ds.model.task.def.FlinkTask;
+import com.cmsr.onebase.framework.ds.model.task.def.HttpTask;
 import com.cmsr.onebase.module.etl.build.service.etl.vo.*;
 import com.cmsr.onebase.module.etl.common.graph.Node;
 import com.cmsr.onebase.module.etl.common.graph.WorkflowGraph;
@@ -29,10 +29,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -40,6 +37,10 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
 
     @Value("${onebase.scheduler.etl-project}")
     private Long etlProjectCode;
+
+    // TODO: localhost cannot be default value, delete it after test
+    @Value("${onebase.flink.address}")
+    private String flinkServerUrl;
 
     @Resource
     private DolphinSchedulerClient dolphinSchedulerClient;
@@ -222,17 +223,12 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
         String jobIdStr = scheduleJobDO.getJobId();
         if (StringUtils.isBlank(jobIdStr)) {
             // create
-            // TODO: this is a sample code to add flink task.
-            FlinkTask flinkTask = new FlinkTask();
-            flinkTask.setProgramType("JAVA");
-            flinkTask.setMainClass("org.example.flink.Application");
-            flinkTask.withResource("onebase-ds/default/resources/JavaProject.Flink-1.0.0-SNAPSHOT.jar");
-            flinkTask.withResource("onebase-ds/default/resources/postgresql-42.7.7.jar");
-            flinkTask.setMainClass("onebase-ds/default/resources/JavaProject.Flink-1.0.0-SNAPSHOT.jar");
-            flinkTask.setDeployMode("local");
-            jobId = dolphinSchedulerClient.createSingletonWorkflow(etlProjectCode,
+            HttpTask httpTask = HttpTask.ofUrl(flinkServerUrl)
+                    .method(HttpTask.HttpMethod.POST)
+                    .body(JsonUtils.toJsonString(Map.of("workflowId", workflowId)));
+            jobId = dolphinSchedulerClient.createSingletonHttpWorkflow(etlProjectCode,
                     String.valueOf(workflowId),
-                    flinkTask,
+                    httpTask,
                     workflowDO.getWorkflowName() + "：" + workflowDO.getDeclaration());
             scheduleJobDO.setJobId(String.valueOf(jobId));
             scheduleJobRepository.update(scheduleJobDO);

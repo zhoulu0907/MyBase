@@ -31,9 +31,6 @@ public class JobClient {
     @Value("${onebase.scheduler.flow-url}")
     private String flowUrl;
 
-    @Value("${onebase.scheduler.flow-token}")
-    private String flowToken;
-
     @Autowired
     private DolphinSchedulerClient dolphinSchedulerClient;
 
@@ -43,7 +40,7 @@ public class JobClient {
             HttpTask httpTask = HttpTask.ofUrl(flowUrl)
                     .method(HttpTask.HttpMethod.POST)
                     .body(JsonUtils.toJsonString(jobCreateRequest.getRemoteCallRequest()));
-            Long jobId = dolphinSchedulerClient.createSingletonWorkflow(flowProjectCode, flowName, httpTask, jobCreateRequest.getRemoteCallRequest().getProcessName());
+            Long jobId = dolphinSchedulerClient.createSingletonHttpWorkflow(flowProjectCode, flowName, httpTask, jobCreateRequest.getRemoteCallRequest().getProcessName());
             Schedule schedule = new Schedule();
             schedule.setStartTime(LocalDateTime.parse(jobCreateRequest.getStartTime(), DATETIME_FORMATTER));
             schedule.setEndTime(LocalDateTime.parse(jobCreateRequest.getEndTime(), DATETIME_FORMATTER));

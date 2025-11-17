@@ -44,6 +44,16 @@ public class PasswordPolicyConfig {
     private Boolean checkContainSpecialChar;
 
     /**
+     * 历史密码限制次数
+     */
+    private Integer historyLimit;
+
+    /**
+     * 密码有效期（天数）
+     */
+    private Integer expiryDays;
+
+    /**
      * 以下参数为3级标准固定参数
      */
 
@@ -120,14 +130,9 @@ public class PasswordPolicyConfig {
     private Boolean checkSameCharSeq = true;
 
     /**
-     * 密码口令中相同字符不允许最小的连续个数，3级标准为3
+     * 密码口令中相同字符不允许最小的连续个数,3级标准为3
      */
     @Builder.Default
     private Integer limitSameCharNum = 3;
-
-    /**
-     * 历史密码限制次数
-     */
-    private Integer historyLimit;
 
 }
