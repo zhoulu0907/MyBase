@@ -118,4 +118,11 @@ public interface MetadataEntityRelationshipBuildService {
      * @return 实体关系列表
      */
     List<MetadataEntityRelationshipDO> findAllByConfig(org.anyline.data.param.init.DefaultConfigStore configStore);
+
+    /**
+     * 根据字段id删除关联关系 包括字段作为 源字段和目标字段 两种情况
+     * @param fieldId
+     * @return
+     */
+    void deleteRelationShipByFieldId(Long fieldId);
 }

@@ -5,9 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.HashSet;
-import java.util.Set;
-
 /**
  * 密码策略配置对象，用于密码校验
  *
@@ -45,6 +42,16 @@ public class PasswordPolicyConfig {
      * 是否检查包含特殊符号
      */
     private Boolean checkContainSpecialChar;
+
+    /**
+     * 历史密码限制次数
+     */
+    private Integer historyLimit;
+
+    /**
+     * 密码有效期（天数）
+     */
+    private Integer expiryDays;
 
     /**
      * 以下参数为3级标准固定参数
@@ -123,7 +130,7 @@ public class PasswordPolicyConfig {
     private Boolean checkSameCharSeq = true;
 
     /**
-     * 密码口令中相同字符不允许最小的连续个数，3级标准为3
+     * 密码口令中相同字符不允许最小的连续个数,3级标准为3
      */
     @Builder.Default
     private Integer limitSameCharNum = 3;

@@ -73,7 +73,7 @@ public interface ErrorCodeConstants {
 
     ErrorCode FLOW_NODE_TYPE_MUST_BE_INITIATION = new ErrorCode(1_009_002_012, "流程节点类型必须为提交节点");
 
-    ErrorCode FLOW_TASK_NOT_EXISTS = new ErrorCode(1_009_002_013, "流程任务不存在");
+    ErrorCode FLOW_TASK_NOT_EXISTS = new ErrorCode(1_009_002_013, "流程任务不存在或已被处理");
 
     ErrorCode FLOW_NOT_BIND_ENTITY_ID = new ErrorCode(1_009_002_014, "流程未绑定实体ID");
 
@@ -108,6 +108,10 @@ public interface ErrorCodeConstants {
     ErrorCode CC_NODE_ROLE_LIST_EMPTY = new ErrorCode(1_009_002_029, "抄送角色列表不能为空");
 
     ErrorCode MISSING_VALID_CC_ROLE_LIST = new ErrorCode(1_009_002_030, "缺少有效抄送角色列表");
+
+    ErrorCode MISSING_EDIT_OR_DETAIL_PAGE_VIEW = new ErrorCode(1_009_002_031, "缺少编辑或详情视图页面");
+
+    ErrorCode MISSING_BINDING_VIEW_ID = new ErrorCode(1_009_002_032, "流程实例缺少绑定视图ID");
 
 
     // ============= 系统相关错误 =============

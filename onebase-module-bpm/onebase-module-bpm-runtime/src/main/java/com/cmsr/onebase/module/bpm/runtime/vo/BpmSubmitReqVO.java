@@ -26,8 +26,8 @@ public class BpmSubmitReqVO {
     /**
      * 业务ID
      */
-    @NotBlank(message = "业务ID不能为空")
-    private String businessId;
+    @NotNull(message = "业务ID不能为空")
+    private Long businessId;
 
     /**
      * 表单名称

@@ -5,6 +5,7 @@ import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthDataGroupDO;
 import com.cmsr.onebase.module.app.core.vo.auth.AuthPermissionReq;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.DataRow;
 import org.anyline.entity.DataSet;
 import org.anyline.entity.Order;
 import org.springframework.stereotype.Repository;
@@ -21,6 +22,7 @@ import java.util.Set;
 @Repository
 public class AppAuthDataGroupRepository extends DataRepository<AuthDataGroupDO> {
 
+
     public AppAuthDataGroupRepository() {
         super(AuthDataGroupDO.class);
     }
@@ -32,6 +34,25 @@ public class AppAuthDataGroupRepository extends DataRepository<AuthDataGroupDO> 
         configs.eq("menu_id", reqVO.getMenuId());
         configs.order("group_order", Order.TYPE.ASC);
         return this.findAllByConfig(configs);
+    }
+
+    public void updateAuthDataGroup(AuthDataGroupDO authDataGroupDO) {
+        DataRow row = new DataRow();
+        row.put("group_name", authDataGroupDO.getGroupName());
+        row.put("group_order", authDataGroupDO.getGroupOrder());
+        row.put("description", authDataGroupDO.getDescription());
+        row.put("scope_tags", authDataGroupDO.getScopeTags());
+        row.put("scope_field_id", authDataGroupDO.getScopeFieldId());
+        row.put("scope_level", authDataGroupDO.getScopeLevel());
+        row.put("scope_value", authDataGroupDO.getScopeValue());
+        row.put("data_filter", authDataGroupDO.getDataFilter());
+        row.put("operation_tags", authDataGroupDO.getOperationTags());
+        row.addAllUpdateColumns(true);
+
+        ConfigStore configs = new DefaultConfigStore();
+        configs.eq("id", authDataGroupDO.getId());
+        anylineService.update("app_auth_data_group", row, configs);
+        this.update(authDataGroupDO);
     }
 
     public List<AuthDataGroupDO> findByAppIdAndRoleIdsAndMenuId(Long applicationId, Set<Long> roleIds, Long menuId) {
@@ -77,4 +98,6 @@ public class AppAuthDataGroupRepository extends DataRepository<AuthDataGroupDO> 
             return authDataGroupDO;
         }).toList();
     }
+
+
 }

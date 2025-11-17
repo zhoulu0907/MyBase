@@ -29,7 +29,7 @@ public class FlowRemoteCallController {
 
 
     @PostMapping("/trigger")
-    @Operation(summary = "触发页面")
+    @Operation(summary = "远程调用触发")
     public CommonResult<ExecutorResult> triggerForm(@RequestBody @Validated RemoteCallRequest request) {
         ExecutorResult result = flowRemoteCallExecutor.executeFlow(request);
         return CommonResult.success(result);

@@ -1,9 +1,13 @@
 package com.cmsr.onebase.framework.ds.model.task;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
+import com.cmsr.onebase.framework.ds.model.common.Parameter;
 import com.cmsr.onebase.framework.ds.model.task.def.AbstractTask;
 import lombok.Data;
 import lombok.experimental.Accessors;
+
+import java.util.List;
+import java.util.Map;
 
 @Data
 @Accessors(chain = true)
@@ -27,8 +31,9 @@ public class TaskDefinition {
 
     private AbstractTask taskParams;
 
-    // taskParamList
-    // taskParamMap
+    private List<Parameter> taskParamList;
+
+    private Map<String, String> taskParamMap;
 
     private String flag = "YES";
 

@@ -7,6 +7,7 @@ import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.*;
 import com.cmsr.onebase.module.metadata.build.service.entity.vo.EntityFieldQueryVO;
 import com.cmsr.onebase.module.metadata.build.service.number.AutoNumberRuleBuildService;
 import com.cmsr.onebase.module.metadata.build.service.component.MetadataComponentFieldTypeBuildService;
+import com.cmsr.onebase.module.metadata.build.service.relationship.MetadataEntityRelationshipBuildService;
 import com.cmsr.onebase.module.metadata.build.service.validation.MetadataPermitRefOtftBuildService;
 import com.cmsr.onebase.module.metadata.build.service.validation.MetadataValidationTypeBuildService;
 import com.cmsr.onebase.module.metadata.build.service.validation.MetadataValidationRequiredBuildService;
@@ -95,6 +96,8 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
     @Resource
     private MetadataEntityFieldRepository metadataEntityFieldRepository;
+    @Resource
+    private MetadataEntityRelationshipBuildService metadataEntityRelationshipBuildService;
     @Resource
     private TemporaryDatasourceService temporaryDatasourceService;
     @Resource
@@ -636,6 +639,9 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                         validationRequiredService.deleteByFieldId(existing.getId());
                         validationUniqueService.deleteByFieldId(existing.getId());
                         validationLengthService.deleteByFieldId(existing.getId());
+
+                        // 删除实体间关联关系
+                        metadataEntityRelationshipBuildService.deleteRelationShipByFieldId(Long.valueOf(item.getId()));
                     } catch (Exception ignore) {}
                 }
 
@@ -769,107 +775,13 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         for (EntityFieldUpsertItemVO item : reqVO.getItems()) {
             // 新增：当未提供ID或ID为空白时进入
             if (!Boolean.TRUE.equals(item.getIsDeleted()) && (item.getId() == null || item.getId().trim().isEmpty())) {
-                // 智能处理：如果没有传ID，但fieldName已存在，则自动转换为更新操作
-                MetadataEntityFieldDO existingField = findExistingFieldByCodeOrName(reqVO.getEntityId(), item);
-                if (existingField != null) {
-                    log.info("发现已存在的字段，自动转换为更新操作: fieldName={}, existingId={}",
-                            item.getFieldName(), existingField.getId());
+                // 【安全策略优化】不再通过 fieldName 自动匹配现有字段进行更新
+                // 原因：fieldName 在跨应用、跨表中不具备唯一性，存在安全风险
+                // 策略：更新操作必须明确提供字段 ID，未提供 ID 时一律作为新增处理
+                log.info("未提供字段ID，将作为新增字段处理: fieldName={}, entityId={}, appId={}",
+                        item.getFieldName(), reqVO.getEntityId(), reqVO.getAppId());
 
-                    // 关键安全校验：验证查找到的字段确实属于当前实体和应用
-                    if (!existingField.getEntityId().equals(Long.valueOf(reqVO.getEntityId()))) {
-                        log.error("安全校验失败：查找到的字段不属于当前实体。fieldName={}, 字段归属entityId={}, 请求entityId={}", 
-                                 item.getFieldName(), existingField.getEntityId(), reqVO.getEntityId());
-                        throw new IllegalArgumentException("字段不属于当前实体，禁止跨实体操作");
-                    }
-                    if (!existingField.getAppId().equals(Long.valueOf(reqVO.getAppId()))) {
-                        log.error("安全校验失败：查找到的字段不属于当前应用。fieldName={}, 字段归属appId={}, 请求appId={}", 
-                                 item.getFieldName(), existingField.getAppId(), reqVO.getAppId());
-                        throw new IllegalArgumentException("字段不属于当前应用，禁止跨应用操作");
-                    }
-
-                    // 转换为更新操作
-                    item.setId(existingField.getId().toString());
-                    String updateFieldName = item.getFieldName() != null ? item.getFieldName() : existingField.getFieldName();
-                    validateEntityFieldNameUnique(existingField.getId().toString(), existingField.getEntityId().toString(), updateFieldName);
-                    String updateDisplayName = item.getDisplayName() != null ? item.getDisplayName() : existingField.getDisplayName();
-                    validateEntityFieldDisplayNameUnique(existingField.getId().toString(), existingField.getEntityId().toString(), updateDisplayName);
-
-                    Integer maxLength = extractMaxLength(item);
-
-                    // 组装更新对象（只覆盖非空字段）
-                    MetadataEntityFieldDO upd = new MetadataEntityFieldDO();
-                    upd.setId(existingField.getId());
-                    upd.setEntityId(existingField.getEntityId());
-                    if (item.getFieldName() != null) upd.setFieldName(item.getFieldName());
-                    if (item.getDisplayName() != null) upd.setDisplayName(item.getDisplayName());
-                    if (item.getFieldType() != null) upd.setFieldType(item.getFieldType());
-                    if (maxLength != null) {
-                        upd.setDataLength(maxLength);
-                    }
-                    if (item.getDecimalPlaces() != null) upd.setDecimalPlaces(item.getDecimalPlaces());
-                    if (item.getDefaultValue() != null) upd.setDefaultValue(item.getDefaultValue());
-                    if (item.getDescription() != null) upd.setDescription(item.getDescription());
-                    if (item.getIsRequired() != null) upd.setIsRequired(item.getIsRequired());
-                    if (item.getIsUnique() != null) upd.setIsUnique(item.getIsUnique());
-                    if (item.getSortOrder() != null) upd.setSortOrder(item.getSortOrder());
-                    if (item.getIsSystemField() != null) upd.setIsSystemField(item.getIsSystemField());
-                    if (item.getDictTypeId() != null) {
-                        upd.setDictTypeId(item.getDictTypeId());
-                    }
-
-                    metadataEntityFieldRepository.update(upd);
-
-                    // 收集物理表更新操作
-                    if (datasource != null && businessEntity.getTableName() != null) {
-                        // 若字段名变更，先收集重命名操作
-                        if (item.getFieldName() != null && !item.getFieldName().equals(existingField.getFieldName())) {
-                            PhysicalTableOperation renameOp = new PhysicalTableOperation();
-                            renameOp.setOperationType("RENAME");
-                            renameOp.setOldFieldName(existingField.getFieldName());
-                            renameOp.setFieldName(item.getFieldName());
-                            physicalTableOps.add(renameOp);
-                        }
-                        
-                        DefaultConfigStore cs2 = new DefaultConfigStore();
-                        cs2.and("id", existingField.getId());
-                        MetadataEntityFieldDO full = metadataEntityFieldRepository.findOne(cs2);
-                        PhysicalTableOperation alterOp = new PhysicalTableOperation();
-                        alterOp.setOperationType("ALTER");
-                        alterOp.setFieldInfo(full);
-                        physicalTableOps.add(alterOp);
-                    }
-                    resp.getUpdatedIds().add(existingField.getId().toString());
-                    
-                    // 同步选项、约束和自动编号（使用智能更新逻辑）
-                    Long fieldId = existingField.getId();
-                    DefaultConfigStore cs2 = new DefaultConfigStore();
-                    cs2.and("id", existingField.getId());
-                    MetadataEntityFieldDO full = metadataEntityFieldRepository.findOne(cs2);
-                    processFieldRelatedData(fieldId, full, item.getOptions(), item.getConstraints(), item.getAutoNumber());
-                    
-                    if (item.getIsRequired() != null && !item.getIsRequired().equals(existingField.getIsRequired())) {
-                        processRequiredValidation(fieldId, full);
-                    }
-                    
-                    if (item.getIsUnique() != null && !item.getIsUnique().equals(existingField.getIsUnique())) {
-                        processUniqueValidation(fieldId, full);
-                    }
-                    
-                    boolean hasConstraintsLengthConfig = item.getConstraints() != null && 
-                        (item.getConstraints().getLengthEnabled() != null || 
-                         item.getConstraints().getMinLength() != null || 
-                         item.getConstraints().getMaxLength() != null ||
-                         StringUtils.hasText(item.getConstraints().getLengthPrompt()));
-                    if (maxLength != null && !maxLength.equals(existingField.getDataLength()) && !hasConstraintsLengthConfig) {
-                        processLengthValidation(fieldId, full);
-                    }
-                    
-                    validateValidationRuleUniqueness(fieldId, existingField.getEntityId());
-                    
-                    continue; // 跳过新增逻辑
-                }
-
-                // 确实是新增字段的情况
+                // 新增字段的情况
                 validateEntityFieldNameUnique(null, reqVO.getEntityId(), item.getFieldName());
                 validateEntityFieldDisplayNameUnique(null, reqVO.getEntityId(), item.getDisplayName());
                 validateEntityAllowModifyStructure(Long.valueOf(reqVO.getEntityId()));
@@ -1406,6 +1318,16 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         try {
             log.info("检查表是否存在 - 表名: {}", tableName);
 
+            // 关键修复：清除Anyline的元数据缓存
+            // Anyline会缓存表结构信息(默认缓存24小时)，导致刚创建的表查询不到
+            // 使用CacheProxy.clear()清除缓存，强制重新从数据库查询最新的表结构
+            try {
+                org.anyline.proxy.CacheProxy.clear();
+                log.debug("已清除Anyline元数据缓存");
+            } catch (Exception e) {
+                log.warn("清除Anyline元数据缓存失败: {}", e.getMessage());
+            }
+
             // 使用Anyline元数据API，跨数据库兼容
             // Anyline会自动处理不同数据库的元数据查询和标识符大小写问题
             Table<?> table = service.metadata().table(tableName);
@@ -1541,7 +1463,8 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
     /**
      * 修改表中的列
      * 
-     * 注意:调用此方法时,field必定已经有ID,说明是已存在的字段,因此无需再检查列是否存在
+     * 说明：即使field有ID，也需要检查物理表中列是否真实存在
+     * 因为可能存在元数据与物理表不一致的情况（如之前物理表操作失败、表被手动重建等）
      */
     private void alterColumnInTable(MetadataDatasourceDO datasource, String tableName, MetadataEntityFieldDO field) {
         try {
@@ -1555,15 +1478,24 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                     throw new RuntimeException("表 " + tableName + " 不存在，请先创建表");
                 }
 
-                // 简化逻辑:如果field有ID,说明是已存在的字段,直接执行ALTER操作
-                // 不再需要checkColumnExists检查,因为前端传递的参数中有字段ID就表示该字段已存在
-                log.info("准备修改表 {} 的列: {}, 字段ID: {}", tableName, field.getFieldName(), field.getId());
+                // 关键修复：必须检查列是否存在，避免元数据与物理表不一致导致的问题
+                boolean columnExists = checkColumnExists(service, tableName, field.getFieldName());
                 
-                // 生成并执行修改列 DDL（传入数据库类型以生成兼容的SQL）
-                String alterColumnDDL = generateAlterColumnDDL(datasource.getDatasourceType(), tableName, field);
-                service.execute(alterColumnDDL);
+                if (!columnExists) {
+                    // 列不存在，应该使用ADD操作而非ALTER
+                    log.warn("准备修改表 {} 的列 {} 时发现列不存在（字段ID: {}），将改为新增列操作", 
+                            tableName, field.getFieldName(), field.getId());
+                    addColumnToTable(datasource, tableName, field);
+                } else {
+                    // 列存在，正常执行ALTER操作
+                    log.info("准备修改表 {} 的列: {}, 字段ID: {}", tableName, field.getFieldName(), field.getId());
+                    
+                    // 生成并执行修改列 DDL（传入数据库类型以生成兼容的SQL）
+                    String alterColumnDDL = generateAlterColumnDDL(datasource.getDatasourceType(), tableName, field);
+                    service.execute(alterColumnDDL);
 
-                log.info("成功修改表 {} 的列: {}", tableName, field.getFieldName());
+                    log.info("成功修改表 {} 的列: {}", tableName, field.getFieldName());
+                }
                 return null;
             });
         } catch (Exception e) {

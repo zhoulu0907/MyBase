@@ -20,7 +20,7 @@ import java.util.Map;
 @Schema(description = "动态数据更新请求VO")
 public class DynamicDataUpdateReqVO {
 
-    @Schema(description = "菜单ID", requiredMode = Schema.RequiredMode.REQUIRED)
+//    @Schema(description = "菜单ID", requiredMode = Schema.RequiredMode.REQUIRED)
 //    @NotNull(message = "菜单ID不能为空")
     private Long menuId;
 

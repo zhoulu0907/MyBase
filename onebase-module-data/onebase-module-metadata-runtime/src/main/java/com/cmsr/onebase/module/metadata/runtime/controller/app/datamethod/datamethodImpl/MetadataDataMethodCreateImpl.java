@@ -22,10 +22,12 @@ import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.vo.Pro
 import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.vo.SubEntityVo;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.anyline.data.transaction.TransactionState;
 import org.anyline.entity.DataRow;
 import org.anyline.service.AnylineService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
@@ -330,12 +332,24 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
                     log.info("DataRow中字段 {} 的值为null", key);
                 }
             });
-            
+
+            // AnyLine开启事务
+            TransactionState transactionState = temporaryService.start();
+
             Object insertResult = temporaryService.insert(quoteTableName(entity.getTableName()), dataRow);
             log.info("创建数据成功，实体ID: {}, 表名: {}, 插入结果: {}", entityId, entity.getTableName(), insertResult);
 
-
-            super.storeData(context);
+            try {
+                super.storeData(context);// 子表处理创建嵌套内部事务
+                log.info("子表处理完成，准备提交事务");
+                // 子表处理完成 提交事务
+                temporaryService.commit(transactionState);
+            }catch (Exception e){
+                log.info("子表处理出现异常，准备回滚事务：{}",e.getMessage());
+                // 子表处理出现异常 回滚事务
+                temporaryService.rollback(transactionState);
+                throw exception(DB_SUBENTITY_OPERATION_ERROR,e.getMessage());
+            }
 
             // 8. 查询插入后的完整数据
             Object primaryKeyValue = getPrimaryKeyValue(processedData, fields);

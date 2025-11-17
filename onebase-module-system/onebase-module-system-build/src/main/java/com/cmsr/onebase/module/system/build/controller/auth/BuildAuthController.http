@@ -25,6 +25,7 @@ if (response.status === 200) {
 }
 %}
 
+
 ### 请求 /admin-login 接口 => 成功
 POST {{baseUrl}}/system/auth/admin-login
 Content-Type: application/json
@@ -58,13 +59,32 @@ tag: {{tag}}
   "password": "test"
 }
 
+
+### 请求 /login 接口 => 成功
+POST {{baseUrl}}/system/auth/corp-login
+Content-Type: application/json
+tenant-id: {{adminTenantId}}
+tag: {{tag}}
+
+{
+  "username": "admin",
+  "password": "admin123",
+   "corpId": "100"
+}
+
+> {%
+    // 登录成功后自动更新token到环境变量
+    if (response.status === 200) {
+        const responseData = response.body;
+        if (responseData.code === 0 && responseData.data && responseData.data.accessToken) {
+            client.global.set("token", responseData.data.accessToken);
+            console.log("Token已更新: " + responseData.data.accessToken);
+        }
+    }
+%}
+
 ### 请求 /get-permission-info 接口 => 成功
 GET {{baseUrl}}/system/auth/get-permission-info?code=tenant
-Authorization: Bearer {{token}}
-tenant-id: {{adminTenantId}}
-
-### 请求 /list-menus 接口 => 成功
-GET {{baseUrl}}/system/list-menus
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
@@ -80,3 +100,27 @@ tag: {{tag}}
   "userId": "544417214451814400",
   "password": "admin125"
 }
+
+
+
+### 所租户login 接口 => 成功
+POST {{baseUrl}}/system/auth/login
+Content-Type: application/json
+tenant-id: {{adminTenantId}}
+tag: {{tag}}
+
+{
+  "username": "admin",
+  "password": "admin123"
+}
+
+> {%
+    // 登录成功后自动更新token到环境变量
+    if (response.status === 200) {
+        const responseData = response.body;
+        if (responseData.code === 0 && responseData.data && responseData.data.accessToken) {
+            client.global.set("token", responseData.data.accessToken);
+            console.log("Token已更新: " + responseData.data.accessToken);
+        }
+    }
+%}

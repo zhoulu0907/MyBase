@@ -16,22 +16,32 @@ import java.time.LocalDateTime;
 @Data
 @Table(name = "bpm_flow_agent")
 public class BpmFlowAgentDO extends TenantBaseDO {
+    public static final String PRINCIPAL_ID = "principal_id";
+
+    public static final String APP_ID = "app_id";
+
+    public static final String START_TIME = "start_time";
+
+    public static final String END_TIME = "end_time";
+
     /**
      * 应用ID
      */
-    @Column(name = "app_id", length = 100)
+    @Column(name = APP_ID, length = 100)
     private Long appId;
 
     /**
      * 被代理人用户ID
      */
-    @Column(name = "principal_id")
+    @Column(name = PRINCIPAL_ID)
     private Long principalId;
-    /*
+
+    /**
     *被代理人用户名称
      */
     @Column(name = "principal_name")
     private String principalName;
+
     /**
      * 代理人用户ID
      */
@@ -47,13 +57,13 @@ public class BpmFlowAgentDO extends TenantBaseDO {
     /**
      * 代理开始时间
      */
-    @Column(name = "start_time")
+    @Column(name = START_TIME)
     private LocalDateTime startTime;
 
     /**
      * 代理结束时间
      */
-    @Column(name = "end_time")
+    @Column(name = END_TIME)
     private LocalDateTime endTime;
 
     /**

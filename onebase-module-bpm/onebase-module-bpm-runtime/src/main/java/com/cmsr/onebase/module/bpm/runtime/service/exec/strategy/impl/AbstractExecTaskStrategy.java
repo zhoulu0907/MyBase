@@ -12,7 +12,9 @@ import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldRespDTO;
 import com.cmsr.onebase.module.metadata.core.enums.OpEnum;
 import jakarta.annotation.Resource;
 import org.apache.commons.collections4.CollectionUtils;
+import org.dromara.warm.flow.core.service.HisTaskService;
 import org.dromara.warm.flow.core.service.TaskService;
+import org.dromara.warm.flow.core.service.UserService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,6 +31,12 @@ import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionU
 public abstract class AbstractExecTaskStrategy<T extends BaseNodeExtDTO> implements ExecTaskStrategy<T> {
     @Resource
     protected TaskService taskService;
+
+    @Resource
+    protected HisTaskService hisTaskService;
+
+    @Resource
+    protected UserService userService;
 
     @Resource
     protected DataMethodApi dataMethodApi;

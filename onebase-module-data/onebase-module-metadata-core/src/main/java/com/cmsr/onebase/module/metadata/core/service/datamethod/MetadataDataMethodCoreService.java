@@ -61,7 +61,7 @@ public interface MetadataDataMethodCoreService {
      */
     PageResult<Map<String, Object>> getDataPage(Long entityId, Integer pageNo, Integer pageSize,
                                                String sortField, String sortDirection,
-                                               Map<String, Object> filters, String methodCode);
+                                               Map<String, Object> filters, String methodCode, Long menuId);
 
     /**
      * OR 复合条件分页查询（单SQL实现 (group1) OR (group2) ... ）

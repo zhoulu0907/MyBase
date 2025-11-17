@@ -9,6 +9,7 @@ import com.cmsr.onebase.module.etl.common.graph.conf.*;
 import com.cmsr.onebase.module.etl.executor.provider.dao.EtlDataSource;
 import com.cmsr.onebase.module.etl.executor.provider.dao.EtlFlinkMapping;
 import com.cmsr.onebase.module.etl.executor.provider.dao.EtlTable;
+import com.cmsr.onebase.module.etl.executor.provider.dao.EtlWorkflow;
 import com.cmsr.onebase.module.etl.executor.util.JacksonUtil;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
@@ -26,23 +27,20 @@ public class WorkflowProvider {
 
     private QueryProvider queryProvider;
 
-    /**
-     * 从数据库里面获得配置，并且补充完整信息，然后转换为工作流图
-     *
-     * @param workflowId
-     * @return
-     */
-    public WorkflowGraph getWorkflowGraph(Long workflowId) throws Exception {
-        String workflowGraphJson = queryProvider.findWorkflowConfig(workflowId);
-        WorkflowGraph workflowGraph = JacksonUtil.fromJson(workflowGraphJson, WorkflowGraph.class);
-        complementGraphInformation(workflowGraph);
-        return workflowGraph;
+
+    public WorkflowGraph createSubWorkflowGraph(String graphJson, String nodeId) throws Exception {
+        WorkflowGraph graph = JacksonUtil.readValue(graphJson, WorkflowGraph.class);
+        WorkflowGraph subgraph = graph.subgraph(nodeId);
+        complementGraphInformation(subgraph);
+        return subgraph;
     }
 
-    public WorkflowGraph getWorkflowGraph(WorkflowGraph workflowGraph) throws Exception {
-        complementGraphInformation(workflowGraph);
-        return workflowGraph;
+    public WorkflowGraph createWorkflowGraph(String graphJson) throws Exception {
+        WorkflowGraph graph = JacksonUtil.fromJson(graphJson, WorkflowGraph.class);
+        complementGraphInformation(graph);
+        return graph;
     }
+
 
     private void complementGraphInformation(WorkflowGraph workflowGraph) throws Exception {
         for (Node node : workflowGraph.getNodes()) {

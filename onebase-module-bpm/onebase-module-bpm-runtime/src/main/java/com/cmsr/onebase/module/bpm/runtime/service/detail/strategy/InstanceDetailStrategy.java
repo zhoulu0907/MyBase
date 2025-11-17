@@ -1,9 +1,8 @@
 package com.cmsr.onebase.module.bpm.runtime.service.detail.strategy;
 
 import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
-import com.cmsr.onebase.module.bpm.runtime.vo.BpmFlowTaskDetailVO;
+import com.cmsr.onebase.module.bpm.runtime.vo.BpmTaskDetailRespVO;
 import org.dromara.warm.flow.core.entity.Instance;
-import org.dromara.warm.flow.core.entity.Task;
 
 /**
  * 流程实例详情策略接口
@@ -33,6 +32,6 @@ public interface InstanceDetailStrategy<T extends BaseNodeExtDTO> {
      * @param instance 流程实例
      * @param loginUserId 登录用户ID
      */
-    void fillDetail(BpmFlowTaskDetailVO vo, T extDTO, Task task, Instance instance, Long loginUserId);
+    void fillDetail(BpmTaskDetailRespVO vo, T extDTO, Instance instance, Long loginUserId, boolean isTodo);
 }
 
