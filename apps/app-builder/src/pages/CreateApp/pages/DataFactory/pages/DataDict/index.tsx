@@ -16,6 +16,7 @@ const DataDictPage: React.FC = () => {
     },
     tabs: {
       enabled: true,
+      defaultTabKey: 'app',
       customDictTab: {
         key: 'app',
         title: '自定义字典'
@@ -38,7 +39,8 @@ const DataDictPage: React.FC = () => {
         title: '系统字典'
         // 系统字典使用默认的API和权限
       }
-    }
+    },
+    isHideTenantAddDictButton: true
   };
 
   const handleDictChange = (dict: any) => {

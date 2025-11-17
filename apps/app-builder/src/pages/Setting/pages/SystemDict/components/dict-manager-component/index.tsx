@@ -76,6 +76,7 @@ export interface DictManagerConfig {
   // Tabs 配置
   tabs?: {
     enabled?: boolean;
+    defaultTabKey?: string;
     systemDictTab?: {
       key: string;
       title: string;
@@ -92,6 +93,8 @@ export interface DictManagerConfig {
   // 样式配置
   className?: string;
   style?: React.CSSProperties;
+  // 其他配置
+  isHideTenantAddDictButton?: boolean; // 是否隐藏系统字典添加字典按钮
 }
 
 interface DictManagerProps {
@@ -141,6 +144,7 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
     },
     tabs: {
       enabled: false,
+      defaultTabKey: 'tenant',
       customDictTab: {
         key: 'app',
         title: '自定义字典',
@@ -155,11 +159,12 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
     },
     className: '',
     style: {},
+    isHideTenantAddDictButton: false,
     ...config
   };
 
   // Tabs 相关状态
-  const [activeTab, setActiveTab] = useState<string>(finalConfig.tabs.systemDictTab?.key || '');
+  const [activeTab, setActiveTab] = useState<string>(finalConfig.tabs?.defaultTabKey || '');
   // 字典相关状态
   const [dictList, setDictList] = useState<DictItem[]>([]);
   const [activeDictId, setActiveDictId] = useState<string | undefined>(undefined);
@@ -538,6 +543,7 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
                       setEditDict(null);
                     }}
                     onSelect={(id) => handleDictSelect(id)}
+                    isHideTenantAddDictButton={finalConfig?.isHideTenantAddDictButton}
                   />
                 </Tabs.TabPane>
               )}
