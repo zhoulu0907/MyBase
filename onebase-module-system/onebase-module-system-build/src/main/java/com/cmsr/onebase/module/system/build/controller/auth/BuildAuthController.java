@@ -39,8 +39,8 @@ import static com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUti
 
 /**
  *  编辑态登录认证相关接口
- *  1. 空间登录
- *  2. 企业登录
+ *  1. 空间登录 tenant-login
+ *  2. 企业登录 corp-login
  *
  *  @author matianyu
  *  @date 2025-11
@@ -69,6 +69,7 @@ public class BuildAuthController {
     @PostMapping("/admin-login")
     @PermitAll
     @Operation(summary = "使用账号密码登录")
+    @Deprecated //todo 之后删除
     public CommonResult<AuthLoginRespVO> adminLogin(@RequestBody @Valid UserLoginReqVO reqVO) {
         return success(authService.adminLogin(reqVO));
     }
@@ -76,13 +77,21 @@ public class BuildAuthController {
     @PostMapping("/login")
     @PermitAll
     @Operation(summary = "使用账号密码登录")
+    @Deprecated // todo 之后删除
     public CommonResult<AuthLoginRespVO> login(@RequestBody @Valid AuthLoginReqVO reqVO) {
+        return success(authService.login(reqVO));
+    }
+
+    @PostMapping("/tenant-login")
+    @PermitAll
+    @Operation(summary = "空间登录（账密）")
+    public CommonResult<AuthLoginRespVO> tenantLogin(@RequestBody @Valid AuthLoginReqVO reqVO) {
         return success(authService.login(reqVO));
     }
 
     @PostMapping("/corp-login")
     @PermitAll
-    @Operation(summary = "使用账号密码登录")
+    @Operation(summary = "企业登录（手机号）")
     public CommonResult<AuthLoginRespVO> corpLogin(@RequestBody @Valid CorpAuthLoginReqVO reqVO) {
         return success(authService.corpLogin(reqVO));
     }

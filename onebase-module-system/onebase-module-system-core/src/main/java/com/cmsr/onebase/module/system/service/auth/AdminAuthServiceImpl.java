@@ -8,6 +8,9 @@ import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
+import com.cmsr.onebase.module.infra.api.security.SecurityConfigApi;
+import com.cmsr.onebase.module.infra.api.security.dto.LoginFailureResultDTO;
+import com.cmsr.onebase.module.infra.api.security.dto.PasswordExpiryCheckDTO;
 import com.cmsr.onebase.module.system.api.logger.dto.LoginLogCreateReqDTO;
 import com.cmsr.onebase.module.system.api.sms.SmsCodeApi;
 import com.cmsr.onebase.module.system.convert.auth.AuthConvert;
@@ -82,26 +85,55 @@ public class AdminAuthServiceImpl implements AdminAuthService {
     private TenantService tenantService;
     @Resource
     private PermissionService permissionService;
+    @Resource
+    private SecurityConfigApi securityConfigApi;
 
     @Override
     public AdminUserDO authenticate(String username, String password) {
         final LoginLogTypeEnum logTypeEnum = LoginLogTypeEnum.LOGIN_USERNAME;
         // 校验账号是否存在
         AdminUserDO user = userService.getUserByUsername(username);
+        checkUserPsdAndStatus(username, password, user, logTypeEnum);
+        return user;
+    }
+
+    public AdminUserDO mobileAuthenticate(String mobile, String password) {
+        final LoginLogTypeEnum logTypeEnum = LoginLogTypeEnum.LOGIN_USERNAME;
+        // 校验账号是否存在
+        AdminUserDO user = userService.getUserByMobile(mobile);
+        checkUserPsdAndStatus(mobile, password, user, logTypeEnum);
+        return user;
+    }
+
+    private void checkUserPsdAndStatus(String account, String password, AdminUserDO user, LoginLogTypeEnum logTypeEnum) {
         if (user == null) {
-            createLoginLog(null, username, logTypeEnum, LoginResultEnum.BAD_CREDENTIALS);
+            createLoginLog(null, account, logTypeEnum, LoginResultEnum.BAD_CREDENTIALS);
             throw exception(AUTH_LOGIN_BAD_CREDENTIALS);
         }
-        if (!userService.isPasswordMatch(password, user.getPassword())) {
-            createLoginLog(user.getId(), username, logTypeEnum, LoginResultEnum.BAD_CREDENTIALS);
-            throw exception(AUTH_LOGIN_BAD_CREDENTIALS);
+        
+        Long userId = user.getId();
+
+        // 检查账号是否被防暴力破解锁定
+        securityConfigApi.checkAccountLocked(userId);
+
+        // 验证密码
+        boolean passwordMatched = userService.isPasswordMatch(password, user.getPassword());
+        if (!passwordMatched) {
+            // 密码错误，记录失败次数并获取返回结果
+            LoginFailureResultDTO failureResult = securityConfigApi.recordLoginFailure(userId).getData();
+            createLoginLog(userId, account, logTypeEnum, LoginResultEnum.BAD_CREDENTIALS);
+            // 使用失败记录中的提示信息作为错误信息参数
+            throw exception(AUTH_LOGIN_BAD_CREDENTIALS, failureResult.getMessage());
         }
+
+        // 密码正确，清除失败记录
+        securityConfigApi.clearLoginFailureRecord(userId);
+
         // 校验是否禁用
         if (CommonStatusEnum.isDisable(user.getStatus())) {
-            createLoginLog(user.getId(), username, logTypeEnum, LoginResultEnum.USER_DISABLED);
+            createLoginLog(userId, account, logTypeEnum, LoginResultEnum.USER_DISABLED);
             throw exception(AUTH_LOGIN_USER_DISABLED);
         }
-        return user;
     }
 
 
@@ -147,23 +179,17 @@ public class AdminAuthServiceImpl implements AdminAuthService {
 
         // 使用账号密码，进行登录
         AdminUserDO user = authenticate(reqVO.getUsername(), reqVO.getPassword());
-
-        // 如果 socialType 非空，说明需要绑定社交用户
-        // if (reqVO.getSocialType() != null) {
-        //     socialUserService.bindSocialUser(new SocialUserBindReqDTO(user.getId(), getUserType().getValue(),
-        //             reqVO.getSocialType(), reqVO.getSocialCode(), reqVO.getSocialState()));
-        // }
-        // 创建 Token 令牌，记录登录日志
         return createTokenAfterLoginSuccess(user.getId(), reqVO.getUsername(), LoginLogTypeEnum.LOGIN_USERNAME);
     }
 
     @Override
     public AuthLoginRespVO corpLogin(CorpAuthLoginReqVO reqVO) {
         // 校验验证码
-        validateCaptcha(reqVO);
+        mobileValidateCaptcha(reqVO);
+
         // 2. 使用账号密码，进行登录
-        AdminUserDO user = authenticate(reqVO.getUsername(), reqVO.getPassword());
-        return createCorpAfterLoginSuccess(reqVO.getCorpId(), user.getId(), reqVO.getUsername(), LoginLogTypeEnum.LOGIN_USERNAME);
+        AdminUserDO user = mobileAuthenticate(reqVO.getMobile(), reqVO.getPassword());
+        return createCorpAfterLoginSuccess(reqVO.getCorpId(), user.getId(), reqVO.getMobile(), LoginLogTypeEnum.LOGIN_MOBILE);
     }
 
     @Override
@@ -218,13 +244,22 @@ public class AdminAuthServiceImpl implements AdminAuthService {
         }
     }
 
-    @VisibleForTesting
     void validateCaptcha(UserLoginReqVO reqVO) {
         ResponseModel response = doValidateCaptcha(reqVO);
         // 校验验证码
         if (!response.isSuccess()) {
             // 创建登录失败日志（验证码不正确)
             createLoginLog(null, reqVO.getUsername(), LoginLogTypeEnum.LOGIN_USERNAME, LoginResultEnum.CAPTCHA_CODE_ERROR);
+            throw exception(AUTH_LOGIN_CAPTCHA_CODE_ERROR, response.getRepMsg());
+        }
+    }
+
+    void mobileValidateCaptcha(MobileLoginReqVO reqVO) {
+        ResponseModel response = doValidateCaptcha(reqVO);
+        // 校验验证码
+        if (!response.isSuccess()) {
+            // 创建登录失败日志（验证码不正确)
+            createLoginLog(null, reqVO.getMobile(), LoginLogTypeEnum.LOGIN_USERNAME, LoginResultEnum.CAPTCHA_CODE_ERROR);
             throw exception(AUTH_LOGIN_CAPTCHA_CODE_ERROR, response.getRepMsg());
         }
     }
@@ -253,7 +288,13 @@ public class AdminAuthServiceImpl implements AdminAuthService {
 
         TenantDO tennantDO = tenantService.getTenant(accessTokenDO.getTenantId());
         // 构建返回结果
-        return AuthConvert.INSTANCE.convert(accessTokenDO, tennantDO);
+        AuthLoginRespVO respVO = AuthConvert.INSTANCE.convert(accessTokenDO, tennantDO);
+
+        // 检查密码有效期
+        PasswordExpiryCheckDTO expiryCheckResult = securityConfigApi.checkPasswordExpiry(userId).getData();
+        respVO.setPasswordExpiryInfo(expiryCheckResult);
+
+        return respVO;
     }
 
     @Override

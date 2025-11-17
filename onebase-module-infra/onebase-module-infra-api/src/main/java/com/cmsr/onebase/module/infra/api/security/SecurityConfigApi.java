@@ -1,6 +1,8 @@
 package com.cmsr.onebase.module.infra.api.security;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.module.infra.api.security.dto.PasswordExpiryCheckDTO;
+import com.cmsr.onebase.module.infra.api.security.dto.LoginFailureResultDTO;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -61,5 +63,53 @@ public interface SecurityConfigApi {
     @PostMapping("/save-history")
     CommonResult<Boolean> savePasswordHistory(@RequestParam("userId") Long userId,
                                                @RequestParam("encodedPassword") String encodedPassword);
+
+    /**
+     * 检查密码有效期
+     * 
+     * 查询用户最近一次密码记录的创建时间，计算密码年龄
+     * 与租户配置的expiryDays比较，判断密码是否已过期
+     *
+     * @param userId 用户ID
+     * @return 检查结果DTO，包含type(expired/valid)、过期天数、提示信息等
+     */
+    @PostMapping("/check-expiry")
+    CommonResult<PasswordExpiryCheckDTO> checkPasswordExpiry(@RequestParam("userId") Long userId);
+
+    /**
+     * 检查账号是否被锁定
+     * 
+     * 检查指定用户账号是否因登录失败次数过多而被锁定
+     * 如果已锁定，返回剩余锁定时间（秒）
+     *
+     * @param userId 用户ID
+     * @return 剩余锁定时间（秒），null表示未锁定
+     */
+    @PostMapping("/check-locked")
+    CommonResult<Long> checkAccountLocked(@RequestParam("userId") Long userId);
+
+    /**
+     * 记录登录失败
+     * 
+     * 记录用户登录失败，增加失败次数
+     * 如果失败次数达到阈值，自动锁定账号
+     * 返回处理结果，包含是否锁定、剩余尝试次数、剩余锁定时间等信息
+     *
+     * @param userId 用户ID
+     * @return 失败处理结果
+     */
+    @PostMapping("/record-failure")
+    CommonResult<LoginFailureResultDTO> recordLoginFailure(@RequestParam("userId") Long userId);
+
+    /**
+     * 清除登录失败记录
+     * 
+     * 用户登录成功后，清除失败次数记录和锁定状态
+     *
+     * @param userId 用户ID
+     * @return 操作结果
+     */
+    @PostMapping("/clear-failure")
+    CommonResult<Boolean> clearLoginFailureRecord(@RequestParam("userId") Long userId);
 
 }

@@ -4,11 +4,13 @@ import com.cmsr.onebase.framework.common.enums.CommonPublishModelEnum;
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.uid.UidGenerator;
 import com.cmsr.onebase.module.app.api.app.dto.UserPhotoDTO;
 import com.cmsr.onebase.module.app.build.service.AppCommonService;
 import com.cmsr.onebase.module.app.build.service.auth.AppAuthRoleService;
+import com.cmsr.onebase.module.app.build.service.version.AppVersionService;
 import com.cmsr.onebase.module.app.build.util.AppUtils;
 import com.cmsr.onebase.module.app.build.util.VersionUtils;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateReqVO;
@@ -25,8 +27,10 @@ import com.cmsr.onebase.module.app.core.dal.database.tag.AppTagRepository;
 import com.cmsr.onebase.module.app.core.dal.database.version.AppVersionRepository;
 import com.cmsr.onebase.module.app.core.dal.database.version.AppVersionResourceRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.app.ApplicationDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.version.VersionDO;
 import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.core.enums.app.ApplicationStatusEnum;
+import com.cmsr.onebase.module.app.core.enums.app.DevelopStatusEnum;
 import com.cmsr.onebase.module.app.core.vo.app.ApplicationPageReqVO;
 import com.cmsr.onebase.module.metadata.api.datasource.MetadataDatasourceApi;
 import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceCreateDefaultReqDTO;
@@ -34,6 +38,8 @@ import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceSaveReqDTO;
 import jakarta.annotation.Resource;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.DataRow;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +47,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -94,6 +102,9 @@ public class AppApplicationServiceImpl implements AppApplicationService {
     @Autowired
     private AppSqlQueryRepository appSqlQueryRepository;
 
+    @Resource
+    private AppVersionService appVersionService;
+
     @Override
     public PageResult<ApplicationRespVO> getApplicationPage(ApplicationPageReqVO pageReqVO) {
         PageResult<ApplicationDO> pageResult = applicationRepository.selectPage(pageReqVO);
@@ -103,7 +114,8 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         List<Long> appIds = pageResult.getList().stream()
                 .map(ApplicationDO::getId)
                 .collect(Collectors.toList());
-        Map<Long, List<UserPhotoDTO>> userListMap = appSqlQueryRepository.findUserPhotoList(appIds);
+         Map<Long,List<UserPhotoDTO>> userListMap=appSqlQueryRepository.findUserPhotoList(appIds);
+        Map<Long, VersionDO> developStatusMap=appVersionService.findVersionMapByAppIds(appIds);
 
         List<ApplicationRespVO> respVOS = pageResult.getList().stream()
                 .map(v -> {
@@ -113,6 +125,10 @@ public class AppApplicationServiceImpl implements AppApplicationService {
                     bean.setCreateUser(userHelper.getUserNickname(v.getCreator()));
                     bean.setUpdateUser(userHelper.getUserNickname(v.getUpdater()));
                     bean.setUserPhotoList(userListMap.get(v.getId()));
+                    if(developStatusMap.get(v.getId()) != null) {
+                        VersionDO versionDO = developStatusMap.get(v.getId());
+                        bean.setDevelopStatus(getDevelopStatus(v, versionDO));
+                    }
                     return bean;
                 })
                 .toList();

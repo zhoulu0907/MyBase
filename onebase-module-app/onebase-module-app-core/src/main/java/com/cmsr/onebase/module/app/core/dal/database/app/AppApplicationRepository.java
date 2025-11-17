@@ -7,6 +7,7 @@ import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.framework.security.core.LoginUser;
 import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import com.cmsr.onebase.module.app.core.dal.dataobject.app.ApplicationDO;
+import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.core.vo.app.ApplicationPageReqVO;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
@@ -15,9 +16,10 @@ import org.anyline.entity.Order;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
-
 import java.util.Collection;
 import java.util.List;
+
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 
 /**
  * @Author：huangjie
@@ -38,9 +40,13 @@ public class AppApplicationRepository extends DataRepository<ApplicationDO> {
         if (pageReqVO.getStatus() != null) {
             configs.and(Compare.EQUAL, ApplicationDO.APP_STATUS, pageReqVO.getStatus());
         }
-        if(pageReqVO.getOwnerTag()!=null && pageReqVO.getOwnerTag().equals(OwnerTagEnum.MY.getValue())){
+
+        if (StringUtils.isNotBlank(pageReqVO.getPublishModel())) {
+            configs.and(Compare.EQUAL, ApplicationDO.PUBLISH_MODEL, pageReqVO.getPublishModel());
+        }
+        if (pageReqVO.getOwnerTag() != null && pageReqVO.getOwnerTag().equals(OwnerTagEnum.MY.getValue())) {
             LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
-            if(loginUser!=null){
+            if (loginUser != null) {
                 configs.and(Compare.EQUAL, ApplicationDO.CREATOR, loginUser.getId());
             }
         }
@@ -95,7 +101,7 @@ public class AppApplicationRepository extends DataRepository<ApplicationDO> {
     public List<ApplicationDO> findAppApplicationByAppName(String appName) {
         ConfigStore configStore = new DefaultConfigStore();
         if (StringUtils.isNotBlank(appName)) {
-            configStore.and(Compare.LIKE, ApplicationDO.APP_NAME,  appName);
+            configStore.and(Compare.LIKE, ApplicationDO.APP_NAME, appName);
         }
         configStore.order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
         return findAllByConfig(configStore);
@@ -110,7 +116,7 @@ public class AppApplicationRepository extends DataRepository<ApplicationDO> {
     public List<ApplicationDO> findAppApplicationByAppIds(Collection<Long> appIds) {
         ConfigStore configStore = new DefaultConfigStore();
         if (CollectionUtils.isNotEmpty(appIds)) {
-            configStore.in(ApplicationDO.ID,  appIds);
+            configStore.in(ApplicationDO.ID, appIds);
         }
         configStore.order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
         return findAllByConfig(configStore);
@@ -119,12 +125,13 @@ public class AppApplicationRepository extends DataRepository<ApplicationDO> {
     public List<ApplicationDO> findMyAppApplicationByAppName(String appName) {
         ConfigStore configStore = new DefaultConfigStore();
         if (StringUtils.isNotBlank(appName)) {
-            configStore.and(Compare.LIKE, ApplicationDO.APP_NAME,  appName);
+            configStore.and(Compare.LIKE, ApplicationDO.APP_NAME, appName);
         }
         LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
-        if(loginUser!=null){
-            configStore.and(Compare.EQUAL, ApplicationDO.CREATOR, loginUser.getId());
+        if (loginUser == null) {
+            throw exception(AppErrorCodeConstants.NOT_LOGIN);
         }
+        configStore.and(Compare.EQUAL, ApplicationDO.CREATOR, loginUser.getId());
         configStore.order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
         return findAllByConfig(configStore);
     }
