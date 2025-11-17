@@ -19,14 +19,6 @@ export const approverConfigVar:any = {
     d: 'd_sign'
   }
 };
-export const approvalConfigVar:any = {
-  approvalMode: {
-    'counter_sign': '会签（所有人同意才通过）',
-    'any_sign': '或签（一人同意即通过）',
-    'c_sign': '依次审批（按顺序依次审批）',
-    'd_sign': '投票（按投票比例决定是否通过）'
-  }
-};
 
 export enum ApproveDrawerTab {
   APPROVER = 'approver',

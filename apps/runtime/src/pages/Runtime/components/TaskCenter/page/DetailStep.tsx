@@ -1,10 +1,10 @@
 import { useEffect, useState, type FC } from 'react';
 import { Steps, Avatar } from '@arco-design/web-react';
-import { IconDownload, IconEye } from '@arco-design/web-react/icon';
+// import { IconDownload, IconEye } from '@arco-design/web-react/icon';
 import dayjs from 'dayjs';
-import ExpendSp from '@/assets/images/task_center/expend-sp.svg';
+// import ExpendSp from '@/assets/images/task_center/expend-sp.svg';
 import '../style/tcPage.less';
-import {approvalConfigVar} from '../../../../../../../app-builder/src/pages/Editor/freeLayout/components/sidebar/components/approver/constant'
+import {approvalConfigVar} from '../constant'
 
 
 const Step = Steps.Step;
@@ -124,7 +124,7 @@ const DetailStep: FC<any> = ({ stepData }: any) => {
         <p className="flex-bw-center date-line">
           <span className="sp-options" style={{padding: '5px 0px 8px'}}>
             <b>{nodeItem?.displayStatus}</b>
-            <span>·{nodeItem?.approvalMode && approvalConfigVar.approvalMode[nodeItem?.approvalMode]}（会签）</span>
+            <span>·多人审批{nodeItem?.approveMode && `（${approvalConfigVar.approvalMode[nodeItem?.approveMode]}）`}</span>
           </span>
           <span className="gray-color">
             {opperator?.operatorTime
