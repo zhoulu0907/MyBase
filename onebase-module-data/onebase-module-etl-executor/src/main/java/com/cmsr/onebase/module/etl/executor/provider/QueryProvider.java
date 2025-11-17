@@ -32,20 +32,21 @@ public class QueryProvider {
         }, workflowId, 0);
     }
 
-    public EtlTable findTableById(Long datasourceId, Long tableId) throws Exception {
+    public EtlTable findTableById(Long tableId) throws Exception {
         String sql = """
-                select table_name, meta_info from etl_table where id = ? and datasource_id = ? and deleted = ?
+                select datasource_id, table_name, meta_info from etl_table where id = ?  and deleted = ?
                 """;
         return runner.query(sql, resultSet -> {
                     EtlTable etlTable = new EtlTable();
                     if (resultSet.next()) {
+                        etlTable.setDatasourceId(resultSet.getLong("datasource_id"));
                         etlTable.setTableName(resultSet.getString("table_name"));
                         etlTable.setMetaInfo(resultSet.getString("meta_info"));
                         return etlTable;
                     }
                     return null;
                 },
-                tableId, datasourceId, 0);
+                tableId, 0);
     }
 
     public EtlDataSource findConnectPropertiesById(Long datasourceId) throws Exception {
