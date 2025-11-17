@@ -9,8 +9,8 @@ import type { XTabsLayoutConfig } from './schema';
 
 const TabPane = Tabs.TabPane;
 
-const XPreviewTabsLayout = memo((props: XTabsLayoutConfig) => {
-  const { id, defaultValue = [], type, colCount, tabPosition, pageType } = props;
+const XPreviewTabsLayout = memo((props: XTabsLayoutConfig & { detailMode?: boolean }) => {
+  const { id, defaultValue = [], type, colCount, tabPosition, pageType, detailMode } = props;
   useSignals();
 
   const {

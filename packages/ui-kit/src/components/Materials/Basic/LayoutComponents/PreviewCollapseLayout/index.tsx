@@ -10,8 +10,8 @@ import type { XCollapseLayoutConfig } from './schema';
 
 const CollapseItem = Collapse.Item;
 
-const XPreviewCollapseLayout = memo((props: XCollapseLayoutConfig) => {
-  const { id, label, colCount = 1, status, collapsed, pageType } = props;
+const XPreviewCollapseLayout = memo((props: XCollapseLayoutConfig & { detailMode?: boolean }) => {
+  const { id, label, colCount = 1, status, collapsed, pageType, detailMode } = props;
   useSignals();
 
   const {
