@@ -257,7 +257,7 @@ const XLoadMore = memo(
       });
       console.log('newTableData: ', newTableData);
       setLoading(false);
-      setTableData([...tableData, ...newTableData]);
+      setTableData(req.pageNo === 1 ? newTableData : [...tableData, ...newTableData]);
       setTableTotal(total);
     };
 
@@ -287,7 +287,7 @@ const XLoadMore = memo(
       if (res) {
         Toast.success('删除成功');
       }
-      handlePage();
+      handleSearch();
     };
 
     const handleEdit = (id: string, toFormPage: boolean) => {

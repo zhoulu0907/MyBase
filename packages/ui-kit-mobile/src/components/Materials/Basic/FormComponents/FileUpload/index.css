@@ -1,43 +1,7 @@
-.uplaodList-text {
-  width: 100%;
-}
-.uplaodList-text-item {
-  background-color: #f7f8fa;
-  padding: 8px 12px;
-  border-radius: 2px;
-  display: flex;
-  align-items: center;
-  margin-top: 8px;
-}
-.uplaodList-text-item-img {
-  width: 40px;
-  height: 40px;
-  border-radius: 2px;
-  object-fit: cover;
-}
-.uplaodList-text-item-name {
-  margin: 0 8px;
-  font-size: 14px;
-  line-height: 22px;
-  color: #1d2129;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.uplaodList-text-item-process {
-  flex: 1;
-  display: flex;
-  align-items: center;
-}
-.uplaodList-text-item-process-close {
-  margin-left: 4px;
-}
-.uplaodList-text-item-opera {
-  margin-left: auto;
-  text-align: right;
-  color: #86909c;
-}
-.uplaodList-text-item-opera svg {
-  margin-left: 8px;
-  cursor: pointer;
+.fileUploadWrapper {
+  .arco-image-picker-error {
+    font-size: 0.14rem;
+    line-height: 0.24rem;
+    color: #ff4d4f;
+  }
 }

@@ -155,11 +155,25 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
       // 处理主表逻辑
       const field = (mainMetaDataFields.value || []).find((f: AppEntityField) => f.fieldId == key);
+      // listPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN]
       if (field) {
         console.log('field: ', field);
         formData[field.fieldId] = value;
       }
+      Object.values(listPageComponentSchemas.value).forEach((item) => {
+        if (item.config.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]) {
+          return;
+        }
+        console.warn('item: ', item);
+        const indexTmp = item.config.columns.findIndex((col: any) => col.id === field.fieldId);
 
+        console.warn('indexTmp: ', indexTmp);
+        console.warn('field: ', field);
+
+        if (indexTmp === -1) {
+          delete formData[field.fieldId];
+        }
+      })
       // 处理子表逻辑
       if (key.startsWith(FORM_COMPONENT_TYPES.SUB_TABLE)) {
         const subEntityId = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[key]?.config
@@ -214,6 +228,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       setFlows(updateFlows);
       if (res) {
         Toast.success('更新成功');
+        setPageType(EDITOR_TYPES.LIST_EDITOR);
       }
       setEditTargetId('');
       setDrawerVisible(false);
@@ -222,6 +237,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
       try {
         let res = null;
+        console.warn('bb=111===', curPage?.value?.pageSetType)
         if (curPage?.value?.pageSetType === PageType.BPM) {
           const reqFlow = {
             isDraft: false,
@@ -370,13 +386,18 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
   const curFormPage = curPage.value?.pages?.find((ele: any) => ele.pageType === CATEGORY_TYPE.LIST)?.pageName || '标题_列表';
   console.warn('xx-d==', useEditorSignalMap.get(editPageViewId.value)?.components.value)
+  console.warn('xxxxxx=====11=1===', useEditorSignalMap)
   return (
     <div className={styles.previewPage}>
 
       {/* <Sticky topOffset={0} className={styles.previewTitle}>
         {curFormPage.slice(0, curFormPage.length - 3)}
       </Sticky> */}
-      <CustomNav title={curFormPage.slice(0, curFormPage.length - 3)} style={{ background: '#fff' }} />
+      <CustomNav
+       title={curFormPage.slice(0, curFormPage.length - 3)}
+        style={{ background: '#fff' }}
+        toBack={pageType === EDITOR_TYPES.LIST_EDITOR ? undefined : () => setPageType(EDITOR_TYPES.LIST_EDITOR)}
+      />
 
       <div className={styles.content}>
         {pageType === EDITOR_TYPES.LIST_EDITOR &&

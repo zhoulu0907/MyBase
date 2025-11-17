@@ -21,4 +21,13 @@
   bottom: 24px;
   left: 12px;
 }
-
+.label {
+  font-size: 0.16rem;
+  color: #1d2129;
+  line-height: 0.36rem;
+  margin-top: 0.08rem;
+}
+.bottomDivider {
+  border-bottom: 0.5PX solid #e5e6eb;
+  margin: 0.16rem 0 0;
+}

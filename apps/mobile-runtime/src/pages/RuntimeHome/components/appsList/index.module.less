@@ -38,6 +38,12 @@
     display: flex;
     align-items: center;
   }
+  .treeNone {
+    font-size: 0.16rem;
+    line-height: 0.56rem;
+    color: #909399;
+    padding-left: 0.36rem;
+  }
   .treeItemGroup {
     // border-bottom: 1px solid #e0e0e0;// #F2F3F5;
     :global {
@@ -64,18 +70,15 @@
     }
   }
 }
-.ineedtodo-icon {
-  background: url(@/assets/images/task_center/willdo-on.svg) no-repeat center;
-  background-size: 100% 100%;
-}
-.ihavedone-icon {
-  background: url(@/assets/images/task_center/idone-on.svg) no-repeat center;
-  background-size: 100% 100%;
-}
 
 .gridLayout {
   :global(.arco-grid-rows-item-text) {
     margin-top: 0.08rem;
+  }
+  :global {
+    .arco-ellipsis {
+      font-size: 0.16rem;
+    }
   }
 }
 
@@ -106,5 +109,25 @@
     font-size: 0.32rem;
     font-style: normal;
     font-weight: 500;
+  }
+
+  // .arco-tab-cell {
+  //     color: #4e5969;
+  //     text-align: center;
+  //     font-size: 0.16rem;
+  //     &.vertical {
+  //       margin: 0 0.08rem !important;
+  //     }
+  //   }
+
+  .arco-tab-cell-underline {
+    border-radius: 4px;
+    height: 0.04rem;
+    width: 0.24rem;
+    background: linear-gradient(
+      301deg,
+      var(--Semantic-Success-600, #00b42a) 25.06%,
+      var(--Brand-Builder-Builder_600, #009e9e) 87.47%
+    );
   }
 }

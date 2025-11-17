@@ -32,4 +32,8 @@
   .arco-input-container .arco-input-label {
     min-width: 1.76rem;
   }
+
+  .arco-cell.without-group {
+    padding: 0;
+  }
 }

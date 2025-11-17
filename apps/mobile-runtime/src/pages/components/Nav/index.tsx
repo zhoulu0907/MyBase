@@ -12,13 +12,14 @@ interface CustomNav {
   hideBackIcon?: boolean;
   style?: React.CSSProperties;
   onClickRight?: () => void;
+  toBack?: () => void;
 }
 
 const CustomNav: React.FC<CustomNav> = (props) => {
   const navigate = useNavigate();
   const { className = '', title, fixed = true, hideBackIcon = false, hasBottomLine = false, style, onClickRight } = props;
 
-  const back = () => navigate(-1);
+  const back = props.toBack || (() => navigate(-1));
 
   return (
     <div className={styles.navWrapper}>

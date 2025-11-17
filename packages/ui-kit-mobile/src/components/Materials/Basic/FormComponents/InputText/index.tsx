@@ -1,5 +1,7 @@
-import { Input } from '@arco-design/mobile-react';
-import { memo, useEffect, useState } from 'react';
+import { Input, Form } from '@arco-design/mobile-react';
+import { memo } from 'react';
+import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
+import { nanoid } from 'nanoid';
 import '../index.css';
 import { type XInputTextConfig } from './schema';
 
@@ -22,57 +24,56 @@ const XInputText = memo((props: XInputTextConfig & { runtime?: boolean; detailMo
     detailMode
   } = props;
 
-  console.warn('align======11====', align);
-  const [fieldId, setFieldId] = useState('');
+  // 生成唯一的字段ID
+  const fieldId = dataField && dataField.length > 0
+    ? dataField[dataField.length - 1]
+    : `${FORM_COMPONENT_TYPES.INPUT_TEXT}_${nanoid()}`;
 
-  useEffect(() => {
-    if (dataField.length > 0) {
-      setFieldId(dataField[dataField.length - 1]);
-    }
-  }, [dataField]);
-
-  return (
-    <div className="inputTextWrapper">
+  // 根据是否为只读模式确定内容
+  const renderContent = () => {
+    // 非只读模式，渲染Input组件
+    return (
       <Input
-        label={label.display && label.text}
-        defaultValue={defaultValue}
         placeholder={placeholder}
         maxLength={maxLength}
-        inputStyle={{ textAlign: align }}
+        inputStyle={{
+          textAlign: align,
+          color: color
+        }}
         style={{
           width: '100%',
-          backgroundColor: bgColor,
-          pointerEvents: runtime ? 'unset' : 'none'
+          backgroundColor: bgColor || 'transparent',
+          color: color
         }}
       />
-      {/* <Form.Item
-        label={label.display && label.text}
-        field={fieldId ? fieldId : `${FORM_COMPONENT_TYPES.INPUT_TEXT}_${nanoid()}`}
-        layout={layout}
-        style={{
-          margin: 0,
-          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
-        }}
-      >
-        {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-          <div>--</div>
-        ) : (
-          //   <div style={{ marginLeft: '10px' }}>{fieldValue || '--'}</div>
-          <Input
-            defaultValue={defaultValue}
-            placeholder={placeholder}
-            maxLength={maxLength}
-            style={{
-              width: '100%',
-              color,
-              textAlign: align,
-              backgroundColor: bgColor,
-              pointerEvents: runtime ? 'unset' : 'none'
-            }}
-          />
-        )}
-      </Form.Item> */}
-    </div>
+    );
+  };
+
+  return (
+    <Form.Item
+      field={fieldId}
+      label={label.display ? label.text : undefined}
+      initialValue={defaultValue || ''}
+      className="formWrapper inputTextWrapper"
+      rules={verify ? [{ required: verify.required, message: verify.message }] : undefined}
+      style={{
+        pointerEvents: (!runtime || detailMode) ? 'none' : 'unset'
+      }}
+    >
+      {!runtime || detailMode ? (
+        // 只读模式，渲染文本内容
+        <div style={{
+          textAlign: align,
+          color: color,
+          backgroundColor: bgColor || 'transparent',
+          padding: '8px'
+        }}>
+          {defaultValue || '--'}
+        </div>
+      ) : (
+        renderContent()
+      )}
+    </Form.Item>
   );
 });
 
