@@ -106,12 +106,12 @@ tag: {{tag}}
 ### 所租户login 接口 => 成功
 POST {{baseUrl}}/system/auth/login
 Content-Type: application/json
-tenant-id: {{adminTenantId}}
+tenant-id: 140488242990448640
 tag: {{tag}}
 
 {
-  "username": "admin",
-  "password": "admin123"
+  "username": "test003",
+  "password": "AdminChina2025!"
 }
 
 > {%
