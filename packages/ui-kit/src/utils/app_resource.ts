@@ -264,6 +264,8 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
         });
 
         newPageComponentSchemas.set(component.componentCode, {
+          id: component.componentCode,
+          type: component.componentType,
           config: JSON.parse(component.config),
           editData: JSON.parse(component.editData)
         });
@@ -338,6 +340,8 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
         }
 
         newPageComponentSchemas.set(component.componentCode, {
+          id: component.componentCode,
+          type: component.componentType,
           config: JSON.parse(component.config),
           editData: JSON.parse(component.editData)
         });
