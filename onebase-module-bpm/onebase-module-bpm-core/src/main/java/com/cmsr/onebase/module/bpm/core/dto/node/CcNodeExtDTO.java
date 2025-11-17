@@ -14,7 +14,7 @@ import lombok.Data;
  * @data 2025-10-24
  */
 @Data
-public class CopyReceiverNodeExtDTO extends BaseNodeExtDTO {
+public class CcNodeExtDTO extends BaseNodeExtDTO {
     /**
      * 抄送人配置
      */

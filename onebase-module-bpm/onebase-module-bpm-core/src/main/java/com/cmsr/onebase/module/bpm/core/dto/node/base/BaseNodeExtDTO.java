@@ -24,7 +24,7 @@ import lombok.Data;
     @JsonSubTypes.Type(value = StartNodeExtDTO .class, name = "start"),
     @JsonSubTypes.Type(value = EndNodeExtDTO.class, name = "end"),
     @JsonSubTypes.Type(value = InitiationNodeExtDTO.class, name = "initiation"),
-    @JsonSubTypes.Type(value = CopyReceiverNodeExtDTO.class, name = "cc")
+    @JsonSubTypes.Type(value = CcNodeExtDTO.class, name = "cc")
 
 })
 public class BaseNodeExtDTO {
