@@ -124,7 +124,7 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         // 增加日志输出，便于调试
         checkPlatformAdminEnableAppCreate();
 
-        // 使用手机密码，进行登录
+        // 使用账号密码，进行登录
         AdminUserDO user = authenticate(reqVO.getUsername(), reqVO.getPassword());
         return createTokenAfterLoginSuccess(reqVO.getAppId(),  user.getId(), reqVO.getUsername(), LoginLogTypeEnum.LOGIN_USERNAME);
     }
