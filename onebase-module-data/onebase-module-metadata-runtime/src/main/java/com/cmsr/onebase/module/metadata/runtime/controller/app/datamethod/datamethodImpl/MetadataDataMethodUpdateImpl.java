@@ -63,6 +63,8 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
     protected void validateDataIntegrity(Map<String, Object> data, List<MetadataEntityFieldDO> fields) {
         // 将字段ID转换为字段名后再校验
         Map<String, Object> convertedData = convertFieldIdToFieldName(data, fields);
+
+        List<String> toDeletedKeys = new ArrayList<>();
         
         // 更新时不校验必填，只校验数据类型等
         for (Map.Entry<String, Object> entry : convertedData.entrySet()) {
@@ -83,8 +85,16 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
 
             // 不允许更新自动编号字段
             if (autoNumberService.hasAutoNumber(field.getId())) {
-                throw invalidParamException("不允许更新自动编号字段[{}]", field.getDisplayName());
+                //忽略自动更新字段，不报错，允许继续更新： 删除key为 fieldName 的数据
+                toDeletedKeys.add(fieldName);
+//                throw invalidParamException("不允许更新自动编号字段[{}]", field.getDisplayName());
+                log.error("不允许更新自动编号字段[{}]", field.getDisplayName());
             }
+        }
+
+        //再处理一次，删除 keys
+        for(String key: toDeletedKeys){
+            convertedData.remove(key);
         }
     }
 

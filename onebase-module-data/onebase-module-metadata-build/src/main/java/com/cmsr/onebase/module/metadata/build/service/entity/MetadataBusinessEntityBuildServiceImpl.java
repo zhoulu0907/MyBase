@@ -5,6 +5,7 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.IdUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.BusinessEntityPageReqVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.BusinessEntityRespVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.BusinessEntitySaveReqVO;
@@ -77,6 +78,9 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
     private MetadataAppAndDatasourceCoreService metadataAppAndDatasourceCoreService;
     @Resource
     private MetadataEntityFieldOptionBuildService fieldOptionService;
+
+    @Resource
+    private AppApplicationApi appApplicationApi;
 
     // 系统字段缓存，避免频繁查询数据库
     private volatile List<MetadataSystemFieldsDO> systemFieldsCache = null;
@@ -1030,6 +1034,10 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
 
     @Override
     public BusinessEntityRespVO createBusinessEntityWithResponse(@Valid BusinessEntitySaveReqVO reqVO) {
+        // 修改企业主表更新时间
+        Long appId = Long.valueOf(reqVO.getAppId());
+        appApplicationApi.updateAppTimeById(appId);
+
         Long id = createBusinessEntity(reqVO);
         MetadataBusinessEntityDO businessEntity = getBusinessEntity(id);
         return modelMapper.map(businessEntity, BusinessEntityRespVO.class);

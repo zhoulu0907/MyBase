@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.flow.core.graph;
+package com.cmsr.onebase.module.flow.core.handler;
 
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessDateFieldRepository;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 @Service
-public class FlowCacheClient {
+public class FlowChangeClient {
 
     @Setter
     @Autowired

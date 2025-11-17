@@ -18,10 +18,12 @@ import java.time.LocalDateTime;
 @Data
 @Table(name = "bpm_flow_instance_biz_ext")
 public class BpmFlowInsBizExtDO extends TenantBaseDO {
+    public static final String INSTANCE_ID = "instance_id";
+
     /**
      * 流程实例ID
      */
-    @Column(name = "instance_id")
+    @Column(name = INSTANCE_ID)
     private Long instanceId;
 
     /**

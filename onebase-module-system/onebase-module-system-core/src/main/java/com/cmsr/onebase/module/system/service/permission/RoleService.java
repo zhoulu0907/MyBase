@@ -138,4 +138,6 @@ public interface RoleService {
     boolean isTenantAdmin(Set<Long> ids);
 
     RoleDO getRoleIdsByCodeAndTenantId(String code, Long id);
+
+    RoleDO getRoleByCodeIgnoreTenant(String code);
 }

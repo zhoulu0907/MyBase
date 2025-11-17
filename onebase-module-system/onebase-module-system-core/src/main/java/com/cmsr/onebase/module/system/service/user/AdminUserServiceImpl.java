@@ -4,12 +4,17 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
+import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
+import com.cmsr.onebase.framework.common.enums.XFromSceneTypeEnum;
 import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
+import com.cmsr.onebase.framework.security.core.LoginUser;
+import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
+import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import com.cmsr.onebase.module.app.api.auth.AppAuthRoleUser;
 import com.cmsr.onebase.module.infra.api.config.ConfigApi;
 import com.cmsr.onebase.module.infra.api.security.SecurityConfigApi;
@@ -141,10 +146,18 @@ public class AdminUserServiceImpl implements AdminUserService {
         if (user.getAdminType() == null) {
             user.setAdminType(AdminTypeEnum.CUSTOM.getType());
         }
-        //下拉框选择的用户肯定是已经存在的，不需要重新保存
-        // adminUserDataRepository.insert(user);
-        user.setId(createReqVO.getId());
-
+        // 根据来源场景保存用户类型和企业id
+        String  fromSceneType = WebFrameworkUtils.getXFromSceneType();
+        if(XFromSceneTypeEnum.CORP.getCode().equals(fromSceneType)){
+            LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+            if(null !=loginUser){
+                user.setCorpId(loginUser.getCorpId());
+            }
+            user.setUserType(UserTypeEnum.CORP.getValue());
+        }else{
+            user.setUserType(UserTypeEnum.TENANT.getValue());
+        }
+        adminUserDataRepository.insert(user);
         // 2.1.1 保存初始密码历史记录
         securityConfigApi.savePasswordHistory(user.getId(), user.getPassword());
 
@@ -177,7 +190,6 @@ public class AdminUserServiceImpl implements AdminUserService {
         if (userDO.getAdminType() == null) {
             userDO.setAdminType(AdminTypeEnum.CUSTOM.getType());
         }
-
         AdminUserDO adminUserDO= adminUserDataRepository.insert(userDO);
 
         // 保存初始密码历史记录
@@ -466,11 +478,6 @@ public class AdminUserServiceImpl implements AdminUserService {
     @Override
     public AdminUserDO getUser(Long id) {
         AdminUserDO adminUserDo= adminUserDataRepository.findById(id);
-        if(CommonStatusEnum.ENABLE.getStatus().equals(adminUserDo.getStatus())){
-            adminUserDo.setStatusDesc(CommonStatusEnum.ENABLE.getName());
-        }else{
-            adminUserDo.setStatusDesc(CommonStatusEnum.DISABLE.getName());
-        }
         return adminUserDo;
     }
 

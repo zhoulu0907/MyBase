@@ -18,11 +18,9 @@ import com.cmsr.onebase.module.system.enums.logger.LoginLogTypeEnum;
 import com.cmsr.onebase.module.system.enums.logger.LoginResultEnum;
 import com.cmsr.onebase.module.system.enums.oauth2.OAuth2ClientConstants;
 import com.cmsr.onebase.module.system.enums.tenant.TenantCodeEnum;
-import com.cmsr.onebase.module.system.runtime.vo.auth.RuntimeAuthLoginReqVO;
 import com.cmsr.onebase.module.system.service.logger.LoginLogService;
 import com.cmsr.onebase.module.system.service.member.MemberService;
 import com.cmsr.onebase.module.system.service.oauth2.OAuth2TokenService;
-import com.cmsr.onebase.module.system.service.permission.PermissionService;
 import com.cmsr.onebase.module.system.service.tenant.TenantService;
 import com.cmsr.onebase.module.system.service.user.AdminUserService;
 import com.cmsr.onebase.module.system.vo.CaptchaVerificationReqVO;
@@ -83,39 +81,67 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
 
     @Resource
     private TenantService     tenantService;
-    @Resource
-    private PermissionService permissionService;
 
     @Override
     public AdminUserDO authenticate(String username, String password) {
         final LoginLogTypeEnum logTypeEnum = LoginLogTypeEnum.LOGIN_USERNAME;
         // 校验账号是否存在
         AdminUserDO user = userService.getUserByUsername(username);
+        checkUserPsdAndStatus(username, password, user, logTypeEnum);
+        return user;
+    }
+
+    public AdminUserDO mobileAuthenticate(String mobile, String password) {
+        final LoginLogTypeEnum logTypeEnum = LoginLogTypeEnum.LOGIN_USERNAME;
+        // 校验账号是否存在
+        AdminUserDO user = userService.getUserByMobile(mobile);
+        checkUserPsdAndStatus(mobile, password, user, logTypeEnum);
+        return user;
+    }
+
+    private void checkUserPsdAndStatus(String account, String password, AdminUserDO user, LoginLogTypeEnum logTypeEnum) {
         if (user == null) {
-            createLoginLog(null, username, logTypeEnum, LoginResultEnum.BAD_CREDENTIALS);
+            createLoginLog(null, account, logTypeEnum, LoginResultEnum.BAD_CREDENTIALS);
             throw exception(AUTH_LOGIN_BAD_CREDENTIALS);
         }
         if (!userService.isPasswordMatch(password, user.getPassword())) {
-            createLoginLog(user.getId(), username, logTypeEnum, LoginResultEnum.BAD_CREDENTIALS);
+            createLoginLog(user.getId(), account, logTypeEnum, LoginResultEnum.BAD_CREDENTIALS);
             throw exception(AUTH_LOGIN_BAD_CREDENTIALS);
         }
         // 校验是否禁用
         if (CommonStatusEnum.isDisable(user.getStatus())) {
-            createLoginLog(user.getId(), username, logTypeEnum, LoginResultEnum.USER_DISABLED);
+            createLoginLog(user.getId(), account, logTypeEnum, LoginResultEnum.USER_DISABLED);
             throw exception(AUTH_LOGIN_USER_DISABLED);
         }
-        return user;
     }
 
 
     @Override
-    public AuthLoginRespVO login(RuntimeAuthLoginReqVO reqVO) {
+    public AuthLoginRespVO appUsernameLogin(AppUserNameLoginReqVO reqVO) {
         // 校验验证码
         validateCaptcha(reqVO);
 
         // 增加日志输出，便于调试
-        log.debug("platformTenantEnableCreateApp配置值: {}", platformTenantEnableCreateApp);
+        checkPlatformAdminEnableAppCreate();
 
+        // 使用手机密码，进行登录
+        AdminUserDO user = mobileAuthenticate(reqVO.getUsername(), reqVO.getPassword());
+        return createTokenAfterLoginSuccess(reqVO.getAppId(),  user.getId(), reqVO.getUsername(), LoginLogTypeEnum.LOGIN_USERNAME);
+    }
+
+    @Override
+    public AuthLoginRespVO appMobileLogin(AppMobileLoginReqVO reqVO) {
+        // 校验验证码
+        mobileValidateCaptcha(reqVO);
+        checkPlatformAdminEnableAppCreate();
+        // 使用手机密码，进行登录
+        AdminUserDO user = authenticate(reqVO.getMobile(), reqVO.getPassword());
+        return createTokenAfterLoginSuccess(reqVO.getAppId(),  user.getId(), reqVO.getMobile(), LoginLogTypeEnum.LOGIN_MOBILE);
+    }
+
+    private void checkPlatformAdminEnableAppCreate() {
+        // 增加日志输出，便于调试
+        log.debug("platformTenantEnableCreateApp配置值: {}", platformTenantEnableCreateApp);
         // 确保配置值不为null，并且为false时才执行校验
         if (Boolean.FALSE.equals(platformTenantEnableCreateApp)) {
             log.info("平台租户创建应用功能已禁用，开始校验租户信息");
@@ -129,11 +155,6 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         } else {
             log.debug("平台租户创建应用功能已启用，跳过租户校验");
         }
-
-        // 使用账号密码，进行登录
-        AdminUserDO user = authenticate(reqVO.getUsername(), reqVO.getPassword());
-
-        return createTokenAfterLoginSuccess(reqVO.getAppId(), user.getId(), reqVO.getUsername(), LoginLogTypeEnum.LOGIN_USERNAME);
     }
 
     private void createLoginLog(Long userId, String username,
@@ -165,6 +186,17 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
             throw exception(AUTH_LOGIN_CAPTCHA_CODE_ERROR, response.getRepMsg());
         }
     }
+
+    void mobileValidateCaptcha(MobileLoginReqVO reqVO) {
+        ResponseModel response = doValidateCaptcha(reqVO);
+        // 校验验证码
+        if (!response.isSuccess()) {
+            // 创建登录失败日志（验证码不正确)
+            createLoginLog(null, reqVO.getMobile(), LoginLogTypeEnum.LOGIN_USERNAME, LoginResultEnum.CAPTCHA_CODE_ERROR);
+            throw exception(AUTH_LOGIN_CAPTCHA_CODE_ERROR, response.getRepMsg());
+        }
+    }
+
 
     private ResponseModel doValidateCaptcha(CaptchaVerificationReqVO reqVO) {
         // 如果验证码关闭，则不进行校验
@@ -265,4 +297,5 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         }
         userService.updateUserPassword(user.getId(), reqVO.getPassword());
     }
+
 }

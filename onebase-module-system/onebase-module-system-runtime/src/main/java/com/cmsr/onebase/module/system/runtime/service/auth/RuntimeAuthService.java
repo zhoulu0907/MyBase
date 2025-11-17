@@ -1,7 +1,6 @@
 package com.cmsr.onebase.module.system.runtime.service.auth;
 
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
-import com.cmsr.onebase.module.system.runtime.vo.auth.RuntimeAuthLoginReqVO;
 import com.cmsr.onebase.module.system.vo.auth.*;
 import jakarta.validation.Valid;
 
@@ -24,20 +23,20 @@ public interface RuntimeAuthService {
     AdminUserDO authenticate(String username, String password);
 
     /**
-     * 账号登录
-     *
-     * @param reqVO 登录信息
-     * @return 登录结果
-     */
-    AuthLoginRespVO login(@Valid RuntimeAuthLoginReqVO reqVO);
-
-    /**
      * 基于 token 退出登录
      *
      * @param token token
      * @param logType 登出类型
      */
     void logout(String token, Integer logType);
+
+    /**
+     * 手机号登录
+     *
+     * @param reqVO 登录信息
+     * @return 登录结果
+     */
+    AuthLoginRespVO appMobileLogin(AppMobileLoginReqVO reqVO);
 
     /**
      * 刷新访问令牌
@@ -61,4 +60,12 @@ public interface RuntimeAuthService {
      * @param reqVO 验证码信息
      */
     void resetPassword(AuthResetPasswordReqVO reqVO);
+
+    /**
+     * 账号密码登录
+     *
+     * @param reqVO 登录信息
+     * @return 登录结果
+     */
+    AuthLoginRespVO appUsernameLogin(@Valid AppUserNameLoginReqVO reqVO);
 }
