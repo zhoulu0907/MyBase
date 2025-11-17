@@ -33,8 +33,6 @@ const XPreviewTabsLayout = memo((props: XTabsLayoutConfig & { detailMode?: boole
         Array.from({ length: defaultValue.length }, () => [])
       );
     }
-    console.log('layoutSubComponents---',layoutSubComponents)
-    console.log('id---',id)
   }, [defaultValue, id, colComponents]);
 
   return (
