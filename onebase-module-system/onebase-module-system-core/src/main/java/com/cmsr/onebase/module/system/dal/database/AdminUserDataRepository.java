@@ -119,7 +119,7 @@ public class AdminUserDataRepository extends DataRepository<AdminUserDO> {
      * @return 用户列表
      */
     public List<AdminUserDO> findAllByStatus(Integer status, String userNickName) {
-        DefaultConfigStore configStore = CorpDeptUserHelper.getCorpConfigStore(AdminUserDO.USER_TYPE);
+        DefaultConfigStore configStore = CorpDeptUserHelper.getUserConfigStore();
         if (StringUtils.isNotBlank(userNickName)) {
             configStore.like(AdminUserDO.NICKNAME, userNickName);
         }
@@ -151,7 +151,7 @@ public class AdminUserDataRepository extends DataRepository<AdminUserDO> {
      * @return 分页结果
      */
     public PageResult<AdminUserDO> findPage(UserPageReqVO reqVO, Collection<Long> deptIds, Collection<Long> includeRoleUserIds, Collection<Long> excludeRoleUserIds) {
-        DefaultConfigStore configStore = CorpDeptUserHelper.getCorpConfigStore(AdminUserDO.USER_TYPE);
+        DefaultConfigStore configStore = CorpDeptUserHelper.getUserConfigStore();
         // 根据关键词模糊查询
         if (reqVO.getKeyword() != null && !reqVO.getKeyword().trim().isEmpty()) {
             configStore.and(new DefaultConfigStore()
@@ -218,7 +218,7 @@ public class AdminUserDataRepository extends DataRepository<AdminUserDO> {
      * @return 分页结果
      */
     public PageResult<AdminUserDO> findSimpleEnablePage(UserSimplePageReqVO reqVO) {
-        DefaultConfigStore configStore = CorpDeptUserHelper.getCorpConfigStore(AdminUserDO.USER_TYPE);
+        DefaultConfigStore configStore = CorpDeptUserHelper.getUserConfigStore();
         configStore.eq(AdminUserDO.STATUS, CommonStatusEnum.ENABLE.getStatus()); // 启用状态
 
         // 根据关键词模糊查询
@@ -256,7 +256,16 @@ public class AdminUserDataRepository extends DataRepository<AdminUserDO> {
     }
 
     public List<AdminUserDO> findEnableUserByIds(Set<Long> userIds) {
-        DefaultConfigStore configStore = CorpDeptUserHelper.getCorpConfigStore(AdminUserDO.USER_TYPE);
+        DefaultConfigStore configStore = CorpDeptUserHelper.getUserConfigStore();
+        configStore.in(AdminUserDO.ID, userIds)
+                .eq(AdminUserDO.STATUS, UserStatusEnum.NORMAL.getStatus())
+                .order(AdminUserDO.ADMIN_TYPE, Order.TYPE.ASC)
+                .order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
+        return findAllByConfig(configStore);
+    }
+
+    public List<AdminUserDO> findPlatformEnableUserByIds(Set<Long> userIds) {
+        DefaultConfigStore configStore = CorpDeptUserHelper.getUserConfigStore();
         configStore.in(AdminUserDO.ID, userIds)
                 .eq(AdminUserDO.STATUS, UserStatusEnum.NORMAL.getStatus())
                 .order(AdminUserDO.ADMIN_TYPE, Order.TYPE.ASC)
@@ -265,8 +274,9 @@ public class AdminUserDataRepository extends DataRepository<AdminUserDO> {
     }
 
 
+
     public List<AdminUserDO> getTenantExistUserCountByIds(List<Long> userIds) {
-        DefaultConfigStore configStore = CorpDeptUserHelper.getCorpConfigStore(AdminUserDO.USER_TYPE);
+        DefaultConfigStore configStore = CorpDeptUserHelper.getUserConfigStore();
         configStore.in(AdminUserDO.ID, userIds)
                 .eq(AdminUserDO.STATUS, UserStatusEnum.NORMAL.getStatus())
                 .order(AdminUserDO.ADMIN_TYPE, Order.TYPE.ASC)

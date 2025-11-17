@@ -74,8 +74,8 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
     @Override
     public void createDefaultRole(Long applicationId, Long userId) {
         {
-            long count = appAuthRoleRepository.countByAppIdAndRoleCode(applicationId, AuthRoleTypeEnum.SYSTEM_ADMIN.getCode());
-            if (count == 0) {
+            AuthRoleDO existRole = appAuthRoleRepository.findByAppIdAndRoleCode(applicationId, AuthRoleTypeEnum.SYSTEM_ADMIN.getCode());
+            if (existRole == null) {
                 AuthRoleDO authRoleDO = new AuthRoleDO();
                 authRoleDO.setApplicationId(applicationId);
                 authRoleDO.setRoleCode(AuthRoleTypeEnum.SYSTEM_ADMIN.getCode());
@@ -86,26 +86,30 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
                 AuthRoleUserDO entity = new AuthRoleUserDO();
                 entity.setUserId(userId);
                 entity.setRoleId(authRoleDO.getId());
+            } else {
+                long count = appAuthRoleUserRepository.countByRoleId(existRole.getId());
+                if (count == 0) {
+                    AuthRoleUserDO entity = new AuthRoleUserDO();
+                    entity.setUserId(userId);
+                    entity.setRoleId(existRole.getId());
+                    appAuthRoleUserRepository.insert(entity);
+                }
             }
         }
         {
-            long count = appAuthRoleRepository.countByAppIdAndRoleCode(applicationId, AuthRoleTypeEnum.SYSTEM_USER.getCode());
-            if (count == 0) {
+            AuthRoleDO existRole = appAuthRoleRepository.findByAppIdAndRoleCode(applicationId, AuthRoleTypeEnum.SYSTEM_USER.getCode());
+            if (existRole == null) {
                 AuthRoleDO authRoleDO = new AuthRoleDO();
                 authRoleDO.setApplicationId(applicationId);
                 authRoleDO.setRoleCode(AuthRoleTypeEnum.SYSTEM_USER.getCode());
                 authRoleDO.setRoleName(AuthRoleTypeEnum.SYSTEM_USER.getName());
                 authRoleDO.setRoleType(AuthRoleTypeEnum.SYSTEM_USER.getValue());
                 appAuthRoleRepository.insert(authRoleDO);
-                //创建者是用户
-                AuthRoleUserDO entity = new AuthRoleUserDO();
-                entity.setUserId(userId);
-                entity.setRoleId(authRoleDO.getId());
             }
         }
         {
-            long count = appAuthRoleRepository.countByAppIdAndRoleCode(applicationId, AuthRoleTypeEnum.OUTER_USER.getCode());
-            if (count == 0) {
+            AuthRoleDO existRole = appAuthRoleRepository.findByAppIdAndRoleCode(applicationId, AuthRoleTypeEnum.OUTER_USER.getCode());
+            if (existRole == null) {
                 AuthRoleDO authRoleDO = new AuthRoleDO();
                 authRoleDO.setApplicationId(applicationId);
                 authRoleDO.setRoleCode(AuthRoleTypeEnum.OUTER_USER.getCode());

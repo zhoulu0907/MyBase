@@ -1,8 +1,6 @@
 package com.cmsr.onebase.module.app.core.vo.app;
 
-import com.cmsr.onebase.framework.common.enums.CommonPublishModelEnum;
 import com.cmsr.onebase.framework.common.pojo.PageParam;
-import com.cmsr.onebase.framework.common.validation.InEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -31,7 +29,6 @@ public class ApplicationPageReqVO extends PageParam {
     private Integer status;
 
     @Schema(description = "发布模式")
-    @InEnum(value = CommonPublishModelEnum.class, message = "返回值类型必须是 {value}")
     private String publishModel;
 
 }

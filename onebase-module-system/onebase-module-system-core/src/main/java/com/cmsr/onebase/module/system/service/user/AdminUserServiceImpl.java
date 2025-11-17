@@ -230,6 +230,7 @@ public class AdminUserServiceImpl implements AdminUserService {
         if (user.getAdminType() == null) {
             user.setAdminType(AdminTypeEnum.CUSTOM.getType());
         }
+        user.setUserType(UserTypeEnum.PLATFORM.getValue());
         adminUserDataRepository.insert(user);
 
         // 保存初始密码历史记录
