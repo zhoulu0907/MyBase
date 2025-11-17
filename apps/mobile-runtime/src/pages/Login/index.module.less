@@ -1,7 +1,7 @@
 .loginPage {
   width: 100%;
   height: 100vh;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.40) 0%, rgba(255, 255, 255, 0.00) 100%);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0) 100%);
   background-image: url('@/assets/images/login-bg.png');
   background-position: top center;
   background-size: contain;
@@ -9,21 +9,21 @@
 
   // 右侧区域
   .loginPageRight {
-      padding: 0.72rem 0.32rem 0.56rem;
-      position: relative;
-      min-height: calc(100vh - 1.28rem);
+    padding: 0.72rem 0.32rem 0.56rem;
+    position: relative;
+    min-height: calc(100vh - 1.28rem);
     .titleContainer {
       .loginLogo {
-        width: 0.64rem;
-        height: 0.64rem;
-        margin-bottom: 0.24rem;
+        width: 1.28rem;
+        height: 1.28rem;
+        margin-bottom: 0.48rem;
       }
 
       .title {
         color: #272e3b;
-        font-size: 0.2rem;
+        font-size: 0.4rem;
         font-weight: 600;
-        line-height: 0.3rem;
+        line-height: 0.6rem;
       }
     }
     .loginFormContainer {
@@ -36,13 +36,14 @@
 
       .rememberMeContainer {
         display: flex;
+        align-items: center;
         justify-content: space-between;
       }
       .forgotPassword {
         text-align: right;
         color: @primary-color;
-        font-size: 0.16rem;
-        line-height: 0.22rem;
+        font-size: 0.32rem;
+        line-height: 0.44rem;
       }
       .smsContainer {
         width: 100%;
@@ -62,14 +63,18 @@
       }
 
       .loginButton {
-        height: 0.4rem;
-        margin: 0.4rem 0;
-        font-size: 0.15rem;
-        line-height: 0.4rem;
+        height: 0.8rem;
+        margin: 0.8rem 0;
+        font-size: 0.3rem;
+        line-height: 0.8rem;
         border-radius: 2px;
-        background: linear-gradient(90deg, var(--Brand-Builder-Builder_600, #009E9E) 0%, var(--Brand-iPaaS-iPaaS_600, #24B28F) 50%, var(--Semantic-Success-600, #00B42A) 100%);
+        background: linear-gradient(
+          90deg,
+          var(--Brand-Builder-Builder_600, #009e9e) 0%,
+          var(--Brand-iPaaS-iPaaS_600, #24b28f) 50%,
+          var(--Semantic-Success-600, #00b42a) 100%
+        );
         box-shadow: 0 4px 8px 0 rgba(0, 94, 115, 0.15);
-
       }
     }
 
@@ -79,11 +84,11 @@
       left: 0;
       right: 0;
       text-align: center;
-      padding: 0.2rem;
+      padding: 0.4rem;
 
       .footerText {
-        font-size: 0.14rem;
-        color: #272E3B;
+        font-size: 0.28rem;
+        color: #272e3b;
         margin: 0;
         span {
           color: @primary-color;

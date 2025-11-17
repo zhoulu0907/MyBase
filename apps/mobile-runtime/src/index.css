@@ -3,12 +3,12 @@
   height: 100vh;
 }
 
-.react-grid-item.react-grid-placeholder {
+/* .react-grid-item.react-grid-placeholder {
   background: lightblue !important;
-}
+} */
 
 /* 菜单隐藏样式 */
-.menuTree {
+/* .menuTree {
   .arco-tree-node-switcher {
     position: absolute;
     right: 0;
@@ -31,4 +31,4 @@
   .arco-tree-node {
     padding: 0;
   }
-}
+} */

@@ -13,7 +13,7 @@ import './index.css';
 import './acro_reset.less';
 import setRootPixel from '@arco-design/mobile-react/tools/flexible';
 
-setRootPixel(100, undefined, 200);
+setRootPixel();
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ErrorBoundary FallbackComponent={ErrorPage}>
