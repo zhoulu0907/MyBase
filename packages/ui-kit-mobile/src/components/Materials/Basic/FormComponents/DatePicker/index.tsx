@@ -101,7 +101,7 @@ const XDatePicker = memo((props: XInputDatePickerConfig & { runtime?: boolean; d
   };
 
   return (
-    <div className="formWrapper">
+    <div className="inputTextWrapper">
       {renderDatePicker()}
       {/* <Form.Item
         label={label.display && label.text}

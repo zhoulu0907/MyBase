@@ -35,7 +35,7 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
   }, [dataField]);
 
   return (
-    <div className="formWrapper">
+    <div className="inputTextWrapper">
       <Cell
         label={label.display && label.text}
         showArrow

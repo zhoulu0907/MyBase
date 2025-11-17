@@ -56,19 +56,20 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
   };
 
   return (
-    <div className="formWrapper inputTextWrapper">
+    <div className="inputTextWrapper">
       <Input
         label={label.display && label.text}
         type="number"
         defaultValue={defaultValue}
         placeholder={placeholder}
         maxLength={verify?.max || 1000000000}
+        suffix={showUnit ? unitValue : ''}
+        inputStyle={{ textAlign: align }}
         style={{
           width: '100%',
           textAlignLast: align,
           pointerEvents: runtime ? 'unset' : 'none'
         }}
-        suffix={showUnit ? unitValue : ''}
       />
 
       {/* <Form.Item

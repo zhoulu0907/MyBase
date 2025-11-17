@@ -45,7 +45,7 @@ const XDateRangePicker = memo((props: XInputDateRangePickerConfig & { runtime?: 
   }
 
   return (
-    <div className="formWrapper">
+    <div className="inputTextWrapper">
       <DatePicker
         mode={"date"}
         title={label.text}

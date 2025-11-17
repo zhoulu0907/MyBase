@@ -346,67 +346,69 @@ const XLoadMore = memo(
           showDropdown={showDropdown}
           onCancel={() => setShowDropdown(false)}
         >
-          <div className="demo-dropdown-option-desc">Group 1</div>
-          <Dropdown.Options
-            useColumn={3}
-            multiple={true}
-            selectedValue={value[0] || []}
-            onOptionClick={() => { console.info('click 1'); }}
-            onOptionChange={(val, item) => {
-              console.info('change 1', val, item);
-              setValue((oldValue) => {
-                oldValue[0] = val;
-                return [...oldValue];
-              });
-            }}
-            options={[
-              {
-                label: 'Option 1',
-                value: 0,
-                disabled: false,
-              },
-              {
-                label: 'Option 2',
-                value: 1,
-              },
-              {
-                label: 'Option 3',
-                value: 2,
-                disabled: true,
-              },
-              {
-                label: 'Option 4',
-                value: 3,
-              }
-            ]}
-          ></Dropdown.Options>
-          <div className="demo-dropdown-option-desc">Group 2</div>
-          <Dropdown.Options
-            useColumn={3}
-            multiple={true}
-            selectedValue={value[1] || []}
-            onOptionClick={() => { console.info('click 2'); }}
-            onOptionChange={(val, item) => {
-              console.info('change 2', val, item);
-              setValue((oldValue) => {
-                oldValue[1] = val;
-                return [...oldValue];
-              });
-            }}
-            options={[
-              {
-                label: 'Option 5',
-                value: 0,
-                disabled: false,
-              },
-              {
-                label: 'Option 6',
-                value: 1,
-              }]}
-          ></Dropdown.Options>
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: '0.16rem' }}>
-            <Button type='ghost' style={{ marginRight: "0.08rem", flex: 1 }}>重置</Button>
-            <Button style={{ flex: 1 }}>确定</Button>
+          <div style={{ padding: '0.32rem' }}>
+            <div className="demo-dropdown-option-desc">Group 1</div>
+            <Dropdown.Options
+              useColumn={3}
+              multiple={true}
+              selectedValue={value[0] || []}
+              onOptionClick={() => { console.info('click 1'); }}
+              onOptionChange={(val, item) => {
+                console.info('change 1', val, item);
+                setValue((oldValue) => {
+                  oldValue[0] = val;
+                  return [...oldValue];
+                });
+              }}
+              options={[
+                {
+                  label: 'Option 1',
+                  value: 0,
+                  disabled: false,
+                },
+                {
+                  label: 'Option 2',
+                  value: 1,
+                },
+                {
+                  label: 'Option 3',
+                  value: 2,
+                  disabled: true,
+                },
+                {
+                  label: 'Option 4',
+                  value: 3,
+                }
+              ]}
+            ></Dropdown.Options>
+            <div className="demo-dropdown-option-desc">Group 2</div>
+            <Dropdown.Options
+              useColumn={3}
+              multiple={true}
+              selectedValue={value[1] || []}
+              onOptionClick={() => { console.info('click 2'); }}
+              onOptionChange={(val, item) => {
+                console.info('change 2', val, item);
+                setValue((oldValue) => {
+                  oldValue[1] = val;
+                  return [...oldValue];
+                });
+              }}
+              options={[
+                {
+                  label: 'Option 5',
+                  value: 0,
+                  disabled: false,
+                },
+                {
+                  label: 'Option 6',
+                  value: 1,
+                }]}
+            ></Dropdown.Options>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <Button type='ghost' style={{ marginRight: "0.16rem", flex: 1 }}>重置</Button>
+              <Button style={{ flex: 1 }}>确定</Button>
+            </div>
           </div>
         </Dropdown>
       )
@@ -414,7 +416,7 @@ const XLoadMore = memo(
 
     return (
       <div className="loadmore-list-wrapper">
-        <Sticky topOffset={0.44 * window.ROOT_FONT_SIZE} className="list-search-header">
+        <Sticky topOffset={0.88 * window.ROOT_FONT_SIZE} className="list-search-header">
           {searchItems?.length ? (
             <SearchBar actionButton={null} placeholder={`请输入${searchItems[0].label}`} />
           ) : null}

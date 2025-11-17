@@ -36,7 +36,7 @@ const XInputEmail = memo((props: XInputEmailConfig & { runtime?: boolean; detail
   }, [dataField]);
 
   return (
-    <div className="formWrapper inputTextWrapper">
+    <div className="inputTextWrapper">
       <Input
         label={label.display && label.text}
         type="email"
@@ -49,6 +49,7 @@ const XInputEmail = memo((props: XInputEmailConfig & { runtime?: boolean; detail
           pointerEvents: runtime ? 'unset' : 'none'
         }}
         placeholder={placeholder}
+        inputStyle={{ textAlign: align }}
       />
       {/* <Form.Item
         label={label.display && label.text}

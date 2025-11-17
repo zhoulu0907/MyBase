@@ -35,7 +35,7 @@ const XDateTimePicker = memo((props: XInputDateTimePickerConfig & { runtime?: bo
   }, [dataField]);
 
   return (
-    <div className="formWrapper">
+    <div className="inputTextWrapper">
       <Cell
         showArrow
         label={label.display && label.text}

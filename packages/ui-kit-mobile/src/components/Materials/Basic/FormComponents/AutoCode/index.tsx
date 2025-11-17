@@ -35,7 +35,7 @@ const XautoCode = memo((props: XautoCodeConfig & { runtime?: boolean; detailMode
   }, [dataField]);
 
   return (
-    <div className="formWrapper inputAutoWrapper">
+    <div className="inputTextWrapper">
       <Input
         readOnly={true}
         label={label.display && label.text}

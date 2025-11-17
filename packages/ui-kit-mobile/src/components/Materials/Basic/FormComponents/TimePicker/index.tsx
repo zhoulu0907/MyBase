@@ -14,7 +14,7 @@ const XTimePicker = memo((props: XInputTimePickerConfig & { runtime?: boolean; d
   }
 
   return (
-    <div className="formWrapper">
+    <div className="inputTextWrapper">
       <DatePicker
         mode={"time"}
         title={label.text}
