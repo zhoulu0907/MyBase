@@ -5,6 +5,8 @@ import activeListDesignSVG from '@/assets/images/list_design_active_icon.svg';
 import defaultListDesignSVG from '@/assets/images/list_design_default_icon.svg';
 import activePageSettingSVG from '@/assets/images/page_setting_active_icon.svg';
 import defaultPageSettingSVG from '@/assets/images/page_setting_default_icon.svg';
+import activeWorkbenchDesignSVG from '@/assets/images/workbench_design_active_icon.svg';
+// import defaultWorkbenchDesignSVG from '@/assets/images/workbench_design_default_icon.svg';
 import previewSVG from '@/assets/images/preview_icon.svg';
 import { appIconMap, useAppEntityStore } from '@onebase/ui-kit';
 import { getEntityFields } from '@onebase/app';
@@ -79,6 +81,13 @@ const baseTabData = [
     alt: 'flow Design',
     defaultIcon: defaultListDesignSVG,
     activeIcon: activeListDesignSVG
+  },
+  {
+    key: EDITOR_TYPES.WORKBENCH_EDITOR,
+    title: '工作台设计',
+    alt: 'workbench Setting',
+    defaultIcon: defaultPageSettingSVG, // TODO: 待UI补充后替换
+    activeIcon: activeWorkbenchDesignSVG
   },
   {
     key: EDITOR_TYPES.PAGE_SETTING,
@@ -207,6 +216,8 @@ export default function EditorHeader() {
       setActiveTab(EDITOR_TYPES.METADATA_MANAGE);
     } else if (hash.includes(EDITOR_TYPES.FLOW_EDITOR)) {
       setActiveTab(EDITOR_TYPES.FLOW_EDITOR);
+    } else if (hash.includes(EDITOR_TYPES.WORKBENCH_EDITOR)) {
+      setActiveTab(EDITOR_TYPES.WORKBENCH_EDITOR);
     }
   }, []);
 
@@ -232,7 +243,11 @@ export default function EditorHeader() {
       loadPageSetInfo(pageSetId);
       setIsEditMode(true);
       handleGetAppInfo(pageSetId);
-      getMainMetaData(pageSetId);
+
+      // 工作台设计页不获取主表数据
+      if (activeTab !== EDITOR_TYPES.WORKBENCH_EDITOR) {
+        getMainMetaData(pageSetId);
+      }
     }
   }, [pageSetId]);
 
@@ -404,6 +419,11 @@ export default function EditorHeader() {
   useEffect(() => {
     if (curPage?.value?.pageSetType === PageType.NORMAL) {
       setTabData(baseTabData.filter((tab) => tab.key !== EDITOR_TYPES.FLOW_EDITOR));
+    } else if (curPage?.value?.pageSetType === PageType.WORKBENCH) {
+      const tabs = baseTabData.filter(
+        (tab) => tab.key === EDITOR_TYPES.WORKBENCH_EDITOR || tab.key === EDITOR_TYPES.PAGE_SETTING
+      );
+      setTabData(tabs);
     } else {
       setTabData(baseTabData);
     }
@@ -458,6 +478,9 @@ export default function EditorHeader() {
                 break;
               case EDITOR_TYPES.FLOW_EDITOR:
                 navigate(`/onebase/editor/${EDITOR_TYPES.FLOW_EDITOR}?pageSetId=${pageSetId}`);
+                break;
+              case EDITOR_TYPES.WORKBENCH_EDITOR:
+                navigate(`/onebase/editor/${EDITOR_TYPES.WORKBENCH_EDITOR}?pageSetId=${pageSetId}`);
                 break;
               default:
                 break;
