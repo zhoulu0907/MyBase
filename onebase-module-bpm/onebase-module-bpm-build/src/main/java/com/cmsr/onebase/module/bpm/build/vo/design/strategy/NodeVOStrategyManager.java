@@ -166,6 +166,7 @@ public class NodeVOStrategyManager {
             nodeJson.setPermissionFlag(JsonUtils.toJsonString(permFlagDTO));
         }
 
+        // todo: 优化
         if (extData instanceof ApproverNodeExtDTO approverNodeExtDTO) {
 
             String approvalMode = approverNodeExtDTO.getApproverConfig().getApprovalMode();

@@ -33,7 +33,7 @@ public class DeptDataRepository extends DataRepository<DeptDO> {
      * @return 子部门列表
      */
     public List<DeptDO> findAllByParentId(Long parentId) {
-        DefaultConfigStore configs = CorpDeptUserHelper.getCorpConfigStore(DeptDO.DEPT_TYPE);
+        DefaultConfigStore configs = CorpDeptUserHelper.getDeptConfigStore();
         configs.and(Compare.EQUAL, DeptDO.PARENT_ID, parentId);
         return findAllByConfig(configs);
     }
@@ -46,7 +46,7 @@ public class DeptDataRepository extends DataRepository<DeptDO> {
      * @return 部门对象
      */
     public DeptDO findOneByParentIdAndName(Long parentId, String name) {
-        DefaultConfigStore configs = CorpDeptUserHelper.getCorpConfigStore(DeptDO.DEPT_TYPE);
+        DefaultConfigStore configs = CorpDeptUserHelper.getDeptConfigStore();
         configs.and(Compare.EQUAL, DeptDO.PARENT_ID, parentId);
         configs.and(Compare.EQUAL, DeptDO.NAME, name);
         return findOne(configs);
@@ -59,7 +59,7 @@ public class DeptDataRepository extends DataRepository<DeptDO> {
      * @return 部门对象
      */
     public DeptDO findOneByName(String name) {
-        DefaultConfigStore configs = CorpDeptUserHelper.getCorpConfigStore(DeptDO.DEPT_TYPE);
+        DefaultConfigStore configs = CorpDeptUserHelper.getDeptConfigStore();
         configs.and(Compare.EQUAL, DeptDO.NAME, name);
         return findOne(configs);
     }
@@ -71,7 +71,7 @@ public class DeptDataRepository extends DataRepository<DeptDO> {
      * @return 部门列表
      */
     public List<DeptDO> findAllByLeaderUserId(Long leaderUserId) {
-        DefaultConfigStore configs = CorpDeptUserHelper.getCorpConfigStore(DeptDO.DEPT_TYPE);
+        DefaultConfigStore configs = CorpDeptUserHelper.getDeptConfigStore();
         configs.and(Compare.EQUAL, DeptDO.LEADER_USER_ID, leaderUserId);
         return findAllByConfig(configs);
     }
@@ -83,7 +83,7 @@ public class DeptDataRepository extends DataRepository<DeptDO> {
      * @return 子部门列表
      */
     public List<DeptDO> findAllByParentIds(Collection<Long> parentIds) {
-        DefaultConfigStore configs = CorpDeptUserHelper.getCorpConfigStore(DeptDO.DEPT_TYPE);
+        DefaultConfigStore configs = CorpDeptUserHelper.getDeptConfigStore();
         configs.and(Compare.IN, DeptDO.PARENT_ID, parentIds);
         return findAllByConfig(configs);
     }
@@ -96,7 +96,7 @@ public class DeptDataRepository extends DataRepository<DeptDO> {
      * @return 部门列表
      */
     public List<DeptDO> findAllByNameAndStatus(String name, Integer status) {
-        DefaultConfigStore configs = CorpDeptUserHelper.getCorpConfigStore(DeptDO.DEPT_TYPE);
+        DefaultConfigStore configs = CorpDeptUserHelper.getDeptConfigStore();
         if (name != null) {
             configs.and(Compare.LIKE, DeptDO.NAME, name);
         }
