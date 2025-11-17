@@ -1,5 +1,5 @@
 import { STATUS_OPTIONS, STATUS_VALUES } from '@/components/Materials/constants';
-import { COMPONENT_GROUP_NAME, PreviewRender, getComponentWidth, usePageEditorSignal, type GridItem } from '@/index';
+import { COMPONENT_GROUP_NAME, EDITOR_TYPES, PreviewRender, getComponentWidth, usePageEditorSignal, type GridItem } from '@/index';
 import { Tabs } from '@arco-design/web-react';
 import { useSignals } from '@preact/signals-react/runtime';
 import { Fragment, memo, useEffect, useState } from 'react';
@@ -20,7 +20,7 @@ const XPreviewTabsLayout = memo((props: XTabsLayoutConfig & { detailMode?: boole
     layoutSubComponents,
     setLayoutSubComponents,
     setShowDeleteButton
-  } = usePageEditorSignal(pageType);
+  } = usePageEditorSignal(pageType || EDITOR_TYPES.FORM_EDITOR);
 
   const [activeTab, setActiveTab] = useState('1');
   const colComponents = layoutSubComponents[id] || Array.from({ length: colCount }, () => []);
