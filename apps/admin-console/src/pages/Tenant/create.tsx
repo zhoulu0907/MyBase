@@ -1,26 +1,17 @@
-import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import {
-  Form,
-  Input,
-  Button,
-  Upload,
-  Select,
-  Message,
-  Space,
-  Checkbox,
-  InputNumber,
-} from '@arco-design/web-react';
+import { generateTimestampString, getDomainPrefix } from '@/utils/date';
+import { Button, Checkbox, Form, Input, InputNumber, Message, Select, Space, Upload } from '@arco-design/web-react';
 import { IconUpload } from '@arco-design/web-react/icon';
+import { TokenManager } from '@onebase/common';
 import {
   addPlatformTenantApi,
   getSimpleUserList,
+  PlatformTenantPublishMode,
   PlatformTenantStatus,
   uploadFile,
-  PlatformTenantPublishMode,
   type CreateTenantParams
 } from '@onebase/platform-center';
-import { generateTimestampString, getDomainPrefix } from '@/utils/date';
+import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styles from './index.module.less';
 
 const CreateSpace = () => {
@@ -30,17 +21,23 @@ const CreateSpace = () => {
   const [adminList, setAdminList] = useState<any[]>([]);
   const [logoUrl, setLogoUrl] = useState<string>(); // logo
 
+  const tokenInfo = TokenManager.getTokenInfo();
+
   const uploadRef = useRef(null);
+
+  useEffect(() => {
+    getPlatformAdminList();
+  }, []);
 
   // 获取Tenant参数
   useEffect(() => {
     form.resetFields();
     form.setFieldsValue({
       status: PlatformTenantStatus.enabled,
-      publishModel: true
+      publishModel: false,
+      tenantAdminUserList: adminList.some((u) => u.id === tokenInfo?.userId) ? [tokenInfo?.userId] : []
     });
-    getPlatformAdminList();
-  }, []);
+  }, [adminList]);
 
   // 生成租户编码
   const generateTenantCode = () => {
@@ -59,12 +56,12 @@ const CreateSpace = () => {
   };
 
   /**
-    * 创建新租户
-    */
+   * 创建新租户
+   */
   const createTenant = async (values: any) => {
     try {
       const formattedAdmin = values.tenantAdminUserList.map((id: string) => {
-        const user = adminList.find(u => u.id === id);
+        const user = adminList.find((u) => u.id === id);
         return {
           adminNickName: user?.nickname || '',
           adminUserName: user?.username || '',
@@ -81,7 +78,7 @@ const CreateSpace = () => {
         website: values.website,
         publishModel: values.publishModel ? PlatformTenantPublishMode.saas : PlatformTenantPublishMode.inner,
         tenantAdminUserReqVOList: formattedAdmin,
-        logoUrl,
+        logoUrl
       };
       await addPlatformTenantApi(newTenantData);
       Message.success('创建租户成功');
@@ -114,11 +111,11 @@ const CreateSpace = () => {
 
     const progressAdapter = onProgress
       ? (progressEvent: ProgressEvent) => {
-        if (progressEvent.lengthComputable) {
-          const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          onProgress(percent, progressEvent);
+          if (progressEvent.lengthComputable) {
+            const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            onProgress(percent, progressEvent);
+          }
         }
-      }
       : undefined;
 
     const res = await uploadFile(formData, progressAdapter);
@@ -131,12 +128,11 @@ const CreateSpace = () => {
         form={form}
         layout="horizontal"
         autoComplete="off"
+        onValuesChange={(values: any, changeValues: any) => {
+          console.log(changeValues);
+        }}
       >
-        <Form.Item
-          label="空间名称"
-          field="name"
-          rules={[{ required: true, message: '请输入空间名称' }]}
-        >
+        <Form.Item label="空间名称" field="name" rules={[{ required: true, message: '请输入空间名称' }]}>
           <Input placeholder="输入空间名称" />
         </Form.Item>
 
@@ -174,11 +170,14 @@ const CreateSpace = () => {
             />
             <Space>
               <Button
-                type='outline'
+                type="outline"
                 icon={<IconUpload />}
                 onClick={() => {
                   uploadRef.current?.getRootDOMNode()?.querySelector('input[type="file"]').click();
-                }}>上传图片</Button>
+                }}
+              >
+                上传图片
+              </Button>
               <div style={{ color: '#999', marginTop: 4 }}>建议比例 2:1</div>
             </Space>
           </Space>
@@ -215,29 +214,18 @@ const CreateSpace = () => {
             mode="multiple"
             allowClear
             style={{ width: '100%' }}
-            options={adminList.map(u => ({
+            options={adminList.map((u) => ({
               label: u.nickname || u.username,
               value: u.id
             }))}
-          >
-          </Select>
+          ></Select>
         </Form.Item>
 
-        <Form.Item
-          label="状态"
-          field="status"
-          triggerPropName="checked"
-          rules={[{ required: true }]}
-        >
+        <Form.Item label="状态" field="status" triggerPropName="checked" rules={[{ required: true }]}>
           <Checkbox>启用</Checkbox>
         </Form.Item>
 
-        <Form.Item
-          label="SaaS 功能"
-          field="publishModel"
-          triggerPropName="checked"
-          rules={[{ required: true }]}
-        >
+        <Form.Item label="SaaS 功能" field="publishModel" triggerPropName="checked" rules={[{ required: true }]}>
           <Checkbox>启用</Checkbox>
         </Form.Item>
 

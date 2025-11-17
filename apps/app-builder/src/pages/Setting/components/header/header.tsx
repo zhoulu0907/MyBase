@@ -6,7 +6,7 @@ import { UserPermissionManager } from '@/utils/permission';
 import { Avatar, Button, Dropdown, Layout, Menu } from '@arco-design/web-react';
 import { IconPoweroff, IconUser } from '@arco-design/web-react/icon';
 import { TokenManager } from '@onebase/common';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './header.module.less';
 
@@ -23,10 +23,6 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   // 获取用户信息
   const tokenInfo = TokenManager.getTokenInfo();
   const userPermissionInfo = UserPermissionManager.getUserPermissionInfo();
-
-  useEffect(() => {
-    console.log(tokenInfo);
-  }, [tokenInfo]);
 
   // 登出处理
   const handleLogout = () => {
