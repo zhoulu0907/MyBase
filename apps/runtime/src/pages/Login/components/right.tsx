@@ -1,15 +1,15 @@
 import { Button, Checkbox, Form, Input, Message, Space, Typography } from '@arco-design/web-react';
 import { IconLock, IconUser } from '@arco-design/web-react/icon';
+import type { IIconBase } from '@icon-park/react/lib/runtime';
+import { getApplication } from '@onebase/app';
 import { getHashQueryParam, SliderCaptcha, TokenManager, type SliderCaptchaRef } from '@onebase/common';
 import { checkCaptchaApi, getCaptchaApi, login, type LoginRequest, type LoginResponse } from '@onebase/platform-center';
-import { getApplication } from '@onebase/app';
 import { appIconMap } from '@onebase/ui-kit';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useI18n } from '../../../hooks/useI18n';
 import { useRememberMe } from '../../../hooks/useRememberMe';
 import styles from '../index.module.less';
-import type { IIconBase } from '@icon-park/react/lib/runtime';
 
 interface DynamicIconProps extends IIconBase {
   IconComponent: React.ComponentType<any>;
@@ -128,7 +128,7 @@ const Right: React.FC = () => {
             refreshToken: response.refreshToken,
             expiresTime: response.expiresTime,
             tenantId: response.tenantWebsite,
-            corpId: response.corpId,
+            corpId: response.corpId
           },
           rememberMe
         );
@@ -273,13 +273,7 @@ const Right: React.FC = () => {
       <div className={styles.loginFooter}>
         <Paragraph className={styles.footerText}>
           登录即表示同意
-          <Button type="text" size="small">
-            《用户协议》
-          </Button>
-          和
-          <Button type="text" size="small">
-            《隐私政策》
-          </Button>
+          <span>《用户协议》</span>和<span>《隐私政策》</span>
         </Paragraph>
       </div>
     </div>

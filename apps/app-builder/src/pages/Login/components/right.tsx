@@ -85,7 +85,7 @@ const Right: React.FC = () => {
             refreshToken: response.refreshToken,
             expiresTime: response.expiresTime,
             tenantId: response.tenantWebsite,
-            corpId: response.corpId,
+            corpId: response.corpId
           },
           rememberMe
         );
@@ -221,13 +221,7 @@ const Right: React.FC = () => {
       <div className={styles.loginFooter}>
         <Paragraph className={styles.footerText}>
           登录即表示同意
-          <Button type="text" size="small">
-            《用户协议》
-          </Button>
-          和
-          <Button type="text" size="small">
-            《隐私政策》
-          </Button>
+          <span>《用户协议》</span>和<span>《隐私政策》</span>
         </Paragraph>
       </div>
     </div>

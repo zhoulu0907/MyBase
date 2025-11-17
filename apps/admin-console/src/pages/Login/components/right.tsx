@@ -71,7 +71,7 @@ const Right: React.FC = () => {
             refreshToken: loginResp.refreshToken,
             expiresTime: loginResp.expiresTime,
             tenantId: loginResp.tenantWebsite,
-            corpId: loginResp.corpId,
+            corpId: loginResp.corpId
           },
           rememberMe
         );
@@ -123,7 +123,7 @@ const Right: React.FC = () => {
     <div className={styles.loginPageRight}>
       <div className={styles.loginFormContainer}>
         <img src={LogoSVG} alt="logo" />
-        <h1 className={styles.title}>欢迎登录数智化底座</h1>
+        <h1 className={styles.title}>欢迎登录平台管理系统</h1>
         <Form
           form={accountForm}
           layout="vertical"
@@ -195,13 +195,7 @@ const Right: React.FC = () => {
       <div className={styles.loginFooter}>
         <Paragraph className={styles.footerText}>
           登录即表示同意
-          <Button type="text" size="small">
-            《用户协议》
-          </Button>
-          和
-          <Button type="text" size="small">
-            《隐私政策》
-          </Button>
+          <span>《用户协议》</span>和<span>《隐私政策》</span>
         </Paragraph>
       </div>
     </div>
