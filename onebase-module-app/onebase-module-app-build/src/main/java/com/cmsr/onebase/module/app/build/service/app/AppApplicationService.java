@@ -34,4 +34,5 @@ public interface AppApplicationService {
     List<ApplicationDO> getSimpleAppList(Integer status);
 
     List<ApplicationDO> getMySimpleAppListByName(String appName);
+
 }
