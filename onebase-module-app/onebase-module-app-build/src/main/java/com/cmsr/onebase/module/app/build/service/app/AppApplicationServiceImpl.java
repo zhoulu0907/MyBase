@@ -4,9 +4,8 @@ import com.cmsr.onebase.framework.common.enums.CommonPublishModelEnum;
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.framework.data.base.BaseDO;
+import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.uid.UidGenerator;
-import com.cmsr.onebase.module.app.api.app.dto.UserPhotoDTO;
 import com.cmsr.onebase.module.app.build.service.AppCommonService;
 import com.cmsr.onebase.module.app.build.service.auth.AppAuthRoleService;
 import com.cmsr.onebase.module.app.build.service.version.AppVersionService;
@@ -26,10 +25,9 @@ import com.cmsr.onebase.module.app.core.dal.database.tag.AppTagRepository;
 import com.cmsr.onebase.module.app.core.dal.database.version.AppVersionRepository;
 import com.cmsr.onebase.module.app.core.dal.database.version.AppVersionResourceRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.app.ApplicationDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.version.VersionDO;
 import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.core.enums.app.ApplicationStatusEnum;
-import com.cmsr.onebase.module.app.core.enums.app.DevelopStatusEnum;
+import com.cmsr.onebase.module.app.core.vo.app.AppUserPhotoDTO;
 import com.cmsr.onebase.module.app.core.vo.app.ApplicationPageReqVO;
 import com.cmsr.onebase.module.metadata.api.datasource.MetadataDatasourceApi;
 import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceCreateDefaultReqDTO;
@@ -37,8 +35,6 @@ import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceSaveReqDTO;
 import jakarta.annotation.Resource;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.DataRow;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,8 +42,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -113,8 +107,7 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         List<Long> appIds = pageResult.getList().stream()
                 .map(ApplicationDO::getId)
                 .collect(Collectors.toList());
-         Map<Long,List<UserPhotoDTO>> userListMap=appSqlQueryRepository.findUserPhotoList(appIds);
-        Map<Long, VersionDO> developStatusMap=appVersionService.findVersionMapByAppIds(appIds);
+        Map<Long, List<AppUserPhotoDTO>> userListMap = appSqlQueryRepository.findUserPhotoList(appIds);
 
         List<ApplicationRespVO> respVOS = pageResult.getList().stream()
                 .map(v -> {
@@ -124,32 +117,10 @@ public class AppApplicationServiceImpl implements AppApplicationService {
                     bean.setCreateUser(userHelper.getUserNickname(v.getCreator()));
                     bean.setUpdateUser(userHelper.getUserNickname(v.getUpdater()));
                     bean.setUserPhotoList(userListMap.get(v.getId()));
-                    if(developStatusMap.get(v.getId()) != null) {
-                        VersionDO versionDO = developStatusMap.get(v.getId());
-                        bean.setDevelopStatus(getDevelopStatus(v, versionDO));
-                    }
                     return bean;
                 })
                 .toList();
         return new PageResult<>(respVOS, pageResult.getTotal());
-    }
-    /**
-     * 根据应用和版本的更新时间设置开发状态
-     *
-     * @param applicationDO 应用对象
-     * @param versionDO 版本对象
-     */
-    private String getDevelopStatus(ApplicationDO applicationDO, VersionDO versionDO) {
-       String text="";
-        if (versionDO != null) {
-            LocalDateTime verUpdate = versionDO.getUpdateTime();
-            LocalDateTime appUpdate = applicationDO.getUpdateTime();
-            if (appUpdate.isAfter(verUpdate)) {
-                // 修改code,前端处理显示名称
-              text= DevelopStatusEnum.ITERATE.getCode();
-            }
-        }
-        return text;
     }
 
     private List<TagRespVO> queryAppTags(Long appId) {
@@ -194,7 +165,8 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         applicationDO.setPublishModel(createReqVO.getPublishModel() == null ? CommonPublishModelEnum.InnerModel.getValue() : createReqVO.getPublishModel());
         applicationDO = applicationRepository.insert(applicationDO);
         saveApplicationTags(applicationDO.getId(), createReqVO.getTagIds());
-        authRoleService.createDefaultRole(applicationDO.getId());
+        Long userId = SecurityFrameworkUtils.getLoginUserId();
+        authRoleService.createDefaultRole(applicationDO.getId(), userId);
         createDatasource(applicationDO.getId(), applicationDO.getAppUid(), createReqVO.getDatasourceSaveReq());
         return BeanUtils.toBean(applicationDO, ApplicationCreateRespVO.class);
     }
@@ -310,6 +282,7 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         }
         throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_UID_GENERATE_FAILED);
     }
+
     @Override
     public List<ApplicationDO> getSimpleAppList(Integer status) {
         return applicationRepository.getSimpleAppList(status);

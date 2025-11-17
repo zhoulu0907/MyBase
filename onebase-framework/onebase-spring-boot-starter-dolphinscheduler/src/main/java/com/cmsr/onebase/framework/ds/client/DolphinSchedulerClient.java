@@ -90,6 +90,7 @@ public class DolphinSchedulerClient {
         });
         OkHttpClient httpClient = httpClientBuilder
                 .connectTimeout(Duration.ofSeconds(15))
+                .callTimeout(Duration.ofSeconds(15))
                 .retryOnConnectionFailure(false)
                 .build();
 
@@ -207,7 +208,11 @@ public class DolphinSchedulerClient {
      * 上线工作流
      */
     public void onlineWorkflow(Long projectCode, Long workflowCode) {
-        offlineWorkflow(projectCode, workflowCode);
+        Result<WorkflowDetailedResp> queryResp = execute(dsClientStub.queryWorkflowByCode(projectCode, workflowCode));
+
+        if (queryResp.getSuccess()) {
+            offlineWorkflow(projectCode, workflowCode);
+        }
         Result<Boolean> releaseResult = execute(dsClientStub.releaseWorkflow(projectCode, workflowCode,
                 // magic string: flowName, DS required for this, but no usage at all.
                 "flowName", "ONLINE"));

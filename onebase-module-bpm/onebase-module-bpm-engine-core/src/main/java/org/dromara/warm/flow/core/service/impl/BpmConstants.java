@@ -14,6 +14,12 @@ public interface BpmConstants {
     /**  节点审批人列表最多10个角色 */
     Integer MAX_NODE_APPROVER_ROLES = 10;
 
+    /**  节点抄送人列表最多500个用户 */
+    Integer MAX_NODE_CC_USERS = 500;
+
+    /**  节点抄送人列表最多50个角色 */
+    Integer MAX_NODE_CC_ROLES = 50;
+
     /**  flow variable 中appId的key */
     String VAR_APP_ID_KEY = "appId";
 

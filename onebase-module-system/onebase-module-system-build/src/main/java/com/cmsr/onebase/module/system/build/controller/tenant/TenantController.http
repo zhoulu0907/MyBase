@@ -14,21 +14,19 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
 {
-  "name": "租户Test001",
-  "tenantCode": "tenant_test001",
-  "website": "tenant_test001",
+  "name": "租户Test003",
+  "tenantCode": "tenant_test003",
+  "website": "tenant_test003",
   "accountCount": 2,
   "status": 1,
   "tenantAdminUserReqVOList": [
     {
-      "adminUserName": "test001",
+      "adminUserName": "test003",
       "adminMobile": "13800000003",
-      "adminNickName": "租户Test001"
+      "adminNickName": "租户t003管理员"
     }
   ]
 }
-
-
 
 ### 更新租户 /admin-api/system/tenant/update
 POST {{baseUrl}}/system/tenant/update
