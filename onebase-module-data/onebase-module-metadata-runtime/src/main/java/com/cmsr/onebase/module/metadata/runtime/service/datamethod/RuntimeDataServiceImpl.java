@@ -369,7 +369,8 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
         Map<String, Object> resultData = coreDataMethodService.getData(
                 reqVO.getEntityId(),
                 reqVO.getId(),
-                reqVO.getMethodCode()
+                reqVO.getMethodCode(),
+                reqVO.getMenuId()
         );
 
 //        //查询子表数据
