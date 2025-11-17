@@ -266,6 +266,7 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
     @Override
     public void configScheduleStrategy(ScheduleConfigVO scheduleVO) {
         ETLWorkflowDO workflowDO = getWorkflowById(scheduleVO.getWorkflowId());
+        workflowDO.setWorkflowName(scheduleVO.getFlowName());
         workflowDO.setScheduleStrategy(scheduleVO.getScheduleStrategy().getValue());
         workflowDO.setScheduleConfig(JsonUtils.toJsonString(scheduleVO.getConfig()));
         workflowRepository.update(workflowDO);
