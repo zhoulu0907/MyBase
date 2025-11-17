@@ -12,10 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -61,17 +58,17 @@ public class AppAuthRoleProvider {
         // 获取用户的部门层次（包含用户所在部门及其所有上级部门）
         List<Long> deptTree = appSqlQueryRepository.findDeptHierarchyByUserId(userId);
         if (deptTree == null || deptTree.isEmpty()) {
-            return new ArrayList<>();
+            return Collections.emptyList();
         }
         // 获取该应用下的部门角色关系
         List<AuthRoleDeptDO> authRoleDeptDOS = appAuthRoleDeptRepository.findByApplicationId(applicationId);
         if (authRoleDeptDOS == null || authRoleDeptDOS.isEmpty()) {
-            return new ArrayList<>();
+            return Collections.emptyList();
         }
         Set<Long> roleIds = findRolesByDept(authRoleDeptDOS, deptTree);
         // 根据角色ID查询完整的角色信息
         if (roleIds.isEmpty()) {
-            return new ArrayList<>();
+            return Collections.emptyList();
         }
         return appAuthRoleRepository.findAllByIds(roleIds);
     }

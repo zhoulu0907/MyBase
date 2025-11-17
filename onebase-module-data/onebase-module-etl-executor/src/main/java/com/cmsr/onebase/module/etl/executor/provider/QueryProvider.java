@@ -3,18 +3,12 @@ package com.cmsr.onebase.module.etl.executor.provider;
 import com.cmsr.onebase.module.etl.executor.provider.dao.*;
 import com.github.f4b6a3.tsid.TsidCreator;
 import org.apache.commons.dbutils.QueryRunner;
-import org.jooq.DSLContext;
-import org.jooq.SQLDialect;
-import org.jooq.conf.ParamType;
-import org.jooq.impl.DSL;
 
 import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.List;
 
 public class QueryProvider {
-
-    private final DSLContext context = DSL.using(SQLDialect.DEFAULT);
 
     private final QueryRunner runner;
 
@@ -23,17 +17,10 @@ public class QueryProvider {
     }
 
     public EtlWorkflow findWorkflowConfig(Long workflowId) throws Exception {
-        var query = context.select(
-                        DSL.field("id", Long.class),
-                        DSL.field("application_id", Long.class),
-                        DSL.field("config", String.class)
-                )
-                .from(DSL.table("etl_workflow"))
-                .where(DSL.and(
-                        DSL.field("id").eq(workflowId),
-                        DSL.field("deleted").eq(0)
-                ));
-        return runner.query(query.getSQL(ParamType.INDEXED), resultSet -> {
+        String sql = """
+                select id, application_id, config from etl_workflow where id = ? and deleted = ?
+                """;
+        return runner.query(sql, resultSet -> {
             if (resultSet.next()) {
                 EtlWorkflow etlWorkflow = new EtlWorkflow();
                 etlWorkflow.setWorkflowId(resultSet.getLong("id"));
@@ -42,23 +29,14 @@ public class QueryProvider {
                 return etlWorkflow;
             }
             return null;
-        }, query.getBindValues().toArray());
+        }, workflowId, 0);
     }
 
     public EtlTable findTableById(Long datasourceId, Long tableId) throws Exception {
-        var query = context.select(
-                        DSL.field("table_name", String.class),
-                        DSL.field("meta_info", String.class)
-                )
-                .from(DSL.table("etl_table"))
-                .where(
-                        DSL.and(
-                                DSL.field("id", Long.class).eq(tableId),
-                                DSL.field("datasource_id", Long.class).eq(datasourceId),
-                                DSL.field("deleted", Long.class).eq(0L)
-                        )
-                );
-        return runner.query(query.getSQL(ParamType.INDEXED), resultSet -> {
+        String sql = """
+                select table_name, meta_info from etl_table where id = ? and datasource_id = ? and deleted = ?
+                """;
+        return runner.query(sql, resultSet -> {
                     EtlTable etlTable = new EtlTable();
                     if (resultSet.next()) {
                         etlTable.setTableName(resultSet.getString("table_name"));
@@ -67,22 +45,14 @@ public class QueryProvider {
                     }
                     return null;
                 },
-                query.getBindValues().toArray());
+                tableId, datasourceId, 0);
     }
 
     public EtlDataSource findConnectPropertiesById(Long datasourceId) throws Exception {
-        var query = context.select(
-                        DSL.field("datasource_type", String.class),
-                        DSL.field("config", String.class)
-                )
-                .from(DSL.table("etl_datasource"))
-                .where(
-                        DSL.and(
-                                DSL.field("id").eq(datasourceId),
-                                DSL.field("deleted", Long.class).eq(0L)
-                        )
-                );
-        return runner.query(query.getSQL(ParamType.INDEXED), resultSet -> {
+        String sql = """
+                select datasource_type, config from etl_datasource where id = ? and deleted = ?
+                """;
+        return runner.query(sql, resultSet -> {
                     if (resultSet.next()) {
                         EtlDataSource etlDataSource = new EtlDataSource();
                         etlDataSource.setDatasourceType(resultSet.getString("datasource_type"));
@@ -91,22 +61,14 @@ public class QueryProvider {
                     }
                     return null;
                 },
-                query.getBindValues().toArray());
+                datasourceId, 0);
     }
 
     public List<EtlFlinkMapping> findFlinkMapping(String datasourceType) throws Exception {
-        var query = context.select(
-                        DSL.field("origin_type", String.class),
-                        DSL.field("flink_type", String.class)
-                )
-                .from(DSL.table("etl_flink_mapping"))
-                .where(
-                        DSL.and(
-                                DSL.field("datasource_type", String.class).eq(datasourceType),
-                                DSL.field("deleted", Long.class).eq(0L)
-                        )
-                );
-        return runner.query(query.getSQL(ParamType.INDEXED), resultSet -> {
+        String sql = """
+                select origin_type, flink_type from etl_flink_mapping where datasource_type = ? and deleted = ?
+                """;
+        return runner.query(sql, resultSet -> {
                     List<EtlFlinkMapping> etlFlinkMappings = new ArrayList<>();
                     while (resultSet.next()) {
                         EtlFlinkMapping etlFlinkMapping = new EtlFlinkMapping();
@@ -116,37 +78,25 @@ public class QueryProvider {
                     }
                     return etlFlinkMappings;
                 },
-                query.getBindValues().toArray());
+                datasourceType, 0);
     }
 
     public void insertEtlExecutionLog(EtlExecutionLog etlExecutionLog) throws Exception {
-        long tsid = TsidCreator.getTsid().toLong();
-        etlExecutionLog.setId(tsid);
-        var query = context.insertInto(DSL.table("etl_execution_log"),
-                        DSL.field("id"),
-                        DSL.field("application_id"),
-                        DSL.field("workflow_id"),
-                        DSL.field("start_time"),
-                        DSL.field("end_time"),
-                        DSL.field("duration_time"),
-                        DSL.field("trigger_type"),
-                        DSL.field("trigger_user"),
-                        DSL.field("task_status"),
-                        DSL.field("error_message")
-                )
-                .values(
-                        etlExecutionLog.getId(),
-                        etlExecutionLog.getApplicationId(),
-                        etlExecutionLog.getWorkflowId(),
-                        etlExecutionLog.getStartTime(),
-                        etlExecutionLog.getEndTime(),
-                        etlExecutionLog.getDurationTime(),
-                        etlExecutionLog.getTriggerType(),
-                        etlExecutionLog.getTriggerUser(),
-                        etlExecutionLog.getTaskStatus(),
-                        etlExecutionLog.getErrorMessage()
-                );
-        runner.execute(query.getSQL(ParamType.INDEXED), query.getBindValues().toArray());
+        String sql = """
+                insert into etl_execution_log(id, application_id, workflow_id, start_time, end_time, duration_time, trigger_type, trigger_user, task_status, error_message)
+                values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """;
+        etlExecutionLog.setId(TsidCreator.getTsid().toLong());
+        runner.execute(sql, etlExecutionLog.getId(),
+                etlExecutionLog.getApplicationId(),
+                etlExecutionLog.getWorkflowId(),
+                etlExecutionLog.getStartTime(),
+                etlExecutionLog.getEndTime(),
+                etlExecutionLog.getDurationTime(),
+                etlExecutionLog.getTriggerType(),
+                etlExecutionLog.getTriggerUser(),
+                etlExecutionLog.getTaskStatus(),
+                etlExecutionLog.getErrorMessage());
     }
 
 }
