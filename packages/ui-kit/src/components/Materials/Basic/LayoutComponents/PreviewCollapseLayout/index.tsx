@@ -1,5 +1,5 @@
 import IconCollapsedDown from '@/assets/images/collapse_down_icon.svg';
-import { COMPONENT_GROUP_NAME, EditRender, getComponentWidth, usePageEditorSignal, type GridItem } from '@/index';
+import { COMPONENT_GROUP_NAME, EDITOR_TYPES, PreviewRender, getComponentWidth, usePageEditorSignal, type GridItem } from '@/index';
 import { Collapse } from '@arco-design/web-react';
 import { useSignals } from '@preact/signals-react/runtime';
 import { Fragment, memo, useEffect, useState } from 'react';
@@ -21,7 +21,7 @@ const XPreviewCollapseLayout = memo((props: XCollapseLayoutConfig & { detailMode
     layoutSubComponents,
     setLayoutSubComponents,
     setShowDeleteButton
-  } = usePageEditorSignal(pageType);
+  } = usePageEditorSignal(pageType || EDITOR_TYPES.FORM_EDITOR);
 
   const colComponents = layoutSubComponents[id] || Array.from({ length: colCount }, () => []);
   const [activeKey, setActiveKey] = useState<string[]>([]);
@@ -91,11 +91,12 @@ const XPreviewCollapseLayout = memo((props: XCollapseLayoutConfig & { detailMode
                           setShowDeleteButton(true);
                         }}
                       >
-                        <EditRender
+                        <PreviewRender
                           cpId={cp.id}
                           cpType={cp.type}
-                          runtime={true}
                           pageComponentSchema={pageComponentSchemas[cp.id]}
+                          runtime={true}
+                          detailMode={detailMode}
                         />
                       </div>
                     )}

@@ -309,11 +309,10 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
             };
           }
           if (page.pageType === CATEGORY_TYPE.FORM) {
-            setFromSubTableComponents(component.parentCode, colComponents as any[]);
+            useEditorSignalMap.get(page.id)!.setSubTableComponents(component.parentCode, colComponents as any[]);
           } else if (page.pageType === CATEGORY_TYPE.LIST) {
             setListSubTableComponents(component.parentCode, colComponents as any[]);
           }
-          // useEditorSignalMap.get(page.id)!.setSubTableComponents(component.parentCode, colComponents as any[]);
         } else {
           const colComponents = newColComponentsMap.get(component.parentCode);
           if (colComponents) {
