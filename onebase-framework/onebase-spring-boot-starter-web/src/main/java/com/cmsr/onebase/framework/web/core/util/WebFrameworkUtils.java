@@ -9,6 +9,7 @@ import com.cmsr.onebase.framework.common.enums.XFromSceneTypeEnum;
 import com.cmsr.onebase.framework.web.config.WebProperties;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.http.HttpServletRequest;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -191,6 +192,13 @@ public class WebFrameworkUtils {
         HttpServletRequest request = getRequest();
         String fromType = request.getHeader(X_From_Scene_Type);
         // TODO 后期更新前端后，取消默认平台, 不允许空，并校验和用户实际类型（user_type）一致
+        if (StringUtils.isBlank(fromType)) {
+            String uri = request.getRequestURI();
+            // 检查 Admin API
+            if (StrUtil.startWith(uri, properties.getPlatformApi().getPrefix())) {
+                fromType =  XFromSceneTypeEnum.PLATFORM.getCode();
+            }
+        }
         return fromType == null ? XFromSceneTypeEnum.TENANT.getCode() : fromType;
     }
 
