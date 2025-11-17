@@ -10,14 +10,12 @@ import org.anyline.entity.DataRow;
 import org.anyline.entity.DataSet;
 import org.anyline.entity.Order;
 import org.anyline.service.AnylineService;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -130,54 +128,107 @@ public class AppSqlQueryRepository {
 
     public List<Long> findDeptHierarchyByUserId(Long userId) {
         List<Long> result = new ArrayList<>();
-//        Long currentDeptId = null;
-//        {
-//            ConfigStore configs = new DefaultConfigStore();
-//            configs.param("userId", userId);
-//            String sql = """
-//                    select
-//                    	dept_id
-//                    from
-//                    	system_users
-//                    where
-//                    	deleted = 0 and id = #{userId}
-//                    """;
-//            DataSet dataSet = anylineService.querys(sql, configs);
-//            for (DataRow dataRow : dataSet) {
-//                Long deptId = dataRow.getLong("dept_id");
-//                if (deptId != null) {
-//                    result.add(deptId);
-//                    currentDeptId = deptId;
-//                }
-//            }
-//        }
-//        while (currentDeptId != null) {
-//            ConfigStore configs = new DefaultConfigStore();
-//            configs.param("deptId", currentDeptId);
-//            String sql = """
-//                    select
-//                    	id,
-//                    	parent_id
-//                    from
-//                    	system_dept
-//                    where
-//                    	deleted = 0 and id = #{deptId}
-//                    """;
-//            DataSet dataSet = anylineService.querys(sql, configs);
-//            for (DataRow dataRow : dataSet) {
-//                Long deptId = dataRow.getLong("id");
-//                if (deptId != null) {
-//                    result.add(deptId);
-//                }
-//                currentDeptId = dataRow.getLong("parent_id");
-//            }
-//        }
-
+        Long currentDeptId = null;
+        {
+            ConfigStore configs = new DefaultConfigStore();
+            configs.param("userId", userId);
+            String sql = """
+                    select
+                    	dept_id
+                    from
+                    	system_users
+                    where
+                    	deleted = 0 and id = #{userId}
+                    """;
+            DataSet dataSet = anylineService.querys(sql, configs);
+            for (DataRow dataRow : dataSet) {
+                currentDeptId = dataRow.getLong("dept_id");
+                if (currentDeptId != null) {
+                    result.add(currentDeptId);
+                }
+            }
+        }
+        int loopCount = 0;
+        while (currentDeptId != null && currentDeptId > 0) {
+            ConfigStore configs = new DefaultConfigStore();
+            configs.param("deptId", currentDeptId);
+            String sql = """
+                    select
+                    	id,
+                    	parent_id
+                    from
+                    	system_dept
+                    where
+                    	deleted = 0 and id = #{deptId}
+                    """;
+            DataSet dataSet = anylineService.querys(sql, configs);
+            for (DataRow dataRow : dataSet) {
+                currentDeptId = dataRow.getLong("parent_id");
+                if (currentDeptId != null && currentDeptId > 0) {
+                    result.add(currentDeptId);
+                }
+            }
+            loopCount++;
+            if (loopCount > 100) {
+                throw new RuntimeException("findDeptHierarchyByUserId 部门层级过深");
+            }
+        }
         return result;
     }
 
     public List<Long> findAllUserIdsByDeptIds(Long deptId, Integer isIncludeChild) {
-        return new ArrayList<>();
+        if (deptId == null || deptId <= 0) {
+            return Collections.emptyList();
+        }
+        List<Long> result = new ArrayList<>();
+        {
+            List<Long> ids = findAllUserIdsByDeptIds(List.of(deptId));
+            result.addAll(ids);
+        }
+        if (isIncludeChild != null && isIncludeChild == 1) {
+            List<Long> deptIds = List.of(deptId);
+            int loopCount = 0;
+            while (CollectionUtils.isNotEmpty(deptIds)) {
+                String sql = """
+                        select id from system_dept where parent_id in (#{deptIds})
+                        """;
+                ConfigStore configs = new DefaultConfigStore();
+                configs.param("deptIds", deptIds);
+                DataSet dataSet = anylineService.querys(sql, configs);
+                deptIds = new ArrayList<>();
+                for (DataRow dataRow : dataSet) {
+                    Long id = dataRow.getLong("id");
+                    if (id != null && id > 0) {
+                        deptIds.add(id);
+                    }
+                }
+                List<Long> ids = findAllUserIdsByDeptIds(deptIds);
+                result.addAll(ids);
+                //
+                loopCount++;
+                if (loopCount > 100) {
+                    throw new RuntimeException("findAllUserIdsByDeptIds部门层级过深");
+                }
+            }
+        }
+        return result;
+    }
+
+    private List<Long> findAllUserIdsByDeptIds(List<Long> deptIds) {
+        if (deptIds == null || deptIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<Long> result = new ArrayList<>();
+        ConfigStore configs = new DefaultConfigStore();
+        configs.param("deptIds", deptIds);
+        String sql = """
+                select id from system_users where deleted = 0 and dept_id in (#{deptIds})
+                """;
+        DataSet dataSet = anylineService.querys(sql, configs);
+        for (DataRow dataRow : dataSet) {
+            result.add(dataRow.getLong("id"));
+        }
+        return result;
     }
 
     public Map<Long, List<UserPhotoDTO>> findUserPhotoList(List<Long> appIds) {
@@ -213,8 +264,8 @@ public class AppSqlQueryRepository {
                                 row -> {
                                     UserPhotoDTO appPhotoDTO = new UserPhotoDTO();
                                     appPhotoDTO.setId(String.valueOf(row.get("id")));
-                                    appPhotoDTO.setAvatar( (String) row.get("avatar"));
-                                    appPhotoDTO.setNickName( (String) row.get("nickName"));
+                                    appPhotoDTO.setAvatar((String) row.get("avatar"));
+                                    appPhotoDTO.setNickName((String) row.get("nickName"));
                                     return appPhotoDTO;
                                 },
                                 Collectors.toList()
