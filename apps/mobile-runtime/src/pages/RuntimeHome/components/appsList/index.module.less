@@ -38,6 +38,12 @@
     display: flex;
     align-items: center;
   }
+   .treeNone {
+      font-size: 0.16rem;
+      line-height: 0.56rem;
+      color: #909399;
+      padding-left: 0.36rem;
+    }
   .treeItemGroup {
     // border-bottom: 1px solid #e0e0e0;// #F2F3F5;
     :global {
@@ -64,47 +70,50 @@
     }
   }
 }
-.ineedtodo-icon {
-  background: url(@/assets/images/task_center/willdo-on.svg) no-repeat center;
-  background-size: 100% 100%;
-}
-.ihavedone-icon {
-  background: url(@/assets/images/task_center/idone-on.svg) no-repeat center;
-  background-size: 100% 100%;
-}
 
 .gridLayout {
   :global(.arco-grid-rows-item-text) {
     margin-top: 0.04rem;
   }
+  :global {
+    .arco-ellipsis {
+      font-size: 0.16rem;
+    }
+  }
 }
 
 .tabs {
-  :global(.arco-tab-cell-container-wrap.vertical) {
-    height: 0.42rem;
-    margin-bottom: 0.16rem;
-  }
+  :global {
+    .arco-tab-cell-container-wrap.vertical {
+      height: 0.42rem;
+      margin-bottom: 0.16rem;
+    }
+    .arco-tab-cell-container.vertical {
+      justify-content: start !important;
+    }
+    .arco-tab-cell.vertical:not(.custom).line:not(.last) {
+      color: #4e5969;
+    }
+    .arco-tab-cell.vertical:not(.custom).line.active {
+      color: rgb(var(--primary-6));
+    }
+    .arco-tab-cell-underline-inner {
+      background-color: rgb(var(--primary-6));
+    }
+    .arco-tab-cell {
+      color: #4e5969;
+      text-align: center;
+      font-size: 0.16rem;
+      &.vertical {
+        margin: 0 0.08rem !important;
+      }
+    }
 
-  :global(.arco-tab-cell.vertical:not(.custom).line:not(.last)) {
-    color: #4e5969;
-    margin-right: 0.16rem;
-  }
-
-  :global(.arco-tab-cell.vertical:not(.custom).line.active) {
-    color: rgb(var(--primary-6));
-    margin-right: 0.16rem;
-  }
-
-  :global(.arco-tab-cell-underline-inner) {
-    background-color: rgb(var(--primary-6));
-  }
-
-  :global(.arco-tab-cell) {
-    color: rgb(var(--parmary-6));
-    text-align: center;
-    font-family: PingFang SC;
-    font-size: 0.16rem;
-    font-style: normal;
-    font-weight: 500;
+    .arco-tab-cell-underline {
+      border-radius: 4px;
+      height: 0.04rem;
+      width: 0.24rem;
+      background: linear-gradient(301deg, var(--Semantic-Success-600, #00B42A) 25.06%, var(--Brand-Builder-Builder_600, #009E9E) 87.47%);
+    }
   }
 }

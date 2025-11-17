@@ -1,8 +1,7 @@
 import React from 'react';
 import CustomNav from '@/pages/components/Nav';
 import styles from './index.module.less';
-
-const demoAvatarSrc = 'https://sf1-cdn-tos.toutiaostatic.com/obj/arco-mobile/_static_/small_image_5.jpg';
+import logoIcon from '../../../../assets/images/logo-icon.svg';
 
 const Protocol: React.FC = () => {
 
@@ -11,7 +10,7 @@ const Protocol: React.FC = () => {
       <CustomNav title="关于我们" />
       <div className={styles.container}>
         <div className={styles.basicInfo}>
-          <img className={styles.icon} src={demoAvatarSrc} />
+          <img className={styles.icon} src={logoIcon} />
           <div className={styles.name}>OneBase</div>
           <div className={styles.version}>当前版本 3.0.6</div>
         </div>

@@ -35,6 +35,8 @@ interface TreeNode {
 
 const Home: React.FC<{ nickname: string }> = ({ nickname }) => {
   useSignals();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const { appId } = useParams<{ appId?: string }>();
 
@@ -160,6 +162,13 @@ const Home: React.FC<{ nickname: string }> = ({ nickname }) => {
     }
     return nickname + '，' + greekString;
   }
+  const handlerItemClick = (curMenuId: string) => {
+    const sp = new URLSearchParams(location.search);
+    sp.set('curMenu', String(curMenuId));
+    // sp.delete('curTab');
+    const to = `${location.pathname.replace('/runtime-home', '/runtime')}?${sp.toString()}`;
+    navigate(to);
+  };
 
   return (
     <div className={styles.home}>
@@ -172,10 +181,11 @@ const Home: React.FC<{ nickname: string }> = ({ nickname }) => {
           columns={4}
           data={
             topCates.map((item, index) => ({
-              key: item.menuCode,
+              key: item.id,
               img: <img className={styles.topcatesImg} src={[topcates1, topcates2, topcates3, topcates4][index]} alt="" />,
               title: <span className={styles.topcatesTitle}>{item.menuName}</span>,
-              itemStyle: { padding: 0 }
+              itemStyle: { padding: 0 },
+              onClick: () => handlerItemClick(item.id),
             }))}
         ></Grid>
       </div>
