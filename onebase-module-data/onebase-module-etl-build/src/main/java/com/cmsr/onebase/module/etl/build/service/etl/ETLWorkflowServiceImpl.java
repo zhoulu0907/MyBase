@@ -15,10 +15,12 @@ import com.cmsr.onebase.module.etl.core.dal.database.*;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLScheduleJobDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLWorkflowDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLWorkflowTableDO;
+import com.cmsr.onebase.module.etl.core.dal.dataobject.schedule.FixedDurationSchedule;
 import com.cmsr.onebase.module.etl.core.enums.ETLConstants;
 import com.cmsr.onebase.module.etl.core.enums.ETLErrorCodeConstants;
 import com.cmsr.onebase.module.etl.core.enums.ScheduleJobStatus;
 import com.cmsr.onebase.module.etl.core.enums.ScheduleType;
+import com.cmsr.onebase.module.etl.core.util.Cron;
 import com.cmsr.onebase.module.etl.core.vo.etl.ExecutionLogVO;
 import com.cmsr.onebase.module.etl.core.vo.etl.WorkflowPageReqVO;
 import jakarta.annotation.Resource;
@@ -236,12 +238,49 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
             jobId = Long.parseLong(jobIdStr);
         }
         // online
-        if (ScheduleType.MANUALLY.equals(scheduleType)) { // 手动执行则仅上线
-            dolphinSchedulerClient.onlineWorkflow(etlProjectCode, jobId);
-        } else {
-            Schedule schedule = new Schedule();
-            // TODO: transform scheduleConfig(String) to Schedule
-            dolphinSchedulerClient.onlineWorkflowWithSchedule(etlProjectCode, jobId, schedule);
+        switch (scheduleType) {
+            case MANUALLY -> dolphinSchedulerClient.onlineWorkflow(etlProjectCode, jobId);
+            case FIXED -> {
+                Schedule schedule = new Schedule();
+                FixedDurationSchedule fixedSchedule = JsonUtils.parseObject(workflowDO.getScheduleConfig(), FixedDurationSchedule.class);
+                String repeatType = fixedSchedule.getRepeatType();
+                String crontab;
+                Cron cron = new Cron();
+                switch (repeatType) {
+                    case "cron":
+                        crontab = fixedSchedule.getTriggerTime();
+                        break;
+                    case "day": {
+                        cron.setHourAndMinute(fixedSchedule.getTriggerTime());
+                        crontab = cron.toCron();
+                        break;
+                    }
+                    case "week": {
+                        cron.setWeeks(fixedSchedule.getRepeatWeek());
+                        cron.setHourAndMinute(fixedSchedule.getTriggerTime());
+                        crontab = cron.toCron();
+                        break;
+                    }
+                    case "month": {
+                        cron.setDays(fixedSchedule.getRepeatDay());
+                        cron.setHourAndMinute(fixedSchedule.getTriggerTime());
+                        crontab = cron.toCron();
+                        break;
+                    }
+                    case "year": {
+                        cron.setMonthAndDay(fixedSchedule.getTriggerDate());
+                        cron.setHourAndMinute(fixedSchedule.getTriggerTime());
+                        crontab = cron.toCron();
+                        break;
+                    }
+                    default:
+                        throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.ILLEGAL_SCHEDULE_TYPE);
+                }
+                schedule.setCrontab(crontab);
+
+                dolphinSchedulerClient.onlineWorkflowWithSchedule(etlProjectCode, jobId, schedule);
+            }
+            default -> throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.ILLEGAL_SCHEDULE_TYPE);
         }
         workflowDO.setIsEnabled(1);
         workflowRepository.update(workflowDO);

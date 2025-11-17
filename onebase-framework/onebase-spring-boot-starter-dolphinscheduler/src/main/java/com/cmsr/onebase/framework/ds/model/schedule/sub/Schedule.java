@@ -10,10 +10,10 @@ import java.time.LocalDateTime;
 public class Schedule {
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime startTime;
+    private LocalDateTime startTime = LocalDateTime.now();
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime endTime;
+    private LocalDateTime endTime = LocalDateTime.now().withYear(2999);
 
     private String crontab;
 
