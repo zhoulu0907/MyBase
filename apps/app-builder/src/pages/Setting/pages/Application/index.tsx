@@ -265,6 +265,13 @@ const AppManagement: React.FC = () => {
     }, delay);
   };
 
+  const getDevelopStatus = (developStatus?: string) => {
+    if(developStatus === "iterate") {
+      return "迭代中"
+    }
+    return "";
+  }
+
   const menu = (item: any) => {
     return (
       <Menu onPointerEnter={clearTimer} onPointerLeave={() => startCloseTimer(80)}>
@@ -412,7 +419,7 @@ const AppManagement: React.FC = () => {
                                   fontWeight: 400
                                 }}
                               >
-                                {item.developStatus}
+                                {getDevelopStatus(item.developStatus)}
                               </Tag>}
 
                               <Tag

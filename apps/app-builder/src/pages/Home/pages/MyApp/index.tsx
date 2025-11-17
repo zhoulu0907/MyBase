@@ -28,10 +28,11 @@ import {
 import { getCommonPaginationList } from '@onebase/common';
 import { debounce, sample } from 'lodash-es';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import emptyApplicationSVG from '@/assets/images/empty_application.svg';
 import plusSVG from '@/assets/images/plus_icon.svg';
+import arrowRightUp from "@/assets/images/arrow-right-up.svg";
 import CreateApp from '@/components/CreateApp';
 import { type Options } from '@/components/CreateApp/const';
 import CreateDataSource, { type DataSourceHandle } from '@/components/CreateDataSource';
@@ -58,7 +59,8 @@ const MyAppPage: React.FC = () => {
   const [form] = Form.useForm();
   const { t } = useI18n();
   const navigate = useNavigate();
-
+  const location = useLocation();
+  const isTenant = true || location.pathname?.includes("tenant");
   const [pageSize, setPageSize] = useState<number>();
   const [pageNo, setPageNo] = useState(1);
   const [dataList, setDataList] = useState<Application[]>();
@@ -89,7 +91,7 @@ const MyAppPage: React.FC = () => {
 
   // option dropdown
   const [optionVisibleId, setOptionVisibleId] = useState('');
-  const timerRef = useRef<number | null>(null);
+  const timerRef: any = useRef<number | null>(null);
 
   useEffect(() => {
     if (!appContainerRef.current) return;
@@ -130,7 +132,7 @@ const MyAppPage: React.FC = () => {
       name,
       ownerTag,
       orderByTime,
-      status: status === '' ? null : Number(status)
+      status: status === '' ? null : (isTenant ? 1 : Number(status))
     };
     const res = await getCommonPaginationList(listApplication, req, setPageNo);
     if (res) {
@@ -265,6 +267,31 @@ const MyAppPage: React.FC = () => {
     }, delay);
   };
 
+  const getModel = (model?: string) => {
+    if(model === "inner") {
+      return "内部模式"
+    }else if(model === "sass") {
+      return "SaSS模式";
+    }
+    return "";
+  }
+
+  const getColor = (model?: string) => {
+    if(model === "inner") {
+      return "cyan"
+    }else if(model === "sass") {
+      return "red";
+    }
+    return "";
+  }
+
+  const handleClickButton = () => {
+    if(isTenant) {
+      navigate('/onebase/setting'); 
+    }
+    setCreateVisible(true)
+  }
+
   const menu = (item: any) => {
     return (
       <Menu onPointerEnter={clearTimer} onPointerLeave={() => startCloseTimer(80)}>
@@ -299,12 +326,12 @@ const MyAppPage: React.FC = () => {
           permission={ACTIONS.CREATE}
           type="default"
           size="large"
-          icon={<img src={plusSVG} alt="create application" />}
+          icon={isTenant ? <img src={arrowRightUp} alt="create application" /> : <img src={plusSVG} alt="create application" />}
           className={styles.createAppButton}
-          onClick={() => setCreateVisible(true)}
+          onClick={handleClickButton}
           style={{ color: 'rgb(var(--primary-6))' }}
         >
-          {t('myApp.createApp')}
+          {isTenant ? t('myApp.applicationManagement') : t('myApp.createApp')}
         </PermissionButton>
       </div>
 
@@ -411,15 +438,11 @@ const MyAppPage: React.FC = () => {
                         </div>
                         <div className={styles.myAppCardInfo}>
                           <div className={styles.infoHeader}>
-                            <div className={styles.myAppTitle}>{item.appName}</div>
-                            <Tag
-                              color={TagColor[item.appStatus]}
-                              style={{
-                                fontSize: 12,
-                                fontWeight: 400
-                              }}
-                            >
-                              SaaS模式
+                            <Tooltip content={item.appName}>
+                              <div className={styles.myAppTitle}>{item.appName}</div>
+                            </Tooltip>
+                            <Tag color={getColor(item.publishModel)} className={styles.tag}>
+                              {getModel(item.publishModel)}
                             </Tag>
                           </div>
                           <Tag
@@ -480,6 +503,7 @@ const MyAppPage: React.FC = () => {
                       onClick={() => {
                         nagivateToDataFactory(item.id);
                       }}
+                      disabled={item.publishModel === "sass"}
                     >
                       进入应用
                     </Button>

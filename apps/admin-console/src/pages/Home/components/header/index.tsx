@@ -1,8 +1,8 @@
 import LogoSVG from '@/assets/images/ob_logo.svg';
 import { useI18n } from '@/hooks/useI18n';
 import { UserPermissionManager } from '@/utils/permission';
-import { Avatar, Dropdown, Layout, Menu, Message } from '@arco-design/web-react';
-import { IconPoweroff, IconUser } from '@arco-design/web-react/icon';
+import { Avatar, Dropdown, Layout, Menu, Message, Typography } from '@arco-design/web-react';
+import { IconExport, IconUser } from '@arco-design/web-react/icon';
 import { TokenManager } from '@onebase/common';
 import { getPermissionInfo, platformLogout } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
@@ -64,12 +64,11 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   const userMenu = (
     <Menu>
       <Menu.Item key="profile">
-        <IconUser />
         {mobile}
       </Menu.Item>
       <Menu.Item key="logout" onClick={handleLogout}>
-        <IconPoweroff />
-        {t('header.logout')}
+        <IconExport style={{color:"#F53F3F"}}/>
+        <Typography.Text type='error'>{t('header.logout')}</Typography.Text>
       </Menu.Item>
     </Menu>
   );

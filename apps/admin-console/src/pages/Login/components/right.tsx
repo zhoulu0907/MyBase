@@ -71,7 +71,6 @@ const Right: React.FC = () => {
             refreshToken: loginResp.refreshToken,
             expiresTime: loginResp.expiresTime,
             tenantId: loginResp.tenantWebsite,
-            corpId: loginResp.corpId
           },
           rememberMe
         );

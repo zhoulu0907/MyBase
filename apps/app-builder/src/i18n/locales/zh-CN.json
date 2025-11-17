@@ -18,6 +18,7 @@
     "title": "ONE BASE",
     "profile": "个人资料",
     "tenantManagement": "租户管理",
+    "tenantManagementBackend":"空间管理后台",
     "logout": "退出登录",
     "user": "用户",
     "theme": "主题",
@@ -128,7 +129,8 @@
     "createEnterprise":"创建企业"
   },
   "myApp": {
-    "createApp": "零代码创建"
+    "createApp": "零代码创建",
+    "applicationManagement":"应用管理"
   },
   "editor": {
     "material": "组件库",

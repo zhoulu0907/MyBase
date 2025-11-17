@@ -128,7 +128,8 @@
     "createEnterprise":"Create Enterprise"
   },
   "myApp": {
-    "createApp": "Create App"
+    "createApp": "Create App",
+    "applicationManagement": "Application Management"
   },
   "editor": {
     "material": "Material",
