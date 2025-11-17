@@ -25,8 +25,8 @@ export abstract class BaseClient {
         prefix: this.getPrefix(),
         headers: {
           'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-          'Tenant-Id': '1'
+          'Access-Control-Allow-Origin': '*'
+          //   'Tenant-Id': '1'
         }
       });
     }
