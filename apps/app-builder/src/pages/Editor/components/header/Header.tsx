@@ -168,13 +168,13 @@ export default function EditorHeader() {
       bpmDefJson: JSON.stringify(currentJsonData),
       globalConfig: configData
     };
-    save(params).then((res: any) => {
-      setFlowId(res);
-      Message.success(isCreate ? '创建成功' : '保存成功');
-      if (isCreate) {
-        setCurrnetFlowId(res);
-      }
-    });
+   return save(params).then((res: any) => {
+     setFlowId(res);
+     Message.success(isCreate ? '创建成功' : '保存成功');
+     if (isCreate) {
+       setCurrnetFlowId(res);
+     }
+   });
   };
   const getVersonList = () => {
     selectRef.current && selectRef.current.getVersionMgmtData();
@@ -348,9 +348,14 @@ export default function EditorHeader() {
   };
   const handleExecTask = async () => {
     try {
+      if (activeTab === EDITOR_TYPES.FLOW_EDITOR) {
+        await onFlowSave();
+      }
       const res = await fetchPublish({ id: flowId });
       Message.success('发布成功');
-    } catch (error) {}
+    } catch (error) {
+      Message.error('发布失败');
+    }
   };
   const clearAllData = () => {
     clearFromLayoutSubComponents();
