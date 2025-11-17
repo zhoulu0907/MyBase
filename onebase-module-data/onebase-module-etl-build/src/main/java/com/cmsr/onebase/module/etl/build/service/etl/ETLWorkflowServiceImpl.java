@@ -244,38 +244,41 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
                 Schedule schedule = new Schedule();
                 FixedDurationSchedule fixedSchedule = JsonUtils.parseObject(workflowDO.getScheduleConfig(), FixedDurationSchedule.class);
                 String repeatType = fixedSchedule.getRepeatType();
-                String crontab;
+                String crontab = null;
                 Cron cron = new Cron();
                 switch (repeatType) {
+                    case "none":
+                        cron.setDateTime(fixedSchedule.getTriggerTime());
+                        break;
                     case "cron":
                         crontab = fixedSchedule.getTriggerTime();
                         break;
                     case "day": {
                         cron.setHourAndMinute(fixedSchedule.getTriggerTime());
-                        crontab = cron.toCron();
                         break;
                     }
                     case "week": {
                         cron.setWeeks(fixedSchedule.getRepeatWeek());
                         cron.setHourAndMinute(fixedSchedule.getTriggerTime());
-                        crontab = cron.toCron();
                         break;
                     }
                     case "month": {
                         cron.setDays(fixedSchedule.getRepeatDay());
                         cron.setHourAndMinute(fixedSchedule.getTriggerTime());
-                        crontab = cron.toCron();
                         break;
                     }
                     case "year": {
                         cron.setMonthAndDay(fixedSchedule.getTriggerDate());
                         cron.setHourAndMinute(fixedSchedule.getTriggerTime());
-                        crontab = cron.toCron();
                         break;
                     }
                     default:
                         throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.ILLEGAL_SCHEDULE_TYPE);
                 }
+                if (crontab == null) {
+                    crontab = cron.toCron();
+                }
+
                 schedule.setCrontab(crontab);
 
                 dolphinSchedulerClient.onlineWorkflowWithSchedule(etlProjectCode, jobId, schedule);
