@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -29,9 +30,11 @@ public class ValidationFormatUpdateReqVO {
     private Integer isEnabled;
 
     @Schema(description = "格式代码", example = "EMAIL")
+    @JsonAlias({"formatType", "formatValidationType"})
     private String formatCode;
 
     @Schema(description = "正则表达式", example = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")
+    @JsonAlias("regex")
     private String regexPattern;
 
     @Schema(description = "标识符", example = "i")

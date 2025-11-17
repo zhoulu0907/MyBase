@@ -5,7 +5,7 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.ds.client.DolphinSchedulerClient;
 import com.cmsr.onebase.framework.ds.model.schedule.sub.Schedule;
-import com.cmsr.onebase.framework.ds.model.task.def.FlinkTask;
+import com.cmsr.onebase.framework.ds.model.task.def.HttpTask;
 import com.cmsr.onebase.module.etl.build.service.etl.vo.*;
 import com.cmsr.onebase.module.etl.common.graph.Node;
 import com.cmsr.onebase.module.etl.common.graph.WorkflowGraph;
@@ -15,10 +15,12 @@ import com.cmsr.onebase.module.etl.core.dal.database.*;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLScheduleJobDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLWorkflowDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLWorkflowTableDO;
+import com.cmsr.onebase.module.etl.core.dal.dataobject.schedule.FixedDurationSchedule;
 import com.cmsr.onebase.module.etl.core.enums.ETLConstants;
 import com.cmsr.onebase.module.etl.core.enums.ETLErrorCodeConstants;
 import com.cmsr.onebase.module.etl.core.enums.ScheduleJobStatus;
 import com.cmsr.onebase.module.etl.core.enums.ScheduleType;
+import com.cmsr.onebase.module.etl.core.util.Cron;
 import com.cmsr.onebase.module.etl.core.vo.etl.ExecutionLogVO;
 import com.cmsr.onebase.module.etl.core.vo.etl.WorkflowPageReqVO;
 import jakarta.annotation.Resource;
@@ -29,10 +31,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -40,6 +39,10 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
 
     @Value("${onebase.scheduler.etl-project}")
     private Long etlProjectCode;
+
+    // TODO: localhost cannot be default value, delete it after test
+    @Value("${onebase.flink.address}")
+    private String flinkServerUrl;
 
     @Resource
     private DolphinSchedulerClient dolphinSchedulerClient;
@@ -157,8 +160,8 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
             if (CollectionUtils.isEmpty(nodes)) {
                 return;
             }
-            List<Node> startNodes = workflowGraph.getStartNodes();
-            List<Node> endNodes = workflowGraph.getEndNode();
+            List<Node> startNodes = workflowGraph.findStartNodes();
+            List<Node> endNodes = workflowGraph.findEndNodes();
             for (Node startNode : startNodes) {
                 try {
                     JdbcInputConfig inputConfig = (JdbcInputConfig) startNode.getConfig();
@@ -222,17 +225,12 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
         String jobIdStr = scheduleJobDO.getJobId();
         if (StringUtils.isBlank(jobIdStr)) {
             // create
-            // TODO: this is a sample code to add flink task.
-            FlinkTask flinkTask = new FlinkTask();
-            flinkTask.setProgramType("JAVA");
-            flinkTask.setMainClass("org.example.flink.Application");
-            flinkTask.withResource("onebase-ds/default/resources/JavaProject.Flink-1.0.0-SNAPSHOT.jar");
-            flinkTask.withResource("onebase-ds/default/resources/postgresql-42.7.7.jar");
-            flinkTask.setMainClass("onebase-ds/default/resources/JavaProject.Flink-1.0.0-SNAPSHOT.jar");
-            flinkTask.setDeployMode("local");
-            jobId = dolphinSchedulerClient.createSingletonWorkflow(etlProjectCode,
+            HttpTask httpTask = HttpTask.ofUrl(flinkServerUrl)
+                    .method(HttpTask.HttpMethod.POST)
+                    .body(JsonUtils.toJsonString(Map.of("workflowId", workflowId)));
+            jobId = dolphinSchedulerClient.createSingletonHttpWorkflow(etlProjectCode,
                     String.valueOf(workflowId),
-                    flinkTask,
+                    httpTask,
                     workflowDO.getWorkflowName() + "：" + workflowDO.getDeclaration());
             scheduleJobDO.setJobId(String.valueOf(jobId));
             scheduleJobRepository.update(scheduleJobDO);
@@ -240,12 +238,49 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
             jobId = Long.parseLong(jobIdStr);
         }
         // online
-        if (ScheduleType.MANUALLY.equals(scheduleType)) { // 手动执行则仅上线
-            dolphinSchedulerClient.onlineWorkflow(etlProjectCode, jobId);
-        } else {
-            Schedule schedule = new Schedule();
-            // TODO: transform scheduleConfig(String) to Schedule
-            dolphinSchedulerClient.onlineWorkflowWithSchedule(etlProjectCode, jobId, schedule);
+        switch (scheduleType) {
+            case MANUALLY -> dolphinSchedulerClient.onlineWorkflow(etlProjectCode, jobId);
+            case FIXED -> {
+                Schedule schedule = new Schedule();
+                FixedDurationSchedule fixedSchedule = JsonUtils.parseObject(workflowDO.getScheduleConfig(), FixedDurationSchedule.class);
+                String repeatType = fixedSchedule.getRepeatType();
+                String crontab;
+                Cron cron = new Cron();
+                switch (repeatType) {
+                    case "cron":
+                        crontab = fixedSchedule.getTriggerTime();
+                        break;
+                    case "day": {
+                        cron.setHourAndMinute(fixedSchedule.getTriggerTime());
+                        crontab = cron.toCron();
+                        break;
+                    }
+                    case "week": {
+                        cron.setWeeks(fixedSchedule.getRepeatWeek());
+                        cron.setHourAndMinute(fixedSchedule.getTriggerTime());
+                        crontab = cron.toCron();
+                        break;
+                    }
+                    case "month": {
+                        cron.setDays(fixedSchedule.getRepeatDay());
+                        cron.setHourAndMinute(fixedSchedule.getTriggerTime());
+                        crontab = cron.toCron();
+                        break;
+                    }
+                    case "year": {
+                        cron.setMonthAndDay(fixedSchedule.getTriggerDate());
+                        cron.setHourAndMinute(fixedSchedule.getTriggerTime());
+                        crontab = cron.toCron();
+                        break;
+                    }
+                    default:
+                        throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.ILLEGAL_SCHEDULE_TYPE);
+                }
+                schedule.setCrontab(crontab);
+
+                dolphinSchedulerClient.onlineWorkflowWithSchedule(etlProjectCode, jobId, schedule);
+            }
+            default -> throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.ILLEGAL_SCHEDULE_TYPE);
         }
         workflowDO.setIsEnabled(1);
         workflowRepository.update(workflowDO);
@@ -270,6 +305,7 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
     @Override
     public void configScheduleStrategy(ScheduleConfigVO scheduleVO) {
         ETLWorkflowDO workflowDO = getWorkflowById(scheduleVO.getWorkflowId());
+        workflowDO.setWorkflowName(scheduleVO.getFlowName());
         workflowDO.setScheduleStrategy(scheduleVO.getScheduleStrategy().getValue());
         workflowDO.setScheduleConfig(JsonUtils.toJsonString(scheduleVO.getConfig()));
         workflowRepository.update(workflowDO);
@@ -302,13 +338,14 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
     @Override
     public ScheduleRespVO getWorkflowSchedule(Long workflowId) {
         ETLWorkflowDO workflowDO = getWorkflowById(workflowId);
+
         ScheduleRespVO scheduleRespVO = new ScheduleRespVO();
         scheduleRespVO.setApplicationId(workflowDO.getApplicationId());
         scheduleRespVO.setWorkflowId(workflowId);
         scheduleRespVO.setFlowName(workflowDO.getWorkflowName());
         scheduleRespVO.setEnableStatus(workflowDO.getIsEnabled());
         scheduleRespVO.setScheduleStrategy(workflowDO.getScheduleStrategy());
-        scheduleRespVO.setConfig(workflowDO.getConfig());
+        scheduleRespVO.setConfig(workflowDO.getScheduleConfig());
 
         return scheduleRespVO;
     }

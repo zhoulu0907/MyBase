@@ -2014,7 +2014,7 @@ CREATE TABLE "metadata_entity_field" (
     "data_length" INTEGER,
     "decimal_places" INTEGER,
     "default_value" text,
-    "description" varchar(256),
+    "description" varchar(1000),
     "is_system_field" INTEGER NOT NULL DEFAULT 0,
     "is_primary_key" INTEGER NOT NULL DEFAULT 0,
     "is_required" INTEGER NOT NULL DEFAULT 0,

@@ -19,10 +19,8 @@ public class JsonFileGraphTest {
         String json = StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8);
 
         JsonGraph jsonGraph = FlowGraphBuilder.build(json);
-        System.out.println(jsonGraph.toFlowChain());
-
-        FlowProcessCache flowProcessCache = new FlowProcessCache();
-        flowProcessCache.update(1L, 1L, jsonGraph);
+        String flowChain = FlowChainBuilder.toFlowChain(jsonGraph);
+        System.out.println(flowChain);
     }
 
     @Test

@@ -4,10 +4,12 @@ import com.cmsr.onebase.framework.common.enums.CommonPublishModelEnum;
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.uid.UidGenerator;
 import com.cmsr.onebase.module.app.api.app.dto.UserPhotoDTO;
 import com.cmsr.onebase.module.app.build.service.AppCommonService;
 import com.cmsr.onebase.module.app.build.service.auth.AppAuthRoleService;
+import com.cmsr.onebase.module.app.build.service.version.AppVersionService;
 import com.cmsr.onebase.module.app.build.util.AppUtils;
 import com.cmsr.onebase.module.app.build.util.VersionUtils;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateReqVO;
@@ -40,7 +42,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -94,6 +95,9 @@ public class AppApplicationServiceImpl implements AppApplicationService {
     @Autowired
     private AppSqlQueryRepository appSqlQueryRepository;
 
+    @Resource
+    private AppVersionService appVersionService;
+
     @Override
     public PageResult<ApplicationRespVO> getApplicationPage(ApplicationPageReqVO pageReqVO) {
         PageResult<ApplicationDO> pageResult = applicationRepository.selectPage(pageReqVO);
@@ -103,7 +107,7 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         List<Long> appIds = pageResult.getList().stream()
                 .map(ApplicationDO::getId)
                 .collect(Collectors.toList());
-         Map<Long,List<UserPhotoDTO>> userListMap=appSqlQueryRepository.findUserPhotoList(appIds);
+        Map<Long, List<UserPhotoDTO>> userListMap = appSqlQueryRepository.findUserPhotoList(appIds);
 
         List<ApplicationRespVO> respVOS = pageResult.getList().stream()
                 .map(v -> {
@@ -161,7 +165,8 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         applicationDO.setPublishModel(createReqVO.getPublishModel() == null ? CommonPublishModelEnum.InnerModel.getValue() : createReqVO.getPublishModel());
         applicationDO = applicationRepository.insert(applicationDO);
         saveApplicationTags(applicationDO.getId(), createReqVO.getTagIds());
-        authRoleService.createDefaultRole(applicationDO.getId());
+        Long userId = SecurityFrameworkUtils.getLoginUserId();
+        authRoleService.createDefaultRole(applicationDO.getId(), userId);
         createDatasource(applicationDO.getId(), applicationDO.getAppUid(), createReqVO.getDatasourceSaveReq());
         return BeanUtils.toBean(applicationDO, ApplicationCreateRespVO.class);
     }
@@ -277,6 +282,7 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         }
         throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_UID_GENERATE_FAILED);
     }
+
     @Override
     public List<ApplicationDO> getSimpleAppList(Integer status) {
         return applicationRepository.getSimpleAppList(status);

@@ -2607,9 +2607,18 @@ COMMENT ON COLUMN "public"."system_login_log"."update_time" IS '更新时间';
 COMMENT ON COLUMN "public"."system_login_log"."deleted" IS '是否删除';
 COMMENT ON COLUMN "public"."system_login_log"."tenant_id" IS '租户编号';
 
+-- Sequence Definition (为UID生成器创建序列)
+CREATE SEQUENCE IF NOT EXISTS "public"."seq_system_uid_worker_node"
+    START WITH 1
+    INCREMENT BY 1
+    MINVALUE 1
+    MAXVALUE 2147483647
+    CACHE 1
+    NO CYCLE;
+
 -- Table Definition
 CREATE TABLE "public"."system_uid_worker_node" (
-    "id" int4 GENERATED ALWAYS AS IDENTITY NOT NULL,
+    "id" int4 NOT NULL DEFAULT nextval('seq_system_uid_worker_node'),
     "worker_host" varchar(64),
     "worker_port" varchar(64),
     "node_type" int2,
@@ -2621,6 +2630,11 @@ CREATE TABLE "public"."system_uid_worker_node" (
     "deleted" int8 NOT NULL DEFAULT 0,
     PRIMARY KEY ("id")
 );
+
+-- Reset sequence to avoid primary key conflicts (重置序列避免主键冲突)
+-- This should be executed after any data import to sync the sequence with existing data
+-- 如果表中已有数据,需要在数据导入后执行此语句以同步序列
+SELECT setval('seq_system_uid_worker_node', (SELECT COALESCE(MAX(id), 0) + 1 FROM system_uid_worker_node), false);
 
 -- Table Definition
 CREATE TABLE "public"."system_mail_log" (

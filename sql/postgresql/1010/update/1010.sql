@@ -13,3 +13,7 @@ COMMENT ON COLUMN public.app_resource_page.component_index IS '组件索引';
 
 ALTER TABLE public.app_resource_pageset ADD pageset_type int4 DEFAULT 1 NOT NULL;
 
+ALTER TABLE public.app_resource_page ADD interaction_rules text NULL;
+COMMENT ON COLUMN public.app_resource_page.interaction_rules IS '视图规则';
+
+

@@ -12,9 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @Author：huangjie
@@ -33,22 +31,16 @@ public class JobClient {
     @Value("${onebase.scheduler.flow-url}")
     private String flowUrl;
 
-    @Value("${onebase.scheduler.flow-token}")
-    private String flowToken;
-
     @Autowired
     private DolphinSchedulerClient dolphinSchedulerClient;
 
     public String startJob(JobCreateRequest jobCreateRequest) {
         try {
-            String flowName = jobCreateRequest.getApplicationId() + "-" + jobCreateRequest.getProcessId();
-            Map<String, Object> body = new HashMap<>();
-            body.put("processId", jobCreateRequest.getProcessId());
-            body.put("token", flowToken);
+            String flowName = jobCreateRequest.getRemoteCallRequest().getApplicationId() + "-" + jobCreateRequest.getRemoteCallRequest().getProcessId();
             HttpTask httpTask = HttpTask.ofUrl(flowUrl)
                     .method(HttpTask.HttpMethod.POST)
-                    .body(JsonUtils.toJsonString(body));
-            Long jobId = dolphinSchedulerClient.createSingletonWorkflow(flowProjectCode, flowName, httpTask, jobCreateRequest.getProcessName());
+                    .body(JsonUtils.toJsonString(jobCreateRequest.getRemoteCallRequest()));
+            Long jobId = dolphinSchedulerClient.createSingletonHttpWorkflow(flowProjectCode, flowName, httpTask, jobCreateRequest.getRemoteCallRequest().getProcessName());
             Schedule schedule = new Schedule();
             schedule.setStartTime(LocalDateTime.parse(jobCreateRequest.getStartTime(), DATETIME_FORMATTER));
             schedule.setEndTime(LocalDateTime.parse(jobCreateRequest.getEndTime(), DATETIME_FORMATTER));

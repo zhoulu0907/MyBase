@@ -93,8 +93,34 @@ public class PasswordPolicyManager {
         config.setCheckUpperCase(extraSet.contains(SecurityConfigKey.ExtraCharacterOption.uppperCase.getKey()));
         config.setCheckContainSpecialChar(extraSet.contains(SecurityConfigKey.ExtraCharacterOption.specialChar.getKey()));
 
-        log.debug("租户密码策略配置转换完成，tenantId: {}, enableWeakPassword: {}, minLength: {}, checkUpperCase: {}, checkContainSpecialChar: {}",
-                null, config.getEnableWeakPassword(), config.getMinLength(), config.getCheckUpperCase(), config.getCheckContainSpecialChar());
+        // 设置历史密码限制
+        String historyLimit = getConfigValue(configMap, SecurityConfigKey.historyLimit.getConfigKey());
+        if (historyLimit != null) {
+            try {
+                config.setHistoryLimit(Integer.parseInt(historyLimit.trim()));
+            } catch (NumberFormatException e) {
+                log.warn("historyLimit配置值无效，使用默认值3");
+                config.setHistoryLimit(3);
+            }
+        } else {
+            config.setHistoryLimit(3); // 默认值
+        }
+
+        // 设置密码有效期
+        String expiryDays = getConfigValue(configMap, SecurityConfigKey.expiryDays.getConfigKey());
+        if (expiryDays != null) {
+            try {
+                config.setExpiryDays(Integer.parseInt(expiryDays.trim()));
+            } catch (NumberFormatException e) {
+                log.warn("expiryDays配置值无效，使用默认值180");
+                config.setExpiryDays(180);
+            }
+        } else {
+            config.setExpiryDays(180); // 默认值180天
+        }
+
+        log.debug("租户密码策略配置转换完成，tenantId: {}, enableWeakPassword: {}, minLength: {}, checkUpperCase: {}, checkContainSpecialChar: {}, historyLimit: {}, expiryDays: {}",
+                null, config.getEnableWeakPassword(), config.getMinLength(), config.getCheckUpperCase(), config.getCheckContainSpecialChar(), config.getHistoryLimit(), config.getExpiryDays());
 
         return config;
     }

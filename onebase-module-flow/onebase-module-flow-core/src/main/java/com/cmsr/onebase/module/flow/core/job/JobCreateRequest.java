@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.flow.core.job;
 
+import com.cmsr.onebase.module.flow.core.flow.RemoteCallRequest;
 import lombok.Data;
 
 /**
@@ -11,16 +12,12 @@ import lombok.Data;
 @Data
 public class JobCreateRequest {
 
-    private Long applicationId;
-
-    private Long processId;
-
-    private String processName;
-
     private String startTime;
 
     private String endTime;
 
     private String crontab;
+
+    private RemoteCallRequest remoteCallRequest;
 
 }

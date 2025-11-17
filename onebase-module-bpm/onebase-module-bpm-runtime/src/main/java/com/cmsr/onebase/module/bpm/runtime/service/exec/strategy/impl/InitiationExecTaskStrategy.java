@@ -1,11 +1,11 @@
 package com.cmsr.onebase.module.bpm.runtime.service.exec.strategy.impl;
 
+import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
+import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowInsBizExtDO;
 import com.cmsr.onebase.module.bpm.core.dto.node.InitiationNodeExtDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeBtnCfgDTO;
 import com.cmsr.onebase.module.bpm.core.enums.BpmActionButtonEnum;
 import com.cmsr.onebase.module.bpm.core.enums.BpmBusinessStatusEnum;
-import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
-import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowInsBizExtDO;
 import com.cmsr.onebase.module.bpm.core.enums.BpmNodeTypeEnum;
 import com.cmsr.onebase.module.bpm.runtime.vo.EntityVO;
 import com.cmsr.onebase.module.bpm.runtime.vo.ExecTaskReqVO;
@@ -16,6 +16,7 @@ import org.anyline.data.param.init.DefaultConfigStore;
 import org.apache.commons.collections4.MapUtils;
 import org.dromara.warm.flow.core.dto.FlowParams;
 import org.dromara.warm.flow.core.entity.Task;
+import org.dromara.warm.flow.core.entity.User;
 import org.dromara.warm.flow.core.enums.SkipType;
 import org.springframework.stereotype.Component;
 
@@ -39,7 +40,7 @@ public class InitiationExecTaskStrategy extends AbstractExecTaskStrategy<Initiat
     }
 
     @Override
-    public void execute(Task task, InitiationNodeExtDTO extDTO, ExecTaskReqVO reqVO) {
+    public void execute(User matchedUser, Task task, InitiationNodeExtDTO extDTO, ExecTaskReqVO reqVO) {
         String buttonType = reqVO.getButtonType();
 
         // 获取按钮权限

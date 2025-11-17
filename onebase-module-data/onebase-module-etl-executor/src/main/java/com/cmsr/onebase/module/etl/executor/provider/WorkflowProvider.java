@@ -11,6 +11,7 @@ import com.cmsr.onebase.module.etl.executor.provider.dao.EtlFlinkMapping;
 import com.cmsr.onebase.module.etl.executor.provider.dao.EtlTable;
 import com.cmsr.onebase.module.etl.executor.util.JacksonUtil;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -25,23 +26,20 @@ public class WorkflowProvider {
 
     private QueryProvider queryProvider;
 
-    /**
-     * 从数据库里面获得配置，并且补充完整信息，然后转换为工作流图
-     *
-     * @param workflowId
-     * @return
-     */
-    public WorkflowGraph getWorkflowGraph(Long workflowId) throws Exception {
-        String workflowGraphJson = queryProvider.findWorkflowConfig(workflowId);
-        WorkflowGraph workflowGraph = JacksonUtil.fromJson(workflowGraphJson, WorkflowGraph.class);
-        complementGraphInformation(workflowGraph);
-        return workflowGraph;
+
+    public WorkflowGraph createSubWorkflowGraph(String graphJson, String nodeId) throws Exception {
+        WorkflowGraph graph = JacksonUtil.readValue(graphJson, WorkflowGraph.class);
+        WorkflowGraph subgraph = graph.subgraph(nodeId);
+        complementGraphInformation(subgraph);
+        return subgraph;
     }
 
-    public WorkflowGraph getWorkflowGraph(WorkflowGraph workflowGraph) throws Exception {
-        complementGraphInformation(workflowGraph);
-        return workflowGraph;
+    public WorkflowGraph createWorkflowGraph(String graphJson) throws Exception {
+        WorkflowGraph graph = JacksonUtil.fromJson(graphJson, WorkflowGraph.class);
+        complementGraphInformation(graph);
+        return graph;
     }
+
 
     private void complementGraphInformation(WorkflowGraph workflowGraph) throws Exception {
         for (Node node : workflowGraph.getNodes()) {
@@ -58,8 +56,8 @@ public class WorkflowProvider {
         Long datasourceId = jdbcInputConfig.getDatasourceId();
         Long tableId = jdbcInputConfig.getTableId();
 
+        EtlTable etlTable = queryProvider.findTableById(tableId);
         EtlDataSource etlDataSource = queryProvider.findConnectPropertiesById(datasourceId);
-        EtlTable etlTable = queryProvider.findTableById(datasourceId, tableId);
 
         JdbcConfig jdbcConfig = JacksonUtil.fromJson(etlDataSource.getConfig(), JdbcConfig.class);
         jdbcConfig.setDatabaseType(etlDataSource.getDatasourceType());
@@ -109,7 +107,7 @@ public class WorkflowProvider {
         Long tableId = jdbcOutputConfig.getTableId();
 
         EtlDataSource etlDataSource = queryProvider.findConnectPropertiesById(datasourceId);
-        EtlTable etlTable = queryProvider.findTableById(datasourceId, tableId);
+        EtlTable etlTable = queryProvider.findTableById(tableId);
 
         JdbcConfig jdbcConfig = JacksonUtil.fromJson(etlDataSource.getConfig(), JdbcConfig.class);
         jdbcConfig.setDatabaseType(etlDataSource.getDatasourceType());
@@ -118,13 +116,11 @@ public class WorkflowProvider {
 
         List<EtlFlinkMapping> flinkMappings = queryProvider.findFlinkMapping(jdbcConfig.getDatabaseType());
         List<ColumnData> etlColumns = JacksonUtil.fromJson(etlTable.getMetaInfo(), TableData.class).getColumns();
-        List<JdbcOutputMapper> fields = jdbcOutputConfig.getFields();
-
-        List<Field> targetFieldList = toFields(fields, etlColumns, flinkMappings);
-        jdbcOutputConfig.setTargetFields(targetFieldList);
+        List<JdbcOutputMapper> jdbcOutputMappers = jdbcOutputConfig.getFields();
+        complementJdbcOutputMappers(jdbcOutputMappers, etlColumns, flinkMappings);
     }
 
-    private List<Field> toFields(List<JdbcOutputMapper> fields, List<ColumnData> etlColumns, List<EtlFlinkMapping> flinkMappings) {
+    private void complementJdbcOutputMappers(List<JdbcOutputMapper> jdbcOutputMappers, List<ColumnData> etlColumns, List<EtlFlinkMapping> flinkMappings) {
         // 预构建查找表，提高查找效率
         Map<String, ColumnData> columnMap = etlColumns.stream()
                 .collect(Collectors.toMap(ColumnData::getName, column -> column));
@@ -133,28 +129,23 @@ public class WorkflowProvider {
         Map<String, EtlFlinkMapping> flinkMappingMap = flinkMappings.stream()
                 .collect(Collectors.toMap(mapping -> mapping.getOriginType().toLowerCase(), mapping -> mapping));
 
-        // 使用stream API进行转换，使代码更简洁
-        return fields.stream().map(mapper -> {
-            String targetFieldId = mapper.getTargetFieldId();
-            ColumnData etlColumn = columnMap.get(targetFieldId);
+        for (JdbcOutputMapper jdbcOutputMapper : jdbcOutputMappers) {
+            String fieldName = StringUtils.substringAfterLast(jdbcOutputMapper.getTargetFieldName(), ".");
+            ColumnData etlColumn = columnMap.get(fieldName);
             if (etlColumn == null) {
-                throw new IllegalArgumentException(String.format("目标字段ID %s 不存在", targetFieldId));
+                throw new IllegalArgumentException(String.format("目标字段ID %s 不存在", jdbcOutputMapper));
             }
-
             String originType = etlColumn.getType();
             EtlFlinkMapping etlFlinkMapping = flinkMappingMap.get(originType.toLowerCase());
             if (etlFlinkMapping == null) {
                 throw new IllegalArgumentException(String.format("字段类型 %s 不存在映射", originType));
             }
-
-            Field field = new Field();
-            field.setFieldName(etlColumn.getName());
-            field.setFieldType(etlFlinkMapping.getFlinkType());
-            field.setLength(etlColumn.getLength());
-            field.setPrecision(etlColumn.getPrecision());
-            field.setScale(etlColumn.getScale());
-            return field;
-        }).collect(Collectors.toList());
+            jdbcOutputMapper.setTargetFieldName(etlColumn.getName());
+            jdbcOutputMapper.setTargetFieldType(etlFlinkMapping.getFlinkType());
+            jdbcOutputMapper.setTargetFieldLength(etlColumn.getLength());
+            jdbcOutputMapper.setTargetFieldPrecision(etlColumn.getPrecision());
+            jdbcOutputMapper.setTargetFieldScale(etlColumn.getScale());
+        }
     }
 
 

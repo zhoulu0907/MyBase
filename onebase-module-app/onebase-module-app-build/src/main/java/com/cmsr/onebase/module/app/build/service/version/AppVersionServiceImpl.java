@@ -34,8 +34,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * @Author：huangjie
@@ -216,6 +217,20 @@ public class AppVersionServiceImpl implements AppVersionService {
     public void deleteApplicationVersion(Long versionId) {
         versionRepository.deleteById(versionId);
         versionResourceRepository.deleteByVersionId(versionId);
+    }
+
+    @Override
+    public Map<Long, VersionDO> findVersionMapByAppIds(List<Long> appIds) {
+        List<VersionDO>  allVersions= versionRepository.findVersionList(appIds);
+        Map<Long, VersionDO> latestVersionMap = allVersions.stream()
+                .sorted(Comparator.comparing(VersionDO::getUpdateTime).reversed())
+                .collect(Collectors.toMap(
+                        VersionDO::getApplicationId,
+                        Function.identity(),
+                        (existing, replacement) -> existing,
+                        LinkedHashMap::new
+                ));
+        return latestVersionMap;
     }
 
     private VersionDO validateApplicationVersionExist(Long id) {

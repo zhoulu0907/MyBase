@@ -14,13 +14,11 @@ public class JdbcOutputConfig extends NodeConfig {
 
     private Long tableId;
 
-
+    /**
+     * 界面配置，部分从数据库补充
+     */
     private List<JdbcOutputMapper> fields;
 
-    /**
-     * 从数据库补充
-     */
-    private List<Field> targetFields;
 
     /**
      * 从数据库补充

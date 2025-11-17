@@ -49,6 +49,16 @@ onebase:
     enable: false
   web:
     return-exception-stack-trace: true # 本地开发：接口错误时返回堆栈，便于调试
+  scheduler:
+    address: http://10.0.104.33:12345/dolphinscheduler
+    token: 85806d2d33502cef3036fb30b320e5f5
+    env: 154612656767296
+    flow-project: 154702155517248
+    flow-url: http://bing.com
+    etl-project: 155572154738048
+    tenant: root
+  flink:
+    address: http://localhost:58080
 
 justauth:
   enabled: true
@@ -79,3 +89,9 @@ liteflow:
   print-banner: true
 rocketmq:
   endpoints: 10.0.104.50:8081
+
+metadata:
+  runtime:
+    enable-auth-check: false
+
+

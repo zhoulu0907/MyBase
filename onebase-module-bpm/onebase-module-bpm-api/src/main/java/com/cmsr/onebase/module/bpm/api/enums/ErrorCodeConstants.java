@@ -73,7 +73,7 @@ public interface ErrorCodeConstants {
 
     ErrorCode FLOW_NODE_TYPE_MUST_BE_INITIATION = new ErrorCode(1_009_002_012, "流程节点类型必须为提交节点");
 
-    ErrorCode FLOW_TASK_NOT_EXISTS = new ErrorCode(1_009_002_013, "流程任务不存在");
+    ErrorCode FLOW_TASK_NOT_EXISTS = new ErrorCode(1_009_002_013, "流程任务不存在或已被处理");
 
     ErrorCode FLOW_NOT_BIND_ENTITY_ID = new ErrorCode(1_009_002_014, "流程未绑定实体ID");
 
@@ -88,6 +88,22 @@ public interface ErrorCodeConstants {
     ErrorCode BPM_BIZ_EXT_NOT_EXIST = new ErrorCode(1_009_002_019, "流程业务扩展信息不存在");
 
     ErrorCode MISSING_NODE_VALID_ROLE_LIST = new ErrorCode(1_009_002_020, "缺少有效审批角色列表");
+
+    ErrorCode AGENT_TIME_CONFLICT = new ErrorCode(1_009_002_021, "被代理人在该时间段内已存在代理设置，请确认现有代理关系后重新配置");
+
+    ErrorCode AGENT_START_TIME_AFTER_END_TIME = new ErrorCode(1_009_002_022, "代理生效时间必须小于代理失效时间");
+
+    ErrorCode AGENT_NOT_EXISTS = new ErrorCode(1_009_002_023, "流程代理不存在");
+
+    ErrorCode AGENT_REVOKE_NO_PERMISSION = new ErrorCode(1_009_002_024, "只有创建人或被代理人是自己才能操作");
+
+    ErrorCode AGENT_REVOKE_INVALID_STATUS = new ErrorCode(1_009_002_025, "只允许操作待生效或代理中的记录");
+
+    ErrorCode AGENT_USER_NOT_EXISTS = new ErrorCode(1_009_002_025, "代理人不存在");
+
+    ErrorCode MISSING_EDIT_OR_DETAIL_PAGE_VIEW = new ErrorCode(1_009_002_026, "缺少编辑或详情视图页面");
+
+    ErrorCode MISSING_BINDING_VIEW_ID = new ErrorCode(1_009_002_027, "流程实例缺少绑定视图ID");
 
 
     // ============= 系统相关错误 =============

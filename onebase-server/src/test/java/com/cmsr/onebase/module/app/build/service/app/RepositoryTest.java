@@ -42,8 +42,15 @@ public class RepositoryTest {
 
     @Test
     void test2() {
-        //TenantContextHolder.setIgnore(true);
-        //List<Long> ids = appAuthRoleUser.findUserIdsByAppIdAndRoleIds(37775560235057152L, List.of(37775560235057154L));
-        //System.out.println(ids);
+        TenantContextHolder.setIgnore(true);
+        List<Long> ids = appSqlQueryRepository.findDeptHierarchyByUserId(85546007599284224L);
+
+    }
+
+    @Test
+    void test3() {
+        TenantContextHolder.setIgnore(true);
+        List<Long> ids = appSqlQueryRepository.findAllUserIdsByDeptIds(889796964974590L,1);
+        System.out.println(ids);
     }
 }

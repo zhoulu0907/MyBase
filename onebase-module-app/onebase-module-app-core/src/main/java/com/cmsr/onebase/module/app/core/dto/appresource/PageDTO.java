@@ -27,4 +27,6 @@ public class PageDTO {
 
     private Boolean created;
 
+    private String interactionRules;
+
 }

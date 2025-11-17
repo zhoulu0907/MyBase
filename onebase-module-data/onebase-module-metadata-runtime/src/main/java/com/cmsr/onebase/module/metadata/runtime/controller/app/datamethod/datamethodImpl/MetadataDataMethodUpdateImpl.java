@@ -10,6 +10,7 @@ import com.cmsr.onebase.module.flow.api.dto.EntityTriggerRespDTO;
 import com.cmsr.onebase.module.flow.api.dto.TriggerEventEnum;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityFieldRepository;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityRelationshipRepository;
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.relationship.MetadataEntityRelationshipDO;
@@ -17,14 +18,18 @@ import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodSubE
 import com.cmsr.onebase.module.metadata.core.domain.query.ProcessContext;
 import com.cmsr.onebase.module.metadata.core.enums.BooleanStatusEnum;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.AbstractMetadataDataMethodCoreService;
+import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.vo.ProcessedSubEntityVo;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.data.transaction.TransactionState;
 import org.anyline.entity.DataRow;
+import org.anyline.entity.DataSet;
 import org.anyline.service.AnylineService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
@@ -49,12 +54,17 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
     @Resource
     private MetadataEntityFieldRepository entityFieldRepository;
 
+    @Resource
+    MetadataDataMethodSubEntityCrudImpl metadataDataMethodSubEntityCrudImpl;
+
     /**
      * 校验更新数据
      */
     protected void validateDataIntegrity(Map<String, Object> data, List<MetadataEntityFieldDO> fields) {
         // 将字段ID转换为字段名后再校验
         Map<String, Object> convertedData = convertFieldIdToFieldName(data, fields);
+
+        List<String> toDeletedKeys = new ArrayList<>();
         
         // 更新时不校验必填，只校验数据类型等
         for (Map.Entry<String, Object> entry : convertedData.entrySet()) {
@@ -75,8 +85,16 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
 
             // 不允许更新自动编号字段
             if (autoNumberService.hasAutoNumber(field.getId())) {
-                throw invalidParamException("不允许更新自动编号字段[{}]", field.getDisplayName());
+                //忽略自动更新字段，不报错，允许继续更新： 删除key为 fieldName 的数据
+                toDeletedKeys.add(fieldName);
+//                throw invalidParamException("不允许更新自动编号字段[{}]", field.getDisplayName());
+                log.error("不允许更新自动编号字段[{}]", field.getDisplayName());
             }
+        }
+
+        //再处理一次，删除 keys
+        for(String key: toDeletedKeys){
+            convertedData.remove(key);
         }
     }
 
@@ -173,7 +191,7 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
                                 upperFieldType.contains("ATTACHMENT") ||    // 附件
                                 upperFieldType.contains("IMAGE") ||         // 图片
                                 upperFieldType.contains("USER") ||          // 人员选择（包括USER、MULTI_USER）
-                                upperFieldType.contains("DEPT") ||          // 部门选择（包括DEPARTMENT、MULTI_DEPARTMENT）
+                                upperFieldType.contains("DEPARTMENT") ||    // 部门选择（包括DEPARTMENT、MULTI_DEPARTMENT）
                                 upperFieldType.contains("DATA") ||          // 数据选择（包括DATA_SELECTION、MULTI_DATA_SELECTION）
                                 upperFieldType.contains("GEOGRAPHY") ||     // 地理位置
                                 upperFieldType.contains("GEO") ||           // 地理位置（简写）
@@ -213,9 +231,23 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
 
             // 4. 执行更新
             DataRow dataRow = new DataRow(processedData);
+
+            // AnyLine开启事务
+            TransactionState transactionState = temporaryService.start();
+
             long updateCount = temporaryService.update(quoteTableName(entity.getTableName()), dataRow, configStore);
             log.info("更新数据成功，实体ID: {}, 表名: {}, 更新记录数: {}", entityId, entity.getTableName(), updateCount);
-            super.storeData(context);
+            try {
+                super.storeData(context);// 子表处理创建嵌套内部事务
+                log.info("子表处理完成，准备提交事务");
+                // 子表处理完成 提交事务
+                temporaryService.commit(transactionState);
+            }catch (Exception e){
+                log.info("子表处理出现异常，准备回滚事务：{}",e.getMessage());
+                // 子表处理出现异常 回滚事务
+                temporaryService.rollback(transactionState);
+                throw exception(DB_SUBENTITY_OPERATION_ERROR,e.getMessage());
+            }
 
             return null;
         });
@@ -264,6 +296,8 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
 
             List<String> processedIds = new ArrayList<String>();// 存放新增数据的id，修改已有数据的id集合
 
+            Long menuId = context.getRequestContext().getMenuId();
+
             // 逐条插入子表数据
             for (Map<Long, Object> row : subData) {
                 // key类型：Long 转 String
@@ -271,7 +305,8 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
                         entry ->entry.getKey().toString(),
                         Map.Entry::getValue));
 
-                Map<String,Object> nameValueParis = convertFieldIdToFieldName(covertedRow,subEntityFields);// id：value 转 name：value
+                // id：value 转 name：value
+                Map<String,Object> nameValueParis = convertFieldIdToFieldName(covertedRow,subEntityFields);
 
                 boolean containsPrimaryKey = nameValueParis.entrySet().stream().anyMatch(entry ->
                         entry.getKey().matches(primaryKeyFieldName));// 是否包括主键字段
@@ -279,67 +314,89 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
                 if(containsPrimaryKey){
                     // 执行更新
                     Object primaryKeyFieldValue = nameValueParis.get(primaryKeyFieldName);
-                    ConfigStore configStore = new DefaultConfigStore();
-                    configStore.and(primaryKeyFieldName, primaryKeyFieldValue);
+                    nameValueParis.remove(primaryKeyFieldName);// 更新操作不能传id主键字段
 
-                    Map updateData = processDataAndSetDefaults(nameValueParis,subEntityFields);// 内含设置更新时间
-                    DataRow dataRow = new DataRow(updateData);
-                    AnylineService<?> temporaryService = context.getTemporaryService();
-                    long updateCount = temporaryService.update(quoteTableName(subEntity.getTableName()), dataRow, configStore);
-                    log.info("更新数据成功，实体ID: {}, 表名: {}, 更新记录数: {}", subEntityId, subEntity.getTableName(), updateCount);
+                    ProcessedSubEntityVo processedSubEntityVo = new ProcessedSubEntityVo();
+                    processedSubEntityVo.setTraceId(context.getTraceId());
+                    processedSubEntityVo.setSubEntityId(subEntityId);
+                    processedSubEntityVo.setId(primaryKeyFieldValue.toString());
+                    processedSubEntityVo.setSubData(nameValueParis);
 
-                    // 将id放入processedIds
+                    Map<String, Object> resultData = metadataDataMethodSubEntityCrudImpl.doUpdate(processedSubEntityVo);
+
+                    // 将更新的数据行id放入processedIds
                     processedIds.add(primaryKeyFieldValue.toString());
                 }else{
                     // 执行插入
-                    Map<String,Object> rowToInsert = processInsertDataAndSetDefaults(nameValueParis,subEntityFields); //设置默认值
-                    rowToInsert.put(subRelFieldName,parentValue); //关联字段值
-                    DataRow dataRow = new DataRow(rowToInsert);
-                    AnylineService<?> temporaryService = context.getTemporaryService();
-                    Object insertResult = temporaryService.insert(quoteTableName(subEntity.getTableName()), dataRow);
-                    log.info("创建数据成功，实体ID: {}, 表名: {}, 插入结果: {}", subEntityId, subEntity.getTableName(), insertResult);
+                    nameValueParis.put(subRelFieldName,parentValue);// 加入关联信息字段
 
-                    // 将id放入processedIds
-                    String primaryKeyFieldValue = rowToInsert.get(primaryKeyFieldName).toString();
-                    processedIds.add(primaryKeyFieldValue.toString());
+                    ProcessedSubEntityVo processedSubEntityVo = new ProcessedSubEntityVo();
+                    processedSubEntityVo.setTraceId(context.getTraceId());
+                    processedSubEntityVo.setSubEntityId(subEntityId);
+                    processedSubEntityVo.setSubData(nameValueParis);
+
+                    Map<String, Object> resultData = metadataDataMethodSubEntityCrudImpl.doInsert(processedSubEntityVo);
+                    if(!ObjectUtils.isEmpty(resultData)){
+                        Map data = (Map) resultData.get("data");
+                        if(!ObjectUtils.isEmpty(data)){
+                            String id = (String)data.get("id");
+                            // 将新插入的数据行id放入processedIds
+                            processedIds.add(id);
+                        }
+                    }
                 }
             }
-
             // 处理完插入和更新操作之后，删除多余的数据行
-            long deleteCount;
-
             AnylineService<?> temporaryService = context.getTemporaryService();
             DefaultConfigStore deleteConfig = new DefaultConfigStore();
             deleteConfig.and(subRelFieldName, parentValue);
             deleteConfig.notIn(primaryKeyFieldName,processedIds);
+            deleteConfig.and("deleted",0);
+            DataSet dateSet = temporaryService.querys(quoteTableName(subEntity.getTableName()), deleteConfig);
 
-            boolean hasDeletedField = subFields.stream()
-                    .anyMatch(field -> "deleted".equalsIgnoreCase(field.getFieldName()));
-            if (hasDeletedField) {
-                // 软删除：更新deleted字段为删除时间戳
-                DataRow updateData = new DataRow();
-                updateData.put("deleted", String.valueOf(System.currentTimeMillis()));
-                deleteCount = temporaryService.update(quoteTableName(subEntity.getTableName()), updateData, deleteConfig);
-                log.info("软删除数据成功，实体ID: {}, 表名: {}, 删除记录数: {}", subEntityId, subEntity.getTableName(), deleteCount);
-            } else {
-                // 物理删除：直接删除记录
-                deleteCount = temporaryService.delete(quoteTableName(subEntity.getTableName()), deleteConfig);
-                log.info("物理删除数据成功，实体ID: {}, 表名: {}, 删除记录数: {}", subEntityId, subEntity.getTableName(), deleteCount);
+            // 待删除数据行的id集合
+            List toDeleteList = dateSet.stream().map(map -> map.get("id")).collect(Collectors.toList());
+            // 执行删除操作
+            for(Object id: toDeleteList){
+
+                ProcessedSubEntityVo processedSubEntityVo = new ProcessedSubEntityVo();
+                processedSubEntityVo.setTraceId(context.getTraceId());
+                processedSubEntityVo.setSubEntityId(subEntityId);
+                processedSubEntityVo.setId(id.toString());
+
+                metadataDataMethodSubEntityCrudImpl.doDelete(processedSubEntityVo);
             }
         }
     }
 
     @Override
     protected void executePreWorkflow(ProcessContext context) {
+        // 根据id查询修改前数据
+        MetadataBusinessEntityDO entity = context.getEntity();
+        List<MetadataEntityFieldDO> fields = context.getFields();
+
+        String primaryKeyField = getPrimaryKeyFieldName(fields);
+
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        Object id = context.getId();
+        configStore.and(primaryKeyField, id);
+
+        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
+        if (datasource == null) {
+            throw exception(DATASOURCE_NOT_EXISTS);
+        }
+        AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
+        log.info("成功切换到数据源：{}", datasource.getCode());
+        DataRow dataRow = temporaryService.query(quoteTableName(entity.getTableName()),configStore);
+
         Long entityId = context.getEntityId();
-        Map<String, Object> data = context.getData();
-        data.put("id",context.getId());//存放id字段
-        Map fieldData = convertNameToId(entityId,data);
+        Map<String, Object> data = convertNameToId(entityId,dataRow.map());
+
         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
         reqDTO.setTraceId(context.getRequestContext().getTraceId());
         reqDTO.setEntityId(entityId);
         reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_UPDATE);
-        reqDTO.setFieldData(fieldData);
+        reqDTO.setFieldData(data);
         EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
         if(!respDTO.isTriggered()){
             log.info("BEFORE_UPDATE 数据更新前置工作流未触发，实体Id：{} ，参数：{}，原因：{}", entityId,data,respDTO.getMessage());
@@ -355,15 +412,32 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
 
     @Override
     protected void executePostWorkflow(ProcessContext context) {
+        // 根据id查询修改后数据
+        MetadataBusinessEntityDO entity = context.getEntity();
+        List<MetadataEntityFieldDO> fields = context.getFields();
+
+        String primaryKeyField = getPrimaryKeyFieldName(fields);
+
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        Object id = context.getId();
+        configStore.and(primaryKeyField, id);
+
+        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
+        if (datasource == null) {
+            throw exception(DATASOURCE_NOT_EXISTS);
+        }
+        AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
+        log.info("成功切换到数据源：{}", datasource.getCode());
+        DataRow dataRow = temporaryService.query(quoteTableName(entity.getTableName()),configStore);
+
         Long entityId = context.getEntityId();
-        Map<String, Object> data = context.getData();
-        data.put("id",context.getId());//存放id字段
-        Map fieldData = convertNameToId(entityId,data);
+        Map<String, Object> data = convertNameToId(entityId,dataRow.map());
+
         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
         reqDTO.setTraceId(context.getRequestContext().getTraceId());
         reqDTO.setEntityId(entityId);
         reqDTO.setTriggerEvent(TriggerEventEnum.AFTER_UPDATE);
-        reqDTO.setFieldData(fieldData);
+        reqDTO.setFieldData(data);
         EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
         if(!respDTO.isTriggered()){
             log.info("AFTER_UPDATE 数据更新后置工作流未触发，实体Id：{} ，参数：{}，原因：{}", entityId,data,respDTO.getMessage());

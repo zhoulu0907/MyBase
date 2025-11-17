@@ -51,6 +51,9 @@ public class ApproverNodeVOStrategy extends AbstractNodeVOStrategy<ApproverNodeV
             // 设置字段权限配置
             nodeVO.getData().setFieldPermConfig(nodeExtDTO.getFieldPermConfig());
 
+            // 设置高级配置
+            nodeVO.getData().setAdvancedConfig(nodeExtDTO.getAdvancedConfig());
+
             log.debug("成功解析审批人节点扩展数据: {}", extData);
         }
     }
@@ -77,6 +80,7 @@ public class ApproverNodeVOStrategy extends AbstractNodeVOStrategy<ApproverNodeV
         extDTO.setApproverConfig(nodeVO.getData().getApproverConfig());
         extDTO.setButtonConfigs(nodeVO.getData().getButtonConfigs());
         extDTO.setFieldPermConfig(nodeVO.getData().getFieldPermConfig());
+        extDTO.setAdvancedConfig(nodeVO.getData().getAdvancedConfig());
 
         // 设置元数据
         extDTO.setMeta(nodeVO.getMeta());

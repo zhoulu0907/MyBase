@@ -1,7 +1,6 @@
 package com.cmsr.onebase.module.bpm.runtime.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 /**
@@ -14,6 +13,8 @@ import lombok.Data;
 @Data
 public class BpmPreviewReqVO {
     @Schema(description = "流程实例ID")
-    @NotNull(message = "流程实例ID不能为空")
     private Long instanceId;
+
+    @Schema(description = "业务ID")
+    private Long businessId;
 }

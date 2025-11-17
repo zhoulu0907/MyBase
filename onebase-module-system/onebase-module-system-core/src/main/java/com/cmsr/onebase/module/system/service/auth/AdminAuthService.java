@@ -61,14 +61,6 @@ public interface AdminAuthService {
     AuthLoginRespVO smsLogin(AuthSmsLoginReqVO reqVO);
 
     /**
-     * 社交快捷登录，使用 code 授权码
-     *
-     * @param reqVO 登录信息
-     * @return 登录结果
-     */
-    // AuthLoginRespVO socialLogin(@Valid AuthSocialLoginReqVO reqVO);
-
-    /**
      * 刷新访问令牌
      *
      * @param refreshToken 刷新令牌
@@ -97,5 +89,6 @@ public interface AdminAuthService {
      * @param reqVO 登录信息
      * @return 登录结果
      */
-    AuthLoginRespVO corpLogin(@Valid AuthLoginReqVO reqVO);
+    AuthLoginRespVO corpLogin(@Valid CorpAuthLoginReqVO reqVO);
+
 }
