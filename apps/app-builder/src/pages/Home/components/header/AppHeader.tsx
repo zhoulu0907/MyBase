@@ -63,15 +63,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     const res = await getPermissionInfo();
     UserPermissionManager.setUserPermissionInfo(res);
     userPermissionSignal.setPermissionInfo(res);
-    setAdminInfo({
-    id: "1",
-    nickname: "admin",
-    avatar: "http://s25029301301.dev.internal.virtueit.net:81/v1/appruntime/assets/avatar-VjZBKqtj.svg",
-    deptId: "1",
-    username: "admin",
-    email: "aoteman@1226.com",
-    mobile: "13812820814"
-  });
+    setAdminInfo(res.user);
     setNickname(res.user.nickname);
   };
 

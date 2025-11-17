@@ -60,7 +60,7 @@ const MyAppPage: React.FC = () => {
   const { t } = useI18n();
   const navigate = useNavigate();
   const location = useLocation();
-  const isTenant = true || location.pathname?.includes("tenant");
+  const isTenant = location.pathname?.includes("tenant");
   const [pageSize, setPageSize] = useState<number>();
   const [pageNo, setPageNo] = useState(1);
   const [dataList, setDataList] = useState<Application[]>();

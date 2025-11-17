@@ -63,6 +63,14 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   // 用户菜单
   const userMenu = (
     <Menu>
+      <Menu.Item key="info" style={{height:"60px"}}>
+        <div className={styles.adminInformation}>
+            <Avatar size={32} >
+              <img src={LogoSVG} />
+            </Avatar>
+            <Typography.Text>{nickname}</Typography.Text>
+        </div>
+      </Menu.Item>
       <Menu.Item key="profile">
         {mobile}
       </Menu.Item>
