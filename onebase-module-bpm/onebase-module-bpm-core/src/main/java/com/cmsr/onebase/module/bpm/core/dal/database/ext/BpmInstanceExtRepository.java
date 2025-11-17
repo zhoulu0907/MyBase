@@ -61,6 +61,7 @@ public class BpmInstanceExtRepository {
                           t.update_time
                     from bpm_flow_instance t
                     inner join bpm_flow_instance_biz_ext t3 on t.id = t3.instance_id
+                    where t.deleted = 0 and t3.deleted = 0
                 ) tf
                 """;
     }

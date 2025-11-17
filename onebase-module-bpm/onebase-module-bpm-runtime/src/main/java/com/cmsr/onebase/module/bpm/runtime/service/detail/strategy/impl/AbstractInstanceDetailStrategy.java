@@ -16,7 +16,6 @@ import org.anyline.data.param.init.DefaultConfigStore;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.warm.flow.core.entity.Instance;
-import org.dromara.warm.flow.core.entity.Task;
 import org.dromara.warm.flow.core.service.impl.BpmConstants;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -63,7 +62,7 @@ public abstract class AbstractInstanceDetailStrategy<T extends BaseNodeExtDTO> i
      *
      * @param instance 流程实例
      */
-    protected void fillPageViewInfo(BpmTaskDetailRespVO vo, Instance instance, Long pageSetId) {
+    protected void fillPageViewInfo(BpmTaskDetailRespVO vo, Instance instance, Long pageSetId, boolean isTodo) {
         PageViewGroupDTO viewGroupDTO = getPageViewGroupDTO(instance, pageSetId);
 
         // 默认获取详情视图
@@ -119,7 +118,7 @@ public abstract class AbstractInstanceDetailStrategy<T extends BaseNodeExtDTO> i
      * @param loginUserId 登录用户ID
      */
     @Override
-    public void fillDetail(BpmTaskDetailRespVO vo, T extDTO, Task currTask, Instance instance, Long loginUserId) {
+    public void fillDetail(BpmTaskDetailRespVO vo, T extDTO, Instance instance, Long loginUserId, boolean isTodo) {
         Long entityId = MapUtils.getLong(instance.getVariableMap(), BpmConstants.VAR_ENTITY_ID_KEY);
         if (entityId == null) {
             throw exception(ErrorCodeConstants.FLOW_NOT_BIND_ENTITY_ID);
@@ -128,25 +127,16 @@ public abstract class AbstractInstanceDetailStrategy<T extends BaseNodeExtDTO> i
         Long pageSetId = getPageSetId(instance);
 
         // 非当前待办，则没有按钮，且字段权限全部为只读
-        if (currTask == null) {
-            // 设置详情视图，详情视图的默认策略就是只读
-            PageViewGroupDTO viewGroupDTO = getPageViewGroupDTO(instance, pageSetId);
-            vo.setPageView(viewGroupDTO.getDetailPageView());
-
-            // 填充字段权限信息（节点类型相关）
-            fillFieldPermConfig(vo, extDTO, entityId, false);
-        } else {
+        if (isTodo) {
             // 填充按钮信息（节点类型相关）
             fillButtonConfigs(vo, extDTO);
-
-            // 填充视图页面信息
-            fillPageViewInfo(vo, instance, pageSetId);
-
-            // 填充字段权限信息（节点类型相关）
-            fillFieldPermConfig(vo, extDTO, entityId, true);
-
-            vo.setTaskId(currTask.getId());
         }
+
+        // 填充视图页面信息
+        fillPageViewInfo(vo, instance, pageSetId, isTodo);
+
+        // 填充字段权限信息（节点类型相关）
+        fillFieldPermConfig(vo, extDTO, entityId, isTodo);
     }
 }
 
