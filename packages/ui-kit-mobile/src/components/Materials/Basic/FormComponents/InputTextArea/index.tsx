@@ -24,16 +24,13 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; 
     labelColSpan = 0,
     minLength = 0,
     maxLength = 0,
-    minRows,
+    minRows = 0,
     maxRows,
     runtime = true,
     detailMode
   } = props;
 
-  // const { form } = Form.useFormContext();
   const [fieldId, setFieldId] = useState('');
-
-  // const fieldValue = Form.useWatch(fieldId, form);
 
   useEffect(() => {
     if (dataField.length > 0) {
@@ -42,7 +39,7 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; 
   }, [dataField]);
 
   return (
-    <div className="formWrapper inputTextAreaWrapper">
+    <div className="inputTextAreaWrapper">
       <Textarea
         label={label.display && label.text}
         key={`${minRows}-${maxRows}`}

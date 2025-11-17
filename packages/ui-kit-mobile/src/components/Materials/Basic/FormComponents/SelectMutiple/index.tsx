@@ -5,6 +5,7 @@ import { memo, useEffect, useState } from 'react';
 // import { nanoid } from 'nanoid';
 import type { XInputSelectMutipleConfig } from './schema';
 import '../index.css';
+import './index.css';
 
 const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const {
@@ -34,7 +35,7 @@ const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: bool
   const options = defaultOptions?.map(({ label, value }: { label: string; value: string | number }) => ({ label, value }));
 
   return (
-    <div className="formWrapper">
+    <div className="inputTextWrapper">
       <Cell
         label={label.display && label.text}
         showArrow
@@ -52,6 +53,7 @@ const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: bool
         onCancel={() => setShowDropdown(false)}
       >
         <Checkbox.Group
+          className="selectCheckout"
           layout='block'
           defaultValue={selected}
           options={options}

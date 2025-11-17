@@ -21,7 +21,7 @@ const XCarousel = memo((props: XCarouselConfig & { runtime?: boolean }) => {
   } = props;
 
   return (
-    <div className="formWrapper">
+    <div className="inputTextWrapper">
       <Carousel
         className={styles.carousel}
         autoPlay={autoplay}

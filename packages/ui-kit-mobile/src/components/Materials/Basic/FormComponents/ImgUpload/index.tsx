@@ -175,7 +175,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
   ]);
 
   return (
-    <div className="formWrapper">
+    <div>
       {/* TODO 预览态下显示情况，及上传接口调用需要修改 */}
       <Cell
         label={label.display && label.text}

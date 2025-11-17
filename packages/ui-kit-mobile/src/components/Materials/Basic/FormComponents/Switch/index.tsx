@@ -31,7 +31,7 @@ const XSwitch = memo((props: XInputSwitchConfig & { runtime?: boolean; detailMod
   }, [dataField]);
 
   return (
-    <div className="formWrapper">
+    <div className="inputTextWrapper">
       <Cell
         label={label.display && label.text}
       >
@@ -43,7 +43,7 @@ const XSwitch = memo((props: XInputSwitchConfig & { runtime?: boolean; detailMod
           }}
         />
       </Cell>
-      
+
       {/* <Form.Item
         label={label.display && label.text}
         field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.SWITCH}_${nanoid()}`}

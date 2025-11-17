@@ -24,10 +24,7 @@ const XInputPhone = memo((props: XInputPhoneConfig & { runtime?: boolean; detail
     detailMode
   } = props;
 
-  // const { form } = Form.useFormContext();
   const [fieldId, setFieldId] = useState('');
-
-  // const fieldValue = Form.useWatch(fieldId, form);
 
   useEffect(() => {
     if (dataField.length > 0) {
@@ -36,19 +33,18 @@ const XInputPhone = memo((props: XInputPhoneConfig & { runtime?: boolean; detail
   }, [dataField]);
 
   return (
-    <div className="formWrapper inputTextWrapper">
+    <div className="inputTextWrapper">
       <Input
         label={label.display && label.text}
         type="tel"
         defaultValue={defaultValue}
+        placeholder={placeholder}
+        inputStyle={{ textAlign: align }}
         style={{
           width: '100%',
-          color,
-          textAlign: align,
           backgroundColor: bgColor,
           pointerEvents: runtime ? 'unset' : 'none'
         }}
-        placeholder={placeholder}
       />
 
       {/* <Form.Item

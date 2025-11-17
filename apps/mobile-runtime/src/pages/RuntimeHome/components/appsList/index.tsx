@@ -19,7 +19,7 @@ import styles from './index.module.less';
 
 const isGridLayout = true;
 
-const levelStyle = (level: number) => ({ padding: `0 ${level > 5 ? '0' : '0.12rem'}` })
+const levelStyle = (level: number) => ({ padding: `0 ${level > 5 ? '0' : '0.24rem'}` })
 
 const AppsList: React.FC<{ treeData: TreeNode[] }> = ({ treeData }) => {
   const navigate = useNavigate();
@@ -53,11 +53,11 @@ const AppsList: React.FC<{ treeData: TreeNode[] }> = ({ treeData }) => {
       img: <DynamicIcon
         IconComponent={menuIconList.find((icon) => icon.code === item.icon)?.icon}
         theme="outline"
-        size="0.24rem"
+        size="0.48rem"
         fill="#F2F3F5"
-        style={{ backgroundColor: '#009E9E', borderRadius: '0.08rem', padding: '0.08rem' }}
+        style={{ backgroundColor: '#009E9E', borderRadius: '0.16rem', padding: '0.16rem' }}
       />,
-      title: <div style={{ fontSize: '0.14rem', lineHeight: '0.22rem', whiteSpace: 'nowrap' }}>{item.title.slice(0, 5)}</div>,
+      title: <div style={{ fontSize: '0.28rem', lineHeight: '0.44rem', whiteSpace: 'nowrap' }}>{item.title.slice(0, 5)}</div>,
       onClick: () => handlerItemClick(item.id!)
     }));
 

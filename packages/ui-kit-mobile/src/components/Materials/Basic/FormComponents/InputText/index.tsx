@@ -1,7 +1,6 @@
 import { Input } from '@arco-design/mobile-react';
 import { memo, useEffect, useState } from 'react';
 import '../index.css';
-import './index.css';
 import { type XInputTextConfig } from './schema';
 
 const XInputText = memo((props: XInputTextConfig & { runtime?: boolean; detailMode?: boolean }) => {
@@ -24,10 +23,7 @@ const XInputText = memo((props: XInputTextConfig & { runtime?: boolean; detailMo
   } = props;
 
   console.warn('align======11====', align);
-  //   const { form } = Form.useFormContext();
   const [fieldId, setFieldId] = useState('');
-
-  //   const fieldValue = Form.useWatch(fieldId, form);
 
   useEffect(() => {
     if (dataField.length > 0) {
@@ -36,7 +32,7 @@ const XInputText = memo((props: XInputTextConfig & { runtime?: boolean; detailMo
   }, [dataField]);
 
   return (
-    <div className="formWrapper inputTextWrapper">
+    <div className="inputTextWrapper">
       <Input
         label={label.display && label.text}
         defaultValue={defaultValue}

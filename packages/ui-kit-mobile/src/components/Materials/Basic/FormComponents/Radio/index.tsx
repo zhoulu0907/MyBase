@@ -23,7 +23,7 @@ const XRadio = memo((props: XInputRadioConfig & { runtime?: boolean; detailMode?
   } = props;
 
   return (
-    <div className="formWrapper">
+    <div className="inputTextWrapper">
       <Cell
         label={label.display && label.text + 1}
         className={styles.radioCell}

@@ -96,7 +96,7 @@ const XDeptSelect = memo((props: XInputDeptSelectConfig & { runtime?: boolean; d
   }
 
   return (
-    <div className="formWrapper">
+    <div className="inputTextWrapper">
       <Cell label={label?.text}
         showArrow
         onClick={() => setVisible(true)}  // 预览或运行时
@@ -107,7 +107,7 @@ const XDeptSelect = memo((props: XInputDeptSelectConfig & { runtime?: boolean; d
             <IconArrowBack onClick={() => setVisible(false)} />
             <span>{label?.text}</span>
             <Button
-              type="default"
+              type="primary"
               onClick={handleConfirm}
               inline
               size="mini"
@@ -116,8 +116,9 @@ const XDeptSelect = memo((props: XInputDeptSelectConfig & { runtime?: boolean; d
             </Button>
           </div>
 
-          <div style={{ padding: '10px 12px' }}>
+          <div style={{ padding: '0.24rem 0.32rem' }}>
             <Input
+              className={styles.deptSearch}
               placeholder="搜索部门"
               clearable
               value={keyword}
@@ -126,6 +127,22 @@ const XDeptSelect = memo((props: XInputDeptSelectConfig & { runtime?: boolean; d
             />
           </div>
           <Collapse.Group items={items} />
+          {/* <Cell
+            className={styles.deptCell}
+            icon={
+              <div className={styles.deptCellLeft}>
+                <Radio
+                  value=""
+                  // checked={true}
+                  onChange={() => { }}
+                />
+                <IconFile />
+              </div>
+            }
+            label="List Content"
+          >
+            <IconArrowIn /> 下级
+          </Cell> */}
         </div>
       </PopupSwiper>
     </div>

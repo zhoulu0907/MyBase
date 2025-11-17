@@ -26,7 +26,7 @@ const XCheckbox = memo((props: XInputCheckboxConfig & { runtime?: boolean; detai
   const fieldId = dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.SELECT_MUTIPLE}_${nanoid()}`
 
   return (
-    <div className="formWrapper">
+    <div className="inputTextWrapper">
       <Cell
         label={label.display && label.text}
         className={styles.checkboxCell}
