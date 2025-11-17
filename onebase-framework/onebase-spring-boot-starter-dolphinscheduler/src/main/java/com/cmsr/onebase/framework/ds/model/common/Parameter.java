@@ -11,5 +11,19 @@ public class Parameter {
 
     private String direct;
 
-    private String type;
+    private String type = "VARCHAR";
+
+    public static Parameter getIn(String propName) {
+        Parameter parameter = new Parameter();
+        parameter.setProp(propName);
+        parameter.setDirect("IN");
+        return parameter;
+    }
+
+    public static Parameter getOut(String propName) {
+        Parameter parameter = new Parameter();
+        parameter.setProp(propName);
+        parameter.setDirect("OUT");
+        return parameter;
+    }
 }

@@ -35,7 +35,7 @@ public class DolphinschedulerClientTest {
                 .method(HttpTask.HttpMethod.GET)
                 .form("q", "你好");
 
-        Long workflowId = client.createSingletonWorkflow(TEST_PROJECT_CODE, "测试创建", httpTask, null);
+        Long workflowId = client.createSingletonHttpWorkflow(TEST_PROJECT_CODE, "测试创建", httpTask, null);
         assert workflowId != null;
         this.workflowCode = workflowId;
     }

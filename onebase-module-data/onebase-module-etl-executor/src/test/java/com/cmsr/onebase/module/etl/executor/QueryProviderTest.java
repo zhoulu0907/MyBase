@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.etl.executor;
 import com.cmsr.onebase.module.etl.common.graph.WorkflowGraph;
 import com.cmsr.onebase.module.etl.executor.provider.QueryProvider;
 import com.cmsr.onebase.module.etl.executor.provider.WorkflowProvider;
+import com.cmsr.onebase.module.etl.executor.provider.dao.EtlWorkflow;
 import com.cmsr.onebase.module.etl.executor.util.JacksonUtil;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -42,7 +43,8 @@ public class QueryProviderTest {
     public void testQuery() throws Exception {
         WorkflowProvider workflowProvider = new WorkflowProvider();
         workflowProvider.setQueryProvider(queryProvider);
-        WorkflowGraph workflowGraph = workflowProvider.getWorkflowGraph(131538080882786304L);
+        EtlWorkflow etlWorkflow = queryProvider.findWorkflowConfig(131538080882786304L);
+        WorkflowGraph workflowGraph = workflowProvider.createWorkflowGraph(etlWorkflow.getConfig());
         System.out.println(JacksonUtil.OBJECT_MAPPER.writeValueAsString(workflowGraph));
     }
 }

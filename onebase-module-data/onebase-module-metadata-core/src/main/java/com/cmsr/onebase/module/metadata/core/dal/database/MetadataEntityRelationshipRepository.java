@@ -90,4 +90,18 @@ public class MetadataEntityRelationshipRepository extends DataRepository<Metadat
         configStore.order("create_time", org.anyline.entity.Order.TYPE.DESC);
         return findAllByConfig(configStore);
     }
+
+    /**
+     * 根据字段ID获取所有相关的关系（包括主表和从表）
+     *
+     * @param fieldId 实体ID
+     * @return 实体关系列表
+     */
+    public List<MetadataEntityRelationshipDO> getRelationshipsByFieldId(Long fieldId) {
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.or(MetadataEntityRelationshipDO.SOURCE_FIELD_ID, fieldId);
+        configStore.or(MetadataEntityRelationshipDO.TARGET_FIELD_ID, fieldId);
+        configStore.order("create_time", org.anyline.entity.Order.TYPE.DESC);
+        return findAllByConfig(configStore);
+    }
 }

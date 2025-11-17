@@ -23,6 +23,7 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.data.transaction.TransactionState;
 import org.anyline.entity.DataRow;
 import org.anyline.entity.DataSet;
 import org.anyline.service.AnylineService;
@@ -62,6 +63,8 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
     protected void validateDataIntegrity(Map<String, Object> data, List<MetadataEntityFieldDO> fields) {
         // 将字段ID转换为字段名后再校验
         Map<String, Object> convertedData = convertFieldIdToFieldName(data, fields);
+
+        List<String> toDeletedKeys = new ArrayList<>();
         
         // 更新时不校验必填，只校验数据类型等
         for (Map.Entry<String, Object> entry : convertedData.entrySet()) {
@@ -82,8 +85,16 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
 
             // 不允许更新自动编号字段
             if (autoNumberService.hasAutoNumber(field.getId())) {
-                throw invalidParamException("不允许更新自动编号字段[{}]", field.getDisplayName());
+                //忽略自动更新字段，不报错，允许继续更新： 删除key为 fieldName 的数据
+                toDeletedKeys.add(fieldName);
+//                throw invalidParamException("不允许更新自动编号字段[{}]", field.getDisplayName());
+                log.error("不允许更新自动编号字段[{}]", field.getDisplayName());
             }
+        }
+
+        //再处理一次，删除 keys
+        for(String key: toDeletedKeys){
+            convertedData.remove(key);
         }
     }
 
@@ -220,9 +231,23 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
 
             // 4. 执行更新
             DataRow dataRow = new DataRow(processedData);
+
+            // AnyLine开启事务
+            TransactionState transactionState = temporaryService.start();
+
             long updateCount = temporaryService.update(quoteTableName(entity.getTableName()), dataRow, configStore);
             log.info("更新数据成功，实体ID: {}, 表名: {}, 更新记录数: {}", entityId, entity.getTableName(), updateCount);
-            super.storeData(context);
+            try {
+                super.storeData(context);// 子表处理创建嵌套内部事务
+                log.info("子表处理完成，准备提交事务");
+                // 子表处理完成 提交事务
+                temporaryService.commit(transactionState);
+            }catch (Exception e){
+                log.info("子表处理出现异常，准备回滚事务：{}",e.getMessage());
+                // 子表处理出现异常 回滚事务
+                temporaryService.rollback(transactionState);
+                throw exception(DB_SUBENTITY_OPERATION_ERROR,e.getMessage());
+            }
 
             return null;
         });
