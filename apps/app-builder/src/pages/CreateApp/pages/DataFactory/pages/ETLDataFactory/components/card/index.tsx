@@ -1,6 +1,13 @@
 import { Button, Dropdown, Menu, Message, Switch, Typography } from '@arco-design/web-react';
 import { IconCheckCircleFill, IconEdit, IconMoreVertical } from '@arco-design/web-react/icon';
-import { disableETLFlow, enableETLFlow, ETL_FLOW_STATUS, ETL_SCHEDULE_STRATEGY, type ETLFlowMgmt } from '@onebase/app';
+import {
+  disableETLFlow,
+  enableETLFlow,
+  ETL_FLOW_STATUS,
+  ETL_SCHEDULE_STRATEGY,
+  startETLFlow,
+  type ETLFlowMgmt
+} from '@onebase/app';
 import dayjs from 'dayjs';
 import React from 'react';
 
@@ -44,6 +51,12 @@ const ETLFlowCard: React.FC<ETLFlowCardProps> = ({ data, handleEdit, handleDelet
       Message.success('禁用成功');
     }
     handlePage();
+  };
+
+  const handleStartETLFlow = async (id: string) => {
+    const res = await startETLFlow(id);
+    console.log(res);
+    Message.success('手动执行成功');
   };
 
   return (
@@ -117,6 +130,16 @@ const ETLFlowCard: React.FC<ETLFlowCardProps> = ({ data, handleEdit, handleDelet
           <Button type="text" size="small" className={styles.cardFooterLeftBtn}>
             查看日志
           </Button>
+          {data.enableStatus === ETL_FLOW_STATUS.ENABLED && (
+            <Button
+              type="text"
+              size="small"
+              className={styles.cardFooterLeftBtn}
+              onClick={() => handleStartETLFlow(data.id)}
+            >
+              手动执行
+            </Button>
+          )}
         </div>
         <div className={styles.cardFooterRight}>
           <IconEdit />
