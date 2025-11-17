@@ -229,7 +229,8 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({
               ></Select>
               {rule.format === '自定义' && (
                 <Input
-                  value={(rule.fixedText as string) || ''}
+                  disabled={configs[autoCodeDisabledKey]}
+                  value={(rule.textValue as string) || ''}
                   placeholder="例如：yyyyMMddHHmmss"
                   onChange={(value) => {
                     const ruleId = rule.id!;
@@ -238,7 +239,7 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({
                     } else {
                       setCustomDateFormatStatusMap((prev) => ({ ...prev, [ruleId]: undefined }));
                     }
-                    updateRule(ruleId, { config: { ...rule.config, fixedText: value } });
+                    updateRule(ruleId, { config: { ...rule.config, textValue: value } });
                   }}
                   className={styles.ruleInput}
                   status={customDateFormatStatusMap[rule.id!]}
