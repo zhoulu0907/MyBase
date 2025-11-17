@@ -146,8 +146,11 @@
 
 .autoCodeItem {
   display: flex;
-  align-items: center;
   margin-bottom: 4px;
+  line-height: 32px;
+  svg {
+    margin-top: 9px;
+  }
   .autoCodeItemLable {
     min-width: 65px;
     font-size: 14px;
@@ -156,6 +159,10 @@
   .ruleInput {
     flex: 1;
     overflow: hidden;
+  }
+  .ruleInputError {
+    color: #ff4d4f;
+    font-size: 12px;
   }
   .editBtn {
     color: #999;

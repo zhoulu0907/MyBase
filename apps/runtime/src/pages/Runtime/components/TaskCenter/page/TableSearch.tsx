@@ -300,7 +300,7 @@ const TableSearch: FC<any> = ({
                 </div>
               </div>
               <div className="filter-footer">
-                <Button type="primary" status="success" onClick={() => handleSearch()}>
+                <Button type="primary" onClick={() => handleSearch()}>
                   筛选
                 </Button>
                 <Button type="text" className="clear-filter-btn" onClick={() => handleReset()}>

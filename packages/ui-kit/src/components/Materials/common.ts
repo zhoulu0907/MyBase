@@ -16,6 +16,7 @@ import {
   UPLOAD_OPTIONS,
   UPLOAD_TYPE_OPTIONS,
   UPLOAD_VALUES,
+  UPLOAD_BUTTON_TYPES,
   WIDTH_OPTIONS,
   WIDTH_VALUES,
   TABS_TYPE_OPTIONS,
@@ -38,6 +39,7 @@ import type {
   IRelatedFormDataConfigType,
   ISelectConfigType,
   ISelectOptionsConfigType,
+  IMutipleSelectOptionsConfigType,
   IStatusConfigType,
   ITableDataConfigType,
   ITextConfigType,
@@ -110,7 +112,7 @@ export const widthConfig: IWidthConfigType<TWidthSelectKeyType> = {
 export type TStatusSelectKeyType = (typeof STATUS_VALUES)[keyof typeof STATUS_VALUES];
 export const statusConfig: IStatusConfigType<TStatusSelectKeyType> = {
   key: 'status',
-  name: '组件状态',
+  name: '显示状态',
   type: CONFIG_TYPES.STATUS_RADIO,
   range: [
     {
@@ -277,6 +279,8 @@ export const uploadTypeConfig: IStatusConfigType<TUploadSelectKeyType> = {
   ]
 };
 
+export type TUploadButtonType =  (typeof UPLOAD_BUTTON_TYPES)[keyof typeof UPLOAD_BUTTON_TYPES];
+
 export type TPagePositionSelectKeyType = (typeof PAGINATION_POSITION_VALUES)[keyof typeof PAGINATION_POSITION_VALUES];
 export const pagePositionConfig: ISelectConfigType<TPagePositionSelectKeyType> = {
   key: 'pagePosition',
@@ -374,21 +378,27 @@ export const baseDefault = {
 };
 
 export const radioDataConfig: IRadioDataConfigType = {
-  key: 'radioData',
+  key: 'defaultOptionsConfig',
   name: '自定义选项',
   type: CONFIG_TYPES.RADIO_DATA
 };
 
 export const checkboxDataConfig: ICheckboxDataConfigType = {
-  key: 'checkboxData',
+  key: 'defaultOptionsConfig',
   name: '自定义选项',
   type: CONFIG_TYPES.CHECKBOX_DATA
 };
 
 export const selectOptionsConfig: ISelectOptionsConfigType = {
-  key: 'selectOptions',
+  key: 'defaultOptionsConfig',
   name: '自定义选项',
   type: CONFIG_TYPES.SELECT_OPTIONS_INPUT
+};
+
+export const mutipleSelectOptionsConfig: IMutipleSelectOptionsConfigType = {
+  key: 'defaultOptionsConfig',
+  name: '自定义选项',
+  type: CONFIG_TYPES.MUTIPLE_SELECT_OPTIONS_INPUT
 };
 
 export const carouselConfig: ICarouselConfigType = {
@@ -543,40 +553,40 @@ export const tableOperationConfig: ITableOperationConfigType = {
   advanced: true,
 };
 
-export const autoCodeConfig:any = {
+export const autoCodeConfig: any = {
   key: 'rules',
-  name:'编号规则配置',
+  name: '编号规则配置',
   type: CONFIG_TYPES.AUTO_CODE_RULES
 }
 
-export const imageHandleConfig:any = {
+export const imageHandleConfig: any = {
   key: 'imageHandle',
-  name:'图片处理',
+  name: '图片处理',
   type: CONFIG_TYPES.IMAGE_HANDLE
 }
 
-export const dateFormatConfig:any = {
-  key: 'dateFormat',
-  name:'日期格式',
-  type: CONFIG_TYPES.DATE_FORMAT
+export const dateRangeConfig: any = {
+  key: 'dateRange',
+  name: '可选范围',
+  type: CONFIG_TYPES.DATE_RANGE
 }
 
-export const timeFormatConfig:any = {
-  key: 'timeFormat',
-  name:'日期格式',
-  type: CONFIG_TYPES.TIME_FORMAT
+export const timeRangeConfig: any = {
+  key: 'timeRange',
+  name: '可选范围',
+  type: CONFIG_TYPES.TIME_RANGE
 }
 
-export const switchFillTextConfig:any = {
+export const switchFillTextConfig: any = {
   key: 'fillText',
-  name:'填充文本',
+  name: '填充文本',
   type: CONFIG_TYPES.SWITCH_FILL_TEXT
 }
 
 // 默认值
-export const defaultValueConfig:any ={
+export const defaultValueConfig: any = {
   key: 'defaultValueConfig',
-  name:'默认值',
+  name: '默认值',
   type: CONFIG_TYPES.DEFAULT_VALUE
 }
 

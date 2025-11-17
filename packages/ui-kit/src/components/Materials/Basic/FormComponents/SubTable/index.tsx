@@ -9,7 +9,7 @@ import { getComponentSchema } from '../../../schema';
 import { FORM_COMPONENT_TYPES, ENTITY_COMPONENT_TYPES } from '../../../componentTypes';
 import EditRender from 'src/components/render/EditRender';
 import { COMPONENT_GROUP_NAME, EDITOR_TYPES, type GridItem } from 'src/utils/const';
-import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { STATUS_OPTIONS, STATUS_VALUES, COLOR_MODE_TYPES, DEFAULT_OPTIONS_TYPE } from '../../../constants';
 import { v4 as uuidv4 } from 'uuid';
 import CompDeleteIcon from '@/assets/images/app_delete.svg';
 import CompCopyIcon from '@/assets/images/copy_comp_icon.svg';
@@ -24,7 +24,7 @@ import './index.css';
 
 const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: boolean }) => {
   useSignals();
-  const { id, label, tooltip, labelColSpan = 100, status, verify, runtime = true, detailMode, pageType } = props;
+  const { id, label, tooltip, status, verify, runtime = true, detailMode, pageType } = props;
   const { mainEntity, subEntities } = useAppEntityStore();
 
   const {
@@ -84,7 +84,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
   };
 
   // 拖拽添加
-  const onSubAdd = async(e: any) => {
+  const onSubAdd = async (e: any) => {
     const cpID = e.item.getAttribute('data-cp-id') || e.item.getAttribute('data-id') || e.item.id;
     const itemType = e.item.getAttribute('data-cp-type');
     const fieldId = e.item.getAttribute('data-field-id');
@@ -132,14 +132,15 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
     schema.config = schemaConfig;
 
     // 当前实体
-    const currentEntity = subEntities.entities?.find((ele)=>ele.entityId===entityId);
+    const currentEntity = subEntities.entities?.find((ele) => ele.entityId === entityId);
     // 当前字段
-    const currentField = currentEntity?.fields?.find((ele)=>ele.fieldId===fieldId);
+    const currentField = currentEntity?.fields?.find((ele) => ele.fieldId === fieldId);
     if (currentField) {
       // 数据长度 dataLength
       // 小数位数 decimalPlaces
       // 默认值 defaultValue
-      schema.config.defaultValue = currentField.defaultValue;
+      const defaultValueConfig = { ...schema.config.defaultValue, customValue: currentField.defaultValue };
+      schema.config.defaultValueConfig = defaultValueConfig;
       // 字段描述 description
       schema.config.tooltip = currentField.description;
       // 是否必填：1-是，0-不是 isRequired
@@ -160,14 +161,31 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
           const dictDataList = res?.type ? await getDictDataListByType(res.type) : [];
           const dictOptions = dictDataList?.filter((e: any) => e.status === 1); // 只显示启用状态的字典数据
           if (dictOptions.length) {
-            schema.config.defaultOptions = dictOptions;
+            const newDefaultOptionsConfig = {
+              type: DEFAULT_OPTIONS_TYPE.DICT,
+              disabled: true,
+              dictTypeId: currentField.dictTypeId,
+              colorMode: true,
+              colorModeType: COLOR_MODE_TYPES.POINT,
+              defaultOptions: dictOptions
+            };
+            schema.config.defaultOptionsConfig = {
+              ...schema.config.defaultOptionsConfig,
+              ...newDefaultOptionsConfig
+            };
           }
         } else if (currentField.options?.length) {
-          schema.config.defaultOptions = currentField.options.map((e) => ({
-            chosen: currentField.defaultValue && e.optionValue === currentField.defaultValue,
-            label: e.optionLabel,
-            value: e.optionValue
-          }));
+          const newDefaultOptionsConfig = {
+            defaultOptions: currentField.options.map((e) => ({
+              label: e.optionLabel,
+              value: e.optionValue
+            }))
+          };
+          schema.config.defaultOptionsConfig = {
+            ...schema.config.defaultOptionsConfig,
+            disabled: true,
+            ...newDefaultOptionsConfig
+          };
         }
       }
       // 字段约束配置（长度/正则） constraints
@@ -221,6 +239,25 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
   const [subTableData, setSubTableData] = useState<any[]>([]);
   const [subTableColumns, setSubTableColumns] = useState<any[]>([]);
   const { form } = Form.useFormContext();
+  
+  /**
+   * 子表单元格配置覆盖
+   */
+  const applySubTableCellOverrides = (cfg: any, type: string) => {
+    if (type === FORM_COMPONENT_TYPES.INPUT_TEXTAREA) {
+      return { ...cfg, minRows: 1 };
+    }
+    return cfg;
+  };
+
+  const refreshSubTableData = () => {
+    const len = subTableDataLength.value[id] || 0;
+    const newData: any[] = [];
+    for (let i = 0; i < len; i++) {
+      newData.push({ key: `${i}` });
+    }
+    setSubTableData(newData);
+  };
 
   useEffect(() => {
     getTableColumns();
@@ -243,13 +280,13 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
       const tableColumn = {
         title: (
           <>
+            {required ? <span style={{ color: 'red', paddingRight: '4px' }}>*</span> : null}
             {displayName}
-            {required ? <span style={{ color: 'red', paddingLeft: '4px' }}>*</span> : null}
           </>
         ),
         dataIndex: column.id,
         key: column.id,
-        bodyCellStyle:{
+        bodyCellStyle: {
           padding: '4px 0'
         },
         render: (_text: string, _record: any, index: number) => {
@@ -257,7 +294,8 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
             ...pageComponentSchemas[column.id].config,
             dataField: [`${id}.${index}.${pageComponentSchemas[column.id].config?.dataField?.[1] || column.id}`]
           };
-          const pageSchema = { ...pageComponentSchemas[column.id], config };
+          const finalConfig = applySubTableCellOverrides(config, column.type);
+          const pageSchema = { ...pageComponentSchemas[column.id], config: finalConfig };
           return (
             <PreviewRender
               cpId={column.id}
@@ -275,16 +313,20 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
       tableColumns.push({
         title: '操作',
         dataIndex: 'action',
-        width: 100,
+        width: 64,
+        align: 'center',
+        headerCellStyle: { textAlign: 'center' },
+        bodyCellStyle: { padding: '0 4px', textAlign: 'center' },
         fixed: 'right',
         render: (_col: any, _record: any, index: number) => {
           return (
-            <Button type="text" status="danger" icon={<IconDelete />} onClick={() => handleDelete(index)}></Button>
+            <Button type="text" size="small" status="danger" style={{ padding: '0 4px' }} icon={<IconDelete />} onClick={() => handleDelete(index)}></Button>
           );
         }
       });
     }
     setSubTableColumns(tableColumns);
+    setTimeout(() => refreshSubTableData(), 300);
   };
 
   // 新增
@@ -317,14 +359,20 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
       <Form.Item
         label={
           label.display &&
-          label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
+          label.text && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+              <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
+              {!detailMode && (
+                <Button type="outline" size="small" icon={<IconPlus />} style={{ pointerEvents: runtime ? 'unset' : 'none' }} onClick={handleAdd}>
+                  新增一项
+                </Button>
+              )}
+            </div>
+          )
         }
         layout="vertical"
         rules={[{ required: verify?.required }]}
         tooltip={tooltip}
-        labelCol={{
-          style: { width: labelColSpan, flex: 'unset' }
-        }}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           width: '100%',
@@ -350,18 +398,6 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                 rowKey="id"
                 pagination={false}
               />
-            </div>
-            <div className="subTableFooter">
-              {!detailMode && (
-                <Button
-                  type="outline"
-                  icon={<IconPlus />}
-                  style={{ pointerEvents: runtime ? 'unset' : 'none', marginTop: 10 }}
-                  onClick={handleAdd}
-                >
-                  新增一项
-                </Button>
-              )}
             </div>
           </>
         ) : (
@@ -416,6 +452,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                   }}
                 >
                   <div className="simulate-header-item">
+                    {pageComponentSchemas[cp.id].config?.verify?.required ? <span style={{ color: 'red', paddingRight: '4px' }}>*</span> : null}
                     {pageComponentSchemas[cp.id].config.label.text || pageComponentSchemas[cp.id].config.displayName}
                   </div>
                   <EditRender

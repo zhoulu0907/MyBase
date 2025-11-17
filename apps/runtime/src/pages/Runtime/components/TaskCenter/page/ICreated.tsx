@@ -11,7 +11,9 @@ const ICreated: FC = ({ appId }: any) => {
   const columns: TableColumnProps[] = [
     {
       title: '流程标题',
-      dataIndex: 'processTitle'
+      dataIndex: 'processTitle',
+      width: 250,
+      ellipsis: true
     },
     {
       title: '流程状态',
@@ -62,7 +64,8 @@ const ICreated: FC = ({ appId }: any) => {
               : '-'}
           </div>
         );
-      }
+      },
+      ellipsis: true
     },
     {
       title: '发起时间',
@@ -85,7 +88,6 @@ const ICreated: FC = ({ appId }: any) => {
       render: (_: any, record: any) => (
         <Button
           type="text"
-          status="success"
           onClick={() => {
             handleDetailPage(record);
           }}
@@ -194,6 +196,7 @@ const ICreated: FC = ({ appId }: any) => {
           setPopVisible={setPopVisible}
           rowData={rowData}
           listType={LISTTYPE.ICREATED}
+          onBack={onBack}
         />
       )}
     </section>

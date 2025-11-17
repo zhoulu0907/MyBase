@@ -12,23 +12,22 @@ import PreviewContainer from './DetailForm';
 const Row = Grid.Row;
 const Col = Grid.Col;
 
+enum PageTypeMap {
+  willdo = 'todo',
+  idone = 'done',
+  icreated = 'created',
+  icopied = 'cc'
+}
+
 interface PageProps {
   detailPopVisible: boolean;
   setPopVisible: (visible: boolean) => void;
   onBack?: () => void;
-  taskId?: string;
   rowData?: any;
   listType?: string;
 }
 
-const DetailPage: React.FC<PageProps> = ({
-  detailPopVisible = false,
-  setPopVisible,
-  onBack,
-  taskId,
-  rowData,
-  listType
-}) => {
+const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisible, onBack, rowData, listType }) => {
   let [drawWidth, setDrawWidth] = useState<string>('66.66%');
   let [isShowRight, setIsShowRight] = useState(true);
   const [stepData, setStepData] = useState();
@@ -72,7 +71,7 @@ const DetailPage: React.FC<PageProps> = ({
     try {
       const req = {
         buttonType,
-        taskId: rowData?.taskId,
+        taskId: detailData?.taskId,
         instanceId: rowData?.instanceId,
         entity: entityData
       };
@@ -124,7 +123,7 @@ const DetailPage: React.FC<PageProps> = ({
                       ref={confirmRef}
                       onSetPopupVisible={(visible: any) => setPopupVisibleByIndex(index, visible)}
                       onBack={onBack}
-                      taskId={taskId}
+                      taskId={detailData?.taskId}
                       instanceId={rowData?.instanceId}
                       itemData={item}
                       isRequired={item?.approvalCommentRequired}
@@ -155,9 +154,12 @@ const DetailPage: React.FC<PageProps> = ({
     setStepData(res);
   };
   const fetchDetailData = async () => {
-    const res = await getFormDetail({ instanceId: rowData?.instanceId, taskId: rowData?.taskId });
+    const res = await getFormDetail({
+      instanceId: rowData?.instanceId,
+      taskId: rowData?.taskId,
+      from: PageTypeMap[listType as keyof typeof PageTypeMap]
+    });
     setDetailData(res);
-    // 拿到详情信息
   };
 
   useEffect(() => {
@@ -176,7 +178,7 @@ const DetailPage: React.FC<PageProps> = ({
         width={drawWidth}
         title={renderTitle()}
         visible={detailPopVisible}
-        footer={listType === LISTTYPE.WILLDO ? renderDrawerFooter() : null}
+        footer={renderDrawerFooter()}
         onOk={() => {
           setPopVisible(false);
         }}
@@ -197,7 +199,7 @@ const DetailPage: React.FC<PageProps> = ({
             <Col span={6}>
               <p className="gray-color">发起人</p>
               <div className="photo-box">
-                <p className="photo-img"></p>
+                <p className="photo-img">{detailData?.initiator?.avatar && <img src={detailData?.initiator?.avatar} alt='' />}</p>
                 {detailData?.initiatorName}
               </div>
             </Col>

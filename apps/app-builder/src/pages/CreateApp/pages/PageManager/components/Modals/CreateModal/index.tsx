@@ -2,7 +2,7 @@ import DynamicIcon from '@/components/DynamicIcon';
 import MenuComp from '@/components/MenuIcon';
 import { menuIconList } from '@/components/MenuIcon/const';
 import { Button, Form, Input, Modal, Select, TreeSelect, type FormInstance } from '@arco-design/web-react';
-import { RootParentPage } from '@onebase/app';
+import { RootParentPage, PageType } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
 
@@ -36,13 +36,35 @@ const CreateModal: React.FC<CreateModalProps> = ({
     if (menuIcon) {
       form.setFieldValue('menuIcon', menuIcon);
     } else {
-      form.setFieldValue('menuIcon', visibleCreateForm === 'page' ? 'page' : 'seo-folder');
+      form.setFieldValue('menuIcon', iconMap[visibleCreateForm as keyof typeof iconMap]);
     }
   }, [menuIcon, visibleCreateForm]);
+
+  const nameMap = {
+    page: '页面',
+    group: '分组',
+    workbench: '页面'
+  };
+
+  const iconMap = {
+    page: 'page',
+    group: 'seo-folder',
+    workbench: 'page'
+  };
 
   const handleCloseModal = () => {
     setMenuIcon('');
     onCancel();
+  };
+
+  const getPageSetTypeOptions = () => {
+    const wb = PageType.WORKBENCH;
+    if (visibleCreateForm !== 'workbench') {
+      return pageSetTypeOptions.filter((opt) => opt.value !== wb);
+    } else {
+      form.setFieldValue('pageSetType', wb);
+      return pageSetTypeOptions.filter((opt) => opt.value === wb);
+    }
   };
 
   return (
@@ -82,22 +104,27 @@ const CreateModal: React.FC<CreateModalProps> = ({
           }}
         >
           {visibleCreateForm !== 'group' && (
-            <Form.Item label="页面类型" field="pageSetType" rules={[{ required: true, message: '请选择页面类型' }]}>
-              <Select options={pageSetTypeOptions} placeholder="请选择页面类型" allowClear />
+            <Form.Item
+              label="页面类型"
+              field="pageSetType"
+              rules={[{ required: true, message: '请选择页面类型' }]}
+              disabled={visibleCreateForm === 'workbench'}
+            >
+              <Select options={getPageSetTypeOptions()} placeholder="请选择页面类型" allowClear />
             </Form.Item>
           )}
 
           <Form.Item
-            label={visibleCreateForm === 'page' ? '页面名称' : '分组名称'}
+            label={nameMap[visibleCreateForm as keyof typeof nameMap]}
             field="menuName"
             rules={[
-              { required: true, message: '请输入页面名称' },
+              { required: true, message: `请输入${nameMap[visibleCreateForm as keyof typeof nameMap]}名称` },
               { maxLength: 20, message: '页面名称不能超过20个字符' }
             ]}
           >
             <Input
               maxLength={20}
-              placeholder="请输入页面名称，不超过20个字符"
+              placeholder={`请输入${nameMap[visibleCreateForm as keyof typeof nameMap]}名称，不超过20个字符`}
               allowClear
               onChange={(value) => {
                 form.setFieldValue('menuName', value);
@@ -131,7 +158,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
                 ) : (
                   <DynamicIcon
                     IconComponent={
-                      menuIconList.find((icon) => icon.code === (visibleCreateForm === 'page' ? 'page' : 'seo-folder'))
+                      menuIconList.find((icon) => icon.code === iconMap[visibleCreateForm as keyof typeof iconMap])
                         ?.icon
                     }
                     theme="outline"

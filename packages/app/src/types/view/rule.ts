@@ -10,7 +10,12 @@ export interface InteractionRule {
 
 export interface FormAction {
   action: InteractionActionType;
-  cpId: string;
+  cpIds?: string[];
+
+  // 字段赋值用
+  cpId?: string;
+  operatorType?: string;
+  value?: string;
 }
 
 export interface InteractionCondition {

@@ -1,5 +1,6 @@
 import CreateGroupIcon from '@/assets/images/addfolder.svg';
 import CreatePageIcon from '@/assets/images/addpage.svg';
+import CreateWorkbenchIcon from '@/assets/images/addworkbench.svg';
 import EditIcon from '@/assets/images/edit_menu_icon.svg';
 import PageManagerGuide from '@/assets/images/page_manaager_guide.svg';
 import { useI18n } from '@/hooks/useI18n';
@@ -35,6 +36,7 @@ import {
   type UpdateApplicationMenuOrderReq,
   type UpdateApplicationMenuVisibleReq
 } from '@onebase/app';
+import { pagesRuntimeSignal } from '@onebase/common';
 import { EDITOR_TYPES } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import { debounce } from 'lodash-es';
@@ -97,13 +99,15 @@ const PageManagerPage: FC = () => {
   const [showGuide, setShowGuide] = useState<boolean>(false);
   const pageSetTypeOptions = [
     { label: '普通表单', value: PageType.NORMAL },
-    { label: '流程表单', value: PageType.BPM }
+    { label: '流程表单', value: PageType.BPM },
+    { label: '工作台', value: PageType.WORKBENCH }
   ];
 
   const [treeData, setTreeData] = useState<TreeNode[]>();
   const [entityListOptions, setEntityListOptions] = useState<Options[]>([]);
 
   const { curMenu, setCurMenu } = menuSignal;
+  const { curPage } = pagesRuntimeSignal;
   const [parentPageOptions, setParentPageOptions] = useState<ApplicationMenu[]>([RootParentPage]);
 
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
@@ -246,6 +250,19 @@ const PageManagerPage: FC = () => {
         </div>
       </MenuItem>
       <MenuItem
+        key="workbench"
+        onClick={() => {
+          setVisibleCreateForm('workbench');
+          createForm.resetFields();
+          setTitle(t('createApp.createWorkbench'));
+        }}
+      >
+        <div className={styles.createItem}>
+          <ReactSVG className={styles.customSvg} src={CreateWorkbenchIcon} />
+          {t('createApp.createWorkbench')}
+        </div>
+      </MenuItem>
+      <MenuItem
         key="group"
         onClick={() => {
           setVisibleCreateForm('group');
@@ -330,6 +347,10 @@ const PageManagerPage: FC = () => {
       if (visibleCreateForm === 'group') {
         req.menuType = MenuType.GROUP;
       }
+      if (visibleCreateForm === 'workbench') {
+        req.menuType = MenuType.PAGE;
+        req.pageType = 'workbench';
+      }
 
       const menuResp = await createApplicationMenu(req);
 
@@ -348,7 +369,16 @@ const PageManagerPage: FC = () => {
           'EDITOR_PAGE_INFO',
           JSON.stringify({ id: curMenu.value?.id, name: menuResp.menuName, icon: createForm.getFieldValue('menuIcon') })
         );
-        navigate(`/onebase/editor/${EDITOR_TYPES.FORM_EDITOR}?pageSetId=${pageSetId}`);
+
+        // 根据页面类型跳转到对应的编辑器
+        let editorType: string = EDITOR_TYPES.FORM_EDITOR;
+        if (visibleCreateForm === 'workbench') {
+          editorType = EDITOR_TYPES.WORKBENCH_EDITOR;
+        } else {
+          editorType = EDITOR_TYPES.FORM_EDITOR;
+        }
+
+        navigate(`/onebase/editor/${editorType}?pageSetId=${pageSetId}`);
       }
     });
   };
@@ -424,9 +454,12 @@ const PageManagerPage: FC = () => {
       return;
     }
 
+    const editorType =
+      curPage.value?.pageSetType === PageType.WORKBENCH ? EDITOR_TYPES.WORKBENCH_EDITOR : EDITOR_TYPES.FORM_EDITOR;
+
     // 把编辑页菜单数据保存起来；
     sessionStorage.setItem('EDITOR_PAGE_INFO', JSON.stringify({ id: curMenu.value?.id, name, icon }));
-    navigate(`/onebase/editor/${EDITOR_TYPES.FORM_EDITOR}?pageSetId=${pageSetId}`);
+    navigate(`/onebase/editor/${editorType}?pageSetId=${pageSetId}`);
   };
 
   // 菜单搜索

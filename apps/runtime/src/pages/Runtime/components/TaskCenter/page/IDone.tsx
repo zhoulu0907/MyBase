@@ -11,11 +11,14 @@ const IDone: FC = ({ appId }: any) => {
   const columns: TableColumnProps[] = [
     {
       title: '流程标题',
-      dataIndex: 'processTitle'
+      dataIndex: 'processTitle',
+      width: 250,
+      ellipsis: true
     },
     {
       title: '发起人',
       dataIndex: 'initiator',
+      ellipsis: true,
       render: (obj: any) => (
         <span className="flex-bw-center">
           <div className="photo-img">{obj?.avatar && <img src={obj?.avatar} />}</div>
@@ -55,7 +58,6 @@ const IDone: FC = ({ appId }: any) => {
       render: (_: any, record: any) => (
         <Button
           type="text"
-          status="success"
           onClick={() => {
             handleDetailPage(record);
           }}
@@ -77,7 +79,6 @@ const IDone: FC = ({ appId }: any) => {
   const [filters, setFilters] = useState<any>({});
   const defaultPageNo = 1;
   function handleDetailPage(row: any) {
-    console.log('click to detail page === row ===', row);
     setRowData(row);
     setPopVisible(true);
   }

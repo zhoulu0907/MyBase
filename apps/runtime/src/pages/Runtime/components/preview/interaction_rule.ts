@@ -1,4 +1,4 @@
-import { InteractionActionType, OPERATOR_MAP, type InteractionRule } from '@onebase/app';
+import { InteractionActionType, OPERATOR_MAP, type FormAction, type InteractionRule } from '@onebase/app';
 import { STATUS_OPTIONS, STATUS_VALUES } from '@onebase/ui-kit';
 import { Jexl } from '@pawel-up/jexl';
 
@@ -10,21 +10,23 @@ export async function initInteractionRule(
   rules: InteractionRule[],
   pageComponentSchemas: any
 ) {
-  console.log('formValues: ', formValues);
-  console.log('rules: ', rules);
-  console.log('pageComponentSchemas: ', pageComponentSchemas);
+  //   console.log('formValues: ', formValues);
+  //   console.log('rules: ', rules);
+  //   console.log('pageComponentSchemas: ', pageComponentSchemas);
 
   // 初始化一个map，用于后续交互规则处理
   const fieldMap: Record<string, any> = {};
   Object.entries(pageComponentSchemas).forEach(([key, value]: [string, any]) => {
-    const fieldId = value.config.dataField[1];
-    const fieldValue = formValues[fieldId];
-    fieldMap[key.replaceAll('-', '')] = fieldValue;
+    if (value.config.dataField?.length > 1) {
+      const fieldId = value.config.dataField[1];
+      const fieldValue = formValues[fieldId];
+      fieldMap[key.replaceAll('-', '')] = fieldValue;
+    }
   });
 
-  console.log('fieldMap: ', fieldMap);
+  //   console.log('fieldMap: ', fieldMap);
 
-  let cpActions: Record<string, InteractionActionType[]> = {};
+  let cpActions: Record<string, FormAction[]> = {};
 
   if (Array.isArray(rules)) {
     // 遍历每一条规则
@@ -51,82 +53,100 @@ export async function initInteractionRule(
         }
       });
 
-      //   console.log('expression: ', expression);
-      //   console.log('fieldMap: ', fieldMap);
-
       const jexl = new Jexl();
       const result = await jexl.eval(expression, fieldMap);
 
-      console.log('result: ', result);
+      //   console.log('jexl eval result: ', result);
+
       if (result) {
         for (const action of rule.formAction) {
-          if (cpActions[action.cpId]) {
-            cpActions[action.cpId].push(action.action);
-          } else {
-            cpActions[action.cpId] = [action.action];
+          if (action.cpIds) {
+            for (const cpId of action.cpIds) {
+              if (cpActions[cpId]) {
+                cpActions[cpId].push(action);
+              } else {
+                cpActions[cpId] = [action];
+              }
+            }
+          }
+          if (action.cpId && action.action === InteractionActionType.SetFieldValue) {
+            if (cpActions[action.cpId]) {
+              cpActions[action.cpId].push(action);
+            } else {
+              cpActions[action.cpId] = [action];
+            }
           }
         }
       }
     }
   }
 
-  console.log(cpActions);
+  //   console.log(cpActions);
 
   let cpActionsResult: Record<string, any> = {};
 
   // 遍历 cpActions 对象，输出每个 cpId 及对应的动作数组
   Object.entries(cpActions).forEach(([cpId, actions]) => {
-    console.log(`组件ID: ${cpId}，动作:`, actions);
-    let hidden = pageComponentSchemas[cpId].config.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN];
-    let readonly = pageComponentSchemas[cpId].config.status === STATUS_VALUES[STATUS_OPTIONS.READONLY];
+    let hiddenAssigned = false;
+    let readonlyAssigned = false;
+    let requiredAssigned = false;
+    let setFieldValueAssigned = false;
 
-    let hiddenAssigned = false; // 标记 hidden 是否已经被赋值
-    let readonlyAssigned = false; // 标记 readonly 是否已经被赋值
-    let allReadonlyAssigned = false; // 标记所有 readonly 是否已经被赋值
-    let requiredAssigned = false; // 标记 required 是否已经被赋值
-
-    let targetAction = {};
+    let targetAction: Record<string, any> = {};
 
     for (const action of actions) {
-      if (action === InteractionActionType.Hide || action === InteractionActionType.Show) {
+      const actionType = action.action;
+      if (actionType === InteractionActionType.Hide || actionType === InteractionActionType.Show) {
         if (hiddenAssigned) {
           continue;
         }
         hiddenAssigned = true;
         targetAction = {
           ...targetAction,
-          hidden: action === InteractionActionType.Hide
+          status:
+            actionType === InteractionActionType.Hide
+              ? STATUS_VALUES[STATUS_OPTIONS.HIDDEN]
+              : STATUS_VALUES[STATUS_OPTIONS.DEFAULT]
         };
       }
 
-      if (
-        action === InteractionActionType.Editable ||
-        action === InteractionActionType.Readonly ||
-        action === InteractionActionType.ReadonlyAll
-      ) {
-        if (readonlyAssigned || allReadonlyAssigned) {
+      if (actionType === InteractionActionType.Editable || actionType === InteractionActionType.Readonly) {
+        if (readonlyAssigned) {
           continue;
         }
-        if (action === InteractionActionType.Editable || action === InteractionActionType.Readonly) {
-          readonlyAssigned = true;
-          targetAction = {
-            ...targetAction,
-            editable: action === InteractionActionType.Editable ? true : false
-          };
+        readonlyAssigned = true;
+        if (targetAction.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]) {
+          continue;
         }
-        if (action === InteractionActionType.ReadonlyAll) {
-          allReadonlyAssigned = true;
-        }
+
+        targetAction = {
+          ...targetAction,
+          status:
+            actionType === InteractionActionType.Editable
+              ? STATUS_VALUES[STATUS_OPTIONS.DEFAULT]
+              : STATUS_VALUES[STATUS_OPTIONS.READONLY]
+        };
       }
 
-      if (action === InteractionActionType.Required) {
+      if (actionType === InteractionActionType.Required || actionType === InteractionActionType.NoRequired) {
         if (requiredAssigned) {
           continue;
         }
         requiredAssigned = true;
         targetAction = {
           ...targetAction,
-          required: action === InteractionActionType.Required ? true : false
+          required: actionType === InteractionActionType.Required ? true : false
+        };
+      }
+
+      if (actionType === InteractionActionType.SetFieldValue) {
+        if (setFieldValueAssigned) {
+          continue;
+        }
+        setFieldValueAssigned = true;
+        targetAction = {
+          ...targetAction,
+          value: action.value || ''
         };
       }
     }
@@ -134,7 +154,7 @@ export async function initInteractionRule(
     cpActionsResult[cpId] = targetAction;
   });
 
-  console.log('cpActionsResult: ', cpActionsResult);
+  //   console.log('cpActionsResult: ', cpActionsResult);
 
   return cpActionsResult;
 }
