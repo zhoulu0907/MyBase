@@ -20,6 +20,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   const { t } = useI18n();
 
   const [nickname, setNickname] = useState('U');
+  const [mobile, setMobile] = useState<string>('');
   // 获取用户信息
   const tokenInfo = TokenManager.getTokenInfo();
 
@@ -29,11 +30,20 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     }
   }, [tokenInfo]);
 
+  const maskMobile = (value: string) => {
+    let reg=/(\d{3})\d{4}(\d{4})/; 
+    const formatMobile = value.replace(reg, "$1****$2");
+    return formatMobile;
+  }
+
   const getInfo = async () => {
     const res = await getPermissionInfo();
     console.log(res);
     UserPermissionManager.setUserPermissionInfo(res);
     setNickname(res.user.nickname);
+    const mobile =res.user.mobile;
+    const formatMobile = maskMobile(mobile);
+    setMobile(formatMobile);
   };
 
   // 登出处理
@@ -55,7 +65,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     <Menu>
       <Menu.Item key="profile">
         <IconUser />
-        {t('header.profile')}
+        {mobile}
       </Menu.Item>
       <Menu.Item key="logout" onClick={handleLogout}>
         <IconPoweroff />
