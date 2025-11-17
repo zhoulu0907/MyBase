@@ -2,8 +2,8 @@ package com.cmsr.onebase.module.app.core.dal.database;
 
 import com.cmsr.onebase.framework.common.pojo.PageParam;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.app.api.app.dto.UserPhotoDTO;
 import com.cmsr.onebase.module.app.core.dto.auth.RoleMemberDTO;
+import com.cmsr.onebase.module.app.core.vo.app.AppUserPhotoDTO;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.DataRow;
@@ -231,45 +231,43 @@ public class AppSqlQueryRepository {
         return result;
     }
 
-    public Map<Long, List<UserPhotoDTO>> findUserPhotoList(List<Long> appIds) {
+    public Map<Long, List<AppUserPhotoDTO>> findUserPhotoList(List<Long> appIds) {
         if (appIds == null || appIds.isEmpty()) {
             return new HashMap<>();
         }
-
         ConfigStore configs = new DefaultConfigStore();
         configs.param("appIds", appIds);
-        configs.param("roleType", 1);
-
         String sql = """
-                SELECT DISTINCT 
+                 select
                     su.id,
                     su.avatar,
                     su.nickName,
-                    r.application_id  
-                FROM app_auth_role r 
-                LEFT JOIN app_auth_role_user ru ON r.id = ru.role_id
-                LEFT JOIN system_users su ON su.id = ru.user_id
-                WHERE r.application_id IN (:appIds) 
-                  AND r.role_type = :roleType
-                  AND su.id IS NOT NULL
+                    r.application_id
+                from
+                    app_auth_role_user ru
+                left join app_auth_role r on
+                    r.id = ru.role_id
+                    and role_type = 1
+                    and ru.deleted = 0
+                    and r.deleted = 0
+                left join system_users su on
+                    su.id = ru.user_id
+                    and su.deleted = 0
+                where
+                    r.application_id in (#{appIds})
+                    and su.id is not null
                 """;
 
         DataSet dataSet = anylineService.querys(sql, configs);
 
         // 处理结果集，按application_id分组
-        return dataSet.stream()
-                .collect(Collectors.groupingBy(
-                        row -> row.getLong("application_id"),
-                        Collectors.mapping(
-                                row -> {
-                                    UserPhotoDTO appPhotoDTO = new UserPhotoDTO();
-                                    appPhotoDTO.setId(String.valueOf(row.get("id")));
-                                    appPhotoDTO.setAvatar((String) row.get("avatar"));
-                                    appPhotoDTO.setNickName((String) row.get("nickName"));
-                                    return appPhotoDTO;
-                                },
-                                Collectors.toList()
-                        )
-                ));
+        return dataSet.stream().map(row -> {
+            AppUserPhotoDTO appPhotoDTO = new AppUserPhotoDTO();
+            appPhotoDTO.setApplicationId(row.getLong("application_id"));
+            appPhotoDTO.setId(String.valueOf(row.get("id")));
+            appPhotoDTO.setAvatar((String) row.get("avatar"));
+            appPhotoDTO.setNickName((String) row.get("nickName"));
+            return appPhotoDTO;
+        }).collect(Collectors.groupingBy(AppUserPhotoDTO::getApplicationId, Collectors.toList()));
     }
 }

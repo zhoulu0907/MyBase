@@ -37,11 +37,11 @@ public class AppAuthRoleRepository extends DataRepository<AuthRoleDO> {
         return findOne(configs);
     }
 
-    public long countByAppIdAndRoleCode(Long applicationId, String roleCode) {
+    public AuthRoleDO findByAppIdAndRoleCode(Long applicationId, String roleCode) {
         ConfigStore configs = new DefaultConfigStore();
         configs.eq("application_id", applicationId);
         configs.eq("role_code", roleCode);
-        return countByConfig(configs);
+        return findOne(configs);
     }
 
     public AuthRoleDO findByApplicationIdAndRoleNameAndIdNot(Long applicationId, String roleName, Long roleId) {
