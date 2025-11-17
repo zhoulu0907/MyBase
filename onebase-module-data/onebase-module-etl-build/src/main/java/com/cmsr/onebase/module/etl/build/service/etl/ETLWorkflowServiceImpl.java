@@ -299,6 +299,7 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
     @Override
     public ScheduleRespVO getWorkflowSchedule(Long workflowId) {
         ETLWorkflowDO workflowDO = getWorkflowById(workflowId);
+
         ScheduleRespVO scheduleRespVO = new ScheduleRespVO();
         scheduleRespVO.setApplicationId(workflowDO.getApplicationId());
         scheduleRespVO.setWorkflowId(workflowId);
