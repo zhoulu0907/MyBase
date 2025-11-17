@@ -865,6 +865,25 @@ public class AdminUserServiceImpl implements AdminUserService {
 
 
     }
+
+    @Override
+    public PageResult<AdminUserDO> getUserByDeptPage(Long deptId, Boolean isRecurseSub, UserSimplePageReqVO reqVO) {
+        // 获取需要查询的部门ID列表
+        Set<Long> deptIds = new HashSet<>();
+        if (Boolean.TRUE.equals(isRecurseSub)) {
+            // 如果需要递归查询子部门，获取当前部门及所有子部门ID
+            deptIds.add(deptId);
+            Set<Long> childDeptIds = deptService.getChildDeptIdListFromCache(deptId);
+            deptIds.addAll(childDeptIds);
+        } else {
+            // 否则只查询当前部门
+            deptIds.add(deptId);
+        }
+        
+        // 查询指定部门的用户
+        return adminUserDataRepository.findSimpleEnablePageByDeptIds(reqVO, deptIds);
+    }
+
     @TenantIgnore
     @Override
     public    Map<Long,Integer> getTenantExistUserCountByIds(List<Long> tenantIds) {

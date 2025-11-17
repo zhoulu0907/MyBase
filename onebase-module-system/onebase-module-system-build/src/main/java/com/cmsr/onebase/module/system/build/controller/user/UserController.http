@@ -1,4 +1,3 @@
-
 ### 获取租户编号 /admin-api/system/get-id-by-name
 GET {{baseUrl}}/system/user/simple-list
 Authorization: Bearer {{token}}
@@ -16,5 +15,17 @@ tenant-id: {{adminTenantId}}
   "password":"123456",
   "status":1
 }
+
+### 获取指定部门的用户简要分页列表（仅直属部门）
+GET {{baseUrl}}/system/user/get-user-by-dept-page?deptId=100
+Authorization: Bearer {{token}}
+
+### 获取指定部门的用户简要分页列表（包含下级部门）
+GET {{baseUrl}}/system/user/get-user-by-dept-page?deptId=100&isRecurseSub=true&pageNo=1&pageSize=10
+Authorization: Bearer {{token}}
+
+### 获取指定部门的用户简要分页列表（带关键词搜索）
+GET {{baseUrl}}/system/user/get-user-by-dept-page?deptId=100&isRecurseSub=false&pageNo=1&pageSize=10&keywords=张三
+Authorization: Bearer {{token}}
 
 ###

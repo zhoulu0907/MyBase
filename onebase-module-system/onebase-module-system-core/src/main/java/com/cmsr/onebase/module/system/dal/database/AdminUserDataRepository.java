@@ -232,6 +232,29 @@ public class AdminUserDataRepository extends DataRepository<AdminUserDO> {
         return findPageWithConditions(configStore, reqVO.getPageNo(), reqVO.getPageSize());
     }
 
+    /**
+     * 简单分页查询指定部门ID集合的启用状态用户
+     *
+     * @param reqVO   分页查询条件
+     * @param deptIds 部门ID集合
+     * @return 分页结果
+     */
+    public PageResult<AdminUserDO> findSimpleEnablePageByDeptIds(UserSimplePageReqVO reqVO, Set<Long> deptIds) {
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.eq(AdminUserDO.STATUS, CommonStatusEnum.ENABLE.getStatus()); // 启用状态
+        configStore.in(AdminUserDO.DEPT_ID, deptIds); // 指定部门ID集合
+
+        // 根据关键词模糊查询
+        if (reqVO.getKeywords() != null && !reqVO.getKeywords().trim().isEmpty()) {
+            configStore.like(AdminUserDO.NICKNAME, reqVO.getKeywords());
+        }
+
+        // 添加排序
+        configStore.order(AdminUserDO.ADMIN_TYPE, Order.TYPE.ASC).order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
+
+        return findPageWithConditions(configStore, reqVO.getPageNo(), reqVO.getPageSize());
+    }
+
     public List<AdminUserDO> findEnableUserByIds(Set<Long> userIds) {
         DefaultConfigStore configStore = CorpDeptUserHelper.getCorpConfigStore(AdminUserDO.USER_TYPE);
         configStore.in(AdminUserDO.ID, userIds)
