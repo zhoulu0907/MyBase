@@ -10,8 +10,8 @@ import { COMPONENT_GROUP_NAME, EDITOR_TYPES, type GridItem } from 'src/utils/con
 import './index.css';
 import { type XColumnLayoutConfig } from './schema';
 
-const XPreviewColumnLayout = (props: XColumnLayoutConfig) => {
-  const { colCount, id, pageType } = props;
+const XPreviewColumnLayout = (props: XColumnLayoutConfig & { detailMode?: boolean }) => {
+  const { colCount, id, pageType, detailMode } = props;
 
   useSignals();
 
@@ -83,7 +83,7 @@ const XPreviewColumnLayout = (props: XColumnLayoutConfig) => {
                         cpType={cp.type}
                         pageComponentSchema={pageComponentSchemas[cp.id]}
                         runtime={true}
-                        detailMode={true}
+                        detailMode={detailMode}
                       />
                     </div>
                   )}

@@ -311,11 +311,11 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
 
       //  布局组件
       case LAYOUT_COMPONENT_TYPES.COLUMN_LAYOUT:
-        return <LayoutComp.XPreviewColumnLayout {...componentConfig} cpName={cpId} id={cpId} pageType={pageType} />;
+        return <LayoutComp.XPreviewColumnLayout {...componentConfig} cpName={cpId} id={cpId} pageType={pageType} detailMode={detailMode} />;
       case LAYOUT_COMPONENT_TYPES.TABS_LAYOUT:
-        return <LayoutComp.XPreviewTabsLayout {...componentConfig} cpName={cpId} id={cpId} pageType={pageType} />;
+        return <LayoutComp.XPreviewTabsLayout {...componentConfig} cpName={cpId} id={cpId} pageType={pageType} detailMode={detailMode} />;
       case LAYOUT_COMPONENT_TYPES.COLLAPSE_LAYOUT:
-        return <LayoutComp.XPreviewCollapseLayout {...componentConfig} cpName={cpId} id={cpId} pageType={pageType} />;
+        return <LayoutComp.XPreviewCollapseLayout {...componentConfig} cpName={cpId} id={cpId} pageType={pageType} detailMode={detailMode} />;
 
       //  列表组件
       case LIST_COMPONENT_TYPES.TABLE:
