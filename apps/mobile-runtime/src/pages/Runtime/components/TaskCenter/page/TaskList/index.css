@@ -1,4 +1,4 @@
-.loadmore-list-wrapper {
+.task-list-wrapper {
     .list-search-header {
         padding: 0.4rem 0.32rem 0.24rem;
         display: flex;
@@ -65,8 +65,9 @@
         }
     }
     .list-body-wrapper {
-        padding: 0.24rem 0.24rem 0;
+        padding: 0.24rem;
         background: #F7F8FA;
+        min-height: calc(100vh - 2.78rem);
         .no-data {
             font-size: 0.28rem;
             color: #86909C;

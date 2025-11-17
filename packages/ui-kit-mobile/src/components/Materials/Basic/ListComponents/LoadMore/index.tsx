@@ -419,7 +419,7 @@ const XLoadMore = memo(
         <Sticky topOffset={0.88 * window.ROOT_FONT_SIZE} className="list-search-header">
           {searchItems?.length ? (
             <SearchBar actionButton={null} placeholder={`请输入${searchItems[0].label}`} />
-          ) : null}
+          ) : <div className="filter-title">筛选过滤</div>}
           <img className="filter-icon" src={filterIcon} alt="" onClick={() => setShowDropdown(true)} />
           {filterDropdown()}
         </Sticky>
@@ -428,6 +428,7 @@ const XLoadMore = memo(
           </div>
         )}
         <div className="list-body-wrapper">
+          {!tableData.length ? <div className="no-data">暂无数据</div> : null}
           {
             tableData.map((item) => (
               <div key={item.key} className="list-body-item-wrapper" onClick={() => handleRowClick(item)}>
