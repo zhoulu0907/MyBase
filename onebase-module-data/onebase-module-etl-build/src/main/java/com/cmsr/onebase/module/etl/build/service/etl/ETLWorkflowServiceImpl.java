@@ -320,7 +320,10 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
     @Override
     public void startWorkflowManually(Long workflowId) {
         // 必须是已启用的ETL
-        ETLWorkflowDO workflowDO = getOperableWorkflow(workflowId);
+        ETLWorkflowDO workflowDO = getWorkflowById(workflowId);
+        if (workflowDO.getIsEnabled() == 0) {
+            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.WORKFLOW_DISABLED);
+        }
         Long applicationId = workflowDO.getApplicationId();
         ETLScheduleJobDO scheduleJobDO = scheduleJobRepository.findByApplicationIdAndWorkflowId(applicationId, workflowId);
         if (scheduleJobDO == null) {
