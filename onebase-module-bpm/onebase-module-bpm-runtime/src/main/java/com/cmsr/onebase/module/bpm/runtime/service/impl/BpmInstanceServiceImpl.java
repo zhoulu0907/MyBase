@@ -16,10 +16,10 @@ import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
 import com.cmsr.onebase.module.bpm.core.enums.*;
 import com.cmsr.onebase.module.bpm.core.service.BpmEngineDefExtService;
 import com.cmsr.onebase.module.bpm.core.utils.BpmUtil;
-import com.cmsr.onebase.module.bpm.core.vo.UserBasicInfoVO;
 import com.cmsr.onebase.module.bpm.core.vo.design.BpmDefJsonVO;
 import com.cmsr.onebase.module.bpm.core.vo.design.node.base.BaseEdgeVO;
 import com.cmsr.onebase.module.bpm.runtime.service.BpmInstanceService;
+import com.cmsr.onebase.module.bpm.runtime.service.detail.BpmDetailService;
 import com.cmsr.onebase.module.bpm.runtime.service.detail.strategy.InstanceDetailStrategyManager;
 import com.cmsr.onebase.module.bpm.runtime.service.exec.strategy.ExecTaskStrategyManager;
 import com.cmsr.onebase.module.bpm.runtime.utils.PageViewUtil;
@@ -35,8 +35,6 @@ import com.cmsr.onebase.module.system.api.user.AdminUserApi;
 import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -123,6 +121,9 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
 
     @Resource
     private PageViewUtil pageViewUtil;
+
+    @Resource
+    private BpmDetailService detailService;
 
     private String buildFormSummary(EntityVO entityVO, BpmDefinitionExtDTO defExtDTO) {
         StringBuilder sb = new StringBuilder();
@@ -603,85 +604,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
 
     @Override
     public BpmTaskDetailRespVO getFormDetail(BpmTaskDetailReqVO reqVO) {
-        BpmTaskDetailRespVO respVO = new BpmTaskDetailRespVO();
-        Long loginUserId = WebFrameworkUtils.getLoginUserId();
-        Long instanceId = reqVO.getInstanceId();
-
-        // 查询流程实例
-        Instance instance = insService.getById(instanceId);
-        if (instance == null) {
-            throw exception(ErrorCodeConstants.FLOW_INSTANCE_NOT_EXISTS);
-        }
-
-        // 设置流程状态
-        respVO.setCurrentStatus(instance.getFlowStatus());
-        respVO.setInstanceId(instanceId);
-
-        // 获取实体ID
-        Long entityId = MapUtils.getLong(instance.getVariableMap(), BpmConstants.VAR_ENTITY_ID_KEY);
-        if (entityId == null) {
-            throw exception(ErrorCodeConstants.FLOW_NOT_BIND_ENTITY_ID);
-        }
-
-        // 填充业务扩展信息（与节点类型无关的通用逻辑）
-        fillBpmBizExt(respVO, instanceId);
-
-        // 填充表单数据（与节点类型无关的通用逻辑）
-        fillFormData(respVO, instance, entityId);
-
-        // 填充其他流程详情
-        instanceDetailStrategyManager.processInstanceDetail(respVO, reqVO, instance, loginUserId);
-
-        return respVO;
-    }
-
-    /**
-     * 填充业务扩展信息
-     *
-     * @param vo 详情VO
-     * @param instanceId 流程实例ID
-     */
-    private void fillBpmBizExt(BpmTaskDetailRespVO vo, Long instanceId) {
-        ConfigStore configStore = new DefaultConfigStore();
-        configStore.and("instance_id", instanceId);
-        BpmFlowInsBizExtDO flowInsExtDO = flowInsExtRepository.findOne(configStore);
-
-        if (flowInsExtDO == null) {
-            throw exception(ErrorCodeConstants.BPM_BIZ_EXT_NOT_EXIST);
-        }
-
-        vo.setBpmVersion(flowInsExtDO.getBpmVersion());
-        vo.setSubmitTime(flowInsExtDO.getSubmitTime());
-        vo.setInitiatorDeptId(flowInsExtDO.getInitiatorDeptId());
-        vo.setInitiatorDeptName(flowInsExtDO.getInitiatorDeptName());
-
-        vo.setInitiator(new UserBasicInfoVO());
-        vo.getInitiator().setUserId(flowInsExtDO.getInitiatorId());
-        vo.getInitiator().setName(flowInsExtDO.getInitiatorName());
-        vo.getInitiator().setAvatar(flowInsExtDO.getInitiatorAvatar());
-
-        // todo: 待删除
-        vo.setInitiatorId(flowInsExtDO.getInitiatorId());
-        vo.setInitiatorName(flowInsExtDO.getInitiatorName());
-    }
-
-    /**
-     * 填充表单数据
-     *
-     * @param vo 详情VO
-     * @param instance 流程实例
-     * @param entityId 实体ID
-     */
-    private void fillFormData(BpmTaskDetailRespVO vo, Instance instance, Long entityId) {
-        String entityDataId = instance.getBusinessId();
-        if (entityDataId == null) {
-            throw exception(ErrorCodeConstants.FLOW_ENTITY_DATA_ID_NOT_EXISTS);
-        }
-
-        Map<String, Object> data = metadataDataMethodCoreService.getData(entityId, entityDataId, null);
-        if (data != null && !data.isEmpty()) {
-            vo.setFormData(data);
-        }
+        return detailService.getFormDetail(reqVO);
     }
 
     @Override
