@@ -72,8 +72,7 @@ const AppsList: React.FC<{ treeData: TreeNode[] }> = ({ treeData }) => {
         fill="#F2F3F5"
         style={{ backgroundColor: '#009E9E', borderRadius: '0.16rem', padding: '0.16rem' }}
       />,
-      // title: <div style={{ fontSize: '0.28rem', lineHeight: '0.44rem', whiteSpace: 'nowrap' }}>{item.title.slice(0, 5)}</div>,
-      title: <Ellipsis text={item.title} style={{ fontSize: '0.28rem', lineHeight: '0.44rem' }} />,
+      title: <Ellipsis text={item.title} />,
       onClick: () => handlerItemClick(item.id!)
     }));
 

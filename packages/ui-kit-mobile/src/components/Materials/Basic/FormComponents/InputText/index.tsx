@@ -7,6 +7,7 @@ import { type XInputTextConfig } from './schema';
 
 const XInputText = memo((props: XInputTextConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const {
+    cpName,
     label,
     dataField,
     placeholder,
@@ -54,8 +55,8 @@ const XInputText = memo((props: XInputTextConfig & { runtime?: boolean; detailMo
       field={fieldId}
       label={label.display ? label.text : undefined}
       initialValue={defaultValue || ''}
-      className="formWrapper inputTextWrapper"
-      rules={verify ? [{ required: verify.required, message: verify.message }] : undefined}
+      className="inputTextWrapper"
+      rules={verify ? [{ required: verify.required, message: `请输入${cpName}` }] : undefined}
       style={{
         pointerEvents: (!runtime || detailMode) ? 'none' : 'unset'
       }}

@@ -21,7 +21,7 @@ const XCarousel = memo((props: XCarouselConfig & { runtime?: boolean }) => {
   } = props;
 
   return (
-    <div className="inputTextWrapper">
+    <div className={`inputTextWrapper ${styles.carouselWrapper}`}>
       <div className={styles.label}>
         {label.display && label.text ? label.text : ''}
       </div>
@@ -31,6 +31,7 @@ const XCarousel = memo((props: XCarouselConfig & { runtime?: boolean }) => {
         style={{
           pointerEvents: runtime ? 'unset' : 'none'
         }}
+        wrapStyle={{ width: `calc(100% - ${labelColSpan}px)` }}
       >
         {carouselConfig.map((img, index) => (
           <div className={styles.imageWrapper} key={index} onClick={() => window.open(img.url)}>
