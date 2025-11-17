@@ -300,6 +300,8 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
         dolphinSchedulerClient.purgeWorkflow(etlProjectCode, jobId);
         workflowDO.setIsEnabled(0);
         workflowRepository.update(workflowDO);
+
+        scheduleJobRepository.removeJobId(workflowId);
     }
 
     @Override
