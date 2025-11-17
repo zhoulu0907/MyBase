@@ -66,7 +66,7 @@ public class ETLWorkflowController {
     }
 
     @GetMapping("/schedule/{workflowId}")
-    public CommonResult<?> getWorkflowSchedule(@PathVariable("workflowId") Long workflowId) {
+    public CommonResult<ScheduleRespVO> getWorkflowSchedule(@PathVariable("workflowId") Long workflowId) {
         ScheduleRespVO scheduleRespVO = workflowService.getWorkflowSchedule(workflowId);
         return CommonResult.success(scheduleRespVO);
     }
