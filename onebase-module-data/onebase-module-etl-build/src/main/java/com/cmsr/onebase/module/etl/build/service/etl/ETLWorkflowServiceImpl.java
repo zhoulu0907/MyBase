@@ -216,7 +216,7 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
 
     private void syncEnableStatus(ETLWorkflowDO workflowDO) {
         Long workflowId = workflowDO.getId();
-        ScheduleType scheduleType = ScheduleType.of(workflowDO.getScheduleConfig());
+        ScheduleType scheduleType = ScheduleType.of(workflowDO.getScheduleStrategy());
         ETLScheduleJobDO scheduleJobDO = scheduleJobRepository.findByApplicationIdAndWorkflowId(workflowDO.getApplicationId(), workflowId);
         if (scheduleJobDO == null) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.UNKNOWN_ERROR);
@@ -308,6 +308,7 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
         workflowDO.setWorkflowName(scheduleVO.getFlowName());
         workflowDO.setScheduleStrategy(scheduleVO.getScheduleStrategy().getValue());
         workflowDO.setScheduleConfig(JsonUtils.toJsonString(scheduleVO.getConfig()));
+        workflowDO.setIsEnabled(scheduleVO.getEnableStatus());
         workflowRepository.update(workflowDO);
         if (workflowDO.isEnabled()) {
             syncEnableStatus(workflowDO);
