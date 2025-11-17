@@ -8,6 +8,7 @@ import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 // import { downloadFileByUrl } from 'src/utils/downloadFile';
 import '../index.css';
+import './index.css'
 import type { XInputFileUploadConfig } from './schema';
 
 const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; detailMode?: boolean }) => {
@@ -109,7 +110,7 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
   };
 
   return (
-    <div className="formWrapper">
+    <div className="formWrapper fileUploadWrapper">
       {/* TODO 预览态下显示情况，及上传接口调用需要修改 */}
       <Uploader
         files={filesList}

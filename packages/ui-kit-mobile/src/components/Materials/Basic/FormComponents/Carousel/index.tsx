@@ -22,6 +22,9 @@ const XCarousel = memo((props: XCarouselConfig & { runtime?: boolean }) => {
 
   return (
     <div className="formWrapper">
+      <div className={styles.label}>
+        {label.display && label.text ? label.text : ''}
+      </div>
       <Carousel
         className={styles.carousel}
         autoPlay={autoplay}
@@ -36,7 +39,7 @@ const XCarousel = memo((props: XCarouselConfig & { runtime?: boolean }) => {
           </div>
         ))}
       </Carousel>
-
+      <div className={styles.bottomDivider}></div>
 
       {/* <Form.Item
         label={label.display && label.text}

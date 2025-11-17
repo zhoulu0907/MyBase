@@ -12,4 +12,7 @@
       white-space: nowrap;
     }
   }
+  .arco-cell.without-group {
+    padding: 0;
+  }
 }
