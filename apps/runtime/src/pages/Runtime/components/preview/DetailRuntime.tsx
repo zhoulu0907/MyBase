@@ -26,6 +26,7 @@ const DetailRuntime: React.FC<DetailRuntimeProps> = ({ visible, onCancel, form, 
 
   return (
     <Drawer
+      getPopupContainer={() => document.querySelector('[class*="previewPage"]') || document.body}
       width={fullScreen ? '98vw' : '60vw'}
       title={
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
