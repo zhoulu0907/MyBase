@@ -306,7 +306,7 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
         scheduleRespVO.setFlowName(workflowDO.getWorkflowName());
         scheduleRespVO.setEnableStatus(workflowDO.getIsEnabled());
         scheduleRespVO.setScheduleStrategy(workflowDO.getScheduleStrategy());
-        scheduleRespVO.setConfig(workflowDO.getConfig());
+        scheduleRespVO.setConfig(workflowDO.getScheduleConfig());
 
         return scheduleRespVO;
     }
