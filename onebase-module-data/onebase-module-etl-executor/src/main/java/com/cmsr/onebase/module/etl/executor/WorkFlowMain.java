@@ -19,8 +19,9 @@ public class WorkFlowMain {
         byte[] decode = Base64.getDecoder().decode(input.getBytes(StandardCharsets.UTF_8));
         String inputJson = new String(decode, StandardCharsets.UTF_8);
         InputArgs inputArgs = JacksonUtil.fromJson(inputJson, InputArgs.class);
-        WorkFlowExecutor workFlowExecutor = new WorkFlowExecutor(inputArgs);
-        workFlowExecutor.execute();
+        try (WorkFlowExecutor workFlowExecutor = new WorkFlowExecutor(inputArgs)) {
+            workFlowExecutor.execute();
+        }
     }
 
 }
