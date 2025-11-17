@@ -66,6 +66,7 @@ export default function EditorWorkspace() {
     pageComponentSchemas,
     setPageComponentSchemas,
     delPageComponentSchemas,
+    batchDelPageComponentSchemas,
     components,
     addComponents,
     setComponents,
@@ -75,9 +76,11 @@ export default function EditorWorkspace() {
     layoutSubComponents,
     setLayoutSubComponents,
     delLayoutSubComponents,
+    batchDelLayoutSubComponents,
     subTableComponents,
     setSubTableComponents,
-    delSubTableComponents
+    delSubTableComponents,
+    batchDelSubTableComponents
   } = usePageEditorSignal();
 
   const [pageMode, setPageMode] = useState<string>('pc');
@@ -183,14 +186,13 @@ export default function EditorWorkspace() {
   // 删除组件
   const handleDeleteComponent = (componentId: string) => {
     // 从组件列表中移除
-    delComponents(componentId);
-    delPageComponentSchemas(componentId);
-    delLayoutSubComponents(componentId);
-    delSubTableComponents(componentId);
 
+
+    // 布局组件删除
     if (layoutSubComponents[componentId]) {
       // 收集所有需要删除的组件 ID
       const idsToDelete = new Set<string>();
+      idsToDelete.add(componentId);
 
       // 递归收集需要删除的组件 ID
       function collectDeleteIds(id: string) {
@@ -210,18 +212,15 @@ export default function EditorWorkspace() {
       // 开始收集
       collectDeleteIds(componentId);
 
+      delComponents(componentId);
       // 删除所有收集到的组件
-      idsToDelete.forEach((id: string) => {
-        // 明确参数类型
-        delPageComponentSchemas(id);
-        delLayoutSubComponents(id);
-      });
-    }
-
-    // 子表单删除
-    if (subTableComponents[componentId]) {
+      batchDelPageComponentSchemas(idsToDelete)
+      batchDelLayoutSubComponents(idsToDelete);
+    } else if (subTableComponents[componentId]) {
+      // 子表单删除
       // 收集所有需要删除的组件 ID
       const idsToDelete = new Set<string>();
+      idsToDelete.add(componentId);
 
       // 递归收集需要删除的组件 ID
       function collectDeleteIds(id: string) {
@@ -237,12 +236,14 @@ export default function EditorWorkspace() {
       // 开始收集
       collectDeleteIds(componentId);
 
+      delComponents(componentId);
       // 删除所有收集到的组件
-      idsToDelete.forEach((id: string) => {
-        // 明确参数类型
-        delPageComponentSchemas(id);
-        delSubTableComponents(id);
-      });
+      batchDelPageComponentSchemas(idsToDelete)
+      batchDelSubTableComponents(idsToDelete);
+    } else {
+      // 从组件列表中移除
+      delComponents(componentId);
+      delPageComponentSchemas(componentId);
     }
 
     // 如果删除的是当前选中的组件，清除选中状态
