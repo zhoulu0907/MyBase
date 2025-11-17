@@ -99,11 +99,19 @@ public interface ErrorCodeConstants {
 
     ErrorCode AGENT_REVOKE_INVALID_STATUS = new ErrorCode(1_009_002_025, "只允许操作待生效或代理中的记录");
 
-    ErrorCode AGENT_USER_NOT_EXISTS = new ErrorCode(1_009_002_025, "代理人不存在");
+    ErrorCode AGENT_USER_NOT_EXISTS = new ErrorCode(1_009_002_026, "代理人不存在");
 
-    ErrorCode MISSING_EDIT_OR_DETAIL_PAGE_VIEW = new ErrorCode(1_009_002_026, "缺少编辑或详情视图页面");
+    ErrorCode UNSUPPORT_NODE_CC_TYPE = new ErrorCode(1_009_002_027, "不支持的抄送人类型");
 
-    ErrorCode MISSING_BINDING_VIEW_ID = new ErrorCode(1_009_002_027, "流程实例缺少绑定视图ID");
+    ErrorCode CC_NODE_USER_LIST_EMPTY = new ErrorCode(1_009_002_028, "抄送人列表不能为空");
+
+    ErrorCode CC_NODE_ROLE_LIST_EMPTY = new ErrorCode(1_009_002_029, "抄送角色列表不能为空");
+
+    ErrorCode MISSING_VALID_CC_ROLE_LIST = new ErrorCode(1_009_002_030, "缺少有效抄送角色列表");
+
+    ErrorCode MISSING_EDIT_OR_DETAIL_PAGE_VIEW = new ErrorCode(1_009_002_031, "缺少编辑或详情视图页面");
+
+    ErrorCode MISSING_BINDING_VIEW_ID = new ErrorCode(1_009_002_032, "流程实例缺少绑定视图ID");
 
 
     // ============= 系统相关错误 =============
