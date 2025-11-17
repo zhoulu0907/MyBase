@@ -19,7 +19,6 @@ import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantPackageDO;
 import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
 import com.cmsr.onebase.module.system.enums.permission.DataScopeEnum;
-import com.cmsr.onebase.module.system.enums.permission.MenuConstants;
 import com.cmsr.onebase.module.system.enums.permission.PackageTypeEnum;
 import com.cmsr.onebase.module.system.service.dept.DeptService;
 import com.cmsr.onebase.module.system.service.tenant.TenantPackageService;
@@ -111,15 +110,17 @@ public class PermissionServiceImpl implements PermissionService {
             Set<String> tenantAllPermissions = null;
             if (PackageTypeEnum.ALL.getCode().equals(tenantPackage.getCode())) {
                 // 若是 PackageTypeEnum.ALL, tenantAllPermissions = tenant、app开头的权限
-                List<MenuDO> menuList = menuService.getMenuList();
+                // List<MenuDO> menuList = menuService.getMenuList();
                 // 过滤出permission字段值为app和tenant开头的菜单项
-                tenantAllPermissions = menuList.stream()
-                        .filter(menu -> menu.getPermission() != null &&
-                                (menu.getPermission().startsWith(MenuConstants.MENU_APP)
-                                        || menu.getPermission().startsWith(MenuConstants.MENU_TENANT)
-                                || menu.getPermission().startsWith(MenuConstants.MENU_SYSTEM)))
-                        .map(MenuDO::getPermission)
-                        .collect(Collectors.toSet());
+                // tenantAllPermissions = menuList.stream()
+                //         .filter(menu -> menu.getPermission() != null &&
+                //                 (menu.getPermission().startsWith(MenuConstants.MENU_APP)
+                //                         || menu.getPermission().startsWith(MenuConstants.MENU_TENANT)
+                //                 || menu.getPermission().startsWith(MenuConstants.MENU_SYSTEM)))
+                //         .map(MenuDO::getPermission)
+                //         .collect(Collectors.toSet());
+                // 租户管理员拥有所有权限
+                return true;
             } else {
                 // 不是All，tenantAllPermissions = package下写入的所有权限点
                 Set<Long> menuIds = tenantPackage.getMenuIds();
