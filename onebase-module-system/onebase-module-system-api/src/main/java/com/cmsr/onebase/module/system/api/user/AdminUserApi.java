@@ -1,12 +1,16 @@
 package com.cmsr.onebase.module.system.api.user;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
+import com.cmsr.onebase.module.system.api.user.dto.UserByDeptPageReqDTO;
+import com.cmsr.onebase.module.system.api.user.dto.UserSimpleRespDTO;
 import com.cmsr.onebase.module.system.enums.ApiConstants;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -75,16 +79,10 @@ public interface AdminUserApi {
     @Parameter(name = "ids", description = "用户编号数组", example = "3,5", required = true)
     CommonResult<Boolean> validateUserList(@RequestParam("ids") Collection<Long> ids);
 
-    // @Override
-    // @FeignIgnore
-    // default List<AdminUserRespDTO> selectByIds(List<?> ids) {
-    //     return getUserList(Convert.toList(Long.class, ids)).getCheckedData();
-    // }
 
-    // @Override
-    // @FeignIgnore
-    // default AdminUserRespDTO selectById(Object id) {
-    //     return getUser(Convert.toLong(id)).getCheckedData();
-    // }
+
+    @GetMapping(PREFIX + "/get-user-page-by-dept")
+    @Operation(summary = "获得指定部门的用户简要分页列表", description = "获取指定部门的直属用户简要信息（分页），isRecurseSub为true时包含所有下级部门用户")
+    CommonResult<PageResult<UserSimpleRespDTO>>  getUserPageByDept(@Valid @RequestParam UserByDeptPageReqDTO reqDTO);
 
 }

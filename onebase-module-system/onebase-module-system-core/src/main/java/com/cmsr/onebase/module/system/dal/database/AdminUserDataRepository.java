@@ -7,8 +7,10 @@ import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
 import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
+import com.cmsr.onebase.module.system.vo.user.UserByDeptPageReqVO;
 import com.cmsr.onebase.module.system.vo.user.UserPageReqVO;
 import com.cmsr.onebase.module.system.vo.user.UserSimplePageReqVO;
+import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
 import org.anyline.entity.Order;
@@ -31,6 +33,7 @@ import java.util.Set;
  * @date 2025-08-18
  */
 @Repository
+@Slf4j
 public class AdminUserDataRepository extends DataRepository<AdminUserDO> {
 
     /**
@@ -241,8 +244,8 @@ public class AdminUserDataRepository extends DataRepository<AdminUserDO> {
      * @param deptIds 部门ID集合
      * @return 分页结果
      */
-    @Cacheable(cacheNames = RedisKeyConstants.USER_FIND_BY_DEPT_IDS, key = "#deptIds + ':' + #reqVO.pageNo + ':' + #reqVO.pageSize + ':' + (#reqVO.keywords == null ? '' : #reqVO.keywords)")
-    public PageResult<AdminUserDO> findEnableUserPageByDeptIds(UserSimplePageReqVO reqVO, Set<Long> deptIds) {
+    public PageResult<AdminUserDO> findEnableUserPageByDeptIds(UserByDeptPageReqVO reqVO, Set<Long> deptIds) {
+        log.info("[findEnableUserPageByDeptIds][deptIds({}) reqVO({})]", deptIds, reqVO);
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.eq(AdminUserDO.STATUS, CommonStatusEnum.ENABLE.getStatus()); // 启用状态
         configStore.in(AdminUserDO.DEPT_ID, deptIds); // 指定部门ID集合

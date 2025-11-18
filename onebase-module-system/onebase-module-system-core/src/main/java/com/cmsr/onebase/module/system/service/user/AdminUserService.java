@@ -297,11 +297,9 @@ public interface AdminUserService {
     /**
      * 获取指定部门的直属用户简要信息（分页）
      *
-     * @param deptId 部门ID
-     * @param isRecurseSub 如果为true，那么把deptId以及它所有下级（下级的下级，递归到结束）部门的用户分页返回
      * @param reqVO 分页条件
      * @return 用户简要信息分页列表
      */
-    PageResult<AdminUserDO> getUserByDeptPage(Long deptId, Boolean isRecurseSub, UserSimplePageReqVO reqVO);
+    PageResult<AdminUserDO> getUserByDeptPage(UserByDeptPageReqVO reqVO);
 
 }

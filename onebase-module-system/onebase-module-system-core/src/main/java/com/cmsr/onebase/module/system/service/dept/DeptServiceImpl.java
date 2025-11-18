@@ -249,6 +249,7 @@ public class DeptServiceImpl implements DeptService {
     @Override
     @Cacheable(cacheNames = RedisKeyConstants.DEPT_CHILDREN_ID_LIST, key = "#id")
     public Set<Long> getChildDeptIdListFromCache(Long id) {
+        log.info("[getChildDeptIdListFromCache][deptId({})]", id);
         List<DeptDO> children = getChildDeptList(id);
         return convertSet(children, DeptDO::getId);
     }
