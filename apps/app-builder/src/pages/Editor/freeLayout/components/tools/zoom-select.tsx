@@ -11,8 +11,8 @@ import { IconZoomIn, IconZoomOut } from '@arco-design/web-react/icon';
 import { SelectZoom } from './styles';
 import styles from './index.module.less';
 
-export const ZoomSelect = () => {
-  const tools = usePlaygroundTools({ maxZoom: 2, minZoom: 0.25 });
+export const ZoomSelect = ({ minZoom = 0.25 }: { minZoom?: number }) => {
+  const tools = usePlaygroundTools({ maxZoom: 2, minZoom });
   const playground = usePlayground();
   const [dropDownVisible, openDropDown] = useState(false);
   return (

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-import { useCallback,useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import { WorkflowNodePanelService, WorkflowNodePanelUtils } from '@flowgram.ai/free-node-panel-plugin';
 import type { LineRenderProps } from '@flowgram.ai/free-lines-plugin';
@@ -105,16 +105,18 @@ export const LineAddButton = (props: LineRenderProps) => {
     line.dispose();
   }, []);
 
-     const handleDeleteLine = (e: React.MouseEvent) => {
-       e.stopPropagation();
-       e.preventDefault();
+  const handleDeleteLine = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
 
-       console.log('删除连线:', line.id);
-
-       // 删除连线
+    // 删除连线
     //    const commandService = useState(CommandService);
     //    commandService.executeCommand('DELETE', [line]);
-     };
+  };
+
+  if (line.id === 'start_0_-start_1_') {
+    return <></>;
+  }
 
   if (!visible) {
     return playground.config.readonly ? '' : <div className="line-node" style={{}}></div>;
