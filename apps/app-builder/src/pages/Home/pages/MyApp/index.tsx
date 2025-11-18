@@ -478,7 +478,7 @@ const MyAppPage: React.FC = () => {
                       onClick={() => {
                         nagivateToDataFactory(item.id);
                       }}
-                      disabled={item.publishModel === "sass"}
+                      disabled={item.publishModel === "saas"}
                     >
                       进入应用
                     </Button>

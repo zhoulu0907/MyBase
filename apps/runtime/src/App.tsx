@@ -13,6 +13,7 @@ function AppContent() {
       <Route path="/:appId/:tenantId/login" element={<Login />} />
 
       <Route path="/onebase/runtime/:appId/" element={<Runtime />} />
+       <Route path="/onebase/runtime/:appId/:tenantId" element={<Runtime />} />
 
       {/* 默认重定向到登录页 */}
       <Route path="/" element={<Navigate to="/login" replace />} />

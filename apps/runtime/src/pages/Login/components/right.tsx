@@ -3,13 +3,14 @@ import { IconLock, IconUser } from '@arco-design/web-react/icon';
 import type { IIconBase } from '@icon-park/react/lib/runtime';
 import { getApplication } from '@onebase/app';
 import { getHashQueryParam, SliderCaptcha, TokenManager, type SliderCaptchaRef } from '@onebase/common';
-import { checkCaptchaApi, getCaptchaApi, login, type LoginRequest, type LoginResponse } from '@onebase/platform-center';
+import { checkCaptchaApi, getCaptchaApi, login, sassLogin, innerLogin, type InnerOrSaSSLoginRequest, type LoginRequest, type LoginResponse } from '@onebase/platform-center';
 import { appIconMap } from '@onebase/ui-kit';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useI18n } from '../../../hooks/useI18n';
 import { useRememberMe } from '../../../hooks/useRememberMe';
 import styles from '../index.module.less';
+import { PUBLISH_MODULE } from '@/constants/permission';
 
 interface DynamicIconProps extends IIconBase {
   IconComponent: React.ComponentType<any>;
@@ -23,6 +24,8 @@ interface APP_INFO {
   appName: string;
   iconName: string;
   iconColor: string;
+  publishModel?: string;
+  id: string;
 }
 
 const { Paragraph } = Typography;
@@ -36,7 +39,8 @@ const Right: React.FC = () => {
   const [appInfo, setAppInfo] = useState<APP_INFO>({
     appName: '',
     iconName: '',
-    iconColor: ''
+    iconColor: '',
+    id: ''
   });
 
   // 从路由中获取 appid 参数
@@ -48,6 +52,10 @@ const Right: React.FC = () => {
 
   // 状态管理
   const [loading, setLoading] = useState(false);
+
+  const match = location.hash.match(/\/onebase\/runtime\/(\d+)\/(\d+)/);
+  const newAppId = match ? match[1]: appId;  
+  const newTenantId = match? match[2] : tenantId; 
 
   // 组件初始化时设置保存的账号
   useEffect(() => {
@@ -82,7 +90,7 @@ const Right: React.FC = () => {
       if (applicationId) {
         const res = await getApplication({ id: applicationId });
         if (res) {
-          setAppInfo({ appName: res.appName || '', iconName: res.iconName || '', iconColor: res.iconColor || '' });
+          setAppInfo({id: res.id || '', publishModel: res.publishModel || '', appName: res.appName || '', iconName: res.iconName || '', iconColor: res.iconColor || '' });
         }
       }
     }
@@ -108,7 +116,7 @@ const Right: React.FC = () => {
       }
 
       const headers = {
-        'Tenant-Id': tenantId || '1'
+        'Tenant-Id': tenantId || newTenantId ||  '1'
       };
 
       const loginData: LoginRequest = {
@@ -116,9 +124,26 @@ const Right: React.FC = () => {
         password: values.password!,
         captchaVerification: captchaVerification
       };
-
-      const response: LoginResponse = await login(loginData, headers);
-
+      const innerloginData:InnerOrSaSSLoginRequest = {
+        password: values.password!,
+        username: values.username!,
+        appId: newAppId,
+        captchaVerification: captchaVerification
+      }
+      const sassloginData: InnerOrSaSSLoginRequest = {
+        password: values.password!,
+        mobile: values.mobile!,
+        appId: newAppId,
+        captchaVerification: captchaVerification
+      };
+      let response: LoginResponse | null = null;
+      if(appInfo.publishModel === PUBLISH_MODULE.SASS) {
+        response = await sassLogin(sassloginData, headers); 
+      }else if(appInfo.publishModel === PUBLISH_MODULE.INNER) {
+        response = await innerLogin(innerloginData, headers);
+      }else {
+        response = await login(loginData, headers);
+      }
       if (response.accessToken) {
         // 使用 TokenManager 存储 token 信息
         TokenManager.setToken(
@@ -137,6 +162,7 @@ const Right: React.FC = () => {
 
         Message.success(t('auth.loginSuccess'));
         const redirectURL = getHashQueryParam('redirectURL');
+        debugger
         if (redirectURL) {
           window.location.href = redirectURL;
         } else {
@@ -164,7 +190,7 @@ const Right: React.FC = () => {
   const handleCaptchaSuccess = async (token: string) => {
     const values = await form.getFieldsValue();
     console.log('values:', values);
-    handleSubmit({ username: values.username, password: values.password, captchaVerification: token });
+    handleSubmit({ username: values.username, mobile: values.mobile, password: values.password, captchaVerification: token });
   };
 
   // 登录按钮点击事件 - 先验证滑块验证码
@@ -217,6 +243,16 @@ const Right: React.FC = () => {
           requiredSymbol={false}
           className={styles.loginForm}
         >
+          {appInfo.publishModel === PUBLISH_MODULE.SASS && 
+          <Form.Item
+            label="手机号"
+            field="mobile"
+            rules={[
+                { required: true, message: '请输入手机号' },
+            ]}
+            >
+              <Input placeholder="输入手机号" maxLength={11} />
+          </Form.Item> || 
           <Form.Item
             field="username"
             label="用户名"
@@ -227,7 +263,7 @@ const Right: React.FC = () => {
             ]}
           >
             <Input placeholder={t('auth.userAccount')} allowClear size="large" prefix={<IconUser />} />
-          </Form.Item>
+          </Form.Item>} 
 
           <Form.Item
             field="password"

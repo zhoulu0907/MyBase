@@ -46,7 +46,11 @@ const Right: React.FC = () => {
         window.location.href = redirectURL;
       } else {
         // 跳转到首页
-        navigate('/onebase/my-app');
+        if(location.hash.slice(1).startsWith("/tenant")) {
+            navigate('/onebase/enterprise-app');
+          }else {
+            navigate('/onebase/my-app');
+        }
       }
     }
   }, []);
@@ -91,7 +95,7 @@ const Right: React.FC = () => {
             accessToken: response.accessToken,
             refreshToken: response.refreshToken,
             expiresTime: response.expiresTime,
-            tenantId: response.tenantWebsite,
+            tenantId: response.tenantId,
           },
           rememberMe
         );
@@ -106,7 +110,7 @@ const Right: React.FC = () => {
           window.location.href = redirectURL;
         } else {
           // 跳转到首页
-          if(location.pathname.includes("/tenant")) {
+          if(location.hash.slice(1).startsWith("/tenant")) {
             navigate('/onebase/enterprise-app');
           }else {
             navigate('/onebase/my-app');
