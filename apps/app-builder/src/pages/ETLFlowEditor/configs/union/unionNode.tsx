@@ -1,6 +1,7 @@
 import { ETLDrawerTab, etlEditorSignal } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useState } from 'react';
+import UnionConfig from './config';
 import styles from './index.module.less';
 
 export const UnionNodeConfig: React.FC = () => {
@@ -13,7 +14,7 @@ export const UnionNodeConfig: React.FC = () => {
 
   return (
     <div className={styles.config}>
-      {curDrawerTab.value === ETLDrawerTab.DATA_CONFIG && <div>123123</div>}
+      {curDrawerTab.value === ETLDrawerTab.DATA_CONFIG && <UnionConfig />}
       {curDrawerTab.value === ETLDrawerTab.DATA_PREVIEW && <div></div>}
       {curDrawerTab.value === ETLDrawerTab.NODE_REMARK && <div></div>}
     </div>

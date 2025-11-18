@@ -28,7 +28,7 @@ export const BaseNode = ({ node }: { node: FlowNodeEntity }) => {
               flowNodeType: node.flowNodeType
             });
 
-            if (node.flowNodeType === ETLNodeType.OUTPUT_NODE) {
+            if (node.flowNodeType === ETLNodeType.OUTPUT_NODE || node.flowNodeType === ETLNodeType.UNION_NODE) {
               etlEditorSignal.setCurDrawerTab(ETLDrawerTab.DATA_CONFIG);
             } else {
               etlEditorSignal.resetCurDrawerTab();
