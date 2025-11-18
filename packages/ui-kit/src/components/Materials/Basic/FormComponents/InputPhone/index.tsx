@@ -47,7 +47,7 @@ const XInputPhone = memo((props: XInputPhoneConfig & { runtime?: boolean; detail
         tooltip={tooltip}
         wrapperCol={{ style: { flex: 1 } }}
         rules={[
-          { required: verify?.required },
+          { required: verify?.required, message:`${label.text}是必填项` },
           {
             validator: (value, callback) => {
               if (phoneType === PHONE_TYPE.MOBILE) {

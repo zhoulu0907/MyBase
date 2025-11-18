@@ -221,7 +221,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
         layout={layout}
         tooltip={tooltip}
         wrapperCol={{ style: { flex: 1 } }}
-        rules={[{ required: verify?.required }]}
+        rules={[{ required: verify?.required, message:`${label.text}是必填项` }]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           margin: 0,
