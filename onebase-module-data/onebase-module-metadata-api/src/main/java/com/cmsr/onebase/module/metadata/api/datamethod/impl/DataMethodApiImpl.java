@@ -1,23 +1,22 @@
 package com.cmsr.onebase.module.metadata.api.datamethod.impl;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.cmsr.onebase.module.metadata.api.datamethod.DataMethodApi;
+import com.cmsr.onebase.module.metadata.api.datamethod.dto.*;
+import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityFieldRepository;
+import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityRelationshipRepository;
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.relationship.MetadataEntityRelationshipDO;
 import com.cmsr.onebase.module.metadata.core.domain.query.*;
 import com.cmsr.onebase.module.metadata.core.enums.ClientTypeEnum;
 import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
+import com.cmsr.onebase.module.metadata.core.enums.OpEnum;
+import com.cmsr.onebase.module.metadata.core.service.entity.impl.MetadataEntityFieldCoreServiceImpl;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
-import com.cmsr.onebase.module.metadata.api.datamethod.dto.DeleteDataReqDTO;
-import com.cmsr.onebase.module.metadata.api.datamethod.dto.EntityFieldDataReqDTO;
-import com.cmsr.onebase.module.metadata.api.datamethod.dto.EntityFieldDataRespDTO;
-import com.cmsr.onebase.module.metadata.api.datamethod.dto.InsertDataReqDTO;
-import com.cmsr.onebase.module.metadata.api.datamethod.dto.UpdateDataReqDTO;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.MetadataDataMethodCoreService;
 import com.cmsr.onebase.module.metadata.core.service.query.MetadataQueryService;
 import com.cmsr.onebase.module.metadata.api.datamethod.assembler.DataMethodAssembler;
@@ -25,6 +24,7 @@ import com.cmsr.onebase.module.metadata.api.datamethod.assembler.DataMethodAssem
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.ObjectUtils;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.*;
@@ -55,6 +55,13 @@ public class DataMethodApiImpl implements DataMethodApi {
 
     @Resource
     private DataMethodAssembler dataMethodAssembler;
+
+    @Resource
+    private MetadataEntityFieldCoreServiceImpl metadataEntityFieldCoreServiceImpl;
+
+    @Resource
+    private MetadataEntityRelationshipRepository entityRelationshipRepository;
+
 
     /**
      * 查询
@@ -170,6 +177,59 @@ public class DataMethodApiImpl implements DataMethodApi {
         if (reqDTO.getData() == null || reqDTO.getData().isEmpty()) {
             throw new IllegalArgumentException("更新内容不能为空");
         }
+
+        // 处理 实体和条件字段 参数不匹配
+        if("subEntity".equals(reqDTO.getUpdateType())){
+            Long subEntityId = reqDTO.getEntityId(); // 要修改的实体的实体id 此时为子表实体
+            Long parentEntityId = reqDTO.getParentEntityId();// 子表对应的主表实体id
+            List<List<ConditionDTO>> conditionDTOs = reqDTO.getConditionDTO();
+            for(List<ConditionDTO> list: conditionDTOs){
+                for(ConditionDTO conditionDTO : list){
+                    Long fieldId = conditionDTO.getFieldId();
+                    //判断字段属于主表还是属于子表
+                    boolean isMainEntityField = false;
+                    MetadataEntityFieldDO metadataEntityFieldDO = metadataEntityFieldCoreServiceImpl.getEntityField(fieldId);
+                    Long entityId = metadataEntityFieldDO.getEntityId();
+                    if(Objects.equals(entityId,parentEntityId)){
+                        isMainEntityField = true;
+                    }
+                    if(isMainEntityField){
+                        // 根据页面配置条件查询主表满足条件的数据行id
+                        QueryRequest queryRequest = new QueryRequest();
+                        queryRequest.setEntityId(reqDTO.getParentEntityId());
+
+                        List<List<ConditionDTO>> newConditonsGroup = new ArrayList<>();
+                        List<ConditionDTO> newConditons = new ArrayList();
+                        newConditons.add(conditionDTO);
+                        newConditonsGroup.add(newConditons);
+
+                        queryRequest.setConditionGroups(dataMethodAssembler.convertConditionGroups(newConditonsGroup));
+                        queryRequest.setLimit(1000);
+                        QueryResult result = metadataQueryService.queryByConditions(queryRequest);
+
+                        List<String> ids = new ArrayList<String>();
+                        List<RowData> rowDatas = result.getRowDataList();
+                        if(ObjectUtils.isEmpty(rowDatas)){
+                            ids.add(""); // 父表查询没有结果 sql拼接为 parent_id = NULL
+                        }else{
+                            for(RowData row : rowDatas){
+                                ids.add(row.getRowId());// 父表查询有结果 sql拼接为 parent_id in (1,2,3)
+                            }
+                        }
+
+                        // 重新组装条件
+                        List<MetadataEntityRelationshipDO> relationshipDOS = entityRelationshipRepository.getRelationshipsBySlaveEntityId(subEntityId);
+                        List<MetadataEntityRelationshipDO> relationships = relationshipDOS.stream().filter(relationship -> parentEntityId.equals(relationship.getSourceEntityId())).toList();
+                        MetadataEntityRelationshipDO relationship = relationships.get(0); // 过滤之后只有一条关系
+                        conditionDTO.setFieldId(Long.valueOf(relationship.getTargetFieldId()));// 子表关联字段id
+                        conditionDTO.setOperator(OpEnum.EXISTS_IN.name());// in
+                        conditionDTO.setFieldValue(ids);// 主表id集合
+                    }
+                }
+            }
+        }
+
+
         QueryRequest queryRequest = new QueryRequest();
         queryRequest.setEntityId(reqDTO.getEntityId());
         queryRequest.setConditionGroups(dataMethodAssembler.convertConditionGroups(reqDTO.getConditionDTO()));
