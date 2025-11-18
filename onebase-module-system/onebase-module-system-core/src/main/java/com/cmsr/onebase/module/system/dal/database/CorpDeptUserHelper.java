@@ -25,7 +25,7 @@ public class CorpDeptUserHelper {
         DefaultConfigStore configStore = new DefaultConfigStore();
         String fromSceneType = WebFrameworkUtils.getXFromSceneType();
         if (XFromSceneTypeEnum.TENANT.getCode().equals(fromSceneType)) {
-            configStore.and(Compare.EQUAL, DeptDO.DEPT_TYPE, DeptTypeEnum.TENANT.getCode());
+            // configStore.and(Compare.EQUAL, DeptDO.DEPT_TYPE, DeptTypeEnum.TENANT.getCode());
         } else if (XFromSceneTypeEnum.CORP.getCode().equals(fromSceneType)) {
             Long corpId = loginUser.getCorpId();
             if (null != corpId) {
@@ -54,7 +54,7 @@ public class CorpDeptUserHelper {
         if (XFromSceneTypeEnum.PLATFORM.getCode().equals(fromSceneType)) {
             configStore.and(Compare.EQUAL, AdminUserDO.USER_TYPE, UserTypeEnum.PLATFORM.getValue());
         } else if (XFromSceneTypeEnum.TENANT.getCode().equals(fromSceneType)) {
-            configStore.and(Compare.EQUAL, AdminUserDO.USER_TYPE, UserTypeEnum.TENANT.getValue());
+            // configStore.and(Compare.EQUAL, AdminUserDO.USER_TYPE, UserTypeEnum.TENANT.getValue());
         } else if (XFromSceneTypeEnum.CORP.getCode().equals(fromSceneType)) {
             Long corpId = loginUser.getCorpId();
             if (null != corpId) {

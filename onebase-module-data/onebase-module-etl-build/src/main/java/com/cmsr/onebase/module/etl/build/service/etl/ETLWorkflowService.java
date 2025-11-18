@@ -30,5 +30,5 @@ public interface ETLWorkflowService {
     // ETL实例相关
     void startWorkflowManually(Long workflowId);
 
-    PageResult<ExecutionLogVO> getWorkflowExecutionLogs(Long workflowId);
+    PageResult<ExecutionLogVO> getWorkflowExecutionLogs(Long applicationId, Long workflowId, Integer pageNo, Integer pageSize);
 }

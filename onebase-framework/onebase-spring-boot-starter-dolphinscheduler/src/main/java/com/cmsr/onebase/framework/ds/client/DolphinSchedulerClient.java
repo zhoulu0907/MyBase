@@ -231,8 +231,12 @@ public class DolphinSchedulerClient {
             execType = "COMPLEMENT_DATA";
         }
 
+        String scheduleTime = "";
+        if (complementTime != null) {
+            scheduleTime = JsonUtils.toJsonString(complementTime);
+        }
         Result<List<Long>> executeResult = execute(dsClientStub.manuallyStartWorkflow(projectCode, workflowCode, environmentCode, tenantCode,
-                complementTime,
+                scheduleTime,
                 "CONTINUE", "NONE",
                 "RUN_MODE_SERIAL", "MEDIUM", workerGroup,
                 execType, "DESC_ORDER"

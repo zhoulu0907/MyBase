@@ -83,12 +83,12 @@ public class ETLWorkflowController {
         return CommonResult.success(Boolean.TRUE);
     }
 
-    @GetMapping("/logs")
-    public CommonResult<PageResult<ExecutionLogVO>> queryWorkflowExecutionLogs(@RequestParam("workflowId") Long workflowId,
+    @GetMapping("/{applicationId}/logs")
+    public CommonResult<PageResult<ExecutionLogVO>> queryWorkflowExecutionLogs(@PathVariable("applicationId") Long applicationId,
+                                                                               @RequestParam("workflowId") Long workflowId,
                                                                                @RequestParam("pageNo") Integer pageNo,
                                                                                @RequestParam("pageSize") Integer pageSize) {
-        // TODO:
-        PageResult<ExecutionLogVO> workflowExecutionLogs = workflowService.getWorkflowExecutionLogs(workflowId);
+        PageResult<ExecutionLogVO> workflowExecutionLogs = workflowService.getWorkflowExecutionLogs(applicationId, workflowId, pageNo, pageSize);
         return CommonResult.success(workflowExecutionLogs);
     }
 }
