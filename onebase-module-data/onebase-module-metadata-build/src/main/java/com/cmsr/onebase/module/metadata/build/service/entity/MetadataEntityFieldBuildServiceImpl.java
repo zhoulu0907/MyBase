@@ -1318,6 +1318,16 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         try {
             log.info("检查表是否存在 - 表名: {}", tableName);
 
+            // 关键修复：清除Anyline的元数据缓存
+            // Anyline会缓存表结构信息(默认缓存24小时)，导致刚创建的表查询不到
+            // 使用CacheProxy.clear()清除缓存，强制重新从数据库查询最新的表结构
+            try {
+                org.anyline.proxy.CacheProxy.clear();
+                log.debug("已清除Anyline元数据缓存");
+            } catch (Exception e) {
+                log.warn("清除Anyline元数据缓存失败: {}", e.getMessage());
+            }
+
             // 使用Anyline元数据API，跨数据库兼容
             // Anyline会自动处理不同数据库的元数据查询和标识符大小写问题
             Table<?> table = service.metadata().table(tableName);
@@ -1453,7 +1463,8 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
     /**
      * 修改表中的列
      * 
-     * 注意:调用此方法时,field必定已经有ID,说明是已存在的字段,因此无需再检查列是否存在
+     * 说明：即使field有ID，也需要检查物理表中列是否真实存在
+     * 因为可能存在元数据与物理表不一致的情况（如之前物理表操作失败、表被手动重建等）
      */
     private void alterColumnInTable(MetadataDatasourceDO datasource, String tableName, MetadataEntityFieldDO field) {
         try {
@@ -1467,15 +1478,24 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                     throw new RuntimeException("表 " + tableName + " 不存在，请先创建表");
                 }
 
-                // 简化逻辑:如果field有ID,说明是已存在的字段,直接执行ALTER操作
-                // 不再需要checkColumnExists检查,因为前端传递的参数中有字段ID就表示该字段已存在
-                log.info("准备修改表 {} 的列: {}, 字段ID: {}", tableName, field.getFieldName(), field.getId());
+                // 关键修复：必须检查列是否存在，避免元数据与物理表不一致导致的问题
+                boolean columnExists = checkColumnExists(service, tableName, field.getFieldName());
                 
-                // 生成并执行修改列 DDL（传入数据库类型以生成兼容的SQL）
-                String alterColumnDDL = generateAlterColumnDDL(datasource.getDatasourceType(), tableName, field);
-                service.execute(alterColumnDDL);
+                if (!columnExists) {
+                    // 列不存在，应该使用ADD操作而非ALTER
+                    log.warn("准备修改表 {} 的列 {} 时发现列不存在（字段ID: {}），将改为新增列操作", 
+                            tableName, field.getFieldName(), field.getId());
+                    addColumnToTable(datasource, tableName, field);
+                } else {
+                    // 列存在，正常执行ALTER操作
+                    log.info("准备修改表 {} 的列: {}, 字段ID: {}", tableName, field.getFieldName(), field.getId());
+                    
+                    // 生成并执行修改列 DDL（传入数据库类型以生成兼容的SQL）
+                    String alterColumnDDL = generateAlterColumnDDL(datasource.getDatasourceType(), tableName, field);
+                    service.execute(alterColumnDDL);
 
-                log.info("成功修改表 {} 的列: {}", tableName, field.getFieldName());
+                    log.info("成功修改表 {} 的列: {}", tableName, field.getFieldName());
+                }
                 return null;
             });
         } catch (Exception e) {

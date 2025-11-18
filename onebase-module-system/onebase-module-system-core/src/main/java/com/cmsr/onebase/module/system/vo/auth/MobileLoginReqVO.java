@@ -1,0 +1,21 @@
+package com.cmsr.onebase.module.system.vo.auth;
+import com.cmsr.onebase.module.system.vo.CaptchaVerificationReqVO;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Pattern;
+import lombok.Data;
+import org.hibernate.validator.constraints.Length;
+@Schema(description = "管理后台 - 手机密码登录 Request VO")
+@Data
+public class MobileLoginReqVO extends CaptchaVerificationReqVO {
+
+    @Schema(description = "手机号", requiredMode = Schema.RequiredMode.REQUIRED, example = "")
+    @NotEmpty(message = "登录手机号不能为空")
+    @Pattern(regexp = "^1[3-9]\\d{9}$", message = "手机号格式不正确")
+    private String mobile;
+
+    @Schema(description = "密码", requiredMode = Schema.RequiredMode.REQUIRED, example = "buzhidao")
+    @NotEmpty(message = "密码不能为空")
+    @Length(min = 4, max = 16, message = "密码长度为 4-16 位")
+    private String password;
+}

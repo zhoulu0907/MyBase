@@ -6,14 +6,18 @@ import com.cmsr.onebase.module.etl.common.graph.conf.Field;
 import com.cmsr.onebase.module.etl.executor.action.CreateTableAction;
 import com.cmsr.onebase.module.etl.executor.action.ExecuteSqlAction;
 import com.cmsr.onebase.module.etl.executor.action.SqlQueryAction;
+import com.cmsr.onebase.module.etl.executor.provider.QueryProvider;
 import com.cmsr.onebase.module.etl.executor.provider.WorkflowProvider;
-import com.cmsr.onebase.module.etl.executor.util.JacksonUtil;
+import com.cmsr.onebase.module.etl.executor.provider.dao.EtlExecutionLog;
+import com.cmsr.onebase.module.etl.executor.provider.dao.EtlWorkflow;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.table.api.*;
 import org.apache.flink.table.catalog.Column;
 import org.apache.flink.types.Row;
 import org.apache.flink.util.CloseableIterator;
 
+import javax.sql.DataSource;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,32 +30,72 @@ public class WorkFlowExecutor {
 
     private InputArgs inputArgs;
 
+    private BeanManager beanManager;
+
+    private EtlWorkflow etlWorkflow;
+
     private WorkflowGraph workflowGraph;
 
     private TableEnvironment tableEnv;
 
+    private LocalDateTime execStartTime;
+
     public WorkFlowExecutor(InputArgs inputArgs) throws Exception {
+        this(inputArgs, null);
+    }
+
+    public WorkFlowExecutor(InputArgs inputArgs, DataSource dataSource) throws Exception {
+        this.execStartTime = LocalDateTime.now();
         this.inputArgs = inputArgs;
-        try (BeanManager beanManager = new BeanManager(inputArgs)) {
-            WorkflowProvider workflowProvider = beanManager.getWorkflowDao();
-            if (inputArgs.getWorkflowId() != null) {
-                workflowGraph = workflowProvider.getWorkflowGraph(inputArgs.getWorkflowId());
-            } else {
-                WorkflowGraph graph = JacksonUtil.readValue(inputArgs.getPreviewWorkflow(), WorkflowGraph.class);
-                WorkflowGraph subgraph = graph.subgraph(inputArgs.getPreviewNodeId());
-                workflowGraph = workflowProvider.getWorkflowGraph(subgraph);
-            }
-        }
-        EnvironmentSettings settings =
-                EnvironmentSettings.newInstance().inBatchMode().build();
+        initializeWorkflowGraph(dataSource);
+        EnvironmentSettings settings = EnvironmentSettings.newInstance().inBatchMode().build();
         this.tableEnv = TableEnvironment.create(settings);
     }
 
-    public void execute() throws Exception {
-        for (Node node : workflowGraph.getNodes()) {
-            doAction(node);
+    private void initializeWorkflowGraph(DataSource dataSource) throws Exception {
+        beanManager = dataSource == null ? new BeanManager(inputArgs) : new BeanManager(inputArgs, dataSource);
+        WorkflowProvider workflowProvider = beanManager.getWorkflowDao();
+        QueryProvider queryProvider = beanManager.getQueryProvider();
+        if (inputArgs.getWorkflowId() != null) {
+            etlWorkflow = queryProvider.findWorkflowConfig(inputArgs.getWorkflowId());
+            checkWorkflow(etlWorkflow);
+            workflowGraph = workflowProvider.createWorkflowGraph(etlWorkflow.getConfig());
+        } else {
+            workflowGraph = workflowProvider.createSubWorkflowGraph(inputArgs.getPreviewWorkflow(), inputArgs.getPreviewNodeId());
         }
-        log.info("execute workflow end");
+    }
+
+    private void checkWorkflow(EtlWorkflow etlWorkflow) throws Exception {
+        if (etlWorkflow.getWorkflowId() == null) {
+            throw new Exception("未找到工作流");
+        }
+        if (etlWorkflow.getConfig() == null) {
+            throw new Exception("未找到工作流配置");
+        }
+    }
+
+    public void execute() throws Exception {
+        EtlExecutionLog executionLog = new EtlExecutionLog();
+        executionLog.setApplicationId(etlWorkflow.getApplicationId());
+        executionLog.setWorkflowId(inputArgs.getWorkflowId());
+        executionLog.setStartTime(execStartTime);
+        try {
+            for (Node node : workflowGraph.getNodes()) {
+                doAction(node);
+            }
+            executionLog.setTaskStatus("success");
+            log.info("execute workflow end");
+        } catch (Exception e) {
+            executionLog.setTaskStatus("failed");
+            executionLog.setErrorMessage(e.getMessage());
+            log.error("execute workflow error", e);
+            throw e;
+        } finally {
+            executionLog.setEndTime(LocalDateTime.now());
+            executionLog.calcDurationTime();
+            beanManager.getQueryProvider().insertEtlExecutionLog(executionLog);
+            beanManager.close();
+        }
     }
 
     private void doAction(Node node) throws Exception {
@@ -72,15 +116,19 @@ public class WorkFlowExecutor {
 
 
     public DataPreview preview() throws Exception {
-        for (Node node : workflowGraph.getNodes()) {
-            doAction(node);
-            if (node.getId().equals(inputArgs.getPreviewNodeId())) {
-                Table table = tableEnv.from(node.getId());
-                TableResult tableResult = table.execute();
-                return tableResultToDataPreview(tableResult);
+        try {
+            for (Node node : workflowGraph.getNodes()) {
+                doAction(node);
+                if (node.getId().equals(inputArgs.getPreviewNodeId())) {
+                    Table table = tableEnv.from(node.getId());
+                    TableResult tableResult = table.execute();
+                    return tableResultToDataPreview(tableResult);
+                }
             }
+            throw new Exception("未找到预览节点");
+        } finally {
+            beanManager.close();
         }
-        throw new RuntimeException("未找到预览节点");
     }
 
 

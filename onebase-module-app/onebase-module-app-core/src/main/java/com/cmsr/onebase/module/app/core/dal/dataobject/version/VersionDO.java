@@ -14,6 +14,8 @@ import lombok.Data;
 @Table(name = "app_version")
 public class VersionDO extends TenantBaseDO {
 
+    public static final String APPLICATION_ID = "application_id";
+
     @Column(name = "application_id", nullable = false, columnDefinition = "BIGINT NOT NULL", comment = "应用ID")
     private Long applicationId;
 
