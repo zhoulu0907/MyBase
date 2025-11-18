@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.bpm.runtime.service.exec.strategy.impl;
 
-import cn.hutool.core.collection.CollectionUtil;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.core.dto.node.ApproverNodeExtDTO;
@@ -14,6 +13,7 @@ import com.cmsr.onebase.module.engine.orm.anyline.entity.FlowUser;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.ConditionDTO;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.UpdateDataReqDTO;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.dromara.warm.flow.core.FlowEngine;
 import org.dromara.warm.flow.core.dto.FlowParams;
@@ -146,7 +146,7 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
             // 在会签和票签场景下，会有新增已办记录，其它可以在全局的Listener里处理
             List<HisTask> hisTaskList = hisTaskService.list(hisTaskQuery);
 
-            if (CollectionUtil.isNotEmpty(hisTaskList)) {
+            if (CollectionUtils.isNotEmpty(hisTaskList)) {
                 for (HisTask hisTask : hisTaskList) {
                     if (StringUtils.isEmpty(hisTask.getExt())) {
                         continue;
@@ -180,7 +180,7 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
             List<User> agentUsers = userService.list(userQuery);
 
             // todo：是否要创建已办记录
-            if (CollectionUtil.isNotEmpty(agentUsers)) {
+            if (CollectionUtils.isNotEmpty(agentUsers)) {
                 log.info("处理代理的场景，被代理人关联的代理人用户信息：{}", agentUsers);
             }
 
