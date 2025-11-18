@@ -1,5 +1,7 @@
-import { Input } from '@arco-design/mobile-react';
-import { memo, useEffect, useState } from 'react';
+import { Input, Form } from '@arco-design/mobile-react';
+import { memo } from 'react';
+import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
+import { nanoid } from 'nanoid';
 import '../index.css';
 import type { XInputNumberConfig } from './schema';
 
@@ -23,16 +25,10 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
 
   const { showUnit, unitValue, showPrecision, precision, showPercent, useThousandsSeparator } = numberFormat;
 
-  // const { form } = Form.useFormContext();
-  const [fieldId, setFieldId] = useState('');
-
-  // const fieldValue = Form.useWatch(fieldId, form);
-
-  useEffect(() => {
-    if (dataField.length > 0) {
-      setFieldId(dataField[dataField.length - 1]);
-    }
-  }, [dataField]);
+  // 生成唯一的字段ID
+  const fieldId = dataField && dataField.length > 0 
+    ? dataField[dataField.length - 1] 
+    : `${FORM_COMPONENT_TYPES.INPUT_NUMBER}_${nanoid()}`;
 
   const detailValue = (value: number) => {
     let result = '';
@@ -55,69 +51,47 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
     return result.toString();
   };
 
-  return (
-    <div className="inputTextWrapper">
+  // 根据是否为只读模式确定内容
+  const renderContent = () => {
+    // 非只读模式，渲染Input组件
+    return (
       <Input
-        label={label.display && label.text}
         type="number"
-        defaultValue={defaultValue}
         placeholder={placeholder}
         maxLength={verify?.max || 1000000000}
         suffix={showUnit ? unitValue : ''}
         inputStyle={{ textAlign: align }}
         style={{
           width: '100%',
-          textAlignLast: align,
-          pointerEvents: runtime ? 'unset' : 'none'
+          textAlignLast: align
         }}
       />
+    );
+  };
 
-      {/* <Form.Item
-        label={label.display && label.text}
-        field={
-          dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.INPUT_NUMBER}_${nanoid()}`
-        }
-        layout={layout}
-        tooltip={tooltip}
-        labelCol={{
-          style: { width: labelColSpan, flex: 'unset' }
-        }}
-        wrapperCol={{ style: { flex: 1 } }}
-        rules={[
-          {
-            required: verify?.required
-          }
-        ]}
-        hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
-        style={{
-          margin: 0,
-          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
-        }}
-      >
-        {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-          <div>{detailValue(fieldValue) || '--'}</div>
-        ) : (
-          <InputNumber
-            defaultValue={defaultValue}
-            placeholder={placeholder}
-            step={step}
-            min={verify?.min}
-            max={verify?.max || 1000000000}
-            precision={showPrecision ? precision : 0}
-            formatter={(value) => {
-              return useThousandsSeparator ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',') : value.toString();
-            }}
-            parser={(value) => value.replace(/,/g, '')}
-            style={{
-              width: '100%',
-              textAlignLast: align,
-              pointerEvents: runtime ? 'unset' : 'none'
-            }}
-            suffix={showUnit ? unitValue : ''}
-          />
-        )}
-      </Form.Item> */}
-    </div>
+  return (
+    <Form.Item
+      field={fieldId}
+      label={label.display ? label.text : undefined}
+      initialValue={defaultValue || ''}
+      className="inputTextWrapper"
+      rules={verify ? [{ required: verify.required, message: verify.message }] : undefined}
+      style={{
+        pointerEvents: (!runtime || detailMode) ? 'none' : 'unset'
+      }}
+    >
+      {!runtime || detailMode ? (
+        // 只读模式，渲染格式化的文本内容
+        <div style={{ 
+          textAlign: align, 
+          padding: '8px'
+        }}>
+          {defaultValue !== undefined && defaultValue !== null ? detailValue(defaultValue) : '--'}
+        </div>
+      ) : (
+        renderContent()
+      )}
+    </Form.Item>
   );
 });
 

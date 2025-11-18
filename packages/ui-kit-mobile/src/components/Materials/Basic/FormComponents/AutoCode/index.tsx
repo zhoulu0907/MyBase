@@ -1,7 +1,6 @@
 import { Input } from '@arco-design/mobile-react';
 import { memo, useEffect, useState } from 'react';
 // import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-import '../index.css';
 import './index.css';
 import { type XautoCodeConfig } from './schema';
 
@@ -35,7 +34,7 @@ const XautoCode = memo((props: XautoCodeConfig & { runtime?: boolean; detailMode
   }, [dataField]);
 
   return (
-    <div className="inputTextWrapper">
+    <div className="inputAutoWrapper">
       <Input
         readOnly={true}
         label={label.display && label.text}
