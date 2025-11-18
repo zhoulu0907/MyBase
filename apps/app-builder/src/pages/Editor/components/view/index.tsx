@@ -82,6 +82,7 @@ const View: React.FC<ViewProps> = ({ pageSetId }) => {
     const newId = await generateId();
     const newView = {
       ...view,
+      created: true,
       id: newId,
       isDefaultEditViewMode: 0,
       isDefaultDetailViewMode: 0,
