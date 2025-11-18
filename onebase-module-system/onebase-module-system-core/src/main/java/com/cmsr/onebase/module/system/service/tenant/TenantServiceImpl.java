@@ -19,7 +19,6 @@ import com.cmsr.onebase.module.system.convert.tenant.TenantConvert;
 import com.cmsr.onebase.module.system.dal.database.TenantDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.corp.CorpDO;
 import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
-import com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.UserRoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
@@ -648,13 +647,13 @@ public class TenantServiceImpl implements TenantService {
         TenantDO tenant = getTenant(TenantContextHolder.getRequiredTenantId());
         Set<Long> menuIds;
         if (isPlatformTenant(tenant)) { // 系统租户，菜单是全量的
-            menuIds = CollectionUtils.convertSet(menuService.getMenuList(), MenuDO::getId);
+            menuIds = permissionService.getAllActiveMenuIds();
         } else {
             TenantPackageDO tenantPackage = tenantPackageService.getTenantPackage(tenant.getPackageId());
             Set<String> tenantAllPermissions = null;
             if (PackageTypeEnum.ALL.getCode().equals(tenantPackage.getCode())) {
                 // 若是 PackageTypeEnum.ALL, tenantAllPermissions = tenant、app开头的权限
-                menuIds = menuService.getMenuList().stream().map(MenuDO::getId).collect(Collectors.toSet());
+                menuIds = permissionService.getAllActiveMenuIds();
             } else {
                 // 不是All，tenantAllPermissions = package下写入的所有权限点
                 menuIds = tenantPackage.getMenuIds();
