@@ -22,8 +22,9 @@ public class WebFrameworkUtils {
     private static final String REQUEST_ATTRIBUTE_LOGIN_USER_ID   = "login_user_id";
     private static final String REQUEST_ATTRIBUTE_LOGIN_USER_TYPE = "login_user_type";
 
+    @Deprecated
     public static final String HEADER_TENANT_ID       = "tenant-id";
-    public static final String HEADER_VISIT_TENANT_ID = "visit-tenant-id";
+    public static final String HEADER_VISIT_TENANT_ID = "X-Visit-Tenant-Id";
 
 
     public static final String HEADER_X_TENANT_ID = "X-Tenant-Id";
@@ -52,7 +53,12 @@ public class WebFrameworkUtils {
      * @return 租户编号
      */
     public static Long getTenantId(HttpServletRequest request) {
-        String tenantId = request.getHeader(HEADER_TENANT_ID);
+        // 启用 X-Tenant-Id 读取租户ID
+        String tenantId = request.getHeader(HEADER_X_TENANT_ID);
+        // 读取 HEADER_TENANT_ID（老租户ID字段） 后续删除
+        if (StringUtils.isBlank(tenantId)) {
+            tenantId = request.getHeader(HEADER_TENANT_ID);
+        }
         return NumberUtil.isNumber(tenantId) ? Long.valueOf(tenantId) : null;
     }
 
@@ -196,7 +202,7 @@ public class WebFrameworkUtils {
             String uri = request.getRequestURI();
             // 检查 Admin API
             if (StrUtil.startWith(uri, properties.getPlatformApi().getPrefix())) {
-                fromType =  XFromSceneTypeEnum.PLATFORM.getCode();
+                fromType = XFromSceneTypeEnum.PLATFORM.getCode();
             }
         }
         return fromType == null ? XFromSceneTypeEnum.TENANT.getCode() : fromType;

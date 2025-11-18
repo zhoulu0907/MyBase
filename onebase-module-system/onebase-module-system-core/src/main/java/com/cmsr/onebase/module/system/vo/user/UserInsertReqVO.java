@@ -82,6 +82,10 @@ public class UserInsertReqVO {
     @Schema(description = "密码", requiredMode = Schema.RequiredMode.REQUIRED, example = "123456")
     private String password;
 
+    @Schema(description = "来自平台克隆的用户id", example = "")
+    private Long platformUserId;
+
+
     @AssertTrue(message = "密码不能为空")
     @JsonIgnore
     public boolean isPasswordValid() {

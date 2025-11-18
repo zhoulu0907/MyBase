@@ -16,4 +16,7 @@ public class TenantAdminUserResVO {
 
     @Schema(description = "管理员id", requiredMode = Schema.RequiredMode.REQUIRED, example = "adminUserId")
     private Long adminUserId;
+
+    @Schema(description = "来自平台克隆的用户id", requiredMode = Schema.RequiredMode.REQUIRED, example = "platformUserId")
+    private Long platformUserId;
 }

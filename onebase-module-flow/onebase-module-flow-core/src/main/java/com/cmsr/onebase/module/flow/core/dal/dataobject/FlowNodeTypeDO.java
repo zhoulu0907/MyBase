@@ -26,6 +26,12 @@ public class FlowNodeTypeDO extends BaseDO {
     @Column(name = "type_code")
     private String typeCode;
 
+    @Column(name = "simple_remark")
+    private String simpleRemark;
+
+    @Column(name = "detail_description")
+    private String detailDescription;
+
     @Column(name = "active_status")
     private Integer activeStatus;
 
