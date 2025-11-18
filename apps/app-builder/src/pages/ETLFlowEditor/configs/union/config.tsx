@@ -1,72 +1,159 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
+import styles from './index.module.less';
 
 /**
  * Union 节点的配置主界面
  * 初始化页面，渲染 UnionNodeConfig 组件
  */
 const UnionConfig: React.FC = () => {
-  const [state, setState] = useState([
-    { id: 1, name: '字段1', hasCol: true },
-    { id: 2, name: '字段2', hasCol: false },
-    { id: 3, name: '字段3', hasCol: true }
+  const [data, setData] = useState([
+    {
+      tableId: '签约表-北京',
+      columns: [
+        { id: 1, name: '签约日期' },
+        { id: 2, name: '合同总价' },
+        { id: 3, name: '销售单价' },
+        { id: 4, name: '' },
+        { id: 5, name: '' },
+        { id: 6, name: '' },
+        { id: 7, name: '' },
+        { id: 8, name: '' },
+        { id: 9, name: '' }
+      ]
+    },
+    {
+      tableId: '签约表-上海',
+      columns: [
+        { id: 1, name: '' },
+        { id: 2, name: '' },
+        { id: 3, name: '' },
+        { id: 4, name: '签约日期' },
+        { id: 5, name: '合同总价' },
+        { id: 6, name: '销售单价' },
+        { id: 7, name: '' },
+        { id: 8, name: '' },
+        { id: 9, name: '' }
+      ]
+    },
+    {
+      tableId: '签约表-广州',
+      columns: [
+        { id: 1, name: '' },
+        { id: 2, name: '' },
+        { id: 3, name: '' },
+        { id: 4, name: '' },
+        { id: 5, name: '' },
+        { id: 6, name: '' },
+        { id: 7, name: '签约日期' },
+        { id: 8, name: '合同总价(人民币)' },
+        { id: 9, name: '销售单价' }
+      ]
+    }
   ]);
 
+  useEffect(() => {
+    console.log(data);
+  }, [data]);
+
+  // 计算所有 columns 字段的去重并集
+  const [colTitles, setColTitles] = useState(
+    data
+      .flatMap((item) => item.columns)
+      .filter((col) => col.name && col.name.trim() !== '')
+      .map((col) => ({
+        id: col.id,
+        name: col.name
+      }))
+  );
+
   return (
-    <div>
-      {state.map((item) => (
-        <div style={{ width: '120px', height: '120px', backgroundColor: 'blue', margin: '10px' }} key={item.id}>
-          <ReactSortable
-            swap // enables swap
-            list={state}
-            group="shared"
-            setList={(newState) => {
-              //   console.log('setList: ', newState);
-              //   setState(newState);
-            }}
-            onAdd={(e) => {
-              console.log('onAdd: ', e.item.getAttribute('data-id'), 'curId: ', item.id);
-              const newState = [...state];
+    <div className={styles.dataConfig}>
+      <div className={styles.rowHeader}>
+        <div className={styles.rowTitle}>合并结果</div>
+        {colTitles.map((col: any, index) => (
+          <div key={col.id} className={styles.colTitle}>
+            {col.name}
+          </div>
+        ))}
+      </div>
 
-              const sourceIdx = newState.findIndex((item) => item.id == Number(e.item.getAttribute('data-id')));
-              const targetIdx = newState.findIndex((itm) => itm.id == item.id);
+      {data.map((row, rowIndex) => {
+        return (
+          <div key={row.tableId} className={styles.row}>
+            <div className={styles.rowTitle}>{row.tableId}</div>
 
-              newState[targetIdx] = {
-                ...newState[targetIdx],
-                hasCol: true,
-                name: newState[Number(sourceIdx)]?.name || ''
-              };
+            {colTitles.map((col: any) => {
+              return (
+                <ReactSortable
+                  key={`${row.tableId}-${col.id}`}
+                  className={styles.colTitle}
+                  swap // enables swap
+                  list={row.columns.filter((c: any) => c.id === col.id)}
+                  group={{
+                    name: row.tableId
+                    // put: row.columns.find((c: any) => c.id === col.id)?.name == ''
+                  }}
+                  setList={(newRow) => {
+                    // 只记录变化，不立即更新状态
+                    // console.log('row: ', rowIndex, 'col: ', col.id, ' setList: ', newRow);
 
-              newState[Number(sourceIdx)] = {
-                ...newState[Number(sourceIdx)],
-                hasCol: false,
-                name: ''
-              };
+                    if (newRow.length > 1) {
+                      if (newRow[0].name != '' && newRow[1].name != '') {
+                        return;
+                      }
 
-              console.log('newState: ', newState);
-              setState(newState);
-            }}
-            onRemove={(e) => {
-              console.log('onRemove: ', e);
-            }}
-          >
-            {/* {state.map((item) => (
-              <div style={{ width: '100px', height: '100px', backgroundColor: 'red', margin: '10px' }} key={item.id}>
-                {item.name}
-              </div>
-            ))} */}
-            {item.hasCol && (
-              <div
-                style={{ width: '100px', height: '100px', backgroundColor: 'red', margin: '10px' }}
-                key={item.id}
-                data-id={item.id}
-              >
-                {item.name}
-              </div>
-            )}
-          </ReactSortable>
-        </div>
-      ))}
+                      let targetId = 0;
+                      let targetName = '';
+                      let sourceId = 0;
+                      for (const item of newRow) {
+                        if (item.name != '') {
+                          sourceId = item.id;
+                          targetName = item.name;
+                        }
+                        if (item.name == '') {
+                          targetId = item.id;
+                        }
+                      }
+
+                      const newData = data.map((item) => {
+                        if (item.tableId == row.tableId) {
+                          return {
+                            ...item,
+                            columns: item.columns.map((c: any) =>
+                              c.id === targetId
+                                ? { ...c, name: targetName }
+                                : c.id === sourceId
+                                  ? { ...c, name: '' }
+                                  : c
+                            )
+                          };
+                        }
+                        return item;
+                      });
+
+                      setData(newData);
+                    }
+                  }}
+                  onEnd={() => {}}
+                  onAdd={(e) => {
+                    console.log('onAdd: ', rowIndex, 'col: ', col.id, e.item.id);
+                  }}
+                  onRemove={(e) => {
+                    console.log('onRemove: ', rowIndex, 'col: ', col.id, e.item.id);
+                  }}
+                >
+                  {row.columns.find((c: any) => c.id === col.id)?.name && (
+                    <div key={`row-${rowIndex}-col-${col.id}`} className={styles.colItem}>
+                      {row.columns.find((c: any) => c.id === col.id)?.name || ''}
+                    </div>
+                  )}
+                </ReactSortable>
+              );
+            })}
+          </div>
+        );
+      })}
     </div>
   );
 };
