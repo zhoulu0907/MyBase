@@ -80,15 +80,20 @@ export interface ListTablesReq {
   writable?: number;
 }
 
+export interface ETLDatasource {
+  id: string;
+  name: string;
+}
+
 export interface ETLTable {
   id: string;
   name: string;
 }
 
 export interface ELTColumn {
-  id: string;
-  name: string;
-  type: string;
+  fieldFqn: string;
+  fieldName: string;
+  fieldType: string;
 }
 
 export interface ETLDatasourceOption {
@@ -108,6 +113,7 @@ export interface PageETLFlowReq {
   flowName?: string;
   scheduleStrategy?: string;
   enableStatus?: number;
+  applicationId: string;
   pageNo: number;
   pageSize: number;
 }
@@ -125,6 +131,11 @@ export interface UpdateETLFlowReq {
   config: any;
 }
 
-export interface DeleteETLFlowReq {
-  id: string;
+export interface UpdateWorkflowScheduleInfoReq {
+  applicationId: string;
+  workflowId: string;
+  flowName: string;
+  scheduleStrategy: string;
+  config: any;
+  enableStatus: number;
 }

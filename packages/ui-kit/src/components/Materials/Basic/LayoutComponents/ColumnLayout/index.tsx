@@ -2,6 +2,8 @@ import CompDeleteIcon from '@/assets/images/app_delete.svg';
 import CompCopyIcon from '@/assets/images/copy_comp_icon.svg';
 import CompShowIcon from '@/assets/images/eye_off_icon.svg';
 import { Divider, Layout } from '@arco-design/web-react';
+import { ENTITY_TYPE, ENTITY_TYPE_VALUE, type AppEntityField } from '@onebase/app';
+import { getDictDataListByType, getDictDetail } from '@onebase/platform-center';
 import { useSignals } from '@preact/signals-react/runtime';
 import { cloneDeep } from 'lodash-es';
 import { useEffect } from 'react';
@@ -9,17 +11,15 @@ import { ReactSortable } from 'react-sortablejs';
 import { getComponentConfig, getComponentWidth } from 'src/components/Materials/schema';
 import EditRender from 'src/components/render/EditRender';
 import { usePageEditorSignal } from 'src/hooks/useSignal';
+import { useAppEntityStore } from 'src/signals/store_entity';
 import { COMPONENT_GROUP_NAME, type GridItem } from 'src/utils/const';
 import { v4 as uuidv4 } from 'uuid';
-import { ENTITY_COMPONENT_TYPES,ALL_COMPONENT_TYPES,FORM_COMPONENT_TYPES } from '../../../componentTypes';
+import { ENTITY_COMPONENT_TYPES, ALL_COMPONENT_TYPES, FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { COMPONENT_MAP } from '../../../componentsMap';
-import { STATUS_OPTIONS, STATUS_VALUES, WIDTH_VALUES,WIDTH_OPTIONS } from '../../../constants';
+import { STATUS_OPTIONS, STATUS_VALUES, WIDTH_VALUES, WIDTH_OPTIONS, COLOR_MODE_TYPES,DEFAULT_OPTIONS_TYPE } from '../../../constants';
 import { getComponentSchema } from '../../../schema';
 import './index.css';
 import { type XColumnLayoutConfig } from './schema';
-import { useAppEntityStore } from 'src/signals/store_entity'
-import { ENTITY_TYPE, ENTITY_TYPE_VALUE, type AppEntityField } from '@onebase/app';
-import { getDictDetail, getDictDataListByType } from '@onebase/platform-center';
 
 const XColumnLayout = (props: XColumnLayoutConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const { colCount, id, runtime = true } = props;
@@ -189,8 +189,82 @@ const XColumnLayout = (props: XColumnLayoutConfig & { runtime?: boolean; detailM
             list={colComponents[index]}
             setList={(newList) => {
               const entityList: GridItem[] = [];
-              newList.forEach(async(item) => {
-               if (item.type == ENTITY_TYPE_VALUE.SUB || item.entityType === ENTITY_TYPE.SUB) {
+              newList.forEach(async (item) => {
+                if (item.type == ENTITY_TYPE_VALUE.MAIN || item.entityType === ENTITY_TYPE.MAIN) {
+                  // 主表业务实体
+                  const fieldList = item.fields.filter(
+                    (field: AppEntityField) =>
+                      field.fieldName !== 'lock_version' &&
+                      field.fieldName !== 'deleted' &&
+                      field.fieldName !== 'parent_id' &&
+                      field.isSystemField !== 1
+                  );
+                  for (let field of fieldList) {
+                    let cpType = COMPONENT_MAP[field.fieldType];
+                    if (!cpType) {
+                      continue;
+                    }
+                    let cpID = `${cpType}-${uuidv4()}`;
+
+                    const schema = getComponentSchema(cpType as any);
+
+                    // 数据长度 dataLength
+                    // 小数位数 decimalPlaces
+                    // 默认值 defaultValue
+                    schema.config.defaultValue = field.defaultValue;
+                    // 字段描述 description
+                    schema.config.tooltip = field.description;
+                    // 是否必填：1-是，0-不是 isRequired
+                    // 是否唯一：1-是，0-不是 isUnique
+                    schema.config.verify = {
+                      ...schema.config.verify,
+                      required: field.isRequired,
+                      noRepeat: field.isUnique
+                    };
+
+                    // 字段选项列表（单/多选字段专用） options COMPONENT_MAP
+                    if (cpType === FORM_COMPONENT_TYPES.SELECT_ONE || cpType === FORM_COMPONENT_TYPES.SELECT_MUTIPLE) {
+                      // 判断是否引用字典数据
+                      if (field.dictTypeId) {
+                        const res = await getDictDetail(field.dictTypeId);
+                        const dictDataList = res?.type ? await getDictDataListByType(res.type) : [];
+                        const dictOptions = dictDataList?.filter((e: any) => e.status === 1); // 只显示启用状态的字典数据
+                        if (dictOptions.length) {
+                          schema.config.defaultOptions = dictOptions;
+                        }
+                      } else if (field.options?.length) {
+                        schema.config.defaultOptions = field.options.map((e: any) => ({
+                          chosen: field.defaultValue && e.optionValue === field.defaultValue,
+                          label: e.optionLabel,
+                          value: e.optionValue
+                        }));
+                      }
+                    }
+                    // 字段约束配置（长度/正则） constraints
+                    schema.config.constraints = field.constraints;
+                    // 自动编号完整配置（含规则项） autoNumberConfig
+                    if (cpType === FORM_COMPONENT_TYPES.AUTO_CODE) {
+                      schema.config.autoCodeConfig = field.autoNumberConfig || schema.config.autoCodeConfig;
+                      schema.config.autoCodeDisabled = field?.autoNumberConfig?.id ? true : false;
+                    }
+                    // 关联的字典类型ID    dictTypeId
+
+                    schema.config.cpName = field.displayName;
+                    schema.config.id = cpID;
+                    schema.config.dataField = [item.entityId, field.fieldId];
+                    schema.config.label.text = field.displayName;
+                    const props = {
+                      id: cpID,
+                      type: cpType,
+                      ...schema
+                    };
+
+                    setPageComponentSchemas(cpID!, props);
+                    setShowDeleteButton(false);
+
+                    entityList.push({ displayName: field.displayName, id: cpID, type: cpType });
+                  }
+                } else if (item.type == ENTITY_TYPE_VALUE.SUB || item.entityType === ENTITY_TYPE.SUB) {
                   // 子表业务实体
                   const cpName = item.entityName || '子表单';
                   const cpType = FORM_COMPONENT_TYPES.SUB_TABLE;
@@ -232,7 +306,8 @@ const XColumnLayout = (props: XColumnLayoutConfig & { runtime?: boolean; detailM
                     // 数据长度 dataLength
                     // 小数位数 decimalPlaces
                     // 默认值 defaultValue
-                    subSchema.config.defaultValue = ele.defaultValue;
+                    const defaultValueConfig = { ...subSchema.config.defaultValue, customValue: ele.defaultValue };
+                    subSchema.config.defaultValueConfig = defaultValueConfig;
                     // 字段描述 description
                     subSchema.config.tooltip = ele.description;
                     subSchema.config.verify = {
@@ -251,14 +326,31 @@ const XColumnLayout = (props: XColumnLayoutConfig & { runtime?: boolean; detailM
                         const dictDataList = res?.type ? await getDictDataListByType(res.type) : [];
                         const dictOptions = dictDataList?.filter((e: any) => e.status === 1); // 只显示启用状态的字典数据
                         if (dictOptions.length) {
-                          schema.config.defaultOptions = dictOptions;
+                          const newDefaultOptionsConfig = {
+                            type: DEFAULT_OPTIONS_TYPE.CUSTOM,
+                            disabled: true,
+                            dictTypeId: ele.dictTypeId,
+                            colorMode: true,
+                            colorModeType: COLOR_MODE_TYPES.POINT,
+                            defaultOptions: dictOptions
+                          };
+                          subSchema.config.defaultOptionsConfig = {
+                            ...subSchema.config.defaultOptionsConfig,
+                            ...newDefaultOptionsConfig
+                          };
                         }
                       } else if (ele.options?.length) {
-                        subSchema.config.defaultOptions = ele.options.map((e:any) => ({
-                          chosen: ele.defaultValue && e.optionValue === ele.defaultValue,
-                          label: e.optionLabel,
-                          value: e.optionValue
-                        }));
+                        const newDefaultOptionsConfig = {
+                          defaultOptions: ele.options.map((e: any) => ({
+                            label: e.optionLabel,
+                            value: e.optionValue
+                          }))
+                        };
+                        subSchema.config.defaultOptionsConfig = {
+                          ...subSchema.config.defaultOptionsConfig,
+                          disabled: true,
+                          ...newDefaultOptionsConfig
+                        };
                       }
                     }
                     // 字段约束配置（长度/正则） constraints
@@ -302,7 +394,9 @@ const XColumnLayout = (props: XColumnLayoutConfig & { runtime?: boolean; detailM
               const itemType = e.item.getAttribute('data-cp-type');
               const itemDisplayName = e.item.getAttribute('data-cp-displayname');
               const entityID = e.item.getAttribute('data-entity-id');
-               // 子表字段不允许
+              const fieldId = e.item.getAttribute('data-field-id');
+
+              // 子表字段不允许
               if (
                 (entityID && entityID !== mainEntity.entityId) ||
                 itemType === ENTITY_COMPONENT_TYPES.MAIN_ENTITY ||
@@ -318,6 +412,7 @@ const XColumnLayout = (props: XColumnLayoutConfig & { runtime?: boolean; detailM
               schema.config = schemaConfig;
               schema.config.cpName = itemDisplayName;
               schema.config.id = cpID;
+              schema.config.dataField = entityID && fieldId ? [entityID, fieldId] : [];
 
               const props = {
                 id: cpID,

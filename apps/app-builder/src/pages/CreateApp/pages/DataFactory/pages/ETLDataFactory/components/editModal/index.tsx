@@ -1,5 +1,5 @@
 import { DatePicker, Form, Grid, Input, Modal, Radio, Select, Switch, TimePicker } from '@arco-design/web-react';
-import { ETL_SCHEDULE_STRATEGY } from '@onebase/app';
+import { ETL_FLOW_STATUS, ETL_SCHEDULE_STRATEGY, type UpdateWorkflowScheduleInfoReq } from '@onebase/app';
 import { isValidCron } from 'cron-validator';
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
@@ -49,21 +49,37 @@ const dayOptions = [
   })
 ];
 
-export interface CreateModalProps {
+export interface EditModalProps {
+  initData: any;
   visible: boolean; // 控制弹窗显示/隐藏
-  onOk?: () => void; // 确认/提交回调
+  onOk?: (req: UpdateWorkflowScheduleInfoReq) => void; // 确认/提交回调
   onCancel?: () => void; // 取消/关闭回调
 }
 
-const CreateModal: React.FC<CreateModalProps> = ({ visible, onOk, onCancel }) => {
+const EditModal: React.FC<EditModalProps> = ({ initData, visible, onOk, onCancel }) => {
   // 控制弹窗显示隐藏
+  useEffect(() => {
+    if (visible) {
+      form.resetFields();
+    }
+  }, [visible]);
 
   // 表单提交事件
   const handleSubmit = () => {
     // 在这里处理表单提交逻辑
     // 校验后提交数据
     // submitData(formData).then(() => closeModal());
-    onOk?.();
+
+    const req: UpdateWorkflowScheduleInfoReq = {
+      applicationId: initData.applicationId,
+      flowName: form.getFieldValue('flowName'),
+      workflowId: initData.workflowId,
+      scheduleStrategy: form.getFieldValue('scheduleStrategy'),
+      config: form.getFieldsValue(),
+      enableStatus: form.getFieldValue('enableStatus') ? ETL_FLOW_STATUS.ENABLED : ETL_FLOW_STATUS.DISABLED
+    };
+
+    onOk?.(req);
   };
 
   const handleCancel = () => {
@@ -77,6 +93,27 @@ const CreateModal: React.FC<CreateModalProps> = ({ visible, onOk, onCancel }) =>
   const enableStatus = Form.useWatch('enableStatus', form);
 
   const [cronValue, setCronValue] = useState<string>('* * * * *');
+
+  useEffect(() => {
+    if (initData) {
+      if (initData.config) {
+        form.setFieldsValue(initData.config);
+      }
+
+      if (initData.flowName) {
+        form.setFieldValue('flowName', initData.flowName);
+      }
+      if (initData.workflowId) {
+        form.setFieldValue('workflowId', initData.workflowId);
+      }
+      if (initData.scheduleStrategy) {
+        form.setFieldValue('scheduleStrategy', initData.scheduleStrategy);
+      }
+      if (initData.enableStatus !== undefined) {
+        form.setFieldValue('enableStatus', initData.enableStatus === ETL_FLOW_STATUS.ENABLED ? true : false);
+      }
+    }
+  }, [initData]);
 
   useEffect(() => {
     if (scheduleStrategy === ETL_SCHEDULE_STRATEGY.FIXED && repeatType === undefined) {
@@ -98,6 +135,14 @@ const CreateModal: React.FC<CreateModalProps> = ({ visible, onOk, onCancel }) =>
     >
       <div className={styles.createETLFlowModal}>
         <Form layout="vertical" form={form}>
+          <Form.Item
+            label="流程名称"
+            hidden={true}
+            field="workflowId"
+            rules={[{ required: true, message: '请输入流程Id' }]}
+          >
+            <Input />
+          </Form.Item>
           <Row>
             <Form.Item label="流程名称" field="flowName" rules={[{ required: true, message: '请输入流程名称' }]}>
               <Input />
@@ -109,7 +154,13 @@ const CreateModal: React.FC<CreateModalProps> = ({ visible, onOk, onCancel }) =>
               field="scheduleStrategy"
               rules={[{ required: true, message: '请选择调度策略' }]}
             >
-              <Radio.Group direction="vertical" options={ScheduleStrategyOptions} />
+              <Radio.Group
+                direction="vertical"
+                options={ScheduleStrategyOptions}
+                onChange={(value) => {
+                  form.resetFields(['repeatType', 'triggerTime', 'repeatWeek', 'repeatDay', 'triggerDate']);
+                }}
+              />
             </Form.Item>
           </Row>
 
@@ -118,7 +169,12 @@ const CreateModal: React.FC<CreateModalProps> = ({ visible, onOk, onCancel }) =>
               <Row align="end" gutter={8}>
                 <Col span={12}>
                   <Form.Item label="定时更新设置" field="repeatType">
-                    <Select options={repeatTypeOptions} />
+                    <Select
+                      options={repeatTypeOptions}
+                      onChange={(value) => {
+                        form.resetFields(['triggerTime', 'repeatWeek', 'repeatDay', 'triggerDate']);
+                      }}
+                    />
                   </Form.Item>
                 </Col>
 
@@ -239,4 +295,4 @@ const CreateModal: React.FC<CreateModalProps> = ({ visible, onOk, onCancel }) =>
   );
 };
 
-export default CreateModal;
+export default EditModal;

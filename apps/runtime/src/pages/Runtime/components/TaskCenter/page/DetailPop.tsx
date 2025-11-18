@@ -13,16 +13,22 @@ import FlowView from '../../../../../../../app-builder/src/pages/Editor/componen
 const Row = Grid.Row;
 const Col = Grid.Col;
 
+enum PageTypeMap {
+  willdo = 'todo',
+  idone = 'done',
+  icreated = 'created',
+  icopied = 'cc'
+}
+
 interface PageProps {
   detailPopVisible: boolean;
-  setPopVisible: Function;
-  onBack?: Function;
-  taskId?: string;
+  setPopVisible: (visible: boolean) => void;
+  onBack?: () => void;
   rowData?: any;
   listType?: string;
 }
 
-const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, onBack, taskId, rowData, listType }) => {
+const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisible, onBack, rowData, listType }) => {
   let [drawWidth, setDrawWidth] = useState<string>('66.66%');
   let [isShowRight, setIsShowRight] = useState(true);
   const [stepData, setStepData] = useState();
@@ -31,9 +37,9 @@ const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, on
   let confirmRef = useRef<any>(null);
   const formRef = useRef<any>(null);
 
-  const [popupVisibleMap, setPopupVisibleMap] = useState({});
-  const setPopupVisibleByIndex = (index, visible) => {
-    setPopupVisibleMap((prev) => ({
+  const [popupVisibleMap, setPopupVisibleMap] = useState<any>({});
+  const setPopupVisibleByIndex = (index: number, visible: boolean) => {
+    setPopupVisibleMap((prev: any) => ({
       ...prev,
       [index]: visible
     }));
@@ -67,7 +73,7 @@ const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, on
     try {
       const req = {
         buttonType,
-        taskId: rowData?.taskId,
+        taskId: detailData?.taskId,
         instanceId: rowData?.instanceId,
         entity: entityData
       };
@@ -93,8 +99,12 @@ const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, on
           流程预览
         </Button>
         {detailData?.buttonConfigs &&
-          detailData?.buttonConfigs?.map((item, index) => {
-            if (!item?.approvalCommentRequired) {
+          detailData?.buttonConfigs?.map((item: any, index: number) => {
+            if (
+              item?.buttonType === BPMConfigButtonType.SAVE ||
+              item?.buttonType === BPMConfigButtonType.SUBMIT ||
+              item?.buttonType === BPMConfigButtonType.WITHDRAW
+            ) {
               return (
                 <Button
                   key={index}
@@ -114,11 +124,12 @@ const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, on
                   content={
                     <DetailOKConfirm
                       ref={confirmRef}
-                      onSetPopupVisible={(visible) => setPopupVisibleByIndex(index, visible)}
+                      onSetPopupVisible={(visible: any) => setPopupVisibleByIndex(index, visible)}
                       onBack={onBack}
-                      taskId={taskId}
+                      taskId={detailData?.taskId}
                       instanceId={rowData?.instanceId}
                       itemData={item}
+                      isRequired={item?.approvalCommentRequired}
                     />
                   }
                   onOk={() => {
@@ -146,7 +157,11 @@ const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, on
     setStepData(res);
   };
   const fetchDetailData = async () => {
-    const res = await getFormDetail({ instanceId: rowData?.instanceId, taskId: rowData?.taskId });
+    const res = await getFormDetail({
+      instanceId: rowData?.instanceId,
+      taskId: rowData?.taskId,
+      from: PageTypeMap[listType as keyof typeof PageTypeMap]
+    });
     setDetailData(res);
   };
 
@@ -165,7 +180,7 @@ const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, on
         width={drawWidth}
         title={renderTitle()}
         visible={detailPopVisible}
-        footer={listType === LISTTYPE.WILLDO ? renderDrawerFooter() : null}
+        footer={renderDrawerFooter()}
         onOk={() => {
           setPopVisible(false);
         }}
@@ -186,7 +201,7 @@ const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, on
             <Col span={6}>
               <p className="gray-color">发起人</p>
               <div className="photo-box">
-                <p className="photo-img"></p>
+                <p className="photo-img">{detailData?.initiator?.avatar && <img src={detailData?.initiator?.avatar} alt='' />}</p>
                 {detailData?.initiatorName}
               </div>
             </Col>

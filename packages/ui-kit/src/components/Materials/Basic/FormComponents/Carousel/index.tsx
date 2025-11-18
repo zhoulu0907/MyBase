@@ -12,7 +12,6 @@ const XCarousel = memo((props: XCarouselConfig & { runtime?: boolean }) => {
     verify,
     layout,
     tooltip,
-    labelColSpan,
     autoplay,
     interval = 3,
     fillStyle,
@@ -29,9 +28,6 @@ const XCarousel = memo((props: XCarouselConfig & { runtime?: boolean }) => {
         }
         layout={layout}
         tooltip={tooltip}
-        labelCol={{
-          style: { width: labelColSpan, flex: 'unset' }
-        }}
         wrapperCol={{ style: { flex: 1 } }}
         rules={[{ required: verify?.required }]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}

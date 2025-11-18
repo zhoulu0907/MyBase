@@ -1,7 +1,6 @@
 import {
   CreateDataSourceReq,
   CreateETLFlowReq,
-  DeleteETLFlowReq,
   ListAppETLDatasourceParams,
   ListTableColumnsReq,
   ListTablesReq,
@@ -10,11 +9,10 @@ import {
   PingDatasourceReq,
   PreviewDatasourceReq,
   UpdateDataSourceReq,
-  UpdateETLFlowReq
+  UpdateETLFlowReq,
+  UpdateWorkflowScheduleInfoReq
 } from '../types';
 import { etlService } from './clients';
-
-export const getETLSupportedDataSource = () => etlService.get(`/datasource/supported`);
 
 export const pingETLDataSource = (params: PingDatasourceReq) => etlService.post(`/datasource/ping`, params);
 
@@ -40,7 +38,7 @@ export const craeteETLFlow = (params: CreateETLFlowReq) => etlService.post(`/wor
 
 export const updateETLFlow = (params: UpdateETLFlowReq) => etlService.post(`/workflow/update`, params);
 
-export const deleteETLFlow = (params: DeleteETLFlowReq) => etlService.post(`/workflow/delete`, params);
+export const deleteETLFlow = (id: string) => etlService.post(`/workflow/delete?id=${id}`);
 
 export const getETLFlow = (worlflowId: string) => etlService.get(`/workflow/${worlflowId}`);
 
@@ -51,3 +49,8 @@ export const startETLFlow = (id: string) => etlService.post(`/workflow/${id}/sta
 export const enableETLFlow = (id: string) => etlService.post(`/workflow/${id}/enable`);
 
 export const disableETLFlow = (id: string) => etlService.post(`/workflow/${id}/disable`);
+
+export const getETLFlowScheduleInfo = (id: string) => etlService.get(`/workflow/schedule/${id}`);
+
+export const updateETLFlowScheduleInfo = (params: UpdateWorkflowScheduleInfoReq) =>
+  etlService.post(`/workflow/schedule`, params);

@@ -1,7 +1,7 @@
 import iconControl from '@workflow/nodes/end.svg';
 import { FlowNodeBaseType } from '@flowgram.ai/fixed-layout-editor';
-import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '@onebase/common';
+import { type FlowNodeRegistry } from '../../../typings';
 import { generateNodeId } from '../../utils';
 import { formMeta } from './form-meta';
 

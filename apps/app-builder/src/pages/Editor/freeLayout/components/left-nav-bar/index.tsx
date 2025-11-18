@@ -1,5 +1,6 @@
-import { Button } from '@arco-design/web-react';
+import { Button, Tooltip } from '@arco-design/web-react';
 import { WorkflowDragService, useService } from '@flowgram.ai/free-layout-editor';
+import { IconQuestionCircle } from '@arco-design/web-react/icon';
 
 import React from 'react';
 import styles from './index.module.less';
@@ -17,6 +18,7 @@ import subprocessTwo from './../../assets/bpmLogo/subprocessTwo.png';
 import copy from './../../assets/bpmLogo/copy.png';
 import deleteIcon from './../../assets/bpmLogo/deleteIcon.png';
 import classNames from 'classnames';
+import { ApproverNodeRegistry, CcRecipientsNodeRegistry, ExecutorNodeRegistry } from '../../nodes/index';
 
 /**
  * 流程编辑页面
@@ -27,9 +29,9 @@ const LeftNavBar: React.FC = () => {
     {
       navTitle: '人工节点',
       navList: [
-        { img: approver, title: '审批人' },
-        { img: executor_big, title: '执行人' },
-        { img: ccto, title: '抄送人' }
+        { img: approver, title: '审批人', type: 'approver', registry: ApproverNodeRegistry },
+        { img: executor_big, title: '执行人', type: 'executor', registry: ExecutorNodeRegistry },
+        { img: ccto, title: '抄送人', type: 'ccRecipients', registry: CcRecipientsNodeRegistry }
       ]
     },
     {
@@ -38,7 +40,8 @@ const LeftNavBar: React.FC = () => {
         { img: conditional_branch, title: '条件分支' },
         { img: parallel_branch, title: '并行分支' },
         { img: sink_node, title: '汇聚节点' }
-      ]
+      ],
+      tips: true
     },
     {
       navTitle: '逻辑节点',
@@ -55,24 +58,53 @@ const LeftNavBar: React.FC = () => {
     }
   ];
   const startDragSerivce = useService<WorkflowDragService>(WorkflowDragService);
+  const CustomTooltipContent = () => {
+    return (
+      <div className={styles.tipContent}>
+        <div>条件分支：按分支的优先级排序，仅执行满足条件的第一个分支</div>
+        <div>并行分支：分支间无优先级，满足条件的分支都会执行</div>
+        <div>汇聚节点：等待所有应到达的上游分支完成，合并路径后继续流程</div>
+      </div>
+    );
+  };
+
   return (
     <div className={styles.leftNav}>
       <div className={classNames(styles.process, styles.processNodeTitle)}>流程节点</div>
       <div className={styles.innerNodesBox}>
         {nodeList?.map((item, i) => (
           <div key={i}>
-            <div className={styles.navTitleColor}> {item.navTitle}</div>
+            <div className={styles.navTitleColor}>
+              {item.navTitle}
+              {item.tips && (
+                <Tooltip position="tl" trigger="hover" content={<CustomTooltipContent />}>
+                  <IconQuestionCircle style={{ fontSize: '15px', marginLeft: '4px', color: '#AAAEB3' }} />
+                </Tooltip>
+              )}
+            </div>
             {/* 左侧子节点 */}
-            {item.navList.map((nodeItem, index) => (
+            {item.navList.map((nodeItem:any, index) => (
               <Button
                 className={styles.nodeItem}
                 key={index}
-                onMouseDown={(e) =>
-                  startDragSerivce.startDragCard('node', e, {
-                    data: {
-                      title: `${nodeItem.title}`
+                onMouseDown={(e) =>{
+                    if(nodeItem?.type){
+                        startDragSerivce.startDragCard(nodeItem?.type, e, {
+                          data: {
+                            name: nodeItem?.title,
+                            registry: nodeItem?.registry
+                          }
+                        });
+
+                    }else{
+                         startDragSerivce.startDragCard('node', e, {
+                           data: {
+                             title: `${nodeItem.title}`
+                           }
+                         });
                     }
-                  })
+                }
+                  
                 }
               >
                 <img

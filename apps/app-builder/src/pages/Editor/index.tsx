@@ -6,6 +6,7 @@ import styles from './index.module.less';
 import { FormEditor } from './pages/FromEditor';
 import { ListEditor } from './pages/ListEditor';
 import FlowEditorPage from './pages/FlowEditor/index';
+import WorkbenchEditor from './pages/WorkbenchEditor';
 const EditorPage: React.FC = () => {
   return (
     <div className={styles.editorPage}>
@@ -15,6 +16,7 @@ const EditorPage: React.FC = () => {
           <Route path={EDITOR_TYPES.FORM_EDITOR} element={<FormEditor />} />
           <Route path={EDITOR_TYPES.LIST_EDITOR} element={<ListEditor />} />
           <Route path={EDITOR_TYPES.FLOW_EDITOR} element={<FlowEditorPage />} />
+          <Route path={EDITOR_TYPES.WORKBENCH_EDITOR} element={<WorkbenchEditor />} />
         </Routes>
       </div>
     </div>

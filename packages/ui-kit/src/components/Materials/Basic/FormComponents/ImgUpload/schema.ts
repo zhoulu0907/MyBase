@@ -2,7 +2,6 @@ import {
   baseConfig,
   baseDefault,
   dataFieldConfig,
-  labelColSpanConfig,
   layoutConfig,
   listTypeConfig,
   uploadTypeConfig,
@@ -27,19 +26,11 @@ import {
   WIDTH_VALUES
 } from '../../../constants';
 import type {
-  IBooleanConfigType,
   IDataFieldConfigType,
   ILabelConfigType,
   ILayoutConfigType,
-  INumberConfigType,
-  IPlaceholderConfigType,
-  ISelectConfigType,
   IStatusConfigType,
-  ITextAreaConfigType,
-  ITextConfigType,
   ITooltipConfigType,
-  IUploadCompressConfigType,
-  IUploadSizeConfigType,
   IVerifyConfigType,
   IWidthConfigType,
   IImageHandleConfigType,
@@ -56,23 +47,15 @@ export interface XInputImgUploadSchema {
 }
 
 export type TXInputImgUploadEditData = Array<
-  | ITextConfigType
   | ILabelConfigType
-  | IPlaceholderConfigType
   | ITooltipConfigType
-  | IStatusConfigType<TStatusSelectKeyType>
-  | IWidthConfigType<TWidthSelectKeyType>
-  | INumberConfigType
-  | ISelectConfigType<TWidthSelectKeyType | TStatusSelectKeyType>
-  | ITextAreaConfigType
-  | IBooleanConfigType
-  | IUploadSizeConfigType
-  | IUploadCompressConfigType
-  | IStatusConfigType<TUploadSelectKeyType>
-  | ILayoutConfigType<TLayoutSelectKeyType>
   | IDataFieldConfigType
-  | IVerifyConfigType
+  | IStatusConfigType<TUploadSelectKeyType>
   | IImageHandleConfigType
+  | IVerifyConfigType
+  | IStatusConfigType<TStatusSelectKeyType>
+  | ILayoutConfigType<TLayoutSelectKeyType>
+  | IWidthConfigType<TWidthSelectKeyType>
 >;
 
 interface IMAGE_HANDLE {
@@ -93,30 +76,26 @@ export interface XInputImgUploadConfig extends ICommonBaseType {
   };
 
   /**
-   * 数据字段
-   */
-  dataField: TTextDefaultType[];
-
-  /**
    * 描述信息（鼠标悬浮时显示）
    */
   tooltip?: TTextAreaDefaultType;
 
   /**
-   * 组件状态：可用、隐藏、只读
-   * 可选值: 'default' | 'hidden' | 'readonly'
+   * 数据字段
    */
-  status?: TSelectDefaultType<TStatusSelectKeyType>;
+  dataField: TTextDefaultType[];
+
+  // 上传方式
+  uploadType?: TSelectDefaultType<TUploadSelectKeyType>;
 
   /**
-   * 默认值
+   * 文件/图片展示样式：文本、平铺、列表
+   * 可选值: 'text' | 'picture-card' | 'picture-list'
    */
-  defaultValue?: TTextDefaultType;
+  listType?: TSelectDefaultType<TUploadSelectKeyType>;
 
-  /**
-   * 字段宽度
-   */
-  width: TSelectDefaultType<TWidthSelectKeyType>;
+  // 图片处理 
+  imageHandle?: IMAGE_HANDLE;
 
   /**
    * required：是否必填，未填写时提交报错
@@ -127,7 +106,14 @@ export interface XInputImgUploadConfig extends ICommonBaseType {
     required: TBooleanDefaultType;
     maxCount: TNumberDefaultType;
     maxSize: TNumberDefaultType;
+    fileFormat: TTextDefaultType;
   };
+
+  /**
+   * 组件状态：可用、隐藏、只读
+   * 可选值: 'default' | 'hidden' | 'readonly'
+   */
+  status?: TSelectDefaultType<TStatusSelectKeyType>;
 
   /**
    * 表单的布局：水平、垂直（默认）
@@ -136,30 +122,9 @@ export interface XInputImgUploadConfig extends ICommonBaseType {
   layout?: TLayoutSelectKeyType;
 
   /**
-   * 标题宽度
+   * 字段宽度
    */
-  labelColSpan?: TNumberDefaultType;
-
-  /**
-   * 图片压缩率（0-1），-1 表示不压缩
-   */
-  uploadCompress?: TNumberDefaultType;
-
-  // 图片处理 
-  imageHandle?: IMAGE_HANDLE
-
-  /**
-   * 文件/图片展示样式：文本、平铺、列表
-   * 可选值: 'text' | 'picture-card' | 'picture-list'
-   */
-  listType?: TSelectDefaultType<TUploadSelectKeyType>;
-
-  uploadType?: TSelectDefaultType<TUploadSelectKeyType>;
-
-  /**
-   * 隐藏时是否提交数据，开启后隐藏状态仍会保存值
-   */
-  saveWithHidden?: TBooleanDefaultType;
+  width: TSelectDefaultType<TWidthSelectKeyType>;
 }
 
 const XImgUpload: XInputImgUploadSchema = {
@@ -170,33 +135,22 @@ const XImgUpload: XInputImgUploadSchema = {
       name: '标题',
       type: CONFIG_TYPES.LABEL_INPUT
     },
-    ...dataFieldConfig,
     {
       key: 'tooltip',
       name: '描述信息',
       type: CONFIG_TYPES.TOOLTIP_INPUT
     },
-    layoutConfig,
-    labelColSpanConfig,
+    ...dataFieldConfig,
+    uploadTypeConfig,
+    listTypeConfig,
     imageHandleConfig,
-    {
-      key: 'uploadCompress',
-      name: '图片压缩率',
-      type: CONFIG_TYPES.UPLOAD_COMPRESS
-    },
-    // {
-    //   key: 'saveWithHidden',
-    //   name: '隐藏时提交数据',
-    //   type: CONFIG_TYPES.SWITCH_INPUT
-    // },
     {
       key: 'verify',
       name: '校验',
       type: CONFIG_TYPES.VERIFY
     },
-    uploadTypeConfig,
-    listTypeConfig,
     statusConfig,
+    layoutConfig,
     widthConfig
   ],
   config: {
@@ -205,18 +159,11 @@ const XImgUpload: XInputImgUploadSchema = {
       text: '图片上传',
       display: true
     },
-    dataField: [],
     tooltip: '',
-    width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
-    status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
-    defaultValue: '',
-    uploadCompress: -1,
-    listType: UPLOAD_VALUES[UPLOAD_OPTIONS.CARD],
+    dataField: [],
     uploadType: UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT],
-    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
-    saveWithHidden: false,
-    labelColSpan: 200,
-    imageHandle:{
+    listType: UPLOAD_VALUES[UPLOAD_OPTIONS.CARD],
+    imageHandle: {
       autoCompress: false, // 自动压缩图片
       addWatermark: false, //添加水印
       watermarkText: '' // 水印文案
@@ -224,8 +171,12 @@ const XImgUpload: XInputImgUploadSchema = {
     verify: {
       required: false,
       maxCount: -1,
-      maxSize: 10
-    }
+      maxSize: 10,
+      fileFormat: ''
+    },
+    status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
+    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
+    width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
   }
 };
 

@@ -20,7 +20,13 @@ const CONFIG_TYPE = {
   DICT: 'DICT'
 } as const;
 
-const DEFAULT_OPTIONS = [
+type OptionItem = {
+  optionLabel: string;
+  optionValue: string;
+  [key: string]: unknown;
+};
+
+const DEFAULT_OPTIONS: OptionItem[] = [
   { optionLabel: '选项1', optionValue: '选项1' },
   { optionLabel: '选项2', optionValue: '选项2' },
   { optionLabel: '选项3', optionValue: '选项3' }
@@ -38,7 +44,7 @@ export const PicklistOptionConfig: React.FC<PicklistOptionConfigProps> = ({
   initialOptions,
   initialDictTypeId
 }) => {
-  const [options, setOptions] = useState(
+  const [options, setOptions] = useState<OptionItem[]>(
     initialDictTypeId
       ? [] // 有字典ID时，初始为空，通过dictTypeId加载字典数据
       : initialOptions && initialOptions.length > 0
@@ -65,7 +71,7 @@ export const PicklistOptionConfig: React.FC<PicklistOptionConfigProps> = ({
 
           const dictDataList = await getDictDataListByType(dictDetail.type);
 
-          const dictOptions = dictDataList
+          const dictOptions: OptionItem[] = dictDataList
             .filter((item: DictData) => item.status === 1) // 只显示启用状态的字典数据
             .map((item: DictData) => ({
               optionLabel: item.label,
@@ -88,21 +94,30 @@ export const PicklistOptionConfig: React.FC<PicklistOptionConfigProps> = ({
   }, [initialDictTypeId]);
 
   const addOption = () => {
-    const newOption = { optionLabel: `选项${options.length + 1}`, optionValue: `选项${options.length + 1}` };
-    setOptions([...options, newOption]);
+    const newOption: OptionItem = {
+      optionLabel: `选项${options.length + 1}`,
+      optionValue: `选项${options.length + 1}`
+    };
+    setOptions((prev) => [...prev, newOption]);
   };
 
   const removeOption = (index: number) => {
     if (options.length > 1) {
-      const newOptions = options.filter((_, i) => i !== index);
-      setOptions(newOptions);
+      setOptions((prev) => prev.filter((_, i) => i !== index));
     }
   };
 
   const updateOption = (index: number, value: string) => {
-    const newOptions = [...options];
-    newOptions[index] = { optionLabel: value, optionValue: value };
-    setOptions(newOptions);
+    setOptions((prev) => {
+      const newOptions = [...prev];
+      const option = newOptions[index] ?? ({} as OptionItem);
+      newOptions[index] = {
+        ...option,
+        optionLabel: value,
+        optionValue: value
+      };
+      return newOptions;
+    });
   };
 
   const handleConfirm = () => {
@@ -230,7 +245,7 @@ export const PicklistOptionConfig: React.FC<PicklistOptionConfigProps> = ({
               <div className={styles.dictOptionsList}>
                 {(showAllOptions ? options : options.slice(0, 3)).map((option, displayIndex) => (
                   <div key={displayIndex} className={styles.dictOptionItem}>
-                    <span className={styles.optionDot} style={{ backgroundColor: option.colorType }} />
+                    <span className={styles.optionDot} style={{ backgroundColor: option.colorType as string }} />
                     <span>{option.optionLabel}</span>
                   </div>
                 ))}

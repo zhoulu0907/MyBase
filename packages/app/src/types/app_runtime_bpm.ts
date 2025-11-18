@@ -19,6 +19,7 @@ export interface FetchExecTaskReq {
 export interface GetFormDetailReq {
   taskId?: string;
   instanceId?: string;
+  from?: 'todo' | 'done' | 'created' | 'cc';
 }
 export interface GetDonePageList {
   appId?: string;
@@ -51,6 +52,13 @@ export interface GetMyCreatePageListReq {
   submitTimeStart?: string;
   submitTimeEnd?: string;
   flowStatus?:string;
+}
+export interface GetPageSetListReq {
+  applicationId: string;
+  pageSetType?: string;
+}
+export interface GetListNodesReq {
+  businessId: string;
 }
 
 export enum FLOWSTATUS_TYPE {
@@ -95,5 +103,13 @@ export enum LISTTYPE {
   ICREATED = 'icreated'
 }
 export const BPMConfigButtonType = {
-  APPROVE: 'approve'
+  APPROVE: 'approve',
+  REJECT: 'reject',
+  SAVE: 'save',
+  TRANSFER: 'transfer',
+  ADD_SIGN: 'add_sign',
+  RETURN: 'return',
+  WITHDRAW: 'withdraw',
+  ABSTAIN: 'abstain',
+  SUBMIT: 'submit'
 };

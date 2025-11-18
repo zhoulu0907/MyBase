@@ -17,6 +17,10 @@ export interface SaveRequest {
 export interface PublishRequest {
   id: string;
 }
+export interface UpdateVersionAlias {
+   id: string;
+   versionAlias:string
+}
 export interface VersionMgmtRequest {
     /**
      * pageSetId

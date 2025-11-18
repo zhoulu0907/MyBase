@@ -1,8 +1,10 @@
 import kingbaseIcon from '@/assets/images/etl/kingbase.png';
 import mockIcon from '@/assets/images/etl/mock.png';
+import mysqlIcon from '@/assets/images/etl/mysql.png';
+import oracleIcon from '@/assets/images/etl/oracle.png';
 import postgresqlIcon from '@/assets/images/etl/postgresql.png';
 import { Button, Checkbox, Form, Grid, Input, Message, Modal, Radio, Select, Steps } from '@arco-design/web-react';
-import { createETLDataSource, getETLSupportedDataSource } from '@onebase/app';
+import { createETLDataSource } from '@onebase/app';
 import { pingETLDataSource } from '@onebase/app/src/services';
 import { getHashQueryParam } from '@onebase/common';
 import React, { useEffect, useState } from 'react';
@@ -27,7 +29,9 @@ const CreateExternalModal: React.FC<CreateExternalModalProps> = ({ visible, onCl
   const [loading, setLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
 
-  const [supportedDatasourceList, setSupportedDataSource] = useState([]);
+  const [supportedDatasourceList, setSupportedDataSource] = useState<{ datasourceType: string; displayName: string }[]>(
+    []
+  );
   const [selectedDataSourceType, setSelectedDataSourceType] = useState('');
 
   const [testConnectionSuccess, setTestConnectionSuccess] = useState(false);
@@ -67,12 +71,16 @@ const CreateExternalModal: React.FC<CreateExternalModalProps> = ({ visible, onCl
       return <img className={styles.datasourceIcon} src={postgresqlIcon} alt="PostgreSQL" />;
     }
 
-    // if (datasourceType === 'MySQL'){}
+    if (datasourceType === 'MySQL') {
+      return <img className={styles.datasourceIcon} src={mysqlIcon} alt="MySQL" />;
+    }
     if (datasourceType === 'KingBase') {
       return <img className={styles.datasourceIcon} src={kingbaseIcon} alt="KingBase" />;
     }
-    // if (datasourceType === 'ORACLE'){}
-    return <img className={styles.datasourceIcon} src={mockIcon} alt="KingBase" />;
+    if (datasourceType === 'ORACLE') {
+      return <img className={styles.datasourceIcon} src={oracleIcon} alt="ORACLE" />;
+    }
+    return <img className={styles.datasourceIcon} src={mockIcon} alt="未知数据源" />;
   };
 
   const handleOk = async () => {
@@ -120,16 +128,28 @@ const CreateExternalModal: React.FC<CreateExternalModalProps> = ({ visible, onCl
   };
 
   const handleCancel = () => {
-    // if (currentStep == 2) {
-    //   setCurrentStep(1);
-    //   return;
-    // }
     onClose();
   };
 
   const handleGetSupportedDataSource = async () => {
-    const res = await getETLSupportedDataSource();
-    console.log('getSupportedDataSource', res);
+    const res = [
+      {
+        datasourceType: 'PostgreSQL',
+        displayName: 'PostgreSQL'
+      },
+      {
+        datasourceType: 'MySQL',
+        displayName: 'MySQL'
+      },
+      {
+        datasourceType: 'KingBase',
+        displayName: '人大金仓'
+      },
+      {
+        datasourceType: 'ORACLE',
+        displayName: 'Oracle'
+      }
+    ];
     setSupportedDataSource(res);
   };
 

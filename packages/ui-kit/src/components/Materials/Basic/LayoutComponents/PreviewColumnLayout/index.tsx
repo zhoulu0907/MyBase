@@ -6,12 +6,12 @@ import { ReactSortable } from 'react-sortablejs';
 import { getComponentWidth } from 'src/components/Materials/schema';
 import PreviewRender from 'src/components/render/PreviewRender';
 import { usePageEditorSignal } from 'src/hooks/useSignal';
-import { COMPONENT_GROUP_NAME, type GridItem } from 'src/utils/const';
+import { COMPONENT_GROUP_NAME, EDITOR_TYPES, type GridItem } from 'src/utils/const';
 import './index.css';
 import { type XColumnLayoutConfig } from './schema';
 
-const XPreviewColumnLayout = (props: XColumnLayoutConfig) => {
-  const { colCount, id, pageType } = props;
+const XPreviewColumnLayout = (props: XColumnLayoutConfig & { detailMode?: boolean }) => {
+  const { colCount, id, pageType, detailMode } = props;
 
   useSignals();
 
@@ -22,7 +22,7 @@ const XPreviewColumnLayout = (props: XColumnLayoutConfig) => {
     layoutSubComponents,
     setLayoutSubComponents,
     setShowDeleteButton
-  } = usePageEditorSignal(pageType);
+  } = usePageEditorSignal(pageType || EDITOR_TYPES.FORM_EDITOR);
 
   // 从 store 中获取当前组件的列数据，如果不存在则初始化为空数组
   const colComponents = layoutSubComponents[id] || Array.from({ length: colCount }, () => []);
@@ -83,6 +83,7 @@ const XPreviewColumnLayout = (props: XColumnLayoutConfig) => {
                         cpType={cp.type}
                         pageComponentSchema={pageComponentSchemas[cp.id]}
                         runtime={true}
+                        detailMode={detailMode}
                       />
                     </div>
                   )}

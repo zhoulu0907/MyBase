@@ -1,6 +1,6 @@
-import iconInteraction from '@workflow/nodes/tooltip.svg';
-import { type FlowNodeRegistry } from '../../../typings';
+import iconInteraction from '@/assets/flow/nodes/tooltip.svg';
 import { NodeType } from '@onebase/common';
+import { type FlowNodeRegistry } from '../../../typings';
 import { generateNodeId } from '../../utils';
 import { formMeta } from './form-meta';
 
@@ -25,7 +25,7 @@ export const TooltipNodeRegistry: FlowNodeRegistry = {
    */
   formMeta,
   canDelete(ctx, node) {
-    return node.parent !== ctx.document.root;
+    return true;
   },
   onAdd(ctx, from) {
     return {

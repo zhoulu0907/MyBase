@@ -19,7 +19,7 @@ const maxImgSizeMB = 20;
 const maxFileSizeMB = 50;
 
 const DetailOKConfirm: FC = forwardRef((props: any, ref: any) => {
-  const { onSetPopupVisible, onBack, taskId, instanceId } = props;
+  const { onSetPopupVisible, onBack, taskId, instanceId, isRequired } = props;
   const [form] = Form.useForm();
   const [imgUpList, setImgUpList] = useState<any>();
 
@@ -69,7 +69,7 @@ const DetailOKConfirm: FC = forwardRef((props: any, ref: any) => {
       <section className="detail-confirm-page">
         <Form form={form} layout="vertical">
           <div className="form-item-title">审批意见</div>
-          <FormItem field="name" rules={[{ required: true,message:'请输入审批意见' }]}>
+          <FormItem field="name" rules={[{ required: isRequired, message: '请输入审批意见' }]}>
             <Input.TextArea
               maxLength={500}
               showWordLimit
@@ -101,7 +101,7 @@ const DetailOKConfirm: FC = forwardRef((props: any, ref: any) => {
                   return false;
                 }
               }}
-              customRequest={async (option) => {
+              customRequest={async (option: any) => {
                 const { onProgress, onError, onSuccess, file } = option;
                 try {
                   const uploadImgUrl = await handleUpload(file, onProgress);
@@ -149,7 +149,7 @@ const DetailOKConfirm: FC = forwardRef((props: any, ref: any) => {
                   return false;
                 }
               }}
-              customRequest={async (option) => {
+              customRequest={async (option: any) => {
                 const { onProgress, onError, onSuccess, file } = option;
                 try {
                   const uploadImgUrl = await handleUpload(file, onProgress);

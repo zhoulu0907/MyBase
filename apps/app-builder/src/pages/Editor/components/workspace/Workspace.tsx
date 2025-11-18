@@ -1,5 +1,5 @@
-import { EDITOR_TYPES, FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES } from '@onebase/ui-kit';
-import { getDictDetail, getDictDataListByType } from '@onebase/platform-center';
+import { getDictDataListByType, getDictDetail } from '@onebase/platform-center';
+import { EDITOR_TYPES, FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, COLOR_MODE_TYPES } from '@onebase/ui-kit';
 import { cloneDeep } from 'lodash-es';
 import { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
@@ -17,6 +17,7 @@ import {
   usePageEditorSignal,
   WIDTH_OPTIONS,
   WIDTH_VALUES,
+  DEFAULT_OPTIONS_TYPE,
   type GridItem
 } from '@onebase/ui-kit';
 
@@ -65,6 +66,7 @@ export default function EditorWorkspace() {
     pageComponentSchemas,
     setPageComponentSchemas,
     delPageComponentSchemas,
+    batchDelPageComponentSchemas,
     components,
     addComponents,
     setComponents,
@@ -74,8 +76,11 @@ export default function EditorWorkspace() {
     layoutSubComponents,
     setLayoutSubComponents,
     delLayoutSubComponents,
+    batchDelLayoutSubComponents,
     subTableComponents,
-    setSubTableComponents
+    setSubTableComponents,
+    delSubTableComponents,
+    batchDelSubTableComponents
   } = usePageEditorSignal();
 
   const [pageMode, setPageMode] = useState<string>('pc');
@@ -181,13 +186,13 @@ export default function EditorWorkspace() {
   // 删除组件
   const handleDeleteComponent = (componentId: string) => {
     // 从组件列表中移除
-    delComponents(componentId);
-    delPageComponentSchemas(componentId);
-    delLayoutSubComponents(componentId);
 
+
+    // 布局组件删除
     if (layoutSubComponents[componentId]) {
       // 收集所有需要删除的组件 ID
       const idsToDelete = new Set<string>();
+      idsToDelete.add(componentId);
 
       // 递归收集需要删除的组件 ID
       function collectDeleteIds(id: string) {
@@ -207,12 +212,38 @@ export default function EditorWorkspace() {
       // 开始收集
       collectDeleteIds(componentId);
 
+      delComponents(componentId);
       // 删除所有收集到的组件
-      idsToDelete.forEach((id: string) => {
-        // 明确参数类型
-        delPageComponentSchemas(id);
-        delLayoutSubComponents(id);
-      });
+      batchDelPageComponentSchemas(idsToDelete)
+      batchDelLayoutSubComponents(idsToDelete);
+    } else if (subTableComponents[componentId]) {
+      // 子表单删除
+      // 收集所有需要删除的组件 ID
+      const idsToDelete = new Set<string>();
+      idsToDelete.add(componentId);
+
+      // 递归收集需要删除的组件 ID
+      function collectDeleteIds(id: string) {
+        if (subTableComponents[id]) {
+          subTableComponents[id].forEach((row: any) => {
+            if (!idsToDelete.has(row.id)) {
+              idsToDelete.add(row.id);
+            }
+          });
+        }
+      }
+
+      // 开始收集
+      collectDeleteIds(componentId);
+
+      delComponents(componentId);
+      // 删除所有收集到的组件
+      batchDelPageComponentSchemas(idsToDelete)
+      batchDelSubTableComponents(idsToDelete);
+    } else {
+      // 从组件列表中移除
+      delComponents(componentId);
+      delPageComponentSchemas(componentId);
     }
 
     // 如果删除的是当前选中的组件，清除选中状态
@@ -250,7 +281,11 @@ export default function EditorWorkspace() {
         </div>
       </div>
 
-      <Form>
+      <Form
+        labelCol={{
+          style: { width: 200, flex: 'unset' }
+        }}
+      >
         <div
           className={styles.workspaceBody}
           id="workspace-body"
@@ -291,7 +326,8 @@ export default function EditorWorkspace() {
                     // 数据长度 dataLength
                     // 小数位数 decimalPlaces
                     // 默认值 defaultValue
-                    schema.config.defaultValue = field.defaultValue;
+                    const defaultValueConfig = { ...schema.config.defaultValue, customValue: field.defaultValue };
+                    schema.config.defaultValueConfig = defaultValueConfig;
                     // 字段描述 description
                     schema.config.tooltip = field.description;
                     // 是否必填：1-是，0-不是 isRequired
@@ -310,14 +346,31 @@ export default function EditorWorkspace() {
                         const dictDataList = res?.type ? await getDictDataListByType(res.type) : [];
                         const dictOptions = dictDataList?.filter((e: any) => e.status === 1); // 只显示启用状态的字典数据
                         if (dictOptions.length) {
-                          schema.config.defaultOptions = dictOptions;
+                          const newDefaultOptionsConfig = {
+                            type: DEFAULT_OPTIONS_TYPE.DICT,
+                            disabled: true,
+                            dictTypeId: field.dictTypeId,
+                            colorMode: true,
+                            colorModeType: COLOR_MODE_TYPES.POINT,
+                            defaultOptions: dictOptions
+                          };
+                          schema.config.defaultOptionsConfig = {
+                            ...schema.config.defaultOptionsConfig,
+                            ...newDefaultOptionsConfig
+                          };
                         }
                       } else if (field.options?.length) {
-                        schema.config.defaultOptions = field.options.map((e: any) => ({
-                          chosen: field.defaultValue && e.optionValue === field.defaultValue,
-                          label: e.optionLabel,
-                          value: e.optionValue
-                        }));
+                        const newDefaultOptionsConfig = {
+                          defaultOptions: field.options.map((e: any) => ({
+                            label: e.optionLabel,
+                            value: e.optionValue
+                          }))
+                        };
+                        schema.config.defaultOptionsConfig = {
+                          ...schema.config.defaultOptionsConfig,
+                          disabled: true,
+                          ...newDefaultOptionsConfig
+                        };
                       }
                     }
                     // 字段约束配置（长度/正则） constraints
@@ -386,7 +439,8 @@ export default function EditorWorkspace() {
                     // 数据长度 dataLength
                     // 小数位数 decimalPlaces
                     // 默认值 defaultValue
-                    subSchema.config.defaultValue = ele.defaultValue;
+                    const defaultValueConfig = { ...subSchema.config.defaultValue, customValue: ele.defaultValue };
+                    subSchema.config.defaultValueConfig = defaultValueConfig;
                     // 字段描述 description
                     subSchema.config.tooltip = ele.description;
                     subSchema.config.verify = {
@@ -405,14 +459,31 @@ export default function EditorWorkspace() {
                         const dictDataList = res?.type ? await getDictDataListByType(res.type) : [];
                         const dictOptions = dictDataList?.filter((e: any) => e.status === 1); // 只显示启用状态的字典数据
                         if (dictOptions.length) {
-                          subSchema.config.defaultOptions = dictOptions;
+                          const newDefaultOptionsConfig = {
+                            type: DEFAULT_OPTIONS_TYPE.DICT,
+                            disabled: true,
+                            dictTypeId: ele.dictTypeId,
+                            colorMode: true,
+                            colorModeType: COLOR_MODE_TYPES.POINT,
+                            defaultOptions: dictOptions
+                          };
+                          subSchema.config.defaultOptionsConfig = {
+                            ...subSchema.config.defaultOptionsConfig,
+                            ...newDefaultOptionsConfig
+                          };
                         }
                       } else if (ele.options?.length) {
-                        subSchema.config.defaultOptions = ele.options.map((e: any) => ({
-                          chosen: ele.defaultValue && e.optionValue === ele.defaultValue,
-                          label: e.optionLabel,
-                          value: e.optionValue
-                        }));
+                        const newDefaultOptionsConfig = {
+                          defaultOptions: ele.options.map((e: any) => ({
+                            label: e.optionLabel,
+                            value: e.optionValue
+                          }))
+                        };
+                        subSchema.config.defaultOptionsConfig = {
+                          ...subSchema.config.defaultOptionsConfig,
+                          disabled: true,
+                          ...newDefaultOptionsConfig
+                        };
                       }
                     }
                     // 字段约束配置（长度/正则） constraints
@@ -514,7 +585,11 @@ export default function EditorWorkspace() {
                     // 数据长度 dataLength
                     // 小数位数 decimalPlaces
                     // 默认值 defaultValue
-                    schema.config.defaultValue = currentField.defaultValue;
+                    const defaultValueConfig = {
+                      ...schema.config.defaultValue,
+                      customValue: currentField.defaultValue
+                    };
+                    schema.config.defaultValueConfig = defaultValueConfig;
                     // 字段描述 description
                     schema.config.tooltip = currentField.description;
                     // 是否必填：1-是，0-不是 isRequired
@@ -535,14 +610,31 @@ export default function EditorWorkspace() {
                         const dictDataList = res?.type ? await getDictDataListByType(res.type) : [];
                         const dictOptions = dictDataList?.filter((e: any) => e.status === 1); // 只显示启用状态的字典数据
                         if (dictOptions.length) {
-                          schema.config.defaultOptions = dictOptions;
+                          const newDefaultOptionsConfig = {
+                            type: DEFAULT_OPTIONS_TYPE.DICT,
+                            disabled: true,
+                            dictTypeId: currentField.dictTypeId,
+                            colorMode: true,
+                            colorModeType: COLOR_MODE_TYPES.POINT,
+                            defaultOptions: dictOptions
+                          };
+                          schema.config.defaultOptionsConfig = {
+                            ...schema.config.defaultOptionsConfig,
+                            ...newDefaultOptionsConfig
+                          };
                         }
                       } else if (currentField.options?.length) {
-                        schema.config.defaultOptions = currentField.options.map((e) => ({
-                          chosen: currentField.defaultValue && e.optionValue === currentField.defaultValue,
-                          label: e.optionLabel,
-                          value: e.optionValue
-                        }));
+                        const newDefaultOptionsConfig = {
+                          defaultOptions: currentField.options.map((e) => ({
+                            label: e.optionLabel,
+                            value: e.optionValue
+                          }))
+                        };
+                        schema.config.defaultOptionsConfig = {
+                          ...schema.config.defaultOptionsConfig,
+                          disabled: true,
+                          ...newDefaultOptionsConfig
+                        };
                       }
                     }
                     // 字段约束配置（长度/正则） constraints
@@ -598,8 +690,9 @@ export default function EditorWorkspace() {
                   className={styles.componentItem}
                   style={{
                     width: `calc(${getComponentWidth(pageComponentSchemas[cp.id], cp.type)} - 8px)`,
-                    borderColor: curComponentID === cp.id ? '#009E9E' : '',
+                    borderColor: curComponentID === cp.id ? 'rgb(var(--primary-6))' : '',
                     borderStyle: curComponentID === cp.id ? 'solid' : 'dashed',
+                    background: curComponentID === cp.id ? 'rgb(var(--primary-1))' : '',
                     margin: '4px'
                   }}
                   onClick={(e: React.MouseEvent<HTMLDivElement>) => {

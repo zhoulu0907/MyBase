@@ -10,8 +10,9 @@ import DynamicIcon from '@/components/DynamicIcon';
 import { menuIconList } from '@/components/MenuIcon/const';
 import { Dropdown, Menu, Message, Tooltip, type FormInstance } from '@arco-design/web-react';
 import { IconEyeInvisible, IconMoreVertical } from '@arco-design/web-react/icon';
-import { getPageSetId, menuSignal, RootParentPage, VisibleType, type GetPageSetIdReq } from '@onebase/app';
+import { getPageSetId, menuSignal, PageType, RootParentPage, VisibleType, type GetPageSetIdReq } from '@onebase/app';
 import { EDITOR_TYPES } from '@onebase/ui-kit';
+import { pagesRuntimeSignal } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -71,6 +72,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
   useSignals();
   const navigate = useNavigate();
   const { curMenu } = menuSignal;
+  const { curPage } = pagesRuntimeSignal;
 
   const [popupVisible, setPopupVisible] = useState(false);
 
@@ -89,22 +91,24 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
           编辑
         </MenuItem>
       )}
-      {(renameForm && triggerRename) && <MenuItem
-        className={styles.menuContent}
-        key="rename"
-        onClick={(e) => {
-          e.stopPropagation();
-          triggerRename();
+      {renameForm && triggerRename && (
+        <MenuItem
+          className={styles.menuContent}
+          key="rename"
+          onClick={(e) => {
+            e.stopPropagation();
+            triggerRename();
 
-          renameForm.resetFields();
-          renameForm.setFieldValue('menuName', menuName);
-          renameForm.setFieldValue('menuId', menuID);
-          renameForm.setFieldValue('menuIcon', menuIcon);
-        }}
-      >
-        <img src={RenameIcon} alt="重命名" />
-        重命名
-      </MenuItem>}
+            renameForm.resetFields();
+            renameForm.setFieldValue('menuName', menuName);
+            renameForm.setFieldValue('menuId', menuID);
+            renameForm.setFieldValue('menuIcon', menuIcon);
+          }}
+        >
+          <img src={RenameIcon} alt="重命名" />
+          重命名
+        </MenuItem>
+      )}
       <MenuItem
         className={styles.menuContent}
         key="visible"
@@ -120,7 +124,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
         )}
         {isVisible === VisibleType.HIDDEN ? '取消隐藏' : '隐藏'}
       </MenuItem>
-      {(!isGroup && copyForm && triggerCopy) && (
+      {!isGroup && copyForm && triggerCopy && (
         <MenuItem
           className={styles.menuContent}
           key="copy"
@@ -136,7 +140,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
           复制
         </MenuItem>
       )}
-      {(isGroup && createForm && triggerCreate) && (
+      {isGroup && createForm && triggerCreate && (
         <MenuItem
           className={styles.menuContent}
           key="createPage"
@@ -152,7 +156,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
         </MenuItem>
       )}
 
-      {(isGroup && createForm && triggerCreate) && (
+      {isGroup && createForm && triggerCreate && (
         <MenuItem
           className={styles.menuContent}
           key="createGroup"
@@ -167,18 +171,20 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
           新建分组
         </MenuItem>
       )}
-      {triggerDelete && <MenuItem
-        className={styles.menuContent}
-        key="delete"
-        onClick={(e) => {
-          e.stopPropagation();
-          triggerDelete(menuID);
-        }}
-        style={{ color: 'red' }}
-      >
-        <img src={DeleteMenuIcon} alt="删除" />
-        删除
-      </MenuItem>}
+      {triggerDelete && (
+        <MenuItem
+          className={styles.menuContent}
+          key="delete"
+          onClick={(e) => {
+            e.stopPropagation();
+            triggerDelete(menuID);
+          }}
+          style={{ color: 'red' }}
+        >
+          <img src={DeleteMenuIcon} alt="删除" />
+          删除
+        </MenuItem>
+      )}
     </Menu>
   );
 
@@ -193,8 +199,11 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
       return;
     }
 
+    const editorType =
+      curPage.value?.pageSetType === PageType.WORKBENCH ? EDITOR_TYPES.WORKBENCH_EDITOR : EDITOR_TYPES.FORM_EDITOR;
+
     sessionStorage.setItem('EDITOR_PAGE_INFO', JSON.stringify({ id: menuID, name: menuName, icon: menuIcon }));
-    navigate(`/onebase/editor/${EDITOR_TYPES.FORM_EDITOR}?pageSetId=${pageSetId}`);
+    navigate(`/onebase/editor/${editorType}?pageSetId=${pageSetId}`);
   };
 
   return (
@@ -220,7 +229,9 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
             style={{ marginRight: 16 }}
           />
           {/* xxx-taskicon 是工作流程任务中心菜单的icon */}
-          {menuIcon.indexOf('-taskicon') > 0 && <i className={`iconfont ${menuIcon}`} style={{ marginRight: '16px' }} />}
+          {menuIcon.indexOf('-taskicon') > 0 && (
+            <i className={`iconfont ${menuIcon}`} style={{ marginRight: '16px' }} />
+          )}
           <span className={styles.name} style={{ maxWidth: maxWidth + 'px' }}>
             {label}
           </span>

@@ -3,7 +3,7 @@ import IconCollapsed from '@/assets/images/collapsed_left_icon.svg';
 import IconSearchForm from '@/assets/images/search_form_icon.svg';
 import FieldCard from '@/components/FieldCard';
 import { Collapse, Input, Layout } from '@arco-design/web-react';
-import { FilterEntityFields, ENTITY_TYPE_VALUE, type AppEntityField } from '@onebase/app';
+import { ENTITY_TYPE_VALUE, FilterEntityFields, type AppEntityField } from '@onebase/app';
 import {
   COMPONENT_GROUP_NAME,
   COMPONENT_MAP,
@@ -276,68 +276,69 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
           </div>
 
           <div className={styles.fieldHeader}>数据字段</div>
+          <div className={styles.fieldListWrapper}>
+            <Collapse
+              defaultActiveKey={'自定义字段'}
+              accordion={false}
+              bordered={false}
+              expandIconPosition="right"
+              expandIcon={<img src={IconCollapsedDown} alt="" />}
+            >
+              {fieldItems[activeEntityID].map((field: GroupedSection) => (
+                <Collapse.Item
+                  header={field.name}
+                  name={field.name}
+                  key={field.name}
+                  style={{ border: 'none' }}
+                  contentStyle={{ backgroundColor: '#fff', border: 'none', paddingLeft: 13 }}
+                >
+                  <div className={styles.fieldList}>
+                    <ReactSortable
+                      list={field.data || []}
+                      setList={() => {}}
+                      group={{
+                        name: COMPONENT_GROUP_NAME,
+                        pull: 'clone',
+                        put: false
+                      }}
+                      sort={false}
+                      className={styles.fieldListContent}
+                      forceFallback={true}
+                      animation={150}
+                      onEnd={(e) => {
+                        const cpType = e.item.getAttribute('data-cp-type');
+                        e.item.id = `${cpType}-${Date.now()}`;
 
-          <Collapse
-            defaultActiveKey={'自定义字段'}
-            accordion={false}
-            bordered={false}
-            expandIconPosition="right"
-            expandIcon={<img src={IconCollapsedDown} alt="" />}
-          >
-            {fieldItems[activeEntityID].map((field: GroupedSection) => (
-              <Collapse.Item
-                header={field.name}
-                name={field.name}
-                key={field.name}
-                style={{ border: 'none' }}
-                contentStyle={{ backgroundColor: '#fff', border: 'none', paddingLeft: 13 }}
-              >
-                <div className={styles.fieldList}>
-                  <ReactSortable
-                    list={field.data || []}
-                    setList={() => {}}
-                    group={{
-                      name: COMPONENT_GROUP_NAME,
-                      pull: 'clone',
-                      put: false
-                    }}
-                    sort={false}
-                    className={styles.fieldListContent}
-                    forceFallback={true}
-                    animation={150}
-                    onEnd={(e) => {
-                      const cpType = e.item.getAttribute('data-cp-type');
-                      e.item.id = `${cpType}-${Date.now()}`;
+                        const newFieldItems = field.data?.map((c: FieldItem, idx: number) => ({
+                          ...c,
+                          id: `${c.type}-${idx}-${Date.now()}`
+                        }));
 
-                      const newFieldItems = field.data?.map((c: FieldItem, idx: number) => ({
-                        ...c,
-                        id: `${c.type}-${idx}-${Date.now()}`
-                      }));
-
-                      setFieldItems((prevFieldItems) => ({
-                        ...prevFieldItems,
-                        [activeEntityID]: prevFieldItems[activeEntityID].map((section) =>
-                          section.name === field.name ? { ...section, data: newFieldItems } : section
-                        )
-                      }));
-                    }}
-                  >
-                    {field.data?.map((item) => (
-                      <FieldCard
-                        key={item.id}
-                        id={item.id}
-                        displayName={item.displayName}
-                        label={item.label}
-                        type={item.type}
-                        fieldID={item.fieldID}
-                        entityID={item.entityID}
-                      />
-                    ))}
-                  </ReactSortable>
-                </div>
-              </Collapse.Item>
-            ))}
-          </Collapse>
+                        setFieldItems((prevFieldItems) => ({
+                          ...prevFieldItems,
+                          [activeEntityID]: prevFieldItems[activeEntityID].map((section) =>
+                            section.name === field.name ? { ...section, data: newFieldItems } : section
+                          )
+                        }));
+                      }}
+                    >
+                      {field.data?.map((item) => (
+                        <FieldCard
+                          key={item.id}
+                          id={item.id}
+                          displayName={item.displayName}
+                          label={item.label}
+                          type={item.type}
+                          fieldID={item.fieldID}
+                          entityID={item.entityID}
+                        />
+                      ))}
+                    </ReactSortable>
+                  </div>
+                </Collapse.Item>
+              ))}
+            </Collapse>
+          </div>
         </div>
       </Sider>
     </div>

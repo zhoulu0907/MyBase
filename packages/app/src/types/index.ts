@@ -1,3 +1,4 @@
+export * from './app_bpm';
 export * from './app_component';
 export * from './app_menu';
 export * from './app_resource';
@@ -15,4 +16,4 @@ export * from './permission';
 export * from './role';
 export * from './tag';
 export * from './trigger';
-export * from './app_bpm';
+export * from './view';

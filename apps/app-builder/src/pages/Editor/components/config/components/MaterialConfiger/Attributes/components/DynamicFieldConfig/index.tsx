@@ -5,7 +5,9 @@ import styles from '../../index.module.less';
 import { useSignals } from '@preact/signals-react/runtime';
 import {
   COMPONENT_FIELD_MAP,
+  COLOR_MODE_TYPES,
   FORM_COMPONENT_TYPES,
+  DEFAULT_OPTIONS_TYPE,
   usePageEditorSignal,
   useFormEditorSignal,
   useAppEntityStore,
@@ -31,7 +33,6 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
   useSignals();
   const autoCodeKey = 'autoCodeConfig';
   const autoCodeDisabledKey = 'autoCodeDisabled';
-  const selectKey = 'defaultOptions';
   const { curComponentSchema, components, pageComponentSchemas, setPageComponentSchemas } = usePageEditorSignal();
   const { subTableComponents } = useFormEditorSignal;
   const { mainEntity, subEntities } = useAppEntityStore();
@@ -62,9 +63,8 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
 
   const initTreeData = async () => {
     // 根据不同组件类型匹配不同的可选择字段
-    const fieldType = components.find((ele) => ele.id === configs.id)?.type;
+    const fieldType = components.find((ele:any) => ele.id === configs.id)?.type;
     const cpTypes = COMPONENT_FIELD_MAP[fieldType];
-    // debugger fieldType
     const mainEntityTree = mainEntity.fields
       .filter((field: AppEntityField) => !FilterEntityFields.includes(field.fieldName))
       .filter((field: AppEntityField) => !cpTypes || cpTypes.length === 0 || cpTypes.includes(field.fieldType))
@@ -118,14 +118,15 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
     }
   };
 
-  const handleAutoCode = async (value: (string | string[])[]) => {
-    const type = components.find((ele) => ele.id === configs.id)?.type;
+  const handleDefaultOptions = async (value: (string | string[])[]) => {
+    const type = components.find((ele:any) => ele.id === configs.id)?.type;
     const isMainEntity = value?.includes(mainEntity.entityId);
     const currentMainField = mainEntity.fields?.find((ele: AppEntityField) => value.includes(ele.fieldId));
-    const isSubEntity = subEntities.entities?.find((ele) => value?.includes(ele.entityId));
+    const isSubEntity = subEntities.entities?.find((ele:any) => value?.includes(ele.entityId));
     const currentSubField = isSubEntity?.fields.find((ele: AppEntityField) => value.includes(ele.fieldId));
 
     if (isMainEntity && currentMainField) {
+      const newConfig = await getDefaultOptions(currentMainField, type);
       // 主表
       const newConfigs = {
         ...configs,
@@ -142,14 +143,11 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
         [autoCodeKey]: type === FORM_COMPONENT_TYPES.AUTO_CODE ? { ...currentMainField.autoNumberConfig } : undefined,
         [autoCodeDisabledKey]:
           type === FORM_COMPONENT_TYPES.AUTO_CODE ? (currentMainField?.autoNumberConfig?.id ? true : false) : undefined,
-        //  字段选项列表（单/多选）
-        [selectKey]:
-          type === FORM_COMPONENT_TYPES.SELECT_ONE || type === FORM_COMPONENT_TYPES.SELECT_MUTIPLE
-            ? await getDefaultOptions(currentMainField)
-            : undefined
+        defaultOptionsConfig: { ...configs.defaultOptionsConfig, ...newConfig }
       };
       handleConfigsChange(newConfigs);
     } else if (isSubEntity && currentSubField) {
+      const newConfig = await getDefaultOptions(currentSubField, type);
       // 子表
       const newConfigs = {
         ...configs,
@@ -167,10 +165,7 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
         [autoCodeDisabledKey]:
           type === FORM_COMPONENT_TYPES.AUTO_CODE ? (currentSubField?.autoNumberConfig?.id ? true : false) : undefined,
         //  字段选项列表（单/多选）
-        [selectKey]:
-          type === FORM_COMPONENT_TYPES.SELECT_ONE || type === FORM_COMPONENT_TYPES.SELECT_MUTIPLE
-            ? await getDefaultOptions(currentSubField)
-            : undefined
+        defaultOptionsConfig: { ...configs.defaultOptionsConfig, ...newConfig }
       };
       handleConfigsChange(newConfigs);
     } else {
@@ -179,23 +174,39 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
     }
   };
 
-  const getDefaultOptions = async (field: any) => {
-    let newOptions: any = [];
+  const getDefaultOptions = async (field: any, type: string) => {
+    if (
+      type !== FORM_COMPONENT_TYPES.SELECT_ONE &&
+      type !== FORM_COMPONENT_TYPES.SELECT_MUTIPLE &&
+      type !== FORM_COMPONENT_TYPES.RADIO &&
+      type !== FORM_COMPONENT_TYPES.CHECKBOX
+    ) {
+      return {};
+    }
+    let newConfig: any = {
+      defaultOptions: []
+    };
     if (field.dictTypeId) {
       const res = await getDictDetail(field.dictTypeId);
       const dictDataList = res?.type ? await getDictDataListByType(res.type) : [];
       const dictOptions = dictDataList?.filter((e: any) => e.status === 1); // 只显示启用状态的字典数据
       if (dictOptions.length) {
-        newOptions = dictOptions;
+        newConfig.type = DEFAULT_OPTIONS_TYPE.DICT;
+        newConfig.disabled = true;
+        newConfig.dictTypeId = field.dictTypeId;
+        newConfig.colorMode = true;
+        newConfig.colorModeType = COLOR_MODE_TYPES.POINT;
+        newConfig.defaultOptions = dictOptions;
       }
     } else if (field.options?.length) {
-      newOptions = field.options?.map((e: any) => ({
-        chosen: field.defaultValue && e.optionValue === field.defaultValue,
+      newConfig.type = DEFAULT_OPTIONS_TYPE.CUSTOM;
+      newConfig.disabled = true;
+      newConfig.defaultOptions = field.options?.map((e: any) => ({
         label: e.optionLabel,
         value: e.optionValue
       }));
     }
-    return newOptions;
+    return newConfig;
   };
 
   return (
@@ -217,7 +228,7 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
         }
         onChange={(value) => {
           handleDataFieldChange(value);
-          handleAutoCode(value);
+          handleDefaultOptions(value);
         }}
       />
     </FormItem>

@@ -1,5 +1,5 @@
 import { bpmService,runtimeBpmService } from './clients';
-import type { GetByBusinessId, SaveRequest, PublishRequest,VersionMgmtRequest,GetFlowPreview} from '../types/app_bpm';
+import { GetByBusinessId, SaveRequest, PublishRequest,VersionMgmtRequest,UpdateVersionAlias,GetFlowPreview } from '../types/app_bpm';
 export const getByBusinessId = (params:GetByBusinessId) => {
   return bpmService.get('/design/get-by-business-id', params);
 };
@@ -20,6 +20,12 @@ export const getVersionMgmt = (params: VersionMgmtRequest) => {
 };
 
 export const getFlowPreview = (params: GetFlowPreview) => {
-  return runtimeBpmService.get('/instance/flow-preview', params);
+  return runtimeBpmService.get('/instance/flow-preview', params)
+} 
+export const versionMgmtDelete = (params: PublishRequest) => {
+  return bpmService.post('/version-mgmt/delete', params);
+};
+export const updateVersionAlias = (params: UpdateVersionAlias) => {
+  return bpmService.post('/version-mgmt/update-version-alias', params);
 };
 
