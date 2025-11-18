@@ -15,27 +15,22 @@ import {
   Tag,
   Tooltip
 } from '@arco-design/web-react';
-import { IconEmpty, IconLeft, IconMoreVertical, IconSearch, IconSettings } from '@arco-design/web-react/icon';
+import { IconEmpty, IconMoreVertical, IconSearch } from '@arco-design/web-react/icon';
 import {
-  createApplication,
   deleteApplication,
   listApplication,
   type Application,
-  type CreateApplicationReq,
   type DatasourceSaveReqDTO,
   type DeleteApplicationReq,
   type PageParam
 } from '@onebase/app';
 import { getCommonPaginationList } from '@onebase/common';
-import { debounce, sample } from 'lodash-es';
+import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import emptyApplicationSVG from '@/assets/images/empty_application.svg';
 import arrowRightUp from "@/assets/images/arrow-right-up.svg";
-import CreateApp from '@/components/CreateApp';
-import { type Options } from '@/components/CreateApp/const';
-import CreateDataSource, { type DataSourceHandle } from '@/components/CreateDataSource';
 import DynamicIcon from '@/components/DynamicIcon';
 import { PermissionButton } from '@/components/PermissionControl';
 import { TENANT_DEPT_PERMISSION as ACTIONS } from '@/constants/permission';
@@ -43,7 +38,6 @@ import { appIconMap } from '@onebase/ui-kit';
 import TagModal from './components/tagModal';
 import {
   appOptions,
-  avatarBgColor,
   calculateMaxItems,
   createTimeOptions,
   defaultTheme,
@@ -70,12 +64,9 @@ const EnterpriseAppPage: React.FC = () => {
   const [status, setStatus] = useState<number | string>('');
 
   const [appName, setAppName] = useState<string>('');
-  const [createType, setCreateType] = useState<'app' | 'datasource'>('app');
   const [deleteApp, setDeleteApp] = useState<Application>();
   const [datasource, setDdtasource] = useState<DatasourceSaveReqDTO | undefined>(); // 自有数据源
   const [deleteVisible, setDeleteVisible] = useState<boolean>(false);
-  const [createVisible, setCreateVisible] = useState<boolean>(false);
-  const [createLoading, setCreateLoading] = useState<boolean>(false);
   const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
   const [tagModalVisible, setTagModalVisible] = useState<boolean>(false);
 
@@ -84,7 +75,6 @@ const EnterpriseAppPage: React.FC = () => {
 
   const { setCurAppId } = useAppStore();
 
-  const createDatasourceRef = useRef<DataSourceHandle>(null);
   const appContainerRef = useRef<HTMLDivElement>(null);
 
   // option dropdown
@@ -154,47 +144,6 @@ const EnterpriseAppPage: React.FC = () => {
 
   const handleSearchChange = (value: string) => {
     debouncedUpdate(value);
-  };
-
-  const randomColors: string[] = useMemo(() => {
-    return Array.from({ length: pageSize || 8 }, () => sample(avatarBgColor) || avatarBgColor[0]);
-  }, [pageSize]);
-
-  /* 创建应用 */
-  const handleCreateApp = async () => {
-    try {
-      // 切换到创建数据源
-      if (createType === 'datasource') {
-        const res = await createDatasourceRef.current?.handleGetDatasource?.();
-        setDdtasource(res);
-        return;
-      }
-
-      const values = await form.validate(); // 等待校验完成并返回数据
-      setCreateLoading(true);
-      const { appCode, appName, iconColor, iconName, description, tagIds, themeColor } = values;
-
-      const params: CreateApplicationReq = {
-        appCode,
-        appMode: 'classic',
-        appName,
-        description,
-        iconColor,
-        iconName,
-        tagIds: tagIds?.map((t: Options) => t.value),
-        themeColor,
-        datasourceSaveReq: datasource
-      };
-      const res = await createApplication(params);
-      setCreateVisible(false);
-      Message.success('应用创建成功');
-      form.resetFields();
-      navigate(`/onebase/create-app/data-factory?appId=${res.id}`);
-    } catch (error) {
-      return null;
-    } finally {
-      setCreateLoading(false);
-    }
   };
 
   /* 删除应用 */
@@ -398,7 +347,6 @@ const EnterpriseAppPage: React.FC = () => {
               {applicationEmpty && !loading && (
                 <div className={styles.applicationEmpty}>
                   <img src={emptyApplicationSVG} alt="暂无应用" />
-                  <div className={styles.goCreateApplication} onClick={() => setCreateVisible(true)} />
                 </div>
               )}
               {applicationFilterEmpty && !loading && (
@@ -548,60 +496,6 @@ const EnterpriseAppPage: React.FC = () => {
             placeholder="请输入要删除的应用名称"
             style={{ width: 476 }}
             onChange={setAppName}
-          />
-        </div>
-      </Modal>
-      <Modal
-        title={
-          <div style={{ textAlign: 'left' }}>
-            {createType === 'app' ? (
-              '创建空白应用'
-            ) : (
-              <div>
-                <IconLeft style={{ cursor: 'pointer' }} onClick={() => setCreateType('app')} />
-                使用自有数据源
-              </div>
-            )}
-          </div>
-        }
-        visible={createVisible}
-        simple
-        unmountOnExit
-        footer={
-          <div style={{ textAlign: 'right', visibility: createType === 'app' ? 'visible' : 'hidden' }}>
-            <Button type="default" onClick={() => setCreateVisible(false)} style={{ marginRight: 12 }}>
-              取消
-            </Button>
-            <Button type="primary" loading={createLoading} onClick={handleCreateApp}>
-              创建
-            </Button>
-          </div>
-        }
-        confirmLoading={true}
-        onCancel={() => setCreateVisible(false)}
-        style={{ width: '1300px' }}
-        className={styles.createAppModal}
-      >
-        <div className={styles.createAppWrapper}>
-          <CreateApp
-            form={form}
-            status="create"
-            previewBgColor="#F2F3F5BF"
-            dataSourceCreated={!!datasource}
-            onCreateDatasource={() => setCreateType('datasource')}
-            style={{
-              position: 'absolute',
-              transform: createType === 'app' ? 'translateX(0)' : 'translateX(-100%)'
-            }}
-          />
-          <CreateDataSource
-            ref={createDatasourceRef}
-            style={{
-              position: 'absolute',
-              padding: '0 200px',
-              boxSizing: 'border-box',
-              transform: createType === 'datasource' ? 'translateX(0)' : 'translateX(100%)'
-            }}
           />
         </div>
       </Modal>

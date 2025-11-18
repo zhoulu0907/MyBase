@@ -61,6 +61,14 @@ export enum TagColor {
   'orangered'
 }
 
+export enum ApplicationStatus {
+  ITERATE = 'iterate'
+}
+
+export enum ApplicationStatusLabel {
+  ITERATE = '迭代中'
+}
+
 export const avatarBgColor = ['#009E9E', '#24B28F', '#1979FF', '#7E5AEA', '#EB693A', '#EBBC00'];
 
 type themeColor = string;

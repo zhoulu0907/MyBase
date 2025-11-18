@@ -39,10 +39,10 @@ import { type Options } from '@/components/CreateApp/const';
 import CreateAppModal from '@/components/CreateApp';
 import CreateDataSource, { type DataSourceHandle } from '@/components/CreateDataSource';
 import DynamicIcon from '@/components/DynamicIcon';
-import { PermissionButton } from '@/components/PermissionControl';
-import { TENANT_DEPT_PERMISSION as ACTIONS } from '@/constants/permission';
 import { appIconMap } from '@onebase/ui-kit';
 import {
+  ApplicationStatus,
+  ApplicationStatusLabel,
   appOptions,
   calculateMaxItems,
   createTimeOptions,
@@ -267,8 +267,8 @@ const AppManagement: React.FC = () => {
   };
 
   const getDevelopStatus = (developStatus?: string) => {
-    if(developStatus === "iterate") {
-      return "迭代中"
+    if(developStatus === ApplicationStatus.ITERATE) {
+      return ApplicationStatusLabel.ITERATE
     }
     return "";
   }
