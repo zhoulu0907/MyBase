@@ -83,7 +83,6 @@ const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, on
   };
 
   function handlePreview() {
-    console.log('handle Preview ...');
     setFlowViewVisible(true);
   }
   function renderDrawerFooter() {
@@ -159,7 +158,6 @@ const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, on
       //根据列表类型请求对应的详情
     }
   }, [listType]);
-
   return (
     <section>
       <Drawer
@@ -225,7 +223,12 @@ const DetailPage: FC<PageProps> = ({ detailPopVisible = false, setPopVisible, on
           </div>
         </div>
       </Drawer>
-      <FlowView visible={flowViewVisible} setVisible={setFlowViewVisible} />
+      <FlowView
+        visible={flowViewVisible}
+        setVisible={setFlowViewVisible}
+        instanceId={rowData?.instanceId}
+        businessId={rowData?.businessId}
+      />
     </section>
   );
 };

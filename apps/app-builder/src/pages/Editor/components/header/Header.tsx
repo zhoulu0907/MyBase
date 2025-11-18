@@ -405,17 +405,8 @@ export default function EditorHeader() {
       setManageVisible(true);
     }
   };
-  const flowPreview = async () => {
-    const res = await getFlowPreview({ instanceId: '1437487585063735296', businessId: '113961425395449857' });
-    console.log(res);
-    try {
-      const parseData = normalizeNodes(JSON.parse(res.bpmDefJson));
-      setPreviewData(parseData);
-    } catch (error) {
-      console.log('预览数据错误');
-    } finally {
-      setFlowViewVisible(true);
-    }
+  const flowPreview = () => {
+    setFlowViewVisible(true);
   };
 
   useEffect(() => {
@@ -597,7 +588,7 @@ export default function EditorHeader() {
       />
 
       <VersionModal visible={manageVisible} setVisible={setManageVisible} />
-      <FlowView visible={flowViewVisible} setVisible={setFlowViewVisible} preViewData={preViewData} />
+      <FlowView visible={flowViewVisible} setVisible={setFlowViewVisible} businessId={flowData?.businessId} />
     </div>
   );
 }

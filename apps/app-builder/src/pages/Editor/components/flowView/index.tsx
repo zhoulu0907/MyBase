@@ -2,56 +2,53 @@ import React, { useState } from 'react';
 import { Modal } from '@arco-design/web-react';
 import FlowEditor from './flowEditor';
 import { getFlowPreview } from '@onebase/app/src/services';
-import { type FlowDocumentJSON } from '../../freeLayout/typings';
 import type { WorkflowJSON } from './indexType';
 import styles from './index.module.less';
+import '@flowgram.ai/free-layout-editor/index.css';
 const sourceNodeIDMap = new Map();
 interface PreviewModalProps {
   visible: boolean;
   setVisible: (visible: boolean) => void;
-  // preViewData: FlowDocumentJSON;
   instanceId?: string;
   businessId?: string;
 }
 
-const FlowView: React.FC<PreviewModalProps> = ({ visible, setVisible, instanceId = '1438169883547406336', businessId = '' }) => {
+const FlowView: React.FC<PreviewModalProps> = ({ visible, setVisible, instanceId = '', businessId = '' }) => {
   const [isModalReady, setIsModalReady] = useState(false);
   const [preViewData, setPreviewData] = useState<any>({});
   const afterOpen = () => {
-    // getFlowPreviewData();
-    setIsModalReady(true);
+    getFlowPreviewData();
   };
 
-  // const normalizeNodes = (obj: WorkflowJSON | undefined) => {
-  //   obj?.edges.forEach((item) => {
-  //     if (item?.type) {
-  //       sourceNodeIDMap.set(item.sourceNodeID + item.targetNodeID, item.type);
-  //     } else {
-  //       item.type = sourceNodeIDMap.get(item.sourceNodeID + item.targetNodeID) || 'PASS';
-  //     }
-  //   });
-  //   const newNodes = obj?.nodes.map((node) => {
-  //     if ('name' in node) {
-  //       return { ...node, data: { ...(node.data || {}), name: node.name } };
-  //     } else if (node.data && 'name' in node.data) {
-  //       return { ...node, name: node.data.name };
-  //     }
-  //     return node;
-  //   });
-  //   return { ...obj, nodes: newNodes };
-  // };
+  const normalizeNodes = (obj: WorkflowJSON | undefined) => {
+    obj?.edges.forEach((item) => {
+      if (item?.type) {
+        sourceNodeIDMap.set(item.sourceNodeID + item.targetNodeID, item.type);
+      } else {
+        item.type = sourceNodeIDMap.get(item.sourceNodeID + item.targetNodeID) || 'PASS';
+      }
+    });
+    const newNodes = obj?.nodes.map((node) => {
+      if ('name' in node) {
+        return { ...node, data: { ...(node.data || {}), name: node.name } };
+      } else if (node.data && 'name' in node.data) {
+        return { ...node, name: node.data.name };
+      }
+      return node;
+    });
+    return { ...obj, nodes: newNodes };
+  };
 
-  // const getFlowPreviewData = async () => {
-  //   const res = await getFlowPreview({ instanceId:'1438169883547406336', businessId });
-  //   try {
-  //     const parseData = normalizeNodes(JSON.parse(res.bpmDefJson));
-  //     console.log(parseData, '处理的数据');
-  //     setPreviewData(parseData);
-  //     setIsModalReady(true);
-  //   } catch (error) {
-  //     console.log('预览数据错误');
-  //   }
-  // };
+  const getFlowPreviewData = async () => {
+    const res = await getFlowPreview({ instanceId, businessId });
+    try {
+      const parseData = normalizeNodes(JSON.parse(res.bpmDefJson));
+      setPreviewData(parseData);
+      setIsModalReady(true);
+    } catch (error) {
+      console.log('预览数据错误');
+    }
+  };
 
   return (
     <Modal
