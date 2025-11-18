@@ -508,9 +508,9 @@ export default function EditorHeader() {
         )}
         {/* 预览 */}
         <Button
-          //  onClick={toPreview}
+           onClick={toPreview}
           className={styles.previewButton}
-          onClick={flowPreview}
+          // onClick={flowPreview}
         >
           <img src={previewSVG} />
           {t('editor.preview')}
