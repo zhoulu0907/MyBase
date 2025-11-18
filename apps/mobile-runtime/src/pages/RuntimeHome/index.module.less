@@ -2,10 +2,26 @@
     background-color: #F7F8FA;
     min-height: 100vh;
     .tabBar {
-      border-top: 1px solid #ccc;
+      border-top: 0.5px solid #ccc;
       background-color: #fff;
       @media (min-width: 900px) {
         max-width: 750px;
+      }
+      :global {
+        .arco-tab-bar-item-active {
+          color: rgb(var(--primary-6));
+        }
+        .arco-tab-bar-item .arco-tab-bar-item-icon {
+          font-size: 0.48rem;
+          margin: 0.16rem 0 0;
+        }
+        .arco-tab-bar-item-title {
+          font-size: 0.2rem;
+          line-height: 0.4rem;
+        }
+        .arco-tab-bar {
+          min-height: 0.4rem;
+        }
       }
     }
 }

@@ -39,8 +39,10 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; 
         maxLength={maxLength}
         showStatistics={maxLength !== undefined}
         statisticsMaxlength={maxLength}
-        autoSize={maxRows ? { minRows, maxRows } : { minRows }}
+        autoSize={false}
+        rows={minRows || 2}
         textareaStyle={{
+          height: 0.25 * (minRows || 2) + 'rem',
           textAlign: align,
           color: color
         }}
