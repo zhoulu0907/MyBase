@@ -61,6 +61,7 @@ const Right: React.FC = () => {
       };
       const loginResp = await adminLogin(values, headers);
       // 显示成功消息并跳转
+      console.log('loginResp: ', loginResp);
       if (loginResp.accessToken) {
         Message.success(t('auth.loginSuccess'));
         // 存储 token 信息（需要导入相应的 token 管理工具）
@@ -70,8 +71,7 @@ const Right: React.FC = () => {
             accessToken: loginResp.accessToken,
             refreshToken: loginResp.refreshToken,
             expiresTime: loginResp.expiresTime,
-            tenantId: loginResp.tenantWebsite,
-            corpId: loginResp.corpId
+            tenantId: loginResp.tenantId
           },
           rememberMe
         );

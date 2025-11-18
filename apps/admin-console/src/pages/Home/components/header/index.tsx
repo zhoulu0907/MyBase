@@ -4,7 +4,7 @@ import { UserPermissionManager } from '@/utils/permission';
 import { Avatar, Dropdown, Layout, Menu, Message } from '@arco-design/web-react';
 import { IconPoweroff, IconUser } from '@arco-design/web-react/icon';
 import { TokenManager } from '@onebase/common';
-import { getPermissionInfo, platformLogout } from '@onebase/platform-center';
+import { getPermissionInfo } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './index.module.less';
@@ -39,7 +39,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   // 登出处理
   const handleLogout = async () => {
     try {
-      await platformLogout();
+      //   await platformLogout();
       // 清除 token
       TokenManager.clearToken();
       // 跳转到登录页
