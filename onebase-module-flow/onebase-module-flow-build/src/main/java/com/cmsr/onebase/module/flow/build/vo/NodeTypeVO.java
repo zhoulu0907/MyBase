@@ -26,5 +26,10 @@ public class NodeTypeVO {
     @Schema(description = "type_code")
     private String typeCode;
 
+    @Schema(description = "简单备注k")
+    private String simpleRemark;
+
+    @Schema(description = "详细描述")
+    private String detailDescription;
 
 }
