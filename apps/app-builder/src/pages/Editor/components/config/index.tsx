@@ -1,6 +1,5 @@
 import { EDITOR_TYPES, usePageEditorSignal } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
-import { useEffect, useState } from 'react';
 import MaterialConfiger from './components/MaterialConfiger';
 import ViewConfiger from './components/ViewConfiger';
 import WorkbenchConfiger from '../../workbench/editor-components/wb-configer';
@@ -13,14 +12,9 @@ export default function EditorConfig({}: EditorConfigProps) {
 
   const { curComponentID } = usePageEditorSignal();
 
-  const [isFormEditor, setIsFormEditor] = useState(false);
-  const [isWorkbenchEditor, setIsWorkbenchEditor] = useState(false);
-
   const hash = window.location.hash;
-  useEffect(() => {
-    setIsFormEditor(hash.includes(EDITOR_TYPES.FORM_EDITOR));
-    setIsWorkbenchEditor(hash.includes(EDITOR_TYPES.WORKBENCH_EDITOR));
-  }, [hash]);
+  const isFormEditor = hash.includes(EDITOR_TYPES.FORM_EDITOR);
+  const isWorkbenchEditor = hash.includes(EDITOR_TYPES.WORKBENCH_EDITOR);
 
   return (
     <div
