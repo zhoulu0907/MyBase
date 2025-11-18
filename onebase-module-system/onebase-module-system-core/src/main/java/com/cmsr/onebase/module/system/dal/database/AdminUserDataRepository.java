@@ -5,6 +5,7 @@ import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
+import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
 import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
 import com.cmsr.onebase.module.system.vo.user.UserPageReqVO;
 import com.cmsr.onebase.module.system.vo.user.UserSimplePageReqVO;
@@ -13,6 +14,7 @@ import org.anyline.entity.Compare;
 import org.anyline.entity.Order;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
@@ -239,13 +241,14 @@ public class AdminUserDataRepository extends DataRepository<AdminUserDO> {
      * @param deptIds 部门ID集合
      * @return 分页结果
      */
-    public PageResult<AdminUserDO> findSimpleEnablePageByDeptIds(UserSimplePageReqVO reqVO, Set<Long> deptIds) {
+    @Cacheable(cacheNames = RedisKeyConstants.USER_FIND_BY_DEPT_IDS, key = "#deptIds + ':' + #reqVO.pageNo + ':' + #reqVO.pageSize + ':' + (#reqVO.keywords == null ? '' : #reqVO.keywords)")
+    public PageResult<AdminUserDO> findEnableUserPageByDeptIds(UserSimplePageReqVO reqVO, Set<Long> deptIds) {
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.eq(AdminUserDO.STATUS, CommonStatusEnum.ENABLE.getStatus()); // 启用状态
         configStore.in(AdminUserDO.DEPT_ID, deptIds); // 指定部门ID集合
 
         // 根据关键词模糊查询
-        if (reqVO.getKeywords() != null && !reqVO.getKeywords().trim().isEmpty()) {
+        if (StringUtils.isNotBlank(reqVO.getKeywords())) {
             configStore.like(AdminUserDO.NICKNAME, reqVO.getKeywords());
         }
 

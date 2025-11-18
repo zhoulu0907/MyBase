@@ -64,8 +64,7 @@ public class DeptServiceImpl implements DeptService {
 
 
     @Override
-    @CacheEvict(cacheNames = RedisKeyConstants.DEPT_CHILDREN_ID_LIST,
-            allEntries = true)
+    @CacheEvict(cacheNames = RedisKeyConstants.DEPT_CHILDREN_ID_LIST, allEntries = true)
     public Long createDept(DeptSaveReqVO createReqVO) {
         if (createReqVO.getParentId() == null) {
             createReqVO.setParentId(DeptDO.PARENT_ID_ROOT);
@@ -92,8 +91,7 @@ public class DeptServiceImpl implements DeptService {
     }
 
     @Override
-    @CacheEvict(cacheNames = RedisKeyConstants.DEPT_CHILDREN_ID_LIST,
-            allEntries = true)
+    @CacheEvict(cacheNames = RedisKeyConstants.DEPT_CHILDREN_ID_LIST, allEntries = true)
     public void updateDept(DeptSaveReqVO updateReqVO) {
         if (updateReqVO.getParentId() == null) {
             updateReqVO.setParentId(DeptDO.PARENT_ID_ROOT);
@@ -111,8 +109,7 @@ public class DeptServiceImpl implements DeptService {
     }
 
     @Override
-    @CacheEvict(cacheNames = RedisKeyConstants.DEPT_CHILDREN_ID_LIST,
-            allEntries = true)
+    @CacheEvict(cacheNames = RedisKeyConstants.DEPT_CHILDREN_ID_LIST, allEntries = true)
     public void deleteDept(Long id) {
         // 校验是否存在
         validateDeptExists(id);
