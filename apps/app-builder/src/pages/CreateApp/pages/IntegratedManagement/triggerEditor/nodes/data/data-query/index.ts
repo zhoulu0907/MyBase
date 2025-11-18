@@ -1,4 +1,4 @@
-import iconData from '@workflow/nodes/dataQuery.svg';
+import iconData from '@/assets/flow/nodes/dataQuery.svg';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '@onebase/common';
 import { generateNodeId } from '../../utils';

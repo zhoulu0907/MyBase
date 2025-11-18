@@ -1,4 +1,4 @@
-import iconControl from '@workflow/nodes/tryCatch.svg';
+import iconControl from '@/assets/flow/nodes/tryCatch.svg';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '@onebase/common';
 import { generateNodeId } from '../../utils';

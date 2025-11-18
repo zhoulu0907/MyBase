@@ -1,4 +1,4 @@
-import iconControl from '@workflow/nodes/ifCase.svg';
+import iconControl from '@/assets/flow/nodes/ifCase.svg';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '@onebase/common';
 import { formMeta } from './form-meta';
