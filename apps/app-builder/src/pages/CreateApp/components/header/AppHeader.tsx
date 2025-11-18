@@ -91,7 +91,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
           <div>{UserPermissionManager.getUserPermissionInfo()?.user.email}</div>
         </div>
       </Menu.Item>
-      <Menu.Item key="logout" onClick={handleLogout} style={{ color: '#FF0000' }}>
+      <Menu.Item key="logout" onClick={handleLogout} style={{ color: '#bfa6a6ff' }}>
         {t('header.logout')}
       </Menu.Item>
     </Menu>

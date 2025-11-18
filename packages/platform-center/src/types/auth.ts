@@ -32,6 +32,25 @@ export interface TenantLoginRequest {
   captchaVerification?: string | null;
 }
 
+export interface InnerOrSaSSLoginRequest {
+  mobile?: string;
+  
+  appId: number;
+  /**
+   * 账号
+   */
+  username: string;
+  /**
+   * 密码
+   */
+  password: string;
+  /**
+   * 验证码
+   */
+  captchaVerification?: string | null;
+}
+
+
 export interface LoginResponse {
   userId: string; // 用户ID
   accessToken: string; // 访问令牌

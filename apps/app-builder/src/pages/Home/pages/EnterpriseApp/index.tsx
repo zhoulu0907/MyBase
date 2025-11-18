@@ -4,11 +4,8 @@ import {
   Button,
   Divider,
   Dropdown,
-  Form,
   Input,
   Menu,
-  Message,
-  Modal,
   Pagination,
   Select,
   Spin,
@@ -17,16 +14,13 @@ import {
 } from '@arco-design/web-react';
 import { IconEmpty, IconMoreVertical, IconSearch } from '@arco-design/web-react/icon';
 import {
-  deleteApplication,
   listApplication,
   type Application,
-  type DatasourceSaveReqDTO,
-  type DeleteApplicationReq,
   type PageParam
 } from '@onebase/app';
-import { getCommonPaginationList } from '@onebase/common';
+import { getCommonPaginationList, getRuntimeURL } from '@onebase/common';
 import { debounce } from 'lodash-es';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import emptyApplicationSVG from '@/assets/images/empty_application.svg';
@@ -50,7 +44,6 @@ import styles from './index.module.less';
 const Option = Select.Option;
 
 const EnterpriseAppPage: React.FC = () => {
-  const [form] = Form.useForm();
   const { t } = useI18n();
   const navigate = useNavigate();
   const [pageSize, setPageSize] = useState<number>();
@@ -63,11 +56,6 @@ const EnterpriseAppPage: React.FC = () => {
   const [orderByTime, setOrderByTime] = useState<'create' | 'update'>('create');
   const [status, setStatus] = useState<number | string>('');
 
-  const [appName, setAppName] = useState<string>('');
-  const [deleteApp, setDeleteApp] = useState<Application>();
-  const [datasource, setDdtasource] = useState<DatasourceSaveReqDTO | undefined>(); // 自有数据源
-  const [deleteVisible, setDeleteVisible] = useState<boolean>(false);
-  const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
   const [tagModalVisible, setTagModalVisible] = useState<boolean>(false);
 
   const [applicationEmpty, setAapplicationEmpty] = useState<boolean>(false); // 未创建应用
@@ -92,10 +80,6 @@ const EnterpriseAppPage: React.FC = () => {
   useEffect(() => {
     pageSize && getApplicationList();
   }, [pageNo, pageSize, name, orderByTime, status, ownerTag]);
-
-  useEffect(() => {
-    setDdtasource(undefined);
-  }, []);
 
   useEffect(() => {
     // 只有ownerTag和status会影响应用列表长度
@@ -146,54 +130,14 @@ const EnterpriseAppPage: React.FC = () => {
     debouncedUpdate(value);
   };
 
-  /* 删除应用 */
-  const handleDeleteApp = async () => {
-    if (appName !== deleteApp?.appName) {
-      Message.warning('请输入正确的应用名称');
-      return;
-    }
-    try {
-      setDeleteLoading(true);
-      const params: DeleteApplicationReq = {
-        id: deleteApp?.id,
-        name: appName
-      };
-      const res = await deleteApplication(params);
-      if (res) {
-        Message.success('删除成功');
-        getApplicationList();
-      }
-    } finally {
-      setAppName('');
-      setDeleteLoading(false);
-      setDeleteVisible(false);
-    }
-  };
-
-  /* 跳转到编辑页 */
-  const nagivateToAppPage = (appId: string) => {
-    setCurAppId(appId);
-    const newWindow = window.open('', '_blank');
-    if (newWindow) {
-      const baseUrl = getBaseUrl();
-      const href = `${baseUrl}create-app/app-setting?appId=${appId}`;
-      newWindow.location.href = href;
-    }
-  };
-
   const nagivateToDataFactory = (appId: string) => {
     setCurAppId(appId);
+    const tenantId = localStorage.getItem("tenant_id") || sessionStorage.getItem("tenant_id") || "";
     const newWindow = window.open('', '_blank');
     if (newWindow) {
-      const baseUrl = getBaseUrl();
-      const href = `${baseUrl}create-app/data-factory?appId=${appId}`;
-      newWindow.location.href = href;
+      const redirectURL = `${getRuntimeURL()}/#/onebase/runtime/${appId}/${tenantId}`;
+      newWindow.location.href = `${getRuntimeURL()}/#/login?redirectURL=${redirectURL}`;;
     }
-  };
-
-  const getBaseUrl = () => {
-    const baseUrl = window.location.href.replace(/my-app.*$/, '');
-    return baseUrl;
   };
 
   const handleOptionVisibleChange = (v: boolean, id: string) => {
@@ -217,8 +161,8 @@ const EnterpriseAppPage: React.FC = () => {
   const getModel = (model?: string) => {
     if(model === "inner") {
       return "内部模式"
-    }else if(model === "sass") {
-      return "SaSS模式";
+    }else if(model === "saas") {
+      return "SaaS模式";
     }
     return "";
   }
@@ -226,7 +170,7 @@ const EnterpriseAppPage: React.FC = () => {
   const getColor = (model?: string) => {
     if(model === "inner") {
       return "cyan"
-    }else if(model === "sass") {
+    }else if(model === "saas") {
       return "red";
     }
     return "";
@@ -243,20 +187,19 @@ const EnterpriseAppPage: React.FC = () => {
           key="1"
           onClick={(e) => {
             e.stopPropagation();
-            nagivateToAppPage(item.id);
+            //TODO
           }}
         >
-          编辑
+          启用
         </Menu.Item>
         <Menu.Item
           key="2"
           onClick={(e) => {
             e.stopPropagation();
-            setDeleteApp(item);
-            setDeleteVisible(true);
+            //TODO
           }}
         >
-          删除
+          下架
         </Menu.Item>
         {/* <Menu.Item key="3">应用管理</Menu.Item> */}
       </Menu>
@@ -435,7 +378,7 @@ const EnterpriseAppPage: React.FC = () => {
                       onClick={() => {
                         nagivateToDataFactory(item.id);
                       }}
-                      disabled={item.publishModel === "sass"}
+                      // disabled={item.publishModel === "saas"}
                     >
                       进入应用
                     </Button>
@@ -457,48 +400,6 @@ const EnterpriseAppPage: React.FC = () => {
           />
         </div>
       </div>
-
-      <Modal
-        title="确认删除应用"
-        visible={deleteVisible}
-        onOk={handleDeleteApp}
-        onCancel={() => setDeleteVisible(false)}
-        autoFocus={false}
-        focusLock={true}
-        confirmLoading={false}
-        okButtonProps={{
-          loading: deleteLoading,
-          disabled: appName?.trim().length === 0,
-          style: {
-            backgroundColor: '#FF4D4F', // 自定义背景色
-            borderColor: '#FF4D4F' // 自定义边框色
-          }
-        }}
-      >
-        <div
-          style={{
-            height: 171,
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between'
-          }}
-        >
-          <div>
-            卸载应用，其流程、流程数据、表单、列表、模型、权限组等都会删除，操作需谨慎。
-            <br />
-            <br />
-            为防止误操作，如确定删除，请输入
-            <strong>&quot;&lt;应用名称&gt;&quot;</strong>进行确认：
-          </div>
-          <Input
-            value={appName}
-            allowClear
-            placeholder="请输入要删除的应用名称"
-            style={{ width: 476 }}
-            onChange={setAppName}
-          />
-        </div>
-      </Modal>
       <TagModal
         visible={tagModalVisible}
         onOk={() => {

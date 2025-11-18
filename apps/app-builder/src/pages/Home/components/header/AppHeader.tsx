@@ -57,13 +57,15 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     if (tokenInfo?.accessToken) {
       getInfo();
     }
-  }, [tokenInfo]);
+  }, [tokenInfo?.accessToken]);
 
   const getInfo = async () => {
     const res = await getPermissionInfo();
     UserPermissionManager.setUserPermissionInfo(res);
     userPermissionSignal.setPermissionInfo(res);
-    setAdminInfo(res.user);
+    if(res.user) {
+      setAdminInfo(res.user);
+    }
     setNickname(res.user.nickname);
   };
 

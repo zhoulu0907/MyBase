@@ -13,6 +13,11 @@ export enum PERMISSION_TYPES {
   ACTION = 3
 }
 
+export enum PUBLISH_MODULE {
+  SASS = 'saas',
+  INNER = 'inner'
+}
+
 /** 菜单-租户管理 */
 export const TENANT_MENUS = {
   USER: 'tenant:user',
