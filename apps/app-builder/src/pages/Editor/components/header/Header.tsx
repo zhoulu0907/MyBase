@@ -417,16 +417,19 @@ export default function EditorHeader() {
     }
   };
   useEffect(() => {
-    if (curPage?.value?.pageSetType === PageType.NORMAL) {
-      setTabData(baseTabData.filter((tab) => tab.key !== EDITOR_TYPES.FLOW_EDITOR));
-    } else if (curPage?.value?.pageSetType === PageType.WORKBENCH) {
-      const tabs = baseTabData.filter(
-        (tab) => tab.key === EDITOR_TYPES.WORKBENCH_EDITOR || tab.key === EDITOR_TYPES.PAGE_SETTING
-      );
-      setTabData(tabs);
-    } else {
-      setTabData(baseTabData);
-    }
+    const pageType = curPage?.value?.pageSetType;
+
+    const shouldKeepTab = (key: string) => {
+      if (pageType === PageType.NORMAL) {
+        return key !== EDITOR_TYPES.FLOW_EDITOR && key !== EDITOR_TYPES.WORKBENCH_EDITOR;
+      }
+      if (pageType === PageType.WORKBENCH) {
+        return key === EDITOR_TYPES.WORKBENCH_EDITOR || key === EDITOR_TYPES.PAGE_SETTING;
+      }
+      return key !== EDITOR_TYPES.WORKBENCH_EDITOR;
+    };
+
+    setTabData(baseTabData.filter((tab) => shouldKeepTab(tab.key)));
   }, [curPage?.value?.pageSetType]);
 
   return (
