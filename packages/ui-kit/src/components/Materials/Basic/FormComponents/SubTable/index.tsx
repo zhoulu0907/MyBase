@@ -1,4 +1,4 @@
-import { Divider, Layout, Form, Button, Table, Pagination } from '@arco-design/web-react';
+import { Divider, Layout, Form, Button, Table } from '@arco-design/web-react';
 import { IconPlus, IconDelete } from '@arco-design/web-react/icon';
 import { type XSubTableConfig } from './schema';
 import { useSignals } from '@preact/signals-react/runtime';
@@ -235,8 +235,8 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
    */
   const [subTableData, setSubTableData] = useState<any[]>([]);
   const [subTableColumns, setSubTableColumns] = useState<any[]>([]);
-  // 分页器
-  const [pageNo, setPageNo] = useState(1);
+
+  // 表单
   const { form } = Form.useFormContext();
 
   /**
@@ -349,7 +349,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
               status="danger"
               style={{ padding: '0 4px' }}
               icon={<IconDelete />}
-              disabled={_record.id && subTableConfig?.deleteRow}
+              disabled={_record.id && !subTableConfig?.deleteRow}
               onClick={() => handleDelete(index)}
             ></Button>
           );
@@ -357,7 +357,6 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
       });
     }
     setSubTableColumns(tableColumns);
-    // setTimeout(() => refreshSubTableData(), 300);
   };
 
   // 新增
@@ -433,17 +432,6 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                 rowKey="id"
                 pagination={false}
               />
-              <Pagination
-                style={{ justifyContent: 'end', marginTop: '8px' }}
-                current={pageNo}
-                total={subTableData.length}
-                showTotal
-                defaultCurrent={1}
-                pageSize={subTableConfig?.pageSize || 5}
-                onChange={(pageNumber) => {
-                  setPageNo(pageNumber);
-                }}
-              ></Pagination>
             </div>
           </>
         ) : (
