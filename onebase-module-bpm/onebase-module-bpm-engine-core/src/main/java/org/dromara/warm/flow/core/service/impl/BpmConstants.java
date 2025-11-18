@@ -37,4 +37,9 @@ public interface BpmConstants {
 
     /**  flow variable 中detailPageView的key */
     String VAR_PAGE_VIEW_GROUP_KEY = "pageViewGroup";
+
+    /**
+     * 抄送人常量
+     */
+    String VAR_CC_USERS_KEY = "ccUsers";
 }

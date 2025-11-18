@@ -158,9 +158,7 @@ public abstract class WarmDaoImpl<T extends RootEntity & BaseDOInterface> implem
 
     @Override
     public void saveBatch(List<T> list) {
-        for (T record : list) {
-            save(record);
-        }
+        getRepository().insertBatch(list);
     }
 
     @Override
