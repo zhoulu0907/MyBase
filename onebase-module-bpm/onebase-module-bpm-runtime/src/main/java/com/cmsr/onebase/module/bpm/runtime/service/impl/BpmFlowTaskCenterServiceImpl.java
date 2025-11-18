@@ -5,8 +5,8 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
+import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowCcRecordRepository;
 import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowInsBizExtRepository;
-import com.cmsr.onebase.module.bpm.core.dal.database.ext.BpmFlowCcRecordExtRepository;
 import com.cmsr.onebase.module.bpm.core.dal.database.ext.BpmHisTaskExtRepository;
 import com.cmsr.onebase.module.bpm.core.dal.database.ext.BpmInstanceExtRepository;
 import com.cmsr.onebase.module.bpm.core.dal.database.ext.BpmTaskExtRepository;
@@ -16,7 +16,6 @@ import com.cmsr.onebase.module.bpm.core.dto.BpmInstanceDTO;
 import com.cmsr.onebase.module.bpm.core.dto.BpmTodoTaskDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
 import com.cmsr.onebase.module.bpm.core.enums.BpmBusinessStatusEnum;
-import com.cmsr.onebase.module.bpm.core.enums.BpmCcViewStatusEnum;
 import com.cmsr.onebase.module.bpm.core.enums.BpmUserTypeEnum;
 import com.cmsr.onebase.module.bpm.core.service.BpmEngineDefExtService;
 import com.cmsr.onebase.module.bpm.core.vo.*;
@@ -106,7 +105,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
     private DefService defService;
 
     @Resource
-    private BpmFlowCcRecordExtRepository bpmFlowCcRecordExtRepository;
+    private BpmFlowCcRecordRepository bpmFlowCcRecordRepository;
 
     private List<String> splitToList(String str) {
         if (StringUtils.isBlank(str)) {
@@ -491,7 +490,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
      * @return
      */
     @Override
-    public PageResult<BpmCopyTaskPageResVO> getCopyPage(BpmCopyTaskPageReqVO pageReqVO) {
+    public PageResult<BpmCcTaskPageResVO> getCcPage(BpmCcTaskPageReqVO pageReqVO) {
         Long loginUserId = WebFrameworkUtils.getLoginUserId();
         // 处理节点编码参数
         pageReqVO.setNodeCodeList(splitToList(pageReqVO.getNodeCode()));
@@ -502,17 +501,17 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         // 构建查询条件
         ConfigStore condition = buildDynamicCondition(pageReqVO, String.valueOf(loginUserId));
 
-        PageResult<BpmCcRecordDTO> pageResult = bpmFlowCcRecordExtRepository.getCopyPage(condition);
+        PageResult<BpmCcRecordDTO> pageResult = bpmFlowCcRecordRepository.getCcPage(condition);
         // 转换 BpmCcRecordDTO 列表为 BpmCopyTaskPageResVO 列表
-        List<BpmCopyTaskPageResVO> copyTaskList = pageResult.getList().stream()
-                .map(this::convertToCopyTaskVO)
+        List<BpmCcTaskPageResVO> copyTaskList = pageResult.getList().stream()
+                .map(this::convertToCcTaskVO)
                 .collect(Collectors.toList());
 
         return new PageResult<>(copyTaskList, pageResult.getTotal());
 
     }
 
-    private ConfigStore buildDynamicCondition(BpmCopyTaskPageReqVO reqVO, String userId) {
+    private ConfigStore buildDynamicCondition(BpmCcTaskPageReqVO reqVO, String userId) {
         DefaultConfigStore condition = new DefaultConfigStore();
 
         // 设置分页参数
@@ -528,23 +527,21 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         condition.and(Compare.EQUAL, "user_id", userId);
 
         // 填充查看状态条件
-        fillViewStatus(condition, "viewed", reqVO.getViewStatus());
+        fillViewed(condition, "viewed", reqVO.getViewed());
 
         // 排序
         fillOrder(condition, "create_time", reqVO.getSortType());
 
         return condition;
     }
-    private void fillViewStatus(ConfigStore condition, String fieldName, String viewStatus) {
-        if (StringUtils.isNotBlank(viewStatus)) {
-            Integer status = BpmCcViewStatusEnum.VIEWED.getCode().equals(viewStatus) ? 1 :
-                    BpmCcViewStatusEnum.UNVIEWED.getCode().equals(viewStatus) ? 0 : null;
-            condition.and(Compare.EQUAL, "viewed", status);
+    private void fillViewed(ConfigStore condition, String fieldName, Boolean viewed) {
+        if (Objects.nonNull(viewed)) {
+            condition.and(Compare.EQUAL, fieldName, viewed ? 1 : 0);
         }
     }
 
-    private BpmCopyTaskPageResVO convertToCopyTaskVO(BpmCcRecordDTO ccRecord) {
-        BpmCopyTaskPageResVO vo = new BpmCopyTaskPageResVO();
+    private BpmCcTaskPageResVO convertToCcTaskVO(BpmCcRecordDTO ccRecord) {
+        BpmCcTaskPageResVO vo = new BpmCcTaskPageResVO();
 
         // 基本字段映射
         vo.setId(ccRecord.getId());
@@ -554,10 +551,10 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         vo.setTaskId(ccRecord.getTaskId());
         vo.setInstanceId(ccRecord.getInstanceId());
         vo.setBusinessId(ccRecord.getBindingViewId());
-        if(1==ccRecord.getViewed()){
-            vo.setViewed(BpmCcViewStatusEnum.VIEWED.getCode());
+        if(1 == ccRecord.getViewed()){
+            vo.setViewed(true);
         }else{
-            vo.setViewed(BpmCcViewStatusEnum.UNVIEWED.getCode());
+            vo.setViewed(false);
         }
         // 设置发起人信息
         UserBasicInfoVO initiator = new UserBasicInfoVO();

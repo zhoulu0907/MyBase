@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.bpm.runtime.service;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.bpm.core.vo.BpmCopyTaskPageReqVO;
+import com.cmsr.onebase.module.bpm.core.vo.BpmCcTaskPageReqVO;
 import com.cmsr.onebase.module.bpm.core.vo.BpmDoneTaskPageReqVO;
 import com.cmsr.onebase.module.bpm.core.vo.BpmMyCreatedPageReqVO;
 import com.cmsr.onebase.module.bpm.core.vo.BpmTodoTaskPageReqVO;
@@ -48,5 +48,5 @@ public interface BpmFlowTaskCenterService {
      * @param pageReqVO
      * @return
      */
-    PageResult<BpmCopyTaskPageResVO> getCopyPage(BpmCopyTaskPageReqVO pageReqVO);
+    PageResult<BpmCcTaskPageResVO> getCcPage(BpmCcTaskPageReqVO pageReqVO);
 }

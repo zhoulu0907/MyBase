@@ -14,8 +14,6 @@ import java.time.LocalDateTime;
 @Table(name = "bpm_flow_cc_record")
 public class BpmFlowCcRecordDO extends TenantBaseDO {
 
-    public static final String ID = "id";
-
     public static final String INSTANCE_ID = "instance_id";
 
     public static final String TASK_ID = "task_id";
@@ -26,11 +24,6 @@ public class BpmFlowCcRecordDO extends TenantBaseDO {
 
     public static final String USER_ID = "user_id";
 
-    /**
-     * 主键id
-     */
-    @Column(name = "id")
-    private Long id;
 
     /**
      * 流程实例id

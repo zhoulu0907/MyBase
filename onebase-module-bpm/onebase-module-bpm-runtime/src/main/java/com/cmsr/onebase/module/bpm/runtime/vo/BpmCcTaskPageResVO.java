@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
  */
 @Schema(description = "待办任务VO")
 @Data
-public class BpmCopyTaskPageResVO  {
+public class BpmCcTaskPageResVO  {
     @Schema(description = "主键id")
     private Long id;
 
@@ -39,5 +39,5 @@ public class BpmCopyTaskPageResVO  {
     private String businessId;
 
     @Schema(description = "已阅 0，否 1，是")
-    private String viewed;
+    private boolean viewed;
 }

@@ -12,7 +12,7 @@ import static com.cmsr.onebase.framework.common.util.date.DateUtils.FORMAT_YEAR_
 @Schema(description = "流程 - 抄送我的分页列表")
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class BpmCopyTaskPageReqVO extends BpmInsExtQueryPageVO {
+public class BpmCcTaskPageReqVO extends BpmInsExtQueryPageVO {
 
     @Schema(description = "发起时间 - 开始（包含）", example = "2025-08-01 00:00:00")
     @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
@@ -23,5 +23,5 @@ public class BpmCopyTaskPageReqVO extends BpmInsExtQueryPageVO {
     private LocalDateTime submitTimeEnd;
 
     @Schema(description = "阅读状态", example = "viewed")
-    private String viewStatus;
+    private Boolean viewed;
 }
