@@ -1,6 +1,10 @@
+.checkboxGroup {
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  flex-direction: column;
 
-.checkboxCell {
-  :global(.arco-cell-inner) {
-    height: auto;
+  &>div {
+    justify-content: flex-end;
   }
 }

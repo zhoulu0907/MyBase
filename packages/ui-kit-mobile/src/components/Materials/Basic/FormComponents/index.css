@@ -5,28 +5,34 @@
   padding: 0 0.32rem;
   box-sizing: border-box;
   border-bottom: 0.5px solid #e5e6eb !important;
+  align-items: center;
 
-  .arco-input-wrap, .arco-form-label-item {
+  .arco-input-wrap,
+  .arco-form-label-item {
     height: 1.08rem;
     border-top: none !important;
-    /* padding: 0 0.32rem; */
+    padding: 0;
     box-sizing: border-box;
     margin-bottom: 0;
+    border-bottom: 0 !important;
   }
+
   .arco-form-item-control-wrapper .arco-input-wrap.single-line {
     height: 1.08rem;
     line-height: 1.08rem;
     border: none !important;
   }
+
   .arco-form-item-control {
     padding: 0;
-    min-height: 1.08rem;
   }
+
   .arco-form-item-message {
     margin: 0.08rem 0;
     width: 100%;
     text-align: right;
   }
+
   .arco-input {
     line-height: 1.08rem;
     height: 1.08rem;
@@ -34,7 +40,8 @@
     font-size: 0.32rem;
     border: none;
 
-    &:hover, &:focus {
+    &:hover,
+    &:focus {
       border: none;
       background-color: none !important;
     }

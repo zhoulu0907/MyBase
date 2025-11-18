@@ -1,4 +1,4 @@
-import { Cell, DatePicker } from '@arco-design/mobile-react';
+import { DatePicker, Form } from '@arco-design/mobile-react';
 import dayjs from 'dayjs';
 import { nanoid } from 'nanoid';
 import { memo, useEffect, useState } from 'react';
@@ -9,6 +9,7 @@ import type { XInputDateRangePickerConfig } from './schema';
 
 const XDateRangePicker = memo((props: XInputDateRangePickerConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const {
+    cpName,
     label,
     dataField,
     status,
@@ -24,11 +25,11 @@ const XDateRangePicker = memo((props: XInputDateRangePickerConfig & { runtime?: 
     detailMode
   } = props;
 
-  // const { form } = Form.useFormContext();
-  const [fieldId, setFieldId] = useState('');
-  const [pickerCurrentTs, setPickerCurrentTs] = useState<number[]>(startTime && endTime ? [dayjs(startTime).valueOf(), dayjs(endTime).valueOf()] : []);
+  // const currentDateType = (dateType !== DATE_VALUES[DATE_OPTIONS.FULL] && dateType) || DATE_VALUES[DATE_OPTIONS.DATE];
+  const validStartTime = startTime && dayjs(startTime).valueOf() || Date.now();
+  const validEndTime = endTime && dayjs(endTime).add(1, 'year').valueOf() || Date.now();
 
-  // const fieldValue = Form.useWatch(fieldId, form);
+  const [fieldId, setFieldId] = useState('');
 
   useEffect(() => {
     if (dataField.length > 0) {
@@ -36,68 +37,48 @@ const XDateRangePicker = memo((props: XInputDateRangePickerConfig & { runtime?: 
     }
   }, [dataField]);
 
-  const currentDateType = (dateType !== DATE_VALUES[DATE_OPTIONS.FULL] && dateType) || DATE_VALUES[DATE_OPTIONS.DATE];
-  const validStartTime = startTime && dayjs(startTime).valueOf() || Date.now();
-  const validEndTime = endTime && dayjs(endTime).valueOf() || Date.now();
-
-  const onPickerChange = (timestamp: number | [number, number]) => {
-    setPickerCurrentTs(timestamp);
-  }
-
-  return (
-    <div className="inputTextWrapper">
+  // 根据是否为只读模式确定内容
+  const renderContent = () => {
+    // 非只读模式，渲染Input组件
+    return (
       <DatePicker
-        mode={"date"}
+        mode="date"
         title={label.text}
         maskClosable
-        currentTs={[validStartTime, validEndTime]}
-        onChange={onPickerChange}
-        renderLinkedContainer={(_, data) => (
-          <Cell
-            label={label.display && label.text}
-            showArrow
-            bordered={false}
-          >{pickerCurrentTs.map(t => dayjs(t).format('YYYY/MM/DD')).join(' - ')}</Cell>
-        )}
+        formatter={(value, type) => {
+          const map = {
+            year: '年',
+            month: '月',
+            date: '日',
+            hour: '时',
+            minute: '分',
+            second: '秒',
+          };
+          return `${value}${map[type] || ''}`;
+        }}
       />
+    );
+  };
 
-      {/* <Form.Item
-        label={label.display && label.text}
-        field={
-          dataField.length > 0
-            ? dataField[dataField.length - 1]
-            : `${FORM_COMPONENT_TYPES.DATE_RANGE_PICKER}_${nanoid()}`
-        }
-        layout={layout}
-        tooltip={tooltip}
-        labelCol={{
-          style: { width: labelColSpan, flex: 'unset' }
-        }}
-        wrapperCol={{ style: { flex: 1 } }}
-        rules={[{ required: verify?.required }]}
-        hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
-        style={{
-          margin: 0,
-          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
-        }}
-      >
-        {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-          <div>
-            {startTime} - {endTime}
-          </div>
-        ) : (
-          <DatePicker.RangePicker
-            mode={currentDateType}
-            defaultValue={[validStartTime, validEndTime]}
-            showTime={dateType === DATE_VALUES[DATE_OPTIONS.FULL]}
-            style={{
-              width: '100%',
-              pointerEvents: runtime ? 'unset' : 'none'
-            }}
-          />
-        )}
-      </Form.Item> */}
-    </div>
+  return (
+    <Form.Item
+      className="inputTextWrapper"
+      label={label.display && label.text}
+      field={fieldId}
+      initialValue={[validStartTime, validEndTime]}
+      required={verify.required}
+      style={{
+        textAlign: 'right'
+      }}
+    >
+      {!runtime || detailMode ? (
+        <div>
+          {startTime} - {endTime}
+        </div>
+      ) : (
+        renderContent()
+      )}
+    </Form.Item>
   );
 });
 

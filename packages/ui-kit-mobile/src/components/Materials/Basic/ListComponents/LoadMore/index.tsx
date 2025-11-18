@@ -434,8 +434,7 @@ const XLoadMore = memo(
               <div key={item.key} className="list-body-item-wrapper" onClick={() => handleRowClick(item)}>
                 {finalColumns?.map((col, index) => {
                   return <div className="list-body-item-element" key={col.dataIndex}>
-                    <Ellipsis className="list-body-item-title" text={col.title} />
-                    {index ? '' : '：'}
+                    <Ellipsis className="list-body-item-title" text={col.title + '：'} />
                     <Ellipsis className="list-body-item-content" text={item[col.dataIndex]} />
                   </div>
                 })}
