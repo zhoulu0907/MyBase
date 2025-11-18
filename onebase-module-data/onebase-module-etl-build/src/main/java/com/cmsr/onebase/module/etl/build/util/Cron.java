@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.etl.core.util;
+package com.cmsr.onebase.module.etl.build.util;
 
 import org.apache.commons.lang3.StringUtils;
 

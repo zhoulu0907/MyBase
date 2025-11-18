@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.etl.core.vo.etl;
+package com.cmsr.onebase.module.etl.core.vo;
 
 import com.cmsr.onebase.framework.common.pojo.PageParam;
 import io.swagger.v3.oas.annotations.media.Schema;

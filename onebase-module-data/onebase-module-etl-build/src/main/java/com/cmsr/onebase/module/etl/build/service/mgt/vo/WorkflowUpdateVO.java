@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.etl.build.service.etl.vo;
+package com.cmsr.onebase.module.etl.build.service.mgt.vo;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;

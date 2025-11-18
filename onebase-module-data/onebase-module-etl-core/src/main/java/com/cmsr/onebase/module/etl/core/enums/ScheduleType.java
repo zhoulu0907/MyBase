@@ -7,7 +7,6 @@ import org.apache.commons.lang3.StringUtils;
 public enum ScheduleType {
     ALL("all"),
     FIXED("fixed"),
-    OBSERVE("observe"),
     MANUALLY("manually");
 
     @Getter

@@ -1,11 +1,11 @@
-package com.cmsr.onebase.module.etl.core.dal.dataobject.schedule;
+package com.cmsr.onebase.module.etl.build.service.mgt;
 
 import lombok.Data;
 
 import java.util.List;
 
 @Data
-public class FixedDurationSchedule implements ScheduleConfig {
+public class FixedDurationSchedule {
 
     private String repeatType;
 
@@ -17,9 +17,4 @@ public class FixedDurationSchedule implements ScheduleConfig {
 
     private String triggerTime;
 
-
-    @Override
-    public boolean isScheduled() {
-        return true;
-    }
 }
