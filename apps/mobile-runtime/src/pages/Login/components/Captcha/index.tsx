@@ -235,7 +235,6 @@ const SliderCaptcha = forwardRef<SliderCaptchaRef, SliderCaptchaProps>(
       window.toastInstance = Toast[func](options);
     }
 
-    console.log('111', Math.floor((parseInt(setSize.imgWidth) * 47) / 310))
     return (
       <>
         {visible && (
