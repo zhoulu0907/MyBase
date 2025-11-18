@@ -1,4 +1,4 @@
-import iconOther from '@/assets/flow/nodes/message.svg';
+import iconOther from '@workflow/nodes/message.svg';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '@onebase/common';
 import { generateNodeId } from '../../utils';

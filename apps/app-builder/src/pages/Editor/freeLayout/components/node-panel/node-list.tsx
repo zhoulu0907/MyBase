@@ -8,8 +8,9 @@ import type { NodePanelRenderProps } from '@flowgram.ai/free-node-panel-plugin';
 import { useClientContext, WorkflowNodeEntity } from '@flowgram.ai/free-layout-editor';
 import { Collapse} from '@arco-design/web-react';
 import type { FlowNodeRegistry } from '../../typings';
-import IconCollapsedDown from '@/assets/images/collapse_down_icon.svg';
-
+import { nodeRegistries } from '../../nodes';
+import IconCollapsedDown from '@workflow/images/collapse_down_icon.svg';
+import './node-list.less';
 import approver from '../../assets/bpmLogo/approver.png';
 import executor_big from '../../assets/bpmLogo/executor_big.png';
 import ccto from '../../assets/bpmLogo/ccto.png';

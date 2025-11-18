@@ -1,50 +1,55 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Modal } from '@arco-design/web-react';
-import {
-  EditorRenderer,
-  FreeLayoutEditorProvider,
-  type FreeLayoutPluginContext
-} from '@flowgram.ai/free-layout-editor';
-import { nodeRegistries } from '../../freeLayout/nodes';
-import { useEditorProps } from '../../freeLayout/hooks';
-import { ZoomSelect } from '../../freeLayout/components/tools/zoom-select';
-import { initialData } from './initial-data';
-import { AutoLayout } from './auto-layout';
-import { IndexType } from './indexType';
+import FlowEditor from './flowEditor';
+import { getFlowPreview } from '@onebase/app/src/services';
+import type { WorkflowJSON } from './indexType';
 import styles from './index.module.less';
-
+import '@flowgram.ai/free-layout-editor/index.css';
+const sourceNodeIDMap = new Map();
 interface PreviewModalProps {
   visible: boolean;
   setVisible: (visible: boolean) => void;
+  instanceId?: string;
+  businessId?: string;
 }
 
-const FlowView: React.FC<PreviewModalProps> = ({ visible, setVisible }) => {
-  const ref = useRef<FreeLayoutPluginContext | null>(null);
-  const editorPropsInit = useEditorProps(initialData, nodeRegistries);
-  const editorProps = Object.assign({}, editorPropsInit, { background: false, readonly: false });
+const FlowView: React.FC<PreviewModalProps> = ({ visible, setVisible, instanceId = '', businessId = '' }) => {
   const [isModalReady, setIsModalReady] = useState(false);
-
-  const afterOpen = async () => {
-    setIsModalReady(true);
-  };
-  const getPassConnections = (edges: Array<any>) => {
-    return edges
-      .filter((edge) => edge.runStatus === IndexType.PASS)
-      .map((edge) => `${edge.sourceNodeID}_-${edge.targetNodeID}_`);
+  const [preViewData, setPreviewData] = useState<any>({});
+  const afterOpen = () => {
+    getFlowPreviewData();
   };
 
-  useEffect(() => {
-    if (!ref.current) return;
-    const passLines = getPassConnections(initialData?.edges);
-    const lines = ref?.current?.document.linesManager.getAllLines();
-    lines?.forEach((line) => {
-      if (passLines.includes(line.id)) {
-        line.lockedColor = IndexType.COMPLETED_COLOR;
+  const normalizeNodes = (obj: WorkflowJSON | undefined) => {
+    obj?.edges.forEach((item) => {
+      if (item?.type) {
+        sourceNodeIDMap.set(item.sourceNodeID + item.targetNodeID, item.type);
       } else {
-        line.lockedColor = IndexType.PENDING;
+        item.type = sourceNodeIDMap.get(item.sourceNodeID + item.targetNodeID) || 'PASS';
       }
     });
-  }, [isModalReady]);
+    const newNodes = obj?.nodes.map((node) => {
+      if ('name' in node) {
+        return { ...node, data: { ...(node.data || {}), name: node.name } };
+      } else if (node.data && 'name' in node.data) {
+        return { ...node, name: node.data.name };
+      }
+      return node;
+    });
+    return { ...obj, nodes: newNodes };
+  };
+
+  const getFlowPreviewData = async () => {
+    const res = await getFlowPreview({ instanceId, businessId });
+    try {
+      const parseData = normalizeNodes(JSON.parse(res.bpmDefJson));
+      setPreviewData(parseData);
+      setIsModalReady(true);
+    } catch (error) {
+      console.log('预览数据错误');
+    }
+  };
+
   return (
     <Modal
       className={styles.flowViewModal}
@@ -69,17 +74,7 @@ const FlowView: React.FC<PreviewModalProps> = ({ visible, setVisible }) => {
         </div>
         <div className={styles.right}>下载为图片</div>
       </div>
-      <div className={styles.flowViewContent}>
-        {isModalReady && (
-          <FreeLayoutEditorProvider {...editorProps} ref={ref}>
-            <EditorRenderer className={styles.demoEditor} />
-            <div className={styles.zoomSelectWrapper}>
-              <ZoomSelect />
-              <AutoLayout />
-            </div>
-          </FreeLayoutEditorProvider>
-        )}
-      </div>
+      <div className={styles.flowViewContent}>{isModalReady && <FlowEditor preViewData={preViewData} />}</div>
     </Modal>
   );
 };
