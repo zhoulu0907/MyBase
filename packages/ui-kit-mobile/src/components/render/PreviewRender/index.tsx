@@ -58,12 +58,13 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
     refresh
   })
   console.warn('b11=======222====', componentConfig)
+  componentConfig.align = ALIGN_VALUES[ALIGN_OPTIONS.RIGHT];
   // 渲染对应的组件
   const renderComponent = () => {
     switch (cpType) {
       case FORM_COMPONENT_TYPES.INPUT_TEXT:
         return (
-          <FormComp.XInputText cpName={cpId} id={cpId} {...componentConfig} align={ALIGN_VALUES[ALIGN_OPTIONS.RIGHT]} runtime={runtime} detailMode={detailMode} />
+          <FormComp.XInputText cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} />
         );
       case FORM_COMPONENT_TYPES.INPUT_TEXTAREA:
         return (

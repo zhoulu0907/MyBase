@@ -1,8 +1,7 @@
-import { Input } from '@arco-design/mobile-react';
-// import { nanoid } from 'nanoid';
-import { memo, useEffect, useState } from 'react';
-// import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
-// import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { Input, Form } from '@arco-design/mobile-react';
+import { nanoid } from 'nanoid';
+import { memo } from 'react';
+import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import '../index.css';
 import type { XInputPhoneConfig } from './schema';
 
@@ -11,83 +10,71 @@ const XInputPhone = memo((props: XInputPhoneConfig & { runtime?: boolean; detail
     label,
     dataField,
     placeholder,
-    tooltip,
-    status,
     defaultValue,
     verify,
     align,
-    layout,
     color,
     bgColor,
-    labelColSpan = 0,
     runtime = true,
     detailMode
   } = props;
 
-  const [fieldId, setFieldId] = useState('');
+  // 生成唯一的字段ID
+  const fieldId = dataField && dataField.length > 0
+    ? dataField[dataField.length - 1]
+    : `${FORM_COMPONENT_TYPES.INPUT_PHONE}_${nanoid()}`;
 
-  useEffect(() => {
-    if (dataField.length > 0) {
-      setFieldId(dataField[dataField.length - 1]);
-    }
-  }, [dataField]);
-
-  return (
-    <div className="inputTextWrapper">
+  // 根据是否为只读模式确定内容
+  const renderContent = () => {
+    // 非只读模式，渲染Input组件
+    return (
       <Input
-        label={label.display && label.text}
-        type="tel"
-        defaultValue={defaultValue}
         placeholder={placeholder}
-        inputStyle={{ textAlign: align }}
+        inputStyle={{
+          textAlign: align,
+          color: color
+        }}
         style={{
           width: '100%',
-          backgroundColor: bgColor,
-          pointerEvents: runtime ? 'unset' : 'none'
+          backgroundColor: bgColor || 'transparent',
+          color: color
         }}
+        type="tel"
       />
+    );
+  };
 
-      {/* <Form.Item
-        label={label.display && label.text}
-        field={
-          dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.INPUT_PHONE}_${nanoid()}`
+  return (
+    <Form.Item
+      field={fieldId}
+      label={label.display ? label.text : undefined}
+      initialValue={defaultValue || ''}
+      className="inputTextWrapper"
+      rules={[
+        ...(verify?.required ? [{ required: true, message: '请输入手机号' }] : []),
+        {
+          match: /^1[3-9]\d{9}$/,
+          message: '请输入有效的11位中国大陆手机号'
         }
-        layout={layout}
-        tooltip={tooltip}
-        labelCol={{
-          style: { width: labelColSpan, flex: 'unset' }
-        }}
-        wrapperCol={{ style: { flex: 1 } }}
-        rules={[
-          { required: verify?.required },
-          {
-            match: /^1[3-9]\d{9}$/,
-            message: '请输入有效的11位中国大陆手机号'
-          }
-        ]}
-        hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
-        style={{
-          margin: 0,
-          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
-        }}
-      >
-        {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-          <div>{fieldValue || '--'}</div>
-        ) : (
-          <Input
-            defaultValue={defaultValue}
-            style={{
-              width: '100%',
-              color,
-              textAlign: align,
-              backgroundColor: bgColor,
-              pointerEvents: runtime ? 'unset' : 'none'
-            }}
-            placeholder={placeholder}
-          />
-        )}
-      </Form.Item> */}
-    </div>
+      ]}
+      style={{
+        pointerEvents: (!runtime || detailMode) ? 'none' : 'unset'
+      }}
+    >
+      {!runtime || detailMode ? (
+        // 只读模式，渲染文本内容
+        <div style={{
+          textAlign: align,
+          color: color,
+          backgroundColor: bgColor || 'transparent',
+          padding: '8px'
+        }}>
+          {defaultValue || '--'}
+        </div>
+      ) : (
+        renderContent()
+      )}
+    </Form.Item>
   );
 });
 

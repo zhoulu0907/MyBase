@@ -43,7 +43,7 @@
     &:hover,
     &:focus {
       border: none;
-      background-color: none !important;
+      background-color: transparent !important;
     }
   }
 
