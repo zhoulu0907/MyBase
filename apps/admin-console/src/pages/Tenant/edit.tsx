@@ -65,7 +65,7 @@ const EditTenant = () => {
         website: tenantInfo.website,
         status: tenantInfo.status === 1,
         accountCount: tenantInfo.accountCount,
-        tenantAdminUserList: tenantInfo.tenantAdminUserList.map((ten: TenantAdminUserResVO) => ten.adminUserId),
+        tenantAdminUserList: tenantInfo.tenantAdminUserList.map((ten: TenantAdminUserResVO) => ten.platformUserId),
         publishModel: tenantInfo.publishModel === PlatformTenantPublishMode.saas
       };
       setLogoUrl(tenantInfo.logoUrl);
@@ -101,17 +101,17 @@ const EditTenant = () => {
       // 构建更新参数
       if (tenantInfo?.id) {
         const formattedAdmin = values.tenantAdminUserList.map((id: string) => {
-          const user = adminList.find(u => u.id === id);
-          if(user?.id) {
+          const user = adminList.find((u) => u.id === id);
+          if (user?.id) {
             return {
               adminNickName: user?.nickname || '',
               adminUserName: user?.username || '',
               adminMobile: user?.mobile || '',
-              adminUserId: user.id
+              platformUserId: user.id
             };
-          }else {
-            const adminUser = tenantInfo?.tenantAdminUserList.find((t: any) => t.adminUserId === id);
-            return adminUser || {}
+          } else {
+            const adminUser = tenantInfo?.tenantAdminUserList.find((t: any) => t.platformUserId === id);
+            return adminUser || {};
           }
         });
         const updateParams: UpdateTenantParams = {
@@ -127,7 +127,7 @@ const EditTenant = () => {
         };
         // 调用 updatePlatformTenantApi
         await updatePlatformTenantApi(updateParams);
-        if(id){
+        if (id) {
           await getTenantInfo(id);
         }
         Message.success('更新成功');
@@ -162,7 +162,7 @@ const EditTenant = () => {
   /* 获取当前管理员集合 */
   const findMatchingItemsById = (arrA: any[], targetArr: any[]) => {
     if (!Array.isArray(targetArr)) return;
-    const cutAdminList = targetArr.map((item) => item.adminUserId);
+    const cutAdminList = targetArr.map((item) => item.platformUserId);
     const result = arrA.filter((item) => cutAdminList.includes(item.id));
 
     return result;
@@ -284,9 +284,9 @@ const EditTenant = () => {
                   mode="multiple"
                   allowClear
                   style={{ width: '100%' }}
-                  options={[...(tenantInfo?.tenantAdminUserList || []),...(adminList || [])].map((u) => ({
+                  options={[...(tenantInfo?.tenantAdminUserList || []), ...(adminList || [])].map((u) => ({
                     label: u.nickname || u.username || u.adminNickName || u.adminUserName,
-                    value: u.id || u.adminUserId
+                    value: u.id || u.platformUserId
                   }))}
                 ></Select>
               ) : (

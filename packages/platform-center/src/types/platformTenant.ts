@@ -6,7 +6,7 @@ export enum PlatformTenantStatus {
   /**
    * 已禁用
    */
-  enabled,
+  enabled
 }
 
 export enum PlatformTenantSort {
@@ -32,7 +32,7 @@ export interface PlatformTenantInfo {
   id?: string;
   /**
    * 访问地址
-  */
+   */
   accessUrl?: string;
   /**
    * 账号数量
@@ -157,9 +157,14 @@ export interface TenantAdminUserResVO {
    */
   adminNickName?: string;
   /**
-   * 管理员id
+   * 空间管理员id
    */
   adminUserId?: number;
+
+  /**
+   * 平台管理员ID
+   */
+  platformUserId?: number;
   /**
    * 管理员账号
    */

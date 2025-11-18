@@ -70,7 +70,7 @@ const CreateSpace = () => {
           adminNickName: user?.nickname || '',
           adminUserName: user?.username || '',
           adminMobile: user?.mobile || '',
-          adminUserId: user?.id
+          platformUserId: user?.id
         };
       });
 
