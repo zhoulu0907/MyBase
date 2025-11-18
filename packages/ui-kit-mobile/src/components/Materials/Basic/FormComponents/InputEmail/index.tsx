@@ -1,8 +1,7 @@
-import { Input } from '@arco-design/mobile-react';
-// import { nanoid } from 'nanoid';
-import { memo, useEffect, useState } from 'react';
-// import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
-// import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { Input, Form } from '@arco-design/mobile-react';
+import { memo } from 'react';
+import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
+import { nanoid } from 'nanoid';
 import '../index.css';
 import type { XInputEmailConfig } from './schema';
 
@@ -24,75 +23,58 @@ const XInputEmail = memo((props: XInputEmailConfig & { runtime?: boolean; detail
     detailMode
   } = props;
 
-  // const { form } = Form.useFormContext();
-  const [fieldId, setFieldId] = useState('');
+  // 生成唯一的字段ID
+  const fieldId = dataField && dataField.length > 0
+    ? dataField[dataField.length - 1]
+    : `${FORM_COMPONENT_TYPES.INPUT_EMAIL}_${nanoid()}`;
 
-  // const fieldValue = Form.useWatch(fieldId, form);
-
-  useEffect(() => {
-    if (dataField.length > 0) {
-      setFieldId(dataField[dataField.length - 1]);
-    }
-  }, [dataField]);
+  // 构建验证规则
+  const rules = [];
+  if (verify?.required) {
+    rules.push({ required: true, message: '请输入邮箱地址' });
+  }
+  // 邮箱格式验证规则
+  rules.push({
+    match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+    message: '请输入合法的邮箱地址'
+  });
 
   return (
-    <div className="inputTextWrapper">
-      <Input
-        label={label.display && label.text}
-        type="email"
-        defaultValue={defaultValue}
-        style={{
-          width: '100%',
+    <Form.Item
+      field={fieldId}
+      label={label.display ? label.text : undefined}
+      initialValue={defaultValue || ''}
+      className="inputTextWrapper"
+      rules={rules}
+      style={{
+        pointerEvents: (!runtime || detailMode) ? 'none' : 'unset'
+      }}
+    >
+      {!runtime || detailMode ? (
+        // 只读模式，渲染文本内容
+        <div style={{
           textAlign: align,
           color: color,
-          backgroundColor: bgColor,
-          pointerEvents: runtime ? 'unset' : 'none'
-        }}
-        placeholder={placeholder}
-        inputStyle={{ textAlign: align }}
-      />
-      {/* <Form.Item
-        label={label.display && label.text}
-        field={
-          dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.INPUT_EMAIL}_${nanoid()}`
-        }
-        layout={layout}
-        tooltip={tooltip}
-        labelCol={{
-          style: { width: labelColSpan, flex: 'unset' }
-        }}
-        wrapperCol={{ style: { flex: 1 } }}
-        rules={[
-          { required: verify?.required },
-          {
-            match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-            message: '请输入合法的邮箱地址'
-          }
-        ]}
-        hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
-        style={{
-          flex: 1,
-          margin: 0,
-          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
-        }}
-      >
-        {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-          <div>{fieldValue || '--'}</div>
-        ) : (
-          <Input
-            defaultValue={defaultValue}
-            style={{
-              width: '100%',
-              color,
-              textAlign: align,
-              backgroundColor: bgColor,
-              pointerEvents: runtime ? 'unset' : 'none'
-            }}
-            placeholder={placeholder}
-          />
-        )}
-      </Form.Item> */}
-    </div>
+          backgroundColor: bgColor || 'transparent',
+          padding: '8px'
+        }}>
+          {defaultValue || '--'}
+        </div>
+      ) : (
+        // 编辑模式，渲染Input组件
+        <Input
+          type="email"
+          placeholder={placeholder}
+          style={{
+            width: '100%',
+            textAlign: align,
+            color: color,
+            backgroundColor: bgColor || 'transparent'
+          }}
+          inputStyle={{ textAlign: align }}
+        />
+      )}
+    </Form.Item>
   );
 });
 
