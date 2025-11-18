@@ -145,7 +145,7 @@ const XSubTable: XSubTableSchema = {
       required: false,
     },
     subTableConfig: {
-      showIndex: false,
+      showIndex: true,
       showOperate: true,
       editRow: true,
       deleteRow: true,
