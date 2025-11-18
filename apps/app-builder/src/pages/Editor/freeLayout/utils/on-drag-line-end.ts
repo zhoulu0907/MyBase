@@ -13,13 +13,14 @@ import {
   WorkflowNodeEntity,
   type WorkflowNodeJSON
 } from '@flowgram.ai/free-layout-editor';
+import { IdList } from '../editorType';
 
 /**
  * Drag the end of the line to create an add panel (feature optional)
  * 拖拽线条结束需要创建一个添加面板 （功能可选）
  */
 export const onDragLineEnd = async (ctx: FreeLayoutPluginContext, params: onDragLineEndParams) => {
-  if (params?.line?.id === 'start_0_-_') {
+  if (params?.line?.id === IdList.START_0_) {
     return;
   }
   // get services from context - 从上下文获取服务

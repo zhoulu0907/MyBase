@@ -18,3 +18,8 @@ export interface FlowData {
   versionStatus?: string;
   businessId?: string;
 }
+
+export enum IdList {
+  PROT_OUTPUT_START_0_ = 'port_output_start_0_',
+  START_0_ = 'start_0_-_'
+}

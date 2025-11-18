@@ -17,6 +17,7 @@ import {
   type WorkflowNodeJSON,
   WorkflowPortEntity
 } from '@flowgram.ai/free-layout-editor';
+import { IdList } from '../editorType';
 
 /**
  * click port to trigger node select panel
@@ -30,7 +31,7 @@ export const usePortClick = () => {
   const linesManager = useService(WorkflowLinesManager);
 
   const onPortClick = useCallback(async (e: React.MouseEvent, port: WorkflowPortEntity) => {
-    if (port.id === 'port_output_start_0_') {
+    if (port.id === IdList.PROT_OUTPUT_START_0_) {
       return;
     }
     const mousePos = playground.config.getPosFromMouseEvent(e);
@@ -51,7 +52,6 @@ export const usePortClick = () => {
 
     // get selected node type and data - 获取选择的节点类型和数据
     const { nodeType, nodeJSON } = result;
-
 
     // calculate position for the new node - 计算新节点的位置
     const nodePosition = WorkflowNodePanelUtils.adjustNodePosition({
