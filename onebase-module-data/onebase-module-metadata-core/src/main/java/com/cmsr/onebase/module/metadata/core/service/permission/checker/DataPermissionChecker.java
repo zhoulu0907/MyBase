@@ -201,8 +201,7 @@ public class DataPermissionChecker implements PermissionChecker {
             }
 
             // 检查数据是否满足该权限组的范围条件
-            boolean matchesScope = (checkScopeTags(group, dataRow, currentUser, context)
-                    || checkScopeLevel(group, dataRow, currentUser, fieldIdToNameMap))
+            boolean matchesScope = checkScopeTags(group, dataRow, currentUser, fieldIdToNameMap)
                     && checkFilters(group, dataRow, fieldIdToNameMap);
 
             if (matchesScope) {
@@ -331,11 +330,10 @@ public class DataPermissionChecker implements PermissionChecker {
      * @param group 权限组
      * @param dataRow 数据行
      * @param currentUser 当前用户
-     * @param context 处理上下文
      * @return 是否满足条件
      */
     private boolean checkScopeTags(DataPermissionGroup group, Map<String, Object> dataRow,
-                                   AdminUserRespDTO currentUser, ProcessContext context) {
+                                   AdminUserRespDTO currentUser, Map<Long, String> fieldIdToNameMap) {
         List<DataPermissionTag> scopeTags = group.getScopTags();
         if (scopeTags == null || scopeTags.isEmpty()) {
             return true; // 没有scopeTags限制，认为满足条件
@@ -376,8 +374,7 @@ public class DataPermissionChecker implements PermissionChecker {
 
                 case CUSTOM_CONDITION:
                     // 自定义条件由checkScopeLevel处理
-                    break;
-
+                    return checkScopeLevel(group, dataRow, currentUser, fieldIdToNameMap);
                 default:
                     log.error("未知的权限标签：{}", tag);
             }
@@ -445,7 +442,7 @@ public class DataPermissionChecker implements PermissionChecker {
     }
 
     /**
-     * 检查scopeLevel权限级别
+     * 检查自定义权限
      *
      * @param group 权限组
      * @param dataRow 数据行

@@ -139,18 +139,18 @@ public class DataPermissionFilterBuilder {
         // tags 可见性（每个tag生成一个子store）
         List<DataPermissionTag> tags = group.getScopTags();
         if (tags != null && !tags.isEmpty()) {
-            List<ConfigStore> tagStores = buildTagVisibilityStores(tags, loginUserCtx);
+            List<ConfigStore> tagStores = buildTagVisibilityStores(group, tags, loginUserCtx, fieldIdToNameMap);
             visibilityAlternatives.addAll(tagStores);
         }
 
-        // 2. 根据权限级别和范围值应用过滤
-        if (group.getScopeLevel() != null && group.getScopeFieldId() != null) {
-            ConfigStore levelStore = buildLevelVisibilityStore(group.getScopeLevel(),
-                    group.getScopeFieldId(), group.getScopeValue(), loginUserCtx, fieldIdToNameMap);
-            if (levelStore != null) {
-                visibilityAlternatives.add(levelStore);
-            }
-        }
+          // 2. 根据权限级别和范围值应用过滤
+//        if (group.getScopeLevel() != null && group.getScopeFieldId() != null) {
+//            ConfigStore levelStore = buildLevelVisibilityStore(group.getScopeLevel(),
+//                    group.getScopeFieldId(), group.getScopeValue(), loginUserCtx, fieldIdToNameMap);
+//            if (levelStore != null) {
+//                visibilityAlternatives.add(levelStore);
+//            }
+//        }
 
         // 把所有备选 OR 成一个组store
         DefaultConfigStore groupOr = new DefaultConfigStore();
@@ -173,8 +173,10 @@ public class DataPermissionFilterBuilder {
      * @param loginUserCtx 当前登录用户
      * @return 子条件列表
      */
-    private List<ConfigStore> buildTagVisibilityStores(List<DataPermissionTag> tags,
-                                                       LoginUserCtx loginUserCtx) {
+    private List<ConfigStore> buildTagVisibilityStores(DataPermissionGroup group,
+                                                       List<DataPermissionTag> tags,
+                                                       LoginUserCtx loginUserCtx,
+                                                       Map<Long, String> fieldIdToNameMap) {
         List<ConfigStore> stores = new ArrayList<>();
 
         for (DataPermissionTag tag : tags) {
@@ -229,7 +231,9 @@ public class DataPermissionFilterBuilder {
 
                 case CUSTOM_CONDITION:
                     // 自定义条件：不在此处处理，由 filters 统一追加
-                    log.debug("权限标签：自定义条件（由filters处理）");
+                    ConfigStore levelStore = buildLevelVisibilityStore(group.getScopeLevel(),
+                            group.getScopeFieldId(), group.getScopeValue(), loginUserCtx, fieldIdToNameMap);
+                    stores.add(levelStore);
                     break;
 
                 default:

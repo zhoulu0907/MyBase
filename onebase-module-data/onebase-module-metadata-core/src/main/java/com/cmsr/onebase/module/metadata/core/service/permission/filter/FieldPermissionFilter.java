@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.metadata.core.service.permission.filter;
 import com.cmsr.onebase.module.app.api.security.bo.FieldPermission;
 import com.cmsr.onebase.module.app.api.security.bo.FieldPermissionItem;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
+import com.cmsr.onebase.module.metadata.core.enums.BooleanStatusEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -60,10 +61,10 @@ public class FieldPermissionFilter {
         }
 
         // 构建字段名到字段ID的映射
-        Map<String, Long> fieldNameToIdMap = fields.stream()
+        Map<String, MetadataEntityFieldDO> fieldNameToIdMap = fields.stream()
                 .collect(Collectors.toMap(
                         f -> f.getFieldName().toUpperCase(),
-                        MetadataEntityFieldDO::getId,
+                        f -> f,
                         (v1, v2) -> v1 // 如果有重复，取第一个
                 ));
 
@@ -74,14 +75,14 @@ public class FieldPermissionFilter {
             String fieldNameUpper = fieldName.toUpperCase();
             
             // 系统字段（如ID、created_at等）始终保留
-            if (isSystemField(fieldNameUpper)) {
+            if (isSystemField(fieldNameToIdMap,fieldNameUpper)) {
                 filteredData.put(fieldName, entry.getValue());
                 continue;
             }
 
             // 检查字段是否有读取权限
-            Long fieldId = fieldNameToIdMap.get(fieldNameUpper);
-            if (fieldId != null && readableFieldIds.contains(fieldId)) {
+            MetadataEntityFieldDO metadataEntityFieldDO = fieldNameToIdMap.get(fieldNameUpper);
+            if (metadataEntityFieldDO != null && readableFieldIds.contains(metadataEntityFieldDO.getId())) {
                 filteredData.put(fieldName, entry.getValue());
             } else {
                 log.debug("过滤无权读取的字段：{}", fieldName);
@@ -142,18 +143,12 @@ public class FieldPermissionFilter {
      * @param fieldName 字段名（大写）
      * @return true表示是系统字段
      */
-    private boolean isSystemField(String fieldName) {
-        Set<String> systemFields = Set.of(
-                "ID",
-                "CREATED_AT",
-                "UPDATED_AT",
-                "CREATOR",
-                "UPDATER",
-                "DELETED",
-                "TENANT_ID"
-        );
+    private boolean isSystemField(Map<String, MetadataEntityFieldDO> fieldNameToIdMap, String fieldName) {
+        if (null == fieldNameToIdMap.get(fieldName)){
+            return false;
+        }
         
-        return systemFields.contains(fieldName);
+        return fieldNameToIdMap.get(fieldName).getIsSystemField() == BooleanStatusEnum.YES.getStatus();
     }
 
     /**
@@ -177,7 +172,7 @@ public class FieldPermissionFilter {
         if (fieldPermission.isAllDenied()) {
             // 全部拒绝：只返回系统字段
             return fields.stream()
-                    .filter(f -> isSystemField(f.getFieldName().toUpperCase()))
+                    .filter(f -> f.getIsSystemField() == BooleanStatusEnum.YES.getStatus())
                     .map(MetadataEntityFieldDO::getFieldName)
                     .collect(Collectors.toList());
         }
@@ -188,7 +183,7 @@ public class FieldPermissionFilter {
         // 返回可读字段名列表 + 系统字段
         return fields.stream()
                 .filter(f -> readableFieldIds.contains(f.getId()) 
-                        || isSystemField(f.getFieldName().toUpperCase()))
+                        || f.getIsSystemField() == BooleanStatusEnum.YES.getStatus())
                 .map(MetadataEntityFieldDO::getFieldName)
                 .collect(Collectors.toList());
     }
