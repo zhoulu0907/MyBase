@@ -22,6 +22,7 @@ import {
 import './index.less';
 import { useVisible } from './use-visible';
 import { IconPlusCircle } from './button';
+import { IdList } from '../../editorType';
 
 export const LineAddButton = (props: LineRenderProps) => {
   const { line, selected, hovered, color } = props;
@@ -114,7 +115,7 @@ export const LineAddButton = (props: LineRenderProps) => {
     //    commandService.executeCommand('DELETE', [line]);
   };
 
-  if (line.id === 'start_0_-start_1_') {
+  if (line.id === IdList.START_0_START_1) {
     return <></>;
   }
 

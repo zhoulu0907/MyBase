@@ -21,5 +21,6 @@ export interface FlowData {
 
 export enum IdList {
   PROT_OUTPUT_START_0_ = 'port_output_start_0_',
-  START_0_ = 'start_0_-_'
+  START_0_ = 'start_0_-_',
+  START_0_START_1 = 'start_0_-start_1_'
 }
