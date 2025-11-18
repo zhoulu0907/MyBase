@@ -1,6 +1,13 @@
 import { Button, Dropdown, Menu, Message, Switch, Typography } from '@arco-design/web-react';
 import { IconCheckCircleFill, IconEdit, IconMoreVertical } from '@arco-design/web-react/icon';
-import { ETL_FLOW_STATUS, ETL_SCHEDULE_STRATEGY, type ETLFlowMgmt } from '@onebase/app';
+import {
+  disableETLFlow,
+  enableETLFlow,
+  ETL_FLOW_STATUS,
+  ETL_SCHEDULE_STRATEGY,
+  startETLFlow,
+  type ETLFlowMgmt
+} from '@onebase/app';
 import dayjs from 'dayjs';
 import React from 'react';
 
@@ -15,10 +22,11 @@ export interface ETLFlowCardProps {
   data: ETLFlowMgmt;
   handleEdit: Function;
   handleDelete: Function;
+  handlePage: Function;
   toFlowEditor: Function;
 }
 
-const ETLFlowCard: React.FC<ETLFlowCardProps> = ({ data, handleEdit, handleDelete, toFlowEditor }) => {
+const ETLFlowCard: React.FC<ETLFlowCardProps> = ({ data, handleEdit, handleDelete, handlePage, toFlowEditor }) => {
   const showTriggerType = () => {
     switch (data.scheduleStrategy) {
       case ETL_SCHEDULE_STRATEGY.FIXED:
@@ -34,12 +42,21 @@ const ETLFlowCard: React.FC<ETLFlowCardProps> = ({ data, handleEdit, handleDelet
 
   const handleChangeProcessStatus = async (id: string, checked: boolean) => {
     if (checked) {
-      //   await enableFlowMgmt(id);
+      const res = await enableETLFlow(id);
+      console.log(res);
       Message.success('启用成功');
     } else {
-      //   await disableFlowMgmt(id);
+      const res = await disableETLFlow(id);
+      console.log(res);
       Message.success('禁用成功');
     }
+    handlePage();
+  };
+
+  const handleStartETLFlow = async (id: string) => {
+    const res = await startETLFlow(id);
+    console.log(res);
+    Message.success('手动执行成功');
   };
 
   return (
@@ -72,7 +89,12 @@ const ETLFlowCard: React.FC<ETLFlowCardProps> = ({ data, handleEdit, handleDelet
           </div>
         </div>
 
-        <div className={styles.cardHeaderContentRight}>
+        <div
+          className={styles.cardHeaderContentRight}
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
+        >
           <span>{data.enableStatus === ETL_FLOW_STATUS.ENABLED ? '已启用' : '禁用'}</span>
           <Switch
             size="small"
@@ -108,6 +130,16 @@ const ETLFlowCard: React.FC<ETLFlowCardProps> = ({ data, handleEdit, handleDelet
           <Button type="text" size="small" className={styles.cardFooterLeftBtn}>
             查看日志
           </Button>
+          {data.enableStatus === ETL_FLOW_STATUS.ENABLED && (
+            <Button
+              type="text"
+              size="small"
+              className={styles.cardFooterLeftBtn}
+              onClick={() => handleStartETLFlow(data.id)}
+            >
+              手动执行
+            </Button>
+          )}
         </div>
         <div className={styles.cardFooterRight}>
           <IconEdit />

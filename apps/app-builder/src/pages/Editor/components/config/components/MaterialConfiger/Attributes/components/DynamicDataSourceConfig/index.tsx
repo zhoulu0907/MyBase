@@ -222,7 +222,7 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
 
             {/* 数据选择后 */}
             <FormItem layout="vertical" labelAlign="left" label={'数据选择后'} className={styles.formItem}>
-              <FormItem layout="vertical" labelAlign="left" label={'显示在表单中'} className={styles.formItem}>
+              {/* <FormItem layout="vertical" labelAlign="left" label={'显示在表单中'} className={styles.formItem}>
                 <Select
                   value={selected}
                   onChange={(e) => handleSelectedChange(e)}
@@ -241,6 +241,20 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
                     </div>
                   )}
                 />
+              </FormItem> */}
+              <FormItem layout="vertical" labelAlign="left" label={'按钮回显字段'} className={styles.formItem}>
+                <Select
+                  // value={selected}
+                  onChange={(e) => handleSelectedChange(e)}
+                  placeholder="设置回显字段"
+                  getPopupContainer={getPopupContainer}
+                >
+                  {displayFieldOptions.map((option) => (
+                    <Option key={option.fieldName} value={option.fieldName}>
+                      {option.displayName}
+                    </Option>
+                  ))}
+                </Select>
               </FormItem>
               <FormItem layout="vertical" labelAlign="left" label={'填充到表单字段'} className={styles.noMarginBottom}>
                 <Button long onClick={() => setRuleSettingVisible(true)}>

@@ -72,8 +72,8 @@ const WillDo:FC = () => {
             align: 'center',
             render: (_, record) => (
                 <>
-                    <Button type='text' status='success' onClick={() => {}}>撤消</Button>
-                    <Button type='text' status='success' onClick={() => {setRowData(record); setEditVisible(true)}}>编辑</Button>
+                    <Button type='text' onClick={() => {}}>撤消</Button>
+                    <Button type='text' onClick={() => {setRowData(record); setEditVisible(true)}}>编辑</Button>
                 </>
             ),
         },

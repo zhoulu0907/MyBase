@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 
 import { WorkflowNodePanelService, WorkflowNodePanelUtils } from '@flowgram.ai/free-node-panel-plugin';
 import type { LineRenderProps } from '@flowgram.ai/free-lines-plugin';
@@ -15,12 +15,14 @@ import {
   WorkflowDragService,
   WorkflowLinesManager,
   WorkflowNodeEntity,
+  usePlayground,
   type WorkflowNodeJSON
 } from '@flowgram.ai/free-layout-editor';
 
 import './index.less';
 import { useVisible } from './use-visible';
 import { IconPlusCircle } from './button';
+import { IdList } from '../../editorType';
 
 export const LineAddButton = (props: LineRenderProps) => {
   const { line, selected, hovered, color } = props;
@@ -30,6 +32,7 @@ export const LineAddButton = (props: LineRenderProps) => {
   const dragService = useService(WorkflowDragService);
   const linesManager = useService(WorkflowLinesManager);
   const historyService = useService(HistoryService);
+  const playground = usePlayground();
 
   const { fromPort, toPort } = line;
 
@@ -103,8 +106,21 @@ export const LineAddButton = (props: LineRenderProps) => {
     line.dispose();
   }, []);
 
+  const handleDeleteLine = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+
+    // 删除连线
+    //    const commandService = useState(CommandService);
+    //    commandService.executeCommand('DELETE', [line]);
+  };
+
+  if (line.id === IdList.START_0_START_1) {
+    return <></>;
+  }
+
   if (!visible) {
-    return <div className="line-node" style={{}}></div>;
+    return playground.config.readonly ? '' : <div className="line-node" style={{}}></div>;
   }
 
   return (
@@ -120,6 +136,31 @@ export const LineAddButton = (props: LineRenderProps) => {
       onClick={onClick}
     >
       <IconPlusCircle />
+      {/* todo:连接线删除测试
+      {selected && (
+        <div
+          className="line-delete-button"
+          style={{
+            position:'absolute',
+            left:'20px',
+            width: '18px',
+            height: '18px',
+            backgroundColor: '#ff4d4f',
+            color: 'white',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '12px',
+            cursor: 'pointer',
+            flexShrink: 0
+          }}
+          onClick={handleDeleteLine}
+          title="删除连线"
+        >
+          ×
+        </div>
+      )} */}
     </div>
   );
 };

@@ -57,6 +57,7 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
                       cpType={cp.type}
                       pageComponentSchema={listPageComponentSchemas.value[cp.id]}
                       runtime={true}
+                      preview={true}
                     />
                   </div>
                 )}
@@ -83,6 +84,7 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
                             cpType={cp.type}
                             pageComponentSchema={formPageComponentSchemas.value[cp.id]}
                             runtime={true}
+                            preview={true}
                           />
                         </div>
                       )}

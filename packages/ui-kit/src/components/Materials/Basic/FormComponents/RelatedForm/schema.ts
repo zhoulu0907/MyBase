@@ -63,18 +63,11 @@ export type TXRelatedFormEditData = Array<
   | ILabelConfigType
   | IPlaceholderConfigType
   | ITooltipConfigType
-  | IStatusConfigType<TStatusSelectKeyType>
-  | IWidthConfigType<TWidthSelectKeyType>
-  | INumberConfigType
-  | ITextAreaConfigType
-  | IBooleanConfigType
-  | IStatusConfigType<TAlignSelectKeyType>
-  | ILayoutConfigType<TLayoutSelectKeyType>
-  | IAlignConfigType<TAlignSelectKeyType>
-  | IColorConfigType
   | IDataFieldConfigType
   | IRelatedFormDataConfigType
-  | IVerifyConfigType
+  | IStatusConfigType<TStatusSelectKeyType>
+  | ILayoutConfigType<TLayoutSelectKeyType>
+  | IWidthConfigType<TWidthSelectKeyType>
 >;
 
 export interface XRelatedFormConfig extends ICommonBaseType {
@@ -89,16 +82,6 @@ export interface XRelatedFormConfig extends ICommonBaseType {
   };
 
   /**
-   * 数据字段
-   */
-  dataField: TTextDefaultType[];
-
-  /**
-   * 关联表单数据字段
-   */
-  relatedFormDataField: TTextDefaultType[];
-
-  /**
    * 占位符
    */
   placeholder: TTextDefaultType;
@@ -109,28 +92,21 @@ export interface XRelatedFormConfig extends ICommonBaseType {
   tooltip?: TTextAreaDefaultType;
 
   /**
+   * 数据字段
+   */
+  dataField: TTextDefaultType[];
+
+  /**
+   * 关联表单数据字段
+   */
+  relatedFormDataField: TTextDefaultType[];
+
+  /**
    * 组件状态：可用、隐藏、只读
    * 可选值: 'default' | 'hidden' | 'readonly'
    */
   status?: TRadioDefaultType<TStatusSelectKeyType>;
-
-  /**
-   * 默认值
-   */
-  defaultValue?: TTextDefaultType;
-
-  /**
-   * 字段宽度
-   */
-  width: TRadioDefaultType<TWidthSelectKeyType>;
-
-  /**
-   * required：是否必填，未填写时提交报错
-   */
-  verify: {
-    required: TBooleanDefaultType;
-  };
-
+ 
   /**
    * 表单的布局：水平、垂直（默认）
    * 可选值: 'vertical' | 'horizontal'
@@ -138,30 +114,9 @@ export interface XRelatedFormConfig extends ICommonBaseType {
   layout?: TLayoutSelectKeyType;
 
   /**
-   * 内容对齐方式：左、中、右
-   * 可选值: 'left' | 'center' | 'right'
+   * 字段宽度
    */
-  align?: TSelectDefaultType<TAlignSelectKeyType>;
-
-  /**
-   * 隐藏时是否提交数据，开启后隐藏状态仍会保存值
-   */
-  saveWithHidden?: TBooleanDefaultType;
-
-  /**
-   * 文本颜色
-   */
-  color?: TTextDefaultType;
-
-  /**
-   * 背景颜色
-   */
-  bgColor?: TTextDefaultType;
-
-  /**
-   * 标题宽度
-   */
-  labelColSpan?: TNumberDefaultType;
+  width: TRadioDefaultType<TWidthSelectKeyType>;
 }
 
 const XRelatedForm: XRelatedFormSchema = {
@@ -172,8 +127,6 @@ const XRelatedForm: XRelatedFormSchema = {
       name: '标题',
       type: CONFIG_TYPES.LABEL_INPUT
     },
-    ...dataFieldConfig,
-    ...relatedFormdataFieldConfig,
     {
       key: 'placeholder',
       name: '占位符',
@@ -184,30 +137,10 @@ const XRelatedForm: XRelatedFormSchema = {
       name: '描述信息',
       type: CONFIG_TYPES.TOOLTIP_INPUT
     },
-    layoutConfig,
-    labelColSpanConfig,
-    {
-      key: 'saveWithHidden',
-      name: '隐藏时提交数据',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
-    {
-      key: 'color',
-      name: '文本颜色',
-      type: CONFIG_TYPES.COLOR
-    },
-    {
-      key: 'bgColor',
-      name: '背景颜色',
-      type: CONFIG_TYPES.COLOR
-    },
-    {
-      key: 'verify',
-      name: '校验',
-      type: CONFIG_TYPES.VERIFY
-    },
-    alignConfig,
+    ...dataFieldConfig,
+    ...relatedFormdataFieldConfig,
     statusConfig,
+    layoutConfig,
     widthConfig
   ],
   config: {
@@ -216,22 +149,13 @@ const XRelatedForm: XRelatedFormSchema = {
       text: '关联表单',
       display: true
     },
-    dataField: [],
-    relatedFormDataField: [],
     placeholder: '请选择关联表单',
     tooltip: '',
-    width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
+    dataField: [],
+    relatedFormDataField: [],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
-    defaultValue: '',
-    align: ALIGN_VALUES[ALIGN_OPTIONS.LEFT],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
-    saveWithHidden: false,
-    color: '',
-    bgColor: '',
-    labelColSpan: 200,
-    verify: {
-      required: false
-    }
+    width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
   }
 };
 

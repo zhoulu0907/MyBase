@@ -322,6 +322,12 @@ export interface ISelectOptionsConfigType {
   type: typeof CONFIG_TYPES.SELECT_OPTIONS_INPUT;
   placeholder?: string;
 }
+export interface IMutipleSelectOptionsConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.MUTIPLE_SELECT_OPTIONS_INPUT;
+  placeholder?: string;
+}
 
 // 数据选择 数据源
 export interface ISelectDataSourceConfigType {
@@ -418,13 +424,34 @@ export interface IDateFormatConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.DATE_FORMAT;
+  range?: Array<{
+    label: string;
+    value: KeyType;
+  }>;
+}
+
+// 日期可选范围
+export interface IDateRangeConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.DATE_RANGE;
 }
 
 // 时间格式
-export interface ITimrFormatConfigType {
+export interface ITimeFormatConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.TIME_FORMAT;
+  range?: Array<{
+    label: string;
+    value: KeyType;
+  }>;
+}
+// 时间可选范围
+export interface ITimeRangeConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.TIME_RANGE;
 }
 
 

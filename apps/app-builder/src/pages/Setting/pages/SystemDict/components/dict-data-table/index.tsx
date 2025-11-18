@@ -15,6 +15,7 @@ interface DictionaryTableProps {
   searchValue: string;
   onSearchChange: (value: string) => void;
   onBatchConfig: () => void;
+  loading?: boolean;
 }
 
 export default function DictionaryTable({
@@ -26,7 +27,8 @@ export default function DictionaryTable({
   onPageSizeChange,
   searchValue,
   onSearchChange,
-  onBatchConfig
+  onBatchConfig,
+  loading
 }: DictionaryTableProps) {
   const columns = [
     {
@@ -60,7 +62,7 @@ export default function DictionaryTable({
         />
       </div>
       <div className={s.tableContainer}>
-        <Table rowKey="id" columns={columns} data={data} pagination={false} scroll={{ y: 510 }} />
+        <Table rowKey="id" columns={columns} data={data} pagination={false} scroll={{ y: 510 }} loading={loading} />
         <div className={s.paginationContainer}>
           <Pagination
             total={total}

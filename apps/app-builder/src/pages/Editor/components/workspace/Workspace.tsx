@@ -1,5 +1,5 @@
 import { getDictDataListByType, getDictDetail } from '@onebase/platform-center';
-import { EDITOR_TYPES, FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES } from '@onebase/ui-kit';
+import { EDITOR_TYPES, FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, COLOR_MODE_TYPES } from '@onebase/ui-kit';
 import { cloneDeep } from 'lodash-es';
 import { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
@@ -18,6 +18,7 @@ import {
   usePageEditorSignal,
   WIDTH_OPTIONS,
   WIDTH_VALUES,
+  DEFAULT_OPTIONS_TYPE,
   type GridItem
 } from '@onebase/ui-kit';
 
@@ -66,6 +67,7 @@ export default function EditorWorkspace() {
     pageComponentSchemas,
     setPageComponentSchemas,
     delPageComponentSchemas,
+    batchDelPageComponentSchemas,
     components,
     addComponents,
     setComponents,
@@ -75,8 +77,11 @@ export default function EditorWorkspace() {
     layoutSubComponents,
     setLayoutSubComponents,
     delLayoutSubComponents,
+    batchDelLayoutSubComponents,
     subTableComponents,
-    setSubTableComponents
+    setSubTableComponents,
+    delSubTableComponents,
+    batchDelSubTableComponents
   } = usePageEditorSignal();
 
   const [pageMode, setPageMode] = useState<string>('pc');
@@ -185,13 +190,13 @@ export default function EditorWorkspace() {
   // 删除组件
   const handleDeleteComponent = (componentId: string) => {
     // 从组件列表中移除
-    delComponents(componentId);
-    delPageComponentSchemas(componentId);
-    delLayoutSubComponents(componentId);
 
+
+    // 布局组件删除
     if (layoutSubComponents[componentId]) {
       // 收集所有需要删除的组件 ID
       const idsToDelete = new Set<string>();
+      idsToDelete.add(componentId);
 
       // 递归收集需要删除的组件 ID
       function collectDeleteIds(id: string) {
@@ -211,12 +216,38 @@ export default function EditorWorkspace() {
       // 开始收集
       collectDeleteIds(componentId);
 
+      delComponents(componentId);
       // 删除所有收集到的组件
-      idsToDelete.forEach((id: string) => {
-        // 明确参数类型
-        delPageComponentSchemas(id);
-        delLayoutSubComponents(id);
-      });
+      batchDelPageComponentSchemas(idsToDelete)
+      batchDelLayoutSubComponents(idsToDelete);
+    } else if (subTableComponents[componentId]) {
+      // 子表单删除
+      // 收集所有需要删除的组件 ID
+      const idsToDelete = new Set<string>();
+      idsToDelete.add(componentId);
+
+      // 递归收集需要删除的组件 ID
+      function collectDeleteIds(id: string) {
+        if (subTableComponents[id]) {
+          subTableComponents[id].forEach((row: any) => {
+            if (!idsToDelete.has(row.id)) {
+              idsToDelete.add(row.id);
+            }
+          });
+        }
+      }
+
+      // 开始收集
+      collectDeleteIds(componentId);
+
+      delComponents(componentId);
+      // 删除所有收集到的组件
+      batchDelPageComponentSchemas(idsToDelete)
+      batchDelSubTableComponents(idsToDelete);
+    } else {
+      // 从组件列表中移除
+      delComponents(componentId);
+      delPageComponentSchemas(componentId);
     }
 
     // 如果删除的是当前选中的组件，清除选中状态
@@ -254,38 +285,39 @@ export default function EditorWorkspace() {
         </div>
       </div>
 
-      {isWorkbenchEditor ? (
-        <WorkbenchWorkspace />
-      ) : (
-        <Form>
-          <div
-            className={styles.workspaceBody}
-            id="workspace-body"
-            onMouseDown={(e: React.MouseEvent<HTMLDivElement>) => {
-              const target = e.target as HTMLElement;
-              if (target.id === 'workspace-content') {
-                // 点击空白区域取消选中
-                console.log('点击空白区域取消选中');
-                clearCurComponentID();
-                setShowDeleteButton(false);
-              }
-            }}
-          >
-            <ReactSortable
-              id="workspace-content"
-              list={components}
-              setList={(newList) => {
-                const entityList: GridItem[] = [];
-                newList.forEach(async (item) => {
-                  if (item.type == ENTITY_TYPE_VALUE.MAIN || item.entityType === ENTITY_TYPE.MAIN) {
-                    // 主表业务实体
-                    const fieldList = item.fields.filter(
-                      (field: AppEntityField) =>
-                        field.fieldName !== 'lock_version' &&
-                        field.fieldName !== 'deleted' &&
-                        field.fieldName !== 'parent_id' &&
-                        field.isSystemField !== 1
-                    );
+      <Form
+        labelCol={{
+          style: { width: 200, flex: 'unset' }
+        }}
+      >
+        <div
+          className={styles.workspaceBody}
+          id="workspace-body"
+          onMouseDown={(e: React.MouseEvent<HTMLDivElement>) => {
+            const target = e.target as HTMLElement;
+            if (target.id === 'workspace-content') {
+              // 点击空白区域取消选中
+              console.log('点击空白区域取消选中');
+              clearCurComponentID();
+              setShowDeleteButton(false);
+            }
+          }}
+        >
+          <ReactSortable
+            id="workspace-content"
+            list={components}
+            setList={(newList) => {
+              const entityList: GridItem[] = [];
+              newList.forEach(async (item) => {
+                if (item.type == ENTITY_TYPE_VALUE.MAIN || item.entityType === ENTITY_TYPE.MAIN) {
+                  // 主表业务实体
+                  const fieldList = item.fields.filter(
+                    (field: AppEntityField) =>
+                      field.fieldName !== 'lock_version' &&
+                      field.fieldName !== 'deleted' &&
+                      field.fieldName !== 'parent_id' &&
+                      field.isSystemField !== 1
+                  );
                   for (let field of fieldList) {
                     let cpType = COMPONENT_MAP[field.fieldType];
                       if (!cpType) {
@@ -293,48 +325,66 @@ export default function EditorWorkspace() {
                       }
                     let cpID = `${cpType}-${uuidv4()}`;
 
-                      const schema = getComponentSchema(cpType as any);
+                    const schema = getComponentSchema(cpType as any);
 
-                      // 数据长度 dataLength
-                      // 小数位数 decimalPlaces
-                      // 默认值 defaultValue
-                      schema.config.defaultValue = field.defaultValue;
-                      // 字段描述 description
-                      schema.config.tooltip = field.description;
-                      // 是否必填：1-是，0-不是 isRequired
-                      // 是否唯一：1-是，0-不是 isUnique
-                      schema.config.verify = {
-                        ...schema.config.verify,
-                        required: field.isRequired,
-                        noRepeat: field.isUnique
-                      };
+                    // 数据长度 dataLength
+                    // 小数位数 decimalPlaces
+                    // 默认值 defaultValue
+                    const defaultValueConfig = { ...schema.config.defaultValue, customValue: field.defaultValue };
+                    schema.config.defaultValueConfig = defaultValueConfig;
+                    // 字段描述 description
+                    schema.config.tooltip = field.description;
+                    // 是否必填：1-是，0-不是 isRequired
+                    // 是否唯一：1-是，0-不是 isUnique
+                    schema.config.verify = {
+                      ...schema.config.verify,
+                      required: field.isRequired,
+                      noRepeat: field.isUnique
+                    };
 
-                      // 字段选项列表（单/多选字段专用） options COMPONENT_MAP
+                    // 字段选项列表（单/多选字段专用） options COMPONENT_MAP
                     if (cpType === FORM_COMPONENT_TYPES.SELECT_ONE || cpType === FORM_COMPONENT_TYPES.SELECT_MUTIPLE) {
-                        // 判断是否引用字典数据
-                        if (field.dictTypeId) {
-                          const res = await getDictDetail(field.dictTypeId);
-                          const dictDataList = res?.type ? await getDictDataListByType(res.type) : [];
-                          const dictOptions = dictDataList?.filter((e: any) => e.status === 1); // 只显示启用状态的字典数据
-                          if (dictOptions.length) {
-                            schema.config.defaultOptions = dictOptions;
-                          }
-                        } else if (field.options?.length) {
-                          schema.config.defaultOptions = field.options.map((e: any) => ({
-                            chosen: field.defaultValue && e.optionValue === field.defaultValue,
+                      // 判断是否引用字典数据
+                      if (field.dictTypeId) {
+                        const res = await getDictDetail(field.dictTypeId);
+                        const dictDataList = res?.type ? await getDictDataListByType(res.type) : [];
+                        const dictOptions = dictDataList?.filter((e: any) => e.status === 1); // 只显示启用状态的字典数据
+                        if (dictOptions.length) {
+                          const newDefaultOptionsConfig = {
+                            type: DEFAULT_OPTIONS_TYPE.DICT,
+                            disabled: true,
+                            dictTypeId: field.dictTypeId,
+                            colorMode: true,
+                            colorModeType: COLOR_MODE_TYPES.POINT,
+                            defaultOptions: dictOptions
+                          };
+                          schema.config.defaultOptionsConfig = {
+                            ...schema.config.defaultOptionsConfig,
+                            ...newDefaultOptionsConfig
+                          };
+                        }
+                      } else if (field.options?.length) {
+                        const newDefaultOptionsConfig = {
+                          defaultOptions: field.options.map((e: any) => ({
                             label: e.optionLabel,
                             value: e.optionValue
-                          }));
-                        }
+                          }))
+                        };
+                        schema.config.defaultOptionsConfig = {
+                          ...schema.config.defaultOptionsConfig,
+                          disabled: true,
+                          ...newDefaultOptionsConfig
+                        };
                       }
-                      // 字段约束配置（长度/正则） constraints
-                      schema.config.constraints = field.constraints;
-                      // 自动编号完整配置（含规则项） autoNumberConfig
-                      if (cpType === FORM_COMPONENT_TYPES.AUTO_CODE) {
-                        schema.config.autoCodeConfig = field.autoNumberConfig || schema.config.autoCodeConfig;
-                        schema.config.autoCodeDisabled = field?.autoNumberConfig?.id ? true : false;
-                      }
-                      // 关联的字典类型ID    dictTypeId
+                    }
+                    // 字段约束配置（长度/正则） constraints
+                    schema.config.constraints = field.constraints;
+                    // 自动编号完整配置（含规则项） autoNumberConfig
+                    if (cpType === FORM_COMPONENT_TYPES.AUTO_CODE) {
+                      schema.config.autoCodeConfig = field.autoNumberConfig || schema.config.autoCodeConfig;
+                      schema.config.autoCodeDisabled = field?.autoNumberConfig?.id ? true : false;
+                    }
+                    // 关联的字典类型ID    dictTypeId
 
                       schema.config.cpName = field.displayName;
                       schema.config.id = cpID;
@@ -383,53 +433,71 @@ export default function EditorWorkspace() {
                     // 子表单的每个表单项配置
                   let subFieldComponents: any = [];
                   for (let ele of subFieldList) {
-                      const subType = COMPONENT_MAP[ele.fieldType];
-                      if (!subType) {
-                        continue;
-                      }
-                      const subSchema = getComponentSchema(subType as any);
-                      const subId = `${subType}-${uuidv4()}`;
+                    const subType = COMPONENT_MAP[ele.fieldType];
+                    if (!subType) {
+                      continue;
+                    }
+                    const subSchema = getComponentSchema(subType as any);
+                    const subId = `${subType}-${uuidv4()}`;
 
-                      // 数据长度 dataLength
-                      // 小数位数 decimalPlaces
-                      // 默认值 defaultValue
-                      subSchema.config.defaultValue = ele.defaultValue;
-                      // 字段描述 description
-                      subSchema.config.tooltip = ele.description;
-                      subSchema.config.verify = {
-                        ...subSchema.config.verify,
-                        required: ele.isRequired,
-                        noRepeat: ele.isUnique
-                      };
+                    // 数据长度 dataLength
+                    // 小数位数 decimalPlaces
+                    // 默认值 defaultValue
+                    const defaultValueConfig = { ...subSchema.config.defaultValue, customValue: ele.defaultValue };
+                    subSchema.config.defaultValueConfig = defaultValueConfig;
+                    // 字段描述 description
+                    subSchema.config.tooltip = ele.description;
+                    subSchema.config.verify = {
+                      ...subSchema.config.verify,
+                      required: ele.isRequired,
+                      noRepeat: ele.isUnique
+                    };
 
-                      // 字段选项列表（单/多选字段专用） options
-                      if (
-                        subType === FORM_COMPONENT_TYPES.SELECT_ONE ||
-                        subType === FORM_COMPONENT_TYPES.SELECT_MUTIPLE
-                      ) {
-                        if (ele.dictTypeId) {
-                          const res = await getDictDetail(ele.dictTypeId);
-                          const dictDataList = res?.type ? await getDictDataListByType(res.type) : [];
-                          const dictOptions = dictDataList?.filter((e: any) => e.status === 1); // 只显示启用状态的字典数据
-                          if (dictOptions.length) {
-                            subSchema.config.defaultOptions = dictOptions;
-                          }
-                        } else if (ele.options?.length) {
-                          subSchema.config.defaultOptions = ele.options.map((e: any) => ({
-                            chosen: ele.defaultValue && e.optionValue === ele.defaultValue,
+                    // 字段选项列表（单/多选字段专用） options
+                    if (
+                      subType === FORM_COMPONENT_TYPES.SELECT_ONE ||
+                      subType === FORM_COMPONENT_TYPES.SELECT_MUTIPLE
+                    ) {
+                      if (ele.dictTypeId) {
+                        const res = await getDictDetail(ele.dictTypeId);
+                        const dictDataList = res?.type ? await getDictDataListByType(res.type) : [];
+                        const dictOptions = dictDataList?.filter((e: any) => e.status === 1); // 只显示启用状态的字典数据
+                        if (dictOptions.length) {
+                          const newDefaultOptionsConfig = {
+                            type: DEFAULT_OPTIONS_TYPE.DICT,
+                            disabled: true,
+                            dictTypeId: ele.dictTypeId,
+                            colorMode: true,
+                            colorModeType: COLOR_MODE_TYPES.POINT,
+                            defaultOptions: dictOptions
+                          };
+                          subSchema.config.defaultOptionsConfig = {
+                            ...subSchema.config.defaultOptionsConfig,
+                            ...newDefaultOptionsConfig
+                          };
+                        }
+                      } else if (ele.options?.length) {
+                        const newDefaultOptionsConfig = {
+                          defaultOptions: ele.options.map((e: any) => ({
                             label: e.optionLabel,
                             value: e.optionValue
-                          }));
-                        }
+                          }))
+                        };
+                        subSchema.config.defaultOptionsConfig = {
+                          ...subSchema.config.defaultOptionsConfig,
+                          disabled: true,
+                          ...newDefaultOptionsConfig
+                        };
                       }
-                      // 字段约束配置（长度/正则） constraints
-                      subSchema.config.constraints = ele.constraints;
-                      // 自动编号完整配置（含规则项） autoNumberConfig
-                      if (subType === FORM_COMPONENT_TYPES.AUTO_CODE) {
-                        subSchema.config.autoCodeConfig = ele.autoNumberConfig || subSchema.config.autoCodeConfig;
-                        subSchema.config.autoCodeDisabled = ele?.autoNumberConfig?.id ? true : false;
-                      }
-                      // 关联的字典类型ID    dictTypeId
+                    }
+                    // 字段约束配置（长度/正则） constraints
+                    subSchema.config.constraints = ele.constraints;
+                    // 自动编号完整配置（含规则项） autoNumberConfig
+                    if (subType === FORM_COMPONENT_TYPES.AUTO_CODE) {
+                      subSchema.config.autoCodeConfig = ele.autoNumberConfig || subSchema.config.autoCodeConfig;
+                      subSchema.config.autoCodeDisabled = ele?.autoNumberConfig?.id ? true : false;
+                    }
+                    // 关联的字典类型ID    dictTypeId
 
                       subSchema.config.cpName = ele.displayName;
                       subSchema.config.id = subId;
@@ -501,69 +569,90 @@ export default function EditorWorkspace() {
                   }
                 }
 
-                // 子表字段不允许
-                if (
-                  (entityID && entityID !== mainEntity.entityId) ||
-                  itemType === ENTITY_COMPONENT_TYPES.MAIN_ENTITY ||
-                  itemType === ENTITY_COMPONENT_TYPES.SUB_ENTITY
-                ) {
-                  console.log('entity id', entityID);
-                } else {
-                  const schema = getComponentSchema(itemType as any);
-                  schema.config.cpName = itemDisplayName;
-                  schema.config.id = cpID;
+              // 子表字段不允许
+              if (
+                (entityID && entityID !== mainEntity.entityId) ||
+                itemType === ENTITY_COMPONENT_TYPES.MAIN_ENTITY ||
+                itemType === ENTITY_COMPONENT_TYPES.SUB_ENTITY
+              ) {
+                console.log('entity id', entityID);
+              } else {
+                const schema = getComponentSchema(itemType as any);
+                schema.config.cpName = itemDisplayName;
+                schema.config.id = cpID;
 
-                  // 主表 字段组件
-                  if (entityID && fieldID) {
-                    // 获取当前字段数据源配置
-                    const currentField = mainEntity.fields?.find((ele: AppEntityField) => ele.fieldId === fieldID);
-                    if (currentField) {
-                      // 数据长度 dataLength
-                      // 小数位数 decimalPlaces
-                      // 默认值 defaultValue
-                      schema.config.defaultValue = currentField.defaultValue;
-                      // 字段描述 description
-                      schema.config.tooltip = currentField.description;
-                      // 是否必填：1-是，0-不是 isRequired
-                      // 是否唯一：1-是，0-不是 isUnique
-                      schema.config.verify = {
-                        ...schema.config.verify,
-                        required: currentField.isRequired,
-                        noRepeat: currentField.isUnique
-                      };
+                // 主表 字段组件
+                if (entityID && fieldID) {
+                  // 获取当前字段数据源配置
+                  const currentField = mainEntity.fields?.find((ele: AppEntityField) => ele.fieldId === fieldID);
+                  if (currentField) {
+                    // 数据长度 dataLength
+                    // 小数位数 decimalPlaces
+                    // 默认值 defaultValue
+                    const defaultValueConfig = {
+                      ...schema.config.defaultValue,
+                      customValue: currentField.defaultValue
+                    };
+                    schema.config.defaultValueConfig = defaultValueConfig;
+                    // 字段描述 description
+                    schema.config.tooltip = currentField.description;
+                    // 是否必填：1-是，0-不是 isRequired
+                    // 是否唯一：1-是，0-不是 isUnique
+                    schema.config.verify = {
+                      ...schema.config.verify,
+                      required: currentField.isRequired,
+                      noRepeat: currentField.isUnique
+                    };
 
-                      // 字段选项列表（单/多选字段专用） options
-                      if (
-                        itemType === FORM_COMPONENT_TYPES.SELECT_ONE ||
-                        itemType === FORM_COMPONENT_TYPES.SELECT_MUTIPLE
-                      ) {
-                        if (currentField.dictTypeId) {
-                          const res = await getDictDetail(currentField.dictTypeId);
-                          const dictDataList = res?.type ? await getDictDataListByType(res.type) : [];
-                          const dictOptions = dictDataList?.filter((e: any) => e.status === 1); // 只显示启用状态的字典数据
-                          if (dictOptions.length) {
-                            schema.config.defaultOptions = dictOptions;
-                          }
-                        } else if (currentField.options?.length) {
-                          schema.config.defaultOptions = currentField.options.map((e) => ({
-                            chosen: currentField.defaultValue && e.optionValue === currentField.defaultValue,
+                    // 字段选项列表（单/多选字段专用） options
+                    if (
+                      itemType === FORM_COMPONENT_TYPES.SELECT_ONE ||
+                      itemType === FORM_COMPONENT_TYPES.SELECT_MUTIPLE
+                    ) {
+                      if (currentField.dictTypeId) {
+                        const res = await getDictDetail(currentField.dictTypeId);
+                        const dictDataList = res?.type ? await getDictDataListByType(res.type) : [];
+                        const dictOptions = dictDataList?.filter((e: any) => e.status === 1); // 只显示启用状态的字典数据
+                        if (dictOptions.length) {
+                          const newDefaultOptionsConfig = {
+                            type: DEFAULT_OPTIONS_TYPE.DICT,
+                            disabled: true,
+                            dictTypeId: currentField.dictTypeId,
+                            colorMode: true,
+                            colorModeType: COLOR_MODE_TYPES.POINT,
+                            defaultOptions: dictOptions
+                          };
+                          schema.config.defaultOptionsConfig = {
+                            ...schema.config.defaultOptionsConfig,
+                            ...newDefaultOptionsConfig
+                          };
+                        }
+                      } else if (currentField.options?.length) {
+                        const newDefaultOptionsConfig = {
+                          defaultOptions: currentField.options.map((e) => ({
                             label: e.optionLabel,
                             value: e.optionValue
-                          }));
-                        }
+                          }))
+                        };
+                        schema.config.defaultOptionsConfig = {
+                          ...schema.config.defaultOptionsConfig,
+                          disabled: true,
+                          ...newDefaultOptionsConfig
+                        };
                       }
-                      // 字段约束配置（长度/正则） constraints
-                      schema.config.constraints = currentField.constraints;
-                      // 自动编号完整配置（含规则项） autoNumberConfig
-                      if (itemType === FORM_COMPONENT_TYPES.AUTO_CODE) {
-                        schema.config.autoCodeConfig = currentField.autoNumberConfig || schema.config.autoCodeConfig;
-                        schema.config.autoCodeDisabled = currentField?.autoNumberConfig?.id ? true : false;
-                      }
-                      // 关联的字典类型ID    dictTypeId
                     }
-                    schema.config.dataField = [entityID, fieldID];
-                    schema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT];
+                    // 字段约束配置（长度/正则） constraints
+                    schema.config.constraints = currentField.constraints;
+                    // 自动编号完整配置（含规则项） autoNumberConfig
+                    if (itemType === FORM_COMPONENT_TYPES.AUTO_CODE) {
+                      schema.config.autoCodeConfig = currentField.autoNumberConfig || schema.config.autoCodeConfig;
+                      schema.config.autoCodeDisabled = currentField?.autoNumberConfig?.id ? true : false;
+                    }
+                    // 关联的字典类型ID    dictTypeId
                   }
+                  schema.config.dataField = [entityID, fieldID];
+                  schema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT];
+                }
 
                   if (dataLabel) {
                     console.log(schema);
@@ -653,48 +742,47 @@ export default function EditorWorkspace() {
                           </>
                         )}
 
-                        <div
-                          className={styles.copyButton}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            console.log('复制组件: ', cp);
-                            handleCopyComponent({ ...cp, id: `${cp.type}-${uuidv4()}` }, cp.id);
-                          }}
-                        >
-                          <img src={CompCopyIcon} alt="component copy" />
-                        </div>
-                        <Divider className={styles.divider} type="vertical" />
-                        {/* 删除按钮 */}
-                        {/* TODO(mickey): 组件继续封装，和layout中的共用一套 */}
-                        <div
-                          className={styles.deleteButton}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            console.log('删除组件: ', cp.id);
-                            handleDeleteComponent(cp.id);
-                          }}
-                        >
-                          <img src={CompDeleteIcon} alt="component delete" />
-                        </div>
+                      <div
+                        className={styles.copyButton}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          console.log('复制组件: ', cp);
+                          handleCopyComponent({ ...cp, id: `${cp.type}-${uuidv4()}` }, cp.id);
+                        }}
+                      >
+                        <img src={CompCopyIcon} alt="component copy" />
                       </div>
-                    )}
-                  </div>
-                ))}
-            </ReactSortable>
-
-            {showEmpty && (
-              <div className={styles.formEmpty}>
-                <div className={styles.formEmptyContent}>
-                  <img src={EmptyIcon} alt="页面无组件" />
-                  拖拽左侧面板里的组件到这里
-                  <br />
-                  开始使用吧！
+                      <Divider className={styles.divider} type="vertical" />
+                      {/* 删除按钮 */}
+                      {/* TODO(mickey): 组件继续封装，和layout中的共用一套 */}
+                      <div
+                        className={styles.deleteButton}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          console.log('删除组件: ', cp.id);
+                          handleDeleteComponent(cp.id);
+                        }}
+                      >
+                        <img src={CompDeleteIcon} alt="component delete" />
+                      </div>
+                    </div>
+                  )}
                 </div>
+              ))}
+          </ReactSortable>
+
+          {showEmpty && (
+            <div className={styles.formEmpty}>
+              <div className={styles.formEmptyContent}>
+                <img src={EmptyIcon} alt="页面无组件" />
+                拖拽左侧面板里的组件到这里
+                <br />
+                开始使用吧！
               </div>
-            )}
-          </div>
-        </Form>
-      )}
+            </div>
+          )}
+        </div>
+      </Form>
     </div>
   );
 }

@@ -144,6 +144,12 @@ const BatchConfigModal: React.FC<BatchConfigModalProps> = ({ visible, onCancel, 
   // 新增字典值
   const addDictValue = () => {
     const mergedDictValues = mergeFormDataWithState();
+
+    if (mergedDictValues.length >= 100) {
+      Message.error('字典值数量不能超过100');
+      return;
+    }
+
     const newValue: DictValueItem = {
       id: `temp-${Date.now()}-${dictValues.length}`,
       label: '',

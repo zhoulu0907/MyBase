@@ -1,7 +1,7 @@
 import { Button, Checkbox, Dropdown, Form, Input, InputNumber, Menu, Message, Select } from '@arco-design/web-react';
 import { IconDelete, IconDragDotVertical } from '@arco-design/web-react/icon';
 import { FilterEntityFields, getEntityFields, type MetadataEntityField, type MetadataEntityPair } from '@onebase/app';
-import { ENTITY_FIELD_TYPE, useAppEntityStore, getPopupContainer } from '@onebase/ui-kit';
+import { ENTITY_FIELD_TYPE, getPopupContainer, useAppEntityStore } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import styles from '../../index.module.less';
@@ -96,7 +96,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
   // 设置允许的列
   useEffect(() => {
     const res = fieldList.some(
-      (item: MetadataEntityField) => !columnsConfig.some((col: any) => col.dataIndex == item.fieldName)
+      (item: MetadataEntityField) => !columnsConfig.some((col: any) => col.dataIndex == item.id)
     );
 
     setEnableAddColumn(res);
@@ -135,9 +135,9 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
     const newColumns = newFieldListNotSystemField.map((item: MetadataEntityField) => ({
       // 保留已有的命名，如果没有则使用字段展示名称
       title:
-        configs[columnsKey].find((col: any) => col.dataIndex === item.fieldName && configs.metaData === entityId)
-          ?.title || item.displayName,
-      dataIndex: item.fieldName,
+        configs[columnsKey].find((col: any) => col.dataIndex === item.id && configs.metaData === entityId)?.title ||
+        item.displayName,
+      dataIndex: item.id,
       disabled: item.disabled,
       id: item.id
     }));
@@ -180,7 +180,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
             <div className={styles.tableColumnList}>
               <ReactSortable
                 list={configs[columnsKey]}
-                setList={() => { }}
+                setList={() => {}}
                 group={{
                   name: 'table-col-item'
                 }}
@@ -196,7 +196,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
                 onSort={(e) => {
                   console.log(e);
                   const newList = [...configs[columnsKey]];
-                  console.log('configs[columnsKey]', configs[columnsKey])
+                  console.log('configs[columnsKey]', configs[columnsKey]);
                   // 根据 onSort 事件中的 oldIndex 和 newIndex 交换数组元素
                   const { oldIndex, newIndex } = e;
                   if (oldIndex !== undefined && newIndex !== undefined && oldIndex !== newIndex) {
@@ -297,15 +297,14 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
                   <Menu>
                     {fieldList
                       .filter(
-                        (item: MetadataEntityField) =>
-                          !columnsConfig.some((col: any) => col.dataIndex === item.fieldName)
+                        (item: MetadataEntityField) => !columnsConfig.some((col: any) => col.dataIndex === item.id)
                       )
                       .map((item: MetadataEntityField) => (
                         <Menu.Item
                           key={item.fieldName}
                           disabled={item?.disabled}
                           onClick={() => {
-                            const newList = [...columnsConfig, { title: item.displayName, dataIndex: item.fieldName }];
+                            const newList = [...columnsConfig, { title: item.displayName, dataIndex: item.id }];
                             setColumnsConfig(newList);
                             handlePropsChange(columnsKey, newList);
                           }}
@@ -433,6 +432,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
                           onClick={() => {
                             const newList = [...searchItemsConfig, { label: item.displayName, value: item.id }];
                             console.log('newList: ', newList);
+                            console.log('item: ', item);
                             add({ label: item.displayName, value: item.fieldName });
                             setSearchItemsConfig(newList);
                             handlePropsChange(searchItemsKey, newList);

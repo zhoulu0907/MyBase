@@ -5,7 +5,7 @@ import executor_big from '../../assets/bpmLogo/executor_big.png';
 
 export const ExecutorNodeRegistry: FlowNodeRegistry = {
   type: 'executor',
-  title: '执行人',
+  name: '执行人',
   category: 'interaction',
   meta: {
     isStart: false,

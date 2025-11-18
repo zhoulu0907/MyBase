@@ -2,7 +2,7 @@ import { Form, Input } from '@arco-design/web-react';
 import { nanoid } from 'nanoid';
 import { memo, useEffect, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
-import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES } from '../../../constants';
 import '../index.css';
 import type { XInputEmailConfig } from './schema';
 
@@ -13,13 +13,10 @@ const XInputEmail = memo((props: XInputEmailConfig & { runtime?: boolean; detail
     placeholder,
     tooltip,
     status,
-    defaultValue,
+    defaultValueConfig,
     verify,
     align,
     layout,
-    color,
-    bgColor,
-    labelColSpan = 0,
     runtime = true,
     detailMode
   } = props;
@@ -47,9 +44,6 @@ const XInputEmail = memo((props: XInputEmailConfig & { runtime?: boolean; detail
         }
         layout={layout}
         tooltip={tooltip}
-        labelCol={{
-          style: { width: labelColSpan, flex: 'unset' }
-        }}
         wrapperCol={{ style: { flex: 1 } }}
         rules={[
           { required: verify?.required },
@@ -64,7 +58,7 @@ const XInputEmail = memo((props: XInputEmailConfig & { runtime?: boolean; detail
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
-        initialValue={defaultValue}
+        initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : ''}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
           <div>{fieldValue || '--'}</div>
@@ -72,9 +66,7 @@ const XInputEmail = memo((props: XInputEmailConfig & { runtime?: boolean; detail
           <Input
             style={{
               width: '100%',
-              color,
               textAlign: align,
-              backgroundColor: bgColor,
               pointerEvents: runtime ? 'unset' : 'none'
             }}
             placeholder={placeholder}

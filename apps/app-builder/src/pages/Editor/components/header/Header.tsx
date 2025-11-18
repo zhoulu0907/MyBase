@@ -17,9 +17,10 @@ import VersionModal from '@/pages/CreateApp/pages/PageManager/components/Modals/
 import { useBasicEditorStore } from '@/store';
 import { useFlowEditorStor } from '@/store/index';
 import { useAppStore } from '@/store/store_app';
-import { Breadcrumb, Button, Form, Message, Tabs, Select } from '@arco-design/web-react';
-import { IconArrowLeft, IconSettings } from '@arco-design/web-react/icon';
+import { Breadcrumb, Button, Form, Message, Tabs } from '@arco-design/web-react';
+import { IconArrowLeft } from '@arco-design/web-react/icon';
 import type { WorkflowJSON } from './headerType';
+import { VersionListSelect } from './versionList';
 import {
   PageType,
   AppStatus,
@@ -49,15 +50,14 @@ import {
   type SavePageSetParams
 } from '@onebase/ui-kit';
 import { cloneDeep } from 'lodash-es';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PartPreview from '../partPreview';
+import FlowView from '../flowView';
 import styles from './index.module.less';
 import { useResourceStore } from '@/store/store_resource';
-import { useInitDefaultVersion } from './useInitDefaultVersion';
 import { VersionStatus } from '../constants';
 
-const Option = Select.Option;
 const BreadcrumbItem = Breadcrumb.Item;
 const sourceNodeIDMap = new Map();
 const baseTabData = [
@@ -105,8 +105,12 @@ const baseTabData = [
   // },
 ];
 
+interface VersionListSelectRef {
+  getVersionMgmtData: () => void;
+}
+
 export default function EditorHeader() {
-  const currentVersionList = useInitDefaultVersion();
+  const selectRef = useRef<VersionListSelectRef>(null);
   const { curPage } = pagesRuntimeSignal;
   const { t } = useI18n();
   const [renameForm] = Form.useForm();
@@ -114,7 +118,6 @@ export default function EditorHeader() {
   const { curViewId } = usePageViewEditorSignal;
   const { flowId, setFlowId } = useFlowPageEditorSignal;
   const { isEditMode, setIsEditMode } = useBasicEditorStore();
-
   const {
     components: formComponents,
     pageComponentSchemas: formPageComponentSchemas,
@@ -154,6 +157,8 @@ export default function EditorHeader() {
   const [visibleRenameForm, setVisibleRenameForm] = useState(false);
   const [partPreviewVisible, setPartPreviewVisible] = useState(false);
   const [manageVisible, setManageVisible] = useState(false);
+  const [flowViewVisible, setFlowViewVisible] = useState(false);
+  const [preViewData, setPreviewData] = useState<any>({});
 
   const sessionData = sessionStorage.getItem('EDITOR_PAGE_INFO') || '{}';
   const pageInfo = JSON.parse(sessionData);
@@ -175,13 +180,16 @@ export default function EditorHeader() {
       bpmDefJson: JSON.stringify(currentJsonData),
       globalConfig: configData
     };
-    save(params).then((res: any) => {
+    return save(params).then((res: any) => {
       setFlowId(res);
       Message.success(isCreate ? '创建成功' : '保存成功');
       if (isCreate) {
         setCurrnetFlowId(res);
       }
     });
+  };
+  const getVersonList = () => {
+    selectRef.current && selectRef.current.getVersionMgmtData();
   };
 
   const normalizeNodes = (obj: WorkflowJSON | undefined) => {
@@ -358,9 +366,14 @@ export default function EditorHeader() {
   };
   const handleExecTask = async () => {
     try {
+      if (activeTab === EDITOR_TYPES.FLOW_EDITOR) {
+        await onFlowSave();
+      }
       const res = await fetchPublish({ id: flowId });
       Message.success('发布成功');
-    } catch (error) {}
+    } catch (error) {
+      Message.error('发布失败');
+    }
   };
   const clearAllData = () => {
     clearFromLayoutSubComponents();
@@ -416,6 +429,10 @@ export default function EditorHeader() {
       setManageVisible(true);
     }
   };
+  const flowPreview = () => {
+    setFlowViewVisible(true);
+  };
+
   useEffect(() => {
     const pageType = curPage?.value?.pageSetType;
 
@@ -507,44 +524,7 @@ export default function EditorHeader() {
 
       <div className={styles.right}>
         {activeTab === EDITOR_TYPES.FLOW_EDITOR && (
-          <Select
-            placeholder="选择流程版本"
-            style={{ width: 154 }}
-            triggerProps={{
-              autoAlignPopupWidth: false,
-              autoAlignPopupMinWidth: true,
-              position: 'bl'
-            }}
-            value={currentFlowId}
-            arrowIcon={null}
-            className={styles.versionSelect}
-            onChange={(value) => changeCurrentFlow(value)}
-          >
-            {currentVersionList.map((item) => (
-              <Option key={item.id} value={item.id}>
-                <div className={styles.versionOption}>
-                  <span className={styles.versionName}>
-                    {item.versionAlias || '未命名'}
-                    {item.version}
-                  </span>
-                  <span
-                    className={`${styles.versionStatus} ${
-                      item.versionStatus === VersionStatus.DESIGNING
-                        ? styles.designing
-                        : item.versionStatus === VersionStatus.PUBLISHED
-                          ? styles.published
-                          : styles.history
-                    }`}
-                  >
-                    {item.versionStatus}
-                  </span>
-                </div>
-              </Option>
-            ))}
-            <Option key="manage" value={VersionStatus.MANAGE} className={styles.manageOption}>
-              <IconSettings /> 流程版本管理
-            </Option>
-          </Select>
+          <VersionListSelect ref={selectRef} setManageVisible={setManageVisible} />
         )}
 
         {appStatus === AppStatus.DEVELOPING && <div className={styles.editorStatusDeveloping}>未保存</div>}
@@ -552,11 +532,16 @@ export default function EditorHeader() {
         {appStatus === AppStatus.EDITING_AFTER_PUBLISH && (
           <div className={styles.editorStatusEditAfterPublished}>未保存</div>
         )}
-
+        {/* 预览 */}
         <Button onClick={toPreview} className={styles.previewButton}>
           <img src={previewSVG} />
           {t('editor.preview')}
         </Button>
+        {activeTab === EDITOR_TYPES.FLOW_EDITOR && (
+          <Button type="primary" onClick={flowPreview}>
+            测试
+          </Button>
+        )}
         <Button
           type="primary"
           onClick={() => {
@@ -600,8 +585,14 @@ export default function EditorHeader() {
         setVisible={setVisibleRenameForm}
         form={renameForm}
       />
-
-      <VersionModal visible={manageVisible} setVisible={setManageVisible} />
+      <FlowView visible={flowViewVisible} setVisible={setFlowViewVisible} businessId={flowData?.businessId} />
+      <VersionModal
+        visible={manageVisible}
+        setVisible={setManageVisible}
+        changeCurrentFlow={changeCurrentFlow}
+        currentFlowId={currentFlowId}
+        getVersonList={getVersonList}
+      />
     </div>
   );
 }

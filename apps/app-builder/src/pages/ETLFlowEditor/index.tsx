@@ -130,19 +130,18 @@ const ETLFlowEditorPage: React.FC = () => {
         edges: edges
       }
     };
-    console.log('req: ', req);
 
     const flowId = getHashQueryParam('flowId');
     if (flowId) {
       const res = await updateETLFlow({ id: flowId, ...req });
 
-      console.log('res: ', res);
       Message.success('更新成功');
     } else {
       const res = await craeteETLFlow(req);
 
-      console.log('res: ', res);
       Message.success('创建成功');
+      const appId = getHashQueryParam('appId');
+      navigate(`/onebase/etl_editor?flowId=${res}&appId=${appId}`);
     }
   };
 

@@ -18,6 +18,7 @@ import subprocessTwo from './../../assets/bpmLogo/subprocessTwo.png';
 import copy from './../../assets/bpmLogo/copy.png';
 import deleteIcon from './../../assets/bpmLogo/deleteIcon.png';
 import classNames from 'classnames';
+import { ApproverNodeRegistry, CcRecipientsNodeRegistry, ExecutorNodeRegistry } from '../../nodes/index';
 
 /**
  * 流程编辑页面
@@ -28,9 +29,9 @@ const LeftNavBar: React.FC = () => {
     {
       navTitle: '人工节点',
       navList: [
-        { img: approver, title: '审批人' },
-        { img: executor_big, title: '执行人' },
-        { img: ccto, title: '抄送人' }
+        { img: approver, title: '审批人', type: 'approver', registry: ApproverNodeRegistry },
+        { img: executor_big, title: '执行人', type: 'executor', registry: ExecutorNodeRegistry },
+        { img: ccto, title: '抄送人', type: 'ccRecipients', registry: CcRecipientsNodeRegistry }
       ]
     },
     {
@@ -82,16 +83,28 @@ const LeftNavBar: React.FC = () => {
               )}
             </div>
             {/* 左侧子节点 */}
-            {item.navList.map((nodeItem, index) => (
+            {item.navList.map((nodeItem:any, index) => (
               <Button
                 className={styles.nodeItem}
                 key={index}
-                onMouseDown={(e) =>
-                  startDragSerivce.startDragCard('node', e, {
-                    data: {
-                      title: `${nodeItem.title}`
+                onMouseDown={(e) =>{
+                    if(nodeItem?.type){
+                        startDragSerivce.startDragCard(nodeItem?.type, e, {
+                          data: {
+                            name: nodeItem?.title,
+                            registry: nodeItem?.registry
+                          }
+                        });
+
+                    }else{
+                         startDragSerivce.startDragCard('node', e, {
+                           data: {
+                             title: `${nodeItem.title}`
+                           }
+                         });
                     }
-                  })
+                }
+                  
                 }
               >
                 <img

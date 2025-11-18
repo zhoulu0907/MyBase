@@ -1,4 +1,4 @@
-import { Divider, Button } from '@arco-design/web-react';
+import { Divider, Button, Popconfirm } from '@arco-design/web-react';
 import styles from './index.module.less';
 import dayjs from 'dayjs';
 import type { TableColumnProps } from '@arco-design/web-react';
@@ -23,8 +23,7 @@ export const getVersionColumns = (
   {
     key: 'versionAlias',
     title: '流程版本备注',
-    dataIndex: 'versionAlias',
-    render: (text, record) => text + record.version
+    dataIndex: 'versionAlias'
   },
   {
     key: 'versionStatus',
@@ -95,10 +94,12 @@ export const getVersionColumns = (
 
         {record.versionStatus !== VersionStatus.PUBLISHED && (
           <>
-            <Divider type="vertical" />
-            <Button type="text" status="warning" onClick={() => handleDelete(record)}>
-              删除
-            </Button>
+            <Popconfirm title="确定要删除此流程版本吗？" onOk={() => handleDelete(record)} focusLock>
+              <Divider type="vertical" />
+              <Button type="text" status="warning">
+                删除
+              </Button>
+            </Popconfirm>
           </>
         )}
       </div>

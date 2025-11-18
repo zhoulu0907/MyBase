@@ -1,19 +1,17 @@
 import { Avatar, Form, Input, Select } from '@arco-design/web-react';
+import { IconClose, IconSearch } from '@arco-design/web-react/icon';
 import { getSimpleUserPage, type UserVO } from '@onebase/platform-center';
 import { debounce } from 'lodash-es';
-import { nanoid } from 'nanoid';
 import { memo, useCallback, useEffect, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-import '../index.css';
-import type { XInputUserSelectConfig } from './schema';
-import { IconClose, IconSearch } from '@arco-design/web-react/icon';
 import AdvanceSelectModal from './AdvanceSelectModal';
+import type { XInputUserSelectConfig } from './schema';
+
+import { getPopupContainer } from '@/utils';
 
 import '../index.css';
 import './index.css';
-import { getPopupContainer } from '@/utils';
-
 
 const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const { label, dataField, tooltip, status, verify, layout, labelColSpan = 0, runtime, detailMode } = props;
@@ -27,7 +25,8 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
   const [fetching, setFetching] = useState<boolean>(false);
 
   const { form } = Form.useFormContext();
-  const fieldName = dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.USER_SELECT}_${props.id}`;
+  const fieldName =
+    dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.USER_SELECT}_${props.id}`;
   const [advanceVisible, setAdvanceVisible] = useState(false); //高级选项popup
   const [currentSelectUser, setCurrentSelectUser] = useState<string>();
   const [currentSelectUserID, setCurrentSelectUserID] = useState<number>();
@@ -98,7 +97,7 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
       userID: value,
       userName: user?.nickname
     });
-  }
+  };
 
   const handleRemove = (e: React.MouseEvent<SVGElement, MouseEvent>) => {
     // 阻止下拉框弹出
@@ -106,7 +105,7 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
     setCurrentSelectUser(undefined);
     setCurrentSelectUserID(undefined);
     form.setFieldValue(fieldName, undefined);
-  }
+  };
 
   const handleOKModal = (user: any) => {
     // form.setFieldValue(fieldName, user.value);
@@ -145,7 +144,7 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
         ) : (
           <Select
             placeholder="请选择"
-            showSearch={true}
+            showSearch={false}
             filterOption={false}
             onSearch={debouncedSearch}
             onPopupScroll={scrollHandler}
@@ -158,13 +157,13 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
             onChange={(value) => handleSelectChange(value)}
             options={userData.map((option) => ({
               label: (
-                <div className='optionDiv'>
-                  <Avatar size={34} className='optionAvatar'>
+                <div className="optionDiv">
+                  <Avatar size={34} className="optionAvatar">
                     {option.nickname[0]}
                   </Avatar>
                   <div>
-                    <div className='optionName'>{option.nickname}</div>
-                    <div className='optionInfo'>
+                    <div className="optionName">{option.nickname}</div>
+                    <div className="optionInfo">
                       {option.deptName} {option.email}
                     </div>
                   </div>
@@ -176,20 +175,14 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
             triggerProps={{
               autoAlignPopupWidth: false,
               autoAlignPopupMinWidth: true,
-              position: 'bl',
+              position: 'bl'
             }}
             dropdownRender={(menu) => (
               <div>
-                <div className='dropdownRender'>
-                  <Input
-                    className='searchInput'
-                    placeholder="搜索人员"
-                    onChange={(value) => debouncedSearch(value)}
-                  />
-                  <IconSearch className='searchIcon' />
-                  <span className='advanceBtn'
-                    onClick={(e) => setAdvanceVisible(true)}
-                  >
+                <div className="dropdownRender">
+                  <Input className="searchInput" placeholder="搜索人员" onChange={(value) => debouncedSearch(value)} />
+                  <IconSearch className="searchIcon" />
+                  <span className="advanceBtn" onClick={(e) => setAdvanceVisible(true)}>
                     高级
                   </span>
                 </div>
@@ -198,26 +191,35 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
             )}
             renderFormat={() => {
               return (
-                <span className='renderFormat'>
-                  <Avatar size={24} className='avatar'>
+                <span className="renderFormat">
+                  <Avatar size={24} className="avatar">
                     {currentSelectUser?.[0]}
                   </Avatar>
-                  <span className='displayName'> {currentSelectUser} </span>
-                  <IconClose className='closeBtn' onMouseDown={(e) => {
-                    // 阻止 mousedown 导致 input 聚焦/下拉打开
-                    e.preventDefault();
-                    e.stopPropagation();
-                  }}
-                    onClick={(e) => { handleRemove(e) }} />
-                </span>);
-            }} />)}
+                  <span className="displayName"> {currentSelectUser} </span>
+                  <IconClose
+                    className="closeBtn"
+                    onMouseDown={(e) => {
+                      // 阻止 mousedown 导致 input 聚焦/下拉打开
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
+                    onClick={(e) => {
+                      handleRemove(e);
+                    }}
+                  />
+                </span>
+              );
+            }}
+          />
+        )}
       </Form.Item>
       <AdvanceSelectModal
         runtime={runtime}
         visible={advanceVisible}
         currentSelectUserID={currentSelectUserID}
         onCancel={() => setAdvanceVisible(false)}
-        onOk={(value: any) => handleOKModal(value)} />
+        onOk={(value: any) => handleOKModal(value)}
+      />
     </div>
   );
 });

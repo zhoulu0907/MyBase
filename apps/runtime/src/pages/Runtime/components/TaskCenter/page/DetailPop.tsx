@@ -9,30 +9,31 @@ import DetailStep from './DetailStep';
 import DetailOKConfirm from './DetailOKConfirm';
 import { getFormDetail, getOperatorRecord, fetchExecTask } from '@onebase/app/src/services/app_runtime';
 import PreviewContainer from './DetailForm';
+import FlowView from '../../../../../../../app-builder/src/pages/Editor/components/flowView';
 const Row = Grid.Row;
 const Col = Grid.Col;
+
+enum PageTypeMap {
+  willdo = 'todo',
+  idone = 'done',
+  icreated = 'created',
+  icopied = 'cc'
+}
 
 interface PageProps {
   detailPopVisible: boolean;
   setPopVisible: (visible: boolean) => void;
   onBack?: () => void;
-  taskId?: string;
   rowData?: any;
   listType?: string;
 }
 
-const DetailPage: React.FC<PageProps> = ({
-  detailPopVisible = false,
-  setPopVisible,
-  onBack,
-  taskId,
-  rowData,
-  listType
-}) => {
+const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisible, onBack, rowData, listType }) => {
   let [drawWidth, setDrawWidth] = useState<string>('66.66%');
   let [isShowRight, setIsShowRight] = useState(true);
   const [stepData, setStepData] = useState();
   const [detailData, setDetailData] = useState<any>();
+  const [flowViewVisible, setFlowViewVisible] = useState(false);
   let confirmRef = useRef<any>(null);
   const formRef = useRef<any>(null);
 
@@ -72,7 +73,7 @@ const DetailPage: React.FC<PageProps> = ({
     try {
       const req = {
         buttonType,
-        taskId: rowData?.taskId,
+        taskId: detailData?.taskId,
         instanceId: rowData?.instanceId,
         entity: entityData
       };
@@ -88,7 +89,7 @@ const DetailPage: React.FC<PageProps> = ({
   };
 
   function handlePreview() {
-    console.log('handle Preview ...');
+    setFlowViewVisible(true);
   }
   function renderDrawerFooter() {
     return (
@@ -106,6 +107,7 @@ const DetailPage: React.FC<PageProps> = ({
             ) {
               return (
                 <Button
+                  key={index}
                   type={item?.buttonType === BPMConfigButtonType.APPROVE ? 'primary' : 'outline'}
                   onClick={() => fetchExec(item)}
                 >
@@ -124,7 +126,7 @@ const DetailPage: React.FC<PageProps> = ({
                       ref={confirmRef}
                       onSetPopupVisible={(visible: any) => setPopupVisibleByIndex(index, visible)}
                       onBack={onBack}
-                      taskId={taskId}
+                      taskId={detailData?.taskId}
                       instanceId={rowData?.instanceId}
                       itemData={item}
                       isRequired={item?.approvalCommentRequired}
@@ -155,9 +157,12 @@ const DetailPage: React.FC<PageProps> = ({
     setStepData(res);
   };
   const fetchDetailData = async () => {
-    const res = await getFormDetail({ instanceId: rowData?.instanceId, taskId: rowData?.taskId });
+    const res = await getFormDetail({
+      instanceId: rowData?.instanceId,
+      taskId: rowData?.taskId,
+      from: PageTypeMap[listType as keyof typeof PageTypeMap]
+    });
     setDetailData(res);
-    // 拿到详情信息
   };
 
   useEffect(() => {
@@ -168,7 +173,6 @@ const DetailPage: React.FC<PageProps> = ({
       //根据列表类型请求对应的详情
     }
   }, [listType]);
-
   return (
     <section>
       <Drawer
@@ -176,7 +180,7 @@ const DetailPage: React.FC<PageProps> = ({
         width={drawWidth}
         title={renderTitle()}
         visible={detailPopVisible}
-        footer={listType === LISTTYPE.WILLDO ? renderDrawerFooter() : null}
+        footer={renderDrawerFooter()}
         onOk={() => {
           setPopVisible(false);
         }}
@@ -197,7 +201,7 @@ const DetailPage: React.FC<PageProps> = ({
             <Col span={6}>
               <p className="gray-color">发起人</p>
               <div className="photo-box">
-                <p className="photo-img"></p>
+                <p className="photo-img">{detailData?.initiator?.avatar && <img src={detailData?.initiator?.avatar} alt='' />}</p>
                 {detailData?.initiatorName}
               </div>
             </Col>
@@ -234,6 +238,12 @@ const DetailPage: React.FC<PageProps> = ({
           </div>
         </div>
       </Drawer>
+      <FlowView
+        visible={flowViewVisible}
+        setVisible={setFlowViewVisible}
+        instanceId={rowData?.instanceId}
+        businessId={rowData?.businessId}
+      />
     </section>
   );
 };

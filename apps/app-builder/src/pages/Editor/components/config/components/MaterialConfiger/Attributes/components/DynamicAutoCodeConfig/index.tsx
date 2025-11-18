@@ -49,6 +49,7 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({
   const [entityTree, setEntityTree] = useState<any[]>([]);
   const [editRuleVisible, setEditRuleVisible] = useState(false);
   const [rules, setRules] = useState<any[]>([]);
+  const [customDateFormatStatusMap, setCustomDateFormatStatusMap] = useState<Record<string, 'error' | undefined>>({});
 
   const getDisplayText = (config: any) => {
     if (!config) {
@@ -98,7 +99,7 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({
     const value = configs.dataField;
     const isMainEntity = value?.includes(mainEntity.entityId);
     const currentMainField = mainEntity.fields?.find((ele: any) => value.includes(ele.fieldId));
-    const isSubEntity = subEntities.entities?.find((ele) => value?.includes(ele.entityId));
+    const isSubEntity = subEntities.entities?.find((ele: any) => value?.includes(ele.entityId));
     const currentSubField = isSubEntity?.fields.find((ele: any) => value.includes(ele.fieldId));
     if (isMainEntity && currentMainField) {
       // 主表
@@ -217,14 +218,37 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({
         return (
           <>
             <span className={styles.autoCodeItemLable}>创建时间:</span>
-            <Select
-              disabled={configs[autoCodeDisabledKey]}
-              value={rule.format}
-              onChange={(value) => updateRule(index, value)}
-              className={styles.ruleInput}
-              options={dataOptions}
-              getPopupContainer={getPopupContainer}
-            ></Select>
+            <div className={styles.ruleInput}>
+              <Select
+                disabled={configs[autoCodeDisabledKey]}
+                value={rule.format}
+                style={{ marginBottom: '4px' }}
+                onChange={(value) => updateRule(index, value)}
+                options={dataOptions}
+                getPopupContainer={getPopupContainer}
+              ></Select>
+              {rule.format === '自定义' && (
+                <Input
+                  disabled={configs[autoCodeDisabledKey]}
+                  value={(rule.textValue as string) || ''}
+                  placeholder="例如：yyyyMMddHHmmss"
+                  onChange={(value) => {
+                    const ruleId = rule.id!;
+                    if (!/^[dhmstyHM]+$/.test(value as string)) {
+                      setCustomDateFormatStatusMap((prev) => ({ ...prev, [ruleId]: 'error' }));
+                    } else {
+                      setCustomDateFormatStatusMap((prev) => ({ ...prev, [ruleId]: undefined }));
+                    }
+                    updateRule(ruleId, { config: { ...rule.config, textValue: value } });
+                  }}
+                  className={styles.ruleInput}
+                  status={customDateFormatStatusMap[rule.id!]}
+                />
+              )}
+              {customDateFormatStatusMap[rule.id!] === 'error' && (
+                <span className={styles.ruleInputError}>{`例如：yyyyMMddHHmmss`}</span>
+              )}
+            </div>
           </>
         );
 
@@ -256,6 +280,7 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({
               animation
               value={findFieldPath(rule.format, entityTree)}
               onChange={(value) => updateRule(index, value?.[1] || '')}
+              getPopupContainer={getPopupContainer}
             />
           </>
         );
@@ -337,6 +362,7 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({
         {!configs[autoCodeDisabledKey] && (
           <Dropdown
             trigger="click"
+            getPopupContainer={getPopupContainer}
             droplist={
               <Menu>
                 <Menu.Item

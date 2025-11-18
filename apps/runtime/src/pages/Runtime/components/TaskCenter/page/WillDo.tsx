@@ -27,7 +27,9 @@ const WillDo: FC<WillDoProps> = ({ appId }) => {
   const columns: TableColumnProps[] = [
     {
       title: '流程标题',
-      dataIndex: 'processTitle'
+      dataIndex: 'processTitle',
+      width:250,
+      ellipsis: true
     },
     {
       title: '发起人',
@@ -37,7 +39,8 @@ const WillDo: FC<WillDoProps> = ({ appId }) => {
           <div className="photo-img">{obj?.avatar && <img src={obj?.avatar} />}</div>
           {obj?.name}
         </span>
-      )
+      ),
+      ellipsis: true
     },
     {
       title: '流程状态',
@@ -72,16 +75,20 @@ const WillDo: FC<WillDoProps> = ({ appId }) => {
     },
     {
       title: '表单摘要',
-      dataIndex: 'formSummary'
+      dataIndex: 'formSummary',
+      width:320,
+      ellipsis: true
     },
     {
       title: '到达时间',
       dataIndex: 'arrivalTime',
+      ellipsis: true,
       render: (value: number) => <span style={{ color: '#FF7D00' }}>{getTimeAgo(value)}</span>
     },
     {
       title: '发起时间',
       dataIndex: 'submitTime',
+      ellipsis: true,
       render: (value: number) => {
         return dayjs(value).format('YYYY-MM-DD HH:mm:ss');
       }
@@ -93,7 +100,6 @@ const WillDo: FC<WillDoProps> = ({ appId }) => {
       render: (_: any, record: any) => (
         <Button
           type="text"
-          status="success"
           onClick={() => {
             handleDetailPage(record);
           }}
@@ -107,7 +113,6 @@ const WillDo: FC<WillDoProps> = ({ appId }) => {
   const [selectedRowKeys, setSelectedRowKeys] = useState<any>();
   const [data, setData] = useState<any>();
   const [rowData, setRowData] = useState();
-  const [taskId, setTaskId] = useState('');
   const [detailPopVisible, setPopVisible] = useState(false);
   const [approveVisible, setApproveVisible] = useState(false);
   const [pagination, setPagination] = useState<any>({
@@ -139,7 +144,6 @@ const WillDo: FC<WillDoProps> = ({ appId }) => {
   }
 
   function handleDetailPage(row: any) {
-    setTaskId(row?.taskId);
     setPopVisible(true);
     setRowData(row);
   }
@@ -245,7 +249,6 @@ const WillDo: FC<WillDoProps> = ({ appId }) => {
           detailPopVisible={detailPopVisible}
           setPopVisible={setPopVisible}
           onBack={onBack}
-          taskId={taskId}
           rowData={rowData}
           listType={LISTTYPE.WILLDO}
         />

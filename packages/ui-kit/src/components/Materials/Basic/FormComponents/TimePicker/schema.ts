@@ -1,18 +1,23 @@
 import {
   baseConfig,
   baseDefault,
-  labelColSpanConfig,
+  dataFieldConfig,
   layoutConfig,
   statusConfig,
   widthConfig,
-  timeFormatConfig,
+  defaultValueConfig,
+  alignConfig,
+  timeRangeConfig,
   type ICommonBaseType,
   type TTimeTypeSelectKeyType,
   type TLayoutSelectKeyType,
   type TStatusSelectKeyType,
+  type TAlignSelectKeyType,
   type TWidthSelectKeyType
 } from '../../../common';
 import {
+  ALIGN_VALUES,
+  ALIGN_OPTIONS,
   CONFIG_TYPES,
   LAYOUT_OPTIONS,
   LAYOUT_VALUES,
@@ -21,7 +26,8 @@ import {
   WIDTH_OPTIONS,
   WIDTH_VALUES,
   TIME_VALUES,
-  TIME_OPTIONS
+  TIME_OPTIONS,
+  DEFAULT_VALUE_TYPES
 } from '../../../constants';
 import type {
   IBooleanConfigType,
@@ -41,7 +47,8 @@ import type {
   TSelectDefaultType,
   TTextAreaDefaultType,
   TTextDefaultType,
-  ITimrFormatConfigType
+  ITimeFormatConfigType,
+  TRadioDefaultType
 } from '../../../types';
 
 export interface XInputTimePickerSchema {
@@ -62,19 +69,24 @@ export type TXInputTimePickerEditData = Array<
   | IBooleanConfigType
   | ILayoutConfigType<TLayoutSelectKeyType>
   | IVerifyConfigType
-  | ITimrFormatConfigType
+  | ITimeFormatConfigType
 >;
 
 export interface XInputTimePickerConfig extends ICommonBaseType {
   /**
-   * 输入框标题
-   * text：标题
-   * display：是否显示
-   */
+     * 输入框标题
+     * text：标题
+     * display：是否显示
+     */
   label: {
     text: TTextDefaultType;
     display: TBooleanDefaultType;
   };
+
+  /**
+   * 占位符
+   */
+  placeholder: TTextDefaultType;
 
   /**
    * 描述信息（鼠标悬浮时显示）
@@ -82,27 +94,49 @@ export interface XInputTimePickerConfig extends ICommonBaseType {
   tooltip?: TTextAreaDefaultType;
 
   /**
-   * 组件状态：可用、隐藏、只读
-   * 可选值: 'default' | 'hidden' | 'readonly'
+   * 数据字段
    */
-  status?: TSelectDefaultType<TStatusSelectKeyType>;
+  dataField: TTextDefaultType[];
 
   /**
    * 默认值
    */
-  defaultValue?: TTextDefaultType;
+  defaultValueConfig?: any;
+
+  // 时间格式
+  dateType: TTimeTypeSelectKeyType;
+  timeType?: boolean;
+
+  // 可选范围
+  timeRange: {
+    earliestLimit: boolean;
+    earliestValue: string;
+    latestLimit: boolean;
+    latestValue: string;
+  };
 
   /**
-   * 字段宽度
-   */
-  width: TSelectDefaultType<TWidthSelectKeyType>;
-
-  /**
-   * required：是否必填，未填写时提交报错
-   */
+  * required：是否必填，未填写时提交报错
+  * noRepeat：是否不允许重复
+  * lengthLimit 长度范围
+  * minLength 最小长度
+  * maxLength 最大长度
+  */
   verify: {
     required: TBooleanDefaultType;
   };
+
+  /**
+   * 组件状态：可用、隐藏、只读
+   * 可选值: 'default' | 'hidden' | 'readonly'
+   */
+  status?: TRadioDefaultType<TStatusSelectKeyType>;
+
+  /**
+   * 内容对齐方式：左、中、右
+   * 可选值: 'left' | 'center' | 'right'
+   */
+  align?: TSelectDefaultType<TAlignSelectKeyType>;
 
   /**
    * 表单的布局：水平、垂直（默认）
@@ -111,15 +145,19 @@ export interface XInputTimePickerConfig extends ICommonBaseType {
   layout?: TLayoutSelectKeyType;
 
   /**
-   * 标题宽度
+   * 安全
+   * display：开启
+   * type：掩码类型
    */
-  labelColSpan?: TNumberDefaultType;
-  dateType: TTimeTypeSelectKeyType;
+  security: {
+    display: TBooleanDefaultType;
+    type?: TTextDefaultType;
+  };
 
   /**
-   * 隐藏时是否提交数据，开启后隐藏状态仍会保存值
+   * 字段宽度
    */
-  saveWithHidden?: TBooleanDefaultType;
+  width: TRadioDefaultType<TWidthSelectKeyType>;
 }
 
 const XTimePicker: XInputTimePickerSchema = {
@@ -131,29 +169,47 @@ const XTimePicker: XInputTimePickerSchema = {
       type: CONFIG_TYPES.LABEL_INPUT
     },
     {
-      key: 'tooltip',
-      name: '描述信息',
-      type: CONFIG_TYPES.TOOLTIP_INPUT
+      key: 'placeholder',
+      name: '占位提示',
+      type: CONFIG_TYPES.PLACEHOLDER_INPUT
     },
     {
-      key: 'defaultValue',
-      name: '默认值',
-      type: CONFIG_TYPES.TEXT_INPUT
+      key: 'tooltip',
+      name: '字段描述',
+      type: CONFIG_TYPES.TOOLTIP_INPUT
     },
-    layoutConfig,
-    labelColSpanConfig,
-    timeFormatConfig,
-    // {
-    //   key: 'saveWithHidden',
-    //   name: '隐藏时提交数据',
-    //   type: CONFIG_TYPES.SWITCH_INPUT
-    // },
+    //  数据绑定
+    ...dataFieldConfig,
+    // 默认值
+    defaultValueConfig,
+    {
+      key: 'timeFormat',
+      name: '时间格式',
+      type: CONFIG_TYPES.TIME_FORMAT,
+      range: [
+        { label: '时', value: TIME_VALUES[TIME_OPTIONS.HOUR] },
+        { label: '时:分', value: TIME_VALUES[TIME_OPTIONS.MINUTE] },
+        { label: '时:分:秒', value: TIME_VALUES[TIME_OPTIONS.SECOND] }
+      ]
+    },
+    timeRangeConfig,
     {
       key: 'verify',
       name: '校验',
       type: CONFIG_TYPES.VERIFY
     },
+    // 显示状态
     statusConfig,
+    // 对齐方式
+    alignConfig,
+    // 布局方式
+    layoutConfig,
+    {
+      key: 'security',
+      name: '安全',
+      type: CONFIG_TYPES.SECURITY
+    },
+    // 字段宽度
     widthConfig
   ],
   config: {
@@ -162,17 +218,32 @@ const XTimePicker: XInputTimePickerSchema = {
       text: '时间选择',
       display: true
     },
+    placeholder: '请输入时间选择',
     tooltip: '',
-    width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
-    status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
-    defaultValue: '',
+    dataField: [],
+    defaultValueConfig: {
+      type: DEFAULT_VALUE_TYPES.CUSTOM,
+      customValue: ''
+    },
     dateType: TIME_VALUES[TIME_OPTIONS.SECOND],
-    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
-    labelColSpan: 200,
-    saveWithHidden: false,
+    timeType: true,
+    timeRange: {
+      earliestLimit: false,
+      earliestValue: '',
+      latestLimit: false,
+      latestValue: ''
+    },
     verify: {
-      required: false
-    }
+      required: false,
+    },
+    status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
+    align: ALIGN_VALUES[ALIGN_OPTIONS.LEFT],
+    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
+    security: {
+      display: false,
+      type: ''
+    },
+    width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
   }
 };
 

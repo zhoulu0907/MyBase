@@ -1,10 +1,10 @@
-// 交互动作类型枚举，和 index.tsx 27-54 保持一致
+// 交互动作类型枚举
 export enum InteractionActionType {
-  Show = 'show',
-  Hide = 'hide',
-  Editable = 'editable',
-  Readonly = 'readonly',
-  Required = 'required',
-  ReadonlyAll = 'readonly_all',
-  SetFieldValue = 'set_field_value'
+  Show = 'show', // 显示
+  Hide = 'hide', // 隐藏
+  Editable = 'editable', // 可编辑
+  Readonly = 'readonly', // 只读
+  Required = 'required', // 必填
+  NoRequired = 'no_required', // 非必填
+  SetFieldValue = 'set_field_value' // 设置字段值
 }
