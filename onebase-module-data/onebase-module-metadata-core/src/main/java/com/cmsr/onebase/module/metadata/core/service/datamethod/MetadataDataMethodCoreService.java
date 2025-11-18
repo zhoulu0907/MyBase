@@ -45,7 +45,7 @@ public interface MetadataDataMethodCoreService {
      * @param methodCode 方法编码（可选）
      * @return 数据详情Map，包含实体信息和字段类型信息
      */
-    Map<String, Object> getData(Long entityId, Object id, String methodCode);
+    Map<String, Object> getData(Long entityId, Object id, String methodCode, Long menuId);
 
     /**
      * 分页查询数据列表

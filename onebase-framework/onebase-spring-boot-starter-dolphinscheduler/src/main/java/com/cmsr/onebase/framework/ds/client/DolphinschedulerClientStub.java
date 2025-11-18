@@ -97,7 +97,7 @@ public interface DolphinschedulerClientStub {
                                                    @Field("workflowDefinitionCode") Long workflowCode,
                                                    @Field("environmentCode") Long environmentCode,
                                                    @Field("tenantCode") String tenantCode,
-                                                   @Field("scheduleTime") ComplementTime scheduleTime, // {xxx}
+                                                   @Field("scheduleTime") String scheduleTime, // {xxx}
                                                    @Field("failureStrategy") String failureStrategy, // CONTINUE
                                                    @Field("warningType") String warningType, // NONE
                                                    @Field("runMode") String runMode, // RUN_MODE_SERIAL

@@ -7,6 +7,12 @@
 GET {{baseUrl}}/system/platform/get-platform-info
 Authorization: Bearer {{token}}
 
+### 获得管理员列表 /admin-api/system/admin-list
+GET {{baseUrl}}/system/platform/admin/list
+Authorization: Bearer {{token}}
+tenant-id: 1
+#X-From-Scene-Type: platform
+
 ### 获得管理员列表分页 /admin-api/system//admin/page
 GET {{baseUrl}}/system/platform/admin/page
 Authorization: Bearer {{token}}

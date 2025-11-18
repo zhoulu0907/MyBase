@@ -113,6 +113,11 @@ public interface ErrorCodeConstants {
 
     ErrorCode MISSING_BINDING_VIEW_ID = new ErrorCode(1_009_002_032, "流程实例缺少绑定视图ID");
 
+    ErrorCode AGENT_UPDATE_NO_PERMISSION = new ErrorCode(1_009_002_033, "只有创建人或被代理人是自己才能操作");
+
+    ErrorCode AGENT_UPDATE_INVALID_STATUS = new ErrorCode(1_009_002_034, "只允许更新待生效或代理中的记录");
+
+    ErrorCode AGENT_END_TIME_BEFORE_NOW = new ErrorCode(1_009_002_035, "代理失效时间必须大于当前时间");
 
     // ============= 系统相关错误 =============
 
