@@ -134,7 +134,7 @@ public class BuildAuthController {
 
         // 1.3 获得菜单列表
         Set<Long> menuIds = permissionService.getRoleMenuListByRoleId(convertSet(roles, RoleDO::getId));
-        List<MenuDO> menuList = menuService.getMenuList(menuIds);
+        List<MenuDO> menuList = menuService.getAllActiveMenuList(menuIds);
         // menuList = menuService.filterDisableMenus(menuList);
 
         // 2. 拼接结果返回

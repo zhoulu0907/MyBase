@@ -16,6 +16,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.anyline.data.param.ConfigStore;
+import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
@@ -104,14 +106,16 @@ public class MenuServiceImpl implements MenuService {
     }
 
     @Override
-    public List<MenuDO> getMenuList() {
-        return menuDataRepository.findAll();
+    public List<MenuDO> getAllActiveMenuList() {
+        ConfigStore configs = new DefaultConfigStore();
+        configs.eq(MenuDO.STATUS, CommonStatusEnum.ENABLE.getStatus());
+        return menuDataRepository.findAllByConfig(configs);
     }
 
     @Override
     public List<MenuDO> getMenuListByTenant(SystemMenuListReqVO reqVO) {
         // 查询所有菜单，并过滤掉关闭的节点
-        List<MenuDO> menus = getMenuList(reqVO);
+        List<MenuDO> menus = getAllActiveMenuList(reqVO);
         // 开启多租户的情况下，需要过滤掉未开通的菜单
         tenantService.handleTenantMenu(menuIds -> menus.removeIf(menu -> !CollUtil.contains(menuIds, menu.getId())));
         return menus;
@@ -164,7 +168,7 @@ public class MenuServiceImpl implements MenuService {
     }
 
     @Override
-    public List<MenuDO> getMenuList(SystemMenuListReqVO reqVO) {
+    public List<MenuDO> getAllActiveMenuList(SystemMenuListReqVO reqVO) {
         return menuDataRepository.findList(reqVO);
     }
 
@@ -181,7 +185,7 @@ public class MenuServiceImpl implements MenuService {
     }
 
     @Override
-    public List<MenuDO> getMenuList(Collection<Long> ids) {
+    public List<MenuDO> getAllActiveMenuList(Collection<Long> ids) {
         // 当 ids 为空时，返回一个空的实例对象
         if (CollUtil.isEmpty(ids)) {
             return Lists.newArrayList();
