@@ -13,4 +13,9 @@ public interface FlowErrorCodeConstants {
 
 
     ErrorCode LOG_NOT_EXIST = new ErrorCode(10002, "执行日志不存在");
+
+
+    ErrorCode CONNECTOR_NOT_EXISTS = new ErrorCode(1123784, "连接器不存在");
+
+    ErrorCode CONNECTOR_SCRIPT_NOT_EXISTS = new ErrorCode(1123784, "脚本配置不存在");
 }

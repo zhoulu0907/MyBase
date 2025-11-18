@@ -12,9 +12,20 @@ public class UpdateDataReqDTO {
     @Schema(description = "链路ID")
     private String traceId;
     /**
-     * 实体ID
+     * 目标实体ID
      */
     private Long entityId;
+
+    /**
+     * 父实体ID 如果目标实体是主表，parentEntityId则为null。如果目标实体是子表，parentEntityId则为目标实体的主表实体ID
+     */
+    private Long parentEntityId;
+
+    /**
+     * 更新类型 主表更新-mainEntity 子表更新-subEntity
+     */
+    private String updateType;
+
     /**
      * 数据内容 key为字段ID，value为字段值
      */

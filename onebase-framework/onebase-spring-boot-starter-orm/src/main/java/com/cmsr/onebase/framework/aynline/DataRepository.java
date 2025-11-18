@@ -53,6 +53,9 @@ public class DataRepository<T extends BaseDOInterface> {
         this.defaultClazz = defaultClazz;
     }
 
+    public DataRepository() {
+    }
+
     /**
      * 获取实体对应的表名
      *

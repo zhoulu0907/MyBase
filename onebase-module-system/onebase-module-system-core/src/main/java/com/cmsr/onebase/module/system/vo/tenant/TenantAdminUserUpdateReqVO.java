@@ -15,7 +15,7 @@ public class TenantAdminUserUpdateReqVO {
     @Schema(description = "管理员手机", example = "")
     private String adminMobile;
 
-    @Schema(description = "用户id", example = "")
-    private Long adminUserId;
+    @Schema(description = "来自平台克隆的用户id", example = "")
+    private Long platformUserId;
 
 }
