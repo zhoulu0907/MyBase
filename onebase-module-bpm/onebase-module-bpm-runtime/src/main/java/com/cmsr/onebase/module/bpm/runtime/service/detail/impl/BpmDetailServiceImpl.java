@@ -296,7 +296,7 @@ public class BpmDetailServiceImpl implements BpmDetailService {
             throw exception(ErrorCodeConstants.FLOW_ENTITY_DATA_ID_NOT_EXISTS);
         }
 
-        Map<String, Object> data = metadataDataMethodCoreService.getData(entityId, entityDataId, null);
+        Map<String, Object> data = metadataDataMethodCoreService.getData(entityId, entityDataId, null, null);
         if (data != null && !data.isEmpty()) {
             vo.setFormData(data);
         }

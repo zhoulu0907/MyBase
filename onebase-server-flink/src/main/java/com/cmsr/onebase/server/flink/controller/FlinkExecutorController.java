@@ -4,7 +4,9 @@ import com.cmsr.onebase.module.etl.executor.DataPreview;
 import com.cmsr.onebase.module.etl.executor.InputArgs;
 import com.cmsr.onebase.module.etl.executor.WorkFlowExecutor;
 import lombok.Setter;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,7 +34,8 @@ public class FlinkExecutorController {
             executor.execute();
             return ResponseEntity.ok(Map.of("result", "success"));
         } catch (Exception e) {
-            return ResponseEntity.ok(Map.of("result", "fail", "message", e.getMessage()));
+            Map<String, String> result = Map.of("result", "fail", "message", ExceptionUtils.getRootCauseMessage(e));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
         }
     }
 
@@ -42,7 +45,8 @@ public class FlinkExecutorController {
             DataPreview preview = executor.preview();
             return ResponseEntity.ok(preview);
         } catch (Exception e) {
-            return ResponseEntity.ok(Map.of("result", "fail", "message", e.getMessage()));
+            Map<String, String> result = Map.of("result", "fail", "message", ExceptionUtils.getRootCauseMessage(e));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
         }
     }
 
