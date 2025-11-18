@@ -1,3 +1,4 @@
+import { IconPlusCircleFill } from '@arco-design/web-react/icon';
 import React, { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import styles from './index.module.less';
@@ -81,7 +82,10 @@ const UnionConfig: React.FC = () => {
       {data.map((row, rowIndex) => {
         return (
           <div key={row.tableId} className={styles.row}>
-            <div className={styles.rowTitle}>{row.tableId}</div>
+            <div className={styles.rowTitle}>
+              <div>{row.tableId}</div>
+              <IconPlusCircleFill style={{ fontSize: 16, color: 'rgba(var(--primary-6))' }} onClick={() => {}} />
+            </div>
 
             {colTitles.map((col: any) => {
               return (
@@ -91,8 +95,26 @@ const UnionConfig: React.FC = () => {
                   swap // enables swap
                   list={row.columns.filter((c: any) => c.id === col.id)}
                   group={{
-                    name: row.tableId
-                    // put: row.columns.find((c: any) => c.id === col.id)?.name == ''
+                    name: row.tableId,
+                    put: (to, from, target) => {
+                      // 1. 只允许在当前行拖拽
+                      // 2. 当前行内的列如果有元素，不允许拖拽
+                      if (from.el.childNodes.length > 0) {
+                        if (row.tableId != (from.el.childNodes[0] as any).dataset.rowId) {
+                          return false;
+                        }
+                      }
+
+                      if (to.el.childNodes.length > 0) {
+                        return false;
+                      }
+
+                      if (target.getAttribute('data-row-id') != row.tableId) {
+                        return false;
+                      }
+
+                      return true;
+                    }
                   }}
                   setList={(newRow) => {
                     // 只记录变化，不立即更新状态
@@ -135,16 +157,21 @@ const UnionConfig: React.FC = () => {
                       setData(newData);
                     }
                   }}
-                  onEnd={() => {}}
-                  onAdd={(e) => {
-                    console.log('onAdd: ', rowIndex, 'col: ', col.id, e.item.id);
-                  }}
-                  onRemove={(e) => {
-                    console.log('onRemove: ', rowIndex, 'col: ', col.id, e.item.id);
-                  }}
+                  //   onEnd={() => {}}
+                  //   onAdd={(e) => {
+                  //     console.log('onAdd: ', rowIndex, 'col: ', col.id, e.item.id);
+                  //   }}
+                  //   onRemove={(e) => {
+                  //     console.log('onRemove: ', rowIndex, 'col: ', col.id, e.item.id);
+                  //   }}
                 >
                   {row.columns.find((c: any) => c.id === col.id)?.name && (
-                    <div key={`row-${rowIndex}-col-${col.id}`} className={styles.colItem}>
+                    <div
+                      key={`row-${rowIndex}-col-${col.id}`}
+                      className={styles.colItem}
+                      data-row-id={row.tableId}
+                      data-col-id={col.id}
+                    >
                       {row.columns.find((c: any) => c.id === col.id)?.name || ''}
                     </div>
                   )}
