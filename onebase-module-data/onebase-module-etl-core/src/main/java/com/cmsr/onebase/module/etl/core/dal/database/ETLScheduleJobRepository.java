@@ -5,6 +5,7 @@ import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLScheduleJobDO;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.DataRow;
 import org.springframework.stereotype.Repository;
 
 @Slf4j
@@ -26,5 +27,16 @@ public class ETLScheduleJobRepository extends DataRepository<ETLScheduleJobDO> {
         cs.eq("workflow_id", workflowId);
 
         return findOne(cs);
+    }
+
+    public void removeJobId(Long workflowId) {
+        ConfigStore cs = new DefaultConfigStore();
+        cs.eq("workflow_id", workflowId);
+        DataRow dataRow = new DataRow();
+        dataRow.put("job_id", null);
+        dataRow.addAllUpdateColumns(true);
+
+        updateByConfig(dataRow, cs);
+
     }
 }

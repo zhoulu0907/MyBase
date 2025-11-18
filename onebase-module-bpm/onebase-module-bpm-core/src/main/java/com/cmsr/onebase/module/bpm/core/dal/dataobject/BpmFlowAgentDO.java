@@ -18,11 +18,21 @@ import java.time.LocalDateTime;
 public class BpmFlowAgentDO extends TenantBaseDO {
     public static final String PRINCIPAL_ID = "principal_id";
 
+    public static final String AGENT_ID = "agent_id";
+
     public static final String APP_ID = "app_id";
 
     public static final String START_TIME = "start_time";
 
     public static final String END_TIME = "end_time";
+
+    public static final String REVOKED_TIME = "revoked_time";
+
+    public static final String AGENT_NAME = "agent_name";
+
+    public static final String PRINCIPAL_NAME = "principal_name";
+
+    public static final String REVOKED_ID = "revoked_id";
 
     /**
      * 应用ID
@@ -39,19 +49,19 @@ public class BpmFlowAgentDO extends TenantBaseDO {
     /**
     *被代理人用户名称
      */
-    @Column(name = "principal_name")
+    @Column(name = PRINCIPAL_NAME)
     private String principalName;
 
     /**
      * 代理人用户ID
      */
-    @Column(name = "agent_id")
+    @Column(name = AGENT_ID)
     private Long agentId;
 
     /**
      * 代理人用户名称
      */
-    @Column(name = "agent_name")
+    @Column(name = AGENT_NAME)
     private String agentName;
 
     /**
@@ -69,12 +79,12 @@ public class BpmFlowAgentDO extends TenantBaseDO {
     /**
      * 撤销人ID
      */
-    @Column(name = "revoker_id")
+    @Column(name = REVOKED_ID)
     private Long revokerId;
 
     /**
      * 撤销时间
      */
-    @Column(name = "revoked_time")
+    @Column(name = REVOKED_TIME)
     private LocalDateTime revokedTime;
 }
