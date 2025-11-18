@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 
 import static com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils.HEADER_TENANT_ID;
+import static com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils.HEADER_X_TENANT_ID;
 
 /**
  * 多租户 Util
@@ -106,6 +107,7 @@ public class TenantUtils {
     public static void addTenantHeader(Map<String, String> headers, Long tenantId) {
         if (tenantId != null) {
             headers.put(HEADER_TENANT_ID, tenantId.toString());
+            headers.put(HEADER_X_TENANT_ID, tenantId.toString());
         }
     }
 

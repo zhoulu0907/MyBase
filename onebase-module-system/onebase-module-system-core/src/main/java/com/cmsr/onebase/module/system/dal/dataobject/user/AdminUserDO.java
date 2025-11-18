@@ -40,6 +40,9 @@ public class AdminUserDO extends TenantBaseDO {
     public static final String USER_TYPE  = "user_type";
     public static final String ADMIN_TYPE = "admin_type";
     public static final String CORP_ID    = "corp_id";
+    public static final String PLATFORM_USER_ID    = "platform_user_id";
+
+
 
     public AdminUserDO setId(Long id) {
         super.setId(id);
@@ -148,4 +151,10 @@ public class AdminUserDO extends TenantBaseDO {
      */
     @Column(name = CORP_ID)
     private Long corpId;
+
+    /**
+     * 来自平台的克隆的用户id
+     */
+    @Column(name = PLATFORM_USER_ID)
+    private Long platformUserId;
 }
