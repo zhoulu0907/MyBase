@@ -1,9 +1,14 @@
 import { cloneDeep } from 'lodash-es';
 import type { GridItem } from '@onebase/ui-kit';
-import { STATUS_OPTIONS, STATUS_VALUES, getComponentSchema } from '@onebase/ui-kit';
+import {
+  STATUS_OPTIONS,
+  STATUS_VALUES,
+  getWorkbenchComponentSchema,
+  type WorkbenchComponentType
+} from '@onebase/ui-kit';
 import { WORKBENCH_DEFAULT_WIDTHS } from '../utils/constants';
 import { getDefaultWidth } from '../utils/width-utils';
-import type { WorkbenchComponentSchema } from '../types/workbenchComponent';
+import type { WorkbenchComponentSchema } from '../types/workbench-component';
 
 interface UseWorkbenchHandlersParams {
   pageComponentSchemas: Record<string, WorkbenchComponentSchema>;
@@ -103,7 +108,7 @@ export function useWorkbenchHandlers({
       }
     }
 
-    const schema = getComponentSchema(itemType as string) as WorkbenchComponentSchema;
+    const schema = getWorkbenchComponentSchema(itemType as WorkbenchComponentType) as WorkbenchComponentSchema;
     schema.config.cpName = itemDisplayName || undefined;
     schema.config.id = cpID ? cpID : undefined;
     schema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT];

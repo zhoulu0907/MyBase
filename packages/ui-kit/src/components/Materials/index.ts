@@ -38,4 +38,4 @@ export {
   workbenchTemplate,
   WORKBENCH_COMPONENT_TYPE_DISPLAY_NAME_MAP
 } from './Workbench';
-export type { WorkbenchComponentType } from './Workbench';
+export type { WorkbenchComponentSchema, WorkbenchComponentType } from './Workbench';

@@ -20,10 +20,8 @@ export interface WorkbenchComponentSchema {
     cpName?: string;
     status?: string;
     width?: string;
-    [key: string]: unknown;
   };
   editData?: unknown;
-  [key: string]: unknown;
 }
 
 /**
