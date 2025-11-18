@@ -37,6 +37,7 @@ const SpaceInfo: React.FC = () => {
   const corpInfo = TokenManager.getCorpIdInfo();
 
   useEffect(() => {
+    console.log('corpInfo: ', corpInfo);
     corpInfo?.corpId && fetchEnterpriseInfo(+corpInfo.corpId);
   }, [corpInfo]);
 

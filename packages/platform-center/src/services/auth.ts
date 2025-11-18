@@ -1,5 +1,11 @@
 import { type Captcha, type CaptchaCheck } from '@onebase/common';
-import { Headers, InnerOrSaSSLoginRequest, LoginRequest, TenantLoginRequest } from '../types';
+import {
+  Headers,
+  LoginRequest,
+  RuntimeAccountLoginRequest,
+  RuntimeMobileLoginRequest,
+  TenantLoginRequest
+} from '../types';
 import { platformService, runtimeService, systemService } from './clients';
 
 export const login = (req: LoginRequest, headers: Headers) => {
@@ -14,21 +20,17 @@ export const getPermissionInfo = () => {
   return systemService.get('/auth/get-permission-info');
 };
 
-// export const adminLogin = (req: LoginRequest, headers: Headers) => {
-//   return systemService.post('/auth/admin-login', req, { headers });
-// };
-
 export const adminLogin = (req: LoginRequest, headers: Headers) => {
   return platformService.post('/auth/login', req, { headers });
 };
 
-export const innerLogin = (req: InnerOrSaSSLoginRequest, headers: Headers) => {
+export const innerLogin = (req: RuntimeAccountLoginRequest, headers: Headers) => {
   return runtimeService.post('/auth/app-login', req, { headers });
-}
+};
 
-export const sassLogin = (req: InnerOrSaSSLoginRequest, headers: Headers) => {
+export const sassLogin = (req: RuntimeMobileLoginRequest, headers: Headers) => {
   return runtimeService.post('/auth/app-login-mobile', req, { headers });
-}
+};
 
 export const platformLogout = () => {
   return platformService.post('/auth/logout');

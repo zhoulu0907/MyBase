@@ -1,16 +1,26 @@
+import { PUBLISH_MODULE } from '@/constants/permission';
 import { Button, Checkbox, Form, Input, Message, Space, Typography } from '@arco-design/web-react';
 import { IconLock, IconUser } from '@arco-design/web-react/icon';
 import type { IIconBase } from '@icon-park/react/lib/runtime';
 import { getApplication } from '@onebase/app';
 import { getHashQueryParam, SliderCaptcha, TokenManager, type SliderCaptchaRef } from '@onebase/common';
-import { checkCaptchaApi, getCaptchaApi, login, sassLogin, innerLogin, type InnerOrSaSSLoginRequest, type LoginRequest, type LoginResponse } from '@onebase/platform-center';
+import {
+  checkCaptchaApi,
+  getCaptchaApi,
+  innerLogin,
+  login,
+  sassLogin,
+  type LoginRequest,
+  type LoginResponse,
+  type RuntimeAccountLoginRequest,
+  type RuntimeMobileLoginRequest
+} from '@onebase/platform-center';
 import { appIconMap } from '@onebase/ui-kit';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useI18n } from '../../../hooks/useI18n';
 import { useRememberMe } from '../../../hooks/useRememberMe';
 import styles from '../index.module.less';
-import { PUBLISH_MODULE } from '@/constants/permission';
 
 interface DynamicIconProps extends IIconBase {
   IconComponent: React.ComponentType<any>;
@@ -54,8 +64,8 @@ const Right: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   const match = location.hash.match(/\/onebase\/runtime\/(\d+)\/(\d+)/);
-  const newAppId = match ? match[1]: appId;  
-  const newTenantId = match? match[2] : tenantId; 
+  const newAppId = match ? match[1] : appId;
+  const newTenantId = match ? match[2] : tenantId;
 
   // 组件初始化时设置保存的账号
   useEffect(() => {
@@ -90,7 +100,13 @@ const Right: React.FC = () => {
       if (applicationId) {
         const res = await getApplication({ id: applicationId });
         if (res) {
-          setAppInfo({id: res.id || '', publishModel: res.publishModel || '', appName: res.appName || '', iconName: res.iconName || '', iconColor: res.iconColor || '' });
+          setAppInfo({
+            id: res.id || '',
+            publishModel: res.publishModel || '',
+            appName: res.appName || '',
+            iconName: res.iconName || '',
+            iconColor: res.iconColor || ''
+          });
         }
       }
     }
@@ -103,7 +119,7 @@ const Right: React.FC = () => {
   };
 
   // 账号密码登录
-  const handleAccountLogin = async (values: LoginRequest) => {
+  const handleRuntimeLogin = async (values: RuntimeAccountLoginRequest | RuntimeMobileLoginRequest | LoginRequest) => {
     setLoading(true);
 
     try {
@@ -116,35 +132,38 @@ const Right: React.FC = () => {
       }
 
       const headers = {
-        'Tenant-Id': tenantId || newTenantId ||  '1'
+        'Tenant-Id': tenantId || newTenantId || '1'
       };
 
-      const loginData: LoginRequest = {
-        username: values.username!,
-        password: values.password!,
-        captchaVerification: captchaVerification
-      };
-      const innerloginData:InnerOrSaSSLoginRequest = {
-        password: values.password!,
-        username: values.username!,
-        appId: newAppId,
-        captchaVerification: captchaVerification
-      }
-      const sassloginData: InnerOrSaSSLoginRequest = {
-        password: values.password!,
-        mobile: values.mobile!,
-        appId: newAppId,
-        captchaVerification: captchaVerification
-      };
       let response: LoginResponse | null = null;
-      if(appInfo.publishModel === PUBLISH_MODULE.SASS) {
-        response = await sassLogin(sassloginData, headers); 
-      }else if(appInfo.publishModel === PUBLISH_MODULE.INNER) {
+      if (appInfo.publishModel === PUBLISH_MODULE.SASS) {
+        const sassloginData: RuntimeMobileLoginRequest = {
+          password: values.password!,
+          mobile: (values as RuntimeMobileLoginRequest).mobile!,
+          appId: newAppId || '',
+          captchaVerification: captchaVerification
+        };
+
+        response = await sassLogin(sassloginData, headers);
+      } else if (appInfo.publishModel === PUBLISH_MODULE.INNER) {
+        const innerloginData: RuntimeAccountLoginRequest = {
+          password: values.password!,
+          username: (values as RuntimeAccountLoginRequest).username!,
+          appId: newAppId || '',
+          captchaVerification: captchaVerification
+        };
         response = await innerLogin(innerloginData, headers);
-      }else {
+      } else {
+        const loginData: LoginRequest = {
+          username: (values as LoginRequest).username!,
+          password: values.password!,
+          captchaVerification: captchaVerification
+        };
+
         response = await login(loginData, headers);
       }
-      if (response.accessToken) {
+
+      if (response && response.accessToken) {
         // 使用 TokenManager 存储 token 信息
         TokenManager.setToken(
           {
@@ -152,17 +171,22 @@ const Right: React.FC = () => {
             accessToken: response.accessToken,
             refreshToken: response.refreshToken,
             expiresTime: response.expiresTime,
-            tenantId: response.tenantWebsite,
+            tenantId: response.tenantWebsite
           },
           rememberMe
         );
 
         // 保存记住我状态和账号信息
-        saveRememberMe(values.username!, rememberMe);
+        if (appInfo.publishModel === PUBLISH_MODULE.INNER) {
+          saveRememberMe((values as RuntimeAccountLoginRequest).username!, rememberMe);
+        } else if (appInfo.publishModel === PUBLISH_MODULE.SASS) {
+          saveRememberMe((values as RuntimeMobileLoginRequest).mobile!, rememberMe);
+        } else {
+          saveRememberMe((values as LoginRequest).username!, rememberMe);
+        }
 
         Message.success(t('auth.loginSuccess'));
         const redirectURL = getHashQueryParam('redirectURL');
-        debugger
         if (redirectURL) {
           window.location.href = redirectURL;
         } else {
@@ -182,15 +206,30 @@ const Right: React.FC = () => {
   };
 
   // 表单提交处理
-  const handleSubmit = (_values: LoginRequest) => {
-    handleAccountLogin(_values);
+  const handleSubmit = (_values: RuntimeAccountLoginRequest | RuntimeMobileLoginRequest | LoginRequest) => {
+    handleRuntimeLogin(_values);
   };
 
   // 验证码验证成功回调
   const handleCaptchaSuccess = async (token: string) => {
     const values = await form.getFieldsValue();
     console.log('values:', values);
-    handleSubmit({ username: values.username, mobile: values.mobile, password: values.password, captchaVerification: token });
+
+    if (appInfo.publishModel === PUBLISH_MODULE.SASS) {
+      handleSubmit({
+        mobile: values.mobile,
+        password: values.password,
+        captchaVerification: token
+      } as RuntimeMobileLoginRequest);
+    } else if (appInfo.publishModel === PUBLISH_MODULE.INNER) {
+      handleSubmit({
+        username: values.username,
+        password: values.password,
+        captchaVerification: token
+      } as RuntimeAccountLoginRequest);
+    } else {
+      handleSubmit({ username: values.username, password: values.password, captchaVerification: token });
+    }
   };
 
   // 登录按钮点击事件 - 先验证滑块验证码
@@ -243,27 +282,23 @@ const Right: React.FC = () => {
           requiredSymbol={false}
           className={styles.loginForm}
         >
-          {appInfo.publishModel === PUBLISH_MODULE.SASS && 
-          <Form.Item
-            label="手机号"
-            field="mobile"
-            rules={[
-                { required: true, message: '请输入手机号' },
-            ]}
-            >
+          {(appInfo.publishModel === PUBLISH_MODULE.SASS && (
+            <Form.Item label="手机号" field="mobile" rules={[{ required: true, message: '请输入手机号' }]}>
               <Input placeholder="输入手机号" maxLength={11} />
-          </Form.Item> || 
-          <Form.Item
-            field="username"
-            label="用户名"
-            initialValue=""
-            rules={[
-              { required: true, message: '请输入账号' },
-              { minLength: 3, message: '账号至少3个字符' }
-            ]}
-          >
-            <Input placeholder={t('auth.userAccount')} allowClear size="large" prefix={<IconUser />} />
-          </Form.Item>} 
+            </Form.Item>
+          )) || (
+            <Form.Item
+              field="username"
+              label="用户名"
+              initialValue=""
+              rules={[
+                { required: true, message: '请输入账号' },
+                { minLength: 3, message: '账号至少3个字符' }
+              ]}
+            >
+              <Input placeholder={t('auth.userAccount')} allowClear size="large" prefix={<IconUser />} />
+            </Form.Item>
+          )}
 
           <Form.Item
             field="password"

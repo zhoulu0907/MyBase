@@ -32,10 +32,12 @@ export interface TenantLoginRequest {
   captchaVerification?: string | null;
 }
 
-export interface InnerOrSaSSLoginRequest {
-  mobile?: string;
-  
-  appId: number;
+export interface RuntimeAccountLoginRequest {
+  /**
+   * 应用id
+   */
+  appId: string;
+
   /**
    * 账号
    */
@@ -50,6 +52,25 @@ export interface InnerOrSaSSLoginRequest {
   captchaVerification?: string | null;
 }
 
+export interface RuntimeMobileLoginRequest {
+  /**
+   * 应用id
+   */
+  appId: string;
+
+  /**
+   * 手机号
+   */
+  mobile: string;
+  /**
+   * 密码
+   */
+  password: string;
+  /**
+   * 验证码
+   */
+  captchaVerification?: string | null;
+}
 
 export interface LoginResponse {
   userId: string; // 用户ID
