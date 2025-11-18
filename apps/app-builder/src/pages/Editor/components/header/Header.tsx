@@ -51,6 +51,7 @@ import { cloneDeep } from 'lodash-es';
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PartPreview from '../partPreview';
+import FlowView from '../flowView';
 import styles from './index.module.less';
 import { useResourceStore } from '@/store/store_resource';
 import { VersionStatus } from '../constants';
@@ -147,6 +148,8 @@ export default function EditorHeader() {
   const [visibleRenameForm, setVisibleRenameForm] = useState(false);
   const [partPreviewVisible, setPartPreviewVisible] = useState(false);
   const [manageVisible, setManageVisible] = useState(false);
+  const [flowViewVisible, setFlowViewVisible] = useState(false);
+  const [preViewData, setPreviewData] = useState<any>({});
 
   const sessionData = sessionStorage.getItem('EDITOR_PAGE_INFO') || '{}';
   const pageInfo = JSON.parse(sessionData);
@@ -168,13 +171,13 @@ export default function EditorHeader() {
       bpmDefJson: JSON.stringify(currentJsonData),
       globalConfig: configData
     };
-   return save(params).then((res: any) => {
-     setFlowId(res);
-     Message.success(isCreate ? '创建成功' : '保存成功');
-     if (isCreate) {
-       setCurrnetFlowId(res);
-     }
-   });
+    return save(params).then((res: any) => {
+      setFlowId(res);
+      Message.success(isCreate ? '创建成功' : '保存成功');
+      if (isCreate) {
+        setCurrnetFlowId(res);
+      }
+    });
   };
   const getVersonList = () => {
     selectRef.current && selectRef.current.getVersionMgmtData();
@@ -411,6 +414,10 @@ export default function EditorHeader() {
       setManageVisible(true);
     }
   };
+  const flowPreview = () => {
+    setFlowViewVisible(true);
+  };
+
   useEffect(() => {
     if (curPage?.value?.pageSetType === PageType.NORMAL) {
       setTabData(baseTabData.filter((tab) => tab.key !== EDITOR_TYPES.FLOW_EDITOR));
@@ -499,11 +506,16 @@ export default function EditorHeader() {
         {appStatus === AppStatus.EDITING_AFTER_PUBLISH && (
           <div className={styles.editorStatusEditAfterPublished}>未保存</div>
         )}
-
+        {/* 预览 */}
         <Button onClick={toPreview} className={styles.previewButton}>
           <img src={previewSVG} />
           {t('editor.preview')}
         </Button>
+        {activeTab === EDITOR_TYPES.FLOW_EDITOR && (
+          <Button type="primary" onClick={flowPreview}>
+            测试
+          </Button>
+        )}
         <Button
           type="primary"
           onClick={() => {
@@ -547,7 +559,7 @@ export default function EditorHeader() {
         setVisible={setVisibleRenameForm}
         form={renameForm}
       />
-
+      <FlowView visible={flowViewVisible} setVisible={setFlowViewVisible} businessId={flowData?.businessId} />
       <VersionModal
         visible={manageVisible}
         setVisible={setManageVisible}

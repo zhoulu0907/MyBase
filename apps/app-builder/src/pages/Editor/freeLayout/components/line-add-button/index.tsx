@@ -15,6 +15,7 @@ import {
   WorkflowDragService,
   WorkflowLinesManager,
   WorkflowNodeEntity,
+  usePlayground,
   type WorkflowNodeJSON
 } from '@flowgram.ai/free-layout-editor';
 
@@ -30,6 +31,7 @@ export const LineAddButton = (props: LineRenderProps) => {
   const dragService = useService(WorkflowDragService);
   const linesManager = useService(WorkflowLinesManager);
   const historyService = useService(HistoryService);
+  const playground = usePlayground();
 
   const { fromPort, toPort } = line;
 
@@ -115,7 +117,7 @@ export const LineAddButton = (props: LineRenderProps) => {
      };
 
   if (!visible) {
-    return <div className="line-node" style={{}}></div>;
+    return playground.config.readonly ? '' : <div className="line-node" style={{}}></div>;
   }
 
   return (
