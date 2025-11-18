@@ -16,6 +16,7 @@ import com.cmsr.onebase.module.bpm.core.dto.BpmInstanceDTO;
 import com.cmsr.onebase.module.bpm.core.dto.BpmTodoTaskDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
 import com.cmsr.onebase.module.bpm.core.enums.BpmBusinessStatusEnum;
+import com.cmsr.onebase.module.bpm.core.enums.BpmCcViewStatusEnum;
 import com.cmsr.onebase.module.bpm.core.enums.BpmUserTypeEnum;
 import com.cmsr.onebase.module.bpm.core.service.BpmEngineDefExtService;
 import com.cmsr.onebase.module.bpm.core.vo.*;
@@ -524,13 +525,24 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         fillTimeRange(condition, "submit_time", reqVO.getSubmitTimeStart(), reqVO.getSubmitTimeEnd());
 
         // 填充处理人条件
-        condition.and(Compare.EQUAL, "processed_by", userId);
+        condition.and(Compare.EQUAL, "user_id", userId);
+
+        // 填充查看状态条件
+        fillViewStatus(condition, "viewed", reqVO.getViewStatus());
 
         // 排序
         fillOrder(condition, "create_time", reqVO.getSortType());
 
         return condition;
     }
+    private void fillViewStatus(ConfigStore condition, String fieldName, String viewStatus) {
+        if (StringUtils.isNotBlank(viewStatus)) {
+            Integer status = BpmCcViewStatusEnum.VIEWED.getCode().equals(viewStatus) ? 1 :
+                    BpmCcViewStatusEnum.UNVIEWED.getCode().equals(viewStatus) ? 0 : null;
+            condition.and(Compare.EQUAL, "viewed", status);
+        }
+    }
+
     private BpmCopyTaskPageResVO convertToCopyTaskVO(BpmCcRecordDTO ccRecord) {
         BpmCopyTaskPageResVO vo = new BpmCopyTaskPageResVO();
 
@@ -542,7 +554,11 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         vo.setTaskId(ccRecord.getTaskId());
         vo.setInstanceId(ccRecord.getInstanceId());
         vo.setBusinessId(ccRecord.getBindingViewId());
-
+        if(1==ccRecord.getViewed()){
+            vo.setViewed(BpmCcViewStatusEnum.VIEWED.getCode());
+        }else{
+            vo.setViewed(BpmCcViewStatusEnum.UNVIEWED.getCode());
+        }
         // 设置发起人信息
         UserBasicInfoVO initiator = new UserBasicInfoVO();
         initiator.setUserId(ccRecord.getInitiatorId());

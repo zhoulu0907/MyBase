@@ -36,7 +36,7 @@ public class BpmFlowCcRecordDO extends TenantBaseDO {
      * 已阅 0，否 1，是
      */
     @Column(name = "viewed")
-    private Short viewed;
+    private Integer viewed;
 
     /**
      * 已读时间

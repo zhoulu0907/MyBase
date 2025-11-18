@@ -29,7 +29,7 @@ public class BpmFlowCcRecordExtRepository {
     }
 
     private String buildBaseSql() {
-        return String.format("""
+        return """
                 select * from (
                    select
                        t3.app_id,
@@ -57,14 +57,10 @@ public class BpmFlowCcRecordExtRepository {
                        t.update_time
                    from
                        bpm_flow_cc_record t
-                       left join bpm_flow_user t1 on t.task_id  = t1.associated
                        left join bpm_flow_instance t2 on t.instance_id = t2.id
                        left join bpm_flow_instance_biz_ext t3 on t.instance_id = t3.instance_id
-                   where  t.deleted = 0 and t1.deleted = 0 and t2.deleted = 0 and t3.deleted = 0
-                          and t1.type = '%s'
+                   where  t.deleted = 0  and t2.deleted = 0 and t3.deleted = 0
                 ) tf
-                """,
-                BpmUserTypeEnum.CC.getCode()
-        );
+                """;
     }
 }
