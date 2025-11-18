@@ -5,10 +5,7 @@
 
 import { useCallback } from 'react';
 
-import {
-  WorkflowNodePanelService,
-  WorkflowNodePanelUtils,
-} from '@flowgram.ai/free-node-panel-plugin';
+import { WorkflowNodePanelService, WorkflowNodePanelUtils } from '@flowgram.ai/free-node-panel-plugin';
 import {
   delay,
   usePlayground,
@@ -18,8 +15,9 @@ import {
   WorkflowLinesManager,
   WorkflowNodeEntity,
   type WorkflowNodeJSON,
-  WorkflowPortEntity,
+  WorkflowPortEntity
 } from '@flowgram.ai/free-layout-editor';
+import { IdList } from '../editorType';
 
 /**
  * click port to trigger node select panel
@@ -33,6 +31,9 @@ export const usePortClick = () => {
   const linesManager = useService(WorkflowLinesManager);
 
   const onPortClick = useCallback(async (e: React.MouseEvent, port: WorkflowPortEntity) => {
+    if (port.id === IdList.PROT_OUTPUT_START_0_) {
+      return;
+    }
     const mousePos = playground.config.getPosFromMouseEvent(e);
     const containerNode = port.node.parent;
     // open node selection panel - 打开节点选择面板
@@ -40,8 +41,8 @@ export const usePortClick = () => {
       position: mousePos,
       containerNode,
       panelProps: {
-        enableScrollClose: true,
-      },
+        enableScrollClose: true
+      }
     });
 
     // return if no node selected - 如果没有选择节点则返回
@@ -57,12 +58,12 @@ export const usePortClick = () => {
       nodeType,
       position: {
         x: mousePos.x + 100,
-        y: mousePos.y,
+        y: mousePos.y
       },
       fromPort: port,
       containerNode,
       document,
-      dragService,
+      dragService
     });
 
     // create new workflow node - 创建新的工作流节点
@@ -80,7 +81,7 @@ export const usePortClick = () => {
     WorkflowNodePanelUtils.buildLine({
       fromPort: port,
       node,
-      linesManager,
+      linesManager
     });
   }, []);
 

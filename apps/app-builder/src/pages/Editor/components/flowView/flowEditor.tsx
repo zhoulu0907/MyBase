@@ -5,6 +5,7 @@ import {
   type FreeLayoutPluginContext
 } from '@flowgram.ai/free-layout-editor';
 import { ZoomSelect } from '../../freeLayout/components/tools/zoom-select';
+import InitInteractive from '../../freeLayout/components/tools/initInteractive';
 import { type FlowDocumentJSON } from '../../freeLayout/typings';
 import { useEditorProps } from '../../freeLayout/hooks';
 import { nodeRegistries } from '../../freeLayout/nodes';
@@ -42,7 +43,8 @@ const FlowEditor: React.FC<FlowEditorProps> = ({ preViewData }) => {
     <FreeLayoutEditorProvider {...editorProps} ref={ref}>
       <EditorRenderer className={styles.demoEditor} />
       <div className={styles.zoomSelectWrapper}>
-        <ZoomSelect />
+        <ZoomSelect minZoom={0.5} />
+        <InitInteractive />
       </div>
     </FreeLayoutEditorProvider>
   );
