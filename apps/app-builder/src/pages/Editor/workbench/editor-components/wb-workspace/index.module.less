@@ -1,0 +1,200 @@
+@import '../../../../Editor/variables.module.less';
+
+// 工作台工作区样式
+.workspaceBody {
+  height: calc(100vh - var(--editor-header-height) - 32px - 20px);
+  display: block;
+  padding: 20px;
+  box-sizing: border-box;
+  position: relative;
+  overflow-y: auto;
+
+  /* 自定义滚动条样式 */
+  &::-webkit-scrollbar {
+    width: 0px;
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #e0e0e0;
+    border-radius: 0px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .workspaceContent {
+    background-color: #fff;
+    min-width: 348px;
+    height: 100%;
+    width: 100%;
+    overflow-y: auto;
+    padding: 16px;
+    box-sizing: border-box;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-content: flex-start;
+
+    /* 自定义滚动条样式 */
+    &::-webkit-scrollbar {
+      width: 0px;
+      background: transparent;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: #e0e0e0;
+      border-radius: 0px;
+    }
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+  }
+
+  .formEmpty {
+    width: 100%;
+    height: 100%;
+    display: block;
+    padding: 40px;
+    box-sizing: border-box;
+    pointer-events: none;
+    user-select: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    .formEmptyContent {
+      width: 100%;
+      height: 100%;
+      color: #a2a3a5;
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 22px;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      background-image: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.08) 4px,
+        rgba(0, 0, 0, 0.08) 0
+      );
+      background-position: 50%;
+      background-size: cover;
+      border-radius: 4px;
+      border: 1px dashed rgba(17, 31, 44, 0.2);
+    }
+  }
+
+  // 工作台组件可调整大小相关样式
+  .resizableWorkbenchItemWrapper {
+    position: relative;
+    display: inline-block;
+    margin: 4px;
+  }
+
+  .resizableWorkbenchItem {
+    cursor: move;
+    box-sizing: border-box;
+    border: 1px dashed transparent;
+    border-radius: 8px;
+    transition: border-color 0.2s ease;
+    position: relative;
+    min-height: 40px;
+
+    &:hover {
+      border-color: #009e9e;
+    }
+
+    & .operationArea {
+      pointer-events: auto !important;
+    }
+  }
+
+  // 调整手柄样式
+  .resizeHandle {
+    position: absolute;
+    background-color: transparent;
+    z-index: 100;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: rgba(0, 158, 158, 0.1);
+    }
+
+    &:active {
+      background-color: rgba(0, 158, 158, 0.2);
+    }
+  }
+
+  .resizeHandleRight {
+    right: -4px;
+    top: 0;
+    bottom: 0;
+    width: 8px;
+    cursor: ew-resize;
+
+    &::after {
+      content: '';
+      position: absolute;
+      right: 2px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 2px;
+      height: 20px;
+      background-color: #009e9e;
+      border-radius: 1px;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    &:hover::after {
+      opacity: 1;
+    }
+  }
+
+  // 操作区域样式
+  .operationArea {
+    position: absolute;
+    top: -18px;
+    right: 16px;
+    height: 24px;
+    padding: 4px;
+    border: 1px solid #e5e6eb;
+    border-radius: 8px;
+    box-sizing: border-box;
+    background-color: #fff;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 10;
+
+    .divider {
+      margin: 0 4px;
+    }
+
+    // 删除按钮样式
+    .copyButton,
+    .deleteButton {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      color: #4e5969;
+      background-color: #fff;
+
+      &:hover {
+        transform: scale(1.1);
+      }
+    }
+
+    .deleteButton {
+      color: #f53f3f;
+    }
+  }
+}
+

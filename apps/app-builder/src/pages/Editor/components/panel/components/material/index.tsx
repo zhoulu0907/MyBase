@@ -9,6 +9,7 @@ import { allTemplate, COMPONENT_GROUP_NAME, EDITOR_TYPES, type EditorType } from
 import React, { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import { v4 as uuidv4 } from 'uuid';
+import WorkbenchPanel from '@/pages/Editor/workbench/editor-components/wb-panel';
 import styles from './index.module.less';
 
 const Sider = Layout.Sider;
@@ -33,6 +34,7 @@ interface MaterialContainerProps {
 const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab, childCollapsed, setChildCollapsed }) => {
   const { t } = useI18n();
   const [activeComponentTab, setActiveComponentTab] = useState('base-component');
+  const [editorType, setEditorType] = useState('');
 
   const [baseItems, setBaseItems] = useState<{ key: CategoryKey; items: any[] }[]>([]);
   const [showSearchInput, setShowSearchInput] = useState<boolean>(false);
@@ -107,6 +109,13 @@ const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab, childC
     setComponents(filterData);
   }, [keyword]);
 
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash.includes(EDITOR_TYPES.WORKBENCH_EDITOR)) {
+      setEditorType(EDITOR_TYPES.WORKBENCH_EDITOR);
+    }
+  }, []);
+
   return (
     <div>
       <Sider collapsed={!childCollapsed} collapsible collapsedWidth={0} trigger={null} width={270}>
@@ -134,31 +143,34 @@ const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab, childC
         </div>
 
         <div className={styles.rightBody}>
-          <div className={styles.componentTabs}>
-            <Tabs
-              type="capsule"
-              activeTab={activeComponentTab}
-              onChange={(key) => {
-                setActiveComponentTab(key);
-              }}
-              size="default"
-            >
-              <Tabs.TabPane
-                key="base-component"
-                title={<div className={styles.componentTabTitle}>{t('editor.baseComponent')}</div>}
-              />
-              <Tabs.TabPane
-                key="template-component"
-                title={<div className={styles.componentTabTitle}>{t('editor.templateComponent')}</div>}
-              />
-              <Tabs.TabPane
-                key="custom-component"
-                title={<div className={styles.componentTabTitle}>{t('editor.customComponent')}</div>}
-              />
-            </Tabs>
-          </div>
+          {editorType !== EDITOR_TYPES.WORKBENCH_EDITOR && (
+            <div className={styles.componentTabs}>
+              <Tabs
+                type="capsule"
+                activeTab={activeComponentTab}
+                onChange={(key) => {
+                  setActiveComponentTab(key);
+                }}
+                size="default"
+              >
+                <Tabs.TabPane
+                  key="base-component"
+                  title={<div className={styles.componentTabTitle}>{t('editor.baseComponent')}</div>}
+                />
+                <Tabs.TabPane
+                  key="template-component"
+                  title={<div className={styles.componentTabTitle}>{t('editor.templateComponent')}</div>}
+                />
+                <Tabs.TabPane
+                  key="custom-component"
+                  title={<div className={styles.componentTabTitle}>{t('editor.customComponent')}</div>}
+                />
+              </Tabs>
+            </div>
+          )}
           <div className={styles.componentList}>
-            {activeComponentTab === 'base-component' && (
+            {/* 表单基础组件 */}
+            {editorType !== EDITOR_TYPES.WORKBENCH_EDITOR && activeComponentTab === 'base-component' && (
               <Collapse
                 defaultActiveKey={baseCategories.map((c) => c.key)}
                 accordion={false}
@@ -236,6 +248,9 @@ const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab, childC
                 })}
               </Collapse>
             )}
+
+            {/* 工作台组件 */}
+            {editorType === EDITOR_TYPES.WORKBENCH_EDITOR && <WorkbenchPanel keyword={keyword} />}
           </div>
         </div>
       </Sider>
