@@ -24,6 +24,7 @@ import com.cmsr.onebase.module.metadata.core.service.datamethod.engine.MultiTabl
 import com.cmsr.onebase.module.metadata.core.service.datasource.MetadataDatasourceCoreService;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataEntityFieldCoreService;
+import com.cmsr.onebase.module.metadata.core.service.permission.filter.FieldPermissionFilter;
 import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.datamethodImpl.MetadataDataMethodCreateImpl;
 import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.datamethodImpl.MetadataDataMethodDeleteImpl;
 import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.datamethodImpl.MetadataDataMethodQueryImpl;
@@ -94,6 +95,9 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
     @Resource
     private UidGenerator uidGenerator;
 
+    @Resource
+    private FieldPermissionFilter fieldPermissionFilter;
+
     @Value("${metadata.runtime.enable-auth-check:false}")
     private boolean enableAuthCheck;
 
@@ -137,12 +141,18 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
     }
 
     @Override
-    public Map<String, Object> getData(Long entityId, Object id, String methodCode) {
+    public Map<String, Object> getData(Long entityId, Object id, String methodCode, Long menuId) {
 
         MetadataDataMethodRequestContext requestContext = new MetadataDataMethodRequestContext();
         requestContext.setMetadataDataMethodOpEnum(MetadataDataMethodOpEnum.GET);
         requestContext.setEntityId(entityId);
+        requestContext.setMenuId(menuId);
         requestContext.setId(id);
+
+        // 获取当前登录用户的运行时权限, 如果是内部调用可能不会传menuId
+        if (null != menuId){
+            this.fetchRuntimePermission(requestContext);
+        }
 
         Map<String, Object> result = metadataDataMethodQuery.doExecuteProcess(requestContext);
         return result;
@@ -316,7 +326,8 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
             for (int i = 0; i < dataSet.size(); i++) {
                 DataRow row = dataSet.getRow(i);
                 Map<String, Object> data = convertDataRowToMap(row, fields);
-                list.add(buildDataResponse(entity, data, fields));
+                Map<String, Object> filterMap = fieldPermissionFilter.filterFields(data, permissionContext.getFieldPermission(), fields);
+                list.add(buildDataResponse(entity, filterMap, fields));
             }
             return new PageResult<>(list, total);
         });
