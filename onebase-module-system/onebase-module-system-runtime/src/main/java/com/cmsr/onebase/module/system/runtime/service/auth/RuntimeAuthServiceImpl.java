@@ -24,7 +24,6 @@ import com.cmsr.onebase.module.system.service.oauth2.OAuth2TokenService;
 import com.cmsr.onebase.module.system.service.tenant.TenantService;
 import com.cmsr.onebase.module.system.service.user.AdminUserService;
 import com.cmsr.onebase.module.system.vo.CaptchaVerificationReqVO;
-import com.cmsr.onebase.module.infra.api.security.SecurityConfigApi;
 import com.cmsr.onebase.module.system.vo.auth.*;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Resource;
@@ -67,8 +66,6 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
     private CaptchaService     captchaService;
     @Resource
     private SmsCodeApi         smsCodeApi;
-    @Resource
-    private SecurityConfigApi securityConfigApi;
     /**
      * 验证码的开关，默认为 true
      */
@@ -127,8 +124,8 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         // 增加日志输出，便于调试
         checkPlatformAdminEnableAppCreate();
 
-        // 使用账号密码，进行登录
-        AdminUserDO user = authenticate(reqVO.getUsername(), reqVO.getPassword());
+        // 使用手机密码，进行登录
+        AdminUserDO user = mobileAuthenticate(reqVO.getUsername(), reqVO.getPassword());
         return createTokenAfterLoginSuccess(reqVO.getAppId(),  user.getId(), reqVO.getUsername(), LoginLogTypeEnum.LOGIN_USERNAME);
     }
 
@@ -138,7 +135,7 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         mobileValidateCaptcha(reqVO);
         checkPlatformAdminEnableAppCreate();
         // 使用手机密码，进行登录
-        AdminUserDO user = mobileAuthenticate(reqVO.getMobile(), reqVO.getPassword());
+        AdminUserDO user = authenticate(reqVO.getMobile(), reqVO.getPassword());
         return createTokenAfterLoginSuccess(reqVO.getAppId(),  user.getId(), reqVO.getMobile(), LoginLogTypeEnum.LOGIN_MOBILE);
     }
 
@@ -181,12 +178,6 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
 
     @VisibleForTesting
     void validateCaptcha(UserLoginReqVO reqVO) {
-        // 检查登录场景是否启用验证码
-        if (!isCaptchaEnabledForLoginScenario()) {
-            log.debug("登录场景未启用验证码，跳过验证");
-            return;
-        }
-        
         ResponseModel response = doValidateCaptcha(reqVO);
         // 校验验证码
         if (!response.isSuccess()) {
@@ -197,12 +188,6 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
     }
 
     void mobileValidateCaptcha(MobileLoginReqVO reqVO) {
-        // 检查登录场景是否启用验证码
-        if (!isCaptchaEnabledForLoginScenario()) {
-            log.debug("登录场景未启用验证码，跳过验证");
-            return;
-        }
-        
         ResponseModel response = doValidateCaptcha(reqVO);
         // 校验验证码
         if (!response.isSuccess()) {
@@ -210,25 +195,6 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
             createLoginLog(null, reqVO.getMobile(), LoginLogTypeEnum.LOGIN_USERNAME, LoginResultEnum.CAPTCHA_CODE_ERROR);
             throw exception(AUTH_LOGIN_CAPTCHA_CODE_ERROR, response.getRepMsg());
         }
-    }
-
-    /**
-     * 检查登录场景是否启用验证码
-     * 
-     * @return true=启用验证码，false=不启用验证码
-     */
-    private boolean isCaptchaEnabledForLoginScenario() {
-        try {
-            com.cmsr.onebase.framework.common.pojo.CommonResult<Boolean> result = 
-                securityConfigApi.isCaptchaEnabledForScenario("login");
-            if (result != null && result.isSuccess() && result.getData() != null) {
-                return result.getData();
-            }
-        } catch (Exception e) {
-            log.warn("检查登录场景验证码启用状态失败，默认启用验证码，错误: {}", e.getMessage());
-        }
-        // 默认启用验证码
-        return true;
     }
 
 

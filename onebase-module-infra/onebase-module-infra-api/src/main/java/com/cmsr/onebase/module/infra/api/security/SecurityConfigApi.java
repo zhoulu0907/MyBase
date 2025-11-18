@@ -112,39 +112,4 @@ public interface SecurityConfigApi {
     @PostMapping("/clear-failure")
     CommonResult<Boolean> clearLoginFailureRecord(@RequestParam("userId") Long userId);
 
-    /**
-     * 获取验证码有效期配置
-     * 
-     * 从当前租户的安全配置中读取验证码有效期（秒）
-     * 用于aj-captcha在生成验证码时设置TTL
-     *
-     * @return 有效期（秒），默认600秒
-     */
-    @PostMapping("/captcha/expiry-seconds")
-    CommonResult<Integer> getCaptchaExpirySeconds();
-
-    /**
-     * 检查是否可以刷新验证码
-     * 
-     * 根据当前租户的刷新间隔配置，检查是否允许刷新
-     * 如果刷新过快，抛出业务异常
-     *
-     * @param sessionKey 会话标识（IP+UserAgent）
-     * @return 检查结果，true=可以刷新
-     */
-    @PostMapping("/captcha/check-refresh")
-    CommonResult<Boolean> checkCanRefreshCaptcha(@RequestParam("sessionKey") String sessionKey);
-
-    /**
-     * 检查场景是否启用验证码
-     * 
-     * 从当前租户的安全配置中读取启用场景列表
-     * 检查指定场景是否需要验证码
-     *
-     * @param scenario 场景标识（login/pwdreset/register/unlock/bind）
-     * @return true=启用验证码，false=不启用验证码
-     */
-    @PostMapping("/captcha/check-scenario")
-    CommonResult<Boolean> isCaptchaEnabledForScenario(@RequestParam("scenario") String scenario);
-
 }

@@ -53,9 +53,6 @@ public interface ErrorCodeConstants {
     // ========== 防暴力破解相关 1-001-005-020 ==========
     ErrorCode AUTH_LOGIN_ACCOUNT_LOCKED = new ErrorCode(1_001_005_020, "账号已被锁定，请{}后再试");
 
-    // ========== 验证码相关 1-001-005-030 ==========
-    ErrorCode CAPTCHA_REFRESH_TOO_FAST = new ErrorCode(1_001_005_030, "验证码刷新过快，请{}后再试");
-
     // ========== 文件配置 1-001-006-000 ==========
     ErrorCode FILE_CONFIG_NOT_EXISTS = new ErrorCode(1_001_006_000, "文件配置不存在");
     ErrorCode FILE_CONFIG_DELETE_FAIL_MASTER = new ErrorCode(1_001_006_001, "该文件配置不允许删除，原因：它是主配置，删除会导致无法上传文件");

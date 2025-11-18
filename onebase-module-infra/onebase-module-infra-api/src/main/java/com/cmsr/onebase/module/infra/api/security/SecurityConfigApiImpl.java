@@ -12,8 +12,6 @@ import com.cmsr.onebase.module.infra.service.security.dto.LoginFailureResult;
 import com.cmsr.onebase.module.infra.service.security.manager.PasswordPolicyManager;
 import com.cmsr.onebase.module.infra.service.security.validator.PasswordValidator;
 import com.cmsr.onebase.module.infra.service.security.validator.config.PasswordPolicyConfig;
-import com.cmsr.onebase.module.infra.service.security.CaptchaSecurityService;
-import com.cmsr.onebase.module.infra.enums.security.SecurityConfigKey;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -54,9 +52,6 @@ public class SecurityConfigApiImpl implements SecurityConfigApi {
     private AntiBruteForceService antiBruteForceService;
 
     private final PasswordValidator passwordValidator = new PasswordValidator();
-
-    @Resource
-    private CaptchaSecurityService captchaSecurityService;
 
     @Override
     @Operation(summary = "校验密码强度")
@@ -219,35 +214,5 @@ public class SecurityConfigApiImpl implements SecurityConfigApi {
         antiBruteForceService.clearLoginFailureRecord(tenantId, userId);
 
         return success(Boolean.TRUE);
-    }
-
-    @Override
-    @Operation(summary = "获取验证码有效期")
-    public CommonResult<Integer> getCaptchaExpirySeconds() {
-        Integer expirySeconds = captchaSecurityService.getCaptchaExpirySeconds();
-        return success(expirySeconds);
-    }
-
-    @Override
-    @Operation(summary = "检查验证码刷新限制")
-    public CommonResult<Boolean> checkCanRefreshCaptcha(@RequestParam("sessionKey") String sessionKey) {
-        captchaSecurityService.checkCanRefreshCaptcha(sessionKey);
-        return success(Boolean.TRUE);
-    }
-
-    @Override
-    @Operation(summary = "检查场景是否启用验证码")
-    public CommonResult<Boolean> isCaptchaEnabledForScenario(@RequestParam("scenario") String scenario) {
-        // 将字符串转换为枚举
-        SecurityConfigKey.EnableScenariosOption scenarioOption;
-        try {
-            scenarioOption = SecurityConfigKey.EnableScenariosOption.valueOf(scenario.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            log.warn("无效的场景参数: {}, 默认启用验证码", scenario);
-            return success(Boolean.TRUE);
-        }
-        
-        Boolean enabled = captchaSecurityService.isCaptchaEnabledForScenario(scenarioOption);
-        return success(enabled);
     }
 }
