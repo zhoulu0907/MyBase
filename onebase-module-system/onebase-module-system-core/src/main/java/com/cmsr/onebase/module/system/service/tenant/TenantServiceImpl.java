@@ -240,6 +240,7 @@ public class TenantServiceImpl implements TenantService {
             reqVO.setMobile(adminUserReqVO.getAdminMobile());
             reqVO.setAdminType(AdminTypeEnum.SYSTEM.getType());
             reqVO.setPassword(TENANT_ADMIN_PASSWORD);
+            reqVO.setPlatformUserId(adminUserReqVO.getPlatformUserId());
             // 创建用户
             Long userId = userService.createUser(reqVO);
             // 分配 管理员角色

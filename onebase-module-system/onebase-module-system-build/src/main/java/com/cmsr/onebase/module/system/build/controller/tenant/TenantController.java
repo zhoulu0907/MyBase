@@ -99,9 +99,6 @@ public class TenantController {
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
     @PreAuthorize("@ss.hasPermission('system:tenant:query')")
     public CommonResult<TenantRespVO> getTenant(@RequestParam("id") Long id) {
-        // if(null == id ){
-        //     id= TenantContextHolder.getTenantId();
-        // }
         return success(tenantService.getTenantWithAppCount(id));
     }
 
