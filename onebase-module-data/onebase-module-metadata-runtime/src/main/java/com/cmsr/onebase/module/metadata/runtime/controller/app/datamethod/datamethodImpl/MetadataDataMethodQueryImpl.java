@@ -13,6 +13,7 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.relationship.Metadat
 import com.cmsr.onebase.module.metadata.core.domain.query.ProcessContext;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.AbstractMetadataDataMethodCoreService;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
+import com.cmsr.onebase.module.metadata.core.service.permission.filter.FieldPermissionFilter;
 import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.vo.SubEntityVo;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +43,9 @@ public class MetadataDataMethodQueryImpl extends AbstractMetadataDataMethodCoreS
 
     @Resource
     private MetadataBusinessEntityCoreService businessEntityService;
+
+    @Resource
+    private FieldPermissionFilter fieldPermissionFilter;
 
     /**
      * 校验创建数据的完整性
@@ -114,11 +118,15 @@ public class MetadataDataMethodQueryImpl extends AbstractMetadataDataMethodCoreS
         log.info("成功切换到数据源：{}", datasource.getCode());
         TenantUtils.executeIgnore(() -> {
             Map<String, Object> resultData = queryDataByIdWithService(temporaryService, quoteTableName(entity.getTableName()), id, fields);
+            Map<String, Object> filterMap = null;
+            if (null != context.getMetadataPermissionContext()){
+                filterMap = fieldPermissionFilter.filterFields(resultData, context.getMetadataPermissionContext().getFieldPermission(), context.getFields());
+            }
             if (resultData == null || resultData.isEmpty()) {
                 throw exception(BUSINESS_ENTITY_NOT_EXISTS);
             }
             // 获取主表数据 放入上下文
-            Map map = buildDataResponse(entity, resultData, fields);
+            Map map = buildDataResponse(entity, filterMap == null ? resultData:filterMap , fields);
             context.setProcessedData(map);
         });
 

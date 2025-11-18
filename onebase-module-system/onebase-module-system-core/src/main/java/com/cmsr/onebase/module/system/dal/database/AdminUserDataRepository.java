@@ -4,14 +4,15 @@ import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.data.base.BaseDO;
-import com.cmsr.onebase.module.system.vo.user.UserPageReqVO;
-import com.cmsr.onebase.module.system.vo.user.UserSimplePageReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
+import com.cmsr.onebase.module.system.vo.user.UserPageReqVO;
+import com.cmsr.onebase.module.system.vo.user.UserSimplePageReqVO;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
 import org.anyline.entity.Order;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
@@ -117,9 +118,9 @@ public class AdminUserDataRepository extends DataRepository<AdminUserDO> {
      * @param status 状态
      * @return 用户列表
      */
-    public List<AdminUserDO> findAllByStatus(Integer status,String userNickName) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        if(userNickName!=null){
+    public List<AdminUserDO> findAllByStatus(Integer status, String userNickName) {
+        DefaultConfigStore configStore = CorpDeptUserHelper.getCorpConfigStore(AdminUserDO.USER_TYPE);
+        if (StringUtils.isNotBlank(userNickName)) {
             configStore.like(AdminUserDO.NICKNAME, userNickName);
         }
         configStore.eq(AdminUserDO.STATUS, status)
@@ -150,8 +151,7 @@ public class AdminUserDataRepository extends DataRepository<AdminUserDO> {
      * @return 分页结果
      */
     public PageResult<AdminUserDO> findPage(UserPageReqVO reqVO, Collection<Long> deptIds, Collection<Long> includeRoleUserIds, Collection<Long> excludeRoleUserIds) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-
+        DefaultConfigStore configStore = CorpDeptUserHelper.getCorpConfigStore(AdminUserDO.USER_TYPE);
         // 根据关键词模糊查询
         if (reqVO.getKeyword() != null && !reqVO.getKeyword().trim().isEmpty()) {
             configStore.and(new DefaultConfigStore()
@@ -204,6 +204,7 @@ public class AdminUserDataRepository extends DataRepository<AdminUserDO> {
             configStore.notIn(BaseDO.ID, excludeRoleUserIds);
         }
 
+
         // 添加排序
         configStore.order(AdminUserDO.ADMIN_TYPE, Order.TYPE.ASC).order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
 
@@ -217,7 +218,7 @@ public class AdminUserDataRepository extends DataRepository<AdminUserDO> {
      * @return 分页结果
      */
     public PageResult<AdminUserDO> findSimpleEnablePage(UserSimplePageReqVO reqVO) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
+        DefaultConfigStore configStore = CorpDeptUserHelper.getCorpConfigStore(AdminUserDO.USER_TYPE);
         configStore.eq(AdminUserDO.STATUS, CommonStatusEnum.ENABLE.getStatus()); // 启用状态
 
         // 根据关键词模糊查询
@@ -232,7 +233,7 @@ public class AdminUserDataRepository extends DataRepository<AdminUserDO> {
     }
 
     public List<AdminUserDO> findEnableUserByIds(Set<Long> userIds) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
+        DefaultConfigStore configStore = CorpDeptUserHelper.getCorpConfigStore(AdminUserDO.USER_TYPE);
         configStore.in(AdminUserDO.ID, userIds)
                 .eq(AdminUserDO.STATUS, UserStatusEnum.NORMAL.getStatus())
                 .order(AdminUserDO.ADMIN_TYPE, Order.TYPE.ASC)
@@ -242,7 +243,7 @@ public class AdminUserDataRepository extends DataRepository<AdminUserDO> {
 
 
     public List<AdminUserDO> getTenantExistUserCountByIds(List<Long> userIds) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
+        DefaultConfigStore configStore = CorpDeptUserHelper.getCorpConfigStore(AdminUserDO.USER_TYPE);
         configStore.in(AdminUserDO.ID, userIds)
                 .eq(AdminUserDO.STATUS, UserStatusEnum.NORMAL.getStatus())
                 .order(AdminUserDO.ADMIN_TYPE, Order.TYPE.ASC)
