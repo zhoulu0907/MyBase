@@ -17,8 +17,6 @@ export class TokenManager {
   private static readonly TOKEN_INFO_KEY = 'onebase_token_info';
   private static readonly REMEMBER_ME_KEY = 'onebase_remember_me';
   private static readonly TENANT_ID = 'tenant_id';
-  private static readonly CORP_ID = 'corp_id';
-  private static readonly APP_ID = 'app_id';
 
   /**
    * 存储 token 信息
@@ -36,9 +34,6 @@ export class TokenManager {
         if (tokenInfo.tenantId) {
           localStorage.setItem(this.TENANT_ID, tokenInfo.tenantId);
         }
-        if (tokenInfo.corpId) {
-          localStorage.setItem(this.CORP_ID, tokenInfo.corpId);
-        }
       } else {
         // 不记住我：使用 sessionStorage（会话存储，关闭浏览器后清除）
         sessionStorage.setItem(this.TOKEN_KEY, tokenInfo.accessToken);
@@ -46,9 +41,6 @@ export class TokenManager {
         sessionStorage.setItem(this.REMEMBER_ME_KEY, 'false');
         if (tokenInfo.tenantId) {
           sessionStorage.setItem(this.TENANT_ID, tokenInfo.tenantId);
-        }
-        if (tokenInfo.corpId) {
-          sessionStorage.setItem(this.CORP_ID, tokenInfo.corpId);
         }
       }
     } catch (error) {
@@ -209,26 +201,6 @@ export class TokenManager {
     }
   }
 
-  /**
-   * 获取 corp_id 信息
-   * @returns corpIdInfo 信息或 null
-   */
-  static getCorpIdInfo(): { corpId: string } | null {
-    try {
-      // 优先从 sessionStorage 获取，然后从 localStorage 获取
-      let corpId = sessionStorage.getItem(this.CORP_ID);
-      if (!corpId) {
-        corpId = localStorage.getItem(this.CORP_ID);
-      }
-
-      if (!corpId) return null;
-
-      return { corpId };
-    } catch (error) {
-      console.error('获取 token 失败:', error);
-      return null;
-    }
-  }
 }
 
 /**

@@ -3,17 +3,29 @@ import AvatarSVG from '@/assets/images/avatar.svg';
 import { useI18n } from '@/hooks/useI18n';
 import { userPermissionSignal } from '@/store/singals/user_permission';
 import { UserPermissionManager } from '@/utils/permission';
-import { Dropdown, Layout, Menu, Tabs } from '@arco-design/web-react';
+import { Avatar, Divider, Dropdown, Layout, Menu, Space, Tabs, Typography } from '@arco-design/web-react';
 import { TokenManager } from '@onebase/common';
 import { getPermissionInfo } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styles from './header.module.less';
+import { IconExport } from '@arco-design/web-react/icon';
+import spaceShipLine from "@/assets/images/space-ship-line.svg";
 
 const { Header } = Layout;
 
 interface HeaderProps {
   className?: string;
+}
+
+interface IAdminInfo {
+  avatar: string;
+  deptId: string;
+  email: string;
+  id: string;
+  nickname: string;
+  username: string;
+  mobile: string;
 }
 
 const AppHeader: React.FC<HeaderProps> = ({ className }) => {
@@ -22,6 +34,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   const { t } = useI18n();
 
   const [nickname, setNickname] = useState('U');
+  const [adminInfo, setAdminInfo] = useState<IAdminInfo | null>(null);
 
   // Tab 切换
   // 根据当前路径设置 activeTab
@@ -50,8 +63,16 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     const res = await getPermissionInfo();
     UserPermissionManager.setUserPermissionInfo(res);
     userPermissionSignal.setPermissionInfo(res);
+    setAdminInfo(res.user);
     setNickname(res.user.nickname);
   };
+
+  const maskMobile = (value?: string) => {
+    let reg = /(\d{3})\d{4}(\d{4})/;
+    const formatMobile = value?.replace(reg, "$1****$2");
+    return formatMobile;
+  }
+
 
   // 登出处理
   const handleLogout = async () => {
@@ -63,6 +84,36 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     // 跳转到登录页
     navigate('/login', { replace: true });
   };
+
+  const tenantAdminMenu = ( 
+      <Menu>
+        <Menu.Item key='info' style={{height:"70px"}}>
+          <div className={styles.adminInformation}>
+            <Avatar size={32} >
+              <img src={adminInfo?.avatar} />
+            </Avatar>
+            <Typography.Text>{adminInfo?.username}</Typography.Text>
+            <Typography.Text type='secondary'>{maskMobile(adminInfo?.mobile)}</Typography.Text>
+          </div>
+        </Menu.Item>
+        <Divider style={{ margin: '4px 0' }} />
+        <Menu.Item
+          key="setting"
+          onClick={() => {
+            navigate('/onebase/setting');
+          }}
+        >
+          <div className={styles.menu}>
+            <img src={spaceShipLine} />
+            {t('header.tenantManagementBackend')}
+          </div>
+        </Menu.Item>
+        <Menu.Item key="logout" onClick={handleLogout}>
+          <IconExport style={{ color: "#F53F3F" }} />
+          <Typography.Text type='error'>{t('header.logout')}</Typography.Text>
+        </Menu.Item>
+      </Menu>
+  )
 
   // 用户菜单
   const userMenu = (
@@ -126,7 +177,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
         <div className={styles.userInfo}>
           {UserPermissionManager.getUserPermissionInfo()?.user?.nickname || '未登录'}
 
-          <Dropdown droplist={userMenu} position="bl">
+          <Dropdown droplist={location.pathname?.startsWith("/onebase/enterprise-app") ? tenantAdminMenu : userMenu} position="bl">
             <div className={styles.userDropdown}>
               <img src={AvatarSVG} alt="avatar" />
             </div>

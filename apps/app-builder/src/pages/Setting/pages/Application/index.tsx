@@ -15,7 +15,8 @@ import {
   Space,
   Spin,
   Tag,
-  Tooltip
+  Tooltip,
+  Typography
 } from '@arco-design/web-react';
 import { IconDelete, IconEdit, IconEmpty, IconEye, IconLaunch, IconLeft, IconMoreVertical, IconPlus, IconSearch } from '@arco-design/web-react/icon';
 import {
@@ -38,10 +39,10 @@ import { type Options } from '@/components/CreateApp/const';
 import CreateAppModal from '@/components/CreateApp';
 import CreateDataSource, { type DataSourceHandle } from '@/components/CreateDataSource';
 import DynamicIcon from '@/components/DynamicIcon';
-import { PermissionButton } from '@/components/PermissionControl';
-import { TENANT_DEPT_PERMISSION as ACTIONS } from '@/constants/permission';
 import { appIconMap } from '@onebase/ui-kit';
 import {
+  ApplicationStatus,
+  ApplicationStatusLabel,
   appOptions,
   calculateMaxItems,
   createTimeOptions,
@@ -265,6 +266,13 @@ const AppManagement: React.FC = () => {
     }, delay);
   };
 
+  const getDevelopStatus = (developStatus?: string) => {
+    if(developStatus === ApplicationStatus.ITERATE) {
+      return ApplicationStatusLabel.ITERATE
+    }
+    return "";
+  }
+
   const menu = (item: any) => {
     return (
       <Menu onPointerEnter={clearTimer} onPointerLeave={() => startCloseTimer(80)}>
@@ -412,7 +420,7 @@ const AppManagement: React.FC = () => {
                                   fontWeight: 400
                                 }}
                               >
-                                {item.developStatus}
+                                {getDevelopStatus(item.developStatus)}
                               </Tag>}
 
                               <Tag
@@ -459,18 +467,14 @@ const AppManagement: React.FC = () => {
                     <div className={styles.footerLeft}>
                       {item?.userPhotoList && item?.userPhotoList.length > 0 && (
                         <>
-                          <AvatarGroup
-                            size={24}
-                            maxCount={4}
-                            zIndexAscend
-                          >
-                            {
-                              item?.userPhotoList?.map(user => (
-                                <img src={user.avatar} />
-                              ))
-                            }
+                          <AvatarGroup size={24} maxCount={4}
+                            zIndexAscend>
+                              {item?.userPhotoList?.map(item => {
+                                  return <Avatar>{item.avatar}</Avatar>
+                              })}
+                              <Avatar>{item?.userPhotoList?.length}</Avatar>
+                              <Typography.Text type='secondary'>{item?.createUser}等{item?.userPhotoList?.length}人开发</Typography.Text>
                           </AvatarGroup>
-                          <div>{item?.createUser}等{item?.userPhotoList?.length}人开发</div>
                         </>
                       )}
                     </div>

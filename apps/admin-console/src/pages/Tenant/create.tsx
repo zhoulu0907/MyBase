@@ -225,11 +225,11 @@ const CreateSpace = () => {
           ></Select>
         </Form.Item>
 
-        <Form.Item label="状态" field="status" triggerPropName="checked" rules={[{ required: true }]}>
+        <Form.Item label="状态" field="status" triggerPropName="checked">
           <Checkbox>启用</Checkbox>
         </Form.Item>
 
-        <Form.Item label="SaaS 功能" field="publishModel" triggerPropName="checked" rules={[{ required: true }]}>
+        <Form.Item label="SaaS 功能" field="publishModel" >
           <Checkbox>启用</Checkbox>
         </Form.Item>
 

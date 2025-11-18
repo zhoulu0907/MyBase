@@ -1,8 +1,8 @@
 import LogoSVG from '@/assets/images/ob_logo.svg';
 import { useI18n } from '@/hooks/useI18n';
 import { UserPermissionManager } from '@/utils/permission';
-import { Avatar, Dropdown, Layout, Menu, Message } from '@arco-design/web-react';
-import { IconPoweroff, IconUser } from '@arco-design/web-react/icon';
+import { Avatar, Dropdown, Layout, Menu, Message, Typography } from '@arco-design/web-react';
+import { IconExport, IconUser } from '@arco-design/web-react/icon';
 import { TokenManager } from '@onebase/common';
 import { getPermissionInfo } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
@@ -20,6 +20,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   const { t } = useI18n();
 
   const [nickname, setNickname] = useState('U');
+  const [mobile, setMobile] = useState<string>('');
   // 获取用户信息
   const tokenInfo = TokenManager.getTokenInfo();
 
@@ -29,11 +30,20 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     }
   }, [tokenInfo]);
 
+  const maskMobile = (value: string) => {
+    let reg=/(\d{3})\d{4}(\d{4})/; 
+    const formatMobile = value.replace(reg, "$1****$2");
+    return formatMobile;
+  }
+
   const getInfo = async () => {
     const res = await getPermissionInfo();
     console.log(res);
     UserPermissionManager.setUserPermissionInfo(res);
     setNickname(res.user.nickname);
+    const mobile =res.user.mobile;
+    const formatMobile = maskMobile(mobile);
+    setMobile(formatMobile);
   };
 
   // 登出处理
@@ -53,13 +63,20 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   // 用户菜单
   const userMenu = (
     <Menu>
+      <Menu.Item key="info" style={{height:"60px"}}>
+        <div className={styles.adminInformation}>
+            <Avatar size={32} >
+              <img src={LogoSVG} />
+            </Avatar>
+            <Typography.Text>{nickname}</Typography.Text>
+        </div>
+      </Menu.Item>
       <Menu.Item key="profile">
-        <IconUser />
-        {t('header.profile')}
+        {mobile}
       </Menu.Item>
       <Menu.Item key="logout" onClick={handleLogout}>
-        <IconPoweroff />
-        {t('header.logout')}
+        <IconExport style={{color:"#F53F3F"}}/>
+        <Typography.Text type='error'>{t('header.logout')}</Typography.Text>
       </Menu.Item>
     </Menu>
   );

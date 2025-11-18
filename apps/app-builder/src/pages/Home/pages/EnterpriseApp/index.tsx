@@ -15,28 +15,22 @@ import {
   Tag,
   Tooltip
 } from '@arco-design/web-react';
-import { IconEmpty, IconLeft, IconMoreVertical, IconSearch, IconSettings } from '@arco-design/web-react/icon';
+import { IconEmpty, IconMoreVertical, IconSearch } from '@arco-design/web-react/icon';
 import {
-  createApplication,
   deleteApplication,
   listApplication,
   type Application,
-  type CreateApplicationReq,
   type DatasourceSaveReqDTO,
   type DeleteApplicationReq,
   type PageParam
 } from '@onebase/app';
 import { getCommonPaginationList } from '@onebase/common';
-import { debounce, sample } from 'lodash-es';
+import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import emptyApplicationSVG from '@/assets/images/empty_application.svg';
-import plusSVG from '@/assets/images/plus_icon.svg';
 import arrowRightUp from "@/assets/images/arrow-right-up.svg";
-import CreateApp from '@/components/CreateApp';
-import { type Options } from '@/components/CreateApp/const';
-import CreateDataSource, { type DataSourceHandle } from '@/components/CreateDataSource';
 import DynamicIcon from '@/components/DynamicIcon';
 import { PermissionButton } from '@/components/PermissionControl';
 import { TENANT_DEPT_PERMISSION as ACTIONS } from '@/constants/permission';
@@ -44,7 +38,6 @@ import { appIconMap } from '@onebase/ui-kit';
 import TagModal from './components/tagModal';
 import {
   appOptions,
-  avatarBgColor,
   calculateMaxItems,
   createTimeOptions,
   defaultTheme,
@@ -56,7 +49,7 @@ import styles from './index.module.less';
 
 const Option = Select.Option;
 
-const MyAppPage: React.FC = () => {
+const EnterpriseAppPage: React.FC = () => {
   const [form] = Form.useForm();
   const { t } = useI18n();
   const navigate = useNavigate();
@@ -71,12 +64,9 @@ const MyAppPage: React.FC = () => {
   const [status, setStatus] = useState<number | string>('');
 
   const [appName, setAppName] = useState<string>('');
-  const [createType, setCreateType] = useState<'app' | 'datasource'>('app');
   const [deleteApp, setDeleteApp] = useState<Application>();
   const [datasource, setDdtasource] = useState<DatasourceSaveReqDTO | undefined>(); // 自有数据源
   const [deleteVisible, setDeleteVisible] = useState<boolean>(false);
-  const [createVisible, setCreateVisible] = useState<boolean>(false);
-  const [createLoading, setCreateLoading] = useState<boolean>(false);
   const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
   const [tagModalVisible, setTagModalVisible] = useState<boolean>(false);
 
@@ -85,7 +75,6 @@ const MyAppPage: React.FC = () => {
 
   const { setCurAppId } = useAppStore();
 
-  const createDatasourceRef = useRef<DataSourceHandle>(null);
   const appContainerRef = useRef<HTMLDivElement>(null);
 
   // option dropdown
@@ -131,7 +120,7 @@ const MyAppPage: React.FC = () => {
       name,
       ownerTag,
       orderByTime,
-      status: status === '' ? null :  Number(status)
+      status: 1
     };
     const res = await getCommonPaginationList(listApplication, req, setPageNo);
     if (res) {
@@ -155,47 +144,6 @@ const MyAppPage: React.FC = () => {
 
   const handleSearchChange = (value: string) => {
     debouncedUpdate(value);
-  };
-
-  const randomColors: string[] = useMemo(() => {
-    return Array.from({ length: pageSize || 8 }, () => sample(avatarBgColor) || avatarBgColor[0]);
-  }, [pageSize]);
-
-  /* 创建应用 */
-  const handleCreateApp = async () => {
-    try {
-      // 切换到创建数据源
-      if (createType === 'datasource') {
-        const res = await createDatasourceRef.current?.handleGetDatasource?.();
-        setDdtasource(res);
-        return;
-      }
-
-      const values = await form.validate(); // 等待校验完成并返回数据
-      setCreateLoading(true);
-      const { appCode, appName, iconColor, iconName, description, tagIds, themeColor } = values;
-
-      const params: CreateApplicationReq = {
-        appCode,
-        appMode: 'classic',
-        appName,
-        description,
-        iconColor,
-        iconName,
-        tagIds: tagIds?.map((t: Options) => t.value),
-        themeColor,
-        datasourceSaveReq: datasource
-      };
-      const res = await createApplication(params);
-      setCreateVisible(false);
-      Message.success('应用创建成功');
-      form.resetFields();
-      navigate(`/onebase/create-app/data-factory?appId=${res.id}`);
-    } catch (error) {
-      return null;
-    } finally {
-      setCreateLoading(false);
-    }
   };
 
   /* 删除应用 */
@@ -266,6 +214,28 @@ const MyAppPage: React.FC = () => {
     }, delay);
   };
 
+  const getModel = (model?: string) => {
+    if(model === "inner") {
+      return "内部模式"
+    }else if(model === "sass") {
+      return "SaSS模式";
+    }
+    return "";
+  }
+
+  const getColor = (model?: string) => {
+    if(model === "inner") {
+      return "cyan"
+    }else if(model === "sass") {
+      return "red";
+    }
+    return "";
+  }
+
+  const handleClickButton = () => {
+    navigate('/onebase/setting/application'); 
+  }
+
   const menu = (item: any) => {
     return (
       <Menu onPointerEnter={clearTimer} onPointerLeave={() => startCloseTimer(80)}>
@@ -300,12 +270,12 @@ const MyAppPage: React.FC = () => {
           permission={ACTIONS.CREATE}
           type="default"
           size="large"
-          icon={<img src={plusSVG} alt="create application" />}
+          icon={<img src={arrowRightUp} alt="create application" />}
           className={styles.createAppButton}
-          onClick={()=>setCreateVisible(true)}
+          onClick={handleClickButton}
           style={{ color: 'rgb(var(--primary-6))' }}
         >
-          {t('myApp.createApp')}
+          {t('myApp.applicationManagement')}
         </PermissionButton>
       </div>
 
@@ -368,17 +338,6 @@ const MyAppPage: React.FC = () => {
                   </Option>
                 ))}
               </Select>
-
-              <Button
-                type="text"
-                icon={<IconSettings />}
-                style={{ color: '#21252e' }}
-                onClick={() => {
-                  setTagModalVisible(true);
-                }}
-              >
-                标签管理
-              </Button>
             </div>
           </div>
 
@@ -388,7 +347,6 @@ const MyAppPage: React.FC = () => {
               {applicationEmpty && !loading && (
                 <div className={styles.applicationEmpty}>
                   <img src={emptyApplicationSVG} alt="暂无应用" />
-                  <div className={styles.goCreateApplication} onClick={() => setCreateVisible(true)} />
                 </div>
               )}
               {applicationFilterEmpty && !loading && (
@@ -415,10 +373,9 @@ const MyAppPage: React.FC = () => {
                             <Tooltip content={item.appName}>
                               <div className={styles.myAppTitle}>{item.appName}</div>
                             </Tooltip>
-                            {/* TODO */}
-                            {/* <Tag color={TagColor[item.appStatus]} className={styles.tag}>
-                              SaaS模式
-                            </Tag> */}
+                            <Tag color={getColor(item.publishModel)} className={styles.tag}>
+                              {getModel(item.publishModel)}
+                            </Tag>
                           </div>
                           <Tag
                             color={TagColor[item.appStatus]}
@@ -542,60 +499,6 @@ const MyAppPage: React.FC = () => {
           />
         </div>
       </Modal>
-      <Modal
-        title={
-          <div style={{ textAlign: 'left' }}>
-            {createType === 'app' ? (
-              '创建空白应用'
-            ) : (
-              <div>
-                <IconLeft style={{ cursor: 'pointer' }} onClick={() => setCreateType('app')} />
-                使用自有数据源
-              </div>
-            )}
-          </div>
-        }
-        visible={createVisible}
-        simple
-        unmountOnExit
-        footer={
-          <div style={{ textAlign: 'right', visibility: createType === 'app' ? 'visible' : 'hidden' }}>
-            <Button type="default" onClick={() => setCreateVisible(false)} style={{ marginRight: 12 }}>
-              取消
-            </Button>
-            <Button type="primary" loading={createLoading} onClick={handleCreateApp}>
-              创建
-            </Button>
-          </div>
-        }
-        confirmLoading={true}
-        onCancel={() => setCreateVisible(false)}
-        style={{ width: '1300px' }}
-        className={styles.createAppModal}
-      >
-        <div className={styles.createAppWrapper}>
-          <CreateApp
-            form={form}
-            status="create"
-            previewBgColor="#F2F3F5BF"
-            dataSourceCreated={!!datasource}
-            onCreateDatasource={() => setCreateType('datasource')}
-            style={{
-              position: 'absolute',
-              transform: createType === 'app' ? 'translateX(0)' : 'translateX(-100%)'
-            }}
-          />
-          <CreateDataSource
-            ref={createDatasourceRef}
-            style={{
-              position: 'absolute',
-              padding: '0 200px',
-              boxSizing: 'border-box',
-              transform: createType === 'datasource' ? 'translateX(0)' : 'translateX(100%)'
-            }}
-          />
-        </div>
-      </Modal>
       <TagModal
         visible={tagModalVisible}
         onOk={() => {
@@ -609,4 +512,4 @@ const MyAppPage: React.FC = () => {
   );
 };
 
-export default MyAppPage;
+export default EnterpriseAppPage;

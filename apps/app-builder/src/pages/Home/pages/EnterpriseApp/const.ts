@@ -2,7 +2,7 @@ export const defaultTheme = '#4FAE7B';
 const applicationWidth = 332;
 const applicationHeight = 206;
 const applicationGutterX = 24;
-const applicationGutterY = 24;
+const applicationGutterY = 28;
 
 export function calculateMaxItems(containerWidth: number, containerHeight: number) {
   const cols = Math.floor((containerWidth + applicationGutterX) / (applicationWidth + applicationGutterX));
@@ -46,12 +46,8 @@ export const statusOptions = [
     value: 0
   },
   {
-    label: '迭代中',
-    value: 1
-  },
-  {
     label: '已发布',
-    value: 2
+    value: 1
   }
 ];
 
@@ -59,14 +55,6 @@ export enum TagColor {
   'arcoblue',
   'red',
   'orangered'
-}
-
-export enum ApplicationStatus {
-  ITERATE = 'iterate'
-}
-
-export enum ApplicationStatusLabel {
-  ITERATE = '迭代中'
 }
 
 export const avatarBgColor = ['#009E9E', '#24B28F', '#1979FF', '#7E5AEA', '#EB693A', '#EBBC00'];

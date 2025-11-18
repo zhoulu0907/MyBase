@@ -291,7 +291,7 @@ const EditTenant = () => {
                 ></Select>
               ) : (
                 <div className={styles.tagWrapper}>
-                  {findMatchingItemsById(adminList, tenantInfo?.tenantAdminUserList)?.map((tag, index) => (
+                  {tenantInfo?.tenantAdminUserList?.map((tag, index) => (
                     <Tag className={styles.adminTag} key={index} size="large" style={{ borderRadius: 16 }}>
                       <Avatar size={24} style={{ marginRight: 4 }}>
                         {tag.adminNickName.slice(0, 1)}
@@ -307,7 +307,7 @@ const EditTenant = () => {
               {isEdit ? <Checkbox>启用</Checkbox> : <span>{tenantInfo?.status ? '已启用' : '未启用'}</span>}
             </Form.Item>
 
-            <Form.Item label="SaaS 功能" field="publishModel" triggerPropName="checked" rules={[{ required: isEdit }]}>
+            <Form.Item label="SaaS 功能" field="publishModel">
               {isEdit ? (
                 <Checkbox>启用</Checkbox>
               ) : (

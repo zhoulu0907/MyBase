@@ -128,7 +128,6 @@ const Right: React.FC = () => {
             refreshToken: response.refreshToken,
             expiresTime: response.expiresTime,
             tenantId: response.tenantWebsite,
-            corpId: response.corpId
           },
           rememberMe
         );
