@@ -11,6 +11,7 @@ import com.cmsr.onebase.module.etl.executor.provider.WorkflowProvider;
 import com.cmsr.onebase.module.etl.executor.provider.dao.EtlExecutionLog;
 import com.cmsr.onebase.module.etl.executor.provider.dao.EtlWorkflow;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.flink.table.api.*;
 import org.apache.flink.table.catalog.Column;
 import org.apache.flink.types.Row;
@@ -89,7 +90,7 @@ public class WorkFlowExecutor implements Closeable {
             log.info("execute workflow end");
         } catch (Exception e) {
             executionLog.setTaskStatus("failed");
-            executionLog.setErrorMessage(e.getMessage());
+            executionLog.setErrorMessage(ExceptionUtils.getRootCauseMessage(e));
             log.error("execute workflow error", e);
             throw e;
         } finally {
