@@ -9,7 +9,6 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.warm.flow.core.dto.FlowParams;
 import org.dromara.warm.flow.core.handler.PermissionHandler;
-import org.dromara.warm.flow.core.service.impl.BpmConstants;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -81,12 +80,6 @@ public class BpmPermissionHandler implements PermissionHandler {
             } catch (Exception e) {
                 log.warn("解析权限字符串为NodePermFlagDTO失败，permission={}", permission, e);
             }
-        }
-
-        // 限制只返回最多100个用户ID
-        if (convertedPermissions.size() > BpmConstants.MAX_NODE_APPROVER_USERS) {
-            log.warn("审批人列表最多100个用户 当前为：{}", convertedPermissions.size());
-            return new ArrayList<>(convertedPermissions.stream().limit(BpmConstants.MAX_NODE_APPROVER_USERS).toList());
         }
 
         return new ArrayList<>(convertedPermissions);
