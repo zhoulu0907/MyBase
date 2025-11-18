@@ -35,6 +35,7 @@ import org.anyline.entity.DefaultPageNavi;
 import org.anyline.entity.PageNavi;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.warm.flow.core.dto.DefJson;
 import org.dromara.warm.flow.core.dto.NodeJson;
@@ -551,11 +552,8 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         vo.setTaskId(ccRecord.getTaskId());
         vo.setInstanceId(ccRecord.getInstanceId());
         vo.setBusinessId(ccRecord.getBindingViewId());
-        if(1 == ccRecord.getViewed()){
-            vo.setViewed(true);
-        }else{
-            vo.setViewed(false);
-        }
+        vo.setViewed(BooleanUtils.toBoolean(ccRecord.getViewed()));
+
         // 设置发起人信息
         UserBasicInfoVO initiator = new UserBasicInfoVO();
         initiator.setUserId(ccRecord.getInitiatorId());
