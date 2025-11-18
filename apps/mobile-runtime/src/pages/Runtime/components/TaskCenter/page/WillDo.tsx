@@ -7,6 +7,7 @@ import { FLOWSTATUS_TYPE, FlowStatusMap, LISTTYPE } from '@onebase/app';
 import { getTodoPageList } from '@onebase/app/src/services/app_runtime';
 import dayjs from 'dayjs';
 import '../style/tcPage.less';
+import TaskList from './TaskList';
 
  const getTimeAgo = (time) => {
    const now = Date.now();
@@ -146,8 +147,8 @@ const WillDo: FC = ({ appId }) => {
       //   submitTimeStart: '',
       //   submitTimeEnd: ''
     };
-    const res = await getTodoPageList(req);
-    setData(res?.list);
+    return await getTodoPageList(req);
+    // setData(res?.list);
   };
 
   const onBack = () => {
@@ -160,42 +161,12 @@ const WillDo: FC = ({ appId }) => {
   }, []);
 
   return (
-    <section className="page-content-rgt">
-      <div className="table-title-box">
-        <b>待我处理</b>
-        <TableSearch
-          uiConfig={{ hasInput: true, hasFilter: true, hasSort: true, hasBatch: true }}
-          batchEvent={handleBatchClick}
-        />
-      </div>
-      {tbRowSelection && (
-        <div className="flex-bw-center title-batch-box">
-          <span>已选中3/20条</span>
-          <div className="batch-btns">
-            <Button type="outline" onClick={() => setTbRowSelection(undefined)}>
-              取消操作
-            </Button>
-            <Button type="outline" onClick={() => handleBatch2Click()}>
-              批量拒绝
-            </Button>
-            <Button type="primary" onClick={() => handleBatch2Click()}>
-              批量同意
-            </Button>
-          </div>
-        </div>
-      )}
-      <Table className="task-tb-box" rowKey="name" rowSelection={tbRowSelection} columns={columns} data={data} />
-      {detailPopVisible && (
-        <DetailPop
-          detailPopVisible={detailPopVisible}
-          setPopVisible={setPopVisible}
-          onBack={onBack}
-          taskId={taskId}
-          rowData={rowData}
-          listType={LISTTYPE.WILLDO}
-        />
-      )}
-      {approveVisible && <BatchApproveModal approveVisible={approveVisible} setApproveVisible={setApproveVisible} />}
+    <section className="page-will-do">
+      <TaskList 
+        title="待我处理"
+        dataFetch={fetchFormData}
+        columns={columns}
+      />
     </section>
   );
 };
