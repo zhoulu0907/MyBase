@@ -80,7 +80,11 @@ public interface AdminUserApi {
     CommonResult<Boolean> validateUserList(@RequestParam("ids") Collection<Long> ids);
 
 
-
+    /**
+     * 根据部门信息，获得用户列表
+     *
+     * @param reqDTO 部门、关键字、分页等信息
+     */
     @GetMapping(PREFIX + "/get-user-page-by-dept")
     @Operation(summary = "获得指定部门的用户简要分页列表", description = "获取指定部门的直属用户简要信息（分页），isRecurseSub为true时包含所有下级部门用户")
     CommonResult<PageResult<UserSimpleRespDTO>>  getUserPageByDept(@Valid @RequestParam UserByDeptPageReqDTO reqDTO);
