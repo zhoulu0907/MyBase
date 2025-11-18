@@ -240,6 +240,7 @@ public class TenantServiceImpl implements TenantService {
             reqVO.setMobile(adminUserReqVO.getAdminMobile());
             reqVO.setAdminType(AdminTypeEnum.SYSTEM.getType());
             reqVO.setPassword(TENANT_ADMIN_PASSWORD);
+            reqVO.setPlatformUserId(adminUserReqVO.getPlatformUserId());
             // 创建用户
             Long userId = userService.createUser(reqVO);
             // 分配 管理员角色
@@ -364,15 +365,16 @@ public class TenantServiceImpl implements TenantService {
                         userInsertReqVO.setMobile(adminUserReqVO.getAdminMobile());
                         userInsertReqVO.setAdminType(AdminTypeEnum.SYSTEM.getType());
                         userInsertReqVO.setPassword(TENANT_ADMIN_PASSWORD);
+                        userInsertReqVO.setPlatformUserId(adminUserReqVO.getPlatformUserId());
                         // 创建用户
                         Long userId = userService.createUser(userInsertReqVO);
                         // 分配管理员权限
                         permissionService.assignUserRoles(userId, singleton(roleId));
                     } else {
                         // 新管理员用户存在，直接分配角色
-                        permissionService.assignUserRoles(adminUserReqVO.getAdminUserId(), singleton(roleId));
+                        permissionService.assignUserRoles(newAdminUser.getId(), singleton(roleId));
                         // 将新管理员设置为内置用户类型
-                        userService.updateAdminType(adminUserReqVO.getAdminUserId(), AdminTypeEnum.SYSTEM.getType());
+                        userService.updateAdminType(newAdminUser.getId(), AdminTypeEnum.SYSTEM.getType());
                     }
                 });
             });
@@ -516,6 +518,8 @@ public class TenantServiceImpl implements TenantService {
                                 .setAdminMobile(uservo.getMobile())
                                 .setAdminUserId(uservo.getId())
                                 .setAdminNickName(uservo.getNickname())
+                                .setPlatformUserId(uservo.getPlatformUserId())
+
                         )
                         .collect(Collectors.toList());
             }

@@ -1,13 +1,11 @@
 package com.cmsr.onebase.module.bpm.runtime.service;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.module.bpm.core.vo.BpmCcTaskPageReqVO;
 import com.cmsr.onebase.module.bpm.core.vo.BpmDoneTaskPageReqVO;
 import com.cmsr.onebase.module.bpm.core.vo.BpmMyCreatedPageReqVO;
 import com.cmsr.onebase.module.bpm.core.vo.BpmTodoTaskPageReqVO;
-import com.cmsr.onebase.module.bpm.runtime.vo.BpmFlowDoneTaskVO;
-import com.cmsr.onebase.module.bpm.runtime.vo.BpmFlowTodoTaskVO;
-import com.cmsr.onebase.module.bpm.runtime.vo.BpmMyCreatedVO;
-import com.cmsr.onebase.module.bpm.runtime.vo.ListNodesRespVO;
+import com.cmsr.onebase.module.bpm.runtime.vo.*;
 
 import java.util.List;
 
@@ -44,4 +42,11 @@ public interface BpmFlowTaskCenterService {
      * @return
      */
     List<ListNodesRespVO.NodeVO> listNodes(Long bindingViewId);
+    /**
+     * 获取流程抄送我的流程
+     *
+     * @param pageReqVO
+     * @return
+     */
+    PageResult<BpmCcTaskPageResVO> getCcPage(BpmCcTaskPageReqVO pageReqVO);
 }

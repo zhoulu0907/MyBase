@@ -12,13 +12,16 @@ import com.cmsr.onebase.module.etl.common.graph.WorkflowGraph;
 import com.cmsr.onebase.module.etl.common.graph.conf.JdbcInputConfig;
 import com.cmsr.onebase.module.etl.common.graph.conf.JdbcOutputConfig;
 import com.cmsr.onebase.module.etl.core.dal.database.*;
+import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLExecutionLogDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLScheduleJobDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLWorkflowDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLWorkflowTableDO;
+import com.cmsr.onebase.module.etl.core.dal.dataobject.schedule.FixedDurationSchedule;
 import com.cmsr.onebase.module.etl.core.enums.ETLConstants;
 import com.cmsr.onebase.module.etl.core.enums.ETLErrorCodeConstants;
 import com.cmsr.onebase.module.etl.core.enums.ScheduleJobStatus;
 import com.cmsr.onebase.module.etl.core.enums.ScheduleType;
+import com.cmsr.onebase.module.etl.core.util.Cron;
 import com.cmsr.onebase.module.etl.core.vo.etl.ExecutionLogVO;
 import com.cmsr.onebase.module.etl.core.vo.etl.WorkflowPageReqVO;
 import jakarta.annotation.Resource;
@@ -38,7 +41,6 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
     @Value("${onebase.scheduler.etl-project}")
     private Long etlProjectCode;
 
-    // TODO: localhost cannot be default value, delete it after test
     @Value("${onebase.flink.address}")
     private String flinkServerUrl;
 
@@ -214,7 +216,7 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
 
     private void syncEnableStatus(ETLWorkflowDO workflowDO) {
         Long workflowId = workflowDO.getId();
-        ScheduleType scheduleType = ScheduleType.of(workflowDO.getScheduleConfig());
+        ScheduleType scheduleType = ScheduleType.of(workflowDO.getScheduleStrategy());
         ETLScheduleJobDO scheduleJobDO = scheduleJobRepository.findByApplicationIdAndWorkflowId(workflowDO.getApplicationId(), workflowId);
         if (scheduleJobDO == null) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.UNKNOWN_ERROR);
@@ -236,12 +238,52 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
             jobId = Long.parseLong(jobIdStr);
         }
         // online
-        if (ScheduleType.MANUALLY.equals(scheduleType)) { // 手动执行则仅上线
-            dolphinSchedulerClient.onlineWorkflow(etlProjectCode, jobId);
-        } else {
-            Schedule schedule = new Schedule();
-            // TODO: transform scheduleConfig(String) to Schedule
-            dolphinSchedulerClient.onlineWorkflowWithSchedule(etlProjectCode, jobId, schedule);
+        switch (scheduleType) {
+            case MANUALLY -> dolphinSchedulerClient.onlineWorkflow(etlProjectCode, jobId);
+            case FIXED -> {
+                Schedule schedule = new Schedule();
+                FixedDurationSchedule fixedSchedule = JsonUtils.parseObject(workflowDO.getScheduleConfig(), FixedDurationSchedule.class);
+                String repeatType = fixedSchedule.getRepeatType();
+                String crontab = null;
+                Cron cron = new Cron();
+                switch (repeatType) {
+                    case "none":
+                        cron.setDateTime(fixedSchedule.getTriggerTime());
+                        break;
+                    case "cron":
+                        crontab = fixedSchedule.getTriggerTime();
+                        break;
+                    case "day": {
+                        cron.setHourAndMinute(fixedSchedule.getTriggerTime());
+                        break;
+                    }
+                    case "week": {
+                        cron.setWeeks(fixedSchedule.getRepeatWeek());
+                        cron.setHourAndMinute(fixedSchedule.getTriggerTime());
+                        break;
+                    }
+                    case "month": {
+                        cron.setDays(fixedSchedule.getRepeatDay());
+                        cron.setHourAndMinute(fixedSchedule.getTriggerTime());
+                        break;
+                    }
+                    case "year": {
+                        cron.setMonthAndDay(fixedSchedule.getTriggerDate());
+                        cron.setHourAndMinute(fixedSchedule.getTriggerTime());
+                        break;
+                    }
+                    default:
+                        throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.ILLEGAL_SCHEDULE_TYPE);
+                }
+                if (crontab == null) {
+                    crontab = cron.toCron();
+                }
+
+                schedule.setCrontab(crontab);
+
+                dolphinSchedulerClient.onlineWorkflowWithSchedule(etlProjectCode, jobId, schedule);
+            }
+            default -> throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.ILLEGAL_SCHEDULE_TYPE);
         }
         workflowDO.setIsEnabled(1);
         workflowRepository.update(workflowDO);
@@ -261,13 +303,17 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
         dolphinSchedulerClient.purgeWorkflow(etlProjectCode, jobId);
         workflowDO.setIsEnabled(0);
         workflowRepository.update(workflowDO);
+
+        scheduleJobRepository.removeJobId(workflowId);
     }
 
     @Override
     public void configScheduleStrategy(ScheduleConfigVO scheduleVO) {
         ETLWorkflowDO workflowDO = getWorkflowById(scheduleVO.getWorkflowId());
+        workflowDO.setWorkflowName(scheduleVO.getFlowName());
         workflowDO.setScheduleStrategy(scheduleVO.getScheduleStrategy().getValue());
         workflowDO.setScheduleConfig(JsonUtils.toJsonString(scheduleVO.getConfig()));
+        workflowDO.setIsEnabled(scheduleVO.getEnableStatus());
         workflowRepository.update(workflowDO);
         if (workflowDO.isEnabled()) {
             syncEnableStatus(workflowDO);
@@ -277,34 +323,51 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
     @Override
     public void startWorkflowManually(Long workflowId) {
         // 必须是已启用的ETL
-        ETLWorkflowDO workflowDO = getOperableWorkflow(workflowId);
+        ETLWorkflowDO workflowDO = getWorkflowById(workflowId);
+        if (workflowDO.getIsEnabled() == 0) {
+            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.WORKFLOW_DISABLED);
+        }
         Long applicationId = workflowDO.getApplicationId();
         ETLScheduleJobDO scheduleJobDO = scheduleJobRepository.findByApplicationIdAndWorkflowId(applicationId, workflowId);
         if (scheduleJobDO == null) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.WORKFLOW_ALREADY_OFFLINE);
         }
         Long jobId = Long.parseLong(scheduleJobDO.getJobId());
-        // TODO: 添加记录到数据库？
-        //      etl_execution_log <applicationId, workflowId, businessDate, startTime, triggerType, triggerUser, taskStatus>
         dolphinSchedulerClient.runWorkflowManually(etlProjectCode, jobId, null, null);
     }
 
     @Override
-    public PageResult<ExecutionLogVO> getWorkflowExecutionLogs(Long workflowId) {
-        // TODO:
-        return null;
+    public PageResult<ExecutionLogVO> getWorkflowExecutionLogs(Long applicationId, Long workflowId, Integer pageNo, Integer pageSize) {
+        PageResult<ETLExecutionLogDO> executionLogResult = executionLogRepository.queryPage(applicationId, workflowId, pageNo, pageSize);
+        List<ExecutionLogVO> logVOList = new ArrayList<>();
+        for (ETLExecutionLogDO logDO : executionLogResult.getList()) {
+            ExecutionLogVO executionLogVO = new ExecutionLogVO();
+            executionLogVO.setApplicationId(logDO.getApplicationId());
+            executionLogVO.setWorkflowId(logDO.getWorkflowId());
+            executionLogVO.setBusinessDate(logDO.getBussinessDate());
+            executionLogVO.setStartTime(logDO.getStartTime());
+            executionLogVO.setEndTime(logDO.getEndTime());
+            executionLogVO.setDuration(logDO.getDurationTime());
+            executionLogVO.setTriggerType(logDO.getTriggerType());
+            executionLogVO.setTriggerUser(String.valueOf(logDO.getTriggerUser()));
+            executionLogVO.setTaskStatus(logDO.getTaskStatus());
+
+            logVOList.add(executionLogVO);
+        }
+        return new PageResult<>(logVOList, executionLogResult.getTotal());
     }
 
     @Override
     public ScheduleRespVO getWorkflowSchedule(Long workflowId) {
         ETLWorkflowDO workflowDO = getWorkflowById(workflowId);
+
         ScheduleRespVO scheduleRespVO = new ScheduleRespVO();
         scheduleRespVO.setApplicationId(workflowDO.getApplicationId());
         scheduleRespVO.setWorkflowId(workflowId);
         scheduleRespVO.setFlowName(workflowDO.getWorkflowName());
         scheduleRespVO.setEnableStatus(workflowDO.getIsEnabled());
         scheduleRespVO.setScheduleStrategy(workflowDO.getScheduleStrategy());
-        scheduleRespVO.setConfig(workflowDO.getConfig());
+        scheduleRespVO.setConfig(workflowDO.getScheduleConfig());
 
         return scheduleRespVO;
     }

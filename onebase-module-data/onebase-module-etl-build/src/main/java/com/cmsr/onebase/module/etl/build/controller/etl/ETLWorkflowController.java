@@ -65,8 +65,8 @@ public class ETLWorkflowController {
         return CommonResult.success(Boolean.TRUE);
     }
 
-    @GetMapping("/schedule")
-    public CommonResult<?> getWorkflowSchedule(@RequestParam("workflowId") Long workflowId) {
+    @GetMapping("/schedule/{workflowId}")
+    public CommonResult<ScheduleRespVO> getWorkflowSchedule(@PathVariable("workflowId") Long workflowId) {
         ScheduleRespVO scheduleRespVO = workflowService.getWorkflowSchedule(workflowId);
         return CommonResult.success(scheduleRespVO);
     }
@@ -83,12 +83,12 @@ public class ETLWorkflowController {
         return CommonResult.success(Boolean.TRUE);
     }
 
-    @GetMapping("/logs")
-    public CommonResult<PageResult<ExecutionLogVO>> queryWorkflowExecutionLogs(@RequestParam("workflowId") Long workflowId,
-                                                                       @RequestParam("pageNo") Integer pageNo,
-                                                                       @RequestParam("pageSize") Integer pageSize) {
-        // TODO:
-        PageResult<ExecutionLogVO> workflowExecutionLogs = workflowService.getWorkflowExecutionLogs(workflowId);
+    @GetMapping("/{applicationId}/logs")
+    public CommonResult<PageResult<ExecutionLogVO>> queryWorkflowExecutionLogs(@PathVariable("applicationId") Long applicationId,
+                                                                               @RequestParam("workflowId") Long workflowId,
+                                                                               @RequestParam("pageNo") Integer pageNo,
+                                                                               @RequestParam("pageSize") Integer pageSize) {
+        PageResult<ExecutionLogVO> workflowExecutionLogs = workflowService.getWorkflowExecutionLogs(applicationId, workflowId, pageNo, pageSize);
         return CommonResult.success(workflowExecutionLogs);
     }
 }
