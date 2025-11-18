@@ -1,4 +1,4 @@
-import iconStartTime from '@workflow/nodes/startTime.svg';
+import iconStartTime from '@/assets/flow/nodes/startTime.svg';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '@onebase/common';
 import { formMeta } from './form-meta';

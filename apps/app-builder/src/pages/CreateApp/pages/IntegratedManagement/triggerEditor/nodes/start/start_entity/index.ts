@@ -1,4 +1,4 @@
-import iconStartEntity from '@workflow/nodes/startEntity.svg';
+import iconStartEntity from '@/assets/flow/nodes/startEntity.svg';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '@onebase/common';
 import { formMeta } from './form-meta';
