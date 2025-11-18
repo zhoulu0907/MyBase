@@ -29,10 +29,9 @@ import {
 import { getCommonPaginationList } from '@onebase/common';
 import { debounce, sample } from 'lodash-es';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import emptyApplicationSVG from '@/assets/images/empty_application.svg';
-import plusSVG from '@/assets/images/plus_icon.svg';
 import arrowRightUp from "@/assets/images/arrow-right-up.svg";
 import CreateApp from '@/components/CreateApp';
 import { type Options } from '@/components/CreateApp/const';
@@ -56,7 +55,7 @@ import styles from './index.module.less';
 
 const Option = Select.Option;
 
-const MyAppPage: React.FC = () => {
+const EnterpriseAppPage: React.FC = () => {
   const [form] = Form.useForm();
   const { t } = useI18n();
   const navigate = useNavigate();
@@ -131,7 +130,7 @@ const MyAppPage: React.FC = () => {
       name,
       ownerTag,
       orderByTime,
-      status: status === '' ? null :  Number(status)
+      status: 1
     };
     const res = await getCommonPaginationList(listApplication, req, setPageNo);
     if (res) {
@@ -266,6 +265,28 @@ const MyAppPage: React.FC = () => {
     }, delay);
   };
 
+  const getModel = (model?: string) => {
+    if(model === "inner") {
+      return "内部模式"
+    }else if(model === "sass") {
+      return "SaSS模式";
+    }
+    return "";
+  }
+
+  const getColor = (model?: string) => {
+    if(model === "inner") {
+      return "cyan"
+    }else if(model === "sass") {
+      return "red";
+    }
+    return "";
+  }
+
+  const handleClickButton = () => {
+    navigate('/onebase/setting/application'); 
+  }
+
   const menu = (item: any) => {
     return (
       <Menu onPointerEnter={clearTimer} onPointerLeave={() => startCloseTimer(80)}>
@@ -300,12 +321,12 @@ const MyAppPage: React.FC = () => {
           permission={ACTIONS.CREATE}
           type="default"
           size="large"
-          icon={<img src={plusSVG} alt="create application" />}
+          icon={<img src={arrowRightUp} alt="create application" />}
           className={styles.createAppButton}
-          onClick={()=>setCreateVisible(true)}
+          onClick={handleClickButton}
           style={{ color: 'rgb(var(--primary-6))' }}
         >
-          {t('myApp.createApp')}
+          {t('myApp.applicationManagement')}
         </PermissionButton>
       </div>
 
@@ -368,17 +389,6 @@ const MyAppPage: React.FC = () => {
                   </Option>
                 ))}
               </Select>
-
-              <Button
-                type="text"
-                icon={<IconSettings />}
-                style={{ color: '#21252e' }}
-                onClick={() => {
-                  setTagModalVisible(true);
-                }}
-              >
-                标签管理
-              </Button>
             </div>
           </div>
 
@@ -415,10 +425,9 @@ const MyAppPage: React.FC = () => {
                             <Tooltip content={item.appName}>
                               <div className={styles.myAppTitle}>{item.appName}</div>
                             </Tooltip>
-                            {/* TODO */}
-                            {/* <Tag color={TagColor[item.appStatus]} className={styles.tag}>
-                              SaaS模式
-                            </Tag> */}
+                            <Tag color={getColor(item.publishModel)} className={styles.tag}>
+                              {getModel(item.publishModel)}
+                            </Tag>
                           </div>
                           <Tag
                             color={TagColor[item.appStatus]}
@@ -609,4 +618,4 @@ const MyAppPage: React.FC = () => {
   );
 };
 
-export default MyAppPage;
+export default EnterpriseAppPage;

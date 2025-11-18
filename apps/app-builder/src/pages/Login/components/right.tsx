@@ -106,7 +106,11 @@ const Right: React.FC = () => {
           window.location.href = redirectURL;
         } else {
           // 跳转到首页
-          navigate('/onebase/my-app');
+          if(location.pathname.includes("/tenant")) {
+            navigate('/onebase/enterprise-app');
+          }else {
+            navigate('/onebase/my-app');
+          }
         }
 
         return;

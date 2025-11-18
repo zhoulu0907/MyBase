@@ -177,7 +177,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
         <div className={styles.userInfo}>
           {UserPermissionManager.getUserPermissionInfo()?.user?.nickname || '未登录'}
 
-          <Dropdown droplist={location.pathname?.includes("tenant") ? tenantAdminMenu : userMenu} position="bl">
+          <Dropdown droplist={location.pathname?.includes("/enterprise-app") ? tenantAdminMenu : userMenu} position="bl">
             <div className={styles.userDropdown}>
               <img src={AvatarSVG} alt="avatar" />
             </div>
