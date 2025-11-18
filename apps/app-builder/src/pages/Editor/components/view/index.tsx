@@ -33,7 +33,7 @@ const View: React.FC<ViewProps> = ({ pageSetId }) => {
   const [dropListVisible, setDropListVisible] = useState(false);
   const [editViewName, setEditViewName] = useState(false);
 
-  const { pageComponentSchemas, components, layoutSubComponents } = usePageEditorSignal();
+  const { pageComponentSchemas, components, layoutSubComponents, subTableComponents } = usePageEditorSignal();
 
   const showViewType = (item: PageView | null) => {
     if (!item) {
@@ -58,6 +58,7 @@ const View: React.FC<ViewProps> = ({ pageSetId }) => {
 
     useEditorSignalMap.get(curViewId.value)!.loadPageComponentSchemas(pageComponentSchemas);
     useEditorSignalMap.get(curViewId.value)!.loadLayoutSubComponents(layoutSubComponents);
+    useEditorSignalMap.get(curViewId.value)!.loadSubTableComponents(subTableComponents);
 
     // 切换到新视图
     switchToView(id);
@@ -71,6 +72,7 @@ const View: React.FC<ViewProps> = ({ pageSetId }) => {
     useEditorSignalMap.get(curViewId.value)!.setComponents(components);
     useEditorSignalMap.get(curViewId.value)!.loadPageComponentSchemas(pageComponentSchemas);
     useEditorSignalMap.get(curViewId.value)!.loadLayoutSubComponents(layoutSubComponents);
+    useEditorSignalMap.get(curViewId.value)!.loadSubTableComponents(subTableComponents);
 
     const view = pageViews.value[id];
     if (!view) {
@@ -146,12 +148,12 @@ const View: React.FC<ViewProps> = ({ pageSetId }) => {
     });
 
     // 替换 subTableComponents 的id
-    Object.entries(oldSubTableComponents).forEach((item:any) => {
+    Object.entries(oldSubTableComponents).forEach((item: any) => {
       if (!idMap[item.id]) {
         return;
       }
       const newCpID = idMap[item.id];
-      const newSubComponents  = {...item,id:newCpID}
+      const newSubComponents = { ...item, id: newCpID };
       newLayoutSubComponents[newCpID] = newSubComponents;
     });
 

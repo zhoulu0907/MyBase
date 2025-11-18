@@ -3,7 +3,7 @@ import { IconDelete, IconDragDotVertical } from '@arco-design/web-react/icon';
 import React, { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import styles from '../../index.module.less';
-import { useAppEntityStore, DEFAULT_OPTIONS_TYPE } from '@onebase/ui-kit';
+import { useAppEntityStore, DEFAULT_OPTIONS_TYPE, getPopupContainer } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import { getDictDetail, getDictDataListByType } from '@onebase/platform-center';
 import SelectDictModal from '@/components/SelectDictModal';
@@ -146,13 +146,14 @@ const DynamicRadioConfig: React.FC<DynamicRadioConfigProps> = ({ handlePropsChan
       <Form.Item layout="vertical" labelAlign="left" label={item.name || '自定义配置'} className={styles.formItem}>
         <Form.Item>
           <Select
+            getPopupContainer={getPopupContainer}
             value={configs[selectKey].type}
             disabled={configs[selectKey].disabled}
             onChange={(value) => {
               if (value === DEFAULT_OPTIONS_TYPE.CUSTOM) {
                 setSelectDisabled(false);
               }
-              handlePropsChange(selectKey, { ...configs[selectKey], type: value,  });
+              handlePropsChange(selectKey, { ...configs[selectKey], type: value, });
             }}
             options={[
               { label: '自定义', value: DEFAULT_OPTIONS_TYPE.CUSTOM },
@@ -172,7 +173,7 @@ const DynamicRadioConfig: React.FC<DynamicRadioConfigProps> = ({ handlePropsChan
             <div className={styles.tableColumnList}>
               <ReactSortable
                 list={configs[selectKey].defaultOptions}
-                setList={() => {}}
+                setList={() => { }}
                 group={{
                   name: 'table-col-item'
                 }}
