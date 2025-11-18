@@ -171,13 +171,13 @@ export default function EditorHeader() {
       bpmDefJson: JSON.stringify(currentJsonData),
       globalConfig: configData
     };
-   return save(params).then((res: any) => {
-     setFlowId(res);
-     Message.success(isCreate ? '创建成功' : '保存成功');
-     if (isCreate) {
-       setCurrnetFlowId(res);
-     }
-   });
+    return save(params).then((res: any) => {
+      setFlowId(res);
+      Message.success(isCreate ? '创建成功' : '保存成功');
+      if (isCreate) {
+        setCurrnetFlowId(res);
+      }
+    });
   };
   const getVersonList = () => {
     selectRef.current && selectRef.current.getVersionMgmtData();
@@ -507,14 +507,15 @@ export default function EditorHeader() {
           <div className={styles.editorStatusEditAfterPublished}>未保存</div>
         )}
         {/* 预览 */}
-        <Button
-           onClick={toPreview}
-          className={styles.previewButton}
-          // onClick={flowPreview}
-        >
+        <Button onClick={toPreview} className={styles.previewButton}>
           <img src={previewSVG} />
           {t('editor.preview')}
         </Button>
+        {activeTab === EDITOR_TYPES.FLOW_EDITOR && (
+          <Button type="primary" onClick={flowPreview}>
+            测试
+          </Button>
+        )}
         <Button
           type="primary"
           onClick={() => {
