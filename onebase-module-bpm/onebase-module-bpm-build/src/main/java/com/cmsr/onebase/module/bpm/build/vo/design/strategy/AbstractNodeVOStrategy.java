@@ -162,7 +162,7 @@ public abstract class AbstractNodeVOStrategy<T extends BaseNodeVO, E extends Bas
 
             // 审批人列表最多100个用户
             if (users.size() > maxUsers) {
-                log.warn("审批人列表最多100个用户 当前为：{}", users.size());
+                log.warn("审批人列表最多 {} 个用户 当前为：{}", maxUsers, users.size());
 
                 users = new ArrayList<>(users.subList(0, maxUsers));
             }
