@@ -2,7 +2,7 @@ import { Drawer } from '@arco-design/web-react';
 import { etlEditorSignal, ETLNodeType } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
 import React from 'react';
-import { InputNodeConfig, OutputNodeConfig } from '../../configs';
+import { InputNodeConfig, JoinNodeConfig, OutputNodeConfig } from '../../configs';
 import DrawerHeader from './components/drawerHeader';
 
 interface DrawerInitPageProps {
@@ -32,6 +32,7 @@ const NodeConfigPage: React.FC<DrawerInitPageProps> = ({ refWrapper }) => {
     >
       {curNode.value.flowNodeType === ETLNodeType.INPUT_NODE && <InputNodeConfig />}
       {curNode.value.flowNodeType === ETLNodeType.OUTPUT_NODE && <OutputNodeConfig />}
+      {curNode.value.flowNodeType === ETLNodeType.JOIN_NODE && <JoinNodeConfig />}
     </Drawer>
   );
 };
