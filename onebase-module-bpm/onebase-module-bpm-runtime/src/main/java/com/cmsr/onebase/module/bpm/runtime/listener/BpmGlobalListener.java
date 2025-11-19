@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.bpm.runtime.listener;
 
-import cn.hutool.core.map.MapUtil;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowAgentRepository;
 import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowAgentDO;
@@ -12,6 +11,7 @@ import com.cmsr.onebase.module.bpm.core.utils.BpmUtil;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.dromara.warm.flow.core.dto.FlowParams;
 import org.dromara.warm.flow.core.entity.Instance;
 import org.dromara.warm.flow.core.entity.Node;
@@ -188,7 +188,7 @@ public class BpmGlobalListener implements GlobalListener {
         }
 
         // todo：确保appId不为空
-        Long appId = MapUtil.getLong(variable, BpmConstants.VAR_APP_ID_KEY);
+        Long appId = MapUtils.getLong(variable, BpmConstants.VAR_APP_ID_KEY);
 
         if (appId == null) {
             return;
