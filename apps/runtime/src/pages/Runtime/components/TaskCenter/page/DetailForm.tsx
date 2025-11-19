@@ -20,6 +20,46 @@ interface PreviewProps {
   detailData: any;
 }
 
+type ViewMode = 'edit' | 'detail';
+type FormStatus = 'default' | 'readonly' | 'hidden';
+
+const ViewModeMap: Record<ViewMode, FormStatus> = {
+  edit: 'default',
+  detail: 'readonly'
+};
+
+const DetailFormMap: Record<FormStatus, FormStatus> = {
+  default: 'readonly',
+  readonly: 'readonly',
+  hidden: 'hidden'
+};
+
+/**
+ * 根据节点配置、表单配置和视图模式确定最终的表单状态
+ *
+ * @param nodeConfig - 节点配置（优先级最高）
+ * @param formConfig - 表单配置
+ * @param viewMode - 视图模式（edit/detail）
+ * @returns 最终状态
+ *
+ * 优先级规则：
+ * 1. 如果提供了nodeConfig，则直接使用nodeConfig（节点配置优先）
+ * 2. 如果没有nodeConfig且viewMode是edit，则使用formConfig（表单配置）
+ *    - 如果formConfig未定义，则使用viewMode
+ * 3. 如果没有nodeConfig且viewMode是detail，则使用formConfig转换后的值：
+ *    - 将default转换为readonly（detail视图下默认只读）
+ *    - 其他状态保持不变
+ */
+const parseStatus = (nodeConfig: FormStatus, formConfig: FormStatus, viewMode: FormStatus) => {
+  if (nodeConfig) {
+    return nodeConfig;
+  } else if (viewMode === ViewModeMap.edit) {
+    return formConfig || viewMode;
+  } else if (viewMode === ViewModeMap.detail) {
+    return DetailFormMap[formConfig as keyof typeof DetailFormMap];
+  }
+};
+
 const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref) => {
   // 启用 signal 的响应式更新
   useSignals();
@@ -31,6 +71,9 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
   const [pageType, setPageType] = useState('');
   const [mainMetaData, setMainMetaData] = useState<string>('');
   const [newCompents, setNewCompents] = useState<any>();
+
+  const pageComponentSchemas = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value;
+  const fieldPerm = detailData?.formData?.fieldPerm;
 
   useImperativeHandle(ref, () => ({
     getFormData: () => {
@@ -49,9 +92,6 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
   };
 
   const updateComponentStatus = async () => {
-    const pageComponentSchemas = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value;
-    const fieldPerm = detailData?.formData?.fieldPerm;
-
     if (pageComponentSchemas) {
       const updatedData: {
         [key: string]: any;
@@ -59,7 +99,12 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
       Object.keys(pageComponentSchemas).forEach((key) => {
         const originalItem = pageComponentSchemas[key];
         const secondDataField = originalItem.config.dataField[1];
-        const newStatus = fieldPerm?.[secondDataField] || originalItem.config.status;
+
+        const nodeConfig = fieldPerm?.[secondDataField];
+        const formConfig = originalItem.config.status;
+        const viewMode = ViewModeMap[detailData?.pageView?.viewMode as keyof typeof ViewModeMap];
+        const newStatus = parseStatus(nodeConfig, formConfig, viewMode);
+
         updatedData[key] = {
           ...originalItem,
           config: {
@@ -71,6 +116,7 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
       setNewCompents(updatedData);
     }
   };
+
   const handleGetData = async () => {
     const res = detailData?.formData;
     const formValues: Record<string, any> = {};
@@ -162,22 +208,23 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
     return dataObj;
   };
 
-  useEffect(() => {
-    parseData();
-  }, [mainMetaData, mainMetaDataFields.value, pageSetId]);
-
-  const parseData = async () => {
-    const res = await startLoadPageSet({ pageSetId: pageSetId });
-    await updateComponentStatus();
-
-    if (mainMetaData && mainMetaDataFields.value.length > 0) {
-      await handleGetData();
-    }
+  const parseData =  () => {
+    startLoadPageSet({ pageSetId: pageSetId });
   };
 
   useEffect(() => {
+    updateComponentStatus();
+    handleGetData();
+  }, [pageComponentSchemas, fieldPerm, detailData]);
+
+  useEffect(() => {
+    parseData();
     getMainMetaData(pageSetId);
   }, [pageSetId]);
+
+  useEffect(() => {
+    setNewCompents(null);
+  }, []);
 
   return (
     <div>
@@ -185,15 +232,11 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
         {newCompents &&
           useEditorSignalMap.get(editPageViewId.value)?.components.value.map((cp: GridItem) => (
             <Fragment key={cp.id}>
-              {useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id].config.status !==
-                STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+              {newCompents && newCompents[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
                 <div
                   key={cp.id}
                   style={{
-                    width: getComponentWidth(
-                      useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id],
-                      cp.type
-                    )
+                    width: getComponentWidth(newCompents && newCompents[cp.id], cp.type)
                   }}
                 >
                   <PreviewRender

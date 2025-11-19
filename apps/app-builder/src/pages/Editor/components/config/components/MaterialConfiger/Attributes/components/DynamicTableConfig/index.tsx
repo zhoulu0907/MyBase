@@ -96,7 +96,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
   // 设置允许的列
   useEffect(() => {
     const res = fieldList.some(
-      (item: MetadataEntityField) => !columnsConfig.some((col: any) => col.dataIndex == item.fieldName)
+      (item: MetadataEntityField) => !columnsConfig.some((col: any) => col.dataIndex == item.id)
     );
 
     setEnableAddColumn(res);
@@ -135,9 +135,9 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
     const newColumns = newFieldListNotSystemField.map((item: MetadataEntityField) => ({
       // 保留已有的命名，如果没有则使用字段展示名称
       title:
-        configs[columnsKey].find((col: any) => col.dataIndex === item.fieldName && configs.metaData === entityId)
-          ?.title || item.displayName,
-      dataIndex: item.fieldName,
+        configs[columnsKey].find((col: any) => col.dataIndex === item.id && configs.metaData === entityId)?.title ||
+        item.displayName,
+      dataIndex: item.id,
       disabled: item.disabled,
       id: item.id
     }));
@@ -297,15 +297,14 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
                   <Menu>
                     {fieldList
                       .filter(
-                        (item: MetadataEntityField) =>
-                          !columnsConfig.some((col: any) => col.dataIndex === item.fieldName)
+                        (item: MetadataEntityField) => !columnsConfig.some((col: any) => col.dataIndex === item.id)
                       )
                       .map((item: MetadataEntityField) => (
                         <Menu.Item
                           key={item.fieldName}
                           disabled={item?.disabled}
                           onClick={() => {
-                            const newList = [...columnsConfig, { title: item.displayName, dataIndex: item.fieldName }];
+                            const newList = [...columnsConfig, { title: item.displayName, dataIndex: item.id }];
                             setColumnsConfig(newList);
                             handlePropsChange(columnsKey, newList);
                           }}

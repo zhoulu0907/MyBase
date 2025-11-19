@@ -6,12 +6,13 @@ import {
   STATUS_OPTIONS,
   STATUS_VALUES,
   TableOperationButton,
-  TableOperationButtonStyle
+  TableOperationButtonStyle,
+  RedirectMethod
 } from '../../../constants';
 
 import DynamicIcon from '@/components/DynamicIcon';
 import { iconMap } from '@/utils/const';
-import { IconPlus, IconRefresh, IconSearch } from '@arco-design/web-react/icon';
+import { IconPlus, IconRefresh } from '@arco-design/web-react/icon';
 import {
   dataMethodDelete,
   dataMethodPage,
@@ -23,13 +24,14 @@ import {
 } from '@onebase/app';
 import { pagesRuntimeSignal } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
+import PreviewRender from 'src/components/render/PreviewRender';
+import { useFormEditorSignal } from 'src/signals/page_editor';
 import { ENTITY_FIELD_TYPE } from '../../../../DataFactory/const';
-import { RedirectMethod } from '../../../constants';
+import { COMPONENT_MAP } from '../../../componentsMap';
+import { getComponentSchema } from '../../../schema'
 import './index.css';
 import type { XTableConfig } from './schema';
 import TableSearch from './tableSerach';
-import { useFormEditorSignal } from 'src/signals/page_editor';
-import PreviewRender from 'src/components/render/PreviewRender';
 
 const leftPanelWidth = 318;
 const rightPanelWidth = 310;
@@ -47,6 +49,7 @@ const XTable = memo(
   (
     props: XTableConfig & {
       runtime?: boolean;
+      preview?: boolean;
       showFromPageData?: Function;
       showAddBtn?: boolean;
       refresh?: number;
@@ -57,7 +60,7 @@ const XTable = memo(
     const { pageComponentSchemas: fromPageComponentSchemas, components } = useFormEditorSignal;
 
     const { setDrawerVisible, setDrawerPageId, setDetailPageViewId } = pagesRuntimeSignal;
-    const { runtime = true, showFromPageData, showAddBtn = true } = props;
+    const { runtime = true, showFromPageData, showAddBtn = true, preview } = props;
     const hasOperationPermission = true;
 
     const {
@@ -105,49 +108,48 @@ const XTable = memo(
       title: '操作',
       dataIndex: 'op',
       fixed: null,
-      width: '110px',
+      width: '80px',
+      headerCellStyle: { textAlign: 'center' },
+      //TODO: zhoumingji ,基础组件上不要写这种样式，最好能放到样式文件里
+      bodyCellStyle: { padding: '0 8px', textAlign: 'center' },
       render: (_: any, record: any) => {
         if (advancedButtonPermission === BUTTON_VALUES[BUTTON_OPTIONS.HIDDEN] && !hasOperationPermission) return;
         const isDisabled =
           advancedButtonPermission === BUTTON_VALUES[BUTTON_OPTIONS.DISABLED] && !hasOperationPermission;
         return (
-          <Space>
+          <Space size={4}>
             {operationButton?.map((opearate, index) => (
               <Tooltip content={!hasOperationPermission && '无操作权限'} key={index}>
                 {opearate.type === TableOperationButton.EDIT && opearate.display && (
-                  <div
-                    style={{
-                      whiteSpace: 'nowrap',
-                      opacity: isDisabled ? 0.5 : 1,
-                      cursor: isDisabled ? 'not-allowed' : 'pointer',
-                      pointerEvents: isDisabled ? 'none' : 'auto',
-                      zIndex: 10
-                    }}
+                  <Button
+                    type="text"
+                    size="small"
+                    style={{ padding: '0 8px' }}
                     onClick={(event) => {
                       event.stopPropagation();
                       handleEdit(record.id, true);
                     }}
-                  >
-                    {
-                      <>
-                        {(operationButtonShowType === TableOperationButtonStyle.ICON ||
-                          operationButtonShowType === TableOperationButtonStyle.ALL) && (
-                            <DynamicIcon
-                              IconComponent={iconMap[opearate.buttonIcon as keyof typeof iconMap]}
-                              theme="outline"
-                              size="16"
-                              fill={opearate.iconColor}
-                              style={{
-                                marginRight: 4
-                              }}
-                            />
-                          )}
-                        {(operationButtonShowType === TableOperationButtonStyle.TEXT ||
-                          operationButtonShowType === TableOperationButtonStyle.ALL) &&
-                          opearate.buttonName}
-                      </>
+                    icon={
+                      (operationButtonShowType === TableOperationButtonStyle.ICON ||
+                        operationButtonShowType === TableOperationButtonStyle.ALL) && (
+                        <DynamicIcon
+                          IconComponent={iconMap[opearate.buttonIcon as keyof typeof iconMap]}
+                          theme="outline"
+                          size="16"
+                          fill={opearate.iconColor}
+                          style={{
+                            marginRight: 2
+                          }}
+                        />
+                      )
                     }
-                  </div>
+                  >
+                    <>
+                      {(operationButtonShowType === TableOperationButtonStyle.TEXT ||
+                        operationButtonShowType === TableOperationButtonStyle.ALL) &&
+                        opearate.buttonName}
+                    </>
+                  </Button>
                 )}
 
                 {opearate.type === TableOperationButton.DELETE && opearate.display && (
@@ -167,6 +169,7 @@ const XTable = memo(
                       focusLock
                       title="确认删除"
                       content={opearate.confirmText}
+                      disabled={preview}
                       onOk={(event) => {
                         event.stopPropagation();
                         handleDelete(record.id);
@@ -177,21 +180,32 @@ const XTable = memo(
                         // }
                       }}
                     >
-                      {(operationButtonShowType === TableOperationButtonStyle.ICON ||
-                        operationButtonShowType === TableOperationButtonStyle.ALL) && (
+                      <Button
+                        type="text"
+                        size="small"
+                        disabled={preview}
+                        style={{ padding: '0 4px' }}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          //   handleDelete(record.id);
+                        }}
+                        status={'danger'}
+                        icon={
                           <DynamicIcon
                             IconComponent={iconMap[opearate.buttonIcon as keyof typeof iconMap]}
                             theme="outline"
                             size="16"
                             fill={opearate.iconColor}
                             style={{
-                              marginRight: 4
+                              marginRight: 2
                             }}
                           />
-                        )}
-                      {(operationButtonShowType === TableOperationButtonStyle.TEXT ||
-                        operationButtonShowType === TableOperationButtonStyle.ALL) &&
-                        opearate.buttonName}
+                        }
+                      >
+                        {(operationButtonShowType === TableOperationButtonStyle.TEXT ||
+                          operationButtonShowType === TableOperationButtonStyle.ALL) &&
+                          opearate.buttonName}
+                      </Button>
                     </Popconfirm>
                   </div>
                 )}
@@ -209,7 +223,7 @@ const XTable = memo(
     }, [refresh]);
 
     useEffect(() => {
-      getFinalColumns()
+      getFinalColumns();
     }, [showOpearate, columns, fixedOpearate, props?.xTableSelectProps?.selectedDataId]);
 
     useEffect(() => {
@@ -227,12 +241,15 @@ const XTable = memo(
             ...column,
             ellipsis: true,
             width: column.width + 'px',
-            bodyCellStyle: { padding: '0 10px 0 0', textAlign: 'center' },
-            render: (_text: string, _record: any, index: number) => {
+            // TODO: zhoumingji ,基础组件上不要写这种样式，最好能放到样式文件里
+            bodyCellStyle: { padding: '0 12px' },
+            render: (_text: any, _record: any, index: number) => {
               const componentSchemasKeys = Object.keys(fromPageComponentSchemas.value || {});
               const cpId = componentSchemasKeys.find((ele) => {
                 return fromPageComponentSchemas.value[ele]?.config?.dataField?.includes(column.id);
               });
+
+              // 表单配置
               if (cpId) {
                 // 组件类型
                 const cpType = components.value?.find((ele) => ele.id === cpId)?.type;
@@ -245,24 +262,24 @@ const XTable = memo(
                     (field: AppEntityField) => field.fieldId === column.id
                   );
                   if (dataFieldInfo && _record[dataFieldInfo.fieldName]) {
-                    dataField = [`${id}.${index}.${dataFieldInfo.fieldName}`]
+                    dataField = [mainMetaData.entityId, `${id}.${index}.${dataFieldInfo.fieldName}`];
                   }
                 }
                 const componentConfig = {
                   ...currentComponentSchemas,
                   config: {
                     ...currentComponentSchemas.config,
-                    dataField: dataField?.length > 0 ? dataField : [`${id}.${index}.${column.id}`],
+                    dataField: dataField?.length > 0 ? dataField : [mainMetaData.entityId, `${id}.${index}.${column.id}`],
                     label: {
                       display: false,
-                      text: '',
+                      text: ''
                     },
                     verify: { required: false },
                     tooltip: ''
                   }
                 };
-                if(!cpType){
-                  return <span>{_text}</span>
+                if (!cpType) {
+                  return <span>{_text}</span>;
                 }
 
                 return (
@@ -275,16 +292,62 @@ const XTable = memo(
                   />
                 );
               }
-              return <span>{_text}</span>
+
+              // 根据字段获取默认配置
+              if (Array.isArray(mainMetaData?.parentFields)) {
+                const dataFieldInfo = mainMetaData.parentFields.find(
+                  (field: AppEntityField) => field.fieldId === column.id
+                );
+                const cpType = COMPONENT_MAP[dataFieldInfo?.fieldType];
+                if (dataFieldInfo?.fieldType && cpType) {
+                  const basicConfig = getComponentSchema(cpType as any);
+                  const componentConfig = {
+                    ...basicConfig,
+                    config: {
+                      ...basicConfig.config,
+                      dataField: [mainMetaData.entityId, `${id}.${index}.${dataFieldInfo.fieldName}`],
+                      label: {
+                        display: false,
+                        text: ''
+                      },
+                      verify: { required: false },
+                      tooltip: ''
+                    }
+                  };
+                  return (
+                    <PreviewRender
+                      cpId={column.id}
+                      cpType={cpType}
+                      detailMode={true}
+                      pageComponentSchema={componentConfig}
+                      runtime={true}
+                    />
+                  );
+                }
+              }
+
+              return <span>{_text}</span>;
             }
           };
         });
       }
+      const indexColumn = {
+        title: '序号',
+        dataIndex: 'index',
+        width: '62px',
+        align: 'center',
+        headerCellStyle: { textAlign: 'center' },
+        bodyCellStyle: { padding: '0 4px', textAlign: 'center' },
+        render: (_: any, __: any, idx: number) => {
+          const size = pageSize || 10;
+          return (tablePageNo - 1) * size + idx + 1;
+        }
+      };
       if (showOpearate) {
         opearate.fixed = fixedOpearate ? 'right' : null;
-        newColumns.push(opearate)
+        newColumns.push(opearate);
       } else {
-        newColumns = newColumns.filter((v) => v.dataIndex !== 'op')
+        newColumns = newColumns.filter((v) => v.dataIndex !== 'op');
       }
 
       if (props?.xTableSelectProps?.showSelect && runtime) {
@@ -301,10 +364,13 @@ const XTable = memo(
             />
           )
         };
-        newColumns = [checkboxColumnRender, ...newColumns]
+        newColumns = [checkboxColumnRender, indexColumn, ...newColumns];
+      } else {
+        newColumns = [indexColumn, ...newColumns];
       }
+
       setFinalColumns(newColumns);
-    }
+    };
 
     const handleCreate = () => {
       console.log('点击新增');
@@ -389,7 +455,7 @@ const XTable = memo(
             );
             if (userSelectField && newItem[key]) {
               if (newItem[key]) {
-                newItem[key] = newItem[key]?.userName || '';
+                // newItem[key] = newItem[key]?.userName || '';
               }
             }
 
@@ -474,30 +540,28 @@ const XTable = memo(
         }}
       >
         <div className="tableHeader">
-          <div className="searchGroup">
-            <Form form={form} layout="horizontal" labelAlign="right" className="searchItems">
-              <TableSearch searchItems={searchItems} labelColSpan={labelColSpan} runtime={runtime} />
-            </Form>
-
-            <div className="searchBtns">
-              {searchItems?.length ? (
-                <>
-                  <Button type="primary" onClick={handleSearch} icon={<IconSearch />}>
-                    查询
-                  </Button>
-                  <Button type="default" onClick={handleReset} icon={<IconRefresh />}>
-                    重置
-                  </Button>
-                </>
-              ) : null}
+          {searchItems?.length ? (
+            <div className="searchGroup">
+              <Form form={form} layout="vertical" className="searchItems">
+                <TableSearch
+                  searchItems={searchItems}
+                  labelColSpan={labelColSpan}
+                  runtime={runtime}
+                  onSearch={handleSearch}
+                  onReset={handleReset}
+                />
+              </Form>
             </div>
-          </div>
-          <div className="addButton">
-            {showAddBtn && (
-              <Button type="primary" onClick={handleCreate} icon={<IconPlus />}>
-                添加数据
-              </Button>
-            )}
+          ) : null}
+          <div className="headerActions">
+            <div className="addButton">
+              {showAddBtn && (
+                <Button type="primary" onClick={handleCreate} icon={<IconPlus />}>
+                  添加数据
+                </Button>
+              )}
+            </div>
+            <Button type="text" onClick={() => handlePage()} icon={<IconRefresh />}></Button>
           </div>
         </div>
         <div>
@@ -510,6 +574,11 @@ const XTable = memo(
                 return {
                   onClick: (event) => {
                     handleRowClick(record);
+                  },
+                  onDoubleClick: () => {
+                    if (props?.xTableSelectProps?.showSelect && props?.xTableSelectProps?.setSelectData) {
+                      props.xTableSelectProps.setSelectData(record);
+                    }
                   }
                 };
               }}

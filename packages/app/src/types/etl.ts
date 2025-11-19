@@ -131,6 +131,11 @@ export interface UpdateETLFlowReq {
   config: any;
 }
 
-export interface DeleteETLFlowReq {
-  id: string;
+export interface UpdateWorkflowScheduleInfoReq {
+  applicationId: string;
+  workflowId: string;
+  flowName: string;
+  scheduleStrategy: string;
+  config: any;
+  enableStatus: number;
 }

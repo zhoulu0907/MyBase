@@ -17,6 +17,10 @@ export interface SaveRequest {
 export interface PublishRequest {
   id: string;
 }
+export interface UpdateVersionAlias {
+   id: string;
+   versionAlias:string
+}
 export interface VersionMgmtRequest {
     /**
      * pageSetId
@@ -42,4 +46,8 @@ export interface VersionMgmtRequest {
      * 版本流程状态：all-全部, published-已发布, designing-设计中, previous-历史
      */
     versionStatus?: string;
+}
+export interface GetFlowPreview {
+  instanceId: string;
+  businessId: string;
 }

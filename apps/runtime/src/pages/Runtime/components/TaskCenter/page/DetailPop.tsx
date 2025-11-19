@@ -9,8 +9,16 @@ import DetailStep from './DetailStep';
 import DetailOKConfirm from './DetailOKConfirm';
 import { getFormDetail, getOperatorRecord, fetchExecTask } from '@onebase/app/src/services/app_runtime';
 import PreviewContainer from './DetailForm';
+import FlowView from '../../../../../../../app-builder/src/pages/Editor/components/flowView';
 const Row = Grid.Row;
 const Col = Grid.Col;
+
+enum PageTypeMap {
+  willdo = 'todo',
+  idone = 'done',
+  icreated = 'created',
+  icopied = 'cc'
+}
 
 interface PageProps {
   detailPopVisible: boolean;
@@ -25,6 +33,7 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
   let [isShowRight, setIsShowRight] = useState(true);
   const [stepData, setStepData] = useState();
   const [detailData, setDetailData] = useState<any>();
+  const [flowViewVisible, setFlowViewVisible] = useState(false);
   let confirmRef = useRef<any>(null);
   const formRef = useRef<any>(null);
 
@@ -80,7 +89,7 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
   };
 
   function handlePreview() {
-    console.log('handle Preview ...');
+    setFlowViewVisible(true);
   }
   function renderDrawerFooter() {
     return (
@@ -98,6 +107,7 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
             ) {
               return (
                 <Button
+                  key={index}
                   type={item?.buttonType === BPMConfigButtonType.APPROVE ? 'primary' : 'outline'}
                   onClick={() => fetchExec(item)}
                 >
@@ -147,7 +157,11 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
     setStepData(res);
   };
   const fetchDetailData = async () => {
-    const res = await getFormDetail({ instanceId: rowData?.instanceId, taskId: detailData?.taskId });
+    const res = await getFormDetail({
+      instanceId: rowData?.instanceId,
+      taskId: rowData?.taskId,
+      from: PageTypeMap[listType as keyof typeof PageTypeMap]
+    });
     setDetailData(res);
   };
 
@@ -159,7 +173,6 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
       //根据列表类型请求对应的详情
     }
   }, [listType]);
-
   return (
     <section>
       <Drawer
@@ -188,7 +201,7 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
             <Col span={6}>
               <p className="gray-color">发起人</p>
               <div className="photo-box">
-                <p className="photo-img"></p>
+                <p className="photo-img">{detailData?.initiator?.avatar && <img src={detailData?.initiator?.avatar} alt='' />}</p>
                 {detailData?.initiatorName}
               </div>
             </Col>
@@ -225,6 +238,12 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
           </div>
         </div>
       </Drawer>
+      <FlowView
+        visible={flowViewVisible}
+        setVisible={setFlowViewVisible}
+        instanceId={rowData?.instanceId}
+        businessId={rowData?.businessId}
+      />
     </section>
   );
 };

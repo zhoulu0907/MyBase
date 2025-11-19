@@ -42,7 +42,10 @@ export interface FlowNodeJSON extends FlowNodeJSONDefault {
      * Rest properties
      */
     [key: string]: any;
+    name?: string;
+    runStatus?: string;
   };
+  name?: string;
 }
 
 /**

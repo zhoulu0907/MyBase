@@ -86,12 +86,7 @@
 
 .subTableContent {
   width: 100%;
-  min-height: 120px;
-  display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  align-items: center;
-  justify-content: center;
+  min-height: 80px;
 }
 
 .subTableFooter {

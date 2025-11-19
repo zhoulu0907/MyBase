@@ -1,0 +1,85 @@
+import { cloneDeep } from 'lodash-es';
+
+import { WORKBENCH_COMPONENT_REGISTRY, type WorkbenchComponentSchema } from './componentRegistry';
+export type { WorkbenchComponentSchema } from './componentRegistry';
+import WorkbenchSchema from './WorkbenchBasicComponents/schema';
+import { WORKBENCH_COMPONENT_TYPE_VALUES, type WorkbenchComponentType } from './componentTypes';
+
+type WorkbenchComponentSchemaMap = Record<WorkbenchComponentType, WorkbenchComponentSchema>;
+
+// 创建组件配置映射
+const workbenchComponentSchemaMap: WorkbenchComponentSchemaMap = WORKBENCH_COMPONENT_TYPE_VALUES.reduce(
+  (acc, componentType) => {
+    acc[componentType] = WORKBENCH_COMPONENT_REGISTRY[componentType].schema;
+    return acc;
+  },
+  {} as WorkbenchComponentSchemaMap
+);
+
+/**
+ * 根据组件类型获取对应的配置
+ * @param componentType 组件类型
+ * @returns 返回该组件的配置对象，包含 editData 和 config
+ */
+export function getWorkbenchComponentSchema<T extends WorkbenchComponentType>(
+  componentType: T
+): WorkbenchComponentSchemaMap[T] {
+  const config = workbenchComponentSchemaMap[componentType];
+
+  if (!config) {
+    throw new Error(`未找到工作台组件类型 "${componentType}" 的配置`);
+  }
+
+  return cloneDeep(config);
+}
+
+/**
+ * 获取所有可用的工作台组件类型
+ * @returns 返回所有可用的组件类型数组
+ */
+export function getAvailableWorkbenchComponentTypes(): WorkbenchComponentType[] {
+  return [...WORKBENCH_COMPONENT_TYPE_VALUES];
+}
+
+/**
+ * 检查工作台组件类型是否存在
+ * @param componentType 组件类型
+ * @returns 返回布尔值，表示该组件类型是否存在
+ */
+export function hasWorkbenchComponentSchema(componentType: string): componentType is WorkbenchComponentType {
+  return componentType in workbenchComponentSchemaMap;
+}
+
+/**
+ * 获取工作台组件宽度
+ * @param schema 组件 schema
+ * @param itemType 组件类型
+ * @returns 返回宽度字符串
+ */
+export function getWorkbenchComponentWidth(
+  schema: Partial<WorkbenchComponentSchema> | undefined,
+  itemType: WorkbenchComponentType
+): string {
+  const resolvedSchema = schema?.config?.width
+    ? (schema as WorkbenchComponentSchema)
+    : getWorkbenchComponentSchema(itemType);
+  return resolvedSchema.config.width;
+}
+
+/**
+ * 获取工作台组件配置
+ * @param schema 组件 schema
+ * @param itemType 组件类型
+ * @returns 返回配置对象
+ */
+export function getWorkbenchComponentConfig(
+  schema: Partial<WorkbenchComponentSchema> | undefined,
+  itemType: WorkbenchComponentType
+): WorkbenchComponentSchema['config'] {
+  const resolvedSchema = schema?.config ? (schema as WorkbenchComponentSchema) : getWorkbenchComponentSchema(itemType);
+  return resolvedSchema.config;
+}
+
+export const workbenchSchema = {
+  ...WorkbenchSchema
+};

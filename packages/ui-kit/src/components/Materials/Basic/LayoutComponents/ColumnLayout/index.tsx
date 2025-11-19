@@ -394,6 +394,8 @@ const XColumnLayout = (props: XColumnLayoutConfig & { runtime?: boolean; detailM
               const itemType = e.item.getAttribute('data-cp-type');
               const itemDisplayName = e.item.getAttribute('data-cp-displayname');
               const entityID = e.item.getAttribute('data-entity-id');
+              const fieldId = e.item.getAttribute('data-field-id');
+
               // 子表字段不允许
               if (
                 (entityID && entityID !== mainEntity.entityId) ||
@@ -410,6 +412,7 @@ const XColumnLayout = (props: XColumnLayoutConfig & { runtime?: boolean; detailM
               schema.config = schemaConfig;
               schema.config.cpName = itemDisplayName;
               schema.config.id = cpID;
+              schema.config.dataField = entityID && fieldId ? [entityID, fieldId] : [];
 
               const props = {
                 id: cpID,

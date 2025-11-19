@@ -29,9 +29,10 @@ const DrawerHeader: React.FC<DrawerHeaderProps> = ({}) => {
           setCurDrawerTab(value as ETLDrawerTab);
         }}
       >
-        {curNode.value.flowNodeType === ETLNodeType.OUTPUT_NODE && (
-          <Tabs.TabPane key={ETLDrawerTab.DATA_CONFIG} title="节点配置"></Tabs.TabPane>
-        )}
+        {curNode.value.flowNodeType === ETLNodeType.OUTPUT_NODE ||
+          (curNode.value.flowNodeType === ETLNodeType.UNION_NODE && (
+            <Tabs.TabPane key={ETLDrawerTab.DATA_CONFIG} title="节点配置"></Tabs.TabPane>
+          ))}
         <Tabs.TabPane key={ETLDrawerTab.DATA_PREVIEW} title="数据预览"></Tabs.TabPane>
         <Tabs.TabPane key={ETLDrawerTab.NODE_REMARK} title="节点备注"></Tabs.TabPane>
       </Tabs>

@@ -4,15 +4,12 @@
  */
 
 import React, { type FC } from 'react';
-import { Button } from '@douyinfe/semi-ui';
-
-import styled from 'styled-components';
 import type { NodePanelRenderProps } from '@flowgram.ai/free-node-panel-plugin';
-import { useClientContext, WorkflowNodeEntity, WorkflowDragService, useService } from '@flowgram.ai/free-layout-editor';
-import { Collapse, Tabs, Layout, Input } from '@arco-design/web-react';
+import { useClientContext, WorkflowNodeEntity } from '@flowgram.ai/free-layout-editor';
+import { Collapse} from '@arco-design/web-react';
 import type { FlowNodeRegistry } from '../../typings';
 import { nodeRegistries } from '../../nodes';
-import IconCollapsedDown from '@/assets/images/collapse_down_icon.svg';
+import IconCollapsedDown from '@workflow/images/collapse_down_icon.svg';
 import './node-list.less';
 import approver from '../../assets/bpmLogo/approver.png';
 import executor_big from '../../assets/bpmLogo/executor_big.png';
@@ -24,11 +21,16 @@ import automation from '../../assets/bpmLogo/automation.png';
 import subprocess from '../../assets/bpmLogo/subprocess.png';
 import task from '../../assets/bpmLogo/task.png';
 import wait from '../../assets/bpmLogo/wait.png';
-
 import message from '../../assets/bpmLogo/message.png';
-import {LLMNodeRegistry} from '../../nodes/llm/index';
-import {ModalNodeRegistry} from '../../nodes/modal/index';
-import { ApproverNodeRegistry, CcRecipientsNodeRegistry, ExecutorNodeRegistry } from '../../nodes/index';
+import {
+  ApproverNodeRegistry,
+  CcRecipientsNodeRegistry,
+  ExecutorNodeRegistry,
+  ParallelBranchNodeRegistry,
+  ConditionalBranchNodeRegistry,
+  SinkNodeBranchNodeRegistry
+} from '../../nodes/index';
+import './node-list.less';
 
 interface NodeListProps {
   onSelect: NodePanelRenderProps['onSelect'];
@@ -77,19 +79,19 @@ export const NodeList: FC<NodeListProps> = (props) => {
           </div>
         </Collapse.Item>
         <Collapse.Item className="collapseItem" header="分支节点" name="2">
-          <div className="nodeItem">
+          <div className="nodeItem" onClick={(e) => handleClick(e, ConditionalBranchNodeRegistry)}>
             <div className="nodeItemIcon">
               <img src={conditional_branch} alt="" />
             </div>
             条件分支
           </div>
-          <div className="nodeItem">
+          <div className="nodeItem" onClick={(e) => handleClick(e, ParallelBranchNodeRegistry)}>
             <div className="nodeItemIcon">
               <img src={parallel_branch} alt="" />
             </div>
             并行分支
           </div>
-          <div className="nodeItem">
+          <div className="nodeItem" onClick={(e) => handleClick(e, SinkNodeBranchNodeRegistry)}>
             <div className="nodeItemIcon">
               <img src={sink_node} alt="" />
             </div>

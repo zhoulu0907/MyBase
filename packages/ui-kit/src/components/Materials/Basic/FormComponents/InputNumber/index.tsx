@@ -70,7 +70,7 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
         wrapperCol={{ style: { flex: 1 } }}
         rules={[
           {
-            required: verify?.required
+            required: verify?.required, message:`${label.text}是必填项`
           }
         ]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}

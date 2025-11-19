@@ -414,8 +414,8 @@ export const selectDataResourceConfig: ISelectDataSourceConfigType = {
 }
 
 export const subTableConfig: ISubTableConfigType = {
-  key: 'subTable',
-  name: '子组件选项',
+  key: 'subTableConfig',
+  name: '展示样式',
   type: CONFIG_TYPES.SUB_TABLE
 };
 

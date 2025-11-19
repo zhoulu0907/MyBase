@@ -21,7 +21,10 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-      '@assets': path.join(__dirname, './src/assets')
+      '@assets': path.join(__dirname, './src/assets'),
+      '@workflow/nodes': path.join(__dirname, '../app-builder/src/assets/flow/nodes'),
+      '@workflow/store': path.join(__dirname, '../app-builder/src/store/singals'),
+      '@workflow/images': path.join(__dirname, '../app-builder/src/assets/images')
     }
   },
   assetsInclude: ['**/*.svg']

@@ -41,13 +41,14 @@ export const NodeWrapper: React.FC<NodeWrapperProps> = (props) => {
   const childRef = useRef<HTMLDivElement>(null);
   const portsRender = ports.map((p) => (
     <WorkflowPortRender
-      className={'nodePort' + (selected ? 'selectedPort' : '')}
+      className={'nodePort' + (selected ? ' selectedPort' : '') + (readonly ? ' readonlyPort' : '')}
       key={p.id}
       entity={p}
       onClick={!readonly ? onPortClick : undefined}
     />
   ));
   const onMouseOver = useCallback(() => {
+    if (readonly) return;
     setIsHover(true);
   }, [node]);
   const onMouseOut = useCallback(
@@ -78,6 +79,7 @@ export const NodeWrapper: React.FC<NodeWrapperProps> = (props) => {
   return (
     <>
       {(isHover || selected) &&
+        !readonly &&
         nodeRender.type !== WorkflowNodeType.START &&
         nodeRender.type !== WorkflowNodeType.END &&
         nodeRender.type !== WorkflowNodeType.INITIATION && (
@@ -91,7 +93,9 @@ export const NodeWrapper: React.FC<NodeWrapperProps> = (props) => {
           </div>
         )}
       <NodeWrapperStyle
-        className={selected ? 'selected' : ''}
+        className={`${selected && !readonly ? 'selected' : ''} 
+        ${readonly && nodeRender.data.status + 'Border'} 
+        ${nodeRender.id.includes('branch') && 'branchNode'}`}
         ref={nodeRef}
         draggable
         onMouseOver={onMouseOver}

@@ -36,6 +36,15 @@ export const createPageEditorSignal = (initialComponents: EditConfig[] = []) => 
     delete newSchemas[cp_id];
     pageComponentSchemas.value = newSchemas;
   };
+  const batchDelPageComponentSchemas = (ids: Set<string> | string[]) => {
+    const newSchemas = { ...pageComponentSchemas.value };
+    ids.forEach((id: string) => {
+      if (newSchemas[id]) {
+        delete newSchemas[id];
+      }
+    });
+    pageComponentSchemas.value = newSchemas;
+  }
 
   const clearPageComponentSchemas = () => {
     pageComponentSchemas.value = {};
@@ -57,11 +66,21 @@ export const createPageEditorSignal = (initialComponents: EditConfig[] = []) => 
     layoutSubComponents.value = newLayoutSubComponents;
   };
 
+  const batchDelLayoutSubComponents = (ids: Set<string> | string[]) => {
+    const newLayoutSubComponents = { ...layoutSubComponents.value };
+    ids.forEach((id: string) => {
+      if (newLayoutSubComponents[id]) {
+        delete newLayoutSubComponents[id];
+      }
+    });
+    layoutSubComponents.value = newLayoutSubComponents;
+  }
+
   const clearLayoutSubComponents = () => {
     layoutSubComponents.value = {};
   };
 
-   // 子表单
+  // 子表单
   const subTableComponents = signal<{ [key: string]: any[] }>({});
   const setSubTableComponents = (cp_id: string, newColumns: any[]) => {
     subTableComponents.value = { ...subTableComponents.value, [cp_id]: newColumns };
@@ -74,6 +93,16 @@ export const createPageEditorSignal = (initialComponents: EditConfig[] = []) => 
     delete newSubTableComponents[cp_id];
     subTableComponents.value = newSubTableComponents;
   };
+  const batchDelSubTableComponents = (ids: Set<string> | string[]) => {
+    const newSubTableComponents = { ...subTableComponents.value };
+    ids.forEach((id: string) => {
+      if (newSubTableComponents[id]) {
+        delete newSubTableComponents[id];
+      }
+    });
+    subTableComponents.value = newSubTableComponents;
+  }
+
   const clearSubTableComponents = () => {
     subTableComponents.value = {};
   };
@@ -92,6 +121,7 @@ export const createPageEditorSignal = (initialComponents: EditConfig[] = []) => 
     setPageComponentSchemas,
     loadPageComponentSchemas,
     delPageComponentSchemas,
+    batchDelPageComponentSchemas,
     clearPageComponentSchemas,
 
     // 列布局组件的列数据
@@ -99,6 +129,7 @@ export const createPageEditorSignal = (initialComponents: EditConfig[] = []) => 
     loadLayoutSubComponents,
     setLayoutSubComponents,
     delLayoutSubComponents,
+    batchDelLayoutSubComponents,
     clearLayoutSubComponents,
 
     // 子表单组件的列数据
@@ -106,6 +137,7 @@ export const createPageEditorSignal = (initialComponents: EditConfig[] = []) => 
     loadSubTableComponents,
     setSubTableComponents,
     delSubTableComponents,
+    batchDelSubTableComponents,
     clearSubTableComponents,
 
   };

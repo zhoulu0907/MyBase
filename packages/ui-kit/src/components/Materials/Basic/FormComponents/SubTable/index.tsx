@@ -18,13 +18,13 @@ import { useEffect, useState } from 'react';
 import PreviewRender from 'src/components/render/PreviewRender';
 import { pagesRuntimeSignal } from '@onebase/common';
 import { ENTITY_TYPE_VALUE } from '@onebase/app';
-import { useAppEntityStore } from 'src/signals/store_entity'
+import { useAppEntityStore } from 'src/signals/store_entity';
 import { getDictDetail, getDictDataListByType } from '@onebase/platform-center';
 import './index.css';
 
 const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: boolean }) => {
   useSignals();
-  const { id, label, tooltip, status, verify, runtime = true, detailMode, pageType } = props;
+  const { id, label, tooltip, status, subTableConfig, verify, runtime = true, detailMode, pageType } = props;
   const { mainEntity, subEntities } = useAppEntityStore();
 
   const {
@@ -96,7 +96,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
       itemType === ENTITY_TYPE_VALUE.SUB ||
       itemType == ENTITY_COMPONENT_TYPES.MAIN_ENTITY ||
       itemType == ENTITY_COMPONENT_TYPES.SUB_ENTITY ||
-      entityId && entityId === mainEntity.entityId
+      (entityId && entityId === mainEntity.entityId)
     ) {
       return;
     }
@@ -149,13 +149,10 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
         ...schema.config.verify,
         required: currentField.isRequired,
         noRepeat: currentField.isUnique
-      }
+      };
 
       // 字段选项列表（单/多选字段专用） options
-      if (
-        itemType === FORM_COMPONENT_TYPES.SELECT_ONE ||
-        itemType === FORM_COMPONENT_TYPES.SELECT_MUTIPLE
-      ) {
+      if (itemType === FORM_COMPONENT_TYPES.SELECT_ONE || itemType === FORM_COMPONENT_TYPES.SELECT_MUTIPLE) {
         if (currentField.dictTypeId) {
           const res = await getDictDetail(currentField.dictTypeId);
           const dictDataList = res?.type ? await getDictDataListByType(res.type) : [];
@@ -238,7 +235,28 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
    */
   const [subTableData, setSubTableData] = useState<any[]>([]);
   const [subTableColumns, setSubTableColumns] = useState<any[]>([]);
+
+  // 表单
   const { form } = Form.useFormContext();
+
+  /**
+   * 子表单元格配置覆盖
+   */
+  const applySubTableCellOverrides = (cfg: any, type: string) => {
+    if (type === FORM_COMPONENT_TYPES.INPUT_TEXTAREA) {
+      return { ...cfg, minRows: 1 };
+    }
+    return cfg;
+  };
+
+  const refreshSubTableData = () => {
+    const len = subTableDataLength.value[id] || 0;
+    const newData: any[] = [];
+    for (let i = 0; i < len; i++) {
+      newData.push({ key: `${i}` });
+    }
+    setSubTableData(newData);
+  };
 
   useEffect(() => {
     getTableColumns();
@@ -255,6 +273,19 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
   // 获取表格配置 columns
   const getTableColumns = () => {
     let tableColumns = [];
+    if (subTableConfig?.showIndex) {
+      const indexColumn = {
+        title: '序号',
+        dataIndex: 'index',
+        width: '62px',
+        align: 'center',
+        fixed: '',
+        headerCellStyle: { textAlign: 'center' },
+        bodyCellStyle: { padding: '0 4px', textAlign: 'center' },
+        render: (_: any, __: any, index: number) => (index + 1)
+      };
+      tableColumns.push(indexColumn);
+    }
     for (let column of subTableComponents[id] || []) {
       const displayName = pageComponentSchemas[column.id].config.label.text || column.displayName;
       const required = pageComponentSchemas[column.id].config?.verify?.required;
@@ -267,6 +298,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
         ),
         dataIndex: column.id,
         key: column.id,
+        fixed: '',
         bodyCellStyle: {
           padding: '4px 0'
         },
@@ -275,12 +307,14 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
             ...pageComponentSchemas[column.id].config,
             dataField: [`${id}.${index}.${pageComponentSchemas[column.id].config?.dataField?.[1] || column.id}`]
           };
-          const pageSchema = { ...pageComponentSchemas[column.id], config };
+          const finalConfig = applySubTableCellOverrides(config, column.type);
+          const pageSchema = { ...pageComponentSchemas[column.id], config: finalConfig };
+          const editDisabled = (_record.key || _record.key === '0') && !subTableConfig?.editRow;
           return (
             <PreviewRender
               cpId={column.id}
               cpType={column.type}
-              detailMode={detailMode}
+              detailMode={detailMode || editDisabled}
               pageComponentSchema={pageSchema}
               runtime={true}
             />
@@ -289,15 +323,36 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
       };
       tableColumns.push(tableColumn);
     }
-    if (runtime && !detailMode) {
+    // 左侧列冻结
+    if (subTableConfig?.columnFixed) {
+      tableColumns.forEach((ele, index) => {
+        if (index < subTableConfig.columnFixed) {
+          ele.fixed = 'left';
+        }
+      });
+    }
+    // 操作列
+    if (runtime && !detailMode && subTableConfig?.showOperate) {
       tableColumns.push({
         title: '操作',
         dataIndex: 'action',
-        width: 100,
-        fixed: 'right',
+        width: 64,
+        align: 'center',
+        headerCellStyle: { textAlign: 'center' },
+        bodyCellStyle: { padding: '0 4px', textAlign: 'center' },
+        fixed: subTableConfig?.operateFixed ? 'right' : '',
         render: (_col: any, _record: any, index: number) => {
+          const delDisabled = (_record.key || _record.key === '0') && !subTableConfig?.deleteRow;
           return (
-            <Button type="text" status="danger" icon={<IconDelete />} onClick={() => handleDelete(index)}></Button>
+            <Button
+              type="text"
+              size="small"
+              status="danger"
+              style={{ padding: '0 4px' }}
+              icon={<IconDelete />}
+              disabled={delDisabled}
+              onClick={() => handleDelete(index)}
+            ></Button>
           );
         }
       });
@@ -335,10 +390,25 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
       <Form.Item
         label={
           label.display &&
-          label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
+          label.text && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+              <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
+              {!detailMode && (
+                <Button
+                  type="outline"
+                  size="small"
+                  icon={<IconPlus />}
+                  style={{ pointerEvents: runtime ? 'unset' : 'none' }}
+                  onClick={handleAdd}
+                >
+                  新增一项
+                </Button>
+              )}
+            </div>
+          )
         }
         layout="vertical"
-        rules={[{ required: verify?.required }]}
+        rules={[{ required: verify?.required, message:`${label.text}是必填项` }]}
         tooltip={tooltip}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
@@ -355,28 +425,14 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                 data={subTableData}
                 size="small"
                 scroll={{ x: 'max-content' }}
-                style={{
-                  width: '100%'
-                }}
+                style={{ width: '100%' }}
                 border={{
                   headerCell: true,
-                  wrapper: true,
+                  wrapper: true
                 }}
                 rowKey="id"
                 pagination={false}
               />
-            </div>
-            <div className="subTableFooter">
-              {!detailMode && (
-                <Button
-                  type="outline"
-                  icon={<IconPlus />}
-                  style={{ pointerEvents: runtime ? 'unset' : 'none', marginTop: 10 }}
-                  onClick={handleAdd}
-                >
-                  新增一项
-                </Button>
-              )}
             </div>
           </>
         ) : (
@@ -399,9 +455,9 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                 // 主表数据
                 const isMain = ele.entityID === mainEntity.entityId;
                 // 同一个子表
-                const isSub = !ele.entityID || !dataField || ele.entityID === dataField
+                const isSub = !ele.entityID || !dataField || ele.entityID === dataField;
                 return !isTable && !isMain && isSub;
-              })
+              });
 
               setSubTableComponents(id, newSubList);
             }}
@@ -431,7 +487,9 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                   }}
                 >
                   <div className="simulate-header-item">
-                    {pageComponentSchemas[cp.id].config?.verify?.required ? <span style={{ color: 'red', paddingRight: '4px' }}>*</span> : null}
+                    {pageComponentSchemas[cp.id].config?.verify?.required ? (
+                      <span style={{ color: 'red', paddingRight: '4px' }}>*</span>
+                    ) : null}
                     {pageComponentSchemas[cp.id].config.label.text || pageComponentSchemas[cp.id].config.displayName}
                   </div>
                   <EditRender

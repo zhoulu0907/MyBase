@@ -44,6 +44,12 @@ import ColumnLayoutIcon from '@/assets/images/cp/col_layout_cp.svg';
 import ColpaseLayoutIcon from '@/assets/images/cp/colpase_layout_cp.svg';
 import TabsLayoutIcon from '@/assets/images/cp/tabs_layout_cp.svg';
 
+import QuickEntryIcon from '@/assets/images/cp/quick_entry_cp.svg';
+import TodoCenterIcon from '@/assets/images/cp/todo_center_cp.svg';
+import TodoListIcon from '@/assets/images/cp/todo_list_cp.svg';
+import WelcomeCardIcon from '@/assets/images/cp/welcome_card_cp.svg';
+import InformationListIcon from '@/assets/images/cp/infomation_list_cp.svg';
+
 export const ICON_Map: Record<string, React.ReactNode> = {
   // 表单组件
   'text_input_cp.svg': <img src={TextInputIcon} alt="XInputText" />,
@@ -94,7 +100,14 @@ export const ICON_Map: Record<string, React.ReactNode> = {
   // 布局组件
   'col_layout_cp.svg': <img src={ColumnLayoutIcon} alt="XColumnLayout" />,
   'tabs_layout_cp.svg': <img src={TabsLayoutIcon} alt="XTabsLayout" />,
-  'colpase_layout_cp.svg': <img src={ColpaseLayoutIcon} alt="XColpaseLayout" />
+  'colpase_layout_cp.svg': <img src={ColpaseLayoutIcon} alt="XColpaseLayout" />,
+
+  // 工作台基础组件
+  'quick_entry_cp.svg': <img src={QuickEntryIcon} alt="XQuickEntry" />,
+  'todo_center_cp.svg': <img src={TodoCenterIcon} alt="XTodoCenter" />,
+  'todo_list_cp.svg': <img src={TodoListIcon} alt="XTodoList" />,
+  'welcome_card_cp.svg': <img src={WelcomeCardIcon} alt="XWelcomeCard" />,
+  'infomation_list_cp.svg': <img src={InformationListIcon} alt="XInformationList" />
 };
 
 // TODO 图标更新
@@ -149,5 +162,12 @@ export const ICON_Map_By_Type: Record<string, React.ReactNode> = {
   // 布局组件
   XColumnLayout: <img src={ColumnLayoutIcon} alt="XColumnLayout" />,
   XTabsLayout: <img src={TabsLayoutIcon} alt="XTabsLayout" />,
-  XColpaseLayout: <img src={ColpaseLayoutIcon} alt="XColpaseLayout" />
+  XColpaseLayout: <img src={ColpaseLayoutIcon} alt="XColpaseLayout" />,
+
+  // 工作台基础组件
+  XQuickEntry: <img src={QuickEntryIcon} alt="XQuickEntry" />,
+  XTodoCenter: <img src={TodoCenterIcon} alt="XTodoCenter" />,
+  XTodoList: <img src={TodoListIcon} alt="XTodoList" />,
+  XWelcomeCard: <img src={WelcomeCardIcon} alt="XWelcomeCard" />,
+  XInformationList: <img src={InformationListIcon} alt="XInformationList" />
 };

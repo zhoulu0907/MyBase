@@ -132,7 +132,7 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
           style: { width: labelColSpan, flex: 'unset' }
         }}
         wrapperCol={{ style: { flex: 1 } }}
-        rules={[{ required: verify?.required }]}
+        rules={[{ required: verify?.required, message:`${label.text}是必填项` }]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           margin: 0,
@@ -144,7 +144,7 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
         ) : (
           <Select
             placeholder="请选择"
-            showSearch={true}
+            showSearch={false}
             filterOption={false}
             onSearch={debouncedSearch}
             onPopupScroll={scrollHandler}
