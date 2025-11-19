@@ -210,8 +210,12 @@ public class AdminUserServiceImpl implements AdminUserService {
         RoleInsertReqVO reqVO = new RoleInsertReqVO();
         reqVO.setName(RoleCodeEnum.CORP_ADMIN.getName()).setCode(RoleCodeEnum.CORP_ADMIN.getCode())
                 .setSort(0).setRemark("系统自动生成");
-        Long roleId = roleService.createRole(reqVO, RoleTypeEnum.SYSTEM.getType());
-        return roleId;
+        RoleDO roleDO = roleService.getRoleIdsByCode(RoleCodeEnum.CORP_ADMIN.getCode());
+        if( null == roleDO){
+            Long roleId = roleService.createRole(reqVO, RoleTypeEnum.SYSTEM.getType());
+            return  roleId;
+        }
+        return roleDO.getId();
     }
 
     @Transactional(rollbackFor = Exception.class)

@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.system.service.auth;
+package com.cmsr.onebase.module.system.platform.service.auth;
 
 import cn.hutool.core.util.ObjUtil;
 import com.anji.captcha.model.common.ResponseModel;
@@ -52,7 +52,7 @@ import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 @Service
 @RefreshScope
 @Slf4j
-public class AdminAuthServiceImpl implements AdminAuthService {
+public class PlatformAuthServiceImpl implements PlatformAuthService {
 
     @Resource
     private AdminUserService userService;
@@ -108,7 +108,7 @@ public class AdminAuthServiceImpl implements AdminAuthService {
     private void checkUserPsdAndStatus(String account, String password, AdminUserDO user, LoginLogTypeEnum logTypeEnum) {
         if (user == null) {
             createLoginLog(null, account, logTypeEnum, LoginResultEnum.BAD_CREDENTIALS);
-            throw exception(AUTH_LOGIN_NO_EXISTS);
+            throw exception(AUTH_LOGIN_BAD_CREDENTIALS);
         }
         
         Long userId = user.getId();
