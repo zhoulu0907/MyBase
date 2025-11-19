@@ -17,7 +17,7 @@ import {
 } from '@onebase/platform-center';
 import { appIconMap } from '@onebase/ui-kit';
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useI18n } from '../../../hooks/useI18n';
 import { useRememberMe } from '../../../hooks/useRememberMe';
 import styles from '../index.module.less';
@@ -53,9 +53,12 @@ const Right: React.FC = () => {
     id: ''
   });
 
+  const [appId, setAppId] = useState<string>('');
+  const [tenantId, setTenantId] = useState<string>('');
+
   // 从路由中获取 appid 参数
-  const { appId } = useParams<{ appId?: string }>();
-  const { tenantId } = useParams<{ tenantId?: string }>();
+  //   const { appId } = useParams<{ appId?: string }>();
+  //   const { tenantId } = useParams<{ tenantId?: string }>();
 
   // 使用记住我hook
   const { rememberMe, savedAccount, saveRememberMe } = useRememberMe();
@@ -63,9 +66,25 @@ const Right: React.FC = () => {
   // 状态管理
   const [loading, setLoading] = useState(false);
 
-  const match = location.hash.match(/\/onebase\/runtime\/(\d+)\/(\d+)/);
-  const newAppId = match ? match[1] : appId;
-  const newTenantId = match ? match[2] : tenantId;
+  //   const match = location.hash.match(/\/onebase\/runtime\/(\d+)\/(\d+)/);
+  //   const newAppId = match ? match[1] : appId;
+  //   const newTenantId = match ? match[2] : tenantId;
+
+  useEffect(() => {
+    const redirectURL = getHashQueryParam('redirectURL');
+    if (redirectURL) {
+      // 使用正则表达式从 redirectURL 中提取 onebase/runtime/ 后的数字
+      // 示例 redirectURL: http://localhost:9527/#/onebase/runtime/132970040164286464/
+      //   const match = redirectURL.match(/onebase\/runtime\/(\d+)/);
+      const match = location.hash.match(/\/onebase\/runtime\/(\d+)\/(\d+)/);
+      if (match && match[1]) {
+        setAppId(match[1]);
+      }
+      if (match && match[2]) {
+        setTenantId(match[2]);
+      }
+    }
+  }, []);
 
   // 组件初始化时设置保存的账号
   useEffect(() => {
@@ -132,7 +151,7 @@ const Right: React.FC = () => {
       }
 
       const headers = {
-        'Tenant-Id': tenantId || newTenantId || '1'
+        'Tenant-Id': tenantId
       };
 
       let response: LoginResponse | null = null;
@@ -140,7 +159,7 @@ const Right: React.FC = () => {
         const sassloginData: RuntimeMobileLoginRequest = {
           password: values.password!,
           mobile: (values as RuntimeMobileLoginRequest).mobile!,
-          appId: newAppId || '',
+          appId: appId,
           captchaVerification: captchaVerification
         };
 
@@ -149,7 +168,7 @@ const Right: React.FC = () => {
         const innerloginData: RuntimeAccountLoginRequest = {
           password: values.password!,
           username: (values as RuntimeAccountLoginRequest).username!,
-          appId: newAppId || '',
+          appId: appId,
           captchaVerification: captchaVerification
         };
         response = await innerLogin(innerloginData, headers);
@@ -171,7 +190,7 @@ const Right: React.FC = () => {
             accessToken: response.accessToken,
             refreshToken: response.refreshToken,
             expiresTime: response.expiresTime,
-            tenantId: response.tenantWebsite
+            tenantId: response.tenantId
           },
           rememberMe
         );

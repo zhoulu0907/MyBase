@@ -1,30 +1,15 @@
 import { useI18n } from '@/hooks/useI18n';
 import { useAppStore } from '@/store/store_app';
-import {
-  Button,
-  Divider,
-  Dropdown,
-  Input,
-  Menu,
-  Pagination,
-  Select,
-  Spin,
-  Tag,
-  Tooltip
-} from '@arco-design/web-react';
+import { Button, Divider, Dropdown, Input, Menu, Pagination, Select, Spin, Tag, Tooltip } from '@arco-design/web-react';
 import { IconEmpty, IconMoreVertical, IconSearch } from '@arco-design/web-react/icon';
-import {
-  listApplication,
-  type Application,
-  type PageParam
-} from '@onebase/app';
-import { getCommonPaginationList, getRuntimeURL } from '@onebase/common';
+import { listApplication, type Application, type PageParam } from '@onebase/app';
+import { getCommonPaginationList, getRuntimeURL, TokenManager } from '@onebase/common';
 import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import arrowRightUp from '@/assets/images/arrow-right-up.svg';
 import emptyApplicationSVG from '@/assets/images/empty_application.svg';
-import arrowRightUp from "@/assets/images/arrow-right-up.svg";
 import DynamicIcon from '@/components/DynamicIcon';
 import { PermissionButton } from '@/components/PermissionControl';
 import { TENANT_DEPT_PERMISSION as ACTIONS } from '@/constants/permission';
@@ -132,11 +117,12 @@ const EnterpriseAppPage: React.FC = () => {
 
   const nagivateToDataFactory = (appId: string) => {
     setCurAppId(appId);
-    const tenantId = localStorage.getItem("tenant_id") || sessionStorage.getItem("tenant_id") || "";
+    const tenantId = TokenManager.getTenantInfo()?.tenantId || '';
+
     const newWindow = window.open('', '_blank');
     if (newWindow) {
       const redirectURL = `${getRuntimeURL()}/#/onebase/runtime/${appId}/${tenantId}`;
-      newWindow.location.href = `${getRuntimeURL()}/#/login?redirectURL=${redirectURL}`;;
+      newWindow.location.href = `${getRuntimeURL()}/#/login?redirectURL=${redirectURL}`;
     }
   };
 
@@ -159,26 +145,26 @@ const EnterpriseAppPage: React.FC = () => {
   };
 
   const getModel = (model?: string) => {
-    if(model === "inner") {
-      return "内部模式"
-    }else if(model === "saas") {
-      return "SaaS模式";
+    if (model === 'inner') {
+      return '内部模式';
+    } else if (model === 'saas') {
+      return 'SaaS模式';
     }
-    return "";
-  }
+    return '';
+  };
 
   const getColor = (model?: string) => {
-    if(model === "inner") {
-      return "cyan"
-    }else if(model === "saas") {
-      return "red";
+    if (model === 'inner') {
+      return 'cyan';
+    } else if (model === 'saas') {
+      return 'red';
     }
-    return "";
-  }
+    return '';
+  };
 
   const handleClickButton = () => {
-    navigate('/onebase/setting/application'); 
-  }
+    navigate('/onebase/setting/application');
+  };
 
   const menu = (item: any) => {
     return (
