@@ -1,8 +1,7 @@
-import AvatarSVG from '@/assets/images/avatar.svg';
 import { useI18n } from '@/hooks/useI18n';
 import { menuSignal } from '@/store/menu';
 import { UserPermissionManager } from '@/utils/permission';
-import { Dropdown, Input, Layout, Menu, Tree } from '@arco-design/web-react';
+import { Input, Layout, Menu, Tree } from '@arco-design/web-react';
 import { IconDown, IconSearch } from '@arco-design/web-react/icon';
 import {
   listApplicationMenu,
@@ -16,6 +15,7 @@ import { getPermissionInfo, runtimeLogout } from '@onebase/platform-center';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { AppHeader } from './components/header';
 import RuntimeMenuItem from './components/menuItem';
 import PreviewContainer from './components/preview';
 import styles from './index.module.less';
@@ -180,63 +180,47 @@ const Runtime: React.FC = () => {
   );
 
   return (
-    <div className={styles.runtimePage}>
-      <Layout style={{ height: '100%' }}>
-        <Layout>
-          <Sider className={styles.sider}>
-            <div className={styles.siderHeader}>
-              <div className={styles.siderHeaderInput}>
-                <Input allowClear suffix={<IconSearch />} placeholder={t('app.searchPlaceHolder')} />
-              </div>
+    <Layout className={styles.runtimePage}>
+      <AppHeader />
+      <Layout>
+        <Sider className={styles.sider}>
+          <div className={styles.siderHeader}>
+            <div className={styles.siderHeaderInput}>
+              <Input allowClear suffix={<IconSearch />} placeholder={t('app.searchPlaceHolder')} />
             </div>
-            <Tree
-              blockNode
-              draggable
-              treeData={treeData}
-              selectedKeys={[curMenu.value?.menuCode!]}
-              expandedKeys={expandedKeys}
-              onExpand={setExpandedKeys}
-              className={`menuTree ${styles.tree}`}
-              showLine={false}
-              icons={{
-                switcherIcon: <IconDown />,
-                dragIcon: null
-              }}
-              actionOnClick={'expand'}
-              style={{
-                width: '200px',
-                overflow: 'hidden',
-                boxSizing: 'border-box',
-                padding: '4px 8px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 8
-              }}
-            />
-          </Sider>
-          <Content className={styles.content}>
-            {curMenu.value?.id && (
-              <div className={styles.contentHeader}>
-                <div className={styles.contentTitle}>{curMenu.value?.menuName}</div>
-                <div className={styles.userInfo}>
-                  {nickname || '未登录'}
-
-                  <Dropdown droplist={userMenu} position="bottom">
-                    <div className={styles.userDropdown}>
-                      <img src={AvatarSVG} alt="avatar" />
-                    </div>
-                  </Dropdown>
-                </div>
-              </div>
-            )}
-
-            <div className={styles.contentBody}>
-              <PreviewContainer menuId={curMenu.value?.id || ''} runtime={true} />
-            </div>
-          </Content>
-        </Layout>
+          </div>
+          <Tree
+            blockNode
+            draggable
+            treeData={treeData}
+            selectedKeys={[curMenu.value?.menuCode!]}
+            expandedKeys={expandedKeys}
+            onExpand={setExpandedKeys}
+            className={`menuTree ${styles.tree}`}
+            showLine={false}
+            icons={{
+              switcherIcon: <IconDown />,
+              dragIcon: null
+            }}
+            actionOnClick={'expand'}
+            style={{
+              width: '200px',
+              overflow: 'hidden',
+              boxSizing: 'border-box',
+              padding: '4px 8px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 8
+            }}
+          />
+        </Sider>
+        <Content className={styles.content}>
+          <div className={styles.contentBody}>
+            <PreviewContainer menuId={curMenu.value?.id || ''} runtime={true} />
+          </div>
+        </Content>
       </Layout>
-    </div>
+    </Layout>
   );
 };
 

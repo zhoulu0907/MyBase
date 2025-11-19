@@ -1,7 +1,8 @@
+import { DynamicIcon } from '@/components';
 import { PUBLISH_MODULE } from '@/constants/permission';
+import { appInfoSignal } from '@/store/app';
 import { Button, Checkbox, Form, Input, Message, Space, Typography } from '@arco-design/web-react';
 import { IconLock, IconUser } from '@arco-design/web-react/icon';
-import type { IIconBase } from '@icon-park/react/lib/runtime';
 import { getApplication } from '@onebase/app';
 import { getHashQueryParam, SliderCaptcha, TokenManager, type SliderCaptchaRef } from '@onebase/common';
 import {
@@ -18,31 +19,27 @@ import {
   type RuntimeCorpLoginRequest
 } from '@onebase/platform-center';
 import { appIconMap } from '@onebase/ui-kit';
+import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useI18n } from '../../../hooks/useI18n';
 import { useRememberMe } from '../../../hooks/useRememberMe';
 import styles from '../index.module.less';
 
-interface DynamicIconProps extends IIconBase {
-  IconComponent: React.ComponentType<any>;
-  theme?: 'outline' | 'filled' | 'two-tone' | 'multi-color';
-  size?: number | string;
-  fill?: string;
-  style?: React.CSSProperties;
-}
-
-interface APP_INFO {
-  appName: string;
-  iconName: string;
-  iconColor: string;
-  publishModel?: string;
-  id: string;
-}
-
 const { Paragraph } = Typography;
 
+interface APP_INFO {
+    appName: string,
+    iconName: string,
+    iconColor: string,
+    id: string
+}
+
 const Right: React.FC = () => {
+  useSignals();
+
+  const { curAppInfo, setCurAppInfo } = appInfoSignal;
+
   const navigate = useNavigate();
   const [form] = Form.useForm();
   const { t } = useI18n();
@@ -59,8 +56,6 @@ const Right: React.FC = () => {
   const [searchParams] = useSearchParams(location.hash);
   const tenantId = searchParams.get("tenantId") || "";
   const appId = searchParams.get("appId") || "";
-
-  console.log(appId, tenantId)
 
   // 使用记住我hook
   const { rememberMe, savedAccount, saveRememberMe } = useRememberMe();
@@ -101,13 +96,7 @@ const Right: React.FC = () => {
       if (appId) {
         const res = await getApplication({ id: appId });
         if (res) {
-          setAppInfo({
-            id: res.id || '',
-            publishModel: res.publishModel || '',
-            appName: res.appName || '',
-            iconName: res.iconName || '',
-            iconColor: res.iconColor || ''
-          });
+          setCurAppInfo(res);
         }
       }
     }
@@ -137,7 +126,7 @@ const Right: React.FC = () => {
       };
 
       let response: LoginResponse | null = null;
-      if (appInfo.publishModel === PUBLISH_MODULE.SASS) {
+      if (curAppInfo.value.publishModel === PUBLISH_MODULE.SASS) {
         const sassloginData: RuntimeMobileLoginRequest = {
           password: values.password!,
           mobile: (values as RuntimeMobileLoginRequest).mobile!,
@@ -146,7 +135,7 @@ const Right: React.FC = () => {
         };
 
         response = await sassLogin(sassloginData, headers);
-      } else if (appInfo.publishModel === PUBLISH_MODULE.INNER) {
+      } else if (curAppInfo.value.publishModel === PUBLISH_MODULE.INNER) {
         const innerloginData: RuntimeAccountLoginRequest = {
           password: values.password!,
           username: (values as RuntimeAccountLoginRequest).username!,
@@ -186,9 +175,9 @@ const Right: React.FC = () => {
         );
 
         // 保存记住我状态和账号信息
-        if (appInfo.publishModel === PUBLISH_MODULE.INNER) {
+        if (curAppInfo.value.publishModel === PUBLISH_MODULE.INNER) {
           saveRememberMe((values as RuntimeAccountLoginRequest).username!, rememberMe);
-        } else if (appInfo.publishModel === PUBLISH_MODULE.SASS) {
+        } else if (curAppInfo.value.publishModel === PUBLISH_MODULE.SASS) {
           saveRememberMe((values as RuntimeMobileLoginRequest).mobile!, rememberMe);
         } else if (!appId) {
           saveRememberMe((values as RuntimeCorpLoginRequest).mobile!, rememberMe);
@@ -230,13 +219,13 @@ const Right: React.FC = () => {
     const values = await form.getFieldsValue();
     console.log('values:', values);
 
-    if (appInfo.publishModel === PUBLISH_MODULE.SASS) {
+    if (curAppInfo.value.publishModel === PUBLISH_MODULE.SASS) {
       handleSubmit({
         mobile: values.mobile,
         password: values.password,
         captchaVerification: token
       } as RuntimeMobileLoginRequest);
-    } else if (appInfo.publishModel === PUBLISH_MODULE.INNER) {
+    } else if (curAppInfo.value.publishModel === PUBLISH_MODULE.INNER) {
       handleSubmit({
         username: values.username,
         password: values.password,
@@ -267,30 +256,25 @@ const Right: React.FC = () => {
     }
   };
 
-  const DynamicIcon = ({ IconComponent, ...rest }: DynamicIconProps) => {
-    if (!IconComponent) return null;
-    return <IconComponent {...rest} />;
-  };
-
   return (
     <div className={styles.loginPageRight}>
       <div className={styles.loginFormContainer}>
-        {appInfo.iconName && (
+        {curAppInfo.value.iconName && (
           <div className={styles.appInfo}>
             <div
               className={styles.appIcon}
               style={{
-                background: appInfo.iconColor || 'transparent'
+                background: curAppInfo.value.iconColor || 'transparent'
               }}
             >
               <DynamicIcon
-                IconComponent={appIconMap[appInfo.iconName as keyof typeof appIconMap]}
+                IconComponent={appIconMap[curAppInfo.value.iconName as keyof typeof appIconMap]}
                 theme="outline"
                 size="40"
                 fill="#F2F3F5"
               />
             </div>
-            <div className={styles.appName}>{appInfo.appName}</div>
+            <div className={styles.appName}>{curAppInfo.value.appName}</div>
           </div>
         )}
         <h1 className={styles.title}>欢迎登录</h1>
