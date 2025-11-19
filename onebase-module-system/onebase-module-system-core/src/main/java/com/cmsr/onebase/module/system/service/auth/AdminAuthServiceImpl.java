@@ -108,7 +108,7 @@ public class AdminAuthServiceImpl implements AdminAuthService {
     private void checkUserPsdAndStatus(String account, String password, AdminUserDO user, LoginLogTypeEnum logTypeEnum) {
         if (user == null) {
             createLoginLog(null, account, logTypeEnum, LoginResultEnum.BAD_CREDENTIALS);
-            throw exception(AUTH_LOGIN_BAD_CREDENTIALS);
+            throw exception(AUTH_LOGIN_NO_EXISTS);
         }
         
         Long userId = user.getId();
