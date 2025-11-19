@@ -1,64 +1,94 @@
-import { useI18n } from '@/hooks/useI18n';
-import { Collapse } from '@arco-design/web-react';
-import React from 'react';
-import IconCollapsedDown from '@/assets/images/collapse_down_icon.svg';
-import { ComponentList } from './component-list';
-import { useWorkbenchItems } from '../../hooks/use-workbench-items';
+import IconLayoutActive from '@/assets/images/edit_layout_active_icon.svg';
+import IconLayout from '@/assets/images/edit_layout_icon.svg';
+import IconCollapsed from '@/assets/images/collapsed_left_icon.svg';
+import IconSearchForm from '@/assets/images/search_form_icon.svg';
+import { Tabs, Tooltip, Input, Layout } from '@arco-design/web-react';
+import { useState } from 'react';
+import { WorkbenchPanelContent } from './workbench-panel-content';
+import styles from './index.module.less';
 
-interface WorkbenchPanelProps {
-  keyword: string;
-}
-
-const COLLAPSE_ITEM_STYLE = {
-  style: { border: 'none' },
-  contentStyle: { backgroundColor: '#fff', border: 'none', paddingLeft: 13 }
-} as const;
+const InputSearch = Input.Search;
+const Sider = Layout.Sider;
 
 /**
- * 工作台组件面板
+ * 工作台面板容器组件
+ * 包含左侧标签页和右侧内容区域
  */
-const WorkbenchPanel: React.FC<WorkbenchPanelProps> = ({ keyword }) => {
-  const { t } = useI18n();
-  const basicItems = useWorkbenchItems({ keyword, category: 'basic' });
-  const advancedItems = useWorkbenchItems({ keyword, category: 'advanced' });
+export default function WorkbenchPanel() {
+  const [activeLeftTabKey, setActiveLeftTabKey] = useState<'material'>('material');
+  const [childCollapsed, setChildCollapsed] = useState<'material' | undefined>('material');
+  const [showSearchInput, setShowSearchInput] = useState<boolean>(false);
+  const [keyword, setKeyword] = useState<string>('');
 
   return (
-    <Collapse
-      defaultActiveKey={['basic', 'advanced']}
-      accordion={false}
-      bordered={false}
-      expandIconPosition="right"
-      expandIcon={<img src={IconCollapsedDown} alt="" />}
+    <div
+      className={styles.workbenchPanel}
+      style={{
+        transition: 'width 0.3s cubic-bezier(0.4, 0, 0.4, 1)'
+      }}
     >
-      <Collapse.Item
-        header={t('editor.basicComponent', '基础组件')}
-        name="basic"
-        key="basic"
-        style={COLLAPSE_ITEM_STYLE.style}
-        contentStyle={COLLAPSE_ITEM_STYLE.contentStyle}
-      >
-        <ComponentList
-          items={basicItems.items}
-          components={basicItems.components}
-          onItemsChange={basicItems.setItems}
-        />
-      </Collapse.Item>
+      <div className={styles.left}>
+        <Tabs
+          type="text"
+          activeTab={activeLeftTabKey}
+          onChange={(key) => {
+            setActiveLeftTabKey(key as 'material');
+          }}
+          size="large"
+          direction="vertical"
+          onClickTab={(key: string) => {
+            setChildCollapsed((prev) => (prev === key ? undefined : (key as 'material')));
+          }}
+        >
+          <Tabs.TabPane
+            key={'material'}
+            title={
+              <div className={styles.tabButton}>
+                <Tooltip mini content="组件库" position="right">
+                  <img
+                    src={
+                      childCollapsed === 'material' && activeLeftTabKey === 'material' ? IconLayoutActive : IconLayout
+                    }
+                  />
+                </Tooltip>
+              </div>
+            }
+          />
+        </Tabs>
+      </div>
 
-      <Collapse.Item
-        header={t('editor.advancedComponent', '高级组件')}
-        name="advanced"
-        key="advanced"
-        style={COLLAPSE_ITEM_STYLE.style}
-        contentStyle={COLLAPSE_ITEM_STYLE.contentStyle}
-      >
-        <ComponentList
-          items={advancedItems.items}
-          components={advancedItems.components}
-          onItemsChange={advancedItems.setItems}
-        />
-      </Collapse.Item>
-    </Collapse>
+      <div className={styles.right}>
+        <Sider collapsed={!childCollapsed} collapsible collapsedWidth={0} trigger={null} width={270}>
+          <div className={styles.rightHeader}>
+            <div className={styles.title}>组件库</div>
+
+            <div className={styles.right}>
+              <div className={styles.search} onClick={() => setShowSearchInput(true)}>
+                {!showSearchInput ? (
+                  <img src={IconSearchForm} alt="search some component" />
+                ) : (
+                  <InputSearch
+                    value={keyword}
+                    autoFocus
+                    allowClear
+                    onBlur={() => setShowSearchInput(false)}
+                    onChange={setKeyword}
+                  />
+                )}
+              </div>
+              <div className={styles.collapse} onClick={() => setChildCollapsed(undefined)}>
+                <img src={IconCollapsed} alt="collapse" />
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.rightBody}>
+            <div className={styles.componentList}>
+              <WorkbenchPanelContent keyword={keyword} />
+            </div>
+          </div>
+        </Sider>
+      </div>
+    </div>
   );
-};
-
-export default WorkbenchPanel;
+}

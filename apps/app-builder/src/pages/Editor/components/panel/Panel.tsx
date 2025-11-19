@@ -29,8 +29,6 @@ export default function EditorPanel() {
       setActiveTab(EDITOR_TYPES.PAGE_SETTING);
     } else if (hash.includes(EDITOR_TYPES.METADATA_MANAGE)) {
       setActiveTab(EDITOR_TYPES.METADATA_MANAGE);
-    } else if (hash.includes(EDITOR_TYPES.WORKBENCH_EDITOR)) {
-      setActiveTab(EDITOR_TYPES.WORKBENCH_EDITOR);
     }
   }, []);
 

@@ -7,7 +7,7 @@ import { COMPONENT_GROUP_NAME } from '@onebase/ui-kit';
 import { ReactSortable } from 'react-sortablejs';
 import { v4 as uuidv4 } from 'uuid';
 import type { WorkbenchItem } from '../../types/workbench';
-import styles from '../../../components/panel/components/material/index.module.less';
+import styles from './index.module.less';
 
 interface ComponentListProps {
   items: WorkbenchItem[];

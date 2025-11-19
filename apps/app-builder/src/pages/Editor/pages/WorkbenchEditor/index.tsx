@@ -1,7 +1,7 @@
 import React from 'react';
-import EditorConfig from '../../components/config';
-import EditorPanel from '../../components/panel/Panel';
-import EditorWorkspace from '../../components/workspace/Workspace';
+import WorkbenchConfiger from '../../workbench/editor-components/wb-configer';
+import WorkbenchPanel from '../../workbench/editor-components/wb-panel';
+import WorkbenchWorkspace from '../../workbench/editor-components/wb-workspace';
 
 import styles from './index.module.less';
 
@@ -13,9 +13,9 @@ import styles from './index.module.less';
 const WorkbenchEditor: React.FC = () => {
   return (
     <div className={styles.workbenchEditorPage}>
-      <EditorPanel />
-      <EditorWorkspace />
-      <EditorConfig />
+      <WorkbenchPanel />
+      <WorkbenchWorkspace />
+      <WorkbenchConfiger />
     </div>
   );
 };

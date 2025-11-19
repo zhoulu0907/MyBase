@@ -13,22 +13,18 @@ const CollapseItem = Collapse.Item;
 
 /**
  * 工作台配置面板组件
- * @param props.cpID 组件唯一ID
  */
-interface WorkbenchConfigerProps {
-  cpID: string;
-}
 
-const WorkbenchConfiger = ({ cpID }: WorkbenchConfigerProps) => {
+const WorkbenchConfiger = () => {
   useSignals();
 
-  const { curComponentSchema } = usePageEditorSignal();
+  const { curComponentID, curComponentSchema } = usePageEditorSignal();
   console.log('curComponentSchema', curComponentSchema);
 
   const [activeKeys, setActiveKeys] = useState<string[]>(['style']);
 
   return (
-    <div className={styles.configs}>
+    <div className={styles.workbenchConfigs}>
       <div className={styles.componentName}>
         <div className={styles.icon}>{ICON_Map_By_Type[curComponentSchema?.type]}</div>
         {curComponentSchema?.displayName || curComponentSchema?.config?.cpName || '工作台组件'}
@@ -47,28 +43,28 @@ const WorkbenchConfiger = ({ cpID }: WorkbenchConfigerProps) => {
             name="style"
             contentStyle={{ backgroundColor: '#fff', border: 'none', paddingLeft: 13 }}
           >
-            {/* <StyleLibrary cpID={cpID} /> */}
+            {/* <StyleLibrary cpID={curComponentID} /> */}
           </CollapseItem>
           <CollapseItem
             header="标题配置"
             name="title"
             contentStyle={{ backgroundColor: '#fff', border: 'none', paddingLeft: 13 }}
           >
-            {/* <TitleConfig cpID={cpID} /> */}
+            {/* <TitleConfig cpID={curComponentID} /> */}
           </CollapseItem>
           <CollapseItem
             header="入口配置"
             name="entry"
             contentStyle={{ backgroundColor: '#fff', border: 'none', paddingLeft: 13 }}
           >
-            {/* <EntryConfig cpID={cpID} /> */}
+            {/* <EntryConfig cpID={curComponentID} /> */}
           </CollapseItem>
           <CollapseItem
             header="其他配置"
             name="other"
             contentStyle={{ backgroundColor: '#fff', border: 'none', paddingLeft: 13 }}
           >
-            {/* <OtherConfig cpID={cpID} /> */}
+            {/* <OtherConfig cpID={curComponentID} /> */}
           </CollapseItem>
         </Collapse>
       </div>

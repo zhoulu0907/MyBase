@@ -1,10 +1,66 @@
 @import '../../../../Editor/variables.module.less';
 
+// 定义工作台工作区头部高度变量
+@workspace-header-height: 32px;
+@workspace-padding: 20px;
+
+// 工作台工作区容器
+.workbenchWorkspace {
+  flex: 1 1 0%;
+  width: auto;
+  height: calc(100vh - var(--editor-header-height));
+  box-sizing: border-box;
+  background-color: #f2f3f5;
+  display: flex;
+  flex-direction: column;
+}
+
+// 工作区头部
+.workspaceHeader {
+  height: @workspace-header-height;
+  background-color: white;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 1px;
+  padding: 0 20px;
+
+  .workspaceHeaderLeft {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  .workspaceHeaderRight {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+  }
+
+  .editorStepCtrl,
+  .pageModeCtrl {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+
+    .pageModeIcon {
+      width: 16px;
+      height: 16px;
+      box-sizing: border-box;
+      cursor: pointer;
+    }
+  }
+}
+
 // 工作台工作区样式
 .workspaceBody {
-  height: calc(100vh - var(--editor-header-height) - 32px - 20px);
+  height: calc(100vh - var(--editor-header-height) - @workspace-header-height - @workspace-padding);
   display: block;
-  padding: 20px;
+  padding: @workspace-padding;
   box-sizing: border-box;
   position: relative;
   overflow-y: auto;

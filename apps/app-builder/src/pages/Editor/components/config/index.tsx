@@ -1,8 +1,8 @@
 import { EDITOR_TYPES, usePageEditorSignal } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
+import { useEffect, useState } from 'react';
 import MaterialConfiger from './components/MaterialConfiger';
 import ViewConfiger from './components/ViewConfiger';
-import WorkbenchConfiger from '../../workbench/editor-components/wb-configer';
 import styles from './index.module.less';
 
 interface EditorConfigProps {}
@@ -12,9 +12,12 @@ export default function EditorConfig({}: EditorConfigProps) {
 
   const { curComponentID } = usePageEditorSignal();
 
+  const [isFormEditor, setIsFormEditor] = useState(false);
+
   const hash = window.location.hash;
-  const isFormEditor = hash.includes(EDITOR_TYPES.FORM_EDITOR);
-  const isWorkbenchEditor = hash.includes(EDITOR_TYPES.WORKBENCH_EDITOR);
+  useEffect(() => {
+    setIsFormEditor(hash.includes(EDITOR_TYPES.FORM_EDITOR));
+  }, [hash]);
 
   return (
     <div
@@ -25,11 +28,7 @@ export default function EditorConfig({}: EditorConfigProps) {
       }}
     >
       {curComponentID ? (
-        isWorkbenchEditor ? (
-          <WorkbenchConfiger cpID={curComponentID} />
-        ) : (
-          <MaterialConfiger cpID={curComponentID} />
-        )
+        <MaterialConfiger cpID={curComponentID} />
       ) : (
         //   只有表单设计时允许显示视图配置
         isFormEditor && <ViewConfiger />
