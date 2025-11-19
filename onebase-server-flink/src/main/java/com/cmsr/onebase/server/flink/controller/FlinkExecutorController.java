@@ -9,6 +9,7 @@ import lombok.Setter;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,7 +33,7 @@ public class FlinkExecutorController {
     @Autowired
     private DataSource dataSource;
 
-    @PostMapping("/execute")
+    @PostMapping(path = "/execute", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> execute(@RequestBody InputArgs inputArgs) throws JsonProcessingException {
         try (WorkFlowExecutor executor = new WorkFlowExecutor(inputArgs, dataSource)) {
             executor.execute();
@@ -44,7 +45,7 @@ public class FlinkExecutorController {
         }
     }
 
-    @PostMapping("/preview")
+    @PostMapping(path = "/preview", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> preview(@RequestBody InputArgs inputArgs) {
         try (WorkFlowExecutor executor = new WorkFlowExecutor(inputArgs, dataSource)) {
             DataPreview preview = executor.preview();
