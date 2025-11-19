@@ -328,6 +328,7 @@ public class CorpServiceImpl implements CorpService {
         Long userId = adminUserService.createCorpAdminUser(user);
         CorpAdminUserRespVO vo = new CorpAdminUserRespVO();
             vo.setUsername(reqVO.getUsername());
+            vo.setMobile(reqVO.getMobile());
             vo.setPassword(password);
             vo.setId(userId);
         return vo;
