@@ -23,6 +23,7 @@ import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.dromara.warm.flow.core.entity.HisTask;
 import org.dromara.warm.flow.core.entity.Instance;
 import org.dromara.warm.flow.core.entity.Task;
@@ -129,6 +130,9 @@ public class BpmDetailServiceImpl implements BpmDetailService {
         // 填充其他流程详情
         instanceDetailStrategyManager.processInstanceDetail(respVO, nodeExtDTO, instance, loginUserId, currTask != null);
 
+        // 标记已读状态
+        markAsRead(currTask, reqVO, loginUserId);
+
         return respVO;
     }
 
@@ -186,6 +190,7 @@ public class BpmDetailServiceImpl implements BpmDetailService {
                 throw exception(ErrorCodeConstants.FLOW_PERMISSION_DENY.getCode(), "待办任务ID不能为空");
             }
 
+            // 权限校验：查询抄送记录
             ConfigStore configStore = new DefaultConfigStore();
             configStore.and(BpmFlowCcRecordDO.TASK_ID, taskId);
             configStore.and(BpmFlowCcRecordDO.USER_ID, loginUserId);
@@ -241,6 +246,47 @@ public class BpmDetailServiceImpl implements BpmDetailService {
 
             log.error("用户 {} 无权限访问已办任务 {}", loginUserId, taskId);
             throw exception(ErrorCodeConstants.FLOW_PERMISSION_DENY.getCode(), "未查询到已办任务");
+        }
+    }
+
+    /**
+     * 标记已读状态
+     *
+     * @param currTask 当前待办任务
+     * @param reqVO 请求VO
+     * @param loginUserId 登录用户ID
+     */
+    private void markAsRead(Task currTask, BpmTaskDetailReqVO reqVO, Long loginUserId) {
+        // 当前待办标记为已读
+        if (currTask != null) {
+           List<User> users = userService.listByProcessedBys(currTask.getId(), String.valueOf(loginUserId));
+           if (CollectionUtils.isNotEmpty(users)) {
+               LocalDateTime now = LocalDateTime.now();
+
+               for (User user : users) {
+                   user.setUpdateTime(now);
+               }
+
+               userService.updateBatch(users);
+           }
+        }
+
+        if (Objects.equals(reqVO.getFrom(), BpmViewSourceEnum.CC.getCode())) {
+            ConfigStore configStore = new DefaultConfigStore();
+            configStore.and(BpmFlowCcRecordDO.TASK_ID, reqVO.getTaskId());
+            configStore.and(BpmFlowCcRecordDO.USER_ID, loginUserId);
+
+            BpmFlowCcRecordDO ccRecord = ccRecordRepository.findOne(configStore);
+
+            if (ccRecord == null) {
+                return;
+            }
+
+            if (!BooleanUtils.toBoolean(ccRecord.getViewed())) {
+                ccRecord.setViewed(BooleanUtils.toInteger(true));
+                ccRecord.setViewedTime(LocalDateTime.now());
+                ccRecordRepository.update(ccRecord);
+            }
         }
     }
 
