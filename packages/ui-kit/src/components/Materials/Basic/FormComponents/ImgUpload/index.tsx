@@ -21,7 +21,6 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
     imageHandle,
     verify,
     layout,
-    labelColSpan = 0,
     runtime = true,
     detailMode
   } = props;
@@ -34,11 +33,11 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
 
     const progressAdapter = onProgress
       ? (progressEvent: ProgressEvent) => {
-          if (progressEvent.lengthComputable) {
-            const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-            onProgress(percent, progressEvent);
-          }
+        if (progressEvent.lengthComputable) {
+          const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          onProgress(percent, progressEvent);
         }
+      }
       : undefined;
 
     const res = await uploadFile(formData, progressAdapter);
@@ -116,13 +115,13 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
                       }
                     }}
                   />
-                  <IconDelete
+                  {!detailMode && <IconDelete
                     onClick={() => {
                       if (fileProps.onRemove) {
                         fileProps.onRemove(file);
                       }
                     }}
-                  />
+                  />}
                 </div>
               )}
             </div>
@@ -192,14 +191,14 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
                     <div className="uplaodList-card-item-size">
                       {file?.originFile?.size ? <span>{(file.originFile.size / 1024 / 1024).toFixed(2)}MB</span> : null}
                     </div>
-                    <IconDelete
+                    {!detailMode && <IconDelete
                       style={{ cursor: 'pointer' }}
                       onClick={() => {
                         if (fileProps.onRemove) {
                           fileProps.onRemove(file);
                         }
                       }}
-                    />
+                    />}
                   </div>
                 }
               />
@@ -221,11 +220,8 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
         field={fieldId}
         layout={layout}
         tooltip={tooltip}
-        labelCol={{
-          style: { width: labelColSpan, flex: 'unset' }
-        }}
         wrapperCol={{ style: { flex: 1 } }}
-        rules={[{ required: verify?.required }]}
+        rules={[{ required: verify?.required, message:`${label.text}是必填项` }]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           margin: 0,
@@ -242,7 +238,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
                 ? undefined
                 : verify?.maxCount
           }
-          accept="image/*"
+          accept={verify?.fileFormat || "image/*"}
           listType={'text'}
           beforeUpload={async (file) => {
             const fileSizeLimit = verify?.maxSize * 1024; // 转换为kb;
@@ -279,7 +275,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
             width: '100%',
             pointerEvents: runtime ? 'unset' : 'none'
           }}
-          disabled={status !== STATUS_VALUES[STATUS_OPTIONS.DEFAULT]}
+          disabled={status !== STATUS_VALUES[STATUS_OPTIONS.DEFAULT] || detailMode}
           drag={uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.LIST]}
           renderUploadList={renderUploadList}
         >

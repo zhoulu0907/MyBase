@@ -6,7 +6,7 @@ import ccto from '../../assets/bpmLogo/ccto.png';
 
 export const CcRecipientsNodeRegistry: FlowNodeRegistry = {
   type: 'ccRecipients',
-  title: '抄送人',
+  name: '抄送人',
   category: 'interaction',
   meta: {
     isStart: false,

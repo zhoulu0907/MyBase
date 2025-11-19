@@ -76,6 +76,7 @@ export interface DictManagerConfig {
   // Tabs 配置
   tabs?: {
     enabled?: boolean;
+    defaultTabKey?: string;
     systemDictTab?: {
       key: string;
       title: string;
@@ -92,6 +93,8 @@ export interface DictManagerConfig {
   // 样式配置
   className?: string;
   style?: React.CSSProperties;
+  // 其他配置
+  isHideTenantAddDictButton?: boolean; // 是否隐藏系统字典添加字典按钮
 }
 
 interface DictManagerProps {
@@ -141,25 +144,27 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
     },
     tabs: {
       enabled: false,
-      systemDictTab: {
-        key: 'tenant',
-        title: '公共字典',
-        ...config.tabs?.systemDictTab
-      },
+      defaultTabKey: 'tenant',
       customDictTab: {
         key: 'app',
         title: '自定义字典',
         ...config.tabs?.customDictTab
       },
+      systemDictTab: {
+        key: 'tenant',
+        title: '系统字典',
+        ...config.tabs?.systemDictTab
+      },
       ...config.tabs
     },
     className: '',
     style: {},
+    isHideTenantAddDictButton: false,
     ...config
   };
 
   // Tabs 相关状态
-  const [activeTab, setActiveTab] = useState<string>(finalConfig.tabs.systemDictTab?.key || '');
+  const [activeTab, setActiveTab] = useState<string>(finalConfig.tabs?.defaultTabKey || '');
   // 字典相关状态
   const [dictList, setDictList] = useState<DictItem[]>([]);
   const [activeDictId, setActiveDictId] = useState<string | undefined>(undefined);
@@ -256,10 +261,10 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
     };
 
     try {
-      const res = await currentTabConfig.api.getDictDataList(params);
-      setTableData(res.list);
-      setTotal(res.total);
-      onDictDataChange?.(res.list);
+      const res = await currentTabConfig.api?.getDictDataList?.(params);
+      setTableData(res?.list || []);
+      setTotal(res?.total || 0);
+      onDictDataChange?.(res?.list || []);
     } catch (error) {
       console.error('加载字典数据失败:', error);
     } finally {
@@ -316,7 +321,7 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
         permission={currentTabConfig.permissions.update}
         type="secondary"
         onClick={() => {
-          handleUpdateDictStatus(activeDict?.id!, activeDict?.status as StatusEnum);
+          handleUpdateDictStatus(activeDict?.id as string, activeDict?.status as StatusEnum);
         }}
       >
         {getStatusButtonText(activeDict?.status as StatusEnum)}
@@ -335,7 +340,7 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
         permission={currentTabConfig.permissions.delete}
         type="secondary"
         onClick={() => {
-          handleDeleteDict(activeDict?.id!);
+          handleDeleteDict(activeDict?.id as string);
         }}
       >
         删除
@@ -401,44 +406,15 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
     }
   };
 
-  // 删除字典数据
-  const handleDeleteDictData = async (id: string) => {
-    Modal.confirm({
-      title: '确认删除',
-      content: '确定要删除这条数据吗？',
-      okText: '确认',
-      cancelText: '取消',
-      onOk: async () => {
-        try {
-          await currentTabConfig.api?.deleteDictData?.(id);
-          Message.success('删除成功');
-
-          const params: PageParam & { dictType: string } = {
-            dictType: dictList.find((t) => t.id === activeDictId)?.type || '',
-            pageNo: currentPage,
-            pageSize
-          };
-          const res = await currentTabConfig.api?.getDictDataList?.(params);
-          setTableData(res.list);
-          setTotal(res.total);
-          onDictDataChange?.(res.list);
-        } catch (error) {
-          console.error('删除失败:', error);
-          Message.error('删除失败');
-        }
-      }
-    });
-  };
-
   // 新增/编辑字典
   const handleDictModalOk = async (values: DictItem) => {
     setModalLoading(true);
     try {
       if (editDict && editDict.id) {
-        await currentTabConfig.api?.updateDict({ ...editDict, ...values });
+        await currentTabConfig.api?.updateDict?.({ ...editDict, ...values });
         setDictList((prev) => prev.map((t) => (t.id === editDict.id ? { ...t, ...values } : t)));
       } else {
-        await currentTabConfig.api?.createDict({
+        await currentTabConfig.api?.createDict?.({
           ...values,
           dictOwnerType: activeTab,
           dictOwnerId: getDictOwnerId()
@@ -458,19 +434,14 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
     }
   };
 
-  const handleDictDataEdit = (item: DictData) => {
-    setEditItem(tableData.find((d) => d.id === item.id) || null);
-    setDictDataModalVisible(true);
-  };
-
   // 字典数据新增/编辑提交
   const handleDictDataModalOk = async (values: DictData) => {
     setDictDataModalLoading(true);
     try {
       if (editItem && editItem.dictType) {
-        await currentTabConfig.api.updateDictData({ ...values, dictType: editItem.dictType, id: editItem.id });
+        await currentTabConfig.api?.updateDictData?.({ ...values, dictType: editItem.dictType, id: editItem.id });
       } else if (activeDict?.type) {
-        await currentTabConfig.api.createDictData({ dictType: activeDict.type, ...values });
+        await currentTabConfig.api?.createDictData?.({ dictType: activeDict.type, ...values });
       }
       // 刷新表格
       if (activeDictId !== undefined) {
@@ -479,27 +450,16 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
           pageNo: currentPage,
           pageSize
         };
-        const res = await currentTabConfig.api.getDictDataList(params);
-        setTableData(res.list);
-        setTotal(res.total);
-        onDictDataChange?.(res.list);
+        const res = await currentTabConfig.api?.getDictDataList?.(params);
+        setTableData(res?.list || []);
+        setTotal(res?.total || 0);
+        onDictDataChange?.(res?.list || []);
       }
       setDictDataModalVisible(false);
       setEditItem(null);
     } finally {
       setDictDataModalLoading(false);
     }
-  };
-
-  const handleUpdateDictDataStatus = (id: string, status: number) => {
-    const params = {
-      id,
-      status
-    };
-    currentTabConfig.api?.updateDictDataStatus?.(params).then(() => {
-      Message.success('操作成功');
-      loadTableData();
-    });
   };
 
   // 批量配置字典值
@@ -534,7 +494,7 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
       const deleteItems = valuesWithDelete.filter((item) => item.isDelete).map((item) => item.id);
 
       console.log('batchConfigDictData', newItems, updateItems, deleteItems);
-      await currentTabConfig.api?.batchConfigDictData({
+      await currentTabConfig.api?.batchConfigDictData?.({
         createList: newItems,
         updateList: updateItems,
         deleteIds: deleteItems
@@ -556,32 +516,37 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
         <Sider width={252} className={styles.leftPanel}>
           {finalConfig.tabs.enabled ? (
             <Tabs activeTab={activeTab} onChange={setActiveTab} type="line" className={styles.tabsContainer}>
-              <Tabs.TabPane key={finalConfig.tabs.systemDictTab.key} title={finalConfig.tabs.systemDictTab.title}>
-                <DictList
-                  list={filteredDictList}
-                  activeId={activeDictId || undefined}
-                  searchValue={dictSearch}
-                  onSearchChange={setDictSearch}
-                  onAdd={() => {
-                    setAddDictModalVisible(true);
-                    setEditDict(null);
-                  }}
-                  onSelect={(id) => handleDictSelect(id)}
-                />
-              </Tabs.TabPane>
-              <Tabs.TabPane key={finalConfig.tabs.customDictTab.key} title={finalConfig.tabs.customDictTab.title}>
-                <DictList
-                  list={filteredDictList}
-                  activeId={activeDictId || undefined}
-                  searchValue={dictSearch}
-                  onSearchChange={setDictSearch}
-                  onAdd={() => {
-                    setAddDictModalVisible(true);
-                    setEditDict(null);
-                  }}
-                  onSelect={(id) => handleDictSelect(id)}
-                />
-              </Tabs.TabPane>
+              {finalConfig.tabs.customDictTab && (
+                <Tabs.TabPane key={finalConfig.tabs.customDictTab?.key} title={finalConfig.tabs.customDictTab?.title}>
+                  <DictList
+                    list={filteredDictList}
+                    activeId={activeDictId || undefined}
+                    searchValue={dictSearch}
+                    onSearchChange={setDictSearch}
+                    onAdd={() => {
+                      setAddDictModalVisible(true);
+                      setEditDict(null);
+                    }}
+                    onSelect={(id) => handleDictSelect(id)}
+                  />
+                </Tabs.TabPane>
+              )}
+              {finalConfig.tabs.systemDictTab && (
+                <Tabs.TabPane key={finalConfig.tabs.systemDictTab?.key} title={finalConfig.tabs.systemDictTab?.title}>
+                  <DictList
+                    list={filteredDictList}
+                    activeId={activeDictId || undefined}
+                    searchValue={dictSearch}
+                    onSearchChange={setDictSearch}
+                    onAdd={() => {
+                      setAddDictModalVisible(true);
+                      setEditDict(null);
+                    }}
+                    onSelect={(id) => handleDictSelect(id)}
+                    isHideTenantAddDictButton={finalConfig?.isHideTenantAddDictButton}
+                  />
+                </Tabs.TabPane>
+              )}
             </Tabs>
           ) : (
             <DictList
@@ -608,7 +573,7 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
                   description={activeDict?.remark}
                   rightChildren={OperationButtons}
                   wrapperClassName={styles.infoPanel}
-                  titleChildren={<StatusTag status={activeDict?.status} type="tag" />}
+                  titleChildren={<StatusTag status={activeDict?.status as StatusEnum} type="tag" />}
                 />
                 <Divider style={{ margin: '16px 0' }} />
               </Header>
@@ -622,6 +587,7 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
                 searchValue={dictDataSearch}
                 onSearchChange={handleDictDataSearch}
                 onBatchConfig={handleBatchConfig}
+                loading={_loading}
               />
             </>
           )}

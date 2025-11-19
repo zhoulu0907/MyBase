@@ -1,4 +1,5 @@
 import { ComponentConfig } from './app_component';
+import { InteractionRule } from './view';
 
 export interface GetPageSetIdReq {
   menuId: string;
@@ -85,28 +86,4 @@ export interface PageView {
   isLatestUpdated?: number;
 
   interactionRules?: InteractionRule[];
-}
-
-export interface InteractionRule {
-  id: string;
-  description: string;
-  enabled: boolean;
-  formAction: FormAction[];
-  interactionCondition: InteractionCondition[];
-}
-
-export interface FormAction {
-  action: string;
-  cpId: string;
-}
-
-export interface InteractionCondition {
-  conditions: InteractionSubCondition[];
-}
-
-export interface InteractionSubCondition {
-  cpId: string;
-  op: string;
-  operatorType: string;
-  value: string;
 }

@@ -264,6 +264,8 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
         });
 
         newPageComponentSchemas.set(component.componentCode, {
+          id: component.componentCode,
+          type: component.componentType,
           config: JSON.parse(component.config),
           editData: JSON.parse(component.editData)
         });
@@ -309,11 +311,10 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
             };
           }
           if (page.pageType === CATEGORY_TYPE.FORM) {
-            setFromSubTableComponents(component.parentCode, colComponents as any[]);
+            useEditorSignalMap.get(page.id)!.setSubTableComponents(component.parentCode, colComponents as any[]);
           } else if (page.pageType === CATEGORY_TYPE.LIST) {
             setListSubTableComponents(component.parentCode, colComponents as any[]);
           }
-          // useEditorSignalMap.get(page.id)!.setSubTableComponents(component.parentCode, colComponents as any[]);
         } else {
           const colComponents = newColComponentsMap.get(component.parentCode);
           if (colComponents) {
@@ -339,6 +340,8 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
         }
 
         newPageComponentSchemas.set(component.componentCode, {
+          id: component.componentCode,
+          type: component.componentType,
           config: JSON.parse(component.config),
           editData: JSON.parse(component.editData)
         });
@@ -376,6 +379,7 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
       setFormComponents(useEditorSignalMap.get(newCurViewId)!.components.value);
       loadFormPageComponentSchemas(useEditorSignalMap.get(newCurViewId)!.pageComponentSchemas.value);
       loadFormLayoutSubComponents(useEditorSignalMap.get(newCurViewId)!.layoutSubComponents.value);
+      loadFormSubTableComponents(useEditorSignalMap.get(newCurViewId)!.subTableComponents.value);
     }
 
     // 规则string转对象

@@ -165,6 +165,7 @@ export const EDITOR_TYPES = {
   PAGE_SETTING: 'page_setting',
   METADATA_MANAGE: 'metadata_manage',
   FLOW_EDITOR:'flow_editor',
+  WORKBENCH_EDITOR: 'workbench_editor',
 } as const;
 
 // 编辑器类型联合类型

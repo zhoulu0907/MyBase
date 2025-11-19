@@ -1,4 +1,4 @@
-import { triggerEditorSignal } from '@/store/singals/trigger_editor';
+import { triggerEditorSignal } from '@workflow/store/trigger_editor';
 import { Form, Grid, Input, Radio, Select, Switch, Tooltip } from '@arco-design/web-react';
 import { IconQuestionCircle } from '@arco-design/web-react/icon';
 import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';

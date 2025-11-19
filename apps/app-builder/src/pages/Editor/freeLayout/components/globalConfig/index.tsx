@@ -127,7 +127,7 @@ export function GlobalConfig(props = { visible: false, onClose: () => {} }) {
               checked={useConfigData.useNodeConfig}
               style={{ marginRight: '22px' }}
             />
-            <div className={styles.tips}>开启后，节点可基于全局设置单独调整；关闭后，统一按全局设置执行。</div>
+            <div className={styles.tips}>{useConfigData.useNodeConfig?'关闭时，字段权限跟随表单组件状态自动同步。':'开启后，节点可基于全局设置单独调整；关闭后，统一按全局设置执行。'}</div>
           </div>
         </div>
         <div className={styles.testrunPanelContent}>

@@ -34,9 +34,12 @@ const DynamicSwitchFillTextConfig: React.FC<DynamicSwitchFillTextConfigProps> = 
 
   return (
     <>
-      <Form.Item layout="inline" label={'填充文本'} className={styles.formItem}>
-        <Switch checked={fillText.display} onChange={(value) => handleChange('display', value)}></Switch>
-      </Form.Item>
+      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '12px' }}>
+        <div style={{ flex: 1, marginRight: 'auto' }}>填充文本</div>
+        <div>
+          <Switch size="small" checked={fillText.display} onChange={(value) => handleChange('display', value)}></Switch>
+        </div>
+      </div>
       {fillText.display && (
         <>
           <Form.Item layout="inline" label={'开启时'} className={styles.formItem}>

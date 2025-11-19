@@ -20,6 +20,7 @@
     "@onebase/common": "workspace:*",
     "@onebase/platform-center": "workspace:*",
     "@onebase/ui-kit": "workspace:*",
+    "@pawel-up/jexl": "^4.4.2",
     "@preact/signals-react": "^3.2.1",
     "@prettier/plugin-oxc": "^0.0.4",
     "@types/nanoid": "^3.0.0",

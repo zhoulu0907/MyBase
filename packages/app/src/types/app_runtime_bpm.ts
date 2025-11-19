@@ -19,6 +19,7 @@ export interface FetchExecTaskReq {
 export interface GetFormDetailReq {
   taskId?: string;
   instanceId?: string;
+  from?: 'todo' | 'done' | 'created' | 'cc';
 }
 export interface GetDonePageList {
   appId?: string;
@@ -51,6 +52,13 @@ export interface GetMyCreatePageListReq {
   submitTimeStart?: string;
   submitTimeEnd?: string;
   flowStatus?:string;
+}
+export interface GetPageSetListReq {
+  applicationId: string;
+  pageSetType?: string;
+}
+export interface GetListNodesReq {
+  businessId: string;
 }
 
 export enum FLOWSTATUS_TYPE {

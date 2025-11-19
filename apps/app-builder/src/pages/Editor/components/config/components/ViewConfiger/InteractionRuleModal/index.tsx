@@ -1,11 +1,10 @@
 import { Button, Divider, Dropdown, Form, Grid, Input, Menu, Modal, Select, Switch, Tag } from '@arco-design/web-react';
 import { IconDelete, IconLaunch, IconMoreVertical, IconPlus } from '@arco-design/web-react/icon';
-import { FieldType, VALIDATION_TYPE } from '@onebase/app';
+import { FieldType, InteractionActionType, VALIDATION_TYPE } from '@onebase/app';
 import { useFormEditorSignal, usePageViewEditorSignal } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { InteractionActionType } from './action';
 import styles from './index.module.less';
 import { getOperatorOptions } from './ruleMap';
 
@@ -45,8 +44,8 @@ const formActionOptions = [
     value: InteractionActionType.Required
   },
   {
-    label: '只读所有字段',
-    value: InteractionActionType.ReadonlyAll
+    label: '非必填',
+    value: InteractionActionType.NoRequired
   },
   {
     label: '设置字段值',
@@ -489,14 +488,7 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
                                 <div key={item.key}>
                                   <div className={styles.items}>
                                     <Grid.Row key={item.key} gutter={8} align="center">
-                                      <Grid.Col
-                                        span={
-                                          form.getFieldValue(item.field + '.action') ==
-                                          InteractionActionType.ReadonlyAll
-                                            ? 23
-                                            : 4
-                                        }
-                                      >
+                                      <Grid.Col span={4}>
                                         <Form.Item field={item.field + '.action'}>
                                           <Select
                                             className={styles.itemSelect}
@@ -508,14 +500,14 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
                                         </Form.Item>
                                       </Grid.Col>
 
-                                      {![
-                                        InteractionActionType.SetFieldValue,
-                                        InteractionActionType.ReadonlyAll
-                                      ].includes(form.getFieldValue(item.field + '.action')) && (
+                                      {![InteractionActionType.SetFieldValue].includes(
+                                        form.getFieldValue(item.field + '.action')
+                                      ) && (
                                         <>
                                           <Grid.Col span={19}>
-                                            <Form.Item field={item.field + '.cpId'}>
+                                            <Form.Item field={item.field + '.cpIds'}>
                                               <Select
+                                                mode="multiple"
                                                 className={styles.itemSelect}
                                                 options={cpOptions}
                                                 onChange={(_value) => {}}
