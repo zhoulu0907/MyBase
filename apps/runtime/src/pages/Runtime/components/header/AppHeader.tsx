@@ -4,7 +4,7 @@ import AvatarSVG from '@/assets/images/avatar.svg';
 import { DynamicIcon } from '@/components';
 import { appInfoSignal } from '@/store/app';
 import { UserPermissionManager } from '@/utils/permission';
-import { Dropdown, Layout, Menu, Typography } from '@arco-design/web-react';
+import { Avatar, Divider, Dropdown, Layout, Menu, Typography } from '@arco-design/web-react';
 import { IconExport } from '@arco-design/web-react/icon';
 import { getApplication, type GetApplicationReq } from '@onebase/app';
 import { TokenManager } from '@onebase/common';
@@ -27,14 +27,19 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   const { curAppInfo, setCurAppInfo } = appInfoSignal;
 
   const [mobile, setMobile] = useState<string>('');
+  const [userInfo, setUserInfo] = useState<any>(null);
   // 获取用户信息
   const tokenInfo = TokenManager.getTokenInfo();
+
+  useEffect(()=>{
+console.log("xxxx2:  ", curAppInfo)
+  }, [curAppInfo])
 
   useEffect(() => {
     if (tokenInfo?.accessToken) {
       getInfo();
     }
-  }, [tokenInfo]);
+  }, [tokenInfo?.accessToken]);
 
   useEffect(() => {
     // 正则匹配 /onebase/runtime/ 后面的两个数字（appId 和 tenantId）
@@ -71,6 +76,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     const mobile = res.user.mobile;
     const formatMobile = maskMobile(mobile);
     setMobile(formatMobile);
+    setUserInfo(res.user);
   };
 
   // 登出处理
@@ -86,7 +92,27 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   // 用户菜单
   const userMenu = (
     <Menu>
-      <Menu.Item key="profile">{mobile}</Menu.Item>
+      <Menu.Item key="info" style={{ height: '70px' }}>
+        <div className={styles.adminInformation}>
+          <Avatar size={32}>
+            <img src={userInfo?.avatar} />
+          </Avatar>
+          <Typography.Text>{userInfo?.nickname}</Typography.Text>
+          <Typography.Text type="secondary">{maskMobile(mobile)}</Typography.Text>
+        </div>
+      </Menu.Item>
+      <Divider style={{ margin: '4px 0' }} />
+      <Menu.Item
+        key="setting"
+        onClick={() => {
+          navigate('/onebase/setting');
+        }}
+      >
+        <div className={styles.menu}>
+          {/* <img src={spaceShipLine} /> */}
+          企业管理后台
+        </div>
+      </Menu.Item>
       <Menu.Item key="logout" onClick={handleLogout}>
         <IconExport style={{ color: '#F53F3F' }} />
         <Typography.Text type="error">{t('header.logout')}</Typography.Text>

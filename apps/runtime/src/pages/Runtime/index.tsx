@@ -64,9 +64,6 @@ const Runtime: React.FC = () => {
 
   useEffect(() => {
     getUserInfo();
-    if(!appId && tenantId) {
-      navigate("/onebase/runtime/my-app")
-    }
   }, []);
 
   const getUserInfo = async () => {

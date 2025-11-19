@@ -96,6 +96,7 @@ const Right: React.FC = () => {
       if (appId) {
         const res = await getApplication({ id: appId });
         if (res) {
+          console.log("xxxx:", res)
           setCurAppInfo(res);
         }
       }
@@ -189,8 +190,10 @@ const Right: React.FC = () => {
         const redirectURL = getHashQueryParam('redirectURL');
         if (redirectURL) {
           if(!appId) {
-            navigate(`/onebase/runtime/${tenantId}`);
+            //企业登录
+            navigate('/onebase/runtime/my-app');
           }else {
+            //saas模式 或者inner模式
             navigate(`/onebase/runtime/${appId}/${tenantId}`);
           }
         } else {

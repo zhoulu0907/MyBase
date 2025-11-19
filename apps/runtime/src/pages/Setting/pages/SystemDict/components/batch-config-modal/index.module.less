@@ -1,0 +1,87 @@
+/* 批量配置弹窗样式 */
+.configContainer {
+  .colorModeSection {
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+    padding: 8px 0;
+    
+    .colorModeLabel {
+      margin-right: 8px;
+      font-size: 14px;
+      color: #333;
+    }
+  }
+
+  .dictValuesSection {
+    margin-bottom: 16px;
+  }
+
+  .actionButtons {
+    display: flex;
+    gap: 12px;
+    
+    .addButton {
+      height: 36px;
+      min-width: 120px;
+    }
+    
+    .generateButton {
+      height: 36px;
+      min-width: 120px;
+      color: #666;
+      
+      &:disabled {
+        color: #c9cdd4;
+        cursor: not-allowed;
+        
+        &:hover {
+          color: #c9cdd4;
+        }
+      }
+    }
+  }
+}
+
+/* 拖拽相关样式 */
+.dragHandle {
+  cursor: move;
+  color: #999;
+  font-size: 16px;
+  
+  &:hover {
+    color: #666;
+  }
+}
+
+/* 必填标识样式 */
+.requiredDot {
+  color: #f53f3f;
+  margin-right: 4px;
+}
+
+// 拖拽时的样式
+.sortableHelper {
+  display: table;
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 9999;
+  opacity: 0.9;
+  
+  tr {
+    display: table-row;
+  }
+  
+  td {
+    display: table-cell;
+    padding: 8px;
+    border-right: 1px solid #e5e5e5;
+  }
+}
+
+.colorPicker {
+  width: 30px;
+  height: 30px;
+  // border-radius: 50%;
+}

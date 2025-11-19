@@ -25,6 +25,8 @@ export const TENANT_MENUS = {
   DEPT: 'tenant:dept',
   DICT: 'tenant:dict',
   INFO: 'tenant:info',
+  AUTHORIZED: 'tenant:authorized',
+  CORP_INFO:'tenant:corpInfo'
 }
 
 /** 租户管理-用户管理 */

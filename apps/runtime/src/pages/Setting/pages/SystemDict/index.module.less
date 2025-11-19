@@ -1,0 +1,71 @@
+@panel-background-color: #fff;
+@panel-padding: 16px;
+.systemDictPage {
+  height: 100%;
+  .pageLayout {
+    height: 100%;
+    background-color: transparent;
+  }
+  .leftPanel {
+    margin-right: 16px;
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    box-shadow: none;
+    background-color: @panel-background-color;
+
+    :global(.arco-layout-sider-children) {
+      padding: @panel-padding;
+    }
+    .searchInput {
+      :global(.arco-input-inner-wrapper) {
+        border-radius: 24px;
+      }
+    }
+
+    .dictList {
+      flex: 1;
+      padding-left: 24px;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+  }
+
+  .rightPanel {
+    display: flex;
+    flex-direction: column;
+    padding: @panel-padding;
+    background-color: @panel-background-color;
+    .tableHeader {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex: 0;
+
+      .searchInput {
+        width: 200px;
+
+        :global(.arco-input-inner-wrapper) {
+          border-radius: 24px;
+        }
+      }
+    }
+    .tableContainer {
+      flex: 1;
+      margin-bottom: 16px;
+      .paginationContainer {
+        margin-top: 12px;
+        display: flex;
+        justify-content: flex-end;
+      }
+      .active {
+        color: #009e9e;
+      }
+      .inactive {
+        color: #8c8c8c;
+      }
+    }
+  }
+}

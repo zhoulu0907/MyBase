@@ -1,0 +1,29 @@
+.organizationPage {
+  background-color: #fff;
+  border-radius: 4px;
+  padding: 20px;
+
+  .pageHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+
+    .leftContent {
+      flex: 1;
+    }
+
+    .rightContent {
+      flex: 1;
+      display: flex;
+      justify-content: flex-end;
+
+      .inputSearch {
+        width: 300px;
+        :global(.arco-input-inner-wrapper) {
+          border-radius: 24px;
+        }
+      }
+    }
+  }
+}

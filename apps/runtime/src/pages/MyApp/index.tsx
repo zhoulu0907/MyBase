@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import emptyApplicationSVG from '@/assets/images/empty_application.svg';
-import DynamicIcon from '@/components/DynamicIcon';
+import {DynamicIcon} from '@/components/DynamicIcon';
 import { appIconMap } from '@onebase/ui-kit';
 import TagModal from './components/tagModal';
 import {
@@ -22,6 +22,7 @@ import {
   ThemeColorMap
 } from './const';
 import styles from './index.module.less';
+import { AppHeader } from '../Runtime/components/header';
 
 const Option = Select.Option;
 
@@ -192,6 +193,7 @@ const MyAppPage: React.FC = () => {
   return (
     <div className={styles.myAppPage}>
       <div className={styles.myAppPageHeader}>
+        <AppHeader />
       </div>
 
       <div className={styles.myAppContainer}>
