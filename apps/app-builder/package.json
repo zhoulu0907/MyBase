@@ -75,6 +75,7 @@
     "react-error-boundary": "^6.0.0",
     "react-grid-layout": "^1.5.2",
     "react-i18next": "^15.6.0",
+    "react-resizable": "^3.0.5",
     "react-router-dom": "^7.6.3",
     "react-sortable-hoc": "^2.0.0",
     "react-sortablejs": "^6.1.4",
