@@ -106,6 +106,7 @@ public class WorkFlowExecutor implements Closeable {
         }
         if (node instanceof SqlQueryAction action) {
             Table table = action.sqlQuery(tableEnv, workflowGraph);
+            tableEnv.createTemporaryView(node.getId(), table);
             log.info("sqlQuery table: {}", table.toString());
         }
         if (node instanceof ExecuteSqlAction action) {
