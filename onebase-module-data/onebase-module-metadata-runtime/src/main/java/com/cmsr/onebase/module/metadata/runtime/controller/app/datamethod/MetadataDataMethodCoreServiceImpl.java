@@ -326,7 +326,7 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
             for (int i = 0; i < dataSet.size(); i++) {
                 DataRow row = dataSet.getRow(i);
                 Map<String, Object> data = convertDataRowToMap(row, fields);
-                Map<String, Object> filterMap = fieldPermissionFilter.filterFields(data, permissionContext.getFieldPermission(), fields);
+                Map<String, Object> filterMap = fieldPermissionFilter.filterFields(data,permissionContext == null? null: permissionContext.getFieldPermission(), fields);
                 list.add(buildDataResponse(entity, filterMap, fields));
             }
             return new PageResult<>(list, total);

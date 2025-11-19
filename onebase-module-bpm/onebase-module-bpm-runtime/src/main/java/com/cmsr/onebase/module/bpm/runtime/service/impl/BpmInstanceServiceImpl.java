@@ -10,7 +10,6 @@ import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowInsBizExtDO;
 import com.cmsr.onebase.module.bpm.core.dto.BpmDefinitionExtDTO;
 import com.cmsr.onebase.module.bpm.core.dto.BpmGlobalConfigDTO;
 import com.cmsr.onebase.module.bpm.core.dto.PageViewGroupDTO;
-import com.cmsr.onebase.module.bpm.core.dto.node.ApproverNodeExtDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.NodePermFlagDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
 import com.cmsr.onebase.module.bpm.core.enums.*;
@@ -20,8 +19,8 @@ import com.cmsr.onebase.module.bpm.core.vo.design.BpmDefJsonVO;
 import com.cmsr.onebase.module.bpm.core.vo.design.node.base.BaseEdgeVO;
 import com.cmsr.onebase.module.bpm.runtime.service.BpmInstanceService;
 import com.cmsr.onebase.module.bpm.runtime.service.detail.BpmDetailService;
-import com.cmsr.onebase.module.bpm.runtime.service.detail.strategy.InstanceDetailStrategyManager;
 import com.cmsr.onebase.module.bpm.runtime.service.exec.strategy.ExecTaskStrategyManager;
+import com.cmsr.onebase.module.bpm.runtime.service.operator.BpmOperatorRecordService;
 import com.cmsr.onebase.module.bpm.runtime.utils.PageViewUtil;
 import com.cmsr.onebase.module.bpm.runtime.vo.*;
 import com.cmsr.onebase.module.metadata.api.datamethod.DataMethodApi;
@@ -30,7 +29,6 @@ import com.cmsr.onebase.module.metadata.api.datamethod.dto.InsertDataReqDTO;
 import com.cmsr.onebase.module.metadata.api.entity.MetadataEntityFieldApi;
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldQueryReqDTO;
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldRespDTO;
-import com.cmsr.onebase.module.metadata.core.service.datamethod.MetadataDataMethodCoreService;
 import com.cmsr.onebase.module.system.api.user.AdminUserApi;
 import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
 import jakarta.annotation.Resource;
@@ -49,7 +47,6 @@ import org.dromara.warm.flow.core.enums.PublishStatus;
 import org.dromara.warm.flow.core.enums.SkipType;
 import org.dromara.warm.flow.core.service.*;
 import org.dromara.warm.flow.core.service.impl.BpmConstants;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -69,11 +66,6 @@ import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionU
 @Slf4j
 @Service
 public class BpmInstanceServiceImpl implements BpmInstanceService {
-    // 自注入
-    @Lazy
-    @Resource
-    private BpmInstanceServiceImpl self;
-
     @Resource
     private BpmEngineDefExtService defExtService;
 
@@ -93,9 +85,6 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
     private DataMethodApi dataMethodApi;
 
     @Resource
-    private HisTaskService hisTaskService;
-
-    @Resource
     private BpmFlowInsBizExtRepository flowInsExtRepository;
 
     @Resource
@@ -108,13 +97,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
     private NodeService nodeService;
 
     @Resource
-    private MetadataDataMethodCoreService metadataDataMethodCoreService;
-
-    @Resource
     private ExecTaskStrategyManager execTaskStrategyManager;
-
-    @Resource
-    private InstanceDetailStrategyManager instanceDetailStrategyManager;
 
     @Resource
     protected MetadataEntityFieldApi metadataEntityFieldApi;
@@ -124,6 +107,9 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
 
     @Resource
     private BpmDetailService detailService;
+
+    @Resource
+    private BpmOperatorRecordService operatorRecordService;
 
     private String buildFormSummary(EntityVO entityVO, BpmDefinitionExtDTO defExtDTO) {
         StringBuilder sb = new StringBuilder();
@@ -286,9 +272,9 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
 //                    .handler(completeTaskBo.getHandler())
                     .variable(variables)
                     .skipType(SkipType.PASS.getKey())
-                    .message("已提交")
+                    .message(BpmNodeApproveStatusEnum.POST_SUBMITTED.getName())
                     .flowStatus(businessStatus.getCode())
-                    .hisStatus("已提交");
+                    .hisStatus(BpmNodeApproveStatusEnum.POST_SUBMITTED.getCode());
 //                    .hisTaskExt(completeTaskBo.getFileId());
             taskService.skip(skipParams, task);
 
@@ -419,187 +405,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
 
     @Override
     public List<BpmOperatorRecordRespVO.OperatorRecord> getOperatorRecord(Long instanceId) {
-        List<BpmOperatorRecordRespVO.OperatorRecord> operatorRecords = new ArrayList<>();
-
-        Instance instance = insService.getById(instanceId);
-
-        if (instance == null) {
-            throw exception(ErrorCodeConstants.FLOW_INSTANCE_NOT_EXISTS);
-        }
-
-        String defJsonStr = instance.getDefJson();
-        DefJson defJson = FlowEngine.jsonConvert.strToBean(defJsonStr, DefJson.class);
-
-        // 查出已办
-        List<HisTask> hisTasks = hisTaskService.getByInsId(instanceId);
-
-        // 查出待办
-        List<Task> tasks = taskService.getByInsId(instanceId);
-
-        // todo： 按照时间排序，已办、待办按照时间排序
-        Map<String, BaseNodeExtDTO> nodeDtoMap = new HashMap<>();
-        Map<Long, BpmOperatorRecordRespVO.OperatorRecord> recordMap = new HashMap<>();
-
-        for (NodeJson nodeJson : defJson.getNodeList()) {
-            BaseNodeExtDTO extDTO = JsonUtils.parseObject(nodeJson.getExt(), BaseNodeExtDTO.class);
-            nodeDtoMap.put(nodeJson.getNodeCode(), extDTO);
-        }
-
-        // 进行组装
-        for (HisTask hisTask : hisTasks) {
-            Long taskId = hisTask.getTaskId();
-
-            // 跳过非中间节点
-            if (!NodeType.isBetween(hisTask.getNodeType())) {
-                continue;
-            }
-
-            BpmOperatorRecordRespVO.OperatorRecord record = recordMap.get(taskId);
-
-            if (record == null) {
-                BaseNodeExtDTO extDTO = nodeDtoMap.get(hisTask.getNodeCode());
-                record = new BpmOperatorRecordRespVO.OperatorRecord();
-                record.setNodeName(hisTask.getNodeName());
-                record.setNodeType(extDTO.getNodeType());
-
-                if (extDTO instanceof ApproverNodeExtDTO approverNodeExtDTO) {
-                    record.setApproveMode(approverNodeExtDTO.getApproverConfig().getApprovalMode());
-                }
-
-                operatorRecords.add(record);
-                recordMap.put(taskId, record);
-            }
-
-            if (record.getOperators() == null) {
-                record.setOperators(new ArrayList<>());
-            }
-
-            BpmOperatorRecordRespVO.OperatorInfo operatorInfo = new BpmOperatorRecordRespVO.OperatorInfo();
-            operatorInfo.setOperator(hisTask.getApprover());
-            operatorInfo.setOperatorTime(hisTask.getUpdateTime());
-            operatorInfo.setComment(hisTask.getMessage());
-            operatorInfo.setTaskStatus(hisTask.getFlowStatus());
-
-            record.setDisplayStatus(operatorInfo.getTaskStatus());
-
-            record.getOperators().add(operatorInfo);
-        }
-
-        // 处理待办数据
-        for (Task task : tasks) {
-            Long taskId = task.getId();
-            BpmOperatorRecordRespVO.OperatorRecord record = recordMap.get(taskId);
-            BaseNodeExtDTO extDTO = nodeDtoMap.get(task.getNodeCode());
-            String nodeType = extDTO.getNodeType();
-
-            if (record == null) {
-                record = new BpmOperatorRecordRespVO.OperatorRecord();
-                record.setNodeName(task.getNodeName());
-                record.setNodeType(nodeType);
-
-                if (extDTO instanceof ApproverNodeExtDTO approverNodeExtDTO) {
-                    record.setApproveMode(approverNodeExtDTO.getApproverConfig().getApprovalMode());
-                }
-
-                operatorRecords.add(record);
-                recordMap.put(taskId, record);
-            }
-
-            // 查找有权限的用户
-            List<User> users = userService.getByAssociateds(List.of(task.getId()),
-                    BpmUserTypeEnum.APPROVAL.getCode(),
-                    BpmUserTypeEnum.TRANSFER.getCode(),
-                    BpmUserTypeEnum.DEPUTE.getCode());
-
-            if (CollectionUtils.isNotEmpty(users)) {
-                if (record.getOperators() == null) {
-                    record.setOperators(new ArrayList<>());
-                }
-
-                for (User user : users) {
-                    BpmOperatorRecordRespVO.OperatorInfo operatorInfo = new BpmOperatorRecordRespVO.OperatorInfo();
-                    operatorInfo.setOperator(user.getProcessedBy());
-                    operatorInfo.setOperatorTime(task.getUpdateTime());
-
-                    // 判断下节点类型
-                    if (Objects.equals(nodeType, BpmNodeTypeEnum.INITIATION.getCode())) {
-                        operatorInfo.setTaskStatus("待提交");
-                    } else if (Objects.equals(nodeType, BpmNodeTypeEnum.APPROVER.getCode())) {
-                        operatorInfo.setTaskStatus("审批中");
-                    } else {
-                        // todo
-                        operatorInfo.setTaskStatus("待处理");
-                    }
-
-                    // 只要有待办，展示状态与任务状态一致
-                    record.setDisplayStatus(operatorInfo.getTaskStatus());
-
-                    record.getOperators().add(operatorInfo);
-                }
-            }
-        }
-
-        // 只运行一次的循环，为了让代码看起来层级简单些
-        do {
-            if (CollectionUtils.isEmpty(operatorRecords)) {
-                break;
-            }
-
-            Set<Long> userIds = new HashSet<>();
-
-            for (BpmOperatorRecordRespVO.OperatorRecord operatorRecord : operatorRecords) {
-                if (CollectionUtils.isNotEmpty(operatorRecord.getOperators())) {
-                    for (BpmOperatorRecordRespVO.OperatorInfo operatorInfo : operatorRecord.getOperators()) {
-                        userIds.add(Long.parseLong(operatorInfo.getOperator()));
-                    }
-                }
-            }
-
-            if (CollectionUtils.isEmpty(userIds)) {
-                break;
-            }
-
-            CommonResult<List<AdminUserRespDTO>> result = adminUserApi.getUserList(userIds);
-
-            // todo: 抛出异常？
-            if (!result.isSuccess()) {
-                log.warn("获取用户列表失败，userIds: {}", userIds);
-                break;
-            }
-
-            if (CollectionUtils.isEmpty(result.getData())) {
-                break;
-            }
-
-            List<AdminUserRespDTO> users = result.getData();
-
-
-            Map<Long, AdminUserRespDTO> userMap = new HashMap<>();
-
-            for (AdminUserRespDTO user : users) {
-                userMap.put(user.getId(), user);
-            }
-
-            for (BpmOperatorRecordRespVO.OperatorRecord operatorRecord : operatorRecords) {
-                if (CollectionUtils.isNotEmpty(operatorRecord.getOperators())) {
-                    for (BpmOperatorRecordRespVO.OperatorInfo operatorInfo : operatorRecord.getOperators()) {
-                        AdminUserRespDTO user = userMap.get(Long.parseLong(operatorInfo.getOperator()));
-
-                        if (user != null) {
-                            operatorInfo.setOperator(user.getNickname());
-                            operatorInfo.setAvatar(user.getAvatar());
-                        } else {
-                            // todo: 用户不存在
-                            operatorInfo.setOperator("-");
-                        }
-                    }
-                }
-            }
-
-            break;
-        } while (false);
-
-        return operatorRecords;
+        return operatorRecordService.getOperatorRecord(instanceId);
     }
 
     @Override

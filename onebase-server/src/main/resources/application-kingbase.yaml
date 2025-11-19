@@ -26,6 +26,10 @@ spring:
           connectionMinimumIdleSize: 2
           connectionPoolSize: 5
           database: 0
+          timeout: 10000  # 命令执行超时时间 (毫秒), 从3秒增加到10秒
+          retryAttempts: 3  # 重试次数
+          retryInterval: 1500  # 重试间隔 (毫秒)
+        nettyThreads: 8  # Netty线程数，增加并发处理能力
   # Redis 配置。Redisson 默认的配置足够使用，一般不需要进行调优
   data:
     redis:

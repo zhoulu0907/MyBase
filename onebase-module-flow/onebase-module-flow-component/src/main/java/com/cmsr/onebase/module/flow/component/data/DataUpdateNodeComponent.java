@@ -57,8 +57,12 @@ public class DataUpdateNodeComponent extends SkippableNodeComponent {
         reqDTO.setTraceId(executeContext.getTraceId());
         if (StringUtils.equalsIgnoreCase("mainEntity", nodeData.getUpdateType())) {
             reqDTO.setEntityId(nodeData.getMainEntityId());
+            reqDTO.setParentEntityId(null);
+            reqDTO.setUpdateType(nodeData.getUpdateType());
         } else if (StringUtils.equalsIgnoreCase("subEntity", nodeData.getUpdateType())) {
             reqDTO.setEntityId(nodeData.getSubEntityId());
+            reqDTO.setParentEntityId(nodeData.getMainEntityId());
+            reqDTO.setUpdateType(nodeData.getUpdateType());
         } else {
             throw new IllegalArgumentException("updateType 类型错误: " + nodeData.getUpdateType());
         }

@@ -7,6 +7,7 @@ package org.dromara.warm.flow.core.service.impl;
  * @date 2025-11-10
  */
 public interface BpmConstants {
+    String SYS_USER_ID = "-1";
 
     /**  节点审批人列表最多100个用户 */
     Integer MAX_NODE_APPROVER_USERS = 100;
@@ -37,4 +38,9 @@ public interface BpmConstants {
 
     /**  flow variable 中detailPageView的key */
     String VAR_PAGE_VIEW_GROUP_KEY = "pageViewGroup";
+
+    /**
+     * 抄送人常量
+     */
+    String VAR_CC_USERS_KEY = "ccUsers";
 }
