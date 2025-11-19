@@ -25,6 +25,7 @@
     "@codemirror/view": "^6.38.1",
     "@douyinfe/semi-icons": "^2.85.0",
     "@douyinfe/semi-ui": "^2.85.0",
+    "@fingerprintjs/fingerprintjs": "^5.0.1",
     "@flowgram.ai/fixed-layout-editor": "0.4.3",
     "@flowgram.ai/fixed-semi-materials": "0.4.3",
     "@flowgram.ai/form-materials": "0.4.3",

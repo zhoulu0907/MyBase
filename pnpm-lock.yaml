@@ -143,6 +143,9 @@ importers:
       '@douyinfe/semi-ui':
         specifier: ^2.85.0
         version: 2.85.0(acorn@8.15.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@fingerprintjs/fingerprintjs':
+        specifier: ^5.0.1
+        version: 5.0.1
       '@flowgram.ai/fixed-layout-editor':
         specifier: 0.4.3
         version: 0.4.3(@babel/core@7.28.0)(react-dom@18.3.1(react@18.3.1))(react-is@18.3.1)(react@18.3.1)(styled-components@6.1.19(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
@@ -2031,6 +2034,9 @@ packages:
   '@eslint/plugin-kit@0.3.3':
     resolution: {integrity: sha512-1+WqvgNMhmlAambTvT3KPtCl/Ibr68VldY2XY40SL1CE0ZXiakFR/cbTspaF5HsnpDMvcYYoJHfl4980NBjGag==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+
+  '@fingerprintjs/fingerprintjs@5.0.1':
+    resolution: {integrity: sha512-KbaeE/rk2WL8MfpRP6jTI4lSr42SJPjvkyrjP3QU6uUDkOMWWYC2Ts1sNSYcegHC8avzOoYTHBj+2fTqvZWQBA==}
 
   '@floating-ui/core@1.7.3':
     resolution: {integrity: sha512-sGnvb5dmrJaKEZ+LDIpguvdX3bDlEllmv4/ClQ9awcmCZrlx5jQyyMWFM5kBI+EyNOCDDiKk8il0zeuX3Zlg/w==}
@@ -7689,7 +7695,7 @@ snapshots:
       eslint-visitor-keys: 2.1.0
       semver: 6.3.1
 
-  '@babel/eslint-plugin@7.27.1(@babel/eslint-parser@7.19.1(@babel/core@7.28.0)(eslint@9.31.0(jiti@2.6.1)))(eslint@8.57.1)':
+  '@babel/eslint-plugin@7.27.1(@babel/eslint-parser@7.19.1(@babel/core@7.28.0)(eslint@8.57.1))(eslint@8.57.1)':
     dependencies:
       '@babel/eslint-parser': 7.19.1(@babel/core@7.28.0)(eslint@8.57.1)
       eslint: 8.57.1
@@ -9312,6 +9318,8 @@ snapshots:
       '@eslint/core': 0.15.1
       levn: 0.4.1
 
+  '@fingerprintjs/fingerprintjs@5.0.1': {}
+
   '@floating-ui/core@1.7.3':
     dependencies:
       '@floating-ui/utils': 0.2.10
@@ -9411,7 +9419,7 @@ snapshots:
     dependencies:
       '@babel/core': 7.28.0
       '@babel/eslint-parser': 7.19.1(@babel/core@7.28.0)(eslint@8.57.1)
-      '@babel/eslint-plugin': 7.27.1(@babel/eslint-parser@7.19.1(@babel/core@7.28.0)(eslint@9.31.0(jiti@2.6.1)))(eslint@8.57.1)
+      '@babel/eslint-plugin': 7.27.1(@babel/eslint-parser@7.19.1(@babel/core@7.28.0)(eslint@8.57.1))(eslint@8.57.1)
       '@babel/preset-env': 7.20.2(@babel/core@7.28.0)
       '@babel/preset-react': 7.13.13(@babel/core@7.28.0)
       '@rushstack/eslint-config': 3.1.1(eslint@8.57.1)(typescript@5.8.3)
