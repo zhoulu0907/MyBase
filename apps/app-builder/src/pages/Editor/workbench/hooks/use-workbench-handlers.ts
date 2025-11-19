@@ -48,13 +48,45 @@ export function useWorkbenchHandlers({
 
   // 复制组件
   const handleCopyComponent = (comp: GridItem, originId: string) => {
+    // 1. 将新组件添加到组件列表
+    const newComponents = [...components, comp];
+    setComponents(newComponents);
+
+    // 2. 获取原始组件的配置
     const originSchema = pageComponentSchemas[originId];
-    const newSchema = cloneDeep(originSchema);
-    newSchema.config.id = comp.id;
-    newSchema.config.cpName = comp.displayName;
-    setPageComponentSchemas(comp.id, newSchema);
+    if (!originSchema) {
+      console.warn(`未找到原始组件 ${originId} 的配置`);
+      return;
+    }
+
+    // 3. 创建新的组件 schema
+    const schema = getWorkbenchComponentSchema(comp.type as WorkbenchComponentType) as WorkbenchComponentSchema;
+
+    // 4. 获取原始组件的配置并合并：使用原始组件的配置覆盖默认配置
+    const originConfig = originSchema.config || {};
+    schema.config = {
+      ...schema.config,
+      ...originConfig,
+      id: comp.id, // 使用新 ID
+      cpName: comp.displayName || '' // 使用新名称
+    };
+
+    // 5. 如果原始组件有 editData，也需要复制
+    if (originSchema.editData) {
+      schema.editData = cloneDeep(originSchema.editData);
+    }
+
+    // 6. 构建完整的 props（WorkbenchComponentSchema 不包含 id 和 type，这些在 config 中）
+    const newProps: WorkbenchComponentSchema = {
+      ...schema
+    };
+
+    // 7. 保存新组件配置
+    setPageComponentSchemas(comp.id, newProps);
+
+    // 8. 设置当前组件
     setCurComponentID(comp.id);
-    setCurComponentSchema(newSchema);
+    setCurComponentSchema(newProps);
     setShowDeleteButton(false);
   };
 
