@@ -20,6 +20,7 @@ export enum WorkflowNodeType {
   START = 'start',
   END = 'end',
   PROCESSNODE = 'process-node',
-  INITIATION='initiation',
-  APPROVER='approver',
+  INITIATION = 'initiation',
+  APPROVER = 'approver',
+  CCRECIPIENTS = 'cc'
 }
