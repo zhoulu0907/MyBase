@@ -31,6 +31,7 @@ import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.
 @Tag(name = "管理后台 - 租户")
 @RestController
 @RequestMapping("/system/tenant")
+@Deprecated
 @Component("oldTenantController")
 public class TenantController {
 

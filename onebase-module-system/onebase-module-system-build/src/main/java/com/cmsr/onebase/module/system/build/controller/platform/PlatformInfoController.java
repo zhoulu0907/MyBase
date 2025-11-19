@@ -34,6 +34,7 @@ import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.USER_PASSW
 @RestController
 @RequestMapping("/system/platform")
 @Tag(name = "平台信息管理")
+@Deprecated
 @Component("oldPlatformInfoController")
 public class PlatformInfoController {
 
