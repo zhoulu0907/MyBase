@@ -33,7 +33,6 @@ public class FlowConnectorScriptServiceImpl implements FlowConnectorScriptServic
         List<ConnectorScriptVO> voList = new ArrayList<>();
         for (FlowConnectorScriptDO scriptDO : pageDO.getList()) {
             ConnectorScriptVO scriptVO = convertToVO(scriptDO);
-
             voList.add(scriptVO);
         }
 
@@ -67,6 +66,7 @@ public class FlowConnectorScriptServiceImpl implements FlowConnectorScriptServic
     @Override
     public Long createConnectorScript(CreateFlowConnectorScriptReqVO createVO) {
         FlowConnectorScriptDO connectorScriptDO = new FlowConnectorScriptDO();
+        connectorScriptDO.setConnectorId(createVO.getConnectorId());
         connectorScriptDO.setScriptName(createVO.getScriptName());
         connectorScriptDO.setScriptType(createVO.getScriptType());
         connectorScriptDO.setDescription(createVO.getDescription());
