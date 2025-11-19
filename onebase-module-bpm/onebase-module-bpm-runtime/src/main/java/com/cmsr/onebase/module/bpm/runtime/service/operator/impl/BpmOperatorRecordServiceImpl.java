@@ -293,7 +293,7 @@ public class BpmOperatorRecordServiceImpl implements BpmOperatorRecordService {
                 }
 
                 // 通过user的更新时间来判断，是否已阅
-                boolean viewed = user.getUpdateTime().isAfter(user.getUpdateTime());
+                boolean viewed = user.getUpdateTime().isAfter(user.getCreateTime());
                 operatorInfo.setViewed(viewed);
 
                 // 只要有待办，展示状态与任务状态一致
