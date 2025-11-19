@@ -6,17 +6,25 @@ import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowInsBizExtRepository;
 import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowInsBizExtDO;
 import com.cmsr.onebase.module.bpm.core.dto.PageViewGroupDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
+import com.cmsr.onebase.module.bpm.core.dto.node.base.FieldPermCfgDTO;
+import com.cmsr.onebase.module.bpm.core.enums.FieldPermTypeEnum;
+import com.cmsr.onebase.module.bpm.core.enums.FieldUiShowModeEnum;
 import com.cmsr.onebase.module.bpm.runtime.service.detail.strategy.InstanceDetailStrategy;
 import com.cmsr.onebase.module.bpm.runtime.utils.PageViewUtil;
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmTaskDetailRespVO;
 import com.cmsr.onebase.module.metadata.api.entity.MetadataEntityFieldApi;
+import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldQueryReqDTO;
+import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldRespDTO;
 import jakarta.annotation.Resource;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.warm.flow.core.entity.Instance;
 import org.dromara.warm.flow.core.service.impl.BpmConstants;
+
+import java.util.*;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 
@@ -55,6 +63,76 @@ public abstract class AbstractInstanceDetailStrategy<T extends BaseNodeExtDTO> i
      */
     protected void fillFieldPermConfig(BpmTaskDetailRespVO vo, T extDTO, Long entityId, boolean isTodo) {
         // 由子类实现，默认什么都不做
+    }
+
+    protected void fillFieldPermFromConfig(BpmTaskDetailRespVO vo, FieldPermCfgDTO fieldPermConfig, Long entityId, boolean isTodo) {
+        // 审批节点未配置字段权限，或未开启节点配置，则返回，使用表单默认权限
+        if (fieldPermConfig == null || !fieldPermConfig.getUseNodeConfig()) {
+            return;
+        }
+
+        EntityFieldQueryReqDTO queryReqDTO = new EntityFieldQueryReqDTO();
+        queryReqDTO.setEntityId(entityId);
+
+        // 查询实体的所有字段
+        List<EntityFieldRespDTO> entityFields = metadataEntityFieldApi.getEntityFieldList(queryReqDTO);
+
+        Map<Long, EntityFieldRespDTO> entityFieldMap = new HashMap<>();
+        Map<Long, String> fieldPermMap = new HashMap<>();
+        Map<Long, String> fieldIdNameMap = new HashMap<>();
+
+        // 默认所有字段都为只读
+        for (EntityFieldRespDTO entityField : entityFields) {
+            entityFieldMap.put(entityField.getId(), entityField);
+            fieldPermMap.put(entityField.getId(), FieldUiShowModeEnum.READ.getCode());
+            fieldIdNameMap.put(entityField.getId(), entityField.getFieldName());
+        }
+
+        vo.getFormData().put("fieldPerm", fieldPermMap);
+
+        // 这里只是为了方便查看id和name的关联关系，业务上暂时没用上
+        vo.getFormData().put("fieldIdName", fieldIdNameMap);
+
+        // 没有配置字段权限，则返回只读权限
+        if (!CollectionUtils.isNotEmpty(fieldPermConfig.getFieldConfigs())) {
+            return;
+        }
+
+        Set<String> hiddenFieldNames = new HashSet<>();
+
+        // 处理节点配置的字段权限 todo: 处理子表字段权限
+        for (FieldPermCfgDTO.FieldConfigDTO fieldConfig : fieldPermConfig.getFieldConfigs()) {
+            // 在实体字段中不存在的，直接跳过
+            EntityFieldRespDTO entityField = entityFieldMap.get(fieldConfig.getFieldId());
+            if (entityField == null) {
+                continue;
+            }
+
+            // 处理隐藏字段
+            if (Objects.equals(FieldPermTypeEnum.HIDDEN.getCode(), fieldConfig.getFieldPermType())) {
+                // 这里才是字段的英文名
+                hiddenFieldNames.add(entityField.getFieldName());
+                fieldPermMap.put(fieldConfig.getFieldId(), FieldUiShowModeEnum.HIDDEN.getCode());
+            } else if (Objects.equals(FieldPermTypeEnum.READ.getCode(), fieldConfig.getFieldPermType())) {
+                fieldPermMap.put(fieldConfig.getFieldId(), FieldUiShowModeEnum.READ.getCode());
+            } else if (Objects.equals(FieldPermTypeEnum.WRITE.getCode(), fieldConfig.getFieldPermType())) {
+                if (isTodo) {
+                    fieldPermMap.put(fieldConfig.getFieldId(), FieldUiShowModeEnum.WRITE.getCode());
+                } else {
+                    // 非待办的情况下，都是只读
+                    fieldPermMap.put(fieldConfig.getFieldId(), FieldUiShowModeEnum.READ.getCode());
+                }
+            }
+        }
+
+        // 移除隐藏字段在表单数据中的值
+        Object entityData = vo.getFormData().get("data");
+
+        if (CollectionUtils.isNotEmpty(hiddenFieldNames) && entityData instanceof Map<?, ?> entityDataMap) {
+            for (String hiddenFieldName : hiddenFieldNames) {
+                entityDataMap.remove(hiddenFieldName);
+            }
+        }
     }
 
     /**
@@ -113,9 +191,9 @@ public abstract class AbstractInstanceDetailStrategy<T extends BaseNodeExtDTO> i
      *
      * @param vo 详情VO
      * @param extDTO 节点扩展信息
-     * @param currTask 待办任务（可能为null）
      * @param instance 流程实例
      * @param loginUserId 登录用户ID
+     * @param isTodo 是否待办
      */
     @Override
     public void fillDetail(BpmTaskDetailRespVO vo, T extDTO, Instance instance, Long loginUserId, boolean isTodo) {
