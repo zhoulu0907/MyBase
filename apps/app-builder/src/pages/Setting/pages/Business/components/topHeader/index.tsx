@@ -17,8 +17,7 @@ export const TopHeader:React.FC<topHeaderProps> = ({type, title, onAdd, isBusine
         const newWindow = window.open('', '_blank');
         if (newWindow) {
             const tenantId = TokenManager.getTenantInfo()?.tenantId || '';
-            const appId = "";
-            const redirectURL = `${getRuntimeURL()}/#/onebase/runtime/?&appId=${appId}&tenantId=${tenantId}`;
+            const redirectURL = `${getRuntimeURL()}/#/onebase/runtime/?&tenantId=${tenantId}`;
             const href = `${getRuntimeURL()}/#/login?redirectURL=${redirectURL}`
             newWindow.location.href = href;
         }

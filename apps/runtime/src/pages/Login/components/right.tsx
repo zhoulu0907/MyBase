@@ -60,6 +60,8 @@ const Right: React.FC = () => {
   const tenantId = searchParams.get("tenantId") || "";
   const appId = searchParams.get("appId") || "";
 
+  console.log(appId, tenantId)
+
   // 使用记住我hook
   const { rememberMe, savedAccount, saveRememberMe } = useRememberMe();
 
@@ -96,8 +98,8 @@ const Right: React.FC = () => {
       const endIndex = endRedirectURL?.indexOf('/');
       const applicationId = redirectURL.slice(startIndex + runtimeLength, startIndex + runtimeLength + endIndex);
 
-      if (applicationId) {
-        const res = await getApplication({ id: applicationId });
+      if (appId) {
+        const res = await getApplication({ id: appId });
         if (res) {
           setAppInfo({
             id: res.id || '',
@@ -197,7 +199,11 @@ const Right: React.FC = () => {
         Message.success(t('auth.loginSuccess'));
         const redirectURL = getHashQueryParam('redirectURL');
         if (redirectURL) {
-          window.location.href = redirectURL;
+          if(!appId) {
+            navigate(`/onebase/runtime/${tenantId}`);
+          }else {
+            navigate(`/onebase/runtime/${appId}/${tenantId}`);
+          }
         } else {
           // 跳转到首页
           navigate(`/onebase/runtime/${appId}`);
@@ -238,7 +244,7 @@ const Right: React.FC = () => {
       } as RuntimeAccountLoginRequest);
     } else if (!appId) {
       handleSubmit({
-        username: values.mobile,
+        mobile: values.mobile,
         password: values.password,
         captchaVerification: token
      } as RuntimeCorpLoginRequest);
@@ -265,8 +271,6 @@ const Right: React.FC = () => {
     if (!IconComponent) return null;
     return <IconComponent {...rest} />;
   };
-
-  console.log( appId,"11")
 
   return (
     <div className={styles.loginPageRight}>
@@ -299,7 +303,7 @@ const Right: React.FC = () => {
           requiredSymbol={false}
           className={styles.loginForm}
         >
-          {((appInfo.publishModel === PUBLISH_MODULE.SASS ) && (
+          {((appInfo.publishModel === PUBLISH_MODULE.SASS || !appId) && (
             <Form.Item label="手机号" field="mobile" rules={[{ required: true, message: '请输入手机号' }]}>
               <Input placeholder="输入手机号" maxLength={11} />
             </Form.Item>

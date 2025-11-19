@@ -34,7 +34,7 @@ export const sassLogin = (req: RuntimeMobileLoginRequest, headers: Headers) => {
 };
 
 export const corpLogin = (req: RuntimeCorpLoginRequest, headers: Headers) => {
-  return runtimeService.post('/auth/corp-login', req, { headers });
+  return systemService.post('/auth/corp-login', req, { headers });
 }
 
 export const platformLogout = () => {
