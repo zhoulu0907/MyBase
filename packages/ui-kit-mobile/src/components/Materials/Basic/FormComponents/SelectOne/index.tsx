@@ -1,10 +1,10 @@
 import { Form, Picker } from '@arco-design/mobile-react';
 import { nanoid } from 'nanoid';
-import { memo, useEffect, useState } from 'react';
+import { memo } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-import '../index.css';
 import type { XInputSelectOneConfig } from './schema';
+import '../index.css';
 
 const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; detailMode?: boolean; defaultOptionsConfig?: any; }) => {
   const {
@@ -21,13 +21,10 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
     detailMode
   } = props;
 
-  const [fieldId, setFieldId] = useState('');
-
-  useEffect(() => {
-    if (dataField?.length > 0) {
-      setFieldId(dataField[dataField?.length - 1]);
-    }
-  }, [dataField]);
+  // 生成唯一的字段ID
+  const fieldId = dataField && dataField.length > 0
+    ? dataField[dataField.length - 1]
+    : `${FORM_COMPONENT_TYPES.INPUT_TEXT}_${nanoid()}`;
 
   return (
     <Form.Item
@@ -45,7 +42,7 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
       ) : (
         <Picker
           cascade={false}
-          data={defaultOptionsConfig.defaultOptions}
+          data={[defaultOptionsConfig.defaultOptions.map(op => op.label)]}
           maskClosable
         />
       )}
