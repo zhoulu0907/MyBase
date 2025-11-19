@@ -22,7 +22,6 @@ import com.cmsr.onebase.module.system.service.user.AdminUserService;
 import com.cmsr.onebase.module.system.util.encrypt.PasswordRandomGenerator;
 import com.cmsr.onebase.module.system.vo.corp.*;
 import com.cmsr.onebase.module.system.vo.corpapprelation.AppAuthTimeReqVO;
-import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppRelationInertReqVO;
 import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppRelationPageReqVO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
