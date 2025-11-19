@@ -296,7 +296,7 @@ const XTable = memo(
       const indexColumn = {
         title: '序号',
         dataIndex: 'index',
-        width: '56px',
+        width: '62px',
         align: 'center',
         headerCellStyle: { textAlign: 'center' },
         bodyCellStyle: { padding: '0 4px', textAlign: 'center' },
