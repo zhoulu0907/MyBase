@@ -11,7 +11,7 @@ export const btnConfigVar = {
   }
 };
 
-export const approverConfigVar:any = {
+export const approverConfigVar: any = {
   approvalMode: {
     a: 'counter_sign',
     b: 'any_sign',
@@ -72,6 +72,7 @@ export interface ApproverConfigDataType {
   fieldPermConfig?: FieldPermConfigType;
   advancedConfig?: AdvancedConfigType;
   name?: string;
+  errorMsg?: string;
 }
 
 export interface ApproveDrawerProps {
@@ -95,7 +96,7 @@ export interface BtnConfig extends BaseConfig<ButtonConfigType[]> {
 
 export interface FieldConfigType extends BaseConfig<FieldPermConfigType> {
   fieldPermConfig: FieldPermConfigType;
-  ckOptions:any
+  ckOptions: any;
 }
 export interface AdvancedConfig extends BaseConfig<AdvancedConfigType> {
   advancedConfig: AdvancedConfigType;
