@@ -75,6 +75,7 @@ export const NodeWrapper: React.FC<NodeWrapperProps> = (props) => {
     },
     [ctx, node]
   );
+console.log(nodeRender,'nodeRender');
 
   return (
     <>
@@ -94,7 +95,7 @@ export const NodeWrapper: React.FC<NodeWrapperProps> = (props) => {
         )}
       <NodeWrapperStyle
         className={`${selected && !readonly ? 'selected' : ''} 
-        ${readonly && nodeRender.data.status + 'Border'} 
+        ${readonly && nodeRender.data.runStatus + 'Border'} 
         ${nodeRender.id.includes('branch') && 'branchNode'}`}
         ref={nodeRef}
         draggable
