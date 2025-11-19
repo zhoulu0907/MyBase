@@ -1,8 +1,9 @@
 package com.cmsr.onebase.module.etl.common.graph;
 
 import lombok.Data;
+import org.jgrapht.GraphPath;
+import org.jgrapht.alg.shortestpath.AllDirectedPaths;
 import org.jgrapht.graph.DefaultDirectedGraph;
-import org.jgrapht.traverse.BreadthFirstIterator;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 
 import java.util.ArrayList;
@@ -62,9 +63,28 @@ public class WorkflowGraph {
     }
 
     public WorkflowGraph subgraph(String endNodeId) {
-        //TODO
-        return this;
+        Set<Node> startNodes = new HashSet<>();
+        startNodes.addAll(findStartNodes());
+        Set<Node> endNodes = Set.of(findNodeById(endNodeId));
+
+        AllDirectedPaths<Node, Edge> allPathsFinder = new AllDirectedPaths<>(directedGraph);
+        List<GraphPath<Node, Edge>> allPaths = allPathsFinder.getAllPaths(
+                startNodes,
+                endNodes,
+                true,
+                directedGraph.vertexSet().size()
+        );
+        WorkflowGraph subgraph = new WorkflowGraph();
+        List<Node> subgraphNodes = new ArrayList<>();
+        List<Edge> subgraphEdges = new ArrayList<>();
+        for (GraphPath<Node, Edge> path : allPaths) {
+            subgraphNodes.addAll(path.getVertexList());
+            subgraphEdges.addAll(path.getEdgeList());
+        }
+        subgraph.init();
+        return subgraph;
     }
+
 
     public List<Node> findStartNodes() {
         Set<String> sourceNodeIds = new HashSet<>();
