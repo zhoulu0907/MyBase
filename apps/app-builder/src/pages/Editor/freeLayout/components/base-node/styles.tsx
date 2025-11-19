@@ -36,6 +36,9 @@ export const NodeWrapperStyle = styled.div`
   &.error {
     border: 1px solid red;
   }
+  &.errorMsgNode {
+    border: 2px solid red !important;
+  }
 `;
 
 export const ErrorIcon = () => (
