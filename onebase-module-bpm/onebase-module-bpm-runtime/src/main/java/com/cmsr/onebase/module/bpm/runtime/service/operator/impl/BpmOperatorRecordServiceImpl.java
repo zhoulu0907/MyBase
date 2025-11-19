@@ -216,6 +216,8 @@ public class BpmOperatorRecordServiceImpl implements BpmOperatorRecordService {
                     record.setApproveMode(approverNodeExtDTO.getApproverConfig().getApprovalMode());
                 }
 
+                // 待办任务节点是当前节点
+                record.setCurrent(true);
                 record.setOperators(new ArrayList<>());
 
                 recordMap.put(taskId, record);
@@ -254,6 +256,9 @@ public class BpmOperatorRecordServiceImpl implements BpmOperatorRecordService {
 
                 // 只要有待办，展示状态与任务状态一致
                 record.setDisplayStatus(operatorInfo.getTaskStatus());
+
+                // 待办任务节点是当前节点
+                record.setCurrent(true);
 
                 record.getOperators().add(operatorInfo);
             }
@@ -348,11 +353,18 @@ public class BpmOperatorRecordServiceImpl implements BpmOperatorRecordService {
         }
     }
 
-    private void fillEndRecord(LinkedHashMap<Long, BpmOperatorRecordRespVO.OperatorRecord> recordMap) {
+    private void fillEndRecord(Instance instance, LinkedHashMap<Long, BpmOperatorRecordRespVO.OperatorRecord> recordMap) {
         Long endId = uidGenerator.getUID();
         BpmOperatorRecordRespVO.OperatorRecord endRecord = new BpmOperatorRecordRespVO.OperatorRecord();
         endRecord.setNodeName("结束");
         endRecord.setNodeType(BpmNodeTypeEnum.END.getCode());
+
+        // 判断是否结束
+        if (CollectionUtils.isEmpty(taskService.getByInsId(instance.getId()))) {
+            // 结束流程
+            endRecord.setCurrent(true);
+        }
+
         recordMap.put(endId, endRecord);
     }
 
@@ -452,7 +464,7 @@ public class BpmOperatorRecordServiceImpl implements BpmOperatorRecordService {
         fillPredictRecord(instance, recordMap);
 
         // 加上结束节点
-        fillEndRecord(recordMap);
+        fillEndRecord(instance, recordMap);
 
         // 填充用户数据
         fillOperatorInfo(recordMap);
