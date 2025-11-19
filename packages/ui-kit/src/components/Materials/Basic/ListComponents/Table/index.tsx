@@ -245,8 +245,9 @@ const XTable = memo(
             bodyCellStyle: { padding: '0 12px' },
             render: (_text: any, _record: any, index: number) => {
               const componentSchemasKeys = Object.keys(fromPageComponentSchemas.value || {});
+              const columnId = column.id || column.dataIndex;
               const cpId = componentSchemasKeys.find((ele) => {
-                return fromPageComponentSchemas.value[ele]?.config?.dataField?.includes(column.id);
+                return fromPageComponentSchemas.value[ele]?.config?.dataField?.includes(columnId);
               });
 
               // 表单配置
@@ -259,7 +260,7 @@ const XTable = memo(
                 let dataField: string[] = [];
                 if (Array.isArray(mainMetaData?.parentFields)) {
                   const dataFieldInfo = mainMetaData.parentFields.find(
-                    (field: AppEntityField) => field.fieldId === column.id
+                    (field: AppEntityField) => field.fieldId === columnId
                   );
                   if (dataFieldInfo && _record[dataFieldInfo.fieldName]) {
                     dataField = [mainMetaData.entityId, `${id}.${index}.${dataFieldInfo.fieldName}`];
@@ -284,7 +285,7 @@ const XTable = memo(
 
                 return (
                   <PreviewRender
-                    cpId={column.id}
+                    cpId={columnId}
                     cpType={cpType}
                     detailMode={true}
                     pageComponentSchema={componentConfig}
