@@ -1,8 +1,5 @@
 .carouselWrapper {
-  display: flex;
-  align-items: center;
-  flex-direction: row;
-  padding: 0.32rem;
+  padding: 0 0.32rem;
 }
 
 .carousel {
@@ -33,7 +30,7 @@
 .label {
   font-size: 0.32rem;
   color: #1d2129;
-  line-height: 0.72rem;
+  line-height: 0.86rem;
   white-space: nowrap;
 }
 
