@@ -81,6 +81,7 @@ public class AnyLineDBInfoListener implements DMListener {
         TENANT_IGNORE_TABLES.add("flow_node_category");
         TENANT_IGNORE_TABLES.add("flow_node_type");
         TENANT_IGNORE_TABLES.add("etl_flink_mapping");
+        TENANT_IGNORE_TABLES.add("etl_flink_function");
         // 可以根据需要添加更多表
     }
 

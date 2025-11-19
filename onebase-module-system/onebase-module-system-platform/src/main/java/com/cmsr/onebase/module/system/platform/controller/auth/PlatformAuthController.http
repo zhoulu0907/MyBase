@@ -58,11 +58,6 @@ tag: {{tag}}
   "password": "test"
 }
 
-### 请求 /get-permission-info 接口 => 成功
-GET {{baseUrl}}/system/auth/get-permission-info?code=tenant
-Authorization: Bearer {{token}}
-tenant-id: {{adminTenantId}}
-
 ### 请求 /list-menus 接口 => 成功
 GET {{baseUrl}}/system/list-menus
 Authorization: Bearer {{token}}

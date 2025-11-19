@@ -227,7 +227,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "GETROLE(id)",
+{ "formula": "GETROLE(id, roleList)",
   "parameters": {"id":114}
 }
 

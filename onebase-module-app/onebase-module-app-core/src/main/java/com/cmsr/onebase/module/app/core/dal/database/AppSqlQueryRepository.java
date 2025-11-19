@@ -150,6 +150,7 @@ public class AppSqlQueryRepository {
         }
         int loopCount = 0;
         while (currentDeptId != null && currentDeptId > 0) {
+            currentDeptId = null;
             ConfigStore configs = new DefaultConfigStore();
             configs.param("deptId", currentDeptId);
             String sql = """
@@ -189,13 +190,13 @@ public class AppSqlQueryRepository {
             List<Long> deptIds = List.of(deptId);
             int loopCount = 0;
             while (CollectionUtils.isNotEmpty(deptIds)) {
+                deptIds = new ArrayList<>();
                 String sql = """
                         select id from system_dept where parent_id in (#{deptIds})
                         """;
                 ConfigStore configs = new DefaultConfigStore();
                 configs.param("deptIds", deptIds);
                 DataSet dataSet = anylineService.querys(sql, configs);
-                deptIds = new ArrayList<>();
                 for (DataRow dataRow : dataSet) {
                     Long id = dataRow.getLong("id");
                     if (id != null && id > 0) {

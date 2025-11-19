@@ -40,7 +40,7 @@ public interface MenuService {
      *
      * @return 菜单列表
      */
-    List<MenuDO> getMenuList();
+    List<MenuDO> getAllActiveMenuList();
 
     /**
      * 基于租户，筛选菜单列表
@@ -65,7 +65,7 @@ public interface MenuService {
      * @param reqVO 筛选条件请求 VO
      * @return 菜单列表
      */
-    List<MenuDO> getMenuList(SystemMenuListReqVO reqVO);
+    List<MenuDO> getAllActiveMenuList(SystemMenuListReqVO reqVO);
 
     /**
      * 获得权限对应的菜单编号数组
@@ -89,6 +89,6 @@ public interface MenuService {
      * @param ids 菜单编号数组
      * @return 菜单数组
      */
-    List<MenuDO> getMenuList(Collection<Long> ids);
+    List<MenuDO> getAllActiveMenuList(Collection<Long> ids);
 
 }

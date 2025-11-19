@@ -19,6 +19,7 @@ import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantPackageDO;
 import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
 import com.cmsr.onebase.module.system.enums.permission.DataScopeEnum;
+import com.cmsr.onebase.module.system.enums.permission.MenuConstants;
 import com.cmsr.onebase.module.system.enums.permission.PackageTypeEnum;
 import com.cmsr.onebase.module.system.service.dept.DeptService;
 import com.cmsr.onebase.module.system.service.tenant.TenantPackageService;
@@ -79,7 +80,7 @@ public class PermissionServiceImpl implements PermissionService {
         if (CollUtil.isEmpty(roles)) {
             return false;
         }
-        return roleService.hasAnySuperAdmin(convertSet(roles, RoleDO::getId));
+        return roleService.hasAnySuperOrTenantAdmin(convertSet(roles, RoleDO::getId));
     }
 
     @Override
@@ -96,7 +97,7 @@ public class PermissionServiceImpl implements PermissionService {
         }
 
         // 情况一：如果是平台管理员，赋予所有权限
-        boolean isPlatformSuperAdmin = roleService.hasAnySuperAdmin(convertSet(roles, RoleDO::getId));
+        boolean isPlatformSuperAdmin = roleService.hasAnySuperOrTenantAdmin(convertSet(roles, RoleDO::getId));
         if (isPlatformSuperAdmin) {
             return true;
         }
@@ -124,7 +125,7 @@ public class PermissionServiceImpl implements PermissionService {
             } else {
                 // 不是All，tenantAllPermissions = package下写入的所有权限点
                 Set<Long> menuIds = tenantPackage.getMenuIds();
-                List<MenuDO> menuList = menuService.getMenuList(menuIds);
+                List<MenuDO> menuList = menuService.getAllActiveMenuList(menuIds);
                 tenantAllPermissions = menuList.stream().map(MenuDO::getPermission).filter(Objects::nonNull)
                         .collect(Collectors.toSet());
             }
@@ -250,11 +251,26 @@ public class PermissionServiceImpl implements PermissionService {
         }
 
         // 如果是管理员的情况下，获取全部菜单编号
-        if (roleService.hasAnySuperAdmin(roleIds)) {
-            return convertSet(menuService.getMenuList(), MenuDO::getId);
+        if (roleService.hasAnySuperOrTenantAdmin(roleIds)) {
+            return getAllActiveMenuIds();
         }
         // 如果是非管理员的情况下，获得拥有的菜单编号
         return convertSet(roleMenuDataRepository.findListByRoleIds(roleIds), RoleMenuDO::getMenuId);
+    }
+
+    @Override
+    public Set<Long> getAllActiveMenuIds(){
+        // 获取所有权限
+        List<MenuDO> menuList = menuService.getAllActiveMenuList();
+        // 过滤出 tenantAllPermissions = tenant、app开头的菜单项
+        Set<Long> tenantAllPermissions = menuList.stream()
+                .filter(menu -> menu.getPermission() != null &&
+                        (menu.getPermission().startsWith(MenuConstants.MENU_APP)
+                                || menu.getPermission().startsWith(MenuConstants.MENU_TENANT)
+                                || menu.getPermission().startsWith(MenuConstants.MENU_SYSTEM)))
+                .map(MenuDO::getId)
+                .collect(Collectors.toSet());
+        return tenantAllPermissions;
     }
 
     @Override
@@ -480,7 +496,7 @@ public class PermissionServiceImpl implements PermissionService {
             return Collections.emptyList();
         }
         // 查询菜单实体
-        List<MenuDO> menuDOList = menuService.getMenuList(menuIds);
+        List<MenuDO> menuDOList = menuService.getAllActiveMenuList(menuIds);
         // 转换为VO
         return BeanUtils.toBean(menuDOList, PermissionMenuRespVO.class);
     }
