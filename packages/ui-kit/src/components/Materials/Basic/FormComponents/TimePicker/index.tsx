@@ -168,7 +168,8 @@ const XTimePicker = memo((props: XInputTimePickerConfig & { runtime?: boolean; d
         disabledMinutes = [...disabledMinutes, ...maxDisabledMinutes];
       }
     }
-    return disabledMinutes;
+    // 去重
+    return Array.from(new Set(disabledMinutes));
   };
   // 禁用的部分秒数选项	0-59
   const handelDisabledSeconds = (selectedHour: number, selectedMinute: number): number[] => {
@@ -218,7 +219,8 @@ const XTimePicker = memo((props: XInputTimePickerConfig & { runtime?: boolean; d
         disabledSeconds = [...disabledSeconds, ...maxDisabledSeconds];
       }
     }
-    return disabledSeconds;
+    // 去重
+    return Array.from(new Set(disabledSeconds));
   };
 
   return (
