@@ -51,8 +51,14 @@ const XInputPhone = memo((props: XInputPhoneConfig & { runtime?: boolean; detail
           {
             validator: (value, callback) => {
               if (phoneType === PHONE_TYPE.MOBILE) {
-                if (!(/^1[3-9]\d{9}$/).test(value)) {
+                if (value && !(/^1[3-9]\d{9}$/).test(value)) {
                   callback(`请输入有效的11位中国大陆手机号`);
+                }
+              }
+              if(phoneType === PHONE_TYPE.LANDLINE){
+                // (010)12345678  010-12345678
+                if (value && !(/^\(?0[0-9]{2,3}\)?-?[0-9]{7,8}$/).test(value)) {
+                  callback(`请输入有效的座机号`);
                 }
               }
             }
