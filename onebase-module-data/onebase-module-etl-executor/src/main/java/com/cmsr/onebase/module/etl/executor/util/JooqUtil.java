@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.etl.executor.util;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.conf.RenderOptionalKeyword;
+import org.jooq.conf.RenderQuotedNames;
 import org.jooq.conf.Settings;
 import org.jooq.impl.DSL;
 
@@ -14,6 +15,7 @@ public class JooqUtil {
     public static final DSLContext DSL_CONTEXT = DSL.using(SQLDialect.DEFAULT,
             new Settings()
                     .withRenderFormatted(true)
+                    .withRenderQuotedNames(RenderQuotedNames.NEVER)
                     .withRenderOptionalOuterKeyword(RenderOptionalKeyword.OFF));
 
 }
