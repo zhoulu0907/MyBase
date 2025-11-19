@@ -10,7 +10,7 @@ export default function CcRecipientsConfig({ setCcRecipientsConfigData, copyRece
 
 
   return (
-    <div className={styles.approverConfig}>
+    <div className={styles.ccResConfig}>
       <div className={styles.configTitle}>抄送人设置</div>
       <div className={styles.configMode}>
         <span>配置模式：</span>

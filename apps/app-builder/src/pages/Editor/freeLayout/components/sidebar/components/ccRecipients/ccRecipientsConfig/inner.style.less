@@ -1,19 +1,25 @@
 .arco-btn-outline.gray-outline-btn {
-    display: flex; align-items: center;
+    display: flex;
+    align-items: center;
     color: rgb(var(--gray-8));
     border-color: rgb(var(--gray-8));
-    & > svg {
+
+    &>svg {
         font-size: 18px;
     }
 }
+
 .condition-modal-box {
     width: 750px;
+
     .arco-form-label-item.no-form-item {
         text-align: left;
     }
+
     .arco-link {
         color: rgb(var(--gray-8));
     }
+
     b.arco-form-item-symbol {
         padding-right: 5px;
         font-size: 16px;
@@ -21,44 +27,62 @@
         position: relative;
         top: 2px;
     }
+
     .arco-divider {
         margin: 2px 0 11px 0;
     }
+
     .arco-radio {
         margin-bottom: 8px;
     }
+
     .arco-radio-text {
-        min-width: 68px; display: inline-block;
+        min-width: 68px;
+        display: inline-block;
     }
+
     .arco-btn-outline.outer-border {
         border-color: var(--color-neutral-3);
         border-radius: 4px;
         padding: 16px;
+
         &:hover {
             border-color: var(--color-neutral-3);
         }
     }
+
     .gray-part {
-        padding: 8px; background-color: var(--color-fill-3); border-radius: 4px;
+        padding: 8px;
+        background-color: var(--color-fill-3);
+        border-radius: 4px;
         margin-bottom: 12px;
-        & > .arco-space {
-            width: 100%; margin-bottom: 12px;
+
+        &>.arco-space {
+            width: 100%;
+            margin-bottom: 12px;
         }
     }
+
     .arco-space-item {
         &:nth-child(4) {
             flex: 1;
         }
-        .arco-select-view:hover, .arco-input-inner-wrapper:hover {
+
+        .arco-select-view:hover,
+        .arco-input-inner-wrapper:hover {
             background-color: #fff;
         }
     }
 }
+
 .arco-drag-table-container-2 {
     margin-bottom: 16px;
+
     .arco-link {
-        font-size: 16px; color: rgb(var(--gray-8));
+        font-size: 16px;
+        color: rgb(var(--gray-8));
     }
+
     // .arco-table-tr {
     //     margin: 10px 0;
     // }

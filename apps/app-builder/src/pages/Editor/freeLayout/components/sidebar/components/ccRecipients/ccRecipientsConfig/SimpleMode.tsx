@@ -131,7 +131,6 @@ const SimpleMode = ({ setCcRecipientsConfigData, copyReceiverConfig }) => {
   useEffect(() => {
     let curUserList: any = copyReceiverConfig?.users
     let prevUIdsList: any = prevUserIdsRef?.current;
-    console.log('prevUserList, curUserList ====', prevUIdsList, curUserList);
     let isChange = false;
     if (prevUIdsList?.length === curUserList?.length) {
       for (let u = 0; u < curUserList?.length; u++) {
@@ -173,7 +172,7 @@ const SimpleMode = ({ setCcRecipientsConfigData, copyReceiverConfig }) => {
 
   return (
     <>
-      <RadioGroup className={styles.approverRadioGroup} value={simpleCkType} onChange={changeSimpleType}>
+      <RadioGroup className={styles.ccResRadioGroup} value={simpleCkType} onChange={changeSimpleType}>
         <Radio value="user">指定成员</Radio>
         <Radio value="role">
           指定角色

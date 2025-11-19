@@ -1,54 +1,82 @@
 .flex-btw {
-    display: flex; align-items: center; justify-content: space-between;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
+
 .field-config {
     p {
-        margin: 0; padding: 0;
+        margin: 0;
+        padding: 0;
     }
+
     .arco-btn-primary.gray-btn {
         background-color: rgb(var(--gray-6));
     }
+
     .p-title {
         font-size: 16px;
         font-weight: 600;
         margin-bottom: 6px;
     }
+
     .title-box {
-        margin-bottom: 16px; position: relative;
+        margin-bottom: 16px;
+        position: relative;
     }
+
     .right-switch {
-        position: absolute; right: 0; top: 12px;
+        position: absolute;
+        right: 0;
+        top: 12px;
     }
-    .right-switch, .switch-outer {
+
+    .right-switch,
+    .switch-outer {
         display: flex;
         align-items: center;
     }
+
     .arco-icon-question-circle {
-        color: var(--color-neutral-5); margin: 0 6px; font-size: 16px;
+        color: var(--color-neutral-5);
+        margin: 0 6px;
+        font-size: 16px;
     }
 }
+
 .field-table-wrapper {
     margin-top: 12px;
+
     .arco-table-th:nth-child(3) {
         .arco-table-th-item {
             padding-left: 31px;
         }
     }
 }
+
 .field-modal {
     width: 600px;
+
     .out-line-box {
-        border: 1px solid var(--color-neutral-3); border-radius: 6px;
+        border: 1px solid var(--color-neutral-3);
+        border-radius: 6px;
         align-items: stretch;
     }
+
     .left-part {
         flex: 1;
     }
+
     .right-part {
-        width: 240px; border-left: 1px solid var(--color-neutral-3);
+        width: 240px;
+        border-left: 1px solid var(--color-neutral-3);
+
         .li {
-            padding: 3px 6px; background-color: rgba(242, 243, 245, 1); border-radius: 4px;
+            padding: 3px 6px;
+            background-color: rgba(242, 243, 245, 1);
+            border-radius: 4px;
             margin-bottom: 8px;
+
             .arco-icon-close {
                 &:hover {
                     color: rgb(var(--primary-6));
@@ -56,13 +84,21 @@
             }
         }
     }
-    .left-part, .right-part {
-        padding: 16px; min-height: 100px;
+
+    .left-part,
+    .right-part {
+        padding: 16px;
+        min-height: 100px;
     }
 }
+
 .check-group-outer {
-    display: block; margin-bottom: 20px; margin-top: 10px;
+    display: block;
+    margin-bottom: 20px;
+    margin-top: 10px;
+
     .arco-checkbox {
-        padding: 6px 0; width: 100%;
+        padding: 6px 0;
+        width: 100%;
     }
 }
