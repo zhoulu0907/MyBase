@@ -28,7 +28,7 @@ const BusinessPage: React.FC = () => {
             dataIndex: 'corpName',
         },
         {
-            title: '企业ID',
+            title: '企业编码',
             dataIndex: 'corpCode',
         },
         {

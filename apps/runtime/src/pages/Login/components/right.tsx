@@ -10,14 +10,16 @@ import {
   innerLogin,
   login,
   sassLogin,
+  corpLogin,
   type LoginRequest,
   type LoginResponse,
   type RuntimeAccountLoginRequest,
-  type RuntimeMobileLoginRequest
+  type RuntimeMobileLoginRequest,
+  type RuntimeCorpLoginRequest
 } from '@onebase/platform-center';
 import { appIconMap } from '@onebase/ui-kit';
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useI18n } from '../../../hooks/useI18n';
 import { useRememberMe } from '../../../hooks/useRememberMe';
 import styles from '../index.module.less';
@@ -53,38 +55,16 @@ const Right: React.FC = () => {
     id: ''
   });
 
-  const [appId, setAppId] = useState<string>('');
-  const [tenantId, setTenantId] = useState<string>('');
-
-  // 从路由中获取 appid 参数
-  //   const { appId } = useParams<{ appId?: string }>();
-  //   const { tenantId } = useParams<{ tenantId?: string }>();
+  // 获取查询参数对象 从路由中获取 appid/tenantId 参数
+  const [searchParams] = useSearchParams(location.hash);
+  const tenantId = searchParams.get("tenantId") || "";
+  const appId = searchParams.get("appId") || "";
 
   // 使用记住我hook
   const { rememberMe, savedAccount, saveRememberMe } = useRememberMe();
 
   // 状态管理
   const [loading, setLoading] = useState(false);
-
-  //   const match = location.hash.match(/\/onebase\/runtime\/(\d+)\/(\d+)/);
-  //   const newAppId = match ? match[1] : appId;
-  //   const newTenantId = match ? match[2] : tenantId;
-
-  useEffect(() => {
-    const redirectURL = getHashQueryParam('redirectURL');
-    if (redirectURL) {
-      // 使用正则表达式从 redirectURL 中提取 onebase/runtime/ 后的数字
-      // 示例 redirectURL: http://localhost:9527/#/onebase/runtime/132970040164286464/
-      //   const match = redirectURL.match(/onebase\/runtime\/(\d+)/);
-      const match = location.hash.match(/\/onebase\/runtime\/(\d+)\/(\d+)/);
-      if (match && match[1]) {
-        setAppId(match[1]);
-      }
-      if (match && match[2]) {
-        setTenantId(match[2]);
-      }
-    }
-  }, []);
 
   // 组件初始化时设置保存的账号
   useEffect(() => {
@@ -138,7 +118,7 @@ const Right: React.FC = () => {
   };
 
   // 账号密码登录
-  const handleRuntimeLogin = async (values: RuntimeAccountLoginRequest | RuntimeMobileLoginRequest | LoginRequest) => {
+  const handleRuntimeLogin = async (values: RuntimeAccountLoginRequest | RuntimeMobileLoginRequest | LoginRequest | RuntimeCorpLoginRequest) => {
     setLoading(true);
 
     try {
@@ -172,6 +152,14 @@ const Right: React.FC = () => {
           captchaVerification: captchaVerification
         };
         response = await innerLogin(innerloginData, headers);
+      } else if (!appId) {
+        const innerloginData: RuntimeCorpLoginRequest = {
+          password: values.password!,
+          mobile: (values as RuntimeCorpLoginRequest).mobile!,
+          corpId: "10",
+          captchaVerification: captchaVerification
+        };
+        response = await corpLogin(innerloginData, headers);
       } else {
         const loginData: LoginRequest = {
           username: (values as LoginRequest).username!,
@@ -200,6 +188,8 @@ const Right: React.FC = () => {
           saveRememberMe((values as RuntimeAccountLoginRequest).username!, rememberMe);
         } else if (appInfo.publishModel === PUBLISH_MODULE.SASS) {
           saveRememberMe((values as RuntimeMobileLoginRequest).mobile!, rememberMe);
+        } else if (!appId) {
+          saveRememberMe((values as RuntimeCorpLoginRequest).mobile!, rememberMe);
         } else {
           saveRememberMe((values as LoginRequest).username!, rememberMe);
         }
@@ -225,7 +215,7 @@ const Right: React.FC = () => {
   };
 
   // 表单提交处理
-  const handleSubmit = (_values: RuntimeAccountLoginRequest | RuntimeMobileLoginRequest | LoginRequest) => {
+  const handleSubmit = (_values: RuntimeAccountLoginRequest | RuntimeMobileLoginRequest | LoginRequest | RuntimeCorpLoginRequest) => {
     handleRuntimeLogin(_values);
   };
 
@@ -246,6 +236,12 @@ const Right: React.FC = () => {
         password: values.password,
         captchaVerification: token
       } as RuntimeAccountLoginRequest);
+    } else if (!appId) {
+      handleSubmit({
+        username: values.mobile,
+        password: values.password,
+        captchaVerification: token
+     } as RuntimeCorpLoginRequest);
     } else {
       handleSubmit({ username: values.username, password: values.password, captchaVerification: token });
     }
@@ -269,6 +265,8 @@ const Right: React.FC = () => {
     if (!IconComponent) return null;
     return <IconComponent {...rest} />;
   };
+
+  console.log( appId,"11")
 
   return (
     <div className={styles.loginPageRight}>
@@ -301,7 +299,7 @@ const Right: React.FC = () => {
           requiredSymbol={false}
           className={styles.loginForm}
         >
-          {(appInfo.publishModel === PUBLISH_MODULE.SASS && (
+          {((appInfo.publishModel === PUBLISH_MODULE.SASS ) && (
             <Form.Item label="手机号" field="mobile" rules={[{ required: true, message: '请输入手机号' }]}>
               <Input placeholder="输入手机号" maxLength={11} />
             </Form.Item>

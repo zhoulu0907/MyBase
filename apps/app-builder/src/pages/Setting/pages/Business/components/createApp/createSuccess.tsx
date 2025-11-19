@@ -33,8 +33,8 @@ export const CreateSuccess:React.FC<ICreateSuccessProps> = ({ successData, setCu
             extra={[
                 <Space direction="vertical" className={styles.notification}>
                      <Row className={styles.section}>
-                        <Col span={5}><Typography.Text type='secondary' className={styles.title}>管理员账号</Typography.Text></Col>
-                        <Col span={19}><Typography>{successData?.username || "" }</Typography></Col>
+                        <Col span={5}><Typography.Text type='secondary' className={styles.title}>管理员手机</Typography.Text></Col>
+                        <Col span={19}><Typography>{successData?.mobile || "" }</Typography></Col>
                     </Row>
                     <Row className={styles.section}>
                         <Col span={5}><Typography.Text type='secondary' className={styles.title}>初始密码</Typography.Text></Col>

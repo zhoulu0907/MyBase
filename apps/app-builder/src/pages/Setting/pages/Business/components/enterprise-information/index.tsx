@@ -259,13 +259,13 @@ const handleUpload = async (file: File, onProgress?: (percent: number, event?: P
       />
     },
     {
-      label:"企业ID", 
+      label:"企业编码", 
       value: <EditableFormItem
           value = {formData?.corpCode}
           onChange={handleChange.bind(null, "corpCode")}
           isEdit={isEdited}
           component={Input}
-          componentProps={{ placeholder: '请输入企业ID' }}
+          componentProps={{ placeholder: '请输入企业编码' }}
       />
     },
      {

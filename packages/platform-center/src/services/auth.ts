@@ -4,7 +4,8 @@ import {
   LoginRequest,
   RuntimeAccountLoginRequest,
   RuntimeMobileLoginRequest,
-  TenantLoginRequest
+  TenantLoginRequest,
+  RuntimeCorpLoginRequest
 } from '../types';
 import { platformService, runtimeService, systemService } from './clients';
 
@@ -31,6 +32,10 @@ export const innerLogin = (req: RuntimeAccountLoginRequest, headers: Headers) =>
 export const sassLogin = (req: RuntimeMobileLoginRequest, headers: Headers) => {
   return runtimeService.post('/auth/app-login-mobile', req, { headers });
 };
+
+export const corpLogin = (req: RuntimeCorpLoginRequest, headers: Headers) => {
+  return runtimeService.post('/auth/corp-login', req, { headers });
+}
 
 export const platformLogout = () => {
   return platformService.post('/auth/logout');
