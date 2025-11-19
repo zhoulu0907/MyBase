@@ -5,6 +5,8 @@ import activeListDesignSVG from '@/assets/images/list_design_active_icon.svg';
 import defaultListDesignSVG from '@/assets/images/list_design_default_icon.svg';
 import activePageSettingSVG from '@/assets/images/page_setting_active_icon.svg';
 import defaultPageSettingSVG from '@/assets/images/page_setting_default_icon.svg';
+import activeWorkbenchDesignSVG from '@/assets/images/workbench_design_active_icon.svg';
+// import defaultWorkbenchDesignSVG from '@/assets/images/workbench_design_default_icon.svg';
 import previewSVG from '@/assets/images/preview_icon.svg';
 import { appIconMap, useAppEntityStore } from '@onebase/ui-kit';
 import { getEntityFields } from '@onebase/app';
@@ -51,6 +53,7 @@ import { cloneDeep } from 'lodash-es';
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PartPreview from '../partPreview';
+import FlowView from '../flowView';
 import styles from './index.module.less';
 import { useResourceStore } from '@/store/store_resource';
 import { VersionStatus } from '../constants';
@@ -78,6 +81,13 @@ const baseTabData = [
     alt: 'flow Design',
     defaultIcon: defaultListDesignSVG,
     activeIcon: activeListDesignSVG
+  },
+  {
+    key: EDITOR_TYPES.WORKBENCH_EDITOR,
+    title: '工作台设计',
+    alt: 'workbench Setting',
+    defaultIcon: defaultPageSettingSVG, // TODO: 待UI补充后替换
+    activeIcon: activeWorkbenchDesignSVG
   },
   {
     key: EDITOR_TYPES.PAGE_SETTING,
@@ -147,6 +157,8 @@ export default function EditorHeader() {
   const [visibleRenameForm, setVisibleRenameForm] = useState(false);
   const [partPreviewVisible, setPartPreviewVisible] = useState(false);
   const [manageVisible, setManageVisible] = useState(false);
+  const [flowViewVisible, setFlowViewVisible] = useState(false);
+  const [preViewData, setPreviewData] = useState<any>({});
 
   const sessionData = sessionStorage.getItem('EDITOR_PAGE_INFO') || '{}';
   const pageInfo = JSON.parse(sessionData);
@@ -168,13 +180,13 @@ export default function EditorHeader() {
       bpmDefJson: JSON.stringify(currentJsonData),
       globalConfig: configData
     };
-   return save(params).then((res: any) => {
-     setFlowId(res);
-     Message.success(isCreate ? '创建成功' : '保存成功');
-     if (isCreate) {
-       setCurrnetFlowId(res);
-     }
-   });
+    return save(params).then((res: any) => {
+      setFlowId(res);
+      Message.success(isCreate ? '创建成功' : '保存成功');
+      if (isCreate) {
+        setCurrnetFlowId(res);
+      }
+    });
   };
   const getVersonList = () => {
     selectRef.current && selectRef.current.getVersionMgmtData();
@@ -212,6 +224,8 @@ export default function EditorHeader() {
       setActiveTab(EDITOR_TYPES.METADATA_MANAGE);
     } else if (hash.includes(EDITOR_TYPES.FLOW_EDITOR)) {
       setActiveTab(EDITOR_TYPES.FLOW_EDITOR);
+    } else if (hash.includes(EDITOR_TYPES.WORKBENCH_EDITOR)) {
+      setActiveTab(EDITOR_TYPES.WORKBENCH_EDITOR);
     }
   }, []);
 
@@ -237,7 +251,11 @@ export default function EditorHeader() {
       loadPageSetInfo(pageSetId);
       setIsEditMode(true);
       handleGetAppInfo(pageSetId);
-      getMainMetaData(pageSetId);
+
+      // 工作台设计页不获取主表数据
+      if (activeTab !== EDITOR_TYPES.WORKBENCH_EDITOR) {
+        getMainMetaData(pageSetId);
+      }
     }
   }, [pageSetId]);
 
@@ -411,12 +429,24 @@ export default function EditorHeader() {
       setManageVisible(true);
     }
   };
+  const flowPreview = () => {
+    setFlowViewVisible(true);
+  };
+
   useEffect(() => {
-    if (curPage?.value?.pageSetType === PageType.NORMAL) {
-      setTabData(baseTabData.filter((tab) => tab.key !== EDITOR_TYPES.FLOW_EDITOR));
-    } else {
-      setTabData(baseTabData);
-    }
+    const pageType = curPage?.value?.pageSetType;
+
+    const shouldKeepTab = (key: string) => {
+      if (pageType === PageType.NORMAL) {
+        return key !== EDITOR_TYPES.FLOW_EDITOR && key !== EDITOR_TYPES.WORKBENCH_EDITOR;
+      }
+      if (pageType === PageType.WORKBENCH) {
+        return key === EDITOR_TYPES.WORKBENCH_EDITOR || key === EDITOR_TYPES.PAGE_SETTING;
+      }
+      return key !== EDITOR_TYPES.WORKBENCH_EDITOR;
+    };
+
+    setTabData(baseTabData.filter((tab) => shouldKeepTab(tab.key)));
   }, [curPage?.value?.pageSetType]);
 
   return (
@@ -469,6 +499,9 @@ export default function EditorHeader() {
               case EDITOR_TYPES.FLOW_EDITOR:
                 navigate(`/onebase/editor/${EDITOR_TYPES.FLOW_EDITOR}?pageSetId=${pageSetId}`);
                 break;
+              case EDITOR_TYPES.WORKBENCH_EDITOR:
+                navigate(`/onebase/editor/${EDITOR_TYPES.WORKBENCH_EDITOR}?pageSetId=${pageSetId}`);
+                break;
               default:
                 break;
             }
@@ -499,11 +532,16 @@ export default function EditorHeader() {
         {appStatus === AppStatus.EDITING_AFTER_PUBLISH && (
           <div className={styles.editorStatusEditAfterPublished}>未保存</div>
         )}
-
+        {/* 预览 */}
         <Button onClick={toPreview} className={styles.previewButton}>
           <img src={previewSVG} />
           {t('editor.preview')}
         </Button>
+        {activeTab === EDITOR_TYPES.FLOW_EDITOR && (
+          <Button type="primary" onClick={flowPreview}>
+            测试
+          </Button>
+        )}
         <Button
           type="primary"
           onClick={() => {
@@ -547,7 +585,7 @@ export default function EditorHeader() {
         setVisible={setVisibleRenameForm}
         form={renameForm}
       />
-
+      <FlowView visible={flowViewVisible} setVisible={setFlowViewVisible} businessId={flowData?.businessId} />
       <VersionModal
         visible={manageVisible}
         setVisible={setManageVisible}

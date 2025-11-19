@@ -3,10 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-import {
-  WorkflowNodePanelService,
-  WorkflowNodePanelUtils,
-} from '@flowgram.ai/free-node-panel-plugin';
+import { WorkflowNodePanelService, WorkflowNodePanelUtils } from '@flowgram.ai/free-node-panel-plugin';
 import {
   delay,
   FreeLayoutPluginContext,
@@ -14,14 +11,18 @@ import {
   WorkflowDragService,
   WorkflowLinesManager,
   WorkflowNodeEntity,
-  type WorkflowNodeJSON,
+  type WorkflowNodeJSON
 } from '@flowgram.ai/free-layout-editor';
+import { IdList } from '../editorType';
 
 /**
  * Drag the end of the line to create an add panel (feature optional)
  * 拖拽线条结束需要创建一个添加面板 （功能可选）
  */
 export const onDragLineEnd = async (ctx: FreeLayoutPluginContext, params: onDragLineEndParams) => {
+  if (params?.line?.id === IdList.START_0_) {
+    return;
+  }
   // get services from context - 从上下文获取服务
   const nodePanelService = ctx.get(WorkflowNodePanelService);
   const document = ctx.document;
@@ -50,8 +51,8 @@ export const onDragLineEnd = async (ctx: FreeLayoutPluginContext, params: onDrag
     containerNode,
     panelProps: {
       enableNodePlaceholder: true,
-      enableScrollClose: true,
-    },
+      enableScrollClose: true
+    }
   });
 
   // return if no node selected - 如果没有选择节点则返回
@@ -70,7 +71,7 @@ export const onDragLineEnd = async (ctx: FreeLayoutPluginContext, params: onDrag
     toPort,
     containerNode,
     document,
-    dragService,
+    dragService
   });
 
   // create new workflow node - 创建新的工作流节点
@@ -88,6 +89,6 @@ export const onDragLineEnd = async (ctx: FreeLayoutPluginContext, params: onDrag
   WorkflowNodePanelUtils.buildLine({
     fromPort,
     node,
-    linesManager,
+    linesManager
   });
 };

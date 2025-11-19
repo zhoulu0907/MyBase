@@ -1,4 +1,4 @@
-import { type FormMeta, type FormRenderProps } from '@flowgram.ai/free-layout-editor';
+import { type FormMeta, type FormRenderProps, type WorkflowEdgeJSON } from '@flowgram.ai/free-layout-editor';
 import { useEffect, useState } from 'react';
 import { type FlowNodeJSON } from '../../../typings';
 import styles from './index.module.less';

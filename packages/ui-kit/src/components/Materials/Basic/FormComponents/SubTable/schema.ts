@@ -13,8 +13,6 @@ import {
 import {
   COLUMN_COUNT_OPTIONS,
   CONFIG_TYPES,
-  LAYOUT_OPTIONS,
-  LAYOUT_VALUES,
   STATUS_OPTIONS,
   STATUS_VALUES,
   WIDTH_OPTIONS,
@@ -33,7 +31,6 @@ import type {
   IVerifyConfigType,
   IWidthConfigType,
   TBooleanDefaultType,
-  TNumberDefaultType,
   TSelectDefaultType,
   TTextAreaDefaultType,
   TTextDefaultType
@@ -81,6 +78,15 @@ export interface XSubTableConfig extends ICommonBaseType {
   verify: {
     required: TBooleanDefaultType;
   };
+  subTableConfig?: {
+    showIndex: boolean;       // 显示序号列
+    showOperate: boolean;     // 显示操作列
+    editRow: boolean;         // 可编辑已有数据
+    deleteRow: boolean;       // 可删除已有数据
+    operateFixed: boolean;    // 操作列冻结
+    pageSize: number;         // 分页条数
+    columnFixed: number;      // 左侧列冻结
+  },
   /**
    * 组件状态：可用、隐藏、只读
    * 可选值: 'default' | 'hidden' | 'readonly'
@@ -96,7 +102,7 @@ export interface XSubTableConfig extends ICommonBaseType {
    * 字段宽度
    */
   width: TSelectDefaultType<TWidthSelectKeyType>;
-  
+
   pageType?: string;
 }
 
@@ -124,6 +130,7 @@ const XSubTable: XSubTableSchema = {
       type: CONFIG_TYPES.VERIFY
     },
     statusConfig,
+    subTableConfig,
     layoutConfig,
     widthConfig
   ],
@@ -136,6 +143,15 @@ const XSubTable: XSubTableSchema = {
     tooltip: '',
     verify: {
       required: false,
+    },
+    subTableConfig: {
+      showIndex: true,
+      showOperate: true,
+      editRow: true,
+      deleteRow: true,
+      operateFixed: true,
+      pageSize: 5,
+      columnFixed: 0
     },
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     width: WIDTH_VALUES[WIDTH_OPTIONS.FULL],

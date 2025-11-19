@@ -46,7 +46,7 @@ const XInputEmail = memo((props: XInputEmailConfig & { runtime?: boolean; detail
         tooltip={tooltip}
         wrapperCol={{ style: { flex: 1 } }}
         rules={[
-          { required: verify?.required },
+          { required: verify?.required, message:`${label.text}是必填项` },
           {
             match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
             message: '请输入合法的邮箱地址'

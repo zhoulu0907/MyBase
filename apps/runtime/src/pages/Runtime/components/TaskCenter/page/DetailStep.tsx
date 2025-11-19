@@ -5,7 +5,7 @@ import dayjs from 'dayjs';
 // import ExpendSp from '@/assets/images/task_center/expend-sp.svg';
 import dotImg from '../../../../../assets/images/task_center/one-dot.svg'
 import '../style/tcPage.less';
-import {approvalConfigVar} from '../constant'
+import {approvalConfigVar, displayStatusMap} from '../constant'
 
 
 const Step = Steps.Step;
@@ -98,53 +98,75 @@ const DetailStep: FC<any> = ({ stepData }: any) => {
     }
   }
   function renderManyUsers(nodeItem:any) {
+    if(!nodeItem) {
+      return;
+    }
     const opperator = nodeItem?.operators?.[0];
-    const userImgArr:string[] = [];
-    const userNameArr:string[] = [];
+    const pendingUserArr:string[] = [];
+    const viewedUserArr:string[] = [];
+    const endUsersArr:any[] = [];
     if (Array.isArray(nodeItem?.operators)) {
       nodeItem.operators.forEach((item:any) => {
-        userImgArr.push(item?.avatar)
-        userNameArr.push(item?.operator)
+        if (item.taskStatus === 'curr_in_approval' || item.taskStatus === '审批中') {
+          pendingUserArr.push(item?.avatar)
+        } else {
+          // 不是审批中的，需要单独显示，模拟renderOneUser参数的结构
+          endUsersArr.push({operators: [item]})
+        }
+        if (item?.viewed) {
+          viewedUserArr.push(item?.operator)
+        }
       })
     }
+    const userMap = displayStatusMap(nodeItem?.displayStatus)
     return (
       <>
-        <div style={{ display: 'flex', alignItems: 'flex-end' }}>
-          <AvatarGroup>
-            {userImgArr && userImgArr.map((imgUrl) => <Avatar>
-              <img
-                alt="avatar"
-                src={imgUrl}
-              />
-            </Avatar>)}
-          </AvatarGroup>
-          <span className="gray-color" style={{ marginLeft: '16px', marginBottom: '3px' }}>
-            {userNameArr.join('、')}
-          </span>
-        </div>
-        <p className="flex-bw-center date-line">
-          <span className="sp-options" style={{padding: '5px 0px 8px'}}>
-            <b>{nodeItem?.displayStatus}</b>
-            <span><img src={dotImg} alt='' style={{width: '17px', position: 'relative', top: '4px'}} />多人审批{nodeItem?.approveMode && `（${approvalConfigVar.approvalMode[nodeItem?.approveMode]}）`}</span>
-          </span>
-          <span className="gray-color">
-            {opperator?.operatorTime
-                ? dayjs(opperator.operatorTime).format('YYYY-MM-DD HH:mm:ss')
-                : '-'}
-          </span>
-        </p>
+        {endUsersArr.map((item:any) => {
+          return renderOneUser(item)
+        })}
+        {pendingUserArr.length > 0 ? 
+          <>
+            <div className='user-temp' style={{ display: 'flex', alignItems: 'flex-end' }}>
+              <AvatarGroup style={{flex: 1}}>
+                {pendingUserArr && pendingUserArr.map((imgUrl) => <Avatar>
+                  <img
+                    alt="avatar"
+                    src={imgUrl}
+                  />
+                </Avatar>)}
+              </AvatarGroup>
+              {viewedUserArr.length > 0 &&<span className="gray-color" style={{ marginLeft: '14px', marginBottom: '3px', width: '44%', lineHeight: '16px' }}>
+                {viewedUserArr.join('、')}&nbsp;已读
+              </span>}
+            </div>
+            <p className="flex-bw-center date-line">
+              <span className="sp-options" style={{padding: '5px 0px 8px'}}>
+                <b className={userMap?.labelColor}>{userMap?.label}</b>
+                <span><img src={dotImg} alt='' style={{width: '17px', position: 'relative', top: '4px'}} />多人审批{nodeItem?.approveMode && `（${approvalConfigVar.approvalMode[nodeItem?.approveMode]}）`}</span>
+              </span>
+              <span className="gray-color">
+                {opperator?.operatorTime
+                    ? dayjs(opperator.operatorTime).format('YYYY-MM-DD HH:mm:ss')
+                    : '-'}
+              </span>
+            </p>
+          </> : <div style={{height: '16px'}}></div>}
       </>
     );
   }
   function renderOneUser(nodeItem: any) {
+    if (nodeItem?.nodeType === 'end') {
+      return <div style={{height: '40px'}}></div>
+    }
     const opperator = nodeItem?.operators?.[0];
+    const userMap = displayStatusMap(opperator?.taskStatus);
     return <>
-      <div className="flex-bw-center">
+      <div className="flex-bw-center user-temp">
         <p className="photo-img">{opperator?.avatar && <img src={opperator.avatar} alt='' />}</p>
         <div style={{ flex: 1 }}>
           <p>{opperator?.operator}</p>
           <p className="flex-bw-center">
-            <span className="sp-options">{opperator?.taskStatus}</span>
+            <b className={`sp-options ${userMap?.labelColor}`}>{userMap?.label}</b>
             <span className="gray-color">
               {opperator?.operatorTime
                 ? dayjs(opperator.operatorTime).format('YYYY-MM-DD HH:mm:ss')
@@ -171,7 +193,7 @@ const DetailStep: FC<any> = ({ stepData }: any) => {
                 disabled={true}
                 title={item?.nodeName}
                 description={renderDescript(item)}
-                className="succss-box"
+                className={displayStatusMap(item?.displayStatus)?.iconClass}
               />
             );
           }
@@ -181,17 +203,24 @@ const DetailStep: FC<any> = ({ stepData }: any) => {
   };
 
   useEffect(() => {
-    setCurrent(stepData?.length);
+    if (Array.isArray(stepData)) {
+      for(let k = 0; k < stepData.length; k++) {
+        if (stepData[k]?.isCurrent) {
+          setCurrent(k + 1)
+          break;
+        }
+      }
+    }
   }, [stepData]);
 
   return (<>
     <ProcessFlow data={stepData} />
-    {/* <Steps current={current} onChange={setCurrent} direction="vertical" className="rgt-sp-steps">
+    {/* <Steps current={5} onChange={setCurrent} direction="vertical" className="rgt-sp-steps">
       <Step disabled={true} title="绿色成功" description={renderDescript(0)} className="succss-box" />
       <Step disabled={true} title="灰色成功" description={renderDescript(0)} className="succss-gray-box" />
       <Step disabled={true} title="红色撤回" description={renderDescript(0)} className="back-box" />
       <Step disabled={true} title="红色拒绝" description={renderDescript(0)} className="refuse-box" />
-      <Step disabled={true} title="Processing" description={renderManyUsers()} />
+      <Step disabled={true} title="Processing" description={renderManyUsers(renderManyTest)} />
       <Step disabled={true} title="Pending" description={renderDescript(0)} />
     </Steps> */}
   </>);

@@ -19,7 +19,7 @@ const DynamicTimeFormatConfig: React.FC<DynamicTimeFormatConfigProps> = ({
   id
 }) => {
   const dateFormatKey = 'dateType';
-  const timeFormatKey = 'timeType';
+  const use24HoursKey = 'use24Hours';
   const options = [
     { label: '时', value: TIME_VALUES[TIME_OPTIONS.HOUR] },
     { label: '时:分', value: TIME_VALUES[TIME_OPTIONS.MINUTE] },
@@ -27,15 +27,15 @@ const DynamicTimeFormatConfig: React.FC<DynamicTimeFormatConfigProps> = ({
   ];
 
   const [dateFormat, setDateFormat] = useState<string>('');
-  const [timeFormat, setTimeFormat] = useState<boolean>(true);
+  const [use24Hours, setUse24Hours] = useState<boolean>(true);
 
   useEffect(() => {
     setDateFormat(configs[dateFormatKey]);
   }, [configs[dateFormatKey]]);
 
   useEffect(() => {
-    setTimeFormat(configs[timeFormatKey]);
-  }, [configs[timeFormatKey]]);
+    setUse24Hours(configs[use24HoursKey]);
+  }, [configs[use24HoursKey]]);
 
   return (
     <Form.Item layout="vertical" label={item.name || '时间格式'} className={styles.formItem}>
@@ -46,7 +46,7 @@ const DynamicTimeFormatConfig: React.FC<DynamicTimeFormatConfigProps> = ({
         onChange={(value) => handlePropsChange(dateFormatKey, value)}
         options={item.range || options}
       ></Select>
-      <Checkbox checked={timeFormat} onChange={(value) => handlePropsChange(timeFormatKey, value)}>
+      <Checkbox checked={use24Hours} onChange={(value) => handlePropsChange(use24HoursKey, value)}>
         24小时制
       </Checkbox>
     </Form.Item>
