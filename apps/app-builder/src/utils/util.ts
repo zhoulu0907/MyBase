@@ -7,6 +7,7 @@ export const getOrCreateDeviceId: any = async () => {
   if (!deviceId) {
     const fp = await FingerprintJS.load();
     const result = await fp.get();
+    console.log('result: ', result);
     deviceId = `web_${result.visitorId.substring(0, 16)}`;
     localStorage.setItem(STORAGE_KEY, deviceId);
   } else {

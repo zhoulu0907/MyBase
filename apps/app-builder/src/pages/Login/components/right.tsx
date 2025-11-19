@@ -115,7 +115,6 @@ const Right: React.FC = () => {
 
   // 表单提交处理
   const handleSubmit = async (_values: LoginRequest) => {
-    // const res = await getOrCreateDeviceId();
     handleAccountLogin(_values);
   };
 
