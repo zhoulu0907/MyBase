@@ -5,14 +5,18 @@ import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
+import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
 import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
+import com.cmsr.onebase.module.system.vo.user.UserByDeptPageReqVO;
 import com.cmsr.onebase.module.system.vo.user.UserPageReqVO;
 import com.cmsr.onebase.module.system.vo.user.UserSimplePageReqVO;
+import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
 import org.anyline.entity.Order;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
@@ -29,6 +33,7 @@ import java.util.Set;
  * @date 2025-08-18
  */
 @Repository
+@Slf4j
 public class AdminUserDataRepository extends DataRepository<AdminUserDO> {
 
     /**
@@ -223,6 +228,30 @@ public class AdminUserDataRepository extends DataRepository<AdminUserDO> {
 
         // 根据关键词模糊查询
         if (reqVO.getKeywords() != null && !reqVO.getKeywords().trim().isEmpty()) {
+            configStore.like(AdminUserDO.NICKNAME, reqVO.getKeywords());
+        }
+
+        // 添加排序
+        configStore.order(AdminUserDO.ADMIN_TYPE, Order.TYPE.ASC).order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
+
+        return findPageWithConditions(configStore, reqVO.getPageNo(), reqVO.getPageSize());
+    }
+
+    /**
+     * 简单分页查询指定部门ID集合的启用状态用户
+     *
+     * @param reqVO   分页查询条件
+     * @param deptIds 部门ID集合
+     * @return 分页结果
+     */
+    public PageResult<AdminUserDO> findEnableUserPageByDeptIds(UserByDeptPageReqVO reqVO, Set<Long> deptIds) {
+        log.info("[findEnableUserPageByDeptIds][deptIds({}) reqVO({})]", deptIds, reqVO);
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.eq(AdminUserDO.STATUS, CommonStatusEnum.ENABLE.getStatus()); // 启用状态
+        configStore.in(AdminUserDO.DEPT_ID, deptIds); // 指定部门ID集合
+
+        // 根据关键词模糊查询
+        if (StringUtils.isNotBlank(reqVO.getKeywords())) {
             configStore.like(AdminUserDO.NICKNAME, reqVO.getKeywords());
         }
 

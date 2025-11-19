@@ -14,7 +14,18 @@ public interface RedisKeyConstants {
      * KEY 格式：dept_children_ids:{id}
      * VALUE 数据类型：String 子部门编号集合
      */
-    String DEPT_CHILDREN_ID_LIST = "dept_children_ids";
+    String DEPT_CHILDREN_ID_LIST = "dept_children_ids#1m";
+
+
+    /**
+     * 启用状态用户分页缓存（按部门ID集合）
+     * <p>
+     * KEY 格式：user_find_by_dept_ids:{deptIds}
+     * VALUE 数据类型：String 分页结果（序列化对象）
+     * 过期时间：3 分钟
+     */
+    String USER_FIND_BY_DEPT_IDS =  "user_find_by_dept_ids#1m";
+
 
     /**
      * 角色的缓存

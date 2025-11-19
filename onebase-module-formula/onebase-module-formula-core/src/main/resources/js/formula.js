@@ -4906,9 +4906,9 @@ function _typeof(o) {
     }
     return updept;
   }
-  function GETROLE(id) {
-    console.log(JSON.stringify(id));
-    return id;
+  function GETROLE(id,roleList) {
+    console.log(JSON.stringify(roleList));
+    return roleList;
   }
   function GETSUPERVISOR(id,name) {
     console.log(id,name);

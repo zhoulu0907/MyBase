@@ -307,6 +307,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
     @NotNull
     private static BpmFlowTodoTaskVO getBpmFlowTodoTaskVO(BpmTodoTaskDTO flowTaskExt) {
         BpmFlowTodoTaskVO todoTaskVO = new BpmFlowTodoTaskVO();
+        todoTaskVO.setId(flowTaskExt.getId());
         todoTaskVO.setTaskId(flowTaskExt.getId());
         todoTaskVO.setInstanceId(flowTaskExt.getInstanceId());
         todoTaskVO.setFlowStatus(flowTaskExt.getFlowStatus());

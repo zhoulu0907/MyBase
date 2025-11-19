@@ -182,4 +182,13 @@ public class UserController {
         return success(userService.importUserList(list, updateSupport));
     }
 
+    @GetMapping("/get-user-page-by-dept")
+    @Operation(summary = "获得指定部门的用户简要分页列表", description = "获取指定部门的直属用户简要信息（分页），isRecurseSub为true时包含所有下级部门用户")
+    @PreAuthorize("@ss.hasPermission('system:user:query')")
+    public CommonResult<PageResult<UserSimpleRespVO>> getUserPageByDept(
+            @Valid UserByDeptPageReqVO pageReqVO) {
+        PageResult<AdminUserDO> pageResult = userService.getUserByDeptPage(pageReqVO);
+        return success(new PageResult<>(UserConvert.INSTANCE.convertList(pageResult.getList()), pageResult.getTotal()));
+    }
+
 }

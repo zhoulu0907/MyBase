@@ -1,12 +1,10 @@
 package com.cmsr.onebase.module.bpm.runtime.handler;
 
-import cn.hutool.core.collection.CollectionUtil;
-import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
-import com.cmsr.onebase.module.app.api.auth.AppAuthRoleUser;
-import com.cmsr.onebase.module.bpm.core.dto.node.NodePermFlagDTO;
+import com.cmsr.onebase.module.bpm.runtime.service.permission.BpmPermissionResolver;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.dromara.warm.flow.core.dto.FlowParams;
 import org.dromara.warm.flow.core.handler.PermissionHandler;
 import org.springframework.stereotype.Component;
@@ -22,7 +20,7 @@ import java.util.*;
 @Slf4j
 public class BpmPermissionHandler implements PermissionHandler {
     @Resource
-    private AppAuthRoleUser appAuthRoleUser;
+    private BpmPermissionResolver permissionResolver;
 
     /**
      * 办理人权限标识，比如用户，角色，部门等，用于校验是否有权限办理任务
@@ -49,7 +47,7 @@ public class BpmPermissionHandler implements PermissionHandler {
      */
     @Override
     public List<String> convertPermissions(List<String> permissions) {
-        if (CollectionUtil.isEmpty(permissions)) {
+        if (CollectionUtils.isEmpty(permissions)) {
             return permissions;
         }
 
@@ -59,23 +57,10 @@ public class BpmPermissionHandler implements PermissionHandler {
         // permissions使用了定义的格式
         for (String permission : permissions) {
             try {
-                NodePermFlagDTO nodePermFlagDTO = JsonUtils.parseObject(permission, NodePermFlagDTO.class);
+                Set<Long> userIds = permissionResolver.resolveUserIds(permission);
 
-                // 处理用户ID列表
-                if (CollectionUtil.isNotEmpty(nodePermFlagDTO.getUserIds())) {
-                    for (Long userId : nodePermFlagDTO.getUserIds()) {
-                        convertedPermissions.add(String.valueOf(userId));
-                    }
-                }
-
-                if (CollectionUtil.isNotEmpty(nodePermFlagDTO.getRoleIds())) {
-                    List<Long> usersFromRoleId = appAuthRoleUser.findUserIdsByRoleIds(nodePermFlagDTO.getRoleIds());
-
-                    if (CollectionUtil.isNotEmpty(usersFromRoleId)) {
-                        for (Long userId : usersFromRoleId) {
-                            convertedPermissions.add(String.valueOf(userId));
-                        }
-                    }
+                if (CollectionUtils.isNotEmpty(userIds)) {
+                    convertedPermissions.addAll(userIds.stream().map(String::valueOf).toList());
                 }
             } catch (Exception e) {
                 log.warn("解析权限字符串为NodePermFlagDTO失败，permission={}", permission, e);

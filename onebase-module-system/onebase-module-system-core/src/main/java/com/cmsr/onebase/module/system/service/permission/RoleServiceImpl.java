@@ -240,14 +240,14 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public boolean hasAnySuperAdmin(Collection<Long> ids) {
+    public boolean hasAnySuperOrTenantAdmin(Collection<Long> ids) {
         if (CollectionUtils.isEmpty(ids)) {
             return false;
         }
         // 通过代理对象调用，确保 @Cacheable 生效
         return ids.stream().anyMatch(id -> {
             RoleDO role = roleService.getRoleFromCache(id);
-            return role != null && RoleCodeEnum.isSuperAdmin(role.getCode());
+            return role != null &&( RoleCodeEnum.isSuperAdmin(role.getCode()) || RoleCodeEnum.isTenantAdmin(role.getCode()));
         });
     }
 

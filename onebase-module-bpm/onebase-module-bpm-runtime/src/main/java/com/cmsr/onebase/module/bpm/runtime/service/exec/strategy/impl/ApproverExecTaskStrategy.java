@@ -12,6 +12,7 @@ import com.cmsr.onebase.module.engine.orm.anyline.entity.FlowHisTask;
 import com.cmsr.onebase.module.engine.orm.anyline.entity.FlowUser;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.ConditionDTO;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.UpdateDataReqDTO;
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -104,7 +105,7 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
         if (Objects.equals(buttonType, BpmActionButtonEnum.APPROVE.getCode())) {
             skipParams = skipParams.skipType(SkipType.PASS.getKey())
                 .flowStatus(BpmBusinessStatusEnum.IN_APPROVAL.getCode())
-               .hisStatus("已" + matchButtonConfig.getButtonName())
+               .hisStatus(BpmNodeApproveStatusEnum.POST_APPROVED.getCode())
                     .handler(approverId);
 
             taskService.skip(skipParams, task);
@@ -123,7 +124,7 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
             skipParams = skipParams.message(comment)
                     .skipType(SkipType.REJECT.getKey())
                     .flowStatus(BpmBusinessStatusEnum.REJECTED.getCode())
-                    .hisStatus("已" + matchButtonConfig.getButtonName())
+                    .hisStatus(BpmNodeApproveStatusEnum.POST_REJECTED.getCode())
                     .handler(approverId);
 
             // 有拒绝节点则走拒绝路线，否则则退回到上一层
@@ -152,7 +153,7 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
                         continue;
                     }
 
-                    Map<String, Object> lastHisExtMap = JsonUtils.parseObject(hisTask.getExt(), Map.class);
+                    Map<String, Object> lastHisExtMap = JsonUtils.parseObject(hisTask.getExt(), new TypeReference<>() {});
 
                     if (lastHisExtMap == null) {
                         return;

@@ -39,12 +39,11 @@ public class BpmCcNodeListener {
     private BpmFlowCcRecordRepository ccRecordRepository;
 
     public void handleCreate(ListenerVariable listenerVariable) {
-        FlowParams flowParams = listenerVariable.getFlowParams();
         Map<String, Object> flowVariable = listenerVariable.getVariable();
         Task currTask = listenerVariable.getTask();
-        String currHandler = flowParams.getHandler();
+        String currHandler = BpmConstants.SYS_USER_ID;
 
-        // 基础 FlowParams
+        // 使用系统用户进行跳转
         FlowParams skipParams = FlowParams.build()
                 .variable(flowVariable)
                 .message("自动抄送")
