@@ -6,7 +6,8 @@ import {
   STATUS_OPTIONS,
   STATUS_VALUES,
   TableOperationButton,
-  TableOperationButtonStyle
+  TableOperationButtonStyle,
+  RedirectMethod
 } from '../../../constants';
 
 import DynamicIcon from '@/components/DynamicIcon';
@@ -26,7 +27,8 @@ import { useSignals } from '@preact/signals-react/runtime';
 import PreviewRender from 'src/components/render/PreviewRender';
 import { useFormEditorSignal } from 'src/signals/page_editor';
 import { ENTITY_FIELD_TYPE } from '../../../../DataFactory/const';
-import { RedirectMethod } from '../../../constants';
+import { COMPONENT_MAP } from '../../../componentsMap';
+import { getComponentSchema } from '../../../schema'
 import './index.css';
 import type { XTableConfig } from './schema';
 import TableSearch from './tableSerach';
@@ -241,11 +243,13 @@ const XTable = memo(
             width: column.width + 'px',
             // TODO: zhoumingji ,基础组件上不要写这种样式，最好能放到样式文件里
             bodyCellStyle: { padding: '0 12px' },
-            render: (_text: string, _record: any, index: number) => {
+            render: (_text: any, _record: any, index: number) => {
               const componentSchemasKeys = Object.keys(fromPageComponentSchemas.value || {});
               const cpId = componentSchemasKeys.find((ele) => {
                 return fromPageComponentSchemas.value[ele]?.config?.dataField?.includes(column.id);
               });
+
+              // 表单配置
               if (cpId) {
                 // 组件类型
                 const cpType = components.value?.find((ele) => ele.id === cpId)?.type;
@@ -258,14 +262,14 @@ const XTable = memo(
                     (field: AppEntityField) => field.fieldId === column.id
                   );
                   if (dataFieldInfo && _record[dataFieldInfo.fieldName]) {
-                    dataField = [`${id}.${index}.${dataFieldInfo.fieldName}`];
+                    dataField = [mainMetaData.entityId, `${id}.${index}.${dataFieldInfo.fieldName}`];
                   }
                 }
                 const componentConfig = {
                   ...currentComponentSchemas,
                   config: {
                     ...currentComponentSchemas.config,
-                    dataField: dataField?.length > 0 ? dataField : [`${id}.${index}.${column.id}`],
+                    dataField: dataField?.length > 0 ? dataField : [mainMetaData.entityId, `${id}.${index}.${column.id}`],
                     label: {
                       display: false,
                       text: ''
@@ -288,6 +292,40 @@ const XTable = memo(
                   />
                 );
               }
+
+              // 根据字段获取默认配置
+              if (Array.isArray(mainMetaData?.parentFields)) {
+                const dataFieldInfo = mainMetaData.parentFields.find(
+                  (field: AppEntityField) => field.fieldId === column.id
+                );
+                const cpType = COMPONENT_MAP[dataFieldInfo?.fieldType];
+                if (dataFieldInfo?.fieldType && cpType) {
+                  const basicConfig = getComponentSchema(cpType as any);
+                  const componentConfig = {
+                    ...basicConfig,
+                    config: {
+                      ...basicConfig.config,
+                      dataField: [mainMetaData.entityId, `${id}.${index}.${dataFieldInfo.fieldName}`],
+                      label: {
+                        display: false,
+                        text: ''
+                      },
+                      verify: { required: false },
+                      tooltip: ''
+                    }
+                  };
+                  return (
+                    <PreviewRender
+                      cpId={column.id}
+                      cpType={cpType}
+                      detailMode={true}
+                      pageComponentSchema={componentConfig}
+                      runtime={true}
+                    />
+                  );
+                }
+              }
+
               return <span>{_text}</span>;
             }
           };
