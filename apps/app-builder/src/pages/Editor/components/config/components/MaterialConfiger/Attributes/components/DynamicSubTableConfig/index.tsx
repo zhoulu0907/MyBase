@@ -71,7 +71,7 @@ const DynamicSubTableConfig: React.FC<DynamicSubTableConfigProps> = ({ handlePro
         </div>
       )}
 
-      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '12px' }}>
+      {/* <div style={{ display: 'flex', alignItems: 'center', marginBottom: '12px' }}>
         <div style={{ flex: 1, marginRight: 'auto', color: 'var(--color-text-2)' }}>分页条数</div>
         <Radio.Group
           type="button"
@@ -84,7 +84,7 @@ const DynamicSubTableConfig: React.FC<DynamicSubTableConfigProps> = ({ handlePro
           <Radio value={20}>20</Radio>
           <Radio value={30}>30</Radio>
         </Radio.Group>
-      </div>
+      </div> */}
 
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '12px' }}>
         <div style={{ flex: 1, marginRight: 'auto', color: 'var(--color-text-2)' }}>左侧冻结列</div>
