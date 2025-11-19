@@ -1,6 +1,9 @@
 import { IconPlusCircleFill } from '@arco-design/web-react/icon';
+import { etlEditorSignal } from '@onebase/common';
+import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
+import { getSourceNodeIdsByTarget } from '../utils';
 import styles from './index.module.less';
 
 /**
@@ -8,65 +11,92 @@ import styles from './index.module.less';
  * 初始化页面，渲染 UnionNodeConfig 组件
  */
 const UnionConfig: React.FC = () => {
-  const [data, setData] = useState([
-    {
-      tableId: '签约表-北京',
-      columns: [
-        { id: 1, name: '签约日期' },
-        { id: 2, name: '合同总价' },
-        { id: 3, name: '销售单价' },
-        { id: 4, name: '' },
-        { id: 5, name: '' },
-        { id: 6, name: '' },
-        { id: 7, name: '' },
-        { id: 8, name: '' },
-        { id: 9, name: '' }
-      ]
-    },
-    {
-      tableId: '签约表-上海',
-      columns: [
-        { id: 1, name: '' },
-        { id: 2, name: '' },
-        { id: 3, name: '' },
-        { id: 4, name: '签约日期' },
-        { id: 5, name: '合同总价' },
-        { id: 6, name: '销售单价' },
-        { id: 7, name: '' },
-        { id: 8, name: '' },
-        { id: 9, name: '' }
-      ]
-    },
-    {
-      tableId: '签约表-广州',
-      columns: [
-        { id: 1, name: '' },
-        { id: 2, name: '' },
-        { id: 3, name: '' },
-        { id: 4, name: '' },
-        { id: 5, name: '' },
-        { id: 6, name: '' },
-        { id: 7, name: '签约日期' },
-        { id: 8, name: '合同总价(人民币)' },
-        { id: 9, name: '销售单价' }
-      ]
+  useSignals();
+
+  const { setNodeData, curNode, nodeData, graphData } = etlEditorSignal;
+
+  const [data, setData] = useState<any[]>(nodeData.value[curNode.value.id].config?.data || []);
+
+  // 计算所有 columns 字段的去重并集
+  const [colTitles, setColTitles] = useState<any[]>([]);
+
+  useEffect(() => {
+    // console.log(nodeData.value);
+    // console.log(graphData.value);
+
+    const tmpData = [];
+    const tmpColumns = [];
+
+    let sourceNodeIds = getSourceNodeIdsByTarget(graphData.value, curNode.value.id);
+    if (sourceNodeIds && sourceNodeIds.length > 0) {
+      for (const sourceNodeId of sourceNodeIds) {
+        const sourceNodeData = nodeData.value[sourceNodeId];
+
+        // console.log('sourceNodeData: ', sourceNodeData);
+        // console.log(sourceNodeData.output?.fields);
+
+        tmpColumns.push(...sourceNodeData.output?.fields);
+      }
+      for (const sourceNodeId of sourceNodeIds) {
+        const sourceNodeData = nodeData.value[sourceNodeId];
+        tmpData.push({
+          tableId: sourceNodeId,
+          tableName: sourceNodeData.title,
+          columns: tmpColumns.map((col) => {
+            // 判断当前columns是否存在col.fieldFqn（对齐Union逻辑）
+            const sourceCols = sourceNodeData.output?.fields || [];
+            const exists = sourceCols.some((field: any) => field.fieldFqn === col.fieldFqn);
+
+            if (exists) {
+              // 如果当前 source 有这个字段，保持 name 和 fieldFqn
+              return { ...col };
+            } else {
+              // 否则，name 清空，fieldFqn 也清空
+              return {
+                ...col,
+                fieldName: ''
+              };
+            }
+          })
+        });
+      }
     }
-  ]);
+
+    const newColTitles = tmpData
+      .flatMap((item) => item.columns)
+      .filter((col) => col.fieldName && col.fieldName.trim() !== '')
+      .map((col) => col);
+
+    //   初始化时候重置
+    if (data.length == 0 || data.length != tmpData.length) {
+      setData(tmpData);
+      setColTitles(newColTitles);
+
+      console.log('tmpData: ', tmpData);
+      console.log('newColTitles: ', newColTitles);
+    }
+  }, [nodeData, graphData]);
 
   useEffect(() => {
     console.log(data);
-  }, [data]);
 
-  // 计算所有 columns 字段的去重并集
-  const [colTitles, setColTitles] = useState(
-    data
-      .flatMap((item) => item.columns)
-      .filter((col) => col.name && col.name.trim() !== '')
-      .map((col) => ({
-        id: col.id,
-        name: col.name
+    const payload = nodeData.value[curNode.value.id];
+
+    payload.config = {
+      data: data,
+      colTitles: colTitles
+    };
+    payload.output = {
+      verified: true,
+      fields: colTitles.map((col: any) => ({
+        fqn: `${curNode.value.id}.${col.fieldName}`,
+        fieldName: col.fieldName,
+        fieldType: col.fieldType
       }))
-  );
+    };
+    console.log(payload);
+    setNodeData(curNode.value.id, payload);
+  }, [data]);
 
   return (
     <div className={styles.dataConfig}>
@@ -74,7 +104,7 @@ const UnionConfig: React.FC = () => {
         <div className={styles.rowTitle}>合并结果</div>
         {colTitles.map((col: any, index) => (
           <div key={col.id} className={styles.colTitle}>
-            {col.name}
+            {col.fieldName}
           </div>
         ))}
       </div>
@@ -83,17 +113,17 @@ const UnionConfig: React.FC = () => {
         return (
           <div key={row.tableId} className={styles.row}>
             <div className={styles.rowTitle}>
-              <div>{row.tableId}</div>
+              <div>{row.tableName}</div>
               <IconPlusCircleFill style={{ fontSize: 16, color: 'rgba(var(--primary-6))' }} onClick={() => {}} />
             </div>
 
             {colTitles.map((col: any) => {
               return (
                 <ReactSortable
-                  key={`${row.tableId}-${col.id}`}
+                  key={`${row.tableId}-${col.fieldFqn}`}
                   className={styles.colTitle}
                   swap // enables swap
-                  list={row.columns.filter((c: any) => c.id === col.id)}
+                  list={row.columns.filter((c: any) => c.fieldFqn === col.fieldFqn)}
                   group={{
                     name: row.tableId,
                     put: (to, from, target) => {
@@ -118,23 +148,24 @@ const UnionConfig: React.FC = () => {
                   }}
                   setList={(newRow) => {
                     // 只记录变化，不立即更新状态
-                    // console.log('row: ', rowIndex, 'col: ', col.id, ' setList: ', newRow);
+                    // console.log('row: ', rowIndex, 'col: ', col.fieldFqn, ' setList: ', newRow);
 
                     if (newRow.length > 1) {
-                      if (newRow[0].name != '' && newRow[1].name != '') {
+                      if (newRow[0].fieldName != '' && newRow[1].fieldName != '') {
                         return;
                       }
 
-                      let targetId = 0;
+                      let targetId = '';
                       let targetName = '';
-                      let sourceId = 0;
+                      let sourceId = '';
+
                       for (const item of newRow) {
-                        if (item.name != '') {
-                          sourceId = item.id;
-                          targetName = item.name;
+                        if (item.fieldName != '') {
+                          sourceId = item.fieldFqn;
+                          targetName = item.fieldName;
                         }
-                        if (item.name == '') {
-                          targetId = item.id;
+                        if (item.fieldName == '') {
+                          targetId = item.fieldFqn;
                         }
                       }
 
@@ -143,16 +174,18 @@ const UnionConfig: React.FC = () => {
                           return {
                             ...item,
                             columns: item.columns.map((c: any) =>
-                              c.id === targetId
-                                ? { ...c, name: targetName }
-                                : c.id === sourceId
-                                  ? { ...c, name: '' }
+                              c.fieldFqn === targetId
+                                ? { ...c, fieldName: targetName }
+                                : c.fieldFqn === sourceId
+                                  ? { ...c, fieldName: '' }
                                   : c
                             )
                           };
                         }
                         return item;
                       });
+
+                      console.log('newData: ', newData);
 
                       setData(newData);
                     }
@@ -165,14 +198,14 @@ const UnionConfig: React.FC = () => {
                   //     console.log('onRemove: ', rowIndex, 'col: ', col.id, e.item.id);
                   //   }}
                 >
-                  {row.columns.find((c: any) => c.id === col.id)?.name && (
+                  {row.columns.find((c: any) => c.fieldFqn == col.fieldFqn)?.fieldName !== '' && (
                     <div
-                      key={`row-${rowIndex}-col-${col.id}`}
+                      key={`row-${rowIndex}-col-${col.fieldFqn}`}
                       className={styles.colItem}
                       data-row-id={row.tableId}
-                      data-col-id={col.id}
+                      data-col-id={col.fieldFqn}
                     >
-                      {row.columns.find((c: any) => c.id === col.id)?.name || ''}
+                      {row.columns.find((c: any) => c.fieldFqn === col.fieldFqn)?.fieldName || ''}
                     </div>
                   )}
                 </ReactSortable>
