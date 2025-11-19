@@ -174,15 +174,15 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
           />
         );
       case FORM_COMPONENT_TYPES.USER_SELECT:
-      // return (
-      //   <FormComp.XUserSelect
-      //     cpName={cpId}
-      //     id={cpId}
-      //     {...componentConfig}
-      //     runtime={runtime}
-      //     detailMode={detailMode}
-      //   />
-      // );
+        return (
+          <FormComp.XUserSelect
+            cpName={cpId}
+            id={cpId}
+            {...componentConfig}
+            runtime={runtime}
+            detailMode={detailMode}
+          />
+        );
       case FORM_COMPONENT_TYPES.DEPT_SELECT:
         return (
           <FormComp.XDeptSelect
@@ -246,9 +246,9 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
           />
         );
       case FORM_COMPONENT_TYPES.SUB_TABLE:
-      // return (
-      //   <FormComp.XSubTable cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} />
-      // );
+        return (
+          <FormComp.XSubTable cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} />
+        );
       case FORM_COMPONENT_TYPES.DATA_SELECT:
       // return (
       //   <FormComp.XDataSelect
