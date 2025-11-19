@@ -5,8 +5,11 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowCcRecordDO;
 import com.cmsr.onebase.module.bpm.core.dto.BpmCcRecordDTO;
 import org.anyline.data.param.ConfigStore;
+import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.DataSet;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 @Repository
 public class BpmFlowCcRecordRepository extends DataRepository<BpmFlowCcRecordDO> {
@@ -59,5 +62,12 @@ public class BpmFlowCcRecordRepository extends DataRepository<BpmFlowCcRecordDO>
                    where  t.deleted = 0  and t2.deleted = 0 and t3.deleted = 0
                 ) tf
                 """;
+    }
+
+    public List<BpmFlowCcRecordDO> findAllByInstanceId(Long instanceId) {
+        ConfigStore configs = new DefaultConfigStore();
+        configs.eq(BpmCcRecordDTO.INSTANCE_ID, instanceId);
+
+        return findAllByConfig(configs);
     }
 }
