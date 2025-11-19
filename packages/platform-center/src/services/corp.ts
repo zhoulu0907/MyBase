@@ -21,7 +21,7 @@ export const getCorpListApi = (data: corpListParams) => systemService.get('/corp
 export const getCorpSimpleDetailsListApi = () => systemService.get('/corp/simple-list');
 
 //获得详情
-export const getDetailsApi = (id: number): CorpDetailResponse => systemService.get(`/corp/get?id=${id}`);
+export const getCorpDetailByIdApi = (id: number): CorpDetailResponse => systemService.get(`/corp/get?id=${id}`);
 
 //获取行业类型
 export const getIndustryType = (type: string) => systemService.get(`dict-data/simple-list-by-type?dictType=${type}`);

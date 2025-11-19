@@ -17,7 +17,7 @@ import {
 import { IconCamera, IconEdit } from '@arco-design/web-react/icon';
 import { TokenManager } from '@onebase/common';
 import type { CorpDetailResponse, DictData } from '@onebase/platform-center';
-import { getDetailsApi, getDictDataByType, updateCorpApi, uploadFile } from '@onebase/platform-center';
+import { getCorpDetailByIdApi, getDictDataByType, updateCorpApi, uploadFile } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
 
@@ -44,7 +44,7 @@ const SpaceInfo: React.FC = () => {
   const fetchEnterpriseInfo = async (id: number) => {
     try {
       setLoading(true);
-      const res = await getDetailsApi(id);
+      const res = await getCorpDetailByIdApi(id);
       setEnterpriseInfo(res);
       setCorpLogo(res.corpLogo);
       if (res.id) {

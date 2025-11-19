@@ -3,10 +3,10 @@ import navBackSVG from '@/assets/images/nav_back.svg';
 import LogoSVG from '@/assets/images/ob_logo.svg';
 import { useI18n } from '@/hooks/useI18n';
 import { UserPermissionManager } from '@/utils/permission';
-import { Avatar, Button, Dropdown, Layout, Menu } from '@arco-design/web-react';
-import { IconPoweroff, IconUser } from '@arco-design/web-react/icon';
+import { Avatar, Button, Dropdown, Layout, Menu, Typography } from '@arco-design/web-react';
+import { IconApps, IconExport, IconPoweroff, IconUser } from '@arco-design/web-react/icon';
 import { TokenManager } from '@onebase/common';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './header.module.less';
 
@@ -33,16 +33,29 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     navigate('/login', { replace: true });
   };
 
+  const maskMobile = (value: string) => {
+    let reg=/(\d{3})\d{4}(\d{4})/; 
+    const formatMobile = value.replace(reg, "$1****$2");
+    return formatMobile;
+  }
+
   // 用户菜单
   const userMenu = (
     <Menu>
-      <Menu.Item key="profile">
-        <IconUser />
-        {t('header.profile')}
+      <Menu.Item key="info" style={{height:"60px"}}>
+        <div className={styles.adminInformation}>
+            <Avatar size={32} >
+              <img src={LogoSVG} />
+            </Avatar>
+            <Typography.Text>{userPermissionInfo?.user?.nickname || ""}</Typography.Text>
+        </div>
+      </Menu.Item>
+       <Menu.Item key="profile">
+        {maskMobile(userPermissionInfo?.user?.mobile || "")}
       </Menu.Item>
       <Menu.Item key="logout" onClick={handleLogout}>
-        <IconPoweroff />
-        {t('header.logout')}
+         <IconExport style={{color:"#F53F3F"}}/>
+        <Typography.Text type='error'>{t('header.logout')}</Typography.Text>
       </Menu.Item>
     </Menu>
   );
@@ -57,11 +70,11 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
         <div className={styles.userInfo}>
           <Button
             type="secondary"
-            icon={<img src={navBackSVG} alt="MyApp" />}
-            onClick={() => navigate('/onebase/my-app')}
+            icon={<IconApps />}
+            onClick={() => navigate('/onebase/enterprise-app')}
             className={styles.backBtn}
           >
-            我的应用
+            应用中心
           </Button>
 
           <div className={styles.username}>{userPermissionInfo?.user.nickname}</div>
