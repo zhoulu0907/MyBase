@@ -44,6 +44,7 @@ const Runtime: React.FC = () => {
 
   const navigate = useNavigate();
   const { appId } = useParams<{ appId?: string }>();
+  const { tenantId } = useParams<{ tenantId?: string }>();
   const { t } = useI18n();
 
   const [treeData, setTreeData] = useState<TreeNode[]>([]);
@@ -63,6 +64,9 @@ const Runtime: React.FC = () => {
 
   useEffect(() => {
     getUserInfo();
+    if(!appId && tenantId) {
+      navigate("/onebase/runtime/my-app")
+    }
   }, []);
 
   const getUserInfo = async () => {
