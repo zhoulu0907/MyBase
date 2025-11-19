@@ -8,6 +8,14 @@
   margin-bottom: 10px;
 }
 
+.headerActions {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+}
+
 .searchGroup {
     width: 100%;
     display: flex;
@@ -16,10 +24,6 @@
     justify-content: flex-start;
     flex-wrap: wrap;
 }
-
-
-
-
 
 .tableFormItem {
   .arco-form-label-item {
@@ -40,13 +44,55 @@
   align-items: flex-start;
   justify-content: flex-start;
   flex-wrap: wrap;
-  width: 92%;
+  width: calc(100% + 6px);
+  margin-left: -6px;
 }
 
 .searchItem {
-  min-width: 200px;
-  max-width: 400px;
+  flex: 0 0 25%;
+  box-sizing: border-box;
+  padding: 4px;
+
+  .labelText {
+    padding-left: 0.5px;
+  }
+}
+
+.searchItem:nth-child(4n+1) {
+  margin-left: -4px;
+}
+
+.searchItem:nth-child(4n) {
+  margin-right: -4px;
+}
+
+.searchItem:last-child {
+  margin-right: -4px;
+}
+
+.searchActions {
+  display: flex;
+}
+
+.searchActions .actionsInner {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  align-items: center;
+}
+
+.searchActions .arco-form-item {
   margin-bottom: 0;
+}
+
+.searchActions-alone .arco-form-label-item {
+  display: none;
+}
+
+.searchItem.placeholder {
+  padding-top: 0;
+  padding-bottom: 0;
 }
 
 .searchBtns {

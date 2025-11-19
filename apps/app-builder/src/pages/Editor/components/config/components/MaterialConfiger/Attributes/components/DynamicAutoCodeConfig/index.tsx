@@ -222,14 +222,15 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({
               <Select
                 disabled={configs[autoCodeDisabledKey]}
                 value={rule.format}
-                style={{marginBottom:'4px'}}
+                style={{ marginBottom: '4px' }}
                 onChange={(value) => updateRule(index, value)}
                 options={dataOptions}
                 getPopupContainer={getPopupContainer}
               ></Select>
               {rule.format === '自定义' && (
                 <Input
-                  value={(rule.fixedText as string) || ''}
+                  disabled={configs[autoCodeDisabledKey]}
+                  value={(rule.textValue as string) || ''}
                   placeholder="例如：yyyyMMddHHmmss"
                   onChange={(value) => {
                     const ruleId = rule.id!;
@@ -238,7 +239,7 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({
                     } else {
                       setCustomDateFormatStatusMap((prev) => ({ ...prev, [ruleId]: undefined }));
                     }
-                    updateRule(ruleId, { config: { ...rule.config, fixedText: value } });
+                    updateRule(ruleId, { config: { ...rule.config, textValue: value } });
                   }}
                   className={styles.ruleInput}
                   status={customDateFormatStatusMap[rule.id!]}
@@ -279,6 +280,7 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({
               animation
               value={findFieldPath(rule.format, entityTree)}
               onChange={(value) => updateRule(index, value?.[1] || '')}
+              getPopupContainer={getPopupContainer}
             />
           </>
         );
@@ -297,7 +299,7 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({
       <Form.Item layout="vertical" label={'编号规则配置'} className={styles.formItem}>
         <ReactSortable
           list={rules}
-          setList={() => {}}
+          setList={() => { }}
           sort={!configs[autoCodeDisabledKey]}
           handle=".autocode-item-handle"
           forceFallback={true}
@@ -360,6 +362,7 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({
         {!configs[autoCodeDisabledKey] && (
           <Dropdown
             trigger="click"
+            getPopupContainer={getPopupContainer}
             droplist={
               <Menu>
                 <Menu.Item

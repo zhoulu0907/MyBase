@@ -13,6 +13,9 @@ export enum SortType {
 export interface VersionModalProps {
   visible: boolean;
   setVisible: (visible: boolean) => void;
+  changeCurrentFlow: (id: string) => void;
+  currentFlowId: string;
+  getVersonList: () => void;
 }
 export interface VersionType {
   createTime: number;

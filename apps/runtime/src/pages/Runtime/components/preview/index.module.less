@@ -50,14 +50,50 @@
 }
 
 .footer {
-  width: 100vw;
+  width: 100%;
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: flex-end;
-  padding: 20px 10px;
+  padding: 0px 14px;
   box-sizing: border-box;
   gap: 16px;
+}
+
+:global {
+  .runtime-preview-formpage {
+    .arco-table-th-item {
+      padding: 8px 12px;
+    }
+
+    .arco-table-td {
+      .formWrapper {
+        padding: 4px 0;
+      }
+    }
+
+    .edit-modal {
+      z-index: 1001;
+
+      .arco-table-td {
+        .formWrapper {
+          padding: 0 4px;
+        }
+      }
+
+      .arco-modal-content {
+        background: transparent;
+        padding: 12px 20px;
+        height: calc(86vh - 156px);
+        overflow: auto;
+      }
+    }
+
+    .edit-modal.edit-modal-fullscreen .arco-modal-content {
+      height: calc(96vh - 156px);
+    }
+
+  }
 }
 
 .drawerTitle {

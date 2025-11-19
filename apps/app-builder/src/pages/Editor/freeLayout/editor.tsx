@@ -40,7 +40,6 @@ export const Editor = () => {
       if (res.globalConfig) {
         setConfigData(res.globalConfig);
       }
-
       if (!res.bpmDefJson) {
         currentJsonData = initialData;
       } else {

@@ -16,7 +16,7 @@ import { IconDelete, IconDragDotVertical } from '@arco-design/web-react/icon';
 import React, { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import styles from '../../index.module.less';
-import { COLOR_MODE_TYPES, useAppEntityStore, DEFAULT_OPTIONS_TYPE } from '@onebase/ui-kit';
+import { COLOR_MODE_TYPES, useAppEntityStore, DEFAULT_OPTIONS_TYPE, getPopupContainer } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import { getDictDetail, getDictDataListByType } from '@onebase/platform-center';
 import SelectDictModal from '@/components/SelectDictModal';
@@ -35,7 +35,7 @@ const DynamicSelectMutipleConfig: React.FC<DynamicSelectMutipleConfigProps> = ({
   configs,
   id
 }) => {
-  const selectMutipleKey = item.key || 'defaultOptionsConfig';
+  const selectMutipleKey = 'defaultOptionsConfig';
   const { mainEntity, subEntities } = useAppEntityStore();
   useSignals();
   const { curAppId } = useAppStore();
@@ -172,6 +172,7 @@ const DynamicSelectMutipleConfig: React.FC<DynamicSelectMutipleConfigProps> = ({
       <Form.Item layout="vertical" labelAlign="left" label={item.name || '自定义配置'} className={styles.formItem}>
         <Form.Item>
           <Select
+            getPopupContainer={getPopupContainer}
             value={configs[selectMutipleKey].type}
             disabled={configs[selectMutipleKey].disabled}
             onChange={(value) => {
@@ -199,7 +200,7 @@ const DynamicSelectMutipleConfig: React.FC<DynamicSelectMutipleConfigProps> = ({
             <div className={styles.tableColumnList}>
               <ReactSortable
                 list={configs[selectMutipleKey].defaultOptions}
-                setList={() => {}}
+                setList={() => { }}
                 group={{
                   name: 'table-col-item'
                 }}

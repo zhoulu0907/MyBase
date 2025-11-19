@@ -44,10 +44,13 @@ const PreviewDataSelectModal: React.FC<PreviewDataSelectModalProps> = ({ visible
 
   const handleSelectData = (data: any) => {
     setSelectedId(data ? data.id : null);
-    [...displayFields].forEach((field: any) => {
-      field.dataValue = data ? data[field.value] : null;
-    });
-    form.setFieldValue(fieldName, data ? {selectID: data.id, dataFields: displayFields} : '');
+    const fieldsWithValue = (displayFields || []).map((field: any) => ({
+      ...field,
+      dataValue: data ? data[field.value] : null
+    }));
+    const lastKey = (displayFields || []).length ? displayFields[displayFields.length - 1]?.value : undefined;
+    const raw = lastKey ? data?.[lastKey] : '';
+    form.setFieldValue(fieldName, data ? {selectID: data.id, dataFields: fieldsWithValue, displayValue: raw} : '');
     if(data) onCancel();
   };
     

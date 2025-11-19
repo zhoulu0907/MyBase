@@ -16,6 +16,7 @@ interface DictionaryListProps {
   onSearchChange: (value: string) => void;
   onSelect: (id: string | undefined) => void;
   onAdd: () => void;
+  isHideTenantAddDictButton?: boolean;
 }
 
 export default function DictionaryListProps({
@@ -24,7 +25,8 @@ export default function DictionaryListProps({
   onSelect,
   searchValue,
   onSearchChange,
-  onAdd
+  onAdd,
+  isHideTenantAddDictButton = false
 }: DictionaryListProps) {
   const listTitle = `全部(${list?.length})`;
   return (
@@ -39,15 +41,17 @@ export default function DictionaryListProps({
         />
       </div>
       <ListItem title={listTitle}>
-        <Button
-          permission={ACTIONS.CREATE}
-          type="text"
-          onClick={onAdd}
-          style={{ paddingLeft: '8px', paddingRight: '8px' }}
-        >
-          <IconPlus />
-          新建
-        </Button>
+        {!isHideTenantAddDictButton && (
+          <Button
+            permission={ACTIONS.CREATE}
+            type="text"
+            onClick={onAdd}
+            style={{ paddingLeft: '8px', paddingRight: '8px' }}
+          >
+            <IconPlus />
+            新建
+          </Button>
+        )}
       </ListItem>
       <PlaceholderPanel className={styles.dictList} hasPermission={hasPermission(ACTIONS.QUERY)}>
         {list?.map((item) => (

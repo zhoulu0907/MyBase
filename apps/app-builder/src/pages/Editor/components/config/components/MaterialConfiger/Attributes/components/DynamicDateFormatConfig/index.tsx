@@ -1,5 +1,5 @@
 import { Form, Select } from '@arco-design/web-react';
-import { DATE_OPTIONS, DATE_VALUES } from '@onebase/ui-kit';
+import { DATE_OPTIONS, DATE_VALUES, getPopupContainer } from '@onebase/ui-kit';
 import { useEffect, useState } from 'react';
 import styles from '../../index.module.less';
 
@@ -36,6 +36,7 @@ const DynamicDateFormatConfig: React.FC<DynamicDateFormatConfigProps> = ({
   return (
     <Form.Item layout="vertical" label={item.name || '日期格式'} className={styles.formItem}>
       <Select
+        getPopupContainer={getPopupContainer}
         value={dateFormat}
         onChange={(value) => handlePropsChange(dateFormatKey, value)}
         options={item.range || options}

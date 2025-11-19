@@ -48,6 +48,10 @@ export function usePageEditorSignal(pageType?:string) {
     ? useListEditorSignal.delPageComponentSchemas
     : useFormEditorSignal.delPageComponentSchemas;
 
+  const batchDelPageComponentSchemas = useList
+    ? useListEditorSignal.batchDelPageComponentSchemas
+    : useFormEditorSignal.batchDelPageComponentSchemas;
+
   const clearPageComponentSchemas = useList
     ? useListEditorSignal.clearPageComponentSchemas
     : useFormEditorSignal.clearPageComponentSchemas;
@@ -68,6 +72,10 @@ export function usePageEditorSignal(pageType?:string) {
     ? useListEditorSignal.delLayoutSubComponents
     : useFormEditorSignal.delLayoutSubComponents;
 
+  const batchDelLayoutSubComponents = useList
+    ? useListEditorSignal.batchDelLayoutSubComponents
+    : useFormEditorSignal.batchDelLayoutSubComponents;
+
   const clearLayoutSubComponents = useList
     ? useListEditorSignal.clearLayoutSubComponents
     : useFormEditorSignal.clearLayoutSubComponents;
@@ -84,6 +92,10 @@ export function usePageEditorSignal(pageType?:string) {
   const delSubTableComponents = useList
     ? useListEditorSignal.delSubTableComponents
     : useFormEditorSignal.delSubTableComponents;
+
+  const batchDelSubTableComponents = useList
+    ? useListEditorSignal.batchDelSubTableComponents
+    : useFormEditorSignal.batchDelSubTableComponents;
 
   const clearSubTableComponents = useList
     ? useListEditorSignal.clearSubTableComponents
@@ -107,15 +119,18 @@ export function usePageEditorSignal(pageType?:string) {
     loadPageComponentSchemas,
     setPageComponentSchemas,
     delPageComponentSchemas,
+    batchDelPageComponentSchemas,
     clearPageComponentSchemas,
     layoutSubComponents,
     loadLayoutSubComponents,
     setLayoutSubComponents,
     delLayoutSubComponents,
+    batchDelLayoutSubComponents,
     clearLayoutSubComponents,
     subTableComponents,
     setSubTableComponents,
     delSubTableComponents,
+    batchDelSubTableComponents,
     clearSubTableComponents,
   };
 }

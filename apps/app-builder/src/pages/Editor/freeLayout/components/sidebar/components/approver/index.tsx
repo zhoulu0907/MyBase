@@ -15,6 +15,7 @@ import { useLocation } from 'react-router-dom';
 import type {
   ApproverConfigDataType,
   ApproverConfigType,
+  AdvancedConfigType,
   ButtonConfigType,
   FieldPermConfigType,
   ApproveDrawerProps
@@ -37,15 +38,19 @@ export default function ApproveDreawer({ handleConfigSubmit, configData }: Appro
       buttonConfigs: [],
       fieldPermConfig: {
         useNodeConfig: false
+      },
+      advancedConfig: {
+        autoApproveCfg: {},
+        emptyApproverCfg: {}
       }
     }
   );
   const [editValue, setEditValue] = useState('');
-  const { approverConfig, buttonConfigs, fieldPermConfig } = approverConfigData;
+  const { approverConfig, buttonConfigs, fieldPermConfig, advancedConfig } = approverConfigData;
 
   function setApprovalConfigData<T extends keyof ApproverConfigDataType>(
     key: T,
-    data: T extends 'buttonConfigs' ? ButtonConfigType[] : ApproverConfigType | FieldPermConfigType
+    data: T extends 'buttonConfigs' ? ButtonConfigType[] : ApproverConfigType | FieldPermConfigType | AdvancedConfigType
   ) {
     setApproverConfigData((prev) => {
       const newData = { ...prev };
@@ -58,6 +63,8 @@ export default function ApproveDreawer({ handleConfigSubmit, configData }: Appro
           ...newData.fieldPermConfig,
           ...data
         } as FieldPermConfigType;
+      } else if (key === 'advancedConfig') {
+        newData.advancedConfig = data as AdvancedConfigType;
       }
       return newData;
     });
@@ -86,7 +93,7 @@ export default function ApproveDreawer({ handleConfigSubmit, configData }: Appro
           />
         );
       case ApproveDrawerTab.ADVANCED_SETTINGS:
-        return <AdvancedConfig />;
+        return <AdvancedConfig setApprovalConfigData={setApprovalConfigData} advancedConfig={advancedConfig || {}} />;
       default:
         return <div>审批人</div>;
     }

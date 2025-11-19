@@ -82,7 +82,7 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
         }
       }
     },
-    [form]
+    [form, ruleType]
   );
 
   const handleCreateRule = async (values: RuleFormValues) => {
@@ -182,35 +182,46 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
 
   // 加载字段选项
   const loadFieldOptions = useCallback(async () => {
-    const res = await ruleService.getEntityFieldsWithChildren(entity.id);
+    try {
+      const res = await ruleService.getEntityFieldsWithChildren(entity.id);
 
-    const parentFields = res.parentFields.map((field: { displayName: string; fieldId: string }) => ({
-      label: field.displayName,
-      value: field.fieldId
-    }));
+      const parentFields = res.parentFields.map((field: { displayName: string; fieldId: string }) => ({
+        label: field.displayName,
+        value: field.fieldId
+      }));
 
-    const childEntities = res.childEntities.map((item: { childEntityName: string; childEntityId: string }) => ({
-      label: item.childEntityName,
-      value: item.childEntityId
-    }));
-    setChildEntityOptions(childEntities); // 子表字段选项
-    setFieldOptions(parentFields); // 子表选项
-  }, [entity.id, editRule, ruleType]);
+      const childEntities = res.childEntities.map((item: { childEntityName: string; childEntityId: string }) => ({
+        label: item.childEntityName,
+        value: item.childEntityId
+      }));
+      setChildEntityOptions(childEntities); // 子表字段选项
+      setFieldOptions(parentFields); // 父表字段选项
+    } catch (error) {
+      console.error('加载字段选项失败:', error);
+      throw error;
+    }
+  }, [entity.id]);
 
   // 初始化表单数据
   useEffect(() => {
-    if (visible) {
-      form.setFieldValue('validationType', ruleType);
-      if (editRule) {
-        // 先加载字段选项，再获取规则数据
-        loadFieldOptions().then(() => {
-          handleGetRuleById(editRule?.id || '');
-        });
-      } else {
-        loadFieldOptions();
-      }
+    if (!visible) {
+      return;
     }
-  }, [visible, editRule, form, ruleType]);
+
+    form.setFieldValue('validationType', ruleType);
+
+    const initFormData = async () => {
+      await loadFieldOptions();
+
+      if (editRule?.id) {
+        await handleGetRuleById(editRule.id);
+      }
+    };
+
+    if (editRule?.id) {
+      initFormData();
+    }
+  }, [visible, editRule?.id, form, ruleType]);
 
   return (
     <Modal
