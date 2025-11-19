@@ -3,6 +3,8 @@ package com.cmsr.onebase.server.flink.controller;
 import com.cmsr.onebase.module.etl.executor.DataPreview;
 import com.cmsr.onebase.module.etl.executor.InputArgs;
 import com.cmsr.onebase.module.etl.executor.WorkFlowExecutor;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Setter;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,28 +27,39 @@ import java.util.Map;
 @RestController
 public class FlinkExecutorController {
 
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
     @Autowired
     private DataSource dataSource;
 
     @PostMapping("/execute")
-    public ResponseEntity<Map> runFlow(@RequestBody InputArgs inputArgs) {
+    public ResponseEntity<String> execute(@RequestBody InputArgs inputArgs) throws JsonProcessingException {
         try (WorkFlowExecutor executor = new WorkFlowExecutor(inputArgs, dataSource)) {
             executor.execute();
-            return ResponseEntity.ok(Map.of("result", "success"));
+            String result = objectToString(Map.of("result", "success"));
+            return ResponseEntity.ok(result);
         } catch (Exception e) {
-            Map<String, String> result = Map.of("result", "fail", "message", ExceptionUtils.getRootCauseMessage(e));
+            String result = objectToString(Map.of("result", "fail", "message", ExceptionUtils.getStackTrace(e)));
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
         }
     }
 
     @PostMapping("/preview")
-    public ResponseEntity<Object> preview(@RequestBody InputArgs inputArgs) {
+    public ResponseEntity<String> preview(@RequestBody InputArgs inputArgs) {
         try (WorkFlowExecutor executor = new WorkFlowExecutor(inputArgs, dataSource)) {
             DataPreview preview = executor.preview();
-            return ResponseEntity.ok(preview);
+            return ResponseEntity.ok(objectToString(preview));
         } catch (Exception e) {
-            Map<String, String> result = Map.of("result", "fail", "message", ExceptionUtils.getRootCauseMessage(e));
+            String result = objectToString(Map.of("result", "fail", "message", ExceptionUtils.getRootCauseMessage(e)));
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
+        }
+    }
+
+    private String objectToString(Object obj) {
+        try {
+            return OBJECT_MAPPER.writeValueAsString(obj);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
         }
     }
 
