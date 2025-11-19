@@ -9,6 +9,7 @@ import DetailStep from './DetailStep';
 import DetailOKConfirm from './DetailOKConfirm';
 import { getFormDetail, getOperatorRecord, fetchExecTask } from '@onebase/app/src/services/app_runtime';
 import PreviewContainer from './DetailForm';
+import FlowView from '../../../../../../../app-builder/src/pages/Editor/components/flowView';
 const Row = Grid.Row;
 const Col = Grid.Col;
 
@@ -32,6 +33,7 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
   let [isShowRight, setIsShowRight] = useState(true);
   const [stepData, setStepData] = useState();
   const [detailData, setDetailData] = useState<any>();
+  const [flowViewVisible, setFlowViewVisible] = useState(false);
   let confirmRef = useRef<any>(null);
   const formRef = useRef<any>(null);
 
@@ -87,7 +89,7 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
   };
 
   function handlePreview() {
-    console.log('handle Preview ...');
+    setFlowViewVisible(true);
   }
   function renderDrawerFooter() {
     return (
@@ -105,6 +107,7 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
             ) {
               return (
                 <Button
+                  key={index}
                   type={item?.buttonType === BPMConfigButtonType.APPROVE ? 'primary' : 'outline'}
                   onClick={() => fetchExec(item)}
                 >
@@ -170,7 +173,6 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
       //根据列表类型请求对应的详情
     }
   }, [listType]);
-
   return (
     <section>
       <Drawer
@@ -236,6 +238,12 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
           </div>
         </div>
       </Drawer>
+      <FlowView
+        visible={flowViewVisible}
+        setVisible={setFlowViewVisible}
+        instanceId={rowData?.instanceId}
+        businessId={rowData?.businessId}
+      />
     </section>
   );
 };

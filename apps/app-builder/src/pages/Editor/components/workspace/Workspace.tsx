@@ -52,6 +52,8 @@ export default function EditorWorkspace() {
     if (pageSetId) {
       setPageSetId(pageSetId);
     }
+    // 默认进入清除已选择组件
+    clearCurComponentID();
   }, []);
 
   useSignals();

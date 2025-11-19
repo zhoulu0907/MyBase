@@ -47,3 +47,7 @@ export interface VersionMgmtRequest {
      */
     versionStatus?: string;
 }
+export interface GetFlowPreview {
+  instanceId: string;
+  businessId: string;
+}
