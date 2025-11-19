@@ -26,7 +26,7 @@ import java.util.Map;
 @RequestMapping("/flink")
 @RestController
 public class FlinkExecutorController {
-    
+
     @Autowired
     private DataSource dataSource;
 
