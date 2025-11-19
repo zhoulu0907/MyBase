@@ -51,6 +51,9 @@ public class SecurityConfigApiImpl implements SecurityConfigApi {
     @Resource
     private AntiBruteForceService antiBruteForceService;
 
+    @Resource
+    private com.cmsr.onebase.module.infra.service.security.MultiDeviceSessionServiceImpl multiDeviceSessionService;
+
     private final PasswordValidator passwordValidator = new PasswordValidator();
 
     @Override
@@ -214,5 +217,39 @@ public class SecurityConfigApiImpl implements SecurityConfigApi {
         antiBruteForceService.clearLoginFailureRecord(tenantId, userId);
 
         return success(Boolean.TRUE);
+    }
+
+    @Override
+    @Operation(summary = "检查并限制设备数")
+    public CommonResult<List<String>> checkAndLimitDevices(@RequestParam("userId") Long userId,
+                                                            @RequestParam("deviceId") String deviceId,
+                                                            @RequestParam("newAccessToken") String newAccessToken) {
+        List<String> removedTokens = multiDeviceSessionService.checkAndLimitDevices(userId, deviceId, newAccessToken);
+        return success(removedTokens);
+    }
+
+    @Override
+    @Operation(summary = "添加Token到在线设备列表")
+    public CommonResult<Boolean> addOnlineDevice(@RequestParam("userId") Long userId,
+                                                  @RequestParam("deviceId") String deviceId,
+                                                  @RequestParam("accessToken") String accessToken) {
+        multiDeviceSessionService.addOnlineDevice(userId, deviceId, accessToken);
+        return success(Boolean.TRUE);
+    }
+
+    @Override
+    @Operation(summary = "清理在线设备记录")
+    public CommonResult<Boolean> removeOnlineDevice(@RequestParam("userId") Long userId,
+                                                     @RequestParam("accessToken") String accessToken) {
+        multiDeviceSessionService.removeOnlineDevice(userId, accessToken);
+        return success(Boolean.TRUE);
+    }
+
+    @Override
+    @Operation(summary = "通过Token反查设备ID")
+    public CommonResult<String> findDeviceIdByToken(@RequestParam("userId") Long userId,
+                                                     @RequestParam("accessToken") String accessToken) {
+        String deviceId = multiDeviceSessionService.findDeviceIdByToken(userId, accessToken);
+        return success(deviceId);
     }
 }

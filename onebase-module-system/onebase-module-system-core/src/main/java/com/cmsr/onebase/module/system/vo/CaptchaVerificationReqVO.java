@@ -14,6 +14,12 @@ public class CaptchaVerificationReqVO {
     @NotEmpty(message = "验证码不能为空", groups = CodeEnableGroup.class)
     private String captchaVerification;
 
+    // ========== 设备标识相关 ==========
+    @Schema(description = "设备ID，用于多设备管理和限制", requiredMode = Schema.RequiredMode.REQUIRED,
+            example = "web_chrome_a1b2c3d4e5f6")
+    @NotEmpty(message = "设备ID不能为空")
+    private String deviceId;
+
     /**
      * 开启验证码的 Group
      */

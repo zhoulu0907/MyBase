@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.List;
+
 /**
  * 密码校验API接口
  * 
@@ -111,5 +113,62 @@ public interface SecurityConfigApi {
      */
     @PostMapping("/clear-failure")
     CommonResult<Boolean> clearLoginFailureRecord(@RequestParam("userId") Long userId);
+
+    /**
+     * 检查并限制设备数
+     * 
+     * 登录时调用，如果超过maxOnlineDevices，踢出最早登录的设备
+     * 返回被踢出的Token列表，调用方需要删除这些Token
+     *
+     * @param userId 用户ID
+     * @param deviceId 设备ID
+     * @param newAccessToken 新登录的AccessToken
+     * @return 被踢出的Token列表（可能为空）
+     */
+    @PostMapping("/check-device-limit")
+    CommonResult<List<String>> checkAndLimitDevices(@RequestParam("userId") Long userId,
+                                                     @RequestParam("deviceId") String deviceId,
+                                                     @RequestParam("newAccessToken") String newAccessToken);
+
+    /**
+     * 添加Token到在线设备列表
+     * 
+     * RefreshToken刷新时调用，将新Token添加到在线设备列表
+     *
+     * @param userId 用户ID
+     * @param deviceId 设备ID
+     * @param accessToken AccessToken
+     * @return 操作结果
+     */
+    @PostMapping("/add-online-device")
+    CommonResult<Boolean> addOnlineDevice(@RequestParam("userId") Long userId,
+                                           @RequestParam("deviceId") String deviceId,
+                                           @RequestParam("accessToken") String accessToken);
+
+    /**
+     * 清理在线设备记录
+     * 
+     * 用户登出或Token过期时调用
+     *
+     * @param userId 用户ID
+     * @param accessToken AccessToken
+     * @return 操作结果
+     */
+    @PostMapping("/remove-online-device")
+    CommonResult<Boolean> removeOnlineDevice(@RequestParam("userId") Long userId,
+                                              @RequestParam("accessToken") String accessToken);
+
+    /**
+     * 通过Token反查设备ID
+     * 
+     * RefreshToken场景下用于获取旧Token对应的deviceId
+     *
+     * @param userId 用户ID
+     * @param accessToken AccessToken
+     * @return 设备ID，未找到返回null
+     */
+    @PostMapping("/find-device-id")
+    CommonResult<String> findDeviceIdByToken(@RequestParam("userId") Long userId,
+                                              @RequestParam("accessToken") String accessToken);
 
 }

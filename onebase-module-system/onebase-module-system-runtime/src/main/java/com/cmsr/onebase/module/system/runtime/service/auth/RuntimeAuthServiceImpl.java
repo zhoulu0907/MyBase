@@ -10,6 +10,7 @@ import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
 import com.cmsr.onebase.module.system.api.logger.dto.LoginLogCreateReqDTO;
 import com.cmsr.onebase.module.system.api.sms.SmsCodeApi;
+import com.cmsr.onebase.module.infra.api.security.SecurityConfigApi;
 import com.cmsr.onebase.module.system.convert.auth.AuthConvert;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
@@ -35,6 +36,7 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Objects;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -81,6 +83,8 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
 
     @Resource
     private TenantService     tenantService;
+    @Resource
+    private SecurityConfigApi securityConfigApi;
 
     @Override
     public AdminUserDO authenticate(String username, String password) {
@@ -126,7 +130,7 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
 
         // 使用手机密码，进行登录
         AdminUserDO user = mobileAuthenticate(reqVO.getUsername(), reqVO.getPassword());
-        return createTokenAfterLoginSuccess(reqVO.getAppId(),  user.getId(), reqVO.getUsername(), LoginLogTypeEnum.LOGIN_USERNAME);
+        return createTokenAfterLoginSuccess(reqVO.getAppId(),  user.getId(), reqVO.getUsername(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_USERNAME);
     }
 
     @Override
@@ -136,7 +140,7 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         checkPlatformAdminEnableAppCreate();
         // 使用手机密码，进行登录
         AdminUserDO user = authenticate(reqVO.getMobile(), reqVO.getPassword());
-        return createTokenAfterLoginSuccess(reqVO.getAppId(),  user.getId(), reqVO.getMobile(), LoginLogTypeEnum.LOGIN_MOBILE);
+        return createTokenAfterLoginSuccess(reqVO.getAppId(),  user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE);
     }
 
     private void checkPlatformAdminEnableAppCreate() {
@@ -209,12 +213,26 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         return captchaService.verification(captchaVO);
     }
 
-    private AuthLoginRespVO createTokenAfterLoginSuccess(Long appId, Long userId, String username, LoginLogTypeEnum logType) {
+    private AuthLoginRespVO createTokenAfterLoginSuccess(Long appId, Long userId, String username, String deviceId, LoginLogTypeEnum logType) {
         // 插入登陆日志
         createLoginLog(userId, username, logType, LoginResultEnum.SUCCESS);
         // 创建访问令牌
         OAuth2AccessTokenDO accessTokenDO = oauth2TokenService.createAppAccessToken(appId, userId, getUserType().getValue(),
                 OAuth2ClientConstants.CLIENT_ID_DEFAULT, null);
+
+        // 校验并限制设备数
+        List<String> removedTokens = securityConfigApi.checkAndLimitDevices(
+                userId,
+                deviceId,
+                accessTokenDO.getAccessToken()
+        ).getData();
+
+        // 删除被踢出的令牌
+        if (removedTokens != null && !removedTokens.isEmpty()) {
+            for (String removedToken : removedTokens) {
+                oauth2TokenService.removeAccessToken(removedToken);
+            }
+        }
 
         TenantDO tennantDO = tenantService.getTenant(accessTokenDO.getTenantId());
         // 构建返回结果
@@ -234,7 +252,14 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         if (accessTokenDO == null) {
             return;
         }
-        // 删除成功，则记录登出日志
+        
+        // 清理在线设备记录
+        securityConfigApi.removeOnlineDevice(
+                accessTokenDO.getUserId(),
+                token
+        );
+        
+        // 删除成功,则记录登出日志
         createLogoutLog(accessTokenDO.getUserId(), accessTokenDO.getUserType(), logType);
     }
 
@@ -276,7 +301,7 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         Long userId = userService.registerUser(registerReqVO);
 
         // 3. 创建 Token 令牌，记录登录日志
-        return createTokenAfterLoginSuccess(registerReqVO.getAppId(), userId, registerReqVO.getUsername(), LoginLogTypeEnum.LOGIN_USERNAME);
+        return createTokenAfterLoginSuccess(registerReqVO.getAppId(), userId, registerReqVO.getUsername(), registerReqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_USERNAME);
     }
 
     @VisibleForTesting
