@@ -49,6 +49,11 @@ public class BpmOperatorRecordRespVO {
         private String operator;
 
         /**
+         * 代理人
+         */
+        private String agent;
+
+        /**
          * 处理人头像
          */
         private String avatar;
@@ -67,5 +72,10 @@ public class BpmOperatorRecordRespVO {
          * 审批意见
          */
         private String comment;
+
+        /**
+         * 是否已读
+         */
+        private boolean viewed;
     }
 }
