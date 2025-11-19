@@ -309,7 +309,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
           };
           const finalConfig = applySubTableCellOverrides(config, column.type);
           const pageSchema = { ...pageComponentSchemas[column.id], config: finalConfig };
-          const editDisabled = _record.id && subTableConfig?.editRow;
+          const editDisabled = (_record.key || _record.key === '0') && !subTableConfig?.editRow;
           return (
             <PreviewRender
               cpId={column.id}
@@ -342,6 +342,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
         bodyCellStyle: { padding: '0 4px', textAlign: 'center' },
         fixed: subTableConfig?.operateFixed ? 'right' : '',
         render: (_col: any, _record: any, index: number) => {
+          const delDisabled = (_record.key || _record.key === '0') && !subTableConfig?.deleteRow;
           return (
             <Button
               type="text"
@@ -349,7 +350,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
               status="danger"
               style={{ padding: '0 4px' }}
               icon={<IconDelete />}
-              disabled={_record.id && !subTableConfig?.deleteRow}
+              disabled={delDisabled}
               onClick={() => handleDelete(index)}
             ></Button>
           );

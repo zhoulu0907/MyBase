@@ -275,7 +275,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
             width: '100%',
             pointerEvents: runtime ? 'unset' : 'none'
           }}
-          disabled={status !== STATUS_VALUES[STATUS_OPTIONS.DEFAULT]}
+          disabled={status !== STATUS_VALUES[STATUS_OPTIONS.DEFAULT] || detailMode}
           drag={uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.LIST]}
           renderUploadList={renderUploadList}
         >

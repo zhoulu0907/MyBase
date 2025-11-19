@@ -178,6 +178,7 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
             width: '100%',
             pointerEvents: runtime ? 'unset' : 'none'
           }}
+          disabled={status !== STATUS_VALUES[STATUS_OPTIONS.DEFAULT] || detailMode}
           showUploadList={{
             removeIcon: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? null : <IconDelete />
           }}
