@@ -8,6 +8,7 @@ import { useRefresh } from '@flowgram.ai/free-layout-editor';
 import { useClientContext } from '@flowgram.ai/free-layout-editor';
 import { IconUndo, IconRedo } from '@douyinfe/semi-icons';
 import { ZoomSelect } from './zoom-select';
+import InitInteractive from './initInteractive';
 import { ToolContainer, ToolSection } from './styles';
 import { AutoLayout } from './auto-layout';
 import { GlobalConfig } from './globalConfig';
@@ -35,6 +36,7 @@ export const DemoTools = ({ onSave }: { onSave: () => void }) => {
   return (
     <ToolContainer className={styles.demoFreeLayoutTools}>
       <ToolSection>
+        <InitInteractive />
         <ZoomSelect />
         <GlobalConfig />
         <AutoLayout />

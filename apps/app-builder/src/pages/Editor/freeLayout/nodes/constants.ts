@@ -20,6 +20,10 @@ export enum WorkflowNodeType {
   START = 'start',
   END = 'end',
   PROCESSNODE = 'process-node',
-  INITIATION='initiation',
-  APPROVER='approver',
+  INITIATION = 'initiation',
+  APPROVER = 'approver',
+  BRANCH_IN = 'branch-in',
+  CONDITIONAL_BRANCH = 'conditional-branch',
+  SINK_NODE_BRANCH='sink-node-branch',
+  PARALLEL_BRANCH='parallel-branch',
 }

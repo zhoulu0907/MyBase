@@ -8,5 +8,6 @@ export {
   metadataService,
   runtimeFlowService,
   runtimeListdataService,
-  runtimeMetadataService
+  runtimeMetadataService,
+  runtimeBpmService
 } from './factory';
