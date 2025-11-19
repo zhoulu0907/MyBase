@@ -6,7 +6,7 @@ import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.security.config.SecurityProperties;
 import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import com.cmsr.onebase.module.system.enums.logger.LoginLogTypeEnum;
-import com.cmsr.onebase.module.system.service.auth.AdminAuthService;
+import com.cmsr.onebase.module.system.platform.service.auth.PlatformAuthService;
 import com.cmsr.onebase.module.system.vo.auth.AuthLoginReqVO;
 import com.cmsr.onebase.module.system.vo.auth.AuthLoginRespVO;
 import com.cmsr.onebase.module.system.vo.auth.AuthRegisterReqVO;
@@ -39,7 +39,7 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 public class PlatformAuthController {
 
     @Resource
-    private AdminAuthService authService;
+    private PlatformAuthService platformAuthService;
 
     @Resource
     private SecurityProperties securityProperties;
@@ -48,7 +48,7 @@ public class PlatformAuthController {
     @PermitAll
     @Operation(summary = "使用账号密码登录")
     public CommonResult<AuthLoginRespVO> login(@RequestBody @Valid AuthLoginReqVO reqVO) {
-        return success(authService.login(reqVO));
+        return success(platformAuthService.login(reqVO));
     }
 
     @PostMapping("/logout")
@@ -58,7 +58,7 @@ public class PlatformAuthController {
         String token = SecurityFrameworkUtils.obtainAuthorization(request,
                 securityProperties.getTokenHeader(), securityProperties.getTokenParameter());
         if (StrUtil.isNotBlank(token)) {
-            authService.logout(token, LoginLogTypeEnum.LOGOUT_SELF.getType());
+            platformAuthService.logout(token, LoginLogTypeEnum.LOGOUT_SELF.getType());
         }
         return success(true);
     }
@@ -68,7 +68,7 @@ public class PlatformAuthController {
     @Operation(summary = "刷新令牌")
     @Parameter(name = "refreshToken", description = "刷新令牌", required = true)
     public CommonResult<AuthLoginRespVO> refreshToken(@RequestParam("refreshToken") String refreshToken) {
-        return success(authService.refreshToken(refreshToken));
+        return success(platformAuthService.refreshToken(refreshToken));
     }
 
 
@@ -76,14 +76,14 @@ public class PlatformAuthController {
     @PermitAll
     @Operation(summary = "注册用户")
     public CommonResult<AuthLoginRespVO> register(@RequestBody @Valid AuthRegisterReqVO registerReqVO) {
-        return success(authService.register(registerReqVO));
+        return success(platformAuthService.register(registerReqVO));
     }
 
     @PostMapping("/reset-password")
     @PermitAll
     @Operation(summary = "重置密码")
     public CommonResult<Boolean> resetPassword(@RequestBody @Valid AuthResetPasswordReqVO reqVO) {
-        authService.resetPassword(reqVO);
+        platformAuthService.resetPassword(reqVO);
         return success(true);
     }
 }
