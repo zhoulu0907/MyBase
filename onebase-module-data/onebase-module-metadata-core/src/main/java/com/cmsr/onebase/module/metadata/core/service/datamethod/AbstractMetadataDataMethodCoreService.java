@@ -645,7 +645,7 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
             if (resultData == null) {
                 return null;
             }
-            applyFieldStorageStrategies(resultData, fields, FieldValueTransformMode.READ);
+            applyFieldStorageStrategies(resultData, fields, FieldValueTransformMode.READ, context);
             Map<String, Object> filtered = filterQueryResultFields(resultData, context);
             context.setProcessedData(filtered);
             return filtered;
@@ -668,13 +668,13 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
             // 确保主键值不为null
             if (primaryKeyValue == null) {
                 log.warn("无法获取主键值，跳过查询插入后的数据，实体ID: {}, 表名: {}", entityId, entity.getTableName());
-                applyFieldStorageStrategies(processedData, fields, FieldValueTransformMode.READ);
+                applyFieldStorageStrategies(processedData, fields, FieldValueTransformMode.READ, context);
                 // 返回插入的数据
                 return buildDataResponse(entity, processedData, fields);
             }
 
             Map<String, Object> resultData = queryDataByIdWithService(temporaryService, quoteTableName(entity.getTableName()), primaryKeyValue, fields);
-            applyFieldStorageStrategies(resultData, fields, FieldValueTransformMode.READ);
+            applyFieldStorageStrategies(resultData, fields, FieldValueTransformMode.READ, context);
             // 9. 构建响应（移除多表写入逻辑，直接返回结果）
             return buildDataResponse(entity, resultData, fields);
 
@@ -733,6 +733,19 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
 
     protected void applyFieldStorageStrategies(Map<String, Object> data, List<MetadataEntityFieldDO> fields,
                                                FieldValueTransformMode mode) {
+        applyFieldStorageStrategies(data, fields, mode, null);
+    }
+
+    /**
+     * 根据字段类型应用存储策略，确保字段值形态一致（带完整上下文）
+     *
+     * @param data    待处理的数据
+     * @param fields  字段定义
+     * @param mode    转换模式
+     * @param context 处理上下文（可选，某些策略需要访问上下文）
+     */
+    protected void applyFieldStorageStrategies(Map<String, Object> data, List<MetadataEntityFieldDO> fields,
+                                               FieldValueTransformMode mode, ProcessContext context) {
         if (data == null || data.isEmpty() || CollectionUtils.isEmpty(fields) || fieldValueStorageStrategyFactory == null) {
             return;
         }
@@ -746,7 +759,14 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
                 continue;
             }
             FieldValueStorageStrategy strategy = fieldValueStorageStrategyFactory.getStrategy(metadataField.getFieldType());
-            Object transformedValue = strategy.transform(entry.getValue(), mode);
+            Object transformedValue;
+            if (context != null) {
+                // 使用带上下文的方法，允许策略访问 ProcessContext
+                transformedValue = strategy.transform(entry.getValue(), mode, context, metadataField);
+            } else {
+                // 使用无上下文的方法，保持向后兼容
+                transformedValue = strategy.transform(entry.getValue(), mode);
+            }
             entry.setValue(transformedValue);
         }
     }

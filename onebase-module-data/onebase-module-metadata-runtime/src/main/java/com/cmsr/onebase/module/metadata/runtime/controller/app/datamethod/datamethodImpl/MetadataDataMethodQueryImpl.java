@@ -126,7 +126,7 @@ public class MetadataDataMethodQueryImpl extends AbstractMetadataDataMethodCoreS
             if (resultData == null || resultData.isEmpty()) {
                 throw exception(BUSINESS_ENTITY_NOT_EXISTS);
             }
-            applyFieldStorageStrategies(resultData, fields, FieldValueTransformMode.READ);
+            applyFieldStorageStrategies(resultData, fields, FieldValueTransformMode.READ, context);
             // 获取主表数据 放入上下文
             Map map = buildDataResponse(entity, filterMap == null ? resultData:filterMap , fields);
             context.setProcessedData(map);

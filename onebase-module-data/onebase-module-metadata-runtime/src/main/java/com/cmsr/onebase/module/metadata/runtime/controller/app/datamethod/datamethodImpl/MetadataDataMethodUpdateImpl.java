@@ -18,6 +18,7 @@ import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodSubE
 import com.cmsr.onebase.module.metadata.core.domain.query.ProcessContext;
 import com.cmsr.onebase.module.metadata.core.enums.BooleanStatusEnum;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.AbstractMetadataDataMethodCoreService;
+import com.cmsr.onebase.module.metadata.core.service.datamethod.strategy.FieldValueTransformMode;
 import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.vo.ProcessedSubEntityVo;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -218,7 +219,8 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
         AnylineService<?> temporaryService = context.getTemporaryService();
         Object id = context.getId();
 
-        applyFieldStorageStrategies(processedData, fields);
+        // 应用存储策略（传入 context，允许策略访问完整上下文信息）
+        applyFieldStorageStrategies(processedData, fields, FieldValueTransformMode.STORE, context);
 
         TenantUtils.executeIgnore(() -> {
             // 1. 校验数据存在
