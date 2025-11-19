@@ -1,16 +1,16 @@
 import LogoSVG from '@/assets/images/app_header_logo.svg';
 import AvatarSVG from '@/assets/images/avatar.svg';
+import spaceShipLine from '@/assets/images/space-ship-line.svg';
 import { useI18n } from '@/hooks/useI18n';
 import { userPermissionSignal } from '@/store/singals/user_permission';
 import { UserPermissionManager } from '@/utils/permission';
-import { Avatar, Divider, Dropdown, Layout, Menu, Space, Tabs, Typography } from '@arco-design/web-react';
+import { Avatar, Divider, Dropdown, Layout, Menu, Tabs, Typography } from '@arco-design/web-react';
+import { IconExport } from '@arco-design/web-react/icon';
 import { TokenManager } from '@onebase/common';
 import { getPermissionInfo } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styles from './header.module.less';
-import { IconExport } from '@arco-design/web-react/icon';
-import spaceShipLine from "@/assets/images/space-ship-line.svg";
 
 const { Header } = Layout;
 
@@ -63,7 +63,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     const res = await getPermissionInfo();
     UserPermissionManager.setUserPermissionInfo(res);
     userPermissionSignal.setPermissionInfo(res);
-    if(res.user) {
+    if (res.user) {
       setAdminInfo(res.user);
     }
     setNickname(res.user.nickname);
@@ -71,10 +71,9 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
 
   const maskMobile = (value?: string) => {
     let reg = /(\d{3})\d{4}(\d{4})/;
-    const formatMobile = value?.replace(reg, "$1****$2");
+    const formatMobile = value?.replace(reg, '$1****$2');
     return formatMobile;
-  }
-
+  };
 
   // 登出处理
   const handleLogout = async () => {
@@ -87,35 +86,35 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     navigate('/login', { replace: true });
   };
 
-  const tenantAdminMenu = ( 
-      <Menu>
-        <Menu.Item key='info' style={{height:"70px"}}>
-          <div className={styles.adminInformation}>
-            <Avatar size={32} >
-              <img src={adminInfo?.avatar} />
-            </Avatar>
-            <Typography.Text>{adminInfo?.username}</Typography.Text>
-            <Typography.Text type='secondary'>{maskMobile(adminInfo?.mobile)}</Typography.Text>
-          </div>
-        </Menu.Item>
-        <Divider style={{ margin: '4px 0' }} />
-        <Menu.Item
-          key="setting"
-          onClick={() => {
-            navigate('/onebase/setting');
-          }}
-        >
-          <div className={styles.menu}>
-            <img src={spaceShipLine} />
-            {t('header.tenantManagementBackend')}
-          </div>
-        </Menu.Item>
-        <Menu.Item key="logout" onClick={handleLogout}>
-          <IconExport style={{ color: "#F53F3F" }} />
-          <Typography.Text type='error'>{t('header.logout')}</Typography.Text>
-        </Menu.Item>
-      </Menu>
-  )
+  const tenantAdminMenu = (
+    <Menu>
+      <Menu.Item key="info" style={{ height: '70px' }}>
+        <div className={styles.adminInformation}>
+          <Avatar size={32}>
+            <img src={adminInfo?.avatar} />
+          </Avatar>
+          <Typography.Text>{adminInfo?.username}</Typography.Text>
+          <Typography.Text type="secondary">{maskMobile(adminInfo?.mobile)}</Typography.Text>
+        </div>
+      </Menu.Item>
+      <Divider style={{ margin: '4px 0' }} />
+      <Menu.Item
+        key="setting"
+        onClick={() => {
+          navigate('/onebase/setting');
+        }}
+      >
+        <div className={styles.menu}>
+          <img src={spaceShipLine} />
+          {t('header.tenantManagementBackend')}
+        </div>
+      </Menu.Item>
+      <Menu.Item key="logout" onClick={handleLogout}>
+        <IconExport style={{ color: '#F53F3F' }} />
+        <Typography.Text type="error">{t('header.logout')}</Typography.Text>
+      </Menu.Item>
+    </Menu>
+  );
 
   // 用户菜单
   const userMenu = (
@@ -133,8 +132,9 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
       >
         {t('header.tenantManagement')}
       </Menu.Item>
-      <Menu.Item key="logout" onClick={handleLogout} style={{ color: '#FF0000' }}>
-        {t('header.logout')}
+      <Menu.Item key="logout" onClick={handleLogout}>
+        <IconExport style={{ color: '#F53F3F' }} />
+        <Typography.Text type="error">{t('header.logout')}</Typography.Text>
       </Menu.Item>
     </Menu>
   );
@@ -179,7 +179,10 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
         <div className={styles.userInfo}>
           {UserPermissionManager.getUserPermissionInfo()?.user?.nickname || '未登录'}
 
-          <Dropdown droplist={location.pathname?.startsWith("/onebase/enterprise-app") ? tenantAdminMenu : userMenu} position="bl">
+          <Dropdown
+            droplist={location.pathname?.startsWith('/onebase/enterprise-app') ? tenantAdminMenu : userMenu}
+            position="bl"
+          >
             <div className={styles.userDropdown}>
               <img src={AvatarSVG} alt="avatar" />
             </div>
