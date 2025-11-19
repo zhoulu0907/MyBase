@@ -17,11 +17,17 @@ import com.cmsr.onebase.module.bpm.core.utils.BpmUtil;
 import com.cmsr.onebase.module.bpm.runtime.service.operator.BpmOperatorRecordService;
 import com.cmsr.onebase.module.bpm.runtime.service.permission.BpmPermissionResolver;
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmOperatorRecordRespVO;
+import com.cmsr.onebase.module.engine.orm.anyline.entity.FlowHisTask;
+import com.cmsr.onebase.module.engine.orm.anyline.entity.FlowTask;
+import com.cmsr.onebase.module.engine.orm.anyline.repository.FlowHisTaskRepository;
+import com.cmsr.onebase.module.engine.orm.anyline.repository.FlowTaskRepository;
 import com.cmsr.onebase.module.system.api.user.AdminUserApi;
 import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
 import com.fasterxml.jackson.core.type.TypeReference;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.anyline.data.param.ConfigStore;
+import org.anyline.data.param.init.DefaultConfigStore;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
@@ -54,6 +60,12 @@ public class BpmOperatorRecordServiceImpl implements BpmOperatorRecordService {
     private HisTaskService hisTaskService;
 
     @Resource
+    private FlowHisTaskRepository hisTaskRepository;
+
+    @Resource
+    private FlowTaskRepository taskRepository;
+
+    @Resource
     private UserService userService;
 
     @Resource
@@ -74,12 +86,42 @@ public class BpmOperatorRecordServiceImpl implements BpmOperatorRecordService {
     @Resource
     private BpmPermissionResolver permissionResolver;
 
+    private List<HisTask> findAllHisTaskByInsId(Long instanceId) {
+        ConfigStore configs = new DefaultConfigStore();
+        configs.and(FlowHisTask.INSTANCE_ID, instanceId);
+        configs.order(FlowHisTask.NODE_TYPE);
+        configs.order(FlowHisTask.CREATE_TIME);
+
+        List<FlowHisTask> flowHisTasks = hisTaskRepository.findAllByConfig(configs);
+
+        if (CollectionUtils.isEmpty(flowHisTasks)) {
+            return new ArrayList<>();
+        }
+
+        return new ArrayList<>(flowHisTasks);
+    }
+
+    private List<Task> findAllTaskByInsId(Long instanceId) {
+        ConfigStore configs = new DefaultConfigStore();
+        configs.and(FlowHisTask.INSTANCE_ID, instanceId);
+        configs.order(FlowHisTask.NODE_TYPE);
+        configs.order(FlowHisTask.CREATE_TIME);
+
+        List<FlowTask> flowTasks = taskRepository.findAllByConfig(configs);
+
+        if (CollectionUtils.isEmpty(flowTasks)) {
+            return new ArrayList<>();
+        }
+
+        return new ArrayList<>(flowTasks);
+    }
+
     /**
      * 构建已办历史记录
      */
     private void fillHisTaskRecord(Instance instance, LinkedHashMap<Long, BpmOperatorRecordRespVO.OperatorRecord> recordMap) {
         // 查出已办
-        List<HisTask> hisTasks = hisTaskService.getByInsId(instance.getId());
+        List<HisTask> hisTasks = findAllHisTaskByInsId(instance.getId());
 
         if (CollectionUtils.isEmpty(hisTasks)) {
             return;
@@ -187,7 +229,7 @@ public class BpmOperatorRecordServiceImpl implements BpmOperatorRecordService {
 
     private void fillTaskRecord(Instance instance, LinkedHashMap<Long, BpmOperatorRecordRespVO.OperatorRecord> recordMap) {
         // 查出待办
-        List<Task> tasks = taskService.getByInsId(instance.getId());
+        List<Task> tasks = findAllTaskByInsId(instance.getId());
 
         if (CollectionUtils.isEmpty(tasks)) {
             return;
