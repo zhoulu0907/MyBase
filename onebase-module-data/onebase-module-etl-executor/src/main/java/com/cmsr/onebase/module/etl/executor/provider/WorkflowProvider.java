@@ -36,6 +36,7 @@ public class WorkflowProvider {
 
     public WorkflowGraph createWorkflowGraph(String graphJson) throws Exception {
         WorkflowGraph graph = JacksonUtil.fromJson(graphJson, WorkflowGraph.class);
+        graph.init();
         complementGraphInformation(graph);
         return graph;
     }

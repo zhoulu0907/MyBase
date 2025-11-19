@@ -7,6 +7,7 @@ import com.cmsr.onebase.module.etl.executor.action.ExecuteSqlAction;
 import com.cmsr.onebase.module.etl.executor.util.JooqUtil;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.table.api.TableEnvironment;
 import org.apache.flink.table.api.TableResult;
 import org.jooq.Condition;
@@ -14,8 +15,7 @@ import org.jooq.Field;
 import org.jooq.JoinType;
 import org.jooq.impl.DSL;
 
-import static org.jooq.impl.DSL.and;
-import static org.jooq.impl.DSL.table;
+import static org.jooq.impl.DSL.*;
 
 /**
  * @Author：huangjie
@@ -64,9 +64,11 @@ public class PairJoinNode extends Node<PairJoinConfig> implements ExecuteSqlActi
     private Condition[] joinConditions() {
         return config.getFieldPairs().stream()
                 .map(fieldPair -> {
-                    String[] left = fieldPair.getLeftFieldFqn().split(".");
-                    String[] right = fieldPair.getRightFieldFqn().split(".");
-                    return table(left[0]).field(left[1], Object.class).eq(table(right[0]).field(right[1], Object.class));
+                    String[] left = StringUtils.split(fieldPair.getLeftFieldFqn(), ".");
+                    String[] right = StringUtils.split(fieldPair.getRightFieldFqn(), ".");
+                    Field<Object> leftField = field(name(left[0], left[1]), Object.class);
+                    Field<Object> rightField = field(name(right[0], right[1]), Object.class);
+                    return DSL.condition(leftField.eq(rightField));
                 })
                 .toArray(Condition[]::new);
     }
