@@ -165,13 +165,13 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
           return;
         }
         console.warn('item: ', item);
-        const indexTmp = item.config.columns.findIndex((col: any) => col.id === field.fieldId);
+        const indexTmp = item.config.columns.findIndex((col: any) => col.id === field?.fieldId);
 
         console.warn('indexTmp: ', indexTmp);
         console.warn('field: ', field);
 
         if (indexTmp === -1) {
-          delete formData[field.fieldId];
+          delete formData[field?.fieldId];
         }
       })
       // 处理子表逻辑
@@ -394,7 +394,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
         {curFormPage.slice(0, curFormPage.length - 3)}
       </Sticky> */}
       <CustomNav
-       title={curFormPage.slice(0, curFormPage.length - 3)}
+        title={curFormPage.slice(0, curFormPage.length - 3)}
         style={{ background: '#fff' }}
         toBack={pageType === EDITOR_TYPES.LIST_EDITOR ? undefined : () => setPageType(EDITOR_TYPES.LIST_EDITOR)}
       />

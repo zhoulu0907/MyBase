@@ -1,8 +1,8 @@
 import { TabBar } from '@arco-design/mobile-react';
 import { IconUser, IconHome } from '@arco-design/mobile-react/esm/icon';
 import { useNavigate, useLocation } from 'react-router-dom';
-import React, { useEffect, useState } from 'react';
-import { TokenManager } from '@onebase/common';
+import { useEffect, useState } from 'react';
+// import { TokenManager } from '@onebase/common';
 import { UserPermissionManager } from '@/utils/permission';
 import { getPermissionInfo } from '@onebase/platform-center';
 import styles from './index.module.less';
@@ -18,12 +18,12 @@ export default function RuntimeHome() {
   const tabs = [
     {
       title: '首页',
-      icon: <IconHome />,
+      icon: <IconHome />
     },
     {
       title: '我的',
-      icon: <IconUser />,
-    },
+      icon: <IconUser />
+    }
   ];
 
   const clickTab = (index: number) => {
@@ -32,8 +32,7 @@ export default function RuntimeHome() {
     sp.set('curTab', String(index));
     const to = `${location.pathname}?${sp.toString()}`;
     navigate(to, { replace: true });
-  }
-
+  };
 
   useEffect(() => {
     getUserInfo();
@@ -47,17 +46,14 @@ export default function RuntimeHome() {
     setUsername(res.user.username);
   };
 
-
   return (
     <div className={styles.runtimeHome}>
-      {
-        activeIndex === 0 ? <Home nickname={nickname} /> : <Me {...{ nickname, username }} />
-      }
+      {activeIndex === 0 ? <Home nickname={nickname} /> : <Me {...{ nickname, username }} />}
       <TabBar
         fixed={true}
         className={styles.tabBar}
         activeIndex={activeIndex}
-        onChange={index => {
+        onChange={(index: number) => {
           clickTab(index);
         }}
       >

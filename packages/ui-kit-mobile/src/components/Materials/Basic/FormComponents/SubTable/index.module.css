@@ -1,0 +1,16 @@
+.collapse {
+
+  :global(.arco-collapse-header) {
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+
+  }
+
+  .collapseHeader {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-left: 0.16rem;
+  }
+}
