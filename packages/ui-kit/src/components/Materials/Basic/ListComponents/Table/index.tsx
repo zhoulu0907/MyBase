@@ -298,7 +298,7 @@ const XTable = memo(
               // 根据字段获取默认配置
               if (Array.isArray(mainMetaData?.parentFields)) {
                 const dataFieldInfo = mainMetaData.parentFields.find(
-                  (field: AppEntityField) => field.fieldId === column.id
+                  (field: AppEntityField) => field.fieldId === columnId
                 );
                 const cpType = COMPONENT_MAP[dataFieldInfo?.fieldType];
                 if (dataFieldInfo?.fieldType && cpType) {
@@ -318,7 +318,7 @@ const XTable = memo(
                   };
                   return (
                     <PreviewRender
-                      cpId={column.id}
+                      cpId={columnId}
                       cpType={cpType}
                       detailMode={true}
                       pageComponentSchema={componentConfig}
@@ -457,7 +457,14 @@ const XTable = memo(
             );
             if (userSelectField && newItem[key]) {
               if (newItem[key]) {
-                newItem[key] = newItem[key]?.userName || '';
+                if (typeof newItem[key] === 'string') {
+                  newItem[key] = {
+                    userID: newItem[key],
+                    userName: newItem[key]
+                  }
+                } else {
+                  newItem[key] = newItem[key]?.userName || '';
+                }
               }
             }
 
