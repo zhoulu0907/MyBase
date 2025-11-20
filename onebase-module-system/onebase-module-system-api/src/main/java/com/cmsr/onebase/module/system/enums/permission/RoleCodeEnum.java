@@ -15,7 +15,6 @@ public enum RoleCodeEnum {
     TENANT_ADMIN("tenant_admin", "租户管理员"),
     CORP_ADMIN("corp_admin", "企业管理员"),
     APP_DEVELOPER("app_developer", "应用开发者"),
-    ROLE_SYSTEM_ADMIN("ROLE_SYSTEM_ADMIN", "应用管理员"),
     ;
 
     /**

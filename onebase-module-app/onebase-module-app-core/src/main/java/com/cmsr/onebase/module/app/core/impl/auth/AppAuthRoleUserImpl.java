@@ -50,10 +50,4 @@ public class AppAuthRoleUserImpl implements AppAuthRoleUser {
         return authRoleDTOS;
     }
 
-    @Override
-    public boolean findAdminByRoleIdAndUserId(Long roleId, Long userId) {
-      List<AuthRoleUserDO> userRoleDOList=  appAuthRoleUserRepository.findAdminByRoleIdAndUserId(roleId,userId);
-        return !userRoleDOList.isEmpty();
-    }
-
 }
