@@ -19,55 +19,31 @@ public class FlinkUtil {
         if (type == null) {
             throw new IllegalArgumentException("Type cannot be null");
         }
-        switch (type.toUpperCase()) {
-            case "CHAR":
-                return DataTypes.CHAR(length);
-            case "VARCHAR":
-                return DataTypes.VARCHAR(length);
-            case "STRING":
-                return DataTypes.STRING();
-            case "BOOLEAN":
-                return DataTypes.BOOLEAN();
-            case "BINARY":
-                return DataTypes.BINARY(length);
-            case "VARBINARY":
-                return DataTypes.VARBINARY(length);
-            case "BYTES":
-                return DataTypes.BYTES();
-            case "DECIMAL":
-                return DataTypes.DECIMAL(precision, scale);
-            case "TINYINT":
-                return DataTypes.TINYINT();
-            case "SMALLINT":
-                return DataTypes.SMALLINT();
-            case "INTEGER":
-                return DataTypes.INT();
-            case "BIGINT":
-                return DataTypes.BIGINT();
-            case "FLOAT":
-                return DataTypes.FLOAT();
-            case "DOUBLE":
-                return DataTypes.DOUBLE();
-            case "DATE":
-                return DataTypes.DATE();
-            case "TIME":
-                return DataTypes.TIME(0);
-            case "TIMESTAMP":
-                return DataTypes.TIMESTAMP(scale);
-            case "TIMESTAMP_LTZ":
-                return DataTypes.TIMESTAMP_LTZ(scale);
-            case "INTERVAL":
-                return DataTypes.INTERVAL(DataTypes.SECOND(3));
-            case "ARRAY":
-                return DataTypes.ARRAY(DataTypes.STRING());
-            case "MULTISET":
-                return DataTypes.MULTISET(DataTypes.STRING());
-            case "MAP":
-                return DataTypes.MAP(DataTypes.STRING(), DataTypes.STRING());
-            case "ROW":
-                return DataTypes.ROW();
-            default:
-                throw new IllegalArgumentException("Unsupported Flink data type: " + type);
-        }
+        return switch (type.toUpperCase()) {
+            case "CHAR" -> DataTypes.CHAR(length);
+            case "VARCHAR" -> DataTypes.VARCHAR(length);
+            case "STRING" -> DataTypes.STRING();
+            case "BOOLEAN" -> DataTypes.BOOLEAN();
+            case "BINARY" -> DataTypes.BINARY(length);
+            case "VARBINARY" -> DataTypes.VARBINARY(length);
+            case "BYTES" -> DataTypes.BYTES();
+            case "DECIMAL" -> DataTypes.DECIMAL(precision, scale);
+            case "TINYINT" -> DataTypes.TINYINT();
+            case "SMALLINT" -> DataTypes.SMALLINT();
+            case "INTEGER" -> DataTypes.INT();
+            case "BIGINT" -> DataTypes.BIGINT();
+            case "FLOAT" -> DataTypes.FLOAT();
+            case "DOUBLE" -> DataTypes.DOUBLE();
+            case "DATE" -> DataTypes.DATE();
+            case "TIME" -> DataTypes.TIME(0);
+            case "TIMESTAMP" -> DataTypes.TIMESTAMP(scale);
+            case "TIMESTAMP_LTZ" -> DataTypes.TIMESTAMP_LTZ(scale);
+            case "INTERVAL" -> DataTypes.INTERVAL(DataTypes.SECOND(3));
+            case "ARRAY" -> DataTypes.ARRAY(DataTypes.STRING());
+            case "MULTISET" -> DataTypes.MULTISET(DataTypes.STRING());
+            case "MAP" -> DataTypes.MAP(DataTypes.STRING(), DataTypes.STRING());
+            case "ROW" -> DataTypes.ROW();
+            default -> throw new IllegalArgumentException("Unsupported Flink data type: " + type);
+        };
     }
 }
