@@ -1,8 +1,10 @@
 package com.cmsr.onebase.module.etl.executor.util;
 
 import com.cmsr.onebase.module.etl.common.graph.Node;
-import com.cmsr.onebase.module.etl.executor.graph.JdbcOutputNode;
 import com.cmsr.onebase.module.etl.executor.graph.JdbcInputNode;
+import com.cmsr.onebase.module.etl.executor.graph.JdbcOutputNode;
+import com.cmsr.onebase.module.etl.executor.graph.PairJoinNode;
+import com.cmsr.onebase.module.etl.executor.graph.UnionNode;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.ObjectCodec;
@@ -40,8 +42,12 @@ public class JacksonUtil {
                     return codec.treeToValue(node, JdbcInputNode.class);
                 case "jdbc_output":
                     return codec.treeToValue(node, JdbcOutputNode.class);
+                case "pair_join":
+                    return codec.treeToValue(node, PairJoinNode.class);
+                case "union":
+                    return codec.treeToValue(node, UnionNode.class);
                 default:
-                    return codec.treeToValue(node, Node.class);
+                    throw new RuntimeException("unknown node type: " + type);
             }
         }
     }
