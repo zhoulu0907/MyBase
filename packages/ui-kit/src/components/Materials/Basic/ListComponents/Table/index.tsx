@@ -457,7 +457,14 @@ const XTable = memo(
             );
             if (userSelectField && newItem[key]) {
               if (newItem[key]) {
-                newItem[key] = newItem[key]?.userName || '';
+                if (typeof newItem[key] === 'string') {
+                  newItem[key] = {
+                    userID: newItem[key],
+                    userName: newItem[key]
+                  }
+                } else {
+                  newItem[key] = newItem[key]?.userName || '';
+                }
               }
             }
 
