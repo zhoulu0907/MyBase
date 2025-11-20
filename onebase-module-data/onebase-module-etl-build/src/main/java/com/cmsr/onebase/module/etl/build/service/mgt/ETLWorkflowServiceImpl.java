@@ -230,7 +230,7 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
         String jobIdStr = scheduleJobDO.getJobId();
         if (StringUtils.isBlank(jobIdStr)) {
             // create
-            HttpTask httpTask = HttpTask.ofUrl(flinkServerUrl)
+            HttpTask httpTask = HttpTask.ofUrl(flinkServerUrl + "/flink/execute")
                     .method(HttpTask.HttpMethod.POST)
                     .body(JsonUtils.toJsonString(Map.of("workflowId", workflowId)));
             jobId = dolphinSchedulerClient.createSingletonHttpWorkflow(etlProjectCode,

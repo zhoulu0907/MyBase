@@ -64,6 +64,12 @@ public class AppAuthSecurityApiImpl implements AppAuthSecurityApi {
     }
 
     @Override
+    public boolean isApplicationAdmin(Long userId, Long applicationId) {
+        UserRoleDTO userRoleDTO = appAuthRoleProvider.findUserRoleByApplication(userId, applicationId);
+        return userRoleDTO != null && userRoleDTO.isAdminRole();
+    }
+
+    @Override
     public OperationPermission getMenuOperationPermission(Long userId, Long applicationId, Long menuId) {
         String redisKey = CacheUtils.keyForOperationPermission(userId, applicationId, menuId);
         RBucket<OperationPermission> bucket = redissonClient.getBucket(redisKey, CacheUtils.KRYO5_CODEC);
