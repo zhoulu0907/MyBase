@@ -96,7 +96,6 @@ const Right: React.FC = () => {
       if (appId) {
         const res = await getApplication({ id: appId });
         if (res) {
-          console.log("xxxx:", res)
           setCurAppInfo(res);
         }
       }
@@ -170,7 +169,8 @@ const Right: React.FC = () => {
             accessToken: response.accessToken,
             refreshToken: response.refreshToken,
             expiresTime: response.expiresTime,
-            tenantId: response.tenantId
+            tenantId: response.tenantId,
+            adminFlag: response.adminFlag || false
           },
           rememberMe
         );
@@ -220,7 +220,6 @@ const Right: React.FC = () => {
   // 验证码验证成功回调
   const handleCaptchaSuccess = async (token: string) => {
     const values = await form.getFieldsValue();
-    console.log('values:', values);
 
     if (curAppInfo.value.publishModel === PUBLISH_MODULE.SASS) {
       handleSubmit({

@@ -6,7 +6,6 @@ import {
   IconList,
   IconMenuFold,
   IconMenuUnfold,
-  IconUser,
   IconUserGroup
 } from '@arco-design/web-react/icon';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';

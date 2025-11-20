@@ -1,6 +1,7 @@
 import { useI18n } from '@/hooks/useI18n';
 // import { useAppStore } from '@/store/store_app';
 import AvatarSVG from '@/assets/images/avatar.svg';
+import BuildingLine from '@/assets/images/building-line.svg';
 import { DynamicIcon } from '@/components';
 import { appInfoSignal } from '@/store/app';
 import { UserPermissionManager } from '@/utils/permission';
@@ -30,10 +31,6 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   const [userInfo, setUserInfo] = useState<any>(null);
   // 获取用户信息
   const tokenInfo = TokenManager.getTokenInfo();
-
-  useEffect(()=>{
-console.log("xxxx2:  ", curAppInfo)
-  }, [curAppInfo])
 
   useEffect(() => {
     if (tokenInfo?.accessToken) {
@@ -71,7 +68,6 @@ console.log("xxxx2:  ", curAppInfo)
 
   const getInfo = async () => {
     const res = await getPermissionInfo();
-    console.log(res);
     UserPermissionManager.setUserPermissionInfo(res);
     const mobile = res.user.mobile;
     const formatMobile = maskMobile(mobile);
@@ -102,17 +98,17 @@ console.log("xxxx2:  ", curAppInfo)
         </div>
       </Menu.Item>
       <Divider style={{ margin: '4px 0' }} />
-      <Menu.Item
-        key="setting"
-        onClick={() => {
-          navigate('/onebase/setting');
-        }}
-      >
-        <div className={styles.menu}>
-          {/* <img src={spaceShipLine} /> */}
-          企业管理后台
+     {<Menu.Item
+          key="setting"
+          onClick={() => {
+            navigate('/onebase/setting');
+          }}
+        >
+        <div className={styles.headerContent}>
+          <img src={BuildingLine} />
+          <span>企业管理后台</span>
         </div>
-      </Menu.Item>
+      </Menu.Item>}
       <Menu.Item key="logout" onClick={handleLogout}>
         <IconExport style={{ color: '#F53F3F' }} />
         <Typography.Text type="error">{t('header.logout')}</Typography.Text>

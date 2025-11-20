@@ -11,7 +11,7 @@ import TenantEditPage from './pages/Tenant/edit';
 import UserPage from './pages/User';
 
 import styles from './index.module.less';
-import AuthorizedApplication from './pages/Business/components/authorizedApp';
+import AuthorizedApplication from './pages/authorizedApp';
 
 
 const Content = Layout.Content;

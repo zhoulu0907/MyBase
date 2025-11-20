@@ -45,46 +45,18 @@ export const TENANT_USER_PERMISSION = {
   STATUS: TENANT_USER_STATUS
 }
 
-/** 租户管理-角色管理 */ 
-export const TENANT_ROLE_QUERY = 'tenant:role:query'; // 查询角色
-export const TENANT_ROLE_CREATE = 'tenant:role:create'; // 新增角色
-export const TENANT_ROLE_UPDATE = 'tenant:role:update'; // 修改角色
-export const TENANT_ROLE_DELETE = 'tenant:role:delete'; // 删除角色
-export const TENANT_ROLE_ASSIGN_USER = 'tenant:role:user'; // 分配用户
-export const TENANT_ROLE_ASSIGN_PERMISSION = 'tenant:role:permission'; // 分配角色权限
-export const TENANT_ROLE_PERMISSION = {
-  QUERY: TENANT_ROLE_QUERY,
-  CREATE: TENANT_ROLE_CREATE,
-  UPDATE: TENANT_ROLE_UPDATE,
-  DELETE: TENANT_ROLE_DELETE,
-  USER: TENANT_ROLE_ASSIGN_USER,
-  PERMISSION: TENANT_ROLE_ASSIGN_PERMISSION
-}
-
 /** 租户管理-组织管理 */
 export const TENANT_DEPT_QUERY = 'tenant:dept:query';
 export const TENANT_DEPT_CREATE = 'tenant:dept:create';
 export const TENANT_DEPT_UPDATE = 'tenant:dept:update';
 export const TENANT_DEPT_DELETE = 'tenant:dept:delete';
+export const TENANT_DEPT_SUB_DEPT = 'tenant:dept:update'; 
 export const TENANT_DEPT_PERMISSION = {
   QUERY: TENANT_DEPT_QUERY,
   CREATE: TENANT_DEPT_CREATE,
   UPDATE: TENANT_DEPT_UPDATE,
-  DELETE: TENANT_DEPT_DELETE
-}
-
-/** 租户管理-数据字典管理 */
-export const TENANT_DICT_QUERY = 'tenant:dict:query';
-export const TENANT_DICT_CREATE = 'tenant:dict:create';
-export const TENANT_DICT_UPDATE = 'tenant:dict:update';
-export const TENANT_DICT_DELETE = 'tenant:dict:delete';
-export const TENANT_DICT_STATUS = 'tenant:dict:enable';
-export const TENANT_DICT_PERMISSION = {
-  QUERY: TENANT_DICT_QUERY,
-  CREATE: TENANT_DICT_CREATE,
-  UPDATE: TENANT_DICT_UPDATE,
-  DELETE: TENANT_DICT_DELETE,
-  STATUS: TENANT_DICT_STATUS,
+  DELETE: TENANT_DEPT_DELETE,
+  SUB_DEPT: TENANT_DEPT_SUB_DEPT
 }
 
 /** 租户管理-租户信息 */

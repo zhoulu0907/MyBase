@@ -53,7 +53,7 @@ export interface RuntimeAccountLoginRequest {
 }
 
 export interface RuntimeCorpLoginRequest {
-   /**
+  /**
    * 应用id
    */
   corpId: string;
