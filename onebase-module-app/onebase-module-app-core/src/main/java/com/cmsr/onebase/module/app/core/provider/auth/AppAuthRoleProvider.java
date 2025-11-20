@@ -34,12 +34,13 @@ public class AppAuthRoleProvider {
     private AppAuthRoleDeptRepository appAuthRoleDeptRepository;
 
     public UserRoleDTO findUserRoleByApplication(Long userId, Long applicationId) {
-        List<AuthRoleDO> authRoleDOS1 = appAuthRoleRepository.findByUserIdAndApplicationId(userId, applicationId);
-        List<AuthRoleDO> authRoleDOS2 = findRolesByDept(userId, applicationId);
-
         List<AuthRoleDO> authRoleDOS = new ArrayList<>();
-        authRoleDOS.addAll(authRoleDOS1);
-        authRoleDOS.addAll(authRoleDOS2);
+
+        List<AuthRoleDO> userAuthRoleDOS = appAuthRoleRepository.findByUserIdAndApplicationId(userId, applicationId);
+        authRoleDOS.addAll(userAuthRoleDOS);
+
+        List<AuthRoleDO> deptAuthRoleDOS = findRolesByDept(userId, applicationId);
+        authRoleDOS.addAll(deptAuthRoleDOS);
 
         UserRoleDTO userRoleDTO = new UserRoleDTO();
         userRoleDTO.setAdminRole(false);
