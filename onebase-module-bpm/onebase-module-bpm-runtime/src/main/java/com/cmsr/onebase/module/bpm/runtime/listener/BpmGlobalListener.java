@@ -103,21 +103,8 @@ public class BpmGlobalListener implements GlobalListener {
             }
         }
 
-        // 查找剩余未操作的用户
-        List<User> unoperatorUsers = userService.listByAssociatedAndTypes(currTask.getId());
-
-        if (CollectionUtils.isNotEmpty(unoperatorUsers)) {
-            // todo 排除自己
-            Set<String> ccPermissionList = unoperatorUsers.stream()
-                    .filter( item -> !Objects.equals(item.getProcessedBy(), flowParams.getHandler()))
-                    .map(User::getProcessedBy)
-                    .collect(Collectors.toSet());
-
-            if (CollectionUtils.isNotEmpty(ccPermissionList)) {
-                flowVariable.put(BpmConstants.VAR_CC_USERS_KEY + "_" + currTask.getNodeCode(),
-                        JsonUtils.toJsonString(ccPermissionList));
-            }
-        }
+        // 处理未操作的用户
+        handleUnOperatorUsersOnAssignment(listenerVariable);
     }
 
     public void finish(ListenerVariable listenerVariable) {
@@ -241,5 +228,32 @@ public class BpmGlobalListener implements GlobalListener {
 
         // 保存代理用户
         userService.saveBatch(agentUsers);
+    }
+
+    private void handleUnOperatorUsersOnAssignment(ListenerVariable listenerVariable) {
+        Task currTask = listenerVariable.getTask();
+        FlowParams flowParams = listenerVariable.getFlowParams();
+        Map<String, Object> flowVariable = listenerVariable.getVariable();
+
+        // 不一定有待办
+        if (currTask == null) {
+            return;
+        }
+
+        // 查找剩余未操作的用户
+        List<User> unoperatorUsers = userService.listByAssociatedAndTypes(currTask.getId());
+
+        if (CollectionUtils.isNotEmpty(unoperatorUsers)) {
+            // todo 排除自己
+            Set<String> ccPermissionList = unoperatorUsers.stream()
+                    .filter( item -> !Objects.equals(item.getProcessedBy(), flowParams.getHandler()))
+                    .map(User::getProcessedBy)
+                    .collect(Collectors.toSet());
+
+            if (CollectionUtils.isNotEmpty(ccPermissionList)) {
+                flowVariable.put(BpmConstants.VAR_CC_USERS_KEY + "_" + currTask.getNodeCode(),
+                        JsonUtils.toJsonString(ccPermissionList));
+            }
+        }
     }
 }
