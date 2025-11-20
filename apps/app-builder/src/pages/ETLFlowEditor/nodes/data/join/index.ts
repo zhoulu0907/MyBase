@@ -11,6 +11,13 @@ export const JoinNodeRegistry: FlowNodeRegistry = {
     deleteDisable: false,
     selectable: true
   },
+  canAddLine: (fromPort, toPort, lines) => {
+    // 控制线条添加数目
+    if (toPort.availableLines.length >= 2) {
+      return false
+    }
+    return true;
+  },
   /**
    * Render node via formMeta
    */
