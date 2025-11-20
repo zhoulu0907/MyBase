@@ -1,6 +1,6 @@
 import { useI18n } from '@/hooks/useI18n';
 import { useAppStore } from '@/store/store_app';
-import { Button, Divider, Dropdown, Input, Menu, Pagination, Select, Spin, Tag, Tooltip } from '@arco-design/web-react';
+import { Button, Divider, Dropdown, Input, Link, Menu, Pagination, Select, Spin, Tag, Tooltip, Typography } from '@arco-design/web-react';
 import { IconEmpty, IconMoreVertical, IconSearch } from '@arco-design/web-react/icon';
 import { listApplication, type Application, type PageParam } from '@onebase/app';
 import { getCommonPaginationList, getRuntimeURL, TokenManager } from '@onebase/common';
@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import arrowRightUp from '@/assets/images/arrow-right-up.svg';
-import emptyApplicationSVG from '@/assets/images/empty_application.svg';
+import emptyApplicationSVG from '@/assets/images/tenantNoContent.svg';
 import DynamicIcon from '@/components/DynamicIcon';
 import { PermissionButton } from '@/components/PermissionControl';
 import { TENANT_DEPT_PERMISSION as ACTIONS } from '@/constants/permission';
@@ -276,6 +276,7 @@ const EnterpriseAppPage: React.FC = () => {
               {applicationEmpty && !loading && (
                 <div className={styles.applicationEmpty}>
                   <img src={emptyApplicationSVG} alt="暂无应用" />
+                  <Typography.Text type='secondary'>还没有应用，<Link onClick={()=>{navigate('/onebase/setting/application')}}>应用管理！</Link></Typography.Text>
                 </div>
               )}
               {applicationFilterEmpty && !loading && (

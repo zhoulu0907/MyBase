@@ -9,7 +9,7 @@ import { hasPermission, /* UserPermissionManager */ } from '@/utils/permission';
 import { TENANT_INFO_PERMISSION as ACTIONS } from '@/constants/permission';
 import StatusTag from '@/components/StatusTag';
 import { appIconMap } from '@onebase/ui-kit';
-import DynamicIcon from '@/components/DynamicIcon';
+import { DynamicIcon } from '@/components/DynamicIcon';
 import styles from './index.module.less';
 import {
   getApplicationSimple,

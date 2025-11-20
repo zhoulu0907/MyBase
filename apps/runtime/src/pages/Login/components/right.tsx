@@ -21,7 +21,7 @@ import {
 import { appIconMap } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useRef, useState } from 'react';
-import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useI18n } from '../../../hooks/useI18n';
 import { useRememberMe } from '../../../hooks/useRememberMe';
 import styles from '../index.module.less';
@@ -34,6 +34,15 @@ interface APP_INFO {
     iconColor: string,
     id: string
 }
+
+/**
+ * 运行态登录一共有三种模式 
+1.企业登录（手机号 + 密码）仅需传递tenantId. 
+2.空间应用saas模式登录 （手机号 + 密码） 需传递appId+ tenantId   
+3.空间应用inner模式登录（账号+ 密码） 需传递appId+ tenantId
+4.原本的登录模式（账号+密码） 需传递appId
+ * @returns 
+ */
 
 const Right: React.FC = () => {
   useSignals();
@@ -92,9 +101,10 @@ const Right: React.FC = () => {
       const endRedirectURL = redirectURL.slice(startIndex + runtimeLength);
       const endIndex = endRedirectURL?.indexOf('/');
       const applicationId = redirectURL.slice(startIndex + runtimeLength, startIndex + runtimeLength + endIndex);
-
-      if (appId) {
-        const res = await getApplication({ id: appId });
+      if (applicationId || appId) {
+        //已发布的应用登录之后获取到appId（路由携带参数?appId=${appId},
+        //从编辑态点击访问登录获取到applicationId，（/runtime/${appId}）
+        const res = await getApplication({ id: applicationId ? applicationId : appId});
         if (res) {
           setCurAppInfo(res);
         }

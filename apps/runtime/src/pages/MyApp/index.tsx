@@ -1,6 +1,6 @@
 import { useI18n } from '@/hooks/useI18n';
 import { useAppStore } from '@/store';
-import { Button, Divider, Dropdown, Input, Menu, Pagination, Select, Spin, Tag, Tooltip } from '@arco-design/web-react';
+import { Button, Divider, Dropdown, Input, Layout, Menu, Pagination, Select, Spin, Tag, Tooltip, Typography } from '@arco-design/web-react';
 import { IconEmpty, IconMoreVertical, IconSearch } from '@arco-design/web-react/icon';
 import { listApplication, type Application, type PageParam } from '@onebase/app';
 import { getCommonPaginationList, getRuntimeURL, TokenManager } from '@onebase/common';
@@ -8,7 +8,7 @@ import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import emptyApplicationSVG from '@/assets/images/empty_application.svg';
+import noContentSVG from '@/assets/images/noContent.svg';
 import {DynamicIcon} from '@/components/DynamicIcon';
 import { appIconMap } from '@onebase/ui-kit';
 import TagModal from './components/tagModal';
@@ -191,199 +191,202 @@ const MyAppPage: React.FC = () => {
   };
 
   return (
-    <div className={styles.myAppPage}>
-      <div className={styles.myAppPageHeader}>
-        <AppHeader />
-      </div>
+     <Layout className={styles.homePage}>
+      <AppHeader />
+      <Layout className={styles.myAppPageContent}>
+        <div className={styles.myAppPageHeader}></div>
+        <div className={styles.myAppPage}>
+        <div className={styles.myAppContainer}>
+          <div className={styles.appHasDataBox}>
+            <div
+              className={styles.myAppFilter}
+              style={{
+                pointerEvents: applicationEmpty ? 'auto' : 'unset'
+              }}
+            >
+              <Input
+                className={styles.myAppInput}
+                allowClear
+                suffix={<IconSearch />}
+                onChange={handleSearchChange}
+                placeholder="搜索"
+              />
 
-      <div className={styles.myAppContainer}>
-        <div className={styles.appHasDataBox}>
-          <div
-            className={styles.myAppFilter}
-            style={{
-              pointerEvents: applicationEmpty ? 'auto' : 'unset'
-            }}
-          >
-            <Input
-              className={styles.myAppInput}
-              allowClear
-              suffix={<IconSearch />}
-              onChange={handleSearchChange}
-              placeholder="搜索"
-            />
-
-            {/* 筛选下拉框 */}
-            <div>
-              <Select
-                placeholder="全部应用"
-                bordered={false}
-                style={{ width: 100 }}
-                value={ownerTag}
-                onChange={(value) => setOwnerTag(value)}
-              >
-                {appOptions.map((option, index) => (
-                  <Option key={index} value={option.value}>
-                    {option.label}
-                  </Option>
-                ))}
-              </Select>
-              <Divider type="vertical" />
-              <Select
-                placeholder="按创建时间排序"
-                bordered={false}
-                style={{ width: 138 }}
-                onChange={(value) => setOrderByTime(value)}
-                value={orderByTime}
-              >
-                {createTimeOptions.map((option, index) => (
-                  <Option key={index} value={option.value}>
-                    {option.label}
-                  </Option>
-                ))}
-              </Select>
-              <Divider type="vertical" />
-              <Select
-                placeholder="全部状态"
-                bordered={false}
-                style={{ width: 100 }}
-                onChange={(value) => setStatus(value)}
-                value={status}
-              >
-                {statusOptions.map((option, index) => (
-                  <Option key={index} value={option.value}>
-                    {option.label}
-                  </Option>
-                ))}
-              </Select>
+              {/* 筛选下拉框 */}
+              <div>
+                <Select
+                  placeholder="全部应用"
+                  bordered={false}
+                  style={{ width: 100 }}
+                  value={ownerTag}
+                  onChange={(value) => setOwnerTag(value)}
+                >
+                  {appOptions.map((option, index) => (
+                    <Option key={index} value={option.value}>
+                      {option.label}
+                    </Option>
+                  ))}
+                </Select>
+                <Divider type="vertical" />
+                <Select
+                  placeholder="按创建时间排序"
+                  bordered={false}
+                  style={{ width: 138 }}
+                  onChange={(value) => setOrderByTime(value)}
+                  value={orderByTime}
+                >
+                  {createTimeOptions.map((option, index) => (
+                    <Option key={index} value={option.value}>
+                      {option.label}
+                    </Option>
+                  ))}
+                </Select>
+                <Divider type="vertical" />
+                <Select
+                  placeholder="全部状态"
+                  bordered={false}
+                  style={{ width: 100 }}
+                  onChange={(value) => setStatus(value)}
+                  value={status}
+                >
+                  {statusOptions.map((option, index) => (
+                    <Option key={index} value={option.value}>
+                      {option.label}
+                    </Option>
+                  ))}
+                </Select>
+              </div>
             </div>
-          </div>
 
-          {/* 我的应用列表 */}
-          <Spin loading={loading} size={40} style={{ width: '100%', height: '100%' }} tip="加载中...">
-            <div className={styles.myAppList} ref={appContainerRef}>
-              {applicationEmpty && !loading && (
-                <div className={styles.applicationEmpty}>
-                  <img src={emptyApplicationSVG} alt="暂无应用" />
-                </div>
-              )}
-              {applicationFilterEmpty && !loading && (
-                <div className={styles.applicationEmpty}>
-                  <IconEmpty fontSize={56} />
-                  暂无数据
-                </div>
-              )}
-              {dataList?.map((item, index) => (
-                <div className={styles.myAppCard} key={index}>
-                  <div className={styles.myAppCardTop}>
-                    <div className={styles.myAppCardHeader}>
-                      <div className={styles.myAppName}>
-                        <div className={styles.myAppIcon} style={{ backgroundColor: item.iconColor }}>
-                          <DynamicIcon
-                            IconComponent={appIconMap[item.iconName as keyof typeof appIconMap]}
-                            theme="outline"
-                            size="32"
-                            fill="#F2F3F5"
-                          />
-                        </div>
-                        <div className={styles.myAppCardInfo}>
-                          <div className={styles.infoHeader}>
-                            {/* <Tooltip content={item.appName}>
-                              <div className={styles.myAppTitle}>{item.appName}</div>
-                            </Tooltip>
-                            <Tag color={getColor(item.publishModel)} className={styles.tag}>
-                              {getModel(item.publishModel)}
-                            </Tag> */}
+            {/* 我的应用列表 */}
+            <Spin loading={loading} size={40} style={{ width: '100%', height: '100%' }} tip="加载中...">
+              <div className={styles.myAppList} ref={appContainerRef}>
+                {applicationEmpty && !loading && (
+                  <div className={styles.applicationEmpty}>
+                    <img src={noContentSVG} alt="暂无应用" />
+                    <Typography.Text type='secondary'>你的企业还没有应用，联系管理员开通吧！</Typography.Text>
+                  </div>
+                )}
+                {applicationFilterEmpty && !loading && (
+                  <div className={styles.applicationEmpty}>
+                    <IconEmpty fontSize={56} />
+                    暂无数据
+                  </div>
+                )}
+                {dataList?.map((item, index) => (
+                  <div className={styles.myAppCard} key={index}>
+                    <div className={styles.myAppCardTop}>
+                      <div className={styles.myAppCardHeader}>
+                        <div className={styles.myAppName}>
+                          <div className={styles.myAppIcon} style={{ backgroundColor: item.iconColor }}>
+                            <DynamicIcon
+                              IconComponent={appIconMap[item.iconName as keyof typeof appIconMap]}
+                              theme="outline"
+                              size="32"
+                              fill="#F2F3F5"
+                            />
                           </div>
-                          <Tag
-                            color={TagColor[item.appStatus]}
-                            style={{
-                              fontSize: 12,
-                              fontWeight: 400
-                            }}
+                          <div className={styles.myAppCardInfo}>
+                            <div className={styles.infoHeader}>
+                              {/* <Tooltip content={item.appName}>
+                                <div className={styles.myAppTitle}>{item.appName}</div>
+                              </Tooltip>
+                              <Tag color={getColor(item.publishModel)} className={styles.tag}>
+                                {getModel(item.publishModel)}
+                              </Tag> */}
+                            </div>
+                            <Tag
+                              color={TagColor[item.appStatus]}
+                              style={{
+                                fontSize: 12,
+                                fontWeight: 400
+                              }}
+                            >
+                              {item.appStatusText}
+                            </Tag>
+                            <Divider type="vertical" style={{ margin: '0 4px 0 6px', height: '8px' }} />
+                            <span className={styles.versionNumber}>{item.versionNumber}</span>
+                          </div>
+                        </div>
+                        <Dropdown
+                          droplist={menu(item)}
+                          trigger="click"
+                          position="bottom"
+                          popupVisible={optionVisibleId === item.id}
+                          onVisibleChange={(v) => handleOptionVisibleChange(v, item.id)}
+                          getPopupContainer={(node) => node.parentNode as HTMLElement}
+                        >
+                          <Button
+                            type="text"
+                            className={styles.optionbtn}
+                            onPointerEnter={clearTimer}
+                            onPointerLeave={() => startCloseTimer(80)}
                           >
-                            {item.appStatusText}
-                          </Tag>
-                          <Divider type="vertical" style={{ margin: '0 4px 0 6px', height: '8px' }} />
-                          <span className={styles.versionNumber}>{item.versionNumber}</span>
+                            <IconMoreVertical style={{ color: '#272e3b' }} />
+                          </Button>
+                        </Dropdown>
+                      </div>
+
+                      <div className={styles.myAppCardBody}>
+                        <div className={styles.myAppDesc}>{item.description ?? '该应用暂无介绍。'}</div>
+                        <div className={styles.myAppTags}>
+                          {item.tags?.map((tag: { id: string; tagName: string }) => (
+                            <Tag
+                              key={tag.id}
+                              style={{
+                                color: item.themeColor || defaultTheme,
+                                height: '22px',
+                                backgroundColor: ThemeColorMap[item.themeColor ?? defaultTheme]
+                              }}
+                            >
+                              {tag.tagName}
+                            </Tag>
+                          ))}
                         </div>
                       </div>
-                      <Dropdown
-                        droplist={menu(item)}
-                        trigger="click"
-                        position="bottom"
-                        popupVisible={optionVisibleId === item.id}
-                        onVisibleChange={(v) => handleOptionVisibleChange(v, item.id)}
-                        getPopupContainer={(node) => node.parentNode as HTMLElement}
+                    </div>
+                    <div className={styles.myAppCardFooter}>
+                      <Button
+                        className={styles.footerBtn}
+                        type="outline"
+                        long
+                        onClick={() => {
+                          nagivateToDataFactory(item.id);
+                        }}
+                        // disabled={item.publishModel === "saas"}
                       >
-                        <Button
-                          type="text"
-                          className={styles.optionbtn}
-                          onPointerEnter={clearTimer}
-                          onPointerLeave={() => startCloseTimer(80)}
-                        >
-                          <IconMoreVertical style={{ color: '#272e3b' }} />
-                        </Button>
-                      </Dropdown>
-                    </div>
-
-                    <div className={styles.myAppCardBody}>
-                      <div className={styles.myAppDesc}>{item.description ?? '该应用暂无介绍。'}</div>
-                      <div className={styles.myAppTags}>
-                        {item.tags?.map((tag: { id: string; tagName: string }) => (
-                          <Tag
-                            key={tag.id}
-                            style={{
-                              color: item.themeColor || defaultTheme,
-                              height: '22px',
-                              backgroundColor: ThemeColorMap[item.themeColor ?? defaultTheme]
-                            }}
-                          >
-                            {tag.tagName}
-                          </Tag>
-                        ))}
-                      </div>
+                        进入应用
+                      </Button>
                     </div>
                   </div>
-                  <div className={styles.myAppCardFooter}>
-                    <Button
-                      className={styles.footerBtn}
-                      type="outline"
-                      long
-                      onClick={() => {
-                        nagivateToDataFactory(item.id);
-                      }}
-                      // disabled={item.publishModel === "saas"}
-                    >
-                      进入应用
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Spin>
+                ))}
+              </div>
+            </Spin>
 
-          <Pagination
-            className={styles.myAppPagination}
-            total={total}
-            current={pageNo}
-            pageSize={pageSize}
-            onChange={(pNo, pSize) => {
-              setPageNo(pNo);
-              setPageSize(pSize);
-            }}
-          />
+            <Pagination
+              className={styles.myAppPagination}
+              total={total}
+              current={pageNo}
+              pageSize={pageSize}
+              onChange={(pNo, pSize) => {
+                setPageNo(pNo);
+                setPageSize(pSize);
+              }}
+            />
+          </div>
         </div>
+        <TagModal
+          visible={tagModalVisible}
+          onOk={() => {
+            setTagModalVisible(false);
+          }}
+          onCancel={() => {
+            setTagModalVisible(false);
+          }}
+        />
       </div>
-      <TagModal
-        visible={tagModalVisible}
-        onOk={() => {
-          setTagModalVisible(false);
-        }}
-        onCancel={() => {
-          setTagModalVisible(false);
-        }}
-      />
-    </div>
+      </Layout>
+    </Layout>
   );
 };
 
