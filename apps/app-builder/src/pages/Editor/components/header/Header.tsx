@@ -22,15 +22,14 @@ import { IconArrowLeft } from '@arco-design/web-react/icon';
 import type { WorkflowJSON } from './headerType';
 import { VersionListSelect } from './versionList';
 import {
+  PageType,
   AppStatus,
   ENTITY_TYPE,
-  fetchPublish,
   getAppIdByPageSetId,
   getApplication,
   getDatasourceList,
   getEntityFieldsWithChildren,
   getPageSetMetaData,
-  PageType,
   updateApplicationMenu,
   fetchPublish,
   save,
@@ -43,14 +42,13 @@ import {
   EDITOR_TYPES,
   startLoadPageSet,
   startSavePageSet,
-  useFlowPageEditorSignal,
   useFormEditorSignal,
   useListEditorSignal,
   usePageEditorSignal,
   usePageViewEditorSignal,
+  useFlowPageEditorSignal,
   type SavePageSetParams
 } from '@onebase/ui-kit';
-import { useSignals } from '@preact/signals-react/runtime';
 import { cloneDeep } from 'lodash-es';
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -114,8 +112,6 @@ interface VersionListSelectRef {
 export default function EditorHeader() {
   const selectRef = useRef<VersionListSelectRef>(null);
   const { curPage } = pagesRuntimeSignal;
-  useSignals();
-
   const { t } = useI18n();
   const [renameForm] = Form.useForm();
   const { clearCurComponentID } = usePageEditorSignal();
@@ -251,9 +247,9 @@ export default function EditorHeader() {
   }, [pageInfo]);
 
   useEffect(() => {
-    if (!editMode.value && pageSetId != '') {
+    if (!isEditMode && pageSetId != '') {
       loadPageSetInfo(pageSetId);
-      setEditMode(EditMode.PC);
+      setIsEditMode(true);
       handleGetAppInfo(pageSetId);
 
       // 工作台设计页不获取主表数据
