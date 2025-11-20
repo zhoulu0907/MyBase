@@ -210,6 +210,20 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         // 填充流程实例条件
         fillInsCondition(condition, reqVO);
 
+        // 发起人编码条件（支持多个值）
+        List<Long> initiatorIdList = Optional.ofNullable(reqVO.getInitiatorIdList())
+                .orElse(Collections.emptyList())
+                .stream()
+                .map(Long::valueOf)
+                .collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(initiatorIdList)) {
+            if (initiatorIdList.size() == 1) {
+                condition.and(Compare.EQUAL, "initiator_id", initiatorIdList.get(0));
+            } else {
+                condition.and(Compare.IN, "initiator_id", initiatorIdList);
+            }
+        }
+
         // 填充时间范围条件
         fillTimeRange(condition, "submit_time", reqVO.getSubmitTimeStart(), reqVO.getSubmitTimeEnd());
 
@@ -230,6 +244,20 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
 
         // 填充流程实例条件
         fillInsCondition(condition, reqVO);
+
+        // 发起人编码条件（支持多个值）
+        List<Long> initiatorIdList = Optional.ofNullable(reqVO.getInitiatorIdList())
+                .orElse(Collections.emptyList())
+                .stream()
+                .map(Long::valueOf)
+                .collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(initiatorIdList)) {
+            if (initiatorIdList.size() == 1) {
+                condition.and(Compare.EQUAL, "initiator_id", initiatorIdList.get(0));
+            } else {
+                condition.and(Compare.IN, "initiator_id", initiatorIdList);
+            }
+        }
 
         // 填充时间范围条件
         fillTimeRange(condition, "submit_time", reqVO.getSubmitTimeStart(), reqVO.getSubmitTimeEnd());
@@ -284,6 +312,9 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
 
         // 处理流程状态参数
         pageReqVO.setFlowStatusList(splitToFlowStatusList(pageReqVO.getFlowStatus()));
+
+        // 处理发起人参数
+        pageReqVO.setInitiatorIdList(splitToList(pageReqVO.getInitiatorId()));
 
         // 构建查询条件
         ConfigStore condition = buildDynamicCondition(pageReqVO, String.valueOf(loginUserId));
@@ -347,6 +378,9 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
 
         // 处理流程状态参数
         pageReqVO.setFlowStatusList(splitToFlowStatusList(pageReqVO.getFlowStatus()));
+
+        // 处理发起人参数
+        pageReqVO.setInitiatorIdList(splitToList(pageReqVO.getInitiatorId()));
 
         // 构建查询条件
         ConfigStore condition = buildDynamicCondition(pageReqVO, String.valueOf(loginUserId));
@@ -500,6 +534,9 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         // 处理流程状态参数
         pageReqVO.setFlowStatusList(splitToFlowStatusList(pageReqVO.getFlowStatus()));
 
+        // 处理发起人参数
+        pageReqVO.setInitiatorIdList(splitToList(pageReqVO.getInitiatorId()));
+
         // 构建查询条件
         ConfigStore condition = buildDynamicCondition(pageReqVO, String.valueOf(loginUserId));
 
@@ -521,6 +558,20 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
 
         // 填充流程实例条件
         fillInsCondition(condition, reqVO);
+
+        // 发起人编码条件（支持多个值）
+        List<Long> initiatorIdList = Optional.ofNullable(reqVO.getInitiatorIdList())
+                .orElse(Collections.emptyList())
+                .stream()
+                .map(Long::valueOf)
+                .collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(initiatorIdList)) {
+            if (initiatorIdList.size() == 1) {
+                condition.and(Compare.EQUAL, "initiator_id", initiatorIdList.get(0));
+            } else {
+                condition.and(Compare.IN, "initiator_id", initiatorIdList);
+            }
+        }
 
         // 填充时间范围条件
         fillTimeRange(condition, "submit_time", reqVO.getSubmitTimeStart(), reqVO.getSubmitTimeEnd());
