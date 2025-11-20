@@ -20,7 +20,7 @@ const TaskCenterPage: FC<any> = ({ curMenuId }) => {
     } else if (curMenuId === TASKMENU_TYPE.TASKICREATED) {
       return <ICreated appId={appId} />;
     } else if (curMenuId === TASKMENU_TYPE.TASKICOPIED) {
-      return <ICopied />;
+      return <ICopied appId={appId} />;
     } else if (curMenuId === TASKMENU_TYPE.TASKTASKPROXY) {
       return <TaskProxy appId={appId} />;
     } else {
