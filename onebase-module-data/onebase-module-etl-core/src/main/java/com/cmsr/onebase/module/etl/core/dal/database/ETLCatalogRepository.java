@@ -16,13 +16,14 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class ETLCatalogRepository implements IService<ETLCatalogDO> {
 
-    private DataRepository<ETLCatalogDO> dataRepository = new DataRepository<>();
+    private DataRepository<ETLCatalogDO> dataRepository;
 
     @Autowired
     private AnylineService<ETLCatalogDO> anylineService;
 
     @PostConstruct
     public void init() {
+        dataRepository = new DataRepository<>(ETLCatalogDO.class);
         dataRepository.setAnylineService(anylineService);
     }
 
