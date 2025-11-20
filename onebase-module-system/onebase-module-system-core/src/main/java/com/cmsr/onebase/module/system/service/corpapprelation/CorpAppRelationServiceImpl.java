@@ -5,11 +5,9 @@ import com.cmsr.onebase.framework.common.enums.CorpAppReationStatusEnum;
 import com.cmsr.onebase.framework.common.enums.CorpStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
 import com.cmsr.onebase.module.system.dal.database.CorpAppRelationDataRepository;
-import com.cmsr.onebase.module.system.dal.dataobject.corp.CorpDO;
 import com.cmsr.onebase.module.system.dal.dataobject.corpapprelation.CorpAppRelationDO;
 import com.cmsr.onebase.module.system.vo.corp.CorpApplicationRespVO;
 import com.cmsr.onebase.module.system.vo.corpapprelation.*;
@@ -18,9 +16,11 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,11 +47,14 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
 
     @Override
     public void createListCorpAppRelation(List<AppAuthTimeReqVO> corpAppRelationInertReqVOList, Long corpId) {
+        if (CollectionUtils.isEmpty(corpAppRelationInertReqVOList)) {
+            return;
+        }
         // 插入
         corpAppRelationInertReqVOList.forEach(corpAppRelationInertReqVO -> {
             // 先删除后插入
             ConfigStore configs = new DefaultConfigStore();
-            configs.eq(CorpAppRelationDO.APPLICATION_ID, corpAppRelationInertReqVO.getId() );
+            configs.eq(CorpAppRelationDO.APPLICATION_ID, corpAppRelationInertReqVO.getId());
             configs.eq(CorpAppRelationDO.CORP_ID, corpId);
             corpAppRelationDataRepository.deleteByConfig(configs);
 
@@ -72,12 +75,12 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
         vo.getApplicationIdList().forEach(appId -> {
             // 先删除后插入
             ConfigStore configs = new DefaultConfigStore();
-            configs.eq(CorpAppRelationDO.APPLICATION_ID,appId );
+            configs.eq(CorpAppRelationDO.APPLICATION_ID, appId);
             configs.eq(CorpAppRelationDO.CORP_ID, vo.getCorpId());
             corpAppRelationDataRepository.deleteByConfig(configs);
 
             // 验证是否重复提交，先删除后插入
-            CorpAppRelationDO corpAppRelationDO =  new CorpAppRelationDO();
+            CorpAppRelationDO corpAppRelationDO = new CorpAppRelationDO();
             corpAppRelationDO.setApplicationId(appId);
             corpAppRelationDO.setAuthorizationTime(vo.getAuthorizationTime());
             corpAppRelationDO.setExpiresTime(vo.getExpiresTime());
@@ -147,7 +150,6 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
     }
 
 
-
     /**
      * 获取app应用状态描述
      *
@@ -199,7 +201,7 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
 
     @Override
     public List<CorpAppRelationDO> getCorpAppRelationList(CorpAppRelationPageReqVO corpAppRelationPageReqVO) {
-        List<CorpAppRelationDO> corpApplicationRespVOList= corpAppRelationDataRepository.getCorpAppRelationList(corpAppRelationPageReqVO);
+        List<CorpAppRelationDO> corpApplicationRespVOList = corpAppRelationDataRepository.getCorpAppRelationList(corpAppRelationPageReqVO);
         return corpApplicationRespVOList;
     }
 }

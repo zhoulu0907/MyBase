@@ -5,12 +5,12 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Schema(description = "企业应用关联创建/修改 Request VO")
 @Data
 public class AppAuthTimeReqVO {
     @Schema(description = "应用id")
+    @NotNull(message = "授权应用ID不能为空")
     private  Long id;
 
     @Schema(description = "授权时间")
