@@ -1,13 +1,14 @@
-package com.cmsr.onebase.framework.base.config;
+package com.cmsr.onebase.framework.base.mybatis;
 
-import com.cmsr.onebase.framework.base.listener.BaseDOListener;
 import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.mybatisflex.annotation.KeyType;
 import com.mybatisflex.core.FlexGlobalConfig;
 import com.mybatisflex.core.audit.AuditManager;
-import com.mybatisflex.core.keygen.KeyGenerators;
+import com.mybatisflex.core.keygen.KeyGeneratorFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
@@ -15,10 +16,16 @@ import java.util.Map;
 
 @Configuration
 public class MyabtisFlexConfiguration {
-    private static final Logger logger = LoggerFactory
-            .getLogger("OneBase-SQL");
 
-    static {
+    private static final Logger logger = LoggerFactory.getLogger("OneBase-SQL");
+
+    private static final String SNOWFLAKE_UUID = "custom_snowflake";
+
+    @Autowired
+    private SnowflakeGenerator snowflakeGenerator;
+
+    @Bean
+    public FlexGlobalConfig flexGlobalConfig() {
         // mybatis-flex configs
         FlexGlobalConfig defaultConfig = FlexGlobalConfig.getDefaultConfig();
 
@@ -49,11 +56,15 @@ public class MyabtisFlexConfiguration {
         ));
 
         // key generators
+        KeyGeneratorFactory.register(SNOWFLAKE_UUID, snowflakeGenerator);
+
         FlexGlobalConfig.KeyConfig keyConfig = new FlexGlobalConfig.KeyConfig();
-        keyConfig.setKeyType(KeyType.Auto);
-        keyConfig.setValue(KeyGenerators.snowFlakeId);
+        keyConfig.setKeyType(KeyType.Generator);
+        keyConfig.setValue(SNOWFLAKE_UUID);
         keyConfig.setBefore(true);
 
         defaultConfig.setKeyConfig(keyConfig);
+
+        return defaultConfig;
     }
 }

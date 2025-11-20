@@ -2,10 +2,8 @@ package com.cmsr.onebase.module.etl.build.service;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
-import com.cmsr.onebase.module.etl.core.dal.database.ETLDatasourceRepository;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLDatasourceDO;
 import com.cmsr.onebase.module.etl.core.enums.ETLErrorCodeConstants;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.metadata.type.DatabaseType;
 import org.apache.commons.lang3.ClassUtils;
@@ -26,9 +24,6 @@ import java.util.regex.Pattern;
 @Component
 public class DatasourceFactory {
     private static final Pattern PARAM_PATTERN = Pattern.compile("\\{([^{}:]+)(:[^{}]+)?\\}");
-
-    @Resource
-    private ETLDatasourceRepository datasourceRepository;
 
     public DataSource constructDataSource(ETLDatasourceDO datasourceDO, boolean oneshot) {
         // 1. 获取数据库类型
