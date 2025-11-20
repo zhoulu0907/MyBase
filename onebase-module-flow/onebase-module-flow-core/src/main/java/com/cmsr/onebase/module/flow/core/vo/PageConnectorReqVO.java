@@ -7,7 +7,7 @@ import lombok.Data;
 @Data
 public class PageConnectorReqVO extends PageParam {
 
-    @NotNull
+    @NotNull(message = "应用ID不能为空")
     private Long applicationId;
 
     private String connectorName;

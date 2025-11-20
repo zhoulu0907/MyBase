@@ -38,6 +38,14 @@
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-security-build</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.konghq</groupId>
+            <artifactId>unirest-java-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.konghq</groupId>
+            <artifactId>unirest-modules-jackson</artifactId>
+        </dependency>
 
         <!-- Compile time -->
         <dependency>

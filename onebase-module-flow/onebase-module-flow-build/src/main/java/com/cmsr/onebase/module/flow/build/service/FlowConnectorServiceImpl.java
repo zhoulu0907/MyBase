@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.flow.build.service;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.flow.build.vo.CreateFlowConnectorReqVO;
 import com.cmsr.onebase.module.flow.build.vo.FlowConnectorVO;
 import com.cmsr.onebase.module.flow.build.vo.UpdateFlowConnectorReqVO;
@@ -12,6 +13,7 @@ import com.cmsr.onebase.module.flow.core.enums.FlowErrorCodeConstants;
 import com.cmsr.onebase.module.flow.core.vo.PageConnectorReqVO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -45,7 +47,10 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         connectorVO.setTypeCode(connectorDO.getTypeCode());
         connectorVO.setConnectorName(connectorVO.getConnectorName());
         connectorVO.setDescription(connectorDO.getDescription());
-        connectorVO.setConfigStr(connectorDO.getConfig());
+        String config = connectorDO.getConfig();
+        if (StringUtils.isNotBlank(config)) {
+            connectorVO.setConfig(JsonUtils.parseTree(config));
+        }
         connectorVO.setCreateTime(connectorDO.getCreateTime());
         return connectorVO;
     }
@@ -63,7 +68,7 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
     public Long createConnector(CreateFlowConnectorReqVO createVO) {
         FlowConnectorDO connectorDO = new FlowConnectorDO();
         connectorDO.setApplicationId(createVO.getApplicationId());
-        connectorDO.setConnectorName(createVO.getConnecotrName());
+        connectorDO.setConnectorName(createVO.getConnectorName());
         connectorDO.setDescription(createVO.getDescription());
         connectorDO.setTypeCode(createVO.getTypeCode());
         connectorDO.setConfig(createVO.getConfigAsStr());
@@ -79,7 +84,7 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         if (oldDO == null) {
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
         }
-        oldDO.setConnectorName(updateVO.getConnecotrName());
+        oldDO.setConnectorName(updateVO.getConnectorName());
         oldDO.setDescription(updateVO.getDescription());
         oldDO.setConfig(updateVO.getConfigAsStr());
 

@@ -1,8 +1,10 @@
 package com.cmsr.onebase.module.etl.executor;
 
+import com.cmsr.onebase.module.etl.common.excute.ExecuteRequest;
 import com.cmsr.onebase.module.etl.common.graph.Node;
 import com.cmsr.onebase.module.etl.common.graph.WorkflowGraph;
-import com.cmsr.onebase.module.etl.common.graph.conf.Field;
+import com.cmsr.onebase.module.etl.common.preview.ColumnDefine;
+import com.cmsr.onebase.module.etl.common.preview.DataPreview;
 import com.cmsr.onebase.module.etl.executor.action.CreateTableAction;
 import com.cmsr.onebase.module.etl.executor.action.ExecuteSqlAction;
 import com.cmsr.onebase.module.etl.executor.action.SqlQueryAction;
@@ -19,7 +21,6 @@ import org.apache.flink.util.CloseableIterator;
 
 import javax.sql.DataSource;
 import java.io.Closeable;
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +32,7 @@ import java.util.List;
 @Slf4j
 public class WorkFlowExecutor implements Closeable {
 
-    private InputArgs inputArgs;
+    private ExecuteRequest executeRequest;
 
     private BeanManager beanManager;
 
@@ -43,28 +44,28 @@ public class WorkFlowExecutor implements Closeable {
 
     private LocalDateTime execStartTime;
 
-    public WorkFlowExecutor(InputArgs inputArgs) throws Exception {
-        this(inputArgs, null);
+    public WorkFlowExecutor(ExecuteRequest executeRequest) throws Exception {
+        this(executeRequest, null);
     }
 
-    public WorkFlowExecutor(InputArgs inputArgs, DataSource dataSource) throws Exception {
+    public WorkFlowExecutor(ExecuteRequest executeRequest, DataSource dataSource) throws Exception {
         this.execStartTime = LocalDateTime.now();
-        this.inputArgs = inputArgs;
+        this.executeRequest = executeRequest;
         initializeWorkflowGraph(dataSource);
         EnvironmentSettings settings = EnvironmentSettings.newInstance().inBatchMode().build();
         this.tableEnv = TableEnvironment.create(settings);
     }
 
     private void initializeWorkflowGraph(DataSource dataSource) throws Exception {
-        beanManager = dataSource == null ? new BeanManager(inputArgs) : new BeanManager(inputArgs, dataSource);
+        beanManager = dataSource == null ? new BeanManager(executeRequest) : new BeanManager(executeRequest, dataSource);
         WorkflowProvider workflowProvider = beanManager.getWorkflowDao();
         QueryProvider queryProvider = beanManager.getQueryProvider();
-        if (inputArgs.getWorkflowId() != null) {
-            etlWorkflow = queryProvider.findWorkflowConfig(inputArgs.getWorkflowId());
+        if (executeRequest.getWorkflowId() != null) {
+            etlWorkflow = queryProvider.findWorkflowConfig(executeRequest.getWorkflowId());
             checkWorkflow(etlWorkflow);
             workflowGraph = workflowProvider.createWorkflowGraph(etlWorkflow.getConfig());
         } else {
-            workflowGraph = workflowProvider.createSubWorkflowGraph(inputArgs.getPreviewWorkflow(), inputArgs.getPreviewNodeId());
+            workflowGraph = workflowProvider.createSubWorkflowGraph(executeRequest.getPreviewWorkflow(), executeRequest.getPreviewNodeId());
         }
     }
 
@@ -80,10 +81,10 @@ public class WorkFlowExecutor implements Closeable {
     public void execute() throws Exception {
         EtlExecutionLog executionLog = new EtlExecutionLog();
         executionLog.setApplicationId(etlWorkflow.getApplicationId());
-        executionLog.setWorkflowId(inputArgs.getWorkflowId());
+        executionLog.setWorkflowId(executeRequest.getWorkflowId());
         executionLog.setStartTime(execStartTime);
         try {
-            for (Node node : workflowGraph.getNodes()) {
+            for (Node node : workflowGraph.iterateNodes()) {
                 doAction(node);
             }
             executionLog.setTaskStatus("success");
@@ -106,6 +107,7 @@ public class WorkFlowExecutor implements Closeable {
         }
         if (node instanceof SqlQueryAction action) {
             Table table = action.sqlQuery(tableEnv, workflowGraph);
+            tableEnv.createTemporaryView(node.getId(), table);
             log.info("sqlQuery table: {}", table.toString());
         }
         if (node instanceof ExecuteSqlAction action) {
@@ -118,11 +120,11 @@ public class WorkFlowExecutor implements Closeable {
 
 
     public DataPreview preview() throws Exception {
-        for (Node node : workflowGraph.getNodes()) {
+        for (Node node : workflowGraph.iterateNodes()) {
             doAction(node);
-            if (node.getId().equals(inputArgs.getPreviewNodeId())) {
-                Table table = tableEnv.from(node.getId());
-                TableResult tableResult = table.execute();
+            if (node.getId().equals(executeRequest.getPreviewNodeId())) {
+                String sql = "select * from " + node.getId() + " limit 20";
+                TableResult tableResult = tableEnv.executeSql(sql);
                 return tableResultToDataPreview(tableResult);
             }
         }
@@ -133,7 +135,7 @@ public class WorkFlowExecutor implements Closeable {
     private DataPreview tableResultToDataPreview(TableResult tableResult) {
         DataPreview dataPreview = new DataPreview();
         for (Column column : tableResult.getResolvedSchema().getColumns()) {
-            Field field = new Field();
+            ColumnDefine field = new ColumnDefine();
             field.setFieldName(column.getName());
             field.setFieldType(column.getDataType().getLogicalType().toString());
             dataPreview.getColumns().add(field);
@@ -149,9 +151,9 @@ public class WorkFlowExecutor implements Closeable {
         return dataPreview;
     }
 
-    private List<Object> rowToList(List<Field> columns, Row row) {
+    private List<Object> rowToList(List<ColumnDefine> columns, Row row) {
         List<Object> list = new ArrayList<>();
-        for (Field column : columns) {
+        for (ColumnDefine column : columns) {
             Object value = row.getField(column.getFieldName());
             list.add(value);
         }
@@ -159,7 +161,7 @@ public class WorkFlowExecutor implements Closeable {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         beanManager.close();
     }
 }

@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.flow.build.vo;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.NullNode;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -10,15 +11,15 @@ import org.apache.commons.lang3.StringUtils;
 @Data
 public class CreateFlowConnectorReqVO {
 
-    @NotNull
+    @NotNull(message = "应用ID不能为空")
     private Long applicationId;
 
-    @NotBlank
-    private String connecotrName;
+    @NotBlank(message = "连接器名称不能为空")
+    private String connectorName;
 
     private String description;
 
-    @NotBlank
+    @NotBlank(message = "连接器类型不能为空")
     private String typeCode;
 
     private String config;
@@ -36,7 +37,7 @@ public class CreateFlowConnectorReqVO {
     }
 
     public void setConfig(JsonNode config) {
-        if (config == null) {
+        if (config == null || config instanceof NullNode) {
             return;
         }
 

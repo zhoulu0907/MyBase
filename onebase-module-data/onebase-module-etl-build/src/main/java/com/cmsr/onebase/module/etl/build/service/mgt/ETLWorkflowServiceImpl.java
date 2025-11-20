@@ -7,10 +7,13 @@ import com.cmsr.onebase.framework.ds.client.DolphinSchedulerClient;
 import com.cmsr.onebase.framework.ds.model.schedule.sub.Schedule;
 import com.cmsr.onebase.framework.ds.model.task.def.HttpTask;
 import com.cmsr.onebase.module.etl.build.service.mgt.vo.*;
+import com.cmsr.onebase.module.etl.build.util.Cron;
+import com.cmsr.onebase.module.etl.common.excute.ExecuteRequest;
 import com.cmsr.onebase.module.etl.common.graph.Node;
 import com.cmsr.onebase.module.etl.common.graph.WorkflowGraph;
 import com.cmsr.onebase.module.etl.common.graph.conf.JdbcInputConfig;
 import com.cmsr.onebase.module.etl.common.graph.conf.JdbcOutputConfig;
+import com.cmsr.onebase.module.etl.common.preview.DataPreview;
 import com.cmsr.onebase.module.etl.core.dal.database.*;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLExecutionLogDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLScheduleJobDO;
@@ -20,10 +23,10 @@ import com.cmsr.onebase.module.etl.core.enums.ETLConstants;
 import com.cmsr.onebase.module.etl.core.enums.ETLErrorCodeConstants;
 import com.cmsr.onebase.module.etl.core.enums.ScheduleJobStatus;
 import com.cmsr.onebase.module.etl.core.enums.ScheduleType;
-import com.cmsr.onebase.module.etl.build.util.Cron;
-import com.cmsr.onebase.module.etl.build.service.mgt.vo.ExecutionLogVO;
 import com.cmsr.onebase.module.etl.core.vo.WorkflowPageReqVO;
 import jakarta.annotation.Resource;
+import kong.unirest.core.HttpResponse;
+import kong.unirest.core.Unirest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -354,6 +357,18 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
             logVOList.add(executionLogVO);
         }
         return new PageResult<>(logVOList, executionLogResult.getTotal());
+    }
+
+    @Override
+    public DataPreview previewWorkflow(PreviewReqVO previewReqVO) {
+        ExecuteRequest executeRequest = new ExecuteRequest();
+        executeRequest.setPreviewWorkflow(previewReqVO.getWorkflow());
+        executeRequest.setPreviewNodeId(previewReqVO.getNodeId());
+        HttpResponse<DataPreview> response = Unirest.post(flinkServerUrl + "/flink/preview")
+                .header("Content-Type", "application/json")
+                .body(executeRequest)
+                .asObject(DataPreview.class);
+        return response.getBody();
     }
 
     @Override

@@ -70,7 +70,7 @@ public class JdbcTypeConvertor {
             case "NUMERIC":
                 return convertNumeric(value);
             default:
-                throw new UnsupportedOperationException("不支持的数据库类型: " + jdbcType);
+                return value;
         }
     }
 

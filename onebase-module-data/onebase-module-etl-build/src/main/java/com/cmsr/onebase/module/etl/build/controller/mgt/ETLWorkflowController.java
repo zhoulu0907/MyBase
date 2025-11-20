@@ -4,7 +4,7 @@ import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.etl.build.service.mgt.ETLWorkflowService;
 import com.cmsr.onebase.module.etl.build.service.mgt.vo.*;
-import com.cmsr.onebase.module.etl.build.service.mgt.vo.ExecutionLogVO;
+import com.cmsr.onebase.module.etl.common.preview.DataPreview;
 import com.cmsr.onebase.module.etl.core.vo.WorkflowPageReqVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -91,4 +91,11 @@ public class ETLWorkflowController {
         PageResult<ExecutionLogVO> workflowExecutionLogs = workflowService.getWorkflowExecutionLogs(applicationId, workflowId, pageNo, pageSize);
         return CommonResult.success(workflowExecutionLogs);
     }
+
+    @PostMapping("/preview")
+    public CommonResult<DataPreview> previewWorkflow(@RequestBody PreviewReqVO previewReqVO) {
+        DataPreview preview = workflowService.previewWorkflow(  previewReqVO);
+        return CommonResult.success(preview);
+    }
+
 }
