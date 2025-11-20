@@ -1,10 +1,11 @@
 import { Button, Form, Select } from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
+import { registerConfigRenderer } from '../../registry';
+import { CONFIG_TYPES } from '@onebase/ui-kit';
 
 import { useAppStore } from '@/store/store_app';
 import { getEntityGraph } from '@onebase/app';
 import DataSelectionProcessConfig from './components/DataSelectionProcessConfig';
-import DropdownRender from './components/DropdownRender';
 import FillingRuleSettingsModal from './components/FillingRuleSettingsModal';
 import styles from './index.module.less';
 import { useResourceStore } from '@/store/store_resource';
@@ -277,3 +278,7 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
 };
 
 export default DynamicDataSourceConfig;
+
+registerConfigRenderer(CONFIG_TYPES.SELECT_DATA_SOURCE, ({ id, handlePropsChange, handleMultiPropsChange, item, configs }) => (
+  <DynamicDataSourceConfig id={id} handlePropsChange={handlePropsChange} handleMultiPropsChange={handleMultiPropsChange} item={item} configs={configs} />
+));

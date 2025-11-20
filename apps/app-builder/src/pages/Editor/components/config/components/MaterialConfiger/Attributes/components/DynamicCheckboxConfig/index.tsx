@@ -14,9 +14,11 @@ import {
 } from '@arco-design/web-react';
 import { IconDelete, IconDragDotVertical } from '@arco-design/web-react/icon';
 import React, { useEffect, useState } from 'react';
+import { registerConfigRenderer } from '../../registry';
+import { CONFIG_TYPES } from '@onebase/ui-kit';
 import { ReactSortable } from 'react-sortablejs';
 import styles from '../../index.module.less';
-import { COLOR_MODE_TYPES, useAppEntityStore, DEFAULT_OPTIONS_TYPE } from '@onebase/ui-kit';
+import { COLOR_MODE_TYPES, useAppEntityStore, DEFAULT_OPTIONS_TYPE, getPopupContainer } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import { getDictDetail, getDictDataListByType } from '@onebase/platform-center';
 import SelectDictModal from '@/components/SelectDictModal';
@@ -161,6 +163,7 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
           <Select
             value={configs[checkboxKey].type}
             disabled={configs[checkboxKey].disabled}
+            getPopupContainer={getPopupContainer}
             onChange={(value) => {
               if (value === DEFAULT_OPTIONS_TYPE.CUSTOM) {
                 setSelectDisabled(false);
@@ -384,3 +387,7 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
 };
 
 export default DynamicCheckboxConfig;
+
+registerConfigRenderer(CONFIG_TYPES.CHECKBOX_DATA, ({ id, handlePropsChange, item, configs }) => (
+  <DynamicCheckboxConfig id={id} handlePropsChange={handlePropsChange} item={item} configs={configs} />
+));

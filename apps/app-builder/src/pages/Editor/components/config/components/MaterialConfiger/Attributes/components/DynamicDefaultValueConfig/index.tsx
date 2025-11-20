@@ -1,6 +1,8 @@
 import { Form, Select, Input, Button, Switch } from '@arco-design/web-react';
 import { useEffect, useState } from 'react';
-import { DEFAULT_VALUE_TYPES, DEFAULT_VALUE_TYPES_LABELS } from '@onebase/ui-kit';
+import { registerConfigRenderer } from '../../registry';
+import { CONFIG_TYPES } from '@onebase/ui-kit';
+import { DEFAULT_VALUE_TYPES, DEFAULT_VALUE_TYPES_LABELS, getPopupContainer } from '@onebase/ui-kit';
 import styles from '../../index.module.less';
 
 export interface DynamicDefaultValueConfigProps {
@@ -36,6 +38,7 @@ const DynamicDefaultValueConfig: React.FC<DynamicDefaultValueConfigProps> = ({
     <>
       <Form.Item layout="vertical" label={item.name || '默认值'} className={styles.formItem}>
         <Select
+          getPopupContainer={getPopupContainer}
           onChange={(value) => handleChange('type', value)}
           value={defaultValueConfig?.type}
           options={[
@@ -65,3 +68,7 @@ const DynamicDefaultValueConfig: React.FC<DynamicDefaultValueConfigProps> = ({
   );
 };
 export default DynamicDefaultValueConfig;
+
+registerConfigRenderer(CONFIG_TYPES.DEFAULT_VALUE, ({ id, handlePropsChange, item, configs }) => (
+  <DynamicDefaultValueConfig id={id} handlePropsChange={handlePropsChange} item={item} configs={configs} />
+));

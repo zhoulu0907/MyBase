@@ -3,9 +3,11 @@ import { useAppStore } from '@/store/store_app';
 import { Button, Form, Input, Radio, Select, Space, Tooltip } from '@arco-design/web-react';
 import { IconDelete, IconDragDotVertical } from '@arco-design/web-react/icon';
 import { getDictDataListByType, getDictDetail } from '@onebase/platform-center';
-import { DEFAULT_OPTIONS_TYPE, useAppEntityStore } from '@onebase/ui-kit';
+import { DEFAULT_OPTIONS_TYPE, useAppEntityStore, getPopupContainer } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
+import { registerConfigRenderer } from '../../registry';
+import { CONFIG_TYPES } from '@onebase/ui-kit';
 import { ReactSortable } from 'react-sortablejs';
 import styles from '../../index.module.less';
 
@@ -154,6 +156,7 @@ const DynamicSelectConfig: React.FC<DynamicSelectConfigProps> = ({ handlePropsCh
               }
               handlePropsChange(selectKey, { ...configs[selectKey], type: value });
             }}
+            getPopupContainer={getPopupContainer}
             options={[
               { label: '自定义', value: DEFAULT_OPTIONS_TYPE.CUSTOM },
               { label: '数据字典', value: DEFAULT_OPTIONS_TYPE.DICT }
@@ -315,3 +318,7 @@ const DynamicSelectConfig: React.FC<DynamicSelectConfigProps> = ({ handlePropsCh
 };
 
 export default DynamicSelectConfig;
+
+registerConfigRenderer(CONFIG_TYPES.SELECT_OPTIONS_INPUT, ({ id, handlePropsChange, item, configs }) => (
+  <DynamicSelectConfig id={id} handlePropsChange={handlePropsChange} item={item} configs={configs} />
+));
