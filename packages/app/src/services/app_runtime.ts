@@ -6,6 +6,7 @@ import {
   GetOperatorRecord,
   SubMitInstanceReq,
   GetMyCreatePageListReq,
+  GetMyCCPageListReq,
   GetListNodesReq,
   GetPageSetListReq
 } from '../types';
@@ -41,4 +42,7 @@ export const getPageSetList = (params: GetPageSetListReq) => {
 };
 export const getListNodes = (params: GetListNodesReq) => {
   return runtimeListdataService.get('/task-center/list-nodes', params);
+};
+export const getMyCCPageList = (params: GetMyCCPageListReq) => {
+  return runtimeListdataService.get('/task-center/cc/page', params);
 };
