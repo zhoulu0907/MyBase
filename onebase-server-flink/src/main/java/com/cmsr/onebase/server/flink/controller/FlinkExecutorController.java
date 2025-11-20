@@ -1,7 +1,7 @@
 package com.cmsr.onebase.server.flink.controller;
 
 import com.cmsr.onebase.module.etl.common.preview.DataPreview;
-import com.cmsr.onebase.module.etl.executor.InputArgs;
+import com.cmsr.onebase.module.etl.common.excute.ExecuteRequest;
 import com.cmsr.onebase.module.etl.executor.WorkFlowExecutor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.Setter;
@@ -31,8 +31,8 @@ public class FlinkExecutorController {
     private DataSource dataSource;
 
     @PostMapping(path = "/execute", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Map> execute(@RequestBody InputArgs inputArgs) throws JsonProcessingException {
-        try (WorkFlowExecutor executor = new WorkFlowExecutor(inputArgs, dataSource)) {
+    public ResponseEntity<Map> execute(@RequestBody ExecuteRequest executeRequest) throws JsonProcessingException {
+        try (WorkFlowExecutor executor = new WorkFlowExecutor(executeRequest, dataSource)) {
             executor.execute();
             Map result = Map.of("result", "success");
             return ResponseEntity.ok(result);
@@ -43,8 +43,8 @@ public class FlinkExecutorController {
     }
 
     @PostMapping(path = "/preview", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Object> preview(@RequestBody InputArgs inputArgs) {
-        try (WorkFlowExecutor executor = new WorkFlowExecutor(inputArgs, dataSource)) {
+    public ResponseEntity<Object> preview(@RequestBody ExecuteRequest executeRequest) {
+        try (WorkFlowExecutor executor = new WorkFlowExecutor(executeRequest, dataSource)) {
             DataPreview preview = executor.preview();
             return ResponseEntity.ok(preview);
         } catch (Exception e) {
