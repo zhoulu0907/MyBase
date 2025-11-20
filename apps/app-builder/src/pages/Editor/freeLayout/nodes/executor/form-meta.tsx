@@ -8,13 +8,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   return (
     <>
       <FormHeader />
-      {isSidebar ? (
-        <FormContent>
-         <div>抽屉</div>
-        </FormContent>
-      ) : (
-        <FormContent></FormContent>
-      )}
     </>
   );
 };

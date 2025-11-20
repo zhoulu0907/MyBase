@@ -35,7 +35,7 @@ export const ExecutorNodeRegistry: FlowNodeRegistry = {
       id: `executor_${nanoid(5)}`,
       type: 'executor',
       data: {
-        title: '执行人'
+        name: '执行人'
       }
     };
   }

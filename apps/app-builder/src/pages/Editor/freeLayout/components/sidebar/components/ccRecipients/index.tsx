@@ -78,6 +78,12 @@ export default function CcRecipientsDreawer({ handleConfigSubmit, configData }) 
   };
 
   function handleSubmit() {
+    let errorMsg = '';
+    const { users = [], roles = [] } = ccRecipientsConfigData.copyReceiverConfig || {};
+    if (!users.length && !roles.length) {
+      errorMsg = '节点缺少抄送人';
+    }
+    ccRecipientsConfigData.errorMsg = errorMsg;
     handleConfigSubmit && handleConfigSubmit(ccRecipientsConfigData, editValue);
   }
 

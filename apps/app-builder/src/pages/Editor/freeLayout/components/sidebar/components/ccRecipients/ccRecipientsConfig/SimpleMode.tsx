@@ -34,7 +34,7 @@ const SimpleMode = ({ setCcRecipientsConfigData, copyReceiverConfig }) => {
   };
   
   const ccRecipientsFormRules = {
-    user: [{ required: true, message: '请选择审批人' }],
+    user: [{ required: true, message: '请选择抄送人' }],
     role: [{ required: true, message: '请选择角色' }]
   };
   const [formRes, setFormRes] = useState<any>({});

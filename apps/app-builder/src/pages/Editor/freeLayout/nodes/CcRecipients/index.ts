@@ -32,7 +32,7 @@ export const CcRecipientsNodeRegistry: FlowNodeRegistry = {
   onAdd(ctx, from) {
     return {
       id: `ccRecipients_${nanoid(5)}`,
-      type: 'ccRecipients',
+      type: 'cc',
       data: {
         name: '抄送人'
       }

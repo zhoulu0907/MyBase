@@ -9,7 +9,6 @@ const CheckboxGroup = Checkbox.Group;
  * @setFmVisible 设置模态框显示状态
  * @curKeyArr 当前选中的字段id数组
  * @title 弹窗名称
- * @fieldPermType 字段类型
  * @mergeDataToTable 合并数据到表格
  * @ckOptions 字段列表
  * @invert 需要排除的字段
@@ -19,7 +18,6 @@ export default function FieldModal({
   setFmVisible,
   curKeyArr,
   title='添加隐藏字段',
-  fieldPermType='hide',
   mergeDataToTable,
   ckOptions = [],
   invert = []
@@ -56,11 +54,12 @@ export default function FieldModal({
   function handleSubmit() {
     if (Array.isArray(checkedItem)) {
       let resData: Array<any> = [];
+
+
       checkedItem.forEach((item: any) => {
         resData.push({
           fieldId: item.value,
           fieldName: item.label,
-          fieldPermType: fieldPermType,
         });
       });
       mergeDataToTable && mergeDataToTable(resData);
@@ -88,6 +87,21 @@ export default function FieldModal({
       <div className="out-line-box flex-btw">
         <section className="left-part">
           <div>字段列表</div>
+          <div className='left-checkbox'>
+            <Checkbox
+              indeterminate={ckedKey.length > 0 && ckedKey.length < useCkOptions.length}
+              checked={ckedKey.length === useCkOptions.length}
+              onChange={(e:boolean) => {
+                if (e) {
+                  handleCheckChange(useCkOptions.map((item:any) => item.value));
+                } else {
+                  handleCheckChange([]);
+                }
+              }}
+            >
+              全选
+            </Checkbox>
+          </div>
           <CheckboxGroup
             className="check-group-outer"
             options={useCkOptions}

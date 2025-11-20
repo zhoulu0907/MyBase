@@ -6,6 +6,7 @@ import './style.less';
 
 /**
  * @param onTableChange 表格数据变化时回调
+ * @param title 弹窗标题
  * @param tbData 表格数据
  * @param setTableData 维护表格数据
  * @param ckOptions 字段配置
@@ -15,7 +16,7 @@ import './style.less';
 
 
 const FieldTable = forwardRef(
-  ({ onTableChange, tbData, setTableData, ckOptions, invert, columnsTable, fieldPermType }: any, ref) => {
+  ({ onTableChange, title,tbData, setTableData, ckOptions, invert, columnsTable }: any, ref) => {
     // keyArr是专门给FieldModal弹窗用的，帮助弹窗反选
     const [curKeyArr, setCurKeyArr] = useState<any[]>([]);
     const [selectRowkeyArr, setSelectRowKeyArr] = useState([]);
@@ -54,6 +55,10 @@ const FieldTable = forwardRef(
       }
       setTableData(_data);
     }
+    function handleDelMass(fid: any) {
+      handleDelRow(fid);
+      setSelectRowKeyArr([]);
+    }
     function mergeDataToTable(arr: Array<any>) {
       setTableData(arr);
     }
@@ -80,7 +85,7 @@ const FieldTable = forwardRef(
             添加字段
           </Button>
           {selectRowkeyArr?.length > 0 && (
-            <Button type="primary" className="gray-btn" onClick={() => handleDelRow(selectRowkeyArr)}>
+            <Button type="primary" onClick={() => handleDelMass(selectRowkeyArr)}>
               批量删除
             </Button>
           )}
@@ -101,8 +106,7 @@ const FieldTable = forwardRef(
             fmVisible={fmVisible}
             ckOptions={ckOptions}
             setFmVisible={setFmVisible}
-            title={'添加字段'}
-            fieldPermType={fieldPermType}
+            title={title}
             curKeyArr={curKeyArr}
             invert={invert}
             mergeDataToTable={mergeDataToTable}
