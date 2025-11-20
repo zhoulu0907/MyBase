@@ -125,18 +125,20 @@ public class WorkFlowExecutor implements Closeable {
             if (node.getId().equals(executeRequest.getPreviewNodeId())) {
                 String sql = "select * from " + node.getId() + " limit 20";
                 TableResult tableResult = tableEnv.executeSql(sql);
-                return tableResultToDataPreview(tableResult);
+                return tableResultToDataPreview(node.getId(), tableResult);
             }
         }
         throw new Exception("未找到预览节点");
     }
 
 
-    private DataPreview tableResultToDataPreview(TableResult tableResult) {
+    private DataPreview tableResultToDataPreview(String nodeId, TableResult tableResult) {
         DataPreview dataPreview = new DataPreview();
         for (Column column : tableResult.getResolvedSchema().getColumns()) {
             ColumnDefine field = new ColumnDefine();
+            field.setFieldFqn(nodeId + "." + column.getName());
             field.setFieldName(column.getName());
+            field.setDisplayName(column.getName());
             field.setFieldType(column.getDataType().getLogicalType().toString());
             dataPreview.getColumns().add(field);
         }
