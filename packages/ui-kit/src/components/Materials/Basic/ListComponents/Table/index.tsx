@@ -462,9 +462,7 @@ const XTable = memo(
                   newItem[key] = {
                     userID: newItem[key],
                     userName: newItem[key]
-                  }
-                } else {
-                  newItem[key] = newItem[key]?.userName || '';
+                  };
                 }
               }
             }
