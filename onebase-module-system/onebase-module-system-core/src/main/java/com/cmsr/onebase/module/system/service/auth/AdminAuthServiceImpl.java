@@ -310,6 +310,9 @@ public class AdminAuthServiceImpl implements AdminAuthService {
         PasswordExpiryCheckDTO expiryCheckResult = securityConfigApi.checkPasswordExpiry(userId).getData();
         respVO.setPasswordExpiryInfo(expiryCheckResult);
 
+        // 创建会话空闲检测Key
+        securityConfigApi.createSessionIdleKey(userId, deviceId);
+
         return respVO;
     }
 

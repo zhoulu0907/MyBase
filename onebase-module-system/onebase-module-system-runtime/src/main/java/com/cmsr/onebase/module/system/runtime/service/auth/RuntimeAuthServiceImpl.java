@@ -248,6 +248,9 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
             }
         }
 
+        // 创建会话空闲检测Key
+        securityConfigApi.createSessionIdleKey(userId, deviceId);
+
         TenantDO tennantDO = tenantService.getTenant(accessTokenDO.getTenantId());
         // 构建返回结果
         return AuthConvert.INSTANCE.convert(accessTokenDO, tennantDO);
