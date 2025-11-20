@@ -7,6 +7,7 @@ import lombok.Data;
 
 @Data
 @Table(name = "etl_catalog")
+@com.mybatisflex.annotation.Table("etl_catalog")
 public class ETLCatalogDO extends TenantBaseDO {
 
     @Column(name = "application_id")

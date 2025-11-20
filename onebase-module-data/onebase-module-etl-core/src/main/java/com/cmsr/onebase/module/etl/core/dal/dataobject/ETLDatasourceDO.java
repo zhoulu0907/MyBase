@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 
 @Data
 @Table(name = "etl_datasource")
+@com.mybatisflex.annotation.Table("etl_datasource")
 public class ETLDatasourceDO extends TenantBaseDO {
 
     @Column(name = "application_id")

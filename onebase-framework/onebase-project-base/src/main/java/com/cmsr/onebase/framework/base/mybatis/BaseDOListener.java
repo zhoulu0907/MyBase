@@ -1,4 +1,4 @@
-package com.cmsr.onebase.framework.base.listener;
+package com.cmsr.onebase.framework.base.mybatis;
 
 import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
