@@ -9,7 +9,9 @@ import com.mybatisflex.core.BaseMapper;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.service.IService;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
+import org.anyline.service.AnylineService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -18,13 +20,20 @@ import java.util.List;
 
 @Repository
 @Slf4j
-public class ETLDatasourceRepository extends DataRepository<ETLDatasourceDO> implements IService<ETLDatasourceDO> {
+public class ETLDatasourceRepository implements IService<ETLDatasourceDO> {
 
     @Autowired
     private ETLDatasourceMapper datasourceMapper;
 
-    public ETLDatasourceRepository() {
-        super(ETLDatasourceDO.class);
+    private DataRepository<ETLDatasourceDO> dataRepository;
+
+    @Autowired
+    private AnylineService<ETLDatasourceDO> anylineService;
+
+    @PostConstruct
+    public void init() {
+        dataRepository = new DataRepository<>(ETLDatasourceDO.class);
+        dataRepository.setAnylineService(anylineService);
     }
 
     public PageResult<ETLDatasourceDO> getETLDatasourcePage(DatasourcePageReqVO pageReqVO) {
