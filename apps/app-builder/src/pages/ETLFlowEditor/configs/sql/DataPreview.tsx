@@ -4,23 +4,22 @@ import { etlEditorSignal } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
 
-interface DataPreviewProps {
-  /**
-   * 预览数据
-   */
-  data?: any[];
-  /**
-   * 列定义
-   */
-  columns?: any[];
-}
+interface DataPreviewProps {}
 
-const DataPreview: React.FC<DataPreviewProps> = ({ data, columns }) => {
+const DataPreview: React.FC<DataPreviewProps> = ({}) => {
   useSignals();
 
   const { curDrawerTab, curNode, nodeData, graphData } = etlEditorSignal;
 
   const [sqlValue] = useState<string>(nodeData.value[curNode.value.id]?.config?.sqlValue);
+
+  const [previewData, setPreviewData] = useState<{
+    columns: any[];
+    data: any[];
+  }>({
+    columns: [],
+    data: []
+  });
 
   useEffect(() => {
     console.log('sqlValue: ', sqlValue);
@@ -59,14 +58,34 @@ const DataPreview: React.FC<DataPreviewProps> = ({ data, columns }) => {
     });
 
     console.log('res: ', res);
+
+    if (res) {
+      const previewData = {
+        columns: res.columns.map((column: any) => ({
+          title: column.displayName,
+          dataIndex: column.fieldFqn,
+          key: column.fieldFqn
+        })),
+        data: res.data.map((row: any[]) => {
+          const obj: any = {};
+          res.columns.forEach((col: any, idx: number) => {
+            obj[col.fieldFqn] = row[idx];
+          });
+          return obj;
+        })
+      };
+
+      console.log('previewData: ', previewData);
+      setPreviewData(previewData);
+    }
   };
 
   return (
     <div style={{ height: '100%', overflow: 'auto', backgroundColor: '#fff' }}>
       <Table
-        data={data}
+        data={previewData.data}
         virtualized={true}
-        columns={columns}
+        columns={previewData.columns}
         pagination={false}
         scroll={{
           y: 480,

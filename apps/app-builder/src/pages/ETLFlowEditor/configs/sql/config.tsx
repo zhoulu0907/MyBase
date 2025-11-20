@@ -67,10 +67,12 @@ const SQLConfig: React.FC = () => {
         tmpSqlVariables[`${sourceNodeId}.${sourceNodeData.title}`] = sourceNodeId;
 
         for (const field of sourceNodeData.output?.fields || []) {
-          tmpSqlVariables[`${sourceNodeId}#${field.fieldFqn}`] = field.fieldFqn;
+          tmpSqlVariables[`${sourceNodeId}#${field.fieldName}.${sourceNodeData.title}.${field.fieldName}`] =
+            field.fieldFqn;
         }
       }
       setFieldList(tmpFieldList);
+      console.log('xxxx: ', tmpSqlVariables);
       setSqlVariables(tmpSqlVariables);
     }
   }, [nodeData, curNode]);
