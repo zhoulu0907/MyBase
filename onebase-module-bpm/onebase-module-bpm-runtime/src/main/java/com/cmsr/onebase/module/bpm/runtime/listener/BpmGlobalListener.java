@@ -27,6 +27,7 @@ import org.dromara.warm.flow.core.service.impl.BpmConstants;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author liyang
@@ -101,6 +102,22 @@ public class BpmGlobalListener implements GlobalListener {
                 nextTask.setPermissionList(List.of(currTaskHandler));
             }
         }
+
+        // 查找剩余未操作的用户
+        List<User> unoperatorUsers = userService.listByAssociatedAndTypes(currTask.getId());
+
+        if (CollectionUtils.isNotEmpty(unoperatorUsers)) {
+            // todo 排除自己
+            Set<String> ccPermissionList = unoperatorUsers.stream()
+                    .filter( item -> !Objects.equals(item.getProcessedBy(), flowParams.getHandler()))
+                    .map(User::getProcessedBy)
+                    .collect(Collectors.toSet());
+
+            if (CollectionUtils.isNotEmpty(ccPermissionList)) {
+                flowVariable.put(BpmConstants.VAR_CC_USERS_KEY + "_" + currTask.getNodeCode(),
+                        JsonUtils.toJsonString(ccPermissionList));
+            }
+        }
     }
 
     public void finish(ListenerVariable listenerVariable) {
@@ -130,6 +147,15 @@ public class BpmGlobalListener implements GlobalListener {
         if (Objects.equals(nodeExtDTO.getNodeType(), BpmNodeTypeEnum.CC.getCode())) {
             ccNodeListener.handleFinish(listenerVariable);
         }
+
+        // 抄送给未处理的用户
+        if (Objects.equals(nodeExtDTO.getNodeType(), BpmNodeTypeEnum.APPROVER.getCode())
+                || Objects.equals(nodeExtDTO.getNodeType(), BpmNodeTypeEnum.EXECUTOR.getCode())) {
+            Map<String, Object> flowVariable = listenerVariable.getVariable();
+            Task currTask = listenerVariable.getTask();
+
+            ccNodeListener.handleCcUsers(currTask, flowVariable);
+        }
     }
 
     /**
@@ -156,7 +182,7 @@ public class BpmGlobalListener implements GlobalListener {
         if (Objects.equals(nodeExtDTO.getNodeType(), BpmNodeTypeEnum.APPROVER.getCode())
                 || Objects.equals(nodeExtDTO.getNodeType(), BpmNodeTypeEnum.EXECUTOR.getCode())) {
             // 此处为nextTask创建的地方，加上代理人的信息
-            handleAgent(listenerVariable);
+            handleAgentOnCreate(listenerVariable);
         }
 
         if (Objects.equals(nodeExtDTO.getNodeType(), BpmNodeTypeEnum.CC.getCode())) {
@@ -167,7 +193,7 @@ public class BpmGlobalListener implements GlobalListener {
     /**
      * 处理代理人的业务逻辑
      */
-    private void handleAgent(ListenerVariable listenerVariable) {
+    private void handleAgentOnCreate(ListenerVariable listenerVariable) {
         Map<String, Object> variable = listenerVariable.getVariable();
         Task task = listenerVariable.getTask();
 

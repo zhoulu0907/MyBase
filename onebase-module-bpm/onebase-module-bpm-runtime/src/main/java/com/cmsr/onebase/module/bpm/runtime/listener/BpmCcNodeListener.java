@@ -17,11 +17,10 @@ import org.dromara.warm.flow.core.enums.SkipType;
 import org.dromara.warm.flow.core.listener.ListenerVariable;
 import org.dromara.warm.flow.core.service.TaskService;
 import org.dromara.warm.flow.core.service.impl.BpmConstants;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 抄送节点监听器
@@ -32,6 +31,10 @@ import java.util.Map;
 @Slf4j
 @Service("ccNodeListener")
 public class BpmCcNodeListener {
+    @Lazy
+    @Resource
+    private BpmCcNodeListener self;
+
     @Resource
     private TaskService taskService;
 
@@ -56,11 +59,12 @@ public class BpmCcNodeListener {
         taskService.skip(skipParams, currTask);
     }
 
-    public void handleFinish(ListenerVariable listenerVariable) {
-        Map<String, Object> flowVariable = listenerVariable.getVariable();
-        Task currTask = listenerVariable.getTask();
-        String ccUsersKey = BpmConstants.VAR_CC_USERS_KEY + "_" + currTask.getNodeCode();
+    public void handleCcUsers(Task currTask, Map<String, Object> flowVariable) {
+        handleCcUsers(currTask, flowVariable, BpmConstants.MAX_NODE_CC_USERS);
+    }
 
+    public void handleCcUsers(Task currTask, Map<String, Object> flowVariable, Integer maxUsers) {
+        String ccUsersKey = BpmConstants.VAR_CC_USERS_KEY + "_" + currTask.getNodeCode();
         String ccUsersStr = MapUtils.getString(flowVariable, ccUsersKey);
 
         if (StringUtils.isBlank(ccUsersStr)) {
@@ -68,7 +72,7 @@ public class BpmCcNodeListener {
             return;
         }
 
-        List<String> ccUsers = JsonUtils.parseObject(ccUsersStr, new TypeReference<>() {});
+        Set<String> ccUsers = JsonUtils.parseObject(ccUsersStr, new TypeReference<>() {});
 
         if (CollectionUtils.isEmpty(ccUsers)) {
             log.warn("无可抄送的人员信息");
@@ -76,9 +80,9 @@ public class BpmCcNodeListener {
         }
 
         // 限制用户上限
-        if (ccUsers.size() > BpmConstants.MAX_NODE_CC_USERS) {
-            log.warn("审批人列表最多{}个用户 当前为：{}",BpmConstants.MAX_NODE_CC_USERS, ccUsers.size());
-            ccUsers = new ArrayList<>(ccUsers.stream().limit(BpmConstants.MAX_NODE_CC_USERS).toList());
+        if (ccUsers.size() > maxUsers) {
+            log.warn("抄送人列表最多{}个用户 当前为：{}", maxUsers, ccUsers.size());
+            ccUsers = new HashSet<>(ccUsers.stream().limit(maxUsers).toList());
         }
 
         List<BpmFlowCcRecordDO> ccRecords = new ArrayList<>();
@@ -98,5 +102,12 @@ public class BpmCcNodeListener {
 
         // 移除抄送用户信息
         flowVariable.remove(ccUsersKey);
+    }
+
+    public void handleFinish(ListenerVariable listenerVariable) {
+        Map<String, Object> flowVariable = listenerVariable.getVariable();
+        Task currTask = listenerVariable.getTask();
+
+        self.handleCcUsers(currTask, flowVariable);
     }
 }
