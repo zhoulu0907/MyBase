@@ -41,7 +41,6 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
   // ===== 表单上下文与字段名与值读取 end =====
 
   // ===== 外部事件：选择数据 begin =====
-  
   // ===== 外部事件：选择数据 end =====
 
   // ===== 内部状态 & 回显begin =====
