@@ -16,6 +16,7 @@ import {
 } from '../../../constants';
 import { useFormEditorSignal } from 'src/signals/page_editor';
 import filterIcon from '@/assets/images/filter.svg';
+import { useForm } from '@arco-design/mobile-react/esm/form';
 import {
   dataMethodDelete,
   dataMethodPage,
@@ -131,24 +132,24 @@ const XLoadMore = memo(
               if (!cpId) {
                 return result;
               }
-              const currentComponentSchemas = fromPageComponentSchemas.value[cpId];
-              if (['SELECT', 'MULTI_SELECT'].includes(dataFieldInfo.fieldType)) {
-                const arrayResult = Array.isArray(result) ? result : result.split(',').map((cItem: string) => cItem.trim())
-                const array = currentComponentSchemas.config.defaultOptionsConfig?.defaultOptions || []
-                const tmpR = array.map((dItem: any) => {
-                  if (arrayResult.includes(dItem.value)) {
-                    return dItem.label
-                  }
-                  return ''
-                }).filter((eItem: string) => eItem !== '')
-                return tmpR.join(',')
-              }
-              if (['BOOLEAN'].includes(dataFieldInfo.fieldType)) {
-                return result ? '是' : '否';
-              }
-              if (['DEPARTMENT'].includes(dataFieldInfo.fieldType)) {
-                return result?.deptName || '-';
-              }
+              // const currentComponentSchemas = fromPageComponentSchemas.value[cpId];
+              // if (['SELECT', 'MULTI_SELECT'].includes(dataFieldInfo.fieldType)) {
+              //   const arrayResult = Array.isArray(result) ? result : result.split(',').map((cItem: string) => cItem.trim())
+              //   const array = currentComponentSchemas.config.defaultOptionsConfig?.defaultOptions || []
+              //   const tmpR = array.map((dItem: any) => {
+              //     if (arrayResult.includes(dItem.value)) {
+              //       return dItem.label
+              //     }
+              //     return ''
+              //   }).filter((eItem: string) => eItem !== '')
+              //   return tmpR.join(',')
+              // }
+              // if (['BOOLEAN'].includes(dataFieldInfo.fieldType)) {
+              //   return result ? '是' : '否';
+              // }
+              // if (['DEPARTMENT'].includes(dataFieldInfo.fieldType)) {
+              //   return result?.deptName || '-';
+              // }
               return result || '-';
             }
           }
@@ -245,6 +246,14 @@ const XLoadMore = memo(
               if (newItem[key]) {
                 newItem[key] = newItem[key].userName;
               }
+            }
+
+            // 部门
+            const departmentField = mainMetaData.parentFields.find(
+              (field: AppEntityField) => field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.DEPARTMENT.VALUE
+            );
+            if (departmentField && newItem[key]) {
+              newItem[key] = newItem[key].deptName || '-';
             }
           }
         });
