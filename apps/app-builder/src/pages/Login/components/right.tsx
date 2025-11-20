@@ -74,12 +74,13 @@ const Right: React.FC = () => {
         'Tenant-Id': tenantId
       };
 
-      const deviceInfo = await getOrCreateDeviceInfo();
+      const deviceId = await getOrCreateDeviceInfo();
 
       const loginData: LoginRequest = {
         username: values.username!,
         password: values.password!,
-        captchaVerification: captchaVerification
+        captchaVerification: captchaVerification,
+        deviceId: deviceId
       };
 
       const response: LoginResponse = await login(loginData, headers);
