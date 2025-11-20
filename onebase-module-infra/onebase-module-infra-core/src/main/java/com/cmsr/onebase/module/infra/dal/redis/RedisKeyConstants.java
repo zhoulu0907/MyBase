@@ -32,8 +32,20 @@ public interface RedisKeyConstants {
      * 注意：此常量与system模块的RedisKeyConstants.OAUTH2_ACCESS_TOKEN保持一致
      */
     String OAUTH2_ACCESS_TOKEN = "oauth2_access_token:%s";
+
     /**
-     * OAuth2 访问令牌 Key 的前缀，用于Lua脚本传参（不包含token）
+     * 用户会话空闲检测的缓存
+     * <p>
+     * KEY 格式：infra:security:user:idle:{tenantId}:{userId}:{deviceId}
+     * VALUE 数据类型：String 最后活跃时间戳
+     * TTL：从租户配置中读取sessionTimeout值（秒）
+     * <p>
+     * 用于实现会话超时自动登出功能：
+     * <ul>
+     *   <li>用户登录时创建此Key，TTL为配置的超时时间</li>
+     *   <li>用户每次操作时更新此Key的TTL和值</li>
+     *   <li>如果Key过期，说明用户超过设定时间未操作，需要重新登录</li>
+     * </ul>
      */
-    String OAUTH2_ACCESS_TOKEN_PREFIX = "oauth2_access_token:";
+    String USER_IDLE_KEY = "infra:security:user:idle:%d:%d:%s";
 }

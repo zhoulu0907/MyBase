@@ -54,6 +54,9 @@ public class SecurityConfigApiImpl implements SecurityConfigApi {
     @Resource
     private com.cmsr.onebase.module.infra.service.security.MultiDeviceSessionServiceImpl multiDeviceSessionService;
 
+    @Resource
+    private com.cmsr.onebase.module.infra.service.security.SessionIdleService sessionIdleService;
+
     private final PasswordValidator passwordValidator = new PasswordValidator();
 
     @Override
@@ -251,5 +254,29 @@ public class SecurityConfigApiImpl implements SecurityConfigApi {
                                                      @RequestParam("accessToken") String accessToken) {
         String deviceId = multiDeviceSessionService.findDeviceIdByToken(userId, accessToken);
         return success(deviceId);
+    }
+
+    @Override
+    @Operation(summary = "创建会话空闲Redis Key")
+    public CommonResult<Boolean> createSessionIdleKey(@RequestParam("userId") Long userId,
+                                                       @RequestParam("deviceId") String deviceId) {
+        sessionIdleService.createRedisIdleKey(userId, deviceId);
+        return success(Boolean.TRUE);
+    }
+
+    @Override
+    @Operation(summary = "更新会话空闲Redis Key")
+    public CommonResult<Boolean> updateSessionIdleKey(@RequestParam("userId") Long userId,
+                                                       @RequestParam("deviceId") String deviceId) {
+        boolean result = sessionIdleService.updateRedisIdleKey(userId, deviceId);
+        return success(result);
+    }
+
+    @Override
+    @Operation(summary = "检查会话空闲Redis Key是否存在")
+    public CommonResult<Boolean> existSessionIdleKey(@RequestParam("userId") Long userId,
+                                                      @RequestParam("deviceId") String deviceId) {
+        boolean exists = sessionIdleService.existRedisIdleKey(userId, deviceId);
+        return success(exists);
     }
 }

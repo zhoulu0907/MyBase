@@ -171,4 +171,43 @@ public interface SecurityConfigApi {
     CommonResult<String> findDeviceIdByToken(@RequestParam("userId") Long userId,
                                               @RequestParam("accessToken") String accessToken);
 
+    /**
+     * 创建会话空闲Redis Key
+     * 
+     * 用户登录成功后调用，初始化会话空闲检测
+     *
+     * @param userId 用户ID
+     * @param deviceId 设备ID
+     * @return 操作结果
+     */
+    @PostMapping("/session-idle/create")
+    CommonResult<Boolean> createSessionIdleKey(@RequestParam("userId") Long userId,
+                                                @RequestParam("deviceId") String deviceId);
+
+    /**
+     * 更新会话空闲Redis Key
+     * 
+     * 用户每次操作时调用（在拦截器或Filter中），更新会话活跃时间和TTL
+     *
+     * @param userId 用户ID
+     * @param deviceId 设备ID
+     * @return true-更新成功，false-会话已过期或不存在
+     */
+    @PostMapping("/session-idle/update")
+    CommonResult<Boolean> updateSessionIdleKey(@RequestParam("userId") Long userId,
+                                                @RequestParam("deviceId") String deviceId);
+
+    /**
+     * 检查会话空闲Redis Key是否存在
+     * 
+     * AccessToken过期使用RefreshToken刷新前调用
+     *
+     * @param userId 用户ID
+     * @param deviceId 设备ID
+     * @return true-会话有效，false-会话已过期
+     */
+    @PostMapping("/session-idle/exist")
+    CommonResult<Boolean> existSessionIdleKey(@RequestParam("userId") Long userId,
+                                               @RequestParam("deviceId") String deviceId);
+
 }
