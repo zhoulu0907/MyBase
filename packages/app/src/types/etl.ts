@@ -150,3 +150,8 @@ export interface FlinkFunction {
   functionName: string;
   functionType: string;
 }
+
+export interface PreviewETLFlowDataReq {
+  nodeId: string;
+  workflow: any;
+}
