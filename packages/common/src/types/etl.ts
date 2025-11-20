@@ -2,7 +2,8 @@ export enum ETLNodeType {
   INPUT_NODE = 'jdbc_input',
   OUTPUT_NODE = 'jdbc_output',
   JOIN_NODE = 'pair_join',
-  UNION_NODE = 'union'
+  UNION_NODE = 'union',
+  SQL_NODE = 'sql'
 }
 
 export enum ETLDrawerTab {

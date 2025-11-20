@@ -1,4 +1,4 @@
-import JoinIcon from '@/assets/images/etl/node_join.svg';
+import SQLIcon from '@/assets/images/etl/node_sql.svg';
 import { type FormMeta, type FormRenderProps } from '@flowgram.ai/free-layout-editor';
 import { etlEditorSignal } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
@@ -11,9 +11,9 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const { nodeData } = etlEditorSignal;
 
   return (
-    <div className={styles.joinNode}>
-      <img src={JoinIcon} alt="union" />
-      {nodeData.value[form.getValueIn('id')]?.title || '横向连接节点'}
+    <div className={styles.sqlNode}>
+      <img src={SQLIcon} alt="sql" />
+      {nodeData.value[form.getValueIn('id')]?.title || 'SQL节点'}
     </div>
   );
 };
