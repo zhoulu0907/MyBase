@@ -37,7 +37,7 @@ public class CorpController {
 
     @PostMapping("create")
     @Operation(summary = "创建企业")
-    @PreAuthorize("@ss.hasPermission('system:corp:create')")
+    @PreAuthorize("@ss.hasPermission('tenant:corp:create')")
     public CommonResult<CorpAdminUserRespVO> createCorpCombined(@RequestBody @Valid CorpCombinedVo reqVO) {
         return success(corpService.createCorpCombined(reqVO));
     }
@@ -45,7 +45,7 @@ public class CorpController {
 
     @PostMapping("update")
     @Operation(summary = "更新企业")
-    @PreAuthorize("@ss.hasPermission('system:corp:update')")
+    @PreAuthorize("@ss.hasPermission('tenant:corp:update')")
     public CommonResult<Boolean> updateCorp(@RequestBody @Valid CorpUpdateReqVO reqVO) {
         corpService.updateCorp(reqVO);
         return success(true);
@@ -54,7 +54,7 @@ public class CorpController {
 
     @PostMapping("update-status")
     @Operation(summary = "企业启用/禁用")
-    @PreAuthorize("@ss.hasPermission('system:corp:update')")
+    @PreAuthorize("@ss.hasPermission('tenant:corp:update')")
     public CommonResult<Boolean> updateStatus(@RequestParam("id") Long id, @RequestParam("status") Long status) {
         corpService.updateStatus(id, status);
         return success(true);
@@ -63,7 +63,7 @@ public class CorpController {
     @PostMapping("delete")
     @Operation(summary = "删除企业")
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
-    @PreAuthorize("@ss.hasPermission('system:corp:delete')")
+    @PreAuthorize("@ss.hasPermission('tenant:corp:delete')")
     public CommonResult<Boolean> deleteCorp(@RequestParam("id") Long id) {
         corpService.deleteCorp(id);
         return success(true);
@@ -71,7 +71,7 @@ public class CorpController {
 
     @GetMapping("page")
     @Operation(summary = "获得企业列表-分页")
-    @PreAuthorize("@ss.hasPermission('system:corp:query')")
+    @PreAuthorize("@ss.hasPermission('tenant:corp:query')")
     public CommonResult<PageResult<CorpRespVO>> getCorpPage(@Valid CorpPageReqVO pageReqVO) {
         PageResult<CorpRespVO> pageResult = corpService.getCorpAppsPage(pageReqVO);
         return success(pageResult);
@@ -79,7 +79,7 @@ public class CorpController {
 
     @GetMapping(value = {"/simple-list"})
     @Operation(summary = "获取企业精简信息列表-不分页", description = "只包含被开启的企业，主要用于前端的下拉选项")
-    @PreAuthorize("@ss.hasPermission('system:corp:query')")
+    @PreAuthorize("@ss.hasPermission('tenant:corp:query')")
     public CommonResult<List<CorpSimpleRespVO>> getSimpleCorpList() {
         List<CorpDO> list = corpService.getSimpleCorpList(CommonStatusEnum.ENABLE.getStatus());
         return success(BeanUtils.toBean(list, CorpSimpleRespVO.class));
@@ -87,7 +87,7 @@ public class CorpController {
 
     @GetMapping("get")
     @Operation(summary = "获得企业详情")
-    @PreAuthorize("@ss.hasPermission('system:corp:query')")
+    @PreAuthorize("@ss.hasPermission('tenant:corp:query')")
     public CommonResult<CorpRespVO> getCorp(@RequestParam("id") Long id) {
         CorpRespVO corp = corpService.getCorp(id);
         return success(corp);

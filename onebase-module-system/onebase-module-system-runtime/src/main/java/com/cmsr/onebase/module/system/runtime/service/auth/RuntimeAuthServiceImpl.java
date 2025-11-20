@@ -8,6 +8,8 @@ import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
+import com.cmsr.onebase.module.infra.api.security.SecurityConfigApi;
+import com.cmsr.onebase.module.infra.api.security.dto.LoginFailureResultDTO;
 import com.cmsr.onebase.module.system.api.logger.dto.LoginLogCreateReqDTO;
 import com.cmsr.onebase.module.system.api.sms.SmsCodeApi;
 import com.cmsr.onebase.module.infra.api.security.SecurityConfigApi;
@@ -86,6 +88,9 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
     @Resource
     private SecurityConfigApi securityConfigApi;
 
+    @Resource
+    private SecurityConfigApi securityConfigApi;
+
     @Override
     public AdminUserDO authenticate(String username, String password) {
         final LoginLogTypeEnum logTypeEnum = LoginLogTypeEnum.LOGIN_USERNAME;
@@ -106,16 +111,28 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
     private void checkUserPsdAndStatus(String account, String password, AdminUserDO user, LoginLogTypeEnum logTypeEnum) {
         if (user == null) {
             createLoginLog(null, account, logTypeEnum, LoginResultEnum.BAD_CREDENTIALS);
-            throw exception(AUTH_LOGIN_BAD_CREDENTIALS);
+            throw exception(AUTH_LOGIN_NO_EXISTS);
         }
-        if (!userService.isPasswordMatch(password, user.getPassword())) {
-            createLoginLog(user.getId(), account, logTypeEnum, LoginResultEnum.BAD_CREDENTIALS);
-            throw exception(AUTH_LOGIN_BAD_CREDENTIALS);
-        }
+        // 检查账号是否被防暴力破解锁定
+        securityConfigApi.checkAccountLocked(user.getId());
+        // 验证密码
+        checkPasswordMatched(password,user,account,logTypeEnum);
         // 校验是否禁用
         if (CommonStatusEnum.isDisable(user.getStatus())) {
             createLoginLog(user.getId(), account, logTypeEnum, LoginResultEnum.USER_DISABLED);
             throw exception(AUTH_LOGIN_USER_DISABLED);
+        }
+    }
+
+    private void  checkPasswordMatched(String password, AdminUserDO user,String account,LoginLogTypeEnum logTypeEnum){
+        boolean passwordMatched = userService.isPasswordMatch(password, user.getPassword());
+        if (!passwordMatched) {
+            Long userId = user.getId();
+            // 密码错误，记录失败次数并获取返回结果
+            LoginFailureResultDTO failureResult = securityConfigApi.recordLoginFailure(userId).getData();
+            createLoginLog(userId, account, logTypeEnum, LoginResultEnum.BAD_CREDENTIALS);
+            // 使用失败记录中的提示信息作为错误信息参数
+            throw exception(AUTH_LOGIN_BAD_CREDENTIALS, failureResult.getMessage());
         }
     }
 

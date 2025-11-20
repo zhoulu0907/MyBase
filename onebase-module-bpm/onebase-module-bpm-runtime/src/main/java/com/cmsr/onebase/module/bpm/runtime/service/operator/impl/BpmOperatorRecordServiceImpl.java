@@ -17,11 +17,17 @@ import com.cmsr.onebase.module.bpm.core.utils.BpmUtil;
 import com.cmsr.onebase.module.bpm.runtime.service.operator.BpmOperatorRecordService;
 import com.cmsr.onebase.module.bpm.runtime.service.permission.BpmPermissionResolver;
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmOperatorRecordRespVO;
+import com.cmsr.onebase.module.engine.orm.anyline.entity.FlowHisTask;
+import com.cmsr.onebase.module.engine.orm.anyline.entity.FlowTask;
+import com.cmsr.onebase.module.engine.orm.anyline.repository.FlowHisTaskRepository;
+import com.cmsr.onebase.module.engine.orm.anyline.repository.FlowTaskRepository;
 import com.cmsr.onebase.module.system.api.user.AdminUserApi;
 import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
 import com.fasterxml.jackson.core.type.TypeReference;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.anyline.data.param.ConfigStore;
+import org.anyline.data.param.init.DefaultConfigStore;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
@@ -54,6 +60,12 @@ public class BpmOperatorRecordServiceImpl implements BpmOperatorRecordService {
     private HisTaskService hisTaskService;
 
     @Resource
+    private FlowHisTaskRepository hisTaskRepository;
+
+    @Resource
+    private FlowTaskRepository taskRepository;
+
+    @Resource
     private UserService userService;
 
     @Resource
@@ -74,12 +86,42 @@ public class BpmOperatorRecordServiceImpl implements BpmOperatorRecordService {
     @Resource
     private BpmPermissionResolver permissionResolver;
 
+    private List<HisTask> findAllHisTaskByInsId(Long instanceId) {
+        ConfigStore configs = new DefaultConfigStore();
+        configs.and(FlowHisTask.INSTANCE_ID, instanceId);
+        configs.order(FlowHisTask.NODE_TYPE);
+        configs.order(FlowHisTask.CREATE_TIME);
+
+        List<FlowHisTask> flowHisTasks = hisTaskRepository.findAllByConfig(configs);
+
+        if (CollectionUtils.isEmpty(flowHisTasks)) {
+            return new ArrayList<>();
+        }
+
+        return new ArrayList<>(flowHisTasks);
+    }
+
+    private List<Task> findAllTaskByInsId(Long instanceId) {
+        ConfigStore configs = new DefaultConfigStore();
+        configs.and(FlowHisTask.INSTANCE_ID, instanceId);
+        configs.order(FlowHisTask.NODE_TYPE);
+        configs.order(FlowHisTask.CREATE_TIME);
+
+        List<FlowTask> flowTasks = taskRepository.findAllByConfig(configs);
+
+        if (CollectionUtils.isEmpty(flowTasks)) {
+            return new ArrayList<>();
+        }
+
+        return new ArrayList<>(flowTasks);
+    }
+
     /**
      * 构建已办历史记录
      */
     private void fillHisTaskRecord(Instance instance, LinkedHashMap<Long, BpmOperatorRecordRespVO.OperatorRecord> recordMap) {
         // 查出已办
-        List<HisTask> hisTasks = hisTaskService.getByInsId(instance.getId());
+        List<HisTask> hisTasks = findAllHisTaskByInsId(instance.getId());
 
         if (CollectionUtils.isEmpty(hisTasks)) {
             return;
@@ -187,7 +229,7 @@ public class BpmOperatorRecordServiceImpl implements BpmOperatorRecordService {
 
     private void fillTaskRecord(Instance instance, LinkedHashMap<Long, BpmOperatorRecordRespVO.OperatorRecord> recordMap) {
         // 查出待办
-        List<Task> tasks = taskService.getByInsId(instance.getId());
+        List<Task> tasks = findAllTaskByInsId(instance.getId());
 
         if (CollectionUtils.isEmpty(tasks)) {
             return;
@@ -216,6 +258,8 @@ public class BpmOperatorRecordServiceImpl implements BpmOperatorRecordService {
                     record.setApproveMode(approverNodeExtDTO.getApproverConfig().getApprovalMode());
                 }
 
+                // 待办任务节点是当前节点
+                record.setCurrent(true);
                 record.setOperators(new ArrayList<>());
 
                 recordMap.put(taskId, record);
@@ -249,11 +293,14 @@ public class BpmOperatorRecordServiceImpl implements BpmOperatorRecordService {
                 }
 
                 // 通过user的更新时间来判断，是否已阅
-                boolean viewed = user.getUpdateTime().isAfter(user.getUpdateTime());
+                boolean viewed = user.getUpdateTime().isAfter(user.getCreateTime());
                 operatorInfo.setViewed(viewed);
 
                 // 只要有待办，展示状态与任务状态一致
                 record.setDisplayStatus(operatorInfo.getTaskStatus());
+
+                // 待办任务节点是当前节点
+                record.setCurrent(true);
 
                 record.getOperators().add(operatorInfo);
             }
@@ -348,11 +395,18 @@ public class BpmOperatorRecordServiceImpl implements BpmOperatorRecordService {
         }
     }
 
-    private void fillEndRecord(LinkedHashMap<Long, BpmOperatorRecordRespVO.OperatorRecord> recordMap) {
+    private void fillEndRecord(Instance instance, LinkedHashMap<Long, BpmOperatorRecordRespVO.OperatorRecord> recordMap) {
         Long endId = uidGenerator.getUID();
         BpmOperatorRecordRespVO.OperatorRecord endRecord = new BpmOperatorRecordRespVO.OperatorRecord();
         endRecord.setNodeName("结束");
         endRecord.setNodeType(BpmNodeTypeEnum.END.getCode());
+
+        // 判断是否结束
+        if (CollectionUtils.isEmpty(taskService.getByInsId(instance.getId()))) {
+            // 结束流程
+            endRecord.setCurrent(true);
+        }
+
         recordMap.put(endId, endRecord);
     }
 
@@ -452,7 +506,7 @@ public class BpmOperatorRecordServiceImpl implements BpmOperatorRecordService {
         fillPredictRecord(instance, recordMap);
 
         // 加上结束节点
-        fillEndRecord(recordMap);
+        fillEndRecord(instance, recordMap);
 
         // 填充用户数据
         fillOperatorInfo(recordMap);

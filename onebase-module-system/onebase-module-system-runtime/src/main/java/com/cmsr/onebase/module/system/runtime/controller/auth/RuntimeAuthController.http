@@ -4,7 +4,7 @@
 # 登录成功后会自动更新token到环境变量中
 
 ### 请求 /login 接口 => 成功
-POST {{baseUrl}}/system/auth/login
+POST {{baseUrl}}/system/auth/app-login
 Content-Type: application/json
 tenant-id: {{adminTenantId}}
 tag: {{tag}}
@@ -25,6 +25,22 @@ tag: {{tag}}
         }
     }
 %}
+
+
+### 请求 /login 接口 => 成功
+POST {{baseUrl}}/system/auth/app-login-mobile
+Content-Type: application/json
+tenant-id: {{adminTenantId}}
+tag: {{tag}}
+
+{
+  "mobile": "13800000004",
+  "password": "AdminChina2025!",
+  "appId":1024
+}
+
+
+
 
 
 ### 请求 /reset-password 接口 => 失败
