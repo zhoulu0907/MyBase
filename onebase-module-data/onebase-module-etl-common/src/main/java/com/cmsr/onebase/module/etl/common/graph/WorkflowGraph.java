@@ -14,9 +14,9 @@ import java.util.Set;
 @Data
 public class WorkflowGraph {
 
-    private List<Node> nodes;
+    private List<Node> nodes = new ArrayList<>();
 
-    private List<Edge> edges;
+    private List<Edge> edges = new ArrayList<>();
 
     private DefaultDirectedGraph<Node, Edge> directedGraph;
 
@@ -75,11 +75,9 @@ public class WorkflowGraph {
                 directedGraph.vertexSet().size()
         );
         WorkflowGraph subgraph = new WorkflowGraph();
-        List<Node> subgraphNodes = new ArrayList<>();
-        List<Edge> subgraphEdges = new ArrayList<>();
         for (GraphPath<Node, Edge> path : allPaths) {
-            subgraphNodes.addAll(path.getVertexList());
-            subgraphEdges.addAll(path.getEdgeList());
+            path.getVertexList().forEach(node -> subgraph.addNode(node));
+            path.getEdgeList().forEach(edge -> subgraph.addEdge(edge));
         }
         subgraph.init();
         return subgraph;
@@ -87,26 +85,43 @@ public class WorkflowGraph {
 
 
     public List<Node> findStartNodes() {
-        Set<String> sourceNodeIds = new HashSet<>();
-        for (Edge edge : this.edges) {
-            sourceNodeIds.add(edge.getSourceNodeId());
+        List<Node> sourceNodes = new ArrayList<>();
+        for (Node node : this.nodes) {
+            int inDegreeOf = directedGraph.inDegreeOf(node);
+            if (inDegreeOf == 0) {
+                sourceNodes.add(node);
+            }
         }
-        for (Edge edge : this.edges) {
-            sourceNodeIds.remove(edge.getTargetNodeId());
-        }
-        return sourceNodeIds.stream().map(this::findNodeById).toList();
+        return sourceNodes;
     }
 
     public List<Node> findEndNodes() {
-        Set<String> targetNodeIds = new HashSet<>();
-        for (Edge edge : this.edges) {
-            targetNodeIds.add(edge.getTargetNodeId());
+        List<Node> targetNodes = new ArrayList<>();
+        for (Node node : this.nodes) {
+            int outDegreeOf = directedGraph.outDegreeOf(node);
+            if (outDegreeOf == 0) {
+                targetNodes.add(node);
+            }
         }
-        for (Edge edge : this.edges) {
-            targetNodeIds.remove(edge.getSourceNodeId());
-        }
-        return targetNodeIds.stream().map(this::findNodeById).toList();
+        return targetNodes;
     }
 
+    private void addNode(Node node) {
+        for (Node n : nodes) {
+            if (n.getId().equals(node.getId())) {
+                return;
+            }
+        }
+        this.nodes.add(node);
+    }
+
+    private void addEdge(Edge edge) {
+        for (Edge e : edges) {
+            if (e.getSourceNodeId().equals(edge.getSourceNodeId()) && e.getTargetNodeId().equals(edge.getTargetNodeId())) {
+                return;
+            }
+        }
+        this.edges.add(edge);
+    }
 
 }

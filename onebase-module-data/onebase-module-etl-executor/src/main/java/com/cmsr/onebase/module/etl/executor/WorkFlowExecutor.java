@@ -119,11 +119,11 @@ public class WorkFlowExecutor implements Closeable {
 
 
     public DataPreview preview() throws Exception {
-        for (Node node : workflowGraph.getNodes()) {
+        for (Node node : workflowGraph.iterateNodes()) {
             doAction(node);
             if (node.getId().equals(inputArgs.getPreviewNodeId())) {
-                Table table = tableEnv.from(node.getId());
-                TableResult tableResult = table.execute();
+                String sql = "select * from " + node.getId() + " limit 20";
+                TableResult tableResult = tableEnv.executeSql(sql);
                 return tableResultToDataPreview(tableResult);
             }
         }

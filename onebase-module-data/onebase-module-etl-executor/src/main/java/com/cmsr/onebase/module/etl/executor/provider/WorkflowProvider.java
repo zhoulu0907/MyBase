@@ -29,6 +29,7 @@ public class WorkflowProvider {
 
     public WorkflowGraph createSubWorkflowGraph(String graphJson, String nodeId) throws Exception {
         WorkflowGraph graph = JacksonUtil.readValue(graphJson, WorkflowGraph.class);
+        graph.init();
         WorkflowGraph subgraph = graph.subgraph(nodeId);
         complementGraphInformation(subgraph);
         return subgraph;
