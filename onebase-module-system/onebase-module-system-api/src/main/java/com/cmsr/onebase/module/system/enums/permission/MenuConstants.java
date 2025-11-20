@@ -8,8 +8,8 @@ public class MenuConstants {
 
     public static final String MENU_APP = "app";
     public static final String MENU_TENANT = "tenant";
+    public static final String MENU_CORP = "corp";
 
-    @Deprecated
     public static final String MENU_SYSTEM = "system";
 
 }
