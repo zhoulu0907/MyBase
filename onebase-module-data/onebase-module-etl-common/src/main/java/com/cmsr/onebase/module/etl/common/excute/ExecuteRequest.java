@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.etl.executor;
+package com.cmsr.onebase.module.etl.common.excute;
 
 import lombok.Data;
 
@@ -7,7 +7,7 @@ import lombok.Data;
  * @Date：2025/11/6 10:11
  */
 @Data
-public class InputArgs {
+public class ExecuteRequest {
 
     private String jdbcDriverClass;
 

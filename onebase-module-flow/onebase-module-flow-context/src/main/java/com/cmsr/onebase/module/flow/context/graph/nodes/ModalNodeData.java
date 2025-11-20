@@ -46,7 +46,7 @@ public class ModalNodeData extends NodeData implements Serializable {
 
         private String fieldType;
 
-        private String value;
+        private Object value;
 
     }
 

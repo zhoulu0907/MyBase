@@ -39,7 +39,7 @@ public class FlowProcessGUITest {
         FormTriggerReqVO reqVO = new FormTriggerReqVO();
         reqVO.setProcessId(124225813148991488L);  //
         reqVO.setExecutionUuid("d0adb4be-a3f7-4283-afff-1fb6f8f9c1f2");
-        Map<Long, String> inputParams = Map.of(
+        Map<Long, Object> inputParams = Map.of(
 
         );
         reqVO.setInputParams(inputParams);
@@ -54,7 +54,7 @@ public class FlowProcessGUITest {
         FormTriggerReqVO reqVO = new FormTriggerReqVO();
         reqVO.setProcessId(130142268047982592L);  //
 //        reqVO.setExecutionUuid("79858562-e948-4d26-9d0c-dfc181829712");
-        Map<Long, String> inputParams = Map.of(
+        Map<Long, Object> inputParams = Map.of(
 //                115291181633175552L,"流字段"
         );
         reqVO.setInputParams(inputParams);
@@ -70,7 +70,7 @@ public class FlowProcessGUITest {
         FormTriggerReqVO reqVO = new FormTriggerReqVO();
         reqVO.setProcessId(131695087709290496L);  //
 //        reqVO.setExecutionUuid("79858562-e948-4d26-9d0c-dfc181829712");
-        Map<Long, String> inputParams = Map.of(
+        Map<Long, Object> inputParams = Map.of(
 //                115291181633175552L,"流字段"
         );
         reqVO.setInputParams(inputParams);
@@ -87,7 +87,7 @@ public class FlowProcessGUITest {
         FormTriggerReqVO reqVO = new FormTriggerReqVO();
         reqVO.setProcessId(131695087709290496L);  //
 //        reqVO.setExecutionUuid("79858562-e948-4d26-9d0c-dfc181829712");
-        Map<Long, String> inputParams = Map.of(
+        Map<Long, Object> inputParams = Map.of(
                 115291181633175552L,"中文111"
         );
         reqVO.setInputParams(inputParams);

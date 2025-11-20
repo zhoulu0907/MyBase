@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.etl.build.service.mgt;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.etl.build.service.mgt.vo.*;
 import com.cmsr.onebase.module.etl.build.service.mgt.vo.ExecutionLogVO;
+import com.cmsr.onebase.module.etl.common.preview.DataPreview;
 import com.cmsr.onebase.module.etl.core.vo.WorkflowPageReqVO;
 
 public interface ETLWorkflowService {
@@ -31,4 +32,7 @@ public interface ETLWorkflowService {
     void startWorkflowManually(Long workflowId);
 
     PageResult<ExecutionLogVO> getWorkflowExecutionLogs(Long applicationId, Long workflowId, Integer pageNo, Integer pageSize);
+
+    DataPreview previewWorkflow(PreviewReqVO previewReqVO);
+
 }

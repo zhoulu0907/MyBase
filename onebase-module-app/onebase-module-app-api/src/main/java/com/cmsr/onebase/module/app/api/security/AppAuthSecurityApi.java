@@ -11,6 +11,8 @@ public interface AppAuthSecurityApi {
 
     boolean checkMenuEntity(Long applicationId, Long menuId, Long entityId);
 
+    boolean isApplicationAdmin(Long userId, Long applicationId);
+
     OperationPermission getMenuOperationPermission(Long userId, Long applicationId, Long menuId);
 
     DataPermission getMenuDataPermission(Long userId, Long applicationId, Long menuId);
