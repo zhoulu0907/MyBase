@@ -25,6 +25,7 @@ import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.service.AnylineService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -432,7 +433,7 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
             return result;
 
         } catch (Exception e) {
-            log.error("执行元数据系统方法失败。请求上下文: [{}]", requestContext, e);
+            log.error("执行元数据系统方法失败。请求上下文: [{}]", requestContext, ExceptionUtils.getRootCause(e));
             throw exception(DATA_METHOD_EXEC_FAIL, e.getMessage());
 //            throw new RuntimeException("执行" + requestContext.getMetadataDataMethodOpEnum() + "异常：" + e.getMessage(), e);
         }
@@ -567,7 +568,7 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
         }
 
         // 使用校验管理器执行所有字段的校验
-        validationManager.validateEntity(entityId, fields, dataForValidation);
+        validationManager.validateEntity(entityId, fields, dataForValidation, operationType);
 
         log.info("数据校验完成：entityId={}", entityId);
     }
