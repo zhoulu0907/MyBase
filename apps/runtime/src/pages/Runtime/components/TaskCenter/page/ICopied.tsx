@@ -1,10 +1,10 @@
-import { useState, useEffect,type FC } from 'react';
-import { Table, type TableColumnProps, Button, Tag, Message, Radio,Pagination } from '@arco-design/web-react';
+import { useState, useEffect, type FC } from 'react';
+import { Table, type TableColumnProps, Button, Tag, Message, Radio, Pagination } from '@arco-design/web-react';
 import { getMyCCPageList } from '@onebase/app/src/services/app_runtime';
 import { FLOWSTATUS_TYPE, FlowStatusMap, LISTTYPE } from '@onebase/app';
 import TableSearch from './TableSearch';
-import DetailPop from './DetailPop'
-import '../style/tcPage.less'
+import DetailPop from './DetailPop';
+import '../style/tcPage.less';
 
 const getTimeAgo = (time: number) => {
   const now = Date.now();
@@ -18,13 +18,13 @@ const getTimeAgo = (time: number) => {
   return '刚刚';
 };
 const radioList = [
-    {label: '未读', value: 'false'},
-    {label: '已读', value: 'true'},
-    {label: '全部', value: 'all'}
-]
-let defaultCheck = 'all'
+  { label: '未读', value: 'false' },
+  { label: '已读', value: 'true' },
+  { label: '全部', value: 'all' }
+];
+let defaultCheck = 'all';
 
-const ICopied: FC = ({ appId }:any) => {
+const ICopied: FC = ({ appId }: any) => {
   const columns: TableColumnProps[] = [
     {
       title: '流程标题',
@@ -104,6 +104,7 @@ const ICopied: FC = ({ appId }:any) => {
   });
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState<any>({});
+  const [viewed, setViewed] = useState<any>();
   const defaultPageNo = 1;
 
   function handleDetailPage(row: any) {
@@ -149,7 +150,13 @@ const ICopied: FC = ({ appId }:any) => {
     fetchFormData(filters, defaultPageNo);
   };
 
-  const handleSearch = (newFilters: any) => {
+  const handleSearch = (params: any) => {
+    let newFilters = {};
+    if (viewed === 'all') {
+      newFilters = params;
+    } else {
+      newFilters = { ...params, viewed: viewed };
+    }
     fetchFormData(newFilters, defaultPageNo);
   };
   const handleReset = () => {
@@ -165,8 +172,15 @@ const ICopied: FC = ({ appId }:any) => {
   }, []);
 
   function CreatedRadioChange(val: string) {
-    console.log('radio ====', val);
-    
+    setViewed(val);
+    let newFilters = {};
+    if (val === 'all') {
+      const { viewed, ...rest } = filters;
+      newFilters = rest;
+    } else {
+      newFilters = { ...filters, viewed: val };
+    }
+    fetchFormData(newFilters, defaultPageNo);
   }
 
   return (
@@ -195,7 +209,11 @@ const ICopied: FC = ({ appId }:any) => {
             })}
           </Radio.Group>
         </div>
-        <TableSearch uiConfig={{ hasInput: true, hasFilter: true, hasSort: true, hasBatch: false }} />
+        <TableSearch
+          uiConfig={{ hasInput: true, hasFilter: true, hasSort: true, hasBatch: false }}
+          onReset={handleReset}
+          onFilterChange={handleSearch}
+        />
       </div>
       <Table className="task-tb-box" columns={columns} data={data} />
       <Pagination
