@@ -8,9 +8,7 @@ import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
-import com.cmsr.onebase.module.app.api.auth.AppAuthRoleApi;
-import com.cmsr.onebase.module.app.api.auth.AppAuthRoleUser;
-import com.cmsr.onebase.module.app.api.auth.dto.AuthRoleDTO;
+import com.cmsr.onebase.module.app.api.security.AppAuthSecurityApi;
 import com.cmsr.onebase.module.infra.api.security.SecurityConfigApi;
 import com.cmsr.onebase.module.infra.api.security.dto.LoginFailureResultDTO;
 import com.cmsr.onebase.module.system.api.logger.dto.LoginLogCreateReqDTO;
@@ -22,7 +20,6 @@ import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.logger.LoginLogTypeEnum;
 import com.cmsr.onebase.module.system.enums.logger.LoginResultEnum;
 import com.cmsr.onebase.module.system.enums.oauth2.OAuth2ClientConstants;
-import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
 import com.cmsr.onebase.module.system.enums.tenant.TenantCodeEnum;
 import com.cmsr.onebase.module.system.service.logger.LoginLogService;
 import com.cmsr.onebase.module.system.service.member.MemberService;
@@ -36,6 +33,7 @@ import jakarta.annotation.Resource;
 import jakarta.validation.Validator;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
@@ -91,11 +89,8 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
     @Resource
     private SecurityConfigApi securityConfigApi;
 
-    @Resource
-    private AppAuthRoleApi appAuthRoleApi;
-
-    @Resource
-    protected AppAuthRoleUser appAuthRoleUser;
+    @Autowired
+    private AppAuthSecurityApi appAuthSecurityApi;
 
     @Override
     public AdminUserDO authenticate(String username, String password) {
@@ -143,8 +138,7 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
     }
 
     public boolean   findAdminFlag( Long userId ,Long appId){
-       //TODO 待黄老师提供接口
-        return true;
+        return  appAuthSecurityApi.isApplicationAdmin(userId,appId);
     }
 
 
