@@ -15,7 +15,9 @@ export interface FilterParams {
   nodeCode?: string;
   dateRange?: [Date, Date];
   keyword?: string;
-  sortType?:string
+  sortType?:string;
+  // 发起人
+  initiator?:string;
 }
 
 export interface OptionItem {
@@ -50,6 +52,7 @@ const TableSearch: FC<any> = ({
   const [filters, setFilters] = useState<FilterParams>({});
   const [formOptions, setFormOptions] = useState<OptionItem[]>([]);
   const [nodeOptions, setNodeOptions] = useState<OptionItem[]>([]);
+  const [startManArr, setStartManArr] = useState<any[]>([{value: '1', label: '111'}, {value: '2', label: '222'}]);
   const [loadingSecond, setLoadingSecond] = useState(false);
   const [loadingThird, setLoadingThird] = useState(false);
   const [operator, setOperator] = useState<string>(selectType.EQUAL);
@@ -113,7 +116,8 @@ const TableSearch: FC<any> = ({
       nodeCode: undefined,
       dateRange: undefined,
       keyword:undefined,
-      sortType:undefined
+      sortType:undefined,
+      initiator: undefined
     };
     setFilters(resetFilters);
     setNodeOptions([]);
@@ -279,6 +283,60 @@ const TableSearch: FC<any> = ({
                   </Select>
                 </div>
                 <Divider />
+                {uiConfig.hasFilter?.hasStartMan && <div className="filter-line">
+                  <InputTag
+                    className="fisrt-input-tag"
+                    style={{ width: 150 }}
+                    addBefore={<IconCheck />}
+                    allowClear
+                    readOnly
+                    inputValue="发起人"
+                  />
+                  <Select
+                    className="mid-select"
+                    placeholder="请选择"
+                    style={{ width: 150 }}
+                    value={operator}
+                    onChange={handleOperatorChange}
+                    allowClear={false} // 不允许清空，必须有值
+                  >
+                    <Option value={selectType.EQUAL}>等于</Option>
+                    <Option value={selectType.CONTAIN}>包含</Option>
+                  </Select>
+                  {operator === selectType.EQUAL ? (
+                    <Select
+                      className="end-select"
+                      placeholder="请选择发起人"
+                      style={{ flex: 1 }}
+                      value={filters.initiator}
+                      onChange={(value: any) => handleFilterChange('initiator', value)}
+                      allowClear
+                    >
+                      {startManArr.map((option) => (
+                        <Option key={option.value} value={option.value}>
+                          {option.label}
+                        </Option>
+                      ))}
+                    </Select>
+                  ) : (
+                    <Select
+                      className="end-select"
+                      placeholder="请选择发起人"
+                      style={{ flex: 1 }}
+                      mode="multiple"
+                      value={filters.initiator}
+                      onChange={(value: any) => handleFilterChange('initiator', value)}
+                      allowClear
+                      maxTagCount="responsive"
+                    >
+                      {startManArr.map((option) => (
+                        <Option key={option.value} value={option.value}>
+                          {option.label}
+                        </Option>
+                      ))}
+                    </Select>
+                  )}
+                </div>}
                 <div className="filter-line">
                   <InputTag
                     className="fisrt-input-tag"

@@ -145,7 +145,7 @@ const IDone: FC = ({ appId }: any) => {
       <div className="table-title-box">
         <b>我已处理</b>
         <TableSearch
-          uiConfig={{ hasInput: true, hasFilter: true, hasSort: true, hasBatch: false }}
+          uiConfig={{ hasInput: true, hasFilter: {hasStartMan: true}, hasSort: true, hasBatch: false }}
           onReset={handleReset}
           onFilterChange={handleSearch}
         />
