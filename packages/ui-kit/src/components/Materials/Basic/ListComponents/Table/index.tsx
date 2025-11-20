@@ -3,11 +3,11 @@ import { memo, useEffect, useState } from 'react';
 import {
   BUTTON_OPTIONS,
   BUTTON_VALUES,
+  RedirectMethod,
   STATUS_OPTIONS,
   STATUS_VALUES,
   TableOperationButton,
-  TableOperationButtonStyle,
-  RedirectMethod
+  TableOperationButtonStyle
 } from '../../../constants';
 
 import DynamicIcon from '@/components/DynamicIcon';
@@ -28,7 +28,7 @@ import PreviewRender from 'src/components/render/PreviewRender';
 import { useFormEditorSignal } from 'src/signals/page_editor';
 import { ENTITY_FIELD_TYPE } from '../../../../DataFactory/const';
 import { COMPONENT_MAP } from '../../../componentsMap';
-import { getComponentSchema } from '../../../schema'
+import { getComponentSchema } from '../../../schema';
 import './index.css';
 import type { XTableConfig } from './schema';
 import TableSearch from './tableSerach';
@@ -270,7 +270,8 @@ const XTable = memo(
                   ...currentComponentSchemas,
                   config: {
                     ...currentComponentSchemas.config,
-                    dataField: dataField?.length > 0 ? dataField : [mainMetaData.entityId, `${id}.${index}.${column.id}`],
+                    dataField:
+                      dataField?.length > 0 ? dataField : [mainMetaData.entityId, `${id}.${index}.${column.id}`],
                     label: {
                       display: false,
                       text: ''
@@ -456,7 +457,7 @@ const XTable = memo(
             );
             if (userSelectField && newItem[key]) {
               if (newItem[key]) {
-                // newItem[key] = newItem[key]?.userName || '';
+                newItem[key] = newItem[key]?.userName || '';
               }
             }
 
