@@ -42,7 +42,7 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
       value = value * 100;
     }
     if (showPrecision && value) {
-      result = value.toFixed(precision);
+      result = Number(value).toFixed(precision);
     }
     if (useThousandsSeparator) {
       result = `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
