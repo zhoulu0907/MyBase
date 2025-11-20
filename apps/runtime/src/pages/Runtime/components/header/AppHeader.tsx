@@ -1,5 +1,4 @@
 import { useI18n } from '@/hooks/useI18n';
-// import { useAppStore } from '@/store/store_app';
 import AvatarSVG from '@/assets/images/avatar.svg';
 import BuildingLine from '@/assets/images/building-line.svg';
 import { DynamicIcon } from '@/components';

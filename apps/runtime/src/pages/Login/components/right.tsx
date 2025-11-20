@@ -94,21 +94,11 @@ const Right: React.FC = () => {
   }, []);
 
   const handleGetApplication = async () => {
-    const redirectURL = getHashQueryParam('redirectURL');
-    if (redirectURL) {
-      const startIndex = redirectURL.indexOf('/runtime/');
-      const runtimeLength = '/runtime/'.length;
-      const endRedirectURL = redirectURL.slice(startIndex + runtimeLength);
-      const endIndex = endRedirectURL?.indexOf('/');
-      const applicationId = redirectURL.slice(startIndex + runtimeLength, startIndex + runtimeLength + endIndex);
-      if (applicationId || appId) {
-        //已发布的应用登录之后获取到appId（路由携带参数?appId=${appId},
-        //从编辑态点击访问登录获取到applicationId，（/runtime/${appId}）
-        const res = await getApplication({ id: applicationId ? applicationId : appId});
+    if (appId) {
+        const res = await getApplication({ id: appId});
         if (res) {
           setCurAppInfo(res);
         }
-      }
     }
   };
 

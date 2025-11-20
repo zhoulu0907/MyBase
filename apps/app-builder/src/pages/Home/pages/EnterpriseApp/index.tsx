@@ -197,7 +197,7 @@ const EnterpriseAppPage: React.FC = () => {
       <div className={styles.myAppPageHeader}>
         <PermissionButton
           permission={ACTIONS.CREATE}
-          type="default"
+          type="outline"
           size="large"
           icon={<img src={arrowRightUp} alt="create application" />}
           className={styles.createAppButton}

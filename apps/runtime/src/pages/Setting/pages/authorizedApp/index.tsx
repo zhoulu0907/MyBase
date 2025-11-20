@@ -1,13 +1,12 @@
-import { TopHeader } from "../../components/topHeader";
 import styles from "./index.module.less";
-import { Button, Dropdown, Menu, Message, Modal, Space, Table, Tabs, Tag } from "@arco-design/web-react";
+import { Button, Dropdown, Input, Menu, Message, Modal, Space, Table, Tabs, Tag } from "@arco-design/web-react";
 import StatusTag from "@/components/StatusTag";
 import { IconMore } from "@douyinfe/semi-icons";
 import { statusMapping } from "../../../../constants";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppStore } from "@/store";
-import { type corpListParams } from "@onebase/platform-center";
+import { type corpAppListParams ,getCorpAuthorizedAppListApi } from "@onebase/platform-center";
 
 
 export interface AppItem {
@@ -97,12 +96,27 @@ const AuthorizedApplication = () => {
         }
     ];
 
+    const getStatus = (value: string) => {
+        switch(value) {
+            case "all":
+                return 0;
+            case "started":
+                return 1;
+            case "disabled":
+                return 2;
+            case "expired":
+                return 3;
+            default:
+                return null
+        }
+    }
+
     const fetchCorpAuthorizedList = async(pageNo = 1, pageSize = 10) => {
         setLoading(true);
-        const params: corpListParams = {
+        const params: corpAppListParams = {
             pageNo,
             pageSize,
-            corpId:""
+            status: getStatus(currentTab)
         };
         try {
         const res = await getCorpAuthorizedAppListApi(params);
@@ -113,9 +127,9 @@ const AuthorizedApplication = () => {
             console.warn('Invalid response format:', res);
         }
         }catch(error) {
-        Message.error("获取企业授权应用列表失败");
+            Message.error("获取企业授权应用列表失败");
         }finally {
-        setLoading(false);
+            setLoading(false);
         }
     }
 
@@ -153,6 +167,10 @@ const AuthorizedApplication = () => {
         });
     }
 
+    const handleChangeTab = (value: string) => {
+        setCurrentTab(value);
+    }
+
     const displayData = useMemo(()=>{
       if (!searchValue.trim()) return tableData
       const lowerSearch = searchValue.toLowerCase();
@@ -161,62 +179,43 @@ const AuthorizedApplication = () => {
       )
     },[tableData, searchValue])
 
-    const getCurrentStatus = (value: string) => {
-        switch(value) {
-            case "all":
-                return -1;
-            case "started":
-                return 1;
-            case "disabled":
-                return 0;
-            case "expired":
-                return 2;
-            default:
-                return ""
-        }
-    }
-
-    const filteredTableData = displayData.filter((item: any) => item.status === getCurrentStatus(currentTab)  );
-
-    const getCurrentTableData = () => {
-        return currentTab === "all" ? displayData : filteredTableData
-    }
-
-    const currentTableData = getCurrentTableData();
-    
     return (
         <div className={styles.authorizedApplication}>
-            <Tabs activeTab={currentTab} onChange={setCurrentTab} type='rounded'
+            <Tabs activeTab={currentTab} onChange={handleChangeTab} type='rounded'
             extra={
-                <TopHeader
-                    title=""
-                    onAdd={()=>null}
-                    isBusiness={false}
-                    setSearchInputValue={handleSearchChange} 
-                />
+                <div className={styles.topHeader}>
+                    <div className={styles.searchContent}>
+                        <Input.Search 
+                            allowClear 
+                            placeholder="输入应用名称"
+                            className={styles.searchInput} 
+                            onChange={handleSearchChange}
+                        />
+                    </div>
+                </div>
             }
             >
-                {statusMapping.map((item:any) => {
-                    return <Tabs.TabPane key={item.value} title={item.label}>
-                            <div style={{ 
-                                tableLayout: 'fixed',
-                                width: '100%',
-                                maxWidth: "1200px" // 强制最大宽度，与容器一致
-                            }}>
-                                <Table
-                                    rowKey="id"
-                                    border={false}
-                                    loading={loading}
-                                    columns={authorizedApplicationColumns}
-                                    data={displayData}
-                                    pagination={{
-                                        ...pageInation,
-                                        onChange: handleChangePagination,
-                                    }}
-                                />
-                        </div>
-                    </Tabs.TabPane>
-                })}
+            {statusMapping.map((item:any) => {
+                return <Tabs.TabPane key={item.value} title={item.label}>
+                        <div style={{ 
+                            tableLayout: 'fixed',
+                            width: '100%',
+                            maxWidth: "1200px"
+                        }}>
+                            <Table
+                                rowKey="id"
+                                border={false}
+                                loading={loading}
+                                columns={authorizedApplicationColumns}
+                                data={displayData}
+                                pagination={{
+                                    ...pageInation,
+                                    onChange: handleChangePagination,
+                                }}
+                            />
+                    </div>
+                </Tabs.TabPane>
+            })}
             </Tabs>
 
         </div>

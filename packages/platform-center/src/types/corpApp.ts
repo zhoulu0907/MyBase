@@ -8,7 +8,7 @@ export interface CorpAppParams {
 export interface corpAppListParams {
   pageNo: number;
   pageSize: number;
-  corpId: string;
+  status?: number;
 }
 
 export interface updateAppParams {
