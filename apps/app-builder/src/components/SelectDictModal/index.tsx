@@ -112,13 +112,14 @@ export default function SelectDictModal({
 
   const footer = (
     <div className={styles.footerBar}>
-      <Button
-        type="text"
-        size="small"
-        onClick={gotoDictPage || (() => navigate(`/onebase/create-app/data-factory?appId=${appId || ''}`))}
-      >
-        数据字典管理
-      </Button>
+      <Space>
+        {typeof gotoDictPage === 'function' && (
+          <Button type="text" size="small" onClick={gotoDictPage}>
+            数据字典管理
+          </Button>
+        )}
+      </Space>
+
       <Space>
         <Button type="outline" size="small" onClick={onCancel}>
           取消
