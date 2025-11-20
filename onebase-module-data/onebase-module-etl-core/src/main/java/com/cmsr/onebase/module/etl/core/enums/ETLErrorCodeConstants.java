@@ -6,9 +6,7 @@ public interface ETLErrorCodeConstants {
     // TODO: 后续规范化后需要修改
 
     // 通用异常
-    ErrorCode UNKNOWN_ERROR = new ErrorCode(110000, "未知内部异常");
     ErrorCode DATASOURCE_ILLEGAL = new ErrorCode(110001, "数据源信息非法");
-    ErrorCode DATA_CONFLICT = new ErrorCode(110002, "未知异常，数据冲突");
     // 数据源类型异常
     ErrorCode DATASOURCE_NOT_SUPPORTED = new ErrorCode(110101, "数据源类型不支持");
     ErrorCode ILLEGAL_DATASOURCE_TYPE = new ErrorCode(110102, "数据源类型异常");
