@@ -120,7 +120,6 @@ public class BpmGlobalListener implements GlobalListener {
                         JsonUtils.toJsonString(ccPermissionList));
             }
         }
->>>>>>> baeb2b7834593848d11f76d5144e6b1b0a5b42ec
     }
 
     public void finish(ListenerVariable listenerVariable) {
