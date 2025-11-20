@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.etl.build.service.mgt.vo;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -12,7 +13,7 @@ import lombok.Data;
 public class PreviewReqVO {
 
     @Schema(description = "流程定义")
-    private String workflow;
+    private JsonNode workflow;
 
     @Schema(description = "节点ID")
     private String nodeId;

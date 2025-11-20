@@ -6,6 +6,7 @@ import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.ds.client.DolphinSchedulerClient;
 import com.cmsr.onebase.framework.ds.model.schedule.sub.Schedule;
 import com.cmsr.onebase.framework.ds.model.task.def.HttpTask;
+import com.cmsr.onebase.jose.JoseGenerator;
 import com.cmsr.onebase.module.etl.build.service.mgt.vo.*;
 import com.cmsr.onebase.module.etl.build.util.Cron;
 import com.cmsr.onebase.module.etl.common.excute.ExecuteRequest;
@@ -24,6 +25,8 @@ import com.cmsr.onebase.module.etl.core.enums.ETLErrorCodeConstants;
 import com.cmsr.onebase.module.etl.core.enums.ScheduleJobStatus;
 import com.cmsr.onebase.module.etl.core.enums.ScheduleType;
 import com.cmsr.onebase.module.etl.core.vo.WorkflowPageReqVO;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.NullNode;
 import jakarta.annotation.Resource;
 import kong.unirest.core.HttpResponse;
 import kong.unirest.core.Unirest;
@@ -362,13 +365,23 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
     @Override
     public DataPreview previewWorkflow(PreviewReqVO previewReqVO) {
         ExecuteRequest executeRequest = new ExecuteRequest();
-        executeRequest.setPreviewWorkflow(previewReqVO.getWorkflow());
+        JsonNode workflow = previewReqVO.getWorkflow();
+        if (workflow instanceof NullNode) {
+            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.WORKFLOW_PARAM_ERROR);
+        }
+        executeRequest.setPreviewWorkflow(workflow.toString());
         executeRequest.setPreviewNodeId(previewReqVO.getNodeId());
-        HttpResponse<DataPreview> response = Unirest.post(flinkServerUrl + "/flink/preview")
+        String token = JoseGenerator.generateToken(30);
+        HttpResponse<String> response = Unirest.post(flinkServerUrl + "/flink/preview")
                 .header("Content-Type", "application/json")
+                .header("X-Exec-Token", token)
                 .body(executeRequest)
-                .asObject(DataPreview.class);
-        return response.getBody();
+                .asString();
+        if (response.getStatus() != 200) {
+            log.error("Flink Server 响应错误: {}", response.getBody());
+            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.PREVIEW_ERROR);
+        }
+        return JsonUtils.parseObject(response.getBody(), DataPreview.class);
     }
 
     @Override
