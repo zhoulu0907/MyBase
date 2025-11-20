@@ -56,8 +56,9 @@ public class PairJoinNode extends Node<PairJoinConfig> implements ExecuteSqlActi
     }
 
     private Field[] selectFieldNames() {
-        return output.getFields().stream()
-                .map(item -> DSL.field(item.getFieldName()))
+        return config.getMappings().stream()
+                .map(mapping -> DSL.field(
+                        name(mapping.getNodeId(), mapping.getFieldName())).as(mapping.getUpdatedFieldName()))
                 .toArray(Field[]::new);
     }
 
@@ -66,8 +67,8 @@ public class PairJoinNode extends Node<PairJoinConfig> implements ExecuteSqlActi
                 .map(fieldPair -> {
                     String[] left = StringUtils.split(fieldPair.getLeftFieldFqn(), ".");
                     String[] right = StringUtils.split(fieldPair.getRightFieldFqn(), ".");
-                    Field<Object> leftField = field(name(left[0], left[1]), Object.class);
-                    Field<Object> rightField = field(name(right[0], right[1]), Object.class);
+                    Field<Object> leftField = field(name(config.getLeftNodeId(), left[1]), Object.class);
+                    Field<Object> rightField = field(name(config.getRightNodeId(), right[1]), Object.class);
                     return DSL.condition(leftField.eq(rightField));
                 })
                 .toArray(Condition[]::new);

@@ -1,25 +1,84 @@
 {
   "nodes": [
     {
-      "id": "jdbc_input_1d80dffd5a484e7384924085a64ec753",
-      "title": "输入actor",
+      "id": "jdbc_input_4e9f7e96f6c54d96aa093715d3039d5a",
+      "title": "输入节点",
+      "description": "",
+      "type": "jdbc_input",
+      "config": {
+        "datasourceId": "143339362546384896",
+        "tableId": "143339379726254094",
+        "fields": [
+          {
+            "fieldName": "actor_id",
+            "fieldType": "integer"
+          },
+          {
+            "fieldName": "first_name",
+            "fieldType": "string"
+          },
+          {
+            "fieldName": "last_name",
+            "fieldType": "string"
+          },
+          {
+            "fieldName": "last_update",
+            "fieldType": "timestamp"
+          }
+        ]
+      },
+      "output": {
+        "verified": true,
+        "fields": [
+          {
+            "fieldFqn": "jdbc_input_4e9f7e96f6c54d96aa093715d3039d5a.actor_id",
+            "fieldName": "actor_id",
+            "fieldType": "integer"
+          },
+          {
+            "fieldFqn": "jdbc_input_4e9f7e96f6c54d96aa093715d3039d5a.first_name",
+            "fieldName": "first_name",
+            "fieldType": "string"
+          },
+          {
+            "fieldFqn": "jdbc_input_4e9f7e96f6c54d96aa093715d3039d5a.last_name",
+            "fieldName": "last_name",
+            "fieldType": "string"
+          },
+          {
+            "fieldFqn": "jdbc_input_4e9f7e96f6c54d96aa093715d3039d5a.last_update",
+            "fieldName": "last_update",
+            "fieldType": "timestamp"
+          }
+        ]
+      },
+      "meta": {
+        "position": {
+          "x": -518,
+          "y": -767
+        }
+      }
+    },
+    {
+      "id": "jdbc_input_327027447fd54f88ab2e3b71e9af9b1d",
+      "title": "输入节点2",
       "description": "",
       "type": "jdbc_input",
       "config": {
         "datasourceId": "143463555821764608",
-        "tableId": "143463555821764623",
+        "tableId": "143463555821764637",
         "fields": [
           {
-            "fieldName": "actor_id",
+            "fieldName": "city_id",
             "fieldType": "integer"
           },
           {
-            "fieldName": "first_name",
+            "fieldName": "city",
             "fieldType": "string"
           },
           {
-            "fieldName": "last_name",
-            "fieldType": "string"
+            "fieldName": "country_id",
+            "fieldType": "integer"
           },
           {
             "fieldName": "last_update",
@@ -31,22 +90,22 @@
         "verified": true,
         "fields": [
           {
-            "fieldFqn": "jdbc_input_1d80dffd5a484e7384924085a64ec753.actor_id",
-            "fieldName": "actor_id",
+            "fieldFqn": "jdbc_input_327027447fd54f88ab2e3b71e9af9b1d.city_id",
+            "fieldName": "city_id",
             "fieldType": "integer"
           },
           {
-            "fieldFqn": "jdbc_input_1d80dffd5a484e7384924085a64ec753.first_name",
-            "fieldName": "first_name",
+            "fieldFqn": "jdbc_input_327027447fd54f88ab2e3b71e9af9b1d.city",
+            "fieldName": "city",
             "fieldType": "string"
           },
           {
-            "fieldFqn": "jdbc_input_1d80dffd5a484e7384924085a64ec753.last_name",
-            "fieldName": "last_name",
-            "fieldType": "string"
+            "fieldFqn": "jdbc_input_327027447fd54f88ab2e3b71e9af9b1d.country_id",
+            "fieldName": "country_id",
+            "fieldType": "integer"
           },
           {
-            "fieldFqn": "jdbc_input_1d80dffd5a484e7384924085a64ec753.last_update",
+            "fieldFqn": "jdbc_input_327027447fd54f88ab2e3b71e9af9b1d.last_update",
             "fieldName": "last_update",
             "fieldType": "timestamp"
           }
@@ -54,345 +113,25 @@
       },
       "meta": {
         "position": {
-          "x": -539.5,
-          "y": -366
+          "x": -521,
+          "y": -576
         }
       }
     },
     {
-      "id": "jdbc_input_d757aeb41ab94a21ad52e43b5451936f",
-      "title": "输入actor_info",
-      "description": "",
-      "type": "jdbc_input",
-      "config": {
-        "datasourceId": "143463555821764608",
-        "tableId": "143463555821764611",
-        "fields": [
-          {
-            "fieldName": "actor_id",
-            "fieldType": "integer"
-          },
-          {
-            "fieldName": "first_name",
-            "fieldType": "string"
-          },
-          {
-            "fieldName": "last_name",
-            "fieldType": "string"
-          },
-          {
-            "fieldName": "film_info",
-            "fieldType": "string"
-          }
-        ]
-      },
-      "output": {
-        "verified": true,
-        "fields": [
-          {
-            "fieldFqn": "jdbc_input_d757aeb41ab94a21ad52e43b5451936f.actor_id",
-            "fieldName": "actor_id",
-            "fieldType": "integer"
-          },
-          {
-            "fieldFqn": "jdbc_input_d757aeb41ab94a21ad52e43b5451936f.first_name",
-            "fieldName": "first_name",
-            "fieldType": "string"
-          },
-          {
-            "fieldFqn": "jdbc_input_d757aeb41ab94a21ad52e43b5451936f.last_name",
-            "fieldName": "last_name",
-            "fieldType": "string"
-          },
-          {
-            "fieldFqn": "jdbc_input_d757aeb41ab94a21ad52e43b5451936f.film_info",
-            "fieldName": "film_info",
-            "fieldType": "string"
-          }
-        ]
-      },
-      "meta": {
-        "position": {
-          "x": -539.5,
-          "y": -228
-        }
-      }
-    },
-    {
-      "id": "union_7343dec4be494eea94606d3bee6ff967",
-      "title": "追加合并节点",
-      "description": "",
-      "type": "union",
-      "config": {
-        "data": [
-          {
-            "tableId": "jdbc_input_1d80dffd5a484e7384924085a64ec753",
-            "tableName": "输入actor",
-            "columns": [
-              {
-                "fieldFqn": "jdbc_input_1d80dffd5a484e7384924085a64ec753.actor_id",
-                "fieldName": "actor_id",
-                "fieldType": "integer",
-                "chosen": false,
-                "selected": false
-              },
-              {
-                "fieldFqn": "jdbc_input_1d80dffd5a484e7384924085a64ec753.first_name",
-                "fieldName": "first_name",
-                "fieldType": "string",
-                "chosen": false,
-                "selected": false
-              },
-              {
-                "fieldFqn": "jdbc_input_1d80dffd5a484e7384924085a64ec753.last_name",
-                "fieldName": "last_name",
-                "fieldType": "string",
-                "chosen": false,
-                "selected": false
-              },
-              {
-                "fieldFqn": "jdbc_input_1d80dffd5a484e7384924085a64ec753.last_update",
-                "fieldName": "last_update",
-                "fieldType": "timestamp",
-                "chosen": false,
-                "selected": false
-              },
-              {
-                "fieldFqn": "jdbc_input_d757aeb41ab94a21ad52e43b5451936f.actor_id",
-                "fieldName": "",
-                "fieldType": "integer",
-                "chosen": false,
-                "selected": false
-              },
-              {
-                "fieldFqn": "jdbc_input_d757aeb41ab94a21ad52e43b5451936f.first_name",
-                "fieldName": "",
-                "fieldType": "string",
-                "chosen": false,
-                "selected": false
-              },
-              {
-                "fieldFqn": "jdbc_input_d757aeb41ab94a21ad52e43b5451936f.last_name",
-                "fieldName": "",
-                "fieldType": "string",
-                "chosen": false,
-                "selected": false
-              },
-              {
-                "fieldFqn": "jdbc_input_d757aeb41ab94a21ad52e43b5451936f.film_info",
-                "fieldName": "",
-                "fieldType": "string",
-                "chosen": false,
-                "selected": false
-              }
-            ]
-          },
-          {
-            "tableId": "jdbc_input_d757aeb41ab94a21ad52e43b5451936f",
-            "tableName": "输入actor_info",
-            "columns": [
-              {
-                "fieldFqn": "jdbc_input_1d80dffd5a484e7384924085a64ec753.actor_id",
-                "fieldName": "actor_id",
-                "fieldType": "integer",
-                "chosen": false,
-                "selected": false
-              },
-              {
-                "fieldFqn": "jdbc_input_1d80dffd5a484e7384924085a64ec753.first_name",
-                "fieldName": "first_name",
-                "fieldType": "string",
-                "chosen": false,
-                "selected": false
-              },
-              {
-                "fieldFqn": "jdbc_input_1d80dffd5a484e7384924085a64ec753.last_name",
-                "fieldName": "last_name",
-                "fieldType": "string",
-                "chosen": false,
-                "selected": false
-              },
-              {
-                "fieldFqn": "jdbc_input_1d80dffd5a484e7384924085a64ec753.last_update",
-                "fieldName": "",
-                "fieldType": "timestamp",
-                "chosen": false,
-                "selected": false
-              },
-              {
-                "fieldFqn": "jdbc_input_d757aeb41ab94a21ad52e43b5451936f.actor_id",
-                "fieldName": "",
-                "fieldType": "integer",
-                "chosen": false,
-                "selected": false
-              },
-              {
-                "fieldFqn": "jdbc_input_d757aeb41ab94a21ad52e43b5451936f.first_name",
-                "fieldName": "",
-                "fieldType": "string",
-                "chosen": false,
-                "selected": false
-              },
-              {
-                "fieldFqn": "jdbc_input_d757aeb41ab94a21ad52e43b5451936f.last_name",
-                "fieldName": "",
-                "fieldType": "string",
-                "chosen": false,
-                "selected": false
-              },
-              {
-                "fieldFqn": "jdbc_input_d757aeb41ab94a21ad52e43b5451936f.film_info",
-                "fieldName": "film_info",
-                "fieldType": "string",
-                "chosen": false,
-                "selected": false
-              }
-            ]
-          }
-        ],
-        "colTitles": [
-          {
-            "fieldFqn": "jdbc_input_1d80dffd5a484e7384924085a64ec753.actor_id",
-            "fieldName": "actor_id",
-            "fieldType": "integer",
-            "chosen": false,
-            "selected": false
-          },
-          {
-            "fieldFqn": "jdbc_input_1d80dffd5a484e7384924085a64ec753.first_name",
-            "fieldName": "first_name",
-            "fieldType": "string",
-            "chosen": false,
-            "selected": false
-          },
-          {
-            "fieldFqn": "jdbc_input_1d80dffd5a484e7384924085a64ec753.last_name",
-            "fieldName": "last_name",
-            "fieldType": "string",
-            "chosen": false,
-            "selected": false
-          },
-          {
-            "fieldFqn": "jdbc_input_1d80dffd5a484e7384924085a64ec753.last_update",
-            "fieldName": "last_update",
-            "fieldType": "timestamp",
-            "chosen": false,
-            "selected": false
-          },
-          {
-            "fieldFqn": "jdbc_input_d757aeb41ab94a21ad52e43b5451936f.actor_id",
-            "fieldName": "actor_id",
-            "fieldType": "integer",
-            "chosen": false,
-            "selected": false
-          },
-          {
-            "fieldFqn": "jdbc_input_d757aeb41ab94a21ad52e43b5451936f.first_name",
-            "fieldName": "first_name",
-            "fieldType": "string",
-            "chosen": false,
-            "selected": false
-          },
-          {
-            "fieldFqn": "jdbc_input_d757aeb41ab94a21ad52e43b5451936f.last_name",
-            "fieldName": "last_name",
-            "fieldType": "string",
-            "chosen": false,
-            "selected": false
-          },
-          {
-            "fieldFqn": "jdbc_input_d757aeb41ab94a21ad52e43b5451936f.film_info",
-            "fieldName": "film_info",
-            "fieldType": "string",
-            "chosen": false,
-            "selected": false
-          }
-        ]
-      },
-      "output": {
-        "verified": true,
-        "fields": [
-          {
-            "fieldFqn": "union_7343dec4be494eea94606d3bee6ff967.actor_id",
-            "fieldName": "actor_id",
-            "fieldType": "integer"
-          },
-          {
-            "fieldFqn": "union_7343dec4be494eea94606d3bee6ff967.first_name",
-            "fieldName": "first_name",
-            "fieldType": "string"
-          },
-          {
-            "fieldFqn": "union_7343dec4be494eea94606d3bee6ff967.last_name",
-            "fieldName": "last_name",
-            "fieldType": "string"
-          },
-          {
-            "fieldFqn": "union_7343dec4be494eea94606d3bee6ff967.last_update",
-            "fieldName": "last_update",
-            "fieldType": "timestamp"
-          },
-          {
-            "fieldFqn": "union_7343dec4be494eea94606d3bee6ff967.actor_id",
-            "fieldName": "actor_id",
-            "fieldType": "integer"
-          },
-          {
-            "fieldFqn": "union_7343dec4be494eea94606d3bee6ff967.first_name",
-            "fieldName": "first_name",
-            "fieldType": "string"
-          },
-          {
-            "fieldFqn": "union_7343dec4be494eea94606d3bee6ff967.last_name",
-            "fieldName": "last_name",
-            "fieldType": "string"
-          },
-          {
-            "fieldFqn": "union_7343dec4be494eea94606d3bee6ff967.film_info",
-            "fieldName": "film_info",
-            "fieldType": "string"
-          }
-        ]
-      },
-      "meta": {
-        "position": {
-          "x": -242.5,
-          "y": -288
-        }
-      }
-    },
-    {
-      "id": "jdbc_output_99d2cd7aadeb4c5587c4050600b75a6d",
+      "id": "jdbc_output_34365d25c440491787a0ea45243bd847",
       "title": "输出节点",
       "description": "",
       "type": "jdbc_output",
       "config": {
-        "datasourceId": "143463555821764608",
-        "tableId": "143463555821764623",
+        "datasourceId": "143339362546384896",
+        "tableId": "143339379726254092",
         "fields": [
           {
-            "targetFieldName": "143463555821764608.sakila.public.actor.actor_id",
-            "sourceFieldFqn": "union_7343dec4be494eea94606d3bee6ff967.actor_id",
-            "sourceFieldName": "actor_id",
-            "sourceFieldType": "integer"
-          },
-          {
-            "targetFieldName": "143463555821764608.sakila.public.actor.first_name",
-            "sourceFieldFqn": "union_7343dec4be494eea94606d3bee6ff967.first_name",
+            "targetFieldName": "143339362546384896.sakila.public.category.name",
+            "sourceFieldFqn": "union_be51fdb725e2433e9cd3c990a4e6d1b4.first_name",
             "sourceFieldName": "first_name",
             "sourceFieldType": "string"
-          },
-          {
-            "targetFieldName": "143463555821764608.sakila.public.actor.last_name",
-            "sourceFieldFqn": "union_7343dec4be494eea94606d3bee6ff967.last_name",
-            "sourceFieldName": "last_name",
-            "sourceFieldType": "string"
-          },
-          {
-            "targetFieldName": "143463555821764608.sakila.public.actor.last_update",
-            "sourceFieldFqn": "union_7343dec4be494eea94606d3bee6ff967.last_update",
-            "sourceFieldName": "last_update",
-            "sourceFieldType": "timestamp"
           }
         ]
       },
@@ -401,24 +140,298 @@
       },
       "meta": {
         "position": {
-          "x": 41.5,
-          "y": -288
+          "x": 185,
+          "y": -350
+        }
+      }
+    },
+    {
+      "id": "union_be51fdb725e2433e9cd3c990a4e6d1b4",
+      "title": "追加合并节点",
+      "description": "",
+      "type": "union",
+      "config": {
+        "data": [
+          {
+            "tableId": "jdbc_input_4e9f7e96f6c54d96aa093715d3039d5a",
+            "tableName": "输入节点",
+            "columns": [
+              {
+                "fieldFqn": "jdbc_input_4e9f7e96f6c54d96aa093715d3039d5a.actor_id",
+                "fieldName": "actor_id",
+                "fieldType": "integer",
+                "chosen": false,
+                "selected": false
+              },
+              {
+                "fieldFqn": "jdbc_input_4e9f7e96f6c54d96aa093715d3039d5a.first_name",
+                "fieldName": "first_name",
+                "fieldType": "string",
+                "chosen": false,
+                "selected": false
+              },
+              {
+                "fieldFqn": "jdbc_input_4e9f7e96f6c54d96aa093715d3039d5a.last_name",
+                "fieldName": "last_name",
+                "fieldType": "string",
+                "chosen": false,
+                "selected": false
+              },
+              {
+                "fieldFqn": "jdbc_input_4e9f7e96f6c54d96aa093715d3039d5a.last_update",
+                "fieldName": "last_update",
+                "fieldType": "timestamp",
+                "chosen": false,
+                "selected": false
+              },
+              {
+                "fieldFqn": "jdbc_input_327027447fd54f88ab2e3b71e9af9b1d.city_id",
+                "fieldName": "",
+                "fieldType": "integer",
+                "chosen": false,
+                "selected": false
+              },
+              {
+                "fieldFqn": "jdbc_input_327027447fd54f88ab2e3b71e9af9b1d.city",
+                "fieldName": "",
+                "fieldType": "string",
+                "chosen": false,
+                "selected": false
+              },
+              {
+                "fieldFqn": "jdbc_input_327027447fd54f88ab2e3b71e9af9b1d.country_id",
+                "fieldName": "",
+                "fieldType": "integer",
+                "chosen": false,
+                "selected": false
+              },
+              {
+                "fieldFqn": "jdbc_input_327027447fd54f88ab2e3b71e9af9b1d.last_update",
+                "fieldName": "",
+                "fieldType": "timestamp",
+                "chosen": false,
+                "selected": false
+              }
+            ]
+          },
+          {
+            "tableId": "jdbc_input_327027447fd54f88ab2e3b71e9af9b1d",
+            "tableName": "输入节点2",
+            "columns": [
+              {
+                "fieldFqn": "jdbc_input_4e9f7e96f6c54d96aa093715d3039d5a.actor_id",
+                "fieldName": "country_id",
+                "fieldType": "integer",
+                "chosen": false,
+                "selected": false
+              },
+              {
+                "fieldFqn": "jdbc_input_4e9f7e96f6c54d96aa093715d3039d5a.first_name",
+                "fieldName": "city",
+                "fieldType": "string",
+                "chosen": false,
+                "selected": false
+              },
+              {
+                "fieldFqn": "jdbc_input_4e9f7e96f6c54d96aa093715d3039d5a.last_name",
+                "fieldName": "",
+                "fieldType": "string",
+                "chosen": false,
+                "selected": false
+              },
+              {
+                "fieldFqn": "jdbc_input_4e9f7e96f6c54d96aa093715d3039d5a.last_update",
+                "fieldName": "last_update",
+                "fieldType": "timestamp",
+                "chosen": false,
+                "selected": false
+              },
+              {
+                "fieldFqn": "jdbc_input_327027447fd54f88ab2e3b71e9af9b1d.city_id",
+                "fieldName": "city_id",
+                "fieldType": "integer",
+                "chosen": false,
+                "selected": false
+              },
+              {
+                "fieldFqn": "jdbc_input_327027447fd54f88ab2e3b71e9af9b1d.city",
+                "fieldName": "",
+                "fieldType": "string",
+                "chosen": false,
+                "selected": false
+              },
+              {
+                "fieldFqn": "jdbc_input_327027447fd54f88ab2e3b71e9af9b1d.country_id",
+                "fieldName": "",
+                "fieldType": "integer",
+                "chosen": false,
+                "selected": false
+              },
+              {
+                "fieldFqn": "jdbc_input_327027447fd54f88ab2e3b71e9af9b1d.last_update",
+                "fieldName": "",
+                "fieldType": "timestamp",
+                "chosen": false,
+                "selected": false
+              }
+            ]
+          }
+        ],
+        "colTitles": [
+          {
+            "fieldFqn": "jdbc_input_4e9f7e96f6c54d96aa093715d3039d5a.actor_id",
+            "fieldName": "actor_id",
+            "fieldType": "integer",
+            "chosen": false,
+            "selected": false
+          },
+          {
+            "fieldFqn": "jdbc_input_4e9f7e96f6c54d96aa093715d3039d5a.first_name",
+            "fieldName": "first_name",
+            "fieldType": "string",
+            "chosen": false,
+            "selected": false
+          },
+          {
+            "fieldFqn": "jdbc_input_4e9f7e96f6c54d96aa093715d3039d5a.last_name",
+            "fieldName": "last_name",
+            "fieldType": "string",
+            "chosen": false,
+            "selected": false
+          },
+          {
+            "fieldFqn": "jdbc_input_4e9f7e96f6c54d96aa093715d3039d5a.last_update",
+            "fieldName": "last_update",
+            "fieldType": "timestamp",
+            "chosen": false,
+            "selected": false
+          },
+          {
+            "fieldFqn": "jdbc_input_327027447fd54f88ab2e3b71e9af9b1d.city_id",
+            "fieldName": "city_id",
+            "fieldType": "integer",
+            "chosen": false,
+            "selected": false
+          },
+          {
+            "fieldFqn": "jdbc_input_327027447fd54f88ab2e3b71e9af9b1d.city",
+            "fieldName": "city",
+            "fieldType": "string",
+            "chosen": false,
+            "selected": false
+          },
+          {
+            "fieldFqn": "jdbc_input_327027447fd54f88ab2e3b71e9af9b1d.country_id",
+            "fieldName": "country_id",
+            "fieldType": "integer",
+            "chosen": false,
+            "selected": false
+          },
+          {
+            "fieldFqn": "jdbc_input_327027447fd54f88ab2e3b71e9af9b1d.last_update",
+            "fieldName": "last_update",
+            "fieldType": "timestamp",
+            "chosen": false,
+            "selected": false
+          }
+        ]
+      },
+      "output": {
+        "verified": true,
+        "fields": [
+          {
+            "fieldFqn": "union_be51fdb725e2433e9cd3c990a4e6d1b4.actor_id",
+            "fieldName": "actor_id",
+            "fieldType": "integer"
+          },
+          {
+            "fieldFqn": "union_be51fdb725e2433e9cd3c990a4e6d1b4.first_name",
+            "fieldName": "first_name",
+            "fieldType": "string"
+          },
+          {
+            "fieldFqn": "union_be51fdb725e2433e9cd3c990a4e6d1b4.last_name",
+            "fieldName": "last_name",
+            "fieldType": "string"
+          },
+          {
+            "fieldFqn": "union_be51fdb725e2433e9cd3c990a4e6d1b4.last_update",
+            "fieldName": "last_update",
+            "fieldType": "timestamp"
+          },
+          {
+            "fieldFqn": "union_be51fdb725e2433e9cd3c990a4e6d1b4.city_id",
+            "fieldName": "city_id",
+            "fieldType": "integer"
+          },
+          {
+            "fieldFqn": "union_be51fdb725e2433e9cd3c990a4e6d1b4.city",
+            "fieldName": "city",
+            "fieldType": "string"
+          },
+          {
+            "fieldFqn": "union_be51fdb725e2433e9cd3c990a4e6d1b4.country_id",
+            "fieldName": "country_id",
+            "fieldType": "integer"
+          },
+          {
+            "fieldFqn": "union_be51fdb725e2433e9cd3c990a4e6d1b4.last_update",
+            "fieldName": "last_update",
+            "fieldType": "timestamp"
+          }
+        ]
+      },
+      "meta": {
+        "position": {
+          "x": -149,
+          "y": -530
+        }
+      }
+    },
+    {
+      "id": "sql_502aac004e5749de9de5c03f3e0d5e8d",
+      "title": "SQL节点",
+      "description": "",
+      "type": "sql",
+      "config": {
+        "sqlValue": "SELECT 1 FROM jdbc_input_4e9f7e96f6c54d96aa093715d3039d5a",
+        "sqlVariables": {
+          "jdbc_input_4e9f7e96f6c54d96aa093715d3039d5a.输入节点": "jdbc_input_4e9f7e96f6c54d96aa093715d3039d5a",
+          "jdbc_input_4e9f7e96f6c54d96aa093715d3039d5a#jdbc_input_4e9f7e96f6c54d96aa093715d3039d5a.actor_id": "jdbc_input_4e9f7e96f6c54d96aa093715d3039d5a.actor_id",
+          "jdbc_input_4e9f7e96f6c54d96aa093715d3039d5a#jdbc_input_4e9f7e96f6c54d96aa093715d3039d5a.first_name": "jdbc_input_4e9f7e96f6c54d96aa093715d3039d5a.first_name",
+          "jdbc_input_4e9f7e96f6c54d96aa093715d3039d5a#jdbc_input_4e9f7e96f6c54d96aa093715d3039d5a.last_name": "jdbc_input_4e9f7e96f6c54d96aa093715d3039d5a.last_name",
+          "jdbc_input_4e9f7e96f6c54d96aa093715d3039d5a#jdbc_input_4e9f7e96f6c54d96aa093715d3039d5a.last_update": "jdbc_input_4e9f7e96f6c54d96aa093715d3039d5a.last_update"
+        },
+        "showSQLValue": "SELECT 1 FROM [[jdbc_input_4e9f7e96f6c54d96aa093715d3039d5a.输入节点]]"
+      },
+      "output": {
+        "verified": true,
+        "fields": []
+      },
+      "meta": {
+        "position": {
+          "x": -22,
+          "y": -691.5
         }
       }
     }
   ],
   "edges": [
     {
-      "sourceNodeId": "jdbc_input_1d80dffd5a484e7384924085a64ec753",
-      "targetNodeId": "union_7343dec4be494eea94606d3bee6ff967"
+      "sourceNodeId": "jdbc_input_4e9f7e96f6c54d96aa093715d3039d5a",
+      "targetNodeId": "union_be51fdb725e2433e9cd3c990a4e6d1b4"
     },
     {
-      "sourceNodeId": "jdbc_input_d757aeb41ab94a21ad52e43b5451936f",
-      "targetNodeId": "union_7343dec4be494eea94606d3bee6ff967"
+      "sourceNodeId": "jdbc_input_4e9f7e96f6c54d96aa093715d3039d5a",
+      "targetNodeId": "sql_502aac004e5749de9de5c03f3e0d5e8d"
     },
     {
-      "sourceNodeId": "union_7343dec4be494eea94606d3bee6ff967",
-      "targetNodeId": "jdbc_output_99d2cd7aadeb4c5587c4050600b75a6d"
+      "sourceNodeId": "jdbc_input_327027447fd54f88ab2e3b71e9af9b1d",
+      "targetNodeId": "union_be51fdb725e2433e9cd3c990a4e6d1b4"
+    },
+    {
+      "sourceNodeId": "union_be51fdb725e2433e9cd3c990a4e6d1b4",
+      "targetNodeId": "jdbc_output_34365d25c440491787a0ea45243bd847"
     }
   ]
 }
