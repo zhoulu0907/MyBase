@@ -142,7 +142,7 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
         Long workflowId = updateVO.getId();
         ETLWorkflowDO oldWorkflow = getOperableWorkflow(workflowId);
         if (!Objects.equals(oldWorkflow.getApplicationId(), updateVO.getApplicationId())) {
-            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATA_CONFLICT);
+            throw new IllegalArgumentException("应用ID不一致");
         }
         oldWorkflow.setWorkflowName(updateVO.getFlowName());
         oldWorkflow.setDeclaration(updateVO.getDeclaration());
@@ -224,7 +224,7 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
         ScheduleType scheduleType = ScheduleType.of(workflowDO.getScheduleStrategy());
         ETLScheduleJobDO scheduleJobDO = scheduleJobRepository.findByApplicationIdAndWorkflowId(workflowDO.getApplicationId(), workflowId);
         if (scheduleJobDO == null) {
-            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.UNKNOWN_ERROR);
+            throw new IllegalStateException("调度信息不存在");
         }
         Long jobId;
         String jobIdStr = scheduleJobDO.getJobId();
@@ -302,7 +302,7 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
         }
         ETLScheduleJobDO scheduleJobDO = scheduleJobRepository.findByApplicationIdAndWorkflowId(workflowDO.getApplicationId(), workflowId);
         if (scheduleJobDO == null) {
-            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.UNKNOWN_ERROR);
+            throw new IllegalStateException("调度信息不存在");
         }
         Long jobId = Long.parseLong(scheduleJobDO.getJobId());
         dolphinSchedulerClient.purgeWorkflow(etlProjectCode, jobId);
@@ -367,7 +367,7 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
         ExecuteRequest executeRequest = new ExecuteRequest();
         JsonNode workflow = previewReqVO.getWorkflow();
         if (workflow instanceof NullNode) {
-            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.WORKFLOW_PARAM_ERROR);
+            throw new IllegalArgumentException("流程参数为空");
         }
         executeRequest.setPreviewWorkflow(workflow.toString());
         executeRequest.setPreviewNodeId(previewReqVO.getNodeId());
@@ -379,7 +379,7 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
                 .asString();
         if (response.getStatus() != 200) {
             log.error("Flink Server 响应错误: {}", response.getBody());
-            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.PREVIEW_ERROR);
+            throw new IllegalStateException("请求响应异常，" + response.getBody());
         }
         return JsonUtils.parseObject(response.getBody(), DataPreview.class);
     }

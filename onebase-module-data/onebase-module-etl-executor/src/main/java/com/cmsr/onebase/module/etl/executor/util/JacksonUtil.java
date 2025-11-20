@@ -1,10 +1,7 @@
 package com.cmsr.onebase.module.etl.executor.util;
 
 import com.cmsr.onebase.module.etl.common.graph.Node;
-import com.cmsr.onebase.module.etl.executor.graph.JdbcInputNode;
-import com.cmsr.onebase.module.etl.executor.graph.JdbcOutputNode;
-import com.cmsr.onebase.module.etl.executor.graph.PairJoinNode;
-import com.cmsr.onebase.module.etl.executor.graph.UnionNode;
+import com.cmsr.onebase.module.etl.executor.graph.*;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.ObjectCodec;
@@ -37,18 +34,14 @@ public class JacksonUtil {
             JsonNode node = codec.readTree(p);
 
             String type = node.get("type").asText();
-            switch (type) {
-                case "jdbc_input":
-                    return codec.treeToValue(node, JdbcInputNode.class);
-                case "jdbc_output":
-                    return codec.treeToValue(node, JdbcOutputNode.class);
-                case "pair_join":
-                    return codec.treeToValue(node, PairJoinNode.class);
-                case "union":
-                    return codec.treeToValue(node, UnionNode.class);
-                default:
-                    throw new RuntimeException("unknown node type: " + type);
-            }
+            return switch (type) {
+                case "jdbc_input" -> codec.treeToValue(node, JdbcInputNode.class);
+                case "jdbc_output" -> codec.treeToValue(node, JdbcOutputNode.class);
+                case "pair_join" -> codec.treeToValue(node, PairJoinNode.class);
+                case "union" -> codec.treeToValue(node, UnionNode.class);
+                case "sql" -> codec.treeToValue(node, SqlNode.class);
+                default -> throw new RuntimeException("unknown node type: " + type);
+            };
         }
     }
 
