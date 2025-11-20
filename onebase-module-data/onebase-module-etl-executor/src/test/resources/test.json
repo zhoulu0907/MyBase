@@ -1,0 +1,424 @@
+{
+  "nodes": [
+    {
+      "id": "jdbc_input_1d80dffd5a484e7384924085a64ec753",
+      "title": "输入actor",
+      "description": "",
+      "type": "jdbc_input",
+      "config": {
+        "datasourceId": "143463555821764608",
+        "tableId": "143463555821764623",
+        "fields": [
+          {
+            "fieldName": "actor_id",
+            "fieldType": "integer"
+          },
+          {
+            "fieldName": "first_name",
+            "fieldType": "string"
+          },
+          {
+            "fieldName": "last_name",
+            "fieldType": "string"
+          },
+          {
+            "fieldName": "last_update",
+            "fieldType": "timestamp"
+          }
+        ]
+      },
+      "output": {
+        "verified": true,
+        "fields": [
+          {
+            "fieldFqn": "jdbc_input_1d80dffd5a484e7384924085a64ec753.actor_id",
+            "fieldName": "actor_id",
+            "fieldType": "integer"
+          },
+          {
+            "fieldFqn": "jdbc_input_1d80dffd5a484e7384924085a64ec753.first_name",
+            "fieldName": "first_name",
+            "fieldType": "string"
+          },
+          {
+            "fieldFqn": "jdbc_input_1d80dffd5a484e7384924085a64ec753.last_name",
+            "fieldName": "last_name",
+            "fieldType": "string"
+          },
+          {
+            "fieldFqn": "jdbc_input_1d80dffd5a484e7384924085a64ec753.last_update",
+            "fieldName": "last_update",
+            "fieldType": "timestamp"
+          }
+        ]
+      },
+      "meta": {
+        "position": {
+          "x": -539.5,
+          "y": -366
+        }
+      }
+    },
+    {
+      "id": "jdbc_input_d757aeb41ab94a21ad52e43b5451936f",
+      "title": "输入actor_info",
+      "description": "",
+      "type": "jdbc_input",
+      "config": {
+        "datasourceId": "143463555821764608",
+        "tableId": "143463555821764611",
+        "fields": [
+          {
+            "fieldName": "actor_id",
+            "fieldType": "integer"
+          },
+          {
+            "fieldName": "first_name",
+            "fieldType": "string"
+          },
+          {
+            "fieldName": "last_name",
+            "fieldType": "string"
+          },
+          {
+            "fieldName": "film_info",
+            "fieldType": "string"
+          }
+        ]
+      },
+      "output": {
+        "verified": true,
+        "fields": [
+          {
+            "fieldFqn": "jdbc_input_d757aeb41ab94a21ad52e43b5451936f.actor_id",
+            "fieldName": "actor_id",
+            "fieldType": "integer"
+          },
+          {
+            "fieldFqn": "jdbc_input_d757aeb41ab94a21ad52e43b5451936f.first_name",
+            "fieldName": "first_name",
+            "fieldType": "string"
+          },
+          {
+            "fieldFqn": "jdbc_input_d757aeb41ab94a21ad52e43b5451936f.last_name",
+            "fieldName": "last_name",
+            "fieldType": "string"
+          },
+          {
+            "fieldFqn": "jdbc_input_d757aeb41ab94a21ad52e43b5451936f.film_info",
+            "fieldName": "film_info",
+            "fieldType": "string"
+          }
+        ]
+      },
+      "meta": {
+        "position": {
+          "x": -539.5,
+          "y": -228
+        }
+      }
+    },
+    {
+      "id": "union_7343dec4be494eea94606d3bee6ff967",
+      "title": "追加合并节点",
+      "description": "",
+      "type": "union",
+      "config": {
+        "data": [
+          {
+            "tableId": "jdbc_input_1d80dffd5a484e7384924085a64ec753",
+            "tableName": "输入actor",
+            "columns": [
+              {
+                "fieldFqn": "jdbc_input_1d80dffd5a484e7384924085a64ec753.actor_id",
+                "fieldName": "actor_id",
+                "fieldType": "integer",
+                "chosen": false,
+                "selected": false
+              },
+              {
+                "fieldFqn": "jdbc_input_1d80dffd5a484e7384924085a64ec753.first_name",
+                "fieldName": "first_name",
+                "fieldType": "string",
+                "chosen": false,
+                "selected": false
+              },
+              {
+                "fieldFqn": "jdbc_input_1d80dffd5a484e7384924085a64ec753.last_name",
+                "fieldName": "last_name",
+                "fieldType": "string",
+                "chosen": false,
+                "selected": false
+              },
+              {
+                "fieldFqn": "jdbc_input_1d80dffd5a484e7384924085a64ec753.last_update",
+                "fieldName": "last_update",
+                "fieldType": "timestamp",
+                "chosen": false,
+                "selected": false
+              },
+              {
+                "fieldFqn": "jdbc_input_d757aeb41ab94a21ad52e43b5451936f.actor_id",
+                "fieldName": "",
+                "fieldType": "integer",
+                "chosen": false,
+                "selected": false
+              },
+              {
+                "fieldFqn": "jdbc_input_d757aeb41ab94a21ad52e43b5451936f.first_name",
+                "fieldName": "",
+                "fieldType": "string",
+                "chosen": false,
+                "selected": false
+              },
+              {
+                "fieldFqn": "jdbc_input_d757aeb41ab94a21ad52e43b5451936f.last_name",
+                "fieldName": "",
+                "fieldType": "string",
+                "chosen": false,
+                "selected": false
+              },
+              {
+                "fieldFqn": "jdbc_input_d757aeb41ab94a21ad52e43b5451936f.film_info",
+                "fieldName": "",
+                "fieldType": "string",
+                "chosen": false,
+                "selected": false
+              }
+            ]
+          },
+          {
+            "tableId": "jdbc_input_d757aeb41ab94a21ad52e43b5451936f",
+            "tableName": "输入actor_info",
+            "columns": [
+              {
+                "fieldFqn": "jdbc_input_1d80dffd5a484e7384924085a64ec753.actor_id",
+                "fieldName": "actor_id",
+                "fieldType": "integer",
+                "chosen": false,
+                "selected": false
+              },
+              {
+                "fieldFqn": "jdbc_input_1d80dffd5a484e7384924085a64ec753.first_name",
+                "fieldName": "first_name",
+                "fieldType": "string",
+                "chosen": false,
+                "selected": false
+              },
+              {
+                "fieldFqn": "jdbc_input_1d80dffd5a484e7384924085a64ec753.last_name",
+                "fieldName": "last_name",
+                "fieldType": "string",
+                "chosen": false,
+                "selected": false
+              },
+              {
+                "fieldFqn": "jdbc_input_1d80dffd5a484e7384924085a64ec753.last_update",
+                "fieldName": "",
+                "fieldType": "timestamp",
+                "chosen": false,
+                "selected": false
+              },
+              {
+                "fieldFqn": "jdbc_input_d757aeb41ab94a21ad52e43b5451936f.actor_id",
+                "fieldName": "",
+                "fieldType": "integer",
+                "chosen": false,
+                "selected": false
+              },
+              {
+                "fieldFqn": "jdbc_input_d757aeb41ab94a21ad52e43b5451936f.first_name",
+                "fieldName": "",
+                "fieldType": "string",
+                "chosen": false,
+                "selected": false
+              },
+              {
+                "fieldFqn": "jdbc_input_d757aeb41ab94a21ad52e43b5451936f.last_name",
+                "fieldName": "",
+                "fieldType": "string",
+                "chosen": false,
+                "selected": false
+              },
+              {
+                "fieldFqn": "jdbc_input_d757aeb41ab94a21ad52e43b5451936f.film_info",
+                "fieldName": "film_info",
+                "fieldType": "string",
+                "chosen": false,
+                "selected": false
+              }
+            ]
+          }
+        ],
+        "colTitles": [
+          {
+            "fieldFqn": "jdbc_input_1d80dffd5a484e7384924085a64ec753.actor_id",
+            "fieldName": "actor_id",
+            "fieldType": "integer",
+            "chosen": false,
+            "selected": false
+          },
+          {
+            "fieldFqn": "jdbc_input_1d80dffd5a484e7384924085a64ec753.first_name",
+            "fieldName": "first_name",
+            "fieldType": "string",
+            "chosen": false,
+            "selected": false
+          },
+          {
+            "fieldFqn": "jdbc_input_1d80dffd5a484e7384924085a64ec753.last_name",
+            "fieldName": "last_name",
+            "fieldType": "string",
+            "chosen": false,
+            "selected": false
+          },
+          {
+            "fieldFqn": "jdbc_input_1d80dffd5a484e7384924085a64ec753.last_update",
+            "fieldName": "last_update",
+            "fieldType": "timestamp",
+            "chosen": false,
+            "selected": false
+          },
+          {
+            "fieldFqn": "jdbc_input_d757aeb41ab94a21ad52e43b5451936f.actor_id",
+            "fieldName": "actor_id",
+            "fieldType": "integer",
+            "chosen": false,
+            "selected": false
+          },
+          {
+            "fieldFqn": "jdbc_input_d757aeb41ab94a21ad52e43b5451936f.first_name",
+            "fieldName": "first_name",
+            "fieldType": "string",
+            "chosen": false,
+            "selected": false
+          },
+          {
+            "fieldFqn": "jdbc_input_d757aeb41ab94a21ad52e43b5451936f.last_name",
+            "fieldName": "last_name",
+            "fieldType": "string",
+            "chosen": false,
+            "selected": false
+          },
+          {
+            "fieldFqn": "jdbc_input_d757aeb41ab94a21ad52e43b5451936f.film_info",
+            "fieldName": "film_info",
+            "fieldType": "string",
+            "chosen": false,
+            "selected": false
+          }
+        ]
+      },
+      "output": {
+        "verified": true,
+        "fields": [
+          {
+            "fieldFqn": "union_7343dec4be494eea94606d3bee6ff967.actor_id",
+            "fieldName": "actor_id",
+            "fieldType": "integer"
+          },
+          {
+            "fieldFqn": "union_7343dec4be494eea94606d3bee6ff967.first_name",
+            "fieldName": "first_name",
+            "fieldType": "string"
+          },
+          {
+            "fieldFqn": "union_7343dec4be494eea94606d3bee6ff967.last_name",
+            "fieldName": "last_name",
+            "fieldType": "string"
+          },
+          {
+            "fieldFqn": "union_7343dec4be494eea94606d3bee6ff967.last_update",
+            "fieldName": "last_update",
+            "fieldType": "timestamp"
+          },
+          {
+            "fieldFqn": "union_7343dec4be494eea94606d3bee6ff967.actor_id",
+            "fieldName": "actor_id",
+            "fieldType": "integer"
+          },
+          {
+            "fieldFqn": "union_7343dec4be494eea94606d3bee6ff967.first_name",
+            "fieldName": "first_name",
+            "fieldType": "string"
+          },
+          {
+            "fieldFqn": "union_7343dec4be494eea94606d3bee6ff967.last_name",
+            "fieldName": "last_name",
+            "fieldType": "string"
+          },
+          {
+            "fieldFqn": "union_7343dec4be494eea94606d3bee6ff967.film_info",
+            "fieldName": "film_info",
+            "fieldType": "string"
+          }
+        ]
+      },
+      "meta": {
+        "position": {
+          "x": -242.5,
+          "y": -288
+        }
+      }
+    },
+    {
+      "id": "jdbc_output_99d2cd7aadeb4c5587c4050600b75a6d",
+      "title": "输出节点",
+      "description": "",
+      "type": "jdbc_output",
+      "config": {
+        "datasourceId": "143463555821764608",
+        "tableId": "143463555821764623",
+        "fields": [
+          {
+            "targetFieldName": "143463555821764608.sakila.public.actor.actor_id",
+            "sourceFieldFqn": "union_7343dec4be494eea94606d3bee6ff967.actor_id",
+            "sourceFieldName": "actor_id",
+            "sourceFieldType": "integer"
+          },
+          {
+            "targetFieldName": "143463555821764608.sakila.public.actor.first_name",
+            "sourceFieldFqn": "union_7343dec4be494eea94606d3bee6ff967.first_name",
+            "sourceFieldName": "first_name",
+            "sourceFieldType": "string"
+          },
+          {
+            "targetFieldName": "143463555821764608.sakila.public.actor.last_name",
+            "sourceFieldFqn": "union_7343dec4be494eea94606d3bee6ff967.last_name",
+            "sourceFieldName": "last_name",
+            "sourceFieldType": "string"
+          },
+          {
+            "targetFieldName": "143463555821764608.sakila.public.actor.last_update",
+            "sourceFieldFqn": "union_7343dec4be494eea94606d3bee6ff967.last_update",
+            "sourceFieldName": "last_update",
+            "sourceFieldType": "timestamp"
+          }
+        ]
+      },
+      "output": {
+        "verified": true
+      },
+      "meta": {
+        "position": {
+          "x": 41.5,
+          "y": -288
+        }
+      }
+    }
+  ],
+  "edges": [
+    {
+      "sourceNodeId": "jdbc_input_1d80dffd5a484e7384924085a64ec753",
+      "targetNodeId": "union_7343dec4be494eea94606d3bee6ff967"
+    },
+    {
+      "sourceNodeId": "jdbc_input_d757aeb41ab94a21ad52e43b5451936f",
+      "targetNodeId": "union_7343dec4be494eea94606d3bee6ff967"
+    },
+    {
+      "sourceNodeId": "union_7343dec4be494eea94606d3bee6ff967",
+      "targetNodeId": "jdbc_output_99d2cd7aadeb4c5587c4050600b75a6d"
+    }
+  ]
+}

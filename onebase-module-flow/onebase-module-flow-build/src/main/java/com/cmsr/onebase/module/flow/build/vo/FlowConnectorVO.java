@@ -40,12 +40,4 @@ public class FlowConnectorVO {
         this.config = JsonUtils.toJsonString(config);
     }
 
-    public void setConfigStr(String config) {
-        this.config = config;
-    }
-
-    public String getConfigStr() {
-        return this.config;
-    }
-
 }

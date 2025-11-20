@@ -144,7 +144,7 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
     /**
      * 从条件列表中收集所有字段ID
      */
-    private List<Long> extractFieldIds(List<Conditions> conditions, Map<Long, String> inputParams) {
+    private List<Long> extractFieldIds(List<Conditions> conditions, Map<Long, Object> inputParams) {
         Set<Long> ids1 = conditions.stream()
                 .flatMap(condition -> condition.getConditions().stream())
                 .map(ruleItem -> NumberUtils.toLong(ruleItem.getFieldId()))
@@ -162,7 +162,7 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
      * @param inputParams
      * @return
      */
-    public Map<String, Object> convertInputParamsData(Map<Long, String> inputParams, Map<Long, EntityFieldJdbcTypeRespDTO> fieldInfoMap) {
+    public Map<String, Object> convertInputParamsData(Map<Long, Object> inputParams, Map<Long, EntityFieldJdbcTypeRespDTO> fieldInfoMap) {
         if (inputParams == null || inputParams.isEmpty()) {
             return new HashMap<>();
         }
@@ -172,12 +172,12 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
     /**
      * 转换输入参数为结果映射
      */
-    private Map<String, Object> convertInputParamsToResult(Map<Long, String> inputParams,
+    private Map<String, Object> convertInputParamsToResult(Map<Long, Object> inputParams,
                                                            Map<Long, EntityFieldJdbcTypeRespDTO> fieldInfoMap) {
         Map<String, Object> result = new HashMap<>();
-        for (Map.Entry<Long, String> entry : inputParams.entrySet()) {
+        for (Map.Entry<Long, Object> entry : inputParams.entrySet()) {
             Long fieldId = entry.getKey();
-            String inputValue = entry.getValue();
+            Object inputValue = entry.getValue();
 
             EntityFieldJdbcTypeRespDTO fieldInfo = fieldInfoMap.get(fieldId);
             if (fieldInfo == null) {
@@ -192,7 +192,7 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
     /**
      * 转换字段值
      */
-    private Object convertFieldValue(Long fieldId, EntityFieldJdbcTypeRespDTO fieldInfo, String inputValue) {
+    private Object convertFieldValue(Long fieldId, EntityFieldJdbcTypeRespDTO fieldInfo, Object inputValue) {
         if (inputValue == null || fieldInfo.getJdbcType() == null) {
             return inputValue;
         }
