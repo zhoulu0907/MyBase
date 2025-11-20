@@ -19,8 +19,8 @@ const PreviewDataSelectModal: React.FC<PreviewDataSelectModalProps> = ({ visible
   const handleSelectData = (record: any | null, fromDoubleClick?: boolean) => {
     const next = record || null;
     setSelectedRow(next);
-    onSelect(next);
-    if (fromDoubleClick) {
+    if (fromDoubleClick && next) {
+      onSelect(next);
       onCancel();
     }
   };
@@ -28,14 +28,25 @@ const PreviewDataSelectModal: React.FC<PreviewDataSelectModalProps> = ({ visible
   return (
     <Modal
       className="filterDataModal"
-      style={{ top: 50, width: '900px' }}
+      style={{ top: 50, width: '60vw' }}
       title={<span className="modalTitleLeft">数据选择</span>}
       visible={visible}
       onCancel={onCancel}
       footer={
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
           <Button onClick={onCancel}>取消</Button>
-          <Button type="primary" disabled={!selectedRow} onClick={() => { onCancel(); }}>确认</Button>
+          <Button
+            type="primary"
+            disabled={!selectedRow}
+            onClick={() => {
+              if (selectedRow) {
+                onSelect(selectedRow);
+              }
+              onCancel();
+            }}
+          >
+            确认
+          </Button>
         </div>
       }
       maskClosable={false}

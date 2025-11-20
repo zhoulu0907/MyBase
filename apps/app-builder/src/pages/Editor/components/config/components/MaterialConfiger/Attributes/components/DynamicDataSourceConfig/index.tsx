@@ -176,6 +176,14 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
     handlePropsChange(ATTR_KEY.DISPLAYFIELDS, displayFields);
   };
 
+  const handleEchoFieldChange = (fieldName: string) => {
+    const option = displayFieldOptions.find((opt: any) => opt.fieldName === fieldName);
+    const displayFields = option
+      ? [{ label: option.displayName, value: option.fieldName }]
+      : [];
+    handlePropsChange(ATTR_KEY.DISPLAYFIELDS, displayFields);
+  };
+
   const handleOKModal = (values: any) => {
     setSelectRule(values);
     handlePropsChange(ATTR_KEY.FILLRULESETTING, values);
@@ -203,8 +211,8 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
           </Select>
         </FormItem>
 
-        {/* 数据选择过程 */}
-        {selectedDataSource.entityId && (
+        {/* 数据选择过程（弹窗/下拉 两种模式均显示配置弹窗） */}
+        {selectedDataSource.entityId && (configs?.selectMethod === 'modal' || configs?.selectMethod === 'dropdown') && (
           <div>
             <FormItem layout="vertical" labelAlign="left" label={'数据选择过程'} className={styles.formItem}>
               <Button long onClick={toSetting}>
@@ -243,10 +251,10 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
                   )}
                 />
               </FormItem> */}
-              <FormItem layout="vertical" labelAlign="left" label={'按钮回显字段'} className={styles.formItem}>
+              <FormItem layout="vertical" labelAlign="left" label={'回显字段'} className={styles.formItem}>
                 <Select
-                  // value={selected}
-                  onChange={(e) => handleSelectedChange(e)}
+                  value={configs[ATTR_KEY.DISPLAYFIELDS]?.[0]?.value}
+                  onChange={(e) => handleEchoFieldChange(e)}
                   placeholder="设置回显字段"
                   getPopupContainer={getPopupContainer}
                 >

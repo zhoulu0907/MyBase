@@ -91,19 +91,13 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
       if (runtime) {
         form.setFieldValue(fieldName, nextValue);
       }
-      if ((props as any).onSelect) {
-        (props as any).onSelect({ id: data?.id, name });
-      }
     },
     selectDropdown: (value: any, option: any) => {
-      const name = option?.label ?? '';
+      const name = (option as any)?.labelTitle ?? '';
       const nextValue = value ? { id: value, name } : '';
       setDataState(nextValue);
       if (runtime) {
         form.setFieldValue(fieldName, nextValue);
-      }
-      if ((props as any).onSelect) {
-        (props as any).onSelect(nextValue || { id: '', name: '' });
       }
     }
   };
@@ -112,8 +106,10 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
   // ===== 方法：帮助方法 begin =====
   const helpers = {
     getDisplayText: (v: any) => (v && typeof v === 'object' ? (v.name ?? '') : ''),
-    getSelectedId: (v: any) => (v && typeof v === 'object' ? (v.id ?? null) : null)
+    getSelectedId: (v: any) => (v && typeof v === 'object' ? (v.id ?? null) : null),
+    isDropdownMode: () => props.selectMethod === 'dropdown'
   };
+
   // ===== 方法：帮助方法 end =====
 
   useEffect(() => {
@@ -137,7 +133,7 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
       }));
       setOptions(opts);
     };
-    if (props.selectMethod === 'dropdown') {
+    if (helpers.isDropdownMode()) {
       fetchOptions();
     }
   }, [runtime, props.selectMethod, props?.dynamicTableConfig?.metaData, props?.selectedDataSource?.entityId, displayFields]);
@@ -159,29 +155,37 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
     </div>
   );
 
-  const renderDropdownContent = () => (
-    <Select
-      placeholder={defaultValue}
-      showSearch
-      allowClear
-      value={helpers.getSelectedId(dataState)}
-      options={options}
-      getPopupContainer={getPopupContainer}
-      onChange={(v, option) => internalEvents.selectDropdown(v, option)}
-      style={{ width: '100%' }}
-    />
-  );
-
   const renderReadonlyContent = () => {
     const fieldValue = helpers.getDisplayText(dataState);
     return <div className="dataSelectReadonly">{fieldValue || '--'}</div>;
   };
 
+  const renderDropdownContent = () => {
+    const selectedId = helpers.getSelectedId(dataState);
+    const selectedLabel = helpers.getDisplayText(dataState);
+    const exists = (options || []).some((o: any) => String(o?.value ?? '') === String(selectedId ?? ''));
+    const finalOptions = selectedId != null && selectedLabel
+      ? (exists ? options : [{ label: selectedLabel, value: selectedId }, ...(options || [])])
+      : (options || []);
+    console.error('finalOptions', finalOptions)
+    return (
+      <Select
+        placeholder={defaultValue}
+        showSearch
+        allowClear
+        value={selectedId}
+        options={finalOptions}
+        onChange={(v, option) => internalEvents.selectDropdown(v, option)}
+      />
+    );
+  };
+
+
   const renderRuntime = (interactive: boolean) => (
     <>
       <Form.Item
         label={label.display && label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>}
-        field={fieldName}
+        field={helpers.isDropdownMode() ? undefined : fieldName}
         layout={layout}
         tooltip={tooltip}
         labelCol={{ style: { width: labelColSpan, flex: 'unset' } }}
@@ -193,10 +197,10 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
       >
-        {interactive ? (props.selectMethod === 'dropdown' ? renderDropdownContent() : renderInteractiveContent()) : renderReadonlyContent()}
+        {interactive ? (helpers.isDropdownMode() ? renderDropdownContent() : renderInteractiveContent()) : renderReadonlyContent()}
       </Form.Item>
       {interactive && (
-        props.selectMethod === 'dropdown' ? null : (
+        helpers.isDropdownMode() ? null : (
           <PreviewDataSelectModal
             visible={uiState.previewVisible}
             onCancel={internalEvents.closePreview}
