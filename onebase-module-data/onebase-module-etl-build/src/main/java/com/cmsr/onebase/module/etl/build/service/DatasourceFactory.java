@@ -84,19 +84,19 @@ public class DatasourceFactory {
         return parseType;
     }
 
-    private Driver getDeclaredDriverInstance(DatabaseType dbType) {
-        String driverName = dbType.driver();
-        try {
-            Class<? extends Driver> driverClass = (Class<? extends Driver>) ClassUtils.getClass(driverName);
-            return driverClass.getDeclaredConstructor().newInstance();
-        } catch (ClassNotFoundException ex) {
-            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_NOT_SUPPORTED);
-        } catch (NoSuchMethodException | InstantiationException | IllegalAccessException |
-                 InvocationTargetException ex) {
-            log.error("JDBC连接驱动初始化失败", ex);
-            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.UNKNOWN_ERROR);
-        }
-    }
+//    private Driver getDeclaredDriverInstance(DatabaseType dbType) {
+//        String driverName = dbType.driver();
+//        try {
+//            Class<? extends Driver> driverClass = (Class<? extends Driver>) ClassUtils.getClass(driverName);
+//            return driverClass.getDeclaredConstructor().newInstance();
+//        } catch (ClassNotFoundException ex) {
+//            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_NOT_SUPPORTED);
+//        } catch (NoSuchMethodException | InstantiationException | IllegalAccessException |
+//                 InvocationTargetException ex) {
+//            log.error("JDBC连接驱动初始化失败", ex);
+//            throw new RuntimeException(ex);
+//        }
+//    }
 
     public static String buildJdbcConnectionString(String databaseType, Properties connectionProperties) {
         DatabaseType dbType = parseDatabaseType(databaseType);

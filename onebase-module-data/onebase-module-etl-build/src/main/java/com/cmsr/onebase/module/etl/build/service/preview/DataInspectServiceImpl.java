@@ -129,7 +129,7 @@ public class DataInspectServiceImpl implements DataInspectService {
             return dataPreview;
         } catch (Exception e) {
             log.error("数据源连接异常，数据源信息: {}", datasourceDO, e);
-            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.UNKNOWN_ERROR);
+            throw new RuntimeException(e);
         }
     }
 }
