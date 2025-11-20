@@ -21,12 +21,11 @@ const { Option } = Select;
 const Administrator: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [createModalVisible, setCreateModalVisible] = useState(false);
-
+  const [passwordForm, setPasswordForm] = useState({ id: '0', username: '', newPassword: '', confirmPassword: '' });
+  const [emailForm, setEmailForm] = useState({ id: '0', username: '', oldEmail: '', newEmail: '' });
+  // const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
   const [modalType, setModalType] = useState<'email' | 'password' | null>(null);
-
   const [createForm] = useForm();
-  const [editForm] = useForm();
-
   const [searchKeyword, setSearchKeyword] = useState('');
   const [searchDebounceTimer, setSearchDebounceTimer] = useState<NodeJS.Timeout | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -168,7 +167,8 @@ const Administrator: React.FC = () => {
 
   const addAdmin = () => {
     createForm.resetFields();
-
+    setPasswordForm({ id: '0', username: '', newPassword: '', confirmPassword: '' }); // 重置密码表单状态
+    setEmailForm({ id: '0', username: '', oldEmail: '', newEmail: '' }); // 重置邮箱表单状态
     setTimeout(() => {
       setCreateModalVisible(true);
     }, 0);
@@ -202,23 +202,13 @@ const Administrator: React.FC = () => {
   };
 
   const handleEditEmail = (record: PlatformAdminInfo) => {
-    setCurrentUser(record);
-
-    editForm.setFieldValue('username', record.username);
-    editForm.setFieldValue('oldEmail', record.email);
-    editForm.setFieldValue('email', '');
-
+    setEmailForm({ id: record.id, username: record.username, oldEmail: record.email, newEmail: '' });
     setModalType('email');
     setModalVisible(true);
   };
 
   const handleEditPassword = (record: PlatformAdminInfo) => {
-    setCurrentUser(record);
-
-    editForm.setFieldValue('username', record.username);
-    editForm.setFieldValue('password', '');
-    editForm.setFieldValue('confirmPassword', '');
-
+    setPasswordForm({ id: record.id, username: record.username, newPassword: '', confirmPassword: '' });
     setModalType('password');
     setModalVisible(true);
   };
@@ -246,13 +236,9 @@ const Administrator: React.FC = () => {
     // setDeleteConfirmVisible(true);
   };
 
-  const handleUpdate = async () => {
-    const newPassword = editForm.getFieldValue('password');
-    const confirmPassword = editForm.getFieldValue('confirmPassword');
-
-    const newEmail = editForm.getFieldValue('email');
-    const id = currentUser?.id!;
-
+  const handleUpdata = async () => {
+    const { id: passwordId, newPassword, confirmPassword } = passwordForm;
+    const { id: emailId, newEmail } = emailForm;
     // modalType
     if (modalType === 'password') {
       if (!newPassword || newPassword.length < 6) {
@@ -265,7 +251,7 @@ const Administrator: React.FC = () => {
         return;
       }
       try {
-        await updatePlatformAdminPasswordApi({ id: id, password: confirmPassword });
+        await updatePlatformAdminPasswordApi({ id: passwordId, password: confirmPassword });
         getPlatformAdminList();
         Message.success('密码修改成功');
       } catch (error) {
@@ -273,7 +259,7 @@ const Administrator: React.FC = () => {
       }
     } else {
       try {
-        await updatePlatformAdminMailApi({ id: id, email: newEmail });
+        await updatePlatformAdminMailApi({ id: emailId, email: newEmail });
         getPlatformAdminList();
         Message.success('邮箱修改成功');
       } catch (error) {
@@ -364,15 +350,15 @@ const Administrator: React.FC = () => {
             <Button key="return" onClick={handleCancelUpdata}>
               取消
             </Button>,
-            <Button key="submit" type="primary" onClick={handleUpdate}>
+            <Button key="submit" type="primary" onClick={handleUpdata}>
               确定
             </Button>
           ]}
         >
           {modalType === 'password' ? (
-            <Form layout="vertical" form={editForm}>
-              <Form.Item label="账号" field="username">
-                <Input disabled />
+            <Form layout="vertical">
+              <Form.Item label="账号">
+                <Input value={passwordForm.username} disabled />
               </Form.Item>
               <Form.Item
                 label="密码"
@@ -383,7 +369,12 @@ const Administrator: React.FC = () => {
                 ]}
                 validateTrigger={['onBlur']}
               >
-                <Input.Password placeholder="新密码" autoComplete="new-password" />
+                <Input.Password
+                  placeholder="新密码"
+                  value={passwordForm.newPassword}
+                  onChange={(value) => setPasswordForm({ ...passwordForm, newPassword: value })}
+                  autoComplete="new-password"
+                />
               </Form.Item>
               <Form.Item
                 label="确认密码"
@@ -393,7 +384,7 @@ const Administrator: React.FC = () => {
                   { required: true, message: '请确认密码' },
                   {
                     validator: (value, cb) => {
-                      const formValues = editForm.getFieldsValue();
+                      const formValues = createForm.getFieldsValue();
                       const password = formValues.password;
                       if (value !== password) {
                         return cb('两次输入的密码不一致');
@@ -404,16 +395,21 @@ const Administrator: React.FC = () => {
                 ]}
                 validateTrigger={['onBlur']}
               >
-                <Input.Password placeholder="确认密码" />
+                <Input.Password
+                  placeholder="确认密码"
+                  value={passwordForm.confirmPassword}
+                  onChange={(value) => setPasswordForm({ ...passwordForm, confirmPassword: value })}
+                  autoComplete="new-password"
+                />
               </Form.Item>
             </Form>
           ) : (
-            <Form layout="vertical" form={editForm}>
-              <Form.Item label="账号" field="username">
-                <Input disabled />
+            <Form layout="vertical">
+              <Form.Item label="账号">
+                <Input value={emailForm.username} disabled />
               </Form.Item>
-              <Form.Item label="原邮箱" field="oldEmail">
-                <Input disabled />
+              <Form.Item label="原邮箱">
+                <Input value={emailForm.oldEmail} disabled />
               </Form.Item>
               <Form.Item
                 label="邮箱"
@@ -424,7 +420,11 @@ const Administrator: React.FC = () => {
                 ]}
                 validateTrigger={['onBlur']}
               >
-                <Input placeholder="新邮箱" />
+                <Input
+                  placeholder="新邮箱"
+                  value={emailForm.newEmail}
+                  onChange={(value) => setEmailForm({ ...emailForm, newEmail: value })}
+                />
               </Form.Item>
             </Form>
           )}

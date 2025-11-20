@@ -1,6 +1,7 @@
 import {
   CreateDataSourceReq,
   CreateETLFlowReq,
+  FlinkFunctionListReq,
   ListAppETLDatasourceParams,
   ListTableColumnsReq,
   ListTablesReq,
@@ -54,3 +55,7 @@ export const getETLFlowScheduleInfo = (id: string) => etlService.get(`/workflow/
 
 export const updateETLFlowScheduleInfo = (params: UpdateWorkflowScheduleInfoReq) =>
   etlService.post(`/workflow/schedule`, params);
+
+export const flinkFunctionList = (params: FlinkFunctionListReq) => etlService.get(`/flink-function/list`, params);
+
+export const flinkFunctionTypeList = () => etlService.get(`/flink-function/list-type`);
