@@ -1,5 +1,5 @@
 import FieldIcon from '@/assets/images/etl/field.svg';
-import { Button, Input } from '@arco-design/web-react';
+import { Button } from '@arco-design/web-react';
 import { listETLTables, previewETLDatasource, type ETLTable } from '@onebase/app';
 import { ETLDrawerTab, etlEditorSignal } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
@@ -8,8 +8,6 @@ import DataPreview from '../../components/dataPreview';
 import DataRemark from '../../components/dataRemark';
 import DatasourceModal from './components/datasourceModal';
 import styles from './index.module.less';
-
-const { TextArea } = Input;
 
 export const InputNodeConfig: React.FC = () => {
   useSignals();

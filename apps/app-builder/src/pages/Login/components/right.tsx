@@ -130,7 +130,13 @@ const Right: React.FC = () => {
   // 验证码验证成功回调
   const handleCaptchaSuccess = async (token: string) => {
     const values = await accountForm.getFieldsValue();
-    handleSubmit({ username: values.username, password: values.password, captchaVerification: token });
+    const deviceId = await getOrCreateDeviceInfo();
+    handleSubmit({
+      username: values.username,
+      password: values.password,
+      captchaVerification: token,
+      deviceId: deviceId
+    });
   };
 
   // 登录按钮点击事件 - 先验证滑块验证码
@@ -138,12 +144,14 @@ const Right: React.FC = () => {
     try {
       // 先验证表单
       await accountForm.validate();
+      const deviceId = await getOrCreateDeviceInfo();
 
       if (accountForm.getFieldValue('captchaVerification')) {
         handleAccountLogin({
           username: accountForm.getFieldValue('username'),
           password: accountForm.getFieldValue('password'),
-          captchaVerification: accountForm.getFieldValue('captchaVerification')
+          captchaVerification: accountForm.getFieldValue('captchaVerification'),
+          deviceId: deviceId
         });
         return;
       }
