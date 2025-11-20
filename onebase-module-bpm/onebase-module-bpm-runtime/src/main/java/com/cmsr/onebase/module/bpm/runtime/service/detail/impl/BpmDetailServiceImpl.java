@@ -2,7 +2,9 @@ package com.cmsr.onebase.module.bpm.runtime.service.detail.impl;
 
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
+import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowCcRecordRepository;
 import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowInsBizExtRepository;
+import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowCcRecordDO;
 import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowInsBizExtDO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
 import com.cmsr.onebase.module.bpm.core.enums.BpmUserTypeEnum;
@@ -21,6 +23,7 @@ import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.dromara.warm.flow.core.entity.HisTask;
 import org.dromara.warm.flow.core.entity.Instance;
 import org.dromara.warm.flow.core.entity.Task;
@@ -31,7 +34,9 @@ import org.dromara.warm.flow.core.service.TaskService;
 import org.dromara.warm.flow.core.service.UserService;
 import org.dromara.warm.flow.core.service.impl.BpmConstants;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -61,11 +66,15 @@ public class BpmDetailServiceImpl implements BpmDetailService {
     private BpmFlowInsBizExtRepository flowInsExtRepository;
 
     @Resource
+    private BpmFlowCcRecordRepository ccRecordRepository;
+
+    @Resource
     private MetadataDataMethodCoreService metadataDataMethodCoreService;
 
     @Resource
     private InstanceDetailStrategyManager instanceDetailStrategyManager;
 
+    @Transactional(rollbackFor = Exception.class)
     public BpmTaskDetailRespVO getFormDetail(BpmTaskDetailReqVO reqVO) {
         BpmTaskDetailRespVO respVO = new BpmTaskDetailRespVO();
         Long loginUserId = WebFrameworkUtils.getLoginUserId();
@@ -121,6 +130,9 @@ public class BpmDetailServiceImpl implements BpmDetailService {
         // 填充其他流程详情
         instanceDetailStrategyManager.processInstanceDetail(respVO, nodeExtDTO, instance, loginUserId, currTask != null);
 
+        // 标记已读状态
+        markAsRead(currTask, reqVO, loginUserId);
+
         return respVO;
     }
 
@@ -171,8 +183,37 @@ public class BpmDetailServiceImpl implements BpmDetailService {
             }
 
             return null;
+        } else if (sourceEnum == BpmViewSourceEnum.CC) {
+            Long taskId = reqVO.getTaskId();
+
+            if (taskId == null) {
+                throw exception(ErrorCodeConstants.FLOW_PERMISSION_DENY.getCode(), "待办任务ID不能为空");
+            }
+
+            // 权限校验：查询抄送记录
+            ConfigStore configStore = new DefaultConfigStore();
+            configStore.and(BpmFlowCcRecordDO.TASK_ID, taskId);
+            configStore.and(BpmFlowCcRecordDO.USER_ID, loginUserId);
+
+            BpmFlowCcRecordDO ccRecordDO = ccRecordRepository.findOne(configStore);
+
+            if (ccRecordDO == null) {
+                throw exception(ErrorCodeConstants.FLOW_PERMISSION_DENY.getCode(), "您没有查看此抄送的任务权限");
+            }
+
+            // 查询已办任务
+            HisTask hisTaskQuery = new FlowHisTask();
+            hisTaskQuery.setTaskId(taskId);
+            hisTaskQuery.setInstanceId(instanceId);
+
+            HisTask hisTask = hisTaskService.getOne(hisTaskQuery);
+
+            if (hisTask == null) {
+                throw exception(ErrorCodeConstants.FLOW_PERMISSION_DENY.getCode(), "未查询到已办任务");
+            }
+
+            return hisTask;
         } else {
-            // todo：抄送的校验逻辑
             Long taskId = reqVO.getTaskId();
 
             if (taskId == null) {
@@ -205,6 +246,47 @@ public class BpmDetailServiceImpl implements BpmDetailService {
 
             log.error("用户 {} 无权限访问已办任务 {}", loginUserId, taskId);
             throw exception(ErrorCodeConstants.FLOW_PERMISSION_DENY.getCode(), "未查询到已办任务");
+        }
+    }
+
+    /**
+     * 标记已读状态
+     *
+     * @param currTask 当前待办任务
+     * @param reqVO 请求VO
+     * @param loginUserId 登录用户ID
+     */
+    private void markAsRead(Task currTask, BpmTaskDetailReqVO reqVO, Long loginUserId) {
+        // 当前待办标记为已读
+        if (currTask != null) {
+           List<User> users = userService.listByProcessedBys(currTask.getId(), String.valueOf(loginUserId));
+           if (CollectionUtils.isNotEmpty(users)) {
+               LocalDateTime now = LocalDateTime.now();
+
+               for (User user : users) {
+                   user.setUpdateTime(now);
+               }
+
+               userService.updateBatch(users);
+           }
+        }
+
+        if (Objects.equals(reqVO.getFrom(), BpmViewSourceEnum.CC.getCode())) {
+            ConfigStore configStore = new DefaultConfigStore();
+            configStore.and(BpmFlowCcRecordDO.TASK_ID, reqVO.getTaskId());
+            configStore.and(BpmFlowCcRecordDO.USER_ID, loginUserId);
+
+            BpmFlowCcRecordDO ccRecord = ccRecordRepository.findOne(configStore);
+
+            if (ccRecord == null) {
+                return;
+            }
+
+            if (!BooleanUtils.toBoolean(ccRecord.getViewed())) {
+                ccRecord.setViewed(BooleanUtils.toInteger(true));
+                ccRecord.setViewedTime(LocalDateTime.now());
+                ccRecordRepository.update(ccRecord);
+            }
         }
     }
 

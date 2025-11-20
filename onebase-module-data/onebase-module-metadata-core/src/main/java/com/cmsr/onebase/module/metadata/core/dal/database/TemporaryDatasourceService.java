@@ -128,8 +128,8 @@ public class TemporaryDatasourceService {
             dsConfig.put("username", username != null ? username : "");
             dsConfig.put("password", password != null ? password : "");
             dsConfig.put("driver", getDriverByType(datasourceType));
-            // 指定连接池类型，使用com.zaxxer.hikari.HikariDataSource
-            dsConfig.put("pool", "com.zaxxer.hikari.HikariDataSource");
+            // 指定连接池类型为 HikariDataSource，Anyline会自动处理
+            dsConfig.put("type", "com.zaxxer.hikari.HikariDataSource");
             
             // 优化HikariCP连接池配置，提高稳定性
             dsConfig.put("minimum-idle", 1);              // 最小空闲连接数
