@@ -122,7 +122,7 @@ public class FlowProcessTest {
         TenantContextHolder.setIgnore(true);
         FormTriggerReqVO reqVO = new FormTriggerReqVO();
         reqVO.setProcessId(114994365031546880L);  // 114994365031546880L 114959369637036032L
-        Map<Long, String> inputParams = Map.of(
+        Map<Long, Object> inputParams = Map.of(
                 46999569445519360L, "班级名称"
         );
         reqVO.setInputParams(inputParams);

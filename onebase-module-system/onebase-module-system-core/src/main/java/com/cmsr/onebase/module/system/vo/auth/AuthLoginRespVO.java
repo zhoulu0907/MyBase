@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.system.vo.auth;
 
+import com.cmsr.onebase.module.infra.api.security.dto.PasswordExpiryCheckDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -35,4 +36,7 @@ public class AuthLoginRespVO {
 
     @Schema(description = "企业ID", example = "1")
     private Long corpId;
+
+    @Schema(description = "密码有效期检查信息")
+    private PasswordExpiryCheckDTO passwordExpiryInfo;
 }

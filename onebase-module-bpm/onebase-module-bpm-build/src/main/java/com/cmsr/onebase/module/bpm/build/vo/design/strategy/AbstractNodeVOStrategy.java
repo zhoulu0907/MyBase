@@ -2,17 +2,15 @@ package com.cmsr.onebase.module.bpm.build.vo.design.strategy;
 
 import com.cmsr.onebase.module.app.api.auth.AppAuthRoleUser;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
-import com.cmsr.onebase.module.bpm.core.vo.design.node.base.BaseNodeVO;
 import com.cmsr.onebase.module.bpm.core.dto.node.NodePermFlagDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.*;
-import com.cmsr.onebase.module.bpm.core.enums.ApprovalModeEnum;
-import com.cmsr.onebase.module.bpm.core.enums.ApproverTypeEnum;
 import com.cmsr.onebase.module.bpm.core.enums.BpmActionButtonEnum;
+import com.cmsr.onebase.module.bpm.core.enums.HandlerTypeEnum;
+import com.cmsr.onebase.module.bpm.core.vo.design.node.base.BaseNodeVO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.dromara.warm.flow.core.service.impl.BpmConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,6 +74,34 @@ public abstract class AbstractNodeVOStrategy<T extends BaseNodeVO, E extends Bas
         return null;
     }
 
+    protected NodePermFlagDTO buildPermissionFlag(HandlerCfgDTO handlerCfg) {
+        NodePermFlagDTO nodePermTagDTO = new NodePermFlagDTO();
+
+        String handlerType = handlerCfg.getHandlerType();
+
+        HandlerTypeEnum handlerTypeEnum = HandlerTypeEnum.getByCode(handlerType);
+
+        if (handlerTypeEnum == HandlerTypeEnum.USER) {
+            for (UserDTO user : handlerCfg.getUsers()) {
+                if (nodePermTagDTO.getUserIds() == null) {
+                    nodePermTagDTO.setUserIds(new ArrayList<>());
+                }
+
+                nodePermTagDTO.getUserIds().add(user.getUserId());
+            }
+        } else if (handlerTypeEnum == HandlerTypeEnum.ROLE) {
+            for (RoleDTO role : handlerCfg.getRoles()) {
+                if (nodePermTagDTO.getRoleIds() == null) {
+                    nodePermTagDTO.setRoleIds(new ArrayList<>());
+                }
+
+                nodePermTagDTO.getRoleIds().add(role.getRoleId());
+            }
+        }
+
+        return nodePermTagDTO;
+    }
+
     /**
      * 默认的按钮配置构建方法
      * <p>
@@ -109,20 +135,22 @@ public abstract class AbstractNodeVOStrategy<T extends BaseNodeVO, E extends Bas
         return buttonConfigs;
     }
 
-    protected void validateApproverConfig(ApproverConfigDTO approverConfig, Long appId) {
-        String approverType = approverConfig.getApproverType();
-        ApproverTypeEnum approverTypeEnum = ApproverTypeEnum.getByCode(approverType);
+    protected void validateHandlerConfig(HandlerCfgDTO handlerCfg, Long appId, Integer maxUsers, Integer maxRoles) {
+        // 优先取处理人类型
+        String handlerType = handlerCfg.getHandlerType();
 
-        if (approverTypeEnum == null) {
-            log.error("未知的审批人类型: {}", approverType);
+        HandlerTypeEnum handlerTypeEnum = HandlerTypeEnum.getByCode(handlerType);
+
+        if (handlerTypeEnum == null) {
+            log.error("未知的审批人类型: {}", handlerType);
             throw exception(ErrorCodeConstants.UNSUPPORT_NODE_APPROVER_TYPE);
         }
 
-        if (approverTypeEnum == ApproverTypeEnum.USER) {
-            List<UserDTO> users = approverConfig.getUsers();
+        if (handlerTypeEnum == HandlerTypeEnum.USER) {
+            List<UserDTO> users = handlerCfg.getUsers();
 
             if (CollectionUtils.isEmpty(users)) {
-                log.error("缺少审批用户列表 {}", approverConfig);
+                log.error("缺少审批用户列表 {}", handlerCfg);
                 throw exception(ErrorCodeConstants.MISSING_NODE_USER_LIST);
             }
 
@@ -133,20 +161,20 @@ public abstract class AbstractNodeVOStrategy<T extends BaseNodeVO, E extends Bas
             users = new ArrayList<>(userMap.values());
 
             // 审批人列表最多100个用户
-            if (users.size() > BpmConstants.MAX_NODE_APPROVER_USERS) {
-                log.warn("审批人列表最多100个用户 当前为：{}", users.size());
+            if (users.size() > maxUsers) {
+                log.warn("审批人列表最多 {} 个用户 当前为：{}", maxUsers, users.size());
 
-                users = new ArrayList<>(users.subList(0, BpmConstants.MAX_NODE_APPROVER_USERS));
+                users = new ArrayList<>(users.subList(0, maxUsers));
             }
 
-            approverConfig.setUsers(users);
+            handlerCfg.setUsers(users);
 
             // 清空角色列表
-            approverConfig.setRoles(null);
-        } else if (approverTypeEnum == ApproverTypeEnum.ROLE) {
-            List<RoleDTO> roles = approverConfig.getRoles();
+            handlerCfg.setRoles(null);
+        } else if (handlerTypeEnum == HandlerTypeEnum.ROLE) {
+            List<RoleDTO> roles = handlerCfg.getRoles();
             if (CollectionUtils.isEmpty(roles)) {
-                log.error("缺少审批角色列表 {}", approverConfig);
+                log.error("缺少审批角色列表 {}", handlerCfg);
                 throw exception(ErrorCodeConstants.MISSING_NODE_ROLE_LIST);
             }
 
@@ -156,7 +184,7 @@ public abstract class AbstractNodeVOStrategy<T extends BaseNodeVO, E extends Bas
             roles.removeIf(role -> !roleIds.contains(role.getRoleId()));
 
             if (CollectionUtils.isEmpty(roles)) {
-                log.error("缺少有效的角色列表 {}", approverConfig);
+                log.error("缺少有效的角色列表 {}", handlerCfg);
                 throw exception(ErrorCodeConstants.MISSING_NODE_VALID_ROLE_LIST);
             }
 
@@ -167,23 +195,15 @@ public abstract class AbstractNodeVOStrategy<T extends BaseNodeVO, E extends Bas
             roles = new ArrayList<>(roleMap.values());
 
             // 审批人列表最多10个角色
-            if (roles.size() > BpmConstants.MAX_NODE_APPROVER_ROLES) {
-                log.warn("审批人列表最多10个角色 当前为：{}", roles.size());
-                roles = new ArrayList<>(roles.subList(0, BpmConstants.MAX_NODE_APPROVER_ROLES));
+            if (roles.size() > maxRoles) {
+                log.warn("审批人列表最多 {} 个角色 当前为：{}", maxRoles, roles.size());
+                roles = new ArrayList<>(roles.subList(0, maxRoles));
             }
 
-            approverConfig.setRoles(roles);
+            handlerCfg.setRoles(roles);
 
             // 清空用户列表
-            approverConfig.setUsers(null);
-        }
-
-        String approvalMode = approverConfig.getApprovalMode();
-        ApprovalModeEnum approvalModeEnum = ApprovalModeEnum.getByCode(approvalMode);
-
-        if (approvalModeEnum == null) {
-            log.error("未知的审批方式: {}", approvalMode);
-            throw exception(ErrorCodeConstants.UNSUPPORT_NODE_APPROVAL_MODE);
+            handlerCfg.setUsers(null);
         }
     }
 

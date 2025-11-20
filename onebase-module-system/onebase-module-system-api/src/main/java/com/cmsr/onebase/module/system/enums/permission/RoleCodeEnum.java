@@ -14,6 +14,7 @@ public enum RoleCodeEnum {
     SUPER_ADMIN("super_admin", "平台管理员"),
     TENANT_ADMIN("tenant_admin", "租户管理员"),
     CORP_ADMIN("corp_admin", "企业管理员"),
+    APP_DEVELOPER("app_developer", "应用开发者"),
     ;
 
     /**
@@ -27,6 +28,11 @@ public enum RoleCodeEnum {
 
     public static boolean isSuperAdmin(String code) {
         return ObjectUtils.equalsAny(code, SUPER_ADMIN.getCode());
+    }
+
+
+    public static boolean isTenantAdmin(String code) {
+        return ObjectUtils.equalsAny(code, TENANT_ADMIN.getCode());
     }
 
 }

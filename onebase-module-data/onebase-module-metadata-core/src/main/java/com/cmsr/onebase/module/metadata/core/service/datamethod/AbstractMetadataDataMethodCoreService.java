@@ -685,7 +685,7 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
 
         // 值为null的字段也放到参数里，触发流程时需要全量的字段信息
         for (MetadataEntityFieldDO field : targetfields) {
-            if(!map.keySet().contains(field.getFieldName())){
+            if(!map.keySet().contains(field.getFieldName().toUpperCase())){
                 newData.put(field.getId(), null);
             };
         }

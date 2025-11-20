@@ -11,8 +11,9 @@ import java.time.LocalDateTime;
  */
 @Schema(description = "待办任务VO")
 @Data
-public class BpmFlowTodoTaskVO extends BpmFlowInstanceVO {
-
+public class BpmFlowTodoTaskVO {
+    @Schema(description = "主键id")
+    private Long id;
 
     @Schema(description = "流程标题")
     private String processTitle;
@@ -40,4 +41,7 @@ public class BpmFlowTodoTaskVO extends BpmFlowInstanceVO {
 
     @Schema(description = "流程表单，实际对应pageSetId")
     private String businessId;
+
+    @Schema(description = "流程节点编码")
+    private String nodeCode;
 }

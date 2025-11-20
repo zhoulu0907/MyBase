@@ -6,6 +6,7 @@ import com.cmsr.onebase.module.bpm.core.dto.node.InitiationNodeExtDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeBtnCfgDTO;
 import com.cmsr.onebase.module.bpm.core.enums.BpmActionButtonEnum;
 import com.cmsr.onebase.module.bpm.core.enums.BpmBusinessStatusEnum;
+import com.cmsr.onebase.module.bpm.core.enums.BpmNodeApproveStatusEnum;
 import com.cmsr.onebase.module.bpm.core.enums.BpmNodeTypeEnum;
 import com.cmsr.onebase.module.bpm.runtime.vo.EntityVO;
 import com.cmsr.onebase.module.bpm.runtime.vo.ExecTaskReqVO;
@@ -69,9 +70,9 @@ public class InitiationExecTaskStrategy extends AbstractExecTaskStrategy<Initiat
             
             FlowParams skipParams = FlowParams.build()
                     .skipType(SkipType.PASS.getKey())
-                    .message("已提交")
+                    .message(BpmNodeApproveStatusEnum.POST_SUBMITTED.getName())
                     .flowStatus(BpmBusinessStatusEnum.IN_APPROVAL.getCode())
-                    .hisStatus("已提交");
+                    .hisStatus(BpmNodeApproveStatusEnum.POST_SUBMITTED.getCode());
             taskService.skip(skipParams, task);
 
             // 只更新首次提交时间

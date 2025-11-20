@@ -425,7 +425,39 @@ COMMENT ON COLUMN bpm_flow_agent.agent_name IS '代理人用户名称';
 COMMENT ON COLUMN bpm_flow_agent.principal_name IS '被代理人用户名称';
 
 
+CREATE TABLE bpm_flow_cc_record
+(
+    id               int8        NOT NULL,
+    instance_id      int8         NOT NULL,
+    task_id          int8         NULL,
+    "viewed"         int2 NOT NULL DEFAULT 0,
+    "viewed_time" timestamp(6) NULL,
+    user_id varchar(80) NULL,
+    "lock_version" int8 NOT NULL DEFAULT 0,
+    "creator" int8 NOT NULL DEFAULT 0,
+    "create_time" timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updater" int8 NOT NULL DEFAULT 0,
+    "update_time" timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "deleted" int8 NOT NULL DEFAULT 0,
+    "tenant_id" int8 NOT NULL DEFAULT 0,
+    CONSTRAINT bpm_flow_cc_record_pk PRIMARY KEY (id)
+);
+COMMENT ON TABLE bpm_flow_cc_record IS '流程抄送记录表';
 
+COMMENT ON COLUMN bpm_flow_cc_record.user_id IS '抄送用户ID';
+COMMENT ON COLUMN bpm_flow_cc_record.task_id IS '任务表id';
+COMMENT ON COLUMN bpm_flow_cc_record.instance_id IS '流程实例id';
+COMMENT ON COLUMN bpm_flow_cc_record.viewed IS '已阅 0，否 1，是';
+COMMENT ON COLUMN bpm_flow_cc_record.viewed_time IS '已读时间';
+
+COMMENT ON COLUMN bpm_flow_cc_record.id IS '主键id';
+COMMENT ON COLUMN bpm_flow_cc_record."lock_version" IS '乐观锁';
+COMMENT ON COLUMN bpm_flow_cc_record.create_time IS '创建时间';
+COMMENT ON COLUMN bpm_flow_cc_record.creator IS '创建人';
+COMMENT ON COLUMN bpm_flow_cc_record.update_time IS '更新时间';
+COMMENT ON COLUMN bpm_flow_cc_record.updater IS '更新人';
+COMMENT ON COLUMN bpm_flow_cc_record.deleted IS '删除标志';
+COMMENT ON COLUMN bpm_flow_cc_record.tenant_id IS '租户id';
 
 -- 以下为增量更新
 ALTER TABLE "bpm_flow_user" ALTER COLUMN "type" TYPE varchar(8) COLLATE "pg_catalog"."default" USING "type"::varchar(8);

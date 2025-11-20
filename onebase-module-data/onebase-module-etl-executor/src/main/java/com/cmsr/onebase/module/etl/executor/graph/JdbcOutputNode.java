@@ -53,9 +53,9 @@ public class JdbcOutputNode extends Node<JdbcOutputConfig> implements CreateTabl
 
     @Override
     public TableResult executeSql(TableEnvironment tableEnv, WorkflowGraph graph) {
-        org.jooq.Field[] intoFields = intoFieldNames(config);
+        org.jooq.Field[] intoFields = intoFieldNames();
         String intoTableName = getId();
-        org.jooq.Field[] fromFields = fromFieldNames(config);
+        org.jooq.Field[] fromFields = fromFieldNames();
         String fromTableName = graph.findIncomingNode(this).getId();
         InsertOnDuplicateStep<Record> select = JooqUtil.DSL_CONTEXT
                 .insertInto(table(intoTableName)).columns(intoFields)
@@ -66,7 +66,7 @@ public class JdbcOutputNode extends Node<JdbcOutputConfig> implements CreateTabl
     }
 
 
-    private org.jooq.Field[] intoFieldNames(JdbcOutputConfig config) {
+    private org.jooq.Field[] intoFieldNames() {
         return config.getFields().stream().map(f -> {
             String targetFieldName = f.getTargetFieldName();
             return DSL.field(targetFieldName);
@@ -74,7 +74,7 @@ public class JdbcOutputNode extends Node<JdbcOutputConfig> implements CreateTabl
     }
 
 
-    private org.jooq.Field[] fromFieldNames(JdbcOutputConfig config) {
+    private org.jooq.Field[] fromFieldNames() {
         return config.getFields().stream().map(f -> {
             String sourceFieldName = f.getSourceFieldName();
             return DSL.field(sourceFieldName);

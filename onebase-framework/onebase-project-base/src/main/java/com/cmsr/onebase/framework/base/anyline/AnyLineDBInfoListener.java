@@ -3,6 +3,7 @@ package com.cmsr.onebase.framework.base.anyline;
 import com.cmsr.onebase.framework.common.consts.DeleteConstant;
 import com.cmsr.onebase.framework.common.exception.DatabaseAccessErrorCodes;
 import com.cmsr.onebase.framework.common.exception.DatabaseAccessException;
+import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.framework.data.base.BaseEntity;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
@@ -11,8 +12,10 @@ import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
 import com.cmsr.onebase.framework.uid.UidGenerator;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import jakarta.annotation.Resource;
+import jakarta.persistence.Column;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.listener.DMListener;
+import org.anyline.service.AnylineService;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.prepare.RunPrepare;
 import org.anyline.data.run.Run;
@@ -36,8 +39,12 @@ public class AnyLineDBInfoListener implements DMListener {
 
     // 需要忽略租户过滤的表名列表
     private static final Set<String> TENANT_IGNORE_TABLES = new HashSet<>();
+    
     @Resource
     private UidGenerator uidGenerator;
+    
+    @Resource
+    private AnylineService anylineService;
 
     static {
         // 添加不需要租户过滤的表
@@ -71,7 +78,12 @@ public class AnyLineDBInfoListener implements DMListener {
         TENANT_IGNORE_TABLES.add("flow_process_stat");
         TENANT_IGNORE_TABLES.add("flow_process_time");
         TENANT_IGNORE_TABLES.add("flow_execution_log");
+        TENANT_IGNORE_TABLES.add("flow_node_category");
+        TENANT_IGNORE_TABLES.add("flow_node_type");
+        TENANT_IGNORE_TABLES.add("flow_connector");
+        TENANT_IGNORE_TABLES.add("flow_connector_script");
         TENANT_IGNORE_TABLES.add("etl_flink_mapping");
+        TENANT_IGNORE_TABLES.add("etl_flink_function");
         // 可以根据需要添加更多表
     }
 
@@ -104,6 +116,24 @@ public class AnyLineDBInfoListener implements DMListener {
 
         // 加入创建时间和创建人等基础信息
         injectBaseInfoToEntity(object);
+        
+        // 检测并处理Map/List字段:转换为DataRow并序列化
+        if (hasComplexFields(object)) {
+            try {
+                log.info("检测到实体{}包含Map/List字段,将转换为DataRow并序列化", object.getClass().getSimpleName());
+                // 转换为DataRow并序列化复杂字段
+                DataRow dataRow = convertEntityToDataRowWithSerialization(object, dest);
+                // 手动插入DataRow
+                anylineService.insert(dest.getName(), dataRow);
+                log.info("通过DataRow插入成功,表: {}", dest.getName());
+                // 返回BREAK阻止原Entity插入
+                return SWITCH.BREAK;
+            } catch (Exception e) {
+                log.error("转换Entity为DataRow并插入失败,降级为原Entity插入流程", e);
+                // 降级:继续原Entity插入
+            }
+        }
+        
         return SWITCH.CONTINUE;
     }
 
@@ -187,6 +217,11 @@ public class AnyLineDBInfoListener implements DMListener {
             }
             // 新增数据，删除状态为未删除。解决批量插入数据是插入deleted为null的问题
             baseDO.setDeleted(DeleteConstant.NOT_DELETED);
+
+            // 设置乐观锁默认值
+            if (Objects.isNull(baseDO.getLockVersion())) {
+                baseDO.setLockVersion(0L);
+            }
         } else if (obj instanceof BaseEntity baseEntity) {
             // 设置雪花ID
             if (baseEntity.getId() == null) {
@@ -218,6 +253,11 @@ public class AnyLineDBInfoListener implements DMListener {
 
             // 新增数据，删除状态为未删除。解决批量插入数据是插入deleted为null的问题
             baseEntity.setDeletedByListener(DeleteConstant.NOT_DELETED);
+
+            // 设置乐观锁默认值
+            if (Objects.isNull(baseEntity.getLockVersion())) {
+                baseEntity.setLockVersion(0L);
+            }
         }
     }
 
@@ -537,6 +577,105 @@ public class AnyLineDBInfoListener implements DMListener {
         }
         // 加入软删判断
         configs.and(Compare.EQUAL, BaseDO.DELETED, 0);
+    }
+
+    /**
+     * 检测Entity是否有需要序列化的Map/List字段
+     * 
+     * @param entity 实体对象
+     * @return 是否包含Map/List类型的字段
+     */
+    private boolean hasComplexFields(Object entity) {
+        if (entity == null) {
+            return false;
+        }
+        
+        // 处理集合的情况
+        if (entity instanceof Collection) {
+            Collection<?> collection = (Collection<?>) entity;
+            if (collection.isEmpty()) {
+                return false;
+            }
+            // 检查集合中第一个元素
+            return hasComplexFields(collection.iterator().next());
+        }
+        
+        Class<?> clazz = entity.getClass();
+        java.lang.reflect.Field[] fields = clazz.getDeclaredFields();
+        
+        for (java.lang.reflect.Field field : fields) {
+            // 只检查带@Column注解的字段(表示需要持久化)
+            if (!field.isAnnotationPresent(Column.class)) {
+                continue;
+            }
+            
+            Class<?> fieldType = field.getType();
+            // 检查是否是Map或List类型
+            if (Map.class.isAssignableFrom(fieldType) || List.class.isAssignableFrom(fieldType)) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    /**
+     * 将Entity转换为DataRow,并对Map/List字段进行JSON序列化
+     * 
+     * @param entity 实体对象
+     * @param table 表信息
+     * @return 转换后的DataRow
+     * @throws Exception 转换异常
+     */
+    private DataRow convertEntityToDataRowWithSerialization(Object entity, Table table) throws Exception {
+        DataRow dataRow = new DataRow();
+        Class<?> clazz = entity.getClass();
+        
+        // 获取所有字段,包括父类字段
+        List<java.lang.reflect.Field> allFields = new ArrayList<>();
+        Class<?> currentClass = clazz;
+        while (currentClass != null && currentClass != Object.class) {
+            allFields.addAll(Arrays.asList(currentClass.getDeclaredFields()));
+            currentClass = currentClass.getSuperclass();
+        }
+        
+        for (java.lang.reflect.Field field : allFields) {
+            try {
+                // 跳过没有@Column注解的字段
+                if (!field.isAnnotationPresent(Column.class)) {
+                    continue;
+                }
+                
+                field.setAccessible(true);
+                Object value = field.get(entity);
+                
+                // 获取列名
+                Column columnAnnotation = field.getAnnotation(Column.class);
+                String columnName = columnAnnotation.name();
+                if (columnName == null || columnName.isEmpty()) {
+                    // 如果@Column没有指定name,使用字段名
+                    columnName = field.getName();
+                }
+                
+                // 处理Map/List字段:序列化为JSON字符串
+                if (value != null && (value instanceof Map || value instanceof List)) {
+                    String jsonString = JsonUtils.toJsonString(value);
+                    dataRow.put(columnName, jsonString);
+                    log.info("序列化字段 {}.{} : {} -> JSON字符串(长度:{})", 
+                        clazz.getSimpleName(), columnName, value.getClass().getSimpleName(), jsonString.length());
+                } else {
+                    // 其他字段直接设置
+                    dataRow.put(columnName, value);
+                }
+                
+            } catch (Exception e) {
+                log.error("转换字段失败: {}", field.getName(), e);
+                // 继续处理其他字段
+            }
+        }
+        
+        log.info("Entity转DataRow完成,表:{}, 字段数:{}", table.getName(), dataRow.size());
+        return dataRow;
     }
 
 }

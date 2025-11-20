@@ -3,8 +3,6 @@ package com.cmsr.onebase.module.bpm.core.dto.node.base;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
-import java.util.List;
-
 /**
  * 审批人配置
  *
@@ -15,25 +13,15 @@ import java.util.List;
  * @date 2025-10-21
  */
 @Data
-public class ApproverConfigDTO {
+public class ApproverConfigDTO extends HandlerCfgDTO {
 
     /**
      * 审批人类型
      * user: 指定成员
      * role: 指定角色
      */
-    @NotBlank(message = "审批人类型不能为空")
+    @Deprecated
     private String approverType;
-
-    /**
-     * 指定成员列表（当审批人类型为user时使用）
-     */
-    private List<UserDTO> users;
-
-    /**
-     * 指定角色列表（当审批人类型为role时使用）
-     */
-    private List<RoleDTO> roles;
 
     /**
      * 审批方式

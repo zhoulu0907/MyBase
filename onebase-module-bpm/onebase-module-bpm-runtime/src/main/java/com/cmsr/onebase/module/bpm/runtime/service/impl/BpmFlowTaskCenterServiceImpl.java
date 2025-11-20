@@ -5,10 +5,12 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
+import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowCcRecordRepository;
 import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowInsBizExtRepository;
 import com.cmsr.onebase.module.bpm.core.dal.database.ext.BpmHisTaskExtRepository;
 import com.cmsr.onebase.module.bpm.core.dal.database.ext.BpmInstanceExtRepository;
 import com.cmsr.onebase.module.bpm.core.dal.database.ext.BpmTaskExtRepository;
+import com.cmsr.onebase.module.bpm.core.dto.BpmCcRecordDTO;
 import com.cmsr.onebase.module.bpm.core.dto.BpmDoneTaskDTO;
 import com.cmsr.onebase.module.bpm.core.dto.BpmInstanceDTO;
 import com.cmsr.onebase.module.bpm.core.dto.BpmTodoTaskDTO;
@@ -18,10 +20,7 @@ import com.cmsr.onebase.module.bpm.core.enums.BpmUserTypeEnum;
 import com.cmsr.onebase.module.bpm.core.service.BpmEngineDefExtService;
 import com.cmsr.onebase.module.bpm.core.vo.*;
 import com.cmsr.onebase.module.bpm.runtime.service.BpmFlowTaskCenterService;
-import com.cmsr.onebase.module.bpm.runtime.vo.BpmFlowDoneTaskVO;
-import com.cmsr.onebase.module.bpm.runtime.vo.BpmFlowTodoTaskVO;
-import com.cmsr.onebase.module.bpm.runtime.vo.BpmMyCreatedVO;
-import com.cmsr.onebase.module.bpm.runtime.vo.ListNodesRespVO;
+import com.cmsr.onebase.module.bpm.runtime.vo.*;
 import com.cmsr.onebase.module.engine.orm.anyline.repository.FlowHisTaskRepository;
 import com.cmsr.onebase.module.engine.orm.anyline.repository.FlowInstanceRepository;
 import com.cmsr.onebase.module.engine.orm.anyline.repository.FlowTaskRepository;
@@ -36,6 +35,7 @@ import org.anyline.entity.DefaultPageNavi;
 import org.anyline.entity.PageNavi;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.warm.flow.core.dto.DefJson;
 import org.dromara.warm.flow.core.dto.NodeJson;
@@ -104,6 +104,9 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
 
     @Resource
     private DefService defService;
+
+    @Resource
+    private BpmFlowCcRecordRepository bpmFlowCcRecordRepository;
 
     private List<String> splitToList(String str) {
         if (StringUtils.isBlank(str)) {
@@ -304,6 +307,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
     @NotNull
     private static BpmFlowTodoTaskVO getBpmFlowTodoTaskVO(BpmTodoTaskDTO flowTaskExt) {
         BpmFlowTodoTaskVO todoTaskVO = new BpmFlowTodoTaskVO();
+        todoTaskVO.setId(flowTaskExt.getId());
         todoTaskVO.setTaskId(flowTaskExt.getId());
         todoTaskVO.setInstanceId(flowTaskExt.getInstanceId());
         todoTaskVO.setFlowStatus(flowTaskExt.getFlowStatus());
@@ -481,4 +485,84 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
 
         return nodeVOs;
     }
+    /**
+     * 获取流程抄送分页
+     *
+     * @param pageReqVO
+     * @return
+     */
+    @Override
+    public PageResult<BpmCcTaskPageResVO> getCcPage(BpmCcTaskPageReqVO pageReqVO) {
+        Long loginUserId = WebFrameworkUtils.getLoginUserId();
+        // 处理节点编码参数
+        pageReqVO.setNodeCodeList(splitToList(pageReqVO.getNodeCode()));
+
+        // 处理流程状态参数
+        pageReqVO.setFlowStatusList(splitToFlowStatusList(pageReqVO.getFlowStatus()));
+
+        // 构建查询条件
+        ConfigStore condition = buildDynamicCondition(pageReqVO, String.valueOf(loginUserId));
+
+        PageResult<BpmCcRecordDTO> pageResult = bpmFlowCcRecordRepository.getCcPage(condition);
+        // 转换 BpmCcRecordDTO 列表为 BpmCopyTaskPageResVO 列表
+        List<BpmCcTaskPageResVO> copyTaskList = pageResult.getList().stream()
+                .map(this::convertToCcTaskVO)
+                .collect(Collectors.toList());
+
+        return new PageResult<>(copyTaskList, pageResult.getTotal());
+
+    }
+
+    private ConfigStore buildDynamicCondition(BpmCcTaskPageReqVO reqVO, String userId) {
+        DefaultConfigStore condition = new DefaultConfigStore();
+
+        // 设置分页参数
+        fillPageNavi(condition, reqVO.getPageNo(), reqVO.getPageSize());
+
+        // 填充流程实例条件
+        fillInsCondition(condition, reqVO);
+
+        // 填充时间范围条件
+        fillTimeRange(condition, "submit_time", reqVO.getSubmitTimeStart(), reqVO.getSubmitTimeEnd());
+
+        // 填充处理人条件
+        condition.and(Compare.EQUAL, "user_id", userId);
+
+        // 填充查看状态条件
+        fillViewed(condition, "viewed", reqVO.getViewed());
+
+        // 排序
+        fillOrder(condition, "create_time", reqVO.getSortType());
+
+        return condition;
+    }
+    private void fillViewed(ConfigStore condition, String fieldName, Boolean viewed) {
+        if (Objects.nonNull(viewed)) {
+            condition.and(Compare.EQUAL, fieldName, viewed ? 1 : 0);
+        }
+    }
+
+    private BpmCcTaskPageResVO convertToCcTaskVO(BpmCcRecordDTO ccRecord) {
+        BpmCcTaskPageResVO vo = new BpmCcTaskPageResVO();
+
+        // 基本字段映射
+        vo.setId(ccRecord.getId());
+        vo.setProcessTitle(ccRecord.getBpmTitle());
+        vo.setFlowStatus(ccRecord.getFlowStatus());
+        vo.setArrivalTime(ccRecord.getCreateTime());
+        vo.setTaskId(ccRecord.getTaskId());
+        vo.setInstanceId(ccRecord.getInstanceId());
+        vo.setBusinessId(ccRecord.getBindingViewId());
+        vo.setViewed(BooleanUtils.toBoolean(ccRecord.getViewed()));
+
+        // 设置发起人信息
+        UserBasicInfoVO initiator = new UserBasicInfoVO();
+        initiator.setUserId(ccRecord.getInitiatorId());
+        initiator.setName(ccRecord.getInitiatorName());
+        initiator.setAvatar(ccRecord.getInitiatorAvatar());
+        vo.setInitiator(initiator);
+
+        return vo;
+    }
+
 }

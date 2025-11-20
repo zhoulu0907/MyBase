@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.etl.executor;
 
+import com.cmsr.onebase.module.etl.common.excute.ExecuteRequest;
 import com.cmsr.onebase.module.etl.executor.provider.QueryProvider;
 import com.cmsr.onebase.module.etl.executor.provider.WorkflowProvider;
 import com.cmsr.onebase.module.etl.executor.util.DataSourceUtil;
@@ -16,7 +17,7 @@ import java.io.IOException;
 @Slf4j
 public class BeanManager implements Closeable {
 
-    private InputArgs inputArgs;
+    private ExecuteRequest executeRequest;
 
     private WorkflowProvider workflowProvider;
 
@@ -26,8 +27,8 @@ public class BeanManager implements Closeable {
 
     private QueryProvider queryProvider;
 
-    public BeanManager(InputArgs inputArgs, DataSource dataSource) {
-        this.inputArgs = inputArgs;
+    public BeanManager(ExecuteRequest executeRequest, DataSource dataSource) {
+        this.executeRequest = executeRequest;
         this.dataSource = dataSource;
         this.needCloseDataSource = false;
         this.queryProvider = new QueryProvider(dataSource);
@@ -36,9 +37,9 @@ public class BeanManager implements Closeable {
     }
 
 
-    public BeanManager(InputArgs inputArgs) {
-        this.inputArgs = inputArgs;
-        this.dataSource = DataSourceUtil.createDataSource(inputArgs);
+    public BeanManager(ExecuteRequest executeRequest) {
+        this.executeRequest = executeRequest;
+        this.dataSource = DataSourceUtil.createDataSource(executeRequest);
         this.needCloseDataSource = true;
         this.queryProvider = new QueryProvider(dataSource);
         this.workflowProvider = new WorkflowProvider();

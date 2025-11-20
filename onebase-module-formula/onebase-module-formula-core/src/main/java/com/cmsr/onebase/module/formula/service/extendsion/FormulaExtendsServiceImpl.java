@@ -31,6 +31,7 @@ public class FormulaExtendsServiceImpl implements FormulaExtendsService {
     public static final String ROLE_ID = "roleId";
     public static final String IS_IN_ROLE = "isInRole";
     public static final String IS_IN_DEPT = "isInDept";
+    public static final String ROLE_LIST = "roleList";
     /**
      * 注入用户API
      */
@@ -105,7 +106,7 @@ public class FormulaExtendsServiceImpl implements FormulaExtendsService {
                             return roleMap;
                         })
                         .collect(Collectors.toList());
-                parameters.put(ID, JsonUtils.toJsonString(roleList));
+                parameters.put(ROLE_LIST, JsonUtils.toJsonString(roleList));
             }
         }
 
@@ -146,7 +147,7 @@ public class FormulaExtendsServiceImpl implements FormulaExtendsService {
         }
         // 检查公式是否包含部门相关函数
         if (formula.contains(ISINDEPT)) {
-            Long id = getId(parameters,"id");
+            Long id = getId(parameters,ID);
             if (id == null) {
                 id = dept.getId();
             }
@@ -167,15 +168,15 @@ public class FormulaExtendsServiceImpl implements FormulaExtendsService {
     }
 
     @Nullable
-    private static Long getId(Map<String, Object> parameters, String key) {
-        Object valueObj = parameters.get(key);
-        Long id = null;
+    private static Long getId(Map<String, Object> parameters, String id) {
+        Object valueObj = parameters.get(id);
+        Long value = null;
         if (valueObj instanceof Long) {
-            id = (Long) valueObj;
+            value = (Long) valueObj;
         } else if (valueObj instanceof Integer) {
-            id = ((Integer) valueObj).longValue();
+            value = ((Integer) valueObj).longValue();
         }
-        return id;
+        return value;
     }
 
 

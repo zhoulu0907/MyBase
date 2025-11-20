@@ -43,4 +43,11 @@ public class AppVersionRepository extends DataRepository<VersionDO> {
         }
         return findPageWithConditions(configs, pageParam.getPageNo(), pageParam.getPageSize());
     }
+
+    public List<VersionDO> findVersionList(List<Long> appIds) {
+        ConfigStore configs = new DefaultConfigStore();
+        configs.in(VersionDO.APPLICATION_ID, appIds);
+        configs.order(BaseDO.UPDATE_TIME, Order.TYPE.DESC);
+        return findAllByConfig(configs);
+    }
 }

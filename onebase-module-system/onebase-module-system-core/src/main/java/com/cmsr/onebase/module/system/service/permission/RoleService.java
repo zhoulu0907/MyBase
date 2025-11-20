@@ -118,7 +118,7 @@ public interface RoleService {
      * @param ids 角色编号数组
      * @return 是否有管理员
      */
-    boolean hasAnySuperAdmin(Collection<Long> ids);
+    boolean hasAnySuperOrTenantAdmin(Collection<Long> ids);
 
     /**
      * 校验角色们是否有效。如下情况，视为无效：
@@ -138,4 +138,6 @@ public interface RoleService {
     boolean isTenantAdmin(Set<Long> ids);
 
     RoleDO getRoleIdsByCodeAndTenantId(String code, Long id);
+
+    RoleDO getRoleByCodeIgnoreTenant(String code);
 }

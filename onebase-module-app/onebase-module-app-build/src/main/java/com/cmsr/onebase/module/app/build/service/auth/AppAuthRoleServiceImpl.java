@@ -3,7 +3,6 @@ package com.cmsr.onebase.module.app.build.service.auth;
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import com.cmsr.onebase.module.app.build.service.AppCommonService;
 import com.cmsr.onebase.module.app.build.util.AuthUtils;
 import com.cmsr.onebase.module.app.build.vo.auth.*;
@@ -11,6 +10,7 @@ import com.cmsr.onebase.module.app.core.dal.database.AppSqlQueryRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleDeptRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleUserRepository;
+import com.cmsr.onebase.module.app.core.dal.dataobject.app.ApplicationDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthRoleDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthRoleDeptDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthRoleUserDO;
@@ -21,20 +21,19 @@ import com.cmsr.onebase.module.app.core.provider.AppCacheProvider;
 import com.cmsr.onebase.module.system.api.dept.DeptApi;
 import com.cmsr.onebase.module.system.api.dept.dto.DeptAndUsersReqDTO;
 import com.cmsr.onebase.module.system.api.dept.dto.DeptAndUsersRespDTO;
-import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
 import jakarta.annotation.Resource;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * @Author：huangjie
  * @Date：2025/8/7 12:56
  */
+@Slf4j
 @Setter
 @Service
 public class AppAuthRoleServiceImpl implements AppAuthRoleService {
@@ -62,31 +61,65 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
 
     @Override
     public List<AuthRoleListRespVO> getRoleList(Long applicationId) {
-        appCommonService.validateApplicationExist(applicationId);
+        ApplicationDO applicationDO = appCommonService.validateApplicationExist(applicationId);
+        try {
+            createDefaultRole(applicationId, applicationDO.getCreator());
+        } catch (Exception e) {
+            log.warn("创建默认角色失败", e);
+        }
         List<AuthRoleDO> authRoleList = appAuthRoleRepository.findByApplicationId(applicationId);
         return BeanUtils.toBean(authRoleList, AuthRoleListRespVO.class);
     }
 
-//    @Override
-//    public PageResult<AuthRoleUsersPageRespVO> pageRoleUsers(AuthRoleUsersPageReqVO reqVO) {
-//        appCommonService.validateRoleExist(reqVO.getRoleId());
-//        PageResult<AuthRoleUserDO> pageResult = appAuthRoleUserRepository.findByRoleId(reqVO.getRoleId(), reqVO);
-//        Set<Long> userIds = pageResult.getList().stream().map(v -> v.getUserId()).collect(Collectors.toSet());
-//        AppCommonService.UserHelper userHelper = appCommonService.getUserHelper(userIds);
-//        List<AuthRoleUsersPageRespVO> respVOS = userIds.stream().map(userId -> {
-//            AdminUserRespDTO user = userHelper.getUser(userId);
-//            if (user == null) {
-//                AuthRoleUsersPageRespVO vo = new AuthRoleUsersPageRespVO();
-//                vo.setId(userId);
-//                vo.setNickname("[" + userId + "]");
-//                vo.setMobile("-");
-//                return vo;
-//            } else {
-//                return BeanUtils.toBean(user, AuthRoleUsersPageRespVO.class);
-//            }
-//        }).toList();
-//        return new PageResult(respVOS, pageResult.getTotal());
-//    }
+    @Override
+    public void createDefaultRole(Long applicationId, Long userId) {
+        {
+            AuthRoleDO existRole = appAuthRoleRepository.findByAppIdAndRoleCode(applicationId, AuthRoleTypeEnum.SYSTEM_ADMIN.getCode());
+            if (existRole == null) {
+                AuthRoleDO authRoleDO = new AuthRoleDO();
+                authRoleDO.setApplicationId(applicationId);
+                authRoleDO.setRoleCode(AuthRoleTypeEnum.SYSTEM_ADMIN.getCode());
+                authRoleDO.setRoleName(AuthRoleTypeEnum.SYSTEM_ADMIN.getName());
+                authRoleDO.setRoleType(AuthRoleTypeEnum.SYSTEM_ADMIN.getValue());
+                appAuthRoleRepository.insert(authRoleDO);
+                //创建者是管理员
+                AuthRoleUserDO entity = new AuthRoleUserDO();
+                entity.setUserId(userId);
+                entity.setRoleId(authRoleDO.getId());
+            } else {
+                long count = appAuthRoleUserRepository.countByRoleId(existRole.getId());
+                if (count == 0) {
+                    AuthRoleUserDO entity = new AuthRoleUserDO();
+                    entity.setUserId(userId);
+                    entity.setRoleId(existRole.getId());
+                    appAuthRoleUserRepository.insert(entity);
+                }
+            }
+        }
+        {
+            AuthRoleDO existRole = appAuthRoleRepository.findByAppIdAndRoleCode(applicationId, AuthRoleTypeEnum.SYSTEM_USER.getCode());
+            if (existRole == null) {
+                AuthRoleDO authRoleDO = new AuthRoleDO();
+                authRoleDO.setApplicationId(applicationId);
+                authRoleDO.setRoleCode(AuthRoleTypeEnum.SYSTEM_USER.getCode());
+                authRoleDO.setRoleName(AuthRoleTypeEnum.SYSTEM_USER.getName());
+                authRoleDO.setRoleType(AuthRoleTypeEnum.SYSTEM_USER.getValue());
+                appAuthRoleRepository.insert(authRoleDO);
+            }
+        }
+        {
+            AuthRoleDO existRole = appAuthRoleRepository.findByAppIdAndRoleCode(applicationId, AuthRoleTypeEnum.OUTER_USER.getCode());
+            if (existRole == null) {
+                AuthRoleDO authRoleDO = new AuthRoleDO();
+                authRoleDO.setApplicationId(applicationId);
+                authRoleDO.setRoleCode(AuthRoleTypeEnum.OUTER_USER.getCode());
+                authRoleDO.setRoleName(AuthRoleTypeEnum.OUTER_USER.getName());
+                authRoleDO.setRoleType(AuthRoleTypeEnum.OUTER_USER.getValue());
+                appAuthRoleRepository.insert(authRoleDO);
+            }
+        }
+    }
+
 
     @Override
     public PageResult<AuthRoleMembersPageRespVO> pageRoleMembers(AuthRoleMembersPageReqVO reqVO) {
@@ -124,35 +157,6 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
         return BeanUtils.toBean(authRoleDO, AuthRoleCreateRespVO.class);
     }
 
-    @Override
-    public void createDefaultRole(Long applicationId) {
-        appCommonService.validateApplicationExist(applicationId);
-        Long userId = SecurityFrameworkUtils.getLoginUserId();
-        {
-            AuthRoleDO authRoleDO = new AuthRoleDO();
-            authRoleDO.setApplicationId(applicationId);
-            authRoleDO.setRoleCode(AuthRoleTypeEnum.SYSTEM_ADMIN.getCode());
-            authRoleDO.setRoleName(AuthRoleTypeEnum.SYSTEM_ADMIN.getName());
-            authRoleDO.setRoleType(AuthRoleTypeEnum.SYSTEM_ADMIN.getValue());
-            appAuthRoleRepository.insert(authRoleDO);
-            //创建者是管理员
-            AuthRoleUserDO entity = new AuthRoleUserDO();
-            entity.setUserId(userId);
-            entity.setRoleId(authRoleDO.getId());
-        }
-        {
-            AuthRoleDO authRoleDO = new AuthRoleDO();
-            authRoleDO.setApplicationId(applicationId);
-            authRoleDO.setRoleCode(AuthRoleTypeEnum.SYSTEM_USER.getCode());
-            authRoleDO.setRoleName(AuthRoleTypeEnum.SYSTEM_USER.getName());
-            authRoleDO.setRoleType(AuthRoleTypeEnum.SYSTEM_USER.getValue());
-            appAuthRoleRepository.insert(authRoleDO);
-            //创建者是用户
-            AuthRoleUserDO entity = new AuthRoleUserDO();
-            entity.setUserId(userId);
-            entity.setRoleId(authRoleDO.getId());
-        }
-    }
 
     @Override
     public void renameRole(Long roleId, String name) {
@@ -173,27 +177,12 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
         appCacheProvider.usersChanged(authRoleDO.getApplicationId(), reqVO.getUserIds());
     }
 
-//    @Override
-//    @Transactional(rollbackFor = Exception.class)
-//    public void deleteRoleUser(AuthRoleDeleteUserReqVO reqVO) {
-//        AuthRoleDO authRoleDO = appCommonService.validateRoleExist(reqVO.getRoleId());
-//        appAuthRoleUserRepository.deleteRoleUser(reqVO.getRoleId(), reqVO.getUserIds());
-//        appCacheProvider.usersChanged(authRoleDO.getApplicationId(), reqVO.getUserIds());
-//    }
-
     @Override
     public void addRoleDept(AuthRoleAddDeptReqVO reqVO) {
         AuthRoleDO authRoleDO = appCommonService.validateRoleExist(reqVO.getRoleId());
         appAuthRoleDeptRepository.addRoleDept(reqVO.getRoleId(), reqVO.getDeptIds(), reqVO.getIsIncludeChild());
         appCacheProvider.deptsChanged(authRoleDO.getApplicationId(), reqVO.getDeptIds(), reqVO.getIsIncludeChild());
     }
-
-//    @Override
-//    public void deleteRoleDept(AuthRoleDeleteDeptReqVO reqVO) {
-//        AuthRoleDO authRoleDO = appCommonService.validateRoleExist(reqVO.getRoleId());
-//        appAuthRoleDeptRepository.deleteRoleDept(reqVO.getRoleId(), reqVO.getDeptIds());
-//        appCacheProvider.deptsChanged(authRoleDO.getApplicationId(), reqVO.getDeptIds(), 1);
-//    }
 
     @Override
     public void deleteRoleMember(AuthRoleDeleteMemberReqVO reqVO) {

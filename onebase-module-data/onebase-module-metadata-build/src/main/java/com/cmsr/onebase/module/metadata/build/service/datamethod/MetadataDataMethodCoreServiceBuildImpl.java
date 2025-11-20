@@ -90,7 +90,7 @@ public class MetadataDataMethodCoreServiceBuildImpl extends AbstractMetadataData
      * @return 数据
      */
     @Override
-    public Map<String, Object> getData(Long entityId, Object id, String methodCode) {
+    public Map<String, Object> getData(Long entityId, Object id, String methodCode, Long menuId) {
         MetadataDataMethodRequestContext requestContext = new MetadataDataMethodRequestContext();
         requestContext.setEntityId(entityId);
         requestContext.setId(id);

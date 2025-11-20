@@ -9,7 +9,6 @@ import com.cmsr.onebase.module.etl.common.graph.conf.*;
 import com.cmsr.onebase.module.etl.executor.provider.dao.EtlDataSource;
 import com.cmsr.onebase.module.etl.executor.provider.dao.EtlFlinkMapping;
 import com.cmsr.onebase.module.etl.executor.provider.dao.EtlTable;
-import com.cmsr.onebase.module.etl.executor.provider.dao.EtlWorkflow;
 import com.cmsr.onebase.module.etl.executor.util.JacksonUtil;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
@@ -30,6 +29,7 @@ public class WorkflowProvider {
 
     public WorkflowGraph createSubWorkflowGraph(String graphJson, String nodeId) throws Exception {
         WorkflowGraph graph = JacksonUtil.readValue(graphJson, WorkflowGraph.class);
+        graph.init();
         WorkflowGraph subgraph = graph.subgraph(nodeId);
         complementGraphInformation(subgraph);
         return subgraph;
@@ -37,6 +37,7 @@ public class WorkflowProvider {
 
     public WorkflowGraph createWorkflowGraph(String graphJson) throws Exception {
         WorkflowGraph graph = JacksonUtil.fromJson(graphJson, WorkflowGraph.class);
+        graph.init();
         complementGraphInformation(graph);
         return graph;
     }
@@ -57,8 +58,8 @@ public class WorkflowProvider {
         Long datasourceId = jdbcInputConfig.getDatasourceId();
         Long tableId = jdbcInputConfig.getTableId();
 
+        EtlTable etlTable = queryProvider.findTableById(tableId);
         EtlDataSource etlDataSource = queryProvider.findConnectPropertiesById(datasourceId);
-        EtlTable etlTable = queryProvider.findTableById(datasourceId, tableId);
 
         JdbcConfig jdbcConfig = JacksonUtil.fromJson(etlDataSource.getConfig(), JdbcConfig.class);
         jdbcConfig.setDatabaseType(etlDataSource.getDatasourceType());
@@ -108,7 +109,7 @@ public class WorkflowProvider {
         Long tableId = jdbcOutputConfig.getTableId();
 
         EtlDataSource etlDataSource = queryProvider.findConnectPropertiesById(datasourceId);
-        EtlTable etlTable = queryProvider.findTableById(datasourceId, tableId);
+        EtlTable etlTable = queryProvider.findTableById(tableId);
 
         JdbcConfig jdbcConfig = JacksonUtil.fromJson(etlDataSource.getConfig(), JdbcConfig.class);
         jdbcConfig.setDatabaseType(etlDataSource.getDatasourceType());

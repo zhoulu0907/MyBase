@@ -4,7 +4,11 @@ import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
+import com.cmsr.onebase.framework.common.enums.XFromSceneTypeEnum;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.framework.security.core.LoginUser;
+import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import com.cmsr.onebase.module.system.enums.dept.IdTypeEnum;
 import com.cmsr.onebase.module.system.enums.corp.CorpConstant;
 import com.cmsr.onebase.module.system.vo.dept.*;
@@ -45,10 +49,10 @@ import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 @Slf4j
 public class DeptServiceImpl implements DeptService {
 
-    public static final int LOOP_COUNT_LIMIT = 30;
-    public static final int LOOP_INIT = 0;
+    public static final int                LOOP_COUNT_LIMIT = 30;
+    public static final int                LOOP_INIT        = 0;
     @Resource
-    private DeptDataRepository deptDataRepository;
+    private             DeptDataRepository deptDataRepository;
 
     @Lazy
     @Resource
@@ -60,8 +64,7 @@ public class DeptServiceImpl implements DeptService {
 
 
     @Override
-    @CacheEvict(cacheNames = RedisKeyConstants.DEPT_CHILDREN_ID_LIST,
-            allEntries = true)
+    @CacheEvict(cacheNames = RedisKeyConstants.DEPT_CHILDREN_ID_LIST, allEntries = true, beforeInvocation = true)
     public Long createDept(DeptSaveReqVO createReqVO) {
         if (createReqVO.getParentId() == null) {
             createReqVO.setParentId(DeptDO.PARENT_ID_ROOT);
@@ -74,14 +77,21 @@ public class DeptServiceImpl implements DeptService {
         // 插入部门
         DeptDO dept = BeanUtils.toBean(createReqVO, DeptDO.class);
         dept.setStatus(CommonStatusEnum.ENABLE.getStatus());
+
+        String fromSceneType = WebFrameworkUtils.getXFromSceneType();
+        dept.setDeptType(fromSceneType);
+        if (XFromSceneTypeEnum.CORP.getCode().equals(fromSceneType)) {
+            LoginUser user = SecurityFrameworkUtils.getLoginUser();
+            dept.setCorpId(user.getCorpId());
+        }
+
         deptDataRepository.insert(dept);
 
         return dept.getId();
     }
 
     @Override
-    @CacheEvict(cacheNames = RedisKeyConstants.DEPT_CHILDREN_ID_LIST,
-            allEntries = true)
+    @CacheEvict(cacheNames = RedisKeyConstants.DEPT_CHILDREN_ID_LIST, allEntries = true, beforeInvocation = true)
     public void updateDept(DeptSaveReqVO updateReqVO) {
         if (updateReqVO.getParentId() == null) {
             updateReqVO.setParentId(DeptDO.PARENT_ID_ROOT);
@@ -99,8 +109,7 @@ public class DeptServiceImpl implements DeptService {
     }
 
     @Override
-    @CacheEvict(cacheNames = RedisKeyConstants.DEPT_CHILDREN_ID_LIST,
-            allEntries = true)
+    @CacheEvict(cacheNames = RedisKeyConstants.DEPT_CHILDREN_ID_LIST, allEntries = true, beforeInvocation = true)
     public void deleteDept(Long id) {
         // 校验是否存在
         validateDeptExists(id);
@@ -240,6 +249,7 @@ public class DeptServiceImpl implements DeptService {
     @Override
     @Cacheable(cacheNames = RedisKeyConstants.DEPT_CHILDREN_ID_LIST, key = "#id")
     public Set<Long> getChildDeptIdListFromCache(Long id) {
+        log.info("[getChildDeptIdListFromCache][deptId({})]", id);
         List<DeptDO> children = getChildDeptList(id);
         return convertSet(children, DeptDO::getId);
     }
@@ -442,7 +452,6 @@ public class DeptServiceImpl implements DeptService {
     }
 
 
-
     private List<DeptDO> getParentDeptsList(Long deptId) {
         List<DeptDO> parentDepts = new ArrayList<>();
         if (deptId == null) {
@@ -471,11 +480,11 @@ public class DeptServiceImpl implements DeptService {
     @Override
     public void updateAdminOrDirector(UserAdminOrDirectorUpdateReqVO reqVO) {
 
-        if(reqVO.getUpdateType().equals(CorpConstant.LEADER_USER_ID)){
+        if (reqVO.getUpdateType().equals(CorpConstant.LEADER_USER_ID)) {
             DataRow row = new DataRow();
             row.put(DeptDO.LEADER_USER_ID, reqVO.getUserId());
             deptDataRepository.updateByConfig(row, new DefaultConfigStore().eq(DeptDO.ID, reqVO.getDeptId()));
-        }else{
+        } else {
             DataRow row = new DataRow();
             row.put(DeptDO.DEPT_DIRECTOR_ID, reqVO.getUserId());
             deptDataRepository.updateByConfig(row, new DefaultConfigStore().eq(DeptDO.ID, reqVO.getDeptId()));

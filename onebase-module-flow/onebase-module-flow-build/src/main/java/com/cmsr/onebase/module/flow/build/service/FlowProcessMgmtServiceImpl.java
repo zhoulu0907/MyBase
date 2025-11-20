@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.flow.build.service;
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.flow.build.vo.*;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraphConstant;
 import com.cmsr.onebase.module.flow.core.dal.database.*;
@@ -14,6 +15,7 @@ import com.cmsr.onebase.module.flow.core.enums.FlowEnableStatusEnum;
 import com.cmsr.onebase.module.flow.core.enums.FlowErrorCodeConstants;
 import com.cmsr.onebase.module.flow.core.enums.FlowTriggerTypeEnum;
 import com.cmsr.onebase.module.flow.core.vo.PageFlowProcessReqVO;
+import jakarta.annotation.Resource;
 import lombok.Setter;
 import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +50,9 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
 
     @Autowired
     private FlowCommonService flowCommonService;
+
+    @Resource
+    private AppApplicationApi appApplicationApi;
 
     @Override
     public PageResult<FlowProcessVO> pageList(PageFlowProcessReqVO reqVO) {
@@ -89,6 +94,9 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long create(CreateFlowProcessReqVO reqVO) {
+        // 修改企业主表更新时间
+        appApplicationApi.updateAppTimeById(reqVO.getApplicationId());
+
         // 转换为DO对象
         FlowProcessDO flowProcessDO = new FlowProcessDO();
         BeanUtils.copyProperties(reqVO, flowProcessDO);

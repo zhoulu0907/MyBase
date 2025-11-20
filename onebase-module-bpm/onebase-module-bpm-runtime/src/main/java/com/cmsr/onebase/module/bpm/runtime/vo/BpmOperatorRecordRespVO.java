@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.bpm.runtime.vo;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -36,6 +37,12 @@ public class BpmOperatorRecordRespVO {
         private String approveMode;
 
         /**
+         * 是否当前节点
+         */
+        @JsonProperty("isCurrent")
+        private boolean isCurrent;
+
+        /**
          * 操作人信息
          */
         private List<OperatorInfo> operators;
@@ -47,6 +54,11 @@ public class BpmOperatorRecordRespVO {
          * 处理人
          */
         private String operator;
+
+        /**
+         * 代理人
+         */
+        private String agent;
 
         /**
          * 处理人头像
@@ -67,5 +79,10 @@ public class BpmOperatorRecordRespVO {
          * 审批意见
          */
         private String comment;
+
+        /**
+         * 是否已读
+         */
+        private boolean viewed;
     }
 }
