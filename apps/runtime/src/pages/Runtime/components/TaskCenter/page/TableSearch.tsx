@@ -76,7 +76,7 @@ const TableSearch: FC<any> = ({
   const loadFormOptions = useCallback(async () => {
     setLoadingSecond(true);
     try {
-      const data = await getPageSetList({ applicationId: appId, pageSetType: pageSetFormType });
+      const data = await getPageSetList({ applicationId: appId || '', pageSetType: pageSetFormType });
       setFormOptions(data?.pageSets || []);
     } catch (error) {
       setFormOptions([]);
@@ -286,7 +286,7 @@ const TableSearch: FC<any> = ({
                     addBefore={<IconCheck />}
                     allowClear
                     readOnly
-                    inputValue="发起时间"
+                    inputValue={uiConfig.hasFilter?.dateTimeLabel || '发起时间'}
                   />
                   <div className="min-text">选择范围</div>
 
