@@ -32,6 +32,7 @@ import type {
   ISelectConfigType,
   ISelectDataSourceConfigType,
   IStatusConfigType,
+  IDataSelectModeConfigType,
   ITextAreaConfigType,
   ITextConfigType,
   ITooltipConfigType,
@@ -65,7 +66,10 @@ export type TXDataSelectEditData = Array<
   | IDataFieldConfigType
   | IVerifyConfigType
   | ISelectDataSourceConfigType
+  | IDataSelectModeConfigType
 >;
+
+export type TSelectMethodKeyType = 'dropdown' | 'modal';
 
 export interface XDataSelectConfig extends ICommonBaseType {
   /**
@@ -124,6 +128,12 @@ export interface XDataSelectConfig extends ICommonBaseType {
   layout?: TLayoutSelectKeyType;
 
   /**
+   * 数据选择方式：下拉框（默认）/ 弹窗
+   * 可选值: 'dropdown' | 'modal'
+   */
+  selectMethod?: TSelectDefaultType<TSelectMethodKeyType>;
+
+  /**
    * 标题宽度
    */
   labelColSpan?: TNumberDefaultType;
@@ -180,6 +190,15 @@ const XDataSelect: XDataSelectSchema = {
       type: CONFIG_TYPES.TOOLTIP_INPUT
     },
     ...dataFieldConfig,
+    // {
+    //   key: 'selectMethod',
+    //   name: '数据选择方式',
+    //   type: CONFIG_TYPES.DATA_SELECT_MODE,
+    //   range: [
+    //     { key: 'dropdown', text: '下拉框', value: 'dropdown', default: true },
+    //     { key: 'modal', text: '弹窗', value: 'modal' }
+    //   ]
+    // },
     selectDataResourceConfig,
     {
       key: 'verify',
@@ -202,6 +221,7 @@ const XDataSelect: XDataSelectSchema = {
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     defaultValue: '数据选择',
+    selectMethod: 'dropdown',
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
     labelColSpan: 200,
     saveWithHidden: false,

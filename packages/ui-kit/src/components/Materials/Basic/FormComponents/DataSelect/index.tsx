@@ -1,5 +1,5 @@
 // ===== 导入 begin =====
-import { Form, Input } from '@arco-design/web-react';
+import { Form, Input, Select } from '@arco-design/web-react';
 import { memo, useEffect, useState } from 'react';
 
 import { FORM_COMPONENT_TYPES } from '@/components/Materials/componentTypes';
@@ -9,6 +9,8 @@ import { XDataSelectConfig } from './schema';
 import { IconClose } from '@arco-design/web-react/icon';
 
 import { useFormField } from '../useFormField';
+import { dataMethodPage, menuSignal, type PageMethodParam } from '@onebase/app';
+import { getPopupContainer } from '@/utils';
 
 import './index.css';
 // ===== 导入 end =====
@@ -46,6 +48,7 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
   // ===== 内部状态 & 回显begin =====
   const [uiState, setUiState] = useState<{ previewVisible: boolean }>({ previewVisible: false });
   const [dataState, setDataState] = useState<any>('');
+  const [options, setOptions] = useState<any[]>([]);
 
   useEffect(() => {
     if (!runtime) {
@@ -91,6 +94,17 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
       if ((props as any).onSelect) {
         (props as any).onSelect({ id: data?.id, name });
       }
+    },
+    selectDropdown: (value: any, option: any) => {
+      const name = option?.label ?? '';
+      const nextValue = value ? { id: value, name } : '';
+      setDataState(nextValue);
+      if (runtime) {
+        form.setFieldValue(fieldName, nextValue);
+      }
+      if ((props as any).onSelect) {
+        (props as any).onSelect(nextValue || { id: '', name: '' });
+      }
     }
   };
   // ===== 内部事件 =====
@@ -101,6 +115,32 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
     getSelectedId: (v: any) => (v && typeof v === 'object' ? (v.id ?? null) : null)
   };
   // ===== 方法：帮助方法 end =====
+
+  useEffect(() => {
+    const fetchOptions = async () => {
+      if (!runtime) return;
+      const entityId = props?.dynamicTableConfig?.metaData || props?.selectedDataSource?.entityId;
+      if (!entityId) return;
+      const { curMenu } = menuSignal;
+      const req: PageMethodParam = {
+        menuId: curMenu.value?.id,
+        entityId,
+        pageNo: 1,
+        pageSize: 100
+      };
+      const res = await dataMethodPage(req);
+      const lastKey = (displayFields || []).length ? displayFields[displayFields.length - 1]?.value : undefined;
+      const list = Array.isArray(res?.list) ? res.list : [];
+      const opts = list.map((item: any) => ({
+        label: lastKey ? item?.data?.[lastKey] ?? '' : '',
+        value: item?.id ?? item?.data?.id
+      }));
+      setOptions(opts);
+    };
+    if (props.selectMethod === 'dropdown') {
+      fetchOptions();
+    }
+  }, [runtime, props.selectMethod, props?.dynamicTableConfig?.metaData, props?.selectedDataSource?.entityId, displayFields]);
 
   const renderInteractiveContent = () => (
     <div className="dataSelectTrigger" onClick={() => internalEvents.openPreview()}>
@@ -119,6 +159,19 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
     </div>
   );
 
+  const renderDropdownContent = () => (
+    <Select
+      placeholder={defaultValue}
+      showSearch
+      allowClear
+      value={helpers.getSelectedId(dataState)}
+      options={options}
+      getPopupContainer={getPopupContainer}
+      onChange={(v, option) => internalEvents.selectDropdown(v, option)}
+      style={{ width: '100%' }}
+    />
+  );
+
   const renderReadonlyContent = () => {
     const fieldValue = helpers.getDisplayText(dataState);
     return <div className="dataSelectReadonly">{fieldValue || '--'}</div>;
@@ -135,17 +188,23 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
         wrapperCol={{ style: { flex: 1 } }}
         rules={[{ required: verify?.required }]}
         hidden={status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
+        style={{
+          margin: 0,
+          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
+        }}
       >
-        {interactive ? renderInteractiveContent() : renderReadonlyContent()}
+        {interactive ? (props.selectMethod === 'dropdown' ? renderDropdownContent() : renderInteractiveContent()) : renderReadonlyContent()}
       </Form.Item>
       {interactive && (
-        <PreviewDataSelectModal
-          visible={uiState.previewVisible}
-          onCancel={internalEvents.closePreview}
-          tableConfig={props.dynamicTableConfig}
-          defaultSelectedId={helpers.getSelectedId(dataState)}
-          onSelect={internalEvents.selectData}
-        />
+        props.selectMethod === 'dropdown' ? null : (
+          <PreviewDataSelectModal
+            visible={uiState.previewVisible}
+            onCancel={internalEvents.closePreview}
+            tableConfig={props.dynamicTableConfig}
+            defaultSelectedId={helpers.getSelectedId(dataState)}
+            onSelect={internalEvents.selectData}
+          />
+        )
       )}
     </>
   );
@@ -160,6 +219,10 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
       wrapperCol={{ style: { flex: 1 } }}
       rules={[{ required: verify?.required }]}
       hidden={false}
+      style={{
+          margin: 0,
+          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
+      }}
     >
       <Input
         readOnly

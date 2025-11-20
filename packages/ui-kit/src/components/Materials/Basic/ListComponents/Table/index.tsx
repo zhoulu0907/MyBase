@@ -296,6 +296,7 @@ const XTable = memo(
                       display: false,
                       text: ''
                     },
+                    status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
                     verify: { required: false },
                     tooltip: ''
                   }

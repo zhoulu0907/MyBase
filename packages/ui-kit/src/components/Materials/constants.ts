@@ -108,6 +108,8 @@ export const CONFIG_TYPES = {
   DEPT_DEFAULT_VALUE: 'deptDefaultValue',
   //选择部门可选范围
   DEPT_SELECT_SCOPE: 'deptSelectScope',
+  // 数据选择方式
+  DATA_SELECT_MODE: 'DataSelectMode',
 } as const;
 
 // 状态选项常量

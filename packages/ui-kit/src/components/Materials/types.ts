@@ -14,6 +14,14 @@ export type TBooleanDefaultType = boolean;
  * 默认基础配置
  * */
 
+export interface ICommonConfigType {
+   key: string;
+   name: string;
+   type: string;
+   /** 配置通用 key value类型 */
+   [key: string]: any;
+}
+
 // 文本输入框配置
 export interface ITextConfigType {
   key: string;
@@ -139,6 +147,14 @@ export interface IStatusConfigType<KeyType> {
     text: string;
     value: KeyType;
   }>;
+}
+
+// 数据选择方式配置（下拉框/弹窗）
+export interface IDataSelectModeConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.DATA_SELECT_MODE;
+  range: Array<any>;
 }
 
 export interface IImageConfigType {

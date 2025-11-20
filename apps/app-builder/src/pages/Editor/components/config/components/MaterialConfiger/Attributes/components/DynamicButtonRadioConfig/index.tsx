@@ -1,5 +1,6 @@
 import { Form, Radio } from '@arco-design/web-react';
 import { useI18n } from '@/hooks/useI18n';
+import { useEffect } from 'react';
 import styles from '../../index.module.less';
 import { registerConfigRenderer } from '../../registry';
 import { CONFIG_TYPES } from '@onebase/ui-kit';
@@ -12,12 +13,22 @@ interface Props {
 
 const DynamicButtonRadioConfig = ({ handlePropsChange, item, configs }: Props) => {
   const { t } = useI18n();
+  const currentValue = configs[item.key];
+  const defaultOption = Array.isArray(item.range) ? item.range.find((opt: any) => opt && opt.default === true) : undefined;
+  const fallbackValue = currentValue ?? defaultOption?.value;
+
+  useEffect(() => {
+    if ((currentValue === undefined || currentValue === null) && defaultOption) {
+      handlePropsChange(item.key, defaultOption.value);
+    }
+  }, [currentValue, defaultOption, item.key]);
+
   return (
     <Form.Item className={styles.formItem} label={item.name}>
       <Radio.Group
         type="button"
         size="default"
-        value={configs[item.key]}
+        value={fallbackValue}
         onChange={(value) => {
           handlePropsChange(item.key, value);
         }}

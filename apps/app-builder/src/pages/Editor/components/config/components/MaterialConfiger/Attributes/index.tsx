@@ -1,54 +1,12 @@
-import { useI18n } from '@/hooks/useI18n';
-import {
-  Checkbox,
-  ColorPicker,
-  DatePicker,
-  Form,
-  Grid,
-  Input,
-  InputNumber,
-  Radio,
-  Select,
-  Switch,
-  Tabs,
-  Tooltip
-} from '@arco-design/web-react';
+import { Form, Input, Tooltip } from '@arco-design/web-react';
 import { IconCopy } from '@arco-design/web-react/icon';
-import { CONFIG_TYPES, usePageEditorSignal, getPopupContainer } from '@onebase/ui-kit';
+import { usePageEditorSignal, getComponentSchema, hasComponentSchema } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useState } from 'react';
-import DynamicAutoCodeConfig from './components/DynamicAutoCodeConfig';
-import DynamicCarouselConfig from './components/DynamicCarouselConfig';
-import DynamicCheckboxConfig from './components/DynamicCheckboxConfig';
-import DynamicDataSourceConfig from './components/DynamicDataSourceConfig';
-import DynamicFieldConfig from './components/DynamicFieldConfig';
-import DynamicFileConfig from './components/DynamicFileConfig';
-import DynamicImageConfig from './components/DynamicImageConfig';
-import DynamicImageHandleConfig from './components/DynamicImageHandleConfig';
-import DynamicOptionsConfig from './components/DynamicOptionsConfig';
-import DynamicOptionsMutipleConfig from './components/DynamicOptionsMutipleConfig';
-import DynamicRadioConfig from './components/DynamicRadioConfig';
-import DynamicRelatedFormConfig from './components/DynamicRelatedFormConfig';
-import DynamicTableConfig from './components/DynamicTableConfig';
-import DynamicTabsConfig from './components/DynamicTabsConfig';
-import DynamicDateFormatConfig from './components/DynamicDateFormatConfig';
-import DynamicTimeFormatConfig from './components/DynamicTimeFormatConfig';
-import DynamicSwitchFillTextConfig from './components/DynamicSwitchFillTextConfig';
-import DynamicDefaultValueConfig from './components/DynamicDefaultValueConfig';
-import DynamicVerifyConfig from './components/DynamicVerifyConfig';
-import DynamicDateRangeConfig from './components/DynamicDateRangeConfig';
-import DynamicTimeRangeConfig from './components/DynamicTimeRangeConfig';
 import styles from './index.module.less';
-import DynamicDeptDefaultValueConfig from './components/DynamicDeptDefaultValueConfig';
-import DynamicSelectScopeConfig from './components/DynamicSelectScopeConfig';
-import DynamicSubTableConfig from './components/DynamicSubTableConfig';
 import { renderConfigItem } from './registry';
 
-const Row = Grid.Row;
-const Col = Grid.Col;
 const FormItem = Form.Item;
-const Option = Select.Option;
-const TabPane = Tabs.TabPane;
 
 /**
  * 属性配置面板组件
@@ -58,43 +16,7 @@ interface ConfigsProps {
   cpID: string;
 }
 
-const securityOptions = [
-  {
-    label: '姓名',
-    value: 'name'
-  },
-  {
-    label: '手机号',
-    value: 'phone'
-  },
-  {
-    label: '邮箱',
-    value: 'email'
-  },
-  {
-    label: '金额',
-    value: 'money'
-  },
-  {
-    label: '身份证号',
-    value: 'id'
-  },
-  {
-    label: '住址',
-    value: 'address'
-  },
-  {
-    label: 'IP地址',
-    value: 'ip'
-  },
-  {
-    label: '车牌号',
-    value: 'car_id'
-  }
-];
-
 const Attributes = ({ cpID }: ConfigsProps) => {
-  const { t } = useI18n();
 
   useSignals();
   const { curComponentID, curComponentSchema, setCurComponentSchema, setPageComponentSchemas, subTableComponents } =
@@ -104,12 +26,36 @@ const Attributes = ({ cpID }: ConfigsProps) => {
   const [configs, setConfigs] = useState<any>({});
   const [isInSubTable, setIsInSubTable] = useState<boolean>(false);
 
+  const resolveType = () => {
+    const t1 = curComponentSchema?.type;
+    if (t1 && hasComponentSchema(t1)) return t1 as any;
+    const prefix = (cpID || '').split('-')[0];
+    if (prefix && hasComponentSchema(prefix)) return prefix as any;
+    return null;
+  };
+
+  const updateSchema = (configUpdates?: Record<string, any>, layoutUpdates?: Record<string, any>) => {
+    const next = {
+      id: cpID,
+      type: resolveType(),
+      editData: curComponentSchema.editData,
+      config: {
+        ...curComponentSchema.config,
+        ...(configUpdates || {})
+      },
+      layout: layoutUpdates ? { ...curComponentSchema.layout, ...layoutUpdates } : curComponentSchema.layout
+    };
+    setCurComponentSchema(next);
+    setPageComponentSchemas(cpID, next);
+  };
+
   useEffect(() => {
     if (!cpID) {
       return;
     }
-
-    setEditData(curComponentSchema.editData);
+    const type = resolveType();
+    const defaultSchema = type ? getComponentSchema(type as any) : { editData: curComponentSchema.editData || [] };
+    setEditData(defaultSchema.editData);
     setConfigs(curComponentSchema.config);
   }, [cpID, curComponentSchema]);
 
@@ -128,38 +74,12 @@ const Attributes = ({ cpID }: ConfigsProps) => {
 
   const handlePropsChange = (key: string, value: any) => {
     console.log(`更新了属性: ${key} 值为: `, value);
-
-    const newCurComponentSchema = {
-      id: cpID,
-      type: curComponentSchema.type,
-      editData: curComponentSchema.editData,
-      config: {
-        ...curComponentSchema.config,
-        [key]: value
-      },
-      layout: curComponentSchema.layout
-    };
-
-    setCurComponentSchema(newCurComponentSchema);
-    setPageComponentSchemas(cpID, newCurComponentSchema);
+    updateSchema({ [key]: value });
   };
 
   const handleConfigsChange = (config: any) => {
     console.log(`更新了属性: config值为: `, config);
-
-    const newCurComponentSchema = {
-      id: cpID,
-      type: curComponentSchema.type,
-      editData: curComponentSchema.editData,
-      config: {
-        ...curComponentSchema.config,
-        ...config
-      },
-      layout: curComponentSchema.layout
-    };
-
-    setCurComponentSchema(newCurComponentSchema);
-    setPageComponentSchemas(cpID, newCurComponentSchema);
+    updateSchema({ ...config });
   };
 
   const handleMultiPropsChange = (updates: { key: string; value: string | number | boolean | any[] }[]) => {
@@ -174,40 +94,13 @@ const Attributes = ({ cpID }: ConfigsProps) => {
       {} as Record<string, any>
     );
 
-    const newCurComponentSchema = {
-      id: cpID,
-      type: curComponentSchema.type,
-      editData: curComponentSchema.editData,
-      config: {
-        ...curComponentSchema.config,
-        ...updatesObj
-      },
-      layout: curComponentSchema.layout
-    };
-
-    setCurComponentSchema(newCurComponentSchema);
-    setPageComponentSchemas(cpID, newCurComponentSchema);
+    updateSchema({ ...updatesObj });
   };
 
   const handleLayoutChange = (key: string, value: string) => {
     console.log(`更新了布局属性: ${key} 值为: ${value}`);
-
-    const newCurComponentSchema = {
-      id: cpID,
-      type: curComponentSchema.type,
-      editData: curComponentSchema.editData,
-      config: {
-        ...curComponentSchema.config,
-        [key]: value
-      },
-      layout: {
-        ...curComponentSchema.layout,
-        [key === 'width' ? 'w' : key === 'height' ? 'h' : key]: value
-      }
-    };
-
-    setCurComponentSchema(newCurComponentSchema);
-    setPageComponentSchemas(cpID, newCurComponentSchema);
+    const mappedKey = key === 'width' ? 'w' : key === 'height' ? 'h' : key;
+    updateSchema({ [key]: value }, { [mappedKey]: value });
   };
 
   const renderEditItem = (item: any, index: number) => {

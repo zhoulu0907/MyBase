@@ -61,9 +61,11 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
     schema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT];
 
     setPageComponentSchemas(componentId, schema);
-    setCurComponentID(componentId);
-    setCurComponentSchema(schema);
-    setShowDeleteButton(false);
+    setTimeout(() => {
+      setCurComponentID(componentId);
+      setCurComponentSchema(schema);
+      setShowDeleteButton(false);
+    }, 0);
   };
   // 复制组件
   const handleCopyComponent = (comp: any, originId: string, index: number) => {
@@ -211,26 +213,32 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
     const newSub = { id: cpID, type: itemType, displayName: itemDisplayName };
     setSubTableComponents(id, [...subTableComponents[id], newSub]);
     setPageComponentSchemas(cpID!, props);
-    setCurComponentID(cpID!);
-    setCurComponentSchema(props);
-    setShowDeleteButton(false);
+    setTimeout(() => {
+      setCurComponentID(cpID!);
+      setCurComponentSchema(props);
+      setShowDeleteButton(false);
+    }, 0);
   };
 
   // 子表单内排序 拖拽选中
   const onSubStart = (e: any) => {
     const cpID = e.item.getAttribute('data-id') || '';
-    setCurComponentID(cpID);
     const curComponentSchema = pageComponentSchemas[cpID] || {};
-    setCurComponentSchema(curComponentSchema);
-    setShowDeleteButton(true);
+    setTimeout(() => {
+      setCurComponentID(cpID);
+      setCurComponentSchema(curComponentSchema);
+      setShowDeleteButton(true);
+    }, 0);
   };
   // 子表单里的元素 点击事件
   const onSubComponentClick = (e: React.MouseEvent<HTMLDivElement>, cp: GridItem) => {
     e.stopPropagation();
-    setCurComponentID(cp.id);
     const curComponentSchema = pageComponentSchemas[cp.id];
-    setCurComponentSchema(curComponentSchema);
-    setShowDeleteButton(true);
+    setTimeout(() => {
+      setCurComponentID(cp.id);
+      setCurComponentSchema(curComponentSchema);
+      setShowDeleteButton(true);
+    }, 0);
   };
 
   /**
@@ -424,7 +432,9 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                 return !isTable && !isMain && isSub;
               })
 
-              setSubTableComponents(id, newSubList);
+              setTimeout(() => {
+                setSubTableComponents(id, newSubList);
+              }, 0);
             }}
             onAdd={onSubAdd}
             group={{ name: COMPONENT_GROUP_NAME }}
