@@ -13,23 +13,28 @@ import com.cmsr.onebase.module.infra.api.security.dto.LoginFailureResultDTO;
 import com.cmsr.onebase.module.infra.api.security.dto.PasswordExpiryCheckDTO;
 import com.cmsr.onebase.module.system.api.logger.dto.LoginLogCreateReqDTO;
 import com.cmsr.onebase.module.system.api.sms.SmsCodeApi;
+import com.cmsr.onebase.module.system.api.user.AdminUserRoleApi;
 import com.cmsr.onebase.module.system.convert.auth.AuthConvert;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO;
+import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.logger.LoginLogTypeEnum;
 import com.cmsr.onebase.module.system.enums.logger.LoginResultEnum;
 import com.cmsr.onebase.module.system.enums.oauth2.OAuth2ClientConstants;
+import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
 import com.cmsr.onebase.module.system.enums.sms.SmsSceneEnum;
 import com.cmsr.onebase.module.system.enums.tenant.TenantCodeEnum;
 import com.cmsr.onebase.module.system.service.logger.LoginLogService;
 import com.cmsr.onebase.module.system.service.member.MemberService;
 import com.cmsr.onebase.module.system.service.oauth2.OAuth2TokenService;
 import com.cmsr.onebase.module.system.service.permission.PermissionService;
+import com.cmsr.onebase.module.system.service.permission.RoleService;
 import com.cmsr.onebase.module.system.service.tenant.TenantService;
 import com.cmsr.onebase.module.system.service.user.AdminUserService;
 import com.cmsr.onebase.module.system.vo.CaptchaVerificationReqVO;
 import com.cmsr.onebase.module.system.vo.auth.*;
+import com.cmsr.onebase.module.system.vo.role.RoleInsertReqVO;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Resource;
 import jakarta.validation.Validator;
@@ -37,6 +42,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -87,6 +93,15 @@ public class AdminAuthServiceImpl implements AdminAuthService {
     private PermissionService permissionService;
     @Resource
     private SecurityConfigApi securityConfigApi;
+
+    @Resource
+    private RoleService roleService;
+
+    @Resource
+    private AdminUserRoleApi adminUserRoleApi;
+
+    @Resource
+    private PasswordEncoder passwordEncoder;
 
     @Override
     public AdminUserDO authenticate(String username, String password) {
@@ -179,7 +194,10 @@ public class AdminAuthServiceImpl implements AdminAuthService {
 
         // 使用账号密码，进行登录
         AdminUserDO user = authenticate(reqVO.getUsername(), reqVO.getPassword());
-        return createTokenAfterLoginSuccess(user.getId(), reqVO.getUsername(), LoginLogTypeEnum.LOGIN_USERNAME);
+        AuthLoginRespVO authLoginRespVO=  createTokenAfterLoginSuccess(user.getId(), reqVO.getUsername(), LoginLogTypeEnum.LOGIN_USERNAME);
+        // 设置是否管理员
+        authLoginRespVO.setAdminFlag(findAdminFlag(RoleCodeEnum.TENANT_ADMIN.getCode(),user.getId()));
+        return authLoginRespVO;
     }
 
     @Override
@@ -189,7 +207,22 @@ public class AdminAuthServiceImpl implements AdminAuthService {
 
         // 2. 使用账号密码，进行登录
         AdminUserDO user = mobileAuthenticate(reqVO.getMobile(), reqVO.getPassword());
-        return createCorpAfterLoginSuccess(reqVO.getCorpId(), user.getId(), reqVO.getMobile(), LoginLogTypeEnum.LOGIN_MOBILE);
+
+        AuthLoginRespVO authLoginRespVO= createCorpAfterLoginSuccess(reqVO.getCorpId(), user.getId(), reqVO.getMobile(), LoginLogTypeEnum.LOGIN_MOBILE);
+        // 设置是否管理员
+        authLoginRespVO.setAdminFlag(findAdminFlag(RoleCodeEnum.CORP_ADMIN.getCode(),user.getId()));
+        return authLoginRespVO;
+    }
+
+    public boolean   findAdminFlag( String roleCode,  Long userId){
+        // 获取权限
+        RoleDO roleDO = roleService.getRoleIdsByCode(roleCode);
+        if(null!=roleDO){
+            // 查询用户是否管理员
+            boolean  adminFlag= userService.findAdminByRoleIdAndUserId(roleDO.getId(),userId);
+            return adminFlag;
+        }
+        return false;
     }
 
     @Override

@@ -17,4 +17,6 @@ public interface AppAuthRoleUser {
     List<Long> findRoleIdsByAppId(Long appId);
 
     List<AuthRoleDTO> findRolesByUserId(Long userId);
+
+    boolean findAdminByRoleIdAndUserId(Long id, Long userId);
 }

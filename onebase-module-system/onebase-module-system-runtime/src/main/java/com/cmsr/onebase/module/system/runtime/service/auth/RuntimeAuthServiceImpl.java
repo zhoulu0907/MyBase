@@ -8,6 +8,9 @@ import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
+import com.cmsr.onebase.module.app.api.auth.AppAuthRoleApi;
+import com.cmsr.onebase.module.app.api.auth.AppAuthRoleUser;
+import com.cmsr.onebase.module.app.api.auth.dto.AuthRoleDTO;
 import com.cmsr.onebase.module.infra.api.security.SecurityConfigApi;
 import com.cmsr.onebase.module.infra.api.security.dto.LoginFailureResultDTO;
 import com.cmsr.onebase.module.system.api.logger.dto.LoginLogCreateReqDTO;
@@ -19,6 +22,7 @@ import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.logger.LoginLogTypeEnum;
 import com.cmsr.onebase.module.system.enums.logger.LoginResultEnum;
 import com.cmsr.onebase.module.system.enums.oauth2.OAuth2ClientConstants;
+import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
 import com.cmsr.onebase.module.system.enums.tenant.TenantCodeEnum;
 import com.cmsr.onebase.module.system.service.logger.LoginLogService;
 import com.cmsr.onebase.module.system.service.member.MemberService;
@@ -87,6 +91,12 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
     @Resource
     private SecurityConfigApi securityConfigApi;
 
+    @Resource
+    private AppAuthRoleApi appAuthRoleApi;
+
+    @Resource
+    protected AppAuthRoleUser appAuthRoleUser;
+
     @Override
     public AdminUserDO authenticate(String username, String password) {
         final LoginLogTypeEnum logTypeEnum = LoginLogTypeEnum.LOGIN_USERNAME;
@@ -132,6 +142,17 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         }
     }
 
+    public boolean   findAdminFlag( Long userId ,Long appId){
+        // 获取权限
+        AuthRoleDTO roleDO = appAuthRoleApi.findRoleByAppIdAndRoleCode(appId, RoleCodeEnum.APP_DEVELOPER.getCode());
+        if(null!=roleDO){
+            // 查询用户是否管理员
+            boolean  adminFlag= appAuthRoleUser.findAdminByRoleIdAndUserId(roleDO.getId(),userId);
+            return adminFlag;
+        }
+        return false;
+    }
+
 
     @Override
     public AuthLoginRespVO appUsernameLogin(AppUserNameLoginReqVO reqVO) {
@@ -143,7 +164,11 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
 
         // 使用账号密码，进行登录
         AdminUserDO user = authenticate(reqVO.getUsername(), reqVO.getPassword());
-        return createTokenAfterLoginSuccess(reqVO.getAppId(),  user.getId(), reqVO.getUsername(), LoginLogTypeEnum.LOGIN_USERNAME);
+        AuthLoginRespVO authLoginRespVO= createTokenAfterLoginSuccess(reqVO.getAppId(),  user.getId(), reqVO.getUsername(), LoginLogTypeEnum.LOGIN_USERNAME);
+        // 设置是否管理员
+        authLoginRespVO.setAdminFlag(findAdminFlag(reqVO.getAppId(),user.getId()));
+        return authLoginRespVO;
+
     }
 
     @Override
@@ -153,7 +178,11 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         checkPlatformAdminEnableAppCreate();
         // 使用手机密码，进行登录
         AdminUserDO user = mobileAuthenticate(reqVO.getMobile(), reqVO.getPassword());
-        return createTokenAfterLoginSuccess(reqVO.getAppId(),  user.getId(), reqVO.getMobile(), LoginLogTypeEnum.LOGIN_MOBILE);
+        AuthLoginRespVO  authLoginRespVO=  createTokenAfterLoginSuccess(reqVO.getAppId(),  user.getId(), reqVO.getMobile(), LoginLogTypeEnum.LOGIN_MOBILE);
+        // 设置是否管理员
+        authLoginRespVO.setAdminFlag(findAdminFlag( reqVO.getAppId(),user.getId()));
+        return authLoginRespVO;
+
     }
 
     private void checkPlatformAdminEnableAppCreate() {
