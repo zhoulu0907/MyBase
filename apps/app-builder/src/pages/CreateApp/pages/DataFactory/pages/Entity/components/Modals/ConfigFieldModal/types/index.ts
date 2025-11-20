@@ -156,5 +156,5 @@ export interface AutoCodeRules {
 export interface EntityFieldsWithChildren {
   label: string;
   value: string;
-  children: { label: string; value: string; fieldType: string }[];
+  children: { label: string; value: string; fieldType: string; isSystemField: number }[];
 }
