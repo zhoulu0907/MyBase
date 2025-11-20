@@ -5,6 +5,7 @@ import com.cmsr.onebase.framework.common.enums.CorpAppReationStatusEnum;
 import com.cmsr.onebase.framework.common.enums.CorpStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
 import com.cmsr.onebase.module.system.dal.database.CorpAppRelationDataRepository;
@@ -25,11 +26,13 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.APPLICATION_AUTH_TENANT_NOT_EXISTS;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.CORP_ID_COMPARE_ERROR;
 
 /**
  * 企业应用关联表 Service 实现类
@@ -137,6 +140,11 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
 
     @Override
     public PageResult<CorpApplicationRespVO> getCorpAppRelationPage(CorpAppPageReqVO pageReqVO) {
+        Long corpId = pageReqVO.getCorpId();
+        Long loginCorpId = SecurityFrameworkUtils.getLoginUser().getCorpId();
+        if(!Objects.equals(corpId, loginCorpId)){
+            throw exception(CORP_ID_COMPARE_ERROR);
+        }
         Map<Long, ApplicationDTO> applicationMap = getApplicationDoMap(pageReqVO.getAppName());
         List<Long> applicationIds = new ArrayList<>(applicationMap.keySet());
         // 查询原始分页数据
@@ -157,17 +165,17 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
      * @return Map<Long, String> key为企业ID，value为企业名称
      */
     public String getCorpStatus(Integer status, LocalDateTime expiresTime) {
-        String statusDesc = "";
+        String showStatus = "";
         if (status != null && status.equals(CorpStatusEnum.DISABLE.getValue())) {
-            statusDesc = CorpAppReationStatusEnum.DISABLE.getName();
+            showStatus = CorpAppReationStatusEnum.DISABLE.getName();
         } else if (expiresTime != null) {
             if (expiresTime.isAfter(java.time.LocalDateTime.now())) {
-                statusDesc = CorpAppReationStatusEnum.ENABLE.getName();
+                showStatus = CorpAppReationStatusEnum.ENABLE.getName();
             } else {
-                statusDesc = CorpAppReationStatusEnum.EXPIRES.getName();
+                showStatus = CorpAppReationStatusEnum.EXPIRES.getName();
             }
         }
-        return statusDesc;
+        return showStatus;
     }
 
     /**
@@ -189,7 +197,7 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
             respVO.setVersionNumber(appDo.getVersionNumber());
             // 获取app应用状态描述
             Integer status = corpDO.getStatus();
-            respVO.setStatusDesc(getCorpStatus(status, corpDO.getExpiresTime()));
+            respVO.setShowStatus(getCorpStatus(status, corpDO.getExpiresTime()));
         }
         return respVO;
     }
