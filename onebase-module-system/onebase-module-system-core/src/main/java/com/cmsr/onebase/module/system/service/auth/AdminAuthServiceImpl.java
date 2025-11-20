@@ -208,9 +208,11 @@ public class AdminAuthServiceImpl implements AdminAuthService {
         // 2. 使用账号密码，进行登录
         AdminUserDO user = mobileAuthenticate(reqVO.getMobile(), reqVO.getPassword());
 
-        AuthLoginRespVO authLoginRespVO= createCorpAfterLoginSuccess(reqVO.getCorpId(), user.getId(), reqVO.getMobile(), LoginLogTypeEnum.LOGIN_MOBILE);
+        AuthLoginRespVO authLoginRespVO= createCorpAfterLoginSuccess(user.getCorpId(), user.getId(), reqVO.getMobile(), LoginLogTypeEnum.LOGIN_MOBILE);
         // 设置是否管理员
         authLoginRespVO.setAdminFlag(findAdminFlag(RoleCodeEnum.CORP_ADMIN.getCode(),user.getId()));
+        // 回显当前登录用户的企业id
+        authLoginRespVO.setCorpId(user.getCorpId());
         return authLoginRespVO;
     }
 
