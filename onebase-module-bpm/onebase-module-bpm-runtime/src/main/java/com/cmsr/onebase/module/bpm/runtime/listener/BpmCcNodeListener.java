@@ -64,6 +64,10 @@ public class BpmCcNodeListener {
     }
 
     public void handleCcUsers(Task currTask, Map<String, Object> flowVariable, Integer maxUsers) {
+        if (currTask == null) {
+            return;
+        }
+
         String ccUsersKey = BpmConstants.VAR_CC_USERS_KEY + "_" + currTask.getNodeCode();
         String ccUsersStr = MapUtils.getString(flowVariable, ccUsersKey);
 
