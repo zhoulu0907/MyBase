@@ -53,6 +53,9 @@ public interface ErrorCodeConstants {
     // ========== 防暴力破解相关 1-001-005-020 ==========
     ErrorCode AUTH_LOGIN_ACCOUNT_LOCKED = new ErrorCode(1_001_005_020, "账号已被锁定，请{}后再试");
 
+    // ========== 会话超时相关 1-001-005-030 ==========
+    ErrorCode SESSION_IDLE_TIMEOUT = new ErrorCode(1_001_005_030, "会话已超时，请重新登录");
+
     // ========== 文件配置 1-001-006-000 ==========
     ErrorCode FILE_CONFIG_NOT_EXISTS = new ErrorCode(1_001_006_000, "文件配置不存在");
     ErrorCode FILE_CONFIG_DELETE_FAIL_MASTER = new ErrorCode(1_001_006_001, "该文件配置不允许删除，原因：它是主配置，删除会导致无法上传文件");

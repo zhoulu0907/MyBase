@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.system.service.oauth2;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstants;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.module.infra.enums.ErrorCodeConstants;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.map.MapUtil;
@@ -134,6 +135,17 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
         if (DateUtils.isExpired(refreshTokenDO.getExpiresTime())) {
             oauth2RefreshTokenDataRepository.deleteById(refreshTokenDO.getId());
             throw exception(GlobalErrorCodeConstants.UNAUTHORIZED.getCode(), "刷新令牌已过期");
+        }
+
+        // 检查会话空闲key是否存在，不存在则表示会话已超时
+        if (StrUtil.isNotBlank(deviceId)) {
+            CommonResult<Boolean> sessionExistsResult = securityConfigApi.existSessionIdleKey(
+                    refreshTokenDO.getUserId(),
+                    deviceId
+            );
+            if (sessionExistsResult == null || sessionExistsResult.getData() == null || !sessionExistsResult.getData()) {
+                throw exception(ErrorCodeConstants.SESSION_IDLE_TIMEOUT);
+            }
         }
 
         // 创建访问令牌
