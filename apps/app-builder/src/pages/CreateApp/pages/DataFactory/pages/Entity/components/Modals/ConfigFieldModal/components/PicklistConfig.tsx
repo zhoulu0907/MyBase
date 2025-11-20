@@ -11,10 +11,11 @@ interface MultiPicklistConfigProps {
   initialOptions?: { optionLabel: string; optionValue: string }[];
   initialDictTypeId?: string;
   onCancel?: () => void;
+  gotoDictPage?: () => void;
 }
 
-export const MultiPicklistConfig: React.FC<MultiPicklistConfigProps> = (props) => {
-  return <PicklistOptionConfig {...props} />;
+export const MultiPicklistConfig: React.FC<MultiPicklistConfigProps> = ({ gotoDictPage, ...props }) => {
+  return <PicklistOptionConfig gotoDictPage={gotoDictPage} {...props} />;
 };
 
 /**
@@ -27,8 +28,9 @@ interface PicklistConfigProps {
   initialOptions?: { optionLabel: string; optionValue: string }[];
   initialDictTypeId?: string;
   onCancel?: () => void;
+  gotoDictPage?: () => void;
 }
 
-export const PicklistConfig: React.FC<PicklistConfigProps> = (props) => {
-  return <PicklistOptionConfig {...props} />;
+export const PicklistConfig: React.FC<PicklistConfigProps> = ({ gotoDictPage, ...props }) => {
+  return <PicklistOptionConfig gotoDictPage={gotoDictPage} {...props} />;
 };

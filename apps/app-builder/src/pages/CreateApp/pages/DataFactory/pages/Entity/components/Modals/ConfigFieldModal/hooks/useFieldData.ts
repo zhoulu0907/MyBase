@@ -47,7 +47,8 @@ export const useFieldData = (
         children: (isChild ? entity?.childFields || [] : entity?.parentFields || []).map((field: any) => ({
           label: field.displayName,
           value: field.fieldId,
-          fieldType: field.fieldType
+          fieldType: field.fieldType,
+          isSystemField: field.isSystemField
         }))
       });
 
