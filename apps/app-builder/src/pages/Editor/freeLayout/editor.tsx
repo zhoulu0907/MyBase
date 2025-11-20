@@ -22,9 +22,12 @@ import { useLocation } from 'react-router-dom';
 import type { WorkflowJSON } from './editorType';
 import { getAppIdByPageSetId } from '@onebase/app';
 import { useFlowEditorStor } from '@/store/index';
+import { debounce } from 'lodash-es';
+import { useRefresh } from '@flowgram.ai/fixed-layout-editor';
 const sourceNodeIDMap = new Map();
 
 export const Editor = () => {
+  const refresh = useRefresh();
   const { currentFlowId, setEditorRef, flowData, setFlowData, initFlowData, configData, setConfigData } =
     useFlowEditorStor();
   const { setFlowId } = useFlowPageEditorSignal;
@@ -40,7 +43,6 @@ export const Editor = () => {
       if (res.globalConfig) {
         setConfigData(res.globalConfig);
       }
-
       if (!res.bpmDefJson) {
         currentJsonData = initialData;
       } else {
@@ -118,6 +120,15 @@ export const Editor = () => {
   useEffect(() => {
     setEditorRef(ref.current);
   }, [ref.current]);
+  useEffect(() => {
+    const toDispose = ref?.current?.document.onContentChange(
+      debounce((e) => {
+        refresh();
+      }, 200)
+    );
+    return () => toDispose?.dispose();
+  }, []);
+
   return (
     <div className="doc-free-feature-overview">
       {

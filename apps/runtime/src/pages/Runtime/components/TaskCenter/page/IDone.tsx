@@ -6,6 +6,7 @@ import { getDonePageList } from '@onebase/app/src/services/app_runtime';
 import { LISTTYPE, TaskStatusMap } from '@onebase/app';
 // import { getDonePageList } from '../../../../../../../../packages/app/src/services/app_runtime';
 import dayjs from 'dayjs';
+import {displayStatusMap} from '../constant'
 
 const IDone: FC = ({ appId }: any) => {
   const columns: TableColumnProps[] = [
@@ -29,7 +30,11 @@ const IDone: FC = ({ appId }: any) => {
     {
       title: '处理操作',
       dataIndex: 'taskStatus',
-      render: (val: TaskStatusMap) => {
+      render: (val: any) => {
+        let temp = displayStatusMap(val)
+        if (temp?.label) {
+          val = temp.label
+        }
         if (val === TaskStatusMap.SUBMITTED || val === TaskStatusMap.AGREED || val === TaskStatusMap.PASS) {
           return <span style={{ color: '#00B42A' }}>{val}</span>;
         } else if (

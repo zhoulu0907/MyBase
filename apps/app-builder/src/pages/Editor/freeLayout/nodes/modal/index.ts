@@ -1,4 +1,4 @@
-import iconInteraction from '@/assets/flow/nodes/modal.svg';
+import iconInteraction from '@workflow/nodes/modal.svg';
 import { type FlowNodeRegistry } from '../../typings';
 import { formMeta } from './form-meta';
 import { nanoid } from 'nanoid';

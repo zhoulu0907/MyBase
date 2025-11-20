@@ -3,6 +3,8 @@ import {
   FormComp,
   LAYOUT_COMPONENT_TYPES,
   LIST_COMPONENT_TYPES,
+  WorkbenchComp,
+  WORKBENCH_COMPONENT_TYPES,
   LayoutComp,
   ListComp,
   SHOW_COMPONENT_TYPES,
@@ -125,6 +127,12 @@ const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pag
         return <ShowComp.XDivider cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case SHOW_COMPONENT_TYPES.PLACEHOLDER:
         return <ShowComp.XPlaceholder cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+
+      //  工作台组件
+      case WORKBENCH_COMPONENT_TYPES.QUICK_ENTRY:
+        return <WorkbenchComp.XQuickEntry cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      case WORKBENCH_COMPONENT_TYPES.TODO_CENTER:
+        return <WorkbenchComp.XTodoCenter cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
 
       default:
         return <div>未知组件类型: {cpType}</div>;

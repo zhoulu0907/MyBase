@@ -72,6 +72,9 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
   const [mainMetaData, setMainMetaData] = useState<string>('');
   const [newCompents, setNewCompents] = useState<any>();
 
+  const pageComponentSchemas = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value;
+  const fieldPerm = detailData?.formData?.fieldPerm;
+
   useImperativeHandle(ref, () => ({
     getFormData: () => {
       const res = getFormValues();
@@ -89,9 +92,6 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
   };
 
   const updateComponentStatus = async () => {
-    const pageComponentSchemas = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value;
-    const fieldPerm = detailData?.formData?.fieldPerm;
-
     if (pageComponentSchemas) {
       const updatedData: {
         [key: string]: any;
@@ -116,6 +116,7 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
       setNewCompents(updatedData);
     }
   };
+
   const handleGetData = async () => {
     const res = detailData?.formData;
     const formValues: Record<string, any> = {};
@@ -207,22 +208,23 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
     return dataObj;
   };
 
-  useEffect(() => {
-    parseData();
-  }, [mainMetaData, mainMetaDataFields.value, pageSetId]);
-
-  const parseData = async () => {
-    const res = await startLoadPageSet({ pageSetId: pageSetId });
-    await updateComponentStatus();
-
-    if (mainMetaData && mainMetaDataFields.value.length > 0) {
-      await handleGetData();
-    }
+  const parseData =  () => {
+    startLoadPageSet({ pageSetId: pageSetId });
   };
 
   useEffect(() => {
+    updateComponentStatus();
+    handleGetData();
+  }, [pageComponentSchemas, fieldPerm, detailData]);
+
+  useEffect(() => {
+    parseData();
     getMainMetaData(pageSetId);
   }, [pageSetId]);
+
+  useEffect(() => {
+    setNewCompents(null);
+  }, []);
 
   return (
     <div>

@@ -44,7 +44,7 @@ const XInputText = memo((props: XInputTextConfig & { runtime?: boolean; detailMo
         tooltip={tooltip}
         wrapperCol={{ style: { flex: 1 } }}
         rules={[
-          { required: verify?.required },
+          { required: verify?.required, message:`${label.text}是必填项` },
           {
             validator: (value, callback) => {
               if (verify.lengthLimit) {

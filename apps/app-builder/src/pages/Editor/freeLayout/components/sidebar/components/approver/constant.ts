@@ -11,20 +11,12 @@ export const btnConfigVar = {
   }
 };
 
-export const approverConfigVar:any = {
+export const approverConfigVar: any = {
   approvalMode: {
     a: 'counter_sign',
     b: 'any_sign',
     c: 'c_sign',
     d: 'd_sign'
-  }
-};
-export const approvalConfigVar:any = {
-  approvalMode: {
-    'counter_sign': '会签（所有人同意才通过）',
-    'any_sign': '或签（一人同意即通过）',
-    'c_sign': '依次审批（按顺序依次审批）',
-    'd_sign': '投票（按投票比例决定是否通过）'
   }
 };
 
@@ -69,12 +61,18 @@ export interface FieldPermConfigType {
   useNodeConfig?: boolean;
   fieldConfigs?: FieldConfig[];
 }
+export interface AdvancedConfigType {
+  autoApproveCfg?: any;
+  emptyApproverCfg?: any;
+}
 
 export interface ApproverConfigDataType {
   approverConfig?: ApproverConfigType;
   buttonConfigs?: ButtonConfigType[];
   fieldPermConfig?: FieldPermConfigType;
+  advancedConfig?: AdvancedConfigType;
   name?: string;
+  errorMsg?: string;
 }
 
 export interface ApproveDrawerProps {
@@ -98,5 +96,8 @@ export interface BtnConfig extends BaseConfig<ButtonConfigType[]> {
 
 export interface FieldConfigType extends BaseConfig<FieldPermConfigType> {
   fieldPermConfig: FieldPermConfigType;
-  ckOptions:any
+  ckOptions: any;
+}
+export interface AdvancedConfig extends BaseConfig<AdvancedConfigType> {
+  advancedConfig: AdvancedConfigType;
 }

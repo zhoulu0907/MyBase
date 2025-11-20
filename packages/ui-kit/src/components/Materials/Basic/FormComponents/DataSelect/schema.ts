@@ -190,15 +190,15 @@ const XDataSelect: XDataSelectSchema = {
       type: CONFIG_TYPES.TOOLTIP_INPUT
     },
     ...dataFieldConfig,
-    // {
-    //   key: 'selectMethod',
-    //   name: '数据选择方式',
-    //   type: CONFIG_TYPES.DATA_SELECT_MODE,
-    //   range: [
-    //     { key: 'dropdown', text: '下拉框', value: 'dropdown', default: true },
-    //     { key: 'modal', text: '弹窗', value: 'modal' }
-    //   ]
-    // },
+    {
+      key: 'selectMethod',
+      name: '数据选择方式',
+      type: CONFIG_TYPES.DATA_SELECT_MODE,
+      range: [
+        { key: 'dropdown', text: '下拉框', value: 'dropdown', default: true },
+        { key: 'modal', text: '弹窗', value: 'modal' }
+      ]
+    },
     selectDataResourceConfig,
     {
       key: 'verify',

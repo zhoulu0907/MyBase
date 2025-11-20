@@ -114,7 +114,7 @@ const Right: React.FC = () => {
   };
 
   // 表单提交处理
-  const handleSubmit = (_values: LoginRequest) => {
+  const handleSubmit = async (_values: LoginRequest) => {
     handleAccountLogin(_values);
   };
 

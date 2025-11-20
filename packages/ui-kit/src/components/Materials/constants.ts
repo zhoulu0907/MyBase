@@ -266,6 +266,12 @@ export const TIME_FORMAT = {
   [TIME_VALUES[TIME_OPTIONS.SECOND]]: 'HH:mm:ss',
 } as const;
 
+export const TIME_12_FORMAT = {
+  [TIME_VALUES[TIME_OPTIONS.HOUR]]: 'hh A',
+  [TIME_VALUES[TIME_OPTIONS.MINUTE]]: 'hh:mm A',
+  [TIME_VALUES[TIME_OPTIONS.SECOND]]: 'hh:mm:ss A',
+} as const;
+
 // 表单的布局
 export const LAYOUT_OPTIONS = {
   HORIZONTAL: '水平',

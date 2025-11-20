@@ -127,7 +127,7 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
         field={fieldId}
         layout={layout}
         tooltip={tooltip}
-        rules={[{ required: verify?.required }]}
+        rules={[{ required: verify?.required, message:`${label.text}是必填项` }]}
         wrapperCol={{ style: { flex: 1 } }}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
@@ -178,6 +178,7 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
             width: '100%',
             pointerEvents: runtime ? 'unset' : 'none'
           }}
+          disabled={status !== STATUS_VALUES[STATUS_OPTIONS.DEFAULT] || detailMode}
           showUploadList={{
             removeIcon: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? null : <IconDelete />
           }}

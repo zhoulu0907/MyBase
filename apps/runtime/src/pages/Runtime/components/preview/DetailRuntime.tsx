@@ -47,7 +47,7 @@ const DetailRuntime: React.FC<DetailRuntimeProps> = ({ visible, onCancel, form, 
       className={fullScreen ? 'detail-drawer detail-drawer-fullscreen' : 'detail-drawer'}
     >
       <div className={styles.content}>
-        <Form layout="inline" form={form} requiredSymbol={{ position: 'end' }}>
+        <Form layout="inline" form={form}>
           {useEditorSignalMap.get(detailPageViewId.value)?.components.value.map((cp: GridItem) => (
             <Fragment key={cp.id}>
               {useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id].config.status !==

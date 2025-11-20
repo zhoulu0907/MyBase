@@ -9,12 +9,13 @@ import BottomBtn from '../../../bottomBtn';
 import ApproverConfig from './approverConfig/index';
 import ApproverBtnConfig from './btnConfig/index';
 import FieldConfig from './fieldConfig/index';
-import AdvancedConfig from './advancedConfig/index'
+import AdvancedConfig from './advancedConfig/index';
 import { ApproveDrawerTab } from './constant';
 import { useLocation } from 'react-router-dom';
 import type {
   ApproverConfigDataType,
   ApproverConfigType,
+  AdvancedConfigType,
   ButtonConfigType,
   FieldPermConfigType,
   ApproveDrawerProps
@@ -32,20 +33,26 @@ export default function ApproveDreawer({ handleConfigSubmit, configData }: Appro
   const [approverConfigData, setApproverConfigData] = useState<ApproverConfigDataType>(
     configData || {
       approverConfig: {
-        approvalMode: 'any_sign'
+        approvalMode: 'any_sign',
+        users: [],
+        roles: []
       },
       buttonConfigs: [],
       fieldPermConfig: {
         useNodeConfig: false
+      },
+      advancedConfig: {
+        autoApproveCfg: {},
+        emptyApproverCfg: {}
       }
     }
   );
   const [editValue, setEditValue] = useState('');
-  const { approverConfig, buttonConfigs, fieldPermConfig } = approverConfigData;
+  const { approverConfig, buttonConfigs, fieldPermConfig, advancedConfig } = approverConfigData;
 
   function setApprovalConfigData<T extends keyof ApproverConfigDataType>(
     key: T,
-    data: T extends 'buttonConfigs' ? ButtonConfigType[] : ApproverConfigType | FieldPermConfigType
+    data: T extends 'buttonConfigs' ? ButtonConfigType[] : ApproverConfigType | FieldPermConfigType | AdvancedConfigType
   ) {
     setApproverConfigData((prev) => {
       const newData = { ...prev };
@@ -58,6 +65,8 @@ export default function ApproveDreawer({ handleConfigSubmit, configData }: Appro
           ...newData.fieldPermConfig,
           ...data
         } as FieldPermConfigType;
+      } else if (key === 'advancedConfig') {
+        newData.advancedConfig = data as AdvancedConfigType;
       }
       return newData;
     });
@@ -86,7 +95,7 @@ export default function ApproveDreawer({ handleConfigSubmit, configData }: Appro
           />
         );
       case ApproveDrawerTab.ADVANCED_SETTINGS:
-        return <AdvancedConfig />;
+        return <AdvancedConfig setApprovalConfigData={setApprovalConfigData} advancedConfig={advancedConfig || {}} />;
       default:
         return <div>审批人</div>;
     }
@@ -94,6 +103,16 @@ export default function ApproveDreawer({ handleConfigSubmit, configData }: Appro
 
   function handleSubmit() {
     console.log('approverConfigData ===', approverConfigData);
+    //error
+    let errorMsg = '';
+    const { users = [], roles = [] } = approverConfigData.approverConfig || {};
+    if (!users.length && !roles.length) {
+      errorMsg = '节点缺少审批人';
+    }
+    if (!approverConfigData?.buttonConfigs?.length) {
+      errorMsg = '节点缺少按钮配置';
+    }
+    approverConfigData.errorMsg = errorMsg;
     handleConfigSubmit && handleConfigSubmit(approverConfigData, editValue);
   }
 
