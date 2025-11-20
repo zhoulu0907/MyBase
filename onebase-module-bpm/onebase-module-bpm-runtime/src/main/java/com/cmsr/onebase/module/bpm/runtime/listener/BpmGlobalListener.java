@@ -105,21 +105,6 @@ public class BpmGlobalListener implements GlobalListener {
 
         // 处理未操作的用户
         handleUnOperatorUsersOnAssignment(listenerVariable);
-        // 查找剩余未操作的用户
-        List<User> unoperatorUsers = userService.listByAssociatedAndTypes(currTask.getId());
-
-        if (CollectionUtils.isNotEmpty(unoperatorUsers)) {
-            // todo 排除自己
-            Set<String> ccPermissionList = unoperatorUsers.stream()
-                    .filter( item -> !Objects.equals(item.getProcessedBy(), flowParams.getHandler()))
-                    .map(User::getProcessedBy)
-                    .collect(Collectors.toSet());
-
-            if (CollectionUtils.isNotEmpty(ccPermissionList)) {
-                flowVariable.put(BpmConstants.VAR_CC_USERS_KEY + "_" + currTask.getNodeCode(),
-                        JsonUtils.toJsonString(ccPermissionList));
-            }
-        }
     }
 
     public void finish(ListenerVariable listenerVariable) {
