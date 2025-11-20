@@ -6,8 +6,10 @@ import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.app.build.service.AppCommonService;
 import com.cmsr.onebase.module.app.build.service.appresource.PageSetService;
 import com.cmsr.onebase.module.app.build.vo.menu.*;
+import com.cmsr.onebase.module.app.core.dal.database.appresource.AppPageSetRepository;
 import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.app.ApplicationDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.PageSetDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.menu.MenuDO;
 import com.cmsr.onebase.module.app.core.dto.appresource.CopyPageSetDTO;
 import com.cmsr.onebase.module.app.core.dto.appresource.CreatePageSetDTO;
@@ -19,6 +21,7 @@ import lombok.Setter;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -48,6 +51,11 @@ public class AppMenuServiceImpl implements AppMenuService {
     @Resource
     private AppApplicationApi appApplicationApi;
 
+    @Autowired
+    private AppPageSetRepository pageSetDataRepository;
+
+
+
     @Override
     public List<MenuListRespVO> listApplicationMenu(Long applicationId, String name) {
         ApplicationDO applicationDO = appCommonService.validateApplicationExist(applicationId);
@@ -59,9 +67,11 @@ public class AppMenuServiceImpl implements AppMenuService {
                 .map(v -> BeanUtils.toBean(v, MenuListRespVO.class))
                 .collect(Collectors.toCollection(LinkedList::new));
         menuListRespList.addAll(levelOneMenus);
+        Map<Long, Integer> menuPageSetTypeMap = buildMenuPageSetTypeMap(menuDOS);
         // 递归实现每个菜单的子菜单
         for (MenuListRespVO respVO : menuListRespList) {
-            LinkedList<MenuListRespVO> children = recursiveGetChildren(respVO.getId(), menuDOS);
+            respVO.setPageSetType(menuPageSetTypeMap.get(respVO.getId()));
+            LinkedList<MenuListRespVO> children = recursiveGetChildren(respVO.getId(), menuDOS, menuPageSetTypeMap);
             respVO.setChildren(children);
         }
         filterMenuByName(menuListRespList, name);
@@ -69,17 +79,40 @@ public class AppMenuServiceImpl implements AppMenuService {
     }
 
 
-    private LinkedList<MenuListRespVO> recursiveGetChildren(Long parentId, List<MenuDO> menuDOS) {
+    //需要查询每个菜单的类型，如果是工作台，前端需要以工作台的类型打开页面
+    private LinkedList<MenuListRespVO> recursiveGetChildren(Long parentId, List<MenuDO> menuDOS,
+                                                           Map<Long, Integer> menuPageSetTypeMap) {
         LinkedList<MenuListRespVO> children = new LinkedList<>();
         for (MenuDO menuDO : menuDOS) {
             if (Objects.equals(menuDO.getParentId(), parentId)) {
                 // 只有父菜单的uuid等于当前菜单的父菜单的uuid时，才添加子菜单，继续递归
                 MenuListRespVO child = BeanUtils.toBean(menuDO, MenuListRespVO.class);
-                child.setChildren(recursiveGetChildren(child.getId(), menuDOS));
+                child.setChildren(recursiveGetChildren(child.getId(), menuDOS, menuPageSetTypeMap));
                 children.add(child);
+                child.setPageSetType(menuPageSetTypeMap.get(child.getId()));
             }
+
         }
         return children.isEmpty() ? null : children;
+    }
+
+    private Map<Long, Integer> buildMenuPageSetTypeMap(List<MenuDO> menuDOS) {
+        if (menuDOS == null || menuDOS.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        List<Long> menuIds = menuDOS.stream()
+                .map(MenuDO::getId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+        if (menuIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        List<PageSetDO> pageSetDOS = pageSetDataRepository.findByMenuIds(menuIds);
+        if (pageSetDOS == null || pageSetDOS.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        return pageSetDOS.stream()
+                .collect(Collectors.toMap(PageSetDO::getMenuId, PageSetDO::getPageSetType, (first, second) -> second));
     }
 
 
