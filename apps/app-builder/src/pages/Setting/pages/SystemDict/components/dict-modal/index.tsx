@@ -41,6 +41,23 @@ export default function DictionaryTypeModal({
     }
   }, [visible, initialValues, form]);
 
+  const rules = {
+    type: [
+      { required: true, message: '请输入字典编码' },
+      {
+        validator: (value: string | undefined, cb: (error?: React.ReactNode) => void) => {
+          if (value && !/^[a-zA-Z0-9_]+$/.test(value)) {
+            cb('仅限英文字母、数字、下划线');
+          } else {
+            cb();
+          }
+        },
+        message: '仅限英文字母、数字、下划线'
+      }
+    ],
+    name: [{ required: true, message: '请输入字典名称' }]
+  };
+
   return (
     <Modal
       title={<div style={{ textAlign: 'left' }}>{title}</div>}
@@ -57,11 +74,11 @@ export default function DictionaryTypeModal({
       autoFocus={false}
     >
       <Form form={form} layout="vertical">
-        <Form.Item label="字典编码" field="type" rules={[{ required: true, message: '请输入字典编码' }]}>
-          <Input placeholder="请输入字典编码" maxLength={32} allowClear />
+        <Form.Item label="字典编码" field="type" rules={rules.type}>
+          <Input placeholder="请输入字典编码" maxLength={50} allowClear />
         </Form.Item>
-        <Form.Item label="字典名称" field="name" rules={[{ required: true, message: '请输入字典名称' }]}>
-          <Input placeholder="请输入字典名称" maxLength={32} allowClear />
+        <Form.Item label="字典名称" field="name" rules={rules.name}>
+          <Input placeholder="请输入字典名称" maxLength={30} allowClear />
         </Form.Item>
         <Form.Item label="描述" field="remark">
           <Input.TextArea placeholder="请输入描述" maxLength={100} allowClear />
