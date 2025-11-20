@@ -103,6 +103,9 @@ public class BpmGlobalListener implements GlobalListener {
             }
         }
 
+        if (currTask == null) { //todo 李洋自己改掉空指针
+            return;
+        }
         // 查找剩余未操作的用户
         List<User> unoperatorUsers = userService.listByAssociatedAndTypes(currTask.getId());
 
