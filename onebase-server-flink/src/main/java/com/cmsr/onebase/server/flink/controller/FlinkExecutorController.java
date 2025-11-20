@@ -1,6 +1,6 @@
 package com.cmsr.onebase.server.flink.controller;
 
-import com.cmsr.onebase.module.etl.executor.DataPreview;
+import com.cmsr.onebase.module.etl.common.preview.DataPreview;
 import com.cmsr.onebase.module.etl.executor.InputArgs;
 import com.cmsr.onebase.module.etl.executor.WorkFlowExecutor;
 import com.fasterxml.jackson.core.JsonProcessingException;

@@ -2,7 +2,8 @@ package com.cmsr.onebase.module.etl.executor;
 
 import com.cmsr.onebase.module.etl.common.graph.Node;
 import com.cmsr.onebase.module.etl.common.graph.WorkflowGraph;
-import com.cmsr.onebase.module.etl.common.graph.conf.Field;
+import com.cmsr.onebase.module.etl.common.preview.ColumnDefine;
+import com.cmsr.onebase.module.etl.common.preview.DataPreview;
 import com.cmsr.onebase.module.etl.executor.action.CreateTableAction;
 import com.cmsr.onebase.module.etl.executor.action.ExecuteSqlAction;
 import com.cmsr.onebase.module.etl.executor.action.SqlQueryAction;
@@ -19,7 +20,6 @@ import org.apache.flink.util.CloseableIterator;
 
 import javax.sql.DataSource;
 import java.io.Closeable;
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -134,7 +134,7 @@ public class WorkFlowExecutor implements Closeable {
     private DataPreview tableResultToDataPreview(TableResult tableResult) {
         DataPreview dataPreview = new DataPreview();
         for (Column column : tableResult.getResolvedSchema().getColumns()) {
-            Field field = new Field();
+            ColumnDefine field = new ColumnDefine();
             field.setFieldName(column.getName());
             field.setFieldType(column.getDataType().getLogicalType().toString());
             dataPreview.getColumns().add(field);
@@ -150,9 +150,9 @@ public class WorkFlowExecutor implements Closeable {
         return dataPreview;
     }
 
-    private List<Object> rowToList(List<Field> columns, Row row) {
+    private List<Object> rowToList(List<ColumnDefine> columns, Row row) {
         List<Object> list = new ArrayList<>();
-        for (Field column : columns) {
+        for (ColumnDefine column : columns) {
             Object value = row.getField(column.getFieldName());
             list.add(value);
         }
@@ -160,7 +160,7 @@ public class WorkFlowExecutor implements Closeable {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         beanManager.close();
     }
 }

@@ -11,6 +11,6 @@ public class DataPreview {
 
     private List<ColumnDefine> columns;
 
-    private List<Collection<Object>> data = new ArrayList<>();
+    private List<List<Object>> data = new ArrayList<>();
 
 }

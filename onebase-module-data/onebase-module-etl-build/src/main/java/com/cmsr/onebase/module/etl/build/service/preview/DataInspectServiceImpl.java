@@ -2,11 +2,11 @@ package com.cmsr.onebase.module.etl.build.service.preview;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.module.etl.build.service.DatasourceFactory;
-import com.cmsr.onebase.module.etl.common.preview.DataPreview;
 import com.cmsr.onebase.module.etl.build.service.preview.vo.TablePreviewVO;
 import com.cmsr.onebase.module.etl.common.entity.ColumnData;
 import com.cmsr.onebase.module.etl.common.entity.TableData;
 import com.cmsr.onebase.module.etl.common.preview.ColumnDefine;
+import com.cmsr.onebase.module.etl.common.preview.DataPreview;
 import com.cmsr.onebase.module.etl.core.dal.database.ETLDatasourceRepository;
 import com.cmsr.onebase.module.etl.core.dal.database.ETLFlinkMappingRepository;
 import com.cmsr.onebase.module.etl.core.dal.database.ETLTableRepository;
@@ -14,6 +14,7 @@ import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLDatasourceDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLTableDO;
 import com.cmsr.onebase.module.etl.core.enums.ETLErrorCodeConstants;
 import com.cmsr.onebase.module.etl.core.enums.MetadataType;
+import com.google.common.collect.Lists;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.ConfigStore;
@@ -124,7 +125,7 @@ public class DataInspectServiceImpl implements DataInspectService {
             cs.limit(inspectSize);
             DataSet dataSet = temporary.querys(table, cs);
             List<DataRow> rows = dataSet.getRows();
-            rows.forEach(row -> dataPreview.getData().add(row.values()));
+            rows.forEach(row -> dataPreview.getData().add(Lists.newArrayList(row.values())));
             return dataPreview;
         } catch (Exception e) {
             log.error("数据源连接异常，数据源信息: {}", datasourceDO, e);

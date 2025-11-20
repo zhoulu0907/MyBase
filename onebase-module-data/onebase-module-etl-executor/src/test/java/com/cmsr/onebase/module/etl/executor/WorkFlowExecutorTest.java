@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.etl.executor;
 
+import com.cmsr.onebase.module.etl.common.preview.DataPreview;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
 
