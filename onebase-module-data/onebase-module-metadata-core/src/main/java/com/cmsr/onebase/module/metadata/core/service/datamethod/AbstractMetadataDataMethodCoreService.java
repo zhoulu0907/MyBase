@@ -683,9 +683,12 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
             }
         }
 
+        // 插入新数据字段key为小写，更新和删除的时候从数据库获取的字段key为大写 统一转大写进行匹配判断
+        Set<String> upperKeySet = map.keySet().stream().map(String::toUpperCase).collect(Collectors.toSet());
+
         // 值为null的字段也放到参数里，触发流程时需要全量的字段信息
         for (MetadataEntityFieldDO field : targetfields) {
-            if(!map.keySet().contains(field.getFieldName().toUpperCase())){
+            if(!upperKeySet.contains(field.getFieldName().toUpperCase())){
                 newData.put(field.getId(), null);
             };
         }
