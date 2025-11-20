@@ -10,6 +10,4 @@ import java.util.List;
  */
 public interface AppAuthRoleApi {
 
-
-    AuthRoleDTO findRoleByAppIdAndRoleCode(Long appId, String adminType);
 }

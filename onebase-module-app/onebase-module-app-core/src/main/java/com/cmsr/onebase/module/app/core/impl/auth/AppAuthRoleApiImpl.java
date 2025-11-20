@@ -12,16 +12,5 @@ import org.springframework.stereotype.Service;
 @Service
 public class AppAuthRoleApiImpl implements AppAuthRoleApi {
 
-    @Autowired
-    private AppAuthRoleRepository appAuthRoleRepository;
-    @Override
-    public AuthRoleDTO findRoleByAppIdAndRoleCode(Long appId, String roleCode) {
-        AuthRoleDO authRoleDO= appAuthRoleRepository.findByAppIdAndRoleCode(appId,roleCode);
-        if(null != authRoleDO){
-            AuthRoleDTO dto= new AuthRoleDTO();
-            dto.setId(authRoleDO.getId());
-            return dto;
-        }
-        return null;
-    }
+
 }

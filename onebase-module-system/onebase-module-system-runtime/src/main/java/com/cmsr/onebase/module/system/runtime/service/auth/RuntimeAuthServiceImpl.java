@@ -143,14 +143,8 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
     }
 
     public boolean   findAdminFlag( Long userId ,Long appId){
-        // 获取权限
-        AuthRoleDTO roleDO = appAuthRoleApi.findRoleByAppIdAndRoleCode(appId, RoleCodeEnum.APP_DEVELOPER.getCode());
-        if(null!=roleDO){
-            // 查询用户是否管理员
-            boolean  adminFlag= appAuthRoleUser.findAdminByRoleIdAndUserId(roleDO.getId(),userId);
-            return adminFlag;
-        }
-        return false;
+       //TODO 待黄老师提供接口
+        return true;
     }
 
 
