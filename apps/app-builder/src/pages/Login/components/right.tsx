@@ -1,7 +1,13 @@
 import LogoSVG from '@/assets/images/ob_logo.svg';
 import { Button, Checkbox, Form, Input, Message, Space, Typography } from '@arco-design/web-react';
 import { IconLock, IconUser } from '@arco-design/web-react/icon';
-import { getHashQueryParam, SliderCaptcha, TokenManager, type SliderCaptchaRef } from '@onebase/common';
+import {
+  getHashQueryParam,
+  getOrCreateDeviceInfo,
+  SliderCaptcha,
+  TokenManager,
+  type SliderCaptchaRef
+} from '@onebase/common';
 import { checkCaptchaApi, getCaptchaApi, login, type LoginRequest, type LoginResponse } from '@onebase/platform-center';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -67,6 +73,8 @@ const Right: React.FC = () => {
       const headers = {
         'Tenant-Id': tenantId
       };
+
+      const deviceInfo = await getOrCreateDeviceInfo();
 
       const loginData: LoginRequest = {
         username: values.username!,
