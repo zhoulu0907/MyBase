@@ -54,18 +54,18 @@ import static com.cmsr.onebase.framework.common.util.json.JsonUtils.toJsonString
 public class PermissionServiceImpl implements PermissionService {
 
     @Resource
-    private RoleService roleService;
+    private RoleService          roleService;
     @Resource
-    private MenuService menuService;
+    private MenuService          menuService;
     @Resource
-    private DeptService deptService;
+    private DeptService          deptService;
     @Resource
-    private AdminUserService userService;
+    private AdminUserService     userService;
     @Resource
     private TenantPackageService tenantPackageService;
     @Resource
     @Lazy // 延迟，避免循环依赖报错
-    private TenantService tenantService;
+    private TenantService        tenantService;
 
 
     @Resource
@@ -104,7 +104,7 @@ public class PermissionServiceImpl implements PermissionService {
 
         // 情况二：如果是租户管理员，赋予所有租户的权限
         boolean isTenantAdmin = roleService.isTenantAdmin(convertSet(roles, RoleDO::getId));
-        if(isTenantAdmin){
+        if (isTenantAdmin) {
             // 读取 tenant package，获取租户所有的权限点 tenantAllPermissions
             TenantDO tenant = tenantService.getTenant(TenantContextHolder.getRequiredTenantId());
             TenantPackageDO tenantPackage = tenantPackageService.getTenantPackage(tenant.getPackageId());
@@ -259,16 +259,15 @@ public class PermissionServiceImpl implements PermissionService {
     }
 
     @Override
-    public Set<Long> getAllValidActiveMenuIds(){
+    public Set<Long> getAllValidActiveMenuIds() {
         // 获取所有权限
         List<MenuDO> menuList = menuService.getAllEnableMenuList();
         // 过滤出 tenantAllPermissions = tenant、app开头的菜单项
         Set<Long> tenantAllPermissions = menuList.stream()
-                .filter(menu -> menu.getPermission() != null &&
-                        (menu.getPermission().startsWith(MenuConstants.MENU_APP)
-                                || menu.getPermission().startsWith(MenuConstants.MENU_TENANT)
-                                || menu.getPermission().startsWith(MenuConstants.MENU_CORP)
-                                || menu.getPermission().startsWith(MenuConstants.MENU_SYSTEM)))
+                .filter(menu -> menu.getPermission() != null
+                        && (menu.getPermission().startsWith(MenuConstants.MENU_TENANT)
+                        || menu.getPermission().startsWith(MenuConstants.MENU_CORP)
+                        || menu.getPermission().startsWith(MenuConstants.MENU_SYSTEM)))
                 .map(MenuDO::getId)
                 .collect(Collectors.toSet());
         return tenantAllPermissions;

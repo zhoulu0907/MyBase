@@ -97,7 +97,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
 ### 请求 /get-permission-info 接口+code => 成功
-GET {{baseUrl}}/system/auth/get-permission-info?code=corp
+GET {{baseUrl}}/system/auth/get-permission-info?code=system
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
