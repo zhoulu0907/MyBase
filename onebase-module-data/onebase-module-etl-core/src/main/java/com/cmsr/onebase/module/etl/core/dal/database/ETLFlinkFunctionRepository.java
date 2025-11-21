@@ -21,9 +21,6 @@ import java.util.List;
 @Repository
 public class ETLFlinkFunctionRepository extends ServiceImpl<ETLFlinkFuntionMapper, ETLFlinkFunctionDO> {
 
-    @Autowired
-    private ETLFlinkFuntionMapper flinkFuntionMapper;
-
     private DataRepository<ETLFlinkFunctionDO> dataRepository;
 
     @Autowired

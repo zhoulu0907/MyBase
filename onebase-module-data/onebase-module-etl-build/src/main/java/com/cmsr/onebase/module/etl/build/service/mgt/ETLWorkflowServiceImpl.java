@@ -181,7 +181,7 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
                 } catch (Exception ignored) {
                 }
             }
-            workflowTableRepository.insertBatch(workflowTableDOList);
+            workflowTableRepository.saveBatch(workflowTableDOList);
         } catch (Exception ignored) {
             log.warn("保存表关系结构异常, {}", workflowDO.getConfig());
         }
