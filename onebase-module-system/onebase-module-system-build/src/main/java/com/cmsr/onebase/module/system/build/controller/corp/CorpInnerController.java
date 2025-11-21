@@ -21,7 +21,7 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
  */
 @Tag(name = "平台服务-企业")
 @RestController
-@RequestMapping("/corp/")
+@RequestMapping("/corp")
 @Validated
 public class CorpInnerController {
 
@@ -29,7 +29,7 @@ public class CorpInnerController {
     private CorpService corpService;
 
 
-    @PostMapping("update-status")
+    @PostMapping("/update-status")
     @Operation(summary = "企业启用/禁用")
     @PreAuthorize("@ss.hasPermission('corp:app-auth:enable')")
     public CommonResult<Boolean> updateStatus(@RequestParam("id") Long id, @RequestParam("status") Long status) {
@@ -37,7 +37,7 @@ public class CorpInnerController {
         return success(true);
     }
 
-    @GetMapping("get")
+    @GetMapping("/get")
     @Operation(summary = "获得企业详情")
     @PreAuthorize("@ss.hasPermission('corp:info')")
     public CommonResult<CorpRespVO> getCorp(@RequestParam("id") Long id) {

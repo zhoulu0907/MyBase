@@ -35,7 +35,7 @@ public class CorpDeptController {
     @Resource
     private DeptService deptService;
 
-    @PostMapping("create")
+    @PostMapping("/create")
     @Operation(summary = "创建部门")
     @PreAuthorize("@ss.hasPermission('corp:dept:create')")
     public CommonResult<Long> createDept(@Valid @RequestBody DeptSaveReqVO createReqVO) {
@@ -43,7 +43,7 @@ public class CorpDeptController {
         return success(deptId);
     }
 
-    @PostMapping("update")
+    @PostMapping("/update")
     @Operation(summary = "更新部门")
     @PreAuthorize("@ss.hasPermission('corp:dept:update')")
     public CommonResult<Boolean> updateDept(@Valid @RequestBody DeptSaveReqVO updateReqVO) {
@@ -59,7 +59,7 @@ public class CorpDeptController {
         return success(true);
     }
 
-    @PostMapping("delete")
+    @PostMapping("/delete")
     @Operation(summary = "删除部门")
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
     @PreAuthorize("@ss.hasPermission('corp:dept:delete')")
