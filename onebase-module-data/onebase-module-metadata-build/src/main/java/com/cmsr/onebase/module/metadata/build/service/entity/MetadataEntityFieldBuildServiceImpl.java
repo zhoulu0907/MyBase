@@ -641,7 +641,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                         validationLengthService.deleteByFieldId(existing.getId());
 
                         // 删除实体间关联关系
-                        metadataEntityRelationshipBuildService.deleteRelationShipByFieldId(Long.valueOf(item.getId()));
+                        metadataEntityRelationshipBuildService.deleteRelationShipByFieldId(existing.getId());
                     } catch (Exception ignore) {}
                 }
 

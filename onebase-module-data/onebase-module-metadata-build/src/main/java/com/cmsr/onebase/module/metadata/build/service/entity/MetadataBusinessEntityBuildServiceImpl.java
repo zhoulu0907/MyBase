@@ -667,6 +667,15 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.in("id", id);
         metadataBusinessEntityRepository.deleteByConfig(configStore);
+
+        // 删除实体关联关系
+        DefaultConfigStore relationshipConfigStore = new DefaultConfigStore();
+        relationshipConfigStore.or("source_entity_id",id);
+        relationshipConfigStore.or("target_entity_id",id);
+        List<MetadataEntityRelationshipDO> relationshipDOs = metadataEntityRelationshipBuildService.findAllByConfig(relationshipConfigStore);
+        for(MetadataEntityRelationshipDO relationshipDO : relationshipDOs){
+            metadataEntityRelationshipBuildService.deleteEntityRelationship(relationshipDO.getId());
+        }
     }
 
     private void validateBusinessEntityExists(Long id) {
