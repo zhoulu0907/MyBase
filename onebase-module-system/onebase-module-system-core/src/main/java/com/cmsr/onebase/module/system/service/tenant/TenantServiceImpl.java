@@ -39,7 +39,7 @@ import com.cmsr.onebase.module.system.service.permission.PermissionService;
 import com.cmsr.onebase.module.system.service.permission.RoleService;
 import com.cmsr.onebase.module.system.service.tenant.handler.TenantInfoHandler;
 import com.cmsr.onebase.module.system.service.tenant.handler.TenantMenuHandler;
-import com.cmsr.onebase.module.system.service.user.AdminUserService;
+import com.cmsr.onebase.module.system.service.user.UserService;
 import com.cmsr.onebase.module.system.vo.role.RoleInsertReqVO;
 import com.cmsr.onebase.module.system.vo.tenant.*;
 import com.cmsr.onebase.module.system.vo.user.UserInsertReqVO;
@@ -82,7 +82,7 @@ public class TenantServiceImpl implements TenantService {
     private TenantPackageService tenantPackageService;
     @Resource
     @Lazy // 延迟，避免循环依赖报错
-    private AdminUserService     userService;
+    private UserService          userService;
 
     @Resource
     private RoleService       roleService;
@@ -103,8 +103,6 @@ public class TenantServiceImpl implements TenantService {
 
     @Resource
     private AdminUserRoleApi adminUserRoleApi;
-    @Resource
-    private AdminUserService adminUserService;
 
     @Override
     public List<Long> getTenantIdList() {
@@ -561,7 +559,7 @@ public class TenantServiceImpl implements TenantService {
         }
         List<TenantDO> tenantDOList = tenantDOPageResult.getList();
         List<Long> tenantIds = CollectionUtils.convertList(tenantDOList, TenantDO::getId);
-        Map<Long, Integer> existUserCountMap = adminUserService.getTenantExistUserCountByIds(tenantIds);
+        Map<Long, Integer> existUserCountMap = userService.getTenantExistUserCountByIds(tenantIds);
         Map<Long, Integer> coupCountMap = findCorpCount();
         Map<Integer, Integer> appCountMap = findAppCount();
         // 转换为VO并设置昵称

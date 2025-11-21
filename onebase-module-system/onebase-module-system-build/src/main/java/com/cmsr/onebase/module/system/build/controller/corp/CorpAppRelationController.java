@@ -42,6 +42,14 @@ public class CorpAppRelationController {
         return success(true);
     }
 
+    @PostMapping("/update-status")
+    @Operation(summary = "企业启用/禁用")
+    @PreAuthorize("@ss.hasPermission('tenant:corp:update')")
+    public CommonResult<Boolean> updateStatus(@RequestParam("id") Long id, @RequestParam("status") Long status) {
+        corpAppRelationService.updateStatus(id, status);
+        return success(true);
+    }
+
     @PostMapping("/delete")
     @PreAuthorize("@ss.hasPermission('tenant:corp:delete')")
     @Operation(summary = "删除应用授权企业")

@@ -11,7 +11,8 @@ tag: {{tag}}
 
 {
   "username": "admin",
-  "password": "admin123"
+  "password": "admin123",
+  "deviceId":666
 }
 
 > {%
@@ -66,7 +67,8 @@ tenant-id: 141724575100338176
 tag: {{tag}}
 
 {"username":"admin","password":"AdminChina2025!",
-  "captchaVerification":"n89lvlHjSOsQQ5kGXjNNtdnkfPnK2Y3YbPwvAEXoVyL0TqzrDumdg8MONVs+z5VaSPf4ni6QKFhhx0GcaXBF4pWVx9hsSsBZ8mysqU8u45E="}
+  "captchaVerification":"n89lvlHjSOsQQ5kGXjNNtdnkfPnK2Y3YbPwvAEXoVyL0TqzrDumdg8MONVs+z5VaSPf4ni6QKFhhx0GcaXBF4pWVx9hsSsBZ8mysqU8u45E=",
+  "deviceId":666}
 
 ### 请求 /login 接口 => 成功
 POST {{baseUrl}}/system/auth/corp-login
@@ -77,7 +79,8 @@ tag: {{tag}}
 {
   "mobile": "13800138000",
   "password": "<1qvZ#cD?g-onw@",
-   "corpId": "100"
+  "corpId": "100",
+  "deviceId":666
 }
 
 > {%
