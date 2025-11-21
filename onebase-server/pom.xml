@@ -43,6 +43,12 @@
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-module-system-build</artifactId>
             <version>${revision}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>error_prone_annotations</artifactId>
+                    <groupId>com.google.errorprone</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
@@ -58,6 +64,20 @@
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-module-metadata-build</artifactId>
             <version>${revision}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>checker-qual</artifactId>
+                    <groupId>org.checkerframework</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>error_prone_annotations</artifactId>
+                    <groupId>com.google.errorprone</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>commons-logging</artifactId>
+                    <groupId>commons-logging</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <!-- 已移除 onebase-module-metadata-runtime 依赖，运行态功能保留在 runtime 模块 -->
         <!--
