@@ -416,6 +416,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
             </div>
           )
         }
+        labelCol={{ span: 24 }}
         layout="vertical"
         rules={[{ required: verify?.required, message:`${label.text}是必填项` }]}
         tooltip={tooltip}
