@@ -1,8 +1,8 @@
 package com.cmsr.onebase.module.infra.api.file;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.module.infra.api.constant.ApiConstants;
 import com.cmsr.onebase.module.infra.api.file.dto.FileCreateReqDTO;
-import com.cmsr.onebase.module.infra.enums.ApiConstants;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

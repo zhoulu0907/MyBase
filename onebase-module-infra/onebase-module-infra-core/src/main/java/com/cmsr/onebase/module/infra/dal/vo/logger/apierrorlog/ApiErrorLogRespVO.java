@@ -4,7 +4,7 @@ import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.cmsr.onebase.framework.excel.core.annotations.DictFormat;
 import com.cmsr.onebase.framework.excel.core.convert.DictConvert;
-import com.cmsr.onebase.module.infra.enums.DictTypeConstants;
+import com.cmsr.onebase.module.infra.api.constant.DictTypeConstants;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 

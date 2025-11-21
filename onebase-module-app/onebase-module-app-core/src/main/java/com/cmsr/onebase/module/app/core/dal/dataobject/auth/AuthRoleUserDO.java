@@ -12,6 +12,9 @@ import lombok.Data;
 @Data
 @Table(name = "app_auth_role_user")
 public class AuthRoleUserDO extends TenantBaseDO {
+
+    public static final String USER_ID = "user_id";
+    public static final String ROLE_ID = "role_id";
     
     @Column(name = "role_id", nullable = false, comment = "角色id")
     private Long roleId;
