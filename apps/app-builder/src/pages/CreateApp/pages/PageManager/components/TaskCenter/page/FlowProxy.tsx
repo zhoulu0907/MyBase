@@ -14,7 +14,7 @@ const radioList = [
 ];
 let defaultCheck = 'all';
 
-const WillDo: FC = () => {
+const FlowProxy: FC = () => {
   let [editVisible, setEditVisible] = useState(false);
   let [rowData, setRowData] = useState();
   const columns: TableColumnProps[] = [
@@ -164,4 +164,4 @@ const WillDo: FC = () => {
   );
 };
 
-export default WillDo;
+export default FlowProxy;
