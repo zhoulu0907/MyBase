@@ -9,6 +9,7 @@ import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
 import com.cmsr.onebase.module.system.dal.database.CorpAppRelationDataRepository;
+import com.cmsr.onebase.module.system.dal.dataobject.corp.CorpDO;
 import com.cmsr.onebase.module.system.dal.dataobject.corpapprelation.CorpAppRelationDO;
 import com.cmsr.onebase.module.system.vo.corp.CorpApplicationRespVO;
 import com.cmsr.onebase.module.system.vo.corpapprelation.*;
@@ -17,6 +18,7 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.DataRow;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,6 +49,9 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
 
     @Resource
     private AppApplicationApi appApplicationApi;
+
+    @Resource
+    private CorpAppRelationDataRepository corpAppRelationRepository;
 
     @Override
     public void createListCorpAppRelation(List<AppAuthTimeReqVO> corpAppRelationInertReqVOList, Long corpId) {
@@ -211,6 +216,14 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
     public List<CorpAppRelationDO> getCorpAppRelationList(CorpAppRelationPageReqVO corpAppRelationPageReqVO) {
         List<CorpAppRelationDO> corpApplicationRespVOList = corpAppRelationDataRepository.getCorpAppRelationList(corpAppRelationPageReqVO);
         return corpApplicationRespVOList;
+    }
+
+    @Override
+    public void updateStatus(Long id, Long status) {
+        //  企业禁用/开启
+        DataRow row = new DataRow();
+        row.put(CorpDO.STATUS, status);
+        corpAppRelationRepository.updateByConfig(row, new DefaultConfigStore().eq(CorpAppRelationDO.ID, id));
     }
 }
 
