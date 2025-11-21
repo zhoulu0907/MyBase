@@ -7,7 +7,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppStore } from "@/store";
 import { TokenManager } from '@onebase/common';
-import { type corpAppListParams ,getCorpAuthorizedAppListApi } from "@onebase/platform-center";
+import { type corpAppListParams ,getCorpAuthorizedAppListApiInCorp } from "@onebase/platform-center";
 
 
 export interface AppItem {
@@ -122,7 +122,7 @@ const AuthorizedApplication = () => {
             corpId: tokenInfo?.corpId || ""
         };
         try {
-        const res = await getCorpAuthorizedAppListApi(params);
+        const res = await getCorpAuthorizedAppListApiInCorp(params);
         if (res && Array.isArray(res.list)) {
             setTableData(res.list);
             setPagination((prev) => ({ ...prev, current: pageNo, pageSize, total: res.total || 0 }));

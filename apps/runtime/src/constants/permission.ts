@@ -34,13 +34,17 @@ export const CORP_USER_UPDATE = 'corp:user:update'; // 修改用户
 export const CORP_USER_DELETE = 'corp:user:delete'; // 删除用户
 export const CORP_USER_STATUS = 'corp:user:enable'; // 启用/禁用用户
 export const CORP_USER_RESET = 'corp:user:reset'; // 重置密码
+export const CORP_USER_IMPORT = 'tenant:user:import'; // 数据导入 // todo
+export const CORP_USER_EXPORT = 'tenant:user:import'; // 数据导出 // todo
 export const CORP_USER_PERMISSION = {
   QUERY: CORP_USER_QUERY,
   CREATE: CORP_USER_CREATE,
   UPDATE: CORP_USER_UPDATE,
   DELETE: CORP_USER_DELETE,
   RESET: CORP_USER_RESET,
-  STATUS: CORP_USER_STATUS
+  STATUS: CORP_USER_STATUS,
+  IMPORT: CORP_USER_IMPORT,
+  EXPORT: CORP_USER_EXPORT
 }
 
 /** 租户管理-组织管理 */

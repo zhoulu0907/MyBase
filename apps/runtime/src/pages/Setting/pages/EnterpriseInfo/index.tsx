@@ -37,10 +37,10 @@ const SpaceInfo: React.FC = () => {
   const tokenInfo = TokenManager.getTokenInfo();
 
   useEffect(() => {
-    tokenInfo?.corpId && fetchEnterpriseInfo(+tokenInfo.corpId);
+    tokenInfo?.corpId && fetchEnterpriseInfo(tokenInfo.corpId);
   }, [tokenInfo?.corpId]);
 
-  const fetchEnterpriseInfo = async (id: number) => {
+  const fetchEnterpriseInfo = async (id: string) => {
     try {
       setLoading(true);
       const res = await getCorpDetailByIdApiInCorp(id);

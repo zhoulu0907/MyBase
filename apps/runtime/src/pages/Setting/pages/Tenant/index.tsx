@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 import { Avatar, Typography, Grid, Space, Tag, Button, Tabs, Pagination, Table, Card, Spin, Image } from '@arco-design/web-react';
-import { getCorpListApi, getLoginedUser, getDictDataByType } from '@onebase/platform-center';
+import { getCorpListApiInCorp, getLoginedUserInCorp, getDictDataByTypeInCorp } from '@onebase/platform-center';
 import type { CorpDetailResponse, DictData, RoleSimpleRespVO, PostSimpleRespVO } from '@onebase/platform-center';
 import PlaceholderPanel from '@/components/PlaceholderPanel';
-import { hasPermission, /* UserPermissionManager */ } from '@/utils/permission';
+import { hasPermission } from '@/utils/permission';
 import { CORP_INFO_PERMISSION as ACTIONS } from '@/constants/permission';
 import StatusTag from '@/components/StatusTag';
 import { appIconMap } from '@onebase/ui-kit';
@@ -61,7 +61,7 @@ const TenantPage: React.FC = () => {
   const fetchUserInfo = async () => {
     try {
       setLoading(true);
-      const res = await getLoginedUser();
+      const res = await getLoginedUserInCorp();
       setUserInfo(res);
       if (res?.id) {
         await fetchIndustryDict(res.id)
@@ -78,7 +78,7 @@ const TenantPage: React.FC = () => {
       pageSize: pageSize,
       ownerTag: 1, // 我创建的
     };
-    const res = await getCorpListApi(req);
+    const res = await getCorpListApiInCorp(req);
     if (res) {
       setCorpData(res.list);
       setTotal(res.total);
@@ -94,7 +94,7 @@ const TenantPage: React.FC = () => {
 
   const fetchIndustryDict = async (id: string) => {
     try {
-      const res = await getDictDataByType(id);
+      const res = await getDictDataByTypeInCorp(id);
       setTndustryDict(res);
     } catch (error) {
       console.error('字典数据列表错误', error);
