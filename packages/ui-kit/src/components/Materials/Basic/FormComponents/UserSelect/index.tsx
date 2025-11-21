@@ -118,6 +118,14 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
     setAdvanceVisible(false);
   };
 
+  const renderCell = () => {
+    if (typeof fieldValue === 'object' && fieldValue) {
+      return fieldValue?.userName ?? '--';
+    }
+    return JSON.stringify(currentSelectUser) || '--';
+  };
+
+
   return (
     <div className="formWrapper">
       <Form.Item
@@ -140,7 +148,7 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
         }}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-          <div>{currentSelectUser || '--'}</div>
+          <div>{renderCell()}</div>
         ) : (
           <Select
             placeholder="请选择"
@@ -193,9 +201,9 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
               return (
                 <span className="renderFormat">
                   <Avatar size={24} className="avatar">
-                    {currentSelectUser?.[0]}
+                    {renderCell()?.[0]}
                   </Avatar>
-                  <span className="displayName"> {currentSelectUser} </span>
+                  <span className="displayName"> {renderCell()} </span>
                   <IconClose
                     className="closeBtn"
                     onMouseDown={(e) => {
