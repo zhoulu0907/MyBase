@@ -2,9 +2,13 @@ package com.cmsr.onebase.module.etl.core.dal.database;
 
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLScheduleJobDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLWorkflowDO;
+import com.cmsr.onebase.module.etl.core.dal.dataobject.table.ETLScheduleJobDOTableDef;
+import com.cmsr.onebase.module.etl.core.dal.dataobject.table.ETLWorkflowDOTableDef;
 import com.cmsr.onebase.module.etl.core.dal.mapper.ETLWorkflowMapper;
 import com.cmsr.onebase.module.etl.core.enums.ScheduleType;
+import com.cmsr.onebase.module.etl.core.vo.WorkflowBriefVO;
 import com.cmsr.onebase.module.etl.core.vo.WorkflowPageReqVO;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
@@ -15,6 +19,9 @@ import org.anyline.service.AnylineService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
+import static com.cmsr.onebase.module.etl.core.dal.dataobject.table.ETLScheduleJobDOTableDef.ETLSCHEDULE_JOB_DO;
+import static com.cmsr.onebase.module.etl.core.dal.dataobject.table.ETLWorkflowDOTableDef.ETLWORKFLOW_DO;
 
 @Slf4j
 @Repository
@@ -31,17 +38,30 @@ public class ETLWorkflowRepository extends ServiceImpl<ETLWorkflowMapper, ETLWor
         dataRepository.setAnylineService(anylineService);
     }
 
-    public PageResult<ETLWorkflowDO> getWorkflowPage(WorkflowPageReqVO pageReqVO) {
+    public PageResult<WorkflowBriefVO> getWorkflowPage(WorkflowPageReqVO pageReqVO) {
         String scheduleStrategy = pageReqVO.getScheduleStrategy();
         boolean filterByScheduleStrategy = StringUtils.isNotBlank(scheduleStrategy) && !StringUtils.equals(ScheduleType.ALL.getValue(), scheduleStrategy);
-        QueryWrapper queryWrapper = query()
-                .eq(ETLWorkflowDO::getApplicationId, pageReqVO.getApplicationId())
+        QueryWrapper queryWrapper = QueryWrapper.create()
+                .select(ETLWORKFLOW_DO.ID
+                        ,ETLWORKFLOW_DO.APPLICATION_ID,
+                        ETLWORKFLOW_DO.SCHEDULE_STRATEGY,
+                        ETLWORKFLOW_DO.WORKFLOW_NAME.as("flow_name"),
+                        ETLWORKFLOW_DO.IS_ENABLED.as("enable_status"),
+                        ETLSCHEDULE_JOB_DO.JOB_STATUS.as("is_sync_done"),
+                        ETLSCHEDULE_JOB_DO.LAST_JOB_TIME
+                )
+                .from(ETLWorkflowDO.class)
+
+                .leftJoin(ETLScheduleJobDO.class).on(ETLWorkflowDO::getId, ETLScheduleJobDO::getWorkflowId)
+
+                .where(ETLWorkflowDO::getApplicationId).eq(pageReqVO.getApplicationId())
                 .like(ETLWorkflowDO::getWorkflowName, pageReqVO.getFlowName(), StringUtils.isNotBlank(pageReqVO.getFlowName()))
                 .eq(ETLWorkflowDO::getScheduleStrategy, scheduleStrategy, filterByScheduleStrategy)
                 .eq(ETLWorkflowDO::getIsEnabled, pageReqVO.getEnableStatus(), pageReqVO.getEnableStatus() != null)
+
                 .orderBy(ETLWorkflowDO::getUpdateTime, false)
                 .orderBy(ETLWorkflowDO::getCreateTime, false);
-        Page<ETLWorkflowDO> pageResult = getMapper().paginate(pageReqVO.getPageNo(), pageReqVO.getPageSize(), queryWrapper);
+        Page<WorkflowBriefVO> pageResult = getMapper().paginateAs(pageReqVO.getPageNo(), pageReqVO.getPageSize(), queryWrapper, WorkflowBriefVO.class);
         return new PageResult<>(pageResult.getRecords(), pageResult.getTotalRow());
     }
 }

@@ -25,6 +25,7 @@ import com.cmsr.onebase.module.etl.core.enums.ETLConstants;
 import com.cmsr.onebase.module.etl.core.enums.ETLErrorCodeConstants;
 import com.cmsr.onebase.module.etl.core.enums.ScheduleJobStatus;
 import com.cmsr.onebase.module.etl.core.enums.ScheduleType;
+import com.cmsr.onebase.module.etl.core.vo.WorkflowBriefVO;
 import com.cmsr.onebase.module.etl.core.vo.WorkflowPageReqVO;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.NullNode;
@@ -70,37 +71,23 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
 
     @Override
     public PageResult<WorkflowBriefVO> getWorkflowPage(WorkflowPageReqVO pageReqVO) {
-        PageResult<ETLWorkflowDO> pageDOs = workflowRepository.getWorkflowPage(pageReqVO);
-        List<WorkflowBriefVO> pageVOs = new ArrayList<>();
-        for (ETLWorkflowDO workflowDO : pageDOs.getList()) {
-            WorkflowBriefVO briefVO = new WorkflowBriefVO();
-            Long workflowId = workflowDO.getId();
-            Long applicationId = workflowDO.getApplicationId();
-            briefVO.setId(workflowId);
-            briefVO.setApplicationId(applicationId);
-            briefVO.setFlowName(workflowDO.getWorkflowName());
-            briefVO.setEnableStatus(workflowDO.getIsEnabled());
-            briefVO.setScheduleStrategy(workflowDO.getScheduleStrategy());
-            ETLScheduleJobDO scheduleJobDO = scheduleJobRepository.findByApplicationIdAndWorkflowId(applicationId, workflowId);
-            if (scheduleJobDO != null) {
-                briefVO.setIsSyncDone(scheduleJobDO.getJobStatus());
-                briefVO.setLastSuccessTime(scheduleJobDO.getLastSuccessTime());
-            }
+        PageResult<WorkflowBriefVO> pageDOs = workflowRepository.getWorkflowPage(pageReqVO);
+        for (WorkflowBriefVO workflowVO : pageDOs.getList()) {
+            Long workflowId = workflowVO.getId();
             Set<Long> relatedSourceTableIds = workflowTableRepository.findSourceTableIdsByWorkflowId(workflowId);
             if (CollectionUtils.isNotEmpty(relatedSourceTableIds)) {
                 List<String> sourceTableNames = tableRepository.getNameByIds(relatedSourceTableIds);
-                briefVO.setSourceTables(sourceTableNames);
+                workflowVO.setSourceTables(sourceTableNames);
             } else {
-                briefVO.setSourceTables(null);
+                workflowVO.setSourceTables(null);
             }
             ETLWorkflowTableDO relatedTargetTable = workflowTableRepository.findTargetTableIdByWorkflowId(workflowId);
             if (relatedTargetTable != null) {
                 String targetTableName = tableRepository.getNameById(relatedTargetTable.getTableId());
-                briefVO.setTargetTable(targetTableName);
+                workflowVO.setTargetTable(targetTableName);
             }
-            pageVOs.add(briefVO);
         }
-        return new PageResult<>(pageVOs, pageDOs.getTotal());
+        return new PageResult<>(pageDOs.getList(), pageDOs.getTotal());
     }
 
     @Override

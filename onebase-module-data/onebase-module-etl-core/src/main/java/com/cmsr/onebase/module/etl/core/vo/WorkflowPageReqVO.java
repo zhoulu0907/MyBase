@@ -11,6 +11,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class WorkflowPageReqVO extends PageParam {
 
+    @Schema(description = "应用ID")
     @NotNull
     private Long applicationId;
 

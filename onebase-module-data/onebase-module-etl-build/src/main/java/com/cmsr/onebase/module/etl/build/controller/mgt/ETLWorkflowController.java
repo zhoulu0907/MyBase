@@ -6,6 +6,7 @@ import com.cmsr.onebase.module.etl.build.service.mgt.ETLWorkflowService;
 import com.cmsr.onebase.module.etl.build.vo.mgt.*;
 import com.cmsr.onebase.module.etl.common.preview.ColumnDefine;
 import com.cmsr.onebase.module.etl.common.preview.DataPreview;
+import com.cmsr.onebase.module.etl.core.vo.WorkflowBriefVO;
 import com.cmsr.onebase.module.etl.core.vo.WorkflowPageReqVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
