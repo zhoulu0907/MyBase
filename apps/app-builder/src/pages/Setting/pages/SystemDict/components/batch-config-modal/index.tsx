@@ -300,7 +300,7 @@ const BatchConfigModal: React.FC<BatchConfigModalProps> = ({ visible, onCancel, 
         </>
       ),
       dataIndex: 'value',
-      width: 200,
+      width: 250,
       render: (_: unknown, record: DictData, index: number) => {
         const fieldName = `dictValues.${index}.value`;
         return (
@@ -312,7 +312,7 @@ const BatchConfigModal: React.FC<BatchConfigModalProps> = ({ visible, onCancel, 
             validateStatus={externalErrors[fieldName] ? 'error' : undefined}
             help={externalErrors[fieldName]}
           >
-            <Input placeholder="请输入字典值编码" value={record.value} />
+            <Input placeholder="请输入字母、数字或下划线" value={record.value} />
           </Form.Item>
         );
       }
