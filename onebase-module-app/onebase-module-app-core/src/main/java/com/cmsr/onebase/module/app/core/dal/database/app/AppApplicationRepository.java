@@ -124,7 +124,9 @@ public class AppApplicationRepository extends DataRepository<ApplicationDO> {
 
     public List<ApplicationDO> findMyAppApplicationByAppName(String appName) {
         ConfigStore configStore = new DefaultConfigStore();
-
+        if (StringUtils.isNotBlank(appName)) {
+            configStore.and(Compare.LIKE, ApplicationDO.APP_NAME, appName);
+        }
         LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
         if (loginUser == null) {
             throw exception(AppErrorCodeConstants.NOT_LOGIN);
