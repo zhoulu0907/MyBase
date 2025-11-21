@@ -16,6 +16,9 @@ export interface LoginRequest {
    */
   captchaVerification?: string | null;
 
+  /**
+   * 设备id
+   */
   deviceId: string;
 }
 
@@ -32,6 +35,10 @@ export interface TenantLoginRequest {
    * 验证码
    */
   captchaVerification?: string | null;
+  /**
+   * 设备id
+   */
+  deviceId: string;
 }
 
 export interface RuntimeAccountLoginRequest {
@@ -52,6 +59,10 @@ export interface RuntimeAccountLoginRequest {
    * 验证码
    */
   captchaVerification?: string | null;
+  /**
+   * 设备id
+   */
+  deviceId: string;
 }
 
 export interface RuntimeCorpLoginRequest {
@@ -67,6 +78,11 @@ export interface RuntimeCorpLoginRequest {
    * 验证码
    */
   captchaVerification?: string | null;
+
+  /**
+   * 设备id
+   */
+  deviceId: string;
 }
 
 export interface RuntimeMobileLoginRequest {
@@ -87,6 +103,11 @@ export interface RuntimeMobileLoginRequest {
    * 验证码
    */
   captchaVerification?: string | null;
+
+  /**
+   * 设备id
+   */
+  deviceId: string;
 }
 
 export interface LoginResponse {
@@ -96,6 +117,8 @@ export interface LoginResponse {
   expiresTime: number; // 令牌过期时间（时间戳，毫秒）
   tenantId: string; // 租户id
   tenantWebsite: string; // 租户网址
+  adminFlag: boolean; // 是否是管理员
+  corpId: string; // 企业id
 }
 
 export interface TenantLoginResponse {

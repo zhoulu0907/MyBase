@@ -4,19 +4,25 @@ import { appInfoSignal } from '@/store/app';
 import { Button, Checkbox, Form, Input, Message, Space, Typography } from '@arco-design/web-react';
 import { IconLock, IconUser } from '@arco-design/web-react/icon';
 import { getApplication } from '@onebase/app';
-import { getHashQueryParam, SliderCaptcha, TokenManager, type SliderCaptchaRef } from '@onebase/common';
+import {
+  getHashQueryParam,
+  getOrCreateDeviceInfo,
+  SliderCaptcha,
+  TokenManager,
+  type SliderCaptchaRef
+} from '@onebase/common';
 import {
   checkCaptchaApi,
+  corpLogin,
   getCaptchaApi,
   innerLogin,
   login,
   sassLogin,
-  corpLogin,
   type LoginRequest,
   type LoginResponse,
   type RuntimeAccountLoginRequest,
-  type RuntimeMobileLoginRequest,
-  type RuntimeCorpLoginRequest
+  type RuntimeCorpLoginRequest,
+  type RuntimeMobileLoginRequest
 } from '@onebase/platform-center';
 import { appIconMap } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
@@ -29,19 +35,19 @@ import styles from '../index.module.less';
 const { Paragraph } = Typography;
 
 interface APP_INFO {
-    appName: string,
-    iconName: string,
-    iconColor: string,
-    id: string
+  appName: string;
+  iconName: string;
+  iconColor: string;
+  id: string;
 }
 
 /**
- * 运行态登录一共有三种模式 
-1.企业登录（手机号 + 密码）仅需传递tenantId. 
-2.空间应用saas模式登录 （手机号 + 密码） 需传递appId+ tenantId   
+ * 运行态登录一共有三种模式
+1.企业登录（手机号 + 密码）仅需传递tenantId.
+2.空间应用saas模式登录 （手机号 + 密码） 需传递appId+ tenantId
 3.空间应用inner模式登录（账号+ 密码） 需传递appId+ tenantId
 4.原本的登录模式（账号+密码） 需传递appId
- * @returns 
+ * @returns
  */
 
 const Right: React.FC = () => {
@@ -54,17 +60,17 @@ const Right: React.FC = () => {
   const { t } = useI18n();
   const sliderCaptchaRef = useRef<SliderCaptchaRef>(null);
 
-  const [appInfo, setAppInfo] = useState<APP_INFO>({
-    appName: '',
-    iconName: '',
-    iconColor: '',
-    id: ''
-  });
+  //   const [appInfo, setAppInfo] = useState<APP_INFO>({
+  //     appName: '',
+  //     iconName: '',
+  //     iconColor: '',
+  //     id: ''
+  //   });
 
   // 获取查询参数对象 从路由中获取 appid/tenantId 参数
   const [searchParams] = useSearchParams(location.hash);
-  const tenantId = searchParams.get("tenantId") || "";
-  const appId = searchParams.get("appId") || "";
+  const tenantId = searchParams.get('tenantId') || '';
+  const appId = searchParams.get('appId') || '';
 
   // 使用记住我hook
   const { rememberMe, savedAccount, saveRememberMe } = useRememberMe();
@@ -85,13 +91,13 @@ const Right: React.FC = () => {
         window.location.href = redirectURL;
       } else {
         //企业登录
-        if(!appId && tenantId) {
+        if (!appId && tenantId) {
           navigate(`/onebase/runtime/my-app`);
         }
-        if(appId && !tenantId) {
+        if (appId && !tenantId) {
           navigate(`/onebase/runtime/${tenantId}`);
         }
-        if(appId && tenantId) {
+        if (appId && tenantId) {
           navigate(`/onebase/runtime/${appId}/${tenantId}`);
         }
       }
@@ -103,10 +109,10 @@ const Right: React.FC = () => {
 
   const handleGetApplication = async () => {
     if (appId) {
-        const res = await getApplication({ id: appId});
-        if (res) {
-          setCurAppInfo(res);
-        }
+      const res = await getApplication({ id: appId });
+      if (res) {
+        setCurAppInfo(res);
+      }
     }
   };
 
@@ -117,7 +123,9 @@ const Right: React.FC = () => {
   };
 
   // 账号密码登录
-  const handleRuntimeLogin = async (values: RuntimeAccountLoginRequest | RuntimeMobileLoginRequest | LoginRequest | RuntimeCorpLoginRequest) => {
+  const handleRuntimeLogin = async (
+    values: RuntimeAccountLoginRequest | RuntimeMobileLoginRequest | LoginRequest | RuntimeCorpLoginRequest
+  ) => {
     setLoading(true);
 
     try {
@@ -134,12 +142,16 @@ const Right: React.FC = () => {
       };
 
       let response: LoginResponse | null = null;
+
+      const deviceId = await getOrCreateDeviceInfo();
+
       if (curAppInfo.value.publishModel === PUBLISH_MODULE.SASS) {
         const sassloginData: RuntimeMobileLoginRequest = {
           password: values.password!,
           mobile: (values as RuntimeMobileLoginRequest).mobile!,
           appId: appId,
-          captchaVerification: captchaVerification
+          captchaVerification: captchaVerification,
+          deviceId: deviceId
         };
 
         response = await sassLogin(sassloginData, headers);
@@ -148,21 +160,24 @@ const Right: React.FC = () => {
           password: values.password!,
           username: (values as RuntimeAccountLoginRequest).username!,
           appId: appId,
-          captchaVerification: captchaVerification
+          captchaVerification: captchaVerification,
+          deviceId: deviceId
         };
         response = await innerLogin(innerloginData, headers);
       } else if (!appId) {
         const innerloginData: RuntimeCorpLoginRequest = {
           password: values.password!,
           mobile: (values as RuntimeCorpLoginRequest).mobile!,
-          captchaVerification: captchaVerification
+          captchaVerification: captchaVerification,
+          deviceId: deviceId
         };
         response = await corpLogin(innerloginData, headers);
       } else {
         const loginData: LoginRequest = {
           username: (values as LoginRequest).username!,
           password: values.password!,
-          captchaVerification: captchaVerification
+          captchaVerification: captchaVerification,
+          deviceId: deviceId
         };
 
         response = await login(loginData, headers);
@@ -177,7 +192,7 @@ const Right: React.FC = () => {
             refreshToken: response.refreshToken,
             expiresTime: response.expiresTime,
             tenantId: response.tenantId,
-            adminFlag: response.adminFlag || false,
+            adminFlag: response.adminFlag,
             corpId: response.corpId
           },
           rememberMe
@@ -197,10 +212,10 @@ const Right: React.FC = () => {
         Message.success(t('auth.loginSuccess'));
         const redirectURL = getHashQueryParam('redirectURL');
         if (redirectURL) {
-          if(!appId) {
+          if (!appId) {
             //企业登录
             navigate('/onebase/runtime/my-app');
-          }else {
+          } else {
             //saas模式 或者inner模式
             navigate(`/onebase/runtime/${appId}/${tenantId}`);
           }
@@ -221,7 +236,9 @@ const Right: React.FC = () => {
   };
 
   // 表单提交处理
-  const handleSubmit = (_values: RuntimeAccountLoginRequest | RuntimeMobileLoginRequest | LoginRequest | RuntimeCorpLoginRequest) => {
+  const handleSubmit = (
+    _values: RuntimeAccountLoginRequest | RuntimeMobileLoginRequest | LoginRequest | RuntimeCorpLoginRequest
+  ) => {
     handleRuntimeLogin(_values);
   };
 
@@ -229,26 +246,36 @@ const Right: React.FC = () => {
   const handleCaptchaSuccess = async (token: string) => {
     const values = await form.getFieldsValue();
 
+    const deviceId = await getOrCreateDeviceInfo();
+
     if (curAppInfo.value.publishModel === PUBLISH_MODULE.SASS) {
       handleSubmit({
         mobile: values.mobile,
         password: values.password,
-        captchaVerification: token
+        captchaVerification: token,
+        deviceId: deviceId
       } as RuntimeMobileLoginRequest);
     } else if (curAppInfo.value.publishModel === PUBLISH_MODULE.INNER) {
       handleSubmit({
         username: values.username,
         password: values.password,
-        captchaVerification: token
+        captchaVerification: token,
+        deviceId: deviceId
       } as RuntimeAccountLoginRequest);
     } else if (!appId) {
       handleSubmit({
         mobile: values.mobile,
         password: values.password,
-        captchaVerification: token
-     } as RuntimeCorpLoginRequest);
+        captchaVerification: token,
+        deviceId: deviceId
+      } as RuntimeCorpLoginRequest);
     } else {
-      handleSubmit({ username: values.username, password: values.password, captchaVerification: token });
+      handleSubmit({
+        username: values.username,
+        password: values.password,
+        captchaVerification: token,
+        deviceId: deviceId
+      } as LoginRequest);
     }
   };
 
@@ -297,7 +324,7 @@ const Right: React.FC = () => {
           requiredSymbol={false}
           className={styles.loginForm}
         >
-          {((appInfo.publishModel === PUBLISH_MODULE.SASS || !appId) && (
+          {((curAppInfo.value.publishModel === PUBLISH_MODULE.SASS || !appId) && (
             <Form.Item label="手机号" field="mobile" rules={[{ required: true, message: '请输入手机号' }]}>
               <Input placeholder="输入手机号" maxLength={11} />
             </Form.Item>
