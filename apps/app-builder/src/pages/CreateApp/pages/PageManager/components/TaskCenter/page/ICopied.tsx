@@ -62,35 +62,7 @@ const ICopied:FC = () => {
             ),
         },
     ];
-    const data = [
-        {
-            key: '1',
-            name: 'Jane Doe',
-            salary: 23000,
-            address: '32 Park Road, London',
-            email: '3jane.doe@example.com',
-            email1: 'e@example.com',
-            email2: 'ample.com',
-        },
-        {
-            key: '2',
-            name: 'Alisa Ross',
-            salary: 25000,
-            address: '35 Park Road, London',
-            email: '6alisa.ross@example.com',
-            email1: '12e@example.com',
-            email2: '3333ample.com',
-        },
-        {
-            key: '3',
-            name: 'Kevin Sandra',
-            salary: 22000,
-            address: '31 Park Road, London',
-            email: '1kevin.sandra@example.com',
-            email1: 'aaae@example.com',
-            email2: 'bbbample.com',
-        },
-    ];
+    const data: any[] = [];
     let [detailPopVisible, setPopVisible] = useState(false)
 
     function CreatedRadioChange(val:string) {

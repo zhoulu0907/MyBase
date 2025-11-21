@@ -38,10 +38,21 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
 
   const [popupVisibleMap, setPopupVisibleMap] = useState<any>({});
   const setPopupVisibleByIndex = (index: number, visible: boolean) => {
-    setPopupVisibleMap((prev: any) => ({
-      ...prev,
-      [index]: visible
-    }));
+    setPopupVisibleMap((prev: any) => {
+      if (visible) {
+        const newState: any = {};
+        Object.keys(prev).forEach((key) => {
+          newState[key] = false;
+        });
+        newState[index] = true;
+        return newState;
+      } else {
+        return {
+          ...prev,
+          [index]: false
+        };
+      }
+    });
   };
   function toggleFullScreen(type: string) {
     if (type === 'FULLSCREEN') {
