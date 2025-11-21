@@ -82,14 +82,14 @@ public class BpmUtil {
 
         for (NodeJson nodeJson : defJson.getNodeList()) {
             BaseNodeExtDTO extDTO =  JsonUtils.parseObject(nodeJson.getExt(), BaseNodeExtDTO.class);
+            if (extDTO == null) {
+                continue;
+            }
+
             if (Objects.equals(extDTO.getNodeType(), BpmNodeTypeEnum.INITIATION.getCode())) {
                 node = nodeJson;
                 break;
             }
-        }
-
-        if (node == null) {
-            return null;
         }
 
         return node;
