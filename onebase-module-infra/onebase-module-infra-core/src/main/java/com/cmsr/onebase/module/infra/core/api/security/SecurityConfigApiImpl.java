@@ -1,7 +1,8 @@
-package com.cmsr.onebase.module.infra.api.security;
+package com.cmsr.onebase.module.infra.core.api.security;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
+import com.cmsr.onebase.module.infra.api.security.SecurityConfigApi;
 import com.cmsr.onebase.module.infra.api.security.dto.LoginFailureResultDTO;
 import com.cmsr.onebase.module.infra.api.security.dto.PasswordExpiryCheckDTO;
 import com.cmsr.onebase.module.infra.dal.database.SecurityRecordDataRepository;

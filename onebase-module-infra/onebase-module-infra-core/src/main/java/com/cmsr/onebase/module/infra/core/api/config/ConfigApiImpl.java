@@ -1,6 +1,7 @@
-package com.cmsr.onebase.module.infra.api.config;
+package com.cmsr.onebase.module.infra.core.api.config;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.module.infra.api.config.ConfigApi;
 import com.cmsr.onebase.module.infra.dal.dataobject.config.ConfigDO;
 import com.cmsr.onebase.module.infra.service.config.ConfigService;
 import jakarta.annotation.Resource;

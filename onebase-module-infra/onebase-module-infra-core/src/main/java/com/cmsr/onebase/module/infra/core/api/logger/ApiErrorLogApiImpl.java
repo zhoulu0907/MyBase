@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.infra.api.logger;
+package com.cmsr.onebase.module.infra.core.api.logger;
 
 import com.cmsr.onebase.framework.common.biz.infra.logger.ApiErrorLogCommonApi;
 import com.cmsr.onebase.framework.common.biz.infra.logger.dto.ApiErrorLogCreateReqDTO;
