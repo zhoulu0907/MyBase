@@ -75,10 +75,7 @@ public class MultiDeviceSessionServiceImpl implements MultiDeviceSessionService 
 
         // 3. 检查设备数限制（排除当前设备）
         Long currentCount = stringRedisTemplate.opsForHash().size(redisKey);
-        if (currentCount == null) {
-            currentCount = 0L;
-        }
-        
+
         // 如果当前设备已存在，实际其他设备数 = currentCount - 1
         boolean deviceExists = stringRedisTemplate.opsForHash().hasKey(redisKey, deviceId);
         long otherDeviceCount = deviceExists ? currentCount - 1 : currentCount;
@@ -135,7 +132,7 @@ public class MultiDeviceSessionServiceImpl implements MultiDeviceSessionService 
 
             // 如果Hash为空，删除Key
             Long count = stringRedisTemplate.opsForHash().size(redisKey);
-            if (count == null || count == 0) {
+            if (count == 0) {
                 stringRedisTemplate.delete(redisKey);
                 log.debug("用户[{}]的在线设备列表已清空，删除Key", userId);
             }
@@ -154,7 +151,7 @@ public class MultiDeviceSessionServiceImpl implements MultiDeviceSessionService 
 
         // 返回准确的设备数
         Long count = stringRedisTemplate.opsForHash().size(redisKey);
-        return count == null ? 0 : count.intValue();
+        return count.intValue();
     }
 
     /**
@@ -346,7 +343,7 @@ public class MultiDeviceSessionServiceImpl implements MultiDeviceSessionService 
 
         // 4. 如果Hash为空，删除Key
         Long count = stringRedisTemplate.opsForHash().size(redisKey);
-        if (count == null || count == 0) {
+        if (count == 0) {
             stringRedisTemplate.delete(redisKey);
         }
 
