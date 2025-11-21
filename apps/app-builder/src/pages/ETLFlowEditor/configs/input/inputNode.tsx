@@ -1,14 +1,13 @@
 import FieldIcon from '@/assets/images/etl/field.svg';
-import { Button, Input } from '@arco-design/web-react';
+import { Button } from '@arco-design/web-react';
 import { listETLTables, previewETLDatasource, type ETLTable } from '@onebase/app';
 import { ETLDrawerTab, etlEditorSignal } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
 import DataPreview from '../../components/dataPreview';
+import DataRemark from '../../components/dataRemark';
 import DatasourceModal from './components/datasourceModal';
 import styles from './index.module.less';
-
-const { TextArea } = Input;
 
 export const InputNodeConfig: React.FC = () => {
   useSignals();
@@ -117,15 +116,7 @@ export const InputNodeConfig: React.FC = () => {
           </div>
         </div>
       )}
-      {curDrawerTab.value === ETLDrawerTab.NODE_REMARK && (
-        <TextArea
-          onChange={handleChangeRemark}
-          value={remark}
-          placeholder="请输入节点备注"
-          autoSize={{ minRows: 3, maxRows: 6 }}
-          allowClear
-        />
-      )}
+      {curDrawerTab.value === ETLDrawerTab.NODE_REMARK && <DataRemark />}
 
       <DatasourceModal
         isModalVisible={isModalVisible}

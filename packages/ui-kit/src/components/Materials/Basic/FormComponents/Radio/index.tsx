@@ -18,7 +18,8 @@ const XRadio = memo((props: XInputRadioConfig & { runtime?: boolean; detailMode?
     verify,
     layout,
     direction,
-    runtime = true
+    runtime = true,
+    detailMode
   } = props;
 
   const { form } = Form.useFormContext();
@@ -51,7 +52,7 @@ const XRadio = memo((props: XInputRadioConfig & { runtime?: boolean; detailMode?
         }}
         initialValue={defaultOptionsConfig?.defaultOptions.find(ele => ele.isChosen)?.value}
       >
-        {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? (
+        {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
           <div>{fieldValue && defaultOptionsConfig?.defaultOptions?.find((op) => op.value === fieldValue)?.label || '--'}</div>
         ) : (
           <RadioGroup

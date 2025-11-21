@@ -1,0 +1,39 @@
+.ccResConfig {
+    .configTitle {
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 16px;
+    }
+
+    .ccResRadioGroup {
+        display: flex;
+        flex-wrap: wrap;
+
+        :global(.arco-radio) {
+            width: 20%;
+            margin-bottom: 8px;
+
+            :global(.arco-radio-text) {
+                color: #5c5e60;
+            }
+        }
+    }
+
+    .approverForm {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+
+        :global(.arco-form-label-item) {
+            padding: 0;
+            text-align: left;
+            margin-bottom: 16px;
+
+            :global(label) {
+                color: #000;
+                font-size: 16px;
+                font-weight: 600;
+            }
+        }
+    }
+}

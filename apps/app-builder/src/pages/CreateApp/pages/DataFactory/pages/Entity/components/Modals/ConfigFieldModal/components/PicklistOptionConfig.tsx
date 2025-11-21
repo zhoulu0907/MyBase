@@ -13,6 +13,7 @@ interface PicklistOptionConfigProps {
   initialOptions?: { optionLabel: string; optionValue: string }[];
   initialDictTypeId?: string;
   onCancel?: () => void;
+  gotoDictPage?: () => void;
 }
 
 const CONFIG_TYPE = {
@@ -38,6 +39,7 @@ const CONFIG_TYPE_OPTIONS = [
 ];
 
 export const PicklistOptionConfig: React.FC<PicklistOptionConfigProps> = ({
+  gotoDictPage,
   onVisibleChange,
   onConfirm,
   onCancel,
@@ -289,6 +291,7 @@ export const PicklistOptionConfig: React.FC<PicklistOptionConfigProps> = ({
         dictTypeId={initialDictTypeId}
         onOk={handleSelectDictOk}
         onCancel={handleSelectDictCancel}
+        gotoDictPage={gotoDictPage}
       />
     </div>
   );

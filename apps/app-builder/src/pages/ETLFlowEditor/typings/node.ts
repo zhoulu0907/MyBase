@@ -5,7 +5,9 @@ import {
   type WorkflowNodeRegistry as FlowNodeRegistryDefault,
   FreeLayoutPluginContext,
   type WorkflowEdgeJSON,
-  type WorkflowNodeMeta
+  type WorkflowNodeMeta,
+  type WorkflowPortEntity,
+  type WorkflowLinesManager
 } from '@flowgram.ai/free-layout-editor';
 
 import { type JsonSchema } from './json-schema';
@@ -59,6 +61,7 @@ export interface FlowNodeRegistry extends FlowNodeRegistryDefault {
     icon: string;
     description: string;
   };
+  canAddLine?: (fromPort: WorkflowPortEntity, toPort: WorkflowPortEntity, lines: WorkflowLinesManager, silent?: boolean) => boolean;
   canAdd?: (ctx: FreeLayoutPluginContext) => boolean;
   canDelete?: (ctx: FreeLayoutPluginContext, from: FlowNodeEntity) => boolean;
   onAdd?: (ctx: FreeLayoutPluginContext) => FlowNodeJSON;

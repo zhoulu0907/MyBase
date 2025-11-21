@@ -4,7 +4,6 @@ import { IconFullscreen, IconLink, IconDoubleRight, IconFullscreenExit } from '@
 import ExpendSp from '@/assets/images/task_center/expend-sp.svg';
 import ProPreviewImg from '@/assets/images/task_center/process-preview.svg';
 import { LISTTYPE, FlowStatusMap, BPMConfigButtonType } from '@onebase/app';
-import DetailTable from './DetailTable';
 import DetailStep from './DetailStep';
 import DetailOKConfirm from './DetailOKConfirm';
 import { getFormDetail, getOperatorRecord, fetchExecTask } from '@onebase/app/src/services/app_runtime';
@@ -166,7 +165,12 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
   };
 
   useEffect(() => {
-    if (listType === LISTTYPE.WILLDO || listType === LISTTYPE.IDONE || listType === LISTTYPE.ICREATED) {
+    if (
+      listType === LISTTYPE.WILLDO ||
+      listType === LISTTYPE.IDONE ||
+      listType === LISTTYPE.ICREATED ||
+      listType === LISTTYPE.ICOPIED
+    ) {
       fetchStepData();
       fetchDetailData();
     } else {

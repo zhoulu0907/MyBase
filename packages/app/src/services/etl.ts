@@ -9,6 +9,7 @@ import {
   PageETLFlowReq,
   PingDatasourceReq,
   PreviewDatasourceReq,
+  PreviewETLFlowDataReq,
   UpdateDataSourceReq,
   UpdateETLFlowReq,
   UpdateWorkflowScheduleInfoReq
@@ -50,6 +51,8 @@ export const startETLFlow = (id: string) => etlService.post(`/workflow/${id}/sta
 export const enableETLFlow = (id: string) => etlService.post(`/workflow/${id}/enable`);
 
 export const disableETLFlow = (id: string) => etlService.post(`/workflow/${id}/disable`);
+
+export const previewETLFlowData = (params: PreviewETLFlowDataReq) => etlService.post(`/workflow/preview`, params);
 
 export const getETLFlowScheduleInfo = (id: string) => etlService.get(`/workflow/schedule/${id}`);
 
