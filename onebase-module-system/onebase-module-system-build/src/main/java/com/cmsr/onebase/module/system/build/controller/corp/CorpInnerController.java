@@ -21,7 +21,7 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
  */
 @Tag(name = "平台服务-企业")
 @RestController
-@RequestMapping("/corp/corp/")
+@RequestMapping("/corp/")
 @Validated
 public class CorpInnerController {
 
