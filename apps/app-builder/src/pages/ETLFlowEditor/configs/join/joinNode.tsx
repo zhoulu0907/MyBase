@@ -5,6 +5,7 @@ import { useSignals } from '@preact/signals-react/runtime';
 import { ETLDrawerTab, etlEditorSignal } from '@onebase/common';
 import JoinRow from './components/joinRow';
 import styles from './index.module.less';
+import DataRemark from '../../components/dataRemark';
 
 type Row = {
   isSelected?: boolean;
@@ -226,6 +227,7 @@ export const JoinNodeConfig: React.FC = () => {
           </Form>
         </div>
       )}
+      {curDrawerTab.value === ETLDrawerTab.NODE_REMARK && <DataRemark />}
     </Layout>
   );
 };
