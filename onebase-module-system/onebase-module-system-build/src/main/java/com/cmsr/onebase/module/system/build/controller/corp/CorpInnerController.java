@@ -31,7 +31,7 @@ public class CorpInnerController {
 
     @PostMapping("/update-status")
     @Operation(summary = "企业启用/禁用")
-    @PreAuthorize("@ss.hasPermission('corp:app-auth:enable')")
+    @PreAuthorize("@ss.hasPermission('corp:info:update')")
     public CommonResult<Boolean> updateStatus(@RequestParam("id") Long id, @RequestParam("status") Long status) {
         corpService.updateStatus(id, status);
         return success(true);
@@ -39,7 +39,7 @@ public class CorpInnerController {
 
     @GetMapping("/get")
     @Operation(summary = "获得企业详情")
-    @PreAuthorize("@ss.hasPermission('corp:info')")
+    @PreAuthorize("@ss.hasPermission('corp:info:query')")
     public CommonResult<CorpRespVO> getCorp(@RequestParam("id") Long id) {
         CorpRespVO corp = corpService.getCorp(id);
         return success(corp);

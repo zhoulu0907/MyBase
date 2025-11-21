@@ -110,7 +110,7 @@ public interface RoleService {
      * @param reqVO 角色分页查询
      * @return 角色分页结果
      */
-    PageResult<RoleDO> getRolePage(RolePageReqVO reqVO);
+    PageResult<RoleDO> findRolePageOnlyTenant(RolePageReqVO reqVO);
 
     /**
      * 判断角色编号数组中，是否有管理员
