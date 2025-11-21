@@ -18,7 +18,7 @@ const UnionConfig: React.FC = () => {
   const [data, setData] = useState<any[]>(nodeData.value[curNode.value.id].config?.data || []);
 
   // 计算所有 columns 字段的去重并集
-  const [colTitles, setColTitles] = useState<any[]>([]);
+  const [colTitles, setColTitles] = useState<any[]>(nodeData.value[curNode.value.id].config?.colTitles || []);
 
   useEffect(() => {
     // console.log(nodeData.value);
@@ -89,7 +89,7 @@ const UnionConfig: React.FC = () => {
     payload.output = {
       verified: true,
       fields: colTitles.map((col: any) => ({
-        fqn: `${curNode.value.id}.${col.fieldName}`,
+        fieldFqn: `${curNode.value.id}.${col.fieldName}`,
         fieldName: col.fieldName,
         fieldType: col.fieldType
       }))

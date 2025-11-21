@@ -175,7 +175,7 @@ const ICreated: FC = ({ appId }: any) => {
           <b style={{ marginRight: '8px' }}>我创建的</b>
         </div>
         <TableSearch
-          uiConfig={{ hasInput: true, hasFilter: true, hasSort: true, hasBatch: false }}
+          uiConfig={{ hasInput: true, hasFilter: {dateTimeLabel: '创建时间'}, hasSort: true, hasBatch: false }}
           onReset={handleReset}
           onFilterChange={handleSearch}
         />

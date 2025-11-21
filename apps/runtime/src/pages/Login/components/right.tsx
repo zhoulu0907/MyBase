@@ -1,15 +1,21 @@
 import { Button, Checkbox, Form, Input, Message, Space, Typography } from '@arco-design/web-react';
 import { IconLock, IconUser } from '@arco-design/web-react/icon';
-import { getHashQueryParam, SliderCaptcha, TokenManager, type SliderCaptchaRef } from '@onebase/common';
-import { checkCaptchaApi, getCaptchaApi, login, type LoginRequest, type LoginResponse } from '@onebase/platform-center';
+import type { IIconBase } from '@icon-park/react/lib/runtime';
 import { getApplication } from '@onebase/app';
+import {
+  getHashQueryParam,
+  getOrCreateDeviceInfo,
+  SliderCaptcha,
+  TokenManager,
+  type SliderCaptchaRef
+} from '@onebase/common';
+import { checkCaptchaApi, getCaptchaApi, login, type LoginRequest, type LoginResponse } from '@onebase/platform-center';
 import { appIconMap } from '@onebase/ui-kit';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useI18n } from '../../../hooks/useI18n';
 import { useRememberMe } from '../../../hooks/useRememberMe';
 import styles from '../index.module.less';
-import type { IIconBase } from '@icon-park/react/lib/runtime';
 
 interface DynamicIconProps extends IIconBase {
   IconComponent: React.ComponentType<any>;
@@ -111,10 +117,13 @@ const Right: React.FC = () => {
         'Tenant-Id': tenantId || '1'
       };
 
+      const deviceId = await getOrCreateDeviceInfo();
+
       const loginData: LoginRequest = {
         username: values.username!,
         password: values.password!,
-        captchaVerification: captchaVerification
+        captchaVerification: captchaVerification,
+        deviceId: deviceId
       };
 
       const response: LoginResponse = await login(loginData, headers);

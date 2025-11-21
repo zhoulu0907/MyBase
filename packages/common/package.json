@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@arco-design/web-react": "^2.66.1",
+    "@fingerprintjs/fingerprintjs": "^5.0.1",
+    "@preact/signals-react": "^3.2.1",
     "@types/crypto-js": "^4.2.2",
     "@types/less": "^3.0.8",
     "@preact/signals-react": "^3.2.1",

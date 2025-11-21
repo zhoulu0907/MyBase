@@ -9,13 +9,18 @@ import tbBatch from '@/assets/images/task_center/tb-batch.svg';
 import tbFilter from '@/assets/images/task_center/tb-filter.svg';
 import { IconCheck } from '@arco-design/web-react/icon';
 import '../style/tcPage.less';
+
+import { getUserPage, type PageParam } from '@onebase/platform-center';
+
 export interface FilterParams {
   flowStatus?: FLOWSTATUS_TYPE;
   businessId?: string;
   nodeCode?: string;
   dateRange?: [Date, Date];
   keyword?: string;
-  sortType?:string
+  sortType?:string;
+  // 发起人
+  initiatorId?:string;
 }
 
 export interface OptionItem {
@@ -50,6 +55,7 @@ const TableSearch: FC<any> = ({
   const [filters, setFilters] = useState<FilterParams>({});
   const [formOptions, setFormOptions] = useState<OptionItem[]>([]);
   const [nodeOptions, setNodeOptions] = useState<OptionItem[]>([]);
+  const [startManArr, setStartManArr] = useState<any[]>([]);
   const [loadingSecond, setLoadingSecond] = useState(false);
   const [loadingThird, setLoadingThird] = useState(false);
   const [operator, setOperator] = useState<string>(selectType.EQUAL);
@@ -76,7 +82,7 @@ const TableSearch: FC<any> = ({
   const loadFormOptions = useCallback(async () => {
     setLoadingSecond(true);
     try {
-      const data = await getPageSetList({ applicationId: appId, pageSetType: pageSetFormType });
+      const data = await getPageSetList({ applicationId: appId || '', pageSetType: pageSetFormType });
       setFormOptions(data?.pageSets || []);
     } catch (error) {
       setFormOptions([]);
@@ -106,6 +112,28 @@ const TableSearch: FC<any> = ({
       ...(key === 'businessId' && { nodeCode: undefined })
     }));
   };
+
+  function initUserData() {
+    const params: PageParam = {
+      pageNo: 1,
+      pageSize: 100
+    };
+    getUserPage(params).then((res:any) => {
+      if (Array.isArray(res?.list)) {
+        const selectArr: any[] = [];
+        res.list?.forEach((item: any) => {
+          selectArr.push({
+            value: item.id,
+            label: item.nickname
+          });
+        });
+        setStartManArr(selectArr);
+      }
+    }).catch((err:any) => {
+      console.info('Api getUserPage Error:', err)
+    })
+  }
+
   const handleReset = useCallback(() => {
     const resetFilters: FilterParams = {
       flowStatus: undefined,
@@ -113,11 +141,12 @@ const TableSearch: FC<any> = ({
       nodeCode: undefined,
       dateRange: undefined,
       keyword:undefined,
-      sortType:undefined
+      sortType:undefined,
+      initiatorId: undefined
     };
     setFilters(resetFilters);
     setNodeOptions([]);
-    onReset()    
+    onReset()
   }, []);
 
   const parseParams = (params: any) => {
@@ -137,7 +166,13 @@ const TableSearch: FC<any> = ({
     if (params.flowStatus) {
       result.flowStatus = Array.isArray(params.flowStatus) ? params.flowStatus.join(',') : params.flowStatus;
     }
-
+    if (params.initiatorId) {
+      if (Array.isArray(params.initiatorId)) {
+        result.initiatorId = params.initiatorId.join(',');
+      } else {
+        result.initiatorId = params.initiatorId;
+      }
+    }
     if (params.dateRange) {
       result.submitTimeStart = params.dateRange[0];
       result.submitTimeEnd = params.dateRange[1];
@@ -151,6 +186,7 @@ const TableSearch: FC<any> = ({
 
   useEffect(() => {
     loadFormOptions();
+    initUserData()
   }, []);
   return (
     <div className="title-rgt-tb-search">
@@ -279,6 +315,33 @@ const TableSearch: FC<any> = ({
                   </Select>
                 </div>
                 <Divider />
+                {uiConfig.hasFilter?.hasStartMan && <div className="filter-line">
+                  <InputTag
+                    className="fisrt-input-tag"
+                    style={{ width: 150 }}
+                    addBefore={<IconCheck />}
+                    allowClear
+                    readOnly
+                    inputValue="发起人"
+                  />
+                  <div className="min-text">等于</div>
+                  <Select
+                      className="end-select"
+                      placeholder="请选择发起人"
+                      style={{ flex: 1 }}
+                      mode="multiple"
+                      value={filters.initiatorId}
+                      onChange={(value: any) => handleFilterChange('initiatorId', value)}
+                      allowClear
+                      maxTagCount="responsive"
+                    >
+                      {startManArr.map((option) => (
+                        <Option key={option.value} value={option.value}>
+                          {option.label}
+                        </Option>
+                      ))}
+                  </Select>
+                </div>}
                 <div className="filter-line">
                   <InputTag
                     className="fisrt-input-tag"
@@ -286,10 +349,9 @@ const TableSearch: FC<any> = ({
                     addBefore={<IconCheck />}
                     allowClear
                     readOnly
-                    inputValue="发起时间"
+                    inputValue={uiConfig.hasFilter?.dateTimeLabel || '发起时间'}
                   />
                   <div className="min-text">选择范围</div>
-
                   <RangePicker
                     mode="date"
                     value={filters.dateRange}

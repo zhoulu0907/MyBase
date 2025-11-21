@@ -1,5 +1,14 @@
 import { bpmService,runtimeBpmService } from './clients';
-import { GetByBusinessId, SaveRequest, PublishRequest,VersionMgmtRequest,UpdateVersionAlias,GetFlowPreview } from '../types/app_bpm';
+import { 
+  GetByBusinessId,
+  SaveRequest,
+  PublishRequest,
+  VersionMgmtRequest,
+  UpdateVersionAlias,
+  GetFlowPreview,
+  AgentPage,
+  AgentCreate
+  } from '../types/app_bpm';
 export const getByBusinessId = (params:GetByBusinessId) => {
   return bpmService.get('/design/get-by-business-id', params);
 };
@@ -28,4 +37,22 @@ export const versionMgmtDelete = (params: PublishRequest) => {
 export const updateVersionAlias = (params: UpdateVersionAlias) => {
   return bpmService.post('/version-mgmt/update-version-alias', params);
 };
+
+export const agentPage = (params: AgentPage) => {
+  return runtimeBpmService.get('/agent/page',params);
+};
+
+export const agentCreate = (params: AgentCreate) => {
+  return runtimeBpmService.post('/agent/create',params);
+};
+
+export const agentUpdate = (params: AgentCreate) => {
+  return runtimeBpmService.post('agent/update',params);
+};
+
+export const agentRevoke = (params: {id:string}) => {
+  return runtimeBpmService.post('agent/revoke',params);
+};
+
+
 

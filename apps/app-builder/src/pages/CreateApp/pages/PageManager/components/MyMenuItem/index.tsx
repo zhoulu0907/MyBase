@@ -232,7 +232,13 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
           {menuIcon.indexOf('-taskicon') > 0 && (
             <i className={`iconfont ${menuIcon}`} style={{ marginRight: '16px' }} />
           )}
-          <span className={styles.name} style={{ maxWidth: maxWidth + 'px' }}>
+          <span
+            className={styles.name}
+            style={{
+              maxWidth: maxWidth + 'px',
+              color: curMenu.value?.id === menuID ? 'rgb(var(--primary-6))' : '#333'
+            }}
+          >
             {label}
           </span>
         </div>

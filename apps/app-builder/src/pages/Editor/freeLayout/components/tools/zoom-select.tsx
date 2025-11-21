@@ -12,7 +12,7 @@ import { SelectZoom } from './styles';
 import styles from './index.module.less';
 
 export const ZoomSelect = ({ minZoom = 0.5 }: { minZoom?: number }) => {
-  const tools = usePlaygroundTools({ maxZoom: 2, minZoom });
+  const tools = usePlaygroundTools({ maxZoom: 1.5, minZoom });
   const playground = usePlayground();
   const [dropDownVisible, openDropDown] = useState(false);
   return (
@@ -29,7 +29,6 @@ export const ZoomSelect = ({ minZoom = 0.5 }: { minZoom?: number }) => {
               <Dropdown.Item onClick={() => playground.config.updateZoom(0.5)}>50%</Dropdown.Item>
               <Dropdown.Item onClick={() => playground.config.updateZoom(1)}>100%</Dropdown.Item>
               <Dropdown.Item onClick={() => playground.config.updateZoom(1.5)}>150%</Dropdown.Item>
-              <Dropdown.Item onClick={() => playground.config.updateZoom(2.0)}>200%</Dropdown.Item>
             </Dropdown.Menu>
           }
         >
