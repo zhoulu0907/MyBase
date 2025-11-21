@@ -62,11 +62,6 @@ export const updateUserStatusInCorp = (id: number, status: number) => {
   return corpService.post('/user/update-status', data);
 };
 
-// 获取用户精简信息列表
-export const getSimpleUserListInCorp = (): Promise<UserVO[]> => {
-  return corpService.get('/platform/admin/list');
-};
-
 // 分页获取用户精简信息列表
 export const getSimpleUserPageInCorp = (params: PageParam): Promise<PageResult<UserVO>> => {
   return corpService.get('/user/simple-page', params);

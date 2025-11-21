@@ -53,9 +53,9 @@ export const statusOptions = [
 
 export const statusColorMap = {
   [StatusEnum.ENABLE]: 'green',
-  [StatusEnum.DISABLE]: 'gray',
+  [StatusEnum.DISABLE]: 'danger',
   [StatusEnum.ALL]:'',
-  [StatusEnum.EXPIRED]:'',
+  [StatusEnum.EXPIRED]:'gray',
 };
 
 export enum StatusLabelEnum {
