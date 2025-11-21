@@ -26,7 +26,10 @@ const PAGE_TYPE = {
   ENTITY_TABLE: 'ENTITY_TABLE'
 };
 
-export const EntityPageContainer: React.FC<{ appId: string }> = ({ appId }) => {
+export const EntityPageContainer: React.FC<{ appId: string; handleMenuClick: (key: string) => void }> = ({
+  appId,
+  handleMenuClick
+}) => {
   const [activeTab, setActiveTab] = useState(PAGE_TYPE.ER_CHART);
   const [refreshEntityList, setRefreshEntityList] = useState(false);
   const [onlyUpdateNode, setOnlyUpdateNode] = useState(false);
@@ -138,6 +141,7 @@ export const EntityPageContainer: React.FC<{ appId: string }> = ({ appId }) => {
             onlyUpdateNode={onlyUpdateNode}
             setOnlyUpdateNode={setOnlyUpdateNode}
             dsData={dsData as DatasourceRecord}
+            handleMenuClick={handleMenuClick}
           />
         </div>
       )}

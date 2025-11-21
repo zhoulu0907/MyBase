@@ -92,7 +92,7 @@ const DataFactoryPage: React.FC = () => {
       {/* 右侧内容 */}
       <Layout.Content className={styles.content}>
         {activeTab === 'data-source' && <DataSourcePage />}
-        {activeTab === 'check-entity' && <EntityPage appId={appId} />}
+        {activeTab === 'check-entity' && <EntityPage appId={appId} handleMenuClick={handleMenuClick} />}
         {activeTab === 'data-dict' && <DataDictPage />}
         {activeTab === 'data-factory' && <EtlDataFactoryPage />}
         {activeTab === 'datasource-management' && <DataSourceManagementPage />}

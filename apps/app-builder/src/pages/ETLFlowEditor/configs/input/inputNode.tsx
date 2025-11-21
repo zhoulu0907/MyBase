@@ -1,14 +1,13 @@
 import FieldIcon from '@/assets/images/etl/field.svg';
-import { Button, Input } from '@arco-design/web-react';
+import { Button } from '@arco-design/web-react';
 import { listETLTables, previewETLDatasource, type ETLTable } from '@onebase/app';
 import { ETLDrawerTab, etlEditorSignal } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
 import DataPreview from '../../components/dataPreview';
+import DataRemark from '../../components/dataRemark';
 import DatasourceModal from './components/datasourceModal';
 import styles from './index.module.less';
-
-const { TextArea } = Input;
 
 export const InputNodeConfig: React.FC = () => {
   useSignals();
@@ -16,7 +15,6 @@ export const InputNodeConfig: React.FC = () => {
   const { curDrawerTab, nodeData, curNode } = etlEditorSignal;
 
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [remark, setRemark] = useState<string>(nodeData.value[curNode.value.id]?.description || '');
   const [tables, setTables] = useState<ETLTable[]>([]);
   const [previewData, setPreviewData] = useState<{
     columns: any[];
@@ -25,14 +23,6 @@ export const InputNodeConfig: React.FC = () => {
     columns: [],
     data: []
   });
-
-  const handleChangeRemark = (value: string) => {
-    if (!curNode.value.id) {
-      return;
-    }
-    nodeData.value[curNode.value.id].description = value;
-    setRemark(value);
-  };
 
   useEffect(() => {
     if (nodeData.value[curNode.value.id]?.config?.datasourceId && nodeData.value[curNode.value.id]?.config?.tableId) {
@@ -117,15 +107,7 @@ export const InputNodeConfig: React.FC = () => {
           </div>
         </div>
       )}
-      {curDrawerTab.value === ETLDrawerTab.NODE_REMARK && (
-        <TextArea
-          onChange={handleChangeRemark}
-          value={remark}
-          placeholder="请输入节点备注"
-          autoSize={{ minRows: 3, maxRows: 6 }}
-          allowClear
-        />
-      )}
+      {curDrawerTab.value === ETLDrawerTab.NODE_REMARK && <DataRemark />}
 
       <DatasourceModal
         isModalVisible={isModalVisible}

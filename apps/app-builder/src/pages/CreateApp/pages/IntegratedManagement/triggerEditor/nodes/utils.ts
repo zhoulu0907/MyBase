@@ -360,7 +360,7 @@ export const searchNodeById = (nodeId: string, nodes: any[]) => {
 export const hasNodeTitle = (title: string, nodes: any[]): boolean => {
   let hasTitle = false;
   for (let ele of nodes) {
-    if (ele.data.title === title) {
+    if (ele.data?.title === title) {
       hasTitle = true;
       return hasTitle;
     }

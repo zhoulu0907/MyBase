@@ -218,9 +218,7 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
       }
     };
 
-    if (editRule?.id) {
-      initFormData();
-    }
+    initFormData();
   }, [visible, editRule?.id, form, ruleType]);
 
   return (

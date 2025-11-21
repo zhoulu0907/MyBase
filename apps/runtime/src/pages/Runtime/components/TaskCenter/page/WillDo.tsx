@@ -43,7 +43,7 @@ const WillDo: FC<WillDoProps> = ({ appId }) => {
       ellipsis: true
     },
     {
-      title: '流程状态',
+      title: '当前节点状态',
       dataIndex: 'flowStatus',
       render: (val: FLOWSTATUS_TYPE) => {
         if (val === FLOWSTATUS_TYPE.APPROVED) {
@@ -205,7 +205,7 @@ const WillDo: FC<WillDoProps> = ({ appId }) => {
       <div className="table-title-box">
         <b>待我处理</b>
         <TableSearch
-          uiConfig={{ hasInput: true, hasFilter: true, hasSort: true, hasBatch: true }}
+          uiConfig={{ hasInput: true, hasFilter: {hasStartMan: true}, hasSort: true, hasBatch: true }}
           batchEvent={handleBatchClick}
           onReset={handleReset}
           onFilterChange={handleSearch}

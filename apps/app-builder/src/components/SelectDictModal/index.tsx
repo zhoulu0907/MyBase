@@ -13,6 +13,7 @@ export interface SelectDictModalProps {
   onOk: (dict?: DictItem) => void;
   onCancel: () => void;
   dictTypeId?: string; // 回显参数：传入时自动选中并展开对应字典
+  gotoDictPage?: () => void;
 }
 
 // 预览展示的最大数量
@@ -23,7 +24,14 @@ const DICT_OWNER_TYPE = {
   TENANT: 'tenant'
 };
 
-export default function SelectDictModal({ appId, visible, onOk, onCancel, dictTypeId }: SelectDictModalProps) {
+export default function SelectDictModal({
+  appId,
+  visible,
+  onOk,
+  onCancel,
+  dictTypeId,
+  gotoDictPage
+}: SelectDictModalProps) {
   const [activeTab, setActiveTab] = useState<string>(DICT_OWNER_TYPE.APP);
   const [loadingList, setLoadingList] = useState(false);
   const [showMoreMap, setShowMoreMap] = useState<Record<string, boolean>>({});
@@ -104,14 +112,14 @@ export default function SelectDictModal({ appId, visible, onOk, onCancel, dictTy
 
   const footer = (
     <div className={styles.footerBar}>
-      {/* TODO: 跳转到数据字典管理页面 */}
-      <Button
-        type="text"
-        size="small"
-        onClick={() => navigate(`/onebase/create-app/data-factory?appId=${appId || ''}`)}
-      >
-        数据字典管理
-      </Button>
+      <Space>
+        {typeof gotoDictPage === 'function' && (
+          <Button type="text" size="small" onClick={gotoDictPage}>
+            数据字典管理
+          </Button>
+        )}
+      </Space>
+
       <Space>
         <Button type="outline" size="small" onClick={onCancel}>
           取消

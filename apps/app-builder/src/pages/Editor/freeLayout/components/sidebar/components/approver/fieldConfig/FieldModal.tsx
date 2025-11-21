@@ -28,13 +28,15 @@ export default function FieldModal({
   const invertKey = invert.map((item: any) => {
     return item.fieldId;
   });
-  const useCkOptions = ckOptions.map((item: any) => {
-    return {
-      label: item.displayName,
-      value: item.fieldId,
-      disabled: invertKey.includes(item.fieldId)
-    };
-  });
+  const useCkOptions = ckOptions
+    .filter((item: any) => item.isSystemField === 0)
+    .map((item: any) => {
+      return {
+        label: item.displayName,
+        value: item.fieldId,
+        disabled: invertKey.includes(item.fieldId)
+      };
+    });
 
   function handleCheckChange(keyArr: Array<any>) {
     setCkedKey(keyArr);

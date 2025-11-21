@@ -12,7 +12,9 @@ import {
   type ETLTable
 } from '@onebase/app';
 import { etlEditorSignal, getHashQueryParam } from '@onebase/common';
+import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useMemo, useState } from 'react';
+import { clearDownStreamNodeConfig } from '../../../utils';
 import CreateExternalModal from '../createExternalModal';
 import styles from './index.module.less';
 
@@ -28,7 +30,9 @@ interface DatasourceModalProps {
 }
 
 const DatasourceModal: React.FC<DatasourceModalProps> = ({ isModalVisible, onClose, onOk }) => {
-  const { curNode, setNodeData, nodeData } = etlEditorSignal;
+  useSignals();
+
+  const { curNode, setNodeData, nodeData, graphData } = etlEditorSignal;
 
   const [activeTab, setActiveTab] = useState('external');
   const [allDatasources, setAllDatasources] = useState<ETLDatasource[]>([]);
@@ -131,7 +135,10 @@ const DatasourceModal: React.FC<DatasourceModalProps> = ({ isModalVisible, onClo
       }))
     };
 
+    // TODO(mickey): 封装成一个方法,设置节点数据和清零下游节点配置都执行一下
     setNodeData(curNode.value.id, payload);
+    clearDownStreamNodeConfig(curNode.value.id, graphData.value, nodeData.value);
+
     onOk?.();
   };
   const handleClose = () => {

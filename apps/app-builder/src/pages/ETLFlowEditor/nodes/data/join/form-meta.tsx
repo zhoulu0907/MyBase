@@ -1,16 +1,21 @@
-import { type FormMeta, type FormRenderProps, type WorkflowEdgeJSON } from '@flowgram.ai/free-layout-editor';
-import { useEffect, useState } from 'react';
+import JoinIcon from '@/assets/images/etl/node_join.svg';
+import { type FormMeta, type FormRenderProps } from '@flowgram.ai/free-layout-editor';
+import { etlEditorSignal } from '@onebase/common';
+import { useSignals } from '@preact/signals-react/runtime';
 import { type FlowNodeJSON } from '../../../typings';
 import styles from './index.module.less';
 
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
-  const [title, setTitle] = useState('横向连接');
+  useSignals();
 
-  useEffect(() => {
-    setTitle(form.getValueIn('title'));
-  }, [form]);
+  const { nodeData } = etlEditorSignal;
 
-  return <div className={styles.joinNode}>{title}</div>;
+  return (
+    <div className={styles.joinNode}>
+      <img src={JoinIcon} alt="union" />
+      {nodeData.value[form.getValueIn('id')]?.title || '横向连接节点'}
+    </div>
+  );
 };
 
 export const formMeta: FormMeta<FlowNodeJSON['data']> = {

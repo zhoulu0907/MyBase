@@ -55,7 +55,15 @@ const AdvanceSelectModal: React.FC<AdvanceSelectModalProps> = ({
     }, []);
 
     useEffect(() => {
-      reset();
+      let finalSelectValue = undefined;
+      if(typeof finalSelect?.value === 'object' && finalSelect?.value !== null) {
+        finalSelectValue = finalSelect?.value.key;
+      } else {
+        finalSelectValue = finalSelect?.value;
+      }
+      if(currentSelectUserID !== finalSelectValue) {
+        reset();
+      }
     },[currentSelectUserID])
 
     useEffect(() => {

@@ -6,9 +6,6 @@ export const CarbonCopyFormRender = ({ form }: FormRenderProps) => {
   return (
     <>
       <FormHeader />
-      <FormContent>
-       
-      </FormContent>
     </>
   );
 };

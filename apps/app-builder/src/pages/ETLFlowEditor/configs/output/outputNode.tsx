@@ -1,4 +1,4 @@
-import { Button, Grid, Input, Message, Select } from '@arco-design/web-react';
+import { Button, Grid, Message, Select } from '@arco-design/web-react';
 import {
   listAppETLDatasource,
   listETLTableColumns,
@@ -10,13 +10,12 @@ import {
 import { ETLDrawerTab, etlEditorSignal, getHashQueryParam } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
+import DataRemark from '../../components/dataRemark';
 import FieldModal, { type FieldMapping } from './components/fieldModal';
 import styles from './index.module.less';
 
 const Row = Grid.Row;
 const Col = Grid.Col;
-
-const { TextArea } = Input;
 
 export const OutputNodeConfig: React.FC = () => {
   useSignals();
@@ -36,8 +35,6 @@ export const OutputNodeConfig: React.FC = () => {
   const [fieldMappings, setFieldMappings] = useState<FieldMapping[]>(
     nodeData.value[curNode.value.id]?.config?.fields || []
   );
-
-  const [remark, setRemark] = useState<string>(nodeData.value[curNode.value.id]?.description || '');
 
   useEffect(() => {
     handleListAppETLDatasource();
@@ -157,14 +154,6 @@ export const OutputNodeConfig: React.FC = () => {
     setFieldMappings(validFields);
   };
 
-  const handleChangeRemark = (value: string) => {
-    if (!curNode.value.id) {
-      return;
-    }
-    nodeData.value[curNode.value.id].description = value;
-    setRemark(value);
-  };
-
   return (
     <div className={styles.config}>
       {curDrawerTab.value === ETLDrawerTab.DATA_CONFIG && (
@@ -219,15 +208,7 @@ export const OutputNodeConfig: React.FC = () => {
 
       {curDrawerTab.value === ETLDrawerTab.DATA_PREVIEW && <div className={styles.dataPreview}></div>}
 
-      {curDrawerTab.value === ETLDrawerTab.NODE_REMARK && (
-        <TextArea
-          onChange={handleChangeRemark}
-          value={remark}
-          placeholder="请输入节点备注"
-          autoSize={{ minRows: 3, maxRows: 6 }}
-          allowClear
-        />
-      )}
+      {curDrawerTab.value === ETLDrawerTab.NODE_REMARK && <DataRemark />}
 
       <FieldModal
         targetColumns={targetColumns.map((option: ELTColumn) => ({

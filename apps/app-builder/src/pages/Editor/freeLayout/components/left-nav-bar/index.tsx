@@ -31,7 +31,7 @@ const LeftNavBar: React.FC = () => {
       navList: [
         { img: approver, title: '审批人', type: 'approver', registry: ApproverNodeRegistry },
         { img: executor_big, title: '执行人', type: 'executor', registry: ExecutorNodeRegistry },
-        { img: ccto, title: '抄送人', type: 'ccRecipients', registry: CcRecipientsNodeRegistry }
+        { img: ccto, title: '抄送人', type: 'cc', registry: CcRecipientsNodeRegistry }
       ]
     },
     {
