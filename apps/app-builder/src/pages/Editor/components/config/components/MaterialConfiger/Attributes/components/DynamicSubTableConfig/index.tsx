@@ -1,6 +1,8 @@
 import { Form, Checkbox, Switch, Radio } from '@arco-design/web-react';
 import { useEffect, useState } from 'react';
 import styles from '../../index.module.less';
+import { CONFIG_TYPES } from '@onebase/ui-kit';
+import { registerConfigRenderer } from '../../registry';
 
 export interface DynamicSubTableConfigProps {
   handlePropsChange: (key: string, value: any) => void;
@@ -104,3 +106,15 @@ const DynamicSubTableConfig: React.FC<DynamicSubTableConfigProps> = ({ handlePro
   );
 };
 export default DynamicSubTableConfig;
+
+registerConfigRenderer(
+  CONFIG_TYPES.SUB_TABLE,
+  ({ id, handlePropsChange, item, configs }) => (
+    <DynamicSubTableConfig
+      id={id}
+      handlePropsChange={handlePropsChange}
+      item={item}
+      configs={configs}
+    />
+  )
+);

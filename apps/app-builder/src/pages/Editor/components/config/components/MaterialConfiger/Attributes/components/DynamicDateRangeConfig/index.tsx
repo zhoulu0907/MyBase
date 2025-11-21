@@ -1,6 +1,7 @@
 import { Form, Grid, Checkbox, Select, DatePicker, Message } from '@arco-design/web-react';
 import { useEffect, useState } from 'react';
-import { WEEK_OPTIONS, WEEK_OPTIONS_LABEL, DATE_EXTREME_TYPE, DATE_DYNAMIC_TYPE, getPopupContainer } from '@onebase/ui-kit';
+import { WEEK_OPTIONS, WEEK_OPTIONS_LABEL, DATE_EXTREME_TYPE, DATE_DYNAMIC_TYPE, getPopupContainer, CONFIG_TYPES } from '@onebase/ui-kit';
+import { registerConfigRenderer } from '../../registry';
 import styles from '../../index.module.less';
 
 export interface DynamicDateRangeConfigProps {
@@ -235,3 +236,15 @@ const DynamicDateRangeConfig: React.FC<DynamicDateRangeConfigProps> = ({ handleP
   );
 };
 export default DynamicDateRangeConfig;
+
+registerConfigRenderer(
+  CONFIG_TYPES.DATE_RANGE,
+  ({ id, handlePropsChange, item, configs }) => (
+    <DynamicDateRangeConfig
+      id={id}
+      handlePropsChange={handlePropsChange}
+      item={item}
+      configs={configs}
+    />
+  )
+);

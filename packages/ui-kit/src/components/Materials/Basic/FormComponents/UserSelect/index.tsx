@@ -125,6 +125,7 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
     return JSON.stringify(currentSelectUser) || '--';
   };
 
+
   return (
     <div className="formWrapper">
       <Form.Item

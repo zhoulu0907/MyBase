@@ -1,6 +1,8 @@
 import { Button, Form, Input, Radio, Space, Tooltip, Select } from '@arco-design/web-react';
 import { IconDelete, IconDragDotVertical } from '@arco-design/web-react/icon';
 import React, { useEffect, useState } from 'react';
+import { registerConfigRenderer } from '../../registry';
+import { CONFIG_TYPES } from '@onebase/ui-kit';
 import { ReactSortable } from 'react-sortablejs';
 import styles from '../../index.module.less';
 import { useAppEntityStore, DEFAULT_OPTIONS_TYPE, getPopupContainer } from '@onebase/ui-kit';
@@ -316,3 +318,7 @@ const DynamicRadioConfig: React.FC<DynamicRadioConfigProps> = ({ handlePropsChan
 };
 
 export default DynamicRadioConfig;
+
+registerConfigRenderer(CONFIG_TYPES.RADIO_DATA, ({ id, handlePropsChange, item, configs }) => (
+  <DynamicRadioConfig id={id} handlePropsChange={handlePropsChange} item={item} configs={configs} />
+));

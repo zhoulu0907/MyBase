@@ -1,5 +1,7 @@
 import { Form, Select, Checkbox } from '@arco-design/web-react';
 import { useEffect, useState } from 'react';
+import { registerConfigRenderer } from '../../registry';
+import { CONFIG_TYPES } from '@onebase/ui-kit';
 import { TIME_OPTIONS, TIME_VALUES, getPopupContainer } from '@onebase/ui-kit';
 import styles from '../../index.module.less';
 
@@ -53,3 +55,7 @@ const DynamicTimeFormatConfig: React.FC<DynamicTimeFormatConfigProps> = ({
   );
 };
 export default DynamicTimeFormatConfig;
+
+registerConfigRenderer(CONFIG_TYPES.TIME_FORMAT, ({ id, handlePropsChange, handleConfigsChange, item, configs }) => (
+  <DynamicTimeFormatConfig id={id} handlePropsChange={handlePropsChange} handleConfigsChange={handleConfigsChange} item={item} configs={configs} />
+));

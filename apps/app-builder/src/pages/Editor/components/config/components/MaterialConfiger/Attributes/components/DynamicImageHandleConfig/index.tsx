@@ -1,6 +1,8 @@
 import { Form, Checkbox, Input } from '@arco-design/web-react';
 import styles from '../../index.module.less';
 import { useEffect, useState } from 'react';
+import { registerConfigRenderer } from '../../registry';
+import { CONFIG_TYPES } from '@onebase/ui-kit';
 
 export interface DynamicImageHandleConfigProps {
   handlePropsChange: (key: string, value: any) => void;
@@ -58,3 +60,7 @@ const DynamicImageHandleConfig: React.FC<DynamicImageHandleConfigProps> = ({
 };
 
 export default DynamicImageHandleConfig;
+
+registerConfigRenderer(CONFIG_TYPES.IMAGE_HANDLE, ({ id, handlePropsChange, item, configs }) => (
+  <DynamicImageHandleConfig id={id} handlePropsChange={handlePropsChange} item={item} configs={configs} />
+));
