@@ -4,7 +4,7 @@ import type { DeptForm, UserVO } from '@onebase/platform-center';
 import { getSimpleDeptList, getSimpleUserList } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
 import { hasPermission } from '@/utils/permission';
-import { TENANT_USER_QUERY } from '@/constants/permission';
+import { CORP_USER_QUERY } from '@/constants/permission';
 
 const { Row, Col } = Grid;
 const FormItem = Form.Item;
@@ -36,7 +36,7 @@ const DepartmentModal: React.FC<DepartmentModalProps> = (props) => {
       }
 
       // 检查是否有用户查询权限
-      const userPermission = hasPermission(TENANT_USER_QUERY);
+      const userPermission = hasPermission(CORP_USER_QUERY);
       setHasUserQueryPermission(userPermission);
 
       // 获取用户列表和部门树

@@ -11,7 +11,7 @@ import UserFormModal from './UserFormModal';
 import PlaceholderPanel from '@/components/PlaceholderPanel';
 import { PermissionButton as Button } from '@/components/PermissionControl';
 import { hasPermission, hasAllPermissions } from '@/utils/permission';
-import { TENANT_USER_PERMISSION as ACTIONS } from '@/constants/permission';
+import { CORP_USER_PERMISSION as ACTIONS } from '@/constants/permission';
 import { AddMembers } from '@onebase/common';
 import { type AuthRoleUsersPageRespVO } from '@onebase/app';
 

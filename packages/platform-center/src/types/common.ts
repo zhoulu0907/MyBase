@@ -21,3 +21,8 @@ export enum StatusEnum {
   ENABLE = 1,
   EXPIRED = 2
 }
+
+export enum CodeType {
+  CORP = 'corp',
+  TENANT = 'tenant'
+}

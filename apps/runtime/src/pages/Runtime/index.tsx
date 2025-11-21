@@ -11,7 +11,7 @@ import {
   type ListApplicationMenuReq
 } from '@onebase/app';
 import { TokenManager } from '@onebase/common';
-import { getPermissionInfo, runtimeLogout } from '@onebase/platform-center';
+import { getPermissionInfo, runtimeLogout, CodeType } from '@onebase/platform-center';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -67,7 +67,7 @@ const Runtime: React.FC = () => {
   }, []);
 
   const getUserInfo = async () => {
-    const res = await getPermissionInfo();
+    const res = await getPermissionInfo(CodeType.CORP);
     UserPermissionManager.setUserPermissionInfo(res);
     // userPermissionSignal.setPermissionInfo(res);
     setNickname(res.user.nickname);

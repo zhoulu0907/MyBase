@@ -13,7 +13,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import type { MenuItemType } from './menuData';
 import styles from './sider.module.less';
 import { hasMenu } from '@/utils/permission';
-import { TENANT_MENUS } from '@/constants/permission'
+import { CORP_MENUS } from '@/constants/permission'
 
 const { Sider } = Layout;
 const MenuItem = Menu.Item;
@@ -39,35 +39,35 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
         title: '组织管理',
         icon: <IconList style={iconStyle} />,
         path: '/onebase/setting/organization',
-        permissionKey: TENANT_MENUS.DEPT
+        permissionKey: CORP_MENUS.DEPT
       },
       {
         key: 'user',
         title: '用户管理',
         icon: <IconUserGroup style={iconStyle} />,
         path: '/onebase/setting/user',
-        permissionKey: TENANT_MENUS.USER
+        permissionKey: CORP_MENUS.USER
       },
       {
         key: 'enterpriseInfo',
         title: '企业信息',
         icon: <IconIdcard style={iconStyle} />,
         path: '/onebase/setting/enterpriseInfo',
-        permissionKey: TENANT_MENUS.CORP_INFO
+        permissionKey: CORP_MENUS.CORP_INFO
       },
       {
         key: 'authorized-application',
         title: '授权应用',
         icon: <IconIdcard style={iconStyle} />,
         path: '/onebase/setting/authorized-application',
-        permissionKey: TENANT_MENUS.AUTHORIZED
+        permissionKey: CORP_MENUS.AUTHORIZED
       },
       {
         key: 'tenant',
         title: '个人中心',
         icon: <IconIdcard style={iconStyle} />,
         path: '/onebase/setting/tenant',
-        permissionKey: TENANT_MENUS.INFO
+        permissionKey: CORP_MENUS.INFO
       }
     ],
     []

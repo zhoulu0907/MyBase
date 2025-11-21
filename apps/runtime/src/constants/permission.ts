@@ -19,52 +19,52 @@ export enum PUBLISH_MODULE {
 }
 
 /** 菜单-租户管理 */
-export const TENANT_MENUS = {
-  USER: 'tenant:user',
-  ROLE: 'tenant:role',
-  DEPT: 'tenant:dept',
-  DICT: 'tenant:dict',
-  INFO: 'tenant:info',
-  AUTHORIZED: 'tenant:authorized',
-  CORP_INFO:'tenant:corpInfo'
+export const CORP_MENUS = {
+  USER: 'corp:user',
+  ROLE: 'corp:role',
+  DEPT: 'corp:dept',
+  DICT: 'corp:dict',
+  INFO: 'corp:info',
+  AUTHORIZED: 'corp:authorized',
+  CORP_INFO:'corp:corpInfo'
 }
 
 /** 租户管理-用户管理 */
-export const TENANT_USER_QUERY = 'tenant:user:query'; // 查询用户
-export const TENANT_USER_CREATE = 'tenant:user:create'; // 增加用户
-export const TENANT_USER_UPDATE = 'tenant:user:update'; // 修改用户
-export const TENANT_USER_DELETE = 'tenant:user:delete'; // 删除用户
-export const TENANT_USER_STATUS = 'tenant:user:enable'; // 启用/禁用用户
-export const TENANT_USER_RESET = 'tenant:user:reset'; // 重置密码
-export const TENANT_USER_PERMISSION = {
-  QUERY: TENANT_USER_QUERY,
-  CREATE: TENANT_USER_CREATE,
-  UPDATE: TENANT_USER_UPDATE,
-  DELETE: TENANT_USER_DELETE,
-  RESET: TENANT_USER_RESET,
-  STATUS: TENANT_USER_STATUS
+export const CORP_USER_QUERY = 'corp:user:query'; // 查询用户
+export const CORP_USER_CREATE = 'corp:user:create'; // 增加用户
+export const CORP_USER_UPDATE = 'corp:user:update'; // 修改用户
+export const CORP_USER_DELETE = 'corp:user:delete'; // 删除用户
+export const CORP_USER_STATUS = 'corp:user:enable'; // 启用/禁用用户
+export const CORP_USER_RESET = 'corp:user:reset'; // 重置密码
+export const CORP_USER_PERMISSION = {
+  QUERY: CORP_USER_QUERY,
+  CREATE: CORP_USER_CREATE,
+  UPDATE: CORP_USER_UPDATE,
+  DELETE: CORP_USER_DELETE,
+  RESET: CORP_USER_RESET,
+  STATUS: CORP_USER_STATUS
 }
 
 /** 租户管理-组织管理 */
-export const TENANT_DEPT_QUERY = 'tenant:dept:query';
-export const TENANT_DEPT_CREATE = 'tenant:dept:create';
-export const TENANT_DEPT_UPDATE = 'tenant:dept:update';
-export const TENANT_DEPT_DELETE = 'tenant:dept:delete';
-export const TENANT_DEPT_SUB_DEPT = 'tenant:dept:update'; 
-export const TENANT_DEPT_PERMISSION = {
-  QUERY: TENANT_DEPT_QUERY,
-  CREATE: TENANT_DEPT_CREATE,
-  UPDATE: TENANT_DEPT_UPDATE,
-  DELETE: TENANT_DEPT_DELETE,
-  SUB_DEPT: TENANT_DEPT_SUB_DEPT
+export const CORP_DEPT_QUERY = 'corp:dept:query';
+export const CORP_DEPT_CREATE = 'corp:dept:create';
+export const CORP_DEPT_UPDATE = 'corp:dept:update';
+export const CORP_DEPT_DELETE = 'corp:dept:delete';
+export const CORP_DEPT_SUB_DEPT = 'corp:dept:update'; 
+export const CORP_DEPT_PERMISSION = {
+  QUERY: CORP_DEPT_QUERY,
+  CREATE: CORP_DEPT_CREATE,
+  UPDATE: CORP_DEPT_UPDATE,
+  DELETE: CORP_DEPT_DELETE,
+  SUB_DEPT: CORP_DEPT_SUB_DEPT
 }
 
 /** 租户管理-租户信息 */
-export const TENANT_INFO_QUERY = 'tenant:info:query';
-export const TENANT_INFO_UPDATE = 'tenant:info:update';
-export const TENANT_INFO_PERMISSION = {
-  QUERY: TENANT_INFO_QUERY,
-  UPDATE: TENANT_INFO_UPDATE,
+export const CORP_INFO_QUERY = 'corp:info:query';
+export const CORP_INFO_UPDATE = 'corp:info:update';
+export const CORP_INFO_PERMISSION = {
+  QUERY: CORP_INFO_QUERY,
+  UPDATE: CORP_INFO_UPDATE,
 }
 /** 应用管理-我的应用管理 */
 export const APP_MYAPP_QUERY = 'app:app:query';

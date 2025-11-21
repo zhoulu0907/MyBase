@@ -5,7 +5,8 @@ import {
   RuntimeAccountLoginRequest,
   RuntimeMobileLoginRequest,
   TenantLoginRequest,
-  RuntimeCorpLoginRequest
+  RuntimeCorpLoginRequest,
+  CodeType,
 } from '../types';
 import { platformService, runtimeService, systemService } from './clients';
 
@@ -17,8 +18,8 @@ export const tenantLogin = (req: TenantLoginRequest, headers: Headers) => {
   return systemService.post('/auth/tenant-login', req, { headers });
 };
 
-export const getPermissionInfo = () => {
-  return systemService.get('/auth/get-permission-info');
+export const getPermissionInfo = (code?: CodeType) => {
+  return systemService.get(`/auth/get-permission-info?code=${code}`);
 };
 
 export const adminLogin = (req: LoginRequest, headers: Headers) => {

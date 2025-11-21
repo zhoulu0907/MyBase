@@ -6,7 +6,7 @@ import DeptTreeCmp from './components/DeptTree';
 import UserTable from './components/UserTable';
 import PlaceholderPanel from '@/components/PlaceholderPanel';
 import { hasPermission } from '@/utils/permission';
-import { TENANT_USER_QUERY, TENANT_DEPT_QUERY } from '@/constants/permission';
+import { CORP_USER_QUERY, CORP_DEPT_QUERY } from '@/constants/permission';
 import styles from './index.module.less';
 const { Sider, Content } = Layout;
 
@@ -49,7 +49,7 @@ export default function UserPage() {
         collapsible={false}
         trigger={null}
       >
-        <PlaceholderPanel hasPermission={hasPermission(TENANT_DEPT_QUERY)}>
+        <PlaceholderPanel hasPermission={hasPermission(CORP_USER_QUERY)}>
           <DeptTreeCmp
             selectedDeptId={selectedDeptId}
             onDeptSelect={setSelectedDeptId}
@@ -60,7 +60,7 @@ export default function UserPage() {
         </PlaceholderPanel>
       </Sider>
       <Content className={styles.rightPanel}>
-        <PlaceholderPanel hasPermission={hasPermission(TENANT_USER_QUERY)}>
+        <PlaceholderPanel hasPermission={hasPermission(CORP_USER_QUERY)}>
           <UserTable
             selectedDeptId={selectedDeptId}
             deptTree={deptTree}

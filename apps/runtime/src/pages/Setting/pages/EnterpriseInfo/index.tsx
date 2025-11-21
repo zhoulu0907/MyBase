@@ -1,5 +1,5 @@
 import PlaceholderPanel from '@/components/PlaceholderPanel';
-import { TENANT_INFO_PERMISSION as ACTIONS } from '@/constants/permission';
+import { CORP_INFO_PERMISSION as ACTIONS } from '@/constants/permission';
 import { hasPermission } from '@/utils/permission';
 import {
   Avatar,

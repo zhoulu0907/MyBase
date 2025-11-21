@@ -6,7 +6,7 @@ import { getCorpListApi, getLoginedUser, getDictDataByType } from '@onebase/plat
 import type { CorpDetailResponse, DictData, RoleSimpleRespVO, PostSimpleRespVO } from '@onebase/platform-center';
 import PlaceholderPanel from '@/components/PlaceholderPanel';
 import { hasPermission, /* UserPermissionManager */ } from '@/utils/permission';
-import { TENANT_INFO_PERMISSION as ACTIONS } from '@/constants/permission';
+import { CORP_INFO_PERMISSION as ACTIONS } from '@/constants/permission';
 import StatusTag from '@/components/StatusTag';
 import { appIconMap } from '@onebase/ui-kit';
 import { DynamicIcon } from '@/components/DynamicIcon';

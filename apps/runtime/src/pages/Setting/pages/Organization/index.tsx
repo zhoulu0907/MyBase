@@ -9,7 +9,7 @@ import OrganizationModal from './components/OrganizationModal';
 import PlaceholderPanel from '@/components/PlaceholderPanel';
 import { PermissionButton as Button } from '@/components/PermissionControl';
 import { hasAnyPermission, hasPermission } from '@/utils/permission';
-import { TENANT_DEPT_PERMISSION as ACTIONS } from '@/constants/permission';
+import { CORP_DEPT_PERMISSION as ACTIONS } from '@/constants/permission';
 import styles from './index.module.less';
 
 const OrganizationPage: React.FC = () => {

@@ -7,7 +7,7 @@ import { UserPermissionManager } from '@/utils/permission';
 import { Avatar, Divider, Dropdown, Layout, Menu, Tabs, Typography } from '@arco-design/web-react';
 import { IconExport } from '@arco-design/web-react/icon';
 import { TokenManager } from '@onebase/common';
-import { getPermissionInfo } from '@onebase/platform-center';
+import { getPermissionInfo, CodeType } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styles from './header.module.less';
@@ -60,7 +60,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   }, [tokenInfo?.accessToken]);
 
   const getInfo = async () => {
-    const res = await getPermissionInfo();
+    const res = await getPermissionInfo(CodeType.TENANT);
     UserPermissionManager.setUserPermissionInfo(res);
     userPermissionSignal.setPermissionInfo(res);
     if (res.user) {

@@ -4,7 +4,7 @@ import type { SimpleRoleVO, UserVO } from '@onebase/platform-center';
 import { createUser, getUser, StatusEnum, updateUser } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
 import { hasPermission } from '@/utils/permission';
-import { TENANT_DEPT_QUERY } from '@/constants/permission';
+import { CORP_DEPT_QUERY } from '@/constants/permission';
 
 const Row = Grid.Row;
 const Col = Grid.Col;
@@ -57,7 +57,7 @@ export default function UserFormModal({
     }
 
     // 检查是否有角色/部门查询权限
-    const deptPermission = hasPermission(TENANT_DEPT_QUERY);
+    const deptPermission = hasPermission(CORP_DEPT_QUERY);
     setHasDeptQueryPermission(deptPermission);
 
     // 在编辑模式下获取用户信息并设置角色ID为初始值
