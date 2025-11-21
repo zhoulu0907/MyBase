@@ -80,7 +80,18 @@ export const clearDownStreamNodeConfig = (curNodeId: string, graphData: any, nod
         };
         break;
       case ETLNodeType.JOIN_NODE:
-        // TODO(ciki): 实现join节点重置逻辑
+        curNodeData.config = {
+          ...curNodeData.config,
+          leftNodeId: undefined,
+          rightNodeId: undefined,
+          joinType: '', // 连接类型
+          fieldPairs: [],
+          mappings: []
+        };
+        curNodeData.output = {
+          verified: false,
+          fields: []
+        };
         break;
       case ETLNodeType.UNION_NODE:
         curNodeData.config = {
@@ -102,4 +113,16 @@ export const clearDownStreamNodeConfig = (curNodeId: string, graphData: any, nod
     console.log('curNodeData: ', curNodeData);
     setNodeData(nodeId, curNodeData);
   }
+};
+
+export const setNodeDataAndResetDownstream = (
+  payload: any,
+  curNodeId: string,
+  graphDataValue: any,
+  nodeDataValue: any
+) => {
+  const { setNodeData } = etlEditorSignal;
+
+  setNodeData(curNodeId, payload);
+  clearDownStreamNodeConfig(curNodeId, graphDataValue, nodeDataValue);
 };
