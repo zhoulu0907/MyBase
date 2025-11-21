@@ -1,5 +1,11 @@
 import { type PageParam } from '../types/common';
-import { CreateFlowMgmtReq, RenameFlowMgmtReq, UpdateFlowMgmtDefinitionReq } from '../types/flow';
+import {
+  CreateFlowMgmtReq,
+  ListConnectFlowNodeReq,
+  ListConnectInstanceReq,
+  RenameFlowMgmtReq,
+  UpdateFlowMgmtDefinitionReq
+} from '../types/flow';
 import { flowService } from './clients';
 
 export const listFlowMgmt = (params: PageParam) => {
@@ -59,4 +65,16 @@ export const getFlowLogDetail = (params: any) => {
 // 统计执行日志
 export const getFlowLogStatistic = (params: any) => {
   return flowService.get('/log/statistic-tody', params);
+};
+
+export const getConnectFlowNodeCategoryList = () => {
+  return flowService.get('/node-category/list');
+};
+
+export const listConnectFlowNode = (params: ListConnectFlowNodeReq) => {
+  return flowService.get('/node-type/page', params);
+};
+
+export const listConnectInstance = (params: ListConnectInstanceReq) => {
+  return flowService.get('/connector/page', params);
 };
