@@ -1,14 +1,10 @@
 package com.cmsr.onebase.module.metadata.api.backupmanage;
 
-import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.module.metadata.api.backupmanage.dto.MetadataBackupReqDTO;
 import com.cmsr.onebase.module.metadata.api.backupmanage.dto.MetadataBackupRespDTO;
 import com.cmsr.onebase.module.metadata.api.backupmanage.dto.MetadataRestoreReqDTO;
-import com.cmsr.onebase.module.metadata.enums.ApiConstants;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 /**

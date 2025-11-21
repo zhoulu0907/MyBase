@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.metadata.core.service.datamethod.validator;
 
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
 import com.cmsr.onebase.module.metadata.core.service.number.AutoNumberService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Component;
@@ -100,11 +101,12 @@ public class ValidationManager {
     /**
      * 执行实体所有字段的校验
      *
-     * @param entityId 实体ID
-     * @param fields 字段列表
-     * @param data 数据对象
+     * @param entityId      实体ID
+     * @param fields        字段列表
+     * @param data          数据对象
+     * @param operationType
      */
-    public void validateEntity(Long entityId, List<MetadataEntityFieldDO> fields, Map<String, Object> data) {
+    public void validateEntity(Long entityId, List<MetadataEntityFieldDO> fields, Map<String, Object> data, MetadataDataMethodOpEnum operationType) {
         log.info("开始校验实体：entityId=" + entityId + ", 字段数量=" + fields.size());
 
         for (MetadataEntityFieldDO field : fields) {
@@ -120,6 +122,13 @@ public class ValidationManager {
             if (field.getIsPrimaryKey() != null && field.getIsPrimaryKey() == 1) {
                 log.fine("跳过主键字段：" + fieldName);
                 continue;
+            }
+
+            //跳过当前不更新的字段(更新时生效)
+            if (operationType == MetadataDataMethodOpEnum.UPDATE) {
+                if (value == null) {
+                    continue;
+                }
             }
 
             validateField(entityId, field, value, data);

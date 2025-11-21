@@ -7,35 +7,34 @@ tenant-id: {{adminTenantId}}
   "password": "admin123"
 }
 
-
-### 创建企业 /admin-api/system/corp/create
+### 企业创建（正常参数示例，可成功）
 POST {{baseUrl}}/system/corp/create
 Content-Type: application/json
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
+
 {
-    "corpReqVO":{
-     "corpLogo":"xx",
-     "corpName":"xx",
-      "corpId":"xx",
-      "industryType":"0",
-      "status":0,
-      "address":"xxxxxx",
-      "userCount":200
-    },
-    "corpUserReqVO":{
-        "username":"xx",
-        "nickname":"xx",
-        "email":"xx",
-        "mobile":"xx"
-    },
-    "corpAppRelationInertReqVO":{
-        "corpId":"1",
-        "applicationIdList":[1002,1001],
-        "authorizationTime":"xx"
-    }
+  "corpReqVO": {
+    "corpLogo": "https://static.example.com/logo/corp-test-001.png",
+    "corpName": "测试企业-001",
+    "industryType": 1,
+    "status": 0,
+    "address": "北京市海淀区中关村大街1号创新大厦8层",
+    "userLimit": 100
+  },
+  "corpAdminReqVO": {
+    "username": "corp_admin",
+    "nickname": "企业管理员",
+    "email": "corp_admin@test.com",
+    "mobile": "13800138000"
+  }
 }
 
+### 创建企业 /admin-api/system/corp/get?id=131231231237783552
+GET {{baseUrl}}/system/corp/get?id=131231231237783552
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
 
 ### 创建企业 /admin-api/system/corp/update
 

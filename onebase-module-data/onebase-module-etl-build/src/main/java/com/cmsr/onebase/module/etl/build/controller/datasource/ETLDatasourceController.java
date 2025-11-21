@@ -9,9 +9,9 @@ import com.cmsr.onebase.module.etl.build.service.datasource.vo.ETLDatasourceUpda
 import com.cmsr.onebase.module.etl.build.service.datasource.vo.TestConnectionVO;
 import com.cmsr.onebase.module.etl.common.preview.DataPreview;
 import com.cmsr.onebase.module.etl.build.service.preview.vo.TablePreviewVO;
-import com.cmsr.onebase.module.etl.core.vo.datasource.DatasourcePageReqVO;
-import com.cmsr.onebase.module.etl.core.vo.datasource.DatasourceRespVO;
-import com.cmsr.onebase.module.etl.core.vo.datasource.MetaBriefVO;
+import com.cmsr.onebase.module.etl.core.vo.DatasourcePageReqVO;
+import com.cmsr.onebase.module.etl.build.service.datasource.vo.DatasourceRespVO;
+import com.cmsr.onebase.module.etl.build.service.datasource.vo.MetaBriefVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;

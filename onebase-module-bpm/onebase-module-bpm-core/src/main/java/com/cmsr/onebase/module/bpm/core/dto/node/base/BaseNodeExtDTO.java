@@ -1,9 +1,6 @@
 package com.cmsr.onebase.module.bpm.core.dto.node.base;
 
-import com.cmsr.onebase.module.bpm.core.dto.node.ApproverNodeExtDTO;
-import com.cmsr.onebase.module.bpm.core.dto.node.EndNodeExtDTO;
-import com.cmsr.onebase.module.bpm.core.dto.node.InitiationNodeExtDTO;
-import com.cmsr.onebase.module.bpm.core.dto.node.StartNodeExtDTO;
+import com.cmsr.onebase.module.bpm.core.dto.node.*;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.Data;
@@ -26,7 +23,9 @@ import lombok.Data;
     @JsonSubTypes.Type(value = ApproverNodeExtDTO.class, name = "approver"),
     @JsonSubTypes.Type(value = StartNodeExtDTO .class, name = "start"),
     @JsonSubTypes.Type(value = EndNodeExtDTO.class, name = "end"),
-    @JsonSubTypes.Type(value = InitiationNodeExtDTO.class, name = "initiation")
+    @JsonSubTypes.Type(value = InitiationNodeExtDTO.class, name = "initiation"),
+    @JsonSubTypes.Type(value = CcNodeExtDTO.class, name = "cc")
+
 })
 public class BaseNodeExtDTO {
     /**

@@ -79,6 +79,8 @@ public class BaseEntity implements BaseDOInterface {
     /**
      * 乐观锁版本号
      */
+    @Getter
+    @Setter
     @Column(name = LOCK_VERSION)
     protected Long lockVersion;
 

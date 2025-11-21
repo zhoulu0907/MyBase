@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.etl.executor.util;
 
-import com.cmsr.onebase.module.etl.executor.InputArgs;
+import com.cmsr.onebase.module.etl.common.excute.ExecuteRequest;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -10,12 +10,12 @@ import com.zaxxer.hikari.HikariDataSource;
  */
 public class DataSourceUtil {
 
-    public static HikariDataSource createDataSource(InputArgs inputArgs) {
+    public static HikariDataSource createDataSource(ExecuteRequest executeRequest) {
         HikariConfig config = new HikariConfig();
-        config.setDriverClassName(inputArgs.getJdbcDriverClass());
-        config.setJdbcUrl(inputArgs.getJdbcUrl());
-        config.setUsername(inputArgs.getJdbcUserName());
-        config.setPassword(inputArgs.getJdbcPassword());
+        config.setDriverClassName(executeRequest.getJdbcDriverClass());
+        config.setJdbcUrl(executeRequest.getJdbcUrl());
+        config.setUsername(executeRequest.getJdbcUserName());
+        config.setPassword(executeRequest.getJdbcPassword());
         config.setMaximumPoolSize(1);
         config.setMinimumIdle(1);
         HikariDataSource dataSource = new HikariDataSource(config);

@@ -59,6 +59,14 @@ tag: {{tag}}
   "password": "test"
 }
 
+### 请求 /login 接口 => 成功
+POST {{baseUrl}}/system/auth/tenant-login
+Content-Type: application/json
+tenant-id: 141724575100338176
+tag: {{tag}}
+
+{"username":"admin","password":"AdminChina2025!",
+  "captchaVerification":"n89lvlHjSOsQQ5kGXjNNtdnkfPnK2Y3YbPwvAEXoVyL0TqzrDumdg8MONVs+z5VaSPf4ni6QKFhhx0GcaXBF4pWVx9hsSsBZ8mysqU8u45E="}
 
 ### 请求 /login 接口 => 成功
 POST {{baseUrl}}/system/auth/corp-login
@@ -67,8 +75,8 @@ tenant-id: {{adminTenantId}}
 tag: {{tag}}
 
 {
-  "username": "admin",
-  "password": "admin123",
+  "mobile": "13800138000",
+  "password": "<1qvZ#cD?g-onw@",
    "corpId": "100"
 }
 
@@ -84,7 +92,12 @@ tag: {{tag}}
 %}
 
 ### 请求 /get-permission-info 接口 => 成功
-GET {{baseUrl}}/system/auth/get-permission-info?code=tenant
+GET {{baseUrl}}/system/auth/get-permission-info
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 请求 /get-permission-info 接口+code => 成功
+GET {{baseUrl}}/system/auth/get-permission-info?code=system
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
@@ -106,12 +119,12 @@ tag: {{tag}}
 ### 所租户login 接口 => 成功
 POST {{baseUrl}}/system/auth/login
 Content-Type: application/json
-tenant-id: {{adminTenantId}}
+tenant-id: 140488242990448640
 tag: {{tag}}
 
 {
-  "username": "admin",
-  "password": "admin123"
+  "username": "test003",
+  "password": "AdminChina2025!"
 }
 
 > {%

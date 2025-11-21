@@ -37,6 +37,9 @@ public class AuthLoginRespVO {
     @Schema(description = "企业ID", example = "1")
     private Long corpId;
 
+    @Schema(description = "是否管理员", example = "")
+    private boolean adminFlag;
+
     @Schema(description = "密码有效期检查信息")
     private PasswordExpiryCheckDTO passwordExpiryInfo;
 }

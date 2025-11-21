@@ -18,6 +18,7 @@ public interface ErrorCodeConstants {
     ErrorCode AUTH_REGISTER_CAPTCHA_CODE_ERROR = new ErrorCode(1_002_000_008, "验证码不正确，原因：{}");
     ErrorCode AUTH_LOGIN_USER_NOT_ADMIN_ERROR = new ErrorCode(1_002_000_009, "登录失败，仅平台管理员可登录。");
     ErrorCode AUTH_LOGIN_PLATFORM_TENANT_ERROR = new ErrorCode(1_002_000_010, "登录失败，平台租户不可登录。");
+    ErrorCode AUTH_LOGIN_NO_EXISTS = new ErrorCode(1_002_000_011, "登录失败，当前账号不存在。");
 
     // ========== 菜单模块 1-002-001-000 ==========
     ErrorCode MENU_NAME_DUPLICATE = new ErrorCode(1_002_001_000, "已经存在该名字的菜单");
@@ -189,6 +190,7 @@ public interface ErrorCodeConstants {
     ErrorCode CORP_ID_EXISTS = new ErrorCode(1_002_025_008, "编码为【{}】的企业已存在");
     ErrorCode CORP_USER_LIMIT_COUNT = new ErrorCode(1_002_025_007, "企业用户数【{}】，大于系统上限");
     ErrorCode CORP_ID_NULL = new ErrorCode(1_002_025_008, "企业ID为空");
+    ErrorCode CORP_ID_COMPARE_ERROR = new ErrorCode(1_002_025_009, "只能获取自己企业的信息");
     // ========== 企业应用关联 1-002-030-000 ==========
     ErrorCode APPLICATION_AUTH_TENANT_NOT_EXISTS = new ErrorCode(1_002_030_000, "企业应用关联表不存在");
 

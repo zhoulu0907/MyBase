@@ -44,6 +44,12 @@ public class AppAuthRoleUserRepository extends DataRepository<AuthRoleUserDO> {
         return findAllByConfig(configStore);
     }
 
+    public long countByRoleId(Long roleId) {
+        ConfigStore configStore = new DefaultConfigStore();
+        configStore.eq("role_id", roleId);
+        return countByConfig(configStore);
+    }
+
     public List<AuthRoleUserDO> findByByRoleIds(List<Long> roleIds) {
         ConfigStore configStore = new DefaultConfigStore();
         configStore.in("role_id", roleIds);
@@ -89,5 +95,13 @@ public class AppAuthRoleUserRepository extends DataRepository<AuthRoleUserDO> {
         configStore.eq("user_id", userId);
         return findAllByConfig(configStore);
     }
+
+    public List<AuthRoleUserDO>  findAdminByRoleIdAndUserId(Long roleId,Long userId){
+        ConfigStore configStore = new DefaultConfigStore();
+        configStore.eq(AuthRoleUserDO.USER_ID, userId);
+        configStore.eq(AuthRoleUserDO.ROLE_ID, roleId);
+        return findAllByConfig(configStore);
+    }
+
 
 }

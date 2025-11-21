@@ -28,6 +28,7 @@ import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.service.AnylineService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -438,7 +439,7 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
             return result;
 
         } catch (Exception e) {
-            log.error("执行元数据系统方法失败。请求上下文: [{}]", requestContext, e);
+            log.error("执行元数据系统方法失败。请求上下文: [{}]", requestContext, ExceptionUtils.getRootCause(e));
             throw exception(DATA_METHOD_EXEC_FAIL, e.getMessage());
 //            throw new RuntimeException("执行" + requestContext.getMetadataDataMethodOpEnum() + "异常：" + e.getMessage(), e);
         }
@@ -573,7 +574,7 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
         }
 
         // 使用校验管理器执行所有字段的校验
-        validationManager.validateEntity(entityId, fields, dataForValidation);
+        validationManager.validateEntity(entityId, fields, dataForValidation, operationType);
 
         log.info("数据校验完成：entityId={}", entityId);
     }
@@ -712,9 +713,12 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
             }
         }
 
+        // 插入新数据字段key为小写，更新和删除的时候从数据库获取的字段key为大写 统一转大写进行匹配判断
+        Set<String> upperKeySet = map.keySet().stream().map(String::toUpperCase).collect(Collectors.toSet());
+
         // 值为null的字段也放到参数里，触发流程时需要全量的字段信息
         for (MetadataEntityFieldDO field : targetfields) {
-            if(!map.keySet().contains(field.getFieldName())){
+            if(!upperKeySet.contains(field.getFieldName().toUpperCase())){
                 newData.put(field.getId(), null);
             };
         }

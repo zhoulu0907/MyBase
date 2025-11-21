@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Repository
@@ -36,8 +35,8 @@ public class ETLSchemaRepository extends DataRepository<ETLSchemaDO> {
     }
 
     @Override
-    @Transactional
     public ETLSchemaDO upsert(ETLSchemaDO schemaDO) {
+        if (schemaDO == null) return null;
         Long applicationId = schemaDO.getApplicationId();
         Long datasourceId = schemaDO.getDatasourceId();
         Long catalogId = schemaDO.getCatalogId();

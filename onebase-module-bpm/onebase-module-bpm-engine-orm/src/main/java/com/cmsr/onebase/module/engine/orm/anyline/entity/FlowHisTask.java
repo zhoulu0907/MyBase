@@ -30,6 +30,7 @@ public class FlowHisTask extends BaseEntity implements HisTask {
 
     public static final String COOPERATE_TYPE = "cooperate_type";
 
+    public static final String NODE_TYPE = "node_type";
 
     /** 流程定义ID */
     @Column(name = "definition_id", nullable = false)
@@ -52,7 +53,7 @@ public class FlowHisTask extends BaseEntity implements HisTask {
     private String nodeName;
 
     /** 开始节点类型 */
-    @Column(name = "node_type")
+    @Column(name = NODE_TYPE)
     private Integer nodeType;
 
     /** 目标节点编码 */

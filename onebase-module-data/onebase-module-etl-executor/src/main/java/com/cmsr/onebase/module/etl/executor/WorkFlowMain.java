@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.etl.executor;
 
+import com.cmsr.onebase.module.etl.common.excute.ExecuteRequest;
 import com.cmsr.onebase.module.etl.executor.util.JacksonUtil;
 
 import java.nio.charset.StandardCharsets;
@@ -18,9 +19,10 @@ public class WorkFlowMain {
         String input = args[0];
         byte[] decode = Base64.getDecoder().decode(input.getBytes(StandardCharsets.UTF_8));
         String inputJson = new String(decode, StandardCharsets.UTF_8);
-        InputArgs inputArgs = JacksonUtil.fromJson(inputJson, InputArgs.class);
-        WorkFlowExecutor workFlowExecutor = new WorkFlowExecutor(inputArgs);
-        workFlowExecutor.execute();
+        ExecuteRequest executeRequest = JacksonUtil.fromJson(inputJson, ExecuteRequest.class);
+        try (WorkFlowExecutor workFlowExecutor = new WorkFlowExecutor(executeRequest)) {
+            workFlowExecutor.execute();
+        }
     }
 
 }

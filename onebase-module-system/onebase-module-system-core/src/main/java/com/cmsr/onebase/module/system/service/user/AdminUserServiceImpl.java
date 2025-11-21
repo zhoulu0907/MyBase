@@ -27,6 +27,7 @@ import com.cmsr.onebase.module.system.dal.dataobject.dept.UserPostDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.UserRoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
+import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
 import com.cmsr.onebase.module.system.enums.permission.AdminTypeEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleTypeEnum;
@@ -49,6 +50,8 @@ import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -112,6 +115,7 @@ public class AdminUserServiceImpl implements AdminUserService {
     @Transactional(rollbackFor = Exception.class)
     @LogRecord(type = SYSTEM_USER_TYPE, subType = SYSTEM_USER_CREATE_SUB_TYPE, bizNo = "{{#user.id}}",
             success = SYSTEM_USER_CREATE_SUCCESS)
+    @CacheEvict(value = RedisKeyConstants.USER_FIND_BY_DEPT_IDS, allEntries = true, beforeInvocation = true)
     public Long createUser(UserInsertReqVO createReqVO) {
         // 如果为空，默认为开启状态
         if (createReqVO.getStatus() == null) {
@@ -147,14 +151,14 @@ public class AdminUserServiceImpl implements AdminUserService {
             user.setAdminType(AdminTypeEnum.CUSTOM.getType());
         }
         // 根据来源场景保存用户类型和企业id
-        String  fromSceneType = WebFrameworkUtils.getXFromSceneType();
-        if(XFromSceneTypeEnum.CORP.getCode().equals(fromSceneType)){
+        String fromSceneType = WebFrameworkUtils.getXFromSceneType();
+        if (XFromSceneTypeEnum.CORP.getCode().equals(fromSceneType)) {
             LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
-            if(null !=loginUser){
+            if (null != loginUser) {
                 user.setCorpId(loginUser.getCorpId());
             }
             user.setUserType(UserTypeEnum.CORP.getValue());
-        }else{
+        } else {
             user.setUserType(UserTypeEnum.TENANT.getValue());
         }
         adminUserDataRepository.insert(user);
@@ -178,6 +182,7 @@ public class AdminUserServiceImpl implements AdminUserService {
     }
 
     @Override
+    @CacheEvict(value = RedisKeyConstants.USER_FIND_BY_DEPT_IDS, allEntries = true, beforeInvocation = true)
     public Long createCorpAdminUser(AdminUserDO userDO) {
         // 校验用户名唯一
         validateUsernameUnique(null, userDO.getUsername());
@@ -190,14 +195,14 @@ public class AdminUserServiceImpl implements AdminUserService {
         if (userDO.getAdminType() == null) {
             userDO.setAdminType(AdminTypeEnum.CUSTOM.getType());
         }
-        AdminUserDO adminUserDO= adminUserDataRepository.insert(userDO);
+        AdminUserDO adminUserDO = adminUserDataRepository.insert(userDO);
 
         // 保存初始密码历史记录
         securityConfigApi.savePasswordHistory(adminUserDO.getId(), adminUserDO.getPassword());
 
-        Long roleId=createCoreAdminRole();
+        Long roleId = createCoreAdminRole();
         permissionService.assignUserRoles(adminUserDO.getId(), singleton(roleId));
-       return adminUserDO.getId();
+        return adminUserDO.getId();
     }
 
     private Long createCoreAdminRole() {
@@ -205,8 +210,12 @@ public class AdminUserServiceImpl implements AdminUserService {
         RoleInsertReqVO reqVO = new RoleInsertReqVO();
         reqVO.setName(RoleCodeEnum.CORP_ADMIN.getName()).setCode(RoleCodeEnum.CORP_ADMIN.getCode())
                 .setSort(0).setRemark("系统自动生成");
-        Long roleId = roleService.createRole(reqVO, RoleTypeEnum.SYSTEM.getType());
-        return roleId;
+        RoleDO roleDO = roleService.getRoleIdsByCode(RoleCodeEnum.CORP_ADMIN.getCode());
+        if( null == roleDO){
+            Long roleId = roleService.createRole(reqVO, RoleTypeEnum.SYSTEM.getType());
+            return  roleId;
+        }
+        return roleDO.getId();
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -230,6 +239,7 @@ public class AdminUserServiceImpl implements AdminUserService {
         if (user.getAdminType() == null) {
             user.setAdminType(AdminTypeEnum.CUSTOM.getType());
         }
+        user.setUserType(UserTypeEnum.PLATFORM.getValue());
         adminUserDataRepository.insert(user);
 
         // 保存初始密码历史记录
@@ -249,6 +259,7 @@ public class AdminUserServiceImpl implements AdminUserService {
 
 
     @Override
+    @CacheEvict(value = RedisKeyConstants.USER_FIND_BY_DEPT_IDS, allEntries = true, beforeInvocation = true)
     public Long registerUser(AuthRegisterReqVO registerReqVO) {
         // 1.1 校验是否开启注册
         if (ObjUtil.notEqual(configApi.getConfigValueByKey(USER_REGISTER_ENABLED_KEY).getCheckedData(), "true")) {
@@ -282,6 +293,7 @@ public class AdminUserServiceImpl implements AdminUserService {
     @Transactional(rollbackFor = Exception.class)
     @LogRecord(type = SYSTEM_USER_TYPE, subType = SYSTEM_USER_UPDATE_SUB_TYPE, bizNo = "{{#updateReqVO.id}}",
             success = SYSTEM_USER_UPDATE_SUCCESS)
+    @CacheEvict(value = RedisKeyConstants.USER_FIND_BY_DEPT_IDS, allEntries = true, beforeInvocation = true)
     public void updateUser(UserUpdateReqVO updateReqVO) {
         // 1. 校验正确性
         AdminUserDO oldUser = validateUserForCreateOrUpdate(updateReqVO.getId(), updateReqVO.getUsername(),
@@ -420,6 +432,7 @@ public class AdminUserServiceImpl implements AdminUserService {
     @Transactional(rollbackFor = Exception.class)
     @LogRecord(type = SYSTEM_USER_TYPE, subType = SYSTEM_USER_DELETE_SUB_TYPE, bizNo = "{{#id}}",
             success = SYSTEM_USER_DELETE_SUCCESS)
+    @CacheEvict(value = RedisKeyConstants.USER_FIND_BY_DEPT_IDS, allEntries = true, beforeInvocation = true)
     public void deleteUser(Long id) {
         // 1. 校验用户存在
         AdminUserDO user = validateUserExists(id);
@@ -477,7 +490,7 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     @Override
     public AdminUserDO getUser(Long id) {
-        AdminUserDO adminUserDo= adminUserDataRepository.findById(id);
+        AdminUserDO adminUserDo = adminUserDataRepository.findById(id);
         return adminUserDo;
     }
 
@@ -727,7 +740,7 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     @Override
     public List<AdminUserDO> getUserListByStatus(Integer status, String userNickName) {
-        return adminUserDataRepository.findAllByStatus(status,userNickName);
+        return adminUserDataRepository.findAllByStatus(status, userNickName);
     }
 
     @Override
@@ -856,8 +869,8 @@ public class AdminUserServiceImpl implements AdminUserService {
     }
 
     @Override
-    public List<String> getUserRoleByRoleIdAndTenantId(Long id,Long tenantId) {
-        List<UserRoleDO> UserRoleDOList=  userRoleDataRepository.getUserRoleByRoleIdAndTenantId(id,tenantId);
+    public List<String> getUserRoleByRoleIdAndTenantId(Long id, Long tenantId) {
+        List<UserRoleDO> UserRoleDOList = userRoleDataRepository.getUserRoleByRoleIdAndTenantId(id, tenantId);
         List<String> userIdsList = UserRoleDOList.stream()
                 .map(userRole -> String.valueOf(userRole.getUserId()))
                 .collect(Collectors.toList());
@@ -865,10 +878,36 @@ public class AdminUserServiceImpl implements AdminUserService {
 
 
     }
+
+    @Override
+    @Cacheable(cacheNames = RedisKeyConstants.USER_FIND_BY_DEPT_IDS, key = "#reqVO.deptId + ':' + #reqVO.pageNo + ':' + #reqVO.pageSize + ':' + (#reqVO.keywords == null ? '' : #reqVO.keywords)")
+    public PageResult<AdminUserDO> getUserByDeptPage(UserByDeptPageReqVO reqVO) {
+        // 获取需要查询的部门ID列表
+        Set<Long> deptIds = new HashSet<>();
+        if (Boolean.TRUE.equals(reqVO.getIsRecurseSub())) {
+            // 如果需要递归查询子部门，获取当前部门及所有子部门ID
+            deptIds.add(reqVO.getDeptId());
+            Set<Long> childDeptIds = deptService.getChildDeptIdListFromCache(reqVO.getDeptId());
+            deptIds.addAll(childDeptIds);
+        } else {
+            // 否则只查询当前部门
+            deptIds.add(reqVO.getDeptId());
+        }
+
+        // 查询指定部门的用户
+        return adminUserDataRepository.findEnableUserPageByDeptIds(reqVO, deptIds);
+    }
+
+    @Override
+    public boolean findAdminByRoleIdAndUserId(Long roleId, Long userId) {
+        List<UserRoleDO> userRoleDOList = userRoleDataRepository.findAdminByRoleIdAndUserId(roleId, userId);
+        return !userRoleDOList.isEmpty();
+    }
+
     @TenantIgnore
     @Override
-    public    Map<Long,Integer> getTenantExistUserCountByIds(List<Long> tenantIds) {
-        List<AdminUserDO>  userlist= adminUserDataRepository.getTenantExistUserCountByIds(tenantIds);
+    public Map<Long, Integer> getTenantExistUserCountByIds(List<Long> tenantIds) {
+        List<AdminUserDO> userlist = adminUserDataRepository.getTenantExistUserCountByIds(tenantIds);
         // 按租户ID分组并统计数量
         return userlist.stream()
                 .collect(Collectors.groupingBy(

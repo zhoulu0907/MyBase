@@ -58,7 +58,7 @@ onebase:
     etl-project: 155572154738048
     tenant: root
   flink:
-    address: http://flinkserver-service-v1.s25029301301-dev.svc:8080
+    address: http://10.0.104.41:30692
 
 justauth:
   enabled: true

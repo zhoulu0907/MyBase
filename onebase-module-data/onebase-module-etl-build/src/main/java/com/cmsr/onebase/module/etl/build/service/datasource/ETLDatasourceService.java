@@ -6,9 +6,7 @@ import com.cmsr.onebase.module.etl.build.service.datasource.vo.*;
 import com.cmsr.onebase.module.etl.common.preview.DataPreview;
 import com.cmsr.onebase.module.etl.build.service.preview.vo.TablePreviewVO;
 import com.cmsr.onebase.module.etl.common.preview.ColumnDefine;
-import com.cmsr.onebase.module.etl.core.vo.datasource.DatasourcePageReqVO;
-import com.cmsr.onebase.module.etl.core.vo.datasource.DatasourceRespVO;
-import com.cmsr.onebase.module.etl.core.vo.datasource.MetaBriefVO;
+import com.cmsr.onebase.module.etl.core.vo.DatasourcePageReqVO;
 
 import java.util.List;
 

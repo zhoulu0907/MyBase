@@ -21,6 +21,7 @@ import org.mapstruct.factory.Mappers;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertSet;
 import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.filterList;
@@ -37,9 +38,11 @@ public interface AuthConvert {
         return AuthPermissionInfoRespVO.builder()
                 .user(BeanUtils.toBean(user, AuthPermissionInfoRespVO.UserVO.class))
                 .roles(convertSet(roleList, RoleDO::getId))
-                // 权限标识信息
-                .permissions(convertSet(menuList, MenuDO::getPermission))
-                // 菜单树
+                // 权限标识信息,过滤 permission 以 expectCode 为开头的权限
+                .permissions(convertSet(menuList, MenuDO::getPermission).stream().filter(
+                        permission -> StringUtils.isBlank(expectCode) || permission.startsWith(expectCode)
+                ).collect(Collectors.toSet()))
+                // 菜单树，过滤以expectCode为开头的权限
                 .menus(buildMenuTree(menuList, expectCode))
                 .build();
     }
@@ -98,13 +101,13 @@ public interface AuthConvert {
 
     SmsCodeUseReqDTO convert(AuthSmsLoginReqVO reqVO, Integer scene, String usedIp);
 
-    default AuthLoginRespVO convert(OAuth2AccessTokenDO accessTokenDO, TenantDO tennantDO){
+    default AuthLoginRespVO convert(OAuth2AccessTokenDO accessTokenDO, TenantDO tennantDO) {
         AuthLoginRespVO respVO = AuthConvert.INSTANCE.convert(accessTokenDO);
         respVO.setTenantId(tennantDO.getId());
         respVO.setTenantWebsite(tennantDO.getWebsite());
         return respVO;
     }
-    
+
     @Named("integerToBoolean")
     default Boolean integerToBoolean(Integer value) {
         return value != null && value != NumberConstant.ZERO;

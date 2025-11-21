@@ -426,7 +426,7 @@ public class RoleDTOServiceTest {
         reqVO.setStatus(CommonStatusEnum.ENABLE.getStatus());
 
         // 执行测试
-        PageResult<RoleDO> pageResult = roleService.getRolePage(reqVO);
+        PageResult<RoleDO> pageResult = roleService.findRolePageOnlyTenant(reqVO);
 
         // 验证结果
         assertNotNull(pageResult, "分页结果不应该为空");
@@ -448,8 +448,8 @@ public class RoleDTOServiceTest {
         RoleDO normalRole = createTestRole(null, "普通角色", "NORMAL_ROLE", CommonStatusEnum.ENABLE.getStatus());
 
         // 执行测试
-        boolean hasSuperAdmin = roleService.hasAnySuperAdmin(Arrays.asList(superAdminRole.getId(), normalRole.getId()));
-        boolean hasNoSuperAdmin = roleService.hasAnySuperAdmin(Collections.singleton(normalRole.getId()));
+        boolean hasSuperAdmin = roleService.hasAnySuperOrTenantAdmin(Arrays.asList(superAdminRole.getId(), normalRole.getId()));
+        boolean hasNoSuperAdmin = roleService.hasAnySuperOrTenantAdmin(Collections.singleton(normalRole.getId()));
 
         // 验证结果
         assertTrue(hasSuperAdmin, "应该包含超级管理员");

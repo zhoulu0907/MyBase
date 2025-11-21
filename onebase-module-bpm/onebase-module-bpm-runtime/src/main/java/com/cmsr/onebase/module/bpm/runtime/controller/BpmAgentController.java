@@ -30,10 +30,10 @@ public class BpmAgentController {
 
     @PostMapping("/create")
     @Operation(summary = "创建流程代理")
-    public CommonResult<Boolean> create(@RequestBody @Validated BpmAgentInsertReqVO reqVO) {
+    public CommonResult<Long> create(@RequestBody @Validated BpmAgentInsertReqVO reqVO) {
         log.info("创建流程代理: {}", reqVO);
-        bpmAgentService.create(reqVO);
-        return CommonResult.success(true);
+        Long id = bpmAgentService.create(reqVO);
+        return CommonResult.success(id);
     }
 
     @PostMapping("/update")

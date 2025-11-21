@@ -4,7 +4,6 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import cn.hutool.core.collection.CollUtil;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.module.system.vo.auth.AuthRegisterReqVO;
-import com.cmsr.onebase.module.system.vo.corp.CorpAdminReqVO;
 import com.cmsr.onebase.module.system.vo.user.UserProfileUpdatePasswordReqVO;
 import com.cmsr.onebase.module.system.vo.user.UserProfileUpdateReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
@@ -294,4 +293,14 @@ public interface AdminUserService {
     List<String> getUserRoleByRoleIdAndTenantId(Long id, Long tenantId);
 
     Map<Long, Integer> getTenantExistUserCountByIds(List<Long> tenantIds);
+
+    /**
+     * 获取指定部门的直属用户简要信息（分页）
+     *
+     * @param reqVO 分页条件
+     * @return 用户简要信息分页列表
+     */
+    PageResult<AdminUserDO> getUserByDeptPage(UserByDeptPageReqVO reqVO);
+
+    boolean findAdminByRoleIdAndUserId(Long roleId, Long userId);
 }
