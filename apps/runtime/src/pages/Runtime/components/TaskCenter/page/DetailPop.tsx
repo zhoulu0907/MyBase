@@ -194,7 +194,6 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
       //根据列表类型请求对应的详情
     }
   }, [listType]);
-  console.log('是不是这个', detailData);
 
   return (
     <section>
