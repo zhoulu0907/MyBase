@@ -1,9 +1,11 @@
 import { useAppStore } from '@/store';
 import { Menu } from '@arco-design/web-react';
-import { IconBranch, IconPlayCircle, IconRefresh, IconTool } from '@arco-design/web-react/icon';
+import { IconBranch, IconCommon, IconLink, IconPlayCircle, IconRefresh, IconTool } from '@arco-design/web-react/icon';
 import React from 'react';
 import { Route, Routes, useNavigate } from 'react-router-dom';
 import styles from './index.module.less';
+import ConnectorPage from './pages/connector';
+import ConnectorInstancesPage from './pages/connectorInstance';
 import FlowEditorPage from './pages/flowEditor';
 import FlowExecuteRecordPage from './pages/flowExecuteRecord';
 import FlowManagementPage from './pages/flowManagement';
@@ -19,7 +21,7 @@ const IntegratedManagementPage: React.FC = () => {
     <div className={styles.integratedManagementPage}>
       <div className={styles.sider}>
         <div className={styles.title}>主菜单</div>
-        <Menu className={styles.menu}>
+        <Menu className={styles.menu} autoOpen>
           <MenuItem
             key="flow"
             onClick={() => navigate(`/onebase/create-app/integrated-management/flow-management?appId=${curAppId}`)}
@@ -41,9 +43,31 @@ const IntegratedManagementPage: React.FC = () => {
           >
             <IconRefresh /> 执行记录
           </MenuItem>
-          <MenuItem key="node">
-            <IconTool /> 节点与连接器
-          </MenuItem>
+          <Menu.SubMenu
+            key="connectors"
+            title={
+              <span>
+                <IconTool /> 连接器中心
+              </span>
+            }
+          >
+            <Menu.Item
+              key="connectors-list"
+              onClick={() => navigate(`/onebase/create-app/integrated-management/connector?appId=${curAppId}`)}
+            >
+              <IconLink />
+              连接器
+            </Menu.Item>
+            <Menu.Item
+              key="connector-instances"
+              onClick={() =>
+                navigate(`/onebase/create-app/integrated-management/connector-instances?appId=${curAppId}`)
+              }
+            >
+              <IconCommon />
+              连接器实例
+            </Menu.Item>
+          </Menu.SubMenu>
         </Menu>
 
         {/* 隐藏系统 */}
@@ -65,6 +89,8 @@ const IntegratedManagementPage: React.FC = () => {
           <Route path="flow-management" element={<FlowManagementPage />} />
           <Route path="flow-editor" element={<FlowEditorPage />} />
           <Route path="flow-execute-record" element={<FlowExecuteRecordPage />} />
+          <Route path="connector" element={<ConnectorPage />} />
+          <Route path="connector-instances" element={<ConnectorInstancesPage />} />
         </Routes>
       </div>
     </div>

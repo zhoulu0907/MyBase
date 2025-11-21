@@ -32,7 +32,7 @@ import { getCommonPaginationList } from '@onebase/common';
 import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import FlowCard from './components/card';
+import FlowCard from '../../components/card';
 import styles from './index.module.less';
 
 const RadioGroup = Radio.Group;
