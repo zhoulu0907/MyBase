@@ -39,6 +39,8 @@ import org.dromara.warm.flow.core.service.*;
 import org.dromara.warm.flow.core.service.impl.BpmConstants;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -85,6 +87,45 @@ public class BpmOperatorRecordServiceImpl implements BpmOperatorRecordService {
 
     @Resource
     private BpmPermissionResolver permissionResolver;
+
+    public String formatWaitedTime(LocalDateTime startTime) {
+        // startTime 是过去的时间（如任务创建时间）
+        LocalDateTime now = LocalDateTime.now();
+
+        // 局部常量：只在本方法内使用
+        final String WAITED_PREFIX = "已等待";
+
+        // 如果 startTime 在未来（异常情况），视为刚刚
+        if (startTime.isAfter(now)) {
+            return "刚刚";
+        }
+
+        // 注意顺序！
+        Duration duration = Duration.between(startTime, now);
+
+        // 不足 1 分钟
+        if (duration.getSeconds() < 60) {
+            return "刚刚";
+        }
+
+        long days = duration.toDays();
+        if (days > 0) {
+            return WAITED_PREFIX + days + "天";
+        }
+
+        long hours = duration.toHours();
+        if (hours > 0) {
+            return WAITED_PREFIX + hours + "小时";
+        }
+
+        long minutes = duration.toMinutes();
+        if (minutes > 0) {
+            return WAITED_PREFIX + minutes + "分钟";
+        }
+
+        // 兜底
+        return "刚刚";
+    }
 
     private List<HisTask> findAllHisTaskByInsId(Long instanceId) {
         ConfigStore configs = new DefaultConfigStore();
@@ -157,6 +198,7 @@ public class BpmOperatorRecordServiceImpl implements BpmOperatorRecordService {
                 }
 
                 record.setOperators(new ArrayList<>());
+                record.setDisplayTime(hisTask.getUpdateTime());
 
                 recordMap.put(taskId, record);
             }
@@ -260,6 +302,8 @@ public class BpmOperatorRecordServiceImpl implements BpmOperatorRecordService {
 
                 // 待办任务节点是当前节点
                 record.setCurrent(true);
+                record.setDisplayTime(task.getCreateTime());
+                record.setWaitTimeDesc(formatWaitedTime(record.getDisplayTime()));
                 record.setOperators(new ArrayList<>());
 
                 recordMap.put(taskId, record);
@@ -298,6 +342,8 @@ public class BpmOperatorRecordServiceImpl implements BpmOperatorRecordService {
 
                 // 只要有待办，展示状态与任务状态一致
                 record.setDisplayStatus(operatorInfo.getTaskStatus());
+                record.setDisplayTime(task.getCreateTime());
+                record.setWaitTimeDesc(formatWaitedTime(record.getDisplayTime()));
 
                 // 待办任务节点是当前节点
                 record.setCurrent(true);

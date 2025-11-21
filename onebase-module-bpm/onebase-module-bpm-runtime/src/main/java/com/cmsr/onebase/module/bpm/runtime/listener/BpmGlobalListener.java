@@ -88,18 +88,16 @@ public class BpmGlobalListener implements GlobalListener {
                 continue;
             }
 
-            // 处理下一个抄送节点，只保留当前节点的办理人权限，todo：使用系统管理员权限
+            // 处理下一个抄送节点，只保留系统用户权限
             if (Objects.equals(nodeExtDTO.getNodeType(), BpmNodeTypeEnum.CC.getCode())) {
-                String currTaskHandler = flowParams.getHandler();
-
                 List<String> ccPermissionList = nextTask.getPermissionList();
 
                 // 存入当前节点的变量值里
                 flowVariable.put(BpmConstants.VAR_CC_USERS_KEY + "_" + nextTask.getNodeCode(),
                         JsonUtils.toJsonString(ccPermissionList));
 
-                // 覆盖权限人
-                nextTask.setPermissionList(List.of(currTaskHandler));
+                // 清空权限人，使用系统用户执行
+                nextTask.setPermissionList(new ArrayList<>());
             }
         }
 
@@ -244,12 +242,14 @@ public class BpmGlobalListener implements GlobalListener {
         List<User> unoperatorUsers = userService.listByAssociatedAndTypes(currTask.getId());
 
         if (CollectionUtils.isNotEmpty(unoperatorUsers)) {
-            // todo 排除自己
+            // 排除自己以及系统用户
             Set<String> ccPermissionList = unoperatorUsers.stream()
-                    .filter( item -> !Objects.equals(item.getProcessedBy(), flowParams.getHandler()))
+                    .filter( item -> !Objects.equals(item.getProcessedBy(), flowParams.getHandler())
+                            && !Objects.equals(item.getProcessedBy(), BpmConstants.SYS_USER_ID))
                     .map(User::getProcessedBy)
                     .collect(Collectors.toSet());
 
+            // todo：同一个节点，会同时有抄送和未操作的用户吗，确认是否会覆盖
             if (CollectionUtils.isNotEmpty(ccPermissionList)) {
                 flowVariable.put(BpmConstants.VAR_CC_USERS_KEY + "_" + currTask.getNodeCode(),
                         JsonUtils.toJsonString(ccPermissionList));
