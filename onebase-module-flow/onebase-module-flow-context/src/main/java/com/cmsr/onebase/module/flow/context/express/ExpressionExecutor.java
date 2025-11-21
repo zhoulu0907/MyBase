@@ -42,15 +42,21 @@ public class ExpressionExecutor implements Serializable {
      * 根据ConditionItem类的注释：规则项之间是AND关系
      */
     public boolean evaluate(OrExpression orExpression, Map<String, Object> vars) {
+        String fullExpression = null;
+        JexlExpression expression = null;
+        Map<String, Object> expressionContext = null;
         try {
-            String fullExpression = buildConditionExpression(orExpression);
-            JexlExpression expression = jexlEngine.createExpression(fullExpression);
-            Map<String, Object> expressionContext = formatMapContextKey(vars);
+            fullExpression = buildConditionExpression(orExpression);
+            expression = jexlEngine.createExpression(fullExpression);
+            expressionContext = formatMapContextKey(vars);
             MapContext jc = new MapContext(expressionContext);
             Object result = expression.evaluate(jc);
             return result instanceof Boolean ? (Boolean) result : Boolean.FALSE;
         } catch (Exception e) {
-            String msg = "表达式执行异常, 执行表达式:" + orExpression + ", 输入条件:" + vars + "";
+            String msg = "表达式执行异常, 执行表达式:" + orExpression
+                    + ", 输入条件:" + vars
+                    + ", 完整表达式:" + Objects.toString(expression, "")
+                    + ", 上下文参数:" + Objects.toString(expressionContext, "");
             throw new RuntimeException(msg, e);
         }
     }

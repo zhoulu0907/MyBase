@@ -106,7 +106,7 @@ public class MenuServiceImpl implements MenuService {
     }
 
     @Override
-    public List<MenuDO> getAllActiveMenuList() {
+    public List<MenuDO> getAllEnableMenuList() {
         ConfigStore configs = new DefaultConfigStore();
         configs.eq(MenuDO.STATUS, CommonStatusEnum.ENABLE.getStatus());
         return menuDataRepository.findAllByConfig(configs);

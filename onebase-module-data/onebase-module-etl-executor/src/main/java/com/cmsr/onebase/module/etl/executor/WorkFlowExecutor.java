@@ -119,25 +119,37 @@ public class WorkFlowExecutor implements Closeable {
     }
 
 
-    public DataPreview preview() throws Exception {
+    public DataPreview nodePreview() throws Exception {
         for (Node node : workflowGraph.iterateNodes()) {
             doAction(node);
             if (node.getId().equals(executeRequest.getPreviewNodeId())) {
                 String sql = "select * from " + node.getId() + " limit 20";
                 TableResult tableResult = tableEnv.executeSql(sql);
-                return tableResultToDataPreview(tableResult);
+                return tableResultToDataPreview(node.getId(), tableResult);
             }
         }
         throw new Exception("未找到预览节点");
     }
 
+    public List<ColumnDefine> nodeColumns() throws Exception {
+        for (Node node : workflowGraph.iterateNodes()) {
+            doAction(node);
+            if (node.getId().equals(executeRequest.getPreviewNodeId())) {
+                Table table = tableEnv.from(node.getId());
+                return tableToColumns(table);
+            }
+        }
+        throw new Exception("未找到预览节点");
+    }
 
-    private DataPreview tableResultToDataPreview(TableResult tableResult) {
+    private DataPreview tableResultToDataPreview(String nodeId, TableResult tableResult) {
         DataPreview dataPreview = new DataPreview();
         for (Column column : tableResult.getResolvedSchema().getColumns()) {
             ColumnDefine field = new ColumnDefine();
+            field.setFieldFqn(nodeId + "." + column.getName());
             field.setFieldName(column.getName());
-            field.setFieldType(column.getDataType().getLogicalType().toString());
+            field.setDisplayName(column.getName());
+            field.setFieldType(column.getDataType().getLogicalType().getTypeRoot().name());
             dataPreview.getColumns().add(field);
         }
         try (CloseableIterator<Row> collected = tableResult.collect()) {
@@ -159,6 +171,20 @@ public class WorkFlowExecutor implements Closeable {
         }
         return list;
     }
+
+
+    private List<ColumnDefine> tableToColumns(Table table) {
+        List<ColumnDefine> columns = new ArrayList<>();
+        for (Column column : table.getResolvedSchema().getColumns()) {
+            ColumnDefine field = new ColumnDefine();
+            field.setFieldName(column.getName());
+            field.setDisplayName(column.getName());
+            field.setFieldType(column.getDataType().getLogicalType().getTypeRoot().name());
+            columns.add(field);
+        }
+        return columns;
+    }
+
 
     @Override
     public void close() {

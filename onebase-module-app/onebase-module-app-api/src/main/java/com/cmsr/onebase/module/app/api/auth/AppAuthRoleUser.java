@@ -17,4 +17,5 @@ public interface AppAuthRoleUser {
     List<Long> findRoleIdsByAppId(Long appId);
 
     List<AuthRoleDTO> findRolesByUserId(Long userId);
+
 }

@@ -142,15 +142,15 @@ public abstract class AbstractNodeVOStrategy<T extends BaseNodeVO, E extends Bas
         HandlerTypeEnum handlerTypeEnum = HandlerTypeEnum.getByCode(handlerType);
 
         if (handlerTypeEnum == null) {
-            log.error("未知的审批人类型: {}", handlerType);
-            throw exception(ErrorCodeConstants.UNSUPPORT_NODE_APPROVER_TYPE);
+            log.error("未知的处理人类型: {}", handlerType);
+            throw exception(ErrorCodeConstants.UNSUPPORT_NODE_HANDLER_TYPE);
         }
 
         if (handlerTypeEnum == HandlerTypeEnum.USER) {
             List<UserDTO> users = handlerCfg.getUsers();
 
             if (CollectionUtils.isEmpty(users)) {
-                log.error("缺少审批用户列表 {}", handlerCfg);
+                log.error("缺少用户列表 {}", handlerCfg);
                 throw exception(ErrorCodeConstants.MISSING_NODE_USER_LIST);
             }
 
