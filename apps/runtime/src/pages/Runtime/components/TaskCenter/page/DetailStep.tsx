@@ -4,6 +4,7 @@ import { Steps, Avatar } from '@arco-design/web-react';
 import dayjs from 'dayjs';
 // import ExpendSp from '@/assets/images/task_center/expend-sp.svg';
 import dotImg from '../../../../../assets/images/task_center/one-dot.svg'
+import systemImg from '../../../../../assets/images/task_center/system.svg'
 import '../style/tcPage.less';
 import {approvalConfigVar, displayStatusMap} from '../constant'
 
@@ -105,20 +106,49 @@ const DetailStep: FC<any> = ({ stepData }: any) => {
     const pendingUserArr:string[] = [];
     const viewedUserArr:string[] = [];
     const endUsersArr:any[] = [];
+    const autoCopyArr: string[] = []
+    const autoCopyItem:any = {
+      // 模拟renderOneUser参数的结构
+      operators: []
+    };
     if (Array.isArray(nodeItem?.operators)) {
+      let isNotStart:boolean = false;
+      let isPending:boolean = false;
       nodeItem.operators.forEach((item:any) => {
-        const isNotStart:boolean = item.taskStatus === 'pre_approval' || item.taskStatus === '待审批'
-        const isPending:boolean = item.taskStatus === 'curr_in_approval' || item.taskStatus === '审批中'
+        isNotStart = item.taskStatus === 'pre_approval' || item.taskStatus === '待审批'
+        isPending = item.taskStatus === 'curr_in_approval' || item.taskStatus === '审批中'
         if (isPending || isNotStart) {
           pendingUserArr.push(item?.avatar)
         } else {
           // 不是审批中的，需要单独显示，模拟renderOneUser参数的结构
-          endUsersArr.push({operators: [item]})
+          if (item.taskStatus === 'post_auto_cc') {
+            // 自动抄送 有特殊样式
+            autoCopyArr.push(item?.operator)
+          } else {
+            endUsersArr.push({operators: [item]})
+          }
         }
         if (item?.viewed) {
           viewedUserArr.push(item?.operator)
         }
       })
+      if(autoCopyArr.length > 0) {
+        let text:string;
+        if (autoCopyArr.length > 2) {
+          text = `${autoCopyArr[0]}、${autoCopyArr[1]}等`
+        } else {
+          text = autoCopyArr.join('、')
+        }
+        autoCopyItem.operators.push({
+          operator: '系统',
+          avatar: systemImg,
+          taskStatus: 'post_auto_cc',
+          operatorTime: nodeItem?.displayTime,
+          colorText: text,
+          autoCopyArr
+        })
+        endUsersArr.push(autoCopyItem)
+      }
     }
     const userMap = displayStatusMap(nodeItem?.displayStatus)
     return (
@@ -166,10 +196,18 @@ const DetailStep: FC<any> = ({ stepData }: any) => {
         <div style={{ flex: 1 }}>
           <p>{opperator?.operator}</p>
           <p className="flex-bw-center">
-            <b className={`sp-options ${userMap?.labelColor}`}>{userMap?.label}</b>
+            {
+              (opperator?.autoCopyArr?.length > 0) ? 
+                <p style={{position: 'relative'}}>
+                  <span className={`sp-options ${userMap?.labelColor}`} style={{fontWeight: 'normal'}}>{userMap?.label}</span>&nbsp;
+                  <span className='auto-copy-color-span'>{opperator?.colorText}</span>
+                  <span className='auto-copy-color-span absolute-span'>{opperator?.autoCopyArr?.length}人</span>
+                </p> : 
+                <b className={`sp-options ${userMap?.labelColor}`}>{userMap?.label}</b>
+            }
             <span className="gray-color">
-              {(nodeItem?.displayTime || opperator.operatorTime)
-                ? dayjs(nodeItem?.displayTime || opperator.operatorTime).format('YYYY-MM-DD HH:mm:ss')
+              {(nodeItem?.displayTime || opperator?.operatorTime)
+                ? dayjs(nodeItem?.displayTime || opperator?.operatorTime).format('YYYY-MM-DD HH:mm:ss')
                 : '-'}
             </span>
           </p>
