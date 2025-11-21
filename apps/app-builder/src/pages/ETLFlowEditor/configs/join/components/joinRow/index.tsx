@@ -8,6 +8,7 @@ import RightJoinIcon from '@/assets/images/etl/right_join.svg';
 import InnerJoinIcon from '@/assets/images/etl/inner_join.svg';
 import JoinRowFields from '../joinRowFields';
 import styles from '../../index.module.less';
+import { setNodeDataAndResetDownstream } from '../../../utils';
 
 const { Option } = Select;
 const FormItem = Form.Item;
@@ -31,7 +32,7 @@ interface JoinRowProps {
 
 const JoinRow = (props: JoinRowProps) => {
   useSignals();
-  const { curNode, nodeData, setNodeData } = etlEditorSignal;
+  const { curNode, nodeData, graphData, setNodeData } = etlEditorSignal;
   const { finalNodeList, form } = props;
 
   // Join Type
@@ -53,8 +54,8 @@ const JoinRow = (props: JoinRowProps) => {
   useEffect(() => {
     const nodeListDetail = nodeData.value;
     if (finalNodeList.length > 0) {
-      const leftNodeId = form.getFieldValue(NODETYPE.LEFT);
-      const rightNodeId = form.getFieldValue(NODETYPE.RIGHT);
+      const leftNodeId = nodeListDetail[curNode.value.id]?.config[NODETYPE.LEFT];
+      const rightNodeId = nodeListDetail[curNode.value.id]?.config[NODETYPE.RIGHT];
       const leftFieldList = nodeListDetail[leftNodeId]?.output ? nodeListDetail[leftNodeId]?.output.fields : [];
       setLeftFieldList(leftFieldList);
       const rigthFieldList = nodeListDetail[rightNodeId]?.output ? nodeListDetail[rightNodeId]?.output.fields : [];
@@ -72,12 +73,30 @@ const JoinRow = (props: JoinRowProps) => {
 
   const handleNodeChange = (nodeType: string, nodeId: string) => {
     const nodeListDetail = nodeData.value;
-    if (nodeType === NODETYPE.LEFT) {
-      const leftFieldList = nodeListDetail[nodeId]?.output ? nodeListDetail[nodeId]?.output.fields : [];
-      setLeftFieldList(leftFieldList);
+    const leftFieldList = nodeListDetail[nodeId]?.output ? nodeListDetail[nodeId]?.output.fields : [];
+    const rigthFieldList = nodeListDetail[nodeId]?.output ? nodeListDetail[nodeId]?.output.fields : [];
+    if (!nodeId) {
+      const fieldPairs = form.getFieldValue('fieldPairs');
+      if (fieldPairs && fieldPairs.length > 0) {
+        setLeftFieldList(nodeType === NODETYPE.LEFT ? [] : leftFieldList);
+        setRightFieldList(nodeType === NODETYPE.LEFT ? rigthFieldList : []);
+        const finalFieldPairs = fieldPairs.map((field: any) => ({
+          leftFieldFqn: nodeType === NODETYPE.LEFT ? undefined : field.leftFieldFqn,
+          rightFieldFqn: nodeType === NODETYPE.LEFT ? field.rightFieldFqn : undefined
+        }));
+        form.setFieldValue('fieldPairs', finalFieldPairs);
+      }
+      const payload = nodeData.value[curNode.value.id];
+      payload.config = {
+        ...payload.config,
+        mappings: []
+      };
     } else {
-      const rigthFieldList = nodeListDetail[nodeId]?.output ? nodeListDetail[nodeId]?.output.fields : [];
-      setRightFieldList(() => rigthFieldList);
+      if (nodeType === NODETYPE.LEFT) {
+        setLeftFieldList(leftFieldList);
+      } else {
+        setRightFieldList(rigthFieldList);
+      }
     }
     setCurNodeData();
   };
@@ -89,7 +108,7 @@ const JoinRow = (props: JoinRowProps) => {
       ...payload.config,
       ...formValue
     };
-    setNodeData(curNode.value.id, payload);
+    setNodeDataAndResetDownstream(payload, curNode.value.id, graphData.value, nodeData.value);
   };
 
   return (

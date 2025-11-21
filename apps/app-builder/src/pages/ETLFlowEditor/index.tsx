@@ -82,7 +82,8 @@ const ETLFlowEditorPage: React.FC = () => {
           config: node.config,
           title: node.title,
           description: node.description,
-          output: node.output
+          output: node.output,
+          type: node.type
         };
         return acc;
       }, {});
