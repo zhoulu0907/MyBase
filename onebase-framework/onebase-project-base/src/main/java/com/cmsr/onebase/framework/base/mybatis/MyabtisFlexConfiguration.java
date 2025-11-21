@@ -5,17 +5,17 @@ import com.mybatisflex.annotation.KeyType;
 import com.mybatisflex.core.FlexGlobalConfig;
 import com.mybatisflex.core.audit.AuditManager;
 import com.mybatisflex.core.keygen.KeyGeneratorFactory;
+import com.mybatisflex.spring.boot.MyBatisFlexCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
 import java.util.Map;
 
 @Configuration
-public class MyabtisFlexConfiguration {
+public class MyabtisFlexConfiguration implements MyBatisFlexCustomizer {
 
     private static final Logger logger = LoggerFactory.getLogger("OneBase-SQL");
 
@@ -24,18 +24,8 @@ public class MyabtisFlexConfiguration {
     @Autowired
     private SnowflakeGenerator snowflakeGenerator;
 
-    @Bean
-    public FlexGlobalConfig flexGlobalConfig() {
-        // mybatis-flex configs
-        FlexGlobalConfig defaultConfig = FlexGlobalConfig.getDefaultConfig();
-
-        // SQL audit
-        AuditManager.setAuditEnable(true);
-        AuditManager.setMessageCollector(auditMessage ->
-                logger.info("{}, Time consumption: {}ms", auditMessage.getFullSql()
-                        , auditMessage.getElapsedTime())
-        );
-
+    @Override
+    public void customize(FlexGlobalConfig defaultConfig) {
         // logic delete
         defaultConfig.setLogicDeleteColumn("deleted");
         defaultConfig.setNormalValueOfLogicDelete(0);
@@ -65,6 +55,11 @@ public class MyabtisFlexConfiguration {
 
         defaultConfig.setKeyConfig(keyConfig);
 
-        return defaultConfig;
+        // SQL audit
+        AuditManager.setAuditEnable(true);
+        AuditManager.setMessageCollector(auditMessage ->
+                logger.info("{}, Time consumption: {}ms", auditMessage.getFullSql()
+                        , auditMessage.getElapsedTime())
+        );
     }
 }
