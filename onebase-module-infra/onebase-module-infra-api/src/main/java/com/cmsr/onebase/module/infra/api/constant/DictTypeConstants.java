@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.infra.enums;
+package com.cmsr.onebase.module.infra.api.constant;
 
 /**
  * Infra 字典类型的枚举类
