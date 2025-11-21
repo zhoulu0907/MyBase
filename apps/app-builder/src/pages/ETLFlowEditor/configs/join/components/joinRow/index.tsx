@@ -44,7 +44,10 @@ const JoinRow = (props: JoinRowProps) => {
   const [rightFieldList, setRightFieldList] = useState<any[]>([]);
 
   useEffect(() => {
-    form.setFieldValue('joinType', curSelectJoin);
+    const joinType = nodeData.value[curNode.value.id]?.config?.joinType;
+    form.setFieldValue('joinType', joinType || JOINOPTIONS[0].key);
+    setCurSelectJoin(joinType || JOINOPTIONS[0].key);
+    setCurSelectJoinObj(JOINOPTIONS.find((option) => option.key === joinType) || JOINOPTIONS[0]);
   }, []);
 
   useEffect(() => {
@@ -82,61 +85,11 @@ const JoinRow = (props: JoinRowProps) => {
   const setCurNodeData = () => {
     const formValue = form.getFieldsValue();
     const payload = nodeData.value[curNode.value.id];
-    let fields = [];
     payload.config = {
       ...payload.config,
       ...formValue
     };
-    if (formValue?.fieldPairs?.length > 0) {
-      fields = generateOutputFields(formValue);
-      payload.output = {
-        verified: true,
-        fields
-      };
-    } else {
-      payload.output = {
-        verified: false
-      };
-    }
     setNodeData(curNode.value.id, payload);
-  };
-
-  const generateOutputFields = (formValue: any) => {
-    if (formValue.joinType === ETLJoinType.RIGHT_JOIN) {
-      const rightFields = rightFieldList.map((field) => ({
-        fqn: curNode.value.id + `.${field.fieldName}`,
-        fieldName: field.fieldName,
-        fieldType: field.fieldType
-      }));
-
-      const fieldPairsSet = new Set(formValue.fieldPairs.map((pair: any) => pair.leftFieldFqn));
-      const leftFields = leftFieldList
-        .filter((field: any) => !fieldPairsSet.has(field.fieldFqn))
-        .map((item: any) => ({
-          fqn: curNode.value.id + `.${item.fieldName}`,
-          fieldName: item.fieldName,
-          fieldType: item.fieldType
-        }));
-
-      return leftFields.concat(rightFields);
-    } else {
-      const leftFields = leftFieldList.map((field) => ({
-        fqn: curNode.value.id + `.${field.fieldName}`,
-        fieldName: field.fieldName,
-        fieldType: field.fieldType
-      }));
-
-      const fieldPairsSet = new Set(formValue.fieldPairs.map((pair: any) => pair.rightFieldFqn));
-      const rightFields = rightFieldList
-        .filter((field: any) => !fieldPairsSet.has(field.fieldFqn))
-        .map((item: any) => ({
-          fqn: curNode.value.id + `.${item.fieldName}`,
-          fieldName: item.fieldName,
-          fieldType: item.fieldType
-        }));
-
-      return leftFields.concat(rightFields);
-    }
   };
 
   return (
