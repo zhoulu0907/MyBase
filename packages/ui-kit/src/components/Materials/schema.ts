@@ -62,7 +62,6 @@ export function getComponentSchema(componentType: ComponentType): ComponentSchem
   const config = componentSchemaMap[componentType];
 
   if (!config) {
-    debugger
     throw new Error(`未找到组件类型 "${componentType}" 的配置`);
   }
 
