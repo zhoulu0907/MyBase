@@ -28,6 +28,7 @@ import org.anyline.service.AnylineService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
@@ -385,6 +386,9 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
         List<MetadataDataMethodSubEntityContext> subEntityVos = context.getSubEntities();
         for(MetadataDataMethodSubEntityContext subEntityContext: subEntityVos){
             Long subEntityId  = subEntityContext.getEntityId();
+            if(ObjectUtils.isEmpty(subEntityId)){
+                throw exception(DB_SUBENTITY_OPERATION_ERROR,"subEntityId 参数不能为空");
+            }
             List<Map<Long, Object>> subData = subEntityContext.getSubData();
 
             String parentRelFieldId = relationshipDOS.stream().filter(relationshipDO ->
