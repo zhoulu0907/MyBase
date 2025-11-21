@@ -4,9 +4,7 @@ import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.mybatisflex.core.tenant.TenantFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Component
@@ -14,7 +12,7 @@ public class DefaultTenantFactory implements TenantFactory {
 
     private final static Set<String> TENANT_IGNORES;
 
-    private final static long IGNORED_TENANT = 1L;
+    private final static long GLOBAL_READABLE_TABLE = -1L;
 
     static {
         TENANT_IGNORES = new HashSet<>();
@@ -27,18 +25,14 @@ public class DefaultTenantFactory implements TenantFactory {
 
     @Override
     public Object[] getTenantIds() {
-        List<Long> tenantIds = new ArrayList<>();
-        // Add tenant conditions
-        tenantIds.add(TenantContextHolder.getTenantId());
-
-        return tenantIds.toArray();
+        return new Object[]{TenantContextHolder.getTenantId(), GLOBAL_READABLE_TABLE};
     }
 
     @Override
     public Object[] getTenantIds(String tableName) {
         if (TenantContextHolder.isIgnore() ||
                 ignoredRule(tableName)) {
-            return new Object[]{IGNORED_TENANT};
+            return new Object[]{GLOBAL_READABLE_TABLE};
         }
 
         return this.getTenantIds();
