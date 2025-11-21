@@ -64,7 +64,7 @@ export const updateUserStatusInCorp = (id: number, status: number) => {
 
 // 分页获取用户精简信息列表
 export const getSimpleUserPageInCorp = (params: PageParam): Promise<PageResult<UserVO>> => {
-  return corpService.get('/user/simple-page', params);
+  return corpService.get('/user/simple-list', params);
 };
 
 // 获得登录用户信息

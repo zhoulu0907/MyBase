@@ -89,7 +89,7 @@ const TenantPage: React.FC = () => {
   const getOwnerApplication = async () => {
     const ownerTag = 1;
     const res = await getApplicationSimple(ownerTag,"");
-    setAppData(res.list);
+    setAppData(res);
   };
 
   const fetchIndustryDict = async (id: string) => {
