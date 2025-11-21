@@ -485,9 +485,8 @@ const XTable = memo(
           key: item.data.id
         };
       });
-
-      setTableData(newTableData);
       tableForm.setFieldsValue({ [id]: newTableData });
+      setTableData(newTableData);
       setTableTotal(total);
     };
 
