@@ -14,6 +14,7 @@ import com.cmsr.onebase.module.etl.common.graph.Node;
 import com.cmsr.onebase.module.etl.common.graph.WorkflowGraph;
 import com.cmsr.onebase.module.etl.common.graph.conf.JdbcInputConfig;
 import com.cmsr.onebase.module.etl.common.graph.conf.JdbcOutputConfig;
+import com.cmsr.onebase.module.etl.common.preview.ColumnDefine;
 import com.cmsr.onebase.module.etl.common.preview.DataPreview;
 import com.cmsr.onebase.module.etl.core.dal.database.*;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLExecutionLogDO;
@@ -378,10 +379,32 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
                 .body(executeRequest)
                 .asString();
         if (response.getStatus() != 200) {
-            log.error("Flink Server 响应错误: {}", response.getBody());
+            log.error("Flink Server 预览数据响应错误: {}", response.getBody());
             throw new IllegalStateException("请求响应异常，" + response.getBody());
         }
         return JsonUtils.parseObject(response.getBody(), DataPreview.class);
+    }
+
+    @Override
+    public List<ColumnDefine> nodeColumns(PreviewReqVO previewReqVO) {
+        ExecuteRequest executeRequest = new ExecuteRequest();
+        JsonNode workflow = previewReqVO.getWorkflow();
+        if (workflow instanceof NullNode) {
+            throw new IllegalArgumentException("流程参数为空");
+        }
+        executeRequest.setPreviewWorkflow(workflow.toString());
+        executeRequest.setPreviewNodeId(previewReqVO.getNodeId());
+        String token = JoseGenerator.generateToken(30);
+        HttpResponse<String> response = Unirest.post(flinkServerUrl + "/flink/columns")
+                .header("Content-Type", "application/json")
+                .header("X-Exec-Token", token)
+                .body(executeRequest)
+                .asString();
+        if (response.getStatus() != 200) {
+            log.error("Flink Server 列分析响应错误: {}", response.getBody());
+            throw new IllegalStateException("请求响应异常，" + response.getBody());
+        }
+        return JsonUtils.parseArray(response.getBody(), ColumnDefine.class);
     }
 
     @Override

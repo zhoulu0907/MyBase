@@ -1,5 +1,6 @@
 package com.cmsr.onebase.server.flink.controller;
 
+import com.cmsr.onebase.module.etl.common.preview.ColumnDefine;
 import com.cmsr.onebase.module.etl.common.preview.DataPreview;
 import com.cmsr.onebase.module.etl.common.excute.ExecuteRequest;
 import com.cmsr.onebase.module.etl.executor.WorkFlowExecutor;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.sql.DataSource;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -45,8 +47,19 @@ public class FlinkExecutorController {
     @PostMapping(path = "/preview", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> preview(@RequestBody ExecuteRequest executeRequest) {
         try (WorkFlowExecutor executor = new WorkFlowExecutor(executeRequest, dataSource)) {
-            DataPreview preview = executor.preview();
+            DataPreview preview = executor.nodePreview();
             return ResponseEntity.ok(preview);
+        } catch (Exception e) {
+            Map result = Map.of("result", "fail", "message", ExceptionUtils.getRootCauseMessage(e));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
+        }
+    }
+
+    @PostMapping(path = "/columns", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> columns(@RequestBody ExecuteRequest executeRequest) {
+        try (WorkFlowExecutor executor = new WorkFlowExecutor(executeRequest, dataSource)) {
+            List<ColumnDefine> columns = executor.nodeColumns();
+            return ResponseEntity.ok(columns);
         } catch (Exception e) {
             Map result = Map.of("result", "fail", "message", ExceptionUtils.getRootCauseMessage(e));
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
