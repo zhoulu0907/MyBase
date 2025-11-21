@@ -1,7 +1,8 @@
 import { useI18n } from '@/hooks/useI18n';
 import AvatarSVG from '@/assets/images/avatar.svg';
+import LogoAvatarSVG from "@/assets/images/ob_logo.svg";
 import BuildingLine from '@/assets/images/building-line.svg';
-import { DynamicIcon } from '@/components';
+import { DynamicIcon } from '@/components/DynamicIcon';
 import { appInfoSignal } from '@/store/app';
 import { UserPermissionManager } from '@/utils/permission';
 import { Avatar, Divider, Dropdown, Layout, Menu, Typography } from '@arco-design/web-react';
@@ -118,17 +119,19 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   return (
     <Header className={`${styles.header} ${className || ''}`}>
       <div className={styles.headerContent}>
-        <div className={styles.appInfo}>
-          <div className={styles.myAppIcon} style={{ backgroundColor: curAppInfo.value.iconColor }}>
-            <DynamicIcon
-              IconComponent={appIconMap[curAppInfo.value.iconName as keyof typeof appIconMap]}
-              theme="outline"
-              size="14"
-              fill="#F2F3F5"
-            />
-          </div>
-          <div className={styles.appName}>{curAppInfo.value.appName}</div>
-        </div>
+        {curAppInfo.value.iconName && 
+          <div className={styles.appInfo}>
+            <div className={styles.myAppIcon} style={{ backgroundColor: curAppInfo.value.iconColor }}>
+              <DynamicIcon
+                IconComponent={appIconMap[curAppInfo.value.iconName as keyof typeof appIconMap]}
+                theme="outline"
+                size="14"
+                fill="#F2F3F5"
+              />
+            </div>
+            <div className={styles.appName}>{curAppInfo.value.appName}</div>
+          </div> || <img src={LogoAvatarSVG} />
+        }
 
         <div className={styles.userInfo}>
           {UserPermissionManager.getUserPermissionInfo()?.user?.nickname || '未登录'}

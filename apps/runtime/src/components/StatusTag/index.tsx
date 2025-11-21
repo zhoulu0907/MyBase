@@ -1,28 +1,19 @@
 import React from 'react';
-import { StatusEnum } from '@onebase/platform-center';
 import s from './index.module.less';
 import { Tag } from '@arco-design/web-react';
+import { statusColorMap, StatusEnum, StatusLabelEnum } from '@/constants';
 
 export interface StatusTagProps {
   status: StatusEnum;
   type?: 'tag' | 'text';
 }
 
-export enum StatusLabelEnum {
-  ENABLE = '启用',
-  DISABLE = '禁用',
-  EXPIRED = '过期'
-}
+
 
 export const getStatusLabel = (status: StatusEnum): string => {
   const isEnable = status === StatusEnum.ENABLE;
   const text = isEnable ? StatusLabelEnum.ENABLE : (status === StatusEnum.EXPIRED ? StatusLabelEnum.EXPIRED : StatusLabelEnum.DISABLE);
   return text;
-};
-
-const statusColorMap: Record<StatusEnum, string> = {
-  [StatusEnum.ENABLE]: 'green',
-  [StatusEnum.DISABLE]: 'gray'
 };
 
 export const StatusTag: React.FC<StatusTagProps> = ({ status, type = 'text' }) => {

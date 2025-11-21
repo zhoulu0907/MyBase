@@ -11,21 +11,21 @@ export enum StatusEnum {
   ALL = 0,
   ENABLE = 1,
   DISABLE = 2,
-  EXPIRES = 3
+  EXPIRED = 3
 }
 
 export enum StatusEnumLabel {
   ALL = "全部",
   ENABLE = "已启用",
   DISABLE = "已禁用",
-  EXPIRES = "已过期"
+  EXPIRED = "已过期"
 }
 
 export enum StatusValue {
   ALL = "all",
   ENABLE = "started",
   DISABLE = "disabled",
-  EXPIRES = "expired"
+  EXPIRED = "expired"
 }
 
 
@@ -33,7 +33,7 @@ export const statusMapping: statusProps[] = [
   {label:StatusEnumLabel.ALL, value: StatusValue.ALL, status: StatusEnum.ALL},
   {label:StatusEnumLabel.ENABLE, value: StatusValue.ENABLE, status:StatusEnum.ENABLE},
   {label:StatusEnumLabel.DISABLE, value: StatusValue.DISABLE, status: StatusEnum.DISABLE},
-  {label:StatusEnumLabel.EXPIRES, value: StatusValue.EXPIRES, status: StatusEnum.EXPIRES},
+  {label:StatusEnumLabel.EXPIRED, value: StatusValue.EXPIRED, status: StatusEnum.EXPIRED},
 ]
 
 export const statusOptions = [
@@ -50,3 +50,16 @@ export const statusOptions = [
     value: 1
   }
 ];
+
+export const statusColorMap = {
+  [StatusEnum.ENABLE]: 'green',
+  [StatusEnum.DISABLE]: 'gray',
+  [StatusEnum.ALL]:'',
+  [StatusEnum.EXPIRED]:'',
+};
+
+export enum StatusLabelEnum {
+  ENABLE = '启用',
+  DISABLE = '禁用',
+  EXPIRED = '过期'
+}

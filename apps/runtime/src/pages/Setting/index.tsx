@@ -7,11 +7,12 @@ import AppSider from './components/sider';
 
 import OrganizationPage from './pages/Organization';
 import EnterpriseInfo from './pages/EnterpriseInfo';
-import TenantEditPage from './pages/Tenant/edit';
 import UserPage from './pages/User';
 
 import styles from './index.module.less';
 import AuthorizedApplication from './pages/authorizedApp';
+import TenantPage from './pages/Tenant';
+import TenantEditPage from './pages/Tenant/edit';
 
 
 const Content = Layout.Content;
@@ -38,7 +39,8 @@ const SettingPage: React.FC = () => {
                 <Route path="user" element={<UserPage />} />
                 <Route path="organization" element={<OrganizationPage />} />
                 <Route path="enterpriseInfo" element={<EnterpriseInfo />} />
-                <Route path="authorized-application" element={<AuthorizedApplication />}></Route>
+                <Route path="authorized-application" element={<AuthorizedApplication />} />
+                <Route path="tenant" element={<TenantPage />} />
                 <Route path="tenant/edit" element={<TenantEditPage />} />
                 <Route path="" element={<Navigate to="user" replace />} />
               </Routes>

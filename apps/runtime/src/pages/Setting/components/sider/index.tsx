@@ -1,19 +1,20 @@
 import { Button, Layout, Menu } from '@arco-design/web-react';
 import {
-  IconApps,
-  IconFile,
   IconIdcard,
-  IconList,
   IconMenuFold,
   IconMenuUnfold,
-  IconUserGroup
 } from '@arco-design/web-react/icon';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import type { MenuItemType } from './menuData';
 import styles from './sider.module.less';
 import { hasMenu } from '@/utils/permission';
-import { CORP_MENUS } from '@/constants/permission'
+import { CORP_MENUS } from '@/constants/permission';
+import organizationSVG from '@/assets/images/organization-chart.svg';
+import vectorSVG from '@/assets/images/vector.svg';
+import buildingLineSVG from '@/assets/images/building-line.svg';
+import userInfoSVG from '@/assets/images/userInfo.svg';
+import authSVG from '@/assets/images/auth-app.svg';
 
 const { Sider } = Layout;
 const MenuItem = Menu.Item;
@@ -37,35 +38,35 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
       {
         key: 'organization',
         title: '组织管理',
-        icon: <IconList style={iconStyle} />,
+        icon: <img src={organizationSVG} />,
         path: '/onebase/setting/organization',
         permissionKey: CORP_MENUS.DEPT
       },
       {
         key: 'user',
         title: '用户管理',
-        icon: <IconUserGroup style={iconStyle} />,
+        icon: <img src={vectorSVG} />,
         path: '/onebase/setting/user',
         permissionKey: CORP_MENUS.USER
       },
       {
         key: 'enterpriseInfo',
         title: '企业信息',
-        icon: <IconIdcard style={iconStyle} />,
+        icon: <img src={buildingLineSVG} />,
         path: '/onebase/setting/enterpriseInfo',
         permissionKey: CORP_MENUS.CORP_INFO
       },
       {
         key: 'authorized-application',
         title: '授权应用',
-        icon: <IconIdcard style={iconStyle} />,
+        icon: <img src={authSVG} />,
         path: '/onebase/setting/authorized-application',
         permissionKey: CORP_MENUS.AUTHORIZED
       },
       {
         key: 'tenant',
         title: '个人中心',
-        icon: <IconIdcard style={iconStyle} />,
+        icon: <img src={userInfoSVG} />,
         path: '/onebase/setting/tenant',
         permissionKey: CORP_MENUS.PROFILE
       }

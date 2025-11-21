@@ -4,10 +4,10 @@ import StatusTag from "@/components/StatusTag";
 import { IconMore } from "@douyinfe/semi-icons";
 import { statusMapping } from "../../../../constants";
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAppStore } from "@/store";
-import { TokenManager } from '@onebase/common';
-import { type corpAppListParams ,getCorpAuthorizedAppListApiInCorp } from "@onebase/platform-center";
+import { TokenManager ,formatTimeYMDHMS } from '@onebase/common';
+import { type corpAppListParams ,getCorpAuthorizedAppListApiInCorp ,type updateAppParams } from "@onebase/platform-center";
+import EditAuthorizedTime from "@/components/Modal/editAuthorizedTime";
+import type { authorizedTimeGroup } from "@/types";
 
 
 export interface AppItem {
@@ -24,9 +24,10 @@ export interface AppItem {
 
 const AuthorizedApplication = () => {
     const [loading, setLoading] = useState<boolean>(false);
+    const [visible, setVisible] = useState<boolean>(false);
     const [tableData, setTableData] = useState<AppItem[]>([]);
     const [searchValue, setSearchValue] = useState<string>("");
-    const [currentTab, setCurrentTab] = useState<string>("all");
+    const [currentTab, setCurrentTab] = useState<string>("0");
     const [pageInation, setPagination] = useState({
         showTotal: true,
         total: 0,
@@ -35,14 +36,12 @@ const AuthorizedApplication = () => {
         sizeCanChange: true,
         pageSizeChangeResetCurrent: true
     });
-    const navigate = useNavigate();
-    const { curAppId } = useAppStore();
     const tokenInfo = TokenManager.getTokenInfo();
 
     const authorizedApplicationColumns = [
         {
             title: '应用名称',
-            dataIndex: 'appName',
+            dataIndex: 'applicationName',
             width: 150, 
             render: (text: string) => (
                 <Space size={12} align="center">{text}</Space>
@@ -50,12 +49,12 @@ const AuthorizedApplication = () => {
         },
         {
             title: '应用ID',
-            dataIndex: 'appId',
+            dataIndex: 'applicationCode',
             width: 180, 
         },
         {
             title: '版本号',
-            dataIndex: 'version',
+            dataIndex: 'versionNumber',
             width: 100, 
             render: (text: string) => (
                 <Tag color="gray" size="small">{text}</Tag>
@@ -63,19 +62,25 @@ const AuthorizedApplication = () => {
         },
         {
             title: '授权启效时间',
-            dataIndex: 'effectTime',
+            dataIndex: 'authorizationTime',
             width: 180, 
+            render: (timeValue: string) => (
+                <div>{formatTimeYMDHMS(timeValue)}</div>
+            )
         },
         {
             title: '过期时间',
-            dataIndex: 'expireTime',
+            dataIndex: 'expiresTime',
             width: 180, 
+            render: (timeValue: string) => (
+                <div>{formatTimeYMDHMS(timeValue)}</div>
+            )
         },
         {
             title: '状态',
-            dataIndex: 'status',
+            dataIndex: 'showStatus',
             width: 120,
-            render: (status: string) => <StatusTag status={status} />
+            render: (status: string) => <StatusTag status={status as any} />
         },
         {
             title: '操作',
@@ -98,27 +103,12 @@ const AuthorizedApplication = () => {
         }
     ];
 
-    const getStatus = (value: string) => {
-        switch(value) {
-            case "all":
-                return 0;
-            case "started":
-                return 1;
-            case "disabled":
-                return 2;
-            case "expired":
-                return 3;
-            default:
-                return null
-        }
-    }
-
-    const fetchCorpAuthorizedList = async(pageNo = 1, pageSize = 10) => {
+    const fetchCorpAuthorizedList = async(pageNo = 1, pageSize = 10, status: string = '0') => {
         setLoading(true);
         const params: corpAppListParams = {
             pageNo,
             pageSize,
-            status: getStatus(currentTab),
+            status: status ? Number(status) : 0,
             corpId: tokenInfo?.corpId || ""
         };
         try {
@@ -147,8 +137,7 @@ const AuthorizedApplication = () => {
     };
 
     const handleChange = (name: string, key: string) => {
-        //权限管理
-        navigate(`/onebase/create-app/app-setting?appId=${curAppId}`);
+        //todo
     }
 
     const handleSearchChange = (searchValue: string) => {
@@ -172,8 +161,8 @@ const AuthorizedApplication = () => {
 
     const handleChangeTab = (value: string) => {
         setCurrentTab(value);
+        fetchCorpAuthorizedList(1,10,value);
     }
-
     const displayData = useMemo(()=>{
       if (!searchValue.trim()) return tableData
       const lowerSearch = searchValue.toLowerCase();
@@ -220,7 +209,6 @@ const AuthorizedApplication = () => {
                 </Tabs.TabPane>
             })}
             </Tabs>
-
         </div>
     )
 }

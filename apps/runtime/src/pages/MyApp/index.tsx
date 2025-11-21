@@ -1,9 +1,9 @@
 import { useI18n } from '@/hooks/useI18n';
 import { useAppStore } from '@/store';
-import { Button, Divider, Dropdown, Input, Layout, Menu, Pagination, Select, Spin, Tag, Tooltip, Typography } from '@arco-design/web-react';
+import { Button, Divider, Dropdown, Input, Layout, Menu, Pagination, Select, Spin, Tag, Typography } from '@arco-design/web-react';
 import { IconEmpty, IconMoreVertical, IconSearch } from '@arco-design/web-react/icon';
 import { listApplication, type Application, type PageParam } from '@onebase/app';
-import { getCommonPaginationList, getRuntimeURL, TokenManager } from '@onebase/common';
+import { getCommonPaginationList, TokenManager } from '@onebase/common';
 import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -116,12 +116,7 @@ const MyAppPage: React.FC = () => {
   const nagivateToDataFactory = (appId: string) => {
     setCurAppId(appId);
     const tenantId = TokenManager.getTenantInfo()?.tenantId || '';
-
-    const newWindow = window.open('', '_blank');
-    if (newWindow) {
-      const redirectURL = `${getRuntimeURL()}/#/onebase/runtime/?&appId=${appId}&tenantId=${tenantId}`;
-      newWindow.location.href = `${getRuntimeURL()}/#/login?redirectURL=${redirectURL}`;
-    }
+    navigate(`/onebase/runtime/${appId}/${tenantId}`);
   };
 
   const handleOptionVisibleChange = (v: boolean, id: string) => {
@@ -140,28 +135,6 @@ const MyAppPage: React.FC = () => {
       setOptionVisibleId('');
       timerRef.current = null;
     }, delay);
-  };
-
-  const getModel = (model?: string) => {
-    if (model === 'inner') {
-      return '内部模式';
-    } else if (model === 'saas') {
-      return 'SaaS模式';
-    }
-    return '';
-  };
-
-  const getColor = (model?: string) => {
-    if (model === 'inner') {
-      return 'cyan';
-    } else if (model === 'saas') {
-      return 'red';
-    }
-    return '';
-  };
-
-  const handleClickButton = () => {
-    navigate('/onebase/setting/application');
   };
 
   const menu = (item: any) => {
@@ -353,7 +326,6 @@ const MyAppPage: React.FC = () => {
                         onClick={() => {
                           nagivateToDataFactory(item.id);
                         }}
-                        // disabled={item.publishModel === "saas"}
                       >
                         进入应用
                       </Button>

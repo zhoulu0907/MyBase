@@ -1,4 +1,4 @@
-import { DynamicIcon } from '@/components';
+import { DynamicIcon } from '@/components/DynamicIcon';
 import { PUBLISH_MODULE } from '@/constants/permission';
 import { appInfoSignal } from '@/store/app';
 import { Button, Checkbox, Form, Input, Message, Space, Typography } from '@arco-design/web-react';
@@ -84,8 +84,16 @@ const Right: React.FC = () => {
       if (redirectURL) {
         window.location.href = redirectURL;
       } else {
-        // 跳转到首页
-        navigate(`/onebase/runtime/${appId}`);
+        //企业登录
+        if(!appId && tenantId) {
+          navigate(`/onebase/runtime/my-app`);
+        }
+        if(appId && !tenantId) {
+          navigate(`/onebase/runtime/${tenantId}`);
+        }
+        if(appId && tenantId) {
+          navigate(`/onebase/runtime/${appId}/${tenantId}`);
+        }
       }
       return;
     }
