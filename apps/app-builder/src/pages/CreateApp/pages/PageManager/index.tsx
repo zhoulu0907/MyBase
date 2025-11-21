@@ -48,6 +48,7 @@ import RenameModal from './components/Modals/RenameModal';
 import MyMenuItem from './components/MyMenuItem';
 import TaskCenterPage from './components/TaskCenter/TaskCenterPage';
 import TaskCenterSide from './components/TaskCenter/taskTreeSide';
+import { currentEditorSignal } from '@onebase/ui-kit/src/signals/current_editor';
 import styles from './index.module.less';
 
 const TreeNode = Tree.Node;

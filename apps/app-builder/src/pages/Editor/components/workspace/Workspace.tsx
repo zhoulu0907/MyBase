@@ -20,6 +20,8 @@ import {
   DEFAULT_OPTIONS_TYPE,
   type GridItem
 } from '@onebase/ui-kit';
+import { currentEditorSignal } from '@onebase/ui-kit/src/signals/current_editor';
+import { EditMode } from '@onebase/common';
 
 import EmptyIcon from '@/assets/images/empty.svg';
 import MobileIcon from '@/assets/images/mobile_icon.svg';
@@ -274,12 +276,14 @@ export default function EditorWorkspace() {
               <img
                 className={styles.pageModeIcon}
                 src={editMode.value === EditMode.MOBILE ? PCIcon : PCActiveIcon}
-                onClick={() => editMode.value === EditMode.MOBILE && switchEditMode(EditMode.PC)}
+                onClick={() => editMode.value === EditMode.MOBILE && setEditMode(EditMode.PC)}
+                title="PC端模式"
               />
               <img
                 className={styles.pageModeIcon}
                 src={editMode.value === EditMode.PC ? MobileIcon : MobileActiveIcon}
-                onClick={() => editMode.value === EditMode.PC && switchEditMode(EditMode.MOBILE)}
+                onClick={() => editMode.value === EditMode.PC && setEditMode(EditMode.MOBILE)}
+                title="移动端模式"
               />
             </>
           </div>
