@@ -1,10 +1,10 @@
-import { useAppStore } from '@/store';
 import { Button, Input, Pagination, Spin } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
-import { listConnectInstance, type ListConnectInstanceReq } from '@onebase/app';
-import { getCommonPaginationList } from '@onebase/common';
+import { createConnectInstance, listConnectInstance, type ListConnectInstanceReq } from '@onebase/app';
+import { getCommonPaginationList, getHashQueryParam } from '@onebase/common';
 import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import ConnectNodeCategoryCard from '../../components/ConnectNodeCategoryCard';
 import styles from './index.module.less';
 
@@ -13,7 +13,7 @@ import styles from './index.module.less';
  * 目前集成触发器编辑器作为主内容
  */
 const ConnectorInstancesPage: React.FC = () => {
-  const { curAppId } = useAppStore();
+  const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
   const [searchInstanceName, setSearchInstanceName] = useState('');
@@ -43,9 +43,9 @@ const ConnectorInstancesPage: React.FC = () => {
 
   const getConnectInstanceList = async (typeName?: string, level1Code?: string) => {
     setLoading(true);
-
+    const curAppId = getHashQueryParam('appId');
     const req: ListConnectInstanceReq = {
-      applicationId: curAppId,
+      applicationId: curAppId || '',
       pageNo: pageNo,
       pageSize: pageSize || 8,
       connectorName: typeName || '',
@@ -62,6 +62,19 @@ const ConnectorInstancesPage: React.FC = () => {
       setTotal(res.total || 0);
       setLoading(false);
     }
+  };
+
+  const handleCreateInstance = async () => {
+    const curAppId = getHashQueryParam('appId');
+    const res = await createConnectInstance({
+      applicationId: curAppId || '',
+      connectionName: '连接器实例',
+      description: '',
+      typeCode: ''
+    });
+
+    console.log('res :', res);
+    // navigate(`/onebase/create-app/integrated-management/connector-instance-detail?appId=${curAppId}&id=${res.id}`);
   };
 
   return (
