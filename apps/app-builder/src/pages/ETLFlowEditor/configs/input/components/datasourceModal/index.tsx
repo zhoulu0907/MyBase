@@ -11,8 +11,9 @@ import {
   type ETLDatasource,
   type ETLTable
 } from '@onebase/app';
-import { etlEditorSignal, getHashQueryParam } from '@onebase/common';
+import { etlEditorSignal, ETLNodeType, getHashQueryParam } from '@onebase/common';
 import React, { useEffect, useMemo, useState } from 'react';
+import { clearDownStreamNodeConfig } from '../../../utils';
 import CreateExternalModal from '../createExternalModal';
 import styles from './index.module.less';
 
@@ -113,6 +114,8 @@ const DatasourceModal: React.FC<DatasourceModalProps> = ({ isModalVisible, onClo
 
     let payload = nodeData.value[curNode.value.id];
 
+    payload.nodeType = ETLNodeType.INPUT_NODE;
+
     payload.config = {
       datasourceId: curDatasourceId,
       tableId: selectedTableId,
@@ -132,7 +135,7 @@ const DatasourceModal: React.FC<DatasourceModalProps> = ({ isModalVisible, onClo
     };
 
     setNodeData(curNode.value.id, payload);
-    // clearDownStreamNodeConfig(curNode.value.id, graphData.value, nodeData.value);
+    clearDownStreamNodeConfig(curNode.value.id, graphData.value, nodeData.value);
 
     onOk?.();
   };
