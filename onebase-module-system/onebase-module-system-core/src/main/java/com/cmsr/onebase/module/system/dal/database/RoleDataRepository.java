@@ -86,7 +86,7 @@ public class RoleDataRepository extends DataRepository<RoleDO> {
      */
     public PageResult<RoleDO> findRolePageOnlyTenant(RolePageReqVO pageReqVO) {
         DefaultConfigStore configStore = buildRolePageConfigStore(pageReqVO);
-        configStore.notIn(RoleDO.CODE, RoleCodeEnum.CORP_ADMIN, RoleCodeEnum.SUPER_ADMIN);
+        configStore.notIn(RoleDO.CODE, RoleCodeEnum.CORP_ADMIN.getCode(), RoleCodeEnum.SUPER_ADMIN.getCode());
         // 排序
         configStore.order(RoleDO.SORT, Order.TYPE.ASC)
                 .order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
