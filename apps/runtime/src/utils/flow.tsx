@@ -1,4 +1,4 @@
-import { Form, Input, Modal, Grid } from '@arco-design/web-react';
+import { Form, Input, Modal, Grid, Message } from '@arco-design/web-react';
 import { useEffect, useState } from 'react';
 import { triggerFlowExecForm } from '@onebase/app';
 import { FLOW_MODAL_CANCEL, FLOW_MODAL_TYPE, NodeType } from '@onebase/common';
@@ -61,6 +61,8 @@ const ExecuteFlows: React.FC<FlowsProps> = ({ flows, inputParams }) => {
 
     if (res.success) {
       if (res.executionEnd) {
+        // 当前流程结束
+        Message.success(res.outputParams?.prompt || '当前流程结束')
         curFlowIndex++;
         await executeSingleFlow('');
         return;

@@ -120,7 +120,10 @@ const EditProxyModal: React.FC<ModalProps> = ({
             </Select>
           </Form.Item>
           <Form.Item label="代理有效期" field="timer" rules={[{ required: true, message: '请选择代理有效期' }]}>
-            <DatePicker.RangePicker style={{ width: '100%' }} disabledDate={(current) => current.isBefore(dayjs())} />
+            <DatePicker.RangePicker
+              style={{ width: '100%' }}
+              disabledDate={(current) => current.isBefore(dayjs().subtract(1, 'day'))}
+            />
           </Form.Item>
         </Form>
       </div>
