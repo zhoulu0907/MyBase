@@ -122,7 +122,6 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
     if (typeof fieldValue === 'object' && fieldValue) {
       return fieldValue?.userName ?? '--';
     }
-    console.log('currentSelectUser :', currentSelectUser);
     if (currentSelectUser == null || currentSelectUser == undefined || currentSelectUser == '') {
       return '--';
     }
