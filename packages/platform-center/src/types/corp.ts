@@ -59,7 +59,8 @@ export interface createCorpParams {
 
 export interface corpListParams {
   pageNo: number;
-  pageSize: number
+  pageSize: number;
+  corpId: string;
 }
 
 /**
