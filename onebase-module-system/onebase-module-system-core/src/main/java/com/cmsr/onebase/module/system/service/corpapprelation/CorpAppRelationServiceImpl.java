@@ -164,15 +164,15 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
      * @param
      * @return Map<Long, String> key为企业ID，value为企业名称
      */
-    public String getCorpStatus(Integer status, LocalDateTime expiresTime) {
-        String showStatus = "";
+    public Integer getCorpStatus(Integer status, LocalDateTime expiresTime) {
+        int showStatus = 0;
         if (status != null && status.equals(CorpStatusEnum.DISABLE.getValue())) {
-            showStatus = CorpAppReationStatusEnum.DISABLE.getName();
+            showStatus = CorpAppReationStatusEnum.DISABLE.getValue();
         } else if (expiresTime != null) {
             if (expiresTime.isAfter(java.time.LocalDateTime.now())) {
-                showStatus = CorpAppReationStatusEnum.ENABLE.getName();
+                showStatus = CorpAppReationStatusEnum.ENABLE.getValue();
             } else {
-                showStatus = CorpAppReationStatusEnum.EXPIRES.getName();
+                showStatus = CorpAppReationStatusEnum.EXPIRES.getValue();
             }
         }
         return showStatus;
