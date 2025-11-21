@@ -64,7 +64,7 @@ export const updateUserStatus = (id: number, status: number) => {
 
 // 获取用户精简信息列表
 export const getSimpleUserList = (): Promise<UserVO[]> => {
-  return systemService.get('/platform/admin/list');
+  return systemService.get('/user/simple-list');
 };
 
 // 分页获取用户精简信息列表

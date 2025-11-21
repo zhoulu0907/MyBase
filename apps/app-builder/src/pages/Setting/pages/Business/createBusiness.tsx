@@ -8,7 +8,7 @@ import { BasicInformation } from "./components/createApp/basicInformation";
 import { AuthorizedApp } from "./components/createApp/authorizedApp";
 import { AdminInformation } from "./components/createApp/adminInfomation";
 import type { AppItem, OutletContextType, successData } from "./types/appItem";
-import {removeCorpAppApi, updateCorpAppApi, createCorpApi, getCorpAuthorizedAppListApi, type CorpAppParams, type createCorpParams, type updatedParams, type corpListParams} from "@onebase/platform-center";
+import { createCorpApi, getCorpAuthorizedAppListApi, type CorpAppParams, type createCorpParams, type updatedParams, type corpListParams} from "@onebase/platform-center";
 import { IconLoading } from "@arco-design/web-react/icon";
 
 const CreateBusinessPage: React.FC = () => {
@@ -68,17 +68,6 @@ const CreateBusinessPage: React.FC = () => {
     const handleRemoveAuthorizedApp = async(id: string) => {
         const newData = tableData.filter(item => item.id !== id);
         setTableData(newData);
-        // try {
-        // const res = await removeCorpAppApi(id);
-        // if(res) {
-        //     await fetchCorpAuthorizedList(pageInation.current,pageInation.pageSize);
-        //     Message.success("授权应用删除成功");
-        // }else {
-        //     Message.success("未删除成功");
-        // }
-        // }catch(error) {
-        //     Message.error("接口返回异常, 授权应用删除失败");
-        // }
     }
 
     const handleSearchChange = (searchValue: string) => {
