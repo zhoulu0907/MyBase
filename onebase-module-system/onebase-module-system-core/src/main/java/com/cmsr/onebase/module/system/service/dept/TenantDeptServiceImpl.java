@@ -1,28 +1,27 @@
 package com.cmsr.onebase.module.system.service.dept;
 
 import com.cmsr.onebase.framework.common.enums.XFromSceneTypeEnum;
-import com.cmsr.onebase.module.system.dal.database.dept.DeptDataRepository;
 import com.cmsr.onebase.module.system.dal.database.dept.AbstractDeptDataRepository;
+import com.cmsr.onebase.module.system.dal.database.dept.TenantDeptDataRepository;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 @Slf4j
-@Service("deptService")
+@Service("tenantDeptService")
 @Validated
-public class DeptServiceImpl extends AbstractDeptServiceImpl {
-
+public class TenantDeptServiceImpl extends AbstractDeptServiceImpl{
     @Resource
-    private DeptDataRepository deptDataRepository;
+    private TenantDeptDataRepository tenantDeptDataRepository;
 
     @Override
     public AbstractDeptDataRepository getDeptDataRepository() {
-        return deptDataRepository;
+        return tenantDeptDataRepository;
     }
 
     @Override
     public String getXFromSceneType() {
-        return XFromSceneTypeEnum.ALL.getCode();
+        return XFromSceneTypeEnum.TENANT.getCode();
     }
 }
