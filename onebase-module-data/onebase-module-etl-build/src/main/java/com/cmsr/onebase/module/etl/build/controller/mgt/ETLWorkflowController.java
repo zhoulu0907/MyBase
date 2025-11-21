@@ -4,6 +4,7 @@ import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.etl.build.service.mgt.ETLWorkflowService;
 import com.cmsr.onebase.module.etl.build.service.mgt.vo.*;
+import com.cmsr.onebase.module.etl.common.preview.ColumnDefine;
 import com.cmsr.onebase.module.etl.common.preview.DataPreview;
 import com.cmsr.onebase.module.etl.core.vo.WorkflowPageReqVO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,6 +13,8 @@ import jakarta.annotation.Resource;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Tag(name = "ETL - 数据流管理")
 @RestController
@@ -94,8 +97,14 @@ public class ETLWorkflowController {
 
     @PostMapping("/preview")
     public CommonResult<DataPreview> previewWorkflow(@RequestBody PreviewReqVO previewReqVO) {
-        DataPreview preview = workflowService.previewWorkflow(  previewReqVO);
+        DataPreview preview = workflowService.previewWorkflow(previewReqVO);
         return CommonResult.success(preview);
+    }
+
+    @PostMapping("/columns")
+    public CommonResult<List<ColumnDefine>> queryWorkflowColumns(@RequestBody PreviewReqVO previewReqVO) {
+        List<ColumnDefine> columns = workflowService.nodeColumns(previewReqVO);
+        return CommonResult.success(columns);
     }
 
 }

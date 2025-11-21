@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.infra.enums;
+package com.cmsr.onebase.module.infra.api.constant;
 
 import com.cmsr.onebase.framework.common.enums.RpcConstants;
 
