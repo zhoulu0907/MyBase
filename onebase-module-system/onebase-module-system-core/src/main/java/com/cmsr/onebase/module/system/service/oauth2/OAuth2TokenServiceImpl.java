@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.system.service.oauth2;
 
+import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstants;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
@@ -58,7 +59,7 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
     @Resource
     private OAuth2RefreshTokenDataRepository oauth2RefreshTokenDataRepository;
     @Resource
-    private com.cmsr.onebase.module.infra.api.security.SecurityConfigApi securityConfigApi;
+    private SecurityConfigApi securityConfigApi;
 
     @Override
     @Transactional(rollbackFor = Exception.class)

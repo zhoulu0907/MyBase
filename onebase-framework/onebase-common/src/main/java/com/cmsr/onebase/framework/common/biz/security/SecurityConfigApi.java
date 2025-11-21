@@ -1,8 +1,8 @@
-package com.cmsr.onebase.module.infra.api.security;
+package com.cmsr.onebase.framework.common.biz.security;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.module.infra.api.security.dto.PasswordExpiryCheckDTO;
-import com.cmsr.onebase.module.infra.api.security.dto.LoginFailureResultDTO;
+import com.cmsr.onebase.framework.common.biz.security.dto.PasswordExpiryCheckDTO;
+import com.cmsr.onebase.framework.common.biz.security.dto.LoginFailureResultDTO;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
