@@ -31,7 +31,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static com.cmsr.onebase.module.bpm.core.utils.BpmUtil.getNodeJsonByNodeType;
+import static com.cmsr.onebase.module.bpm.core.utils.BpmUtil.getInitiationNodeJson;
 
 /**
  * 审批节点策略
@@ -132,7 +132,7 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
                 taskService.skip(skipParams, task);
             } else {
                 Instance instance = insService.getById(task.getInstanceId());
-                NodeJson initNode = getNodeJsonByNodeType(BpmNodeTypeEnum.INITIATION.getCode() ,instance.getDefJson());
+                NodeJson initNode = getInitiationNodeJson(instance.getDefJson());
                 skipParams.nodeCode(initNode.getNodeCode());
                 taskService.skip(skipParams,task );
             }
