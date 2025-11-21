@@ -5,6 +5,7 @@ import com.cmsr.onebase.module.etl.common.graph.Node;
 import com.cmsr.onebase.module.etl.common.graph.WorkflowGraph;
 import com.cmsr.onebase.module.etl.common.preview.ColumnDefine;
 import com.cmsr.onebase.module.etl.common.preview.DataPreview;
+import com.cmsr.onebase.module.etl.common.preview.PreviewColumn;
 import com.cmsr.onebase.module.etl.executor.action.CreateTableAction;
 import com.cmsr.onebase.module.etl.executor.action.ExecuteSqlAction;
 import com.cmsr.onebase.module.etl.executor.action.SqlQueryAction;
@@ -23,7 +24,9 @@ import javax.sql.DataSource;
 import java.io.Closeable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Author：huangjie
@@ -145,17 +148,20 @@ public class WorkFlowExecutor implements Closeable {
     private DataPreview tableResultToDataPreview(String nodeId, TableResult tableResult) {
         DataPreview dataPreview = new DataPreview();
         for (Column column : tableResult.getResolvedSchema().getColumns()) {
-            ColumnDefine field = new ColumnDefine();
-            field.setFieldFqn(nodeId + "." + column.getName());
-            field.setFieldName(column.getName());
-            field.setDisplayName(column.getName());
-            field.setFieldType(column.getDataType().getLogicalType().getTypeRoot().name());
-            dataPreview.getColumns().add(field);
+            PreviewColumn previewColumn = new PreviewColumn();
+            previewColumn.setTitle(column.getName());
+            previewColumn.setDataIndex("_" + column.getName());
+            previewColumn.setFieldType(column.getDataType().getLogicalType().getTypeRoot().name());
+            dataPreview.getColumns().add(previewColumn);
         }
         try (CloseableIterator<Row> collected = tableResult.collect()) {
+            int rowIndex = 1;
             while (collected.hasNext()) {
                 Row row = collected.next();
-                dataPreview.getData().add(rowToList(dataPreview.getColumns(), row));
+                Map<String, Object> rowMap = rowToList(dataPreview.getColumns(), row);
+                rowMap.put("key", rowIndex);
+                dataPreview.getData().add(rowMap);
+                rowIndex++;
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -163,13 +169,14 @@ public class WorkFlowExecutor implements Closeable {
         return dataPreview;
     }
 
-    private List<Object> rowToList(List<ColumnDefine> columns, Row row) {
-        List<Object> list = new ArrayList<>();
-        for (ColumnDefine column : columns) {
-            Object value = row.getField(column.getFieldName());
-            list.add(value);
+    private Map<String, Object> rowToList(List<PreviewColumn> columns, Row row) {
+        Map<String, Object> dataRow = new HashMap<>();
+        for (PreviewColumn column : columns) {
+            String rowIndex = column.getDataIndex();
+            Object value = row.getField(rowIndex);
+            dataRow.put("_" + rowIndex, value);
         }
-        return list;
+        return dataRow;
     }
 
 

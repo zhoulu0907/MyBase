@@ -5,8 +5,8 @@ import com.cmsr.onebase.module.etl.build.service.DatasourceFactory;
 import com.cmsr.onebase.module.etl.build.service.preview.vo.TablePreviewVO;
 import com.cmsr.onebase.module.etl.common.entity.ColumnData;
 import com.cmsr.onebase.module.etl.common.entity.TableData;
-import com.cmsr.onebase.module.etl.common.preview.ColumnDefine;
 import com.cmsr.onebase.module.etl.common.preview.DataPreview;
+import com.cmsr.onebase.module.etl.common.preview.PreviewColumn;
 import com.cmsr.onebase.module.etl.core.dal.database.ETLDatasourceRepository;
 import com.cmsr.onebase.module.etl.core.dal.database.ETLFlinkMappingRepository;
 import com.cmsr.onebase.module.etl.core.dal.database.ETLTableRepository;
@@ -14,7 +14,6 @@ import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLDatasourceDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLTableDO;
 import com.cmsr.onebase.module.etl.core.enums.ETLErrorCodeConstants;
 import com.cmsr.onebase.module.etl.core.enums.MetadataType;
-import com.google.common.collect.Lists;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.ConfigStore;
@@ -24,12 +23,12 @@ import org.anyline.entity.DataSet;
 import org.anyline.metadata.Table;
 import org.anyline.proxy.ServiceProxy;
 import org.anyline.service.AnylineService;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.sql.DataSource;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -94,38 +93,32 @@ public class DataInspectServiceImpl implements DataInspectService {
             DataPreview dataPreview = new DataPreview();
             TableData tableData = tableDO.getMetaInfo();
             List<ColumnData> columnDataList = tableData.getColumns();
-            List<ColumnDefine> columnList = new ArrayList<>(columnDataList.size());
+            List<PreviewColumn> columnList = new ArrayList<>(columnDataList.size());
             for (ColumnData columnData : columnDataList) {
-                ColumnDefine columnDefine = new ColumnDefine();
-                String fqn = String.format("%s.%s.%s.%s.%s", datasourceDO.getId(),
-                        tableData.getCatalogName(),
-                        tableData.getSchemaName(),
-                        tableData.getName(),
-                        columnData.getName());
-                columnDefine.setFieldFqn(fqn);
+                PreviewColumn previewColumn = new PreviewColumn();
 
-                String tableName = columnData.getName();
+                String columnName = columnData.getName();
                 String displayName = columnData.getDisplayName();
-                String comment = columnData.getComment();
-                String declaration = columnData.getDeclaration();
-                columnDefine.setFieldName(tableName);
-                columnDefine.setDisplayName(tableName);
-                if (StringUtils.isNotBlank(comment)) columnDefine.setDisplayName(comment);
-                if (StringUtils.isNotBlank(declaration) && !StringUtils.equals(declaration, comment))
-                    columnDefine.setDisplayName(declaration);
-                if (StringUtils.isNotBlank(displayName) && !StringUtils.equals(tableName, displayName))
-                    columnDefine.setDisplayName(displayName);
                 String flinkType = fieldTypeMapping.get(columnData.getType());
-                columnDefine.setFieldType(flinkType);
+                previewColumn.setDataIndex("_" + columnName);
+                previewColumn.setTitle(displayName);
+                previewColumn.setFieldType(flinkType);
                 int metaColumnIdx = columnData.getPosition() - 1;
-                columnList.add(metaColumnIdx, columnDefine);
+                columnList.add(metaColumnIdx, previewColumn);
             }
             dataPreview.setColumns(columnList);
             ConfigStore cs = new DefaultConfigStore();
             cs.limit(inspectSize);
             DataSet dataSet = temporary.querys(table, cs);
             List<DataRow> rows = dataSet.getRows();
-            rows.forEach(row -> dataPreview.getData().add(Lists.newArrayList(row.values())));
+            int rowIdx = 1;
+            for (DataRow row : rows) {
+                Map<String, Object> rowMap = new HashMap<>();
+                row.forEach((k, v) -> rowMap.put("_" + k, v));
+                rowMap.put("key", rowIdx);
+                dataPreview.getData().add(rowMap);
+                rowIdx++;
+            }
             return dataPreview;
         } catch (Exception e) {
             log.error("数据源连接异常，数据源信息: {}", datasourceDO, e);
