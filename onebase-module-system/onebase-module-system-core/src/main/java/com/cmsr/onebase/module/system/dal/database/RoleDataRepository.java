@@ -4,6 +4,8 @@ import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
+import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
+import com.cmsr.onebase.module.system.enums.permission.RoleTypeEnum;
 import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
 import com.cmsr.onebase.module.system.vo.role.RolePageReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
@@ -92,9 +94,13 @@ public class RoleDataRepository extends DataRepository<RoleDO> {
         }
 
         // 按编码模糊查询
-        if (pageReqVO.getCode() != null && !pageReqVO.getCode().trim().isEmpty()) {
+       if (pageReqVO.getCode() != null && !pageReqVO.getCode().trim().isEmpty()) {
             configStore.like(RoleDO.CODE, pageReqVO.getCode());
-        }
+        } else{
+           configStore.and(new DefaultConfigStore()
+                   .or(RoleDO.TYPE,  RoleTypeEnum.CUSTOM.getType())
+                   .or(RoleDO.CODE, RoleCodeEnum.TENANT_ADMIN.getCode()));
+       }
 
         // 按状态查询
         if (pageReqVO.getStatus() != null) {
