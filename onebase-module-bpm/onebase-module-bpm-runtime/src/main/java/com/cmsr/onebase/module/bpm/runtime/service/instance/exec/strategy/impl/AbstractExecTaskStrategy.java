@@ -1,9 +1,9 @@
-package com.cmsr.onebase.module.bpm.runtime.service.exec.strategy.impl;
+package com.cmsr.onebase.module.bpm.runtime.service.instance.exec.strategy.impl;
 
 import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowInsBizExtRepository;
-import com.cmsr.onebase.module.bpm.runtime.service.exec.strategy.ExecTaskStrategy;
+import com.cmsr.onebase.module.bpm.runtime.service.instance.exec.strategy.ExecTaskStrategy;
 import com.cmsr.onebase.module.metadata.api.datamethod.DataMethodApi;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.ConditionDTO;
 import com.cmsr.onebase.module.metadata.api.entity.MetadataEntityFieldApi;

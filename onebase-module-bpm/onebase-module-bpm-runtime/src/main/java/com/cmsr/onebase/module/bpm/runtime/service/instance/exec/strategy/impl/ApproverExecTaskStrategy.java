@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.bpm.runtime.service.exec.strategy.impl;
+package com.cmsr.onebase.module.bpm.runtime.service.instance.exec.strategy.impl;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;

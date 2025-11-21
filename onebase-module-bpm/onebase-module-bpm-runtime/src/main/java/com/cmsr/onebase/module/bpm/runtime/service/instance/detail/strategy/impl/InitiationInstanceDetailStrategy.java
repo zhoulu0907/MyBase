@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.bpm.runtime.service.detail.strategy.impl;
+package com.cmsr.onebase.module.bpm.runtime.service.instance.detail.strategy.impl;
 
 import com.cmsr.onebase.module.bpm.core.dto.PageViewGroupDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.InitiationNodeExtDTO;

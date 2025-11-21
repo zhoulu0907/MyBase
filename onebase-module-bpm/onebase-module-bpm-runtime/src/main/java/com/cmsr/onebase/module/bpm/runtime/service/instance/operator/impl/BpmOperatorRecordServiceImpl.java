@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.bpm.runtime.service.operator.impl;
+package com.cmsr.onebase.module.bpm.runtime.service.instance.operator.impl;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
@@ -14,8 +14,8 @@ import com.cmsr.onebase.module.bpm.core.enums.BpmNodeApproveStatusEnum;
 import com.cmsr.onebase.module.bpm.core.enums.BpmNodeTypeEnum;
 import com.cmsr.onebase.module.bpm.core.enums.BpmUserTypeEnum;
 import com.cmsr.onebase.module.bpm.core.utils.BpmUtil;
-import com.cmsr.onebase.module.bpm.runtime.service.operator.BpmOperatorRecordService;
-import com.cmsr.onebase.module.bpm.runtime.service.permission.BpmPermissionResolver;
+import com.cmsr.onebase.module.bpm.runtime.service.instance.operator.BpmOperatorRecordService;
+import com.cmsr.onebase.module.bpm.runtime.service.common.permission.BpmPermissionResolver;
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmOperatorRecordRespVO;
 import com.cmsr.onebase.module.engine.orm.anyline.entity.FlowHisTask;
 import com.cmsr.onebase.module.engine.orm.anyline.entity.FlowTask;
