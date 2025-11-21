@@ -47,7 +47,7 @@ public class MetadataManager {
                 Optional<TableData> optional = schemaData.getTables().stream()
                         .filter(tableData -> tableData.getName().equals(tableDO.getTableName())).findAny();
                 if (!optional.isPresent()) {
-                    tableRepository.delete(tableDO);
+                    tableRepository.removeById(tableDO);
                 }
             }
         }

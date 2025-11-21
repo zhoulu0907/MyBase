@@ -5,8 +5,9 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Table;
 import lombok.Data;
 
-@Table(name = "etl_flink_mapping")
 @Data
+@Table(name = "etl_flink_mapping")
+@com.mybatisflex.annotation.Table("etl_flink_mapping")
 public class ETLFlinkMappingDO extends TenantBaseDO {
 
     @Column(name = "datasource_type")

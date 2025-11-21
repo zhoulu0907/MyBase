@@ -68,13 +68,13 @@ public class DataInspectServiceImpl implements DataInspectService {
     @Override
     public DataPreview previewData(TablePreviewVO previewVO) {
         Long datasourceId = previewVO.getDatasourceId();
-        ETLDatasourceDO datasourceDO = datasourceRepository.findById(datasourceId);
+        ETLDatasourceDO datasourceDO = datasourceRepository.getById(datasourceId);
         if (datasourceDO == null) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_NOT_EXIST);
         }
         String datasourceType = datasourceDO.getDatasourceType();
         Long tableId = previewVO.getTableId();
-        ETLTableDO tableDO = tableRepository.findById(tableId);
+        ETLTableDO tableDO = tableRepository.getById(tableId);
         if (tableDO == null) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.TABLE_NOT_EXIST);
         }

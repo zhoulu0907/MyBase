@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 
 @Data
 @Table(name = "etl_schedule_job")
+@com.mybatisflex.annotation.Table("etl_schedule_job")
 public class ETLScheduleJobDO extends TenantBaseDO {
 
     @Column(name = "application_id")

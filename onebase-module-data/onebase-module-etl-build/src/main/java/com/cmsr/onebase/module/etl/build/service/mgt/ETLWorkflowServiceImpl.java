@@ -125,14 +125,14 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
         workflowDO.setIsEnabled(0);
         workflowDO.setScheduleStrategy(ScheduleType.MANUALLY.getValue());
         // 创建workflow
-        ETLWorkflowDO result = workflowRepository.insert(workflowDO);
-        Long workflowId = result.getId();
+        workflowRepository.save(workflowDO);
+        Long workflowId = workflowDO.getId();
         // 创建scheduleJob
         ETLScheduleJobDO scheduleJobDO = new ETLScheduleJobDO();
         scheduleJobDO.setApplicationId(applicationId);
         scheduleJobDO.setWorkflowId(workflowId);
         scheduleJobDO.setJobStatus(ScheduleJobStatus.INITIALIZED.getValue());
-        scheduleJobRepository.insert(scheduleJobDO);
+        scheduleJobRepository.save(scheduleJobDO);
         // 解析workflow相关的表信息
         updateWorkflowTableRelations(workflowDO);
         return workflowId;
@@ -149,7 +149,7 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
         oldWorkflow.setDeclaration(updateVO.getDeclaration());
         oldWorkflow.setConfig(updateVO.getConfig());
         updateWorkflowTableRelations(oldWorkflow);
-        workflowRepository.update(oldWorkflow);
+        workflowRepository.updateById(oldWorkflow);
     }
 
     private void updateWorkflowTableRelations(ETLWorkflowDO workflowDO) {
@@ -211,7 +211,7 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
         executionLogRepository.deleteByWorkflowId(workflowId);
         workflowTableRepository.deleteByWorkflowId(workflowId);
         scheduleJobRepository.deleteByWorkflowId(workflowId);
-        workflowRepository.deleteById(workflowId);
+        workflowRepository.removeById(workflowId);
     }
 
     @Override
@@ -239,7 +239,7 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
                     httpTask,
                     workflowDO.getWorkflowName() + "：" + workflowDO.getDeclaration());
             scheduleJobDO.setJobId(String.valueOf(jobId));
-            scheduleJobRepository.update(scheduleJobDO);
+            scheduleJobRepository.updateById(scheduleJobDO);
         } else {
             jobId = Long.parseLong(jobIdStr);
         }
@@ -292,7 +292,7 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
             default -> throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.ILLEGAL_SCHEDULE_TYPE);
         }
         workflowDO.setIsEnabled(1);
-        workflowRepository.update(workflowDO);
+        workflowRepository.updateById(workflowDO);
     }
 
     @Override
@@ -308,7 +308,7 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
         Long jobId = Long.parseLong(scheduleJobDO.getJobId());
         dolphinSchedulerClient.purgeWorkflow(etlProjectCode, jobId);
         workflowDO.setIsEnabled(0);
-        workflowRepository.update(workflowDO);
+        workflowRepository.updateById(workflowDO);
 
         scheduleJobRepository.removeJobId(workflowId);
     }
@@ -320,7 +320,7 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
         workflowDO.setScheduleStrategy(scheduleVO.getScheduleStrategy().getValue());
         workflowDO.setScheduleConfig(JsonUtils.toJsonString(scheduleVO.getConfig()));
         workflowDO.setIsEnabled(scheduleVO.getEnableStatus());
-        workflowRepository.update(workflowDO);
+        workflowRepository.updateById(workflowDO);
         if (workflowDO.isEnabled()) {
             syncEnableStatus(workflowDO);
         }
@@ -437,7 +437,7 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
     }
 
     private ETLWorkflowDO getWorkflowById(Long workflowId) {
-        ETLWorkflowDO workflowDO = workflowRepository.findById(workflowId);
+        ETLWorkflowDO workflowDO = workflowRepository.getById(workflowId);
         if (workflowDO == null) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.WORKFLOW_NOT_EXIST);
         }

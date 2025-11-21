@@ -9,6 +9,7 @@ import lombok.Data;
 
 @Data
 @Table(name = "etl_workflow")
+@com.mybatisflex.annotation.Table("etl_workflow")
 public class ETLWorkflowDO extends TenantBaseDO {
 
     @Column(name = "application_id")

@@ -3,38 +3,45 @@ package com.cmsr.onebase.module.etl.core.dal.database;
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLWorkflowDO;
+import com.cmsr.onebase.module.etl.core.dal.mapper.ETLWorkflowMapper;
 import com.cmsr.onebase.module.etl.core.enums.ScheduleType;
 import com.cmsr.onebase.module.etl.core.vo.WorkflowPageReqVO;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.spring.service.impl.ServiceImpl;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Order;
+import org.anyline.service.AnylineService;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 @Slf4j
 @Repository
-public class ETLWorkflowRepository extends DataRepository<ETLWorkflowDO> {
+public class ETLWorkflowRepository extends ServiceImpl<ETLWorkflowMapper, ETLWorkflowDO> {
 
-    public ETLWorkflowRepository() {
-        super(ETLWorkflowDO.class);
+    private DataRepository<ETLWorkflowDO> dataRepository;
+
+    @Autowired
+    private AnylineService<ETLWorkflowDO> anylineService;
+
+    @PostConstruct
+    public void init() {
+        dataRepository = new DataRepository<>(ETLWorkflowDO.class);
+        dataRepository.setAnylineService(anylineService);
     }
 
     public PageResult<ETLWorkflowDO> getWorkflowPage(WorkflowPageReqVO pageReqVO) {
-        ConfigStore cs = new DefaultConfigStore();
-        cs.eq("application_id", pageReqVO.getApplicationId());
-        if (StringUtils.isNotBlank(pageReqVO.getFlowName())) {
-            cs.like("workflow_name", pageReqVO.getFlowName());
-        }
         String scheduleStrategy = pageReqVO.getScheduleStrategy();
-        if (StringUtils.isNotBlank(scheduleStrategy) && !StringUtils.equals(ScheduleType.ALL.getValue(), scheduleStrategy)) {
-            cs.eq("schedule_strategy", scheduleStrategy);
-        }
-        if (pageReqVO.getEnableStatus() != null) {
-            cs.eq("is_enabled", pageReqVO.getEnableStatus());
-        }
-        cs.order("create_time", Order.TYPE.DESC);
-        cs.order("update_time", Order.TYPE.DESC);
-        return findPageWithConditions(cs, pageReqVO.getPageNo(), pageReqVO.getPageSize());
+        boolean filterByScheduleStrategy = StringUtils.isNotBlank(scheduleStrategy) && !StringUtils.equals(ScheduleType.ALL.getValue(), scheduleStrategy);
+        QueryWrapper queryWrapper = query()
+                .eq(ETLWorkflowDO::getApplicationId, pageReqVO.getApplicationId())
+                .like(ETLWorkflowDO::getWorkflowName, pageReqVO.getFlowName(), StringUtils.isNotBlank(pageReqVO.getFlowName()))
+                .eq(ETLWorkflowDO::getScheduleStrategy, scheduleStrategy, filterByScheduleStrategy)
+                .eq(ETLWorkflowDO::getIsEnabled, pageReqVO.getEnableStatus(), pageReqVO.getEnableStatus() != null)
+                .orderBy(ETLWorkflowDO::getUpdateTime, false)
+                .orderBy(ETLWorkflowDO::getCreateTime, false);
+        Page<ETLWorkflowDO> pageResult = getMapper().paginate(pageReqVO.getPageNo(), pageReqVO.getPageSize(), queryWrapper);
+        return new PageResult<>(pageResult.getRecords(), pageResult.getTotalRow());
     }
 }

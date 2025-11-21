@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 
 @Data
 @Table(name = "etl_execution_log")
+@com.mybatisflex.annotation.Table("etl_execution_log")
 public class ETLExecutionLogDO extends TenantBaseDO {
 
     @Column(name = "application_id")

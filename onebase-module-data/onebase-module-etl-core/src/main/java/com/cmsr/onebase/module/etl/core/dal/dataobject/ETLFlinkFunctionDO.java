@@ -7,6 +7,7 @@ import lombok.Data;
 
 @Data
 @Table(name = "etl_flink_function")
+@com.mybatisflex.annotation.Table("etl_flink_function")
 public class ETLFlinkFunctionDO extends BaseDO {
 
     @Column(name = "function_type")

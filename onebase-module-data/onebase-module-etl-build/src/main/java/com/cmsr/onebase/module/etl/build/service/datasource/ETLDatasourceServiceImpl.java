@@ -83,7 +83,7 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
 
     @Override
     public DatasourceRespVO queryDatasourceDetail(Long datasourceId) {
-        ETLDatasourceDO datasourceDO = datasourceRepository.findById(datasourceId);
+        ETLDatasourceDO datasourceDO = datasourceRepository.getById(datasourceId);
         if (datasourceDO == null) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_NOT_EXIST);
         }
@@ -120,7 +120,7 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
         // initialize collect status to `none`, infer datasource will be empty.
         datasourceDO.setCollectStatus(CollectStatus.NONE);
         complementJdbcDatasourceProperties(datasourceDO);
-        datasourceDO = datasourceRepository.insert(datasourceDO);
+        datasourceRepository.save(datasourceDO);
         Long datasourceId = datasourceDO.getId();
         Boolean withCollect = createReqVO.getWithCollect();
         if (withCollect) {
@@ -143,7 +143,7 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
 
     @Override
     public void updateDatasource(ETLDatasourceUpdateReqVO updateReqVO) {
-        ETLDatasourceDO oldDatasource = datasourceRepository.findById(updateReqVO.getId());
+        ETLDatasourceDO oldDatasource = datasourceRepository.getById(updateReqVO.getId());
         oldDatasource.setDatasourceName(updateReqVO.getDatasourceName());
         oldDatasource.setDeclaration(updateReqVO.getDeclaration());
         oldDatasource.setConfig(updateReqVO.getConfig());
@@ -151,7 +151,7 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
         // udpate collect status to `required`, demonds user to execute at least once
         oldDatasource.setCollectStatus(CollectStatus.REQUIRED);
         complementJdbcDatasourceProperties(oldDatasource);
-        datasourceRepository.update(oldDatasource);
+        datasourceRepository.updateById(oldDatasource);
     }
 
     private void complementJdbcDatasourceProperties(ETLDatasourceDO datasourceDO) {
@@ -166,8 +166,8 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
 
     @Override
     public void deleteDatasource(Long datasourceId) {
-        boolean entityExists = datasourceRepository.existsById(datasourceId);
-        if (!entityExists) {
+        ETLDatasourceDO entity = datasourceRepository.getById(datasourceId);
+        if (entity == null) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_NOT_EXIST);
         }
         boolean existsTableReffered = workflowTableRepository.existsByDatasourceId(datasourceId);
@@ -182,12 +182,12 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
         tableRepository.deleteAllByDatasourceId(datasourceId);
         schemaRepository.deleteAllByDatasourceId(datasourceId);
         catalogRepository.deleteAllByDatasourceId(datasourceId);
-        datasourceRepository.deleteById(datasourceId);
+        datasourceRepository.removeById(datasourceId);
     }
 
     @Override
     public void executeMetadataCollectJob(Long datasourceId) {
-        ETLDatasourceDO datasourceDO = datasourceRepository.findById(datasourceId);
+        ETLDatasourceDO datasourceDO = datasourceRepository.getById(datasourceId);
         if (datasourceDO == null) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_NOT_EXIST);
         }
@@ -235,7 +235,7 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
 
     @Override
     public List<MetaBriefVO> listDatasourceTables(Long datasourceId, Integer writable) {
-        ETLDatasourceDO datasourceDO = datasourceRepository.findById(datasourceId);
+        ETLDatasourceDO datasourceDO = datasourceRepository.getById(datasourceId);
         if (datasourceDO == null) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_NOT_EXIST);
         }
@@ -258,11 +258,11 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
 
     @Override
     public List<ColumnDefine> listTableColumns(Long tableId) {
-        ETLTableDO tableDO = tableRepository.findById(tableId);
+        ETLTableDO tableDO = tableRepository.getById(tableId);
         if (tableDO == null) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.TABLE_NOT_EXIST);
         }
-        ETLDatasourceDO datasourceDO = datasourceRepository.findById(tableDO.getDatasourceId());
+        ETLDatasourceDO datasourceDO = datasourceRepository.getById(tableDO.getDatasourceId());
         if (datasourceDO == null) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_NOT_EXIST);
         }

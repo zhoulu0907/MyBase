@@ -2,51 +2,63 @@ package com.cmsr.onebase.module.etl.core.dal.database;
 
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLTableDO;
+import com.cmsr.onebase.module.etl.core.dal.mapper.ETLTableMapper;
+import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.spring.service.impl.ServiceImpl;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Order;
+import org.anyline.service.AnylineService;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 @Repository
 @Slf4j
-public class ETLTableRepository extends DataRepository<ETLTableDO> {
+public class ETLTableRepository extends ServiceImpl<ETLTableMapper, ETLTableDO> {
 
-    public ETLTableRepository() {
-        super(ETLTableDO.class);
+    private DataRepository<ETLTableDO> dataRepository;
+
+    @Autowired
+    private AnylineService<ETLTableDO> anylineService;
+
+    @PostConstruct
+    public void init() {
+        dataRepository = new DataRepository<>(ETLTableDO.class);
+        dataRepository.setAnylineService(anylineService);
     }
 
     public List<ETLTableDO> findAllByCatalogIdAndSchemaIdAndDatasourceId(Long datasourceId, Long catalogId, Long schemaId) {
-        ConfigStore cs = new DefaultConfigStore();
-        cs.eq("datasource_id", datasourceId);
-        cs.eq("catalog_id", catalogId);
-        cs.eq("schema_id", schemaId);
-        return findAllByConfig(cs);
+        QueryWrapper queryWrapper = query()
+                .eq(ETLTableDO::getDatasourceId, datasourceId)
+                .eq(ETLTableDO::getCatalogId, catalogId)
+                .eq(ETLTableDO::getSchemaId, schemaId)
+                .orderBy(ETLTableDO::getUpdateTime, false)
+                .orderBy(ETLTableDO::getCreateTime, false)
+                .orderBy(ETLTableDO::getTableName, true);
+
+        return list(queryWrapper);
     }
 
     public void deleteAllByDatasourceId(Long datasourceId) {
-        ConfigStore cs = new DefaultConfigStore();
-        cs.eq("datasource_id", datasourceId);
-
-        deleteByConfig(cs);
+        QueryWrapper queryWrapper = query().eq(ETLTableDO::getDatasourceId, datasourceId);
+        remove(queryWrapper);
     }
 
     // 优化方法名：更简洁但保持语义清晰
     public ETLTableDO findOneByQualifiedName(Long applicationId, Long datasourceId, Long catalogId, Long schemaId, String tableName) {
-        ConfigStore cs = new DefaultConfigStore();
-        cs.eq("application_id", applicationId);
-        cs.eq("datasource_id", datasourceId);
-        cs.eq("catalog_id", catalogId);
-        cs.eq("schema_id", schemaId);
-        cs.eq("table_name", tableName);
-
-        return findOne(cs);
+        QueryWrapper queryWrapper = query()
+                .eq(ETLTableDO::getApplicationId, applicationId)
+                .eq(ETLTableDO::getDatasourceId, datasourceId)
+                .eq(ETLTableDO::getCatalogId, catalogId)
+                .eq(ETLTableDO::getSchemaId, schemaId)
+                .eq(ETLTableDO::getTableName, tableName);
+        return getOne(queryWrapper);
     }
 
-    @Override
     public ETLTableDO upsert(ETLTableDO tableDO) {
         Long applicationId = tableDO.getApplicationId();
         Long datasourceId = tableDO.getDatasourceId();
@@ -55,33 +67,32 @@ public class ETLTableRepository extends DataRepository<ETLTableDO> {
         String tableName = tableDO.getTableName();
         // 调用优化后的方法名
         ETLTableDO old = findOneByQualifiedName(applicationId, datasourceId, catalogId, schemaId, tableName);
-        if (old == null) {
-            tableDO = insert(tableDO);
-        } else {
+        if (old != null) {
             tableDO.setId(old.getId());
-            update(tableDO);
         }
+        saveOrUpdate(tableDO);
         return tableDO;
     }
 
     public String getNameById(Long id) {
-        ETLTableDO tableDO = findById(id);
+        QueryWrapper queryWrapper = query().select(ETLTableDO::getDisplayName).eq(ETLTableDO::getId, id);
+        ETLTableDO tableDO = getOne(queryWrapper);
         return tableDO.getDisplayName();
     }
 
     public List<String> getNameByIds(Collection<Long> ids) {
-        List<ETLTableDO> tables = findAllByIds(ids);
+        if (CollectionUtils.isEmpty(ids)) {
+            return Collections.emptyList();
+        }
+        QueryWrapper queryWrapper = query().select(ETLTableDO::getDisplayName).in(ETLTableDO::getId, ids).orderBy(ETLTableDO::getTableName, true);
+        List<ETLTableDO> tables = list(queryWrapper);
         return tables.stream().map(ETLTableDO::getDisplayName).toList();
     }
 
     public List<ETLTableDO> findAllByDatasourceId(Long datasourceId, Boolean writable) {
-        ConfigStore cs = new DefaultConfigStore();
-        cs.eq("datasource_id", datasourceId);
-        if (writable) {
-            cs.eq("table_type", "table");
-        }
-        cs.order("table_name", Order.TYPE.ASC);
-
-        return findAllByConfig(cs);
+        QueryWrapper queryWrapper = query().eq(ETLTableDO::getDatasourceId, datasourceId)
+                .eq(ETLTableDO::getTableType, "table", writable)
+                .orderBy(ETLTableDO::getTableName, true);
+        return list(queryWrapper);
     }
 }
