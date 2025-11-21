@@ -58,4 +58,40 @@ public class BpmUtil {
 
         return JsonUtils.parseObject(currNodeJson.getExt(), BaseNodeExtDTO.class);
     }
+
+    /**
+     * 根据节点类型获取节点JSON对象
+     *
+     * @param nodeType 节点类型
+     * @param defJsonStr 节点JSON字符串
+     * @return 节点JSON对象，如果未找到则返回null
+     */
+
+    public static NodeJson getNodeJsonByNodeType(String nodeType, String defJsonStr) {
+
+        if (StringUtils.isBlank(defJsonStr)) {
+            return null;
+        }
+
+        DefJson defJson = JsonUtils.parseObject(defJsonStr, DefJson.class);
+        if (defJson == null || defJson.getNodeList() == null) {
+            return null;
+        }
+
+        NodeJson node = null;
+
+        for (NodeJson nodeJson : defJson.getNodeList()) {
+            BaseNodeExtDTO extDTO =  JsonUtils.parseObject(nodeJson.getExt(), BaseNodeExtDTO.class);
+            if (Objects.equals(extDTO.getNodeType(), nodeType)) {
+                node = nodeJson;
+                break;
+            }
+        }
+
+        if (node == null) {
+            return null;
+        }
+
+        return node;
+    }
 }
