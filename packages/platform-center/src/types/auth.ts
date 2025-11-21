@@ -15,6 +15,8 @@ export interface LoginRequest {
    * 验证码
    */
   captchaVerification?: string | null;
+
+  deviceId: string;
 }
 
 export interface TenantLoginRequest {
