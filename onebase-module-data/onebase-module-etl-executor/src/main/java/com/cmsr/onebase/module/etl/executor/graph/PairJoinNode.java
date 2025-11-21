@@ -3,13 +3,13 @@ package com.cmsr.onebase.module.etl.executor.graph;
 import com.cmsr.onebase.module.etl.common.graph.Node;
 import com.cmsr.onebase.module.etl.common.graph.WorkflowGraph;
 import com.cmsr.onebase.module.etl.common.graph.conf.PairJoinConfig;
-import com.cmsr.onebase.module.etl.executor.action.ExecuteSqlAction;
+import com.cmsr.onebase.module.etl.executor.action.SqlQueryAction;
 import com.cmsr.onebase.module.etl.executor.util.JooqUtil;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.TableEnvironment;
-import org.apache.flink.table.api.TableResult;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.JoinType;
@@ -23,10 +23,10 @@ import static org.jooq.impl.DSL.*;
  */
 @Slf4j
 @ToString(callSuper = true)
-public class PairJoinNode extends Node<PairJoinConfig> implements ExecuteSqlAction {
+public class PairJoinNode extends Node<PairJoinConfig> implements SqlQueryAction {
 
     @Override
-    public TableResult executeSql(TableEnvironment tableEnv, WorkflowGraph graph) {
+    public Table sqlQuery(TableEnvironment tableEnv, WorkflowGraph graph) {
         org.jooq.Field[] selectFields = selectFieldNames();
         JoinType joinType = getJoinType();
 
@@ -36,7 +36,7 @@ public class PairJoinNode extends Node<PairJoinConfig> implements ExecuteSqlActi
                 .on(and(joinConditions()));
         String sql = select.getSQL();
         log.info("execute sql: {}", sql);
-        return tableEnv.executeSql(sql);
+        return tableEnv.sqlQuery(sql);
     }
 
     private JoinType getJoinType() {
