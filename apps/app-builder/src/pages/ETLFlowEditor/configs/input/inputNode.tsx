@@ -15,7 +15,6 @@ export const InputNodeConfig: React.FC = () => {
   const { curDrawerTab, nodeData, curNode } = etlEditorSignal;
 
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [remark, setRemark] = useState<string>(nodeData.value[curNode.value.id]?.description || '');
   const [tables, setTables] = useState<ETLTable[]>([]);
   const [previewData, setPreviewData] = useState<{
     columns: any[];
@@ -24,14 +23,6 @@ export const InputNodeConfig: React.FC = () => {
     columns: [],
     data: []
   });
-
-  const handleChangeRemark = (value: string) => {
-    if (!curNode.value.id) {
-      return;
-    }
-    nodeData.value[curNode.value.id].description = value;
-    setRemark(value);
-  };
 
   useEffect(() => {
     if (nodeData.value[curNode.value.id]?.config?.datasourceId && nodeData.value[curNode.value.id]?.config?.tableId) {
