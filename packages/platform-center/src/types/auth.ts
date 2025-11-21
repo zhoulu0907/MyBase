@@ -52,6 +52,21 @@ export interface RuntimeAccountLoginRequest {
   captchaVerification?: string | null;
 }
 
+export interface RuntimeCorpLoginRequest {
+  /**
+   * 手机号
+   */
+  mobile: string;
+  /**
+   * 密码
+   */
+  password: string;
+  /**
+   * 验证码
+   */
+  captchaVerification?: string | null;
+}
+
 export interface RuntimeMobileLoginRequest {
   /**
    * 应用id

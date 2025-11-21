@@ -10,3 +10,6 @@ export * from './tenant';
 export * from './user';
 export * from './corp';
 export * from "./corpApp";
+export * from "./corpDept";
+export * from "./corpUser";
+export * from "./corpInfo";

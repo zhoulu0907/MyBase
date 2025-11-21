@@ -1,5 +1,6 @@
 import { Form, Input } from "@arco-design/web-react"
 import { type CorpAdminInfo} from "@onebase/platform-center";
+import { phoneValidator } from '@/utils/validator';
 
 interface IAdminInfoProps {
     adminValues: CorpAdminInfo;
@@ -43,6 +44,7 @@ export const AdminInformation:React.FC<IAdminInfoProps> = ({adminValues, onDataC
                 field="mobile"
                 rules={[
                     { required: true, message: '请输入手机号' },
+                    { validator: phoneValidator }
                 ]}
             >
                 <Input placeholder="输入手机号" maxLength={11} />

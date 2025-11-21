@@ -6,7 +6,7 @@ import styles from "./index.module.less";
 import { AuthorizedApp } from '../createApp/authorizedApp';
 import { useOutletContext, useParams } from 'react-router-dom';
 import type { AppItem, cropItem, industryTypeOption, OutletContextType, updatedParams } from '../../types/appItem';
-import { getDetailsApi, updateCorpApi, getCorpAuthorizedAppListApi,createCorpAppApi, removeCorpAppApi, updateCorpAppApi, uploadFile, type CorpAppParams, type corpListParams } from "@onebase/platform-center";
+import { getCorpDetailByIdApi, updateCorpApi, getCorpAuthorizedAppListApi,createCorpAppApi, removeCorpAppApi, updateCorpAppApi, uploadFile, type CorpAppParams, type corpListParams } from "@onebase/platform-center";
 import { allowedFormats } from '../../constants';
 
 const EnterpriseInfoPage: React.FC = () => {
@@ -35,7 +35,7 @@ const EnterpriseInfoPage: React.FC = () => {
 
   const fetchCorpDetail = async() => {
     try {
-      const res = await getDetailsApi(currentId);
+      const res = await getCorpDetailByIdApi(currentId);
       setFormData(res && res || null);
       setOriginalInfo(res && res || null);
       if(res.corpLogo) {
@@ -259,13 +259,13 @@ const handleUpload = async (file: File, onProgress?: (percent: number, event?: P
       />
     },
     {
-      label:"企业ID", 
+      label:"企业编码", 
       value: <EditableFormItem
           value = {formData?.corpCode}
           onChange={handleChange.bind(null, "corpCode")}
           isEdit={isEdited}
           component={Input}
-          componentProps={{ placeholder: '请输入企业ID' }}
+          componentProps={{ placeholder: '请输入企业编码' }}
       />
     },
      {

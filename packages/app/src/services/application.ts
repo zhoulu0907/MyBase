@@ -40,6 +40,6 @@ export const generateId = () => {
 };
 
 // 获取应用精简信息列表-不分页
-export const getApplicationSimple = (ownerTag: number) => {
-  return appService.get(`/application/simple-list-by-name?ownerTag=${ownerTag}`);
+export const getApplicationSimple = (ownerTag: number, appName: string) => {
+  return appService.get(`/application/simple-list-by-name?ownerTag=${ownerTag}&appName=${appName}`);
 };

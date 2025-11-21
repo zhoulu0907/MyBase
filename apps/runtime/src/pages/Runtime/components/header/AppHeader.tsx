@@ -1,14 +1,15 @@
 import { useI18n } from '@/hooks/useI18n';
-// import { useAppStore } from '@/store/store_app';
 import AvatarSVG from '@/assets/images/avatar.svg';
-import { DynamicIcon } from '@/components';
+import LogoAvatarSVG from "@/assets/images/ob_logo.svg";
+import BuildingLine from '@/assets/images/building-line.svg';
+import { DynamicIcon } from '@/components/DynamicIcon';
 import { appInfoSignal } from '@/store/app';
 import { UserPermissionManager } from '@/utils/permission';
-import { Dropdown, Layout, Menu, Typography } from '@arco-design/web-react';
+import { Avatar, Divider, Dropdown, Layout, Menu, Typography } from '@arco-design/web-react';
 import { IconExport } from '@arco-design/web-react/icon';
 import { getApplication, type GetApplicationReq } from '@onebase/app';
 import { TokenManager } from '@onebase/common';
-import { getPermissionInfo } from '@onebase/platform-center';
+import { getPermissionInfo , CodeType } from '@onebase/platform-center';
 import { appIconMap } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -27,6 +28,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   const { curAppInfo, setCurAppInfo } = appInfoSignal;
 
   const [mobile, setMobile] = useState<string>('');
+  const [userInfo, setUserInfo] = useState<any>(null);
   // 获取用户信息
   const tokenInfo = TokenManager.getTokenInfo();
 
@@ -34,7 +36,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     if (tokenInfo?.accessToken) {
       getInfo();
     }
-  }, [tokenInfo]);
+  }, [tokenInfo?.accessToken]);
 
   useEffect(() => {
     // 正则匹配 /onebase/runtime/ 后面的两个数字（appId 和 tenantId）
@@ -65,12 +67,12 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   };
 
   const getInfo = async () => {
-    const res = await getPermissionInfo();
-    console.log(res);
+    const res = await getPermissionInfo(CodeType.CORP);
     UserPermissionManager.setUserPermissionInfo(res);
     const mobile = res.user.mobile;
     const formatMobile = maskMobile(mobile);
     setMobile(formatMobile);
+    setUserInfo(res.user);
   };
 
   // 登出处理
@@ -86,7 +88,27 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   // 用户菜单
   const userMenu = (
     <Menu>
-      <Menu.Item key="profile">{mobile}</Menu.Item>
+      <Menu.Item key="info" style={{ height: '70px' }}>
+        <div className={styles.adminInformation}>
+          <Avatar size={32}>
+            <img src={userInfo?.avatar} />
+          </Avatar>
+          <Typography.Text>{userInfo?.nickname}</Typography.Text>
+          <Typography.Text type="secondary">{maskMobile(mobile)}</Typography.Text>
+        </div>
+      </Menu.Item>
+      <Divider style={{ margin: '4px 0' }} />
+     {tokenInfo?.adminFlag && <Menu.Item
+          key="setting"
+          onClick={() => {
+            navigate('/onebase/setting');
+          }}
+        >
+        <div className={styles.headerContent}>
+          <img src={BuildingLine} />
+          <span>企业管理后台</span>
+        </div>
+      </Menu.Item>}
       <Menu.Item key="logout" onClick={handleLogout}>
         <IconExport style={{ color: '#F53F3F' }} />
         <Typography.Text type="error">{t('header.logout')}</Typography.Text>
@@ -97,17 +119,19 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   return (
     <Header className={`${styles.header} ${className || ''}`}>
       <div className={styles.headerContent}>
-        <div className={styles.appInfo}>
-          <div className={styles.myAppIcon} style={{ backgroundColor: curAppInfo.value.iconColor }}>
-            <DynamicIcon
-              IconComponent={appIconMap[curAppInfo.value.iconName as keyof typeof appIconMap]}
-              theme="outline"
-              size="14"
-              fill="#F2F3F5"
-            />
-          </div>
-          <div className={styles.appName}>{curAppInfo.value.appName}</div>
-        </div>
+        {curAppInfo.value.iconName && 
+          <div className={styles.appInfo}>
+            <div className={styles.myAppIcon} style={{ backgroundColor: curAppInfo.value.iconColor }}>
+              <DynamicIcon
+                IconComponent={appIconMap[curAppInfo.value.iconName as keyof typeof appIconMap]}
+                theme="outline"
+                size="14"
+                fill="#F2F3F5"
+              />
+            </div>
+            <div className={styles.appName}>{curAppInfo.value.appName}</div>
+          </div> || <img src={LogoAvatarSVG} />
+        }
 
         <div className={styles.userInfo}>
           {UserPermissionManager.getUserPermissionInfo()?.user?.nickname || '未登录'}

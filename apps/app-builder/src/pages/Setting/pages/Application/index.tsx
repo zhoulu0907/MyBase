@@ -472,8 +472,12 @@ const AppManagement: React.FC = () => {
                               {item?.userPhotoList?.map(item => {
                                   return <Avatar>{item.avatar}</Avatar>
                               })}
-                              <Avatar>{item?.userPhotoList?.length}</Avatar>
-                              <Typography.Text type='secondary'>{item?.createUser}等{item?.userPhotoList?.length}人开发</Typography.Text>
+                              {item?.userPhotoList?.length >1 && 
+                                <>
+                                  <Avatar>{item?.userPhotoList?.length}</Avatar>
+                                  <Typography.Text type='secondary'>{item?.createUser}等{item?.userPhotoList?.length}人开发</Typography.Text>
+                                </>
+                              }
                           </AvatarGroup>
                         </>
                       )}

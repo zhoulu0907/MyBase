@@ -78,11 +78,11 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
         permissionKey: TENANT_MENUS.INFO // todo
       },
       {
-        key: 'enterpriseInfo',
-        title: '企业信息',
+        key: 'enterprise',
+        title: '企业管理',
         icon: <IconIdcard style={iconStyle} />,
-        path: '/onebase/setting/enterpriseInfo',
-        permissionKey: TENANT_MENUS.INFO
+        path: '/onebase/setting/enterprise',
+        permissionKey: TENANT_MENUS.CORP
       },
       {
         key: 'tenant',
@@ -90,20 +90,6 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
         icon: <IconIdcard style={iconStyle} />,
         path: '/onebase/setting/tenant',
         permissionKey: TENANT_MENUS.INFO
-      },
-      {
-        key: 'enterprise',
-        title: '企业管理',
-        icon: <IconIdcard style={iconStyle} />,
-        path: '/onebase/setting/enterprise',
-        permissionKey: TENANT_MENUS.BUSINESS
-      },
-      {
-        key: 'authorized-application',
-        title: '授权应用',
-        icon: <IconIdcard style={iconStyle} />,
-        path: '/onebase/setting/authorized-application',
-        permissionKey: TENANT_MENUS.AUTHORIZED
       }
     ],
     []

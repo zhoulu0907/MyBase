@@ -111,5 +111,5 @@ export interface industryTypeOption {
 export interface successData {
   id: string;
   password: string;
-  username: string;
+  mobile: string;
 }

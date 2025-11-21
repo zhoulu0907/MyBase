@@ -100,7 +100,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   const toRuntime = () => {
     const newWindow = window.open('', '_blank');
     if (newWindow) {
-      const redirectURL = `${getRuntimeURL()}/#/onebase/runtime/${curAppId}/`;
+      const redirectURL = `${getRuntimeURL()}/#/onebase/runtime/?&appId=${curAppId}`;
       newWindow.location.href = `${getRuntimeURL()}/#/login?redirectURL=${redirectURL}`;
     }
   };

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Avatar, Spin, Typography, Message, Grid, Upload, Image, Tooltip, Modal, Input, Form } from '@arco-design/web-react';
 import { IconCamera, IconCopy, IconEdit } from '@arco-design/web-react/icon';
 import type { PlatformTenantInfo } from '@onebase/platform-center';
-import { getPlatformTenantAdminInfoApi, updatePlatformTenantApi, PlatformTenantPublishMode, uploadFile } from '@onebase/platform-center';
+import { getTenantInfo, updatePlatformTenantApi, PlatformTenantPublishMode, uploadFile } from '@onebase/platform-center';
 import PlaceholderPanel from '@/components/PlaceholderPanel';
 import { hasPermission } from '@/utils/permission';
 import { TENANT_INFO_PERMISSION as ACTIONS } from '@/constants/permission';
@@ -26,7 +26,7 @@ const SpaceInfo: React.FC = () => {
   const fetchSpaceInfo = async (id: string) => {
     try {
       setLoading(true);
-      const res = await getPlatformTenantAdminInfoApi(id);
+      const res = await getTenantInfo(id);
       setSpaceInfo(res);
       setLogoUrl(res.logoUrl);
     } finally {
@@ -35,7 +35,7 @@ const SpaceInfo: React.FC = () => {
   };
 
   useEffect(() => {
-    tokenInfo?.userId && fetchSpaceInfo(`${tokenInfo.userId}`);
+    tokenInfo?.tenantId && fetchSpaceInfo(`${tokenInfo.tenantId}`);
     form.resetFields();
   }, []);
 

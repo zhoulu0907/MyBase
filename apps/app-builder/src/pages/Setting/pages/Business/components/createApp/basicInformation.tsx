@@ -40,11 +40,11 @@ export const BasicInformation:React.FC<IBasicInfoProps> = ({ industryOptions, ba
                 <Input placeholder="输入企业名称" maxLength={50} />
             </Form.Item>
             <Form.Item
-                label="企业ID"
+                label="企业编码"
                 field="corpCode"
-                rules={[{ required: true, message: '请输入企业ID' }]}
+                rules={[{ required: true, message: '请输入企业编码' }]}
             >
-                <Input placeholder="输入企业ID" />
+                <Input placeholder="输入企业编码" />
             </Form.Item>
             <Form.Item
                 label="行业类型"

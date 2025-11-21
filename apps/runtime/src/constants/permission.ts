@@ -19,84 +19,60 @@ export enum PUBLISH_MODULE {
 }
 
 /** 菜单-租户管理 */
-export const TENANT_MENUS = {
-  USER: 'tenant:user',
-  ROLE: 'tenant:role',
-  DEPT: 'tenant:dept',
-  DICT: 'tenant:dict',
-  INFO: 'tenant:info',
+export const CORP_MENUS = {
+  USER: 'corp:user',
+  DEPT: 'corp:dept',
+  PROFILE: 'corp:profile',
+  AUTHORIZED: 'corp:app-auth',
+  CORP_INFO:'corp:info'
 }
 
 /** 租户管理-用户管理 */
-export const TENANT_USER_QUERY = 'tenant:user:query'; // 查询用户
-export const TENANT_USER_CREATE = 'tenant:user:create'; // 增加用户
-export const TENANT_USER_UPDATE = 'tenant:user:update'; // 修改用户
-export const TENANT_USER_DELETE = 'tenant:user:delete'; // 删除用户
-export const TENANT_USER_STATUS = 'tenant:user:enable'; // 启用/禁用用户
-export const TENANT_USER_RESET = 'tenant:user:reset'; // 重置密码
-export const TENANT_USER_PERMISSION = {
-  QUERY: TENANT_USER_QUERY,
-  CREATE: TENANT_USER_CREATE,
-  UPDATE: TENANT_USER_UPDATE,
-  DELETE: TENANT_USER_DELETE,
-  RESET: TENANT_USER_RESET,
-  STATUS: TENANT_USER_STATUS
-}
-
-/** 租户管理-角色管理 */ 
-export const TENANT_ROLE_QUERY = 'tenant:role:query'; // 查询角色
-export const TENANT_ROLE_CREATE = 'tenant:role:create'; // 新增角色
-export const TENANT_ROLE_UPDATE = 'tenant:role:update'; // 修改角色
-export const TENANT_ROLE_DELETE = 'tenant:role:delete'; // 删除角色
-export const TENANT_ROLE_ASSIGN_USER = 'tenant:role:user'; // 分配用户
-export const TENANT_ROLE_ASSIGN_PERMISSION = 'tenant:role:permission'; // 分配角色权限
-export const TENANT_ROLE_PERMISSION = {
-  QUERY: TENANT_ROLE_QUERY,
-  CREATE: TENANT_ROLE_CREATE,
-  UPDATE: TENANT_ROLE_UPDATE,
-  DELETE: TENANT_ROLE_DELETE,
-  USER: TENANT_ROLE_ASSIGN_USER,
-  PERMISSION: TENANT_ROLE_ASSIGN_PERMISSION
+export const CORP_USER_QUERY = 'corp:user:query'; // 查询用户
+export const CORP_USER_CREATE = 'corp:user:create'; // 增加用户
+export const CORP_USER_UPDATE = 'corp:user:update'; // 修改用户
+export const CORP_USER_DELETE = 'corp:user:delete'; // 删除用户
+export const CORP_USER_STATUS = 'corp:user:enable'; // 启用/禁用用户
+export const CORP_USER_RESET = 'corp:user:reset'; // 重置密码
+export const CORP_USER_IMPORT = 'tenant:user:import'; // 数据导入 // todo
+export const CORP_USER_EXPORT = 'tenant:user:import'; // 数据导出 // todo
+export const CORP_USER_PERMISSION = {
+  QUERY: CORP_USER_QUERY,
+  CREATE: CORP_USER_CREATE,
+  UPDATE: CORP_USER_UPDATE,
+  DELETE: CORP_USER_DELETE,
+  RESET: CORP_USER_RESET,
+  STATUS: CORP_USER_STATUS,
+  IMPORT: CORP_USER_IMPORT,
+  EXPORT: CORP_USER_EXPORT
 }
 
 /** 租户管理-组织管理 */
-export const TENANT_DEPT_QUERY = 'tenant:dept:query';
-export const TENANT_DEPT_CREATE = 'tenant:dept:create';
-export const TENANT_DEPT_UPDATE = 'tenant:dept:update';
-export const TENANT_DEPT_DELETE = 'tenant:dept:delete';
-export const TENANT_DEPT_PERMISSION = {
-  QUERY: TENANT_DEPT_QUERY,
-  CREATE: TENANT_DEPT_CREATE,
-  UPDATE: TENANT_DEPT_UPDATE,
-  DELETE: TENANT_DEPT_DELETE
-}
-
-/** 租户管理-数据字典管理 */
-export const TENANT_DICT_QUERY = 'tenant:dict:query';
-export const TENANT_DICT_CREATE = 'tenant:dict:create';
-export const TENANT_DICT_UPDATE = 'tenant:dict:update';
-export const TENANT_DICT_DELETE = 'tenant:dict:delete';
-export const TENANT_DICT_STATUS = 'tenant:dict:enable';
-export const TENANT_DICT_PERMISSION = {
-  QUERY: TENANT_DICT_QUERY,
-  CREATE: TENANT_DICT_CREATE,
-  UPDATE: TENANT_DICT_UPDATE,
-  DELETE: TENANT_DICT_DELETE,
-  STATUS: TENANT_DICT_STATUS,
+export const CORP_DEPT_QUERY = 'corp:dept:query';
+export const CORP_DEPT_CREATE = 'corp:dept:create';
+export const CORP_DEPT_UPDATE = 'corp:dept:update';
+export const CORP_DEPT_DELETE = 'corp:dept:delete';
+export const CORP_DEPT_SUB_DEPT = 'corp:dept:update'; 
+export const CORP_DEPT_PERMISSION = {
+  QUERY: CORP_DEPT_QUERY,
+  CREATE: CORP_DEPT_CREATE,
+  UPDATE: CORP_DEPT_UPDATE,
+  DELETE: CORP_DEPT_DELETE,
+  SUB_DEPT: CORP_DEPT_SUB_DEPT
 }
 
 /** 租户管理-租户信息 */
-export const TENANT_INFO_QUERY = 'tenant:info:query';
-export const TENANT_INFO_UPDATE = 'tenant:info:update';
-export const TENANT_INFO_PERMISSION = {
-  QUERY: TENANT_INFO_QUERY,
-  UPDATE: TENANT_INFO_UPDATE,
+export const CORP_INFO_QUERY = 'corp:info:query';
+export const CORP_INFO_UPDATE = 'corp:info:update';
+export const CORP_INFO_PERMISSION = {
+  QUERY: CORP_INFO_QUERY,
+  UPDATE: CORP_INFO_UPDATE,
 }
 /** 应用管理-我的应用管理 */
-export const APP_MYAPP_QUERY = 'app:app:query';
-export const APP_MYAPP_CREATE = 'app:app:create';
-export const APP_MYAPP_DELETE = 'app:app:delete';
-export const APP_MYAPP_UPDATE = 'app:app:update';
+export const APP_MYAPP_QUERY = 'corp:app:query';
+export const APP_MYAPP_CREATE = 'corp:app:create';
+export const APP_MYAPP_DELETE = 'corp:app:delete';
+export const APP_MYAPP_UPDATE = 'corp:app:update';
 export const APP_MYAPP_PERMISSION = {
   QUERY: APP_MYAPP_QUERY,
   CREATE: APP_MYAPP_CREATE,
