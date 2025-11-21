@@ -9,7 +9,8 @@ export enum ETLNodeType {
 export enum ETLDrawerTab {
   DATA_CONFIG = 'dataConfig',
   DATA_PREVIEW = 'dataPreview',
-  NODE_REMARK = 'nodeRemark'
+  NODE_REMARK = 'nodeRemark',
+  FIELD_CONFIG = 'fieldConfig'
 }
 
 export enum ETLJoinType {
