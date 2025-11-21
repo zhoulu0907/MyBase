@@ -78,8 +78,6 @@ const SQLConfig: React.FC = () => {
   }, [nodeData, curNode]);
 
   useEffect(() => {
-    // setSqlValue(nodeData.value[curNode.value.id]?.config?.sql || '');
-
     let payload = nodeData.value[curNode.value.id];
 
     let sqlValue = showSQLValue;

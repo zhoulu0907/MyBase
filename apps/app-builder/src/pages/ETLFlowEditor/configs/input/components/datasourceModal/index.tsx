@@ -28,7 +28,7 @@ interface DatasourceModalProps {
 }
 
 const DatasourceModal: React.FC<DatasourceModalProps> = ({ isModalVisible, onClose, onOk }) => {
-  const { curNode, setNodeData, nodeData } = etlEditorSignal;
+  const { curNode, setNodeData, nodeData, graphData } = etlEditorSignal;
 
   const [activeTab, setActiveTab] = useState('external');
   const [allDatasources, setAllDatasources] = useState<ETLDatasource[]>([]);
@@ -132,6 +132,8 @@ const DatasourceModal: React.FC<DatasourceModalProps> = ({ isModalVisible, onClo
     };
 
     setNodeData(curNode.value.id, payload);
+    // clearDownStreamNodeConfig(curNode.value.id, graphData.value, nodeData.value);
+
     onOk?.();
   };
   const handleClose = () => {
