@@ -78,8 +78,8 @@ export default function FieldConfig({ setCcRecipientsConfigData, fieldPermConfig
   ];
 
   const setTableData = (v: any) => {
-    const tableMap = new Map<string, any>(tbData.map((item: any) => [item.fieldId, item]));
-    const addType = v.map((item: any) => ({
+    const tableMap = new Map<string, any>(tbData?.map((item: any) => [item.fieldId, item]));
+    const addType = v?.map((item: any) => ({
       ...item,
       fieldPermType: tableMap.has(item.fieldId) ? tableMap.get(item.fieldId).fieldPermType : 'read'
     }));
