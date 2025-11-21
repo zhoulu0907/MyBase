@@ -14,3 +14,17 @@
     margin-left: 0.16rem;
   }
 }
+
+.onAdd {
+  text-align: center;
+  color: rgb(var(--primary-6));
+  font-family: "PingFang SC";
+  font-size: 0.32rem;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 0.48rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.2rem 0;
+}

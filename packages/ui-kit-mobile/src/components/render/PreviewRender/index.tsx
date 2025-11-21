@@ -34,6 +34,8 @@ interface PreviewRenderProps {
   showFromPageData?: Function;
 
   refresh?: number;
+
+  form?: any;
 }
 
 const PreviewRender: React.FC<PreviewRenderProps> = ({
@@ -43,7 +45,8 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
   runtime,
   detailMode,
   showFromPageData,
-  refresh
+  refresh,
+  form
 }) => {
   // 获取组件配置
   const componentConfig = getComponentConfig(pageComponentSchema, cpType);
@@ -247,7 +250,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
         );
       case FORM_COMPONENT_TYPES.SUB_TABLE:
         return (
-          <FormComp.XSubTable cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} />
+          <FormComp.XSubTable cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} form={form} />
         );
       case FORM_COMPONENT_TYPES.DATA_SELECT:
       // return (

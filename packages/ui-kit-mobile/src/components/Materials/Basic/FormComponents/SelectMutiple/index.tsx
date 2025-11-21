@@ -28,7 +28,7 @@ const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: bool
     ? dataField[dataField.length - 1]
     : `${FORM_COMPONENT_TYPES.INPUT_TEXT}_${nanoid()}`;
 
-  const options = defaultOptionsConfig.defaultOptions?.map(({ label, value }: { label: string; value: string | number }) => ({ label, value }));
+  const options = defaultOptionsConfig?.defaultOptions?.map(({ label, value }: { label: string; value: string | number }) => ({ label, value }));
 
   return (
     <Form.Item

@@ -144,12 +144,14 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   // 提交表单
   const submitForm = async () => {
     const fields = form.getFieldsValue();
-    console.log('fields: ', fields);
-    console.log('mainMetaDataFields: ', mainMetaDataFields.value);
-    console.log('menuId: ', menuId);
+    // console.log('fields: ', fields);
+    // console.log('mainMetaDataFields: ', mainMetaDataFields.value);
+    // console.log('menuId: ', menuId);
 
     const formData = {} as any;
     const subFormData = [] as any;
+    const groups = {} as any;
+    let subEntityId: string = '';
     Object.entries(fields).forEach(([key, value]) => {
       console.log('key: ', key, '   value: ', value);
 
@@ -157,47 +159,49 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       const field = (mainMetaDataFields.value || []).find((f: AppEntityField) => f.fieldId == key);
       // listPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN]
       if (field) {
-        console.log('field: ', field);
+        // console.log('field: ', field);
         formData[field.fieldId] = value;
       }
       Object.values(listPageComponentSchemas.value).forEach((item) => {
         if (item.config.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]) {
           return;
         }
-        console.warn('item: ', item);
+        // console.warn('item: ', item);
         const indexTmp = item.config.columns.findIndex((col: any) => col.id === field?.fieldId);
 
-        console.warn('indexTmp: ', indexTmp);
-        console.warn('field: ', field);
+        // console.warn('indexTmp: ', indexTmp);
+        // console.warn('field: ', field);
 
         if (indexTmp === -1) {
           delete formData[field?.fieldId];
         }
-      })
+      });
+
       // 处理子表逻辑
       if (key.startsWith(FORM_COMPONENT_TYPES.SUB_TABLE)) {
-        const subEntityId = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[key]?.config
+        const parts = key.split('.');
+
+        subEntityId = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[parts[0]]?.config
           ?.subTable;
 
-        //   过滤空行
-        const subTableRows = [] as any;
-        for (const item of value) {
-          if (Object.values(item).every((v: any) => v === undefined)) {
-            return;
-          }
-          const keys = Object.keys(item);
-          let temp: any = {};
-          for (let key of keys) {
-            const newKey = key.slice(key.lastIndexOf('.') + 1);
-            temp[newKey] = item[key];
-          }
-          subTableRows.push(temp);
+        const groupIndex = parts[parts.length - 2];
+        const fieldId = parts[parts.length - 1];
+
+        if (!groups[groupIndex]) {
+          groups[groupIndex] = {};
         }
-        subFormData.push({
-          subEntityId: subEntityId,
-          subData: subTableRows
-        });
+
+        groups[groupIndex][fieldId] = value;
       }
+    });
+
+    const subData = Object.keys(groups)
+      .sort((a, b) => Number(a) - Number(b))
+      .map((k) => groups[k]);
+
+    subFormData.push({
+      subEntityId,
+      subData
     });
 
     console.log('formData:   ', formData);
@@ -234,10 +238,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       setDrawerVisible(false);
       setRefresh(Date.now());
     } else {
-
       try {
         let res = null;
-        console.warn('bb=111===', curPage?.value?.pageSetType)
+        console.warn('bb=111===', curPage?.value?.pageSetType);
         if (curPage?.value?.pageSetType === PageType.BPM) {
           const reqFlow = {
             isDraft: false,
@@ -271,10 +274,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
           Toast.success('创建成功');
         }
       } catch (error) {
-        Toast.error('创建失败')
+        Toast.error('创建失败');
       }
     }
-
   };
 
   const cancelSubmitForm = () => {
@@ -285,11 +287,11 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   };
 
   const showFromPageData = (id: string, toFormPage: boolean = false) => {
-    console.warn('bb=11===', id)
+    // console.warn('bb=11===', id);
     form.resetFields();
 
     if (id && id !== '') {
-      console.log('edit row id: ', id);
+      // console.log('edit row id: ', id);
       setEditTargetId(id);
       if (mainMetaData) {
         handleGetData(mainMetaData, id);
@@ -312,7 +314,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       id: id
     };
     const res = await dataMethodData(req);
-    console.log('xxx=====', res);
+    // console.log('xxx=====', res);
 
     // 遍历 res.data，将数据回填到表单
     const formValues: Record<string, any> = {};
@@ -324,7 +326,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
         fieldIdNameMap[field.fieldName] = field.fieldId;
       });
 
-      console.log('fieldIdNameMap: ', fieldIdNameMap);
+      // console.log('fieldIdNameMap: ', fieldIdNameMap);
 
       // 只处理第一个数据对象（通常为单条数据）
       const dataItem = Array.isArray(res.data) ? res.data[0] : res.data;
@@ -349,12 +351,12 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
       for (const subEntity of res.subEntities) {
         const targetSubEntity = subEntities.value.find((ele: any) => ele.childEntityId == subEntity.subEntityId);
-        console.log('已找到目标子表: ', targetSubEntity);
+        // console.log('已找到目标子表: ', targetSubEntity);
 
         if (targetSubEntity) {
           Object.entries(componentSchemas).forEach(([key, schema]: [string, any]) => {
             if (key.startsWith(FORM_COMPONENT_TYPES.SUB_TABLE) && schema?.config?.subTable == subEntity.subEntityId) {
-              console.log('subEntity.data: ', subEntity.subData);
+              // console.log('subEntity.data: ', subEntity.subData);
 
               pagesRuntimeSignal.setSubTableDataLength(key, (subEntity.subData || []).length);
 
@@ -384,12 +386,13 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     setDetailMode(false);
   };
 
-  const curFormPage = curPage.value?.pages?.find((ele: any) => ele.pageType === CATEGORY_TYPE.LIST)?.pageName || '标题_列表';
-  console.warn('xx-d==', useEditorSignalMap.get(editPageViewId.value)?.components.value)
-  console.warn('xxxxxx=====11=1===', useEditorSignalMap)
+  const curFormPage =
+    curPage.value?.pages?.find((ele: any) => ele.pageType === CATEGORY_TYPE.LIST)?.pageName || '标题_列表';
+  // console.warn('xx-d==', useEditorSignalMap.get(editPageViewId.value)?.components.value);
+  // console.warn('xxxxxx=====11=1===', useEditorSignalMap);
+  console.log('pageType---', pageType);
   return (
     <div className={styles.previewPage}>
-
       {/* <Sticky topOffset={0} className={styles.previewTitle}>
         {curFormPage.slice(0, curFormPage.length - 3)}
       </Sticky> */}
@@ -427,27 +430,24 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
         {pageType == EDITOR_TYPES.FORM_EDITOR && (
           <Form layout="inline" form={form} className={styles.formWrapper}>
             {useEditorSignalMap.get(editPageViewId.value)?.components.value.map((cp: GridItem) => (
-              <Fragment key={cp.id} >
+              <Fragment key={cp.id}>
                 {useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id].config.status !==
                   STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
-                    <div
-                      key={cp.id}
-                      className={styles.componentItem}
-                      style={{ width: '100%' }}
-                    >
-                      <PreviewRender
-                        cpId={cp.id}
-                        cpType={cp.type}
-                        pageComponentSchema={
-                          useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id]
-                        }
-                        runtime={true}
-                        showFromPageData={() => {
-                          setPageType(EDITOR_TYPES.FORM_EDITOR);
-                        }}
-                      />
-                    </div>
-                  )}
+                  <div key={cp.id} className={styles.componentItem} style={{ width: '100%' }}>
+                    <PreviewRender
+                      cpId={cp.id}
+                      cpType={cp.type}
+                      pageComponentSchema={
+                        useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id]
+                      }
+                      form={form}
+                      runtime={true}
+                      showFromPageData={() => {
+                        setPageType(EDITOR_TYPES.FORM_EDITOR);
+                      }}
+                    />
+                  </div>
+                )}
               </Fragment>
             ))}
 
@@ -475,7 +475,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
           //   </div>
           // }
           visible={drawerVisible.value}
-          close={() => { setDrawerVisible(false) }}
+          close={() => {
+            setDrawerVisible(false);
+          }}
         >
           <div className={styles.content}>
             <Form layout="inline" form={form}>
@@ -483,28 +485,28 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                 <Fragment key={cp.id}>
                   {useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id].config.status !==
                     STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
-                      <div
-                        key={cp.id}
-                        className={styles.componentItem}
-                        style={{
-                          width: getComponentWidth(
-                            useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id],
-                            cp.type
-                          )
-                        }}
-                      >
-                        <PreviewRender
-                          cpId={cp.id}
-                          cpType={cp.type}
-                          pageComponentSchema={
-                            useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id]
-                          }
-                          runtime={true}
-                          detailMode={detailMode}
-                          showFromPageData={() => { }}
-                        />
-                      </div>
-                    )}
+                    <div
+                      key={cp.id}
+                      className={styles.componentItem}
+                      style={{
+                        width: getComponentWidth(
+                          useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id],
+                          cp.type
+                        )
+                      }}
+                    >
+                      <PreviewRender
+                        cpId={cp.id}
+                        cpType={cp.type}
+                        pageComponentSchema={
+                          useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id]
+                        }
+                        runtime={true}
+                        detailMode={detailMode}
+                        showFromPageData={() => {}}
+                      />
+                    </div>
+                  )}
                 </Fragment>
               ))}
 

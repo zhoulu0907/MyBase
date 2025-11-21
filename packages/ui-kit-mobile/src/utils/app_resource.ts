@@ -275,7 +275,7 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
         LAYOUT_COMPONENT_TYPES.TABS_LAYOUT
       ];
 
-      const subList:string[] = [
+      const subList: string[] = [
         FORM_COMPONENT_TYPES.SUB_TABLE,
       ];
 
@@ -300,7 +300,7 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
       if (component.parentCode !== '' && component.parentCode !== null) {
         if (component.parentCode.indexOf(FORM_COMPONENT_TYPES.SUB_TABLE) !== -1) {
           const colComponents = newSubTableComponentsMap.get(component.parentCode);
-          if(colComponents){
+          if (colComponents) {
             colComponents[component.containerIndex] = {
               id: component.componentCode,
               chosen: false,
@@ -311,11 +311,10 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
           }
           if (page.pageType === CATEGORY_TYPE.FORM) {
             setFromSubTableComponents(component.parentCode, colComponents as any[])
-           
           } else if (page.pageType === CATEGORY_TYPE.LIST) {
             setListSubTableComponents(component.parentCode, colComponents as any[])
           }
-          // useEditorSignalMap.get(page.id)!.setSubTableComponents(component.parentCode, colComponents as any[]);
+          useEditorSignalMap.get(page.id)!.setSubTableComponents(component.parentCode, colComponents as any[]);
         } else {
           const colComponents = newColComponentsMap.get(component.parentCode);
           if (colComponents) {
