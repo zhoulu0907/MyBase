@@ -1,3 +1,5 @@
+import { etlEditorSignal, ETLNodeType } from '@onebase/common';
+
 /**
  * 根据 graphData 查找指向指定 targetNodeId 的边，并返回其来源节点 ID（sourceNodeID）。
  * @param graphData - 拓扑数据，包含 edges 数组
@@ -54,14 +56,50 @@ export function getAllDownstreamNodeIds(
 }
 
 export const clearDownStreamNodeConfig = (curNodeId: string, graphData: any, nodeData: any) => {
+  const { setNodeData } = etlEditorSignal;
   console.log(curNodeId);
   console.log('graphData: ', graphData);
   console.log('nodeData: ', nodeData);
 
   const nodeIds = getAllDownstreamNodeIds(graphData, curNodeId);
   console.log(nodeIds);
+
   for (const nodeId of nodeIds) {
     const curNodeData = nodeData[nodeId];
-    console.log(curNodeData);
+
+    switch (curNodeData.type) {
+      case ETLNodeType.INPUT_NODE:
+        break;
+      case ETLNodeType.OUTPUT_NODE:
+        curNodeData.config = {
+          ...curNodeData.config,
+          fields: []
+        };
+        curNodeData.output = {
+          verified: false
+        };
+        break;
+      case ETLNodeType.JOIN_NODE:
+        // TODO(ciki): 实现join节点重置逻辑
+        break;
+      case ETLNodeType.UNION_NODE:
+        curNodeData.config = {
+          ...curNodeData.config,
+          data: [],
+          colTitles: []
+        };
+        curNodeData.output = {
+          verified: false,
+          fields: []
+        };
+        break;
+      case ETLNodeType.SQL_NODE:
+        break;
+      default:
+        break;
+    }
+
+    console.log('curNodeData: ', curNodeData);
+    setNodeData(nodeId, curNodeData);
   }
 };

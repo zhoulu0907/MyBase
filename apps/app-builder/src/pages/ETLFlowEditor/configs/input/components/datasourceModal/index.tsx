@@ -11,7 +11,8 @@ import {
   type ETLDatasource,
   type ETLTable
 } from '@onebase/app';
-import { etlEditorSignal, ETLNodeType, getHashQueryParam } from '@onebase/common';
+import { etlEditorSignal, getHashQueryParam } from '@onebase/common';
+import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useMemo, useState } from 'react';
 import { clearDownStreamNodeConfig } from '../../../utils';
 import CreateExternalModal from '../createExternalModal';
@@ -29,6 +30,8 @@ interface DatasourceModalProps {
 }
 
 const DatasourceModal: React.FC<DatasourceModalProps> = ({ isModalVisible, onClose, onOk }) => {
+  useSignals();
+
   const { curNode, setNodeData, nodeData, graphData } = etlEditorSignal;
 
   const [activeTab, setActiveTab] = useState('external');
@@ -114,8 +117,6 @@ const DatasourceModal: React.FC<DatasourceModalProps> = ({ isModalVisible, onClo
 
     let payload = nodeData.value[curNode.value.id];
 
-    payload.nodeType = ETLNodeType.INPUT_NODE;
-
     payload.config = {
       datasourceId: curDatasourceId,
       tableId: selectedTableId,
@@ -134,6 +135,7 @@ const DatasourceModal: React.FC<DatasourceModalProps> = ({ isModalVisible, onClo
       }))
     };
 
+    // TODO(mickey): 封装成一个方法,设置节点数据和清零下游节点配置都执行一下
     setNodeData(curNode.value.id, payload);
     clearDownStreamNodeConfig(curNode.value.id, graphData.value, nodeData.value);
 
