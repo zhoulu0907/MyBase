@@ -3,7 +3,8 @@ import { Button, Form, Select, TreeSelect } from '@arco-design/web-react';
 import { FormulaEditor } from '@/components/FormulaEditor';
 import { getDeptList } from '@onebase/platform-center';
 import { listToTree } from '@onebase/common';
-import { getPopupContainer } from '@onebase/ui-kit';
+import { getPopupContainer, CONFIG_TYPES } from '@onebase/ui-kit';
+import { registerConfigRenderer } from '../../registry';
 
 export interface DynamicDeptDefaultValueConfigProps {
   handlePropsChange: (key: string, value: string | number | boolean | any[]) => void;
@@ -161,3 +162,15 @@ const DynamicDeptDefaultValueConfig: React.FC<DynamicDeptDefaultValueConfigProps
 };
 
 export default DynamicDeptDefaultValueConfig;
+
+registerConfigRenderer(
+  CONFIG_TYPES.DEPT_DEFAULT_VALUE,
+  ({ id, handlePropsChange, item, configs }) => (
+    <DynamicDeptDefaultValueConfig
+      id={id}
+      handlePropsChange={handlePropsChange}
+      item={item}
+      configs={configs}
+    />
+  )
+);

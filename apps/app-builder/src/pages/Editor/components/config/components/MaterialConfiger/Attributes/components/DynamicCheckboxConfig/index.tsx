@@ -14,6 +14,8 @@ import {
 } from '@arco-design/web-react';
 import { IconDelete, IconDragDotVertical } from '@arco-design/web-react/icon';
 import React, { useEffect, useState } from 'react';
+import { registerConfigRenderer } from '../../registry';
+import { CONFIG_TYPES } from '@onebase/ui-kit';
 import { ReactSortable } from 'react-sortablejs';
 import styles from '../../index.module.less';
 import { COLOR_MODE_TYPES, useAppEntityStore, DEFAULT_OPTIONS_TYPE, getPopupContainer } from '@onebase/ui-kit';
@@ -385,3 +387,7 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
 };
 
 export default DynamicCheckboxConfig;
+
+registerConfigRenderer(CONFIG_TYPES.CHECKBOX_DATA, ({ id, handlePropsChange, item, configs }) => (
+  <DynamicCheckboxConfig id={id} handlePropsChange={handlePropsChange} item={item} configs={configs} />
+));

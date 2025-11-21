@@ -3,7 +3,7 @@ import { Drawer, Grid, Tag, Button, Popconfirm, Tooltip } from '@arco-design/web
 import { IconFullscreen, IconLink, IconDoubleRight, IconFullscreenExit } from '@arco-design/web-react/icon';
 import ExpendSp from '@/assets/images/task_center/expend-sp.svg';
 import ProPreviewImg from '@/assets/images/task_center/process-preview.svg';
-import { LISTTYPE, FlowStatusMap, BPMConfigButtonType } from '@onebase/app';
+import { LISTTYPE, FlowStatusMap, BPMConfigButtonType, FLOWSTATUS_TYPE } from '@onebase/app';
 import DetailStep from './DetailStep';
 import DetailOKConfirm from './DetailOKConfirm';
 import { getFormDetail, getOperatorRecord, fetchExecTask } from '@onebase/app/src/services/app_runtime';
@@ -38,10 +38,21 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
 
   const [popupVisibleMap, setPopupVisibleMap] = useState<any>({});
   const setPopupVisibleByIndex = (index: number, visible: boolean) => {
-    setPopupVisibleMap((prev: any) => ({
-      ...prev,
-      [index]: visible
-    }));
+    setPopupVisibleMap((prev: any) => {
+      if (visible) {
+        const newState: any = {};
+        Object.keys(prev).forEach((key) => {
+          newState[key] = false;
+        });
+        newState[index] = true;
+        return newState;
+      } else {
+        return {
+          ...prev,
+          [index]: false
+        };
+      }
+    });
   };
   function toggleFullScreen(type: string) {
     if (type === 'FULLSCREEN') {
@@ -164,6 +175,23 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
     setDetailData(res);
   };
 
+  const getColor = (status: string) => {
+    switch (status) {
+      case FLOWSTATUS_TYPE.IN_APPROVAL:
+        return 'blue';
+      case FLOWSTATUS_TYPE.APPROVED:
+        return 'green';
+      case FLOWSTATUS_TYPE.DRAFT:
+        return 'gray';
+      case FLOWSTATUS_TYPE.REJECTED:
+      case FLOWSTATUS_TYPE.WITHDRAWN:
+      case FLOWSTATUS_TYPE.TERMINATED:
+        return 'red';
+      default:
+        return 'gray';
+    }
+  };
+
   useEffect(() => {
     if (
       listType === LISTTYPE.WILLDO ||
@@ -177,6 +205,7 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
       //根据列表类型请求对应的详情
     }
   }, [listType]);
+
   return (
     <section>
       <Drawer
@@ -197,7 +226,7 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
             <Col span={6}>
               <p className="gray-color">当前状态</p>
               <div style={{ padding: '4px 0' }}>
-                <Tag color="arcoblue" defaultChecked checkable={false}>
+                <Tag color={getColor(detailData?.currentStatus)} defaultChecked checkable={false}>
                   {detailData?.currentStatus && FlowStatusMap[detailData?.currentStatus]}
                 </Tag>
               </div>
@@ -205,7 +234,9 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
             <Col span={6}>
               <p className="gray-color">发起人</p>
               <div className="photo-box">
-                <p className="photo-img">{detailData?.initiator?.avatar && <img src={detailData?.initiator?.avatar} alt='' />}</p>
+                <p className="photo-img">
+                  {detailData?.initiator?.avatar && <img src={detailData?.initiator?.avatar} alt="" />}
+                </p>
                 {detailData?.initiatorName}
               </div>
             </Col>

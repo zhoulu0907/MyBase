@@ -1,5 +1,7 @@
 import { Form, Switch, Input } from '@arco-design/web-react';
 import { useEffect, useState } from 'react';
+import { registerConfigRenderer } from '../../registry';
+import { CONFIG_TYPES } from '@onebase/ui-kit';
 import styles from '../../index.module.less';
 
 export interface DynamicSwitchFillTextConfigProps {
@@ -54,3 +56,7 @@ const DynamicSwitchFillTextConfig: React.FC<DynamicSwitchFillTextConfigProps> = 
   );
 };
 export default DynamicSwitchFillTextConfig;
+
+registerConfigRenderer(CONFIG_TYPES.SWITCH_FILL_TEXT, ({ id, handlePropsChange, item, configs }) => (
+  <DynamicSwitchFillTextConfig id={id} handlePropsChange={handlePropsChange} item={item} configs={configs} />
+));

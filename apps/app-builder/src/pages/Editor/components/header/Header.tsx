@@ -370,6 +370,7 @@ export default function EditorHeader() {
         await onFlowSave();
       }
       const res = await fetchPublish({ id: flowId });
+      getVersonList();
       Message.success('发布成功');
     } catch (error) {
       Message.error('发布失败');
