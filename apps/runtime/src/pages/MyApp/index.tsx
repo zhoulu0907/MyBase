@@ -261,12 +261,7 @@ const MyAppPage: React.FC = () => {
                           </div>
                           <div className={styles.myAppCardInfo}>
                             <div className={styles.infoHeader}>
-                              {/* <Tooltip content={item.appName}>
-                                <div className={styles.myAppTitle}>{item.appName}</div>
-                              </Tooltip>
-                              <Tag color={getColor(item.publishModel)} className={styles.tag}>
-                                {getModel(item.publishModel)}
-                              </Tag> */}
+                              <div className={styles.myAppTitle}>{item.appName}</div>
                             </div>
                             <Tag
                               color={TagColor[item.appStatus]}
