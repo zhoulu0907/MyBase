@@ -32,6 +32,18 @@ public class BpmOperatorRecordRespVO {
         private String displayStatus;
 
         /**
+         * 已完成的， 显示的是完成时间；
+         * 进行中的，显示是到达/创建时间；
+         * 未开始的，则为空；
+         */
+        private LocalDateTime displayTime;
+
+        /**
+         * 等待时间描述，目前仅当前节点展示
+         */
+        private String waitTimeDesc;
+
+        /**
          * 审批方式，仅审批类型节点展示
          */
         private String approveMode;

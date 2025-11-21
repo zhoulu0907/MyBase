@@ -647,13 +647,13 @@ public class TenantServiceImpl implements TenantService {
         TenantDO tenant = getTenant(TenantContextHolder.getRequiredTenantId());
         Set<Long> menuIds;
         if (isPlatformTenant(tenant)) { // 系统租户，菜单是全量的
-            menuIds = permissionService.getAllActiveMenuIds();
+            menuIds = permissionService.getAllValidActiveMenuIds();
         } else {
             TenantPackageDO tenantPackage = tenantPackageService.getTenantPackage(tenant.getPackageId());
             Set<String> tenantAllPermissions = null;
             if (PackageTypeEnum.ALL.getCode().equals(tenantPackage.getCode())) {
                 // 若是 PackageTypeEnum.ALL, tenantAllPermissions = tenant、app开头的权限
-                menuIds = permissionService.getAllActiveMenuIds();
+                menuIds = permissionService.getAllValidActiveMenuIds();
             } else {
                 // 不是All，tenantAllPermissions = package下写入的所有权限点
                 menuIds = tenantPackage.getMenuIds();

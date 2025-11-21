@@ -292,4 +292,28 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
         }
     }
 
+    @Override
+    public Integer getIntConfig(Long tenantId, String configKey) {
+        List<SecurityConfigItemRespVO> configs = getSecurityConfigsByTenant(tenantId);
+        if (configs == null || configs.isEmpty()) {
+            return null;
+        }
+
+        for (SecurityConfigItemRespVO config : configs) {
+            if (configKey.equals(config.getConfigKey())) {
+                String configValue = config.getConfigValue();
+                if (configValue == null || configValue.trim().isEmpty()) {
+                    return null;
+                }
+                try {
+                    return Integer.parseInt(configValue.trim());
+                } catch (NumberFormatException e) {
+                    log.warn("解析配置值失败, tenantId: {}, configKey: {}, value: {}", tenantId, configKey, configValue);
+                    return null;
+                }
+            }
+        }
+        return null;
+    }
+
 }

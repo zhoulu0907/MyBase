@@ -22,11 +22,7 @@
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-common</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-module-infra-core</artifactId>
-            <version>${revision}</version>
-        </dependency>
+
         <!-- Web 相关 -->
         <dependency>
             <groupId>org.springdoc</groupId> <!-- 接口文档：使用最新版本的 Swagger 模型 -->

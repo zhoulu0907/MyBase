@@ -1,9 +1,6 @@
 package com.cmsr.onebase.module.etl.common.graph;
 
-import com.cmsr.onebase.module.etl.common.graph.conf.JdbcInputConfig;
-import com.cmsr.onebase.module.etl.common.graph.conf.JdbcOutputConfig;
-import com.cmsr.onebase.module.etl.common.graph.conf.PairJoinConfig;
-import com.cmsr.onebase.module.etl.common.graph.conf.UnionConfig;
+import com.cmsr.onebase.module.etl.common.graph.conf.*;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.Data;
@@ -28,7 +25,8 @@ public class Node<T extends NodeConfig> {
             @JsonSubTypes.Type(value = JdbcInputConfig.class, name = "jdbc_input"),
             @JsonSubTypes.Type(value = JdbcOutputConfig.class, name = "jdbc_output"),
             @JsonSubTypes.Type(value = PairJoinConfig.class, name = "pair_join"),
-            @JsonSubTypes.Type(value = UnionConfig.class, name = "union")
+            @JsonSubTypes.Type(value = UnionConfig.class, name = "union"),
+            @JsonSubTypes.Type(value = SqlConfig.class, name = "sql")
     })
     protected T config;
 

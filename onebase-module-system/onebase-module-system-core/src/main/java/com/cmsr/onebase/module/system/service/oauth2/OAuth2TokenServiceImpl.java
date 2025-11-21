@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.system.service.oauth2;
 
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstants;
+import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.map.MapUtil;
@@ -56,6 +57,8 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
     private OAuth2AccessTokenDataRepository  oauth2AccessTokenDataRepository;
     @Resource
     private OAuth2RefreshTokenDataRepository oauth2RefreshTokenDataRepository;
+    @Resource
+    private com.cmsr.onebase.module.infra.api.security.SecurityConfigApi securityConfigApi;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -100,12 +103,31 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
             throw exception(GlobalErrorCodeConstants.BAD_REQUEST.getCode(), "刷新令牌的客户端编号不正确");
         }
 
-        // 移除相关的访问令牌
+        // 移除相关的访问令牌，并反查deviceId
+        String deviceId = null;
         List<OAuth2AccessTokenDO> accessTokenDOs = oauth2AccessTokenDataRepository.findListByRefreshToken(refreshToken);
         if (CollUtil.isNotEmpty(accessTokenDOs)) {
+            // 通过旧Token反查deviceId
+            OAuth2AccessTokenDO oldToken = accessTokenDOs.get(0);
+            CommonResult<String> deviceIdResult = securityConfigApi.findDeviceIdByToken(
+                    oldToken.getUserId(),
+                    oldToken.getAccessToken()
+            );
+            if (deviceIdResult != null && deviceIdResult.getData() != null) {
+                deviceId = deviceIdResult.getData();
+            }
+            
             List<Long> ids = accessTokenDOs.stream().map(OAuth2AccessTokenDO::getId).collect(Collectors.toUnmodifiableList());
             oauth2AccessTokenDataRepository.deleteByIds(ids);
             oauth2AccessTokenRedisDAO.deleteList(convertSet(accessTokenDOs, OAuth2AccessTokenDO::getAccessToken));
+            
+            // 删除在线设备记录中的旧Token
+            for (OAuth2AccessTokenDO accessToken : accessTokenDOs) {
+                securityConfigApi.removeOnlineDevice(
+                        accessToken.getUserId(),
+                        accessToken.getAccessToken()
+                );
+            }
         }
 
         // 已过期的情况下，删除刷新令牌
@@ -115,7 +137,18 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
         }
 
         // 创建访问令牌
-        return createOAuth2AccessToken(refreshTokenDO, clientDO);
+        OAuth2AccessTokenDO newAccessTokenDO = createOAuth2AccessToken(refreshTokenDO, clientDO);
+        
+        // 将新Token添加到在线设备记录：如果反查到deviceId则使用，否则直接存储新Token
+        if (StrUtil.isNotBlank(deviceId)) {
+            securityConfigApi.addOnlineDevice(
+                    newAccessTokenDO.getUserId(),
+                    deviceId,
+                    newAccessTokenDO.getAccessToken()
+            );
+        }
+        
+        return newAccessTokenDO;
     }
 
     @Override

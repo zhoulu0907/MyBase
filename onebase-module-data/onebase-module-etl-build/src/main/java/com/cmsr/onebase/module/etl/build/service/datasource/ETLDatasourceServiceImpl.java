@@ -9,13 +9,13 @@ import com.cmsr.onebase.module.etl.build.service.DatasourceFactory;
 import com.cmsr.onebase.module.etl.build.service.collector.MetadataCollector;
 import com.cmsr.onebase.module.etl.build.service.collector.MetadataManager;
 import com.cmsr.onebase.module.etl.build.service.datasource.vo.*;
-import com.cmsr.onebase.module.etl.common.preview.ColumnDefine;
 import com.cmsr.onebase.module.etl.build.service.preview.DataInspectService;
-import com.cmsr.onebase.module.etl.common.preview.DataPreview;
 import com.cmsr.onebase.module.etl.build.service.preview.vo.TablePreviewVO;
 import com.cmsr.onebase.module.etl.common.entity.CatalogData;
 import com.cmsr.onebase.module.etl.common.entity.ColumnData;
 import com.cmsr.onebase.module.etl.common.entity.TableData;
+import com.cmsr.onebase.module.etl.common.preview.ColumnDefine;
+import com.cmsr.onebase.module.etl.common.preview.DataPreview;
 import com.cmsr.onebase.module.etl.core.dal.database.*;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLDatasourceDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLTableDO;
@@ -264,7 +264,7 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
         }
         ETLDatasourceDO datasourceDO = datasourceRepository.findById(tableDO.getDatasourceId());
         if (datasourceDO == null) {
-            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.UNKNOWN_ERROR);
+            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_NOT_EXIST);
         }
         Map<String, String> flinkTypeMappings = flinkMappingRepository.findAllMappingsByDatasourceType(datasourceDO.getDatasourceType());
         TableData tableData = tableDO.getMetaInfo();
