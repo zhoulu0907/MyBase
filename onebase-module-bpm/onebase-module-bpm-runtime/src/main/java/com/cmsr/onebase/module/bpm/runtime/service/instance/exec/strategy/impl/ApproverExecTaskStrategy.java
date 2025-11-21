@@ -4,6 +4,7 @@ import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.core.dto.node.ApproverNodeExtDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.ApproverNodeBtnCfgDTO;
+import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.FieldPermCfgDTO;
 import com.cmsr.onebase.module.bpm.core.enums.*;
 import com.cmsr.onebase.module.bpm.runtime.vo.EntityVO;
@@ -18,10 +19,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.dromara.warm.flow.core.FlowEngine;
 import org.dromara.warm.flow.core.dto.FlowParams;
-import org.dromara.warm.flow.core.entity.HisTask;
-import org.dromara.warm.flow.core.entity.Skip;
-import org.dromara.warm.flow.core.entity.Task;
-import org.dromara.warm.flow.core.entity.User;
+import org.dromara.warm.flow.core.dto.NodeJson;
+import org.dromara.warm.flow.core.entity.*;
 import org.dromara.warm.flow.core.enums.SkipType;
 import org.dromara.warm.flow.core.utils.StringUtils;
 import org.springframework.stereotype.Component;
@@ -32,6 +31,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static com.cmsr.onebase.module.bpm.core.utils.BpmUtil.getInitiationNodeJson;
 
 /**
  * 审批节点策略
@@ -127,11 +127,14 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
                     .hisStatus(BpmNodeApproveStatusEnum.POST_REJECTED.getCode())
                     .handler(approverId);
 
-            // 有拒绝节点则走拒绝路线，否则则退回到上一层
+            // 有拒绝节点则走拒绝路线，否则退回至发起节点
             if (hasRejectNode) {
                 taskService.skip(skipParams, task);
             } else {
-                taskService.rejectLast(task, skipParams);
+                Instance instance = insService.getById(task.getInstanceId());
+                NodeJson initNode = getInitiationNodeJson(instance.getDefJson());
+                skipParams.nodeCode(initNode.getNodeCode());
+                taskService.skip(skipParams,task );
             }
         } else {
             throw exception(ErrorCodeConstants.UNSUPPORT_ACTION_BUTTON_TYPE);

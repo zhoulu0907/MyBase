@@ -12,7 +12,9 @@ import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldRespDTO;
 import com.cmsr.onebase.module.metadata.core.enums.OpEnum;
 import jakarta.annotation.Resource;
 import org.apache.commons.collections4.CollectionUtils;
+import org.dromara.warm.flow.core.entity.Instance;
 import org.dromara.warm.flow.core.service.HisTaskService;
+import org.dromara.warm.flow.core.service.InsService;
 import org.dromara.warm.flow.core.service.TaskService;
 import org.dromara.warm.flow.core.service.UserService;
 import org.springframework.stereotype.Service;
@@ -46,6 +48,9 @@ public abstract class AbstractExecTaskStrategy<T extends BaseNodeExtDTO> impleme
 
     @Resource
     protected BpmFlowInsBizExtRepository insBizExtRepository;
+
+    @Resource
+    protected InsService insService;
 
     /**
      *  获取实体字段信息的主键ID
