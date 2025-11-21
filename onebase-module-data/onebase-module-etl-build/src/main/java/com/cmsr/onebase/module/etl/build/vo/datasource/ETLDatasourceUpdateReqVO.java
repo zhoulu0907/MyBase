@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.etl.build.service.datasource.vo;
+package com.cmsr.onebase.module.etl.build.vo.datasource;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+@Schema(description = "数据工厂 - 数据源 - 数据源更新VO")
 @Data
 public class ETLDatasourceUpdateReqVO {
     @Schema(description = "数据源ID")

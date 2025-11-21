@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.etl.build.service.datasource.vo;
+package com.cmsr.onebase.module.etl.build.vo.datasource;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;

@@ -1,8 +1,9 @@
-package com.cmsr.onebase.module.etl.build.service.mgt.vo;
+package com.cmsr.onebase.module.etl.build.vo.mgt;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+@Schema(description = "数据工厂 - ETL - Flink函数预览")
 @Data
 public class FlinkFunctionVO {
 
