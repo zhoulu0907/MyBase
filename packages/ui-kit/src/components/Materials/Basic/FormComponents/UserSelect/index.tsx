@@ -122,9 +122,13 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
     if (typeof fieldValue === 'object' && fieldValue) {
       return fieldValue?.userName ?? '--';
     }
-    return JSON.stringify(currentSelectUser) || '--';
-  };
+    console.log('currentSelectUser :', currentSelectUser);
+    if (currentSelectUser == null || currentSelectUser == undefined || currentSelectUser == '') {
+      return '--';
+    }
 
+    return JSON.stringify(currentSelectUser);
+  };
 
   return (
     <div className="formWrapper">
