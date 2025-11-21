@@ -9,20 +9,14 @@ import {
   LoadMore,
   Dropdown,
 } from '@arco-design/mobile-react';
-import { useForm } from '@arco-design/mobile-react/esm/form';
 import { memo, useEffect, useState } from 'react';
 import {
   BUTTON_OPTIONS,
   BUTTON_VALUES,
-  STATUS_OPTIONS,
-  STATUS_VALUES,
-  TableOperationButton,
-  TableOperationButtonStyle
 } from '../../../constants';
-
-import DynamicIcon from '@/components/DynamicIcon';
-import { iconMap } from '@/utils/const';
+import { useFormEditorSignal } from 'src/signals/page_editor';
 import filterIcon from '@/assets/images/filter.svg';
+import { useForm } from '@arco-design/mobile-react/esm/form';
 import {
   dataMethodDelete,
   dataMethodPage,
@@ -38,13 +32,6 @@ import { ENTITY_FIELD_TYPE } from '../../../../DataFactory/const';
 import { RedirectMethod } from '../../../constants';
 import './index.css';
 import type { XLoadMoreConfig } from './schema';
-import { IconHandle } from '@douyinfe/semi-icons';
-
-const leftPanelWidth = 318;
-const rightPanelWidth = 310;
-const canvasPaddingWidth = 40 + 32 + 10;
-const canvasMarginWidth = 10;
-const componentMaxWidth = leftPanelWidth + rightPanelWidth + canvasPaddingWidth + canvasMarginWidth;
 
 type XTableSelectProps = {
   showSelect: boolean;
@@ -64,36 +51,24 @@ const XLoadMore = memo(
   ) => {
     useSignals();
 
+    const { pageComponentSchemas: fromPageComponentSchemas } = useFormEditorSignal;
     const { setDrawerVisible, setDrawerPageId, setDetailPageViewId } = pagesRuntimeSignal;
     const { runtime = true, showFromPageData, showAddBtn = true } = props;
     const hasOperationPermission = true;
 
     const {
-      label,
-      status,
-      defaultValue,
       metaData,
       searchItems,
       columns,
-      hover,
-      border,
-      borderCell,
-      showHeader,
-      stripe,
-      pagePosition,
       pageSize = 10,
-      showTotal,
       showOpearate,
       fixedOpearate,
-      labelColSpan,
       sortByObject,
       advancedRowRedirect,
       redirectPageId,
       redirectMethod,
-      operationButton,
       advancedButtonPermission,
       // operationButtonCollpaseNumber,
-      operationButtonShowType,
       refresh,
       manuClick
     } = props;
@@ -111,7 +86,6 @@ const XLoadMore = memo(
     const [showDropdown, setShowDropdown] = useState(false);
 
     const onReachBottom = (cb: Function) => {
-      console.log('onReachBottom', tablePageNo);
       if (!tableData.length) return;
       setTablePageNo(prevPageNo => prevPageNo + 1);
       cb('prepare');
@@ -124,33 +98,7 @@ const XLoadMore = memo(
     }, [refresh]);
 
     useEffect(() => {
-      if (Object.keys(columns as any).length) {
-        columns?.map((v) => {
-          return {
-            ...v,
-            ellipsis: true,
-            width: v.width + 'px'
-          };
-        });
-      }
-      setFinalColumns(() => columns?.filter((v) => v.dataIndex !== 'op'));
-
-      // if (props?.xTableSelectProps?.showSelect && runtime) {
-      //   const checkboxColumnRender = {
-      //     title: '',
-      //     dataIndex: 'select',
-      //     width: 48,
-      //     render: (_: any, record: any) => (
-      //       <Checkbox
-      //         checked={props?.xTableSelectProps?.selectedDataId === record.id}
-      //         onChange={(checked: boolean) => {
-      //           props?.xTableSelectProps?.setSelectData(checked ? record : null);
-      //         }}
-      //       />
-      //     )
-      //   };
-      //   setFinalColumns([checkboxColumnRender, ...(columns as any)]);
-      // }
+      getFinalColumns();
     }, [showOpearate, columns, fixedOpearate, props?.xTableSelectProps?.selectedDataId]);
 
     useEffect(() => {
@@ -158,6 +106,58 @@ const XLoadMore = memo(
         handlePage();
       }
     }, [finalColumns, tablePageNo, metaData, sortByObject]);
+
+    const getFinalColumns = async () => {
+      let newColumns: any[] = [];
+      if (Object.keys(columns as any).length) {
+        const mainMetaData = await getEntityFieldsWithChildren(metaData);
+        newColumns = (columns || []).map((column) => {
+          return {
+            ...column,
+            render: (item: any, index: number) => {
+              const dataFieldInfo = mainMetaData.parentFields.find(
+                (field: AppEntityField) => field.fieldId === column.id
+              );
+              const result = item[dataFieldInfo.fieldName] || ''
+              console.log('render result: ', { result, dataFieldInfo })
+              if (!result) return '';
+              // if (['EMAIL', 'LONG_TEXT', 'TEXT', 'PHONE', 'NUMBER', 'DATE', 'DATETIME', 'URL', 'ADDRESS', 'AUTO_CODE', 'USER']
+              //   .includes(dataFieldInfo.fieldType)) {
+              //   return result || '-';
+              // }
+              const componentSchemasKeys = Object.keys(fromPageComponentSchemas.value || {});
+              const cpId = componentSchemasKeys.find((ele) => {
+                return fromPageComponentSchemas.value[ele]?.config?.dataField?.includes(column.id);
+              });
+              if (!cpId) {
+                return result;
+              }
+              // const currentComponentSchemas = fromPageComponentSchemas.value[cpId];
+              // if (['SELECT', 'MULTI_SELECT'].includes(dataFieldInfo.fieldType)) {
+              //   const arrayResult = Array.isArray(result) ? result : result.split(',').map((cItem: string) => cItem.trim())
+              //   const array = currentComponentSchemas.config.defaultOptionsConfig?.defaultOptions || []
+              //   const tmpR = array.map((dItem: any) => {
+              //     if (arrayResult.includes(dItem.value)) {
+              //       return dItem.label
+              //     }
+              //     return ''
+              //   }).filter((eItem: string) => eItem !== '')
+              //   return tmpR.join(',')
+              // }
+              // if (['BOOLEAN'].includes(dataFieldInfo.fieldType)) {
+              //   return result ? '是' : '否';
+              // }
+              // if (['DEPARTMENT'].includes(dataFieldInfo.fieldType)) {
+              //   return result?.deptName || '-';
+              // }
+              return result || '-';
+            }
+          }
+        });
+      }
+      newColumns = newColumns.filter((v) => v.dataIndex !== 'op');
+      setFinalColumns(newColumns);
+    };
 
     const handleCreate = () => {
       console.log('点击新增');
@@ -247,6 +247,14 @@ const XLoadMore = memo(
                 newItem[key] = newItem[key].userName;
               }
             }
+
+            // 部门
+            const departmentField = mainMetaData.parentFields.find(
+              (field: AppEntityField) => field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.DEPARTMENT.VALUE
+            );
+            if (departmentField && newItem[key]) {
+              newItem[key] = newItem[key].deptName || '-';
+            }
           }
         });
 
@@ -255,7 +263,6 @@ const XLoadMore = memo(
           key: item.data.id
         };
       });
-      console.log('newTableData: ', newTableData);
       setLoading(false);
       setTableData(req.pageNo === 1 ? newTableData : [...tableData, ...newTableData]);
       setTableTotal(total);
@@ -416,13 +423,13 @@ const XLoadMore = memo(
 
     return (
       <div className="loadmore-list-wrapper">
-        <Sticky topOffset={0.88 * window.ROOT_FONT_SIZE} className="list-search-header">
+       {searchItems?.length ? <Sticky topOffset={0.88 * window.ROOT_FONT_SIZE} className="list-search-header">
           {searchItems?.length ? (
             <SearchBar actionButton={null} placeholder={`请输入${searchItems[0].label}`} />
           ) : <div className="filter-title">筛选过滤</div>}
           <img className="filter-icon" src={filterIcon} alt="" onClick={() => setShowDropdown(true)} />
           {filterDropdown()}
-        </Sticky>
+        </Sticky>: null}
         {showAddBtn && (
           <div className="list-create-btn" onClick={handleCreate}>
           </div>
@@ -430,12 +437,12 @@ const XLoadMore = memo(
         <div className="list-body-wrapper">
           {!tableData.length ? <div className="no-data">暂无数据</div> : null}
           {
-            tableData.map((item) => (
+            tableData.map((item, index) => (
               <div key={item.key} className="list-body-item-wrapper" onClick={() => handleRowClick(item)}>
-                {finalColumns?.map((col, index) => {
+                {finalColumns?.map((col) => {
                   return <div className="list-body-item-element" key={col.dataIndex}>
                     <Ellipsis className="list-body-item-title" text={col.title + '：'} />
-                    <Ellipsis className="list-body-item-content" text={item[col.dataIndex]} />
+                    <Ellipsis className="list-body-item-content" text={col.render?.(item, index)} />
                   </div>
                 })}
                 {getItemBtns(item)}

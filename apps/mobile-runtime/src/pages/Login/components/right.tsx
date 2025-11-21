@@ -250,7 +250,7 @@ const Right: React.FC = () => {
             initialValue=""
             rules={rules.username}
           >
-            <Input type="tel" placeholder={t('auth.userAccount')} clearable />
+            <Input placeholder={t('auth.userAccount')} clearable={false} />
           </Form.Item>
 
           <Form.Item
@@ -259,7 +259,7 @@ const Right: React.FC = () => {
             initialValue=""
             rules={rules.password}
           >
-            <Input type="password" placeholder={t('auth.password')} clearable />
+            <Input type="password" placeholder={t('auth.password')} clearable={false} />
           </Form.Item>
           <div className={styles.rememberMeContainer}>
             <Checkbox
