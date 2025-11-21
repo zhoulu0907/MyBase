@@ -1,5 +1,6 @@
 import { type PageParam } from '../types/common';
 import {
+  CreateConnectInstanceReq,
   CreateFlowMgmtReq,
   ListConnectFlowNodeReq,
   ListConnectInstanceReq,
@@ -77,4 +78,8 @@ export const listConnectFlowNode = (params: ListConnectFlowNodeReq) => {
 
 export const listConnectInstance = (params: ListConnectInstanceReq) => {
   return flowService.get('/connector/page', params);
+};
+
+export const createConnectInstance = (params: CreateConnectInstanceReq) => {
+  return flowService.post('/connector/create', params);
 };

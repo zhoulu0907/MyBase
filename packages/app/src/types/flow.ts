@@ -156,9 +156,17 @@ export interface ListConnectInstanceReq {
   pageNo: number;
   pageSize: number;
 
-  applicationId: string;
+  applicationId?: string;
   connectorName?: string;
   level1Code?: string;
   level2Code?: string;
   level3Code?: string;
+}
+
+export interface CreateConnectInstanceReq {
+  applicationId: string;
+  connectionName: string;
+  description?: string;
+  typeCode: string;
+  config?: any;
 }
