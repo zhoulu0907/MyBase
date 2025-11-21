@@ -101,13 +101,15 @@ const DetailStep: FC<any> = ({ stepData }: any) => {
     if(!nodeItem) {
       return;
     }
-    const opperator = nodeItem?.operators?.[0];
+    // const opperator = nodeItem?.operators?.[0];
     const pendingUserArr:string[] = [];
     const viewedUserArr:string[] = [];
     const endUsersArr:any[] = [];
     if (Array.isArray(nodeItem?.operators)) {
       nodeItem.operators.forEach((item:any) => {
-        if (item.taskStatus === 'curr_in_approval' || item.taskStatus === '审批中') {
+        const isNotStart:boolean = item.taskStatus === 'pre_approval' || item.taskStatus === '待审批'
+        const isPending:boolean = item.taskStatus === 'curr_in_approval' || item.taskStatus === '审批中'
+        if (isPending || isNotStart) {
           pendingUserArr.push(item?.avatar)
         } else {
           // 不是审批中的，需要单独显示，模拟renderOneUser参数的结构
@@ -128,7 +130,7 @@ const DetailStep: FC<any> = ({ stepData }: any) => {
           <>
             <div className='user-temp' style={{ display: 'flex', alignItems: 'flex-end' }}>
               <AvatarGroup style={{flex: 1}}>
-                {pendingUserArr && pendingUserArr.map((imgUrl) => <Avatar>
+                {pendingUserArr && pendingUserArr.map((imgUrl, i) => <Avatar key={i}>
                   <img
                     alt="avatar"
                     src={imgUrl}
@@ -145,9 +147,7 @@ const DetailStep: FC<any> = ({ stepData }: any) => {
                 <span><img src={dotImg} alt='' style={{width: '17px', position: 'relative', top: '4px'}} />多人审批{nodeItem?.approveMode && `（${approvalConfigVar.approvalMode[nodeItem?.approveMode]}）`}</span>
               </span>
               <span className="gray-color">
-                {opperator?.operatorTime
-                    ? dayjs(opperator.operatorTime).format('YYYY-MM-DD HH:mm:ss')
-                    : '-'}
+                {nodeItem?.waitTimeDesc ? nodeItem?.waitTimeDesc : '-'}
               </span>
             </p>
           </> : <div style={{height: '16px'}}></div>}
@@ -168,8 +168,8 @@ const DetailStep: FC<any> = ({ stepData }: any) => {
           <p className="flex-bw-center">
             <b className={`sp-options ${userMap?.labelColor}`}>{userMap?.label}</b>
             <span className="gray-color">
-              {opperator?.operatorTime
-                ? dayjs(opperator.operatorTime).format('YYYY-MM-DD HH:mm:ss')
+              {(nodeItem?.displayTime || opperator.operatorTime)
+                ? dayjs(nodeItem?.displayTime || opperator.operatorTime).format('YYYY-MM-DD HH:mm:ss')
                 : '-'}
             </span>
           </p>
