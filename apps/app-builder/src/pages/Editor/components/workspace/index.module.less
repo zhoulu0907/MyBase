@@ -55,11 +55,10 @@
 
   .workspaceBody {
     height: calc(100vh - var(--editor-header-height) - @workspace-header-height - @workspace-padding);
-    display: block;
+    display: flex;
     padding: @workspace-padding;
     box-sizing: border-box;
     position: relative;
-
     overflow-y: auto;
 
     /* 自定义滚动条样式 */
@@ -77,10 +76,10 @@
 
     .workspaceContent {
       background-color: #fff;
-
       min-width: 348px;
       height: 100%;
-      width: 100%;
+      width: 0;
+      flex: 1 1 auto;
       overflow-y: auto;
       padding: 16px;
       box-sizing: border-box;

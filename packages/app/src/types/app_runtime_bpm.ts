@@ -100,7 +100,8 @@ export enum TASKMENU_TYPE {
 export enum LISTTYPE {
   WILLDO = 'willdo',
   IDONE = 'idone',
-  ICREATED = 'icreated'
+  ICREATED = 'icreated',
+  ICOPIED = 'icopied'
 }
 export const BPMConfigButtonType = {
   APPROVE: 'approve',
@@ -113,3 +114,16 @@ export const BPMConfigButtonType = {
   ABSTAIN: 'abstain',
   SUBMIT: 'submit'
 };
+export interface GetMyCCPageListReq {
+  pageNo?: number;
+  pageSize?: number;
+  sortType?: string;
+  appId: string;
+  submitTimeStart?: string;
+  submitTimeEnd?: string;
+  flowStatus?: string;
+  keyword?: string;
+  nodeCode?: string;
+  businessId?: string;
+  viewed?: string;
+}

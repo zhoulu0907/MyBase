@@ -1,7 +1,13 @@
 import LogoSVG from '@/assets/images/ob_logo.svg';
 import { Button, Checkbox, Form, Input, Message, Space, Typography } from '@arco-design/web-react';
 import { IconLock, IconUser } from '@arco-design/web-react/icon';
-import { getHashQueryParam, SliderCaptcha, TokenManager, type SliderCaptchaRef } from '@onebase/common';
+import {
+  getHashQueryParam,
+  getOrCreateDeviceInfo,
+  SliderCaptcha,
+  TokenManager,
+  type SliderCaptchaRef
+} from '@onebase/common';
 import { checkCaptchaApi, getCaptchaApi, login, type LoginRequest, type LoginResponse } from '@onebase/platform-center';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -68,10 +74,13 @@ const Right: React.FC = () => {
         'Tenant-Id': tenantId
       };
 
+      const deviceId = await getOrCreateDeviceInfo();
+
       const loginData: LoginRequest = {
         username: values.username!,
         password: values.password!,
-        captchaVerification: captchaVerification
+        captchaVerification: captchaVerification,
+        deviceId: deviceId
       };
 
       const response: LoginResponse = await login(loginData, headers);
@@ -114,14 +123,20 @@ const Right: React.FC = () => {
   };
 
   // 表单提交处理
-  const handleSubmit = (_values: LoginRequest) => {
+  const handleSubmit = async (_values: LoginRequest) => {
     handleAccountLogin(_values);
   };
 
   // 验证码验证成功回调
   const handleCaptchaSuccess = async (token: string) => {
     const values = await accountForm.getFieldsValue();
-    handleSubmit({ username: values.username, password: values.password, captchaVerification: token });
+    const deviceId = await getOrCreateDeviceInfo();
+    handleSubmit({
+      username: values.username,
+      password: values.password,
+      captchaVerification: token,
+      deviceId: deviceId
+    });
   };
 
   // 登录按钮点击事件 - 先验证滑块验证码
@@ -129,12 +144,14 @@ const Right: React.FC = () => {
     try {
       // 先验证表单
       await accountForm.validate();
+      const deviceId = await getOrCreateDeviceInfo();
 
       if (accountForm.getFieldValue('captchaVerification')) {
         handleAccountLogin({
           username: accountForm.getFieldValue('username'),
           password: accountForm.getFieldValue('password'),
-          captchaVerification: accountForm.getFieldValue('captchaVerification')
+          captchaVerification: accountForm.getFieldValue('captchaVerification'),
+          deviceId: deviceId
         });
         return;
       }

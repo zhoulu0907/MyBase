@@ -1,6 +1,7 @@
 import {
   CreateDataSourceReq,
   CreateETLFlowReq,
+  FlinkFunctionListReq,
   ListAppETLDatasourceParams,
   ListTableColumnsReq,
   ListTablesReq,
@@ -8,6 +9,7 @@ import {
   PageETLFlowReq,
   PingDatasourceReq,
   PreviewDatasourceReq,
+  PreviewETLFlowDataReq,
   UpdateDataSourceReq,
   UpdateETLFlowReq,
   UpdateWorkflowScheduleInfoReq
@@ -50,7 +52,13 @@ export const enableETLFlow = (id: string) => etlService.post(`/workflow/${id}/en
 
 export const disableETLFlow = (id: string) => etlService.post(`/workflow/${id}/disable`);
 
+export const previewETLFlowData = (params: PreviewETLFlowDataReq) => etlService.post(`/workflow/preview`, params);
+
 export const getETLFlowScheduleInfo = (id: string) => etlService.get(`/workflow/schedule/${id}`);
 
 export const updateETLFlowScheduleInfo = (params: UpdateWorkflowScheduleInfoReq) =>
   etlService.post(`/workflow/schedule`, params);
+
+export const flinkFunctionList = (params: FlinkFunctionListReq) => etlService.get(`/flink-function/list`, params);
+
+export const flinkFunctionTypeList = () => etlService.get(`/flink-function/list-type`);
