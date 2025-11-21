@@ -40,7 +40,7 @@ public interface MenuService {
      *
      * @return 菜单列表
      */
-    List<MenuDO> getAllActiveMenuList();
+    List<MenuDO> getAllEnableMenuList();
 
     /**
      * 基于租户，筛选菜单列表

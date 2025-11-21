@@ -898,6 +898,12 @@ public class AdminUserServiceImpl implements AdminUserService {
         return adminUserDataRepository.findEnableUserPageByDeptIds(reqVO, deptIds);
     }
 
+    @Override
+    public boolean findAdminByRoleIdAndUserId(Long roleId, Long userId) {
+        List<UserRoleDO> userRoleDOList = userRoleDataRepository.findAdminByRoleIdAndUserId(roleId, userId);
+        return !userRoleDOList.isEmpty();
+    }
+
     @TenantIgnore
     @Override
     public Map<Long, Integer> getTenantExistUserCountByIds(List<Long> tenantIds) {

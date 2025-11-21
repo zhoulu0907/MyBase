@@ -190,6 +190,7 @@ public interface ErrorCodeConstants {
     ErrorCode CORP_ID_EXISTS = new ErrorCode(1_002_025_008, "编码为【{}】的企业已存在");
     ErrorCode CORP_USER_LIMIT_COUNT = new ErrorCode(1_002_025_007, "企业用户数【{}】，大于系统上限");
     ErrorCode CORP_ID_NULL = new ErrorCode(1_002_025_008, "企业ID为空");
+    ErrorCode CORP_ID_COMPARE_ERROR = new ErrorCode(1_002_025_009, "只能获取自己企业的信息");
     // ========== 企业应用关联 1-002-030-000 ==========
     ErrorCode APPLICATION_AUTH_TENANT_NOT_EXISTS = new ErrorCode(1_002_030_000, "企业应用关联表不存在");
 

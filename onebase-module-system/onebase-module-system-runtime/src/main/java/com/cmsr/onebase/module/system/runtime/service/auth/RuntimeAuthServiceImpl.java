@@ -8,6 +8,7 @@ import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
+import com.cmsr.onebase.module.app.api.security.AppAuthSecurityApi;
 import com.cmsr.onebase.module.infra.api.security.SecurityConfigApi;
 import com.cmsr.onebase.module.infra.api.security.dto.LoginFailureResultDTO;
 import com.cmsr.onebase.module.system.api.logger.dto.LoginLogCreateReqDTO;
@@ -33,6 +34,7 @@ import jakarta.annotation.Resource;
 import jakarta.validation.Validator;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
@@ -88,6 +90,9 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
     @Resource
     private SecurityConfigApi securityConfigApi;
 
+    @Autowired
+    private AppAuthSecurityApi appAuthSecurityApi;
+
     @Override
     public AdminUserDO authenticate(String username, String password) {
         final LoginLogTypeEnum logTypeEnum = LoginLogTypeEnum.LOGIN_USERNAME;
@@ -133,6 +138,10 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         }
     }
 
+    public boolean   findAdminFlag( Long userId ,Long appId){
+        return  appAuthSecurityApi.isApplicationAdmin(userId,appId);
+    }
+
 
     @Override
     public AuthLoginRespVO appUsernameLogin(AppUserNameLoginReqVO reqVO) {
@@ -142,9 +151,13 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         // 增加日志输出，便于调试
         checkPlatformAdminEnableAppCreate();
 
-        // 使用手机密码，进行登录
-        AdminUserDO user = mobileAuthenticate(reqVO.getUsername(), reqVO.getPassword());
-        return createTokenAfterLoginSuccess(reqVO.getAppId(),  user.getId(), reqVO.getUsername(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_USERNAME);
+        // 使用账号密码，进行登录
+        AdminUserDO user = authenticate(reqVO.getUsername(), reqVO.getPassword());
+        AuthLoginRespVO authLoginRespVO= createTokenAfterLoginSuccess(reqVO.getAppId(),  user.getId(), reqVO.getUsername(),reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_USERNAME);
+        // 设置是否管理员
+        authLoginRespVO.setAdminFlag(findAdminFlag(reqVO.getAppId(),user.getId()));
+        return authLoginRespVO;
+
     }
 
     @Override
@@ -153,8 +166,12 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         mobileValidateCaptcha(reqVO);
         checkPlatformAdminEnableAppCreate();
         // 使用手机密码，进行登录
-        AdminUserDO user = authenticate(reqVO.getMobile(), reqVO.getPassword());
-        return createTokenAfterLoginSuccess(reqVO.getAppId(),  user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE);
+        AdminUserDO user = mobileAuthenticate(reqVO.getMobile(), reqVO.getPassword());
+        AuthLoginRespVO  authLoginRespVO=  createTokenAfterLoginSuccess(reqVO.getAppId(),  user.getId(), reqVO.getMobile(),reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE);
+        // 设置是否管理员
+        authLoginRespVO.setAdminFlag(findAdminFlag( reqVO.getAppId(),user.getId()));
+        return authLoginRespVO;
+
     }
 
     private void checkPlatformAdminEnableAppCreate() {
@@ -269,13 +286,13 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         if (accessTokenDO == null) {
             return;
         }
-        
+
         // 清理在线设备记录
         securityConfigApi.removeOnlineDevice(
                 accessTokenDO.getUserId(),
                 token
         );
-        
+
         // 删除成功,则记录登出日志
         createLogoutLog(accessTokenDO.getUserId(), accessTokenDO.getUserType(), logType);
     }

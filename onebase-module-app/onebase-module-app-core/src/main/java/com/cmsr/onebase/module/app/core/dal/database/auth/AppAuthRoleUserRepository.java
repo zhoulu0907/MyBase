@@ -96,5 +96,12 @@ public class AppAuthRoleUserRepository extends DataRepository<AuthRoleUserDO> {
         return findAllByConfig(configStore);
     }
 
+    public List<AuthRoleUserDO>  findAdminByRoleIdAndUserId(Long roleId,Long userId){
+        ConfigStore configStore = new DefaultConfigStore();
+        configStore.eq(AuthRoleUserDO.USER_ID, userId);
+        configStore.eq(AuthRoleUserDO.ROLE_ID, roleId);
+        return findAllByConfig(configStore);
+    }
+
 
 }

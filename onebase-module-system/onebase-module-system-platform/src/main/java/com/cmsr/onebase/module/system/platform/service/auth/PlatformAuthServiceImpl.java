@@ -191,7 +191,7 @@ public class PlatformAuthServiceImpl implements PlatformAuthService {
 
         // 2. 使用账号密码，进行登录
         AdminUserDO user = mobileAuthenticate(reqVO.getMobile(), reqVO.getPassword());
-        return createCorpAfterLoginSuccess(reqVO.getCorpId(), user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE);
+        return createCorpAfterLoginSuccess(user.getCorpId(), user.getId(), reqVO.getMobile(), reqVO.getDeviceId(),LoginLogTypeEnum.LOGIN_MOBILE);
     }
 
     @Override
@@ -294,7 +294,7 @@ public class PlatformAuthServiceImpl implements PlatformAuthService {
                 deviceId,
                 accessTokenDO.getAccessToken()
         ).getData();
-        
+
         // 删除被踢出的Token
         if (removedTokens != null && !removedTokens.isEmpty()) {
             for (String removedToken : removedTokens) {

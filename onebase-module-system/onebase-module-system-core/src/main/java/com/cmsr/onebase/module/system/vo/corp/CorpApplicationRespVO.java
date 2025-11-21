@@ -25,6 +25,6 @@ public class CorpApplicationRespVO {
     @Schema(description = "过期时间")
     private LocalDateTime expiresTime;
     @Schema(description = "状态描述")
-    private String statusDesc;
+    private String        showStatus;
 
 }

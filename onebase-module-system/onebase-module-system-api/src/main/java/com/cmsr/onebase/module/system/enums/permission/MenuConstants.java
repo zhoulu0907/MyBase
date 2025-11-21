@@ -6,10 +6,8 @@ package com.cmsr.onebase.module.system.enums.permission;
  */
 public class MenuConstants {
 
-    public static final String MENU_APP = "app";
     public static final String MENU_TENANT = "tenant";
-
-    @Deprecated
+    public static final String MENU_CORP = "corp";
     public static final String MENU_SYSTEM = "system";
 
 }
