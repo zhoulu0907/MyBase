@@ -1,7 +1,13 @@
 import LogoSVG from '@/assets/images/ob_logo.svg';
 import { Button, Checkbox, Form, Input, Message, Space, Typography } from '@arco-design/web-react';
 import { IconLock, IconUser } from '@arco-design/web-react/icon';
-import { getHashQueryParam, SliderCaptcha, TokenManager, type SliderCaptchaRef } from '@onebase/common';
+import {
+  getHashQueryParam,
+  getOrCreateDeviceInfo,
+  SliderCaptcha,
+  TokenManager,
+  type SliderCaptchaRef
+} from '@onebase/common';
 import {
   checkCaptchaApi,
   getCaptchaApi,
@@ -46,10 +52,10 @@ const Right: React.FC = () => {
         window.location.href = redirectURL;
       } else {
         // 跳转到首页
-        if(location.hash.slice(1).startsWith("/tenant")) {
-            navigate('/onebase/enterprise-app');
-          }else {
-            navigate('/onebase/my-app');
+        if (location.hash.slice(1).startsWith('/tenant')) {
+          navigate('/onebase/enterprise-app');
+        } else {
+          navigate('/onebase/my-app');
         }
       }
     }
@@ -81,7 +87,8 @@ const Right: React.FC = () => {
       const loginData: LoginRequest = {
         username: values.username!,
         password: values.password!,
-        captchaVerification: captchaVerification
+        captchaVerification: captchaVerification,
+        deviceId: values.deviceId!
       };
 
       const response: TenantLoginResponse = await tenantLogin(loginData, headers);
@@ -95,7 +102,7 @@ const Right: React.FC = () => {
             accessToken: response.accessToken,
             refreshToken: response.refreshToken,
             expiresTime: response.expiresTime,
-            tenantId: response.tenantId,
+            tenantId: response.tenantId
           },
           rememberMe
         );
@@ -110,9 +117,9 @@ const Right: React.FC = () => {
           window.location.href = redirectURL;
         } else {
           // 跳转到首页
-          if(location.hash.slice(1).startsWith("/tenant")) {
+          if (location.hash.slice(1).startsWith('/tenant')) {
             navigate('/onebase/enterprise-app');
-          }else {
+          } else {
             navigate('/onebase/my-app');
           }
         }
@@ -135,8 +142,15 @@ const Right: React.FC = () => {
 
   // 验证码验证成功回调
   const handleCaptchaSuccess = async (token: string) => {
+    const deviceId = await getOrCreateDeviceInfo();
+
     const values = await accountForm.getFieldsValue();
-    handleSubmit({ username: values.username, password: values.password, captchaVerification: token });
+    handleSubmit({
+      username: values.username,
+      password: values.password,
+      captchaVerification: token,
+      deviceId: deviceId
+    });
   };
 
   // 登录按钮点击事件 - 先验证滑块验证码
@@ -145,11 +159,14 @@ const Right: React.FC = () => {
       // 先验证表单
       await accountForm.validate();
 
+      const deviceId = await getOrCreateDeviceInfo();
+
       if (accountForm.getFieldValue('captchaVerification')) {
         handleAccountLogin({
           username: accountForm.getFieldValue('username'),
           password: accountForm.getFieldValue('password'),
-          captchaVerification: accountForm.getFieldValue('captchaVerification')
+          captchaVerification: accountForm.getFieldValue('captchaVerification'),
+          deviceId: deviceId
         });
         return;
       }
