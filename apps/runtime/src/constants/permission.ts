@@ -21,12 +21,10 @@ export enum PUBLISH_MODULE {
 /** 菜单-租户管理 */
 export const CORP_MENUS = {
   USER: 'corp:user',
-  ROLE: 'corp:role',
   DEPT: 'corp:dept',
-  DICT: 'corp:dict',
-  INFO: 'corp:info',
-  AUTHORIZED: 'corp:authorized',
-  CORP_INFO:'corp:corpInfo'
+  PROFILE: 'corp:profile',
+  AUTHORIZED: 'corp:app-auth',
+  CORP_INFO:'corp:info'
 }
 
 /** 租户管理-用户管理 */
@@ -67,10 +65,10 @@ export const CORP_INFO_PERMISSION = {
   UPDATE: CORP_INFO_UPDATE,
 }
 /** 应用管理-我的应用管理 */
-export const APP_MYAPP_QUERY = 'app:app:query';
-export const APP_MYAPP_CREATE = 'app:app:create';
-export const APP_MYAPP_DELETE = 'app:app:delete';
-export const APP_MYAPP_UPDATE = 'app:app:update';
+export const APP_MYAPP_QUERY = 'corp:app:query';
+export const APP_MYAPP_CREATE = 'corp:app:create';
+export const APP_MYAPP_DELETE = 'corp:app:delete';
+export const APP_MYAPP_UPDATE = 'corp:app:update';
 export const APP_MYAPP_PERMISSION = {
   QUERY: APP_MYAPP_QUERY,
   CREATE: APP_MYAPP_CREATE,

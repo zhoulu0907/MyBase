@@ -34,11 +34,11 @@ const SpaceInfo: React.FC = () => {
   const [renameVisible, setRenameVisible] = useState<boolean>(false);
 
   // 获取用户信息
-  const corpInfo = TokenManager.getCorpIdInfo();
+  const tokenInfo = TokenManager.getTokenInfo();
 
   useEffect(() => {
-    corpInfo?.corpId && fetchEnterpriseInfo(+corpInfo.corpId);
-  }, [corpInfo]);
+    tokenInfo?.corpId && fetchEnterpriseInfo(+tokenInfo.corpId);
+  }, [tokenInfo?.corpId]);
 
   const fetchEnterpriseInfo = async (id: number) => {
     try {

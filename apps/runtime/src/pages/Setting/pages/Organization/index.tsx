@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import { listToTree } from '@/utils/tree';
 import { Input, Message, Modal, Space, Table } from '@arco-design/web-react';
 import { IconPlus, IconSearch, IconCaretDown, IconCaretRight } from '@arco-design/web-react/icon';
-import { createDept, deleteDept, getDeptList, updateDept, type DeptForm, type DeptVO } from '@onebase/platform-center';
+import { createCorpDept, deleteCorpDept, getCorpDeptList, updateCorpDept, type DeptForm, type DeptVO } from '@onebase/platform-center';
 import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import OrganizationModal from './components/OrganizationModal';
@@ -102,7 +102,7 @@ const OrganizationPage: React.FC = () => {
         status: 'danger',
       },
       onOk: async () => {
-        deleteDept(record.id).then(() => {
+        deleteCorpDept(record.id).then(() => {
           Message.success('删除成功');
           fetchDeptList(searchValue);
         });
@@ -122,10 +122,10 @@ const OrganizationPage: React.FC = () => {
     setModalLoading(true);
     try {
       if (editRecord?.id) {
-        await updateDept({ ...values, id: editRecord.id });
+        await updateCorpDept({ ...values, id: editRecord.id });
         Message.success(`编辑成功`);
       } else {
-        await createDept(values);
+        await createCorpDept(values);
         Message.success(`添加成功`);
       }
       handleSearch(searchValue);
@@ -141,7 +141,7 @@ const OrganizationPage: React.FC = () => {
   const fetchDeptList = async (name?: string) => {
     setLoading(true);
     try {
-      const res = await getDeptList({ name });
+      const res = await getCorpDeptList({ name });
       // 将平铺的部门列表数据转换为树形结构
       const treeData = listToTree(res);
       setData(treeData);

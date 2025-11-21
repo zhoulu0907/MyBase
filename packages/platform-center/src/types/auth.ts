@@ -54,11 +54,6 @@ export interface RuntimeAccountLoginRequest {
 
 export interface RuntimeCorpLoginRequest {
   /**
-   * 应用id
-   */
-  corpId: string;
-
-  /**
    * 手机号
    */
   mobile: string;

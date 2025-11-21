@@ -196,7 +196,7 @@ const AuthorizedApplication = () => {
             }
             >
             {statusMapping.map((item:any) => {
-                return <Tabs.TabPane key={item.value} title={item.label}>
+                return <Tabs.TabPane key={item.status} title={item.label}>
                         <div style={{ 
                             tableLayout: 'fixed',
                             width: '100%',

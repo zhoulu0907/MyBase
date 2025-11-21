@@ -8,3 +8,4 @@ export const platformService = createClient('/system', getPlatformBackendURL());
 export const runtimeService = createClient('/system', getRuntimeBackendURL());
 export const infraService = createClient('/infra');
 export const appService = createClient('/app');
+export const corpService = createClient('/corp');

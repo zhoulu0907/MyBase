@@ -67,7 +67,7 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
         title: '个人中心',
         icon: <IconIdcard style={iconStyle} />,
         path: '/onebase/setting/tenant',
-        permissionKey: CORP_MENUS.INFO
+        permissionKey: CORP_MENUS.PROFILE
       }
     ],
     []

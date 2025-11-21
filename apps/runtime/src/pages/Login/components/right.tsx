@@ -147,7 +147,6 @@ const Right: React.FC = () => {
         const innerloginData: RuntimeCorpLoginRequest = {
           password: values.password!,
           mobile: (values as RuntimeCorpLoginRequest).mobile!,
-          corpId: "10",
           captchaVerification: captchaVerification
         };
         response = await corpLogin(innerloginData, headers);
@@ -170,7 +169,8 @@ const Right: React.FC = () => {
             refreshToken: response.refreshToken,
             expiresTime: response.expiresTime,
             tenantId: response.tenantId,
-            adminFlag: response.adminFlag || false
+            adminFlag: response.adminFlag || false,
+            corpId: response.corpId
           },
           rememberMe
         );

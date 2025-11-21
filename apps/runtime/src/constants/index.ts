@@ -4,11 +4,36 @@ export interface statusProps {
   status: number;
 }
 
+/**
+ * 全部0, 启用1，禁用2, 过期 3
+ */
+export enum StatusEnum {
+  ALL = 0,
+  ENABLE = 1,
+  DISABLE = 2,
+  EXPIRES = 3
+}
+
+export enum StatusEnumLabel {
+  ALL = "全部",
+  ENABLE = "已启用",
+  DISABLE = "已禁用",
+  EXPIRES = "已过期"
+}
+
+export enum StatusValue {
+  ALL = "all",
+  ENABLE = "started",
+  DISABLE = "disabled",
+  EXPIRES = "expired"
+}
+
+
 export const statusMapping: statusProps[] = [
-    {label:"全部", value: "all", status: 3},
-    {label:"已启用", value: "started", status:0},
-    {label:"已禁用", value: "disabled", status: 1},
-    {label:"已过期", value: "expired", status: 2},
+  {label:StatusEnumLabel.ALL, value: StatusValue.ALL, status: StatusEnum.ALL},
+  {label:StatusEnumLabel.ENABLE, value: StatusValue.ENABLE, status:StatusEnum.ENABLE},
+  {label:StatusEnumLabel.DISABLE, value: StatusValue.DISABLE, status: StatusEnum.DISABLE},
+  {label:StatusEnumLabel.EXPIRES, value: StatusValue.EXPIRES, status: StatusEnum.EXPIRES},
 ]
 
 export const statusOptions = [
