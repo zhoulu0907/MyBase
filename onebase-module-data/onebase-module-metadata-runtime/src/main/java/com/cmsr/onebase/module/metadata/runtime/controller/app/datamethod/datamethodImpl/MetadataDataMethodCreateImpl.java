@@ -32,6 +32,7 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -434,7 +435,7 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
         Map processedData = context.getProcessedData();
 
         Long entityId = context.getEntityId();
-        Map fieldData = convertNameToId(entityId,processedData);
+        Map fieldData = convertNameToId(entityId,processedData == null ? new HashMap<>() : processedData);
         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
         reqDTO.setTraceId(UUID.randomUUID().toString());
         reqDTO.setEntityId(entityId);
@@ -459,7 +460,7 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
         Map processedData = context.getProcessedData();
 
         Long entityId = context.getEntityId();
-        Map fieldData = convertNameToId(entityId,processedData);
+        Map fieldData = convertNameToId(entityId,processedData == null ? new HashMap<>() : processedData);
         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
         reqDTO.setTraceId(UUID.randomUUID().toString());
         reqDTO.setEntityId(entityId);
