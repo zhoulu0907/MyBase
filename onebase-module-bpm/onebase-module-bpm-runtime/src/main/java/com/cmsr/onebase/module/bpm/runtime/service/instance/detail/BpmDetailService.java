@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.bpm.runtime.service.detail;
+package com.cmsr.onebase.module.bpm.runtime.service.instance.detail;
 
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmTaskDetailReqVO;
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmTaskDetailRespVO;

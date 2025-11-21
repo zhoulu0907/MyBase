@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.bpm.runtime.handler;
 
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
-import com.cmsr.onebase.module.bpm.runtime.service.permission.BpmPermissionResolver;
+import com.cmsr.onebase.module.bpm.runtime.service.common.permission.BpmPermissionResolver;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;

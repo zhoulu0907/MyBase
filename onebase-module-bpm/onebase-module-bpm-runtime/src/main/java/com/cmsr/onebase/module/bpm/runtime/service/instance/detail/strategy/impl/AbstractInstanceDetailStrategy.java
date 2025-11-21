@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.bpm.runtime.service.detail.strategy.impl;
+package com.cmsr.onebase.module.bpm.runtime.service.instance.detail.strategy.impl;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
@@ -9,7 +9,7 @@ import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.FieldPermCfgDTO;
 import com.cmsr.onebase.module.bpm.core.enums.FieldPermTypeEnum;
 import com.cmsr.onebase.module.bpm.core.enums.FieldUiShowModeEnum;
-import com.cmsr.onebase.module.bpm.runtime.service.detail.strategy.InstanceDetailStrategy;
+import com.cmsr.onebase.module.bpm.runtime.service.instance.detail.strategy.InstanceDetailStrategy;
 import com.cmsr.onebase.module.bpm.runtime.utils.PageViewUtil;
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmTaskDetailRespVO;
 import com.cmsr.onebase.module.metadata.api.entity.MetadataEntityFieldApi;

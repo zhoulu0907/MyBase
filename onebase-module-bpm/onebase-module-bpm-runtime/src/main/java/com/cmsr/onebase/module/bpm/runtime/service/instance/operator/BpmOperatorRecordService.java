@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.bpm.runtime.service.operator;
+package com.cmsr.onebase.module.bpm.runtime.service.instance.operator;
 
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmOperatorRecordRespVO;
 

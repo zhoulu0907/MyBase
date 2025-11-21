@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.bpm.runtime.service.exec.strategy.impl;
+package com.cmsr.onebase.module.bpm.runtime.service.instance.exec.strategy.impl;
 
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowInsBizExtDO;

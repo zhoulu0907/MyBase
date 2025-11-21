@@ -1,7 +1,7 @@
-package com.cmsr.onebase.module.bpm.runtime.service.detail.strategy;
+package com.cmsr.onebase.module.bpm.runtime.service.instance.detail.strategy;
 
 import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
-import com.cmsr.onebase.module.bpm.runtime.service.detail.strategy.impl.DefaultInstanceDetailStrategy;
+import com.cmsr.onebase.module.bpm.runtime.service.instance.detail.strategy.impl.DefaultInstanceDetailStrategy;
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmTaskDetailRespVO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;

@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.bpm.runtime.service.detail.impl;
+package com.cmsr.onebase.module.bpm.runtime.service.instance.detail.impl;
 
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
@@ -11,8 +11,8 @@ import com.cmsr.onebase.module.bpm.core.enums.BpmUserTypeEnum;
 import com.cmsr.onebase.module.bpm.core.enums.BpmViewSourceEnum;
 import com.cmsr.onebase.module.bpm.core.utils.BpmUtil;
 import com.cmsr.onebase.module.bpm.core.vo.UserBasicInfoVO;
-import com.cmsr.onebase.module.bpm.runtime.service.detail.BpmDetailService;
-import com.cmsr.onebase.module.bpm.runtime.service.detail.strategy.InstanceDetailStrategyManager;
+import com.cmsr.onebase.module.bpm.runtime.service.instance.detail.BpmDetailService;
+import com.cmsr.onebase.module.bpm.runtime.service.instance.detail.strategy.InstanceDetailStrategyManager;
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmTaskDetailReqVO;
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmTaskDetailRespVO;
 import com.cmsr.onebase.module.engine.orm.anyline.entity.FlowHisTask;

@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.bpm.runtime.service.permission;
+package com.cmsr.onebase.module.bpm.runtime.service.common.permission;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.app.api.auth.AppAuthRoleUser;

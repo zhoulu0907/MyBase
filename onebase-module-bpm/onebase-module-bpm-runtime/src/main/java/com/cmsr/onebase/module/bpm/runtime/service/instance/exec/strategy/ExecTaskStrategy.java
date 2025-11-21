@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.bpm.runtime.service.exec.strategy;
+package com.cmsr.onebase.module.bpm.runtime.service.instance.exec.strategy;
 
 import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
 import com.cmsr.onebase.module.bpm.runtime.vo.ExecTaskReqVO;
