@@ -121,7 +121,7 @@ export default function ApproverBtnConfig({ setApprovalConfigData, buttonConfigs
       defaultApprovalComment: '同意',
       approvalCommentRequired: false,
       batchApproval: false,
-      enabled: true
+      enabled: false
     },
     {
       key: '2',
@@ -130,9 +130,9 @@ export default function ApproverBtnConfig({ setApprovalConfigData, buttonConfigs
       displayName: '拒绝',
       name: '拒绝',
       defaultApprovalComment: '拒绝',
-      approvalCommentRequired: true,
+      approvalCommentRequired: false,
       batchApproval: false,
-      enabled: true
+      enabled: false
     },
     {
       key: '3',
@@ -169,7 +169,7 @@ export default function ApproverBtnConfig({ setApprovalConfigData, buttonConfigs
       displayName: '退回',
       name: '退回',
       defaultApprovalComment: '退回',
-      approvalCommentRequired: true,
+      approvalCommentRequired: false,
       batchApproval: false,
       enabled: false
     },
@@ -189,7 +189,7 @@ export default function ApproverBtnConfig({ setApprovalConfigData, buttonConfigs
       displayName: '弃权',
       name: '弃权',
       defaultApprovalComment: '弃权',
-      approvalCommentRequired: true,
+      approvalCommentRequired: false,
       batchApproval: false,
       enabled: false
     }
@@ -304,12 +304,25 @@ export default function ApproverBtnConfig({ setApprovalConfigData, buttonConfigs
   }
 
   useEffect(() => {
-    setApprovalConfigData(
-      'buttonConfigs',
-      tbData.filter((item: any) => {
-        return item?.enabled;
-      })
-    );
+    const neededProps = [
+      'buttonType',
+      'buttonName',
+      'displayName',
+      'defaultApprovalComment',
+      'approvalCommentRequired',
+      'enabled',
+      'batchApproval'
+    ];
+    const newTbData = tbData.map((item) => {
+      const newObj = {};
+      neededProps.forEach((prop) => {
+        if (prop in item) {
+          (newObj as any)[prop] = item[prop];
+        }
+      });
+      return newObj;
+    });
+    setApprovalConfigData('buttonConfigs', newTbData);
   }, [tbData]);
 
   return (
