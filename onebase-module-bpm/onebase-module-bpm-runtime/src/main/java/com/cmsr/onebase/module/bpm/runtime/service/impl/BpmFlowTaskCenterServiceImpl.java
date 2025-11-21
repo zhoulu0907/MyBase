@@ -108,6 +108,8 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
     @Resource
     private BpmFlowCcRecordRepository bpmFlowCcRecordRepository;
 
+    private static final String AGENT_TITLE_PREFIX = "【代理审批】";
+
     private List<String> splitToList(String str) {
         if (StringUtils.isBlank(str)) {
             return Collections.emptyList();
@@ -344,9 +346,8 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         todoTaskVO.setArrivalTime(flowTaskExt.getCreateTime());
         todoTaskVO.setBusinessId(flowTaskExt.getBindingViewId());
 
-        // todo 确定代理人展示形式
         if (Objects.equals(flowTaskExt.getUserType(), BpmUserTypeEnum.AGENT.getCode())) {
-            todoTaskVO.setProcessTitle("代理审批：" + flowTaskExt.getBpmTitle());
+            todoTaskVO.setProcessTitle(AGENT_TITLE_PREFIX + flowTaskExt.getBpmTitle());
         }
 
         todoTaskVO.setInitiator(new UserBasicInfoVO());
@@ -414,7 +415,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
 
                 // 只判断是否有值
                 if (Objects.equals(agentId, String.valueOf(loginUserId))) {
-                    doneTaskVO.setProcessTitle("代理审批：" + flowHisTaskExt.getBpmTitle());
+                    doneTaskVO.setProcessTitle(AGENT_TITLE_PREFIX + flowHisTaskExt.getBpmTitle());
                 }
             }
         }
