@@ -2,7 +2,7 @@ import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-e
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { defaultFormMeta } from '../../default-form-meta';
-import { Form, Input } from '@arco-design/web-react';
+import { Form, Input, Select } from '@arco-design/web-react';
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { validateNodeForm } from '../../utils';
 import { type FlowNodeJSON } from '../../../typings';
@@ -36,7 +36,13 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
               <Input placeholder="用于提示用户流程已被终结，不超过30个字" maxLength={30} />
             </Form.Item>
             <Form.Item label="状态码" field="statusCode">
-              <Input placeholder="请输入" />
+              <Select
+                placeholder="请选择"
+                options={[
+                  { label: '正常结束', value: 'true' },
+                  { label: '异常结束', value: 'false' }
+                ]}
+              ></Select>
             </Form.Item>
           </Form>
         </FormContent>
