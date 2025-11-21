@@ -93,29 +93,21 @@ public class DataInspectServiceImpl implements DataInspectService {
             DataPreview dataPreview = new DataPreview();
             TableData tableData = tableDO.getMetaInfo();
             List<ColumnData> columnDataList = tableData.getColumns();
-            List<PreviewColumn> columnList = new ArrayList<>(columnDataList.size());
-            for (ColumnData columnData : columnDataList) {
-                PreviewColumn previewColumn = new PreviewColumn();
-
-                String columnName = columnData.getName();
-                String displayName = columnData.getDisplayName();
-                String flinkType = fieldTypeMapping.get(columnData.getType());
-                previewColumn.setDataIndex("_" + columnName);
-                previewColumn.setTitle(displayName);
-                previewColumn.setFieldType(flinkType);
-                int metaColumnIdx = columnData.getPosition() - 1;
-                columnList.add(metaColumnIdx, previewColumn);
-            }
+            List<PreviewColumn> columnList = extractPreviewColumns(columnDataList, fieldTypeMapping);
             dataPreview.setColumns(columnList);
             ConfigStore cs = new DefaultConfigStore();
             cs.limit(inspectSize);
+
             DataSet dataSet = temporary.querys(table, cs);
             List<DataRow> rows = dataSet.getRows();
             int rowIdx = 1;
             for (DataRow row : rows) {
                 Map<String, Object> rowMap = new HashMap<>();
-                row.forEach((k, v) -> rowMap.put("_" + k, v));
                 rowMap.put("key", rowIdx);
+                for (int colIdx = 0; colIdx < columnDataList.size(); colIdx++) {
+                    String key = columnDataList.get(colIdx).getName();
+                    rowMap.put("_" + key, row.get(key));
+                }
                 dataPreview.getData().add(rowMap);
                 rowIdx++;
             }
@@ -124,5 +116,22 @@ public class DataInspectServiceImpl implements DataInspectService {
             log.error("数据源连接异常，数据源信息: {}", datasourceDO, e);
             throw new RuntimeException(e);
         }
+    }
+
+    private static List<PreviewColumn> extractPreviewColumns(List<ColumnData> columnDataList, Map<String, String> fieldTypeMapping) {
+        List<PreviewColumn> columnList = new ArrayList<>(columnDataList.size());
+        for (ColumnData columnData : columnDataList) {
+            PreviewColumn previewColumn = new PreviewColumn();
+
+            String columnName = columnData.getName();
+            String displayName = columnData.getDisplayName();
+            String flinkType = fieldTypeMapping.get(columnData.getType());
+            previewColumn.setDataIndex("_" + columnName);
+            previewColumn.setTitle(displayName);
+            previewColumn.setFieldType(flinkType);
+            int metaColumnIdx = columnData.getPosition() - 1;
+            columnList.add(metaColumnIdx, previewColumn);
+        }
+        return columnList;
     }
 }

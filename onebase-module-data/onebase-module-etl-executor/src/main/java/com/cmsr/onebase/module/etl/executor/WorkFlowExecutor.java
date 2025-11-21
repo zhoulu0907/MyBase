@@ -158,7 +158,7 @@ public class WorkFlowExecutor implements Closeable {
             int rowIndex = 1;
             while (collected.hasNext()) {
                 Row row = collected.next();
-                Map<String, Object> rowMap = rowToList(dataPreview.getColumns(), row);
+                Map<String, Object> rowMap = rowToList(tableResult.getResolvedSchema().getColumns(), row);
                 rowMap.put("key", rowIndex);
                 dataPreview.getData().add(rowMap);
                 rowIndex++;
@@ -169,10 +169,10 @@ public class WorkFlowExecutor implements Closeable {
         return dataPreview;
     }
 
-    private Map<String, Object> rowToList(List<PreviewColumn> columns, Row row) {
+    private Map<String, Object> rowToList(List<Column> columns, Row row) {
         Map<String, Object> dataRow = new HashMap<>();
-        for (PreviewColumn column : columns) {
-            String rowIndex = column.getDataIndex();
+        for (Column column : columns) {
+            String rowIndex = column.getName();
             Object value = row.getField(rowIndex);
             dataRow.put("_" + rowIndex, value);
         }
