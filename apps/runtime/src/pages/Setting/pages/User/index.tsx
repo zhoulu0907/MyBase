@@ -1,12 +1,12 @@
 import { listToTree } from '@/utils/tree';
 import { Layout } from '@arco-design/web-react';
-import { getDeptList, getUserPage } from '@onebase/platform-center';
+import { getCorpDeptList, getUserPageInCorp } from '@onebase/platform-center';
 import { useEffect, useState } from 'react';
 import DeptTreeCmp from './components/DeptTree';
 import UserTable from './components/UserTable';
 import PlaceholderPanel from '@/components/PlaceholderPanel';
 import { hasPermission } from '@/utils/permission';
-import { CORP_USER_QUERY, CORP_DEPT_QUERY } from '@/constants/permission';
+import { CORP_USER_QUERY } from '@/constants/permission';
 import styles from './index.module.less';
 const { Sider, Content } = Layout;
 
@@ -20,7 +20,7 @@ export default function UserPage() {
   const fetchDeptList = async () => {
     setDeptLoading(true);
     try {
-      const res = await getDeptList();
+      const res = await getCorpDeptList();
 
       const total = await getUserContent();
       setTotalUserCount(total);
@@ -32,7 +32,7 @@ export default function UserPage() {
   };
 
   const getUserContent = async () => {
-    const resq = await getUserPage({ pageNo: 1, pageSize: 10 });
+    const resq = await getUserPageInCorp({ pageNo: 1, pageSize: 10 });
     return resq.total;
   };
 

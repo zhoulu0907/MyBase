@@ -17,7 +17,7 @@ import {
 import { IconCamera, IconEdit } from '@arco-design/web-react/icon';
 import { TokenManager } from '@onebase/common';
 import type { CorpDetailResponse, DictData } from '@onebase/platform-center';
-import { getCorpDetailByIdApi, getDictDataByType, updateCorpApi, uploadFile } from '@onebase/platform-center';
+import { getCorpDetailByIdApiInCorp, getDictDataByTypeInCorp, updateCorpApiInCorp, uploadFile } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
 
@@ -43,7 +43,7 @@ const SpaceInfo: React.FC = () => {
   const fetchEnterpriseInfo = async (id: number) => {
     try {
       setLoading(true);
-      const res = await getCorpDetailByIdApi(id);
+      const res = await getCorpDetailByIdApiInCorp(id);
       setEnterpriseInfo(res);
       setCorpLogo(res.corpLogo);
       if (res.id) {
@@ -56,7 +56,7 @@ const SpaceInfo: React.FC = () => {
 
   const fetchIndustryDict = async (id: string) => {
     try {
-      const res = await getDictDataByType(id);
+      const res = await getDictDataByTypeInCorp(id);
       setTndustryDict(res);
     } catch (error) {
       console.error('字典数据列表错误', error);
@@ -74,7 +74,7 @@ const SpaceInfo: React.FC = () => {
     }
 
     try {
-      await updateCorpApi({
+      await updateCorpApiInCorp({
         id: enterpriseInfo.id!,
         corpName: newName,
         corpCode: enterpriseInfo.corpCode,

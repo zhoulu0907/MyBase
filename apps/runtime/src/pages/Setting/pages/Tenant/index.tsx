@@ -88,7 +88,7 @@ const TenantPage: React.FC = () => {
   // 我创建的应用
   const getOwnerApplication = async () => {
     const ownerTag = 1;
-    const res = await getApplicationSimple(ownerTag);
+    const res = await getApplicationSimple(ownerTag,"");
     setAppData(res.list);
   };
 
@@ -344,7 +344,7 @@ const TenantPage: React.FC = () => {
           </TabPane>
           <TabPane key={CREATED_TYPE.APPLICATION} title='我创建的应用'>
             <Space direction="vertical" size={16}>
-              {appData.map((item, index) => (
+              {appData?.map((item, index) => (
                 <Card
                   key={index}
                   bordered={false}

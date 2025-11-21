@@ -6,6 +6,7 @@ import { statusMapping } from "../../../../constants";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppStore } from "@/store";
+import { TokenManager } from '@onebase/common';
 import { type corpAppListParams ,getCorpAuthorizedAppListApi } from "@onebase/platform-center";
 
 
@@ -36,6 +37,7 @@ const AuthorizedApplication = () => {
     });
     const navigate = useNavigate();
     const { curAppId } = useAppStore();
+    const tokenInfo = TokenManager.getTokenInfo();
 
     const authorizedApplicationColumns = [
         {
@@ -116,7 +118,8 @@ const AuthorizedApplication = () => {
         const params: corpAppListParams = {
             pageNo,
             pageSize,
-            status: getStatus(currentTab)
+            status: getStatus(currentTab),
+            corpId: tokenInfo?.corpId || ""
         };
         try {
         const res = await getCorpAuthorizedAppListApi(params);
