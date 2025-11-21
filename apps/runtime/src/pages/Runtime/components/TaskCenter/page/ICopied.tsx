@@ -1,132 +1,241 @@
-import { useState, type FC } from 'react';
-import { Table, type TableColumnProps, Button, Tag, Space, Radio } from '@arco-design/web-react';
+import { useState, useEffect, type FC } from 'react';
+import { Table, type TableColumnProps, Button, Tag, Message, Radio, Pagination } from '@arco-design/web-react';
+import { getMyCCPageList } from '@onebase/app/src/services/app_runtime';
+import { FLOWSTATUS_TYPE, FlowStatusMap, LISTTYPE } from '@onebase/app';
 import TableSearch from './TableSearch';
-import DetailPop from './DetailPop'
-import '../style/tcPage.less'
+import DetailPop from './DetailPop';
+import '../style/tcPage.less';
 
+const getTimeAgo = (time: number) => {
+  const now = Date.now();
+  const diff = now - time;
+  const minutes = Math.floor(diff / 60000);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+  if (days > 0) return `${days}天前`;
+  if (hours > 0) return `${hours}小时前`;
+  if (minutes > 0) return `${minutes}分钟前`;
+  return '刚刚';
+};
 const radioList = [
-    {label: '未读', value: '0'},
-    {label: '已读', value: '1'},
-    {label: '全部', value: 'all'}
-]
-let defaultCheck = 'all'
+  { label: '未读', value: 'false' },
+  { label: '已读', value: 'true' },
+  { label: '全部', value: 'all' }
+];
+let defaultCheck = 'all';
 
-const ICopied:FC = () => {
-    const columns: TableColumnProps[] = [
-        {
-            title: '流程标题',
-            dataIndex: 'name',
-        },
-        {
-            title: '发起人',
-            dataIndex: 'salary',
-            render: (val, record) => (
-                <span className='flex-bw-center'>
-                    <div className='photo-img'>{record?.avatar && <img src={record?.avatar} />}</div>{val}
-                </span>
-            ),
-        },
-        {
-            title: '流程状态',
-            dataIndex: 'email2',
-            render: (val, record) => {
-                if (record.key === '1') {
-                    return <Tag color='green' size='medium'>{val}</Tag>
-                } else if (record.key === '2') {
-                    return <Tag color='blue' size='medium'>{val}</Tag>
-                } else {
-                    return <Tag color='gray' size='medium'>{val}</Tag>
-                }
-            },
-        },
-        {
-            title: '到达时间',
-            dataIndex: 'email',
-            defaultSortOrder: 'ascend',
-            sorter: (a, b) => {
-                if (a.email > b.email) {
-                    return 1;
-                }
-                if (a.email < b.email) {
-                    return -1;
-                }
-                return 0;
-            },
-        },
-        {
-            title: '操作',
-            dataIndex: 'op',
-            align: 'center',
-            render: (_, record) => (
-                <Button type='text' onClick={() => {handleDetailPage(record)}}>详情</Button>
-            ),
-        },
-    ];
-    const data = [
-        {
-            key: '1',
-            name: 'Jane Doe',
-            salary: 23000,
-            address: '32 Park Road, London',
-            email: '3jane.doe@example.com',
-            email1: 'e@example.com',
-            email2: 'ample.com',
-        },
-        {
-            key: '2',
-            name: 'Alisa Ross',
-            salary: 25000,
-            address: '35 Park Road, London',
-            email: '6alisa.ross@example.com',
-            email1: '12e@example.com',
-            email2: '3333ample.com',
-        },
-        {
-            key: '3',
-            name: 'Kevin Sandra',
-            salary: 22000,
-            address: '31 Park Road, London',
-            email: '1kevin.sandra@example.com',
-            email1: 'aaae@example.com',
-            email2: 'bbbample.com',
-        },
-    ];
-    let [detailPopVisible, setPopVisible] = useState(false)
-
-    function CreatedRadioChange(val:string) {
-        console.log('radio ====', val)
+const ICopied: FC = ({ appId }: any) => {
+  const columns: TableColumnProps[] = [
+    {
+      title: '流程标题',
+      dataIndex: 'processTitle'
+    },
+    {
+      title: '发起人',
+      dataIndex: 'salary',
+      render: (val, record) => (
+        <span className="flex-bw-center">
+          <div className="photo-img">{record?.avatar && <img src={record?.avatar} />}</div>
+          {val}
+        </span>
+      )
+    },
+    {
+      title: '流程状态',
+      dataIndex: 'flowStatus',
+      render: (val: FLOWSTATUS_TYPE) => {
+        if (val === FLOWSTATUS_TYPE.APPROVED) {
+          return (
+            <Tag color="green" size="medium">
+              {FlowStatusMap[val]}
+            </Tag>
+          );
+        } else if (val === FLOWSTATUS_TYPE.IN_APPROVAL) {
+          return (
+            <Tag color="blue" size="medium">
+              {FlowStatusMap[val]}
+            </Tag>
+          );
+        } else if (val === FLOWSTATUS_TYPE.REJECTED || val === FLOWSTATUS_TYPE.WITHDRAWN) {
+          return (
+            <Tag color="red" size="medium">
+              {FlowStatusMap[val]}
+            </Tag>
+          );
+        } else {
+          return (
+            <Tag color="gray" size="medium">
+              {FlowStatusMap[val]}
+            </Tag>
+          );
+        }
+      }
+    },
+    {
+      title: '到达时间',
+      dataIndex: 'arrivalTime',
+      ellipsis: true,
+      render: (value: number) => <span style={{ color: '#FF7D00' }}>{getTimeAgo(value)}</span>
+    },
+    {
+      title: '操作',
+      dataIndex: 'op',
+      align: 'center',
+      render: (_, record) => (
+        <Button
+          type="text"
+          onClick={() => {
+            handleDetailPage(record);
+          }}
+        >
+          详情
+        </Button>
+      )
     }
+  ];
 
-    function handleDetailPage(row:any) {
-        console.log('click to detail page === row ===', row)
-        setPopVisible(true)
+  const [detailPopVisible, setPopVisible] = useState(false);
+  const [data, setData] = useState<any>();
+  const [rowData, setRowData] = useState();
+  const [pagination, setPagination] = useState<any>({
+    current: 1,
+    pageSize: 10,
+    total: 0
+  });
+  const [loading, setLoading] = useState(false);
+  const [filters, setFilters] = useState<any>({});
+  const [viewed, setViewed] = useState<any>();
+  const defaultPageNo = 1;
+
+  function handleDetailPage(row: any) {
+    setRowData(row);
+    setPopVisible(true);
+  }
+
+  const fetchFormData = async (currentParams = filters, currentPage = 1, currentPageSize = pagination.pageSize) => {
+    setLoading(true);
+    try {
+      const queryParams = {
+        ...currentParams,
+        pageNo: currentPage,
+        pageSize: currentPageSize,
+        appId
+      };
+      const res = await getMyCCPageList(queryParams);
+      if (Array.isArray(res?.list)) {
+        setData(
+          res.list.map((item: object, i: number) => {
+            return {
+              ...(item || {}),
+              key: i
+            };
+          })
+        );
+      }
+      setPagination({
+        current: currentPage,
+        pageSize: currentPageSize,
+        total: res.total || 0
+      });
+      setFilters(currentParams);
+    } catch (error) {
+      Message.error('加载失败');
+    } finally {
+      setLoading(false);
     }
+  };
 
-    return <section className='page-content-rgt'>
-        <div className='table-title-box'>
-            <div>
-                <b style={{marginRight: '8px'}}>抄送我的</b>
-                <Radio.Group defaultValue={defaultCheck} onChange={CreatedRadioChange} name='button-radio-group' className='created-radio-group'>
-                    {radioList.map((item) => {
-                        return (
-                        <Radio key={item.value} value={item.value}>
-                            {({ checked }) => {
-                                return (
-                                    <Button key={item.value} type='text' className={`${checked ? 'rdo-checked' : ''}`}>
-                                        {item.label}
-                                    </Button>
-                                );
-                            }}
-                        </Radio>
-                        );
-                    })}
-                </Radio.Group>
-            </div>
-            <TableSearch uiConfig={{hasInput: true, hasFilter: true, hasSort: true, hasBatch: false}}/>
+  const onBack = () => {
+    setPopVisible(false);
+    fetchFormData(filters, defaultPageNo);
+  };
+
+  const handleSearch = (params: any) => {
+    let newFilters = {};
+    if (viewed === 'all') {
+      newFilters = params;
+    } else {
+      newFilters = { ...params, viewed: viewed };
+    }
+    fetchFormData(newFilters, defaultPageNo);
+  };
+  const handleReset = () => {
+    fetchFormData({}, defaultPageNo);
+  };
+
+  const handlePageChange = (current: number, pageSize: number) => {
+    fetchFormData(filters, current, pageSize);
+  };
+
+  useEffect(() => {
+    fetchFormData({}, defaultPageNo);
+  }, []);
+
+  function CreatedRadioChange(val: string) {
+    setViewed(val);
+    let newFilters = {};
+    if (val === 'all') {
+      const { viewed, ...rest } = filters;
+      newFilters = rest;
+    } else {
+      newFilters = { ...filters, viewed: val };
+    }
+    fetchFormData(newFilters, defaultPageNo);
+  }
+
+  return (
+    <section className="page-content-rgt">
+      <div className="table-title-box">
+        <div>
+          <b style={{ marginRight: '8px' }}>抄送我的</b>
+          <Radio.Group
+            defaultValue={defaultCheck}
+            onChange={CreatedRadioChange}
+            name="button-radio-group"
+            className="created-radio-group"
+          >
+            {radioList.map((item) => {
+              return (
+                <Radio key={item.value} value={item.value}>
+                  {({ checked }) => {
+                    return (
+                      <Button key={item.value} type="text" className={`${checked ? 'rdo-checked' : ''}`}>
+                        {item.label}
+                      </Button>
+                    );
+                  }}
+                </Radio>
+              );
+            })}
+          </Radio.Group>
         </div>
-        <Table className='task-tb-box' columns={columns} data={data} />
-        {detailPopVisible && <DetailPop detailPopVisible={detailPopVisible} setPopVisible={setPopVisible}/>}
+        <TableSearch
+          uiConfig={{ hasInput: true, hasFilter: true, hasSort: true, hasBatch: false }}
+          onReset={handleReset}
+          onFilterChange={handleSearch}
+        />
+      </div>
+      <Table className="task-tb-box" columns={columns} data={data} />
+      <Pagination
+        current={pagination.current}
+        pageSize={pagination.pageSize}
+        total={pagination.total}
+        onChange={handlePageChange}
+        showTotal={(total: any) => `共 ${total} 项数据`}
+        showJumper
+        sizeCanChange
+      />
+      {detailPopVisible && (
+        <DetailPop
+          detailPopVisible={detailPopVisible}
+          setPopVisible={setPopVisible}
+          rowData={rowData}
+          onBack={onBack}
+          listType={LISTTYPE.ICOPIED}
+        />
+      )}
     </section>
-}
+  );
+};
 
 export default ICopied;

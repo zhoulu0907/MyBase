@@ -41,6 +41,7 @@ import DynamicTimeRangeConfig from './components/DynamicTimeRangeConfig';
 import styles from './index.module.less';
 import DynamicDeptDefaultValueConfig from './components/DynamicDeptDefaultValueConfig';
 import DynamicSelectScopeConfig from './components/DynamicSelectScopeConfig';
+import DynamicSubTableConfig from './components/DynamicSubTableConfig';
 
 const Row = Grid.Row;
 const Col = Grid.Col;
@@ -261,7 +262,9 @@ const Attributes = ({ cpID }: ConfigsProps) => {
         return <DynamicOptionsConfig id={cpID} handlePropsChange={handlePropsChange} item={item} configs={configs} />;
       case CONFIG_TYPES.MUTIPLE_SELECT_OPTIONS_INPUT:
         // 自定义选项 select 多选
-        return <DynamicOptionsMutipleConfig id={cpID} handlePropsChange={handlePropsChange} item={item} configs={configs} />;
+        return (
+          <DynamicOptionsMutipleConfig id={cpID} handlePropsChange={handlePropsChange} item={item} configs={configs} />
+        );
       case CONFIG_TYPES.CAROUSEL:
         // 轮播
         return <DynamicCarouselConfig id={cpID} handlePropsChange={handlePropsChange} item={item} configs={configs} />;
@@ -769,6 +772,9 @@ const Attributes = ({ cpID }: ConfigsProps) => {
             configs={configs}
           />
         );
+      case CONFIG_TYPES.SUB_TABLE:
+        // 子表单
+        return <DynamicSubTableConfig id={cpID} handlePropsChange={handlePropsChange} item={item} configs={configs} />;
       default:
         return (
           <FormItem className={styles.formItem} label={item.name}>

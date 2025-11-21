@@ -3,6 +3,7 @@ import type { ELTColumn } from '@onebase/app';
 import { etlEditorSignal } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
+import { getSourceNodeIdsByTarget } from '../../../utils';
 import styles from './index.module.less';
 
 const Row = Grid.Row;
@@ -43,18 +44,10 @@ const FieldModal: React.FC<FieldModalProps> = ({ isModalVisible, onClose, onOk, 
     console.log('nodeData: ', nodeData.value);
 
     // 根据 curNode.value.id 从 graphData 中找到对应的 sourceNodeID
-    let sourceNodeId = '';
-    if (graphData.value && Array.isArray(graphData.value.edges)) {
-      // 查找指向当前节点(curNode.value.id)的边
-      const edge = graphData.value.edges.find((e: any) => e.targetNodeID === curNode.value.id);
-      if (edge) {
-        sourceNodeId = edge.sourceNodeID;
-        console.log('sourceNodeId:', sourceNodeId);
-      }
-    }
+    let sourceNodeIds = getSourceNodeIdsByTarget(graphData.value, curNode.value.id);
 
-    if (sourceNodeId) {
-      const sourceNodeData = nodeData.value[sourceNodeId];
+    if (sourceNodeIds && sourceNodeIds.length > 0) {
+      const sourceNodeData = nodeData.value[sourceNodeIds[0]];
       console.log('sourceNodeData: ', sourceNodeData);
       setOutputColumns(
         sourceNodeData?.output?.fields?.map((field: any) => ({

@@ -1,7 +1,7 @@
 import LogoSVG from '@/assets/images/ob_logo.svg';
 import { Button, Checkbox, Form, Input, Message, Space, Typography } from '@arco-design/web-react';
 import { IconLock, IconUser } from '@arco-design/web-react/icon';
-import { SliderCaptcha, TokenManager, type SliderCaptchaRef } from '@onebase/common';
+import { getOrCreateDeviceInfo, SliderCaptcha, TokenManager, type SliderCaptchaRef } from '@onebase/common';
 import { adminLogin, checkCaptchaApi, getCaptchaApi, type LoginRequest } from '@onebase/platform-center';
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -92,7 +92,13 @@ const Right: React.FC = () => {
   const handleCaptchaSuccess = async (token: string) => {
     // 验证码通过后重新提交表单
     const values = await accountForm.getFieldsValue();
-    handleSubmit({ username: values.username, password: values.password, captchaVerification: token });
+    const deviceId = await getOrCreateDeviceInfo();
+    handleSubmit({
+      username: values.username,
+      password: values.password,
+      captchaVerification: token,
+      deviceId: deviceId
+    });
   };
 
   // 登录按钮点击事件 - 先验证滑块验证码

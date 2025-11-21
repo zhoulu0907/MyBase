@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { Button, Input, Select, Dropdown, Menu, Cascader, Space, Message } from '@arco-design/web-react';
 import { IconDelete, IconDragDotVertical, IconPlus, IconEdit } from '@arco-design/web-react/icon';
-import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
+import { ENTITY_FIELD_TYPE, FIELD_TYPE } from '@onebase/ui-kit';
 import { ReactSortable } from 'react-sortablejs';
 import AutoCodeNumberSettingsModal from './AutoCodeNumberSettingsModal';
 import type { AutoNumberRule, AutoCodeRule, AutoNumberRuleResponce, EntityFieldsWithChildren } from '../types';
@@ -44,12 +44,9 @@ const getFieldOptions = (entitys: EntityFieldsWithChildren[]) => {
     return {
       label: entity.label,
       value: entity.value,
-      children: entity.children
-        ?.filter((field) => filterTypes.includes(field.fieldType))
-        ?.map((field) => ({
-          label: field.label,
-          value: field.value
-        }))
+      children: entity.children?.filter(
+        (field) => filterTypes.includes(field.fieldType) && field.isSystemField === FIELD_TYPE.CUSTOM
+      )
     };
   });
 };

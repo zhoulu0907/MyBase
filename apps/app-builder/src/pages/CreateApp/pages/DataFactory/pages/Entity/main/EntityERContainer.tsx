@@ -37,7 +37,8 @@ export const EntityERContainer: React.FC<{
   onlyUpdateNode: boolean;
   setOnlyUpdateNode: (onlyUpdateNode: boolean) => void;
   dsData: DatasourceRecord;
-}> = ({ refreshEntityList, setRefreshEntityList, onlyUpdateNode, setOnlyUpdateNode, dsData }) => {
+  handleMenuClick: (key: string) => void;
+}> = ({ refreshEntityList, setRefreshEntityList, onlyUpdateNode, setOnlyUpdateNode, dsData, handleMenuClick }) => {
   const { curAppId } = useAppStore();
   const { curDataSourceId } = useResourceStore();
 
@@ -211,6 +212,12 @@ export const EntityERContainer: React.FC<{
     openModal(MODAL_TYPE.EDIT_RELATION, { relationData: data });
   };
 
+  // 跳转到字典页面
+  const gotoDictPage = () => {
+    closeModal();
+    handleMenuClick('data-dict');
+  };
+
   // 获取图表位置
   // const getGraphPositon = () => {
   //   return chartRef.current?.getGraphPositon();
@@ -289,6 +296,7 @@ export const EntityERContainer: React.FC<{
         setVisible={(visible) => !visible && closeModal()}
         entity={getModalData('nodedata') as EntityNode}
         successCallback={handleSuccessCallback}
+        gotoDictPage={gotoDictPage}
       />
       <CreateRelationModal
         visible={isModalOpen(MODAL_TYPE.CREATE_RELATION)}

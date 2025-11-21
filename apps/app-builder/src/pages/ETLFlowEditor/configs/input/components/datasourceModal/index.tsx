@@ -125,7 +125,7 @@ const DatasourceModal: React.FC<DatasourceModalProps> = ({ isModalVisible, onClo
     payload.output = {
       verified: true,
       fields: selectedColumns.map((column) => ({
-        fieldFqn: `${selectedTableId}.${column.fieldName}`,
+        fieldFqn: `${curNode.value.id}.${column.fieldName}`,
         fieldName: column.fieldName,
         fieldType: column.fieldType
       }))
