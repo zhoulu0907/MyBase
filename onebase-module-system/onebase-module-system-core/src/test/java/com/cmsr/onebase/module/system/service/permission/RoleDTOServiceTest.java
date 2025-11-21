@@ -426,7 +426,7 @@ public class RoleDTOServiceTest {
         reqVO.setStatus(CommonStatusEnum.ENABLE.getStatus());
 
         // 执行测试
-        PageResult<RoleDO> pageResult = roleService.getRolePage(reqVO);
+        PageResult<RoleDO> pageResult = roleService.findRolePageOnlyTenant(reqVO);
 
         // 验证结果
         assertNotNull(pageResult, "分页结果不应该为空");
