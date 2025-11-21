@@ -380,7 +380,7 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
         DefaultConfigStore configStore = new DefaultConfigStore();
         Object id = context.getId();
         configStore.and(primaryKeyField, id);
-
+        configStore.and("deleted", 0);
         MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
         if (datasource == null) {
             throw exception(DATASOURCE_NOT_EXISTS);
@@ -390,7 +390,7 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
         DataRow dataRow = temporaryService.query(quoteTableName(entity.getTableName()),configStore);
 
         Long entityId = context.getEntityId();
-        Map<String, Object> data = convertNameToId(entityId,dataRow.map());
+        Map<String, Object> data = convertNameToId(entityId,dataRow == null ? new HashMap<>() : dataRow.map());
 
         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
         reqDTO.setTraceId(context.getRequestContext().getTraceId());
@@ -421,6 +421,7 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
         DefaultConfigStore configStore = new DefaultConfigStore();
         Object id = context.getId();
         configStore.and(primaryKeyField, id);
+        configStore.and("deleted",0);
 
         MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
         if (datasource == null) {
@@ -431,7 +432,7 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
         DataRow dataRow = temporaryService.query(quoteTableName(entity.getTableName()),configStore);
 
         Long entityId = context.getEntityId();
-        Map<String, Object> data = convertNameToId(entityId,dataRow.map());
+        Map<String, Object> data = convertNameToId(entityId,dataRow == null ? new HashMap<>() : dataRow.map());
 
         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
         reqDTO.setTraceId(context.getRequestContext().getTraceId());

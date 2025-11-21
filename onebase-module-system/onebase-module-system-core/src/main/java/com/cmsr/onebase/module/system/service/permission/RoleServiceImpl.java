@@ -235,8 +235,8 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public PageResult<RoleDO> getRolePage(RolePageReqVO reqVO) {
-        return roleDataRepository.findPage(reqVO);
+    public PageResult<RoleDO> findRolePageOnlyTenant(RolePageReqVO reqVO) {
+        return roleDataRepository.findRolePageOnlyTenant(reqVO);
     }
 
     @Override
