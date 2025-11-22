@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 public class DeptDataRepository extends AbstractDeptDataRepository {
     @Override
     public String getXFromSceneType() {
-        return XFromSceneTypeEnum.CORP.getCode();
+        return XFromSceneTypeEnum.ALL.getCode();
     }
 }

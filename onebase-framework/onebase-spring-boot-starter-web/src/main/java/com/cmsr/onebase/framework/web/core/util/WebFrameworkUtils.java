@@ -194,6 +194,7 @@ public class WebFrameworkUtils {
         return NumberUtil.isNumber(corpID) ? Long.valueOf(corpID) : null;
     }
 
+    @Deprecated
     public static String getXFromSceneType() {
         HttpServletRequest request = getRequest();
         String fromType = request.getHeader(X_From_Scene_Type);
