@@ -26,7 +26,12 @@ const ConnectInstanceCard: React.FC<CardProps> = ({ data, onEdit, onDelete }) =>
   };
 
   return (
-    <div className={styles.card}>
+    <div
+      className={styles.card}
+      onClick={() => {
+        handleEdit(data.connectorId);
+      }}
+    >
       <div className={styles.cardHeader}>
         <div className={styles.cardHeaderIcon}>
           {data.typeCode === TypeCode.SCRIPT && <img src={jsNodeIcon} alt="" />}
@@ -48,27 +53,51 @@ const ConnectInstanceCard: React.FC<CardProps> = ({ data, onEdit, onDelete }) =>
           <div className={styles.cardBodyRowContent}>{dayjs(data.createTime).format('YYYY-MM-DD HH:mm:ss')}</div>
         </div>
       </div>
-      <div className={styles.cardFooter}>
+      <div
+        className={styles.cardFooter}
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
+      >
         <div className={styles.cardFooterLeft}>
           <Tag color="green">已启用</Tag>
         </div>
         <div className={styles.cardFooterRight}>
-          <Button type="text" size="small" onClick={() => handleEdit(data.connectorId)}>
+          <Button
+            type="text"
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleEdit(data.connectorId);
+            }}
+          >
             编辑
           </Button>
-          <Dropdown
-            position="bl"
-            trigger="click"
-            droplist={
-              <Menu>
-                <Menu.Item key="delete" onClick={() => handleDelete(data.connectorId)}>
-                  删除
-                </Menu.Item>
-              </Menu>
-            }
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
           >
-            <IconMoreVertical className={styles.cardFooterRightBtn} />
-          </Dropdown>
+            <Dropdown
+              position="bl"
+              trigger="click"
+              droplist={
+                <Menu>
+                  <Menu.Item
+                    key="delete"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(data.connectorId);
+                    }}
+                  >
+                    删除
+                  </Menu.Item>
+                </Menu>
+              }
+            >
+              <IconMoreVertical className={styles.cardFooterRightBtn} />
+            </Dropdown>
+          </div>
         </div>
       </div>
     </div>

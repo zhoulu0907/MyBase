@@ -1,6 +1,12 @@
-import { Button, Input, Pagination, Spin } from '@arco-design/web-react';
+import { Button, Input, Message, Pagination, Spin } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
-import { createConnectInstance, listConnectInstance, TypeCode, type ListConnectInstanceReq } from '@onebase/app';
+import {
+  createConnectInstance,
+  deleteConnectInstance,
+  listConnectInstance,
+  TypeCode,
+  type ListConnectInstanceReq
+} from '@onebase/app';
 import { getCommonPaginationList, getHashQueryParam } from '@onebase/common';
 import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -75,7 +81,7 @@ const ConnectorInstancesPage: React.FC = () => {
 
     console.log('res :', res);
 
-    // navigate(`/onebase/create-app/integrated-management/connector-instance-detail?appId=${curAppId}&id=${res.id}`);
+    navigate(`/onebase/create-app/integrated-management/connector-detail?appId=${curAppId}&id=${res}`);
   };
 
   const handleEdit = (id: string) => {
@@ -83,8 +89,14 @@ const ConnectorInstancesPage: React.FC = () => {
     navigate(`/onebase/create-app/integrated-management/connector-detail?appId=${curAppId}&id=${id}`);
   };
 
-  const handleDelete = (id: string) => {
-    console.log('delete', id);
+  const handleDelete = async (id: string) => {
+    const res = await deleteConnectInstance({
+      id: id
+    });
+    if (res) {
+      Message.success('删除成功');
+      getConnectInstanceList();
+    }
   };
 
   return (

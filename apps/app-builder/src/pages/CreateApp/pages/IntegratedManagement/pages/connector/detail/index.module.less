@@ -26,6 +26,50 @@
       box-sizing: border-box;
       background-color: white;
       border-bottom: 1px solid #e5e5e5;
+      gap: 8px;
+
+      .backIcon {
+        cursor: pointer;
+        font-size: 16px;
+        color: #4e5969;
+        flex-shrink: 0;
+
+        &:hover {
+          color: #165dff;
+        }
+      }
+
+      .connectorName {
+        flex: 1;
+        font-size: 14px;
+        font-weight: 500;
+        color: #1d2129;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .nameInput {
+        flex: 1;
+      }
+
+      .icon {
+        cursor: pointer;
+        font-size: 16px;
+        color: #4e5969;
+        flex-shrink: 0;
+        transition: color 0.2s;
+
+        &:hover {
+          color: #165dff;
+        }
+      }
+
+      .editActions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
     }
   }
 
