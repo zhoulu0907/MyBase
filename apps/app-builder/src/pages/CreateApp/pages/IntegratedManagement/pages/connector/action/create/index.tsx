@@ -41,6 +41,8 @@ const CreateScriptActionPage: React.FC<CreateScriptActionPageProps> = ({ onSucce
   const inputParameter = Form.useWatch('inputParameter', form);
 
   const [inputSchema, setInputSchema] = useState<any>(null);
+  // 缓存文本模式下的 JSON 值
+  const [cachedInputParameter, setCachedInputParameter] = useState<string>('');
 
   useEffect(() => {
     if (editData) {
@@ -152,6 +154,10 @@ const CreateScriptActionPage: React.FC<CreateScriptActionPageProps> = ({ onSucce
 
   const handleInputParameterChange = (checked: boolean) => {
     if (checked) {
+      // 切换到图形模式：缓存当前的文本值
+      const currentTextValue = form.getFieldValue('inputParameter') || '';
+      setCachedInputParameter(currentTextValue);
+
       setInputEditType(EditTypeEnum.Visual);
       // 将 JSON 字符串转换为 schema 并初始化表单数据
       if (inputParameter) {
@@ -176,12 +182,22 @@ const CreateScriptActionPage: React.FC<CreateScriptActionPageProps> = ({ onSucce
         form.setFieldValue('inputParameterSchema', []);
       }
     } else {
+      // 切回文本模式：将表单数据转换回 JSON 字符串
       setInputEditType(EditTypeEnum.Json);
-      // 将表单数据转换回 JSON 字符串
       const formData = form.getFieldValue('inputParameterSchema');
       if (formData && formData.length > 0) {
-        const jsonObj = formDataToJson(formData);
-        form.setFieldValue('inputParameter', JSON.stringify(jsonObj, null, 2));
+        try {
+          const jsonObj = formDataToJson(formData);
+          const jsonString = JSON.stringify(jsonObj, null, 2);
+          form.setFieldValue('inputParameter', jsonString);
+        } catch (e) {
+          // 如果转换失败，恢复缓存的文本值
+          Message.warning('表单数据转换失败，已恢复之前的文本内容');
+          form.setFieldValue('inputParameter', cachedInputParameter);
+        }
+      } else {
+        // 如果表单数据为空，恢复缓存的文本值
+        form.setFieldValue('inputParameter', cachedInputParameter || '{}');
       }
     }
   };
