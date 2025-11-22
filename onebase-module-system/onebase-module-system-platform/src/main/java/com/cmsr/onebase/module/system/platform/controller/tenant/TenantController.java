@@ -24,9 +24,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertList;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.TENANT_ONLY_GET_SELF;
 
 @Tag(name = "管理后台 - 租户")
 @RestController
@@ -65,8 +68,9 @@ public class TenantController {
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
     @PreAuthorize("@ss.hasPermission('tenant:space:query')")
     public CommonResult<TenantRespVO> getTenant(@RequestParam("id") Long id) {
-        if(null == id ){
-            id= TenantContextHolder.getTenantId();
+        Long loginTenantId = TenantContextHolder.getTenantId();
+        if(!Objects.equals(loginTenantId, id)){
+            throw exception(TENANT_ONLY_GET_SELF);
         }
         return success(tenantService.getTenantWithAppCount(id));
     }
