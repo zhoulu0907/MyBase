@@ -49,9 +49,24 @@ public class AppMenuServiceImpl implements AppMenuService {
     private AppApplicationApi appApplicationApi;
 
     @Override
+    public List<MenuListRespVO> listBpmApplicationMenu(Long applicationId) {
+        ApplicationDO applicationDO = appCommonService.validateApplicationExist(applicationId);
+        List<MenuDO> menuDOS = appMenuRepository.findByApplicationIdAndType(applicationDO.getId(),
+                Set.of(MenuTypeEnum.BPM.getValue())
+        );
+
+        // 返回菜单
+        return menuDOS.stream()
+                .map(v -> BeanUtils.toBean(v, MenuListRespVO.class))
+                .collect(Collectors.toCollection(LinkedList::new));
+    }
+
+    @Override
     public List<MenuListRespVO> listApplicationMenu(Long applicationId, String name) {
         ApplicationDO applicationDO = appCommonService.validateApplicationExist(applicationId);
-        List<MenuDO> menuDOS = appMenuRepository.findByApplicationId(applicationDO.getId());
+        List<MenuDO> menuDOS = appMenuRepository.findByApplicationIdAndType(applicationDO.getId(),
+                Set.of(MenuTypeEnum.PAGE.getValue(), MenuTypeEnum.GROUP.getValue())
+        );
         List<MenuListRespVO> menuListRespList = new ArrayList<>();
         // 把第一层的菜单添加到列表中
         LinkedList<MenuListRespVO> levelOneMenus = menuDOS.stream()

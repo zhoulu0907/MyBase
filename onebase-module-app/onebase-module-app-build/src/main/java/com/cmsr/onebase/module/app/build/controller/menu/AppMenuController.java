@@ -26,6 +26,13 @@ public class AppMenuController {
     @Resource
     private AppMenuService appMenuService;
 
+    @GetMapping("/bpm-list")
+    @Operation(summary = "BPM应用菜单列表")
+    public CommonResult<List<MenuListRespVO>> listBpmApplicationMenu(
+            @RequestParam("applicationId") Long applicationId) {
+        return success(appMenuService.listBpmApplicationMenu(applicationId));
+    }
+
     @GetMapping("/list")
     @Operation(summary = "应用菜单列表")
     public CommonResult<List<MenuListRespVO>> listApplicationMenu(
