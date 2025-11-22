@@ -1,8 +1,10 @@
 package com.cmsr.onebase.module.bpm.runtime.listener;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
+import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowAgentInsRepository;
 import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowAgentRepository;
 import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowAgentDO;
+import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowAgentInsDO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
 import com.cmsr.onebase.module.bpm.core.enums.BpmBusinessStatusEnum;
 import com.cmsr.onebase.module.bpm.core.enums.BpmNodeTypeEnum;
@@ -12,6 +14,7 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.warm.flow.core.dto.FlowParams;
 import org.dromara.warm.flow.core.entity.Instance;
@@ -53,6 +56,9 @@ public class BpmGlobalListener implements GlobalListener {
 
     @Resource
     private BpmCcNodeListener ccNodeListener;
+
+    @Resource
+    private BpmFlowAgentInsRepository agentInsRepository;
 
     @Override
     public void start(ListenerVariable listenerVariable) {
@@ -217,21 +223,23 @@ public class BpmGlobalListener implements GlobalListener {
             return;
         }
 
-        List<User> agentUsers = new ArrayList<>();
+        List<BpmFlowAgentInsDO> agentInsList = new ArrayList<>();
 
         // 增加代理人信息
         for (BpmFlowAgentDO agent : activeAgents) {
-            User user = userService.structureUser(
-                    task.getId(),
-                    String.valueOf(agent.getAgentId()),
-                    BpmUserTypeEnum.AGENT.getCode(),
-                    String.valueOf(agent.getPrincipalId())
-            );
-            agentUsers.add(user);
+            BpmFlowAgentInsDO agentIns = new BpmFlowAgentInsDO();
+            agentIns.setTaskId(task.getId());
+            agentIns.setInstanceId(task.getInstanceId());
+            agentIns.setAgentId(agent.getAgentId());
+            agentIns.setPrincipalId(agent.getPrincipalId());
+            agentIns.setAgentName(agent.getAgentName());
+            agentIns.setPrincipalName(agent.getPrincipalName());
+            agentIns.setIsExecutor(BooleanUtils.toInteger(false));
+            agentInsList.add(agentIns);
         }
 
         // 保存代理用户
-        userService.saveBatch(agentUsers);
+        agentInsRepository.insertBatch(agentInsList);
     }
 
     private void handleUnOperatorUsersOnAssignment(ListenerVariable listenerVariable) {

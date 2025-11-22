@@ -87,4 +87,16 @@ public class BpmTodoTaskDTO extends FlowTask {
      */
     @Column(name = "user_type")
     private String userType;
+
+    /**
+     * 代理人ID
+     */
+    @Column(name = "agent_id")
+    private String agentId;
+
+    /**
+     * 代理人名称
+     */
+    @Column(name = "agent_name")
+    private String agentName;
 }

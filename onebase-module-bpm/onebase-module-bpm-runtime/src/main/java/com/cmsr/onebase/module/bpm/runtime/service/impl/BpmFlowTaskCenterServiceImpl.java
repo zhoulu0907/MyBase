@@ -16,7 +16,6 @@ import com.cmsr.onebase.module.bpm.core.dto.BpmInstanceDTO;
 import com.cmsr.onebase.module.bpm.core.dto.BpmTodoTaskDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
 import com.cmsr.onebase.module.bpm.core.enums.BpmBusinessStatusEnum;
-import com.cmsr.onebase.module.bpm.core.enums.BpmUserTypeEnum;
 import com.cmsr.onebase.module.bpm.core.service.BpmEngineDefExtService;
 import com.cmsr.onebase.module.bpm.core.vo.*;
 import com.cmsr.onebase.module.bpm.runtime.service.BpmFlowTaskCenterService;
@@ -215,8 +214,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         // 填充时间范围条件
         fillTimeRange(condition, "submit_time", reqVO.getSubmitTimeStart(), reqVO.getSubmitTimeEnd());
 
-        // 填充处理人条件
-        condition.and(Compare.EQUAL, "processed_by", userId);
+        // 填充处理人条件，已经在sql中做了处理
 
         // 排序
         fillOrder(condition, "create_time", reqVO.getSortType());
@@ -312,7 +310,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         // 构建查询条件
         ConfigStore condition = buildDynamicCondition(pageReqVO, String.valueOf(loginUserId));
 
-        PageResult<BpmTodoTaskDTO> pageResult = taskExtRepository.getTodoTaskPage(condition);
+        PageResult<BpmTodoTaskDTO> pageResult = taskExtRepository.getTodoTaskPage(condition, String.valueOf(loginUserId));
         List<BpmFlowTodoTaskVO> todoTaskList = new ArrayList<>();
 
         for (BpmTodoTaskDTO flowTaskExt : pageResult.getList()) {
@@ -330,6 +328,8 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
 
     @NotNull
     private static BpmFlowTodoTaskVO getBpmFlowTodoTaskVO(BpmTodoTaskDTO flowTaskExt) {
+        Long loginUserId = WebFrameworkUtils.getLoginUserId();
+
         BpmFlowTodoTaskVO todoTaskVO = new BpmFlowTodoTaskVO();
         todoTaskVO.setId(flowTaskExt.getId());
         todoTaskVO.setTaskId(flowTaskExt.getId());
@@ -343,7 +343,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         todoTaskVO.setArrivalTime(flowTaskExt.getCreateTime());
         todoTaskVO.setBusinessId(flowTaskExt.getBindingViewId());
 
-        if (Objects.equals(flowTaskExt.getUserType(), BpmUserTypeEnum.AGENT.getCode())) {
+        if (StringUtils.isNotBlank(flowTaskExt.getAgentId()) && Objects.equals(String.valueOf(loginUserId), flowTaskExt.getAgentId())) {
             todoTaskVO.setProcessTitle(AGENT_TITLE_PREFIX + flowTaskExt.getBpmTitle());
         }
 
