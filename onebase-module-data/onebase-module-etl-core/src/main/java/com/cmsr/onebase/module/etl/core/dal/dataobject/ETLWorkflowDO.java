@@ -12,9 +12,6 @@ import lombok.Data;
 @com.mybatisflex.annotation.Table("etl_workflow")
 public class ETLWorkflowDO extends BaseBizEntity {
 
-    @Column(name = "application_id")
-    private Long applicationId;
-
     @Column(name = "workflow_name")
     private String workflowName;
 

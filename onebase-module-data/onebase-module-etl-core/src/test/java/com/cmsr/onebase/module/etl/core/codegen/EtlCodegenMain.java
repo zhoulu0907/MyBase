@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.etl.core.codegen;
 
-import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
+import com.cmsr.onebase.framework.mybatis.BaseBizEntity;
 import com.mybatisflex.codegen.Generator;
 import com.mybatisflex.codegen.config.GlobalConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -55,7 +55,7 @@ public class EtlCodegenMain {
 
         //设置生成 entity 并启用 Lombok
         globalConfig.setEntityPackage("com.cmsr.onebase.module.etl.core.dal.dataobject");
-        globalConfig.setEntitySuperClass(TenantBaseDO.class);
+        globalConfig.setEntitySuperClass(BaseBizEntity.class);
         globalConfig.setEntityGenerateEnable(true);
         globalConfig.setEntityWithLombok(true);
         globalConfig.setEntityLombokAllArgsConstructorEnable(false);
@@ -68,7 +68,7 @@ public class EtlCodegenMain {
         //设置生成 mapper
         globalConfig.setMapperGenerateEnable(true);
         globalConfig.setMapperXmlGenerateEnable(true);
-        globalConfig.setMapperXmlPath("D:/temp/xml");
+        globalConfig.setMapperXmlPath("temp/xml");
         //设置生成 service
         globalConfig.setServiceGenerateEnable(false);
         globalConfig.setServiceImplGenerateEnable(false);
@@ -77,7 +77,7 @@ public class EtlCodegenMain {
         globalConfig.setControllerRestStyle(false);
 
 
-        globalConfig.setSourceDir("D:/temp");
+        globalConfig.setSourceDir("temp");
         //可以单独配置某个列
 //        ColumnConfig columnConfig = new ColumnConfig();
 //        columnConfig.setColumnName("tenant_id");
