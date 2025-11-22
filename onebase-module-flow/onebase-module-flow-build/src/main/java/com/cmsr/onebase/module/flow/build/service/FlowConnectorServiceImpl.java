@@ -47,7 +47,11 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         connectorVO.setTypeCode(connectorDO.getTypeCode());
         connectorVO.setConnectorName(connectorDO.getConnectorName());
         connectorVO.setConnectorVersion("1.0.0");
-        connectorVO.setDescription(connectorDO.getDescription());
+        if (StringUtils.isBlank(connectorDO.getDescription())) {
+            connectorVO.setDescription("");
+        } else {
+            connectorVO.setDescription(connectorDO.getDescription());
+        }
         String config = connectorDO.getConfig();
         if (StringUtils.isNotBlank(config)) {
             connectorVO.setConfig(JsonUtils.parseTree(config));
