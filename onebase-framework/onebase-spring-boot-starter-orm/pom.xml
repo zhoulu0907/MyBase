@@ -105,8 +105,11 @@
             <artifactId>opengauss-jdbc</artifactId>
             <optional>true</optional>
         </dependency>
-
-
+        <dependency>
+            <groupId>com.mybatis-flex</groupId>
+            <artifactId>mybatis-flex-codegen</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 </project>

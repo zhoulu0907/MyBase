@@ -4,8 +4,6 @@ import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLScheduleJobDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLWorkflowDO;
-import com.cmsr.onebase.module.etl.core.dal.dataobject.table.ETLScheduleJobDOTableDef;
-import com.cmsr.onebase.module.etl.core.dal.dataobject.table.ETLWorkflowDOTableDef;
 import com.cmsr.onebase.module.etl.core.dal.mapper.ETLWorkflowMapper;
 import com.cmsr.onebase.module.etl.core.enums.ScheduleType;
 import com.cmsr.onebase.module.etl.core.vo.WorkflowBriefVO;
@@ -20,8 +18,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import static com.cmsr.onebase.module.etl.core.dal.dataobject.table.ETLScheduleJobDOTableDef.ETLSCHEDULE_JOB_DO;
-import static com.cmsr.onebase.module.etl.core.dal.dataobject.table.ETLWorkflowDOTableDef.ETLWORKFLOW_DO;
+import static com.cmsr.onebase.module.etl.core.dal.dataobject.table.EtlScheduleJobTableDef.ETL_SCHEDULE_JOB;
+import static com.cmsr.onebase.module.etl.core.dal.dataobject.table.EtlWorkflowTableDef.ETL_WORKFLOW;
 
 @Slf4j
 @Repository
@@ -42,13 +40,13 @@ public class ETLWorkflowRepository extends ServiceImpl<ETLWorkflowMapper, ETLWor
         String scheduleStrategy = pageReqVO.getScheduleStrategy();
         boolean filterByScheduleStrategy = StringUtils.isNotBlank(scheduleStrategy) && !StringUtils.equals(ScheduleType.ALL.getValue(), scheduleStrategy);
         QueryWrapper queryWrapper = QueryWrapper.create()
-                .select(ETLWORKFLOW_DO.ID
-                        ,ETLWORKFLOW_DO.APPLICATION_ID,
-                        ETLWORKFLOW_DO.SCHEDULE_STRATEGY,
-                        ETLWORKFLOW_DO.WORKFLOW_NAME.as("flow_name"),
-                        ETLWORKFLOW_DO.IS_ENABLED.as("enable_status"),
-                        ETLSCHEDULE_JOB_DO.JOB_STATUS.as("is_sync_done"),
-                        ETLSCHEDULE_JOB_DO.LAST_JOB_TIME
+                .select(ETL_WORKFLOW.ID,
+                        ETL_WORKFLOW.APPLICATION_ID,
+                        ETL_WORKFLOW.SCHEDULE_STRATEGY,
+                        ETL_WORKFLOW.WORKFLOW_NAME.as("flow_name"),
+                        ETL_WORKFLOW.IS_ENABLED.as("enable_status"),
+                        ETL_SCHEDULE_JOB.JOB_STATUS.as("is_sync_done"),
+                        ETL_SCHEDULE_JOB.LAST_JOB_TIME
                 )
                 .from(ETLWorkflowDO.class)
 

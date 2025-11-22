@@ -82,6 +82,11 @@
         </dependency>
         <!-- Test 测试相关 -->
         <dependency>
+            <groupId>com.mybatis-flex</groupId>
+            <artifactId>mybatis-flex-codegen</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-spring-boot-starter-test</artifactId>
             <scope>test</scope>
