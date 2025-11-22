@@ -322,11 +322,7 @@ public class AdminAuthServiceImpl implements AdminAuthService {
                 OAuth2ClientConstants.CLIENT_ID_DEFAULT, null);
 
         // 检查并限制设备数，踢出超限的设备
-        List<String> removedTokens = securityConfigApi.checkAndLimitDevices(
-                userId,
-                deviceId,
-                accessTokenDO.getAccessToken()
-        ).getData();
+        List<String> removedTokens = securityConfigApi.checkAndLimitDevices(userId, deviceId, accessTokenDO.getAccessToken()).getData();
 
         // 删除被踢出的Token
         if (removedTokens != null && !removedTokens.isEmpty()) {
@@ -365,10 +361,7 @@ public class AdminAuthServiceImpl implements AdminAuthService {
         }
 
         // 清理在线设备记录
-        securityConfigApi.removeOnlineDevice(
-                accessTokenDO.getUserId(),
-                token
-        );
+        securityConfigApi.removeOnlineDevice(null, accessTokenDO.getUserId(), token);
 
         // 删除成功，则记录登出日志
         createLogoutLog(accessTokenDO.getUserId(), accessTokenDO.getUserType(), logType);

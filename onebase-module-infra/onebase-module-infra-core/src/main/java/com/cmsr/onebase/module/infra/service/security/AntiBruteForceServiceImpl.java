@@ -1,6 +1,9 @@
 package com.cmsr.onebase.module.infra.service.security;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static com.cmsr.onebase.module.infra.dal.redis.RedisKeyConstants.REDIS_KEY_FAIL_COUNT;
+import static com.cmsr.onebase.module.infra.dal.redis.RedisKeyConstants.REDIS_KEY_LOCK;
+
 import com.cmsr.onebase.module.infra.dal.database.SecurityRecordDataRepository;
 import com.cmsr.onebase.module.infra.service.security.dto.LoginFailureResult;
 import com.cmsr.onebase.module.infra.dal.dataobject.security.SecurityRecordDO;
@@ -27,17 +30,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class AntiBruteForceServiceImpl implements AntiBruteForceService {
-
-    /**
-     * Redis Key前缀 - 失败次数记录
-     */
-    private static final String REDIS_KEY_FAIL_COUNT = "infra:security:login:fail:";
-
-    /**
-     * Redis Key前缀 - 锁定状态记录
-     */
-    private static final String REDIS_KEY_LOCK = "infra:security:login:lock:";
-
     /**
      * 默认失败锁定阈值
      */

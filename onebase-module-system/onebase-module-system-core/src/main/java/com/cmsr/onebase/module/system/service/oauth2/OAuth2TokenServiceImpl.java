@@ -111,6 +111,7 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
             // 通过旧Token反查deviceId
             OAuth2AccessTokenDO oldToken = accessTokenDOs.get(0);
             CommonResult<String> deviceIdResult = securityConfigApi.findDeviceIdByToken(
+                    null,  // OAuth2TokenServiceImpl在同一模块，TenantContextHolder能正常获取
                     oldToken.getUserId(),
                     oldToken.getAccessToken()
             );
@@ -124,10 +125,7 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
             
             // 删除在线设备记录中的旧Token
             for (OAuth2AccessTokenDO accessToken : accessTokenDOs) {
-                securityConfigApi.removeOnlineDevice(
-                        accessToken.getUserId(),
-                        accessToken.getAccessToken()
-                );
+                securityConfigApi.removeOnlineDevice(null, accessToken.getUserId(), accessToken.getAccessToken());
             }
         }
 

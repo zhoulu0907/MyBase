@@ -286,11 +286,8 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
             return;
         }
 
-        // 清理在线设备记录
-        securityConfigApi.removeOnlineDevice(
-                accessTokenDO.getUserId(),
-                token
-        );
+        // 清理在线设备
+        securityConfigApi.removeOnlineDevice(null, accessTokenDO.getUserId(), token);
 
         // 删除成功,则记录登出日志
         createLogoutLog(accessTokenDO.getUserId(), accessTokenDO.getUserType(), logType);

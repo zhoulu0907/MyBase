@@ -119,9 +119,13 @@ public class MultiDeviceSessionServiceImpl implements MultiDeviceSessionService 
     }
 
     @Override
-    public void removeOnlineDevice(Long userId, String accessToken) {
-        Long tenantId = TenantContextHolder.getTenantId();
-        String redisKey = String.format(RedisKeyConstants.ONLINE_DEVICES_KEY, tenantId, userId);
+    public void removeOnlineDevice(Long tenantId, Long userId, String accessToken) {
+        // 优先使用TenantContextHolder中的租户ID，为null时使用传入的参数
+        Long actualTenantId = TenantContextHolder.getTenantId();
+        if (actualTenantId == null) {
+            actualTenantId = tenantId;
+        }
+        String redisKey = String.format(RedisKeyConstants.ONLINE_DEVICES_KEY, actualTenantId, userId);
 
         // 反查deviceId
         String deviceId = findDeviceIdByTokenInternal(redisKey, accessToken);
@@ -245,9 +249,13 @@ public class MultiDeviceSessionServiceImpl implements MultiDeviceSessionService 
     }
 
     @Override
-    public String findDeviceIdByToken(Long userId, String accessToken) {
-        Long tenantId = TenantContextHolder.getTenantId();
-        String redisKey = String.format(RedisKeyConstants.ONLINE_DEVICES_KEY, tenantId, userId);
+    public String findDeviceIdByToken(Long tenantId, Long userId, String accessToken) {
+        // 优先使用TenantContextHolder中的租户ID，如果为null则使用传递的参数
+        Long actualTenantId = TenantContextHolder.getTenantId();
+        if (actualTenantId == null) {
+            actualTenantId = tenantId;
+        }
+        String redisKey = String.format(RedisKeyConstants.ONLINE_DEVICES_KEY, actualTenantId, userId);
         return findDeviceIdByTokenInternal(redisKey, accessToken);
     }
 

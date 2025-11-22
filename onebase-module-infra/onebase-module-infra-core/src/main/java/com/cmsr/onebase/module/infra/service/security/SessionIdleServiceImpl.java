@@ -68,16 +68,9 @@ public class SessionIdleServiceImpl implements SessionIdleService {
     }
 
     @Override
-    public boolean updateRedisIdleKey(Long userId, String deviceId) {
-        if (userId == null || StrUtil.isBlank(deviceId)) {
-            log.warn("更新会话空闲Key失败，参数不完整: userId={}, deviceId={}", userId, deviceId);
-            return false;
-        }
-
-        // 获取当前租户ID
-        Long tenantId = TenantContextHolder.getTenantId();
-        if (tenantId == null) {
-            log.warn("更新会话空闲Key失败，无法获取租户ID: userId={}, deviceId={}", userId, deviceId);
+    public boolean updateRedisIdleKey(Long tenantId, Long userId, String deviceId) {
+        if (tenantId == null || userId == null || StrUtil.isBlank(deviceId)) {
+            log.warn("更新会话空闲Key失败，参数不完整: tenantId={}, userId={}, deviceId={}", tenantId, userId, deviceId);
             return false;
         }
 

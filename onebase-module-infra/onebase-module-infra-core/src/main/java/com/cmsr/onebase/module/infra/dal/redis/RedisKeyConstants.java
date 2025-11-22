@@ -8,6 +8,17 @@ package com.cmsr.onebase.module.infra.dal.redis;
  */
 public interface RedisKeyConstants {
 
+    String SECURITY_TENANT_CONFIGS = "infra:security:tenant-config#30m";
+    /**
+     * Redis Key前缀 - 失败次数记录
+     */
+    String REDIS_KEY_FAIL_COUNT = "infra:security:login:fail:";
+
+    /**
+     * Redis Key前缀 - 锁定状态记录
+     */
+    String REDIS_KEY_LOCK = "infra:security:login:lock:";
+
     /**
      * 在线设备列表的缓存
      * <p>

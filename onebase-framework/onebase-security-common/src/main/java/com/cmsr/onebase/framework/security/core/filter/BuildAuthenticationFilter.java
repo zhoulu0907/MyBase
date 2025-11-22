@@ -200,7 +200,7 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter {
         }
 
         // 步骤1：通过token反查deviceId
-        CommonResult<String> deviceIdResult = securityConfigApi.findDeviceIdByToken(loginUser.getId(), token);
+        CommonResult<String> deviceIdResult = securityConfigApi.findDeviceIdByToken(loginUser.getTenantId(), loginUser.getId(), token);
 
         if (deviceIdResult == null || StrUtil.isBlank(deviceIdResult.getData())) {
             log.warn("[checkAndUpdateSessionIdle][无法反查deviceId，跳过会话空闲检查] userId={}, token={}", loginUser.getId(), token);
@@ -210,7 +210,7 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter {
         String deviceId = deviceIdResult.getData();
 
         // 步骤2：更新会话空闲Redis key的TTL和value
-        CommonResult<Boolean> updateResult = securityConfigApi.updateSessionIdleKey(loginUser.getId(), deviceId);
+        CommonResult<Boolean> updateResult = securityConfigApi.updateSessionIdleKey(loginUser.getTenantId(), loginUser.getId(), deviceId);
 
         // 步骤3：如果更新失败（返回false），表示Redis key已过期，执行登出操作
         if (updateResult == null || updateResult.getData() == null || !updateResult.getData()) {
@@ -219,7 +219,7 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter {
             // 删除accessToken
             oauth2TokenApi.removeAccessToken(token);
             // 删除在线设备记录
-            securityConfigApi.removeOnlineDevice(loginUser.getId(), token);
+            securityConfigApi.removeOnlineDevice(loginUser.getTenantId(), loginUser.getId(), token);
         }
 
         log.debug("[checkAndUpdateSessionIdle][会话空闲key更新成功] userId={}, deviceId={}", loginUser.getId(), deviceId);
