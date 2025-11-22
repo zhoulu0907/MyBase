@@ -98,9 +98,11 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   );
 
   const toRuntime = () => {
+    const tenantId = TokenManager.getTenantInfo()?.tenantId || '';
+
     const newWindow = window.open('', '_blank');
     if (newWindow) {
-      const redirectURL = `${getRuntimeURL()}/#/onebase/runtime/?&appId=${curAppId}`;
+      const redirectURL = `${getRuntimeURL()}/#/onebase/runtime?appId=${curAppId}&tenantId=${tenantId}`;
       newWindow.location.href = `${getRuntimeURL()}/#/login?redirectURL=${redirectURL}`;
     }
   };
