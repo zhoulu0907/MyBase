@@ -23,6 +23,15 @@ public class AppMenuRepository extends DataRepository<MenuDO> {
         super(MenuDO.class);
     }
 
+    public List<MenuDO> findByApplicationIdAndType(Long applicationId, Set<Integer> menuTypes) {
+        ConfigStore configs = new DefaultConfigStore();
+        configs.eq("application_id", applicationId);
+        configs.order("menu_sort", Order.TYPE.ASC);
+        configs.in("menu_type", menuTypes);
+
+        return findAllByConfig(configs);
+    }
+
     public List<MenuDO> findByApplicationId(Long applicationId) {
         ConfigStore configs = new DefaultConfigStore();
         configs.eq("application_id", applicationId);

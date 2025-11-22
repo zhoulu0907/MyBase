@@ -12,6 +12,7 @@ import com.cmsr.onebase.module.app.core.dal.dataobject.menu.MenuDO;
 import com.cmsr.onebase.module.app.core.dto.appresource.CopyPageSetDTO;
 import com.cmsr.onebase.module.app.core.dto.appresource.CreatePageSetDTO;
 import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
+import com.cmsr.onebase.module.app.core.enums.menu.BpmMenuEnum;
 import com.cmsr.onebase.module.app.core.enums.menu.MenuTypeEnum;
 import com.cmsr.onebase.module.app.core.utils.MenuUtils;
 import jakarta.annotation.Resource;
@@ -49,9 +50,46 @@ public class AppMenuServiceImpl implements AppMenuService {
     private AppApplicationApi appApplicationApi;
 
     @Override
+    public List<MenuListRespVO> listBpmApplicationMenu(Long applicationId) {
+        ApplicationDO applicationDO = appCommonService.validateApplicationExist(applicationId);
+        List<MenuDO> menuDOS = appMenuRepository.findByApplicationIdAndType(applicationDO.getId(),
+                Set.of(MenuTypeEnum.BPM.getValue())
+        );
+
+        // 返回菜单
+        return menuDOS.stream()
+                .map(v -> BeanUtils.toBean(v, MenuListRespVO.class))
+                .collect(Collectors.toCollection(LinkedList::new));
+    }
+
+    @Override
+    public void createDefaultBpmMenu(Long applicationId) {
+        List<MenuDO> menuDOList = new ArrayList<>();
+        int menuSort = 0;
+
+        for (BpmMenuEnum bpmMenuEnum : BpmMenuEnum.values()) {
+            MenuDO menuDO = new MenuDO();
+            menuDO.setApplicationId(applicationId);
+            menuDO.setParentId(0L);
+            menuDO.setMenuCode(bpmMenuEnum.getCode());
+            menuDO.setMenuSort(menuSort++);
+            menuDO.setMenuType(MenuTypeEnum.BPM.getValue());
+            menuDO.setMenuName(bpmMenuEnum.getText());
+            menuDO.setMenuIcon("icon-folder");
+            menuDO.setIsVisible(0);
+
+            menuDOList.add(menuDO);
+        }
+
+        appMenuRepository.insertBatch(menuDOList);
+    }
+
+    @Override
     public List<MenuListRespVO> listApplicationMenu(Long applicationId, String name) {
         ApplicationDO applicationDO = appCommonService.validateApplicationExist(applicationId);
-        List<MenuDO> menuDOS = appMenuRepository.findByApplicationId(applicationDO.getId());
+        List<MenuDO> menuDOS = appMenuRepository.findByApplicationIdAndType(applicationDO.getId(),
+                Set.of(MenuTypeEnum.PAGE.getValue(), MenuTypeEnum.GROUP.getValue())
+        );
         List<MenuListRespVO> menuListRespList = new ArrayList<>();
         // 把第一层的菜单添加到列表中
         LinkedList<MenuListRespVO> levelOneMenus = menuDOS.stream()
