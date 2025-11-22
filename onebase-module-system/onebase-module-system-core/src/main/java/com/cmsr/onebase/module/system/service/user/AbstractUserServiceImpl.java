@@ -159,7 +159,7 @@ public abstract class AbstractUserServiceImpl implements UserService {
             user.setAdminType(AdminTypeEnum.CUSTOM.getType());
         }
         // 根据来源场景保存用户类型和企业id
-        setUserTypeByScene(user);
+        buildUserTypeForCreateUer(user);
         getAdminUserDataRepository().insert(user);
         // 2.1.1 保存初始密码历史记录
         securityConfigApi.savePasswordHistory(user.getId(), user.getPassword());
@@ -181,10 +181,11 @@ public abstract class AbstractUserServiceImpl implements UserService {
     }
 
     /**
-     * 根据来源场景保存用户类型和企业id
+     * 创建用户专用：根据来源场景保存用户类型和企业id
+     * 目前只允许创建下面几种类型用户，如有新增类型，需要更新此处逻辑
      * @param user
      */
-    private void setUserTypeByScene(AdminUserDO user) {
+    private void buildUserTypeForCreateUer(AdminUserDO user) {
         String fromSceneType = getXFromSceneType();
         if (XFromSceneTypeEnum.PLATFORM.getCode().equals(fromSceneType)) {
             user.setUserType(UserTypeEnum.PLATFORM.getValue());
@@ -197,6 +198,7 @@ public abstract class AbstractUserServiceImpl implements UserService {
                 user.setCorpId(loginUser.getCorpId());
             }
         } else {
+            // 目前只允许创建以上三种类型用户，如有新增，需要更新此处逻辑
             throw exception(USER_TYPE_EXCEPTION, fromSceneType);
         }
     }
@@ -302,7 +304,7 @@ public abstract class AbstractUserServiceImpl implements UserService {
         AdminUserDO user = BeanUtils.toBean(registerReqVO, AdminUserDO.class);
         user.setStatus(CommonStatusEnum.ENABLE.getStatus()); // 默认开启
         user.setPassword(encodePassword(registerReqVO.getPassword())); //
-        setUserTypeByScene(user);
+        buildUserTypeForCreateUer(user);
         getAdminUserDataRepository().insert(user);
 
         // 2.1 保存初始密码历史记录

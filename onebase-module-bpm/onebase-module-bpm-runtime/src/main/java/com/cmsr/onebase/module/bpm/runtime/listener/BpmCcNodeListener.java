@@ -35,7 +35,7 @@ public class BpmCcNodeListener {
     @Resource
     private BpmCcNodeListener self;
 
-    @Resource
+    @Resource(name = "bpmTaskService")
     private TaskService taskService;
 
     @Resource
