@@ -27,10 +27,11 @@ interface ObjectFieldItemProps {
   index: number;
   form: FormInstance;
   level: number;
+  onAdd: (index: number) => void;
   onRemove: (index: number) => void;
 }
 
-const ObjectFieldItem: React.FC<ObjectFieldItemProps> = ({ field, index, form, level, onRemove }) => {
+const ObjectFieldItem: React.FC<ObjectFieldItemProps> = ({ field, index, form, level, onAdd, onRemove }) => {
   const fieldName = field.field;
   const fieldType = Form.useWatch(`${fieldName}.type`, form);
   const fieldSchema = Form.useWatch(`${fieldName}.schema`, form) || { type: fieldType || 'string' };
@@ -75,16 +76,24 @@ const ObjectFieldItem: React.FC<ObjectFieldItemProps> = ({ field, index, form, l
             />
           </Form.Item>
         </Col>
-        <Col span={6}>
+        <Col span={4} style={{ display: 'flex', gap: '4px', justifyContent: 'flex-end' }}>
+          <Button
+            type="text"
+            icon={<IconPlus />}
+            onClick={() => onAdd(index)}
+            style={{ padding: '4px 8px' }}
+            title="添加字段"
+          />
           <Button
             type="text"
             status="danger"
             icon={<IconDelete />}
             onClick={() => onRemove(index)}
             style={{ padding: '4px 8px' }}
+            title="删除字段"
           />
         </Col>
-        <Col span={2}></Col>
+        <Col span={4}></Col>
       </Row>
 
       {/* 递归渲染嵌套的表单 */}
@@ -129,7 +138,7 @@ const ArrayFormList: React.FC<ArrayFormListProps> = ({ fieldPrefix, form, level,
   return (
     <div style={{ marginLeft: level > 0 ? level * 20 : 0 }}>
       <Form.List field={listFieldName}>
-        {(fields, { add, remove }) => {
+        {(fields) => {
           return (
             <>
               {fields.map((field, index) => (
@@ -140,33 +149,12 @@ const ArrayFormList: React.FC<ArrayFormListProps> = ({ fieldPrefix, form, level,
                   form={form}
                   level={level}
                   itemsSchema={itemsSchema}
-                  onRemove={(idx) => {
-                    // 如果删除后数组为空，阻止删除，确保至少有一个项
-                    if (fields.length === 1) {
-                      return;
-                    }
-                    remove(idx);
+                  onRemove={() => {
+                    // 数组类型不允许删除，至少需要保留1项
+                    return;
                   }}
                 />
               ))}
-
-              <Row>
-                <Col span={24}>
-                  <Button
-                    type="dashed"
-                    icon={<IconPlus />}
-                    onClick={() => {
-                      add({
-                        type: itemsSchema.type || 'string',
-                        schema: itemsSchema
-                      });
-                    }}
-                    style={{ width: '100%', marginTop: 8 }}
-                  >
-                    添加项
-                  </Button>
-                </Col>
-              </Row>
             </>
           );
         }}
@@ -194,7 +182,7 @@ const ArrayFieldItem: React.FC<ArrayFieldItemProps> = ({ field, index, form, lev
     <div style={{ marginBottom: 16, paddingLeft: 12, borderLeft: '2px solid #e5e6eb' }}>
       <Row gutter={8}>
         <Col span={6}>
-          <div style={{ padding: '4px 0', color: '#86909c' }}>项 {index + 1}</div>
+          <div style={{ padding: '4px 0', color: '#86909c' }}>字段 </div>
         </Col>
         <Col span={10}>
           <Form.Item
@@ -218,16 +206,18 @@ const ArrayFieldItem: React.FC<ArrayFieldItemProps> = ({ field, index, form, lev
             />
           </Form.Item>
         </Col>
-        <Col span={6}>
+        <Col span={4} style={{ display: 'flex', gap: '4px', justifyContent: 'flex-end' }}>
           <Button
             type="text"
             status="danger"
             icon={<IconDelete />}
             onClick={() => onRemove(index)}
-            style={{ padding: '4px 8px' }}
+            disabled
+            style={{ padding: '4px 8px', opacity: 0.5, cursor: 'not-allowed' }}
+            title="数组类型至少需要保留1项"
           />
         </Col>
-        <Col span={2}></Col>
+        <Col span={4}></Col>
       </Row>
 
       {/* 递归渲染嵌套的表单 */}
@@ -253,6 +243,25 @@ const SchemaForm: React.FC<SchemaFormProps> = ({ form, schema, fieldPrefix = 'sc
   // 处理 object 类型
   if (schema.type === 'object') {
     const listFieldName = fieldPrefix;
+    const initializedRef = React.useRef(false);
+
+    // 如果对象为空，自动添加一个字段
+    React.useEffect(() => {
+      if (!initializedRef.current) {
+        const currentValue = form.getFieldValue(listFieldName);
+        if (!currentValue || currentValue.length === 0) {
+          // 初始化一个默认字段
+          form.setFieldValue(listFieldName, [
+            {
+              name: '',
+              type: 'string',
+              schema: { type: 'string' }
+            }
+          ]);
+        }
+        initializedRef.current = true;
+      }
+    }, [listFieldName, form]);
 
     return (
       <div style={{ marginLeft: level > 0 ? level * 20 : 0 }}>
@@ -267,28 +276,20 @@ const SchemaForm: React.FC<SchemaFormProps> = ({ form, schema, fieldPrefix = 'sc
                     index={index}
                     form={form}
                     level={level}
-                    onRemove={remove}
-                  />
-                ))}
-
-                <Row>
-                  <Col span={24}>
-                    <Button
-                      type="dashed"
-                      icon={<IconPlus />}
-                      onClick={() => {
-                        add({
+                    onAdd={(currentIndex) => {
+                      // 在当前行的下一行插入新字段
+                      add(
+                        {
                           name: '',
                           type: 'string',
                           schema: { type: 'string' }
-                        });
-                      }}
-                      style={{ width: '100%', marginTop: 8 }}
-                    >
-                      添加字段
-                    </Button>
-                  </Col>
-                </Row>
+                        },
+                        currentIndex + 1
+                      );
+                    }}
+                    onRemove={remove}
+                  />
+                ))}
               </>
             );
           }}

@@ -290,7 +290,7 @@ const CreateScriptActionPage: React.FC<CreateScriptActionPageProps> = ({ onSucce
         </Row>
         {inputEditType === EditTypeEnum.Visual && inputSchema && (
           <Row>
-            <Form.Item field="inputParameterSchema" label="字段配置">
+            <Form.Item field="inputParameterSchema">
               <SchemaForm form={form} schema={inputSchema} fieldPrefix="inputParameterSchema" level={0} />
             </Form.Item>
           </Row>
