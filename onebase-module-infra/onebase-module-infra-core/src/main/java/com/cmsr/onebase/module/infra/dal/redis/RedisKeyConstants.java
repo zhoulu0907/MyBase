@@ -16,6 +16,7 @@ public interface RedisKeyConstants {
 
     /**
      * Redis Key前缀 - 锁定状态记录
+     * 设置过期时间，过期自动删除(自动解锁）
      */
     String REDIS_KEY_LOCK = "infra:security:login:lock:";
 
