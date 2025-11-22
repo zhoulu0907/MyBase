@@ -11,6 +11,8 @@ import java.util.List;
 public interface AppMenuService {
     List<MenuListRespVO> listBpmApplicationMenu(Long applicationId);
 
+    void createDefaultBpmMenu(Long applicationId);
+
     List<MenuListRespVO> listApplicationMenu(Long applicationId, String name);
 
     MenuCreateRespVO createApplicationMenu(MenuCreateReqVO createReqVO);

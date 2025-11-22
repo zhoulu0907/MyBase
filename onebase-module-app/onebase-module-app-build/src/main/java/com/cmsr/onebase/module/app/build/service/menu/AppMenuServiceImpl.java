@@ -12,6 +12,7 @@ import com.cmsr.onebase.module.app.core.dal.dataobject.menu.MenuDO;
 import com.cmsr.onebase.module.app.core.dto.appresource.CopyPageSetDTO;
 import com.cmsr.onebase.module.app.core.dto.appresource.CreatePageSetDTO;
 import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
+import com.cmsr.onebase.module.app.core.enums.menu.BpmMenuEnum;
 import com.cmsr.onebase.module.app.core.enums.menu.MenuTypeEnum;
 import com.cmsr.onebase.module.app.core.utils.MenuUtils;
 import jakarta.annotation.Resource;
@@ -59,6 +60,28 @@ public class AppMenuServiceImpl implements AppMenuService {
         return menuDOS.stream()
                 .map(v -> BeanUtils.toBean(v, MenuListRespVO.class))
                 .collect(Collectors.toCollection(LinkedList::new));
+    }
+
+    @Override
+    public void createDefaultBpmMenu(Long applicationId) {
+        List<MenuDO> menuDOList = new ArrayList<>();
+        int menuSort = 0;
+
+        for (BpmMenuEnum bpmMenuEnum : BpmMenuEnum.values()) {
+            MenuDO menuDO = new MenuDO();
+            menuDO.setApplicationId(applicationId);
+            menuDO.setParentId(0L);
+            menuDO.setMenuCode(bpmMenuEnum.getCode());
+            menuDO.setMenuSort(menuSort++);
+            menuDO.setMenuType(MenuTypeEnum.BPM.getValue());
+            menuDO.setMenuName(bpmMenuEnum.getText());
+            menuDO.setMenuIcon("icon-folder");
+            menuDO.setIsVisible(0);
+
+            menuDOList.add(menuDO);
+        }
+
+        appMenuRepository.insertBatch(menuDOList);
     }
 
     @Override
