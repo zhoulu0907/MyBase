@@ -31,17 +31,11 @@ public class EtlCodegenMain {
         //创建配置内容
         GlobalConfig globalConfig = new GlobalConfig();
 
-
-        //设置根包
-        //globalConfig.setBasePackage("com.cmsr.onebase.module.etl.core.dal.dataobject");
-
         globalConfig.enableTableDef();
         globalConfig.setTableDefPackage("com.cmsr.onebase.module.etl.core.dal.dataobject.table");
-        //globalConfig.setTableDefClassPrefix("");
         globalConfig.setTableDefClassSuffix("TableDef");
 
         //设置表前缀和只生成哪些表
-        //globalConfig.setTablePrefix("etl_");
         globalConfig.setGenerateTable("etl_catalog",
                 "etl_datasource",
                 "etl_execution_log",

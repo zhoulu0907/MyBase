@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 @Configuration
-public class MyabtisFlexConfiguration implements MyBatisFlexCustomizer {
+public class MyBatisFlexConfiguration implements MyBatisFlexCustomizer {
 
     private static final Logger logger = LoggerFactory.getLogger("OneBase-SQL");
 
