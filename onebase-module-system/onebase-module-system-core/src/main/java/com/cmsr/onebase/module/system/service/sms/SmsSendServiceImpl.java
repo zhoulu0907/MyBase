@@ -16,7 +16,7 @@ import com.cmsr.onebase.module.system.framework.sms.core.client.dto.SmsSendRespD
 import com.cmsr.onebase.module.system.mq.message.sms.SmsSendMessage;
 import com.cmsr.onebase.module.system.mq.producer.sms.SmsProducer;
 import com.cmsr.onebase.module.system.service.member.MemberService;
-import com.cmsr.onebase.module.system.service.user.AdminUserService;
+import com.cmsr.onebase.module.system.service.user.UserService;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +38,7 @@ import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 public class SmsSendServiceImpl implements SmsSendService {
 
     @Resource
-    private AdminUserService adminUserService;
+    private UserService   userService;
     @Resource
     private MemberService memberService;
     @Resource
@@ -55,7 +55,7 @@ public class SmsSendServiceImpl implements SmsSendService {
     public Long sendSingleSmsToAdmin(String mobile, Long userId, String templateCode, Map<String, Object> templateParams) {
         // 如果 mobile 为空，则加载用户编号对应的手机号
         if (StrUtil.isEmpty(mobile)) {
-            AdminUserDO user = adminUserService.getUser(userId);
+            AdminUserDO user = userService.getUser(userId);
             if (user != null) {
                 mobile = user.getMobile();
             }

@@ -110,7 +110,7 @@ public class MetadataValidationLengthBuildServiceImpl implements MetadataValidat
         data.setEntityId(field.getEntityId());
         data.setAppId(field.getAppId());
         data.setGroupId(groupId);
-
+        data.setPromptMessage(vo.getPopPrompt());
         // 保存长度校验规则
         lengthRepository.upsert(data);
         
@@ -197,6 +197,7 @@ public class MetadataValidationLengthBuildServiceImpl implements MetadataValidat
             updateDO.setEntityId(existingDO.getEntityId());
             updateDO.setAppId(existingDO.getAppId());
             updateDO.setGroupId(targetGroupId);
+            updateDO.setPromptMessage(reqVO.getPopPrompt());
 
             // 执行更新
             lengthRepository.update(updateDO);

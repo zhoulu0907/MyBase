@@ -11,7 +11,7 @@ import com.cmsr.onebase.module.system.dal.dataobject.dept.PostDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.service.dept.DeptService;
 import com.cmsr.onebase.module.system.service.dept.PostService;
-import com.cmsr.onebase.module.system.service.user.AdminUserService;
+import com.cmsr.onebase.module.system.service.user.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
@@ -41,7 +41,7 @@ import static com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUti
 public class OAuth2UserController {
 
     @Resource
-    private AdminUserService userService;
+    private UserService userService;
     @Resource
     private DeptService deptService;
     @Resource

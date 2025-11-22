@@ -395,10 +395,10 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
         DataRow dataRow = temporaryService.query(quoteTableName(entity.getTableName()),configStore);
 
         // 将要删除的数据行保存下来，以便在后置删除触发方法中使用（物理删除之后数据库可能不存在该数据行）
-        context.setProcessedData(dataRow.map());
+        context.setProcessedData(dataRow == null ? new HashMap<>() : dataRow.map());
 
         Long entityId = context.getEntityId();
-        Map<String, Object> data = convertNameToId(entityId,dataRow.map());
+        Map<String, Object> data = convertNameToId(entityId,dataRow == null ? new HashMap<>() : dataRow.map());
 
         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
         reqDTO.setTraceId(UUID.randomUUID().toString());
@@ -424,7 +424,7 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
         Map deletedData = context.getProcessedData();
 
         Long entityId = context.getEntityId();
-        Map<String, Object> data = convertNameToId(entityId,deletedData);
+        Map<String, Object> data = convertNameToId(entityId,deletedData == null ? new HashMap<>() : deletedData);
 
         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
         reqDTO.setTraceId(UUID.randomUUID().toString());
