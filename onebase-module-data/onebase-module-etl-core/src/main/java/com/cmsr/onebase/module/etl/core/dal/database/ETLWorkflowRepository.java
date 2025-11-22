@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.etl.core.dal.database;
 
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.mybatis.BaseBizRepository;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLScheduleJobDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLWorkflowDO;
 import com.cmsr.onebase.module.etl.core.dal.mapper.ETLWorkflowMapper;
@@ -10,7 +11,6 @@ import com.cmsr.onebase.module.etl.core.vo.WorkflowBriefVO;
 import com.cmsr.onebase.module.etl.core.vo.WorkflowPageReqVO;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
-import com.mybatisflex.spring.service.impl.ServiceImpl;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.service.AnylineService;
@@ -23,7 +23,7 @@ import static com.cmsr.onebase.module.etl.core.dal.dataobject.table.EtlWorkflowT
 
 @Slf4j
 @Repository
-public class ETLWorkflowRepository extends ServiceImpl<ETLWorkflowMapper, ETLWorkflowDO> {
+public class ETLWorkflowRepository extends BaseBizRepository<ETLWorkflowMapper, ETLWorkflowDO> {
 
     private DataRepository<ETLWorkflowDO> dataRepository;
 
@@ -41,7 +41,7 @@ public class ETLWorkflowRepository extends ServiceImpl<ETLWorkflowMapper, ETLWor
         boolean filterByScheduleStrategy = StringUtils.isNotBlank(scheduleStrategy) && !StringUtils.equals(ScheduleType.ALL.getValue(), scheduleStrategy);
         QueryWrapper queryWrapper = QueryWrapper.create()
                 .select(ETL_WORKFLOW.ID,
-                        ETL_WORKFLOW.APPLICATION_ID,
+//                        ETL_WORKFLOW.APPLICATION_ID,
                         ETL_WORKFLOW.SCHEDULE_STRATEGY,
                         ETL_WORKFLOW.WORKFLOW_NAME.as("flow_name"),
                         ETL_WORKFLOW.IS_ENABLED.as("enable_status"),

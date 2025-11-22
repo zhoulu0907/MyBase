@@ -62,10 +62,7 @@ public class RepositoryTest {
 
     @Test
     void test4() {
-        WorkflowPageReqVO vo = new WorkflowPageReqVO();
-        vo.setPageNo(1);
-        vo.setPageSize(10);
-        PageResult<WorkflowBriefVO> workflowPage = workflowRepository.getWorkflowPage(vo);
-        System.out.println(workflowPage);
+        var result = workflowRepository.getById(47891273491857189L);
+        System.out.println(result);
     }
 }
