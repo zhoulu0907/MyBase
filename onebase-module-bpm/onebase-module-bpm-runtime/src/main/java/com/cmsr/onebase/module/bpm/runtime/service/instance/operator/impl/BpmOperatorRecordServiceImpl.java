@@ -52,14 +52,11 @@ import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionU
 @Slf4j
 @Service
 public class BpmOperatorRecordServiceImpl implements BpmOperatorRecordService {
-    @Resource
+    @Resource(name = "bpmInsService")
     private InsService insService;
 
-    @Resource
+    @Resource(name = "bpmTaskService")
     private TaskService taskService;
-
-    @Resource
-    private HisTaskService hisTaskService;
 
     @Resource
     private FlowHisTaskRepository hisTaskRepository;
@@ -67,10 +64,10 @@ public class BpmOperatorRecordServiceImpl implements BpmOperatorRecordService {
     @Resource
     private FlowTaskRepository taskRepository;
 
-    @Resource
+    @Resource(name = "bpmUserService")
     private UserService userService;
 
-    @Resource
+    @Resource(name = "bpmNodeService")
     private NodeService nodeService;
 
     @Resource

@@ -81,16 +81,13 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
     @Resource
     private BpmInstanceExtRepository insExtRepository;
 
-    @Resource
-    private UserService flowUserservice;
-
-    @Resource
+    @Resource(name = "bpmTaskService")
     private TaskService taskService;
 
-    @Resource
+    @Resource(name = "bpmUserService")
     private UserService userService;
 
-    @Resource
+    @Resource(name = "bpmInsService")
     private InsService insService;
 
     @Resource
@@ -102,7 +99,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
     @Resource
     private BpmEngineDefExtService engineDefExtService;
 
-    @Resource
+    @Resource(name = "bpmDefService")
     private DefService defService;
 
     @Resource
@@ -460,7 +457,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
             if (CollectionUtils.isNotEmpty(flowTaskList)) {
                 bpmMyCreatedVO.setTaskId(flowTaskList.get(0).getId());
                 List<Long> taskIds = StreamUtils.toList(flowTaskList, Task::getId);
-                List<User> userList = flowUserservice.getByAssociateds(taskIds);
+                List<User> userList = userService.getByAssociateds(taskIds);
                 List<Long> processedByIds = userList.stream()
                         .map(user -> Long.valueOf(user.getProcessedBy()))
                         .collect(Collectors.toList());

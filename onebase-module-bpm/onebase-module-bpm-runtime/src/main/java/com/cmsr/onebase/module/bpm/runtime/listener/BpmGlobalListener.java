@@ -36,16 +36,16 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 public class BpmGlobalListener implements GlobalListener {
-    @Resource
+    @Resource(name = "bpmTaskService")
     private TaskService taskService;
 
-    @Resource
+    @Resource(name = "bpmInsService")
     private InsService insService;
 
-    @Resource
+    @Resource(name = "bpmNodeService")
     private NodeService nodeService;
 
-    @Resource
+    @Resource(name = "bpmUserService")
     private UserService userService;
 
     @Resource
