@@ -39,7 +39,7 @@ import com.cmsr.onebase.module.system.service.permission.PermissionService;
 import com.cmsr.onebase.module.system.service.permission.RoleService;
 import com.cmsr.onebase.module.system.service.tenant.handler.TenantInfoHandler;
 import com.cmsr.onebase.module.system.service.tenant.handler.TenantMenuHandler;
-import com.cmsr.onebase.module.system.service.user.AdminUserService;
+import com.cmsr.onebase.module.system.service.user.UserService;
 import com.cmsr.onebase.module.system.vo.role.RoleInsertReqVO;
 import com.cmsr.onebase.module.system.vo.tenant.*;
 import com.cmsr.onebase.module.system.vo.user.UserInsertReqVO;
@@ -82,7 +82,7 @@ public class TenantServiceImpl implements TenantService {
     private TenantPackageService tenantPackageService;
     @Resource
     @Lazy // 延迟，避免循环依赖报错
-    private AdminUserService     userService;
+    private UserService          tenantUserService;
 
     @Resource
     private RoleService       roleService;
@@ -103,8 +103,6 @@ public class TenantServiceImpl implements TenantService {
 
     @Resource
     private AdminUserRoleApi adminUserRoleApi;
-    @Resource
-    private AdminUserService adminUserService;
 
     @Override
     public List<Long> getTenantIdList() {
@@ -129,7 +127,7 @@ public class TenantServiceImpl implements TenantService {
     @Override
     public Long getAvailableAccountCount() {
         LicenseDO license = licenseService.getLatestActiveLicense();
-        Integer userCount = userService.getUserCountByStatus(UserStatusEnum.NORMAL.getStatus());
+        Integer userCount = tenantUserService.getUserCountByStatus(UserStatusEnum.NORMAL.getStatus());
         if (license != null) {
             // 获取license总人数限制
             Integer licenseUserLimit = license.getUserLimit();
@@ -159,7 +157,7 @@ public class TenantServiceImpl implements TenantService {
     public Long getTenantExistUserCount(Long tenantId) {
         // 查询当前租户下已分配的用户数量
         return TenantUtils.execute(tenantId, () -> {
-            return Long.valueOf(userService.getUserCountByStatus(UserStatusEnum.NORMAL.getStatus()));
+            return Long.valueOf(tenantUserService.getUserCountByStatus(UserStatusEnum.NORMAL.getStatus()));
         });
     }
 
@@ -241,7 +239,7 @@ public class TenantServiceImpl implements TenantService {
             reqVO.setPassword(TENANT_ADMIN_PASSWORD);
             reqVO.setPlatformUserId(adminUserReqVO.getPlatformUserId());
             // 创建用户
-            Long userId = userService.createUser(reqVO);
+            Long userId = tenantUserService.createUser(reqVO);
             // 分配 管理员角色
             permissionService.assignUserRoles(userId, singleton(roleId));
         });
@@ -290,7 +288,7 @@ public class TenantServiceImpl implements TenantService {
             }
             TenantUtils.execute(tenant.getId(), () -> {
                 // 查询当前租户下已分配的用户数量，下限
-                Integer count = userService.getUserCountByStatus(UserStatusEnum.NORMAL.getStatus());
+                Integer count = tenantUserService.getUserCountByStatus(UserStatusEnum.NORMAL.getStatus());
                 if (updateReqVO.getAccountCount() < count) {
                     throw exception(LENANT_ALLOCATE_PERSON_COUNT_LESS_THEN_ALLOCATED,
                             count);
@@ -330,7 +328,7 @@ public class TenantServiceImpl implements TenantService {
                         .map(Long::valueOf)
                         .collect(Collectors.toList());
                 // 使用AdminUserService批量获取用户数据
-                List<AdminUserDO> users = userService.getUserList(userIds);
+                List<AdminUserDO> users = tenantUserService.getUserList(userIds);
                 Map<String, Long> usernameIdMap = users.stream()
                         .collect(Collectors.toMap(AdminUserDO::getUsername, AdminUserDO::getId));
                 // 删除处理
@@ -349,12 +347,12 @@ public class TenantServiceImpl implements TenantService {
                         permissionService.deleteRoleUsers(roleId, singleton(userRoleDO.getUserId()));
                     }
                     // 将旧管理员设置为普通用户,降级
-                    userService.updateAdminType(userId, AdminTypeEnum.CUSTOM.getType());
+                    tenantUserService.updateAdminType(userId, AdminTypeEnum.CUSTOM.getType());
                 }
 
                 updateReqVO.getTenantAdminUserUpdateReqVOSList().forEach(adminUserReqVO -> {
                     // 已存在的用户
-                    AdminUserDO newAdminUser = userService.getUserByUsername(adminUserReqVO.getAdminUserName());
+                    AdminUserDO newAdminUser = tenantUserService.getUserByUsername(adminUserReqVO.getAdminUserName());
                     // 判断前端上送的管理员是否已存在，存在则分配角色且不是老用户
                     if (newAdminUser == null) {
                         // 新管理员用户不存在，创建用户，并分配角色
@@ -366,14 +364,14 @@ public class TenantServiceImpl implements TenantService {
                         userInsertReqVO.setPassword(TENANT_ADMIN_PASSWORD);
                         userInsertReqVO.setPlatformUserId(adminUserReqVO.getPlatformUserId());
                         // 创建用户
-                        Long userId = userService.createUser(userInsertReqVO);
+                        Long userId = tenantUserService.createUser(userInsertReqVO);
                         // 分配管理员权限
                         permissionService.assignUserRoles(userId, singleton(roleId));
                     } else {
                         // 新管理员用户存在，直接分配角色
                         permissionService.assignUserRoles(newAdminUser.getId(), singleton(roleId));
                         // 将新管理员设置为内置用户类型
-                        userService.updateAdminType(newAdminUser.getId(), AdminTypeEnum.SYSTEM.getType());
+                        tenantUserService.updateAdminType(newAdminUser.getId(), AdminTypeEnum.SYSTEM.getType());
                     }
                 });
             });
@@ -485,7 +483,7 @@ public class TenantServiceImpl implements TenantService {
         Map<Long, Integer> corpCountMap = findCorpCount();
         TenantDO tenantDO = getTenant(id);
         // 查询当前租户下的已有的正常状态的用户数量
-        Integer count = userService.getUserCountByStatus(UserStatusEnum.NORMAL.getStatus());
+        Integer count = tenantUserService.getUserCountByStatus(UserStatusEnum.NORMAL.getStatus());
         TenantRespVO tenantRespVO = TenantConvert.INSTANCE.convert(tenantDO);
         tenantRespVO.setExistUserCount(count);
         Long appCountResult = appApplicationApi.countApplicationByTenantId(id);
@@ -509,7 +507,7 @@ public class TenantServiceImpl implements TenantService {
             // 获取租户管理员用户信息
             List<TenantAdminUserResVO> adminUserList = new ArrayList<>();
             if (userIds.size() > 0) {
-                List<AdminUserDO> adminUsers = userService.getUserList(userIds);
+                List<AdminUserDO> adminUsers = tenantUserService.getUserList(userIds);
                 adminUserList = adminUsers.stream()
                         .filter(Objects::nonNull)
                         .map(uservo -> new TenantAdminUserResVO()
@@ -561,7 +559,7 @@ public class TenantServiceImpl implements TenantService {
         }
         List<TenantDO> tenantDOList = tenantDOPageResult.getList();
         List<Long> tenantIds = CollectionUtils.convertList(tenantDOList, TenantDO::getId);
-        Map<Long, Integer> existUserCountMap = adminUserService.getTenantExistUserCountByIds(tenantIds);
+        Map<Long, Integer> existUserCountMap = tenantUserService.getTenantExistUserCountByIds(tenantIds);
         Map<Long, Integer> coupCountMap = findCorpCount();
         Map<Integer, Integer> appCountMap = findAppCount();
         // 转换为VO并设置昵称

@@ -23,7 +23,7 @@ import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2ClientDO;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2RefreshTokenDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.dal.redis.oauth2.OAuth2AccessTokenRedisDAO;
-import com.cmsr.onebase.module.system.service.user.AdminUserService;
+import com.cmsr.onebase.module.system.service.user.UserService;
 import jakarta.annotation.Resource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -52,7 +52,7 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
     private OAuth2ClientService oauth2ClientService;
     @Resource
     @Lazy // 懒加载，避免循环依赖
-    private AdminUserService    adminUserService;
+    private UserService         userService;
 
     @Resource
     private OAuth2AccessTokenDataRepository  oauth2AccessTokenDataRepository;
@@ -255,7 +255,7 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
      */
     private Map<String, String> buildUserInfo(Long userId, Integer userType) {
         if (userType.equals(UserTypeEnum.THIRD.getValue())) {
-            AdminUserDO user = adminUserService.getUser(userId);
+            AdminUserDO user = userService.getUser(userId);
             return MapUtil.builder(LoginUser.INFO_KEY_NICKNAME, user.getNickname())
                     .put(LoginUser.INFO_KEY_DEPT_ID, StrUtil.toStringOrNull(user.getDeptId())).build();
         } else if (userType.equals(UserTypeEnum.CORP.getValue())) {

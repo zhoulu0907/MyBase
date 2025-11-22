@@ -1,0 +1,67 @@
+### 创建部门
+POST {{baseUrl}}/corp/dept/create
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "测试部门",
+  "parentId": 0,
+  "sort": 1,
+  "phone": "13800000001",
+  "email": "dept@test.com",
+  "status": 0,
+  "remark": "测试部门描述"
+}
+
+### 更新部门
+POST {{baseUrl}}/corp/dept/update
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "id": 100,
+  "name": "更新测试部门",
+  "parentId": 0,
+  "sort": 2,
+  "phone": "13800000002",
+  "email": "updated_dept@test.com",
+  "status": 0,
+  "remark": "更新测试部门描述",
+  "leaderUserId": 1001,
+  "adminUserId": 1002
+}
+
+### 修改部门用户管理员/主管
+POST {{baseUrl}}/corp/dept/update-dept-admin-or-director
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "updateType": "admin",
+  "deptId": 100,
+  "userId": 1001
+}
+
+### 删除部门
+POST {{baseUrl}}/corp/dept/delete?id=100
+Authorization: Bearer {{token}}
+
+### 获取部门列表
+GET {{baseUrl}}/corp/dept/list?name=测试&status=0
+Authorization: Bearer {{token}}
+
+### 获取部门精简信息列表
+GET {{baseUrl}}/corp/dept/simple-list
+Authorization: Bearer {{token}}
+
+### 获得部门信息
+GET {{baseUrl}}/corp/dept/get?id=100
+Authorization: Bearer {{token}}
+
+### 指定/搜索获取部门和用户信息
+GET {{baseUrl}}/corp/dept/get-dept-users?deptId=100&keywords=test
+Authorization: Bearer {{token}}
+
+### 根据ID和类型获取其所属部门及其父部门列表
+GET {{baseUrl}}/corp/dept/get-depts-by-id?id=100&idType=user
+Authorization: Bearer {{token}}

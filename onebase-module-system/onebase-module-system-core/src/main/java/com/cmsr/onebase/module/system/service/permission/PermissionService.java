@@ -83,6 +83,8 @@ public interface PermissionService {
      */
     Set<Long> getRoleMenuListByRoleId(Collection<Long> roleIds);
 
+    Set<Long> getAllCorpActiveMenuIds();
+
     /**
      * 获得所有激活的菜单编号集合
      *

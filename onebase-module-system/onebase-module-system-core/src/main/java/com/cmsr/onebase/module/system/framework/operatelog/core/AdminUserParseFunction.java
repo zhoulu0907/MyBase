@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.system.framework.operatelog.core;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
-import com.cmsr.onebase.module.system.service.user.AdminUserService;
+import com.cmsr.onebase.module.system.service.user.UserService;
 import com.mzt.logapi.service.IParseFunction;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +21,7 @@ public class AdminUserParseFunction implements IParseFunction {
     public static final String NAME = "getAdminUserById";
 
     @Resource
-    private AdminUserService adminUserService;
+    private UserService userService;
 
     @Override
     public String functionName() {
@@ -35,7 +35,7 @@ public class AdminUserParseFunction implements IParseFunction {
         }
 
         // 获取用户信息
-        AdminUserDO user = adminUserService.getUser(Convert.toLong(value));
+        AdminUserDO user = userService.getUser(Convert.toLong(value));
         if (user == null) {
             log.warn("[apply][获取用户{{}}为空", value);
             return "";

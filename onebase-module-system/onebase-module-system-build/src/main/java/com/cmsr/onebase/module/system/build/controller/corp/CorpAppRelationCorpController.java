@@ -34,4 +34,14 @@ public class CorpAppRelationCorpController {
         PageResult<CorpApplicationRespVO> pageResult = corpAppRelationService.getCorpAppRelationPage(corpAppPageReqVO);
         return success(pageResult);
     }
+
+
+    @PostMapping("/update-status")
+    @Operation(summary = "企业启用/禁用")
+    @PreAuthorize("@ss.hasPermission('corp:corp:update')")
+    public CommonResult<Boolean> updateStatus(@RequestParam("id") Long id, @RequestParam("status") Long status) {
+        corpAppRelationService.updateStatus(id, status);
+        return success(true);
+    }
+
 }

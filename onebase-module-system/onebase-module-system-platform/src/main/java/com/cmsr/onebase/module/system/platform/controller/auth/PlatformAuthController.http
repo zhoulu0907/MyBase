@@ -11,7 +11,8 @@ tag: {{tag}}
 
 {
   "username": "admin",
-  "password": "admin123"
+  "password": "admin123",
+    "deviceId":666
 }
 
 > {%
