@@ -50,16 +50,16 @@ import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionU
 @Slf4j
 @Service
 public class BpmDetailServiceImpl implements BpmDetailService {
-    @Resource
+    @Resource(name = "bpmInsService")
     private InsService insService;
 
-    @Resource
+    @Resource(name = "bpmTaskService")
     private TaskService taskService;
 
-    @Resource
+    @Resource(name = "bpmHisTaskService")
     private HisTaskService hisTaskService;
 
-    @Resource
+    @Resource(name = "bpmUserService")
     private UserService userService;
 
     @Resource

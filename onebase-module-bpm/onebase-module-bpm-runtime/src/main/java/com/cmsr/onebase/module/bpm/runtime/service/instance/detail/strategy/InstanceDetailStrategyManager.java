@@ -6,9 +6,6 @@ import com.cmsr.onebase.module.bpm.runtime.vo.BpmTaskDetailRespVO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.warm.flow.core.entity.Instance;
-import org.dromara.warm.flow.core.service.HisTaskService;
-import org.dromara.warm.flow.core.service.TaskService;
-import org.dromara.warm.flow.core.service.UserService;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -28,15 +25,6 @@ public class InstanceDetailStrategyManager {
 
     @Resource
     private List<InstanceDetailStrategy<?>> strategies;
-
-    @Resource
-    private TaskService taskService;
-
-    @Resource
-    private HisTaskService hisTaskService;
-
-    @Resource
-    private UserService userService;
 
     @Resource
     private DefaultInstanceDetailStrategy defaultStrategy;
