@@ -11,7 +11,7 @@ import com.cmsr.onebase.module.system.service.dept.DeptService;
 import com.cmsr.onebase.module.system.service.dept.PostService;
 import com.cmsr.onebase.module.system.service.permission.PermissionService;
 import com.cmsr.onebase.module.system.service.permission.RoleService;
-import com.cmsr.onebase.module.system.service.user.AdminUserService;
+import com.cmsr.onebase.module.system.service.user.UserService;
 import com.cmsr.onebase.module.system.vo.user.UserProfileRespVO;
 import com.cmsr.onebase.module.system.vo.user.UserProfileUpdatePasswordReqVO;
 import com.cmsr.onebase.module.system.vo.user.UserProfileUpdateReqVO;
@@ -37,11 +37,11 @@ import static com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUti
 public class CorpUserProfileController {
 
     @Resource
-    private AdminUserService userService;
+    private UserService corpUserService;
     @Resource
-    private DeptService deptService;
+    private DeptService corpDeptService;
     @Resource
-    private PostService postService;
+    private PostService      postService;
     @Resource
     private PermissionService permissionService;
     @Resource
@@ -52,11 +52,11 @@ public class CorpUserProfileController {
     @PreAuthorize("@ss.hasPermission('corp:profile:query')")
     public CommonResult<UserProfileRespVO> getUserProfile() {
         // 获得用户基本信息
-        AdminUserDO user = userService.getUser(getLoginUserId());
+        AdminUserDO user = corpUserService.getUser(getLoginUserId());
         // 获得用户角色
         List<RoleDO> userRoles = roleService.getRoleListFromCache(permissionService.getRoleIdsListByUserId(user.getId()));
         // 获得部门信息
-        DeptDO dept = user.getDeptId() != null ? deptService.getDept(user.getDeptId()) : null;
+        DeptDO dept = user.getDeptId() != null ? corpDeptService.getDept(user.getDeptId()) : null;
         // 获得岗位信息
         List<PostDO> posts = CollUtil.isNotEmpty(user.getPostIds()) ? postService.getPostList(user.getPostIds()) : null;
         return success(UserConvert.INSTANCE.convert(user, userRoles, dept, posts));
@@ -66,7 +66,7 @@ public class CorpUserProfileController {
     @Operation(summary = "修改用户个人信息")
     @PreAuthorize("@ss.hasPermission('corp:profile:update')")
     public CommonResult<Boolean> updateUserProfile(@Valid @RequestBody UserProfileUpdateReqVO reqVO) {
-        userService.updateUserProfile(getLoginUserId(), reqVO);
+        corpUserService.updateUserProfile(getLoginUserId(), reqVO);
         return success(true);
     }
 
@@ -74,7 +74,7 @@ public class CorpUserProfileController {
     @Operation(summary = "修改用户个人密码")
     @PreAuthorize("@ss.hasPermission('corp:profile:reset-pwd')")
     public CommonResult<Boolean> updateUserProfilePassword(@Valid @RequestBody UserProfileUpdatePasswordReqVO reqVO) {
-        userService.updateUserPassword(getLoginUserId(), reqVO);
+        corpUserService.updateUserPassword(getLoginUserId(), reqVO);
         return success(true);
     }
 

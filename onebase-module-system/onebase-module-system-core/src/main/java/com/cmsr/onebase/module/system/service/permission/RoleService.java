@@ -120,6 +120,16 @@ public interface RoleService {
      */
     boolean hasAnySuperOrTenantAdmin(Collection<Long> ids);
 
+
+    /**
+     * 判断角色编号数组中，是否有企业管理员
+     *
+     * @param ids 角色编号数组
+     * @return 是否有管理员
+     */
+    boolean hasAnyCorpAdmin(Collection<Long> ids);
+
+
     /**
      * 校验角色们是否有效。如下情况，视为无效：
      * 1. 角色编号不存在

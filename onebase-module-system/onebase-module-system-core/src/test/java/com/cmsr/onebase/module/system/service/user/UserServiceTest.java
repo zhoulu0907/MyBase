@@ -2,17 +2,17 @@ package com.cmsr.onebase.module.system.service.user;
 
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.system.vo.user.UserPageReqVO;
+import com.cmsr.onebase.module.system.dal.database.RoleDataRepository;
+import com.cmsr.onebase.module.system.dal.database.UserRoleDataRepository;
+import com.cmsr.onebase.module.system.dal.database.dept.DeptDataRepository;
+import com.cmsr.onebase.module.system.dal.database.user.AdminUserDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.UserRoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
-import com.cmsr.onebase.module.system.dal.database.AdminUserDataRepository;
-import com.cmsr.onebase.module.system.dal.database.DeptDataRepository;
-import com.cmsr.onebase.module.system.dal.database.RoleDataRepository;
-import com.cmsr.onebase.module.system.dal.database.UserRoleDataRepository;
 import com.cmsr.onebase.module.system.enums.permission.DataScopeEnum;
 import com.cmsr.onebase.module.system.service.permission.PermissionService;
+import com.cmsr.onebase.module.system.vo.user.UserPageReqVO;
 import jakarta.annotation.Resource;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.junit.jupiter.api.AfterEach;
@@ -55,10 +55,10 @@ import static org.junit.jupiter.api.Assertions.*;
 })
 @ActiveProfiles("unit-test")
 @Transactional
-public class AdminUserServiceTest {
+public class UserServiceTest {
 
     @Resource
-    private AdminUserService adminUserService;
+    private UserService userService;
 
     @Resource
     private PermissionService permissionService;
@@ -126,7 +126,7 @@ public class AdminUserServiceTest {
         reqVO.setPageSize(10);
 
         // 执行测试
-        PageResult<AdminUserDO> result = adminUserService.getUserPage(reqVO);
+        PageResult<AdminUserDO> result = userService.getUserPage(reqVO);
 
         // 验证结果
         assertNotNull(result, "结果不应该为空");
@@ -146,7 +146,7 @@ public class AdminUserServiceTest {
         reqVO.setNickname("user");
 
         // 执行测试
-        PageResult<AdminUserDO> result = adminUserService.getUserPage(reqVO);
+        PageResult<AdminUserDO> result = userService.getUserPage(reqVO);
 
         // 验证结果
         assertNotNull(result, "结果不应该为空");
@@ -167,7 +167,7 @@ public class AdminUserServiceTest {
         reqVO.setMobile("138");
 
         // 执行测试
-        PageResult<AdminUserDO> result = adminUserService.getUserPage(reqVO);
+        PageResult<AdminUserDO> result = userService.getUserPage(reqVO);
 
         // 验证结果
         assertNotNull(result, "结果不应该为空");
@@ -188,7 +188,7 @@ public class AdminUserServiceTest {
         reqVO.setStatus(CommonStatusEnum.ENABLE.getStatus());
 
         // 执行测试
-        PageResult<AdminUserDO> result = adminUserService.getUserPage(reqVO);
+        PageResult<AdminUserDO> result = userService.getUserPage(reqVO);
 
         // 验证结果
         assertNotNull(result, "结果不应该为空");
@@ -209,7 +209,7 @@ public class AdminUserServiceTest {
         reqVO.setDeptId(testDept1.getId());
 
         // 执行测试
-        PageResult<AdminUserDO> result = adminUserService.getUserPage(reqVO);
+        PageResult<AdminUserDO> result = userService.getUserPage(reqVO);
 
         // 验证结果
         assertNotNull(result, "结果不应该为空");
@@ -230,7 +230,7 @@ public class AdminUserServiceTest {
         reqVO.setRoleId(testRole.getId());
 
         // 执行测试
-        PageResult<AdminUserDO> result = adminUserService.getUserPage(reqVO);
+        PageResult<AdminUserDO> result = userService.getUserPage(reqVO);
 
         // 验证结果
         assertNotNull(result, "结果不应该为空");
@@ -254,7 +254,7 @@ public class AdminUserServiceTest {
         });
 
         // 执行测试
-        PageResult<AdminUserDO> result = adminUserService.getUserPage(reqVO);
+        PageResult<AdminUserDO> result = userService.getUserPage(reqVO);
 
         // 验证结果
         assertNotNull(result, "结果不应该为空");
@@ -275,7 +275,7 @@ public class AdminUserServiceTest {
         reqVO.setDeptId(testDept1.getId());
 
         // 执行测试
-        PageResult<AdminUserDO> result = adminUserService.getUserPage(reqVO);
+        PageResult<AdminUserDO> result = userService.getUserPage(reqVO);
 
         // 验证结果
         assertNotNull(result, "结果不应该为空");
@@ -298,7 +298,7 @@ public class AdminUserServiceTest {
         reqVO.setRoleId(99999L); // 不存在的角色ID
 
         // 执行测试
-        PageResult<AdminUserDO> result = adminUserService.getUserPage(reqVO);
+        PageResult<AdminUserDO> result = userService.getUserPage(reqVO);
 
         // 验证结果
         assertNotNull(result, "结果不应该为空");
@@ -317,7 +317,7 @@ public class AdminUserServiceTest {
         reqVO.setPageSize(2);
 
         // 执行测试
-        PageResult<AdminUserDO> result = adminUserService.getUserPage(reqVO);
+        PageResult<AdminUserDO> result = userService.getUserPage(reqVO);
 
         // 验证结果
         assertNotNull(result, "结果不应该为空");
@@ -326,7 +326,7 @@ public class AdminUserServiceTest {
 
         // 测试第二页
         reqVO.setPageNo(2);
-        PageResult<AdminUserDO> result2 = adminUserService.getUserPage(reqVO);
+        PageResult<AdminUserDO> result2 = userService.getUserPage(reqVO);
         assertEquals(1, result2.getList().size(), "第二页应该返回1条记录");
     }
 

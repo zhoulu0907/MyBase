@@ -1,11 +1,15 @@
-package com.cmsr.onebase.module.system.dal.database;
+package com.cmsr.onebase.module.system.dal.database.user;
 
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
+import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
+import com.cmsr.onebase.framework.common.enums.XFromSceneTypeEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.data.base.BaseDO;
+import com.cmsr.onebase.framework.security.core.LoginUser;
+import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
+import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
-import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
 import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
 import com.cmsr.onebase.module.system.vo.user.UserByDeptPageReqVO;
 import com.cmsr.onebase.module.system.vo.user.UserPageReqVO;
@@ -16,13 +20,14 @@ import org.anyline.entity.Compare;
 import org.anyline.entity.Order;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 
 /**
  * 管理员用户数据访问层
@@ -32,15 +37,53 @@ import java.util.Set;
  * @author matianyu
  * @date 2025-08-18
  */
-@Repository
 @Slf4j
-public class AdminUserDataRepository extends DataRepository<AdminUserDO> {
+public abstract class AbstractUserDataRepository extends DataRepository<AdminUserDO> {
 
     /**
      * 构造方法，指定默认实体类
      */
-    public AdminUserDataRepository() {
+    public AbstractUserDataRepository() {
         super(AdminUserDO.class);
+    }
+
+    /**
+     * 获取当前服务对应的场景类型：空间/企业
+     *
+     * @return
+     */
+    public abstract String getXFromSceneType();
+
+    private DefaultConfigStore buildUserConfigStore() {
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+        if (loginUser == null || loginUser.getId() == null) {
+            // 立即失败，抛出异常，防止数据越权
+            throw exception(USER_NOT_EXISTS);
+        }
+
+        String fromSceneType = getXFromSceneType();
+
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        if (XFromSceneTypeEnum.PLATFORM.getCode().equals(fromSceneType)) {
+            configStore.and(Compare.EQUAL, AdminUserDO.USER_TYPE, UserTypeEnum.PLATFORM.getValue());
+        } else if (XFromSceneTypeEnum.TENANT.getCode().equals(fromSceneType)) {
+            // todo 暂时注掉，因为PLATFORM类型租户（tenant_id=1）在被空间中开发测试使用，需要返回该租户用户数据
+            // configStore.and(Compare.EQUAL, AdminUserDO.USER_TYPE, UserTypeEnum.TENANT.getValue());
+        } else if (XFromSceneTypeEnum.CORP.getCode().equals(fromSceneType)) {
+            Long corpId = loginUser.getCorpId();
+            if (null == corpId) {
+                // 立即失败，抛出异常，防止数据越权
+                throw exception(CORP_ID_NULL);
+            }
+            configStore.and(Compare.EQUAL, DeptDO.CORP_ID, corpId);
+            configStore.and(Compare.EQUAL, AdminUserDO.USER_TYPE, UserTypeEnum.CORP.getValue());
+        } else if (XFromSceneTypeEnum.ALL.getCode().equals(fromSceneType)) {
+            // 全部类型，不做任何处理
+        } else {
+            // 立即失败，抛出异常，防止数据越权
+            throw exception(USER_TYPE_EXCEPTION, fromSceneType);
+        }
+        return configStore;
     }
 
     /**
@@ -124,7 +167,7 @@ public class AdminUserDataRepository extends DataRepository<AdminUserDO> {
      * @return 用户列表
      */
     public List<AdminUserDO> findAllByStatus(Integer status, String userNickName) {
-        DefaultConfigStore configStore = CorpDeptUserHelper.getUserConfigStore();
+        DefaultConfigStore configStore = buildUserConfigStore();
         if (StringUtils.isNotBlank(userNickName)) {
             configStore.like(AdminUserDO.NICKNAME, userNickName);
         }
@@ -156,7 +199,7 @@ public class AdminUserDataRepository extends DataRepository<AdminUserDO> {
      * @return 分页结果
      */
     public PageResult<AdminUserDO> findPage(UserPageReqVO reqVO, Collection<Long> deptIds, Collection<Long> includeRoleUserIds, Collection<Long> excludeRoleUserIds) {
-        DefaultConfigStore configStore = CorpDeptUserHelper.getUserConfigStore();
+        DefaultConfigStore configStore = buildUserConfigStore();
         // 根据关键词模糊查询
         if (reqVO.getKeyword() != null && !reqVO.getKeyword().trim().isEmpty()) {
             configStore.and(new DefaultConfigStore()
@@ -223,7 +266,7 @@ public class AdminUserDataRepository extends DataRepository<AdminUserDO> {
      * @return 分页结果
      */
     public PageResult<AdminUserDO> findSimpleEnablePage(UserSimplePageReqVO reqVO) {
-        DefaultConfigStore configStore = CorpDeptUserHelper.getUserConfigStore();
+        DefaultConfigStore configStore = buildUserConfigStore();
         configStore.eq(AdminUserDO.STATUS, CommonStatusEnum.ENABLE.getStatus()); // 启用状态
 
         // 根据关键词模糊查询
@@ -262,7 +305,7 @@ public class AdminUserDataRepository extends DataRepository<AdminUserDO> {
     }
 
     public List<AdminUserDO> findEnableUserByIds(Set<Long> userIds) {
-        DefaultConfigStore configStore = CorpDeptUserHelper.getUserConfigStore();
+        DefaultConfigStore configStore = buildUserConfigStore();
         configStore.in(AdminUserDO.ID, userIds)
                 .eq(AdminUserDO.STATUS, UserStatusEnum.NORMAL.getStatus())
                 .order(AdminUserDO.ADMIN_TYPE, Order.TYPE.ASC)
@@ -271,7 +314,7 @@ public class AdminUserDataRepository extends DataRepository<AdminUserDO> {
     }
 
     public List<AdminUserDO> findPlatformEnableUserByIds(Set<Long> userIds) {
-        DefaultConfigStore configStore = CorpDeptUserHelper.getUserConfigStore();
+        DefaultConfigStore configStore = buildUserConfigStore();
         configStore.in(AdminUserDO.ID, userIds)
                 .eq(AdminUserDO.STATUS, UserStatusEnum.NORMAL.getStatus())
                 .order(AdminUserDO.ADMIN_TYPE, Order.TYPE.ASC)
@@ -280,9 +323,8 @@ public class AdminUserDataRepository extends DataRepository<AdminUserDO> {
     }
 
 
-
     public List<AdminUserDO> getTenantExistUserCountByIds(List<Long> userIds) {
-        DefaultConfigStore configStore = CorpDeptUserHelper.getUserConfigStore();
+        DefaultConfigStore configStore = buildUserConfigStore();
         configStore.in(AdminUserDO.ID, userIds)
                 .eq(AdminUserDO.STATUS, UserStatusEnum.NORMAL.getStatus())
                 .order(AdminUserDO.ADMIN_TYPE, Order.TYPE.ASC)

@@ -26,9 +26,6 @@ public class DeptSaveReqVO {
     @Schema(description = "显示顺序", example = "1024")
     private Integer sort;
 
-    @Schema(description = "管理员的用户ID", example = "2048")
-    private Long leaderUserId;
-
     @Schema(description = "联系电话", example = "15601691000")
     @Size(max = 11, message = "联系电话长度不能超过11个字符")
     private String phone;
@@ -46,7 +43,10 @@ public class DeptSaveReqVO {
     @Size(max = 512, message = "邮箱长度不能超过 512 个字符")
     private String remark;
 
-    @Schema(description = "部门主管", example = "")
-    private Long deptDirectorId;
+    @Schema(description = "主管UserID", example = "2048")
+    private Long leaderUserId;
+
+    @Schema(description = "管理员UserID", example = "")
+    private Long adminUserId;
 
 }
