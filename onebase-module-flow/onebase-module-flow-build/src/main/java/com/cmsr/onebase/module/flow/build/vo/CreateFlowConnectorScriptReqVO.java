@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.flow.build.vo;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.NullNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -31,12 +32,18 @@ public class CreateFlowConnectorScriptReqVO {
         if (this.inputParameter == null || this.inputParameter instanceof NullNode) {
             return null;
         }
+        if (this.inputParameter instanceof TextNode) {
+            return this.inputParameter.asText();
+        }
         return JsonUtils.toJsonString(this.inputParameter);
     }
 
     public String getOutputParameter() {
         if (this.outputParameter == null || this.outputParameter instanceof NullNode) {
             return null;
+        }
+        if (this.outputParameter instanceof TextNode) {
+            return this.outputParameter.asText();
         }
         return JsonUtils.toJsonString(this.outputParameter);
     }
