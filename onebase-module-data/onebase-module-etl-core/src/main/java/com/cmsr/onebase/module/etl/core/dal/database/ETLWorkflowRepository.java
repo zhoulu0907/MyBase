@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.etl.core.dal.database;
 
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.mybatis.BaseBizRepository;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLScheduleJobDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLWorkflowDO;
 import com.cmsr.onebase.module.etl.core.dal.mapper.ETLWorkflowMapper;
@@ -23,7 +24,7 @@ import static com.cmsr.onebase.module.etl.core.dal.dataobject.table.EtlWorkflowT
 
 @Slf4j
 @Repository
-public class ETLWorkflowRepository extends ServiceImpl<ETLWorkflowMapper, ETLWorkflowDO> {
+public class ETLWorkflowRepository extends BaseBizRepository<ETLWorkflowMapper, ETLWorkflowDO> {
 
     private DataRepository<ETLWorkflowDO> dataRepository;
 

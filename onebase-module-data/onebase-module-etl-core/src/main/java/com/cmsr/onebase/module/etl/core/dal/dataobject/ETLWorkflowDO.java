@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.etl.core.dal.dataobject;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
-import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
+import com.cmsr.onebase.framework.mybatis.BaseBizEntity;
 import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.Column;
 import jakarta.persistence.Table;
@@ -10,7 +10,7 @@ import lombok.Data;
 @Data
 @Table(name = "etl_workflow")
 @com.mybatisflex.annotation.Table("etl_workflow")
-public class ETLWorkflowDO extends TenantBaseDO {
+public class ETLWorkflowDO extends BaseBizEntity {
 
     @Column(name = "application_id")
     private Long applicationId;

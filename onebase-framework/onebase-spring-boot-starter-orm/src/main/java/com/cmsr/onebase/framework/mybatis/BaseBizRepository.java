@@ -16,8 +16,8 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
 
     private QueryWrapper injectQueryLimitation(QueryWrapper queryWrapper) {
         // TODO: add filters like applicationId, loginEnv
-        Long applicationId = null;
-        String loginEnv = null;
+        Long applicationId = 1234567890L;
+        String loginEnv = "bld";
         return queryWrapper
                 .eq(T::getApplicationId, applicationId)
                 .eq(T::getLoginEnv, loginEnv);

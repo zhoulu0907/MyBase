@@ -6,7 +6,7 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class BaseBizEntity extends BaseDO {
+public abstract class BaseBizEntity extends BaseDO {
 
     private Long applicationId;
 
