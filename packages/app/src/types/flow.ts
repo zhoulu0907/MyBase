@@ -165,8 +165,24 @@ export interface ListConnectInstanceReq {
 
 export interface CreateConnectInstanceReq {
   applicationId: string;
-  connectionName: string;
+  connectorName: string;
   description?: string;
   typeCode: string;
   config?: any;
+}
+
+/**
+ * TypeCode 枚举，用于表示流程节点的类型标识。
+ */
+export enum TypeCode {
+  SCRIPT = 'script' // 脚本类型
+  // 其他类型可在此处继续扩展
+}
+
+export interface ConnectInstance {
+  applicationId: string;
+  connectorId: string;
+  connectorName: string;
+  typeCode: TypeCode;
+  createTime: string;
 }

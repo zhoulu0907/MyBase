@@ -1,0 +1,112 @@
+.card {
+  width: 350px;
+  height: 188px;
+  background-color: #fff;
+  border-radius: 8px;
+  border: 1px solid #e5e5e5;
+
+  &:hover {
+    outline: 1px solid rgb(var(--primary-6));
+    background-color: #fff;
+    box-shadow: 0px 0px 8px 8px rgba(0, 0, 0, 0.05);
+  }
+
+  .cardHeader {
+    height: 72px;
+    box-sizing: border-box;
+    padding: 16px 16px 8px 16px;
+    display: flex;
+    cursor: pointer;
+
+    .cardHeaderIcon {
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #e8fffe;
+      border-radius: 8px;
+    }
+
+    .cardHeaderContent {
+      flex: 1;
+      padding-left: 16px;
+      overflow: hidden;
+
+      .cardHeaderContentTitle {
+        margin-bottom: 0;
+        font-size: 16px;
+        font-weight: 500;
+        line-height: 24px;
+        color: #1d2129;
+      }
+    }
+  }
+
+  .cardBody {
+    width: 100%;
+    height: 76px;
+    padding-left: 16px;
+    padding-right: 16px;
+    box-sizing: border-box;
+    cursor: pointer;
+
+    .cardBodyRow {
+      width: 100%;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 8px;
+
+      .cardBodyRowLabel {
+        font-size: 12px;
+        font-weight: 400;
+        color: #86909c;
+      }
+      .cardBodyRowContent {
+        text-align: right;
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        padding-left: 16px;
+        font-size: 12px;
+        font-weight: 400;
+        color: #272e3b;
+      }
+    }
+  }
+
+  .cardFooter {
+    height: 40px;
+    width: 100%;
+    padding: 6px 8px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #fff;
+    border-radius: 0 0 8px 8px;
+
+    .cardFooterLeft {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 16px;
+      line-height: 20px;
+      font-size: 12px;
+      color: #4e5969;
+    }
+
+    .cardFooterRight {
+      .cardFooterRightBtn {
+        font-weight: 400;
+        font-size: 14px;
+        color: #4e5969;
+      }
+    }
+  }
+}

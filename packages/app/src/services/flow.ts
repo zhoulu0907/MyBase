@@ -83,3 +83,7 @@ export const listConnectInstance = (params: ListConnectInstanceReq) => {
 export const createConnectInstance = (params: CreateConnectInstanceReq) => {
   return flowService.post('/connector/create', params);
 };
+
+export const getConnectInstance = (id: string) => {
+  return flowService.get(`/connector/get?id=${id}`);
+};

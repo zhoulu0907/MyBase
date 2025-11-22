@@ -8,7 +8,7 @@ import {
 import { getCommonPaginationList } from '@onebase/common';
 import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useState } from 'react';
-import ConnectNodeCategoryCard from '../../components/ConnectNodeCategoryCard';
+import ConnectNodeCategoryCard from '../../../components/ConnectNodeCategoryCard';
 import styles from './index.module.less';
 
 /**

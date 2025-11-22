@@ -1,30 +1,42 @@
 import { Menu } from '@arco-design/web-react';
-import { IconBackward, IconEdit } from '@arco-design/web-react/icon';
-import React, { useState } from 'react';
+import { IconArrowLeft, IconEdit } from '@arco-design/web-react/icon';
+import { getConnectInstance } from '@onebase/app';
+import { getHashQueryParam } from '@onebase/common';
+import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
 
-interface ConnectorInstanceDetailProps {
-  // 连接器实例ID
-  id: string;
-}
+interface ConnectorInstanceDetailProps {}
 
-const ConnectorInstanceDetail: React.FC<ConnectorInstanceDetailProps> = ({ id }) => {
+const ConnectorDetailPage: React.FC<ConnectorInstanceDetailProps> = ({}) => {
   const [activeKey, setActiveKey] = useState<'base' | 'action' | 'logic'>('base');
+
+  useEffect(() => {
+    const id = getHashQueryParam('id');
+
+    if (id) {
+      handleGetIntanceDetail(id);
+    }
+  }, []);
+
+  const handleGetIntanceDetail = async (id: string) => {
+    const res = await getConnectInstance(id);
+    console.log('res :', res);
+  };
 
   return (
     <div className={styles.connectorInstanceDetail}>
       <div className={styles.sider}>
         <div className={styles.siderHeader}>
-          <div>
-            <IconBackward />
-          </div>
+          <IconArrowLeft />
           <div>连接器实例2</div>
-          <div>
-            <IconEdit />
-          </div>
+          <IconEdit />
         </div>
         <div className={styles.sideMenu}>
-          <Menu style={{ width: '100%' }} defaultSelectedKeys={['base']}>
+          <Menu
+            style={{ width: '100%' }}
+            defaultSelectedKeys={['base']}
+            onClickMenuItem={(key) => setActiveKey(key as 'base' | 'action' | 'logic')}
+          >
             <Menu.Item key="base">基本信息</Menu.Item>
             <Menu.Item key="action">动作配置</Menu.Item>
             <Menu.Item key="logic">关联逻辑流</Menu.Item>
@@ -40,4 +52,4 @@ const ConnectorInstanceDetail: React.FC<ConnectorInstanceDetailProps> = ({ id })
   );
 };
 
-export default ConnectorInstanceDetail;
+export default ConnectorDetailPage;
