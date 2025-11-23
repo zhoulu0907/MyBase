@@ -3,7 +3,9 @@ package com.cmsr.onebase.module.metadata.build.service.entity;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
+import com.cmsr.onebase.module.flow.context.enums.FieldTypeEnum;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.*;
+import com.cmsr.onebase.module.metadata.build.controller.admin.relationship.vo.EntityRelationshipSaveReqVO;
 import com.cmsr.onebase.module.metadata.build.service.entity.vo.EntityFieldQueryVO;
 import com.cmsr.onebase.module.metadata.build.service.number.AutoNumberRuleBuildService;
 import com.cmsr.onebase.module.metadata.build.service.component.MetadataComponentFieldTypeBuildService;
@@ -16,10 +18,12 @@ import com.cmsr.onebase.module.metadata.build.service.validation.MetadataValidat
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.field.MetadataEntityFieldOptionDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataPermitRefOtftDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationTypeDO;
+import com.cmsr.onebase.module.metadata.core.enums.RelationshipTypeEnum;
 import com.cmsr.onebase.module.metadata.core.util.StatusEnumUtil;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.relationship.MetadataEntityRelationshipDO;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityFieldRepository;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationFormatRepository;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationLengthRepository;
@@ -78,6 +82,9 @@ import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.ENT
 @Slf4j
 public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldBuildService {
 
+    @Resource
+    private MetadataEntityRelationshipBuildService metadataEntityRelationshipBuildService;
+
     /**
      * 系统保留字段名列表
      */
@@ -95,8 +102,6 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
     @Resource
     private MetadataEntityFieldRepository metadataEntityFieldRepository;
-    @Resource
-    private MetadataEntityRelationshipBuildService metadataEntityRelationshipBuildService;
     @Resource
     private TemporaryDatasourceService temporaryDatasourceService;
     @Resource
@@ -795,6 +800,12 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 }
 
                 validateValidationRuleUniqueness(fieldId, origin.getEntityId());
+
+                //特别处理：如果数据选择类型的字段发生了变化，需要额外同步到 关联关系表中
+                if ("DATA_SELECTION".equals(item.getFieldType())) {
+
+                    processEntityRelation(reqVO.getAppId(), fieldId, full, item);
+                }
             }
         }
 
@@ -869,6 +880,13 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 }
 
                 validateValidationRuleUniqueness(fieldId, toCreate.getEntityId());
+
+                //特别处理：如果数据选择类型的字段发生了变化，需要额外同步到 关联关系表中
+                if ("DATA_SELECTION".equals(item.getFieldType())) {
+                    processEntityRelation(reqVO.getAppId(), fieldId, toCreate, item);
+                }
+
+
             }
         }
 
@@ -878,6 +896,69 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         }
 
         return resp;
+    }
+
+    private void processEntityRelation(String appId, Long fieldId, MetadataEntityFieldDO full, EntityFieldUpsertItemVO item) {
+        if (item.getDataSelectionConfig() == null) {
+            return;
+        }
+
+        Long targetEntityId = item.getDataSelectionConfig().getTargetEntityId();
+        Long targetFieldId = item.getDataSelectionConfig().getTargetFieldId();
+        
+        if (targetEntityId == null || targetFieldId == null) {
+            log.warn("数据选择配置不完整，跳过处理关系。sourceEntityId={}, fieldId={}", full.getEntityId(), fieldId);
+            return;
+        }
+
+        // 查询数据库中已存在的关系（根据 sourceEntityId 和 sourceFieldId）
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.and(MetadataEntityRelationshipDO.SOURCE_ENTITY_ID, full.getEntityId());
+        configStore.and(MetadataEntityRelationshipDO.SOURCE_FIELD_ID, fieldId.toString());
+        List<MetadataEntityRelationshipDO> existingRelations = 
+                metadataEntityRelationshipBuildService.findAllByConfig(configStore);
+
+        // 查找与当前字段相关的关系（应该只有一条）
+        MetadataEntityRelationshipDO existingRelation = null;
+        if (existingRelations != null && !existingRelations.isEmpty()) {
+            existingRelation = existingRelations.get(0);
+        }
+
+        // 构建新的关系数据
+        EntityRelationshipSaveReqVO r = new EntityRelationshipSaveReqVO();
+        r.setRelationName("数据选择关系");
+        r.setSourceEntityId(full.getEntityId().toString());
+        r.setTargetEntityId(targetEntityId.toString());
+        r.setRelationshipType(RelationshipTypeEnum.ONE_TO_MANY.getRelationshipType());
+        r.setSourceFieldId(fieldId.toString());
+        r.setTargetFieldId(targetFieldId.toString());
+        r.setCascadeType("READ");
+        r.setDescription("数据选择的一对多关系");
+        r.setAppId(appId);
+
+        // 比较数据：如果数据库中的关系和请求的数据一样，则忽略
+        if (existingRelation != null) {
+            boolean isSame = Objects.equals(existingRelation.getTargetEntityId(), targetEntityId)
+                    && Objects.equals(existingRelation.getTargetFieldId(), targetFieldId.toString());
+            
+            if (isSame) {
+                log.debug("数据选择关系未变化，忽略更新。sourceEntityId={}, fieldId={}, targetEntityId={}, targetFieldId={}",
+                        full.getEntityId(), fieldId, targetEntityId, targetFieldId);
+                return;
+            } else {
+                // 数据不同，更新关系
+                log.info("数据选择关系已变化，更新关系。sourceEntityId={}, fieldId={}, 原targetEntityId={}, 原targetFieldId={}, 新targetEntityId={}, 新targetFieldId={}",
+                        full.getEntityId(), fieldId, existingRelation.getTargetEntityId(), existingRelation.getTargetFieldId(),
+                        targetEntityId, targetFieldId);
+                r.setId(existingRelation.getId().toString());
+                metadataEntityRelationshipBuildService.updateEntityRelationship(r);
+            }
+        } else {
+            // 不存在关系，创建新关系
+            log.info("创建新的数据选择关系。sourceEntityId={}, fieldId={}, targetEntityId={}, targetFieldId={}",
+                    full.getEntityId(), fieldId, targetEntityId, targetFieldId);
+            metadataEntityRelationshipBuildService.createEntityRelationship(r);
+        }
     }
 
     private Integer extractMaxLength(EntityFieldUpsertItemVO item) {

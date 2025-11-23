@@ -69,4 +69,7 @@ public class EntityFieldUpsertItemVO {
 
     @Schema(description = "关联的字典类型ID,用于SELECT/MULTI_SELECT字段复用系统字典,为null时使用自定义选项", example = "1001")
     private Long dictTypeId;
+
+    @Schema(description = "数据选择配置，目标表的配置; 数据单选时使用")
+    private DataSelectionConfig dataSelectionConfig;
 }
