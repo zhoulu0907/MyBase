@@ -408,7 +408,7 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
 
             // 6. 功能权限校验
             if (requestContext.isEnableAuthCheck()) {
-                validatePermission(context);//todo 暂未实现
+                validatePermission(context);
             }
 
             // 7. 初步数据校验------数据校验规则 ----核心功能!!!
