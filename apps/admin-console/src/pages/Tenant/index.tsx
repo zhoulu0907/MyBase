@@ -1,26 +1,24 @@
-import { copyToClipboard, formatTimestamp, getDomainPrefix, simplifyUrl } from '@/utils/date';
+import { copyToClipboard, formatTimestamp, simplifyUrl } from '@/utils/date';
+import { getPlatformFeDomain } from '@/utils/domain';
+import { Button, Dropdown, Input, Menu, Message, Modal, Pagination, Select, Space, Tag } from '@arco-design/web-react';
 import {
-  Button,
-  Dropdown,
-  Form,
-  Input,
-  Menu,
-  Message,
-  Modal,
-  Pagination,
-  Select,
-  Space,
-  Tag,
-} from '@arco-design/web-react';
-import { IconCaretDown, IconCheckCircleFill, IconCopy, IconDelete, IconEdit, IconPlus, IconRecord, IconSearch, IconStop } from '@arco-design/web-react/icon';
+  IconCaretDown,
+  IconCheckCircleFill,
+  IconCopy,
+  IconDelete,
+  IconEdit,
+  IconPlus,
+  IconRecord,
+  IconSearch
+} from '@arco-design/web-react/icon';
 import {
+  deletePlatformTenantApi,
   getPlatformTenantListApi,
+  PlatformTenantSort,
   PlatformTenantStatus,
   updatePlatformTenantApi,
-  deletePlatformTenantApi,
   type PlatformTenantInfo,
-  type UpdateTenantParams,
-  PlatformTenantSort
+  type UpdateTenantParams
 } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -29,30 +27,30 @@ import styles from './index.module.less';
 interface Options {
   label: string;
   value: string | PlatformTenantStatus;
-};
+}
 
 const timeOptions: Options[] = [
   {
-    label: "按创建时间正序排序",
+    label: '按创建时间正序排序',
     value: PlatformTenantSort.asc
   },
   {
-    label: "按创建时间倒序排序",
+    label: '按创建时间倒序排序',
     value: PlatformTenantSort.desc
-  },
+  }
 ];
 
 const statusOptions: Options[] = [
   {
-    label: "全部状态",
-    value: ""
+    label: '全部状态',
+    value: ''
   },
   {
-    label: "已启用",
+    label: '已启用',
     value: PlatformTenantStatus.enabled
   },
   {
-    label: "已禁用",
+    label: '已禁用',
     value: PlatformTenantStatus.disabled
   }
 ];
@@ -143,18 +141,22 @@ const TenantManagement: React.FC = () => {
       publishModel: data.publishModel,
       logoUrl: data.logoUrl,
       status: data.status === 1 ? 0 : 1,
-      tenantAdminUserUpdateReqVOSList: data.tenantAdminUserList,
+      tenantAdminUserUpdateReqVOSList: data.tenantAdminUserList
     };
     Modal.confirm({
       title: `确认要${statusText}空间（${data?.name}）吗？`,
-      content: (<>
-        <div style={{ marginBottom: 20 }}>
-          <p>
-            {data.status === 0 ? '启用空间，该空间下的用户可正常进入空间并使用' : '禁用空间，该空间下的用户将无法登陆，再次启用时可恢复正常使用'}
-          </p>
-        </div>
-      </>),
-      okButtonProps: { status: data.status === 1 ? "danger" : "default" },
+      content: (
+        <>
+          <div style={{ marginBottom: 20 }}>
+            <p>
+              {data.status === 0
+                ? '启用空间，该空间下的用户可正常进入空间并使用'
+                : '禁用空间，该空间下的用户将无法登陆，再次启用时可恢复正常使用'}
+            </p>
+          </div>
+        </>
+      ),
+      okButtonProps: { status: data.status === 1 ? 'danger' : 'default' },
       onOk: async () => {
         await updatePlatformTenantApi(updateParams);
         await getPlatformTenantList();
@@ -168,20 +170,20 @@ const TenantManagement: React.FC = () => {
     let workspaceName = '';
     Modal.confirm({
       title: `确认要删除空间（${data?.name}）吗？`,
-      content: (<>
-        <div style={{ marginBottom: 20 }}>
-          <p>
-            删除空间，该空间下的企业、用户等数据将被永久删除，操作不可逆，请谨慎操作。
-          </p>
-        </div>
-        <p style={{ marginBottom: 8 }}>如确定删除，请输入空间名称：{data?.name}</p>
-        <Input
-          placeholder="请输入空间名称"
-          onChange={(v) => {
-            workspaceName = v;
-          }}
-        />
-      </>),
+      content: (
+        <>
+          <div style={{ marginBottom: 20 }}>
+            <p>删除空间，该空间下的企业、用户等数据将被永久删除，操作不可逆，请谨慎操作。</p>
+          </div>
+          <p style={{ marginBottom: 8 }}>如确定删除，请输入空间名称：{data?.name}</p>
+          <Input
+            placeholder="请输入空间名称"
+            onChange={(v) => {
+              workspaceName = v;
+            }}
+          />
+        </>
+      ),
       okButtonProps: { status: 'danger' },
       onOk: async () => {
         if (data.name !== workspaceName) {
@@ -212,27 +214,27 @@ const TenantManagement: React.FC = () => {
   const iconStyle = {
     marginRight: 4,
     fontSize: 16,
-    transform: 'translateY(1px)',
+    transform: 'translateY(1px)'
   };
 
   const DropList = ({ data }: { data: PlatformTenantInfo }) => {
     return (
       <Menu>
-        <Menu.Item key='1' onClick={() => nav(`edit?id=${data.id}`)}>
+        <Menu.Item key="1" onClick={() => nav(`edit?id=${data.id}`)}>
           <IconEdit style={iconStyle} />
           编辑
         </Menu.Item>
-        <Menu.Item key='2' onClick={confirmEnable}>
+        <Menu.Item key="2" onClick={confirmEnable}>
           <IconRecord style={iconStyle} />
-          {data.status === 0 ? "启用" : "禁用"}
+          {data.status === 0 ? '启用' : '禁用'}
         </Menu.Item>
-        <Menu.Item key='4' onClick={() => confirmDelete(data)}>
+        <Menu.Item key="4" onClick={() => confirmDelete(data)}>
           <IconDelete style={iconStyle} />
           删除
         </Menu.Item>
       </Menu>
-    )
-  }
+    );
+  };
 
   return (
     <div className={styles.tenant}>
@@ -243,7 +245,12 @@ const TenantManagement: React.FC = () => {
         </Button>
         <Space size="large">
           <Select options={timeOptions} defaultValue={timeFilter} bordered={false} onChange={handleTimeChange} />
-          <Select options={statusOptions} defaultValue={statusOptions[0].value} bordered={false} onChange={handleStatusChange} />
+          <Select
+            options={statusOptions}
+            defaultValue={statusOptions[0].value}
+            bordered={false}
+            onChange={handleStatusChange}
+          />
 
           <Input.Search
             className={styles.inputSearch}
@@ -259,85 +266,85 @@ const TenantManagement: React.FC = () => {
 
       {/* 租户表格 */}
       <div className={styles.tenantList}>
-        {
-          tenantList.map(tenant => {
-            const { id, website = '' } = tenant;
-            // 获取当前环境的域名前缀
-            const domainPrefix = getDomainPrefix();
-            const fullUrl = `${domainPrefix}/v0/obappbuilder/#/tenant/${id}/${website}/`;
-            const displayUrl = simplifyUrl(fullUrl);
+        {tenantList.map((tenant) => {
+          const { id, website = '' } = tenant;
+          // 获取当前环境的域名前缀
+          const platformFe = getPlatformFeDomain();
+          const fullUrl = `${platformFe}#/tenant/${id}/${website}/`;
+          const displayUrl = simplifyUrl(fullUrl);
 
-            return (
-              <div className={styles.tenantItem} key={tenant.id}>
-                <div className={styles.left}>
-                  {tenant.logoUrl ? <img className={styles.tenantLogo} src="" alt="" /> :
-                    <div className={styles.tenantLogo}>{tenant?.name?.slice(0, 6)}</div>}
-                  <div className={styles.tenantBaseInfo}>
-                    <div className={styles.tenantName}>
-                      <div className={styles.tenantNameText}>{tenant.name}</div>
-                      {tenant.status === PlatformTenantStatus.enabled ? <Tag color='arcoblue' icon={<IconCheckCircleFill />}>
+          return (
+            <div className={styles.tenantItem} key={tenant.id}>
+              <div className={styles.left}>
+                {tenant.logoUrl ? (
+                  <img className={styles.tenantLogo} src="" alt="" />
+                ) : (
+                  <div className={styles.tenantLogo}>{tenant?.name?.slice(0, 6)}</div>
+                )}
+                <div className={styles.tenantBaseInfo}>
+                  <div className={styles.tenantName}>
+                    <div className={styles.tenantNameText}>{tenant.name}</div>
+                    {tenant.status === PlatformTenantStatus.enabled ? (
+                      <Tag color="arcoblue" icon={<IconCheckCircleFill />}>
                         已启用
-                      </Tag> :
-                        <Tag color='gray' icon={<IconCheckCircleFill />}>
-                          未启用
-                        </Tag>
-                      }
-                    </div>
-                    <div className={styles.tenantID}>
-                      <div>ID：</div>
-                      <div className={styles.idText}>{tenant.tenantCode}</div>
-                    </div>
-                    <div className={styles.tenantAddress}>
-                      <div>访问地址：</div>
-                      <div className={styles.addressText}>{displayUrl}</div>
-                      <IconCopy onClick={() => copyToClipboard(fullUrl)} style={{ fontSize: 16 }} />
-                    </div>
+                      </Tag>
+                    ) : (
+                      <Tag color="gray" icon={<IconCheckCircleFill />}>
+                        未启用
+                      </Tag>
+                    )}
                   </div>
-                </div>
-
-                <div className={styles.center}>
-                  <div className={styles.enterpriseNumber}>
-                    <div className={styles.rowName}>企业数</div>
-                    <div className={styles.rowValue16}>{tenant.corpCount || 0}</div>
+                  <div className={styles.tenantID}>
+                    <div>ID：</div>
+                    <div className={styles.idText}>{tenant.tenantCode}</div>
                   </div>
-
-                  <div className={styles.UserNumber}>
-                    <div className={styles.rowName}>用户数</div>
-                    <div className={styles.flexRow}>
-                      <div className={styles.rowValue16}>{tenant.existUserCount || 0}</div>
-                      <div className={styles.rowValue14}>/{tenant.accountCount || 0}</div>
-                    </div>
+                  <div className={styles.tenantAddress}>
+                    <div>访问地址：</div>
+                    <div className={styles.addressText}>{displayUrl}</div>
+                    <IconCopy onClick={() => copyToClipboard(fullUrl)} style={{ fontSize: 16 }} />
                   </div>
-
-                  <div className={styles.appNumber}>
-                    <div className={styles.rowName}>应用数</div>
-                    <div className={styles.rowValue16}>{tenant.appCount || 0}</div>
-                  </div>
-
-                  <div className={styles.createTime}>
-                    <div className={styles.rowName}>创建时间</div>
-                    <div className={styles.rowValue12}>{formatTimestamp(tenant.createTime)}</div>
-                  </div>
-                </div>
-
-                <div className={styles.right}>
-                  <Button type="primary" onClick={() => handleClick(fullUrl)}>
-                    进入空间
-                  </Button>
-                  <Dropdown.Button
-                    type='secondary'
-                    icon={<IconCaretDown />}
-                    droplist={<DropList data={tenant} />}
-                  >
-                    <div onClick={() => nav(`edit?id=${tenant.id}`)} >
-                      <IconEdit fontSize={16} style={{ marginRight: 4 }} />编辑
-                    </div>
-                  </Dropdown.Button>
                 </div>
               </div>
-            )
-          })
-        }
+
+              <div className={styles.center}>
+                <div className={styles.enterpriseNumber}>
+                  <div className={styles.rowName}>企业数</div>
+                  <div className={styles.rowValue16}>{tenant.corpCount || 0}</div>
+                </div>
+
+                <div className={styles.UserNumber}>
+                  <div className={styles.rowName}>用户数</div>
+                  <div className={styles.flexRow}>
+                    <div className={styles.rowValue16}>{tenant.existUserCount || 0}</div>
+                    <div className={styles.rowValue14}>/{tenant.accountCount || 0}</div>
+                  </div>
+                </div>
+
+                <div className={styles.appNumber}>
+                  <div className={styles.rowName}>应用数</div>
+                  <div className={styles.rowValue16}>{tenant.appCount || 0}</div>
+                </div>
+
+                <div className={styles.createTime}>
+                  <div className={styles.rowName}>创建时间</div>
+                  <div className={styles.rowValue12}>{formatTimestamp(tenant.createTime)}</div>
+                </div>
+              </div>
+
+              <div className={styles.right}>
+                <Button type="primary" onClick={() => handleClick(fullUrl)}>
+                  进入空间
+                </Button>
+                <Dropdown.Button type="secondary" icon={<IconCaretDown />} droplist={<DropList data={tenant} />}>
+                  <div onClick={() => nav(`edit?id=${tenant.id}`)}>
+                    <IconEdit fontSize={16} style={{ marginRight: 4 }} />
+                    编辑
+                  </div>
+                </Dropdown.Button>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       <Pagination
@@ -349,7 +356,6 @@ const TenantManagement: React.FC = () => {
           alignSelf: 'flex-end'
         }}
       />
-
     </div>
   );
 };

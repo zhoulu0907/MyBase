@@ -2,7 +2,7 @@ import { DynamicIcon } from '@/components/DynamicIcon';
 import { PUBLISH_MODULE } from '@/constants/permission';
 import { appInfoSignal } from '@/store/app';
 import { Button, Checkbox, Form, Input, Message, Space, Typography } from '@arco-design/web-react';
-import { IconLock, IconUser } from '@arco-design/web-react/icon';
+import { IconLock, IconMobile, IconUser } from '@arco-design/web-react/icon';
 import { getApplication } from '@onebase/app';
 import {
   getHashQueryParam,
@@ -326,7 +326,7 @@ const Right: React.FC = () => {
         >
           {((curAppInfo.value.publishModel === PUBLISH_MODULE.SASS || !appId) && (
             <Form.Item label="手机号" field="mobile" rules={[{ required: true, message: '请输入手机号' }]}>
-              <Input placeholder="输入手机号" maxLength={11} />
+              <Input placeholder="输入手机号" maxLength={11} prefix={<IconMobile />} />
             </Form.Item>
           )) || (
             <Form.Item

@@ -1,4 +1,5 @@
-import { copyToClipboard, getDomainPrefix, simplifyUrl } from '@/utils/date';
+import { copyToClipboard, simplifyUrl } from '@/utils/date';
+import { getPlatformFeDomain } from '@/utils/domain';
 import {
   Avatar,
   Button,
@@ -43,8 +44,8 @@ const EditTenant = () => {
   const [adminList, setAdminList] = useState<UserVO[]>([]);
   const [logoUrl, setLogoUrl] = useState<string>();
 
-  const domainPrefix = getDomainPrefix();
-  const fullUrl = `${domainPrefix}/v0/obappbuilder/#/tenant/${tenantInfo?.id}/${tenantInfo?.website}/`;
+  const platformFe = getPlatformFeDomain();
+  const fullUrl = `${platformFe}/#/tenant/${tenantInfo?.id}/${tenantInfo?.website}/`;
   const displayUrl = simplifyUrl(fullUrl);
 
   const uploadRef = useRef(null);
@@ -257,7 +258,10 @@ const EditTenant = () => {
               validateTrigger={['onBlur']}
             >
               {isEdit ? (
-                <Input addBefore={getDomainPrefix()} placeholder="www.onebase.com/" />
+                <Input
+                  addBefore={<div style={{ width: '250px' }}>{getPlatformFeDomain()}</div>}
+                  placeholder="www.onebase.com"
+                />
               ) : (
                 <div className={styles.urlWrapper}>
                   <Tooltip content={displayUrl}>
@@ -291,7 +295,7 @@ const EditTenant = () => {
                 ></Select>
               ) : (
                 <div className={styles.tagWrapper}>
-                  {tenantInfo?.tenantAdminUserList?.map((tag, index) => (
+                  {tenantInfo?.tenantAdminUserList?.map((tag: any, index: number) => (
                     <Tag className={styles.adminTag} key={index} size="large" style={{ borderRadius: 16 }}>
                       <Avatar size={24} style={{ marginRight: 4 }}>
                         {tag.adminNickName.slice(0, 1)}

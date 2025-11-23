@@ -1,4 +1,5 @@
-import { generateTimestampString, getDomainPrefix } from '@/utils/date';
+import { generateTimestampString } from '@/utils/date';
+import { getPlatformFeDomain } from '@/utils/domain';
 import { Button, Checkbox, Form, Input, InputNumber, Message, Select, Space, Upload } from '@arco-design/web-react';
 import { IconUpload } from '@arco-design/web-react/icon';
 import { TokenManager } from '@onebase/common';
@@ -193,7 +194,10 @@ const CreateSpace = () => {
           rules={[{ required: true, message: '请输入访问地址' }]}
           validateTrigger={['onBlur']}
         >
-          <Input addBefore={getDomainPrefix()} placeholder="请输入访问地址" />
+          <Input
+            addBefore={<div style={{ width: '250px' }}>{getPlatformFeDomain()}</div>}
+            placeholder="请输入访问地址"
+          />
         </Form.Item>
 
         <Form.Item
@@ -229,7 +233,7 @@ const CreateSpace = () => {
           <Checkbox>启用</Checkbox>
         </Form.Item>
 
-        <Form.Item label="SaaS 功能" field="publishModel" >
+        <Form.Item label="SaaS 功能" field="publishModel">
           <Checkbox>启用</Checkbox>
         </Form.Item>
 

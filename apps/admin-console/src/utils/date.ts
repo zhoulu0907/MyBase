@@ -1,5 +1,4 @@
-import { Message } from "@arco-design/web-react";
-import { getBackendURL } from '@onebase/common';
+import { Message } from '@arco-design/web-react';
 
 /**
  * 将时间戳转换为格式化日期字符串
@@ -72,30 +71,6 @@ export const fallbackCopyToClipboard = (text: string) => {
     Message.error('复制失败');
   }
   document.body.removeChild(textArea);
-};
-
-// 获取当前环境的域名前缀
-export const getDomainPrefix = () => {
-  // 检查全局配置
-  try {
-    const url = new URL(getBackendURL());
-    return `${url.protocol}//${url.host}`;
-  } catch (e) {
-    console.error('解析BASE_URL失败:', e);
-  }
-
-  // 检查环境变量
-  if (import.meta.env.VITE_API_BASE_URL) {
-    try {
-      const url = new URL(import.meta.env.VITE_API_BASE_URL);
-      return `${url.protocol}//${url.host}`;
-    } catch (e) {
-      console.error('解析VITE_API_BASE_URL失败:', e);
-    }
-  }
-
-  // 返回默认值
-  return 'http://localhost:9524';
 };
 
 // 简化URL显示
