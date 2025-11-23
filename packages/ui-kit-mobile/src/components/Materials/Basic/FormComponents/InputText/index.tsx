@@ -61,7 +61,7 @@ const XInputText = memo((props: XInputTextConfig & { runtime?: boolean; detailMo
         pointerEvents: (!runtime || detailMode) ? 'none' : 'unset'
       }}
     >
-      {!runtime || detailMode ? (
+      {detailMode ? (
         // 只读模式，渲染文本内容
         <div style={{
           textAlign: align,
