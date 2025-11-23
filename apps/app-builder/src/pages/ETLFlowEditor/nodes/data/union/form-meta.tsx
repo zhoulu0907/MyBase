@@ -1,16 +1,21 @@
+import UnionIcon from '@/assets/images/etl/node_union.svg';
 import { type FormMeta, type FormRenderProps } from '@flowgram.ai/free-layout-editor';
-import { useEffect, useState } from 'react';
+import { etlEditorSignal } from '@onebase/common';
+import { useSignals } from '@preact/signals-react/runtime';
 import { type FlowNodeJSON } from '../../../typings';
 import styles from './index.module.less';
 
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
-  const [title, setTitle] = useState('追加合并');
+  useSignals();
 
-  useEffect(() => {
-    setTitle(form.getValueIn('title'));
-  }, [form]);
+  const { nodeData } = etlEditorSignal;
 
-  return <div className={styles.unionNode}>{title}</div>;
+  return (
+    <div className={styles.unionNode}>
+      <img src={UnionIcon} alt="union" />
+      {nodeData.value[form.getValueIn('id')]?.title || '追加合并节点'}
+    </div>
+  );
 };
 
 export const formMeta: FormMeta<FlowNodeJSON['data']> = {

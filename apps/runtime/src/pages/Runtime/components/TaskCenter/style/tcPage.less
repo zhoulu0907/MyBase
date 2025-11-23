@@ -317,15 +317,12 @@
                 background: url(@/assets/images/task_center/success-green.svg) no-repeat 0 0;
             }
             .sp-options {
-                color: rgb(var(--primary-6)); font-weight: bold;
+                font-weight: bold;
             }
         }
         .succss-gray-box {
             .arco-steps-item-icon {
                 background: url(@/assets/images/task_center/success-green.svg) no-repeat 0 0;
-            }
-            .sp-options {
-                color: rgba(134, 144, 156, 1);
             }
         }
         .back-box {
@@ -333,7 +330,7 @@
                 background: url(@/assets/images/task_center/back-red.svg) no-repeat 0 0;
             }
             .sp-options {
-                color: red; font-weight: bold;
+                font-weight: bold;
             }
         }
         .refuse-box {
@@ -341,7 +338,7 @@
                 background: url(@/assets/images/task_center/refuse-red.svg) no-repeat 0 0;
             }
             .sp-options {
-                color: red; font-weight: bold;
+                font-weight: bold;
             }
         }
         .arco-steps-item-process {
@@ -351,7 +348,7 @@
                 background-position-x: 1px;
             }
             .date-line {
-                padding: 8px 0 8px 2px;
+                padding: 2px 0 8px 2px;
                 .sp-options > b {
                     color: rgba(22, 93, 255, 1); margin-right: 6px;
                 }
@@ -365,8 +362,26 @@
                 color: rgba(134, 144, 156, 1);
             }
         }
-        .arco-avatar-group .arco-avatar {
-            background-color: #86909c;
+        .arco-avatar-group {
+            padding-left: 10px;
+            .arco-avatar {
+                background-color: #86909c; margin-left: -10px !important;
+            }
+        }
+        .user-temp + .user-temp {
+            margin-top: 10px;
+        }
+        .blue-label {
+            color: rgba(22, 93, 255, 1)
+        }
+        .red-label {
+            color: red;
+        }
+        .green-label {
+            color: rgb(var(--primary-6));
+        }
+        .gray-label{
+            color: rgba(134, 144, 156, 1);
         }
     }
 }

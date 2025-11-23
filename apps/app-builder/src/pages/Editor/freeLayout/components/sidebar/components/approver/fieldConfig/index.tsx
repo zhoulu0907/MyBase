@@ -1,5 +1,5 @@
 import { useEffect, useState, forwardRef, useImperativeHandle, useRef } from 'react';
-import { Switch, Button, Table, type TableColumnProps } from '@arco-design/web-react';
+import { Switch, Button, Table, type TableColumnProps, Tooltip } from '@arco-design/web-react';
 import { IconQuestionCircle, IconPlus } from '@arco-design/web-react/icon';
 import FieldModal from './FieldModal';
 import { type FieldConfigType } from '../constant';
@@ -162,7 +162,9 @@ export default function FieldConfig({ setApprovalConfigData, fieldPermConfig, ck
         <div className="right-switch">
           <p>节点独立配置</p>
           <p className="switch-outer">
-            <IconQuestionCircle />
+            <Tooltip position='tr' trigger='hover' content='关闭时，字段权限跟随表单组件状态自动同步；开启后，可独立配置当前节点的字段权限。'>
+              <IconQuestionCircle />
+            </Tooltip>
             <Switch onChange={changeNodeSwitch} checked={nodeSwitch} />
           </p>
         </div>

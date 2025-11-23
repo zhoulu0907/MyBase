@@ -139,3 +139,19 @@ export interface UpdateWorkflowScheduleInfoReq {
   config: any;
   enableStatus: number;
 }
+
+export interface FlinkFunctionListReq {
+  key?: string;
+  type?: string;
+}
+
+export interface FlinkFunction {
+  functionDesc: string;
+  functionName: string;
+  functionType: string;
+}
+
+export interface PreviewETLFlowDataReq {
+  nodeId: string;
+  workflow: any;
+}

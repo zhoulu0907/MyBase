@@ -15,6 +15,7 @@ import { getRuntimeURL, TokenManager } from '@onebase/common';
 import { appIconMap } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { IconArrowLeft } from '@arco-design/web-react/icon';
 import styles from './header.module.less';
 
 const { Header } = Layout;
@@ -115,7 +116,8 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
               navigate('/onebase/my-app');
             }}
           >
-            <img src={AppIconSVG} alt="application icon" />
+            {/* <img src={AppIconSVG} alt="application icon" /> */}
+            <Button shape="square" type="default" size="small" icon={<IconArrowLeft />} />
           </div>
           <div className={styles.myAppIcon} style={{ backgroundColor: curAppInfo?.iconColor }}>
             <DynamicIcon
@@ -126,7 +128,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
             />
           </div>
           <Tooltip content={curAppInfo?.appName}>
-            <div className={styles.appName} >{curAppInfo?.appName}</div>
+            <div className={styles.appName}>{curAppInfo?.appName}</div>
           </Tooltip>
           {curAppInfo?.appStatus === AppStatus.DEVELOPING && <div className={styles.appStatusDeveloping}>开发中</div>}
           {curAppInfo?.appStatus == AppStatus.PUBLISHED && <div className={styles.appStatusPublished}>已发布</div>}

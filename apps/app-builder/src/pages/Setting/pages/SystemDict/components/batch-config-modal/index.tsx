@@ -246,7 +246,13 @@ const BatchConfigModal: React.FC<BatchConfigModalProps> = ({ visible, onCancel, 
         width: 32,
         render: (_: unknown, record: DictData, index: number) => (
           <Form.Item field={`dictValues.${index}.colorType`} style={{ margin: 0 }}>
-            <ColorPicker value={record.colorType} size="small" className={styles.colorPicker} />
+            <ColorPicker
+              value={record.colorType}
+              size="small"
+              className={styles.colorPicker}
+              showPreset
+              presetColors={Object.values(arcoPalette.light)}
+            />
           </Form.Item>
         )
       });
@@ -294,7 +300,7 @@ const BatchConfigModal: React.FC<BatchConfigModalProps> = ({ visible, onCancel, 
         </>
       ),
       dataIndex: 'value',
-      width: 200,
+      width: 250,
       render: (_: unknown, record: DictData, index: number) => {
         const fieldName = `dictValues.${index}.value`;
         return (
@@ -306,7 +312,7 @@ const BatchConfigModal: React.FC<BatchConfigModalProps> = ({ visible, onCancel, 
             validateStatus={externalErrors[fieldName] ? 'error' : undefined}
             help={externalErrors[fieldName]}
           >
-            <Input placeholder="请输入字典值编码" value={record.value} />
+            <Input placeholder="请输入字母、数字或下划线" value={record.value} />
           </Form.Item>
         );
       }

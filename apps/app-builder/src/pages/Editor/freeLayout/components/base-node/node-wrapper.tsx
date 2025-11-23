@@ -3,8 +3,10 @@
  * SPDX-License-Identifier: MIT
  */
 
-import React, { useState, useContext, useRef, useCallback } from 'react';
+import React, { useState, useContext, useRef, useCallback, useEffect } from 'react';
 import { WorkflowPortRender } from '@flowgram.ai/free-layout-editor';
+import { Tooltip } from '@arco-design/web-react';
+import { IconExclamationCircleFill } from '@arco-design/web-react/icon';
 import { useClientContext, CommandService } from '@flowgram.ai/free-layout-editor';
 import { type FlowNodeMeta } from '../../typings';
 import { useNodeRenderContext, usePortClick } from '../../hooks';
@@ -75,7 +77,26 @@ export const NodeWrapper: React.FC<NodeWrapperProps> = (props) => {
     },
     [ctx, node]
   );
-
+  const setErrmsg = useCallback(() => {
+    let errorMsg = '';
+    if (nodeRender.ports) {
+      let flag = false;
+      nodeRender.ports.forEach((port) => {
+        if (port.availableLines.length) {
+          flag = true;
+        }
+      });
+      if (!flag) {
+        errorMsg = '该节点为独立节点';
+      }
+    }
+    if (!nodeRender.data.errorMsg || nodeRender.data.errorMsg == '该节点为独立节点') {
+      nodeRender.updateData(Object.assign({}, nodeRender.data, { errorMsg }));
+    }
+  }, [node]);
+  useEffect(() => {
+    setErrmsg();
+  });
   return (
     <>
       {(isHover || selected) &&
@@ -92,10 +113,18 @@ export const NodeWrapper: React.FC<NodeWrapperProps> = (props) => {
             </div>
           </div>
         )}
+      {nodeRender.data.errorMsg && (
+        <div className={'nodeErrorIcon'}>
+          <Tooltip content={nodeRender.data.errorMsg}>
+            <IconExclamationCircleFill />
+          </Tooltip>
+        </div>
+      )}
       <NodeWrapperStyle
         className={`${selected && !readonly ? 'selected' : ''} 
-        ${readonly && nodeRender.data.status + 'Border'} 
-        ${nodeRender.id.includes('branch') && 'branchNode'}`}
+        ${readonly && nodeRender.data.runStatus + 'Border'} 
+        ${nodeRender.id.includes('branch') && 'branchNode'}
+        ${nodeRender.data.errorMsg && 'errorMsgNode'}`}
         ref={nodeRef}
         draggable
         onMouseOver={onMouseOver}
