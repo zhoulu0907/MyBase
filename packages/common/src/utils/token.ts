@@ -11,6 +11,7 @@ export interface TokenInfo {
   tenantId?: string; // 租户id
   corpId?: string; // 企业id
   adminFlag?: boolean; // 是否是管理员
+  loginURL?: string;
 }
 
 export class TokenManager {
@@ -18,6 +19,7 @@ export class TokenManager {
   private static readonly TOKEN_INFO_KEY = 'onebase_token_info';
   private static readonly REMEMBER_ME_KEY = 'onebase_remember_me';
   private static readonly TENANT_ID = 'tenant_id';
+  private static readonly LOGIN_URL = 'login_url';
 
   /**
    * 存储 token 信息
@@ -128,6 +130,7 @@ export class TokenManager {
       localStorage.removeItem(this.TOKEN_KEY);
       localStorage.removeItem(this.TOKEN_INFO_KEY);
       localStorage.removeItem(this.REMEMBER_ME_KEY);
+      localStorage.removeItem(this.LOGIN_URL);
     } catch (error) {
       console.error('清除 token 失败:', error);
     }
