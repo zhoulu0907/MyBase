@@ -11,75 +11,75 @@ import com.zaxxer.hikari.HikariDataSource;
  */
 public class EtlCodegenMain {
 
+    //修改下面的各种参数
+//    private static final String DB_DRIVER = "org.postgresql.Driver";
+//    private static final String DB_URL = "jdbc:postgresql://10.0.104.38:5432/onebase_cloud_v3";
+//    private static final String DB_USERNAME = "postgres";
+//    private static final String DB_PASSWORD = "onebase@2025";
+    private static final String DB_DRIVER = "dm.jdbc.driver.DmDriver";
+    private static final String DB_URL = "jdbc:dm://10.0.104.50:5237/ONEBASE_CLOUD_V3?zeroDateTimeBehavior=convertToNull&useUnicode=true&characterEncoding=utf-8&schema=ONEBASE_CLOUD_V3";
+    private static final String DB_USERNAME = "ONEBASE_CLOUD_V3";
+    private static final String DB_PASSWORD = "Onebase2025";
+
+    private static final String[] tables = new String[]{
+            "etl_catalog",
+            "etl_datasource",
+            "etl_execution_log",
+            "etl_flink_function",
+            "etl_flink_mapping",
+            "etl_schedule_job",
+            "etl_schema",
+            "etl_table",
+            "etl_workflow",
+            "etl_workflow_table"
+    };
+
+    private static String entityPackage = "com.cmsr.onebase.module.etl.core.dal.dataobject";
+    private static String tableDefPackage = "com.cmsr.onebase.module.etl.core.dal.dataobject.table";
+
+    private static String sourceDir = "d:/temp";
+
+
     public static void main(String[] args) {
         //配置数据源
         HikariDataSource dataSource = new HikariDataSource();
-        dataSource.setJdbcUrl("jdbc:postgresql://10.0.104.38:5432/onebase_cloud_v3");
-        dataSource.setUsername("postgres");
-        dataSource.setPassword("onebase@2025");
-
-        //创建配置内容
-        GlobalConfig globalConfig = createGlobalConfigUseStyle();
-
-        //通过 datasource 和 globalConfig 创建代码生成器
-        Generator generator = new Generator(dataSource, globalConfig);
-        //生成代码
-        generator.generate();
+        dataSource.setDriverClassName(DB_DRIVER);
+        dataSource.setJdbcUrl(DB_URL);
+        dataSource.setUsername(DB_USERNAME);
+        dataSource.setPassword(DB_PASSWORD);
+        //
+        createEntity(dataSource);
+        createTableDef(dataSource);
     }
 
-    public static GlobalConfig createGlobalConfigUseStyle() {
-        //创建配置内容
+    private static void createEntity(HikariDataSource dataSource) {
         GlobalConfig globalConfig = new GlobalConfig();
-
-        globalConfig.enableTableDef();
-        globalConfig.setTableDefPackage("com.cmsr.onebase.module.etl.core.dal.dataobject.table");
-        globalConfig.setTableDefClassSuffix("TableDef");
-
-        //设置表前缀和只生成哪些表
-        globalConfig.setGenerateTable("etl_catalog",
-                "etl_datasource",
-                "etl_execution_log",
-                "etl_flink_function",
-                "etl_flink_mapping",
-                "etl_schedule_job",
-                "etl_schema",
-                "etl_table",
-                "etl_workflow",
-                "etl_workflow_table");
-
-        //设置生成 entity 并启用 Lombok
-        globalConfig.setEntityPackage("com.cmsr.onebase.module.etl.core.dal.dataobject");
+        globalConfig.setGenerateTable(tables);
+        globalConfig.setEntityPackage(entityPackage);
         globalConfig.setEntitySuperClass(BaseBizEntity.class);
         globalConfig.setEntityGenerateEnable(true);
         globalConfig.setEntityWithLombok(true);
         globalConfig.setEntityLombokAllArgsConstructorEnable(false);
         globalConfig.setEntityLombokNoArgsConstructorEnable(false);
         globalConfig.setEntityOverwriteEnable(true);
-
-        //设置项目的JDK版本，项目的JDK为14及以上时建议设置该项，小于14则可以不设置
         globalConfig.setEntityJdkVersion(17);
-
-        //设置生成 mapper
         globalConfig.setMapperGenerateEnable(true);
         globalConfig.setMapperXmlGenerateEnable(true);
-        globalConfig.setMapperXmlPath("temp/xml");
-        //设置生成 service
-        globalConfig.setServiceGenerateEnable(false);
-        globalConfig.setServiceImplGenerateEnable(false);
-        //设置生成 controller
-        globalConfig.setControllerGenerateEnable(false);
-        globalConfig.setControllerRestStyle(false);
+        globalConfig.setMapperXmlPath(sourceDir);
+        //生成代码
+        Generator generator = new Generator(dataSource, globalConfig);
+        generator.generate();
+    }
 
-
-        globalConfig.setSourceDir("temp");
-        //可以单独配置某个列
-//        ColumnConfig columnConfig = new ColumnConfig();
-//        columnConfig.setColumnName("tenant_id");
-//        columnConfig.setLarge(true);
-//        columnConfig.setVersion(true);
-//        globalConfig.setColumnConfig("tb_account", columnConfig);
-
-        return globalConfig;
+    private static void createTableDef(HikariDataSource dataSource) {
+        GlobalConfig globalConfig = new GlobalConfig();
+        globalConfig.setGenerateTable(tables);
+        globalConfig.enableTableDef();
+        globalConfig.setTableDefPackage(tableDefPackage);
+        globalConfig.setSourceDir(sourceDir);
+        //生成代码
+        Generator generator = new Generator(dataSource, globalConfig);
+        generator.generate();
     }
 
 

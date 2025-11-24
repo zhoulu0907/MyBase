@@ -12,15 +12,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity> extends ServiceImpl<M, T> {
+public class BaseBizRepository<M extends BaseMapper<T>, T> extends ServiceImpl<M, T> {
 
     private QueryWrapper injectQueryLimitation(QueryWrapper queryWrapper) {
-        // TODO: add filters like applicationId, loginEnv
-        Long applicationId = 1234567890L;
-        String loginEnv = "bld";
-        return queryWrapper
-                .eq(T::getApplicationId, applicationId)
-                .eq(T::getLoginEnv, loginEnv);
+        // TODO: add filters like applicationId, versionStatus
+//        Long applicationId = 1234567890L;
+//        String versionStatus = "bld";
+//        return queryWrapper
+//                .eq("application_id", applicationId)
+//                .eq("version_status", versionStatus);
+        return queryWrapper;
     }
 
     private QueryWrapper injectCondition(QueryCondition condition) {
@@ -29,7 +30,7 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
 
     @Override
     public T getById(Serializable id) { //
-        return this.getOne(QueryWrapper.create().eq(T::getId, id));
+        return super.getById(id);
     }
 
     @Override
@@ -129,7 +130,7 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
 
     @Override
     public List<T> listByIds(Collection<? extends Serializable> ids) {
-        return this.list(QueryWrapper.create().in(T::getId, ids));
+        return super.listByIds(ids);
     }
 
     @Override
@@ -164,12 +165,12 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
 
     @Override
     public Page<T> page(Page<T> page) {
-        return this.page(page, QueryWrapper.create());
+        return super.page(page);
     }
 
     @Override
     public Page<T> page(Page<T> page, QueryWrapper query) {
-        return super.page(page, this.injectQueryLimitation(query));
+        return super.page(page, query);
     }
 
     @Override

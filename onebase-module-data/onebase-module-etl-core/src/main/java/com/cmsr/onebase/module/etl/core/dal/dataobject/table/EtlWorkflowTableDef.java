@@ -3,17 +3,15 @@ package com.cmsr.onebase.module.etl.core.dal.dataobject.table;
 import com.mybatisflex.core.query.QueryColumn;
 import com.mybatisflex.core.table.TableDef;
 
-import java.io.Serial;
 
 /**
  *  表定义层。
  *
- * @author v1endr3
- * @since 2025-11-22
+ * @author HuangJie
+ * @since 2025-11-23
  */
 public class EtlWorkflowTableDef extends TableDef {
 
-    @Serial
     private static final long serialVersionUID = 1L;
 
     /**
@@ -46,6 +44,14 @@ public class EtlWorkflowTableDef extends TableDef {
      */
     public final QueryColumn UPDATER = new QueryColumn(this, "updater");
 
+    
+    public final QueryColumn LOGIN_ENV = new QueryColumn(this, "LOGIN_ENV");
+
+    /**
+     * 租户ID
+     */
+    public final QueryColumn TENANT_ID = new QueryColumn(this, "tenant_id");
+
     /**
      * 启用状态,默认为关闭(0)
      */
@@ -77,6 +83,11 @@ public class EtlWorkflowTableDef extends TableDef {
     public final QueryColumn WORKFLOW_NAME = new QueryColumn(this, "workflow_name");
 
     /**
+     * 应用Id
+     */
+    public final QueryColumn APPLICATION_ID = new QueryColumn(this, "application_id");
+
+    /**
      * 调度配置
      */
     public final QueryColumn SCHEDULE_CONFIG = new QueryColumn(this, "schedule_config");
@@ -94,7 +105,7 @@ public class EtlWorkflowTableDef extends TableDef {
     /**
      * 默认字段，不包含逻辑删除或者 large 等字段。
      */
-    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, WORKFLOW_NAME, CONFIG, IS_ENABLED, SCHEDULE_STRATEGY, SCHEDULE_CONFIG, DELETED, CREATOR, CREATE_TIME, UPDATER, UPDATE_TIME, LOCK_VERSION, DECLARATION};
+    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, APPLICATION_ID, WORKFLOW_NAME, CONFIG, IS_ENABLED, SCHEDULE_STRATEGY, SCHEDULE_CONFIG, DELETED, CREATOR, CREATE_TIME, UPDATER, UPDATE_TIME, LOCK_VERSION, TENANT_ID, DECLARATION, LOGIN_ENV};
 
     public EtlWorkflowTableDef() {
         super("", "etl_workflow");
