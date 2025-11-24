@@ -322,7 +322,7 @@ public class BpmDetailServiceImpl implements BpmDetailService {
             }
 
             for (BpmFlowAgentInsDO agentInsDO : agentInsList) {
-                hisTask = hisTaskMap.get(agentInsDO.getPrincipalId());
+                hisTask = hisTaskMap.get(String.valueOf(agentInsDO.getPrincipalId()));
 
                 if (hisTask != null) {
                     // 代理人权限，直接返回
