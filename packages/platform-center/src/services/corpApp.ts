@@ -1,4 +1,4 @@
-import { CorpAppParams, corpAppListParams, updateAppParams } from "../types";
+import { CorpAppParams, authAppStatusParams, corpAppListParams, updateAppParams } from "../types";
 import { systemService } from "./clients";
 import { appService } from "./clients/factory";
 
@@ -19,3 +19,8 @@ export const getCorpAppRelatedListApi = (data: corpAppListParams) => systemServi
 
 //获取应用列表
 export const getCorpAppSimpleListApi = () => appService.get('/application/simple-list');
+
+// 授权应用禁用启用
+export const updateAuthAppStatus = (data: authAppStatusParams) => {
+  return systemService.post('/corp-app-relation/update-status', data);
+};

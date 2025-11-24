@@ -265,7 +265,9 @@ const SpaceInfo: React.FC = () => {
 
       {/* 修改空间名称 */}
       <Modal title="修改空间名称" visible={renameVisible} onOk={handleRenameSubmit} onCancel={() => setRenameVisible(false)}>
-        <Form form={form} layout="vertical">
+        <Form form={form} layout="vertical" initialValues={{
+          newName: spaceInfo.name
+        }}>
           <Form.Item label="新的空间名称" field="newName" rules={[{ required: true, message: "请输入新的空间名称" }]}>
             <Input placeholder="请输入新的空间名称" />
           </Form.Item>
