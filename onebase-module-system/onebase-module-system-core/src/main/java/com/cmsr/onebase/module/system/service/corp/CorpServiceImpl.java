@@ -284,8 +284,8 @@ public class CorpServiceImpl implements CorpService {
         }
         respVO.setAppCount(getCorpAppCount(id));
         Long userCountLong=corpUserService.getUserCountByCorpId(id);
-        Integer usercount= (userCountLong != null) ? userCountLong.intValue() : 0;
-        respVO.setUserCount(usercount);
+        Integer userCount= (userCountLong != null) ? userCountLong.intValue() : 0;
+        respVO.setUserCount(userCount);
         return respVO;
     }
     /**
