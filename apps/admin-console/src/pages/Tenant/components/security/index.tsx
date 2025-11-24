@@ -40,12 +40,16 @@ const WorkspaceSecurity: React.FC<WorkspaceSecurityProps> = ({}) => {
   };
 
   const handleUpdateSecurityConfigs = async () => {
+    // 将 form 的字段对象转成数组 [{ configKey, configValue }]
+    const fieldsObject = form.getFieldsValue();
+    const configsArray = Object.entries(fieldsObject).map(([configKey, configValue]) => ({
+      configKey,
+      configValue: Array.isArray(configValue) ? configValue.join(', ') : configValue.toString()
+    }));
+
     try {
       const res = await batchUpdateSecurityConfigs({
-        configs: itemsData.map((item) => ({
-          configKey: item.configKey,
-          configValue: item.configValue
-        }))
+        configs: configsArray
       });
       if (res) {
         Message.success('更新配置成功');
@@ -65,11 +69,23 @@ const WorkspaceSecurity: React.FC<WorkspaceSecurityProps> = ({}) => {
     const res = await getSecurityConfigItems(id);
 
     const tmpItemsData = (Array.isArray(res) ? res : []).reduce((acc: Record<string, any>, item: any) => {
-      if (item.configKey !== undefined) {
-        acc[item.configKey] = item.configValue;
+      if (item.widgetType === 'MULTISELECT') {
+        acc[item.configKey] = item.configValue
+          ? String(item.configValue)
+              .split(',')
+              .map((s: string) => s.trim())
+          : [];
+      } else if (item.widgetType === 'SWITCH') {
+        acc[item.configKey] = item.configValue === 'true';
+      } else {
+        if (item.configKey !== undefined) {
+          acc[item.configKey] = item.configValue;
+        }
       }
+
       return acc;
     }, {});
+
     form.setFieldsValue(tmpItemsData);
 
     setItemsData(res);
@@ -144,6 +160,7 @@ const WorkspaceSecurity: React.FC<WorkspaceSecurityProps> = ({}) => {
                         label={item.configName}
                         extra={item.description}
                         rules={[{ required: item.required === 'true', message: `请输入${item.description}` }]}
+                        triggerPropName="checked"
                       >
                         <Switch />
                       </Form.Item>
