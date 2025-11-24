@@ -20,6 +20,10 @@ public class BpmFlowCcRecordRepository extends DataRepository<BpmFlowCcRecordDO>
         // 构建基础SQL
         String baseSql = buildBaseSql();
 
+        // todo：优化sql
+        // 去重
+        condition.eq("rn", 1);
+
         // 执行查询
         DataSet dataSet = querys(baseSql, condition);
         return new PageResult<>(
@@ -54,12 +58,25 @@ public class BpmFlowCcRecordRepository extends DataRepository<BpmFlowCcRecordDO>
                        t.creator,
                        t.create_time,
                        t.updater,
-                       t.update_time
+                       t.update_time,
+                       t4.agent_id as agent_id,
+                       t4.agent_name as agent_name,
+                       ROW_NUMBER() OVER (
+                        PARTITION BY t.id
+                         ORDER BY CASE
+                                WHEN t.user_id = #{userId} THEN 1
+                                WHEN t4.agent_id = #{userId} THEN 2
+                                ELSE 3
+                                END
+                       ) as rn
                    from
                        bpm_flow_cc_record t
                        left join bpm_flow_instance t2 on t.instance_id = t2.id
                        left join bpm_flow_instance_biz_ext t3 on t.instance_id = t3.instance_id
-                   where  t.deleted = 0  and t2.deleted = 0 and t3.deleted = 0
+                       left join bpm_flow_agent_ins t4 ON t.task_id = t4.task_id AND t.user_id = t4.principal_id and t4.deleted = 0
+                   where
+                   t.deleted = 0 and t2.deleted = 0 and t3.deleted = 0
+                   and (t.user_id = #{userId} or t4.agent_id = #{userId})
                 ) tf
                 """;
     }

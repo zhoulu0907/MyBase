@@ -315,7 +315,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         todoTaskVO.setArrivalTime(flowTaskExt.getCreateTime());
         todoTaskVO.setBusinessId(flowTaskExt.getBindingViewId());
 
-        if (StringUtils.isNotBlank(flowTaskExt.getAgentId()) && Objects.equals(String.valueOf(loginUserId), flowTaskExt.getAgentId())) {
+        if (flowTaskExt.getAgentId() != null && Objects.equals(loginUserId, flowTaskExt.getAgentId())) {
             todoTaskVO.setProcessTitle(BpmConstants.AGENT_TITLE_PREFIX + flowTaskExt.getBpmTitle());
         }
 
@@ -349,7 +349,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         // 构建查询条件
         ConfigStore condition = buildDynamicCondition(pageReqVO, String.valueOf(loginUserId));
 
-        PageResult<BpmDoneTaskDTO> pageResult = hisTaskExtRepository.getDoneTaskPage(condition, String.valueOf(loginUserId));
+        PageResult<BpmDoneTaskDTO> pageResult = hisTaskExtRepository.getDoneTaskPage(condition);
 
         List<BpmFlowDoneTaskVO> doneTaskList = new ArrayList<>();
         for (BpmDoneTaskDTO flowHisTaskExt : pageResult.getList()) {
@@ -369,7 +369,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
             doneTaskVO.getInitiator().setAvatar(flowHisTaskExt.getInitiatorAvatar());
 
             // 判断代理执行
-            if (StringUtils.isNotBlank(flowHisTaskExt.getAgentId()) && Objects.equals(String.valueOf(loginUserId), flowHisTaskExt.getAgentId())) {
+            if (flowHisTaskExt.getAgentId() != null && Objects.equals(loginUserId, flowHisTaskExt.getAgentId())) {
                 doneTaskVO.setProcessTitle(BpmConstants.AGENT_TITLE_PREFIX + flowHisTaskExt.getBpmTitle());
             }
 
@@ -517,7 +517,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         fillTimeRange(condition, "submit_time", reqVO.getSubmitTimeStart(), reqVO.getSubmitTimeEnd());
 
         // 填充处理人条件
-        condition.and(Compare.EQUAL, "user_id", userId);
+        condition.param("userId", userId);
 
         // 填充查看状态条件
         fillViewed(condition, "viewed", reqVO.getViewed());
@@ -535,6 +535,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
 
     private BpmCcTaskPageResVO convertToCcTaskVO(BpmCcRecordDTO ccRecord) {
         BpmCcTaskPageResVO vo = new BpmCcTaskPageResVO();
+        Long loginUserId = WebFrameworkUtils.getLoginUserId();
 
         // 基本字段映射
         vo.setId(ccRecord.getId());
@@ -551,6 +552,12 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         initiator.setUserId(ccRecord.getInitiatorId());
         initiator.setName(ccRecord.getInitiatorName());
         initiator.setAvatar(ccRecord.getInitiatorAvatar());
+
+        // 判断代理执行
+        if (ccRecord.getAgentId() != null && Objects.equals(loginUserId, ccRecord.getAgentId())) {
+            vo.setProcessTitle(BpmConstants.AGENT_TITLE_PREFIX + ccRecord.getBpmTitle());
+        }
+
         vo.setInitiator(initiator);
 
         return vo;

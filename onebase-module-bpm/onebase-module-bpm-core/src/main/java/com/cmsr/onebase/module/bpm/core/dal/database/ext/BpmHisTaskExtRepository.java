@@ -22,7 +22,7 @@ public class BpmHisTaskExtRepository {
     @Resource
     private FlowHisTaskRepository hisTaskRepository;
 
-    public PageResult<BpmDoneTaskDTO> getDoneTaskPage(ConfigStore condition, String loginUserId) {
+    public PageResult<BpmDoneTaskDTO> getDoneTaskPage(ConfigStore condition) {
         // 构建基础SQL
         String baseSql = buildBaseSql();
 
