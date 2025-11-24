@@ -401,6 +401,11 @@ export interface ICollapsedConfigType<KeyType> {
     value: KeyType;
   }>;
 }
+export interface ICollapsedStyleConfig {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.COLLAPSED_STYLE;
+}
 
 export interface ITableOperationConfigType {
   key: string;

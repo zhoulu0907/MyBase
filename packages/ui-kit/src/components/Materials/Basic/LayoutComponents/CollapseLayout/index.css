@@ -1,15 +1,27 @@
 .XCollapseLayout {
   width: 100%;
-  border: 1px solid #d4d4d4 !important;
   box-sizing: border-box;
   border-radius: 8px;
 
-  .collapse-title-ellipsis {
+  .collapse-title {
     width: 100%;
-    max-width: 200px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    display: flex;
+    align-items: center;
+
+    .collapse-title-shape {
+      width: 3px;
+      height: 14px;
+      border-radius: 2px;
+      margin-right: 8px;
+    }
+
+    .collapse-title-ellipsis {
+      flex: 1;
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
   }
 
   .item {
