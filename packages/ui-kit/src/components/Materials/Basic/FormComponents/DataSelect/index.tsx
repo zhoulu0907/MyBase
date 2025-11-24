@@ -3,18 +3,16 @@ import { Form, Input, Select } from '@arco-design/web-react';
 import { memo, useEffect, useState } from 'react';
 
 import { FORM_COMPONENT_TYPES } from '@/components/Materials/componentTypes';
+import { IconClose } from '@arco-design/web-react/icon';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import PreviewDataSelectModal from './previewDataSelectModal';
 import { XDataSelectConfig } from './schema';
-import { IconClose } from '@arco-design/web-react/icon';
 
-import { useFormField } from '../useFormField';
 import { dataMethodPage, menuSignal, type PageMethodParam } from '@onebase/app';
-import { getPopupContainer } from '@/utils';
+import { useFormField } from '../useFormField';
 
 import './index.css';
 // ===== 导入 end =====
-
 
 // ===== 组件定义 begin =====
 const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detailMode?: boolean }) => {
@@ -35,12 +33,12 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
   } = props;
   // ===== 外部 props end =====
 
-// ===== 表单上下文与字段名与值读取 begin =====
-  const { form, fieldName, fieldValue: formFieldValue } = useFormField(
-    dataField,
-    props.id,
-    FORM_COMPONENT_TYPES.DATA_SELECT
-  );
+  // ===== 表单上下文与字段名与值读取 begin =====
+  const {
+    form,
+    fieldName,
+    fieldValue: formFieldValue
+  } = useFormField(dataField, props.id, FORM_COMPONENT_TYPES.DATA_SELECT);
   // ===== 表单上下文与字段名与值读取 end =====
 
   // ===== 外部事件：选择数据 begin =====
@@ -72,7 +70,6 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
   }, [formFieldValue, runtime]);
   // =====  内部状态 & 回显 end =====
 
-
   // ===== 内部事件 =====
   const internalEvents = {
     openPreview: () => setUiState((prev) => ({ ...prev, previewVisible: true })),
@@ -85,7 +82,6 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
       }
     },
     selectData: (data: any) => {
-      debugger
       const lastKey = (displayFields || []).length ? displayFields[displayFields.length - 1]?.value : undefined;
       const name = lastKey ? data?.[lastKey] : '';
       const nextValue = data ? { id: data.id, name } : '';
@@ -130,7 +126,7 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
       const lastKey = (displayFields || []).length ? displayFields[displayFields.length - 1]?.value : undefined;
       const list = Array.isArray(res?.list) ? res.list : [];
       const opts = list.map((item: any) => ({
-        label: lastKey ? item?.data?.[lastKey] ?? '' : '',
+        label: lastKey ? (item?.data?.[lastKey] ?? '') : '',
         value: item?.id ?? item?.data?.id
       }));
       setOptions(opts);
@@ -138,7 +134,13 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
     if (helpers.isDropdownMode()) {
       fetchOptions();
     }
-  }, [runtime, props.selectMethod, props?.dynamicTableConfig?.metaData, props?.selectedDataSource?.entityId, displayFields]);
+  }, [
+    runtime,
+    props.selectMethod,
+    props?.dynamicTableConfig?.metaData,
+    props?.selectedDataSource?.entityId,
+    displayFields
+  ]);
 
   const renderInteractiveContent = () => (
     <div className="dataSelectTrigger" onClick={() => internalEvents.openPreview()}>
@@ -166,46 +168,55 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
     const selectedId = helpers.getSelectedId(dataState);
     const selectedLabel = helpers.getDisplayText(dataState);
     const exists = (options || []).some((o: any) => String(o?.value ?? '') === String(selectedId ?? ''));
-    const finalOptions = selectedId != null && selectedLabel
-      ? (exists ? options : [{ label: selectedLabel, value: selectedId }, ...(options || [])])
-      : (options || []);
+    const finalOptions =
+      selectedId != null && selectedLabel
+        ? exists
+          ? options
+          : [{ label: selectedLabel, value: selectedId }, ...(options || [])]
+        : options || [];
     return (
       <div>
-        <Input value={selectedId} hidden/>
+        <Input value={selectedId} hidden />
         <Select
           placeholder={placeholder}
           showSearch
           allowClear
           value={selectedId}
           options={finalOptions}
-          style={{minWidth: '120px', width: '100%' }}
+          style={{ minWidth: '120px', width: '100%' }}
           onChange={(v, option) => internalEvents.selectDropdown(v, option)}
         />
       </div>
     );
   };
 
-
   const renderRuntime = (interactive: boolean) => (
     <>
       <Form.Item
-        label={label.display && label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>}
+        label={
+          label.display &&
+          label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
+        }
         field={fieldName}
         layout={layout}
         tooltip={tooltip}
         labelCol={{ style: { width: labelColSpan, flex: 'unset' } }}
         wrapperCol={{ style: { flex: 1 } }}
-        rules={[{ required: verify?.required, message:`${label.text}是必填项` }]}
+        rules={[{ required: verify?.required, message: `${label.text}是必填项` }]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
       >
-        {interactive ? (helpers.isDropdownMode() ? renderDropdownContent() : renderInteractiveContent()) : renderReadonlyContent()}
+        {interactive
+          ? helpers.isDropdownMode()
+            ? renderDropdownContent()
+            : renderInteractiveContent()
+          : renderReadonlyContent()}
       </Form.Item>
-      {interactive && (
-        helpers.isDropdownMode() ? null : (
+      {interactive &&
+        (helpers.isDropdownMode() ? null : (
           <PreviewDataSelectModal
             visible={uiState.previewVisible}
             onCancel={internalEvents.closePreview}
@@ -213,14 +224,15 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
             defaultSelectedId={helpers.getSelectedId(dataState)}
             onSelect={internalEvents.selectData}
           />
-        )
-      )}
+        ))}
     </>
   );
 
   const renderBuilder = () => (
     <Form.Item
-      label={label.display && label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>}
+      label={
+        label.display && label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
+      }
       field={fieldName}
       layout={layout}
       tooltip={tooltip}
@@ -229,24 +241,16 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
       rules={[{ required: verify?.required }]}
       hidden={false}
       style={{
-          margin: 0,
-          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
+        margin: 0,
+        opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
       }}
     >
-      <Input
-        readOnly
-        placeholder={defaultValue}
-        value={helpers.getDisplayText(dataState)}
-      />
+      <Input readOnly placeholder={defaultValue} value={helpers.getDisplayText(dataState)} />
     </Form.Item>
   );
 
   const isInteractive = runtime && status !== STATUS_VALUES[STATUS_OPTIONS.READONLY] && !detailMode;
-  return (
-    <div className="formWrapper">
-      {runtime ? renderRuntime(isInteractive!) : renderBuilder()}
-    </div>
-  );
+  return <div className="formWrapper">{runtime ? renderRuntime(isInteractive!) : renderBuilder()}</div>;
 });
 // ===== 组件定义 end =====
 
