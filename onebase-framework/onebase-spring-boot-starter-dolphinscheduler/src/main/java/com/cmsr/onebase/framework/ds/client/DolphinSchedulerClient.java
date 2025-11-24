@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Lazy
 @Setter
@@ -91,7 +92,7 @@ public class DolphinSchedulerClient {
         OkHttpClient httpClient = httpClientBuilder
                 .connectTimeout(Duration.ofSeconds(15))
                 .callTimeout(Duration.ofSeconds(15))
-                .retryOnConnectionFailure(false)
+                .retryOnConnectionFailure(true)
                 .build();
 
         Retrofit.Builder retrofitBuilder = new Retrofit.Builder();
@@ -360,12 +361,31 @@ public class DolphinSchedulerClient {
         return JsonUtils.toJsonString(array);
     }
 
+    private <T> Response<Result<T>> tryExecute(Call<Result<T>> call) throws IOException, InterruptedException {
+        Response<Result<T>> resp = null;
+        IOException exception = null;
+        for (int i = 0; i < 3; i++) {
+            try {
+                resp = call.execute();
+                return resp;
+            } catch (IOException e) {
+                exception = e;
+                call = call.clone();
+                log.info("DolphinScheduler接口请求失败, 第{}次重试中...", i + 1);
+                TimeUnit.SECONDS.sleep(i + 1);
+            }
+        }
+        throw exception;
+    }
+
     private <T> Result<T> execute(Call<Result<T>> call) {
         Response<Result<T>> resp;
         try {
-            resp = call.execute();
+            resp = tryExecute(call);
         } catch (IOException e) {
             throw DolphinschedulerException.of("DolphinScheduler接口请求失败", e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
         // 判断响应是否为成功
         if (!resp.isSuccessful()) {
