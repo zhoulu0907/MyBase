@@ -24,7 +24,7 @@ import com.cmsr.onebase.module.system.enums.permission.PackageTypeEnum;
 import com.cmsr.onebase.module.system.service.dept.DeptService;
 import com.cmsr.onebase.module.system.service.tenant.TenantPackageService;
 import com.cmsr.onebase.module.system.service.tenant.TenantService;
-import com.cmsr.onebase.module.system.service.user.AdminUserService;
+import com.cmsr.onebase.module.system.service.user.UserService;
 import com.cmsr.onebase.module.system.vo.permission.PermissionMenuRespVO;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Suppliers;
@@ -54,18 +54,18 @@ import static com.cmsr.onebase.framework.common.util.json.JsonUtils.toJsonString
 public class PermissionServiceImpl implements PermissionService {
 
     @Resource
-    private RoleService roleService;
+    private RoleService          roleService;
     @Resource
-    private MenuService menuService;
+    private MenuService          menuService;
     @Resource
-    private DeptService deptService;
+    private DeptService          deptService;
     @Resource
-    private AdminUserService userService;
+    private UserService          userService;
     @Resource
     private TenantPackageService tenantPackageService;
     @Resource
     @Lazy // 延迟，避免循环依赖报错
-    private TenantService tenantService;
+    private TenantService        tenantService;
 
 
     @Resource
@@ -104,7 +104,7 @@ public class PermissionServiceImpl implements PermissionService {
 
         // 情况二：如果是租户管理员，赋予所有租户的权限
         boolean isTenantAdmin = roleService.isTenantAdmin(convertSet(roles, RoleDO::getId));
-        if(isTenantAdmin){
+        if (isTenantAdmin) {
             // 读取 tenant package，获取租户所有的权限点 tenantAllPermissions
             TenantDO tenant = tenantService.getTenant(TenantContextHolder.getRequiredTenantId());
             TenantPackageDO tenantPackage = tenantPackageService.getTenantPackage(tenant.getPackageId());
@@ -129,6 +129,21 @@ public class PermissionServiceImpl implements PermissionService {
                 tenantAllPermissions = menuList.stream().map(MenuDO::getPermission).filter(Objects::nonNull)
                         .collect(Collectors.toSet());
             }
+            // permissions 和 tenantAllPermissions对比，命中一个即返回true
+            for (String permission : permissions) {
+                if (tenantAllPermissions.contains(permission)) {
+                    return true;
+                }
+            }
+        }
+
+        // 情况二：如果是企业管理员，赋予所有企业相关权限
+        boolean isCorpAdmin = roleService.hasAnyCorpAdmin(convertSet(roles, RoleDO::getId));
+        if (isCorpAdmin) {
+            Set<Long> menuIds = getAllCorpActiveMenuIds();
+            List<MenuDO> menuList = menuService.getAllActiveMenuList(menuIds);
+            Set<String> tenantAllPermissions = menuList.stream().map(MenuDO::getPermission).filter(Objects::nonNull)
+                    .collect(Collectors.toSet());
             // permissions 和 tenantAllPermissions对比，命中一个即返回true
             for (String permission : permissions) {
                 if (tenantAllPermissions.contains(permission)) {
@@ -250,28 +265,47 @@ public class PermissionServiceImpl implements PermissionService {
             return Collections.emptySet();
         }
 
-        // 如果是管理员的情况下，获取全部菜单编号
+        // 如果是平台、空间管理员的情况下，获取全部菜单编号
         if (roleService.hasAnySuperOrTenantAdmin(roleIds)) {
-            return getAllActiveMenuIds();
+            return getAllValidActiveMenuIds();
         }
+        // 如果是企业管理员的情况下，获取企业菜单编号
+        if (roleService.hasAnyCorpAdmin(roleIds)) {
+            return getAllCorpActiveMenuIds();
+        }
+
         // 如果是非管理员的情况下，获得拥有的菜单编号
         return convertSet(roleMenuDataRepository.findListByRoleIds(roleIds), RoleMenuDO::getMenuId);
     }
 
     @Override
-    public Set<Long> getAllActiveMenuIds(){
+    public Set<Long> getAllCorpActiveMenuIds() {
         // 获取所有权限
-        List<MenuDO> menuList = menuService.getAllActiveMenuList();
+        List<MenuDO> menuList = menuService.getAllEnableMenuList();
         // 过滤出 tenantAllPermissions = tenant、app开头的菜单项
         Set<Long> tenantAllPermissions = menuList.stream()
-                .filter(menu -> menu.getPermission() != null &&
-                        (menu.getPermission().startsWith(MenuConstants.MENU_APP)
-                                || menu.getPermission().startsWith(MenuConstants.MENU_TENANT)
-                                || menu.getPermission().startsWith(MenuConstants.MENU_SYSTEM)))
+                .filter(menu -> menu.getPermission() != null
+                        && menu.getPermission().startsWith(MenuConstants.MENU_CORP))
                 .map(MenuDO::getId)
                 .collect(Collectors.toSet());
         return tenantAllPermissions;
     }
+
+    @Override
+    public Set<Long> getAllValidActiveMenuIds() {
+        // 获取所有权限
+        List<MenuDO> menuList = menuService.getAllEnableMenuList();
+        // 过滤出 tenantAllPermissions = tenant、app开头的菜单项
+        Set<Long> tenantAllPermissions = menuList.stream()
+                .filter(menu -> menu.getPermission() != null
+                        && (menu.getPermission().startsWith(MenuConstants.MENU_TENANT)
+                        || menu.getPermission().startsWith(MenuConstants.MENU_CORP)
+                        || menu.getPermission().startsWith(MenuConstants.MENU_SYSTEM)))
+                .map(MenuDO::getId)
+                .collect(Collectors.toSet());
+        return tenantAllPermissions;
+    }
+
 
     @Override
     @Cacheable(value = RedisKeyConstants.MENU_ROLE_ID_LIST, key = "#menuId")

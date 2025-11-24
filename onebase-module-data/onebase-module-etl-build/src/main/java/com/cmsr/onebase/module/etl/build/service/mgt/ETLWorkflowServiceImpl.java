@@ -6,11 +6,16 @@ import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.ds.client.DolphinSchedulerClient;
 import com.cmsr.onebase.framework.ds.model.schedule.sub.Schedule;
 import com.cmsr.onebase.framework.ds.model.task.def.HttpTask;
+import com.cmsr.onebase.jose.JoseGenerator;
 import com.cmsr.onebase.module.etl.build.service.mgt.vo.*;
+import com.cmsr.onebase.module.etl.build.util.Cron;
+import com.cmsr.onebase.module.etl.common.excute.ExecuteRequest;
 import com.cmsr.onebase.module.etl.common.graph.Node;
 import com.cmsr.onebase.module.etl.common.graph.WorkflowGraph;
 import com.cmsr.onebase.module.etl.common.graph.conf.JdbcInputConfig;
 import com.cmsr.onebase.module.etl.common.graph.conf.JdbcOutputConfig;
+import com.cmsr.onebase.module.etl.common.preview.ColumnDefine;
+import com.cmsr.onebase.module.etl.common.preview.DataPreview;
 import com.cmsr.onebase.module.etl.core.dal.database.*;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLExecutionLogDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLScheduleJobDO;
@@ -20,10 +25,12 @@ import com.cmsr.onebase.module.etl.core.enums.ETLConstants;
 import com.cmsr.onebase.module.etl.core.enums.ETLErrorCodeConstants;
 import com.cmsr.onebase.module.etl.core.enums.ScheduleJobStatus;
 import com.cmsr.onebase.module.etl.core.enums.ScheduleType;
-import com.cmsr.onebase.module.etl.build.util.Cron;
-import com.cmsr.onebase.module.etl.build.service.mgt.vo.ExecutionLogVO;
 import com.cmsr.onebase.module.etl.core.vo.WorkflowPageReqVO;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.NullNode;
 import jakarta.annotation.Resource;
+import kong.unirest.core.HttpResponse;
+import kong.unirest.core.Unirest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -136,7 +143,7 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
         Long workflowId = updateVO.getId();
         ETLWorkflowDO oldWorkflow = getOperableWorkflow(workflowId);
         if (!Objects.equals(oldWorkflow.getApplicationId(), updateVO.getApplicationId())) {
-            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATA_CONFLICT);
+            throw new IllegalArgumentException("应用ID不一致");
         }
         oldWorkflow.setWorkflowName(updateVO.getFlowName());
         oldWorkflow.setDeclaration(updateVO.getDeclaration());
@@ -218,13 +225,13 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
         ScheduleType scheduleType = ScheduleType.of(workflowDO.getScheduleStrategy());
         ETLScheduleJobDO scheduleJobDO = scheduleJobRepository.findByApplicationIdAndWorkflowId(workflowDO.getApplicationId(), workflowId);
         if (scheduleJobDO == null) {
-            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.UNKNOWN_ERROR);
+            throw new IllegalStateException("调度信息不存在");
         }
         Long jobId;
         String jobIdStr = scheduleJobDO.getJobId();
         if (StringUtils.isBlank(jobIdStr)) {
             // create
-            HttpTask httpTask = HttpTask.ofUrl(flinkServerUrl)
+            HttpTask httpTask = HttpTask.ofUrl(flinkServerUrl + "/flink/execute")
                     .method(HttpTask.HttpMethod.POST)
                     .body(JsonUtils.toJsonString(Map.of("workflowId", workflowId)));
             jobId = dolphinSchedulerClient.createSingletonHttpWorkflow(etlProjectCode,
@@ -296,7 +303,7 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
         }
         ETLScheduleJobDO scheduleJobDO = scheduleJobRepository.findByApplicationIdAndWorkflowId(workflowDO.getApplicationId(), workflowId);
         if (scheduleJobDO == null) {
-            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.UNKNOWN_ERROR);
+            throw new IllegalStateException("调度信息不存在");
         }
         Long jobId = Long.parseLong(scheduleJobDO.getJobId());
         dolphinSchedulerClient.purgeWorkflow(etlProjectCode, jobId);
@@ -354,6 +361,50 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
             logVOList.add(executionLogVO);
         }
         return new PageResult<>(logVOList, executionLogResult.getTotal());
+    }
+
+    @Override
+    public DataPreview previewWorkflow(PreviewReqVO previewReqVO) {
+        ExecuteRequest executeRequest = new ExecuteRequest();
+        JsonNode workflow = previewReqVO.getWorkflow();
+        if (workflow instanceof NullNode) {
+            throw new IllegalArgumentException("流程参数为空");
+        }
+        executeRequest.setPreviewWorkflow(workflow.toString());
+        executeRequest.setPreviewNodeId(previewReqVO.getNodeId());
+        String token = JoseGenerator.generateToken(30);
+        HttpResponse<String> response = Unirest.post(flinkServerUrl + "/flink/preview")
+                .header("Content-Type", "application/json")
+                .header("X-Exec-Token", token)
+                .body(executeRequest)
+                .asString();
+        if (response.getStatus() != 200) {
+            log.error("Flink Server 预览数据响应错误: {}", response.getBody());
+            throw new IllegalStateException("请求响应异常，" + response.getBody());
+        }
+        return JsonUtils.parseObject(response.getBody(), DataPreview.class);
+    }
+
+    @Override
+    public List<ColumnDefine> nodeColumns(PreviewReqVO previewReqVO) {
+        ExecuteRequest executeRequest = new ExecuteRequest();
+        JsonNode workflow = previewReqVO.getWorkflow();
+        if (workflow instanceof NullNode) {
+            throw new IllegalArgumentException("流程参数为空");
+        }
+        executeRequest.setPreviewWorkflow(workflow.toString());
+        executeRequest.setPreviewNodeId(previewReqVO.getNodeId());
+        String token = JoseGenerator.generateToken(30);
+        HttpResponse<String> response = Unirest.post(flinkServerUrl + "/flink/columns")
+                .header("Content-Type", "application/json")
+                .header("X-Exec-Token", token)
+                .body(executeRequest)
+                .asString();
+        if (response.getStatus() != 200) {
+            log.error("Flink Server 列分析响应错误: {}", response.getBody());
+            throw new IllegalStateException("请求响应异常，" + response.getBody());
+        }
+        return JsonUtils.parseArray(response.getBody(), ColumnDefine.class);
     }
 
     @Override

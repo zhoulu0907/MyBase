@@ -12,6 +12,7 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.dromara.warm.flow.core.dto.FlowParams;
 import org.dromara.warm.flow.core.entity.Instance;
 import org.dromara.warm.flow.core.entity.Node;
@@ -27,6 +28,7 @@ import org.dromara.warm.flow.core.service.impl.BpmConstants;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author liyang
@@ -34,16 +36,16 @@ import java.util.*;
 @Slf4j
 @Component
 public class BpmGlobalListener implements GlobalListener {
-    @Resource
+    @Resource(name = "bpmTaskService")
     private TaskService taskService;
 
-    @Resource
+    @Resource(name = "bpmInsService")
     private InsService insService;
 
-    @Resource
+    @Resource(name = "bpmNodeService")
     private NodeService nodeService;
 
-    @Resource
+    @Resource(name = "bpmUserService")
     private UserService userService;
 
     @Resource
@@ -87,24 +89,26 @@ public class BpmGlobalListener implements GlobalListener {
                 continue;
             }
 
-            // 处理下一个抄送节点，只保留当前节点的办理人权限，todo：使用系统管理员权限
+            // 处理下一个抄送节点，只保留系统用户权限
             if (Objects.equals(nodeExtDTO.getNodeType(), BpmNodeTypeEnum.CC.getCode())) {
-                String currTaskHandler = flowParams.getHandler();
-
                 List<String> ccPermissionList = nextTask.getPermissionList();
 
                 // 存入当前节点的变量值里
                 flowVariable.put(BpmConstants.VAR_CC_USERS_KEY + "_" + nextTask.getNodeCode(),
                         JsonUtils.toJsonString(ccPermissionList));
 
-                // 覆盖权限人
-                nextTask.setPermissionList(List.of(currTaskHandler));
+                // 清空权限人，使用系统用户执行
+                nextTask.setPermissionList(new ArrayList<>());
             }
         }
+
+        // 处理未操作的用户
+        handleUnOperatorUsersOnAssignment(listenerVariable);
     }
 
     public void finish(ListenerVariable listenerVariable) {
         Node currNode = listenerVariable.getNode();
+        Map<String, Object> flowVariable = listenerVariable.getVariable();
 
         // 获取节点ext信息
         String ext = currNode.getExt();
@@ -129,6 +133,19 @@ public class BpmGlobalListener implements GlobalListener {
 
         if (Objects.equals(nodeExtDTO.getNodeType(), BpmNodeTypeEnum.CC.getCode())) {
             ccNodeListener.handleFinish(listenerVariable);
+        }
+
+        // 抄送给未处理的用户
+        if (Objects.equals(nodeExtDTO.getNodeType(), BpmNodeTypeEnum.APPROVER.getCode())
+                || Objects.equals(nodeExtDTO.getNodeType(), BpmNodeTypeEnum.EXECUTOR.getCode())) {
+            Task currTask = listenerVariable.getTask();
+
+            ccNodeListener.handleCcUsers(currTask, flowVariable);
+        }
+
+        if (flowVariable != null) {
+            // 清理代理人信息
+            flowVariable.remove("agentId");
         }
     }
 
@@ -156,7 +173,7 @@ public class BpmGlobalListener implements GlobalListener {
         if (Objects.equals(nodeExtDTO.getNodeType(), BpmNodeTypeEnum.APPROVER.getCode())
                 || Objects.equals(nodeExtDTO.getNodeType(), BpmNodeTypeEnum.EXECUTOR.getCode())) {
             // 此处为nextTask创建的地方，加上代理人的信息
-            handleAgent(listenerVariable);
+            handleAgentOnCreate(listenerVariable);
         }
 
         if (Objects.equals(nodeExtDTO.getNodeType(), BpmNodeTypeEnum.CC.getCode())) {
@@ -167,7 +184,7 @@ public class BpmGlobalListener implements GlobalListener {
     /**
      * 处理代理人的业务逻辑
      */
-    private void handleAgent(ListenerVariable listenerVariable) {
+    private void handleAgentOnCreate(ListenerVariable listenerVariable) {
         Map<String, Object> variable = listenerVariable.getVariable();
         Task task = listenerVariable.getTask();
 
@@ -215,5 +232,55 @@ public class BpmGlobalListener implements GlobalListener {
 
         // 保存代理用户
         userService.saveBatch(agentUsers);
+    }
+
+    private void handleUnOperatorUsersOnAssignment(ListenerVariable listenerVariable) {
+        Task currTask = listenerVariable.getTask();
+        FlowParams flowParams = listenerVariable.getFlowParams();
+        Map<String, Object> flowVariable = listenerVariable.getVariable();
+
+        // 不一定有待办
+        if (currTask == null) {
+            return;
+        }
+
+        // 查找剩余未操作的用户
+        List<User> unOperatorUsers = userService.listByAssociatedAndTypes(currTask.getId());
+
+        if (CollectionUtils.isNotEmpty(unOperatorUsers)) {
+            String currHandler = flowParams.getHandler();
+            String agentId = MapUtils.getString(flowVariable, "agentId");
+
+            Set<String> ccPermissionList = unOperatorUsers.stream()
+                .filter(item -> {
+                    // 排除自己
+                    if (Objects.equals(item.getProcessedBy(), currHandler)) {
+                        return false;
+                    }
+
+                    // 排除系统用户
+                    if (Objects.equals(item.getProcessedBy(), BpmConstants.SYS_USER_ID)) {
+                        return false;
+                    }
+
+                    // 代理人执行的，排除当前指定被代理人的代理用户
+                    if (StringUtils.isNotBlank(agentId)
+                            && Objects.equals(item.getType(), BpmUserTypeEnum.AGENT.getCode())
+                            && Objects.equals(item.getCreateBy(), currHandler)
+                            && Objects.equals(item.getProcessedBy(), agentId)) {
+                        return false;
+                    }
+
+                    return true;
+                })
+                .map(User::getProcessedBy)
+                .collect(Collectors.toSet());
+
+            // todo：同一个节点，是否会同时有抄送和未操作的用户，确认是否会覆盖
+            if (CollectionUtils.isNotEmpty(ccPermissionList)) {
+                flowVariable.put(BpmConstants.VAR_CC_USERS_KEY + "_" + currTask.getNodeCode(),
+                        JsonUtils.toJsonString(ccPermissionList));
+            }
+        }
     }
 }

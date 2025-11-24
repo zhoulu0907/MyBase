@@ -73,14 +73,14 @@ public class TenantController {
 
     @PostMapping("/create")
     @Operation(summary = "创建租户")
-    @PreAuthorize("@ss.hasPermission('system:tenant:create')")
+    @PreAuthorize("@ss.hasPermission('tenant:space:create')")
     public CommonResult<Long> createTenant(@Valid @RequestBody TenantInsertReqVO createReqVO) {
         return success(tenantService.createTenant(createReqVO));
     }
 
     @PostMapping("/update")
     @Operation(summary = "更新租户")
-    @PreAuthorize("@ss.hasPermission('system:tenant:update')")
+    @PreAuthorize("@ss.hasPermission('tenant:space:update')")
     public CommonResult<Boolean> updateTenant(@Valid @RequestBody TenantUpdateReqVO updateReqVO) {
         tenantService.updateTenant(updateReqVO);
         return success(true);
@@ -89,7 +89,7 @@ public class TenantController {
     @PostMapping("/delete")
     @Operation(summary = "删除租户")
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
-    @PreAuthorize("@ss.hasPermission('system:tenant:delete')")
+    @PreAuthorize("@ss.hasPermission('tenant:space:delete')")
     public CommonResult<Boolean> deleteTenant(@RequestParam("id") Long id) {
         tenantService.deleteTenant(id);
         return success(true);
@@ -98,14 +98,14 @@ public class TenantController {
     @GetMapping("/get")
     @Operation(summary = "获得租户(安全考虑仅获取用户所属租户)")
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
-    @PreAuthorize("@ss.hasPermission('system:tenant:query')")
+    @PreAuthorize("@ss.hasPermission('tenant:space:query')")
     public CommonResult<TenantRespVO> getTenant(@RequestParam("id") Long id) {
         return success(tenantService.getTenantWithAppCount(id));
     }
 
     @GetMapping("/get-allocatable-count")
     @Operation(summary = "获得租户可分配数量")
-    @PreAuthorize("@ss.hasPermission('system:tenant:query')")
+    @PreAuthorize("@ss.hasPermission('tenant:tenant:query')")
     public CommonResult<Long> getAllocatableCount() {
         Long accountCount = tenantService.getAvailableAccountCount();
         return success(accountCount);
@@ -113,7 +113,7 @@ public class TenantController {
 
     @GetMapping("/get-other-exist-user-count")
     @Operation(summary = "获得其他已有的用户数量和")
-    @PreAuthorize("@ss.hasPermission('system:tenant:query')")
+    @PreAuthorize("@ss.hasPermission('tenant:tenant:query')")
     public CommonResult<Long> getOtherTenantUserCount(@RequestParam(required = false) Long id) {
         Long accountCount = tenantService.getOtherTenantUserLimitCount(id);
         return success(accountCount);
@@ -121,7 +121,7 @@ public class TenantController {
 
     @GetMapping("/get-tenant-exist-user-count")
     @Operation(summary = "获得当前已有的用户数量和")
-    @PreAuthorize("@ss.hasPermission('system:tenant:query')")
+    @PreAuthorize("@ss.hasPermission('tenant:tenant:query')")
     public CommonResult<Long> getTenantExistUserCount(@RequestParam Long id) {
         Long userCount = tenantService.getTenantExistUserCount(id);
         return success(userCount);
@@ -137,7 +137,7 @@ public class TenantController {
 
     @GetMapping("/export-excel")
     @Operation(summary = "导出租户 Excel")
-    @PreAuthorize("@ss.hasPermission('system:tenant:export')")
+    @PreAuthorize("@ss.hasPermission('tenant:tenant:export')")
     public void exportTenantExcel(@Valid TenantPageReqVO exportReqVO, HttpServletResponse response) throws IOException {
         exportReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
         List<TenantRespVO> list = tenantService.getTenantPage(exportReqVO).getList();

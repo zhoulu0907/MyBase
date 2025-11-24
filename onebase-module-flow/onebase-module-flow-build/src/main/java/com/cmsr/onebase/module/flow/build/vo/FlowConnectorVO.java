@@ -22,6 +22,8 @@ public class FlowConnectorVO {
 
     private String config;
 
+    private String connectorVersion;
+
     private LocalDateTime createTime;
 
     public JsonNode getConfig() {
@@ -38,14 +40,6 @@ public class FlowConnectorVO {
         }
 
         this.config = JsonUtils.toJsonString(config);
-    }
-
-    public void setConfigStr(String config) {
-        this.config = config;
-    }
-
-    public String getConfigStr() {
-        return this.config;
     }
 
 }

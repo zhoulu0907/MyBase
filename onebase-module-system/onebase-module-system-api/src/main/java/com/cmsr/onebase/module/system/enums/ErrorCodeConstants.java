@@ -18,6 +18,7 @@ public interface ErrorCodeConstants {
     ErrorCode AUTH_REGISTER_CAPTCHA_CODE_ERROR = new ErrorCode(1_002_000_008, "验证码不正确，原因：{}");
     ErrorCode AUTH_LOGIN_USER_NOT_ADMIN_ERROR = new ErrorCode(1_002_000_009, "登录失败，仅平台管理员可登录。");
     ErrorCode AUTH_LOGIN_PLATFORM_TENANT_ERROR = new ErrorCode(1_002_000_010, "登录失败，平台租户不可登录。");
+    ErrorCode AUTH_LOGIN_NO_EXISTS = new ErrorCode(1_002_000_011, "登录失败，当前账号不存在。");
 
     // ========== 菜单模块 1-002-001-000 ==========
     ErrorCode MENU_NAME_DUPLICATE = new ErrorCode(1_002_001_000, "已经存在该名字的菜单");
@@ -63,6 +64,7 @@ public interface ErrorCodeConstants {
     ErrorCode DEPT_NOT_ENABLE = new ErrorCode(1_002_004_006, "部门({})不处于开启状态，不允许选择");
     ErrorCode DEPT_PARENT_IS_CHILD = new ErrorCode(1_002_004_007, "不能设置自己的子部门为父部门");
     ErrorCode DEPT_DEL_FAILD_EXISTS_USERS = new ErrorCode(1_002_004_008, "请先移除部门内所有人员再进行删除部门操作");
+    ErrorCode DEPT_TYPE_EXCEPTION = new ErrorCode(1_002_004_009, "部门类型异常:{}");
 
     // ========== 岗位模块 1-002-005-000 ==========
     ErrorCode POST_NOT_FOUND = new ErrorCode(1_002_005_000, "当前岗位不存在");
@@ -118,6 +120,7 @@ public interface ErrorCodeConstants {
     ErrorCode TENANT_NAME_DUPLICATE = new ErrorCode(1_002_015_004, "名字为【{}】的租户已存在");
     ErrorCode TENANT_WEBSITE_DUPLICATE = new ErrorCode(1_002_015_005, "租户域名为【{}】的租户已存在");
     ErrorCode TENANT_WEBSITE_IS_NULL = new ErrorCode(1_002_015_006, "租户域名不可为空");
+    ErrorCode TENANT_ONLY_GET_SELF = new ErrorCode(1_002_015_007, "只能获取自己所在的租户的信息");
 
     // ========== 租户套餐 1-002-016-000 ==========
     ErrorCode TENANT_PACKAGE_NOT_EXISTS = new ErrorCode(1_002_016_000, "租户套餐不存在");
@@ -125,18 +128,7 @@ public interface ErrorCodeConstants {
     ErrorCode TENANT_PACKAGE_DISABLE = new ErrorCode(1_002_016_002, "名字为【{}】的租户套餐已被禁用");
     ErrorCode TENANT_PACKAGE_NAME_DUPLICATE = new ErrorCode(1_002_016_003, "已经存在该名字的租户套餐");
 
-    // ========== 社交用户 1-002-018-000 ==========
-    ErrorCode SOCIAL_USER_AUTH_FAILURE = new ErrorCode(1_002_018_000, "社交授权失败，原因是：{}");
-    ErrorCode SOCIAL_USER_NOT_FOUND = new ErrorCode(1_002_018_001, "社交授权失败，找不到对应的用户");
-
-    ErrorCode SOCIAL_CLIENT_WEIXIN_MINI_APP_PHONE_CODE_ERROR = new ErrorCode(1_002_018_200, "获得手机号失败");
-    ErrorCode SOCIAL_CLIENT_WEIXIN_MINI_APP_QRCODE_ERROR = new ErrorCode(1_002_018_201, "获得小程序码失败");
-    ErrorCode SOCIAL_CLIENT_WEIXIN_MINI_APP_SUBSCRIBE_TEMPLATE_ERROR = new ErrorCode(1_002_018_202, "获得小程序订阅消息模版失败");
-    ErrorCode SOCIAL_CLIENT_WEIXIN_MINI_APP_SUBSCRIBE_MESSAGE_ERROR = new ErrorCode(1_002_018_203, "发送小程序订阅消息失败");
-    ErrorCode SOCIAL_CLIENT_WEIXIN_MINI_APP_ORDER_UPLOAD_SHIPPING_INFO_ERROR = new ErrorCode(1_002_018_204, "上传微信小程序发货信息失败");
-    ErrorCode SOCIAL_CLIENT_WEIXIN_MINI_APP_ORDER_NOTIFY_CONFIRM_RECEIVE_ERROR = new ErrorCode(1_002_018_205, "上传微信小程序订单收货信息失败");
-    ErrorCode SOCIAL_CLIENT_NOT_EXISTS = new ErrorCode(1_002_018_210, "社交客户端不存在");
-    ErrorCode SOCIAL_CLIENT_UNIQUE = new ErrorCode(1_002_018_211, "社交客户端已存在配置");
+    // ========== 外部用户 1-002-018-000 ==========
 
     // ========== OAuth2 客户端 1-002-020-000 =========
     ErrorCode OAUTH2_CLIENT_NOT_EXISTS = new ErrorCode(1_002_020_000, "OAuth2 客户端不存在");
@@ -189,6 +181,7 @@ public interface ErrorCodeConstants {
     ErrorCode CORP_ID_EXISTS = new ErrorCode(1_002_025_008, "编码为【{}】的企业已存在");
     ErrorCode CORP_USER_LIMIT_COUNT = new ErrorCode(1_002_025_007, "企业用户数【{}】，大于系统上限");
     ErrorCode CORP_ID_NULL = new ErrorCode(1_002_025_008, "企业ID为空");
+    ErrorCode CORP_ID_COMPARE_ERROR = new ErrorCode(1_002_025_009, "只能获取自己企业的信息");
     // ========== 企业应用关联 1-002-030-000 ==========
     ErrorCode APPLICATION_AUTH_TENANT_NOT_EXISTS = new ErrorCode(1_002_030_000, "企业应用关联表不存在");
 

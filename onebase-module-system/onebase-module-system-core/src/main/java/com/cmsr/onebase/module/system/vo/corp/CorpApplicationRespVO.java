@@ -24,7 +24,7 @@ public class CorpApplicationRespVO {
     private String versionNumber;
     @Schema(description = "过期时间")
     private LocalDateTime expiresTime;
-    @Schema(description = "状态描述")
-    private String statusDesc;
+    @Schema(description = "状态值")
+    private Integer    showStatus;
 
 }

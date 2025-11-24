@@ -48,4 +48,13 @@ public interface SecurityConfigService {
      */
     List<SecurityConfigItemRespVO> getSecurityConfigsByTenant(Long tenantId);
 
+    /**
+     * 获取整数类型的配置值
+     *
+     * @param tenantId 租户ID
+     * @param configKey 配置键
+     * @return 配置值，如果不存在或解析失败返回null
+     */
+    Integer getIntConfig(Long tenantId, String configKey);
+
 }

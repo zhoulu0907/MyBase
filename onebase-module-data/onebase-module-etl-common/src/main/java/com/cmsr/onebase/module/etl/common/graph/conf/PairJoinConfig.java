@@ -16,6 +16,27 @@ public class PairJoinConfig extends NodeConfig {
 
     private String joinType;
 
-    private List<String[]> fieldPairs;
+    private List<FieldPair> fieldPairs;
 
+    private List<Mapping> mappings;
+
+    @Data
+    public static class FieldPair {
+
+        private String leftFieldFqn;
+
+        private String rightFieldFqn;
+
+    }
+
+    @Data
+    public static class Mapping {
+
+        private String fieldName;
+
+        private String updatedFieldName;
+
+        private String nodeId;
+
+    }
 }

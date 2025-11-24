@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.system.framework.operatelog.core;
 
 import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.dict.core.DictFrameworkUtils;
-import com.cmsr.onebase.module.infra.enums.DictTypeConstants;
+import com.cmsr.onebase.module.infra.api.constant.DictTypeConstants;
 import com.mzt.logapi.service.IParseFunction;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

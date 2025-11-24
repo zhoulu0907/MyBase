@@ -88,7 +88,7 @@ onebase:
     etl-project: 155572154738048
     tenant: root
   flink:
-    address: http://localhost:58080
+    address: http://10.0.104.41:30692
 
 justauth:
   enabled: true

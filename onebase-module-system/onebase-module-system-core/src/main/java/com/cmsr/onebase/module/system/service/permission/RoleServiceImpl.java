@@ -235,8 +235,8 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public PageResult<RoleDO> getRolePage(RolePageReqVO reqVO) {
-        return roleDataRepository.findPage(reqVO);
+    public PageResult<RoleDO> findRolePageOnlyTenant(RolePageReqVO reqVO) {
+        return roleDataRepository.findRolePageOnlyTenant(reqVO);
     }
 
     @Override
@@ -247,7 +247,19 @@ public class RoleServiceImpl implements RoleService {
         // 通过代理对象调用，确保 @Cacheable 生效
         return ids.stream().anyMatch(id -> {
             RoleDO role = roleService.getRoleFromCache(id);
-            return role != null &&( RoleCodeEnum.isSuperAdmin(role.getCode()) || RoleCodeEnum.isTenantAdmin(role.getCode()));
+            return role != null && (RoleCodeEnum.isSuperAdmin(role.getCode()) || RoleCodeEnum.isTenantAdmin(role.getCode()));
+        });
+    }
+
+    @Override
+    public boolean hasAnyCorpAdmin(Collection<Long> ids) {
+        if (CollectionUtils.isEmpty(ids)) {
+            return false;
+        }
+        // 通过代理对象调用，确保 @Cacheable 生效
+        return ids.stream().anyMatch(id -> {
+            RoleDO role = roleService.getRoleFromCache(id);
+            return role != null && (RoleCodeEnum.isCorpAdmin(role.getCode()));
         });
     }
 

@@ -1,0 +1,85 @@
+### 新增用户
+
+POST {{baseUrl}}/corp/user/create
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "username": "testUser001",
+  "nickname": "测试用户001",
+  "password": "123456",
+  "email": "test001@example.com",
+  "mobile": "13800000002",
+  "sex": 1,
+  "status": 1
+}
+
+### 修改用户
+POST {{baseUrl}}/corp/user/update
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "id": 146832820233502720,
+  "username": "updatedUser001",
+  "nickname": "更新测试用户001",
+  "email": "updated001@example.com",
+  "mobile": "13800000002",
+  "sex": 2,
+  "deptId": 101,
+  "postIds": [2, 3],
+  "roleIds": [2],
+  "status": 0
+}
+
+### 删除用户
+POST {{baseUrl}}/corp/user/delete?id=1
+Authorization: Bearer {{token}}
+
+### 重置用户密码
+POST {{baseUrl}}/corp/user/update-password
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "id": 1,
+  "password": "newPassword123"
+}
+
+### 修改用户状态
+POST {{baseUrl}}/corp/user/update-status
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "id": 1,
+  "status": 1
+}
+
+### 获得用户分页列表
+GET {{baseUrl}}/corp/user/page?nickname=test&mobile=138&pageNo=1&pageSize=10
+Authorization: Bearer {{token}}
+
+### 获得简要用户分页列表(启用状态)
+GET {{baseUrl}}/corp/user/simple-page?keywords=admin&pageNo=1&pageSize=10
+Authorization: Bearer {{token}}
+
+### 获取用户精简信息列表
+GET {{baseUrl}}/corp/user/simple-list
+Authorization: Bearer {{token}}
+
+### 通过昵称获取用户精简信息列表
+GET {{baseUrl}}/corp/user/simple-list-by-name?userNickName=test
+Authorization: Bearer {{token}}
+
+### 获得用户详情
+GET {{baseUrl}}/corp/user/get?id=1
+Authorization: Bearer {{token}}
+
+### 导出用户
+GET {{baseUrl}}/corp/user/export?nickname=test&pageNo=1&pageSize=10
+Authorization: Bearer {{token}}
+
+### 获得指定部门的用户简要分页列表
+GET {{baseUrl}}/corp/user/get-user-page-by-dept?deptId=100&isRecurseSub=true&keywords=it&pageNo=1&pageSize=10
+Authorization: Bearer {{token}}

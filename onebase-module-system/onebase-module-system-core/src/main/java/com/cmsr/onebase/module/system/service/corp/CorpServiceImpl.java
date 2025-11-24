@@ -16,13 +16,11 @@ import com.cmsr.onebase.module.system.dal.dataobject.corp.CorpDO;
 import com.cmsr.onebase.module.system.dal.dataobject.corpapprelation.CorpAppRelationDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.corp.CorpConstant;
-import com.cmsr.onebase.module.system.enums.permission.AdminTypeEnum;
 import com.cmsr.onebase.module.system.service.corpapprelation.CorpAppRelationService;
-import com.cmsr.onebase.module.system.service.user.AdminUserService;
+import com.cmsr.onebase.module.system.service.user.UserService;
 import com.cmsr.onebase.module.system.util.encrypt.PasswordRandomGenerator;
 import com.cmsr.onebase.module.system.vo.corp.*;
 import com.cmsr.onebase.module.system.vo.corpapprelation.AppAuthTimeReqVO;
-import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppRelationInertReqVO;
 import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppRelationPageReqVO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -57,7 +55,7 @@ public class CorpServiceImpl implements CorpService {
     private CorpDataRepository corpDataRepository;
 
     @Resource
-    private AdminUserService adminUserService;
+    private UserService corpUserService;
 
     @Resource
     private PasswordEncoder passwordEncoder;
@@ -67,9 +65,6 @@ public class CorpServiceImpl implements CorpService {
 
     @Resource
     private AppApplicationApi appApplicationApi;
-
-    @Resource
-    private AdminUserService userService;
 
     @Resource
     private   DictDataCommonApi dictDataApi;
@@ -234,7 +229,7 @@ public class CorpServiceImpl implements CorpService {
                 .map(CorpDO::getAdminId)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
-        Map<Long, AdminUserDO> userDOMap= userService.getUserMap(adminUserIds);
+        Map<Long, AdminUserDO> userDOMap= corpUserService.getUserMap(adminUserIds);
 
         // Step 4：组装返回值
         List<CorpRespVO> respList = corpList.stream()
@@ -281,7 +276,7 @@ public class CorpServiceImpl implements CorpService {
             return null;
         }
         CorpRespVO respVO = BeanUtils.toBean(corpDO, CorpRespVO.class);
-        AdminUserDO userDO=  userService.getUser(corpDO.getAdminId());
+        AdminUserDO userDO=  corpUserService.getUser(corpDO.getAdminId());
         if(userDO!=null){
             respVO.setAdminName(userDO.getNickname());
             respVO.setEmail(userDO.getEmail());
@@ -312,22 +307,19 @@ public class CorpServiceImpl implements CorpService {
 
     public CorpAdminUserRespVO createAdminUser(CorpAdminReqVO reqVO,Long corpId) {
         // 2.2.1 判断如果不存在，在进行插入
-        AdminUserDO existUser = adminUserService.getUserByUsername(reqVO.getUsername());
+        AdminUserDO existUser = corpUserService.getUserByUsername(reqVO.getUsername());
         if (existUser != null) {
             throw exception(USER_USERNAME_EXISTS);
         }
         // 插入用户
         AdminUserDO user = BeanUtils.toBean(reqVO, AdminUserDO.class);
-        user.setStatus(CommonStatusEnum.ENABLE.getStatus()); // 默认开启
         String password = PasswordRandomGenerator.generateSecurePassword(15);
         user.setPassword(encodePassword(password)); // 加密密码
-        if (user.getAdminType() == null) {
-            user.setAdminType(AdminTypeEnum.CUSTOM.getType());
-        }
         user.setCorpId(corpId);
-        Long userId = adminUserService.createCorpAdminUser(user);
+        Long userId = corpUserService.createCorpAdminUser(user);
         CorpAdminUserRespVO vo = new CorpAdminUserRespVO();
             vo.setUsername(reqVO.getUsername());
+            vo.setMobile(reqVO.getMobile());
             vo.setPassword(password);
             vo.setId(userId);
         return vo;

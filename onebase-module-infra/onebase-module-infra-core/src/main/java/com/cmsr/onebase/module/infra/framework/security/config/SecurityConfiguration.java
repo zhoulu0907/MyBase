@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.infra.framework.security.config;
 
 import com.cmsr.onebase.framework.security.config.AuthorizeRequestsCustomizer;
-import com.cmsr.onebase.module.infra.enums.ApiConstants;
+import com.cmsr.onebase.module.infra.api.constant.ApiConstants;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

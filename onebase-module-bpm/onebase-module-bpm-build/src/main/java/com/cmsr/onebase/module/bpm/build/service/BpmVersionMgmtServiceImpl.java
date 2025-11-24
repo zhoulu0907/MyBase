@@ -50,16 +50,16 @@ import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionU
 @Slf4j
 public class BpmVersionMgmtServiceImpl implements BpmVersionMgmtService {
 
-    @Resource
+    @Resource(name = "bpmDefService")
     private DefService defService;
 
-    @Resource
+    @Resource(name = "bpmNodeService")
     private NodeService nodeService;
 
-    @Resource
+    @Resource(name = "bpmSkipService")
     private SkipService skipService;
 
-    @Resource
+    @Resource(name = "bpmInsService")
     private InsService insService;
 
     @Resource

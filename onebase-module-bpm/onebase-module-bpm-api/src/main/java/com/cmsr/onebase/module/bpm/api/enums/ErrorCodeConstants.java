@@ -53,11 +53,11 @@ public interface ErrorCodeConstants {
 
     ErrorCode VALIDATE_BPM_DEF_JSON_FAILED = new ErrorCode(1_009_002_002, "校验流程定义JSON失败");
 
-    ErrorCode UNSUPPORT_NODE_APPROVER_TYPE = new ErrorCode(1_009_002_003, "不支持的审批人类型");
+    ErrorCode UNSUPPORT_NODE_HANDLER_TYPE = new ErrorCode(1_009_002_003, "不支持的处理人类型");
 
-    ErrorCode MISSING_NODE_USER_LIST = new ErrorCode(1_009_002_004, "审批人列表不能为空");
+    ErrorCode MISSING_NODE_USER_LIST = new ErrorCode(1_009_002_004, "用户列表不能为空");
 
-    ErrorCode MISSING_NODE_ROLE_LIST = new ErrorCode(1_009_002_005, "审批角色列表不能为空");
+    ErrorCode MISSING_NODE_ROLE_LIST = new ErrorCode(1_009_002_005, "角色列表不能为空");
 
     ErrorCode UNSUPPORT_NODE_APPROVAL_MODE = new ErrorCode(1_009_002_006, "不支持的审批方式");
 
@@ -87,7 +87,7 @@ public interface ErrorCodeConstants {
 
     ErrorCode BPM_BIZ_EXT_NOT_EXIST = new ErrorCode(1_009_002_019, "流程业务扩展信息不存在");
 
-    ErrorCode MISSING_NODE_VALID_ROLE_LIST = new ErrorCode(1_009_002_020, "缺少有效审批角色列表");
+    ErrorCode MISSING_NODE_VALID_ROLE_LIST = new ErrorCode(1_009_002_020, "缺少有效角色列表");
 
     ErrorCode AGENT_TIME_CONFLICT = new ErrorCode(1_009_002_021, "被代理人在该时间段内已存在代理设置，请确认现有代理关系后重新配置");
 
