@@ -3,11 +3,11 @@ import { memo, useEffect, useState } from 'react';
 import {
   BUTTON_OPTIONS,
   BUTTON_VALUES,
+  RedirectMethod,
   STATUS_OPTIONS,
   STATUS_VALUES,
   TableOperationButton,
-  TableOperationButtonStyle,
-  RedirectMethod
+  TableOperationButtonStyle
 } from '../../../constants';
 
 import DynamicIcon from '@/components/DynamicIcon';
@@ -28,7 +28,7 @@ import PreviewRender from 'src/components/render/PreviewRender';
 import { useFormEditorSignal } from 'src/signals/page_editor';
 import { ENTITY_FIELD_TYPE } from '../../../../DataFactory/const';
 import { COMPONENT_MAP } from '../../../componentsMap';
-import { getComponentSchema } from '../../../schema'
+import { getComponentSchema } from '../../../schema';
 import './index.css';
 import type { XTableConfig } from './schema';
 import TableSearch from './tableSerach';
@@ -245,8 +245,9 @@ const XTable = memo(
             bodyCellStyle: { padding: '0 12px' },
             render: (_text: any, _record: any, index: number) => {
               const componentSchemasKeys = Object.keys(fromPageComponentSchemas.value || {});
+              const columnId = column.id || column.dataIndex;
               const cpId = componentSchemasKeys.find((ele) => {
-                return fromPageComponentSchemas.value[ele]?.config?.dataField?.includes(column.id);
+                return fromPageComponentSchemas.value[ele]?.config?.dataField?.includes(columnId);
               });
 
               // 表单配置
@@ -259,7 +260,7 @@ const XTable = memo(
                 let dataField: string[] = [];
                 if (Array.isArray(mainMetaData?.parentFields)) {
                   const dataFieldInfo = mainMetaData.parentFields.find(
-                    (field: AppEntityField) => field.fieldId === column.id
+                    (field: AppEntityField) => field.fieldId === columnId
                   );
                   if (dataFieldInfo && _record[dataFieldInfo.fieldName]) {
                     dataField = [mainMetaData.entityId, `${id}.${index}.${dataFieldInfo.fieldName}`];
@@ -269,11 +270,13 @@ const XTable = memo(
                   ...currentComponentSchemas,
                   config: {
                     ...currentComponentSchemas.config,
-                    dataField: dataField?.length > 0 ? dataField : [mainMetaData.entityId, `${id}.${index}.${column.id}`],
+                    dataField:
+                      dataField?.length > 0 ? dataField : [mainMetaData.entityId, `${id}.${index}.${column.id}`],
                     label: {
                       display: false,
                       text: ''
                     },
+                    status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
                     verify: { required: false },
                     tooltip: ''
                   }
@@ -284,7 +287,7 @@ const XTable = memo(
 
                 return (
                   <PreviewRender
-                    cpId={column.id}
+                    cpId={columnId}
                     cpType={cpType}
                     detailMode={true}
                     pageComponentSchema={componentConfig}
@@ -296,7 +299,7 @@ const XTable = memo(
               // 根据字段获取默认配置
               if (Array.isArray(mainMetaData?.parentFields)) {
                 const dataFieldInfo = mainMetaData.parentFields.find(
-                  (field: AppEntityField) => field.fieldId === column.id
+                  (field: AppEntityField) => field.fieldId === columnId
                 );
                 const cpType = COMPONENT_MAP[dataFieldInfo?.fieldType];
                 if (dataFieldInfo?.fieldType && cpType) {
@@ -316,7 +319,7 @@ const XTable = memo(
                   };
                   return (
                     <PreviewRender
-                      cpId={column.id}
+                      cpId={columnId}
                       cpType={cpType}
                       detailMode={true}
                       pageComponentSchema={componentConfig}
@@ -455,7 +458,12 @@ const XTable = memo(
             );
             if (userSelectField && newItem[key]) {
               if (newItem[key]) {
-                // newItem[key] = newItem[key]?.userName || '';
+                if (typeof newItem[key] === 'string') {
+                  newItem[key] = {
+                    userID: newItem[key],
+                    userName: newItem[key]
+                  };
+                }
               }
             }
 

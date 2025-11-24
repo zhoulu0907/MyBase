@@ -9,7 +9,7 @@ import BottomBtn from '../../../bottomBtn';
 import ApproverConfig from './approverConfig/index';
 import ApproverBtnConfig from './btnConfig/index';
 import FieldConfig from './fieldConfig/index';
-import AdvancedConfig from './advancedConfig/index'
+import AdvancedConfig from './advancedConfig/index';
 import { ApproveDrawerTab } from './constant';
 import { useLocation } from 'react-router-dom';
 import type {
@@ -33,7 +33,9 @@ export default function ApproveDreawer({ handleConfigSubmit, configData }: Appro
   const [approverConfigData, setApproverConfigData] = useState<ApproverConfigDataType>(
     configData || {
       approverConfig: {
-        approvalMode: 'any_sign'
+        approvalMode: 'any_sign',
+        users: [],
+        roles: []
       },
       buttonConfigs: [],
       fieldPermConfig: {
@@ -101,6 +103,16 @@ export default function ApproveDreawer({ handleConfigSubmit, configData }: Appro
 
   function handleSubmit() {
     console.log('approverConfigData ===', approverConfigData);
+    //error
+    let errorMsg = '';
+    const { users = [], roles = [] } = approverConfigData.approverConfig || {};
+    if (!users.length && !roles.length) {
+      errorMsg = '节点缺少审批人';
+    }
+    if (!approverConfigData?.buttonConfigs?.length) {
+      errorMsg = '节点缺少按钮配置';
+    }
+    approverConfigData.errorMsg = errorMsg;
     handleConfigSubmit && handleConfigSubmit(approverConfigData, editValue);
   }
 

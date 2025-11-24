@@ -22,6 +22,7 @@ export enum WorkflowNodeType {
   PROCESSNODE = 'process-node',
   INITIATION = 'initiation',
   APPROVER = 'approver',
+  CCRECIPIENTS = 'cc',
   BRANCH_IN = 'branch-in',
   CONDITIONAL_BRANCH = 'conditional-branch',
   SINK_NODE_BRANCH='sink-node-branch',

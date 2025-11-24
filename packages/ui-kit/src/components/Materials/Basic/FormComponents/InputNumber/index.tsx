@@ -2,7 +2,7 @@ import { Form, InputNumber } from '@arco-design/web-react';
 import { nanoid } from 'nanoid';
 import { memo, useEffect, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
-import { STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES } from '../../../constants';
+import { DEFAULT_VALUE_TYPES, STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import '../index.css';
 import type { XInputNumberConfig } from './schema';
 
@@ -41,8 +41,8 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
     if (showPercent) {
       value = value * 100;
     }
-    if (showPrecision) {
-      result = value.toFixed(precision);
+    if (showPrecision && value) {
+      result = Number(value).toFixed(precision);
     }
     if (useThousandsSeparator) {
       result = `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
@@ -70,7 +70,8 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
         wrapperCol={{ style: { flex: 1 } }}
         rules={[
           {
-            required: verify?.required, message:`${label.text}是必填项`
+            required: verify?.required,
+            message: `${label.text}是必填项`
           }
         ]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}

@@ -15,6 +15,11 @@ export interface LoginRequest {
    * 验证码
    */
   captchaVerification?: string | null;
+
+  /**
+   * 设备ID
+   */
+  deviceId: string;
 }
 
 export interface LoginResponse {

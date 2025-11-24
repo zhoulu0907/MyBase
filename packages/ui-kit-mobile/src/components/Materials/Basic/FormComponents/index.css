@@ -21,6 +21,7 @@
     height: 1.08rem;
     line-height: 1.08rem;
     border: none !important;
+    box-shadow: none !important;
   }
 
   .arco-form-item-control {

@@ -7,7 +7,7 @@ import type { FieldConfigPopoverProps } from '../types';
 import styles from '../index.module.less';
 
 const FieldConfigPopover: React.FC<FieldConfigPopoverProps> = React.memo(
-  ({ fieldType, fieldId, field, onConfirm, onCancel, fields }) => {
+  ({ fieldType, fieldId, field, onConfirm, onCancel, fields, gotoDictPage }) => {
     // 根据字段类型渲染对应的配置组件
     const configComponent = useMemo(() => {
       switch (fieldType) {
@@ -20,6 +20,7 @@ const FieldConfigPopover: React.FC<FieldConfigPopoverProps> = React.memo(
               initialOptions={field?.options}
               initialDictTypeId={field?.dictTypeId}
               onCancel={() => onCancel(ENTITY_FIELD_TYPE.SELECT.VALUE)}
+              gotoDictPage={gotoDictPage}
             />
           );
 
@@ -32,6 +33,7 @@ const FieldConfigPopover: React.FC<FieldConfigPopoverProps> = React.memo(
               initialOptions={field?.options}
               initialDictTypeId={field?.dictTypeId}
               onCancel={() => onCancel(ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE)}
+              gotoDictPage={gotoDictPage}
             />
           );
 

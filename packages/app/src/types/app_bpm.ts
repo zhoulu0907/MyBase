@@ -51,3 +51,32 @@ export interface GetFlowPreview {
   instanceId: string;
   businessId: string;
 }
+
+export interface AgentPage {
+    /**
+     * 代理状态(inactive 待生效 ,active  代理中,expired 已失效 ,revoked 已撤销)
+     */
+    agentStatus?: string;
+    /**
+     * 应用id
+     */
+    appId?: string;
+    pageNo?: number;
+    pageSize?: number;
+    /**
+     * 人员名称（模糊匹配代理人和被代理人）
+     */
+    personName?: string;
+}
+export type AgentCreate = {
+    agentId: string;
+    agentName: string;
+    startTime: string;
+    endTime: string;
+    appId?: string;
+    principalId?: string;
+    principalName?: string;
+    id?: string;
+}
+
+
