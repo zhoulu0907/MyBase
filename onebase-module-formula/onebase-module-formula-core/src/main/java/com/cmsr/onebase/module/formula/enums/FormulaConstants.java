@@ -59,7 +59,10 @@ public class FormulaConstants {
             "TRANSPOSE", "UNIQUE", "SORT", "FILTER", "SUMPRODUCT",
 
             // 正则表达式函数
-            "REGEXEXTRACTALL", "REGEXEXTRACT", "REGEXMATCH", "REGEXREPLACE"
+            "REGEXEXTRACTALL", "REGEXEXTRACT", "REGEXMATCH", "REGEXREPLACE",
+
+            // 人员函数
+            "GETUSER", "GETDEPT", "GETUPDEPT", "GETROLE", "GETSUPERVISOR", "ISINROLE", "ISINDEPT"
     };
 
     /**
