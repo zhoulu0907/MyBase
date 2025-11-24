@@ -88,7 +88,7 @@ public class MetadataManager {
         tableDO.setTableName(tableName);
         tableDO.setDisplayName(tableName);
         tableDO.setTableType(tableData.getType());
-        tableDO.setMetaInfo(tableData);
+        tableDO.setMetaInfo(JsonUtils.toJsonString(tableData));
         String comment = tableData.getComment();
         tableDO.setRemarks(comment);
         tableDO.setDeclaration(comment);

@@ -6,7 +6,6 @@ import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLDatasourceDO;
 import com.cmsr.onebase.module.etl.core.enums.ETLErrorCodeConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.metadata.type.DatabaseType;
-import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
@@ -14,8 +13,6 @@ import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
-import java.lang.reflect.InvocationTargetException;
-import java.sql.Driver;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -78,20 +75,6 @@ public class DatasourceFactory {
         }
         return parseType;
     }
-
-//    private Driver getDeclaredDriverInstance(DatabaseType dbType) {
-//        String driverName = dbType.driver();
-//        try {
-//            Class<? extends Driver> driverClass = (Class<? extends Driver>) ClassUtils.getClass(driverName);
-//            return driverClass.getDeclaredConstructor().newInstance();
-//        } catch (ClassNotFoundException ex) {
-//            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_NOT_SUPPORTED);
-//        } catch (NoSuchMethodException | InstantiationException | IllegalAccessException |
-//                 InvocationTargetException ex) {
-//            log.error("JDBC连接驱动初始化失败", ex);
-//            throw new RuntimeException(ex);
-//        }
-//    }
 
     public static String buildJdbcConnectionString(String databaseType, Properties connectionProperties) {
         DatabaseType dbType = parseDatabaseType(databaseType);

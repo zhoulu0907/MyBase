@@ -97,8 +97,8 @@ public class ETLWorkflowController {
     }
 
     @Operation(summary = "查询ETL日志信息")
-    @GetMapping("/{applicationId}/logs")
-    public CommonResult<PageResult<ExecutionLogVO>> queryWorkflowExecutionLogs(@PathVariable("applicationId") Long applicationId,
+    @GetMapping("/logs")
+    public CommonResult<PageResult<ExecutionLogVO>> queryWorkflowExecutionLogs(@RequestParam("applicationId") Long applicationId,
                                                                                @RequestParam("workflowId") Long workflowId,
                                                                                @RequestParam("pageNo") Integer pageNo,
                                                                                @RequestParam("pageSize") Integer pageSize) {
