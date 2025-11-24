@@ -194,21 +194,23 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
             {...componentConfig}
             runtime={runtime}
             detailMode={detailMode}
+            form={form}
           />
         );
       case FORM_COMPONENT_TYPES.FILE_UPLOAD:
-      // return (
-      //   <FormComp.XFileUpload
-      //     cpName={cpId}
-      //     id={cpId}
-      //     {...componentConfig}
-      //     runtime={runtime}
-      //     detailMode={detailMode}
-      //   />
-      // );
+        return (
+          <FormComp.XFileUpload
+            cpName={cpId}
+            id={cpId}
+            {...componentConfig}
+            runtime={runtime}
+            detailMode={detailMode}
+            form={form}
+          />
+        );
       case FORM_COMPONENT_TYPES.IMG_UPLOAD:
         return (
-          <FormComp.XImgUpload cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} />
+          <FormComp.XImgUpload cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} form={form} />
         );
       case FORM_COMPONENT_TYPES.AUTO_CODE:
         return (

@@ -1,11 +1,21 @@
-import { Checkbox, Form } from '@arco-design/mobile-react';
 import { memo } from 'react';
+import { nanoid } from 'nanoid';
+import { Checkbox, Form } from '@arco-design/mobile-react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
-import { nanoid } from 'nanoid';
 import type { XInputSelectMutipleConfig } from './schema';
+import IconSquareChecked from '@arco-design/mobile-react/esm/icon/IconSquareChecked';
+import IconSquareUnchecked from '@arco-design/mobile-react/esm/icon/IconSquareUnchecked';
+import IconSquareDisabled from '@arco-design/mobile-react/esm/icon/IconSquareDisabled';
 import '../index.css';
 import './index.css';
+
+const squareIcon = {
+  normal: <IconSquareUnchecked />,
+  active: <IconSquareChecked />,
+  disabled: <IconSquareDisabled />,
+  activeDisabled: <IconSquareChecked />
+}
 
 const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const {
@@ -46,6 +56,7 @@ const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: bool
         <Checkbox.Group
           className="selectCheckout"
           layout='block'
+          icons={squareIcon}
           options={options}
         >
         </Checkbox.Group>

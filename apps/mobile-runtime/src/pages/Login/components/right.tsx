@@ -3,7 +3,7 @@ import { useForm } from '@arco-design/mobile-react/esm/form';
 import IconSquareChecked from '@arco-design/mobile-react/esm/icon/IconSquareChecked';
 import IconSquareUnchecked from '@arco-design/mobile-react/esm/icon/IconSquareUnchecked';
 import IconSquareDisabled from '@arco-design/mobile-react/esm/icon/IconSquareDisabled';
-import { getHashQueryParam, TokenManager, type SliderCaptchaRef } from '@onebase/common';
+import { getHashQueryParam, TokenManager, type SliderCaptchaRef, getOrCreateDeviceInfo } from '@onebase/common';
 import { SliderCaptcha } from './Captcha';
 import { checkCaptchaApi, getCaptchaApi, login, type LoginRequest, type LoginResponse } from '@onebase/platform-center';
 import { getApplication } from '@onebase/app';
@@ -118,7 +118,8 @@ const Right: React.FC = () => {
       const loginData: LoginRequest = {
         username: values.username!,
         password: values.password!,
-        captchaVerification: captchaVerification
+        captchaVerification: captchaVerification,
+        deviceId: values.deviceId
       };
 
       const response: LoginResponse = await login(loginData, headers);
@@ -168,7 +169,9 @@ const Right: React.FC = () => {
   const handleCaptchaSuccess = async (token: string) => {
     const values = await form.getFieldsValue();
     console.log('values:', values);
-    handleSubmit({ username: values.username, password: values.password, captchaVerification: token });
+
+    const deviceId = await getOrCreateDeviceInfo();
+    handleSubmit({ username: values.username, password: values.password, captchaVerification: token, deviceId });
   };
 
   // 登录按钮点击事件 - 先验证滑块验证码

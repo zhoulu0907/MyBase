@@ -14,7 +14,7 @@ import XRadio from './FormComponents/Radio/schema';
 import XSwitch from './FormComponents/Switch/schema';
 import XImgUpload from './FormComponents/ImgUpload/schema';
 import XCarousel from './FormComponents/Carousel/schema';
-import FileUpload from './FormComponents/FileUpload/schema';
+import XFileUpload from './FormComponents/FileUpload/schema';
 import XAutoCode from './FormComponents/AutoCode/schema';
 import XDeptSelect from './FormComponents/DeptSelect/schema';
 import XShowMonitor from './ListComponents/ShowMonitor/schema';
@@ -37,7 +37,7 @@ const baseSchema = {
   XSwitch,
   XImgUpload,
   XCarousel,
-  FileUpload,
+  XFileUpload,
   XAutoCode,
   XDeptSelect,
 

@@ -11,7 +11,7 @@ import '../index.css';
 import './index.css'
 import type { XInputFileUploadConfig } from './schema';
 
-const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; detailMode?: boolean }) => {
+const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; detailMode?: boolean; form?: any; }) => {
   const {
     label,
     dataField,
@@ -24,7 +24,8 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
     layout,
     labelColSpan = 0,
     runtime = true,
-    detailMode
+    detailMode,
+    form
   } = props;
 
   const [filesList, setFilesList] = useState<{ file: File, status: "loaded" | "loading" | "error", url: string }[]>([]);
