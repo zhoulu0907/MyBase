@@ -4,7 +4,7 @@ import { IconEdit, IconSettings } from '@arco-design/web-react/icon';
 import SettingModal from './SettingModal';
 import styles from '../approverConfig/index.module.less';
 import './style.less';
-import { type BtnConfig } from '../constant';
+import { type BtnConfig, getDefaultBtnConfig } from '../constant';
 const FormItem = Form.Item;
 const EditableContext = React.createContext<{ getForm?: () => FormInstance }>({});
 
@@ -118,95 +118,7 @@ function EditableCell(props: any) {
   );
 }
 
-const columnsData = [
-  {
-    key: '1',
-    buttonType: 'approve',
-    buttonName: '同意',
-    displayName: '同意',
-    name: '同意',
-    defaultApprovalComment: '同意',
-    approvalCommentRequired: false,
-    batchApproval: false,
-    enabled: false
-  },
-  {
-    key: '2',
-    buttonType: 'reject',
-    buttonName: '拒绝',
-    displayName: '拒绝',
-    name: '拒绝',
-    defaultApprovalComment: '拒绝',
-    approvalCommentRequired: false,
-    batchApproval: false,
-    enabled: false
-  },
-  {
-    key: '3',
-    buttonType: 'save',
-    buttonName: '保存',
-    displayName: '保存',
-    name: '保存',
-    approvalCommentRequired: false,
-    batchApproval: false,
-    enabled: false
-  },
-  {
-    key: '4',
-    buttonType: 'transfer',
-    buttonName: '转交',
-    displayName: '转交',
-    name: '转交',
-    defaultApprovalComment: '转交',
-    approvalCommentRequired: false,
-    batchApproval: false,
-    enabled: false
-  },
-  {
-    key: '5',
-    buttonType: 'add_sign',
-    buttonName: '加签',
-    displayName: '加签',
-    name: '加签',
-    defaultApprovalComment: '加签',
-    approvalCommentRequired: false,
-    batchApproval: false,
-    enabled: false
-  },
-  {
-    key: '6',
-    buttonType: 'return',
-    buttonName: '退回',
-    displayName: '退回',
-    name: '退回',
-    defaultApprovalComment: '退回',
-    approvalCommentRequired: false,
-    batchApproval: false,
-    enabled: false
-  },
-  {
-    key: '7',
-    buttonType: 'withdraw',
-    buttonName: '撤回',
-    displayName: '撤回',
-    name: '撤回',
-    defaultApprovalComment: '撤回',
-    approvalCommentRequired: false,
-    batchApproval: false,
-    enabled: false
-  },
-  {
-    key: '8',
-    buttonType: 'abstain',
-    buttonName: '弃权',
-    displayName: '弃权',
-    name: '弃权',
-    defaultApprovalComment: '弃权',
-    approvalCommentRequired: false,
-    batchApproval: false,
-    enabled: false
-  }
-];
+const columnsData = getDefaultBtnConfig()
 
 export default function ApproverBtnConfig({ setApprovalConfigData, buttonConfigs }: BtnConfig) {
   const [tbData, setData] = useState<any[]>([]);
