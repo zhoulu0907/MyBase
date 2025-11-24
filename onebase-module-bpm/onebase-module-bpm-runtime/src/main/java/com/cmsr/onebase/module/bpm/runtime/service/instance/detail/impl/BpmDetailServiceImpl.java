@@ -36,6 +36,7 @@ import org.dromara.warm.flow.core.service.InsService;
 import org.dromara.warm.flow.core.service.TaskService;
 import org.dromara.warm.flow.core.service.UserService;
 import org.dromara.warm.flow.core.service.impl.BpmConstants;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -80,6 +81,8 @@ public class BpmDetailServiceImpl implements BpmDetailService {
 
     @Resource
     private InstanceDetailStrategyManager instanceDetailStrategyManager;
+    @Autowired
+    private WebFrameworkUtils webFrameworkUtils;
 
     @Data
     private static class InsDetailContext {
@@ -367,7 +370,11 @@ public class BpmDetailServiceImpl implements BpmDetailService {
         }
 
         if (Objects.equals(reqVO.getFrom(), BpmViewSourceEnum.CC.getCode())) {
-            String processedBy = matchedUser.getProcessedBy();
+            String processedBy = String.valueOf(WebFrameworkUtils.getLoginUserId());
+
+            if (context.getAgentIns() != null) {
+                processedBy = String.valueOf(context.getAgentIns().getPrincipalId());
+            }
 
             ConfigStore configStore = new DefaultConfigStore();
             configStore.and(BpmFlowCcRecordDO.TASK_ID, reqVO.getTaskId());
