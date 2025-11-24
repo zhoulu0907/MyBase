@@ -236,6 +236,13 @@ public class FlowProcessExecutor {
         result.setExecutionEndNodeType(executeContext.getExecutionEndNodeType());
         result.setExecutionEndNodeTag(executeContext.getExecutionEndNodeTag());
         result.setOutputParams(variableContext.getOutputParams());
+        if (executeContext.getAbnormalTermination().isPresent()
+                && !executeContext.getAbnormalTermination().get()) {
+            result.setSuccess(false);
+            if (executeContext.getTerminationMessage() != null) {
+                result.setMessage(executeContext.getTerminationMessage());
+            }
+        }
         return result;
     }
 
