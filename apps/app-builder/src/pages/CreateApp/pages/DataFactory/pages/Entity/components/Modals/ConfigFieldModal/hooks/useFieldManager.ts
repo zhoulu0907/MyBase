@@ -117,6 +117,9 @@ export const useFieldManager = (
         case ENTITY_FIELD_TYPE.AUTO_CODE.VALUE:
           fieldConfig = { autoNumber: configData };
           break;
+        case ENTITY_FIELD_TYPE.DATA_SELECTION.VALUE:
+          fieldConfig = { dataSelectionConfig: configData };
+          break;
         case 'CONSTRAINTS':
           fieldConfig = { constraints: configData };
           break;

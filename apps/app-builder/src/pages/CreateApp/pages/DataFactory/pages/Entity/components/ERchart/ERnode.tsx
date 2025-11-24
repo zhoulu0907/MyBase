@@ -2,7 +2,7 @@ import type { EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/inter
 import { Node } from '@antv/x6';
 import { Button, Popover, Space, Switch } from '@arco-design/web-react';
 import { IconCaretDown, IconCaretUp, IconSync } from '@arco-design/web-react/icon';
-import { ENTITY_STATUS, FIELD_TYPE, SYSTEM_FIELD_MAP, useNewNodeStore } from '@onebase/ui-kit';
+import { ENTITY_STATUS, FIELD_TYPE, SYSTEM_FIELD_MAP, useGraphEntitytore } from '@onebase/ui-kit';
 import { useFieldStore } from '@/store/store_field';
 import React, { useState } from 'react';
 import styles from './ERnode.module.less';
@@ -38,7 +38,7 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
   // 从 node 的 data 中获取节点数据
   const nodeData = (node.getData() as NodeData)?.data;
   const isSelected = Boolean((node.getData() as NodeData)?.selected);
-  const { newNodes } = useNewNodeStore();
+  const { newNodes } = useGraphEntitytore();
 
   const { fieldTypes } = useFieldStore();
 

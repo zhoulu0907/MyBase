@@ -11,7 +11,7 @@ import type { ConfigFieldModalProps } from './types';
 import { FIELD_TYPES_NEED_CONFIG } from './utils/const';
 
 const ConfigFieldModal: React.FC<ConfigFieldModalProps> = memo(
-  ({ visible, setVisible, entity, successCallback, gotoDictPage }: ConfigFieldModalProps) => {
+  ({ visible, setVisible, entity, successCallback, gotoDictPage, entities }: ConfigFieldModalProps) => {
     // 使用统一的字段管理hook
     const fieldManager = useFieldManager(visible, entity, successCallback, setVisible);
 
@@ -36,6 +36,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = memo(
             onConfirm={fieldManager.handleConfigConfirm}
             onCancel={fieldManager.handleConfigCancel}
             gotoDictPage={gotoDictPage}
+            entities={entities}
           />
         );
       },

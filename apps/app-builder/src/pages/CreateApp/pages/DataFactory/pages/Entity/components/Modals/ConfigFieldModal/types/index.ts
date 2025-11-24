@@ -41,6 +41,7 @@ export interface ConfigFieldModalProps {
   successCallback: () => void;
   initialFields?: FieldFormValues[];
   gotoDictPage?: () => void;
+  entities?: EntityNode[];
 }
 
 // 字段操作接口
@@ -93,6 +94,7 @@ export interface FieldConfigPopoverProps {
   onCancel: (fieldType: string) => void;
   fields: any[];
   gotoDictPage?: () => void;
+  entities?: EntityNode[];
 }
 
 // 可排序表格属性

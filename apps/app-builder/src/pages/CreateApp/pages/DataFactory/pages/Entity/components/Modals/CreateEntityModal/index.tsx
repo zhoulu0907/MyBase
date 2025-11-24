@@ -1,4 +1,4 @@
-import { DS_RESOURCE_TYPE, useNewNodeStore } from '@onebase/ui-kit';
+import { DS_RESOURCE_TYPE, useGraphEntitytore } from '@onebase/ui-kit';
 import { useAppStore } from '@/store/store_app';
 import { useResourceStore } from '@/store/store_resource';
 import { Form, Input, Message, Modal, Radio, Select } from '@arco-design/web-react';
@@ -34,7 +34,7 @@ const CreateEntityModal: React.FC<{
 }> = ({ visible, setVisible, successCallback }) => {
   const { curDataSourceId } = useResourceStore();
   const { curAppId } = useAppStore();
-  const { newNodes, setNewNodes } = useNewNodeStore();
+  const { newNodes, setNewNodes } = useGraphEntitytore();
   const [form] = Form.useForm<EntityFormValues>();
   const [dsResource, setDsResource] = useState<string>(DS_RESOURCE_TYPE.EXTERNAL); // 数据源来源：内部数据源、外部数据源、外部数据源中引用自有数据源已有资产
 
