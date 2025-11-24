@@ -10,7 +10,7 @@ import ApproverConfig from './approverConfig/index';
 import ApproverBtnConfig from './btnConfig/index';
 import FieldConfig from './fieldConfig/index';
 import AdvancedConfig from './advancedConfig/index';
-import { ApproveDrawerTab } from './constant';
+import { ApproveDrawerTab, defaultBtnConfigArr } from './constant';
 import { useLocation } from 'react-router-dom';
 import type {
   ApproverConfigDataType,
@@ -23,51 +23,6 @@ import type {
 import { getEntityFieldsWithChildren, getPageSetMetaData } from '@onebase/app';
 
 const RadioGroup = Radio.Group;
-
-const defaultBtnConfig = [
-  {
-    key: '1',
-    buttonType: 'approve',
-    buttonName: '同意',
-    displayName: '同意',
-    name: '同意',
-    defaultApprovalComment: '同意',
-    approvalCommentRequired: false,
-    batchApproval: false,
-    enabled: true
-  },
-  {
-    key: '2',
-    buttonType: 'reject',
-    buttonName: '拒绝',
-    displayName: '拒绝',
-    name: '拒绝',
-    defaultApprovalComment: '拒绝',
-    approvalCommentRequired: true,
-    batchApproval: false,
-    enabled: true
-  },
-  {
-    key: '6',
-    buttonName: '退回',
-    displayName: '退回',
-    name: '退回',
-    defaultApprovalComment: '退回',
-    approvalCommentRequired: true,
-    batchApproval: false,
-    enabled: false
-  },
-  {
-    key: '8',
-    buttonName: '弃权',
-    displayName: '弃权',
-    name: '弃权',
-    defaultApprovalComment: '弃权',
-    approvalCommentRequired: true,
-    batchApproval: false,
-    enabled: false
-  }
-];
 
 export default function ApproveDreawer({ handleConfigSubmit, configData }: ApproveDrawerProps) {
   const location = useLocation();
@@ -98,7 +53,7 @@ export default function ApproveDreawer({ handleConfigSubmit, configData }: Appro
     if (keys.length === 2 && keys.includes('name') && keys.includes('errorMsg')) {
       return {
         ...initData,
-        buttonConfigs: defaultBtnConfig
+        buttonConfigs: defaultBtnConfigArr
       };
     } else {
       return initData;
