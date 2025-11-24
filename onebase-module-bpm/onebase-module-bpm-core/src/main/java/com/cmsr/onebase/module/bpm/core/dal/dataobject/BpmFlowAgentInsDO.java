@@ -22,6 +22,8 @@ public class BpmFlowAgentInsDO extends TenantBaseDO {
 
     public static final String PRINCIPAL_NAME = "principal_name";
 
+    public static final String TASK_ID = "task_id";
+
     /**
      * 被代理人用户ID
      */
@@ -49,7 +51,7 @@ public class BpmFlowAgentInsDO extends TenantBaseDO {
     /**
      * 任务ID
      */
-    @Column(name = "task_id")
+    @Column(name = TASK_ID)
     private Long taskId;
 
     /**

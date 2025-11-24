@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.bpm.runtime.service.instance.exec.strategy;
 
+import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowAgentInsDO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
 import com.cmsr.onebase.module.bpm.runtime.vo.ExecTaskReqVO;
 import org.dromara.warm.flow.core.entity.Task;
@@ -23,15 +24,16 @@ public interface ExecTaskStrategy<T extends BaseNodeExtDTO> {
      */
     boolean supports(String bizNodeType);
 
-
     /**
-     * 执行
+     * 执行任务
      *
+     * @param matchedUser 匹配到的用户
+     * @param agentInsDO 流程代理信息
      * @param task 任务
      * @param extDTO 节点扩展信息
      * @param reqVO 请求参数
      */
-    void execute(User matchedUser, Task task, T extDTO, ExecTaskReqVO reqVO);
+    void execute(User matchedUser, BpmFlowAgentInsDO agentInsDO, Task task, T extDTO, ExecTaskReqVO reqVO);
 }
 
 
