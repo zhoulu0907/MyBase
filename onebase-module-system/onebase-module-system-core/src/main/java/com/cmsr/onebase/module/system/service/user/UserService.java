@@ -303,4 +303,6 @@ public interface UserService {
     PageResult<AdminUserDO> getUserByDeptPage(UserByDeptPageReqVO reqVO);
 
     boolean findAdminByRoleIdAndUserId(Long roleId, Long userId);
+
+    Long getUserCountByCorpId(Long id);
 }

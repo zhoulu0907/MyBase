@@ -283,8 +283,9 @@ public class CorpServiceImpl implements CorpService {
             respVO.setMobile(userDO.getMobile());
         }
         respVO.setAppCount(getCorpAppCount(id));
-        // TODO  获取企业用户数 待后续完善
-        respVO.setUserCount(respVO.getAppCount());
+        Long userCountLong=corpUserService.getUserCountByCorpId(id);
+        Integer usercount= (userCountLong != null) ? userCountLong.intValue() : 0;
+        respVO.setUserCount(usercount);
         return respVO;
     }
     /**
