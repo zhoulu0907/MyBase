@@ -10,9 +10,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
  * sj
  */
 @EnableAsync
-@MapperScan({
-        "com.cmsr.onebase.**.mapper"
-})
+@MapperScan({"com.cmsr.onebase.**.mapper"})
 @SpringBootApplication(scanBasePackages = {"com.cmsr.onebase", "org.anyline"})
 public class OneBaseServerApplication {
 
