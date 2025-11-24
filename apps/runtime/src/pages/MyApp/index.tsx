@@ -167,8 +167,8 @@ const MyAppPage: React.FC = () => {
      <Layout className={styles.homePage}>
       <AppHeader />
       <Layout className={styles.myAppPageContent}>
-        <div className={styles.myAppPageHeader}></div>
         <div className={styles.myAppPage}>
+        <div className={styles.myAppPageHeader}></div>
         <div className={styles.myAppContainer}>
           <div className={styles.appHasDataBox}>
             <div
@@ -261,7 +261,7 @@ const MyAppPage: React.FC = () => {
                           </div>
                           <div className={styles.myAppCardInfo}>
                             <div className={styles.infoHeader}>
-                              <div className={styles.myAppTitle}>{item.appName}</div>
+                                <div className={styles.myAppTitle}>{item.appName}</div>
                             </div>
                             <Tag
                               color={TagColor[item.appStatus]}
