@@ -34,6 +34,7 @@ import kong.unirest.core.HttpResponse;
 import kong.unirest.core.Unirest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -108,7 +109,7 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
         workflowDO.setApplicationId(applicationId);
         workflowDO.setWorkflowName(createVO.getFlowName());
         workflowDO.setDeclaration(createVO.getDeclaration());
-        workflowDO.setConfig(createVO.getConfig());
+        workflowDO.setConfig(JsonUtils.toJsonString(createVO.getConfig()));
         workflowDO.setIsEnabled(0);
         workflowDO.setScheduleStrategy(ScheduleType.MANUALLY.getValue());
         // 创建workflow
@@ -134,7 +135,7 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
         }
         oldWorkflow.setWorkflowName(updateVO.getFlowName());
         oldWorkflow.setDeclaration(updateVO.getDeclaration());
-        oldWorkflow.setConfig(updateVO.getConfig());
+        oldWorkflow.setConfig(JsonUtils.toJsonString(updateVO.getConfig()));
         updateWorkflowTableRelations(oldWorkflow);
         workflowRepository.updateById(oldWorkflow);
     }
@@ -285,7 +286,7 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
     @Override
     public void disableWorkflow(Long workflowId) {
         ETLWorkflowDO workflowDO = getWorkflowById(workflowId);
-        if (!workflowDO.isEnabled()) {
+        if (!BooleanUtils.toBoolean(workflowDO.getIsEnabled())) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.WORKFLOW_DISABLED);
         }
         ETLScheduleJobDO scheduleJobDO = scheduleJobRepository.findByApplicationIdAndWorkflowId(workflowDO.getApplicationId(), workflowId);
@@ -308,7 +309,7 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
         workflowDO.setScheduleConfig(JsonUtils.toJsonString(scheduleVO.getConfig()));
         workflowDO.setIsEnabled(scheduleVO.getEnableStatus());
         workflowRepository.updateById(workflowDO);
-        if (workflowDO.isEnabled()) {
+        if (BooleanUtils.toBoolean(workflowDO.getIsEnabled())) {
             syncEnableStatus(workflowDO);
         }
     }
@@ -417,7 +418,7 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
      */
     private ETLWorkflowDO getOperableWorkflow(Long workflowId) {
         ETLWorkflowDO workflowDO = getWorkflowById(workflowId);
-        if (workflowDO.isEnabled()) {
+        if (BooleanUtils.toBoolean(workflowDO.getIsEnabled())) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.WORKFLOW_ENABLED);
         }
         return workflowDO;

@@ -1,8 +1,6 @@
 package com.cmsr.onebase.module.etl.core.dal.dataobject;
 
-import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.data.BaseTenantEntity;
-import com.cmsr.onebase.module.etl.common.entity.TableData;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
 import lombok.Data;
@@ -37,13 +35,5 @@ public class ETLTableDO extends BaseTenantEntity {
 
     @Column(value = "declaration")
     private String declaration;
-
-    public TableData getMetaInfo() {
-        return JsonUtils.parseObject(this.metaInfo, TableData.class);
-    }
-
-    public void setMetaInfo(TableData metaInfo) {
-        this.metaInfo = JsonUtils.toJsonString(metaInfo);
-    }
 
 }
