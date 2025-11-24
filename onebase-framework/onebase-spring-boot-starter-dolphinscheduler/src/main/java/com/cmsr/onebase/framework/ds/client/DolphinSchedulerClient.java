@@ -113,14 +113,14 @@ public class DolphinSchedulerClient {
         Result<PageInfo<WorkflowDefinitionResp>> pageResp =
                 execute(dsClientStub.queryWorkflowPage(projectCode, flowName, 1, 1000));
         if (pageResp.getFailed()) {
-            throw DolphinschedulerException.of("根据查询条件【%s】查询工作流异常, %s", flowName, pageResp.getMsg());
+            throw DolphinschedulerException.of("根据查询条件【{}】查询工作流异常, {}", flowName, pageResp.getMsg());
         }
         int totalPage = pageResp.getData().getTotalPage();
         result.addAll(pageResp.getData().getTotalList());
         for (int i = 2; i <= totalPage; i++) {
             pageResp = execute(dsClientStub.queryWorkflowPage(projectCode, flowName, i, 1000));
             if (pageResp.getFailed()) {
-                throw DolphinschedulerException.of("根据查询条件【%s】查询工作流异常, %s", flowName, pageResp.getMsg());
+                throw DolphinschedulerException.of("根据查询条件【{}】查询工作流异常, {}", flowName, pageResp.getMsg());
             }
             result.addAll(pageResp.getData().getTotalList());
         }
@@ -186,7 +186,7 @@ public class DolphinSchedulerClient {
                         description, "[]", "0"
                 ));
         if (response.getFailed()) {
-            throw DolphinschedulerException.of("创建工作流【%s】失败,响应信息: %s", flowName, response.getMsg());
+            throw DolphinschedulerException.of("创建工作流【{}】失败,响应信息: {}", flowName, response.getMsg());
         }
         return response.getData().getCode();
     }
@@ -194,12 +194,12 @@ public class DolphinSchedulerClient {
     public Long queryWorkflowByName(Long projectCode, String flowName) {
         Result<WorkflowDetailedResp> queryResp = execute(dsClientStub.queryWorkflowByName(projectCode, flowName));
         if (queryResp.getFailed() && queryResp.getMsg().contains("does not exist")) {
-            //throw DolphinschedulerException.of("工作流【%s】查询失败！%s", flowName, queryResp.getMsg());
+            //throw DolphinschedulerException.of("工作流【{}】查询失败！{}", flowName, queryResp.getMsg());
             return null;
         }
         WorkflowDefinitionResp workflowDef = queryResp.getData().getWorkflowDefinition();
         if (workflowDef == null) {
-            //throw DolphinschedulerException.of("工作流【%s】不存在！", flowName, queryResp.getMsg());
+            //throw DolphinschedulerException.of("工作流【{}】不存在！", flowName, queryResp.getMsg());
             return null;
         }
         return workflowDef.getCode();
@@ -218,7 +218,7 @@ public class DolphinSchedulerClient {
                 // magic string: flowName, DS required for this, but no usage at all.
                 "flowName", "ONLINE"));
         if (releaseResult.getFailed()) {
-            throw DolphinschedulerException.of("工作流【%s】上线失败", workflowCode);
+            throw DolphinschedulerException.of("工作流【{}】上线失败", workflowCode);
         }
     }
 
@@ -245,7 +245,7 @@ public class DolphinSchedulerClient {
 
         if (executeResult.getFailed()) {
             log.error("工作流运行失败{}, {}", workflowCode, executeResult.getMsg());
-            throw DolphinschedulerException.of("工作流【%s】运行提交失败, %s", workflowCode);
+            throw DolphinschedulerException.of("工作流【{}】运行提交失败, {}", workflowCode);
         }
 
         return executeResult.getData();
@@ -261,13 +261,13 @@ public class DolphinSchedulerClient {
         Result<ScheduleInfoResp> createScheduleResp = execute(dsClientStub.createSchedule(projectCode, workflowCode, environmentCode, tenantCode, schedule,
                 "CONTINUE", "NONE", "MEDIUM", 0L, "default"));
         if (createScheduleResp.getFailed()) {
-            throw DolphinschedulerException.of("工作流【%s】上线失败，失败原因：创建调度失败，%s", workflowCode, createScheduleResp.getMsg());
+            throw DolphinschedulerException.of("工作流【{}】上线失败，失败原因：创建调度失败，{}", workflowCode, createScheduleResp.getMsg());
         }
         Integer scheduleId = createScheduleResp.getData().getId();
         // 3. 上线调度
         Result<Boolean> onlineScheduleResult = execute(dsClientStub.onlineSchedule(projectCode, scheduleId));
         if (onlineScheduleResult.getFailed()) {
-            throw DolphinschedulerException.of("工作流【%s】调度【%s】上线失败，%s", workflowCode, scheduleId, onlineScheduleResult.getMsg());
+            throw DolphinschedulerException.of("工作流【{}】调度【{}】上线失败，{}", workflowCode, scheduleId, onlineScheduleResult.getMsg());
         }
     }
 
@@ -281,7 +281,7 @@ public class DolphinSchedulerClient {
         Result<Object> deleted = execute(dsClientStub.deleteWorkflow(projectCode, workflowCode));
         if (deleted.getFailed()) {
             log.error("删除工作流【{}】失败, {}", workflowCode, deleted.getMsg());
-            throw DolphinschedulerException.of("删除工作流【%s】失败, %s", workflowCode, deleted.getMsg());
+            throw DolphinschedulerException.of("删除工作流【{}】失败, {}", workflowCode, deleted.getMsg());
         }
     }
 
@@ -299,7 +299,7 @@ public class DolphinSchedulerClient {
         Result<PageInfo<ScheduleInfoResp>> scheduleQueryResp = execute(dsClientStub.queryScheduleByWorkflow(projectCode, workflowCode, 1, 1));
         if (scheduleQueryResp.getFailed()) {
             log.warn("获取工作流【{}】调度信息失败, {}", workflowCode, scheduleQueryResp.getMsg());
-            throw DolphinschedulerException.of("获取工作流【%s】调度信息失败, %s", workflowCode, scheduleQueryResp.getMsg());
+            throw DolphinschedulerException.of("获取工作流【{}】调度信息失败, {}", workflowCode, scheduleQueryResp.getMsg());
         }
         PageInfo<ScheduleInfoResp> schedulePage = scheduleQueryResp.getData();
         List<ScheduleInfoResp> scheduleList = null;
@@ -320,7 +320,7 @@ public class DolphinSchedulerClient {
             Result<Boolean> offlineScheduleResp = execute(dsClientStub.offlineSchedule(projectCode, scheduleCode));
             if (offlineScheduleResp.getFailed()) {
                 log.warn("下线工作流【{}】对应调度【{}】失败, {}", workflowCode, scheduleCode, offlineScheduleResp.getMsg());
-                throw DolphinschedulerException.of("下线工作流【%s】对应调度【%s】失败, %s", workflowCode, offlineScheduleResp.getMsg());
+                throw DolphinschedulerException.of("下线工作流【{}】对应调度【{}】失败, {}", workflowCode, offlineScheduleResp.getMsg());
             }
         }
         //  1.3. 如果调度存在，则删除
@@ -328,7 +328,7 @@ public class DolphinSchedulerClient {
             Result<Boolean> deleteScheduleResp = execute(dsClientStub.deleteSchedule(projectCode, scheduleCode, scheduleCode));
             if (deleteScheduleResp.getFailed()) {
                 log.warn("删除工作流【{}】对应调度【{}】失败,{}", workflowCode, scheduleCode, deleteScheduleResp.getMsg());
-                throw DolphinschedulerException.of("删除工作流【%s】对应调度【%s】失败, %s", workflowCode, deleteScheduleResp.getMsg());
+                throw DolphinschedulerException.of("删除工作流【{}】对应调度【{}】失败, {}", workflowCode, deleteScheduleResp.getMsg());
             }
         }
         // 2. 下线工作流若存在
@@ -338,7 +338,7 @@ public class DolphinSchedulerClient {
                     "flowName", "OFFLINE"));
             if (releaseResult.getFailed()) {
                 log.warn("工作流【{}】下线失败，下线接口调用失败, {}", workflowCode, releaseResult.getMsg());
-                throw DolphinschedulerException.of("工作流【%s】下线失败, %s", workflowCode, releaseResult.getMsg());
+                throw DolphinschedulerException.of("工作流【{}】下线失败, {}", workflowCode, releaseResult.getMsg());
             }
         }
     }
@@ -347,11 +347,11 @@ public class DolphinSchedulerClient {
         Result<WorkflowDetailedResp> queryResp = execute(dsClientStub.queryWorkflowByCode(projectCode, workflowCode));
 
         if (queryResp.getFailed()) {
-            throw DolphinschedulerException.of("工作流【%s】查询失败！%s", workflowCode, queryResp.getMsg());
+            throw DolphinschedulerException.of("工作流【{}】查询失败！{}", workflowCode, queryResp.getMsg());
         }
         WorkflowDefinitionResp workflowDef = queryResp.getData().getWorkflowDefinition();
         if (workflowDef == null) {
-            throw DolphinschedulerException.of("工作流【%s】不存在！", workflowCode, queryResp.getMsg());
+            throw DolphinschedulerException.of("工作流【{}】不存在！", workflowCode, queryResp.getMsg());
         }
         return workflowDef;
     }
@@ -390,7 +390,7 @@ public class DolphinSchedulerClient {
         // 判断响应是否为成功
         if (!resp.isSuccessful()) {
             String errorBody = extractErrorBody(resp);
-            throw DolphinschedulerException.of("DolphinScheduler接口请求失败, code: %s, 错误信息: %s, %s",
+            throw DolphinschedulerException.of("DolphinScheduler接口请求失败, code: {}, 错误信息: {}, {}",
                     resp.code(), resp.message(), errorBody);
         }
         return resp.body();
