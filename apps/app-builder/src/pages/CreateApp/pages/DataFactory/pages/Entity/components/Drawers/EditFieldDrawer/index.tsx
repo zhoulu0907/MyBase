@@ -259,12 +259,12 @@ const EditFieldDrawer: React.FC<EditFieldDrawerProps> = ({ visible, setVisible, 
               </div>
 
               <div className={styles['info-item']}>
-                <span className={styles['info-label']}>所属实体：</span>
+                <span className={styles['info-label']}>所属资产：</span>
                 <span className={styles['info-value']}>{fieldDetail.entityName}</span>
               </div>
 
               <div className={styles['info-item']}>
-                <span className={styles['info-label']}>实体ID：</span>
+                <span className={styles['info-label']}>资产ID：</span>
                 <span className={styles['info-value']}>{fieldDetail.entityId}</span>
               </div>
             </div> */}

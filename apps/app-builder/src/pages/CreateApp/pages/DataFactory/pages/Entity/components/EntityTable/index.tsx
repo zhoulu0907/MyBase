@@ -145,7 +145,7 @@ const EntityTable: React.FC = () => {
         onConfirm={confirmDelete}
         confirmLoading={deleteLoading}
         title="确认删除"
-        content="确定要删除这个业务实体吗？删除后无法恢复。"
+        content="确定要删除这个数据资产吗？删除后无法恢复。"
         okText="确认删除"
         cancelText="取消"
       />

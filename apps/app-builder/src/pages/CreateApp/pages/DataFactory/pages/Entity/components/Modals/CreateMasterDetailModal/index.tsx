@@ -33,7 +33,7 @@ const CreateMasterDetailModal: React.FC<{
   const [entityOptions, setEntityOptions] = useState<EntityOption[]>([]);
   const [childEntityOptions, setChildEntityOptions] = useState<EntityOption[]>([]);
 
-  // 初始化实体选项
+  // 初始化资产选项
   useEffect(() => {
     if (visible && curDataSourceId) {
       loadEntities();
@@ -53,7 +53,7 @@ const CreateMasterDetailModal: React.FC<{
         form.setFieldValue('parentEntityId', entityId);
       }
     } catch (error) {
-      console.error('加载实体列表失败:', error);
+      console.error('加载资产列表失败:', error);
     }
   };
 
@@ -126,7 +126,7 @@ const CreateMasterDetailModal: React.FC<{
         {/* 主表选择 */}
         <Form.Item label="主表" required>
           <Form.Item field="parentEntityId" rules={[{ required: true, message: '请选择主表' }]}>
-            <Select placeholder="请选择业务实体" options={entityOptions} disabled />
+            <Select placeholder="请选择业务资产" options={entityOptions} disabled />
           </Form.Item>
         </Form.Item>
 
@@ -170,7 +170,7 @@ const CreateMasterDetailModal: React.FC<{
                   >
                     <Input
                       maxLength={40}
-                      placeholder="请输入业务实体编码,由字母、数字、下划线组合,须以字母开头,不超过40个字符"
+                      placeholder="请输入业务资产编码,由字母、数字、下划线组合,须以字母开头,不超过40个字符"
                     />
                   </Form.Item>
 
@@ -182,7 +182,7 @@ const CreateMasterDetailModal: React.FC<{
                       { max: 50, message: '子表名称不能超过50个字符' }
                     ]}
                   >
-                    <Input maxLength={50} placeholder="请输入实体名称,不超过50个字符" />
+                    <Input maxLength={50} placeholder="请输入资产名称,不超过50个字符" />
                   </Form.Item>
 
                   <Form.Item label="子表描述" field="childTableDescription">

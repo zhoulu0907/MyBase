@@ -21,7 +21,7 @@ const DataMethods: React.FC<DataMethodsProps> = ({ node }) => {
   const [methods, setMethods] = useState<DataMethod[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // 获取实体方法数据
+  // 获取资产方法数据
   const loadMethods = async () => {
     if (!node?.entityId) return;
 

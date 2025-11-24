@@ -52,7 +52,7 @@ const Relations: React.FC<RelationsProps> = ({ entity, activeTab, reloadList }) 
 
   const handleSuccessCallback = (type?: 'new_master_child' | 'relation') => {
     getRelation();
-    // 新建主子关系子表时，需重新加载实体列表
+    // 新建主子关系子表时，需重新加载资产列表
     if (type === 'new_master_child') {
       reloadList();
     }
@@ -94,7 +94,7 @@ const Relations: React.FC<RelationsProps> = ({ entity, activeTab, reloadList }) 
       render: (text: string, record: any, index: number) => index + 1 + (page.pageNo - 1) * page.pageSize
     },
     {
-      title: '源实体',
+      title: '源资产',
       dataIndex: 'sourceEntityName',
       key: 'sourceEntityName'
     },
@@ -110,7 +110,7 @@ const Relations: React.FC<RelationsProps> = ({ entity, activeTab, reloadList }) 
       render: (type: string) => <Tag color="purple">{type}</Tag>
     },
     {
-      title: '目标实体',
+      title: '目标资产',
       dataIndex: 'targetEntityName',
       key: 'targetEntityName'
     },
