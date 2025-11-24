@@ -1,5 +1,6 @@
 package com.cmsr.onebase.framework.security.build.config;
 
+import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
 import com.cmsr.onebase.framework.common.biz.system.permission.PermissionCommonApi;
 import com.cmsr.onebase.framework.security.config.SecurityProperties;
 import com.cmsr.onebase.framework.security.core.context.TransmittableThreadLocalSecurityContextHolderStrategy;
@@ -69,8 +70,8 @@ public class OneBaseSecurityAutoConfiguration {
      */
     @Bean
     public BuildAuthenticationFilter authenticationTokenFilter(GlobalExceptionHandler globalExceptionHandler,
-                                                               OAuth2TokenCommonApi oauth2TokenApi) {
-        return new BuildAuthenticationFilter(securityProperties, globalExceptionHandler, oauth2TokenApi);
+                                                               OAuth2TokenCommonApi oauth2TokenApi, SecurityConfigApi securityConfigApi) {
+        return new BuildAuthenticationFilter(securityProperties, globalExceptionHandler, oauth2TokenApi,securityConfigApi);
     }
 
     @Bean("ss") // 使用 Spring Security 的缩写，方便使用

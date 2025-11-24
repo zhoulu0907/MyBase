@@ -30,11 +30,12 @@ public interface SessionIdleService {
      * 用户每次操作时调用（在拦截器或Filter中），更新会话活跃时间和TTL
      * 如果Redis Key不存在，说明会话已超时，返回false
      *
+     * @param tenantId 租户ID
      * @param userId 用户ID
      * @param deviceId 设备ID
      * @return true-更新成功，false-会话已过期或不存在
      */
-    boolean updateRedisIdleKey(Long userId, String deviceId);
+    boolean updateRedisIdleKey(Long tenantId, Long userId, String deviceId);
 
     /**
      * 检查会话空闲Redis Key是否存在

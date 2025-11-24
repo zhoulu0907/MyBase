@@ -1,4 +1,4 @@
-package com.cmsr.onebase.framework.security.core;
+package com.cmsr.onebase.framework.common.security.dto;
 
 import cn.hutool.core.map.MapUtil;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;

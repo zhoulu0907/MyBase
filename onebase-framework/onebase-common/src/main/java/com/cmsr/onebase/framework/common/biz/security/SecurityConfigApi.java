@@ -1,8 +1,8 @@
-package com.cmsr.onebase.module.infra.api.security;
+package com.cmsr.onebase.framework.common.biz.security;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.module.infra.api.security.dto.PasswordExpiryCheckDTO;
-import com.cmsr.onebase.module.infra.api.security.dto.LoginFailureResultDTO;
+import com.cmsr.onebase.framework.common.biz.security.dto.PasswordExpiryCheckDTO;
+import com.cmsr.onebase.framework.common.biz.security.dto.LoginFailureResultDTO;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -146,16 +146,18 @@ public interface SecurityConfigApi {
                                            @RequestParam("accessToken") String accessToken);
 
     /**
-     * 清理在线设备记录
+     * 移除在线设备
      * 
      * 用户登出或Token过期时调用
      *
+     * @param tenantId 租户ID（可选，为null时从TenantContextHolder获取）
      * @param userId 用户ID
      * @param accessToken AccessToken
      * @return 操作结果
      */
     @PostMapping("/remove-online-device")
-    CommonResult<Boolean> removeOnlineDevice(@RequestParam("userId") Long userId,
+    CommonResult<Boolean> removeOnlineDevice(@RequestParam(value = "tenantId", required = false) Long tenantId,
+                                              @RequestParam("userId") Long userId,
                                               @RequestParam("accessToken") String accessToken);
 
     /**
@@ -163,12 +165,14 @@ public interface SecurityConfigApi {
      * 
      * RefreshToken场景下用于获取旧Token对应的deviceId
      *
+     * @param tenantId 租户ID（可选，为null时从TenantContextHolder获取）
      * @param userId 用户ID
      * @param accessToken AccessToken
      * @return 设备ID，未找到返回null
      */
     @PostMapping("/find-device-id")
-    CommonResult<String> findDeviceIdByToken(@RequestParam("userId") Long userId,
+    CommonResult<String> findDeviceIdByToken(@RequestParam(value = "tenantId", required = false) Long tenantId,
+                                              @RequestParam("userId") Long userId,
                                               @RequestParam("accessToken") String accessToken);
 
     /**
@@ -189,25 +193,12 @@ public interface SecurityConfigApi {
      * 
      * 用户每次操作时调用（在拦截器或Filter中），更新会话活跃时间和TTL
      *
+     * @param tenantId 租户ID
      * @param userId 用户ID
      * @param deviceId 设备ID
      * @return true-更新成功，false-会话已过期或不存在
      */
     @PostMapping("/session-idle/update")
-    CommonResult<Boolean> updateSessionIdleKey(@RequestParam("userId") Long userId,
-                                                @RequestParam("deviceId") String deviceId);
-
-    /**
-     * 检查会话空闲Redis Key是否存在
-     * 
-     * AccessToken过期使用RefreshToken刷新前调用
-     *
-     * @param userId 用户ID
-     * @param deviceId 设备ID
-     * @return true-会话有效，false-会话已过期
-     */
-    @PostMapping("/session-idle/exist")
-    CommonResult<Boolean> existSessionIdleKey(@RequestParam("userId") Long userId,
-                                               @RequestParam("deviceId") String deviceId);
-
+    CommonResult<Boolean> updateSessionIdleKey(@RequestParam("tenantId") Long tenantId,
+                                                @RequestParam("userId") Long userId, @RequestParam("deviceId") String deviceId);
 }
