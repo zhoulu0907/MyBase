@@ -119,8 +119,10 @@ const XLoadMore = memo(
                 (field: AppEntityField) => field.fieldId === column.id
               );
               const result = item[dataFieldInfo.fieldName] || ''
-              console.log('render result: ', { result, dataFieldInfo })
               if (!result) return '';
+              if (typeof result === 'object') {
+                return JSON.stringify(result)
+              }
               // if (['EMAIL', 'LONG_TEXT', 'TEXT', 'PHONE', 'NUMBER', 'DATE', 'DATETIME', 'URL', 'ADDRESS', 'AUTO_CODE', 'USER']
               //   .includes(dataFieldInfo.fieldType)) {
               //   return result || '-';
@@ -160,14 +162,9 @@ const XLoadMore = memo(
     };
 
     const handleCreate = () => {
-      console.log('点击新增');
-
-      console.log('runtime: ', runtime);
       if (!runtime) {
         return;
       }
-      console.log('showFromPageData: ', showFromPageData);
-
       showFromPageData?.(null, true);
     };
 
@@ -284,7 +281,6 @@ const XLoadMore = memo(
       if (!runtime) {
         return;
       }
-      console.log('删除数据 id: ', id);
       const req: DeleteMethodParam = {
         menuId: curMenu.value?.id,
         entityId: metaData,
