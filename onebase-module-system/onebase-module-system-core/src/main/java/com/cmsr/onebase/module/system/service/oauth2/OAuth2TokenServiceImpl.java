@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.system.service.oauth2;
 
+import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstants;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
@@ -11,8 +12,8 @@ import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.util.date.DateUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.framework.security.core.LoginUser;
-import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
+import com.cmsr.onebase.framework.common.security.dto.LoginUser;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.system.vo.oauth.OAuth2AccessTokenPageReqVO;
 import com.cmsr.onebase.module.system.dal.database.OAuth2AccessTokenDataRepository;
@@ -58,7 +59,7 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
     @Resource
     private OAuth2RefreshTokenDataRepository oauth2RefreshTokenDataRepository;
     @Resource
-    private com.cmsr.onebase.module.infra.api.security.SecurityConfigApi securityConfigApi;
+    private SecurityConfigApi securityConfigApi;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -110,6 +111,7 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
             // 通过旧Token反查deviceId
             OAuth2AccessTokenDO oldToken = accessTokenDOs.get(0);
             CommonResult<String> deviceIdResult = securityConfigApi.findDeviceIdByToken(
+                    null,  // OAuth2TokenServiceImpl在同一模块，TenantContextHolder能正常获取
                     oldToken.getUserId(),
                     oldToken.getAccessToken()
             );
@@ -123,10 +125,7 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
             
             // 删除在线设备记录中的旧Token
             for (OAuth2AccessTokenDO accessToken : accessTokenDOs) {
-                securityConfigApi.removeOnlineDevice(
-                        accessToken.getUserId(),
-                        accessToken.getAccessToken()
-                );
+                securityConfigApi.removeOnlineDevice(null, accessToken.getUserId(), accessToken.getAccessToken());
             }
         }
 
@@ -248,7 +247,7 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
     }
 
     /**
-     * 加载用户信息，方便 {@link com.cmsr.onebase.framework.security.core.LoginUser} 获取到昵称、部门等信息
+     * 加载用户信息，方便 {@link LoginUser} 获取到昵称、部门等信息
      *
      * @param userId   用户编号
      * @param userType 用户类型

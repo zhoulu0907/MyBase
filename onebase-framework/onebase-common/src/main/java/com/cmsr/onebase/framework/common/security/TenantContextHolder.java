@@ -1,4 +1,4 @@
-package com.cmsr.onebase.framework.tenant.core.context;
+package com.cmsr.onebase.framework.common.security;
 
 import com.alibaba.ttl.TransmittableThreadLocal;
 

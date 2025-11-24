@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.infra.api.security.dto;
+package com.cmsr.onebase.framework.common.biz.security.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
