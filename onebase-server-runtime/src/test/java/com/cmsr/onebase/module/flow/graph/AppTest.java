@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.flow.graph;
 
-import com.cmsr.onebase.framework.security.runtime.RuntimeSecurityContext;
+import com.cmsr.onebase.framework.security.runtime.RTSecurityContext;
 import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.module.app.api.security.bo.FieldPermission;
 import com.cmsr.onebase.module.app.api.security.bo.OperationPermission;
@@ -44,7 +44,7 @@ public class AppTest {
     @Test
     public void testSimple() throws IOException {
         TenantContextHolder.setIgnore(true);
-        RuntimeSecurityContext.mockLoginUser(3386012505007460352L, 46699591748616192L);
+        RTSecurityContext.mockLoginUser(3386012505007460352L, 46699591748616192L);
         List<MenuListRespVO> menuListRespVOS = appMenuService.listApplicationMenu();
         System.out.println(menuListRespVOS);
     }
@@ -52,7 +52,7 @@ public class AppTest {
     @Test
     public void testSimple2() throws IOException {
         TenantContextHolder.setIgnore(true);
-        RuntimeSecurityContext.mockLoginUser(3386012505007460352L, 46699591748616192L);
+        RTSecurityContext.mockLoginUser(3386012505007460352L, 46699591748616192L);
         MenuPermissionVO menuPermission = appMenuService.getMenuPermission(47012574606491648L);
         System.out.println(menuPermission);
     }
@@ -60,7 +60,7 @@ public class AppTest {
     @Test
     public void testGraph() throws IOException {
         TenantContextHolder.setIgnore(true);
-        RuntimeSecurityContext.mockLoginUser(3386012505007460352L, 46699591748616192L);
+        RTSecurityContext.mockLoginUser(3386012505007460352L, 46699591748616192L);
         MenuPermissionVO menuPermissionVO = appMenuService.getMenuPermission(95847916169691136L);
         System.out.println(menuPermissionVO);
     }
@@ -82,8 +82,8 @@ public class AppTest {
     @Test
     public void testGraph4() throws IOException {
         TenantContextHolder.setIgnore(true);
-        RuntimeSecurityContext.mockLoginUser(3386012505007460352L, 46699591748616192L);
-        FieldPermission fieldPermission = RuntimeSecurityContext.getMenuFieldPermission(47012574606491648L);
+        RTSecurityContext.mockLoginUser(3386012505007460352L, 46699591748616192L);
+        FieldPermission fieldPermission = RTSecurityContext.getMenuFieldPermission(47012574606491648L);
         System.out.println(fieldPermission);
     }
 

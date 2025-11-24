@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.app.runtime.service.menu;
 
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.framework.security.runtime.RuntimeSecurityContext;
+import com.cmsr.onebase.framework.security.runtime.RTSecurityContext;
 import com.cmsr.onebase.module.app.api.security.bo.OperationPermission;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthViewRepository;
 import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
@@ -56,8 +56,8 @@ public class AppMenuServiceImpl implements AppMenuService {
 
     @Override
     public List<MenuListRespVO> listApplicationMenu() {
-        Long userId = RuntimeSecurityContext.getUserId();
-        Long applicationId = RuntimeSecurityContext.getApplicationId();
+        Long userId = RTSecurityContext.getUserId();
+        Long applicationId = RTSecurityContext.getApplicationId();
         UserRoleDTO userRoleDTO = appAuthRoleProvider.findUserRoleByApplication(userId, applicationId);
         List<MenuDO> menuDOS;
         if (userRoleDTO.isAdminRole()) {
@@ -106,8 +106,8 @@ public class AppMenuServiceImpl implements AppMenuService {
 
     @Override
     public MenuPermissionVO getMenuPermission(Long menuId) {
-        Long userId = RuntimeSecurityContext.getUserId();
-        Long applicationId = RuntimeSecurityContext.getApplicationId();
+        Long userId = RTSecurityContext.getUserId();
+        Long applicationId = RTSecurityContext.getApplicationId();
         MenuPermissionVO menuPermissionVO = new MenuPermissionVO();
         menuPermissionVO.setOperationPermission(appAuthSecurityApi.getMenuOperationPermission(userId, applicationId, menuId));
         menuPermissionVO.setFieldPermission(appAuthSecurityApi.getMenuFieldPermission(userId, applicationId, menuId));

@@ -15,7 +15,7 @@ import java.util.Collections;
  * @Author：huangjie
  * @Date：2025/10/17 12:30
  */
-public class RuntimeSecurityContext {
+public class RTSecurityContext {
 
     public static RuntimeLoginUser getLoginUser() {
         return SecurityFrameworkUtils.getLoginUser();
