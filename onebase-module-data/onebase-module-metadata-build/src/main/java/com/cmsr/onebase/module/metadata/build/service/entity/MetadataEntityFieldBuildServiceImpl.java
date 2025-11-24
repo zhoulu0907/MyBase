@@ -2559,6 +2559,48 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             full.setRuleItems(ruleVOs);
             vo.setAutoNumberConfig(full);
         }
+
+        // 填充数据选择配置
+        if ("DATA_SELECTION".equalsIgnoreCase(field.getFieldType())) {
+            DataSelectionConfig dataSelectionConfig = buildDataSelectionConfig(field);
+            if (dataSelectionConfig != null) {
+                vo.setDataSelectionConfig(dataSelectionConfig);
+            }
+        }
+    }
+
+    /**
+     * 查询并构建数据选择配置
+     *
+     * @param field 字段
+     * @return 数据选择配置
+     */
+    private DataSelectionConfig buildDataSelectionConfig(MetadataEntityFieldDO field) {
+        if (field == null || field.getId() == null || field.getEntityId() == null) {
+            return null;
+        }
+
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.and(MetadataEntityRelationshipDO.SOURCE_ENTITY_ID, field.getEntityId());
+        configStore.and(MetadataEntityRelationshipDO.SOURCE_FIELD_ID, String.valueOf(field.getId()));
+        List<MetadataEntityRelationshipDO> relationships = metadataEntityRelationshipBuildService.findAllByConfig(configStore);
+        if (relationships == null || relationships.isEmpty()) {
+            return null;
+        }
+        MetadataEntityRelationshipDO relationship = relationships.get(0);
+        if (relationship.getTargetEntityId() == null || relationship.getTargetFieldId() == null) {
+            return null;
+        }
+
+        DataSelectionConfig dataSelectionConfig = new DataSelectionConfig();
+        dataSelectionConfig.setTargetEntityId(relationship.getTargetEntityId());
+        try {
+            dataSelectionConfig.setTargetFieldId(Long.valueOf(relationship.getTargetFieldId()));
+        } catch (NumberFormatException ex) {
+            log.warn("解析数据选择配置目标字段ID失败，fieldId={}, targetFieldId={}", field.getId(), relationship.getTargetFieldId());
+            return null;
+        }
+        return dataSelectionConfig;
     }
 
     /**
