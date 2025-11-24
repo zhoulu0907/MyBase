@@ -10,7 +10,7 @@ import ApproverConfig from './approverConfig/index';
 import ApproverBtnConfig from './btnConfig/index';
 import FieldConfig from './fieldConfig/index';
 import AdvancedConfig from './advancedConfig/index';
-import { ApproveDrawerTab, getDefaultBtnConfig } from './constant';
+import { ApproveDrawerTab, defaultBtnConfigArr } from './constant';
 import { useLocation } from 'react-router-dom';
 import type {
   ApproverConfigDataType,
@@ -23,8 +23,6 @@ import type {
 import { getEntityFieldsWithChildren, getPageSetMetaData } from '@onebase/app';
 
 const RadioGroup = Radio.Group;
-
-const defaultBtnConfig = getDefaultBtnConfig()
 
 export default function ApproveDreawer({ handleConfigSubmit, configData }: ApproveDrawerProps) {
   const location = useLocation();
@@ -55,7 +53,7 @@ export default function ApproveDreawer({ handleConfigSubmit, configData }: Appro
     if (keys.length === 2 && keys.includes('name') && keys.includes('errorMsg')) {
       return {
         ...initData,
-        buttonConfigs: defaultBtnConfig
+        buttonConfigs: defaultBtnConfigArr
       };
     } else {
       return initData;

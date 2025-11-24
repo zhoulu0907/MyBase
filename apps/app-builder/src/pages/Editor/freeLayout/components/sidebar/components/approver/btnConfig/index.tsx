@@ -4,7 +4,7 @@ import { IconEdit, IconSettings } from '@arco-design/web-react/icon';
 import SettingModal from './SettingModal';
 import styles from '../approverConfig/index.module.less';
 import './style.less';
-import { type BtnConfig, getDefaultBtnConfig } from '../constant';
+import { type BtnConfig, defaultBtnConfigArr } from '../constant';
 const FormItem = Form.Item;
 const EditableContext = React.createContext<{ getForm?: () => FormInstance }>({});
 
@@ -117,8 +117,6 @@ function EditableCell(props: any) {
     </div>
   );
 }
-
-const columnsData = getDefaultBtnConfig()
 
 export default function ApproverBtnConfig({ setApprovalConfigData, buttonConfigs }: BtnConfig) {
   const [tbData, setData] = useState<any[]>([]);
@@ -245,7 +243,7 @@ export default function ApproverBtnConfig({ setApprovalConfigData, buttonConfigs
   }, [tbData]);
 
   useEffect(() => {
-    const initData:any = columnsData.map((item: any) => {
+    const initData:any = defaultBtnConfigArr.map((item: any) => {
       buttonConfigs.forEach((config: any) => {
         if (item.buttonName === config.buttonName) {
           item = { ...item, ...config };
