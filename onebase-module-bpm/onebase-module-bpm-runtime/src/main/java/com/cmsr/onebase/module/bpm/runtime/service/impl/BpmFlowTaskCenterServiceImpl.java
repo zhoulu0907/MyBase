@@ -33,7 +33,6 @@ import org.anyline.entity.Compare;
 import org.anyline.entity.DefaultPageNavi;
 import org.anyline.entity.PageNavi;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.warm.flow.core.dto.DefJson;
@@ -214,7 +213,8 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         // 填充时间范围条件
         fillTimeRange(condition, "submit_time", reqVO.getSubmitTimeStart(), reqVO.getSubmitTimeEnd());
 
-        // 填充处理人条件，已经在sql中做了处理
+        // 填充处理人条件
+        condition.param("userId", userId);
 
         // 排序
         fillOrder(condition, "create_time", reqVO.getSortType());
@@ -238,12 +238,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         fillTimeRange(condition, "submit_time", reqVO.getSubmitTimeStart(), reqVO.getSubmitTimeEnd());
 
         // 填充处理人条件
-        ConfigStore handlerCondition = new DefaultConfigStore();
-
-        handlerCondition.or(Compare.EQUAL, "approver", userId);
-        handlerCondition.or(Compare.EQUAL, "collaborator", userId);
-
-        condition.and(handlerCondition);
+        condition.param("userId", userId);
 
         // 排序
         fillOrder(condition, "update_time", reqVO.getSortType());
@@ -310,7 +305,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         // 构建查询条件
         ConfigStore condition = buildDynamicCondition(pageReqVO, String.valueOf(loginUserId));
 
-        PageResult<BpmTodoTaskDTO> pageResult = taskExtRepository.getTodoTaskPage(condition, String.valueOf(loginUserId));
+        PageResult<BpmTodoTaskDTO> pageResult = taskExtRepository.getTodoTaskPage(condition);
         List<BpmFlowTodoTaskVO> todoTaskList = new ArrayList<>();
 
         for (BpmTodoTaskDTO flowTaskExt : pageResult.getList()) {
@@ -377,7 +372,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         // 构建查询条件
         ConfigStore condition = buildDynamicCondition(pageReqVO, String.valueOf(loginUserId));
 
-        PageResult<BpmDoneTaskDTO> pageResult = hisTaskExtRepository.getDoneTaskPage(condition);
+        PageResult<BpmDoneTaskDTO> pageResult = hisTaskExtRepository.getDoneTaskPage(condition, String.valueOf(loginUserId));
 
         List<BpmFlowDoneTaskVO> doneTaskList = new ArrayList<>();
         for (BpmDoneTaskDTO flowHisTaskExt : pageResult.getList()) {
@@ -396,25 +391,12 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
             doneTaskVO.getInitiator().setName(flowHisTaskExt.getInitiatorName());
             doneTaskVO.getInitiator().setAvatar(flowHisTaskExt.getInitiatorAvatar());
 
-            doneTaskList.add(doneTaskVO);
-
-            // 判断下是否为代理执行
-            if (StringUtils.isNotBlank(flowHisTaskExt.getCollaborator()) && StringUtils.isNotBlank(flowHisTaskExt.getExt())) {
-                String hisExt = flowHisTaskExt.getExt();
-
-                Map<String, Object> extMap = JsonUtils.parseObject(hisExt, Map.class);
-
-                if (extMap == null) {
-                    continue;
-                }
-
-                String agentId = MapUtils.getString(extMap, "agentId");
-
-                // 只判断是否有值
-                if (Objects.equals(agentId, String.valueOf(loginUserId))) {
-                    doneTaskVO.setProcessTitle(AGENT_TITLE_PREFIX + flowHisTaskExt.getBpmTitle());
-                }
+            // 判断代理执行
+            if (StringUtils.isNotBlank(flowHisTaskExt.getAgentId()) && Objects.equals(String.valueOf(loginUserId), flowHisTaskExt.getAgentId())) {
+                doneTaskVO.setProcessTitle(AGENT_TITLE_PREFIX + flowHisTaskExt.getBpmTitle());
             }
+
+            doneTaskList.add(doneTaskVO);
         }
 
         return new PageResult<>(doneTaskList, pageResult.getTotal());

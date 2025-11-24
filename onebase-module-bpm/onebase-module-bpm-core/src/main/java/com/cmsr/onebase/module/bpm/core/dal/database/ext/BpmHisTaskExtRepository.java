@@ -7,7 +7,6 @@ import jakarta.annotation.Resource;
 import lombok.Getter;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.entity.DataSet;
-import org.dromara.warm.flow.core.enums.NodeType;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -23,9 +22,13 @@ public class BpmHisTaskExtRepository {
     @Resource
     private FlowHisTaskRepository hisTaskRepository;
 
-    public PageResult<BpmDoneTaskDTO> getDoneTaskPage(ConfigStore condition) {
+    public PageResult<BpmDoneTaskDTO> getDoneTaskPage(ConfigStore condition, String loginUserId) {
         // 构建基础SQL
         String baseSql = buildBaseSql();
+
+        // todo：优化sql
+        // 去重
+        condition.eq("rn", 1);
 
         // 执行查询
         DataSet dataSet = hisTaskRepository.querys(baseSql, condition);
@@ -60,20 +63,29 @@ public class BpmHisTaskExtRepository {
                         t.create_time,
                         t.update_time,
                         t1.node_code,
-                        t1.flow_status
+                        t1.flow_status,
+                        t4.agent_id as agent_id,
+                        t4.agent_name as agent_name,
+                        ROW_NUMBER() OVER (
+                        PARTITION BY t.id
+                         ORDER BY CASE
+                                WHEN t.approver = #{userId} THEN 1
+                                WHEN t4.agent_id = #{userId} THEN 2
+                                ELSE 3
+                                END
+                        ) as rn
                     FROM bpm_flow_his_task t
                     LEFT JOIN bpm_flow_instance t1 ON t.instance_id = t1.id
                     left join bpm_flow_instance_biz_ext t3 on t.instance_id = t3.instance_id
+                    left join bpm_flow_agent_ins t4 on t.task_id = t4.task_id and t.approver = t4.principal_id and t4.deleted = 0
                     WHERE
                     t1.deleted = 0
                     and t.deleted = 0
                     and t3.deleted = 0
-                    and t.node_type in ('%d','%d','%d')
+                    and t.node_type = 1
+                    and (t.approver = #{userId} or t4.agent_id = #{userId})
                 ) tf
-                """,
-                NodeType.BETWEEN.getKey(),
-                NodeType.SERIAL.getKey(),
-                NodeType.PARALLEL.getKey()
+                """
         );
     }
 }

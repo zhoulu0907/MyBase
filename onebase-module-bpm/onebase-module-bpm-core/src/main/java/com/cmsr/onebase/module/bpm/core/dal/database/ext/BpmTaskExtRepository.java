@@ -21,10 +21,11 @@ public class BpmTaskExtRepository {
     @Resource
     private FlowTaskRepository flowTaskRepository;
 
-    public PageResult<BpmTodoTaskDTO> getTodoTaskPage(ConfigStore condition, String userId) {
+    public PageResult<BpmTodoTaskDTO> getTodoTaskPage(ConfigStore condition) {
         // 构建基础SQL
-        String baseSql = buildBaseSql(userId);
+        String baseSql = buildBaseSql();
 
+        // todo：优化sql
         // 去重
         condition.eq("rn", 1);
 
@@ -35,8 +36,8 @@ public class BpmTaskExtRepository {
                 dataSet.total()
         );
     }
-    private String buildBaseSql(String userId) {
-        return String.format("""
+    private String buildBaseSql() {
+        return """
                 select * from (
                    select
                      t3.app_id,
@@ -62,8 +63,8 @@ public class BpmTaskExtRepository {
                      ROW_NUMBER() OVER (
                          PARTITION BY t.id
                          ORDER BY CASE
-                                WHEN t1.processed_by = '%s' THEN 1
-                                WHEN t4.agent_id = '%s' THEN 2
+                                WHEN t1.processed_by = #{userId} THEN 1
+                                WHEN t4.agent_id = #{userId} THEN 2
                                 ELSE 3
                                 END
                      ) as rn
@@ -74,13 +75,8 @@ public class BpmTaskExtRepository {
                      left join bpm_flow_agent_ins t4 ON t.id = t4.task_id AND t1.processed_by = t4.principal_id and t4.deleted = 0
                      where t.node_type = 1 and t.flow_status != 'draft'
                      and t.deleted = 0 and t1.deleted = 0 and t2.deleted = 0 and t3.deleted = 0
-                     and (t1.processed_by = '%s' or t4.agent_id = '%s')
+                     and (t1.processed_by = #{userId} or t4.agent_id = #{userId})
                 ) tf
-                """,
-                userId,
-                userId,
-                userId,
-                userId
-        );
+            """;
     }
 }
