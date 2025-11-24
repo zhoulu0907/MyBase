@@ -1675,13 +1675,13 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                     ddl.append("ALTER TABLE \"").append(tableName)
                             .append("\" ALTER COLUMN \"").append(fieldName)
                             .append("\" TYPE ").append(columnType);
-                    
+
                     // 为需要类型转换的字段添加 USING 子句
                     String usingClause = generateUsingClause(field.getFieldType(), fieldName);
                     if (usingClause != null) {
                         ddl.append(" USING ").append(usingClause);
                     }
-                    
+
                     ddl.append(";\n");
 
                     // 2. 修改是否允许为空
@@ -1769,51 +1769,54 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         if (fieldType == null) {
             return null;
         }
-        
+
         String quotedFieldName = "\"" + fieldName + "\"";
-        
+        // 先将列转换为TEXT类型，这样可以处理从任何类型（包括已经是目标类型）的转换
+        String textFieldName = quotedFieldName + "::text";
+
         // 需要显式类型转换的字段类型，使用CASE WHEN进行安全转换
         switch (fieldType.toUpperCase()) {
             case "DATETIME":
             case "TIMESTAMP":
                 // VARCHAR/TEXT 转 TIMESTAMP：使用CASE WHEN处理无效数据
                 // 正则表达式检查是否为有效的时间戳格式
-                return "CASE WHEN " + quotedFieldName + " ~ '^\\d{4}-\\d{2}-\\d{2}' " +
-                       "THEN " + quotedFieldName + "::timestamp " +
-                       "ELSE NULL END";
-                
+                return "CASE WHEN " + textFieldName + " ~ '^\\\\d{4}-\\\\d{2}-\\\\d{2}' " +
+                        "THEN " + textFieldName + "::timestamp " +
+                        "ELSE NULL END";
+
             case "DATE":
                 // VARCHAR/TEXT 转 DATE：使用CASE WHEN处理无效数据
-                return "CASE WHEN " + quotedFieldName + " ~ '^\\d{4}-\\d{2}-\\d{2}' " +
-                       "THEN " + quotedFieldName + "::date " +
-                       "ELSE NULL END";
-                
+                return "CASE WHEN " + textFieldName + " ~ '^\\\\d{4}-\\\\d{2}-\\\\d{2}' " +
+                        "THEN " + textFieldName + "::date " +
+                        "ELSE NULL END";
+
             case "NUMBER":
             case "NUMERIC":
             case "DECIMAL":
                 // VARCHAR/TEXT 转 NUMERIC：使用CASE WHEN处理无效数据
                 // 检查是否为数字格式（支持小数和负数）
-                return "CASE WHEN " + quotedFieldName + " ~ '^-?\\d+\\.?\\d*$' " +
-                       "THEN " + quotedFieldName + "::numeric " +
-                       "ELSE NULL END";
-                
+                return "CASE WHEN " + textFieldName + " ~ '^-?\\\\d+\\\\.?\\\\d*$' " +
+                        "THEN " + textFieldName + "::numeric " +
+                        "ELSE NULL END";
+
             case "INTEGER":
             case "INT":
             case "BIGINT":
                 // VARCHAR/TEXT 转 INTEGER：使用CASE WHEN处理无效数据
                 // 检查是否为整数格式
-                return "CASE WHEN " + quotedFieldName + " ~ '^-?\\d+$' " +
-                       "THEN " + quotedFieldName + "::integer " +
-                       "ELSE NULL END";
-                
+                return "CASE WHEN " + textFieldName + " ~ '^-?\\\\d+$' " +
+                        "THEN " + textFieldName + "::integer " +
+                        "ELSE NULL END";
+
             case "BOOLEAN":
             case "BOOL":
                 // VARCHAR/TEXT 转 BOOLEAN：使用CASE WHEN处理无效数据
                 // 支持常见的布尔值表示
-                return "CASE WHEN " + quotedFieldName + " IN ('true', 'false', 't', 'f', '1', '0', 'yes', 'no', 'y', 'n') " +
-                       "THEN " + quotedFieldName + "::boolean " +
-                       "ELSE NULL END";
-                
+                return "CASE WHEN " + textFieldName
+                        + " IN ('true', 'false', 't', 'f', '1', '0', 'yes', 'no', 'y', 'n') " +
+                        "THEN " + textFieldName + "::boolean " +
+                        "ELSE NULL END";
+
             default:
                 // 其他类型通常可以自动转换，不需要USING子句
                 return null;
