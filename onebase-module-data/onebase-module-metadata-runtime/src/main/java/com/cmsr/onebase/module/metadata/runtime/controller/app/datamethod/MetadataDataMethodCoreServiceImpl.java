@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.security.runtime.RTLoginUser;
+import com.cmsr.onebase.framework.common.security.dto.RuntimeLoginUser;
 import com.cmsr.onebase.framework.security.runtime.RTSecurityContext;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.framework.uid.UidGenerator;
@@ -571,7 +571,7 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
             throw exception(METADATA_DATA_METHOD_RUNTIME_MENU_ID_REQUIRED);
         }
 
-        RTLoginUser loginUser = RTSecurityContext.getLoginUser();
+        RuntimeLoginUser loginUser = RTSecurityContext.getLoginUser();
         if (loginUser == null) {
             throw exception(UNAUTHORIZED);
         }
@@ -590,7 +590,7 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
 
     }
 
-    private LoginUserCtx convertLoginUserCtx(RTLoginUser loginUser) {
+    private LoginUserCtx convertLoginUserCtx(RuntimeLoginUser loginUser) {
         LoginUserCtx loginUserCtx = new LoginUserCtx();
         loginUserCtx.setUserId(loginUser.getId());
         loginUserCtx.setApplicationId(loginUser.getApplicationId());
