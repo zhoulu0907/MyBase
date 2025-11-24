@@ -15,7 +15,7 @@ import java.util.Collection;
 import java.util.List;
 
 @Slf4j
-public class BaseRepository<M extends BaseMapper<T>, T> extends ServiceImpl<M, T> {
+public class BaseTenantRepository<M extends BaseMapper<T>, T> extends ServiceImpl<M, T> {
 
     protected QueryWrapper injectBizFilter(QueryWrapper queryWrapper) {
 //        Long applicationId = XXX;

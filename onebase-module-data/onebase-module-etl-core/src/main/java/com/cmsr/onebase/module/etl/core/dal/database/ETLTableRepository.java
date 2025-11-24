@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.etl.core.dal.database;
 
-import com.cmsr.onebase.framework.mybatis.BaseRepository;
+import com.cmsr.onebase.framework.mybatis.BaseTenantRepository;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLTableDO;
 import com.cmsr.onebase.module.etl.core.dal.mapper.ETLTableMapper;
 import com.mybatisflex.core.query.QueryWrapper;
@@ -14,7 +14,7 @@ import java.util.List;
 
 @Repository
 @Slf4j
-public class ETLTableRepository extends BaseRepository<ETLTableMapper, ETLTableDO> {
+public class ETLTableRepository extends BaseTenantRepository<ETLTableMapper, ETLTableDO> {
 
     public List<ETLTableDO> findAllByCatalogIdAndSchemaIdAndDatasourceId(Long datasourceId, Long catalogId, Long schemaId) {
         QueryWrapper queryWrapper = query()

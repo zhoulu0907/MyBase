@@ -6,6 +6,11 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
+/**
+ *   字段：ID、创建人、创建时间、更新人、更新时间、删除标识、乐观锁；
+ * <p>
+ *   适用场景：系统表、字典表等忽略租户、应用权限管控的相关表单；
+ */
 @Data
 public class BaseEntity {
 

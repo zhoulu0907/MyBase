@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.etl.core.dal.database;
 
-import com.cmsr.onebase.framework.mybatis.BaseRepository;
+import com.cmsr.onebase.framework.mybatis.BaseTenantRepository;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLSchemaDO;
 import com.cmsr.onebase.module.etl.core.dal.mapper.ETLSchemaMapper;
 import com.mybatisflex.core.query.QueryWrapper;
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 
 @Slf4j
 @Repository
-public class ETLSchemaRepository extends BaseRepository<ETLSchemaMapper, ETLSchemaDO> {
+public class ETLSchemaRepository extends BaseTenantRepository<ETLSchemaMapper, ETLSchemaDO> {
 
     // 优化方法名：更简洁但保持语义清晰
     public ETLSchemaDO findOneByQualifiedName(Long applicationId, Long datasourceId, Long catalogId, String name) {

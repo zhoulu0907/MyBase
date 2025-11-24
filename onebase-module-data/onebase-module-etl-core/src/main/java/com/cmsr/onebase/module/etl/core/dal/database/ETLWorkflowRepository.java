@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.etl.core.dal.database;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.mybatis.BaseRepository;
+import com.cmsr.onebase.framework.mybatis.BaseTenantRepository;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLScheduleJobDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLWorkflowDO;
 import com.cmsr.onebase.module.etl.core.dal.mapper.ETLWorkflowMapper;
@@ -19,7 +19,7 @@ import static com.cmsr.onebase.module.etl.core.dal.dataobject.table.EtlWorkflowT
 
 @Slf4j
 @Repository
-public class ETLWorkflowRepository extends BaseRepository<ETLWorkflowMapper, ETLWorkflowDO> {
+public class ETLWorkflowRepository extends BaseTenantRepository<ETLWorkflowMapper, ETLWorkflowDO> {
 
     public PageResult<WorkflowBriefVO> getWorkflowPage(WorkflowPageReqVO pageReqVO) {
         String scheduleStrategy = pageReqVO.getScheduleStrategy();

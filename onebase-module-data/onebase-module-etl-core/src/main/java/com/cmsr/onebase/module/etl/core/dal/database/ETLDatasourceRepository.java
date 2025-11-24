@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.etl.core.dal.database;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.mybatis.BaseRepository;
+import com.cmsr.onebase.framework.mybatis.BaseTenantRepository;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLDatasourceDO;
 import com.cmsr.onebase.module.etl.core.dal.mapper.ETLDatasourceMapper;
 import com.cmsr.onebase.module.etl.core.vo.DatasourcePageReqVO;
@@ -15,7 +15,7 @@ import java.util.List;
 
 @Repository
 @Slf4j
-public class ETLDatasourceRepository extends BaseRepository<ETLDatasourceMapper, ETLDatasourceDO> {
+public class ETLDatasourceRepository extends BaseTenantRepository<ETLDatasourceMapper, ETLDatasourceDO> {
 
     public PageResult<ETLDatasourceDO> getETLDatasourcePage(DatasourcePageReqVO pageReqVO) {
         QueryWrapper queryWrapper = query()
