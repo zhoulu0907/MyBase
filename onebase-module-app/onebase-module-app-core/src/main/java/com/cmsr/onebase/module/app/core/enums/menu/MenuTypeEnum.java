@@ -11,7 +11,10 @@ public enum MenuTypeEnum {
 
     PAGE(1, "页面"),
 
-    GROUP(2, "目录");
+    GROUP(2, "目录"),
+
+    BPM(3, "BPM工作流"),
+    ;
 
     private final Integer value;
 

@@ -70,16 +70,16 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
     @Resource
     private BpmEngineDefExtService defExtService;
 
-    @Resource
+    @Resource(name = "bpmDefService")
     private DefService defService;
 
-    @Resource
+    @Resource(name = "bpmInsService")
     private InsService insService;
 
-    @Resource
+    @Resource(name = "bpmTaskService")
     private TaskService taskService;
 
-    @Resource
+    @Resource(name = "bpmUserService")
     private UserService userService;
 
     @Resource
@@ -94,7 +94,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
     @Resource
     private AppAuthRoleUser appAuthRoleUser;
 
-    @Resource
+    @Resource(name = "bpmNodeService")
     private NodeService nodeService;
 
     @Resource
