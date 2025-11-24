@@ -2,15 +2,17 @@ package com.cmsr.onebase.module.bpm.runtime.service.instance.detail.impl;
 
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
+import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowAgentInsRepository;
 import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowCcRecordRepository;
 import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowInsBizExtRepository;
+import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowAgentInsDO;
 import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowCcRecordDO;
 import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowInsBizExtDO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
-import com.cmsr.onebase.module.bpm.core.enums.BpmUserTypeEnum;
 import com.cmsr.onebase.module.bpm.core.enums.BpmViewSourceEnum;
 import com.cmsr.onebase.module.bpm.core.utils.BpmUtil;
 import com.cmsr.onebase.module.bpm.core.vo.UserBasicInfoVO;
+import com.cmsr.onebase.module.bpm.runtime.service.context.BpmPermissionUserContext;
 import com.cmsr.onebase.module.bpm.runtime.service.instance.detail.BpmDetailService;
 import com.cmsr.onebase.module.bpm.runtime.service.instance.detail.strategy.InstanceDetailStrategyManager;
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmTaskDetailReqVO;
@@ -18,6 +20,7 @@ import com.cmsr.onebase.module.bpm.runtime.vo.BpmTaskDetailRespVO;
 import com.cmsr.onebase.module.engine.orm.anyline.entity.FlowHisTask;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.MetadataDataMethodCoreService;
 import jakarta.annotation.Resource;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
@@ -38,6 +41,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 
@@ -69,10 +73,40 @@ public class BpmDetailServiceImpl implements BpmDetailService {
     private BpmFlowCcRecordRepository ccRecordRepository;
 
     @Resource
+    private BpmFlowAgentInsRepository agentInsRepository;
+
+    @Resource
     private MetadataDataMethodCoreService metadataDataMethodCoreService;
 
     @Resource
     private InstanceDetailStrategyManager instanceDetailStrategyManager;
+
+    @Data
+    private static class InsDetailContext {
+        /**
+         * 流程实例 必须存在
+         */
+        private Instance instance;
+
+        /**
+         * 登录用户ID 必须存在
+         */
+        private Long loginUserId;
+
+        private Task task;
+
+        private HisTask hisTask;
+
+        /**
+         * 匹配的用户（审批人/转办人/委派人）
+         */
+        private User matchedUser;
+
+        /**
+         * 代理人记录（如果当前用户是代理人，则不为null）
+         */
+        private BpmFlowAgentInsDO agentIns;
+    }
 
     @Transactional(rollbackFor = Exception.class)
     public BpmTaskDetailRespVO getFormDetail(BpmTaskDetailReqVO reqVO) {
@@ -101,15 +135,15 @@ public class BpmDetailServiceImpl implements BpmDetailService {
             throw exception(ErrorCodeConstants.FLOW_NOT_BIND_ENTITY_ID);
         }
 
-        // 当前待办
-        Task currTask = getLastTodoTask(reqVO, loginUserId, source);
+        InsDetailContext context = new InsDetailContext();
+        context.setInstance(instance);
 
-        // 历史已办
-        HisTask hisTask = null;
+        // 当前待办
+        getLastTodoTask(reqVO, context, loginUserId, source);
 
         // 存在最新待办，已办就没必要查了
-        if (currTask == null) {
-            hisTask = getDoneTask(reqVO, instance, loginUserId, source);
+        if (context.getTask() == null) {
+            getDoneTask(reqVO, context, loginUserId, source);
         }
 
         // 填充业务扩展信息（与节点类型无关的通用逻辑）
@@ -119,6 +153,8 @@ public class BpmDetailServiceImpl implements BpmDetailService {
         fillFormData(respVO, instance, entityId);
 
         BaseNodeExtDTO nodeExtDTO = null;
+        Task currTask = context.getTask();
+        HisTask hisTask = context.getHisTask();
 
         if (currTask != null) {
             respVO.setTaskId(currTask.getId());
@@ -131,13 +167,18 @@ public class BpmDetailServiceImpl implements BpmDetailService {
         instanceDetailStrategyManager.processInstanceDetail(respVO, nodeExtDTO, instance, loginUserId, currTask != null);
 
         // 标记已读状态
-        markAsRead(currTask, reqVO, loginUserId);
+        markAsRead(reqVO, context);
+
+        // 处理代理信息
+        if (context.getAgentIns() != null) {
+            respVO.setProcessTitle(BpmConstants.AGENT_TITLE_PREFIX + respVO.getProcessTitle());
+        }
 
         return respVO;
     }
 
-    private Task getLastTodoTask(BpmTaskDetailReqVO reqVO, Long loginUserId, BpmViewSourceEnum sourceEnum) {
-        Long instanceId = reqVO.getInstanceId();
+    private void getLastTodoTask(BpmTaskDetailReqVO reqVO, InsDetailContext context, Long loginUserId, BpmViewSourceEnum sourceEnum) {
+        Long instanceId = context.getInstance().getId();
 
         if (sourceEnum == BpmViewSourceEnum.TODO) {
             Long taskId = reqVO.getTaskId();
@@ -157,32 +198,34 @@ public class BpmDetailServiceImpl implements BpmDetailService {
             }
 
             // 权限判断
-            List<User> users = userService.listByProcessedBys(taskId, String.valueOf(loginUserId));
+            BpmPermissionUserContext userContext = findPermissionUserContext(taskId, String.valueOf(loginUserId));
 
-            if (CollectionUtils.isEmpty(users)) {
-                log.error("用户 {} 无权限访问待办 taskId: {}", loginUserId, taskId);
+            if (userContext == null) {
                 throw exception(ErrorCodeConstants.FLOW_PERMISSION_DENY);
             }
 
-            return task;
+            context.setMatchedUser(userContext.getMatchedUser());
+            context.setAgentIns(userContext.getAgentIns());
+            context.setTask(task);
+
+            return;
         }
 
-        return getLastTodoTask(instanceId, loginUserId);
+        getLastTodoTask(instanceId, context, loginUserId);
     }
 
-    private HisTask getDoneTask(BpmTaskDetailReqVO reqVO, Instance instance, Long loginUserId, BpmViewSourceEnum sourceEnum) {
-        Long instanceId = reqVO.getInstanceId();
+    private void getDoneTask(BpmTaskDetailReqVO reqVO, InsDetailContext context, Long loginUserId, BpmViewSourceEnum sourceEnum) {
+        Instance instance = context.getInstance();
+        Long instanceId = instance.getId();
 
         if (sourceEnum == BpmViewSourceEnum.TODO) {
-            return null;
+            // 暂无已办任务
         } else if (sourceEnum == BpmViewSourceEnum.CREATED) {
             // 我的创建无需已办任务，但需要校验是否为创建人，todo：是否增加统一校验逻辑
             if (!Objects.equals(String.valueOf(loginUserId), instance.getCreateBy())) {
                 log.error("用户 {} 无权限访问我的创建实例 {}", loginUserId, instanceId);
                 throw exception(ErrorCodeConstants.FLOW_PERMISSION_DENY);
             }
-
-            return null;
         } else if (sourceEnum == BpmViewSourceEnum.CC) {
             Long taskId = reqVO.getTaskId();
 
@@ -197,8 +240,35 @@ public class BpmDetailServiceImpl implements BpmDetailService {
 
             BpmFlowCcRecordDO ccRecordDO = ccRecordRepository.findOne(configStore);
 
+            // 当前用户没有查看此抄送的任务权限
             if (ccRecordDO == null) {
-                throw exception(ErrorCodeConstants.FLOW_PERMISSION_DENY.getCode(), "您没有查看此抄送的任务权限");
+                // 查出代理人权限
+                List<BpmFlowAgentInsDO> agentInsList = agentInsRepository.findAllByTaskIdAndAgentId(taskId, String.valueOf(loginUserId));
+
+                if (CollectionUtils.isEmpty(agentInsList)) {
+                    throw exception(ErrorCodeConstants.FLOW_PERMISSION_DENY.getCode(), "您没有查看此抄送的任务权限");
+                }
+
+                Set<Long> approveUserIds = new HashSet<>();
+                Map<Long, BpmFlowAgentInsDO> agentInsMap = new HashMap<>();
+
+                for (BpmFlowAgentInsDO agentInsDO : agentInsList) {
+                    approveUserIds.add(agentInsDO.getPrincipalId());
+                    agentInsMap.put(agentInsDO.getPrincipalId(), agentInsDO);
+                }
+
+                ConfigStore agentCcQuery = new DefaultConfigStore();
+                agentCcQuery.and(BpmFlowCcRecordDO.TASK_ID, taskId);
+                agentCcQuery.in(BpmFlowCcRecordDO.USER_ID, approveUserIds);
+
+                ccRecordDO = ccRecordRepository.findOne(agentCcQuery);
+
+                // 当前用户没有查看此抄送的任务权限
+                if (ccRecordDO == null) {
+                    throw exception(ErrorCodeConstants.FLOW_PERMISSION_DENY.getCode(), "您没有查看此抄送的任务权限");
+                }
+
+                context.setAgentIns(agentInsMap.get(ccRecordDO.getUserId()));
             }
 
             // 查询已办任务
@@ -212,7 +282,7 @@ public class BpmDetailServiceImpl implements BpmDetailService {
                 throw exception(ErrorCodeConstants.FLOW_PERMISSION_DENY.getCode(), "未查询到已办任务");
             }
 
-            return hisTask;
+            context.setHisTask(hisTask);
         } else {
             Long taskId = reqVO.getTaskId();
 
@@ -232,15 +302,33 @@ public class BpmDetailServiceImpl implements BpmDetailService {
                 throw exception(ErrorCodeConstants.FLOW_PERMISSION_DENY.getCode(), "未查询到已办任务");
             }
 
+            Map<String, HisTask> hisTaskMap = new HashMap<>();
             for (HisTask hisTask : hisTasks) {
-                if (Objects.equals(hisTask.getApprover(), String.valueOf(loginUserId))) {
-                    // 审批人权限，直接返回
-                    return hisTask;
-                }
+                hisTaskMap.put(hisTask.getApprover(), hisTask);
+            }
 
-                if (Objects.equals(hisTask.getCollaborator(), String.valueOf(loginUserId))) {
-                    // 协作者权限，直接返回
-                    return hisTask;
+            HisTask hisTask = hisTaskMap.get(String.valueOf(loginUserId));
+            if (hisTask != null) {
+                // 审批人权限，直接返回
+                context.setHisTask(hisTask);
+                return;
+            }
+
+            // 查出代理人权限
+            List<BpmFlowAgentInsDO> agentInsList = agentInsRepository.findAllByTaskIdAndAgentId(taskId, String.valueOf(loginUserId));
+
+            if (CollectionUtils.isEmpty(agentInsList)) {
+                throw exception(ErrorCodeConstants.FLOW_PERMISSION_DENY.getCode(), "没有已办任务权限");
+            }
+
+            for (BpmFlowAgentInsDO agentInsDO : agentInsList) {
+                hisTask = hisTaskMap.get(agentInsDO.getPrincipalId());
+
+                if (hisTask != null) {
+                    // 代理人权限，直接返回
+                    context.setAgentIns(agentInsDO);
+                    context.setHisTask(hisTask);
+                    return;
                 }
             }
 
@@ -252,29 +340,38 @@ public class BpmDetailServiceImpl implements BpmDetailService {
     /**
      * 标记已读状态
      *
-     * @param currTask 当前待办任务
-     * @param reqVO 请求VO
+     * @param reqVO       请求VO
      * @param loginUserId 登录用户ID
      */
-    private void markAsRead(Task currTask, BpmTaskDetailReqVO reqVO, Long loginUserId) {
+    private void markAsRead(BpmTaskDetailReqVO reqVO, InsDetailContext context) {
+        Task currTask = context.getTask();
+
+        // 查看匹配的用户
+        User matchedUser = context.getMatchedUser();
+
         // 当前待办标记为已读
         if (currTask != null) {
-           List<User> users = userService.listByProcessedBys(currTask.getId(), String.valueOf(loginUserId));
-           if (CollectionUtils.isNotEmpty(users)) {
-               LocalDateTime now = LocalDateTime.now();
+            // 待办必定有匹配的用户
+            String processedBy = matchedUser.getProcessedBy();
 
-               for (User user : users) {
-                   user.setUpdateTime(now);
-               }
+            List<User> users = userService.listByProcessedBys(currTask.getId(), processedBy);
+            if (CollectionUtils.isNotEmpty(users)) {
+                LocalDateTime now = LocalDateTime.now();
 
-               userService.updateBatch(users);
-           }
+                for (User user : users) {
+                    user.setUpdateTime(now);
+                }
+
+                userService.updateBatch(users);
+            }
         }
 
         if (Objects.equals(reqVO.getFrom(), BpmViewSourceEnum.CC.getCode())) {
+            String processedBy = matchedUser.getProcessedBy();
+
             ConfigStore configStore = new DefaultConfigStore();
             configStore.and(BpmFlowCcRecordDO.TASK_ID, reqVO.getTaskId());
-            configStore.and(BpmFlowCcRecordDO.USER_ID, loginUserId);
+            configStore.and(BpmFlowCcRecordDO.USER_ID, processedBy);
 
             BpmFlowCcRecordDO ccRecord = ccRecordRepository.findOne(configStore);
 
@@ -293,15 +390,15 @@ public class BpmDetailServiceImpl implements BpmDetailService {
     /**
      * 获取最新的待办任务
      *
-     * @param instanceId 流程实例ID
+     * @param instanceId  流程实例ID
      * @param loginUserId 登录用户ID
      * @return 待办任务，如果无权限则返回null
      */
-    private Task getLastTodoTask(Long instanceId, Long loginUserId) {
+    private void getLastTodoTask(Long instanceId, InsDetailContext context, Long loginUserId) {
         // 查询该实例的待办任务
         List<Task> tasks = taskService.getByInsId(instanceId);
         if (tasks == null || tasks.isEmpty()) {
-            return null;
+            return;
         }
 
         List<Long> taskIds = new ArrayList<>();
@@ -312,44 +409,33 @@ public class BpmDetailServiceImpl implements BpmDetailService {
             taskMap.put(task.getId(), task);
         }
 
-        // 查询任务关联的用户（审批人、转交人、委派人）
-        List<User> users = userService.getByAssociateds(
-                taskIds,
-                BpmUserTypeEnum.APPROVAL.getCode(),
-                BpmUserTypeEnum.TRANSFER.getCode(),
-                BpmUserTypeEnum.DEPUTE.getCode(),
-                BpmUserTypeEnum.AGENT.getCode()
-        );
+        BpmPermissionUserContext userContext = findPermissionUserContext(taskIds, String.valueOf(loginUserId));
 
-        if (CollectionUtils.isEmpty(users)) {
-            return null;
+        if (userContext == null) {
+            return;
         }
 
-        // 检查当前用户是否有权限
-        for (User user : users) {
-            if (Objects.equals(user.getProcessedBy(), String.valueOf(loginUserId))) {
-                return taskMap.get(user.getAssociated());
-            }
-        }
-
-        return null;
+        context.setMatchedUser(userContext.getMatchedUser());
+        context.setAgentIns(userContext.getAgentIns());
+        context.setTask(taskMap.get(userContext.getMatchedUser().getAssociated()));
     }
 
     /**
      * 填充业务扩展信息
      *
-     * @param vo 详情VO
+     * @param vo         详情VO
      * @param instanceId 流程实例ID
      */
     private void fillBpmBizExt(BpmTaskDetailRespVO vo, Long instanceId) {
         ConfigStore configStore = new DefaultConfigStore();
-        configStore.and("instance_id", instanceId);
+        configStore.and(BpmFlowInsBizExtDO.INSTANCE_ID, instanceId);
         BpmFlowInsBizExtDO flowInsExtDO = flowInsExtRepository.findOne(configStore);
 
         if (flowInsExtDO == null) {
             throw exception(ErrorCodeConstants.BPM_BIZ_EXT_NOT_EXIST);
         }
 
+        vo.setProcessTitle(flowInsExtDO.getBpmTitle());
         vo.setBpmVersion(flowInsExtDO.getBpmVersion());
         vo.setSubmitTime(flowInsExtDO.getSubmitTime());
         vo.setInitiatorDeptId(flowInsExtDO.getInitiatorDeptId());
@@ -368,7 +454,7 @@ public class BpmDetailServiceImpl implements BpmDetailService {
     /**
      * 填充表单数据
      *
-     * @param vo 详情VO
+     * @param vo       详情VO
      * @param instance 流程实例
      * @param entityId 实体ID
      */
@@ -382,5 +468,46 @@ public class BpmDetailServiceImpl implements BpmDetailService {
         if (data != null && !data.isEmpty()) {
             vo.setFormData(data);
         }
+    }
+
+    private BpmPermissionUserContext findPermissionUserContext(Long taskId, String loginUserId) {
+        return findPermissionUserContext(List.of(taskId), loginUserId);
+    }
+
+    private BpmPermissionUserContext findPermissionUserContext(List<Long> taskIds, String loginUserId) {
+        List<User> users = userService.getByAssociateds(taskIds);
+        BpmPermissionUserContext userContext = null;
+
+        if (CollectionUtils.isEmpty(users)) {
+            return userContext;
+        }
+
+        Map<String, User> userMap = users.stream().collect(Collectors.toMap(User::getProcessedBy, user -> user));
+        User matchedUser = userMap.get(loginUserId);
+
+        if (matchedUser != null) {
+            userContext = new BpmPermissionUserContext(matchedUser, null);
+            return userContext;
+        }
+
+        // 找出节点关联的代理人
+        List<BpmFlowAgentInsDO> agentInsDOList = agentInsRepository.findAllByTaskIdsAndAgentId(taskIds, loginUserId);
+
+        if (CollectionUtils.isEmpty(agentInsDOList)) {
+            return userContext;
+        }
+
+        for (BpmFlowAgentInsDO agentInsDO : agentInsDOList) {
+            Long principalId = agentInsDO.getPrincipalId();
+
+            User agentUser = userMap.get(String.valueOf(principalId));
+
+            if (agentUser != null) {
+                userContext = new BpmPermissionUserContext(agentUser, agentInsDO);
+                break;
+            }
+        }
+
+        return userContext;
     }
 }
