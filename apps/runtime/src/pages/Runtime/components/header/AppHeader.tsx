@@ -1,15 +1,16 @@
-import { useI18n } from '@/hooks/useI18n';
 import AvatarSVG from '@/assets/images/avatar.svg';
-import LogoAvatarSVG from "@/assets/images/ob_logo.svg";
 import BuildingLine from '@/assets/images/building-line.svg';
+import LogoAvatarSVG from '@/assets/images/ob_logo.svg';
 import { DynamicIcon } from '@/components/DynamicIcon';
+import { useI18n } from '@/hooks/useI18n';
 import { appInfoSignal } from '@/store/app';
 import { UserPermissionManager } from '@/utils/permission';
+import { getHashQueryParam } from '@/utils/router';
 import { Avatar, Divider, Dropdown, Layout, Menu, Typography } from '@arco-design/web-react';
 import { IconExport } from '@arco-design/web-react/icon';
 import { getApplication, type GetApplicationReq } from '@onebase/app';
 import { TokenManager } from '@onebase/common';
-import { getPermissionInfo , CodeType } from '@onebase/platform-center';
+import { CodeType, getPermissionInfo } from '@onebase/platform-center';
 import { appIconMap } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -82,7 +83,22 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     TokenManager.clearToken();
     UserPermissionManager.clearUserPermissionInfo();
     // 跳转到登录页
-    navigate('/login', { replace: true });
+
+    const appId = getHashQueryParam('appId');
+    const tenantId = getHashQueryParam('tenantId');
+
+    if (!appId && tenantId) {
+      navigate(`/onebase/runtime/my-app`, { replace: true });
+    }
+    if (appId && !tenantId) {
+      navigate(`/onebase/runtime/?appId=${appId}`, { replace: true });
+    }
+    if (appId && tenantId) {
+      navigate(`/onebase/runtime/?appId=${appId}&tenantId=${tenantId}`, { replace: true });
+    }
+
+    // 退出登录后刷新页面，确保状态清空
+    window.location.reload();
   };
 
   // 用户菜单
@@ -98,17 +114,19 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
         </div>
       </Menu.Item>
       <Divider style={{ margin: '4px 0' }} />
-     {tokenInfo?.adminFlag && <Menu.Item
+      {tokenInfo?.adminFlag && (
+        <Menu.Item
           key="setting"
           onClick={() => {
             navigate('/onebase/setting');
           }}
         >
-        <div className={styles.headerContent}>
-          <img src={BuildingLine} />
-          <span>企业管理后台</span>
-        </div>
-      </Menu.Item>}
+          <div className={styles.headerContent}>
+            <img src={BuildingLine} />
+            <span>企业管理后台</span>
+          </div>
+        </Menu.Item>
+      )}
       <Menu.Item key="logout" onClick={handleLogout}>
         <IconExport style={{ color: '#F53F3F' }} />
         <Typography.Text type="error">{t('header.logout')}</Typography.Text>
@@ -119,7 +137,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   return (
     <Header className={`${styles.header} ${className || ''}`}>
       <div className={styles.headerContent}>
-        {curAppInfo.value.iconName && 
+        {(curAppInfo.value.iconName && (
           <div className={styles.appInfo}>
             <div className={styles.myAppIcon} style={{ backgroundColor: curAppInfo.value.iconColor }}>
               <DynamicIcon
@@ -130,8 +148,8 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
               />
             </div>
             <div className={styles.appName}>{curAppInfo.value.appName}</div>
-          </div> || <img src={LogoAvatarSVG} />
-        }
+          </div>
+        )) || <img src={LogoAvatarSVG} />}
 
         <div className={styles.userInfo}>
           {UserPermissionManager.getUserPermissionInfo()?.user?.nickname || '未登录'}

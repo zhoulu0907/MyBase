@@ -27,7 +27,7 @@ import {
 import { appIconMap } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useI18n } from '../../../hooks/useI18n';
 import { useRememberMe } from '../../../hooks/useRememberMe';
 import styles from '../index.module.less';
@@ -60,17 +60,21 @@ const Right: React.FC = () => {
   const { t } = useI18n();
   const sliderCaptchaRef = useRef<SliderCaptchaRef>(null);
 
-  //   const [appInfo, setAppInfo] = useState<APP_INFO>({
-  //     appName: '',
-  //     iconName: '',
-  //     iconColor: '',
-  //     id: ''
-  //   });
+  const [appId, setAppId] = useState('');
+  const [tenantId, setTenantId] = useState('');
 
-  // 获取查询参数对象 从路由中获取 appid/tenantId 参数
-  const [searchParams] = useSearchParams(location.hash);
-  const tenantId = searchParams.get('tenantId') || '';
-  const appId = searchParams.get('appId') || '';
+  useEffect(() => {
+    // 从 window.location.hash 中解析 redirectURL，再从 redirectURL 解析 appId 和 tenantId
+    const rawHash = window.location.hash;
+    const prefix = '#/login?redirectURL=';
+    if (rawHash.startsWith(prefix)) {
+      const redirectURL = rawHash.replace(prefix, '');
+      let aid = getHashQueryParam('appId', redirectURL) || '';
+      let tid = getHashQueryParam('tenantId', redirectURL) || '';
+      setAppId(aid);
+      setTenantId(tid);
+    }
+  }, []);
 
   // 使用记住我hook
   const { rememberMe, savedAccount, saveRememberMe } = useRememberMe();
@@ -95,17 +99,21 @@ const Right: React.FC = () => {
           navigate(`/onebase/runtime/my-app`);
         }
         if (appId && !tenantId) {
-          navigate(`/onebase/runtime/${tenantId}`);
+          navigate(`/onebase/runtime/?appId=${appId}`);
         }
         if (appId && tenantId) {
-          navigate(`/onebase/runtime/${appId}/${tenantId}`);
+          navigate(`/onebase/runtime/?appId=${appId}&tenantId=${tenantId}`);
         }
       }
       return;
     }
-
-    handleGetApplication();
   }, []);
+
+  useEffect(() => {
+    if (appId) {
+      handleGetApplication();
+    }
+  }, [appId]);
 
   const handleGetApplication = async () => {
     if (appId) {
@@ -217,11 +225,11 @@ const Right: React.FC = () => {
             navigate('/onebase/runtime/my-app');
           } else {
             //saas模式 或者inner模式
-            navigate(`/onebase/runtime/${appId}/${tenantId}`);
+            navigate(`/onebase/runtime/?appId=${appId}&tenantId=${tenantId}`);
           }
         } else {
           // 跳转到首页
-          navigate(`/onebase/runtime/${appId}`);
+          navigate(`/onebase/runtime/?appId=${appId}`);
         }
 
         return;
