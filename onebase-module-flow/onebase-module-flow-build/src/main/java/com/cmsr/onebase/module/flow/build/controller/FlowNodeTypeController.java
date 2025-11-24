@@ -26,8 +26,8 @@ public class FlowNodeTypeController {
     @Resource
     private FlowNodeTypeService flowNodeTypeService;
 
-    @GetMapping("/page")
     @Operation(summary = "获取流程节点分类列表")
+    @GetMapping("/page")
     public CommonResult<PageResult<NodeTypeVO>> pageNodeType(PageNodeTypeReqVO reqVO) {
         PageResult<NodeTypeVO> result = flowNodeTypeService.pageNodeType(reqVO);
         return CommonResult.success(result);

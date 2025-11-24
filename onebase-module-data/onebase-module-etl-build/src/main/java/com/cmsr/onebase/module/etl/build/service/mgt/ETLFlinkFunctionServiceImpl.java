@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.etl.build.service.mgt;
 
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.etl.build.service.mgt.vo.FlinkFunctionVO;
+import com.cmsr.onebase.module.etl.build.vo.mgt.FlinkFunctionVO;
 import com.cmsr.onebase.module.etl.core.dal.database.ETLFlinkFunctionRepository;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLFlinkFunctionDO;
 import lombok.Setter;

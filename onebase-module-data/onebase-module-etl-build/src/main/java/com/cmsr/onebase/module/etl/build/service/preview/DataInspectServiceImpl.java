@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.etl.build.service.preview;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.module.etl.build.service.DatasourceFactory;
-import com.cmsr.onebase.module.etl.build.service.preview.vo.TablePreviewVO;
+import com.cmsr.onebase.module.etl.build.vo.preview.TablePreviewVO;
 import com.cmsr.onebase.module.etl.common.entity.ColumnData;
 import com.cmsr.onebase.module.etl.common.entity.TableData;
 import com.cmsr.onebase.module.etl.common.preview.DataPreview;
@@ -67,13 +67,13 @@ public class DataInspectServiceImpl implements DataInspectService {
     @Override
     public DataPreview previewData(TablePreviewVO previewVO) {
         Long datasourceId = previewVO.getDatasourceId();
-        ETLDatasourceDO datasourceDO = datasourceRepository.findById(datasourceId);
+        ETLDatasourceDO datasourceDO = datasourceRepository.getById(datasourceId);
         if (datasourceDO == null) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_NOT_EXIST);
         }
         String datasourceType = datasourceDO.getDatasourceType();
         Long tableId = previewVO.getTableId();
-        ETLTableDO tableDO = tableRepository.findById(tableId);
+        ETLTableDO tableDO = tableRepository.getById(tableId);
         if (tableDO == null) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.TABLE_NOT_EXIST);
         }

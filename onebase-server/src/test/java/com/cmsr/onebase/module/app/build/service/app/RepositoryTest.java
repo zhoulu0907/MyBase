@@ -6,7 +6,11 @@ import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.module.app.core.dal.database.AppSqlQueryRepository;
 import com.cmsr.onebase.module.app.core.dto.auth.RoleMemberDTO;
 import com.cmsr.onebase.module.app.core.impl.auth.AppAuthRoleUserImpl;
+import com.cmsr.onebase.module.etl.core.dal.database.ETLWorkflowRepository;
+import com.cmsr.onebase.module.etl.core.vo.WorkflowBriefVO;
+import com.cmsr.onebase.module.etl.core.vo.WorkflowPageReqVO;
 import com.cmsr.onebase.server.OneBaseServerApplication;
+import com.mybatisflex.core.paginate.Page;
 import lombok.Setter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +31,9 @@ public class RepositoryTest {
 
     @Autowired
     private AppAuthRoleUserImpl appAuthRoleUser;
+
+    @Autowired
+    private ETLWorkflowRepository workflowRepository;
 
     @Test
     void test() {
@@ -50,7 +57,20 @@ public class RepositoryTest {
     @Test
     void test3() {
         TenantContextHolder.setIgnore(true);
-        List<Long> ids = appSqlQueryRepository.findAllUserIdsByDeptIds(889796964974590L,1);
+        List<Long> ids = appSqlQueryRepository.findAllUserIdsByDeptIds(889796964974590L, 1);
         System.out.println(ids);
+    }
+
+    @Test
+    void test4() {
+        var result = workflowRepository.getById(47891273491857189L);
+        System.out.println(result);
+    }
+
+    @Test
+    void test5() {
+        Page page =Page.of(1, 10);
+        var result = workflowRepository.page(page);
+        System.out.println(result);
     }
 }

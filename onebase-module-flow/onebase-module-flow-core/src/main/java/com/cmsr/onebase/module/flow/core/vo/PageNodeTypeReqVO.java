@@ -8,8 +8,8 @@ import lombok.Data;
  * @Author：huangjie
  * @Date：2025/11/17 17:35
  */
-@Data
 @Schema(description = "节点分类 - 分页查询节点分类请求参数")
+@Data
 public class PageNodeTypeReqVO extends PageParam {
 
     @Schema(description = "level1_code")
