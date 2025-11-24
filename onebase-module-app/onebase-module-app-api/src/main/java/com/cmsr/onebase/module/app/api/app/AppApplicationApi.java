@@ -1,5 +1,7 @@
 package com.cmsr.onebase.module.app.api.app;
 
+import com.cmsr.onebase.module.app.api.app.dto.TagVO;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -19,4 +21,6 @@ public interface AppApplicationApi {
     Map<Integer,Integer> findAppApplicationAll();
 
     void  updateAppTimeById(Long appId);
+
+    Map<Long, List<TagVO>> queryAppTags(List<Long> appIds);
 }
