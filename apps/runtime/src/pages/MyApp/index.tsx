@@ -1,6 +1,18 @@
 import { useI18n } from '@/hooks/useI18n';
 import { useAppStore } from '@/store';
-import { Button, Divider, Dropdown, Input, Layout, Menu, Pagination, Select, Spin, Tag, Typography } from '@arco-design/web-react';
+import {
+  Button,
+  Divider,
+  Dropdown,
+  Input,
+  Layout,
+  Menu,
+  Pagination,
+  Select,
+  Spin,
+  Tag,
+  Typography
+} from '@arco-design/web-react';
 import { IconEmpty, IconMoreVertical, IconSearch } from '@arco-design/web-react/icon';
 import { listApplication, type Application, type PageParam } from '@onebase/app';
 import { getCommonPaginationList, TokenManager } from '@onebase/common';
@@ -9,8 +21,9 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import noContentSVG from '@/assets/images/noContent.svg';
-import {DynamicIcon} from '@/components/DynamicIcon';
+import { DynamicIcon } from '@/components/DynamicIcon';
 import { appIconMap } from '@onebase/ui-kit';
+import { AppHeader } from '../Runtime/components/header';
 import TagModal from './components/tagModal';
 import {
   appOptions,
@@ -22,7 +35,6 @@ import {
   ThemeColorMap
 } from './const';
 import styles from './index.module.less';
-import { AppHeader } from '../Runtime/components/header';
 
 const Option = Select.Option;
 
@@ -164,10 +176,9 @@ const MyAppPage: React.FC = () => {
   };
 
   return (
-     <Layout className={styles.homePage}>
+    <Layout className={styles.homePage}>
       <AppHeader />
-      <Layout className={styles.myAppPageContent}>
-        <div className={styles.myAppPage}>
+      <Layout className={styles.myAppPage}>
         <div className={styles.myAppPageHeader}></div>
         <div className={styles.myAppContainer}>
           <div className={styles.appHasDataBox}>
@@ -237,7 +248,7 @@ const MyAppPage: React.FC = () => {
                 {applicationEmpty && !loading && (
                   <div className={styles.applicationEmpty}>
                     <img src={noContentSVG} alt="暂无应用" />
-                    <Typography.Text type='secondary'>你的企业还没有应用，联系管理员开通吧！</Typography.Text>
+                    <Typography.Text type="secondary">你的企业还没有应用，联系管理员开通吧！</Typography.Text>
                   </div>
                 )}
                 {applicationFilterEmpty && !loading && (
@@ -261,7 +272,7 @@ const MyAppPage: React.FC = () => {
                           </div>
                           <div className={styles.myAppCardInfo}>
                             <div className={styles.infoHeader}>
-                                <div className={styles.myAppTitle}>{item.appName}</div>
+                              <div className={styles.myAppTitle}>{item.appName}</div>
                             </div>
                             <Tag
                               color={TagColor[item.appStatus]}
@@ -351,7 +362,6 @@ const MyAppPage: React.FC = () => {
             setTagModalVisible(false);
           }}
         />
-      </div>
       </Layout>
     </Layout>
   );
