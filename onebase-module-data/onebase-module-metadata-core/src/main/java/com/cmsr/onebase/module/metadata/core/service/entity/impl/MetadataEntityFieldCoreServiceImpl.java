@@ -32,7 +32,6 @@ public class MetadataEntityFieldCoreServiceImpl implements MetadataEntityFieldCo
     @Resource
     private MetadataComponentFieldTypeRepository metadataComponentFieldTypeRepository;
 
-
     @Override
     public Long createEntityField(@Valid MetadataEntityFieldDO entityField) {
         metadataEntityFieldRepository.insert(entityField);
@@ -129,7 +128,8 @@ public class MetadataEntityFieldCoreServiceImpl implements MetadataEntityFieldCo
 
         Map<Long, String> idToTypeCode = fields.stream()
                 .filter(f -> f.getId() != null && f.getFieldType() != null && !f.getFieldType().isBlank())
-                .collect(Collectors.toMap(MetadataEntityFieldDO::getId, MetadataEntityFieldDO::getFieldType, (a,b)->a));
+                .collect(Collectors.toMap(MetadataEntityFieldDO::getId, MetadataEntityFieldDO::getFieldType,
+                        (a, b) -> a));
 
         if (idToTypeCode.isEmpty()) {
             return Collections.emptyMap();
@@ -170,12 +170,14 @@ public class MetadataEntityFieldCoreServiceImpl implements MetadataEntityFieldCo
 
         Map<Long, String> idToTypeCode = fields.stream()
                 .filter(f -> f.getId() != null && f.getFieldType() != null && !f.getFieldType().isBlank())
-                .collect(Collectors.toMap(MetadataEntityFieldDO::getId, MetadataEntityFieldDO::getFieldType, (a,b)->a));
+                .collect(Collectors.toMap(MetadataEntityFieldDO::getId, MetadataEntityFieldDO::getFieldType,
+                        (a, b) -> a));
 
         // 同时构建 id 到 fieldName 的映射
         Map<Long, String> idToFieldName = fields.stream()
                 .filter(f -> f.getId() != null && f.getFieldName() != null && !f.getFieldName().isBlank())
-                .collect(Collectors.toMap(MetadataEntityFieldDO::getId, MetadataEntityFieldDO::getFieldName, (a,b)->a));
+                .collect(Collectors.toMap(MetadataEntityFieldDO::getId, MetadataEntityFieldDO::getFieldName,
+                        (a, b) -> a));
 
         if (idToTypeCode.isEmpty()) {
             return Collections.emptyMap();
@@ -206,5 +208,10 @@ public class MetadataEntityFieldCoreServiceImpl implements MetadataEntityFieldCo
             }
         }
         return result;
+    }
+
+    @Override
+    public long countByDictTypeId(Long dictTypeId) {
+        return metadataEntityFieldRepository.countByDictTypeId(dictTypeId);
     }
 }
