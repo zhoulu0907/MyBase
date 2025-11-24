@@ -24,6 +24,7 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
     dataField,
     tooltip,
     status,
+    placeholder,
     defaultValue,
     verify,
     layout,
@@ -84,6 +85,7 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
       }
     },
     selectData: (data: any) => {
+      debugger
       const lastKey = (displayFields || []).length ? displayFields[displayFields.length - 1]?.value : undefined;
       const name = lastKey ? data?.[lastKey] : '';
       const nextValue = data ? { id: data.id, name } : '';
@@ -142,7 +144,7 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
     <div className="dataSelectTrigger" onClick={() => internalEvents.openPreview()}>
       <Input
         readOnly
-        placeholder={defaultValue}
+        placeholder={placeholder}
         value={helpers.getDisplayText(dataState)}
         suffix={
           !!helpers.getDisplayText(dataState) ? (
@@ -167,16 +169,19 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
     const finalOptions = selectedId != null && selectedLabel
       ? (exists ? options : [{ label: selectedLabel, value: selectedId }, ...(options || [])])
       : (options || []);
-    console.error('finalOptions', finalOptions)
     return (
-      <Select
-        placeholder={defaultValue}
-        showSearch
-        allowClear
-        value={selectedId}
-        options={finalOptions}
-        onChange={(v, option) => internalEvents.selectDropdown(v, option)}
-      />
+      <div>
+        <Input value={selectedId} hidden/>
+        <Select
+          placeholder={placeholder}
+          showSearch
+          allowClear
+          value={selectedId}
+          options={finalOptions}
+          style={{minWidth: '120px', width: '100%' }}
+          onChange={(v, option) => internalEvents.selectDropdown(v, option)}
+        />
+      </div>
     );
   };
 
@@ -185,7 +190,7 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
     <>
       <Form.Item
         label={label.display && label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>}
-        field={helpers.isDropdownMode() ? undefined : fieldName}
+        field={fieldName}
         layout={layout}
         tooltip={tooltip}
         labelCol={{ style: { width: labelColSpan, flex: 'unset' } }}
