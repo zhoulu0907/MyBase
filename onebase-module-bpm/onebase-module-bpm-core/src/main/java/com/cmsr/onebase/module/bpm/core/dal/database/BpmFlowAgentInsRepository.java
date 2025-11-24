@@ -20,19 +20,19 @@ public class BpmFlowAgentInsRepository extends DataRepository<BpmFlowAgentInsDO>
         super(BpmFlowAgentInsDO.class);
     }
 
-    public BpmFlowAgentInsDO findOneByTaskIdAndAgentId(Long taskId, String agentId) {
+    public List<BpmFlowAgentInsDO> findAllByTaskIdAndAgentId(Long taskId, String agentId) {
         ConfigStore configs = new DefaultConfigStore();
 
         configs.eq(BpmFlowAgentInsDO.TASK_ID, taskId);
         configs.eq(BpmFlowAgentInsDO.AGENT_ID, agentId);
 
-        return findOne(configs);
+        return findAllByConfig(configs);
     }
 
-    public List<BpmFlowAgentInsDO> findAllByTaskIdAndAgentId(Long taskId, String agentId) {
+    public List<BpmFlowAgentInsDO> findAllByTaskIdsAndAgentId(List<Long> taskIds, String agentId) {
         ConfigStore configs = new DefaultConfigStore();
 
-        configs.eq(BpmFlowAgentInsDO.TASK_ID, taskId);
+        configs.in(BpmFlowAgentInsDO.TASK_ID, taskIds);
         configs.eq(BpmFlowAgentInsDO.AGENT_ID, agentId);
 
         return findAllByConfig(configs);

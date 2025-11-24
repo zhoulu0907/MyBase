@@ -9,7 +9,7 @@ import com.cmsr.onebase.module.bpm.core.enums.BpmActionButtonEnum;
 import com.cmsr.onebase.module.bpm.core.enums.BpmUserTypeEnum;
 import com.cmsr.onebase.module.bpm.core.utils.BpmUtil;
 import com.cmsr.onebase.module.bpm.runtime.service.instance.exec.BpmExecService;
-import com.cmsr.onebase.module.bpm.runtime.service.instance.exec.context.ExecTaskContext;
+import com.cmsr.onebase.module.bpm.runtime.service.context.BpmPermissionUserContext;
 import com.cmsr.onebase.module.bpm.runtime.service.instance.exec.strategy.ExecTaskStrategyManager;
 import com.cmsr.onebase.module.bpm.runtime.vo.ExecTaskReqVO;
 import jakarta.annotation.Resource;
@@ -56,10 +56,10 @@ public class BpmExecServiceImpl implements BpmExecService {
     @Resource
     private ExecTaskStrategyManager execTaskStrategyManager;
 
-    private List<ExecTaskContext> buildExecTaskContexts(ExecTaskReqVO reqVO) {
+    private List<BpmPermissionUserContext> buildExecTaskContexts(ExecTaskReqVO reqVO) {
         Long taskId = reqVO.getTaskId();
         // 收集所有需要执行的任务（用户直接权限 + 所有代理人权限）
-        List<ExecTaskContext> execTaskContexts = new ArrayList<>();
+        List<BpmPermissionUserContext> permissionUserContexts = new ArrayList<>();
 
         List<User> users = userService.getByAssociateds(List.of(taskId),
                 BpmUserTypeEnum.APPROVAL.getCode(),
@@ -67,7 +67,7 @@ public class BpmExecServiceImpl implements BpmExecService {
                 BpmUserTypeEnum.DEPUTE.getCode());
 
         if (CollectionUtils.isEmpty(users)) {
-            return execTaskContexts;
+            return permissionUserContexts;
         }
 
         Long loginUserId = WebFrameworkUtils.getLoginUserId();
@@ -87,7 +87,7 @@ public class BpmExecServiceImpl implements BpmExecService {
 
         // 1. 如果当前用户直接拥有权限，添加一次执行
         if (directMatchedUser != null) {
-            execTaskContexts.add(new ExecTaskContext(directMatchedUser, null));
+            permissionUserContexts.add(new BpmPermissionUserContext(directMatchedUser, null));
         }
 
         // 2. 如果是代理人，为每个被代理人添加一次执行
@@ -105,14 +105,14 @@ public class BpmExecServiceImpl implements BpmExecService {
 
                     if (Objects.equals(processedBy, String.valueOf(principalId))) {
                         // 说明是当前登录用户拥有被代理人权限
-                        execTaskContexts.add(new ExecTaskContext(user, agentInsDO));
+                        permissionUserContexts.add(new BpmPermissionUserContext(user, agentInsDO));
                         break;
                     }
                 }
             }
         }
 
-        return execTaskContexts;
+        return permissionUserContexts;
     }
 
     @Override
@@ -167,22 +167,22 @@ public class BpmExecServiceImpl implements BpmExecService {
         }
 
         // 构建所有需要执行的任务上下文
-        List<ExecTaskContext> execTaskContexts = buildExecTaskContexts(reqVO);
+        List<BpmPermissionUserContext> permissionUserContexts = buildExecTaskContexts(reqVO);
 
         // 如果没有任何匹配的任务的执行权限，返回权限不足错误
-        if (execTaskContexts.isEmpty()) {
+        if (permissionUserContexts.isEmpty()) {
             throw exception(ErrorCodeConstants.FLOW_PERMISSION_DENY);
         }
 
         // 循环执行所有匹配的任务（当前用户直接权限 + 所有代理人权限）
         // 注意：第二次及以后需要重新查询task，因为或签任意一个执行完就结束了，会签有一个拒绝也会结束
-        for (int i = 0; i < execTaskContexts.size(); i++) {
-            ExecTaskContext context = execTaskContexts.get(i);
+        for (int i = 0; i < permissionUserContexts.size(); i++) {
+            BpmPermissionUserContext context = permissionUserContexts.get(i);
             boolean isFirstExecution = (i == 0);
             Task currentTask;
 
             log.info("[execTask][开始执行任务(任务ID: {}, 被代理人ID: {}, 代理人记录ID: {})]",
-                    taskId, context.getMatchedUser().getId(), context.getAgentInsDO() != null ? context.getAgentInsDO().getId() : "无");
+                    taskId, context.getMatchedUser().getId(), context.getAgentIns() != null ? context.getAgentIns().getId() : "无");
 
             if (isFirstExecution) {
                 // 第一次执行，使用已经查询过的task
@@ -196,7 +196,7 @@ public class BpmExecServiceImpl implements BpmExecService {
                 }
             }
 
-            execTaskStrategyManager.execute(context.getMatchedUser(), context.getAgentInsDO(), currentTask, extDTO, reqVO);
+            execTaskStrategyManager.execute(context.getMatchedUser(), context.getAgentIns(), currentTask, extDTO, reqVO);
         }
     }
 }

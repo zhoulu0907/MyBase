@@ -6,7 +6,6 @@ import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowCcRecordRepository;
-import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowInsBizExtRepository;
 import com.cmsr.onebase.module.bpm.core.dal.database.ext.BpmHisTaskExtRepository;
 import com.cmsr.onebase.module.bpm.core.dal.database.ext.BpmInstanceExtRepository;
 import com.cmsr.onebase.module.bpm.core.dal.database.ext.BpmTaskExtRepository;
@@ -20,9 +19,6 @@ import com.cmsr.onebase.module.bpm.core.service.BpmEngineDefExtService;
 import com.cmsr.onebase.module.bpm.core.vo.*;
 import com.cmsr.onebase.module.bpm.runtime.service.BpmFlowTaskCenterService;
 import com.cmsr.onebase.module.bpm.runtime.vo.*;
-import com.cmsr.onebase.module.engine.orm.anyline.repository.FlowHisTaskRepository;
-import com.cmsr.onebase.module.engine.orm.anyline.repository.FlowInstanceRepository;
-import com.cmsr.onebase.module.engine.orm.anyline.repository.FlowTaskRepository;
 import com.cmsr.onebase.module.system.api.user.AdminUserApi;
 import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
 import jakarta.annotation.Resource;
@@ -43,9 +39,9 @@ import org.dromara.warm.flow.core.entity.User;
 import org.dromara.warm.flow.core.enums.NodeType;
 import org.dromara.warm.flow.core.enums.PublishStatus;
 import org.dromara.warm.flow.core.service.DefService;
-import org.dromara.warm.flow.core.service.InsService;
 import org.dromara.warm.flow.core.service.TaskService;
 import org.dromara.warm.flow.core.service.UserService;
+import org.dromara.warm.flow.core.service.impl.BpmConstants;
 import org.dromara.warm.flow.core.utils.StreamUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
@@ -59,17 +55,6 @@ import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionU
 @Service
 @Slf4j
 public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
-
-
-    @Resource
-    private FlowInstanceRepository flowInstanceRepository;
-
-    @Resource
-    private FlowHisTaskRepository flowHisTaskRepository;
-
-    @Resource
-    private FlowTaskRepository flowTaskRepository;
-
     @Resource
     private BpmTaskExtRepository taskExtRepository;
 
@@ -85,12 +70,6 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
     @Resource(name = "bpmUserService")
     private UserService userService;
 
-    @Resource(name = "bpmInsService")
-    private InsService insService;
-
-    @Resource
-    private BpmFlowInsBizExtRepository insBizExtRepository;
-
     @Resource
     private AdminUserApi adminUserApi;
 
@@ -102,8 +81,6 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
 
     @Resource
     private BpmFlowCcRecordRepository bpmFlowCcRecordRepository;
-
-    private static final String AGENT_TITLE_PREFIX = "【代理审批】";
 
     private List<String> splitToList(String str) {
         if (StringUtils.isBlank(str)) {
@@ -339,7 +316,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         todoTaskVO.setBusinessId(flowTaskExt.getBindingViewId());
 
         if (StringUtils.isNotBlank(flowTaskExt.getAgentId()) && Objects.equals(String.valueOf(loginUserId), flowTaskExt.getAgentId())) {
-            todoTaskVO.setProcessTitle(AGENT_TITLE_PREFIX + flowTaskExt.getBpmTitle());
+            todoTaskVO.setProcessTitle(BpmConstants.AGENT_TITLE_PREFIX + flowTaskExt.getBpmTitle());
         }
 
         todoTaskVO.setInitiator(new UserBasicInfoVO());
@@ -393,7 +370,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
 
             // 判断代理执行
             if (StringUtils.isNotBlank(flowHisTaskExt.getAgentId()) && Objects.equals(String.valueOf(loginUserId), flowHisTaskExt.getAgentId())) {
-                doneTaskVO.setProcessTitle(AGENT_TITLE_PREFIX + flowHisTaskExt.getBpmTitle());
+                doneTaskVO.setProcessTitle(BpmConstants.AGENT_TITLE_PREFIX + flowHisTaskExt.getBpmTitle());
             }
 
             doneTaskList.add(doneTaskVO);
