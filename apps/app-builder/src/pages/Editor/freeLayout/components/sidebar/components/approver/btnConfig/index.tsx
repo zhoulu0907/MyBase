@@ -277,11 +277,11 @@ export default function ApproverBtnConfig({ setApprovalConfigData, buttonConfigs
       title: '启用按钮',
       dataIndex: 'enabled',
       render: (val: any, row: any) => {
-        if (row?.key === '4') {
+        if (row?.key === '6') {
           return (
             <div className="back-settings">
               <Switch onChange={(flag: boolean) => handleSwitchChange(row, 'enabled', flag)} size="small" checked={val} />
-              <IconSettings onClick={() => setSettingShow(true)} />
+              {row?.enabled && <IconSettings onClick={() => setSettingShow(true)} />}
             </div>
           );
         } else {
