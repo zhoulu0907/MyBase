@@ -1,10 +1,10 @@
 package com.cmsr.onebase.module.infra.core.api.security;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
-import com.cmsr.onebase.module.infra.api.security.SecurityConfigApi;
-import com.cmsr.onebase.module.infra.api.security.dto.LoginFailureResultDTO;
-import com.cmsr.onebase.module.infra.api.security.dto.PasswordExpiryCheckDTO;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
+import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
+import com.cmsr.onebase.framework.common.biz.security.dto.LoginFailureResultDTO;
+import com.cmsr.onebase.framework.common.biz.security.dto.PasswordExpiryCheckDTO;
 import com.cmsr.onebase.module.infra.dal.database.SecurityRecordDataRepository;
 import com.cmsr.onebase.module.infra.dal.dataobject.security.SecurityRecordDO;
 import com.cmsr.onebase.module.infra.enums.security.SecurityRecordTypeEnum;
@@ -242,18 +242,20 @@ public class SecurityConfigApiImpl implements SecurityConfigApi {
     }
 
     @Override
-    @Operation(summary = "清理在线设备记录")
-    public CommonResult<Boolean> removeOnlineDevice(@RequestParam("userId") Long userId,
+    @Operation(summary = "移除在线设备")
+    public CommonResult<Boolean> removeOnlineDevice(@RequestParam(value = "tenantId", required = false) Long tenantId,
+                                                     @RequestParam("userId") Long userId,
                                                      @RequestParam("accessToken") String accessToken) {
-        multiDeviceSessionService.removeOnlineDevice(userId, accessToken);
+        multiDeviceSessionService.removeOnlineDevice(tenantId, userId, accessToken);
         return success(Boolean.TRUE);
     }
 
     @Override
     @Operation(summary = "通过Token反查设备ID")
-    public CommonResult<String> findDeviceIdByToken(@RequestParam("userId") Long userId,
+    public CommonResult<String> findDeviceIdByToken(@RequestParam(value = "tenantId", required = false) Long tenantId,
+                                                     @RequestParam("userId") Long userId,
                                                      @RequestParam("accessToken") String accessToken) {
-        String deviceId = multiDeviceSessionService.findDeviceIdByToken(userId, accessToken);
+        String deviceId = multiDeviceSessionService.findDeviceIdByToken(tenantId, userId, accessToken);
         return success(deviceId);
     }
 
@@ -267,17 +269,10 @@ public class SecurityConfigApiImpl implements SecurityConfigApi {
 
     @Override
     @Operation(summary = "更新会话空闲Redis Key")
-    public CommonResult<Boolean> updateSessionIdleKey(@RequestParam("userId") Long userId,
+    public CommonResult<Boolean> updateSessionIdleKey(@RequestParam("tenantId") Long tenantId,
+                                                       @RequestParam("userId") Long userId,
                                                        @RequestParam("deviceId") String deviceId) {
-        boolean result = sessionIdleService.updateRedisIdleKey(userId, deviceId);
+        boolean result = sessionIdleService.updateRedisIdleKey(tenantId, userId, deviceId);
         return success(result);
-    }
-
-    @Override
-    @Operation(summary = "检查会话空闲Redis Key是否存在")
-    public CommonResult<Boolean> existSessionIdleKey(@RequestParam("userId") Long userId,
-                                                      @RequestParam("deviceId") String deviceId) {
-        boolean exists = sessionIdleService.existRedisIdleKey(userId, deviceId);
-        return success(exists);
     }
 }

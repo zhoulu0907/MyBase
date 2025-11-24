@@ -5,7 +5,6 @@ import com.cmsr.onebase.module.etl.common.entity.CatalogData;
 import com.cmsr.onebase.module.etl.common.entity.SchemaData;
 import com.cmsr.onebase.module.etl.common.entity.TableData;
 import com.cmsr.onebase.module.etl.core.dal.database.ETLCatalogRepository;
-import com.cmsr.onebase.module.etl.core.dal.database.ETLDatasourceRepository;
 import com.cmsr.onebase.module.etl.core.dal.database.ETLSchemaRepository;
 import com.cmsr.onebase.module.etl.core.dal.database.ETLTableRepository;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLCatalogDO;
@@ -21,9 +20,6 @@ import java.util.Optional;
 @Slf4j
 @Service
 public class MetadataManager {
-
-    @Resource
-    private ETLDatasourceRepository datasourceRepository;
 
     @Resource
     private ETLCatalogRepository catalogRepository;
@@ -51,7 +47,7 @@ public class MetadataManager {
                 Optional<TableData> optional = schemaData.getTables().stream()
                         .filter(tableData -> tableData.getName().equals(tableDO.getTableName())).findAny();
                 if (!optional.isPresent()) {
-                    tableRepository.delete(tableDO);
+                    tableRepository.removeById(tableDO);
                 }
             }
         }

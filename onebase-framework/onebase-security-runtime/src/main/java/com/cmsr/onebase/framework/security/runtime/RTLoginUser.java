@@ -1,6 +1,6 @@
 package com.cmsr.onebase.framework.security.runtime;
 
-import com.cmsr.onebase.framework.security.core.LoginUser;
+import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import lombok.Data;
 
 /**

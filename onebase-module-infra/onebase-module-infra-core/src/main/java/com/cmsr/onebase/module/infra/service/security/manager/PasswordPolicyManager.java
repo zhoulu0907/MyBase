@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.infra.service.security.manager;
 
-import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigItemRespVO;
 import com.cmsr.onebase.module.infra.enums.security.SecurityConfigKey;
 import com.cmsr.onebase.module.infra.service.security.SecurityConfigService;

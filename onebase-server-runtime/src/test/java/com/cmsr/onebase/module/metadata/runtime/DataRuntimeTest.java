@@ -1,9 +1,8 @@
 package com.cmsr.onebase.module.metadata.runtime;
 
-import com.alibaba.fastjson.JSONObject;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.security.runtime.RTSecurityContext;
-import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.vo.DynamicDataDeleteReqVO;
 import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.vo.DynamicDataPageReqVO;
 import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.vo.DynamicDataRespVO;
