@@ -6,11 +6,12 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-@Schema(description = "ETL - 分页查询 VO")
+@Schema(description = "数据工厂 - ETL - 分页查询ETL 请求VO")
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class WorkflowPageReqVO extends PageParam {
 
+    @Schema(description = "应用ID")
     @NotNull
     private Long applicationId;
 

@@ -797,6 +797,11 @@ public abstract class AbstractUserServiceImpl implements UserService {
     }
 
     @Override
+    public Long getUserCountByCorpId(Long corpId) {
+        return    getAdminUserDataRepository().getUserCountByCorpId(corpId);
+    }
+
+    @Override
     public Map<Long, Integer> getUserCountByDeptIds(Collection<Long> deptIds) {
         if (CollUtil.isEmpty(deptIds)) {
             return Collections.emptyMap();

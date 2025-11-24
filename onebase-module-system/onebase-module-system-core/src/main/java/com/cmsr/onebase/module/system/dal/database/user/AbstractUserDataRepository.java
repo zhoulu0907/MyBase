@@ -190,6 +190,18 @@ public abstract class AbstractUserDataRepository extends DataRepository<AdminUse
     }
 
     /**
+     * 根据corpId统计用户数量
+     *
+     * @param corpId  企业id
+     * @return 用户数量
+     */
+    public long getUserCountByCorpId(Long corpId) {
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.eq(AdminUserDO.CORP_ID, corpId);
+        return countByConfig(configStore);
+    }
+
+    /**
      * 分页查询用户
      *
      * @param reqVO              分页查询条件
