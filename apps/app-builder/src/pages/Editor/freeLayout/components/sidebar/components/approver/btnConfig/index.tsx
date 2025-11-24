@@ -143,6 +143,7 @@ const columnsData = [
   },
   {
     key: '3',
+    buttonType: 'save',
     buttonName: '保存',
     displayName: '保存',
     name: '保存',
@@ -152,6 +153,7 @@ const columnsData = [
   },
   {
     key: '4',
+    buttonType: 'transfer',
     buttonName: '转交',
     displayName: '转交',
     name: '转交',
@@ -162,6 +164,7 @@ const columnsData = [
   },
   {
     key: '5',
+    buttonType: 'add_sign',
     buttonName: '加签',
     displayName: '加签',
     name: '加签',
@@ -172,6 +175,7 @@ const columnsData = [
   },
   {
     key: '6',
+    buttonType: 'return',
     buttonName: '退回',
     displayName: '退回',
     name: '退回',
@@ -182,6 +186,7 @@ const columnsData = [
   },
   {
     key: '7',
+    buttonType: 'withdraw',
     buttonName: '撤回',
     displayName: '撤回',
     name: '撤回',
@@ -192,6 +197,7 @@ const columnsData = [
   },
   {
     key: '8',
+    buttonType: 'abstain',
     buttonName: '弃权',
     displayName: '弃权',
     name: '弃权',
