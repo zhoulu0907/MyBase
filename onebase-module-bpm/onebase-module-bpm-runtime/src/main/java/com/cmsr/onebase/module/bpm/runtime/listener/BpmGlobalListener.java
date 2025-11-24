@@ -148,11 +148,6 @@ public class BpmGlobalListener implements GlobalListener {
 
             ccNodeListener.handleCcUsers(currTask, flowVariable);
         }
-
-        if (flowVariable != null) {
-            // 清理代理人信息
-            flowVariable.remove("agentId");
-        }
     }
 
     /**
@@ -268,14 +263,6 @@ public class BpmGlobalListener implements GlobalListener {
 
                     // 排除系统用户
                     if (Objects.equals(item.getProcessedBy(), BpmConstants.SYS_USER_ID)) {
-                        return false;
-                    }
-
-                    // 代理人执行的，排除当前指定被代理人的代理用户
-                    if (StringUtils.isNotBlank(agentId)
-                            && Objects.equals(item.getType(), BpmUserTypeEnum.AGENT.getCode())
-                            && Objects.equals(item.getCreateBy(), currHandler)
-                            && Objects.equals(item.getProcessedBy(), agentId)) {
                         return false;
                     }
 
