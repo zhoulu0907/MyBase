@@ -19,3 +19,8 @@ export interface updateAppParams {
   authorizationTime: string;
   expiresTime: string;
 }
+
+export interface authAppStatusParams {
+  id: string;
+  status: string;
+}

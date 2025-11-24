@@ -152,9 +152,7 @@ const EnterpriseInfoPage: React.FC = () => {
       if (res) {
         await fetchCorpAuthorizedList(pageInation.current, pageInation.pageSize);
         Message.success('更新授权时间成功');
-      } else {
-        Message.success('接口返回数据异常');
-      }
+      } 
     } catch (error) {
       Message.error('更新授权时间失败');
     } finally {
