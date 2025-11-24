@@ -7,6 +7,7 @@ import { useEditorSignalMap, usePageViewEditorSignal, useFormEditorSignal } from
 import { PreviewRender } from '@/components/render';
 import type { XSubTableConfig } from './schema';
 import styles from './index.module.css';
+import { useSignals } from '@preact/signals-react/runtime';
 
 const XSubTable = memo((props: XSubTableConfig & { runtime?: boolean; detailMode?: boolean; defaultOptionsConfig?: any; form?: any }) => {
   const {
@@ -22,6 +23,7 @@ const XSubTable = memo((props: XSubTableConfig & { runtime?: boolean; detailMode
     form
   } = props;
 
+  useSignals();
   const { curViewId } = usePageViewEditorSignal;
 
   const subTableComponents = useEditorSignalMap.get(curViewId.value)?.subTableComponents.value[props.id] || [];
@@ -29,6 +31,7 @@ const XSubTable = memo((props: XSubTableConfig & { runtime?: boolean; detailMode
   const { subTableDataLength } = pagesRuntimeSignal;
   const [subTableData, setSubTableData] = useState<any[]>([]);
 
+  console.warn('b=11=props=', props)
   useEffect(() => {
     if (!subTableData || subTableData.length === 0) {
       let newSubTableData: any[] = [];
@@ -51,6 +54,7 @@ const XSubTable = memo((props: XSubTableConfig & { runtime?: boolean; detailMode
     e.stopPropagation();
 
       const formData = form.getFieldsValue();
+      console.warn('sssss======11111===', formData)
 
       const filtered = Object.fromEntries(
         Object.entries(formData).filter(([key]) => !key.includes(`.${index}.`))
@@ -62,11 +66,12 @@ const XSubTable = memo((props: XSubTableConfig & { runtime?: boolean; detailMode
       form.setFieldsValue(filtered);
   };
 
-  console.log('subTableData', subTableData)
-
+  console.log('subTableData-----', subTableData)
+  console.log('subTableComponents-----', subTableComponents)
+  console.log('form-----', form.getFieldsValue())
   return (
     <Cell
-      label={'子表'}
+      label={label?.text || '子表'}
       append={
         <>
           {
@@ -80,7 +85,7 @@ const XSubTable = memo((props: XSubTableConfig & { runtime?: boolean; detailMode
                     <IconDelete onClick={(e) => handleDelete(e, item.key)} />
                   </div>
                 }
-                value={index + ''}
+                value={item.key + ''}
                 defaultActive
                 content={
                   <Cell.Group>
@@ -89,7 +94,7 @@ const XSubTable = memo((props: XSubTableConfig & { runtime?: boolean; detailMode
 
                       const config = {
                         ...schema.config,
-                        dataField: [`${id}.${index}.${schema.config?.dataField?.[1] || subTable.id}`]
+                        dataField: [`${id}.${item.key}.${schema.config?.dataField?.[1] || subTable.id}`]
                       };
                       const pageSchema = { ...schema, config };
 

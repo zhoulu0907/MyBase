@@ -144,7 +144,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   // 提交表单
   const submitForm = async () => {
     const fields = form.getFieldsValue();
-    // console.log('fields: ', fields);
+    console.log('fields: ', fields);
     // console.log('mainMetaDataFields: ', mainMetaDataFields.value);
     // console.log('menuId: ', menuId);
 
@@ -161,16 +161,23 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       if (field) {
         // console.log('field: ', field);
         formData[field.fieldId] = value;
+        if (Array.isArray(value)) {
+          formData[field.fieldId] = value.map((item: any) => {
+            if (item.response && item.url) {
+              return {
+                ...item,
+                url: item.response
+              };
+            }
+            return item
+          });
+        }
       }
-      Object.values(listPageComponentSchemas.value).forEach((item) => {
+      !(typeof value === 'object') && Object.values(listPageComponentSchemas.value).forEach((item) => {
         if (item.config.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]) {
           return;
         }
-        // console.warn('item: ', item);
         const indexTmp = item.config.columns.findIndex((col: any) => col.id === field?.fieldId);
-
-        // console.warn('indexTmp: ', indexTmp);
-        // console.warn('field: ', field);
 
         if (indexTmp === -1) {
           delete formData[field?.fieldId];
@@ -199,10 +206,12 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       .sort((a, b) => Number(a) - Number(b))
       .map((k) => groups[k]);
 
-    subFormData.push({
-      subEntityId,
-      subData
-    });
+    if (subEntityId) {
+      subFormData.push({
+        subEntityId,
+        subData
+      });
+    }
 
     console.log('formData:   ', formData);
     console.log('subFormData:   ', subFormData);
@@ -240,7 +249,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     } else {
       try {
         let res = null;
-        console.warn('bb=111===', curPage?.value?.pageSetType);
         if (curPage?.value?.pageSetType === PageType.BPM) {
           const reqFlow = {
             isDraft: false,
@@ -287,7 +295,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   };
 
   const showFromPageData = (id: string, toFormPage: boolean = false) => {
-    // console.warn('bb=11===', id);
     form.resetFields();
 
     if (id && id !== '') {
@@ -388,8 +395,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
   const curFormPage =
     curPage.value?.pages?.find((ele: any) => ele.pageType === CATEGORY_TYPE.LIST)?.pageName || '标题_列表';
-  // console.warn('xx-d==', useEditorSignalMap.get(editPageViewId.value)?.components.value);
-  // console.warn('xxxxxx=====11=1===', useEditorSignalMap);
   return (
     <div className={styles.previewPage}>
       {/* <Sticky topOffset={0} className={styles.previewTitle}>

@@ -8,6 +8,7 @@ import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { STATUS_OPTIONS, STATUS_VALUES, UPLOAD_VALUES, UPLOAD_OPTIONS } from '../../../constants';
 import './index.css';
 import type { XInputImgUploadConfig } from './schema';
+import { getFieldById } from '@onebase/app';
 
 // 定义文件项类型
 interface FileItem {
@@ -39,7 +40,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
 
   const [filesList, setFilesList] = useState<FileItem[]>([]);
 
-  const handleUpload = async (file: File) => {
+  const handleUpload = async ({ file }: { file: File }) => {
     const formData = new FormData();
     formData.append('file', file);
 
@@ -53,7 +54,26 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
     //   : undefined;
 
     const res = await uploadFile(formData);
-    return res;
+    console.warn('bb=-00===ssss=', file)
+    console.warn('bb=-11===ssss=', res)
+    console.warn('bb=-22===ssss=', form.getFieldValue(fieldId))
+    const allValues = form.getFieldsValue()
+    console.warn('bb=-333===ssss=', allValues)
+    // const values = form.getFieldValue(fieldId) || []
+    // const last =  values[values.length - 1] || {}
+    // last.name = file.name
+    // last.originFile = {}
+    // last.percent = 100
+    // last.response = res.url
+    // last.status = "done"
+    // last.uid = 'sdfsdfsdf'
+    // last.url = res.url
+    // allValues[fieldId] = values
+    // form.setFieldsValue(allValues)
+    return {
+      name: file.name,
+      response: res
+    };
   };
 
   const fieldId =
@@ -80,7 +100,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
   return (
     <div>
       <Form.Item
-        className="inputTextWrapper"
+        className="inputTextWrapper ImgUploadWrapper"
         label={
           label.display && label.text
         }

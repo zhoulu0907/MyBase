@@ -60,7 +60,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
     showFromPageData,
     refresh
   })
-  console.warn('b11=======222====', componentConfig)
+  console.warn('b11======222====', componentConfig)
   componentConfig.align = ALIGN_VALUES[ALIGN_OPTIONS.RIGHT];
   // 渲染对应的组件
   const renderComponent = () => {
@@ -272,7 +272,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
       // return <LayoutComp.XPreviewTabsLayout {...componentConfig} cpName={cpId} id={cpId} />;
       case LAYOUT_COMPONENT_TYPES.COLLAPSE_LAYOUT:
         // return <LayoutComp.XPreviewCollapseLayout {...componentConfig} cpName={cpId} id={cpId} />;
-        return <div>todo: LayoutComp</div>
+        return null
       //  列表组件
       case LIST_COMPONENT_TYPES.TABLE:
         return <ListComp.XLoadMore cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} showFromPageData={showFromPageData} />;

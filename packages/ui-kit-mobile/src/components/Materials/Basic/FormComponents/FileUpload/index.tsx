@@ -1,15 +1,21 @@
-import { Form, Uploader, CircleProgress, Toast, Loading, Cell } from '@arco-design/mobile-react';
-import { type UploadItem, type UploadListProps } from '@arco-design/mobile-react/lib/Upload';
-import { IconDelete, IconClose, IconDownload, IconFile, IconAdd } from '@arco-design/mobile-react/esm/icon';
+import { Form, Uploader, Toast, Loading } from '@arco-design/mobile-react';
+import { type UploadItem } from '@arco-design/mobile-react/lib/Upload';
+import { IconDelete, IconClose, IconDownload, IconFile } from '@arco-design/mobile-react/esm/icon';
 import { uploadFile } from '@onebase/platform-center';
 import { nanoid } from 'nanoid';
-import { memo, useState, useEffect } from 'react';
+import { memo, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-// import { downloadFileByUrl } from 'src/utils/downloadFile';
 import '../index.css';
 import './index.css'
 import type { XInputFileUploadConfig } from './schema';
+
+// 定义文件项类型
+interface FileItem {
+  url?: string;
+  status?: "loaded" | "loading" | "error";
+  file?: File;
+}
 
 const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; detailMode?: boolean; form?: any; }) => {
   const {
@@ -17,9 +23,6 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
     dataField,
     status,
     tooltip,
-    // showPreview, // todo
-    // showDownload, // todo
-    listType,
     verify,
     layout,
     labelColSpan = 0,
@@ -28,43 +31,47 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
     form
   } = props;
 
-  const [filesList, setFilesList] = useState<{ file: File, status: "loaded" | "loading" | "error", url: string }[]>([]);
+  const [filesList, setFilesList] = useState<FileItem[]>([]);
 
-  const handleUpload = async (file: File, onProgress?: (percent: number, event?: ProgressEvent) => void) => {
+  const fieldId =
+    dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.FILE_UPLOAD}_${nanoid()}`;
+
+  const handleUpload = async ({ file }: { file: File }) => {
     const formData = new FormData();
     formData.append('file', file);
 
-    const progressAdapter = onProgress
-      ? (progressEvent: ProgressEvent) => {
-        if (progressEvent.lengthComputable) {
-          const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          onProgress(percent, progressEvent);
-        }
-      }
-      : undefined;
+    try {
+      const res = await uploadFile(formData);
 
-    const res = await uploadFile(formData, progressAdapter);
-    return res;
+      console.warn('aabb=-00===ssss=', file)
+      console.warn('aabb=-11===ssss=', res)
+
+      return {
+        name: file.name,
+        response: res
+      };
+    } catch (error) {
+      Toast.toast({
+        content: '上传失败，请重试',
+        duration: 2000
+      });
+      throw error;
+    }
   };
 
-  // const { form } = Form.useFormContext();
-  const fieldId =
-    dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.FILE_UPLOAD}_${nanoid()}`;
-  // const fieldValue = Form.useWatch(fieldId, form);
-
-  // useEffect(() => {
-  //   let flag = false;
-  //   const newFieldValue = (fieldValue || []).map((ele: any) => {
-  //     if (ele.url !== ele.response) {
-  //       flag = true;
-  //       return { ...ele, url: ele.response };
-  //     }
-  //     return { ...ele };
-  //   });
-  //   if (flag) {
-  //     form.setFieldValue(fieldId, newFieldValue);
-  //   }
-  // }, [fieldValue]);
+  const handleChange = (files: any[]) => {
+    setFilesList(files);
+    // 将文件数据同步到表单字段
+    if (form) {
+      // 提取需要保存到表单的数据，如文件名和URL
+      const formValues = files.map(file => ({
+        name: file.name,
+        url: file.url || '',
+        response: file.response
+      }));
+      form.setFieldValue(fieldId, formValues);
+    }
+  };
 
   // 自定义文件列表展示
   const renderUploadList = (fileListMethods) => {
@@ -80,8 +87,8 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
       <div className="uplaodList-text">
         {filesList.map(({ file, status, url }, index) => (
           <div key={index} className="uplaodList-text-item">
-            {getFileIcon(file)}
-            <div className="uplaodList-text-item-name">{file.name}</div>
+            {getFileIcon(file as UploadItem)}
+            <div className="uplaodList-text-item-name">{file?.name}</div>
             {status && status !== 'loaded' ? (
               <div className="uplaodList-text-item-process">
                 <Loading type="circle" radius={7} />
@@ -94,7 +101,7 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
               <div className="uplaodList-text-item-opera">
                 <IconDownload
                   onClick={() => {
-                    if (url && file.name) {
+                    if (url && file?.name) {
                       // downloadFileByUrl(file.url, file.name);
                     }
                   }}
@@ -111,33 +118,44 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
   };
 
   return (
-    <div className="inputTextWrapper fileUploadWrapper">
-      {/* TODO 预览态下显示情况，及上传接口调用需要修改 */}
-      <Cell
-        label={label.display && label.text}
-        bordered={false}
-        onClick={() => { }}
-        append={
-          <Uploader
-            files={filesList}
-            limit={
-              (status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode) ? 1 : verify?.maxCount === -1 ? undefined : verify?.maxCount
-            }
-            accept={verify?.fileFormat}
-            // onChange={setFilesList} 
-            onMaxSizeExceed={(file) =>
-              Toast.toast({
-                content: '文件大小超出限制',
-                duration: 2000
-              })}
-            style={{
-              width: '100%',
-              pointerEvents: runtime ? 'unset' : 'none'
-            }}
-            renderFileList={renderUploadList}
-          />
+    <div>
+      <Form.Item
+        className="inputTextWrapper fileUploadWrapper"
+        label={
+          label.display && label.text
         }
-      />
+        layout="vertical"
+        field={fieldId}
+        required={verify?.required}
+        trigger="fileList"
+        style={{
+          pointerEvents: runtime ? 'unset' : 'none'
+        }}
+      >
+        <Uploader
+          accept={verify?.fileFormat}
+          files={filesList}
+          limit={verify?.maxCount === -1 ? undefined : verify?.maxCount}
+          onMaxSizeExceed={(file) =>
+            Toast.toast({
+              content: '文件大小超出限制',
+              duration: 2000
+            })}
+          onLimitExceed={(file) =>
+            Toast.toast({
+              content: '文件数量超出限制',
+              duration: 2000
+            })}
+          disabled={status !== STATUS_VALUES[STATUS_OPTIONS.DEFAULT] || status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode}
+          style={{
+            width: '100%',
+            pointerEvents: runtime ? 'unset' : 'none'
+          }}
+          renderFileList={renderUploadList}
+          onChange={handleChange}
+          upload={handleUpload}
+        />
+      </Form.Item>
     </div>
   );
 });
