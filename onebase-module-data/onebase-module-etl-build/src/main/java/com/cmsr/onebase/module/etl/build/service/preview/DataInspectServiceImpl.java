@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.etl.build.service.preview;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
+import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.etl.build.service.DatasourceFactory;
 import com.cmsr.onebase.module.etl.build.vo.preview.TablePreviewVO;
 import com.cmsr.onebase.module.etl.common.entity.ColumnData;
@@ -91,7 +92,7 @@ public class DataInspectServiceImpl implements DataInspectService {
             }
             Map<String, String> fieldTypeMapping = flinkMappingRepository.findAllMappingsByDatasourceType(datasourceType);
             DataPreview dataPreview = new DataPreview();
-            TableData tableData = tableDO.getMetaInfo();
+            TableData tableData = JsonUtils.parseObject(tableDO.getMetaInfo(), TableData.class);
             List<ColumnData> columnDataList = tableData.getColumns();
             List<PreviewColumn> columnList = extractPreviewColumns(columnDataList, fieldTypeMapping);
             dataPreview.setColumns(columnList);

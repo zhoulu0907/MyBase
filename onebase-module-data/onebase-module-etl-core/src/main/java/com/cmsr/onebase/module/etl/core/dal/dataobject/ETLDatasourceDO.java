@@ -40,14 +40,6 @@ public class ETLDatasourceDO extends BaseTenantEntity {
     @Column(value = "readonly")
     private Integer readonly;
 
-    public void setConfig(Object config) {
-        if (config == null) {
-            this.config = null;
-        }
-
-        this.config = JsonUtils.toJsonString(config);
-    }
-
     @Override
     public String toString() {
         return JsonUtils.toJsonString(this);
