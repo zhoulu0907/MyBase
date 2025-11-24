@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.formula.service.extendsion;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
-import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.module.app.api.auth.AppAuthRoleUser;
 import com.cmsr.onebase.module.app.api.auth.dto.AuthRoleDTO;
 import com.cmsr.onebase.module.system.api.dept.DeptApi;

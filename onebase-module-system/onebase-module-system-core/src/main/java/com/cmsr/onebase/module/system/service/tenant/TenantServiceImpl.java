@@ -6,12 +6,13 @@ import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.enums.CommonPublishModelEnum;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.common.util.date.DateUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.tenant.config.TenantProperties;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
-import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.system.api.user.AdminUserRoleApi;
@@ -480,6 +481,15 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     public TenantRespVO getTenantWithAppCount(Long id) {
+        // 仅允许获取自己的租户信息(平台管理员除外)
+        boolean isPlatformAdmin = permissionService.isPlatformSuperAdmin(SecurityFrameworkUtils.getLoginUserId());
+        if (!isPlatformAdmin) {
+            Long loginTenantId = TenantContextHolder.getTenantId();
+            if (!Objects.equals(loginTenantId, id)) {
+                throw exception(TENANT_ONLY_GET_SELF);
+            }
+        }
+
         Map<Long, Integer> corpCountMap = findCorpCount();
         TenantDO tenantDO = getTenant(id);
         // 查询当前租户下的已有的正常状态的用户数量

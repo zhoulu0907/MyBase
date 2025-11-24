@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.etl.build.service.mgt;
 
-import com.cmsr.onebase.module.etl.build.service.mgt.vo.FlinkFunctionVO;
+import com.cmsr.onebase.module.etl.build.vo.mgt.FlinkFunctionVO;
 
 import java.util.List;
 

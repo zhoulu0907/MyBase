@@ -8,7 +8,7 @@ import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
-import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
 import com.cmsr.onebase.module.system.dal.database.CorpDataRepository;
@@ -283,8 +283,9 @@ public class CorpServiceImpl implements CorpService {
             respVO.setMobile(userDO.getMobile());
         }
         respVO.setAppCount(getCorpAppCount(id));
-        // TODO  获取企业用户数 待后续完善
-        respVO.setUserCount(respVO.getAppCount());
+        Long userCountLong=corpUserService.getUserCountByCorpId(id);
+        Integer userCount= (userCountLong != null) ? userCountLong.intValue() : 0;
+        respVO.setUserCount(userCount);
         return respVO;
     }
     /**

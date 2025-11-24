@@ -4,7 +4,7 @@ import com.cmsr.onebase.framework.common.biz.infra.logger.dto.ApiAccessLogCreate
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.common.util.string.StrUtils;
-import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.infra.dal.database.ApiAccessLogDataRepository;
 import com.cmsr.onebase.module.infra.dal.dataobject.logger.ApiAccessLogDO;

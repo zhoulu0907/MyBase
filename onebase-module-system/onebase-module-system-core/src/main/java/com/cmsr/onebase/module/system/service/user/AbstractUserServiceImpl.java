@@ -11,12 +11,12 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
-import com.cmsr.onebase.framework.security.core.LoginUser;
-import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.common.security.dto.LoginUser;
+import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.app.api.auth.AppAuthRoleUser;
 import com.cmsr.onebase.module.infra.api.config.ConfigApi;
-import com.cmsr.onebase.module.infra.api.security.SecurityConfigApi;
+import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
 import com.cmsr.onebase.module.system.convert.user.UserConvert;
 import com.cmsr.onebase.module.system.dal.database.UserPostDataRepository;
 import com.cmsr.onebase.module.system.dal.database.UserRoleDataRepository;
@@ -794,6 +794,11 @@ public abstract class AbstractUserServiceImpl implements UserService {
     @Override
     public Integer getUserCountByStatus(Integer status) {
         return (int) getAdminUserDataRepository().countByStatus(status);
+    }
+
+    @Override
+    public Long getUserCountByCorpId(Long corpId) {
+        return    getAdminUserDataRepository().getUserCountByCorpId(corpId);
     }
 
     @Override

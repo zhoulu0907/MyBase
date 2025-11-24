@@ -24,6 +24,7 @@
         <!-- Web 相关 -->
         <springdoc.version>2.8.3</springdoc.version>
         <!-- DB 相关 -->
+        <mybatis-flex.version>1.11.4</mybatis-flex.version>
         <redisson.version>3.52.0</redisson.version>
         <jetcache.version>2.7.8</jetcache.version>
         <kryo.version>5.6.2</kryo.version>
@@ -160,11 +161,11 @@
                 <version>${revision}</version>
             </dependency>
 
-<!--            <dependency>-->
-<!--                <groupId>com.cmsr.onebase</groupId>-->
-<!--                <artifactId>onebase-spring-boot-starter-security</artifactId>-->
-<!--                <version>${revision}</version>-->
-<!--            </dependency>-->
+            <!--            <dependency>-->
+            <!--                <groupId>com.cmsr.onebase</groupId>-->
+            <!--                <artifactId>onebase-spring-boot-starter-security</artifactId>-->
+            <!--                <version>${revision}</version>-->
+            <!--            </dependency>-->
 
             <dependency>
                 <groupId>org.springdoc</groupId>
@@ -181,6 +182,19 @@
                 <groupId>com.cmsr.onebase</groupId>
                 <artifactId>onebase-spring-boot-starter-orm</artifactId>
                 <version>${revision}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.mybatis-flex</groupId>
+                <artifactId>mybatis-flex-dependencies</artifactId>
+                <version>${mybatis-flex.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.mybatis-flex</groupId>
+                <artifactId>mybatis-flex-codegen</artifactId>
+                <version>${mybatis-flex.version}</version>
             </dependency>
 
             <dependency>

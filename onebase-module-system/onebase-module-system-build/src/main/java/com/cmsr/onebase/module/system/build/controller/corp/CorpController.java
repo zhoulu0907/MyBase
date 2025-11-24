@@ -54,7 +54,7 @@ public class CorpController {
 
     @PostMapping("/update-status")
     @Operation(summary = "企业启用/禁用")
-    @PreAuthorize("@ss.hasPermission('tenant:corp:update')")
+    @PreAuthorize("@ss.hasPermission('tenant:corp:enable')")
     public CommonResult<Boolean> updateStatus(@RequestParam("id") Long id, @RequestParam("status") Long status) {
         corpService.updateStatus(id, status);
         return success(true);

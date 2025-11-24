@@ -6,8 +6,8 @@ import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.enums.XFromSceneTypeEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.data.base.BaseDO;
-import com.cmsr.onebase.framework.security.core.LoginUser;
-import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.common.security.dto.LoginUser;
+import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
@@ -186,6 +186,18 @@ public abstract class AbstractUserDataRepository extends DataRepository<AdminUse
     public long countByStatus(Integer status) {
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.eq(AdminUserDO.STATUS, status);
+        return countByConfig(configStore);
+    }
+
+    /**
+     * 根据corpId统计用户数量
+     *
+     * @param corpId  企业id
+     * @return 用户数量
+     */
+    public long getUserCountByCorpId(Long corpId) {
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.eq(AdminUserDO.CORP_ID, corpId);
         return countByConfig(configStore);
     }
 
