@@ -1,10 +1,9 @@
-package com.cmsr.onebase.framework.security.core.util;
+package com.cmsr.onebase.framework.common.security;
 
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
-import com.cmsr.onebase.framework.security.core.LoginUser;
-import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
+import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import org.springframework.lang.Nullable;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -127,8 +126,8 @@ public class SecurityFrameworkUtils {
 
         // 额外设置到 request 中，用于 ApiAccessLogFilter 可以获取到用户编号；
         // 原因是，Spring Security 的 Filter 在 ApiAccessLogFilter 后面，在它记录访问日志时，线上上下文已经没有用户编号等信息
-        WebFrameworkUtils.setLoginUserId(request, loginUser.getId());
-        WebFrameworkUtils.setLoginUserType(request, loginUser.getUserType());
+        // WebFrameworkUtils.setLoginUserId(request, loginUser.getId());
+        // WebFrameworkUtils.setLoginUserType(request, loginUser.getUserType());
     }
 
     private static Authentication buildAuthentication(LoginUser loginUser, HttpServletRequest request) {

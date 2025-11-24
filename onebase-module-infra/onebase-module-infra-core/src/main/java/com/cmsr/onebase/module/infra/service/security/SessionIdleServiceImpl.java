@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.infra.service.security;
 
 import cn.hutool.core.util.StrUtil;
-import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.module.infra.dal.redis.RedisKeyConstants;
 import com.cmsr.onebase.module.infra.enums.security.SecurityConfigKey;
 import jakarta.annotation.Resource;
@@ -70,7 +70,7 @@ public class SessionIdleServiceImpl implements SessionIdleService {
     @Override
     public boolean updateRedisIdleKey(Long tenantId, Long userId, String deviceId) {
         if (tenantId == null || userId == null || StrUtil.isBlank(deviceId)) {
-            log.warn("更新会话空闲Key失败，参数不完整: tenantId={}, userId={}, deviceId={}", tenantId, userId, deviceId);
+            log.error("更新会话空闲Key失败，参数不完整: tenantId={}, userId={}, deviceId={}", tenantId, userId, deviceId);
             return false;
         }
 
@@ -80,7 +80,7 @@ public class SessionIdleServiceImpl implements SessionIdleService {
         // 检查Key是否存在
         Boolean exists = stringRedisTemplate.hasKey(redisKey);
         if (!exists) {
-            log.debug("会话空闲Key不存在，会话已超时: userId={}, deviceId={}", userId, deviceId);
+            log.info("会话空闲Key不存在，会话已超时: userId={}, deviceId={}", userId, deviceId);
             return false;
         }
         

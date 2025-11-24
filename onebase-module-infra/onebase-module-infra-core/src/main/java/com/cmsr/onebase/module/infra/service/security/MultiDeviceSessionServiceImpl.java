@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.infra.service.security;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
-import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.module.infra.dal.redis.RedisKeyConstants;
 import com.cmsr.onebase.module.infra.enums.security.SecurityConfigKey;
 import com.fasterxml.jackson.core.JsonProcessingException;

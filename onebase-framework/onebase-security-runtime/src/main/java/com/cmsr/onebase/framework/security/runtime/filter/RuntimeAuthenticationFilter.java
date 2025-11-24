@@ -9,8 +9,8 @@ import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.security.config.SecurityProperties;
-import com.cmsr.onebase.framework.security.core.LoginUser;
-import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.common.security.dto.LoginUser;
+import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.security.runtime.RTLoginUser;
 import com.cmsr.onebase.framework.web.core.handler.GlobalExceptionHandler;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
@@ -134,7 +134,7 @@ public class RuntimeAuthenticationFilter extends OncePerRequestFilter {
         // 构建模拟用户
         Long userId = Long.valueOf(token.substring(securityProperties.getMockSecret().length()));
         RTLoginUser loginUser = new RTLoginUser();
-        loginUser.setId(userId).setUserType(userType).setTenantId(WebFrameworkUtils.getTenantId(request));
+        loginUser.setId(userId).setUserType(userType).setTenantId(WebFrameworkUtils.getTenantIdFromHeader(request));
         return loginUser;
     }
 

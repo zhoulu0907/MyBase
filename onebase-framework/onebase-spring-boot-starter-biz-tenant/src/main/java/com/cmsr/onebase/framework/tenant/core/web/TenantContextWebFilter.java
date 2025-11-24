@@ -1,6 +1,6 @@
 package com.cmsr.onebase.framework.tenant.core.web;
 
-import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -21,7 +21,7 @@ public class TenantContextWebFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
         // 设置
-        Long tenantId = WebFrameworkUtils.getTenantId(request);
+        Long tenantId = WebFrameworkUtils.getTenantIdFromHeader(request);
         if (tenantId != null) {
             TenantContextHolder.setTenantId(tenantId);
         }
