@@ -89,24 +89,24 @@ const Right: React.FC = () => {
     }
 
     // 如果已经登录了就自动跳转到首
-    if (TokenManager.isTokenValid()) {
-      const redirectURL = getHashQueryParam('redirectURL');
-      if (redirectURL) {
-        window.location.href = redirectURL;
-      } else {
-        //企业登录
-        if (!appId && tenantId) {
-          navigate(`/onebase/runtime/my-app`);
-        }
-        if (appId && !tenantId) {
-          navigate(`/onebase/runtime/?appId=${appId}`);
-        }
-        if (appId && tenantId) {
-          navigate(`/onebase/runtime/?appId=${appId}&tenantId=${tenantId}`);
-        }
-      }
-      return;
-    }
+    // if (TokenManager.isTokenValid()) {
+    //   const redirectURL = getHashQueryParam('redirectURL');
+    //   if (redirectURL) {
+    //     window.location.href = redirectURL;
+    //   } else {
+    //     //企业登录
+    //     if (!appId && tenantId) {
+    //       navigate(`/onebase/runtime/my-app`);
+    //     }
+    //     if (appId && !tenantId) {
+    //       navigate(`/onebase/runtime/?appId=${appId}`);
+    //     }
+    //     if (appId && tenantId) {
+    //       navigate(`/onebase/runtime/?appId=${appId}&tenantId=${tenantId}`);
+    //     }
+    //   }
+    //   return;
+    // }
   }, []);
 
   useEffect(() => {

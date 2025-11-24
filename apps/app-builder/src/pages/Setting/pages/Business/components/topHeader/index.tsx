@@ -14,11 +14,12 @@ interface topHeaderProps {
 
 export const TopHeader: React.FC<topHeaderProps> = ({ type, title, onAdd, isBusiness = true, setSearchInputValue }) => {
   const navigateToRunTime = () => {
+    const tenantId = TokenManager.getTenantInfo()?.tenantId || '';
+    const redirectURL = `${getRuntimeURL()}/#/onebase/runtime/?tenantId=${tenantId}`;
+    const href = `${getRuntimeURL()}/#/login?redirectURL=${redirectURL}`;
+
     const newWindow = window.open('', '_blank');
     if (newWindow) {
-      const tenantId = TokenManager.getTenantInfo()?.tenantId || '';
-      const redirectURL = `${getRuntimeURL()}/#/onebase/runtime/?tenantId=${tenantId}`;
-      const href = `${getRuntimeURL()}/#/login?redirectURL=${redirectURL}`;
       newWindow.location.href = href;
     }
   };
