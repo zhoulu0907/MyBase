@@ -30,6 +30,9 @@ public class FlowConnectorVO {
     @Schema(description = "连接器可选配置")
     private String config;
 
+    @Schema(description = "连接器版本")
+    private String connectorVersion;
+
     @Schema(description = "连接器创建时间")
     private LocalDateTime createTime;
 

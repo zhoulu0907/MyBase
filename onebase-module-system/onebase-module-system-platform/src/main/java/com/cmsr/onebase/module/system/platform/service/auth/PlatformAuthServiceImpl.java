@@ -27,11 +27,13 @@ import com.cmsr.onebase.module.system.service.member.MemberService;
 import com.cmsr.onebase.module.system.service.oauth2.OAuth2TokenService;
 import com.cmsr.onebase.module.system.service.permission.PermissionService;
 import com.cmsr.onebase.module.system.service.tenant.TenantService;
-import com.cmsr.onebase.module.system.service.user.AdminUserService;
+import com.cmsr.onebase.module.system.service.user.UserService;
 import com.cmsr.onebase.module.system.vo.CaptchaVerificationReqVO;
 import com.cmsr.onebase.module.system.vo.auth.*;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Resource;
+
+import java.util.List;
 import jakarta.validation.Validator;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -55,7 +57,7 @@ import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 public class PlatformAuthServiceImpl implements PlatformAuthService {
 
     @Resource
-    private AdminUserService userService;
+    private UserService     userService;
     @Resource
     private LoginLogService loginLogService;
     @Resource
@@ -152,7 +154,7 @@ public class PlatformAuthServiceImpl implements PlatformAuthService {
         }
 
         // 4. 创建 Token 令牌，记录登录日志
-        return createTokenAfterLoginSuccess(user.getId(), reqVO.getUsername(), LoginLogTypeEnum.LOGIN_USERNAME);
+        return createTokenAfterLoginSuccess(user.getId(), reqVO.getUsername(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_USERNAME);
     }
 
     @Override
@@ -179,7 +181,7 @@ public class PlatformAuthServiceImpl implements PlatformAuthService {
 
         // 使用账号密码，进行登录
         AdminUserDO user = authenticate(reqVO.getUsername(), reqVO.getPassword());
-        return createTokenAfterLoginSuccess(user.getId(), reqVO.getUsername(), LoginLogTypeEnum.LOGIN_USERNAME);
+        return createTokenAfterLoginSuccess(user.getId(), reqVO.getUsername(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_USERNAME);
     }
 
     @Override
@@ -189,7 +191,7 @@ public class PlatformAuthServiceImpl implements PlatformAuthService {
 
         // 2. 使用账号密码，进行登录
         AdminUserDO user = mobileAuthenticate(reqVO.getMobile(), reqVO.getPassword());
-        return createCorpAfterLoginSuccess(user.getCorpId(), user.getId(), reqVO.getMobile(), LoginLogTypeEnum.LOGIN_MOBILE);
+        return createCorpAfterLoginSuccess(user.getCorpId(), user.getId(), reqVO.getMobile(), reqVO.getDeviceId(),LoginLogTypeEnum.LOGIN_MOBILE);
     }
 
     @Override
@@ -222,7 +224,7 @@ public class PlatformAuthServiceImpl implements PlatformAuthService {
         }
 
         // 创建 Token 令牌，记录登录日志
-        return createTokenAfterLoginSuccess(user.getId(), reqVO.getMobile(), LoginLogTypeEnum.LOGIN_MOBILE);
+        return createTokenAfterLoginSuccess(user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE);
     }
 
     private void createLoginLog(Long userId, String username,
@@ -275,16 +277,31 @@ public class PlatformAuthServiceImpl implements PlatformAuthService {
         return captchaService.verification(captchaVO);
     }
 
-    private AuthLoginRespVO createTokenAfterLoginSuccess(Long userId, String username, LoginLogTypeEnum logType) {
-        return createCorpAfterLoginSuccess(null, userId, username, logType);
+    private AuthLoginRespVO createTokenAfterLoginSuccess(Long userId, String username, String deviceId, LoginLogTypeEnum logType) {
+        return createCorpAfterLoginSuccess(null, userId, username, deviceId, logType);
     }
 
-    private AuthLoginRespVO createCorpAfterLoginSuccess(Long corpId, Long userId, String username, LoginLogTypeEnum logType) {
+    private AuthLoginRespVO createCorpAfterLoginSuccess(Long corpId, Long userId, String username, String deviceId, LoginLogTypeEnum logType) {
         // 插入登陆日志
         createLoginLog(userId, username, logType, LoginResultEnum.SUCCESS);
         // 创建访问令牌
         OAuth2AccessTokenDO accessTokenDO = oauth2TokenService.createCorpAccessToken(corpId, userId, getUserType().getValue(),
                 OAuth2ClientConstants.CLIENT_ID_DEFAULT, null);
+
+        // 检查并限制设备数，踢出超限的设备
+        List<String> removedTokens = securityConfigApi.checkAndLimitDevices(
+                userId,
+                deviceId,
+                accessTokenDO.getAccessToken()
+        ).getData();
+
+        // 删除被踢出的Token
+        if (removedTokens != null && !removedTokens.isEmpty()) {
+            for (String removedToken : removedTokens) {
+                oauth2TokenService.removeAccessToken(removedToken);
+                log.info("用户[{}]设备数超限，已踢出Token: {}", userId, removedToken);
+            }
+        }
 
         TenantDO tennantDO = tenantService.getTenant(accessTokenDO.getTenantId());
         // 构建返回结果
@@ -293,6 +310,9 @@ public class PlatformAuthServiceImpl implements PlatformAuthService {
         // 检查密码有效期
         PasswordExpiryCheckDTO expiryCheckResult = securityConfigApi.checkPasswordExpiry(userId).getData();
         respVO.setPasswordExpiryInfo(expiryCheckResult);
+
+        // 创建会话空闲检测Key
+        securityConfigApi.createSessionIdleKey(userId, deviceId);
 
         return respVO;
     }
@@ -352,7 +372,7 @@ public class PlatformAuthServiceImpl implements PlatformAuthService {
         Long userId = userService.registerUser(registerReqVO);
 
         // 3. 创建 Token 令牌，记录登录日志
-        return createTokenAfterLoginSuccess(userId, registerReqVO.getUsername(), LoginLogTypeEnum.LOGIN_USERNAME);
+        return createTokenAfterLoginSuccess(userId, registerReqVO.getUsername(), registerReqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_USERNAME);
     }
 
     @VisibleForTesting

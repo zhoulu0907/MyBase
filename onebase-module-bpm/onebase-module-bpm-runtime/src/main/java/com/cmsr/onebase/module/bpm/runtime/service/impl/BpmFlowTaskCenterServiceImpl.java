@@ -81,16 +81,13 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
     @Resource
     private BpmInstanceExtRepository insExtRepository;
 
-    @Resource
-    private UserService flowUserservice;
-
-    @Resource
+    @Resource(name = "bpmTaskService")
     private TaskService taskService;
 
-    @Resource
+    @Resource(name = "bpmUserService")
     private UserService userService;
 
-    @Resource
+    @Resource(name = "bpmInsService")
     private InsService insService;
 
     @Resource
@@ -102,11 +99,13 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
     @Resource
     private BpmEngineDefExtService engineDefExtService;
 
-    @Resource
+    @Resource(name = "bpmDefService")
     private DefService defService;
 
     @Resource
     private BpmFlowCcRecordRepository bpmFlowCcRecordRepository;
+
+    private static final String AGENT_TITLE_PREFIX = "【代理审批】";
 
     private List<String> splitToList(String str) {
         if (StringUtils.isBlank(str)) {
@@ -344,9 +343,8 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         todoTaskVO.setArrivalTime(flowTaskExt.getCreateTime());
         todoTaskVO.setBusinessId(flowTaskExt.getBindingViewId());
 
-        // todo 确定代理人展示形式
         if (Objects.equals(flowTaskExt.getUserType(), BpmUserTypeEnum.AGENT.getCode())) {
-            todoTaskVO.setProcessTitle("代理审批：" + flowTaskExt.getBpmTitle());
+            todoTaskVO.setProcessTitle(AGENT_TITLE_PREFIX + flowTaskExt.getBpmTitle());
         }
 
         todoTaskVO.setInitiator(new UserBasicInfoVO());
@@ -414,7 +412,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
 
                 // 只判断是否有值
                 if (Objects.equals(agentId, String.valueOf(loginUserId))) {
-                    doneTaskVO.setProcessTitle("代理审批：" + flowHisTaskExt.getBpmTitle());
+                    doneTaskVO.setProcessTitle(AGENT_TITLE_PREFIX + flowHisTaskExt.getBpmTitle());
                 }
             }
         }
@@ -459,7 +457,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
             if (CollectionUtils.isNotEmpty(flowTaskList)) {
                 bpmMyCreatedVO.setTaskId(flowTaskList.get(0).getId());
                 List<Long> taskIds = StreamUtils.toList(flowTaskList, Task::getId);
-                List<User> userList = flowUserservice.getByAssociateds(taskIds);
+                List<User> userList = userService.getByAssociateds(taskIds);
                 List<Long> processedByIds = userList.stream()
                         .map(user -> Long.valueOf(user.getProcessedBy()))
                         .collect(Collectors.toList());

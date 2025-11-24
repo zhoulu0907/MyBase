@@ -8,13 +8,13 @@ import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.module.system.api.sms.SmsCodeApi;
 import com.cmsr.onebase.module.system.api.sms.dto.code.SmsCodeSendReqDTO;
 import com.cmsr.onebase.module.system.api.sms.dto.code.SmsCodeUseReqDTO;
-import com.cmsr.onebase.module.system.dal.database.AdminUserDataRepository;
+import com.cmsr.onebase.module.system.dal.database.user.AdminUserDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.service.logger.LoginLogService;
 import com.cmsr.onebase.module.system.service.member.MemberService;
 import com.cmsr.onebase.module.system.service.oauth2.OAuth2TokenService;
-import com.cmsr.onebase.module.system.service.user.AdminUserService;
+import com.cmsr.onebase.module.system.service.user.UserService;
 import com.cmsr.onebase.module.system.vo.auth.*;
 import jakarta.annotation.Resource;
 import org.anyline.data.param.init.DefaultConfigStore;
@@ -69,7 +69,7 @@ public class AdminAuthServiceTest {
     private AdminUserDataRepository adminUserDataRepository;
 
     @Mock
-    private AdminUserService userService;
+    private UserService userService;
 
     @Mock
     private LoginLogService loginLogService;

@@ -3,14 +3,11 @@ package com.cmsr.onebase.module.system.api.tenant;
 import com.cmsr.onebase.framework.common.biz.system.tenant.TenantCommonApi;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
-import com.cmsr.onebase.module.system.dal.database.TenantDataRepository;
 import com.cmsr.onebase.module.system.service.tenant.TenantService;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.DataRow;
+import jakarta.annotation.Resource;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.annotation.Resource;
 import java.util.List;
 
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;

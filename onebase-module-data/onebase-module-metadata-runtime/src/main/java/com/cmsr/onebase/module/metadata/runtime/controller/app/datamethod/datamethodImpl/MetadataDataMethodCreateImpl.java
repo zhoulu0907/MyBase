@@ -28,10 +28,12 @@ import org.anyline.service.AnylineService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -384,6 +386,9 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
         List<MetadataDataMethodSubEntityContext> subEntityVos = context.getSubEntities();
         for(MetadataDataMethodSubEntityContext subEntityContext: subEntityVos){
             Long subEntityId  = subEntityContext.getEntityId();
+            if(ObjectUtils.isEmpty(subEntityId)){
+                throw exception(DB_SUBENTITY_OPERATION_ERROR,"subEntityId 参数不能为空");
+            }
             List<Map<Long, Object>> subData = subEntityContext.getSubData();
 
             String parentRelFieldId = relationshipDOS.stream().filter(relationshipDO ->
@@ -434,7 +439,7 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
         Map processedData = context.getProcessedData();
 
         Long entityId = context.getEntityId();
-        Map fieldData = convertNameToId(entityId,processedData);
+        Map fieldData = convertNameToId(entityId,processedData == null ? new HashMap<>() : processedData);
         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
         reqDTO.setTraceId(UUID.randomUUID().toString());
         reqDTO.setEntityId(entityId);
@@ -459,7 +464,7 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
         Map processedData = context.getProcessedData();
 
         Long entityId = context.getEntityId();
-        Map fieldData = convertNameToId(entityId,processedData);
+        Map fieldData = convertNameToId(entityId,processedData == null ? new HashMap<>() : processedData);
         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
         reqDTO.setTraceId(UUID.randomUUID().toString());
         reqDTO.setEntityId(entityId);

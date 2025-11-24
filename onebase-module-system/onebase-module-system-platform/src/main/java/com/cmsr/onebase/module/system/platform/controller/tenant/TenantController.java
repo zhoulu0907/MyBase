@@ -24,9 +24,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertList;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.TENANT_ONLY_GET_SELF;
 
 @Tag(name = "管理后台 - 租户")
 @RestController
@@ -35,6 +38,42 @@ public class TenantController {
 
     @Resource
     private TenantService tenantService;
+
+    @PostMapping("/create")
+    @Operation(summary = "创建租户")
+    @PreAuthorize("@ss.hasPermission('tenant:space:create')")
+    public CommonResult<Long> createTenant(@Valid @RequestBody TenantInsertReqVO createReqVO) {
+        return success(tenantService.createTenant(createReqVO));
+    }
+
+    @PostMapping("/update")
+    @Operation(summary = "更新租户")
+    @PreAuthorize("@ss.hasPermission('tenant:space:update')")
+    public CommonResult<Boolean> updateTenant(@Valid @RequestBody TenantUpdateReqVO updateReqVO) {
+        tenantService.updateTenant(updateReqVO);
+        return success(true);
+    }
+
+    @PostMapping("/delete")
+    @Operation(summary = "删除租户")
+    @Parameter(name = "id", description = "编号", required = true, example = "1024")
+    @PreAuthorize("@ss.hasPermission('tenant:space:delete')")
+    public CommonResult<Boolean> deleteTenant(@RequestParam("id") Long id) {
+        tenantService.deleteTenant(id);
+        return success(true);
+    }
+
+    @GetMapping("/get")
+    @Operation(summary = "获得租户(安全考虑仅获取用户所属租户)")
+    @Parameter(name = "id", description = "编号", required = true, example = "1024")
+    @PreAuthorize("@ss.hasPermission('tenant:space:query')")
+    public CommonResult<TenantRespVO> getTenant(@RequestParam("id") Long id) {
+        Long loginTenantId = TenantContextHolder.getTenantId();
+        if(!Objects.equals(loginTenantId, id)){
+            throw exception(TENANT_ONLY_GET_SELF);
+        }
+        return success(tenantService.getTenantWithAppCount(id));
+    }
 
     @GetMapping("/get-id-by-name")
     @PermitAll
@@ -67,41 +106,6 @@ public class TenantController {
             return success(null);
         }
         return success(TenantConvert.INSTANCE.convertToSimpleRespVO(tenant));
-    }
-
-    @PostMapping("/create")
-    @Operation(summary = "创建租户")
-    @PreAuthorize("@ss.hasPermission('tenant:space:create')")
-    public CommonResult<Long> createTenant(@Valid @RequestBody TenantInsertReqVO createReqVO) {
-        return success(tenantService.createTenant(createReqVO));
-    }
-
-    @PostMapping("/update")
-    @Operation(summary = "更新租户")
-    @PreAuthorize("@ss.hasPermission('tenant:space:update')")
-    public CommonResult<Boolean> updateTenant(@Valid @RequestBody TenantUpdateReqVO updateReqVO) {
-        tenantService.updateTenant(updateReqVO);
-        return success(true);
-    }
-
-    @PostMapping("/delete")
-    @Operation(summary = "删除租户")
-    @Parameter(name = "id", description = "编号", required = true, example = "1024")
-    @PreAuthorize("@ss.hasPermission('tenant:space:delete')")
-    public CommonResult<Boolean> deleteTenant(@RequestParam("id") Long id) {
-        tenantService.deleteTenant(id);
-        return success(true);
-    }
-
-    @GetMapping("/get")
-    @Operation(summary = "获得租户(安全考虑仅获取用户所属租户)")
-    @Parameter(name = "id", description = "编号", required = true, example = "1024")
-    @PreAuthorize("@ss.hasPermission('tenant:space:query')")
-    public CommonResult<TenantRespVO> getTenant(@RequestParam("id") Long id) {
-        if(null == id ){
-            id= TenantContextHolder.getTenantId();
-        }
-        return success(tenantService.getTenantWithAppCount(id));
     }
 
     @GetMapping("/get-allocatable-count")

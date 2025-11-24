@@ -141,6 +141,9 @@ public class MetadataDataMethodQueryImpl extends AbstractMetadataDataMethodCoreS
             MetadataEntityFieldDO sourceFieldDO = entityFieldRepository.findById(Long.valueOf(relationshipDO.getSourceFieldId()));
 
             MetadataBusinessEntityDO targetEntity = businessEntityService.getBusinessEntity(relationshipDO.getTargetEntityId());
+            if(targetEntity == null){
+                continue;
+            }
             MetadataEntityFieldDO targetFieldDO = entityFieldRepository.findById(Long.valueOf(relationshipDO.getTargetFieldId()));
             String tableName = targetEntity.getTableName();
             String fieldName = targetFieldDO.getFieldName();
