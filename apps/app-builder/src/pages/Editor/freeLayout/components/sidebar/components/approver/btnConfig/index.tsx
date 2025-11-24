@@ -67,13 +67,13 @@ function EditableCell(props: any) {
         [column.dataIndex]: value
       };
       onHandleSave && onHandleSave({ ...rowData, ...values });
-      setTimeout(() => setEditing(!editing), 300);
+      // setTimeout(() => setEditing(!editing), 300);
     } else {
       const form = getForm && getForm();
       if (form) {
         form.validate([column.dataIndex], (errors, values) => {
           if (!errors || !errors[column.dataIndex]) {
-            setEditing(!editing);
+            // setEditing(!editing);
             onHandleSave && onHandleSave({ ...rowData, ...values });
           }
         });
@@ -82,6 +82,14 @@ function EditableCell(props: any) {
       }
     }
   };
+
+  const setCellEdit = () => {
+    if (column.dataIndex === 'salary_select') {
+      setTimeout(() => setEditing(!editing), 300);
+    } else {
+      setEditing(!editing);
+    }
+  }
 
   if (editing) {
     return (
@@ -94,7 +102,7 @@ function EditableCell(props: any) {
           field={column.dataIndex}
           rules={[{ required: true }]}
         >
-          <Input ref={refInput} onPressEnter={cellValueChangeHandler} style={{ width: '86px' }} />
+          <Input ref={refInput} onPressEnter={setCellEdit} onChange={cellValueChangeHandler} style={{ width: '86px' }} />
         </FormItem>
       </div>
     );
@@ -110,101 +118,92 @@ function EditableCell(props: any) {
   );
 }
 
-export default function ApproverBtnConfig({ setApprovalConfigData, buttonConfigs }: BtnConfig) {
-  const columnsData = [
-    {
-      key: '1',
-      buttonType: 'approve',
-      buttonName: '同意',
-      displayName: '同意',
-      name: '同意',
-      defaultApprovalComment: '同意',
-      approvalCommentRequired: false,
-      batchApproval: false,
-      enabled: false
-    },
-    {
-      key: '2',
-      buttonType: 'reject',
-      buttonName: '拒绝',
-      displayName: '拒绝',
-      name: '拒绝',
-      defaultApprovalComment: '拒绝',
-      approvalCommentRequired: false,
-      batchApproval: false,
-      enabled: false
-    },
-    {
-      key: '3',
-      buttonName: '保存',
-      displayName: '保存',
-      name: '保存',
-      approvalCommentRequired: false,
-      batchApproval: false,
-      enabled: false
-    },
-    {
-      key: '4',
-      buttonName: '转交',
-      displayName: '转交',
-      name: '转交',
-      defaultApprovalComment: '转交',
-      approvalCommentRequired: false,
-      batchApproval: false,
-      enabled: false
-    },
-    {
-      key: '5',
-      buttonName: '加签',
-      displayName: '加签',
-      name: '加签',
-      defaultApprovalComment: '加签',
-      approvalCommentRequired: false,
-      batchApproval: false,
-      enabled: false
-    },
-    {
-      key: '6',
-      buttonName: '退回',
-      displayName: '退回',
-      name: '退回',
-      defaultApprovalComment: '退回',
-      approvalCommentRequired: false,
-      batchApproval: false,
-      enabled: false
-    },
-    {
-      key: '7',
-      buttonName: '撤回',
-      displayName: '撤回',
-      name: '撤回',
-      defaultApprovalComment: '撤回',
-      approvalCommentRequired: false,
-      batchApproval: false,
-      enabled: false
-    },
-    {
-      key: '8',
-      buttonName: '弃权',
-      displayName: '弃权',
-      name: '弃权',
-      defaultApprovalComment: '弃权',
-      approvalCommentRequired: false,
-      batchApproval: false,
-      enabled: false
-    }
-  ];
+const columnsData = [
+  {
+    key: '1',
+    buttonType: 'approve',
+    buttonName: '同意',
+    displayName: '同意',
+    name: '同意',
+    defaultApprovalComment: '同意',
+    approvalCommentRequired: false,
+    batchApproval: false,
+    enabled: false
+  },
+  {
+    key: '2',
+    buttonType: 'reject',
+    buttonName: '拒绝',
+    displayName: '拒绝',
+    name: '拒绝',
+    defaultApprovalComment: '拒绝',
+    approvalCommentRequired: false,
+    batchApproval: false,
+    enabled: false
+  },
+  {
+    key: '3',
+    buttonName: '保存',
+    displayName: '保存',
+    name: '保存',
+    approvalCommentRequired: false,
+    batchApproval: false,
+    enabled: false
+  },
+  {
+    key: '4',
+    buttonName: '转交',
+    displayName: '转交',
+    name: '转交',
+    defaultApprovalComment: '转交',
+    approvalCommentRequired: false,
+    batchApproval: false,
+    enabled: false
+  },
+  {
+    key: '5',
+    buttonName: '加签',
+    displayName: '加签',
+    name: '加签',
+    defaultApprovalComment: '加签',
+    approvalCommentRequired: false,
+    batchApproval: false,
+    enabled: false
+  },
+  {
+    key: '6',
+    buttonName: '退回',
+    displayName: '退回',
+    name: '退回',
+    defaultApprovalComment: '退回',
+    approvalCommentRequired: false,
+    batchApproval: false,
+    enabled: false
+  },
+  {
+    key: '7',
+    buttonName: '撤回',
+    displayName: '撤回',
+    name: '撤回',
+    defaultApprovalComment: '撤回',
+    approvalCommentRequired: false,
+    batchApproval: false,
+    enabled: false
+  },
+  {
+    key: '8',
+    buttonName: '弃权',
+    displayName: '弃权',
+    name: '弃权',
+    defaultApprovalComment: '弃权',
+    approvalCommentRequired: false,
+    batchApproval: false,
+    enabled: false
+  }
+];
 
-  const initData = columnsData.map((item: any) => {
-    buttonConfigs.forEach((config: any) => {
-      if (item.buttonName === config.buttonName) {
-        item = { ...item, ...config };
-        item.name = item.buttonName;
-      }
-    });
-    return item;
-  });
-  const [tbData, setData] = useState(initData);
+export default function ApproverBtnConfig({ setApprovalConfigData, buttonConfigs }: BtnConfig) {
+  const [tbData, setData] = useState<any[]>([]);
   const columns = [
     {
       title: '操作按钮',
@@ -297,33 +296,48 @@ export default function ApproverBtnConfig({ setApprovalConfigData, buttonConfigs
   }
 
   function handleSave(row: any) {
-    const newData = [...tbData];
+    const newData:any[] = [...tbData];
     const index = newData.findIndex((item) => row.key === item.key);
     newData.splice(index, 1, { ...newData[index], ...row });
     setData(newData);
   }
 
   useEffect(() => {
-    const neededProps = [
-      'buttonType',
-      'buttonName',
-      'displayName',
-      'defaultApprovalComment',
-      'approvalCommentRequired',
-      'enabled',
-      'batchApproval'
-    ];
-    const newTbData = tbData.map((item) => {
-      const newObj = {};
-      neededProps.forEach((prop) => {
-        if (prop in item) {
-          (newObj as any)[prop] = item[prop];
+    if(Array.isArray(tbData) && tbData.length > 0) {
+      const neededProps = [
+        'buttonType',
+        'buttonName',
+        'displayName',
+        'defaultApprovalComment',
+        'approvalCommentRequired',
+        'enabled',
+        'batchApproval'
+      ];
+      const newTbData = tbData.map((item) => {
+        const newObj = {};
+        neededProps.forEach((prop) => {
+          if (prop in item) {
+            (newObj as any)[prop] = item[prop];
+          }
+        });
+        return newObj;
+      });
+      setApprovalConfigData('buttonConfigs', newTbData);
+    }
+  }, [tbData]);
+
+  useEffect(() => {
+    const initData:any = columnsData.map((item: any) => {
+      buttonConfigs.forEach((config: any) => {
+        if (item.buttonName === config.buttonName) {
+          item = { ...item, ...config };
+          item.name = item.buttonName;
         }
       });
-      return newObj;
+      return item;
     });
-    setApprovalConfigData('buttonConfigs', newTbData);
-  }, [tbData]);
+    setData(initData)
+  }, [])
 
   return (
     <div className={styles.approverConfig}>
