@@ -192,5 +192,5 @@ export function getDefaultBtnConfig() {
       enabled: false
     }
   ];
-  return JSON.parse(JSON.stringify(btns))
+  return btns
 }
