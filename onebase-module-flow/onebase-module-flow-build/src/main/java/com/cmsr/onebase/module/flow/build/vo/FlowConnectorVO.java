@@ -22,6 +22,8 @@ public class FlowConnectorVO {
 
     private String config;
 
+    private String connectorVersion;
+
     private LocalDateTime createTime;
 
     public JsonNode getConfig() {

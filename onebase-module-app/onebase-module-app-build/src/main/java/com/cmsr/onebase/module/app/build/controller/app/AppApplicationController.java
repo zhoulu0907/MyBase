@@ -91,7 +91,7 @@ public class AppApplicationController {
 
     @GetMapping(value = {"/simple-list-by-name"})
     @Operation(summary = "获取我创建的应用列表-不分页", description = "获取我创建的应用列表")
-    public CommonResult<List<ApplicationSimpleRespVO>> getSimpleAppListByName(@RequestParam("appName") String appName) {
+    public CommonResult<List<ApplicationSimpleRespVO>> getSimpleAppListByName(@RequestParam(value = "appName", required = false)  String appName) {
         List<ApplicationDO> list = appApplicationService.getMySimpleAppListByName(appName);
         return success(BeanUtils.toBean(list, ApplicationSimpleRespVO.class));
     }

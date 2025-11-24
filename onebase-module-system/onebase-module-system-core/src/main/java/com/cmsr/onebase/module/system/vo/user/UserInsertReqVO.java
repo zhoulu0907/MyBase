@@ -10,7 +10,6 @@ import com.mzt.logapi.starter.annotation.DiffLogField;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.Data;
-import org.hibernate.validator.constraints.Length;
 
 import java.util.Set;
 
@@ -53,6 +52,7 @@ public class UserInsertReqVO {
 
     @Schema(description = "手机号码", example = "15601691300")
     @Mobile
+    @NotBlank(message = "手机号码不能为空")
     @DiffLogField(name = "手机号码")
     private String mobile;
 
@@ -63,10 +63,6 @@ public class UserInsertReqVO {
     @Schema(description = "用户头像", example = "https://www.cmsr.com")
     @DiffLogField(name = "用户头像")
     private String avatar;
-
-    @Schema(description = "用户类型", example = "2")
-    @DiffLogField(name = "用户类型")
-    private Integer userType;
 
     @Schema(description = "管理员类型", example = "2")
     @DiffLogField(name = "管理员类型")

@@ -73,7 +73,7 @@ public class SystemRoleController {
     @Operation(summary = "获得角色分页")
     @PreAuthorize("@ss.hasPermission('system:role:query')")
     public CommonResult<PageResult<RoleRespVO>> getRolePage(RolePageReqVO pageReqVO) {
-        PageResult<RoleDO> pageResult = roleService.getRolePage(pageReqVO);
+        PageResult<RoleDO> pageResult = roleService.findRolePageOnlyTenant(pageReqVO);
         return success(BeanUtils.toBean(pageResult, RoleRespVO.class));
     }
 
@@ -90,7 +90,7 @@ public class SystemRoleController {
     //@PreAuthorize("@ss.hasPermission('system:role:export')")
     public void export(HttpServletResponse response, @Validated RolePageReqVO exportReqVO) throws IOException {
         exportReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
-        List<RoleDO> list = roleService.getRolePage(exportReqVO).getList();
+        List<RoleDO> list = roleService.findRolePageOnlyTenant(exportReqVO).getList();
         // 输出
         ExcelUtils.write(response, "角色数据.xls", "数据", RoleRespVO.class,
                 BeanUtils.toBean(list, RoleRespVO.class));

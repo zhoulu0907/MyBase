@@ -31,10 +31,9 @@ import com.cmsr.onebase.module.system.service.oauth2.OAuth2TokenService;
 import com.cmsr.onebase.module.system.service.permission.PermissionService;
 import com.cmsr.onebase.module.system.service.permission.RoleService;
 import com.cmsr.onebase.module.system.service.tenant.TenantService;
-import com.cmsr.onebase.module.system.service.user.AdminUserService;
+import com.cmsr.onebase.module.system.service.user.UserService;
 import com.cmsr.onebase.module.system.vo.CaptchaVerificationReqVO;
 import com.cmsr.onebase.module.system.vo.auth.*;
-import com.cmsr.onebase.module.system.vo.role.RoleInsertReqVO;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Resource;
 import jakarta.validation.Validator;
@@ -46,6 +45,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Objects;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -61,7 +61,7 @@ import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 public class AdminAuthServiceImpl implements AdminAuthService {
 
     @Resource
-    private AdminUserService userService;
+    private UserService     userService;
     @Resource
     private LoginLogService loginLogService;
     @Resource
@@ -167,7 +167,7 @@ public class AdminAuthServiceImpl implements AdminAuthService {
         }
 
         // 4. 创建 Token 令牌，记录登录日志
-        return createTokenAfterLoginSuccess(user.getId(), reqVO.getUsername(), LoginLogTypeEnum.LOGIN_USERNAME);
+        return createTokenAfterLoginSuccess(user.getId(), reqVO.getUsername(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_USERNAME);
     }
 
     @Override
@@ -194,7 +194,7 @@ public class AdminAuthServiceImpl implements AdminAuthService {
 
         // 使用账号密码，进行登录
         AdminUserDO user = authenticate(reqVO.getUsername(), reqVO.getPassword());
-        AuthLoginRespVO authLoginRespVO=  createTokenAfterLoginSuccess(user.getId(), reqVO.getUsername(), LoginLogTypeEnum.LOGIN_USERNAME);
+        AuthLoginRespVO authLoginRespVO=  createTokenAfterLoginSuccess(user.getId(), reqVO.getUsername(),reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_USERNAME);
         // 设置是否管理员
         authLoginRespVO.setAdminFlag(findAdminFlag(RoleCodeEnum.TENANT_ADMIN.getCode(),user.getId()));
         return authLoginRespVO;
@@ -208,7 +208,7 @@ public class AdminAuthServiceImpl implements AdminAuthService {
         // 2. 使用账号密码，进行登录
         AdminUserDO user = mobileAuthenticate(reqVO.getMobile(), reqVO.getPassword());
 
-        AuthLoginRespVO authLoginRespVO= createCorpAfterLoginSuccess(user.getCorpId(), user.getId(), reqVO.getMobile(), LoginLogTypeEnum.LOGIN_MOBILE);
+        AuthLoginRespVO authLoginRespVO= createCorpAfterLoginSuccess(user.getCorpId(), user.getId(), reqVO.getMobile(),reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE);
         // 设置是否管理员
         authLoginRespVO.setAdminFlag(findAdminFlag(RoleCodeEnum.CORP_ADMIN.getCode(),user.getId()));
         // 回显当前登录用户的企业id
@@ -257,7 +257,7 @@ public class AdminAuthServiceImpl implements AdminAuthService {
         }
 
         // 创建 Token 令牌，记录登录日志
-        return createTokenAfterLoginSuccess(user.getId(), reqVO.getMobile(), LoginLogTypeEnum.LOGIN_MOBILE);
+        return createTokenAfterLoginSuccess(user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE);
     }
 
     private void createLoginLog(Long userId, String username,
@@ -310,16 +310,31 @@ public class AdminAuthServiceImpl implements AdminAuthService {
         return captchaService.verification(captchaVO);
     }
 
-    private AuthLoginRespVO createTokenAfterLoginSuccess(Long userId, String username, LoginLogTypeEnum logType) {
-        return createCorpAfterLoginSuccess(null, userId, username, logType);
+    private AuthLoginRespVO createTokenAfterLoginSuccess(Long userId, String username, String deviceId, LoginLogTypeEnum logType) {
+        return createCorpAfterLoginSuccess(null, userId, username, deviceId, logType);
     }
 
-    private AuthLoginRespVO createCorpAfterLoginSuccess(Long corpId, Long userId, String username, LoginLogTypeEnum logType) {
+    private AuthLoginRespVO createCorpAfterLoginSuccess(Long corpId, Long userId, String username, String deviceId, LoginLogTypeEnum logType) {
         // 插入登陆日志
         createLoginLog(userId, username, logType, LoginResultEnum.SUCCESS);
         // 创建访问令牌
         OAuth2AccessTokenDO accessTokenDO = oauth2TokenService.createCorpAccessToken(corpId, userId, getUserType().getValue(),
                 OAuth2ClientConstants.CLIENT_ID_DEFAULT, null);
+
+        // 检查并限制设备数，踢出超限的设备
+        List<String> removedTokens = securityConfigApi.checkAndLimitDevices(
+                userId,
+                deviceId,
+                accessTokenDO.getAccessToken()
+        ).getData();
+
+        // 删除被踢出的Token
+        if (removedTokens != null && !removedTokens.isEmpty()) {
+            for (String removedToken : removedTokens) {
+                oauth2TokenService.removeAccessToken(removedToken);
+                log.info("用户[{}]设备数超限，已踢出Token: {}", userId, removedToken);
+            }
+        }
 
         TenantDO tennantDO = tenantService.getTenant(accessTokenDO.getTenantId());
         // 构建返回结果
@@ -328,6 +343,9 @@ public class AdminAuthServiceImpl implements AdminAuthService {
         // 检查密码有效期
         PasswordExpiryCheckDTO expiryCheckResult = securityConfigApi.checkPasswordExpiry(userId).getData();
         respVO.setPasswordExpiryInfo(expiryCheckResult);
+
+        // 创建会话空闲检测Key
+        securityConfigApi.createSessionIdleKey(userId, deviceId);
 
         return respVO;
     }
@@ -345,6 +363,13 @@ public class AdminAuthServiceImpl implements AdminAuthService {
         if (accessTokenDO == null) {
             return;
         }
+
+        // 清理在线设备记录
+        securityConfigApi.removeOnlineDevice(
+                accessTokenDO.getUserId(),
+                token
+        );
+
         // 删除成功，则记录登出日志
         createLogoutLog(accessTokenDO.getUserId(), accessTokenDO.getUserType(), logType);
     }
@@ -387,7 +412,7 @@ public class AdminAuthServiceImpl implements AdminAuthService {
         Long userId = userService.registerUser(registerReqVO);
 
         // 3. 创建 Token 令牌，记录登录日志
-        return createTokenAfterLoginSuccess(userId, registerReqVO.getUsername(), LoginLogTypeEnum.LOGIN_USERNAME);
+        return createTokenAfterLoginSuccess(userId, registerReqVO.getUsername(), registerReqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_USERNAME);
     }
 
     @VisibleForTesting

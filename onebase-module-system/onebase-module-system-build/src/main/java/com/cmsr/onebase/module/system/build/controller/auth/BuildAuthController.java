@@ -16,7 +16,7 @@ import com.cmsr.onebase.module.system.service.auth.AdminAuthService;
 import com.cmsr.onebase.module.system.service.permission.MenuService;
 import com.cmsr.onebase.module.system.service.permission.PermissionService;
 import com.cmsr.onebase.module.system.service.permission.RoleService;
-import com.cmsr.onebase.module.system.service.user.AdminUserService;
+import com.cmsr.onebase.module.system.service.user.UserService;
 import com.cmsr.onebase.module.system.vo.auth.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -55,9 +55,9 @@ public class BuildAuthController {
     @Resource
     private AdminAuthService authService;
     @Resource
-    private AdminUserService userService;
+    private UserService      userService;
     @Resource
-    private RoleService roleService;
+    private RoleService      roleService;
     @Resource
     private MenuService menuService;
     @Resource

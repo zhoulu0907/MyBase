@@ -58,4 +58,5 @@ public interface CorpAppRelationService {
     List<CorpAppRelationDO> getCorpAppRelationList(CorpAppRelationPageReqVO corpAppRelationPageReqVO);
 
 
+    void updateStatus(Long id, Long status);
 }

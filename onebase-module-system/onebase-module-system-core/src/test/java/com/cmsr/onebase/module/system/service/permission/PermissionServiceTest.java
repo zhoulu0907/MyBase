@@ -1,9 +1,13 @@
 package com.cmsr.onebase.module.system.service.permission;
 
+import cn.hutool.core.collection.CollUtil;
 import com.cmsr.onebase.framework.common.biz.system.permission.dto.DeptDataPermissionRespDTO;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
-import cn.hutool.core.collection.CollUtil;
-import com.cmsr.onebase.module.system.dal.database.*;
+import com.cmsr.onebase.module.system.dal.database.MenuDataRepository;
+import com.cmsr.onebase.module.system.dal.database.PermissionDataRepository;
+import com.cmsr.onebase.module.system.dal.database.RoleDataRepository;
+import com.cmsr.onebase.module.system.dal.database.UserRoleDataRepository;
+import com.cmsr.onebase.module.system.dal.database.dept.DeptDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
@@ -64,7 +68,7 @@ public class PermissionServiceTest {
     @Resource
     private UserRoleDataRepository   userRoleDataRepository;
     @Resource
-    private RoleDataRepository       roleDataRepository;
+    private RoleDataRepository roleDataRepository;
     @Resource
     private DeptDataRepository deptDataRepository;
     @Resource

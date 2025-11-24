@@ -5,18 +5,15 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.system.api.logger.dto.OperateLogRespDTO;
 import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
 import com.cmsr.onebase.module.system.api.user.dto.UserByDeptPageReqDTO;
 import com.cmsr.onebase.module.system.api.user.dto.UserSimpleRespDTO;
 import com.cmsr.onebase.module.system.convert.user.UserConvert;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
-import com.cmsr.onebase.module.system.dal.dataobject.logger.OperateLogDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.service.dept.DeptService;
-import com.cmsr.onebase.module.system.service.user.AdminUserService;
+import com.cmsr.onebase.module.system.service.user.UserService;
 import com.cmsr.onebase.module.system.vo.user.UserByDeptPageReqVO;
-import com.cmsr.onebase.module.system.vo.user.UserSimpleRespVO;
 import jakarta.annotation.Resource;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,7 +29,7 @@ import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.
 public class AdminUserApiImpl implements AdminUserApi {
 
     @Resource
-    private AdminUserService userService;
+    private UserService userService;
     @Resource
     private DeptService deptService;
 

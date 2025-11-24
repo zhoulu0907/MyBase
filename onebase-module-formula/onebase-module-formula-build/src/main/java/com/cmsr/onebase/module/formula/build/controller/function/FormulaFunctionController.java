@@ -35,7 +35,7 @@ public class FormulaFunctionController {
     @Resource(name = "formulaFunctionService") // 使用指定的bean名称
     private FormulaFunctionService functionService;
 
-    @PostMapping("create")
+    @PostMapping("/create")
     @Operation(summary = "创建函数")
     @PreAuthorize("@ss.hasPermission('formula:function:create')")
     public CommonResult<Long> createFunction(@Valid @RequestBody FunctionInsertReqVO createReqVO) {
@@ -43,7 +43,7 @@ public class FormulaFunctionController {
         return success(functionId);
     }
 
-    @PostMapping("update")
+    @PostMapping("/update")
     @Operation(summary = "更新函数")
     @PreAuthorize("@ss.hasPermission('formula:function:update')")
     public CommonResult<Boolean> updateFunction(@Valid @RequestBody FunctionUpdateReqVO updateReqVO) {
@@ -51,7 +51,7 @@ public class FormulaFunctionController {
         return success(true);
     }
 
-    @PostMapping("delete")
+    @PostMapping("/delete")
     @Operation(summary = "删除函数")
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
     @PreAuthorize("@ss.hasPermission('formula:function:delete')")
