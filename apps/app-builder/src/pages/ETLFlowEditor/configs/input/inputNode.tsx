@@ -2,7 +2,7 @@ import { Button, Table } from '@arco-design/web-react';
 import { listETLTableColumns, listETLTables, previewETLDatasource, type ELTColumn, type ETLTable } from '@onebase/app';
 import { ETLDrawerTab, etlEditorSignal } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import DataPreview from '../../components/dataPreview';
 import DataRemark from '../../components/dataRemark';
 import { setNodeDataAndResetDownstream } from '../utils';
@@ -29,49 +29,18 @@ export const InputNodeConfig: React.FC = () => {
     nodeData.value[curNode.value.id]?.config?.fields || []
   );
 
-  const isAllSelected = useMemo(() => {
-    if (!curColumns.length) {
-      return false;
-    }
-    return selectedColumns.length === curColumns.length;
-  }, [curColumns, selectedColumns]);
-
-  const isIndeterminate = useMemo(() => {
-    if (!curColumns.length) {
-      return false;
-    }
-    return selectedColumns.length > 0 && selectedColumns.length < curColumns.length;
-  }, [curColumns, selectedColumns]);
-
-  const handleSelectAllColumns = (checked: boolean) => {
-    if (checked) {
-      setSelectColumns(curColumns);
-      return;
-    }
-    setSelectColumns([]);
-  };
-
-  const handleColumnSelect = (columnId: string) => {
-    setSelectColumns((prevSelected: ELTColumn[]) => {
-      // 判断该字段是否已经被选中
-      if (prevSelected.some((col) => col.fieldName === columnId)) {
-        // 如果已经选中则移除
-        return prevSelected.filter((col) => col.fieldName !== columnId);
-      }
-      // 否则将该字段加入已选中列表
-      const column = curColumns.find((col) => col.fieldName === columnId);
-      return column ? [...prevSelected, column] : prevSelected;
-    });
-  };
-
   useEffect(() => {
     if (nodeData.value[curNode.value.id]?.config?.datasourceId && nodeData.value[curNode.value.id]?.config?.tableId) {
       handleListETLTables(nodeData.value[curNode.value.id]?.config?.datasourceId);
       handlelistETLTableColumns(nodeData.value[curNode.value.id]?.config?.tableId);
     }
-
-    handlePreviewData();
   }, [nodeData.value[curNode.value.id]?.config?.tableId]);
+
+  useEffect(() => {
+    if (curDrawerTab.value == ETLDrawerTab.DATA_PREVIEW) {
+      handlePreviewData();
+    }
+  }, [curDrawerTab.value]);
 
   useEffect(() => {
     let payload = nodeData.value[curNode.value.id];
@@ -172,7 +141,7 @@ export const InputNodeConfig: React.FC = () => {
 
               <div className={styles.columnContent}>
                 <Table
-                  data={curColumns}
+                  data={curColumns.map((col) => ({ ...col, key: col.fieldName }))}
                   pagination={false}
                   columns={[
                     {
