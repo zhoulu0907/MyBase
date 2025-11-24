@@ -411,14 +411,16 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
                 validatePermission(context);
             }
 
+            // 9. 数据编号
+            generateDataNumber(context);
+
             // 7. 初步数据校验------数据校验规则 ----核心功能!!!
             validateData(context);
 
             // 10. 前置自动化工作流触发
             executePreWorkflow(context);
 
-            // 9. 数据编号
-            generateDataNumber(context);
+
 
             // 10. 数据存储
             storeData(context);
