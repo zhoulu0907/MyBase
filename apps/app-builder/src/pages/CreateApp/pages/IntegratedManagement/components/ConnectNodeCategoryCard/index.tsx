@@ -8,11 +8,11 @@ import styles from './index.module.less';
  * FlowCard 组件
  * 用于流程管理页面的卡片展示
  */
-export interface FlowCardProps {
+export interface CardProps {
   data: ConnectFlowNode;
 }
 
-const ConnectNodeCategoryCard: React.FC<FlowCardProps> = ({ data }) => {
+const ConnectNodeCategoryCard: React.FC<CardProps> = ({ data }) => {
   return (
     <div className={styles.card}>
       <div className={styles.cardHeader}>

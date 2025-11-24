@@ -4,8 +4,9 @@ import { IconBranch, IconCommon, IconLink, IconPlayCircle, IconRefresh, IconTool
 import React from 'react';
 import { Route, Routes, useNavigate } from 'react-router-dom';
 import styles from './index.module.less';
-import ConnectorPage from './pages/connector';
-import ConnectorInstancesPage from './pages/connectorInstance';
+import ConnectorPage from './pages/connector/connectorNode';
+import ConnectorDetailPage from './pages/connector/detail';
+import ConnectorInstancesPage from './pages/connector/instance';
 import FlowEditorPage from './pages/flowEditor';
 import FlowExecuteRecordPage from './pages/flowExecuteRecord';
 import FlowManagementPage from './pages/flowManagement';
@@ -21,7 +22,7 @@ const IntegratedManagementPage: React.FC = () => {
     <div className={styles.integratedManagementPage}>
       <div className={styles.sider}>
         <div className={styles.title}>主菜单</div>
-        <Menu className={styles.menu} autoOpen>
+        <Menu className={styles.menu} defaultOpenKeys={['connectors']}>
           <MenuItem
             key="flow"
             onClick={() => navigate(`/onebase/create-app/integrated-management/flow-management?appId=${curAppId}`)}
@@ -91,6 +92,7 @@ const IntegratedManagementPage: React.FC = () => {
           <Route path="flow-execute-record" element={<FlowExecuteRecordPage />} />
           <Route path="connector" element={<ConnectorPage />} />
           <Route path="connector-instances" element={<ConnectorInstancesPage />} />
+          <Route path="connector-detail" element={<ConnectorDetailPage />} />
         </Routes>
       </div>
     </div>

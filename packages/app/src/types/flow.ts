@@ -165,8 +165,70 @@ export interface ListConnectInstanceReq {
 
 export interface CreateConnectInstanceReq {
   applicationId: string;
-  connectionName: string;
+  connectorName: string;
   description?: string;
   typeCode: string;
   config?: any;
+}
+
+/**
+ * TypeCode 枚举，用于表示流程节点的类型标识。
+ */
+export enum TypeCode {
+  SCRIPT = 'script' // 脚本类型
+  // 其他类型可在此处继续扩展
+}
+
+export interface ConnectInstance {
+  applicationId: string;
+  connectorId: string;
+  connectorName: string;
+  typeCode: TypeCode;
+  createTime: string;
+  description?: string;
+}
+
+export interface UpdateConnectInstanceReq {
+  connectorId: string;
+  connectorName: string;
+  description?: string;
+}
+
+export interface DeleteConnectInstanceReq {
+  id: string;
+}
+
+export interface ListScriptActionReq {
+  pageNo: number;
+  pageSize: number;
+  connectorId: string;
+  scriptName?: string;
+}
+
+export interface CreateScriptActionReq {
+  connectorId: string; // 连接器ID，必需
+  scriptName: string; // 动作名称，必需
+  scriptType?: string; // 脚本类型，可选
+  description?: string; // 描述，可选
+  rawScript: string; // 原始脚本内容，必需
+  inputParameter?: string; // 入参，可选
+  outputParameter?: string; // 出参，可选
+}
+
+export interface UpdateScriptActionReq {
+  scriptId: string; // 脚本ID，必需
+  scriptName: string; // 动作名称，必需
+  scriptType?: string; // 脚本类型，可选
+  description?: string; // 描述，可选
+  rawScript: string; // 原始脚本内容，必需
+  inputParameter?: string; // 入参，可选
+  outputParameter?: string; // 出参，可选
+}
+
+export interface ScriptActionItem {
+  connectorId: string;
+  craeteTime: string;
+  description: string;
+  scriptId: string;
+  scriptName: string;
 }
