@@ -1,6 +1,6 @@
 package com.cmsr.onebase.framework.tenant.core.rpc;
 
-import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
 

@@ -15,11 +15,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 @Slf4j
+// @Order(-1) // 保证在最前面执行
 public class LicenseCheckFilter extends OncePerRequestFilter {
 
     @Resource
     private LicenseCheckHandler licenseCheckHandler;
-
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
