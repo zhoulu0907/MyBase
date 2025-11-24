@@ -1,6 +1,6 @@
 package com.cmsr.onebase.framework.base.mybatis;
 
-import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.mybatisflex.core.tenant.TenantFactory;
 import org.springframework.stereotype.Component;
 
