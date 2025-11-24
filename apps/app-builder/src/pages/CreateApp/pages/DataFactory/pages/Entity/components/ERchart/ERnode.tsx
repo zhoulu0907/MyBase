@@ -150,7 +150,7 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
       <div className={styles.nodeHeader}>
         <IconSync className={styles.refreshIcon} onClick={handleRefresh} />
         <span className={styles.nodeTitle}>
-          {nodeData.entityName || '未命名实体'}
+          {nodeData.entityName || '未命名资产'}
           {newNodes.includes(nodeData.entityId) && <span className={styles.nodeIsNew} />}
         </span>
         <Switch

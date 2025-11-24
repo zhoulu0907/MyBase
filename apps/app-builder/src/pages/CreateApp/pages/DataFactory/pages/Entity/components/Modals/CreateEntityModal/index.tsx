@@ -20,7 +20,7 @@ interface EntityFormValues {
 
 // 实体类型(1:自建表，2:复用已有表)
 const entitySources = [
-  { label: '新建业务实体', value: '1' },
+  { label: '新建数据资产', value: '1' },
   { label: '引用自有数据源中已有资产', value: '2' }
 ];
 
@@ -92,7 +92,7 @@ const CreateEntityModal: React.FC<{
   return (
     <Modal
       className={styles.createEntityModal}
-      title="创建业务实体"
+      title="创建数据资产"
       visible={visible}
       onOk={handleFinish}
       onCancel={handleCancel}
@@ -102,9 +102,9 @@ const CreateEntityModal: React.FC<{
       <Form form={form} layout="vertical" onSubmit={handleFinish}>
         {dsResource !== DS_RESOURCE_TYPE.INTERNAL && (
           <Form.Item
-            label="业务实体来源于"
+            label="数据资产来源于"
             field="source"
-            rules={[{ required: true, message: '请选择业务实体来源' }]}
+            rules={[{ required: true, message: '请选择数据资产来源' }]}
             initialValue={entitySources[0].value}
           >
             <Radio.Group onChange={handleSourceChange}>
@@ -129,15 +129,15 @@ const CreateEntityModal: React.FC<{
           </>
         )}
 
-        <Form.Item label="业务实体名称" field="tableName" rules={[...createEntityRules.tableName]}>
+        <Form.Item label="数据资产名称" field="tableName" rules={[...createEntityRules.tableName]}>
           <Input maxLength={40} placeholder="由小写字母、数字、下划线组成，须以字母开头，不超过40个字符" />
         </Form.Item>
 
-        <Form.Item label="业务展示名称" field="displayName" rules={[...createEntityRules.displayName]}>
-          <Input maxLength={50} placeholder="请输入业务展示名称，不超过50个字符" />
+        <Form.Item label="数据资产展示名称" field="displayName" rules={[...createEntityRules.displayName]}>
+          <Input maxLength={50} placeholder="请输入数据资产展示名称，不超过50个字符" />
         </Form.Item>
 
-        <Form.Item label="业务实体描述" field="description" rules={[...createEntityRules.description]}>
+        <Form.Item label="数据资产描述" field="description" rules={[...createEntityRules.description]}>
           <Input.TextArea placeholder="请输入描述（选填）" rows={4} maxLength={500} showWordLimit />
         </Form.Item>
       </Form>

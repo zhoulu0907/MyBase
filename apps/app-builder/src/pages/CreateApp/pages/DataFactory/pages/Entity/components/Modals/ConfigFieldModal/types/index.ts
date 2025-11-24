@@ -152,7 +152,7 @@ export interface AutoCodeRules {
   rules: AutoCodeRule[];
 }
 
-// 实体及子表字段
+// 资产及子表字段
 export interface EntityFieldsWithChildren {
   label: string;
   value: string;

@@ -46,9 +46,9 @@ const DataFactoryPage: React.FC = () => {
           collapse={collapsed}
         >
           <Menu.Item key="check-entity">
-            <Tooltip content="业务实体管理" position="right">
+            <Tooltip content="数据资产管理" position="right">
               <IconCommon />
-              业务实体管理
+              数据资产管理
             </Tooltip>
           </Menu.Item>
           <Menu.Item key="data-source">

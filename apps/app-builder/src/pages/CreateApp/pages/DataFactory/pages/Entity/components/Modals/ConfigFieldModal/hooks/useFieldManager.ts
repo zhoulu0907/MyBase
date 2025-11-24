@@ -225,7 +225,7 @@ export const useFieldManager = (
     }
 
     try {
-      // 检查实体是否存在
+      // 检查资产是否存在
       if (!entity?.entityId) {
         return;
       }

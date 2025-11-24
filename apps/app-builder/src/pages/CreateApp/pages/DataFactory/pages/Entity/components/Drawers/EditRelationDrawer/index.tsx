@@ -55,7 +55,7 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-  // 初始化实体选项
+  // 初始化资产选项
   useEffect(() => {
     if (visible && curDataSourceId) {
       loadEntities();
@@ -90,7 +90,7 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
         handleEntityChange(relationData?.target?.cell || relationData?.targetEntityId || '', 'right');
       }
     } catch (error) {
-      console.error('加载实体列表失败:', error);
+      console.error('加载资产列表失败:', error);
     }
   };
 
@@ -117,7 +117,7 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
     }
   };
 
-  // 处理实体选择变化
+  // 处理资产选择变化
   const handleEntityChange = (entityId: string, side: 'left' | 'right') => {
     if (entityId) {
       loadFields(entityId, side);
