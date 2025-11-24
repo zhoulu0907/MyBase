@@ -98,12 +98,14 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
       } = {};
       Object.keys(pageComponentSchemas).forEach((key) => {
         const originalItem = pageComponentSchemas[key];
-        const secondDataField = originalItem.config.dataField[1];
-
-        const nodeConfig = fieldPerm?.[secondDataField];
-        const formConfig = originalItem.config.status;
-        const viewMode = ViewModeMap[detailData?.pageView?.viewMode as keyof typeof ViewModeMap];
-        const newStatus = parseStatus(nodeConfig, formConfig, viewMode);
+        const secondDataField = originalItem.config?.dataField?.[1];
+        let newStatus = originalItem.config?.status;
+        if (secondDataField) {
+          const nodeConfig = fieldPerm?.[secondDataField];
+          const formConfig = originalItem.config.status;
+          const viewMode = ViewModeMap[detailData?.pageView?.viewMode as keyof typeof ViewModeMap];
+          newStatus = parseStatus(nodeConfig, formConfig, viewMode);
+        }
 
         updatedData[key] = {
           ...originalItem,
