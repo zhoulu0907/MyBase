@@ -102,7 +102,8 @@ const Right: React.FC = () => {
             accessToken: response.accessToken,
             refreshToken: response.refreshToken,
             expiresTime: response.expiresTime,
-            tenantId: response.tenantId
+            tenantId: response.tenantId,
+            loginURL: window.location.href // 当前地址
           },
           rememberMe
         );

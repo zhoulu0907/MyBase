@@ -7,7 +7,7 @@ import { UserPermissionManager } from '@/utils/permission';
 import { Avatar, Divider, Dropdown, Layout, Menu, Tabs, Typography } from '@arco-design/web-react';
 import { IconExport } from '@arco-design/web-react/icon';
 import { TokenManager } from '@onebase/common';
-import { getPermissionInfo, CodeType } from '@onebase/platform-center';
+import { CodeType, getPermissionInfo } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styles from './header.module.less';
@@ -80,10 +80,15 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     // TODO(mickey): 联调后打开
     // await systemLogout();
     // 清除 token
+    const loginURL = TokenManager.getTokenInfo()?.loginURL;
     TokenManager.clearToken();
     UserPermissionManager.clearUserPermissionInfo();
     // 跳转到登录页
-    navigate('/login', { replace: true });
+    if (loginURL) {
+      window.location.href = loginURL;
+    } else {
+      navigate('/login', { replace: true });
+    }
   };
 
   const tenantAdminMenu = (

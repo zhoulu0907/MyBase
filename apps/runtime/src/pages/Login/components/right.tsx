@@ -201,7 +201,8 @@ const Right: React.FC = () => {
             expiresTime: response.expiresTime,
             tenantId: response.tenantId,
             adminFlag: response.adminFlag,
-            corpId: response.corpId
+            corpId: response.corpId,
+            loginURL: window.location.href // 当前地址
           },
           rememberMe
         );
