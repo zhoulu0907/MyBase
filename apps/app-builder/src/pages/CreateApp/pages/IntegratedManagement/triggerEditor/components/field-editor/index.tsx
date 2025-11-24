@@ -116,9 +116,12 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId, data
         });
       } else if (
         field?.fieldType === fieldType ||
+        field?.fieldType === FieldType.VALUE ||
+        field?.fieldType === FieldType.FORMULA ||
         ([ENTITY_FIELD_TYPE.NUMBER.VALUE, ENTITY_FIELD_TYPE.ID.VALUE].includes(field?.fieldType) &&
           [ENTITY_FIELD_TYPE.NUMBER.VALUE, ENTITY_FIELD_TYPE.ID.VALUE].includes(fieldType))
       ) {
+        //  FieldType 计算节点类型
         children.push({
           key: `${nodeId}.${field.value}`,
           title: field.label

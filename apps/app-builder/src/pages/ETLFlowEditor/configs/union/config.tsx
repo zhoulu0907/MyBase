@@ -3,7 +3,7 @@ import { etlEditorSignal } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
-import { getSourceNodeIdsByTarget } from '../utils';
+import { getSourceNodeIdsByTarget, setNodeDataAndResetDownstream } from '../utils';
 import styles from './index.module.less';
 
 /**
@@ -95,7 +95,7 @@ const UnionConfig: React.FC = () => {
       }))
     };
     console.log(payload);
-    setNodeData(curNode.value.id, payload);
+    setNodeDataAndResetDownstream(payload, curNode.value.id, graphData.value, nodeData.value);
   }, [data]);
 
   return (

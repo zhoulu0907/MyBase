@@ -4,6 +4,7 @@ import styles from '../../index.module.less';
 import { useSignals } from '@preact/signals-react/runtime';
 import { etlEditorSignal, ETLJoinType } from '@onebase/common';
 import { useEffect, useState } from 'react';
+import { setNodeDataAndResetDownstream } from '../../../utils';
 
 const { Option } = Select;
 const FormItem = Form.Item;
@@ -24,7 +25,7 @@ interface JoinRowFieldsProps {
 
 const JoinRowFields = (props: JoinRowFieldsProps) => {
   useSignals();
-  const { curNode, nodeData, setNodeData } = etlEditorSignal;
+  const { curNode, nodeData, graphData, setNodeData } = etlEditorSignal;
   const { index, rowField, leftFieldList, rightFieldList, form, remove } = props;
 
   const [finialRightFieldList, setFinialRightFieldList] = useState<any[]>(rightFieldList);
@@ -89,7 +90,7 @@ const JoinRowFields = (props: JoinRowFieldsProps) => {
       ...formValue
     };
 
-    setNodeData(curNode.value.id, payload);
+    setNodeDataAndResetDownstream(payload, curNode.value.id, graphData.value, nodeData.value);
   };
 
   return (

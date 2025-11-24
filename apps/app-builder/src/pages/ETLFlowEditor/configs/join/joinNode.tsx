@@ -6,6 +6,7 @@ import { ETLDrawerTab, etlEditorSignal } from '@onebase/common';
 import JoinRow from './components/joinRow';
 import styles from './index.module.less';
 import DataRemark from '../../components/dataRemark';
+import { setNodeDataAndResetDownstream } from '../utils';
 
 type Row = {
   isSelected?: boolean;
@@ -22,13 +23,12 @@ type Row = {
 export const JoinNodeConfig: React.FC = () => {
   useSignals();
 
-  const { curNode, curDrawerTab, nodeData, graphData, setNodeData } = etlEditorSignal;
+  const { curNode, curDrawerTab, nodeData, graphData } = etlEditorSignal;
   const [form] = useForm();
   const [finalNodeList, setFinalNodeList] = useState<any[]>([]);
 
   const [fieldListform] = useForm();
   const [rows, setRows] = useState<Row[]>([]);
-  const [selectedRows, setSelectedRows] = useState<Row[]>([]);
 
   useEffect(() => {
     const finalNodeList = generateNodeList(curNode.value.id);
@@ -44,10 +44,10 @@ export const JoinNodeConfig: React.FC = () => {
       let allFieldList = [];
       if (curNodeDetailConfig?.mappings?.length > 0) {
         allFieldList = curNodeDetailConfig?.mappings;
-      } else {
+      } else if (leftNodeId && rightNodeId) {
         const leftFiledList = nodeListDetail[leftNodeId]?.output.fields;
         const rightFiledList = nodeListDetail[rightNodeId]?.output.fields;
-        const finalLeftFiledList = leftFiledList.map((field: any) => ({
+        const finalLeftFiledList = leftFiledList?.map((field: any) => ({
           fieldType: field.fieldType,
           fieldFqn: field.fieldFqn,
           fieldName: field.fieldName,
@@ -55,7 +55,7 @@ export const JoinNodeConfig: React.FC = () => {
           nodeId: leftNodeId,
           nodeName: nodeListDetail[leftNodeId].title
         }));
-        const finalRightFiledList = rightFiledList.map((field: any) => ({
+        const finalRightFiledList = rightFiledList?.map((field: any) => ({
           fieldType: field.fieldType,
           fieldFqn: field.fieldFqn,
           fieldName: field.fieldName,
@@ -102,7 +102,8 @@ export const JoinNodeConfig: React.FC = () => {
         verified: false
       };
     }
-    setNodeData(curNode.value.id, payload);
+
+    setNodeDataAndResetDownstream(payload, curNode.value.id, graphData.value, nodeData.value);
   };
 
   const selectedRowKeys = rows.filter((r) => r.isSelected).map((r) => r.fieldFqn) as (string | number)[];
@@ -111,7 +112,6 @@ export const JoinNodeConfig: React.FC = () => {
     const next = rows.map((r) => ({ ...r, isSelected: keySet.has(String(r.fieldFqn)) }));
     fieldListform.setFieldsValue({ mappings: next });
     setRows(next);
-    setSelectedRows(selectedRows);
   };
 
   const rowSelection = {
