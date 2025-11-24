@@ -63,3 +63,45 @@
     display: flex;
   }
 }
+
+.container {
+  overflow: hidden auto;
+
+  .empty {
+    font-size: 0.36rem;
+    text-align: center;
+    padding: 2rem 0;
+  }
+
+  .item {
+    height: 1.28rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 0.32rem;
+    box-sizing: border-box;
+
+    .left {
+      display: flex;
+      align-items: center;
+      gap: 0.16rem;
+
+      .icon {
+        font-size: 0.32rem;
+        background-color: rgb(var(--primary-6));
+      }
+
+      .title {
+        color: #1D2129;
+        font-size: 0.32rem;
+      }
+
+    }
+
+    .stepDept {
+      font-size: 0.28rem;
+      color: rgb(var(--primary-6));
+
+    }
+  }
+}

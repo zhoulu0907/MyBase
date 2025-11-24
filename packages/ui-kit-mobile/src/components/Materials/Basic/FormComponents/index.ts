@@ -15,7 +15,7 @@ import XRadio from './Radio';
 import XSwitch from './Switch';
 import XImgUpload from './ImgUpload';
 import XCarouselForm from './Carousel';
-import FileUpload from './FileUpload';
+import XFileUpload from './FileUpload';
 import XAutoCode from './AutoCode';
 import XDeptSelect from './DeptSelect';
 import XUserSelect from './UserSelect';
@@ -38,7 +38,7 @@ import XRadioSchema from './Radio/schema';
 import XSwitchSchema from './Switch/schema';
 import XImgUploadSchema from './ImgUpload/schema';
 import XCarouselSchema from './Carousel/schema';
-import FileUploadSchema from './FileUpload/schema';
+import XFileUploadSchema from './FileUpload/schema';
 import XAutoCodeSchema from './AutoCode/schema';
 import XDeptSelectSchema from './DeptSelect/schema';
 import XUserSelectSchema from './UserSelect/schema';
@@ -62,7 +62,7 @@ export const FormComp = {
   XSwitch,
   XImgUpload,
   XCarouselForm,
-  FileUpload,
+  XFileUpload,
   XAutoCode,
   XDeptSelect,
   XUserSelect,
@@ -86,7 +86,7 @@ export const FormSchema = {
   XSwitchSchema,
   XImgUploadSchema,
   XCarouselSchema,
-  FileUploadSchema,
+  XFileUploadSchema,
   XAutoCodeSchema,
   XDeptSelectSchema,
   XUserSelectSchema,

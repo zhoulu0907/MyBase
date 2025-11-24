@@ -423,13 +423,13 @@ const XLoadMore = memo(
 
     return (
       <div className="loadmore-list-wrapper">
-       {searchItems?.length ? <Sticky topOffset={0.88 * window.ROOT_FONT_SIZE} className="list-search-header">
+        {searchItems?.length ? <Sticky topOffset={0.88 * window.ROOT_FONT_SIZE} className="list-search-header">
           {searchItems?.length ? (
             <SearchBar actionButton={null} placeholder={`请输入${searchItems[0].label}`} />
           ) : <div className="filter-title">筛选过滤</div>}
           <img className="filter-icon" src={filterIcon} alt="" onClick={() => setShowDropdown(true)} />
           {filterDropdown()}
-        </Sticky>: null}
+        </Sticky> : null}
         {showAddBtn && (
           <div className="list-create-btn" onClick={handleCreate}>
           </div>
