@@ -1,14 +1,11 @@
 package com.cmsr.onebase.module.etl.core.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.mybatis.BaseRepository;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLWorkflowTableDO;
 import com.cmsr.onebase.module.etl.core.dal.mapper.ETLWorkflowTableMapper;
 import com.cmsr.onebase.module.etl.core.enums.ETLConstants;
 import com.mybatisflex.core.query.QueryWrapper;
-import com.mybatisflex.spring.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.service.AnylineService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -17,12 +14,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Repository
-public class ETLWorkflowTableRepository extends ServiceImpl<ETLWorkflowTableMapper, ETLWorkflowTableDO> {
-
-    private DataRepository<ETLWorkflowTableDO> dataRepository;
-
-    @Autowired
-    private AnylineService<ETLWorkflowTableDO> anylineService;
+public class ETLWorkflowTableRepository extends BaseRepository<ETLWorkflowTableMapper, ETLWorkflowTableDO> {
 
     public void deleteByWorkflowId(Long workflowId) {
         QueryWrapper queryWrapper = query().eq(ETLWorkflowTableDO::getWorkflowId, workflowId);

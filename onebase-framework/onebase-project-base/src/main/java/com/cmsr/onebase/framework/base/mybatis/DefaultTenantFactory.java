@@ -6,10 +6,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class DefaultTenantFactory implements TenantFactory {
-
-
     private final static long DEFAULT_TENANT_ID = -1L;
-
 
     @Override
     public Object[] getTenantIds() {
@@ -25,6 +22,5 @@ public class DefaultTenantFactory implements TenantFactory {
             return new Object[]{tenantId};
         }
     }
-
 
 }

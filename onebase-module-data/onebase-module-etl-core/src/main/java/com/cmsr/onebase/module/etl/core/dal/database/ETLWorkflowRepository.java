@@ -1,8 +1,7 @@
 package com.cmsr.onebase.module.etl.core.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.mybatis.BaseBizRepository;
+import com.cmsr.onebase.framework.mybatis.BaseRepository;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLScheduleJobDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLWorkflowDO;
 import com.cmsr.onebase.module.etl.core.dal.mapper.ETLWorkflowMapper;
@@ -11,12 +10,8 @@ import com.cmsr.onebase.module.etl.core.vo.WorkflowBriefVO;
 import com.cmsr.onebase.module.etl.core.vo.WorkflowPageReqVO;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
-import com.mybatisflex.spring.service.impl.ServiceImpl;
-import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.service.AnylineService;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import static com.cmsr.onebase.module.etl.core.dal.dataobject.table.EtlScheduleJobTableDef.ETL_SCHEDULE_JOB;
@@ -24,18 +19,7 @@ import static com.cmsr.onebase.module.etl.core.dal.dataobject.table.EtlWorkflowT
 
 @Slf4j
 @Repository
-public class ETLWorkflowRepository extends BaseBizRepository<ETLWorkflowMapper, ETLWorkflowDO> {
-
-//    private DataRepository<ETLWorkflowDO> dataRepository;
-//
-//    @Autowired
-//    private AnylineService<ETLWorkflowDO> anylineService;
-//
-//    @PostConstruct
-//    public void init() {
-//        dataRepository = new DataRepository<>(ETLWorkflowDO.class);
-//        dataRepository.setAnylineService(anylineService);
-//    }
+public class ETLWorkflowRepository extends BaseRepository<ETLWorkflowMapper, ETLWorkflowDO> {
 
     public PageResult<WorkflowBriefVO> getWorkflowPage(WorkflowPageReqVO pageReqVO) {
         String scheduleStrategy = pageReqVO.getScheduleStrategy();

@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.etl.core.codegen;
 
-import com.cmsr.onebase.framework.mybatis.BaseBizEntity;
+import com.cmsr.onebase.framework.data.BaseBizEntity;
 import com.mybatisflex.codegen.Generator;
 import com.mybatisflex.codegen.config.GlobalConfig;
 import com.zaxxer.hikari.HikariDataSource;

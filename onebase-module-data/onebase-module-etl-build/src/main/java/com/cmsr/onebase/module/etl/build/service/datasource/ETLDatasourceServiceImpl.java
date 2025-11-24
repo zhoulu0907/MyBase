@@ -9,8 +9,8 @@ import com.cmsr.onebase.module.etl.build.service.DatasourceFactory;
 import com.cmsr.onebase.module.etl.build.service.collector.MetadataCollector;
 import com.cmsr.onebase.module.etl.build.service.collector.MetadataManager;
 import com.cmsr.onebase.module.etl.build.service.preview.DataInspectService;
-import com.cmsr.onebase.module.etl.build.vo.preview.TablePreviewVO;
 import com.cmsr.onebase.module.etl.build.vo.datasource.*;
+import com.cmsr.onebase.module.etl.build.vo.preview.TablePreviewVO;
 import com.cmsr.onebase.module.etl.common.entity.CatalogData;
 import com.cmsr.onebase.module.etl.common.entity.ColumnData;
 import com.cmsr.onebase.module.etl.common.entity.TableData;
@@ -25,6 +25,7 @@ import com.cmsr.onebase.module.etl.core.vo.DatasourcePageReqVO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.metadata.type.DatabaseType;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
@@ -127,7 +128,7 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
             try {
                 boolean collectResult = runMetadataCollect(LocalDateTime.now(), datasourceDO);
                 if (!collectResult) {
-                    ServiceExceptionUtil.exception(ETLErrorCodeConstants.METADATA_COLLECT_FAILED.getCode(),
+                    throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.METADATA_COLLECT_FAILED.getCode(),
                             ETLErrorCodeConstants.METADATA_COLLECT_FAILED.getMsg(),
                             datasourceId);
                 }
@@ -147,7 +148,7 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
         oldDatasource.setDatasourceName(updateReqVO.getDatasourceName());
         oldDatasource.setDeclaration(updateReqVO.getDeclaration());
         oldDatasource.setConfig(updateReqVO.getConfig());
-        oldDatasource.setReadonly(updateReqVO.getReadonly());
+        oldDatasource.setReadonly(BooleanUtils.toInteger(updateReqVO.getReadonly()));
         // udpate collect status to `required`, demonds user to execute at least once
         oldDatasource.setCollectStatus(CollectStatus.REQUIRED);
         complementJdbcDatasourceProperties(oldDatasource);
@@ -239,8 +240,8 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
         if (datasourceDO == null) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_NOT_EXIST);
         }
-        Boolean isWritable = writable != null && writable != 0;
-        if (datasourceDO.getReadonly() && isWritable) {
+        boolean isWritable = writable != null && writable != 0;
+        if (BooleanUtils.toBoolean(datasourceDO.getReadonly()) && isWritable) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_READONLY);
         }
 

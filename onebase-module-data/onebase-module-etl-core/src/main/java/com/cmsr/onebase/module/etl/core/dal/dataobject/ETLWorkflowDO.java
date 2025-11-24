@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.etl.core.dal.dataobject;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
-import com.cmsr.onebase.framework.mybatis.BaseBizEntity;
+import com.cmsr.onebase.framework.data.BaseTenantEntity;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
@@ -9,7 +9,7 @@ import lombok.Data;
 
 @Data
 @Table("etl_workflow")
-public class ETLWorkflowDO extends BaseBizEntity {
+public class ETLWorkflowDO extends BaseTenantEntity {
 
     @Column("workflow_name")
     private String workflowName;

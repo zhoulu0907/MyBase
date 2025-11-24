@@ -5,6 +5,7 @@ import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLDatasourceDO;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDateTime;
@@ -71,7 +72,7 @@ public class DatasourceRespVO {
         respVO.setDatasourceName(datasourceDO.getDatasourceName());
         respVO.setDeclaration(datasourceDO.getDeclaration());
         respVO.setDatasourceType(datasourceDO.getDatasourceType());
-        respVO.setReadonly(datasourceDO.getReadonly());
+        respVO.setReadonly(BooleanUtils.toBoolean(datasourceDO.getReadonly()));
         respVO.setCollectStatus(datasourceDO.getCollectStatus().getValue());
         respVO.setCollectStartTime(datasourceDO.getCollectStartTime());
         respVO.setCollectEndTime(datasourceDO.getCollectEndTime());

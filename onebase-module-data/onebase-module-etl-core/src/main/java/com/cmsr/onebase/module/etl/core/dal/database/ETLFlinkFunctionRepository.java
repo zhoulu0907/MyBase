@@ -1,14 +1,10 @@
 package com.cmsr.onebase.module.etl.core.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLFlinkFunctionDO;
 import com.cmsr.onebase.module.etl.core.dal.mapper.ETLFlinkFuntionMapper;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
-import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.service.AnylineService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -20,17 +16,6 @@ import java.util.List;
 @Slf4j
 @Repository
 public class ETLFlinkFunctionRepository extends ServiceImpl<ETLFlinkFuntionMapper, ETLFlinkFunctionDO> {
-
-    private DataRepository<ETLFlinkFunctionDO> dataRepository;
-
-    @Autowired
-    private AnylineService<ETLFlinkFunctionDO> anylineService;
-
-    @PostConstruct
-    public void init() {
-        dataRepository = new DataRepository<>(ETLFlinkFunctionDO.class);
-        dataRepository.setAnylineService(anylineService);
-    }
 
     public List<String> listFunctionTypes() {
         QueryWrapper queryWrapper = query().select(ETLFlinkFunctionDO::getFunctionType)

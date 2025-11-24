@@ -1,6 +1,6 @@
 package com.cmsr.onebase.framework.base.mybatis;
 
-import com.cmsr.onebase.framework.data.base.BaseDO;
+import com.cmsr.onebase.framework.data.BaseEntity;
 import com.mybatisflex.annotation.KeyType;
 import com.mybatisflex.core.FlexGlobalConfig;
 import com.mybatisflex.core.audit.AuditManager;
@@ -15,11 +15,11 @@ import java.util.List;
 import java.util.Map;
 
 @Configuration
-public class MyBatisFlexConfiguration implements MyBatisFlexCustomizer {
+public class MybatisFlexConfiguration implements MyBatisFlexCustomizer {
 
     private static final Logger logger = LoggerFactory.getLogger("OneBase-SQL");
 
-    private static final String SNOWFLAKE_UUID = "custom_snowflake";
+    private static final String SNOWFLAKE_UUID = "onebase_snowflake";
 
     @Autowired
     private SnowflakeGenerator snowflakeGenerator;
@@ -34,15 +34,12 @@ public class MyBatisFlexConfiguration implements MyBatisFlexCustomizer {
 //        // setVersionColumn
 //        defaultConfig.setVersionColumn("lock_version");
 
-        // tenant column
-        defaultConfig.setTenantColumn("tenant_id");
-
         // base infomation listener
         defaultConfig.setEntityInsertListeners(Map.of(
-                BaseDO.class, List.of(new BaseDOListener())
+                BaseEntity.class, List.of(new BaseEntityListener())
         ));
         defaultConfig.setEntityUpdateListeners(Map.of(
-                BaseDO.class, List.of(new BaseDOListener())
+                BaseEntity.class, List.of(new BaseEntityListener())
         ));
 
         // key generators
