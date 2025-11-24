@@ -43,10 +43,9 @@ export default forwardRef(function RoleList({ activeId, onSelect, onAdd }: RoleL
         if (searchValue) params.name = searchValue;
 
         const res = await getRolePage(params);
-        const newRoleList = res.list || [];
-
+        const newRoleList = (res.list || []).reverse();
         if (append) {
-          setRoleList((prev) => [...prev, ...newRoleList]);
+          setRoleList((prev) => [...prev,...newRoleList]);
         } else {
           setRoleList(newRoleList);
         }
