@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.app.build.vo.app;
 
 import com.cmsr.onebase.module.app.build.vo.tag.TagRespVO;
+import com.cmsr.onebase.module.app.core.vo.app.AppUserPhotoDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -68,6 +69,9 @@ public class ApplicationRespVO {
 
     @Schema(description = "发布模式")
     private String publishModel;
+
+    @Schema(description = "头像集合")
+    private  List<AppUserPhotoDTO> userPhotoList;
 
     @Schema(description = "开发状态")
     private String developStatus;
