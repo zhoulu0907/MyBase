@@ -66,6 +66,7 @@ export const Editor = () => {
     ref?.current?.document.clear();
     ref?.current?.document.fromJSON(initialData);
   };
+
   useEffect(() => {
     if (currentFlowId) {
       getFlowData(currentFlowId);
@@ -127,6 +128,13 @@ export const Editor = () => {
       }, 200)
     );
     return () => toDispose?.dispose();
+  }, []);
+
+  useEffect(() => {
+    const dispose = ref?.current?.document.linesManager.onAvailableLinesChange((e) => {
+      console.log(e, '这里监听线条的新增和删除');
+    });
+    return () => dispose?.dispose();
   }, []);
 
   return (

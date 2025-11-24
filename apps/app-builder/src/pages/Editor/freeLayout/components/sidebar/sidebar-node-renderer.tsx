@@ -12,7 +12,7 @@ import Launch from './components/launch';
 import CcRecipientsDreawer from './components/ccRecipients/index';
 import Conditional from './components/conditional';
 import Parallel from './components/parallel';
-import Sink from './components/sink'
+import Sink from './components/sink';
 import { WorkflowNodeType } from '../../nodes/constants';
 export function SidebarNodeRenderer(props: { node: FlowNodeEntity }) {
   const { node } = props;
@@ -53,7 +53,7 @@ export function SidebarNodeRenderer(props: { node: FlowNodeEntity }) {
         )}
         {nodeRender?.type === WorkflowNodeType.CONDITIONAL_BRANCH && <Conditional />}
         {nodeRender?.type === WorkflowNodeType.PARALLEL_BRANCH && <Parallel />}
-         {nodeRender?.type === WorkflowNodeType.SINK_NODE_BRANCH && <Sink />}
+        {nodeRender?.type === WorkflowNodeType.SINK_NODE_BRANCH && <Sink />}
       </div>
     </NodeRenderContext.Provider>
   );

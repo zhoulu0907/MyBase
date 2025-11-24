@@ -5,25 +5,23 @@
 
 import { useCallback, useContext, useEffect, useMemo, startTransition } from 'react';
 
-import {
-  PlaygroundEntityContext,
-  useRefresh,
-  useClientContext,
-} from '@flowgram.ai/free-layout-editor';
+import { PlaygroundEntityContext, useRefresh, useClientContext } from '@flowgram.ai/free-layout-editor';
 import { SideSheet } from '@douyinfe/semi-ui';
 
 import { type FlowNodeMeta } from '../../typings';
 import { SidebarContext, IsSidebarContext } from '../../context';
 import { SidebarNodeRenderer } from './sidebar-node-renderer';
+import { SidebarLineRenderer } from './sidebar-line-renderer';
 
 export const SidebarRenderer = () => {
-  const { nodeId, setNodeId } = useContext(SidebarContext);
+  const { nodeId, setNodeId, lineData, setLineData } = useContext(SidebarContext);
   const { selection, playground, document } = useClientContext();
   const refresh = useRefresh();
   const handleClose = useCallback(() => {
     // Sidebar delayed closing
     startTransition(() => {
       setNodeId(undefined);
+      setLineData(undefined);
     });
   }, []);
   const node = nodeId ? document.getNode(nodeId) : undefined;
@@ -68,12 +66,17 @@ export const SidebarRenderer = () => {
   }, [node]);
 
   const visible = useMemo(() => {
-    if (!node) {
+    if (!node && !lineData) {
       return false;
     }
-    const { sidebarDisabled = false } = node.getNodeMeta<FlowNodeMeta>();
-    return !sidebarDisabled;
-  }, [node]);
+    if (lineData) {
+      return true;
+    }
+    if (node) {
+      const { sidebarDisabled = false } = node.getNodeMeta<FlowNodeMeta>();
+      return !sidebarDisabled;
+    }
+  }, [node, lineData]);
 
   if (playground.config.readonly) {
     return null;
@@ -86,6 +89,8 @@ export const SidebarRenderer = () => {
       <PlaygroundEntityContext.Provider key={node.id} value={node}>
         <SidebarNodeRenderer node={node} />
       </PlaygroundEntityContext.Provider>
+    ) : lineData && visible ? (
+      <SidebarLineRenderer line={lineData} />
     ) : null;
 
   return (
@@ -97,14 +102,14 @@ export const SidebarRenderer = () => {
       motion={false}
       width={700}
       headerStyle={{
-        display: 'none',
+        display: 'none'
       }}
       bodyStyle={{
-        padding: 0,
+        padding: 0
       }}
       style={{
         background: 'none',
-        boxShadow: 'none',
+        boxShadow: 'none'
       }}
     >
       <IsSidebarContext.Provider value={true}>{content}</IsSidebarContext.Provider>
