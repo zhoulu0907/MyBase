@@ -4,7 +4,6 @@ import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.core.dto.node.ApproverNodeExtDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.ApproverNodeBtnCfgDTO;
-import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.FieldPermCfgDTO;
 import com.cmsr.onebase.module.bpm.core.enums.*;
 import com.cmsr.onebase.module.bpm.runtime.vo.EntityVO;
@@ -53,6 +52,9 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
 
         // 原审批人
         String approverId = matchedUser.getProcessedBy();
+
+        // 代理人ID
+        String agentId = null;
         Map<String, Object> hisExtMap = new HashMap<>();
 
         if (Objects.equals(matchedUser.getType(), BpmUserTypeEnum.APPROVAL.getCode())) {
@@ -63,6 +65,7 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
 
             // todo: 是否存入更多信息
             hisExtMap.put("agentId", matchedUser.getProcessedBy());
+            agentId = matchedUser.getProcessedBy();
         } else {
             // todo 其他用户类型，后续再处理
             throw exception(ErrorCodeConstants.UNSUPPORT_NODE_APPROVAL_MODE);
@@ -102,6 +105,11 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
                  .message(comment)
                 .hisTaskExt(JsonUtils.toJsonString(hisExtMap));
 
+        // 填充代理人ID，用于全局监听器处理
+        if (agentId != null) {
+            skipParams.getVariable().put("agentId", agentId);
+        }
+
         if (Objects.equals(buttonType, BpmActionButtonEnum.APPROVE.getCode())) {
             skipParams = skipParams.skipType(SkipType.PASS.getKey())
                 .flowStatus(BpmBusinessStatusEnum.IN_APPROVAL.getCode())
@@ -134,7 +142,7 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
                 Instance instance = insService.getById(task.getInstanceId());
                 NodeJson initNode = getInitiationNodeJson(instance.getDefJson());
                 skipParams.nodeCode(initNode.getNodeCode());
-                taskService.skip(skipParams,task );
+                taskService.skip(skipParams, task);
             }
         } else {
             throw exception(ErrorCodeConstants.UNSUPPORT_ACTION_BUTTON_TYPE);
@@ -162,9 +170,9 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
                         return;
                     }
 
-                    String agentId = MapUtils.getString(lastHisExtMap, "agentId");
+                    String hisAgentId = MapUtils.getString(lastHisExtMap, "agentId");
 
-                    if (!Objects.equals(matchedUser.getProcessedBy(), agentId)) {
+                    if (!Objects.equals(matchedUser.getProcessedBy(), hisAgentId)) {
                         continue;
                     }
 
