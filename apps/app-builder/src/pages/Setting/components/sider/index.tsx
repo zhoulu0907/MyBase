@@ -1,22 +1,19 @@
+import corpSVG from '@/assets/images/building-line.svg';
+import dictSVG from '@/assets/images/file.svg';
+import organizationSVG from '@/assets/images/organization-chart.svg';
+import tenantInfoSVG from '@/assets/images/space-ship-line.svg';
+import appLicationManageSVG from '@/assets/images/terminal-window-line.svg';
+import roleSVG from '@/assets/images/user.svg';
+import userInfoSVG from '@/assets/images/userInfo.svg';
+import vectorSVG from '@/assets/images/vector.svg';
+import { TENANT_MENUS } from '@/constants/permission';
+import { hasMenu } from '@/utils/permission';
 import { Button, Layout, Menu } from '@arco-design/web-react';
-import {
-  IconMenuFold,
-  IconMenuUnfold,
-} from '@arco-design/web-react/icon';
+import { IconMenuFold, IconMenuUnfold } from '@arco-design/web-react/icon';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import type { MenuItemType } from './menuData';
 import styles from './sider.module.less';
-import { hasMenu } from '@/utils/permission';
-import { TENANT_MENUS } from '@/constants/permission';
-import organizationSVG from '@/assets/images/organization-chart.svg';
-import vectorSVG from '@/assets/images/vector.svg';
-import userInfoSVG from '@/assets/images/userInfo.svg';
-import appLicationManageSVG from '@/assets/images/terminal-window-line.svg';
-import tenantInfoSVG from '@/assets/images/space-ship-line.svg';
-import roleSVG from '@/assets/images/user.svg';
-import dictSVG from '@/assets/images/file.svg';
-import corpSVG from '@/assets/images/building-line.svg';
 
 const { Sider } = Layout;
 const MenuItem = Menu.Item;
@@ -59,7 +56,7 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
           path: '/onebase/setting/application',
           permissionKey: TENANT_MENUS.INFO
         }
-      ],
+      ]
     },
     {
       title: '用户与组织',
@@ -85,7 +82,7 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
           path: '/onebase/setting/organization',
           permissionKey: TENANT_MENUS.DEPT
         }
-      ],
+      ]
     },
     {
       title: '系统配置',
@@ -95,7 +92,7 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
           title: '空间信息',
           icon: <img src={tenantInfoSVG} />,
           path: '/onebase/setting/spaceInfo',
-          permissionKey: TENANT_MENUS.INFO 
+          permissionKey: TENANT_MENUS.INFO
         },
         {
           key: 'system-dict',
@@ -111,7 +108,7 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
           path: '/onebase/setting/tenant',
           permissionKey: TENANT_MENUS.INFO
         }
-      ],
+      ]
     },
     {
       title: '扩展功能',
@@ -123,87 +120,24 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
           path: '/onebase/setting/enterprise',
           permissionKey: TENANT_MENUS.CORP
         }
-      ],
-    },
-];
-
-  // const defaultMenuItems = useMemo(
-  //   () => [
-  //     {
-  //       key: 'application',
-  //       title: '应用管理',
-  //       icon: <img src={appLicationManageSVG} />,
-  //       path: '/onebase/setting/application',
-  //       permissionKey: TENANT_MENUS.INFO
-  //     },
-  //     {
-  //       key: 'user',
-  //       title: '用户管理',
-  //       icon: <img src={vectorSVG} />,
-  //       path: '/onebase/setting/user',
-  //       permissionKey: TENANT_MENUS.USER
-  //     },
-  //     {
-  //       key: 'role',
-  //       title: '角色管理',
-  //       icon: <img src={roleSVG} />,
-  //       path: '/onebase/setting/role',
-  //       permissionKey: TENANT_MENUS.ROLE
-  //     },
-  //     {
-  //       key: 'organization',
-  //       title: '组织管理',
-  //       icon: <img src={organizationSVG} />,
-  //       path: '/onebase/setting/organization',
-  //       permissionKey: TENANT_MENUS.DEPT
-  //     },
-  //     {
-  //       key: 'system-dict',
-  //       title: '数据字典管理',
-  //       icon: <img src={dictSVG} />,
-  //       path: '/onebase/setting/system-dict',
-  //       permissionKey: TENANT_MENUS.DICT
-  //     },
-  //     {
-  //       key: 'spaceInfo',
-  //       title: '空间信息',
-  //       icon: <img src={tenantInfoSVG} />,
-  //       path: '/onebase/setting/spaceInfo',
-  //       permissionKey: TENANT_MENUS.INFO 
-  //     },
-  //     {
-  //       key: 'enterprise',
-  //       title: '企业管理',
-  //       icon: <img src={corpSVG} />,
-  //       path: '/onebase/setting/enterprise',
-  //       permissionKey: TENANT_MENUS.CORP
-  //     },
-  //     {
-  //       key: 'tenant',
-  //       title: '个人中心',
-  //       icon: <img src={userInfoSVG} />,
-  //       path: '/onebase/setting/tenant',
-  //       permissionKey: TENANT_MENUS.INFO
-  //     }
-  //   ],
-  //   []
-  // );
+      ]
+    }
+  ];
 
   const platMenuData = () => {
-     let result:any[] = [];
-    menuConfig?.forEach(menu => {
-        if(menu.items?.length >0) {
-           menu.items.forEach(item => {
-            result.push(item);
-           })
-        }
+    let result: any[] = [];
+    menuConfig?.forEach((menu) => {
+      if (menu.items?.length > 0) {
+        menu.items.forEach((item) => {
+          result.push(item);
+        });
+      }
     });
     return result;
-  }
+  };
 
   // 使用传入的菜单项或默认菜单项
   const finalMenuItems = useMemo(() => {
-   
     return menuItems.length > 0 ? menuItems : platMenuData();
   }, [menuItems, menuConfig]);
 
@@ -244,11 +178,11 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
       return null;
     };
 
-    const path = findPathByKey(finalMenuItems, key.replace(".$",""));
+    const path = findPathByKey(finalMenuItems, key.replace('.$', ''));
     if (path) {
       navigate(path);
     }
-  }
+  };
 
   // 处理折叠按钮点击
   const handleCollapseClick = useCallback(() => {
@@ -258,53 +192,56 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
   }, [onCollapse, collapsed]);
 
   // 递归渲染菜单项
-  const renderMenuItems = React.useCallback((items: MenuItemType[]): React.ReactNode => {
-    return items
-      .map((item) => {
-        // TODO 后端返回数据暂未更新，暂不开启权限控制
-        const permissionKey = item.permissionKey;
-        if (permissionKey && !hasMenu(permissionKey as any)) return null;
+  const renderMenuItems = React.useCallback(
+    (items: MenuItemType[]): React.ReactNode => {
+      return items
+        .map((item) => {
+          // TODO 后端返回数据暂未更新，暂不开启权限控制
+          const permissionKey = item.permissionKey;
+          if (permissionKey && !hasMenu(permissionKey as any)) return null;
 
-        if (item.children && item.children.length > 0) {
-          const childrenNodes = renderMenuItems(item.children) as React.ReactNode[];
-          const hasChildren = Array.isArray(childrenNodes) && childrenNodes.filter(Boolean).length > 0;
-          if (!hasChildren && !item.path) return null;
+          if (item.children && item.children.length > 0) {
+            const childrenNodes = renderMenuItems(item.children) as React.ReactNode[];
+            const hasChildren = Array.isArray(childrenNodes) && childrenNodes.filter(Boolean).length > 0;
+            if (!hasChildren && !item.path) return null;
+            return (
+              <SubMenu
+                key={item.key}
+                title={
+                  <span>
+                    {item.icon}
+                    <span className={styles.menuTitle}>{item.title}</span>
+                  </span>
+                }
+              >
+                {childrenNodes}
+              </SubMenu>
+            );
+          }
+
           return (
-            <SubMenu
+            <MenuItem
               key={item.key}
-              title={
-                <span>
-                  {item.icon}
-                  <span className={styles.menuTitle}>{item.title}</span>
-                </span>
-              }
+              disabled={item.disabled}
+              style={collapsed ? { padding: '0 10px' } : { display: 'flex', alignItems: 'center' }}
             >
-              {childrenNodes}
-            </SubMenu>
+              {item.icon}
+              <span className={styles.menuTitle}>{item.title}</span>
+            </MenuItem>
           );
-        }
-
-        return (
-          <MenuItem
-            key={item.key}
-            disabled={item.disabled}
-            style={collapsed ? { padding: '0 10px' } : { display: 'flex', alignItems: 'center' }}
-          >
-            {item.icon}
-            <span className={styles.menuTitle}>{item.title}</span>
-          </MenuItem>
-        );
-      })
-      .filter(Boolean);
-  }, [collapsed]);
+        })
+        .filter(Boolean);
+    },
+    [collapsed]
+  );
 
   const renderContent = (data: MenuItemConfig[]) => {
     return (
-      <Menu mode="vertical" selectedKeys={selectedKeys} onClickMenuItem={handleMenuClick} levelIndent={29} >
-          {renderMenuItems(data)}
+      <Menu mode="vertical" selectedKeys={selectedKeys} onClickMenuItem={handleMenuClick} levelIndent={29}>
+        {renderMenuItems(data)}
       </Menu>
-    )
-  }
+    );
+  };
 
   return (
     <Sider
@@ -325,8 +262,7 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
             >
               {renderContent(group.items)}
             </Menu.ItemGroup>
-        ))}
-          
+          ))}
         </div>
 
         <div className={styles.collapseButtonContainer}>
