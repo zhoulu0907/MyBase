@@ -21,7 +21,7 @@ import java.util.Map;
  * 使用 @ConditionalOnMissingBean 注解，仅在运行态实现类不存在时才创建此 Bean
  * 
  * 与运行态实现的主要区别：
- * 1. 使用 LoginUser 代替 RTLoginUser
+ * 1. 使用 LoginUser 代替 RuntimeLoginUser
  * 2. 使用 SecurityFrameworkUtils 代替 RTSecurityContext
  * 3. 编辑态不进行权限校验（enableAuthCheck=false）
  * 4. 无 applicationId 概念
