@@ -7,8 +7,33 @@
   .header {
     display: flex;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: space-between;
     margin-bottom: 12px;
+
+    .searchSelect {
+      width: 120px;
+      background-color: rgb(var(--primary-6));
+
+      :global(.arco-select-view:hover) {
+        background-color: rgb(var(--primary-5));
+      }
+
+      :global(.arco-select-view:hover .renderFormat) {
+        background-color: rgb(var(--primary-5));
+      }
+
+      :global(.arco-select-view-value) {
+        color: white;
+      }
+
+      :global(.arco-select-arrow-icon) {
+        color: white;
+      }
+
+      :global(.arco-select-view) {
+        background-color: unset;
+      }
+    }
   }
 
   .table {
