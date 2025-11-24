@@ -68,6 +68,12 @@ const CreateScriptActionPage: React.FC<CreateScriptActionPageProps> = ({ onSucce
   };
 
   const handleSubmit = async () => {
+    try {
+      await form.validate();
+    } catch (error) {
+      console.error('表单验证失败:', error);
+    }
+
     const id = getHashQueryParam('id');
 
     // 如果当前是图形模式，需要将表单数据转换回 JSON 字符串
@@ -336,7 +342,7 @@ const CreateScriptActionPage: React.FC<CreateScriptActionPageProps> = ({ onSucce
         {inputEditType === EditTypeEnum.Json && (
           <Row>
             <Form.Item field="inputParameter">
-              <Input.TextArea placeholder="请输入动作入参（JSON格式）" rows={6} />
+              <Input.TextArea placeholder="请输入动作入参（JSON格式）" rows={4} />
             </Form.Item>
           </Row>
         )}
@@ -355,7 +361,7 @@ const CreateScriptActionPage: React.FC<CreateScriptActionPageProps> = ({ onSucce
         <Row>
           <Form.Item field="rawScript">
             <CodeMirror
-              height="500px"
+              height="100px"
               className={styles.editor}
               extensions={customExtensions}
               value={rawScript}
@@ -381,7 +387,7 @@ const CreateScriptActionPage: React.FC<CreateScriptActionPageProps> = ({ onSucce
         {outputEditType === EditTypeEnum.Json && (
           <Row>
             <Form.Item field="outputParameter">
-              <Input.TextArea placeholder="请输入动作出参" />
+              <Input.TextArea placeholder="请输入动作出参（JSON格式）" rows={4} />
             </Form.Item>
           </Row>
         )}
