@@ -39,10 +39,13 @@ const CreateScriptActionPage: React.FC<CreateScriptActionPageProps> = ({ onSucce
 
   const rawScript = Form.useWatch('rawScript', form);
   const inputParameter = Form.useWatch('inputParameter', form);
+  const outputParameter = Form.useWatch('outputParameter', form);
 
-  const [inputSchema, setInputSchema] = useState<any>(null);
+  const [inputSchema, setInputSchema] = useState<any>({});
+  const [outputSchema, setOutputSchema] = useState<any>({});
   // 缓存文本模式下的 JSON 值
   const [cachedInputParameter, setCachedInputParameter] = useState<string>('');
+  const [cachedOutputParameter, setCachedOutputParameter] = useState<string>('');
 
   useEffect(() => {
     if (editData) {
@@ -202,6 +205,56 @@ const CreateScriptActionPage: React.FC<CreateScriptActionPageProps> = ({ onSucce
     }
   };
 
+  const handleOutputParameterChange = (checked: boolean) => {
+    if (checked) {
+      // 切换到图形模式：缓存当前的文本值
+      const currentTextValue = form.getFieldValue('outputParameter') || '';
+      setCachedOutputParameter(currentTextValue);
+
+      setOutputEditType(EditTypeEnum.Visual);
+      // 将 JSON 字符串转换为 schema 并初始化表单数据
+      if (outputParameter) {
+        try {
+          const schema = jsonToJsonSchema(outputParameter);
+          setOutputSchema(schema);
+          // 初始化表单数据
+          const formData = schemaToFormData(schema);
+          form.setFieldValue('outputParameterSchema', formData);
+        } catch (e) {
+          Message.error('无效的 JSON 字符串，无法转换为图形化表单');
+          setOutputEditType(EditTypeEnum.Json);
+        }
+      } else {
+        // 如果没有输入参数，创建一个空的 object schema
+        const emptySchema = {
+          $schema: 'http://json-schema.org/draft-07/schema#',
+          type: 'object',
+          properties: {}
+        };
+        setOutputSchema(emptySchema);
+        form.setFieldValue('outputParameterSchema', []);
+      }
+    } else {
+      // 切回文本模式：将表单数据转换回 JSON 字符串
+      setOutputEditType(EditTypeEnum.Json);
+      const formData = form.getFieldValue('outputParameterSchema');
+      if (formData && formData.length > 0) {
+        try {
+          const jsonObj = formDataToJson(formData);
+          const jsonString = JSON.stringify(jsonObj, null, 2);
+          form.setFieldValue('outputParameter', jsonString);
+        } catch (e) {
+          // 如果转换失败，恢复缓存的文本值
+          Message.warning('表单数据转换失败，已恢复之前的文本内容');
+          form.setFieldValue('outputParameter', cachedOutputParameter);
+        }
+      } else {
+        // 如果表单数据为空，恢复缓存的文本值
+        form.setFieldValue('outputParameter', cachedOutputParameter || '{}');
+      }
+    }
+  };
+
   // 将表单数据转换回 JSON 对象
   const formDataToJson = (formData: any[]): any => {
     if (!formData || formData.length === 0) {
@@ -279,15 +332,14 @@ const CreateScriptActionPage: React.FC<CreateScriptActionPageProps> = ({ onSucce
             ></Switch>
           </Col>
         </Row>
-        <Row>
-          <Form.Item field="inputParameter">
-            {inputEditType === EditTypeEnum.Json ? (
+
+        {inputEditType === EditTypeEnum.Json && (
+          <Row>
+            <Form.Item field="inputParameter">
               <Input.TextArea placeholder="请输入动作入参（JSON格式）" rows={6} />
-            ) : (
-              <div style={{ display: 'none' }} />
-            )}
-          </Form.Item>
-        </Row>
+            </Form.Item>
+          </Row>
+        )}
         {inputEditType === EditTypeEnum.Visual && inputSchema && (
           <Row>
             <Form.Item field="inputParameterSchema">
@@ -321,20 +373,25 @@ const CreateScriptActionPage: React.FC<CreateScriptActionPageProps> = ({ onSucce
               checkedText="图形"
               uncheckedText="文本"
               checked={outputEditType === EditTypeEnum.Visual}
-              onChange={(checked) => setOutputEditType(checked ? EditTypeEnum.Visual : EditTypeEnum.Json)}
+              onChange={handleOutputParameterChange}
             ></Switch>
           </Col>
         </Row>
 
-        <Row>
-          <Form.Item field="outputParameter">
-            {outputEditType === 'json' ? (
+        {outputEditType === EditTypeEnum.Json && (
+          <Row>
+            <Form.Item field="outputParameter">
               <Input.TextArea placeholder="请输入动作出参" />
-            ) : (
-              <div style={{ display: 'none' }} />
-            )}
-          </Form.Item>
-        </Row>
+            </Form.Item>
+          </Row>
+        )}
+        {outputEditType === EditTypeEnum.Visual && outputSchema && (
+          <Row>
+            <Form.Item field="outputParameterSchema">
+              <SchemaForm form={form} schema={outputSchema} fieldPrefix="outputParameterSchema" level={0} />
+            </Form.Item>
+          </Row>
+        )}
         <Row>
           <Col span={2}>
             <Button type="primary" onClick={handleSubmit}>
