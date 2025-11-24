@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.metadata.runtime;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.security.runtime.RTSecurityContext;
+import com.cmsr.onebase.framework.security.runtime.RuntimeSecurityContext;
 import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.vo.DynamicDataDeleteReqVO;
 import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.vo.DynamicDataPageReqVO;
@@ -41,7 +41,7 @@ public class DataRuntimeTest {
         };
         reqVO.setData(data);
         TenantContextHolder.setIgnore(true);
-        RTSecurityContext.mockLoginUser(116683300797415424L, 113428849444978688L);
+        RuntimeSecurityContext.mockLoginUser(116683300797415424L, 113428849444978688L);
         DynamicDataRespVO dynamicDataRespVO = runtimeDataService.updateData(reqVO);
         System.out.println(dynamicDataRespVO);
     }
@@ -63,7 +63,7 @@ public class DataRuntimeTest {
         };
         reqVO.setData(data);
         TenantContextHolder.setIgnore(true);
-        RTSecurityContext.mockLoginUser(123957446409093120L, 123944716126027776L);
+        RuntimeSecurityContext.mockLoginUser(123957446409093120L, 123944716126027776L);
         DynamicDataRespVO dynamicDataRespVO = runtimeDataService.updateData(reqVO);
         System.out.println(dynamicDataRespVO);
     }
@@ -79,7 +79,7 @@ public class DataRuntimeTest {
         reqVO.setPageSize(10);
 
         TenantContextHolder.setIgnore(true);
-        RTSecurityContext.mockLoginUser(123957446409093120L, 123944716126027776L);
+        RuntimeSecurityContext.mockLoginUser(123957446409093120L, 123944716126027776L);
         PageResult<DynamicDataRespVO> dataPage = runtimeDataService.getDataPage(reqVO);
         for (DynamicDataRespVO dynamicDataRespVO : dataPage.getList()){
             System.out.println(dynamicDataRespVO);
@@ -106,7 +106,7 @@ public class DataRuntimeTest {
 //        reqVO.setData(data);
         TenantContextHolder.setIgnore(true);
         //用户：zhangxihui 应用：zxh1030
-        RTSecurityContext.mockLoginUser(116683300797415424L, 113428849444978688L);
+        RuntimeSecurityContext.mockLoginUser(116683300797415424L, 113428849444978688L);
         boolean dynamicDataRespVO = runtimeDataService.deleteData(reqVO);
         System.out.println(dynamicDataRespVO);
     }

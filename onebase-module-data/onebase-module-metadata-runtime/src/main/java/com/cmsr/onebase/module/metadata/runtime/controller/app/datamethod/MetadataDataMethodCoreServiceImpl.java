@@ -1,8 +1,8 @@
 package com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.security.runtime.RTLoginUser;
-import com.cmsr.onebase.framework.security.runtime.RTSecurityContext;
+import com.cmsr.onebase.framework.common.security.dto.RuntimeLoginUser;
+import com.cmsr.onebase.framework.security.runtime.RuntimeSecurityContext;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.framework.uid.UidGenerator;
 import com.cmsr.onebase.module.app.api.security.bo.DataPermission;
@@ -571,14 +571,14 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
             throw exception(METADATA_DATA_METHOD_RUNTIME_MENU_ID_REQUIRED);
         }
 
-        RTLoginUser loginUser = RTSecurityContext.getLoginUser();
+        RuntimeLoginUser loginUser = RuntimeSecurityContext.getLoginUser();
         if (loginUser == null) {
             throw exception(UNAUTHORIZED);
         }
 
-        DataPermission menuDataPermission = RTSecurityContext.getMenuDataPermission(menuId);
-        FieldPermission menuFieldPermission = RTSecurityContext.getMenuFieldPermission(menuId);
-        OperationPermission menuOperation = RTSecurityContext.getMenuOperation(menuId);
+        DataPermission menuDataPermission = RuntimeSecurityContext.getMenuDataPermission(menuId);
+        FieldPermission menuFieldPermission = RuntimeSecurityContext.getMenuFieldPermission(menuId);
+        OperationPermission menuOperation = RuntimeSecurityContext.getMenuOperation(menuId);
 
         MetadataPermissionContext metadataPermissionContext = new MetadataPermissionContext();
         metadataPermissionContext.setDataPermission(menuDataPermission);
@@ -590,7 +590,7 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
 
     }
 
-    private LoginUserCtx convertLoginUserCtx(RTLoginUser loginUser) {
+    private LoginUserCtx convertLoginUserCtx(RuntimeLoginUser loginUser) {
         LoginUserCtx loginUserCtx = new LoginUserCtx();
         loginUserCtx.setUserId(loginUser.getId());
         loginUserCtx.setApplicationId(loginUser.getApplicationId());

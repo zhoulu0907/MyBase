@@ -6,12 +6,12 @@ import com.cmsr.onebase.framework.common.biz.system.oauth2.dto.OAuth2AccessToken
 import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
+import com.cmsr.onebase.framework.common.security.dto.RuntimeLoginUser;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.security.config.SecurityProperties;
 import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
-import com.cmsr.onebase.framework.security.runtime.RTLoginUser;
 import com.cmsr.onebase.framework.web.core.handler.GlobalExceptionHandler;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import jakarta.servlet.FilterChain;
@@ -53,7 +53,7 @@ public class RuntimeAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
         // 情况一，基于 header[login-user] 获得用户，例如说来自 Gateway 或者其它服务透传
-        RTLoginUser loginUser = buildLoginUserByHeader(request);
+        RuntimeLoginUser loginUser = buildLoginUserByHeader(request);
         // 情况二，基于 Token 获得用户
         String token = null;
         if (loginUser == null) {
@@ -88,7 +88,7 @@ public class RuntimeAuthenticationFilter extends OncePerRequestFilter {
         chain.doFilter(request, response);
     }
 
-    private RTLoginUser buildLoginUserByToken(String token, Integer userType) {
+    private RuntimeLoginUser buildLoginUserByToken(String token, Integer userType) {
         try {
             // 校验访问令牌
             OAuth2AccessTokenCheckRespDTO accessToken = oauth2TokenApi.checkAccessToken(token).getCheckedData();
@@ -100,7 +100,7 @@ public class RuntimeAuthenticationFilter extends OncePerRequestFilter {
             log.info("buildLoginUserByToken userType:{}", userType);
 
             // 构建登录用户
-            RTLoginUser loginUser = new RTLoginUser();
+            RuntimeLoginUser loginUser = new RuntimeLoginUser();
             loginUser.setApplicationId(accessToken.getAppId())
                     .setId(accessToken.getUserId()).setUserType(accessToken.getUserType())
                     .setInfo(accessToken.getUserInfo()) // 额外的用户信息
@@ -123,7 +123,7 @@ public class RuntimeAuthenticationFilter extends OncePerRequestFilter {
      * @param userType 用户类型
      * @return 模拟的 LoginUser
      */
-    private RTLoginUser mockLoginUser(HttpServletRequest request, String token, Integer userType) {
+    private RuntimeLoginUser mockLoginUser(HttpServletRequest request, String token, Integer userType) {
         if (!securityProperties.getMockEnable()) {
             return null;
         }
@@ -133,19 +133,19 @@ public class RuntimeAuthenticationFilter extends OncePerRequestFilter {
         }
         // 构建模拟用户
         Long userId = Long.valueOf(token.substring(securityProperties.getMockSecret().length()));
-        RTLoginUser loginUser = new RTLoginUser();
+        RuntimeLoginUser loginUser = new RuntimeLoginUser();
         loginUser.setId(userId).setUserType(userType).setTenantId(WebFrameworkUtils.getTenantIdFromHeader(request));
         return loginUser;
     }
 
-    private RTLoginUser buildLoginUserByHeader(HttpServletRequest request) {
+    private RuntimeLoginUser buildLoginUserByHeader(HttpServletRequest request) {
         String loginUserStr = request.getHeader(SecurityFrameworkUtils.LOGIN_USER_HEADER);
         if (StrUtil.isEmpty(loginUserStr)) {
             return null;
         }
         try {
             loginUserStr = URLDecoder.decode(loginUserStr, StandardCharsets.UTF_8); // 解码，解决中文乱码问题
-            RTLoginUser loginUser = JsonUtils.parseObject(loginUserStr, RTLoginUser.class);
+            RuntimeLoginUser loginUser = JsonUtils.parseObject(loginUserStr, RuntimeLoginUser.class);
             return loginUser;
         } catch (Exception ex) {
             log.error("[buildLoginUserByHeader][解析 LoginUser({}) 发生异常]", loginUserStr, ex);
@@ -184,7 +184,7 @@ public class RuntimeAuthenticationFilter extends OncePerRequestFilter {
      * @param request HTTP请求
      * @param response HTTP响应
      */
-    private void checkAndUpdateSessionIdle(RTLoginUser loginUser, String token, 
+    private void checkAndUpdateSessionIdle(RuntimeLoginUser loginUser, String token,
                                            HttpServletRequest request, HttpServletResponse response) {
         if (loginUser == null || StrUtil.isBlank(token)) {
             return;
