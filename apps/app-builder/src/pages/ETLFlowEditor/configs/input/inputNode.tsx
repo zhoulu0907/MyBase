@@ -57,7 +57,7 @@ export const InputNodeConfig: React.FC = () => {
 
   return (
     <div className={styles.config}>
-      {curDrawerTab.value === ETLDrawerTab.DATA_PREVIEW && (
+      {curDrawerTab.value === ETLDrawerTab.DATA_CONFIG && (
         <div className={styles.dataPreview}>
           <div className={styles.dataSource}>
             <div className={styles.dataSourceHeader}>
@@ -89,10 +89,13 @@ export const InputNodeConfig: React.FC = () => {
               </div>
             )}
           </div>
-          <div className={styles.dataPreviewContent}>
+          {/* <div className={styles.dataPreviewContent}>
             {<DataPreview data={previewData.data} columns={previewData.columns} />}
-          </div>
+          </div> */}
         </div>
+      )}
+      {curDrawerTab.value === ETLDrawerTab.DATA_PREVIEW && (
+        <DataPreview data={previewData.data} columns={previewData.columns} />
       )}
       {curDrawerTab.value === ETLDrawerTab.NODE_REMARK && <DataRemark />}
 
