@@ -8,16 +8,7 @@ import lombok.Data;
 @Data
 @Table(value = "flow_process")
 public class FlowProcessDO extends BaseAppEntity {
-    /**
-     * 主键ID
-     */
-    @Column(value = "id")
-    private Long id;
-    /**
-     * 应用ID
-     */
-    @Column(value = "application_id")
-    private Long applicationId;
+
     /**
      * 流程名称
      */
