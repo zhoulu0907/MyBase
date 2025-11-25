@@ -1,5 +1,5 @@
 import {
-  AUTO_CODE_NUMBER_DEFAULT_CONFIG,
+  AUTO_CODE_SEQUENCE_DEFAULT_CONFIG,
   AUTO_CODE_NUMBER_MODE,
   AUTO_CODE_RULE_TYPE,
   DIGIT_DEFAULT,
@@ -18,7 +18,7 @@ export const convertAutoCodeCompoToAutoNumberRule = (autoCodeRules: AutoCodeRule
   if (!autoCodeRules || autoCodeRules.length === 0) {
     // 返回默认配置
     return {
-      ...AUTO_CODE_NUMBER_DEFAULT_CONFIG,
+      ...AUTO_CODE_SEQUENCE_DEFAULT_CONFIG,
       rules: []
     };
   }
@@ -51,7 +51,7 @@ export const convertAutoCodeCompoToAutoNumberRule = (autoCodeRules: AutoCodeRule
       digitWidth: (config.digitWidth as number) || DIGIT_DEFAULT,
       overflowContinue: (config.overflowContinue as number) || CONSTANTS.ENABLED,
       initialValue: (config.startValue as number) || START_VALUE_DEFAULT,
-      resetCycle: (config.resetCycle as string) || AUTO_CODE_NUMBER_DEFAULT_CONFIG.resetCycle,
+      resetCycle: (config.resetCycle as string) || AUTO_CODE_SEQUENCE_DEFAULT_CONFIG.resetCycle,
       resetOnInitialChange: (config.resetOnInitialChange as number) || CONSTANTS.ENABLED,
       rules: otherRules
     };
@@ -59,7 +59,7 @@ export const convertAutoCodeCompoToAutoNumberRule = (autoCodeRules: AutoCodeRule
 
   // 没有 SEQUENCE 规则时，使用默认配置
   return {
-    ...AUTO_CODE_NUMBER_DEFAULT_CONFIG,
+    ...AUTO_CODE_SEQUENCE_DEFAULT_CONFIG,
     rules: otherRules
   };
 };

@@ -60,7 +60,8 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = memo(
       externalErrors: fieldManager.errors,
       getFieldIndex: fieldManager.getFieldIndex,
       deleteField: fieldManager.deleteField,
-      fields: fieldManager.fields
+      fields: fieldManager.fields,
+      handleConfigConfirm: fieldManager.handleConfigConfirm
     });
 
     return (
