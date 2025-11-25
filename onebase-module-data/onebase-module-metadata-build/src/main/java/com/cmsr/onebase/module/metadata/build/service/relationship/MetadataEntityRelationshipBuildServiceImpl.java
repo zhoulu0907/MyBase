@@ -548,7 +548,7 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
     }
 
     @Override
-    public EntityWithChildrenRespVO getEntityWithChildrenById(Long entityId) {
+    public EntityWithChildrenRespVO getEntityWithChildrenById(Long entityId, String relationshipType) {
         // 1. 获取实体基本信息
         MetadataBusinessEntityDO entity = businessEntityService.getBusinessEntity(entityId);
         if (entity == null) {
@@ -567,6 +567,10 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
         // 3. 查询以该实体为源实体的所有关系（即该实体作为父表的关系）
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.and(MetadataEntityRelationshipDO.SOURCE_ENTITY_ID, entityId);
+        // 增加关系类型筛选条件
+        if (StringUtils.hasText(relationshipType)) {
+            configStore.and(MetadataEntityRelationshipDO.RELATIONSHIP_TYPE, relationshipType);
+        }
         configStore.order("create_time", Order.TYPE.DESC);
 
         List<MetadataEntityRelationshipDO> relationships = entityRelationshipRepository.findAllByConfig(configStore);
@@ -582,8 +586,8 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
 
         result.setChildEntities(childEntities);
 
-        log.info("查询实体及其关联子表成功，实体ID: {}, 关联子表数量: {}, 父表字段数量: {}",
-                entityId, childEntities.size(), parentFields.size());
+        log.info("查询实体及其关联子表成功，实体ID: {}, 关系类型筛选: {}, 关联子表数量: {}, 父表字段数量: {}",
+                entityId, relationshipType, childEntities.size(), parentFields.size());
         return result;
     }
 
