@@ -18,11 +18,11 @@ import java.util.List;
 public class BaseBizRepository<M extends BaseMapper<T>, T> extends ServiceImpl<M, T> {
 
     protected QueryWrapper injectBizFilter(QueryWrapper queryWrapper) {
-        // TODO: add filters like applicationId, versionStatus
-//        Long applicationId = 1234567890L;
-//        String versionStatus = "bld";
+        // TODO: add filters like applicationId, versionFlag
+//        Long applicationId = XXXXX;
+//        var versionStatus = 0,1,xxxxxxx;
 //        return queryWrapper
-//                .eq("version_status", versionStatus);
+//                .eq("version_flag", versionFlag);
         log.debug("注入SQL查询条件");
         return queryWrapper;
     }
