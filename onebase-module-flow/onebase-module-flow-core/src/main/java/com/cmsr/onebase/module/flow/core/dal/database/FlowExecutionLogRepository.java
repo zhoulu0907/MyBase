@@ -58,7 +58,7 @@ public class FlowExecutionLogRepository extends ServiceImpl<FlowExecutionLogMapp
                     .where(filterCondition)
                     .groupBy(FLOW_EXECUTION_LOG.EXECUTION_RESULT);
             int total = 0;
-            List<Map> dataSet = this.objListAs(queryWrapper, Map.class);
+            List<Map> dataSet = this.listAs(queryWrapper, Map.class);
             for (Map dataRow : dataSet) {
                 String key = MapUtils.getString(dataRow, "result");
                 long value = MapUtils.getLong(dataRow, "counts");
