@@ -146,29 +146,31 @@ const AuthorizedApplication = () => {
   };
 
   const handleDisabled = async(record: any) => {
-    if(record.status === 0) {
+    if(record.showStatus === 2) {
       const params = {id: record.id, status: 1};
       try {
           await updateAuthAppStatus(params);
           await fetchCorpAuthorizedList(pageInation.current,pageInation.pageSize);
       }catch(error) {
-          console.log(error);
+          Message.error("启用失败");
       }
     }else {
-     return (
-        Modal.confirm({
-          title: `禁用应用(${record.appName})? `,
-          content: '禁用状态下，企业用户无法使用该应用，再次启用时用户可恢复正常使用',
-          okButtonProps: {
-            status: 'danger'
-          },
-          onOk: async () => {
-            await updateAuthAppStatus(record.id, currentTab);
-            Message.success('禁用成功');
-          }
-        })
-      );
-    }
+      const params = {id: record.id, status: 0};
+      return (
+          Modal.confirm({
+            title: `禁用应用(${record.applicationName})? `,
+            content: '禁用状态下，企业用户无法使用该应用，再次启用时用户可恢复正常使用',
+            okButtonProps: {
+              status: 'danger'
+            },
+            onOk: async () => {
+              await updateAuthAppStatus(params);
+              await fetchCorpAuthorizedList(pageInation.current,pageInation.pageSize);
+              Message.success('禁用成功');
+            }
+          })
+        );
+      }
   };
 
   const handleChangeTab = (value: string) => {

@@ -6,7 +6,7 @@ import type { authorizedAppList, ICreateAppModal } from "../../types/appItem";
 import styles from "./index.module.less";
 
 
-export const CreateAppModal:React.FC<ICreateAppModal> = ({visible, onCloseAppModal, onSaveAppData}) => {
+export const CreateAppModal:React.FC<ICreateAppModal> = ({visible, tableData, onCloseAppModal, onSaveAppData}) => {
     const [createNewAppForm] = Form.useForm();
     const [dropdownList, setDropdownList] = useState<authorizedAppList[]>([]);
 
@@ -44,6 +44,8 @@ export const CreateAppModal:React.FC<ICreateAppModal> = ({visible, onCloseAppMod
         createNewAppForm.resetFields();
     }
 
+    const filterOptions = dropdownList.filter(data => !tableData?.some(item => item.id === data.id));
+
     return (
         <Modal
             title={
@@ -71,7 +73,7 @@ export const CreateAppModal:React.FC<ICreateAppModal> = ({visible, onCloseAppMod
                             return selectedOption ? selectedOption.appName : value;
                         }}
                     >
-                        {dropdownList.map((option) => (
+                        {filterOptions.map((option) => (
                         <Select.Option key={option.id} value={option.id}>
                             <Space align="center" size={12}>
                                 <Avatar style={{ backgroundColor: option.iconColor }}>{option.iconName}</Avatar>
