@@ -9,6 +9,7 @@ import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.framework.common.security.TenantContextHolder;
+import com.cmsr.onebase.module.system.convert.auth.AuthConvert;
 import com.cmsr.onebase.module.system.dal.database.RoleMenuDataRepository;
 import com.cmsr.onebase.module.system.dal.database.UserRoleDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO;
@@ -17,14 +18,17 @@ import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleMenuDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.UserRoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantPackageDO;
+import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
 import com.cmsr.onebase.module.system.enums.permission.DataScopeEnum;
 import com.cmsr.onebase.module.system.enums.permission.MenuConstants;
 import com.cmsr.onebase.module.system.enums.permission.PackageTypeEnum;
+import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
 import com.cmsr.onebase.module.system.service.dept.DeptService;
 import com.cmsr.onebase.module.system.service.tenant.TenantPackageService;
 import com.cmsr.onebase.module.system.service.tenant.TenantService;
 import com.cmsr.onebase.module.system.service.user.UserService;
+import com.cmsr.onebase.module.system.vo.auth.AuthPermissionInfoRespVO;
 import com.cmsr.onebase.module.system.vo.permission.PermissionMenuRespVO;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Suppliers;
@@ -43,8 +47,12 @@ import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
+import static com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils.getLoginUserId;
 import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertSet;
 import static com.cmsr.onebase.framework.common.util.json.JsonUtils.toJsonString;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.USER_NOT_EXISTS;
 
 /**
  * 权限 Service 实现类
@@ -67,6 +75,8 @@ public class PermissionServiceImpl implements PermissionService {
     @Lazy // 延迟，避免循环依赖报错
     private TenantService        tenantService;
 
+    @Resource
+    private PermissionService permissionService;
 
     @Resource
     private UserRoleDataRepository userRoleDataRepository;
@@ -141,6 +151,21 @@ public class PermissionServiceImpl implements PermissionService {
         boolean isCorpAdmin = roleService.hasAnyCorpAdmin(convertSet(roles, RoleDO::getId));
         if (isCorpAdmin) {
             Set<Long> menuIds = getAllCorpActiveMenuIds();
+            List<MenuDO> menuList = menuService.getAllActiveMenuList(menuIds);
+            Set<String> tenantAllPermissions = menuList.stream().map(MenuDO::getPermission).filter(Objects::nonNull)
+                    .collect(Collectors.toSet());
+            // permissions 和 tenantAllPermissions对比，命中一个即返回true
+            for (String permission : permissions) {
+                if (tenantAllPermissions.contains(permission)) {
+                    return true;
+                }
+            }
+        }
+        // 情况二：如果是开发管理员，赋予所有开发相关权限
+        boolean isDevAdmin=roleService.hasAnyDevloperAdmin(convertSet(roles, RoleDO::getId));
+        if(isDevAdmin){
+            // 所有开发者的权限
+            Set<Long> menuIds = RoleCodeEnum.APP_DEVELOPER.getDevloperPermissionCodes();
             List<MenuDO> menuList = menuService.getAllActiveMenuList(menuIds);
             Set<String> tenantAllPermissions = menuList.stream().map(MenuDO::getPermission).filter(Objects::nonNull)
                     .collect(Collectors.toSet());
@@ -272,6 +297,10 @@ public class PermissionServiceImpl implements PermissionService {
         // 如果是企业管理员的情况下，获取企业菜单编号
         if (roleService.hasAnyCorpAdmin(roleIds)) {
             return getAllCorpActiveMenuIds();
+        }
+        // 如果是开发管理员的情况下，获取开发菜单编号
+        if (roleService.hasAnyDevloperAdmin(roleIds)) {
+           return  RoleCodeEnum.APP_DEVELOPER.getDevloperPermissionCodes();
         }
 
         // 如果是非管理员的情况下，获得拥有的菜单编号
@@ -507,6 +536,28 @@ public class PermissionServiceImpl implements PermissionService {
 
         // 删除指定角色下的指定菜单关系
         return roleMenuDataRepository.deleteByRoleIdAndMenuIds(roleId, menuIds);
+    }
+
+    @Override
+    public AuthPermissionInfoRespVO getPermissionInfo(String code) {
+        // 1.1 获得用户信息
+        AdminUserDO user = userService.getUser(getLoginUserId());
+        if (user == null) {
+            throw exception(USER_NOT_EXISTS);
+        }
+        // 1.2 获得角色列表
+        Set<Long> roleIds = permissionService.getRoleIdsListByUserId(getLoginUserId());
+        if (CollUtil.isEmpty(roleIds)) {
+            return AuthConvert.INSTANCE.convert(user, Collections.emptyList(), Collections.emptyList(), code);
+        }
+        List<RoleDO> roles = roleService.getRoleList(roleIds);
+        roles.removeIf(role -> !CommonStatusEnum.ENABLE.getStatus().equals(role.getStatus())); // 移除禁用的角色
+
+        // 1.3 获得菜单列表
+        Set<Long> menuIds = permissionService.getRoleMenuListByRoleId(convertSet(roles, RoleDO::getId));
+        List<MenuDO> menuList = menuService.getAllActiveMenuList(menuIds);
+
+        return AuthConvert.INSTANCE.convert(user, roles, menuList, code);
     }
 
     /**
