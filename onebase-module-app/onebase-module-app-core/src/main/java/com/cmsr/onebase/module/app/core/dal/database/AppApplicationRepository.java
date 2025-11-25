@@ -13,6 +13,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
@@ -103,5 +104,11 @@ public class AppApplicationRepository extends ServiceImpl<AppApplicationMapper, 
                 .orderBy(ApplicationDO::getUpdateTime, false)
                 .orderBy(ApplicationDO::getCreateTime, false);
         return list(queryWrapper);
+    }
+
+    public void updateAppTimeByApplicationId(Long appId) {
+        this.updateChain().set(ApplicationDO::getUpdateTime, LocalDateTime.now())
+                .eq(ApplicationDO::getId, appId)
+                .update();
     }
 }
