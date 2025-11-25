@@ -1,4 +1,11 @@
 .loadmore-list-wrapper {
+    .total-data {
+        display: block;
+        line-height: 0.6rem;
+        font-size: 0.2rem;
+        text-align: center;
+        color: #86909C;
+    }
     .list-search-header {
         padding: 0.4rem 0.32rem 0.24rem;
         display: flex;
@@ -6,7 +13,7 @@
         background-color: #fff;
         width: calc(100% - 0.64rem) !important;
         @media screen and (min-width: 900px) {
-            max-width: calc(750px - 0.64rem) !important;
+            max-width: calc(450px - 0.64rem) !important;
         }
         .filter-title {
             font-size: 0.28rem;
@@ -44,6 +51,9 @@
         position: fixed;
         bottom: 2.4rem;
         right: 0.24rem;
+        @media screen and (min-width: 900px) {
+            right: calc(0.24rem + 50% - 225px);
+        }
         &::before {
         content: '';
         position: absolute;
@@ -153,7 +163,7 @@
 .arco-dialog-content {
     max-width: 80%;
     @media screen and (min-width: 900px) {
-        max-width: 600px;
+        max-width: 400px;
     }
     .arco-dialog-header.ios {
         font-size: 0.4rem;
