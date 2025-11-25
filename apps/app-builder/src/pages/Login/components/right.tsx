@@ -51,12 +51,7 @@ const Right: React.FC = () => {
       if (redirectURL) {
         window.location.href = redirectURL;
       } else {
-        // 跳转到首页
-        if (location.hash.slice(1).startsWith('/tenant')) {
-          navigate('/onebase/enterprise-app');
-        } else {
-          navigate('/onebase/my-app');
-        }
+        navigate('/onebase/enterprise-app');
       }
     }
   }, []);
@@ -117,12 +112,7 @@ const Right: React.FC = () => {
         if (redirectURL) {
           window.location.href = redirectURL;
         } else {
-          // 跳转到首页
-          if (location.hash.slice(1).startsWith('/tenant')) {
-            navigate('/onebase/enterprise-app');
-          } else {
-            navigate('/onebase/my-app');
-          }
+          navigate('/onebase/enterprise-app');
         }
 
         return;
