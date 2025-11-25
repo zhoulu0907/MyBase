@@ -18,6 +18,7 @@ import org.dromara.warm.flow.core.dto.NodeJson;
 import org.dromara.warm.flow.core.dto.SkipJson;
 import org.dromara.warm.flow.core.enums.NodeType;
 import org.dromara.warm.flow.core.enums.PublishStatus;
+import org.dromara.warm.flow.core.enums.SkipType;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -209,7 +210,6 @@ public class BpmDesignConvertImpl implements BpmDesignConvert {
                 edgeVO.setSourceNodeId(skipJson.getNowNodeCode());
                 edgeVO.setTargetNodeId(skipJson.getNextNodeCode());
                 edgeVO.setName(skipJson.getSkipName());
-                edgeVO.setType(skipJson.getSkipType());
                 edgeVO.setSkipCondition(skipJson.getSkipCondition());
 
                 // 添加边视图到列表
@@ -287,7 +287,10 @@ public class BpmDesignConvertImpl implements BpmDesignConvert {
             skipJson.setNowNodeCode(sourceNodeCode);
             skipJson.setNextNodeCode(targetNodeCode);
             skipJson.setSkipName(edgeVO.getName());
-            skipJson.setSkipType(edgeVO.getType());
+
+            // 目前场景只有PASS
+            skipJson.setSkipType(SkipType.PASS.getKey());
+
             skipJson.setSkipCondition(edgeVO.getSkipCondition());
             skipJson.setCoordinate("0,0;0,0;");
 

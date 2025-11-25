@@ -33,9 +33,6 @@ public class BaseEdgeVO {
     @Schema(description = "边名称")
     private String name;
 
-    @Schema(description = "边类型（PASS审批通过 REJECT退回）")
-    private String type;
-
     @Schema(description = "条件")
     private String skipCondition;
 

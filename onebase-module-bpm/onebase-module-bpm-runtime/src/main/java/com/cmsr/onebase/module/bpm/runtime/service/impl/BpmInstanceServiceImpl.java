@@ -426,7 +426,6 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
                 edgeVO.setSourceNodeId(skipJson.getNowNodeCode());
                 edgeVO.setTargetNodeId(skipJson.getNextNodeCode());
                 edgeVO.setName(skipJson.getSkipName());
-                edgeVO.setType(skipJson.getSkipType());
                 edgeVO.setSkipCondition(skipJson.getSkipCondition());
 
                 // 设置状态
