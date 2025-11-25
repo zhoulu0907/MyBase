@@ -188,13 +188,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public CommonResult<?> methodArgumentTypeInvalidFormatExceptionHandler(HttpMessageNotReadableException ex) {
         log.warn("[methodArgumentTypeInvalidFormatExceptionHandler]", ex);
-        
+
         // 处理具体的JSON格式类型错误
         if (ex.getCause() instanceof InvalidFormatException) {
             InvalidFormatException invalidFormatException = (InvalidFormatException) ex.getCause();
             return CommonResult.error(BAD_REQUEST.getCode(), String.format("请求参数类型错误:%s", invalidFormatException.getValue()));
         }
-        
+
         // 处理JSON解析异常（如格式错误、非法字符等）
         if (ex.getCause() instanceof com.fasterxml.jackson.core.JsonParseException) {
             com.fasterxml.jackson.core.JsonParseException parseException = (com.fasterxml.jackson.core.JsonParseException) ex.getCause();
@@ -208,55 +208,55 @@ public class GlobalExceptionHandler {
                 return CommonResult.error(BAD_REQUEST.getCode(), String.format("JSON格式错误：%s", errorMsg != null ? errorMsg : "请求参数格式不正确"));
             }
         }
-        
+
         // 处理JSON映射异常（如类型不匹配、字段缺失等）
         if (ex.getCause() instanceof com.fasterxml.jackson.databind.JsonMappingException) {
             com.fasterxml.jackson.databind.JsonMappingException mappingException = (com.fasterxml.jackson.databind.JsonMappingException) ex.getCause();
             String originalMessage = mappingException.getOriginalMessage();
-            
+
             // 特殊处理 MismatchedInputException，提供更友好的错误提示
             if (mappingException instanceof com.fasterxml.jackson.databind.exc.MismatchedInputException) {
-                com.fasterxml.jackson.databind.exc.MismatchedInputException mismatchException = 
-                    (com.fasterxml.jackson.databind.exc.MismatchedInputException) mappingException;
-                
+                com.fasterxml.jackson.databind.exc.MismatchedInputException mismatchException =
+                        (com.fasterxml.jackson.databind.exc.MismatchedInputException) mappingException;
+
                 // 获取目标类型名称
-                String targetType = mismatchException.getTargetType() != null ? 
-                    mismatchException.getTargetType().getSimpleName() : "对象";
-                
+                String targetType = mismatchException.getTargetType() != null ?
+                        mismatchException.getTargetType().getSimpleName() : "对象";
+
                 // 获取字段路径
                 String fieldPath = "";
                 if (mismatchException.getPath() != null && !mismatchException.getPath().isEmpty()) {
                     fieldPath = mismatchException.getPath().stream()
-                        .map(ref -> ref.getFieldName() != null ? ref.getFieldName() : "[" + ref.getIndex() + "]")
-                        .reduce((a, b) -> a + "." + b)
-                        .orElse("");
+                            .map(ref -> ref.getFieldName() != null ? ref.getFieldName() : "[" + ref.getIndex() + "]")
+                            .reduce((a, b) -> a + "." + b)
+                            .orElse("");
                 }
-                
+
                 // 构造友好的错误提示
                 String errorMessage = "JSON数据格式错误";
                 if (StrUtil.isNotBlank(fieldPath)) {
                     errorMessage += "，字段 [" + fieldPath + "]";
                 }
                 errorMessage += " 需要是 " + targetType + " 类型";
-                
+
                 // 针对Map类型的特殊提示
                 if (targetType.contains("Map") || targetType.contains("HashMap") || targetType.contains("LinkedHashMap")) {
                     errorMessage += "，请确保该字段的值是一个JSON对象（用{}包裹），而不是字符串或其他类型";
                 }
-                
+
                 return CommonResult.error(BAD_REQUEST.getCode(), errorMessage);
             }
-            
+
             // 其他JSON映射异常
             return CommonResult.error(BAD_REQUEST.getCode(), String.format("JSON映射错误：%s", originalMessage));
         }
-        
+
         // 其他HTTP消息不可读异常，返回通用的JSON格式错误提示
         String message = ex.getMessage();
         if (message != null && message.contains("JSON")) {
             return CommonResult.error(BAD_REQUEST.getCode(), "JSON格式错误：请求参数格式不正确，请检查JSON格式");
         }
-        
+
         // 其他未知类型的异常
         return CommonResult.error(BAD_REQUEST.getCode(), "请求参数格式错误：无法解析请求体");
     }
@@ -358,7 +358,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(value = IllegalArgumentException.class)
     public CommonResult<?> illegalArgumentExceptionHandler(HttpServletRequest req, IllegalArgumentException ex) {
-        log.warn("[illegalArgumentExceptionHandler][url({}) 参数校验失败: {}]", req.getRequestURI(), ex.getMessage());
+        log.warn("[illegalArgumentExceptionHandler][url({}) 参数校验失败: {}]", req.getRequestURI(), ex.getMessage(), ex);
         // 将具体的错误信息放到 msg 中返回
         String errorMessage = StrUtil.isNotBlank(ex.getMessage()) ? ex.getMessage() : "参数校验失败";
         return CommonResult.error(BAD_REQUEST.getCode(), errorMessage);
@@ -371,7 +371,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(value = IllegalStateException.class)
     public CommonResult<?> illegalStateExceptionHandler(HttpServletRequest req, IllegalStateException ex) {
-        log.warn("[illegalStateExceptionHandler][url({}) 状态校验失败: {}]", req.getRequestURI(), ex.getMessage());
+        log.warn("[illegalStateExceptionHandler][url({}) 状态校验失败: {}]", req.getRequestURI(), ex.getMessage(), ex);
         // 将具体的错误信息放到 msg 中返回
         String errorMessage = StrUtil.isNotBlank(ex.getMessage()) ? ex.getMessage() : "状态校验失败";
         return CommonResult.error(BAD_REQUEST.getCode(), errorMessage);
@@ -383,7 +383,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = Exception.class)
     public CommonResult<?> defaultExceptionHandler(HttpServletRequest req, Throwable ex) {
         log.error("[defaultExceptionHandler]", ex);
-        
+
         // 优先检查异常消息中是否包含"校验失败"关键字，如果包含则认为是业务异常
         // 这样可以提取到完整的错误信息（包含字段名和校验类型）
         String exceptionMessage = ex.getMessage();
@@ -393,7 +393,7 @@ public class GlobalExceptionHandler {
             log.warn("[defaultExceptionHandler][业务校验失败] url: {}, 错误: {}", req.getRequestURI(), errorMessage);
             return CommonResult.error(BAD_REQUEST.getCode(), errorMessage);
         }
-        
+
         // 其次检查根因异常，如果是业务相关的异常，提取具体错误信息
         Throwable rootCause = ExceptionUtils.getRootCause(ex);
         if (rootCause != null && rootCause instanceof IllegalArgumentException) {
@@ -402,7 +402,7 @@ public class GlobalExceptionHandler {
             log.warn("[defaultExceptionHandler][业务参数异常] url: {}, 错误: {}", req.getRequestURI(), errorMessage);
             return CommonResult.error(BAD_REQUEST.getCode(), errorMessage);
         }
-        
+
         // 插入异常日志
         createExceptionLog(req, ex);
         // 返回 ERROR；在开发/测试环境返回结构化 JSON（放入 data），生产只返回简要 msg
@@ -420,10 +420,10 @@ public class GlobalExceptionHandler {
             return CommonResult.error(INTERNAL_SERVER_ERROR.getCode(), INTERNAL_SERVER_ERROR.getMsg());
         }
     }
-    
+
     /**
      * 从异常消息中提取校验错误信息
-     * 
+     *
      * @param exceptionMessage 异常消息
      * @return 提取后的错误信息
      */
@@ -437,14 +437,14 @@ public class GlobalExceptionHandler {
                 // 从 "字段[" 开始提取完整的错误信息
                 return exceptionMessage.substring(fieldStartIndex);
             }
-            
+
             // 如果没有找到 "字段["，则查找最后一个冒号
             int lastColonIndex = exceptionMessage.lastIndexOf("：");
             if (lastColonIndex > 0 && lastColonIndex < exceptionMessage.length() - 1) {
                 return exceptionMessage.substring(lastColonIndex + 1).trim();
             }
         }
-        
+
         // 如果都没找到，返回完整的异常消息
         return exceptionMessage;
     }
