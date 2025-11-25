@@ -15,6 +15,12 @@ import java.util.List;
 @Repository
 public class AppApplicationTagRepository extends BaseAppRepository<AppApplicationTagMapper, ApplicationTagDO> {
 
+    public List<ApplicationTagDO> findTagIdsByApplicationIds(List<Long> applicationIds) {
+        QueryWrapper queryWrapper = this.query()
+                .in(ApplicationTagDO::getApplicationId, applicationIds);
+        return this.list(queryWrapper);
+    }
+
     public List<Long> findTagIdsByApplicationId(Long applicationId) {
         QueryWrapper queryWrapper = this.query()
                 .select(ApplicationTagDO::getTagId)
