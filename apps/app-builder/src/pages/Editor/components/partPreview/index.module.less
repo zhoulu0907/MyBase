@@ -13,6 +13,13 @@
   position: relative;
 
   overflow-y: auto;
+  &.mobilePreview {
+    width: 450px;
+    min-width: auto;
+    .content {
+      background-color: #f5f7fa;
+    }
+  }
 
   /* 自定义滚动条样式 */
   &::-webkit-scrollbar {

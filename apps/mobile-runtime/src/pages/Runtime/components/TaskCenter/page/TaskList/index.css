@@ -6,7 +6,7 @@
         background-color: #fff;
         width: calc(100% - 0.64rem) !important;
         @media screen and (min-width: 900px) {
-            max-width: calc(750px - 0.64rem) !important;
+            max-width: calc(450px - 0.64rem) !important;
         }
         .filter-title {
             font-size: 0.28rem;
@@ -153,7 +153,7 @@
 .arco-dialog-content {
     max-width: 80%;
     @media screen and (min-width: 900px) {
-        max-width: 600px;
+        max-width: 400px;
     }
     .arco-dialog-header.ios {
         font-size: 0.4rem;

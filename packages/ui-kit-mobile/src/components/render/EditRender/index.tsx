@@ -1,4 +1,11 @@
-import { ALIGN_VALUES, FORM_COMPONENT_TYPES, FormComp, getComponentConfig } from 'src/components/Materials';
+import {
+  ALIGN_VALUES,
+  FORM_COMPONENT_TYPES,
+  FormComp,
+  ListComp,
+  LIST_COMPONENT_TYPES,
+  getComponentConfig
+} from 'src/components/Materials';
 
 import {
   ALIGN_OPTIONS,
@@ -83,6 +90,8 @@ const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pag
       case FORM_COMPONENT_TYPES.SUB_TABLE:
         return <FormComp.XSubTable cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
 
+      case LIST_COMPONENT_TYPES.TABLE:
+        return <ListComp.XLoadMore cpName={cpId} id={cpId} {...componentConfig} editMode={true} runtime={runtime} />;
       default:
         return <div>未知组件类型: {cpType}</div>;
     }
