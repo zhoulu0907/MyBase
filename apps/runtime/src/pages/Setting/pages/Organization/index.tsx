@@ -29,12 +29,12 @@ const OrganizationPage: React.FC = () => {
     },
     {
       title: '管理员',
-      dataIndex: 'leaderUserName',
+      dataIndex: 'adminUserName',
       placeholder: '-'
     },
     {
       title: '部门主管',
-      dataIndex: 'deptDirectorName',
+      dataIndex: 'leaderUserName',
       placeholder: '-'
     },
     {
