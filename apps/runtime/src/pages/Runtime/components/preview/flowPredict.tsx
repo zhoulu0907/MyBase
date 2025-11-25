@@ -49,7 +49,7 @@ const FlowPredict = ({ businessId }) => {
   return (
     <div>
       <div className={styles.predictTitle}>提交流程</div>
-      <div className={styles.predictContent}>
+      <div className={styles.predictContent} style={{maxHeight: '65vh', overflowY: 'auto'}}>
         <ProcessFlow data={stepData} />
       </div>
     </div>
