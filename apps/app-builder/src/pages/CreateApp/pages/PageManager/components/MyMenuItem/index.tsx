@@ -239,7 +239,6 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
                 svg.setAttribute('fill', fillColor);
                 svg.setAttribute('width', '18px');
                 svg.setAttribute('height', '18px');
-                svg.setAttribute('margin-top', '3px');
               }}
             />
           )}

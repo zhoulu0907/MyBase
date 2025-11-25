@@ -51,7 +51,6 @@ const RuntimeMenuItem: React.FC<MenuItemProps> = ({ label, menuID, menuIcon, onC
               svg.setAttribute('fill', fillColor);
               svg.setAttribute('width', '18px');
               svg.setAttribute('height', '18px');
-              svg.setAttribute('margin-top', '3px');
             }}
           />
         )}
