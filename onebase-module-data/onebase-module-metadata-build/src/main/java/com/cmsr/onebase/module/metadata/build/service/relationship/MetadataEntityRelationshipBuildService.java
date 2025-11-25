@@ -97,9 +97,10 @@ public interface MetadataEntityRelationshipBuildService {
      * 根据实体ID查询实体名称及其关联的子表信息
      *
      * @param entityId 实体ID
+     * @param relationshipType 关系类型筛选（ONE_TO_ONE-一对一, ONE_TO_MANY-一对多），为null时查询所有类型
      * @return 实体及其关联子表信息
      */
-    EntityWithChildrenRespVO getEntityWithChildrenById(Long entityId);
+    EntityWithChildrenRespVO getEntityWithChildrenById(Long entityId, String relationshipType);
 
     /**
      * 根据应用ID查询所有实体及字段信息
