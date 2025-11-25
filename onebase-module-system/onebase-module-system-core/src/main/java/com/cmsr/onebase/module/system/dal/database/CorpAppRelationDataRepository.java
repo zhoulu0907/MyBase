@@ -75,4 +75,10 @@ public class CorpAppRelationDataRepository extends DataRepository<CorpAppRelatio
         return findAllByConfig(configStore);
 
     }
+
+    public List<CorpAppRelationDO> findCorpAppRelationByCorpId(Long corpId) {
+        ConfigStore configs = new DefaultConfigStore();
+        configs.eq(CorpAppRelationDO.CORP_ID, corpId);
+        return findAllByConfig(configs);
+    }
 }

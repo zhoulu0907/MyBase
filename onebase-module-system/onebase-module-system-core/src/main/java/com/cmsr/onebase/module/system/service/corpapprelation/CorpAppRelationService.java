@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.system.service.corpapprelation;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
 import com.cmsr.onebase.module.system.dal.dataobject.corpapprelation.CorpAppRelationDO;
 import com.cmsr.onebase.module.system.vo.corp.CorpApplicationRespVO;
 import com.cmsr.onebase.module.system.vo.corpapprelation.*;
@@ -59,4 +60,6 @@ public interface CorpAppRelationService {
 
 
     void updateStatus(Long id, Long status);
+
+    List<ApplicationDTO> getCorpNOApplicationsList(Long corpId, String appName);
 }

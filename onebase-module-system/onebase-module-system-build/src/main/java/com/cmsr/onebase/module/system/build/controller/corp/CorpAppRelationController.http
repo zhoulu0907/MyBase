@@ -14,6 +14,7 @@ POST {{baseUrl}}/system/corp/create
 Content-Type: application/json
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
+
 {
     "corpReqVO":{
      "corpLogo":"xx",
@@ -47,5 +48,13 @@ tenant-id: {{adminTenantId}}
 
 ### 请求 /delete 接口 => 成功
 get {{baseUrl}}/system/corp-app-relation/page?corp_id=1
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+
+
+
+### 请求 /delete 接口 => 成功
+POST {{baseUrl}}/system/corp-app-relation/corp-no-applications-list?corpId=146825072112500736&appName=订单系统
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
