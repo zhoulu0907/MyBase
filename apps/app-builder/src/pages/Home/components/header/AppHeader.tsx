@@ -36,7 +36,6 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   const { t } = useI18n();
 
   const [adminInfo, setAdminInfo] = useState<IAdminInfo | null>(null);
-  const [tenantInfo, setTenantInfo] = useState<TenantInfo | null>(null);
   const { tenantId } = useParams();
 
   // Tab 切换
@@ -70,9 +69,6 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     if (res.user) {
       setAdminInfo(res.user);
     }
-    if(tenantInfoRes) {
-      setTenantInfo(tenantInfoRes);
-    }
     tenantInfoSignal.setTenantInfo(tenantInfoRes);
   };
 
@@ -88,6 +84,8 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     logout(navigate);
   };
 
+  const tenantInfo = tenantInfoSignal.tenantInfo.value;
+  
   const tenantAdminMenu = (
     <Menu style={{ marginRight: '10px' }}>
       <Menu.Item key="info" style={{ height: '90px' }}>
