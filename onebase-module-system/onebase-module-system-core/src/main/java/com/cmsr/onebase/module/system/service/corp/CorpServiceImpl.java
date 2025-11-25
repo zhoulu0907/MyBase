@@ -323,6 +323,7 @@ public class CorpServiceImpl implements CorpService {
             vo.setMobile(reqVO.getMobile());
             vo.setPassword(password);
             vo.setId(userId);
+            vo.setCorpId(corpId);
         return vo;
 
     }
