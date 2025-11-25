@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.etl.core.dal.database;
 
-import com.cmsr.onebase.framework.orm.mybatis.BaseTenantRepository;
+import com.cmsr.onebase.framework.orm.mybatis.BaseAppRepository;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLWorkflowTableDO;
 import com.cmsr.onebase.module.etl.core.dal.mapper.ETLWorkflowTableMapper;
 import com.cmsr.onebase.module.etl.core.enums.ETLConstants;
@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Repository
-public class ETLWorkflowTableRepository extends BaseTenantRepository<ETLWorkflowTableMapper, ETLWorkflowTableDO> {
+public class ETLWorkflowTableRepository extends BaseAppRepository<ETLWorkflowTableMapper, ETLWorkflowTableDO> {
 
     public void deleteByWorkflowId(Long workflowId) {
         QueryWrapper queryWrapper = query().eq(ETLWorkflowTableDO::getWorkflowId, workflowId);
