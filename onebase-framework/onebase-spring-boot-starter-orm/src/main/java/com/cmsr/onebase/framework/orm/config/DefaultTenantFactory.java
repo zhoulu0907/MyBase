@@ -1,4 +1,4 @@
-package com.cmsr.onebase.framework.base.mybatis;
+package com.cmsr.onebase.framework.orm.config;
 
 import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.mybatisflex.core.tenant.TenantFactory;

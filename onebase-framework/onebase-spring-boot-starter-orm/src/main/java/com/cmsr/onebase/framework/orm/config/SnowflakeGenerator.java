@@ -1,4 +1,4 @@
-package com.cmsr.onebase.framework.base.mybatis;
+package com.cmsr.onebase.framework.orm.config;
 
 import com.cmsr.onebase.framework.uid.UidGenerator;
 import com.mybatisflex.core.keygen.IKeyGenerator;

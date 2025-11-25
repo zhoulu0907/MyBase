@@ -1,4 +1,4 @@
-package com.cmsr.onebase.framework.base.mybatis;
+package com.cmsr.onebase.framework.orm.config;
 
 import com.cmsr.onebase.framework.orm.data.BaseEntity;
 import com.mybatisflex.annotation.KeyType;
@@ -17,9 +17,9 @@ import java.util.Map;
 @Configuration
 public class MybatisFlexConfiguration implements MyBatisFlexCustomizer {
 
-    private static final Logger logger = LoggerFactory.getLogger("ORM-SQL");
+    private static final Logger logger = LoggerFactory.getLogger("orm-sql");
 
-    private static final String SNOWFLAKE_PRIMARY_ID = "default_primary_id";
+    private static final String DEFAULT_ID_GENERATOR = "default_id_generator";
 
     @Autowired
     private SnowflakeGenerator snowflakeGenerator;
@@ -43,11 +43,11 @@ public class MybatisFlexConfiguration implements MyBatisFlexCustomizer {
         ));
 
         // key generators
-        KeyGeneratorFactory.register(SNOWFLAKE_PRIMARY_ID, snowflakeGenerator);
+        KeyGeneratorFactory.register(DEFAULT_ID_GENERATOR, snowflakeGenerator);
 
         FlexGlobalConfig.KeyConfig keyConfig = new FlexGlobalConfig.KeyConfig();
         keyConfig.setKeyType(KeyType.Generator);
-        keyConfig.setValue(SNOWFLAKE_PRIMARY_ID);
+        keyConfig.setValue(DEFAULT_ID_GENERATOR);
         keyConfig.setBefore(true);
 
         defaultConfig.setKeyConfig(keyConfig);
