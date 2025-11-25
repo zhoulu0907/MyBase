@@ -1,55 +1,52 @@
 package com.cmsr.onebase.module.flow.core.dal.dataobject;
 
-import com.cmsr.onebase.framework.data.base.BaseDO;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import com.cmsr.onebase.framework.orm.data.BaseAppEntity;
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Table;
 import lombok.Data;
 
 @Data
-@Entity
-@Table(name = "flow_process")
-public class FlowProcessDO extends BaseDO {
-
+@Table(value = "flow_process")
+public class FlowProcessDO extends BaseAppEntity {
     /**
      * 主键ID
      */
-    @Column(name = "id", length = 19, nullable = false)
+    @Column(value = "id")
     private Long id;
     /**
      * 应用ID
      */
-    @Column(name = "application_id", length = 19, nullable = false)
+    @Column(value = "application_id")
     private Long applicationId;
     /**
      * 流程名称
      */
-    @Column(name = "process_name", length = 128, nullable = false)
+    @Column(value = "process_name")
     private String processName;
     /**
      * 描述
      */
-    @Column(name = "process_description", length = 1024)
+    @Column(value = "process_description")
     private String processDescription;
     /**
      * 流程json
      */
-    @Column(name = "process_definition", length = 2147483647, nullable = false)
+    @Column(value = "process_definition")
     private String processDefinition;
     /**
      * 启用状态（编辑、发布）
      */
-    @Column(name = "enable_status", nullable = false)
+    @Column(value = "enable_status")
     private Integer enableStatus;
     /**
      * 发布状态（编辑、发布）
      */
-    @Column(name = "publish_status", nullable = false)
+    @Column(value = "publish_status")
     private Integer publishStatus;
     /**
      * 流程类型，如表达触发，定时触发，API触发等
      */
-    @Column(name = "trigger_type", length = 64, nullable = false)
+    @Column(value = "trigger_type")
     private String triggerType;
 
 }

@@ -9,6 +9,7 @@ import com.cmsr.onebase.module.flow.core.graph.FlowChainBuilder;
 import com.cmsr.onebase.module.flow.core.graph.FlowGraphBuilder;
 import com.cmsr.onebase.module.flow.core.graph.FlowProcessCache;
 import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
+import com.mybatisflex.core.tenant.TenantManager;
 import com.yomahub.liteflow.builder.el.LiteFlowChainELBuilder;
 import com.yomahub.liteflow.flow.FlowBus;
 import lombok.Setter;
@@ -39,8 +40,7 @@ public class FlowCacheHandler {
 
 
     public void initAllProcess() {
-        //TODO 这里要用 TenantUtils.executeIgnore 去查询，但这个没有拆分出来，会导致依赖问题。
-        List<FlowProcessDO> flowProcessDOS = flowProcessRepository.findAllByEnableStatus(FlowEnableStatusEnum.ENABLE.getStatus());
+        List<FlowProcessDO> flowProcessDOS = TenantManager.withoutTenantCondition(() -> flowProcessRepository.findAllByEnableStatus(FlowEnableStatusEnum.ENABLE.getStatus()));
         for (FlowProcessDO flowProcessDO : flowProcessDOS) {
             try {
                 onProcessUpdate(flowProcessDO);
@@ -52,7 +52,7 @@ public class FlowCacheHandler {
     }
 
     public String onApplicationChange(Long applicationId) {
-        List<FlowProcessDO> flowProcessDOS = flowProcessRepository.findByApplicationIdAndEnableStatus(applicationId, FlowEnableStatusEnum.ENABLE.getStatus());
+        List<FlowProcessDO> flowProcessDOS = TenantManager.withoutTenantCondition(() -> flowProcessRepository.findByApplicationIdAndEnableStatus(applicationId, FlowEnableStatusEnum.ENABLE.getStatus()));
         Set<Long> oldProcessIds = flowProcessCache.findProcessByApplicationId(applicationId);
         for (FlowProcessDO flowProcessDO : flowProcessDOS) {
             oldProcessIds.remove(flowProcessDO.getId());

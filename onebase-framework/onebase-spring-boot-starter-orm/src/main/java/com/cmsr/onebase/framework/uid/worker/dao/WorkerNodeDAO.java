@@ -67,7 +67,7 @@ public class WorkerNodeDAO {
                             databaseType = "unknown";
                         }
                     } catch (Exception e) {
-                        throw new RuntimeException("Failed to get database type", e);
+                        databaseType = "postgresql";
                     }
                 }
             }
@@ -82,47 +82,50 @@ public class WorkerNodeDAO {
      */
     public void addWorkerNode(WorkerNodeEntity workerNodeEntity) {
         String dbType = getDatabaseType();
-        
         // 达梦数据库：需要手动生成ID（表中id列不是自增的）
         if ("dameng".equals(dbType)) {
             // 先查询当前最大ID
             Long maxId = jdbcTemplate.queryForObject(
-                "SELECT COALESCE(MAX(\"id\"), 0) FROM \"system_uid_worker_node\"", 
-                Long.class
+                    """
+                            SELECT COALESCE(MAX("id"), 0) FROM "system_uid_worker_node""",
+                    Long.class
             );
             Long newId = (maxId != null ? maxId : 0L) + 1;
-            
             // 插入时显式指定ID和所有必需字段
-            String sql = "INSERT INTO \"system_uid_worker_node\" " +
-                        "(\"id\", \"worker_host\", \"worker_port\", \"node_type\", \"launch_date\", \"creator\", " +
-                        "\"create_time\", \"updater\", \"update_time\", \"deleted\") " +
-                        "VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0)";
-            
-            jdbcTemplate.update(sql, newId, 
-                workerNodeEntity.getWorkerHost(), 
-                workerNodeEntity.getWorkerPort(), 
-                workerNodeEntity.getNodeType());
-            
+            String sql = """
+                    INSERT INTO "system_uid_worker_node"
+                    ("id", "worker_host", "worker_port", "node_type", "launch_date", "creator",
+                    "create_time", "updater", "update_time", "deleted")
+                    VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0)""";
+
+            jdbcTemplate.update(sql, newId,
+                    workerNodeEntity.getWorkerHost(),
+                    workerNodeEntity.getWorkerPort(),
+                    workerNodeEntity.getNodeType());
+
             workerNodeEntity.setId(newId);
             return;
         }
-        
+
         // 其他数据库的处理逻辑
         String sql;
         if ("kingbase".equals(dbType)) {
             // 人大金仓：显式使用序列生成ID
-            sql = "INSERT INTO \"system_uid_worker_node\" (\"id\", \"worker_host\", \"worker_port\", \"node_type\") " +
-                  "VALUES (nextval('seq_system_uid_worker_node'), ?, ?, ?)";
+            sql = """
+                    INSERT INTO "system_uid_worker_node" ("id", "worker_host", "worker_port", "node_type")
+                    VALUES (nextval('seq_system_uid_worker_node'), ?, ?, ?)""";
         } else if ("oracle".equals(dbType)) {
             // Oracle：显式使用序列生成ID
-            sql = "INSERT INTO \"system_uid_worker_node\" (\"id\", \"worker_host\", \"worker_port\", \"node_type\") " +
-                  "VALUES (seq_system_uid_worker_node.NEXTVAL, ?, ?, ?)";
+            sql = """
+                    INSERT INTO "system_uid_worker_node" ("id", "worker_host", "worker_port", "node_type")
+                    VALUES (seq_system_uid_worker_node.NEXTVAL, ?, ?, ?)""";
         } else {
             // MySQL、PostgreSQL等：依赖自增主键
-            sql = "INSERT INTO \"system_uid_worker_node\" (\"worker_host\", \"worker_port\", \"node_type\") " +
-                  "VALUES (?, ?, ?)";
+            sql = """
+                    INSERT INTO "system_uid_worker_node" ("worker_host", "worker_port", "node_type")
+                    VALUES (?, ?, ?)""";
         }
-        
+
         // 使用KeyHolder获取自动生成的ID
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
@@ -132,10 +135,10 @@ public class WorkerNodeDAO {
             ps.setInt(3, workerNodeEntity.getNodeType());
             return ps;
         }, keyHolder);
-        
+
         // 获取自增ID（兼容不同数据库的键名：id, ID, GENERATED_KEY等）
         Number generatedId = null;
-        
+
         // 方式1：尝试从keyHolder直接获取
         try {
             if (keyHolder.getKey() != null) {
@@ -145,7 +148,7 @@ public class WorkerNodeDAO {
             // 如果失败，继续使用方式2
             generatedId = null;
         }
-        
+
         // 方式2：从keyList中获取
         if (generatedId == null) {
             List<Map<String, Object>> keyList = keyHolder.getKeyList();
@@ -164,7 +167,6 @@ public class WorkerNodeDAO {
                 }
             }
         }
-        
         if (generatedId == null) {
             throw new RuntimeException("Failed to get generated key for worker node, database type: " + databaseType);
         }
