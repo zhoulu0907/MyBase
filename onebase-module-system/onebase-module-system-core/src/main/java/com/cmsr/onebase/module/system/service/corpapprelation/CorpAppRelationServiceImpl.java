@@ -199,7 +199,7 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
      * @return CorpApplicationRespVO 响应VO对象
      */
     private CorpApplicationRespVO convertToRespVO(CorpAppRelationDO corpDO, Map<Long, ApplicationDTO> applicationMap, Map<Long, List<TagVO>> tagsMap) {
-        CorpApplicationRespVO respVO = BeanUtils.toBean(corpDO, CorpApplicationRespVO.class);
+        CorpApplicationRespVO respVO =  new CorpApplicationRespVO();
         ApplicationDTO appDo = applicationMap.get(corpDO.getApplicationId());
         if (appDo != null) {
             respVO = BeanUtils.toBean(appDo, CorpApplicationRespVO.class);
@@ -214,6 +214,8 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
             respVO.setShowStatus(getCorpStatus(status, corpDO.getExpiresTime()));
             respVO.setTags(tagsMap.get(appDo.getId()));
         }
+        respVO.setAuthorizationTime(corpDO.getAuthorizationTime());
+        respVO.setExpiresTime(corpDO.getExpiresTime());
         return respVO;
     }
 

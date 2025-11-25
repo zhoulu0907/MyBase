@@ -165,13 +165,13 @@ public class PermissionServiceImpl implements PermissionService {
         boolean isDevAdmin=roleService.hasAnyDevloperAdmin(convertSet(roles, RoleDO::getId));
         if(isDevAdmin){
             // 所有开发者的权限
-            Set<Long> menuIds = RoleCodeEnum.APP_DEVELOPER.getDevloperPermissionCodes();
-            List<MenuDO> menuList = menuService.getAllActiveMenuList(menuIds);
-            Set<String> tenantAllPermissions = menuList.stream().map(MenuDO::getPermission).filter(Objects::nonNull)
+            Set<String> menuCodes = RoleCodeEnum.APP_DEVELOPER.getDevloperPermissionCodes();
+            List<MenuDO> menuList = menuService.getAllActiveMenuListByCodes(menuCodes);
+            Set<String> devAllPermissions = menuList.stream().map(MenuDO::getPermission).filter(Objects::nonNull)
                     .collect(Collectors.toSet());
             // permissions 和 tenantAllPermissions对比，命中一个即返回true
             for (String permission : permissions) {
-                if (tenantAllPermissions.contains(permission)) {
+                if (devAllPermissions.contains(permission)) {
                     return true;
                 }
             }
@@ -300,7 +300,9 @@ public class PermissionServiceImpl implements PermissionService {
         }
         // 如果是开发管理员的情况下，获取开发菜单编号
         if (roleService.hasAnyDevloperAdmin(roleIds)) {
-           return  RoleCodeEnum.APP_DEVELOPER.getDevloperPermissionCodes();
+           Set<String> menuCode=  RoleCodeEnum.APP_DEVELOPER.getDevloperPermissionCodes();
+            List<MenuDO>  menudoList= menuService.getAllActiveMenuListByCodes(menuCode);
+            return   convertSet(menudoList, MenuDO::getId);
         }
 
         // 如果是非管理员的情况下，获得拥有的菜单编号
