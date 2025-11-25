@@ -404,7 +404,6 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
                                                               {renderValueFormItem(
                                                                 form.getFieldValue(item.field + '.cpId')
                                                               )}
-                                                              {/* <Input placeholder="请输入静态值" /> */}
                                                             </Form.Item>
                                                           )}
                                                           {/* 公式 */}
