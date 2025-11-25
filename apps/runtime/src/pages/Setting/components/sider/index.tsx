@@ -1,6 +1,5 @@
 import { Button, Layout, Menu } from '@arco-design/web-react';
 import {
-  IconIdcard,
   IconMenuFold,
   IconMenuUnfold,
 } from '@arco-design/web-react/icon';
@@ -11,7 +10,7 @@ import styles from './sider.module.less';
 import { hasMenu } from '@/utils/permission';
 import { CORP_MENUS } from '@/constants/permission';
 import organizationSVG from '@/assets/images/organization-chart.svg';
-import vectorSVG from '@/assets/images/vector.svg';
+import userSVG from '@/assets/images/user-group.svg';
 import buildingLineSVG from '@/assets/images/building-line.svg';
 import userInfoSVG from '@/assets/images/userInfo.svg';
 import authSVG from '@/assets/images/auth-app.svg';
@@ -45,7 +44,7 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
       {
         key: 'user',
         title: '用户管理',
-        icon: <img src={vectorSVG} />,
+        icon: <img src={userSVG} />,
         path: '/onebase/setting/user',
         permissionKey: CORP_MENUS.USER
       },
