@@ -6,6 +6,7 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.framework.data.base.BaseDOInterface;
 import jakarta.annotation.Resource;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
@@ -45,6 +46,7 @@ public class DataRepository<T extends BaseDOInterface> {
     }
 
     @Resource
+    @Setter
     protected AnylineService<?> anylineService;
 
     private Class<T> defaultClazz = null;

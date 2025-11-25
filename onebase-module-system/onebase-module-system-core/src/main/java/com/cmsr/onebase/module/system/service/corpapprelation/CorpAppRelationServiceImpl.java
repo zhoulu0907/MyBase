@@ -7,6 +7,7 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
+import com.cmsr.onebase.module.app.api.app.dto.TagVO;
 import com.cmsr.onebase.module.system.dal.database.CorpAppRelationDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.corp.CorpDO;
 import com.cmsr.onebase.module.system.dal.dataobject.corpapprelation.CorpAppRelationDO;
@@ -152,9 +153,18 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
         List<Long> applicationIds = new ArrayList<>(applicationMap.keySet());
         // 查询原始分页数据
         PageResult<CorpAppRelationDO> pageResult = corpAppRelationDataRepository.selectPage(pageReqVO, applicationIds);
+
+        // 1. 获取应用ID列表
+        List<Long> appIds = pageResult.getList().stream()
+                .map(CorpAppRelationDO::getApplicationId)
+                .collect(Collectors.toList());
+
+        // 获取标签列表
+        Map<Long, List<TagVO>> tagMap = appApplicationApi.queryAppTags(appIds);
+
         // 转换为 VO 对象并根据 applicationName 过滤
         List<CorpApplicationRespVO> filteredList = pageResult.getList().stream()
-                .map(corpDO -> convertToRespVO(corpDO, applicationMap))
+                .map(corpDO -> convertToRespVO(corpDO, applicationMap, tagMap))
                 .collect(Collectors.toList());
         // 返回过滤后的结果和总数
         return new PageResult<>(filteredList, pageResult.getTotal());
@@ -188,10 +198,11 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
      * @param applicationMap 应用信息映射表
      * @return CorpApplicationRespVO 响应VO对象
      */
-    private CorpApplicationRespVO convertToRespVO(CorpAppRelationDO corpDO, Map<Long, ApplicationDTO> applicationMap) {
-        CorpApplicationRespVO respVO = BeanUtils.toBean(corpDO, CorpApplicationRespVO.class);
+    private CorpApplicationRespVO convertToRespVO(CorpAppRelationDO corpDO, Map<Long, ApplicationDTO> applicationMap, Map<Long, List<TagVO>> tagsMap) {
+        CorpApplicationRespVO respVO =  new CorpApplicationRespVO();
         ApplicationDTO appDo = applicationMap.get(corpDO.getApplicationId());
         if (appDo != null) {
+            respVO = BeanUtils.toBean(appDo, CorpApplicationRespVO.class);
             respVO.setApplicationName(appDo.getAppName());
             respVO.setApplicationCode(appDo.getAppCode());
             respVO.setApplicationUid(appDo.getAppUid());
@@ -201,7 +212,10 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
             // 获取app应用状态描述
             Integer status = corpDO.getStatus();
             respVO.setShowStatus(getCorpStatus(status, corpDO.getExpiresTime()));
+            respVO.setTags(tagsMap.get(appDo.getId()));
         }
+        respVO.setAuthorizationTime(corpDO.getAuthorizationTime());
+        respVO.setExpiresTime(corpDO.getExpiresTime());
         return respVO;
     }
 

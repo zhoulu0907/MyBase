@@ -1,32 +1,29 @@
 package com.cmsr.onebase.module.etl.core.dal.dataobject;
 
-import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
-import jakarta.persistence.Column;
-import jakarta.persistence.Table;
+import com.cmsr.onebase.framework.orm.data.BaseAppEntity;
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Table;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 
 @Data
-@Table(name = "etl_schedule_job")
-public class ETLScheduleJobDO extends TenantBaseDO {
+@Table(value = "etl_schedule_job")
+public class ETLScheduleJobDO extends BaseAppEntity {
 
-    @Column(name = "application_id")
-    private Long applicationId;
-
-    @Column(name = "workflow_id")
+    @Column(value = "workflow_id")
     private Long workflowId;
 
-    @Column(name = "job_id")
+    @Column(value = "job_id")
     private String jobId;
 
-    @Column(name = "job_status")
+    @Column(value = "job_status")
     private String jobStatus;
 
-    @Column(name = "last_job_time")
+    @Column(value = "last_job_time")
     private LocalDateTime lastJobTime;
 
-    @Column(name = "last_success_time")
+    @Column(value = "last_success_time")
     private LocalDateTime lastSuccessTime;
 
 }

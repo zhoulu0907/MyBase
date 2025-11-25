@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * 菜单数据访问层
@@ -86,6 +87,18 @@ public class MenuDataRepository extends DataRepository<MenuDO> {
             configStore.eq(MenuDO.STATUS, reqVO.getStatus());
         }
 
+        return findAllByConfig(configStore);
+    }
+
+    /**
+     * 根据code查询菜单列表
+     *
+     * @param codes 查询条件
+     * @return 菜单列表
+     */
+    public List<MenuDO> findAllByCodes(Set<String> codes) {
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.in(MenuDO.PERMISSION, codes);
         return findAllByConfig(configStore);
     }
 }

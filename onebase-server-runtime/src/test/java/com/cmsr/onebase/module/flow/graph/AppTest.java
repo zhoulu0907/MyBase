@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.flow.graph;
 
 import com.cmsr.onebase.framework.security.runtime.RTSecurityContext;
-import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.module.app.api.security.bo.FieldPermission;
 import com.cmsr.onebase.module.app.api.security.bo.OperationPermission;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthDataGroupRepository;

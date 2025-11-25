@@ -56,4 +56,13 @@ public class BpmTaskDetailRespVO {
 
     @Schema(description = "页面视图信息")
     private PageViewDTO pageView;
+
+    @Schema(description = "流程标题")
+    private String processTitle;
+
+    @Schema(description = "代理人名称")
+    private String agentName;
+
+    @Schema(description = "代理人ID")
+    private Long agentId;
 }

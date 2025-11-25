@@ -68,7 +68,7 @@ public class MetadataEntityFieldRepository extends DataRepository<MetadataEntity
     /**
      * 根据实体ID和字段名获取字段
      *
-     * @param entityId 实体ID
+     * @param entityId  实体ID
      * @param fieldName 字段名
      * @return 实体字段对象
      */
@@ -105,5 +105,20 @@ public class MetadataEntityFieldRepository extends DataRepository<MetadataEntity
         configStore.and(MetadataEntityFieldDO.ENTITY_ID, entityId);
         configStore.and(MetadataEntityFieldDO.FIELD_NAME, "id");
         return findOne(configStore);
+    }
+
+    /**
+     * 根据字典类型ID统计引用该字典的字段数量
+     *
+     * @param dictTypeId 字典类型ID
+     * @return 引用该字典的字段数量
+     */
+    public long countByDictTypeId(Long dictTypeId) {
+        if (dictTypeId == null) {
+            return 0;
+        }
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.and(MetadataEntityFieldDO.DICT_TYPE_ID, dictTypeId);
+        return countByConfig(configStore);
     }
 }
