@@ -210,11 +210,17 @@ const TenantPage: React.FC = () => {
           {/* 左侧头像与姓名 */}
           <Col flex="auto">
             <Space align="center">
-              <Avatar size={80}>
-                <img
-                  alt='avatar'
-                  src={userInfo.avatar}
-                />
+              <Avatar
+                size={80}
+                shape="circle"
+                style={{ border: '1px solid #f0f0f0', backgroundColor: '#E5E6EB' ,overflow: 'hidden' }}
+              >
+                <Image width={80} height={80} src={userInfo.avatar}   
+                  style={{
+                    objectFit: 'cover',
+                    borderRadius: '50%', // 强制圆形裁剪
+                    display: 'block',     // 避免 inline 元素影响
+                  }}/>
               </Avatar>
               <div>
                 <div className={styles.userTop}>
