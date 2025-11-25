@@ -3,6 +3,7 @@ import { useSignals } from '@preact/signals-react/runtime';
 import React from 'react';
 import styles from './index.module.less';
 import { webMenuIcons } from '@onebase/ui-kit';
+import { ReactSVG } from 'react-svg';
 
 /**
  * MenuItem 组件
@@ -32,20 +33,29 @@ const RuntimeMenuItem: React.FC<MenuItemProps> = ({ label, menuID, menuIcon, onC
           maxWidth: maxWidth + 'px'
         }}
       >
-        <img
-          style={{
-            width: 'auto',
-            height: '18px',
-            marginRight: 16,
-            color: curMenu.value?.id === menuID ? 'rgb(var(--primary-6))' : '#333',
-            fill: curMenu.value?.id === menuID ? 'rgb(var(--primary-6))' : '#333'
-          }}
-          src={allWebMenuIcons.find((ele) => ele.code === menuIcon)?.icon}
-          alt=""
-        />
+        {menuIcon.indexOf('-taskicon') > 0 ? (
+          // xxx-taskicon 是工作流程任务中心菜单的icon
+          <i className={`iconfont ${menuIcon}`} style={{ marginRight: '16px' }} />
+        ) : (
+          // 正常菜单 icon
+          <ReactSVG
+            className={styles.menuIcon}
+            src={
+              allWebMenuIcons.find((ele) => ele.code === menuIcon)?.icon ||
+              allWebMenuIcons.find((ele) => ele.code === 'FormPageLine')?.icon ||
+              ''
+            }
+            beforeInjection={(svg) => {
+              const fillColor = curMenu.value?.id === menuID ? 'rgb(var(--primary-6))' : '#333';
+              svg.querySelectorAll('*').forEach((el) => el.removeAttribute('fill'));
+              svg.setAttribute('fill', fillColor);
+              svg.setAttribute('width', '18px');
+              svg.setAttribute('height', '18px');
+              svg.setAttribute('margin-top', '3px');
+            }}
+          />
+        )}
 
-        {/* xxx-taskicon 是工作流程任务中心菜单的icon */}
-        {menuIcon.indexOf('-taskicon') > 0 && <i className={`iconfont ${menuIcon}`} style={{ marginRight: '16px' }} />}
         <span style={{ color: curMenu.value?.id === menuID ? 'rgb(var(--primary-6))' : '#333' }}>{label}</span>
       </div>
     </div>

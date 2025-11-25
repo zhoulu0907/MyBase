@@ -6,8 +6,6 @@ import EditIcon from '@/assets/images/edit_menu_icon.svg';
 import RenameIcon from '@/assets/images/edit_page_name_icon.svg';
 import HiddenIcon from '@/assets/images/eye_off_icon.svg';
 import VisibleIcon from '@/assets/images/eye_on_icon.svg';
-import DynamicIcon from '@/components/DynamicIcon';
-import { menuIconList } from '@/components/MenuIcon/const';
 import { Dropdown, Menu, Message, Tooltip, type FormInstance } from '@arco-design/web-react';
 import { IconEyeInvisible, IconMoreVertical } from '@arco-design/web-react/icon';
 import { getPageSetId, menuSignal, PageType, RootParentPage, VisibleType, type GetPageSetIdReq } from '@onebase/app';
@@ -16,6 +14,7 @@ import { pagesRuntimeSignal } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ReactSVG } from 'react-svg';
 import styles from './index.module.less';
 
 const MenuItem = Menu.Item;
@@ -222,14 +221,27 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
     >
       <Tooltip content={menuName} position="top">
         <div className={styles.menuName}>
-          <img
-            style={{ width: 'auto', height: '18px', fill: '#333', marginRight: 16 }}
-            src={allWebMenuIcons.find((ele) => ele.code === menuIcon)?.icon}
-            alt=""
-          />
-          {/* xxx-taskicon 是工作流程任务中心菜单的icon */}
-          {menuIcon.indexOf('-taskicon') > 0 && (
+          {menuIcon.indexOf('-taskicon') > 0 ? (
+            // xxx-taskicon 是工作流程任务中心菜单的icon
             <i className={`iconfont ${menuIcon}`} style={{ marginRight: '16px' }} />
+          ) : (
+            // 正常菜单 icon
+            <ReactSVG
+              className={styles.menuIcon}
+              src={
+                allWebMenuIcons.find((ele) => ele.code === menuIcon)?.icon ||
+                allWebMenuIcons.find((ele) => ele.code === 'FormPageLine')?.icon ||
+                ''
+              }
+              beforeInjection={(svg) => {
+                const fillColor = curMenu.value?.id === menuID ? 'rgb(var(--primary-6))' : '#333';
+                svg.querySelectorAll('*').forEach((el) => el.removeAttribute('fill'));
+                svg.setAttribute('fill', fillColor);
+                svg.setAttribute('width', '18px');
+                svg.setAttribute('height', '18px');
+                svg.setAttribute('margin-top', '3px');
+              }}
+            />
           )}
           <span
             className={styles.name}
