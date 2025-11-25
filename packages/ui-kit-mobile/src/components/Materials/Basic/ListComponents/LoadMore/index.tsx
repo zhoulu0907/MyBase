@@ -47,6 +47,7 @@ const XLoadMore = memo(
       showAddBtn?: boolean;
       refresh?: number;
       xTableSelectProps?: XTableSelectProps;
+      editMode?: boolean;
     }
   ) => {
     useSignals();
@@ -57,6 +58,7 @@ const XLoadMore = memo(
     const hasOperationPermission = true;
 
     const {
+      editMode = false,
       metaData,
       searchItems,
       columns,
@@ -266,6 +268,9 @@ const XLoadMore = memo(
     };
 
     const handleDeleteAction = (id: string) => {
+      if (!runtime || !showFromPageData) {
+        return;
+      }
       window.modalInstance = Dialog.confirm({
         title: '删除确认',
         children: '确定删除？删除后不可恢复！',
@@ -278,7 +283,7 @@ const XLoadMore = memo(
       });
     };
     const handleDelete = async (id: string) => {
-      if (!runtime) {
+      if (!runtime || !showFromPageData) {
         return;
       }
       const req: DeleteMethodParam = {
@@ -417,6 +422,26 @@ const XLoadMore = memo(
       )
     }
 
+    const getBottomBar = () => {
+      if (editMode) {
+        return null;
+      }
+      if (!loading && !tableData.length && tableTotal === 0) {
+        return <div className="no-data">暂无数据</div>;
+      }
+      if (loading || tablePageNo * pageSize >= (tableTotal || Number.MAX_SAFE_INTEGER)) {
+        return tableTotal ? <div className="total-data">共{tableTotal}条数据</div> : null;
+      }
+      return <LoadMore
+        getData={onReachBottom}
+        getDataAtFirst={false}
+        threshold={200}
+        blockWhenLoading={false}
+        trigger={manuClick ? 'click' : 'scroll'}
+        throttle={300}
+      />
+    }
+
     return (
       <div className="loadmore-list-wrapper">
         {searchItems?.length ? <Sticky topOffset={0.88 * window.ROOT_FONT_SIZE} className="list-search-header">
@@ -431,13 +456,12 @@ const XLoadMore = memo(
           </div>
         )}
         <div className="list-body-wrapper">
-          {!tableData.length ? <div className="no-data">暂无数据</div> : null}
           {
-            tableData.map((item, index) => (
+            (editMode ? [{}] : tableData).map((item, index) => (
               <div key={item.key} className="list-body-item-wrapper" onClick={() => handleRowClick(item)}>
-                {finalColumns?.map((col) => {
+                {(finalColumns?.length ? finalColumns : [{}, {}])?.map((col) => {
                   return <div className="list-body-item-element" key={col.dataIndex}>
-                    <Ellipsis className="list-body-item-title" text={col.title + '：'} />
+                    <Ellipsis className="list-body-item-title" text={(col.title || '') + '：'} />
                     <Ellipsis className="list-body-item-content" text={col.render?.(item, index)} />
                   </div>
                 })}
@@ -445,16 +469,7 @@ const XLoadMore = memo(
               </div>
             ))
           }
-          {
-            loading || tablePageNo * pageSize >= (tableTotal || Number.MAX_SAFE_INTEGER) ? null : <LoadMore
-              getData={onReachBottom}
-              getDataAtFirst={false}
-              threshold={200}
-              blockWhenLoading={false}
-              trigger={manuClick ? 'click' : 'scroll'}
-              throttle={300}
-            />
-          }
+          {getBottomBar()}
         </div>
       </div>
     );
