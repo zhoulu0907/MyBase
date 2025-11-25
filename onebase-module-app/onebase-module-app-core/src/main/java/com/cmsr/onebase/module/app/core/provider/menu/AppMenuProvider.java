@@ -18,7 +18,7 @@ public class AppMenuProvider {
     private AppMenuRepository appMenuRepository;
 
     public MenuDO findByMenuId(Long menuId) {
-        return appMenuRepository.findById(menuId);
+        return appMenuRepository.getById(menuId);
     }
 
 }

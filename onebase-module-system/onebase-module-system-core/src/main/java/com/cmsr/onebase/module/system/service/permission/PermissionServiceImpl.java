@@ -59,7 +59,7 @@ public class PermissionServiceImpl implements PermissionService {
     private MenuService          menuService;
     @Resource
     private DeptService          deptService;
-    @Resource
+    @Resource @Lazy
     private UserService          userService;
     @Resource
     private TenantPackageService tenantPackageService;

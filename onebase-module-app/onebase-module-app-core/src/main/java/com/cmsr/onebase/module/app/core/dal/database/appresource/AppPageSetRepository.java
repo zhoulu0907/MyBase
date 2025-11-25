@@ -1,53 +1,35 @@
 package com.cmsr.onebase.module.app.core.dal.database.appresource;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.PageSetDO;
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
+import com.cmsr.onebase.module.app.core.dal.mapper.appresource.AppPageSetMapper;
+import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.spring.service.impl.ServiceImpl;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
-public class AppPageSetRepository extends DataRepository<PageSetDO> {
-
-    public AppPageSetRepository() {
-        super(PageSetDO.class);
-    }
+public class AppPageSetRepository extends ServiceImpl<AppPageSetMapper, PageSetDO> {
 
     public PageSetDO findPageSetByMenuId(Long menuId) {
-        ConfigStore configs = new DefaultConfigStore();
-        configs.eq(PageSetDO.MENU_ID, menuId);
-        return findOne(configs);
+        QueryWrapper queryWrapper = this.query().eq(PageSetDO::getMenuId, menuId);
+        return getOne(queryWrapper);
     }
 
     public List<PageSetDO> findByMenuIds(List<Long> menuIds) {
-        ConfigStore configs = new DefaultConfigStore();
-        configs.in(PageSetDO.MENU_ID, menuIds);
-        return findAllByConfig(configs);
+        QueryWrapper queryWrapper = this.query().in(PageSetDO::getMenuId, menuIds);
+        return list(queryWrapper);
     }
 
     public void deletePageSetByMenuId(Long menuId) {
-        ConfigStore configs = new DefaultConfigStore();
-        configs.eq(PageSetDO.MENU_ID, menuId);
-        deleteByConfig(configs);
-    }
-
-    public List<PageSetDO> findByMenuId(List<Long> menuIds) {
-        ConfigStore configs = new DefaultConfigStore();
-        configs.in(PageSetDO.MENU_ID, menuIds);
-        return findAllByConfig(configs);
+        QueryWrapper queryWrapper = this.query().eq(PageSetDO::getMenuId, menuId);
+        remove(queryWrapper);
     }
 
     public List<PageSetDO> findByMenuIdAndType(List<Long> menuIds, Integer pageSetType) {
-        ConfigStore configs = new DefaultConfigStore();
-        configs.in(PageSetDO.MENU_ID, menuIds);
-
-        if (pageSetType != null) {
-            configs.eq(PageSetDO.PAGESET_TYPE, pageSetType);
-        }
-
-        return findAllByConfig(configs);
+        QueryWrapper queryWrapper = this.query().in(PageSetDO::getMenuId, menuIds)
+                .eq(PageSetDO::getPageSetType, pageSetType, pageSetType != null);
+        return list(queryWrapper);
     }
 
 }

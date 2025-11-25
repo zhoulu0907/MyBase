@@ -360,7 +360,7 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
 
 
     private List<PageDO> queryAlFormPages(Long menuId) {
-        List<PageSetDO> pageSetDOS = appPageSetRepository.findByMenuId(List.of(menuId));
+        List<PageSetDO> pageSetDOS = appPageSetRepository.findByMenuIds(List.of(menuId));
         if (CollectionUtils.isEmpty(pageSetDOS)) {
             return Collections.emptyList();
         }
@@ -370,7 +370,7 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
             return Collections.emptyList();
         }
         List<Long> pageIds = pageSetPageDOS.stream().map(pageSetPageDO -> pageSetPageDO.getPageId()).toList();
-        List<PageDO> pageDOS = appPageRepository.findByPageIds(pageIds);
+        List<PageDO> pageDOS = appPageRepository.listByIds(pageIds);
         if (CollectionUtils.isEmpty(pageDOS)) {
             return Collections.emptyList();
         }

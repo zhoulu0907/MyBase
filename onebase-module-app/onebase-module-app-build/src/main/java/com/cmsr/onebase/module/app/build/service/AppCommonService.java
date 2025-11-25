@@ -59,7 +59,7 @@ public class AppCommonService {
     }
 
     public MenuDO validateMenuExist(Long id) {
-        MenuDO menuDO = menuRepository.findById(id);
+        MenuDO menuDO = menuRepository.getById(id);
         if (menuDO == null) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_MENU_NOT_EXIST);
         }

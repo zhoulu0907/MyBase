@@ -4,11 +4,10 @@ import com.cmsr.onebase.framework.common.pojo.PageParam;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.module.app.core.dal.database.AppSqlQueryRepository;
+import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dto.auth.RoleMemberDTO;
 import com.cmsr.onebase.module.app.core.impl.auth.AppAuthRoleUserImpl;
 import com.cmsr.onebase.module.etl.core.dal.database.ETLWorkflowRepository;
-import com.cmsr.onebase.module.etl.core.vo.WorkflowBriefVO;
-import com.cmsr.onebase.module.etl.core.vo.WorkflowPageReqVO;
 import com.cmsr.onebase.server.OneBaseServerApplication;
 import com.mybatisflex.core.paginate.Page;
 import lombok.Setter;
@@ -34,6 +33,9 @@ public class RepositoryTest {
 
     @Autowired
     private ETLWorkflowRepository workflowRepository;
+
+    @Autowired
+    private AppMenuRepository appMenuRepository;
 
     @Test
     void test() {
@@ -69,8 +71,14 @@ public class RepositoryTest {
 
     @Test
     void test5() {
-        Page page =Page.of(1, 10);
+        Page page = Page.of(1, 10);
         var result = workflowRepository.page(page);
         System.out.println(result);
+    }
+
+    @Test
+    public void test6() {
+        TenantContextHolder.setTenantId(1L);
+        var result = appMenuRepository.findPageIdsByAppIdAndMenuId(89762669056458752L, 89763253172011008L);
     }
 }

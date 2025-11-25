@@ -19,7 +19,7 @@ public class AppWorkbenchComponentRepository extends DataRepository<WorkbenchCom
 
     public void deleteComponentByPageId(Long pageId) {
         ConfigStore configs = new DefaultConfigStore();
-        configs.eq(ComponentDO.PAGE_ID, pageId);
+        configs.eq(WorkbenchComponentDO.PAGE_ID, pageId);
         deleteByConfig(configs);
     }
 

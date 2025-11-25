@@ -57,20 +57,10 @@ public class WorkBenchPageSetServiceImpl implements WorkBenchPageSetService {
     private AppWorkbenchComponentRepository workbenchComponentRepository;
 
     @Resource
-    private AppPageMetaRepository pageMetaDataRepository;
-
-    @Resource
-    private AppPageSetLabelRepository pageSetLabelDataRepository;
-
-    @Resource
-    private AppPageRefRouterRepository appPageRefRouterDataRepository;
-
-    @Resource
     private AppMenuRepository appMenuRepository;
 
     @Resource
     private AppApplicationRepository appApplicationRepository;
-
 
 
     @Override
@@ -164,7 +154,7 @@ public class WorkBenchPageSetServiceImpl implements WorkBenchPageSetService {
                 pageSetPageDO.setPageId(pageDO.getId());
                 pageSetPageDO.setIsDefault(0);
                 pageSetPageDO.setDefaultSeq(1);
-                pageSetPageDataRepository.insert(pageSetPageDO);
+                pageSetPageDataRepository.save(pageSetPageDO);
 
                 page.setId(pageDO.getId());
             }
@@ -202,8 +192,6 @@ public class WorkBenchPageSetServiceImpl implements WorkBenchPageSetService {
         });
 
     }
-
-
 
 
 }
