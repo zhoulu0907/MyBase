@@ -1,13 +1,13 @@
 package com.cmsr.onebase.module.etl.core.dal.dataobject;
 
-import com.cmsr.onebase.framework.orm.data.BaseTenantEntity;
+import com.cmsr.onebase.framework.orm.data.BaseAppEntity;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
 import lombok.Data;
 
 @Data
 @Table(value = "etl_table")
-public class ETLTableDO extends BaseTenantEntity {
+public class ETLTableDO extends BaseAppEntity {
 
     @Column(value = "datasource_id")
     private Long datasourceId;

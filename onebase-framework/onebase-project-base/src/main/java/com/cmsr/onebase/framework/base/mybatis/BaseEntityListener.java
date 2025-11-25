@@ -5,7 +5,6 @@ import com.cmsr.onebase.framework.orm.data.BaseBizEntity;
 import com.cmsr.onebase.framework.orm.data.BaseEntity;
 import com.mybatisflex.annotation.InsertListener;
 import com.mybatisflex.annotation.UpdateListener;
-import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDateTime;
 
@@ -23,11 +22,8 @@ public class BaseEntityListener implements InsertListener, UpdateListener {
         }
         if (o instanceof BaseBizEntity bizEntity) {
             // TODO: set version properties for biz entity if absent
-            if (bizEntity.getVersionId() == null) {
+            if (bizEntity.getVersionTag() == null) {
 //            bizEntity.setVersionId();
-            }
-            if (StringUtils.isNotBlank(bizEntity.getVersionStatus())) {
-//            bizEntity.setVersionStatus();
             }
         }
     }
@@ -40,11 +36,8 @@ public class BaseEntityListener implements InsertListener, UpdateListener {
         }
         if (o instanceof BaseBizEntity bizEntity) {
             // TODO: set version properties for biz entity if absent
-            if (bizEntity.getVersionId() == null) {
+            if (bizEntity.getVersionTag() == null) {
 //            bizEntity.setVersionId();
-            }
-            if (StringUtils.isNotBlank(bizEntity.getVersionStatus())) {
-//            bizEntity.setVersionStatus();
             }
         }
     }
