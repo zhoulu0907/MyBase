@@ -100,7 +100,7 @@ public class AppMenuServiceImpl implements AppMenuService {
             menuDOList.add(menuDO);
         }
 
-        appMenuRepository.insertBatch(menuDOList);
+        appMenuRepository.saveBatch(menuDOList);
     }
 
     @Override
@@ -290,7 +290,7 @@ public class AppMenuServiceImpl implements AppMenuService {
         menuDO.setMenuSort(generateMenuSort(applicationDO.getId()));
         menuDO.setIsVisible(NumberUtils.INTEGER_ONE);
         menuDO.setEntityId(createReqVO.getEntityId());
-        appMenuRepository.insert(menuDO);
+        appMenuRepository.save(menuDO);
         // 创建页面集
         CreatePageSetDTO createPageSetDTO = new CreatePageSetDTO();
         createPageSetDTO.setMenuId(menuDO.getId());
@@ -328,7 +328,7 @@ public class AppMenuServiceImpl implements AppMenuService {
         MenuDO menuDO = appCommonService.validateMenuExist(updateReqVO.getId());
         menuDO.setMenuName(updateReqVO.getMenuName());
         menuDO.setMenuIcon(updateReqVO.getMenuIcon());
-        appMenuRepository.update(menuDO);
+        appMenuRepository.updateById(menuDO);
     }
 
     @Override
@@ -336,20 +336,20 @@ public class AppMenuServiceImpl implements AppMenuService {
     public void updateApplicationMenuName(Long id, String menuName) {
         MenuDO menuDO = appCommonService.validateMenuExist(id);
         menuDO.setMenuName(menuName);
-        appMenuRepository.update(menuDO);
+        appMenuRepository.updateById(menuDO);
     }
 
     @Override
     public void updateApplicationMenuOrder(MenuOrderUpdateReqVO updateReqVO) {
         MenuDO menuDO = appCommonService.validateMenuExist(updateReqVO.getId());
         menuDO.setParentId(updateReqVO.getParentId());
-        appMenuRepository.update(menuDO);
+        appMenuRepository.updateById(menuDO);
         Map<Long, Integer> menuSortMap = toMenuSortMap(updateReqVO.getMenuTree());
         List<MenuDO> menuDOS = appMenuRepository.findByApplicationId(menuDO.getApplicationId());
         for (MenuDO menu : menuDOS) {
             Integer order = MapUtils.getInteger(menuSortMap, menu.getId(), MenuUtils.MENU_SORT_MAX_VALUE);
             menu.setMenuSort(order);
-            appMenuRepository.update(menu);
+            appMenuRepository.updateById(menu);
         }
     }
 
@@ -392,7 +392,7 @@ public class AppMenuServiceImpl implements AppMenuService {
     public void updateApplicationMenuVisible(Long id, Integer visible) {
         MenuDO menuDO = appCommonService.validateMenuExist(id);
         menuDO.setIsVisible(visible);
-        appMenuRepository.update(menuDO);
+        appMenuRepository.updateById(menuDO);
     }
 
     @Override
@@ -408,7 +408,7 @@ public class AppMenuServiceImpl implements AppMenuService {
         menuDO.setMenuName(copyReqVO.getMenuName());
         menuDO.setParentId(validateParentMenuId(copyReqVO.getParentId()));
         menuDO.setMenuCode(MenuUtils.generateMenuCode());
-        appMenuRepository.insert(menuDO);
+        appMenuRepository.save(menuDO);
         // 复制页面
         CopyPageSetDTO copyPageSetDTO = new CopyPageSetDTO();
         copyPageSetDTO.setMenuId(sourceMenuId);
@@ -428,7 +428,7 @@ public class AppMenuServiceImpl implements AppMenuService {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_MENU_GROUP_HAS_CHILDREN);
         }
         // 删除菜单
-        appMenuRepository.deleteById(id);
+        appMenuRepository.removeById(id);
         // 删除页面
         pageSetService.deletePageSet(menuDO.getId());
     }

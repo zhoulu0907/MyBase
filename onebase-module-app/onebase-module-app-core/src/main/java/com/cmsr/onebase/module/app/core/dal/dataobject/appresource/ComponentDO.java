@@ -1,68 +1,64 @@
 package com.cmsr.onebase.module.app.core.dal.dataobject.appresource;
 
-import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Table;
+import com.cmsr.onebase.framework.orm.data.BaseTenantEntity;
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-@Table(name = "app_resource_component")
+@Table(value = "app_resource_component")
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ComponentDO extends TenantBaseDO {
-
-    public static final String PAGE_ID = "page_id";
-    public static final String COMPONENT_INDEX = "component_index";
+public class ComponentDO extends BaseTenantEntity {
 
     /**
      * 组件编码
      */
-    @Column(name = "component_code", columnDefinition = "VARCHAR(255) NOT NULL", comment = "组件编码")
+    @Column(value = "component_code", comment = "组件编码")
     private String componentCode;
 
     /**
      * 页面编码
      */
-    @Column(name = "page_id", columnDefinition = "BIGINT NOT NULL", nullable = false, comment = "页面ID")
+    @Column(value = "page_id", comment = "页面ID")
     private Long pageId;
 
     /**
      * 组件类型
      */
-    @Column(name = "component_type", columnDefinition = "VARCHAR(64) NOT NULL", comment = "组件类型")
+    @Column(value = "component_type", comment = "组件类型")
     private String componentType;
 
     /**
      * 配置
      */
-    @Column(name = "config", columnDefinition = "TEXT NOT NULL", comment = "配置")
+    @Column(value = "config", comment = "配置")
     private String config;
 
     /**
      * 编辑数据
      */
-    @Column(name = "edit_data", columnDefinition = "TEXT NOT NULL", comment = "编辑数据")
+    @Column(value = "edit_data", comment = "编辑数据")
     private String editData;
 
-    @Column(name = "parent_code", columnDefinition = "VARCHAR(255)", comment = "父组件编码")
+    @Column(value = "parent_code", comment = "父组件编码")
     private String parentCode;
 
     /**
      * 块索引
      */
-    @Column(name = "block_index", columnDefinition = "INT8 NOT NULL DEFAULT 0", comment = "块索引")
+    @Column(value = "block_index", comment = "块索引")
     private Integer blockIndex;
 
     /**
      * 容器索引
      */
-    @Column(name = "container_index", columnDefinition = "INT8 NOT NULL DEFAULT 0", comment = "容器索引")
+    @Column(value = "container_index", comment = "容器索引")
     private Integer containerIndex;
 
     /**
      * 组件索引
      */
-    @Column(name = "component_index", columnDefinition = "INT8 NOT NULL DEFAULT 0", comment = "组件索引")
+    @Column(value = "component_index", comment = "组件索引")
     private Integer componentIndex;
 }

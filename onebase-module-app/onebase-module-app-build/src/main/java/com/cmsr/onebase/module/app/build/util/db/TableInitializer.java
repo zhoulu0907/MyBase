@@ -2,10 +2,9 @@ package com.cmsr.onebase.module.app.build.util.db;
 
 import com.cmsr.onebase.framework.aynline.DataDDLRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.*;
-import org.springframework.stereotype.Component;
-
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 /**
  * @ClassName TableInitializer
@@ -44,10 +43,7 @@ public class TableInitializer {
 
             dataDDLRepository.createTable(ComponentDO.class, reset, execute);
             dataDDLRepository.createTable(PageDO.class, reset, execute);
-            dataDDLRepository.createTable(PageMetadataDO.class, reset, execute);
-            dataDDLRepository.createTable(PageRefRouterDO.class, reset, execute);
             dataDDLRepository.createTable(PageSetDO.class, reset, execute);
-            dataDDLRepository.createTable(PageSetLabelDO.class, reset, execute);
             dataDDLRepository.createTable(PageSetPageDO.class, reset, execute);
 
             log.info("数据库表结构初始化完成");

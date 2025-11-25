@@ -1,45 +1,32 @@
 package com.cmsr.onebase.module.app.core.dal.database.appresource;
 
-import java.util.List;
-
 import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.PageDO;
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
+import com.cmsr.onebase.module.app.core.dal.mapper.appresource.AppPageMapper;
+import com.cmsr.onebase.module.app.core.enums.appresource.PageEnum;
+import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.spring.service.impl.ServiceImpl;
 import org.springframework.stereotype.Repository;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
+import java.util.List;
 
 /**
  * @Author：mickey.zhou
- *                     @Date：2025/8/6 9:31
+ * @Date：2025/8/6 9:31
  */
 @Repository
-public class AppPageRepository extends DataRepository<PageDO> {
-
-    public AppPageRepository() {
-        super(PageDO.class);
-    }
+public class AppPageRepository extends ServiceImpl<AppPageMapper, PageDO> {
 
     public void updatePageName(Long pageId, String pageName) {
-        ConfigStore configs = new DefaultConfigStore();
-        configs.eq("id", pageId);
-        PageDO pageDO = findOne(configs);
-        pageDO.setPageName(pageName);
-        update(pageDO);
-
-        return;
+        this.updateChain()
+                .set(PageDO::getPageName, pageName)
+                .where(PageDO::getId).eq(pageId)
+                .update();
     }
 
-    public void deletePageByIds(List<Long> pageIds) {
-        ConfigStore configs = new DefaultConfigStore();
-        configs.in("id", pageIds);
-        deleteByConfig(configs);
-    }
-
-    public List<PageDO> findByPageIds(List<Long> pageIds) {
-        ConfigStore configs = new DefaultConfigStore();
-        configs.in("id", pageIds);
-        return findAllByConfig(configs);
+    public List<PageDO> findAllFormPageByPageSetId(Long pageSetId) {
+        QueryWrapper queryWrapper = this.query().eq(PageDO::getPageSetId, pageSetId)
+                .eq(PageDO::getPageType, PageEnum.FORM.getValue());
+        return list(queryWrapper);
     }
 
 }

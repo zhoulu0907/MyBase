@@ -4,11 +4,10 @@ import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.framework.data.base.BaseDO;
+import com.cmsr.onebase.framework.orm.data.BaseEntity;
 import com.cmsr.onebase.framework.uid.UidGenerator;
 import com.cmsr.onebase.module.app.core.dal.database.app.AppApplicationRepository;
 import com.cmsr.onebase.module.app.core.dal.database.appresource.AppPageRepository;
-import com.cmsr.onebase.module.app.core.dal.database.appresource.AppPageSetLabelRepository;
 import com.cmsr.onebase.module.app.core.dal.database.appresource.AppPageSetPageRepository;
 import com.cmsr.onebase.module.app.core.dal.database.appresource.AppPageSetRepository;
 import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
@@ -17,7 +16,6 @@ import com.cmsr.onebase.module.app.core.dal.database.version.AppVersionResourceR
 import com.cmsr.onebase.module.app.core.dal.dataobject.app.ApplicationDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.PageDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.PageSetDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.PageSetLabelDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.PageSetPageDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.menu.MenuDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.version.VersionDO;
@@ -66,9 +64,6 @@ public class AppVersionServiceImpl implements AppVersionService {
     private AppPageSetRepository pageSetRepository;
 
     @Resource
-    private AppPageSetLabelRepository pageSetLabelRepository;
-
-    @Resource
     private AppPageSetPageRepository pageSetPageRepository;
 
     @Resource
@@ -112,8 +107,6 @@ public class AppVersionServiceImpl implements AppVersionService {
         List<Long> menuIds = backupMenu(applicationId, versionId);
         // 备份 pageset
         List<Long> pageSetCodes = backupPageSet(applicationId, versionId, menuIds);
-        // 备份 pageset label
-        backupPageSetLabel(applicationId, versionId, pageSetCodes);
         // 备份 PageSet Page
         List<Long> pageCodes = backupPageSetPage(applicationId, versionId, pageSetCodes);
         // 备份 page
@@ -143,16 +136,6 @@ public class AppVersionServiceImpl implements AppVersionService {
         return pageSetDOS.stream().map(v -> v.getId()).toList();
     }
 
-    private void backupPageSetLabel(Long applicationId, Long versionId, List<Long> pageSetIds) {
-        List<PageSetLabelDO> pageSetLabelDOS = pageSetLabelRepository.findByPageSetIds(pageSetIds);
-        VersionResourceDO versionResourceDO = new VersionResourceDO();
-        versionResourceDO.setApplicationId(applicationId);
-        versionResourceDO.setVersionId(versionId);
-        versionResourceDO.setResType(ResTypeEnum.PAGE_SET_LABEL.getValue());
-        versionResourceDO.setResData(JsonUtils.toJsonString(pageSetLabelDOS));
-        versionResourceRepository.insert(versionResourceDO);
-    }
-
     private List<Long> backupPageSetPage(Long applicationId, Long versionId, List<Long> pageSetIds) {
         List<PageSetPageDO> pageSetPageDOs = pageSetPageRepository.findByPageSetIds(pageSetIds);
         VersionResourceDO versionResourceDO = new VersionResourceDO();
@@ -165,7 +148,7 @@ public class AppVersionServiceImpl implements AppVersionService {
     }
 
     private List<Long> backupPage(Long applicationId, Long versionId, List<Long> pageIds) {
-        List<PageDO> pageDOs = pageRepository.findByPageIds(pageIds);
+        List<PageDO> pageDOs = pageRepository.listByIds(pageIds);
         VersionResourceDO versionResourceDO = new VersionResourceDO();
         versionResourceDO.setApplicationId(applicationId);
         versionResourceDO.setVersionId(versionId);
@@ -196,13 +179,12 @@ public class AppVersionServiceImpl implements AppVersionService {
                 .findByApplicationIdAndVersionIdAndResType(applicationId, versionId, ResTypeEnum.MENU.getValue());
         List<MenuDO> menuDOS = JsonUtils.parseArray(resourceDOS.getResData(), MenuDO.class);
         prepareForBackup(menuDOS);
-        menuRepository.insertBatch(menuDOS);
+        menuRepository.saveBatch(menuDOS);
     }
 
-    private void prepareForBackup(List<? extends BaseDO> list) {
+    private void prepareForBackup(List<? extends BaseEntity> list) {
         list.forEach(v -> {
             // TODO clean方法待完善
-            v.clean();
             v.setId(null);
             v.setUpdater(null);
             v.setUpdateTime(null);
@@ -221,7 +203,7 @@ public class AppVersionServiceImpl implements AppVersionService {
 
     @Override
     public Map<Long, VersionDO> findVersionMapByAppIds(List<Long> appIds) {
-        List<VersionDO>  allVersions= versionRepository.findVersionList(appIds);
+        List<VersionDO> allVersions = versionRepository.findVersionList(appIds);
         Map<Long, VersionDO> latestVersionMap = allVersions.stream()
                 .sorted(Comparator.comparing(VersionDO::getUpdateTime).reversed())
                 .collect(Collectors.toMap(

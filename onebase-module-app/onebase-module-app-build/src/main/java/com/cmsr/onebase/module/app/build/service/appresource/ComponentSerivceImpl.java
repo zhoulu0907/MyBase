@@ -17,7 +17,7 @@ public class ComponentSerivceImpl implements ComponentSerivce {
 
     @Override
     public Boolean deleteComponent(Long id) {
-        appComponentDataRepository.deleteById(id);
+        appComponentDataRepository.removeById(id);
         return true;
     }
 

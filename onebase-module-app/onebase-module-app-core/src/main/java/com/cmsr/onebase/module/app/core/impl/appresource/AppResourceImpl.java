@@ -32,10 +32,10 @@ public class AppResourceImpl implements AppResourceApi {
         }
 
         ConfigStore configStore = new DefaultConfigStore();
-        configStore.eq(PageSetPageDO.PAGE_SET_ID, pageSetId);
+        configStore.eq("pageset_id", pageSetId);
 
         // 读取页面集中的页面
-        List<PageDO> pageDOS = pageRepository.findAllByConfig(configStore);
+        List<PageDO> pageDOS = pageRepository.list();
 
         pageDOS.forEach(pageDO -> {
             PageRespDTO pageRespDTO = BeanUtils.toBean(pageDO, PageRespDTO.class);

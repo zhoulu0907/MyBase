@@ -1,31 +1,28 @@
 package com.cmsr.onebase.module.app.core.dal.dataobject.appresource;
 
-import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Table;
+import com.cmsr.onebase.framework.orm.data.BaseTenantEntity;
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-@Table(name = "app_resource_pageset_page")
+@Table(value = "app_resource_pageset_page")
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class PageSetPageDO extends TenantBaseDO {
-    public static final String PAGE_SET_ID = "pageset_id";
-    public static final String PAGE_ID = "page_id";
+public class PageSetPageDO extends BaseTenantEntity {
 
-    @Column(name = "pageset_id", columnDefinition = "BIGINT NOT NULL", nullable = false, comment = "页面集ID")
+    @Column(value = "pageset_id", comment = "页面集ID")
     private Long pageSetId;
 
-    @Column(name = "page_id", columnDefinition = "BIGINT NOT NULL", nullable = false, comment = "页面ID")
+    @Column(value = "page_id", comment = "页面ID")
     private Long pageId;
 
-    @Column(name = "page_type", columnDefinition = "VARCHAR(64) NOT NULL", comment = "页面类型 list edit detail")
+    @Column(value = "page_type", comment = "页面类型 list edit detail")
     private String pageType;
 
-    @Column(name = "is_default", columnDefinition = "INT(2) NOT NULL", comment = "是否默认")
+    @Column(value = "is_default", comment = "是否默认")
     private Integer isDefault;
 
-    @Column(name = "default_seq", columnDefinition = "INTEGER NOT NULL", comment = "默认顺序")
+    @Column(value = "default_seq", comment = "默认顺序")
     private Integer defaultSeq;
 }
