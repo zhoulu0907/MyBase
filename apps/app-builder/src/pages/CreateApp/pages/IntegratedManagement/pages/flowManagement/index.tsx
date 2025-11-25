@@ -320,7 +320,9 @@ const FlowManagementPage: React.FC = () => {
                   data={item}
                   handleEdit={handleEditFlow}
                   handleDelete={handleDeleteFlow}
-                  refreshList={getFlowMgmtList}
+                  refreshList={() => {
+                    getFlowMgmtList(searchFlowProcessName, searchFlowProccessStatus, searchTriggerType);
+                  }}
                   toFlowEditor={toFlowEditor}
                 />
               ))}
