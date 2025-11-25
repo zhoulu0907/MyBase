@@ -399,12 +399,12 @@ const CreateScriptActionPage: React.FC<CreateScriptActionPageProps> = ({ onSucce
           </Row>
         )}
         <Row>
-          <Col span={2}>
+          <Col span={1}>
             <Button type="primary" onClick={handleSubmit}>
               {isEdit ? '更新' : '保存'}
             </Button>
           </Col>
-          <Col span={2}>
+          <Col span={1}>
             <Button onClick={handleCancel}>取消</Button>
           </Col>
         </Row>
