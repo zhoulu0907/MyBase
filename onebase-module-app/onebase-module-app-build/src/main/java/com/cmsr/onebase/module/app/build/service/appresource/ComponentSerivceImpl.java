@@ -1,8 +1,8 @@
 package com.cmsr.onebase.module.app.build.service.appresource;
 
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.app.core.dal.database.appresource.AppComponentRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.ComponentDO;
+import com.cmsr.onebase.module.app.core.dal.database.AppComponentRepository;
+import com.cmsr.onebase.module.app.core.dal.dataobject.ComponentDO;
 import com.cmsr.onebase.module.app.core.dto.appresource.ComponentDTO;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;

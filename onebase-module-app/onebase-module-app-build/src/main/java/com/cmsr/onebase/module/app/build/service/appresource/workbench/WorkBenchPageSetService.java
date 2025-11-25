@@ -2,8 +2,8 @@ package com.cmsr.onebase.module.app.build.service.appresource.workbench;
 
 import com.cmsr.onebase.module.app.build.vo.appresource.LoadPageSetRespVO;
 import com.cmsr.onebase.module.app.build.vo.appresource.SavePageSetReqVO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.PageSetDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.PageSetPageDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.PageSetDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.PageSetPageDO;
 
 import java.util.List;
 

@@ -1,11 +1,7 @@
 package com.cmsr.onebase.module.app.build.controller.appresource;
 
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.app.build.util.PageUtils;
 import com.cmsr.onebase.module.app.build.vo.appresource.*;
-import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.PageDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.PageSetDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.PageSetPageDO;
 import com.cmsr.onebase.module.app.core.dto.appresource.CreatePageViewDTO;
 import com.cmsr.onebase.module.app.core.dto.appresource.PageDTO;
 import org.springframework.validation.annotation.Validated;
@@ -23,7 +19,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 
 import java.util.List;
-import java.util.UUID;
 
 /**
  * @ClassName PageController
