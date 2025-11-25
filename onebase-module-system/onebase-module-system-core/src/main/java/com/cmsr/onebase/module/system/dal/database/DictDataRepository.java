@@ -60,7 +60,8 @@ public class DictDataRepository extends DataRepository<DictDataDO> {
             configs.and(Compare.LIKE, DictDataDO.LABEL, reqVO.getLabel());
         }
         if (reqVO.getDictType() != null && !reqVO.getDictType().trim().isEmpty()) {
-            configs.and(Compare.LIKE, DictDataDO.DICT_TYPE, reqVO.getDictType());
+            // 使用EQUAL精确匹配，确保与其他字典数据查询接口行为一致
+            configs.and(Compare.EQUAL, DictDataDO.DICT_TYPE, reqVO.getDictType());
         }
         if (reqVO.getStatus() != null) {
             configs.and(Compare.EQUAL, DictDataDO.STATUS, reqVO.getStatus());

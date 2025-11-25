@@ -1,4 +1,4 @@
-package com.cmsr.onebase.framework.data;
+package com.cmsr.onebase.framework.orm.data;
 
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Id;

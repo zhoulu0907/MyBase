@@ -1,13 +1,13 @@
 package com.cmsr.onebase.module.etl.core.dal.dataobject;
 
-import com.cmsr.onebase.framework.data.BaseTenantEntity;
+import com.cmsr.onebase.framework.orm.data.BaseAppEntity;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
 import lombok.Data;
 
 @Data
 @Table("etl_workflow")
-public class ETLWorkflowDO extends BaseTenantEntity {
+public class ETLWorkflowDO extends BaseAppEntity {
 
     @Column("workflow_name")
     private String workflowName;

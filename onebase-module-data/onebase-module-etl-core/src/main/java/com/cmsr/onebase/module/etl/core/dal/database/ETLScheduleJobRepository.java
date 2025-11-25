@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.etl.core.dal.database;
 
-import com.cmsr.onebase.framework.mybatis.BaseTenantRepository;
+import com.cmsr.onebase.framework.orm.mybatis.BaseAppRepository;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLScheduleJobDO;
 import com.cmsr.onebase.module.etl.core.dal.mapper.ETLSchecheduJobMapper;
 import com.mybatisflex.core.query.QueryWrapper;
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 
 @Slf4j
 @Repository
-public class ETLScheduleJobRepository extends BaseTenantRepository<ETLSchecheduJobMapper, ETLScheduleJobDO> {
+public class ETLScheduleJobRepository extends BaseAppRepository<ETLSchecheduJobMapper, ETLScheduleJobDO> {
 
 
     public void deleteByWorkflowId(Long workflowId) {

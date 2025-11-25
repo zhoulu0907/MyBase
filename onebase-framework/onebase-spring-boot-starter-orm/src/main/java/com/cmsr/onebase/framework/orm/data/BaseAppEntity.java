@@ -1,4 +1,4 @@
-package com.cmsr.onebase.framework.data;
+package com.cmsr.onebase.framework.orm.data;
 
 import com.mybatisflex.annotation.Column;
 import lombok.Data;
@@ -11,7 +11,7 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class BaseTenantEntity extends BaseEntity {
+public class BaseAppEntity extends BaseEntity {
 
     @Column(value = "application_id", comment = "应用ID")
     private Long applicationId;

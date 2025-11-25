@@ -215,6 +215,8 @@ public class TenantServiceImpl implements TenantService {
         TenantUtils.execute(tenant.getId(), () -> {
             // 创建管理员角色
             Long roleId = createTenantAdminRole();
+            //  开发者角色 判断是否存在开发者，不存在就新增开发者角色
+            createDeveloperAdminRole();
             // 创建用户，并分配角色
             createSystemUser(roleId, createReqVO);
         });
@@ -254,6 +256,19 @@ public class TenantServiceImpl implements TenantService {
         Long roleId = roleService.createRole(reqVO, RoleTypeEnum.SYSTEM.getType());
         return roleId;
     }
+
+
+    private void createDeveloperAdminRole() {
+        RoleDO roleDO= roleService.getRoleByCode(RoleCodeEnum.APP_DEVELOPER.getCode());
+        if(roleDO==null) {
+            // 创建角色
+            RoleInsertReqVO reqVO = new RoleInsertReqVO();
+            reqVO.setName(RoleCodeEnum.APP_DEVELOPER.getName()).setCode(RoleCodeEnum.APP_DEVELOPER.getCode())
+                    .setSort(0).setRemark("系统自动生成");
+              roleService.createRole(reqVO, RoleTypeEnum.SYSTEM.getType());
+        }
+    }
+
 
     @Override
     @Transactional(rollbackFor = Exception.class)

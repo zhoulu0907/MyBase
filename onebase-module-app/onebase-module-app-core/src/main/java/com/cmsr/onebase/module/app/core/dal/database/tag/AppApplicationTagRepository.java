@@ -27,6 +27,12 @@ public class AppApplicationTagRepository extends DataRepository<ApplicationTagDO
                 .toList();
     }
 
+    public  List<ApplicationTagDO>  findTagIdsByApplicationIds(List<Long> applicationIds) {
+        ConfigStore configStore = new DefaultConfigStore();
+        configStore.in("application_id", applicationIds);
+        return findAllByConfig(configStore);
+    }
+
 
     public void deleteByApplicationId(Long applicationId) {
         ConfigStore configStore = new DefaultConfigStore();
