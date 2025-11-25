@@ -49,12 +49,12 @@ public class AppTagServiceImpl implements AppTagService {
         }
         TagDO tagDO = new TagDO();
         tagDO.setTagName(tagName);
-        appTagRepository.insert(tagDO);
+        appTagRepository.save(tagDO);
     }
 
     @Override
     public void deleteTag(Long tagId) {
-        appTagRepository.deleteById(tagId);
+        appTagRepository.removeById(tagId);
     }
 
     @Override
@@ -72,13 +72,13 @@ public class AppTagServiceImpl implements AppTagService {
             if (tagDO == null) {
                 tagDO = new TagDO();
                 tagDO.setTagName(tagRespVO.getTagName());
-                appTagRepository.insert(tagDO);
+                appTagRepository.save(tagDO);
             } else if (tagRespVO == null) {
-                appTagRepository.deleteById(tagDO.getId());
+                appTagRepository.removeById(tagDO.getId());
                 appApplicationTagRepository.deleteByTagId(tagDO.getId());
             } else {
                 tagDO.setTagName(tagRespVO.getTagName());
-                appTagRepository.update(tagDO);
+                appTagRepository.updateById(tagDO);
             }
         }
     }

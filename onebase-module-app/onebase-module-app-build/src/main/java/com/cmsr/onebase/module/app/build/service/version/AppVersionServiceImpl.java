@@ -6,26 +6,14 @@ import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.orm.data.BaseEntity;
 import com.cmsr.onebase.framework.uid.UidGenerator;
-import com.cmsr.onebase.module.app.core.dal.database.AppApplicationRepository;
-import com.cmsr.onebase.module.app.core.dal.database.AppPageRepository;
-import com.cmsr.onebase.module.app.core.dal.database.AppPageSetPageRepository;
-import com.cmsr.onebase.module.app.core.dal.database.AppPageSetRepository;
-import com.cmsr.onebase.module.app.core.dal.database.AppMenuRepository;
-import com.cmsr.onebase.module.app.core.dal.database.AppVersionRepository;
-import com.cmsr.onebase.module.app.core.dal.database.AppVersionResourceRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.ApplicationDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.PageDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.PageSetDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.PageSetPageDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.MenuDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.VersionDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.VersionResourceDO;
-import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
-import com.cmsr.onebase.module.app.core.enums.version.ResTypeEnum;
+import com.cmsr.onebase.module.app.build.service.AppCommonService;
 import com.cmsr.onebase.module.app.build.vo.version.VersionCreateReqVO;
 import com.cmsr.onebase.module.app.build.vo.version.VersionPageReqVo;
 import com.cmsr.onebase.module.app.build.vo.version.VersionPageRespVO;
-import com.cmsr.onebase.module.app.build.service.AppCommonService;
+import com.cmsr.onebase.module.app.core.dal.database.*;
+import com.cmsr.onebase.module.app.core.dal.dataobject.*;
+import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
+import com.cmsr.onebase.module.app.core.enums.version.ResTypeEnum;
 import jakarta.annotation.Resource;
 import lombok.Setter;
 import org.springframework.stereotype.Service;
@@ -100,7 +88,7 @@ public class AppVersionServiceImpl implements AppVersionService {
         versionDO.setVersionURL(UUID.randomUUID().toString().replace("-", ""));
         versionDO.setOperationType(createReqVO.getOperationType());
         versionDO.setEnvironment(createReqVO.getEnvironment());
-        versionRepository.insert(versionDO);
+        versionRepository.save(versionDO);
         Long applicationId = applicationDO.getId();
         Long versionId = versionDO.getId();
         // 备份 Menu
@@ -121,8 +109,8 @@ public class AppVersionServiceImpl implements AppVersionService {
         versionResourceDO.setVersionId(versionId);
         versionResourceDO.setResType(ResTypeEnum.MENU.getValue());
         versionResourceDO.setResData(JsonUtils.toJsonString(menuDOS));
-        versionResourceRepository.insert(versionResourceDO);
-        return menuDOS.stream().map(menuDO -> menuDO.getId()).toList();
+        versionResourceRepository.save(versionResourceDO);
+        return menuDOS.stream().map(BaseEntity::getId).toList();
     }
 
     private List<Long> backupPageSet(Long applicationId, Long versionId, List<Long> menuIds) {
@@ -132,8 +120,8 @@ public class AppVersionServiceImpl implements AppVersionService {
         versionResourceDO.setVersionId(versionId);
         versionResourceDO.setResType(ResTypeEnum.PAGE_SET.getValue());
         versionResourceDO.setResData(JsonUtils.toJsonString(pageSetDOS));
-        versionResourceRepository.insert(versionResourceDO);
-        return pageSetDOS.stream().map(v -> v.getId()).toList();
+        versionResourceRepository.save(versionResourceDO);
+        return pageSetDOS.stream().map(BaseEntity::getId).toList();
     }
 
     private List<Long> backupPageSetPage(Long applicationId, Long versionId, List<Long> pageSetIds) {
@@ -143,8 +131,8 @@ public class AppVersionServiceImpl implements AppVersionService {
         versionResourceDO.setVersionId(versionId);
         versionResourceDO.setResType(ResTypeEnum.PAGE_SET_PAGE.getValue());
         versionResourceDO.setResData(JsonUtils.toJsonString(pageSetPageDOs));
-        versionResourceRepository.insert(versionResourceDO);
-        return pageSetPageDOs.stream().map(v -> v.getId()).toList();
+        versionResourceRepository.save(versionResourceDO);
+        return pageSetPageDOs.stream().map(BaseEntity::getId).toList();
     }
 
     private List<Long> backupPage(Long applicationId, Long versionId, List<Long> pageIds) {
@@ -154,8 +142,8 @@ public class AppVersionServiceImpl implements AppVersionService {
         versionResourceDO.setVersionId(versionId);
         versionResourceDO.setResType(ResTypeEnum.PAGE.name());
         versionResourceDO.setResData(JsonUtils.toJsonString(pageDOs));
-        versionResourceRepository.insert(versionResourceDO);
-        return pageDOs.stream().map(v -> v.getId()).toList();
+        versionResourceRepository.save(versionResourceDO);
+        return pageDOs.stream().map(BaseEntity::getId).toList();
     }
 
     @Transactional
@@ -164,9 +152,9 @@ public class AppVersionServiceImpl implements AppVersionService {
         VersionDO applicationVersionDO = validateApplicationVersionExist(versionId);
         Long applicationId = applicationVersionDO.getApplicationId();
         // 更新到主表
-        ApplicationDO applicationDO = applicationRepository.findById(applicationId);
+        ApplicationDO applicationDO = applicationRepository.getById(applicationId);
         applicationDO.setVersionNumber(applicationVersionDO.getVersionNumber());
-        applicationRepository.update(applicationDO);
+        applicationRepository.updateById(applicationDO);
         // 恢复菜单
         restoreMenu(applicationDO.getId(), versionId);
     }
@@ -197,7 +185,7 @@ public class AppVersionServiceImpl implements AppVersionService {
 
     @Override
     public void deleteApplicationVersion(Long versionId) {
-        versionRepository.deleteById(versionId);
+        versionRepository.removeById(versionId);
         versionResourceRepository.deleteByVersionId(versionId);
     }
 
@@ -216,7 +204,7 @@ public class AppVersionServiceImpl implements AppVersionService {
     }
 
     private VersionDO validateApplicationVersionExist(Long id) {
-        VersionDO versionDO = versionRepository.findById(id);
+        VersionDO versionDO = versionRepository.getById(id);
         if (versionDO == null) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_VERSION_NOT_EXIST);
         }

@@ -6,10 +6,10 @@ import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.build.service.AppCommonService;
 import com.cmsr.onebase.module.app.build.util.AuthUtils;
 import com.cmsr.onebase.module.app.build.vo.auth.*;
-import com.cmsr.onebase.module.app.core.dal.database.AppSqlQueryRepository;
 import com.cmsr.onebase.module.app.core.dal.database.AppAuthRoleDeptRepository;
 import com.cmsr.onebase.module.app.core.dal.database.AppAuthRoleRepository;
 import com.cmsr.onebase.module.app.core.dal.database.AppAuthRoleUserRepository;
+import com.cmsr.onebase.module.app.core.dal.database.AppSqlQueryRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.ApplicationDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AuthRoleDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AuthRoleDeptDO;
@@ -81,7 +81,7 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
                 authRoleDO.setRoleCode(AuthRoleTypeEnum.SYSTEM_ADMIN.getCode());
                 authRoleDO.setRoleName(AuthRoleTypeEnum.SYSTEM_ADMIN.getName());
                 authRoleDO.setRoleType(AuthRoleTypeEnum.SYSTEM_ADMIN.getValue());
-                appAuthRoleRepository.insert(authRoleDO);
+                appAuthRoleRepository.save(authRoleDO);
                 //创建者是管理员
                 AuthRoleUserDO entity = new AuthRoleUserDO();
                 entity.setUserId(userId);
@@ -92,7 +92,7 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
                     AuthRoleUserDO entity = new AuthRoleUserDO();
                     entity.setUserId(userId);
                     entity.setRoleId(existRole.getId());
-                    appAuthRoleUserRepository.insert(entity);
+                    appAuthRoleUserRepository.save(entity);
                 }
             }
         }
@@ -104,7 +104,7 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
                 authRoleDO.setRoleCode(AuthRoleTypeEnum.SYSTEM_USER.getCode());
                 authRoleDO.setRoleName(AuthRoleTypeEnum.SYSTEM_USER.getName());
                 authRoleDO.setRoleType(AuthRoleTypeEnum.SYSTEM_USER.getValue());
-                appAuthRoleRepository.insert(authRoleDO);
+                appAuthRoleRepository.save(authRoleDO);
             }
         }
         {
@@ -115,7 +115,7 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
                 authRoleDO.setRoleCode(AuthRoleTypeEnum.OUTER_USER.getCode());
                 authRoleDO.setRoleName(AuthRoleTypeEnum.OUTER_USER.getName());
                 authRoleDO.setRoleType(AuthRoleTypeEnum.OUTER_USER.getValue());
-                appAuthRoleRepository.insert(authRoleDO);
+                appAuthRoleRepository.save(authRoleDO);
             }
         }
     }
@@ -153,7 +153,7 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
         authRoleDO.setRoleType(AuthRoleTypeEnum.CUSTOM_ROLE.getValue());
         authRoleDO.setRoleName(reqVO.getRoleName());
         authRoleDO.setRoleCode(AuthUtils.createRoleCode());
-        appAuthRoleRepository.insert(authRoleDO);
+        appAuthRoleRepository.save(authRoleDO);
         return BeanUtils.toBean(authRoleDO, AuthRoleCreateRespVO.class);
     }
 
@@ -166,7 +166,7 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
         }
         checkRoleNameExists(authRoleDO.getApplicationId(), name, roleId);
         authRoleDO.setRoleName(name);
-        appAuthRoleRepository.update(authRoleDO);
+        appAuthRoleRepository.updateById(authRoleDO);
     }
 
     @Override
@@ -189,16 +189,16 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
         AuthRoleDO authRoleDO = appCommonService.validateRoleExist(reqVO.getRoleId());
         for (AuthRoleDeleteMemberReqVO.DeleteMember member : reqVO.getMembers()) {
             if (RoleMemberDTO.MEMBER_TYPE_USER.equalsIgnoreCase(member.getMemberType())) {
-                AuthRoleUserDO authRoleUserDO = appAuthRoleUserRepository.findById(member.getId());
+                AuthRoleUserDO authRoleUserDO = appAuthRoleUserRepository.getById(member.getId());
                 if (authRoleUserDO != null) {
-                    appAuthRoleUserRepository.deleteById(member.getId());
+                    appAuthRoleUserRepository.removeById(member.getId());
                     appCacheProvider.usersChanged(authRoleDO.getApplicationId(), List.of(authRoleUserDO.getUserId()));
                 }
             }
             if (RoleMemberDTO.MEMBER_TYPE_DEPT.equalsIgnoreCase(member.getMemberType())) {
-                AuthRoleDeptDO authRoleDeptDO = appAuthRoleDeptRepository.findById(member.getId());
+                AuthRoleDeptDO authRoleDeptDO = appAuthRoleDeptRepository.getById(member.getId());
                 if (authRoleDeptDO != null) {
-                    appAuthRoleDeptRepository.deleteById(member.getId());
+                    appAuthRoleDeptRepository.removeById(member.getId());
                     appCacheProvider.deptChanged(authRoleDO.getApplicationId(), authRoleDeptDO.getDeptId(), authRoleDeptDO.getIsIncludeChild());
                 }
             }
@@ -215,7 +215,7 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
         List<Long> userIds = appAuthRoleUserRepository.findByRoleId(roleId).stream().map(v -> v.getUserId()).toList();
         appAuthRoleUserRepository.deleteByRoleId(roleId);
         appAuthRoleDeptRepository.deleteByRoleId(roleId);
-        appAuthRoleRepository.deleteById(roleId);
+        appAuthRoleRepository.removeById(roleId);
         appCacheProvider.usersChanged(authRoleDO.getApplicationId(), userIds);
     }
 

@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.app.build.service;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.framework.data.base.BaseDO;
+import com.cmsr.onebase.framework.orm.data.BaseEntity;
 import com.cmsr.onebase.module.app.core.dal.database.AppApplicationRepository;
 import com.cmsr.onebase.module.app.core.dal.database.AppAuthRoleRepository;
 import com.cmsr.onebase.module.app.core.dal.database.AppMenuRepository;
@@ -43,7 +43,7 @@ public class AppCommonService {
     private AdminUserApi adminUserApi;
 
     public ApplicationDO validateApplicationExist(Long id) {
-        ApplicationDO applicationDO = applicationRepository.findById(id);
+        ApplicationDO applicationDO = applicationRepository.getById(id);
         if (applicationDO == null) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_NOT_EXIST);
         }
@@ -51,7 +51,7 @@ public class AppCommonService {
     }
 
     public AuthRoleDO validateRoleExist(Long id) {
-        AuthRoleDO authRoleDO = authRoleRepository.findById(id);
+        AuthRoleDO authRoleDO = authRoleRepository.getById(id);
         if (authRoleDO == null) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_AUTH_ROLE_NOT_EXISTS);
         }
@@ -66,16 +66,16 @@ public class AppCommonService {
         return menuDO;
     }
 
-    public UserHelper getUserHelper(BaseDO baseDO) {
+    public UserHelper getUserHelper(BaseEntity baseDO) {
         Set<Long> ids = new HashSet<>();
         ids.add(baseDO.getCreator());
         ids.add(baseDO.getUpdater());
         return getUserHelper(ids);
     }
 
-    public UserHelper getUserHelper(List<? extends BaseDO> baseDOS) {
-        Set<Long> ids1 = baseDOS.stream().map(BaseDO::getCreator).collect(Collectors.toSet());
-        Set<Long> ids2 = baseDOS.stream().map(BaseDO::getUpdater).collect(Collectors.toSet());
+    public UserHelper getUserHelper(List<? extends BaseEntity> baseDOS) {
+        Set<Long> ids1 = baseDOS.stream().map(BaseEntity::getCreator).collect(Collectors.toSet());
+        Set<Long> ids2 = baseDOS.stream().map(BaseEntity::getUpdater).collect(Collectors.toSet());
         Set<Long> ids = new HashSet<>();
         ids.addAll(ids1);
         ids.addAll(ids2);
