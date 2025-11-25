@@ -45,7 +45,7 @@ public class AppAuthRoleUserImpl implements AppAuthRoleUser {
     @Override
     public List<AuthRoleDTO> findRolesByUserId(Long userId) {
         List<Long> list = appAuthRoleUserRepository.findByUserId(userId).stream().map(AuthRoleUserDO::getRoleId).toList();
-        List<AuthRoleDO> authRoleDOS = appAuthRoleRepository.findAllByIds(list);
+        List<AuthRoleDO> authRoleDOS = appAuthRoleRepository.listByIds(list);
         List<AuthRoleDTO> authRoleDTOS = BeanUtils.toBean(authRoleDOS, AuthRoleDTO.class);
         return authRoleDTOS;
     }

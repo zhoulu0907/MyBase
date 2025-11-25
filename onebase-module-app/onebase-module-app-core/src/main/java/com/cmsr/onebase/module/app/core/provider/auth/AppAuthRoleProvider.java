@@ -1,8 +1,8 @@
 package com.cmsr.onebase.module.app.core.provider.auth;
 
-import com.cmsr.onebase.module.app.core.dal.database.AppSqlQueryRepository;
 import com.cmsr.onebase.module.app.core.dal.database.AppAuthRoleDeptRepository;
 import com.cmsr.onebase.module.app.core.dal.database.AppAuthRoleRepository;
+import com.cmsr.onebase.module.app.core.dal.database.AppSqlQueryRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AuthRoleDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AuthRoleDeptDO;
 import com.cmsr.onebase.module.app.core.dto.auth.UserRoleDTO;
@@ -71,7 +71,7 @@ public class AppAuthRoleProvider {
         if (roleIds.isEmpty()) {
             return Collections.emptyList();
         }
-        return appAuthRoleRepository.findAllByIds(roleIds);
+        return appAuthRoleRepository.listByIds(roleIds);
     }
 
     private Set<Long> findRolesByDept(List<AuthRoleDeptDO> authRoleDeptDOS, List<Long> deptTree) {
