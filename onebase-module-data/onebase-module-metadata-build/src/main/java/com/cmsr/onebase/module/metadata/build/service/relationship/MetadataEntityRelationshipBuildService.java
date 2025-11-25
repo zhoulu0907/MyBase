@@ -125,4 +125,13 @@ public interface MetadataEntityRelationshipBuildService {
      * @return
      */
     void deleteRelationShipByFieldId(Long fieldId);
+
+    /**
+     * 根据源实体ID和目标实体ID查找关系
+     *
+     * @param sourceEntityId 源实体ID
+     * @param targetEntityId 目标实体ID
+     * @return 实体关系列表
+     */
+    List<MetadataEntityRelationshipDO> findBySourceEntityIdAndTargetEntityId(Long sourceEntityId, Long targetEntityId);
 }

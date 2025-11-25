@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.etl.core.dal.dataobject;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
-import com.cmsr.onebase.framework.data.BaseTenantEntity;
+import com.cmsr.onebase.framework.orm.data.BaseAppEntity;
 import com.cmsr.onebase.module.etl.core.enums.CollectStatus;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 
 @Data
 @Table(value = "etl_datasource")
-public class ETLDatasourceDO extends BaseTenantEntity {
+public class ETLDatasourceDO extends BaseAppEntity {
 
     @Column(value = "datasource_code")
     private String datasourceCode;
@@ -39,14 +39,6 @@ public class ETLDatasourceDO extends BaseTenantEntity {
 
     @Column(value = "readonly")
     private Integer readonly;
-
-    public void setConfig(Object config) {
-        if (config == null) {
-            this.config = null;
-        }
-
-        this.config = JsonUtils.toJsonString(config);
-    }
 
     @Override
     public String toString() {

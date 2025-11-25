@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.etl.build.vo.datasource;
 
-import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -34,7 +33,7 @@ public class ETLDatasourceCreateReqVO {
 
     @Schema(description = "数据源配置信息")
     @NotBlank(message = "数据源配置信息不能为空")
-    private String config;
+    private JsonNode config;
 
     @Schema(description = "只读", defaultValue = "true")
     private Boolean readonly = true;
@@ -42,19 +41,11 @@ public class ETLDatasourceCreateReqVO {
     @Schema(description = "是否创建时进行采集", defaultValue = "false")
     private Boolean withCollect = false;
 
-    public JsonNode getConfig() {
-        return JsonUtils.parseTree(this.config);
-    }
-
     public Integer getReadonly() {
         return BooleanUtils.toInteger(readonly);
     }
 
     public void setWithCollect(Integer withCollect) {
         this.withCollect = BooleanUtils.toBoolean(withCollect);
-    }
-
-    public void setConfig(JsonNode config) {
-        this.config = JsonUtils.toJsonString(config);
     }
 }

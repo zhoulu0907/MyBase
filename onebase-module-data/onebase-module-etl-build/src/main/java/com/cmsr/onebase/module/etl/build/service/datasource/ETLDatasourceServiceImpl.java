@@ -89,7 +89,9 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_NOT_EXIST);
         }
         DatasourceRespVO datasourceRespVO = DatasourceRespVO.convertFrom(datasourceDO);
-        datasourceRespVO.setConfig(datasourceDO.getConfig());
+        if (datasourceDO.getConfig() != null) {
+            datasourceRespVO.setConfig(JsonUtils.parseTree(datasourceDO.getConfig()));
+        }
         return datasourceRespVO;
     }
 
@@ -116,7 +118,7 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
         datasourceDO.setDatasourceName(createReqVO.getDatasourceName());
         datasourceDO.setDeclaration(createReqVO.getDeclaration());
         datasourceDO.setDatasourceType(datasourceType);
-        datasourceDO.setConfig(createReqVO.getConfig());
+        datasourceDO.setConfig(JsonUtils.toJsonString(createReqVO.getConfig()));
         datasourceDO.setReadonly(createReqVO.getReadonly());
         // initialize collect status to `none`, infer datasource will be empty.
         datasourceDO.setCollectStatus(CollectStatus.NONE);
@@ -145,9 +147,12 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
     @Override
     public void updateDatasource(ETLDatasourceUpdateReqVO updateReqVO) {
         ETLDatasourceDO oldDatasource = datasourceRepository.getById(updateReqVO.getId());
+        if (oldDatasource == null) {
+            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_NOT_EXIST);
+        }
         oldDatasource.setDatasourceName(updateReqVO.getDatasourceName());
         oldDatasource.setDeclaration(updateReqVO.getDeclaration());
-        oldDatasource.setConfig(updateReqVO.getConfig());
+        oldDatasource.setConfig(JsonUtils.toJsonString(updateReqVO.getConfig()));
         oldDatasource.setReadonly(BooleanUtils.toInteger(updateReqVO.getReadonly()));
         // udpate collect status to `required`, demonds user to execute at least once
         oldDatasource.setCollectStatus(CollectStatus.REQUIRED);
@@ -162,7 +167,7 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
         connectionProperties.put("driver", databaseType.driver());
         String jdbcUrl = DatasourceFactory.buildJdbcConnectionString(datasourceType, connectionProperties);
         connectionProperties.put("jdbcUrl", jdbcUrl);
-        datasourceDO.setConfig(connectionProperties);
+        datasourceDO.setConfig(JsonUtils.toJsonString(connectionProperties));
     }
 
     @Override
@@ -211,7 +216,7 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
             return true;
         } catch (Exception e) {
             long timeCost = Duration.between(plannedTime, LocalDateTime.now()).toMillis();
-            log.error("元数据采集任务执行失败，数据源ID：{}，耗时：{} ms", datasourceId, timeCost);
+            log.error("元数据采集任务执行失败，数据源ID：{}，耗时：{} ms", datasourceId, timeCost, e);
             return false;
         }
     }
@@ -268,7 +273,7 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_NOT_EXIST);
         }
         Map<String, String> flinkTypeMappings = flinkMappingRepository.findAllMappingsByDatasourceType(datasourceDO.getDatasourceType());
-        TableData tableData = tableDO.getMetaInfo();
+        TableData tableData = JsonUtils.parseObject(tableDO.getMetaInfo(), TableData.class);
         List<ColumnData> columns = tableData.getColumns();
         return columns.stream()
                 .map(columnMeta -> {

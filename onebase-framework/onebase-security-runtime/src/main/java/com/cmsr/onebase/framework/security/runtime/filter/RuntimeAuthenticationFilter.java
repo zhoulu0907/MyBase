@@ -6,12 +6,12 @@ import com.cmsr.onebase.framework.common.biz.system.oauth2.dto.OAuth2AccessToken
 import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
+import com.cmsr.onebase.framework.common.security.dto.RuntimeLoginUser;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.security.config.SecurityProperties;
 import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
-import com.cmsr.onebase.framework.security.runtime.RTLoginUser;
 import com.cmsr.onebase.framework.web.core.handler.GlobalExceptionHandler;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import jakarta.servlet.FilterChain;
@@ -26,6 +26,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+
+import static com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstants.SEESION_TIMEOUT;
 
 /**
  * Token 过滤器，验证 token 的有效性
@@ -53,7 +55,7 @@ public class RuntimeAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
         // 情况一，基于 header[login-user] 获得用户，例如说来自 Gateway 或者其它服务透传
-        RTLoginUser loginUser = buildLoginUserByHeader(request);
+        RuntimeLoginUser loginUser = buildLoginUserByHeader(request);
         // 情况二，基于 Token 获得用户
         String token = null;
         if (loginUser == null) {
@@ -81,14 +83,20 @@ public class RuntimeAuthenticationFilter extends OncePerRequestFilter {
 
             // 会话空闲检查：排除登录和登出请求
             if (!isLoginOrLogoutRequest(request)) {
-                checkAndUpdateSessionIdle(loginUser, token, request, response);
+                boolean checkSuc = checkAndUpdateSessionIdle(loginUser, token);
+                if (!checkSuc) {
+                    log.error("[BuildAuthenticationFilter][长时间内无操作，自动登出。]");
+                    CommonResult<?> result = CommonResult.error(SEESION_TIMEOUT);
+                    ServletUtils.writeJSON(response, result);
+                    return; // 中断
+                }
             }
         }
         // 继续过滤链
         chain.doFilter(request, response);
     }
 
-    private RTLoginUser buildLoginUserByToken(String token, Integer userType) {
+    private RuntimeLoginUser buildLoginUserByToken(String token, Integer userType) {
         try {
             // 校验访问令牌
             OAuth2AccessTokenCheckRespDTO accessToken = oauth2TokenApi.checkAccessToken(token).getCheckedData();
@@ -100,7 +108,7 @@ public class RuntimeAuthenticationFilter extends OncePerRequestFilter {
             log.info("buildLoginUserByToken userType:{}", userType);
 
             // 构建登录用户
-            RTLoginUser loginUser = new RTLoginUser();
+            RuntimeLoginUser loginUser = new RuntimeLoginUser();
             loginUser.setApplicationId(accessToken.getAppId())
                     .setId(accessToken.getUserId()).setUserType(accessToken.getUserType())
                     .setInfo(accessToken.getUserInfo()) // 额外的用户信息
@@ -123,7 +131,7 @@ public class RuntimeAuthenticationFilter extends OncePerRequestFilter {
      * @param userType 用户类型
      * @return 模拟的 LoginUser
      */
-    private RTLoginUser mockLoginUser(HttpServletRequest request, String token, Integer userType) {
+    private RuntimeLoginUser mockLoginUser(HttpServletRequest request, String token, Integer userType) {
         if (!securityProperties.getMockEnable()) {
             return null;
         }
@@ -133,19 +141,19 @@ public class RuntimeAuthenticationFilter extends OncePerRequestFilter {
         }
         // 构建模拟用户
         Long userId = Long.valueOf(token.substring(securityProperties.getMockSecret().length()));
-        RTLoginUser loginUser = new RTLoginUser();
+        RuntimeLoginUser loginUser = new RuntimeLoginUser();
         loginUser.setId(userId).setUserType(userType).setTenantId(WebFrameworkUtils.getTenantIdFromHeader(request));
         return loginUser;
     }
 
-    private RTLoginUser buildLoginUserByHeader(HttpServletRequest request) {
+    private RuntimeLoginUser buildLoginUserByHeader(HttpServletRequest request) {
         String loginUserStr = request.getHeader(SecurityFrameworkUtils.LOGIN_USER_HEADER);
         if (StrUtil.isEmpty(loginUserStr)) {
             return null;
         }
         try {
             loginUserStr = URLDecoder.decode(loginUserStr, StandardCharsets.UTF_8); // 解码，解决中文乱码问题
-            RTLoginUser loginUser = JsonUtils.parseObject(loginUserStr, RTLoginUser.class);
+            RuntimeLoginUser loginUser = JsonUtils.parseObject(loginUserStr, RuntimeLoginUser.class);
             return loginUser;
         } catch (Exception ex) {
             log.error("[buildLoginUserByHeader][解析 LoginUser({}) 发生异常]", loginUserStr, ex);
@@ -156,7 +164,7 @@ public class RuntimeAuthenticationFilter extends OncePerRequestFilter {
 
     /**
      * 判断是否为登录或登出请求
-     * 
+     *
      * @param request HTTP请求
      * @return 是否为登录/登出请求
      */
@@ -167,43 +175,41 @@ public class RuntimeAuthenticationFilter extends OncePerRequestFilter {
         }
         // 获取路径的最后一段
         String lastSegment = uri.substring(uri.lastIndexOf('/') + 1);
-        // 检查是否包含login或logout（不区分大小写）
-        return lastSegment.toLowerCase().contains("login") || lastSegment.toLowerCase().contains("logout");
+        // 检查是否包含login或logout或register（不区分大小写）
+        return lastSegment.toLowerCase().contains("login")
+                || lastSegment.toLowerCase().contains("logout")
+                || lastSegment.toLowerCase().contains("register")
+                ;
     }
 
     /**
      * 检查并更新会话空闲状态
-     * 
+     * <p>
      * 实现逻辑：
      * 1. 从token中反查deviceId
      * 2. 调用updateSessionIdleKey更新Redis key的TTL和value
      * 3. 如果更新返回false（Redis key已过期），则调用登出接口并抛出会话超时异常
-     * 
+     *
      * @param loginUser 登录用户
-     * @param token 访问令牌
-     * @param request HTTP请求
-     * @param response HTTP响应
+     * @param token     访问令牌
      */
-    private void checkAndUpdateSessionIdle(RTLoginUser loginUser, String token, 
-                                           HttpServletRequest request, HttpServletResponse response) {
+    private boolean checkAndUpdateSessionIdle(RuntimeLoginUser loginUser, String token) {
         if (loginUser == null || StrUtil.isBlank(token)) {
-            return;
+            return true;
         }
 
         // 步骤1：通过token反查deviceId
-        CommonResult<String> deviceIdResult = securityConfigApi.findDeviceIdByToken(
-                loginUser.getTenantId(), loginUser.getId(), token);
+        CommonResult<String> deviceIdResult = securityConfigApi.findDeviceIdByToken(loginUser.getTenantId(), loginUser.getId(), token);
 
         if (deviceIdResult == null || StrUtil.isBlank(deviceIdResult.getData())) {
             log.warn("[checkAndUpdateSessionIdle][无法反查deviceId，跳过会话空闲检查] userId={}, token={}", loginUser.getId(), token);
-            return;
+            return true;
         }
 
         String deviceId = deviceIdResult.getData();
 
         // 步骤2：更新会话空闲Redis key的TTL和value
-        CommonResult<Boolean> updateResult = securityConfigApi.updateSessionIdleKey(
-                loginUser.getTenantId(), loginUser.getId(), deviceId);
+        CommonResult<Boolean> updateResult = securityConfigApi.updateSessionIdleKey(loginUser.getTenantId(), loginUser.getId(), deviceId);
 
         // 步骤3：如果更新失败（返回false），表示Redis key已过期，执行登出操作
         if (updateResult == null || updateResult.getData() == null || !updateResult.getData()) {
@@ -212,11 +218,13 @@ public class RuntimeAuthenticationFilter extends OncePerRequestFilter {
             // 删除accessToken
             oauth2TokenApi.removeAccessToken(token);
             // 删除在线设备记录
-            securityConfigApi.removeOnlineDevice(
-                    loginUser.getTenantId(), loginUser.getId(), token);
+            securityConfigApi.removeOnlineDevice(loginUser.getTenantId(), loginUser.getId(), token);
+
+            return false;
         }
 
         log.debug("[checkAndUpdateSessionIdle][会话空闲key更新成功] userId={}, deviceId={}", loginUser.getId(), deviceId);
+        return true;
     }
 
 }

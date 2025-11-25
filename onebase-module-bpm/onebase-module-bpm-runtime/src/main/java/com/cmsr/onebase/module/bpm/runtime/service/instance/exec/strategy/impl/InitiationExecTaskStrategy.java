@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.bpm.runtime.service.instance.exec.strategy.impl;
 
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
+import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowAgentInsDO;
 import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowInsBizExtDO;
 import com.cmsr.onebase.module.bpm.core.dto.node.InitiationNodeExtDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeBtnCfgDTO;
@@ -41,7 +42,7 @@ public class InitiationExecTaskStrategy extends AbstractExecTaskStrategy<Initiat
     }
 
     @Override
-    public void execute(User matchedUser, Task task, InitiationNodeExtDTO extDTO, ExecTaskReqVO reqVO) {
+    public void execute(User matchedUser, BpmFlowAgentInsDO agentInsDO, Task task, InitiationNodeExtDTO extDTO, ExecTaskReqVO reqVO) {
         String buttonType = reqVO.getButtonType();
 
         // 获取按钮权限
