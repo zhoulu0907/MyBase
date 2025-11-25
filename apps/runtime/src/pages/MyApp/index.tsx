@@ -14,7 +14,8 @@ import {
   Typography
 } from '@arco-design/web-react';
 import { IconEmpty, IconMoreVertical, IconSearch } from '@arco-design/web-react/icon';
-import { listApplication, type Application, type PageParam } from '@onebase/app';
+import { type PageParam } from '@onebase/app';
+import { getCorpAuthorizedAppListApiInCorp } from '@onebase/platform-center';
 import { getCommonPaginationList, TokenManager } from '@onebase/common';
 import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -35,6 +36,8 @@ import {
   ThemeColorMap
 } from './const';
 import styles from './index.module.less';
+import type { ApplicationList, TagProps } from '@/types';
+import { StatusEnumLabel } from '@/constants';
 
 const Option = Select.Option;
 
@@ -43,7 +46,7 @@ const MyAppPage: React.FC = () => {
   const navigate = useNavigate();
   const [pageSize, setPageSize] = useState<number>();
   const [pageNo, setPageNo] = useState(1);
-  const [dataList, setDataList] = useState<Application[]>();
+  const [dataList, setDataList] = useState<ApplicationList[]>();
   const [total, setTotal] = useState(0);
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
@@ -92,6 +95,7 @@ const MyAppPage: React.FC = () => {
   }, [ownerTag, status, dataList]);
 
   const getApplicationList = async () => {
+    const tokenInfo = TokenManager.getTokenInfo();
     setLoading(true);
     const req: PageParam = {
       pageNo,
@@ -99,9 +103,10 @@ const MyAppPage: React.FC = () => {
       name,
       ownerTag,
       orderByTime,
-      status: 1
+      status: 1,
+      corpId: tokenInfo?.corpId || ""
     };
-    const res = await getCommonPaginationList(listApplication, req, setPageNo);
+    const res = await getCommonPaginationList(getCorpAuthorizedAppListApiInCorp, req, setPageNo);
     if (res) {
       setDataList(res.list || []);
       setTotal(res.total || 0);
@@ -272,7 +277,7 @@ const MyAppPage: React.FC = () => {
                           </div>
                           <div className={styles.myAppCardInfo}>
                             <div className={styles.infoHeader}>
-                              <div className={styles.myAppTitle}>{item.appName}</div>
+                              <div className={styles.myAppTitle}>{item.applicationName}</div>
                             </div>
                             <Tag
                               color={TagColor[item.appStatus]}
@@ -281,7 +286,7 @@ const MyAppPage: React.FC = () => {
                                 fontWeight: 400
                               }}
                             >
-                              {item.appStatusText}
+                              {item.appStatus === 1 ? StatusEnumLabel.ENABLE : StatusEnumLabel.DISABLE}
                             </Tag>
                             <Divider type="vertical" style={{ margin: '0 4px 0 6px', height: '8px' }} />
                             <span className={styles.versionNumber}>{item.versionNumber}</span>
@@ -309,7 +314,7 @@ const MyAppPage: React.FC = () => {
                       <div className={styles.myAppCardBody}>
                         <div className={styles.myAppDesc}>{item.description ?? '该应用暂无介绍。'}</div>
                         <div className={styles.myAppTags}>
-                          {item.tags?.map((tag: { id: string; tagName: string }) => (
+                          {item.tags?.map((tag: TagProps) => (
                             <Tag
                               key={tag.id}
                               style={{

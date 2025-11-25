@@ -10,6 +10,25 @@ export interface AppItem {
   statusDesc: string;
 }
 
+export interface TagProps {
+  id: string;
+  tagName: string;
+  themeColor: string;
+}
+
+export interface ApplicationList {
+  applicationName: string;
+  applicationId: string;
+  iconName: string;
+  iconColor: string;
+  appStatus: number;
+  id: string;
+  versionNumber: string;
+  tags?: TagProps[];
+  description: string;
+  themeColor: string;
+}
+
 export interface authorizedTime {
   authorizationTime: string;
   expiresTime: string;

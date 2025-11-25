@@ -1,6 +1,6 @@
 import { CorpAppParams, authAppStatusParams, corpAppListParams, updateAppParams } from "../types";
 import { systemService } from "./clients";
-import { appService } from "./clients/factory";
+import { appService, corpService } from "./clients/factory";
 
 //新增企业应用
 export const createCorpAppApi = (data: CorpAppParams) => systemService.post('/corp-app-relation/create', data);
@@ -22,5 +22,5 @@ export const getCorpAppSimpleListApi = () => appService.get('/application/simple
 
 // 授权应用禁用启用
 export const updateAuthAppStatus = (data: authAppStatusParams) => {
-  return systemService.post('/corp-app-relation/update-status', data);
+  return corpService.post(`/corp-app-relation/update-status?id=${data.id}&status=${data.status}`);
 };

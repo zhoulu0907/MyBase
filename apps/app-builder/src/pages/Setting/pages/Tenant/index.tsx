@@ -129,9 +129,19 @@ const TenantPage: React.FC = () => {
         title: '企业LOGO',
         dataIndex: 'corpLogo',
         width: 100,
-        render: (url: any) => (
-          <img src={url} style={{ width: 72, height: 36, borderRadius: 5, border: '1px solid #F2F3F5', backgroundColor: '#F7F8FA', objectFit: 'contain' }} />
-        )
+        render: (url: any,record: any) => {
+          
+          return url ? 
+            <img 
+              src={url} 
+              style={{ width: 72, height: 36, 
+                borderRadius: 5, 
+                border: '1px solid #F2F3F5', 
+                backgroundColor: '#F7F8FA', 
+                objectFit: 'contain' 
+              }} /> : 
+            <div className={styles.corpLogo}>{record?.corpName || ""}</div> 
+        }
       },
       {
         title: '企业名称',
@@ -201,12 +211,16 @@ const TenantPage: React.FC = () => {
           <Col flex="auto">
             <Space align="center">
               <Avatar
-                className={styles.avatar}
                 size={80}
                 shape="circle"
-                style={{ border: '1px solid #f0f0f0', overflow: 'hidden' }}
+                style={{ border: '1px solid #f0f0f0', backgroundColor: '#E5E6EB' ,overflow: 'hidden' }}
               >
-                <Image width={80} height={80} src={userInfo.avatar} />
+                <Image width={80} height={80} src={userInfo.avatar}   
+                  style={{
+                    objectFit: 'cover',
+                    borderRadius: '50%', // 强制圆形裁剪
+                    display: 'block',     // 避免 inline 元素影响
+                  }}/>
               </Avatar>
               <div>
                 <div className={styles.userTop}>

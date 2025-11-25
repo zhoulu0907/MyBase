@@ -109,7 +109,7 @@ const DepartmentModal: React.FC<DepartmentModalProps> = (props) => {
           </Col>
 
           <Col span={12}>
-            <FormItem label="管理员" field="leaderUserId">
+            <FormItem label="管理员" field="adminUserId">
               <Select
                 placeholder={hasUserQueryPermission ? "请选择管理员" : "无权限"}
                 allowClear
@@ -130,7 +130,7 @@ const DepartmentModal: React.FC<DepartmentModalProps> = (props) => {
 
           <Col span={12}>
             {/* todo 部门主管调整 */}
-            <FormItem label="部门主管" field="deptDirectorId">
+            <FormItem label="部门主管" field="leaderUserId">
               <Select
                 placeholder={hasUserQueryPermission ? "请选择部门主管" : "无权限"}
                 allowClear
