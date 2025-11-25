@@ -143,7 +143,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
   // 提交表单
   const submitForm = async () => {
-    const fields = await form.validateFields();
+    await form.validateFields();
+    const fields = form.getFieldsValue();
+
     // console.log('fields: ', fields);
     // console.log('mainMetaDataFields: ', mainMetaDataFields.value);
     // console.log('menuId: ', menuId);
