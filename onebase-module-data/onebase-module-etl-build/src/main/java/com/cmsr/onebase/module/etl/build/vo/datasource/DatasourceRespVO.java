@@ -1,12 +1,10 @@
 package com.cmsr.onebase.module.etl.build.vo.datasource;
 
-import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLDatasourceDO;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDateTime;
 
@@ -33,7 +31,7 @@ public class DatasourceRespVO {
     private String datasourceType;
 
     @Schema(description = "数据源配置信息")
-    private String config;
+    private JsonNode config;
 
     @Schema(description = "只读")
     private Boolean readonly;
@@ -48,21 +46,6 @@ public class DatasourceRespVO {
     private LocalDateTime collectEndTime;
 
     // TODO: lack of creator, create_time, updater, update_time.,
-
-    public void setConfig(JsonNode config) {
-        this.config = JsonUtils.toJsonString(config);
-    }
-
-    public void setConfig(String config) {
-        this.config = config;
-    }
-
-    public JsonNode getConfig() {
-        if (StringUtils.isBlank(this.config)) {
-            return null;
-        }
-        return JsonUtils.parseTree(this.config);
-    }
 
     public static DatasourceRespVO convertFrom(ETLDatasourceDO datasourceDO) {
         DatasourceRespVO respVO = new DatasourceRespVO();

@@ -1,11 +1,14 @@
 package com.cmsr.onebase.module.bpm.runtime.service.instance.exec.strategy;
 
+import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowAgentInsDO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
 import com.cmsr.onebase.module.bpm.runtime.vo.ExecTaskReqVO;
 import jakarta.annotation.Resource;
 import org.dromara.warm.flow.core.entity.Task;
 import org.dromara.warm.flow.core.entity.User;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -49,14 +52,15 @@ public class ExecTaskStrategyManager {
      * @param reqVO 请求参数
      */
     @SuppressWarnings("unchecked")
-    public void execute(User matchedUser, Task task, BaseNodeExtDTO extDTO, ExecTaskReqVO reqVO) {
+    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
+    public void execute(User matchedUser, BpmFlowAgentInsDO agentInsDO, Task task, BaseNodeExtDTO extDTO, ExecTaskReqVO reqVO) {
         ExecTaskStrategy<?> strategy = getStrategy(extDTO.getNodeType());
         if (strategy == null) {
             throw new IllegalStateException("No ExecTaskStrategy for bizNodeType: " + extDTO.getNodeType());
         }
 
         // 由于策略使用泛型，需要强制转换，但这是安全的，因为我们已经通过 supports 方法验证了类型匹配
-        ((ExecTaskStrategy<BaseNodeExtDTO>) strategy).execute(matchedUser, task, extDTO, reqVO);
+        ((ExecTaskStrategy<BaseNodeExtDTO>) strategy).execute(matchedUser, agentInsDO, task, extDTO, reqVO);
     }
 }
 

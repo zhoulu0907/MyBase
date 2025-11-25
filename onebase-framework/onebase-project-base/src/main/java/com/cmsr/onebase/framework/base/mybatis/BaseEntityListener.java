@@ -1,8 +1,8 @@
 package com.cmsr.onebase.framework.base.mybatis;
 
+import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.data.BaseBizEntity;
 import com.cmsr.onebase.framework.data.BaseEntity;
-import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import com.mybatisflex.annotation.InsertListener;
 import com.mybatisflex.annotation.UpdateListener;
 import org.apache.commons.lang3.StringUtils;
@@ -14,7 +14,7 @@ public class BaseEntityListener implements InsertListener, UpdateListener {
     @Override
     public void onInsert(Object o) {
         if (o instanceof BaseEntity baseEntity) {
-            Long userId = WebFrameworkUtils.getLoginUserId();
+            Long userId = SecurityFrameworkUtils.getLoginUserId();
             baseEntity.setCreator(userId);
             baseEntity.setUpdater(userId);
             LocalDateTime now = LocalDateTime.now();
@@ -35,7 +35,7 @@ public class BaseEntityListener implements InsertListener, UpdateListener {
     @Override
     public void onUpdate(Object o) {
         if (o instanceof BaseEntity baseEntity) {
-            baseEntity.setUpdater(WebFrameworkUtils.getLoginUserId());
+            baseEntity.setUpdater(SecurityFrameworkUtils.getLoginUserId());
             baseEntity.setUpdateTime(LocalDateTime.now());
         }
         if (o instanceof BaseBizEntity bizEntity) {

@@ -747,4 +747,13 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
             entityRelationshipRepository.deleteById(id);
         }
     }
+
+    @Override
+    public List<MetadataEntityRelationshipDO> findBySourceEntityIdAndTargetEntityId(Long sourceEntityId, Long targetEntityId) {
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.and(MetadataEntityRelationshipDO.SOURCE_ENTITY_ID, sourceEntityId);
+        configStore.and(MetadataEntityRelationshipDO.TARGET_ENTITY_ID, targetEntityId);
+        configStore.order("create_time", Order.TYPE.DESC);
+        return entityRelationshipRepository.findAllByConfig(configStore);
+    }
 }

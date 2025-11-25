@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.etl.build.service.preview;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
+import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.etl.build.service.DatasourceFactory;
 import com.cmsr.onebase.module.etl.build.vo.preview.TablePreviewVO;
 import com.cmsr.onebase.module.etl.common.entity.ColumnData;
@@ -14,8 +15,10 @@ import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLDatasourceDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLTableDO;
 import com.cmsr.onebase.module.etl.core.enums.ETLErrorCodeConstants;
 import com.cmsr.onebase.module.etl.core.enums.MetadataType;
+import com.github.f4b6a3.uuid.UuidCreator;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.anyline.data.datasource.DataSourceHolder;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.DataRow;
@@ -79,9 +82,10 @@ public class DataInspectServiceImpl implements DataInspectService {
         }
 
         DataSource dataSource = dataSourceFactory.constructDataSource(datasourceDO, true);
-
+        String runnerKey = "ping-" + datasourceId + UuidCreator.getTimeOrderedEpoch();
         try {
-            AnylineService<?> temporary = ServiceProxy.temporary(dataSource);
+            DataSourceHolder.reg(runnerKey, dataSource);
+            AnylineService<?> temporary = ServiceProxy.service(runnerKey);
             Table<?> table;
             MetadataType metadataType = MetadataType.getType(tableDO.getTableType());
             switch (metadataType) {
@@ -91,7 +95,7 @@ public class DataInspectServiceImpl implements DataInspectService {
             }
             Map<String, String> fieldTypeMapping = flinkMappingRepository.findAllMappingsByDatasourceType(datasourceType);
             DataPreview dataPreview = new DataPreview();
-            TableData tableData = tableDO.getMetaInfo();
+            TableData tableData = JsonUtils.parseObject(tableDO.getMetaInfo(), TableData.class);
             List<ColumnData> columnDataList = tableData.getColumns();
             List<PreviewColumn> columnList = extractPreviewColumns(columnDataList, fieldTypeMapping);
             dataPreview.setColumns(columnList);
@@ -115,6 +119,8 @@ public class DataInspectServiceImpl implements DataInspectService {
         } catch (Exception e) {
             log.error("数据源连接异常，数据源信息: {}", datasourceDO, e);
             throw new RuntimeException(e);
+        } finally {
+            unregisterDataSource(runnerKey);
         }
     }
 
@@ -133,5 +139,13 @@ public class DataInspectServiceImpl implements DataInspectService {
             columnList.add(metaColumnIdx, previewColumn);
         }
         return columnList;
+    }
+
+    private void unregisterDataSource(String datasourceKey) {
+        try {
+            DataSourceHolder.destroy(datasourceKey);
+        } catch (Exception ex) {
+            log.error("注销数据源失败，数据源标识：{}", datasourceKey, ex);
+        }
     }
 }

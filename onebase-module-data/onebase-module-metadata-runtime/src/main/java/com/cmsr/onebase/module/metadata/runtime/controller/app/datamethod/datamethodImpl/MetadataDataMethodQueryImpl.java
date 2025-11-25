@@ -9,6 +9,7 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntit
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.relationship.MetadataEntityRelationshipDO;
 import com.cmsr.onebase.module.metadata.core.domain.query.ProcessContext;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.AbstractMetadataDataMethodCoreService;
+import com.cmsr.onebase.module.metadata.core.service.datamethod.strategy.FieldValueTransformMode;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
 import com.cmsr.onebase.module.metadata.core.service.permission.filter.FieldPermissionFilter;
 import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.vo.SubEntityVo;
@@ -122,6 +123,7 @@ public class MetadataDataMethodQueryImpl extends AbstractMetadataDataMethodCoreS
             if (resultData == null || resultData.isEmpty()) {
                 throw exception(BUSINESS_ENTITY_NOT_EXISTS);
             }
+            applyFieldStorageStrategies(resultData, fields, FieldValueTransformMode.READ, context);
             // 获取主表数据 放入上下文
             Map map = buildDataResponse(entity, filterMap == null ? resultData:filterMap , fields);
             context.setProcessedData(map);

@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.etl.build.vo.datasource;
 
-import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -33,16 +32,8 @@ public class ETLDatasourceUpdateReqVO {
 
     @Schema(description = "数据源配置信息")
     @NotBlank(message = "数据源配置信息不能为空")
-    private String config;
+    private JsonNode config;
 
     @Schema(description = "只读", requiredMode = Schema.RequiredMode.NOT_REQUIRED, defaultValue = "true")
     private Boolean readonly;
-
-    public JsonNode getConfig() {
-        return JsonUtils.parseTree(this.config);
-    }
-
-    public void setConfig(JsonNode config) {
-        this.config = JsonUtils.toJsonString(config);
-    }
 }
