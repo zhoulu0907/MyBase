@@ -52,7 +52,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className, avatarUrl }) => {
         </div>
       </Menu.Item>
       <Divider style={{ margin: '4px 0' }} />
-      <Menu.Item key="logout" onClick={handleLogout} style={{ marginLeft: '8px' }}>
+      <Menu.Item key="logout" onClick={handleLogout}>
         <IconExport style={{ color: '#F53F3F' }} />
         <Typography.Text type="error">{t('header.logout')}</Typography.Text>
       </Menu.Item>
