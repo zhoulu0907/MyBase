@@ -45,7 +45,7 @@ public class FlowExecutionLogServiceImpl implements FlowExecutionLogService {
 
     @Override
     public ExecutionLogVO getDetail(Long id) {
-        FlowExecutionLogDO logDO = flowExecutionLogRepository.findById(id);
+        FlowExecutionLogDO logDO = flowExecutionLogRepository.getById(id);
         if (logDO == null) {
             return null;
         }
