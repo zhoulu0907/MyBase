@@ -2,8 +2,8 @@ package com.cmsr.onebase.module.app.core.enums.auth;
 
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
-import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthDataGroupDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthPermissionDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AuthDataGroupDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AuthPermissionDO;
 import com.cmsr.onebase.module.app.core.vo.auth.AuthPermissionReq;
 import org.apache.commons.lang3.math.NumberUtils;
 

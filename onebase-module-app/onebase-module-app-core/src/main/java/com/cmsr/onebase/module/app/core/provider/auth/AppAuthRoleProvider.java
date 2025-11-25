@@ -1,10 +1,10 @@
 package com.cmsr.onebase.module.app.core.provider.auth;
 
 import com.cmsr.onebase.module.app.core.dal.database.AppSqlQueryRepository;
-import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleDeptRepository;
-import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthRoleDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthRoleDeptDO;
+import com.cmsr.onebase.module.app.core.dal.database.AppAuthRoleDeptRepository;
+import com.cmsr.onebase.module.app.core.dal.database.AppAuthRoleRepository;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AuthRoleDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AuthRoleDeptDO;
 import com.cmsr.onebase.module.app.core.dto.auth.UserRoleDTO;
 import com.cmsr.onebase.module.app.core.enums.auth.AuthRoleTypeEnum;
 import lombok.Setter;

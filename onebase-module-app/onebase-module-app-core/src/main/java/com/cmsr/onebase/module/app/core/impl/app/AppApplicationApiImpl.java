@@ -4,15 +4,9 @@ import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
-import com.cmsr.onebase.module.app.api.app.dto.TagVO;
-import com.cmsr.onebase.module.app.core.dal.database.AppSqlQueryRepository;
 import com.cmsr.onebase.module.app.core.dal.database.app.AppApplicationRepository;
-import com.cmsr.onebase.module.app.core.dal.database.tag.AppApplicationTagRepository;
-import com.cmsr.onebase.module.app.core.dal.database.tag.AppTagRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.app.ApplicationDO;
 import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.app.ApplicationTagDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.tag.TagDO;
 import jakarta.annotation.Resource;
 import lombok.Setter;
 import org.anyline.data.param.init.DefaultConfigStore;
@@ -21,7 +15,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -89,7 +82,7 @@ public class AppApplicationApiImpl implements AppApplicationApi {
     public void updateAppTimeById(Long appId) {
         // 更新修改日期 没有别的字段更新，不写不生效
         DataRow row = new DataRow();
-        row.put(BaseDO.UPDATE_TIME, LocalDateTime.now());
+        row.put(BaseDO.UPDATE_TIME,  LocalDateTime.now());
         appApplicationRepository.updateByConfig(row, new DefaultConfigStore().eq(ApplicationDO.ID, appId));
     }
 

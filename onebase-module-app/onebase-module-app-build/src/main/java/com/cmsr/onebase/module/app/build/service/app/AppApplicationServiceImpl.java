@@ -3,8 +3,8 @@ package com.cmsr.onebase.module.app.build.service.app;
 import com.cmsr.onebase.framework.common.enums.CommonPublishModelEnum;
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.uid.UidGenerator;
 import com.cmsr.onebase.module.app.build.service.AppCommonService;
 import com.cmsr.onebase.module.app.build.service.auth.AppAuthRoleService;
@@ -16,16 +16,16 @@ import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateReqVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateRespVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationRespVO;
 import com.cmsr.onebase.module.app.build.vo.tag.TagRespVO;
+import com.cmsr.onebase.module.app.core.dal.database.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.database.AppSqlQueryRepository;
-import com.cmsr.onebase.module.app.core.dal.database.app.AppApplicationRepository;
-import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleRepository;
-import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleUserRepository;
-import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
-import com.cmsr.onebase.module.app.core.dal.database.tag.AppApplicationTagRepository;
-import com.cmsr.onebase.module.app.core.dal.database.tag.AppTagRepository;
-import com.cmsr.onebase.module.app.core.dal.database.version.AppVersionRepository;
-import com.cmsr.onebase.module.app.core.dal.database.version.AppVersionResourceRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.app.ApplicationDO;
+import com.cmsr.onebase.module.app.core.dal.database.AppApplicationRepository;
+import com.cmsr.onebase.module.app.core.dal.database.AppAuthRoleRepository;
+import com.cmsr.onebase.module.app.core.dal.database.AppAuthRoleUserRepository;
+import com.cmsr.onebase.module.app.core.dal.database.AppApplicationTagRepository;
+import com.cmsr.onebase.module.app.core.dal.database.AppTagRepository;
+import com.cmsr.onebase.module.app.core.dal.database.AppVersionRepository;
+import com.cmsr.onebase.module.app.core.dal.database.AppVersionResourceRepository;
+import com.cmsr.onebase.module.app.core.dal.dataobject.ApplicationDO;
 import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.core.enums.app.ApplicationStatusEnum;
 import com.cmsr.onebase.module.app.core.vo.app.AppUserPhotoDTO;
@@ -104,7 +104,8 @@ public class AppApplicationServiceImpl implements AppApplicationService {
 
     @Override
     public PageResult<ApplicationRespVO> getApplicationPage(ApplicationPageReqVO pageReqVO) {
-        PageResult<ApplicationDO> pageResult = applicationRepository.selectPage(pageReqVO);
+        Long userId = SecurityFrameworkUtils.getLoginUserId();
+        PageResult<ApplicationDO> pageResult = applicationRepository.selectPage(pageReqVO, userId);
         AppCommonService.UserHelper userHelper = appCommonService.getUserHelper(pageResult.getList());
 
         // 1. 获取应用ID列表
@@ -295,6 +296,7 @@ public class AppApplicationServiceImpl implements AppApplicationService {
 
     @Override
     public List<ApplicationDO> getMySimpleAppListByName(String appName) {
-        return applicationRepository.findMyAppApplicationByAppName(appName);
+        Long currentUserId = SecurityFrameworkUtils.getLoginUserId();
+        return applicationRepository.findMyAppApplicationByAppName(appName, currentUserId);
     }
 }

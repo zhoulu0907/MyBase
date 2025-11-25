@@ -1,10 +1,10 @@
 package com.cmsr.onebase.module.app.build.service.appresource;
 
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.app.core.dal.database.appresource.AppPageSetPageRepository;
-import com.cmsr.onebase.module.app.core.dal.database.appresource.AppPageSetRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.PageSetDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.PageSetPageDO;
+import com.cmsr.onebase.module.app.core.dal.database.AppPageSetPageRepository;
+import com.cmsr.onebase.module.app.core.dal.database.AppPageSetRepository;
+import com.cmsr.onebase.module.app.core.dal.dataobject.PageSetDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.PageSetPageDO;
 import com.cmsr.onebase.module.app.core.dto.appresource.CreatePageSetPageDTO;
 import com.cmsr.onebase.module.app.core.dto.appresource.PageSetPageRespDTO;
 import jakarta.annotation.Resource;

@@ -3,14 +3,14 @@ package com.cmsr.onebase.module.app.build.service.appresource;
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.build.util.PageUtils;
-import com.cmsr.onebase.module.app.core.dal.database.appresource.AppPageRepository;
-import com.cmsr.onebase.module.app.core.dal.database.appresource.AppPageSetPageRepository;
-import com.cmsr.onebase.module.app.core.dal.database.appresource.AppPageSetRepository;
-import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.PageDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.PageSetDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.PageSetPageDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.menu.MenuDO;
+import com.cmsr.onebase.module.app.core.dal.database.AppPageRepository;
+import com.cmsr.onebase.module.app.core.dal.database.AppPageSetPageRepository;
+import com.cmsr.onebase.module.app.core.dal.database.AppPageSetRepository;
+import com.cmsr.onebase.module.app.core.dal.database.AppMenuRepository;
+import com.cmsr.onebase.module.app.core.dal.dataobject.PageDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.PageSetDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.PageSetPageDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.MenuDO;
 import com.cmsr.onebase.module.app.core.dto.appresource.*;
 import com.cmsr.onebase.module.app.core.enums.appresource.AppResourceErrorCodeConstants;
 import com.cmsr.onebase.module.app.core.enums.appresource.PageEnum;
@@ -24,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class PageServiceImpl implements PageService {

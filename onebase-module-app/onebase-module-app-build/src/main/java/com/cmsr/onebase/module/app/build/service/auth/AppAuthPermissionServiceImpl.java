@@ -5,21 +5,21 @@ import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.build.service.AppCommonService;
 import com.cmsr.onebase.module.app.build.util.AuthUtils;
 import com.cmsr.onebase.module.app.build.vo.auth.*;
-import com.cmsr.onebase.module.app.core.dal.database.appresource.AppPageRepository;
-import com.cmsr.onebase.module.app.core.dal.database.appresource.AppPageSetPageRepository;
-import com.cmsr.onebase.module.app.core.dal.database.appresource.AppPageSetRepository;
-import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthDataGroupRepository;
-import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthFieldRepository;
-import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthPermissionRepository;
-import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthViewRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.PageDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.PageSetDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.PageSetPageDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthDataGroupDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthFieldDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthPermissionDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthViewDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.menu.MenuDO;
+import com.cmsr.onebase.module.app.core.dal.database.AppPageRepository;
+import com.cmsr.onebase.module.app.core.dal.database.AppPageSetPageRepository;
+import com.cmsr.onebase.module.app.core.dal.database.AppPageSetRepository;
+import com.cmsr.onebase.module.app.core.dal.database.AppAuthDataGroupRepository;
+import com.cmsr.onebase.module.app.core.dal.database.AppAuthFieldRepository;
+import com.cmsr.onebase.module.app.core.dal.database.AppAuthPermissionRepository;
+import com.cmsr.onebase.module.app.core.dal.database.AppAuthViewRepository;
+import com.cmsr.onebase.module.app.core.dal.dataobject.PageDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.PageSetDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.PageSetPageDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AuthDataGroupDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AuthFieldDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AuthPermissionDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AuthViewDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.MenuDO;
 import com.cmsr.onebase.module.app.core.enums.auth.AuthDefaultFactory;
 import com.cmsr.onebase.module.app.core.provider.AppCacheProvider;
 import com.cmsr.onebase.module.app.core.vo.auth.AuthPermissionReq;
@@ -232,7 +232,7 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
                 authDataGroupDO.setScopeLevel(null);
                 authDataGroupDO.setScopeValue(null);
             }
-            authDataGroupRepository.updateAuthDataGroup(authDataGroupDO);
+            authDataGroupRepository.updateById(authDataGroupDO, false);
         }
         appCacheProvider.roleMenuChanged(reqVO.getPermissionReq());
     }

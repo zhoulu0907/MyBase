@@ -1,7 +1,10 @@
 package com.cmsr.onebase.module.app.build.util.db;
 
 import com.cmsr.onebase.framework.aynline.DataDDLRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.*;
+import com.cmsr.onebase.module.app.core.dal.dataobject.ComponentDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.PageDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.PageSetDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.PageSetPageDO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

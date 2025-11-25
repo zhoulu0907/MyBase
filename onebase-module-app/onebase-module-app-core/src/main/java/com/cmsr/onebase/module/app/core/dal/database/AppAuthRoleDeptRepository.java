@@ -1,0 +1,96 @@
+package com.cmsr.onebase.module.app.core.dal.database;
+
+import com.cmsr.onebase.framework.common.pojo.PageParam;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AuthRoleDeptDO;
+import com.cmsr.onebase.module.app.core.dal.mapper.AppAuthRoleDeptMapper;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.spring.service.impl.ServiceImpl;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppAuthRoleDeptTableDef.APP_AUTH_ROLE_DEPT;
+import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppAuthRoleTableDef.APP_AUTH_ROLE;
+
+/**
+ * 应用权限用户角色数据访问层
+ *
+ * @author lingma
+ * @date 2025-08-05
+ */
+@Repository
+public class AppAuthRoleDeptRepository extends ServiceImpl<AppAuthRoleDeptMapper, AuthRoleDeptDO> {
+
+    public void addRoleDept(Long roleId, List<Long> deptIds, Integer isIncludeChild) {
+        for (Long deptId : deptIds) {
+            QueryWrapper queryWrapper = this.query()
+                    .eq(AuthRoleDeptDO::getRoleId, roleId)
+                    .eq(AuthRoleDeptDO::getDeptId, deptId);
+            boolean exists = this.exists(queryWrapper);
+            if (!exists) {
+                AuthRoleDeptDO authRoleDeptDO = new AuthRoleDeptDO();
+                authRoleDeptDO.setRoleId(roleId);
+                authRoleDeptDO.setDeptId(deptId);
+                authRoleDeptDO.setIsIncludeChild(isIncludeChild);
+                this.save(authRoleDeptDO);
+            }
+        }
+
+    }
+
+    public List<AuthRoleDeptDO> findByRoleId(Long roleId) {
+        QueryWrapper queryWrapper = this.query()
+                .eq(AuthRoleDeptDO::getRoleId, roleId);
+        return list(queryWrapper);
+    }
+
+    public PageResult<AuthRoleDeptDO> findByRoleId(Long roleId, PageParam pageParam) {
+        QueryWrapper queryWrapper = this.query()
+                .eq(AuthRoleDeptDO::getRoleId, roleId);
+        Page<AuthRoleDeptDO> pageQuery = Page.of(pageParam.getPageNo(), pageParam.getPageSize());
+        Page<AuthRoleDeptDO> pageResult = this.page(pageQuery, queryWrapper);
+        return new PageResult<>(pageResult.getRecords(), pageResult.getTotalRow());
+    }
+
+
+    public void deleteRoleDept(Long roleId, List<Long> deptIds) {
+        this.updateChain()
+                .eq(AuthRoleDeptDO::getRoleId, roleId)
+                .in(AuthRoleDeptDO::getDeptId, deptIds)
+                .remove();
+    }
+
+    public void deleteRoleDept(Long roleId, Long deptId) {
+        this.updateChain()
+                .eq(AuthRoleDeptDO::getRoleId, roleId)
+                .eq(AuthRoleDeptDO::getDeptId, deptId)
+                .remove();
+    }
+
+    public void deleteByRoleId(Long roleId) {
+        this.updateChain()
+                .eq(AuthRoleDeptDO::getRoleId, roleId)
+                .remove();
+    }
+
+
+    public void deleteByDeptId(Long deptId) {
+        this.updateChain()
+                .eq(AuthRoleDeptDO::getDeptId, deptId)
+                .remove();
+    }
+
+
+    public List<AuthRoleDeptDO> findByApplicationId(Long applicationId) {
+        QueryWrapper queryWrapper = this.query()
+                .select(
+                        APP_AUTH_ROLE_DEPT.ALL_COLUMNS
+                )
+                .from(APP_AUTH_ROLE_DEPT, APP_AUTH_ROLE)
+                .where(APP_AUTH_ROLE_DEPT.ROLE_ID.eq(APP_AUTH_ROLE.ID))
+                .and(APP_AUTH_ROLE.APPLICATION_ID.eq(applicationId));
+        return this.list(queryWrapper);
+    }
+}

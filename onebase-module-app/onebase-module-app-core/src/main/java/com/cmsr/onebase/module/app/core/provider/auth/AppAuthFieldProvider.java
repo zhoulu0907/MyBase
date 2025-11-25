@@ -1,8 +1,8 @@
 package com.cmsr.onebase.module.app.core.provider.auth;
 
 import com.cmsr.onebase.module.app.api.security.bo.FieldPermissionItem;
-import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthFieldRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthFieldDO;
+import com.cmsr.onebase.module.app.core.dal.database.AppAuthFieldRepository;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AuthFieldDO;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.math.NumberUtils;
