@@ -141,6 +141,7 @@ const DynamicDateRangeConfig: React.FC<DynamicDateRangeConfigProps> = ({ handleP
                 {configs[dateRangeKey]['earliestType'] === DATE_EXTREME_TYPE.STATIC && (
                   <DatePicker
                     format="YYYY-MM-DD"
+                    getPopupContainer={getPopupContainer}
                     value={configs[dateRangeKey]['earliestStaticValue']}
                     onChange={(value) => {
                       // 校验最早可选日期不得晚于最晚可选日期
@@ -200,6 +201,7 @@ const DynamicDateRangeConfig: React.FC<DynamicDateRangeConfigProps> = ({ handleP
                 {configs[dateRangeKey]['latestType'] === DATE_EXTREME_TYPE.STATIC && (
                   <DatePicker
                     format="YYYY-MM-DD"
+                    getPopupContainer={getPopupContainer}
                     value={configs[dateRangeKey]['latestStaticValue']}
                     onChange={(value) => {
                       // 校验最早可选日期不得晚于最晚可选日期 earliestLimit earliestLimit

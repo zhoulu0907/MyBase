@@ -1,5 +1,7 @@
 import { DatePicker, Form } from '@arco-design/web-react';
+import { FORM_COMPONENT_TYPES } from '@/components/Materials/componentTypes';
 import dayjs from 'dayjs';
+import { nanoid } from 'nanoid';
 import { memo, useEffect, useState } from 'react';
 import {
   DATE_OPTIONS,
@@ -32,14 +34,8 @@ const XDateRangePicker = memo((props: XInputDateRangePickerConfig & { runtime?: 
   } = props;
 
   const { form } = Form.useFormContext();
-  const [fieldId, setFieldId] = useState('');
+  const fieldId = dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.DATE_RANGE_PICKER}_${nanoid()}`
   const fieldValue = Form.useWatch(fieldId, form);
-
-  useEffect(() => {
-    if (dataField.length > 0) {
-      setFieldId(dataField[dataField.length - 1]);
-    }
-  }, [dataField]);
 
   // 确保 dateType 有默认值，避免 Form.Item 中没有元素
   const currentDateType = (dateType !== DATE_VALUES[DATE_OPTIONS.FULL] && dateType) || DATE_VALUES[DATE_OPTIONS.DATE];
@@ -109,7 +105,7 @@ const XDateRangePicker = memo((props: XInputDateRangePickerConfig & { runtime?: 
           label.display &&
           label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
         }
-        field={fieldId}
+        field={fieldId ? fieldId : `${FORM_COMPONENT_TYPES.DATE_RANGE_PICKER}_${nanoid()}`}
         layout={layout}
         tooltip={tooltip}
         wrapperCol={{ style: { flex: 1 } }}
