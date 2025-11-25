@@ -1,6 +1,6 @@
 package com.cmsr.onebase.framework.base.mybatis;
 
-import com.cmsr.onebase.framework.data.BaseEntity;
+import com.cmsr.onebase.framework.orm.data.BaseEntity;
 import com.mybatisflex.annotation.KeyType;
 import com.mybatisflex.core.FlexGlobalConfig;
 import com.mybatisflex.core.audit.AuditManager;

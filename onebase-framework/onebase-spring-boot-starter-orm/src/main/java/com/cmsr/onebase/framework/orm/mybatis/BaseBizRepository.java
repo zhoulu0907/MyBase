@@ -1,4 +1,4 @@
-package com.cmsr.onebase.framework.mybatis;
+package com.cmsr.onebase.framework.orm.mybatis;
 
 import com.mybatisflex.core.BaseMapper;
 import com.mybatisflex.core.paginate.Page;
@@ -15,11 +15,14 @@ import java.util.Collection;
 import java.util.List;
 
 @Slf4j
-public class BaseTenantRepository<M extends BaseMapper<T>, T> extends ServiceImpl<M, T> {
+public class BaseBizRepository<M extends BaseMapper<T>, T> extends ServiceImpl<M, T> {
 
     protected QueryWrapper injectBizFilter(QueryWrapper queryWrapper) {
-//        Long applicationId = XXX;
-//        queryWrapper.eq("application_id", applicationId);
+        // TODO: add filters like applicationId, versionFlag
+//        Long applicationId = XXXXX;
+//        var versionStatus = 0,1,xxxxxxx;
+//        return queryWrapper
+//                .eq("version_flag", versionFlag);
         log.debug("注入SQL查询条件");
         return queryWrapper;
     }

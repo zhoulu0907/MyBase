@@ -1,8 +1,8 @@
 package com.cmsr.onebase.framework.base.mybatis;
 
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
-import com.cmsr.onebase.framework.data.BaseBizEntity;
-import com.cmsr.onebase.framework.data.BaseEntity;
+import com.cmsr.onebase.framework.orm.data.BaseBizEntity;
+import com.cmsr.onebase.framework.orm.data.BaseEntity;
 import com.mybatisflex.annotation.InsertListener;
 import com.mybatisflex.annotation.UpdateListener;
 import org.apache.commons.lang3.StringUtils;
