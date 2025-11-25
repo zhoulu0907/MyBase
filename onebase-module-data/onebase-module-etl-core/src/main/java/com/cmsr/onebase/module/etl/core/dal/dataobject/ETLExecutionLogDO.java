@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.etl.core.dal.dataobject;
 
-import com.cmsr.onebase.framework.orm.data.BaseTenantEntity;
+import com.cmsr.onebase.framework.orm.data.BaseAppEntity;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
 import lombok.Data;
@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Data
 @Table(value = "etl_execution_log")
-public class ETLExecutionLogDO extends BaseTenantEntity {
+public class ETLExecutionLogDO extends BaseAppEntity {
 
     @Column(value = "workflow_id")
     private Long workflowId;
