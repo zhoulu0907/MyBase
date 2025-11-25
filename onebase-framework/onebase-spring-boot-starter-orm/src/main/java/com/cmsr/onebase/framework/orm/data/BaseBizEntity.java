@@ -10,7 +10,13 @@ import lombok.Data;
  * 适用场景：需要参与应用发布及版本管理的相关实体；
  */
 @Data
-public class BaseBizEntity extends BaseTenantEntity {
+public class BaseBizEntity extends BaseEntity {
+
+    @Column(value = "application_id", comment = "应用ID")
+    private Long applicationId;
+
+    @Column(value = "tenant_id", comment = "租户ID", tenantId = true)
+    private Long tenantId;
 
     @Column(value = "version_tag", comment = "版本标签")
     private Long versionTag;
