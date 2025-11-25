@@ -56,6 +56,7 @@ const FieldConfigPopover: React.FC<FieldConfigPopoverProps> = React.memo(
               }
               onCancel={() => onCancel(ENTITY_FIELD_TYPE.DATA_SELECTION.VALUE)}
               entities={entities}
+              initialDataSelectionConfig={field?.dataSelectionConfig}
             />
           );
 
