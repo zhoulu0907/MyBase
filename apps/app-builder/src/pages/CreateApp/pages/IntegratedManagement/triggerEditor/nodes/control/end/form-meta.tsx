@@ -32,10 +32,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             <Form.Item label="节点ID" field="id" initialValue={node.id} rules={[{ required: true }]}>
               <Input disabled />
             </Form.Item>
-            <Form.Item label="用户提示语" field="prompt">
-              <Input placeholder="用于提示用户流程已被终结，不超过30个字" maxLength={30} />
-            </Form.Item>
-            <Form.Item label="状态码" field="statusCode">
+            
+            <Form.Item label="状态码" field="statusCode" initialValue={'true'}>
               <Select
                 placeholder="请选择"
                 options={[
@@ -43,6 +41,9 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                   { label: '异常结束', value: 'false' }
                 ]}
               ></Select>
+            </Form.Item>
+            <Form.Item label="终止描述" field="prompt">
+              <Input placeholder="不超过30个字" maxLength={30} />
             </Form.Item>
           </Form>
         </FormContent>
