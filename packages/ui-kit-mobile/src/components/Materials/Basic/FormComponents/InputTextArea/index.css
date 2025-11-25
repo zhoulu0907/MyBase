@@ -10,29 +10,34 @@
     padding-right: 0.32rem;
     font-size: 0.32rem;
   }
+
   .arco-input-wrap {
     &textarea {
       height: auto;
     }
+
     height: auto;
   }
 
   .arco-input-container .arco-input-label {
     min-width: 1.76rem;
   }
+
   &.showStatistics {
     .arco-textarea {
       margin-bottom: 0.8rem;
     }
   }
+
   .arco-textarea {
     line-height: 0.48rem;
     height: 0.96rem;
     padding: 0;
     margin: 0.32rem 0;
     font-size: 0.32rem;
-   
-    &:hover, &:focus {
+
+    &:hover,
+    &:focus {
       border: none;
       background-color: transparent !important;
     }

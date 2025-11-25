@@ -1,24 +1,22 @@
-import { Input, Form } from '@arco-design/mobile-react';
 import { memo } from 'react';
-import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { nanoid } from 'nanoid';
+import { Input, Form } from '@arco-design/mobile-react';
+import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
+
+import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES, FormSchema } from '@onebase/ui-kit';
+type XInputEmailConfig = typeof FormSchema.XInputNumberSchema.config;
 import '../index.css';
-import type { XInputEmailConfig } from './schema';
 
 const XInputEmail = memo((props: XInputEmailConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const {
     label,
     dataField,
     placeholder,
-    tooltip,
     status,
-    defaultValue,
+    defaultValueConfig,
     verify,
     align,
     layout,
-    color,
-    bgColor,
-    labelColSpan = 0,
     runtime = true,
     detailMode
   } = props;
@@ -28,37 +26,39 @@ const XInputEmail = memo((props: XInputEmailConfig & { runtime?: boolean; detail
     ? dataField[dataField.length - 1]
     : `${FORM_COMPONENT_TYPES.INPUT_EMAIL}_${nanoid()}`;
 
-  // 构建验证规则
-  const rules = [];
-  if (verify?.required) {
-    rules.push({ required: true, message: '请输入邮箱地址' });
-  }
-  // 邮箱格式验证规则
-  rules.push({
-    match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-    message: '请输入合法的邮箱地址'
-  });
+  const rules: ITypeRules<ValidatorType.Custom>[] = [
+    {
+      type: ValidatorType.Custom,
+      validator: (value, callback) => {
+        if (!value && verify?.required) {
+          callback(`${label.text}是必填项`);
+        }
+
+        if (value && !(/^[^\s@]+@[^\s@]+\.[^\s@]+$/).test(value)) {
+          callback(`请输入合法的邮箱地址`);
+        }
+      }
+    }
+  ];
 
   return (
     <Form.Item
-      field={fieldId}
-      label={label.display ? label.text : undefined}
-      initialValue={defaultValue || ''}
       className="inputTextWrapper"
+      field={fieldId}
       rules={rules}
+      label={label.display ? label.text : undefined}
+      initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : ''}
       style={{
         pointerEvents: (!runtime || detailMode) ? 'none' : 'unset'
       }}
     >
-      {!runtime || detailMode ? (
+      {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
         // 只读模式，渲染文本内容
         <div style={{
           textAlign: align,
-          color: color,
-          backgroundColor: bgColor || 'transparent',
           padding: '8px'
         }}>
-          {defaultValue || '--'}
+          --
         </div>
       ) : (
         // 编辑模式，渲染Input组件
@@ -67,9 +67,7 @@ const XInputEmail = memo((props: XInputEmailConfig & { runtime?: boolean; detail
           placeholder={placeholder}
           style={{
             width: '100%',
-            textAlign: align,
-            color: color,
-            backgroundColor: bgColor || 'transparent'
+            textAlign: align
           }}
           inputStyle={{ textAlign: align }}
         />

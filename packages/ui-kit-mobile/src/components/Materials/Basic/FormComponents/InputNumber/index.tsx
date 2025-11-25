@@ -1,23 +1,23 @@
-import { Input, Form } from '@arco-design/mobile-react';
 import { memo } from 'react';
-import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { nanoid } from 'nanoid';
+import { Input, Form } from '@arco-design/mobile-react';
+import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
+
+import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES, FormSchema } from '@onebase/ui-kit';
+type XInputNumberConfig = typeof FormSchema.XInputNumberSchema.config;
 import '../index.css';
-import type { XInputNumberConfig } from './schema';
 
 const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const {
     label,
     placeholder,
     dataField,
-    tooltip,
     status,
-    defaultValue,
+    defaultValueConfig,
     verify,
     align,
     step,
     layout,
-    labelColSpan = 0,
     runtime = true,
     detailMode,
     numberFormat
@@ -26,8 +26,8 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
   const { showUnit, unitValue, showPrecision, precision, showPercent, useThousandsSeparator } = numberFormat;
 
   // 生成唯一的字段ID
-  const fieldId = dataField && dataField.length > 0 
-    ? dataField[dataField.length - 1] 
+  const fieldId = dataField && dataField.length > 0
+    ? dataField[dataField.length - 1]
     : `${FORM_COMPONENT_TYPES.INPUT_NUMBER}_${nanoid()}`;
 
   const detailValue = (value: number) => {
@@ -69,24 +69,45 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
     );
   };
 
+  const rules: ITypeRules<ValidatorType.Custom>[] = [
+    {
+      type: ValidatorType.Custom,
+      validator: (value, callback) => {
+        if (!value && verify?.required) {
+          callback(`${label.text}是必填项`);
+        }
+
+        if (value && verify?.numberLimit) {
+          if (value < verify?.min!) {
+            callback(`字数不能小于${verify?.min}`);
+          } else if (value > verify?.max!) {
+            callback(`字数不能大于${verify?.max}`);
+          }
+        } else {
+          callback();
+        }
+      }
+    }
+  ];
+
   return (
     <Form.Item
-      field={fieldId}
-      label={label.display ? label.text : undefined}
-      initialValue={defaultValue || ''}
       className="inputTextWrapper"
-      rules={verify ? [{ required: verify.required, message: verify.message }] : undefined}
+      field={fieldId}
+      rules={rules}
+      label={label.display ? label.text : undefined}
+      initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : ''}
       style={{
         pointerEvents: (!runtime || detailMode) ? 'none' : 'unset'
       }}
     >
-      {!runtime || detailMode ? (
+      {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
         // 只读模式，渲染格式化的文本内容
-        <div style={{ 
-          textAlign: align, 
+        <div style={{
+          textAlign: align,
           padding: '8px'
         }}>
-          {defaultValue !== undefined && defaultValue !== null ? detailValue(defaultValue) : '--'}
+          --
         </div>
       ) : (
         renderContent()

@@ -1,26 +1,23 @@
-import { Input, Form } from '@arco-design/mobile-react';
 import { memo } from 'react';
-import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { nanoid } from 'nanoid';
+import { Input, Form } from '@arco-design/mobile-react';
+import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
+
+import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES, FormSchema } from '@onebase/ui-kit';
+type XInputTextConfig = typeof FormSchema.XInputTextSchema.config;
+
 import '../index.css';
-import { type XInputTextConfig } from './schema';
 
 const XInputText = memo((props: XInputTextConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const {
-    cpName,
     label,
     dataField,
     placeholder,
-    tooltip,
+    defaultValueConfig,
     status,
-    defaultValue,
     verify,
     align,
     layout,
-    color,
-    bgColor,
-    labelColSpan = 0,
-    maxLength,
     runtime = true,
     detailMode
   } = props;
@@ -36,40 +33,54 @@ const XInputText = memo((props: XInputTextConfig & { runtime?: boolean; detailMo
     return (
       <Input
         placeholder={placeholder}
-        maxLength={maxLength}
+        maxLength={verify?.lengthLimit ? verify?.maxLength : undefined}
         inputStyle={{
-          textAlign: align,
-          color: color
+          textAlign: align
         }}
         style={{
-          width: '100%',
-          backgroundColor: bgColor || 'transparent',
-          color: color
+          width: '100%'
         }}
       />
     );
   };
 
+  const rules: ITypeRules<ValidatorType.Custom>[] = [
+    {
+      type: ValidatorType.Custom,
+      validator: (value, callback) => {
+        if (!value && verify?.required) {
+          callback(`${label.text}是必填项`);
+        }
+
+        if (value && verify?.lengthLimit) {
+          if (value.length < verify?.minLength!) {
+            callback(`字数不能小于${verify?.minLength}`);
+          } else if (value.length > verify?.maxLength!) {
+            callback(`字数不能大于${verify?.maxLength}`);
+          }
+        }
+      }
+    }
+  ];
+
   return (
     <Form.Item
-      field={fieldId}
-      label={label.display ? label.text : undefined}
-      initialValue={defaultValue || ''}
       className="inputTextWrapper"
-      rules={verify ? [{ required: verify.required, message: `请输入${cpName}` }] : undefined}
+      field={fieldId}
+      rules={rules}
+      label={label.display ? label.text : undefined}
+      initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : ''}
       style={{
         pointerEvents: (!runtime || detailMode) ? 'none' : 'unset'
       }}
     >
-      {detailMode ? (
+      {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
         // 只读模式，渲染文本内容
         <div style={{
           textAlign: align,
-          color: color,
-          backgroundColor: bgColor || 'transparent',
           padding: '8px'
         }}>
-          {defaultValue || '--'}
+          --
         </div>
       ) : (
         renderContent()

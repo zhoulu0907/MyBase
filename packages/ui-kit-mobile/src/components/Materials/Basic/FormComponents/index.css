@@ -5,11 +5,11 @@
   padding: 0 0.32rem;
   box-sizing: border-box;
   border-bottom: 0.5px solid #e5e6eb !important;
-  align-items: center;
+  align-items: center !important;
 
   .arco-input-wrap,
   .arco-form-label-item {
-    height: 1.08rem;
+    height: 100%;
     border-top: none !important;
     padding: 0;
     box-sizing: border-box;
