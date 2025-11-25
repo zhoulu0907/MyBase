@@ -11,7 +11,7 @@ import { menuIconList } from '@/components/MenuIcon/const';
 import { Dropdown, Menu, Message, Tooltip, type FormInstance } from '@arco-design/web-react';
 import { IconEyeInvisible, IconMoreVertical } from '@arco-design/web-react/icon';
 import { getPageSetId, menuSignal, PageType, RootParentPage, VisibleType, type GetPageSetIdReq } from '@onebase/app';
-import { EDITOR_TYPES } from '@onebase/ui-kit';
+import { EDITOR_TYPES, webMenuIcons } from '@onebase/ui-kit';
 import { pagesRuntimeSignal } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useState } from 'react';
@@ -69,6 +69,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
   createForm,
   style
 }) => {
+  const allWebMenuIcons = webMenuIcons.map((ele) => ele.children).reduce((acc, current) => acc.concat(current), []);
   useSignals();
   const navigate = useNavigate();
   const { curMenu } = menuSignal;
@@ -221,12 +222,10 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
     >
       <Tooltip content={menuName} position="top">
         <div className={styles.menuName}>
-          <DynamicIcon
-            IconComponent={menuIconList.find((icon) => icon.code === menuIcon)?.icon}
-            theme="outline"
-            size="18"
-            fill={curMenu.value?.id === menuID ? 'rgb(var(--primary-6))' : '#333'}
-            style={{ marginRight: 16 }}
+          <img
+            style={{ width: 'auto', height: '18px', fill: '#333', marginRight: 16 }}
+            src={allWebMenuIcons.find((ele) => ele.code === menuIcon)?.icon}
+            alt=""
           />
           {/* xxx-taskicon 是工作流程任务中心菜单的icon */}
           {menuIcon.indexOf('-taskicon') > 0 && (

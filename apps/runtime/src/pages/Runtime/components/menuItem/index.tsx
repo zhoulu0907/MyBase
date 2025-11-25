@@ -4,6 +4,7 @@ import React from 'react';
 import DynamicIcon from '../DynamicIcon';
 import { menuIconList } from '../DynamicIcon/const';
 import styles from './index.module.less';
+import { webMenuIcons } from '@onebase/ui-kit';
 
 /**
  * MenuItem 组件
@@ -23,6 +24,7 @@ interface MenuItemProps {
 const RuntimeMenuItem: React.FC<MenuItemProps> = ({ label, menuID, menuIcon, onClick, maxWidth }) => {
   useSignals();
   const { curMenu } = menuSignal;
+  const allWebMenuIcons = webMenuIcons.map((ele) => ele.children).reduce((acc, current) => acc.concat(current), []);
 
   return (
     <div className={styles.runtimeMenuItem} onClick={onClick} role="menuitem" tabIndex={0}>
@@ -32,13 +34,18 @@ const RuntimeMenuItem: React.FC<MenuItemProps> = ({ label, menuID, menuIcon, onC
           maxWidth: maxWidth + 'px'
         }}
       >
-        <DynamicIcon
-          IconComponent={menuIconList.find((icon) => icon.code === menuIcon)?.icon}
-          theme="outline"
-          size="18"
-          fill={curMenu.value?.id === menuID ? 'rgb(var(--primary-6))' : '#333'}
-          style={{ marginRight: 16 }}
+        <img
+          style={{
+            width: 'auto',
+            height: '18px',
+             marginRight: 16,
+            color: curMenu.value?.id === menuID ? 'rgb(var(--primary-6))' : '#333',
+            fill: curMenu.value?.id === menuID ? 'rgb(var(--primary-6))' : '#333'
+          }}
+          src={allWebMenuIcons.find((ele) => ele.code === menuIcon)?.icon}
+          alt=""
         />
+       
         {/* xxx-taskicon 是工作流程任务中心菜单的icon */}
         {menuIcon.indexOf('-taskicon') > 0 && <i className={`iconfont ${menuIcon}`} style={{ marginRight: '16px' }} />}
         <span style={{ color: curMenu.value?.id === menuID ? 'rgb(var(--primary-6))' : '#333' }}>{label}</span>
