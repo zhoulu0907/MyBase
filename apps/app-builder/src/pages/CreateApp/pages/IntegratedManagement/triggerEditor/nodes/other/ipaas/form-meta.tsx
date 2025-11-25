@@ -4,6 +4,7 @@ import { Form, Pagination, Steps } from '@arco-design/web-react';
 import { IconSync } from '@douyinfe/semi-icons';
 import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
 import {
+  getScriptAction,
   listConnectInstance,
   listScriptAction,
   type ConnectInstance,
@@ -32,6 +33,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   const [selectedInstance, setSelectedInstance] = useState<ConnectInstance>();
   const [selectedAction, setSelectedAction] = useState<ScriptActionItem>();
+  const [inputParameter, setInputParameter] = useState<string>('{}');
   const [onSwap, setOnSwap] = useState(false);
 
   const handlePropsOnChange = (key: string, value: any) => {
@@ -60,6 +62,12 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     }
   }, [selectedInstance]);
 
+  useEffect(() => {
+    if (selectedAction && selectedAction.scriptId) {
+      handleGetScriptAction(selectedAction.scriptId);
+    }
+  }, [selectedAction]);
+
   const getConnectInstanceList = async () => {
     const curAppId = getHashQueryParam('appId');
     const req: ListConnectInstanceReq = {
@@ -75,7 +83,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     console.log('res :', res);
     if (res) {
       setInstanceList(res.list || []);
-      setTotal(res.total || 0);
     }
   };
 
@@ -92,11 +99,23 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       setPageNo
     );
 
-    console.log('res :', res);
     if (res) {
       setActionList(res.list || []);
       setTotal(res.total || 0);
     }
+  };
+
+  const handleGetScriptAction = async (scriptId: string) => {
+    const res = await getScriptAction(scriptId);
+    console.log(res);
+    if (res && res.inputParameter) {
+      console.log('res.inputParameter :', res.inputParameter);
+      setInputParameter(res.inputParameter);
+    }
+  };
+
+  const renderInputParameter = () => {
+    const inputParameterObj = JSON.parse(inputParameter);
   };
 
   return (
@@ -181,6 +200,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                 />
               </div>
             )}
+
+            {/* {currentStep === 2 && renderInputParameter()} */}
           </div>
 
           {/* <Form

@@ -171,10 +171,12 @@ const CreateScriptActionPage: React.FC<CreateScriptActionPageProps> = ({ onSucce
       // 将 JSON 字符串转换为 schema 并初始化表单数据
       if (inputParameter) {
         try {
+          const jsonObj = JSON.parse(inputParameter);
           const schema = jsonToJsonSchema(inputParameter);
+          console.log('schema :', schema);
           setInputSchema(schema);
-          // 初始化表单数据
-          const formData = schemaToFormData(schema);
+          // 初始化表单数据，传入原始 JSON 对象以保留值
+          const formData = schemaToFormData(schema, jsonObj);
           form.setFieldValue('inputParameterSchema', formData);
         } catch (e) {
           Message.error('无效的 JSON 字符串，无法转换为图形化表单');
@@ -221,10 +223,11 @@ const CreateScriptActionPage: React.FC<CreateScriptActionPageProps> = ({ onSucce
       // 将 JSON 字符串转换为 schema 并初始化表单数据
       if (outputParameter) {
         try {
+          const jsonObj = JSON.parse(outputParameter);
           const schema = jsonToJsonSchema(outputParameter);
           setOutputSchema(schema);
-          // 初始化表单数据
-          const formData = schemaToFormData(schema);
+          // 初始化表单数据，传入原始 JSON 对象以保留值
+          const formData = schemaToFormData(schema, jsonObj);
           form.setFieldValue('outputParameterSchema', formData);
         } catch (e) {
           Message.error('无效的 JSON 字符串，无法转换为图形化表单');
