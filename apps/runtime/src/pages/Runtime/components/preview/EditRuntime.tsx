@@ -100,7 +100,9 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({ form, isAdd, submitLoading, o
       focusLock={true}
       style={{ width: fullScreen ? '98vw' : '60vw' }}
       alignCenter
-      wrapClassName={fullScreen ? 'runtime-preview-formpage edit-modal edit-modal-fullscreen' : 'runtime-preview-formpage edit-modal'}
+      wrapClassName={
+        fullScreen ? 'runtime-preview-formpage edit-modal edit-modal-fullscreen' : 'runtime-preview-formpage edit-modal'
+      }
     >
       <div style={{ height: '100%' }}>
         <Form layout="inline" form={form} onValuesChange={handleFormValuesChange}>
