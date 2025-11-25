@@ -1,20 +1,23 @@
 package com.cmsr.onebase.module.app.core.impl.app;
 
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
-import com.cmsr.onebase.module.app.core.dal.database.app.AppApplicationRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.app.ApplicationDO;
 import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
+import com.cmsr.onebase.module.app.api.app.dto.TagVO;
+import com.cmsr.onebase.module.app.core.dal.database.AppApplicationRepository;
+import com.cmsr.onebase.module.app.core.dal.database.AppApplicationTagRepository;
+import com.cmsr.onebase.module.app.core.dal.database.AppSqlQueryRepository;
+import com.cmsr.onebase.module.app.core.dal.database.AppTagRepository;
+import com.cmsr.onebase.module.app.core.dal.dataobject.ApplicationDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.ApplicationTagDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.TagDO;
 import jakarta.annotation.Resource;
 import lombok.Setter;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.DataRow;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -88,7 +91,7 @@ public class AppApplicationApiImpl implements AppApplicationApi {
         Map<Long, List<TagVO>> tagListMap = new HashMap<>();
         Map<Long, List<Long>> listMap = findTagIdsByApplicationIdsGrouped(appIds);
         listMap.forEach((appId, tagIds) -> {
-            List<TagDO> tagDOList = tagRepository.findAllByIds(tagIds);
+            List<TagDO> tagDOList = tagRepository.listByIds(tagIds);
             List<TagVO> tagVOList = tagDOList.stream()
                     .map(tagDO -> BeanUtils.toBean(tagDO, TagVO.class))
                     .collect(Collectors.toList());
@@ -106,6 +109,5 @@ public class AppApplicationApiImpl implements AppApplicationApi {
                         Collectors.mapping(ApplicationTagDO::getTagId, Collectors.toList())
                 ));
     }
-
 
 }
