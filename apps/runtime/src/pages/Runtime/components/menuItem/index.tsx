@@ -1,8 +1,6 @@
 import { menuSignal } from '@onebase/app';
 import { useSignals } from '@preact/signals-react/runtime';
 import React from 'react';
-import DynamicIcon from '../DynamicIcon';
-import { menuIconList } from '../DynamicIcon/const';
 import styles from './index.module.less';
 import { webMenuIcons } from '@onebase/ui-kit';
 
@@ -38,14 +36,14 @@ const RuntimeMenuItem: React.FC<MenuItemProps> = ({ label, menuID, menuIcon, onC
           style={{
             width: 'auto',
             height: '18px',
-             marginRight: 16,
+            marginRight: 16,
             color: curMenu.value?.id === menuID ? 'rgb(var(--primary-6))' : '#333',
             fill: curMenu.value?.id === menuID ? 'rgb(var(--primary-6))' : '#333'
           }}
           src={allWebMenuIcons.find((ele) => ele.code === menuIcon)?.icon}
           alt=""
         />
-       
+
         {/* xxx-taskicon 是工作流程任务中心菜单的icon */}
         {menuIcon.indexOf('-taskicon') > 0 && <i className={`iconfont ${menuIcon}`} style={{ marginRight: '16px' }} />}
         <span style={{ color: curMenu.value?.id === menuID ? 'rgb(var(--primary-6))' : '#333' }}>{label}</span>
