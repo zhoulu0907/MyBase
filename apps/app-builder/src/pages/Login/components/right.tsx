@@ -45,15 +45,17 @@ const Right: React.FC = () => {
       accountForm.setFieldValue('account', savedAccount);
     }
 
+    console.log('233333:   ', TokenManager.isTokenValid());
+
     // 如果已经登录了就自动跳转到首页
-    if (TokenManager.isTokenValid()) {
-      const redirectURL = getHashQueryParam('redirectURL');
-      if (redirectURL) {
-        window.location.href = redirectURL;
-      } else {
-        navigate('/onebase/enterprise-app');
-      }
-    }
+    // if (TokenManager.isTokenValid()) {
+    //   const redirectURL = getHashQueryParam('redirectURL');
+    //   if (redirectURL) {
+    //     window.location.href = redirectURL;
+    //   } else {
+    //     navigate('/onebase/enterprise-app');
+    //   }
+    // }
   }, []);
 
   // 处理记住我状态变化
