@@ -29,9 +29,8 @@ const DrawerHeader: React.FC<DrawerHeaderProps> = ({}) => {
           setCurDrawerTab(value as ETLDrawerTab);
         }}
       >
-        {curNode.value.flowNodeType !== ETLNodeType.INPUT_NODE && (
-          <Tabs.TabPane key={ETLDrawerTab.DATA_CONFIG} title="节点配置"></Tabs.TabPane>
-        )}
+        <Tabs.TabPane key={ETLDrawerTab.DATA_CONFIG} title="节点配置"></Tabs.TabPane>
+
         {curNode.value.flowNodeType === ETLNodeType.JOIN_NODE && (
           <Tabs.TabPane key={ETLDrawerTab.FIELD_CONFIG} title="字段设置"></Tabs.TabPane>
         )}

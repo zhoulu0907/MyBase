@@ -94,6 +94,7 @@ export interface ELTColumn {
   fieldFqn: string;
   fieldName: string;
   fieldType: string;
+  displayName: string;
 }
 
 export interface ETLDatasourceOption {

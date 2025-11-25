@@ -7,23 +7,11 @@
   height: 100%;
   background-color: #ffffff;
 
-  .left {
-    width: 240px;
+  .contentWrapper {
+    width: 100%;
     height: 100%;
 
-    .leftHeader {
-      width: 100%;
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: flex-start;
-      font-size: 14px;
-      font-weight: 500;
-      color: #000000;
-      box-sizing: border-box;
-    }
-
-    .leftContent {
+    .content {
       width: 100%;
       margin-bottom: 12px;
       display: flex;
@@ -132,71 +120,6 @@
             }
           }
         }
-      }
-    }
-  }
-
-  .right {
-    flex: 1;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: flex-start;
-    padding-left: 16px;
-
-    .rightHeader {
-      width: 100%;
-      display: flex;
-      flex-direction: row;
-      align-items: flex-start;
-      justify-content: space-between;
-
-      .rightHeaderTitle {
-        font-size: 14px;
-        font-weight: 500;
-        color: #000000;
-        box-sizing: border-box;
-      }
-
-      .rightHeaderSearch {
-        width: 200px;
-      }
-    }
-
-    .rightContent {
-      width: 100%;
-      height: 500px;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      justify-content: flex-start;
-      padding-top: 32px;
-      gap: 12px;
-      overflow-y: auto;
-      box-sizing: border-box;
-
-      // 设置自定义滚动条宽度和样式（含兼容性）
-      &::-webkit-scrollbar {
-        width: 5px;
-        background: transparent;
-      }
-      &::-webkit-scrollbar-thumb {
-        background: #e5e6eb;
-        border-radius: 3px;
-      }
-      &::-webkit-scrollbar-track {
-        background: transparent;
-      }
-
-      .columnItem {
-        width: 100%;
-        box-sizing: border-box;
-
-        font-size: 14px;
-        font-weight: 400;
-        line-height: 22px;
-        color: #1d2129;
       }
     }
   }
