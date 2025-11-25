@@ -1,5 +1,9 @@
-import { Button, Form, Input, InputNumber, Menu, Select, Switch } from '@arco-design/web-react';
-import { getSecurityConfigCategories, getSecurityConfigItems } from '@onebase/platform-center';
+import { Button, Form, Input, InputNumber, Menu, Message, Select, Switch } from '@arco-design/web-react';
+import {
+  batchUpdateSecurityConfigs,
+  getSecurityConfigCategories,
+  getSecurityConfigItems
+} from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
 
@@ -18,9 +22,8 @@ const WorkspaceSecurity: React.FC<WorkspaceSecurityProps> = ({}) => {
     setActiveMenuItem(id);
   };
 
-  //   TODO(mickey): 联调接口，获取配置项目和配置项
-  const handleSave = () => {
-    console.log('保存');
+  const handleUpdate = () => {
+    handleUpdateSecurityConfigs();
   };
 
   useEffect(() => {
@@ -31,6 +34,29 @@ const WorkspaceSecurity: React.FC<WorkspaceSecurityProps> = ({}) => {
     const res = await getSecurityConfigCategories();
 
     setCategories(res);
+    if (res.length > 0) {
+      setActiveMenuItem(res[0].id);
+    }
+  };
+
+  const handleUpdateSecurityConfigs = async () => {
+    // 将 form 的字段对象转成数组 [{ configKey, configValue }]
+    const fieldsObject = form.getFieldsValue();
+    const configsArray = Object.entries(fieldsObject).map(([configKey, configValue]) => ({
+      configKey,
+      configValue: Array.isArray(configValue) ? configValue.join(', ') : configValue.toString()
+    }));
+
+    try {
+      const res = await batchUpdateSecurityConfigs({
+        configs: configsArray
+      });
+      if (res) {
+        Message.success('更新配置成功');
+      }
+    } catch (error) {
+      console.error('更新配置失败', error);
+    }
   };
 
   useEffect(() => {
@@ -43,11 +69,23 @@ const WorkspaceSecurity: React.FC<WorkspaceSecurityProps> = ({}) => {
     const res = await getSecurityConfigItems(id);
 
     const tmpItemsData = (Array.isArray(res) ? res : []).reduce((acc: Record<string, any>, item: any) => {
-      if (item.configKey !== undefined) {
-        acc[item.configKey] = item.configValue;
+      if (item.widgetType === 'MULTISELECT') {
+        acc[item.configKey] = item.configValue
+          ? String(item.configValue)
+              .split(',')
+              .map((s: string) => s.trim())
+          : [];
+      } else if (item.widgetType === 'SWITCH') {
+        acc[item.configKey] = item.configValue === 'true';
+      } else {
+        if (item.configKey !== undefined) {
+          acc[item.configKey] = item.configValue;
+        }
       }
+
       return acc;
     }, {});
+
     form.setFieldsValue(tmpItemsData);
 
     setItemsData(res);
@@ -65,7 +103,7 @@ const WorkspaceSecurity: React.FC<WorkspaceSecurityProps> = ({}) => {
       <div className={styles.content}>
         <div className={styles.contentHeader}>
           <div className={styles.contentTitle}>配置项</div>
-          <Button type="primary" onClick={handleSave}>
+          <Button type="primary" onClick={handleUpdate}>
             更新配置
           </Button>
         </div>
@@ -82,11 +120,13 @@ const WorkspaceSecurity: React.FC<WorkspaceSecurityProps> = ({}) => {
                         extra={item.description}
                         rules={[
                           {
-                            required: item.required === 'true',
-                            message: `请输入${item.description}`,
+                            required: item.required == 'true',
+                            message: `请输入${item.description}`
+                          },
+                          {
                             type: 'number',
-                            min: Number(item.min),
-                            max: Number(item.max)
+                            min: Number(item.minValue),
+                            max: Number(item.maxValue)
                           }
                         ]}
                       >
@@ -120,6 +160,7 @@ const WorkspaceSecurity: React.FC<WorkspaceSecurityProps> = ({}) => {
                         label={item.configName}
                         extra={item.description}
                         rules={[{ required: item.required === 'true', message: `请输入${item.description}` }]}
+                        triggerPropName="checked"
                       >
                         <Switch />
                       </Form.Item>
