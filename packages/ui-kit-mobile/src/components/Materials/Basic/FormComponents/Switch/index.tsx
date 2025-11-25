@@ -1,16 +1,20 @@
-import { Switch, Form } from '@arco-design/mobile-react';
 import { memo } from 'react';
-import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { nanoid } from 'nanoid';
-import '../index.css';
+import { Switch, Form } from '@arco-design/mobile-react';
+import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES, FormSchema } from '@onebase/ui-kit';
 import './index.css';
-import { type XInputSwitchConfig } from './schema';
+import '../index.css';
 
-const XSwitch = memo((props: XInputSwitchConfig & { runtime?: boolean; detailMode?: boolean }) => {
+type XSwitchConfig = typeof FormSchema.XSwitchSchema.config;
+
+const XSwitch = memo((props: XSwitchConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const {
     label,
     dataField,
-    defaultValue,
+    status,
+    defaultValueConfig,
+    layout,
+    fillText,
     runtime = true,
     detailMode
   } = props;
@@ -25,29 +29,26 @@ const XSwitch = memo((props: XInputSwitchConfig & { runtime?: boolean; detailMod
     // 非只读模式，渲染Switch组件
     return (
       <Switch
-        platform="android"
-        triggerPropName="checked"
-        style={{
-          pointerEvents: runtime ? 'unset' : 'none'
-        }}
+        text={{ on: fillText?.display ? fillText.checkedText : '', off: fillText?.display ? fillText.uncheckedText : '' }}
       />
     );
   };
 
   return (
     <Form.Item
+      className="inputTextWrapper switchWrapper"
       field={fieldId}
       label={label.display ? label.text : undefined}
-      initialValue={defaultValue || false}
-      className="inputTextWrapper switchWrapper"
+      initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : ''}
       style={{
-        pointerEvents: (!runtime || detailMode) ? 'none' : 'unset'
+        pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
+        opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
       }}
     >
-      {!runtime || detailMode ? (
+      {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
         // 只读模式，渲染文本内容
         <div>
-          {defaultValue ? '开启' : '关闭'}
+          {/* {defaultValue ? '开启' : '关闭'} */}
         </div>
       ) : (
         renderContent()

@@ -71,7 +71,8 @@ const XInputText = memo((props: XInputTextConfig & { runtime?: boolean; detailMo
       label={label.display ? label.text : undefined}
       initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : ''}
       style={{
-        pointerEvents: (!runtime || detailMode) ? 'none' : 'unset'
+        pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
+        opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
       }}
     >
       {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (

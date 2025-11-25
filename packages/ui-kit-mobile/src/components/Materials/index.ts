@@ -17,7 +17,7 @@ export {
   getComponentSchema,
   getComponentWidth,
   hasComponentSchema,
-  schema
+  // schema
 } from './schema';
 export { allTemplate, COMPONENT_TYPE_DISPLAY_NAME_MAP } from './template';
 export { type EditConfig } from './types';

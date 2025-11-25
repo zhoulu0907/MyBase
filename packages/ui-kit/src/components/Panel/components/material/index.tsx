@@ -180,7 +180,7 @@ const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab, childC
                         ) : (
                           <ReactSortable
                             list={baseItems.find((c) => c.key === cat.key)?.items || []}
-                            setList={() => {}}
+                            setList={() => { }}
                             group={{
                               name: COMPONENT_GROUP_NAME,
                               pull: 'clone',
@@ -201,11 +201,11 @@ const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab, childC
                                 prev.map((c) =>
                                   c.key === cat.key
                                     ? {
-                                        ...c,
-                                        items: c.items.map((item) =>
-                                          item.type === cpType ? { ...item, id: `${e.item.id}` } : item
-                                        )
-                                      }
+                                      ...c,
+                                      items: c.items.map((item) =>
+                                        item.type === cpType ? { ...item, id: `${e.item.id}` } : item
+                                      )
+                                    }
                                     : c
                                 )
                               );

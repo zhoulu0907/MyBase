@@ -4,7 +4,7 @@ import { Input, Form } from '@arco-design/mobile-react';
 import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
 
 import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES, FormSchema } from '@onebase/ui-kit';
-type XInputEmailConfig = typeof FormSchema.XInputNumberSchema.config;
+type XInputEmailConfig = typeof FormSchema.XInputEmailSchema.config;
 import '../index.css';
 
 const XInputEmail = memo((props: XInputEmailConfig & { runtime?: boolean; detailMode?: boolean }) => {
@@ -49,7 +49,8 @@ const XInputEmail = memo((props: XInputEmailConfig & { runtime?: boolean; detail
       label={label.display ? label.text : undefined}
       initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : ''}
       style={{
-        pointerEvents: (!runtime || detailMode) ? 'none' : 'unset'
+        pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
+        opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
       }}
     >
       {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (

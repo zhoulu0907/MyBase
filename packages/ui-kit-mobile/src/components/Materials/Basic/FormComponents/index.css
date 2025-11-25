@@ -26,6 +26,7 @@
 
   .arco-form-item-control {
     padding: 0;
+    justify-content: flex-end;
   }
 
   .arco-form-item-message {

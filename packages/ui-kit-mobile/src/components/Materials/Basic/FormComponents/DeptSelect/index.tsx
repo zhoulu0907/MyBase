@@ -9,8 +9,10 @@ import IconSquareDisabled from '@arco-design/mobile-react/esm/icon/IconSquareDis
 
 import { formatDeptAndUsers } from './const';
 import deptIcon from '@/assets/images/dept_icon.svg';
-import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
-import type { XInputDeptSelectConfig } from './schema';
+
+import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, FormSchema } from '@onebase/ui-kit';
+type XDeptSelectConfig = typeof FormSchema.XDeptSelectSchema.config;
+
 import styles from './index.module.css';
 
 const squareIcon = {
@@ -26,36 +28,8 @@ interface DeptNode {
   children?: DeptNode[];
 }
 
-// 示例树形结构：一级/二级部门
-const treeData: DeptNode[] = [
-  {
-    key: 'node1',
-    title: 'Trunk',
-    children: [
-      {
-        key: 'node2',
-        title: 'Leaf'
-      }
-    ]
-  },
-  {
-    key: 'node3',
-    title: 'Trunk2',
-    children: [
-      {
-        key: 'node4',
-        title: 'Leaf'
-      },
-      {
-        key: 'node5',
-        title: 'Leaf'
-      }
-    ]
-  }
-];
-
-const XDeptSelect = memo((props: XInputDeptSelectConfig & { runtime?: boolean; detailMode?: boolean }) => {
-  const { label, dataField, tooltip, status, verify, layout, labelColSpan = 0, runtime = true, form } = props;
+const XDeptSelect = memo((props: XDeptSelectConfig & { runtime?: boolean; detailMode?: boolean }) => {
+  const { label, dataField, status, verify, layout, runtime = true, form } = props;
 
   const [visible, setVisible] = useState(false);
   const [popupDirection] = useState<'bottom' | 'top' | 'left' | 'right'>('bottom');
@@ -152,6 +126,10 @@ const XDeptSelect = memo((props: XInputDeptSelectConfig & { runtime?: boolean; d
         className="inputTextWrapper"
         label={deptData?.deptList.find(v => v.id === selectedKeys[0])?.name}
         field={fieldId}
+        style={{
+          pointerEvents: runtime ? 'unset' : 'none',
+          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
+        }}
       >
         <PopupSwiper visible={visible} close={(e) => handleCancel(e)} direction={popupDirection}>
           <div style={{ height: '100vh', width: '100vw', background: '#fff' }}>
