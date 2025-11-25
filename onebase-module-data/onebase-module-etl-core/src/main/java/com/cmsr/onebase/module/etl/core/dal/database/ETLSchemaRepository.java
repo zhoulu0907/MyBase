@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.etl.core.dal.database;
 
-import com.cmsr.onebase.framework.mybatis.BaseTenantRepository;
+import com.cmsr.onebase.framework.orm.mybatis.BaseTenantRepository;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLSchemaDO;
 import com.cmsr.onebase.module.etl.core.dal.mapper.ETLSchemaMapper;
 import com.mybatisflex.core.query.QueryWrapper;

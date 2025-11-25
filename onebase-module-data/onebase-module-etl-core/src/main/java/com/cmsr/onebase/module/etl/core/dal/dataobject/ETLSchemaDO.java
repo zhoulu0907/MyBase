@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.etl.core.dal.dataobject;
 
 
-import com.cmsr.onebase.framework.data.BaseTenantEntity;
+import com.cmsr.onebase.framework.orm.data.BaseTenantEntity;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
 import lombok.Data;
