@@ -244,7 +244,7 @@ const MyAppPage: React.FC = () => {
   };
 
   const getBaseUrl = () => {
-    const baseUrl = window.location.href.replace(/my-app.*$/, '');
+    const baseUrl = window.location.href.replace(/enterprise-app.*$/, '');
     return baseUrl;
   };
 

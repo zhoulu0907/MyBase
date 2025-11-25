@@ -476,7 +476,8 @@ const AppManagement: React.FC = () => {
                                 <>
                                   <Avatar>{item?.userPhotoList?.length}</Avatar>
                                   <Typography.Text type='secondary'>{item?.createUser}等{item?.userPhotoList?.length}人开发</Typography.Text>
-                                </>
+                                </> || 
+                                <Typography.Text type='secondary'>{item?.createUser}</Typography.Text>
                               }
                           </AvatarGroup>
                         </>

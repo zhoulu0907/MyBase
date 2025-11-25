@@ -109,7 +109,7 @@ const DepartmentModal: React.FC<DepartmentModalProps> = (props) => {
           </Col>
 
           <Col span={12}>
-            <FormItem label="管理员" field="leaderUserId" rules={[{ required: true, message: '请选择管理员' }]}>
+            <FormItem label="管理员" field="leaderUserId">
               <Select
                 placeholder={hasUserQueryPermission ? "请选择管理员" : "无权限"}
                 allowClear
@@ -146,12 +146,6 @@ const DepartmentModal: React.FC<DepartmentModalProps> = (props) => {
                   </Select.Option>
                 ))}
               </Select>
-            </FormItem>
-          </Col>
-
-          <Col span={12}>
-            <FormItem label="用户数量" field="userCount" rules={[{ required: true, message: '请输入用户数量' }]}>
-              <Input placeholder="请输入用户数量" />
             </FormItem>
           </Col>
         </Row>

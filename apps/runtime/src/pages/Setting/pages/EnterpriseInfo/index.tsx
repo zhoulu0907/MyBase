@@ -283,7 +283,9 @@ const SpaceInfo: React.FC = () => {
         onOk={handleRenameSubmit}
         onCancel={() => setRenameVisible(false)}
       >
-        <Form form={form} layout="vertical">
+        <Form form={form} layout="vertical" initialValues={{
+          newName: enterpriseInfo.corpName || ""
+        }}>
           <Form.Item label="新的企业名称" field="newName" rules={[{ required: true, message: '请输入新的企业名称' }]}>
             <Input placeholder="请输入新的企业名称" />
           </Form.Item>
