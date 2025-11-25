@@ -23,9 +23,6 @@ const DynamicDefaultValueConfig: React.FC<DynamicDefaultValueConfigProps> = ({
   const [defaultValueConfig, setDefaultValueConfig] = useState({
     type: '',
     customValue: undefined,
-    customDateValue: undefined,
-    customDateTimeValue: undefined,
-    customTimeValue: undefined
   });
 
   useEffect(() => {
