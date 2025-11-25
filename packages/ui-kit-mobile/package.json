@@ -10,9 +10,11 @@
   },
   "dependencies": {
     "@arco-design/mobile-react": "^2.38.2",
+    "@arco-design/mobile-utils": "^2.23.2",
     "@icon-park/react": "^1.4.2",
     "@onebase/app": "workspace:*",
     "@onebase/common": "workspace:*",
+    "@onebase/ui-kit": "workspace:*",
     "@onebase/platform-center": "workspace:*",
     "@preact/signals-react": "^3.2.1",
     "@types/lodash-es": "^4.17.12",

@@ -164,26 +164,6 @@ export interface IWidthConfigType<KeyType> {
   }>;
 }
 
-// 默认值配置
-export interface IDefaultValueConfigType {
-  key: string;
-  name: string;
-  type: typeof CONFIG_TYPES.DEFAULT_VALUE_SELECT;
-  range: Array<{
-    key: string;
-    text: string;
-    value: KeyType;
-  }>;
-}
-
-// 默认值输入配置
-export interface IDefaultValueInputConfigType {
-  key: string;
-  name: string;
-  type: typeof CONFIG_TYPES.DEFAULT_VALUE_INPUT;
-  placeholder?: string;
-}
-
 // 是否必填配置
 export interface IRequiredCheckboxConfigType {
   key: string;
@@ -342,6 +322,12 @@ export interface ISelectOptionsConfigType {
   type: typeof CONFIG_TYPES.SELECT_OPTIONS_INPUT;
   placeholder?: string;
 }
+export interface IMutipleSelectOptionsConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.MUTIPLE_SELECT_OPTIONS_INPUT;
+  placeholder?: string;
+}
 
 // 数据选择 数据源
 export interface ISelectDataSourceConfigType {
@@ -425,4 +411,60 @@ export interface IAutoCodeConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.AUTO_CODE_RULES;
+}
+
+export interface IImageHandleConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.IMAGE_HANDLE;
+}
+
+// 日期格式
+export interface IDateFormatConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.DATE_FORMAT;
+  range?: Array<{
+    label: string;
+    value: KeyType;
+  }>;
+}
+
+// 日期可选范围
+export interface IDateRangeConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.DATE_RANGE;
+}
+
+// 时间格式
+export interface ITimeFormatConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.TIME_FORMAT;
+  range?: Array<{
+    label: string;
+    value: KeyType;
+  }>;
+}
+// 时间可选范围
+export interface ITimeRangeConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.TIME_RANGE;
+}
+
+
+// 填充文本 switch
+export interface ISwitchFillTextConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.SWITCH_FILL_TEXT;
+}
+
+// 默认值
+export interface IDefaultValueConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.DEFAULT_VALUE;
 }

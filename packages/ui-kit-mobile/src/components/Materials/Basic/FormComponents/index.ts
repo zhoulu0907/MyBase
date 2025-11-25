@@ -21,29 +21,6 @@ import XDeptSelect from './DeptSelect';
 import XUserSelect from './UserSelect';
 import XSubTable from './SubTable';
 
-// ========== Schema导入区域 ==========
-import XInputTextSchema from './InputText/schema';
-import XInputTextAreaSchema from './InputTextArea/schema';
-import XInputEmailSchema from './InputEmail/schema';
-import XInputPhoneSchema from './InputPhone/schema';
-import XInputNumberSchema from './InputNumber/schema';
-import XDatePickerSchema from './DatePicker/schema';
-import XDateRangePickerSchema from './DateRangePicker/schema';
-import XDateTimePickerSchema from './DateTimePicker/schema';
-import XTimePickerSchema from './TimePicker/schema';
-import XSelectOneSchema from './SelectOne/schema';
-import XSelectMutipleSchema from './SelectMutiple/schema';
-import XCheckboxSchema from './Checkbox/schema';
-import XRadioSchema from './Radio/schema';
-import XSwitchSchema from './Switch/schema';
-import XImgUploadSchema from './ImgUpload/schema';
-import XCarouselSchema from './Carousel/schema';
-import XFileUploadSchema from './FileUpload/schema';
-import XAutoCodeSchema from './AutoCode/schema';
-import XDeptSelectSchema from './DeptSelect/schema';
-import XUserSelectSchema from './UserSelect/schema';
-import XSubTableSchema from './SubTable/schema';
-
 // ========== 导出对象 ==========
 export const FormComp = {
   XInputText,
@@ -67,28 +44,4 @@ export const FormComp = {
   XDeptSelect,
   XUserSelect,
   XSubTable
-} as const;
-
-export const FormSchema = {
-  XInputTextSchema,
-  XInputTextAreaSchema,
-  XInputEmailSchema,
-  XInputPhoneSchema,
-  XInputNumberSchema,
-  XDatePickerSchema,
-  XDateRangePickerSchema,
-  XDateTimePickerSchema,
-  XTimePickerSchema,
-  XSelectOneSchema,
-  XSelectMutipleSchema,
-  XCheckboxSchema,
-  XRadioSchema,
-  XSwitchSchema,
-  XImgUploadSchema,
-  XCarouselSchema,
-  XFileUploadSchema,
-  XAutoCodeSchema,
-  XDeptSelectSchema,
-  XUserSelectSchema,
-  XSubTableSchema
 } as const;

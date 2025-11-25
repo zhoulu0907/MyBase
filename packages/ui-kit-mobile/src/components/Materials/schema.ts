@@ -1,6 +1,6 @@
 import { cloneDeep } from 'lodash-es';
-import BasicSchema from './Basic/schema';
-import { ALL_COMPONENT_TYPES, type ComponentType } from './componentTypes';
+import { ALL_COMPONENT_TYPES, type ComponentType } from '@onebase/ui-kit';
+import * as BasicSchema from '@onebase/ui-kit';
 
 // 定义组件配置的类型
 export type ComponentSchema = typeof BasicSchema | any; // 可以根据需要扩展其他组件的类型

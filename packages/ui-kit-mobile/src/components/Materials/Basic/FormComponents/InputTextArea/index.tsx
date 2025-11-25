@@ -1,24 +1,23 @@
-import { Textarea, Form } from '@arco-design/mobile-react';
 import { memo } from 'react';
-import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { nanoid } from 'nanoid';
-import '../index.css';
+import { Textarea, Form } from '@arco-design/mobile-react';
+import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
+
+import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES, FormSchema } from '@onebase/ui-kit';
+type XInputTextAreaConfig = typeof FormSchema.XInputTextAreaSchema.config;
 import './index.css';
-import { type XInputTextAreaConfig } from './schema';
+import '../index.css';
 
 const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const {
     label,
     dataField,
     placeholder,
-    defaultValue,
+    defaultValueConfig,
     verify,
     align,
-    color,
-    bgColor,
+    status,
     minRows = 1,
-    maxRows,
-    maxLength,
     runtime = true,
     detailMode
   } = props;
@@ -36,53 +35,64 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; 
       <Textarea
         border="none"
         placeholder={placeholder}
-        maxLength={maxLength}
-        showStatistics={maxLength !== undefined}
-        statisticsMaxlength={maxLength}
-        autoSize={false}
+        maxLength={verify?.lengthLimit ? verify?.maxLength : undefined}
+        showStatistics={verify?.lengthLimit}
+        statisticsMaxlength={verify?.lengthLimit ? verify?.maxLength : undefined}
+        autosize={false}
         rows={minRows || 2}
         textareaStyle={{
-          height: 0.25 * (minRows || 2) + 'rem',
-          textAlign: align,
-          color: color
+          height: 0.25 * (minRows || 2) * 2 + 'rem',
+          textAlign: align
         }}
         style={{
-          width: '100%',
-          backgroundColor: bgColor || 'transparent',
-          color: color
+          width: '100%'
         }}
       />
     );
   };
 
-  // 简化验证规则，与InputText保持一致
-  const rules = verify ? [
-    { required: verify.required, message: '此项为必填项' }
-  ] : undefined;
+  const rules: ITypeRules<ValidatorType.Custom>[] = [
+    {
+      type: ValidatorType.Custom,
+      validator: (value, callback) => {
+        if (!value && verify?.required) {
+          callback(`${label.text}是必填项`);
+        }
+
+        if (value && verify?.lengthLimit) {
+          if (value.length < verify?.minLength!) {
+            callback(`字数不能小于${verify?.minLength}`);
+          } else if (value.length > verify?.maxLength!) {
+            callback(`字数不能大于${verify?.maxLength}`);
+          }
+        } else {
+          callback();
+        }
+      }
+    }
+  ];
 
   return (
     <Form.Item
+      className={`inputTextWrapper inputTextAreaWrapper ${verify?.lengthLimit ? 'showStatistics' : ''}`}
       field={fieldId}
-      label={label.display ? label.text : undefined}
-      initialValue={defaultValue || ''}
-      className={`inputTextWrapper inputTextAreaWrapper ${maxLength ? 'showStatistics' : ''}`}
       rules={rules}
+      label={label.display ? label.text : undefined}
+      initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : ''}
       style={{
         pointerEvents: (!runtime || detailMode) ? 'none' : 'unset'
       }}
     >
-      {!runtime || detailMode ? (
+      {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
         // 只读模式，渲染文本内容
         <div style={{
           textAlign: align,
-          color: color,
-          backgroundColor: bgColor || 'transparent',
           padding: '8px',
           whiteSpace: 'pre-wrap',
           wordBreak: 'break-word',
           minHeight: `${minRows * 24 + 16}px`
         }}>
-          {defaultValue || '--'}
+          --
         </div>
       ) : (
         renderContent()

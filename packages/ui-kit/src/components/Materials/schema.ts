@@ -1,5 +1,5 @@
 import { cloneDeep } from 'lodash-es';
-import BasicSchema from './Basic/schema';
+import { baseSchema as BasicSchema } from './Basic/schema';
 import { ALL_COMPONENT_TYPES, type ComponentType } from './componentTypes';
 
 // 定义组件配置的类型

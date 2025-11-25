@@ -1,86 +1,50 @@
-import { Input } from '@arco-design/mobile-react';
-import { memo, useEffect, useState } from 'react';
-// import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { memo } from 'react';
+import { nanoid } from 'nanoid';
+import { Form, Input } from '@arco-design/mobile-react';
+import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, FormSchema } from '@onebase/ui-kit';
+type XautoCodeConfig = typeof FormSchema.XAutoCodeSchema.config;
 import './index.css';
-import { type XautoCodeConfig } from './schema';
 
 const XautoCode = memo((props: XautoCodeConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const {
     label,
     dataField,
-    tooltip,
     placeholder,
     status,
-    defaultValue,
-    verify,
-    align,
     layout,
-    color,
-    bgColor,
-    labelColSpan = 0,
     runtime = true,
     detailMode
   } = props;
 
-  // const { form } = Form.useFormContext();
-  const [fieldId, setFieldId] = useState('');
 
-  // const fieldValue = Form.useWatch(fieldId, form);
-
-  useEffect(() => {
-    if (dataField.length > 0) {
-      setFieldId(dataField[dataField.length - 1]);
-    }
-  }, [dataField]);
+  // 生成唯一的字段ID
+  const fieldId = dataField && dataField.length > 0
+    ? dataField[dataField.length - 1]
+    : `${FORM_COMPONENT_TYPES.INPUT_EMAIL}_${nanoid()}`;
 
   return (
     <div className="inputAutoWrapper">
-      <Input
-        readOnly={true}
+      <Form.Item
         label={label.display && label.text}
-        defaultValue={defaultValue}
-        placeholder={placeholder}
-        style={{
-          width: '100%',
-          color,
-          textAlign: align,
-          backgroundColor: bgColor,
-          pointerEvents: runtime ? 'unset' : 'none'
-        }}
-      />
-
-      {/* <Form.Item
-        label={label.display && label.text}
-        layout={layout}
-        rules={[{ required: verify?.required }]}
-        tooltip={tooltip}
-        labelCol={{
-          style: { width: labelColSpan, flex: 'unset' }
-        }}
-        wrapperCol={{ style: { flex: 1 } }}
-        hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
+        field={fieldId}
         style={{
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-          <div>{fieldValue || '--'}</div>
+          <div>--</div>
         ) : (
           <Input
             readOnly={true}
-            defaultValue={defaultValue}
             placeholder={placeholder}
             style={{
               width: '100%',
-              color,
-              textAlign: align,
-              backgroundColor: bgColor,
               pointerEvents: runtime ? 'unset' : 'none'
             }}
           />
         )}
-      </Form.Item> */}
+      </Form.Item>
     </div>
   );
 });
