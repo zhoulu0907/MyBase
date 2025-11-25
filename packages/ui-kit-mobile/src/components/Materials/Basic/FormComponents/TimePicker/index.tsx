@@ -1,33 +1,57 @@
+import { memo } from 'react';
 import { DatePicker, Form } from '@arco-design/mobile-react';
-import { memo, useState } from 'react';
-// import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-import type { XInputTimePickerConfig } from './schema';
+import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
+import { STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES, FormSchema } from '@onebase/ui-kit';
 import '../index.css';
 
-const XTimePicker = memo((props: XInputTimePickerConfig & { runtime?: boolean; detailMode?: boolean }) => {
-  const { label, tooltip, status, defaultValue, verify, layout, labelColSpan = 0, runtime = true, detailMode } = props;
+type XTimePickerConfig = typeof FormSchema.XTimePickerSchema.config;
+
+const XTimePicker = memo((props: XTimePickerConfig & { runtime?: boolean; detailMode?: boolean }) => {
+  const {
+    label,
+    status,
+    defaultValueConfig,
+    timeRange,
+    dateType,
+    use24Hours,
+    verify,
+    layout,
+    runtime = true,
+    detailMode
+  } = props;
+
+  const rules: ITypeRules<ValidatorType.Custom>[] = [
+    {
+      type: ValidatorType.Custom,
+      validator: (value, callback) => {
+        if (!value && verify?.required) {
+          callback(`${label.text}是必填项`);
+        }
+      }
+    }
+  ];
 
   return (
     <Form.Item
       className="inputTextWrapper"
-      field={''}
+      field=''
+      rules={rules}
       label={label.display && label.text}
       required={verify?.required}
+      initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : ''}
       style={{
-        textAlign: 'right'
+        textAlign: 'right',
+        pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
+        opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
       }}
     >
-      {!runtime || detailMode ? (
-        <div>{defaultValue || '--'}</div>
+      {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
+        <div>--</div>
       ) : (
         <DatePicker
           mode={"time"}
           title={label.text}
           maskClosable
-          contentStyle={{
-            width: '100%',
-            pointerEvents: runtime ? 'unset' : 'none'
-          }}
           formatter={(value, type) => {
             const map = {
               year: '年',

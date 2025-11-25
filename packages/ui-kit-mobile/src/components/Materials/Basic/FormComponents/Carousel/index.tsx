@@ -1,23 +1,24 @@
-import { Carousel } from '@arco-design/mobile-react';
 import { memo } from 'react';
-import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-import '../index.css';
+import { Carousel } from '@arco-design/mobile-react';
+import { STATUS_OPTIONS, STATUS_VALUES, FormSchema } from '@onebase/ui-kit';
 import styles from './index.module.css';
-import { type XCarouselConfig } from './schema';
+import '../index.css';
 
-const XCarousel = memo((props: XCarouselConfig & { runtime?: boolean }) => {
+type XCarouselConfig = typeof FormSchema.XCarouselFormSchema.config;
+
+const XCarousel = memo((props: XCarouselConfig & { runtime?: boolean; detailMode?: boolean; }) => {
   const {
     label,
     status,
     verify,
     layout,
     tooltip,
-    labelColSpan,
     autoplay,
     interval = 3,
     fillStyle,
     carouselConfig = [],
-    runtime
+    runtime,
+    detailMode
   } = props;
 
   return (
@@ -29,9 +30,9 @@ const XCarousel = memo((props: XCarouselConfig & { runtime?: boolean }) => {
         className={styles.carousel}
         autoPlay={autoplay}
         style={{
-          pointerEvents: runtime ? 'unset' : 'none'
+          pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
+          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
-        wrapStyle={{ width: `calc(100% - ${labelColSpan}px)` }}
       >
         {carouselConfig.map((img, index) => (
           <div className={styles.imageWrapper} key={index} onClick={() => window.open(img.url)}>

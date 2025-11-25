@@ -1,30 +1,24 @@
-import { DatePicker, Form } from '@arco-design/mobile-react';
+import { memo } from 'react';
 import { nanoid } from 'nanoid';
-import { memo, useState } from 'react';
-import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
-import { DATE_OPTIONS, DATE_VALUES } from '../../../constants';
-import '../index.css';
-import type { XInputDatePickerConfig } from './schema';
-import dayjs from 'dayjs';
+import { DatePicker, Form } from '@arco-design/mobile-react';
 import { ItemType } from '@arco-design/mobile-react/cjs/date-picker';
+import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
+import { FORM_COMPONENT_TYPES, DATE_OPTIONS, DATE_VALUES, STATUS_OPTIONS, STATUS_VALUES, FormSchema } from '@onebase/ui-kit';
+type XDatePickerConfig = typeof FormSchema.XDatePickerSchema.config;
+import '../index.css';
 
-const XDatePicker = memo((props: XInputDatePickerConfig & { runtime?: boolean; detailMode?: boolean }) => {
+const XDatePicker = memo((props: XDatePickerConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const {
-    cpName,
     label,
     dataField,
-    tooltip,
     status,
-    defaultValue,
     verify,
     dateType,
+    align,
     layout,
-    labelColSpan = 0,
     runtime = true,
     detailMode
   } = props;
-
-  const [pickerCurrentTs, setPickerCurrentTs] = useState(defaultValue ? dayjs(defaultValue).valueOf() : new Date().getTime());
 
   // 生成唯一的字段ID
   const fieldId = dataField && dataField.length > 0
@@ -35,33 +29,28 @@ const XDatePicker = memo((props: XInputDatePickerConfig & { runtime?: boolean; d
 
   // 根据日期类型渲染对应的日期选择器
   const renderDatePicker = () => {
-    let mode: ItemType[];
+    let mode: ItemType[] = [];
     switch (currentDateType) {
       case DATE_VALUES[DATE_OPTIONS.YEAR]:
-        mode = ['year'];
+        mode.push('year');
         break;
       case DATE_VALUES[DATE_OPTIONS.MONTH]:
-        mode = ['year', 'month'];
+        mode.push('year', 'month');
         break;
       case DATE_VALUES[DATE_OPTIONS.DATE]:
-        mode = ['year', 'month', 'date'];
+        mode.push('year', 'month', 'date');
         break;
       case DATE_VALUES[DATE_OPTIONS.FULL]:
-        mode = ['year', 'month', 'month', 'hour', 'minute', 'second'];
+        mode.push('year', 'month', 'month', 'hour', 'minute', 'second');
         break;
       default:
-        mode = ['date'];
-    }
-
-    const onPickerChange = (timestamp: number | [number, number]) => {
-      setPickerCurrentTs(timestamp);
-    }
+        mode.push('date');
+    };
 
     return (
       <DatePicker
         title={label.text}
         typeArr={mode}
-        currentTs={pickerCurrentTs}
         maskClosable
         formatter={(value, type) => {
           const map = {
@@ -74,21 +63,35 @@ const XDatePicker = memo((props: XInputDatePickerConfig & { runtime?: boolean; d
           };
           return `${value}${map[type] || ''}`;
         }}
-        onChange={onPickerChange}
       />
     )
   };
+
+  const rules: ITypeRules<ValidatorType.Custom>[] = [
+    {
+      type: ValidatorType.Custom,
+      validator: (value, callback) => {
+        if (!value && verify?.required) {
+          callback(`${label.text}是必填项`);
+        }
+      }
+    }
+  ];
 
   return (
     <Form.Item
       className="inputTextWrapper"
       field={fieldId}
+      rules={rules}
       label={label.display && label.text}
-      required={verify.required}
-      style={{ textAlign: 'right' }}
+      style={{
+        textAlign: align,
+        pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
+        opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
+      }}
     >
-      {!runtime || detailMode ? (
-        <div>{defaultValue || '--'}</div>
+      {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
+        <div>--</div>
       ) : (
         renderDatePicker()
       )}

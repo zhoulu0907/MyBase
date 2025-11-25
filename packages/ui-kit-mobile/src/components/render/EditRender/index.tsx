@@ -38,11 +38,11 @@ interface ComponentRenderProps {
  */
 const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pageComponentSchema, runtime }) => {
   // 获取组件配置
-      console.warn('aaaaaaaa==0000000==', cpType)
+  // console.warn('aaaaaaaa==0000000==', cpType)
 
   const componentConfig = getComponentConfig(pageComponentSchema, cpType);
-    console.warn('aaaaaaaa==1111==', componentConfig)
-    componentConfig.align = ALIGN_VALUES[ALIGN_OPTIONS.RIGHT];
+  // console.warn('aaaaaaaa==1111==', componentConfig)
+  componentConfig.align = ALIGN_VALUES[ALIGN_OPTIONS.RIGHT];
 
   // 渲染对应的组件
   const renderComponent = () => {
@@ -85,9 +85,9 @@ const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pag
         return <FormComp.XAutoCode cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case FORM_COMPONENT_TYPES.DEPT_SELECT:
         return <FormComp.XDeptSelect cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-      case FORM_COMPONENT_TYPES.DEPT_SELECT:
+      case FORM_COMPONENT_TYPES.USER_SELECT:
         return <FormComp.XUserSelect cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-      case FORM_COMPONENT_TYPES.DEPT_SELECT:
+      case FORM_COMPONENT_TYPES.SUB_TABLE:
         return <FormComp.XSubTable cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
 
       case LIST_COMPONENT_TYPES.TABLE:

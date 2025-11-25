@@ -1,22 +1,20 @@
 
-import { Form, Picker } from '@arco-design/mobile-react';
-import { nanoid } from 'nanoid';
 import { memo, useEffect, useState } from 'react';
-import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
-import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-import type { XInputUserSelectConfig } from './schema';
+import { nanoid } from 'nanoid';
+import { Form, Picker } from '@arco-design/mobile-react';
+import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
 import { getSimpleUserList, UserVO } from '@onebase/platform-center';
+import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, FormSchema } from '@onebase/ui-kit';
 import '../index.css';
 
-const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; detailMode?: boolean; defaultOptionsConfig?: any; }) => {
+type XUserSelectConfig = typeof FormSchema.XUserSelectSchema.config;
+const XUserSelect = memo((props: XUserSelectConfig & { runtime?: boolean; detailMode?: boolean; defaultOptionsConfig?: any; }) => {
   const {
     label,
     dataField,
-    tooltip,
     status,
     verify,
     layout,
-    labelColSpan = 0,
     defaultOptionsConfig,
     runtime = true,
     detailMode
@@ -38,18 +36,30 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
     setUserData(res);
   };
 
+  const rules: ITypeRules<ValidatorType.Custom>[] = [
+    {
+      type: ValidatorType.Custom,
+      validator: (value, callback) => {
+        if (!value && verify?.required) {
+          callback(`${label.text}是必填项`);
+        }
+      }
+    }
+  ];
+
   return (
     <Form.Item
       className="inputTextWrapper"
       label={label.display && label.text}
       field={fieldId}
-      required={verify?.required}
+      rules={rules}
       style={{
         textAlign: 'right',
-        pointerEvents: runtime ? 'unset' : 'none'
+        pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
+        opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
       }}
     >
-      {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || !runtime || detailMode ? (
+      {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
         /* todo */
         <div>{defaultOptionsConfig.defaultOptions.find((item: any) => item.value == '')?.label || '--'}</div>
       ) : (

@@ -1,41 +1,33 @@
-import { DatePicker, Form } from '@arco-design/mobile-react';
-import dayjs from 'dayjs';
+import { memo } from 'react';
 import { nanoid } from 'nanoid';
-import { memo, useEffect, useState } from 'react';
-import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
-import { DATE_OPTIONS, DATE_VALUES, STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-import '../index.css';
-import type { XInputDateRangePickerConfig } from './schema';
+import { DatePicker, Form } from '@arco-design/mobile-react';
+import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
 
-const XDateRangePicker = memo((props: XInputDateRangePickerConfig & { runtime?: boolean; detailMode?: boolean }) => {
+import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES, FormSchema } from '@onebase/ui-kit';
+type XDateRangePickerConfig = typeof FormSchema.XDateRangePickerSchema.config;
+
+import '../index.css';
+
+const XDateRangePicker = memo((props: XDateRangePickerConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const {
-    cpName,
     label,
+    align,
     dataField,
+    dateRange,
     status,
-    tooltip,
     verify,
     layout,
-    defaultValue,
-    labelColSpan = 0,
+    startDefaultValueConfig,
+    endDefaultValueConfig,
     dateType,
-    startTime,
-    endTime,
     runtime = true,
     detailMode
   } = props;
 
-  // const currentDateType = (dateType !== DATE_VALUES[DATE_OPTIONS.FULL] && dateType) || DATE_VALUES[DATE_OPTIONS.DATE];
-  const validStartTime = startTime && dayjs(startTime).valueOf() || Date.now();
-  const validEndTime = endTime && dayjs(endTime).add(1, 'year').valueOf() || Date.now();
-
-  const [fieldId, setFieldId] = useState('');
-
-  useEffect(() => {
-    if (dataField.length > 0) {
-      setFieldId(dataField[dataField.length - 1]);
-    }
-  }, [dataField]);
+  // 生成唯一的字段ID
+  const fieldId = dataField && dataField.length > 0
+    ? dataField[dataField.length - 1]
+    : `${FORM_COMPONENT_TYPES.INPUT_TEXT}_${nanoid()}`;
 
   // 根据是否为只读模式确定内容
   const renderContent = () => {
@@ -60,20 +52,36 @@ const XDateRangePicker = memo((props: XInputDateRangePickerConfig & { runtime?: 
     );
   };
 
+  const rules: ITypeRules<ValidatorType.Custom>[] = [
+    {
+      type: ValidatorType.Custom,
+      validator: (value, callback) => {
+        if (!value && verify?.required) {
+          callback(`${label.text}是必填项`);
+        }
+      }
+    }
+  ];
+
   return (
     <Form.Item
       className="inputTextWrapper"
       label={label.display && label.text}
       field={fieldId}
-      initialValue={[validStartTime, validEndTime]}
-      required={verify.required}
+      rules={rules}
+      initialValue={[
+        startDefaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? startDefaultValueConfig?.customValue : '',
+        endDefaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? endDefaultValueConfig?.customValue : ''
+      ]}
       style={{
-        textAlign: 'right'
+        textAlign: align,
+        pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
+        opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
       }}
     >
-      {!runtime || detailMode ? (
+      {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
         <div>
-          {startTime} - {endTime}
+          --
         </div>
       ) : (
         renderContent()

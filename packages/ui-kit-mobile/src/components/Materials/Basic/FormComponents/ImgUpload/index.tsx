@@ -1,14 +1,14 @@
-import { Uploader, Progress, Toast, ImagePreview, Loading, ImagePicker, Form } from '@arco-design/mobile-react';
+import { memo, useEffect, useState } from 'react';
+import { nanoid } from 'nanoid';
 import { IconDelete, IconClose, IconDownload, IconEyeVisible } from '@arco-design/mobile-react/esm/icon';
+import { Uploader, Progress, Toast, ImagePreview, Loading, ImagePicker, Form } from '@arco-design/mobile-react';
+import { getFieldById } from '@onebase/app';
 import { uploadFile } from '@onebase/platform-center';
 // import { downloadFileByUrl } from 'src/utils/downloadFile';
-import { nanoid } from 'nanoid';
-import { memo, useEffect, useState } from 'react';
-import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
-import { STATUS_OPTIONS, STATUS_VALUES, UPLOAD_VALUES, UPLOAD_OPTIONS } from '../../../constants';
+import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, UPLOAD_VALUES, UPLOAD_OPTIONS, FormSchema } from '@onebase/ui-kit';
 import './index.css';
-import type { XInputImgUploadConfig } from './schema';
-import { getFieldById } from '@onebase/app';
+
+type XImgUploadConfig = typeof FormSchema.XImgUploadSchema.config;
 
 // 定义文件项类型
 interface FileItem {
@@ -22,7 +22,7 @@ interface UploadListProps {
   onRemove?: (file: FileItem) => void;
 }
 
-const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; detailMode?: boolean; form?: any; }) => {
+const XImgUpload = memo((props: XImgUploadConfig & { runtime?: boolean; detailMode?: boolean; form?: any; }) => {
   const {
     label,
     dataField,

@@ -1,12 +1,11 @@
 import { memo } from 'react';
 import { nanoid } from 'nanoid';
 import { Checkbox, Form } from '@arco-design/mobile-react';
-import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
-import type { XInputSelectMutipleConfig } from './schema';
 import IconSquareChecked from '@arco-design/mobile-react/esm/icon/IconSquareChecked';
 import IconSquareUnchecked from '@arco-design/mobile-react/esm/icon/IconSquareUnchecked';
 import IconSquareDisabled from '@arco-design/mobile-react/esm/icon/IconSquareDisabled';
+import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
+import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, FormSchema } from '@onebase/ui-kit';
 import '../index.css';
 import './index.css';
 
@@ -16,18 +15,15 @@ const squareIcon = {
   disabled: <IconSquareDisabled />,
   activeDisabled: <IconSquareChecked />
 }
+type XSelectMutipleConfig = typeof FormSchema.XSelectMutipleSchema.config;
 
-const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: boolean; detailMode?: boolean }) => {
+const XSelectMutiple = memo((props: XSelectMutipleConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const {
     label,
     dataField,
-    tooltip,
     status,
     verify,
     layout,
-    labelColSpan = 0,
-    showSearch,
-    defaultOptions,
     defaultOptionsConfig,
     runtime = true,
     detailMode
@@ -40,18 +36,36 @@ const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: bool
 
   const options = defaultOptionsConfig?.defaultOptions?.map(({ label, value }: { label: string; value: string | number }) => ({ label, value }));
 
+  const rules: ITypeRules<ValidatorType.Custom>[] = [
+    {
+      type: ValidatorType.Custom,
+      validator: (value, callback) => {
+        if (value.length === 0 && verify?.required) {
+          callback(`${label.text}是必填项`);
+        }
+        if (value.length > verify?.maxChecked) {
+          callback(`选中数量不能大于${verify?.maxChecked}`);
+        } else {
+          callback();
+        }
+      }
+    }
+  ];
+
   return (
     <Form.Item
       className="inputTextWrapper"
       label={label.display && label.text}
       field={fieldId}
-      required={verify?.required}
+      rules={rules}
+      initialValue={defaultOptionsConfig?.defaultOptions.filter(ele => ele.isChosen)?.map(ele => ele.value)}
       style={{
-        pointerEvents: runtime ? 'unset' : 'none'
+        pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
+        opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
       }}
     >
-      {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || !runtime || detailMode ? (
-        <div>{defaultOptions || '--'}</div>
+      {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
+        <div>--</div>
       ) : (
         <Checkbox.Group
           className="selectCheckout"

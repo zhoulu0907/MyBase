@@ -2,32 +2,41 @@
   :global(.arco-collapse-header) {
     flex-direction: row-reverse;
     justify-content: flex-end;
+
     &::after {
       display: none;
     }
   }
+
   :global(.arco-collapse-content-container) {
     padding-top: 0;
     padding-bottom: 0;
   }
+
   :global(.arco-form-label-item) {
     display: none;
   }
+
   :global(.inputTextWrapper) {
     border: none !important;
   }
+
   :global(.arco-cell-group .cell-group-body.bordered::before) {
     transform: none;
   }
+
   :global(.arco-cell:not(:first-of-type).bordered::before) {
     transform: none;
   }
+
   :global(.arco-cell-group .cell-group-body.bordered::after) {
     transform: none;
   }
+
   :global(.arco-cell.without-group.bordered::after) {
     transform: none;
   }
+
   .collapseHeader {
     width: 100%;
     display: flex;
@@ -35,7 +44,7 @@
     justify-content: space-between;
     margin-left: 0.16rem;
   }
-  
+
 }
 
 .onAdd {
@@ -50,4 +59,5 @@
   align-items: center;
   justify-content: center;
   padding: 0.2rem 0;
+  margin: 0 auto;
 }

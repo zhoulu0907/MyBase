@@ -28,7 +28,7 @@ const XautoCode = memo((props: XautoCodeConfig & { runtime?: boolean; detailMode
         label={label.display && label.text}
         field={fieldId}
         style={{
-          margin: 0,
+          pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
       >
@@ -38,10 +38,6 @@ const XautoCode = memo((props: XautoCodeConfig & { runtime?: boolean; detailMode
           <Input
             readOnly={true}
             placeholder={placeholder}
-            style={{
-              width: '100%',
-              pointerEvents: runtime ? 'unset' : 'none'
-            }}
           />
         )}
       </Form.Item>

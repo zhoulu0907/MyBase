@@ -1,27 +1,35 @@
-import { Checkbox, Form, Tag } from '@arco-design/mobile-react';
+import { memo } from 'react';
 import { nanoid } from 'nanoid';
-import { memo, useEffect, useState } from 'react';
-import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
-import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-import type { XInputCheckboxConfig } from './schema';
+import { Checkbox, Form, Tag } from '@arco-design/mobile-react';
+import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
+import IconSquareChecked from '@arco-design/mobile-react/esm/icon/IconSquareChecked';
+import IconSquareUnchecked from '@arco-design/mobile-react/esm/icon/IconSquareUnchecked';
+import IconSquareDisabled from '@arco-design/mobile-react/esm/icon/IconSquareDisabled';
+import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, FormSchema } from '@onebase/ui-kit';
 import styles from './index.module.css';
+import '../index.css';
+
+type XCheckboxConfig = typeof FormSchema.XCheckboxSchema.config;
 const CheckboxGroup = Checkbox.Group;
 
-const XCheckbox = memo((props: XInputCheckboxConfig & { runtime?: boolean; detailMode?: boolean; defaultOptionsConfig?: any; }) => {
+const squareIcon = {
+  normal: <IconSquareUnchecked />,
+  active: <IconSquareChecked />,
+  disabled: <IconSquareDisabled />,
+  activeDisabled: <IconSquareChecked />,
+}
+
+const XCheckbox = memo((props: XCheckboxConfig & { runtime?: boolean; detailMode?: boolean; defaultOptionsConfig?: any; }) => {
   const {
-    cpName,
     label,
+    align,
     dataField,
-    tooltip,
     status,
-    defaultValue,
+    defaultOptionsConfig,
     verify,
     layout,
     direction,
-    labelColSpan = 0,
-    // allChecked,
     runtime = true,
-    defaultOptionsConfig,
     detailMode
   } = props;
 
@@ -34,29 +42,40 @@ const XCheckbox = memo((props: XInputCheckboxConfig & { runtime?: boolean; detai
       <CheckboxGroup
         className={styles.checkboxGroup}
         layout='block'
+        icons={squareIcon}
         defaultValue={defaultOptionsConfig?.defaultOptions?.filter((op) => op.chosen).map((op) => op.value)}
         options={defaultOptionsConfig?.defaultOptions}
-        style={{
-          pointerEvents: runtime ? 'unset' : 'none'
-        }}
       />
     );
   };
+
+  const rules: ITypeRules<ValidatorType.Custom>[] = [
+    {
+      type: ValidatorType.Custom,
+      validator: (value, callback) => {
+        if (!!value.length && verify?.required) {
+          callback(`${label.text}是必填项`);
+        }
+      }
+    }
+  ];
 
   return (
     <Form.Item
       className="inputTextWrapper"
       field={fieldId}
       label={label.display && label.text}
-      required={verify.required}
+      rules={rules}
+      initialValue={defaultOptionsConfig?.defaultOptions.filter(ele => ele.isChosen)?.map(ele => ele.value) || []}
       style={{
-        pointerEvents: (!runtime || detailMode) ? 'none' : 'unset'
+        textAlign: align || 'right',
+        pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
+        opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
       }}
     >
-      {!runtime || detailMode ? (
+      {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
         // 只读模式，渲染文本内容
-        <div style={{
-        }}>
+        <div>
           {defaultOptionsConfig?.defaultOptions.map((ele: any, index: number) => ele.isChosen && <Tag key={index}>
             {ele.label}
           </Tag>)}

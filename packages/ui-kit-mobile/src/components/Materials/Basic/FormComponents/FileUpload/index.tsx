@@ -4,11 +4,11 @@ import { IconDelete, IconClose, IconDownload, IconFile } from '@arco-design/mobi
 import { uploadFile } from '@onebase/platform-center';
 import { nanoid } from 'nanoid';
 import { memo, useState } from 'react';
-import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
-import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, FormSchema } from '@onebase/ui-kit';
 import '../index.css';
 import './index.css'
-import type { XInputFileUploadConfig } from './schema';
+
+type XFileUploadConfig = typeof FormSchema.XFileUploadSchema.config;
 
 // 定义文件项类型
 interface FileItem {
@@ -17,15 +17,13 @@ interface FileItem {
   file?: File;
 }
 
-const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; detailMode?: boolean; form?: any; }) => {
+const XFileUpload = memo((props: XFileUploadConfig & { runtime?: boolean; detailMode?: boolean; form?: any; }) => {
   const {
     label,
     dataField,
     status,
-    tooltip,
     verify,
     layout,
-    labelColSpan = 0,
     runtime = true,
     detailMode,
     form

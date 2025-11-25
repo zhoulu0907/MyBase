@@ -1,73 +1,64 @@
-import { Cell, Radio } from '@arco-design/mobile-react';
-// import { nanoid } from 'nanoid';
 import { memo } from 'react';
-// import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
-// import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-import type { XInputRadioConfig } from './schema';
-import styles from './index.module.css';
+import { nanoid } from 'nanoid';
+import { Form, Radio } from '@arco-design/mobile-react';
+import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
+import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, FormSchema } from '@onebase/ui-kit';
+import '../index.css';
 
+type XRadioConfig = typeof FormSchema.XRadioSchema.config;
 const RadioGroup = Radio.Group;
 
-const XRadio = memo((props: XInputRadioConfig & { runtime?: boolean; detailMode?: boolean }) => {
+const XRadio = memo((props: XRadioConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const {
     label,
     dataField,
-    tooltip,
     status,
-    defaultOptions,
+    defaultOptionsConfig,
     verify,
     layout,
-    labelColSpan = 0,
     direction,
-    runtime = true
+    runtime = true,
+    detailMode
   } = props;
 
+  // 生成唯一的字段ID
+  const fieldId = dataField && dataField.length > 0
+    ? dataField[dataField.length - 1]
+    : `${FORM_COMPONENT_TYPES.SWITCH}_${nanoid()}`;
+
+  const rules: ITypeRules<ValidatorType.Custom>[] = [
+    {
+      type: ValidatorType.Custom,
+      validator: (value, callback) => {
+        if (!value && verify?.required) {
+          callback(`${label.text}是必填项`);
+        }
+      }
+    }
+  ];
+
   return (
-    <div className="inputTextWrapper">
-      <Cell
-        label={label.display && label.text + 1}
-        className={styles.radioCell}
-      >
+    <Form.Item
+      className="inputTextWrapper"
+      label={label.display && label.text}
+      field={fieldId}
+      layout={layout}
+      rules={rules}
+      initialValue={defaultOptionsConfig?.defaultOptions.find(ele => ele.isChosen)?.value}
+      style={{
+        margin: 0,
+        pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
+        opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
+      }}
+    >
+      {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? (
+        <div>--</div>
+      ) : (
         <RadioGroup
-          options={defaultOptions}
-          defaultValue={defaultOptions?.find((op) => op.chosen)?.value}
-          style={{
-            pointerEvents: runtime ? 'unset' : 'none'
-          }}
+          options={defaultOptionsConfig?.defaultOptions}
         />
-      </Cell>
-
-
-      {/* <Form.Item
-        label={label.display && label.text}
-        field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.RADIO}_${nanoid()}`}
-        layout={layout}
-        tooltip={tooltip}
-        labelCol={{
-          style: { width: labelColSpan, flex: 'unset' }
-        }}
-        wrapperCol={{ style: { flex: 1 } }}
-        rules={[{ required: verify?.required }]}
-        hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
-        style={{
-          margin: 0,
-          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
-        }}
-      >
-        {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? (
-          <div>{defaultValue?.find((op) => op.chosen)?.label || '--'}</div>
-        ) : (
-          <RadioGroup
-            direction={direction}
-            options={defaultValue}
-            defaultValue={defaultValue?.find((op) => op.chosen)?.value}
-            style={{
-              pointerEvents: runtime ? 'unset' : 'none'
-            }}
-          />
-        )}
-      </Form.Item> */}
-    </div>
+      )}
+    </Form.Item>
   );
 });
 
