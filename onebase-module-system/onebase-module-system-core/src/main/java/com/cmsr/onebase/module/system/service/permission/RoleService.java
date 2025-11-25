@@ -149,5 +149,7 @@ public interface RoleService {
 
     RoleDO getRoleIdsByCodeAndTenantId(String code, Long id);
 
-    RoleDO getRoleByCodeIgnoreTenant(String code);
+    RoleDO getRoleByCode(String code);
+
+    boolean hasAnyDevloperAdmin(Collection<Long> roleIds);
 }
