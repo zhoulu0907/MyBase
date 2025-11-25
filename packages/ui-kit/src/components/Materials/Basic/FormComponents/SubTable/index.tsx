@@ -401,7 +401,10 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
           label.display &&
           label.text && (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-              <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
+              <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>
+                {verify?.required ? <span style={{ color: 'red', paddingRight: '4px' }}>*</span> : null}
+                {label.text}
+              </span>
               {!detailMode && (
                 <Button
                   type="outline"
@@ -418,7 +421,6 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
         }
         labelCol={{ span: 24 }}
         layout="vertical"
-        rules={[{ required: verify?.required, message:`${label.text}是必填项` }]}
         tooltip={tooltip}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
