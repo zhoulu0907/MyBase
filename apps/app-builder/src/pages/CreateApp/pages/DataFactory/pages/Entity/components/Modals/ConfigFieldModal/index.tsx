@@ -74,7 +74,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = memo(
         okText="保存"
         cancelText="取消"
         confirmLoading={fieldManager.submitting}
-        style={{ width: 1400 }}
+        style={{ width: 1260 }}
       >
         <Spin loading={fieldManager.loading} style={{ width: '100%' }}>
           <Form form={fieldManager.form} initialValues={{ fields: fieldManager.activeFields }} id="field-config-form">
