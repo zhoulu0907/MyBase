@@ -6,9 +6,10 @@ import EditIcon from '@/assets/images/edit_menu_icon.svg';
 import RenameIcon from '@/assets/images/edit_page_name_icon.svg';
 import HiddenIcon from '@/assets/images/eye_off_icon.svg';
 import VisibleIcon from '@/assets/images/eye_on_icon.svg';
+import SettingIcon from '@/assets/images/task_center/setting-on.svg';
 import { Dropdown, Menu, Message, Tooltip, type FormInstance } from '@arco-design/web-react';
 import { IconEyeInvisible, IconMoreVertical } from '@arco-design/web-react/icon';
-import { getPageSetId, menuSignal, PageType, RootParentPage, VisibleType, type GetPageSetIdReq } from '@onebase/app';
+import { getPageSetId, menuSignal, PageType, RootParentPage, VisibleType, MenuType, type GetPageSetIdReq } from '@onebase/app';
 import { EDITOR_TYPES, webMenuIcons } from '@onebase/ui-kit';
 import { pagesRuntimeSignal } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
@@ -35,6 +36,7 @@ interface MenuItemProps {
   label: string;
   menuIcon: string;
   isGroup: boolean;
+  menuType?: number;
   onClick?: () => void;
   triggerCreate?: (formType: string) => void;
   triggerRename?: () => void;
@@ -56,6 +58,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
   label,
   menuIcon,
   isGroup,
+  menuType,
   onClick,
   triggerCreate,
   triggerRename,
@@ -221,7 +224,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
     >
       <Tooltip content={menuName} position="top">
         <div className={styles.menuName}>
-          {menuIcon.indexOf('-taskicon') > 0 ? (
+          {menuIcon.includes('TASK-') ? (
             // xxx-taskicon 是工作流程任务中心菜单的icon
             <i className={`iconfont ${menuIcon}`} style={{ marginRight: '16px' }} />
           ) : (
@@ -269,10 +272,14 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
             trigger="click"
             position="bl"
           >
-            <IconMoreVertical className={styles.moreIcon} onClick={(e) => e.stopPropagation()} />
+            {menuType === MenuType.BPM ? (
+              <img src={SettingIcon} alt="" />
+            ) : (
+              <IconMoreVertical className={styles.moreIcon} onClick={(e) => e.stopPropagation()} />
+            )}
           </Dropdown>
         </div>
-      )}
+     )}
     </div>
   );
 };
