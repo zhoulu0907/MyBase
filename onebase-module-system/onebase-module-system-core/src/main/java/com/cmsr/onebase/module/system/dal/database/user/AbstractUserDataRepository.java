@@ -216,7 +216,9 @@ public abstract class AbstractUserDataRepository extends DataRepository<AdminUse
         if (reqVO.getKeyword() != null && !reqVO.getKeyword().trim().isEmpty()) {
             configStore.and(new DefaultConfigStore()
                     .or(Compare.LIKE, AdminUserDO.USERNAME, reqVO.getKeyword())
-                    .or(Compare.LIKE, AdminUserDO.EMAIL, reqVO.getKeyword()));
+                    .or(Compare.LIKE, AdminUserDO.EMAIL, reqVO.getKeyword()))
+                    .or(Compare.LIKE, AdminUserDO.MOBILE, reqVO.getKeyword())
+                    .or(Compare.LIKE, AdminUserDO.NICKNAME, reqVO.getKeyword());
         }
 
         // 用户名模糊查询
@@ -316,12 +318,18 @@ public abstract class AbstractUserDataRepository extends DataRepository<AdminUse
         return findPageWithConditions(configStore, reqVO.getPageNo(), reqVO.getPageSize());
     }
 
-    public List<AdminUserDO> findEnableUserByIds(Set<Long> userIds) {
+    public List<AdminUserDO> findEnableUserByIds(Set<Long> userIds,String keyword,Integer status) {
         DefaultConfigStore configStore = buildUserConfigStore();
         configStore.in(AdminUserDO.ID, userIds)
-                .eq(AdminUserDO.STATUS, UserStatusEnum.NORMAL.getStatus())
-                .order(AdminUserDO.ADMIN_TYPE, Order.TYPE.ASC)
-                .order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
+                .eq(AdminUserDO.STATUS, status)
+                .order(AdminUserDO.ADMIN_TYPE, Order.TYPE.ASC);
+        // 根据关键词模糊查询
+        if (StringUtils.isNotBlank(keyword)) {
+            configStore.and(new DefaultConfigStore()
+                    .or(Compare.LIKE, AdminUserDO.USERNAME, keyword)
+                    .or(Compare.LIKE, AdminUserDO.NICKNAME, keyword));
+        }
+        configStore.order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
         return findAllByConfig(configStore);
     }
 

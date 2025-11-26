@@ -768,7 +768,7 @@ public abstract class AbstractUserServiceImpl implements UserService {
     }
 
     @Override
-    public List<AdminUserDO> getPlatformAdminListByStatus(Integer status) {
+        public List<AdminUserDO> getPlatformAdminListByStatus(UserSearchReqVO userSearchReqVO) {
         // 获取平台管理员角色
         RoleDO platformAdminRole = roleService.getRoleIdsByCode(RoleCodeEnum.SUPER_ADMIN.getCode());
         if (platformAdminRole == null) {
@@ -782,7 +782,7 @@ public abstract class AbstractUserServiceImpl implements UserService {
         Set<Long> platformAdminUserIds = convertSet(userRoles, UserRoleDO::getUserId);
 
         // 获取所有指定状态的用户
-        List<AdminUserDO> users = getAdminUserDataRepository().findEnableUserByIds(platformAdminUserIds);
+        List<AdminUserDO> users = getAdminUserDataRepository().findEnableUserByIds(platformAdminUserIds,userSearchReqVO.getKeyword(),userSearchReqVO.getStatus());
         return users;
     }
 
