@@ -295,6 +295,7 @@ const EnterpriseAppPage: React.FC = () => {
                       onClick={() => {
                         navigate('/onebase/setting/application');
                       }}
+                      className={styles.linkText}
                     >
                       应用管理！
                     </Link>

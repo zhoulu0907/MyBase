@@ -1,13 +1,13 @@
-import { Button, Space, Tag } from "@arco-design/web-react";
+import { Button, Message, Space, Tag } from "@arco-design/web-react";
 import { CommonTable } from "../table/commonTable";
 import { TopHeader } from "../topHeader";
 import styles from "./authorizedApp.module.less"
-import type { AppItem, authorizedTimeGroup, IAuthorizedAppProps, OutletContextType } from "../../types/appItem";
+import type { AppItem, authorizedAppList, authorizedTimeGroup, IAuthorizedAppProps, OutletContextType } from "../../types/appItem";
 import {formatTimeYMDHMS} from "@onebase/common";
-import { type CorpAppParams, type updateAppParams } from "@onebase/platform-center";
+import { type CorpAppParams, type updateAppParams, getCorpAppSimpleListApi } from "@onebase/platform-center";
 import EditAuthorizedTime from "../modal/editAuthorizedTime";
 import { useState } from "react";
-import { useOutletContext } from "react-router-dom";
+import { useLocation, useOutletContext } from "react-router-dom";
 import { CreateAppModal } from "../modal/createAppModal";
 
 
@@ -15,11 +15,25 @@ export const AuthorizedApp:React.FC<IAuthorizedAppProps> = ({
     className, loading, tableData, pageination, visible,addAppModalVisible, setAddAppModalVisible,
     onChange, onSearch,onUpdateTime, setVisible, onRemoveAuthorizedApp, onSubmit
  }) => {
+    const location = useLocation();
     const { currentId } = useOutletContext<OutletContextType>();
     const [authorizedAppItem, setAuthorizedAppItem] = useState<AppItem | null>(null);
+    const [dropdownList, setDropdownList] = useState<authorizedAppList[]>([]);
+
+    const getApplicationIdResult = async() => {
+        try{
+            const res: authorizedAppList[]= await getCorpAppSimpleListApi(currentId);
+            setDropdownList(res ? res : [])
+        }catch(error) {
+            Message.error("获取列表失败")
+        }
+    }
 
     //点击创建应用打开modal
-    const handleAddApplication = () => {
+    const handleAddApplication = async() => {
+        if(!location.pathname?.includes('/create-enterprise')) {
+            await getApplicationIdResult();
+        }
         setAddAppModalVisible(true);
     }
 
@@ -136,7 +150,7 @@ export const AuthorizedApp:React.FC<IAuthorizedAppProps> = ({
         {/* 编辑授权应用 */}
         <EditAuthorizedTime visible={visible} setVisible={setVisible} onUpdateData={handleSubmitTime} initialFormData={authorizedAppItem}/>
         {/* 创建授权应用modal */}
-        <CreateAppModal currentId={currentId} visible={addAppModalVisible} tableData={tableData} onCloseAppModal={handleCloseModal} onSaveAppData={handleAddSubmit} />
+        <CreateAppModal dropdownList={dropdownList} visible={addAppModalVisible} tableData={tableData} onCloseAppModal={handleCloseModal} onSaveAppData={handleAddSubmit} />
         </>
     )
 }

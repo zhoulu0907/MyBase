@@ -1,8 +1,10 @@
 import { Message, Tabs, Form, Select, Input, Button, Upload, Spin, Image } from '@arco-design/web-react';
-import { getLoginedUser, updateLoginedUser, updateLoginedUserPwd, uploadFile } from '@onebase/platform-center';
+import { getLoginedUser, updateLoginedUser, updateLoginedUserPwd, uploadFile,getPermissionInfo, CodeType } from '@onebase/platform-center';
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './index.module.less';
+import { UserPermissionManager } from '@/utils/permission';
+import { userPermissionSignal } from '@/store/singals/user_permission';
 
 const TabPane = Tabs.TabPane;
 const { Item: FormItem } = Form;
@@ -161,6 +163,13 @@ const EditPage: React.FC = () => {
                         try {
                           const uploadImgUrl = await handleUpload(file, onProgress);
                           if (uploadImgUrl !== '') {
+                            const res:any = {
+                              ...userPermissionSignal.permissionInfo.value,
+                              user:{
+                                avatarUrl: "1"
+                              }
+                           };
+                           userPermissionSignal.setPermissionInfo(res);
                             setAvatarUrl(uploadImgUrl);
                             onSuccess(uploadImgUrl);
                           } else {

@@ -34,14 +34,14 @@ import styles from './index.module.less';
 
 const EnterpriseInfoPage: React.FC = () => {
   const { activeTab } = useParams();
-  const { currentId, industryOptions } = useOutletContext<OutletContextType>();
+  const { currentId, industryOptions, editable } = useOutletContext<OutletContextType>();
   const [addAppModalVisible, setAddAppModalVisible] = useState<boolean>(false);
   const uploadRef = useRef(null);
   const [isImageFailed, setIsImageFailed] = useState<boolean>(false);
   const [avatarUrl, setAvatarUrl] = useState<string>('');
   const [visible, setVisible] = useState<boolean>(false);
   const [currentTab, setCurrentTab] = useState(activeTab === '授权应用' ? 'authorized' : 'basic');
-  const [isEdited, setIsEdited] = React.useState(false);
+  const [isEdited, setIsEdited] = useState<boolean>(editable ? editable : false);
   const [tableData, setTableData] = useState<AppItem[]>([]);
   const [formData, setFormData] = useState<cropItem | null>(null);
   const [originalInfo, setOriginalInfo] = useState<cropItem | null>(null);
@@ -302,6 +302,30 @@ const EnterpriseInfoPage: React.FC = () => {
           isEdit={isEdited}
           component={Input}
           componentProps={{ placeholder: '请输入企业名称' }}
+        />
+      )
+    },
+    {
+      label: '企业管理员',
+      value: (
+        <EditableFormItem
+          value={formData?.adminName}
+          onChange={()=> null}
+          isEdit={isEdited}
+          component={Input}
+          componentProps={{ disabled: true }}
+        />
+      )
+    },
+    {
+      label: '手机号',
+      value: (
+        <EditableFormItem
+          value={formData?.adminMobile}
+          onChange={handleChange.bind(null, 'adminMobile')}
+          isEdit={isEdited}
+          component={Input}
+          componentProps={{ placeholder: '请输入手机号' }}
         />
       )
     },

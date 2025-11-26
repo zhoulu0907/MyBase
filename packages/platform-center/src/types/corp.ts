@@ -61,6 +61,7 @@ export interface corpListParams {
   pageNo: number;
   pageSize: number;
   corpId: string;
+  status?: number;
 }
 
 /**

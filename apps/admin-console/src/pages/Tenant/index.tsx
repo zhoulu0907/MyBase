@@ -277,7 +277,7 @@ const TenantManagement: React.FC = () => {
             <div className={styles.tenantItem} key={tenant.id}>
               <div className={styles.left}>
                 {tenant.logoUrl ? (
-                  <img className={styles.tenantLogo} src="" alt="" />
+                  <img className={styles.tenantLogo} src={tenant.logoUrl} alt="" />
                 ) : (
                   <div className={styles.tenantLogo}>{tenant?.name?.slice(0, 6)}</div>
                 )}

@@ -50,6 +50,10 @@ const BusinessPage: React.FC = () => {
             dataIndex: 'adminName',
         },
         {
+            title: '手机号',
+            dataIndex: 'adminMobile',
+        },
+        {
             title: '状态',
             dataIndex: 'status',
             render: (status: number) => <StatusTag status={status} />
@@ -66,6 +70,7 @@ const BusinessPage: React.FC = () => {
             render: (_: any, record: any) => (
                 <Space size={4}>
                     <Button size="small" type="text" onClick={handleEdit.bind(null, record, "basic")}>编辑</Button>
+                    <Button size="small" type="text" onClick={onReviewInfo.bind(null, record, "basic")}>查看</Button>
                     <Button size="small" type="text" onClick={handleEdit.bind(null, record, "authorized")}>应用授权</Button>
                     <Dropdown
                         trigger="click"
@@ -84,6 +89,7 @@ const BusinessPage: React.FC = () => {
     const isCreatePage = useMatch('onebase/setting/enterprise/create-enterprise');
     const [loading, setLoading] = useState<boolean>(false);
     const [editable, setEditable] = useState<boolean>(false);
+    const [displayInfo, setDisplayInfo] = useState<boolean>(false);
     const [searchValue, setSearchValue] = useState<string>("");
     const [tableData, setTableData] = useState<cropItem[]>([]);
     const [currentId, setCurrentId] = useState<string>("");
@@ -114,11 +120,12 @@ const BusinessPage: React.FC = () => {
         </>
     }
 
-    const fetchTableDataList = async(pageNo = 1, pageSize = 10) => {
+    const fetchTableDataList = async(pageNo = 1, pageSize = 10, status = null) => {
         setLoading(true);
         const params: corpListParams = {
             pageNo,
-            pageSize
+            pageSize,
+            status
         };
         try {
             const res = await getCorpListApi(params);
@@ -146,8 +153,8 @@ const BusinessPage: React.FC = () => {
 
     useEffect(() => {
         if(location.pathname === "/onebase/setting/enterprise") {
-            if(editable) {
-                setEditable(false);
+            if(displayInfo) {
+                setDisplayInfo(false);
             }
             fetchTableDataList();
             fetchIndustryType();
@@ -158,11 +165,25 @@ const BusinessPage: React.FC = () => {
         fetchTableDataList(current, pageSize);
     };
 
-    const handleEdit = (record:cropItem, activeTab: string) => {
-        setEditable(true);
+    const navigateInfo = (record:cropItem, activeTab: string) => {
         setCurrentId(record.id);
+        setDisplayInfo(true); //展示基本信息
         const encodedName = encodeURIComponent(record.corpName);
         navigate(`${encodedName}/${activeTab === "basic" ? "基本信息" : "授权应用"}`);
+    }
+
+    const onReviewInfo = (record:cropItem, activeTab: string) => {
+        setEditable(false); //查看是false
+        navigateInfo(record, activeTab);
+    }
+
+    const handleEdit = (record:cropItem, activeTab: string) => {
+        setEditable(true);//编辑是true
+        navigateInfo(record, activeTab);
+    }
+
+    const handleChangeStatus = (value: number | null) =>{
+        fetchTableDataList(pagination.current, pagination.pageSize, value as any)
     }
 
     //创建企业
@@ -269,15 +290,15 @@ const BusinessPage: React.FC = () => {
     );
 
     const renderContent = () => {
-        if (editable) {
-            return <Outlet context={{industryOptions, currentId}}/>
+        if (displayInfo) {
+            return <Outlet context={{industryOptions, currentId, editable }}/>
         }
         if (isCreatePage) {
             return <Outlet context={{industryOptions, currentId }}/>
         }
         return (
             <div className={styles.businessManagement}>
-                <TopHeader title="创建企业" onAdd={handleCreateBusiness} setSearchInputValue={handleSearchChange} />
+                <TopHeader title="创建企业" onchange={handleChangeStatus} onAdd={handleCreateBusiness} setSearchInputValue={handleSearchChange} />
                 <Table
                     loading={loading}
                     columns={businessManageColumns}

@@ -23,11 +23,22 @@ export const statusMapping:statusProps[] = [
     {label:"已过期", value: "expired", status: 2},
 ]
 
+export enum StatusEnum {
+    ALL = 2,
+    ENABLE = 1,
+    DISABLE = 0
+}
+
+export enum StatusEnumLabel {
+    ALl = "全部状态",
+    ENABLE = "已启用",
+    DISABLE = "已禁用"
+}
+
 export const statusOptions = [
-    { label: '全部状态', value: 'all' },
-    { label: '开发中', value: 'develop' },
-    { label: '迭代中', value: 'fixing' },
-    { label: '已发布', value: 'published' }
+    {label: StatusEnumLabel.ALl, value: StatusEnum.ALL },
+    { label: StatusEnumLabel.ENABLE, value: StatusEnum.ENABLE },
+    { label: StatusEnumLabel.DISABLE, value: StatusEnum.DISABLE },
 ]
 
 // 允许的文件格式列表
