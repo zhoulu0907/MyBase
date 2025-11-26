@@ -10,6 +10,7 @@ import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
@@ -22,6 +23,9 @@ public class MybatisFlexConfiguration implements MyBatisFlexCustomizer {
     private static final Logger logger = LoggerFactory.getLogger("orm-sql");
 
     private static final String SNOWFLAKE_ID_GENERATOR = "snowflake_id";
+
+    @Value("${mybatis-flex.print-sql:false}")
+    private boolean printSql = false;
 
     @Autowired
     private SnowflakeIdGenerator snowflakeIdGenerator;
@@ -55,7 +59,7 @@ public class MybatisFlexConfiguration implements MyBatisFlexCustomizer {
         defaultConfig.setKeyConfig(keyConfig);
 
         // SQL audit
-        AuditManager.setAuditEnable(true);
+        AuditManager.setAuditEnable(printSql);
         AuditManager.setMessageCollector(auditMessage ->
                 logger.info("{}, Time consumption: {} ms", auditMessage.getFullSql(), auditMessage.getElapsedTime())
         );
