@@ -7,7 +7,7 @@ import {
   // LayoutComp,
   ListComp,
   SHOW_COMPONENT_TYPES,
-  // ShowComp,
+  ShowComp,
   getComponentConfig
 } from 'src/components/Materials';
 import {
@@ -62,6 +62,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
   // })
   // console.warn('b11=======222====', componentConfig)
   componentConfig.align = ALIGN_VALUES[ALIGN_OPTIONS.RIGHT];
+  componentConfig.width = '100%';
   // 渲染对应的组件
   const renderComponent = () => {
     switch (cpType) {
@@ -305,11 +306,11 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
       case SHOW_COMPONENT_TYPES.FILE:
       // return <ShowComp.XFile cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case SHOW_COMPONENT_TYPES.TEXT:
-      //  return <ShowComp.XText cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+       return <ShowComp.XText cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case SHOW_COMPONENT_TYPES.WEB_VIEW:
       // return <ShowComp.XWebView cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case SHOW_COMPONENT_TYPES.DIVIDER:
-      // return <ShowComp.XDivider cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      return <ShowComp.XDivider cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case SHOW_COMPONENT_TYPES.PLACEHOLDER:
       // return <ShowComp.XPlaceholder cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
 

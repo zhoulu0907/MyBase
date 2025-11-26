@@ -103,7 +103,7 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
                     key={cp.id}
                     className={styles.componentItem}
                     style={{
-                      width: `calc(${getComponentWidth(listPageComponentSchemas.value[cp.id], cp.type)} - 8px)`,
+                      width: editMode.value === EditMode.MOBILE ? '100%' : `calc(${getComponentWidth(listPageComponentSchemas.value[cp.id], cp.type)} - 8px)`,
                       margin: '4px'
                     }}
                   >
@@ -140,7 +140,7 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
                   </MobileForm>
                 ) : (
                   <Form layout="inline">
-                    {getFormContent()}
+                    {getFormContent(false)}
                   </Form>
                 )}
               </div>
