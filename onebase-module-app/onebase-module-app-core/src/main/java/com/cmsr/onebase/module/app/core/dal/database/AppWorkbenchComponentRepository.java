@@ -1,7 +1,8 @@
-package com.cmsr.onebase.module.app.core.dal.database.appresource;
+package com.cmsr.onebase.module.app.core.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.workbench.WorkbenchComponentDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.WorkbenchComponentDO;
+import com.cmsr.onebase.module.app.core.dal.mapper.WorkbenchComponentMapper;
+import com.mybatisflex.spring.service.impl.ServiceImpl;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Order;
@@ -10,11 +11,8 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public class AppWorkbenchComponentRepository extends DataRepository<WorkbenchComponentDO> {
+public class AppWorkbenchComponentRepository extends ServiceImpl<WorkbenchComponentMapper, WorkbenchComponentDO> {
 
-    public AppWorkbenchComponentRepository() {
-        super(WorkbenchComponentDO.class);
-    }
 
     public void deleteComponentByPageId(Long pageId) {
         ConfigStore configs = new DefaultConfigStore();

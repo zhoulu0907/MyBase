@@ -1,17 +1,16 @@
-package com.cmsr.onebase.module.app.core.dal.database.appresource;
+package com.cmsr.onebase.module.app.core.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.workbench.WorkBenchPageDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.WorkBenchPageDO;
+import com.cmsr.onebase.module.app.core.dal.mapper.WorkBenchPageMapper;
+import com.mybatisflex.spring.service.impl.ServiceImpl;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+
 @Repository
-public class AppWorkbenchPageRepository extends DataRepository<WorkBenchPageDO> {
-    public AppWorkbenchPageRepository() {
-        super(WorkBenchPageDO.class);
-    }
+public class AppWorkbenchPageRepository extends ServiceImpl<WorkBenchPageMapper, WorkBenchPageDO> {
 
 
     public void updatePageName(Long pageId, String pageName) {
