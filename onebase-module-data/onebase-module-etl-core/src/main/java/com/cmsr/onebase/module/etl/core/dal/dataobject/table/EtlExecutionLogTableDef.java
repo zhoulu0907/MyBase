@@ -3,17 +3,15 @@ package com.cmsr.onebase.module.etl.core.dal.dataobject.table;
 import com.mybatisflex.core.query.QueryColumn;
 import com.mybatisflex.core.table.TableDef;
 
-import java.io.Serial;
 
 /**
  *  表定义层。
  *
- * @author HuangJie
- * @since 2025-11-22
+ * @author v1endr3
+ * @since 2025-11-26
  */
 public class EtlExecutionLogTableDef extends TableDef {
 
-    @Serial
     private static final long serialVersionUID = 1L;
 
     /**
@@ -37,6 +35,9 @@ public class EtlExecutionLogTableDef extends TableDef {
     public final QueryColumn UPDATER = new QueryColumn(this, "updater");
 
     
+    public final QueryColumn TENANT_ID = new QueryColumn(this, "tenant_id");
+
+    
     public final QueryColumn START_TIME = new QueryColumn(this, "start_time");
 
     
@@ -47,9 +48,6 @@ public class EtlExecutionLogTableDef extends TableDef {
 
     
     public final QueryColumn UPDATE_TIME = new QueryColumn(this, "update_time");
-
-    
-    public final QueryColumn WORKFLOW_ID = new QueryColumn(this, "workflow_id");
 
     
     public final QueryColumn LOCK_VERSION = new QueryColumn(this, "lock_version");
@@ -70,6 +68,9 @@ public class EtlExecutionLogTableDef extends TableDef {
     public final QueryColumn ERROR_MESSAGE = new QueryColumn(this, "error_message");
 
     
+    public final QueryColumn WORKFLOW_UUID = new QueryColumn(this, "workflow_uuid");
+
+    
     public final QueryColumn APPLICATION_ID = new QueryColumn(this, "application_id");
 
     /**
@@ -80,7 +81,7 @@ public class EtlExecutionLogTableDef extends TableDef {
     /**
      * 默认字段，不包含逻辑删除或者 large 等字段。
      */
-    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, APPLICATION_ID, WORKFLOW_ID, BUSINESS_DATE, START_TIME, END_TIME, DURATION_TIME, TRIGGER_TYPE, TRIGGER_USER, TASK_STATUS, ERROR_MESSAGE, DELETED, CREATOR, CREATE_TIME, UPDATER, UPDATE_TIME, LOCK_VERSION};
+    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, APPLICATION_ID, WORKFLOW_UUID, BUSINESS_DATE, START_TIME, END_TIME, DURATION_TIME, TRIGGER_TYPE, TRIGGER_USER, TASK_STATUS, ERROR_MESSAGE, DELETED, CREATOR, CREATE_TIME, UPDATER, UPDATE_TIME, LOCK_VERSION, TENANT_ID};
 
     public EtlExecutionLogTableDef() {
         super("", "etl_execution_log");

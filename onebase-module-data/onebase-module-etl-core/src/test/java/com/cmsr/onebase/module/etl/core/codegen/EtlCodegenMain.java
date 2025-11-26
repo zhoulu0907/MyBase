@@ -12,14 +12,14 @@ import com.zaxxer.hikari.HikariDataSource;
 public class EtlCodegenMain {
 
     //修改下面的各种参数
-//    private static final String DB_DRIVER = "org.postgresql.Driver";
-//    private static final String DB_URL = "jdbc:postgresql://10.0.104.38:5432/onebase_cloud_v3";
-//    private static final String DB_USERNAME = "postgres";
-//    private static final String DB_PASSWORD = "onebase@2025";
-    private static final String DB_DRIVER = "dm.jdbc.driver.DmDriver";
-    private static final String DB_URL = "jdbc:dm://10.0.104.50:5237/ONEBASE_CLOUD_V3?zeroDateTimeBehavior=convertToNull&useUnicode=true&characterEncoding=utf-8&schema=ONEBASE_CLOUD_V3";
-    private static final String DB_USERNAME = "ONEBASE_CLOUD_V3";
-    private static final String DB_PASSWORD = "Onebase2025";
+    private static final String DB_DRIVER = "org.postgresql.Driver";
+    private static final String DB_URL = "jdbc:postgresql://10.0.104.38:5432/onebase_cloud_v3";
+    private static final String DB_USERNAME = "postgres";
+    private static final String DB_PASSWORD = "onebase@2025";
+//    private static final String DB_DRIVER = "dm.jdbc.driver.DmDriver";
+//    private static final String DB_URL = "jdbc:dm://10.0.104.50:5237/ONEBASE_CLOUD_V3?zeroDateTimeBehavior=convertToNull&useUnicode=true&characterEncoding=utf-8&schema=ONEBASE_CLOUD_V3";
+//    private static final String DB_USERNAME = "ONEBASE_CLOUD_V3";
+//    private static final String DB_PASSWORD = "Onebase2025";
 
     private static final String[] tables = new String[]{
             "etl_catalog",

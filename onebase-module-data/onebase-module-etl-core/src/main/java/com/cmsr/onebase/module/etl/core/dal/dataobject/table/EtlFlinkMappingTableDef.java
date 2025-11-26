@@ -3,17 +3,15 @@ package com.cmsr.onebase.module.etl.core.dal.dataobject.table;
 import com.mybatisflex.core.query.QueryColumn;
 import com.mybatisflex.core.table.TableDef;
 
-import java.io.Serial;
 
 /**
  *  表定义层。
  *
- * @author HuangJie
- * @since 2025-11-22
+ * @author v1endr3
+ * @since 2025-11-26
  */
 public class EtlFlinkMappingTableDef extends TableDef {
 
-    @Serial
     private static final long serialVersionUID = 1L;
 
     /**

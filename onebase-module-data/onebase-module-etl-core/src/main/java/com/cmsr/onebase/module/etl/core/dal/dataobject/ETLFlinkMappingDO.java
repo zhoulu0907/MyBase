@@ -1,21 +1,20 @@
 package com.cmsr.onebase.module.etl.core.dal.dataobject;
 
 import com.cmsr.onebase.framework.orm.entity.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Table;
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Table;
 import lombok.Data;
 
 @Data
-@Table(name = "etl_flink_mapping")
-@com.mybatisflex.annotation.Table("etl_flink_mapping")
+@Table(value = "etl_flink_mapping")
 public class ETLFlinkMappingDO extends BaseEntity {
 
-    @Column(name = "datasource_type")
+    @Column(value = "datasource_type")
     private String datasourceType;
 
-    @Column(name = "origin_type")
+    @Column(value = "origin_type")
     private String originType;
 
-    @Column(name = "flink_type")
+    @Column(value = "flink_type")
     private String flinkType;
 }

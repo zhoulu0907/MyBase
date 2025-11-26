@@ -13,8 +13,8 @@ import java.time.LocalDateTime;
 @Table(value = "etl_datasource")
 public class ETLDatasourceDO extends BaseAppEntity {
 
-    @Column(value = "datasource_code")
-    private String datasourceCode;
+    @Column(value = "datasource_uuid")
+    private String datasourceUuid;
 
     @Column(value = "datasource_name")
     private String datasourceName;

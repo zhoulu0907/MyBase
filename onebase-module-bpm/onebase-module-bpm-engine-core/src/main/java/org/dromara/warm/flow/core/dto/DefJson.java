@@ -201,7 +201,10 @@ public class DefJson {
                             .setNowNodeCode(skip.getNowNodeCode())
                             .setNextNodeCode(skip.getNextNodeCode())
                             .setCreateBy(skip.getCreateBy())
-                            .setUpdateBy(skip.getUpdateBy()));
+                            .setUpdateBy(skip.getUpdateBy())
+                            .setExt(skip.getExt())
+                            .setPriority(skip.getPriority())
+                    );
                 }
             }
 
@@ -261,7 +264,10 @@ public class DefJson {
                             .setNowNodeCode(skipJson.getNowNodeCode())
                             .setNextNodeCode(skipJson.getNextNodeCode())
                             .setCreateBy(skipJson.getCreateBy())
-                            .setUpdateBy(skipJson.getUpdateBy()));
+                            .setUpdateBy(skipJson.getUpdateBy())
+                            .setExt(skipJson.getExt())
+                            .setPriority(skipJson.getPriority())
+                    );
                 }
             }
 
