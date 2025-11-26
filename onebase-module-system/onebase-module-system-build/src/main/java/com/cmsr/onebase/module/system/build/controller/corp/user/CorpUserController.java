@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.system.build.controller.corp;
+package com.cmsr.onebase.module.system.build.controller.corp.user;
 
 import cn.hutool.core.collection.CollUtil;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
