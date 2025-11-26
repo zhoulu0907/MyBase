@@ -104,7 +104,7 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         List<Long> appIds = pageResult.getList().stream()
                 .map(AppApplicationDO::getId)
                 .collect(Collectors.toList());
-        Map<Long, List<AppUserPhotoDTO>> userListMap = appSqlQueryRepository.findUserPhotoList(appIds);
+        Map<Long, List<AppUserPhotoDTO>> userListMap = appAuthRoleRepository.findUserPhotoList(appIds);
 
         List<ApplicationRespVO> respVOS = pageResult.getList().stream()
                 .map(v -> {

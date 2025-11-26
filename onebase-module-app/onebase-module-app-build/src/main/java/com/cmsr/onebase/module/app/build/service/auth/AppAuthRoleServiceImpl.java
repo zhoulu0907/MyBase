@@ -124,7 +124,7 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
     @Override
     public PageResult<AuthRoleMembersPageRespVO> pageRoleMembers(AuthRoleMembersPageReqVO reqVO) {
         appCommonService.validateRoleExist(reqVO.getRoleId());
-        PageResult<RoleMemberDTO> result = appSqlQueryRepository.findRoleMembers(reqVO.getRoleId(), reqVO.getMemberName(), reqVO.getMemberType(), reqVO);
+        PageResult<RoleMemberDTO> result = appAuthRoleRepository.findRoleMembers(reqVO.getRoleId(), reqVO.getMemberName(), reqVO.getMemberType(), reqVO);
         List<AuthRoleMembersPageRespVO> voResult = result.getList().stream().map(v -> {
             AuthRoleMembersPageRespVO vo = new AuthRoleMembersPageRespVO();
             vo.setId(v.getId());
