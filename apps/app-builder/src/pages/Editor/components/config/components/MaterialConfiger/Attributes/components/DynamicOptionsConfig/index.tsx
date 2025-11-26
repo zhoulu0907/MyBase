@@ -154,7 +154,7 @@ const DynamicSelectConfig: React.FC<DynamicSelectConfigProps> = ({ handlePropsCh
               if (value === DEFAULT_OPTIONS_TYPE.CUSTOM) {
                 setSelectDisabled(false);
               }
-              handlePropsChange(selectKey, { ...configs[selectKey], type: value });
+              handlePropsChange(selectKey, { ...configs[selectKey], type: value, defaultOptions: [] });
             }}
             getPopupContainer={getPopupContainer}
             options={[

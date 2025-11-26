@@ -57,7 +57,7 @@ const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: bool
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
           <Space wrap size={[4,4]}>
-            {fieldValue && defaultOptionsConfig?.defaultOptions && typeof fieldValue === 'string' && fieldValue.split(', ').map((ele: any, index: number) => <Tag key={index} style={{ marginBottom: '0' }}>
+            {fieldValue && defaultOptionsConfig?.defaultOptions && typeof fieldValue === 'string' && fieldValue.split(',').map((ele: any, index: number) => <Tag key={index} style={{ marginBottom: '0' }}>
               {defaultOptionsConfig?.defaultOptions.find((e: any) => e.value === ele)?.label}
             </Tag>)}
           </Space>

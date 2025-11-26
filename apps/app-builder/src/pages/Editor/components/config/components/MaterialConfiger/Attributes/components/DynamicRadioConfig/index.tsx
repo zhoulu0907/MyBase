@@ -1,8 +1,20 @@
-import { Button, Form, Input, Radio, Space, Tooltip, Select } from '@arco-design/web-react';
+import {
+  Button,
+  Form,
+  Input,
+  Radio,
+  Space,
+  Tooltip,
+  Select,
+  ColorPicker,
+  Grid,
+  Switch,
+  Tag
+} from '@arco-design/web-react';
 import { IconDelete, IconDragDotVertical } from '@arco-design/web-react/icon';
 import React, { useEffect, useState } from 'react';
 import { registerConfigRenderer } from '../../registry';
-import { CONFIG_TYPES } from '@onebase/ui-kit';
+import { CONFIG_TYPES, COLOR_MODE_TYPES } from '@onebase/ui-kit';
 import { ReactSortable } from 'react-sortablejs';
 import styles from '../../index.module.less';
 import { useAppEntityStore, DEFAULT_OPTIONS_TYPE, getPopupContainer } from '@onebase/ui-kit';
@@ -51,6 +63,8 @@ const DynamicRadioConfig: React.FC<DynamicRadioConfigProps> = ({ handlePropsChan
             type: DEFAULT_OPTIONS_TYPE.DICT,
             disabled: true,
             dictTypeId: currentMainField.dictTypeId,
+            colorMode: true,
+            colorModeType: COLOR_MODE_TYPES.POINT,
             defaultOptions: dictOptions.map((e: any) => {
               if (configs[selectKey].defaultOptions?.length) {
                 const oldOption = configs[selectKey].defaultOptions.find((ele: any) => ele.value === e.value);
@@ -92,6 +106,8 @@ const DynamicRadioConfig: React.FC<DynamicRadioConfigProps> = ({ handlePropsChan
             type: DEFAULT_OPTIONS_TYPE.DICT,
             disabled: true,
             dictTypeId: currentSubField.dictTypeId,
+            colorMode: true,
+            colorModeType: COLOR_MODE_TYPES.POINT,
             defaultOptions: dictOptions.map((e: any) => {
               if (configs[selectKey].defaultOptions?.length) {
                 const oldOption = configs[selectKey].defaultOptions.find((ele: any) => ele.value === e.value);
@@ -132,7 +148,9 @@ const DynamicRadioConfig: React.FC<DynamicRadioConfigProps> = ({ handlePropsChan
       handlePropsChange(selectKey, {
         ...configs[selectKey],
         defaultOptions: dictOptions,
-        dictTypeId: dict.id
+        dictTypeId: dict.id,
+        colorMode: true,
+        colorModeType: COLOR_MODE_TYPES.POINT
       });
       setSelectDisabled(false);
     }
@@ -155,7 +173,7 @@ const DynamicRadioConfig: React.FC<DynamicRadioConfigProps> = ({ handlePropsChan
               if (value === DEFAULT_OPTIONS_TYPE.CUSTOM) {
                 setSelectDisabled(false);
               }
-              handlePropsChange(selectKey, { ...configs[selectKey], type: value, });
+              handlePropsChange(selectKey, { ...configs[selectKey], type: value, defaultOptions: [] });
             }}
             options={[
               { label: '自定义', value: DEFAULT_OPTIONS_TYPE.CUSTOM },
@@ -175,12 +193,16 @@ const DynamicRadioConfig: React.FC<DynamicRadioConfigProps> = ({ handlePropsChan
             <div className={styles.tableColumnList}>
               <ReactSortable
                 list={configs[selectKey].defaultOptions}
-                setList={() => { }}
+                setList={() => {}}
                 group={{
                   name: 'table-col-item'
                 }}
                 swap
-                sort={!configs[selectKey].disabled && !selectDisabled}
+                sort={
+                  !configs[selectKey].disabled &&
+                  !selectDisabled &&
+                  configs[selectKey].type !== DEFAULT_OPTIONS_TYPE.DICT
+                }
                 handle=".table-col-item-handle"
                 className={styles.componentCollapseContent}
                 forceFallback={true}
@@ -240,7 +262,11 @@ const DynamicRadioConfig: React.FC<DynamicRadioConfigProps> = ({ handlePropsChan
                         />
                         <Input
                           size="small"
-                          disabled={configs[selectKey].disabled || selectDisabled}
+                          disabled={
+                            configs[selectKey].disabled ||
+                            selectDisabled ||
+                            configs[selectKey].type === DEFAULT_OPTIONS_TYPE.DICT
+                          }
                           value={configs[selectKey].defaultOptions[idx].label}
                           onChange={(e) => {
                             const newList = [...configs[selectKey].defaultOptions];
@@ -254,23 +280,45 @@ const DynamicRadioConfig: React.FC<DynamicRadioConfigProps> = ({ handlePropsChan
                           className={styles.tableColumnItemInput}
                           placeholder={'新选项'}
                         />
-                        {!configs[selectKey].disabled && !selectDisabled && (
-                          <Button
-                            icon={<IconDelete />}
-                            shape="circle"
+                        {configs[selectKey]['colorMode'] && (
+                          <ColorPicker
                             size="mini"
-                            status="danger"
-                            disabled={configs[selectKey]?.defaultOptions?.length <= 2}
-                            className={styles.tableColumnItemButton}
-                            onClick={() => {
+                            disabled={
+                              configs[selectKey].disabled ||
+                              selectDisabled ||
+                              configs[selectKey].type === DEFAULT_OPTIONS_TYPE.DICT
+                            }
+                            value={configs[selectKey].defaultOptions[idx].colorType || 'rgb(var(--primary-7))'}
+                            onChange={(e) => {
                               const newList = [...configs[selectKey].defaultOptions];
-                              newList.splice(idx, 1);
+                              newList[idx] = {
+                                ...newList[idx],
+                                colorType: e
+                              };
                               const newConfig = { ...configs[selectKey], defaultOptions: newList };
                               handlePropsChange(selectKey, newConfig);
-                              remove(idx);
                             }}
-                          />
+                          ></ColorPicker>
                         )}
+                        {!configs[selectKey].disabled &&
+                          !selectDisabled &&
+                          configs[selectKey].type !== DEFAULT_OPTIONS_TYPE.DICT && (
+                            <Button
+                              icon={<IconDelete />}
+                              shape="circle"
+                              size="mini"
+                              status="danger"
+                              disabled={configs[selectKey]?.defaultOptions?.length <= 2}
+                              className={styles.tableColumnItemButton}
+                              onClick={() => {
+                                const newList = [...configs[selectKey].defaultOptions];
+                                newList.splice(idx, 1);
+                                const newConfig = { ...configs[selectKey], defaultOptions: newList };
+                                handlePropsChange(selectKey, newConfig);
+                                remove(idx);
+                              }}
+                            />
+                          )}
                       </Space>
                     </div>
                   </Tooltip>
@@ -305,6 +353,51 @@ const DynamicRadioConfig: React.FC<DynamicRadioConfigProps> = ({ handlePropsChan
             </div>
           )}
         </Form.List>
+        <Grid.Row gutter={8} style={{ marginTop: '4px' }}>
+          <Grid.Col span={6} style={{ color: 'var(--color-text-2)' }}>
+            彩色模式
+          </Grid.Col>
+          <Grid.Col span={4}>
+            <Switch
+              disabled={
+                configs[selectKey].disabled || selectDisabled || configs[selectKey].type === DEFAULT_OPTIONS_TYPE.DICT
+              }
+              size="small"
+              checked={configs[selectKey].colorMode}
+              onChange={(value) => {
+                handlePropsChange(selectKey, { ...configs[selectKey], colorMode: value });
+              }}
+            />
+          </Grid.Col>
+          <Grid.Col span={14}>
+            <Radio.Group
+              disabled={
+                configs[selectKey].disabled || selectDisabled || configs[selectKey].type === DEFAULT_OPTIONS_TYPE.DICT
+              }
+              value={configs[selectKey].colorModeType}
+              onChange={(value) => {
+                handlePropsChange(selectKey, { ...configs[selectKey], colorModeType: value });
+              }}
+            >
+              <Radio value={COLOR_MODE_TYPES.TAG} style={{ marginRight: '8px' }}>
+                <Tag color="rgb(var(--primary-7))">选项</Tag>
+              </Radio>
+              <Radio value={COLOR_MODE_TYPES.POINT} style={{ marginRight: '0' }}>
+                <span
+                  style={{
+                    width: '8px',
+                    height: '8px',
+                    borderRadius: '50%',
+                    background: 'rgb(var(--primary-7))',
+                    display: 'inline-block',
+                    marginRight: '8px'
+                  }}
+                ></span>
+                <span>选项</span>
+              </Radio>
+            </Radio.Group>
+          </Grid.Col>
+        </Grid.Row>
       </Form.Item>
       <SelectDictModal
         appId={curAppId}

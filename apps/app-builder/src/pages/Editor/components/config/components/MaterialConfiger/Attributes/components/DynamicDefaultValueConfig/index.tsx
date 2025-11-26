@@ -1,4 +1,4 @@
-import { Form, Select, Input, Button, Switch } from '@arco-design/web-react';
+import { Form, Select, Input, Button, Switch, DatePicker, TimePicker } from '@arco-design/web-react';
 import { useEffect, useState } from 'react';
 import { registerConfigRenderer } from '../../registry';
 import { CONFIG_TYPES } from '@onebase/ui-kit';
@@ -22,7 +22,7 @@ const DynamicDefaultValueConfig: React.FC<DynamicDefaultValueConfigProps> = ({
 
   const [defaultValueConfig, setDefaultValueConfig] = useState({
     type: '',
-    customValue: undefined
+    customValue: undefined,
   });
 
   useEffect(() => {
@@ -51,14 +51,43 @@ const DynamicDefaultValueConfig: React.FC<DynamicDefaultValueConfigProps> = ({
       {/* 自定义 */}
       {defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM && (
         <Form.Item layout="vertical" className={styles.formItem}>
-          {typeof defaultValueConfig?.customValue === 'boolean' ? (
-            <Switch checked={defaultValueConfig?.customValue} onChange={(value) => handleChange('customValue', value)} />
-          ) : (
+          {item.valueType === 'boolean' && (
+            <Switch
+              checked={defaultValueConfig?.customValue}
+              onChange={(value) => handleChange('customValue', value)}
+            />
+          )}
+          {item.valueType === 'string' && (
             <Input
               value={defaultValueConfig?.customValue}
               onChange={(value) => handleChange('customValue', value)}
               placeholder="请输入"
             />
+          )}
+          {item.valueType === 'date' && (
+            <DatePicker
+              style={{ width: '100%' }}
+              getPopupContainer={getPopupContainer}
+              format="YYYY-MM-DD"
+              onChange={(value) => handleChange('customDateValue', value)}
+            ></DatePicker>
+          )}
+          {item.valueType === 'dateTime' && (
+            <DatePicker
+              showTime
+              style={{ width: '100%' }}
+              getPopupContainer={getPopupContainer}
+              format="YYYY-MM-DD HH:mm:ss"
+              onChange={(value) => handleChange('customDateTimeValue', value)}
+            ></DatePicker>
+          )}
+          {item.valueType === 'time' && (
+            <TimePicker
+              style={{ width: '100%' }}
+              getPopupContainer={getPopupContainer}
+              format="HH:mm:ss"
+              onChange={(value) => handleChange('customTimeValue', value)}
+            ></TimePicker>
           )}
         </Form.Item>
       )}

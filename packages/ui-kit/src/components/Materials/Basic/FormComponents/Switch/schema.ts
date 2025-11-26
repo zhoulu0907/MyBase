@@ -142,7 +142,12 @@ const XSwitch: XInputSwitchSchema = {
     //  数据绑定
     ...dataFieldConfig,
     // 默认值
-    defaultValueConfig,
+    {
+      key: 'defaultValueConfig',
+      name: '默认值',
+      type: CONFIG_TYPES.DEFAULT_VALUE,
+      valueType: 'boolean'
+    },
     switchFillTextConfig,
     // 显示状态
     statusConfig,
