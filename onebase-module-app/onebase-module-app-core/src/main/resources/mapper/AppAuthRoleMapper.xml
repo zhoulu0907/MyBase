@@ -4,4 +4,25 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.cmsr.onebase.module.app.core.dal.mapper.AppAuthRoleMapper">
 
+    <select id="selectRoleUsers" resultType="com.cmsr.onebase.module.app.core.dto.auth.RoleMemberDTO">
+        select
+        aaru.id,
+        aaru.user_id AS member_id,
+        aaru.update_time,
+        -1 AS is_include_child,
+        d.name AS dept_name,
+        u.nickname AS member_name,
+        'user' AS member_type
+        from
+        app_auth_role_user aaru
+        left join system_users u on aaru.user_id = u.id and u.deleted = 0
+        left join system_dept d on u.dept_id = d.id
+        where
+        aaru.role_id = #{roleId}
+        <if test="memberName != null">
+            and u.nickname like '%'|| #{memberName} ||'%'
+        </if>
+        and aaru.deleted = 0
+    </select>
+
 </mapper>

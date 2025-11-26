@@ -1,9 +1,10 @@
 package com.cmsr.onebase.module.app.core.dal.mapper;
 
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthRoleDO;
 import com.cmsr.onebase.module.app.core.dto.auth.RoleMemberDTO;
 import com.mybatisflex.core.BaseMapper;
-import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthRoleDO;
-import com.mybatisflex.core.paginate.Page;
+
+import java.util.List;
 
 /**
  * 应用角色 映射层。
@@ -13,6 +14,6 @@ import com.mybatisflex.core.paginate.Page;
  */
 public interface AppAuthRoleMapper extends BaseMapper<AppAuthRoleDO> {
 
-    Page<RoleMemberDTO> selectRoleMembers(Page page, Long roleId, String memberName);
+    List<RoleMemberDTO> selectRoleUsers(Long roleId, String memberName);
 
 }
