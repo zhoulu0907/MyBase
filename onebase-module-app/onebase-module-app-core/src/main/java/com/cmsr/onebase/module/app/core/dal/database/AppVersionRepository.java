@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.app.core.dal.database;
 
 import com.cmsr.onebase.framework.common.pojo.PageParam;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.orm.mybatis.BaseAppRepository;
+import com.cmsr.onebase.framework.orm.repo.BaseAppRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.VersionDO;
 import com.cmsr.onebase.module.app.core.dal.mapper.AppVersionMapper;
 import com.mybatisflex.core.paginate.Page;

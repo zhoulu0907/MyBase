@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.app;
 
-import com.cmsr.onebase.framework.orm.data.BaseEntity;
+import com.cmsr.onebase.framework.orm.entity.BaseEntity;
 import com.mybatisflex.codegen.Generator;
 import com.mybatisflex.codegen.config.GlobalConfig;
 import com.zaxxer.hikari.HikariDataSource;
