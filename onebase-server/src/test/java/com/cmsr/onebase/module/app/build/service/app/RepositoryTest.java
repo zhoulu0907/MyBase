@@ -3,12 +3,14 @@ package com.cmsr.onebase.module.app.build.service.app;
 import com.cmsr.onebase.framework.common.pojo.PageParam;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.security.TenantContextHolder;
-import com.cmsr.onebase.module.app.core.dal.database.AppSqlQueryRepository;
 import com.cmsr.onebase.module.app.core.dal.database.AppMenuRepository;
+import com.cmsr.onebase.module.app.core.dal.database.AppSqlQueryRepository;
+import com.cmsr.onebase.module.app.core.dal.mapper.AppAuthRoleMapper;
 import com.cmsr.onebase.module.app.core.dto.auth.RoleMemberDTO;
 import com.cmsr.onebase.module.app.core.impl.auth.AppAuthRoleUserImpl;
 import com.cmsr.onebase.module.etl.core.dal.database.ETLWorkflowRepository;
 import com.cmsr.onebase.server.OneBaseServerApplication;
+import com.github.pagehelper.PageHelper;
 import com.mybatisflex.core.paginate.Page;
 import lombok.Setter;
 import org.junit.jupiter.api.Test;
@@ -36,6 +38,9 @@ public class RepositoryTest {
 
     @Autowired
     private AppMenuRepository appMenuRepository;
+
+    @Autowired
+    private AppAuthRoleMapper appAuthRoleMapper;
 
     @Test
     void test() {
@@ -81,4 +86,13 @@ public class RepositoryTest {
         TenantContextHolder.setTenantId(1L);
         var result = appMenuRepository.findPageIdsByAppIdAndMenuId(89762669056458752L, 89763253172011008L);
     }
+
+    @Test
+    public void test7() {
+        com.github.pagehelper.Page<Object> page = PageHelper
+                .startPage(1, 10)
+                .doSelectPage(() -> appAuthRoleMapper.selectRoleUsers(46699591748616193L, "管理"));
+        System.out.println(page);
+    }
+
 }
