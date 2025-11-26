@@ -1,10 +1,11 @@
-import { IconPlusCircleFill } from '@arco-design/web-react/icon';
+import { IconClose, IconPlusCircleFill } from '@arco-design/web-react/icon';
 import { etlEditorSignal } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
-import { getSourceNodeIdsByTarget } from '../utils';
+import { getSourceNodeIdsByTarget, setNodeDataAndResetDownstream } from '../utils';
 import styles from './index.module.less';
+import { Button } from '@arco-design/web-react';
 
 /**
  * Union 节点的配置主界面
@@ -19,6 +20,7 @@ const UnionConfig: React.FC = () => {
 
   // 计算所有 columns 字段的去重并集
   const [colTitles, setColTitles] = useState<any[]>(nodeData.value[curNode.value.id].config?.colTitles || []);
+  const [emptyColumn, setEmptyColumn] = useState<string[]>([]);
 
   useEffect(() => {
     // console.log(nodeData.value);
@@ -35,7 +37,9 @@ const UnionConfig: React.FC = () => {
         // console.log('sourceNodeData: ', sourceNodeData);
         // console.log(sourceNodeData.output?.fields);
 
-        tmpColumns.push(...sourceNodeData.output?.fields);
+        if (sourceNodeData?.output) {
+          tmpColumns.push(...sourceNodeData.output?.fields);
+        }
       }
       for (const sourceNodeId of sourceNodeIds) {
         const sourceNodeData = nodeData.value[sourceNodeId];
@@ -68,14 +72,17 @@ const UnionConfig: React.FC = () => {
       .map((col) => col);
 
     //   初始化时候重置
-    if (data.length == 0 || data.length != tmpData.length) {
-      setData(tmpData);
-      setColTitles(newColTitles);
+    setData(tmpData);
+    setColTitles(newColTitles);
 
-      console.log('tmpData: ', tmpData);
-      console.log('newColTitles: ', newColTitles);
-    }
+    console.log('tmpData: ', tmpData);
+    console.log('newColTitles: ', newColTitles);
   }, [nodeData, graphData]);
+
+  useEffect(() => {
+    const empty = getEmptyFieldFqns(colTitles, data);
+    setEmptyColumn(empty);
+  }, []);
 
   useEffect(() => {
     console.log(data);
@@ -95,8 +102,28 @@ const UnionConfig: React.FC = () => {
       }))
     };
     console.log(payload);
-    setNodeData(curNode.value.id, payload);
-  }, [data]);
+    setNodeDataAndResetDownstream(payload, curNode.value.id, graphData.value, nodeData.value);
+  }, [data, colTitles]);
+
+  const getEmptyFieldFqns = (colTitles: any[], rows: any[]): string[] => {
+    return colTitles
+      .map((c) => c.fieldFqn)
+      .filter((fieldFqn) =>
+        // 对于每个 fieldFqn，检查所有 row
+        rows.every((row) => {
+          const col = row.columns.find((c: any) => c.fieldFqn === fieldFqn);
+          // 没有该列 或 fieldName 为空 => 视为这一行在该列没数据
+          return !col || !col.fieldName;
+        })
+      );
+  };
+
+  const handleRemoveColumn = (index: number, fieldFqn: string) => {
+    setColTitles([...colTitles.slice(0, index), ...colTitles.slice(index + 1)]);
+
+    const idx = emptyColumn.indexOf(fieldFqn);
+    setEmptyColumn([...emptyColumn.slice(0, idx), ...emptyColumn.slice(idx + 1)]);
+  };
 
   return (
     <div className={styles.dataConfig}>
@@ -104,11 +131,19 @@ const UnionConfig: React.FC = () => {
         <div className={styles.rowTitle}>合并结果</div>
         {colTitles.map((col: any, index) => (
           <div key={col.id} className={styles.colTitle}>
+            {emptyColumn.includes(col.fieldFqn) && (
+              <Button
+                type="text"
+                size="mini"
+                shape="circle"
+                onClick={() => handleRemoveColumn(index, col.fieldFqn)}
+                icon={<IconClose />}
+              />
+            )}
             {col.fieldName}
           </div>
         ))}
       </div>
-
       {data.map((row, rowIndex) => {
         return (
           <div key={row.tableId} className={styles.row}>
@@ -186,8 +221,10 @@ const UnionConfig: React.FC = () => {
                       });
 
                       console.log('newData: ', newData);
-
                       setData(newData);
+
+                      const empty = getEmptyFieldFqns(colTitles, newData);
+                      setEmptyColumn(empty);
                     }
                   }}
                   //   onEnd={() => {}}

@@ -41,7 +41,7 @@ const SortableTable: React.FC<SortableTableProps> = ({ data, columns, onSort }) 
               </div>
             </td>
           ),
-          width: 40
+          width: 30
         }
       ],
       tbody: (props: { children: React.ReactNode; [key: string]: unknown }) => (
@@ -75,6 +75,7 @@ const SortableTable: React.FC<SortableTableProps> = ({ data, columns, onSort }) 
       className={styles.fieldConfigTable}
       rowKey="id"
       components={components}
+      scroll={{ y: 'calc(100vh - 400px)' }}
     />
   );
 };

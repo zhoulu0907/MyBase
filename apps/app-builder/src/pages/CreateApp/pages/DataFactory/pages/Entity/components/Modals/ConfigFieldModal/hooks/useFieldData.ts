@@ -18,7 +18,7 @@ export const useFieldData = (
   // 计算活跃字段（未删除且非系统字段）
   const activeFields = fields.filter((field) => !field.isDeleted && field.isSystemField === FIELD_TYPE.CUSTOM);
 
-  // 加载实体字段
+  // 加载资产字段
   const loadEntityFields = useCallback(async () => {
     if (!entity?.entityId) return;
 
@@ -31,11 +31,11 @@ export const useFieldData = (
       }));
       setFields(fieldsData);
     } catch (error) {
-      console.error('加载实体字段失败:', error);
+      console.error('加载资产字段失败:', error);
     }
   }, [entity?.entityId]);
 
-  // 加载实体及子表字段
+  // 加载资产及子表字段
   const loadEntityFieldsWithChildren = useCallback(async () => {
     if (!entity?.entityId) return;
 
@@ -64,7 +64,7 @@ export const useFieldData = (
 
       setOriginFields(entities);
     } catch (error) {
-      console.error('加载实体及子表字段失败:', error);
+      console.error('加载资产及子表字段失败:', error);
     }
   }, [entity?.entityId]);
 

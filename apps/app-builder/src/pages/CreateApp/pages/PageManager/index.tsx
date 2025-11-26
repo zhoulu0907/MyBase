@@ -195,7 +195,6 @@ const PageManagerPage: FC = () => {
       name: keywords
     };
     const res = await listApplicationMenu(req);
-
     // 为每个children元素补充parentId字段
     const processedRes = addParentIdToChildren(res, RootParentPage.id);
     setParentPageOptions([{ ...RootParentPage, children: processedRes }]);
@@ -591,7 +590,17 @@ const PageManagerPage: FC = () => {
               />
             </div>
           </div>
-          <TaskCenterSide setCurMenu={setCurMenu} styles_tree={styles.tree} />
+          <TaskCenterSide
+            curMenu={curMenu}
+            setCurMenu={setCurMenu}
+            styles_tree={styles.tree}
+            curAppId={curAppId}
+            triggerHide={triggerHide}
+            findFirstPage={findFirstPage}
+            setSearchResult={setSearchResult}
+            searchResult={searchResult}
+            setShowGuide={setShowGuide}
+          />
           <Tree
             blockNode
             draggable
@@ -655,7 +664,7 @@ const PageManagerPage: FC = () => {
                 </div>
               ) : (
                 <>
-                  {curMenu.value?.id && curMenu.value?.id?.indexOf('TASK-') < 0 && (
+                  {curMenu.value?.menuCode && curMenu.value?.menuCode?.indexOf('TASK-') < 0 && (
                     <>
                       <div className={styles.contentHeader}>
                         <div className={styles.contentTitle}>{curMenu.value?.menuName}</div>
@@ -674,8 +683,8 @@ const PageManagerPage: FC = () => {
                       </div>
                     </>
                   )}
-                  {curMenu?.value?.id && curMenu?.value?.id?.indexOf('TASK-') >= 0 && (
-                    <TaskCenterPage curMenuId={curMenu.value?.id} />
+                  {curMenu?.value?.menuCode && curMenu?.value?.menuCode?.indexOf('TASK-') >= 0 && (
+                    <TaskCenterPage curMenuId={curMenu.value?.menuCode} />
                   )}
                 </>
               )}
@@ -700,7 +709,7 @@ const PageManagerPage: FC = () => {
         handleCopy={handleCopy}
         setVisible={setVisibleCopyForm}
         form={copyForm}
-        treeData={convertMenuToTreeData(parentPageOptions, initTreeItemWidth)}
+        treeData={convertMenuToTreeData(parentPageOptions, initTreeItemWidth, false, { height: '32px' })}
       />
 
       {/* 创建弹窗 */}
@@ -715,7 +724,7 @@ const PageManagerPage: FC = () => {
         pageSetTypeOptions={pageSetTypeOptions}
         visibleCreateForm={visibleCreateForm}
         initValue={{ pageType: PageType.NORMAL, menuName: '', parentId: RootParentPage.id }}
-        treeData={convertMenuToTreeData(parentPageOptions, initTreeItemWidth)}
+        treeData={convertMenuToTreeData(parentPageOptions, initTreeItemWidth, false, { height: '32px' })}
       />
     </div>
   );

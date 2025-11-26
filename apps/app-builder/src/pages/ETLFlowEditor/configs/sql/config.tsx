@@ -78,8 +78,6 @@ const SQLConfig: React.FC = () => {
   }, [nodeData, curNode]);
 
   useEffect(() => {
-    // setSqlValue(nodeData.value[curNode.value.id]?.config?.sql || '');
-
     let payload = nodeData.value[curNode.value.id];
 
     let sqlValue = showSQLValue;
@@ -228,7 +226,11 @@ const SQLConfig: React.FC = () => {
               const variable = `[[${variableId}.${displayName}]]`;
 
               console.log('variable: ', variable);
-              setShowSQLValue(showSQLValue + variable);
+
+              let insertPos = typeof currentCursorPos === 'number' ? currentCursorPos : showSQLValue.length;
+              const newSQLValue = showSQLValue.slice(0, insertPos) + variable + showSQLValue.slice(insertPos);
+              setShowSQLValue(newSQLValue);
+              setCurrentCursorPos(insertPos + variable.length);
             }}
             onExpand={(keys, info) => {
               console.log('展开节点:', keys, info);

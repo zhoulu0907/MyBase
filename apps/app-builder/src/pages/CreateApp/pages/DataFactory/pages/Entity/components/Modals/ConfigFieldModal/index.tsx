@@ -11,7 +11,7 @@ import type { ConfigFieldModalProps } from './types';
 import { FIELD_TYPES_NEED_CONFIG } from './utils/const';
 
 const ConfigFieldModal: React.FC<ConfigFieldModalProps> = memo(
-  ({ visible, setVisible, entity, successCallback, gotoDictPage }: ConfigFieldModalProps) => {
+  ({ visible, setVisible, entity, successCallback, gotoDictPage, entities }: ConfigFieldModalProps) => {
     // 使用统一的字段管理hook
     const fieldManager = useFieldManager(visible, entity, successCallback, setVisible);
 
@@ -36,6 +36,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = memo(
             onConfirm={fieldManager.handleConfigConfirm}
             onCancel={fieldManager.handleConfigCancel}
             gotoDictPage={gotoDictPage}
+            entities={entities}
           />
         );
       },
@@ -59,7 +60,8 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = memo(
       externalErrors: fieldManager.errors,
       getFieldIndex: fieldManager.getFieldIndex,
       deleteField: fieldManager.deleteField,
-      fields: fieldManager.fields
+      fields: fieldManager.fields,
+      handleConfigConfirm: fieldManager.handleConfigConfirm
     });
 
     return (
@@ -72,7 +74,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = memo(
         okText="保存"
         cancelText="取消"
         confirmLoading={fieldManager.submitting}
-        style={{ width: 1400 }}
+        style={{ width: 1260 }}
       >
         <Spin loading={fieldManager.loading} style={{ width: '100%' }}>
           <Form form={fieldManager.form} initialValues={{ fields: fieldManager.activeFields }} id="field-config-form">

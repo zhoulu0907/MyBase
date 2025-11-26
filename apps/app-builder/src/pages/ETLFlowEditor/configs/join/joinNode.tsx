@@ -1,10 +1,24 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Checkbox, Form, Grid, Layout } from '@arco-design/web-react';
+import { Button, Checkbox, Form, Grid, Input, Layout, Select, Table } from '@arco-design/web-react';
 import useForm from '@arco-design/web-react/es/Form/useForm';
 import { useSignals } from '@preact/signals-react/runtime';
 import { ETLDrawerTab, etlEditorSignal } from '@onebase/common';
 import JoinRow from './components/joinRow';
 import styles from './index.module.less';
+import DataRemark from '../../components/dataRemark';
+import { setNodeDataAndResetDownstream } from '../utils';
+
+type Row = {
+  isSelected?: boolean;
+  fieldType: string;
+  // displayFieldName: string;            TODO
+  // updatedDisplayFieldName: string;     TODO
+  fieldFqn: string;
+  fieldName: string;
+  updatedFieldName: string;
+  nodeId: string;
+  nodeName: string;
+};
 
 export const JoinNodeConfig: React.FC = () => {
   useSignals();
@@ -13,10 +27,98 @@ export const JoinNodeConfig: React.FC = () => {
   const [form] = useForm();
   const [finalNodeList, setFinalNodeList] = useState<any[]>([]);
 
+  const [fieldListform] = useForm();
+  const [rows, setRows] = useState<Row[]>([]);
+
   useEffect(() => {
     const finalNodeList = generateNodeList(curNode.value.id);
     setFinalNodeList(finalNodeList);
   }, []);
+
+  useEffect(() => {
+    if (curDrawerTab.value === ETLDrawerTab.FIELD_CONFIG) {
+      const nodeListDetail = nodeData.value;
+      const curNodeDetailConfig = nodeListDetail[curNode.value.id]?.config;
+      const leftNodeId = curNodeDetailConfig?.leftNodeId;
+      const rightNodeId = curNodeDetailConfig?.rightNodeId;
+      let allFieldList = [];
+      if (curNodeDetailConfig?.mappings?.length > 0) {
+        allFieldList = curNodeDetailConfig?.mappings;
+      } else if (leftNodeId && rightNodeId) {
+        const leftFiledList = nodeListDetail[leftNodeId]?.output.fields;
+        const rightFiledList = nodeListDetail[rightNodeId]?.output.fields;
+        const finalLeftFiledList = leftFiledList?.map((field: any) => ({
+          fieldType: field.fieldType,
+          fieldFqn: field.fieldFqn,
+          fieldName: field.fieldName,
+          updatedFieldName: field.fieldName,
+          nodeId: leftNodeId,
+          nodeName: nodeListDetail[leftNodeId].title
+        }));
+        const finalRightFiledList = rightFiledList?.map((field: any) => ({
+          fieldType: field.fieldType,
+          fieldFqn: field.fieldFqn,
+          fieldName: field.fieldName,
+          updatedFieldName: field.fieldName,
+          nodeId: rightNodeId,
+          nodeName: nodeListDetail[rightNodeId].title
+        }));
+        allFieldList = finalLeftFiledList.concat(finalRightFiledList);
+      }
+
+      fieldListform.setFieldsValue({ mappings: allFieldList });
+      setRows(allFieldList);
+
+      setCurNodeData(allFieldList);
+    }
+  }, [curDrawerTab.value]);
+
+  // 同步表单变化到本地 rows（用于 Table 渲染）
+  const onValuesChange = (_: any, allValues: any) => {
+    const rows = (allValues?.mappings as Row[]) ?? [];
+    setRows(rows);
+    const selectedRow = rows.filter((r) => r.isSelected);
+    setCurNodeData(rows, selectedRow);
+  };
+
+  const setCurNodeData = (rows: Row[], selectedRow?: Row[]) => {
+    const payload = nodeData.value[curNode.value.id];
+    payload.config = {
+      ...payload.config,
+      mappings: rows
+    };
+    if (selectedRow && selectedRow.length > 0) {
+      const fields = selectedRow.map((field) => ({
+        fieldFqn: curNode.value.id + `.${field.updatedFieldName}`,
+        fieldName: field.updatedFieldName,
+        fieldType: field.fieldType
+      }));
+      payload.output = {
+        verified: true,
+        fields
+      };
+    } else {
+      payload.output = {
+        verified: false
+      };
+    }
+
+    setNodeDataAndResetDownstream(payload, curNode.value.id, graphData.value, nodeData.value);
+  };
+
+  const selectedRowKeys = rows.filter((r) => r.isSelected).map((r) => r.fieldFqn) as (string | number)[];
+  const onSelectChange = (keys: (string | number)[], selectedRows: Row[]) => {
+    const keySet = new Set(keys.map(String));
+    const next = rows.map((r) => ({ ...r, isSelected: keySet.has(String(r.fieldFqn)) }));
+    fieldListform.setFieldsValue({ mappings: next });
+    setRows(next);
+  };
+
+  const rowSelection = {
+    type: 'checkbox' as const,
+    selectedRowKeys,
+    onChange: onSelectChange
+  };
 
   const generateNodeList = (targetNodeId: string) => {
     if (!graphData) return [];
@@ -45,14 +147,7 @@ export const JoinNodeConfig: React.FC = () => {
             <Checkbox>合并连接字段</Checkbox>
           </div>
 
-          <Form
-            form={form}
-            className={styles.content}
-            initialValues={{ ...nodeData.value[curNode.value.id]?.config }}
-            onValuesChange={(_, v) => {
-              console.log(_, v);
-            }}
-          >
+          <Form form={form} className={styles.content} initialValues={{ ...nodeData.value[curNode.value.id]?.config }}>
             <JoinRow finalNodeList={finalNodeList} form={form} />
             {/* <Form.List field="joinList">
               {(joinList, { add: addRow }) => {
@@ -80,6 +175,59 @@ export const JoinNodeConfig: React.FC = () => {
           </Form>
         </div>
       )}
+      {curDrawerTab.value === ETLDrawerTab.FIELD_CONFIG && (
+        <div>
+          <Form form={fieldListform} onValuesChange={onValuesChange}>
+            <Form.List field="mappings">
+              {(fields, {}) => {
+                const columns = [
+                  {
+                    title: '类型',
+                    dataIndex: 'fieldType',
+                    width: 120,
+                    render: (_: any, record: Row) => <div>{record.fieldType}</div>
+                  },
+                  // TODO
+                  // {
+                  //   title: '字段名称',
+                  //   dataIndex: 'fieldName',
+                  //   render: (_: any, record: Row) => <div>{record.fieldName}</div>
+                  // },
+                  {
+                    title: '原字段名称',
+                    dataIndex: 'updatedFieldName',
+                    render: (_: any, record: Row, idx: number) => {
+                      return (
+                        <Form.Item noStyle field={`mappings.${idx}.updatedFieldName`}>
+                          <Input size="mini" allowClear />
+                        </Form.Item>
+                      );
+                    }
+                  },
+                  {
+                    title: '来源节点',
+                    dataIndex: 'nodeName',
+                    render: (_: any, record: Row) => <div>{record.nodeName}</div>
+                  }
+                ];
+
+                return (
+                  <>
+                    <Table
+                      columns={columns}
+                      data={rows}
+                      rowKey={(r: Row) => r.fieldFqn}
+                      pagination={false}
+                      rowSelection={rowSelection}
+                    />
+                  </>
+                );
+              }}
+            </Form.List>
+          </Form>
+        </div>
+      )}
+      {curDrawerTab.value === ETLDrawerTab.NODE_REMARK && <DataRemark />}
     </Layout>
   );
 };

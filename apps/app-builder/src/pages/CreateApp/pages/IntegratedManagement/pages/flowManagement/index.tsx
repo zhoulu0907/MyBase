@@ -32,7 +32,7 @@ import { getCommonPaginationList } from '@onebase/common';
 import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import FlowCard from './components/card';
+import FlowCard from '../../components/card';
 import styles from './index.module.less';
 
 const RadioGroup = Radio.Group;
@@ -320,7 +320,9 @@ const FlowManagementPage: React.FC = () => {
                   data={item}
                   handleEdit={handleEditFlow}
                   handleDelete={handleDeleteFlow}
-                  refreshList={getFlowMgmtList}
+                  refreshList={() => {
+                    getFlowMgmtList(searchFlowProcessName, searchFlowProccessStatus, searchTriggerType);
+                  }}
                   toFlowEditor={toFlowEditor}
                 />
               ))}

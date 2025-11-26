@@ -8,6 +8,7 @@ import RightJoinIcon from '@/assets/images/etl/right_join.svg';
 import InnerJoinIcon from '@/assets/images/etl/inner_join.svg';
 import JoinRowFields from '../joinRowFields';
 import styles from '../../index.module.less';
+import { setNodeDataAndResetDownstream } from '../../../utils';
 
 const { Option } = Select;
 const FormItem = Form.Item;
@@ -31,7 +32,7 @@ interface JoinRowProps {
 
 const JoinRow = (props: JoinRowProps) => {
   useSignals();
-  const { curNode, nodeData, setNodeData } = etlEditorSignal;
+  const { curNode, nodeData, graphData, setNodeData } = etlEditorSignal;
   const { finalNodeList, form } = props;
 
   // Join Type
@@ -44,14 +45,17 @@ const JoinRow = (props: JoinRowProps) => {
   const [rightFieldList, setRightFieldList] = useState<any[]>([]);
 
   useEffect(() => {
-    form.setFieldValue('joinType', curSelectJoin);
+    const joinType = nodeData.value[curNode.value.id]?.config?.joinType;
+    form.setFieldValue('joinType', joinType || JOINOPTIONS[0].key);
+    setCurSelectJoin(joinType || JOINOPTIONS[0].key);
+    setCurSelectJoinObj(JOINOPTIONS.find((option) => option.key === joinType) || JOINOPTIONS[0]);
   }, []);
 
   useEffect(() => {
     const nodeListDetail = nodeData.value;
     if (finalNodeList.length > 0) {
-      const leftNodeId = form.getFieldValue(NODETYPE.LEFT);
-      const rightNodeId = form.getFieldValue(NODETYPE.RIGHT);
+      const leftNodeId = nodeListDetail[curNode.value.id]?.config[NODETYPE.LEFT];
+      const rightNodeId = nodeListDetail[curNode.value.id]?.config[NODETYPE.RIGHT];
       const leftFieldList = nodeListDetail[leftNodeId]?.output ? nodeListDetail[leftNodeId]?.output.fields : [];
       setLeftFieldList(leftFieldList);
       const rigthFieldList = nodeListDetail[rightNodeId]?.output ? nodeListDetail[rightNodeId]?.output.fields : [];
@@ -69,12 +73,30 @@ const JoinRow = (props: JoinRowProps) => {
 
   const handleNodeChange = (nodeType: string, nodeId: string) => {
     const nodeListDetail = nodeData.value;
-    if (nodeType === NODETYPE.LEFT) {
-      const leftFieldList = nodeListDetail[nodeId]?.output ? nodeListDetail[nodeId]?.output.fields : [];
-      setLeftFieldList(leftFieldList);
+    const leftFieldList = nodeListDetail[nodeId]?.output ? nodeListDetail[nodeId]?.output.fields : [];
+    const rigthFieldList = nodeListDetail[nodeId]?.output ? nodeListDetail[nodeId]?.output.fields : [];
+    if (!nodeId) {
+      const fieldPairs = form.getFieldValue('fieldPairs');
+      if (fieldPairs && fieldPairs.length > 0) {
+        setLeftFieldList(nodeType === NODETYPE.LEFT ? [] : leftFieldList);
+        setRightFieldList(nodeType === NODETYPE.LEFT ? rigthFieldList : []);
+        const finalFieldPairs = fieldPairs.map((field: any) => ({
+          leftFieldFqn: nodeType === NODETYPE.LEFT ? undefined : field.leftFieldFqn,
+          rightFieldFqn: nodeType === NODETYPE.LEFT ? field.rightFieldFqn : undefined
+        }));
+        form.setFieldValue('fieldPairs', finalFieldPairs);
+      }
+      const payload = nodeData.value[curNode.value.id];
+      payload.config = {
+        ...payload.config,
+        mappings: []
+      };
     } else {
-      const rigthFieldList = nodeListDetail[nodeId]?.output ? nodeListDetail[nodeId]?.output.fields : [];
-      setRightFieldList(() => rigthFieldList);
+      if (nodeType === NODETYPE.LEFT) {
+        setLeftFieldList(leftFieldList);
+      } else {
+        setRightFieldList(rigthFieldList);
+      }
     }
     setCurNodeData();
   };
@@ -82,61 +104,11 @@ const JoinRow = (props: JoinRowProps) => {
   const setCurNodeData = () => {
     const formValue = form.getFieldsValue();
     const payload = nodeData.value[curNode.value.id];
-    let fields = [];
     payload.config = {
       ...payload.config,
       ...formValue
     };
-    if (formValue?.fieldPairs?.length > 0) {
-      fields = generateOutputFields(formValue);
-      payload.output = {
-        verified: true,
-        fields
-      };
-    } else {
-      payload.output = {
-        verified: false
-      };
-    }
-    setNodeData(curNode.value.id, payload);
-  };
-
-  const generateOutputFields = (formValue: any) => {
-    if (formValue.joinType === ETLJoinType.RIGHT_JOIN) {
-      const rightFields = rightFieldList.map((field) => ({
-        fqn: curNode.value.id + `.${field.fieldName}`,
-        fieldName: field.fieldName,
-        fieldType: field.fieldType
-      }));
-
-      const fieldPairsSet = new Set(formValue.fieldPairs.map((pair: any) => pair.leftFieldFqn));
-      const leftFields = leftFieldList
-        .filter((field: any) => !fieldPairsSet.has(field.fieldFqn))
-        .map((item: any) => ({
-          fqn: curNode.value.id + `.${item.fieldName}`,
-          fieldName: item.fieldName,
-          fieldType: item.fieldType
-        }));
-
-      return leftFields.concat(rightFields);
-    } else {
-      const leftFields = leftFieldList.map((field) => ({
-        fqn: curNode.value.id + `.${field.fieldName}`,
-        fieldName: field.fieldName,
-        fieldType: field.fieldType
-      }));
-
-      const fieldPairsSet = new Set(formValue.fieldPairs.map((pair: any) => pair.rightFieldFqn));
-      const rightFields = rightFieldList
-        .filter((field: any) => !fieldPairsSet.has(field.fieldFqn))
-        .map((item: any) => ({
-          fqn: curNode.value.id + `.${item.fieldName}`,
-          fieldName: item.fieldName,
-          fieldType: item.fieldType
-        }));
-
-      return leftFields.concat(rightFields);
-    }
+    setNodeDataAndResetDownstream(payload, curNode.value.id, graphData.value, nodeData.value);
   };
 
   return (

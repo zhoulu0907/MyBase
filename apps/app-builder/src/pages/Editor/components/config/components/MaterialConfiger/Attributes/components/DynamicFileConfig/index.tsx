@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { registerConfigRenderer } from '../../registry';
+import { CONFIG_TYPES } from '@onebase/ui-kit';
 import { Form, Upload, Message } from '@arco-design/web-react';
 import { IconDelete } from '@arco-design/web-react/icon';
 import { uploadFile } from '@onebase/platform-center';
@@ -110,3 +112,7 @@ const DynamicFileConfig: React.FC<DynamicFileConfigProps> = ({ handlePropsChange
 };
 
 export default DynamicFileConfig;
+
+registerConfigRenderer(CONFIG_TYPES.FILE, ({ id, handlePropsChange, item, configs }) => (
+  <DynamicFileConfig id={id} handlePropsChange={handlePropsChange} item={item} configs={configs} />
+));

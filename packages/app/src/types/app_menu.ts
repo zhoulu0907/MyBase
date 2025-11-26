@@ -17,7 +17,8 @@ export interface ApplicationMenu {
 
 export enum MenuType {
   PAGE = 1,
-  GROUP = 2
+  GROUP = 2,
+  BPM = 3
 }
 
 export enum VisibleType {

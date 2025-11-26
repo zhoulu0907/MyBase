@@ -2,6 +2,8 @@ import { Button, Form, Input, Space } from '@arco-design/web-react';
 import { IconCopy, IconDelete, IconDragDotVertical } from '@arco-design/web-react/icon';
 import { nanoid } from 'nanoid';
 import React, { useState } from 'react';
+import { registerConfigRenderer } from '../../registry';
+import { CONFIG_TYPES } from '@onebase/ui-kit';
 import { ReactSortable } from 'react-sortablejs';
 import styles from '../../index.module.less';
 const FormItem = Form.Item;
@@ -148,3 +150,7 @@ const DynamicTabsConfig: React.FC<DynamicTabsConfigProps> = ({
 };
 
 export default DynamicTabsConfig;
+
+registerConfigRenderer(CONFIG_TYPES.TABS, ({ id, handlePropsChange, handleMultiPropsChange, item, configs }) => (
+  <DynamicTabsConfig id={id} handlePropsChange={handlePropsChange} handleMultiPropsChange={handleMultiPropsChange} item={item} configs={configs} />
+));

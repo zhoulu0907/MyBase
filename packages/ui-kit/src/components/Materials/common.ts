@@ -510,7 +510,7 @@ export const fileConfig: IFileConfigType = {
 export type TCollapsedSelectKeyType = (typeof COLLAPSED_VALUES)[keyof typeof COLLAPSED_VALUES];
 export const collapsedConfig: ICollapsedConfigType<TCollapsedSelectKeyType> = {
   key: 'collapsed',
-  name: '默认展示样式',
+  name: '折叠状态',
   type: CONFIG_TYPES.COLLAPSED,
   range: [
     {
@@ -522,6 +522,11 @@ export const collapsedConfig: ICollapsedConfigType<TCollapsedSelectKeyType> = {
       key: COLLAPSED_OPTIONS.COLLAPSED,
       text: COLLAPSED_OPTIONS.COLLAPSED,
       value: COLLAPSED_VALUES[COLLAPSED_OPTIONS.COLLAPSED]
+    },
+    {
+      key: COLLAPSED_OPTIONS.DISABLED_COLLAPSED,
+      text: COLLAPSED_OPTIONS.DISABLED_COLLAPSED,
+      value: COLLAPSED_VALUES[COLLAPSED_OPTIONS.DISABLED_COLLAPSED]
     }
   ]
 };
@@ -587,7 +592,8 @@ export const switchFillTextConfig: any = {
 export const defaultValueConfig: any = {
   key: 'defaultValueConfig',
   name: '默认值',
-  type: CONFIG_TYPES.DEFAULT_VALUE
+  type: CONFIG_TYPES.DEFAULT_VALUE,
+  valueType: 'string'
 }
 
 export const defaultValueModeConfig: any = {

@@ -4,7 +4,7 @@ import { register } from '@antv/x6-react-shape';
 import { Button, InputNumber } from '@arco-design/web-react';
 import DetailDrawer from '../Drawers/DetailDrawer';
 import { type EntityNode, type EntityERProps } from '../../../../utils/interface';
-import { FIELD_TYPE, useNewNodeStore } from '@onebase/ui-kit';
+import { FIELD_TYPE, useGraphEntitytore } from '@onebase/ui-kit';
 import EntityNodeComponent from './ERnode';
 import nodeStyles from './ERnode.module.less';
 import styles from './index.module.less';
@@ -22,7 +22,7 @@ const LINE_TITLE_HEIGHT = 44;
 const NODE_WIDTH = 280;
 const NODE_HEIGHT = 200;
 
-interface ERchartRef {
+export interface ERchartRef {
   getGraphPositon: () => void;
 }
 
@@ -45,7 +45,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
     },
     ref
   ) => {
-    const { newNodes } = useNewNodeStore();
+    const { newNodes } = useGraphEntitytore();
     const [selectedNode] = useState<EntityNode | null>(null);
     const [drawerVisible, setDrawerVisible] = useState(false);
     const [zoom, setZoom] = useState(100);

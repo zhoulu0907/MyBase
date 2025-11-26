@@ -1,14 +1,20 @@
 import { useEffect, useState, type FC } from 'react';
-import { Tree, Form } from '@arco-design/web-react';
+import { Tree, Form, Message } from '@arco-design/web-react';
 import {
   MenuType,
+  listApplicationBPMMenu,
+  updateApplicationMenu,
+  updateApplicationMenuOrder,
+  type UpdateApplicationMenuNameReq,
   type ApplicationMenu,
+  type ListApplicationMenuReq,
+  type UpdateApplicationMenuOrderReq
 } from '@onebase/app';
 import MyMenuItem from '../MyMenuItem';
 import { IconSettings, IconDragDotVertical } from '@arco-design/web-react/icon';
-import RenameForm from './modal/renameForm'
+import RenameForm from './modal/renameForm';
 
-import './style/taskSide.less'
+import './style/taskSide.less';
 
 const TreeNode = Tree.Node;
 /**
@@ -24,16 +30,30 @@ interface TreeNode {
 interface ComProps {
   setCurMenu: any;
   styles_tree: any;
+  curAppId: any;
+  curMenu: any;
+  searchResult: any;
+  setSearchResult: any;
+  setShowGuide: any;
+  triggerHide: (menuID: string, isVisible: number) => void;
 }
-const TaskCenterTreeSide:FC<ComProps> = ({setCurMenu, styles_tree}) => {
-  const [curMenu2, setCurMenu2] = useState<ApplicationMenu | any>();
-  // const [_activeMenu, setActiveMenu] = useState<ApplicationMenu>();
 
-  // 将接口返回的菜单数据（res）转换为 Tree 组件可用的 treeData 格式
-  // TODO(mickey): showOption重构
+const TaskCenterTreeSide: FC<ComProps> = ({
+  setCurMenu,
+  curMenu,
+  styles_tree,
+  curAppId,
+  searchResult,
+  setSearchResult,
+  setShowGuide,
+  triggerHide
+}) => {
+  const [curMenu2, setCurMenu2] = useState<ApplicationMenu | any>();
+
   const convertMenuToTreeData = (menus: ApplicationMenu[], maxWidth: number, showOption: boolean = false): any[] => {
     return menus.map((menu, idx) => ({
-      key: menu.id + '-' + idx,
+      key: menu.id,
+      parentId: menu.parentId,
       title: (
         <MyMenuItem
           showOption={showOption}
@@ -41,24 +61,24 @@ const TaskCenterTreeSide:FC<ComProps> = ({setCurMenu, styles_tree}) => {
           isVisible={menu.isVisible}
           menuCode={menu.menuCode}
           menuName={menu.menuName}
-          menuIcon={menu.menuIcon}
+          menuIcon={menu.menuCode}
+          menuType={menu.menuType}
           isGroup={true}
           maxWidth={maxWidth}
           label={menu.menuName}
           onClick={() => {
-            if (menu.menuType == MenuType.PAGE) {
+            if (menu.menuType == MenuType.BPM) {
               let _menu = {
                 ...menu,
-                _key: menu.id + '-' + idx
+                _key: menu.id
               };
               setCurMenu2(_menu);
               setCurMenu(_menu);
             }
-            // setActiveMenu(menu);
-          } }
-          triggerRename = {() => setVisibleRenameForm(true)}
-          triggerHide = {() => triggerHide(menu.id, idx, menu.isVisible)}
-          renameForm = {renameForm}
+          }}
+          triggerRename={() => setVisibleRenameForm(true)}
+          triggerHide={() => onTriggerHide(menu.id, menu.isVisible)}
+          renameForm={renameForm}
         />
       ),
       children: menu.children ? convertMenuToTreeData(menu.children, maxWidth - 25, showOption) : []
@@ -70,148 +90,132 @@ const TaskCenterTreeSide:FC<ComProps> = ({setCurMenu, styles_tree}) => {
   const [renameForm] = Form.useForm();
   const [visibleRenameForm, setVisibleRenameForm] = useState(false);
 
-  function getMenuArr() {
-    return [
-      {
-        id: "TASK-ineedtodo",
-        isVisible: 1,
-        menuCode: "ineedtodo",
-        menuIcon: "ineedtodo-taskicon",
-        menuName: "待我处理",
-        menuSort: 1,
-        menuType: 1,
-        parentId: "0"
-      },
-      {
-        id: "TASK-ihavedone",
-        isVisible: 1,
-        menuCode: "ihavedone",
-        menuIcon: "ihavedone-taskicon",
-        menuName: "我已处理",
-        menuSort: 2,
-        menuType: 1,
-        parentId: "0"
-      },
-      {
-        id: "TASK-icreated",
-        isVisible: 1,
-        menuCode: "icreated",
-        menuIcon: "icreated-taskicon",
-        menuName: "我创建的",
-        menuSort: 3,
-        menuType: 1,
-        parentId: "0"
-      },
-      {
-        id: "TASK-icopied",
-        isVisible: 1,
-        menuCode: "icopied",
-        menuIcon: "icopied-taskicon",
-        menuName: "抄送我的",
-        menuSort: 4,
-        menuType: 1,
-        parentId: "0"
-      },
-      {
-        id: "TASK-taskproxy",
-        isVisible: 1,
-        menuCode: "taskproxy",
-        menuIcon: "taskproxy-taskicon",
-        menuName: "流程代理",
-        menuSort: 5,
-        menuType: 1,
-        parentId: "0"
+  const handleRename = async () => {
+    if (!renameForm.getFieldValue('menuId')) {
+      Message.error('请选择要重命名的菜单');
+      return;
+    }
+    const req: UpdateApplicationMenuNameReq = {
+      id: renameForm.getFieldValue('menuId'),
+      menuName: renameForm.getFieldValue('menuName'),
+      menuIcon: renameForm.getFieldValue('menuIcon')
+    };
+    const res = await updateApplicationMenu(req);
+    if (res) {
+      Message.success('重命名成功');
+    }
+    setVisibleRenameForm(false);
+    getBpmMenuList();
+  };
+  const loop = (data: any, key: string, callback: (item: any, index: number, arr: any) => void) => {
+    data.some((item:any, index:any, arr:any) => {
+      if (item.key === key) {
+        callback(item, index, arr);
+        return true;
       }
-    ];
-  }
-  function handleRename() {
-    console.log('handle re name function.')
-  }
-  // 更新应用菜单可见性  显示/隐藏
-  function triggerHide(menuId: string | number, arrIdx: number, isVisible: number) {
-    console.log('trigger hide ===', menuId, arrIdx)
-    let res:Array<any> = getMenuArr()
-    res[arrIdx].isVisible = isVisible === 0 ? 1 : 0;
-    const treeData = convertMenuToTreeData(res, 155, true);
-    setTreeData(treeData);
-  }
+      return false;
+    });
+  };
+  const handleDrop = async ({ dragNode, dropNode, dropPosition }: any) => {
+    if (dropPosition === 0) {
+    //   Message.warning('仅支持拖拽到节点上下方调整顺序，禁止拖入节点内部');
+      return;
+    }
+    if (!dropNode || dragNode.props._key === dropNode.props._key) {
+      return;
+    }
+    const data = treeData ? [...treeData] : [];
+    let dragItem: any;
+    loop(data, dragNode.props._key, (item, index, arr) => {
+      arr.splice(index, 1);
+      dragItem = item;
+    });
+
+    if (!dragItem) return;
+
+    loop(data, dropNode.props._key, (_, index, arr) => {
+      arr.splice(dropPosition < 0 ? index : index + 1, 0, dragItem!);
+    });
+    setTreeData([...data]);
+    const menuTree = data.map((node) => ({
+      id: node.key
+    }));
+    const payload: UpdateApplicationMenuOrderReq = {
+      id: dragNode.key,
+      parentId: dragNode.parentId,
+      menuTree
+    };
+    await updateApplicationMenuOrder(payload);
+  };
+  const getBpmMenuList = async () => {
+    const req: ListApplicationMenuReq = {
+      applicationId: curAppId
+    };
+    const res = await listApplicationBPMMenu(req);
+    if (res && res.length > 0) {
+      const sortedData = res?.sort((a: any, b: any) => a.menuSort - b.menuSort);
+      const _treeData = convertMenuToTreeData(sortedData, 155, true);
+      setTreeData(_treeData);
+      if (!curMenu.value || Object.keys(curMenu.value).length === 0) {
+        setCurMenu({ ...sortedData[0], _key: sortedData[0]?.id });
+        setCurMenu2({ ...sortedData[0], _key: sortedData[0]?.id });
+      }
+      setSearchResult(false);
+    }
+  };
+  const onTriggerHide = async (menuId: string, isVisible: number) => {
+    await triggerHide(menuId, isVisible);
+    getBpmMenuList();
+  };
 
   useEffect(() => {
-    let res:Array<any> = getMenuArr()
-    const _treeData = convertMenuToTreeData(res, 155, true);
-    setTreeData(_treeData);
-  }, [])
+    if (curAppId !== '') {
+      getBpmMenuList();
+    }
+  }, [curAppId]);
 
-  // useEffect(() => {
-  //   console.log(curMenu2)
-  // }, [curMenu2])
-  
-  return <section className='task-center-side'>
-    <Tree
-      blockNode
-      draggable={true}
-      selectable
-      selectedKeys={[curMenu2?._key]}
-      treeData={treeData}
-      className={styles_tree}
-      showLine={false}
-      icons={{
-        switcherIcon: null,
-        dragIcon: <IconDragDotVertical/>
-      }}
-      actionOnClick={'expand'}
-      onDrop={({ dragNode, dropNode, dropPosition }: any) => {
-        const loop = (data: Array<TreeNode>, key: string, callback: Function) => {
-            data.some((item: TreeNode, index: number, arr: Array<any>) => {
-              if (item.key === key) {
-                callback(item, index, arr);
-                return true;
-              }
+  useEffect(() => {
+    if (searchResult) return;
+    setShowGuide(treeData?.length === 0);
+  }, [treeData, searchResult]);
 
-              if (item.children) {
-                return loop(item.children, key, callback);
-              }
-            });
-          };
+  useEffect(() => {
+    if (curMenu.value && curMenu.value?.menuType !== MenuType.BPM) {
+      setCurMenu2(null);
+    }
+  }, [curMenu.value]);
 
-          const data = treeData? [...treeData] : [];
-          let dragItem:TreeNode | any;
-          loop(data, dragNode.props._key, (item: TreeNode, index: number, arr: Array<any>) => {
-            arr.splice(index, 1);
-            dragItem = item;
-            dragItem.className = 'tree-node-dropover';
-          });
-
-          if (dropPosition === 0) {
-            loop(data, dropNode.props._key, (item: TreeNode, index: number, arr: Array<any>) => {
-              item.children = item.children || [];
-              item.children.push(dragItem);
-            });
-          } else {
-            loop(data, dropNode.props._key, (item: TreeNode, index: number, arr: Array<any>) => {
-              arr.splice(dropPosition < 0 ? index : index + 1, 0, dragItem);
-            });
-          }
-
-          setTreeData([...data]);
-          setTimeout(() => {
-            dragItem.className = '';
-            setTreeData([...data]);
-          }, 1000);
-      }}
-      style={{
-        width: '220px',
-        overflow: 'hidden',
-        boxSizing: 'border-box',
-        padding: '0 8px',
-      }}
-    />
-    <RenameForm
+  return (
+    <section className="task-center-side">
+      <Tree
+        blockNode
+        draggable={true}
+        selectable
+        selectedKeys={[curMenu2?._key]}
+        treeData={treeData}
+        className={styles_tree}
+        showLine={false}
+        icons={{
+          switcherIcon: null,
+          dragIcon: <IconDragDotVertical />
+        }}
+        actionOnClick={'expand'}
+        onDrop={handleDrop}
+        style={{
+          width: '220px',
+          overflow: 'hidden',
+          boxSizing: 'border-box',
+          padding: '0 8px'
+        }}
+      />
+      <RenameForm
         visible={visibleRenameForm}
         handleRename={handleRename}
         setVisible={setVisibleRenameForm}
-        form={renameForm}/>
-  </section>
-}
+        form={renameForm}
+      />
+    </section>
+  );
+};
 
 export default TaskCenterTreeSide;

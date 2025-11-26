@@ -10,7 +10,7 @@ import ApproverConfig from './approverConfig/index';
 import ApproverBtnConfig from './btnConfig/index';
 import FieldConfig from './fieldConfig/index';
 import AdvancedConfig from './advancedConfig/index';
-import { ApproveDrawerTab } from './constant';
+import { ApproveDrawerTab, defaultBtnConfigArr } from './constant';
 import { useLocation } from 'react-router-dom';
 import type {
   ApproverConfigDataType,
@@ -30,23 +30,35 @@ export default function ApproveDreawer({ handleConfigSubmit, configData }: Appro
   const pageSetId = searchParams.get('pageSetId') || '';
   const [ckOptions, setCkOptions] = useState([]);
   const [useApprover, setApprover] = useState<string>('approver');
-  const [approverConfigData, setApproverConfigData] = useState<ApproverConfigDataType>(
-    configData || {
-      approverConfig: {
-        approvalMode: 'any_sign',
-        users: [],
-        roles: []
-      },
-      buttonConfigs: [],
-      fieldPermConfig: {
-        useNodeConfig: false
-      },
-      advancedConfig: {
-        autoApproveCfg: {},
-        emptyApproverCfg: {}
-      }
+  const [approverConfigData, setApproverConfigData] = useState<ApproverConfigDataType>(processInitData(configData));
+  function processInitData(initData: any) {
+    if (!initData) {
+      return {
+        approverConfig: {
+          approvalMode: 'any_sign',
+          users: [],
+          roles: []
+        },
+        buttonConfigs: [],
+        fieldPermConfig: {
+          useNodeConfig: false
+        },
+        advancedConfig: {
+          autoApproveCfg: {},
+          emptyApproverCfg: {}
+        }
+      };
     }
-  );
+    const keys = Object.keys(initData);
+    if (keys.length === 2 && keys.includes('name') && keys.includes('errorMsg')) {
+      return {
+        ...initData,
+        buttonConfigs: defaultBtnConfigArr
+      };
+    } else {
+      return initData;
+    }
+  }
   const [editValue, setEditValue] = useState('');
   const { approverConfig, buttonConfigs, fieldPermConfig, advancedConfig } = approverConfigData;
 

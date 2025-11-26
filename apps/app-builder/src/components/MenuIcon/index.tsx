@@ -1,8 +1,7 @@
 import { Button, Input, Empty } from '@arco-design/web-react';
 import { IconSync, IconLeft } from '@arco-design/web-react/icon';
 import { useEffect, useState } from 'react';
-import DynamicIcon from '../DynamicIcon';
-import { menuIconList, menuIconType, type MenuItem } from './const';
+import { webMenuIcons } from '@onebase/ui-kit';
 import styles from './index.module.less';
 
 const InputSearch = Input.Search;
@@ -16,26 +15,29 @@ interface IProps {
 // 菜单图标
 const MenuIcon = (props: IProps) => {
   const { style, onSelected, handleBack } = props;
-  const [data, setData] = useState<MenuItem[]>(menuIconList);
+  const allWebMenuIcons = webMenuIcons.map((ele) => ele.children).reduce((acc, current) => acc.concat(current), []);
+  const [data, setData] = useState<any[]>(allWebMenuIcons);
   const [activeMenu, setActiveMenu] = useState<string>('all');
   const [activeIcon, setActiveIcon] = useState<string>();
   const [inputValue, setInputValue] = useState<string>('');
 
+  const menuIconType = [{ name: '全部', type: 'all' }, ...webMenuIcons];
+
   useEffect(() => {
     if (inputValue) {
-      const result = menuIconList
+      const result = webMenuIcons
         .filter((item) => item.name.includes(inputValue))
         .filter((item) => item.type === activeMenu || activeMenu === 'all');
 
       setData(result);
     } else {
-      const result = activeMenu === 'all' ? menuIconList : menuIconList.filter((v) => v.type === activeMenu);
-      setData(result);
+      const result = activeMenu === 'all' ? allWebMenuIcons : webMenuIcons.find((v) => v.type === activeMenu)?.children;
+      setData(result || []);
     }
   }, [inputValue, activeMenu]);
 
   const handleReset = () => {
-    setData(menuIconList);
+    setData(allWebMenuIcons);
     setInputValue('');
   };
 
@@ -58,17 +60,17 @@ const MenuIcon = (props: IProps) => {
 
       <div className={styles.menuContainer}>
         <div className={styles.menuType}>
-          {menuIconType.map((type) => (
+          {menuIconType.map((item) => (
             <div
               className={styles.menuItem}
-              key={type.key}
+              key={item.type}
               style={{
-                color: activeMenu === type.key ? '#2468F2' : '#111',
-                backgroundColor: activeMenu === type.key ? '#E6F0FF' : '#FFF'
+                color: activeMenu === item.type ? '#2468F2' : '#111',
+                backgroundColor: activeMenu === item.type ? '#E6F0FF' : '#FFF'
               }}
-              onClick={() => setActiveMenu(type.key)}
+              onClick={() => setActiveMenu(item.type)}
             >
-              {type.name}
+              {item.name}
             </div>
           ))}
         </div>
@@ -90,12 +92,7 @@ const MenuIcon = (props: IProps) => {
                     handleBack();
                   }}
                 >
-                  <DynamicIcon
-                    IconComponent={item.icon}
-                    theme="outline"
-                    size="32"
-                    fill="#333"
-                  />
+                  <img src={item.icon} style={{ width: '32px', height: '32px', color: '#333' }} alt="" />
                   <div className={styles.name}>{item.name}</div>
                 </div>
               ))}

@@ -16,7 +16,7 @@ import { COMPONENT_GROUP_NAME, type GridItem } from 'src/utils/const';
 import { v4 as uuidv4 } from 'uuid';
 import { ENTITY_COMPONENT_TYPES, ALL_COMPONENT_TYPES, FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { COMPONENT_MAP } from '../../../componentsMap';
-import { STATUS_OPTIONS, STATUS_VALUES, WIDTH_VALUES, WIDTH_OPTIONS, COLOR_MODE_TYPES,DEFAULT_OPTIONS_TYPE } from '../../../constants';
+import { STATUS_OPTIONS, STATUS_VALUES, WIDTH_VALUES, WIDTH_OPTIONS, COLOR_MODE_TYPES, DEFAULT_OPTIONS_TYPE, DEFAULT_VALUE_TYPES } from '../../../constants';
 import { getComponentSchema } from '../../../schema';
 import './index.css';
 import { type XColumnLayoutConfig } from './schema';
@@ -210,7 +210,7 @@ const XColumnLayout = (props: XColumnLayoutConfig & { runtime?: boolean; detailM
 
                     // 数据长度 dataLength
                     // 小数位数 decimalPlaces
-                    // 默认值 defaultValue
+                    // 默认值 defaultValue => defaultValueConfig
                     schema.config.defaultValue = field.defaultValue;
                     // 字段描述 description
                     schema.config.tooltip = field.description;
@@ -305,9 +305,15 @@ const XColumnLayout = (props: XColumnLayoutConfig & { runtime?: boolean; detailM
 
                     // 数据长度 dataLength
                     // 小数位数 decimalPlaces
-                    // 默认值 defaultValue
-                    const defaultValueConfig = { ...subSchema.config.defaultValue, customValue: ele.defaultValue };
-                    subSchema.config.defaultValueConfig = defaultValueConfig;
+                    // 默认值 defaultValue => defaultValueConfig
+                    if (subSchema.config.defaultValueConfig) {
+                      const defaultValueConfig = {
+                        ...subSchema.config.defaultValueConfig,
+                        type: DEFAULT_VALUE_TYPES.CUSTOM,
+                        customValue: ele.defaultValue
+                      };
+                      subSchema.config.defaultValueConfig = defaultValueConfig;
+                    }
                     // 字段描述 description
                     subSchema.config.tooltip = ele.description;
                     subSchema.config.verify = {
