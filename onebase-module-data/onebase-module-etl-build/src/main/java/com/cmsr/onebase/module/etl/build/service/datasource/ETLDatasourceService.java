@@ -17,7 +17,7 @@ public interface ETLDatasourceService {
 
     PageResult<DatasourceRespVO> getETLDatasourcePage(DatasourcePageReqVO pageReqVO);
 
-    CommonResult<String> createDatasource(ETLDatasourceCreateReqVO createReqVO);
+    CommonResult<MetaBriefVO> createDatasource(ETLDatasourceCreateReqVO createReqVO);
 
     void updateDatasource(ETLDatasourceUpdateReqVO updateReqVO);
 

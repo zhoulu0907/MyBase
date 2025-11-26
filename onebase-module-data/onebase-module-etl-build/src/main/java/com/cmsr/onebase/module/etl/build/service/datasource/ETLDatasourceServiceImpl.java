@@ -98,7 +98,7 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
     }
 
     @Override
-    public CommonResult<String> createDatasource(ETLDatasourceCreateReqVO createReqVO) {
+    public CommonResult<MetaBriefVO> createDatasource(ETLDatasourceCreateReqVO createReqVO) {
         Long applicationId = createReqVO.getApplicationId();
         String datasourceType = createReqVO.getDatasourceType();
 
@@ -132,7 +132,10 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
                         datasourceId);
             }
         }
-        return CommonResult.success(uuid);
+        MetaBriefVO metaBriefVO = new MetaBriefVO();
+        metaBriefVO.setId(String.valueOf(datasourceDO.getId()));
+        metaBriefVO.setUuid(uuid);
+        return CommonResult.success(metaBriefVO);
     }
 
     @Override
