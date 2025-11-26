@@ -97,6 +97,7 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
         ETLWorkflowDO workflowDO = getWorkflowById(workflowId);
         WorkflowDetailVO workflowDetailVO = new WorkflowDetailVO();
         workflowDetailVO.setId(workflowDO.getId());
+        workflowDetailVO.setFlowUuid(workflowDO.getWorkflowUuid());
         workflowDetailVO.setFlowName(workflowDO.getWorkflowName());
         workflowDetailVO.setConfig(workflowDO.getConfig());
 
@@ -344,7 +345,7 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
         for (ETLExecutionLogDO logDO : executionLogResult.getList()) {
             ExecutionLogVO executionLogVO = new ExecutionLogVO();
             executionLogVO.setApplicationId(logDO.getApplicationId());
-            executionLogVO.setWorkflowId(logDO.getWorkflowUuid());
+            executionLogVO.setFlowUuid(logDO.getWorkflowUuid());
             executionLogVO.setBusinessDate(logDO.getBussinessDate());
             executionLogVO.setStartTime(logDO.getStartTime());
             executionLogVO.setEndTime(logDO.getEndTime());
@@ -408,7 +409,7 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
 
         ScheduleRespVO scheduleRespVO = new ScheduleRespVO();
         scheduleRespVO.setApplicationId(workflowDO.getApplicationId());
-        scheduleRespVO.setWorkflowId(workflowId);
+        scheduleRespVO.setFlowUuid(workflowDO.getWorkflowUuid());
         scheduleRespVO.setFlowName(workflowDO.getWorkflowName());
         scheduleRespVO.setEnableStatus(workflowDO.getIsEnabled());
         scheduleRespVO.setScheduleStrategy(workflowDO.getScheduleStrategy());
