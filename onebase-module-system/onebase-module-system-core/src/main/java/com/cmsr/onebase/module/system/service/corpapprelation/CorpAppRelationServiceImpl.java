@@ -200,7 +200,7 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
      * @return CorpApplicationRespVO 响应VO对象
      */
     private CorpApplicationRespVO convertToRespVO(CorpAppRelationDO corpDO, Map<Long, ApplicationDTO> applicationMap, Map<Long, List<TagVO>> tagsMap) {
-        CorpApplicationRespVO respVO =  new CorpApplicationRespVO();
+        CorpApplicationRespVO respVO = new CorpApplicationRespVO();
         ApplicationDTO appDo = applicationMap.get(corpDO.getApplicationId());
         if (appDo != null) {
             respVO = BeanUtils.toBean(appDo, CorpApplicationRespVO.class);
@@ -240,14 +240,15 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
     }
 
     @Override
-    public List<ApplicationDTO> getCorpNOApplicationsList(Long corpId, String appName) {
-        List<ApplicationDTO> applicationDTOList = appApplicationApi.findAppApplicationByAppName(appName);
-        if(null==corpId){
+    public List<ApplicationDTO> getCorpNoRelationAppList(CorpRelationAppReqVO relationAppReqVO) {
+        List<ApplicationDTO> applicationDTOList = appApplicationApi.findAppApplicationByAppName(relationAppReqVO.getAppName());
+        if (null == relationAppReqVO.getCorpId()) {
+            // 用于企业创建时拉取全部应用
             return applicationDTOList;
         }
         // 获取企业已关联的数据
-        List<CorpAppRelationDO> corpAppRelationDOList =  corpAppRelationDataRepository.findCorpAppRelationByCorpId(corpId);
-        if(corpAppRelationDOList.isEmpty()){
+        List<CorpAppRelationDO> corpAppRelationDOList = corpAppRelationDataRepository.findCorpAppRelationByCorpId(relationAppReqVO.getCorpId());
+        if (corpAppRelationDOList.isEmpty()) {
             return applicationDTOList;
         }
         // 获取已关联的应用ID集合

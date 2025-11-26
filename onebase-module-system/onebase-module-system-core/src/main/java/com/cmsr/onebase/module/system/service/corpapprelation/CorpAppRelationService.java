@@ -54,12 +54,31 @@ public interface CorpAppRelationService {
      */
     PageResult<CorpApplicationRespVO> getCorpAppRelationPage(CorpAppPageReqVO pageReqVO);
 
+    /**
+     * 根据企业ID删除企业应用关联
+     * @param corpID
+     */
     void deleteCorpAppRelationByCorpId(Long corpID);
 
+    /**
+     * 获取企业应用关联列表
+     * @param corpAppRelationPageReqVO
+     * @return
+     */
     List<CorpAppRelationDO> getCorpAppRelationList(CorpAppRelationPageReqVO corpAppRelationPageReqVO);
 
 
+    /**
+     * 企业启用/禁用
+     * @param id
+     * @param status
+     */
     void updateStatus(Long id, Long status);
 
-    List<ApplicationDTO> getCorpNOApplicationsList(Long corpId, String appName);
+    /**
+     * 获取排除企业已关联应用的应用列表
+     * @param relationAppReqVO
+     * @return
+     */
+    List<ApplicationDTO> getCorpNoRelationAppList(CorpRelationAppReqVO relationAppReqVO);
 }

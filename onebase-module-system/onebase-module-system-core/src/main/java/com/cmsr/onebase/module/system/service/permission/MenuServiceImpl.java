@@ -199,7 +199,7 @@ public class MenuServiceImpl implements MenuService {
         if (CollUtil.isEmpty(codes)) {
             return Lists.newArrayList();
         }
-        return menuDataRepository.findAllByCodes(codes);
+        return menuDataRepository.findAllEnableByCodes(codes);
     }
 
     /**

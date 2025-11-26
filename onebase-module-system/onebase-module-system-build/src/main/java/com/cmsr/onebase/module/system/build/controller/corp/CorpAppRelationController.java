@@ -8,6 +8,7 @@ import com.cmsr.onebase.module.system.vo.corp.CorpApplicationRespVO;
 import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppPageReqVO;
 import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppRelationInertReqVO;
 import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppRelationUpdateReqVO;
+import com.cmsr.onebase.module.system.vo.corpapprelation.CorpRelationAppReqVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
@@ -69,12 +70,11 @@ public class CorpAppRelationController {
         return success(pageResult);
     }
 
-    @PostMapping("/corp-no-applications-list")
+    @PostMapping("/corp-no-relation-app-list")
     @Operation(summary = "获取企业未关联应用", description = "主要用于前端的下拉选项")
     @PreAuthorize("@ss.hasPermission('tenant:corp:query')")
-    public CommonResult<List<ApplicationDTO>> getCorpNOApplicationsList(@RequestParam(value = "corpId", required = false)  Long corpId ,
-                                                                        @RequestParam(value = "appName", required = false) String appName) {
-        List<ApplicationDTO>  applicationsList=  corpAppRelationService.getCorpNOApplicationsList(corpId,appName);
+    public CommonResult<List<ApplicationDTO>> getCorpNoRelationAppList(CorpRelationAppReqVO relationAppReqVO) {
+        List<ApplicationDTO>  applicationsList=  corpAppRelationService.getCorpNoRelationAppList(relationAppReqVO);
         return success( applicationsList);
     }
 }

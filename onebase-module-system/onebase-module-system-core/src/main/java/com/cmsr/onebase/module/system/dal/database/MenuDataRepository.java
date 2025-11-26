@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.system.dal.database;
 
 import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.module.system.vo.menu.SystemMenuListReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO;
 import org.anyline.data.param.init.DefaultConfigStore;
@@ -96,9 +97,10 @@ public class MenuDataRepository extends DataRepository<MenuDO> {
      * @param codes 查询条件
      * @return 菜单列表
      */
-    public List<MenuDO> findAllByCodes(Set<String> codes) {
+    public List<MenuDO> findAllEnableByCodes(Set<String> codes) {
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.in(MenuDO.PERMISSION, codes);
+        configStore.eq(MenuDO.STATUS, CommonStatusEnum.ENABLE.getStatus());
         return findAllByConfig(configStore);
     }
 }
