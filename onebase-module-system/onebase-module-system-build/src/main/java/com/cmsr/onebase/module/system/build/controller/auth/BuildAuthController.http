@@ -6,7 +6,7 @@
 ### 请求 /login 接口 => 成功
 POST {{baseUrl}}/system/auth/login
 Content-Type: application/json
-tenant-id: {{adminTenantId}}
+X-Tenant-Id: {{adminTenantId}}
 tag: {{tag}}
 
 {
@@ -26,48 +26,14 @@ if (response.status === 200) {
 }
 %}
 
-
-### 请求 /admin-login 接口 => 成功
-POST {{baseUrl}}/system/auth/admin-login
-Content-Type: application/json
-tenant-id: {{adminTenantId}}
-tag: {{tag}}
-
-{
-  "username": "admin",
-  "password": "admin123"
-}
-
-> {%
-// 管理员登录成功后自动更新token到环境变量
-if (response.status === 200) {
-    const responseData = response.body;
-    if (responseData.code === 0 && responseData.data && responseData.data.accessToken) {
-        client.global.set("token", responseData.data.accessToken);
-        console.log("Admin Token已更新: " + responseData.data.accessToken);
-    }
-}
-%}
-
-### 请求 /admin-login 接口 => 失败
-POST {{baseUrl}}/system/auth/admin-login
-Content-Type: application/json
-tenant-id: {{adminTenantId}}
-tag: {{tag}}
-
-{
-  "username": "test",
-  "password": "test"
-}
-
 ### 请求 /login 接口 => 成功
 POST {{baseUrl}}/system/auth/tenant-login
 Content-Type: application/json
-tenant-id: 152071632369614848
+X-Tenant-Id: 153539686553452544
 tag: {{tag}}
 
-{"username":"test004","password":"AdminChina2025!",
-  "captchaVerification":"oXGkq00pF8GQBeRCEJE7JfNLSx4sdyWCYcPorKIb0la+sWJuLIjClL/bhezkiSb2T2qq++I+f4U5fCCWQA9kBQhSiEC7BS/r9y7/HhAc2ko=",
+{"username":"user001","password":"AdminChina2025!",
+  "captchaVerification":"n89lvlHjSOsQQ5kGXjNNtdnkfPnK2Y3YbPwvAEXoVyL0TqzrDumdg8MONVs+z5VaSPf4ni6QKFhhx0GcaXBF4pWVx9hsSsBZ8mysqU8u45E=",
   "deviceId":666}
 
 > {%
@@ -84,7 +50,7 @@ tag: {{tag}}
 ### 请求 /login 接口 => 成功
 POST {{baseUrl}}/system/auth/corp-login
 Content-Type: application/json
-tenant-id: {{adminTenantId}}
+X-Tenant-Id: {{adminTenantId}}
 tag: {{tag}}
 
 {
@@ -108,46 +74,22 @@ tag: {{tag}}
 ### 请求 /get-permission-info 接口 => 成功
 GET {{baseUrl}}/system/auth/get-permission-info
 Authorization: Bearer {{token}}
-tenant-id: {{adminTenantId}}
+X-Tenant-Id: {{adminTenantId}}
 
 ### 请求 /get-permission-info 接口+code => 成功
 GET {{baseUrl}}/system/auth/get-permission-info?code=tenant
 Authorization: Bearer {{token}}
-tenant-id: {{adminTenantId}}
+X-Tenant-Id: {{adminTenantId}}
 
 
 ### 请求 /reset-password 接口 => 失败
 POST {{baseUrl}}/system/auth/reset-password
 Content-Type: application/json
 Authorization: Bearer {{token}}
-tenant-id: {{adminTenantId}}
+X-Tenant-Id: {{adminTenantId}}
 tag: {{tag}}
 
 {
   "userId": "544417214451814400",
   "password": "admin125"
 }
-
-
-
-### 所租户login 接口 => 成功
-POST {{baseUrl}}/system/auth/login
-Content-Type: application/json
-tenant-id: 140488242990448640
-tag: {{tag}}
-
-{
-  "username": "test003",
-  "password": "AdminChina2025!"
-}
-
-> {%
-    // 登录成功后自动更新token到环境变量
-    if (response.status === 200) {
-        const responseData = response.body;
-        if (responseData.code === 0 && responseData.data && responseData.data.accessToken) {
-            client.global.set("token", responseData.data.accessToken);
-            console.log("Token已更新: " + responseData.data.accessToken);
-        }
-    }
-%}
