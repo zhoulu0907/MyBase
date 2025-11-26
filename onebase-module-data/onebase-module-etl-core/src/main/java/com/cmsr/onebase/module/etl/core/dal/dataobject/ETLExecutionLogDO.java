@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 public class ETLExecutionLogDO extends BaseAppEntity {
 
     @Column(value = "workflow_uuid")
-    private Long workflowUuid;
+    private String workflowUuid;
 
     @Column(value = "business_date")
     private LocalDateTime bussinessDate;

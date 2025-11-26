@@ -14,7 +14,7 @@ public class ScheduleRespVO {
     private Long applicationId;
 
     @Schema(description = "ETL ID")
-    private Long workflowId;
+    private String flowUuid;
 
     @Schema(description = "ETL名称")
     private String flowName;

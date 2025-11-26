@@ -48,4 +48,10 @@ public class ETLWorkflowRepository extends BaseAppRepository<ETLWorkflowMapper, 
         Page<WorkflowBriefVO> pageResult = getMapper().paginateAs(pageReqVO.getPageNo(), pageReqVO.getPageSize(), queryWrapper, WorkflowBriefVO.class);
         return new PageResult<>(pageResult.getRecords(), pageResult.getTotalRow());
     }
+
+    public ETLWorkflowDO findOneByUuid(String workflowUuid) {
+        QueryWrapper queryWrapper = this.query()
+                .eq(ETLWorkflowDO::getWorkflowUuid, workflowUuid);
+        return getOne(queryWrapper);
+    }
 }

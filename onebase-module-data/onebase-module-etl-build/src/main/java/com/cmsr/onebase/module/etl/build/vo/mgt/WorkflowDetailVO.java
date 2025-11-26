@@ -12,6 +12,9 @@ public class WorkflowDetailVO {
     @Schema(description = "ETL ID")
     private Long id;
 
+    @Schema(description = "ETL UUID")
+    private String flowUuid;
+
     @Schema(description = "ETL名称")
     private String flowName;
 
