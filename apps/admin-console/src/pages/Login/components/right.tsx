@@ -57,7 +57,7 @@ const Right: React.FC = () => {
         return;
       }
       const headers = {
-        'Tenant-Id': tenantId
+        'X-Tenant-Id': tenantId
       };
       const loginResp = await adminLogin(values, headers);
       // 显示成功消息并跳转

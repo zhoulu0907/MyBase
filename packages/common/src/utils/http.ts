@@ -105,12 +105,18 @@ export class HttpClient {
           if (data.code !== 0) {
             Message.error(data.msg || '请求失败');
             if (data.code === 401) {
+              const loginURL = TokenManager.getTokenInfo()?.loginURL;
+
               TokenManager.clearToken();
 
-              const redirectURL = getHashQueryParam('redirectURL') || window.location.href;
-              //   window.location.href = '/#/login';
-
-              window.location.href = `/#/login?redirectURL=${redirectURL}`;
+              // 跳转到登录页
+              if (loginURL) {
+                window.location.href = loginURL;
+              } else {
+                const redirectURL = getHashQueryParam('redirectURL') || window.location.href;
+                //   window.location.href = '/#/login';
+                window.location.href = `/#/login?redirectURL=${redirectURL}`;
+              }
             }
             return Promise.reject(new Error(data.msg || '请求失败'));
           }
