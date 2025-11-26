@@ -30,11 +30,14 @@ export const InputNodeConfig: React.FC = () => {
   );
 
   useEffect(() => {
-    if (nodeData.value[curNode.value.id]?.config?.datasourceId && nodeData.value[curNode.value.id]?.config?.tableId) {
-      handleListETLTables(nodeData.value[curNode.value.id]?.config?.datasourceId);
-      handlelistETLTableColumns(nodeData.value[curNode.value.id]?.config?.tableId);
+    if (
+      nodeData.value[curNode.value.id]?.config?.datasourceUUID &&
+      nodeData.value[curNode.value.id]?.config?.tableUUID
+    ) {
+      handleListETLTables(nodeData.value[curNode.value.id]?.config?.datasourceUUID);
+      handlelistETLTableColumns(nodeData.value[curNode.value.id]?.config?.tableUUID);
     }
-  }, [nodeData.value[curNode.value.id]?.config?.tableId]);
+  }, [nodeData.value[curNode.value.id]?.config?.tableUUID]);
 
   useEffect(() => {
     if (curDrawerTab.value == ETLDrawerTab.DATA_PREVIEW) {
@@ -62,27 +65,28 @@ export const InputNodeConfig: React.FC = () => {
     setNodeDataAndResetDownstream(payload, curNode.value.id, graphData.value, nodeData.value);
   }, [selectedColumns]);
 
-  const handleListETLTables = async (datasourceId: string) => {
-    const res = await listETLTables({ id: datasourceId });
+  const handleListETLTables = async (datasourceUuid: string) => {
+    const res = await listETLTables({ uuid: datasourceUuid });
+    console.log(res);
     setTables(res);
   };
 
-  const handlelistETLTableColumns = async (tableId: string) => {
-    const res = await listETLTableColumns({ tableId });
+  const handlelistETLTableColumns = async (tableUuid: string) => {
+    const res = await listETLTableColumns({ tableUuid });
     console.log(res);
     setCurColumns(res);
   };
 
   const handlePreviewData = async () => {
-    const datasourceId = nodeData.value[curNode.value.id]?.config?.datasourceId;
-    const tableId = nodeData.value[curNode.value.id]?.config?.tableId;
+    const datasourceUUID = nodeData.value[curNode.value.id]?.config?.datasourceUUID;
+    const tableUUID = nodeData.value[curNode.value.id]?.config?.tableUUID;
 
-    if (!datasourceId || !tableId) {
+    if (!datasourceUUID || !tableUUID) {
       return;
     }
     const res = await previewETLDatasource({
-      datasourceId: datasourceId,
-      tableId: tableId
+      datasourceUuid: datasourceUUID,
+      tableUuid: tableUUID
     });
 
     console.log('res: ', res);
@@ -93,23 +97,24 @@ export const InputNodeConfig: React.FC = () => {
 
   const handleOk = () => {
     const payload = nodeData.value[curNode.value.id];
-    if (payload?.config?.tableId) {
-      handlelistETLTableColumns(payload?.config?.tableId);
+    if (payload?.config?.tableUUID) {
+      handlelistETLTableColumns(payload?.config?.tableUUID);
     }
 
     setIsModalVisible(false);
   };
 
-  const handleUpdate = (tableId: string, columns: ELTColumn[]) => {
+  const handleUpdate = (datasourceUUID: string, tableUUID: string, columns: ELTColumn[]) => {
     setCurColumns(columns);
 
-    if (tableId !== nodeData.value[curNode.value.id]?.config?.tableId) {
+    if (tableUUID !== nodeData.value[curNode.value.id]?.config?.tableUUID) {
       setSelectColumns([]);
       let payload = nodeData.value[curNode.value.id];
 
       payload.config = {
         ...payload.config,
-        tableId: tableId,
+        datasourceUUID: datasourceUUID,
+        tableUUID: tableUUID,
         fields: []
       };
 
@@ -133,10 +138,13 @@ export const InputNodeConfig: React.FC = () => {
               </Button>
             </div>
           </div>
-          {nodeData.value[curNode.value.id]?.config?.tableId && (
+          {nodeData.value[curNode.value.id]?.config?.tableUUID && (
             <div className={styles.dataSourceContent}>
               <div className={styles.dataSourceName}>
-                {tables.find((table: ETLTable) => table.id === nodeData.value[curNode.value.id]?.config?.tableId)?.name}
+                {
+                  tables.find((table: ETLTable) => table.uuid === nodeData.value[curNode.value.id]?.config?.tableUUID)
+                    ?.name
+                }
               </div>
 
               <div className={styles.columnContent}>
