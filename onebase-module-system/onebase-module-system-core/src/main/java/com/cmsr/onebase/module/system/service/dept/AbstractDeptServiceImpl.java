@@ -21,6 +21,8 @@ import com.cmsr.onebase.module.system.vo.dept.*;
 import com.cmsr.onebase.module.system.vo.user.UserAdminOrDirectorUpdateReqVO;
 import com.cmsr.onebase.module.system.vo.user.UserSimpleRespVO;
 import com.google.common.annotations.VisibleForTesting;
+import com.mzt.logapi.context.LogRecordContext;
+import com.mzt.logapi.starter.annotation.LogRecord;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.init.DefaultConfigStore;
@@ -37,6 +39,7 @@ import java.util.stream.Collectors;
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertSet;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
+import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
 
 /**
  * 部门 Service 实现类
@@ -72,6 +75,8 @@ public abstract class AbstractDeptServiceImpl implements DeptService {
 
     @Override
     @CacheEvict(cacheNames = RedisKeyConstants.DEPT_CHILDREN_ID_LIST, allEntries = true, beforeInvocation = true)
+    @LogRecord(type = SYSTEM_DEPT_TYPE, subType = SYSTEM_DEPT_CREATE_SUB_TYPE, bizNo = "{{#dept.id}}",
+            success = SYSTEM_DEPT_CREATE_SUCCESS)
     public Long createDept(DeptSaveReqVO createReqVO) {
         if (createReqVO.getParentId() == null) {
             createReqVO.setParentId(DeptDO.PARENT_ID_ROOT);
@@ -101,11 +106,19 @@ public abstract class AbstractDeptServiceImpl implements DeptService {
 
         getDeptDataRepository().insert(dept);
 
+        // 记录操作日志上下文
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+
+        LogRecordContext.putVariable("loginUser", loginUser);
+        LogRecordContext.putVariable("dept", dept);
+
         return dept.getId();
     }
 
     @Override
     @CacheEvict(cacheNames = RedisKeyConstants.DEPT_CHILDREN_ID_LIST, allEntries = true, beforeInvocation = true)
+    @LogRecord(type = SYSTEM_DEPT_TYPE, subType = SYSTEM_DEPT_UPDATE_SUB_TYPE, bizNo = "{{#dept.id}}",
+            success = SYSTEM_DEPT_UPDATE_SUCCESS)
     public void updateDept(DeptSaveReqVO updateReqVO) {
         if (updateReqVO.getParentId() == null) {
             updateReqVO.setParentId(DeptDO.PARENT_ID_ROOT);
@@ -120,10 +133,18 @@ public abstract class AbstractDeptServiceImpl implements DeptService {
         // 更新部门
         DeptDO updateObj = BeanUtils.toBean(updateReqVO, DeptDO.class);
         getDeptDataRepository().update(updateObj);
+
+        // 记录操作日志上下文
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+
+        LogRecordContext.putVariable("loginUser", loginUser);
+        LogRecordContext.putVariable("dept", updateObj);
     }
 
     @Override
     @CacheEvict(cacheNames = RedisKeyConstants.DEPT_CHILDREN_ID_LIST, allEntries = true, beforeInvocation = true)
+    @LogRecord(type = SYSTEM_DEPT_TYPE, subType = SYSTEM_DEPT_DELETE_SUB_TYPE, bizNo = "{{#dept.id}}",
+            success = SYSTEM_DEPT_DELETE_SUCCESS)
     public void deleteDept(Long id) {
         // 校验是否存在
         validateDeptExists(id);
@@ -136,8 +157,17 @@ public abstract class AbstractDeptServiceImpl implements DeptService {
         if (CollectionUtils.isNotEmpty(userListByDeptIds)) {
             throw exception(DEPT_DEL_FAILD_EXISTS_USERS);
         }
+
+        DeptDO deptDO = getDeptDataRepository().findById(id);
+
         // 删除部门
         getDeptDataRepository().deleteById(id);
+
+        // 记录操作日志上下文
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+
+        LogRecordContext.putVariable("loginUser", loginUser);
+        LogRecordContext.putVariable("dept", deptDO);
     }
 
     /**

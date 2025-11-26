@@ -1,6 +1,21 @@
 package com.cmsr.onebase.module.system.service.oauth2;
 
-import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertSet;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.lang.Assert;
+import com.cmsr.onebase.framework.common.consts.NumberConstant;
+import com.cmsr.onebase.framework.common.util.date.DateUtils;
+import com.cmsr.onebase.framework.security.core.LoginUser;
+import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
+import com.cmsr.onebase.module.system.dal.database.OAuth2ApproveDataRepository;
+import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2ApproveDO;
+import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2ClientDO;
+import com.google.common.annotations.VisibleForTesting;
+import com.mzt.logapi.context.LogRecordContext;
+import com.mzt.logapi.starter.annotation.LogRecord;
+import jakarta.annotation.Resource;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -8,20 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.lang.Assert;
-import com.cmsr.onebase.framework.common.consts.NumberConstant;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.annotation.Validated;
-
-import com.cmsr.onebase.framework.common.util.date.DateUtils;
-import com.cmsr.onebase.module.system.dal.database.OAuth2ApproveDataRepository;
-import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2ApproveDO;
-import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2ClientDO;
-import com.google.common.annotations.VisibleForTesting;
-
-import jakarta.annotation.Resource;
+import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertSet;
+import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
 
 /**
  * OAuth2 批准 Service 实现类
@@ -44,6 +47,8 @@ public class OAuth2ApproveServiceImpl implements OAuth2ApproveService {
 
     @Override
     @Transactional
+    @LogRecord(type = SYSTEM_OAUTH_TYPE, subType = SYSTEM_OAUTH_APPROVE_SUB_TYPE, bizNo = "{{#clientDO.id}}",
+            success = SYSTEM_OAUTH_APPROVE_SUCCESS)
     public boolean checkForPreApproval(Long userId, Integer userType, String clientId, Collection<String> requestedScopes) {
         // 第一步，基于 Client 的自动授权计算，如果 scopes 都在自动授权中，则返回 true 通过
         OAuth2ClientDO clientDO = oauth2ClientService.validOAuthClientFromCache(clientId);
@@ -54,6 +59,11 @@ public class OAuth2ApproveServiceImpl implements OAuth2ApproveService {
             for (String scope : requestedScopes) {
                 saveApprove(userId, userType, clientId, scope, NumberConstant.ONE, expireTime);
             }
+            // 记录操作日志上下文
+            LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+
+            LogRecordContext.putVariable("loginUser", loginUser);
+            LogRecordContext.putVariable("client", clientDO);
             return true;
         }
 

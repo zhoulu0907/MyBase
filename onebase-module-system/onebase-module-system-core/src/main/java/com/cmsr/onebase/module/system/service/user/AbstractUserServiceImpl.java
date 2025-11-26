@@ -175,8 +175,12 @@ public abstract class AbstractUserServiceImpl implements UserService {
             permissionService.assignUserRoles(user.getId(), createReqVO.getRoleIds());
         }
 
-        // 3. 记录操作日志上下文
+        // 记录操作日志上下文
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+
+        LogRecordContext.putVariable("loginUser", loginUser);
         LogRecordContext.putVariable("user", user);
+
         return user.getId();
     }
 
@@ -276,6 +280,9 @@ public abstract class AbstractUserServiceImpl implements UserService {
 
 
         // 3. 记录操作日志上下文
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+
+        LogRecordContext.putVariable("loginUser", loginUser);
         LogRecordContext.putVariable("user", user);
         return user.getId();
     }
@@ -351,7 +358,10 @@ public abstract class AbstractUserServiceImpl implements UserService {
 
         // 3. 记录操作日志上下文
         LogRecordContext.putVariable(DiffParseFunction.OLD_OBJECT, BeanUtils.toBean(oldUser, UserInsertReqVO.class));
-        LogRecordContext.putVariable("user", oldUser);
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+
+        LogRecordContext.putVariable("loginUser", loginUser);
+        LogRecordContext.putVariable("oldUser", oldUser);
     }
 
     @Override
@@ -437,6 +447,9 @@ public abstract class AbstractUserServiceImpl implements UserService {
         getAdminUserDataRepository().update(updateObj);
 
         // 4. 记录操作日志上下文
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+
+        LogRecordContext.putVariable("loginUser", loginUser);
         LogRecordContext.putVariable("user", user);
         LogRecordContext.putVariable("newPassword", updateObj.getPassword());
     }
@@ -469,7 +482,11 @@ public abstract class AbstractUserServiceImpl implements UserService {
         userPostDataRepository.deleteByUserId(id);
         // 2.2 删除用户角色
         appAuthRoleUser.deleteByUserId(id);
-        // 3. 记录操作日志上下文
+
+        // 记录操作日志上下文
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+
+        LogRecordContext.putVariable("loginUser", loginUser);
         LogRecordContext.putVariable("user", user);
     }
 

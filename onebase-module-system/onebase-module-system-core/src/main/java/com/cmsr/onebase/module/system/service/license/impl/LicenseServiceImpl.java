@@ -4,15 +4,20 @@ import com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstant
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.system.vo.license.LicenseExportRespVO;
-import com.cmsr.onebase.module.system.vo.license.LicensePageReqVO;
-import com.cmsr.onebase.module.system.vo.license.LicenseSaveReqVO;
+import com.cmsr.onebase.framework.security.core.LoginUser;
+import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import com.cmsr.onebase.module.system.convert.license.LicenseConvert;
 import com.cmsr.onebase.module.system.dal.database.LicenseDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
 import com.cmsr.onebase.module.system.enums.license.LicenseStatusEnum;
 import com.cmsr.onebase.module.system.service.license.LicenseService;
+import com.cmsr.onebase.module.system.service.user.UserService;
 import com.cmsr.onebase.module.system.util.encrypt.SM4Utils;
+import com.cmsr.onebase.module.system.vo.license.LicenseExportRespVO;
+import com.cmsr.onebase.module.system.vo.license.LicensePageReqVO;
+import com.cmsr.onebase.module.system.vo.license.LicenseSaveReqVO;
+import com.mzt.logapi.context.LogRecordContext;
+import com.mzt.logapi.starter.annotation.LogRecord;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +38,7 @@ import java.util.List;
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.framework.license.core.handler.LicenseCheckHandler.LICENSE_KEY;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
+import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
 import static com.cmsr.onebase.module.system.util.encrypt.SM4Utils.sm4Encrypt;
 
 /**
@@ -179,7 +185,10 @@ public class LicenseServiceImpl implements LicenseService {
 
     @Override
     @Transactional
+    @LogRecord(type = SYSTEM_LICENSE_TYPE, subType = SYSTEM_LICENSE_IMPORT_SUB_TYPE, bizNo = "{{#licenseId}}",
+            success = SYSTEM_LICENSE_IMPORT_SUCCESS)
     public Long importLicense(MultipartFile file) {
+
 
         try {
             // 直接从MultipartFile获取字节数据并转换为字符串
@@ -224,6 +233,13 @@ public class LicenseServiceImpl implements LicenseService {
             stringRedisTemplate.delete(LICENSE_KEY);
 
             log.info("insert and enable new license ------> {}", licenseId);
+
+            // 记录操作日志上下文
+            LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+
+            LogRecordContext.putVariable("licenseId", licenseId);
+            LogRecordContext.putVariable("loginUser", loginUser);
+
             return licenseId;
         } catch (Exception e) {
             log.error("导入License失败", e);

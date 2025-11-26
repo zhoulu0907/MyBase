@@ -32,7 +32,7 @@ Content-Type: multipart/form-data; boundary=WebAppBoundary
 Content-Disposition: form-data; name="file"; filename="license.lic.sm4"
 Content-Type: application/octet-stream
 
-< ./license.lic-2.sm4
+< ./license.lic.sm4
 --WebAppBoundary--
 
 ### 创建凭证
@@ -46,8 +46,8 @@ tenant-id: {{adminTenantId}}
   "enterpriseCode": "F200090910001",
   "enterpriseAddress": "上海市浦东金桥开发区",
   "platformType": "私有化部署",
-  "expireTime": 1764547308000,
+  "expireTime": 1827705600000,
   "tenantLimit": "3000",
-  "userLimit": "1000",
+  "userLimit": "500000",
   "isTrial": false
 }

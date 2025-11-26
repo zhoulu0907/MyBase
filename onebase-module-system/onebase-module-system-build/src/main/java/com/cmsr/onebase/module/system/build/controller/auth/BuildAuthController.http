@@ -4,7 +4,7 @@
 # 登录成功后会自动更新token到环境变量中
 
 ### 请求 /login 接口 => 成功
-POST {{baseUrl}}/system/auth/login
+POST {{baseUrl}}/system/auth/tenant-login
 Content-Type: application/json
 tenant-id: {{adminTenantId}}
 tag: {{tag}}
@@ -140,3 +140,10 @@ tag: {{tag}}
         }
     }
 %}
+
+### 请求 /logout 接口 => 成功
+POST {{baseUrl}}/system/auth/logout
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+

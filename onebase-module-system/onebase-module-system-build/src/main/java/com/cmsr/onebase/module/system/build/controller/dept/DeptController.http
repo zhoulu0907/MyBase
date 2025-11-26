@@ -10,12 +10,12 @@ tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
 {
-  "name": "测试部门4",
+  "name": "测试部门Gsp123",
   "leaderUserId": "3385310182593531904"
 }
 
 ### 请求 /delete 接口 => 成功
-POST {{baseUrl}}/system/dept/delete?id=117
+POST {{baseUrl}}/system/dept/delete?id=153815681152909312
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
@@ -26,13 +26,13 @@ tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
 {
-  "id": 100,
-  "name": "测试部门-更新",
+  "id": 153815681152909312,
+  "name": "测试部门Gsp123-更新",
   "parentId": 0,
   "sort": 1,
   "leaderUserId": 3385310182593531904,
-  "phone": "13012345678",
-  "email": "test@example.com",
+  "phone": "13012345610",
+  "email": "testGsp123@example.com",
   "status": 0
 }
 

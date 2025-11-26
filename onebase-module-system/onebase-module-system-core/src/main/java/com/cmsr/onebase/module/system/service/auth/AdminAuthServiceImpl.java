@@ -35,6 +35,8 @@ import com.cmsr.onebase.module.system.service.user.UserService;
 import com.cmsr.onebase.module.system.vo.CaptchaVerificationReqVO;
 import com.cmsr.onebase.module.system.vo.auth.*;
 import com.google.common.annotations.VisibleForTesting;
+import com.mzt.logapi.context.LogRecordContext;
+import com.mzt.logapi.starter.annotation.LogRecord;
 import jakarta.annotation.Resource;
 import jakarta.validation.Validator;
 import lombok.Setter;
@@ -51,6 +53,7 @@ import java.util.Objects;
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.framework.common.util.servlet.ServletUtils.getClientIP;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
+import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
 
 /**
  * Auth Service 实现类
@@ -109,14 +112,15 @@ public class AdminAuthServiceImpl implements AdminAuthService {
         // 校验账号是否存在
         AdminUserDO user = userService.getUserByUsername(username);
         checkUserPsdAndStatus(username, password, user, logTypeEnum);
+
         return user;
     }
-
     public AdminUserDO mobileAuthenticate(String mobile, String password) {
         final LoginLogTypeEnum logTypeEnum = LoginLogTypeEnum.LOGIN_USERNAME;
         // 校验账号是否存在
         AdminUserDO user = userService.getUserByMobile(mobile);
         checkUserPsdAndStatus(mobile, password, user, logTypeEnum);
+
         return user;
     }
 
@@ -171,6 +175,8 @@ public class AdminAuthServiceImpl implements AdminAuthService {
     }
 
     @Override
+    @LogRecord(type = LOGIN_USER_TYPE, subType = LOGIN_USER_TENANT_SUB_TYPE, bizNo = "{{#user.id}}",
+            success = LOGIN_USER_TENANT_SUCCESS)
     public AuthLoginRespVO login(AuthLoginReqVO reqVO) {
         // 校验验证码
         validateCaptcha(reqVO);
@@ -197,10 +203,13 @@ public class AdminAuthServiceImpl implements AdminAuthService {
         AuthLoginRespVO authLoginRespVO=  createTokenAfterLoginSuccess(user.getId(), reqVO.getUsername(),reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_USERNAME);
         // 设置是否管理员
         authLoginRespVO.setAdminFlag(findAdminFlag(RoleCodeEnum.TENANT_ADMIN.getCode(),user.getId()));
+        LogRecordContext.putVariable("user", user);
         return authLoginRespVO;
     }
 
     @Override
+    @LogRecord(type = LOGIN_USER_TYPE, subType = LOGIN_USER_CORP_SUB_TYPE, bizNo = "{{#user.id}}",
+            success = LOGIN_USER_CORP_SUCCESS)
     public AuthLoginRespVO corpLogin(CorpAuthLoginReqVO reqVO) {
         // 校验验证码
         mobileValidateCaptcha(reqVO);
@@ -213,6 +222,8 @@ public class AdminAuthServiceImpl implements AdminAuthService {
         authLoginRespVO.setAdminFlag(findAdminFlag(RoleCodeEnum.CORP_ADMIN.getCode(),user.getId()));
         // 回显当前登录用户的企业id
         authLoginRespVO.setCorpId(user.getCorpId());
+        // 3. 记录操作日志上下文
+        LogRecordContext.putVariable("user", user);
         return authLoginRespVO;
     }
 
@@ -255,7 +266,6 @@ public class AdminAuthServiceImpl implements AdminAuthService {
         if (user == null) {
             throw exception(USER_NOT_EXISTS);
         }
-
         // 创建 Token 令牌，记录登录日志
         return createTokenAfterLoginSuccess(user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE);
     }
@@ -357,6 +367,8 @@ public class AdminAuthServiceImpl implements AdminAuthService {
     }
 
     @Override
+    @LogRecord(type = LOGIN_USER_TYPE, subType = LOGOUT_USER_SUB_TYPE, bizNo = "{{#user.id}}",
+            success = LOGOUT_USER_SUCCESS)
     public void logout(String token, Integer logType) {
         // 删除访问令牌
         OAuth2AccessTokenDO accessTokenDO = oauth2TokenService.removeAccessToken(token);
@@ -370,9 +382,15 @@ public class AdminAuthServiceImpl implements AdminAuthService {
                 token
         );
 
+
         // 删除成功，则记录登出日志
         createLogoutLog(accessTokenDO.getUserId(), accessTokenDO.getUserType(), logType);
+
+        // 记录操作日志上下文
+        AdminUserDO user = userService.getUser(accessTokenDO.getUserId());
+        LogRecordContext.putVariable("user", user);
     }
+
 
     private void createLogoutLog(Long userId, Integer userType, Integer logType) {
         LoginLogCreateReqDTO reqDTO = new LoginLogCreateReqDTO();
