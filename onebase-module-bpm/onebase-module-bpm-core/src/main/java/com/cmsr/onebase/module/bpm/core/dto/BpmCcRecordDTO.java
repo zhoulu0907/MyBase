@@ -86,4 +86,16 @@ public class BpmCcRecordDTO extends BpmFlowCcRecordDO {
      */
     @Column(name = "flow_status", length = 100)
     private String flowStatus;
+
+    /**
+     * 代理人名称
+     */
+    @Column(name = "agent_name")
+    private String agentName;
+
+    /**
+     * 代理人ID
+     */
+    @Column(name = "agent_id")
+    private Long agentId;
 }

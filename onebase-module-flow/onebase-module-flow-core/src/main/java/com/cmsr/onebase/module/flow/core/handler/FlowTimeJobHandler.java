@@ -18,6 +18,7 @@ import com.cmsr.onebase.module.flow.core.graph.FlowGraphBuilder;
 import com.cmsr.onebase.module.flow.core.job.JobClient;
 import com.cmsr.onebase.module.flow.core.job.JobCreateRequest;
 import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
+import com.mybatisflex.core.tenant.TenantManager;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
@@ -60,8 +61,7 @@ public class FlowTimeJobHandler {
     private RedissonClient redissonClient;
 
     public void initAllJob() {
-        //TODO 这里要用 TenantUtils.executeIgnore 去查询，但这个没有拆分出来，会导致依赖问题。
-        List<FlowProcessDO> flowProcessDOS = flowProcessRepository.findAllByEnableStatus(FlowEnableStatusEnum.ENABLE.getStatus());
+        List<FlowProcessDO> flowProcessDOS = TenantManager.withoutTenantCondition(() -> flowProcessRepository.findAllByEnableStatus(FlowEnableStatusEnum.ENABLE.getStatus()));
         for (FlowProcessDO flowProcessDO : flowProcessDOS) {
             try {
                 startJob(flowProcessDO);
@@ -72,7 +72,7 @@ public class FlowTimeJobHandler {
     }
 
     public void onApplicationChange(Long applicationId) throws InterruptedException {
-        List<FlowProcessDO> flowProcessDOS = flowProcessRepository.findByApplicationIdAndEnableStatus(applicationId, FlowEnableStatusEnum.ENABLE.getStatus());
+        List<FlowProcessDO> flowProcessDOS = TenantManager.withoutTenantCondition(() -> flowProcessRepository.findByApplicationIdAndEnableStatus(applicationId, FlowEnableStatusEnum.ENABLE.getStatus()));
         for (FlowProcessDO flowProcessDO : flowProcessDOS) {
             RLock lock = redissonClient.getLock(FlowUtils.toRedisProcessLockKey(flowProcessDO.getId()));
             if (lock.tryLock(60, TimeUnit.SECONDS)) {
@@ -108,7 +108,7 @@ public class FlowTimeJobHandler {
     }
 
     private void startTimeJob(FlowProcessDO flowProcessDO) {
-        FlowProcessTimeDO flowProcessTimeDO = flowProcessTimeRepository.findByProcessId(flowProcessDO.getId());
+        FlowProcessTimeDO flowProcessTimeDO = TenantManager.withoutTenantCondition(() -> flowProcessTimeRepository.findByProcessId(flowProcessDO.getId()));
         if (flowProcessTimeDO != null
                 && flowProcessTimeDO.getJobId() != null
                 && FlowJobStatusEnum.isDeployed(flowProcessTimeDO.getJobStatus())) {
@@ -129,11 +129,11 @@ public class FlowTimeJobHandler {
             flowProcessTimeDO.setProcessId(flowProcessDO.getId());
             flowProcessTimeDO.setJobId(jobId);
             flowProcessTimeDO.setJobStatus(FlowJobStatusEnum.DEPLOYED.getStatus());
-            flowProcessTimeRepository.insert(flowProcessTimeDO);
+            flowProcessTimeRepository.save(flowProcessTimeDO);
         } else {
             flowProcessTimeDO.setJobId(jobId);
             flowProcessTimeDO.setJobStatus(FlowJobStatusEnum.DEPLOYED.getStatus());
-            flowProcessTimeRepository.update(flowProcessTimeDO);
+            flowProcessTimeRepository.updateById(flowProcessTimeDO);
         }
         log.info("加载flowProcess流程成功：{}", flowProcessDO.getId());
     }
@@ -148,7 +148,7 @@ public class FlowTimeJobHandler {
     }
 
     private void startDateFieldJob(FlowProcessDO flowProcessDO) {
-        FlowProcessDateFieldDO flowProcessDateFieldDO = flowProcessDateFieldRepository.findByProcessId(flowProcessDO.getId());
+        FlowProcessDateFieldDO flowProcessDateFieldDO = TenantManager.withoutTenantCondition(() -> flowProcessDateFieldRepository.findByProcessId(flowProcessDO.getId()));
         if (flowProcessDateFieldDO != null
                 && flowProcessDateFieldDO.getJobId() != null
                 && FlowJobStatusEnum.isDeployed(flowProcessDateFieldDO.getJobStatus())) {
@@ -169,11 +169,11 @@ public class FlowTimeJobHandler {
             flowProcessDateFieldDO.setProcessId(flowProcessDO.getId());
             flowProcessDateFieldDO.setJobId(jobId);
             flowProcessDateFieldDO.setJobStatus(FlowJobStatusEnum.DEPLOYED.getStatus());
-            flowProcessDateFieldRepository.insert(flowProcessDateFieldDO);
+            flowProcessDateFieldRepository.save(flowProcessDateFieldDO);
         } else {
             flowProcessDateFieldDO.setJobId(jobId);
             flowProcessDateFieldDO.setJobStatus(FlowJobStatusEnum.DEPLOYED.getStatus());
-            flowProcessDateFieldRepository.update(flowProcessDateFieldDO);
+            flowProcessDateFieldRepository.updateById(flowProcessDateFieldDO);
         }
     }
 

@@ -1,40 +1,31 @@
 package com.cmsr.onebase.module.etl.core.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.orm.repo.BaseAppRepository;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLSchemaDO;
+import com.cmsr.onebase.module.etl.core.dal.mapper.ETLSchemaMapper;
+import com.mybatisflex.core.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.stereotype.Repository;
 
 @Slf4j
 @Repository
-public class ETLSchemaRepository extends DataRepository<ETLSchemaDO> {
-
-    public ETLSchemaRepository() {
-        super(ETLSchemaDO.class);
-    }
-
+public class ETLSchemaRepository extends BaseAppRepository<ETLSchemaMapper, ETLSchemaDO> {
 
     // 优化方法名：更简洁但保持语义清晰
     public ETLSchemaDO findOneByQualifiedName(Long applicationId, Long datasourceId, Long catalogId, String name) {
-        ConfigStore cs = new DefaultConfigStore();
-        cs.eq("application_id", applicationId);
-        cs.eq("datasource_id", datasourceId);
-        cs.eq("catalog_id", catalogId);
-        cs.eq("schema_name", name);
-
-        return findOne(cs);
+        QueryWrapper queryWrapper = query()
+                .eq(ETLSchemaDO::getApplicationId, applicationId)
+                .eq(ETLSchemaDO::getDatasourceId, datasourceId)
+                .eq(ETLSchemaDO::getCatalogId, catalogId)
+                .eq(ETLSchemaDO::getSchemaName, name);
+        return getOne(queryWrapper);
     }
 
     public void deleteAllByDatasourceId(Long datasourceId) {
-        ConfigStore cs = new DefaultConfigStore();
-        cs.eq("datasource_id", datasourceId);
-
-        deleteByConfig(cs);
+        QueryWrapper queryWrapper = query().eq(ETLSchemaDO::getDatasourceId, datasourceId);
+        remove(queryWrapper);
     }
 
-    @Override
     public ETLSchemaDO upsert(ETLSchemaDO schemaDO) {
         if (schemaDO == null) return null;
         Long applicationId = schemaDO.getApplicationId();
@@ -43,12 +34,10 @@ public class ETLSchemaRepository extends DataRepository<ETLSchemaDO> {
         String schemaName = schemaDO.getSchemaName();
         // 调用优化后的方法名
         ETLSchemaDO oldSchema = findOneByQualifiedName(applicationId, datasourceId, catalogId, schemaName);
-        if (oldSchema == null) {
-            schemaDO = insert(schemaDO);
-        } else {
+        if (oldSchema != null) {
             schemaDO.setId(oldSchema.getId());
-            update(schemaDO);
         }
+        saveOrUpdate(schemaDO);
         return schemaDO;
     }
 }

@@ -1,44 +1,44 @@
 package com.cmsr.onebase.module.flow.core.dal.dataobject;
 
-import com.cmsr.onebase.framework.data.base.BaseDO;
-import jakarta.persistence.Column;
-import jakarta.persistence.Table;
+import com.cmsr.onebase.framework.orm.entity.BaseEntity;
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-@Table(name = "flow_node_type")
-public class FlowNodeTypeDO extends BaseDO {
+@Table(value = "flow_node_type")
+public class FlowNodeTypeDO extends BaseEntity {
 
-    @Column(name = "level1_code")
+    @Column(value = "level1_code")
     private String level1Code;
 
-    @Column(name = "level2_code")
+    @Column(value = "level2_code")
     private String level2Code;
 
-    @Column(name = "level3_code")
+    @Column(value = "level3_code")
     private String level3Code;
 
-    @Column(name = "type_name")
+    @Column(value = "type_name")
     private String typeName;
 
-    @Column(name = "type_code")
+    @Column(value = "type_code")
     private String typeCode;
 
-    @Column(name = "simple_remark")
+    @Column(value = "simple_remark")
     private String simpleRemark;
 
-    @Column(name = "detail_description")
+    @Column(value = "detail_description")
     private String detailDescription;
 
-    @Column(name = "active_status")
+    @Column(value = "active_status")
     private Integer activeStatus;
 
-    @Column(name = "default_properties")
+    @Column(value = "default_properties")
     private String defaultProperties;
 
-    @Column(name = "sort_order")
+    @Column(value = "sort_order")
     private Integer sortOrder;
 
 }

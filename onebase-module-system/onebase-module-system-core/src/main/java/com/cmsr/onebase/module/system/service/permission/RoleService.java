@@ -110,7 +110,7 @@ public interface RoleService {
      * @param reqVO 角色分页查询
      * @return 角色分页结果
      */
-    PageResult<RoleDO> getRolePage(RolePageReqVO reqVO);
+    PageResult<RoleDO> findRolePageOnlyTenant(RolePageReqVO reqVO);
 
     /**
      * 判断角色编号数组中，是否有管理员
@@ -119,6 +119,16 @@ public interface RoleService {
      * @return 是否有管理员
      */
     boolean hasAnySuperOrTenantAdmin(Collection<Long> ids);
+
+
+    /**
+     * 判断角色编号数组中，是否有企业管理员
+     *
+     * @param ids 角色编号数组
+     * @return 是否有管理员
+     */
+    boolean hasAnyCorpAdmin(Collection<Long> ids);
+
 
     /**
      * 校验角色们是否有效。如下情况，视为无效：
@@ -139,5 +149,7 @@ public interface RoleService {
 
     RoleDO getRoleIdsByCodeAndTenantId(String code, Long id);
 
-    RoleDO getRoleByCodeIgnoreTenant(String code);
+    RoleDO getRoleByCode(String code);
+
+    boolean hasAnyDevloperAdmin(Collection<Long> roleIds);
 }

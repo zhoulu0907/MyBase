@@ -9,11 +9,10 @@ import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
 import com.cmsr.onebase.module.app.api.security.AppAuthSecurityApi;
-import com.cmsr.onebase.module.infra.api.security.SecurityConfigApi;
-import com.cmsr.onebase.module.infra.api.security.dto.LoginFailureResultDTO;
+import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
+import com.cmsr.onebase.framework.common.biz.security.dto.LoginFailureResultDTO;
 import com.cmsr.onebase.module.system.api.logger.dto.LoginLogCreateReqDTO;
 import com.cmsr.onebase.module.system.api.sms.SmsCodeApi;
-import com.cmsr.onebase.module.infra.api.security.SecurityConfigApi;
 import com.cmsr.onebase.module.system.convert.auth.AuthConvert;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
@@ -26,7 +25,7 @@ import com.cmsr.onebase.module.system.service.logger.LoginLogService;
 import com.cmsr.onebase.module.system.service.member.MemberService;
 import com.cmsr.onebase.module.system.service.oauth2.OAuth2TokenService;
 import com.cmsr.onebase.module.system.service.tenant.TenantService;
-import com.cmsr.onebase.module.system.service.user.AdminUserService;
+import com.cmsr.onebase.module.system.service.user.UserService;
 import com.cmsr.onebase.module.system.vo.CaptchaVerificationReqVO;
 import com.cmsr.onebase.module.system.vo.auth.*;
 import com.google.common.annotations.VisibleForTesting;
@@ -59,9 +58,9 @@ import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 public class RuntimeAuthServiceImpl implements RuntimeAuthService {
 
     @Resource
-    private AdminUserService   userService;
+    private UserService     userService;
     @Resource
-    private LoginLogService    loginLogService;
+    private LoginLogService loginLogService;
     @Resource
     private OAuth2TokenService oauth2TokenService;
     @Resource
@@ -287,11 +286,8 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
             return;
         }
 
-        // 清理在线设备记录
-        securityConfigApi.removeOnlineDevice(
-                accessTokenDO.getUserId(),
-                token
-        );
+        // 清理在线设备
+        securityConfigApi.removeOnlineDevice(null, accessTokenDO.getUserId(), token);
 
         // 删除成功,则记录登出日志
         createLogoutLog(accessTokenDO.getUserId(), accessTokenDO.getUserType(), logType);

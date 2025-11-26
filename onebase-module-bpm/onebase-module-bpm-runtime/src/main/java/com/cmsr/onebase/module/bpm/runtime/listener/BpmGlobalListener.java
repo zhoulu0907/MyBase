@@ -1,8 +1,10 @@
 package com.cmsr.onebase.module.bpm.runtime.listener;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
+import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowAgentInsRepository;
 import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowAgentRepository;
 import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowAgentDO;
+import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowAgentInsDO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
 import com.cmsr.onebase.module.bpm.core.enums.BpmBusinessStatusEnum;
 import com.cmsr.onebase.module.bpm.core.enums.BpmNodeTypeEnum;
@@ -12,6 +14,8 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.dromara.warm.flow.core.dto.FlowParams;
 import org.dromara.warm.flow.core.entity.Instance;
 import org.dromara.warm.flow.core.entity.Node;
@@ -35,16 +39,16 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 public class BpmGlobalListener implements GlobalListener {
-    @Resource
+    @Resource(name = "bpmTaskService")
     private TaskService taskService;
 
-    @Resource
+    @Resource(name = "bpmInsService")
     private InsService insService;
 
-    @Resource
+    @Resource(name = "bpmNodeService")
     private NodeService nodeService;
 
-    @Resource
+    @Resource(name = "bpmUserService")
     private UserService userService;
 
     @Resource
@@ -52,6 +56,9 @@ public class BpmGlobalListener implements GlobalListener {
 
     @Resource
     private BpmCcNodeListener ccNodeListener;
+
+    @Resource
+    private BpmFlowAgentInsRepository agentInsRepository;
 
     @Override
     public void start(ListenerVariable listenerVariable) {
@@ -107,6 +114,7 @@ public class BpmGlobalListener implements GlobalListener {
 
     public void finish(ListenerVariable listenerVariable) {
         Node currNode = listenerVariable.getNode();
+        Map<String, Object> flowVariable = listenerVariable.getVariable();
 
         // 获取节点ext信息
         String ext = currNode.getExt();
@@ -136,7 +144,6 @@ public class BpmGlobalListener implements GlobalListener {
         // 抄送给未处理的用户
         if (Objects.equals(nodeExtDTO.getNodeType(), BpmNodeTypeEnum.APPROVER.getCode())
                 || Objects.equals(nodeExtDTO.getNodeType(), BpmNodeTypeEnum.EXECUTOR.getCode())) {
-            Map<String, Object> flowVariable = listenerVariable.getVariable();
             Task currTask = listenerVariable.getTask();
 
             ccNodeListener.handleCcUsers(currTask, flowVariable);
@@ -211,21 +218,23 @@ public class BpmGlobalListener implements GlobalListener {
             return;
         }
 
-        List<User> agentUsers = new ArrayList<>();
+        List<BpmFlowAgentInsDO> agentInsList = new ArrayList<>();
 
         // 增加代理人信息
         for (BpmFlowAgentDO agent : activeAgents) {
-            User user = userService.structureUser(
-                    task.getId(),
-                    String.valueOf(agent.getAgentId()),
-                    BpmUserTypeEnum.AGENT.getCode(),
-                    String.valueOf(agent.getPrincipalId())
-            );
-            agentUsers.add(user);
+            BpmFlowAgentInsDO agentIns = new BpmFlowAgentInsDO();
+            agentIns.setTaskId(task.getId());
+            agentIns.setInstanceId(task.getInstanceId());
+            agentIns.setAgentId(agent.getAgentId());
+            agentIns.setPrincipalId(agent.getPrincipalId());
+            agentIns.setAgentName(agent.getAgentName());
+            agentIns.setPrincipalName(agent.getPrincipalName());
+            agentIns.setIsExecutor(BooleanUtils.toInteger(false));
+            agentInsList.add(agentIns);
         }
 
         // 保存代理用户
-        userService.saveBatch(agentUsers);
+        agentInsRepository.insertBatch(agentInsList);
     }
 
     private void handleUnOperatorUsersOnAssignment(ListenerVariable listenerVariable) {
@@ -239,17 +248,30 @@ public class BpmGlobalListener implements GlobalListener {
         }
 
         // 查找剩余未操作的用户
-        List<User> unoperatorUsers = userService.listByAssociatedAndTypes(currTask.getId());
+        List<User> unOperatorUsers = userService.listByAssociatedAndTypes(currTask.getId());
 
-        if (CollectionUtils.isNotEmpty(unoperatorUsers)) {
-            // 排除自己以及系统用户
-            Set<String> ccPermissionList = unoperatorUsers.stream()
-                    .filter( item -> !Objects.equals(item.getProcessedBy(), flowParams.getHandler())
-                            && !Objects.equals(item.getProcessedBy(), BpmConstants.SYS_USER_ID))
-                    .map(User::getProcessedBy)
-                    .collect(Collectors.toSet());
+        if (CollectionUtils.isNotEmpty(unOperatorUsers)) {
+            String currHandler = flowParams.getHandler();
+            String agentId = MapUtils.getString(flowVariable, "agentId");
 
-            // todo：同一个节点，会同时有抄送和未操作的用户吗，确认是否会覆盖
+            Set<String> ccPermissionList = unOperatorUsers.stream()
+                .filter(item -> {
+                    // 排除自己
+                    if (Objects.equals(item.getProcessedBy(), currHandler)) {
+                        return false;
+                    }
+
+                    // 排除系统用户
+                    if (Objects.equals(item.getProcessedBy(), BpmConstants.SYS_USER_ID)) {
+                        return false;
+                    }
+
+                    return true;
+                })
+                .map(User::getProcessedBy)
+                .collect(Collectors.toSet());
+
+            // todo：同一个节点，是否会同时有抄送和未操作的用户，确认是否会覆盖
             if (CollectionUtils.isNotEmpty(ccPermissionList)) {
                 flowVariable.put(BpmConstants.VAR_CC_USERS_KEY + "_" + currTask.getNodeCode(),
                         JsonUtils.toJsonString(ccPermissionList));

@@ -21,12 +21,6 @@ public class DeptRespVO {
     @Schema(description = "显示顺序", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
     private Integer sort;
 
-    @Schema(description = "管理员ID", example = "2048")
-    private Long leaderUserId;
-
-    @Schema(description = "管理员名称", example = "小管")
-    private String leaderUserName;
-
     @Schema(description = "描述", example = "简介")
     private String remark;
 
@@ -45,10 +39,16 @@ public class DeptRespVO {
     @Schema(description = "部门人数", example = "10")
     private Integer userCount;
 
-    @Schema(description = "部门主管ID", example = "")
-    private Long deptDirectorId;
+    @Schema(description = "主管ID", example = "2048")
+    private Long leaderUserId;
 
-    @Schema(description = "部门主管", example = "")
-    private String deptDirectorName;
+    @Schema(description = "主管名称", example = "小管")
+    private String leaderUserName;
+
+    @Schema(description = "管理员ID", example = "")
+    private Long adminUserId;
+
+    @Schema(description = "管理员名称", example = "")
+    private String adminUserName;
 
 }

@@ -1,9 +1,11 @@
 package com.cmsr.onebase.framework.ds.exception;
 
+import org.slf4j.helpers.MessageFormatter;
+
 public class DolphinschedulerException extends RuntimeException {
 
     public DolphinschedulerException(String message, Object... args) {
-        super(String.format(message, args));
+        super(MessageFormatter.arrayFormat(message, args).getMessage());
     }
 
     public DolphinschedulerException(String message, Throwable ex) {

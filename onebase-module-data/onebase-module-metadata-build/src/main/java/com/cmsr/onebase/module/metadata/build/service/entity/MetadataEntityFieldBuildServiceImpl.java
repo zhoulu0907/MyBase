@@ -3,7 +3,9 @@ package com.cmsr.onebase.module.metadata.build.service.entity;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
+import com.cmsr.onebase.module.flow.context.enums.FieldTypeEnum;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.*;
+import com.cmsr.onebase.module.metadata.build.controller.admin.relationship.vo.EntityRelationshipSaveReqVO;
 import com.cmsr.onebase.module.metadata.build.service.entity.vo.EntityFieldQueryVO;
 import com.cmsr.onebase.module.metadata.build.service.number.AutoNumberRuleBuildService;
 import com.cmsr.onebase.module.metadata.build.service.component.MetadataComponentFieldTypeBuildService;
@@ -16,10 +18,12 @@ import com.cmsr.onebase.module.metadata.build.service.validation.MetadataValidat
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.field.MetadataEntityFieldOptionDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataPermitRefOtftDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationTypeDO;
+import com.cmsr.onebase.module.metadata.core.enums.RelationshipTypeEnum;
 import com.cmsr.onebase.module.metadata.core.util.StatusEnumUtil;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.relationship.MetadataEntityRelationshipDO;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityFieldRepository;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationFormatRepository;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationLengthRepository;
@@ -78,6 +82,9 @@ import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.ENT
 @Slf4j
 public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldBuildService {
 
+    @Resource
+    private MetadataEntityRelationshipBuildService metadataEntityRelationshipBuildService;
+
     /**
      * 系统保留字段名列表
      */
@@ -95,8 +102,6 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
     @Resource
     private MetadataEntityFieldRepository metadataEntityFieldRepository;
-    @Resource
-    private MetadataEntityRelationshipBuildService metadataEntityRelationshipBuildService;
     @Resource
     private TemporaryDatasourceService temporaryDatasourceService;
     @Resource
@@ -795,6 +800,12 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 }
 
                 validateValidationRuleUniqueness(fieldId, origin.getEntityId());
+
+                //特别处理：如果数据选择类型的字段发生了变化，需要额外同步到 关联关系表中
+                if ("DATA_SELECTION".equals(item.getFieldType())) {
+
+                    processEntityRelation(reqVO.getAppId(), fieldId, full, item);
+                }
             }
         }
 
@@ -869,6 +880,13 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 }
 
                 validateValidationRuleUniqueness(fieldId, toCreate.getEntityId());
+
+                //特别处理：如果数据选择类型的字段发生了变化，需要额外同步到 关联关系表中
+                if ("DATA_SELECTION".equals(item.getFieldType())) {
+                    processEntityRelation(reqVO.getAppId(), fieldId, toCreate, item);
+                }
+
+
             }
         }
 
@@ -878,6 +896,69 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         }
 
         return resp;
+    }
+
+    private void processEntityRelation(String appId, Long fieldId, MetadataEntityFieldDO full, EntityFieldUpsertItemVO item) {
+        if (item.getDataSelectionConfig() == null) {
+            return;
+        }
+
+        Long targetEntityId = item.getDataSelectionConfig().getTargetEntityId();
+        Long targetFieldId = item.getDataSelectionConfig().getTargetFieldId();
+        
+        if (targetEntityId == null || targetFieldId == null) {
+            log.warn("数据选择配置不完整，跳过处理关系。sourceEntityId={}, fieldId={}", full.getEntityId(), fieldId);
+            return;
+        }
+
+        // 查询数据库中已存在的关系（根据 sourceEntityId 和 sourceFieldId）
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.and(MetadataEntityRelationshipDO.SOURCE_ENTITY_ID, full.getEntityId());
+        configStore.and(MetadataEntityRelationshipDO.SOURCE_FIELD_ID, fieldId.toString());
+        List<MetadataEntityRelationshipDO> existingRelations = 
+                metadataEntityRelationshipBuildService.findAllByConfig(configStore);
+
+        // 查找与当前字段相关的关系（应该只有一条）
+        MetadataEntityRelationshipDO existingRelation = null;
+        if (existingRelations != null && !existingRelations.isEmpty()) {
+            existingRelation = existingRelations.get(0);
+        }
+
+        // 构建新的关系数据
+        EntityRelationshipSaveReqVO r = new EntityRelationshipSaveReqVO();
+        r.setRelationName("数据选择关系");
+        r.setSourceEntityId(targetEntityId.toString());
+        r.setTargetEntityId(full.getEntityId().toString());
+        r.setRelationshipType(RelationshipTypeEnum.ONE_TO_MANY.getRelationshipType());
+        r.setSourceFieldId(targetFieldId.toString());
+        r.setTargetFieldId(fieldId.toString());
+        r.setCascadeType("READ");
+        r.setDescription("数据选择的一对多关系");
+        r.setAppId(appId);
+
+        // 比较数据：如果数据库中的关系和请求的数据一样，则忽略
+        if (existingRelation != null) {
+            boolean isSame = Objects.equals(existingRelation.getTargetEntityId(), targetEntityId)
+                    && Objects.equals(existingRelation.getTargetFieldId(), targetFieldId.toString());
+            
+            if (isSame) {
+                log.debug("数据选择关系未变化，忽略更新。sourceEntityId={}, fieldId={}, targetEntityId={}, targetFieldId={}",
+                        full.getEntityId(), fieldId, targetEntityId, targetFieldId);
+                return;
+            } else {
+                // 数据不同，更新关系
+                log.info("数据选择关系已变化，更新关系。sourceEntityId={}, fieldId={}, 原targetEntityId={}, 原targetFieldId={}, 新targetEntityId={}, 新targetFieldId={}",
+                        full.getEntityId(), fieldId, existingRelation.getTargetEntityId(), existingRelation.getTargetFieldId(),
+                        targetEntityId, targetFieldId);
+                r.setId(existingRelation.getId().toString());
+                metadataEntityRelationshipBuildService.updateEntityRelationship(r);
+            }
+        } else {
+            // 不存在关系，创建新关系
+            log.info("创建新的数据选择关系。sourceEntityId={}, fieldId={}, targetEntityId={}, targetFieldId={}",
+                    full.getEntityId(), fieldId, targetEntityId, targetFieldId);
+            metadataEntityRelationshipBuildService.createEntityRelationship(r);
+        }
     }
 
     private Integer extractMaxLength(EntityFieldUpsertItemVO item) {
@@ -1674,13 +1755,13 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                     ddl.append("ALTER TABLE \"").append(tableName)
                             .append("\" ALTER COLUMN \"").append(fieldName)
                             .append("\" TYPE ").append(columnType);
-                    
+
                     // 为需要类型转换的字段添加 USING 子句
                     String usingClause = generateUsingClause(field.getFieldType(), fieldName);
                     if (usingClause != null) {
                         ddl.append(" USING ").append(usingClause);
                     }
-                    
+
                     ddl.append(";\n");
 
                     // 2. 修改是否允许为空
@@ -1768,51 +1849,54 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         if (fieldType == null) {
             return null;
         }
-        
+
         String quotedFieldName = "\"" + fieldName + "\"";
-        
+        // 先将列转换为TEXT类型，这样可以处理从任何类型（包括已经是目标类型）的转换
+        String textFieldName = quotedFieldName + "::text";
+
         // 需要显式类型转换的字段类型，使用CASE WHEN进行安全转换
         switch (fieldType.toUpperCase()) {
             case "DATETIME":
             case "TIMESTAMP":
                 // VARCHAR/TEXT 转 TIMESTAMP：使用CASE WHEN处理无效数据
                 // 正则表达式检查是否为有效的时间戳格式
-                return "CASE WHEN " + quotedFieldName + " ~ '^\\d{4}-\\d{2}-\\d{2}' " +
-                       "THEN " + quotedFieldName + "::timestamp " +
-                       "ELSE NULL END";
-                
+                return "CASE WHEN " + textFieldName + " ~ '^\\\\d{4}-\\\\d{2}-\\\\d{2}' " +
+                        "THEN " + textFieldName + "::timestamp " +
+                        "ELSE NULL END";
+
             case "DATE":
                 // VARCHAR/TEXT 转 DATE：使用CASE WHEN处理无效数据
-                return "CASE WHEN " + quotedFieldName + " ~ '^\\d{4}-\\d{2}-\\d{2}' " +
-                       "THEN " + quotedFieldName + "::date " +
-                       "ELSE NULL END";
-                
+                return "CASE WHEN " + textFieldName + " ~ '^\\\\d{4}-\\\\d{2}-\\\\d{2}' " +
+                        "THEN " + textFieldName + "::date " +
+                        "ELSE NULL END";
+
             case "NUMBER":
             case "NUMERIC":
             case "DECIMAL":
                 // VARCHAR/TEXT 转 NUMERIC：使用CASE WHEN处理无效数据
                 // 检查是否为数字格式（支持小数和负数）
-                return "CASE WHEN " + quotedFieldName + " ~ '^-?\\d+\\.?\\d*$' " +
-                       "THEN " + quotedFieldName + "::numeric " +
-                       "ELSE NULL END";
-                
+                return "CASE WHEN " + textFieldName + " ~ '^-?\\\\d+\\\\.?\\\\d*$' " +
+                        "THEN " + textFieldName + "::numeric " +
+                        "ELSE NULL END";
+
             case "INTEGER":
             case "INT":
             case "BIGINT":
                 // VARCHAR/TEXT 转 INTEGER：使用CASE WHEN处理无效数据
                 // 检查是否为整数格式
-                return "CASE WHEN " + quotedFieldName + " ~ '^-?\\d+$' " +
-                       "THEN " + quotedFieldName + "::integer " +
-                       "ELSE NULL END";
-                
+                return "CASE WHEN " + textFieldName + " ~ '^-?\\\\d+$' " +
+                        "THEN " + textFieldName + "::integer " +
+                        "ELSE NULL END";
+
             case "BOOLEAN":
             case "BOOL":
                 // VARCHAR/TEXT 转 BOOLEAN：使用CASE WHEN处理无效数据
                 // 支持常见的布尔值表示
-                return "CASE WHEN " + quotedFieldName + " IN ('true', 'false', 't', 'f', '1', '0', 'yes', 'no', 'y', 'n') " +
-                       "THEN " + quotedFieldName + "::boolean " +
-                       "ELSE NULL END";
-                
+                return "CASE WHEN " + textFieldName
+                        + " IN ('true', 'false', 't', 'f', '1', '0', 'yes', 'no', 'y', 'n') " +
+                        "THEN " + textFieldName + "::boolean " +
+                        "ELSE NULL END";
+
             default:
                 // 其他类型通常可以自动转换，不需要USING子句
                 return null;
@@ -2478,7 +2562,51 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             full.setRuleItems(ruleVOs);
             vo.setAutoNumberConfig(full);
         }
+
+        // 填充数据选择配置
+        if ("DATA_SELECTION".equalsIgnoreCase(field.getFieldType())) {
+            DataSelectionConfig dataSelectionConfig = buildDataSelectionConfig(field);
+            if (dataSelectionConfig != null) {
+                vo.setDataSelectionConfig(dataSelectionConfig);
+            }
+        }
     }
+
+    /**
+     * 查询并构建数据选择配置
+     *
+     * @param field 字段
+     * @return 数据选择配置
+     */
+    private DataSelectionConfig buildDataSelectionConfig(MetadataEntityFieldDO field) {
+        if (field == null || field.getId() == null || field.getEntityId() == null) {
+            return null;
+        }
+
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.and(MetadataEntityRelationshipDO.TARGET_ENTITY_ID, field.getEntityId());
+        configStore.and(MetadataEntityRelationshipDO.TARGET_FIELD_ID, String.valueOf(field.getId()));
+        List<MetadataEntityRelationshipDO> relationships = metadataEntityRelationshipBuildService.findAllByConfig(configStore);
+
+        if (relationships == null || relationships.isEmpty()) {
+            return null;
+        }
+        MetadataEntityRelationshipDO relationship = relationships.get(0);
+        if (relationship == null || relationship.getSourceEntityId() == null || relationship.getSourceFieldId() == null) {
+            return null;
+        }
+
+        DataSelectionConfig dataSelectionConfig = new DataSelectionConfig();
+        dataSelectionConfig.setTargetEntityId(relationship.getSourceEntityId());
+        try {
+            dataSelectionConfig.setTargetFieldId(Long.valueOf(relationship.getSourceFieldId()));
+        } catch (NumberFormatException ex) {
+            log.warn("解析数据选择配置目标字段ID失败，fieldId={}, sourceFieldId={}", field.getId(), relationship.getSourceFieldId());
+            return null;
+        }
+        return dataSelectionConfig;
+    }
+
 
     /**
      * 转换自动编号配置DO为响应VO

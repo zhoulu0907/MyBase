@@ -1,6 +1,10 @@
 package com.cmsr.onebase.module.infra.service.security;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static com.cmsr.onebase.module.infra.dal.redis.RedisKeyConstants.REDIS_KEY_FAIL_COUNT;
+import static com.cmsr.onebase.module.infra.dal.redis.RedisKeyConstants.REDIS_KEY_FAIL_SHARED_LOCK;
+import static com.cmsr.onebase.module.infra.dal.redis.RedisKeyConstants.REDIS_KEY_LOCK;
+
 import com.cmsr.onebase.module.infra.dal.database.SecurityRecordDataRepository;
 import com.cmsr.onebase.module.infra.service.security.dto.LoginFailureResult;
 import com.cmsr.onebase.module.infra.dal.dataobject.security.SecurityRecordDO;
@@ -27,17 +31,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class AntiBruteForceServiceImpl implements AntiBruteForceService {
-
-    /**
-     * Redis Key前缀 - 失败次数记录
-     */
-    private static final String REDIS_KEY_FAIL_COUNT = "infra:security:login:fail:";
-
-    /**
-     * Redis Key前缀 - 锁定状态记录
-     */
-    private static final String REDIS_KEY_LOCK = "infra:security:login:lock:";
-
     /**
      * 默认失败锁定阈值
      */
@@ -112,7 +105,7 @@ public class AntiBruteForceServiceImpl implements AntiBruteForceService {
         String lockKey = buildLockKey(tenantId, userId);
         
         // 使用分布式锁防止并发竞态条件
-        String lockIdentifier = failKey + ":sharedlock";
+        String lockIdentifier = String.format(REDIS_KEY_FAIL_SHARED_LOCK, tenantId, userId);
         Boolean acquired = stringRedisTemplate.opsForValue().setIfAbsent(lockIdentifier, "1", 5, TimeUnit.SECONDS);
         if (Boolean.FALSE.equals(acquired)) {
             // 其他线程正在处理，短暂等待后重试

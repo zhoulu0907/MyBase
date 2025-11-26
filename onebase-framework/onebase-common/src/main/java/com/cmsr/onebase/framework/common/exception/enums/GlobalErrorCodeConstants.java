@@ -24,6 +24,7 @@ public interface GlobalErrorCodeConstants {
     ErrorCode METHOD_NOT_ALLOWED = new ErrorCode(405, "请求方法不正确");
     ErrorCode LOCKED             = new ErrorCode(423, "请求失败，请稍后重试"); // 并发请求，不允许
     ErrorCode TOO_MANY_REQUESTS  = new ErrorCode(429, "请求过于频繁，请稍后重试");
+    ErrorCode SEESION_TIMEOUT     = new ErrorCode(401, "会话超时，请重新登录");
 
     // ========== 服务端错误段 ==========
 
@@ -33,6 +34,7 @@ public interface GlobalErrorCodeConstants {
     ErrorCode LICENSE_NOT_ENABLE    = new ErrorCode(505, "缺失有效凭证");
     ErrorCode LICENSE_IS_EXPIRED    = new ErrorCode(505, "凭证已过期");
     ErrorCode LICENSE_GET_ERROR     = new ErrorCode(505, "获取凭证失败");
+
 
     ErrorCode APP_PERM_CHECK_ERROR     = new ErrorCode(506, "应用权限校验异常");
 

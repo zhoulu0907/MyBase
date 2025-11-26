@@ -3,23 +3,23 @@ package com.cmsr.onebase.module.system.dal.database;
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.data.base.BaseDO;
-import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
-import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
-import com.cmsr.onebase.module.system.vo.role.RolePageReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
+import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
+import com.cmsr.onebase.module.system.vo.role.RolePageReqVO;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
 import org.anyline.entity.Order;
+import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Repository;
-import org.yaml.snakeyaml.events.Event;
 
 import java.util.Collection;
 import java.util.List;
 
 /**
  * 角色数据访问层
- *
+ * <p>
  * 负责角色相关的数据操作，继承DataRepositoryNew，提供标准CRUD能力。
  *
  * @author matianyu
@@ -77,13 +77,41 @@ public class RoleDataRepository extends DataRepository<RoleDO> {
         return findAllByConfig(new DefaultConfigStore());
     }
 
+
     /**
      * 分页查询角色
      *
      * @param pageReqVO 分页查询条件
      * @return 分页结果
      */
-    public PageResult<RoleDO> findPage(RolePageReqVO pageReqVO) {
+    public PageResult<RoleDO> findRolePageOnlyTenant(RolePageReqVO pageReqVO) {
+        DefaultConfigStore configStore = buildRolePageConfigStore(pageReqVO);
+        configStore.notIn(RoleDO.CODE, RoleCodeEnum.CORP_ADMIN.getCode(), RoleCodeEnum.SUPER_ADMIN.getCode());
+        // 排序
+        configStore.order(RoleDO.SORT, Order.TYPE.ASC)
+                .order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
+
+        return findPageWithConditions(configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());
+    }
+
+
+    /**
+     * 分页查询角色
+     *
+     * @param pageReqVO 分页查询条件
+     * @return 分页结果
+     */
+    public PageResult<RoleDO> findRolePage(RolePageReqVO pageReqVO) {
+        DefaultConfigStore configStore = buildRolePageConfigStore(pageReqVO);
+        // 排序
+        configStore.order(RoleDO.SORT, Order.TYPE.ASC)
+                .order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
+
+        return findPageWithConditions(configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());
+    }
+
+    @NotNull
+    private static DefaultConfigStore buildRolePageConfigStore(RolePageReqVO pageReqVO) {
         DefaultConfigStore configStore = new DefaultConfigStore();
 
         // 按名称模糊查询
@@ -92,7 +120,7 @@ public class RoleDataRepository extends DataRepository<RoleDO> {
         }
 
         // 按编码模糊查询
-        if (pageReqVO.getCode() != null && !pageReqVO.getCode().trim().isEmpty()) {
+        if (StringUtils.isNotBlank(pageReqVO.getCode())) {
             configStore.like(RoleDO.CODE, pageReqVO.getCode());
         }
 
@@ -110,12 +138,7 @@ public class RoleDataRepository extends DataRepository<RoleDO> {
                 configStore.le(BaseDO.CREATE_TIME, pageReqVO.getCreateTime()[1]);
             }
         }
-
-        // 排序
-        configStore.order(RoleDO.SORT, Order.TYPE.ASC)
-                .order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
-
-        return findPageWithConditions(configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());
+        return configStore;
     }
 
     /**
@@ -130,14 +153,15 @@ public class RoleDataRepository extends DataRepository<RoleDO> {
         return findAllByConfig(configStore);
     }
 
-    public RoleDO getRoleIdsByCodeAndTenantId(String code,Long tenandID) {
+    public RoleDO getRoleIdsByCodeAndTenantId(String code, Long tenandID) {
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.in(RoleDO.CODE, code);
         configStore.eq(RoleDO.TENANT_ID, tenandID);
         return findOne(configStore);
 
     }
-    public RoleDO getRoleByCodeIgnoreTenant(String codes) {
+
+    public RoleDO getRoleByCode(String codes) {
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.in(RoleDO.CODE, codes);
         return findOne(configStore);

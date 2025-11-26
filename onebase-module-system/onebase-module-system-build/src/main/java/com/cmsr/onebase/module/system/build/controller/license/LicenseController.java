@@ -37,6 +37,7 @@ import java.util.List;
 @RequestMapping("/system/license")
 @Tag(name = "License管理")
 @Component("oldLicenseController")
+@Deprecated
 public class LicenseController {
 
     @Resource

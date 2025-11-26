@@ -1,6 +1,7 @@
 package com.cmsr.onebase.framework.security.runtime.config;
 
 import com.cmsr.onebase.framework.common.biz.system.oauth2.OAuth2TokenCommonApi;
+import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
 import com.cmsr.onebase.framework.security.config.SecurityProperties;
 import com.cmsr.onebase.framework.security.core.context.TransmittableThreadLocalSecurityContextHolderStrategy;
 import com.cmsr.onebase.framework.security.core.handler.AccessDeniedHandlerImpl;
@@ -62,12 +63,13 @@ public class RuntimeSecurityAutoConfiguration {
     }
 
     /**
-     * Token 认证过滤器 Bean`
+     * Token 认证过滤器 Bean
      */
     @Bean
     public RuntimeAuthenticationFilter runtimeAuthenticationTokenFilter(GlobalExceptionHandler globalExceptionHandler,
-                                                                        OAuth2TokenCommonApi oauth2TokenApi) {
-        return new RuntimeAuthenticationFilter(securityProperties, globalExceptionHandler, oauth2TokenApi);
+                                                                        OAuth2TokenCommonApi oauth2TokenApi,
+                                                                        SecurityConfigApi securityConfigApi) {
+        return new RuntimeAuthenticationFilter(securityProperties, globalExceptionHandler, oauth2TokenApi, securityConfigApi);
     }
 
     @Bean
