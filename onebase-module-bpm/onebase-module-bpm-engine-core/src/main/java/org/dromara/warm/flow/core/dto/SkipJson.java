@@ -82,4 +82,10 @@ public class SkipJson {
 
     private String updateBy;
 
+    private String ext;
+
+    /**
+     * 优先级，设置默认为 0，防止批量创建的时候，anyline会插入null值导致异常
+     */
+    private Integer priority = 0;
 }
