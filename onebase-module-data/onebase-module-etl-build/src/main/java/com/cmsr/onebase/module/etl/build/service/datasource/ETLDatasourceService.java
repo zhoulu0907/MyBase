@@ -17,7 +17,7 @@ public interface ETLDatasourceService {
 
     PageResult<DatasourceRespVO> getETLDatasourcePage(DatasourcePageReqVO pageReqVO);
 
-    CommonResult<MetaBriefVO> createDatasource(ETLDatasourceCreateReqVO createReqVO);
+    CommonResult<String> createDatasource(ETLDatasourceCreateReqVO createReqVO);
 
     void updateDatasource(ETLDatasourceUpdateReqVO updateReqVO);
 
@@ -27,7 +27,7 @@ public interface ETLDatasourceService {
 
     List<MetaBriefVO> listDatasources(Long applicationId, Integer writable);
 
-    List<MetaBriefVO> listDatasourceTables(Long datasourceId, Integer writable);
+    List<MetaBriefVO> listDatasourceTables(String datasourceUuid, Integer writable);
 
-    List<ColumnDefine> listTableColumns(Long tableId);
+    List<ColumnDefine> listTableColumns(String tableUuid);
 }

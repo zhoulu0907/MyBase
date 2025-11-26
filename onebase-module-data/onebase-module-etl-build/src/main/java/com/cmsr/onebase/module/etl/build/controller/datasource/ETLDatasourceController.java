@@ -54,7 +54,7 @@ public class ETLDatasourceController {
     // POSTs
     @Operation(summary = "创建数据源")
     @PostMapping("/create")
-    public CommonResult<MetaBriefVO> createETLDatasource(@Validated @RequestBody ETLDatasourceCreateReqVO createReqVO) {
+    public CommonResult<String> createETLDatasource(@Validated @RequestBody ETLDatasourceCreateReqVO createReqVO) {
         return etlDatasourceService.createDatasource(createReqVO);
     }
 
@@ -89,16 +89,16 @@ public class ETLDatasourceController {
 
     @Operation(summary = "查询数据源下的表")
     @GetMapping("/tables")
-    public CommonResult<List<MetaBriefVO>> listDatasourceTables(@RequestParam("id") Long id,
+    public CommonResult<List<MetaBriefVO>> listDatasourceTables(@RequestParam("uuid") String uuid,
                                                                 @RequestParam(value = "writable", required = false) Integer writable) {
-        List<MetaBriefVO> briefVOList = etlDatasourceService.listDatasourceTables(id, writable);
+        List<MetaBriefVO> briefVOList = etlDatasourceService.listDatasourceTables(uuid, writable);
         return CommonResult.success(briefVOList);
     }
 
     @Operation(summary = "查询表的列")
     @GetMapping("/table/columns")
-    public CommonResult<List<ColumnDefine>> listTableColumns(@RequestParam("tableId") Long tableId) {
-        List<ColumnDefine> columnDefines = etlDatasourceService.listTableColumns(tableId);
+    public CommonResult<List<ColumnDefine>> listTableColumns(@RequestParam("tableUuid") String tableUuid) {
+        List<ColumnDefine> columnDefines = etlDatasourceService.listTableColumns(tableUuid);
         return CommonResult.success(columnDefines);
     }
 

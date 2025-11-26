@@ -68,4 +68,10 @@ public class ETLTableRepository extends BaseAppRepository<ETLTableMapper, ETLTab
                 .orderBy(ETLTableDO::getTableName, true);
         return list(queryWrapper);
     }
+
+    public ETLTableDO getByUuid(String tableUuid) {
+        QueryWrapper queryWrapper = this.query()
+                .eq(ETLTableDO::getTableUuid, tableUuid);
+        return getOne(queryWrapper);
+    }
 }

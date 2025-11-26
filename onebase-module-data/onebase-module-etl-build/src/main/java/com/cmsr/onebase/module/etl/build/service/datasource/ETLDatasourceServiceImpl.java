@@ -37,7 +37,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.UUID;
 
 @Service
 @Slf4j
@@ -98,7 +97,7 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
     }
 
     @Override
-    public CommonResult<MetaBriefVO> createDatasource(ETLDatasourceCreateReqVO createReqVO) {
+    public CommonResult<String> createDatasource(ETLDatasourceCreateReqVO createReqVO) {
         Long applicationId = createReqVO.getApplicationId();
         String datasourceType = createReqVO.getDatasourceType();
 
@@ -132,10 +131,7 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
                         datasourceId);
             }
         }
-        MetaBriefVO metaBriefVO = new MetaBriefVO();
-        metaBriefVO.setId(String.valueOf(datasourceDO.getId()));
-        metaBriefVO.setUuid(uuid);
-        return CommonResult.success(metaBriefVO);
+        return CommonResult.success(uuid);
     }
 
     @Override
@@ -235,8 +231,8 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
     }
 
     @Override
-    public List<MetaBriefVO> listDatasourceTables(Long datasourceId, Integer writable) {
-        ETLDatasourceDO datasourceDO = datasourceRepository.getById(datasourceId);
+    public List<MetaBriefVO> listDatasourceTables(String datasourceUuid, Integer writable) {
+        ETLDatasourceDO datasourceDO = datasourceRepository.getByUuid(datasourceUuid);
         if (datasourceDO == null) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_NOT_EXIST);
         }
@@ -258,8 +254,8 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
     }
 
     @Override
-    public List<ColumnDefine> listTableColumns(Long tableId) {
-        ETLTableDO tableDO = tableRepository.getById(tableId);
+    public List<ColumnDefine> listTableColumns(String tableUuid) {
+        ETLTableDO tableDO = tableRepository.getByUuid(tableUuid);
         if (tableDO == null) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.TABLE_NOT_EXIST);
         }

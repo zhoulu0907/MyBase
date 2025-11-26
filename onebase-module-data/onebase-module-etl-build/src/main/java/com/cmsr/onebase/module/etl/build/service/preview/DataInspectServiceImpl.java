@@ -78,20 +78,20 @@ public class DataInspectServiceImpl implements DataInspectService {
 
     @Override
     public DataPreview previewData(TablePreviewVO previewVO) {
-        Long datasourceId = previewVO.getDatasourceId();
-        ETLDatasourceDO datasourceDO = datasourceRepository.getById(datasourceId);
+        String datasourceUuid = previewVO.getDatasourceUuid();
+        ETLDatasourceDO datasourceDO = datasourceRepository.getByUuid(datasourceUuid);
         if (datasourceDO == null) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_NOT_EXIST);
         }
         String datasourceType = datasourceDO.getDatasourceType();
-        Long tableId = previewVO.getTableId();
-        ETLTableDO tableDO = tableRepository.getById(tableId);
+        String tableUuid = previewVO.getTableUuid();
+        ETLTableDO tableDO = tableRepository.getByUuid(tableUuid);
         if (tableDO == null) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.TABLE_NOT_EXIST);
         }
 
         DataSource dataSource = dataSourceFactory.constructDataSource(datasourceDO, true);
-        String runnerKey = "preview-" + datasourceId + UuidCreator.getTimeOrderedEpoch();
+        String runnerKey = "preview-" + datasourceUuid + UuidCreator.getTimeOrderedEpoch();
         try {
             DataSourceHolder.reg(runnerKey, dataSource);
             AnylineService<?> temporary = ServiceProxy.service(runnerKey);
