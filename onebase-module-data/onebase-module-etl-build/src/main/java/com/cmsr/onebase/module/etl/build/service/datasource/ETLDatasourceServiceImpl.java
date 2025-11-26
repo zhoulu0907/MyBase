@@ -194,6 +194,7 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
     }
 
     private boolean runMetadataCollect(LocalDateTime plannedTime, ETLDatasourceDO datasourceDO) {
+        datasourceRepository.changeCollectStatus(datasourceDO.getId(), CollectStatus.RUNNING, plannedTime);
         Long applicationId = datasourceDO.getApplicationId();
         Long datasourceId = datasourceDO.getId();
         String datasourceUuid = datasourceDO.getDatasourceUuid();
@@ -202,11 +203,15 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
             DataSource datasource = datasourceFactory.constructDataSource(datasourceDO, false);
             CatalogData catalogData = metadataCollector.collectCatalog(datasourceId, datasource);
             metadataManager.saveMetadata(applicationId, datasourceUuid, catalogData);
-            long timeCost = Duration.between(plannedTime, LocalDateTime.now()).toMillis();
+            LocalDateTime endTime = LocalDateTime.now();
+            long timeCost = Duration.between(plannedTime, endTime).toMillis();
+            datasourceRepository.changeCollectStatus(datasourceDO.getId(), CollectStatus.SUCCESS, endTime);
             log.info("元数据采集任务执行成功，数据源ID：{}，耗时：{} ms", datasourceId, timeCost);
             return true;
         } catch (Exception e) {
-            long timeCost = Duration.between(plannedTime, LocalDateTime.now()).toMillis();
+            LocalDateTime endTime = LocalDateTime.now();
+            long timeCost = Duration.between(plannedTime, endTime).toMillis();
+            datasourceRepository.changeCollectStatus(datasourceDO.getId(), CollectStatus.FAILED, endTime);
             log.error("元数据采集任务执行失败，数据源ID：{}，耗时：{} ms", datasourceId, timeCost, e);
             return false;
         }

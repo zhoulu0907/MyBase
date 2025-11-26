@@ -16,7 +16,7 @@ public class DatasourcePageReqVO extends PageParam {
     private Long applicationId;
 
     @Schema(description = "数据源编号")
-    private String datasourceUUID;
+    private String datasourceUuid;
 
     @Schema(description = "数据源名称信息")
     private String datasourceName;
