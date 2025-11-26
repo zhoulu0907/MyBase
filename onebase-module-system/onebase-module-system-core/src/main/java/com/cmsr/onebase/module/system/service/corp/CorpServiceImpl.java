@@ -162,6 +162,18 @@ public class CorpServiceImpl implements CorpService {
         corpAppRelationService.deleteCorpAppRelationByCorpId(id);
     }
 
+    /**
+     * 手机号脱敏
+     * @param phone
+     * @return
+     */
+    public static String maskMobleNumber(String phone) {
+        if (phone == null || phone.length() != 11) {
+            return phone;
+        }
+        return phone.replaceAll("(\\d{3})\\d{4}(\\d{4})", "$1****$2");
+    }
+
     @Override
     public PageResult<CorpRespVO> getCorpAppsPage(CorpPageReqVO pageReqVO) {
 
@@ -208,6 +220,7 @@ public class CorpServiceImpl implements CorpService {
                         AdminUserDO userDO = userDOMap.get(corpDO.getAdminId());
                         if (userDO != null) {
                             respVO.setAdminName(userDO.getNickname());
+                            respVO.setMobile(maskMobleNumber(userDO.getMobile()));
                         }
                         respVO.setIndustryTypeName(dictmap.get(respVO.getIndustryType()));
                         return respVO;
@@ -255,6 +268,7 @@ public class CorpServiceImpl implements CorpService {
                     AdminUserDO userDO = userDOMap.get(corpDO.getAdminId());
                     if (userDO != null) {
                         respVO.setAdminName(userDO.getNickname());
+                        respVO.setMobile(maskMobleNumber(userDO.getMobile()));
                     }
                     respVO.setIndustryTypeName(dictmap.get(respVO.getIndustryType()));
                     return respVO;
