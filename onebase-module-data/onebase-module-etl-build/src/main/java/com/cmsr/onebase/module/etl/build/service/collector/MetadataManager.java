@@ -10,6 +10,7 @@ import com.cmsr.onebase.module.etl.core.dal.database.ETLTableRepository;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLCatalogDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLSchemaDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLTableDO;
+import com.github.f4b6a3.uuid.UuidCreator;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -59,6 +60,7 @@ public class MetadataManager {
             catalogDO = new ETLCatalogDO();
             catalogDO.setApplicationId(applicationId);
             catalogDO.setDatasourceUuid(datasourceUuid);
+            catalogDO.setCatalogUuid(UuidCreator.getTimeOrderedEpoch().toString());
         }
         String name = catalogData.getName();
         catalogDO.setCatalogName(name);
@@ -76,6 +78,7 @@ public class MetadataManager {
             schemaDO.setApplicationId(applicationId);
             schemaDO.setDatasourceUuid(datasourceUuid);
             schemaDO.setCatalogUuid(catalogUuid);
+            schemaDO.setSchemaUuid(UuidCreator.getTimeOrderedEpoch().toString());
         }
         String name = schemaData.getName();
         schemaDO.setSchemaName(name);
@@ -94,6 +97,7 @@ public class MetadataManager {
             tableDO.setDatasourceUuid(datasourceUuid);
             tableDO.setCatalogUuid(catalogUuid);
             tableDO.setSchemaUuid(schemaUuid);
+            tableDO.setTableUuid(UuidCreator.getTimeOrderedEpoch().toString());
         }
         tableDO.setTableName(tableName);
         tableDO.setDisplayName(tableName);

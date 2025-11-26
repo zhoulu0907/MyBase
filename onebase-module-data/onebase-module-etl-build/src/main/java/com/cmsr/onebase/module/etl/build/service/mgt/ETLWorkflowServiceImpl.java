@@ -29,6 +29,7 @@ import com.cmsr.onebase.module.etl.core.vo.WorkflowBriefVO;
 import com.cmsr.onebase.module.etl.core.vo.WorkflowPageReqVO;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.NullNode;
+import com.github.f4b6a3.uuid.UuidCreator;
 import com.mybatisflex.core.row.Db;
 import jakarta.annotation.Resource;
 import kong.unirest.core.HttpResponse;
@@ -107,6 +108,7 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
         ETLWorkflowDO workflowDO = new ETLWorkflowDO();
         Long applicationId = createVO.getApplicationId();
         workflowDO.setApplicationId(applicationId);
+        workflowDO.setWorkflowUuid(UuidCreator.getTimeOrderedEpoch().toString());
         workflowDO.setWorkflowName(createVO.getFlowName());
         workflowDO.setDeclaration(createVO.getDeclaration());
         workflowDO.setConfig(JsonUtils.toJsonString(createVO.getConfig()));
