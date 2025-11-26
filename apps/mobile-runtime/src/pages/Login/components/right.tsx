@@ -260,6 +260,7 @@ const Right: React.FC = () => {
             field="password"
             label="密码"
             initialValue=""
+            className={styles.passwordItem}
             rules={rules.password}
           >
             <Input type="password" placeholder={t('auth.password')} clearable={false} />
