@@ -28,7 +28,7 @@ public class ETLDatasourceCreateReqVO {
     private String datasourceType;
 
     @Schema(description = "数据源配置信息")
-    @NotBlank(message = "数据源配置信息不能为空")
+    @NotNull(message = "数据源配置信息不能为空")
     private JsonNode config;
 
     @Schema(description = "只读", defaultValue = "1")
