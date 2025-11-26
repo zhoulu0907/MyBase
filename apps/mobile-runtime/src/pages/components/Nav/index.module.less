@@ -1,5 +1,14 @@
 .navWrapper {
   width: 100%;
+  margin: 0 auto;
+  background-color: red;
+  @media screen and (min-width: 900px) {
+    width: 450px;
+    :global(.arco-nav-bar-wrapper.arco-nav-bar-wrapper-fixed) {
+        width: 450px;
+        left: calc(50% - 225px);
+      }
+  }
 
   :global(.arco-nav-bar) {
     background-color: transparent;
