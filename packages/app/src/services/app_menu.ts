@@ -40,3 +40,7 @@ export const updateApplicationMenuVisible = (params: UpdateApplicationMenuVisibl
 export const copyApplicationMenu = (params: CopyApplicationMenuReq) => {
   return appService.post('/menu/copy', params);
 };
+
+export const listApplicationBPMMenu = (params: ListApplicationMenuReq) => {
+  return appService.get('/menu/bpm-list', params);
+};
