@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.system.build.controller.corp;
+package com.cmsr.onebase.module.system.build.controller.corpsys;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
@@ -21,11 +21,17 @@ import java.util.List;
 
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
-@Tag(name = "平台服务-企业应用关系")
+/**
+ * 空间内使用的服务 - 企业应用关联表 Controller
+ *
+ * @author mty
+ * @date 2025-10-20
+ */
+@Tag(name = "空间服务 - 企业应用关系")
 @RestController
 @Validated
 @RequestMapping("/system/corp-app-relation")
-public class CorpAppRelationController {
+public class SystemCorpAppRelationController {
 
     @Resource
     private CorpAppRelationService corpAppRelationService;

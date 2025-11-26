@@ -6,6 +6,7 @@ import com.anji.captcha.model.vo.CaptchaVO;
 import com.anji.captcha.service.CaptchaService;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
 import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
@@ -25,6 +26,7 @@ import com.cmsr.onebase.module.system.enums.oauth2.OAuth2ClientConstants;
 import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
 import com.cmsr.onebase.module.system.enums.sms.SmsSceneEnum;
 import com.cmsr.onebase.module.system.enums.tenant.TenantCodeEnum;
+import com.cmsr.onebase.module.system.service.corp.CorpService;
 import com.cmsr.onebase.module.system.service.logger.LoginLogService;
 import com.cmsr.onebase.module.system.service.member.MemberService;
 import com.cmsr.onebase.module.system.service.oauth2.OAuth2TokenService;
@@ -34,6 +36,7 @@ import com.cmsr.onebase.module.system.service.tenant.TenantService;
 import com.cmsr.onebase.module.system.service.user.UserService;
 import com.cmsr.onebase.module.system.vo.CaptchaVerificationReqVO;
 import com.cmsr.onebase.module.system.vo.auth.*;
+import com.cmsr.onebase.module.system.vo.corp.CorpRespVO;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Resource;
 import jakarta.validation.Validator;
@@ -103,6 +106,9 @@ public class AdminAuthServiceImpl implements AdminAuthService {
     @Resource
     private PasswordEncoder passwordEncoder;
 
+    @Resource
+    private CorpService corpService;
+
     @Override
     public AdminUserDO authenticate(String username, String password) {
         final LoginLogTypeEnum logTypeEnum = LoginLogTypeEnum.LOGIN_USERNAME;
@@ -119,6 +125,24 @@ public class AdminAuthServiceImpl implements AdminAuthService {
         checkUserPsdAndStatus(mobile, password, user, logTypeEnum);
         return user;
     }
+
+
+    private void checkCropStatus(Long corpId) {
+        CorpRespVO corp = corpService.getCorp(corpId);
+        if (null == corp || CommonStatusEnum.DISABLE.getStatus().equals(corp.getStatus())) {
+            throw exception(AUTH_LOGIN_CORP_DELETE_OR_DISABLE);
+        }
+    }
+
+
+    private void checkTenantStatus(Long tenantId) {
+        TenantDO tenantDO = tenantService.getTenant(tenantId);
+        if (null == tenantDO || CommonStatusEnum.DISABLE.getStatus().equals(tenantDO.getStatus())) {
+            throw exception(AUTH_LOGIN_TENANT_DELETE_OR_DISABLE);
+        }
+
+    }
+
 
     private void checkUserPsdAndStatus(String account, String password, AdminUserDO user, LoginLogTypeEnum logTypeEnum) {
         if (user == null) {
@@ -194,6 +218,11 @@ public class AdminAuthServiceImpl implements AdminAuthService {
 
         // 使用账号密码，进行登录
         AdminUserDO user = authenticate(reqVO.getUsername(), reqVO.getPassword());
+
+        // 验证空间状态是否异常
+        Long tenantId = TenantContextHolder.getTenantId();
+        checkTenantStatus(tenantId);
+
         AuthLoginRespVO authLoginRespVO = createTokenAfterLoginSuccess(user.getId(), reqVO.getUsername(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_USERNAME);
         // 设置是否管理员
         authLoginRespVO.setAdminFlag(findAdminFlag(RoleCodeEnum.TENANT_ADMIN.getCode(), user.getId()));
@@ -207,6 +236,9 @@ public class AdminAuthServiceImpl implements AdminAuthService {
 
         // 2. 使用账号密码，进行登录
         AdminUserDO user = mobileAuthenticate(reqVO.getMobile(), reqVO.getPassword());
+
+        // 验证企业状态是否异常
+        checkCropStatus(user.getCorpId());
 
         AuthLoginRespVO authLoginRespVO = createCorpAfterLoginSuccess(user.getCorpId(), user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE);
         // 设置是否管理员

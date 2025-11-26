@@ -107,10 +107,11 @@ public class PlatformInfoController {
     @GetMapping("/admin/list")
     @Operation(summary = "获得所有平台管理员列表")
     @PreAuthorize("@ss.hasPermission('system:platform-admin:query')")
-    public CommonResult<List<UserRespVO>> getPlatformAdminList() {
+    public CommonResult<List<UserRespVO>> getPlatformAdminList(UserSearchReqVO userSearchReqVO) {
+        userSearchReqVO.setStatus(UserStatusEnum.NORMAL.getStatus());
 
         // 获取所有平台管理员用户
-        List<AdminUserDO> userList = platformUserService.getPlatformAdminListByStatus(UserStatusEnum.NORMAL.getStatus());
+        List<AdminUserDO> userList = platformUserService.getPlatformAdminListByStatus(userSearchReqVO);
         // 转换为响应对象
         List<UserRespVO> respList = BeanUtils.toBean(userList, UserRespVO.class);
 

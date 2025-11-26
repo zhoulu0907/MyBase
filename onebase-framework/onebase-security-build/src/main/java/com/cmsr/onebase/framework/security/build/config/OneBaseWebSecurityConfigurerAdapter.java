@@ -115,7 +115,9 @@ public class OneBaseWebSecurityConfigurerAdapter {
     @Bean
     protected SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         RequestMatcher buildApiMatcher = new OrRequestMatcher(
-                new AntPathRequestMatcher(webProperties.getBuildApi().getPrefix() + "/**")
+                new AntPathRequestMatcher(webProperties.getBuildApi().getPrefix() + "/**"),
+                // 平台管理暂不独立部署，platform相关接口同步初始化
+                new AntPathRequestMatcher(webProperties.getPlatformApi().getPrefix() + "/**")
         );
         httpSecurity.securityMatcher(buildApiMatcher);
 
