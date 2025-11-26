@@ -24,7 +24,7 @@ const XCheckbox = memo((props: XInputCheckboxConfig & { runtime?: boolean; detai
 
   const { form } = Form.useFormContext();
 
-  const fieldId = dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.SELECT_MUTIPLE}_${nanoid()}`
+  const fieldId = dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.CHECKBOX}_${nanoid()}`
 
   const fieldValue = Form.useWatch(fieldId, form);
 
@@ -35,7 +35,7 @@ const XCheckbox = memo((props: XInputCheckboxConfig & { runtime?: boolean; detai
           label.display &&
           label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
         }
-        field={fieldId}
+        field={fieldId ? fieldId : `${FORM_COMPONENT_TYPES.CHECKBOX}_${nanoid()}`}
         layout={layout}
         tooltip={tooltip}
         wrapperCol={{ style: { flex: 1 } }}
@@ -49,7 +49,7 @@ const XCheckbox = memo((props: XInputCheckboxConfig & { runtime?: boolean; detai
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
           <Space wrap>
-            {fieldValue && defaultOptionsConfig?.defaultOptions && typeof fieldValue === 'string' && fieldValue.split(', ').map((ele: any, index: number) => <Tag key={index}>
+            {fieldValue && defaultOptionsConfig?.defaultOptions && typeof fieldValue === 'string' && fieldValue.split(',').map((ele: any, index: number) => <Tag key={index}>
               {defaultOptionsConfig?.defaultOptions.find((e: any) => e.value === ele)?.label}
             </Tag>)}
           </Space>
