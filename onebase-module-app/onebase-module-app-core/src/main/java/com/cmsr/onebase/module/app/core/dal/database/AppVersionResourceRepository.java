@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.app.core.dal.database;
 
 import com.cmsr.onebase.framework.orm.repo.BaseAppRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.VersionResourceDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppVersionResourceDO;
 import com.cmsr.onebase.module.app.core.dal.mapper.AppVersionResourceMapper;
 import com.mybatisflex.core.query.QueryWrapper;
 import org.springframework.stereotype.Repository;
@@ -11,26 +11,26 @@ import org.springframework.stereotype.Repository;
  * @Date：2025/8/6 14:44
  */
 @Repository
-public class AppVersionResourceRepository extends BaseAppRepository<AppVersionResourceMapper, VersionResourceDO> {
+public class AppVersionResourceRepository extends BaseAppRepository<AppVersionResourceMapper, AppVersionResourceDO> {
 
     public void deleteByApplicationId(Long applicationId) {
         this.updateChain()
-                .eq(VersionResourceDO::getApplicationId, applicationId)
+                .eq(AppVersionResourceDO::getApplicationId, applicationId)
                 .remove();
     }
 
 
-    public VersionResourceDO findByApplicationIdAndVersionIdAndResType(Long applicationId, Long versionId, String resType) {
+    public AppVersionResourceDO findByApplicationIdAndVersionIdAndResType(Long applicationId, Long versionId, String resType) {
         QueryWrapper queryWrapper = this.query()
-                .eq(VersionResourceDO::getApplicationId, applicationId)
-                .eq(VersionResourceDO::getVersionId, versionId)
-                .eq(VersionResourceDO::getResType, resType);
+                .eq(AppVersionResourceDO::getApplicationId, applicationId)
+                .eq(AppVersionResourceDO::getVersionId, versionId)
+                .eq(AppVersionResourceDO::getResType, resType);
         return this.getOne(queryWrapper);
     }
 
     public void deleteByVersionId(Long versionId) {
         this.updateChain()
-                .eq(VersionResourceDO::getVersionId, versionId)
+                .eq(AppVersionResourceDO::getVersionId, versionId)
                 .remove();
     }
 

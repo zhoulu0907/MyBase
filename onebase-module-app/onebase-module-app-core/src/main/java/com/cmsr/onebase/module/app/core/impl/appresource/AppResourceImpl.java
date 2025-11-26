@@ -4,7 +4,7 @@ import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.api.appresource.AppResourceApi;
 import com.cmsr.onebase.module.app.api.appresource.dto.PageRespDTO;
 import com.cmsr.onebase.module.app.core.dal.database.AppPageRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.PageDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePageDO;
 import jakarta.annotation.Resource;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
@@ -34,7 +34,7 @@ public class AppResourceImpl implements AppResourceApi {
         configStore.eq("pageset_id", pageSetId);
 
         // 读取页面集中的页面
-        List<PageDO> pageDOS = pageRepository.list();
+        List<AppResourcePageDO> pageDOS = pageRepository.list();
 
         pageDOS.forEach(pageDO -> {
             PageRespDTO pageRespDTO = BeanUtils.toBean(pageDO, PageRespDTO.class);

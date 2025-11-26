@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.app.core.dal.database;
 
 import com.cmsr.onebase.framework.common.pojo.PageParam;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.app.core.dal.dataobject.AuthRoleDeptDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthRoleDeptDO;
 import com.cmsr.onebase.module.app.core.dal.mapper.AppAuthRoleDeptMapper;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
@@ -21,16 +21,16 @@ import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppAuthRoleT
  * @date 2025-08-05
  */
 @Repository
-public class AppAuthRoleDeptRepository extends ServiceImpl<AppAuthRoleDeptMapper, AuthRoleDeptDO> {
+public class AppAuthRoleDeptRepository extends ServiceImpl<AppAuthRoleDeptMapper, AppAuthRoleDeptDO> {
 
     public void addRoleDept(Long roleId, List<Long> deptIds, Integer isIncludeChild) {
         for (Long deptId : deptIds) {
             QueryWrapper queryWrapper = this.query()
-                    .eq(AuthRoleDeptDO::getRoleId, roleId)
-                    .eq(AuthRoleDeptDO::getDeptId, deptId);
+                    .eq(AppAuthRoleDeptDO::getRoleId, roleId)
+                    .eq(AppAuthRoleDeptDO::getDeptId, deptId);
             boolean exists = this.exists(queryWrapper);
             if (!exists) {
-                AuthRoleDeptDO authRoleDeptDO = new AuthRoleDeptDO();
+                AppAuthRoleDeptDO authRoleDeptDO = new AppAuthRoleDeptDO();
                 authRoleDeptDO.setRoleId(roleId);
                 authRoleDeptDO.setDeptId(deptId);
                 authRoleDeptDO.setIsIncludeChild(isIncludeChild);
@@ -40,50 +40,50 @@ public class AppAuthRoleDeptRepository extends ServiceImpl<AppAuthRoleDeptMapper
 
     }
 
-    public List<AuthRoleDeptDO> findByRoleId(Long roleId) {
+    public List<AppAuthRoleDeptDO> findByRoleId(Long roleId) {
         QueryWrapper queryWrapper = this.query()
-                .eq(AuthRoleDeptDO::getRoleId, roleId);
+                .eq(AppAuthRoleDeptDO::getRoleId, roleId);
         return list(queryWrapper);
     }
 
-    public PageResult<AuthRoleDeptDO> findByRoleId(Long roleId, PageParam pageParam) {
+    public PageResult<AppAuthRoleDeptDO> findByRoleId(Long roleId, PageParam pageParam) {
         QueryWrapper queryWrapper = this.query()
-                .eq(AuthRoleDeptDO::getRoleId, roleId);
-        Page<AuthRoleDeptDO> pageQuery = Page.of(pageParam.getPageNo(), pageParam.getPageSize());
-        Page<AuthRoleDeptDO> pageResult = this.page(pageQuery, queryWrapper);
+                .eq(AppAuthRoleDeptDO::getRoleId, roleId);
+        Page<AppAuthRoleDeptDO> pageQuery = Page.of(pageParam.getPageNo(), pageParam.getPageSize());
+        Page<AppAuthRoleDeptDO> pageResult = this.page(pageQuery, queryWrapper);
         return new PageResult<>(pageResult.getRecords(), pageResult.getTotalRow());
     }
 
 
     public void deleteRoleDept(Long roleId, List<Long> deptIds) {
         this.updateChain()
-                .eq(AuthRoleDeptDO::getRoleId, roleId)
-                .in(AuthRoleDeptDO::getDeptId, deptIds)
+                .eq(AppAuthRoleDeptDO::getRoleId, roleId)
+                .in(AppAuthRoleDeptDO::getDeptId, deptIds)
                 .remove();
     }
 
     public void deleteRoleDept(Long roleId, Long deptId) {
         this.updateChain()
-                .eq(AuthRoleDeptDO::getRoleId, roleId)
-                .eq(AuthRoleDeptDO::getDeptId, deptId)
+                .eq(AppAuthRoleDeptDO::getRoleId, roleId)
+                .eq(AppAuthRoleDeptDO::getDeptId, deptId)
                 .remove();
     }
 
     public void deleteByRoleId(Long roleId) {
         this.updateChain()
-                .eq(AuthRoleDeptDO::getRoleId, roleId)
+                .eq(AppAuthRoleDeptDO::getRoleId, roleId)
                 .remove();
     }
 
 
     public void deleteByDeptId(Long deptId) {
         this.updateChain()
-                .eq(AuthRoleDeptDO::getDeptId, deptId)
+                .eq(AppAuthRoleDeptDO::getDeptId, deptId)
                 .remove();
     }
 
 
-    public List<AuthRoleDeptDO> findByApplicationId(Long applicationId) {
+    public List<AppAuthRoleDeptDO> findByApplicationId(Long applicationId) {
         QueryWrapper queryWrapper = this.query()
                 .select(
                         APP_AUTH_ROLE_DEPT.ALL_COLUMNS

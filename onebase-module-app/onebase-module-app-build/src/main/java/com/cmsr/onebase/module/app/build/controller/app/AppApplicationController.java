@@ -8,7 +8,7 @@ import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateReqVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateRespVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationRespVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationSimpleRespVO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.ApplicationDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationDO;
 import com.cmsr.onebase.module.app.core.enums.app.ApplicationStatusEnum;
 import com.cmsr.onebase.module.app.core.vo.app.ApplicationPageReqVO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -83,14 +83,14 @@ public class AppApplicationController {
     @GetMapping(value = {"/simple-list"})
     @Operation(summary = "获取应用精简信息列表-不分页", description = "只包含被开启的应用，主要用于前端的下拉选项")
     public CommonResult<List<ApplicationSimpleRespVO>> getSimpleAppList() {
-        List<ApplicationDO> list = appApplicationService.getSimpleAppList(ApplicationStatusEnum.PUBLISHED.getValue());
+        List<AppApplicationDO> list = appApplicationService.getSimpleAppList(ApplicationStatusEnum.PUBLISHED.getValue());
         return success(BeanUtils.toBean(list, ApplicationSimpleRespVO.class));
     }
 
     @GetMapping(value = {"/simple-list-by-name"})
     @Operation(summary = "获取我创建的应用列表-不分页", description = "获取我创建的应用列表")
     public CommonResult<List<ApplicationSimpleRespVO>> getSimpleAppListByName(@RequestParam(value = "appName", required = false)  String appName) {
-        List<ApplicationDO> list = appApplicationService.getMySimpleAppListByName(appName);
+        List<AppApplicationDO> list = appApplicationService.getMySimpleAppListByName(appName);
         return success(BeanUtils.toBean(list, ApplicationSimpleRespVO.class));
     }
 

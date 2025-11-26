@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.app.core.dal.database;
 
 import com.cmsr.onebase.framework.orm.repo.BaseAppRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.ApplicationTagDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationTagDO;
 import com.cmsr.onebase.module.app.core.dal.mapper.AppApplicationTagMapper;
 import com.mybatisflex.core.query.QueryWrapper;
 import org.springframework.stereotype.Repository;
@@ -13,38 +13,38 @@ import java.util.List;
  * @Date：2025/8/6 14:15
  */
 @Repository
-public class AppApplicationTagRepository extends BaseAppRepository<AppApplicationTagMapper, ApplicationTagDO> {
+public class AppApplicationTagRepository extends BaseAppRepository<AppApplicationTagMapper, AppApplicationTagDO> {
 
-    public List<ApplicationTagDO> findTagIdsByApplicationIds(List<Long> applicationIds) {
+    public List<AppApplicationTagDO> findTagIdsByApplicationIds(List<Long> applicationIds) {
         QueryWrapper queryWrapper = this.query()
-                .in(ApplicationTagDO::getApplicationId, applicationIds);
+                .in(AppApplicationTagDO::getApplicationId, applicationIds);
         return this.list(queryWrapper);
     }
 
     public List<Long> findTagIdsByApplicationId(Long applicationId) {
         QueryWrapper queryWrapper = this.query()
-                .select(ApplicationTagDO::getTagId)
-                .eq(ApplicationTagDO::getApplicationId, applicationId);
+                .select(AppApplicationTagDO::getTagId)
+                .eq(AppApplicationTagDO::getApplicationId, applicationId);
         return this.objListAs(queryWrapper, Long.class);
     }
 
 
     public void deleteByApplicationId(Long applicationId) {
         this.updateChain()
-                .eq(ApplicationTagDO::getApplicationId, applicationId)
+                .eq(AppApplicationTagDO::getApplicationId, applicationId)
                 .remove();
     }
 
     public void deleteByByApplicationIdAndTagsNotIn(Long applicationId, List<Long> tagIds) {
         this.updateChain()
-                .eq(ApplicationTagDO::getApplicationId, applicationId)
-                .notIn(ApplicationTagDO::getTagId, tagIds)
+                .eq(AppApplicationTagDO::getApplicationId, applicationId)
+                .notIn(AppApplicationTagDO::getTagId, tagIds)
                 .remove();
     }
 
     public void deleteByTagId(Long tagId) {
         this.updateChain()
-                .eq(ApplicationTagDO::getTagId, tagId)
+                .eq(AppApplicationTagDO::getTagId, tagId)
                 .remove();
     }
 
@@ -55,7 +55,7 @@ public class AppApplicationTagRepository extends BaseAppRepository<AppApplicatio
                     .eq("tag_id", tagId);
             boolean exists = exists(queryWrapper);
             if (!exists) {
-                ApplicationTagDO applicationTagDO = new ApplicationTagDO();
+                AppApplicationTagDO applicationTagDO = new AppApplicationTagDO();
                 applicationTagDO.setApplicationId(applicationId);
                 applicationTagDO.setTagId(tagId);
                 this.save(applicationTagDO);

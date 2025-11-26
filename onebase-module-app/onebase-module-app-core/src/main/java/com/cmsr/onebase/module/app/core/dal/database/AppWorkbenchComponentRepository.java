@@ -1,31 +1,29 @@
 package com.cmsr.onebase.module.app.core.dal.database;
 
-import com.cmsr.onebase.module.app.core.dal.dataobject.WorkbenchComponentDO;
-import com.cmsr.onebase.module.app.core.dal.mapper.WorkbenchComponentMapper;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourceWorkbenchComponentDO;
+import com.cmsr.onebase.module.app.core.dal.mapper.AppResourceWorkbenchComponentMapper;
+import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Order;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppResourceWorkbenchComponentTableDef.APP_RESOURCE_WORKBENCH_COMPONENT;
+
 @Repository
-public class AppWorkbenchComponentRepository extends ServiceImpl<WorkbenchComponentMapper, WorkbenchComponentDO> {
+public class AppWorkbenchComponentRepository extends ServiceImpl<AppResourceWorkbenchComponentMapper, AppResourceWorkbenchComponentDO> {
 
 
     public void deleteComponentByPageId(Long pageId) {
-        ConfigStore configs = new DefaultConfigStore();
-        configs.eq(WorkbenchComponentDO.PAGE_ID, pageId);
-        deleteByConfig(configs);
+        QueryWrapper queryWrapper = query().where(APP_RESOURCE_WORKBENCH_COMPONENT.PAGE_ID.eq(pageId));
+        this.remove(queryWrapper);
     }
 
-    public List<WorkbenchComponentDO> findByPageId(Long pageId) {
-        ConfigStore configs = new DefaultConfigStore();
-        configs.eq(WorkbenchComponentDO.PAGE_ID, pageId);
-        configs.order(WorkbenchComponentDO.COMPONENT_INDEX, Order.TYPE.ASC);
-        return findAllByConfig(configs);
+    public List<AppResourceWorkbenchComponentDO> findByPageId(Long pageId) {
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_RESOURCE_WORKBENCH_COMPONENT.PAGE_ID.eq(pageId))
+                .orderBy(APP_RESOURCE_WORKBENCH_COMPONENT.COMPONENT_INDEX, true);
+        return this.list(queryWrapper);
     }
-
 
 }

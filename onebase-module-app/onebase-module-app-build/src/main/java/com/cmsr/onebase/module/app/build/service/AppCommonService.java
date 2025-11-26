@@ -6,9 +6,9 @@ import com.cmsr.onebase.framework.orm.entity.BaseEntity;
 import com.cmsr.onebase.module.app.core.dal.database.AppApplicationRepository;
 import com.cmsr.onebase.module.app.core.dal.database.AppAuthRoleRepository;
 import com.cmsr.onebase.module.app.core.dal.database.AppMenuRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.ApplicationDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.AuthRoleDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.MenuDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthRoleDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppMenuDO;
 import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
 import com.cmsr.onebase.module.system.api.user.AdminUserApi;
 import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
@@ -42,24 +42,24 @@ public class AppCommonService {
     @Resource
     private AdminUserApi adminUserApi;
 
-    public ApplicationDO validateApplicationExist(Long id) {
-        ApplicationDO applicationDO = applicationRepository.getById(id);
+    public AppApplicationDO validateApplicationExist(Long id) {
+        AppApplicationDO applicationDO = applicationRepository.getById(id);
         if (applicationDO == null) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_NOT_EXIST);
         }
         return applicationDO;
     }
 
-    public AuthRoleDO validateRoleExist(Long id) {
-        AuthRoleDO authRoleDO = authRoleRepository.getById(id);
+    public AppAuthRoleDO validateRoleExist(Long id) {
+        AppAuthRoleDO authRoleDO = authRoleRepository.getById(id);
         if (authRoleDO == null) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_AUTH_ROLE_NOT_EXISTS);
         }
         return authRoleDO;
     }
 
-    public MenuDO validateMenuExist(Long id) {
-        MenuDO menuDO = menuRepository.getById(id);
+    public AppMenuDO validateMenuExist(Long id) {
+        AppMenuDO menuDO = menuRepository.getById(id);
         if (menuDO == null) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_MENU_NOT_EXIST);
         }

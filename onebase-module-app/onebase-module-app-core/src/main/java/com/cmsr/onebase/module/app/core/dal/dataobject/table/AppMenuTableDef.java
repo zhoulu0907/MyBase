@@ -7,8 +7,8 @@ import com.mybatisflex.core.table.TableDef;
 /**
  * 应用菜单表 表定义层。
  *
- * @author v1endr3
- * @since 2025-11-25
+ * @author HuangJie
+ * @since 2025-11-26
  */
 public class AppMenuTableDef extends TableDef {
 

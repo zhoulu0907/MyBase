@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.app.core.dal.database;
 import com.cmsr.onebase.framework.common.pojo.PageParam;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.orm.repo.BaseAppRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.VersionDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppVersionDO;
 import com.cmsr.onebase.module.app.core.dal.mapper.AppVersionMapper;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
@@ -16,35 +16,35 @@ import java.util.List;
  * @Date：2025/8/6 14:42
  */
 @Repository
-public class AppVersionRepository extends BaseAppRepository<AppVersionMapper, VersionDO> {
+public class AppVersionRepository extends BaseAppRepository<AppVersionMapper, AppVersionDO> {
 
     public void deleteByApplicationId(Long applicationId) {
         this.updateChain()
-                .eq(VersionDO::getApplicationId, applicationId)
+                .eq(AppVersionDO::getApplicationId, applicationId)
                 .remove();
     }
 
-    public List<VersionDO> findByApplicationId(Long applicationId) {
+    public List<AppVersionDO> findByApplicationId(Long applicationId) {
         QueryWrapper queryWrapper = this.query()
-                .eq(VersionDO::getApplicationId, applicationId)
-                .orderBy(VersionDO::getUpdateTime, false)
-                .orderBy(VersionDO::getCreateTime, false);
+                .eq(AppVersionDO::getApplicationId, applicationId)
+                .orderBy(AppVersionDO::getUpdateTime, false)
+                .orderBy(AppVersionDO::getCreateTime, false);
         return list(queryWrapper);
     }
 
-    public PageResult<VersionDO> selectPage(Long applicationId, PageParam pageParam) {
+    public PageResult<AppVersionDO> selectPage(Long applicationId, PageParam pageParam) {
         QueryWrapper queryWrapper = this.query()
-                .eq(VersionDO::getApplicationId, applicationId);
-        Page<VersionDO> pageQuery = Page.of(pageParam.getPageNo(), pageParam.getPageSize());
-        Page<VersionDO> pageResult = this.page(pageQuery, queryWrapper);
+                .eq(AppVersionDO::getApplicationId, applicationId);
+        Page<AppVersionDO> pageQuery = Page.of(pageParam.getPageNo(), pageParam.getPageSize());
+        Page<AppVersionDO> pageResult = this.page(pageQuery, queryWrapper);
         return new PageResult<>(pageResult.getRecords(), pageResult.getTotalRow());
     }
 
-    public List<VersionDO> findVersionList(List<Long> appIds) {
+    public List<AppVersionDO> findVersionList(List<Long> appIds) {
         QueryWrapper queryWrapper = this.query()
-                .in(VersionDO::getApplicationId, appIds)
-                .orderBy(VersionDO::getUpdateTime, false)
-                .orderBy(VersionDO::getCreateTime, false);
+                .in(AppVersionDO::getApplicationId, appIds)
+                .orderBy(AppVersionDO::getUpdateTime, false)
+                .orderBy(AppVersionDO::getCreateTime, false);
         return this.list(queryWrapper);
     }
 }

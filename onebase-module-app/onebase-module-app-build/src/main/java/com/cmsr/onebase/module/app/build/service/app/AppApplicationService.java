@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.app.build.service.app;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateReqVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateRespVO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.ApplicationDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationDO;
 import com.cmsr.onebase.module.app.core.vo.app.ApplicationPageReqVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationRespVO;
 
@@ -31,8 +31,8 @@ public interface AppApplicationService {
 
     Long generateId();
 
-    List<ApplicationDO> getSimpleAppList(Integer status);
+    List<AppApplicationDO> getSimpleAppList(Integer status);
 
-    List<ApplicationDO> getMySimpleAppListByName(String appName);
+    List<AppApplicationDO> getMySimpleAppListByName(String appName);
 
 }
