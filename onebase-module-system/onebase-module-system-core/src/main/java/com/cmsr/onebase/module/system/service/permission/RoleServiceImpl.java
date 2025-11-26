@@ -312,9 +312,20 @@ public class RoleServiceImpl implements RoleService {
         return roleDataRepository.getRoleIdsByCodeAndTenantId(code, id);
     }
 
-    @TenantIgnore
-    public RoleDO getRoleByCodeIgnoreTenant(String code) {
-        return roleDataRepository.getRoleByCodeIgnoreTenant(code);
+    public RoleDO getRoleByCode(String code) {
+        return roleDataRepository.getRoleByCode(code);
+    }
+
+    @Override
+    public boolean hasAnyDevloperAdmin(Collection<Long> roleIds) {
+        if (CollectionUtils.isEmpty(roleIds)) {
+            return false;
+        }
+        // 通过代理对象调用，确保 @Cacheable 生效
+        return roleIds.stream().anyMatch(id -> {
+            RoleDO role = roleService.getRoleFromCache(id);
+            return role != null && (RoleCodeEnum.isDevloperAdmin(role.getCode()));
+        });
     }
 
 }

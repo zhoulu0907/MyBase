@@ -1,36 +1,34 @@
 package com.cmsr.onebase.module.etl.core.dal.dataobject;
 
-import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
-import jakarta.persistence.Column;
-import jakarta.persistence.Table;
+
+import com.cmsr.onebase.framework.orm.entity.BaseAppEntity;
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Table;
 import lombok.Data;
 
 @Data
-@Table(name = "etl_schema")
-public class ETLSchemaDO extends TenantBaseDO {
+@Table(value = "etl_schema")
+public class ETLSchemaDO extends BaseAppEntity {
 
-    @Column(name = "application_id")
-    private Long applicationId;
-
-    @Column(name = "datasource_id")
+    @Column(value = "datasource_id")
     private Long datasourceId;
 
-    @Column(name = "catalog_id")
+    @Column(value = "catalog_id")
     private Long catalogId;
 
-    @Column(name = "schema_name")
+    @Column(value = "schema_name")
     private String schemaName;
 
-    @Column(name = "display_name")
+    @Column(value = "display_name")
     private String displayName;
 
     // currently no usage, ;.
-    @Column(name = "meta_info")
+    @Column(value = "meta_info")
     private String metaInfo;
 
-    @Column(name = "remarks")
+    @Column(value = "remarks")
     private String remarks;
 
-    @Column(name = "declaration")
+    @Column(value = "declaration")
     private String declaration;
 }

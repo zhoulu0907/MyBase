@@ -8,9 +8,9 @@ import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
-import com.cmsr.onebase.module.infra.api.security.SecurityConfigApi;
-import com.cmsr.onebase.module.infra.api.security.dto.LoginFailureResultDTO;
-import com.cmsr.onebase.module.infra.api.security.dto.PasswordExpiryCheckDTO;
+import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
+import com.cmsr.onebase.framework.common.biz.security.dto.LoginFailureResultDTO;
+import com.cmsr.onebase.framework.common.biz.security.dto.PasswordExpiryCheckDTO;
 import com.cmsr.onebase.module.system.api.logger.dto.LoginLogCreateReqDTO;
 import com.cmsr.onebase.module.system.api.sms.SmsCodeApi;
 import com.cmsr.onebase.module.system.api.user.AdminUserRoleApi;
@@ -64,34 +64,34 @@ import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
 public class AdminAuthServiceImpl implements AdminAuthService {
 
     @Resource
-    private UserService     userService;
+    private UserService        userService;
     @Resource
-    private LoginLogService loginLogService;
+    private LoginLogService    loginLogService;
     @Resource
     private OAuth2TokenService oauth2TokenService;
     @Resource
-    private MemberService memberService;
+    private MemberService      memberService;
     @Resource
-    private Validator validator;
+    private Validator          validator;
     @Resource
-    private CaptchaService captchaService;
+    private CaptchaService     captchaService;
     @Resource
-    private SmsCodeApi smsCodeApi;
+    private SmsCodeApi         smsCodeApi;
     /**
      * 验证码的开关，默认为 true
      */
     @Value("${onebase.captcha.enable:true}")
     @Setter // 为了单测：开启或者关闭验证码
-    private Boolean captchaEnable;
+    private Boolean            captchaEnable;
     /**
      * 平台租户验证开关，默认为 false
      */
     @Value("${onebase.platform-tenant.enable-create-app:false}")
     @Setter // 为了单测：开启或者关闭验证码
-    private Boolean       platformTenantEnableCreateApp;
+    private Boolean            platformTenantEnableCreateApp;
 
     @Resource
-    private TenantService tenantService;
+    private TenantService     tenantService;
     @Resource
     private PermissionService permissionService;
     @Resource
@@ -129,7 +129,7 @@ public class AdminAuthServiceImpl implements AdminAuthService {
             createLoginLog(null, account, logTypeEnum, LoginResultEnum.BAD_CREDENTIALS);
             throw exception(AUTH_LOGIN_NO_EXISTS);
         }
-        
+
         Long userId = user.getId();
 
         // 检查账号是否被防暴力破解锁定
@@ -200,7 +200,7 @@ public class AdminAuthServiceImpl implements AdminAuthService {
 
         // 使用账号密码，进行登录
         AdminUserDO user = authenticate(reqVO.getUsername(), reqVO.getPassword());
-        AuthLoginRespVO authLoginRespVO=  createTokenAfterLoginSuccess(user.getId(), reqVO.getUsername(),reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_USERNAME);
+        AuthLoginRespVO authLoginRespVO = createTokenAfterLoginSuccess(user.getId(), reqVO.getUsername(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_USERNAME);
         // 设置是否管理员
         authLoginRespVO.setAdminFlag(findAdminFlag(RoleCodeEnum.TENANT_ADMIN.getCode(),user.getId()));
         LogRecordContext.putVariable("user", user);
@@ -217,9 +217,9 @@ public class AdminAuthServiceImpl implements AdminAuthService {
         // 2. 使用账号密码，进行登录
         AdminUserDO user = mobileAuthenticate(reqVO.getMobile(), reqVO.getPassword());
 
-        AuthLoginRespVO authLoginRespVO= createCorpAfterLoginSuccess(user.getCorpId(), user.getId(), reqVO.getMobile(),reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE);
+        AuthLoginRespVO authLoginRespVO = createCorpAfterLoginSuccess(user.getCorpId(), user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE);
         // 设置是否管理员
-        authLoginRespVO.setAdminFlag(findAdminFlag(RoleCodeEnum.CORP_ADMIN.getCode(),user.getId()));
+        authLoginRespVO.setAdminFlag(findAdminFlag(RoleCodeEnum.CORP_ADMIN.getCode(), user.getId()));
         // 回显当前登录用户的企业id
         authLoginRespVO.setCorpId(user.getCorpId());
         // 3. 记录操作日志上下文
@@ -227,12 +227,12 @@ public class AdminAuthServiceImpl implements AdminAuthService {
         return authLoginRespVO;
     }
 
-    public boolean   findAdminFlag( String roleCode,  Long userId){
+    public boolean findAdminFlag(String roleCode, Long userId) {
         // 获取权限
         RoleDO roleDO = roleService.getRoleIdsByCode(roleCode);
-        if(null!=roleDO){
+        if (null != roleDO) {
             // 查询用户是否管理员
-            boolean  adminFlag= userService.findAdminByRoleIdAndUserId(roleDO.getId(),userId);
+            boolean adminFlag = userService.findAdminByRoleIdAndUserId(roleDO.getId(), userId);
             return adminFlag;
         }
         return false;
@@ -332,11 +332,7 @@ public class AdminAuthServiceImpl implements AdminAuthService {
                 OAuth2ClientConstants.CLIENT_ID_DEFAULT, null);
 
         // 检查并限制设备数，踢出超限的设备
-        List<String> removedTokens = securityConfigApi.checkAndLimitDevices(
-                userId,
-                deviceId,
-                accessTokenDO.getAccessToken()
-        ).getData();
+        List<String> removedTokens = securityConfigApi.checkAndLimitDevices(userId, deviceId, accessTokenDO.getAccessToken()).getData();
 
         // 删除被踢出的Token
         if (removedTokens != null && !removedTokens.isEmpty()) {
@@ -377,10 +373,7 @@ public class AdminAuthServiceImpl implements AdminAuthService {
         }
 
         // 清理在线设备记录
-        securityConfigApi.removeOnlineDevice(
-                accessTokenDO.getUserId(),
-                token
-        );
+        securityConfigApi.removeOnlineDevice(null, accessTokenDO.getUserId(), token);
 
 
         // 删除成功，则记录登出日志

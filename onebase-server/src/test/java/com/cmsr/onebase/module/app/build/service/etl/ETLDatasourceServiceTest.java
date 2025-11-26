@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.app.build.service.etl;
 
-import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.module.etl.build.service.datasource.ETLDatasourceService;
 import com.cmsr.onebase.server.OneBaseServerApplication;
 import lombok.Setter;

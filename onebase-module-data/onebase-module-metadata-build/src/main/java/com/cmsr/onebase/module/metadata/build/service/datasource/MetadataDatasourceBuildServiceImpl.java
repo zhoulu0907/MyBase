@@ -19,7 +19,7 @@ import com.cmsr.onebase.module.metadata.core.dal.database.MetadataDatasourceRepo
 import org.anyline.metadata.type.DatabaseType;
 import com.cmsr.onebase.module.metadata.core.service.datasource.MetadataAppAndDatasourceCoreService;
 import com.cmsr.onebase.module.metadata.core.service.datasource.MetadataDatasourceCoreService;
-import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.module.system.api.user.AdminUserApi;
 import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
 import jakarta.annotation.Resource;

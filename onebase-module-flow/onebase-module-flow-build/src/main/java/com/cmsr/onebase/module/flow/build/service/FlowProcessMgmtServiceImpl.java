@@ -71,7 +71,7 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
 
     @Override
     public FlowProcessVO getDetail(Long id) {
-        FlowProcessDO flowProcessDO = flowProcessRepository.findById(id);
+        FlowProcessDO flowProcessDO = flowProcessRepository.getById(id);
         if (flowProcessDO == null) {
             return null;
         }
@@ -103,9 +103,9 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
         // 禁用
         flowProcessDO.setEnableStatus(FlowEnableStatusEnum.DISABLE.getStatus());
         // 保存到数据库
-        FlowProcessDO saved = flowProcessRepository.insert(flowProcessDO);
+        flowProcessRepository.save(flowProcessDO);
         saveAdditional(flowProcessDO, reqVO.getTriggerConfig());
-        return saved.getId();
+        return flowProcessDO.getId();
     }
 
     private void saveAdditional(FlowProcessDO flowProcessDO, Map<String, Object> triggerConfig) {
@@ -115,19 +115,19 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
             FlowProcessFormDO flowProcessFormDO = new FlowProcessFormDO();
             flowProcessFormDO.setProcessId(flowProcessDO.getId());
             flowProcessFormDO.setPageId(pageId);
-            flowProcessFormRepository.insert(flowProcessFormDO);
+            flowProcessFormRepository.save(flowProcessFormDO);
         } else if (triggerTypeEnum == FlowTriggerTypeEnum.ENTITY) {
             Long entityId = MapUtils.getLong(triggerConfig, JsonGraphConstant.ENTITY_ID);
             FlowProcessEntityDO flowProcessEntityDO = new FlowProcessEntityDO();
             flowProcessEntityDO.setProcessId(flowProcessDO.getId());
             flowProcessEntityDO.setEntityId(entityId);
-            flowProcessEntityRepository.insert(flowProcessEntityDO);
+            flowProcessEntityRepository.save(flowProcessEntityDO);
         } else if (triggerTypeEnum == FlowTriggerTypeEnum.DATE_FIELD) {
             Long entityId = MapUtils.getLong(triggerConfig, JsonGraphConstant.ENTITY_ID);
             FlowProcessDateFieldDO flowProcessDateFieldDO = new FlowProcessDateFieldDO();
             flowProcessDateFieldDO.setProcessId(flowProcessDO.getId());
             flowProcessDateFieldDO.setEntityId(entityId);
-            flowProcessDateFieldRepository.insert(flowProcessDateFieldDO);
+            flowProcessDateFieldRepository.save(flowProcessDateFieldDO);
         }
     }
 
@@ -139,7 +139,7 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
         // 更新字段
         BeanUtils.copyProperties(reqVO, flowProcessDO);
         // 保存更新
-        flowProcessRepository.update(flowProcessDO);
+        flowProcessRepository.updateById(flowProcessDO);
         // 清除缓存
         flowCommonService.clearProcessNameCache(flowProcessDO.getId());
     }
@@ -154,7 +154,7 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
             flowProcessDO.setEnableStatus(reqVO.getProcessStatus());
         }
         // 保存更新
-        flowProcessRepository.update(flowProcessDO);
+        flowProcessRepository.updateById(flowProcessDO);
     }
 
 
@@ -165,7 +165,7 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
         FlowProcessDO flowProcessDO = validateFlowProcessExist(reqVO.getId());
         // 更新流程名称
         flowProcessDO.setProcessName(reqVO.getProcessName());
-        flowProcessRepository.update(flowProcessDO);
+        flowProcessRepository.updateById(flowProcessDO);
     }
 
     @Override
@@ -175,7 +175,7 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
         FlowProcessDO flowProcessDO = validateFlowProcessExist(id);
         // 启用流程
         flowProcessDO.setEnableStatus(FlowEnableStatusEnum.ENABLE.getStatus());
-        flowProcessRepository.update(flowProcessDO);
+        flowProcessRepository.updateById(flowProcessDO);
     }
 
     @Override
@@ -185,7 +185,7 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
         FlowProcessDO flowProcessDO = validateFlowProcessExist(id);
         // 关闭流程
         flowProcessDO.setEnableStatus(FlowEnableStatusEnum.DISABLE.getStatus());
-        flowProcessRepository.update(flowProcessDO);
+        flowProcessRepository.updateById(flowProcessDO);
     }
 
     @Override
@@ -194,7 +194,7 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
         // 检查流程是否存在
         validateFlowProcessExist(id);
         // 删除流程
-        flowProcessRepository.deleteById(id);
+        flowProcessRepository.removeById(id);
         flowProcessDateFieldRepository.deleteByProcessId(id);
         flowProcessEntityRepository.deleteByProcessId(id);
         flowProcessFormRepository.deleteByProcessId(id);
@@ -208,11 +208,11 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
         for (Long id : ids) {
             validateFlowProcessExist(id);
         }
-        flowProcessRepository.deleteByIds(ids);
+        flowProcessRepository.removeByIds(ids);
     }
 
     private FlowProcessDO validateFlowProcessExist(Long id) {
-        FlowProcessDO flowProcessDO = flowProcessRepository.findById(id);
+        FlowProcessDO flowProcessDO = flowProcessRepository.getById(id);
         if (flowProcessDO == null) {
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.FLOW_NOT_EXIST);
         }

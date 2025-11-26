@@ -62,6 +62,12 @@
             <artifactId>kryo5</artifactId>
         </dependency>
         <!-- 测试依赖 -->
+        <!-- Test 测试相关 -->
+        <dependency>
+            <groupId>com.mybatis-flex</groupId>
+            <artifactId>mybatis-flex-codegen</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>

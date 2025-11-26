@@ -1,14 +1,15 @@
 package com.cmsr.onebase.module.system.enums.permission;
 
 import com.cmsr.onebase.framework.common.util.object.ObjectUtils;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * 角色标识枚举
  */
 @Getter
-@AllArgsConstructor
 public enum RoleCodeEnum {
 
     SUPER_ADMIN("super_admin", "平台管理员"),
@@ -16,6 +17,12 @@ public enum RoleCodeEnum {
     CORP_ADMIN("corp_admin", "企业管理员"),
     APP_DEVELOPER("app_developer", "应用开发者"),
     ;
+
+
+    RoleCodeEnum(String code, String name) {
+        this.code = code;
+        this.name = name;
+    }
 
     /**
      * 角色编码
@@ -25,6 +32,27 @@ public enum RoleCodeEnum {
      * 名字
      */
     private final String name;
+
+    /**
+     * 应用开发者权限编码列表(建议未来迁移到数据库配置)
+     */
+    private final Set<String> devloperPermissionCodes = new HashSet<String>() {{
+        add("tenant:app:create"); // 应用新增
+        add("tenant:app:delete"); // 应用删除
+        add("tenant:app:enable");  // 应用禁用
+        add("tenant:app:query");  //应用查看
+        add("tenant:app:update"); // 应用修改
+
+        add("tenant:user:query"); // 用户查看
+        add("tenant:role:query");  // 角色查看
+        add("tenant:dept:query");  //组织查看
+
+        add("tenant:info:query"); // 空间信息查看
+        add("tenant:dict:query"); // 数据字典查看
+        add("tenant:profile:query");  // 个人中心查看
+        add("tenant:profile:update");  // 个人中心修改
+        add("tenant:profile:reset-pwd"); //修改密码
+    }};
 
     public static boolean isSuperAdmin(String code) {
         return ObjectUtils.equalsAny(code, SUPER_ADMIN.getCode());
@@ -39,4 +67,7 @@ public enum RoleCodeEnum {
         return ObjectUtils.equalsAny(code, CORP_ADMIN.getCode());
     }
 
+    public static boolean isDevloperAdmin(String code) {
+        return ObjectUtils.equalsAny(code, APP_DEVELOPER.getCode());
+    }
 }

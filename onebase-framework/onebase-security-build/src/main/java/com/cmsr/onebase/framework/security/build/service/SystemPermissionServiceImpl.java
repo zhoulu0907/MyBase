@@ -3,8 +3,8 @@ package com.cmsr.onebase.framework.security.build.service;
 import com.cmsr.onebase.framework.common.biz.system.permission.PermissionCommonApi;
 import com.cmsr.onebase.framework.common.core.KeyValue;
 import cn.hutool.core.collection.CollUtil;
-import com.cmsr.onebase.framework.security.core.LoginUser;
-import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.common.security.dto.LoginUser;
+import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import lombok.AllArgsConstructor;
@@ -15,8 +15,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.cmsr.onebase.framework.common.util.cache.CacheUtils.buildCache;
-import static com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils.getLoginUserId;
-import static com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils.skipPermissionCheck;
+import static com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils.getLoginUserId;
+import static com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils.skipPermissionCheck;
 
 /**
  * 默认的 {@link SystemPermissionService} 实现类

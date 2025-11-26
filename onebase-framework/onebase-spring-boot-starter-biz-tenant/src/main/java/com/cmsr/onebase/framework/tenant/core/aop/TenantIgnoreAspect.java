@@ -1,7 +1,7 @@
 package com.cmsr.onebase.framework.tenant.core.aop;
 
 import com.cmsr.onebase.framework.common.util.spring.SpringExpressionUtils;
-import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;

@@ -67,7 +67,7 @@ tag: {{tag}}
 GET {{baseUrl}}/system/corp/get?id=131231231237783552
 Content-Type: application/json
 Authorization: Bearer {{token}}
-tenant-id: {{adminTenantId}}
+#tenant-id: {{adminTenantId}}
 
 ### 创建企业 /admin-api/system/corp/update
 

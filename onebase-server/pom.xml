@@ -166,7 +166,11 @@
             <groupId>cn.com.kingbase</groupId>
             <artifactId>kingbase8</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>com.mybatis-flex</groupId>
+            <artifactId>mybatis-flex-codegen</artifactId>
+            <scope>test</scope>
+        </dependency>
 <!--        <dependency>-->
 <!--            <groupId>com.cmsr.onebase</groupId>-->
 <!--            <artifactId>onebase-module-flow-component</artifactId>-->
