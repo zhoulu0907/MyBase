@@ -2,6 +2,7 @@ import { useState, type FC } from 'react';
 import { Table, type TableColumnProps, Button, Tag, Space, Radio } from '@arco-design/web-react';
 import TableSearch from './TableSearch';
 import DetailPop from './DetailPop'
+import TaskList from './TaskList';
 import '../style/tcPage.less'
 
 const radioList = [
@@ -102,6 +103,25 @@ const ICopied:FC = () => {
         setPopVisible(true)
     }
 
+    const fetchFormData = async () => {
+        return {
+            total: data.length,
+            list: data
+        }
+    }
+
+    const newTask = true;
+    if (newTask) {
+        return (
+        <section className="page-will-do">
+            <TaskList 
+            title="我创建的"
+            dataFetch={fetchFormData}
+            columns={columns}
+            />
+        </section>
+        );
+    }
     return <section className='page-content-rgt'>
         <div className='table-title-box'>
             <div>

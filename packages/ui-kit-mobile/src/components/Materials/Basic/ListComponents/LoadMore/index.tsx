@@ -426,7 +426,7 @@ const XLoadMore = memo(
       if (editMode) {
         return null;
       }
-      if (!loading && !tableData.length && tableTotal === 0) {
+      if (!loading && !tableData.length && tableTotal == 0) {
         return <div className="no-data">暂无数据</div>;
       }
       if (loading || tablePageNo * pageSize >= (tableTotal || Number.MAX_SAFE_INTEGER)) {

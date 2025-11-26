@@ -1,4 +1,11 @@
 .task-list-wrapper {
+    .total-data {
+        display: block;
+        line-height: 0.6rem;
+        font-size: 0.2rem;
+        text-align: center;
+        color: #86909C;
+    }
     .list-search-header {
         padding: 0.4rem 0.32rem 0.24rem;
         display: flex;
@@ -68,6 +75,7 @@
         padding: 0.24rem;
         background: #F7F8FA;
         min-height: calc(100vh - 2.78rem);
+        font-size: 0.32rem;
         .no-data {
             font-size: 0.28rem;
             color: #86909C;
