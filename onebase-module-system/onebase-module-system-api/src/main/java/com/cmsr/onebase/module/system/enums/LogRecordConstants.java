@@ -51,7 +51,7 @@ public interface LogRecordConstants {
     String SYSTEM_PERMISSION_ASSIGN_ROLE_DATA_SCOPE_SUB_TYPE = "赋予角色数据权限";
     String SYSTEM_PERMISSION_ASSIGN_ROLE_DATA_SCOPE_SUCCESS = LOGIN_USER +"赋予【{{#role.name}}】角色【{{#dataScopeDeptIds}}】数据权限";
     String SYSTEM_PERMISSION_ASSIGN_USER_ROLES_SUB_TYPE = "赋予用户角色";
-    String SYSTEM_PERMISSION_ASSIGN_USER_ROLES_SUCCESS = LOGIN_USER +"赋予【{{#user.nickname}}】用户角色【{{#roleNames}}】";
+    String SYSTEM_PERMISSION_ASSIGN_USER_ROLES_SUCCESS = LOGIN_USER +"给【{{#user.nickname}}】用户分配【{{#roleNames}}】角色";
     String SYSTEM_PERMISSIONSUB_ADD_ROLE_USERS_TYPE = "为角色分配用户";
     String SYSTEM_PERMISSION_ADD_ROLE_USERS__SUCCESS = LOGIN_USER +"为角色【{{#role.name}}】分配用户:【{{#userNames}}】";
     String SYSTEM_PERMISSION_DELETE_ROLE_USERS_SUB_TYPE = "从角色中移除用户";
@@ -101,7 +101,7 @@ public interface LogRecordConstants {
     String SYSTEM_CORP_UPDATE_SUB_TYPE = "更新企业";
     String SYSTEM_CORP_UPDATE_SUCCESS = LOGIN_USER + "用户更新了企业 【{{#corp.corpName}}】";
     String SYSTEM_CORP_DELETE_SUB_TYPE = "删除企业";
-    String SYSTEM_CORP_DELETE_SUCCESS = LOGIN_USER + "删除了用户【{{#corp.corpName}}】";
+    String SYSTEM_CORP_DELETE_SUCCESS = LOGIN_USER + "删除了企业【{{#corp.corpName}}】";
 
     // ======================= DEPT 部门 =======================
 
