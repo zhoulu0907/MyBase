@@ -76,7 +76,7 @@ const Right: React.FC = () => {
       }
 
       const headers = {
-        'Tenant-Id': tenantId
+        'X-Tenant-Id': tenantId
       };
 
       const loginData: LoginRequest = {

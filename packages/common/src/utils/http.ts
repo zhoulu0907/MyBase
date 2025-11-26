@@ -63,7 +63,9 @@ export class HttpClient {
         if (tokenInfo?.accessToken) {
           config.headers['Authorization'] = `Bearer ${tokenInfo.accessToken}`;
 
-          config.headers['X-Tenant-Id'] = tenantInfo?.tenantId;
+          if (config.headers['X-Tenant-Id'] == undefined || config.headers['X-Tenant-Id'] === '') {
+            config.headers['X-Tenant-Id'] = tenantInfo?.tenantId;
+          }
         }
 
         // 执行自定义请求拦截器

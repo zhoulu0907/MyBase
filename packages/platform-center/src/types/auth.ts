@@ -171,4 +171,4 @@ export interface MenuInfo {
 /**
  * 登录的租户id
  */
-export type Headers = Record<'Tenant-Id', string>;
+export type Headers = Record<'X-Tenant-Id', string>;
