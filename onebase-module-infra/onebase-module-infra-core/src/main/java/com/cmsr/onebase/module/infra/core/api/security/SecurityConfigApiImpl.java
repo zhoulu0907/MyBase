@@ -157,7 +157,7 @@ public class SecurityConfigApiImpl implements SecurityConfigApi {
         long passwordAge = ChronoUnit.DAYS.between(passwordCreateTime, now);
 
         // 判断密码是否过期
-        if (passwordAge >= expiryDays) {
+        if (passwordAge > expiryDays) {
             // 密码已过期
             int daysExpired = (int) (passwordAge - expiryDays);
             return success(PasswordExpiryCheckDTO.builder()
