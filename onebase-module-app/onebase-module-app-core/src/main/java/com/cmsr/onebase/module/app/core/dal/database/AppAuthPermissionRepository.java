@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.app.core.dal.database;
 
-import com.cmsr.onebase.framework.orm.mybatis.BaseAppRepository;
+import com.cmsr.onebase.framework.orm.repo.BaseAppRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AuthPermissionDO;
 import com.cmsr.onebase.module.app.core.dal.mapper.AppAuthPermissionMapper;
 import com.cmsr.onebase.module.app.core.vo.auth.AuthPermissionReq;
