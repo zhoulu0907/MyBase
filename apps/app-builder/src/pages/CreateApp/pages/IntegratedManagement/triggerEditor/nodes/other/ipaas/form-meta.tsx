@@ -1,6 +1,6 @@
 import jsNodeIcon from '@/assets/flow/connect/js_node.svg';
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
-import { Form, Pagination, Steps } from '@arco-design/web-react';
+import { Form, Input, Pagination, Steps } from '@arco-design/web-react';
 import { IconSync } from '@douyinfe/semi-icons';
 import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
 import {
@@ -13,15 +13,16 @@ import {
   type ScriptActionItem
 } from '@onebase/app';
 import { getCommonPaginationList, getHashQueryParam } from '@onebase/common';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
 import styles from './index.module.less';
+import { InputParameterForm } from './InputParameterForm';
 
 const Step = Steps.Step;
 
-export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
+export const renderForm = ({}: FormRenderProps<FlowNodeJSON['data']>) => {
   const isSidebar = useIsSidebar();
   const { node } = useNodeRenderContext();
 
@@ -31,18 +32,14 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const [total, setTotal] = useState(0);
   const [actionList, setActionList] = useState<ScriptActionItem[]>([]);
 
-  const [selectedInstance, setSelectedInstance] = useState<ConnectInstance>();
-  const [selectedAction, setSelectedAction] = useState<ScriptActionItem>();
+  const [selectedInstanceId, setSelectedInstanceId] = useState<string>(
+    triggerEditorSignal.nodeData.value[node.id].instanceId || ''
+  );
+  const [selectedActionId, setSelectedActionId] = useState<string>(
+    triggerEditorSignal.nodeData.value[node.id].actionId || ''
+  );
   const [inputParameter, setInputParameter] = useState<string>('{}');
   const [onSwap, setOnSwap] = useState(false);
-
-  const handlePropsOnChange = (key: string, value: any) => {
-    const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    triggerEditorSignal.setNodeData(node.id, {
-      ...nodeData,
-      [key]: value
-    });
-  };
 
   const [payloadForm] = Form.useForm();
 
@@ -53,20 +50,27 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   };
 
   useEffect(() => {
+    // console.log(...triggerEditorSignal.nodeData.value[node.id]);
+    console.log(node.id);
+    console.log(triggerEditorSignal.nodeData.value[node.id]);
+  }, []);
+
+  useEffect(() => {
     getConnectInstanceList();
   }, []);
 
   useEffect(() => {
-    if (selectedInstance && selectedInstance.connectorId) {
-      handleGetScriptActionList(selectedInstance.connectorId);
+    if (selectedInstanceId) {
+      handleGetScriptActionList(selectedInstanceId);
     }
-  }, [selectedInstance]);
+  }, [selectedInstanceId]);
 
+  // 初始化时，如果已有 selectedActionId，立即获取 inputParameter
   useEffect(() => {
-    if (selectedAction && selectedAction.scriptId) {
-      handleGetScriptAction(selectedAction.scriptId);
+    if (selectedActionId) {
+      handleGetScriptAction(selectedActionId);
     }
-  }, [selectedAction]);
+  }, [selectedActionId]);
 
   const getConnectInstanceList = async () => {
     const curAppId = getHashQueryParam('appId');
@@ -80,6 +84,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       req,
       setPageNo
     );
+
     console.log('res :', res);
     if (res) {
       setInstanceList(res.list || []);
@@ -107,115 +112,133 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   const handleGetScriptAction = async (scriptId: string) => {
     const res = await getScriptAction(scriptId);
-    console.log(res);
-    if (res && res.inputParameter) {
-      console.log('res.inputParameter :', res.inputParameter);
-      setInputParameter(res.inputParameter);
+    if (res) {
+      if (res.inputParameter) {
+        setInputParameter(res.inputParameter);
+      } else {
+        setInputParameter('{}');
+      }
     }
   };
 
-  const renderInputParameter = () => {
-    const inputParameterObj = JSON.parse(inputParameter);
-  };
+  const renderInputParameter = useCallback(() => {
+    return <InputParameterForm inputParameter={inputParameter} form={payloadForm} />;
+  }, [inputParameter]);
 
   return (
     <>
       <FormHeader />
       {isSidebar ? (
         <FormContent>
-          <div className={styles.ipaasContainer}>
-            <div className={styles.stepsContainer}>
-              <Steps current={currentStep} style={{ margin: '0 auto' }} size="small" onChange={handleStepChange}>
-                <Step title="选择动作" />
-                <Step title="参数配置" />
-              </Steps>
-            </div>
-            {currentStep === 1 && selectedInstance && (
-              <div className={styles.selectedInstance}>
-                <div className={styles.selectedInstanceLeft}>
-                  <img src={jsNodeIcon} alt="" className={styles.selectIcon} />
-                  <div className={styles.instanceItemText}>{selectedInstance.connectorName}</div>
-                </div>
-
-                <div
-                  className={styles.selectedInstanceRight}
-                  onClick={() => {
-                    setOnSwap(true);
-                    setPageNo(1);
-                  }}
-                >
-                  <IconSync />
-                  切换
-                </div>
-              </div>
-            )}
-
-            {currentStep === 1 && (onSwap || !selectedInstance) && (
-              <div className={styles.instanceList}>
-                {instanceList?.map((item: ConnectInstance) => (
-                  <div
-                    key={item.connectorId}
-                    className={styles.instanceItem}
-                    onClick={() => {
-                      setSelectedInstance(item);
-                      setOnSwap(false);
-                      setPageNo(1);
-                    }}
-                  >
-                    <img src={jsNodeIcon} alt="" className={styles.instanceItemIcon} />
-                    <div className={styles.instanceItemText}>{item.connectorName}</div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {currentStep === 1 && !onSwap && (
-              <div className={styles.actionList}>
-                {actionList?.map((item: ScriptActionItem) => (
-                  <div
-                    key={item.scriptId}
-                    className={styles.actionItem}
-                    onClick={() => {
-                      setSelectedAction(item);
-                      setCurrentStep(2);
-                    }}
-                  >
-                    <div className={styles.actionItemName}>{item.scriptName}</div>
-                    <div className={styles.actionItemDescription}>{item.description}</div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {currentStep === 1 && (
-              <div className={styles.paginationContainer}>
-                <Pagination
-                  total={total}
-                  current={pageNo}
-                  pageSize={pageSize}
-                  onChange={(pNo, pSize) => {
-                    setPageNo(pNo);
-                    setPageSize(pSize);
-                  }}
-                />
-              </div>
-            )}
-
-            {/* {currentStep === 2 && renderInputParameter()} */}
-          </div>
-
-          {/* <Form
+          <Form
             form={payloadForm}
             initialValues={{ ...triggerEditorSignal.nodeData.value[node.id] }}
             requiredSymbol={{ position: 'end' }}
           >
-            <Form.Item label="节点ID" field="id" initialValue={node.id} rules={[{ required: true }]}>
+            <Form.Item field="instanceId" initialValue={selectedInstanceId} hidden>
               <Input disabled />
             </Form.Item>
-            <Form.Item label="节点名称" field="title">
-              <Input onChange={(e) => handlePropsOnChange('title', e)} />
+            <Form.Item field="actionId" initialValue={selectedActionId} hidden>
+              <Input disabled />
             </Form.Item>
-          </Form> */}
+
+            <div className={styles.ipaasContainer}>
+              <div className={styles.stepsContainer}>
+                <Steps current={currentStep} style={{ margin: '0 auto' }} size="small" onChange={handleStepChange}>
+                  <Step title="选择动作" />
+                  <Step title="参数配置" />
+                </Steps>
+              </div>
+              {currentStep === 1 && selectedInstanceId != '' && (
+                <div className={styles.selectedInstance}>
+                  <div className={styles.selectedInstanceLeft}>
+                    <img src={jsNodeIcon} alt="" className={styles.selectIcon} />
+                    <div className={styles.instanceItemText}>
+                      {instanceList.find((item) => item.connectorId === selectedInstanceId)?.connectorName}
+                    </div>
+                  </div>
+
+                  <div
+                    className={styles.selectedInstanceRight}
+                    onClick={() => {
+                      setOnSwap(true);
+                      setPageNo(1);
+                    }}
+                  >
+                    <IconSync />
+                    切换
+                  </div>
+                </div>
+              )}
+
+              {currentStep === 1 && (onSwap || selectedInstanceId === '') && (
+                <div className={styles.instanceList}>
+                  {instanceList?.map((item: ConnectInstance) => (
+                    <div
+                      key={item.connectorId}
+                      className={styles.instanceItem}
+                      onClick={() => {
+                        setSelectedInstanceId(item.connectorId);
+                        payloadForm.setFieldValue('instanceId', item.connectorId);
+                        setOnSwap(false);
+                        setPageNo(1);
+                      }}
+                      style={{
+                        border: selectedInstanceId === item.connectorId ? '1px solid rgb(var(--primary-6))' : 'none'
+                      }}
+                    >
+                      <img src={jsNodeIcon} alt="" className={styles.instanceItemIcon} />
+                      <div className={styles.instanceItemText}>{item.connectorName}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {currentStep === 1 && !onSwap && (
+                <div className={styles.actionList}>
+                  {actionList?.map((item: ScriptActionItem) => (
+                    <div
+                      key={item.scriptId}
+                      className={styles.actionItem}
+                      onClick={() => {
+                        setSelectedActionId(item.scriptId);
+                        payloadForm.setFieldValue('actionId', item.scriptId);
+                        // 如果选中的 actionId 与当前不同，清空 inputParameterFields 参数配置
+                        if (item.scriptId !== selectedActionId) {
+                          payloadForm.setFieldValue('inputParameterFields', []);
+                        }
+                        setCurrentStep(2);
+                      }}
+                      style={{
+                        border: selectedActionId === item.scriptId ? '1px solid rgb(var(--primary-6))' : 'none'
+                      }}
+                    >
+                      <div className={styles.actionItemName}>{item.scriptName}</div>
+                      <div className={styles.actionItemDescription}>{item.description}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {currentStep === 1 && (
+                <div className={styles.paginationContainer}>
+                  <Pagination
+                    total={total}
+                    current={pageNo}
+                    pageSize={pageSize}
+                    onChange={(pNo, pSize) => {
+                      setPageNo(pNo);
+                      setPageSize(pSize);
+                    }}
+                  />
+                </div>
+              )}
+
+              <div className={currentStep === 2 ? styles.inputParameterVisible : styles.inputParameterHidden}>
+                {renderInputParameter()}
+              </div>
+            </div>
+          </Form>
         </FormContent>
       ) : (
         <FormContent>
