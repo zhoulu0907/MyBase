@@ -238,17 +238,16 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
 
             // AnyLine开启事务
             TransactionState transactionState = temporaryService.start();
-
-            long updateCount = temporaryService.update(quoteTableName(entity.getTableName()), dataRow, configStore);
-            log.info("更新数据成功，实体ID: {}, 表名: {}, 更新记录数: {}", entityId, entity.getTableName(), updateCount);
             try {
+                long updateCount = temporaryService.update(quoteTableName(entity.getTableName()), dataRow, configStore);
+                log.info("更新数据成功，实体ID: {}, 表名: {}, 更新记录数: {}", entityId, entity.getTableName(), updateCount);
                 super.storeData(context);// 子表处理创建嵌套内部事务
                 log.info("子表处理完成，准备提交事务");
                 // 子表处理完成 提交事务
                 temporaryService.commit(transactionState);
             }catch (Exception e){
-                log.info("子表处理出现异常，准备回滚事务：{}",e.getMessage());
-                // 子表处理出现异常 回滚事务
+                log.info("数据更新出现异常，准备回滚事务：{}",e.getMessage());
+                // 数据更新出现异常 回滚事务
                 temporaryService.rollback(transactionState);
                 throw exception(DB_SUBENTITY_OPERATION_ERROR,e.getMessage());
             }

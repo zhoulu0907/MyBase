@@ -181,7 +181,8 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
         if (data.getMinRows() == null) {
             data.setMinRows(1); // 默认最少1行
         }
-
+        // 提示信息
+        data.setPromptMessage(vo.getPopPrompt());
         // 保存子表非空校验规则
         childNotEmptyRepository.upsert(data);
         return data.getId();
@@ -226,6 +227,8 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
         updateObj.setGroupId(targetGroupId);
         // fieldId保持不变，设置为null或保留原值
         updateObj.setFieldId(null);
+        // 提示信息
+        updateObj.setPromptMessage(vo.getPopPrompt());
         childNotEmptyRepository.update(updateObj);
     }
 

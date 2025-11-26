@@ -1,7 +1,9 @@
 package com.cmsr.onebase.module.metadata.core.service.datamethod.validator;
 
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
+import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodSubEntityContext;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -21,7 +23,7 @@ public interface ValidationService {
      * @param value 字段值
      * @param data 完整数据对象
      */
-    void validate(Long entityId, Long fieldId, MetadataEntityFieldDO field, Object value, Map<String, Object> data);
+    void validate(Long entityId, Long fieldId, MetadataEntityFieldDO field, Object value, Map<String, Object> data, List<MetadataDataMethodSubEntityContext> subEntities);
 
     /**
      * 获取校验类型
