@@ -11,7 +11,7 @@ export interface GetRunTimePageSetIdReq {
 }
 export interface FetchExecTaskReq {
   buttonType: string;
-  comment: string;
+  comment?: string;
   taskId: string;
   instanceId: string;
   entity?: any;
