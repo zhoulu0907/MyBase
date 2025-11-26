@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.app.core.dal.mapper;
 
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthRoleDO;
 import com.cmsr.onebase.module.app.core.dto.auth.RoleMemberDTO;
+import com.cmsr.onebase.module.app.core.vo.app.AppUserPhotoDTO;
 import com.mybatisflex.core.BaseMapper;
 
 import java.util.List;
@@ -15,5 +16,11 @@ import java.util.List;
 public interface AppAuthRoleMapper extends BaseMapper<AppAuthRoleDO> {
 
     List<RoleMemberDTO> selectRoleUsers(Long roleId, String memberName);
+
+    List<RoleMemberDTO> selectRoleDepts(Long roleId, String memberName);
+
+    List<RoleMemberDTO> selectRoleMembers(Long roleId, String memberName);
+
+    List<AppUserPhotoDTO> findUserPhotoList(List<Long> appIds);
 
 }

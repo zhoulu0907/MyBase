@@ -35,17 +35,17 @@ public class RepositoryTest {
     @Autowired
     private EtlWorkflowRepository workflowRepository;
 
-    @Test
-    void test() {
-        TenantContextHolder.setIgnore(true);
-        PageParam pageParam = new PageParam();
-        pageParam.setPageNo(1);
-        pageParam.setPageSize(10);
-        PageResult<RoleMemberDTO> result = appSqlQueryRepository.findRoleMembers(37775560235057154L, null, "dept", pageParam);
-        System.out.println(result);
-        System.out.println(result.getList());
-        System.out.println(result.getTotal());
-    }
+//    @Test
+//    void test() {
+//        TenantContextHolder.setIgnore(true);
+//        PageParam pageParam = new PageParam();
+//        pageParam.setPageNo(1);
+//        pageParam.setPageSize(10);
+//        PageResult<RoleMemberDTO> result = appSqlQueryRepository.findRoleMembers(37775560235057154L, null, "dept", pageParam);
+//        System.out.println(result);
+//        System.out.println(result.getList());
+//        System.out.println(result.getTotal());
+//    }
 
     @Test
     void test2() {
