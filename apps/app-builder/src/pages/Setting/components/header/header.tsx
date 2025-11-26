@@ -23,7 +23,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   // 获取用户信息
   const tokenInfo = TokenManager.getTokenInfo();
   const userPermissionInfo = UserPermissionManager.getUserPermissionInfo();
-console.log("1",userPermissionInfo)
+
   // 登出处理
   const handleLogout = async () => {
     // TODO(mickey): 联调后打开
