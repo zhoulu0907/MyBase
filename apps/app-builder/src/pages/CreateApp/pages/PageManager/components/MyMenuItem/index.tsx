@@ -9,7 +9,7 @@ import VisibleIcon from '@/assets/images/eye_on_icon.svg';
 import SettingIcon from '@/assets/images/task_center/setting-on.svg';
 import { Dropdown, Menu, Message, Tooltip, type FormInstance } from '@arco-design/web-react';
 import { IconEyeInvisible, IconMoreVertical } from '@arco-design/web-react/icon';
-import { getPageSetId, menuSignal, PageType, RootParentPage, VisibleType, type GetPageSetIdReq } from '@onebase/app';
+import { getPageSetId, menuSignal, PageType, RootParentPage, VisibleType, MenuType, type GetPageSetIdReq } from '@onebase/app';
 import { EDITOR_TYPES, webMenuIcons } from '@onebase/ui-kit';
 import { pagesRuntimeSignal } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
