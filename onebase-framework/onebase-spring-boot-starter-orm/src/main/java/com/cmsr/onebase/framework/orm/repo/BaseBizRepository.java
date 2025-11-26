@@ -1,5 +1,6 @@
-package com.cmsr.onebase.framework.orm.mybatis;
+package com.cmsr.onebase.framework.orm.repo;
 
+import com.cmsr.onebase.framework.orm.entity.BaseBizEntity;
 import com.mybatisflex.core.BaseMapper;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.CPI;
@@ -15,7 +16,7 @@ import java.util.Collection;
 import java.util.List;
 
 @Slf4j
-public class BaseBizRepository<M extends BaseMapper<T>, T> extends ServiceImpl<M, T> {
+public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity> extends ServiceImpl<M, T> {
 
     protected QueryWrapper injectBizFilter(QueryWrapper queryWrapper) {
         // TODO: add filters like applicationId, versionFlag
