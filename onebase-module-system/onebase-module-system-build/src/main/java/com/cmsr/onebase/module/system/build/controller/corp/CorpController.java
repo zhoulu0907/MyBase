@@ -26,7 +26,7 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
  * @author ggq
  * @date 2025-10-20
  */
-@Tag(name = "平台服务-企业")
+@Tag(name = "企业服务 - 企业管理")
 @RestController
 @RequestMapping("/system/corp")
 @Validated

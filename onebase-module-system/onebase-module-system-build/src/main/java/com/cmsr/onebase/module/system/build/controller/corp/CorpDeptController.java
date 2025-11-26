@@ -26,7 +26,7 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
  * @author matianyu
  * @date 2025-01-27
  */
-@Tag(name = "管理后台 -企业 - 部门")
+@Tag(name = "企业服务 - 部门管理")
 @RestController
 @RequestMapping("/corp/dept")
 @Validated

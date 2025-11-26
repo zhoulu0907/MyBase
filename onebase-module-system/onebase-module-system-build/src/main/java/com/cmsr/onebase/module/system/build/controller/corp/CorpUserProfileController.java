@@ -29,7 +29,7 @@ import java.util.List;
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 import static com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils.getLoginUserId;
 
-@Tag(name = "管理后台 - 用户个人中心")
+@Tag(name = "企业服务 - 用户个人中心")
 @RestController
 @RequestMapping("/corp/user/profile")
 @Validated

@@ -21,7 +21,7 @@ import java.util.List;
 
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
-@Tag(name = "平台服务-企业应用关系")
+@Tag(name = "企业服务 - 企业应用关系")
 @RestController
 @Validated
 @RequestMapping("/system/corp-app-relation")

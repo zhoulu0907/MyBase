@@ -29,7 +29,7 @@ import java.util.Map;
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertList;
 
-@Tag(name = "管理后台 - 企业 - 用户")
+@Tag(name = "企业服务 - 用户管理")
 @RestController
 @RequestMapping("/corp/user")
 @Validated
