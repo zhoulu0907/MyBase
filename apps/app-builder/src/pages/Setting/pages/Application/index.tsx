@@ -18,7 +18,7 @@ import {
   Tooltip,
   Typography
 } from '@arco-design/web-react';
-import { IconDelete, IconEdit, IconEmpty, IconEye, IconLaunch, IconLeft, IconMoreVertical, IconPlus, IconSearch } from '@arco-design/web-react/icon';
+import { IconDelete, IconEdit, IconEmpty, IconEye, IconLaunch, IconLeft, IconMoreVertical, IconPlus, IconRight, IconSearch } from '@arco-design/web-react/icon';
 import {
   createApplication,
   deleteApplication,
@@ -34,7 +34,7 @@ import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import emptyApplicationSVG from '@/assets/images/empty_application.svg';
+import emptyApplicationSVG from '@/assets/images/applicationLogo.svg';
 import { type Options } from '@/components/CreateApp/const';
 import CreateAppModal from '@/components/CreateApp';
 import CreateDataSource, { type DataSourceHandle } from '@/components/CreateDataSource';
@@ -381,10 +381,11 @@ const AppManagement: React.FC = () => {
           {/* 我的应用列表 */}
           <Spin className={styles.appListLoading} loading={loading} size={40} tip="加载中..." ref={appContainerRef}>
             <div className={styles.appList}>
-              {applicationEmpty && !loading && (
+              {true && (
                 <div className={styles.applicationEmpty}>
                   <img src={emptyApplicationSVG} alt="暂无应用" />
-                  <div className={styles.goCreateApplication} onClick={() => setCreateVisible(true)} />
+                  <Typography.Text type='secondary'>还没有应用</Typography.Text>
+                  <Button className={styles.goCreateApplication} onClick={()=>setCreateVisible(true)}>去创建 <IconRight /></Button>
                 </div>
               )}
               {applicationFilterEmpty && !loading && (

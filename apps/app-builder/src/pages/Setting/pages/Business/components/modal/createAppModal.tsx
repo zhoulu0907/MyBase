@@ -1,28 +1,11 @@
-import { useEffect, useState } from "react";
-import { Avatar, DatePicker, Form, Message, Modal, Select, Space, Typography } from "@arco-design/web-react";
-import { getCorpAppSimpleListApi, } from "@onebase/platform-center";
+import { Avatar, DatePicker, Form,  Modal, Select, Space, Typography } from "@arco-design/web-react";
 import { formatTimeYMDHMS } from "@onebase/common";
-import type { authorizedAppList, ICreateAppModal } from "../../types/appItem";
+import type { ICreateAppModal } from "../../types/appItem";
 import styles from "./index.module.less";
 
 
-export const CreateAppModal:React.FC<ICreateAppModal> = ({visible,currentId, tableData, onCloseAppModal, onSaveAppData}) => {
+export const CreateAppModal:React.FC<ICreateAppModal> = ({visible, dropdownList, tableData, onCloseAppModal, onSaveAppData}) => {
     const [createNewAppForm] = Form.useForm();
-    const [dropdownList, setDropdownList] = useState<authorizedAppList[]>([]);
-
-    const getApplicationIdResult = async() => {
-        try{
-           const res: authorizedAppList[]= await getCorpAppSimpleListApi(currentId);
-           setDropdownList(res ? res : [])
-        }catch(error) {
-            Message.error("获取列表失败")
-        }
-    }
-
-    useEffect(() => {
-        getApplicationIdResult();
-    },[])
-
     const handleCancel = () => {
         onCloseAppModal();
         createNewAppForm.resetFields();

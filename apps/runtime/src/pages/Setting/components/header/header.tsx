@@ -8,6 +8,7 @@ import { IconApps, IconExport } from '@arco-design/web-react/icon';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './header.module.less';
+import UserProfileAvatar from '@/components//UserProfileAvatar';
 
 const { Header } = Layout;
 
@@ -41,9 +42,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     <Menu>
       <Menu.Item key="info" style={{ height: '60px' }}>
         <div className={styles.adminInformation}>
-          <Avatar size={32}>
-            <img src={LogoSVG} />
-          </Avatar>
+           <UserProfileAvatar adminInfo={userPermissionInfo?.user} />
           <Typography.Text>{userPermissionInfo?.user?.nickname || ''}</Typography.Text>
         </div>
       </Menu.Item>
@@ -79,6 +78,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
               <Avatar size={32} style={{ backgroundColor: '#4FAE7B' }}>
                 <img src={defaultAvatar} alt="avatar" />
               </Avatar>
+              <UserProfileAvatar adminInfo={userPermissionInfo?.user}/>
             </div>
           </Dropdown>
         </div>

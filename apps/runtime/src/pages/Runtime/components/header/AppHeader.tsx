@@ -1,4 +1,3 @@
-import AvatarSVG from '@/assets/images/avatar.svg';
 import BuildingLine from '@/assets/images/building-line.svg';
 import LogoAvatarSVG from '@/assets/images/ob_logo.svg';
 import { DynamicIcon } from '@/components/DynamicIcon';
@@ -6,7 +5,7 @@ import { useI18n } from '@/hooks/useI18n';
 import { appInfoSignal } from '@/store/app';
 import { UserPermissionManager } from '@/utils/permission';
 import { logout } from '@/utils/session';
-import { Avatar, Divider, Dropdown, Layout, Menu, Typography } from '@arco-design/web-react';
+import { Divider, Dropdown, Layout, Menu, Typography } from '@arco-design/web-react';
 import { IconExport } from '@arco-design/web-react/icon';
 import { getApplication, type GetApplicationReq } from '@onebase/app';
 import { TokenManager } from '@onebase/common';
@@ -15,6 +14,7 @@ import { appIconMap } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styles from './header.module.less';
+import UserProfileAvatar from '@/components/UserProfileAvatar';
 
 const { Header } = Layout;
 
@@ -86,9 +86,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     <Menu>
       <Menu.Item key="info" style={{ height: '70px' }}>
         <div className={styles.adminInformation}>
-          <Avatar size={32}>
-            <img src={userInfo?.avatar} />
-          </Avatar>
+          <UserProfileAvatar adminInfo={userInfo} />
           <Typography.Text>{userInfo?.nickname}</Typography.Text>
           <Typography.Text type="secondary">{maskMobile(mobile)}</Typography.Text>
         </div>
@@ -136,7 +134,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
 
           <Dropdown droplist={userMenu} position="bottom">
             <div className={styles.userDropdown}>
-              <img src={AvatarSVG} alt="avatar" />
+              <UserProfileAvatar adminInfo={userInfo} />
             </div>
           </Dropdown>
         </div>

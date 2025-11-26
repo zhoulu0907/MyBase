@@ -69,11 +69,13 @@ export interface cropItem {
   status: number;
   userLimit:number;
   adminName: string;
+  adminMobile: string;
   corpApplicationList: corpApplicationListProps[];
 }
 
 export interface OutletContextType {
   currentId: string;
+  editable?: boolean;
   industryOptions: industryTypeOption[]
 }
 
@@ -87,8 +89,8 @@ export interface authorizedTimeGroup {
 
 export interface ICreateAppModal {
     visible: boolean;
-    currentId: string;
     tableData?: AppItem[];
+    dropdownList: authorizedAppList[];
     onCloseAppModal: () =>void;
     onSaveAppData: (data: any)=>void;
 }
