@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.app.build.util;
 
 
 import com.cmsr.onebase.module.app.core.dal.dataobject.PageDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.workbench.WorkBenchPageDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.WorkBenchPageDO;
 
 public class PageUtils {
 
