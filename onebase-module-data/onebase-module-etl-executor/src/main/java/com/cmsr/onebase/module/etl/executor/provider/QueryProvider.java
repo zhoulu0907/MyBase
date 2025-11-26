@@ -84,13 +84,13 @@ public class QueryProvider {
 
     public void insertEtlExecutionLog(EtlExecutionLog etlExecutionLog) throws Exception {
         String sql = """
-                insert into etl_execution_log(id, application_id, workflow_id, start_time, end_time, duration_time, trigger_type, trigger_user, task_status, error_message)
+                insert into etl_execution_log(id, application_id, workflow_uu id, start_time, end_time, duration_time, trigger_type, trigger_user, task_status, error_message)
                 values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """;
         etlExecutionLog.setId(TsidCreator.getTsid().toLong());
         runner.execute(sql, etlExecutionLog.getId(),
                 etlExecutionLog.getApplicationId(),
-                etlExecutionLog.getWorkflowId(),
+                etlExecutionLog.getWorkflowUuid(),
                 etlExecutionLog.getStartTime(),
                 etlExecutionLog.getEndTime(),
                 etlExecutionLog.getDurationTime(),

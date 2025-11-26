@@ -54,7 +54,7 @@ public class ETLDatasourceController {
     // POSTs
     @Operation(summary = "创建数据源")
     @PostMapping("/create")
-    public CommonResult<Long> createETLDatasource(@Validated @RequestBody ETLDatasourceCreateReqVO createReqVO) {
+    public CommonResult<MetaBriefVO> createETLDatasource(@Validated @RequestBody ETLDatasourceCreateReqVO createReqVO) {
         return etlDatasourceService.createDatasource(createReqVO);
     }
 

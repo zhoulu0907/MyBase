@@ -98,14 +98,14 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
     }
 
     @Override
-    public CommonResult<Long> createDatasource(ETLDatasourceCreateReqVO createReqVO) {
+    public CommonResult<MetaBriefVO> createDatasource(ETLDatasourceCreateReqVO createReqVO) {
         Long applicationId = createReqVO.getApplicationId();
         String datasourceType = createReqVO.getDatasourceType();
 
         ETLDatasourceDO datasourceDO = new ETLDatasourceDO();
         datasourceDO.setApplicationId(applicationId);
-        UUID uuid = UuidCreator.getTimeOrderedEpoch();
-        datasourceDO.setDatasourceUuid(uuid.toString());
+        String uuid = UuidCreator.getTimeOrderedEpoch().toString();
+        datasourceDO.setDatasourceUuid(uuid);
         datasourceDO.setDatasourceName(createReqVO.getDatasourceName());
         datasourceDO.setDeclaration(createReqVO.getDeclaration());
         datasourceDO.setDatasourceType(datasourceType);
@@ -132,7 +132,10 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
                         datasourceId);
             }
         }
-        return CommonResult.success(datasourceId);
+        MetaBriefVO metaBriefVO = new MetaBriefVO();
+        metaBriefVO.setId(String.valueOf(datasourceDO.getId()));
+        metaBriefVO.setUuid(uuid);
+        return CommonResult.success(metaBriefVO);
     }
 
     @Override
@@ -270,7 +273,7 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
         return columns.stream()
                 .map(columnMeta -> {
                     ColumnDefine columnDefine = new ColumnDefine();
-                    String fqn = String.format("%s.%s.%s.%s.%s", datasourceDO.getId(),
+                    String fqn = String.format("%s.%s.%s.%s.%s", datasourceDO.getDatasourceUuid(),
                             tableData.getCatalogName(),
                             tableData.getSchemaName(),
                             tableData.getName(),
