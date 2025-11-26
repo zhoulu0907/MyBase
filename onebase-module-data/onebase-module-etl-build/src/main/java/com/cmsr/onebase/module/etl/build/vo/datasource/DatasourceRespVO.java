@@ -19,7 +19,7 @@ public class DatasourceRespVO {
     private Long applicationId;
 
     @Schema(description = "数据源编号")
-    private String datasourceCode;
+    private String datasourceUuid;
 
     @Schema(description = "数据源名称信息")
     private String datasourceName;
@@ -45,13 +45,11 @@ public class DatasourceRespVO {
     @Schema(description = "采集结束时间")
     private LocalDateTime collectEndTime;
 
-    // TODO: lack of creator, create_time, updater, update_time.,
-
     public static DatasourceRespVO convertFrom(ETLDatasourceDO datasourceDO) {
         DatasourceRespVO respVO = new DatasourceRespVO();
         respVO.setId(datasourceDO.getId());
         respVO.setApplicationId(datasourceDO.getApplicationId());
-        respVO.setDatasourceCode(datasourceDO.getDatasourceCode());
+        respVO.setDatasourceUuid(datasourceDO.getDatasourceUuid());
         respVO.setDatasourceName(datasourceDO.getDatasourceName());
         respVO.setDeclaration(datasourceDO.getDeclaration());
         respVO.setDatasourceType(datasourceDO.getDatasourceType());

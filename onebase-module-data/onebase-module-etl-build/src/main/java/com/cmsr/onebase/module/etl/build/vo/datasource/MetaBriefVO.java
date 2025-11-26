@@ -10,6 +10,9 @@ public class MetaBriefVO {
     @Schema(description = "元数据ID")
     private String id;
 
+    @Schema(description = "元数据UUID")
+    private String uuid;
+
     @Schema(description = "元数据名称")
     private String name;
 

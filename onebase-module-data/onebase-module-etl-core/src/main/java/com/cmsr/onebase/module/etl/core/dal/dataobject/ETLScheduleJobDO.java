@@ -11,8 +11,8 @@ import java.time.LocalDateTime;
 @Table(value = "etl_schedule_job")
 public class ETLScheduleJobDO extends BaseAppEntity {
 
-    @Column(value = "workflow_id")
-    private Long workflowId;
+    @Column(value = "workflow_uuid")
+    private String workflowUuid;
 
     @Column(value = "job_id")
     private String jobId;

@@ -2,7 +2,9 @@ package com.cmsr.onebase.module.etl.build.service.preview;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
+import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.etl.build.service.DatasourceFactory;
+import com.cmsr.onebase.module.etl.build.vo.datasource.TestConnectionVO;
 import com.cmsr.onebase.module.etl.build.vo.preview.TablePreviewVO;
 import com.cmsr.onebase.module.etl.common.entity.ColumnData;
 import com.cmsr.onebase.module.etl.common.entity.TableData;
@@ -55,15 +57,22 @@ public class DataInspectServiceImpl implements DataInspectService {
     private ETLFlinkMappingRepository flinkMappingRepository;
 
     @Override
-    public boolean testConnection(ETLDatasourceDO datasourceDO) {
+    public boolean testConnection(TestConnectionVO pingVO) {
+        ETLDatasourceDO datasourceDO = BeanUtils.toBean(pingVO, ETLDatasourceDO.class);
         DataSource datasource = dataSourceFactory.constructDataSource(datasourceDO, true);
+        String runnerKey = "ping-" + UuidCreator.getTimeOrderedEpoch();
+
         try {
-            boolean validity = ServiceProxy.temporary(datasource).validity();
-            boolean hit = ServiceProxy.temporary(datasource).hit();
+            DataSourceHolder.reg(runnerKey, datasource);
+            AnylineService<?> temporary = ServiceProxy.service(runnerKey);
+            boolean validity = temporary.validity();
+            boolean hit = temporary.hit();
             return validity || hit;
         } catch (Exception ex) {
-            log.error("测试数据源连接异常，数据源信息: {}", datasourceDO, ex);
+            log.error("测试数据源连接异常，数据源信息: {}", pingVO, ex);
             return false;
+        } finally {
+            unregisterDataSource(runnerKey);
         }
     }
 
@@ -82,7 +91,7 @@ public class DataInspectServiceImpl implements DataInspectService {
         }
 
         DataSource dataSource = dataSourceFactory.constructDataSource(datasourceDO, true);
-        String runnerKey = "ping-" + datasourceId + UuidCreator.getTimeOrderedEpoch();
+        String runnerKey = "preview-" + datasourceId + UuidCreator.getTimeOrderedEpoch();
         try {
             DataSourceHolder.reg(runnerKey, dataSource);
             AnylineService<?> temporary = ServiceProxy.service(runnerKey);

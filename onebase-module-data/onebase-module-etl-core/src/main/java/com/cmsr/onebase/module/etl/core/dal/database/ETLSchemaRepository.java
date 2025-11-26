@@ -11,33 +11,16 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class ETLSchemaRepository extends BaseAppRepository<ETLSchemaMapper, ETLSchemaDO> {
 
-    // 优化方法名：更简洁但保持语义清晰
-    public ETLSchemaDO findOneByQualifiedName(Long applicationId, Long datasourceId, Long catalogId, String name) {
+    public ETLSchemaDO findByDatasourceAndCatalog(Long applicationId, String datasourceUuid, String catalogUuid) {
         QueryWrapper queryWrapper = query()
                 .eq(ETLSchemaDO::getApplicationId, applicationId)
-                .eq(ETLSchemaDO::getDatasourceId, datasourceId)
-                .eq(ETLSchemaDO::getCatalogId, catalogId)
-                .eq(ETLSchemaDO::getSchemaName, name);
+                .eq(ETLSchemaDO::getDatasourceUuid, datasourceUuid)
+                .eq(ETLSchemaDO::getCatalogUuid, catalogUuid);
         return getOne(queryWrapper);
     }
 
-    public void deleteAllByDatasourceId(Long datasourceId) {
-        QueryWrapper queryWrapper = query().eq(ETLSchemaDO::getDatasourceId, datasourceId);
+    public void deleteAllByDatasource(String datasourceUuid) {
+        QueryWrapper queryWrapper = query().eq(ETLSchemaDO::getDatasourceUuid, datasourceUuid);
         remove(queryWrapper);
-    }
-
-    public ETLSchemaDO upsert(ETLSchemaDO schemaDO) {
-        if (schemaDO == null) return null;
-        Long applicationId = schemaDO.getApplicationId();
-        Long datasourceId = schemaDO.getDatasourceId();
-        Long catalogId = schemaDO.getCatalogId();
-        String schemaName = schemaDO.getSchemaName();
-        // 调用优化后的方法名
-        ETLSchemaDO oldSchema = findOneByQualifiedName(applicationId, datasourceId, catalogId, schemaName);
-        if (oldSchema != null) {
-            schemaDO.setId(oldSchema.getId());
-        }
-        saveOrUpdate(schemaDO);
-        return schemaDO;
     }
 }

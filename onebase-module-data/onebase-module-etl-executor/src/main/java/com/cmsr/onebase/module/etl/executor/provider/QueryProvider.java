@@ -32,9 +32,9 @@ public class QueryProvider {
         }, workflowId, 0);
     }
 
-    public EtlTable findTableById(Long tableId) throws Exception {
+    public EtlTable findTableByUuid(String tableUuid) throws Exception {
         String sql = """
-                select datasource_id, table_name, meta_info from etl_table where id = ?  and deleted = ?
+                select datasource_id, table_name, meta_info from etl_table where table_uuid = ?  and deleted = ?
                 """;
         return runner.query(sql, resultSet -> {
                     EtlTable etlTable = new EtlTable();
@@ -46,12 +46,12 @@ public class QueryProvider {
                     }
                     return null;
                 },
-                tableId, 0);
+                tableUuid, 0);
     }
 
-    public EtlDataSource findConnectPropertiesById(Long datasourceId) throws Exception {
+    public EtlDataSource findConnectPropertiesByUuid(String datasourceUuid) throws Exception {
         String sql = """
-                select datasource_type, config from etl_datasource where id = ? and deleted = ?
+                select datasource_type, config from etl_datasource where datasource_uuid = ? and deleted = ?
                 """;
         return runner.query(sql, resultSet -> {
                     if (resultSet.next()) {
@@ -62,7 +62,7 @@ public class QueryProvider {
                     }
                     return null;
                 },
-                datasourceId, 0);
+                datasourceUuid, 0);
     }
 
     public List<EtlFlinkMapping> findFlinkMapping(String datasourceType) throws Exception {

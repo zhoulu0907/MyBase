@@ -12,22 +12,23 @@ import org.springframework.stereotype.Repository;
 public class ETLScheduleJobRepository extends BaseAppRepository<ETLSchecheduJobMapper, ETLScheduleJobDO> {
 
 
-    public void deleteByWorkflowId(Long workflowId) {
-        QueryWrapper queryWrapper = query().eq(ETLScheduleJobDO::getWorkflowId, workflowId);
-        remove(queryWrapper);
+    public void deleteByWorkflow(String workflowUuid) {
+        this.updateChain()
+                .eq(ETLScheduleJobDO::getWorkflowUuid, workflowUuid)
+                .remove();
     }
 
-    public ETLScheduleJobDO findByApplicationIdAndWorkflowId(Long applicationId, Long workflowId) {
+    public ETLScheduleJobDO findByApplicationAndWorkflow(Long applicationId, String workflowUuid) {
         QueryWrapper queryWrapper = query()
                 .eq(ETLScheduleJobDO::getApplicationId, applicationId)
-                .eq(ETLScheduleJobDO::getWorkflowId, workflowId);
+                .eq(ETLScheduleJobDO::getWorkflowUuid, workflowUuid);
         return getOne(queryWrapper);
     }
 
-    public void removeJobId(Long workflowId) {
+    public void removeJobId(String workflowUuid) {
         updateChain()
                 .set(ETLScheduleJobDO::getJobId, null)
-                .where(ETLScheduleJobDO::getWorkflowId).eq(workflowId)
+                .where(ETLScheduleJobDO::getWorkflowUuid).eq(workflowUuid)
                 .update();
     }
 }

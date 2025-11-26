@@ -11,15 +11,16 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class ETLCatalogRepository extends BaseAppRepository<ETLCatalogMapper, ETLCatalogDO> {
 
-    public void deleteAllByDatasourceId(Long datasourceId) {
-        QueryWrapper queryWrapper = query()
-                .eq(ETLCatalogDO::getDatasourceId, datasourceId);
-
-        getMapper().deleteByQuery(queryWrapper);
+    public void deleteAllByDatasource(String datasourceUuid) {
+        this.updateChain()
+                .eq(ETLCatalogDO::getDatasourceUuid, datasourceUuid)
+                .remove();
     }
 
-    public ETLCatalogDO upsert(ETLCatalogDO catalogDO) {
-        saveOrUpdate(catalogDO);
-        return catalogDO;
+    public ETLCatalogDO findCatalogByDatasource(Long applicationId, String datasourceUuid) {
+        QueryWrapper queryWrapper = this.query()
+                .eq(ETLCatalogDO::getApplicationId, applicationId)
+                .eq(ETLCatalogDO::getDatasourceUuid, datasourceUuid);
+        return getOne(queryWrapper);
     }
 }

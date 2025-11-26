@@ -12,8 +12,6 @@ import java.util.List;
 
 public interface ETLDatasourceService {
 
-    Boolean pingDatasource(TestConnectionVO pingVO);
-
     DatasourceRespVO queryDatasourceDetail(Long datasourceId);
 
     PageResult<DatasourceRespVO> getETLDatasourcePage(DatasourcePageReqVO pageReqVO);
@@ -25,8 +23,6 @@ public interface ETLDatasourceService {
     void deleteDatasource(Long datasourceId);
 
     void executeMetadataCollectJob(Long datasourceId);
-
-    DataPreview previewTable(TablePreviewVO tablePreviewVO);
 
     List<MetaBriefVO> listDatasources(Long applicationId, Integer writable);
 
