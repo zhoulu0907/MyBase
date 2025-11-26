@@ -26,10 +26,12 @@ export const OutputNodeConfig: React.FC = () => {
 
   const [datasourceOptions, setDatasourceOptions] = useState<ETLDatasourceOption[]>([]);
   const [datasourceType, setDatasourceType] = useState<string>('external');
-  const [selectDatasourceId, setSelectDatasourceId] = useState<string>(
-    nodeData.value[curNode.value.id]?.config?.datasourceId || ''
+  const [selectDatasourceUUID, setSelectDatasourceUUID] = useState<string>(
+    nodeData.value[curNode.value.id]?.config?.datasourceUUID || ''
   );
-  const [selectTableId, setSelectTableId] = useState<string>(nodeData.value[curNode.value.id]?.config?.tableId || '');
+  const [selectTableUUID, setSelectTableUUID] = useState<string>(
+    nodeData.value[curNode.value.id]?.config?.tableUUID || ''
+  );
   const [tableOptions, setTableOptions] = useState<ETLTable[]>([]);
   const [targetColumns, setTargetColumns] = useState<ELTColumn[]>([]);
   const [fieldMappings, setFieldMappings] = useState<FieldMapping[]>(
@@ -41,20 +43,20 @@ export const OutputNodeConfig: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (selectDatasourceId) {
-      handleListETLTables(selectDatasourceId);
+    if (selectDatasourceUUID) {
+      handleListETLTables(selectDatasourceUUID);
     }
-  }, [selectDatasourceId]);
+  }, [selectDatasourceUUID]);
 
   useEffect(() => {
-    if (selectTableId) {
-      handleListETLTableColumns(selectTableId);
+    if (selectTableUUID) {
+      handleListETLTableColumns(selectTableUUID);
     }
-  }, [selectTableId]);
+  }, [selectTableUUID]);
 
   const handleDatasourceTypeOnChange = (value: string) => {
     setDatasourceType(value);
-    setSelectDatasourceId('');
+    setSelectDatasourceUUID('');
     setTableOptions([]);
     setTargetColumns([]);
     setFieldMappings([]);
@@ -62,8 +64,8 @@ export const OutputNodeConfig: React.FC = () => {
     const payload = nodeData.value[curNode.value.id];
     payload.config = {
       datasourceType: value,
-      datasourceId: '',
-      tableId: '',
+      datasourceUUID: '',
+      tableUUID: '',
       fields: []
     };
     payload.output = {
@@ -72,13 +74,16 @@ export const OutputNodeConfig: React.FC = () => {
     setNodeData(curNode.value.id, payload);
   };
 
-  const handleDatasourceIdOnChange = (value: string) => {
-    setSelectDatasourceId(value);
+  const handleDatasourceUUIDOnChange = (value: string) => {
+    setSelectDatasourceUUID(value);
+
+    setTargetColumns([]);
+    setFieldMappings([]);
     const payload = nodeData.value[curNode.value.id];
     payload.config = {
       ...payload.config,
-      datasourceId: value,
-      tableId: '',
+      datasourceUUID: value,
+      tableUUID: '',
       fields: []
     };
 
@@ -99,12 +104,13 @@ export const OutputNodeConfig: React.FC = () => {
       applicationId: curAppId,
       writable: 1
     });
+    console.log('res: ', res);
     setDatasourceOptions(res);
   };
 
-  const handleListETLTables = async (datasourceId: string) => {
+  const handleListETLTables = async (datasourceUuid: string) => {
     const res = await listETLTables({
-      id: datasourceId,
+      uuid: datasourceUuid,
       writable: 1
     });
     setTableOptions(res);
@@ -114,14 +120,17 @@ export const OutputNodeConfig: React.FC = () => {
     setIsModalVisible(true);
   };
 
-  const handleSelectTableOnChange = async (tableId: string) => {
-    setSelectTableId(tableId);
-    handleListETLTableColumns(tableId);
+  const handleSelectTableOnChange = async (tableUuid: string) => {
+    setSelectTableUUID(tableUuid);
+    handleListETLTableColumns(tableUuid);
+
+    setFieldMappings([]);
 
     const payload = nodeData.value[curNode.value.id];
     payload.config = {
       ...payload.config,
-      tableId: tableId
+      tableUUID: tableUuid,
+      fields: []
     };
     payload.output = {
       verified: false
@@ -130,9 +139,9 @@ export const OutputNodeConfig: React.FC = () => {
     setNodeData(curNode.value.id, payload);
   };
 
-  const handleListETLTableColumns = async (tableId: string) => {
+  const handleListETLTableColumns = async (tableUuid: string) => {
     const res = await listETLTableColumns({
-      tableId: tableId
+      tableUuid: tableUuid
     });
     setTargetColumns(res);
   };
@@ -175,9 +184,9 @@ export const OutputNodeConfig: React.FC = () => {
               <Select
                 style={{ width: '200px' }}
                 placeholder="请选择数据源"
-                value={nodeData.value[curNode.value.id]?.config?.datasourceId}
-                options={datasourceOptions.map((option) => ({ label: option.name, value: option.id }))}
-                onChange={handleDatasourceIdOnChange}
+                value={nodeData.value[curNode.value.id]?.config?.datasourceUUID}
+                options={datasourceOptions.map((option) => ({ label: option.name, value: option.uuid }))}
+                onChange={handleDatasourceUUIDOnChange}
               />
             </Col>
           </Row>
@@ -187,8 +196,8 @@ export const OutputNodeConfig: React.FC = () => {
             <Col span={12}>
               <Select
                 style={{ width: '200px' }}
-                value={nodeData.value[curNode.value.id]?.config?.tableId}
-                options={tableOptions.map((option) => ({ label: option.name, value: option.id }))}
+                value={nodeData.value[curNode.value.id]?.config?.tableUUID}
+                options={tableOptions.map((option) => ({ label: option.name, value: option.uuid }))}
                 onChange={handleSelectTableOnChange}
               />
             </Col>
@@ -197,7 +206,7 @@ export const OutputNodeConfig: React.FC = () => {
                 style={{ width: '200px' }}
                 type="secondary"
                 onClick={openFieldModal}
-                disabled={!selectDatasourceId || !targetColumns.length}
+                disabled={!selectDatasourceUUID || !targetColumns.length}
               >
                 设置同步字段
               </Button>
@@ -214,7 +223,8 @@ export const OutputNodeConfig: React.FC = () => {
         targetColumns={targetColumns.map((option: ELTColumn) => ({
           fieldFqn: option.fieldFqn,
           fieldName: option.fieldName,
-          fieldType: option.fieldType
+          fieldType: option.fieldType,
+          displayName: option.displayName
         }))}
         isModalVisible={isModalVisible}
         initialMappings={fieldMappings}
