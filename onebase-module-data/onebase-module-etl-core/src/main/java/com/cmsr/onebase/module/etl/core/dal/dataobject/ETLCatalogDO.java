@@ -9,8 +9,11 @@ import lombok.Data;
 @Table(value = "etl_catalog")
 public class ETLCatalogDO extends BaseAppEntity {
 
-    @Column(value = "datasource_id")
-    private Long datasourceId;
+    @Column(value = "datasource_uuid")
+    private String datasourceUuid;
+
+    @Column(value = "catalog_uuid")
+    private String catalogUuid;
 
     @Column(value = "catalog_name")
     private String catalogName;

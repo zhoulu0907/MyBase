@@ -3,8 +3,9 @@ package com.cmsr.onebase.module.etl.build.controller.datasource;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.etl.build.service.datasource.ETLDatasourceService;
-import com.cmsr.onebase.module.etl.build.vo.preview.TablePreviewVO;
+import com.cmsr.onebase.module.etl.build.service.preview.DataInspectService;
 import com.cmsr.onebase.module.etl.build.vo.datasource.*;
+import com.cmsr.onebase.module.etl.build.vo.preview.TablePreviewVO;
 import com.cmsr.onebase.module.etl.common.preview.ColumnDefine;
 import com.cmsr.onebase.module.etl.common.preview.DataPreview;
 import com.cmsr.onebase.module.etl.core.vo.DatasourcePageReqVO;
@@ -25,11 +26,14 @@ public class ETLDatasourceController {
     @Resource
     private ETLDatasourceService etlDatasourceService;
 
+    @Resource
+    private DataInspectService dataInspectService;
+
     // GETs
     @Operation(summary = "测试数据源连接")
     @PostMapping("/ping")
     public CommonResult<Boolean> testConnection(@Validated @RequestBody TestConnectionVO requestVO) {
-        Boolean connected = etlDatasourceService.pingDatasource(requestVO);
+        Boolean connected = dataInspectService.testConnection(requestVO);
         return CommonResult.success(connected);
     }
 
@@ -101,7 +105,7 @@ public class ETLDatasourceController {
     @Operation(summary = "预览表数据")
     @PostMapping("/preview")
     public CommonResult<DataPreview> previewTableData(@Validated @RequestBody TablePreviewVO tablePreviewVO) {
-        DataPreview dataPreview = etlDatasourceService.previewTable(tablePreviewVO);
+        DataPreview dataPreview = dataInspectService.previewData(tablePreviewVO);
         return CommonResult.success(dataPreview);
     }
 }

@@ -9,15 +9,15 @@ import lombok.Data;
 @Table("etl_workflow_table")
 public class ETLWorkflowTableDO extends BaseAppEntity {
 
-    @Column(value = "workflow_id")
-    private Long workflowId;
+    @Column(value = "workflow_uuid")
+    private String workflowUuid;
 
     @Column(value = "relation")
     private String relation;
 
-    @Column(value = "datasource_id")
-    private Long datasourceId;
+    @Column(value = "datasource_uuid")
+    private String datasourceUuid;
 
-    @Column(value = "table_id")
-    private Long tableId;
+    @Column(value = "table_uuid")
+    private String tableUuid;
 }

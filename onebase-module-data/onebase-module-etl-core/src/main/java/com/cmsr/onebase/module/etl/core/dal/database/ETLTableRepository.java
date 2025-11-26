@@ -16,11 +16,11 @@ import java.util.List;
 @Slf4j
 public class ETLTableRepository extends BaseAppRepository<ETLTableMapper, ETLTableDO> {
 
-    public List<ETLTableDO> findAllByCatalogIdAndSchemaIdAndDatasourceId(Long datasourceId, Long catalogId, Long schemaId) {
+    public List<ETLTableDO> findAllByCatalogAndSchemaAndDatasource(String datasourceUuid, String catalogUuid, String schemaUuid) {
         QueryWrapper queryWrapper = query()
-                .eq(ETLTableDO::getDatasourceId, datasourceId)
-                .eq(ETLTableDO::getCatalogId, catalogId)
-                .eq(ETLTableDO::getSchemaId, schemaId)
+                .eq(ETLTableDO::getDatasourceUuid, datasourceUuid)
+                .eq(ETLTableDO::getCatalogUuid, catalogUuid)
+                .eq(ETLTableDO::getSchemaUuid, schemaUuid)
                 .orderBy(ETLTableDO::getUpdateTime, false)
                 .orderBy(ETLTableDO::getCreateTime, false)
                 .orderBy(ETLTableDO::getTableName, true);
@@ -28,54 +28,42 @@ public class ETLTableRepository extends BaseAppRepository<ETLTableMapper, ETLTab
         return list(queryWrapper);
     }
 
-    public void deleteAllByDatasourceId(Long datasourceId) {
-        QueryWrapper queryWrapper = query().eq(ETLTableDO::getDatasourceId, datasourceId);
-        remove(queryWrapper);
+    public void deleteAllByDatasource(String datasourceUuid) {
+        this.updateChain()
+                .eq(ETLTableDO::getDatasourceUuid, datasourceUuid)
+                .remove();
     }
 
     // 优化方法名：更简洁但保持语义清晰
-    public ETLTableDO findOneByQualifiedName(Long applicationId, Long datasourceId, Long catalogId, Long schemaId, String tableName) {
+    public ETLTableDO findOneByQualifiedName(Long applicationId, String datasourceUuid, String catalogUuid, String schemaUuid, String tableName) {
         QueryWrapper queryWrapper = query()
                 .eq(ETLTableDO::getApplicationId, applicationId)
-                .eq(ETLTableDO::getDatasourceId, datasourceId)
-                .eq(ETLTableDO::getCatalogId, catalogId)
-                .eq(ETLTableDO::getSchemaId, schemaId)
+                .eq(ETLTableDO::getDatasourceUuid, datasourceUuid)
+                .eq(ETLTableDO::getCatalogUuid, catalogUuid)
+                .eq(ETLTableDO::getSchemaUuid, schemaUuid)
                 .eq(ETLTableDO::getTableName, tableName);
         return getOne(queryWrapper);
     }
 
-    public ETLTableDO upsert(ETLTableDO tableDO) {
-        Long applicationId = tableDO.getApplicationId();
-        Long datasourceId = tableDO.getDatasourceId();
-        Long catalogId = tableDO.getCatalogId();
-        Long schemaId = tableDO.getSchemaId();
-        String tableName = tableDO.getTableName();
-        // 调用优化后的方法名
-        ETLTableDO old = findOneByQualifiedName(applicationId, datasourceId, catalogId, schemaId, tableName);
-        if (old != null) {
-            tableDO.setId(old.getId());
-        }
-        saveOrUpdate(tableDO);
-        return tableDO;
+    public String getNameByUuid(String tableUuid) {
+        QueryWrapper queryWrapper = query().select(ETLTableDO::getDisplayName)
+                .eq(ETLTableDO::getTableUuid, tableUuid);
+        return getObjAs(queryWrapper, String.class);
     }
 
-    public String getNameById(Long id) {
-        QueryWrapper queryWrapper = query().select(ETLTableDO::getDisplayName).eq(ETLTableDO::getId, id);
-        ETLTableDO tableDO = getOne(queryWrapper);
-        return tableDO.getDisplayName();
-    }
-
-    public List<String> getNameByIds(Collection<Long> ids) {
-        if (CollectionUtils.isEmpty(ids)) {
+    public List<String> getNameByIds(Collection<String> uuids) {
+        if (CollectionUtils.isEmpty(uuids)) {
             return Collections.emptyList();
         }
-        QueryWrapper queryWrapper = query().select(ETLTableDO::getDisplayName).in(ETLTableDO::getId, ids).orderBy(ETLTableDO::getTableName, true);
-        List<ETLTableDO> tables = list(queryWrapper);
-        return tables.stream().map(ETLTableDO::getDisplayName).toList();
+        QueryWrapper queryWrapper = query()
+                .select(ETLTableDO::getDisplayName)
+                .in(ETLTableDO::getTableUuid, uuids)
+                .orderBy(ETLTableDO::getTableName, true);
+        return objListAs(queryWrapper, String.class);
     }
 
-    public List<ETLTableDO> findAllByDatasourceId(Long datasourceId, Boolean writable) {
-        QueryWrapper queryWrapper = query().eq(ETLTableDO::getDatasourceId, datasourceId)
+    public List<ETLTableDO> findAllByDatasource(String datasourceUuid, Boolean writable) {
+        QueryWrapper queryWrapper = query().eq(ETLTableDO::getDatasourceUuid, datasourceUuid)
                 .eq(ETLTableDO::getTableType, "table", writable)
                 .orderBy(ETLTableDO::getTableName, true);
         return list(queryWrapper);

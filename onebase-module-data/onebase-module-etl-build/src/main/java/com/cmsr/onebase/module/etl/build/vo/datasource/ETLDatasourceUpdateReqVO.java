@@ -34,6 +34,6 @@ public class ETLDatasourceUpdateReqVO {
     @NotBlank(message = "数据源配置信息不能为空")
     private JsonNode config;
 
-    @Schema(description = "只读", requiredMode = Schema.RequiredMode.NOT_REQUIRED, defaultValue = "true")
-    private Boolean readonly;
+    @Schema(description = "只读", requiredMode = Schema.RequiredMode.NOT_REQUIRED, defaultValue = "1")
+    private Integer readonly;
 }
