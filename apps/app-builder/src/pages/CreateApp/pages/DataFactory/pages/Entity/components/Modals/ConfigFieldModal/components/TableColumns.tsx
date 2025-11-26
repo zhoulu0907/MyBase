@@ -1,12 +1,13 @@
 import React from 'react';
-import { FIELD_TYPE, FIELD_TYPE_LABEL } from '@onebase/ui-kit';
+import { FIELD_TYPE, FIELD_TYPE_LABEL, ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
 import { Button, Checkbox, Form, Input, Select, Space } from '@arco-design/web-react';
 import { IconSelectAll, IconSettings, IconEdit } from '@arco-design/web-react/icon';
 import { createFieldRules } from '@/pages/CreateApp/pages/DataFactory/utils/rules';
 import { FIELD_CONSTRAINT_LENGTH_ENABLED, FIELD_CONSTRAINT_REGEX_ENABLED } from '@onebase/ui-kit';
 import { ModalPopover } from '@/components/ModalPopover';
-import type { FieldFormValues, ColumnConfig } from '../types';
-import { CHECK_CONST } from '../utils/const';
+import type { FieldFormValues, ColumnConfig, AutoCodeRule } from '../types';
+import { CHECK_CONST, AUTO_CODE_INITIAL_RULES } from '../utils/const';
+import { convertAutoCodeCompoToAutoNumberRule } from '../utils/transform';
 import styles from '../index.module.less';
 
 interface TableColumnsProps {
@@ -21,6 +22,7 @@ interface TableColumnsProps {
   getFieldIndex: (fieldId: string) => number;
   deleteField: (id: string) => void;
   fields: FieldFormValues[];
+  handleConfigConfirm: (fieldType: string, fieldId: string, configData: unknown, dictTypeId?: string) => void;
 }
 
 // 渲染表单字段组件
@@ -206,7 +208,8 @@ const TableColumns = ({
   renderFieldConfigContent,
   externalErrors,
   getFieldIndex,
-  deleteField
+  deleteField,
+  handleConfigConfirm
 }: TableColumnsProps): ColumnConfig[] => {
   return [
     {
@@ -281,6 +284,14 @@ const TableColumns = ({
               showSearch
               filterOption={(input, option) => {
                 return option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0;
+              }}
+              onChange={(value) => {
+                // 当选择自动编号类型时，如果字段还没有配置，自动创建默认规则
+                if (value === ENTITY_FIELD_TYPE.AUTO_CODE.VALUE && !record.autoNumber && !record.autoNumberConfig) {
+                  const defaultRules: AutoCodeRule[] = AUTO_CODE_INITIAL_RULES;
+                  const autoNumberRule = convertAutoCodeCompoToAutoNumberRule(defaultRules);
+                  handleConfigConfirm(ENTITY_FIELD_TYPE.AUTO_CODE.VALUE, record.id || '', autoNumberRule);
+                }
               }}
             />
           )}

@@ -1,7 +1,7 @@
 import { Button, Divider, Dropdown, Form, Grid, Input, Menu, Modal, Select, Switch, Tag } from '@arco-design/web-react';
 import { IconDelete, IconLaunch, IconMoreVertical, IconPlus } from '@arco-design/web-react/icon';
 import { FieldType, InteractionActionType, VALIDATION_TYPE } from '@onebase/app';
-import { useFormEditorSignal, usePageViewEditorSignal } from '@onebase/ui-kit';
+import { FORM_COMPONENT_TYPES, useFormEditorSignal, usePageViewEditorSignal } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
@@ -170,6 +170,25 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
       nextRules.splice(targetIndex, 0, currentRule);
       return nextRules;
     });
+  };
+
+  const renderValueFormItem: any = (cpId: string) => {
+    const component = components.value.find((item: any) => item?.id === cpId);
+    if (component?.type) {
+      switch (component?.type) {
+        case FORM_COMPONENT_TYPES.SELECT_ONE:
+        case FORM_COMPONENT_TYPES.SELECT_MUTIPLE:
+        case FORM_COMPONENT_TYPES.RADIO:
+        case FORM_COMPONENT_TYPES.CHECKBOX:
+          const options = pageComponentSchemas.value[cpId]?.config?.defaultOptionsConfig?.defaultOptions || [];
+          return <Select options={options} placeholder="请选择静态值" />;
+
+        default:
+          return <Input placeholder="请输入静态值" />;
+      }
+    }
+
+    return <Input placeholder="请输入静态值" />;
   };
 
   return (
@@ -378,13 +397,16 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
                                                               <Input placeholder="请输入" disabled />
                                                             </Form.Item>
                                                           )}
+                                                          {/* 静态值 */}
                                                           {form.getFieldValue(item.field + '.operatorType') ==
                                                             FieldType.VALUE && (
                                                             <Form.Item field={item.field + '.value'}>
-                                                              <Input placeholder="请输入静态值" />
+                                                              {renderValueFormItem(
+                                                                form.getFieldValue(item.field + '.cpId')
+                                                              )}
                                                             </Form.Item>
                                                           )}
-
+                                                          {/* 公式 */}
                                                           {form.getFieldValue(item.field + '.operatorType') ==
                                                             FieldType.VARIABLES && (
                                                             <Form.Item field={item.field + '.value'}>

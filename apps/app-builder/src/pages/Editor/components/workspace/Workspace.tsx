@@ -1,5 +1,12 @@
 import { getDictDataListByType, getDictDetail } from '@onebase/platform-center';
-import { EDITOR_TYPES, FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, COLOR_MODE_TYPES } from '@onebase/ui-kit';
+import {
+  EDITOR_TYPES,
+  FORM_COMPONENT_TYPES,
+  STATUS_OPTIONS,
+  STATUS_VALUES,
+  COLOR_MODE_TYPES,
+  DEFAULT_VALUE_TYPES
+} from '@onebase/ui-kit';
 import { cloneDeep } from 'lodash-es';
 import { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
@@ -189,7 +196,6 @@ export default function EditorWorkspace() {
   const handleDeleteComponent = (componentId: string) => {
     // 从组件列表中移除
 
-
     // 布局组件删除
     if (layoutSubComponents[componentId]) {
       // 收集所有需要删除的组件 ID
@@ -216,7 +222,7 @@ export default function EditorWorkspace() {
 
       delComponents(componentId);
       // 删除所有收集到的组件
-      batchDelPageComponentSchemas(idsToDelete)
+      batchDelPageComponentSchemas(idsToDelete);
       batchDelLayoutSubComponents(idsToDelete);
     } else if (subTableComponents[componentId]) {
       // 子表单删除
@@ -240,7 +246,7 @@ export default function EditorWorkspace() {
 
       delComponents(componentId);
       // 删除所有收集到的组件
-      batchDelPageComponentSchemas(idsToDelete)
+      batchDelPageComponentSchemas(idsToDelete);
       batchDelSubTableComponents(idsToDelete);
     } else {
       // 从组件列表中移除
@@ -327,9 +333,15 @@ export default function EditorWorkspace() {
 
                     // 数据长度 dataLength
                     // 小数位数 decimalPlaces
-                    // 默认值 defaultValue
-                    const defaultValueConfig = { ...schema.config.defaultValue, customValue: field.defaultValue };
-                    schema.config.defaultValueConfig = defaultValueConfig;
+                    // 默认值 defaultValue => defaultValueConfig
+                    if (schema.config.defaultValueConfig) {
+                      const defaultValueConfig = {
+                        ...schema.config.defaultValueConfig,
+                        type: DEFAULT_VALUE_TYPES.CUSTOM,
+                        customValue: field.defaultValue
+                      };
+                      schema.config.defaultValueConfig = defaultValueConfig;
+                    }
                     // 字段描述 description
                     schema.config.tooltip = field.description;
                     // 是否必填：1-是，0-不是 isRequired
@@ -440,9 +452,15 @@ export default function EditorWorkspace() {
 
                     // 数据长度 dataLength
                     // 小数位数 decimalPlaces
-                    // 默认值 defaultValue
-                    const defaultValueConfig = { ...subSchema.config.defaultValue, customValue: ele.defaultValue };
-                    subSchema.config.defaultValueConfig = defaultValueConfig;
+                    // 默认值 defaultValue => defaultValueConfig
+                    if (subSchema.config.defaultValueConfig) {
+                      const defaultValueConfig = {
+                        ...subSchema.config.defaultValueConfig,
+                        type: DEFAULT_VALUE_TYPES.CUSTOM,
+                        customValue: ele.defaultValue
+                      };
+                      subSchema.config.defaultValueConfig = defaultValueConfig;
+                    }
                     // 字段描述 description
                     subSchema.config.tooltip = ele.description;
                     subSchema.config.verify = {
@@ -586,12 +604,15 @@ export default function EditorWorkspace() {
                   if (currentField) {
                     // 数据长度 dataLength
                     // 小数位数 decimalPlaces
-                    // 默认值 defaultValue
-                    const defaultValueConfig = {
-                      ...schema.config.defaultValue,
-                      customValue: currentField.defaultValue
-                    };
-                    schema.config.defaultValueConfig = defaultValueConfig;
+                    // 默认值 defaultValue => defaultValueConfig
+                    if (schema.config.defaultValueConfig) {
+                      const defaultValueConfig = {
+                        ...schema.config.defaultValueConfig,
+                        type: DEFAULT_VALUE_TYPES.CUSTOM,
+                        customValue: currentField.defaultValue
+                      };
+                      schema.config.defaultValueConfig = defaultValueConfig;
+                    }
                     // 字段描述 description
                     schema.config.tooltip = currentField.description;
                     // 是否必填：1-是，0-不是 isRequired

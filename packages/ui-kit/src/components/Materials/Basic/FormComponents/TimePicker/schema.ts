@@ -181,7 +181,12 @@ const XTimePicker: XInputTimePickerSchema = {
     //  数据绑定
     ...dataFieldConfig,
     // 默认值
-    defaultValueConfig,
+    {
+      key: 'defaultValueConfig',
+      name: '默认值',
+      type: CONFIG_TYPES.DEFAULT_VALUE,
+      valueType: 'time'
+    },
     {
       key: 'timeFormat',
       name: '时间格式',

@@ -15,9 +15,10 @@ import {
   AUTO_CODE_RESET_CYCLE,
   AUTO_CODE_RULE_TYPE,
   DATE_FORMAT_DEFAULT,
-  AUTO_CODE_NUMBER_DEFAULT_CONFIG,
+  AUTO_CODE_SEQUENCE_DEFAULT_CONFIG,
   DATE_FORMAT_OPTIONS,
-  DATE_FORMAT_VALUES
+  DATE_FORMAT_VALUES,
+  AUTO_CODE_INITIAL_RULES
 } from '../utils/const';
 import styles from '../index.module.less';
 
@@ -67,15 +68,7 @@ export const AutoCodeRuleConfig: React.FC<AutoCodeRuleConfigProps> = ({
     if (initialConfig) {
       return convertAutoNumberRuleToAutoCodeComp(initialConfig, fields);
     }
-    return [
-      {
-        id: 'rule-1',
-        itemType: AUTO_CODE_RULE_TYPE.SEQUENCE,
-        config: {
-          ...AUTO_CODE_NUMBER_DEFAULT_CONFIG
-        }
-      }
-    ];
+    return AUTO_CODE_INITIAL_RULES;
   }, [initialConfig, fields]);
 
   const [rules, setRules] = useState<AutoCodeRule[]>(getInitialRules());
@@ -100,7 +93,7 @@ export const AutoCodeRuleConfig: React.FC<AutoCodeRuleConfigProps> = ({
     let config: AutoCodeRule['config'] = {};
     switch (type) {
       case AUTO_CODE_RULE_TYPE.SEQUENCE:
-        config = { ...AUTO_CODE_NUMBER_DEFAULT_CONFIG };
+        config = { ...AUTO_CODE_SEQUENCE_DEFAULT_CONFIG };
         setDisplayText(getDisplayText(config));
         break;
       case AUTO_CODE_RULE_TYPE.DATE:

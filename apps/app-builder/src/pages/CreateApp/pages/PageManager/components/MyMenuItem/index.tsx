@@ -7,25 +7,15 @@ import RenameIcon from '@/assets/images/edit_page_name_icon.svg';
 import HiddenIcon from '@/assets/images/eye_off_icon.svg';
 import VisibleIcon from '@/assets/images/eye_on_icon.svg';
 import SettingIcon from '@/assets/images/task_center/setting-on.svg';
-
-import DynamicIcon from '@/components/DynamicIcon';
-import { menuIconList } from '@/components/MenuIcon/const';
 import { Dropdown, Menu, Message, Tooltip, type FormInstance } from '@arco-design/web-react';
 import { IconEyeInvisible, IconMoreVertical } from '@arco-design/web-react/icon';
-import {
-  getPageSetId,
-  menuSignal,
-  PageType,
-  RootParentPage,
-  VisibleType,
-  MenuType,
-  type GetPageSetIdReq
-} from '@onebase/app';
-import { EDITOR_TYPES } from '@onebase/ui-kit';
+import { getPageSetId, menuSignal, PageType, RootParentPage, VisibleType, type GetPageSetIdReq } from '@onebase/app';
+import { EDITOR_TYPES, webMenuIcons } from '@onebase/ui-kit';
 import { pagesRuntimeSignal } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ReactSVG } from 'react-svg';
 import styles from './index.module.less';
 
 const MenuItem = Menu.Item;
@@ -81,6 +71,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
   createForm,
   style
 }) => {
+  const allWebMenuIcons = webMenuIcons.map((ele) => ele.children).reduce((acc, current) => acc.concat(current), []);
   useSignals();
   const navigate = useNavigate();
   const { curMenu } = menuSignal;
@@ -233,15 +224,27 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
     >
       <Tooltip content={menuName} position="top">
         <div className={styles.menuName}>
-          <DynamicIcon
-            IconComponent={menuIconList.find((icon) => icon.code === menuIcon)?.icon}
-            theme="outline"
-            size="18"
-            fill={curMenu.value?.id === menuID ? 'rgb(var(--primary-6))' : '#333'}
-            style={{ marginRight: 16 }}
-          />
-          {/* TASK-xxx 是工作流程任务中心菜单的icon */}
-          {menuIcon.includes('TASK-') && <i className={`iconfont ${menuIcon}`} style={{ marginRight: '16px' }} />}
+          {menuIcon.includes('TASK-') ? (
+            // xxx-taskicon 是工作流程任务中心菜单的icon
+            <i className={`iconfont ${menuIcon}`} style={{ marginRight: '16px' }} />
+          ) : (
+            // 正常菜单 icon
+            <ReactSVG
+              className={styles.menuIcon}
+              src={
+                allWebMenuIcons.find((ele) => ele.code === menuIcon)?.icon ||
+                allWebMenuIcons.find((ele) => ele.code === 'FormPageLine')?.icon ||
+                ''
+              }
+              beforeInjection={(svg) => {
+                const fillColor = curMenu.value?.id === menuID ? 'rgb(var(--primary-6))' : '#333';
+                svg.querySelectorAll('*').forEach((el) => el.removeAttribute('fill'));
+                svg.setAttribute('fill', fillColor);
+                svg.setAttribute('width', '18px');
+                svg.setAttribute('height', '18px');
+              }}
+            />
+          )}
           <span
             className={styles.name}
             style={{

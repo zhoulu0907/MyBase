@@ -709,7 +709,7 @@ const PageManagerPage: FC = () => {
         handleCopy={handleCopy}
         setVisible={setVisibleCopyForm}
         form={copyForm}
-        treeData={convertMenuToTreeData(parentPageOptions, initTreeItemWidth)}
+        treeData={convertMenuToTreeData(parentPageOptions, initTreeItemWidth, false, { height: '32px' })}
       />
 
       {/* 创建弹窗 */}
@@ -724,7 +724,7 @@ const PageManagerPage: FC = () => {
         pageSetTypeOptions={pageSetTypeOptions}
         visibleCreateForm={visibleCreateForm}
         initValue={{ pageType: PageType.NORMAL, menuName: '', parentId: RootParentPage.id }}
-        treeData={convertMenuToTreeData(parentPageOptions, initTreeItemWidth)}
+        treeData={convertMenuToTreeData(parentPageOptions, initTreeItemWidth, false, { height: '32px' })}
       />
     </div>
   );

@@ -31,6 +31,13 @@ export interface FieldFormValues {
     regexPattern: string;
     regexPrompt: string;
   };
+  dataSelectionConfig?: DataSelectionType;
+}
+
+// 数据选择配置
+export interface DataSelectionType {
+  targetEntityId: string;
+  targetFieldId: string;
 }
 
 // 字段配置弹窗属性

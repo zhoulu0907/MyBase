@@ -1,0 +1,146 @@
+.ipaasContainer {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  overflow-y: hidden;
+  overflow-x: hidden;
+
+  .stepsContainer {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    border-bottom: 1px solid #e5e5e5;
+    margin-bottom: 16px;
+  }
+
+  .selectedInstance {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    box-sizing: border-box;
+    padding: 16px;
+    margin-bottom: 16px;
+    background-color: #e8f3ff;
+    border-radius: 8px;
+
+    .selectedInstanceLeft {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 16px;
+
+      .selectIcon {
+        width: 32px;
+        height: 32px;
+      }
+    }
+
+    .selectedInstanceRight {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 8px;
+    }
+  }
+
+  .instanceList {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+
+    .instanceItem {
+      width: 330px;
+      height: 73px;
+      background-color: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 8px;
+      padding: 0px 16px;
+
+      .instanceItemIcon {
+        width: 48px;
+        height: 48px;
+      }
+
+      // 高亮选中状态的边框颜色
+      &:hover {
+        border-color: rgb(var(--primary-6));
+        box-shadow: 0 0 0 2px rgba(22, 93, 255, 0.1);
+      }
+    }
+  }
+
+  .actionList {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+
+    .actionItem {
+      width: 100%;
+      height: 73px;
+      background-color: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 0px 16px;
+
+      .actionItemName {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 16px;
+        font-weight: 400;
+      }
+
+      .actionItemDescription {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 16px;
+        font-weight: 400;
+        color: #0000008c;
+      }
+
+      // 高亮选中状态的边框颜色
+      &:hover {
+        border-color: rgb(var(--primary-6));
+        box-shadow: 0 0 0 2px rgba(22, 93, 255, 0.1);
+      }
+    }
+  }
+
+  .paginationContainer {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    margin-top: 16px;
+  }
+}
