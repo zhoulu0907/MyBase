@@ -23,7 +23,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   // 获取用户信息
   const tokenInfo = TokenManager.getTokenInfo();
   const userPermissionInfo = UserPermissionManager.getUserPermissionInfo();
-
+console.log("1",userPermissionInfo)
   // 登出处理
   const handleLogout = async () => {
     // TODO(mickey): 联调后打开
@@ -45,7 +45,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
       <Menu.Item key="info" style={{height:"60px"}}>
         <div className={styles.adminInformation}>
             <Avatar size={32} >
-              <img src={LogoSVG} />
+              <img src={userPermissionInfo?.user?.avatar || ""} />
             </Avatar>
             <Typography.Text>{userPermissionInfo?.user?.nickname || ""}</Typography.Text>
         </div>
@@ -81,8 +81,8 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
 
           <Dropdown droplist={userMenu} position="bottom">
             <div className={styles.userDropdown}>
-              <Avatar size={32} style={{ backgroundColor: '#4FAE7B' }}>
-                <img src={defaultAvatar} alt="avatar" />
+              <Avatar size={32}>
+                <img src={userPermissionInfo?.user?.avatar || ""} alt="avatar" />
               </Avatar>
             </div>
           </Dropdown>

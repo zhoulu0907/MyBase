@@ -188,8 +188,10 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
             droplist={location.pathname?.startsWith('/onebase/enterprise-app') ? tenantAdminMenu : userMenu}
             position="bl"
           >
-            <div className={styles.userDropdown}>
-              <img src={AvatarSVG} alt="avatar" />
+              <div className={styles.userDropdown}>
+                <Avatar size={32}>
+                  <img src={adminInfo?.avatar} alt="avatar" />
+                </Avatar>
             </div>
           </Dropdown>
         </div>

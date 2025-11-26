@@ -160,6 +160,7 @@ const EditTenant = () => {
     return res;
   };
 
+  console.log("2",[...(tenantInfo?.tenantAdminUserList || []), ...(adminList || [])])
   /* 获取当前管理员集合 */
   const findMatchingItemsById = (arrA: any[], targetArr: any[]) => {
     if (!Array.isArray(targetArr)) return;
