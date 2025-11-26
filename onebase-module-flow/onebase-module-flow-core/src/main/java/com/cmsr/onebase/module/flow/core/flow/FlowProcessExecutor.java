@@ -102,7 +102,7 @@ public class FlowProcessExecutor {
             executionLog.setEndTime(LocalDateTime.now());
             Duration duration = Duration.between(executionLog.getStartTime(), executionLog.getEndTime());
             executionLog.setDurationTime(duration.toMillis());
-            flowExecutionLogRepository.insert(executionLog);
+            flowExecutionLogRepository.save(executionLog);
         }
     }
 
@@ -162,7 +162,7 @@ public class FlowProcessExecutor {
             executionLog.setEndTime(LocalDateTime.now());
             Duration duration = Duration.between(executionLog.getStartTime(), executionLog.getEndTime());
             executionLog.setDurationTime(duration.toMillis());
-            flowExecutionLogRepository.insert(executionLog);
+            flowExecutionLogRepository.save(executionLog);
         }
     }
 

@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.etl.core.dal.database;
 
-import com.cmsr.onebase.framework.orm.mybatis.BaseAppRepository;
+import com.cmsr.onebase.framework.orm.repo.BaseAppRepository;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLWorkflowTableDO;
 import com.cmsr.onebase.module.etl.core.dal.mapper.ETLWorkflowTableMapper;
 import com.cmsr.onebase.module.etl.core.enums.ETLConstants;

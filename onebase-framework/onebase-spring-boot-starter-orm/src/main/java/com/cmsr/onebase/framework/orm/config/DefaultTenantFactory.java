@@ -1,4 +1,4 @@
-package com.cmsr.onebase.framework.base.mybatis;
+package com.cmsr.onebase.framework.orm.config;
 
 import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.mybatisflex.core.tenant.TenantFactory;
@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class DefaultTenantFactory implements TenantFactory {
+
     private final static long DEFAULT_TENANT_ID = -1L;
 
     @Override
