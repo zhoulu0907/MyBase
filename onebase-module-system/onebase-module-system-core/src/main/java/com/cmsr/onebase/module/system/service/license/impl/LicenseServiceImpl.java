@@ -2,10 +2,10 @@ package com.cmsr.onebase.module.system.service.license.impl;
 
 import com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstants;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.framework.security.core.LoginUser;
-import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import com.cmsr.onebase.module.system.convert.license.LicenseConvert;
 import com.cmsr.onebase.module.system.dal.database.LicenseDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
