@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.metadata.core.service.datasource;
 
-import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataDatasourceRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
 import jakarta.annotation.Resource;

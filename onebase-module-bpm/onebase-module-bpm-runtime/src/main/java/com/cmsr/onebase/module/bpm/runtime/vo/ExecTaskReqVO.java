@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.bpm.runtime.vo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 /**
@@ -25,8 +26,8 @@ public class ExecTaskReqVO {
     /**
      * 任务ID
      */
-    @NotBlank(message = "任务ID不能为空")
-    private String taskId;
+    @NotNull(message = "任务ID不能为空")
+    private Long taskId;
 
     /**
      * 流程实例ID

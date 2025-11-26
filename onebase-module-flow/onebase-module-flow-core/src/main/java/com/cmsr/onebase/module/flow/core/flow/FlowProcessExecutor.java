@@ -102,7 +102,7 @@ public class FlowProcessExecutor {
             executionLog.setEndTime(LocalDateTime.now());
             Duration duration = Duration.between(executionLog.getStartTime(), executionLog.getEndTime());
             executionLog.setDurationTime(duration.toMillis());
-            flowExecutionLogRepository.insert(executionLog);
+            flowExecutionLogRepository.save(executionLog);
         }
     }
 
@@ -162,7 +162,7 @@ public class FlowProcessExecutor {
             executionLog.setEndTime(LocalDateTime.now());
             Duration duration = Duration.between(executionLog.getStartTime(), executionLog.getEndTime());
             executionLog.setDurationTime(duration.toMillis());
-            flowExecutionLogRepository.insert(executionLog);
+            flowExecutionLogRepository.save(executionLog);
         }
     }
 
@@ -236,6 +236,13 @@ public class FlowProcessExecutor {
         result.setExecutionEndNodeType(executeContext.getExecutionEndNodeType());
         result.setExecutionEndNodeTag(executeContext.getExecutionEndNodeTag());
         result.setOutputParams(variableContext.getOutputParams());
+        if (executeContext.getAbnormalTermination().isPresent()
+                && !executeContext.getAbnormalTermination().get()) {
+            result.setSuccess(false);
+            if (executeContext.getTerminationMessage() != null) {
+                result.setMessage(executeContext.getTerminationMessage());
+            }
+        }
         return result;
     }
 

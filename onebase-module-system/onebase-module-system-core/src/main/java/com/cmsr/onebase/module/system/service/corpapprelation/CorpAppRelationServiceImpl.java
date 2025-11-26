@@ -5,10 +5,11 @@ import com.cmsr.onebase.framework.common.enums.CorpAppReationStatusEnum;
 import com.cmsr.onebase.framework.common.enums.CorpStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
+import com.cmsr.onebase.module.app.api.app.dto.TagVO;
 import com.cmsr.onebase.module.system.dal.database.CorpAppRelationDataRepository;
+import com.cmsr.onebase.module.system.dal.dataobject.corp.CorpDO;
 import com.cmsr.onebase.module.system.dal.dataobject.corpapprelation.CorpAppRelationDO;
 import com.cmsr.onebase.module.system.vo.corp.CorpApplicationRespVO;
 import com.cmsr.onebase.module.system.vo.corpapprelation.*;
@@ -17,6 +18,7 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.DataRow;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,13 +28,12 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.APPLICATION_AUTH_TENANT_NOT_EXISTS;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.CORP_ID_COMPARE_ERROR;
 
 /**
  * 企业应用关联表 Service 实现类
@@ -47,6 +48,9 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
 
     @Resource
     private AppApplicationApi appApplicationApi;
+
+    @Resource
+    private CorpAppRelationDataRepository corpAppRelationRepository;
 
     @Override
     public void createListCorpAppRelation(List<AppAuthTimeReqVO> corpAppRelationInertReqVOList, Long corpId) {
@@ -140,18 +144,28 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
 
     @Override
     public PageResult<CorpApplicationRespVO> getCorpAppRelationPage(CorpAppPageReqVO pageReqVO) {
-        Long corpId = pageReqVO.getCorpId();
-        Long loginCorpId = SecurityFrameworkUtils.getLoginUser().getCorpId();
-        if(!Objects.equals(corpId, loginCorpId)){
-            throw exception(CORP_ID_COMPARE_ERROR);
-        }
+        // todo 空间里有调用，暂时去掉校验
+        // Long corpId = pageReqVO.getCorpId();
+        // Long loginCorpId = SecurityFrameworkUtils.getLoginUser().getCorpId();
+        // if(!Objects.equals(corpId, loginCorpId)){
+        //     throw exception(CORP_ID_COMPARE_ERROR);
+        // }
         Map<Long, ApplicationDTO> applicationMap = getApplicationDoMap(pageReqVO.getAppName());
         List<Long> applicationIds = new ArrayList<>(applicationMap.keySet());
         // 查询原始分页数据
         PageResult<CorpAppRelationDO> pageResult = corpAppRelationDataRepository.selectPage(pageReqVO, applicationIds);
+
+        // 1. 获取应用ID列表
+        List<Long> appIds = pageResult.getList().stream()
+                .map(CorpAppRelationDO::getApplicationId)
+                .collect(Collectors.toList());
+
+        // 获取标签列表
+        Map<Long, List<TagVO>> tagMap = appApplicationApi.queryAppTags(appIds);
+
         // 转换为 VO 对象并根据 applicationName 过滤
         List<CorpApplicationRespVO> filteredList = pageResult.getList().stream()
-                .map(corpDO -> convertToRespVO(corpDO, applicationMap))
+                .map(corpDO -> convertToRespVO(corpDO, applicationMap, tagMap))
                 .collect(Collectors.toList());
         // 返回过滤后的结果和总数
         return new PageResult<>(filteredList, pageResult.getTotal());
@@ -164,15 +178,15 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
      * @param
      * @return Map<Long, String> key为企业ID，value为企业名称
      */
-    public String getCorpStatus(Integer status, LocalDateTime expiresTime) {
-        String showStatus = "";
+    public Integer getCorpStatus(Integer status, LocalDateTime expiresTime) {
+        int showStatus = 0;
         if (status != null && status.equals(CorpStatusEnum.DISABLE.getValue())) {
-            showStatus = CorpAppReationStatusEnum.DISABLE.getName();
+            showStatus = CorpAppReationStatusEnum.DISABLE.getValue();
         } else if (expiresTime != null) {
             if (expiresTime.isAfter(java.time.LocalDateTime.now())) {
-                showStatus = CorpAppReationStatusEnum.ENABLE.getName();
+                showStatus = CorpAppReationStatusEnum.ENABLE.getValue();
             } else {
-                showStatus = CorpAppReationStatusEnum.EXPIRES.getName();
+                showStatus = CorpAppReationStatusEnum.EXPIRES.getValue();
             }
         }
         return showStatus;
@@ -185,10 +199,11 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
      * @param applicationMap 应用信息映射表
      * @return CorpApplicationRespVO 响应VO对象
      */
-    private CorpApplicationRespVO convertToRespVO(CorpAppRelationDO corpDO, Map<Long, ApplicationDTO> applicationMap) {
-        CorpApplicationRespVO respVO = BeanUtils.toBean(corpDO, CorpApplicationRespVO.class);
+    private CorpApplicationRespVO convertToRespVO(CorpAppRelationDO corpDO, Map<Long, ApplicationDTO> applicationMap, Map<Long, List<TagVO>> tagsMap) {
+        CorpApplicationRespVO respVO = new CorpApplicationRespVO();
         ApplicationDTO appDo = applicationMap.get(corpDO.getApplicationId());
         if (appDo != null) {
+            respVO = BeanUtils.toBean(appDo, CorpApplicationRespVO.class);
             respVO.setApplicationName(appDo.getAppName());
             respVO.setApplicationCode(appDo.getAppCode());
             respVO.setApplicationUid(appDo.getAppUid());
@@ -198,7 +213,10 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
             // 获取app应用状态描述
             Integer status = corpDO.getStatus();
             respVO.setShowStatus(getCorpStatus(status, corpDO.getExpiresTime()));
+            respVO.setTags(tagsMap.get(appDo.getId()));
         }
+        respVO.setAuthorizationTime(corpDO.getAuthorizationTime());
+        respVO.setExpiresTime(corpDO.getExpiresTime());
         return respVO;
     }
 
@@ -211,6 +229,38 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
     public List<CorpAppRelationDO> getCorpAppRelationList(CorpAppRelationPageReqVO corpAppRelationPageReqVO) {
         List<CorpAppRelationDO> corpApplicationRespVOList = corpAppRelationDataRepository.getCorpAppRelationList(corpAppRelationPageReqVO);
         return corpApplicationRespVOList;
+    }
+
+    @Override
+    public void updateStatus(Long id, Long status) {
+        //  企业禁用/开启
+        DataRow row = new DataRow();
+        row.put(CorpDO.STATUS, status);
+        corpAppRelationRepository.updateByConfig(row, new DefaultConfigStore().eq(CorpAppRelationDO.ID, id));
+    }
+
+    @Override
+    public List<ApplicationDTO> getCorpNoRelationAppList(CorpRelationAppReqVO relationAppReqVO) {
+        List<ApplicationDTO> applicationDTOList = appApplicationApi.findAppApplicationByAppName(relationAppReqVO.getAppName());
+        if (null == relationAppReqVO.getCorpId()) {
+            // 用于企业创建时拉取全部应用
+            return applicationDTOList;
+        }
+        // 获取企业已关联的数据
+        List<CorpAppRelationDO> corpAppRelationDOList = corpAppRelationDataRepository.findCorpAppRelationByCorpId(relationAppReqVO.getCorpId());
+        if (corpAppRelationDOList.isEmpty()) {
+            return applicationDTOList;
+        }
+        // 获取已关联的应用ID集合
+        Set<Long> relatedAppIds = corpAppRelationDOList.stream()
+                .map(CorpAppRelationDO::getApplicationId)
+                .collect(Collectors.toSet());
+
+        // 过滤掉已关联的应用
+        List<ApplicationDTO> filteredList = applicationDTOList.stream()
+                .filter(app -> !relatedAppIds.contains(app.getId()))
+                .collect(Collectors.toList());
+        return filteredList;
     }
 }
 

@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.etl.build.controller.mgt;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.module.etl.build.service.mgt.ETLFlinkFunctionService;
-import com.cmsr.onebase.module.etl.build.service.mgt.vo.FlinkFunctionVO;
+import com.cmsr.onebase.module.etl.build.vo.mgt.FlinkFunctionVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
@@ -24,16 +24,16 @@ public class ETLFlinkFunctionController {
     private ETLFlinkFunctionService etlFlinkFunctionService;
 
 
-    @GetMapping("/list-type")
     @Operation(summary = "查询Flink函数类型列表")
+    @GetMapping("/list-type")
     public CommonResult<List<String>> listFlinkFunctionTypes() {
         List<String> workflowPage = etlFlinkFunctionService.listFlinkFunctionTypes();
         return CommonResult.success(workflowPage);
     }
 
 
-    @GetMapping("/list")
     @Operation(summary = "查询Flink函数列表")
+    @GetMapping("/list")
     public CommonResult<List<FlinkFunctionVO>> listFlinkFunctions(
             @RequestParam(name = "type", required = false) String type,
             @RequestParam(name = "key", required = false) String key) {

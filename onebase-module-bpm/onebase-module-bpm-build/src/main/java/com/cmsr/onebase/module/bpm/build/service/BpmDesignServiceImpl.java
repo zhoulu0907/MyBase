@@ -42,7 +42,7 @@ import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionU
 @Slf4j
 public class BpmDesignServiceImpl implements BpmDesignService {
 
-    @Resource
+    @Resource(name = "bpmDefService")
     private DefService defService;
 
     @Resource

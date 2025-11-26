@@ -4,7 +4,7 @@ package com.cmsr.onebase.module.system.platform.controller.auth;
 import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.security.config.SecurityProperties;
-import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.module.system.enums.logger.LoginLogTypeEnum;
 import com.cmsr.onebase.module.system.platform.service.auth.PlatformAuthService;
 import com.cmsr.onebase.module.system.vo.auth.AuthLoginReqVO;

@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.system.service.corpapprelation;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
 import com.cmsr.onebase.module.system.dal.dataobject.corpapprelation.CorpAppRelationDO;
 import com.cmsr.onebase.module.system.vo.corp.CorpApplicationRespVO;
 import com.cmsr.onebase.module.system.vo.corpapprelation.*;
@@ -53,9 +54,31 @@ public interface CorpAppRelationService {
      */
     PageResult<CorpApplicationRespVO> getCorpAppRelationPage(CorpAppPageReqVO pageReqVO);
 
+    /**
+     * 根据企业ID删除企业应用关联
+     * @param corpID
+     */
     void deleteCorpAppRelationByCorpId(Long corpID);
 
+    /**
+     * 获取企业应用关联列表
+     * @param corpAppRelationPageReqVO
+     * @return
+     */
     List<CorpAppRelationDO> getCorpAppRelationList(CorpAppRelationPageReqVO corpAppRelationPageReqVO);
 
 
+    /**
+     * 企业启用/禁用
+     * @param id
+     * @param status
+     */
+    void updateStatus(Long id, Long status);
+
+    /**
+     * 获取排除企业已关联应用的应用列表
+     * @param relationAppReqVO
+     * @return
+     */
+    List<ApplicationDTO> getCorpNoRelationAppList(CorpRelationAppReqVO relationAppReqVO);
 }

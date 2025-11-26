@@ -26,8 +26,8 @@ public class FlowNodeCategoryController {
     @Resource
     private FlowNodeCategoryService flowNodeCategoryService;
 
-    @GetMapping("/list")
     @Operation(summary = "获取连接器分类列表")
+    @GetMapping("/list")
     public CommonResult<List<NodeCategoryVO>> getNodeCategoryList() {
         List<NodeCategoryVO> nodeCategoryVOS = flowNodeCategoryService.getNodeCategoryList();
         return CommonResult.success(nodeCategoryVOS);

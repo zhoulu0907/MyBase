@@ -6,8 +6,8 @@ import com.cmsr.onebase.module.flow.build.vo.ConnectorScriptVO;
 import com.cmsr.onebase.module.flow.build.vo.CreateFlowConnectorScriptReqVO;
 import com.cmsr.onebase.module.flow.build.vo.UpdateFlowConnectorScriptReqVO;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowConnectorRepository;
-import com.cmsr.onebase.module.flow.core.dal.database.connector.FlowConnectorScriptRepository;
-import com.cmsr.onebase.module.flow.core.dal.dataobject.connector.FlowConnectorScriptDO;
+import com.cmsr.onebase.module.flow.core.dal.database.FlowConnectorScriptRepository;
+import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowConnectorScriptDO;
 import com.cmsr.onebase.module.flow.core.enums.FlowErrorCodeConstants;
 import com.cmsr.onebase.module.flow.core.vo.PageConnectorScriptReqVO;
 import jakarta.annotation.Resource;
@@ -41,7 +41,7 @@ public class FlowConnectorScriptServiceImpl implements FlowConnectorScriptServic
 
     @Override
     public ConnectorScriptVO getConnectorScript(Long scriptId) {
-        FlowConnectorScriptDO scriptDO = connectorScriptRepository.findById(scriptId);
+        FlowConnectorScriptDO scriptDO = connectorScriptRepository.getById(scriptId);
         if (scriptDO == null) {
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_SCRIPT_NOT_EXISTS);
         }
@@ -74,14 +74,14 @@ public class FlowConnectorScriptServiceImpl implements FlowConnectorScriptServic
         connectorScriptDO.setInputParameter(createVO.getInputParameter());
         connectorScriptDO.setOutputParameter(createVO.getOutputParameter());
 
-        connectorScriptDO = connectorScriptRepository.insert(connectorScriptDO);
+        connectorScriptRepository.save(connectorScriptDO);
         return connectorScriptDO.getId();
     }
 
     @Override
     public void updateConnectorScript(UpdateFlowConnectorScriptReqVO updateVO) {
         Long scriptId = updateVO.getScriptId();
-        FlowConnectorScriptDO oldDO = connectorScriptRepository.findById(scriptId);
+        FlowConnectorScriptDO oldDO = connectorScriptRepository.getById(scriptId);
         if (oldDO == null) {
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_SCRIPT_NOT_EXISTS);
         }
@@ -92,11 +92,11 @@ public class FlowConnectorScriptServiceImpl implements FlowConnectorScriptServic
         oldDO.setInputParameter(updateVO.getInputParameter());
         oldDO.setOutputParameter(updateVO.getOutputParameter());
 
-        connectorScriptRepository.update(oldDO);
+        connectorScriptRepository.updateById(oldDO);
     }
 
     @Override
     public void deleteById(Long scriptId) {
-        connectorScriptRepository.deleteById(scriptId);
+        connectorScriptRepository.removeById(scriptId);
     }
 }

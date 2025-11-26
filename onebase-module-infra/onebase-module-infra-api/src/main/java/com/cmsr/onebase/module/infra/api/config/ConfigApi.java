@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.infra.api.config;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.module.infra.enums.ApiConstants;
+import com.cmsr.onebase.module.infra.api.constant.ApiConstants;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.cloud.openfeign.FeignClient;

@@ -1,10 +1,13 @@
 package com.cmsr.onebase.module.etl.build.service.mgt;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.etl.build.service.mgt.vo.*;
-import com.cmsr.onebase.module.etl.build.service.mgt.vo.ExecutionLogVO;
+import com.cmsr.onebase.module.etl.build.vo.mgt.*;
+import com.cmsr.onebase.module.etl.common.preview.ColumnDefine;
 import com.cmsr.onebase.module.etl.common.preview.DataPreview;
+import com.cmsr.onebase.module.etl.core.vo.WorkflowBriefVO;
 import com.cmsr.onebase.module.etl.core.vo.WorkflowPageReqVO;
+
+import java.util.List;
 
 public interface ETLWorkflowService {
 
@@ -34,5 +37,7 @@ public interface ETLWorkflowService {
     PageResult<ExecutionLogVO> getWorkflowExecutionLogs(Long applicationId, Long workflowId, Integer pageNo, Integer pageSize);
 
     DataPreview previewWorkflow(PreviewReqVO previewReqVO);
+
+    List<ColumnDefine> nodeColumns(PreviewReqVO previewReqVO);
 
 }
