@@ -8,7 +8,7 @@ import com.mybatisflex.annotation.UpdateListener;
 
 import java.time.LocalDateTime;
 
-public class BaseEntityListener implements InsertListener, UpdateListener {
+public class DefaultEntityListener implements InsertListener, UpdateListener {
 
     @Override
     public void onInsert(Object o) {

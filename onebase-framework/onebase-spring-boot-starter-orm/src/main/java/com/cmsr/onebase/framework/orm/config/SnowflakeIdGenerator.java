@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SnowflakeGenerator implements IKeyGenerator {
+public class SnowflakeIdGenerator implements IKeyGenerator {
 
     @Autowired
     private UidGenerator uidGenerator;
