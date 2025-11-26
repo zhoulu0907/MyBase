@@ -185,6 +185,23 @@ const TaskList = memo(
       )
     }
 
+    const getBottomBar = () => {
+      if (!loading && !tableData.length && tableTotal == 0) {
+        return <div className="no-data">暂无数据</div>;
+      }
+      if (loading || tablePageNo * pageSize >= (tableTotal || Number.MAX_SAFE_INTEGER)) {
+        return tableTotal ? <div className="total-data">共{tableTotal}条数据</div> : null;
+      }
+      return <LoadMore
+        getData={onReachBottom}
+        getDataAtFirst={false}
+        threshold={200}
+        blockWhenLoading={false}
+        trigger={'scroll'}
+        throttle={300}
+      />
+    }
+
     return (
       <div className="task-list-wrapper">
             <CustomNav
@@ -197,7 +214,6 @@ const TaskList = memo(
             {filterDropdown()}
         </Sticky>
         <div className="list-body-wrapper">
-          {!tableData.length ? <div className="no-data">暂无数据</div> : null}
           {
             tableData.map((item) => (
               <div key={item.key} className="list-body-item-wrapper" onClick={() => handleRowClick(item)}>
@@ -211,15 +227,7 @@ const TaskList = memo(
               </div>
             ))
           }
-          {
-            loading || tablePageNo * pageSize >= (tableTotal || Number.MAX_SAFE_INTEGER) ? null : <LoadMore
-              getData={onReachBottom}
-              getDataAtFirst={false}
-              threshold={200}
-              blockWhenLoading={false}
-              throttle={300}
-            />
-          }
+          {getBottomBar()}
         </div>
       </div>
     );
