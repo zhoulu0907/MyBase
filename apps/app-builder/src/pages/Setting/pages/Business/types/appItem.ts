@@ -87,6 +87,7 @@ export interface authorizedTimeGroup {
 
 export interface ICreateAppModal {
     visible: boolean;
+    currentId: string;
     tableData?: AppItem[];
     onCloseAppModal: () =>void;
     onSaveAppData: (data: any)=>void;

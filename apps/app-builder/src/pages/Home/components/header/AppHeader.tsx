@@ -1,16 +1,16 @@
 import LogoSVG from '@/assets/images/app_header_logo.svg';
-import AvatarSVG from '@/assets/images/avatar.svg';
 import spaceShipLine from '@/assets/images/space-ship-line.svg';
 import { useI18n } from '@/hooks/useI18n';
 import { userPermissionSignal } from '@/store/singals/user_permission';
 import { UserPermissionManager } from '@/utils/permission';
-import { Avatar, Divider, Dropdown, Layout, Menu, Tabs, Typography } from '@arco-design/web-react';
+import {  Divider, Dropdown, Layout, Menu, Tabs, Typography } from '@arco-design/web-react';
 import { IconExport } from '@arco-design/web-react/icon';
 import { TokenManager } from '@onebase/common';
 import { CodeType, getPermissionInfo } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styles from './header.module.less';
+import UserProfileAvatar from '@/components/UserProfileAvatar';
 
 const { Header } = Layout;
 
@@ -18,7 +18,7 @@ interface HeaderProps {
   className?: string;
 }
 
-interface IAdminInfo {
+export interface IAdminInfo {
   avatar: string;
   deptId: string;
   email: string;
@@ -33,7 +33,6 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   const location = useLocation();
   const { t } = useI18n();
 
-  const [nickname, setNickname] = useState('U');
   const [adminInfo, setAdminInfo] = useState<IAdminInfo | null>(null);
 
   // Tab 切换
@@ -66,7 +65,6 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     if (res.user) {
       setAdminInfo(res.user);
     }
-    setNickname(res.user.nickname);
   };
 
   const maskMobile = (value?: string) => {
@@ -95,9 +93,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     <Menu>
       <Menu.Item key="info" style={{ height: '70px' }}>
         <div className={styles.adminInformation}>
-          <Avatar size={32}>
-            <img src={adminInfo?.avatar} />
-          </Avatar>
+          <UserProfileAvatar adminInfo={adminInfo} />
           <Typography.Text>{adminInfo?.username}</Typography.Text>
           <Typography.Text type="secondary">{maskMobile(adminInfo?.mobile)}</Typography.Text>
         </div>
@@ -189,9 +185,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
             position="bl"
           >
               <div className={styles.userDropdown}>
-                <Avatar size={32}>
-                  <img src={adminInfo?.avatar} alt="avatar" />
-                </Avatar>
+                <UserProfileAvatar adminInfo={adminInfo} />
             </div>
           </Dropdown>
         </div>

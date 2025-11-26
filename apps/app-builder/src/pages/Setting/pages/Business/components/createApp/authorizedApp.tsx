@@ -136,7 +136,7 @@ export const AuthorizedApp:React.FC<IAuthorizedAppProps> = ({
         {/* 编辑授权应用 */}
         <EditAuthorizedTime visible={visible} setVisible={setVisible} onUpdateData={handleSubmitTime} initialFormData={authorizedAppItem}/>
         {/* 创建授权应用modal */}
-        <CreateAppModal visible={addAppModalVisible} tableData={tableData} onCloseAppModal={handleCloseModal} onSaveAppData={handleAddSubmit} />
+        <CreateAppModal currentId={currentId} visible={addAppModalVisible} tableData={tableData} onCloseAppModal={handleCloseModal} onSaveAppData={handleAddSubmit} />
         </>
     )
 }

@@ -18,7 +18,7 @@ export const getCorpAuthorizedAppListApi = (data: corpAppListParams) => systemSe
 export const getCorpAppRelatedListApi = (data: corpAppListParams) => systemService.get('/corp-app-relation/page',data);
 
 //获取应用列表
-export const getCorpAppSimpleListApi = () => appService.get('/application/simple-list');
+export const getCorpAppSimpleListApi = (id: string) => systemService.get(`/corp-app-relation/corp-no-application-list/?corpId=${id}`);
 
 // 授权应用禁用启用
 export const updateAuthAppStatus = (data: authAppStatusParams) => {
