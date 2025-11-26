@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.etl.core.dal.dataobject;
 
-import com.cmsr.onebase.framework.orm.data.BaseEntity;
+import com.cmsr.onebase.framework.orm.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Table;
 import lombok.Data;

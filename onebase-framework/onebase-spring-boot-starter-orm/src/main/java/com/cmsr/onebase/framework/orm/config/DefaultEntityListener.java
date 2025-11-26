@@ -1,14 +1,14 @@
-package com.cmsr.onebase.framework.base.mybatis;
+package com.cmsr.onebase.framework.orm.config;
 
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
-import com.cmsr.onebase.framework.orm.data.BaseBizEntity;
-import com.cmsr.onebase.framework.orm.data.BaseEntity;
+import com.cmsr.onebase.framework.orm.entity.BaseBizEntity;
+import com.cmsr.onebase.framework.orm.entity.BaseEntity;
 import com.mybatisflex.annotation.InsertListener;
 import com.mybatisflex.annotation.UpdateListener;
 
 import java.time.LocalDateTime;
 
-public class BaseEntityListener implements InsertListener, UpdateListener {
+public class DefaultEntityListener implements InsertListener, UpdateListener {
 
     @Override
     public void onInsert(Object o) {

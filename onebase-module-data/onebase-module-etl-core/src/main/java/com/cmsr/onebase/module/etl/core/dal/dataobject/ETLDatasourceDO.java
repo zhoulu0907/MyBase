@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.etl.core.dal.dataobject;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
-import com.cmsr.onebase.framework.orm.data.BaseAppEntity;
+import com.cmsr.onebase.framework.orm.entity.BaseAppEntity;
 import com.cmsr.onebase.module.etl.core.enums.CollectStatus;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;

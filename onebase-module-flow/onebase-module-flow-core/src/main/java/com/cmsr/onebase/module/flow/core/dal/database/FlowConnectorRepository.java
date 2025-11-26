@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.flow.core.dal.database;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.orm.mybatis.BaseAppRepository;
+import com.cmsr.onebase.framework.orm.repo.BaseAppRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowConnectorDO;
 import com.cmsr.onebase.module.flow.core.dal.mapper.FlowConnectorMapper;
 import com.cmsr.onebase.module.flow.core.vo.PageConnectorReqVO;
