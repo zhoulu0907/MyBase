@@ -417,7 +417,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                   key={cp.id}
                   className={styles.componentItem}
                   style={{
-                    width: getComponentWidth(listPageComponentSchemas.value[cp.id], cp.type)
+                    width: '100%'
                   }}
                 >
                   <PreviewRender
