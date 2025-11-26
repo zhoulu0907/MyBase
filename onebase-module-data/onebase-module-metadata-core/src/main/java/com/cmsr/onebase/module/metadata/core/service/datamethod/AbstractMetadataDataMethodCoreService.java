@@ -7,6 +7,7 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataD
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodRequestContext;
+import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodSubEntityContext;
 import com.cmsr.onebase.module.metadata.core.domain.query.MetadataPermissionContext;
 import com.cmsr.onebase.module.metadata.core.domain.query.ProcessContext;
 import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
@@ -576,7 +577,8 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
         }
 
         // 使用校验管理器执行所有字段的校验
-        validationManager.validateEntity(entityId, fields, dataForValidation, operationType);
+        List<MetadataDataMethodSubEntityContext> subEntities = context.getSubEntities();
+        validationManager.validateEntity(entityId, fields, dataForValidation, subEntities, operationType);
 
         log.info("数据校验完成：entityId={}", entityId);
     }

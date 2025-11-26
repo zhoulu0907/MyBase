@@ -4,6 +4,7 @@ package com.cmsr.onebase.module.metadata.core.service.datamethod.validator.impl;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRuleDefinitionDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRuleGroupDO;
+import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodSubEntityContext;
 import com.cmsr.onebase.module.metadata.core.enums.OpEnum;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationRuleDefinitionRepository;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationRuleGroupRepository;
@@ -54,7 +55,7 @@ public class SelfDefinedValidationService implements ValidationService {
     }
 
     @Override
-    public void validate(Long entityId, Long fieldId, MetadataEntityFieldDO field, Object value, Map<String, Object> data) {
+    public void validate(Long entityId, Long fieldId, MetadataEntityFieldDO field, Object value, Map<String, Object> data, List<MetadataDataMethodSubEntityContext> subEntities) {
         List<MetadataValidationRuleGroupDO> ruleGroups = findActiveRuleGroups(entityId);
         if (ruleGroups.isEmpty()) {
             return;
