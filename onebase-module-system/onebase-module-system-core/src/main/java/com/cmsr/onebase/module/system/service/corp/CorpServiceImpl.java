@@ -206,10 +206,11 @@ public class CorpServiceImpl implements CorpService {
             List<CorpRespVO> noAppResp = corpList.stream()
                     .map(corpDO -> {
                         CorpRespVO respVO = BeanUtils.toBean(corpDO, CorpRespVO.class);
-                        AdminUserDO userDO = userDOMap.get(corpDO.getAdminId());
-                        if (userDO != null) {
-                            respVO.setAdminName(userDO.getNickname());
-                            respVO.setMobile(userDO.getMobile());
+                        AdminUserDO adminUser = userDOMap.get(corpDO.getAdminId());
+                        if (adminUser != null) {
+                            respVO.setAdminName(adminUser.getNickname());
+                            respVO.setAdminMobile(adminUser.getMobile());
+                            respVO.setAdminEmail(adminUser.getEmail());
                         }
                         respVO.setIndustryTypeName(dictmap.get(respVO.getIndustryType()));
                         return respVO;
@@ -254,10 +255,11 @@ public class CorpServiceImpl implements CorpService {
                         }
                         respVO.setCorpApplicationList(corpApplicationList);
                     }
-                    AdminUserDO userDO = userDOMap.get(corpDO.getAdminId());
-                    if (userDO != null) {
-                        respVO.setAdminName(userDO.getNickname());
-                        respVO.setMobile(userDO.getMobile());
+                    AdminUserDO adminUser = userDOMap.get(corpDO.getAdminId());
+                    if (adminUser != null) {
+                        respVO.setAdminName(adminUser.getNickname());
+                        respVO.setAdminMobile(adminUser.getMobile());
+                        respVO.setAdminEmail(adminUser.getEmail());
                     }
                     respVO.setIndustryTypeName(dictmap.get(respVO.getIndustryType()));
                     return respVO;
@@ -283,8 +285,8 @@ public class CorpServiceImpl implements CorpService {
         AdminUserDO userDO = corpUserService.getUser(corpDO.getAdminId());
         if (userDO != null) {
             respVO.setAdminName(userDO.getNickname());
-            respVO.setEmail(userDO.getEmail());
-            respVO.setMobile(userDO.getMobile());
+            respVO.setAdminEmail(userDO.getEmail());
+            respVO.setAdminMobile(userDO.getMobile());
         }
         respVO.setAppCount(getCorpAppCount(id));
         Long userCountLong = corpUserService.getUserCountByCorpId(id);
