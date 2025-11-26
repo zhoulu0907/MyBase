@@ -12,8 +12,8 @@ public class ExecutionLogVO {
     @Schema(description = "应用ID")
     private Long applicationId;
 
-    @Schema(description = "ETL ID")
-    private Long workflowId;
+    @Schema(description = "ETL UUID")
+    private String flowUuid;
 
     @Schema(description = "业务日期")
     private LocalDateTime businessDate;
