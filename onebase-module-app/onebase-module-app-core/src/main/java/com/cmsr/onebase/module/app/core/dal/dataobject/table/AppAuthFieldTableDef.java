@@ -7,8 +7,8 @@ import com.mybatisflex.core.table.TableDef;
 /**
  * 应用权限-字段权限 表定义层。
  *
- * @author v1endr3
- * @since 2025-11-25
+ * @author HuangJie
+ * @since 2025-11-26
  */
 public class AppAuthFieldTableDef extends TableDef {
 

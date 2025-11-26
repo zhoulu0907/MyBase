@@ -9,9 +9,9 @@ import com.cmsr.onebase.module.app.core.dal.database.AppApplicationRepository;
 import com.cmsr.onebase.module.app.core.dal.database.AppApplicationTagRepository;
 import com.cmsr.onebase.module.app.core.dal.database.AppSqlQueryRepository;
 import com.cmsr.onebase.module.app.core.dal.database.AppTagRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.ApplicationDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.ApplicationTagDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.TagDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationTagDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppTagDO;
 import jakarta.annotation.Resource;
 import lombok.Setter;
 import org.springframework.stereotype.Service;
@@ -52,7 +52,7 @@ public class AppApplicationApiImpl implements AppApplicationApi {
 
     @Override
     public List<ApplicationDTO> findAppApplicationByAppName(String appName) {
-        List<ApplicationDO> applicationList = appApplicationRepository.findAppApplicationByAppName(appName);
+        List<AppApplicationDO> applicationList = appApplicationRepository.findAppApplicationByAppName(appName);
         return applicationList.stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
@@ -60,20 +60,20 @@ public class AppApplicationApiImpl implements AppApplicationApi {
 
     @Override
     public List<ApplicationDTO> findAppApplicationByAppIds(Collection<Long> appIds) {
-        List<ApplicationDO> applicationList = appApplicationRepository.findAppApplicationByAppIds(appIds);
+        List<AppApplicationDO> applicationList = appApplicationRepository.findAppApplicationByAppIds(appIds);
         return applicationList.stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
-    private ApplicationDTO convertToDTO(ApplicationDO applicationDO) {
+    private ApplicationDTO convertToDTO(AppApplicationDO applicationDO) {
         return BeanUtils.toBean(applicationDO, ApplicationDTO.class);
     }
 
     @Override
     @TenantIgnore
     public Map<Integer, Integer> findAppApplicationAll() {
-        List<ApplicationDO> allApplications = appApplicationRepository.finAppApplicationAll();
+        List<AppApplicationDO> allApplications = appApplicationRepository.finAppApplicationAll();
         return allApplications.stream()
                 .collect(Collectors.groupingBy(
                         app -> app.getTenantId().intValue(),  // Long转Integer
@@ -91,7 +91,7 @@ public class AppApplicationApiImpl implements AppApplicationApi {
         Map<Long, List<TagVO>> tagListMap = new HashMap<>();
         Map<Long, List<Long>> listMap = findTagIdsByApplicationIdsGrouped(appIds);
         listMap.forEach((appId, tagIds) -> {
-            List<TagDO> tagDOList = tagRepository.listByIds(tagIds);
+            List<AppTagDO> tagDOList = tagRepository.listByIds(tagIds);
             List<TagVO> tagVOList = tagDOList.stream()
                     .map(tagDO -> BeanUtils.toBean(tagDO, TagVO.class))
                     .collect(Collectors.toList());
@@ -102,11 +102,11 @@ public class AppApplicationApiImpl implements AppApplicationApi {
     }
 
     public Map<Long, List<Long>> findTagIdsByApplicationIdsGrouped(List<Long> appIds) {
-        List<ApplicationTagDO> tagDOListIds = applicationTagRepository.findTagIdsByApplicationIds(appIds);
+        List<AppApplicationTagDO> tagDOListIds = applicationTagRepository.findTagIdsByApplicationIds(appIds);
         return tagDOListIds.stream()
                 .collect(Collectors.groupingBy(
-                        ApplicationTagDO::getApplicationId,
-                        Collectors.mapping(ApplicationTagDO::getTagId, Collectors.toList())
+                        AppApplicationTagDO::getApplicationId,
+                        Collectors.mapping(AppApplicationTagDO::getTagId, Collectors.toList())
                 ));
     }
 

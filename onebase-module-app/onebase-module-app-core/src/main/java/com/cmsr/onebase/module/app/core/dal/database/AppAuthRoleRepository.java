@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.app.core.dal.database;
 
 import com.cmsr.onebase.framework.orm.repo.BaseAppRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.AuthRoleDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthRoleDO;
 import com.cmsr.onebase.module.app.core.dal.mapper.AppAuthRoleMapper;
 import com.mybatisflex.core.query.QueryWrapper;
 import org.springframework.stereotype.Repository;
@@ -18,40 +18,40 @@ import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppAuthRoleU
  * @date 2025-08-05
  */
 @Repository
-public class AppAuthRoleRepository extends BaseAppRepository<AppAuthRoleMapper, AuthRoleDO> {
+public class AppAuthRoleRepository extends BaseAppRepository<AppAuthRoleMapper, AppAuthRoleDO> {
 
-    public List<AuthRoleDO> findByApplicationId(Long applicationId) {
+    public List<AppAuthRoleDO> findByApplicationId(Long applicationId) {
         QueryWrapper queryWrapper = this.query()
-                .eq(AuthRoleDO::getApplicationId, applicationId)
-                .orderBy(AuthRoleDO::getRoleType, true)
-                .orderBy(AuthRoleDO::getRoleName, true);
+                .eq(AppAuthRoleDO::getApplicationId, applicationId)
+                .orderBy(AppAuthRoleDO::getRoleType, true)
+                .orderBy(AppAuthRoleDO::getRoleName, true);
         return this.list(queryWrapper);
     }
 
-    public AuthRoleDO findByApplicationIdAndRoleName(Long applicationId, String roleName) {
+    public AppAuthRoleDO findByApplicationIdAndRoleName(Long applicationId, String roleName) {
         QueryWrapper queryWrapper = this.query()
-                .eq(AuthRoleDO::getApplicationId, applicationId)
-                .eq(AuthRoleDO::getRoleName, roleName);
+                .eq(AppAuthRoleDO::getApplicationId, applicationId)
+                .eq(AppAuthRoleDO::getRoleName, roleName);
         return getOne(queryWrapper);
     }
 
-    public AuthRoleDO findByAppIdAndRoleCode(Long applicationId, String roleCode) {
+    public AppAuthRoleDO findByAppIdAndRoleCode(Long applicationId, String roleCode) {
         QueryWrapper queryWrapper = this.query()
-                .eq(AuthRoleDO::getApplicationId, applicationId)
-                .eq(AuthRoleDO::getRoleCode, roleCode);
+                .eq(AppAuthRoleDO::getApplicationId, applicationId)
+                .eq(AppAuthRoleDO::getRoleCode, roleCode);
         return getOne(queryWrapper);
     }
 
-    public AuthRoleDO findByApplicationIdAndRoleNameAndIdNot(Long applicationId, String roleName, Long roleId) {
+    public AppAuthRoleDO findByApplicationIdAndRoleNameAndIdNot(Long applicationId, String roleName, Long roleId) {
         QueryWrapper queryWrapper = this.query()
-                .eq(AuthRoleDO::getApplicationId, applicationId)
-                .eq(AuthRoleDO::getRoleName, roleName)
-                .eq(AuthRoleDO::getId, roleId);
+                .eq(AppAuthRoleDO::getApplicationId, applicationId)
+                .eq(AppAuthRoleDO::getRoleName, roleName)
+                .eq(AppAuthRoleDO::getId, roleId);
         return getOne(queryWrapper);
     }
 
 
-    public List<AuthRoleDO> findByUserIdAndApplicationId(Long userId, Long applicationId) {
+    public List<AppAuthRoleDO> findByUserIdAndApplicationId(Long userId, Long applicationId) {
         QueryWrapper queryWrapper = this.query()
                 .select(
                         APP_AUTH_ROLE.ID,
@@ -63,6 +63,6 @@ public class AppAuthRoleRepository extends BaseAppRepository<AppAuthRoleMapper, 
                 .where(APP_AUTH_ROLE_USER.ROLE_ID.eq(APP_AUTH_ROLE.ID))
                 .and(APP_AUTH_ROLE_USER.USER_ID.eq(userId));
 
-        return this.listAs(queryWrapper, AuthRoleDO.class);
+        return this.listAs(queryWrapper, AppAuthRoleDO.class);
     }
 }

@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.app.core.provider.menu;
 
 import com.cmsr.onebase.module.app.core.dal.database.AppMenuRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.MenuDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppMenuDO;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,7 +17,7 @@ public class AppMenuProvider {
     @Autowired
     private AppMenuRepository appMenuRepository;
 
-    public MenuDO findByMenuId(Long menuId) {
+    public AppMenuDO findByMenuId(Long menuId) {
         return appMenuRepository.getById(menuId);
     }
 

@@ -1,9 +1,9 @@
 package com.cmsr.onebase.module.app.core.dal.database;
 
 import com.cmsr.onebase.framework.orm.repo.BaseAppRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.PageSetDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.PageSetPageDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.MenuDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppMenuDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetPageDO;
 import com.cmsr.onebase.module.app.core.dal.mapper.AppMenuMapper;
 import com.mybatisflex.core.query.QueryWrapper;
 import org.springframework.stereotype.Repository;
@@ -22,51 +22,51 @@ import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppResourceP
  */
 @Repository
 // TODO: applicationId 需要托管至BaseAppRepository
-public class AppMenuRepository extends BaseAppRepository<AppMenuMapper, MenuDO> {
+public class AppMenuRepository extends BaseAppRepository<AppMenuMapper, AppMenuDO> {
 
-    public List<MenuDO> findByApplicationIdAndType(Long applicationId, Set<Integer> menuTypes) {
+    public List<AppMenuDO> findByApplicationIdAndType(Long applicationId, Set<Integer> menuTypes) {
         QueryWrapper queryWrapper = this.query()
-                .eq(MenuDO::getApplicationId, applicationId)
-                .in(MenuDO::getMenuType, menuTypes)
-                .orderBy(MenuDO::getMenuSort, true);
+                .eq(AppMenuDO::getApplicationId, applicationId)
+                .in(AppMenuDO::getMenuType, menuTypes)
+                .orderBy(AppMenuDO::getMenuSort, true);
         return list(queryWrapper);
     }
 
-    public List<MenuDO> findByApplicationId(Long applicationId) {
+    public List<AppMenuDO> findByApplicationId(Long applicationId) {
         QueryWrapper queryWrapper = this.query()
-                .eq(MenuDO::getApplicationId, applicationId)
-                .orderBy(MenuDO::getMenuSort, true);
+                .eq(AppMenuDO::getApplicationId, applicationId)
+                .orderBy(AppMenuDO::getMenuSort, true);
         return list(queryWrapper);
     }
 
     public long countByParentId(Long id) {
-        QueryWrapper queryWrapper = this.query().eq(MenuDO::getParentId, id);
+        QueryWrapper queryWrapper = this.query().eq(AppMenuDO::getParentId, id);
         return count(queryWrapper);
     }
 
     public void deleteByApplicationId(Long applicationId) {
         this.updateChain()
-                .eq(MenuDO::getApplicationId, applicationId)
+                .eq(AppMenuDO::getApplicationId, applicationId)
                 .remove();
     }
 
 
     public int countByApplicationId(Long applicationId) {
-        QueryWrapper queryWrapper = this.query().eq(MenuDO::getApplicationId, applicationId);
+        QueryWrapper queryWrapper = this.query().eq(AppMenuDO::getApplicationId, applicationId);
         return (int) count(queryWrapper);
     }
 
-    public List<MenuDO> findVisibleByAppId(Long applicationId) {
-        QueryWrapper queryWrapper = this.query().eq(MenuDO::getApplicationId, applicationId)
-                .eq(MenuDO::getIsVisible, 1);
+    public List<AppMenuDO> findVisibleByAppId(Long applicationId) {
+        QueryWrapper queryWrapper = this.query().eq(AppMenuDO::getApplicationId, applicationId)
+                .eq(AppMenuDO::getIsVisible, 1);
         return list(queryWrapper);
     }
 
-    public List<MenuDO> findVisibleByAppIdAndMenuIds(Long applicationId, Set<Long> menuIds) {
+    public List<AppMenuDO> findVisibleByAppIdAndMenuIds(Long applicationId, Set<Long> menuIds) {
         QueryWrapper queryWrapper = this.query()
-                .eq(MenuDO::getApplicationId, applicationId)
-                .in(MenuDO::getId, menuIds)
-                .eq(MenuDO::getIsVisible, 1);
+                .eq(AppMenuDO::getApplicationId, applicationId)
+                .in(AppMenuDO::getId, menuIds)
+                .eq(AppMenuDO::getIsVisible, 1);
         return list(queryWrapper);
     }
 
@@ -74,10 +74,10 @@ public class AppMenuRepository extends BaseAppRepository<AppMenuMapper, MenuDO> 
         QueryWrapper queryWrapper = QueryWrapper.create()
                 .select(
                         APP_RESOURCE_PAGESET_PAGE.PAGE_ID
-                ).from(PageSetPageDO.class)
-                .leftJoin(PageSetDO.class)
+                ).from(AppResourcePagesetPageDO.class)
+                .leftJoin(AppResourcePagesetDO.class)
                 .on(APP_RESOURCE_PAGESET_PAGE.PAGESET_ID.eq(APP_RESOURCE_PAGESET.ID))
-                .leftJoin(MenuDO.class)
+                .leftJoin(AppMenuDO.class)
                 .on(APP_RESOURCE_PAGESET.MENU_ID.eq(APP_MENU.ID))
                 .where(APP_MENU.IS_VISIBLE.eq(1))
                 .and(APP_MENU.APPLICATION_ID.eq(applicationId))

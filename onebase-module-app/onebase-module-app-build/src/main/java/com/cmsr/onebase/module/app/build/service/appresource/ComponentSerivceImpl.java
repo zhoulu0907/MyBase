@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.app.build.service.appresource;
 
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.core.dal.database.AppComponentRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.ComponentDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourceComponentDO;
 import com.cmsr.onebase.module.app.core.dto.appresource.ComponentDTO;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
@@ -23,7 +23,7 @@ public class ComponentSerivceImpl implements ComponentSerivce {
 
     @Override
     public List<ComponentDTO> listComponent(Long pageId) {
-        List<ComponentDO> componentDOS = appComponentDataRepository.findByPageId(pageId);
+        List<AppResourceComponentDO> componentDOS = appComponentDataRepository.findByPageId(pageId);
         return BeanUtils.toBean(componentDOS, ComponentDTO.class);
     }
 

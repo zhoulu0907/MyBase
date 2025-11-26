@@ -62,7 +62,7 @@ public class AppVersionServiceImpl implements AppVersionService {
 
     @Override
     public PageResult<VersionPageRespVO> getApplicationVersionPage(VersionPageReqVo listReqVo) {
-        PageResult<VersionDO> pageResult = versionRepository.selectPage(listReqVo.getApplicationId(), listReqVo);
+        PageResult<AppVersionDO> pageResult = versionRepository.selectPage(listReqVo.getApplicationId(), listReqVo);
         AppCommonService.UserHelper userHelper = appCommonService.getUserHelper(pageResult.getList());
         List<VersionPageRespVO> respVOS = pageResult.getList().stream()
                 .map(v -> {
@@ -77,10 +77,10 @@ public class AppVersionServiceImpl implements AppVersionService {
     @Transactional
     @Override
     public void createApplicationVersion(VersionCreateReqVO createReqVO) {
-        ApplicationDO applicationDO = appCommonService.validateApplicationExist(createReqVO.getApplicationId());
+        AppApplicationDO applicationDO = appCommonService.validateApplicationExist(createReqVO.getApplicationId());
         // 先备份老的相关数据
         // 创建新版本
-        final VersionDO versionDO = new VersionDO();
+        final AppVersionDO versionDO = new AppVersionDO();
         versionDO.setApplicationId(applicationDO.getId());
         versionDO.setVersionName(createReqVO.getVersionName());
         versionDO.setVersionNumber(createReqVO.getVersionNumber());
@@ -103,8 +103,8 @@ public class AppVersionServiceImpl implements AppVersionService {
     }
 
     private List<Long> backupMenu(Long applicationId, Long versionId) {
-        List<MenuDO> menuDOS = menuRepository.findByApplicationId(applicationId);
-        VersionResourceDO versionResourceDO = new VersionResourceDO();
+        List<AppMenuDO> menuDOS = menuRepository.findByApplicationId(applicationId);
+        AppVersionResourceDO versionResourceDO = new AppVersionResourceDO();
         versionResourceDO.setApplicationId(applicationId);
         versionResourceDO.setVersionId(versionId);
         versionResourceDO.setResType(ResTypeEnum.MENU.getValue());
@@ -114,8 +114,8 @@ public class AppVersionServiceImpl implements AppVersionService {
     }
 
     private List<Long> backupPageSet(Long applicationId, Long versionId, List<Long> menuIds) {
-        List<PageSetDO> pageSetDOS = pageSetRepository.findByMenuIds(menuIds);
-        VersionResourceDO versionResourceDO = new VersionResourceDO();
+        List<AppResourcePagesetDO> pageSetDOS = pageSetRepository.findByMenuIds(menuIds);
+        AppVersionResourceDO versionResourceDO = new AppVersionResourceDO();
         versionResourceDO.setApplicationId(applicationId);
         versionResourceDO.setVersionId(versionId);
         versionResourceDO.setResType(ResTypeEnum.PAGE_SET.getValue());
@@ -125,8 +125,8 @@ public class AppVersionServiceImpl implements AppVersionService {
     }
 
     private List<Long> backupPageSetPage(Long applicationId, Long versionId, List<Long> pageSetIds) {
-        List<PageSetPageDO> pageSetPageDOs = pageSetPageRepository.findByPageSetIds(pageSetIds);
-        VersionResourceDO versionResourceDO = new VersionResourceDO();
+        List<AppResourcePagesetPageDO> pageSetPageDOs = pageSetPageRepository.findByPageSetIds(pageSetIds);
+        AppVersionResourceDO versionResourceDO = new AppVersionResourceDO();
         versionResourceDO.setApplicationId(applicationId);
         versionResourceDO.setVersionId(versionId);
         versionResourceDO.setResType(ResTypeEnum.PAGE_SET_PAGE.getValue());
@@ -136,8 +136,8 @@ public class AppVersionServiceImpl implements AppVersionService {
     }
 
     private List<Long> backupPage(Long applicationId, Long versionId, List<Long> pageIds) {
-        List<PageDO> pageDOs = pageRepository.listByIds(pageIds);
-        VersionResourceDO versionResourceDO = new VersionResourceDO();
+        List<AppResourcePageDO> pageDOs = pageRepository.listByIds(pageIds);
+        AppVersionResourceDO versionResourceDO = new AppVersionResourceDO();
         versionResourceDO.setApplicationId(applicationId);
         versionResourceDO.setVersionId(versionId);
         versionResourceDO.setResType(ResTypeEnum.PAGE.name());
@@ -149,10 +149,10 @@ public class AppVersionServiceImpl implements AppVersionService {
     @Transactional
     @Override
     public void restoreApplicationVersion(Long versionId) {
-        VersionDO applicationVersionDO = validateApplicationVersionExist(versionId);
+        AppVersionDO applicationVersionDO = validateApplicationVersionExist(versionId);
         Long applicationId = applicationVersionDO.getApplicationId();
         // 更新到主表
-        ApplicationDO applicationDO = applicationRepository.getById(applicationId);
+        AppApplicationDO applicationDO = applicationRepository.getById(applicationId);
         applicationDO.setVersionNumber(applicationVersionDO.getVersionNumber());
         applicationRepository.updateById(applicationDO);
         // 恢复菜单
@@ -163,9 +163,9 @@ public class AppVersionServiceImpl implements AppVersionService {
         // 删除相关数据
         menuRepository.deleteByApplicationId(applicationId);
         // 恢复菜单
-        VersionResourceDO resourceDOS = versionResourceRepository
+        AppVersionResourceDO resourceDOS = versionResourceRepository
                 .findByApplicationIdAndVersionIdAndResType(applicationId, versionId, ResTypeEnum.MENU.getValue());
-        List<MenuDO> menuDOS = JsonUtils.parseArray(resourceDOS.getResData(), MenuDO.class);
+        List<AppMenuDO> menuDOS = JsonUtils.parseArray(resourceDOS.getResData(), AppMenuDO.class);
         prepareForBackup(menuDOS);
         menuRepository.saveBatch(menuDOS);
     }
@@ -190,12 +190,12 @@ public class AppVersionServiceImpl implements AppVersionService {
     }
 
     @Override
-    public Map<Long, VersionDO> findVersionMapByAppIds(List<Long> appIds) {
-        List<VersionDO> allVersions = versionRepository.findVersionList(appIds);
-        Map<Long, VersionDO> latestVersionMap = allVersions.stream()
-                .sorted(Comparator.comparing(VersionDO::getUpdateTime).reversed())
+    public Map<Long, AppVersionDO> findVersionMapByAppIds(List<Long> appIds) {
+        List<AppVersionDO> allVersions = versionRepository.findVersionList(appIds);
+        Map<Long, AppVersionDO> latestVersionMap = allVersions.stream()
+                .sorted(Comparator.comparing(AppVersionDO::getUpdateTime).reversed())
                 .collect(Collectors.toMap(
-                        VersionDO::getApplicationId,
+                        AppVersionDO::getApplicationId,
                         Function.identity(),
                         (existing, replacement) -> existing,
                         LinkedHashMap::new
@@ -203,8 +203,8 @@ public class AppVersionServiceImpl implements AppVersionService {
         return latestVersionMap;
     }
 
-    private VersionDO validateApplicationVersionExist(Long id) {
-        VersionDO versionDO = versionRepository.getById(id);
+    private AppVersionDO validateApplicationVersionExist(Long id) {
+        AppVersionDO versionDO = versionRepository.getById(id);
         if (versionDO == null) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_VERSION_NOT_EXIST);
         }

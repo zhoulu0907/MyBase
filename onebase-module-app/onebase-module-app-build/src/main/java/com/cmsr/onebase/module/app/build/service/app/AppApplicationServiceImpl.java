@@ -17,7 +17,7 @@ import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateRespVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationRespVO;
 import com.cmsr.onebase.module.app.build.vo.tag.TagRespVO;
 import com.cmsr.onebase.module.app.core.dal.database.*;
-import com.cmsr.onebase.module.app.core.dal.dataobject.ApplicationDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationDO;
 import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.core.enums.app.ApplicationStatusEnum;
 import com.cmsr.onebase.module.app.core.vo.app.AppUserPhotoDTO;
@@ -97,12 +97,12 @@ public class AppApplicationServiceImpl implements AppApplicationService {
     @Override
     public PageResult<ApplicationRespVO> getApplicationPage(ApplicationPageReqVO pageReqVO) {
         Long userId = SecurityFrameworkUtils.getLoginUserId();
-        PageResult<ApplicationDO> pageResult = applicationRepository.selectPage(pageReqVO, userId);
+        PageResult<AppApplicationDO> pageResult = applicationRepository.selectPage(pageReqVO, userId);
         AppCommonService.UserHelper userHelper = appCommonService.getUserHelper(pageResult.getList());
 
         // 1. 获取应用ID列表
         List<Long> appIds = pageResult.getList().stream()
-                .map(ApplicationDO::getId)
+                .map(AppApplicationDO::getId)
                 .collect(Collectors.toList());
         Map<Long, List<AppUserPhotoDTO>> userListMap = appSqlQueryRepository.findUserPhotoList(appIds);
 
@@ -129,7 +129,7 @@ public class AppApplicationServiceImpl implements AppApplicationService {
 
     @Override
     public ApplicationRespVO getApplication(Long id) {
-        ApplicationDO applicationDO = applicationRepository.getById(id);
+        AppApplicationDO applicationDO = applicationRepository.getById(id);
         if (applicationDO == null) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_NOT_EXIST);
         }
@@ -148,7 +148,7 @@ public class AppApplicationServiceImpl implements AppApplicationService {
     @Transactional(rollbackFor = Exception.class)
     public ApplicationCreateRespVO createApplication(ApplicationCreateReqVO createReqVO) {
         validApplicationCodeDuplicate(createReqVO.getAppCode(), null);
-        ApplicationDO applicationDO = BeanUtils.toBean(createReqVO, ApplicationDO.class);
+        AppApplicationDO applicationDO = BeanUtils.toBean(createReqVO, AppApplicationDO.class);
         applicationDO.setId(null);
         applicationDO.setAppUid(findAndCreateAppUid());
         applicationDO.setVersionNumber(VersionUtils.INIT_VERSION);
@@ -202,7 +202,7 @@ public class AppApplicationServiceImpl implements AppApplicationService {
     public void updateApplication(ApplicationCreateReqVO createReqVO) {
         appCommonService.validateApplicationExist(createReqVO.getId());
         validApplicationCodeDuplicate(createReqVO.getAppCode(), createReqVO.getId());
-        ApplicationDO updateObj = BeanUtils.toBean(createReqVO, ApplicationDO.class);
+        AppApplicationDO updateObj = BeanUtils.toBean(createReqVO, AppApplicationDO.class);
         updateObj.setPublishModel(createReqVO.getPublishModel() == null ? CommonPublishModelEnum.InnerModel.getValue() : createReqVO.getPublishModel());
         saveApplicationTags(createReqVO.getId(), createReqVO.getTagIds());
         applicationRepository.updateById(updateObj);
@@ -212,7 +212,7 @@ public class AppApplicationServiceImpl implements AppApplicationService {
     @Transactional(rollbackFor = Exception.class)
     public void updateApplicationName(Long id, String name) {
         appCommonService.validateApplicationExist(id);
-        ApplicationDO applicationDO = new ApplicationDO();
+        AppApplicationDO applicationDO = new AppApplicationDO();
         applicationDO.setId(id);
         applicationDO.setAppName(name);
         applicationRepository.updateById(applicationDO);
@@ -220,7 +220,7 @@ public class AppApplicationServiceImpl implements AppApplicationService {
 
     @Override
     public void updateApplicationVersion(Long id, String versionNumber, String versionUrl) {
-        ApplicationDO applicationDO = applicationRepository.getById(id);
+        AppApplicationDO applicationDO = applicationRepository.getById(id);
         if (applicationDO == null) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_NOT_EXIST);
         }
@@ -232,7 +232,7 @@ public class AppApplicationServiceImpl implements AppApplicationService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteApplication(Long id, String name) {
-        ApplicationDO applicationDO = appCommonService.validateApplicationExist(id);
+        AppApplicationDO applicationDO = appCommonService.validateApplicationExist(id);
         if (!StringUtils.equals(name, applicationDO.getAppName())) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_NAME_ERROR);
         }
@@ -252,7 +252,7 @@ public class AppApplicationServiceImpl implements AppApplicationService {
 
 
     /**
-     * 检查 ApplicationDO 表 code 码是否重复，重复跑出异常
+     * 检查 AppApplicationDO 表 code 码是否重复，重复跑出异常
      */
     private void validApplicationCodeDuplicate(String code, Long id) {
         if (id == null) {
@@ -282,12 +282,12 @@ public class AppApplicationServiceImpl implements AppApplicationService {
     }
 
     @Override
-    public List<ApplicationDO> getSimpleAppList(Integer status) {
+    public List<AppApplicationDO> getSimpleAppList(Integer status) {
         return applicationRepository.getSimpleAppList(status);
     }
 
     @Override
-    public List<ApplicationDO> getMySimpleAppListByName(String appName) {
+    public List<AppApplicationDO> getMySimpleAppListByName(String appName) {
         Long currentUserId = SecurityFrameworkUtils.getLoginUserId();
         return applicationRepository.findMyAppApplicationByAppName(appName, currentUserId);
     }

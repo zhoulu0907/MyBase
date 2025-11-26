@@ -3,8 +3,8 @@ package com.cmsr.onebase.module.app.build.service.appresource;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.core.dal.database.AppPageSetPageRepository;
 import com.cmsr.onebase.module.app.core.dal.database.AppPageSetRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.PageSetDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.PageSetPageDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetPageDO;
 import com.cmsr.onebase.module.app.core.dto.appresource.CreatePageSetPageDTO;
 import com.cmsr.onebase.module.app.core.dto.appresource.PageSetPageRespDTO;
 import jakarta.annotation.Resource;
@@ -23,13 +23,13 @@ public class PageSetPageServiceImpl implements PageSetPageService {
 
     @Override
     public PageSetPageRespDTO getPageSetPage(Long id) {
-        PageSetPageDO pageSetPageDO = pageSetPageDataRepository.getById(id);
+        AppResourcePagesetPageDO pageSetPageDO = pageSetPageDataRepository.getById(id);
         return BeanUtils.toBean(pageSetPageDO, PageSetPageRespDTO.class);
     }
 
     @Override
     public Long createPageSetPage(CreatePageSetPageDTO createPageSetPageDTO) {
-        PageSetPageDO pageSetPageDO = BeanUtils.toBean(createPageSetPageDTO, PageSetPageDO.class);
+        AppResourcePagesetPageDO pageSetPageDO = BeanUtils.toBean(createPageSetPageDTO, AppResourcePagesetPageDO.class);
         pageSetPageDataRepository.save(pageSetPageDO);
         return pageSetPageDO.getId();
     }
@@ -42,15 +42,15 @@ public class PageSetPageServiceImpl implements PageSetPageService {
 
     @Override
     public Boolean updatePageSetPage(PageSetPageRespDTO pageSetPageRespDTO) {
-        PageSetPageDO pageSetPageDO = BeanUtils.toBean(pageSetPageRespDTO, PageSetPageDO.class);
+        AppResourcePagesetPageDO pageSetPageDO = BeanUtils.toBean(pageSetPageRespDTO, AppResourcePagesetPageDO.class);
         pageSetPageDataRepository.updateById(pageSetPageDO);
         return true;
     }
 
     @Override
     public List<PageSetPageRespDTO> getPageSetPageList(Long pageSetId) {
-        PageSetDO pageSetDO = pageSetDataRepository.getById(pageSetId);
-        List<PageSetPageDO> pageSetPageDOList = pageSetPageDataRepository.findByPageSetId(pageSetDO.getId());
+        AppResourcePagesetDO pageSetDO = pageSetDataRepository.getById(pageSetId);
+        List<AppResourcePagesetPageDO> pageSetPageDOList = pageSetPageDataRepository.findByPageSetId(pageSetDO.getId());
         return BeanUtils.toBean(pageSetPageDOList, PageSetPageRespDTO.class);
     }
 }

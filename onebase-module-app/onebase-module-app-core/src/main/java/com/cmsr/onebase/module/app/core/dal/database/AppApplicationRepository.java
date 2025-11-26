@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.app.core.dal.database;
 
 import com.cmsr.onebase.framework.common.enums.OwnerTagEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.app.core.dal.dataobject.ApplicationDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationDO;
 import com.cmsr.onebase.module.app.core.dal.mapper.AppApplicationMapper;
 import com.cmsr.onebase.module.app.core.vo.app.ApplicationPageReqVO;
 import com.mybatisflex.core.paginate.Page;
@@ -22,93 +22,93 @@ import java.util.List;
  * @Date：2025/8/6 14:08
  */
 @Repository
-public class AppApplicationRepository extends ServiceImpl<AppApplicationMapper, ApplicationDO> {
+public class AppApplicationRepository extends ServiceImpl<AppApplicationMapper, AppApplicationDO> {
 
-    public PageResult<ApplicationDO> selectPage(ApplicationPageReqVO pageReqVO, Long userId) {
+    public PageResult<AppApplicationDO> selectPage(ApplicationPageReqVO pageReqVO, Long userId) {
         boolean filterByUser = pageReqVO.getOwnerTag() != null && pageReqVO.getOwnerTag().equals(OwnerTagEnum.MY.getValue()) && userId != null;
         QueryWrapper queryWrapper = this.query()
-                .like(ApplicationDO::getAppName, pageReqVO.getName(), StringUtils::isNotBlank)
-                .eq(ApplicationDO::getAppStatus, pageReqVO.getStatus(), pageReqVO.getStatus() != null)
-                .eq(ApplicationDO::getPublishModel, pageReqVO.getPublishModel(), StringUtils::isNotBlank)
-                .eq(ApplicationDO::getCreator, userId, filterByUser);
+                .like(AppApplicationDO::getAppName, pageReqVO.getName(), StringUtils::isNotBlank)
+                .eq(AppApplicationDO::getAppStatus, pageReqVO.getStatus(), pageReqVO.getStatus() != null)
+                .eq(AppApplicationDO::getPublishModel, pageReqVO.getPublishModel(), StringUtils::isNotBlank)
+                .eq(AppApplicationDO::getCreator, userId, filterByUser);
         if (StringUtils.equalsIgnoreCase(pageReqVO.getOrderByTime(), "create")) {
-            queryWrapper = queryWrapper.orderBy(ApplicationDO::getUpdateTime, false);
+            queryWrapper = queryWrapper.orderBy(AppApplicationDO::getUpdateTime, false);
         }
         if (StringUtils.equalsIgnoreCase(pageReqVO.getOrderByTime(), "update")) {
-            queryWrapper = queryWrapper.orderBy(ApplicationDO::getCreateTime, false);
+            queryWrapper = queryWrapper.orderBy(AppApplicationDO::getCreateTime, false);
         }
-        Page<ApplicationDO> pageQuery = Page.of(pageReqVO.getPageNo(), pageReqVO.getPageSize());
-        Page<ApplicationDO> pageResult = this.page(pageQuery, queryWrapper);
+        Page<AppApplicationDO> pageQuery = Page.of(pageReqVO.getPageNo(), pageReqVO.getPageSize());
+        Page<AppApplicationDO> pageResult = this.page(pageQuery, queryWrapper);
         return new PageResult<>(pageResult.getRecords(), pageResult.getTotalRow());
     }
 
-    public ApplicationDO findOneByAppCode(String appCode) {
-        QueryWrapper queryWrapper = this.query().eq(ApplicationDO::getAppCode, appCode);
+    public AppApplicationDO findOneByAppCode(String appCode) {
+        QueryWrapper queryWrapper = this.query().eq(AppApplicationDO::getAppCode, appCode);
         return getOne(queryWrapper);
     }
 
-    public ApplicationDO findOneByUid(String uid) {
-        QueryWrapper queryWrapper = this.query().eq(ApplicationDO::getAppUid, uid);
+    public AppApplicationDO findOneByUid(String uid) {
+        QueryWrapper queryWrapper = this.query().eq(AppApplicationDO::getAppUid, uid);
         return getOne(queryWrapper);
     }
 
-    public ApplicationDO findByAppCodeAndIdNot(String appCode, Long id) {
-        QueryWrapper queryWrapper = this.query().eq(ApplicationDO::getAppCode, appCode)
-                .ne(ApplicationDO::getId, id);
+    public AppApplicationDO findByAppCodeAndIdNot(String appCode, Long id) {
+        QueryWrapper queryWrapper = this.query().eq(AppApplicationDO::getAppCode, appCode)
+                .ne(AppApplicationDO::getId, id);
         return getOne(queryWrapper);
     }
 
-    public ApplicationDO findByUidAndIdNot(String uid, Long id) {
-        QueryWrapper queryWrapper = this.query().eq(ApplicationDO::getAppUid, uid)
-                .ne(ApplicationDO::getId, id);
+    public AppApplicationDO findByUidAndIdNot(String uid, Long id) {
+        QueryWrapper queryWrapper = this.query().eq(AppApplicationDO::getAppUid, uid)
+                .ne(AppApplicationDO::getId, id);
         return getOne(queryWrapper);
     }
 
     public Long countByTenantId(Long tenantId) {
-        QueryWrapper queryWrapper = this.query().eq(ApplicationDO::getTenantId, tenantId);
+        QueryWrapper queryWrapper = this.query().eq(AppApplicationDO::getTenantId, tenantId);
         return TenantManager.withoutTenantCondition(() -> this.count(queryWrapper));
     }
 
-    public List<ApplicationDO> getSimpleAppList(Integer status) {
-        QueryWrapper queryWrapper = this.query().eq(ApplicationDO::getAppStatus, status)
-                .orderBy(ApplicationDO::getCreateTime, false);
+    public List<AppApplicationDO> getSimpleAppList(Integer status) {
+        QueryWrapper queryWrapper = this.query().eq(AppApplicationDO::getAppStatus, status)
+                .orderBy(AppApplicationDO::getCreateTime, false);
         return list(queryWrapper);
     }
 
-    public List<ApplicationDO> findAppApplicationByAppName(String appName) {
+    public List<AppApplicationDO> findAppApplicationByAppName(String appName) {
         QueryWrapper queryWrapper = this.query()
-                .like(ApplicationDO::getAppName, appName, StringUtils::isNotBlank)
-                .orderBy(ApplicationDO::getUpdateTime, false)
-                .orderBy(ApplicationDO::getCreateTime, false);
+                .like(AppApplicationDO::getAppName, appName, StringUtils::isNotBlank)
+                .orderBy(AppApplicationDO::getUpdateTime, false)
+                .orderBy(AppApplicationDO::getCreateTime, false);
         return list(queryWrapper);
     }
 
-    public List<ApplicationDO> finAppApplicationAll() {
-        QueryWrapper queryWrapper = this.query().orderBy(ApplicationDO::getUpdateTime, false)
-                .orderBy(ApplicationDO::getCreateTime, false);
+    public List<AppApplicationDO> finAppApplicationAll() {
+        QueryWrapper queryWrapper = this.query().orderBy(AppApplicationDO::getUpdateTime, false)
+                .orderBy(AppApplicationDO::getCreateTime, false);
         return list(queryWrapper);
     }
 
-    public List<ApplicationDO> findAppApplicationByAppIds(Collection<Long> appIds) {
+    public List<AppApplicationDO> findAppApplicationByAppIds(Collection<Long> appIds) {
         QueryWrapper queryWrapper = this.query()
-                .in(ApplicationDO::getId, appIds, CollectionUtils.isNotEmpty(appIds))
-                .orderBy(ApplicationDO::getUpdateTime, false)
-                .orderBy(ApplicationDO::getCreateTime, false);
+                .in(AppApplicationDO::getId, appIds, CollectionUtils.isNotEmpty(appIds))
+                .orderBy(AppApplicationDO::getUpdateTime, false)
+                .orderBy(AppApplicationDO::getCreateTime, false);
         return list(queryWrapper);
     }
 
-    public List<ApplicationDO> findMyAppApplicationByAppName(String appName, Long userId) {
+    public List<AppApplicationDO> findMyAppApplicationByAppName(String appName, Long userId) {
         QueryWrapper queryWrapper = this.query()
-                .like(ApplicationDO::getAppName, appName, StringUtils::isNotBlank)
-                .eq(ApplicationDO::getCreator, userId)
-                .orderBy(ApplicationDO::getUpdateTime, false)
-                .orderBy(ApplicationDO::getCreateTime, false);
+                .like(AppApplicationDO::getAppName, appName, StringUtils::isNotBlank)
+                .eq(AppApplicationDO::getCreator, userId)
+                .orderBy(AppApplicationDO::getUpdateTime, false)
+                .orderBy(AppApplicationDO::getCreateTime, false);
         return list(queryWrapper);
     }
 
     public void updateAppTimeByApplicationId(Long appId) {
-        this.updateChain().set(ApplicationDO::getUpdateTime, LocalDateTime.now())
-                .eq(ApplicationDO::getId, appId)
+        this.updateChain().set(AppApplicationDO::getUpdateTime, LocalDateTime.now())
+                .eq(AppApplicationDO::getId, appId)
                 .update();
     }
 }

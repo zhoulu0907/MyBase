@@ -6,7 +6,7 @@ import com.cmsr.onebase.module.app.build.util.AuthUtils;
 import com.cmsr.onebase.module.app.build.vo.tag.TagRespVO;
 import com.cmsr.onebase.module.app.core.dal.database.AppApplicationTagRepository;
 import com.cmsr.onebase.module.app.core.dal.database.AppTagRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.TagDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppTagDO;
 import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.core.vo.tag.TagGroupCountVO;
 import jakarta.annotation.Resource;
@@ -37,7 +37,7 @@ public class AppTagServiceImpl implements AppTagService {
 
     @Override
     public List<TagRespVO> listTags(String tagName) {
-        List<TagDO> tagDOS = appTagRepository.findByTagNameLike(tagName);
+        List<AppTagDO> tagDOS = appTagRepository.findByTagNameLike(tagName);
         return BeanUtils.toBean(tagDOS, TagRespVO.class);
     }
 
@@ -47,7 +47,7 @@ public class AppTagServiceImpl implements AppTagService {
         if (count > 0) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_TAG_EXIST);
         }
-        TagDO tagDO = new TagDO();
+        AppTagDO tagDO = new AppTagDO();
         tagDO.setTagName(tagName);
         appTagRepository.save(tagDO);
     }
@@ -64,13 +64,13 @@ public class AppTagServiceImpl implements AppTagService {
 
     @Override
     public void updateTags(List<TagRespVO> tagRespVOS) {
-        List<TagDO> tagDOS = appTagRepository.findAllTags();
-        List<Pair<TagDO, TagRespVO>> pairs = AuthUtils.fullOuterJoin(tagDOS, tagRespVOS, (tagDO, tagRespVO) -> tagDO.getId().equals(tagRespVO.getId()));
-        for (Pair<TagDO, TagRespVO> pair : pairs) {
-            TagDO tagDO = pair.getLeft();
+        List<AppTagDO> tagDOS = appTagRepository.findAllTags();
+        List<Pair<AppTagDO, TagRespVO>> pairs = AuthUtils.fullOuterJoin(tagDOS, tagRespVOS, (tagDO, tagRespVO) -> tagDO.getId().equals(tagRespVO.getId()));
+        for (Pair<AppTagDO, TagRespVO> pair : pairs) {
+            AppTagDO tagDO = pair.getLeft();
             TagRespVO tagRespVO = pair.getRight();
             if (tagDO == null) {
-                tagDO = new TagDO();
+                tagDO = new AppTagDO();
                 tagDO.setTagName(tagRespVO.getTagName());
                 appTagRepository.save(tagDO);
             } else if (tagRespVO == null) {

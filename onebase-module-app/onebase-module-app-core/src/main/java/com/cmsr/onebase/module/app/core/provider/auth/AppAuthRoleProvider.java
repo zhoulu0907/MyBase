@@ -3,8 +3,8 @@ package com.cmsr.onebase.module.app.core.provider.auth;
 import com.cmsr.onebase.module.app.core.dal.database.AppAuthRoleDeptRepository;
 import com.cmsr.onebase.module.app.core.dal.database.AppAuthRoleRepository;
 import com.cmsr.onebase.module.app.core.dal.database.AppSqlQueryRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.AuthRoleDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.AuthRoleDeptDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthRoleDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthRoleDeptDO;
 import com.cmsr.onebase.module.app.core.dto.auth.UserRoleDTO;
 import com.cmsr.onebase.module.app.core.enums.auth.AuthRoleTypeEnum;
 import lombok.Setter;
@@ -34,35 +34,35 @@ public class AppAuthRoleProvider {
     private AppAuthRoleDeptRepository appAuthRoleDeptRepository;
 
     public UserRoleDTO findUserRoleByApplication(Long userId, Long applicationId) {
-        List<AuthRoleDO> authRoleDOS = new ArrayList<>();
+        List<AppAuthRoleDO> authRoleDOS = new ArrayList<>();
 
-        List<AuthRoleDO> userAuthRoleDOS = appAuthRoleRepository.findByUserIdAndApplicationId(userId, applicationId);
+        List<AppAuthRoleDO> userAuthRoleDOS = appAuthRoleRepository.findByUserIdAndApplicationId(userId, applicationId);
         authRoleDOS.addAll(userAuthRoleDOS);
 
-        List<AuthRoleDO> deptAuthRoleDOS = findRolesByDept(userId, applicationId);
+        List<AppAuthRoleDO> deptAuthRoleDOS = findRolesByDept(userId, applicationId);
         authRoleDOS.addAll(deptAuthRoleDOS);
 
         UserRoleDTO userRoleDTO = new UserRoleDTO();
         userRoleDTO.setAdminRole(false);
         userRoleDTO.setRoleIds(Set.of());
-        for (AuthRoleDO authRoleDO : authRoleDOS) {
+        for (AppAuthRoleDO authRoleDO : authRoleDOS) {
             if (AuthRoleTypeEnum.isSystemAdminRole(authRoleDO.getRoleType())) {
                 userRoleDTO.setAdminRole(true);
             }
         }
-        Set<Long> ids = authRoleDOS.stream().map(AuthRoleDO::getId).collect(Collectors.toSet());
+        Set<Long> ids = authRoleDOS.stream().map(AppAuthRoleDO::getId).collect(Collectors.toSet());
         userRoleDTO.setRoleIds(ids);
         return userRoleDTO;
     }
 
-    private List<AuthRoleDO> findRolesByDept(Long userId, Long applicationId) {
+    private List<AppAuthRoleDO> findRolesByDept(Long userId, Long applicationId) {
         // 获取用户的部门层次（包含用户所在部门及其所有上级部门）
         List<Long> deptTree = appSqlQueryRepository.findDeptHierarchyByUserId(userId);
         if (deptTree == null || deptTree.isEmpty()) {
             return Collections.emptyList();
         }
         // 获取该应用下的部门角色关系
-        List<AuthRoleDeptDO> authRoleDeptDOS = appAuthRoleDeptRepository.findByApplicationId(applicationId);
+        List<AppAuthRoleDeptDO> authRoleDeptDOS = appAuthRoleDeptRepository.findByApplicationId(applicationId);
         if (authRoleDeptDOS == null || authRoleDeptDOS.isEmpty()) {
             return Collections.emptyList();
         }
@@ -74,9 +74,9 @@ public class AppAuthRoleProvider {
         return appAuthRoleRepository.listByIds(roleIds);
     }
 
-    private Set<Long> findRolesByDept(List<AuthRoleDeptDO> authRoleDeptDOS, List<Long> deptTree) {
+    private Set<Long> findRolesByDept(List<AppAuthRoleDeptDO> authRoleDeptDOS, List<Long> deptTree) {
         Set<Long> roleIds = new HashSet<>();
-        for (AuthRoleDeptDO authRoleDeptDO : authRoleDeptDOS) {
+        for (AppAuthRoleDeptDO authRoleDeptDO : authRoleDeptDOS) {
             Long roleDeptId = authRoleDeptDO.getDeptId();
             Integer isIncludeChild = authRoleDeptDO.getIsIncludeChild();
             if (isIncludeChild != null && isIncludeChild == 1) {

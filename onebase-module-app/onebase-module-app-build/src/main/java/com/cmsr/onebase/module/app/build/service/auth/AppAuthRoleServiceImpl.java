@@ -10,10 +10,10 @@ import com.cmsr.onebase.module.app.core.dal.database.AppAuthRoleDeptRepository;
 import com.cmsr.onebase.module.app.core.dal.database.AppAuthRoleRepository;
 import com.cmsr.onebase.module.app.core.dal.database.AppAuthRoleUserRepository;
 import com.cmsr.onebase.module.app.core.dal.database.AppSqlQueryRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.ApplicationDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.AuthRoleDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.AuthRoleDeptDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.AuthRoleUserDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthRoleDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthRoleDeptDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthRoleUserDO;
 import com.cmsr.onebase.module.app.core.dto.auth.RoleMemberDTO;
 import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.core.enums.auth.AuthRoleTypeEnum;
@@ -61,35 +61,35 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
 
     @Override
     public List<AuthRoleListRespVO> getRoleList(Long applicationId) {
-        ApplicationDO applicationDO = appCommonService.validateApplicationExist(applicationId);
+        AppApplicationDO applicationDO = appCommonService.validateApplicationExist(applicationId);
         try {
             createDefaultRole(applicationId, applicationDO.getCreator());
         } catch (Exception e) {
             log.warn("创建默认角色失败", e);
         }
-        List<AuthRoleDO> authRoleList = appAuthRoleRepository.findByApplicationId(applicationId);
+        List<AppAuthRoleDO> authRoleList = appAuthRoleRepository.findByApplicationId(applicationId);
         return BeanUtils.toBean(authRoleList, AuthRoleListRespVO.class);
     }
 
     @Override
     public void createDefaultRole(Long applicationId, Long userId) {
         {
-            AuthRoleDO existRole = appAuthRoleRepository.findByAppIdAndRoleCode(applicationId, AuthRoleTypeEnum.SYSTEM_ADMIN.getCode());
+            AppAuthRoleDO existRole = appAuthRoleRepository.findByAppIdAndRoleCode(applicationId, AuthRoleTypeEnum.SYSTEM_ADMIN.getCode());
             if (existRole == null) {
-                AuthRoleDO authRoleDO = new AuthRoleDO();
+                AppAuthRoleDO authRoleDO = new AppAuthRoleDO();
                 authRoleDO.setApplicationId(applicationId);
                 authRoleDO.setRoleCode(AuthRoleTypeEnum.SYSTEM_ADMIN.getCode());
                 authRoleDO.setRoleName(AuthRoleTypeEnum.SYSTEM_ADMIN.getName());
                 authRoleDO.setRoleType(AuthRoleTypeEnum.SYSTEM_ADMIN.getValue());
                 appAuthRoleRepository.save(authRoleDO);
                 //创建者是管理员
-                AuthRoleUserDO entity = new AuthRoleUserDO();
+                AppAuthRoleUserDO entity = new AppAuthRoleUserDO();
                 entity.setUserId(userId);
                 entity.setRoleId(authRoleDO.getId());
             } else {
                 long count = appAuthRoleUserRepository.countByRoleId(existRole.getId());
                 if (count == 0) {
-                    AuthRoleUserDO entity = new AuthRoleUserDO();
+                    AppAuthRoleUserDO entity = new AppAuthRoleUserDO();
                     entity.setUserId(userId);
                     entity.setRoleId(existRole.getId());
                     appAuthRoleUserRepository.save(entity);
@@ -97,9 +97,9 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
             }
         }
         {
-            AuthRoleDO existRole = appAuthRoleRepository.findByAppIdAndRoleCode(applicationId, AuthRoleTypeEnum.SYSTEM_USER.getCode());
+            AppAuthRoleDO existRole = appAuthRoleRepository.findByAppIdAndRoleCode(applicationId, AuthRoleTypeEnum.SYSTEM_USER.getCode());
             if (existRole == null) {
-                AuthRoleDO authRoleDO = new AuthRoleDO();
+                AppAuthRoleDO authRoleDO = new AppAuthRoleDO();
                 authRoleDO.setApplicationId(applicationId);
                 authRoleDO.setRoleCode(AuthRoleTypeEnum.SYSTEM_USER.getCode());
                 authRoleDO.setRoleName(AuthRoleTypeEnum.SYSTEM_USER.getName());
@@ -108,9 +108,9 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
             }
         }
         {
-            AuthRoleDO existRole = appAuthRoleRepository.findByAppIdAndRoleCode(applicationId, AuthRoleTypeEnum.OUTER_USER.getCode());
+            AppAuthRoleDO existRole = appAuthRoleRepository.findByAppIdAndRoleCode(applicationId, AuthRoleTypeEnum.OUTER_USER.getCode());
             if (existRole == null) {
-                AuthRoleDO authRoleDO = new AuthRoleDO();
+                AppAuthRoleDO authRoleDO = new AppAuthRoleDO();
                 authRoleDO.setApplicationId(applicationId);
                 authRoleDO.setRoleCode(AuthRoleTypeEnum.OUTER_USER.getCode());
                 authRoleDO.setRoleName(AuthRoleTypeEnum.OUTER_USER.getName());
@@ -148,7 +148,7 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
     public AuthRoleCreateRespVO createRole(AuthRoleCreateReqVO reqVO) {
         appCommonService.validateApplicationExist(reqVO.getApplicationId());
         checkRoleNameExists(reqVO.getApplicationId(), reqVO.getRoleName());
-        AuthRoleDO authRoleDO = new AuthRoleDO();
+        AppAuthRoleDO authRoleDO = new AppAuthRoleDO();
         authRoleDO.setApplicationId(reqVO.getApplicationId());
         authRoleDO.setRoleType(AuthRoleTypeEnum.CUSTOM_ROLE.getValue());
         authRoleDO.setRoleName(reqVO.getRoleName());
@@ -160,7 +160,7 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
 
     @Override
     public void renameRole(Long roleId, String name) {
-        AuthRoleDO authRoleDO = appCommonService.validateRoleExist(roleId);
+        AppAuthRoleDO authRoleDO = appCommonService.validateRoleExist(roleId);
         if (AuthRoleTypeEnum.isSystemRoleType(authRoleDO.getRoleType())) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_AUTH_ROLE_NOT_ALLOW_RENAME);
         }
@@ -172,31 +172,31 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void addRoleUser(AuthRoleAddUserReqVO reqVO) {
-        AuthRoleDO authRoleDO = appCommonService.validateRoleExist(reqVO.getRoleId());
+        AppAuthRoleDO authRoleDO = appCommonService.validateRoleExist(reqVO.getRoleId());
         appAuthRoleUserRepository.addRoleUser(reqVO.getRoleId(), reqVO.getUserIds());
         appCacheProvider.usersChanged(authRoleDO.getApplicationId(), reqVO.getUserIds());
     }
 
     @Override
     public void addRoleDept(AuthRoleAddDeptReqVO reqVO) {
-        AuthRoleDO authRoleDO = appCommonService.validateRoleExist(reqVO.getRoleId());
+        AppAuthRoleDO authRoleDO = appCommonService.validateRoleExist(reqVO.getRoleId());
         appAuthRoleDeptRepository.addRoleDept(reqVO.getRoleId(), reqVO.getDeptIds(), reqVO.getIsIncludeChild());
         appCacheProvider.deptsChanged(authRoleDO.getApplicationId(), reqVO.getDeptIds(), reqVO.getIsIncludeChild());
     }
 
     @Override
     public void deleteRoleMember(AuthRoleDeleteMemberReqVO reqVO) {
-        AuthRoleDO authRoleDO = appCommonService.validateRoleExist(reqVO.getRoleId());
+        AppAuthRoleDO authRoleDO = appCommonService.validateRoleExist(reqVO.getRoleId());
         for (AuthRoleDeleteMemberReqVO.DeleteMember member : reqVO.getMembers()) {
             if (RoleMemberDTO.MEMBER_TYPE_USER.equalsIgnoreCase(member.getMemberType())) {
-                AuthRoleUserDO authRoleUserDO = appAuthRoleUserRepository.getById(member.getId());
+                AppAuthRoleUserDO authRoleUserDO = appAuthRoleUserRepository.getById(member.getId());
                 if (authRoleUserDO != null) {
                     appAuthRoleUserRepository.removeById(member.getId());
                     appCacheProvider.usersChanged(authRoleDO.getApplicationId(), List.of(authRoleUserDO.getUserId()));
                 }
             }
             if (RoleMemberDTO.MEMBER_TYPE_DEPT.equalsIgnoreCase(member.getMemberType())) {
-                AuthRoleDeptDO authRoleDeptDO = appAuthRoleDeptRepository.getById(member.getId());
+                AppAuthRoleDeptDO authRoleDeptDO = appAuthRoleDeptRepository.getById(member.getId());
                 if (authRoleDeptDO != null) {
                     appAuthRoleDeptRepository.removeById(member.getId());
                     appCacheProvider.deptChanged(authRoleDO.getApplicationId(), authRoleDeptDO.getDeptId(), authRoleDeptDO.getIsIncludeChild());
@@ -208,7 +208,7 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteRole(Long roleId) {
-        AuthRoleDO authRoleDO = appCommonService.validateRoleExist(roleId);
+        AppAuthRoleDO authRoleDO = appCommonService.validateRoleExist(roleId);
         if (AuthRoleTypeEnum.isSystemRoleType(authRoleDO.getRoleType())) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_AUTH_ROLE_NOT_ALLOW_DELETE);
         }
@@ -230,14 +230,14 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
     }
 
     private void checkRoleNameExists(Long applicationId, String roleName) {
-        AuthRoleDO authRoleDO = appAuthRoleRepository.findByApplicationIdAndRoleName(applicationId, roleName);
+        AppAuthRoleDO authRoleDO = appAuthRoleRepository.findByApplicationIdAndRoleName(applicationId, roleName);
         if (authRoleDO != null) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_AUTH_ROLE_NAME_EXISTS);
         }
     }
 
     private void checkRoleNameExists(Long applicationId, String roleName, Long roleId) {
-        AuthRoleDO authRoleDO = appAuthRoleRepository.findByApplicationIdAndRoleNameAndIdNot(applicationId, roleName, roleId);
+        AppAuthRoleDO authRoleDO = appAuthRoleRepository.findByApplicationIdAndRoleNameAndIdNot(applicationId, roleName, roleId);
         if (authRoleDO != null) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_AUTH_ROLE_NAME_EXISTS);
         }

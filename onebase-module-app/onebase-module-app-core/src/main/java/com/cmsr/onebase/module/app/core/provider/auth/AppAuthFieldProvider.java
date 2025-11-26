@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.app.core.provider.auth;
 
 import com.cmsr.onebase.module.app.api.security.bo.FieldPermissionItem;
 import com.cmsr.onebase.module.app.core.dal.database.AppAuthFieldRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.AuthFieldDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthFieldDO;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -24,9 +24,9 @@ public class AppAuthFieldProvider {
     private AppAuthFieldRepository appAuthFieldRepository;
 
     public List<FieldPermissionItem> findFields(Long applicationId, Set<Long> roleIds, Long menuId) {
-        List<AuthFieldDO> fieldDOS = appAuthFieldRepository.findByAppIdAndRoleIdsAndMenuId(applicationId, roleIds, menuId);
+        List<AppAuthFieldDO> fieldDOS = appAuthFieldRepository.findByAppIdAndRoleIdsAndMenuId(applicationId, roleIds, menuId);
         Map<Long, FieldPermissionItem> fieldPermissionItemMap = new HashMap<>();
-        for (AuthFieldDO fieldDO : fieldDOS) {
+        for (AppAuthFieldDO fieldDO : fieldDOS) {
             FieldPermissionItem item = fieldPermissionItemMap.get(fieldDO.getFieldId());
             if (item == null) {
                 item = new FieldPermissionItem();
