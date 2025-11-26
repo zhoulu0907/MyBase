@@ -195,10 +195,28 @@ public class CorpServiceImpl implements CorpService {
                 .filter(Objects::nonNull)
                 .toList();
 
+        CommonResult<List<DictDataRespDTO>> dictlist= dictDataApi.getDictDataList(CorpConstant.INDUSTRY_TYPE);
+        Map<Long, String> dictmap = dictlist.getData().stream()
+                .collect(Collectors.toMap(DictDataRespDTO::getId
+                        , DictDataRespDTO::getLabel));
+        Set<Long> adminUserIds = corpList.stream()
+                .map(CorpDO::getAdminId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        Map<Long, AdminUserDO> userDOMap= corpUserService.getUserMap(adminUserIds);
+
         if (relations.isEmpty()) {
             // 无关联应用，直接返回企业基本信息
             List<CorpRespVO> noAppResp = corpList.stream()
-                    .map(c -> BeanUtils.toBean(c, CorpRespVO.class))
+                    .map(corpDO -> {
+                        CorpRespVO respVO = BeanUtils.toBean(corpDO, CorpRespVO.class);
+                        AdminUserDO userDO=userDOMap.get(corpDO.getAdminId());
+                        if(userDO!=null){
+                            respVO.setAdminName(userDO.getNickname());
+                        }
+                        respVO.setIndustryTypeName(dictmap.get(respVO.getIndustryType()));
+                        return respVO;
+                    })
                     .collect(Collectors.toList());
             return new PageResult<>(noAppResp, pageResult.getTotal());
         }
@@ -219,18 +237,6 @@ public class CorpServiceImpl implements CorpService {
         // 关联关系按企业分组，便于组装
         Map<Long, List<CorpAppRelationDO>> relationGroupByCorp = relations.stream()
                 .collect(Collectors.groupingBy(CorpAppRelationDO::getCorpId));
-
-         CommonResult<List<DictDataRespDTO>> dictlist= dictDataApi.getDictDataList(CorpConstant.INDUSTRY_TYPE);
-        Map<Long, String> dictmap = dictlist.getData().stream()
-                .collect(Collectors.toMap(DictDataRespDTO::getId
-                        , DictDataRespDTO::getLabel));
-
-        Set<Long> adminUserIds = corpList.stream()
-                .map(CorpDO::getAdminId)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
-        Map<Long, AdminUserDO> userDOMap= corpUserService.getUserMap(adminUserIds);
-
         // Step 4：组装返回值
         List<CorpRespVO> respList = corpList.stream()
                 .map(corpDO -> {

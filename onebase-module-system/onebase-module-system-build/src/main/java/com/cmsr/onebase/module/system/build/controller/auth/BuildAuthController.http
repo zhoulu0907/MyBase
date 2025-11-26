@@ -63,10 +63,10 @@ tag: {{tag}}
 ### 请求 /login 接口 => 成功
 POST {{baseUrl}}/system/auth/tenant-login
 Content-Type: application/json
-tenant-id: 1
+tenant-id: 152071632369614848
 tag: {{tag}}
 
-{"username":"admin","password":"admin123",
+{"username":"test004","password":"AdminChina2025!",
   "captchaVerification":"oXGkq00pF8GQBeRCEJE7JfNLSx4sdyWCYcPorKIb0la+sWJuLIjClL/bhezkiSb2T2qq++I+f4U5fCCWQA9kBQhSiEC7BS/r9y7/HhAc2ko=",
   "deviceId":666}
 
