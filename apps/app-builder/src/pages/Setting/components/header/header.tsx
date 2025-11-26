@@ -1,14 +1,13 @@
-import defaultAvatar from '@/assets/images/default_avatar.png';
-import navBackSVG from '@/assets/images/nav_back.svg';
 import LogoSVG from '@/assets/images/ob_logo.svg';
 import { useI18n } from '@/hooks/useI18n';
 import { UserPermissionManager } from '@/utils/permission';
-import { Avatar, Button, Dropdown, Layout, Menu, Typography } from '@arco-design/web-react';
-import { IconApps, IconExport, IconPoweroff, IconUser } from '@arco-design/web-react/icon';
+import { Button, Dropdown, Layout, Menu, Typography } from '@arco-design/web-react';
+import { IconApps, IconExport } from '@arco-design/web-react/icon';
 import { TokenManager } from '@onebase/common';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './header.module.less';
+import UserProfileAvtar from '@/components/UserProfileAvatar';
 
 const { Header } = Layout;
 
@@ -21,7 +20,6 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   const { t } = useI18n();
 
   // 获取用户信息
-  const tokenInfo = TokenManager.getTokenInfo();
   const userPermissionInfo = UserPermissionManager.getUserPermissionInfo();
 
   // 登出处理
@@ -44,9 +42,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     <Menu>
       <Menu.Item key="info" style={{height:"60px"}}>
         <div className={styles.adminInformation}>
-            <Avatar size={32} >
-              <img src={LogoSVG} />
-            </Avatar>
+            <UserProfileAvtar adminInfo={userPermissionInfo?.user} />
             <Typography.Text>{userPermissionInfo?.user?.nickname || ""}</Typography.Text>
         </div>
       </Menu.Item>
@@ -81,9 +77,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
 
           <Dropdown droplist={userMenu} position="bottom">
             <div className={styles.userDropdown}>
-              <Avatar size={32} style={{ backgroundColor: '#4FAE7B' }}>
-                <img src={defaultAvatar} alt="avatar" />
-              </Avatar>
+              <UserProfileAvtar adminInfo={userPermissionInfo?.user}/>
             </div>
           </Dropdown>
         </div>

@@ -6,13 +6,13 @@ import type { authorizedAppList, ICreateAppModal } from "../../types/appItem";
 import styles from "./index.module.less";
 
 
-export const CreateAppModal:React.FC<ICreateAppModal> = ({visible, tableData, onCloseAppModal, onSaveAppData}) => {
+export const CreateAppModal:React.FC<ICreateAppModal> = ({visible,currentId, tableData, onCloseAppModal, onSaveAppData}) => {
     const [createNewAppForm] = Form.useForm();
     const [dropdownList, setDropdownList] = useState<authorizedAppList[]>([]);
 
     const getApplicationIdResult = async() => {
         try{
-           const res: authorizedAppList[]= await getCorpAppSimpleListApi();
+           const res: authorizedAppList[]= await getCorpAppSimpleListApi(currentId);
            setDropdownList(res ? res : [])
         }catch(error) {
             Message.error("获取列表失败")
