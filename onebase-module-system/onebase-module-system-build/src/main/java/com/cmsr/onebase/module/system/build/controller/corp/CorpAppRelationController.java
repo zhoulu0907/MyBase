@@ -2,11 +2,13 @@ package com.cmsr.onebase.module.system.build.controller.corp;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
 import com.cmsr.onebase.module.system.service.corpapprelation.CorpAppRelationService;
 import com.cmsr.onebase.module.system.vo.corp.CorpApplicationRespVO;
 import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppPageReqVO;
 import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppRelationInertReqVO;
 import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppRelationUpdateReqVO;
+import com.cmsr.onebase.module.system.vo.corpapprelation.CorpRelationAppReqVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
@@ -14,6 +16,8 @@ import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
@@ -64,5 +68,13 @@ public class CorpAppRelationController {
     public CommonResult<PageResult<CorpApplicationRespVO>> getCorpAppRelationPage(@Valid CorpAppPageReqVO corpAppPageReqVO) {
         PageResult<CorpApplicationRespVO> pageResult = corpAppRelationService.getCorpAppRelationPage(corpAppPageReqVO);
         return success(pageResult);
+    }
+
+    @PostMapping("/corp-no-relation-app-list")
+    @Operation(summary = "获取企业未关联应用", description = "主要用于前端的下拉选项")
+    @PreAuthorize("@ss.hasPermission('tenant:corp:query')")
+    public CommonResult<List<ApplicationDTO>> getCorpNoRelationAppList(CorpRelationAppReqVO relationAppReqVO) {
+        List<ApplicationDTO>  applicationsList=  corpAppRelationService.getCorpNoRelationAppList(relationAppReqVO);
+        return success( applicationsList);
     }
 }
