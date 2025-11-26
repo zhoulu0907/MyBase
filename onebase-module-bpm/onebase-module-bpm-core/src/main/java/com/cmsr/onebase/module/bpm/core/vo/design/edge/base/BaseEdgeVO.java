@@ -1,5 +1,6 @@
-package com.cmsr.onebase.module.bpm.core.vo.design.node.base;
+package com.cmsr.onebase.module.bpm.core.vo.design.edge.base;
 
+import com.cmsr.onebase.module.bpm.core.dto.edge.EdgeExtDTO;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -33,11 +34,16 @@ public class BaseEdgeVO {
     @Schema(description = "边名称")
     private String name;
 
-    @Schema(description = "条件")
-    private String skipCondition;
+    /**
+     * 边扩展信息
+     *
+     * 普通边不用传该参数
+     *
+     */
+    private EdgeExtDTO data;
 
     /**
-     * 线状态，运行实例使用
+     * 边状态，运行实例使用
      */
     @Schema(description = "线状态")
     private String runStatus;
