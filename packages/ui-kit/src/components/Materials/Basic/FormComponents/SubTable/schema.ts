@@ -87,7 +87,11 @@ export interface XSubTableConfig extends ICommonBaseType {
     pageSize: number;         // 分页条数
     columnFixed: number;      // 左侧列冻结
   },
- 
+  /**
+   * 组件状态：可用、隐藏、只读
+   * 可选值: 'default' | 'hidden' | 'readonly'
+   */
+  status?: TSelectDefaultType<TStatusSelectKeyType>;
   /**
      * 表单的布局：水平、垂直（默认）
      * 可选值: 'vertical' | 'horizontal'
@@ -148,6 +152,7 @@ const XSubTable: XSubTableSchema = {
       pageSize: 5,
       columnFixed: 0
     },
+    status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     width: WIDTH_VALUES[WIDTH_OPTIONS.FULL],
   }
 };

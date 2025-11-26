@@ -124,7 +124,7 @@ const XDateRangePicker = memo((props: XInputDateRangePickerConfig & { runtime?: 
           <div>
             {fieldValue &&
               typeof fieldValue === 'string' &&
-              fieldValue.split(', ').map((ele: any, index: number) => (
+              fieldValue.split(',').map((ele: any, index: number) => (
                 <span key={index} style={{ marginBottom: '0' }}>
                   {ele}
                 </span>
