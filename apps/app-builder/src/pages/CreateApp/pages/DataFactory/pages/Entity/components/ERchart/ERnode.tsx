@@ -238,7 +238,7 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
                     className={`${styles.fieldItem} ${styles.customField} ${styles.clickableField}`}
                     onClick={(e) => handleFieldClick(field.fieldId, e)}
                   >
-                    <span className={styles.fieldName}>
+                    <span className={styles.fieldName} title={field.displayName}>
                       {isNew && <span className={styles.fieldIsNew} />}
                       {field.displayName}
                     </span>
