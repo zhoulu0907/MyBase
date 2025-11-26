@@ -18,7 +18,18 @@ import {
   Tooltip,
   Typography
 } from '@arco-design/web-react';
-import { IconDelete, IconEdit, IconEmpty, IconEye, IconLaunch, IconLeft, IconMoreVertical, IconPlus, IconRight, IconSearch } from '@arco-design/web-react/icon';
+import {
+  IconDelete,
+  IconEdit,
+  IconEmpty,
+  IconEye,
+  IconLaunch,
+  IconLeft,
+  IconMoreVertical,
+  IconPlus,
+  IconRight,
+  IconSearch
+} from '@arco-design/web-react/icon';
 import {
   createApplication,
   deleteApplication,
@@ -35,11 +46,12 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import emptyApplicationSVG from '@/assets/images/applicationLogo.svg';
-import { type Options } from '@/components/CreateApp/const';
 import CreateAppModal from '@/components/CreateApp';
+import { type Options } from '@/components/CreateApp/const';
 import CreateDataSource, { type DataSourceHandle } from '@/components/CreateDataSource';
 import DynamicIcon from '@/components/DynamicIcon';
 import { appIconMap } from '@onebase/ui-kit';
+import dayjs from 'dayjs';
 import {
   ApplicationStatus,
   ApplicationStatusLabel,
@@ -52,7 +64,6 @@ import {
   ThemeColorMap
 } from './const';
 import styles from './index.module.less';
-import dayjs from 'dayjs';
 
 const Option = Select.Option;
 const AvatarGroup = Avatar.Group;
@@ -98,7 +109,7 @@ const AppManagement: React.FC = () => {
     const containerWidth = appContainerRef.current?.offsetWidth;
     const containerHeight = appContainerRef.current?.offsetHeight;
     const maxAppInfo = calculateMaxItems(containerWidth, containerHeight);
-    console.log('maxAppInfo', maxAppInfo, containerWidth, containerHeight)
+    console.log('maxAppInfo', maxAppInfo, containerWidth, containerHeight);
     setPageSize(maxAppInfo.total || 8);
   }, [appContainerRef.current]);
 
@@ -226,7 +237,7 @@ const AppManagement: React.FC = () => {
     const newWindow = window.open('', '_blank');
     if (newWindow) {
       const baseUrl = getBaseUrl();
-      console.log(baseUrl, 9999)
+      console.log(baseUrl, 9999);
       const href = `${baseUrl}create-app/app-setting?appId=${appId}`;
       newWindow.location.href = href;
     }
@@ -267,11 +278,11 @@ const AppManagement: React.FC = () => {
   };
 
   const getDevelopStatus = (developStatus?: string) => {
-    if(developStatus === ApplicationStatus.ITERATE) {
-      return ApplicationStatusLabel.ITERATE
+    if (developStatus === ApplicationStatus.ITERATE) {
+      return ApplicationStatusLabel.ITERATE;
     }
-    return "";
-  }
+    return '';
+  };
 
   const menu = (item: any) => {
     return (
@@ -305,7 +316,6 @@ const AppManagement: React.FC = () => {
   return (
     <div className={styles.appPage}>
       <div className={styles.appContainer}>
-
         <div className={styles.appHasDataBox}>
           <div
             className={styles.appFilter}
@@ -381,11 +391,13 @@ const AppManagement: React.FC = () => {
           {/* 我的应用列表 */}
           <Spin className={styles.appListLoading} loading={loading} size={40} tip="加载中..." ref={appContainerRef}>
             <div className={styles.appList}>
-              {true && (
+              {applicationEmpty && !loading && (
                 <div className={styles.applicationEmpty}>
                   <img src={emptyApplicationSVG} alt="暂无应用" />
-                  <Typography.Text type='secondary'>还没有应用</Typography.Text>
-                  <Button className={styles.goCreateApplication} onClick={()=>setCreateVisible(true)}>去创建 <IconRight /></Button>
+                  <Typography.Text type="secondary">还没有应用</Typography.Text>
+                  <Button className={styles.goCreateApplication} onClick={() => setCreateVisible(true)}>
+                    去创建 <IconRight />
+                  </Button>
                 </div>
               )}
               {applicationFilterEmpty && !loading && (
@@ -414,15 +426,17 @@ const AppManagement: React.FC = () => {
                             </Tooltip>
 
                             <div className={styles.tagWrapper}>
-                              {item?.developStatus && <Tag
-                                color={TagColor[item.appStatus]}
-                                style={{
-                                  fontSize: 12,
-                                  fontWeight: 400
-                                }}
-                              >
-                                {getDevelopStatus(item.developStatus)}
-                              </Tag>}
+                              {item?.developStatus && (
+                                <Tag
+                                  color={TagColor[item.appStatus]}
+                                  style={{
+                                    fontSize: 12,
+                                    fontWeight: 400
+                                  }}
+                                >
+                                  {getDevelopStatus(item.developStatus)}
+                                </Tag>
+                              )}
 
                               <Tag
                                 color={TagColor[item.appStatus]}
@@ -433,14 +447,14 @@ const AppManagement: React.FC = () => {
                               >
                                 {item.appStatusText}
                               </Tag>
-
                             </div>
                           </div>
 
-                          <div className={styles.updateTime}>更新时间：{dayjs(item?.updateTime).format('YYYY-MM-DD HH:mm:ss')}</div>
+                          <div className={styles.updateTime}>
+                            更新时间：{dayjs(item?.updateTime).format('YYYY-MM-DD HH:mm:ss')}
+                          </div>
                         </div>
                       </div>
-
                     </div>
 
                     <div className={styles.appCardBody}>
@@ -468,18 +482,18 @@ const AppManagement: React.FC = () => {
                     <div className={styles.footerLeft}>
                       {item?.userPhotoList && item?.userPhotoList.length > 0 && (
                         <>
-                          <AvatarGroup size={24} maxCount={4}
-                            zIndexAscend>
-                              {item?.userPhotoList?.map(item => {
-                                  return <Avatar>{item.avatar}</Avatar>
-                              })}
-                              {item?.userPhotoList?.length >1 && 
-                                <>
-                                  <Avatar>{item?.userPhotoList?.length}</Avatar>
-                                  <Typography.Text type='secondary'>{item?.createUser}等{item?.userPhotoList?.length}人开发</Typography.Text>
-                                </> || 
-                                <Typography.Text type='secondary'>{item?.createUser}</Typography.Text>
-                              }
+                          <AvatarGroup size={24} maxCount={4} zIndexAscend>
+                            {item?.userPhotoList?.map((item) => {
+                              return <Avatar>{item.avatar}</Avatar>;
+                            })}
+                            {(item?.userPhotoList?.length > 1 && (
+                              <>
+                                <Avatar>{item?.userPhotoList?.length}</Avatar>
+                                <Typography.Text type="secondary">
+                                  {item?.createUser}等{item?.userPhotoList?.length}人开发
+                                </Typography.Text>
+                              </>
+                            )) || <Typography.Text type="secondary">{item?.createUser}</Typography.Text>}
                           </AvatarGroup>
                         </>
                       )}
@@ -487,7 +501,11 @@ const AppManagement: React.FC = () => {
 
                     <div className={styles.footerRight}>
                       <Space>
-                        <IconEdit className={styles.operationIcon} fontSize={16} onClick={() => nagivateToAppPage(item.id)} />
+                        <IconEdit
+                          className={styles.operationIcon}
+                          fontSize={16}
+                          onClick={() => nagivateToAppPage(item.id)}
+                        />
                         <IconEye className={styles.operationIcon} fontSize={16} />
                         <Dropdown
                           droplist={menu(item)}
@@ -497,7 +515,11 @@ const AppManagement: React.FC = () => {
                           onVisibleChange={(v) => handleOptionVisibleChange(v, item.id)}
                           getPopupContainer={(node) => node.parentNode as HTMLElement}
                         >
-                          <IconMoreVertical className={styles.operationIcon} fontSize={16} style={{ color: '#272e3b' }} />
+                          <IconMoreVertical
+                            className={styles.operationIcon}
+                            fontSize={16}
+                            style={{ color: '#272e3b' }}
+                          />
                         </Dropdown>
                       </Space>
                     </div>
@@ -551,13 +573,7 @@ const AppManagement: React.FC = () => {
             <br />
             如确定删除，请输入应用名称：智慧工厂应用
           </div>
-          <Input
-            value={appName}
-            allowClear
-            placeholder="请输入应用名称"
-            style={{ width: 400 }}
-            onChange={setAppName}
-          />
+          <Input value={appName} allowClear placeholder="请输入应用名称" style={{ width: 400 }} onChange={setAppName} />
         </div>
       </Modal>
       <Modal
