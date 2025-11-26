@@ -5,6 +5,7 @@ import { Dropdown, Input, Layout, Menu, Tree } from '@arco-design/web-react';
 import { IconDown, IconSearch } from '@arco-design/web-react/icon';
 import {
   listApplicationMenu,
+  listApplicationBPMMenu,
   menuSignal,
   MenuType,
   TASKMENU_TYPE,
@@ -98,13 +99,17 @@ const Runtime: React.FC = () => {
       applicationId: appID
     };
     const res = await listApplicationMenu(req);
-
+    const bpmRes = await listApplicationBPMMenu(req);
+    let bpmData: any[] = [];
+    if (bpmRes && bpmRes.length > 0) {
+      bpmData = dealPage(bpmRes);
+    }
     // 处理数据
-    const resPageList:any[] = res && res.length > 0 ? dealPage(res) : [];
-    const pageList:any[] = getMenuArr().concat(resPageList);
+    const resPageList: any[] = res && res.length > 0 ? dealPage(res) : [];
+    const pageList: any[] = bpmData.concat(resPageList);
+
     const treeData = convertMenuToTreeData(pageList, initTreeItemWidth);
     setTreeData(treeData);
-
     // 如果菜单列表不为空，默认选中第一个菜单
     if (pageList && pageList.length > 0) {
       // 初始化页面没有curMenuId就处理第一个菜单为分组的情况 分组里没有页面的情况
@@ -149,11 +154,11 @@ const Runtime: React.FC = () => {
       title: (
         <RuntimeMenuItem
           menuID={menu.id}
-          menuIcon={menu.menuIcon}
+          menuIcon={menu.menuType === MenuType.BPM ? menu.menuCode : menu.menuIcon}
           maxWidth={maxWidth}
           label={menu.menuName}
           onClick={() => {
-            if (menu.menuType == MenuType.PAGE) {
+            if (menu.menuType == MenuType.PAGE || menu.menuType == MenuType.BPM) {
               handleCurMenuUrl(menu.id);
               setCurMenu(menu);
             }
@@ -164,60 +169,6 @@ const Runtime: React.FC = () => {
     }));
   };
 
-  function getMenuArr() {
-    return [
-      {
-        id: TASKMENU_TYPE.TASKINEEDTODO,
-        isVisible: 1,
-        menuCode: 'ineedtodo',
-        menuIcon: 'ineedtodo-taskicon',
-        menuName: '待我处理',
-        menuSort: 1,
-        menuType: 1,
-        parentId: '0'
-      },
-      {
-        id: TASKMENU_TYPE.TASKIHAVEDONE,
-        isVisible: 1,
-        menuCode: 'ihavedone',
-        menuIcon: 'ihavedone-taskicon',
-        menuName: '我已处理',
-        menuSort: 2,
-        menuType: 1,
-        parentId: '0'
-      },
-      {
-        id: TASKMENU_TYPE.TASKICREATED,
-        isVisible: 1,
-        menuCode: 'icreated',
-        menuIcon: 'icreated-taskicon',
-        menuName: '我创建的',
-        menuSort: 3,
-        menuType: 1,
-        parentId: '0'
-      },
-      {
-        id: TASKMENU_TYPE.TASKICOPIED,
-        isVisible: 1,
-        menuCode: 'icopied',
-        menuIcon: 'icopied-taskicon',
-        menuName: '抄送我的',
-        menuSort: 4,
-        menuType: 1,
-        parentId: '0'
-      },
-      {
-        id: TASKMENU_TYPE.TASKTASKPROXY,
-        isVisible: 1,
-        menuCode: 'taskproxy',
-        menuIcon: 'taskproxy-taskicon',
-        menuName: '流程代理',
-        menuSort: 5,
-        menuType: 1,
-        parentId: '0'
-      }
-    ];
-  }
 
   // 登出处理
   const handleLogout = () => {
@@ -284,14 +235,13 @@ const Runtime: React.FC = () => {
                 </Dropdown>
               </div>
             </div>
-            {curMenu?.value?.id && curMenu?.value?.id?.indexOf('TASK-') >= 0 ? (
-              <TaskCenterPage curMenuId={curMenu.value.id} />
+            {curMenu?.value?.menuCode && curMenu?.value?.menuCode?.indexOf('TASK-') >= 0 ? (
+                <TaskCenterPage curMenuCode={curMenu.value.menuCode} />
             ) : (
               <div className={styles.contentBody}>
                 <PreviewContainer menuId={curMenu.value?.id || ''} runtime={true} />
               </div>
             )}
-
             {/* <div className={styles.contentBody}>
               <PreviewContainer menuId={curMenu.value?.id || ''} runtime={true} />
             </div> */}

@@ -33,8 +33,8 @@ const RuntimeMenuItem: React.FC<MenuItemProps> = ({ label, menuID, menuIcon, onC
           maxWidth: maxWidth + 'px'
         }}
       >
-        {menuIcon.indexOf('-taskicon') > 0 ? (
-          // xxx-taskicon 是工作流程任务中心菜单的icon
+        {menuIcon.includes('TASK-')  ? (
+          // TASK-XXX 是工作流程任务中心菜单的icon
           <i className={`iconfont ${menuIcon}`} style={{ marginRight: '16px' }} />
         ) : (
           // 正常菜单 icon
