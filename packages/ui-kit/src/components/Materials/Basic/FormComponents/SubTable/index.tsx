@@ -10,7 +10,7 @@ import { getComponentSchema } from '../../../schema';
 import { FORM_COMPONENT_TYPES, ENTITY_COMPONENT_TYPES } from '../../../componentTypes';
 import EditRender from 'src/components/render/EditRender';
 import { COMPONENT_GROUP_NAME, EDITOR_TYPES, type GridItem } from 'src/utils/const';
-import { STATUS_OPTIONS, STATUS_VALUES, COLOR_MODE_TYPES, DEFAULT_OPTIONS_TYPE } from '../../../constants';
+import { STATUS_OPTIONS, STATUS_VALUES, COLOR_MODE_TYPES, DEFAULT_OPTIONS_TYPE, DEFAULT_VALUE_TYPES } from '../../../constants';
 import { v4 as uuidv4 } from 'uuid';
 import CompDeleteIcon from '@/assets/images/app_delete.svg';
 import CompCopyIcon from '@/assets/images/copy_comp_icon.svg';
@@ -141,9 +141,15 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
     if (currentField) {
       // 数据长度 dataLength
       // 小数位数 decimalPlaces
-      // 默认值 defaultValue
-      const defaultValueConfig = { ...schema.config.defaultValue, customValue: currentField.defaultValue };
-      schema.config.defaultValueConfig = defaultValueConfig;
+      // 默认值 defaultValue => defaultValueConfig
+      if (schema.config.defaultValueConfig) {
+        const defaultValueConfig = {
+          ...schema.config.defaultValueConfig,
+          type: DEFAULT_VALUE_TYPES.CUSTOM,
+          customValue: currentField.defaultValue
+        };
+        schema.config.defaultValueConfig = defaultValueConfig;
+      }
       // 字段描述 description
       schema.config.tooltip = currentField.description;
       // 是否必填：1-是，0-不是 isRequired
