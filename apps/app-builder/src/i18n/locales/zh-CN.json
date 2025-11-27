@@ -18,7 +18,7 @@
     "title": "ONE BASE",
     "profile": "个人资料",
     "tenantManagement": "租户管理",
-    "tenantManagementBackend":"空间管理后台",
+    "tenantManagementBackend": "空间管理后台",
     "logout": "退出登录",
     "user": "用户",
     "theme": "主题",
@@ -118,19 +118,20 @@
     "role": "角色管理",
     "organization": "组织管理",
     "systemDict": "数据字典管理",
+    "security": "安全设置",
     "business": "企业管理",
-    "createBusiness":"创建企业",
-    "authorizedApplication":"授权应用",
+    "createBusiness": "创建企业",
+    "authorizedApplication": "授权应用",
     "spaceInfo": "空间信息",
     "enterpriseInfo": "企业信息",
     "enterprise": "企业管理",
     "tenant": "个人中心",
     "edit": "编辑",
-    "createEnterprise":"创建企业"
+    "createEnterprise": "创建企业"
   },
   "myApp": {
     "createApp": "零代码创建",
-    "applicationManagement":"应用管理"
+    "applicationManagement": "应用管理"
   },
   "editor": {
     "material": "组件库",

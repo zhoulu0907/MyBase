@@ -117,15 +117,16 @@
     "role": "Role Management",
     "organization": "Organization Management",
     "systemDict": "System Dictionary",
+    "security": "Security Settings",
     "business": "Business",
-    "createBusiness":"Create Business",
+    "createBusiness": "Create Business",
     "authorizedApplication": "Authorized Application",
     "spaceInfo": "Space Info",
     "enterpriseInfo": "Enterprise Info",
     "enterprise": "Enterprise Management",
     "tenant": "Personal Center",
     "edit": "Edit",
-    "createEnterprise":"Create Enterprise"
+    "createEnterprise": "Create Enterprise"
   },
   "myApp": {
     "createApp": "Create App",
