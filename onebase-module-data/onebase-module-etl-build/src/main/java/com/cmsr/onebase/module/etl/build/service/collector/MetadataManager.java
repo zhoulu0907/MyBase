@@ -13,6 +13,7 @@ import com.cmsr.onebase.module.etl.core.dal.dataobject.EtlTableDO;
 import com.github.f4b6a3.uuid.UuidCreator;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -106,6 +107,9 @@ public class MetadataManager {
         String comment = tableData.getComment();
         tableDO.setRemarks(comment);
         tableDO.setDeclaration(comment);
+        if (StringUtils.isNotBlank(comment)) {
+            tableDO.setDisplayName(comment);
+        }
 
         return tableDO;
     }
