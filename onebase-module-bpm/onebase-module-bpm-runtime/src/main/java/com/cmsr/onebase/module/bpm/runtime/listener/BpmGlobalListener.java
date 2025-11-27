@@ -66,6 +66,14 @@ public class BpmGlobalListener implements GlobalListener {
 
         String ext = listenerVariable.getNode().getExt();
         log.info("开始启动流程，节点ext信息：{}", ext);
+        BaseNodeExtDTO nodeExtDTO = BpmUtil.getNodeExtDTOByNodeCode(listenerVariable.getNode().getNodeCode(), listenerVariable.getInstance().getDefJson());
+
+        // 处理未操作的用户
+        if (Objects.equals(nodeExtDTO.getNodeType(), BpmNodeTypeEnum.APPROVER.getCode())
+                || Objects.equals(nodeExtDTO.getNodeType(), BpmNodeTypeEnum.EXECUTOR.getCode()))
+        {
+            handleUnOperatorUsersOnAssignment(listenerVariable);
+        }
     }
 
     public void assignment(ListenerVariable listenerVariable) {
@@ -108,8 +116,6 @@ public class BpmGlobalListener implements GlobalListener {
             }
         }
 
-        // 处理未操作的用户
-        handleUnOperatorUsersOnAssignment(listenerVariable);
     }
 
     public void finish(ListenerVariable listenerVariable) {
