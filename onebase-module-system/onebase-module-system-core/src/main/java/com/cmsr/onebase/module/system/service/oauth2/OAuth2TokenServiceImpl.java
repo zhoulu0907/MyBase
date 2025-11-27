@@ -1,22 +1,20 @@
 package com.cmsr.onebase.module.system.service.oauth2;
 
-import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
-import com.cmsr.onebase.framework.common.enums.RunModeEnum;
-import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
-import com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstants;
-import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.framework.common.pojo.PageResult;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
+import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
+import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
+import com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstants;
+import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
+import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.common.util.date.DateUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.framework.common.security.dto.LoginUser;
-import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
-import com.cmsr.onebase.module.system.vo.oauth.OAuth2AccessTokenPageReqVO;
 import com.cmsr.onebase.module.system.dal.database.OAuth2AccessTokenDataRepository;
 import com.cmsr.onebase.module.system.dal.database.OAuth2RefreshTokenDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO;
@@ -25,6 +23,7 @@ import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2RefreshTokenDO
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.dal.redis.oauth2.OAuth2AccessTokenRedisDAO;
 import com.cmsr.onebase.module.system.service.user.UserService;
+import com.cmsr.onebase.module.system.vo.oauth.OAuth2AccessTokenPageReqVO;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Lazy;
@@ -125,7 +124,7 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
         }
 
         // 创建访问令牌
-        OAuth2AccessTokenDO newAccessTokenDO = createOAuth2AccessToken(refreshTokenDO, clientDO);
+        OAuth2AccessTokenDO newAccessTokenDO = createOAuth2AccessToken(null, refreshTokenDO, clientDO);
 
         // 将新Token添加到在线设备记录：如果反查到deviceId则使用，否则直接存储新Token
         if (StrUtil.isNotBlank(deviceId)) {
