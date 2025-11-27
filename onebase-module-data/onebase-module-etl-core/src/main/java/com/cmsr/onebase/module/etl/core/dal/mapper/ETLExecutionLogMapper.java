@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.etl.core.dal.mapper;
 
-import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLExecutionLogDO;
+import com.cmsr.onebase.module.etl.core.dal.dataobject.EtlExecutionLogDO;
 import com.mybatisflex.core.BaseMapper;
 
-public interface ETLExecutionLogMapper extends BaseMapper<ETLExecutionLogDO> {
+public interface EtlExecutionLogMapper extends BaseMapper<EtlExecutionLogDO> {
 }

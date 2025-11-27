@@ -2,9 +2,9 @@ package com.cmsr.onebase.module.etl.core.dal.database;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.orm.repo.BaseAppRepository;
-import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLScheduleJobDO;
-import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLWorkflowDO;
-import com.cmsr.onebase.module.etl.core.dal.mapper.ETLWorkflowMapper;
+import com.cmsr.onebase.module.etl.core.dal.dataobject.EtlScheduleJobDO;
+import com.cmsr.onebase.module.etl.core.dal.dataobject.EtlWorkflowDO;
+import com.cmsr.onebase.module.etl.core.dal.mapper.EtlWorkflowMapper;
 import com.cmsr.onebase.module.etl.core.enums.ScheduleType;
 import com.cmsr.onebase.module.etl.core.vo.WorkflowBriefVO;
 import com.cmsr.onebase.module.etl.core.vo.WorkflowPageReqVO;
@@ -19,7 +19,7 @@ import static com.cmsr.onebase.module.etl.core.dal.dataobject.table.EtlWorkflowT
 
 @Slf4j
 @Repository
-public class ETLWorkflowRepository extends BaseAppRepository<ETLWorkflowMapper, ETLWorkflowDO> {
+public class EtlWorkflowRepository extends BaseAppRepository<EtlWorkflowMapper, EtlWorkflowDO> {
 
     public PageResult<WorkflowBriefVO> getWorkflowPage(WorkflowPageReqVO pageReqVO) {
         String scheduleStrategy = pageReqVO.getScheduleStrategy();
@@ -34,24 +34,24 @@ public class ETLWorkflowRepository extends BaseAppRepository<ETLWorkflowMapper, 
                         ETL_SCHEDULE_JOB.JOB_STATUS.as("is_sync_done"),
                         ETL_SCHEDULE_JOB.LAST_JOB_TIME
                 )
-                .from(ETLWorkflowDO.class)
+                .from(EtlWorkflowDO.class)
 
-                .leftJoin(ETLScheduleJobDO.class).on(ETLWorkflowDO::getWorkflowUuid, ETLScheduleJobDO::getWorkflowUuid)
+                .leftJoin(EtlScheduleJobDO.class).on(EtlWorkflowDO::getWorkflowUuid, EtlScheduleJobDO::getWorkflowUuid)
 
-                .where(ETLWorkflowDO::getApplicationId).eq(pageReqVO.getApplicationId())
-                .like(ETLWorkflowDO::getWorkflowName, pageReqVO.getFlowName(), StringUtils.isNotBlank(pageReqVO.getFlowName()))
-                .eq(ETLWorkflowDO::getScheduleStrategy, scheduleStrategy, filterByScheduleStrategy)
-                .eq(ETLWorkflowDO::getIsEnabled, pageReqVO.getEnableStatus(), pageReqVO.getEnableStatus() != null)
+                .where(EtlWorkflowDO::getApplicationId).eq(pageReqVO.getApplicationId())
+                .like(EtlWorkflowDO::getWorkflowName, pageReqVO.getFlowName(), StringUtils.isNotBlank(pageReqVO.getFlowName()))
+                .eq(EtlWorkflowDO::getScheduleStrategy, scheduleStrategy, filterByScheduleStrategy)
+                .eq(EtlWorkflowDO::getIsEnabled, pageReqVO.getEnableStatus(), pageReqVO.getEnableStatus() != null)
 
-                .orderBy(ETLWorkflowDO::getUpdateTime, false)
-                .orderBy(ETLWorkflowDO::getCreateTime, false);
+                .orderBy(EtlWorkflowDO::getUpdateTime, false)
+                .orderBy(EtlWorkflowDO::getCreateTime, false);
         Page<WorkflowBriefVO> pageResult = getMapper().paginateAs(pageReqVO.getPageNo(), pageReqVO.getPageSize(), queryWrapper, WorkflowBriefVO.class);
         return new PageResult<>(pageResult.getRecords(), pageResult.getTotalRow());
     }
 
-    public ETLWorkflowDO findOneByUuid(String workflowUuid) {
+    public EtlWorkflowDO findOneByUuid(String workflowUuid) {
         QueryWrapper queryWrapper = this.query()
-                .eq(ETLWorkflowDO::getWorkflowUuid, workflowUuid);
+                .eq(EtlWorkflowDO::getWorkflowUuid, workflowUuid);
         return getOne(queryWrapper);
     }
 }

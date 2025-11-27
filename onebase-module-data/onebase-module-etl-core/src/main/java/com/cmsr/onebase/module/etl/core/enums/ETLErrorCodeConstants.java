@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.etl.core.enums;
 
 import com.cmsr.onebase.framework.common.exception.ErrorCode;
 
-public interface ETLErrorCodeConstants {
+public interface EtlErrorCodeConstants {
     // TODO: 后续规范化后需要修改
 
     // 通用异常

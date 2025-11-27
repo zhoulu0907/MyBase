@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 
 @Data
 @Table(value = "etl_datasource")
-public class ETLDatasourceDO extends BaseAppEntity {
+public class EtlDatasourceDO extends BaseAppEntity {
 
     @Column(value = "datasource_uuid")
     private String datasourceUuid;

@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.etl.core.dal.mapper;
 
-import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLDatasourceDO;
+import com.cmsr.onebase.module.etl.core.dal.dataobject.EtlDatasourceDO;
 import com.mybatisflex.core.BaseMapper;
 
-public interface ETLDatasourceMapper extends BaseMapper<ETLDatasourceDO> {
+public interface EtlDatasourceMapper extends BaseMapper<EtlDatasourceDO> {
 }

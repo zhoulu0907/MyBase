@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.etl.core.dal.database;
 
-import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLFlinkFunctionDO;
-import com.cmsr.onebase.module.etl.core.dal.mapper.ETLFlinkFuntionMapper;
+import com.cmsr.onebase.module.etl.core.dal.dataobject.EtlFlinkFunctionDO;
+import com.cmsr.onebase.module.etl.core.dal.mapper.EtlFlinkFuntionMapper;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -16,21 +16,21 @@ import java.util.List;
  */
 @Slf4j
 @Repository
-public class ETLFlinkFunctionRepository extends ServiceImpl<ETLFlinkFuntionMapper, ETLFlinkFunctionDO> {
+public class EtlFlinkFunctionRepository extends ServiceImpl<EtlFlinkFuntionMapper, EtlFlinkFunctionDO> {
 
     public List<String> listFunctionTypes() {
-        QueryWrapper queryWrapper = query().select(ETLFlinkFunctionDO::getFunctionType)
-                .groupBy(ETLFlinkFunctionDO::getFunctionType)
-                .orderBy(ETLFlinkFunctionDO::getFunctionType, true);
+        QueryWrapper queryWrapper = query().select(EtlFlinkFunctionDO::getFunctionType)
+                .groupBy(EtlFlinkFunctionDO::getFunctionType)
+                .orderBy(EtlFlinkFunctionDO::getFunctionType, true);
         return objListAs(queryWrapper, String.class);
     }
 
-    public List<ETLFlinkFunctionDO> findFunctionsByKey(String type, String key) {
+    public List<EtlFlinkFunctionDO> findFunctionsByKey(String type, String key) {
         QueryWrapper queryWrapper = query()
-                .or(ETLFlinkFunctionDO::getFunctionType).eq(type, StringUtils::isNotBlank)
-                .or(ETLFlinkFunctionDO::getFunctionName).like(key, StringUtils::isNotBlank)
-                .or(ETLFlinkFunctionDO::getFunctionDesc).like(key, StringUtils::isNotBlank)
-                .orderBy(ETLFlinkFunctionDO::getFunctionName, true);
+                .or(EtlFlinkFunctionDO::getFunctionType).eq(type, StringUtils::isNotBlank)
+                .or(EtlFlinkFunctionDO::getFunctionName).like(key, StringUtils::isNotBlank)
+                .or(EtlFlinkFunctionDO::getFunctionDesc).like(key, StringUtils::isNotBlank)
+                .orderBy(EtlFlinkFunctionDO::getFunctionName, true);
 
         return list(queryWrapper);
     }
