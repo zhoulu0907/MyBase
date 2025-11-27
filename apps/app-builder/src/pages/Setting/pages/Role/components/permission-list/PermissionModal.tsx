@@ -36,7 +36,7 @@ const PermissionConfigModal: React.FC<PermissionConfigModalProps> = ({
   const loadPermissions = async () => {
     setLoading(true);
     try {
-      const data = await getAllPermissions();
+      const data = await getAllPermissions("tenant");
       // 接口返回三层：模块、功能、操作，需筛选出后两层数据
       const filteredData = data.filter(item => item.type !== PERMISSION_TYPES.MODULE);
       const tree = listToTree(filteredData);
