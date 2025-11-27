@@ -19,6 +19,7 @@ import com.cmsr.onebase.module.app.core.enums.menu.MenuTypeEnum;
 import com.cmsr.onebase.module.app.core.utils.MenuUtils;
 import jakarta.annotation.Resource;
 import lombok.Setter;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -63,6 +64,16 @@ public class AppMenuServiceImpl implements AppMenuService {
         List<MenuDO> menuDOS = appMenuRepository.findByApplicationIdAndType(applicationDO.getId(),
                 Set.of(MenuTypeEnum.BPM.getValue())
         );
+
+        // 兼容旧的应用，自动补齐默认的审批流菜单，todo：后续可以删除
+        if (CollectionUtils.isEmpty(menuDOS)) {
+            createDefaultBpmMenu(applicationId);
+
+            // 重新查询
+            menuDOS = appMenuRepository.findByApplicationIdAndType(applicationDO.getId(),
+                    Set.of(MenuTypeEnum.BPM.getValue())
+            );
+        }
 
         // 返回菜单
         return menuDOS.stream()
