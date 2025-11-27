@@ -66,15 +66,14 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter {
                 token = SecurityFrameworkUtils.obtainAuthorization(request,
                         securityProperties.getTokenHeader(), securityProperties.getTokenParameter());
                 if (StrUtil.isNotEmpty(token)) {
-                    Integer userType = WebFrameworkUtils.getLoginUserType(request);
                     try {
                         // 1.1 基于 token 构建登录用户
                         String runMode = getRunModeByUri(request);
 
-                        loginUser = buildLoginUserByToken(runMode, token, userType);
+                        loginUser = buildLoginUserByToken(runMode, token);
                         // 1.2 模拟 Login 功能，方便日常开发调试
                         if (loginUser == null) {
-                            loginUser = mockLoginUser(request, token, userType);
+                            loginUser = mockLoginUser(request, token);
                         }
                     } catch (Throwable ex) {
                         CommonResult<?> result = globalExceptionHandler.allExceptionHandler(request, ex);
@@ -102,14 +101,13 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter {
         chain.doFilter(request, response);
     }
 
-    private LoginUser buildLoginUserByToken(String runMode, String token, Integer userType) {
+    private LoginUser buildLoginUserByToken(String runMode, String token) {
         try {
             // 校验访问令牌
             OAuth2AccessTokenCheckRespDTO accessToken = oauth2TokenApi.checkAccessToken(runMode, token).getCheckedData();
             if (accessToken == null) {
                 return null;
             }
-            log.info("buildLoginUserByToken userType:{}", userType);
 
             // 构建登录用户
             return new LoginUser().setId(accessToken.getUserId()).setUserType(accessToken.getUserType())
@@ -131,10 +129,9 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter {
      *
      * @param request  请求
      * @param token    模拟的 token，格式为 {@link SecurityProperties#getMockSecret()} + 用户编号
-     * @param userType 用户类型
      * @return 模拟的 LoginUser
      */
-    private LoginUser mockLoginUser(HttpServletRequest request, String token, Integer userType) {
+    private LoginUser mockLoginUser(HttpServletRequest request, String token) {
         if (!securityProperties.getMockEnable()) {
             return null;
         }
@@ -144,7 +141,7 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter {
         }
         // 构建模拟用户
         Long userId = Long.valueOf(token.substring(securityProperties.getMockSecret().length()));
-        return new LoginUser().setId(userId).setUserType(userType)
+        return new LoginUser().setId(userId)
                 .setTenantId(WebFrameworkUtils.getTenantIdFromHeader(request));
     }
 

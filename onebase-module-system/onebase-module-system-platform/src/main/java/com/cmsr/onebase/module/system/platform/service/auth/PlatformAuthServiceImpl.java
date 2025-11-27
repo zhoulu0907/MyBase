@@ -9,7 +9,7 @@ import com.cmsr.onebase.framework.common.biz.security.dto.LoginFailureResultDTO;
 import com.cmsr.onebase.framework.common.biz.security.dto.PasswordExpiryCheckDTO;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.RunModeEnum;
-import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
+import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
 import com.cmsr.onebase.module.system.api.logger.dto.LoginLogCreateReqDTO;
@@ -198,7 +198,7 @@ public class PlatformAuthServiceImpl implements PlatformAuthService {
         reqDTO.setLogType(logTypeEnum.getType());
         reqDTO.setTraceId("n/a");
         reqDTO.setUserId(userId);
-        reqDTO.setUserType(getUserType().getValue());
+        reqDTO.setUserType(getUserType());
         reqDTO.setUsername(username);
         reqDTO.setUserAgent(ServletUtils.getUserAgent());
         reqDTO.setUserIp(ServletUtils.getClientIP());
@@ -247,7 +247,7 @@ public class PlatformAuthServiceImpl implements PlatformAuthService {
         // 创建访问令牌
         OAuth2AccessTokenDO accessTokenDO = oauth2TokenService.createAccessTokenWithMode(
                 RunModeEnum.PLATFORM.getValue(), null, null,
-                userId, getUserType().getValue(),
+                userId, getUserType(),
                 OAuth2ClientConstants.CLIENT_ID_DEFAULT, null);
 
         // 检查并限制设备数，踢出超限的设备
@@ -302,7 +302,7 @@ public class PlatformAuthServiceImpl implements PlatformAuthService {
         reqDTO.setTraceId("n/a");
         reqDTO.setUserId(userId);
         reqDTO.setUserType(userType);
-        if (ObjUtil.equal(getUserType().getValue(), userType)) {
+        if (ObjUtil.equal(getUserType(), userType)) {
             reqDTO.setUsername(getUsername(userId));
         } else {
             reqDTO.setUsername(memberService.getMemberUserMobile(userId));
@@ -321,8 +321,8 @@ public class PlatformAuthServiceImpl implements PlatformAuthService {
         return user != null ? user.getUsername() : null;
     }
 
-    private UserTypeEnum getUserType() {
-        return UserTypeEnum.THIRD;
+    private Integer getUserType() {
+        return SecurityFrameworkUtils.getLoginUserType();
     }
 
     @Override

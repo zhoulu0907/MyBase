@@ -71,13 +71,12 @@ public class RuntimeAuthenticationFilter extends OncePerRequestFilter {
                 token = SecurityFrameworkUtils.obtainAuthorization(request,
                         securityProperties.getTokenHeader(), securityProperties.getTokenParameter());
                 if (StrUtil.isNotEmpty(token)) {
-                    Integer userType = WebFrameworkUtils.getLoginUserType(request);
                     try {
                         // 1.1 基于 token 构建登录用户
-                        loginUser = buildLoginUserByToken(token, userType);
+                        loginUser = buildLoginUserByToken(token);
                         // 1.2 模拟 Login 功能，方便日常开发调试
                         if (loginUser == null) {
-                            loginUser = mockLoginUser(request, token, userType);
+                            loginUser = mockLoginUser(request, token);
                         }
                     } catch (Throwable ex) {
                         CommonResult<?> result = globalExceptionHandler.allExceptionHandler(request, ex);
@@ -103,16 +102,13 @@ public class RuntimeAuthenticationFilter extends OncePerRequestFilter {
         chain.doFilter(request, response);
     }
 
-    private RuntimeLoginUser buildLoginUserByToken(String token, Integer userType) {
+    private RuntimeLoginUser buildLoginUserByToken(String token) {
         try {
             // 校验访问令牌
             OAuth2AccessTokenCheckRespDTO accessToken = oauth2TokenApi.checkAccessToken(RunModeEnum.RUNTIME.getValue(), token).getCheckedData();
             if (accessToken == null) {
                 return null;
             }
-
-            // 暂不校验类型，打印日志
-            log.info("buildLoginUserByToken userType:{}", userType);
 
             // 构建登录用户
             RuntimeLoginUser loginUser = new RuntimeLoginUser();
@@ -136,10 +132,9 @@ public class RuntimeAuthenticationFilter extends OncePerRequestFilter {
      *
      * @param request  请求
      * @param token    模拟的 token，格式为 {@link SecurityProperties#getMockSecret()} + 用户编号
-     * @param userType 用户类型
      * @return 模拟的 LoginUser
      */
-    private RuntimeLoginUser mockLoginUser(HttpServletRequest request, String token, Integer userType) {
+    private RuntimeLoginUser mockLoginUser(HttpServletRequest request, String token) {
         if (!securityProperties.getMockEnable()) {
             return null;
         }
@@ -150,7 +145,7 @@ public class RuntimeAuthenticationFilter extends OncePerRequestFilter {
         // 构建模拟用户
         Long userId = Long.valueOf(token.substring(securityProperties.getMockSecret().length()));
         RuntimeLoginUser loginUser = new RuntimeLoginUser();
-        loginUser.setId(userId).setUserType(userType).setTenantId(WebFrameworkUtils.getTenantIdFromHeader(request));
+        loginUser.setId(userId).setTenantId(WebFrameworkUtils.getTenantIdFromHeader(request));
         return loginUser;
     }
 
