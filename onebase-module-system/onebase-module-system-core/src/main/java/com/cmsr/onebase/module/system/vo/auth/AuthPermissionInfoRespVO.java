@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.system.vo.auth;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -76,13 +77,14 @@ public class AuthPermissionInfoRespVO {
         @Schema(description = "菜单名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
         private String name;
 
-        @Schema(description = "路由地址,仅菜单类型为菜单或者目录时，才需要传", example = "post")
+        @Schema(hidden = true, description = "路由地址,仅菜单类型为菜单或者目录时，才需要传", example = "post")
         private String path;
 
         @Schema(description = "组件路径,仅菜单类型为菜单时，才需要传", example = "system/post/index")
+        @JsonIgnore
         private String component;
 
-        @Schema(description = "组件名", example = "SystemUser")
+        @Schema(hidden = true, description = "组件名", example = "SystemUser")
         private String componentName;
 
         @Schema(description = "菜单图标,仅菜单类型为菜单或者目录时，才需要传", example = "/menu/list")
@@ -91,10 +93,10 @@ public class AuthPermissionInfoRespVO {
         @Schema(description = "是否可见", requiredMode = Schema.RequiredMode.REQUIRED, example = "false")
         private Boolean visible;
 
-        @Schema(description = "是否缓存", requiredMode = Schema.RequiredMode.REQUIRED, example = "false")
+        @Schema(hidden = true, description = "是否缓存", requiredMode = Schema.RequiredMode.REQUIRED, example = "false")
         private Boolean keepAlive;
 
-        @Schema(description = "是否总是显示", example = "false")
+        @Schema(hidden = true, description = "是否总是显示", example = "false")
         private Boolean alwaysShow;
 
         /**

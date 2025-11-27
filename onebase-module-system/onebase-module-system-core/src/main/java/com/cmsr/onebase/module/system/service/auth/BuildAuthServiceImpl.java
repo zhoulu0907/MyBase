@@ -5,6 +5,7 @@ import com.anji.captcha.model.common.ResponseModel;
 import com.anji.captcha.model.vo.CaptchaVO;
 import com.anji.captcha.service.CaptchaService;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
+import com.cmsr.onebase.framework.common.enums.RunModeEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
@@ -61,7 +62,7 @@ import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 @Service
 @RefreshScope
 @Slf4j
-public class AdminAuthServiceImpl implements AdminAuthService {
+public class BuildAuthServiceImpl implements BuildAuthService {
 
     @Resource
     private UserService        userService;
@@ -350,7 +351,9 @@ public class AdminAuthServiceImpl implements AdminAuthService {
         // 插入登陆日志
         createLoginLog(userId, username, logType, LoginResultEnum.SUCCESS);
         // 创建访问令牌
-        OAuth2AccessTokenDO accessTokenDO = oauth2TokenService.createCorpAccessToken(corpId, userId, getUserType().getValue(),
+        OAuth2AccessTokenDO accessTokenDO = oauth2TokenService.createAccessTokenWithMode(
+                RunModeEnum.BUILD.getValue(), corpId, null,
+                userId, getUserType().getValue(),
                 OAuth2ClientConstants.CLIENT_ID_DEFAULT, null);
 
         // 检查并限制设备数，踢出超限的设备

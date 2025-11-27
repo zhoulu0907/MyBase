@@ -5,6 +5,7 @@ import com.anji.captcha.model.common.ResponseModel;
 import com.anji.captcha.model.vo.CaptchaVO;
 import com.anji.captcha.service.CaptchaService;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
+import com.cmsr.onebase.framework.common.enums.RunModeEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
@@ -58,9 +59,9 @@ import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 public class RuntimeAuthServiceImpl implements RuntimeAuthService {
 
     @Resource
-    private UserService     userService;
+    private UserService        userService;
     @Resource
-    private LoginLogService loginLogService;
+    private LoginLogService    loginLogService;
     @Resource
     private OAuth2TokenService oauth2TokenService;
     @Resource
@@ -120,7 +121,7 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         // 检查账号是否被防暴力破解锁定
         securityConfigApi.checkAccountLocked(user.getId());
         // 验证密码
-        checkPasswordMatched(password,user,account,logTypeEnum);
+        checkPasswordMatched(password, user, account, logTypeEnum);
         // 校验是否禁用
         if (CommonStatusEnum.isDisable(user.getStatus())) {
             createLoginLog(user.getId(), account, logTypeEnum, LoginResultEnum.USER_DISABLED);
@@ -138,7 +139,7 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         }
     }
 
-    private void  checkPasswordMatched(String password, AdminUserDO user,String account,LoginLogTypeEnum logTypeEnum){
+    private void checkPasswordMatched(String password, AdminUserDO user, String account, LoginLogTypeEnum logTypeEnum) {
         boolean passwordMatched = userService.isPasswordMatch(password, user.getPassword());
         if (!passwordMatched) {
             Long userId = user.getId();
@@ -150,8 +151,8 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         }
     }
 
-    public boolean   findAdminFlag( Long userId ,Long appId){
-        return  appAuthSecurityApi.isApplicationAdmin(userId,appId);
+    public boolean findAdminFlag(Long userId, Long appId) {
+        return appAuthSecurityApi.isApplicationAdmin(userId, appId);
     }
 
 
@@ -168,9 +169,9 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
 
         // 使用账号密码，进行登录
         AdminUserDO user = authenticate(reqVO.getUsername(), reqVO.getPassword());
-        AuthLoginRespVO authLoginRespVO= createTokenAfterLoginSuccess(reqVO.getAppId(),  user.getId(), reqVO.getUsername(),reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_USERNAME);
+        AuthLoginRespVO authLoginRespVO = createTokenAfterLoginSuccess(reqVO.getAppId(), user.getId(), reqVO.getUsername(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_USERNAME);
         // 设置是否管理员
-        authLoginRespVO.setAdminFlag(findAdminFlag(reqVO.getAppId(),user.getId()));
+        authLoginRespVO.setAdminFlag(findAdminFlag(reqVO.getAppId(), user.getId()));
         return authLoginRespVO;
 
     }
@@ -186,9 +187,9 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         checkPlatformAdminEnableAppCreate();
         // 使用手机密码，进行登录
         AdminUserDO user = mobileAuthenticate(reqVO.getMobile(), reqVO.getPassword());
-        AuthLoginRespVO  authLoginRespVO=  createTokenAfterLoginSuccess(reqVO.getAppId(),  user.getId(), reqVO.getMobile(),reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE);
+        AuthLoginRespVO authLoginRespVO = createTokenAfterLoginSuccess(reqVO.getAppId(), user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE);
         // 设置是否管理员
-        authLoginRespVO.setAdminFlag(findAdminFlag( reqVO.getAppId(),user.getId()));
+        authLoginRespVO.setAdminFlag(findAdminFlag(reqVO.getAppId(), user.getId()));
         return authLoginRespVO;
 
     }
@@ -267,7 +268,9 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         // 插入登陆日志
         createLoginLog(userId, username, logType, LoginResultEnum.SUCCESS);
         // 创建访问令牌
-        OAuth2AccessTokenDO accessTokenDO = oauth2TokenService.createAppAccessToken(appId, userId, getUserType().getValue(),
+        OAuth2AccessTokenDO accessTokenDO = oauth2TokenService.createAccessTokenWithMode(
+                RunModeEnum.RUNTIME.getValue(), null, appId,
+                userId, getUserType().getValue(),
                 OAuth2ClientConstants.CLIENT_ID_DEFAULT, null);
 
         // 校验并限制设备数

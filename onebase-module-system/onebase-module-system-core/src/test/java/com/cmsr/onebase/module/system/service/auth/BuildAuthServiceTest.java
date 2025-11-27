@@ -60,10 +60,10 @@ import static org.mockito.Mockito.*;
 })
 @ActiveProfiles("unit-test")
 @Transactional
-public class AdminAuthServiceTest {
+public class BuildAuthServiceTest {
 
     @Resource
-    private AdminAuthService adminAuthService;
+    private BuildAuthService buildAuthService;
 
     @Resource
     private AdminUserDataRepository adminUserDataRepository;
@@ -95,7 +95,7 @@ public class AdminAuthServiceTest {
     @BeforeEach
     public void setUp() {
         // 设置验证码为关闭状态
-        ((AdminAuthServiceImpl) adminAuthService).setCaptchaEnable(false);
+        ((BuildAuthServiceImpl) buildAuthService).setCaptchaEnable(false);
 
         // 准备测试用户
         testUser = createTestUser();
@@ -129,7 +129,7 @@ public class AdminAuthServiceTest {
         when(userService.isPasswordMatch(password, testUser.getPassword())).thenReturn(true);
 
         // 执行测试
-        AdminUserDO result = adminAuthService.authenticate(username, password);
+        AdminUserDO result = buildAuthService.authenticate(username, password);
 
         // 验证结果
         assertNotNull(result, "认证结果不应该为空");
@@ -154,7 +154,7 @@ public class AdminAuthServiceTest {
 
         // 执行测试并验证异常
         ServiceException exception = assertThrows(ServiceException.class,
-            () -> adminAuthService.authenticate(username, password));
+            () -> buildAuthService.authenticate(username, password));
 
         assertEquals(AUTH_LOGIN_BAD_CREDENTIALS.getCode(), exception.getCode(), "错误码应该一致");
         verify(loginLogService).createLoginLog(any());
@@ -174,7 +174,7 @@ public class AdminAuthServiceTest {
 
         // 执行测试并验证异常
         ServiceException exception = assertThrows(ServiceException.class,
-            () -> adminAuthService.authenticate(username, password));
+            () -> buildAuthService.authenticate(username, password));
 
         assertEquals(AUTH_LOGIN_BAD_CREDENTIALS.getCode(), exception.getCode(), "错误码应该一致");
         verify(loginLogService).createLoginLog(any());
@@ -195,7 +195,7 @@ public class AdminAuthServiceTest {
 
         // 执行测试并验证异常
         ServiceException exception = assertThrows(ServiceException.class,
-            () -> adminAuthService.authenticate(username, password));
+            () -> buildAuthService.authenticate(username, password));
 
         assertEquals(AUTH_LOGIN_USER_DISABLED.getCode(), exception.getCode(), "错误码应该一致");
         verify(loginLogService).createLoginLog(any());
@@ -216,7 +216,7 @@ public class AdminAuthServiceTest {
         when(oauth2TokenService.createAccessToken(any(), any(), any(), any())).thenReturn(testToken);
 
         // 执行测试
-        AuthLoginRespVO result = adminAuthService.login(reqVO);
+        AuthLoginRespVO result = buildAuthService.login(reqVO);
 
         // 验证结果
         assertNotNull(result, "登录结果不应该为空");
@@ -242,7 +242,7 @@ public class AdminAuthServiceTest {
         when(userService.getUserByMobile(reqVO.getMobile())).thenReturn(testUser);
 
         // 执行测试
-        assertDoesNotThrow(() -> adminAuthService.sendSmsCode(reqVO));
+        assertDoesNotThrow(() -> buildAuthService.sendSmsCode(reqVO));
 
         // 验证调用
         verify(smsCodeApi).sendSmsCode(any(SmsCodeSendReqDTO.class));
@@ -262,7 +262,7 @@ public class AdminAuthServiceTest {
 
         // 执行测试并验证异常
         ServiceException exception = assertThrows(ServiceException.class,
-            () -> adminAuthService.sendSmsCode(reqVO));
+            () -> buildAuthService.sendSmsCode(reqVO));
 
         assertEquals(AUTH_MOBILE_NOT_EXISTS.getCode(), exception.getCode(), "错误码应该一致");
     }
@@ -282,7 +282,7 @@ public class AdminAuthServiceTest {
         when(oauth2TokenService.createAccessToken(any(), any(), any(), any())).thenReturn(testToken);
 
         // 执行测试
-        AuthLoginRespVO result = adminAuthService.smsLogin(reqVO);
+        AuthLoginRespVO result = buildAuthService.smsLogin(reqVO);
 
         // 验证结果
         assertNotNull(result, "登录结果不应该为空");
@@ -307,7 +307,7 @@ public class AdminAuthServiceTest {
 
         // 执行测试并验证异常
         ServiceException exception = assertThrows(ServiceException.class,
-            () -> adminAuthService.smsLogin(reqVO));
+            () -> buildAuthService.smsLogin(reqVO));
 
         assertEquals(USER_NOT_EXISTS.getCode(), exception.getCode(), "错误码应该一致");
     }
@@ -323,7 +323,7 @@ public class AdminAuthServiceTest {
         when(oauth2TokenService.refreshAccessToken(refreshToken, any())).thenReturn(testToken);
 
         // 执行测试
-        AuthLoginRespVO result = adminAuthService.refreshToken(refreshToken);
+        AuthLoginRespVO result = buildAuthService.refreshToken(refreshToken);
 
         // 验证结果
         assertNotNull(result, "刷新结果不应该为空");
@@ -343,7 +343,7 @@ public class AdminAuthServiceTest {
         when(userService.getUser(testToken.getUserId())).thenReturn(testUser);
 
         // 执行测试
-        assertDoesNotThrow(() -> adminAuthService.logout(token, logType));
+        assertDoesNotThrow(() -> buildAuthService.logout(token, logType));
 
         // 验证调用
         verify(oauth2TokenService).removeAccessToken(token);
@@ -362,7 +362,7 @@ public class AdminAuthServiceTest {
         when(oauth2TokenService.removeAccessToken(token)).thenReturn(null);
 
         // 执行测试
-        assertDoesNotThrow(() -> adminAuthService.logout(token, logType));
+        assertDoesNotThrow(() -> buildAuthService.logout(token, logType));
 
         // 验证不会创建登出日志
         verify(loginLogService, never()).createLoginLog(any());
@@ -382,7 +382,7 @@ public class AdminAuthServiceTest {
         when(oauth2TokenService.createAccessToken(any(), any(), any(), any())).thenReturn(testToken);
 
         // 执行测试
-        AuthLoginRespVO result = adminAuthService.register(reqVO);
+        AuthLoginRespVO result = buildAuthService.register(reqVO);
 
         // 验证结果
         assertNotNull(result, "注册结果不应该为空");
@@ -406,7 +406,7 @@ public class AdminAuthServiceTest {
         when(userService.getUser(reqVO.getUserId())).thenReturn(testUser);
 
         // 执行测试
-        assertDoesNotThrow(() -> adminAuthService.resetPassword(reqVO));
+        assertDoesNotThrow(() -> buildAuthService.resetPassword(reqVO));
 
         // 验证调用
         verify(userService).updateUserPassword(testUser.getId(), reqVO.getPassword());
@@ -426,7 +426,7 @@ public class AdminAuthServiceTest {
 
         // 执行测试并验证异常
         ServiceException exception = assertThrows(ServiceException.class,
-            () -> adminAuthService.resetPassword(reqVO));
+            () -> buildAuthService.resetPassword(reqVO));
 
         assertEquals(USER_MOBILE_NOT_EXISTS.getCode(), exception.getCode(), "错误码应该一致");
     }
@@ -437,7 +437,7 @@ public class AdminAuthServiceTest {
     @Test
     public void testValidateCaptcha_Failed() {
         // 设置验证码为开启状态
-        ((AdminAuthServiceImpl) adminAuthService).setCaptchaEnable(true);
+        ((BuildAuthServiceImpl) buildAuthService).setCaptchaEnable(true);
 
         // 准备数据
         AuthLoginReqVO reqVO = new AuthLoginReqVO();
@@ -450,7 +450,7 @@ public class AdminAuthServiceTest {
 
         // 执行测试并验证异常
         ServiceException exception = assertThrows(ServiceException.class,
-            () -> adminAuthService.login(reqVO));
+            () -> buildAuthService.login(reqVO));
 
         assertEquals(AUTH_LOGIN_CAPTCHA_CODE_ERROR.getCode(), exception.getCode(), "错误码应该一致");
     }
