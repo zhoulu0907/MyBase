@@ -342,7 +342,7 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
     }
 
     private UserTypeEnum getUserType() {
-        return UserTypeEnum.THIRD;
+        return UserTypeEnum.TENANT;
     }
 
     @Override

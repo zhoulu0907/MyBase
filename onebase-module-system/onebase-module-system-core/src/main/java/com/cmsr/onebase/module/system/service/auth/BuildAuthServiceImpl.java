@@ -428,7 +428,7 @@ public class BuildAuthServiceImpl implements BuildAuthService {
     }
 
     private UserTypeEnum getUserType() {
-        return UserTypeEnum.THIRD;
+        return UserTypeEnum.TENANT;
     }
 
     @Override

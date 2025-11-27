@@ -322,7 +322,7 @@ public class PlatformAuthServiceImpl implements PlatformAuthService {
     }
 
     private UserTypeEnum getUserType() {
-        return UserTypeEnum.THIRD;
+        return UserTypeEnum.PLATFORM;
     }
 
     @Override
