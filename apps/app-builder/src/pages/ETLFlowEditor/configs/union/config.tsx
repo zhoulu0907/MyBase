@@ -6,21 +6,34 @@ import { ReactSortable } from 'react-sortablejs';
 import { getSourceNodeIdsByTarget, setNodeDataAndResetDownstream } from '../utils';
 import styles from './index.module.less';
 import { Button } from '@arco-design/web-react';
+import { cloneDeep } from 'lodash-es';
+
+type UnionConfigProps = {
+  onRegisterSave?: (fn: () => void) => void;
+};
 
 /**
  * Union 节点的配置主界面
  * 初始化页面，渲染 UnionNodeConfig 组件
  */
-const UnionConfig: React.FC = () => {
+const UnionConfig: React.FC<UnionConfigProps> = ({ onRegisterSave }) => {
   useSignals();
 
   const { setNodeData, curNode, nodeData, graphData } = etlEditorSignal;
 
-  const [data, setData] = useState<any[]>(nodeData.value[curNode.value.id].config?.data || []);
+  const [data, setData] = useState<any[]>(cloneDeep(nodeData.value[curNode.value.id].config?.data) || []);
 
   // 计算所有 columns 字段的去重并集
-  const [colTitles, setColTitles] = useState<any[]>(nodeData.value[curNode.value.id].config?.colTitles || []);
+  const [colTitles, setColTitles] = useState<any[]>(
+    cloneDeep(nodeData.value[curNode.value.id].config?.colTitles) || []
+  );
   const [emptyColumn, setEmptyColumn] = useState<string[]>([]);
+
+  const [newPayload, setNewPayload] = useState<any>(cloneDeep(nodeData.value[curNode.value.id]));
+
+  useEffect(() => {
+    onRegisterSave?.(handleSaveInner);
+  }, [onRegisterSave]);
 
   useEffect(() => {
     // console.log(nodeData.value);
@@ -72,22 +85,23 @@ const UnionConfig: React.FC = () => {
       .map((col) => col);
 
     //   初始化时候重置
-    setData(tmpData);
-    setColTitles(newColTitles);
+    if (data.length == 0 || data.length != tmpData.length) {
+      setData(tmpData);
+      setColTitles(newColTitles);
 
-    console.log('tmpData: ', tmpData);
-    console.log('newColTitles: ', newColTitles);
+      console.log('tmpData: ', tmpData);
+      console.log('newColTitles: ', newColTitles);
+    }
   }, [nodeData, graphData]);
 
-  useEffect(() => {
-    const empty = getEmptyFieldFqns(colTitles, data);
-    setEmptyColumn(empty);
-  }, []);
-
+  const handleSaveInner = () => {
+    setNodeDataAndResetDownstream(newPayload, curNode.value.id, graphData.value, nodeData.value);
+  };
   useEffect(() => {
     console.log(data);
-
-    const payload = nodeData.value[curNode.value.id];
+    const empty = getEmptyFieldFqns(colTitles, data);
+    setEmptyColumn(empty);
+    const payload = newPayload;
 
     payload.config = {
       data: data,
@@ -102,7 +116,7 @@ const UnionConfig: React.FC = () => {
       }))
     };
     console.log(payload);
-    setNodeDataAndResetDownstream(payload, curNode.value.id, graphData.value, nodeData.value);
+    setNewPayload(payload);
   }, [data, colTitles]);
 
   const getEmptyFieldFqns = (colTitles: any[], rows: any[]): string[] => {

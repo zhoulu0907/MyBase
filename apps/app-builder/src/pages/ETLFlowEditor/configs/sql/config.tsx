@@ -13,12 +13,17 @@ import CodeMirror, { EditorView } from '@uiw/react-codemirror';
 import React, { useEffect, useState } from 'react';
 import { getSourceNodeIdsByTarget } from '../utils';
 import styles from './index.module.less';
+import { cloneDeep } from 'lodash-es';
+
+type SQLConfigProps = {
+  onRegisterSave?: (fn: () => void) => void;
+};
 
 /**
  * SQL 节点的配置主界面
  * 初始化页面，渲染 SQLNodeConfig 组件
  */
-const SQLConfig: React.FC = () => {
+const SQLConfig: React.FC<SQLConfigProps> = ({ onRegisterSave }) => {
   useSignals();
 
   const { curDrawerTab, curNode, nodeData, setNodeData, graphData } = etlEditorSignal;
@@ -40,6 +45,7 @@ const SQLConfig: React.FC = () => {
   const [sqlVariables, setSqlVariables] = useState<Record<string, string>>({});
 
   const [currentCursorPos, setCurrentCursorPos] = useState<number | null>(null);
+  const [newPayload, setNewPayload] = useState<any>(cloneDeep(nodeData.value[curNode.value.id]));
 
   useEffect(() => {
     handleGetFlinkFunctionTypeList();
@@ -50,6 +56,10 @@ const SQLConfig: React.FC = () => {
       type: selectedFuncType
     });
   }, [selectedFuncType]);
+
+  useEffect(() => {
+    onRegisterSave?.(handleSaveInner);
+  }, [onRegisterSave]);
 
   useEffect(() => {
     let sourceNodeIds = getSourceNodeIdsByTarget(graphData.value, curNode.value.id);
@@ -78,7 +88,7 @@ const SQLConfig: React.FC = () => {
   }, [nodeData, curNode]);
 
   useEffect(() => {
-    let payload = nodeData.value[curNode.value.id];
+    let payload = newPayload;
 
     let sqlValue = showSQLValue;
     for (const [key, value] of Object.entries(sqlVariables)) {
@@ -97,8 +107,12 @@ const SQLConfig: React.FC = () => {
     };
 
     console.log('save:  ', curNode.value.id, '-', sqlValue);
-    setNodeData(curNode.value.id, payload);
+    setNewPayload(payload);
   }, [showSQLValue, sqlVariables]);
+
+  const handleSaveInner = () => {
+    setNodeData(curNode.value.id, newPayload);
+  };
 
   const handleGetFlinkFunctionList = async (req: FlinkFunctionListReq) => {
     const res = await flinkFunctionList(req);

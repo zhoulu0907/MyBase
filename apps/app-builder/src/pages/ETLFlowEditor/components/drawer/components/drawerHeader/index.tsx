@@ -1,4 +1,4 @@
-import { Tabs } from '@arco-design/web-react';
+import { Button, Tabs } from '@arco-design/web-react';
 import { ETLDrawerTab, etlEditorSignal, ETLNodeType } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
 import React from 'react';
@@ -10,9 +10,11 @@ import styles from './index.module.less';
  * 初始化页面，展示节点的标题
  * 后续可以按需扩展更多头部功能
  */
-interface DrawerHeaderProps {}
+interface DrawerHeaderProps {
+  onOk: () => void;
+}
 
-const DrawerHeader: React.FC<DrawerHeaderProps> = ({}) => {
+const DrawerHeader: React.FC<DrawerHeaderProps> = ({ onOk }) => {
   useSignals();
 
   const { curNode, nodeData, curDrawerTab, setCurDrawerTab } = etlEditorSignal;
@@ -37,6 +39,10 @@ const DrawerHeader: React.FC<DrawerHeaderProps> = ({}) => {
         <Tabs.TabPane key={ETLDrawerTab.DATA_PREVIEW} title="数据预览"></Tabs.TabPane>
         <Tabs.TabPane key={ETLDrawerTab.NODE_REMARK} title="节点备注"></Tabs.TabPane>
       </Tabs>
+
+      <Button type="primary" onClick={onOk}>
+        确定
+      </Button>
     </div>
   );
 };

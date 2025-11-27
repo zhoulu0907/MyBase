@@ -13,11 +13,14 @@ import React, { useEffect, useState } from 'react';
 import DataRemark from '../../components/dataRemark';
 import FieldModal, { type FieldMapping } from './components/fieldModal';
 import styles from './index.module.less';
+import { cloneDeep } from 'lodash-es';
 
 const Row = Grid.Row;
 const Col = Grid.Col;
 
-export const OutputNodeConfig: React.FC = () => {
+type OutputNodeConfigProps = { onRegisterSave?: (fn: () => void) => void };
+
+export const OutputNodeConfig: React.FC<OutputNodeConfigProps> = ({ onRegisterSave }) => {
   useSignals();
 
   const { curDrawerTab, setNodeData, curNode, nodeData } = etlEditorSignal;
@@ -27,16 +30,18 @@ export const OutputNodeConfig: React.FC = () => {
   const [datasourceOptions, setDatasourceOptions] = useState<ETLDatasourceOption[]>([]);
   const [datasourceType, setDatasourceType] = useState<string>('external');
   const [selectDatasourceUUID, setSelectDatasourceUUID] = useState<string>(
-    nodeData.value[curNode.value.id]?.config?.datasourceUUID || ''
+    cloneDeep(nodeData.value[curNode.value.id]?.config?.datasourceUUID) || ''
   );
   const [selectTableUUID, setSelectTableUUID] = useState<string>(
-    nodeData.value[curNode.value.id]?.config?.tableUUID || ''
+    cloneDeep(nodeData.value[curNode.value.id]?.config?.tableUUID) || ''
   );
   const [tableOptions, setTableOptions] = useState<ETLTable[]>([]);
   const [targetColumns, setTargetColumns] = useState<ELTColumn[]>([]);
   const [fieldMappings, setFieldMappings] = useState<FieldMapping[]>(
-    nodeData.value[curNode.value.id]?.config?.fields || []
+    cloneDeep(nodeData.value[curNode.value.id]?.config?.fields) || []
   );
+
+  const [newPayload, setNewPayload] = useState<any>(cloneDeep(nodeData.value[curNode.value.id]));
 
   useEffect(() => {
     handleListAppETLDatasource();
@@ -54,6 +59,14 @@ export const OutputNodeConfig: React.FC = () => {
     }
   }, [selectTableUUID]);
 
+  useEffect(() => {
+    onRegisterSave?.(handleSaveInner);
+  }, [onRegisterSave]);
+
+  const handleSaveInner = () => {
+    setNodeData(curNode.value.id, newPayload);
+  };
+
   const handleDatasourceTypeOnChange = (value: string) => {
     setDatasourceType(value);
     setSelectDatasourceUUID('');
@@ -61,7 +74,7 @@ export const OutputNodeConfig: React.FC = () => {
     setTargetColumns([]);
     setFieldMappings([]);
 
-    const payload = nodeData.value[curNode.value.id];
+    const payload = newPayload;
     payload.config = {
       datasourceType: value,
       datasourceUUID: '',
@@ -71,7 +84,7 @@ export const OutputNodeConfig: React.FC = () => {
     payload.output = {
       verified: false
     };
-    setNodeData(curNode.value.id, payload);
+    setNewPayload(payload);
   };
 
   const handleDatasourceUUIDOnChange = (value: string) => {
@@ -79,7 +92,7 @@ export const OutputNodeConfig: React.FC = () => {
 
     setTargetColumns([]);
     setFieldMappings([]);
-    const payload = nodeData.value[curNode.value.id];
+    const payload = newPayload;
     payload.config = {
       ...payload.config,
       datasourceUUID: value,
@@ -91,7 +104,7 @@ export const OutputNodeConfig: React.FC = () => {
       verified: false
     };
 
-    setNodeData(curNode.value.id, payload);
+    setNewPayload(payload);
   };
 
   const handleListAppETLDatasource = async () => {
@@ -126,7 +139,7 @@ export const OutputNodeConfig: React.FC = () => {
 
     setFieldMappings([]);
 
-    const payload = nodeData.value[curNode.value.id];
+    const payload = newPayload;
     payload.config = {
       ...payload.config,
       tableUUID: tableUuid,
@@ -136,7 +149,7 @@ export const OutputNodeConfig: React.FC = () => {
       verified: false
     };
 
-    setNodeData(curNode.value.id, payload);
+    setNewPayload(payload);
   };
 
   const handleListETLTableColumns = async (tableUuid: string) => {
@@ -148,7 +161,7 @@ export const OutputNodeConfig: React.FC = () => {
 
   const handleFieldModalOk = (validFields: FieldMapping[]) => {
     console.log('validFields: ', validFields);
-    const payload = nodeData.value[curNode.value.id];
+    const payload = newPayload;
 
     payload.config = {
       ...payload.config,
@@ -159,7 +172,7 @@ export const OutputNodeConfig: React.FC = () => {
       verified: true
     };
 
-    setNodeData(curNode.value.id, payload);
+    setNewPayload(payload);
     setFieldMappings(validFields);
   };
 
@@ -184,7 +197,7 @@ export const OutputNodeConfig: React.FC = () => {
               <Select
                 style={{ width: '200px' }}
                 placeholder="请选择数据源"
-                value={nodeData.value[curNode.value.id]?.config?.datasourceUUID}
+                value={selectDatasourceUUID}
                 options={datasourceOptions.map((option) => ({ label: option.name, value: option.uuid }))}
                 onChange={handleDatasourceUUIDOnChange}
               />
@@ -196,7 +209,7 @@ export const OutputNodeConfig: React.FC = () => {
             <Col span={12}>
               <Select
                 style={{ width: '200px' }}
-                value={nodeData.value[curNode.value.id]?.config?.tableUUID}
+                value={selectTableUUID}
                 options={tableOptions.map((option) => ({ label: option.name, value: option.uuid }))}
                 onChange={handleSelectTableOnChange}
               />
