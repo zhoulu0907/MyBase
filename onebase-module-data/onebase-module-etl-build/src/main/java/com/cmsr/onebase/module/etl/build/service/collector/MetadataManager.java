@@ -1,62 +1,68 @@
 package com.cmsr.onebase.module.etl.build.service.collector;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
+import com.cmsr.onebase.framework.common.util.string.UuidUtils;
 import com.cmsr.onebase.module.etl.common.entity.CatalogData;
 import com.cmsr.onebase.module.etl.common.entity.SchemaData;
 import com.cmsr.onebase.module.etl.common.entity.TableData;
-import com.cmsr.onebase.module.etl.core.dal.database.ETLCatalogRepository;
-import com.cmsr.onebase.module.etl.core.dal.database.ETLSchemaRepository;
-import com.cmsr.onebase.module.etl.core.dal.database.ETLTableRepository;
-import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLCatalogDO;
-import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLSchemaDO;
-import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLTableDO;
+import com.cmsr.onebase.module.etl.core.dal.database.EtlCatalogRepository;
+import com.cmsr.onebase.module.etl.core.dal.database.EtlSchemaRepository;
+import com.cmsr.onebase.module.etl.core.dal.database.EtlTableRepository;
+import com.cmsr.onebase.module.etl.core.dal.dataobject.EtlCatalogDO;
+import com.cmsr.onebase.module.etl.core.dal.dataobject.EtlSchemaDO;
+import com.cmsr.onebase.module.etl.core.dal.dataobject.EtlTableDO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 public class MetadataManager {
 
     @Resource
-    private ETLCatalogRepository catalogRepository;
+    private EtlCatalogRepository catalogRepository;
 
     @Resource
-    private ETLSchemaRepository schemaRepository;
+    private EtlSchemaRepository schemaRepository;
 
     @Resource
-    private ETLTableRepository tableRepository;
+    private EtlTableRepository tableRepository;
 
-    public void saveMetadata(Long applicationId, Long datasourceId, CatalogData catalogData) {
-        ETLCatalogDO catalogDO = extractCatalogDO(applicationId, datasourceId, catalogData);
-        catalogDO = catalogRepository.upsert(catalogDO);
-        Long catalogId = catalogDO.getId();
+    public void saveMetadata(Long applicationId, String datasourceUuid, CatalogData catalogData) {
+        EtlCatalogDO catalogDO = extractCatalogDO(applicationId, datasourceUuid, catalogData);
+        catalogRepository.saveOrUpdate(catalogDO);
+        String catalogUuid = catalogDO.getCatalogUuid();
         for (SchemaData schemaData : catalogData.getSchemas()) {
-            ETLSchemaDO schemaDO = extractSchemaDO(applicationId, datasourceId, catalogId, schemaData);
-            schemaDO = schemaRepository.upsert(schemaDO);
-            Long schemaId = schemaDO.getId();
+            EtlSchemaDO schemaDO = extractSchemaDO(applicationId, datasourceUuid, catalogUuid, schemaData);
+            schemaRepository.saveOrUpdate(schemaDO);
+            String schemaUuid = schemaDO.getSchemaUuid();
             for (TableData tableData : schemaData.getTables()) {
-                ETLTableDO etlTableDO = extractTableDO(applicationId, datasourceId, catalogId, schemaId, tableData);
-                tableRepository.upsert(etlTableDO);
+                EtlTableDO etlTableDO = extractTableDO(applicationId, datasourceUuid, catalogUuid, schemaUuid, tableData);
+                tableRepository.saveOrUpdate(etlTableDO);
             }
-            List<ETLTableDO> tableDOS = tableRepository.findAllByCatalogIdAndSchemaIdAndDatasourceId(datasourceId, catalogId, schemaId);
-            for (ETLTableDO tableDO : tableDOS) {
-                Optional<TableData> optional = schemaData.getTables().stream()
-                        .filter(tableData -> tableData.getName().equals(tableDO.getTableName())).findAny();
-                if (!optional.isPresent()) {
+            Set<String> collectedTableNames = schemaData.getTables().stream().map(TableData::getName).collect(Collectors.toSet());
+            List<EtlTableDO> tableDOS = tableRepository.findAllByCatalogAndSchemaAndDatasource(datasourceUuid, catalogUuid, schemaUuid);
+            for (EtlTableDO tableDO : tableDOS) {
+                if (!collectedTableNames.contains(tableDO.getTableName())) {
                     tableRepository.removeById(tableDO);
                 }
             }
         }
     }
 
-    private ETLCatalogDO extractCatalogDO(Long applicationId, Long datasourceId, CatalogData catalogData) {
-        ETLCatalogDO catalogDO = new ETLCatalogDO();
-        catalogDO.setApplicationId(applicationId);
-        catalogDO.setDatasourceId(datasourceId);
+    private EtlCatalogDO extractCatalogDO(Long applicationId, String datasourceUuid, CatalogData catalogData) {
+        EtlCatalogDO catalogDO = catalogRepository.findCatalogByDatasource(applicationId, datasourceUuid);
+        if (catalogDO == null) {
+            catalogDO = new EtlCatalogDO();
+            catalogDO.setApplicationId(applicationId);
+            catalogDO.setDatasourceUuid(datasourceUuid);
+            catalogDO.setCatalogUuid(UuidUtils.getUuid());
+        }
         String name = catalogData.getName();
         catalogDO.setCatalogName(name);
         catalogDO.setDisplayName(name);
@@ -65,11 +71,16 @@ public class MetadataManager {
         return catalogDO;
     }
 
-    private ETLSchemaDO extractSchemaDO(Long applicationId, Long datasourceId, Long catalogId, SchemaData schemaData) {
-        ETLSchemaDO schemaDO = new ETLSchemaDO();
-        schemaDO.setApplicationId(applicationId);
-        schemaDO.setDatasourceId(datasourceId);
-        schemaDO.setCatalogId(catalogId);
+    private EtlSchemaDO extractSchemaDO(Long applicationId, String datasourceUuid, String catalogUuid, SchemaData schemaData) {
+
+        EtlSchemaDO schemaDO = schemaRepository.findByDatasourceAndCatalog(applicationId, datasourceUuid, catalogUuid);
+        if (schemaDO == null) {
+            schemaDO = new EtlSchemaDO();
+            schemaDO.setApplicationId(applicationId);
+            schemaDO.setDatasourceUuid(datasourceUuid);
+            schemaDO.setCatalogUuid(catalogUuid);
+            schemaDO.setSchemaUuid(UuidUtils.getUuid());
+        }
         String name = schemaData.getName();
         schemaDO.setSchemaName(name);
         schemaDO.setDisplayName(name);
@@ -78,13 +89,17 @@ public class MetadataManager {
         return schemaDO;
     }
 
-    private ETLTableDO extractTableDO(Long applicationId, Long datasourceId, Long catalogId, Long schemaId, TableData tableData) {
-        ETLTableDO tableDO = new ETLTableDO();
-        tableDO.setApplicationId(applicationId);
-        tableDO.setDatasourceId(datasourceId);
-        tableDO.setCatalogId(catalogId);
-        tableDO.setSchemaId(schemaId);
+    private EtlTableDO extractTableDO(Long applicationId, String datasourceUuid, String catalogUuid, String schemaUuid, TableData tableData) {
         String tableName = tableData.getName();
+        EtlTableDO tableDO = tableRepository.findOneByQualifiedName(applicationId, datasourceUuid, catalogUuid, schemaUuid, tableName);
+        if (tableDO == null) {
+            tableDO = new EtlTableDO();
+            tableDO.setApplicationId(applicationId);
+            tableDO.setDatasourceUuid(datasourceUuid);
+            tableDO.setCatalogUuid(catalogUuid);
+            tableDO.setSchemaUuid(schemaUuid);
+            tableDO.setTableUuid(UuidUtils.getUuid());
+        }
         tableDO.setTableName(tableName);
         tableDO.setDisplayName(tableName);
         tableDO.setTableType(tableData.getType());
@@ -92,6 +107,9 @@ public class MetadataManager {
         String comment = tableData.getComment();
         tableDO.setRemarks(comment);
         tableDO.setDeclaration(comment);
+        if (StringUtils.isNotBlank(comment)) {
+            tableDO.setDisplayName(comment);
+        }
 
         return tableDO;
     }

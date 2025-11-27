@@ -55,11 +55,11 @@ public class WorkflowProvider {
     }
 
     private void complementJdbcInputInformation(JdbcInputConfig jdbcInputConfig) throws Exception {
-        Long datasourceId = jdbcInputConfig.getDatasourceId();
-        Long tableId = jdbcInputConfig.getTableId();
+        String datasourceUuid = jdbcInputConfig.getDatasourceUuid();
+        String tableUuid = jdbcInputConfig.getTableUuid();
 
-        EtlTable etlTable = queryProvider.findTableById(tableId);
-        EtlDataSource etlDataSource = queryProvider.findConnectPropertiesById(datasourceId);
+        EtlTable etlTable = queryProvider.findTableByUuid(tableUuid);
+        EtlDataSource etlDataSource = queryProvider.findConnectPropertiesByUuid(datasourceUuid);
 
         JdbcConfig jdbcConfig = JacksonUtil.fromJson(etlDataSource.getConfig(), JdbcConfig.class);
         jdbcConfig.setDatabaseType(etlDataSource.getDatasourceType());
@@ -105,11 +105,11 @@ public class WorkflowProvider {
 
 
     private void complementJdbcOutputInformation(JdbcOutputConfig jdbcOutputConfig) throws Exception {
-        Long datasourceId = jdbcOutputConfig.getDatasourceId();
-        Long tableId = jdbcOutputConfig.getTableId();
+        String datasourceUuid = jdbcOutputConfig.getDatasourceUuid();
+        String tableUuid = jdbcOutputConfig.getTableUuid();
 
-        EtlDataSource etlDataSource = queryProvider.findConnectPropertiesById(datasourceId);
-        EtlTable etlTable = queryProvider.findTableById(tableId);
+        EtlDataSource etlDataSource = queryProvider.findConnectPropertiesByUuid(datasourceUuid);
+        EtlTable etlTable = queryProvider.findTableByUuid(tableUuid);
 
         JdbcConfig jdbcConfig = JacksonUtil.fromJson(etlDataSource.getConfig(), JdbcConfig.class);
         jdbcConfig.setDatabaseType(etlDataSource.getDatasourceType());

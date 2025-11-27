@@ -3,9 +3,8 @@ package com.cmsr.onebase.module.app.core.impl.appresource;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.api.appresource.AppResourceApi;
 import com.cmsr.onebase.module.app.api.appresource.dto.PageRespDTO;
-import com.cmsr.onebase.module.app.core.dal.database.appresource.AppPageRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.PageDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.PageSetPageDO;
+import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageRepository;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePageDO;
 import jakarta.annotation.Resource;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
@@ -32,10 +31,10 @@ public class AppResourceImpl implements AppResourceApi {
         }
 
         ConfigStore configStore = new DefaultConfigStore();
-        configStore.eq(PageSetPageDO.PAGE_SET_ID, pageSetId);
+        configStore.eq("pageset_id", pageSetId);
 
         // 读取页面集中的页面
-        List<PageDO> pageDOS = pageRepository.findAllByConfig(configStore);
+        List<AppResourcePageDO> pageDOS = pageRepository.list();
 
         pageDOS.forEach(pageDO -> {
             PageRespDTO pageRespDTO = BeanUtils.toBean(pageDO, PageRespDTO.class);

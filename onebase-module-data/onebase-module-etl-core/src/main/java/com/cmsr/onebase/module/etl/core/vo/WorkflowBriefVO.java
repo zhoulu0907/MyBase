@@ -17,6 +17,9 @@ public class WorkflowBriefVO {
     @Schema(description = "应用ID")
     private Long applicationId;
 
+    @Schema(description = "数据流UUID")
+    private String flowUuid;
+
     @Schema(description = "数据流名称")
     private String flowName;
 

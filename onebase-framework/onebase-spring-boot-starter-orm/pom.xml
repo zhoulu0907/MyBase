@@ -26,16 +26,14 @@
             <artifactId>mybatis-flex-spring-boot3-starter</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.mybatis-flex</groupId>
-            <artifactId>mybatis-flex-processor</artifactId>
-            <scope>provided</scope>
+            <groupId>com.github.pagehelper</groupId>
+            <artifactId>pagehelper-spring-boot-starter</artifactId>
+            <version>2.1.1</version>
         </dependency>
         <dependency>
             <groupId>com.github.f4b6a3</groupId>
             <artifactId>uuid-creator</artifactId>
-            <version>6.1.1</version>
         </dependency>
-
         <!-- Aynline 相关 -->
         <dependency>
             <groupId>org.anyline</groupId>

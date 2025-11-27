@@ -161,3 +161,13 @@ anyline:
   is-log-sql-param: false
   is-log-sql-when-error: true
   is-log-sql-param-when-error: true
+
+
+mybatis-flex:
+  configuration:
+    mapUnderscoreToCamelCase: true
+  print-sql: true
+pagehelper:
+  helperDialect: postgresql
+  reasonable: false
+  defaultCount: true

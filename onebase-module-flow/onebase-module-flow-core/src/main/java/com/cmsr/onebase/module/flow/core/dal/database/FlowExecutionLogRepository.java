@@ -8,8 +8,8 @@ import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryCondition;
 import com.mybatisflex.core.query.QueryMethods;
 import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.core.row.Row;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
-import org.apache.commons.collections4.MapUtils;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -58,10 +58,10 @@ public class FlowExecutionLogRepository extends ServiceImpl<FlowExecutionLogMapp
                     .where(filterCondition)
                     .groupBy(FLOW_EXECUTION_LOG.EXECUTION_RESULT);
             int total = 0;
-            List<Map> dataSet = this.listAs(queryWrapper, Map.class);
-            for (Map dataRow : dataSet) {
-                String key = MapUtils.getString(dataRow, "result");
-                long value = MapUtils.getLong(dataRow, "counts");
+            List<Row> dataSet = this.listAs(queryWrapper, Row.class);
+            for (Row dataRow : dataSet) {
+                String key = dataRow.getString("result");
+                long value = dataRow.getLong("counts");
                 result.put(key, value);
                 total += value;
             }

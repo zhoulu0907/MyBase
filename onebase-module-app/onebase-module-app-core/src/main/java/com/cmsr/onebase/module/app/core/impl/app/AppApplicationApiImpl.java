@@ -1,25 +1,21 @@
 package com.cmsr.onebase.module.app.core.impl.app;
 
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
+import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
 import com.cmsr.onebase.module.app.api.app.dto.TagVO;
-import com.cmsr.onebase.module.app.core.dal.database.AppSqlQueryRepository;
 import com.cmsr.onebase.module.app.core.dal.database.app.AppApplicationRepository;
 import com.cmsr.onebase.module.app.core.dal.database.tag.AppApplicationTagRepository;
+import com.cmsr.onebase.module.app.core.dal.database.AppSqlQueryRepository;
 import com.cmsr.onebase.module.app.core.dal.database.tag.AppTagRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.app.ApplicationDO;
-import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.app.ApplicationTagDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.tag.TagDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationTagDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppTagDO;
 import jakarta.annotation.Resource;
 import lombok.Setter;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.DataRow;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -56,7 +52,7 @@ public class AppApplicationApiImpl implements AppApplicationApi {
 
     @Override
     public List<ApplicationDTO> findAppApplicationByAppName(String appName) {
-        List<ApplicationDO> applicationList = appApplicationRepository.findAppApplicationByAppName(appName);
+        List<AppApplicationDO> applicationList = appApplicationRepository.findAppApplicationByAppName(appName);
         return applicationList.stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
@@ -64,33 +60,30 @@ public class AppApplicationApiImpl implements AppApplicationApi {
 
     @Override
     public List<ApplicationDTO> findAppApplicationByAppIds(Collection<Long> appIds) {
-        List<ApplicationDO> applicationList = appApplicationRepository.findAppApplicationByAppIds(appIds);
+        List<AppApplicationDO> applicationList = appApplicationRepository.findAppApplicationByAppIds(appIds);
         return applicationList.stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
-    private ApplicationDTO convertToDTO(ApplicationDO applicationDO) {
+    private ApplicationDTO convertToDTO(AppApplicationDO applicationDO) {
         return BeanUtils.toBean(applicationDO, ApplicationDTO.class);
     }
 
     @Override
     @TenantIgnore
-    public Map<Long, Integer> findAppApplicationAll() {
-        List<ApplicationDO> allApplications = appApplicationRepository.finAppApplicationAll();
+    public Map<Integer, Integer> findAppApplicationAll() {
+        List<AppApplicationDO> allApplications = appApplicationRepository.finAppApplicationAll();
         return allApplications.stream()
                 .collect(Collectors.groupingBy(
-                        app -> app.getTenantId(),
+                        app -> app.getTenantId().intValue(),  // Long转Integer
                         Collectors.summingInt(app -> 1)       // Integer计数替代Long计数
                 ));
     }
 
     @Override
     public void updateAppTimeById(Long appId) {
-        // 更新修改日期 没有别的字段更新，不写不生效
-        DataRow row = new DataRow();
-        row.put(BaseDO.UPDATE_TIME, LocalDateTime.now());
-        appApplicationRepository.updateByConfig(row, new DefaultConfigStore().eq(ApplicationDO.ID, appId));
+        appApplicationRepository.updateAppTimeByApplicationId(appId);
     }
 
     @Override
@@ -98,7 +91,7 @@ public class AppApplicationApiImpl implements AppApplicationApi {
         Map<Long, List<TagVO>> tagListMap = new HashMap<>();
         Map<Long, List<Long>> listMap = findTagIdsByApplicationIdsGrouped(appIds);
         listMap.forEach((appId, tagIds) -> {
-            List<TagDO> tagDOList = tagRepository.findAllByIds(tagIds);
+            List<AppTagDO> tagDOList = tagRepository.listByIds(tagIds);
             List<TagVO> tagVOList = tagDOList.stream()
                     .map(tagDO -> BeanUtils.toBean(tagDO, TagVO.class))
                     .collect(Collectors.toList());
@@ -109,13 +102,12 @@ public class AppApplicationApiImpl implements AppApplicationApi {
     }
 
     public Map<Long, List<Long>> findTagIdsByApplicationIdsGrouped(List<Long> appIds) {
-        List<ApplicationTagDO> tagDOListIds = applicationTagRepository.findTagIdsByApplicationIds(appIds);
+        List<AppApplicationTagDO> tagDOListIds = applicationTagRepository.findTagIdsByApplicationIds(appIds);
         return tagDOListIds.stream()
                 .collect(Collectors.groupingBy(
-                        ApplicationTagDO::getApplicationId,
-                        Collectors.mapping(ApplicationTagDO::getTagId, Collectors.toList())
+                        AppApplicationTagDO::getApplicationId,
+                        Collectors.mapping(AppApplicationTagDO::getTagId, Collectors.toList())
                 ));
     }
-
 
 }

@@ -1,14 +1,18 @@
 package com.cmsr.onebase.module.app.core.dal.database.auth;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageParam;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthRoleDeptDO;
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthRoleDeptDO;
+import com.cmsr.onebase.module.app.core.dal.mapper.AppAuthRoleDeptMapper;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.spring.service.impl.ServiceImpl;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+
+import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppAuthRoleDeptTableDef.APP_AUTH_ROLE_DEPT;
+import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppAuthRoleTableDef.APP_AUTH_ROLE;
 
 /**
  * 应用权限用户角色数据访问层
@@ -17,91 +21,74 @@ import java.util.List;
  * @date 2025-08-05
  */
 @Repository
-public class AppAuthRoleDeptRepository extends DataRepository<AuthRoleDeptDO> {
-
-    public AppAuthRoleDeptRepository() {
-        super(AuthRoleDeptDO.class);
-    }
+public class AppAuthRoleDeptRepository extends ServiceImpl<AppAuthRoleDeptMapper, AppAuthRoleDeptDO> {
 
     public void addRoleDept(Long roleId, List<Long> deptIds, Integer isIncludeChild) {
         for (Long deptId : deptIds) {
-            ConfigStore configStore = new DefaultConfigStore();
-            configStore.eq("role_id", roleId);
-            configStore.eq("dept_id", deptId);
-            if (this.countByConfig(configStore) == 0) {
-                AuthRoleDeptDO authRoleDeptDO = new AuthRoleDeptDO();
+            QueryWrapper queryWrapper = this.query()
+                    .eq(AppAuthRoleDeptDO::getRoleId, roleId)
+                    .eq(AppAuthRoleDeptDO::getDeptId, deptId);
+            boolean exists = this.exists(queryWrapper);
+            if (!exists) {
+                AppAuthRoleDeptDO authRoleDeptDO = new AppAuthRoleDeptDO();
                 authRoleDeptDO.setRoleId(roleId);
                 authRoleDeptDO.setDeptId(deptId);
                 authRoleDeptDO.setIsIncludeChild(isIncludeChild);
-                this.insert(authRoleDeptDO);
+                this.save(authRoleDeptDO);
             }
         }
-
     }
 
-    public List<AuthRoleDeptDO> findByRoleId(Long roleId) {
-        ConfigStore configStore = new DefaultConfigStore();
-        configStore.eq("role_id", roleId);
-        return findAllByConfig(configStore);
+    public List<AppAuthRoleDeptDO> findByRoleId(Long roleId) {
+        QueryWrapper queryWrapper = this.query()
+                .eq(AppAuthRoleDeptDO::getRoleId, roleId);
+        return list(queryWrapper);
     }
 
-    public PageResult<AuthRoleDeptDO> findByRoleId(Long roleId, PageParam pageParam) {
-        ConfigStore configStore = new DefaultConfigStore();
-        configStore.eq("role_id", roleId);
-        return this.findPageWithConditions(configStore, pageParam.getPageNo(), pageParam.getPageSize());
+    public PageResult<AppAuthRoleDeptDO> findByRoleId(Long roleId, PageParam pageParam) {
+        QueryWrapper queryWrapper = this.query()
+                .eq(AppAuthRoleDeptDO::getRoleId, roleId);
+        Page<AppAuthRoleDeptDO> pageQuery = Page.of(pageParam.getPageNo(), pageParam.getPageSize());
+        Page<AppAuthRoleDeptDO> pageResult = this.page(pageQuery, queryWrapper);
+        return new PageResult<>(pageResult.getRecords(), pageResult.getTotalRow());
     }
 
 
     public void deleteRoleDept(Long roleId, List<Long> deptIds) {
-        ConfigStore configStore = new DefaultConfigStore();
-        configStore.eq("role_id", roleId);
-        configStore.in("dept_id", deptIds);
-        this.deleteByConfig(configStore);
+        this.updateChain()
+                .eq(AppAuthRoleDeptDO::getRoleId, roleId)
+                .in(AppAuthRoleDeptDO::getDeptId, deptIds)
+                .remove();
     }
 
     public void deleteRoleDept(Long roleId, Long deptId) {
-        ConfigStore configStore = new DefaultConfigStore();
-        configStore.eq("role_id", roleId);
-        configStore.eq("dept_id", deptId);
-        this.deleteByConfig(configStore);
+        this.updateChain()
+                .eq(AppAuthRoleDeptDO::getRoleId, roleId)
+                .eq(AppAuthRoleDeptDO::getDeptId, deptId)
+                .remove();
     }
 
     public void deleteByRoleId(Long roleId) {
-        ConfigStore configStore = new DefaultConfigStore();
-        configStore.eq("role_id", roleId);
-        this.deleteByConfig(configStore);
+        this.updateChain()
+                .eq(AppAuthRoleDeptDO::getRoleId, roleId)
+                .remove();
     }
-
 
     public void deleteByDeptId(Long deptId) {
-        ConfigStore configStore = new DefaultConfigStore();
-        configStore.eq("dept_id", deptId);
-        this.deleteByConfig(configStore);
+        this.updateChain()
+                .eq(AppAuthRoleDeptDO::getDeptId, deptId)
+                .remove();
     }
 
 
-    public List<AuthRoleDeptDO> findByApplicationId(Long applicationId) {
-        ConfigStore configStore = new DefaultConfigStore();
-        configStore.param("applicationId", applicationId);
-        String sql = """
-                select
-                	d.*
-                from
-                	app_auth_role_dept d,
-                	app_auth_role r
-                where
-                	d.deleted = 0
-                	and r.deleted = 0
-                	and d.role_id = r.id
-                	and r.application_id = #{applicationId}
-                """;
-        return this.querys(sql, configStore).stream().map(dataRow -> {
-            AuthRoleDeptDO authRoleDeptDO = new AuthRoleDeptDO();
-            authRoleDeptDO.setId(dataRow.getLong("id"));
-            authRoleDeptDO.setRoleId(dataRow.getLong("role_id"));
-            authRoleDeptDO.setDeptId(dataRow.getLong("dept_id"));
-            authRoleDeptDO.setIsIncludeChild(dataRow.getInt("is_include_child"));
-            return authRoleDeptDO;
-        }).toList();
+    public List<AppAuthRoleDeptDO> findByApplicationId(Long applicationId) {
+        QueryWrapper queryWrapper = this.query()
+                .select(
+                        APP_AUTH_ROLE_DEPT.ALL_COLUMNS
+                )
+                .from(APP_AUTH_ROLE_DEPT, APP_AUTH_ROLE)
+                .where(APP_AUTH_ROLE_DEPT.ROLE_ID.eq(APP_AUTH_ROLE.ID))
+                .and(APP_AUTH_ROLE.APPLICATION_ID.eq(applicationId));
+        return this.list(queryWrapper);
     }
 }
