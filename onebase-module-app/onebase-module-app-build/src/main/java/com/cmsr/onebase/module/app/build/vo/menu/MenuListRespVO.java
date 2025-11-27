@@ -48,4 +48,8 @@ public class MenuListRespVO {
     @JsonIgnore
     private boolean filter = false;
 
+
+    @Schema(description = "页面集类型 1-普通表单 2-流程表单 3-工作台")
+    private Integer pageSetType;
+
 }

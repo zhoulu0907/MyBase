@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
-@Schema(description = "数据工厂 - ETL - 创建ETL VO")
+@Schema(description = "数据工厂 - Etl - 创建Etl VO")
 @Data
 public class WorkflowCreateVO {
 

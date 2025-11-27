@@ -1,9 +1,9 @@
 package com.cmsr.onebase.module.app.core.dal.database.version;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.version.VersionResourceDO;
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
+import com.cmsr.onebase.framework.orm.repo.BaseAppRepository;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppVersionResourceDO;
+import com.cmsr.onebase.module.app.core.dal.mapper.AppVersionResourceMapper;
+import com.mybatisflex.core.query.QueryWrapper;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -11,32 +11,27 @@ import org.springframework.stereotype.Repository;
  * @Date：2025/8/6 14:44
  */
 @Repository
-public class AppVersionResourceRepository extends DataRepository<VersionResourceDO> {
-
-    public AppVersionResourceRepository() {
-        super(VersionResourceDO.class);
-    }
+public class AppVersionResourceRepository extends BaseAppRepository<AppVersionResourceMapper, AppVersionResourceDO> {
 
     public void deleteByApplicationId(Long applicationId) {
-        ConfigStore configs = new DefaultConfigStore();
-        configs.eq("application_id", applicationId);
-        deleteByConfig(configs);
+        this.updateChain()
+                .eq(AppVersionResourceDO::getApplicationId, applicationId)
+                .remove();
     }
 
 
-    public VersionResourceDO findByApplicationIdAndVersionIdAndResType(Long applicationId, Long versionId, String resType) {
-        ConfigStore configs = new DefaultConfigStore();
-        configs.eq("application_id", applicationId);
-        configs.eq("version_id", versionId);
-        configs.eq("res_type", resType);
-        return findOne(configs);
+    public AppVersionResourceDO findByApplicationIdAndVersionIdAndResType(Long applicationId, Long versionId, String resType) {
+        QueryWrapper queryWrapper = this.query()
+                .eq(AppVersionResourceDO::getApplicationId, applicationId)
+                .eq(AppVersionResourceDO::getVersionId, versionId)
+                .eq(AppVersionResourceDO::getResType, resType);
+        return this.getOne(queryWrapper);
     }
 
     public void deleteByVersionId(Long versionId) {
-        ConfigStore configs = new DefaultConfigStore();
-        configs.eq("version_id", versionId);
-        deleteByConfig(configs);
+        this.updateChain()
+                .eq(AppVersionResourceDO::getVersionId, versionId)
+                .remove();
     }
-
 
 }

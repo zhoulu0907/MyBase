@@ -1,13 +1,24 @@
 package com.cmsr.onebase.module.app.core.dal.database.auth;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthRoleDO;
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Order;
+import com.cmsr.onebase.framework.common.pojo.PageParam;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.orm.repo.BaseAppRepository;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthRoleDO;
+import com.cmsr.onebase.module.app.core.dal.mapper.AppAuthRoleMapper;
+import com.cmsr.onebase.module.app.core.dto.auth.RoleMemberDTO;
+import com.cmsr.onebase.module.app.core.vo.app.AppUserPhotoDTO;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
+import com.mybatisflex.core.query.QueryWrapper;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppAuthRoleTableDef.APP_AUTH_ROLE;
+import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppAuthRoleUserTableDef.APP_AUTH_ROLE_USER;
 
 /**
  * 应用角色数据访问类
@@ -16,67 +27,70 @@ import java.util.List;
  * @date 2025-08-05
  */
 @Repository
-public class AppAuthRoleRepository extends DataRepository<AuthRoleDO> {
+public class AppAuthRoleRepository extends BaseAppRepository<AppAuthRoleMapper, AppAuthRoleDO> {
 
-    public AppAuthRoleRepository() {
-        super(AuthRoleDO.class);
+    public List<AppAuthRoleDO> findByApplicationId(Long applicationId) {
+        QueryWrapper queryWrapper = this.query()
+                .eq(AppAuthRoleDO::getApplicationId, applicationId)
+                .orderBy(AppAuthRoleDO::getRoleType, true)
+                .orderBy(AppAuthRoleDO::getRoleName, true);
+        return this.list(queryWrapper);
     }
 
-    public List<AuthRoleDO> findByApplicationId(Long applicationId) {
-        ConfigStore configs = new DefaultConfigStore();
-        configs.eq("application_id", applicationId);
-        configs.order("role_type", Order.TYPE.ASC);
-        configs.order("role_name", Order.TYPE.ASC);
-        return findAllByConfig(configs);
+    public AppAuthRoleDO findByApplicationIdAndRoleName(Long applicationId, String roleName) {
+        QueryWrapper queryWrapper = this.query()
+                .eq(AppAuthRoleDO::getApplicationId, applicationId)
+                .eq(AppAuthRoleDO::getRoleName, roleName);
+        return getOne(queryWrapper);
     }
 
-    public AuthRoleDO findByApplicationIdAndRoleName(Long applicationId, String roleName) {
-        ConfigStore configs = new DefaultConfigStore();
-        configs.eq("application_id", applicationId);
-        configs.eq("role_name", roleName);
-        return findOne(configs);
+    public AppAuthRoleDO findByAppIdAndRoleCode(Long applicationId, String roleCode) {
+        QueryWrapper queryWrapper = this.query()
+                .eq(AppAuthRoleDO::getApplicationId, applicationId)
+                .eq(AppAuthRoleDO::getRoleCode, roleCode);
+        return getOne(queryWrapper);
     }
 
-    public AuthRoleDO findByAppIdAndRoleCode(Long applicationId, String roleCode) {
-        ConfigStore configs = new DefaultConfigStore();
-        configs.eq("application_id", applicationId);
-        configs.eq("role_code", roleCode);
-        return findOne(configs);
+    public AppAuthRoleDO findByApplicationIdAndRoleNameAndIdNot(Long applicationId, String roleName, Long roleId) {
+        QueryWrapper queryWrapper = this.query()
+                .eq(AppAuthRoleDO::getApplicationId, applicationId)
+                .eq(AppAuthRoleDO::getRoleName, roleName)
+                .eq(AppAuthRoleDO::getId, roleId);
+        return getOne(queryWrapper);
     }
 
-    public AuthRoleDO findByApplicationIdAndRoleNameAndIdNot(Long applicationId, String roleName, Long roleId) {
-        ConfigStore configs = new DefaultConfigStore();
-        configs.eq("application_id", applicationId);
-        configs.eq("role_name", roleName);
-        configs.ne("id", roleId);
-        return findOne(configs);
+    public List<AppAuthRoleDO> findByUserIdAndApplicationId(Long userId, Long applicationId) {
+        QueryWrapper queryWrapper = this.query()
+                .select(
+                        APP_AUTH_ROLE.ID,
+                        APP_AUTH_ROLE.ROLE_CODE,
+                        APP_AUTH_ROLE.ROLE_TYPE,
+                        APP_AUTH_ROLE.ROLE_NAME
+                )
+                .from(APP_AUTH_ROLE_USER, APP_AUTH_ROLE)
+                .where(APP_AUTH_ROLE_USER.ROLE_ID.eq(APP_AUTH_ROLE.ID))
+                .and(APP_AUTH_ROLE_USER.USER_ID.eq(userId));
+        return this.listAs(queryWrapper, AppAuthRoleDO.class);
     }
 
+    public PageResult<RoleMemberDTO> findRoleMembers(Long roleId, String memberName, String memberType, PageParam pageParam) {
+        if (StringUtils.equals(memberType, RoleMemberDTO.MEMBER_TYPE_USER)) {
+            Page<RoleMemberDTO> result = PageHelper.startPage(pageParam.getPageNo(), pageParam.getPageSize())
+                    .doSelectPage(() -> this.mapper.selectRoleMembers(roleId, memberName));
+            return new PageResult<>(result.getResult(), result.getTotal());
+        } else if (StringUtils.equals(memberType, RoleMemberDTO.MEMBER_TYPE_DEPT)) {
+            Page<RoleMemberDTO> result = PageHelper.startPage(pageParam.getPageNo(), pageParam.getPageSize())
+                    .doSelectPage(() -> this.mapper.selectRoleDepts(roleId, memberName));
+            return new PageResult<>(result.getResult(), result.getTotal());
+        } else {
+            Page<RoleMemberDTO> result = PageHelper.startPage(pageParam.getPageNo(), pageParam.getPageSize())
+                    .doSelectPage(() -> this.mapper.selectRoleMembers(roleId, memberName));
+            return new PageResult<>(result.getResult(), result.getTotal());
+        }
+    }
 
-    public List<AuthRoleDO> findByUserIdAndApplicationId(Long userId, Long applicationId) {
-        ConfigStore configs = new DefaultConfigStore();
-        configs.param("userId", userId);
-        configs.param("applicationId", applicationId);
-        String sql = """
-                select
-                	aar.id, aar.role_code, aar.role_type, aar.role_name
-                from
-                	app_auth_role_user aaru ,
-                	app_auth_role aar
-                where
-                	aaru.role_id = aar.id
-                    and aaru.deleted = 0
-                    and aar.deleted = 0
-                	and aaru.user_id = #{userId}
-                	and aar.application_id = #{applicationId}
-                """;
-        return this.querys(sql, configs).stream().map(row -> {
-            AuthRoleDO authRoleDO = new AuthRoleDO();
-            authRoleDO.setId(row.getLong("id"));
-            authRoleDO.setRoleCode(row.getString("role_code"));
-            authRoleDO.setRoleType(row.getInt("role_type"));
-            authRoleDO.setRoleName(row.getString("role_name"));
-            return authRoleDO;
-        }).toList();
+    public Map<Long, List<AppUserPhotoDTO>> findUserPhotoList(List<Long> appIds) {
+        return mapper.findUserPhotoList(appIds)
+                .stream().collect(Collectors.groupingBy(AppUserPhotoDTO::getApplicationId, Collectors.toList()));
     }
 }

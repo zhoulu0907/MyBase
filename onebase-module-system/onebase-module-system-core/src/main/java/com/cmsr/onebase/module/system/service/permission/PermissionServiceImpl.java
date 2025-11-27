@@ -5,10 +5,10 @@ import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.cmsr.onebase.framework.common.biz.system.permission.dto.DeptDataPermissionRespDTO;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
-import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.module.system.convert.auth.AuthConvert;
 import com.cmsr.onebase.module.system.dal.database.RoleMenuDataRepository;
 import com.cmsr.onebase.module.system.dal.database.UserRoleDataRepository;
@@ -48,7 +48,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 import static com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils.getLoginUserId;
 import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertSet;
 import static com.cmsr.onebase.framework.common.util.json.JsonUtils.toJsonString;
@@ -67,8 +66,7 @@ public class PermissionServiceImpl implements PermissionService {
     private MenuService          menuService;
     @Resource
     private DeptService          deptService;
-    @Resource
-    @Lazy // 延迟，避免循环依赖报错
+    @Resource @Lazy
     private UserService          userService;
     @Resource
     private TenantPackageService tenantPackageService;
@@ -163,16 +161,12 @@ public class PermissionServiceImpl implements PermissionService {
             }
         }
         // 情况二：如果是开发管理员，赋予所有开发相关权限
-        boolean isDevAdmin=roleService.hasAnyDevloperAdmin(convertSet(roles, RoleDO::getId));
-        if(isDevAdmin){
+        boolean isDevAdmin = roleService.hasAnyDevloperAdmin(convertSet(roles, RoleDO::getId));
+        if (isDevAdmin) {
             // 所有开发者的权限
-            Set<Long> menuIds = RoleCodeEnum.APP_DEVELOPER.getDevloperPermissionCodes();
-            List<MenuDO> menuList = menuService.getAllActiveMenuList(menuIds);
-            Set<String> tenantAllPermissions = menuList.stream().map(MenuDO::getPermission).filter(Objects::nonNull)
-                    .collect(Collectors.toSet());
-            // permissions 和 tenantAllPermissions对比，命中一个即返回true
+            Set<String> menuCodes = RoleCodeEnum.APP_DEVELOPER.getDevloperPermissionCodes();
             for (String permission : permissions) {
-                if (tenantAllPermissions.contains(permission)) {
+                if (menuCodes.contains(permission)) {
                     return true;
                 }
             }
@@ -301,7 +295,9 @@ public class PermissionServiceImpl implements PermissionService {
         }
         // 如果是开发管理员的情况下，获取开发菜单编号
         if (roleService.hasAnyDevloperAdmin(roleIds)) {
-           return  RoleCodeEnum.APP_DEVELOPER.getDevloperPermissionCodes();
+            Set<String> menuCode = RoleCodeEnum.APP_DEVELOPER.getDevloperPermissionCodes();
+            List<MenuDO> menudoList = menuService.getAllActiveMenuListByCodes(menuCode);
+            return convertSet(menudoList, MenuDO::getId);
         }
 
         // 如果是非管理员的情况下，获得拥有的菜单编号

@@ -16,7 +16,7 @@ import com.cmsr.onebase.module.bpm.core.enums.BpmNodeApproveStatusEnum;
 import com.cmsr.onebase.module.bpm.core.enums.BpmNodeTypeEnum;
 import com.cmsr.onebase.module.bpm.core.service.BpmEngineDefExtService;
 import com.cmsr.onebase.module.bpm.core.vo.design.BpmDefJsonVO;
-import com.cmsr.onebase.module.bpm.core.vo.design.node.base.BaseEdgeVO;
+import com.cmsr.onebase.module.bpm.core.vo.design.edge.base.BaseEdgeVO;
 import com.cmsr.onebase.module.bpm.runtime.service.BpmInstanceService;
 import com.cmsr.onebase.module.bpm.runtime.service.instance.detail.BpmDetailService;
 import com.cmsr.onebase.module.bpm.runtime.service.instance.exec.impl.BpmExecServiceImpl;
@@ -426,8 +426,6 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
                 edgeVO.setSourceNodeId(skipJson.getNowNodeCode());
                 edgeVO.setTargetNodeId(skipJson.getNextNodeCode());
                 edgeVO.setName(skipJson.getSkipName());
-                edgeVO.setType(skipJson.getSkipType());
-                edgeVO.setSkipCondition(skipJson.getSkipCondition());
 
                 // 设置状态
                 BpmEleRunStatusEnum eleRunStatus = BpmEleRunStatusEnum.chartStatusToEleRunStatus(skipJson.getStatus());

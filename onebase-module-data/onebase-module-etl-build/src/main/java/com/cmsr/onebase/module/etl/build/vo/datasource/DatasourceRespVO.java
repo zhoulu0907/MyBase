@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.etl.build.vo.datasource;
 
-import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLDatasourceDO;
+import com.cmsr.onebase.module.etl.core.dal.dataobject.EtlDatasourceDO;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
@@ -19,7 +19,7 @@ public class DatasourceRespVO {
     private Long applicationId;
 
     @Schema(description = "数据源编号")
-    private String datasourceCode;
+    private String datasourceUuid;
 
     @Schema(description = "数据源名称信息")
     private String datasourceName;
@@ -45,13 +45,11 @@ public class DatasourceRespVO {
     @Schema(description = "采集结束时间")
     private LocalDateTime collectEndTime;
 
-    // TODO: lack of creator, create_time, updater, update_time.,
-
-    public static DatasourceRespVO convertFrom(ETLDatasourceDO datasourceDO) {
+    public static DatasourceRespVO convertFrom(EtlDatasourceDO datasourceDO) {
         DatasourceRespVO respVO = new DatasourceRespVO();
         respVO.setId(datasourceDO.getId());
         respVO.setApplicationId(datasourceDO.getApplicationId());
-        respVO.setDatasourceCode(datasourceDO.getDatasourceCode());
+        respVO.setDatasourceUuid(datasourceDO.getDatasourceUuid());
         respVO.setDatasourceName(datasourceDO.getDatasourceName());
         respVO.setDeclaration(datasourceDO.getDeclaration());
         respVO.setDatasourceType(datasourceDO.getDatasourceType());
