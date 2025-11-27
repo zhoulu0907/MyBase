@@ -72,7 +72,7 @@ const TenantPage: React.FC = () => {
   return (
     <div className={styles.tenantPage}>
       <div className={styles.userInfo}>
-        <Row justify="space-between" align="center">
+        <Row justify="space-between" align="center" style={{ marginBottom: 24 }}>
           {/* 左侧头像与姓名 */}
           <Col flex="auto">
             <Space align="center">

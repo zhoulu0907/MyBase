@@ -184,7 +184,7 @@ const EditTenant = () => {
               {isEdit ? <Input placeholder="输入空间名称" /> : <span>{tenantInfo?.name}</span>}
             </Form.Item>
 
-            <Form.Item label="空间 Logo" field="logoUrl">
+            <Form.Item label="空间 Logo" field="logoUrl" triggerPropName='fileList'>
               <Space direction="vertical">
                 {isEdit ? (
                   <>
@@ -194,14 +194,7 @@ const EditTenant = () => {
                       imagePreview
                       accept="image/*"
                       listType="picture-card"
-                      fileList={[
-                        {
-                          uid: '1',
-                          name: 'logo',
-                          url: logoUrl,
-                          status: 'done'
-                        }
-                      ]}
+                      showUploadList
                       customRequest={async (option) => {
                         const { onProgress, onError, onSuccess, file } = option;
                         try {
@@ -326,6 +319,9 @@ const EditTenant = () => {
                     label: u.nickname || u.username || u.adminNickName || u.adminUserName,
                     value: u.id || u.platformUserId
                   }))}
+                  filterOption={(inputValue:any, option:any) =>{
+                    return option.props.children?.includes(inputValue)
+                  }}
                 ></Select>
               ) : (
                 <div className={styles.tagWrapper}>

@@ -151,13 +151,6 @@ const CreateSpace = () => {
     []
   );
 
-  const handleCreateTagChange = (value: string[]) => {
-    //如果清除管理员数据之后重新获取option数据
-    if(!value.length) {
-      getPlatformAdminList();
-    }
-  }
-
   return (
     <div className={styles.createPage}>
       <Form
@@ -281,28 +274,17 @@ const CreateSpace = () => {
             mode="multiple"
             allowClear
             showSearch
-            filterOption={false}
-            notFoundContent={
-              fetching ? (
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <Spin style={{ margin: 12 }} />
-                </div>
-              ) : null
-            }
-            onSearch={debouncedFetchUser}
             style={{ width: '100%' }}
-            options={adminList.map((u) => ({
-              label: u.nickname || u.username,
-              value: u.id
-            }))}
-            onChange={handleCreateTagChange}
-          ></Select>
+            filterOption={(inputValue:any, option:any) =>{
+                return option.props.children?.includes(inputValue)
+             }}
+          >
+            {adminList.map((u) => (
+              <Select.Option key={u.id} value={u.id}>
+                {u.nickname || u.username}
+              </Select.Option>
+           ))}
+        </Select>
         </Form.Item>
 
         <Form.Item label="状态" field="status" triggerPropName="checked">
