@@ -38,6 +38,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -581,7 +582,7 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
 
         // 5. 转换为子表信息列表
         List<ChildEntityInfoRespVO> childEntities = relationships.stream()
-                .map(this::convertToChildEntityInfo)
+                .map(this::convertToChildEntityInfo).filter(Objects::nonNull)
                 .toList();
 
         result.setChildEntities(childEntities);
@@ -598,20 +599,21 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
      * @return 子表信息
      */
     private ChildEntityInfoRespVO convertToChildEntityInfo(MetadataEntityRelationshipDO relationshipDO) {
+        // 获取目标实体信息
+        MetadataBusinessEntityDO targetEntity = businessEntityService.getBusinessEntity(relationshipDO.getTargetEntityId());
+        // 关联的目标实体为空（不存在或被删除）直接跳过后续处理
+        if (targetEntity == null) {
+            return null;
+        }
         ChildEntityInfoRespVO childInfo = BeanUtils.toBean(relationshipDO, ChildEntityInfoRespVO.class, info -> {
-            info.setChildEntityId(relationshipDO.getTargetEntityId());
-            info.setRelationshipId(String.valueOf(relationshipDO.getId()));
-            info.setRelationshipName(relationshipDO.getRelationName());
-            info.setRelationshipType(relationshipDO.getRelationshipType());
-
-            // 获取目标实体信息
-            MetadataBusinessEntityDO targetEntity = businessEntityService.getBusinessEntity(relationshipDO.getTargetEntityId());
-            if (targetEntity != null) {
+                info.setChildEntityId(relationshipDO.getTargetEntityId());
+                info.setRelationshipId(String.valueOf(relationshipDO.getId()));
+                info.setRelationshipName(relationshipDO.getRelationName());
+                info.setRelationshipType(relationshipDO.getRelationshipType());
                 info.setChildEntityName(targetEntity.getDisplayName());
                 info.setChildEntityCode(targetEntity.getCode());
                 // 设置子表实际表名
                 info.setChildTableName(targetEntity.getTableName());
-            }
         });
 
         // 获取字段名称
