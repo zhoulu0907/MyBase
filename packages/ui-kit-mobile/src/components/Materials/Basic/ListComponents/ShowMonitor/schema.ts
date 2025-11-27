@@ -7,13 +7,6 @@ import {
   tableMetaDataConfig,
   tableOperationConfig,
   widthConfig,
-  type ICommonBaseType,
-  type TButtonSelectKeyType,
-  type TPagePositionSelectKeyType,
-  type TStatusSelectKeyType,
-  type TWidthSelectKeyType
-} from '../../../common';
-import {
   BUTTON_OPTIONS,
   BUTTON_VALUES,
   CONFIG_TYPES,
@@ -24,9 +17,7 @@ import {
   STATUS_VALUES,
   TableOperationButton,
   WIDTH_OPTIONS,
-  WIDTH_VALUES
-} from '../../../constants';
-import type {
+  WIDTH_VALUES,
   IBooleanConfigType,
   ILabelConfigType,
   INumberConfigType,
@@ -42,8 +33,13 @@ import type {
   TNumberDefaultType,
   TRadioDefaultType,
   TSelectDefaultType,
-  TTextDefaultType
-} from '../../../types';
+  TTextDefaultType,
+  type ICommonBaseType,
+  type TButtonSelectKeyType,
+  type TPagePositionSelectKeyType,
+  type TStatusSelectKeyType,
+  type TWidthSelectKeyType
+} from '@onebase/ui-kit';
 
 export interface XShowMonitorSchema {
   editData: TXShowMonitorEditData;

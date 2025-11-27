@@ -5,15 +5,13 @@ import {
   LAYOUT_COMPONENT_TYPES,
   LIST_COMPONENT_TYPES,
   // LayoutComp,
-  ListComp,
   SHOW_COMPONENT_TYPES,
   ShowComp,
-  getComponentConfig
-} from 'src/components/Materials';
-import {
+  getComponentConfig,
   ALIGN_OPTIONS,
   ALIGN_VALUES,
-} from '../../Materials/Basic/constants';
+} from '@onebase/ui-kit';
+import { ListComp } from '@/components/Materials/Basic/ListComponents';
 
 /**
  * 组件渲染的通用属性
@@ -291,7 +289,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
       case LIST_COMPONENT_TYPES.TIMELINE:
       // return <ListComp.XTimeline cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case LIST_COMPONENT_TYPES.CAROUSEL:
-      // return <ListComp.XCarousel cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+        return <ListComp.XCarousel cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case LIST_COMPONENT_TYPES.LIST:
       // return <ListComp.XList cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case LIST_COMPONENT_TYPES.COLLAPSE:
@@ -300,19 +298,19 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
 
       //  展示组件
       case SHOW_COMPONENT_TYPES.INFO_NOTICE:
-      // return <ShowComp.XInfoNotice cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+        return <ShowComp.XInfoNotice cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case SHOW_COMPONENT_TYPES.IMAGE:
-      // return <ShowComp.XImage cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+        return <ShowComp.XImage cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case SHOW_COMPONENT_TYPES.FILE:
-      // return <ShowComp.XFile cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+        return <ShowComp.XFile cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case SHOW_COMPONENT_TYPES.TEXT:
-       return <ShowComp.XText cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+        return <ShowComp.XText cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case SHOW_COMPONENT_TYPES.WEB_VIEW:
-      // return <ShowComp.XWebView cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+        return <ShowComp.XWebView cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case SHOW_COMPONENT_TYPES.DIVIDER:
-      return <ShowComp.XDivider cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+        return <ShowComp.XDivider cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case SHOW_COMPONENT_TYPES.PLACEHOLDER:
-      // return <ShowComp.XPlaceholder cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+        return <ShowComp.XPlaceholder cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
 
       default:
         return <div>未知组件类型: {cpType}</div>;

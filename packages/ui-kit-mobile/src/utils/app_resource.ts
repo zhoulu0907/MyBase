@@ -1,4 +1,3 @@
-// import { Message } from '@arco-design/web-react';
 import {
   CATEGORY_TYPE,
   listPageView,
@@ -17,7 +16,7 @@ import {
   EditConfig,
   FORM_COMPONENT_TYPES,
   LAYOUT_COMPONENT_TYPES
-} from 'src/components';
+} from '@onebase/ui-kit';
 import {
   createPageEditorSignal,
   useEditorSignalMap,

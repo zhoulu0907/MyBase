@@ -38,14 +38,17 @@ import {
   EDITOR_TYPES,
   FORM_COMPONENT_TYPES,
   getComponentWidth,
-  PreviewRender,
-  startLoadPageSet,
   STATUS_OPTIONS,
   STATUS_VALUES,
+  type GridItem
+} from '@onebase/ui-kit';
+
+import {
+  PreviewRender,
+  startLoadPageSet,
   useEditorSignalMap,
   useListEditorSignal,
-  useFormEditorSignal,
-  type GridItem
+  useFormEditorSignal
 } from '@onebase/ui-kit-mobile';
 import { fetchSubmitInstance } from '@onebase/app/src/services/app_runtime';
 import { useSignals } from '@preact/signals-react/runtime';
@@ -163,7 +166,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       if (field) {
         // console.log('field: ', field);
         formData[field.fieldId] = value;
-        if (Array.isArray(value)) {
+        const filterType = ['IMAGE', 'FILE'];
+        if (filterType.includes(field.fieldType) && Array.isArray(value)) {
           formData[field.fieldId] = value.map((item: any) => {
             if (item.response && item.url) {
               return {
@@ -339,12 +343,19 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
       // 只处理第一个数据对象（通常为单条数据）
       const dataItem = Array.isArray(res.data) ? res.data[0] : res.data;
+      const arrayType = ['DATE', 'DATETIME', 'SELECT', 'MULTI_SELECT', 'MULTI_DEPARTMENT', 'DATA_SELECTION', 'MULTI_DATA_SELECTION', 'MULTI_USER', 'USER']; // 表单回显需要数组格式数据；
 
       if (dataItem && typeof dataItem === 'object') {
         Object.entries(dataItem).forEach(([fieldName, value]) => {
           const fieldID = fieldIdNameMap[fieldName];
           if (fieldID) {
+            const fieldType = mainMetaDataFields.value.find(v => v.fieldId === fieldID)?.fieldType;
+            if (arrayType.includes(fieldType)) {
+              formValues[fieldID] = [value];
+              return;
+            }
             formValues[fieldID] = value;
+            console.warn('fieldID:', fieldID, 'fieldName:', fieldName, '    value:', value);
           }
         });
       }

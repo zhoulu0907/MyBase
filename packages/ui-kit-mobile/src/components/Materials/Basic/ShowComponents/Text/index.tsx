@@ -1,6 +1,5 @@
 import { memo } from 'react';
-import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-import { ShowSchema } from '@onebase/ui-kit';
+import { STATUS_OPTIONS, STATUS_VALUES, ShowSchema } from '@onebase/ui-kit';
 import '../index.css';
 import './index.css'
 
@@ -8,9 +7,7 @@ const XText = memo((props: ShowSchema.XTextConfig & { runtime?: boolean; detailM
   const { status, content, color } = props;
 
   return (
-    <div
-      className="formWrapper"
-    >
+    <div className="formWrapper">
       <div
         className="formWrapper--text"
         style={{

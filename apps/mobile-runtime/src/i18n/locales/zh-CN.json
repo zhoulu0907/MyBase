@@ -32,6 +32,7 @@
     "username": "用户名",
     "password": "密码",
     "rememberMe": "记住我",
+    "accountRegistration": "账号注册",
     "forgotPassword": "忘记密码？",
     "loginSuccess": "登录成功",
     "loginFailed": "登录失败",

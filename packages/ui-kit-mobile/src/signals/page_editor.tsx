@@ -1,5 +1,5 @@
 import { signal } from '@preact/signals-react';
-import type { EditConfig } from '../components/Materials/types';
+import type { EditConfig } from '@onebase/ui-kit';
 
 // 创建编辑器组件管理 store 的工厂函数
 export const createPageEditorSignal = (initialComponents: EditConfig[] = []) => {
@@ -61,7 +61,7 @@ export const createPageEditorSignal = (initialComponents: EditConfig[] = []) => 
     layoutSubComponents.value = {};
   };
 
-   // 子表单
+  // 子表单
   const subTableComponents = signal<{ [key: string]: any[] }>({});
   const setSubTableComponents = (cp_id: string, newColumns: any[]) => {
     subTableComponents.value = { ...subTableComponents.value, [cp_id]: newColumns };
