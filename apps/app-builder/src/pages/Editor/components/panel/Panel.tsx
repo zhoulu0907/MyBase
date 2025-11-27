@@ -83,7 +83,7 @@ export default function EditorPanel() {
               key={'metadata'}
               title={
                 <div className={styles.tabButton}>
-                  <Tooltip mini content="业务实体" position="right">
+                  <Tooltip mini content="数据资产" position="right">
                     <img
                       src={
                         childCollapsed === 'metadata' && activeLeftTabKey === 'metadata' ? IconEntityActive : IconEntity

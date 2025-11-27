@@ -3,11 +3,16 @@ import {
   jsonToJsonSchema,
   schemaToFormData
 } from '@/pages/CreateApp/pages/IntegratedManagement/pages/connector/action/create/util';
+import { triggerEditorSignal } from '@/store/singals/trigger_editor';
+import { triggerNodeOutputSignal } from '@/store/singals/trigger_node_output';
 import type { FormInstance } from '@arco-design/web-react';
 import { Button, Form, Grid, Input, InputNumber, Select, Switch, TreeSelect } from '@arco-design/web-react';
+import type { TreeSelectDataType } from '@arco-design/web-react/es/TreeSelect/interface';
 import { IconLaunch } from '@arco-design/web-react/icon';
-import { FieldType } from '@onebase/app';
-import React, { useEffect, useState } from 'react';
+import { FieldType, type ConditionField } from '@onebase/app';
+import { NodeType } from '@onebase/common';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { getPrecedingNodes } from '../../../nodes/utils';
 
 const Row = Grid.Row;
 const Col = Grid.Col;
@@ -35,17 +40,22 @@ interface InputParameterFieldItemProps {
   form: FormInstance;
   onOpenFormulaEditor: (fieldKey: string) => void;
   renderStaticValueComponent: (fieldName: string, fieldType: string) => React.ReactNode;
+  getVariableOptions: () => TreeSelectDataType[];
+  showTriggerElement: (params: any, options: TreeSelectDataType[]) => string;
 }
 
 export const InputParameterFieldItem: React.FC<InputParameterFieldItemProps> = ({
   field,
   form,
   onOpenFormulaEditor,
-  renderStaticValueComponent
+  renderStaticValueComponent,
+  getVariableOptions,
+  showTriggerElement
 }) => {
   const fieldName = field.field;
   const fieldType = Form.useWatch(`${fieldName}.type`, form) || 'string';
   const operatorType = Form.useWatch(`${fieldName}.operatorType`, form);
+  const variableOptions = getVariableOptions();
 
   return (
     <Row gutter={8} align="center" style={{ marginBottom: 12 }}>
@@ -88,10 +98,11 @@ export const InputParameterFieldItem: React.FC<InputParameterFieldItemProps> = (
           <Form.Item field={`${fieldName}.value`} style={{ marginBottom: 0 }}>
             <TreeSelect
               placeholder="请选择变量"
-              treeData={[]}
+              treeData={variableOptions}
               triggerElement={(params) => {
+                const displayValue = showTriggerElement(params, variableOptions);
                 return (
-                  <Input readOnly value={params.value || ''} placeholder="请选择变量" style={{ width: '210px' }} />
+                  <Input readOnly value={displayValue || ''} placeholder="请选择变量" style={{ width: '210px' }} />
                 );
               }}
             />
@@ -102,6 +113,7 @@ export const InputParameterFieldItem: React.FC<InputParameterFieldItemProps> = (
             <Button
               onClick={() => onOpenFormulaEditor(`${fieldName}.value`)}
               long
+              style={{ width: '210px' }}
               type={form.getFieldValue(`${fieldName}.value`) ? 'secondary' : 'outline'}
             >
               {form.getFieldValue(`${fieldName}.value`) ? '已设置公式' : 'ƒx 编辑公式'}
@@ -150,16 +162,117 @@ const renderStaticValueComponent = (fieldName: string, fieldType: string) => {
 export interface InputParameterFormProps {
   inputParameter: string;
   form: FormInstance;
+  nodeId: string;
 }
 
 /**
  * 输入参数表单组件
  * 用于渲染和编辑 inputParameter 的图形化表单
  */
-export const InputParameterForm: React.FC<InputParameterFormProps> = ({ inputParameter, form }) => {
+export const InputParameterForm: React.FC<InputParameterFormProps> = ({ inputParameter, form, nodeId }) => {
   const [formulaVisible, setFormulaVisible] = useState(false);
   const [formulaFieldKey, setFormulaFieldKey] = useState<string>('');
   const [formulaData, setFormulaData] = useState<string>('');
+
+  // 提取公共的字段处理逻辑
+  const processConditionFields = (
+    nodeId: string,
+    conditionFields: ConditionField[],
+    children: TreeSelectDataType[]
+  ): void => {
+    if (!conditionFields) return;
+
+    conditionFields.forEach((field: ConditionField) => {
+      // 对于 inputParameter 中的字段，不进行类型过滤，允许所有类型的变量
+      children.push({
+        key: `${nodeId}.${field.value}`,
+        title: field.label
+      });
+    });
+  };
+
+  // 使用 useMemo 缓存节点类型集合，避免重复创建
+  const nodesWithConditionFields = useMemo(
+    () =>
+      new Set([
+        NodeType.START_FORM,
+        NodeType.START_ENTITY,
+        NodeType.START_DATE_FIELD,
+        NodeType.DATA_ADD,
+        NodeType.DATA_QUERY,
+        NodeType.DATA_QUERY_MULTIPLE,
+        NodeType.DATA_UPDATE,
+        NodeType.DATA_CALC,
+        NodeType.MODAL
+      ]),
+    []
+  );
+
+  // 使用 useCallback 缓存函数，避免不必要的重新创建
+  const getVariableOptions = useCallback((): TreeSelectDataType[] => {
+    if (!nodeId) {
+      return [];
+    }
+
+    const nodeTypes = [
+      NodeType.DATA_QUERY,
+      NodeType.DATA_QUERY_MULTIPLE,
+      NodeType.DATA_UPDATE,
+      NodeType.DATA_ADD,
+      NodeType.DATA_CALC,
+      NodeType.START_FORM,
+      NodeType.START_ENTITY,
+      NodeType.START_TIME,
+      NodeType.START_DATE_FIELD,
+      NodeType.START_API,
+      NodeType.START_BPM,
+      NodeType.LOOP,
+      NodeType.MODAL
+    ];
+
+    const nodes = getPrecedingNodes(nodeId, triggerEditorSignal.nodes.value, nodeTypes);
+    const options: TreeSelectDataType[] = [];
+
+    nodes.forEach((node: any) => {
+      const nodeOutput = triggerNodeOutputSignal.getTriggerNodeOutput(node.id);
+
+      // 只处理有 conditionFields 的节点类型
+      if (!node.type || !nodesWithConditionFields.has(node.type as NodeType)) {
+        return;
+      }
+
+      const treeNode: TreeSelectDataType = {
+        key: node.id,
+        title: node.data?.title,
+        disabled: true,
+        children: []
+      };
+
+      // 统一处理 conditionFields
+      if (nodeOutput.conditionFields && treeNode.children) {
+        processConditionFields(node.id, nodeOutput.conditionFields, treeNode.children);
+      }
+
+      // 只有当有子字段时才添加到选项中
+      if (treeNode.children && treeNode.children.length > 0) {
+        options.push(treeNode);
+      }
+    });
+
+    return options;
+  }, [nodeId, nodesWithConditionFields]);
+
+  const showTriggerElement = useCallback((params: any, options: TreeSelectDataType[]): string => {
+    if (params.value) {
+      const parentId = params.value.split('.')[0];
+      const parentNode = options.find((item) => item.key == parentId);
+
+      const childrenName = parentNode?.children?.find((item) => item.key == params.value)?.title;
+      return `${parentNode?.title} - ${childrenName}`;
+    }
+
+    return '';
+  }, []);
 
   // 合并已保存的数据和新生成的表单数据
   const mergeFormData = (savedData: any[], newFormData: any[]): any[] => {
@@ -257,6 +370,8 @@ export const InputParameterForm: React.FC<InputParameterFormProps> = ({ inputPar
                     form={form}
                     onOpenFormulaEditor={openFormulaEditor}
                     renderStaticValueComponent={renderStaticValueComponent}
+                    getVariableOptions={getVariableOptions}
+                    showTriggerElement={showTriggerElement}
                   />
                 ))}
               </>

@@ -1,7 +1,7 @@
 import MenuComp from '@/components/MenuIcon';
-import { webMenuIcons } from '@onebase/ui-kit';
 import { Button, Form, Input, Modal, Select, TreeSelect, type FormInstance } from '@arco-design/web-react';
-import { RootParentPage, PageType } from '@onebase/app';
+import { PageType, RootParentPage } from '@onebase/app';
+import { webMenuIcons } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
 
@@ -169,8 +169,8 @@ const CreateModal: React.FC<CreateModalProps> = ({
             <TreeSelect treeData={treeData} placeholder="请选择父级页面" allowClear />
           </Form.Item>
           {visibleCreateForm === 'page' && (
-            <Form.Item label="业务实体" field="entityId" rules={[{ required: true, message: '请选择业务实体' }]}>
-              <Select options={entityListOptions} placeholder="请选择业务实体" allowClear />
+            <Form.Item label="数据资产" field="entityId" rules={[{ required: true, message: '请选择数据资产' }]}>
+              <Select options={entityListOptions} placeholder="请选择数据资产" allowClear />
             </Form.Item>
           )}
         </Form>
