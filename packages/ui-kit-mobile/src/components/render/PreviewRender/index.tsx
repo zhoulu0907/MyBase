@@ -291,7 +291,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
       case LIST_COMPONENT_TYPES.TIMELINE:
       // return <ListComp.XTimeline cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case LIST_COMPONENT_TYPES.CAROUSEL:
-      // return <ListComp.XCarousel cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+        return <ListComp.XCarousel cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case LIST_COMPONENT_TYPES.LIST:
       // return <ListComp.XList cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case LIST_COMPONENT_TYPES.COLLAPSE:

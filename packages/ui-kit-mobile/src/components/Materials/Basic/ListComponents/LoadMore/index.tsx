@@ -459,8 +459,8 @@ const XLoadMore = memo(
           {
             (editMode ? [{}] : tableData).map((item, index) => (
               <div key={item.key} className="list-body-item-wrapper" onClick={() => handleRowClick(item)}>
-                {(finalColumns?.length ? finalColumns : [{}, {}])?.map((col) => {
-                  return <div className="list-body-item-element" key={col.dataIndex}>
+                {(finalColumns?.length ? finalColumns : [{}, {}])?.map((col, index) => {
+                  return <div className="list-body-item-element" key={index}>
                     <Ellipsis className="list-body-item-title" text={(col.title || '') + '：'} />
                     <Ellipsis className="list-body-item-content" text={col.render?.(item, index)} />
                   </div>

@@ -107,8 +107,12 @@ const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pag
         return <ShowComp.XDivider cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case SHOW_COMPONENT_TYPES.PLACEHOLDER:
         return <ShowComp.XPlaceholder cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+
+      //  列表组件
       case LIST_COMPONENT_TYPES.TABLE:
         return <ListComp.XLoadMore cpName={cpId} id={cpId} {...componentConfig} editMode={true} runtime={runtime} />;
+      case LIST_COMPONENT_TYPES.CAROUSEL:
+        return <ListComp.XCarousel cpName={cpId} id={cpId} {...componentConfig} editMode={true} runtime={runtime} />;
       default:
         return <div>未知组件类型: {cpType}</div>;
     }

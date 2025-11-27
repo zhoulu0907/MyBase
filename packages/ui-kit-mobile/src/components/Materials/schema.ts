@@ -1,5 +1,5 @@
 import { cloneDeep } from 'lodash-es';
-import { ALL_COMPONENT_TYPES, FormSchema as BasicSchema, type ComponentType } from '@onebase/ui-kit';
+import { ALL_COMPONENT_TYPES, FormSchema as BasicSchema, ListSchema, type ComponentType } from '@onebase/ui-kit';
 import XLoadMoreSchema from '@/components/Materials/Basic/ListComponents/LoadMore/schema'
 
 // 定义组件配置的类型
@@ -28,6 +28,7 @@ const componentSchemaMap: Partial<Record<ComponentType, ComponentSchema>> = {
   [ALL_COMPONENT_TYPES.DEPT_SELECT]: BasicSchema.XDeptSelectSchema,
 
   [ALL_COMPONENT_TYPES.TABLE]: XLoadMoreSchema,
+  [ALL_COMPONENT_TYPES.CAROUSEL]: ListSchema.XCarouselSchema
 };
 
 /**

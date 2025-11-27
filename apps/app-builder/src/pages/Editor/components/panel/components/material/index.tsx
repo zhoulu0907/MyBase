@@ -6,7 +6,7 @@ import { useI18n } from '@/hooks/useI18n';
 import { useSignals } from '@preact/signals-react/runtime';
 import { Collapse, Input, Layout, Tabs } from '@arco-design/web-react';
 import { CATEGORY_TYPE } from '@onebase/app';
-import { allTemplate, COMPONENT_GROUP_NAME, EDITOR_TYPES, FORM_COMPONENT_TYPES, LAYOUT_COMPONENT_TYPES, type EditorType } from '@onebase/ui-kit';
+import { allTemplate, COMPONENT_GROUP_NAME, EDITOR_TYPES, FORM_COMPONENT_TYPES, LAYOUT_COMPONENT_TYPES, LIST_COMPONENT_TYPES, type EditorType } from '@onebase/ui-kit';
 import React, { useEffect, useMemo, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import { v4 as uuidv4 } from 'uuid';
@@ -73,7 +73,10 @@ const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab, childC
         key: CATEGORY_TYPE.FORM,
         items: editMode.value === EditMode.MOBILE ? baseFormItems.filter(item => item.type !== FORM_COMPONENT_TYPES.RICH_TEXT) : baseFormItems
       },
-      { key: CATEGORY_TYPE.LIST, items: baseListItems },
+      {
+        key: CATEGORY_TYPE.LIST,
+        items: editMode.value === EditMode.MOBILE ? baseListItems.filter(item => [LIST_COMPONENT_TYPES.TABLE, LIST_COMPONENT_TYPES.CAROUSEL].includes(item.type)) : baseListItems
+      },
       { key: CATEGORY_TYPE.SHOW, items: baseShowItems }
     ];
   }, [editMode.value]);
