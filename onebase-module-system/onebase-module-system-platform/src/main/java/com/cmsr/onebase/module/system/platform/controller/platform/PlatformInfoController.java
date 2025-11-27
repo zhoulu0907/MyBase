@@ -126,4 +126,14 @@ public class PlatformInfoController {
         return success(true);
     }
 
+
+    @GetMapping("/admin/get")
+    @Operation(summary = "获取平台管理员")
+    @Parameter(name = "id", description = "编号", required = true, example = "1024")
+    @PreAuthorize("@ss.hasPermission('system:platform-admin:query')")
+    public CommonResult<UserRespVO> getPlatformAdmin(@RequestParam("id") Long id) {
+        AdminUserDO adminUserDO = platformUserService.getUser(id);
+        return success(BeanUtils.toBean(adminUserDO, UserRespVO.class));
+    }
+
 }
