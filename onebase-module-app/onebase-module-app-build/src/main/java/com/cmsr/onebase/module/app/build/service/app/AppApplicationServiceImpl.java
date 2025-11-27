@@ -204,7 +204,7 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         if (CollectionUtils.isEmpty(tagIds)) {
             applicationTagRepository.deleteByApplicationId(applicationId);
         } else {
-            applicationTagRepository.deleteByByApplicationIdAndTagsNotIn(applicationId, tagIds);
+            applicationTagRepository.deleteByApplicationIdAndTagsNotIn(applicationId, tagIds);
             applicationTagRepository.saveAll(applicationId, tagIds);
         }
     }
