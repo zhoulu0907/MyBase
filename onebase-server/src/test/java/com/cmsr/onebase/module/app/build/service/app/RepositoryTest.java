@@ -6,6 +6,7 @@ import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationRespVO;
 import com.cmsr.onebase.module.app.core.dal.database.AppSqlQueryRepository;
+import com.cmsr.onebase.module.app.core.dal.database.app.AppApplicationRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthDataGroupRepository;
 import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthDataGroupDO;
@@ -22,6 +23,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -49,6 +51,9 @@ public class RepositoryTest {
 
     @Autowired
     private AppApplicationServiceImpl appApplicationService;
+
+    @Autowired
+    private AppApplicationRepository appApplicationRepository;
 
     private static final Long APP_ID = 89762669056458752L;
 
@@ -122,5 +127,11 @@ public class RepositoryTest {
         reqVO.setOwnerTag(0);
         PageResult<ApplicationRespVO> result = appApplicationService.getApplicationPage(reqVO);
         System.out.println(result);
+    }
+
+    @Test
+    public void test11() {
+        Map<Long, Integer> longIntegerMap = appApplicationRepository.countAppByTenantId();
+        System.out.println(longIntegerMap);
     }
 }

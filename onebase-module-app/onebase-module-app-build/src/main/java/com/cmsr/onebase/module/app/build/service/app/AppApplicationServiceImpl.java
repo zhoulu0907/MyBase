@@ -16,7 +16,7 @@ import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateReqVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateRespVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationRespVO;
 import com.cmsr.onebase.module.app.build.vo.tag.TagRespVO;
-import com.cmsr.onebase.module.app.core.dal.database.*;
+import com.cmsr.onebase.module.app.core.dal.database.AppSqlQueryRepository;
 import com.cmsr.onebase.module.app.core.dal.database.app.AppApplicationRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleUserRepository;
@@ -43,6 +43,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -130,6 +131,9 @@ public class AppApplicationServiceImpl implements AppApplicationService {
 
     private List<TagRespVO> queryAppTags(Long appId) {
         List<Long> tagIds = applicationTagRepository.findTagIdsByApplicationId(appId);
+        if (CollectionUtils.isEmpty(tagIds)) {
+            return Collections.emptyList();
+        }
         return tagRepository.listByIds(tagIds).stream()
                 .map(v -> BeanUtils.toBean(v, TagRespVO.class))
                 .toList();
