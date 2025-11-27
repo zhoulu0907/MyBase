@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.etl.build.service.preview;
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.framework.common.util.string.UuidUtils;
 import com.cmsr.onebase.module.etl.build.service.DatasourceFactory;
 import com.cmsr.onebase.module.etl.build.vo.datasource.TestConnectionVO;
 import com.cmsr.onebase.module.etl.build.vo.preview.TablePreviewVO;
@@ -60,7 +61,7 @@ public class DataInspectServiceImpl implements DataInspectService {
     public boolean testConnection(TestConnectionVO pingVO) {
         EtlDatasourceDO datasourceDO = BeanUtils.toBean(pingVO, EtlDatasourceDO.class);
         DataSource datasource = dataSourceFactory.constructDataSource(datasourceDO, true);
-        String runnerKey = "ping-" + UuidCreator.getTimeOrderedEpoch();
+        String runnerKey = "ping-" + UuidUtils.getUuid();
 
         try {
             DataSourceHolder.reg(runnerKey, datasource);
@@ -91,7 +92,7 @@ public class DataInspectServiceImpl implements DataInspectService {
         }
 
         DataSource dataSource = dataSourceFactory.constructDataSource(datasourceDO, true);
-        String runnerKey = "preview-" + datasourceUuid + UuidCreator.getTimeOrderedEpoch();
+        String runnerKey = "preview-" + datasourceUuid + UuidUtils.getUuid();
         try {
             DataSourceHolder.reg(runnerKey, dataSource);
             AnylineService<?> temporary = ServiceProxy.service(runnerKey);

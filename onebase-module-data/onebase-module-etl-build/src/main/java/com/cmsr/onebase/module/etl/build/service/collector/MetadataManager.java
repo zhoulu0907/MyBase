@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.etl.build.service.collector;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
+import com.cmsr.onebase.framework.common.util.string.UuidUtils;
 import com.cmsr.onebase.module.etl.common.entity.CatalogData;
 import com.cmsr.onebase.module.etl.common.entity.SchemaData;
 import com.cmsr.onebase.module.etl.common.entity.TableData;
@@ -10,7 +11,6 @@ import com.cmsr.onebase.module.etl.core.dal.database.EtlTableRepository;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.EtlCatalogDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.EtlSchemaDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.EtlTableDO;
-import com.github.f4b6a3.uuid.UuidCreator;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -61,7 +61,7 @@ public class MetadataManager {
             catalogDO = new EtlCatalogDO();
             catalogDO.setApplicationId(applicationId);
             catalogDO.setDatasourceUuid(datasourceUuid);
-            catalogDO.setCatalogUuid(UuidCreator.getTimeOrderedEpoch().toString());
+            catalogDO.setCatalogUuid(UuidUtils.getUuid());
         }
         String name = catalogData.getName();
         catalogDO.setCatalogName(name);
@@ -79,7 +79,7 @@ public class MetadataManager {
             schemaDO.setApplicationId(applicationId);
             schemaDO.setDatasourceUuid(datasourceUuid);
             schemaDO.setCatalogUuid(catalogUuid);
-            schemaDO.setSchemaUuid(UuidCreator.getTimeOrderedEpoch().toString());
+            schemaDO.setSchemaUuid(UuidUtils.getUuid());
         }
         String name = schemaData.getName();
         schemaDO.setSchemaName(name);
@@ -98,7 +98,7 @@ public class MetadataManager {
             tableDO.setDatasourceUuid(datasourceUuid);
             tableDO.setCatalogUuid(catalogUuid);
             tableDO.setSchemaUuid(schemaUuid);
-            tableDO.setTableUuid(UuidCreator.getTimeOrderedEpoch().toString());
+            tableDO.setTableUuid(UuidUtils.getUuid());
         }
         tableDO.setTableName(tableName);
         tableDO.setDisplayName(tableName);
