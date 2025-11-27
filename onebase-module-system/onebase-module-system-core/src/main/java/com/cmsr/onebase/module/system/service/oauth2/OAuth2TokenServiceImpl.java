@@ -1,21 +1,20 @@
 package com.cmsr.onebase.module.system.service.oauth2;
 
-import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
-import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
-import com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstants;
-import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.framework.common.pojo.PageResult;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
+import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
+import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
+import com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstants;
+import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
+import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.common.util.date.DateUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.framework.common.security.dto.LoginUser;
-import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
-import com.cmsr.onebase.module.system.vo.oauth.OAuth2AccessTokenPageReqVO;
 import com.cmsr.onebase.module.system.dal.database.OAuth2AccessTokenDataRepository;
 import com.cmsr.onebase.module.system.dal.database.OAuth2RefreshTokenDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO;
@@ -24,7 +23,9 @@ import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2RefreshTokenDO
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.dal.redis.oauth2.OAuth2AccessTokenRedisDAO;
 import com.cmsr.onebase.module.system.service.user.UserService;
+import com.cmsr.onebase.module.system.vo.oauth.OAuth2AccessTokenPageReqVO;
 import jakarta.annotation.Resource;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,34 +60,21 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
     @Resource
     private OAuth2RefreshTokenDataRepository oauth2RefreshTokenDataRepository;
     @Resource
-    private SecurityConfigApi securityConfigApi;
+    private SecurityConfigApi                securityConfigApi;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public OAuth2AccessTokenDO createAccessToken(Long userId, Integer userType, String clientId, List<String> scopes) {
-        OAuth2ClientDO clientDO = oauth2ClientService.validOAuthClientFromCache(clientId);
-        // 创建刷新令牌
-        OAuth2RefreshTokenDO refreshTokenDO = createOAuth2RefreshToken(null, null, userId, userType, clientDO, scopes);
-        // 创建访问令牌
-        return createOAuth2AccessToken(refreshTokenDO, clientDO);
+        return createAccessTokenWithMode(null, null, null, userId, userType, clientId, scopes);
     }
 
     @Override
-    public OAuth2AccessTokenDO createAppAccessToken(Long appId, Long userId, Integer userType, String clientId, List<String> scopes) {
+    public OAuth2AccessTokenDO createAccessTokenWithMode(String runMode, Long corpId, Long appId, Long userId, Integer userType, String clientId, List<String> scopes) {
         OAuth2ClientDO clientDO = oauth2ClientService.validOAuthClientFromCache(clientId);
         // 创建刷新令牌
-        OAuth2RefreshTokenDO refreshTokenDO = createOAuth2RefreshToken(null, appId, userId, userType, clientDO, scopes);
+        OAuth2RefreshTokenDO refreshTokenDO = createOAuth2RefreshToken(runMode, corpId, appId, userId, userType, clientDO, scopes);
         // 创建访问令牌
-        return createOAuth2AccessToken(refreshTokenDO, clientDO);
-    }
-
-    @Override
-    public OAuth2AccessTokenDO createCorpAccessToken(Long corpId, Long userId, Integer userType, String clientId, List<String> scopes) {
-        OAuth2ClientDO clientDO = oauth2ClientService.validOAuthClientFromCache(clientId);
-        // 创建刷新令牌
-        OAuth2RefreshTokenDO refreshTokenDO = createOAuth2RefreshToken(corpId, null, userId, userType, clientDO, scopes);
-        // 创建访问令牌
-        return createOAuth2AccessToken(refreshTokenDO, clientDO);
+        return createOAuth2AccessToken(runMode, refreshTokenDO, clientDO);
     }
 
     @Override
@@ -118,11 +106,11 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
             if (deviceIdResult != null && deviceIdResult.getData() != null) {
                 deviceId = deviceIdResult.getData();
             }
-            
+
             List<Long> ids = accessTokenDOs.stream().map(OAuth2AccessTokenDO::getId).collect(Collectors.toUnmodifiableList());
             oauth2AccessTokenDataRepository.deleteByIds(ids);
             oauth2AccessTokenRedisDAO.deleteList(convertSet(accessTokenDOs, OAuth2AccessTokenDO::getAccessToken));
-            
+
             // 删除在线设备记录中的旧Token
             for (OAuth2AccessTokenDO accessToken : accessTokenDOs) {
                 securityConfigApi.removeOnlineDevice(null, accessToken.getUserId(), accessToken.getAccessToken());
@@ -136,8 +124,8 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
         }
 
         // 创建访问令牌
-        OAuth2AccessTokenDO newAccessTokenDO = createOAuth2AccessToken(refreshTokenDO, clientDO);
-        
+        OAuth2AccessTokenDO newAccessTokenDO = createOAuth2AccessToken(null, refreshTokenDO, clientDO);
+
         // 将新Token添加到在线设备记录：如果反查到deviceId则使用，否则直接存储新Token
         if (StrUtil.isNotBlank(deviceId)) {
             securityConfigApi.addOnlineDevice(
@@ -146,7 +134,7 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
                     newAccessTokenDO.getAccessToken()
             );
         }
-        
+
         return newAccessTokenDO;
     }
 
@@ -178,10 +166,13 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
     }
 
     @Override
-    public OAuth2AccessTokenDO checkAccessToken(String accessToken) {
+    public OAuth2AccessTokenDO checkAccessToken(String runMode, String accessToken) {
         OAuth2AccessTokenDO accessTokenDO = getAccessToken(accessToken);
         if (accessTokenDO == null) {
             throw exception(GlobalErrorCodeConstants.UNAUTHORIZED.getCode(), "访问令牌不存在");
+        }
+        if(StringUtils.isNotBlank(runMode) && !runMode.equalsIgnoreCase(accessTokenDO.getRunMode())){
+            throw exception(GlobalErrorCodeConstants.UNAUTHORIZED.getCode(), "访问令牌不存在(模式不匹配)");
         }
         if (DateUtils.isExpired(accessTokenDO.getExpiresTime())) {
             throw exception(GlobalErrorCodeConstants.UNAUTHORIZED.getCode(), "访问令牌已过期");
@@ -210,8 +201,9 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
         return oauth2AccessTokenDataRepository.findPage(reqVO);
     }
 
-    private OAuth2AccessTokenDO createOAuth2AccessToken(OAuth2RefreshTokenDO refreshTokenDO, OAuth2ClientDO clientDO) {
+    private OAuth2AccessTokenDO createOAuth2AccessToken(String runMode, OAuth2RefreshTokenDO refreshTokenDO, OAuth2ClientDO clientDO) {
         OAuth2AccessTokenDO accessTokenDO = new OAuth2AccessTokenDO().setAccessToken(generateAccessToken())
+                .setRunMode(runMode)
                 .setUserId(refreshTokenDO.getUserId()).setUserType(refreshTokenDO.getUserType())
                 .setCorpId(refreshTokenDO.getCorpId())
                 .setAppId(refreshTokenDO.getAppId())
@@ -226,14 +218,14 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
         return accessTokenDO;
     }
 
-    private OAuth2RefreshTokenDO createOAuth2RefreshToken(Long corpId, Long appId, Long userId, Integer userType, OAuth2ClientDO clientDO, List<String> scopes) {
+    private OAuth2RefreshTokenDO createOAuth2RefreshToken(String runMode, Long corpId, Long appId, Long userId, Integer userType, OAuth2ClientDO clientDO, List<String> scopes) {
         OAuth2RefreshTokenDO refreshToken = new OAuth2RefreshTokenDO().setRefreshToken(generateRefreshToken())
+                .setRunMode(runMode)
                 .setUserId(userId).setUserType(userType)
                 .setCorpId(corpId)
                 .setAppId(appId)
                 .setClientId(clientDO.getClientId()).setScopes(scopes)
                 .setExpiresTime(LocalDateTime.now().plusSeconds(clientDO.getRefreshTokenValiditySeconds()));
-
         oauth2RefreshTokenDataRepository.insert(refreshToken);
         return refreshToken;
     }

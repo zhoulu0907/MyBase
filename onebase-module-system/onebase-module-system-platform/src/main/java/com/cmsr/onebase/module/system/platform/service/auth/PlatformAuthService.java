@@ -20,14 +20,6 @@ public interface PlatformAuthService {
      * @return 用户
      */
     AdminUserDO authenticate(String username, String password);
-
-    /**
-     * Admin账号登录
-     *
-     * @param reqVO 登录信息
-     * @return 登录结果
-     */
-    AuthLoginRespVO adminLogin(@Valid UserLoginReqVO reqVO);
     /**
      * 账号登录
      *
@@ -81,13 +73,4 @@ public interface PlatformAuthService {
      * @param reqVO 验证码信息
      */
     void resetPassword(AuthResetPasswordReqVO reqVO);
-
-    /**
-     * 账号登录
-     *
-     * @param reqVO 登录信息
-     * @return 登录结果
-     */
-    AuthLoginRespVO corpLogin(@Valid CorpAuthLoginReqVO reqVO);
-
 }

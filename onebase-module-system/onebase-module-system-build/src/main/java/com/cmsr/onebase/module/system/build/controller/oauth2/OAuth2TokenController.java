@@ -7,7 +7,7 @@ import com.cmsr.onebase.module.system.vo.oauth.OAuth2AccessTokenPageReqVO;
 import com.cmsr.onebase.module.system.vo.oauth.OAuth2AccessTokenRespVO;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO;
 import com.cmsr.onebase.module.system.enums.logger.LoginLogTypeEnum;
-import com.cmsr.onebase.module.system.service.auth.AdminAuthService;
+import com.cmsr.onebase.module.system.service.auth.BuildAuthService;
 import com.cmsr.onebase.module.system.service.oauth2.OAuth2TokenService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -28,7 +28,7 @@ public class OAuth2TokenController {
     @Resource
     private OAuth2TokenService oauth2TokenService;
     @Resource
-    private AdminAuthService authService;
+    private BuildAuthService   authService;
 
     @GetMapping("/page")
     @Operation(summary = "获得访问令牌分页", description = "只返回有效期内的")

@@ -3,6 +3,7 @@ package com.cmsr.onebase.framework.security.runtime.filter;
 import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.biz.system.oauth2.OAuth2TokenCommonApi;
 import com.cmsr.onebase.framework.common.biz.system.oauth2.dto.OAuth2AccessTokenCheckRespDTO;
+import com.cmsr.onebase.framework.common.enums.RunModeEnum;
 import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
@@ -105,7 +106,7 @@ public class RuntimeAuthenticationFilter extends OncePerRequestFilter {
     private RuntimeLoginUser buildLoginUserByToken(String token, Integer userType) {
         try {
             // 校验访问令牌
-            OAuth2AccessTokenCheckRespDTO accessToken = oauth2TokenApi.checkAccessToken(token).getCheckedData();
+            OAuth2AccessTokenCheckRespDTO accessToken = oauth2TokenApi.checkAccessToken(RunModeEnum.RUNTIME.getValue(), token).getCheckedData();
             if (accessToken == null) {
                 return null;
             }
@@ -116,6 +117,7 @@ public class RuntimeAuthenticationFilter extends OncePerRequestFilter {
             // 构建登录用户
             RuntimeLoginUser loginUser = new RuntimeLoginUser();
             loginUser.setApplicationId(accessToken.getAppId())
+                    .setRunMode(accessToken.getRunMode())
                     .setId(accessToken.getUserId()).setUserType(accessToken.getUserType())
                     .setInfo(accessToken.getUserInfo()) // 额外的用户信息
                     .setTenantId(accessToken.getTenantId()).setScopes(accessToken.getScopes())

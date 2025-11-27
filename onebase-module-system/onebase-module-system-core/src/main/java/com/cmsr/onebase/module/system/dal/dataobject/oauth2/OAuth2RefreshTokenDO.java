@@ -27,6 +27,7 @@ public class OAuth2RefreshTokenDO extends TenantBaseDO {
     public static final String EXPIRES_TIME  = "expires_time";
     public static final String CORP_ID       = "corp_id";
     public static final String APP_ID        = "app_id";
+    public static final String RUN_MODE      = "run_mode";
 
     /**
      * 刷新令牌
@@ -73,5 +74,10 @@ public class OAuth2RefreshTokenDO extends TenantBaseDO {
      * AppID
      */
     @Column(name = APP_ID)
-    private Long appId;
+    private Long   appId;
+    /**
+     * 运行模式 see {@link com.cmsr.onebase.framework.common.enums.RunModeEnum}
+     */
+    @Column(name = RUN_MODE)
+    private String runMode;
 }
