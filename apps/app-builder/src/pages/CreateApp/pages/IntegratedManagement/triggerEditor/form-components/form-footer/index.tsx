@@ -2,6 +2,7 @@ import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { Button } from '@arco-design/web-react';
 import { getNodeForm, useClientContext } from '@flowgram.ai/fixed-layout-editor';
 import { type ConditionField, DATA_SOURCE_TYPE, getEntityFields, getEntityFieldsWithChildren } from '@onebase/app';
+import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
 import { NodeType } from '@onebase/common';
 import { updateLoopOutputs } from '../../nodes/control/loop/output';
 import { updateDataAddOutputs } from '../../nodes/data/data-add/output';
@@ -19,6 +20,10 @@ import {
   searchNodeById,
   validateNodeForm
 } from '../../nodes/utils';
+import {
+  jsonToJsonSchema,
+  schemaToFormData
+} from '@/pages/CreateApp/pages/IntegratedManagement/pages/connector/action/create/util';
 import styles from './index.module.less';
 
 export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
@@ -103,6 +108,23 @@ export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
 
           case NodeType.DATA_CALC: {
             if (originalNodeData.calType != formInfo.calType) {
+              clearDataOriginNodeId(nodeId.value);
+            }
+            break;
+          }
+
+          case NodeType.IPAAS: {
+            const noChange = formInfo.inputParameterFields.every((item: any) => {
+              return originalNodeData.inputParameterFields?.find(
+                (ele: any) => ele.name === item.name && ele.type === item.type
+              );
+            });
+
+            if (
+              !noChange ||
+              (originalNodeData.inputParameterFields &&
+                formInfo.inputParameterFields.length !== originalNodeData.inputParameterFields.length)
+            ) {
               clearDataOriginNodeId(nodeId.value);
             }
             break;
@@ -272,15 +294,17 @@ export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
           updateModalOutputs(curNode.id, modalFields);
           break;
         case NodeType.IPAAS:
-          const ipaasFields: ConditionField[] = (formInfo.inputParameterFields || [])
-            .filter((item: any) => item && item.name && item.value)
-            .map((item: any) => {
-              return {
-                label: item.name,
-                value: item.value,
-                fieldType: item.type
-              };
-            });
+          const outputParameter = JSON.parse(formInfo.outputParameter || '{}');
+          const schema = jsonToJsonSchema(formInfo.outputParameter || '{}');
+          const newFormData = schemaToFormData(schema, outputParameter);
+          const ipaasFields: ConditionField[] = newFormData.map((item: any) => {
+            // ? 类型处理
+            return {
+              label: item.name,
+              value: item.name,
+              fieldType: item.type === 'number' ? ENTITY_FIELD_TYPE.NUMBER.VALUE : ENTITY_FIELD_TYPE.TEXT.VALUE
+            };
+          });
           updateIpaasOutputs(curNode.id, ipaasFields);
           break;
         default:
