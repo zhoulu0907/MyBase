@@ -1,18 +1,9 @@
-import { useI18n } from '@/hooks/useI18n';
 import { Collapse, Ellipsis, Grid, Tabs } from '@arco-design/mobile-react';
 import {
-  listApplicationMenu,
   menuSignal,
-  MenuType,
-  TASKMENU_TYPE,
-  VisibleType,
-  type ApplicationMenu,
-  type ListApplicationMenuReq
 } from '@onebase/app';
-import { useSignals } from '@preact/signals-react/runtime';
-import { IconUser, IconHome } from '@arco-design/mobile-react/esm/icon';
-import React, { useEffect, useMemo, useState } from 'react';
-import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import React, { useMemo } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { DynamicIcon, menuIconList } from '@onebase/common';
 import { splitAndFlatten, type TreeNode } from '@/utils/tree';
 import styles from './index.module.less';
@@ -22,15 +13,16 @@ const isGridLayout = true;
 const levelStyle = (level: number) => ({ padding: `0 ${level > 5 ? '0' : '0.24rem'}` })
 
 const AppsList: React.FC<{ treeData: TreeNode[] }> = ({ treeData }) => {
+  const { setCurMenu } = menuSignal;
   const navigate = useNavigate();
   const location = useLocation();
   const getGroupItem = (itemData: TreeNode, level: number = 0) => {
     if (itemData.isPage) {
-      return <div key={itemData.key + 1} className={styles.treeItem} style={levelStyle(level)} onClick={() => handlerItemClick(itemData.id!)}>
+      return <div key={itemData.key + 1} className={styles.treeItem} style={levelStyle(level)} onClick={() => handlerItemClick(itemData)}>
         <DynamicIcon
           IconComponent={menuIconList.find((icon) => icon.code === itemData.icon)?.icon}
           theme="outline"
-          size="0.2rem"
+          size="0.36rem"
           fill="#009E9E"
           style={{ padding: '0.04rem', marginRight: '0.08rem' }}
         />
@@ -46,7 +38,7 @@ const AppsList: React.FC<{ treeData: TreeNode[] }> = ({ treeData }) => {
           <DynamicIcon
             IconComponent={menuIconList.find((icon) => icon.code === itemData.icon)?.icon}
             theme="outline"
-            size="0.2rem"
+            size="0.36rem"
             fill="#009E9E"
             style={{ padding: '0.04rem', marginRight: '0.08rem' }}
           />
@@ -73,7 +65,7 @@ const AppsList: React.FC<{ treeData: TreeNode[] }> = ({ treeData }) => {
         style={{ backgroundColor: '#009E9E', borderRadius: '0.16rem', padding: '0.16rem' }}
       />,
       title: <Ellipsis text={item.title} />,
-      onClick: () => handlerItemClick(item.id!)
+      onClick: () => handlerItemClick(item)
     }));
 
     return (
@@ -81,9 +73,20 @@ const AppsList: React.FC<{ treeData: TreeNode[] }> = ({ treeData }) => {
     );
   };
 
-  const handlerItemClick = (curMenuId: string) => {
+  const handlerItemClick = (item: TreeNode) => {
     const sp = new URLSearchParams(location.search);
-    sp.set('curMenu', String(curMenuId));
+    sp.set('curMenu', String(item.id));
+    setCurMenu({
+      id: item.id || '',
+      menuCode: item.key,
+      menuSort: item.menuSort,
+      menuType: item.menuType,
+      menuName: item.title,
+      menuIcon: item.icon || '',
+      isVisible: item.isVisible || 0,
+      children: [],
+      
+    });
     // sp.delete('curTab');
     const to = `${location.pathname.replace('/runtime-home', '/runtime')}?${sp.toString()}`;
     navigate(to);

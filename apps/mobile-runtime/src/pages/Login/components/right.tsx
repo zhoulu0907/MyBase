@@ -9,27 +9,18 @@ import { checkCaptchaApi, getCaptchaApi, login, type LoginRequest, type LoginRes
 import { getApplication } from '@onebase/app';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { DynamicIcon, menuIconList } from '@onebase/common';
 import { useI18n } from '../../../hooks/useI18n';
 import { useRememberMe } from '../../../hooks/useRememberMe';
 import styles from '../index.module.less';
-import type { IIconBase } from '@icon-park/react/lib/runtime';
 import { ValidatorType } from '@arco-design/mobile-utils';
 import logoIcon from '../../../assets/images/logo-icon.svg';
-
-interface DynamicIconProps extends IIconBase {
-  IconComponent: React.ComponentType<any>;
-  theme?: 'outline' | 'filled' | 'two-tone' | 'multi-color';
-  size?: number | string;
-  fill?: string;
-  style?: React.CSSProperties;
-}
 
 interface APP_INFO {
   appName: string;
   iconName: string;
   iconColor: string;
 }
-
 
 const Right: React.FC = () => {
   const navigate = useNavigate();
@@ -77,12 +68,15 @@ const Right: React.FC = () => {
   const handleGetApplication = async () => {
     const redirectURL = getHashQueryParam('redirectURL');
     if (redirectURL) {
-      const startIndex = redirectURL.indexOf('/runtime/');
-      const runtimeLength = '/runtime/'.length;
+      let startIndex = redirectURL.indexOf('/runtime/');
+      const runtimeLength = startIndex === -1 ? '/runtime-home/'.length : '/runtime/'.length;
+      if (startIndex === -1) {
+        startIndex = redirectURL.indexOf('/runtime-home/');
+      }
       const endRedirectURL = redirectURL.slice(startIndex + runtimeLength);
-      const endIndex = endRedirectURL?.indexOf('/');
-      const applicationId = redirectURL.slice(startIndex + runtimeLength, startIndex + runtimeLength + endIndex);
-
+      const endIndex = endRedirectURL?.indexOf('?');
+      let applicationId = redirectURL.slice(startIndex + runtimeLength, startIndex + runtimeLength + endIndex);
+      applicationId = applicationId.split('/')[0];
       if (applicationId) {
         const res = await getApplication({ id: applicationId });
         if (res) {
@@ -188,11 +182,6 @@ const Right: React.FC = () => {
     }
   };
 
-  const DynamicIcon = ({ IconComponent, ...rest }: DynamicIconProps) => {
-    if (!IconComponent) return null;
-    return <IconComponent {...rest} />;
-  };
-
   const rules = {
     password: [
       {
@@ -232,10 +221,24 @@ const Right: React.FC = () => {
     disabled: <IconSquareDisabled />,
     activeDisabled: <IconSquareChecked />,
   }
+  const getAppIcon = () => {
+    if (!appInfo.iconName) {
+      return <img src={logoIcon} alt="logo" className={styles.loginLogo} />;
+    }
+    return (
+      <DynamicIcon
+          IconComponent={menuIconList.find((icon) => icon.code === appInfo.iconName)?.icon}
+          theme="filled"
+          size="0.88rem"
+          fill="#fff"
+          style={{ padding: '0.2rem', marginRight: '0.08rem', backgroundColor: appInfo.iconColor || '#009E9E' }}
+        />
+    );
+  }
   return (
     <div className={styles.loginPageRight}>
       <div className={styles.titleContainer}>
-        <img src={logoIcon} alt="logo" className={styles.loginLogo} />
+        {getAppIcon()}
         <h1 className={styles.title}>欢迎登录{appInfo.appName ? ` ${appInfo.appName} 应用` : 'Onebase'}</h1>
       </div>
       <div className={styles.loginFormContainer}>
@@ -295,9 +298,9 @@ const Right: React.FC = () => {
       <div className={styles.loginFooter}>
         <div className={styles.footerText}>
           登录即表示同意
-          <span>《用户协议》</span>
+          <span onClick={() => navigate('/onebase/runtime-home/protocol')}>《用户协议》</span>
           和
-          <span>《隐私政策》</span>
+          <span onClick={() => navigate('/onebase/runtime-home/privacy')}>《隐私政策》</span>
         </div>
       </div>
     </div>
