@@ -1,5 +1,4 @@
 .imageStyle img {
-  object-fit: var(--fit, contain);
   max-height: var(--maxHeight, none);
 }
 

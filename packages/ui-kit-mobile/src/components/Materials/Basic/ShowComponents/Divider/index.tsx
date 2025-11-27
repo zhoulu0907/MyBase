@@ -13,7 +13,7 @@ const XDivider = memo((props: ShowSchema.XDividerConfig) => {
         margin: `${margin}px 0`,
       }}
     >
-      { content && <span>{content}</span> }
+      {content && <span>{content}</span>}
     </div>
   );
 });

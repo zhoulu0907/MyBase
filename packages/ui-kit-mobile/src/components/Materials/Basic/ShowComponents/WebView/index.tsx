@@ -1,9 +1,8 @@
 import { memo, useState } from 'react';
-import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-import { type XWebViewConfig } from './schema';
-import './index.css';
+import { STATUS_OPTIONS, STATUS_VALUES, ShowSchema } from '@onebase/ui-kit';
+import styles from './index.module.css';
 
-const XWebView = memo((props: XWebViewConfig & { runtime?: boolean; detailMode?: boolean }) => {
+const XWebView = memo((props: ShowSchema.XWebViewConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const { status, title, webViewUrl, runtime = true } = props;
 
   const [iframeError, setIframeError] = useState(false);
@@ -36,14 +35,15 @@ const XWebView = memo((props: XWebViewConfig & { runtime?: boolean; detailMode?:
         }}
       >
         <div style={{ textAlign: 'center' }}>
-          <p style={{ margin: '0 0 10px 0', color: '#666' }}>无法加载网页内容</p>
+          <p style={{ margin: '0 0 10px 0', color: '#666', fontSize: '0.24rem' }}>无法加载网页内容</p>
           <a
             href={validUrl}
             target="_blank"
             rel="noopener noreferrer"
             style={{
               color: '#1890ff',
-              textDecoration: 'none'
+              textDecoration: 'none',
+              fontSize: '0.24rem'
             }}
           >
             在新窗口中打开
@@ -58,10 +58,12 @@ const XWebView = memo((props: XWebViewConfig & { runtime?: boolean; detailMode?:
       style={{
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1,
         display: runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 'none' : 'flex',
-        flexDirection: 'column'
+        pointerEvents: !runtime ? 'none' : 'unset',
+        flexDirection: 'column',
+        padding: '0.18rem'
       }}
     >
-      <div className='iframeTitle'>{title}</div>
+      <div className={styles.iframeTitle}>{title}</div>
       <iframe
         src={validUrl}
         style={{

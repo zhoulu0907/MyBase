@@ -253,7 +253,7 @@ const Right: React.FC = () => {
             initialValue=""
             rules={rules.username}
           >
-            <Input placeholder={t('auth.userAccount')} border="none" clearable={false} style={{ padding: '0.13rem 0.16rem', borderRadius: '0.08rem', backgroundColor: '#F2F3F5' }} />
+            <Input placeholder={t('auth.userAccount')} clearable={false} />
           </Form.Item>
 
           <Form.Item
@@ -263,7 +263,7 @@ const Right: React.FC = () => {
             className={styles.passwordItem}
             rules={rules.password}
           >
-            <Input type="password" placeholder={t('auth.password')} border="none" clearable={false} style={{ padding: '0.13rem 0.16rem', borderRadius: '0.08rem', backgroundColor: '#F2F3F5' }} />
+            <Input type="password" placeholder={t('auth.password')} clearable={false} />
           </Form.Item>
           <div className={styles.rememberMeContainer}>
             {/* <Checkbox
@@ -274,7 +274,7 @@ const Right: React.FC = () => {
               icons={squareIcon}
               onChange={handleRememberMeChange}
             >{t('auth.rememberMe')}</Checkbox> */}
-            <div className={styles.accountRegistration}> {t('auth.accountRegistration')}</div>
+            <div className={styles.forgotPassword}> {t('auth.accountRegistration')}</div>
             <div className={styles.forgotPassword}> {t('auth.forgotPassword')}</div>
           </div>
           <Button type="primary" onClick={toSubmit} loading={loading} size="large" className={styles.loginButton}>

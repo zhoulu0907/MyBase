@@ -1,23 +1,22 @@
-import { Card } from '@arco-design/web-react';
 import { memo } from 'react';
-import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-import { type XInfoNoticeConfig } from './schema';
+import { NoticeBar } from '@arco-design/mobile-react';
+import IconNotice from '@arco-design/mobile-react/esm/icon/IconNotice';
+import { STATUS_OPTIONS, STATUS_VALUES, ShowSchema } from '@onebase/ui-kit';
 
-const XInfoNotice = memo((props: XInfoNoticeConfig & { runtime?: boolean; detailMode?: boolean }) => {
+const XInfoNotice = memo((props: ShowSchema.XInfoNoticeConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const { status, content, runtime = true } = props;
 
   return (
-    <Card
+    <NoticeBar
+      leftContent={<IconNotice />}
       style={{
         width: '100%',
-        borderRadius: 8,
+        borderRadius: '0.16rem',
+        padding: '0.12rem 0.32rem',
         boxSizing: 'border-box',
-        opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1,
-        display: runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 'none' : 'block'
+        opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
       }}
-    >
-      <h1>{content}</h1>
-    </Card>
+    >{content}</NoticeBar>
   );
 });
 

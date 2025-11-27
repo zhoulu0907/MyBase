@@ -92,22 +92,21 @@ const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pag
       case FORM_COMPONENT_TYPES.SUB_TABLE:
         return <FormComp.XSubTable cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
 
-        
       //  展示组件
-      // case SHOW_COMPONENT_TYPES.INFO_NOTICE:
-      //   return <ShowComp.XInfoNotice cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-      // case SHOW_COMPONENT_TYPES.IMAGE:
-      //   return <ShowComp.XImage cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-      // case SHOW_COMPONENT_TYPES.FILE:
-      //   return <ShowComp.XFile cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      case SHOW_COMPONENT_TYPES.INFO_NOTICE:
+        return <ShowComp.XInfoNotice cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      case SHOW_COMPONENT_TYPES.IMAGE:
+        return <ShowComp.XImage cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      case SHOW_COMPONENT_TYPES.FILE:
+        return <ShowComp.XFile cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case SHOW_COMPONENT_TYPES.TEXT:
         return <ShowComp.XText cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-      // case SHOW_COMPONENT_TYPES.WEB_VIEW:
-      //   return <ShowComp.XWebView cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      case SHOW_COMPONENT_TYPES.WEB_VIEW:
+        return <ShowComp.XWebView cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case SHOW_COMPONENT_TYPES.DIVIDER:
         return <ShowComp.XDivider cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-      // case SHOW_COMPONENT_TYPES.PLACEHOLDER:
-      //   return <ShowComp.XPlaceholder cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      case SHOW_COMPONENT_TYPES.PLACEHOLDER:
+        return <ShowComp.XPlaceholder cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case LIST_COMPONENT_TYPES.TABLE:
         return <ListComp.XLoadMore cpName={cpId} id={cpId} {...componentConfig} editMode={true} runtime={runtime} />;
       default:
