@@ -1,35 +1,35 @@
 package com.cmsr.onebase.module.flow.core.dal.dataobject;
 
-import com.cmsr.onebase.framework.data.base.BaseDO;
-import jakarta.persistence.Column;
-import jakarta.persistence.Table;
+import com.cmsr.onebase.framework.orm.entity.BaseEntity;
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-@Table(name = "flow_node_category")
-public class FlowNodeCategoryDO extends BaseDO {
+@Table(value = "flow_node_category")
+public class FlowNodeCategoryDO extends BaseEntity {
 
-    @Column(name = "level1_code")
+    @Column(value = "level1_code")
     private String level1Code;
 
-    @Column(name = "level1_name")
+    @Column(value = "level1_name")
     private String level1Name;
 
-    @Column(name = "level2_code")
+    @Column(value = "level2_code")
     private String level2Code;
 
-    @Column(name = "level2_name")
+    @Column(value = "level2_name")
     private String level2Name;
 
-    @Column(name = "level3_code")
+    @Column(value = "level3_code")
     private String level3Code;
 
-    @Column(name = "level3_name")
+    @Column(value = "level3_name")
     private String level3Name;
 
-    @Column(name = "sort_order")
+    @Column(value = "sort_order")
     private Integer sortOrder;
 
 }

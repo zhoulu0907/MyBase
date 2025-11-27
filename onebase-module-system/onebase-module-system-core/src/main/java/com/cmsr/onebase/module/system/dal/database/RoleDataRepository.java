@@ -161,7 +161,7 @@ public class RoleDataRepository extends DataRepository<RoleDO> {
 
     }
 
-    public RoleDO getRoleByCodeIgnoreTenant(String codes) {
+    public RoleDO getRoleByCode(String codes) {
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.in(RoleDO.CODE, codes);
         return findOne(configStore);

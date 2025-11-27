@@ -243,10 +243,10 @@ public interface UserService {
     /**
      * 获取所有平台管理员列表
      *
-     * @param status 状态
+     * @param userSearchReqVO
      * @return 用户们
      */
-    List<AdminUserDO> getPlatformAdminListByStatus(Integer status);
+    List<AdminUserDO> getPlatformAdminListByStatus(UserSearchReqVO userSearchReqVO);
 
 
     /**
@@ -303,4 +303,6 @@ public interface UserService {
     PageResult<AdminUserDO> getUserByDeptPage(UserByDeptPageReqVO reqVO);
 
     boolean findAdminByRoleIdAndUserId(Long roleId, Long userId);
+
+    Long getUserCountByCorpId(Long id);
 }

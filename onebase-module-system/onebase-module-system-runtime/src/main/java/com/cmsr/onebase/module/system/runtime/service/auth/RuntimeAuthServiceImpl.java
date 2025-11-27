@@ -8,9 +8,11 @@ import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
+import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
+import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
 import com.cmsr.onebase.module.app.api.security.AppAuthSecurityApi;
-import com.cmsr.onebase.module.infra.api.security.SecurityConfigApi;
-import com.cmsr.onebase.module.infra.api.security.dto.LoginFailureResultDTO;
+import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
+import com.cmsr.onebase.framework.common.biz.security.dto.LoginFailureResultDTO;
 import com.cmsr.onebase.module.system.api.logger.dto.LoginLogCreateReqDTO;
 import com.cmsr.onebase.module.system.api.sms.SmsCodeApi;
 import com.cmsr.onebase.module.system.convert.auth.AuthConvert;
@@ -33,14 +35,12 @@ import jakarta.annotation.Resource;
 import jakarta.validation.Validator;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
@@ -89,8 +89,11 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
     @Resource
     private SecurityConfigApi securityConfigApi;
 
-    @Autowired
+    @Resource
     private AppAuthSecurityApi appAuthSecurityApi;
+
+    @Resource
+    private AppApplicationApi appApplicationApi;
 
     @Override
     public AdminUserDO authenticate(String username, String password) {
@@ -125,6 +128,16 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         }
     }
 
+
+    private void checkApplicationStatus(Long appId) {
+        Set<Long> appIds = new HashSet<Long>();
+        appIds.add(appId);
+        List<ApplicationDTO> applicationDTOS = appApplicationApi.findAppApplicationByAppIds(appIds);
+        if (applicationDTOS.isEmpty()) {
+            throw exception(AUTH_LOGIN_CORP_DELETE_OR_DISABLE);
+        }
+    }
+
     private void  checkPasswordMatched(String password, AdminUserDO user,String account,LoginLogTypeEnum logTypeEnum){
         boolean passwordMatched = userService.isPasswordMatch(password, user.getPassword());
         if (!passwordMatched) {
@@ -147,6 +160,9 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         // 校验验证码
         validateCaptcha(reqVO);
 
+        // 验证应用是否存在
+        checkApplicationStatus(reqVO.getAppId());
+
         // 增加日志输出，便于调试
         checkPlatformAdminEnableAppCreate();
 
@@ -163,6 +179,10 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
     public AuthLoginRespVO appMobileLogin(AppMobileLoginReqVO reqVO) {
         // 校验验证码
         mobileValidateCaptcha(reqVO);
+
+        // 验证应用是否存在
+        checkApplicationStatus(reqVO.getAppId());
+
         checkPlatformAdminEnableAppCreate();
         // 使用手机密码，进行登录
         AdminUserDO user = mobileAuthenticate(reqVO.getMobile(), reqVO.getPassword());
@@ -286,11 +306,8 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
             return;
         }
 
-        // 清理在线设备记录
-        securityConfigApi.removeOnlineDevice(
-                accessTokenDO.getUserId(),
-                token
-        );
+        // 清理在线设备
+        securityConfigApi.removeOnlineDevice(null, accessTokenDO.getUserId(), token);
 
         // 删除成功,则记录登出日志
         createLogoutLog(accessTokenDO.getUserId(), accessTokenDO.getUserType(), logType);

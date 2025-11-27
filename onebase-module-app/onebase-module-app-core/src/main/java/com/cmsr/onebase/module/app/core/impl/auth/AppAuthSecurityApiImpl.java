@@ -3,8 +3,8 @@ package com.cmsr.onebase.module.app.core.impl.auth;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.app.api.security.AppAuthSecurityApi;
 import com.cmsr.onebase.module.app.api.security.bo.*;
-import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthPermissionDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.menu.MenuDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthPermissionDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppMenuDO;
 import com.cmsr.onebase.module.app.core.dto.auth.UserRoleDTO;
 import com.cmsr.onebase.module.app.core.provider.auth.AppAuthDataGroupProvider;
 import com.cmsr.onebase.module.app.core.provider.auth.AppAuthFieldProvider;
@@ -51,7 +51,7 @@ public class AppAuthSecurityApiImpl implements AppAuthSecurityApi {
 
     @Override
     public boolean checkMenuEntity(Long applicationId, Long menuId, Long entityId) {
-        MenuDO menuDO = appMenuProvider.findByMenuId(menuId);
+        AppMenuDO menuDO = appMenuProvider.findByMenuId(menuId);
         if (menuDO == null) {
             return false;
         }
@@ -87,8 +87,8 @@ public class AppAuthSecurityApiImpl implements AppAuthSecurityApi {
             return operationPermission;
         }
         Set<Long> roleIds = userRoleDTO.getRoleIds();
-        List<AuthPermissionDO> permissionDOs = appAuthPermissionProvider.findPermissions(applicationId, roleIds, menuId);
-        for (AuthPermissionDO permissionDO : permissionDOs) {
+        List<AppAuthPermissionDO> permissionDOs = appAuthPermissionProvider.findPermissions(applicationId, roleIds, menuId);
+        for (AppAuthPermissionDO permissionDO : permissionDOs) {
             if (NumberUtils.INTEGER_ONE.equals(permissionDO.getIsPageAllowed())) {
                 operationPermission.setPageAllowed(true);
             }

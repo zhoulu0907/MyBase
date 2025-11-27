@@ -97,11 +97,14 @@ public class MetadataComponentFieldTypeBuildServiceImpl implements MetadataCompo
             case "BIGINT":
                 return "BIGINT";
             case "VARCHAR":
+                // VARCHAR类型才使用dataLength
                 return "VARCHAR(" + (dataLength != null && dataLength > 0 ? dataLength : 255) + ")";
             case "TEXT":
             case "LONGVARCHAR":
-                // LONGVARCHAR 类型映射为 TEXT，用于存储较长的文本数据
-                // 包括：单选列表、多选列表、结构化对象、数组列表、文件、图片、地理位置、用户多选、部门多选、数据多选等
+                // TEXT/LONGVARCHAR 类型固定映射为 TEXT，不受 dataLength 影响
+                // 包括：TEXT、LONG_TEXT、单选列表、多选列表、结构化对象、数组列表、
+                // 文件、图片、地理位置、用户多选、部门多选、数据多选等
+                // 这些类型不应受 dataLength 限制，因为它们可能存储较长或可变长度的数据
                 return "TEXT";
             case "TIMESTAMP":
                 return "TIMESTAMP";
@@ -145,9 +148,8 @@ public class MetadataComponentFieldTypeBuildServiceImpl implements MetadataCompo
                     case "BIGINT":
                     case "DECIMAL":
                         respVO.setSupportLength(true);
-                        respVO.setDefaultLength(fieldTypeCode.equals("VARCHAR") ? 255 :
-                                               fieldTypeCode.equals("INTEGER") ? 11 :
-                                               fieldTypeCode.equals("BIGINT") ? 20 : 10);
+                        respVO.setDefaultLength(fieldTypeCode.equals("VARCHAR") ? 255
+                                : fieldTypeCode.equals("INTEGER") ? 11 : fieldTypeCode.equals("BIGINT") ? 20 : 10);
                         respVO.setMaxLength(fieldTypeCode.equals("VARCHAR") ? 4000 : null);
                         break;
                     default:
@@ -206,7 +208,7 @@ public class MetadataComponentFieldTypeBuildServiceImpl implements MetadataCompo
      * 创建默认字段类型对象
      */
     private MetadataComponentFieldTypeDO createDefaultFieldType(String code, String name, String desc,
-                                                              String dataType, int sortOrder) {
+            String dataType, int sortOrder) {
         return MetadataComponentFieldTypeDO.builder()
                 .fieldTypeCode(code)
                 .fieldTypeName(name)

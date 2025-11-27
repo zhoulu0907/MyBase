@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cmsr.onebase.module.app.core.dal.mapper.AppAuthRoleMapper">
+
+    <select id="selectRoleUsers" resultType="com.cmsr.onebase.module.app.core.dto.auth.RoleMemberDTO">
+        select
+        aaru.id,
+        aaru.user_id AS member_id,
+        aaru.update_time,
+        -1 AS is_include_child,
+        d.name AS dept_name,
+        u.nickname AS member_name,
+        'user' AS member_type
+        from
+        app_auth_role_user aaru
+        left join system_users u on aaru.user_id = u.id and u.deleted = 0
+        left join system_dept d on u.dept_id = d.id
+        where
+        aaru.role_id = #{roleId}
+        <if test="memberName != null">
+            and u.nickname like '%'|| #{memberName} ||'%'
+        </if>
+        and aaru.deleted = 0
+    </select>
+    <select id="selectRoleDepts" resultType="com.cmsr.onebase.module.app.core.dto.auth.RoleMemberDTO">
+        select
+        aard.id,
+        aard.dept_id as member_id,
+        aard.update_time,
+        aard.is_include_child,
+        d.name as dept_name,
+        d.name as member_name,
+        'dept' as member_type
+        from
+        app_auth_role_dept aard
+        left join system_dept d on aard.dept_id = d.id
+        where
+        aard.role_id = #{roleid}
+        <if test="memberName != null">
+            and d.name like '%'|| #{memberName} ||'%'
+        </if>
+        and aard.deleted = 0
+        and (d.id is null or d.deleted = 0)
+    </select>
+    <select id="selectRoleMembers" resultType="com.cmsr.onebase.module.app.core.dto.auth.RoleMemberDTO">
+        select * from (
+        select
+        aaru.id,
+        aaru.user_id AS member_id,
+        aaru.update_time,
+        -1 AS is_include_child,
+        d.name AS dept_name,
+        u.nickname AS member_name,
+        'user' AS member_type
+        from
+        app_auth_role_user aaru
+        left join system_users u on aaru.user_id = u.id and u.deleted = 0
+        left join system_dept d on u.dept_id = d.id
+        where
+        aaru.role_id = #{roleId}
+        <if test="memberName != null">
+            and u.nickname like '%'|| #{memberName} ||'%'
+        </if>
+        and aaru.deleted = 0
+        union all
+        select
+        aard.id,
+        aard.dept_id as member_id,
+        aard.update_time,
+        aard.is_include_child,
+        d.name as dept_name,
+        d.name as member_name,
+        'dept' as member_type
+        from
+        app_auth_role_dept aard
+        left join system_dept d on aard.dept_id = d.id
+        where
+        aard.role_id = #{roleid}
+        <if test="memberName != null">
+            and d.name like '%'|| #{memberName} ||'%'
+        </if>
+        and aard.deleted = 0
+        and (d.id is null or d.deleted = 0)
+        ) as combined_result
+    </select>
+
+    <select id="findUserPhotoList" resultType="com.cmsr.onebase.module.app.core.vo.app.AppUserPhotoDTO">
+        select
+        su.id,
+        su.avatar,
+        su.nickName,
+        r.application_id
+        from
+        app_auth_role_user ru
+        left join app_auth_role r on
+        r.id = ru.role_id
+        and role_type = 1
+        and ru.deleted = 0
+        and r.deleted = 0
+        left join system_users su on
+        su.id = ru.user_id
+        and su.deleted = 0
+        where
+        r.application_id in (#{appIds})
+        and su.id is not null
+    </select>
+
+
+</mapper>

@@ -6,11 +6,12 @@ import com.anji.captcha.model.vo.CaptchaVO;
 import com.anji.captcha.service.CaptchaService;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
-import com.cmsr.onebase.module.infra.api.security.SecurityConfigApi;
-import com.cmsr.onebase.module.infra.api.security.dto.LoginFailureResultDTO;
-import com.cmsr.onebase.module.infra.api.security.dto.PasswordExpiryCheckDTO;
+import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
+import com.cmsr.onebase.framework.common.biz.security.dto.LoginFailureResultDTO;
+import com.cmsr.onebase.framework.common.biz.security.dto.PasswordExpiryCheckDTO;
 import com.cmsr.onebase.module.system.api.logger.dto.LoginLogCreateReqDTO;
 import com.cmsr.onebase.module.system.api.sms.SmsCodeApi;
 import com.cmsr.onebase.module.system.api.user.AdminUserRoleApi;
@@ -25,6 +26,7 @@ import com.cmsr.onebase.module.system.enums.oauth2.OAuth2ClientConstants;
 import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
 import com.cmsr.onebase.module.system.enums.sms.SmsSceneEnum;
 import com.cmsr.onebase.module.system.enums.tenant.TenantCodeEnum;
+import com.cmsr.onebase.module.system.service.corp.CorpService;
 import com.cmsr.onebase.module.system.service.logger.LoginLogService;
 import com.cmsr.onebase.module.system.service.member.MemberService;
 import com.cmsr.onebase.module.system.service.oauth2.OAuth2TokenService;
@@ -34,6 +36,7 @@ import com.cmsr.onebase.module.system.service.tenant.TenantService;
 import com.cmsr.onebase.module.system.service.user.UserService;
 import com.cmsr.onebase.module.system.vo.CaptchaVerificationReqVO;
 import com.cmsr.onebase.module.system.vo.auth.*;
+import com.cmsr.onebase.module.system.vo.corp.CorpRespVO;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Resource;
 import jakarta.validation.Validator;
@@ -61,34 +64,34 @@ import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 public class AdminAuthServiceImpl implements AdminAuthService {
 
     @Resource
-    private UserService     userService;
+    private UserService        userService;
     @Resource
-    private LoginLogService loginLogService;
+    private LoginLogService    loginLogService;
     @Resource
     private OAuth2TokenService oauth2TokenService;
     @Resource
-    private MemberService memberService;
+    private MemberService      memberService;
     @Resource
-    private Validator validator;
+    private Validator          validator;
     @Resource
-    private CaptchaService captchaService;
+    private CaptchaService     captchaService;
     @Resource
-    private SmsCodeApi smsCodeApi;
+    private SmsCodeApi         smsCodeApi;
     /**
      * 验证码的开关，默认为 true
      */
     @Value("${onebase.captcha.enable:true}")
     @Setter // 为了单测：开启或者关闭验证码
-    private Boolean captchaEnable;
+    private Boolean            captchaEnable;
     /**
      * 平台租户验证开关，默认为 false
      */
     @Value("${onebase.platform-tenant.enable-create-app:false}")
     @Setter // 为了单测：开启或者关闭验证码
-    private Boolean       platformTenantEnableCreateApp;
+    private Boolean            platformTenantEnableCreateApp;
 
     @Resource
-    private TenantService tenantService;
+    private TenantService     tenantService;
     @Resource
     private PermissionService permissionService;
     @Resource
@@ -102,6 +105,9 @@ public class AdminAuthServiceImpl implements AdminAuthService {
 
     @Resource
     private PasswordEncoder passwordEncoder;
+
+    @Resource
+    private CorpService corpService;
 
     @Override
     public AdminUserDO authenticate(String username, String password) {
@@ -120,12 +126,30 @@ public class AdminAuthServiceImpl implements AdminAuthService {
         return user;
     }
 
+
+    private void checkCropStatus(Long corpId) {
+        CorpRespVO corp = corpService.getCorp(corpId);
+        if (null == corp || CommonStatusEnum.DISABLE.getStatus().equals(corp.getStatus())) {
+            throw exception(AUTH_LOGIN_CORP_DELETE_OR_DISABLE);
+        }
+    }
+
+
+    private void checkTenantStatus(Long tenantId) {
+        TenantDO tenantDO = tenantService.getTenant(tenantId);
+        if (null == tenantDO || CommonStatusEnum.DISABLE.getStatus().equals(tenantDO.getStatus())) {
+            throw exception(AUTH_LOGIN_TENANT_DELETE_OR_DISABLE);
+        }
+
+    }
+
+
     private void checkUserPsdAndStatus(String account, String password, AdminUserDO user, LoginLogTypeEnum logTypeEnum) {
         if (user == null) {
             createLoginLog(null, account, logTypeEnum, LoginResultEnum.BAD_CREDENTIALS);
             throw exception(AUTH_LOGIN_NO_EXISTS);
         }
-        
+
         Long userId = user.getId();
 
         // 检查账号是否被防暴力破解锁定
@@ -194,9 +218,14 @@ public class AdminAuthServiceImpl implements AdminAuthService {
 
         // 使用账号密码，进行登录
         AdminUserDO user = authenticate(reqVO.getUsername(), reqVO.getPassword());
-        AuthLoginRespVO authLoginRespVO=  createTokenAfterLoginSuccess(user.getId(), reqVO.getUsername(),reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_USERNAME);
+
+        // 验证空间状态是否异常
+        Long tenantId = TenantContextHolder.getTenantId();
+        checkTenantStatus(tenantId);
+
+        AuthLoginRespVO authLoginRespVO = createTokenAfterLoginSuccess(user.getId(), reqVO.getUsername(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_USERNAME);
         // 设置是否管理员
-        authLoginRespVO.setAdminFlag(findAdminFlag(RoleCodeEnum.TENANT_ADMIN.getCode(),user.getId()));
+        authLoginRespVO.setAdminFlag(findAdminFlag(RoleCodeEnum.TENANT_ADMIN.getCode(), user.getId()));
         return authLoginRespVO;
     }
 
@@ -208,20 +237,23 @@ public class AdminAuthServiceImpl implements AdminAuthService {
         // 2. 使用账号密码，进行登录
         AdminUserDO user = mobileAuthenticate(reqVO.getMobile(), reqVO.getPassword());
 
-        AuthLoginRespVO authLoginRespVO= createCorpAfterLoginSuccess(user.getCorpId(), user.getId(), reqVO.getMobile(),reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE);
+        // 验证企业状态是否异常
+        checkCropStatus(user.getCorpId());
+
+        AuthLoginRespVO authLoginRespVO = createCorpAfterLoginSuccess(user.getCorpId(), user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE);
         // 设置是否管理员
-        authLoginRespVO.setAdminFlag(findAdminFlag(RoleCodeEnum.CORP_ADMIN.getCode(),user.getId()));
+        authLoginRespVO.setAdminFlag(findAdminFlag(RoleCodeEnum.CORP_ADMIN.getCode(), user.getId()));
         // 回显当前登录用户的企业id
         authLoginRespVO.setCorpId(user.getCorpId());
         return authLoginRespVO;
     }
 
-    public boolean   findAdminFlag( String roleCode,  Long userId){
+    public boolean findAdminFlag(String roleCode, Long userId) {
         // 获取权限
         RoleDO roleDO = roleService.getRoleIdsByCode(roleCode);
-        if(null!=roleDO){
+        if (null != roleDO) {
             // 查询用户是否管理员
-            boolean  adminFlag= userService.findAdminByRoleIdAndUserId(roleDO.getId(),userId);
+            boolean adminFlag = userService.findAdminByRoleIdAndUserId(roleDO.getId(), userId);
             return adminFlag;
         }
         return false;
@@ -322,11 +354,7 @@ public class AdminAuthServiceImpl implements AdminAuthService {
                 OAuth2ClientConstants.CLIENT_ID_DEFAULT, null);
 
         // 检查并限制设备数，踢出超限的设备
-        List<String> removedTokens = securityConfigApi.checkAndLimitDevices(
-                userId,
-                deviceId,
-                accessTokenDO.getAccessToken()
-        ).getData();
+        List<String> removedTokens = securityConfigApi.checkAndLimitDevices(userId, deviceId, accessTokenDO.getAccessToken()).getData();
 
         // 删除被踢出的Token
         if (removedTokens != null && !removedTokens.isEmpty()) {
@@ -365,10 +393,7 @@ public class AdminAuthServiceImpl implements AdminAuthService {
         }
 
         // 清理在线设备记录
-        securityConfigApi.removeOnlineDevice(
-                accessTokenDO.getUserId(),
-                token
-        );
+        securityConfigApi.removeOnlineDevice(null, accessTokenDO.getUserId(), token);
 
         // 删除成功，则记录登出日志
         createLogoutLog(accessTokenDO.getUserId(), accessTokenDO.getUserType(), logType);

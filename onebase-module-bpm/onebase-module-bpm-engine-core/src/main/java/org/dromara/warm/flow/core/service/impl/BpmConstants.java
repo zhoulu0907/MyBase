@@ -43,4 +43,6 @@ public interface BpmConstants {
      * 抄送人常量
      */
     String VAR_CC_USERS_KEY = "ccUsers";
+
+    String AGENT_TITLE_PREFIX = "【代理审批】";
 }

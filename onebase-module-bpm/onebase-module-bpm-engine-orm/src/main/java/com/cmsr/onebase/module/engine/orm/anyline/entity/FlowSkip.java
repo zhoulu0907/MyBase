@@ -58,6 +58,17 @@ public class FlowSkip extends BaseEntity implements Skip {
     @Column(name = "coordinate", length = 100)
     private String coordinate;
 
+    /** 扩展属性 */
+    @Column(name = "ext")
+    private String ext;
+
+    /**
+     * 优先级
+     */
+    @Column(name = "priority")
+    private Integer priority;
+
+
     /* ==================== 以下为非数据库字段 ==================== */
     /**
      * 节点ID

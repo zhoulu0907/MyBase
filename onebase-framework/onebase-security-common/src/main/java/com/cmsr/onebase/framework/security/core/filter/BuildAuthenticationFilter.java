@@ -4,12 +4,14 @@ import com.cmsr.onebase.framework.common.biz.system.oauth2.OAuth2TokenCommonApi;
 import com.cmsr.onebase.framework.common.biz.system.oauth2.dto.OAuth2AccessTokenCheckRespDTO;
 import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
 import cn.hutool.core.util.StrUtil;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.security.config.SecurityProperties;
-import com.cmsr.onebase.framework.security.core.LoginUser;
-import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.common.security.dto.LoginUser;
+import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.web.core.handler.GlobalExceptionHandler;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import jakarta.servlet.FilterChain;
@@ -23,6 +25,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+
+import static com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstants.SEESION_TIMEOUT;
 
 /**
  * Token 过滤器，验证 token 的有效性
@@ -39,39 +43,57 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter {
 
     private final OAuth2TokenCommonApi oauth2TokenApi;
 
+    private final SecurityConfigApi securityConfigApi;
+
     @Override
     @SuppressWarnings("NullableProblems")
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
-        // 情况一，基于 header[login-user] 获得用户，例如说来自 Gateway 或者其它服务透传
-        LoginUser loginUser = buildLoginUserByHeader(request);
-
-        // 情况二，基于 Token 获得用户
-        // 注意，这里主要满足直接使用 Nginx 直接转发到 Spring Cloud 服务的场景。
-        if (loginUser == null) {
-            String token = SecurityFrameworkUtils.obtainAuthorization(request,
-                    securityProperties.getTokenHeader(), securityProperties.getTokenParameter());
-            if (StrUtil.isNotEmpty(token)) {
-                Integer userType = WebFrameworkUtils.getLoginUserType(request);
-                try {
-                    // 1.1 基于 token 构建登录用户
-                    loginUser = buildLoginUserByToken(token, userType);
-                    // 1.2 模拟 Login 功能，方便日常开发调试
-                    if (loginUser == null) {
-                        loginUser = mockLoginUser(request, token, userType);
+        if (isLoginOrLogoutRequest(request)) {
+            // 如果是登录、登出、注册，那么从header中获取租户信息
+            TenantContextHolder.setTenantId(WebFrameworkUtils.getTenantIdFromHeader(request));
+            // 无需获取token和登录用户信息
+        } else {
+            // 其他接口，需要获取token和登录用户信息
+            // 情况一，基于 header[login-user] 获得用户，例如说来自 Gateway 或者其它服务透传
+            LoginUser loginUser = buildLoginUserByHeader(request);
+            // 情况二，基于 Token 获得用户
+            // 注意，这里主要满足直接使用 Nginx 直接转发到 Spring Cloud 服务的场景。
+            String token = null;
+            if (loginUser == null) {
+                token = SecurityFrameworkUtils.obtainAuthorization(request,
+                        securityProperties.getTokenHeader(), securityProperties.getTokenParameter());
+                if (StrUtil.isNotEmpty(token)) {
+                    Integer userType = WebFrameworkUtils.getLoginUserType(request);
+                    try {
+                        // 1.1 基于 token 构建登录用户
+                        loginUser = buildLoginUserByToken(token, userType);
+                        // 1.2 模拟 Login 功能，方便日常开发调试
+                        if (loginUser == null) {
+                            loginUser = mockLoginUser(request, token, userType);
+                        }
+                    } catch (Throwable ex) {
+                        CommonResult<?> result = globalExceptionHandler.allExceptionHandler(request, ex);
+                        ServletUtils.writeJSON(response, result);
+                        return;
                     }
-                } catch (Throwable ex) {
-                    CommonResult<?> result = globalExceptionHandler.allExceptionHandler(request, ex);
+                }
+            }
+            // 设置当前用户
+            if (loginUser != null) {
+                SecurityFrameworkUtils.setLoginUser(loginUser, request);
+                TenantContextHolder.setTenantId(loginUser.getTenantId());
+                // 会话空闲检查：排除登录和登出请求
+                boolean checkSuc = checkAndUpdateSessionIdle(loginUser, token);
+                if (!checkSuc) {
+                    log.error("[BuildAuthenticationFilter][长时间内无操作，自动登出。]");
+                    CommonResult<?> result = CommonResult.error(SEESION_TIMEOUT);
                     ServletUtils.writeJSON(response, result);
-                    return;
+                    return; // 中断
                 }
             }
         }
 
-        // 设置当前用户
-        if (loginUser != null) {
-            SecurityFrameworkUtils.setLoginUser(loginUser, request);
-        }
         // 继续过滤链
         chain.doFilter(request, response);
     }
@@ -125,7 +147,7 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter {
         // 构建模拟用户
         Long userId = Long.valueOf(token.substring(securityProperties.getMockSecret().length()));
         return new LoginUser().setId(userId).setUserType(userType)
-                .setTenantId(WebFrameworkUtils.getTenantId(request));
+                .setTenantId(WebFrameworkUtils.getTenantIdFromHeader(request));
     }
 
     private LoginUser buildLoginUserByHeader(HttpServletRequest request) {
@@ -152,6 +174,71 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter {
             ;
             throw ex;
         }
+    }
+
+    /**
+     * 判断是否为登录或登出请求
+     *
+     * @param request HTTP请求
+     * @return 是否为登录/登出请求
+     */
+    private boolean isLoginOrLogoutRequest(HttpServletRequest request) {
+        String uri = request.getRequestURI();
+        if (uri == null) {
+            return false;
+        }
+        // 获取路径的最后一段
+        String lastSegment = uri.substring(uri.lastIndexOf('/') + 1);
+        // 检查是否包含login或logout或register（不区分大小写）
+        return lastSegment.toLowerCase().contains("login")
+                || lastSegment.toLowerCase().contains("logout")
+                || lastSegment.toLowerCase().contains("register")
+                ;
+    }
+
+    /**
+     * 检查并更新会话空闲状态
+     * <p>
+     * 实现逻辑：
+     * 1. 从token中反查deviceId
+     * 2. 调用updateSessionIdleKey更新Redis key的TTL和value
+     * 3. 如果更新返回false（Redis key已过期），则调用登出接口并抛出会话超时异常
+     *
+     * @param loginUser 登录用户
+     * @param token     访问令牌
+     */
+    private boolean checkAndUpdateSessionIdle(LoginUser loginUser, String token) {
+        if (loginUser == null || StrUtil.isBlank(token)) {
+            return true;
+        }
+
+        // 步骤1：通过token反查deviceId
+        CommonResult<String> deviceIdResult = securityConfigApi.findDeviceIdByToken(loginUser.getTenantId(), loginUser.getId(), token);
+
+        if (deviceIdResult == null || StrUtil.isBlank(deviceIdResult.getData())) {
+            log.warn("[checkAndUpdateSessionIdle][无法反查deviceId，跳过会话空闲检查] userId={}, token={}", loginUser.getId(), token);
+            return true;
+        }
+
+        String deviceId = deviceIdResult.getData();
+
+        // 步骤2：更新会话空闲Redis key的TTL和value
+        CommonResult<Boolean> updateResult = securityConfigApi.updateSessionIdleKey(loginUser.getTenantId(), loginUser.getId(), deviceId);
+
+        // 步骤3：如果更新失败（返回false），表示Redis key已过期，执行登出操作
+        if (updateResult == null || updateResult.getData() == null || !updateResult.getData()) {
+            log.info("[checkAndUpdateSessionIdle][会话已超时，执行强制登出] userId={}, deviceId={}", loginUser.getId(), deviceId);
+
+            // 删除accessToken
+            oauth2TokenApi.removeAccessToken(token);
+            // 删除在线设备记录
+            securityConfigApi.removeOnlineDevice(loginUser.getTenantId(), loginUser.getId(), token);
+
+            return false;
+        }
+
+        log.debug("[checkAndUpdateSessionIdle][会话空闲key更新成功] userId={}, deviceId={}", loginUser.getId(), deviceId);
+        return true;
     }
 
 }

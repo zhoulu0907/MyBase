@@ -50,12 +50,12 @@ onebase:
   web:
     return-exception-stack-trace: true # 本地开发：接口错误时返回堆栈，便于调试
   scheduler:
-    address: http://10.0.104.33:12345/dolphinscheduler
-    token: 85806d2d33502cef3036fb30b320e5f5
-    env: 154612656767296
-    flow-project: 154702155517248
-    flow-url: http://bing.com
-    etl-project: 155572154738048
+    address: http://10.0.104.50:12345/dolphinscheduler
+    token: 06bd06605a9bc7b9621590acb7cc80ec
+    env: 158049897452288
+    flow-project: 158049907843840
+    flow-url: http://10.0.104.41:49224/runtime/flow/remote-call/trigger
+    etl-project: 158049912856320
     tenant: root
   flink:
     address: http://localhost:58080

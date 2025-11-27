@@ -1,8 +1,8 @@
 package com.cmsr.onebase.framework.security.core.rpc;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
-import com.cmsr.onebase.framework.security.core.LoginUser;
-import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.common.security.dto.LoginUser;
+import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
 import lombok.extern.slf4j.Slf4j;

@@ -6,8 +6,8 @@ import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.enums.XFromSceneTypeEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.data.base.BaseDO;
-import com.cmsr.onebase.framework.security.core.LoginUser;
-import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.common.security.dto.LoginUser;
+import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
@@ -190,6 +190,18 @@ public abstract class AbstractUserDataRepository extends DataRepository<AdminUse
     }
 
     /**
+     * 根据corpId统计用户数量
+     *
+     * @param corpId  企业id
+     * @return 用户数量
+     */
+    public long getUserCountByCorpId(Long corpId) {
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.eq(AdminUserDO.CORP_ID, corpId);
+        return countByConfig(configStore);
+    }
+
+    /**
      * 分页查询用户
      *
      * @param reqVO              分页查询条件
@@ -204,7 +216,9 @@ public abstract class AbstractUserDataRepository extends DataRepository<AdminUse
         if (reqVO.getKeyword() != null && !reqVO.getKeyword().trim().isEmpty()) {
             configStore.and(new DefaultConfigStore()
                     .or(Compare.LIKE, AdminUserDO.USERNAME, reqVO.getKeyword())
-                    .or(Compare.LIKE, AdminUserDO.EMAIL, reqVO.getKeyword()));
+                    .or(Compare.LIKE, AdminUserDO.EMAIL, reqVO.getKeyword()))
+                    .or(Compare.LIKE, AdminUserDO.MOBILE, reqVO.getKeyword())
+                    .or(Compare.LIKE, AdminUserDO.NICKNAME, reqVO.getKeyword());
         }
 
         // 用户名模糊查询
@@ -304,12 +318,18 @@ public abstract class AbstractUserDataRepository extends DataRepository<AdminUse
         return findPageWithConditions(configStore, reqVO.getPageNo(), reqVO.getPageSize());
     }
 
-    public List<AdminUserDO> findEnableUserByIds(Set<Long> userIds) {
+    public List<AdminUserDO> findEnableUserByIds(Set<Long> userIds,String keyword,Integer status) {
         DefaultConfigStore configStore = buildUserConfigStore();
         configStore.in(AdminUserDO.ID, userIds)
-                .eq(AdminUserDO.STATUS, UserStatusEnum.NORMAL.getStatus())
-                .order(AdminUserDO.ADMIN_TYPE, Order.TYPE.ASC)
-                .order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
+                .eq(AdminUserDO.STATUS, status)
+                .order(AdminUserDO.ADMIN_TYPE, Order.TYPE.ASC);
+        // 根据关键词模糊查询
+        if (StringUtils.isNotBlank(keyword)) {
+            configStore.and(new DefaultConfigStore()
+                    .or(Compare.LIKE, AdminUserDO.USERNAME, keyword)
+                    .or(Compare.LIKE, AdminUserDO.NICKNAME, keyword));
+        }
+        configStore.order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
         return findAllByConfig(configStore);
     }
 

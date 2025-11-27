@@ -1,6 +1,6 @@
 package com.cmsr.onebase.framework.tenant.core.util;
 
-import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 
 import java.util.Map;
 import java.util.concurrent.Callable;

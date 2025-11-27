@@ -1,0 +1,86 @@
+package com.cmsr.onebase.module.system.build.controller.corpsys;
+
+import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
+import com.cmsr.onebase.module.system.service.corpapprelation.CorpAppRelationService;
+import com.cmsr.onebase.module.system.vo.corp.CorpApplicationRespVO;
+import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppPageReqVO;
+import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppRelationInertReqVO;
+import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppRelationUpdateReqVO;
+import com.cmsr.onebase.module.system.vo.corpapprelation.CorpRelationAppReqVO;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
+
+/**
+ * 空间内使用的服务 - 企业应用关联表 Controller
+ *
+ * @author mty
+ * @date 2025-10-20
+ */
+@Tag(name = "空间服务 - 企业应用关系")
+@RestController
+@Validated
+@RequestMapping("/system/corp-app-relation")
+public class SystemCorpAppRelationController {
+
+    @Resource
+    private CorpAppRelationService corpAppRelationService;
+
+    @PostMapping("/create")
+    @PreAuthorize("@ss.hasPermission('tenant:corp:create')")
+    @Operation(summary = "新增企业应用关联")
+    public CommonResult<Boolean> createCorpAppRelation(@Valid @RequestBody CorpAppRelationInertReqVO corpAppRelationInertReqVO) {
+        corpAppRelationService.createCorpAppRelation(corpAppRelationInertReqVO);
+        return success(true);
+    }
+
+    @PostMapping("/update")
+    @PreAuthorize("@ss.hasPermission('tenant:corp:update')")
+    @Operation(summary = "更新企业应用关联")
+    public CommonResult<Boolean> updateCorpAppRelation(@Valid @RequestBody CorpAppRelationUpdateReqVO updateReqVO) {
+        corpAppRelationService.updateCorpAppRelation(updateReqVO);
+        return success(true);
+    }
+
+    @PostMapping("/update-status")
+    @Operation(summary = "企业启用/禁用")
+    @PreAuthorize("@ss.hasPermission('tenant:corp:enable')")
+    public CommonResult<Boolean> updateStatus(@RequestParam("id") Long id, @RequestParam("status") Long status) {
+        corpAppRelationService.updateStatus(id, status);
+        return success(true);
+    }
+
+    @PostMapping("/delete")
+    @PreAuthorize("@ss.hasPermission('tenant:corp:delete')")
+    @Operation(summary = "删除应用授权企业")
+    public CommonResult<Boolean> deleteCorpAppRelation(@RequestParam("id") Long id) {
+        corpAppRelationService.deleteCorpAppRelation(id);
+        return success(true);
+    }
+
+    @GetMapping("/corp-applications-page")
+    @Operation(summary = "获得企业授权应用列表-分页")
+    @PreAuthorize("@ss.hasPermission('tenant:corp:query')")
+    public CommonResult<PageResult<CorpApplicationRespVO>> getCorpAppRelationPage(@Valid CorpAppPageReqVO corpAppPageReqVO) {
+        PageResult<CorpApplicationRespVO> pageResult = corpAppRelationService.getCorpAppRelationPage(corpAppPageReqVO);
+        return success(pageResult);
+    }
+
+    @PostMapping("/corp-no-relation-app-list")
+    @Operation(summary = "获取企业未关联应用", description = "主要用于前端的下拉选项")
+    @PreAuthorize("@ss.hasPermission('tenant:corp:query')")
+    public CommonResult<List<ApplicationDTO>> getCorpNoRelationAppList(CorpRelationAppReqVO relationAppReqVO) {
+        List<ApplicationDTO>  applicationsList=  corpAppRelationService.getCorpNoRelationAppList(relationAppReqVO);
+        return success( applicationsList);
+    }
+}

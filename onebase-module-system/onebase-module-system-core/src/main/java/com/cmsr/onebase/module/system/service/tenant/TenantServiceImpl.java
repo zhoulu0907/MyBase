@@ -6,12 +6,13 @@ import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.enums.CommonPublishModelEnum;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.common.util.date.DateUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.tenant.config.TenantProperties;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
-import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.system.api.user.AdminUserRoleApi;
@@ -214,6 +215,8 @@ public class TenantServiceImpl implements TenantService {
         TenantUtils.execute(tenant.getId(), () -> {
             // 创建管理员角色
             Long roleId = createTenantAdminRole();
+            //  开发者角色 判断是否存在开发者，不存在就新增开发者角色
+            createDeveloperAdminRole();
             // 创建用户，并分配角色
             createSystemUser(roleId, createReqVO);
         });
@@ -253,6 +256,19 @@ public class TenantServiceImpl implements TenantService {
         Long roleId = roleService.createRole(reqVO, RoleTypeEnum.SYSTEM.getType());
         return roleId;
     }
+
+
+    private void createDeveloperAdminRole() {
+        RoleDO roleDO= roleService.getRoleByCode(RoleCodeEnum.APP_DEVELOPER.getCode());
+        if(roleDO==null) {
+            // 创建角色
+            RoleInsertReqVO reqVO = new RoleInsertReqVO();
+            reqVO.setName(RoleCodeEnum.APP_DEVELOPER.getName()).setCode(RoleCodeEnum.APP_DEVELOPER.getCode())
+                    .setSort(0).setRemark("系统自动生成");
+              roleService.createRole(reqVO, RoleTypeEnum.SYSTEM.getType());
+        }
+    }
+
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -480,6 +496,15 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     public TenantRespVO getTenantWithAppCount(Long id) {
+        // 仅允许获取自己的租户信息(平台管理员除外)
+        boolean isPlatformAdmin = permissionService.isPlatformSuperAdmin(SecurityFrameworkUtils.getLoginUserId());
+        if (!isPlatformAdmin) {
+            Long loginTenantId = TenantContextHolder.getTenantId();
+            if (!Objects.equals(loginTenantId, id)) {
+                throw exception(TENANT_ONLY_GET_SELF);
+            }
+        }
+
         Map<Long, Integer> corpCountMap = findCorpCount();
         TenantDO tenantDO = getTenant(id);
         // 查询当前租户下的已有的正常状态的用户数量

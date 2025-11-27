@@ -34,14 +34,15 @@ public interface MultiDeviceSessionService {
     void addOnlineDevice(Long userId, String deviceId, String accessToken);
 
     /**
-     * 清理在线设备记录
+     * 移除在线设备
      * 
      * 用户登出或Token过期时调用
      *
+     * @param tenantId 租户ID（可选，为null时从TenantContextHolder获取）
      * @param userId 用户ID
      * @param accessToken AccessToken
      */
-    void removeOnlineDevice(Long userId, String accessToken);
+    void removeOnlineDevice(Long tenantId, Long userId, String accessToken);
 
     /**
      * 获取用户在线设备数
@@ -60,5 +61,5 @@ public interface MultiDeviceSessionService {
      * @param accessToken AccessToken
      * @return 设备ID，未找到返回null
      */
-    String findDeviceIdByToken(Long userId, String accessToken);
+    String findDeviceIdByToken(Long tenantId, Long userId, String accessToken);
 }

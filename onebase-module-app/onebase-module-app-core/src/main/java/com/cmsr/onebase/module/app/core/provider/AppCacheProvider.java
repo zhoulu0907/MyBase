@@ -3,8 +3,8 @@ package com.cmsr.onebase.module.app.core.provider;
 import com.cmsr.onebase.module.app.core.dal.database.AppSqlQueryRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleUserRepository;
 import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthRoleUserDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.menu.MenuDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthRoleUserDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppMenuDO;
 import com.cmsr.onebase.module.app.core.utils.CacheUtils;
 import com.cmsr.onebase.module.app.core.vo.auth.AuthPermissionReq;
 import lombok.Setter;
@@ -38,12 +38,12 @@ public class AppCacheProvider {
 
     private List<Long> findAllMenuIds(Long applicationId) {
         return appMenuRepository.findByApplicationId(applicationId)
-                .stream().map(MenuDO::getId).toList();
+                .stream().map(AppMenuDO::getId).toList();
     }
 
     private List<Long> findAllUserIds(Long roleId) {
         return appAuthRoleUserRepository.findByRoleId(roleId)
-                .stream().map(AuthRoleUserDO::getUserId).toList();
+                .stream().map(AppAuthRoleUserDO::getUserId).toList();
     }
 
     public void usersChanged(Long applicationId, List<Long> userIds) {

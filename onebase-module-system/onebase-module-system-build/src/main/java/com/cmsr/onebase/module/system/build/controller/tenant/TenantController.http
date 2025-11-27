@@ -14,16 +14,16 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
 {
-  "name": "租户Test003",
-  "tenantCode": "tenant_test003",
-  "website": "tenant_test003",
-  "accountCount": 2,
+  "name": "租户001",
+  "tenantCode": "tenant_001",
+  "website": "tenant_001",
+  "accountCount": 10,
   "status": 1,
   "tenantAdminUserReqVOList": [
     {
-      "adminUserName": "test003",
-      "adminMobile": "13800000003",
-      "adminNickName": "租户t003管理员"
+      "adminUserName": "user001",
+      "adminMobile": "13800000001",
+      "adminNickName": "租户001管理员"
     }
   ]
 }

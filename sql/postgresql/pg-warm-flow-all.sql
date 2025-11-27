@@ -459,5 +459,52 @@ COMMENT ON COLUMN bpm_flow_cc_record.updater IS '更新人';
 COMMENT ON COLUMN bpm_flow_cc_record.deleted IS '删除标志';
 COMMENT ON COLUMN bpm_flow_cc_record.tenant_id IS '租户id';
 
--- 以下为增量更新
+CREATE TABLE bpm_flow_agent_ins
+(
+    id              int8         NOT NULL,
+    task_id         int8         NOT NULL,
+    instance_id     int8         NOT NULL,
+    principal_id    varchar(80)  NOT NULL,
+    principal_name  varchar(64)  NOT NULL,
+    agent_id        varchar(80)  NOT NULL,
+    agent_name      varchar(64)  NOT NULL,
+    is_executor     int2         NOT NULL DEFAULT 0,
+    "lock_version"  int8 NOT NULL DEFAULT 0,
+    "creator"       int8 NOT NULL DEFAULT 0,
+    "create_time"   timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updater"       int8 NOT NULL DEFAULT 0,
+    "update_time"   timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "deleted"       int8 NOT NULL DEFAULT 0,
+    "tenant_id"     int8 NOT NULL DEFAULT 0,
+    CONSTRAINT bpm_flow_agent_ins_pkey PRIMARY KEY (id)
+);
+-- 表注释
+COMMENT ON TABLE bpm_flow_agent_ins IS '代理关系实例表';
+
+-- 字段注释
+COMMENT ON COLUMN bpm_flow_agent_ins.task_id IS '任务ID';
+COMMENT ON COLUMN bpm_flow_agent_ins.instance_id IS '流程实例ID';
+COMMENT ON COLUMN bpm_flow_agent_ins.principal_id IS '被代理人ID';
+COMMENT ON COLUMN bpm_flow_agent_ins.agent_id IS '代理人ID';
+COMMENT ON COLUMN bpm_flow_agent_ins.is_executor IS '是否执行人：0=未操作, 1=执行人';
+COMMENT ON COLUMN bpm_flow_agent_ins.agent_name IS '代理人用户名称';
+COMMENT ON COLUMN bpm_flow_agent_ins.principal_name IS '被代理人用户名称';
+
+COMMENT ON COLUMN bpm_flow_agent_ins.id IS '主键id';
+COMMENT ON COLUMN bpm_flow_agent_ins."lock_version" IS '乐观锁';
+COMMENT ON COLUMN bpm_flow_agent_ins.create_time IS '创建时间';
+COMMENT ON COLUMN bpm_flow_agent_ins.creator IS '创建人';
+COMMENT ON COLUMN bpm_flow_agent_ins.update_time IS '更新时间';
+COMMENT ON COLUMN bpm_flow_agent_ins.updater IS '更新人';
+COMMENT ON COLUMN bpm_flow_agent_ins.deleted IS '删除标志';
+COMMENT ON COLUMN bpm_flow_agent_ins.tenant_id IS '租户id';
+
+-- 以下为增量字段更新
 ALTER TABLE "bpm_flow_user" ALTER COLUMN "type" TYPE varchar(8) COLLATE "pg_catalog"."default" USING "type"::varchar(8);
+
+-- bpm_flow_skip 新增字段
+ALTER TABLE "bpm_flow_skip" ADD COLUMN "ext" text, ADD COLUMN "priority" int2 NOT NULL DEFAULT 0;
+
+COMMENT ON COLUMN "public"."bpm_flow_skip"."ext" IS '扩展信息';
+
+COMMENT ON COLUMN "public"."bpm_flow_skip"."priority" IS '优先级';

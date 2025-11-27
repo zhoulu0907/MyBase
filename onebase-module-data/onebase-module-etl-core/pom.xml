@@ -27,6 +27,10 @@
         <!-- OneBase相关依赖 -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-spring-boot-starter-orm</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-spring-boot-starter-biz-tenant</artifactId>
         </dependency>
         <dependency>
@@ -81,6 +85,11 @@
             <artifactId>kingbase8</artifactId>
         </dependency>
         <!-- Test 测试相关 -->
+        <dependency>
+            <groupId>com.mybatis-flex</groupId>
+            <artifactId>mybatis-flex-codegen</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-spring-boot-starter-test</artifactId>

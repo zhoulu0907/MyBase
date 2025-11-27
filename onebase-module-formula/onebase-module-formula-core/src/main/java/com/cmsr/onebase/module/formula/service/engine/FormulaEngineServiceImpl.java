@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.formula.service.engine;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.formula.config.FormulaEngineProperties;
 import com.cmsr.onebase.module.formula.service.extendsion.FormulaExtendsService;
+import com.cmsr.onebase.module.formula.util.FormulaValidate;
 import com.fasterxml.jackson.core.type.TypeReference;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -81,7 +82,8 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
             throw new SecurityException("公式包含不安全的操作或函数");
         }
 
-
+        // 检查的函数是否存在，函数参数个数，参数类型，并返回报错提示
+        FormulaValidate.validateSupportedFunctions(formula);
         // 创建GraalVM JavaScript上下文
         Context.Builder contextBuilder = Context.newBuilder("js")
                 .allowHostAccess(HostAccess.CONSTRAINED)

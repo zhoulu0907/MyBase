@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cmsr.onebase.module.app.core.dal.mapper.AppAuthPermissionMapper">
+
+    <select id="findByAppIdAndRoleIdsAndMenuId"
+            resultType="com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthPermissionDO">
+        select
+        r.role_code,
+        r.role_type,
+        g.*
+        from
+        app_auth_role r
+        left join app_auth_permission g
+        on
+        r.application_id = g.application_id
+        and r.id = g.role_id
+        where
+        r.deleted = 0
+        and (g.deleted = 0 or g.deleted is null)
+        and r.application_id = #{applicationId}
+        <foreach item="item" index="index" collection="roleIds" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        and (g.menu_id = #{menuId} or g.menu_id is null)
+    </select>
+    <select id="findByAppIdAndRoleIds"
+            resultType="com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthPermissionDO">
+        select
+        r.role_code,
+        r.role_type,
+        g.*
+        from
+        app_auth_role r
+        left join app_auth_permission g
+        on
+        r.application_id = g.application_id
+        and r.id = g.role_id
+        where
+        r.deleted = 0
+        and (g.deleted = 0 or g.deleted is null)
+        and r.application_id = #{applicationId}
+        and r.id in
+        <foreach item="item" index="index" collection="roleIds" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+</mapper>
