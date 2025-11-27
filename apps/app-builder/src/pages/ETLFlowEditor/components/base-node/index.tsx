@@ -28,9 +28,7 @@ export const BaseNode = ({ node }: { node: FlowNodeEntity }) => {
               flowNodeType: node.flowNodeType
             });
 
-            if (node.flowNodeType === ETLNodeType.INPUT_NODE) {
-              etlEditorSignal.setCurDrawerTab(ETLDrawerTab.DATA_CONFIG);
-            }
+            etlEditorSignal.setCurDrawerTab(ETLDrawerTab.DATA_CONFIG);
           }}
           style={{
             /**
