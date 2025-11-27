@@ -67,7 +67,8 @@ export const InputNodeConfig: React.FC<InputNodeConfigProps> = ({ onRegisterSave
       fields: selectedColumns.map((column) => ({
         fieldFqn: `${curNode.value.id}.${column.fieldName}`,
         fieldName: column.fieldName,
-        fieldType: column.fieldType
+        fieldType: column.fieldType,
+        displayName: column.displayName
       }))
     };
 
