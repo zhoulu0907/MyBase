@@ -4,13 +4,11 @@ import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.app.build.service.AppCommonService;
-import com.cmsr.onebase.module.app.build.service.appresource.PageSetService;
+import com.cmsr.onebase.module.app.build.service.resource.PageSetService;
 import com.cmsr.onebase.module.app.build.vo.menu.*;
-import com.cmsr.onebase.module.app.core.dal.database.appresource.AppPageSetRepository;
 import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.app.ApplicationDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.PageSetDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.menu.MenuDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppMenuDO;
 import com.cmsr.onebase.module.app.core.dto.appresource.CopyPageSetDTO;
 import com.cmsr.onebase.module.app.core.dto.appresource.CreatePageSetDTO;
 import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
@@ -19,11 +17,9 @@ import com.cmsr.onebase.module.app.core.enums.menu.MenuTypeEnum;
 import com.cmsr.onebase.module.app.core.utils.MenuUtils;
 import jakarta.annotation.Resource;
 import lombok.Setter;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -53,27 +49,12 @@ public class AppMenuServiceImpl implements AppMenuService {
     @Resource
     private AppApplicationApi appApplicationApi;
 
-    @Autowired
-    private AppPageSetRepository pageSetDataRepository;
-
-
-
     @Override
     public List<MenuListRespVO> listBpmApplicationMenu(Long applicationId) {
-        ApplicationDO applicationDO = appCommonService.validateApplicationExist(applicationId);
-        List<MenuDO> menuDOS = appMenuRepository.findByApplicationIdAndType(applicationDO.getId(),
+        AppApplicationDO applicationDO = appCommonService.validateApplicationExist(applicationId);
+        List<AppMenuDO> menuDOS = appMenuRepository.findByApplicationIdAndType(applicationDO.getId(),
                 Set.of(MenuTypeEnum.BPM.getValue())
         );
-
-        // 兼容旧的应用，自动补齐默认的审批流菜单，todo：后续可以删除
-        if (CollectionUtils.isEmpty(menuDOS)) {
-            createDefaultBpmMenu(applicationId);
-
-            // 重新查询
-            menuDOS = appMenuRepository.findByApplicationIdAndType(applicationDO.getId(),
-                    Set.of(MenuTypeEnum.BPM.getValue())
-            );
-        }
 
         // 返回菜单
         return menuDOS.stream()
@@ -83,11 +64,11 @@ public class AppMenuServiceImpl implements AppMenuService {
 
     @Override
     public void createDefaultBpmMenu(Long applicationId) {
-        List<MenuDO> menuDOList = new ArrayList<>();
+        List<AppMenuDO> menuDOList = new ArrayList<>();
         int menuSort = 0;
 
         for (BpmMenuEnum bpmMenuEnum : BpmMenuEnum.values()) {
-            MenuDO menuDO = new MenuDO();
+            AppMenuDO menuDO = new AppMenuDO();
             menuDO.setApplicationId(applicationId);
             menuDO.setParentId(0L);
             menuDO.setMenuCode(bpmMenuEnum.getCode());
@@ -100,13 +81,13 @@ public class AppMenuServiceImpl implements AppMenuService {
             menuDOList.add(menuDO);
         }
 
-        appMenuRepository.insertBatch(menuDOList);
+        appMenuRepository.saveBatch(menuDOList);
     }
 
     @Override
     public List<MenuListRespVO> listApplicationMenu(Long applicationId, String name) {
-        ApplicationDO applicationDO = appCommonService.validateApplicationExist(applicationId);
-        List<MenuDO> menuDOS = appMenuRepository.findByApplicationIdAndType(applicationDO.getId(),
+        AppApplicationDO applicationDO = appCommonService.validateApplicationExist(applicationId);
+        List<AppMenuDO> menuDOS = appMenuRepository.findByApplicationIdAndType(applicationDO.getId(),
                 Set.of(MenuTypeEnum.PAGE.getValue(), MenuTypeEnum.GROUP.getValue())
         );
         List<MenuListRespVO> menuListRespList = new ArrayList<>();
@@ -116,11 +97,9 @@ public class AppMenuServiceImpl implements AppMenuService {
                 .map(v -> BeanUtils.toBean(v, MenuListRespVO.class))
                 .collect(Collectors.toCollection(LinkedList::new));
         menuListRespList.addAll(levelOneMenus);
-        Map<Long, Integer> menuPageSetTypeMap = buildMenuPageSetTypeMap(menuDOS);
         // 递归实现每个菜单的子菜单
         for (MenuListRespVO respVO : menuListRespList) {
-            respVO.setPageSetType(menuPageSetTypeMap.get(respVO.getId()));
-            LinkedList<MenuListRespVO> children = recursiveGetChildren(respVO.getId(), menuDOS, menuPageSetTypeMap);
+            LinkedList<MenuListRespVO> children = recursiveGetChildren(respVO.getId(), menuDOS);
             respVO.setChildren(children);
         }
         filterMenuByName(menuListRespList, name);
@@ -128,40 +107,17 @@ public class AppMenuServiceImpl implements AppMenuService {
     }
 
 
-    //需要查询每个菜单的类型，如果是工作台，前端需要以工作台的类型打开页面
-    private LinkedList<MenuListRespVO> recursiveGetChildren(Long parentId, List<MenuDO> menuDOS,
-                                                           Map<Long, Integer> menuPageSetTypeMap) {
+    private LinkedList<MenuListRespVO> recursiveGetChildren(Long parentId, List<AppMenuDO> menuDOS) {
         LinkedList<MenuListRespVO> children = new LinkedList<>();
-        for (MenuDO menuDO : menuDOS) {
+        for (AppMenuDO menuDO : menuDOS) {
             if (Objects.equals(menuDO.getParentId(), parentId)) {
                 // 只有父菜单的uuid等于当前菜单的父菜单的uuid时，才添加子菜单，继续递归
                 MenuListRespVO child = BeanUtils.toBean(menuDO, MenuListRespVO.class);
-                child.setChildren(recursiveGetChildren(child.getId(), menuDOS, menuPageSetTypeMap));
+                child.setChildren(recursiveGetChildren(child.getId(), menuDOS));
                 children.add(child);
-                child.setPageSetType(menuPageSetTypeMap.get(child.getId()));
             }
-
         }
         return children.isEmpty() ? null : children;
-    }
-
-    private Map<Long, Integer> buildMenuPageSetTypeMap(List<MenuDO> menuDOS) {
-        if (menuDOS == null || menuDOS.isEmpty()) {
-            return Collections.emptyMap();
-        }
-        List<Long> menuIds = menuDOS.stream()
-                .map(MenuDO::getId)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-        if (menuIds.isEmpty()) {
-            return Collections.emptyMap();
-        }
-        List<PageSetDO> pageSetDOS = pageSetDataRepository.findByMenuIds(menuIds);
-        if (pageSetDOS == null || pageSetDOS.isEmpty()) {
-            return Collections.emptyMap();
-        }
-        return pageSetDOS.stream()
-                .collect(Collectors.toMap(PageSetDO::getMenuId, PageSetDO::getPageSetType, (first, second) -> second));
     }
 
 
@@ -278,9 +234,9 @@ public class AppMenuServiceImpl implements AppMenuService {
 
         // 菜单类型校验
         MenuTypeEnum.validate(createReqVO.getMenuType());
-        ApplicationDO applicationDO = appCommonService.validateApplicationExist(createReqVO.getApplicationId());
+        AppApplicationDO applicationDO = appCommonService.validateApplicationExist(createReqVO.getApplicationId());
         // 创建菜单
-        MenuDO menuDO = new MenuDO();
+        AppMenuDO menuDO = new AppMenuDO();
         menuDO.setApplicationId(createReqVO.getApplicationId());
         menuDO.setParentId(validateParentMenuId(createReqVO.getParentId()));
         menuDO.setMenuCode(MenuUtils.generateMenuCode());
@@ -290,7 +246,7 @@ public class AppMenuServiceImpl implements AppMenuService {
         menuDO.setMenuSort(generateMenuSort(applicationDO.getId()));
         menuDO.setIsVisible(NumberUtils.INTEGER_ONE);
         menuDO.setEntityId(createReqVO.getEntityId());
-        appMenuRepository.insert(menuDO);
+        appMenuRepository.save(menuDO);
         // 创建页面集
         CreatePageSetDTO createPageSetDTO = new CreatePageSetDTO();
         createPageSetDTO.setMenuId(menuDO.getId());
@@ -312,7 +268,7 @@ public class AppMenuServiceImpl implements AppMenuService {
         if (parentId == null) {
             return MenuUtils.ROOT_MENU_ID;
         }
-        MenuDO parentMenu = appCommonService.validateMenuExist(parentId);
+        AppMenuDO parentMenu = appCommonService.validateMenuExist(parentId);
         if (parentMenu == null) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_MENU_NOT_EXIST);
         }
@@ -325,31 +281,31 @@ public class AppMenuServiceImpl implements AppMenuService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateApplicationMenu(MenuUpdateReqVO updateReqVO) {
-        MenuDO menuDO = appCommonService.validateMenuExist(updateReqVO.getId());
+        AppMenuDO menuDO = appCommonService.validateMenuExist(updateReqVO.getId());
         menuDO.setMenuName(updateReqVO.getMenuName());
         menuDO.setMenuIcon(updateReqVO.getMenuIcon());
-        appMenuRepository.update(menuDO);
+        appMenuRepository.updateById(menuDO);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateApplicationMenuName(Long id, String menuName) {
-        MenuDO menuDO = appCommonService.validateMenuExist(id);
+        AppMenuDO menuDO = appCommonService.validateMenuExist(id);
         menuDO.setMenuName(menuName);
-        appMenuRepository.update(menuDO);
+        appMenuRepository.updateById(menuDO);
     }
 
     @Override
     public void updateApplicationMenuOrder(MenuOrderUpdateReqVO updateReqVO) {
-        MenuDO menuDO = appCommonService.validateMenuExist(updateReqVO.getId());
+        AppMenuDO menuDO = appCommonService.validateMenuExist(updateReqVO.getId());
         menuDO.setParentId(updateReqVO.getParentId());
-        appMenuRepository.update(menuDO);
+        appMenuRepository.updateById(menuDO);
         Map<Long, Integer> menuSortMap = toMenuSortMap(updateReqVO.getMenuTree());
-        List<MenuDO> menuDOS = appMenuRepository.findByApplicationId(menuDO.getApplicationId());
-        for (MenuDO menu : menuDOS) {
+        List<AppMenuDO> menuDOS = appMenuRepository.findByApplicationId(menuDO.getApplicationId());
+        for (AppMenuDO menu : menuDOS) {
             Integer order = MapUtils.getInteger(menuSortMap, menu.getId(), MenuUtils.MENU_SORT_MAX_VALUE);
             menu.setMenuSort(order);
-            appMenuRepository.update(menu);
+            appMenuRepository.updateById(menu);
         }
     }
 
@@ -390,15 +346,15 @@ public class AppMenuServiceImpl implements AppMenuService {
 
     @Override
     public void updateApplicationMenuVisible(Long id, Integer visible) {
-        MenuDO menuDO = appCommonService.validateMenuExist(id);
+        AppMenuDO menuDO = appCommonService.validateMenuExist(id);
         menuDO.setIsVisible(visible);
-        appMenuRepository.update(menuDO);
+        appMenuRepository.updateById(menuDO);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public MenuCreateRespVO copyApplicationMenu(MenuCopyReqVO copyReqVO) {
-        MenuDO menuDO = appCommonService.validateMenuExist(copyReqVO.getId());
+        AppMenuDO menuDO = appCommonService.validateMenuExist(copyReqVO.getId());
         if (menuDO.getMenuType() == MenuTypeEnum.GROUP.getValue()) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_MENU_GROUP_NOT_ALLOW_COPY);
         }
@@ -408,7 +364,7 @@ public class AppMenuServiceImpl implements AppMenuService {
         menuDO.setMenuName(copyReqVO.getMenuName());
         menuDO.setParentId(validateParentMenuId(copyReqVO.getParentId()));
         menuDO.setMenuCode(MenuUtils.generateMenuCode());
-        appMenuRepository.insert(menuDO);
+        appMenuRepository.save(menuDO);
         // 复制页面
         CopyPageSetDTO copyPageSetDTO = new CopyPageSetDTO();
         copyPageSetDTO.setMenuId(sourceMenuId);
@@ -422,13 +378,13 @@ public class AppMenuServiceImpl implements AppMenuService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteApplicationMenu(Long id) {
-        MenuDO menuDO = appCommonService.validateMenuExist(id);
+        AppMenuDO menuDO = appCommonService.validateMenuExist(id);
         if (menuDO.getMenuType() == MenuTypeEnum.GROUP.getValue()
                 && validateMenuGroupHasChildren(menuDO.getId())) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_MENU_GROUP_HAS_CHILDREN);
         }
         // 删除菜单
-        appMenuRepository.deleteById(id);
+        appMenuRepository.removeById(id);
         // 删除页面
         pageSetService.deletePageSet(menuDO.getId());
     }

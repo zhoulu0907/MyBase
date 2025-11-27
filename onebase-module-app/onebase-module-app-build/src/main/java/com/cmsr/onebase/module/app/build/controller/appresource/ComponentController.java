@@ -4,7 +4,7 @@ import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.module.app.core.dto.appresource.ComponentDTO;
 import com.cmsr.onebase.module.app.build.vo.appresource.GetComponentListByPageIdReqVO;
 import com.cmsr.onebase.module.app.build.vo.appresource.GetComponentPageListByPageIdRespVO;
-import com.cmsr.onebase.module.app.build.service.appresource.ComponentSerivce;
+import com.cmsr.onebase.module.app.build.service.resource.ComponentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
@@ -28,7 +28,7 @@ import java.util.List;
 @Validated
 public class ComponentController {
     @Resource
-    private ComponentSerivce componentService;
+    private ComponentService componentService;
 
     @PostMapping("/list")
     @Operation(summary = "根据page_id获取表单字段")

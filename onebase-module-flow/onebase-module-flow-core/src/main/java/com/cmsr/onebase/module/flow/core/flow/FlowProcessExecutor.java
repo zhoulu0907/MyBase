@@ -62,6 +62,7 @@ public class FlowProcessExecutor {
         if (!flowProcessCache.isProcessExist(processId)) {
             return ExecutorResult.error(processId, "流程不存在: " + processId);
         }
+        // TODO 让调用方必须生成一个traceId，这个地方做为空判断异常
         if (StringUtils.isEmpty(traceId)) {
             traceId = FlowUtils.generateTraceId();
         }

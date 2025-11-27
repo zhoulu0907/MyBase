@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.app.build.controller.appresource;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.module.app.build.service.appresource.PageSetService;
+import com.cmsr.onebase.module.app.build.service.resource.PageSetService;
 import com.cmsr.onebase.module.app.build.vo.appresource.*;
 import com.cmsr.onebase.module.app.core.dto.appresource.CopyPageSetDTO;
 import com.cmsr.onebase.module.app.core.dto.appresource.CreatePageSetDTO;
