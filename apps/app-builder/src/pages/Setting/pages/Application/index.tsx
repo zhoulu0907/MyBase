@@ -22,8 +22,6 @@ import {
   IconDelete,
   IconEdit,
   IconEmpty,
-  IconEye,
-  IconLaunch,
   IconLeft,
   IconMoreVertical,
   IconPlus,
@@ -46,6 +44,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import emptyApplicationSVG from '@/assets/images/applicationLogo.svg';
+import launchSVG from '@/assets/images/launch.svg';
 import CreateAppModal from '@/components/CreateApp';
 import { type Options } from '@/components/CreateApp/const';
 import CreateDataSource, { type DataSourceHandle } from '@/components/CreateDataSource';
@@ -231,18 +230,6 @@ const AppManagement: React.FC = () => {
     }
   };
 
-  /* 跳转到编辑页 */
-  const nagivateToAppPage = (appId: string) => {
-    setCurAppId(appId);
-    const newWindow = window.open('', '_blank');
-    if (newWindow) {
-      const baseUrl = getBaseUrl();
-      console.log(baseUrl, 9999);
-      const href = `${baseUrl}create-app/app-setting?appId=${appId}`;
-      newWindow.location.href = href;
-    }
-  };
-
   const nagivateToDataFactory = (appId: string) => {
     setCurAppId(appId);
     const newWindow = window.open('', '_blank');
@@ -294,8 +281,10 @@ const AppManagement: React.FC = () => {
             nagivateToDataFactory(item.id);
           }}
         >
-          <IconLaunch style={{ marginRight: 4 }} />
-          进入应用
+          <div className={styles.menuItem}>
+            <img src={launchSVG} alt="访问应用" style={{ marginRight: 4 }} />
+            访问应用
+          </div>
         </Menu.Item>
         <Menu.Item
           key="2"
@@ -504,9 +493,9 @@ const AppManagement: React.FC = () => {
                         <IconEdit
                           className={styles.operationIcon}
                           fontSize={16}
-                          onClick={() => nagivateToAppPage(item.id)}
+                          onClick={() => nagivateToDataFactory(item.id)}
                         />
-                        <IconEye className={styles.operationIcon} fontSize={16} />
+                        {/* <IconEye className={styles.operationIcon} fontSize={16} /> */}
                         <Dropdown
                           droplist={menu(item)}
                           trigger="click"
