@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.app.core.provider.menu;
 
-import com.cmsr.onebase.module.app.core.dal.database.AppMenuRepository;
+import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppMenuDO;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -4,8 +4,8 @@ import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.build.util.AuthUtils;
 import com.cmsr.onebase.module.app.build.vo.tag.TagRespVO;
-import com.cmsr.onebase.module.app.core.dal.database.AppApplicationTagRepository;
-import com.cmsr.onebase.module.app.core.dal.database.AppTagRepository;
+import com.cmsr.onebase.module.app.core.dal.database.tag.AppApplicationTagRepository;
+import com.cmsr.onebase.module.app.core.dal.database.tag.AppTagRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppTagDO;
 import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.core.vo.tag.TagGroupCountVO;
@@ -59,7 +59,7 @@ public class AppTagServiceImpl implements AppTagService {
 
     @Override
     public List<TagGroupCountVO> groupCount() {
-        return appTagRepository.groupCount();
+        return appTagRepository.selectNameCounts();
     }
 
     @Override

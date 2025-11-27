@@ -1,12 +1,11 @@
 package com.cmsr.onebase.module.app.build.service.app;
 
-import com.cmsr.onebase.framework.common.pojo.PageParam;
-import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.security.TenantContextHolder;
-import com.cmsr.onebase.module.app.core.dal.database.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.database.AppSqlQueryRepository;
+import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthDataGroupRepository;
+import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthDataGroupDO;
 import com.cmsr.onebase.module.app.core.dal.mapper.AppAuthRoleMapper;
-import com.cmsr.onebase.module.app.core.dto.auth.RoleMemberDTO;
 import com.cmsr.onebase.module.app.core.impl.auth.AppAuthRoleUserImpl;
 import com.cmsr.onebase.module.etl.core.dal.database.ETLWorkflowRepository;
 import com.cmsr.onebase.server.OneBaseServerApplication;
@@ -18,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @Author：huangjie
@@ -41,6 +41,9 @@ public class RepositoryTest {
 
     @Autowired
     private AppAuthRoleMapper appAuthRoleMapper;
+
+    @Autowired
+    private AppAuthDataGroupRepository appAuthDataGroupRepository;
 
 //    @Test
 //    void test() {
@@ -93,6 +96,15 @@ public class RepositoryTest {
                 .startPage(1, 10)
                 .doSelectPage(() -> appAuthRoleMapper.selectRoleUsers(46699591748616193L, "管理"));
         System.out.println(page);
+    }
+
+    @Test
+    public void test8() {
+        List<AppAuthDataGroupDO> appAuthDataGroupDOS = appAuthDataGroupRepository.findByAppIdAndRoleIdsAndMenuId(46699591748616192L, Set.of(104446011218624512L,
+                140498533732220928L,
+                46699591748616193L,
+                46699591748616194L), 95847916169691136L);
+        System.out.println(appAuthDataGroupDOS);
     }
 
 }

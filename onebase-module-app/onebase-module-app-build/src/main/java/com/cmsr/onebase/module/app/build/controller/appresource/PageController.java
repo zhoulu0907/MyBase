@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.module.app.core.dto.appresource.UpdatePageNameDTO;
-import com.cmsr.onebase.module.app.build.service.appresource.PageService;
+import com.cmsr.onebase.module.app.build.service.resource.PageService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.app.core.impl.appresource;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.api.appresource.AppResourceApi;
 import com.cmsr.onebase.module.app.api.appresource.dto.PageRespDTO;
-import com.cmsr.onebase.module.app.core.dal.database.AppPageRepository;
+import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePageDO;
 import jakarta.annotation.Resource;
 import org.anyline.data.param.ConfigStore;

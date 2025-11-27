@@ -17,6 +17,14 @@ import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateRespVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationRespVO;
 import com.cmsr.onebase.module.app.build.vo.tag.TagRespVO;
 import com.cmsr.onebase.module.app.core.dal.database.*;
+import com.cmsr.onebase.module.app.core.dal.database.app.AppApplicationRepository;
+import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleRepository;
+import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleUserRepository;
+import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
+import com.cmsr.onebase.module.app.core.dal.database.tag.AppApplicationTagRepository;
+import com.cmsr.onebase.module.app.core.dal.database.tag.AppTagRepository;
+import com.cmsr.onebase.module.app.core.dal.database.version.AppVersionRepository;
+import com.cmsr.onebase.module.app.core.dal.database.version.AppVersionResourceRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationDO;
 import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.core.enums.app.ApplicationStatusEnum;
@@ -256,25 +264,25 @@ public class AppApplicationServiceImpl implements AppApplicationService {
      */
     private void validApplicationCodeDuplicate(String code, Long id) {
         if (id == null) {
-            if (applicationRepository.findOneByAppCode(code) != null) {
+            if (applicationRepository.findOneByAppCode(code) != 0) {
                 throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_CODE_DUPLICATE);
             }
         } else {
-            if (applicationRepository.findByAppCodeAndIdNot(code, id) != null) {
+            if (applicationRepository.findByAppCodeAndIdNot(code, id) != 0) {
                 throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_CODE_DUPLICATE);
             }
         }
     }
 
     /**
-     * 随机生成一个appUid，然后去数据库里面查询是否唯一，如果不唯一，则重新生成一个，尝试10次
+     * 随机生成一个appUid，然后去数据库里面查询是否唯一，如果不唯一，则重新生成一个，尝试25次
      *
      * @return 唯一的appUid
      */
     private String findAndCreateAppUid() {
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 25; i++) {
             String appUid = AppUtils.createAppUid();
-            if (applicationRepository.findOneByUid(appUid) == null) {
+            if (applicationRepository.findOneByUid(appUid) == 0) {
                 return appUid;
             }
         }

@@ -1,8 +1,8 @@
 package com.cmsr.onebase.module.app.core.provider;
 
 import com.cmsr.onebase.module.app.core.dal.database.AppSqlQueryRepository;
-import com.cmsr.onebase.module.app.core.dal.database.AppAuthRoleUserRepository;
-import com.cmsr.onebase.module.app.core.dal.database.AppMenuRepository;
+import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleUserRepository;
+import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthRoleUserDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppMenuDO;
 import com.cmsr.onebase.module.app.core.utils.CacheUtils;

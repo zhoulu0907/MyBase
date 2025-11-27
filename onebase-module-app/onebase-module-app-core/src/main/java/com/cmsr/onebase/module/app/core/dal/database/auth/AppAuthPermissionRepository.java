@@ -1,0 +1,40 @@
+package com.cmsr.onebase.module.app.core.dal.database.auth;
+
+import com.cmsr.onebase.framework.orm.repo.BaseAppRepository;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthPermissionDO;
+import com.cmsr.onebase.module.app.core.dal.mapper.AppAuthPermissionMapper;
+import com.cmsr.onebase.module.app.core.vo.auth.AuthPermissionReq;
+import com.mybatisflex.core.query.QueryWrapper;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Set;
+
+import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppAuthPermissionTableDef.APP_AUTH_PERMISSION;
+import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppAuthRoleTableDef.APP_AUTH_ROLE;
+
+/**
+ * 应用权限功能数据访问层
+ *
+ * @author lingma
+ * @date 2025-08-05
+ */
+@Repository
+public class AppAuthPermissionRepository extends BaseAppRepository<AppAuthPermissionMapper, AppAuthPermissionDO> {
+
+    public AppAuthPermissionDO findByQuery(AuthPermissionReq reqVO) {
+        QueryWrapper queryWrapper = this.query()
+                .eq(AuthPermissionReq::getApplicationId, reqVO.getApplicationId())
+                .eq(AuthPermissionReq::getRoleId, reqVO.getRoleId())
+                .eq(AuthPermissionReq::getMenuId, reqVO.getMenuId());
+        return this.getOne(queryWrapper);
+    }
+
+    public List<AppAuthPermissionDO> findByAppIdAndRoleIdsAndMenuId(Long applicationId, Set<Long> roleIds, Long menuId) {
+        return mapper.findByAppIdAndRoleIdsAndMenuId(applicationId, roleIds, menuId);
+    }
+
+    public List<AppAuthPermissionDO> findByAppIdAndRoleIds(Long applicationId, Set<Long> roleIds) {
+        return mapper.findByAppIdAndRoleIds(applicationId, roleIds);
+    }
+}

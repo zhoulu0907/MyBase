@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.app.core.provider.auth;
 
-import com.cmsr.onebase.module.app.core.dal.database.AppAuthPermissionRepository;
+import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthPermissionRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthPermissionDO;
 import com.cmsr.onebase.module.app.core.enums.auth.AuthDefaultFactory;
 import lombok.Setter;

@@ -4,7 +4,7 @@ import com.cmsr.onebase.framework.security.runtime.RTSecurityContext;
 import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.module.app.api.security.bo.FieldPermission;
 import com.cmsr.onebase.module.app.api.security.bo.OperationPermission;
-import com.cmsr.onebase.module.app.core.dal.database.AppAuthDataGroupRepository;
+import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthDataGroupRepository;
 import com.cmsr.onebase.module.app.core.impl.auth.AppAuthSecurityApiImpl;
 import com.cmsr.onebase.module.app.core.provider.auth.AppAuthDataGroupProvider;
 import com.cmsr.onebase.module.app.runtime.service.menu.AppMenuService;
