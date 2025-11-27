@@ -10,12 +10,12 @@ import com.cmsr.onebase.module.etl.common.entity.ColumnData;
 import com.cmsr.onebase.module.etl.common.entity.TableData;
 import com.cmsr.onebase.module.etl.common.preview.DataPreview;
 import com.cmsr.onebase.module.etl.common.preview.PreviewColumn;
-import com.cmsr.onebase.module.etl.core.dal.database.ETLDatasourceRepository;
-import com.cmsr.onebase.module.etl.core.dal.database.ETLFlinkMappingRepository;
-import com.cmsr.onebase.module.etl.core.dal.database.ETLTableRepository;
-import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLDatasourceDO;
-import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLTableDO;
-import com.cmsr.onebase.module.etl.core.enums.ETLErrorCodeConstants;
+import com.cmsr.onebase.module.etl.core.dal.database.EtlDatasourceRepository;
+import com.cmsr.onebase.module.etl.core.dal.database.EtlFlinkMappingRepository;
+import com.cmsr.onebase.module.etl.core.dal.database.EtlTableRepository;
+import com.cmsr.onebase.module.etl.core.dal.dataobject.EtlDatasourceDO;
+import com.cmsr.onebase.module.etl.core.dal.dataobject.EtlTableDO;
+import com.cmsr.onebase.module.etl.core.enums.EtlErrorCodeConstants;
 import com.cmsr.onebase.module.etl.core.enums.MetadataType;
 import com.github.f4b6a3.uuid.UuidCreator;
 import jakarta.annotation.Resource;
@@ -48,17 +48,17 @@ public class DataInspectServiceImpl implements DataInspectService {
     private DatasourceFactory dataSourceFactory;
 
     @Resource
-    private ETLDatasourceRepository datasourceRepository;
+    private EtlDatasourceRepository datasourceRepository;
 
     @Resource
-    private ETLTableRepository tableRepository;
+    private EtlTableRepository tableRepository;
 
     @Resource
-    private ETLFlinkMappingRepository flinkMappingRepository;
+    private EtlFlinkMappingRepository flinkMappingRepository;
 
     @Override
     public boolean testConnection(TestConnectionVO pingVO) {
-        ETLDatasourceDO datasourceDO = BeanUtils.toBean(pingVO, ETLDatasourceDO.class);
+        EtlDatasourceDO datasourceDO = BeanUtils.toBean(pingVO, EtlDatasourceDO.class);
         DataSource datasource = dataSourceFactory.constructDataSource(datasourceDO, true);
         String runnerKey = "ping-" + UuidCreator.getTimeOrderedEpoch();
 
@@ -79,15 +79,15 @@ public class DataInspectServiceImpl implements DataInspectService {
     @Override
     public DataPreview previewData(TablePreviewVO previewVO) {
         String datasourceUuid = previewVO.getDatasourceUuid();
-        ETLDatasourceDO datasourceDO = datasourceRepository.getByUuid(datasourceUuid);
+        EtlDatasourceDO datasourceDO = datasourceRepository.getByUuid(datasourceUuid);
         if (datasourceDO == null) {
-            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_NOT_EXIST);
+            throw ServiceExceptionUtil.exception(EtlErrorCodeConstants.DATASOURCE_NOT_EXIST);
         }
         String datasourceType = datasourceDO.getDatasourceType();
         String tableUuid = previewVO.getTableUuid();
-        ETLTableDO tableDO = tableRepository.getByUuid(tableUuid);
+        EtlTableDO tableDO = tableRepository.getByUuid(tableUuid);
         if (tableDO == null) {
-            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.TABLE_NOT_EXIST);
+            throw ServiceExceptionUtil.exception(EtlErrorCodeConstants.TABLE_NOT_EXIST);
         }
 
         DataSource dataSource = dataSourceFactory.constructDataSource(datasourceDO, true);
@@ -100,7 +100,7 @@ public class DataInspectServiceImpl implements DataInspectService {
             switch (metadataType) {
                 case TABLE -> table = temporary.metadata().table(tableDO.getTableName());
                 case VIEW -> table = temporary.metadata().view(tableDO.getTableName());
-                default -> throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.ILLEGAL_METADATA_TYPE);
+                default -> throw ServiceExceptionUtil.exception(EtlErrorCodeConstants.ILLEGAL_METADATA_TYPE);
             }
             Map<String, String> fieldTypeMapping = flinkMappingRepository.findAllMappingsByDatasourceType(datasourceType);
             DataPreview dataPreview = new DataPreview();

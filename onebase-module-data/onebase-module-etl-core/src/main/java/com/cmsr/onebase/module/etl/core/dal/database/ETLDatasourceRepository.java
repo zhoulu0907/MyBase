@@ -2,8 +2,8 @@ package com.cmsr.onebase.module.etl.core.dal.database;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.orm.repo.BaseAppRepository;
-import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLDatasourceDO;
-import com.cmsr.onebase.module.etl.core.dal.mapper.ETLDatasourceMapper;
+import com.cmsr.onebase.module.etl.core.dal.dataobject.EtlDatasourceDO;
+import com.cmsr.onebase.module.etl.core.dal.mapper.EtlDatasourceMapper;
 import com.cmsr.onebase.module.etl.core.enums.CollectStatus;
 import com.cmsr.onebase.module.etl.core.vo.DatasourcePageReqVO;
 import com.mybatisflex.core.paginate.Page;
@@ -17,48 +17,48 @@ import java.util.List;
 
 @Repository
 @Slf4j
-public class ETLDatasourceRepository extends BaseAppRepository<ETLDatasourceMapper, ETLDatasourceDO> {
+public class EtlDatasourceRepository extends BaseAppRepository<EtlDatasourceMapper, EtlDatasourceDO> {
 
-    public PageResult<ETLDatasourceDO> getETLDatasourcePage(DatasourcePageReqVO pageReqVO) {
+    public PageResult<EtlDatasourceDO> getEtlDatasourcePage(DatasourcePageReqVO pageReqVO) {
         QueryWrapper queryWrapper = query().select()
-                .eq(ETLDatasourceDO::getApplicationId, pageReqVO.getApplicationId())
-                .like(ETLDatasourceDO::getDatasourceUuid, pageReqVO.getDatasourceUuid(), StringUtils::isNotBlank)
-                .like(ETLDatasourceDO::getDatasourceName, pageReqVO.getDatasourceName(), StringUtils::isNotBlank)
-                .eq(ETLDatasourceDO::getDatasourceType, pageReqVO.getDatasourceType(), StringUtils::isNotBlank)
-                .eq(ETLDatasourceDO::getReadonly, pageReqVO.getReadonly(), pageReqVO.getReadonly() != null)
-                .eq(ETLDatasourceDO::getCollectStatus, pageReqVO.getCollectStatus(), StringUtils::isNotBlank)
-                .orderBy(ETLDatasourceDO::getUpdateTime, false)
-                .orderBy(ETLDatasourceDO::getCreateTime, false);
-        Page<ETLDatasourceDO> pageQuery = Page.of(pageReqVO.getPageNo(), pageReqVO.getPageSize());
-        Page<ETLDatasourceDO> pageResult = this.page(pageQuery, queryWrapper);
+                .eq(EtlDatasourceDO::getApplicationId, pageReqVO.getApplicationId())
+                .like(EtlDatasourceDO::getDatasourceUuid, pageReqVO.getDatasourceUuid(), StringUtils::isNotBlank)
+                .like(EtlDatasourceDO::getDatasourceName, pageReqVO.getDatasourceName(), StringUtils::isNotBlank)
+                .eq(EtlDatasourceDO::getDatasourceType, pageReqVO.getDatasourceType(), StringUtils::isNotBlank)
+                .eq(EtlDatasourceDO::getReadonly, pageReqVO.getReadonly(), pageReqVO.getReadonly() != null)
+                .eq(EtlDatasourceDO::getCollectStatus, pageReqVO.getCollectStatus(), StringUtils::isNotBlank)
+                .orderBy(EtlDatasourceDO::getUpdateTime, false)
+                .orderBy(EtlDatasourceDO::getCreateTime, false);
+        Page<EtlDatasourceDO> pageQuery = Page.of(pageReqVO.getPageNo(), pageReqVO.getPageSize());
+        Page<EtlDatasourceDO> pageResult = this.page(pageQuery, queryWrapper);
         return new PageResult<>(pageResult.getRecords(), pageResult.getTotalRow());
     }
 
-    public List<ETLDatasourceDO> findAllByApplicationIdWithWritable(Long applicationId, Integer writable) {
+    public List<EtlDatasourceDO> findAllByApplicationIdWithWritable(Long applicationId, Integer writable) {
         QueryWrapper queryWrapper = query().select(
-                        ETLDatasourceDO::getId,
-                        ETLDatasourceDO::getDatasourceUuid,
-                        ETLDatasourceDO::getDatasourceName
+                        EtlDatasourceDO::getId,
+                        EtlDatasourceDO::getDatasourceUuid,
+                        EtlDatasourceDO::getDatasourceName
                 )
-                .eq(ETLDatasourceDO::getApplicationId, applicationId)
-                .eq(ETLDatasourceDO::getReadonly, 0, writable != null)
-                .orderBy(ETLDatasourceDO::getUpdateTime, false)
-                .orderBy(ETLDatasourceDO::getCreateTime, false);
+                .eq(EtlDatasourceDO::getApplicationId, applicationId)
+                .eq(EtlDatasourceDO::getReadonly, 0, writable != null)
+                .orderBy(EtlDatasourceDO::getUpdateTime, false)
+                .orderBy(EtlDatasourceDO::getCreateTime, false);
         return this.list(queryWrapper);
     }
 
-    public ETLDatasourceDO getByUuid(String datasourceUuid) {
+    public EtlDatasourceDO getByUuid(String datasourceUuid) {
         QueryWrapper queryWrapper = this.query()
-                .eq(ETLDatasourceDO::getDatasourceUuid, datasourceUuid);
+                .eq(EtlDatasourceDO::getDatasourceUuid, datasourceUuid);
         return this.getOne(queryWrapper);
     }
 
     public void changeCollectStatus(Long datasourceId, CollectStatus collectStatus, LocalDateTime editTime) {
         this.updateChain()
-                .set(ETLDatasourceDO::getCollectStatus, collectStatus)
-                .set(ETLDatasourceDO::getCollectStartTime, editTime, collectStatus == CollectStatus.RUNNING)
-                .set(ETLDatasourceDO::getCollectEndTime, editTime, collectStatus == CollectStatus.SUCCESS || collectStatus == CollectStatus.FAILED)
-                .where(ETLDatasourceDO::getId).eq(datasourceId)
+                .set(EtlDatasourceDO::getCollectStatus, collectStatus)
+                .set(EtlDatasourceDO::getCollectStartTime, editTime, collectStatus == CollectStatus.RUNNING)
+                .set(EtlDatasourceDO::getCollectEndTime, editTime, collectStatus == CollectStatus.SUCCESS || collectStatus == CollectStatus.FAILED)
+                .where(EtlDatasourceDO::getId).eq(datasourceId)
                 .update();
     }
 }

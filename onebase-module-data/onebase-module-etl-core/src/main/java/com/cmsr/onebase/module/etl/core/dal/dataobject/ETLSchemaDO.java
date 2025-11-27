@@ -8,7 +8,7 @@ import lombok.Data;
 
 @Data
 @Table(value = "etl_schema")
-public class ETLSchemaDO extends BaseAppEntity {
+public class EtlSchemaDO extends BaseAppEntity {
 
     @Column(value = "datasource_uuid")
     private String datasourceUuid;

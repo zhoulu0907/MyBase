@@ -2,8 +2,8 @@ package com.cmsr.onebase.module.etl.build.service.mgt;
 
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.etl.build.vo.mgt.FlinkFunctionVO;
-import com.cmsr.onebase.module.etl.core.dal.database.ETLFlinkFunctionRepository;
-import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLFlinkFunctionDO;
+import com.cmsr.onebase.module.etl.core.dal.database.EtlFlinkFunctionRepository;
+import com.cmsr.onebase.module.etl.core.dal.dataobject.EtlFlinkFunctionDO;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,10 +18,10 @@ import java.util.List;
 @Setter
 @Slf4j
 @Service
-public class ETLFlinkFunctionServiceImpl implements ETLFlinkFunctionService {
+public class EtlFlinkFunctionServiceImpl implements EtlFlinkFunctionService {
 
     @Autowired
-    private ETLFlinkFunctionRepository flinkFunctionRepository;
+    private EtlFlinkFunctionRepository flinkFunctionRepository;
 
     @Override
     public List<String> listFlinkFunctionTypes() {
@@ -30,7 +30,7 @@ public class ETLFlinkFunctionServiceImpl implements ETLFlinkFunctionService {
 
     @Override
     public List<FlinkFunctionVO> listFlinkFunctions(String type, String key) {
-        List<ETLFlinkFunctionDO> dos = flinkFunctionRepository.findFunctionsByKey(type, key);
+        List<EtlFlinkFunctionDO> dos = flinkFunctionRepository.findFunctionsByKey(type, key);
         return BeanUtils.toBean(dos, FlinkFunctionVO.class);
     }
 

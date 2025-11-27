@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.etl.core.dal.mapper;
 
-import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLWorkflowTableDO;
+import com.cmsr.onebase.module.etl.core.dal.dataobject.EtlWorkflowTableDO;
 import com.mybatisflex.core.BaseMapper;
 
-public interface ETLWorkflowTableMapper extends BaseMapper<ETLWorkflowTableDO> {
+public interface EtlWorkflowTableMapper extends BaseMapper<EtlWorkflowTableDO> {
 }

@@ -8,7 +8,7 @@ import lombok.Data;
  * @Author：huangjie
  * @Date：2025/11/20 12:22
  */
-@Schema(description = "数据工厂 - ETL - 数据预览请求VO")
+@Schema(description = "数据工厂 - Etl - 数据预览请求VO")
 @Data
 public class PreviewReqVO {
 

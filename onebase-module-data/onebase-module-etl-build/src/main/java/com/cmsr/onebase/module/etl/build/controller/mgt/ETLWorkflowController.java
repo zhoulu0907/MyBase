@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.etl.build.controller.mgt;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.etl.build.service.mgt.ETLWorkflowService;
+import com.cmsr.onebase.module.etl.build.service.mgt.EtlWorkflowService;
 import com.cmsr.onebase.module.etl.build.vo.mgt.*;
 import com.cmsr.onebase.module.etl.common.preview.ColumnDefine;
 import com.cmsr.onebase.module.etl.common.preview.DataPreview;
@@ -21,10 +21,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/etl/workflow")
 @Validated
-public class ETLWorkflowController {
+public class EtlWorkflowController {
 
     @Resource
-    private ETLWorkflowService workflowService;
+    private EtlWorkflowService workflowService;
 
     @Operation(summary = "分页查询ETL")
     @GetMapping("/page")

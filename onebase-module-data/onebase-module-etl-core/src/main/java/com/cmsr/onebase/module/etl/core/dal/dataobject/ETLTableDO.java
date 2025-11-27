@@ -7,7 +7,7 @@ import lombok.Data;
 
 @Data
 @Table(value = "etl_table")
-public class ETLTableDO extends BaseAppEntity {
+public class EtlTableDO extends BaseAppEntity {
 
     @Column(value = "datasource_uuid")
     private String datasourceUuid;

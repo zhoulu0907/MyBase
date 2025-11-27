@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.app.build.service.etl;
 
 import com.cmsr.onebase.framework.common.security.TenantContextHolder;
-import com.cmsr.onebase.module.etl.build.service.datasource.ETLDatasourceService;
+import com.cmsr.onebase.module.etl.build.service.datasource.EtlDatasourceService;
 import com.cmsr.onebase.server.OneBaseServerApplication;
 import lombok.Setter;
 import org.junit.jupiter.api.Test;
@@ -14,10 +14,10 @@ import org.springframework.boot.test.context.SpringBootTest;
  */
 @Setter
 @SpringBootTest(classes = OneBaseServerApplication.class)
-public class ETLDatasourceServiceTest {
+public class EtlDatasourceServiceTest {
 
     @Autowired
-    private ETLDatasourceService etlDatasourceService;
+    private EtlDatasourceService etlDatasourceService;
 
     @Test
     public void test() {

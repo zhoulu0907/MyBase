@@ -7,7 +7,7 @@ import lombok.Data;
 
 @Data
 @Table(value = "etl_flink_function")
-public class ETLFlinkFunctionDO extends BaseEntity {
+public class EtlFlinkFunctionDO extends BaseEntity {
 
     @Column(value = "function_type")
     private String functionType;
