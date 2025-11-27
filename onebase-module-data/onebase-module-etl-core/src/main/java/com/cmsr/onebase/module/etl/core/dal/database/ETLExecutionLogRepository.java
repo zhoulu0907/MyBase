@@ -15,16 +15,16 @@ import org.springframework.stereotype.Repository;
 public class EtlExecutionLogRepository extends BaseAppRepository<EtlExecutionLogMapper, EtlExecutionLogDO> {
 
 
-    public void deleteByWorkflow(String workflowUuid) {
+    public void deleteByWorkflow(Long workflowId) {
         QueryWrapper queryWrapper = query()
-                .eq(EtlExecutionLogDO::getWorkflowUuid, workflowUuid);
+                .eq(EtlExecutionLogDO::getWorkflowId, workflowId);
         getMapper().deleteByQuery(queryWrapper);
     }
 
-    public PageResult<EtlExecutionLogDO> queryPage(Long applicationId, String workflowUuid, Integer pageNo, Integer pageSize) {
+    public PageResult<EtlExecutionLogDO> queryPage(Long applicationId, Long workflowId, Integer pageNo, Integer pageSize) {
         QueryWrapper queryWrapper = query()
                 .eq(EtlExecutionLogDO::getApplicationId, applicationId)
-                .eq(EtlExecutionLogDO::getWorkflowUuid, workflowUuid, StringUtils::isNotBlank)
+                .eq(EtlExecutionLogDO::getWorkflowId, workflowId, workflowId != null)
                 .orderBy(EtlExecutionLogDO::getUpdateTime, false)
                 .orderBy(EtlExecutionLogDO::getCreateTime, false);
         Page<EtlExecutionLogDO> pageResult = getMapper().paginate(pageNo, pageSize, queryWrapper);

@@ -11,8 +11,8 @@ import java.time.LocalDateTime;
 @Table(value = "etl_execution_log")
 public class EtlExecutionLogDO extends BaseAppEntity {
 
-    @Column(value = "workflow_uuid")
-    private String workflowUuid;
+    @Column(value = "workflow_id")
+    private Long workflowId;
 
     @Column(value = "business_date")
     private LocalDateTime bussinessDate;

@@ -197,7 +197,7 @@ public class EtlWorkflowServiceImpl implements EtlWorkflowService {
         EtlWorkflowDO operableWorkflow = getOperableWorkflow(workflowId);
         String workflowUuid = operableWorkflow.getWorkflowUuid();
         Db.tx(() -> {
-            executionLogRepository.deleteByWorkflow(workflowUuid);
+            executionLogRepository.deleteByWorkflow(workflowId);
             workflowTableRepository.deleteByWorkflow(workflowUuid);
             scheduleJobRepository.deleteByWorkflow(workflowUuid);
             workflowRepository.removeById(workflowId);
@@ -338,14 +338,13 @@ public class EtlWorkflowServiceImpl implements EtlWorkflowService {
 
     @Override
     public PageResult<ExecutionLogVO> getWorkflowExecutionLogs(Long applicationId, Long workflowId, Integer pageNo, Integer pageSize) {
-        EtlWorkflowDO workflowDO = workflowRepository.getById(workflowId);
         PageResult<EtlExecutionLogDO> executionLogResult = executionLogRepository.queryPage(applicationId,
-                workflowDO.getWorkflowUuid(), pageNo, pageSize);
+                workflowId, pageNo, pageSize);
         List<ExecutionLogVO> logVOList = new ArrayList<>();
         for (EtlExecutionLogDO logDO : executionLogResult.getList()) {
             ExecutionLogVO executionLogVO = new ExecutionLogVO();
             executionLogVO.setApplicationId(logDO.getApplicationId());
-            executionLogVO.setFlowUuid(logDO.getWorkflowUuid());
+            executionLogVO.setWorkflowId(logDO.getWorkflowId());
             executionLogVO.setBusinessDate(logDO.getBussinessDate());
             executionLogVO.setStartTime(logDO.getStartTime());
             executionLogVO.setEndTime(logDO.getEndTime());
