@@ -119,6 +119,7 @@ export const renderForm = ({}: FormRenderProps<FlowNodeJSON['data']>) => {
       } else {
         setInputParameter('{}');
       }
+      payloadForm.setFieldValue("outputParameter",res.outputParameter || '{}')
     }
   };
 
@@ -140,6 +141,9 @@ export const renderForm = ({}: FormRenderProps<FlowNodeJSON['data']>) => {
               <Input disabled />
             </Form.Item>
             <Form.Item field="actionId" initialValue={selectedActionId} hidden>
+              <Input disabled />
+            </Form.Item>
+            <Form.Item field="outputParameter" hidden>
               <Input disabled />
             </Form.Item>
 
