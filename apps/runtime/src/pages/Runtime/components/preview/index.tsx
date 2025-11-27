@@ -112,6 +112,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   const [flows, setFlows] = useState<any[]>([]);
   const [inputParams, setInputParams] = useState<any>({});
 
+  const [entityParam, setEntityParam] = useState<any>()
+
   // 提交表单
   const submitForm = async (isSave = false) => {
     await form.validate();
@@ -352,6 +354,19 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
   const onSubmit = () => {
     if (curPage?.value?.pageSetType === PageType.BPM) {
+      const fields = form.getFieldsValue();
+      const formData:any = {}
+      Object.entries(fields).forEach(([key, value]) => {
+        // 处理主表逻辑
+        const field = (mainMetaDataFields.value || []).find((f: AppEntityField) => f.fieldId == key);
+        if (field) {
+          formData[field.fieldId] = value || '';
+        }
+      })
+      setEntityParam({
+        entityId: mainMetaData,
+        data: formData
+      })
       setPredictVisible(true);
     } else {
       submitForm();
@@ -406,7 +421,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
           autoFocus={false}
           focusLock={true}
         >
-          <FlowPredict businessId={curPage?.value?.id} />
+          <FlowPredict businessId={curPage?.value?.id} entityParam={entityParam}/>
         </Modal>
       )}
     </div>

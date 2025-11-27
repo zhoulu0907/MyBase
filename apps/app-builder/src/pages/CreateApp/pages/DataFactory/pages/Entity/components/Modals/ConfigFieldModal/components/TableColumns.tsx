@@ -65,7 +65,7 @@ const renderConfigButton = (
   FIELD_TYPES_NEED_CONFIG: string[]
 ) => {
   if (!FIELD_TYPES_NEED_CONFIG.includes(fieldType)) {
-    return null;
+    return <div style={{ width: 24 }} />;
   }
 
   const isVisible = configPopoverVisible === record.id;
@@ -220,7 +220,7 @@ const TableColumns = ({
         </>
       ),
       dataIndex: 'fieldName',
-      width: 175,
+      width: 150,
       align: 'center',
       render: (value: unknown, record: FieldFormValues, index: number) =>
         record.isSystemField === FIELD_TYPE.SYSTEM
@@ -232,7 +232,7 @@ const TableColumns = ({
               createFieldRules.fieldName,
               externalErrors,
               getFieldIndex,
-              <Input placeholder="由小写字母、数字、下划线组成，须以字母开头，不超过40个字符" />,
+              <Input placeholder="由小写字母、数字、下划线组成，须以字母开头，不超过40个字符" size="mini" />,
               !record.id?.includes('field-')
             )
     },
@@ -244,7 +244,7 @@ const TableColumns = ({
         </>
       ),
       dataIndex: 'displayName',
-      width: 175,
+      width: 150,
       align: 'center',
       render: (value: unknown, record: FieldFormValues, index: number) =>
         record.isSystemField === FIELD_TYPE.SYSTEM
@@ -256,7 +256,7 @@ const TableColumns = ({
               createFieldRules.displayName,
               externalErrors,
               getFieldIndex,
-              <Input />
+              <Input size="mini" />
             )
     },
     {
@@ -267,7 +267,7 @@ const TableColumns = ({
         </>
       ),
       dataIndex: 'fieldType',
-      width: 140,
+      width: 130,
       align: 'center',
       render: (_: unknown, record: FieldFormValues, index: number) => (
         <Space>
@@ -280,7 +280,8 @@ const TableColumns = ({
             getFieldIndex,
             <Select
               options={fieldTypeOptions}
-              style={{ width: 100 }}
+              style={{ width: 90 }}
+              size="mini"
               showSearch
               filterOption={(input, option) => {
                 return option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0;
@@ -321,7 +322,7 @@ const TableColumns = ({
     {
       title: '字段描述',
       dataIndex: 'description',
-      width: 200,
+      width: 160,
       align: 'center',
       ellipsis: true,
       render: (_: unknown, record: FieldFormValues, index: number) =>
@@ -334,7 +335,7 @@ const TableColumns = ({
               [],
               externalErrors,
               getFieldIndex,
-              <Input placeholder="请输入字段描述" />
+              <Input placeholder="请输入字段描述" size="mini" />
             )
     },
     {
@@ -350,13 +351,13 @@ const TableColumns = ({
     {
       title: '默认值',
       dataIndex: 'defaultValue',
-      width: 120,
+      width: 100,
       align: 'center',
       render: (_: unknown, record: FieldFormValues, index: number) =>
         record.isSystemField === FIELD_TYPE.SYSTEM ? (
           <span className={styles.systemField}>-</span>
         ) : (
-          renderFormField('defaultValue', record, index, [], externalErrors, getFieldIndex, <Input />)
+          renderFormField('defaultValue', record, index, [], externalErrors, getFieldIndex, <Input size="mini" />)
         )
     },
     {
@@ -419,7 +420,7 @@ const TableColumns = ({
     {
       title: '操作',
       dataIndex: 'operation',
-      width: 70,
+      width: 60,
       align: 'center',
       render: (_: unknown, record: FieldFormValues) => {
         return (

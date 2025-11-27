@@ -68,21 +68,95 @@ export function jsonToJsonSchema(jsonStr: string): any {
 
 /**
  * 将 JSON Schema 转换为表单初始数据
+ * 递归处理嵌套的对象和数组结构，为嵌套字段生成 children 数据
+ * 同时保留原始 JSON 对象的值
  * @param schema JSON Schema 对象
+ * @param jsonValue 原始的 JSON 对象值（可选）
  * @returns 表单初始数据
  */
-export function schemaToFormData(schema: any): any[] {
+export function schemaToFormData(schema: any, jsonValue?: any): any[] {
   if (!schema || !schema.type) {
     return [];
   }
 
   if (schema.type === 'object' && schema.properties) {
     const properties = schema.properties;
-    return Object.keys(properties).map((key) => ({
-      name: key,
-      type: properties[key].type || 'string',
-      schema: properties[key]
-    }));
+    const objectValue = jsonValue || {};
+
+    return Object.keys(properties).map((key) => {
+      const propertySchema = properties[key];
+      const propertyType = propertySchema.type || 'string';
+      const propertyValue = objectValue[key];
+
+      const formItem: any = {
+        name: key,
+        type: propertyType,
+        schema: propertySchema
+      };
+
+      // 递归处理嵌套的对象类型
+      if (propertyType === 'object' && propertySchema.properties) {
+        const children = schemaToFormData(propertySchema, propertyValue);
+        if (children.length > 0) {
+          formItem.children = children;
+        }
+      }
+      // 递归处理嵌套的数组类型
+      else if (propertyType === 'array' && propertySchema.items) {
+        const itemsSchema = propertySchema.items;
+        const itemsType = itemsSchema.type || 'string';
+        const arrayValue = Array.isArray(propertyValue) ? propertyValue : [];
+
+        // 数组类型的 children 包含数组中的所有项
+        if (itemsType === 'object' && itemsSchema.properties) {
+          // 如果数组项是对象类型，递归生成 children
+          formItem.children = arrayValue.map((itemValue: any) => ({
+            type: itemsType,
+            schema: itemsSchema,
+            children: schemaToFormData(itemsSchema, itemValue)
+          }));
+
+          // 如果数组为空，至少创建一个空项
+          if (formItem.children.length === 0) {
+            formItem.children = [
+              {
+                type: itemsType,
+                schema: itemsSchema,
+                children: schemaToFormData(itemsSchema)
+              }
+            ];
+          }
+        } else {
+          // 如果数组项是基本类型，生成所有项的值
+          formItem.children = arrayValue.map((itemValue: any) => ({
+            type: itemsType,
+            schema: itemsSchema,
+            value: itemValue
+          }));
+
+          // 如果数组为空，至少创建一个空项
+          if (formItem.children.length === 0) {
+            formItem.children = [
+              {
+                type: itemsType,
+                schema: itemsSchema
+              }
+            ];
+          }
+        }
+      }
+      // 基本类型：保留原始值（包括 null、undefined 等）
+      else {
+        // 只有当值不为 undefined 时才设置 value，避免丢失 null 值
+        // propertyValue 可能为 null、undefined 或其他值
+        // 如果是 undefined（字段不存在），不设置 value；如果是 null，设置 value 为 null
+        if (propertyValue !== undefined) {
+          formItem.value = propertyValue;
+        }
+      }
+
+      return formItem;
+    });
   }
 
   if (schema.type === 'array' && schema.items) {

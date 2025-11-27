@@ -1,4 +1,4 @@
-import { Button, Form, Grid, Input, Select, type FormInstance } from '@arco-design/web-react';
+import { Button, Form, Grid, Input, InputNumber, Select, Switch, type FormInstance } from '@arco-design/web-react';
 import { IconDelete, IconPlus } from '@arco-design/web-react/icon';
 import React from 'react';
 
@@ -20,6 +20,59 @@ const FIELD_TYPES = [
   { label: '数组', value: 'array' },
   { label: '空值', value: 'null' }
 ];
+
+/**
+ * 根据新类型转换值
+ * @param value 原始值
+ * @param newType 新类型
+ * @param oldType 旧类型
+ * @returns 转换后的值
+ */
+const convertValueByType = (value: any, newType: string, oldType: string): any => {
+  // 如果值已经是 null 或 undefined，直接返回
+  if (value === null || value === undefined) {
+    return null;
+  }
+
+  // 如果新旧类型相同，直接返回原值
+  if (newType === oldType) {
+    return value;
+  }
+
+  // 如果新类型是 object 或 array，返回 null（因为这些类型不需要 value 字段）
+  if (newType === 'object' || newType === 'array') {
+    return undefined; // 返回 undefined 表示不设置 value
+  }
+
+  // 如果旧类型是 object 或 array，新类型是基本类型，返回 null
+  if (oldType === 'object' || oldType === 'array') {
+    return null;
+  }
+
+  // 类型转换逻辑
+  try {
+    switch (newType) {
+      case 'string':
+        return String(value);
+      case 'number':
+        // 尝试转换为数字
+        const num = Number(value);
+        return isNaN(num) ? null : num;
+      case 'boolean':
+        // 转换布尔值
+        if (typeof value === 'string') {
+          return value.toLowerCase() === 'true' || value === '1';
+        }
+        return Boolean(value);
+      case 'null':
+        return null;
+      default:
+        return value;
+    }
+  } catch (e) {
+    return null;
+  }
+};
 
 // 对象类型字段项组件
 interface ObjectFieldItemProps {
@@ -45,7 +98,7 @@ const ObjectFieldItem: React.FC<ObjectFieldItemProps> = ({ field, index, form, l
       }}
     >
       <Row gutter={8}>
-        <Col span={8}>
+        <Col span={6}>
           <Form.Item
             field={`${fieldName}.name`}
             rules={[{ required: true, message: '请输入字段名称' }]}
@@ -54,7 +107,7 @@ const ObjectFieldItem: React.FC<ObjectFieldItemProps> = ({ field, index, form, l
             <Input placeholder="字段名称" />
           </Form.Item>
         </Col>
-        <Col span={8}>
+        <Col span={5}>
           <Form.Item
             field={`${fieldName}.type`}
             rules={[{ required: true, message: '请选择字段类型' }]}
@@ -64,19 +117,63 @@ const ObjectFieldItem: React.FC<ObjectFieldItemProps> = ({ field, index, form, l
               placeholder="字段类型"
               options={FIELD_TYPES}
               onChange={(value) => {
+                // 获取当前字段的完整数据
+                const currentFieldData = form.getFieldValue(fieldName);
+                const oldType = currentFieldData?.type || 'string';
+                const oldValue = currentFieldData?.value;
+
                 const newSchema = {
                   type: value,
                   ...(value === 'object' ? { properties: {} } : {}),
                   ...(value === 'array' ? { items: {} } : {})
                 };
                 form.setFieldValue(`${fieldName}.schema`, newSchema);
-                // 清空子字段数据
-                form.setFieldValue(`${fieldName}.children`, undefined);
+                form.setFieldValue(`${fieldName}.type`, value);
+
+                // 如果新类型是 object 或 array，清空子字段和 value
+                if (value === 'object' || value === 'array') {
+                  form.setFieldValue(`${fieldName}.children`, undefined);
+                  form.setFieldValue(`${fieldName}.value`, undefined);
+                } else {
+                  // 如果新类型是基本类型，尝试转换并保留值
+                  form.setFieldValue(`${fieldName}.children`, undefined);
+                  const convertedValue = convertValueByType(oldValue, value, oldType);
+                  // 只有当转换后的值不为 undefined 时才设置（undefined 表示不设置 value）
+                  if (convertedValue !== undefined) {
+                    form.setFieldValue(`${fieldName}.value`, convertedValue);
+                  } else {
+                    form.setFieldValue(`${fieldName}.value`, null);
+                  }
+                }
               }}
             />
           </Form.Item>
         </Col>
-        <Col span={4} style={{ display: 'flex', gap: '4px', justifyContent: 'flex-end' }}>
+        <Col span={9}>
+          {/* 根据字段类型显示不同的默认值输入控件 */}
+          {(fieldType === 'string' || !fieldType) && (
+            <Form.Item field={`${fieldName}.value`} style={{ marginBottom: 0 }}>
+              <Input placeholder="默认值（字符串）" />
+            </Form.Item>
+          )}
+          {fieldType === 'number' && (
+            <Form.Item field={`${fieldName}.value`} style={{ marginBottom: 0 }}>
+              <InputNumber placeholder="默认值（数字）" style={{ width: '100%' }} />
+            </Form.Item>
+          )}
+          {fieldType === 'boolean' && (
+            <Form.Item field={`${fieldName}.value`} triggerPropName="checked" style={{ marginBottom: 0 }}>
+              <Switch checkedText="true" uncheckedText="false" />
+            </Form.Item>
+          )}
+          {(fieldType === 'object' || fieldType === 'array') && (
+            <div style={{ padding: '4px 0', color: '#86909c', fontSize: '12px' }}>
+              {fieldType === 'object' ? '对象类型无需设置默认值' : '数组类型无需设置默认值'}
+            </div>
+          )}
+          {fieldType === 'null' && <div style={{ padding: '4px 0', color: '#86909c', fontSize: '12px' }}>null</div>}
+        </Col>
+        <Col span={2} style={{ display: 'flex', gap: '4px', justifyContent: 'flex-end' }}>
           <Button
             type="text"
             icon={<IconPlus />}
@@ -84,6 +181,8 @@ const ObjectFieldItem: React.FC<ObjectFieldItemProps> = ({ field, index, form, l
             style={{ padding: '4px 8px' }}
             title="添加字段"
           />
+        </Col>
+        <Col span={2} style={{ display: 'flex', gap: '4px', justifyContent: 'flex-start' }}>
           <Button
             type="text"
             status="danger"
@@ -93,7 +192,6 @@ const ObjectFieldItem: React.FC<ObjectFieldItemProps> = ({ field, index, form, l
             title="删除字段"
           />
         </Col>
-        <Col span={4}></Col>
       </Row>
 
       {/* 递归渲染嵌套的表单 */}
@@ -184,7 +282,7 @@ const ArrayFieldItem: React.FC<ArrayFieldItemProps> = ({ field, index, form, lev
         <Col span={6}>
           <div style={{ padding: '4px 0', color: '#86909c' }}>字段 </div>
         </Col>
-        <Col span={10}>
+        <Col span={5}>
           <Form.Item
             field={`${fieldName}.type`}
             rules={[{ required: true, message: '请选择字段类型' }]}
@@ -194,19 +292,63 @@ const ArrayFieldItem: React.FC<ArrayFieldItemProps> = ({ field, index, form, lev
               placeholder="字段类型"
               options={FIELD_TYPES}
               onChange={(value) => {
+                // 获取当前数组项的完整数据
+                const currentItemData = form.getFieldValue(fieldName);
+                const oldType = currentItemData?.type || 'string';
+                const oldValue = currentItemData?.value;
+
                 const newSchema = {
                   type: value,
                   ...(value === 'object' ? { properties: {} } : {}),
                   ...(value === 'array' ? { items: {} } : {})
                 };
                 form.setFieldValue(`${fieldName}.schema`, newSchema);
-                // 清空子字段数据
-                form.setFieldValue(`${fieldName}.children`, undefined);
+                form.setFieldValue(`${fieldName}.type`, value);
+
+                // 如果新类型是 object 或 array，清空子字段和 value
+                if (value === 'object' || value === 'array') {
+                  form.setFieldValue(`${fieldName}.children`, undefined);
+                  form.setFieldValue(`${fieldName}.value`, undefined);
+                } else {
+                  // 如果新类型是基本类型，尝试转换并保留值
+                  form.setFieldValue(`${fieldName}.children`, undefined);
+                  const convertedValue = convertValueByType(oldValue, value, oldType);
+                  // 只有当转换后的值不为 undefined 时才设置（undefined 表示不设置 value）
+                  if (convertedValue !== undefined) {
+                    form.setFieldValue(`${fieldName}.value`, convertedValue);
+                  } else {
+                    form.setFieldValue(`${fieldName}.value`, null);
+                  }
+                }
               }}
             />
           </Form.Item>
         </Col>
-        <Col span={4} style={{ display: 'flex', gap: '4px', justifyContent: 'flex-end' }}>
+        <Col span={9}>
+          {/* 根据字段类型显示不同的默认值输入控件 */}
+          {(itemType === 'string' || !itemType) && (
+            <Form.Item field={`${fieldName}.value`} style={{ marginBottom: 0 }}>
+              <Input placeholder="默认值（字符串）" />
+            </Form.Item>
+          )}
+          {itemType === 'number' && (
+            <Form.Item field={`${fieldName}.value`} style={{ marginBottom: 0 }}>
+              <InputNumber placeholder="默认值（数字）" style={{ width: '100%' }} />
+            </Form.Item>
+          )}
+          {itemType === 'boolean' && (
+            <Form.Item field={`${fieldName}.value`} triggerPropName="checked" style={{ marginBottom: 0 }}>
+              <Switch checkedText="true" uncheckedText="false" />
+            </Form.Item>
+          )}
+          {(itemType === 'object' || itemType === 'array') && (
+            <div style={{ padding: '4px 0', color: '#86909c', fontSize: '12px' }}>
+              {itemType === 'object' ? '对象类型无需设置默认值' : '数组类型无需设置默认值'}
+            </div>
+          )}
+          {itemType === 'null' && <div style={{ padding: '4px 0', color: '#86909c', fontSize: '12px' }}>null</div>}
+        </Col>
+        <Col span={2} style={{ display: 'flex', gap: '4px', justifyContent: 'flex-end' }}>
           <Button
             type="text"
             status="danger"
@@ -217,7 +359,7 @@ const ArrayFieldItem: React.FC<ArrayFieldItemProps> = ({ field, index, form, lev
             title="数组类型至少需要保留1项"
           />
         </Col>
-        <Col span={4}></Col>
+        <Col span={2}></Col>
       </Row>
 
       {/* 递归渲染嵌套的表单 */}
