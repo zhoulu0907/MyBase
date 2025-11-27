@@ -6,6 +6,7 @@ import { getDonePageList } from '@onebase/app/src/services/app_runtime';
 import { LISTTYPE, TaskStatusMap } from '@onebase/app';
 // import { getDonePageList } from '../../../../../../../../packages/app/src/services/app_runtime';
 import dayjs from 'dayjs';
+import TaskList from './TaskList';
 
 const IDone: FC = ({ appId }) => {
   const columns: TableColumnProps[] = [
@@ -87,6 +88,7 @@ const IDone: FC = ({ appId }) => {
     };
     const res = await getDonePageList(req);
     setData(res?.list);
+    return res
   };
 
   const onBack = () => {
@@ -96,6 +98,18 @@ const IDone: FC = ({ appId }) => {
   useEffect(() => {
     fetchFormData();
   }, []);
+  const newTask = true;
+  if (newTask) {
+    return (
+      <section className="page-will-do">
+        <TaskList 
+          title="我已处理"
+          dataFetch={fetchFormData}
+          columns={columns}
+        />
+      </section>
+    );
+  }
   return (
     <section className="page-content-rgt">
       <div className="table-title-box">

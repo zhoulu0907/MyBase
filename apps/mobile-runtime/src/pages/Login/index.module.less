@@ -9,9 +9,38 @@
 
   // 右侧区域
   .loginPageRight {
-    padding: 0.72rem 0.32rem 0.56rem;
+    padding: 2rem 0.64rem 0.56rem;
     position: relative;
-    min-height: calc(100vh - 1.28rem);
+    min-height: calc(100vh - 2.56rem);
+    :global {
+      .arco-form-item {
+        border: none;
+      }
+      .arco-form-item-control {
+        padding: 0;
+      }
+      .arco-form-item.arco-form-item-vertical .arco-form-label-item {
+        margin-bottom: 0.1rem;
+      }
+      .arco-form-item.arco-form-item-vertical .arco-input-wrap {
+        border: none !important;
+      }
+      .arco-input-wrap input {
+        height: 0.96rem;
+        line-height: 0.96rem;
+        background-color: #f2f3f5;
+        border-radius: 8px;
+        padding: 0 0.32rem;
+      }
+      .arco-form-item-control-wrapper .arco-input-wrap.single-line {
+        height: auto;
+        line-height: unset;
+      }
+      .arco-form-item-message {
+        margin-top: 0.1rem;
+        padding-left: 0.32rem;
+      }
+    }
     .titleContainer {
       .loginLogo {
         width: 1.28rem;
@@ -43,17 +72,13 @@
         align-items: center;
         justify-content: space-between;
       }
-      .accountRegistration {
-        text-align: left;
-        color: @primary-color;
-        font-size: 0.32rem;
-        line-height: 0.44rem;
+      .passwordItem {
+        margin: 0.48rem 0 0.2rem;
       }
       .forgotPassword {
         text-align: right;
         color: @primary-color;
         font-size: 0.32rem;
-        line-height: 0.44rem;
       }
       .smsContainer {
         width: 100%;
@@ -73,10 +98,10 @@
       }
 
       .loginButton {
-        height: 0.8rem;
+        height: 0.88rem;
         margin: 0.8rem 0;
         font-size: 0.3rem;
-        line-height: 0.8rem;
+        line-height: 0.88rem;
         border-radius: 2px;
         background: linear-gradient(
           90deg,
@@ -94,7 +119,7 @@
       left: 0;
       right: 0;
       text-align: center;
-      padding: 0.4rem;
+      padding: 0.6rem;
 
       .footerText {
         font-size: 0.28rem;

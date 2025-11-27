@@ -1,5 +1,6 @@
 export { FormComp } from './Basic';
 export { ListComp } from './Basic';
+export { ShowComp } from './Basic';
 
 export * from './common';
 export * from './constants';

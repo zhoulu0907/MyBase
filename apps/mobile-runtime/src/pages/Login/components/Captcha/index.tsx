@@ -2,7 +2,7 @@ import { Toast, Dialog } from '@arco-design/mobile-react';
 import CryptoJS from 'crypto-js';
 import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import type { Captcha, CaptchaCheck } from './types';
-
+import './index.less';
 interface SliderCaptchaProps {
   onSuccess: (token: string) => void;
   onError?: (error: any) => void;
@@ -26,12 +26,21 @@ const SliderCaptcha = forwardRef<SliderCaptchaRef, SliderCaptchaProps>(
     const [sliderImage, setSliderImage] = useState('');
     const sliderRef = useRef<HTMLDivElement>(null);
     const trackRef = useRef<HTMLDivElement>(null);
-    const [setSize, setSetSize] = useState({
+    const smallSize = window.innerWidth < 360;
+    const [setSize, setSetSize] = useState(smallSize ? {
+      imgWidth: '250px',
+      imgHeight: '135px',
+      barWidth: '250px',
+      contentWidth: '290px',
+      barHeight: '20px'
+    } : {
       imgWidth: '310px',
       imgHeight: '155px',
       barWidth: '310px',
+      contentWidth: '350px',
       barHeight: '40px'
     });
+    console.warn(window.innerWidth)
 
     // AES加密函数
     const aesEncrypt = (word: string, keyWord: string = 'XwKsGlMcdPMEhR1B') => {
@@ -173,7 +182,7 @@ const SliderCaptcha = forwardRef<SliderCaptchaRef, SliderCaptchaProps>(
 
         // 构造pointJson参数
         const pointJson = JSON.stringify({
-          x: moveLeft,
+          x: moveLeft * (310 / parseInt(setSize.imgWidth)),
           y: 5.0, // 默认y值
           width: 100,
           height: 100
@@ -259,7 +268,7 @@ const SliderCaptcha = forwardRef<SliderCaptchaRef, SliderCaptchaProps>(
           footer={undefined}
           className="slider-captcha-modal"
           unmountOnExit
-          contentStyle={{ zIndex: 1001, width: '350px' }}
+          contentStyle={{ zIndex: 1001, width: setSize.contentWidth }}
         >
 
           <div className="slider-captcha-container">

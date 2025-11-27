@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { TokenManager } from '@onebase/common';
 import { UserPermissionManager } from '@/utils/permission';
 import { getPermissionInfo } from '@onebase/platform-center';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Popup, Cell } from '@arco-design/mobile-react';
 import logout from '../../../../assets/images/logout.svg';
 import file from '../../../../assets/images/file.svg';
@@ -19,6 +19,7 @@ interface MeProps {
 const Me: React.FC<MeProps> = ({ nickname, username }) => {
 
   const navigate = useNavigate();
+  const location = useLocation();
   const handleLogout = () => {
     // 清除 token
     TokenManager.clearToken();
@@ -26,7 +27,7 @@ const Me: React.FC<MeProps> = ({ nickname, username }) => {
     // 关闭弹窗
     window.modalInstance?.close();
     // 跳转到登录页
-    navigate('/login', { replace: true });
+    navigate(`/login?redirectURL=${window.location.origin}#${(location.pathname)}`, { replace: true });
   };
 
   const toLogout = () => {
