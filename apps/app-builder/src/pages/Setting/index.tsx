@@ -1,26 +1,26 @@
 import { Layout } from '@arco-design/web-react';
 import React, { useState } from 'react';
-import { Route, Routes, Navigate } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import AppBreadcrumb from '../../components/Breadcrumb';
 import AppHeader from './components/header';
 import AppSider from './components/sider';
 
 import ApplicationPage from './pages/Application';
+import EnterpriseInfo from './pages/EnterpriseInfo';
 import OrganizationPage from './pages/Organization';
 import RolePage from './pages/Role';
-import SystemDictPage from './pages/SystemDict';
 import SpaceInfo from './pages/SpaceInfo';
-import EnterpriseInfo from './pages/EnterpriseInfo';
+import SystemDictPage from './pages/SystemDict';
 import TenantPage from './pages/Tenant';
 import TenantEditPage from './pages/Tenant/edit';
 import UserPage from './pages/User';
 
 import styles from './index.module.less';
 import BusinessPage from './pages/Business';
-import CreateBusinessPage from './pages/Business/createBusiness';
 import EnterpriseInfoPage from './pages/Business/components/enterprise-information';
+import CreateBusinessPage from './pages/Business/createBusiness';
 import RedirectEnterprise from './pages/Business/redirectEnterprise';
-
+import SecurityPage from './pages/Security';
 
 const Content = Layout.Content;
 
@@ -48,6 +48,7 @@ const SettingPage: React.FC = () => {
                 <Route path="role" element={<RolePage />} />
                 <Route path="organization" element={<OrganizationPage />} />
                 <Route path="system-dict" element={<SystemDictPage />} />
+                <Route path="security" element={<SecurityPage />} />
                 <Route path="spaceInfo" element={<SpaceInfo />} />
                 <Route path="enterpriseInfo" element={<EnterpriseInfo />} />
                 <Route path="tenant" element={<TenantPage />} />

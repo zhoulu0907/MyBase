@@ -28,7 +28,6 @@ import {
 } from '@onebase/platform-center';
 import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import WorkspaceSecurity from './components/security';
 import styles from './index.module.less';
 
 const EditTenant = () => {
@@ -330,9 +329,6 @@ const EditTenant = () => {
               </Space>
             </Form.Item>
           </Form>
-        </Tabs.TabPane>
-        <Tabs.TabPane key="2" title="安全设置">
-          <WorkspaceSecurity />
         </Tabs.TabPane>
       </Tabs>
     </div>

@@ -9,9 +9,9 @@ import styles from './index.module.less';
 
 const MenuItem = Menu.Item;
 
-interface WorkspaceSecurityProps {}
+interface SecurityPageProps {}
 
-const WorkspaceSecurity: React.FC<WorkspaceSecurityProps> = ({}) => {
+const SecurityPage: React.FC<SecurityPageProps> = ({}) => {
   const [form] = Form.useForm();
 
   const [categories, setCategories] = useState<any[]>([]);
@@ -92,7 +92,7 @@ const WorkspaceSecurity: React.FC<WorkspaceSecurityProps> = ({}) => {
   };
 
   return (
-    <div className={styles.workspaceSecurityPage}>
+    <div className={styles.securityPage}>
       <div className={styles.sider}>
         <Menu style={{ width: 200 }} mode="pop" onClickMenuItem={handleClickMenuItem}>
           {categories.map((category) => (
@@ -269,4 +269,4 @@ const WorkspaceSecurity: React.FC<WorkspaceSecurityProps> = ({}) => {
   );
 };
 
-export default WorkspaceSecurity;
+export default SecurityPage;

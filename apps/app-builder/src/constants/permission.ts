@@ -20,11 +20,12 @@ export const TENANT_MENUS = {
   ROLE: 'tenant:role',
   DEPT: 'tenant:dept',
   DICT: 'tenant:dict',
+  SECURITY: 'tenant:security',
   INFO: 'tenant:info',
   BUSINESS: 'tenant:business',
   AUTHORIZED: 'tenant:authorized',
-  CORP : 'tenant:corp'
-}
+  CORP: 'tenant:corp'
+};
 
 // todo 应用管理
 
@@ -46,7 +47,7 @@ export const TENANT_USER_PERMISSION = {
   STATUS: TENANT_USER_STATUS,
   IMPORT: TENANT_USER_IMPORT,
   EXPORT: TENANT_USER_EXPORT
-}
+};
 
 /** 租户管理-角色管理 */
 export const TENANT_ROLE_QUERY = 'tenant:role:query'; // 查询角色
@@ -62,7 +63,7 @@ export const TENANT_ROLE_PERMISSION = {
   DELETE: TENANT_ROLE_DELETE,
   USER: TENANT_ROLE_ASSIGN_USER,
   PERMISSION: TENANT_ROLE_ASSIGN_PERMISSION
-}
+};
 
 /** 租户管理-组织管理 */
 export const TENANT_DEPT_QUERY = 'tenant:dept:query';
@@ -76,7 +77,7 @@ export const TENANT_DEPT_PERMISSION = {
   SUB_DEPT: TENANT_DEPT_SUB_DEPT,
   UPDATE: TENANT_DEPT_UPDATE,
   DELETE: TENANT_DEPT_DELETE
-}
+};
 
 /** 租户管理-数据字典管理 */
 export const TENANT_DICT_QUERY = 'tenant:dict:query';
@@ -89,16 +90,16 @@ export const TENANT_DICT_PERMISSION = {
   CREATE: TENANT_DICT_CREATE,
   UPDATE: TENANT_DICT_UPDATE,
   DELETE: TENANT_DICT_DELETE,
-  STATUS: TENANT_DICT_STATUS,
-}
+  STATUS: TENANT_DICT_STATUS
+};
 
 /** 租户管理-租户信息 */
 export const TENANT_INFO_QUERY = 'tenant:info:query';
 export const TENANT_INFO_UPDATE = 'tenant:info:update';
 export const TENANT_INFO_PERMISSION = {
   QUERY: TENANT_INFO_QUERY,
-  UPDATE: TENANT_INFO_UPDATE,
-}
+  UPDATE: TENANT_INFO_UPDATE
+};
 
 /** 应用管理-我的应用管理 */
 export const APP_MYAPP_QUERY = 'app:app:query';
@@ -109,8 +110,8 @@ export const APP_MYAPP_PERMISSION = {
   QUERY: APP_MYAPP_QUERY,
   CREATE: APP_MYAPP_CREATE,
   DELETE: APP_MYAPP_DELETE,
-  UPDATE: APP_MYAPP_UPDATE,
-}
+  UPDATE: APP_MYAPP_UPDATE
+};
 
 export const ALL_PERMISSION_CODE = '*:*:*';
 
