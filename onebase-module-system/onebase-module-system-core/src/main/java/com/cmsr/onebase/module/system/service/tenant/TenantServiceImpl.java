@@ -578,7 +578,7 @@ public class TenantServiceImpl implements TenantService {
      */
     @TenantIgnore
     public Map<Long, Integer> findAppCount() {
-        return appApplicationApi.findAppApplicationAll();
+        return appApplicationApi.countAppByTenantId();
     }
 
     @TenantIgnore
