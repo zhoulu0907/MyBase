@@ -176,7 +176,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
         }
       }
       !(typeof value === 'object') && Object.values(listPageComponentSchemas.value).forEach((item) => {
-        if (item.config.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]) {
+        if (!item.config.columns || item.config.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]) {
           return;
         }
         const indexTmp = item.config.columns.findIndex((col: any) => col.id === field?.fieldId);
@@ -410,28 +410,34 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
       <div className={styles.content}>
         {pageType === EDITOR_TYPES.LIST_EDITOR &&
-          listComponents.value.map((cp: GridItem) => (
-            <Fragment key={cp.id}>
-              {listPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
-                <div
-                  key={cp.id}
-                  className={styles.componentItem}
-                  style={{
-                    width: '100%'
-                  }}
-                >
-                  <PreviewRender
-                    cpId={cp.id}
-                    cpType={cp.type}
-                    pageComponentSchema={listPageComponentSchemas.value[cp.id]}
-                    runtime={runtime}
-                    showFromPageData={showFromPageData}
-                    refresh={refresh}
-                  />
-                </div>
-              )}
-            </Fragment>
-          ))}
+          (
+            !listComponents.value?.length ? (
+              <div className={styles.noData}>暂无数据</div>
+            ) :
+            listComponents.value.map((cp: GridItem) => (
+              <Fragment key={cp.id}>
+                {listPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+                  <div
+                    key={cp.id}
+                    className={styles.componentItem}
+                    style={{
+                      width: '100%'
+                    }}
+                  >
+                    <PreviewRender
+                      cpId={cp.id}
+                      cpType={cp.type}
+                      pageComponentSchema={listPageComponentSchemas.value[cp.id]}
+                      runtime={runtime}
+                      showFromPageData={showFromPageData}
+                      refresh={refresh}
+                    />
+                  </div>
+                )}
+              </Fragment>
+            ))
+          )
+        }
 
         {pageType == EDITOR_TYPES.FORM_EDITOR && (
           <Form layout="inline" form={form} className={styles.formWrapper}>

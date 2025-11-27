@@ -2,7 +2,6 @@ import { NotFoundPage } from '@onebase/common';
 import { Navigate, Route, HashRouter as Router, Routes } from 'react-router-dom';
 import Login from './pages/Login';
 import Runtime from './pages/Runtime';
-import RuntimeLast from './pages/RuntimeLast';
 import RuntimeHome from './pages/RuntimeHome';
 import RuntimeHomeProtocol from './pages/RuntimeHome/components/Protocol';
 import RuntimeHomePrivacy from './pages/RuntimeHome/components/Privacy';
@@ -22,7 +21,6 @@ function AppContent() {
       <Route path="/onebase/runtime-home/privacy" element={<RuntimeHomePrivacy />} />
       <Route path="/onebase/runtime-home/about" element={<RuntimeHomeAbout />} />
 
-      <Route path="/onebase/runtime-last/:appId/" element={<RuntimeLast />} />
       <Route path="/onebase/runtime/:appId/" element={<Runtime />} />
 
       {/* 默认重定向到登录页 */}
