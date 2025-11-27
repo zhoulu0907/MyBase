@@ -38,7 +38,7 @@ public enum RoleCodeEnum {
      */
     private final Set<String> devloperPermissionCodes = new HashSet<String>() {{
 
-
+        add("tenant"); // 应用管理
         add("tenant:app"); // 应用管理
         add("tenant:app:create"); // 应用新增
         add("tenant:app:delete"); // 应用删除
