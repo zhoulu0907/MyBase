@@ -1,13 +1,13 @@
 package com.cmsr.onebase.module.app.build.util;
 
 
-import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.PageDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.workbench.WorkBenchPageDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePageDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourceWorkbenchPageDO;
 
 public class PageUtils {
 
-    public static PageDO initPage(Long pageSetId, String pageName, String routerPath, String pageType, Boolean openViewMode ) {
-        PageDO pageDO = new PageDO();
+    public static AppResourcePageDO initPage(Long pageSetId, String pageName, String routerPath, String pageType, Boolean openViewMode ) {
+        AppResourcePageDO pageDO = new AppResourcePageDO();
         pageDO.setPageSetId(pageSetId);
         pageDO.setPageName(pageName);
         pageDO.setTitle(pageName);
@@ -37,8 +37,8 @@ public class PageUtils {
     }
 
 
-    public static WorkBenchPageDO initWorkbenchPage(Long pageSetId, String pageName, String routerPath, String pageType, Boolean openViewMode ) {
-        WorkBenchPageDO pageDO = new WorkBenchPageDO();
+    public static AppResourceWorkbenchPageDO initWorkbenchPage(Long pageSetId, String pageName, String routerPath, String pageType, Boolean openViewMode ) {
+        AppResourceWorkbenchPageDO pageDO = new AppResourceWorkbenchPageDO();
         pageDO.setPageSetId(pageSetId);
         pageDO.setPageName(pageName);
         pageDO.setTitle(pageName);
