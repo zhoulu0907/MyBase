@@ -166,6 +166,7 @@ anyline:
 mybatis-flex:
   configuration:
     mapUnderscoreToCamelCase: true
+  print-sql: true
 pagehelper:
   helperDialect: postgresql
   reasonable: false
