@@ -103,7 +103,7 @@ const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab, childC
       .filter((cat) => cat.items.length > 0); // 去掉空的分类
 
     setBaseItems(newBaseItems);
-  }, [keyword]);
+  }, [keyword, editMode.value]);
 
   useEffect(() => {
     if (!keyword) return setComponents(baseCategories); // 没关键词直接返回原数据

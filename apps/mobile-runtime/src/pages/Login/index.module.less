@@ -34,10 +34,20 @@
       // 确保表单在固定高度内正确显示
       min-height: 40vh;
 
+      :global(.arco-form-item) {
+        border: 0;
+      }
+
       .rememberMeContainer {
         display: flex;
         align-items: center;
         justify-content: space-between;
+      }
+      .accountRegistration {
+        text-align: left;
+        color: @primary-color;
+        font-size: 0.32rem;
+        line-height: 0.44rem;
       }
       .forgotPassword {
         text-align: right;

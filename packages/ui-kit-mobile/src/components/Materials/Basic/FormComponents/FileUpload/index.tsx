@@ -127,7 +127,8 @@ const XFileUpload = memo((props: XFileUploadConfig & { runtime?: boolean; detail
         required={verify?.required}
         trigger="fileList"
         style={{
-          pointerEvents: runtime ? 'unset' : 'none'
+          pointerEvents: runtime ? 'unset' : 'none',
+          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
       >
         <Uploader
@@ -146,8 +147,7 @@ const XFileUpload = memo((props: XFileUploadConfig & { runtime?: boolean; detail
             })}
           disabled={status !== STATUS_VALUES[STATUS_OPTIONS.DEFAULT] || status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode}
           style={{
-            width: '100%',
-            pointerEvents: runtime ? 'unset' : 'none'
+            width: '100%'
           }}
           renderFileList={renderUploadList}
           onChange={handleChange}

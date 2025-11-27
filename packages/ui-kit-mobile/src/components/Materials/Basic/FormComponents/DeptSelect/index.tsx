@@ -22,12 +22,6 @@ const squareIcon = {
   activeDisabled: <IconSquareChecked />
 }
 
-interface DeptNode {
-  key: string;
-  title: string;
-  children?: DeptNode[];
-}
-
 const XDeptSelect = memo((props: XDeptSelectConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const { label, dataField, status, verify, layout, runtime = true, form } = props;
 
@@ -45,7 +39,7 @@ const XDeptSelect = memo((props: XDeptSelectConfig & { runtime?: boolean; detail
   const isMultiple = false; // todo 多选
 
   const fieldId = dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.DEPT_SELECT}_${props.id}`;
-  const formData = form.getFieldValue(fieldId);
+  const formData = form?.getFieldValue(fieldId);
 
   useEffect(() => {
     getDeptUsers({});
@@ -68,7 +62,7 @@ const XDeptSelect = memo((props: XDeptSelectConfig & { runtime?: boolean; detail
       deptID: selectedKeys[0],
       deptName: deptData?.deptList.find(v => v.id === selectedKeys[0])?.name
     };
-    form.setFieldValue(fieldId, curSelectDept);
+    form?.setFieldValue(fieldId, curSelectDept);
     setVisible(false);
   };
 
@@ -114,22 +108,20 @@ const XDeptSelect = memo((props: XDeptSelectConfig & { runtime?: boolean; detail
     await getDeptUsers({});
   };
 
-  console.warn('deptData', selectedKeys, deptData, props, formData)
-
   return (
-    <Cell
+    <Form.Item
+      className="inputTextWrapper"
       label={label.display && label.text}
-      showArrow
-      onClick={() => setVisible(true)}  // 预览或运行时
+      field={fieldId}
+      style={{
+        borderRadius: '0.16rem',
+        pointerEvents: runtime ? 'unset' : 'none',
+        opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
+      }}
     >
-      <Form.Item
-        className="inputTextWrapper"
-        label={deptData?.deptList.find(v => v.id === selectedKeys[0])?.name}
-        field={fieldId}
-        style={{
-          pointerEvents: runtime ? 'unset' : 'none',
-          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
-        }}
+      <Cell
+        text={deptData?.deptList.find(v => v.id === selectedKeys[0])?.name}
+        onClick={() => setVisible(true)}
       >
         <PopupSwiper visible={visible} close={(e) => handleCancel(e)} direction={popupDirection}>
           <div style={{ height: '100vh', width: '100vw', background: '#fff' }}>
@@ -223,8 +215,8 @@ const XDeptSelect = memo((props: XDeptSelectConfig & { runtime?: boolean; detail
             </div>
           </div>
         </PopupSwiper>
-      </Form.Item>
-    </Cell>
+      </Cell>
+    </Form.Item>
   );
 });
 

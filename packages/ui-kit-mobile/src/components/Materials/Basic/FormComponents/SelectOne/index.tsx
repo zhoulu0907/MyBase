@@ -2,6 +2,7 @@ import { Form, Picker } from '@arco-design/mobile-react';
 import { nanoid } from 'nanoid';
 import { memo } from 'react';
 import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
+import { FormInternalComponentType } from '@arco-design/mobile-react/esm/form';
 import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, FormSchema } from '@onebase/ui-kit';
 import '../index.css';
 
@@ -42,6 +43,7 @@ const XSelectOne = memo((props: XSelectOneConfig & { runtime?: boolean; detailMo
       label={label.display && label.text}
       field={fieldId}
       rules={rules}
+      displayType={FormInternalComponentType.Picker}
       initialValue={defaultOptionsConfig?.defaultOptions.find((ele) => ele.isChosen)?.value}
       style={{
         textAlign: align,
@@ -50,7 +52,7 @@ const XSelectOne = memo((props: XSelectOneConfig & { runtime?: boolean; detailMo
       }}
     >
       {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-        <div>{defaultOptionsConfig.defaultOptions.find((item: any) => item.value == '')?.label || '--'}</div>
+        <div>--</div>
       ) : (
         <Picker
           cascade={false}

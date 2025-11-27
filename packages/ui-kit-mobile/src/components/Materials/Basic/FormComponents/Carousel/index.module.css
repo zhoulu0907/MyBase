@@ -6,6 +6,7 @@
   width: 100%;
   height: 100%;
   flex: 1;
+  margin-bottom: 0.16rem;
 }
 
 .imageWrapper {
@@ -36,7 +37,6 @@
 
 .bottomDivider {
   border-bottom: 0.5PX solid #e5e6eb;
-  margin: 0.16rem 0 0;
   position: absolute;
   left: 0;
   bottom: 0;
