@@ -1,41 +1,38 @@
 package com.cmsr.onebase.module.etl.core.dal.dataobject;
 
-import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
-import jakarta.persistence.Column;
-import jakarta.persistence.Table;
+import com.cmsr.onebase.framework.orm.entity.BaseAppEntity;
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Table;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 
 @Data
-@Table(name = "etl_execution_log")
-public class ETLExecutionLogDO extends TenantBaseDO {
+@Table(value = "etl_execution_log")
+public class ETLExecutionLogDO extends BaseAppEntity {
 
-    @Column(name = "application_id")
-    private Long applicationId;
-
-    @Column(name = "workflow_id")
+    @Column(value = "workflow_id")
     private Long workflowId;
 
-    @Column(name = "business_date")
+    @Column(value = "business_date")
     private LocalDateTime bussinessDate;
 
-    @Column(name = "start_time")
+    @Column(value = "start_time")
     private LocalDateTime startTime;
 
-    @Column(name = "end_time")
+    @Column(value = "end_time")
     private LocalDateTime endTime;
 
-    @Column(name = "duration_time")
+    @Column(value = "duration_time")
     private Long durationTime;
 
-    @Column(name = "trigger_type")
+    @Column(value = "trigger_type")
     private String triggerType;
 
-    @Column(name = "trigger_user")
+    @Column(value = "trigger_user")
     private Long triggerUser;
 
-    @Column(name = "task_status")
+    @Column(value = "task_status")
     private String taskStatus;
 
 }

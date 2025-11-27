@@ -27,7 +27,6 @@ public class CorpUpdateReqVO {
     @Schema(description = "状态", example = "1")
     private Integer status;
 
-    @NotBlank(message = "地址不能为空")
     @Schema(description = "地址", example = "")
     private String address;
 

@@ -1,52 +1,39 @@
 package com.cmsr.onebase.module.etl.core.dal.dataobject;
 
-import com.cmsr.onebase.framework.common.util.json.JsonUtils;
-import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
-import com.cmsr.onebase.module.etl.common.entity.TableData;
-import jakarta.persistence.Column;
-import jakarta.persistence.Table;
+import com.cmsr.onebase.framework.orm.entity.BaseAppEntity;
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Table;
 import lombok.Data;
 
 @Data
-@Table(name = "etl_table")
-public class ETLTableDO extends TenantBaseDO {
+@Table(value = "etl_table")
+public class ETLTableDO extends BaseAppEntity {
 
-    @Column(name = "application_id")
-    private Long applicationId;
-
-    @Column(name = "datasource_id")
+    @Column(value = "datasource_id")
     private Long datasourceId;
 
-    @Column(name = "catalog_id")
+    @Column(value = "catalog_id")
     private Long catalogId;
 
-    @Column(name = "schema_id")
+    @Column(value = "schema_id")
     private Long schemaId;
 
-    @Column(name = "table_type")
+    @Column(value = "table_type")
     private String tableType;
 
-    @Column(name = "table_name")
+    @Column(value = "table_name")
     private String tableName;
 
-    @Column(name = "display_name")
+    @Column(value = "display_name")
     private String displayName;
 
-    @Column(name = "meta_info")
+    @Column(value = "meta_info")
     private String metaInfo;
 
-    @Column(name = "remarks")
+    @Column(value = "remarks")
     private String remarks;
 
-    @Column(name = "declaration")
+    @Column(value = "declaration")
     private String declaration;
-
-    public TableData getMetaInfo() {
-        return JsonUtils.parseObject(this.metaInfo, TableData.class);
-    }
-
-    public void setMetaInfo(TableData metaInfo) {
-        this.metaInfo = JsonUtils.toJsonString(metaInfo);
-    }
 
 }

@@ -2,7 +2,6 @@ package com.cmsr.onebase.module.bpm.core.dal.database.ext;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.bpm.core.dto.BpmTodoTaskDTO;
-import com.cmsr.onebase.module.bpm.core.enums.BpmUserTypeEnum;
 import com.cmsr.onebase.module.engine.orm.anyline.repository.FlowTaskRepository;
 import jakarta.annotation.Resource;
 import lombok.Getter;
@@ -26,6 +25,10 @@ public class BpmTaskExtRepository {
         // 构建基础SQL
         String baseSql = buildBaseSql();
 
+        // todo：优化sql
+        // 去重
+        condition.eq("rn", 1);
+
         // 执行查询
         DataSet dataSet = flowTaskRepository.querys(baseSql, condition);
         return new PageResult<>(
@@ -34,10 +37,9 @@ public class BpmTaskExtRepository {
         );
     }
     private String buildBaseSql() {
-        return String.format("""
+        return """
                 select * from (
                    select
-                     distinct
                      t3.app_id,
                      t3.bpm_title,
                      t3.initiator_id,
@@ -55,20 +57,26 @@ public class BpmTaskExtRepository {
                      t.create_time,
                      t1.processed_by,
                      t1.type as user_type,
-                     t2.node_code
+                     t2.node_code,
+                     t4.agent_id as agent_id,
+                     t4.agent_name as agent_name,
+                     ROW_NUMBER() OVER (
+                         PARTITION BY t.id
+                         ORDER BY CASE
+                                WHEN t1.processed_by = #{userId} THEN 1
+                                WHEN t4.agent_id = #{userId} THEN 2
+                                ELSE 3
+                                END
+                     ) as rn
                      from bpm_flow_task t
                      left join bpm_flow_user t1 on t.id = t1.associated
                      left join bpm_flow_instance t2 on t.instance_id = t2.id
                      left join bpm_flow_instance_biz_ext t3 on t.instance_id = t3.instance_id
-                     where t.node_type = 1 and t.flow_status !='draft'
-                     and t1.type in ('%s','%s','%s','%s')
+                     left join bpm_flow_agent_ins t4 ON t.id = t4.task_id AND t1.processed_by = t4.principal_id and t4.deleted = 0
+                     where t.node_type = 1 and t.flow_status != 'draft'
                      and t.deleted = 0 and t1.deleted = 0 and t2.deleted = 0 and t3.deleted = 0
+                     and (t1.processed_by = #{userId} or t4.agent_id = #{userId})
                 ) tf
-                """,
-                BpmUserTypeEnum.APPROVAL.getCode(),
-                BpmUserTypeEnum.TRANSFER.getCode(),
-                BpmUserTypeEnum.DEPUTE.getCode(),
-                BpmUserTypeEnum.AGENT.getCode()
-        );
+            """;
     }
 }

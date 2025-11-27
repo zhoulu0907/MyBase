@@ -131,41 +131,40 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
 
             // AnyLine开启事务
             TransactionState transactionState = temporaryService.start();
+            try{
+                long deleteCount;
+                if (hasDeletedField) {
+                    // 软删除：更新deleted字段为删除时间戳
+                    DataRow updateData = new DataRow();
+                    updateData.put("deleted", String.valueOf(System.currentTimeMillis()));
 
-            long deleteCount;
-            if (hasDeletedField) {
-                // 软删除：更新deleted字段为删除时间戳
-                DataRow updateData = new DataRow();
-                updateData.put("deleted", String.valueOf(System.currentTimeMillis()));
+                    // 修改时间
+                    LocalDateTime dateTime = LocalDateTime.now();
+                    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                    String now = dateTime.format(dateTimeFormatter);
+                    updateData.put("updated_time", now);
 
-                // 修改时间
-                LocalDateTime dateTime = LocalDateTime.now();
-                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-                String now = dateTime.format(dateTimeFormatter);
-                updateData.put("updated_time", now);
-
-                deleteCount = temporaryService.update(quoteTableName(entity.getTableName()), updateData, configStore);
-                log.info("软删除数据成功，实体ID: {}, 表名: {}, 删除记录数: {}", entityId, entity.getTableName(), deleteCount);
-            } else {
-                // 物理删除：直接删除记录
-                deleteCount = temporaryService.delete(quoteTableName(entity.getTableName()), configStore);
-                log.info("物理删除数据成功，实体ID: {}, 表名: {}, 删除记录数: {}", entityId, entity.getTableName(), deleteCount);
-            }
-            boolean ok = deleteCount > 0;
-            if(ok){
-                try {
-                    super.storeData(context);// 子表处理创建嵌套内部事务
-                    log.info("子表处理完成，准备提交事务");
-                    // 子表处理完成 提交事务
-                    temporaryService.commit(transactionState);
-                }catch (Exception e){
-                    log.info("子表处理出现异常，准备回滚事务：{}",e.getMessage());
-                    // 子表处理出现异常 回滚事务
-                    temporaryService.rollback(transactionState);
-                    throw exception(DB_SUBENTITY_OPERATION_ERROR,e.getMessage());
+                    deleteCount = temporaryService.update(quoteTableName(entity.getTableName()), updateData, configStore);
+                    log.info("软删除数据成功，实体ID: {}, 表名: {}, 删除记录数: {}", entityId, entity.getTableName(), deleteCount);
+                } else {
+                    // 物理删除：直接删除记录
+                    deleteCount = temporaryService.delete(quoteTableName(entity.getTableName()), configStore);
+                    log.info("物理删除数据成功，实体ID: {}, 表名: {}, 删除记录数: {}", entityId, entity.getTableName(), deleteCount);
                 }
+                boolean ok = deleteCount > 0;
+                if(ok){
+                        super.storeData(context);// 子表处理创建嵌套内部事务
+                        log.info("子表处理完成，准备提交事务");
+                        // 子表处理完成 提交事务
+                        temporaryService.commit(transactionState);
+                }
+                return ok;
+            }catch (Exception e){
+                log.info("数据删除出现异常，准备回滚事务：{}",e.getMessage());
+                // 数据删除出现异常 回滚事务
+                temporaryService.rollback(transactionState);
+                throw exception(DB_SUBENTITY_OPERATION_ERROR,e.getMessage());
             }
-            return ok;
         });
     }
 
@@ -395,10 +394,10 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
         DataRow dataRow = temporaryService.query(quoteTableName(entity.getTableName()),configStore);
 
         // 将要删除的数据行保存下来，以便在后置删除触发方法中使用（物理删除之后数据库可能不存在该数据行）
-        context.setProcessedData(dataRow.map());
+        context.setProcessedData(dataRow == null ? new HashMap<>() : dataRow.map());
 
         Long entityId = context.getEntityId();
-        Map<String, Object> data = convertNameToId(entityId,dataRow.map());
+        Map<String, Object> data = convertNameToId(entityId,dataRow == null ? new HashMap<>() : dataRow.map());
 
         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
         reqDTO.setTraceId(UUID.randomUUID().toString());
@@ -424,7 +423,7 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
         Map deletedData = context.getProcessedData();
 
         Long entityId = context.getEntityId();
-        Map<String, Object> data = convertNameToId(entityId,deletedData);
+        Map<String, Object> data = convertNameToId(entityId,deletedData == null ? new HashMap<>() : deletedData);
 
         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
         reqDTO.setTraceId(UUID.randomUUID().toString());

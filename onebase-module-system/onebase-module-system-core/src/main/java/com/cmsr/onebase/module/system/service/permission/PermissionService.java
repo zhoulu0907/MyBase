@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.system.service.permission;
 
 import com.cmsr.onebase.framework.common.biz.system.permission.dto.DeptDataPermissionRespDTO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.UserRoleDO;
+import com.cmsr.onebase.module.system.vo.auth.AuthPermissionInfoRespVO;
 import com.cmsr.onebase.module.system.vo.permission.PermissionMenuRespVO;
 
 import java.util.Collection;
@@ -83,12 +84,14 @@ public interface PermissionService {
      */
     Set<Long> getRoleMenuListByRoleId(Collection<Long> roleIds);
 
+    Set<Long> getAllCorpActiveMenuIds();
+
     /**
      * 获得所有激活的菜单编号集合
      *
      * @return 菜单编号集合
      */
-    Set<Long> getAllActiveMenuIds();
+    Set<Long> getAllValidActiveMenuIds();
 
     /**
      * 获得拥有指定菜单的角色编号数组，从缓存中获取
@@ -203,4 +206,11 @@ public interface PermissionService {
      * @return 删除的行数
      */
     long deleteRoleMenus(Long roleId, Set<Long> menuIds);
+    /**
+     * 获取权限
+     *
+     * @param code 场景编码
+     * @return  AuthPermissionInfoRespVO
+     */
+    AuthPermissionInfoRespVO getPermissionInfo(String code);
 }

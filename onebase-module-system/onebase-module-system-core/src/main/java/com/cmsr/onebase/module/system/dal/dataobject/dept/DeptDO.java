@@ -18,17 +18,17 @@ public class DeptDO extends TenantBaseDO {
     public static final Long PARENT_ID_ROOT = 0L;
 
     // 列名常量
-    public static final String NAME             = "name";
-    public static final String PARENT_ID        = "parent_id";
-    public static final String SORT             = "sort";
-    public static final String LEADER_USER_ID   = "leader_user_id";
-    public static final String PHONE            = "phone";
-    public static final String EMAIL            = "email";
-    public static final String STATUS           = "status";
-    public static final String REMARK           = "remark";
-    public static final String DEPT_DIRECTOR_ID = "dept_director_id";
-    public static final String CORP_ID          = "corp_id";
-    public static final String DEPT_TYPE        = "dept_type";
+    public static final String NAME           = "name";
+    public static final String PARENT_ID      = "parent_id";
+    public static final String SORT           = "sort";
+    public static final String LEADER_USER_ID = "leader_user_id";
+    public static final String PHONE          = "phone";
+    public static final String EMAIL          = "email";
+    public static final String STATUS         = "status";
+    public static final String REMARK         = "remark";
+    public static final String ADMIN_USER_ID  = "admin_user_id";
+    public static final String CORP_ID        = "corp_id";
+    public static final String DEPT_TYPE      = "dept_type";
 
     /**
      * 部门名称
@@ -47,12 +47,19 @@ public class DeptDO extends TenantBaseDO {
     @Column(name = SORT)
     private Integer sort;
     /**
-     * 管理员UserID
+     * 主管UserID
      * <p>
      * 关联
      */
     @Column(name = LEADER_USER_ID)
     private Long    leaderUserId;
+
+    /**
+     * 管理员id
+     */
+    @Column(name = ADMIN_USER_ID)
+    private Long adminUserId;
+
     /**
      * 联系电话
      */
@@ -77,11 +84,6 @@ public class DeptDO extends TenantBaseDO {
     @Column(name = REMARK)
     private String remark;
 
-    /**
-     * 部门主管id
-     */
-    @Column(name = DEPT_DIRECTOR_ID)
-    private Long deptDirectorId;
 
     /**
      * 部门类型： tenant-空间部门，corp-企业部门
@@ -94,6 +96,5 @@ public class DeptDO extends TenantBaseDO {
      */
     @Column(name = CORP_ID)
     private Long corpId;
-
 
 }

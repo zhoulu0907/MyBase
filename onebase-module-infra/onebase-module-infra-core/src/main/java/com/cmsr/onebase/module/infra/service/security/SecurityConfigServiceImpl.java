@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.infra.enums.ErrorCodeConstants.*;
+import static com.cmsr.onebase.module.infra.dal.redis.RedisKeyConstants.SECURITY_TENANT_CONFIGS;
 
 /**
  * 安全配置服务实现类
@@ -55,8 +56,6 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
     @Resource
     private SecurityConfigDataRepository securityConfigDataRepository;
 
-    private static final String cacheNames = "infra:security:tenant-config#30m";
-
     @Override
     public List<SecurityConfigCategoryRespVO> getAllCategories() {
         // 接口1：从infra_security_config_category中拉取所有deleted=0的数据
@@ -71,7 +70,7 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
     }
 
     @Override
-    @Cacheable(cacheNames = cacheNames, key = "#tenantId")
+    @Cacheable(cacheNames = SECURITY_TENANT_CONFIGS, key = "#tenantId")
     public List<SecurityConfigItemRespVO> getSecurityConfigsByTenant(Long tenantId) {
         // 获取租户所有安全配置项，用于安全逻辑判断（使用Redis分布式缓存，TTL=30分钟）
         log.info("从数据库加载租户安全配置，tenantId: {}", tenantId);
@@ -93,7 +92,7 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(cacheNames = cacheNames, key = "#tenantId")
+    @CacheEvict(cacheNames = SECURITY_TENANT_CONFIGS, key = "#tenantId")
     public void batchUpdateConfig(Long tenantId, List<SecurityConfigUpdateReqVO> updateReqVOList) {
         // 接口4：批量更新租户安全配置
         if (CollectionUtils.isEmpty(updateReqVOList)) {
@@ -290,6 +289,30 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
         } catch (NumberFormatException e) {
             throw exception(SECURITY_CONFIG_DATA_TYPE_WRONG,configName, DATATYPE_INTEGER);
         }
+    }
+
+    @Override
+    public Integer getIntConfig(Long tenantId, String configKey) {
+        List<SecurityConfigItemRespVO> configs = getSecurityConfigsByTenant(tenantId);
+        if (configs == null || configs.isEmpty()) {
+            return null;
+        }
+
+        for (SecurityConfigItemRespVO config : configs) {
+            if (configKey.equals(config.getConfigKey())) {
+                String configValue = config.getConfigValue();
+                if (configValue == null || configValue.trim().isEmpty()) {
+                    return null;
+                }
+                try {
+                    return Integer.parseInt(configValue.trim());
+                } catch (NumberFormatException e) {
+                    log.warn("解析配置值失败, tenantId: {}, configKey: {}, value: {}", tenantId, configKey, configValue);
+                    return null;
+                }
+            }
+        }
+        return null;
     }
 
 }

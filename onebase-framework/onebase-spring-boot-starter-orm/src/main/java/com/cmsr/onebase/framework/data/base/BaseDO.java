@@ -34,6 +34,7 @@ public class BaseDO implements BaseDOInterface, Serializable {
      */
     @Id
     @Column(name = ID, columnDefinition = "BIGINT NOT NULL PRIMARY KEY")
+    @com.mybatisflex.annotation.Id
     private Long id;
     /**
      * 创建时间

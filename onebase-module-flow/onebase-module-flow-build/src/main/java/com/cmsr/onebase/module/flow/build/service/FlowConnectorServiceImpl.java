@@ -45,8 +45,13 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         connectorVO.setApplicationId(connectorDO.getApplicationId());
         connectorVO.setConnectorId(connectorDO.getId());
         connectorVO.setTypeCode(connectorDO.getTypeCode());
-        connectorVO.setConnectorName(connectorVO.getConnectorName());
-        connectorVO.setDescription(connectorDO.getDescription());
+        connectorVO.setConnectorName(connectorDO.getConnectorName());
+        connectorVO.setConnectorVersion("1.0.0");
+        if (StringUtils.isBlank(connectorDO.getDescription())) {
+            connectorVO.setDescription("");
+        } else {
+            connectorVO.setDescription(connectorDO.getDescription());
+        }
         String config = connectorDO.getConfig();
         if (StringUtils.isNotBlank(config)) {
             connectorVO.setConfig(JsonUtils.parseTree(config));
@@ -57,7 +62,7 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
 
     @Override
     public FlowConnectorVO getConnectorDetail(Long connectorId) {
-        FlowConnectorDO connectorDO = connectorRepository.findById(connectorId);
+        FlowConnectorDO connectorDO = connectorRepository.getById(connectorId);
         if (connectorDO == null) {
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
         }
@@ -73,26 +78,25 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         connectorDO.setTypeCode(createVO.getTypeCode());
         connectorDO.setConfig(createVO.getConfigAsStr());
 
-        connectorDO = connectorRepository.insert(connectorDO);
+        connectorRepository.save(connectorDO);
         return connectorDO.getId();
     }
 
     @Override
     public void updateConnector(UpdateFlowConnectorReqVO updateVO) {
         Long connectorId = updateVO.getConnectorId();
-        FlowConnectorDO oldDO = connectorRepository.findById(connectorId);
+        FlowConnectorDO oldDO = connectorRepository.getById(connectorId);
         if (oldDO == null) {
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
         }
         oldDO.setConnectorName(updateVO.getConnectorName());
         oldDO.setDescription(updateVO.getDescription());
         oldDO.setConfig(updateVO.getConfigAsStr());
-
-        connectorRepository.update(oldDO);
+        connectorRepository.updateById(oldDO);
     }
 
     @Override
     public void deleteById(Long connectorId) {
-        connectorRepository.deleteById(connectorId);
+        connectorRepository.removeById(connectorId);
     }
 }

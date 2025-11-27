@@ -7,10 +7,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
@@ -63,6 +60,14 @@ public class ExecuteContext implements Serializable {
     @Setter
     @Getter
     private volatile String executionEndNodeTag;
+
+    @Setter
+    @Getter
+    private volatile Optional<Boolean> abnormalTermination;
+
+    @Setter
+    @Getter
+    private volatile String terminationMessage;
 
     private volatile Stopwatch stopwatch;
 

@@ -28,14 +28,14 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
  */
 @Tag(name = "平台服务-企业")
 @RestController
-@RequestMapping("/system/corp/")
+@RequestMapping("/system/corp")
 @Validated
 public class CorpController {
 
     @Resource
     private CorpService corpService;
 
-    @PostMapping("create")
+    @PostMapping("/create")
     @Operation(summary = "创建企业")
     @PreAuthorize("@ss.hasPermission('tenant:corp:create')")
     public CommonResult<CorpAdminUserRespVO> createCorpCombined(@RequestBody @Valid CorpCombinedVo reqVO) {
@@ -43,7 +43,7 @@ public class CorpController {
     }
 
 
-    @PostMapping("update")
+    @PostMapping("/update")
     @Operation(summary = "更新企业")
     @PreAuthorize("@ss.hasPermission('tenant:corp:update')")
     public CommonResult<Boolean> updateCorp(@RequestBody @Valid CorpUpdateReqVO reqVO) {
@@ -52,15 +52,15 @@ public class CorpController {
     }
 
 
-    @PostMapping("update-status")
+    @PostMapping("/update-status")
     @Operation(summary = "企业启用/禁用")
-    @PreAuthorize("@ss.hasPermission('tenant:corp:update')")
+    @PreAuthorize("@ss.hasPermission('tenant:corp:enable')")
     public CommonResult<Boolean> updateStatus(@RequestParam("id") Long id, @RequestParam("status") Long status) {
         corpService.updateStatus(id, status);
         return success(true);
     }
 
-    @PostMapping("delete")
+    @PostMapping("/delete")
     @Operation(summary = "删除企业")
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
     @PreAuthorize("@ss.hasPermission('tenant:corp:delete')")
@@ -69,7 +69,7 @@ public class CorpController {
         return success(true);
     }
 
-    @GetMapping("page")
+    @GetMapping("/page")
     @Operation(summary = "获得企业列表-分页")
     @PreAuthorize("@ss.hasPermission('tenant:corp:query')")
     public CommonResult<PageResult<CorpRespVO>> getCorpPage(@Valid CorpPageReqVO pageReqVO) {
@@ -85,7 +85,7 @@ public class CorpController {
         return success(BeanUtils.toBean(list, CorpSimpleRespVO.class));
     }
 
-    @GetMapping("get")
+    @GetMapping("/get")
     @Operation(summary = "获得企业详情")
     @PreAuthorize("@ss.hasPermission('tenant:corp:query')")
     public CommonResult<CorpRespVO> getCorp(@RequestParam("id") Long id) {

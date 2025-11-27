@@ -10,6 +10,7 @@ import com.cmsr.onebase.module.flow.core.enums.FlowEnableStatusEnum;
 import com.cmsr.onebase.module.flow.core.enums.FlowJobStatusEnum;
 import com.cmsr.onebase.module.flow.core.enums.FlowTriggerTypeEnum;
 import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
+import com.mybatisflex.core.tenant.TenantManager;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RMapCache;
@@ -47,7 +48,7 @@ public class FlowChangeClient {
 
     public void applicationUpdate(Long applicationId) {
         log.info("更新应用版本：{}", applicationId);
-        List<FlowProcessDO> flowProcessDOS = flowProcessRepository.findByApplicationIdAndEnableStatus(applicationId, FlowEnableStatusEnum.ENABLE.getStatus());
+        List<FlowProcessDO> flowProcessDOS = TenantManager.withoutTenantCondition(() -> flowProcessRepository.findByApplicationIdAndEnableStatus(applicationId, FlowEnableStatusEnum.ENABLE.getStatus()));
         for (FlowProcessDO flowProcessDO : flowProcessDOS) {
             if (FlowTriggerTypeEnum.isTime(flowProcessDO.getTriggerType())) {
                 updateTimeJob(flowProcessDO);
@@ -69,18 +70,18 @@ public class FlowChangeClient {
     }
 
     private void updateTimeJob(FlowProcessDO flowProcessDO) {
-        FlowProcessTimeDO flowProcessTimeDO = flowProcessTimeRepository.findByProcessId(flowProcessDO.getId());
+        FlowProcessTimeDO flowProcessTimeDO = TenantManager.withoutTenantCondition(() -> flowProcessTimeRepository.findByProcessId(flowProcessDO.getId()));
         if (flowProcessTimeDO != null) {
             flowProcessTimeDO.setJobStatus(FlowJobStatusEnum.NEED_DEPLOY.getStatus());
-            flowProcessTimeRepository.update(flowProcessTimeDO);
+            flowProcessTimeRepository.updateById(flowProcessTimeDO);
         }
     }
 
     private void updateDateFieldJob(FlowProcessDO flowProcessDO) {
-        FlowProcessDateFieldDO flowProcessDateFieldDO = flowProcessDateFieldRepository.findByProcessId(flowProcessDO.getId());
+        FlowProcessDateFieldDO flowProcessDateFieldDO = TenantManager.withoutTenantCondition(() -> flowProcessDateFieldRepository.findByProcessId(flowProcessDO.getId()));
         if (flowProcessDateFieldDO != null) {
             flowProcessDateFieldDO.setJobStatus(FlowJobStatusEnum.NEED_DEPLOY.getStatus());
-            flowProcessDateFieldRepository.update(flowProcessDateFieldDO);
+            flowProcessDateFieldRepository.updateById(flowProcessDateFieldDO);
         }
     }
 

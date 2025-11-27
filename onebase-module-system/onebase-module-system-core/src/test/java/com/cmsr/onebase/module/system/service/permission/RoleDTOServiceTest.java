@@ -3,10 +3,11 @@ package com.cmsr.onebase.module.system.service.permission;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.module.system.dal.database.user.AdminUserDataRepository;
 import com.cmsr.onebase.module.system.vo.role.RoleInsertReqVO;
 import com.cmsr.onebase.module.system.vo.role.RolePageReqVO;
 import com.cmsr.onebase.module.system.vo.role.RoleUpdateReqVO;
-import com.cmsr.onebase.module.system.dal.database.AdminUserDataRepository;
+import com.cmsr.onebase.module.system.dal.database.user.AbstractUserDataRepository;
 import com.cmsr.onebase.module.system.dal.database.RoleDataRepository;
 import com.cmsr.onebase.module.system.dal.database.UserRoleDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
@@ -426,7 +427,7 @@ public class RoleDTOServiceTest {
         reqVO.setStatus(CommonStatusEnum.ENABLE.getStatus());
 
         // 执行测试
-        PageResult<RoleDO> pageResult = roleService.getRolePage(reqVO);
+        PageResult<RoleDO> pageResult = roleService.findRolePageOnlyTenant(reqVO);
 
         // 验证结果
         assertNotNull(pageResult, "分页结果不应该为空");

@@ -1,7 +1,9 @@
 package com.cmsr.onebase.module.system.service.oauth2;
 
+import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstants;
+import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.map.MapUtil;
@@ -10,8 +12,8 @@ import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.util.date.DateUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.framework.security.core.LoginUser;
-import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
+import com.cmsr.onebase.framework.common.security.dto.LoginUser;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.system.vo.oauth.OAuth2AccessTokenPageReqVO;
 import com.cmsr.onebase.module.system.dal.database.OAuth2AccessTokenDataRepository;
@@ -21,7 +23,7 @@ import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2ClientDO;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2RefreshTokenDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.dal.redis.oauth2.OAuth2AccessTokenRedisDAO;
-import com.cmsr.onebase.module.system.service.user.AdminUserService;
+import com.cmsr.onebase.module.system.service.user.UserService;
 import jakarta.annotation.Resource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -50,12 +52,14 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
     private OAuth2ClientService oauth2ClientService;
     @Resource
     @Lazy // 懒加载，避免循环依赖
-    private AdminUserService    adminUserService;
+    private UserService         userService;
 
     @Resource
     private OAuth2AccessTokenDataRepository  oauth2AccessTokenDataRepository;
     @Resource
     private OAuth2RefreshTokenDataRepository oauth2RefreshTokenDataRepository;
+    @Resource
+    private SecurityConfigApi securityConfigApi;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -100,12 +104,29 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
             throw exception(GlobalErrorCodeConstants.BAD_REQUEST.getCode(), "刷新令牌的客户端编号不正确");
         }
 
-        // 移除相关的访问令牌
+        // 移除相关的访问令牌，并反查deviceId
+        String deviceId = null;
         List<OAuth2AccessTokenDO> accessTokenDOs = oauth2AccessTokenDataRepository.findListByRefreshToken(refreshToken);
         if (CollUtil.isNotEmpty(accessTokenDOs)) {
+            // 通过旧Token反查deviceId
+            OAuth2AccessTokenDO oldToken = accessTokenDOs.get(0);
+            CommonResult<String> deviceIdResult = securityConfigApi.findDeviceIdByToken(
+                    null,  // OAuth2TokenServiceImpl在同一模块，TenantContextHolder能正常获取
+                    oldToken.getUserId(),
+                    oldToken.getAccessToken()
+            );
+            if (deviceIdResult != null && deviceIdResult.getData() != null) {
+                deviceId = deviceIdResult.getData();
+            }
+            
             List<Long> ids = accessTokenDOs.stream().map(OAuth2AccessTokenDO::getId).collect(Collectors.toUnmodifiableList());
             oauth2AccessTokenDataRepository.deleteByIds(ids);
             oauth2AccessTokenRedisDAO.deleteList(convertSet(accessTokenDOs, OAuth2AccessTokenDO::getAccessToken));
+            
+            // 删除在线设备记录中的旧Token
+            for (OAuth2AccessTokenDO accessToken : accessTokenDOs) {
+                securityConfigApi.removeOnlineDevice(null, accessToken.getUserId(), accessToken.getAccessToken());
+            }
         }
 
         // 已过期的情况下，删除刷新令牌
@@ -115,7 +136,18 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
         }
 
         // 创建访问令牌
-        return createOAuth2AccessToken(refreshTokenDO, clientDO);
+        OAuth2AccessTokenDO newAccessTokenDO = createOAuth2AccessToken(refreshTokenDO, clientDO);
+        
+        // 将新Token添加到在线设备记录：如果反查到deviceId则使用，否则直接存储新Token
+        if (StrUtil.isNotBlank(deviceId)) {
+            securityConfigApi.addOnlineDevice(
+                    newAccessTokenDO.getUserId(),
+                    deviceId,
+                    newAccessTokenDO.getAccessToken()
+            );
+        }
+        
+        return newAccessTokenDO;
     }
 
     @Override
@@ -215,7 +247,7 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
     }
 
     /**
-     * 加载用户信息，方便 {@link com.cmsr.onebase.framework.security.core.LoginUser} 获取到昵称、部门等信息
+     * 加载用户信息，方便 {@link LoginUser} 获取到昵称、部门等信息
      *
      * @param userId   用户编号
      * @param userType 用户类型
@@ -223,7 +255,7 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
      */
     private Map<String, String> buildUserInfo(Long userId, Integer userType) {
         if (userType.equals(UserTypeEnum.THIRD.getValue())) {
-            AdminUserDO user = adminUserService.getUser(userId);
+            AdminUserDO user = userService.getUser(userId);
             return MapUtil.builder(LoginUser.INFO_KEY_NICKNAME, user.getNickname())
                     .put(LoginUser.INFO_KEY_DEPT_ID, StrUtil.toStringOrNull(user.getDeptId())).build();
         } else if (userType.equals(UserTypeEnum.CORP.getValue())) {

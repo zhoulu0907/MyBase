@@ -2,13 +2,10 @@ package com.cmsr.onebase.module.etl.build.service;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
-import com.cmsr.onebase.module.etl.core.dal.database.ETLDatasourceRepository;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLDatasourceDO;
 import com.cmsr.onebase.module.etl.core.enums.ETLErrorCodeConstants;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.metadata.type.DatabaseType;
-import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
@@ -16,8 +13,6 @@ import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
-import java.lang.reflect.InvocationTargetException;
-import java.sql.Driver;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -26,9 +21,6 @@ import java.util.regex.Pattern;
 @Component
 public class DatasourceFactory {
     private static final Pattern PARAM_PATTERN = Pattern.compile("\\{([^{}:]+)(:[^{}]+)?\\}");
-
-    @Resource
-    private ETLDatasourceRepository datasourceRepository;
 
     public DataSource constructDataSource(ETLDatasourceDO datasourceDO, boolean oneshot) {
         // 1. 获取数据库类型
@@ -82,20 +74,6 @@ public class DatasourceFactory {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_NOT_SUPPORTED);
         }
         return parseType;
-    }
-
-    private Driver getDeclaredDriverInstance(DatabaseType dbType) {
-        String driverName = dbType.driver();
-        try {
-            Class<? extends Driver> driverClass = (Class<? extends Driver>) ClassUtils.getClass(driverName);
-            return driverClass.getDeclaredConstructor().newInstance();
-        } catch (ClassNotFoundException ex) {
-            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_NOT_SUPPORTED);
-        } catch (NoSuchMethodException | InstantiationException | IllegalAccessException |
-                 InvocationTargetException ex) {
-            log.error("JDBC连接驱动初始化失败", ex);
-            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.UNKNOWN_ERROR);
-        }
     }
 
     public static String buildJdbcConnectionString(String databaseType, Properties connectionProperties) {

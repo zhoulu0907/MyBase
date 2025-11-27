@@ -1,75 +1,61 @@
 package com.cmsr.onebase.module.flow.core.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.data.base.BaseDO;
+import com.cmsr.onebase.framework.orm.repo.BaseAppRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
+import com.cmsr.onebase.module.flow.core.dal.mapper.FlowProcessMapper;
 import com.cmsr.onebase.module.flow.core.vo.PageFlowProcessReqVO;
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Order;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+
+import static com.cmsr.onebase.module.flow.core.dal.dataobject.table.FlowProcessTableDef.FLOW_PROCESS;
 
 /**
  * @Author：huangjie
  * @Date：2025/8/29 14:35
  */
 @Repository
-public class FlowProcessRepository extends DataRepository<FlowProcessDO> {
+public class FlowProcessRepository extends BaseAppRepository<FlowProcessMapper, FlowProcessDO> {
 
-    public FlowProcessRepository() {
-        super(FlowProcessDO.class);
-    }
 
     public PageResult<FlowProcessDO> findPageByQuery(PageFlowProcessReqVO reqVO) {
-        ConfigStore configs = new DefaultConfigStore();
-        if (reqVO.getApplicationId() != null) {
-            configs.eq("application_id", reqVO.getApplicationId());
-        }
-        if (StringUtils.isNotEmpty(reqVO.getProcessName())) {
-            configs.like("process_name", reqVO.getProcessName());
-        }
-        if (reqVO.getEnableStatus() != null) {
-            configs.eq("enable_status", reqVO.getEnableStatus());
-        }
-        if (StringUtils.isNotEmpty(reqVO.getTriggerType())) {
-            configs.eq("trigger_type", reqVO.getTriggerType());
-        }
-        configs.order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
-        return this.findPageWithConditions(configs, reqVO.getPageNo(), reqVO.getPageSize());
+        QueryWrapper query = this.query()
+                .where(FLOW_PROCESS.APPLICATION_ID.eq(reqVO.getApplicationId()).when(reqVO.getApplicationId() != null))
+                .where(FLOW_PROCESS.PROCESS_NAME.like(reqVO.getProcessName()).when(StringUtils.isNotEmpty(reqVO.getProcessName())))
+                .where(FLOW_PROCESS.ENABLE_STATUS.eq(reqVO.getEnableStatus()).when(reqVO.getEnableStatus() != null))
+                .where(FLOW_PROCESS.TRIGGER_TYPE.eq(reqVO.getTriggerType()).when(StringUtils.isNotEmpty(reqVO.getTriggerType())))
+                .orderBy(FLOW_PROCESS.UPDATE_TIME, false);
+        Page page = new Page<>(reqVO.getPageNo(), reqVO.getPageSize());
+        Page<FlowProcessDO> pageData = this.page(page, query);
+        return new PageResult(pageData.getRecords(), pageData.getTotalRow());
     }
 
     public List<FlowProcessDO> findAllByEnableStatus(Integer status) {
-        DefaultConfigStore configs = new DefaultConfigStore();
-        configs.eq("enable_status", status);
-        return findAllByConfig(configs);
+        QueryWrapper query = this.query().where(FLOW_PROCESS.ENABLE_STATUS.eq(status));
+        return list(query);
     }
 
     public List<FlowProcessDO> findByApplicationId(Long applicationId) {
-        DefaultConfigStore configs = new DefaultConfigStore();
-        configs.eq("application_id", applicationId);
-        return findAllByConfig(configs);
+        QueryWrapper query = this.query().where(FLOW_PROCESS.APPLICATION_ID.eq(applicationId));
+        return list(query);
     }
 
     public List<FlowProcessDO> findByApplicationIdAndEnableStatus(Long applicationId, Integer status) {
-        DefaultConfigStore configs = new DefaultConfigStore();
-        configs.eq("application_id", applicationId);
-        configs.eq("enable_status", status);
-        return findAllByConfig(configs);
+        QueryWrapper query = this.query()
+                .where(FLOW_PROCESS.APPLICATION_ID.eq(applicationId))
+                .where(FLOW_PROCESS.ENABLE_STATUS.eq(status));
+        return list(query);
     }
 
     public String findProcessNameById(Long id) {
-        DefaultConfigStore configs = new DefaultConfigStore();
-        configs.columns("process_name");
-        configs.eq("id", id);
-        FlowProcessDO process = findOne(configs);
-        if (process != null) {
-            return process.getProcessName();
-        }
-        return null;
+        QueryWrapper query = this.query()
+                .select(FLOW_PROCESS.PROCESS_NAME)
+                .where(FLOW_PROCESS.ID.eq(id));
+        return getObjAs(query, String.class);
     }
 
 }

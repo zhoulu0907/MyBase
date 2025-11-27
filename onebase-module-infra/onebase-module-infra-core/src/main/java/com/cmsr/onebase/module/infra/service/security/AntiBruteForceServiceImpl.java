@@ -1,6 +1,10 @@
 package com.cmsr.onebase.module.infra.service.security;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static com.cmsr.onebase.module.infra.dal.redis.RedisKeyConstants.REDIS_KEY_FAIL_COUNT;
+import static com.cmsr.onebase.module.infra.dal.redis.RedisKeyConstants.REDIS_KEY_FAIL_SHARED_LOCK;
+import static com.cmsr.onebase.module.infra.dal.redis.RedisKeyConstants.REDIS_KEY_LOCK;
+
 import com.cmsr.onebase.module.infra.dal.database.SecurityRecordDataRepository;
 import com.cmsr.onebase.module.infra.service.security.dto.LoginFailureResult;
 import com.cmsr.onebase.module.infra.dal.dataobject.security.SecurityRecordDO;
@@ -27,17 +31,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class AntiBruteForceServiceImpl implements AntiBruteForceService {
-
-    /**
-     * Redis Key前缀 - 失败次数记录
-     */
-    private static final String REDIS_KEY_FAIL_COUNT = "infra:security:login:fail:";
-
-    /**
-     * Redis Key前缀 - 锁定状态记录
-     */
-    private static final String REDIS_KEY_LOCK = "infra:security:login:lock:";
-
     /**
      * 默认失败锁定阈值
      */
@@ -60,16 +53,30 @@ public class AntiBruteForceServiceImpl implements AntiBruteForceService {
     @Override
     public Long checkAccountLocked(Long tenantId, Long userId) {
         String lockKey = buildLockKey(tenantId, userId);
-        Long ttl = stringRedisTemplate.getExpire(lockKey, TimeUnit.SECONDS);
-
-        if (ttl != null && ttl > 0) {
-            log.debug("账号已锁定，tenantId: {}, userId: {}, 剩余锁定时间: {}秒", tenantId, userId, ttl);
+        
+        // 先检查 key 是否存在
+        Boolean exists = stringRedisTemplate.hasKey(lockKey);
+        if (Boolean.TRUE.equals(exists)) {
+            Long ttl = stringRedisTemplate.getExpire(lockKey, TimeUnit.SECONDS);
             
-            // 格式化锁定时间提示
-            String timeHint = formatLockTimeHint(ttl);
-            
-            // 抛出异常，包含锁定时间提示
-            throw exception(ErrorCodeConstants.AUTH_LOGIN_ACCOUNT_LOCKED, timeHint);
+            // ttl == -1 表示 key 存在但没有过期时间（手动解锁方式）
+            // ttl > 0 表示 key 存在且有过期时间（自动解锁方式）
+            if (ttl != null && (ttl == -1 || ttl > 0)) {
+                log.debug("账号已锁定，tenantId: {}, userId: {}, TTL: {}", tenantId, userId, ttl);
+                
+                // 格式化锁定时间提示
+                String timeHint;
+                if (ttl == -1) {
+                    // 手动解锁方式，没有过期时间
+                    timeHint = "请联系管理员解锁";
+                } else {
+                    // 自动解锁方式，显示剩余时间
+                    timeHint = formatLockTimeHint(ttl);
+                }
+                
+                // 抛出异常，包含锁定时间提示
+                throw exception(ErrorCodeConstants.AUTH_LOGIN_ACCOUNT_LOCKED, timeHint);
+            }
         }
 
         return null;
@@ -77,16 +84,60 @@ public class AntiBruteForceServiceImpl implements AntiBruteForceService {
 
     @Override
     public LoginFailureResult recordLoginFailure(Long tenantId, Long userId) {
-        log.info("记录登录失败，tenantId: {}, userId: {}", tenantId, userId);
+        return recordLoginFailureInternal(tenantId, userId, 3);
+    }
+    
+    /**
+     * 带重试次数限制的登录失败记录
+     */
+    private LoginFailureResult recordLoginFailureInternal(Long tenantId, Long userId, int maxRetries) {
+        if (maxRetries <= 0) {
+            log.error("记录登录失败超过最大重试次数，tenantId: {}, userId: {}", tenantId, userId);
+            throw exception(ErrorCodeConstants.AUTH_LOGIN_ACCOUNT_LOCKED, "系统繁忙，请稍后重试");
+        }
+        
+        log.info("记录登录失败，tenantId: {}, userId: {}, 剩余重试次数: {}", tenantId, userId, maxRetries);
 
         // 获取租户防暴力破解配置
         AntiBruteForceConfig config = getAntiBruteForceConfig(tenantId);
 
         String failKey = buildFailKey(tenantId, userId);
         String lockKey = buildLockKey(tenantId, userId);
-
-        // 增加失败次数
+        
+        // 使用分布式锁防止并发竞态条件
+        String lockIdentifier = String.format(REDIS_KEY_FAIL_SHARED_LOCK, tenantId, userId);
+        Boolean acquired = stringRedisTemplate.opsForValue().setIfAbsent(lockIdentifier, "1", 5, TimeUnit.SECONDS);
+        if (Boolean.FALSE.equals(acquired)) {
+            // 其他线程正在处理，短暂等待后重试
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw exception(ErrorCodeConstants.AUTH_LOGIN_ACCOUNT_LOCKED, "系统繁忙，请稍后重试");
+            }
+            // 直接递归重试，不检查锁定状态（避免异常干扰）
+            return recordLoginFailureInternal(tenantId, userId, maxRetries - 1);
+        }
+        
+        try {
+            return doRecordLoginFailure(tenantId, userId, config, failKey, lockKey);
+        } finally {
+            stringRedisTemplate.delete(lockIdentifier);
+        }
+    }
+    
+    /**
+     * 执行登录失败记录（内部方法，已加锁保护）
+     */
+    private LoginFailureResult doRecordLoginFailure(Long tenantId, Long userId, AntiBruteForceConfig config, String failKey, String lockKey) {
+        // 增加失败次数（已有分布式锁保护，无需再检查锁定状态）
         Long failCount = stringRedisTemplate.opsForValue().increment(failKey);
+        
+        // 如果是第一次失败，立即设置过期时间（防止内存泄漏）
+        if (failCount == 1) {
+            stringRedisTemplate.expire(failKey, config.lockDuration(), TimeUnit.MINUTES);
+        }
+        
         log.debug("当前失败次数: {}, 阈值: {}", failCount, config.failedLockThreshold());
 
         // 判断是否需要锁定
@@ -108,9 +159,6 @@ public class AntiBruteForceServiceImpl implements AntiBruteForceService {
             // 未锁定，返回剩余次数
             int remainingAttempts = config.failedLockThreshold() - failCount.intValue();
 
-            // 设置失败次数的过期时间（与锁定时长一致）
-            stringRedisTemplate.expire(failKey, config.lockDuration(), TimeUnit.MINUTES);
-
             return LoginFailureResult.builder()
                     .locked(false)
                     .remainingAttempts(remainingAttempts)
@@ -127,10 +175,23 @@ public class AntiBruteForceServiceImpl implements AntiBruteForceService {
         String failKey = buildFailKey(tenantId, userId);
         String lockKey = buildLockKey(tenantId, userId);
 
+        // 清除失败次数记录
         stringRedisTemplate.delete(failKey);
-        stringRedisTemplate.delete(lockKey);
+        
+        // 只清除自动解锁方式的锁定状态（有TTL的），手动锁定需要管理员解锁
+        Boolean lockExists = stringRedisTemplate.hasKey(lockKey);
+        if (Boolean.TRUE.equals(lockExists)) {
+            Long ttl = stringRedisTemplate.getExpire(lockKey, TimeUnit.SECONDS);
+            // 只有自动解锁方式（ttl > 0）才能通过登录成功自动清除
+            if (ttl != null && ttl > 0) {
+                stringRedisTemplate.delete(lockKey);
+                log.debug("已清除自动解锁方式的锁定状态");
+            } else if (ttl != null && ttl == -1) {
+                log.info("账号处于手动锁定状态，需要管理员解锁，tenantId: {}, userId: {}", tenantId, userId);
+            }
+        }
 
-        log.debug("已清除失败记录和锁定状态");
+        log.debug("已清除失败记录");
     }
 
     /**
@@ -146,15 +207,22 @@ public class AntiBruteForceServiceImpl implements AntiBruteForceService {
     private void lockAccount(Long tenantId, Long userId, int lockDuration, String unlockMethod, String lockKey, String failKey) {
         long lockSeconds = lockDuration * 60L;
 
+        // 如果 unlockMethod 为空或无效，使用默认值 auto
+        String effectiveUnlockMethod = unlockMethod;
+        if (effectiveUnlockMethod == null || effectiveUnlockMethod.trim().isEmpty()) {
+            effectiveUnlockMethod = SecurityConfigKey.UnlockMethodOption.auto.getKey();
+            log.warn("unlockMethod 为空，使用默认值: auto, tenantId: {}, userId: {}", tenantId, userId);
+        }
+
         // 判断解锁方式，决定是否设置Redis过期时间
-        if (SecurityConfigKey.UnlockMethodOption.auto.getKey() .equals(unlockMethod)) {
+        if (SecurityConfigKey.UnlockMethodOption.auto.getKey().equals(effectiveUnlockMethod)) {
             // 自动解锁方式：设置Redis过期时间，时间到期后自动解锁
             stringRedisTemplate.opsForValue().set(lockKey, String.valueOf(System.currentTimeMillis()), lockSeconds, TimeUnit.SECONDS);
             log.info("账号已锁定（自动解锁方式），tenantId: {}, userId: {}, 锁定时长: {}分钟", tenantId, userId, lockDuration);
         } else {
             // 其他解锁方式（如manual等）：不设置过期时间，需要手动解锁
             stringRedisTemplate.opsForValue().set(lockKey, String.valueOf(System.currentTimeMillis()));
-            log.info("账号已锁定（{}解锁方式），tenantId: {}, userId: {}", unlockMethod, tenantId, userId);
+            log.info("账号已锁定（{}解锁方式），tenantId: {}, userId: {}", effectiveUnlockMethod, tenantId, userId);
         }
 
         // 清除失败次数记录
@@ -277,10 +345,15 @@ public class AntiBruteForceServiceImpl implements AntiBruteForceService {
         long minutes = lockSeconds / 60;
         long seconds = lockSeconds % 60;
 
-        if (minutes > 0) {
+        if (minutes > 0 && seconds > 0) {
+            // 既有分钟又有秒数
             return String.format("%d分钟%d秒", minutes, seconds);
+        } else if (minutes > 0) {
+            // 只有分钟，没有秒数
+            return String.format("%d分钟", minutes);
         } else {
-            return String.format("%d秒", seconds);
+            // 少于1分钟，只显示秒数
+            return String.format("%d秒", Math.max(seconds, 1));
         }
     }
 

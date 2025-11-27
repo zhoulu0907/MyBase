@@ -8,14 +8,14 @@ import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.etl.build.service.DatasourceFactory;
 import com.cmsr.onebase.module.etl.build.service.collector.MetadataCollector;
 import com.cmsr.onebase.module.etl.build.service.collector.MetadataManager;
-import com.cmsr.onebase.module.etl.build.service.datasource.vo.*;
-import com.cmsr.onebase.module.etl.common.preview.ColumnDefine;
 import com.cmsr.onebase.module.etl.build.service.preview.DataInspectService;
-import com.cmsr.onebase.module.etl.common.preview.DataPreview;
-import com.cmsr.onebase.module.etl.build.service.preview.vo.TablePreviewVO;
+import com.cmsr.onebase.module.etl.build.vo.datasource.*;
+import com.cmsr.onebase.module.etl.build.vo.preview.TablePreviewVO;
 import com.cmsr.onebase.module.etl.common.entity.CatalogData;
 import com.cmsr.onebase.module.etl.common.entity.ColumnData;
 import com.cmsr.onebase.module.etl.common.entity.TableData;
+import com.cmsr.onebase.module.etl.common.preview.ColumnDefine;
+import com.cmsr.onebase.module.etl.common.preview.DataPreview;
 import com.cmsr.onebase.module.etl.core.dal.database.*;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLDatasourceDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLTableDO;
@@ -25,6 +25,7 @@ import com.cmsr.onebase.module.etl.core.vo.DatasourcePageReqVO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.metadata.type.DatabaseType;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
@@ -83,12 +84,14 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
 
     @Override
     public DatasourceRespVO queryDatasourceDetail(Long datasourceId) {
-        ETLDatasourceDO datasourceDO = datasourceRepository.findById(datasourceId);
+        ETLDatasourceDO datasourceDO = datasourceRepository.getById(datasourceId);
         if (datasourceDO == null) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_NOT_EXIST);
         }
         DatasourceRespVO datasourceRespVO = DatasourceRespVO.convertFrom(datasourceDO);
-        datasourceRespVO.setConfig(datasourceDO.getConfig());
+        if (datasourceDO.getConfig() != null) {
+            datasourceRespVO.setConfig(JsonUtils.parseTree(datasourceDO.getConfig()));
+        }
         return datasourceRespVO;
     }
 
@@ -115,19 +118,19 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
         datasourceDO.setDatasourceName(createReqVO.getDatasourceName());
         datasourceDO.setDeclaration(createReqVO.getDeclaration());
         datasourceDO.setDatasourceType(datasourceType);
-        datasourceDO.setConfig(createReqVO.getConfig());
+        datasourceDO.setConfig(JsonUtils.toJsonString(createReqVO.getConfig()));
         datasourceDO.setReadonly(createReqVO.getReadonly());
         // initialize collect status to `none`, infer datasource will be empty.
         datasourceDO.setCollectStatus(CollectStatus.NONE);
         complementJdbcDatasourceProperties(datasourceDO);
-        datasourceDO = datasourceRepository.insert(datasourceDO);
+        datasourceRepository.save(datasourceDO);
         Long datasourceId = datasourceDO.getId();
         Boolean withCollect = createReqVO.getWithCollect();
         if (withCollect) {
             try {
                 boolean collectResult = runMetadataCollect(LocalDateTime.now(), datasourceDO);
                 if (!collectResult) {
-                    ServiceExceptionUtil.exception(ETLErrorCodeConstants.METADATA_COLLECT_FAILED.getCode(),
+                    throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.METADATA_COLLECT_FAILED.getCode(),
                             ETLErrorCodeConstants.METADATA_COLLECT_FAILED.getMsg(),
                             datasourceId);
                 }
@@ -143,15 +146,18 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
 
     @Override
     public void updateDatasource(ETLDatasourceUpdateReqVO updateReqVO) {
-        ETLDatasourceDO oldDatasource = datasourceRepository.findById(updateReqVO.getId());
+        ETLDatasourceDO oldDatasource = datasourceRepository.getById(updateReqVO.getId());
+        if (oldDatasource == null) {
+            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_NOT_EXIST);
+        }
         oldDatasource.setDatasourceName(updateReqVO.getDatasourceName());
         oldDatasource.setDeclaration(updateReqVO.getDeclaration());
-        oldDatasource.setConfig(updateReqVO.getConfig());
-        oldDatasource.setReadonly(updateReqVO.getReadonly());
+        oldDatasource.setConfig(JsonUtils.toJsonString(updateReqVO.getConfig()));
+        oldDatasource.setReadonly(BooleanUtils.toInteger(updateReqVO.getReadonly()));
         // udpate collect status to `required`, demonds user to execute at least once
         oldDatasource.setCollectStatus(CollectStatus.REQUIRED);
         complementJdbcDatasourceProperties(oldDatasource);
-        datasourceRepository.update(oldDatasource);
+        datasourceRepository.updateById(oldDatasource);
     }
 
     private void complementJdbcDatasourceProperties(ETLDatasourceDO datasourceDO) {
@@ -161,13 +167,13 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
         connectionProperties.put("driver", databaseType.driver());
         String jdbcUrl = DatasourceFactory.buildJdbcConnectionString(datasourceType, connectionProperties);
         connectionProperties.put("jdbcUrl", jdbcUrl);
-        datasourceDO.setConfig(connectionProperties);
+        datasourceDO.setConfig(JsonUtils.toJsonString(connectionProperties));
     }
 
     @Override
     public void deleteDatasource(Long datasourceId) {
-        boolean entityExists = datasourceRepository.existsById(datasourceId);
-        if (!entityExists) {
+        ETLDatasourceDO entity = datasourceRepository.getById(datasourceId);
+        if (entity == null) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_NOT_EXIST);
         }
         boolean existsTableReffered = workflowTableRepository.existsByDatasourceId(datasourceId);
@@ -182,12 +188,12 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
         tableRepository.deleteAllByDatasourceId(datasourceId);
         schemaRepository.deleteAllByDatasourceId(datasourceId);
         catalogRepository.deleteAllByDatasourceId(datasourceId);
-        datasourceRepository.deleteById(datasourceId);
+        datasourceRepository.removeById(datasourceId);
     }
 
     @Override
     public void executeMetadataCollectJob(Long datasourceId) {
-        ETLDatasourceDO datasourceDO = datasourceRepository.findById(datasourceId);
+        ETLDatasourceDO datasourceDO = datasourceRepository.getById(datasourceId);
         if (datasourceDO == null) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_NOT_EXIST);
         }
@@ -210,7 +216,7 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
             return true;
         } catch (Exception e) {
             long timeCost = Duration.between(plannedTime, LocalDateTime.now()).toMillis();
-            log.error("元数据采集任务执行失败，数据源ID：{}，耗时：{} ms", datasourceId, timeCost);
+            log.error("元数据采集任务执行失败，数据源ID：{}，耗时：{} ms", datasourceId, timeCost, e);
             return false;
         }
     }
@@ -235,12 +241,12 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
 
     @Override
     public List<MetaBriefVO> listDatasourceTables(Long datasourceId, Integer writable) {
-        ETLDatasourceDO datasourceDO = datasourceRepository.findById(datasourceId);
+        ETLDatasourceDO datasourceDO = datasourceRepository.getById(datasourceId);
         if (datasourceDO == null) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_NOT_EXIST);
         }
-        Boolean isWritable = writable != null && writable != 0;
-        if (datasourceDO.getReadonly() && isWritable) {
+        boolean isWritable = writable != null && writable != 0;
+        if (BooleanUtils.toBoolean(datasourceDO.getReadonly()) && isWritable) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_READONLY);
         }
 
@@ -258,16 +264,16 @@ public class ETLDatasourceServiceImpl implements ETLDatasourceService {
 
     @Override
     public List<ColumnDefine> listTableColumns(Long tableId) {
-        ETLTableDO tableDO = tableRepository.findById(tableId);
+        ETLTableDO tableDO = tableRepository.getById(tableId);
         if (tableDO == null) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.TABLE_NOT_EXIST);
         }
-        ETLDatasourceDO datasourceDO = datasourceRepository.findById(tableDO.getDatasourceId());
+        ETLDatasourceDO datasourceDO = datasourceRepository.getById(tableDO.getDatasourceId());
         if (datasourceDO == null) {
-            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.UNKNOWN_ERROR);
+            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_NOT_EXIST);
         }
         Map<String, String> flinkTypeMappings = flinkMappingRepository.findAllMappingsByDatasourceType(datasourceDO.getDatasourceType());
-        TableData tableData = tableDO.getMetaInfo();
+        TableData tableData = JsonUtils.parseObject(tableDO.getMetaInfo(), TableData.class);
         List<ColumnData> columns = tableData.getColumns();
         return columns.stream()
                 .map(columnMeta -> {

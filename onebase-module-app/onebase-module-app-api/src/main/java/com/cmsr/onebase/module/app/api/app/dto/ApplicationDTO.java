@@ -2,6 +2,8 @@ package com.cmsr.onebase.module.app.api.app.dto;
 
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 /**
  * @Date：2025/7/22 17:50
  */
@@ -57,5 +59,10 @@ public class ApplicationDTO {
      * 发布模式
      */
     private String publishModel;
+
+    /**
+     * 创建时间
+     */
+    private LocalDateTime createTime;
 
 }

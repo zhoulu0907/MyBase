@@ -45,6 +45,10 @@
             <optional>true</optional>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
         <!-- Web 相关 -->
         <dependency>
             <groupId>org.springframework</groupId>
@@ -163,6 +167,10 @@
             <artifactId>jakarta.persistence-api</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>transmittable-thread-local</artifactId>
+        </dependency>
         <!-- Test 测试相关 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
