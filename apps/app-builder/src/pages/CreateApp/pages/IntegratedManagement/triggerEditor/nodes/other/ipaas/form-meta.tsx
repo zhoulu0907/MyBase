@@ -112,6 +112,7 @@ export const renderForm = ({}: FormRenderProps<FlowNodeJSON['data']>) => {
 
   const handleGetScriptAction = async (scriptId: string) => {
     const res = await getScriptAction(scriptId);
+    console.log(res);
     if (res) {
       if (res.inputParameter) {
         setInputParameter(res.inputParameter);
@@ -122,8 +123,8 @@ export const renderForm = ({}: FormRenderProps<FlowNodeJSON['data']>) => {
   };
 
   const renderInputParameter = useCallback(() => {
-    return <InputParameterForm inputParameter={inputParameter} form={payloadForm} />;
-  }, [inputParameter]);
+    return <InputParameterForm inputParameter={inputParameter} form={payloadForm} nodeId={node.id} />;
+  }, [inputParameter, node.id]);
 
   return (
     <>
@@ -149,6 +150,7 @@ export const renderForm = ({}: FormRenderProps<FlowNodeJSON['data']>) => {
                   <Step title="参数配置" />
                 </Steps>
               </div>
+
               {currentStep === 1 && selectedInstanceId != '' && (
                 <div className={styles.selectedInstance}>
                   <div className={styles.selectedInstanceLeft}>
@@ -184,7 +186,10 @@ export const renderForm = ({}: FormRenderProps<FlowNodeJSON['data']>) => {
                         setPageNo(1);
                       }}
                       style={{
-                        border: selectedInstanceId === item.connectorId ? '1px solid rgb(var(--primary-6))' : 'none'
+                        border:
+                          selectedInstanceId === item.connectorId
+                            ? '2px solid rgb(var(--primary-6))'
+                            : '1px solid #9c9c9c'
                       }}
                     >
                       <img src={jsNodeIcon} alt="" className={styles.instanceItemIcon} />
@@ -210,7 +215,8 @@ export const renderForm = ({}: FormRenderProps<FlowNodeJSON['data']>) => {
                         setCurrentStep(2);
                       }}
                       style={{
-                        border: selectedActionId === item.scriptId ? '1px solid rgb(var(--primary-6))' : 'none'
+                        border:
+                          selectedActionId === item.scriptId ? '2px solid rgb(var(--primary-6))' : '1px solid #9c9c9c'
                       }}
                     >
                       <div className={styles.actionItemName}>{item.scriptName}</div>
