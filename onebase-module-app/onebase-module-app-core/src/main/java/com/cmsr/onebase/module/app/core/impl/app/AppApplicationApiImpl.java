@@ -1,13 +1,12 @@
 package com.cmsr.onebase.module.app.core.impl.app;
 
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
 import com.cmsr.onebase.module.app.api.app.dto.TagVO;
+import com.cmsr.onebase.module.app.core.dal.database.AppSqlQueryRepository;
 import com.cmsr.onebase.module.app.core.dal.database.app.AppApplicationRepository;
 import com.cmsr.onebase.module.app.core.dal.database.tag.AppApplicationTagRepository;
-import com.cmsr.onebase.module.app.core.dal.database.AppSqlQueryRepository;
 import com.cmsr.onebase.module.app.core.dal.database.tag.AppTagRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationTagDO;
@@ -71,14 +70,8 @@ public class AppApplicationApiImpl implements AppApplicationApi {
     }
 
     @Override
-    @TenantIgnore
-    public Map<Integer, Integer> findAppApplicationAll() {
-        List<AppApplicationDO> allApplications = appApplicationRepository.finAppApplicationAll();
-        return allApplications.stream()
-                .collect(Collectors.groupingBy(
-                        app -> app.getTenantId().intValue(),  // Long转Integer
-                        Collectors.summingInt(app -> 1)       // Integer计数替代Long计数
-                ));
+    public Map<Long, Integer> countAppByTenantId() {
+        return appApplicationRepository.countAppByTenantId();
     }
 
     @Override

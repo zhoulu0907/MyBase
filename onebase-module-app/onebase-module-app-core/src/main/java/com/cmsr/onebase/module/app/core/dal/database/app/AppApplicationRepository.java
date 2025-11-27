@@ -6,7 +6,9 @@ import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationDO;
 import com.cmsr.onebase.module.app.core.dal.mapper.AppApplicationMapper;
 import com.cmsr.onebase.module.app.core.vo.app.ApplicationPageReqVO;
 import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryMethods;
 import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.core.row.Row;
 import com.mybatisflex.core.tenant.TenantManager;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import org.apache.commons.collections4.CollectionUtils;
@@ -16,6 +18,10 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppApplicationTableDef.APP_APPLICATION;
 
 /**
  * @Author：huangjie
@@ -77,10 +83,19 @@ public class AppApplicationRepository extends ServiceImpl<AppApplicationMapper, 
         return list(queryWrapper);
     }
 
-    public List<AppApplicationDO> finAppApplicationAll() {
-        QueryWrapper queryWrapper = this.query().orderBy(AppApplicationDO::getUpdateTime, false)
-                .orderBy(AppApplicationDO::getCreateTime, false);
-        return list(queryWrapper);
+    public Map<Long, Integer> countAppByTenantId() {
+        QueryWrapper queryWrapper = this.query()
+                .select(
+                        APP_APPLICATION.TENANT_ID.as("tenant_id"),
+                        QueryMethods.count(APP_APPLICATION.ID).as("counts")
+                ).groupBy(APP_APPLICATION.TENANT_ID);
+        List<Row> rows = TenantManager.withoutTenantCondition(() -> getMapper().selectRowsByQuery(queryWrapper));
+        Map<Long, Integer> result = rows.stream()
+                .collect(Collectors.toMap(
+                        row -> row.getLong("tenant_id"),
+                        row -> row.getInt("counts")
+                ));
+        return result;
     }
 
     public List<AppApplicationDO> findAppApplicationByAppIds(Collection<Long> appIds) {
