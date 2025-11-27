@@ -50,7 +50,7 @@ export const JoinNodeConfig: React.FC<JoinNodeConfigProps> = ({ onRegisterSave }
   useEffect(() => {
     if (curDrawerTab.value === ETLDrawerTab.FIELD_CONFIG) {
       const nodeListDetail = nodeData.value;
-      const curNodeDetailConfig = newPayload?.config || nodeListDetail[curNode.value.id]?.config;
+      const curNodeDetailConfig = newPayload?.config;
       const leftNodeId = curNodeDetailConfig?.leftNodeId;
       const rightNodeId = curNodeDetailConfig?.rightNodeId;
       let allFieldList = [];
@@ -159,11 +159,7 @@ export const JoinNodeConfig: React.FC<JoinNodeConfigProps> = ({ onRegisterSave }
             <Checkbox>合并连接字段</Checkbox>
           </div>
 
-          <Form
-            form={form}
-            className={styles.content}
-            initialValues={newPayload?.config || { ...nodeData.value[curNode.value.id]?.config }}
-          >
+          <Form form={form} className={styles.content} initialValues={newPayload?.config}>
             <JoinRow finalNodeList={finalNodeList} form={form} payload={newPayload} setPayload={setNewPayload} />
             {/* <Form.List field="joinList">
               {(joinList, { add: addRow }) => {

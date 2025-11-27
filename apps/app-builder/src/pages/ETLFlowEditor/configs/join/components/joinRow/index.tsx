@@ -46,7 +46,7 @@ const JoinRow = (props: JoinRowProps) => {
   const [rightFieldList, setRightFieldList] = useState<any[]>([]);
 
   useEffect(() => {
-    const joinType = payload?.config?.joinType || nodeData.value[curNode.value.id]?.config?.joinType;
+    const joinType = payload?.config?.joinType;
     form.setFieldValue('joinType', joinType || JOINOPTIONS[0].key);
     setCurSelectJoin(joinType || JOINOPTIONS[0].key);
     setCurSelectJoinObj(JOINOPTIONS.find((option) => option.key === joinType) || JOINOPTIONS[0]);
@@ -54,7 +54,7 @@ const JoinRow = (props: JoinRowProps) => {
 
   useEffect(() => {
     const nodeListDetail = nodeData.value;
-    const curNodeConfig = payload?.config || nodeListDetail[curNode.value.id]?.config;
+    const curNodeConfig = payload?.config;
     if (finalNodeList.length > 0 && curNodeConfig) {
       const leftNodeId = curNodeConfig[NODETYPE.LEFT];
       const rightNodeId = curNodeConfig[NODETYPE.RIGHT];

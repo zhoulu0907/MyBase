@@ -8,8 +8,11 @@ import DataRemark from '../../components/dataRemark';
 import { setNodeDataAndResetDownstream } from '../utils';
 import DatasourceModal from './components/datasourceModal';
 import styles from './index.module.less';
+import { cloneDeep } from 'lodash-es';
 
-export const InputNodeConfig: React.FC = () => {
+type InputNodeConfigProps = { onRegisterSave?: (fn: () => void) => void };
+
+export const InputNodeConfig: React.FC<InputNodeConfigProps> = ({ onRegisterSave }) => {
   useSignals();
 
   const { curDrawerTab, nodeData, curNode, graphData } = etlEditorSignal;
@@ -26,18 +29,24 @@ export const InputNodeConfig: React.FC = () => {
 
   const [curColumns, setCurColumns] = useState<ELTColumn[]>([]);
   const [selectedColumns, setSelectColumns] = useState<ELTColumn[]>(
-    nodeData.value[curNode.value.id]?.config?.fields || []
+    cloneDeep(nodeData.value[curNode.value.id]?.config?.fields) || []
   );
+  const [newPayload, setNewPayload] = useState<any>(cloneDeep(nodeData.value[curNode.value.id]));
 
   useEffect(() => {
-    if (
-      nodeData.value[curNode.value.id]?.config?.datasourceUUID &&
-      nodeData.value[curNode.value.id]?.config?.tableUUID
-    ) {
-      handleListETLTables(nodeData.value[curNode.value.id]?.config?.datasourceUUID);
-      handlelistETLTableColumns(nodeData.value[curNode.value.id]?.config?.tableUUID);
+    onRegisterSave?.(handleSaveInner);
+  }, [onRegisterSave]);
+
+  const handleSaveInner = () => {
+    setNodeDataAndResetDownstream(newPayload, curNode.value.id, graphData.value, nodeData.value);
+  };
+
+  useEffect(() => {
+    if (newPayload?.config?.datasourceUUID && newPayload?.config?.tableUUID) {
+      handleListETLTables(newPayload?.config?.datasourceUUID);
+      handlelistETLTableColumns(newPayload?.config?.tableUUID);
     }
-  }, [nodeData.value[curNode.value.id]?.config?.tableUUID]);
+  }, [newPayload?.config?.tableUUID]);
 
   useEffect(() => {
     if (curDrawerTab.value == ETLDrawerTab.DATA_PREVIEW) {
@@ -46,7 +55,7 @@ export const InputNodeConfig: React.FC = () => {
   }, [curDrawerTab.value]);
 
   useEffect(() => {
-    let payload = nodeData.value[curNode.value.id];
+    let payload = newPayload;
 
     payload.config = {
       ...payload.config,
@@ -62,7 +71,7 @@ export const InputNodeConfig: React.FC = () => {
       }))
     };
 
-    setNodeDataAndResetDownstream(payload, curNode.value.id, graphData.value, nodeData.value);
+    setNewPayload(payload);
   }, [selectedColumns]);
 
   const handleListETLTables = async (datasourceUuid: string) => {
@@ -78,8 +87,8 @@ export const InputNodeConfig: React.FC = () => {
   };
 
   const handlePreviewData = async () => {
-    const datasourceUUID = nodeData.value[curNode.value.id]?.config?.datasourceUUID;
-    const tableUUID = nodeData.value[curNode.value.id]?.config?.tableUUID;
+    const datasourceUUID = newPayload?.config?.datasourceUUID;
+    const tableUUID = newPayload?.config?.tableUUID;
 
     if (!datasourceUUID || !tableUUID) {
       return;
@@ -96,7 +105,7 @@ export const InputNodeConfig: React.FC = () => {
   };
 
   const handleOk = () => {
-    const payload = nodeData.value[curNode.value.id];
+    const payload = newPayload;
     if (payload?.config?.tableUUID) {
       handlelistETLTableColumns(payload?.config?.tableUUID);
     }
@@ -107,9 +116,9 @@ export const InputNodeConfig: React.FC = () => {
   const handleUpdate = (datasourceUUID: string, tableUUID: string, columns: ELTColumn[]) => {
     setCurColumns(columns);
 
-    if (tableUUID !== nodeData.value[curNode.value.id]?.config?.tableUUID) {
+    if (tableUUID !== newPayload?.config?.tableUUID) {
       setSelectColumns([]);
-      let payload = nodeData.value[curNode.value.id];
+      let payload = newPayload;
 
       payload.config = {
         ...payload.config,
@@ -122,7 +131,8 @@ export const InputNodeConfig: React.FC = () => {
         verified: true,
         fields: []
       };
-      setNodeDataAndResetDownstream(payload, curNode.value.id, graphData.value, nodeData.value);
+
+      setNewPayload(payload);
     }
   };
 
@@ -138,13 +148,10 @@ export const InputNodeConfig: React.FC = () => {
               </Button>
             </div>
           </div>
-          {nodeData.value[curNode.value.id]?.config?.tableUUID && (
+          {newPayload?.config?.tableUUID && (
             <div className={styles.dataSourceContent}>
               <div className={styles.dataSourceName}>
-                {
-                  tables.find((table: ETLTable) => table.uuid === nodeData.value[curNode.value.id]?.config?.tableUUID)
-                    ?.name
-                }
+                {tables.find((table: ETLTable) => table.uuid === newPayload?.config?.tableUUID)?.name}
               </div>
 
               <div className={styles.columnContent}>
