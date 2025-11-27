@@ -11,6 +11,7 @@ import { updateDataQueryMultipleOutputs } from '../../nodes/data/data-query-mult
 import { updateDataQueryOutputs } from '../../nodes/data/data-query/output';
 import { updateDataUpdateOutputs } from '../../nodes/data/data-update/output';
 import { updateModalOutputs } from '../../nodes/interaction/modal/output';
+import { updateIpaasOutputs } from '../../nodes/other/ipaas/output';
 import {
   clearDataOriginNodeId,
   getDataNodeSource,
@@ -269,6 +270,18 @@ export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
               };
             });
           updateModalOutputs(curNode.id, modalFields);
+          break;
+        case NodeType.IPAAS:
+          const ipaasFields: ConditionField[] = (formInfo.inputParameterFields || [])
+            .filter((item: any) => item && item.name && item.value)
+            .map((item: any) => {
+              return {
+                label: item.name,
+                value: item.value,
+                fieldType: item.type
+              };
+            });
+          updateIpaasOutputs(curNode.id, ipaasFields);
           break;
         default:
           break;
