@@ -577,7 +577,7 @@ public class TenantServiceImpl implements TenantService {
      * @return
      */
     @TenantIgnore
-    public Map<Integer, Integer> findAppCount() {
+    public Map<Long, Integer> findAppCount() {
         return appApplicationApi.findAppApplicationAll();
     }
 
@@ -592,7 +592,7 @@ public class TenantServiceImpl implements TenantService {
         List<Long> tenantIds = CollectionUtils.convertList(tenantDOList, TenantDO::getId);
         Map<Long, Integer> existUserCountMap = tenantUserService.getTenantExistUserCountByIds(tenantIds);
         Map<Long, Integer> coupCountMap = findCorpCount();
-        Map<Integer, Integer> appCountMap = findAppCount();
+        Map<Long, Integer> appCountMap = findAppCount();
         // 转换为VO并设置昵称
 
         List<TenantRespVO> tenantRespVOList = tenantDOPageResult.getList().stream()
@@ -612,7 +612,7 @@ public class TenantServiceImpl implements TenantService {
                     tenantRespVO.setCorpCount(corpCount);
 
                     Integer appCount = appCountMap.get(tenantDO.getId());
-                    if (corpCount == null) {
+                    if (appCount == null) {
                         appCount = CorpConstant.ZERO; // 默认值处理
                     }
                     tenantRespVO.setAppCount(appCount);

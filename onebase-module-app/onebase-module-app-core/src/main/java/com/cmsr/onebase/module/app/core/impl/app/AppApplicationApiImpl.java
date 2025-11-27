@@ -76,11 +76,11 @@ public class AppApplicationApiImpl implements AppApplicationApi {
 
     @Override
     @TenantIgnore
-    public Map<Integer, Integer> findAppApplicationAll() {
+    public Map<Long, Integer> findAppApplicationAll() {
         List<ApplicationDO> allApplications = appApplicationRepository.finAppApplicationAll();
         return allApplications.stream()
                 .collect(Collectors.groupingBy(
-                        app -> app.getTenantId().intValue(),  // Long转Integer
+                        app -> app.getTenantId(),
                         Collectors.summingInt(app -> 1)       // Integer计数替代Long计数
                 ));
     }

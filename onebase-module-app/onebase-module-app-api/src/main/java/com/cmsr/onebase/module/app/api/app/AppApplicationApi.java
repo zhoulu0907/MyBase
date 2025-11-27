@@ -19,7 +19,7 @@ public interface AppApplicationApi {
 
     List<ApplicationDTO> findAppApplicationByAppIds(Collection<Long> appIds);
 
-    Map<Integer,Integer> findAppApplicationAll();
+    Map<Long,Integer> findAppApplicationAll();
 
     void  updateAppTimeById(Long appId);
 
