@@ -4,15 +4,15 @@ import cn.hutool.core.util.ObjUtil;
 import com.anji.captcha.model.common.ResponseModel;
 import com.anji.captcha.model.vo.CaptchaVO;
 import com.anji.captcha.service.CaptchaService;
-import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
-import com.cmsr.onebase.framework.common.enums.RunModeEnum;
-import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
-import com.cmsr.onebase.framework.common.security.TenantContextHolder;
-import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
-import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
 import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
 import com.cmsr.onebase.framework.common.biz.security.dto.LoginFailureResultDTO;
 import com.cmsr.onebase.framework.common.biz.security.dto.PasswordExpiryCheckDTO;
+import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
+import com.cmsr.onebase.framework.common.enums.RunModeEnum;
+import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
+import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
+import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
 import com.cmsr.onebase.module.system.api.logger.dto.LoginLogCreateReqDTO;
 import com.cmsr.onebase.module.system.api.sms.SmsCodeApi;
 import com.cmsr.onebase.module.system.api.user.AdminUserRoleApi;
@@ -300,7 +300,7 @@ public class BuildAuthServiceImpl implements BuildAuthService {
         reqDTO.setLogType(logTypeEnum.getType());
         reqDTO.setTraceId("n/a");
         reqDTO.setUserId(userId);
-        reqDTO.setUserType(getUserType().getValue());
+        reqDTO.setUserType(getUserType());
         reqDTO.setUsername(username);
         reqDTO.setUserAgent(ServletUtils.getUserAgent());
         reqDTO.setUserIp(ServletUtils.getClientIP());
@@ -353,7 +353,7 @@ public class BuildAuthServiceImpl implements BuildAuthService {
         // 创建访问令牌
         OAuth2AccessTokenDO accessTokenDO = oauth2TokenService.createAccessTokenWithMode(
                 RunModeEnum.BUILD.getValue(), corpId, null,
-                userId, getUserType().getValue(),
+                userId, getUserType(),
                 OAuth2ClientConstants.CLIENT_ID_DEFAULT, null);
 
         // 检查并限制设备数，踢出超限的设备
@@ -408,7 +408,7 @@ public class BuildAuthServiceImpl implements BuildAuthService {
         reqDTO.setTraceId("n/a");
         reqDTO.setUserId(userId);
         reqDTO.setUserType(userType);
-        if (ObjUtil.equal(getUserType().getValue(), userType)) {
+        if (ObjUtil.equal(getUserType(), userType)) {
             reqDTO.setUsername(getUsername(userId));
         } else {
             reqDTO.setUsername(memberService.getMemberUserMobile(userId));
@@ -427,8 +427,8 @@ public class BuildAuthServiceImpl implements BuildAuthService {
         return user != null ? user.getUsername() : null;
     }
 
-    private UserTypeEnum getUserType() {
-        return UserTypeEnum.TENANT;
+    private Integer getUserType() {
+        return SecurityFrameworkUtils.getLoginUserType();
     }
 
     @Override

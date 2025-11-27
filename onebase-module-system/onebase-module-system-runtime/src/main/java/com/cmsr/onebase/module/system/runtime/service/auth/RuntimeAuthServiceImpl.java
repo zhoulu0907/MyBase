@@ -4,16 +4,16 @@ import cn.hutool.core.util.ObjUtil;
 import com.anji.captcha.model.common.ResponseModel;
 import com.anji.captcha.model.vo.CaptchaVO;
 import com.anji.captcha.service.CaptchaService;
+import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
+import com.cmsr.onebase.framework.common.biz.security.dto.LoginFailureResultDTO;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.RunModeEnum;
-import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
+import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
 import com.cmsr.onebase.module.app.api.security.AppAuthSecurityApi;
-import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
-import com.cmsr.onebase.framework.common.biz.security.dto.LoginFailureResultDTO;
 import com.cmsr.onebase.module.system.api.logger.dto.LoginLogCreateReqDTO;
 import com.cmsr.onebase.module.system.api.sms.SmsCodeApi;
 import com.cmsr.onebase.module.system.convert.auth.AuthConvert;
@@ -41,7 +41,10 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
@@ -219,7 +222,7 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         reqDTO.setLogType(logTypeEnum.getType());
         reqDTO.setTraceId("n/a");
         reqDTO.setUserId(userId);
-        reqDTO.setUserType(getUserType().getValue());
+        reqDTO.setUserType(getUserType());
         reqDTO.setUsername(username);
         reqDTO.setUserAgent(ServletUtils.getUserAgent());
         reqDTO.setUserIp(ServletUtils.getClientIP());
@@ -270,7 +273,7 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         // 创建访问令牌
         OAuth2AccessTokenDO accessTokenDO = oauth2TokenService.createAccessTokenWithMode(
                 RunModeEnum.RUNTIME.getValue(), null, appId,
-                userId, getUserType().getValue(),
+                userId, getUserType(),
                 OAuth2ClientConstants.CLIENT_ID_DEFAULT, null);
 
         // 校验并限制设备数
@@ -322,7 +325,7 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         reqDTO.setTraceId("n/a");
         reqDTO.setUserId(userId);
         reqDTO.setUserType(userType);
-        if (ObjUtil.equal(getUserType().getValue(), userType)) {
+        if (ObjUtil.equal(getUserType(), userType)) {
             reqDTO.setUsername(getUsername(userId));
         } else {
             reqDTO.setUsername(memberService.getMemberUserMobile(userId));
@@ -341,8 +344,8 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         return user != null ? user.getUsername() : null;
     }
 
-    private UserTypeEnum getUserType() {
-        return UserTypeEnum.TENANT;
+    private Integer getUserType() {
+        return SecurityFrameworkUtils.getLoginUserType();
     }
 
     @Override
