@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.etl.build.controller.datasource;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.etl.build.service.datasource.ETLDatasourceService;
+import com.cmsr.onebase.module.etl.build.service.datasource.EtlDatasourceService;
 import com.cmsr.onebase.module.etl.build.service.preview.DataInspectService;
 import com.cmsr.onebase.module.etl.build.vo.datasource.*;
 import com.cmsr.onebase.module.etl.build.vo.preview.TablePreviewVO;
@@ -21,10 +21,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/etl/datasource")
 @Validated
-public class ETLDatasourceController {
+public class EtlDatasourceController {
 
     @Resource
-    private ETLDatasourceService etlDatasourceService;
+    private EtlDatasourceService etlDatasourceService;
 
     @Resource
     private DataInspectService dataInspectService;
@@ -39,8 +39,8 @@ public class ETLDatasourceController {
 
     @Operation(summary = "分页查询数据源")
     @GetMapping("/page")
-    public CommonResult<PageResult<DatasourceRespVO>> getETLDatasourcePage(@Validated DatasourcePageReqVO pageReqVO) {
-        PageResult<DatasourceRespVO> pageResult = etlDatasourceService.getETLDatasourcePage(pageReqVO);
+    public CommonResult<PageResult<DatasourceRespVO>> getEtlDatasourcePage(@Validated DatasourcePageReqVO pageReqVO) {
+        PageResult<DatasourceRespVO> pageResult = etlDatasourceService.getEtlDatasourcePage(pageReqVO);
         return CommonResult.success(pageResult);
     }
 
@@ -54,13 +54,13 @@ public class ETLDatasourceController {
     // POSTs
     @Operation(summary = "创建数据源")
     @PostMapping("/create")
-    public CommonResult<String> createETLDatasource(@Validated @RequestBody ETLDatasourceCreateReqVO createReqVO) {
+    public CommonResult<String> createEtlDatasource(@Validated @RequestBody EtlDatasourceCreateReqVO createReqVO) {
         return etlDatasourceService.createDatasource(createReqVO);
     }
 
     @Operation(summary = "更新数据源")
     @PostMapping("/update")
-    public CommonResult<Boolean> updateETLDatasource(@Validated @RequestBody ETLDatasourceUpdateReqVO updateReqVO) {
+    public CommonResult<Boolean> updateEtlDatasource(@Validated @RequestBody EtlDatasourceUpdateReqVO updateReqVO) {
         etlDatasourceService.updateDatasource(updateReqVO);
         return CommonResult.success(Boolean.TRUE);
     }

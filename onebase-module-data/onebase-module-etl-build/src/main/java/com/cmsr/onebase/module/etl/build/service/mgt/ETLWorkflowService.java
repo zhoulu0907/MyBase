@@ -9,7 +9,7 @@ import com.cmsr.onebase.module.etl.core.vo.WorkflowPageReqVO;
 
 import java.util.List;
 
-public interface ETLWorkflowService {
+public interface EtlWorkflowService {
 
     // ETL流程相关
     PageResult<WorkflowBriefVO> getWorkflowPage(WorkflowPageReqVO pageReqVO);

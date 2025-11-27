@@ -17,12 +17,12 @@ import com.cmsr.onebase.module.etl.common.graph.conf.JdbcOutputConfig;
 import com.cmsr.onebase.module.etl.common.preview.ColumnDefine;
 import com.cmsr.onebase.module.etl.common.preview.DataPreview;
 import com.cmsr.onebase.module.etl.core.dal.database.*;
-import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLExecutionLogDO;
-import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLScheduleJobDO;
-import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLWorkflowDO;
-import com.cmsr.onebase.module.etl.core.dal.dataobject.ETLWorkflowTableDO;
-import com.cmsr.onebase.module.etl.core.enums.ETLConstants;
-import com.cmsr.onebase.module.etl.core.enums.ETLErrorCodeConstants;
+import com.cmsr.onebase.module.etl.core.dal.dataobject.EtlExecutionLogDO;
+import com.cmsr.onebase.module.etl.core.dal.dataobject.EtlScheduleJobDO;
+import com.cmsr.onebase.module.etl.core.dal.dataobject.EtlWorkflowDO;
+import com.cmsr.onebase.module.etl.core.dal.dataobject.EtlWorkflowTableDO;
+import com.cmsr.onebase.module.etl.core.enums.EtlConstants;
+import com.cmsr.onebase.module.etl.core.enums.EtlErrorCodeConstants;
 import com.cmsr.onebase.module.etl.core.enums.ScheduleJobStatus;
 import com.cmsr.onebase.module.etl.core.enums.ScheduleType;
 import com.cmsr.onebase.module.etl.core.vo.WorkflowBriefVO;
@@ -45,7 +45,7 @@ import java.util.*;
 
 @Slf4j
 @Service
-public class ETLWorkflowServiceImpl implements ETLWorkflowService {
+public class EtlWorkflowServiceImpl implements EtlWorkflowService {
 
     @Value("${onebase.scheduler.etl-project}")
     private Long etlProjectCode;
@@ -57,19 +57,19 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
     private DolphinSchedulerClient dolphinSchedulerClient;
 
     @Resource
-    private ETLWorkflowRepository workflowRepository;
+    private EtlWorkflowRepository workflowRepository;
 
     @Resource
-    private ETLWorkflowTableRepository workflowTableRepository;
+    private EtlWorkflowTableRepository workflowTableRepository;
 
     @Resource
-    private ETLScheduleJobRepository scheduleJobRepository;
+    private EtlScheduleJobRepository scheduleJobRepository;
 
     @Resource
-    private ETLExecutionLogRepository executionLogRepository;
+    private EtlExecutionLogRepository executionLogRepository;
 
     @Resource
-    private ETLTableRepository tableRepository;
+    private EtlTableRepository tableRepository;
 
     @Override
     public PageResult<WorkflowBriefVO> getWorkflowPage(WorkflowPageReqVO pageReqVO) {
@@ -94,7 +94,7 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
 
     @Override
     public WorkflowDetailVO getWorkflowDetail(Long workflowId) {
-        ETLWorkflowDO workflowDO = getWorkflowById(workflowId);
+        EtlWorkflowDO workflowDO = getWorkflowById(workflowId);
         WorkflowDetailVO workflowDetailVO = new WorkflowDetailVO();
         workflowDetailVO.setId(workflowDO.getId());
         workflowDetailVO.setFlowUuid(workflowDO.getWorkflowUuid());
@@ -106,7 +106,7 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
 
     @Override
     public Long createWorkflow(WorkflowCreateVO createVO) {
-        ETLWorkflowDO workflowDO = new ETLWorkflowDO();
+        EtlWorkflowDO workflowDO = new EtlWorkflowDO();
         Long applicationId = createVO.getApplicationId();
         workflowDO.setApplicationId(applicationId);
         workflowDO.setWorkflowUuid(UuidCreator.getTimeOrderedEpoch().toString());
@@ -120,7 +120,7 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
         Long workflowId = workflowDO.getId();
         String workflowUuid = workflowDO.getWorkflowUuid();
         // 创建scheduleJob
-        ETLScheduleJobDO scheduleJobDO = new ETLScheduleJobDO();
+        EtlScheduleJobDO scheduleJobDO = new EtlScheduleJobDO();
         scheduleJobDO.setApplicationId(applicationId);
         scheduleJobDO.setWorkflowUuid(workflowUuid);
         scheduleJobDO.setJobStatus(ScheduleJobStatus.INITIALIZED.getValue());
@@ -133,7 +133,7 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
     @Override
     public void updateWorkflow(WorkflowUpdateVO updateVO) {
         Long workflowId = updateVO.getId();
-        ETLWorkflowDO oldWorkflow = getOperableWorkflow(workflowId);
+        EtlWorkflowDO oldWorkflow = getOperableWorkflow(workflowId);
         if (!Objects.equals(oldWorkflow.getApplicationId(), updateVO.getApplicationId())) {
             throw new IllegalArgumentException("应用ID不一致");
         }
@@ -144,12 +144,12 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
         workflowRepository.updateById(oldWorkflow);
     }
 
-    private void updateWorkflowTableRelations(ETLWorkflowDO workflowDO) {
+    private void updateWorkflowTableRelations(EtlWorkflowDO workflowDO) {
         try {
             Long applicationId = workflowDO.getApplicationId();
             String workflowUuid = workflowDO.getWorkflowUuid();
             workflowTableRepository.deleteByWorkflow(workflowUuid);
-            List<ETLWorkflowTableDO> workflowTableDOList = new ArrayList<>();
+            List<EtlWorkflowTableDO> workflowTableDOList = new ArrayList<>();
             if (StringUtils.isBlank(workflowDO.getConfig())) {
                 return;
             }
@@ -163,10 +163,10 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
             for (Node startNode : startNodes) {
                 try {
                     JdbcInputConfig inputConfig = (JdbcInputConfig) startNode.getConfig();
-                    ETLWorkflowTableDO workflowTableRel = new ETLWorkflowTableDO();
+                    EtlWorkflowTableDO workflowTableRel = new EtlWorkflowTableDO();
                     workflowTableRel.setWorkflowUuid(workflowUuid);
                     workflowTableRel.setApplicationId(applicationId);
-                    workflowTableRel.setRelation(ETLConstants.WORKFLOW_TABLE_RELATION_SOURCE);
+                    workflowTableRel.setRelation(EtlConstants.WORKFLOW_TABLE_RELATION_SOURCE);
                     workflowTableRel.setDatasourceUuid(inputConfig.getDatasourceUuid());
                     workflowTableRel.setTableUuid(inputConfig.getTableUuid());
                     workflowTableDOList.add(workflowTableRel);
@@ -176,10 +176,10 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
             for (Node endNode : endNodes) {
                 try {
                     JdbcOutputConfig outputConfig = (JdbcOutputConfig) endNode.getConfig();
-                    ETLWorkflowTableDO workflowTableRel = new ETLWorkflowTableDO();
+                    EtlWorkflowTableDO workflowTableRel = new EtlWorkflowTableDO();
                     workflowTableRel.setWorkflowUuid(workflowUuid);
                     workflowTableRel.setApplicationId(applicationId);
-                    workflowTableRel.setRelation(ETLConstants.WORKFLOW_TABLE_RELATION_TARGET);
+                    workflowTableRel.setRelation(EtlConstants.WORKFLOW_TABLE_RELATION_TARGET);
                     workflowTableRel.setDatasourceUuid(outputConfig.getDatasourceUuid());
                     workflowTableRel.setTableUuid(outputConfig.getTableUuid());
                     workflowTableDOList.add(workflowTableRel);
@@ -194,7 +194,7 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
 
     @Override
     public void deleteWorkflow(Long workflowId) {
-        ETLWorkflowDO operableWorkflow = getOperableWorkflow(workflowId);
+        EtlWorkflowDO operableWorkflow = getOperableWorkflow(workflowId);
         String workflowUuid = operableWorkflow.getWorkflowUuid();
         Db.tx(() -> {
             executionLogRepository.deleteByWorkflow(workflowUuid);
@@ -207,15 +207,15 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
 
     @Override
     public void enableWorkflow(Long workflowId) {
-        ETLWorkflowDO workflowDO = getOperableWorkflow(workflowId);
+        EtlWorkflowDO workflowDO = getOperableWorkflow(workflowId);
         syncEnableStatus(workflowDO);
     }
 
-    private void syncEnableStatus(ETLWorkflowDO workflowDO) {
+    private void syncEnableStatus(EtlWorkflowDO workflowDO) {
         Long workflowId = workflowDO.getId();
         String workflowUuid = workflowDO.getWorkflowUuid();
         ScheduleType scheduleType = ScheduleType.of(workflowDO.getScheduleStrategy());
-        ETLScheduleJobDO scheduleJobDO = scheduleJobRepository.findByApplicationAndWorkflow(workflowDO.getApplicationId(), workflowUuid);
+        EtlScheduleJobDO scheduleJobDO = scheduleJobRepository.findByApplicationAndWorkflow(workflowDO.getApplicationId(), workflowUuid);
         if (scheduleJobDO == null) {
             throw new IllegalStateException("调度信息不存在");
         }
@@ -271,7 +271,7 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
                         break;
                     }
                     default:
-                        throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.ILLEGAL_SCHEDULE_TYPE);
+                        throw ServiceExceptionUtil.exception(EtlErrorCodeConstants.ILLEGAL_SCHEDULE_TYPE);
                 }
                 if (crontab == null) {
                     crontab = cron.toCron();
@@ -281,7 +281,7 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
 
                 dolphinSchedulerClient.onlineWorkflowWithSchedule(etlProjectCode, jobId, schedule);
             }
-            default -> throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.ILLEGAL_SCHEDULE_TYPE);
+            default -> throw ServiceExceptionUtil.exception(EtlErrorCodeConstants.ILLEGAL_SCHEDULE_TYPE);
         }
         workflowDO.setIsEnabled(1);
         workflowRepository.updateById(workflowDO);
@@ -289,12 +289,12 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
 
     @Override
     public void disableWorkflow(Long workflowId) {
-        ETLWorkflowDO workflowDO = getWorkflowById(workflowId);
+        EtlWorkflowDO workflowDO = getWorkflowById(workflowId);
         if (!BooleanUtils.toBoolean(workflowDO.getIsEnabled())) {
-            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.WORKFLOW_DISABLED);
+            throw ServiceExceptionUtil.exception(EtlErrorCodeConstants.WORKFLOW_DISABLED);
         }
         String workflowUuid = workflowDO.getWorkflowUuid();
-        ETLScheduleJobDO scheduleJobDO = scheduleJobRepository.findByApplicationAndWorkflow(workflowDO.getApplicationId(), workflowUuid);
+        EtlScheduleJobDO scheduleJobDO = scheduleJobRepository.findByApplicationAndWorkflow(workflowDO.getApplicationId(), workflowUuid);
         if (scheduleJobDO == null) {
             throw new IllegalStateException("调度信息不存在");
         }
@@ -308,7 +308,7 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
 
     @Override
     public void configScheduleStrategy(ScheduleConfigVO scheduleVO) {
-        ETLWorkflowDO workflowDO = getWorkflowById(scheduleVO.getWorkflowId());
+        EtlWorkflowDO workflowDO = getWorkflowById(scheduleVO.getWorkflowId());
         workflowDO.setWorkflowName(scheduleVO.getFlowName());
         workflowDO.setScheduleStrategy(scheduleVO.getScheduleStrategy().getValue());
         workflowDO.setScheduleConfig(JsonUtils.toJsonString(scheduleVO.getConfig()));
@@ -322,15 +322,15 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
     @Override
     public void startWorkflowManually(Long workflowId) {
         // 必须是已启用的ETL
-        ETLWorkflowDO workflowDO = getWorkflowById(workflowId);
+        EtlWorkflowDO workflowDO = getWorkflowById(workflowId);
         if (workflowDO.getIsEnabled() == 0) {
-            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.WORKFLOW_DISABLED);
+            throw ServiceExceptionUtil.exception(EtlErrorCodeConstants.WORKFLOW_DISABLED);
         }
         Long applicationId = workflowDO.getApplicationId();
         String workflowUuid = workflowDO.getWorkflowUuid();
-        ETLScheduleJobDO scheduleJobDO = scheduleJobRepository.findByApplicationAndWorkflow(applicationId, workflowUuid);
+        EtlScheduleJobDO scheduleJobDO = scheduleJobRepository.findByApplicationAndWorkflow(applicationId, workflowUuid);
         if (scheduleJobDO == null) {
-            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.WORKFLOW_ALREADY_OFFLINE);
+            throw ServiceExceptionUtil.exception(EtlErrorCodeConstants.WORKFLOW_ALREADY_OFFLINE);
         }
         Long jobId = Long.parseLong(scheduleJobDO.getJobId());
         dolphinSchedulerClient.runWorkflowManually(etlProjectCode, jobId, null, null);
@@ -338,11 +338,11 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
 
     @Override
     public PageResult<ExecutionLogVO> getWorkflowExecutionLogs(Long applicationId, Long workflowId, Integer pageNo, Integer pageSize) {
-        ETLWorkflowDO workflowDO = workflowRepository.getById(workflowId);
-        PageResult<ETLExecutionLogDO> executionLogResult = executionLogRepository.queryPage(applicationId,
+        EtlWorkflowDO workflowDO = workflowRepository.getById(workflowId);
+        PageResult<EtlExecutionLogDO> executionLogResult = executionLogRepository.queryPage(applicationId,
                 workflowDO.getWorkflowUuid(), pageNo, pageSize);
         List<ExecutionLogVO> logVOList = new ArrayList<>();
-        for (ETLExecutionLogDO logDO : executionLogResult.getList()) {
+        for (EtlExecutionLogDO logDO : executionLogResult.getList()) {
             ExecutionLogVO executionLogVO = new ExecutionLogVO();
             executionLogVO.setApplicationId(logDO.getApplicationId());
             executionLogVO.setFlowUuid(logDO.getWorkflowUuid());
@@ -405,7 +405,7 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
 
     @Override
     public ScheduleRespVO getWorkflowSchedule(Long workflowId) {
-        ETLWorkflowDO workflowDO = getWorkflowById(workflowId);
+        EtlWorkflowDO workflowDO = getWorkflowById(workflowId);
 
         ScheduleRespVO scheduleRespVO = new ScheduleRespVO();
         scheduleRespVO.setApplicationId(workflowDO.getApplicationId());
@@ -424,18 +424,18 @@ public class ETLWorkflowServiceImpl implements ETLWorkflowService {
      * @param workflowId Worflow ID
      * @return Workflow对象
      */
-    private ETLWorkflowDO getOperableWorkflow(Long workflowId) {
-        ETLWorkflowDO workflowDO = getWorkflowById(workflowId);
+    private EtlWorkflowDO getOperableWorkflow(Long workflowId) {
+        EtlWorkflowDO workflowDO = getWorkflowById(workflowId);
         if (BooleanUtils.toBoolean(workflowDO.getIsEnabled())) {
-            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.WORKFLOW_ENABLED);
+            throw ServiceExceptionUtil.exception(EtlErrorCodeConstants.WORKFLOW_ENABLED);
         }
         return workflowDO;
     }
 
-    private ETLWorkflowDO getWorkflowById(Long workflowId) {
-        ETLWorkflowDO workflowDO = workflowRepository.getById(workflowId);
+    private EtlWorkflowDO getWorkflowById(Long workflowId) {
+        EtlWorkflowDO workflowDO = workflowRepository.getById(workflowId);
         if (workflowDO == null) {
-            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.WORKFLOW_NOT_EXIST);
+            throw ServiceExceptionUtil.exception(EtlErrorCodeConstants.WORKFLOW_NOT_EXIST);
         }
         return workflowDO;
     }

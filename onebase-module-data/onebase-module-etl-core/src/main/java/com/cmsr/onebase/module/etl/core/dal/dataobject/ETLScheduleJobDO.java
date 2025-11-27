@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Data
 @Table(value = "etl_schedule_job")
-public class ETLScheduleJobDO extends BaseAppEntity {
+public class EtlScheduleJobDO extends BaseAppEntity {
 
     @Column(value = "workflow_uuid")
     private String workflowUuid;

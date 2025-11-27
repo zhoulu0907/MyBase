@@ -9,7 +9,7 @@ import lombok.Data;
 
 @Schema(description = "数据工厂 - 数据源 - 数据源更新VO")
 @Data
-public class ETLDatasourceUpdateReqVO {
+public class EtlDatasourceUpdateReqVO {
     @Schema(description = "数据源ID")
     @NotNull(message = "数据源ID不可为空")
     private Long id;

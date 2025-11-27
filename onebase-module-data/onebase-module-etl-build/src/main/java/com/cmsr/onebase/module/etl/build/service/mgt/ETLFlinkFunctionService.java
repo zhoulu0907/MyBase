@@ -8,7 +8,7 @@ import java.util.List;
  * @Author：huangjie
  * @Date：2025/11/18 16:33
  */
-public interface ETLFlinkFunctionService {
+public interface EtlFlinkFunctionService {
 
     List<String> listFlinkFunctionTypes();
 

@@ -3,23 +3,23 @@ package com.cmsr.onebase.module.etl.build.service.datasource;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.etl.build.vo.datasource.DatasourceRespVO;
-import com.cmsr.onebase.module.etl.build.vo.datasource.ETLDatasourceCreateReqVO;
-import com.cmsr.onebase.module.etl.build.vo.datasource.ETLDatasourceUpdateReqVO;
+import com.cmsr.onebase.module.etl.build.vo.datasource.EtlDatasourceCreateReqVO;
+import com.cmsr.onebase.module.etl.build.vo.datasource.EtlDatasourceUpdateReqVO;
 import com.cmsr.onebase.module.etl.build.vo.datasource.MetaBriefVO;
 import com.cmsr.onebase.module.etl.common.preview.ColumnDefine;
 import com.cmsr.onebase.module.etl.core.vo.DatasourcePageReqVO;
 
 import java.util.List;
 
-public interface ETLDatasourceService {
+public interface EtlDatasourceService {
 
     DatasourceRespVO queryDatasourceDetail(Long datasourceId);
 
-    PageResult<DatasourceRespVO> getETLDatasourcePage(DatasourcePageReqVO pageReqVO);
+    PageResult<DatasourceRespVO> getEtlDatasourcePage(DatasourcePageReqVO pageReqVO);
 
-    CommonResult<String> createDatasource(ETLDatasourceCreateReqVO createReqVO);
+    CommonResult<String> createDatasource(EtlDatasourceCreateReqVO createReqVO);
 
-    void updateDatasource(ETLDatasourceUpdateReqVO updateReqVO);
+    void updateDatasource(EtlDatasourceUpdateReqVO updateReqVO);
 
     void deleteDatasource(Long datasourceId);
 

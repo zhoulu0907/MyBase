@@ -7,9 +7,9 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
-@Schema(description = "ETL - 数据源创建 Request VO")
+@Schema(description = "Etl - 数据源创建 Request VO")
 @Data
-public class ETLDatasourceCreateReqVO {
+public class EtlDatasourceCreateReqVO {
 
     @Schema(description = "应用ID")
     @NotNull(message = "应用ID不可为空")

@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.etl.build.controller.mgt;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.module.etl.build.service.mgt.ETLFlinkFunctionService;
+import com.cmsr.onebase.module.etl.build.service.mgt.EtlFlinkFunctionService;
 import com.cmsr.onebase.module.etl.build.vo.mgt.FlinkFunctionVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -18,10 +18,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/etl/flink-function")
 @Validated
-public class ETLFlinkFunctionController {
+public class EtlFlinkFunctionController {
 
     @Resource
-    private ETLFlinkFunctionService etlFlinkFunctionService;
+    private EtlFlinkFunctionService etlFlinkFunctionService;
 
 
     @Operation(summary = "查询Flink函数类型列表")

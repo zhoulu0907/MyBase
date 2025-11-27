@@ -7,7 +7,7 @@ import lombok.Data;
 
 @Data
 @Table("etl_workflow")
-public class ETLWorkflowDO extends BaseAppEntity {
+public class EtlWorkflowDO extends BaseAppEntity {
 
     @Column("workflow_uuid")
     private String workflowUuid;

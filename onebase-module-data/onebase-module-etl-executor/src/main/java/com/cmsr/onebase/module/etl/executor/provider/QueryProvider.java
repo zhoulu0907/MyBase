@@ -90,7 +90,7 @@ public class QueryProvider {
         etlExecutionLog.setId(TsidCreator.getTsid().toLong());
         runner.execute(sql, etlExecutionLog.getId(),
                 etlExecutionLog.getApplicationId(),
-                etlExecutionLog.getWorkflowUuid(),
+                etlExecutionLog.getWorkflowId(),
                 etlExecutionLog.getStartTime(),
                 etlExecutionLog.getEndTime(),
                 etlExecutionLog.getDurationTime(),
