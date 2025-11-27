@@ -3,13 +3,25 @@ import { Avatar } from "@arco-design/web-react"
 import styles from './index.module.less';
 
 interface IUserProfileAvatar {
-    adminInfo: IAdminInfo | null
+    adminInfo: IAdminInfo | null;
+    avatarUrl?: string;
 }
 
-const UserProfileAvatar:React.FC<IUserProfileAvatar> = ({ adminInfo }) => {
+const UserProfileAvatar:React.FC<IUserProfileAvatar> = ({ adminInfo , avatarUrl }) => {
     const defaultNickName = adminInfo?.nickname?.charAt(0) || 'U';
+
+    const getAvatar = () => {
+        if(avatarUrl) {
+            return <img src={avatarUrl} alt="avatar" /> ;
+        }
+        if(adminInfo?.avatar) {
+            return <img src={adminInfo?.avatar} alt="avatar" /> 
+        }
+        return defaultNickName
+    }
+
     return (
-        <Avatar size={32} className={adminInfo?.avatar ?  '' : styles.avatarBackground}>{adminInfo?.avatar ? <img src={adminInfo?.avatar} alt="avatar" /> : defaultNickName}</Avatar>
+        <Avatar size={32} className={adminInfo?.avatar ?  '' : styles.avatarBackground}>{getAvatar()}</Avatar>
     )
 }
 

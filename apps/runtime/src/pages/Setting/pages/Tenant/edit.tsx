@@ -1,4 +1,4 @@
-import { Message, Tabs, Form, Select, Input, Button, Upload, Spin, Image } from '@arco-design/web-react';
+import { Message, Tabs, Form, Select, Input, Button, Upload, Spin, Image, Avatar } from '@arco-design/web-react';
 import { getLoginedUser, updateLoginedUser, updateLoginedUserPwd, uploadFile } from '@onebase/platform-center';
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -7,12 +7,16 @@ import styles from './index.module.less';
 const TabPane = Tabs.TabPane;
 const { Item: FormItem } = Form;
 
-const EditPage: React.FC = () => {
+
+interface IEditPageProps {
+  avatarUrl: string;
+  setAvatarUrl: (data: string) => void;
+}
+
+const EditPage: React.FC<IEditPageProps> = ({avatarUrl, setAvatarUrl}) => {
   const nav = useNavigate();
   const [form] = Form.useForm();
   const [passwordForm] = Form.useForm();
-
-  const [avatarUrl, setAvatarUrl] = useState<string>();
   const [userInfo, setUserInfo] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -118,6 +122,8 @@ const EditPage: React.FC = () => {
     );
   }
 
+  const defaultNickName = userInfo?.nickname?.charAt(0) || 'U';
+
   return (
     <div className={styles.editPage}>
       <Tabs tabPosition='left'>
@@ -135,7 +141,7 @@ const EditPage: React.FC = () => {
             >
               <FormItem label="头像" field="avatar">
                 <div>
-                  <Image
+                  {avatarUrl ? <Image
                     width={120}
                     height={120}
                     src={avatarUrl}
@@ -148,7 +154,7 @@ const EditPage: React.FC = () => {
                       marginBottom: 16,
                       display: 'block'
                     }}
-                  />
+                  />: <Avatar size={96} style={{ marginBottom:'12px', backgroundColor: '#009e9e'}}>{defaultNickName}</Avatar>}
                   <div>
                     <Upload
                       ref={uploadRef}

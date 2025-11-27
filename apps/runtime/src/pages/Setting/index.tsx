@@ -19,6 +19,7 @@ const Content = Layout.Content;
 
 const SettingPage: React.FC = () => {
   const [collapsed, setCollapsed] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string>('');
 
   const handleCollapse = (collapsed: boolean) => {
     setCollapsed(collapsed);
@@ -26,7 +27,7 @@ const SettingPage: React.FC = () => {
 
   return (
     <Layout className={styles.settingPage}>
-      <AppHeader className={styles.settingPageHeader} />
+      <AppHeader className={styles.settingPageHeader} avatarUrl={avatarUrl} />
 
       <Layout className={styles.settingPageContent}>
         <AppSider collapsed={collapsed} onCollapse={handleCollapse} />
@@ -41,7 +42,7 @@ const SettingPage: React.FC = () => {
                 <Route path="enterpriseInfo" element={<EnterpriseInfo />} />
                 <Route path="authorized-application" element={<AuthorizedApplication />} />
                 <Route path="tenant" element={<TenantPage />} />
-                <Route path="tenant/edit" element={<TenantEditPage />} />
+                <Route path="tenant/edit" element={<TenantEditPage setAvatarUrl={setAvatarUrl} avatarUrl={avatarUrl} />} />
                 <Route path="" element={<Navigate to="user" replace />} />
               </Routes>
             </div>

@@ -67,6 +67,7 @@ const TenantPage: React.FC = () => {
       return "正常"
     }
   }
+  const defaultNickName = userInfo?.nickname?.charAt(0) || 'U';
 
   return (
     <div className={styles.tenantPage}>
@@ -76,12 +77,17 @@ const TenantPage: React.FC = () => {
           <Col flex="auto">
             <Space align="center">
               <Avatar
-                className={styles.avatar}
                 size={80}
                 shape="circle"
-                style={{ border: '1px solid #f0f0f0', overflow: 'hidden' }}
+                className={userInfo.avatar ? styles.currentAvatar : styles.defaultAvatar }
+                style={{ border: '1px solid #f0f0f0' ,overflow: 'hidden' }}
               >
-                <Image width={80} height={80} src={userInfo.avatar} />
+                {userInfo.avatar ? <Image width={80} height={80} src={userInfo.avatar}   
+                  style={{
+                    objectFit: 'cover',
+                    borderRadius: '50%', // 强制圆形裁剪
+                    display: 'block',     // 避免 inline 元素影响
+                  }}/> : defaultNickName}
               </Avatar>
               <div>
                 <div className={styles.userTop}>

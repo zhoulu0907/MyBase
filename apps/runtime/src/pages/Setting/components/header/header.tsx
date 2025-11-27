@@ -14,9 +14,10 @@ const { Header } = Layout;
 
 interface HeaderProps {
   className?: string;
+  avatarUrl: string;
 }
 
-const AppHeader: React.FC<HeaderProps> = ({ className }) => {
+const AppHeader: React.FC<HeaderProps> = ({ className, avatarUrl }) => {
   const navigate = useNavigate();
   const { t } = useI18n();
 
@@ -42,7 +43,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     <Menu>
       <Menu.Item key="info" style={{ height: '60px' }}>
         <div className={styles.adminInformation}>
-           <UserProfileAvatar adminInfo={userPermissionInfo?.user} />
+           <UserProfileAvatar adminInfo={userPermissionInfo?.user} avatarUrl={avatarUrl} />
           <Typography.Text>{userPermissionInfo?.user?.nickname || ''}</Typography.Text>
         </div>
       </Menu.Item>
@@ -75,10 +76,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
 
           <Dropdown droplist={userMenu} position="bottom">
             <div className={styles.userDropdown}>
-              <Avatar size={32} style={{ backgroundColor: '#4FAE7B' }}>
-                <img src={defaultAvatar} alt="avatar" />
-              </Avatar>
-              <UserProfileAvatar adminInfo={userPermissionInfo?.user}/>
+              <UserProfileAvatar adminInfo={userPermissionInfo?.user} avatarUrl={avatarUrl} />
             </div>
           </Dropdown>
         </div>
