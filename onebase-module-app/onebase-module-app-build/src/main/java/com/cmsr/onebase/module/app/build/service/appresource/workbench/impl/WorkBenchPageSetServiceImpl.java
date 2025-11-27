@@ -28,7 +28,6 @@ import java.util.UUID;
 @Service
 public class WorkBenchPageSetServiceImpl implements WorkBenchPageSetService {
 
-
     @Resource
     private AppWorkbenchPageRepository appWorkbenchPageRepository;
 
@@ -71,14 +70,20 @@ public class WorkBenchPageSetServiceImpl implements WorkBenchPageSetService {
     @Resource
     private AppApplicationRepository appApplicationRepository;
 
-
-
     @Override
     public void initWorkbenchPage(PageSetDO pageSetDO) {
-        //1. 初始化工作台页面配置（空页面配置）
+        // 1. 初始化工作台页面配置（空页面配置）
         WorkBenchPageDO workBenchPageDO = this.buildEmptyWorkbenchPage(pageSetDO);
         appWorkbenchPageRepository.insert(workBenchPageDO);
 
+        // 2. 创建页面集-页面关联记录
+        PageSetPageDO pageSetPageDO = new PageSetPageDO();
+        pageSetPageDO.setPageSetId(pageSetDO.getId());
+        pageSetPageDO.setPageType(PageEnum.WORKBENCH.getValue());
+        pageSetPageDO.setPageId(workBenchPageDO.getId());
+        pageSetPageDO.setIsDefault(1);
+        pageSetPageDO.setDefaultSeq(1);
+        pageSetPageDataRepository.insert(pageSetPageDO);
     }
 
     @Override
@@ -121,13 +126,14 @@ public class WorkBenchPageSetServiceImpl implements WorkBenchPageSetService {
     }
 
     private WorkBenchPageDO buildEmptyWorkbenchPage(PageSetDO pageSetDO) {
-        String pageName = StringUtils.isBlank(pageSetDO.getDisplayName()) ? pageSetDO.getPageSetName() : pageSetDO.getDisplayName();
+        String pageName = StringUtils.isBlank(pageSetDO.getDisplayName()) ? pageSetDO.getPageSetName()
+                : pageSetDO.getDisplayName();
         WorkBenchPageDO workBenchPageDO = new WorkBenchPageDO();
         workBenchPageDO.setPageSetId(pageSetDO.getId());
         workBenchPageDO.setPageName(pageName);
         workBenchPageDO.setTitle(pageName);
         workBenchPageDO.setPageType(PageEnum.WORKBENCH.getValue());
-        //补全必填字段
+        // 补全必填字段
         workBenchPageDO.setLayout("horizontal");
         workBenchPageDO.setWidth("auto");
         workBenchPageDO.setMargin("0");
@@ -151,7 +157,8 @@ public class WorkBenchPageSetServiceImpl implements WorkBenchPageSetService {
                 String pageType = PageEnum.FORM.getValue();
                 Boolean openViewMode = false;
 
-                WorkBenchPageDO pageDO = PageUtils.initWorkbenchPage(savePageSetReqVO.getId(), pageName, routerPath, pageType,
+                WorkBenchPageDO pageDO = PageUtils.initWorkbenchPage(savePageSetReqVO.getId(), pageName, routerPath,
+                        pageType,
                         openViewMode);
                 pageDO.setId(page.getId());
 
@@ -190,7 +197,8 @@ public class WorkBenchPageSetServiceImpl implements WorkBenchPageSetService {
             // 插入新的component
             List<WorkbenchComponentDO> componentDOs = new ArrayList<>();
             for (int idx = 0; idx < page.getComponents().size(); idx++) {
-                WorkbenchComponentDO componentDO = BeanUtils.toBean(page.getComponents().get(idx), WorkbenchComponentDO.class);
+                WorkbenchComponentDO componentDO = BeanUtils.toBean(page.getComponents().get(idx),
+                        WorkbenchComponentDO.class);
                 componentDO.setPageId(finalPageDO.getId());
                 componentDO.setComponentIndex(idx);
                 componentDOs.add(componentDO);
@@ -202,8 +210,5 @@ public class WorkBenchPageSetServiceImpl implements WorkBenchPageSetService {
         });
 
     }
-
-
-
 
 }
