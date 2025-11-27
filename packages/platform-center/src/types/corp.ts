@@ -16,9 +16,10 @@ export interface pageParams {
 
 export interface updateCorpParams {
   id: string;
-  corpId: string;
+  corpCode: string;
   corpName: string;
   industryType: number;
+  status: number;
   address: string;
   userLimit: number;
 }

@@ -11,7 +11,7 @@ import {
   type ListApplicationMenuReq
 } from '@onebase/app';
 import { TokenManager } from '@onebase/common';
-import { getPermissionInfo, runtimeLogout, CodeType } from '@onebase/platform-center';
+import { CodeType, getPermissionInfo, runtimeLogout } from '@onebase/platform-center';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';

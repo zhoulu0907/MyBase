@@ -1,4 +1,6 @@
 import LogoSVG from '@/assets/images/ob_logo.svg';
+import UserProfileAvtar from '@/components/UserProfileAvatar';
+
 import { useI18n } from '@/hooks/useI18n';
 import { UserPermissionManager } from '@/utils/permission';
 import { Button, Dropdown, Layout, Menu, Typography } from '@arco-design/web-react';
@@ -7,7 +9,6 @@ import { TokenManager } from '@onebase/common';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './header.module.less';
-import UserProfileAvtar from '@/components/UserProfileAvatar';
 
 const { Header } = Layout;
 
@@ -16,7 +17,7 @@ interface HeaderProps {
   avatarUrl: string;
 }
 
-const AppHeader: React.FC<HeaderProps> = ({ className ,avatarUrl }) => {
+const AppHeader: React.FC<HeaderProps> = ({ className, avatarUrl }) => {
   const navigate = useNavigate();
   const { t } = useI18n();
 
@@ -33,26 +34,24 @@ const AppHeader: React.FC<HeaderProps> = ({ className ,avatarUrl }) => {
   };
 
   const maskMobile = (value: string) => {
-    let reg=/(\d{3})\d{4}(\d{4})/; 
-    const formatMobile = value.replace(reg, "$1****$2");
+    let reg = /(\d{3})\d{4}(\d{4})/;
+    const formatMobile = value.replace(reg, '$1****$2');
     return formatMobile;
-  }
+  };
 
   // 用户菜单
   const userMenu = (
     <Menu>
-      <Menu.Item key="info" style={{height:"60px"}}>
+      <Menu.Item key="info" style={{ height: '60px' }}>
         <div className={styles.adminInformation}>
-            <UserProfileAvtar adminInfo={userPermissionInfo?.user} avatarUrl={avatarUrl} />
-            <Typography.Text>{userPermissionInfo?.user?.nickname || ""}</Typography.Text>
+          <UserProfileAvtar adminInfo={userPermissionInfo?.user} avatarUrl={avatarUrl} />
+          <Typography.Text>{userPermissionInfo?.user?.nickname || ''}</Typography.Text>
         </div>
       </Menu.Item>
-       <Menu.Item key="profile">
-        {maskMobile(userPermissionInfo?.user?.mobile || "")}
-      </Menu.Item>
+      <Menu.Item key="profile">{maskMobile(userPermissionInfo?.user?.mobile || '')}</Menu.Item>
       <Menu.Item key="logout" onClick={handleLogout}>
-         <IconExport style={{color:"#F53F3F"}}/>
-        <Typography.Text type='error'>{t('header.logout')}</Typography.Text>
+        <IconExport style={{ color: '#F53F3F' }} />
+        <Typography.Text type="error">{t('header.logout')}</Typography.Text>
       </Menu.Item>
     </Menu>
   );

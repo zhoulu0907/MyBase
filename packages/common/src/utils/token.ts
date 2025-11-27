@@ -3,6 +3,8 @@
  * 提供 token 的存储、获取、删除和验证功能
  */
 
+import { getEnv } from './env';
+
 export interface TokenInfo {
   userId: string; // 用户ID
   accessToken: string; // 访问令牌
@@ -21,6 +23,10 @@ export class TokenManager {
   private static readonly TENANT_ID = 'tenant_id';
   private static readonly LOGIN_URL = 'login_url';
 
+  static addEnv(key: string): string {
+    return `${getEnv()}_${key}`;
+  }
+
   /**
    * 存储 token 信息
    * @param tokenInfo token信息
@@ -31,19 +37,19 @@ export class TokenManager {
       // 根据记住我选项选择存储方式
       if (rememberMe) {
         // 记住我：使用 localStorage（持久化存储）
-        localStorage.setItem(this.TOKEN_KEY, tokenInfo.accessToken);
-        localStorage.setItem(this.TOKEN_INFO_KEY, JSON.stringify(tokenInfo));
-        localStorage.setItem(this.REMEMBER_ME_KEY, 'true');
+        localStorage.setItem(this.addEnv(this.TOKEN_KEY), tokenInfo.accessToken);
+        localStorage.setItem(this.addEnv(this.TOKEN_INFO_KEY), JSON.stringify(tokenInfo));
+        localStorage.setItem(this.addEnv(this.REMEMBER_ME_KEY), 'true');
         if (tokenInfo.tenantId) {
-          localStorage.setItem(this.TENANT_ID, tokenInfo.tenantId);
+          localStorage.setItem(this.addEnv(this.TENANT_ID), tokenInfo.tenantId);
         }
       } else {
         // 不记住我：使用 sessionStorage（会话存储，关闭浏览器后清除）
-        sessionStorage.setItem(this.TOKEN_KEY, tokenInfo.accessToken);
-        sessionStorage.setItem(this.TOKEN_INFO_KEY, JSON.stringify(tokenInfo));
-        sessionStorage.setItem(this.REMEMBER_ME_KEY, 'false');
+        sessionStorage.setItem(this.addEnv(this.TOKEN_KEY), tokenInfo.accessToken);
+        sessionStorage.setItem(this.addEnv(this.TOKEN_INFO_KEY), JSON.stringify(tokenInfo));
+        sessionStorage.setItem(this.addEnv(this.REMEMBER_ME_KEY), 'false');
         if (tokenInfo.tenantId) {
-          sessionStorage.setItem(this.TENANT_ID, tokenInfo.tenantId);
+          sessionStorage.setItem(this.addEnv(this.TENANT_ID), tokenInfo.tenantId);
         }
       }
     } catch (error) {
@@ -59,9 +65,9 @@ export class TokenManager {
   static getToken(): string | null {
     try {
       // 优先从 sessionStorage 获取，然后从 localStorage 获取
-      let token = sessionStorage.getItem(this.TOKEN_KEY);
+      let token = sessionStorage.getItem(this.addEnv(this.TOKEN_KEY));
       if (!token) {
-        token = localStorage.getItem(this.TOKEN_KEY);
+        token = localStorage.getItem(this.addEnv(this.TOKEN_KEY));
       }
       return token;
     } catch (error) {
@@ -77,9 +83,9 @@ export class TokenManager {
   static getTokenInfo(): TokenInfo | null {
     try {
       // 优先从 sessionStorage 获取，然后从 localStorage 获取
-      let tokenInfoStr = sessionStorage.getItem(this.TOKEN_INFO_KEY);
+      let tokenInfoStr = sessionStorage.getItem(this.addEnv(this.TOKEN_INFO_KEY));
       if (!tokenInfoStr) {
-        tokenInfoStr = localStorage.getItem(this.TOKEN_INFO_KEY);
+        tokenInfoStr = localStorage.getItem(this.addEnv(this.TOKEN_INFO_KEY));
       }
 
       if (!tokenInfoStr) {
@@ -124,13 +130,13 @@ export class TokenManager {
   static clearToken(): void {
     try {
       // 清除所有存储位置的 token
-      sessionStorage.removeItem(this.TOKEN_KEY);
-      sessionStorage.removeItem(this.TOKEN_INFO_KEY);
-      sessionStorage.removeItem(this.REMEMBER_ME_KEY);
-      localStorage.removeItem(this.TOKEN_KEY);
-      localStorage.removeItem(this.TOKEN_INFO_KEY);
+      sessionStorage.removeItem(this.addEnv(this.TOKEN_KEY));
+      sessionStorage.removeItem(this.addEnv(this.TOKEN_INFO_KEY));
+      sessionStorage.removeItem(this.addEnv(this.REMEMBER_ME_KEY));
+      localStorage.removeItem(this.addEnv(this.TOKEN_KEY));
+      localStorage.removeItem(this.addEnv(this.TOKEN_INFO_KEY));
       localStorage.removeItem(this.REMEMBER_ME_KEY);
-      localStorage.removeItem(this.LOGIN_URL);
+      localStorage.removeItem(this.addEnv(this.LOGIN_URL));
     } catch (error) {
       console.error('清除 token 失败:', error);
     }
@@ -142,7 +148,9 @@ export class TokenManager {
    */
   static getRememberMe(): boolean {
     try {
-      const remembered = sessionStorage.getItem(this.REMEMBER_ME_KEY) || localStorage.getItem(this.REMEMBER_ME_KEY);
+      const remembered =
+        sessionStorage.getItem(this.addEnv(this.REMEMBER_ME_KEY)) ||
+        localStorage.getItem(this.addEnv(this.REMEMBER_ME_KEY));
       return remembered === 'true';
     } catch (error) {
       console.error('获取记住我状态失败:', error);
@@ -191,9 +199,9 @@ export class TokenManager {
   static getTenantInfo(): { tenantId: string } | null {
     try {
       // 优先从 sessionStorage 获取，然后从 localStorage 获取
-      let tenantId = sessionStorage.getItem(this.TENANT_ID);
+      let tenantId = sessionStorage.getItem(this.addEnv(this.TENANT_ID));
       if (!tenantId) {
-        tenantId = localStorage.getItem(this.TENANT_ID);
+        tenantId = localStorage.getItem(this.addEnv(this.TENANT_ID));
       }
 
       if (!tenantId) return null;

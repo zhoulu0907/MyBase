@@ -1,6 +1,18 @@
+import Cropper from '@/components/Cropper';
 import { generateTimestampString } from '@/utils/date';
 import { getPlatformFeDomain } from '@/utils/domain';
-import { Button, Checkbox, Form, Input, InputNumber, Message, Modal, Select, Space, Spin, Upload } from '@arco-design/web-react';
+import {
+  Button,
+  Checkbox,
+  Form,
+  Input,
+  InputNumber,
+  Message,
+  Modal,
+  Select,
+  Space,
+  Upload
+} from '@arco-design/web-react';
 import { IconUpload } from '@arco-design/web-react/icon';
 import { TokenManager } from '@onebase/common';
 import {
@@ -12,17 +24,16 @@ import {
   type CreateTenantParams,
   type UserVO
 } from '@onebase/platform-center';
+import { debounce } from 'lodash-es';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './index.module.less';
-import Cropper from '@/components/Cropper';
-import { debounce } from 'lodash-es';
 
 const CreateSpace = () => {
   const [form] = Form.useForm();
   const nav = useNavigate();
   const [fetching, setFetching] = useState(false);
-  const refFetchId:any = useRef(null);
+  const refFetchId: any = useRef(null);
   const [adminList, setAdminList] = useState<UserVO[]>([]);
   const [logoUrl, setLogoUrl] = useState<string>(); // logo
 
@@ -131,21 +142,21 @@ const CreateSpace = () => {
   };
 
   const debouncedFetchUser = useCallback(
-    debounce(async(inputValue: string) => {
+    debounce(async (inputValue: string) => {
       refFetchId.current = Date.now();
       const fetchId = refFetchId.current;
       setFetching(true);
       try {
         const adminListResp = await getPlatformTenantAdminListApi(inputValue);
         if (refFetchId.current === fetchId) {
-          setAdminList(adminListResp)
-        }else {
+          setAdminList(adminListResp);
+        } else {
           setAdminList(adminList);
         }
       } catch (error) {
         console.error('Error fetching adminList:', error);
-      }finally {
-         setFetching(false);
+      } finally {
+        setFetching(false);
       }
     }, 500),
     []
@@ -206,7 +217,7 @@ const CreateSpace = () => {
                     content: (
                       <Cropper
                         file={file}
-                        onOK={(file:any) => {
+                        onOK={(file: any) => {
                           resolve(file);
                           modal.close();
                         }}
@@ -217,7 +228,7 @@ const CreateSpace = () => {
                         }}
                       />
                     ),
-                    footer: null,
+                    footer: null
                   });
                 });
               }}
@@ -275,16 +286,16 @@ const CreateSpace = () => {
             allowClear
             showSearch
             style={{ width: '100%' }}
-            filterOption={(inputValue:any, option:any) =>{
-                return option.props.children?.includes(inputValue)
-             }}
+            filterOption={(inputValue: any, option: any) => {
+              return option.props.children?.includes(inputValue);
+            }}
           >
             {adminList.map((u) => (
               <Select.Option key={u.id} value={u.id}>
                 {u.nickname || u.username}
               </Select.Option>
-           ))}
-        </Select>
+            ))}
+          </Select>
         </Form.Item>
 
         <Form.Item label="状态" field="status" triggerPropName="checked">

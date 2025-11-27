@@ -6,6 +6,7 @@ import TabLastSelectBgSVG from '@/assets/images/tab_last_select_bg.svg';
 import TabMiddleSelectBgSVG from '@/assets/images/tab_select_bg.svg';
 import VisitIconSVG from '@/assets/images/visit.svg';
 import DynamicIcon from '@/components/DynamicIcon';
+
 import { useI18n } from '@/hooks/useI18n';
 import { useAppStore } from '@/store/store_app';
 import { UserPermissionManager } from '@/utils/permission';

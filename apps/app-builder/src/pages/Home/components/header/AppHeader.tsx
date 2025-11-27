@@ -1,16 +1,17 @@
 import LogoSVG from '@/assets/images/app_header_logo.svg';
 import spaceShipLine from '@/assets/images/space-ship-line.svg';
+import UserProfileAvatar from '@/components/UserProfileAvatar';
+
 import { useI18n } from '@/hooks/useI18n';
 import { userPermissionSignal } from '@/store/singals/user_permission';
 import { UserPermissionManager } from '@/utils/permission';
-import {  Divider, Dropdown, Layout, Menu, Tabs, Typography } from '@arco-design/web-react';
+import { Divider, Dropdown, Layout, Menu, Tabs, Typography } from '@arco-design/web-react';
 import { IconExport } from '@arco-design/web-react/icon';
 import { TokenManager } from '@onebase/common';
 import { CodeType, getPermissionInfo } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styles from './header.module.less';
-import UserProfileAvatar from '@/components/UserProfileAvatar';
 
 const { Header } = Layout;
 
@@ -184,8 +185,8 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
             droplist={location.pathname?.startsWith('/onebase/enterprise-app') ? tenantAdminMenu : userMenu}
             position="bl"
           >
-              <div className={styles.userDropdown}>
-                <UserProfileAvatar adminInfo={adminInfo} />
+            <div className={styles.userDropdown}>
+              <UserProfileAvatar adminInfo={adminInfo} />
             </div>
           </Dropdown>
         </div>

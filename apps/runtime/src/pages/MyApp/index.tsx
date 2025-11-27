@@ -15,14 +15,17 @@ import {
 } from '@arco-design/web-react';
 import { IconEmpty, IconMoreVertical, IconSearch } from '@arco-design/web-react/icon';
 import { type PageParam } from '@onebase/app';
-import { getCorpAuthorizedAppListApiInCorp } from '@onebase/platform-center';
 import { getCommonPaginationList, TokenManager } from '@onebase/common';
+import { getCorpAuthorizedAppListApiInCorp } from '@onebase/platform-center';
 import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import noContentSVG from '@/assets/images/noContent.svg';
 import { DynamicIcon } from '@/components/DynamicIcon';
+
+import { StatusEnumLabel } from '@/constants';
+import type { ApplicationList, TagProps } from '@/types';
 import { appIconMap } from '@onebase/ui-kit';
 import { AppHeader } from '../Runtime/components/header';
 import TagModal from './components/tagModal';
@@ -36,8 +39,6 @@ import {
   ThemeColorMap
 } from './const';
 import styles from './index.module.less';
-import type { ApplicationList, TagProps } from '@/types';
-import { StatusEnumLabel } from '@/constants';
 
 const Option = Select.Option;
 
@@ -104,7 +105,7 @@ const MyAppPage: React.FC = () => {
       ownerTag,
       orderByTime,
       status: 1,
-      corpId: tokenInfo?.corpId || ""
+      corpId: tokenInfo?.corpId || ''
     };
     const res = await getCommonPaginationList(getCorpAuthorizedAppListApiInCorp, req, setPageNo);
     if (res) {

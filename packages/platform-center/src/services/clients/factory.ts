@@ -5,7 +5,8 @@ import { createClient, getPlatformBackendURL, getRuntimeBackendURL } from '@oneb
  */
 export const systemService = createClient('/system');
 export const platformService = createClient('/system', getPlatformBackendURL());
-export const runtimeService = createClient('/system', getRuntimeBackendURL());
 export const infraService = createClient('/infra');
 export const appService = createClient('/app');
 export const corpService = createClient('/corp');
+
+export const runtimeService = createClient('/system', getRuntimeBackendURL());

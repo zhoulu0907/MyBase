@@ -1,14 +1,32 @@
-import React, { useEffect, useState } from 'react';
-import { Avatar, Spin, Typography, Message, Grid, Upload, Image, Tooltip, Modal, Input, Form } from '@arco-design/web-react';
-import { IconCamera, IconCopy, IconEdit } from '@arco-design/web-react/icon';
-import type { PlatformTenantInfo } from '@onebase/platform-center';
-import { getTenantInfo, updatePlatformTenantApi, PlatformTenantPublishMode, uploadFile } from '@onebase/platform-center';
 import PlaceholderPanel from '@/components/PlaceholderPanel';
-import { hasPermission } from '@/utils/permission';
+
 import { TENANT_INFO_PERMISSION as ACTIONS } from '@/constants/permission';
-import Tags from './Tags';
+import { hasPermission } from '@/utils/permission';
+import {
+  Avatar,
+  Form,
+  Grid,
+  Image,
+  Input,
+  Message,
+  Modal,
+  Spin,
+  Tooltip,
+  Typography,
+  Upload
+} from '@arco-design/web-react';
+import { IconCamera, IconCopy, IconEdit } from '@arco-design/web-react/icon';
 import { TokenManager } from '@onebase/common';
+import type { PlatformTenantInfo } from '@onebase/platform-center';
+import {
+  getTenantInfo,
+  PlatformTenantPublishMode,
+  updatePlatformTenantApi,
+  uploadFile
+} from '@onebase/platform-center';
+import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
+import Tags from './Tags';
 
 const { Col, Row } = Grid;
 const { Text } = Typography;
@@ -53,11 +71,11 @@ const SpaceInfo: React.FC = () => {
 
     const progressAdapter = onProgress
       ? (progressEvent: ProgressEvent) => {
-        if (progressEvent.lengthComputable) {
-          const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          onProgress(percent, progressEvent);
+          if (progressEvent.lengthComputable) {
+            const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            onProgress(percent, progressEvent);
+          }
         }
-      }
       : undefined;
 
     const res = await uploadFile(formData, progressAdapter);
@@ -87,7 +105,7 @@ const SpaceInfo: React.FC = () => {
         id: spaceInfo.id,
         name: newName,
         tenantAdminUserUpdateReqVOSList: spaceInfo.tenantAdminUserList
-      })
+      });
 
       setSpaceInfo({
         ...spaceInfo,
@@ -131,7 +149,6 @@ const SpaceInfo: React.FC = () => {
     <PlaceholderPanel hasPermission={hasPermission(ACTIONS.QUERY)} isLoading={loading}>
       <div className={styles.spaceInfoPage}>
         <div className={styles.spaceInfoPageMain}>
-
           <div className={`${styles.infoCard} ${styles.infoCardPrimary}`}>
             <div className={styles.blockHeader}>基本信息</div>
 
@@ -171,22 +188,30 @@ const SpaceInfo: React.FC = () => {
                           width={160}
                           height={80}
                           preview={false}
-                          actions={[
-                            <IconCamera />
-                          ]}
+                          actions={[<IconCamera />]}
                         />
-                      </Upload>) :
-                      <Avatar shape="square" style={{ width: 160, height: 80, backgroundColor: '#F7F8FA', borderRadius: 12 }}>
+                      </Upload>
+                    ) : (
+                      <Avatar
+                        shape="square"
+                        style={{ width: 160, height: 80, backgroundColor: '#F7F8FA', borderRadius: 12 }}
+                      >
                         <span className={styles.avatarText}>{spaceInfo.name?.slice(0, 6)}</span>
-                      </Avatar>}
+                      </Avatar>
+                    )}
                   </Tooltip>
                 </div>
                 {/* 名称 & ID */}
                 <div className={styles.section}>
                   <div className={styles.enterpriseName}>
-                    {spaceInfo.name} {hasPermission(ACTIONS.UPDATE) && <IconEdit onClick={() => setRenameVisible(true)} style={{ cursor: 'pointer' }} />}
+                    {spaceInfo.name}{' '}
+                    {hasPermission(ACTIONS.UPDATE) && (
+                      <IconEdit onClick={() => setRenameVisible(true)} style={{ cursor: 'pointer' }} />
+                    )}
                   </div>
-                  <div className={styles.enterpriseId}>企业ID：<Text copyable>{spaceInfo.id}</Text></div>
+                  <div className={styles.enterpriseId}>
+                    企业ID：<Text copyable>{spaceInfo.id}</Text>
+                  </div>
                 </div>
               </div>
 
@@ -194,9 +219,7 @@ const SpaceInfo: React.FC = () => {
               <div className={styles.statsSection}>
                 <div className={styles.statCard}>
                   <div className={styles.statLabel}>企业数(个)</div>
-                  <div className={styles.statValue}>
-                    {spaceInfo.corpCount || 0}
-                  </div>
+                  <div className={styles.statValue}>{spaceInfo.corpCount || 0}</div>
                 </div>
                 <div className={styles.statCard}>
                   <div className={styles.statLabel}>应用数量(个)</div>
@@ -239,7 +262,9 @@ const SpaceInfo: React.FC = () => {
                 <Col span={12}>
                   <div style={{ display: 'flex' }}>
                     <span className={styles.infoKey}>用户数量</span>
-                    <span>{spaceInfo.existUserCount ?? '-'}/{spaceInfo.accountCount || 0}</span>
+                    <span>
+                      {spaceInfo.existUserCount ?? '-'}/{spaceInfo.accountCount || 0}
+                    </span>
                   </div>
                 </Col>
               </Row>
@@ -264,11 +289,20 @@ const SpaceInfo: React.FC = () => {
       </div>
 
       {/* 修改空间名称 */}
-      <Modal title="修改空间名称" visible={renameVisible} onOk={handleRenameSubmit} onCancel={() => setRenameVisible(false)}>
-        <Form form={form} layout="vertical" initialValues={{
-          newName: spaceInfo.name
-        }}>
-          <Form.Item label="新的空间名称" field="newName" rules={[{ required: true, message: "请输入新的空间名称" }]}>
+      <Modal
+        title="修改空间名称"
+        visible={renameVisible}
+        onOk={handleRenameSubmit}
+        onCancel={() => setRenameVisible(false)}
+      >
+        <Form
+          form={form}
+          layout="vertical"
+          initialValues={{
+            newName: spaceInfo.name
+          }}
+        >
+          <Form.Item label="新的空间名称" field="newName" rules={[{ required: true, message: '请输入新的空间名称' }]}>
             <Input placeholder="请输入新的空间名称" />
           </Form.Item>
         </Form>

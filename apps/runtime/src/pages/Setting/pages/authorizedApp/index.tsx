@@ -1,8 +1,13 @@
 import StatusTag from '@/components/StatusTag';
+
 import { Button, Dropdown, Input, Menu, Message, Modal, Space, Table, Tabs, Tag } from '@arco-design/web-react';
 import { IconMore } from '@arco-design/web-react/icon';
 import { TokenManager, formatTimeYMDHMS } from '@onebase/common';
-import { type corpAppListParams, getCorpAuthorizedAppListApiInCorp, updateAuthAppStatus } from '@onebase/platform-center';
+import {
+  type corpAppListParams,
+  getCorpAuthorizedAppListApiInCorp,
+  updateAuthAppStatus
+} from '@onebase/platform-center';
 import { useEffect, useMemo, useState } from 'react';
 import { statusMapping } from '../../../../constants';
 import styles from './index.module.less';
@@ -92,7 +97,7 @@ const AuthorizedApplication = () => {
             droplist={
               <Menu>
                 <Menu.Item key="disable" onClick={() => handleDisabled(record)}>
-                  {record.showStatus === 1 ?  "禁用" : "启用" }
+                  {record.showStatus === 1 ? '禁用' : '启用'}
                 </Menu.Item>
               </Menu>
             }
@@ -145,32 +150,30 @@ const AuthorizedApplication = () => {
     setSearchValue(searchValue);
   };
 
-  const handleDisabled = async(record: any) => {
-    if(record.showStatus === 2) {
-      const params = {id: record.id, status: 1};
+  const handleDisabled = async (record: any) => {
+    if (record.showStatus === 2) {
+      const params = { id: record.id, status: 1 };
       try {
+        await updateAuthAppStatus(params);
+        await fetchCorpAuthorizedList(pageInation.current, pageInation.pageSize);
+      } catch (error) {
+        Message.error('启用失败');
+      }
+    } else {
+      const params = { id: record.id, status: 0 };
+      return Modal.confirm({
+        title: `禁用应用(${record.applicationName})? `,
+        content: '禁用状态下，企业用户无法使用该应用，再次启用时用户可恢复正常使用',
+        okButtonProps: {
+          status: 'danger'
+        },
+        onOk: async () => {
           await updateAuthAppStatus(params);
-          await fetchCorpAuthorizedList(pageInation.current,pageInation.pageSize);
-      }catch(error) {
-          Message.error("启用失败");
-      }
-    }else {
-      const params = {id: record.id, status: 0};
-      return (
-          Modal.confirm({
-            title: `禁用应用(${record.applicationName})? `,
-            content: '禁用状态下，企业用户无法使用该应用，再次启用时用户可恢复正常使用',
-            okButtonProps: {
-              status: 'danger'
-            },
-            onOk: async () => {
-              await updateAuthAppStatus(params);
-              await fetchCorpAuthorizedList(pageInation.current,pageInation.pageSize);
-              Message.success('禁用成功');
-            }
-          })
-        );
-      }
+          await fetchCorpAuthorizedList(pageInation.current, pageInation.pageSize);
+          Message.success('禁用成功');
+        }
+      });
+    }
   };
 
   const handleChangeTab = (value: string) => {

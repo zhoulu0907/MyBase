@@ -1,4 +1,5 @@
 import PlaceholderPanel from '@/components/PlaceholderPanel';
+
 import { CORP_INFO_PERMISSION as ACTIONS } from '@/constants/permission';
 import { hasPermission } from '@/utils/permission';
 import {
@@ -17,7 +18,12 @@ import {
 import { IconCamera, IconEdit } from '@arco-design/web-react/icon';
 import { TokenManager } from '@onebase/common';
 import type { CorpDetailResponse, DictData } from '@onebase/platform-center';
-import { getCorpDetailByIdApiInCorp, getDictDataByType, updateCorpApiInCorp, uploadFile } from '@onebase/platform-center';
+import {
+  getCorpDetailByIdApiInCorp,
+  getDictDataByType,
+  updateCorpApiInCorp,
+  uploadFile
+} from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
 
@@ -27,7 +33,7 @@ const { Text } = Typography;
 const SpaceInfo: React.FC = () => {
   const [form] = Form.useForm();
 
-  const [enterpriseInfo, setEnterpriseInfo] = useState<CorpDetailResponse | null>(null);
+  const [enterpriseInfo, setEnterpriseInfo] = useState<CorpDetailResponse>();
   const [industryDict, setTndustryDict] = useState<DictData[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [corpLogo, setCorpLogo] = useState<string>();
@@ -65,11 +71,21 @@ const SpaceInfo: React.FC = () => {
 
   // 重命名
   const handleRenameSubmit = async () => {
-    if (enterpriseInfo === null) return;
+    if (!enterpriseInfo) return;
     const { newName } = await form.validate();
 
     if (!newName.trim()) {
       Message.error('空间名称不能为空');
+      return;
+    }
+
+    if (!enterpriseInfo.corpCode) {
+      Message.error('企业编码不存在，无法更新');
+      return;
+    }
+
+    if (!enterpriseInfo.status) {
+      Message.error('企业状态不存在，无法更新');
       return;
     }
 
@@ -283,9 +299,13 @@ const SpaceInfo: React.FC = () => {
         onOk={handleRenameSubmit}
         onCancel={() => setRenameVisible(false)}
       >
-        <Form form={form} layout="vertical" initialValues={{
-          newName: enterpriseInfo.corpName || ""
-        }}>
+        <Form
+          form={form}
+          layout="vertical"
+          initialValues={{
+            newName: enterpriseInfo.corpName || ''
+          }}
+        >
           <Form.Item label="新的企业名称" field="newName" rules={[{ required: true, message: '请输入新的企业名称' }]}>
             <Input placeholder="请输入新的企业名称" />
           </Form.Item>

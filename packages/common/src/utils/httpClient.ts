@@ -26,7 +26,6 @@ export abstract class BaseClient {
         headers: {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*'
-          //   'Tenant-Id': '1'
         }
       });
     }

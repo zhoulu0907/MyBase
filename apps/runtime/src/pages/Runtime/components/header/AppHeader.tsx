@@ -1,10 +1,11 @@
 import BuildingLine from '@/assets/images/building-line.svg';
 import LogoAvatarSVG from '@/assets/images/ob_logo.svg';
 import { DynamicIcon } from '@/components/DynamicIcon';
+import UserProfileAvatar from '@/components/UserProfileAvatar';
+
 import { useI18n } from '@/hooks/useI18n';
 import { appInfoSignal } from '@/store/app';
 import { UserPermissionManager } from '@/utils/permission';
-import { logout } from '@/utils/session';
 import { Divider, Dropdown, Layout, Menu, Typography } from '@arco-design/web-react';
 import { IconExport } from '@arco-design/web-react/icon';
 import { getApplication, type GetApplicationReq } from '@onebase/app';
@@ -14,7 +15,6 @@ import { appIconMap } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styles from './header.module.less';
-import UserProfileAvatar from '@/components/UserProfileAvatar';
 
 const { Header } = Layout;
 
@@ -78,7 +78,9 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
 
   // 登出处理
   const handleLogout = async () => {
-    logout(navigate);
+    TokenManager.clearToken();
+    // 跳转到登录页
+    navigate('/login', { replace: true });
   };
 
   // 用户菜单

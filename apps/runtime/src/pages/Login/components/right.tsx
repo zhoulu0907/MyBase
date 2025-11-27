@@ -1,4 +1,5 @@
 import { DynamicIcon } from '@/components/DynamicIcon';
+
 import { PUBLISH_MODULE } from '@/constants/permission';
 import { appInfoSignal } from '@/store/app';
 import { Button, Checkbox, Form, Input, Message, Space, Typography } from '@arco-design/web-react';
