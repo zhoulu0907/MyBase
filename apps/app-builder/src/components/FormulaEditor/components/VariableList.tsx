@@ -16,6 +16,16 @@ interface VariableListProps {
 
 export function VariableList({ variables, searchValue, onSearchChange, onInsertVariable }: VariableListProps) {
   const [filteredVariables, setFilteredVariables] = useState<VariablesList[]>([]);
+
+  // 文件、图片、位置、关联关系、密码、加密字段类型的不适合在函数公式中进行计算
+  const disableTagTypes = [
+    FIELD_TAG_TYPE.FILE.VALUE,
+    FIELD_TAG_TYPE.IMAGE.VALUE,
+    FIELD_TAG_TYPE.GEOGRAPHY.VALUE,
+    FIELD_TAG_TYPE.RELATION.VALUE,
+    FIELD_TAG_TYPE.PASSWORD.VALUE,
+    FIELD_TAG_TYPE.ENCRYPTED.VALUE
+  ];
   /**
    * 处理搜索框值变化
    * @param value - 搜索框输入的值
@@ -126,20 +136,9 @@ export function VariableList({ variables, searchValue, onSearchChange, onInsertV
           <List
             size="small"
             className={styles.listSection}
-            dataSource={(filteredVariables?.[0]?.fields || variables?.[0]?.fields || []).filter((ele) => {
-              /**
-               * 文件、图片、位置、关联关系、密码、加密字段类型的不适合在函数公式中进行计算，
-               * 字段展示会把这几种类型过滤掉
-               */
-              return (
-                ele.fieldType !== FIELD_TAG_TYPE.FILE.VALUE &&
-                ele.fieldType !== FIELD_TAG_TYPE.IMAGE.VALUE &&
-                ele.fieldType !== FIELD_TAG_TYPE.GEOGRAPHY.VALUE &&
-                ele.fieldType !== FIELD_TAG_TYPE.RELATION.VALUE &&
-                ele.fieldType !== FIELD_TAG_TYPE.PASSWORD.VALUE &&
-                ele.fieldType !== FIELD_TAG_TYPE.ENCRYPTED.VALUE
-              );
-            })}
+            dataSource={(filteredVariables?.[0]?.fields || variables?.[0]?.fields || []).filter(
+              (ele) => !disableTagTypes.includes(ele.fieldType)
+            )}
             render={(variable, index) => (
               <List.Item key={index} className={styles.variableItem} onClick={() => handleVariableClick(variable)}>
                 <div className={styles.variableInfo}>
