@@ -32,7 +32,7 @@ tenant-id: 1
   "adminType": "2"
 }
 ### 查询用户
-GET http://localhost:48080/platform/system/platform/admin/get?id=153539738093060096
+GET {{baseUrl}}/system/platform/admin/get?id=153539738093060096
 Authorization: Bearer {{token}}
 
 
