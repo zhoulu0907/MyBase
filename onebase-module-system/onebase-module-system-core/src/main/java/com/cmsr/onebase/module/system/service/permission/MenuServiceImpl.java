@@ -193,6 +193,15 @@ public class MenuServiceImpl implements MenuService {
         return menuDataRepository.findAllByIds(ids);
     }
 
+    @Override
+    public List<MenuDO> getAllActiveMenuListByCodes(Set<String> codes) {
+        // 当 codes 为空时，返回一个空的实例对象
+        if (CollUtil.isEmpty(codes)) {
+            return Lists.newArrayList();
+        }
+        return menuDataRepository.findAllEnableByCodes(codes);
+    }
+
     /**
      * 校验父菜单是否合法
      * <p>

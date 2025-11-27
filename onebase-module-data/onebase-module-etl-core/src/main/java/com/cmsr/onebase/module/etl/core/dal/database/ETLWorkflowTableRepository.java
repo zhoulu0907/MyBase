@@ -8,38 +8,36 @@ import com.mybatisflex.core.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Repository
 public class ETLWorkflowTableRepository extends BaseAppRepository<ETLWorkflowTableMapper, ETLWorkflowTableDO> {
 
-    public void deleteByWorkflowId(Long workflowId) {
-        QueryWrapper queryWrapper = query().eq(ETLWorkflowTableDO::getWorkflowId, workflowId);
-        remove(queryWrapper);
+    public void deleteByWorkflow(String workflowUuid) {
+        this.updateChain()
+                .eq(ETLWorkflowTableDO::getWorkflowUuid, workflowUuid)
+                .remove();
     }
 
-    public boolean existsByDatasourceId(Long datasourceId) {
-        QueryWrapper queryWrapper = query().eq(ETLWorkflowTableDO::getDatasourceId, datasourceId);
+    public boolean existsByDatasource(String datasourceUuid) {
+        QueryWrapper queryWrapper = query()
+                .eq(ETLWorkflowTableDO::getDatasourceUuid, datasourceUuid);
         return exists(queryWrapper);
     }
 
-    public Set<Long> findSourceTableIdsByWorkflowId(Long workflowId) {
-        QueryWrapper queryWrapper = query().select(ETLWorkflowTableDO::getTableId)
-                .eq(ETLWorkflowTableDO::getWorkflowId, workflowId)
+    public Set<String> findSourceTablesByWorkflow(String workflowUuid) {
+        QueryWrapper queryWrapper = query().select(ETLWorkflowTableDO::getTableUuid)
+                .eq(ETLWorkflowTableDO::getWorkflowUuid, workflowUuid)
                 .eq(ETLWorkflowTableDO::getRelation, ETLConstants.WORKFLOW_TABLE_RELATION_SOURCE);
-        List<ETLWorkflowTableDO> relations = list(queryWrapper);
-        return relations.stream()
-                .map(ETLWorkflowTableDO::getTableId)
-                .collect(Collectors.toSet());
+        return new HashSet<>(objListAs(queryWrapper, String.class));
     }
 
-    public ETLWorkflowTableDO findTargetTableIdByWorkflowId(Long workflowId) {
-        QueryWrapper queryWrapper = query().select(ETLWorkflowTableDO::getTableId)
-                .eq(ETLWorkflowTableDO::getWorkflowId, workflowId)
+    public String findTargetTableByWorkflow(String workflowUuid) {
+        QueryWrapper queryWrapper = query().select(ETLWorkflowTableDO::getTableUuid)
+                .eq(ETLWorkflowTableDO::getWorkflowUuid, workflowUuid)
                 .eq(ETLWorkflowTableDO::getRelation, ETLConstants.WORKFLOW_TABLE_RELATION_TARGET);
-        return getOne(queryWrapper);
+        return getObjAs(queryWrapper, String.class);
     }
 }

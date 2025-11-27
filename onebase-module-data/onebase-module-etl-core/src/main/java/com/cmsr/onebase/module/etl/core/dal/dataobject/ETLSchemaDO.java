@@ -10,11 +10,14 @@ import lombok.Data;
 @Table(value = "etl_schema")
 public class ETLSchemaDO extends BaseAppEntity {
 
-    @Column(value = "datasource_id")
-    private Long datasourceId;
+    @Column(value = "datasource_uuid")
+    private String datasourceUuid;
 
-    @Column(value = "catalog_id")
-    private Long catalogId;
+    @Column(value = "catalog_uuid")
+    private String catalogUuid;
+
+    @Column(value = "schema_uuid")
+    private String schemaUuid;
 
     @Column(value = "schema_name")
     private String schemaName;

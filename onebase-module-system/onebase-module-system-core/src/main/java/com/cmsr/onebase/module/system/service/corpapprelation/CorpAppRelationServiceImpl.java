@@ -28,6 +28,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -199,7 +200,7 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
      * @return CorpApplicationRespVO 响应VO对象
      */
     private CorpApplicationRespVO convertToRespVO(CorpAppRelationDO corpDO, Map<Long, ApplicationDTO> applicationMap, Map<Long, List<TagVO>> tagsMap) {
-        CorpApplicationRespVO respVO = BeanUtils.toBean(corpDO, CorpApplicationRespVO.class);
+        CorpApplicationRespVO respVO = new CorpApplicationRespVO();
         ApplicationDTO appDo = applicationMap.get(corpDO.getApplicationId());
         if (appDo != null) {
             respVO = BeanUtils.toBean(appDo, CorpApplicationRespVO.class);
@@ -214,6 +215,8 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
             respVO.setShowStatus(getCorpStatus(status, corpDO.getExpiresTime()));
             respVO.setTags(tagsMap.get(appDo.getId()));
         }
+        respVO.setAuthorizationTime(corpDO.getAuthorizationTime());
+        respVO.setExpiresTime(corpDO.getExpiresTime());
         return respVO;
     }
 
@@ -234,6 +237,30 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
         DataRow row = new DataRow();
         row.put(CorpDO.STATUS, status);
         corpAppRelationRepository.updateByConfig(row, new DefaultConfigStore().eq(CorpAppRelationDO.ID, id));
+    }
+
+    @Override
+    public List<ApplicationDTO> getCorpNoRelationAppList(CorpRelationAppReqVO relationAppReqVO) {
+        List<ApplicationDTO> applicationDTOList = appApplicationApi.findAppApplicationByAppName(relationAppReqVO.getAppName());
+        if (null == relationAppReqVO.getCorpId()) {
+            // 用于企业创建时拉取全部应用
+            return applicationDTOList;
+        }
+        // 获取企业已关联的数据
+        List<CorpAppRelationDO> corpAppRelationDOList = corpAppRelationDataRepository.findCorpAppRelationByCorpId(relationAppReqVO.getCorpId());
+        if (corpAppRelationDOList.isEmpty()) {
+            return applicationDTOList;
+        }
+        // 获取已关联的应用ID集合
+        Set<Long> relatedAppIds = corpAppRelationDOList.stream()
+                .map(CorpAppRelationDO::getApplicationId)
+                .collect(Collectors.toSet());
+
+        // 过滤掉已关联的应用
+        List<ApplicationDTO> filteredList = applicationDTOList.stream()
+                .filter(app -> !relatedAppIds.contains(app.getId()))
+                .collect(Collectors.toList());
+        return filteredList;
     }
 }
 

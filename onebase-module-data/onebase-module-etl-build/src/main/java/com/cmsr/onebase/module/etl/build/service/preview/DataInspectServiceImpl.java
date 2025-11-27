@@ -2,7 +2,9 @@ package com.cmsr.onebase.module.etl.build.service.preview;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
+import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.etl.build.service.DatasourceFactory;
+import com.cmsr.onebase.module.etl.build.vo.datasource.TestConnectionVO;
 import com.cmsr.onebase.module.etl.build.vo.preview.TablePreviewVO;
 import com.cmsr.onebase.module.etl.common.entity.ColumnData;
 import com.cmsr.onebase.module.etl.common.entity.TableData;
@@ -55,34 +57,41 @@ public class DataInspectServiceImpl implements DataInspectService {
     private ETLFlinkMappingRepository flinkMappingRepository;
 
     @Override
-    public boolean testConnection(ETLDatasourceDO datasourceDO) {
+    public boolean testConnection(TestConnectionVO pingVO) {
+        ETLDatasourceDO datasourceDO = BeanUtils.toBean(pingVO, ETLDatasourceDO.class);
         DataSource datasource = dataSourceFactory.constructDataSource(datasourceDO, true);
+        String runnerKey = "ping-" + UuidCreator.getTimeOrderedEpoch();
+
         try {
-            boolean validity = ServiceProxy.temporary(datasource).validity();
-            boolean hit = ServiceProxy.temporary(datasource).hit();
+            DataSourceHolder.reg(runnerKey, datasource);
+            AnylineService<?> temporary = ServiceProxy.service(runnerKey);
+            boolean validity = temporary.validity();
+            boolean hit = temporary.hit();
             return validity || hit;
         } catch (Exception ex) {
-            log.error("测试数据源连接异常，数据源信息: {}", datasourceDO, ex);
+            log.error("测试数据源连接异常，数据源信息: {}", pingVO, ex);
             return false;
+        } finally {
+            unregisterDataSource(runnerKey);
         }
     }
 
     @Override
     public DataPreview previewData(TablePreviewVO previewVO) {
-        Long datasourceId = previewVO.getDatasourceId();
-        ETLDatasourceDO datasourceDO = datasourceRepository.getById(datasourceId);
+        String datasourceUuid = previewVO.getDatasourceUuid();
+        ETLDatasourceDO datasourceDO = datasourceRepository.getByUuid(datasourceUuid);
         if (datasourceDO == null) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.DATASOURCE_NOT_EXIST);
         }
         String datasourceType = datasourceDO.getDatasourceType();
-        Long tableId = previewVO.getTableId();
-        ETLTableDO tableDO = tableRepository.getById(tableId);
+        String tableUuid = previewVO.getTableUuid();
+        ETLTableDO tableDO = tableRepository.getByUuid(tableUuid);
         if (tableDO == null) {
             throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.TABLE_NOT_EXIST);
         }
 
         DataSource dataSource = dataSourceFactory.constructDataSource(datasourceDO, true);
-        String runnerKey = "ping-" + datasourceId + UuidCreator.getTimeOrderedEpoch();
+        String runnerKey = "preview-" + datasourceUuid + UuidCreator.getTimeOrderedEpoch();
         try {
             DataSourceHolder.reg(runnerKey, dataSource);
             AnylineService<?> temporary = ServiceProxy.service(runnerKey);

@@ -16,7 +16,7 @@ public class EtlExecutionLog {
 
     private Long applicationId;
 
-    private Long workflowId;
+    private Long workflowUuid;
 
     private LocalDateTime startTime;
 

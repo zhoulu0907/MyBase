@@ -187,4 +187,7 @@ public interface ErrorCodeConstants {
     // ========== 企业应用关联 1-002-030-000 ==========
     ErrorCode APPLICATION_AUTH_TENANT_NOT_EXISTS = new ErrorCode(1_002_030_000, "企业应用关联表不存在");
 
+    ErrorCode AUTH_LOGIN_CORP_DELETE_OR_DISABLE = new ErrorCode(1_002_025_010, "你的的账号所属企业已被删除或禁用，暂时无法登录。");
+    ErrorCode AUTH_LOGIN_TENANT_DELETE_OR_DISABLE = new ErrorCode(1_002_025_011, "你的的账号所属空间已被删除或禁用，暂时无法登录。");
+
 }

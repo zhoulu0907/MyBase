@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.system.build.controller.corp;
+package com.cmsr.onebase.module.system.build.controller.corpsys;
 
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
@@ -21,16 +21,16 @@ import java.util.List;
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
 /**
- * 管理后台 - 企业 Controller
+ * 空间内使用的服务 - 企业 Controller
  *
  * @author ggq
  * @date 2025-10-20
  */
-@Tag(name = "平台服务-企业")
+@Tag(name = "空间服务 - 企业管理")
 @RestController
 @RequestMapping("/system/corp")
 @Validated
-public class CorpController {
+public class SystemCorpController {
 
     @Resource
     private CorpService corpService;

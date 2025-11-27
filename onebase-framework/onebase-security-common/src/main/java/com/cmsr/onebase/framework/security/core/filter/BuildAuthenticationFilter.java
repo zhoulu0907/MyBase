@@ -49,39 +49,41 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter {
     @SuppressWarnings("NullableProblems")
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
-        // 情况一，基于 header[login-user] 获得用户，例如说来自 Gateway 或者其它服务透传
-        LoginUser loginUser = buildLoginUserByHeader(request);
-
-        // 情况二，基于 Token 获得用户
-        // 注意，这里主要满足直接使用 Nginx 直接转发到 Spring Cloud 服务的场景。
-        String token = null;
-        if (loginUser == null) {
-            token = SecurityFrameworkUtils.obtainAuthorization(request,
-                    securityProperties.getTokenHeader(), securityProperties.getTokenParameter());
-            if (StrUtil.isNotEmpty(token)) {
-                Integer userType = WebFrameworkUtils.getLoginUserType(request);
-                try {
-                    // 1.1 基于 token 构建登录用户
-                    loginUser = buildLoginUserByToken(token, userType);
-                    // 1.2 模拟 Login 功能，方便日常开发调试
-                    if (loginUser == null) {
-                        loginUser = mockLoginUser(request, token, userType);
+        if (isLoginOrLogoutRequest(request)) {
+            // 如果是登录、登出、注册，那么从header中获取租户信息
+            TenantContextHolder.setTenantId(WebFrameworkUtils.getTenantIdFromHeader(request));
+            // 无需获取token和登录用户信息
+        } else {
+            // 其他接口，需要获取token和登录用户信息
+            // 情况一，基于 header[login-user] 获得用户，例如说来自 Gateway 或者其它服务透传
+            LoginUser loginUser = buildLoginUserByHeader(request);
+            // 情况二，基于 Token 获得用户
+            // 注意，这里主要满足直接使用 Nginx 直接转发到 Spring Cloud 服务的场景。
+            String token = null;
+            if (loginUser == null) {
+                token = SecurityFrameworkUtils.obtainAuthorization(request,
+                        securityProperties.getTokenHeader(), securityProperties.getTokenParameter());
+                if (StrUtil.isNotEmpty(token)) {
+                    Integer userType = WebFrameworkUtils.getLoginUserType(request);
+                    try {
+                        // 1.1 基于 token 构建登录用户
+                        loginUser = buildLoginUserByToken(token, userType);
+                        // 1.2 模拟 Login 功能，方便日常开发调试
+                        if (loginUser == null) {
+                            loginUser = mockLoginUser(request, token, userType);
+                        }
+                    } catch (Throwable ex) {
+                        CommonResult<?> result = globalExceptionHandler.allExceptionHandler(request, ex);
+                        ServletUtils.writeJSON(response, result);
+                        return;
                     }
-                } catch (Throwable ex) {
-                    CommonResult<?> result = globalExceptionHandler.allExceptionHandler(request, ex);
-                    ServletUtils.writeJSON(response, result);
-                    return;
                 }
             }
-        }
-
-        // 设置当前用户
-        if (loginUser != null) {
-            SecurityFrameworkUtils.setLoginUser(loginUser, request);
-            TenantContextHolder.setTenantId(loginUser.getTenantId());
-
-            // 会话空闲检查：排除登录和登出请求
-            if (!isLoginOrLogoutRequest(request)) {
+            // 设置当前用户
+            if (loginUser != null) {
+                SecurityFrameworkUtils.setLoginUser(loginUser, request);
+                TenantContextHolder.setTenantId(loginUser.getTenantId());
+                // 会话空闲检查：排除登录和登出请求
                 boolean checkSuc = checkAndUpdateSessionIdle(loginUser, token);
                 if (!checkSuc) {
                     log.error("[BuildAuthenticationFilter][长时间内无操作，自动登出。]");
@@ -91,6 +93,7 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
         }
+
         // 继续过滤链
         chain.doFilter(request, response);
     }

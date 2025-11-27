@@ -13,7 +13,7 @@ import java.util.Set;
 public enum RoleCodeEnum {
 
     SUPER_ADMIN("super_admin", "平台管理员"),
-    TENANT_ADMIN("tenant_admin", "租户管理员"),
+    TENANT_ADMIN("tenant_admin", "空间管理员"),
     CORP_ADMIN("corp_admin", "企业管理员"),
     APP_DEVELOPER("app_developer", "应用开发者"),
     ;
@@ -36,22 +36,22 @@ public enum RoleCodeEnum {
     /**
      * 应用开发者权限编码列表(建议未来迁移到数据库配置)
      */
-    private final Set<Long> devloperPermissionCodes = new HashSet<Long>() {{
-        add(544485027803697153L); // 应用新增
-        add(544485027803697154L); // 应用删除
-        add(544485027803697156L);  // 应用禁用
-        add(544485027803697152L); //应用查看
-        add(544485027803697155L); // 应用修改
+    private final Set<String> devloperPermissionCodes = new HashSet<String>() {{
+        add("tenant:app:create"); // 应用新增
+        add("tenant:app:delete"); // 应用删除
+        add("tenant:app:enable");  // 应用禁用
+        add("tenant:app:query");  //应用查看
+        add("tenant:app:update"); // 应用修改
 
-        add(544483827918180352L); // 用户查看
-        add(544479356609761280L);  // 角色查看
-        add(544480773651173376L);  //组织查看
+        add("tenant:user:query"); // 用户查看
+        add("tenant:role:query");  // 角色查看
+        add("tenant:dept:query");  //组织查看
 
-        add(544476963323121664L); // 空间信息查看
-        add(544481822814375936L); // 数据字典查看
-        add(544479208566661002L);  // 个人中心查看
-        add(544479208566661003L);  // 个人中心修改
-        add(544479208566661004L); //修改密码
+        add("tenant:info:query"); // 空间信息查看
+        add("tenant:dict:query"); // 数据字典查看
+        add("tenant:profile:query");  // 个人中心查看
+        add("tenant:profile:update");  // 个人中心修改
+        add("tenant:profile:reset-pwd"); //修改密码
     }};
 
     public static boolean isSuperAdmin(String code) {

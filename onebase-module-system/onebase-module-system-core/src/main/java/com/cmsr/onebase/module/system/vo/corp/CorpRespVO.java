@@ -1,7 +1,6 @@
 package com.cmsr.onebase.module.system.vo.corp;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -46,10 +45,10 @@ public class CorpRespVO {
     private Integer appCount;
 
     @Schema(description = "联系人邮箱")
-    private String email;
+    private String adminEmail;
 
     @Schema(description = "联系人电话")
-    private String mobile;
+    private String adminMobile;
 
     @Schema(description = "管理员")
     private String adminName;

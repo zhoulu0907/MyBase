@@ -501,3 +501,10 @@ COMMENT ON COLUMN bpm_flow_agent_ins.tenant_id IS '租户id';
 
 -- 以下为增量字段更新
 ALTER TABLE "bpm_flow_user" ALTER COLUMN "type" TYPE varchar(8) COLLATE "pg_catalog"."default" USING "type"::varchar(8);
+
+-- bpm_flow_skip 新增字段
+ALTER TABLE "bpm_flow_skip" ADD COLUMN "ext" text, ADD COLUMN "priority" int2 NOT NULL DEFAULT 0;
+
+COMMENT ON COLUMN "public"."bpm_flow_skip"."ext" IS '扩展信息';
+
+COMMENT ON COLUMN "public"."bpm_flow_skip"."priority" IS '优先级';

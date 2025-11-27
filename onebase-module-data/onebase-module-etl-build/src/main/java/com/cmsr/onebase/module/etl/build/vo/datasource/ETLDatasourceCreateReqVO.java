@@ -6,7 +6,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
-import org.apache.commons.lang3.BooleanUtils;
 
 @Schema(description = "ETL - 数据源创建 Request VO")
 @Data
@@ -15,9 +14,6 @@ public class ETLDatasourceCreateReqVO {
     @Schema(description = "应用ID")
     @NotNull(message = "应用ID不可为空")
     private Long applicationId;
-
-    @Schema(description = "数据源编号")
-    private String datasourceCode;
 
     @Schema(description = "数据源名称")
     @NotBlank(message = "数据源名称不能为空")
@@ -32,20 +28,13 @@ public class ETLDatasourceCreateReqVO {
     private String datasourceType;
 
     @Schema(description = "数据源配置信息")
-    @NotBlank(message = "数据源配置信息不能为空")
+    @NotNull(message = "数据源配置信息不能为空")
     private JsonNode config;
 
-    @Schema(description = "只读", defaultValue = "true")
-    private Boolean readonly = true;
+    @Schema(description = "只读", defaultValue = "1")
+    private Integer readonly = 1;
 
-    @Schema(description = "是否创建时进行采集", defaultValue = "false")
-    private Boolean withCollect = false;
+    @Schema(description = "是否创建时进行采集", defaultValue = "0")
+    private Integer withCollect = 0;
 
-    public Integer getReadonly() {
-        return BooleanUtils.toInteger(readonly);
-    }
-
-    public void setWithCollect(Integer withCollect) {
-        this.withCollect = BooleanUtils.toBoolean(withCollect);
-    }
 }

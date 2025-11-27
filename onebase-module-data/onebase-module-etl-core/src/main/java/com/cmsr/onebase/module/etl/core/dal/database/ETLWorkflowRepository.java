@@ -27,6 +27,7 @@ public class ETLWorkflowRepository extends BaseAppRepository<ETLWorkflowMapper, 
         QueryWrapper queryWrapper = QueryWrapper.create()
                 .select(ETL_WORKFLOW.ID,
                         ETL_WORKFLOW.APPLICATION_ID,
+                        ETL_WORKFLOW.WORKFLOW_UUID.as("flow_uuid"),
                         ETL_WORKFLOW.SCHEDULE_STRATEGY,
                         ETL_WORKFLOW.WORKFLOW_NAME.as("flow_name"),
                         ETL_WORKFLOW.IS_ENABLED.as("enable_status"),
@@ -35,7 +36,7 @@ public class ETLWorkflowRepository extends BaseAppRepository<ETLWorkflowMapper, 
                 )
                 .from(ETLWorkflowDO.class)
 
-                .leftJoin(ETLScheduleJobDO.class).on(ETLWorkflowDO::getId, ETLScheduleJobDO::getWorkflowId)
+                .leftJoin(ETLScheduleJobDO.class).on(ETLWorkflowDO::getWorkflowUuid, ETLScheduleJobDO::getWorkflowUuid)
 
                 .where(ETLWorkflowDO::getApplicationId).eq(pageReqVO.getApplicationId())
                 .like(ETLWorkflowDO::getWorkflowName, pageReqVO.getFlowName(), StringUtils.isNotBlank(pageReqVO.getFlowName()))
@@ -46,5 +47,11 @@ public class ETLWorkflowRepository extends BaseAppRepository<ETLWorkflowMapper, 
                 .orderBy(ETLWorkflowDO::getCreateTime, false);
         Page<WorkflowBriefVO> pageResult = getMapper().paginateAs(pageReqVO.getPageNo(), pageReqVO.getPageSize(), queryWrapper, WorkflowBriefVO.class);
         return new PageResult<>(pageResult.getRecords(), pageResult.getTotalRow());
+    }
+
+    public ETLWorkflowDO findOneByUuid(String workflowUuid) {
+        QueryWrapper queryWrapper = this.query()
+                .eq(ETLWorkflowDO::getWorkflowUuid, workflowUuid);
+        return getOne(queryWrapper);
     }
 }

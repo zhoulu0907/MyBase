@@ -16,7 +16,10 @@ import java.util.stream.Collectors;
 public class ETLFlinkMappingRepository extends ServiceImpl<ETLFlinkMappingMapper, ETLFlinkMappingDO> {
 
     public Map<String, String> findAllMappingsByDatasourceType(String datasourceType) {
-        QueryWrapper queryWrapper = query().select(ETLFlinkMappingDO::getOriginType, ETLFlinkMappingDO::getFlinkType)
+        QueryWrapper queryWrapper = query().select(
+                        ETLFlinkMappingDO::getOriginType,
+                        ETLFlinkMappingDO::getFlinkType
+                )
                 .eq(ETLFlinkMappingDO::getDatasourceType, datasourceType);
 
         List<ETLFlinkMappingDO> flinkMappingDOs = list(queryWrapper);
