@@ -47,7 +47,7 @@ const NodeConfigPage: React.FC<DrawerInitPageProps> = ({ refWrapper }) => {
         configRef.current = null;
       }}
     >
-      {curNode.value.flowNodeType === ETLNodeType.INPUT_NODE && <InputNodeConfig />}
+      {curNode.value.flowNodeType === ETLNodeType.INPUT_NODE && <InputNodeConfig onRegisterSave={handleRegisterSave} />}
       {curNode.value.flowNodeType === ETLNodeType.OUTPUT_NODE && (
         <OutputNodeConfig onRegisterSave={handleRegisterSave} />
       )}
