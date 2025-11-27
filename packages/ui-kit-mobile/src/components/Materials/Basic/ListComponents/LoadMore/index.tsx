@@ -2,7 +2,6 @@ import {
   Dialog,
   Sticky,
   Ellipsis,
-  Input,
   SearchBar,
   Toast,
   Button,
@@ -13,7 +12,9 @@ import { memo, useEffect, useState } from 'react';
 import {
   BUTTON_OPTIONS,
   BUTTON_VALUES,
-} from '../../../constants';
+  RedirectMethod,
+  ENTITY_FIELD_TYPE
+} from '@onebase/ui-kit';
 import { useFormEditorSignal } from 'src/signals/page_editor';
 import filterIcon from '@/assets/images/filter.svg';
 import { useForm } from '@arco-design/mobile-react/esm/form';
@@ -28,8 +29,6 @@ import {
 } from '@onebase/app';
 import { pagesRuntimeSignal } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
-import { ENTITY_FIELD_TYPE } from '../../../../DataFactory/const';
-import { RedirectMethod } from '../../../constants';
 import './index.css';
 import type { XLoadMoreConfig } from './schema';
 
@@ -458,7 +457,7 @@ const XLoadMore = memo(
         <div className="list-body-wrapper">
           {
             (editMode ? [{}] : tableData).map((item, index) => (
-              <div key={item.key} className="list-body-item-wrapper" onClick={() => handleRowClick(item)}>
+              <div key={index} className="list-body-item-wrapper" onClick={() => handleRowClick(item)}>
                 {(finalColumns?.length ? finalColumns : [{}, {}])?.map((col, index) => {
                   return <div className="list-body-item-element" key={index}>
                     <Ellipsis className="list-body-item-title" text={(col.title || '') + '：'} />

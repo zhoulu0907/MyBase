@@ -1,19 +1,15 @@
+import React from 'react';
 import {
   ALIGN_VALUES,
   FORM_COMPONENT_TYPES,
-  FormComp,
-  ListComp,
-  ShowComp,
   LIST_COMPONENT_TYPES,
   SHOW_COMPONENT_TYPES,
-  getComponentConfig
-} from 'src/components/Materials';
-
-import {
+  getComponentConfig,
   ALIGN_OPTIONS,
-} from '../../Materials/Basic/constants';
-
-import React from 'react';
+} from '@onebase/ui-kit';
+import { FormComp } from '@/components/Materials/Basic/FormComponents';
+import { ShowComp } from '@/components/Materials/Basic/ShowComponents';
+import { ListComp } from '@/components/Materials/Basic/ListComponents';
 
 // TODO(mickey): 解决样式隔离问题
 import '@arco-design/mobile-react/dist/style.css';

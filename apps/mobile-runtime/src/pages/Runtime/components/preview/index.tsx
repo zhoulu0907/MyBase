@@ -38,14 +38,17 @@ import {
   EDITOR_TYPES,
   FORM_COMPONENT_TYPES,
   getComponentWidth,
-  PreviewRender,
-  startLoadPageSet,
   STATUS_OPTIONS,
   STATUS_VALUES,
+  type GridItem
+} from '@onebase/ui-kit';
+
+import {
+  PreviewRender,
+  startLoadPageSet,
   useEditorSignalMap,
   useListEditorSignal,
-  useFormEditorSignal,
-  type GridItem
+  useFormEditorSignal
 } from '@onebase/ui-kit-mobile';
 import { fetchSubmitInstance } from '@onebase/app/src/services/app_runtime';
 import { useSignals } from '@preact/signals-react/runtime';

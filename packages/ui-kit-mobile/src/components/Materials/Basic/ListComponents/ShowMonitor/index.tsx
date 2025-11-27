@@ -1,9 +1,9 @@
 import {
-    Form,
-    Input,
-    Toast,
-    ShowMonitor,
-    Button,
+  Form,
+  Input,
+  Toast,
+  ShowMonitor,
+  Button,
 } from '@arco-design/mobile-react';
 import { useForm } from '@arco-design/mobile-react/esm/form';
 import { memo, useEffect, useState } from 'react';
@@ -12,12 +12,14 @@ import {
   BUTTON_VALUES,
   STATUS_OPTIONS,
   STATUS_VALUES,
+  ENTITY_FIELD_TYPE,
   TableOperationButton,
-  TableOperationButtonStyle
-} from '../../../constants';
+  TableOperationButtonStyle,
+  iconMap,
+  RedirectMethod,
+} from '@onebase/ui-kit';
 
-import DynamicIcon from '@/components/DynamicIcon';
-import { iconMap } from '@/utils/const';
+// import DynamicIcon from '@/components/DynamicIcon';
 import {
   dataMethodDelete,
   dataMethodPage,
@@ -29,10 +31,8 @@ import {
 } from '@onebase/app';
 import { pagesRuntimeSignal } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
-import { ENTITY_FIELD_TYPE } from '../../../../DataFactory/const';
-import { RedirectMethod } from '../../../constants';
-import './index.css';
 import type { XShowMonitorConfig } from './schema';
+import './index.css';
 
 const leftPanelWidth = 318;
 const rightPanelWidth = 310;

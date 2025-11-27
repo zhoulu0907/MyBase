@@ -2,8 +2,9 @@ import { memo } from 'react';
 import { Carousel } from '@arco-design/mobile-react';
 import { STATUS_OPTIONS, STATUS_VALUES, ListSchema } from '@onebase/ui-kit';
 import ImageUrl from '@/assets/images/dept_icon.svg';
+type XCarouselConfig = typeof ListSchema.XCarouselSchema.config;
 
-const XCarousel = memo((props: ListSchema.XCarouselConfig & { runtime?: boolean; detailMode?: boolean }) => {
+const XCarousel = memo((props: XCarouselConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const { status, runtime = true } = props;
 
   return (

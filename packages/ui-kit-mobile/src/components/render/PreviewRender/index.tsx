@@ -5,15 +5,13 @@ import {
   LAYOUT_COMPONENT_TYPES,
   LIST_COMPONENT_TYPES,
   // LayoutComp,
-  ListComp,
   SHOW_COMPONENT_TYPES,
   ShowComp,
-  getComponentConfig
-} from 'src/components/Materials';
-import {
+  getComponentConfig,
   ALIGN_OPTIONS,
   ALIGN_VALUES,
-} from '../../Materials/Basic/constants';
+} from '@onebase/ui-kit';
+import { ListComp } from '@/components/Materials/Basic/ListComponents';
 
 /**
  * 组件渲染的通用属性
