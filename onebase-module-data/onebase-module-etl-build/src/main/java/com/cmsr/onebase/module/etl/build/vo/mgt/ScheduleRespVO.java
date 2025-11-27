@@ -6,7 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 
-@Schema(description = "数据工厂 - ETL - 调度配置响应VO")
+@Schema(description = "数据工厂 - Etl - 调度配置响应VO")
 @Data
 public class ScheduleRespVO {
 
