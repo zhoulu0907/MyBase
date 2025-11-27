@@ -7,6 +7,7 @@ import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthDataGroupDO;
 import com.cmsr.onebase.module.app.core.dal.mapper.AppAuthRoleMapper;
 import com.cmsr.onebase.module.app.core.impl.auth.AppAuthRoleUserImpl;
+import com.cmsr.onebase.module.app.core.vo.app.AppUserPhotoDTO;
 import com.cmsr.onebase.server.OneBaseServerApplication;
 import com.github.pagehelper.PageHelper;
 import lombok.Setter;
@@ -39,6 +40,9 @@ public class RepositoryTest {
 
     @Autowired
     private AppAuthDataGroupRepository appAuthDataGroupRepository;
+
+    private static final Long APP_ID = 89762669056458752L;
+
 
 //    @Test
 //    void test() {
@@ -89,4 +93,9 @@ public class RepositoryTest {
         System.out.println(appAuthDataGroupDOS);
     }
 
+    @Test
+    public void test9() {
+        List<AppUserPhotoDTO> result = appAuthRoleMapper.findUserPhotoList(List.of(46699591748616193L));
+        System.out.println(result);
+    }
 }

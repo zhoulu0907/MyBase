@@ -103,7 +103,10 @@
         su.id = ru.user_id
         and su.deleted = 0
         where
-        r.application_id in (#{appIds})
+        r.application_id in
+        <foreach item="item" index="index" collection="appIds" open="(" separator="," close=")">
+            #{item}
+        </foreach>
         and su.id is not null
     </select>
 
