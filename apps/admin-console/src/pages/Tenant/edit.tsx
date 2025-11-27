@@ -8,6 +8,7 @@ import {
   Image,
   Input,
   Message,
+  Modal,
   Select,
   Space,
   Tabs,
@@ -29,6 +30,7 @@ import {
 import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import styles from './index.module.less';
+import Cropper from '@/components/Cropper';
 
 const EditTenant = () => {
   const [form] = Form.useForm();
@@ -39,10 +41,10 @@ const EditTenant = () => {
   const id = searchParams.get('id');
 
   const [isEdit, setIsEdit] = useState(false);
+  const [saasChecked, setSaaSChecked] = useState<boolean>(false);
   const [tenantInfo, setTenantInfo] = useState<any>();
   const [adminList, setAdminList] = useState<UserVO[]>([]);
   const [logoUrl, setLogoUrl] = useState<string>();
-
   const platformFe = getPlatformFeDomain();
   const fullUrl = `${platformFe}/#/tenant/${tenantInfo?.id}/${tenantInfo?.website}/`;
   const displayUrl = simplifyUrl(fullUrl);
@@ -68,6 +70,7 @@ const EditTenant = () => {
         tenantAdminUserList: tenantInfo.tenantAdminUserList.map((ten: TenantAdminUserResVO) => ten.platformUserId),
         publishModel: tenantInfo.publishModel === PlatformTenantPublishMode.saas
       };
+      setSaaSChecked(tenantInfo.publishModel === PlatformTenantPublishMode.saas ?  true : false)
       setLogoUrl(tenantInfo.logoUrl);
       form.setFieldsValue(initialValues);
     }
@@ -159,6 +162,10 @@ const EditTenant = () => {
     return res;
   };
 
+  const handleChecked = (value: boolean) => {
+    setSaaSChecked(value);
+  }
+
   /* 获取当前管理员集合 */
   const findMatchingItemsById = (arrA: any[], targetArr: any[]) => {
     if (!Array.isArray(targetArr)) return;
@@ -214,6 +221,34 @@ const EditTenant = () => {
                             msg: '上传失败'
                           });
                         }
+                      }}
+                      beforeUpload={(file) => {
+                        return new Promise((resolve) => {
+                          const modal = Modal.confirm({
+                            title: '裁剪图片',
+                            onCancel: () => {
+                              Message.info('取消上传');
+                              resolve(false);
+                              modal.close();
+                            },
+                            simple: false,
+                            content: (
+                              <Cropper
+                                file={file}
+                                onOK={(file:any) => {
+                                  resolve(file);
+                                  modal.close();
+                                }}
+                                onCancel={() => {
+                                  resolve(false);
+                                  Message.info('取消上传');
+                                  modal.close();
+                                }}
+                              />
+                            ),
+                            footer: null,
+                          });
+                        });
                       }}
                       style={{
                         display: 'none'
@@ -312,7 +347,7 @@ const EditTenant = () => {
 
             <Form.Item label="SaaS 功能" field="publishModel">
               {isEdit ? (
-                <Checkbox>启用</Checkbox>
+                <Checkbox checked={saasChecked} onChange={handleChecked}>启用</Checkbox>
               ) : (
                 <span>{tenantInfo?.publishModel === PlatformTenantPublishMode.saas ? '已启用' : '未启用'}</span>
               )}

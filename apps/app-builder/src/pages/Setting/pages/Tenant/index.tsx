@@ -203,6 +203,8 @@ const TenantPage: React.FC = () => {
     }
   }
 
+  const defaultNickName = userInfo?.nickname?.charAt(0) || 'U';
+
   return (
     <div className={styles.tenantPage}>
       <div className={styles.userInfo}>
@@ -213,14 +215,15 @@ const TenantPage: React.FC = () => {
               <Avatar
                 size={80}
                 shape="circle"
-                style={{ border: '1px solid #f0f0f0', backgroundColor: '#E5E6EB' ,overflow: 'hidden' }}
+                className={userInfo.avatar ? styles.currentAvatar : styles.defaultAvatar }
+                style={{ border: '1px solid #f0f0f0' ,overflow: 'hidden' }}
               >
-                <Image width={80} height={80} src={userInfo.avatar}   
+                {userInfo.avatar ? <Image width={80} height={80} src={userInfo.avatar}   
                   style={{
                     objectFit: 'cover',
                     borderRadius: '50%', // 强制圆形裁剪
                     display: 'block',     // 避免 inline 元素影响
-                  }}/>
+                  }}/> : defaultNickName}
               </Avatar>
               <div>
                 <div className={styles.userTop}>

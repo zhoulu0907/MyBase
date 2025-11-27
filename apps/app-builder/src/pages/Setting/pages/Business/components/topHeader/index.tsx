@@ -80,7 +80,7 @@ const copyToClipboard = async (text: string) => {
       </div>
       {/* 顶部右侧 搜索*/}
       <div className={styles.searchContent}>
-        {isBusiness && <Select bordered={false} options={statusOptions} onChange={handleChange}/>}
+        {isBusiness && <Select bordered={false} options={statusOptions} defaultValue={2} onChange={handleChange}/>}
         <Input.Search
           allowClear
           placeholder={`输入${title}名称`}

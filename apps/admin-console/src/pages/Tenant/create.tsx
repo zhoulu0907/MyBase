@@ -1,6 +1,6 @@
 import { generateTimestampString } from '@/utils/date';
 import { getPlatformFeDomain } from '@/utils/domain';
-import { Button, Checkbox, Form, Input, InputNumber, Message, Select, Space, Upload } from '@arco-design/web-react';
+import { Button, Checkbox, Form, Input, InputNumber, Message, Modal, Select, Space, Spin, Upload } from '@arco-design/web-react';
 import { IconUpload } from '@arco-design/web-react/icon';
 import { TokenManager } from '@onebase/common';
 import {
@@ -12,14 +12,17 @@ import {
   type CreateTenantParams,
   type UserVO
 } from '@onebase/platform-center';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './index.module.less';
+import Cropper from '@/components/Cropper';
+import { debounce } from 'lodash-es';
 
 const CreateSpace = () => {
   const [form] = Form.useForm();
   const nav = useNavigate();
-
+  const [fetching, setFetching] = useState(false);
+  const refFetchId:any = useRef(null);
   const [adminList, setAdminList] = useState<UserVO[]>([]);
   const [logoUrl, setLogoUrl] = useState<string>(); // logo
 
@@ -127,6 +130,34 @@ const CreateSpace = () => {
     return res;
   };
 
+  const debouncedFetchUser = useCallback(
+    debounce(async(inputValue: string) => {
+      refFetchId.current = Date.now();
+      const fetchId = refFetchId.current;
+      setFetching(true);
+      try {
+        const adminListResp = await getPlatformTenantAdminListApi(inputValue);
+        if (refFetchId.current === fetchId) {
+          setAdminList(adminListResp)
+        }else {
+          setAdminList(adminList);
+        }
+      } catch (error) {
+        console.error('Error fetching adminList:', error);
+      }finally {
+         setFetching(false);
+      }
+    }, 500),
+    []
+  );
+
+  const handleCreateTagChange = (value: string[]) => {
+    //如果清除管理员数据之后重新获取option数据
+    if(!value.length) {
+      getPlatformAdminList();
+    }
+  }
+
   return (
     <div className={styles.createPage}>
       <Form
@@ -169,6 +200,34 @@ const CreateSpace = () => {
                   });
                 }
               }}
+              beforeUpload={(file) => {
+                return new Promise((resolve) => {
+                  const modal = Modal.confirm({
+                    title: '裁剪图片',
+                    onCancel: () => {
+                      Message.info('取消上传');
+                      resolve(false);
+                      modal.close();
+                    },
+                    simple: false,
+                    content: (
+                      <Cropper
+                        file={file}
+                        onOK={(file:any) => {
+                          resolve(file);
+                          modal.close();
+                        }}
+                        onCancel={() => {
+                          resolve(false);
+                          Message.info('取消上传');
+                          modal.close();
+                        }}
+                      />
+                    ),
+                    footer: null,
+                  });
+                });
+              }}
               style={{
                 display: 'none'
               }}
@@ -178,7 +237,7 @@ const CreateSpace = () => {
                 type="outline"
                 icon={<IconUpload />}
                 onClick={() => {
-                  uploadRef.current?.getRootDOMNode()?.querySelector('input[type="file"]').click();
+                  (uploadRef as any).current?.getRootDOMNode()?.querySelector('input[type="file"]').click();
                 }}
               >
                 上传图片
@@ -221,11 +280,28 @@ const CreateSpace = () => {
             placeholder="选择管理员"
             mode="multiple"
             allowClear
+            showSearch
+            filterOption={false}
+            notFoundContent={
+              fetching ? (
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Spin style={{ margin: 12 }} />
+                </div>
+              ) : null
+            }
+            onSearch={debouncedFetchUser}
             style={{ width: '100%' }}
             options={adminList.map((u) => ({
               label: u.nickname || u.username,
               value: u.id
             }))}
+            onChange={handleCreateTagChange}
           ></Select>
         </Form.Item>
 

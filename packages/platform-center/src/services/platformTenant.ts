@@ -48,7 +48,7 @@ export const updatePlatformTenantApi = (data: any) => platformService.post('/ten
 export const deletePlatformTenantApi = (id: string) => platformService.post(`/tenant/delete?id=${id}`);
 
 // 获取租户管理员列表
-export const getPlatformTenantAdminListApi = () => platformService.get('/platform/admin/list');
+export const getPlatformTenantAdminListApi = (keyword?: string) => platformService.get(`/platform/admin/list?keyword=${keyword ? keyword : ''}`);
 
 // 获得租户(安全考虑仅获取用户所属租户)
 export const getPlatformTenantAdminInfoApi = (id: string) => platformService.get(`/tenant/get?id=${id}`);
