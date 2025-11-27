@@ -104,7 +104,7 @@
         and su.deleted = 0
         where
         r.application_id in
-        <foreach item="item" index="index" collection="appIds" open="(" separator="," close=")">
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
             #{item}
         </foreach>
         and su.id is not null
