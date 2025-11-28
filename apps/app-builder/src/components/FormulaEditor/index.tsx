@@ -159,8 +159,8 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
     const newFields =
       variables?.[0]?.fields?.filter(
         (v) =>
-          v.fieldName.toLowerCase().includes(variableSearch.toLowerCase()) ||
-          v.fieldName.toLowerCase().includes(variableSearch.toLowerCase())
+          v.displayName.toLowerCase().includes(variableSearch.toLowerCase()) ||
+          v.displayName.toLowerCase().includes(variableSearch.toLowerCase())
       ) || [];
     variables[0].fields = newFields;
     return variables;
