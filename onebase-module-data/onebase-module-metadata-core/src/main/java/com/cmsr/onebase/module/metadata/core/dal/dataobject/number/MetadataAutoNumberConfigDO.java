@@ -1,10 +1,11 @@
 package com.cmsr.onebase.module.metadata.core.dal.dataobject.number;
 
-import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
-import jakarta.persistence.Column;
-import jakarta.persistence.Table;
-import lombok.*;
-import lombok.experimental.SuperBuilder;
+import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Table;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
 /**
  * 自动编号-字段配置 DO
  *
@@ -15,50 +16,67 @@ import lombok.experimental.SuperBuilder;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-@ToString(callSuper = true)
-@SuperBuilder
-@NoArgsConstructor
-@AllArgsConstructor
-@Table(name = "metadata_auto_number_config")
-public class MetadataAutoNumberConfigDO extends TenantBaseDO {
+@Table(value = "metadata_auto_number_config")
+public class MetadataAutoNumberConfigDO extends BaseTenantEntity {
 
-    public static final String FIELD_ID = "field_id";
-    public static final String NUMBER_MODE = "number_mode";
-    public static final String DIGIT_WIDTH = "digit_width";
-    public static final String OVERFLOW_CONTINUE = "overflow_continue";
-    public static final String INITIAL_VALUE = "initial_value";
-    public static final String RESET_CYCLE = "reset_cycle";
-    public static final String RESET_ON_INITIAL_CHANGE = "reset_on_initial_change";
-    public static final String IS_ENABLED = "is_enabled";
-    public static final String RUN_MODE = "run_mode";
-    public static final String APP_ID = "app_id";
-
-    @Column(name = FIELD_ID)
+    /**
+     * 字段ID
+     */
+    @Column(value = "field_id", comment = "字段ID")
     private Long fieldId;
-    @Column(name = NUMBER_MODE)
+
+    /**
+     * 编号模式
+     */
+    @Column(value = "number_mode", comment = "编号模式")
     private String numberMode;
-    @Column(name = DIGIT_WIDTH)
+
+    /**
+     * 数字宽度
+     */
+    @Column(value = "digit_width", comment = "数字宽度")
     private Short digitWidth;
-    @Column(name = OVERFLOW_CONTINUE)
+
+    /**
+     * 溢出后是否继续
+     */
+    @Column(value = "overflow_continue", comment = "溢出后是否继续")
     private Integer overflowContinue;
-    @Column(name = INITIAL_VALUE)
+
+    /**
+     * 初始值
+     */
+    @Column(value = "initial_value", comment = "初始值")
     private Long initialValue;
-    @Column(name = RESET_CYCLE)
+
+    /**
+     * 重置周期
+     */
+    @Column(value = "reset_cycle", comment = "重置周期")
     private String resetCycle;
+
     /**
      * 下一条记录以修改后的开始值编号：1-是，0-否
      */
-    @Column(name = RESET_ON_INITIAL_CHANGE)
+    @Column(value = "reset_on_initial_change", comment = "下一条记录以修改后的开始值编号：1-是，0-否")
     private Integer resetOnInitialChange;
+
     /**
      * 是否启用：1-启用，0-禁用
-     * @see CommonStatusEnum
      */
-    @Column(name = IS_ENABLED)
+    @Column(value = "is_enabled", comment = "是否启用：1-启用，0-禁用")
     private Integer isEnabled;
-    @Column(name = RUN_MODE)
+
+    /**
+     * 运行模式
+     */
+    @Column(value = "run_mode", comment = "运行模式")
     private Integer runMode;
-    @Column(name = APP_ID)
+
+    /**
+     * 应用ID
+     */
+    @Column(value = "app_id", comment = "应用ID")
     private Long appId;
 }
 

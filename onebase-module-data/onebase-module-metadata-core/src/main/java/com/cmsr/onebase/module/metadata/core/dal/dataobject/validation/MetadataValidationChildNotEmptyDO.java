@@ -1,45 +1,47 @@
 package com.cmsr.onebase.module.metadata.core.dal.dataobject.validation;
 
-import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
-import jakarta.persistence.Table;
-import lombok.*;
-import lombok.experimental.SuperBuilder;
+import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Table;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * 字段校验-子表非空规则 DO
  * 对应表：metadata_validation_child_not_empty
+ *
+ * @author bty418
+ * @date 2025-08-18
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-@ToString(callSuper = true)
-@SuperBuilder
-@NoArgsConstructor
-@AllArgsConstructor
-@Table(name = "metadata_validation_child_not_empty")
-public class MetadataValidationChildNotEmptyDO extends TenantBaseDO {
+@Table(value = "metadata_validation_child_not_empty")
+public class MetadataValidationChildNotEmptyDO extends BaseTenantEntity {
 
-    public static final String GROUP_ID       = "group_id";
-    public static final String ENTITY_ID      = "entity_id";
-    public static final String FIELD_ID       = "field_id";
-    public static final String CHILD_ENTITY_ID= "child_entity_id";
-    public static final String IS_ENABLED     = "is_enabled";
-    public static final String MIN_ROWS       = "min_rows";
-    public static final String PROMPT_MESSAGE = "prompt_message";
-    public static final String RUN_MODE       = "run_mode";
-    public static final String APP_ID         = "app_id";
-
-    public MetadataValidationChildNotEmptyDO setId(Long id) {
-        super.setId(id);
-        return this;
-    }
-
+    @Column(value = "group_id", comment = "规则组ID")
     private Long groupId;
+
+    @Column(value = "entity_id", comment = "实体ID")
     private Long entityId;
+
+    @Column(value = "field_id", comment = "字段ID")
     private Long fieldId;
+
+    @Column(value = "child_entity_id", comment = "子实体ID")
     private Long childEntityId;
+
+    @Column(value = "is_enabled", comment = "是否启用：1-启用，0-禁用")
     private Integer isEnabled;
+
+    @Column(value = "min_rows", comment = "最小行数")
     private Integer minRows;
+
+    @Column(value = "prompt_message", comment = "提示信息")
     private String promptMessage;
+
+    @Column(value = "run_mode", comment = "运行模式")
     private Integer runMode;
+
+    @Column(value = "app_id", comment = "应用ID")
     private Long appId;
 }

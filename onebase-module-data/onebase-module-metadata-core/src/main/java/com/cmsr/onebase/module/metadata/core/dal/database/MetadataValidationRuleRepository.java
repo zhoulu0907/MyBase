@@ -1,9 +1,10 @@
 package com.cmsr.onebase.module.metadata.core.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRuleDefinitionDO;
+import com.cmsr.onebase.module.metadata.core.dal.mapper.MetadataValidationRuleDefinitionMapper;
+import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.spring.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -11,21 +12,14 @@ import java.util.List;
 /**
  * 元数据验证规则仓储类
  * <p>
- * 提供验证规则相关的数据库操作接口，继承自DataRepositoryNew获得基础的CRUD能力
+ * 提供验证规则相关的数据库操作接口，继承自ServiceImpl获得基础的CRUD能力
  *
  * @author matianyu
  * @date 2025-08-11
  */
 @Repository
 @Slf4j
-public class MetadataValidationRuleRepository extends DataRepository<MetadataValidationRuleDefinitionDO> {
-
-    /**
-     * 构造方法，指定默认实体类
-     */
-    public MetadataValidationRuleRepository() {
-        super(MetadataValidationRuleDefinitionDO.class);
-    }
+public class MetadataValidationRuleRepository extends ServiceImpl<MetadataValidationRuleDefinitionMapper, MetadataValidationRuleDefinitionDO> {
 
     /**
      * 根据字段ID获取验证规则列表
@@ -34,10 +28,10 @@ public class MetadataValidationRuleRepository extends DataRepository<MetadataVal
      * @return 验证规则列表
      */
     public List<MetadataValidationRuleDefinitionDO> getValidationRulesByFieldId(Long fieldId) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and("field_id", fieldId);
-        configStore.order("create_time", org.anyline.entity.Order.TYPE.DESC);
-        return findAllByConfig(configStore);
+        QueryWrapper queryWrapper = this.query()
+                .eq("field_id", fieldId)
+                .orderBy(MetadataValidationRuleDefinitionDO::getCreateTime, false);
+        return list(queryWrapper);
     }
 
     /**
@@ -47,10 +41,10 @@ public class MetadataValidationRuleRepository extends DataRepository<MetadataVal
      * @return 验证规则列表
      */
     public List<MetadataValidationRuleDefinitionDO> getValidationRulesByType(String ruleType) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and("rule_type", ruleType);
-        configStore.order("create_time", org.anyline.entity.Order.TYPE.DESC);
-        return findAllByConfig(configStore);
+        QueryWrapper queryWrapper = this.query()
+                .eq("rule_type", ruleType)
+                .orderBy(MetadataValidationRuleDefinitionDO::getCreateTime, false);
+        return list(queryWrapper);
     }
 
     /**
@@ -61,10 +55,10 @@ public class MetadataValidationRuleRepository extends DataRepository<MetadataVal
      * @return 验证规则对象
      */
     public MetadataValidationRuleDefinitionDO getValidationRuleByFieldAndType(Long fieldId, String ruleType) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and("field_id", fieldId);
-        configStore.and("rule_type", ruleType);
-        return findOne(configStore);
+        QueryWrapper queryWrapper = this.query()
+                .eq("field_id", fieldId)
+                .eq("rule_type", ruleType);
+        return getOne(queryWrapper);
     }
 
     /**
@@ -73,8 +67,8 @@ public class MetadataValidationRuleRepository extends DataRepository<MetadataVal
      * @return 验证规则列表
      */
     public List<MetadataValidationRuleDefinitionDO> getAllValidationRules() {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.order("create_time", org.anyline.entity.Order.TYPE.DESC);
-        return findAllByConfig(configStore);
+        QueryWrapper queryWrapper = this.query()
+                .orderBy(MetadataValidationRuleDefinitionDO::getCreateTime, false);
+        return list(queryWrapper);
     }
 }

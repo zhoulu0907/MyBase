@@ -1,10 +1,10 @@
 package com.cmsr.onebase.module.metadata.core.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.field.MetadataEntityFieldOptionDO;
+import com.cmsr.onebase.module.metadata.core.dal.mapper.MetadataEntityFieldOptionMapper;
+import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.spring.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Order;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -17,28 +17,21 @@ import java.util.List;
  */
 @Repository
 @Slf4j
-public class MetadataEntityFieldOptionRepository extends DataRepository<MetadataEntityFieldOptionDO> {
-
-    public MetadataEntityFieldOptionRepository() {
-        super(MetadataEntityFieldOptionDO.class);
-    }
+public class MetadataEntityFieldOptionRepository extends ServiceImpl<MetadataEntityFieldOptionMapper, MetadataEntityFieldOptionDO> {
 
     public List<MetadataEntityFieldOptionDO> findAllByFieldId(Long fieldId) {
-        DefaultConfigStore cs = new DefaultConfigStore();
-        cs.and(MetadataEntityFieldOptionDO.FIELD_ID, fieldId);
-        cs.and("deleted", 0);
-        cs.order(MetadataEntityFieldOptionDO.OPTION_ORDER, Order.TYPE.ASC);
-        cs.order("create_time", Order.TYPE.ASC);
-        return findAllByConfig(cs);
+        QueryWrapper queryWrapper = this.query()
+                .eq(MetadataEntityFieldOptionDO::getFieldId, fieldId)
+                .eq(MetadataEntityFieldOptionDO::getDeleted, 0)
+                .orderBy(MetadataEntityFieldOptionDO::getOptionOrder, true)
+                .orderBy(MetadataEntityFieldOptionDO::getCreateTime, true);
+        return list(queryWrapper);
     }
 
     public void deleteByFieldId(Long fieldId) {
-        DefaultConfigStore cs = new DefaultConfigStore();
-        cs.and(MetadataEntityFieldOptionDO.FIELD_ID, fieldId);
-        List<MetadataEntityFieldOptionDO> list = findAllByConfig(cs);
-        for (MetadataEntityFieldOptionDO item : list) {
-            deleteById(item.getId());
-        }
+        QueryWrapper queryWrapper = this.query()
+                .eq(MetadataEntityFieldOptionDO::getFieldId, fieldId);
+        remove(queryWrapper);
     }
 }
 

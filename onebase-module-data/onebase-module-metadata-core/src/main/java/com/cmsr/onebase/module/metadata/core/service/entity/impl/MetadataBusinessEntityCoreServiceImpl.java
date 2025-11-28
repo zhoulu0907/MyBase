@@ -4,11 +4,10 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataBusinessEntityRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
+import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Compare;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,7 +32,7 @@ public class MetadataBusinessEntityCoreServiceImpl implements MetadataBusinessEn
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long createBusinessEntity(@Valid MetadataBusinessEntityDO businessEntity) {
-        metadataBusinessEntityRepository.insert(businessEntity);
+        metadataBusinessEntityRepository.save(businessEntity);
         return businessEntity.getId();
     }
 
@@ -41,16 +40,14 @@ public class MetadataBusinessEntityCoreServiceImpl implements MetadataBusinessEn
     @Transactional(rollbackFor = Exception.class)
     public void updateBusinessEntity(@Valid MetadataBusinessEntityDO businessEntity) {
         validateBusinessEntityExists(businessEntity.getId());
-        metadataBusinessEntityRepository.update(businessEntity);
+        metadataBusinessEntityRepository.updateById(businessEntity);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteBusinessEntity(Long id) {
         validateBusinessEntityExists(id);
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.in("id", id);
-        metadataBusinessEntityRepository.deleteByConfig(configStore);
+        metadataBusinessEntityRepository.removeById(id);
     }
 
     @Override
@@ -58,15 +55,12 @@ public class MetadataBusinessEntityCoreServiceImpl implements MetadataBusinessEn
         if (id == null) {
             return null;
         }
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.in("id", id);
-        return metadataBusinessEntityRepository.findOne(configStore);
+        return metadataBusinessEntityRepository.getById(id);
     }
 
     @Override
     public List<MetadataBusinessEntityDO> getBusinessEntityList() {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        return metadataBusinessEntityRepository.findAllByConfig(configStore);
+        return metadataBusinessEntityRepository.list();
     }
 
     @Override
@@ -74,9 +68,9 @@ public class MetadataBusinessEntityCoreServiceImpl implements MetadataBusinessEn
         if (code == null || code.trim().isEmpty()) {
             return null;
         }
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and("code", code.trim());
-        return metadataBusinessEntityRepository.findOne(configStore);
+        QueryWrapper queryWrapper = metadataBusinessEntityRepository.query()
+                .eq("code", code.trim());
+        return metadataBusinessEntityRepository.getOne(queryWrapper);
     }
 
     @Override
@@ -84,19 +78,19 @@ public class MetadataBusinessEntityCoreServiceImpl implements MetadataBusinessEn
         if (datasourceId == null) {
             return List.of();
         }
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and("datasource_id", datasourceId);
-        return metadataBusinessEntityRepository.findAllByConfig(configStore);
+        QueryWrapper queryWrapper = metadataBusinessEntityRepository.query()
+                .eq("datasource_id", datasourceId);
+        return metadataBusinessEntityRepository.list(queryWrapper);
     }
 
     @Override
-    public List<MetadataBusinessEntityDO> findAllByConfig(DefaultConfigStore configStore) {
-        return metadataBusinessEntityRepository.findAllByConfig(configStore);
+    public List<MetadataBusinessEntityDO> findAllByConfig(QueryWrapper queryWrapper) {
+        return metadataBusinessEntityRepository.list(queryWrapper);
     }
 
     @Override
-    public long countByConfig(DefaultConfigStore configStore) {
-        return metadataBusinessEntityRepository.countByConfig(configStore);
+    public long countByConfig(QueryWrapper queryWrapper) {
+        return metadataBusinessEntityRepository.count(queryWrapper);
     }
 
     /**

@@ -1,13 +1,11 @@
 package com.cmsr.onebase.module.metadata.core.dal.dataobject.validation;
 
-import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
+import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
 import com.cmsr.onebase.module.metadata.core.enums.ValidationStatusEnum;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 /**
  * 规则定义表 DO
@@ -17,86 +15,74 @@ import lombok.experimental.SuperBuilder;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-@SuperBuilder
-@NoArgsConstructor
-@AllArgsConstructor
-@Table(name = "metadata_validation_rule_definition")
-public class MetadataValidationRuleDefinitionDO extends TenantBaseDO {
-
-    // 列名常量
-    public static final String GROUP_ID        = "group_id";
-    public static final String PARENT_RULE_ID  = "parent_rule_id";
-    public static final String ENTITY_ID       = "entity_id";
-    public static final String FIELD_ID        = "field_id";
-    public static final String LOGIC_TYPE      = "logic_type";
-    public static final String OPERATOR        = "operator";
-    public static final String LOGIC_OPERATOR  = "logic_operator";
-    public static final String FIELD_CODE      = "field_code";
-    public static final String FIELD_VALUE     = "field_value";
-    public static final String FIELD_VALUE2    = "field_value2";
-    public static final String STATUS          = "status";
-
-    public MetadataValidationRuleDefinitionDO setId(Long id) {
-        super.setId(id);
-        return this;
-    }
+@Table(value = "metadata_validation_rule_definition")
+public class MetadataValidationRuleDefinitionDO extends BaseTenantEntity {
 
     /**
      * 所属规则组ID，关联metadata_validation_rule_group表的id
      */
+    @Column(value = "group_id", comment = "所属规则组ID")
     private Long groupId;
-
-
 
     /**
      * 父规则ID，用于层级关系；顶级规则为NULL
      */
+    @Column(value = "parent_rule_id", comment = "父规则ID")
     private Long parentRuleId;
 
     /**
      * 关联的业务实体ID，关联metadata_business_entity表的id
      */
+    @Column(value = "entity_id", comment = "关联的业务实体ID")
     private Long entityId;
 
     /**
      * 关联的实体字段ID，关联metadata_entity_field表的id
      */
+    @Column(value = "field_id", comment = "关联的实体字段ID")
     private Long fieldId;
 
     /**
      * 逻辑类型："LOGIC"（逻辑操作符）/"CONDITION"（条件判断）
      */
+    @Column(value = "logic_type", comment = "逻辑类型")
     private String logicType;
 
     /**
      * logic_type="CONDITION"时，取值为">"/"<"/"="/"IN"/"BETWEEN"等
      */
+    @Column(value = "operator", comment = "操作符")
     private String operator;
 
     /**
      * 当logic_type="LOGIC"时，取值为"AND"/"OR"
      */
+    @Column(value = "logic_operator", comment = "逻辑操作符")
     private String logicOperator;
 
     /**
      * 条件字段编码，如"AGE"、"INCOME"、"CUSTOMER_LEVEL"（仅logic_type="CONDITION"时有效）
      */
+    @Column(value = "field_code", comment = "条件字段编码")
     private String fieldCode;
 
     /**
      * 条件值引用（单值条件或范围表达式的第一个）
      */
+    @Column(value = "field_value", comment = "条件值引用")
     private Long fieldValue;
 
     /**
      * 条件值引用2（单值条件或范围表达式的第二个）
      */
+    @Column(value = "field_value2", comment = "条件值引用2")
     private Long fieldValue2;
 
     /**
      * 状态：1-激活，0-非激活
      * @see ValidationStatusEnum
      */
+    @Column(value = "status", comment = "状态：1-激活，0-非激活")
     private Integer status;
 
 }

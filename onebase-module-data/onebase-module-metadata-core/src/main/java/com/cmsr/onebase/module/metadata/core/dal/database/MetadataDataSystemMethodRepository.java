@@ -1,10 +1,11 @@
 package com.cmsr.onebase.module.metadata.core.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.method.MetadataDataSystemMethodDO;
+import com.cmsr.onebase.module.metadata.core.dal.mapper.MetadataDataSystemMethodMapper;
+import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.spring.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -12,21 +13,14 @@ import java.util.List;
 /**
  * 元数据数据系统方法仓储类
  * <p>
- * 提供数据系统方法相关的数据库操作接口，继承自DataRepositoryNew获得基础的CRUD能力
+ * 提供数据系统方法相关的数据库操作接口，继承自ServiceImpl获得基础的CRUD能力
  *
  * @author matianyu
  * @date 2025-08-11
  */
 @Repository
 @Slf4j
-public class MetadataDataSystemMethodRepository extends DataRepository<MetadataDataSystemMethodDO> {
-
-    /**
-     * 构造方法，指定默认实体类
-     */
-    public MetadataDataSystemMethodRepository() {
-        super(MetadataDataSystemMethodDO.class);
-    }
+public class MetadataDataSystemMethodRepository extends ServiceImpl<MetadataDataSystemMethodMapper, MetadataDataSystemMethodDO> {
 
     /**
      * 获取启用的数据方法列表
@@ -34,10 +28,10 @@ public class MetadataDataSystemMethodRepository extends DataRepository<MetadataD
      * @return 数据方法列表
      */
     public List<MetadataDataSystemMethodDO> getEnabledDataMethodList() {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and("is_enabled", CommonStatusEnum.ENABLE.getStatus());
-        configStore.order("create_time", org.anyline.entity.Order.TYPE.DESC);
-        return findAllByConfig(configStore);
+        QueryWrapper queryWrapper = this.query()
+                .eq(MetadataDataSystemMethodDO::getIsEnabled, CommonStatusEnum.ENABLE.getStatus())
+                .orderBy(MetadataDataSystemMethodDO::getCreateTime, false);
+        return list(queryWrapper);
     }
 
     /**
@@ -47,10 +41,10 @@ public class MetadataDataSystemMethodRepository extends DataRepository<MetadataD
      * @return 数据方法对象
      */
     public MetadataDataSystemMethodDO getDataMethodByCode(String methodCode) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and("method_code", methodCode);
-        configStore.and("is_enabled", CommonStatusEnum.ENABLE.getStatus());
-        return findOne(configStore);
+        QueryWrapper queryWrapper = this.query()
+                .eq(MetadataDataSystemMethodDO::getMethodCode, methodCode)
+                .eq(MetadataDataSystemMethodDO::getIsEnabled, CommonStatusEnum.ENABLE.getStatus());
+        return getOne(queryWrapper);
     }
 
     /**
@@ -60,11 +54,11 @@ public class MetadataDataSystemMethodRepository extends DataRepository<MetadataD
      * @return 数据方法列表
      */
     public List<MetadataDataSystemMethodDO> getDataMethodListByType(String methodType) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and("method_type", methodType);
-        configStore.and("is_enabled", CommonStatusEnum.ENABLE.getStatus());
-        configStore.order("create_time", org.anyline.entity.Order.TYPE.DESC);
-        return findAllByConfig(configStore);
+        QueryWrapper queryWrapper = this.query()
+                .eq(MetadataDataSystemMethodDO::getMethodType, methodType)
+                .eq(MetadataDataSystemMethodDO::getIsEnabled, CommonStatusEnum.ENABLE.getStatus())
+                .orderBy(MetadataDataSystemMethodDO::getCreateTime, false);
+        return list(queryWrapper);
     }
 
     /**
@@ -73,8 +67,8 @@ public class MetadataDataSystemMethodRepository extends DataRepository<MetadataD
      * @return 数据方法列表
      */
     public List<MetadataDataSystemMethodDO> getAllDataMethodList() {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.order("create_time", org.anyline.entity.Order.TYPE.DESC);
-        return findAllByConfig(configStore);
+        QueryWrapper queryWrapper = this.query()
+                .orderBy(MetadataDataSystemMethodDO::getCreateTime, false);
+        return list(queryWrapper);
     }
 }

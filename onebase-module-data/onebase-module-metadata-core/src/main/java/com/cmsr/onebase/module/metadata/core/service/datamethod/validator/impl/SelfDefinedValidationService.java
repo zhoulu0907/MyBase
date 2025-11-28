@@ -9,9 +9,9 @@ import com.cmsr.onebase.module.metadata.core.enums.OpEnum;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationRuleDefinitionRepository;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationRuleGroupRepository;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.validator.ValidationService;
+import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.init.DefaultConfigStore;
 import org.mvel2.MVEL;
 import org.mvel2.ParserContext;
 import org.springframework.stereotype.Component;
@@ -347,20 +347,20 @@ public class SelfDefinedValidationService implements ValidationService {
     }
 
     private List<MetadataValidationRuleGroupDO> findActiveRuleGroups(Long entityId) {
-        DefaultConfigStore cs = new DefaultConfigStore();
-        cs.and(MetadataValidationRuleGroupDO.ENTITY_ID, entityId);
-        cs.and(MetadataValidationRuleGroupDO.VALIDATION_TYPE, "SELF_DEFINED");
-        cs.and(MetadataValidationRuleGroupDO.RG_STATUS, 1);
-        cs.and("deleted", 0);
-        return ruleGroupRepository.findAllByConfig(cs);
+        QueryWrapper queryWrapper = ruleGroupRepository.query()
+                .eq("entity_id", entityId)
+                .eq("validation_type", "SELF_DEFINED")
+                .eq("rg_status", 1)
+                .eq("deleted", 0);
+        return ruleGroupRepository.list(queryWrapper);
     }
 
     private Map<Long, String> buildFieldIdToNameMap(Long entityId) {
-        DefaultConfigStore cs = new DefaultConfigStore();
-        cs.and("entity_id", entityId);
-        cs.and("deleted", 0);
+        QueryWrapper queryWrapper = entityFieldRepository.query()
+                .eq("entity_id", entityId)
+                .eq("deleted", 0);
 
-        return entityFieldRepository.findAllByConfig(cs).stream()
+        return entityFieldRepository.list(queryWrapper).stream()
                 .collect(Collectors.toMap(MetadataEntityFieldDO::getId, MetadataEntityFieldDO::getFieldName));
     }
 

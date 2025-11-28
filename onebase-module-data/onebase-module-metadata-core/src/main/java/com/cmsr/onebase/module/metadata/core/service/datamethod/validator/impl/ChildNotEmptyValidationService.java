@@ -5,10 +5,9 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntit
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationChildNotEmptyDO;
 import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodSubEntityContext;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.validator.ValidationService;
+import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 
@@ -25,11 +24,11 @@ public class ChildNotEmptyValidationService implements ValidationService {
     @Override
     public void validate(Long entityId, Long fieldId, MetadataEntityFieldDO field, Object value, Map<String, Object> data, List<MetadataDataMethodSubEntityContext> subEntities) {
 
-        ConfigStore configStore = new DefaultConfigStore();
-        configStore.and("entity_id",entityId);
-        configStore.and("is_enabled",1);// 是否启用 1-启用 0-禁用
-        configStore.and("deleted",0);
-        List<MetadataValidationChildNotEmptyDO> rules = childNotEmptyRepository.findAllByConfig(configStore);
+        QueryWrapper queryWrapper = childNotEmptyRepository.query()
+                .eq("entity_id", entityId)
+                .eq("is_enabled", 1)
+                .eq("deleted", 0);
+        List<MetadataValidationChildNotEmptyDO> rules = childNotEmptyRepository.list(queryWrapper);
         if(ObjectUtils.isEmpty(rules)){
             log.info("该实体未配置子表空行校验，跳过校验，主实体ID：" + entityId);
         }else{

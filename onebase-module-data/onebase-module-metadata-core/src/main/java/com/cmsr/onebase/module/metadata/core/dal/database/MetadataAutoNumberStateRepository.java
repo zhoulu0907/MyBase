@@ -1,29 +1,32 @@
 package com.cmsr.onebase.module.metadata.core.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.number.MetadataAutoNumberStateDO;
-import org.anyline.data.param.init.DefaultConfigStore;
+import com.cmsr.onebase.module.metadata.core.dal.mapper.MetadataAutoNumberStateMapper;
+import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.spring.service.impl.ServiceImpl;
 import org.springframework.stereotype.Repository;
 
 /**
  * 自动编号-状态 仓储
+ *
+ * @author matianyu
+ * @date 2025-11-28
  */
 @Repository
-public class MetadataAutoNumberStateRepository extends DataRepository<MetadataAutoNumberStateDO> {
-    public MetadataAutoNumberStateRepository() { super(MetadataAutoNumberStateDO.class); }
+public class MetadataAutoNumberStateRepository extends ServiceImpl<MetadataAutoNumberStateMapper, MetadataAutoNumberStateDO> {
 
     public MetadataAutoNumberStateDO findOneByPeriod(Long configId, String periodKey) {
-        DefaultConfigStore cs = new DefaultConfigStore();
-        cs.and(MetadataAutoNumberStateDO.CONFIG_ID, configId);
-        cs.and(MetadataAutoNumberStateDO.PERIOD_KEY, periodKey);
-        cs.and("deleted", 0);
-        return findOne(cs);
+        QueryWrapper queryWrapper = this.query()
+                .eq(MetadataAutoNumberStateDO::getConfigId, configId)
+                .eq(MetadataAutoNumberStateDO::getPeriodKey, periodKey)
+                .eq(MetadataAutoNumberStateDO::getDeleted, 0);
+        return getOne(queryWrapper);
     }
 
     public void deleteByConfigId(Long configId) {
-        DefaultConfigStore cs = new DefaultConfigStore();
-        cs.and(MetadataAutoNumberStateDO.CONFIG_ID, configId);
-        deleteByConfig(cs);
+        QueryWrapper queryWrapper = this.query()
+                .eq(MetadataAutoNumberStateDO::getConfigId, configId);
+        remove(queryWrapper);
     }
 
     /**

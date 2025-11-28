@@ -1,33 +1,58 @@
 package com.cmsr.onebase.module.metadata.core.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRangeDO;
+import com.cmsr.onebase.module.metadata.core.dal.mapper.MetadataValidationRangeMapper;
+import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.spring.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+/**
+ * 范围验证规则仓储类
+ *
+ * @author matianyu
+ * @date 2025-08-11
+ */
 @Repository
 @Slf4j
-public class MetadataValidationRangeRepository extends DataRepository<MetadataValidationRangeDO> {
-    public MetadataValidationRangeRepository() { super(MetadataValidationRangeDO.class); }
+public class MetadataValidationRangeRepository extends ServiceImpl<MetadataValidationRangeMapper, MetadataValidationRangeDO> {
 
+    /**
+     * 根据字段ID查询范围验证规则列表
+     *
+     * @param fieldId 字段ID
+     * @return 范围验证规则列表
+     */
     public List<MetadataValidationRangeDO> findByFieldId(Long fieldId) {
-        DefaultConfigStore cs = new DefaultConfigStore();
-        cs.and(MetadataValidationRangeDO.FIELD_ID, fieldId);
-        cs.and("deleted", 0);
-        return findAllByConfig(cs);
+        QueryWrapper queryWrapper = query()
+                .eq("field_id", fieldId)
+                .eq("deleted", 0);
+        return list(queryWrapper);
     }
 
+    /**
+     * 根据字段ID删除范围验证规则
+     *
+     * @param fieldId 字段ID
+     */
     public void deleteByFieldId(Long fieldId) {
-        for (var item : findByFieldId(fieldId)) { deleteById(item.getId()); }
+        for (var item : findByFieldId(fieldId)) {
+            removeById(item.getId());
+        }
     }
 
+    /**
+     * 根据组ID查询范围验证规则列表
+     *
+     * @param groupId 组ID
+     * @return 范围验证规则列表
+     */
     public List<MetadataValidationRangeDO> findByGroupId(Long groupId) {
-        DefaultConfigStore cs = new DefaultConfigStore();
-        cs.and("group_id", groupId);
-        cs.and("deleted", 0);
-        return findAllByConfig(cs);
+        QueryWrapper queryWrapper = query()
+                .eq("group_id", groupId)
+                .eq("deleted", 0);
+        return list(queryWrapper);
     }
 }
