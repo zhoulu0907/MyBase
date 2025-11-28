@@ -1,5 +1,6 @@
 export interface FormulaEditorProps {
   visible: boolean;
+  fieldName?: string;
   onCancel: () => void;
   onConfirm: (formula: string, formattedFormula: string, params: any) => void;
   initialFormula?: string;

@@ -135,7 +135,7 @@
   },
   "editor": {
     "material": "组件库",
-    "metadata": "业务实体",
+    "metadata": "数据资产",
     "telegram": "页面分享",
     "baseComponent": "基础",
     "preview": "预览",
@@ -168,6 +168,7 @@
     "commom": "常用",
     "createPage": "新建页面",
     "createForm": "新建普通表单",
+    "createWorkbench": "新建工作台",
     "createGroup": "新建分组",
     "rename": "重命名",
     "copyPage": "复制页面",

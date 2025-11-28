@@ -1,9 +1,9 @@
-import { menuSignal } from '@/store/menu';
+import { menuSignal } from '@onebase/app';
 import { useSignals } from '@preact/signals-react/runtime';
 import React from 'react';
-import DynamicIcon from '../DynamicIcon';
-import { menuIconList } from '../DynamicIcon/const';
 import styles from './index.module.less';
+import { webMenuIcons } from '@onebase/ui-kit';
+import { ReactSVG } from 'react-svg';
 
 /**
  * MenuItem 组件
@@ -23,6 +23,7 @@ interface MenuItemProps {
 const RuntimeMenuItem: React.FC<MenuItemProps> = ({ label, menuID, menuIcon, onClick, maxWidth }) => {
   useSignals();
   const { curMenu } = menuSignal;
+  const allWebMenuIcons = webMenuIcons.map((ele) => ele.children).reduce((acc, current) => acc.concat(current), []);
 
   return (
     <div className={styles.runtimeMenuItem} onClick={onClick} role="menuitem" tabIndex={0}>
@@ -32,14 +33,29 @@ const RuntimeMenuItem: React.FC<MenuItemProps> = ({ label, menuID, menuIcon, onC
           maxWidth: maxWidth + 'px'
         }}
       >
-        <DynamicIcon
-          IconComponent={menuIconList.find((icon) => icon.code === menuIcon)?.icon}
-          theme="outline"
-          size="18"
-          fill={curMenu.value?.id === menuID ? 'rgb(var(--primary-6))' : '#333'}
-          style={{ marginRight: 16 }}
-        />
-        {label}
+        {menuIcon.includes('TASK-')  ? (
+          // TASK-XXX 是工作流程任务中心菜单的icon
+          <i className={`iconfont ${menuIcon}`} style={{ marginRight: '16px' }} />
+        ) : (
+          // 正常菜单 icon
+          <ReactSVG
+            className={styles.menuIcon}
+            src={
+              allWebMenuIcons.find((ele) => ele.code === menuIcon)?.icon ||
+              allWebMenuIcons.find((ele) => ele.code === 'FormPageLine')?.icon ||
+              ''
+            }
+            beforeInjection={(svg) => {
+              const fillColor = curMenu.value?.id === menuID ? 'rgb(var(--primary-6))' : '#333';
+              svg.querySelectorAll('*').forEach((el) => el.removeAttribute('fill'));
+              svg.setAttribute('fill', fillColor);
+              svg.setAttribute('width', '18px');
+              svg.setAttribute('height', '18px');
+            }}
+          />
+        )}
+
+        <span style={{ color: curMenu.value?.id === menuID ? 'rgb(var(--primary-6))' : '#333' }}>{label}</span>
       </div>
     </div>
   );

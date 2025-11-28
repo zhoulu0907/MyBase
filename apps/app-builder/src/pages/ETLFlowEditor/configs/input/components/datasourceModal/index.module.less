@@ -1,0 +1,153 @@
+.datasourceModal {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+
+  height: 100%;
+  background-color: #ffffff;
+
+  .contentWrapper {
+    width: 100%;
+    height: 100%;
+
+    .content {
+      width: 100%;
+      margin-bottom: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-start;
+      gap: 12px;
+
+      .externalDatasource {
+        width: 100%;
+
+        .externalDatasourceHeader {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          justify-content: flex-start;
+          gap: 12px;
+
+          .externalDatasourceCreate {
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            font-size: 14px;
+            font-weight: 400;
+          }
+        }
+
+        .externalDatasourceContent {
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          justify-content: flex-start;
+
+          .externalDatasourceContentItem {
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 8px;
+            margin-bottom: 8px;
+
+            .databaseItem {
+              width: 100%;
+              display: flex;
+              flex-direction: row;
+              align-items: center;
+              justify-content: flex-start;
+              gap: 8px;
+            }
+
+            .datasourceContent {
+              width: 100%;
+              display: flex;
+              flex-direction: column;
+              align-items: flex-start;
+              justify-content: flex-start;
+              gap: 16px;
+            }
+          }
+
+          .tableList {
+            width: 100%;
+            height: 300px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: flex-start;
+
+            // 设置自定义滚动条宽度和样式（含兼容性）
+            &::-webkit-scrollbar {
+              width: 5px;
+              background: transparent;
+            }
+            &::-webkit-scrollbar-thumb {
+              background: #e5e6eb;
+              border-radius: 3px;
+            }
+            &::-webkit-scrollbar-track {
+              background: transparent;
+            }
+
+            .tableItem {
+              width: 95%;
+              height: 40px;
+              display: flex;
+              flex-direction: row;
+              align-items: center;
+              justify-content: flex-start;
+              box-sizing: border-box;
+              padding: 8px 12px;
+              gap: 8px;
+              font-size: 14px;
+              font-weight: 400;
+              color: #4e5969;
+
+              &:hover {
+                background-color: #f7f8fa;
+                color: #009e9e;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+.datasourceItem {
+  width: 300px;
+  height: 32px;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+  font-weight: 400;
+  color: #4e5969;
+  gap: 8px;
+  box-sizing: border-box;
+
+  .datasourceItemCurrent {
+    font-size: 14px;
+    font-weight: 400;
+    color: rgb(var(--primary-6));
+  }
+  .datasourceItemName {
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}

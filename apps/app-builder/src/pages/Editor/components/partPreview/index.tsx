@@ -48,7 +48,8 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
                     key={cp.id}
                     className={styles.componentItem}
                     style={{
-                      width: getComponentWidth(listPageComponentSchemas.value[cp.id], cp.type)
+                      width: `calc(${getComponentWidth(listPageComponentSchemas.value[cp.id], cp.type)} - 8px)`,
+                      margin: '4px'
                     }}
                   >
                     <PreviewRender
@@ -56,6 +57,7 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
                       cpType={cp.type}
                       pageComponentSchema={listPageComponentSchemas.value[cp.id]}
                       runtime={true}
+                      preview={true}
                     />
                   </div>
                 )}
@@ -65,7 +67,7 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
           {pageType == EDITOR_TYPES.FORM_EDITOR && (
             <div className={styles.fromContain}>
               <div className={styles.previewForm}>
-                <Form layout="inline" >
+                <Form layout="inline">
                   {formComponents.value.map((cp: GridItem) => (
                     <Fragment key={cp.id}>
                       {formPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
@@ -73,7 +75,8 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
                           key={cp.id}
                           className={styles.componentItem}
                           style={{
-                            width: getComponentWidth(formPageComponentSchemas.value[cp.id], cp.type)
+                            width: `calc(${getComponentWidth(formPageComponentSchemas.value[cp.id], cp.type)} - 8px)`,
+                            margin: '4px'
                           }}
                         >
                           <PreviewRender
@@ -81,6 +84,7 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
                             cpType={cp.type}
                             pageComponentSchema={formPageComponentSchemas.value[cp.id]}
                             runtime={true}
+                            preview={true}
                           />
                         </div>
                       )}

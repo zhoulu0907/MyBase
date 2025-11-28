@@ -43,7 +43,7 @@ export enum NodeTypeName {
 
   // 交互节点
   modal = '弹窗',
-  nagivate = '跳转',
+  navigate = '跳转',
   refresh = '刷新',
   tooltip = '提示'
 }

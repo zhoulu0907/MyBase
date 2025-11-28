@@ -94,6 +94,9 @@ const AppManagement: React.FC = () => {
   const [applicationEmpty, setAapplicationEmpty] = useState<boolean>(false); // 未创建应用
   const [applicationFilterEmpty, setAapplicationFilterEmpty] = useState<boolean>(false); // 应用列表过滤后为空，此时applicationEmpty为true
 
+  const [currentStep, setCurrentStep] = useState<number>(1); // 创建数据源步骤
+  const [dbTypeSelect, setDbTypeSelect] = useState<string>(''); // 数据源类型
+
   const { setCurAppId } = useAppStore();
 
   const createDatasourceRef = useRef<DataSourceHandle>(null);
@@ -119,6 +122,12 @@ const AppManagement: React.FC = () => {
   useEffect(() => {
     setDdtasource(undefined);
   }, []);
+
+  useEffect(() => {
+    setCreateType('app');
+    setCurrentStep(1);
+    setDbTypeSelect('');
+  }, [createVisible]);
 
   useEffect(() => {
     // 只有ownerTag和status会影响应用列表长度
@@ -172,13 +181,6 @@ const AppManagement: React.FC = () => {
   /* 创建应用 */
   const handleCreateApp = async () => {
     try {
-      // 切换到创建数据源
-      if (createType === 'datasource') {
-        const res = await createDatasourceRef.current?.handleGetDatasource?.();
-        setDdtasource(res);
-        return;
-      }
-
       const values = await form.validate(); // 等待校验完成并返回数据
       setCreateLoading(true);
       const { appCode, appName, iconColor, iconName, description, tagIds, themeColor } = values;
@@ -582,14 +584,50 @@ const AppManagement: React.FC = () => {
         simple
         unmountOnExit
         footer={
-          <div style={{ textAlign: 'right', visibility: createType === 'app' ? 'visible' : 'hidden' }}>
-            <Button type="default" onClick={() => setCreateVisible(false)} style={{ marginRight: 12 }}>
-              取消
+          <Space style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <Button
+              type="default"
+              onClick={() => setCurrentStep(1)}
+              style={{ visibility: createType === 'datasource' && currentStep === 2 ? 'visible' : 'hidden' }}
+            >
+              上一步
             </Button>
-            <Button type="primary" loading={createLoading} onClick={handleCreateApp}>
-              创建
-            </Button>
-          </div>
+
+            <Space>
+              <Button type="default" onClick={() => setCreateVisible(false)} style={{ marginRight: 12 }}>
+                取消
+              </Button>
+
+              {createType === 'datasource' && currentStep === 1 && (
+                <Button type="primary" onClick={() => setCurrentStep(2)} disabled={!dbTypeSelect}>
+                  下一步
+                </Button>
+              )}
+              {createType !== 'app' ? (
+                <>
+                  {currentStep === 2 && (
+                    <Button
+                      type="primary"
+                      onClick={async () => {
+                        if (createType === 'datasource') {
+                          const res = await createDatasourceRef.current?.handleGetDatasource?.();
+                          setDdtasource(res);
+                        }
+                        setCreateType('app');
+                        setCurrentStep(1);
+                      }}
+                    >
+                      完成
+                    </Button>
+                  )}
+                </>
+              ) : (
+                <Button type="primary" loading={createLoading} onClick={handleCreateApp}>
+                  创建
+                </Button>
+              )}
+            </Space>
+          </Space>
         }
         confirmLoading={true}
         onCancel={() => setCreateVisible(false)}
@@ -610,6 +648,9 @@ const AppManagement: React.FC = () => {
           />
           <CreateDataSource
             ref={createDatasourceRef}
+            currentStep={currentStep}
+            dbTypeSelect={dbTypeSelect}
+            setDbTypeSelect={setDbTypeSelect}
             style={{
               position: 'absolute',
               padding: '0 200px',

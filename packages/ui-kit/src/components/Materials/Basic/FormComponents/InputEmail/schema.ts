@@ -3,7 +3,7 @@ import {
   baseConfig,
   baseDefault,
   dataFieldConfig,
-  labelColSpanConfig,
+  defaultValueConfig,
   layoutConfig,
   statusConfig,
   widthConfig,
@@ -22,30 +22,26 @@ import {
   STATUS_OPTIONS,
   STATUS_VALUES,
   WIDTH_OPTIONS,
-  WIDTH_VALUES
+  WIDTH_VALUES,
+  DEFAULT_VALUE_TYPES
 } from '../../../constants';
 import type {
   IAlignConfigType,
-  IBooleanConfigType,
-  IColorConfigType,
   IDataFieldConfigType,
   ILabelConfigType,
   ILayoutConfigType,
-  INumberConfigType,
   IPlaceholderConfigType,
   ISecurityConfigType,
-  ISelectConfigType,
   IStatusConfigType,
-  ITextAreaConfigType,
-  ITextConfigType,
   ITooltipConfigType,
   IVerifyConfigType,
   IWidthConfigType,
   TBooleanDefaultType,
-  TNumberDefaultType,
   TSelectDefaultType,
   TTextAreaDefaultType,
-  TTextDefaultType
+  TTextDefaultType,
+  TRadioDefaultType,
+  IDefaultValueConfigType
 } from '../../../types';
 
 export interface XInputEmailSchema {
@@ -54,23 +50,17 @@ export interface XInputEmailSchema {
 }
 
 export type TXInputEmailEditData = Array<
-  | ITextConfigType
   | ILabelConfigType
   | IPlaceholderConfigType
   | ITooltipConfigType
-  | IStatusConfigType<TStatusSelectKeyType>
-  | IWidthConfigType<TWidthSelectKeyType>
-  | INumberConfigType
-  | ISelectConfigType<TWidthSelectKeyType | TStatusSelectKeyType>
-  | ITextAreaConfigType
-  | IBooleanConfigType
-  | IStatusConfigType<TAlignSelectKeyType>
-  | ILayoutConfigType<TLayoutSelectKeyType>
-  | IAlignConfigType<TAlignSelectKeyType>
-  | IColorConfigType
   | IDataFieldConfigType
-  | ISecurityConfigType
+  | IDefaultValueConfigType
   | IVerifyConfigType
+  | IStatusConfigType<TStatusSelectKeyType>
+  | IAlignConfigType<TAlignSelectKeyType>
+  | ILayoutConfigType<TLayoutSelectKeyType>
+  | ISecurityConfigType
+  | IWidthConfigType<TWidthSelectKeyType>
 >;
 
 export interface XInputEmailConfig extends ICommonBaseType {
@@ -85,11 +75,6 @@ export interface XInputEmailConfig extends ICommonBaseType {
   };
 
   /**
-   * 数据字段
-   */
-  dataField: TTextDefaultType[];
-
-  /**
    * 占位符
    */
   placeholder: TTextDefaultType;
@@ -100,40 +85,32 @@ export interface XInputEmailConfig extends ICommonBaseType {
   tooltip?: TTextAreaDefaultType;
 
   /**
-   * 组件状态：可用、隐藏、只读
-   * 可选值: 'default' | 'hidden' | 'readonly'
+   * 数据字段
    */
-  status?: TSelectDefaultType<TStatusSelectKeyType>;
+  dataField: TTextDefaultType[];
 
   /**
    * 默认值
    */
-  defaultValue?: TTextDefaultType;
+  defaultValueConfig?: any;
 
   /**
-   * 字段宽度
-   */
-  width: TSelectDefaultType<TWidthSelectKeyType>;
-
-  /**
-   * required：是否必填，未填写时提交报错
-   * noRepeat：是否不允许重复
-   */
+  * required：是否必填，未填写时提交报错
+  * noRepeat：是否不允许重复
+  * lengthLimit 长度范围
+  * minLength 最小长度
+  * maxLength 最大长度
+  */
   verify: {
     required: TBooleanDefaultType;
     noRepeat?: TBooleanDefaultType;
   };
 
   /**
-   * 表单的布局：水平、垂直（默认）
-   * 可选值: 'vertical' | 'horizontal'
+   * 组件状态：可用、隐藏、只读
+   * 可选值: 'default' | 'hidden' | 'readonly'
    */
-  layout?: TLayoutSelectKeyType;
-
-  /**
-   * 标题宽度
-   */
-  labelColSpan?: TNumberDefaultType;
+  status?: TRadioDefaultType<TStatusSelectKeyType>;
 
   /**
    * 内容对齐方式：左、中、右
@@ -142,19 +119,10 @@ export interface XInputEmailConfig extends ICommonBaseType {
   align?: TSelectDefaultType<TAlignSelectKeyType>;
 
   /**
-   * 隐藏时是否提交数据，开启后隐藏状态仍会保存值
+   * 表单的布局：水平、垂直（默认）
+   * 可选值: 'vertical' | 'horizontal'
    */
-  saveWithHidden?: TBooleanDefaultType;
-
-  /**
-   * 文本颜色
-   */
-  color?: TTextDefaultType;
-
-  /**
-   * 背景颜色
-   */
-  bgColor?: TTextDefaultType;
+  layout?: TLayoutSelectKeyType;
 
   /**
    * 安全
@@ -165,6 +133,11 @@ export interface XInputEmailConfig extends ICommonBaseType {
     display: TBooleanDefaultType;
     type?: TTextDefaultType;
   };
+
+  /**
+   * 字段宽度
+   */
+  width: TRadioDefaultType<TWidthSelectKeyType>;
 }
 
 const XInputEmail: XInputEmailSchema = {
@@ -175,52 +148,38 @@ const XInputEmail: XInputEmailSchema = {
       name: '标题',
       type: CONFIG_TYPES.LABEL_INPUT
     },
-    ...dataFieldConfig,
     {
       key: 'placeholder',
-      name: '占位符',
+      name: '占位提示',
       type: CONFIG_TYPES.PLACEHOLDER_INPUT
     },
     {
       key: 'tooltip',
-      name: '描述信息',
+      name: '字段描述',
       type: CONFIG_TYPES.TOOLTIP_INPUT
     },
-    {
-      key: 'defaultValue',
-      name: '默认值',
-      type: CONFIG_TYPES.TEXT_INPUT
-    },
-    layoutConfig,
-    labelColSpanConfig,
-    {
-      key: 'saveWithHidden',
-      name: '隐藏时提交数据',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
-    {
-      key: 'color',
-      name: '文本颜色',
-      type: CONFIG_TYPES.COLOR
-    },
-    {
-      key: 'bgColor',
-      name: '背景颜色',
-      type: CONFIG_TYPES.COLOR
-    },
+    //  数据绑定
+    ...dataFieldConfig,
+    // 默认值
+    defaultValueConfig,
     {
       key: 'verify',
       name: '校验',
       type: CONFIG_TYPES.VERIFY
     },
+    // 显示状态
     statusConfig,
+    // 对齐方式
     alignConfig,
+    // 布局方式
+    layoutConfig,
     {
       key: 'security',
       name: '安全',
       type: CONFIG_TYPES.SECURITY
     },
-    widthConfig
+    // 字段宽度
+    widthConfig,
   ],
   config: {
     ...baseDefault,
@@ -228,26 +187,25 @@ const XInputEmail: XInputEmailSchema = {
       text: '邮箱',
       display: true
     },
-    dataField: [],
     placeholder: '请输入邮箱',
     tooltip: '',
-    width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
-    status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
-    defaultValue: '',
-    align: ALIGN_VALUES[ALIGN_OPTIONS.LEFT],
-    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
-    saveWithHidden: false,
-    color: '',
-    bgColor: '',
-    labelColSpan: 200,
-    security: {
-      display: false,
-      type: 'email'
+    dataField: [],
+    defaultValueConfig: {
+      type: DEFAULT_VALUE_TYPES.CUSTOM,
+      customValue: ''
     },
     verify: {
       required: false,
       noRepeat: false
-    }
+    },
+    status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
+    align: ALIGN_VALUES[ALIGN_OPTIONS.LEFT],
+    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
+    security: {
+      display: false,
+      type: 'email'
+    },
+    width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
   }
 };
 

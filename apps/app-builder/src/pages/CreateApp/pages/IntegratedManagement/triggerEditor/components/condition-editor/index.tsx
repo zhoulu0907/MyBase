@@ -251,7 +251,11 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
           key: `${nodeId}.${field.value}`,
           title: field.label
         });
-      } else if (field?.fieldType === fieldType) {
+      } else if (
+        field?.fieldType === fieldType ||
+        ([ENTITY_FIELD_TYPE.NUMBER.VALUE, ENTITY_FIELD_TYPE.ID.VALUE].includes(field?.fieldType) &&
+          [ENTITY_FIELD_TYPE.NUMBER.VALUE, ENTITY_FIELD_TYPE.ID.VALUE].includes(fieldType))
+      ) {
         children.push({
           key: `${nodeId}.${field.value}`,
           title: field.label
@@ -273,7 +277,8 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
         NodeType.DATA_UPDATE,
         NodeType.DATA_CALC,
         NodeType.LOOP,
-        NodeType.MODAL
+        NodeType.MODAL,
+        NodeType.IPAAS
       ]),
     []
   );
@@ -301,7 +306,8 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
         NodeType.START_API,
         NodeType.START_BPM,
         NodeType.LOOP,
-        NodeType.MODAL
+        NodeType.MODAL,
+        NodeType.IPAAS
       ];
 
       const fieldId = form.getFieldValue(item.field + '.fieldId');
@@ -375,10 +381,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
 
   const handleFormulaConfirm = (formulaData: string, formattedFormula: string, params: any) => {
     setFormulaVisible(false);
-    form.setFieldValue(
-      formulaFieldKey, 
-      {formulaData: formulaData, formula: formattedFormula, parameters: params}
-    );
+    form.setFieldValue(formulaFieldKey, { formulaData: formulaData, formula: formattedFormula, parameters: params });
     setFormulaData('');
     setFormulaFieldKey('');
   };
@@ -511,8 +514,10 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
                                                 FieldType.FORMULA && (
                                                 <Form.Item field={item.field + '.value'}>
                                                   <Button onClick={() => openFormulaEditor(item.field + '.value')} long>
-                                                    {form.getFieldValue(item.field + '.value') ? '已设置公式' : 'ƒx 编辑公式'}
-                                                    {form.getFieldValue(item.field + '.value') ? <IconLaunch /> : ""}
+                                                    {form.getFieldValue(item.field + '.value')
+                                                      ? '已设置公式'
+                                                      : 'ƒx 编辑公式'}
+                                                    {form.getFieldValue(item.field + '.value') ? <IconLaunch /> : ''}
                                                   </Button>
                                                 </Form.Item>
                                               )}

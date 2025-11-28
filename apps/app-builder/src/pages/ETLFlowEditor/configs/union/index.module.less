@@ -1,0 +1,83 @@
+.config {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  box-sizing: border-box;
+  padding: 0px;
+  color: #272e3b;
+  font-size: 14px;
+  font-weight: 400;
+  overflow-x: hidden;
+
+  .dataConfig {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+
+    .rowHeader {
+      width: 100%;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-start;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .colTitle {
+      flex: 1;
+      height: 50px;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      border: 0.5px solid #e5e6eb;
+      position: relative;
+
+      button {
+        position: absolute;
+        top: 0px;
+        right: 0px;
+      }
+    }
+    .colItem {
+      flex: 1;
+      height: 50px;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      background-color: #e8f6f5;
+      cursor: pointer;
+    }
+
+    .rowTitle {
+      width: 150px;
+      height: 50px;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      border: 0.5px solid #e5e6eb;
+      padding: 0 16px;
+      box-sizing: border-box;
+    }
+
+    .row {
+      width: 100%;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-start;
+      margin-bottom: 8px;
+    }
+  }
+
+  .dataPreview {
+  }
+}

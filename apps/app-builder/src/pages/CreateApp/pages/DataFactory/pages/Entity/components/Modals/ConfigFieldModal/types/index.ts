@@ -19,7 +19,9 @@ export interface FieldFormValues {
   isDeleted?: boolean;
   displayName?: string;
   options?: { optionLabel: string; optionValue: string }[];
-  autoNumberConfig?: AutoNumberRule;
+  dictTypeId?: string; // 字典类型ID（用于引用字典）
+  autoNumber?: AutoNumberRule; // 前端更新后的自动编号配置（提交给后端时使用）
+  autoNumberConfig?: AutoNumberRule; // 后端返回的自动编号配置（用于初始化和回显）
   constraints?: {
     lengthEnabled: number;
     minLength: number;
@@ -29,6 +31,13 @@ export interface FieldFormValues {
     regexPattern: string;
     regexPrompt: string;
   };
+  dataSelectionConfig?: DataSelectionType;
+}
+
+// 数据选择配置
+export interface DataSelectionType {
+  targetEntityId: string;
+  targetFieldId: string;
 }
 
 // 字段配置弹窗属性
@@ -38,12 +47,14 @@ export interface ConfigFieldModalProps {
   entity: Partial<EntityNode>;
   successCallback: () => void;
   initialFields?: FieldFormValues[];
+  gotoDictPage?: () => void;
+  entities?: EntityNode[];
 }
 
 // 字段操作接口
 export interface FieldOperations {
   addField: () => void;
-  deleteField: (id: string) => void;
+  deleteField: (id: string, onDelete?: (id: string) => void) => void;
   updateField: (id: string, updates: Partial<FieldFormValues>) => void;
   moveField: (oldIndex: number, newIndex: number) => void;
   getFieldById: (id: string) => FieldFormValues | undefined;
@@ -86,9 +97,11 @@ export interface FieldConfigPopoverProps {
   fieldType: string;
   fieldId: string;
   field: FieldFormValues;
-  onConfirm: (fieldType: string, fieldId: string, configData: any) => void;
+  onConfirm: (fieldType: string, fieldId: string, configData: any, dictTypeId?: string) => void;
   onCancel: (fieldType: string) => void;
   fields: any[];
+  gotoDictPage?: () => void;
+  entities?: EntityNode[];
 }
 
 // 可排序表格属性
@@ -100,11 +113,13 @@ export interface SortableTableProps {
 
 // 创建自动编号规则返回值
 export interface AutoNumberRuleResponce {
-  mode?: string;
+  numberMode?: string;
   digitWidth: number;
   overflowContinue?: number;
   resetCycle?: string;
-  nextRecordStartValue?: number;
+  resetOnInitialChange?: number;
+  startValue?: number;
+  initialValue?:number
 }
 // 创建自动编号规则
 export interface AutoNumberRule {
@@ -114,7 +129,7 @@ export interface AutoNumberRule {
   overflowContinue: number;
   initialValue: number;
   resetCycle: string;
-  nextRecordStartValue?: number;
+  resetOnInitialChange?: number;
   startValue?: number;
   rules: AutoNumberRuleItem[];
 }
@@ -144,4 +159,11 @@ export interface AutoCodeRule {
 
 export interface AutoCodeRules {
   rules: AutoCodeRule[];
+}
+
+// 资产及子表字段
+export interface EntityFieldsWithChildren {
+  label: string;
+  value: string;
+  children: { label: string; value: string; fieldType: string; isSystemField: number }[];
 }

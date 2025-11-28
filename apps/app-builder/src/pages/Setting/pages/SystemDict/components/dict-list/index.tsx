@@ -11,11 +11,12 @@ import StatusTag from '@/components/StatusTag';
 
 interface DictionaryListProps {
   list: DictItem[];
-  activeId: number | undefined;
+  activeId: string | undefined;
   searchValue: string;
   onSearchChange: (value: string) => void;
-  onSelect: (id: number | undefined) => void;
+  onSelect: (id: string | undefined) => void;
   onAdd: () => void;
+  isHideTenantAddDictButton?: boolean;
 }
 
 export default function DictionaryListProps({
@@ -24,7 +25,8 @@ export default function DictionaryListProps({
   onSelect,
   searchValue,
   onSearchChange,
-  onAdd
+  onAdd,
+  isHideTenantAddDictButton = false
 }: DictionaryListProps) {
   const listTitle = `全部(${list?.length})`;
   return (
@@ -37,15 +39,17 @@ export default function DictionaryListProps({
         allowClear
       />
       <ListItem title={listTitle}>
-        <Button
-          permission={ACTIONS.CREATE}
-          type="text"
-          onClick={onAdd}
-          style={{ paddingLeft: '8px', paddingRight: '8px' }}
-        >
-          <IconPlus />
-          新建
-        </Button>
+        {!isHideTenantAddDictButton && (
+          <Button
+            permission={ACTIONS.CREATE}
+            type="text"
+            onClick={onAdd}
+            style={{ paddingLeft: '8px', paddingRight: '8px' }}
+          >
+            <IconPlus />
+            新建
+          </Button>
+        )}
       </ListItem>
       <PlaceholderPanel className={styles.dictList} hasPermission={hasPermission(ACTIONS.QUERY)}>
         {list?.map((item) => (

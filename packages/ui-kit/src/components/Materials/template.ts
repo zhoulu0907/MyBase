@@ -13,7 +13,7 @@ export const COMPONENT_TYPE_DISPLAY_NAME_MAP: Record<string, string> = {
   // 布局组件
   [LAYOUT_COMPONENT_TYPES.COLUMN_LAYOUT]: '分栏布局',
   [LAYOUT_COMPONENT_TYPES.TABS_LAYOUT]: '页签组件',
-  [LAYOUT_COMPONENT_TYPES.COLLAPSE_LAYOUT]: '折叠组件',
+  [LAYOUT_COMPONENT_TYPES.COLLAPSE_LAYOUT]: '分组布局',
 
   // 表单组件
   [FORM_COMPONENT_TYPES.INPUT_TEXT]: '单行文本',
@@ -23,7 +23,7 @@ export const COMPONENT_TYPE_DISPLAY_NAME_MAP: Record<string, string> = {
   [FORM_COMPONENT_TYPES.INPUT_NUMBER]: '数字录入',
   [FORM_COMPONENT_TYPES.DATE_PICKER]: '日期',
   [FORM_COMPONENT_TYPES.DATE_RANGE_PICKER]: '日期区间',
-  // [FORM_COMPONENT_TYPES.DATE_TIME_PICKER]: '日期时间',
+  [FORM_COMPONENT_TYPES.DATE_TIME_PICKER]: '日期时间',
   [FORM_COMPONENT_TYPES.STATIC_TEXT]: '静态文本',
   [FORM_COMPONENT_TYPES.TIME_PICKER]: '时间',
   [FORM_COMPONENT_TYPES.SWITCH]: '开关',
@@ -40,7 +40,7 @@ export const COMPONENT_TYPE_DISPLAY_NAME_MAP: Record<string, string> = {
   [FORM_COMPONENT_TYPES.RICH_TEXT]: '富文本',
   [FORM_COMPONENT_TYPES.CAROUSEL_FORM]: '轮播图',
   [FORM_COMPONENT_TYPES.SUB_TABLE]: '子表单',
-  [FORM_COMPONENT_TYPES.DATA_SELECT]: '选择数据',
+  [FORM_COMPONENT_TYPES.DATA_SELECT]: '数据选择',
 
   // 列表组件
   [LIST_COMPONENT_TYPES.TABLE]: '表格',
@@ -165,14 +165,14 @@ const allTemplate = {
           icon: 'date_picker_cp.svg',
           category: 'base'
         },
-        // {
-        //   type: FORM_COMPONENT_TYPES.DATE_TIME_PICKER,
-        //   h: 36,
-        //   w: 118,
-        //   displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.DATE_TIME_PICKER],
-        //   icon: 'time_picker_cp.svg',
-        //   category: 'base'
-        // },
+        {
+          type: FORM_COMPONENT_TYPES.DATE_TIME_PICKER,
+          h: 36,
+          w: 118,
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.DATE_TIME_PICKER],
+          icon: 'time_picker_cp.svg',
+          category: 'base'
+        },
         {
           type: FORM_COMPONENT_TYPES.TIME_PICKER,
           h: 36,

@@ -4,11 +4,16 @@ import { useFormEditorSignal, useListEditorSignal } from '../signals/page_editor
 
 import { useLocation } from 'react-router-dom';
 
-export function usePageEditorSignal() {
-  //   useSignals();
+export function usePageEditorSignal(pageType?:string) {
 
   const path = useLocation().pathname;
-  const useList = path.endsWith(`/${EDITOR_TYPES.LIST_EDITOR}`);
+  
+  /**
+   * 表单设计页、新增、编辑、详情页  使用 useFormEditorSignal
+   * 其余  使用 useListEditorSignal
+   */
+  const useList = !(pageType && pageType.indexOf(EDITOR_TYPES.FORM_EDITOR) !== -1 ||
+    path.endsWith(`/${EDITOR_TYPES.FORM_EDITOR}`));
 
   // 优化：避免多次调用 createCurrentEditorSignal，提升性能和可读性
   const curComponentID = currentEditorSignal.curComponentID.value;
@@ -39,6 +44,10 @@ export function usePageEditorSignal() {
     ? useListEditorSignal.delPageComponentSchemas
     : useFormEditorSignal.delPageComponentSchemas;
 
+  const batchDelPageComponentSchemas = useList
+    ? useListEditorSignal.batchDelPageComponentSchemas
+    : useFormEditorSignal.batchDelPageComponentSchemas;
+
   const clearPageComponentSchemas = useList
     ? useListEditorSignal.clearPageComponentSchemas
     : useFormEditorSignal.clearPageComponentSchemas;
@@ -55,9 +64,35 @@ export function usePageEditorSignal() {
     ? useListEditorSignal.delLayoutSubComponents
     : useFormEditorSignal.delLayoutSubComponents;
 
+  const batchDelLayoutSubComponents = useList
+    ? useListEditorSignal.batchDelLayoutSubComponents
+    : useFormEditorSignal.batchDelLayoutSubComponents;
+
   const clearLayoutSubComponents = useList
     ? useListEditorSignal.clearLayoutSubComponents
     : useFormEditorSignal.clearLayoutSubComponents;
+
+  // 子表单
+  const subTableComponents = useList
+    ? useListEditorSignal.subTableComponents.value
+    : useFormEditorSignal.subTableComponents?.value;
+
+  const setSubTableComponents = useList
+    ? useListEditorSignal.setSubTableComponents
+    : useFormEditorSignal.setSubTableComponents;
+
+  const delSubTableComponents = useList
+    ? useListEditorSignal.delSubTableComponents
+    : useFormEditorSignal.delSubTableComponents;
+
+  const batchDelSubTableComponents = useList
+    ? useListEditorSignal.batchDelSubTableComponents
+    : useFormEditorSignal.batchDelSubTableComponents;
+
+  const clearSubTableComponents = useList
+    ? useListEditorSignal.clearSubTableComponents
+    : useFormEditorSignal.clearSubTableComponents;
+
 
   return {
     curComponentID,
@@ -75,10 +110,17 @@ export function usePageEditorSignal() {
     pageComponentSchemas,
     setPageComponentSchemas,
     delPageComponentSchemas,
+    batchDelPageComponentSchemas,
     clearPageComponentSchemas,
     layoutSubComponents,
     setLayoutSubComponents,
     delLayoutSubComponents,
-    clearLayoutSubComponents
+    batchDelLayoutSubComponents,
+    clearLayoutSubComponents,
+    subTableComponents,
+    setSubTableComponents,
+    delSubTableComponents,
+    batchDelSubTableComponents,
+    clearSubTableComponents,
   };
 }

@@ -80,11 +80,13 @@ const Right: React.FC = () => {
         'X-Tenant-Id': tenantId
       };
 
+      const deviceId = await getOrCreateDeviceInfo();
+
       const loginData: LoginRequest = {
         username: values.username!,
         password: values.password!,
         captchaVerification: captchaVerification,
-        deviceId: values.deviceId!
+        deviceId: deviceId
       };
 
       const response: TenantLoginResponse = await tenantLogin(loginData, headers);
@@ -128,7 +130,7 @@ const Right: React.FC = () => {
   };
 
   // 表单提交处理
-  const handleSubmit = (_values: LoginRequest) => {
+  const handleSubmit = async (_values: LoginRequest) => {
     handleAccountLogin(_values);
   };
 

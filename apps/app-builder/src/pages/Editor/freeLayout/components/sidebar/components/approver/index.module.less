@@ -1,0 +1,33 @@
+.approver {
+  background-color: #fff;
+  height: calc(100% - 200px);
+  padding: 16px 32px;
+  .radioGroup {
+    width: 100%;
+    display: flex;
+    border-radius: 4px;
+    border: 1px solid #e5e6eb;
+    background-color: #fff;
+    :global(.arco-radio-button) {
+      flex: 1;
+      background-color: #fff;
+      text-align: center;
+      &:hover {
+        background: rgb(var(--primary-6));
+        color: #fff;
+      }
+      &::after {
+        background-color: #fff;
+      }
+    }
+    :global(.arco-radio-checked) {
+      background: rgb(var(--primary-6));
+      color: #fff;
+    }
+  }
+  .content {
+    margin-top: 16px;
+    height: calc(100% - 14px);
+    overflow-y: auto;
+  }
+}

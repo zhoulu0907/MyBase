@@ -7,3 +7,4 @@ export * from './httpClient';
 export * from './list';
 export * from './router';
 export * from './token';
+export * from './tree';

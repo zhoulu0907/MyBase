@@ -1,4 +1,5 @@
 import { useResourceStore } from '@/store/store_resource';
+import { newFieldSignal } from '@/store/singals/new_field';
 import { Message, Radio, Tag } from '@arco-design/web-react';
 import { IconCopy, IconMindMapping, IconNav } from '@arco-design/web-react/icon';
 import { getDatasourceList } from '@onebase/app';
@@ -25,7 +26,10 @@ const PAGE_TYPE = {
   ENTITY_TABLE: 'ENTITY_TABLE'
 };
 
-export const EntityPageContainer: React.FC<{ appId: string }> = ({ appId }) => {
+export const EntityPageContainer: React.FC<{ appId: string; handleMenuClick: (key: string) => void }> = ({
+  appId,
+  handleMenuClick
+}) => {
   const [activeTab, setActiveTab] = useState(PAGE_TYPE.ER_CHART);
   const [refreshEntityList, setRefreshEntityList] = useState(false);
   const [onlyUpdateNode, setOnlyUpdateNode] = useState(false);
@@ -74,12 +78,19 @@ export const EntityPageContainer: React.FC<{ appId: string }> = ({ appId }) => {
       clearCurDataSourceId();
       setRefreshEntityList(false);
       setOnlyUpdateNode(false);
+      newFieldSignal.clearAllNewFields();
     }
 
     prevAppIdRef.current = appId;
 
     getAppResources(appId);
   }, [appId]);
+
+  useEffect(() => {
+    return () => {
+      newFieldSignal.clearAllNewFields();
+    };
+  }, []);
 
   const handleCopy = (text: string | undefined) => {
     if (text) {
@@ -130,6 +141,7 @@ export const EntityPageContainer: React.FC<{ appId: string }> = ({ appId }) => {
             onlyUpdateNode={onlyUpdateNode}
             setOnlyUpdateNode={setOnlyUpdateNode}
             dsData={dsData as DatasourceRecord}
+            handleMenuClick={handleMenuClick}
           />
         </div>
       )}

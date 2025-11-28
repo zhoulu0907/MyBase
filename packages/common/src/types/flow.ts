@@ -37,7 +37,7 @@ export enum NodeType {
   DATA_MAPPER = 'dataMapper',
 
   MODAL = 'modal',
-  NAGIVATE = 'nagivate',
+  NAVIGATE = 'navigate',
   REFRESH = 'refresh',
   TOOLTIP = 'tooltip'
 }

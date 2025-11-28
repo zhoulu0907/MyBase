@@ -16,7 +16,7 @@ import { DataQueryNodeRegistry } from './data/data-query';
 import { DataQueryMultipleNodeRegistry } from './data/data-query-multiple';
 import { DataUpdateNodeRegistry } from './data/data-update';
 import { ModalNodeRegistry } from './interaction/modal';
-import { NagivateNodeRegistry } from './interaction/nagivate';
+import { NavigateNodeRegistry } from './interaction/navigate';
 import { RefreshNodeRegistry } from './interaction/refresh';
 import { TooltipNodeRegistry } from './interaction/tooltip';
 import { DataMapperNodeRegistry } from './other/data-mapper';
@@ -65,7 +65,7 @@ export const FlowNodeRegistries: FlowNodeRegistry[] = [
   DataMapperNodeRegistry,
 
   ModalNodeRegistry,
-  NagivateNodeRegistry,
+  NavigateNodeRegistry,
   RefreshNodeRegistry,
   TooltipNodeRegistry
 ];

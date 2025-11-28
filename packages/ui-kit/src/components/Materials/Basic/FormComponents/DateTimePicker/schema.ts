@@ -2,44 +2,53 @@ import {
   baseConfig,
   baseDefault,
   dataFieldConfig,
-  labelColSpanConfig,
+  alignConfig,
+  defaultValueConfig,
   layoutConfig,
   statusConfig,
   widthConfig,
+  dateRangeConfig,
   type ICommonBaseType,
+  type TDateTypeSelectKeyType,
   type TLayoutSelectKeyType,
   type TStatusSelectKeyType,
+  type TAlignSelectKeyType,
   type TWidthSelectKeyType
 } from '../../../common';
 import {
+  ALIGN_VALUES,
+  ALIGN_OPTIONS,
   CONFIG_TYPES,
+  DATE_OPTIONS,
+  DATE_VALUES,
   LAYOUT_OPTIONS,
   LAYOUT_VALUES,
   STATUS_OPTIONS,
   STATUS_VALUES,
   WIDTH_OPTIONS,
-  WIDTH_VALUES
+  WIDTH_VALUES,
+  DEFAULT_VALUE_TYPES,
+  DATE_EXTREME_TYPE,
+  DATE_DYNAMIC_TYPE
 } from '../../../constants';
 import type {
-  IBooleanConfigType,
   IDataFieldConfigType,
   ILabelConfigType,
   ILayoutConfigType,
-  INumberConfigType,
-  IPlaceholderConfigType,
-  ISecurityConfigType,
-  ISelectConfigType,
   IStatusConfigType,
-  ITextAreaConfigType,
-  ITextConfigType,
   ITooltipConfigType,
   IVerifyConfigType,
   IWidthConfigType,
   TBooleanDefaultType,
-  TNumberDefaultType,
+  IPlaceholderConfigType,
   TSelectDefaultType,
   TTextAreaDefaultType,
-  TTextDefaultType
+  TTextDefaultType,
+  TRadioDefaultType,
+  IDefaultValueConfigType,
+  IAlignConfigType,
+  ISecurityConfigType,
+  IDateRangeConfigType
 } from '../../../types';
 
 export interface XInputDateTimePickerSchema {
@@ -48,20 +57,18 @@ export interface XInputDateTimePickerSchema {
 }
 
 export type TXInputDateTimePickerEditData = Array<
-  | ITextConfigType
   | ILabelConfigType
   | IPlaceholderConfigType
   | ITooltipConfigType
+  | IDataFieldConfigType
+  | IDefaultValueConfigType
+  | IDateRangeConfigType
+  | IVerifyConfigType
   | IStatusConfigType<TStatusSelectKeyType>
-  | IWidthConfigType<TWidthSelectKeyType>
-  | INumberConfigType
-  | ISelectConfigType<TWidthSelectKeyType | TStatusSelectKeyType>
-  | ITextAreaConfigType
-  | IBooleanConfigType
+  | IAlignConfigType<TAlignSelectKeyType>
   | ILayoutConfigType<TLayoutSelectKeyType>
   | ISecurityConfigType
-  | IVerifyConfigType
-  | IDataFieldConfigType
+  | IWidthConfigType<TWidthSelectKeyType>
 >;
 
 export interface XInputDateTimePickerConfig extends ICommonBaseType {
@@ -76,9 +83,9 @@ export interface XInputDateTimePickerConfig extends ICommonBaseType {
   };
 
   /**
-   * 数据字段
+   * 占位符
    */
-  dataField: TTextDefaultType[];
+  placeholder: TTextDefaultType;
 
   /**
    * 描述信息（鼠标悬浮时显示）
@@ -86,27 +93,64 @@ export interface XInputDateTimePickerConfig extends ICommonBaseType {
   tooltip?: TTextAreaDefaultType;
 
   /**
-   * 组件状态：可用、隐藏、只读
-   * 可选值: 'default' | 'hidden' | 'readonly'
+   * 数据字段
    */
-  status?: TSelectDefaultType<TStatusSelectKeyType>;
+  dataField: TTextDefaultType[];
 
   /**
    * 默认值
    */
-  defaultValue?: TTextDefaultType;
+  defaultValueConfig?: any;
 
   /**
-   * 字段宽度
+   * 日期格式： 年、年月、年月日、年月日时
+   * 可选值: 'YEAR' | 'MONTH' | 'DATE' | 'FULL'
    */
-  width: TSelectDefaultType<TWidthSelectKeyType>;
+  dateType: TDateTypeSelectKeyType;
 
   /**
-   * required：是否必填，未填写时提交报错
+   * 可选范围
+   * 特定星期   全选/星期一/星期二/星期三/星期四/星期五/星期六/星期日
+   * 最早可选日期  静态值、动态值、变量
+   * 最晚可选日期  静态值、动态值、变量
    */
+  dateRange: {
+    weekLimit: boolean;
+    week: string[];
+    earliestLimit: boolean;
+    earliestType: string;
+    earliestStaticValue: string;
+    earliestDynamicValue: string;
+    earliestVariableValue: string[];
+    latestLimit: boolean;
+    latestType: string;
+    latestStaticValue: string;
+    latestDynamicValue: string;
+    latestVariableValue: string[];
+  };
+
+  /**
+  * required：是否必填，未填写时提交报错
+  * noRepeat：是否不允许重复
+  * lengthLimit 长度范围
+  * minLength 最小长度
+  * maxLength 最大长度
+  */
   verify: {
     required: TBooleanDefaultType;
   };
+
+  /**
+   * 组件状态：可用、隐藏、只读
+   * 可选值: 'default' | 'hidden' | 'readonly'
+   */
+  status?: TRadioDefaultType<TStatusSelectKeyType>;
+
+  /**
+   * 内容对齐方式：左、中、右
+   * 可选值: 'left' | 'center' | 'right'
+   */
+  align?: TSelectDefaultType<TAlignSelectKeyType>;
 
   /**
    * 表单的布局：水平、垂直（默认）
@@ -115,14 +159,19 @@ export interface XInputDateTimePickerConfig extends ICommonBaseType {
   layout?: TLayoutSelectKeyType;
 
   /**
-   * 标题宽度
+   * 安全
+   * display：开启
+   * type：掩码类型
    */
-  labelColSpan?: TNumberDefaultType;
+  security: {
+    display: TBooleanDefaultType;
+    type?: TTextDefaultType;
+  };
 
   /**
-   * 隐藏时是否提交数据，开启后隐藏状态仍会保存值
+   * 字段宽度
    */
-  saveWithHidden?: TBooleanDefaultType;
+  width: TRadioDefaultType<TWidthSelectKeyType>;
 }
 
 const XDateTimePicker: XInputDateTimePickerSchema = {
@@ -133,31 +182,44 @@ const XDateTimePicker: XInputDateTimePickerSchema = {
       name: '标题',
       type: CONFIG_TYPES.LABEL_INPUT
     },
-    ...dataFieldConfig,
+    {
+      key: 'placeholder',
+      name: '占位提示',
+      type: CONFIG_TYPES.PLACEHOLDER_INPUT
+    },
     {
       key: 'tooltip',
-      name: '描述信息',
+      name: '字段描述',
       type: CONFIG_TYPES.TOOLTIP_INPUT
     },
+    //  数据绑定
+    ...dataFieldConfig,
+    // 默认值
     {
-      key: 'defaultValue',
+      key: 'defaultValueConfig',
       name: '默认值',
-      type: CONFIG_TYPES.TEXT_INPUT
+      type: CONFIG_TYPES.DEFAULT_VALUE,
+      valueType: 'dateTime'
     },
-    layoutConfig,
-    labelColSpanConfig,
-    {
-      key: 'saveWithHidden',
-      name: '隐藏时提交数据',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
+    dateRangeConfig,
     {
       key: 'verify',
       name: '校验',
       type: CONFIG_TYPES.VERIFY
     },
+    // 显示状态
     statusConfig,
-    widthConfig
+    // 对齐方式
+    alignConfig,
+    // 布局方式
+    layoutConfig,
+    {
+      key: 'security',
+      name: '安全',
+      type: CONFIG_TYPES.SECURITY
+    },
+    // 字段宽度
+    widthConfig,
   ],
   config: {
     ...baseDefault,
@@ -165,17 +227,39 @@ const XDateTimePicker: XInputDateTimePickerSchema = {
       text: '日期时间',
       display: true
     },
-    dataField: [],
+    placeholder: '请选择日期时间',
     tooltip: '',
-    width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
-    status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
-    defaultValue: '',
-    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
-    saveWithHidden: false,
-    labelColSpan: 200,
+    dataField: [],
+    defaultValueConfig: {
+      type: DEFAULT_VALUE_TYPES.CUSTOM,
+      customValue: ''
+    },
+    dateType: DATE_VALUES[DATE_OPTIONS.DATE],
+    dateRange: {
+      weekLimit: false,
+      week: [],
+      earliestLimit: false,
+      earliestType: DATE_EXTREME_TYPE.DYNAMIC,
+      earliestStaticValue: '',
+      earliestDynamicValue: DATE_DYNAMIC_TYPE.TODAY,
+      earliestVariableValue: [],
+      latestLimit: false,
+      latestType: DATE_EXTREME_TYPE.DYNAMIC,
+      latestStaticValue: '',
+      latestDynamicValue: DATE_DYNAMIC_TYPE.TODAY,
+      latestVariableValue: []
+    },
     verify: {
-      required: false
-    }
+      required: false,
+    },
+    status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
+    align: ALIGN_VALUES[ALIGN_OPTIONS.LEFT],
+    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
+    security: {
+      display: false,
+      type: ''
+    },
+    width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
   }
 };
 

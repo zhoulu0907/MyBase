@@ -1,4 +1,6 @@
-import React from 'react';
+import { Form } from '@arco-design/web-react';
+import { cloneDeep } from 'lodash-es';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   FORM_COMPONENT_TYPES,
   FormComp,
@@ -22,7 +24,11 @@ interface PreviewRenderProps {
   /** 组件schema映射 */
   pageComponentSchema: any;
 
+  /** 运行状态 */
   runtime: boolean;
+
+  /** 预览状态 */
+  preview?: boolean;
 
   // 详情视图
   detailMode?: boolean;
@@ -30,6 +36,10 @@ interface PreviewRenderProps {
   showFromPageData?: Function;
 
   refresh?: number;
+  pageType?: string;
+
+  // 自定义视图规则
+  cpState?: any;
 }
 
 const PreviewRender: React.FC<PreviewRenderProps> = ({
@@ -37,15 +47,63 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
   cpType,
   pageComponentSchema,
   runtime,
+  preview,
   detailMode,
   showFromPageData,
-  refresh
+  refresh,
+  pageType,
+  cpState
 }) => {
-  // 获取组件配置
-  const componentConfig = getComponentConfig(pageComponentSchema, cpType);
+  // 获取组件配置，使用深拷贝确保每次都是新对象
+  const [componentConfig, setComponentConfig] = useState(() =>
+    cloneDeep(getComponentConfig(pageComponentSchema, cpType))
+  );
+
+  const { form } = Form.useFormContext();
+
+  // 处理组件配置的更新
+  useEffect(() => {
+    if (cpState) {
+      // 使用函数式更新，基于当前状态创建新对象，避免依赖 componentConfig
+      setComponentConfig((prevConfig: any) => {
+        // 创建新对象，而不是直接修改原对象
+        const updatedConfig = {
+          ...prevConfig,
+          status: cpState.status !== undefined ? cpState.status : prevConfig.status,
+          verify: {
+            ...prevConfig.verify,
+            required: cpState.required !== undefined ? cpState.required : prevConfig.verify.required
+          }
+        };
+        return updatedConfig;
+      });
+    } else {
+      // 使用深拷贝确保每次都是新对象，避免引用共享问题
+      const newComponentConfig = cloneDeep(getComponentConfig(pageComponentSchema, cpType));
+
+      setComponentConfig(newComponentConfig);
+    }
+  }, [cpState, pageComponentSchema, cpType]);
+
+  // 单独处理表单值的更新，使用 queueMicrotask 确保在渲染后执行
+  useEffect(() => {
+    if (cpState?.value && pageComponentSchema?.config?.dataField && pageComponentSchema.config.dataField.length > 1) {
+      const fieldName = pageComponentSchema.config.dataField[pageComponentSchema.config.dataField.length - 1];
+      // 检查当前表单值是否与目标值不同
+      const currentValue = form.getFieldValue(fieldName);
+      if (currentValue !== cpState.value) {
+        // 使用 queueMicrotask 延迟执行，确保不在渲染期间更新表单
+        queueMicrotask(() => {
+          form.setFieldValue(fieldName, cpState.value);
+        });
+      }
+    }
+  }, [cpState?.value, pageComponentSchema?.config?.dataField, form]);
+
+  // 基于视图规则渲染
 
   // 渲染对应的组件
-  const renderComponent = () => {
+  const renderComponent = useCallback(() => {
     switch (cpType) {
       case FORM_COMPONENT_TYPES.INPUT_TEXT:
         return (
@@ -231,7 +289,14 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
         );
       case FORM_COMPONENT_TYPES.SUB_TABLE:
         return (
-          <FormComp.XSubTable cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} />
+          <FormComp.XSubTable
+            cpName={cpId}
+            id={cpId}
+            {...componentConfig}
+            runtime={runtime}
+            detailMode={detailMode}
+            pageType={pageType}
+          />
         );
       case FORM_COMPONENT_TYPES.DATA_SELECT:
         return (
@@ -246,11 +311,11 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
 
       //  布局组件
       case LAYOUT_COMPONENT_TYPES.COLUMN_LAYOUT:
-        return <LayoutComp.XPreviewColumnLayout {...componentConfig} cpName={cpId} id={cpId} />;
+        return <LayoutComp.XPreviewColumnLayout {...componentConfig} cpName={cpId} id={cpId} pageType={pageType} detailMode={detailMode} />;
       case LAYOUT_COMPONENT_TYPES.TABS_LAYOUT:
-        return <LayoutComp.XPreviewTabsLayout {...componentConfig} cpName={cpId} id={cpId} />;
+        return <LayoutComp.XPreviewTabsLayout {...componentConfig} cpName={cpId} id={cpId} pageType={pageType} detailMode={detailMode} />;
       case LAYOUT_COMPONENT_TYPES.COLLAPSE_LAYOUT:
-        return <LayoutComp.XPreviewCollapseLayout {...componentConfig} cpName={cpId} id={cpId} />;
+        return <LayoutComp.XPreviewCollapseLayout {...componentConfig} cpName={cpId} id={cpId} pageType={pageType} detailMode={detailMode} />;
 
       //  列表组件
       case LIST_COMPONENT_TYPES.TABLE:
@@ -260,6 +325,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
             id={cpId}
             {...componentConfig}
             runtime={runtime}
+            preview={preview}
             showFromPageData={showFromPageData}
             refresh={refresh}
           />
@@ -294,7 +360,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
       default:
         return <div>未知组件类型: {cpType}</div>;
     }
-  };
+  }, [componentConfig, refresh]);
 
   return <>{renderComponent()}</>;
 };

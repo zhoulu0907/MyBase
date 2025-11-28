@@ -4,7 +4,7 @@ import { register } from '@antv/x6-react-shape';
 import { Button, InputNumber } from '@arco-design/web-react';
 import DetailDrawer from '../Drawers/DetailDrawer';
 import { type EntityNode, type EntityERProps } from '../../../../utils/interface';
-import { FIELD_TYPE } from '@onebase/ui-kit';
+import { FIELD_TYPE, useGraphEntitytore } from '@onebase/ui-kit';
 import EntityNodeComponent from './ERnode';
 import nodeStyles from './ERnode.module.less';
 import styles from './index.module.less';
@@ -15,7 +15,6 @@ import {
   toggleNodeShadow,
   toggleEdgeSelected
 } from './utils';
-import { useNewNodeStore } from '@/store/store_entity';
 
 const LINE_HEAD_HEIGHT = 48;
 const LINE_HEIGHT = 34.8;
@@ -23,7 +22,7 @@ const LINE_TITLE_HEIGHT = 44;
 const NODE_WIDTH = 280;
 const NODE_HEIGHT = 200;
 
-interface ERchartRef {
+export interface ERchartRef {
   getGraphPositon: () => void;
 }
 
@@ -46,7 +45,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
     },
     ref
   ) => {
-    const { newNodes } = useNewNodeStore();
+    const { newNodes } = useGraphEntitytore();
     const [selectedNode] = useState<EntityNode | null>(null);
     const [drawerVisible, setDrawerVisible] = useState(false);
     const [zoom, setZoom] = useState(100);
@@ -225,6 +224,33 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
       ]
     );
 
+    // 根据字段ID和节点数据，获取应该连接的连接桩
+    const getPortForField = (
+      fieldId: string,
+      nodeId: string,
+      nodeData: EntityNode,
+      isSource: boolean,
+      systemCollapsed: boolean = true,
+      customCollapsed: boolean = false
+    ): string => {
+      const field = nodeData.fields.find((f) => f.fieldId === fieldId || f.fieldName === fieldId);
+      if (!field) {
+        return `${fieldId}_${isSource ? 'source' : 'target'}`;
+      }
+
+      const isSystemField = field.isSystemField === FIELD_TYPE.SYSTEM;
+      const isCollapsed = isSystemField ? systemCollapsed : customCollapsed;
+
+      // 折叠状态，使用聚合连接桩
+      if (isCollapsed) {
+        const section = isSystemField ? 'system' : 'custom';
+        return `${nodeId}_${section}_fields_${isSource ? 'source' : 'target'}`;
+      }
+
+      // 展开状态，使用字段连接桩
+      return `${fieldId}_${isSource ? 'source' : 'target'}`;
+    };
+
     const createAndAddEdge = (
       graph: Graph,
       edgeData: {
@@ -233,23 +259,55 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
         targetEntityId: string;
         targetFieldId: string;
         label?: string;
-      }
+      },
+      nodesData: EntityNode[],
+      systemCollapsed: boolean = true,
+      customCollapsed: boolean = false
     ) => {
+      const sourceNode = nodesData.find((n) => n.entityId === edgeData.sourceEntityId);
+      const targetNode = nodesData.find((n) => n.entityId === edgeData.targetEntityId);
+
+      // 获取连接桩
+      const sourcePort = sourceNode
+        ? getPortForField(
+            edgeData.sourceFieldId,
+            edgeData.sourceEntityId,
+            sourceNode,
+            true,
+            systemCollapsed,
+            customCollapsed
+          )
+        : `${edgeData.sourceFieldId}_source`;
+      const targetPort = targetNode
+        ? getPortForField(
+            edgeData.targetFieldId,
+            edgeData.targetEntityId,
+            targetNode,
+            false,
+            systemCollapsed,
+            customCollapsed
+          )
+        : `${edgeData.targetFieldId}_target`;
+
+      // 保存原始连接桩（用于后续展开时恢复）
+      const originalSource = { cell: edgeData.sourceEntityId, port: `${edgeData.sourceFieldId}_source` };
+      const originalTarget = { cell: edgeData.targetEntityId, port: `${edgeData.targetFieldId}_target` };
+
       const edge = graph.createEdge({
-        source: { cell: edgeData.sourceEntityId, port: `${edgeData.sourceFieldId}_source` },
-        target: { cell: edgeData.targetEntityId, port: `${edgeData.targetFieldId}_target` },
+        source: { cell: edgeData.sourceEntityId, port: sourcePort },
+        target: { cell: edgeData.targetEntityId, port: targetPort },
         attrs: {
           line: {
-            stroke: 'rgba(var(--primary-6), 1)',
-            strokeWidth: 2,
+            stroke: 'rgb(var(--gray-5))',
+            strokeWidth: 1,
             targetMarker: { name: 'block', width: 12, height: 8 }
           }
         },
         connector: { name: 'smooth' },
         data: {
           ...edgeData,
-          originalSource: { cell: edgeData.sourceEntityId, port: `${edgeData.sourceFieldId}_source` },
-          originalTarget: { cell: edgeData.targetEntityId, port: `${edgeData.targetFieldId}_target` }
+          originalSource,
+          originalTarget
         },
         labels: edgeData.label
           ? [
@@ -258,7 +316,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
                 attrs: {
                   label: {
                     text: edgeData.label,
-                    fill: 'rgba(var(--primary-6), 1)',
+                    fill: 'rgb(var(--primary-6))',
                     fontSize: 12,
                     textAnchor: 'middle',
                     textVerticalAnchor: 'middle'
@@ -568,14 +626,19 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
 
       graphRef?.current?.clearCells();
 
-      // --- 添加节点 ---
+      // --- 1、添加节点 ---
       if (data.nodes && data.nodes.length > 0) {
         createAndAddNode(positioner, data.nodes);
       }
 
-      // --- 添加边 ---
+      // --- 2、更新连接桩位置（自定义字段的位置依赖系统字段的折叠状态）
+      if (data.nodes && data.nodes.length > 0 && collapseHandlerRef.current) {
+        collapseHandlerRef.current.updatePortsPosition(data.nodes, true);
+      }
+
+      // --- 3、添加边（根据新的连接桩位置）---
       if (data.edges && data.edges.length > 0) {
-        data.edges.forEach((edge) => createAndAddEdge(graphRef.current!, edge));
+        data.edges.forEach((edge) => createAndAddEdge(graphRef.current!, edge, data.nodes, true, false));
       }
 
       // 是否首次加载且有节点
@@ -612,7 +675,6 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
       }
 
       try {
-        // 执行自动布局算法
         const newPositions = performAutoLayout(data.nodes, data.edges || [], {
           nodeWidth: NODE_WIDTH,
           horizontalSpacing: 50,

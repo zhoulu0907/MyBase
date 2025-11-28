@@ -5,6 +5,7 @@ import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { nanoid } from 'nanoid';
 import '../index.css';
 import type { XInputSelectMutipleConfig } from './schema';
+import { getPopupContainer } from '@/utils';
 
 const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const {
@@ -14,9 +15,7 @@ const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: bool
     status,
     verify,
     layout,
-    labelColSpan = 0,
-    showSearch,
-    defaultValue,
+    defaultOptionsConfig,
     runtime = true,
     detailMode
   } = props;
@@ -32,51 +31,46 @@ const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: bool
     }
   }, [dataField]);
 
-  const getPopupContainer = (node?: HTMLElement): HTMLElement => {
-    return (
-      (node?.closest('.arco-form-item') as HTMLElement) ||
-      node?.parentNode as HTMLElement ||
-      document.body
-    );
-  };
-
   return (
     <div className="formWrapper">
       <Form.Item
-        label={label.display && label.text}
+        label={
+          label.display &&
+          label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
+        }
         field={
           dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.SELECT_ONE}_${nanoid()}`
         }
         layout={layout}
         tooltip={tooltip}
-        labelCol={{
-          style: { width: labelColSpan, flex: 'unset' }
-        }}
         wrapperCol={{ style: { flex: 1 } }}
-        rules={[{ required: verify?.required }, { maxLength: verify?.maxChecked }]}
+        rules={[
+          { required: verify?.required, message:`${label.text}是必填项` },
+          { maxLength: verify?.maxChecked }
+        ]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
+        initialValue={defaultOptionsConfig?.defaultOptions.filter(ele => ele.isChosen)?.map(ele => ele.value)}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-          <Space wrap>
-            {fieldValue && defaultValue && fieldValue.map((ele: any, index: number) => <Tag key={index}>
-              {defaultValue.find((e: any) => e.value === ele)?.label}
+          <Space wrap size={[4,4]}>
+            {fieldValue && defaultOptionsConfig?.defaultOptions && typeof fieldValue === 'string' && fieldValue.split(',').map((ele: any, index: number) => <Tag key={index} style={{ marginBottom: '0' }}>
+              {defaultOptionsConfig?.defaultOptions.find((e: any) => e.value === ele)?.label}
             </Tag>)}
           </Space>
         ) : (
           <Select
             mode="multiple"
             allowClear
-            showSearch={showSearch}
             getPopupContainer={getPopupContainer}
             filterOption={(input, option) => {
               return option?.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0;
             }}
             placeholder="请选择"
-            options={defaultValue}
+            options={defaultOptionsConfig?.defaultOptions}
             style={{
               width: '100%',
               pointerEvents: runtime ? 'unset' : 'none'

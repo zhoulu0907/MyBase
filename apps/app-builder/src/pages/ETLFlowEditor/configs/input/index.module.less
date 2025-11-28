@@ -1,0 +1,94 @@
+.config {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  box-sizing: border-box;
+  padding: 0px;
+  color: #272e3b;
+  font-size: 14px;
+  font-weight: 400;
+
+  .dataConfig {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+
+    .dataSourceHeader {
+      width: 100%;
+      height: 40px;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      box-sizing: border-box;
+
+      .dataSourceHeaderLeft {
+        font-size: 14px;
+        font-weight: 400;
+        color: #4e5969;
+      }
+    }
+
+    .dataSourceContent {
+      display: flex;
+      width: 100%;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-start;
+      gap: 8px;
+
+      .dataSourceName {
+        width: 100%;
+        height: 40px;
+        background-color: #f7f8fa;
+        border-radius: 6px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+        font-size: 14px;
+        font-weight: 500;
+        line-height: 22px;
+
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .columnContent {
+        width: 100%;
+        overflow: auto;
+
+        .columnTable {
+          :global(.arco-table-th) {
+            padding: 8px 12px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #4e5969;
+            background-color: #f7f8fa;
+          }
+
+          :global(.arco-table-td) {
+            padding: 8px 12px;
+            font-size: 14px;
+            color: #272e3b;
+          }
+
+          :global(.arco-table-tr:hover) {
+            background-color: #f7f8fa;
+          }
+
+          padding-bottom: 16px;
+          box-sizing: border-box;
+        }
+      }
+    }
+  }
+}

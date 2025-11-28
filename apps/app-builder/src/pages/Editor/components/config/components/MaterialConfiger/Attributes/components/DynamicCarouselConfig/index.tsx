@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Form, Input, Upload, Message, Popover } from '@arco-design/web-react';
 import { IconEdit, IconDelete } from '@arco-design/web-react/icon';
 import { uploadFile } from '@onebase/platform-center';
-// import { useAppEntityStore } from '@/store/store_entity';
-// import { type MetadataEntityField, type MetadataEntityPair } from '@onebase/app';
 import styles from '../../index.module.less';
+import { CONFIG_TYPES } from '@onebase/ui-kit';
+import { registerConfigRenderer } from '../../registry';
 
 const FormItem = Form.Item;
 
@@ -187,3 +187,10 @@ const DynamicCarouselConfig: React.FC<DynamicCarouselConfigProps> = ({ handlePro
 };
 
 export default DynamicCarouselConfig;
+
+registerConfigRenderer(
+  CONFIG_TYPES.CAROUSEL,
+  ({ id, handlePropsChange, item, configs }) => (
+    <DynamicCarouselConfig id={id} handlePropsChange={handlePropsChange} item={item} configs={configs} />
+  )
+);

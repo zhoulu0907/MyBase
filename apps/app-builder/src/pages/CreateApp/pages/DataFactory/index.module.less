@@ -1,18 +1,52 @@
-.data-factory-page {
+.dataFactoryPage {
   height: calc(100vh - 64px);
-  .menu {
-    height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+
+  .sider {
+    height: calc(100vh - 64px);
     width: 100%;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-    border-right: 1px solid #e5e6eb;
-    :global(.arco-menu-item) {
-      padding: 0 8px !important;
+
+    .title {
+      height: 40px;
+      padding-left: 16px;
+      box-sizing: border-box;
+      font-size: 14px;
+      color: #6b7785;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-start;
+    }
+
+    .dataProcessTitle {
+      height: 40px;
+      padding-top: 8px;
+      padding-left: 16px;
+      font-size: 14px;
+      color: #6b7785;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-start;
+      border-top: 1px solid #e5e6eb;
+    }
+
+    .menu {
+      height: 150px;
+    }
+
+    .dataProcessMenu {
+      height: calc(100vh - 64px - 150px - 90px);
     }
   }
-  .sider {
-    height: 100%;
-  }
+
   .content {
     position: relative;
+    width: 100%;
+    height: 100%;
   }
 }

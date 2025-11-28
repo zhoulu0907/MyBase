@@ -25,7 +25,7 @@ import {
   type GridItem
 } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import styles from './index.module.less';
 
 interface PreviewProps {
@@ -38,7 +38,12 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
   useSignals();
 
-  const { components: listComponents, pageComponentSchemas: listPageComponentSchemas } = useListEditorSignal;
+  const {
+    components: listComponents,
+    pageComponentSchemas: listPageComponentSchemas,
+    clearComponents,
+    clearPageComponentSchemas
+  } = useListEditorSignal;
 
   const { editPageViewId } = pagesRuntimeSignal;
 
@@ -48,6 +53,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   const [mainMetaData, setMainMetaData] = useState<string>('');
   const [mainMetaDataFields, setMainMetaDataFields] = useState<AppEntityField[]>([]);
   const [editTargetId, setEditTargetId] = useState('');
+  const preview = true;
 
   useEffect(() => {
     const appId = getHashQueryParam('appId');
@@ -67,12 +73,30 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     setMainMetaDataFields(entityWithChildren.parentFields);
   };
 
+  const handleGetPageSetId = useCallback(async (menuId: string) => {
+    const req: GetPageSetIdReq = { menuId: menuId };
+    const res = await getPageSetId(req);
+    setPageSetId(res);
+  }, []);
+
   useEffect(() => {
     if (menuId) {
-      handleGetPageSetId(menuId);
+      // 重置所有状态，避免显示上一次的数据
+      setPageSetId('');
+      setPageType('');
+      setMainMetaData('');
+      setMainMetaDataFields([]);
       setEditTargetId('');
+      form.resetFields();
+
+      // 清空全局 signals 中的组件和 schemas
+      clearComponents();
+      clearPageComponentSchemas();
+
+      // 然后加载新的数据
+      handleGetPageSetId(menuId);
     }
-  }, [menuId]);
+  }, [menuId, handleGetPageSetId, clearComponents, clearPageComponentSchemas, form]);
 
   // 仅在 mainMetaData 或 mainMetaDataFields 变化且存在 editTargetId 时重新获取数据
   useEffect(() => {
@@ -89,12 +113,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     // 优先切换到列表页
     setPageType(EDITOR_TYPES.LIST_EDITOR);
   }, [pageSetId]);
-
-  const handleGetPageSetId = async (menuId: string) => {
-    const req: GetPageSetIdReq = { menuId: menuId };
-    const res = await getPageSetId(req);
-    setPageSetId(res);
-  };
 
   const loadPageSetInfo = async (pageSetId: string) => {
     startLoadPageSet({ pageSetId: pageSetId });
@@ -211,7 +229,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                   key={cp.id}
                   className={styles.componentItem}
                   style={{
-                    width: getComponentWidth(listPageComponentSchemas.value[cp.id], cp.type)
+                    width: `calc(${getComponentWidth(listPageComponentSchemas.value[cp.id], cp.type)} - 8px)`,
+                    margin: '4px'
                   }}
                 >
                   <PreviewRender
@@ -219,6 +238,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                     cpType={cp.type}
                     pageComponentSchema={listPageComponentSchemas.value[cp.id]}
                     runtime={runtime}
+                    preview={preview}
                     showFromPageData={showFromPageData}
                   />
                 </div>
@@ -238,10 +258,11 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                     key={cp.id}
                     className={styles.componentItem}
                     style={{
-                      width: getComponentWidth(
+                      width: `calc(${getComponentWidth(
                         useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id],
                         cp.type
-                      )
+                      )} - 8px)`,
+                      margin: '4px'
                     }}
                   >
                     <PreviewRender
@@ -251,6 +272,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                         useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id]
                       }
                       runtime={runtime}
+                      preview={preview}
                       showFromPageData={() => {
                         setPageType(EDITOR_TYPES.FORM_EDITOR);
                       }}
@@ -261,7 +283,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
             ))}
 
             <div className={styles.footer}>
-              <Button type="primary" onClick={submitForm}>
+              <Button type="primary" disabled={preview} onClick={submitForm}>
                 提交
               </Button>
               <Button type="default" onClick={cancelSubmitForm}>

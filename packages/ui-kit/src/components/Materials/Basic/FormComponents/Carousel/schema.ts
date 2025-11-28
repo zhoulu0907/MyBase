@@ -83,20 +83,10 @@ export interface XCarouselConfig extends ICommonBaseType {
   };
 
   /**
-   * 组件状态：可用、隐藏、只读
-   * 可选值: 'default' | 'hidden' | 'readonly'
-   */
-  status?: TRadioDefaultType<TStatusSelectKeyType>;
-
-  /**
    * 描述信息（鼠标悬浮时显示）
    */
   tooltip?: TTextAreaDefaultType;
 
-  /**
-   * 字段宽度
-   */
-  width: TSelectDefaultType<TWidthSelectKeyType>;
   /**
    * 自动轮播
    */
@@ -126,21 +116,21 @@ export interface XCarouselConfig extends ICommonBaseType {
   };
 
   /**
+   * 组件状态：可用、隐藏、只读
+   * 可选值: 'default' | 'hidden' | 'readonly'
+   */
+  status?: TRadioDefaultType<TStatusSelectKeyType>;
+
+  /**
    * 表单的布局：水平、垂直（默认）
    * 可选值: 'vertical' | 'horizontal'
    */
   layout?: TLayoutSelectKeyType;
 
   /**
-   * 内容对齐方式：左、中、右
-   * 可选值: 'left' | 'center' | 'right'
+   * 字段宽度
    */
-  align?: TSelectDefaultType<TAlignSelectKeyType>;
-
-  /**
-   * 标题宽度
-   */
-  labelColSpan?: TNumberDefaultType;
+  width: TSelectDefaultType<TWidthSelectKeyType>;
 }
 
 const XCarousel: XCarouselSchema = {
@@ -156,7 +146,6 @@ const XCarousel: XCarouselSchema = {
       name: '描述信息',
       type: CONFIG_TYPES.TOOLTIP_INPUT
     },
-    layoutConfig,
     carouselConfig,
     {
       key: 'autoplay',
@@ -168,13 +157,14 @@ const XCarousel: XCarouselSchema = {
       name: '轮播间隔',
       type: CONFIG_TYPES.NUMBER_INPUT
     },
+    fillConfig,
     {
       key: 'verify',
       name: '校验',
       type: CONFIG_TYPES.VERIFY
     },
-    fillConfig,
     statusConfig,
+    layoutConfig,
     widthConfig
   ],
   config: {
@@ -184,30 +174,18 @@ const XCarousel: XCarouselSchema = {
       display: true
     },
     tooltip: '',
-    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
-    width: WIDTH_VALUES[WIDTH_OPTIONS.FULL],
-    status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
-    fillStyle: FILL_VALUES[FILL_OPTIONS.COVER],
+    carouselConfig: [],
     autoplay: false,
     interval: 3,
-    labelColSpan: 200,
-    carouselConfig: [
-      {
-        image: 'https://devops.cm-iov.com:9000/system-static/img/annual2.jpg',
-        text: '🎑 中秋快乐 🎉',
-        url: 'https://devops.cm-iov.com:9000/system-static/img/annual2.jpg'
-      },
-      {
-        image: 'https://devops.cm-iov.com/static/img/bg.dd06daaa.png',
-        text: '222',
-        url: '#'
-      }
-    ],
+    fillStyle: FILL_VALUES[FILL_OPTIONS.COVER],
     verify: {
       required: false,
       maxCount: 10,
       maxSize: 5
-    }
+    },
+    width: WIDTH_VALUES[WIDTH_OPTIONS.FULL],
+    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
+    status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
   }
 };
 

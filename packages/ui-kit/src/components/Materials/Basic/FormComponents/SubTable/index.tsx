@@ -1,99 +1,392 @@
-import { ENTITY_FIELD_TYPE } from '@/components/DataFactory';
-import { FormComp, FormSchema } from '@/components/Materials/Basic/FormComponents';
-import { LAYOUT_OPTIONS, LAYOUT_VALUES, STATUS_OPTIONS, STATUS_VALUES } from '@/components/Materials/constants';
-import { getComponentConfig, getComponentSchema } from '@/components/Materials/schema';
-import { usePageEditorSignal } from '@/hooks';
-import { Button, Form, Layout, Table } from '@arco-design/web-react';
-import { IconPlus } from '@arco-design/web-react/icon';
-import { pagesRuntimeSignal } from '@onebase/common';
-import { useSignals } from '@preact/signals-react/runtime';
-import { useEffect, useState } from 'react';
-import { v4 as uuidv4 } from 'uuid';
-import { COMPONENT_MAP } from '../../../componentsMap';
-import './index.css';
+import { Divider, Layout, Form, Button, Table } from '@arco-design/web-react';
+import { IconPlus, IconDelete } from '@arco-design/web-react/icon';
+import { nanoid } from 'nanoid';
 import { type XSubTableConfig } from './schema';
-
-const leftPanelWidth = 318;
-const rightPanelWidth = 310;
-const canvasPaddingWidth = 40 + 32 + 10;
-const canvasMarginWidth = 10;
-const componentMaxWidth = leftPanelWidth + rightPanelWidth + canvasPaddingWidth + canvasMarginWidth;
+import { useSignals } from '@preact/signals-react/runtime';
+import { usePageEditorSignal } from 'src/hooks/useSignal';
+import { ReactSortable } from 'react-sortablejs';
+import { getComponentConfig } from 'src/components/Materials/schema';
+import { getComponentSchema } from '../../../schema';
+import { FORM_COMPONENT_TYPES, ENTITY_COMPONENT_TYPES } from '../../../componentTypes';
+import EditRender from 'src/components/render/EditRender';
+import { COMPONENT_GROUP_NAME, EDITOR_TYPES, type GridItem } from 'src/utils/const';
+import { STATUS_OPTIONS, STATUS_VALUES, COLOR_MODE_TYPES, DEFAULT_OPTIONS_TYPE, DEFAULT_VALUE_TYPES } from '../../../constants';
+import { v4 as uuidv4 } from 'uuid';
+import CompDeleteIcon from '@/assets/images/app_delete.svg';
+import CompCopyIcon from '@/assets/images/copy_comp_icon.svg';
+import CompShowIcon from '@/assets/images/eye_off_icon.svg';
+import { useEffect, useState } from 'react';
+import PreviewRender from 'src/components/render/PreviewRender';
+import { pagesRuntimeSignal } from '@onebase/common';
+import { ENTITY_TYPE_VALUE } from '@onebase/app';
+import { useAppEntityStore } from 'src/signals/store_entity';
+import { getDictDetail, getDictDataListByType } from '@onebase/platform-center';
+import './index.css';
 
 const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: boolean }) => {
-  const {
-    cpName,
-    columns = [],
-    id,
-    runtime = true,
-    label,
-    layout,
-    tooltip,
-    labelColSpan = 100,
-    status,
-    verify,
-    dataField,
-    detailMode
-  } = props;
-
   useSignals();
-
-  const { subTableDataLength } = pagesRuntimeSignal;
-
-  const { form } = Form.useFormContext();
+  const { id, label, tooltip, status, subTableConfig, verify, runtime = true, detailMode, pageType } = props;
+  const { mainEntity, subEntities } = useAppEntityStore();
 
   const {
+    curComponentID,
     setCurComponentID,
+    clearCurComponentID,
     setCurComponentSchema,
     pageComponentSchemas,
     setPageComponentSchemas,
-    setShowDeleteButton
-  } = usePageEditorSignal();
+    delPageComponentSchemas,
+    showDeleteButton,
+    setShowDeleteButton,
+    subTableComponents,
+    setSubTableComponents
+  } = usePageEditorSignal(pageType || EDITOR_TYPES.FORM_EDITOR);
+  const { subTableDataLength } = pagesRuntimeSignal;
+
+  // 判断拖拽的组件是否是表单组件
+  const isFormComponent = (type: string): boolean => {
+    let isForm = false;
+    const keys = Object.keys(FORM_COMPONENT_TYPES);
+    for (let key of keys) {
+      if (type === FORM_COMPONENT_TYPES[key as keyof typeof FORM_COMPONENT_TYPES]) {
+        isForm = true;
+      }
+    }
+
+    return isForm;
+  };
+
+  // 取消隐藏组件
+  const handleShowComponent = (componentId: string) => {
+    const schema = pageComponentSchemas[componentId];
+    schema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT];
+
+    setPageComponentSchemas(componentId, schema);
+    // setTimeout(() => {
+    setCurComponentID(componentId);
+    setCurComponentSchema(schema);
+    setShowDeleteButton(false);
+    // }, 0);
+  };
+  // 复制组件
+  const handleCopyComponent = (comp: any, originId: string, index: number) => {
+    // ID 映射表，记录旧 ID 到新 ID 的映射
+  };
+  // 删除组件
+  const handleDeleteComponent = (componentId: string) => {
+    // 从组件列表中移除 遍历，过滤掉 id 匹配的组件
+    const updatedColumns = subTableComponents[id].filter((cp) => cp.id !== componentId);
+    setSubTableComponents(id, updatedColumns);
+    delPageComponentSchemas(componentId);
+
+    // 如果删除的是当前选中的组件，清除选中状态
+    if (curComponentID === componentId) {
+      delPageComponentSchemas(componentId);
+      clearCurComponentID();
+    }
+  };
+
+  // 拖拽添加
+  const onSubAdd = async (e: any) => {
+    const cpID = e.item.getAttribute('data-cp-id') || e.item.getAttribute('data-id') || e.item.id;
+    const itemType = e.item.getAttribute('data-cp-type');
+    const fieldId = e.item.getAttribute('data-field-id');
+    const entityId = e.item.getAttribute('data-entity-id');
+
+    // 不允许拖拽主、子表嵌套、主表字段
+    if (
+      itemType === ENTITY_TYPE_VALUE.MAIN ||
+      itemType === ENTITY_TYPE_VALUE.SUB ||
+      itemType == ENTITY_COMPONENT_TYPES.MAIN_ENTITY ||
+      itemType == ENTITY_COMPONENT_TYPES.SUB_ENTITY ||
+      (entityId && entityId === mainEntity.entityId)
+    ) {
+      return;
+    }
+    // 只能拖拽表单 && 不能是子表单
+    const isForm = isFormComponent(itemType || '');
+    if (!itemType || !isForm || itemType === FORM_COMPONENT_TYPES.SUB_TABLE) {
+      if (cpID) {
+        const updatedColumns = subTableComponents[cpID]?.filter((cp) => cp.id !== cpID);
+        if (updatedColumns) {
+          setSubTableComponents(id, updatedColumns);
+        }
+        delPageComponentSchemas(cpID);
+        clearCurComponentID();
+      }
+      return;
+    }
+
+    // 拖拽的子表项必须是同一个子表
+    if (entityId) {
+      const sameField = subTableComponents[id]?.every((ele) => {
+        const dataField = pageComponentSchemas[ele.id].config.dataField;
+        return !dataField || dataField?.[0] === entityId;
+      });
+      if (!sameField) {
+        return;
+      }
+    }
+
+    // 表单项配置
+    const schemaConfig = getComponentConfig(pageComponentSchemas[cpID!], itemType!);
+    const schema = getComponentSchema(itemType as any);
+    const itemDisplayName = e.item.getAttribute('data-label') || e.item.getAttribute('data-cp-displayname');
+    schema.config = schemaConfig;
+
+    // 当前实体
+    const currentEntity = subEntities.entities?.find((ele) => ele.entityId === entityId);
+    // 当前字段
+    const currentField = currentEntity?.fields?.find((ele) => ele.fieldId === fieldId);
+    if (currentField) {
+      // 数据长度 dataLength
+      // 小数位数 decimalPlaces
+      // 默认值 defaultValue => defaultValueConfig
+      if (schema.config.defaultValueConfig) {
+        const defaultValueConfig = {
+          ...schema.config.defaultValueConfig,
+          type: DEFAULT_VALUE_TYPES.CUSTOM,
+          customValue: currentField.defaultValue
+        };
+        schema.config.defaultValueConfig = defaultValueConfig;
+      }
+      // 字段描述 description
+      schema.config.tooltip = currentField.description;
+      // 是否必填：1-是，0-不是 isRequired
+      // 是否唯一：1-是，0-不是 isUnique
+      schema.config.verify = {
+        ...schema.config.verify,
+        required: currentField.isRequired,
+        noRepeat: currentField.isUnique
+      };
+
+      // 字段选项列表（单/多选字段专用） options
+      if (itemType === FORM_COMPONENT_TYPES.SELECT_ONE || itemType === FORM_COMPONENT_TYPES.SELECT_MUTIPLE) {
+        if (currentField.dictTypeId) {
+          const res = await getDictDetail(currentField.dictTypeId);
+          const dictDataList = res?.type ? await getDictDataListByType(res.type) : [];
+          const dictOptions = dictDataList?.filter((e: any) => e.status === 1); // 只显示启用状态的字典数据
+          if (dictOptions.length) {
+            const newDefaultOptionsConfig = {
+              type: DEFAULT_OPTIONS_TYPE.DICT,
+              disabled: true,
+              dictTypeId: currentField.dictTypeId,
+              colorMode: true,
+              colorModeType: COLOR_MODE_TYPES.POINT,
+              defaultOptions: dictOptions
+            };
+            schema.config.defaultOptionsConfig = {
+              ...schema.config.defaultOptionsConfig,
+              ...newDefaultOptionsConfig
+            };
+          }
+        } else if (currentField.options?.length) {
+          const newDefaultOptionsConfig = {
+            defaultOptions: currentField.options.map((e) => ({
+              label: e.optionLabel,
+              value: e.optionValue
+            }))
+          };
+          schema.config.defaultOptionsConfig = {
+            ...schema.config.defaultOptionsConfig,
+            disabled: true,
+            ...newDefaultOptionsConfig
+          };
+        }
+      }
+      // 字段约束配置（长度/正则） constraints
+      schema.config.constraints = currentField.constraints;
+      // 自动编号完整配置（含规则项） autoNumberConfig
+      if (itemType === FORM_COMPONENT_TYPES.AUTO_CODE) {
+        schema.config.autoCodeConfig = currentField.autoNumberConfig || schema.config.autoCodeConfig;
+        schema.config.autoCodeDisabled = currentField?.autoNumberConfig?.id ? true : false;
+      }
+      // 关联的字典类型ID    dictTypeId
+    }
+
+    schema.config.cpName = itemDisplayName;
+    schema.config.label.text = itemDisplayName;
+    schema.config.label.display = false;
+    schema.config.dataField = entityId ? [entityId, fieldId] : [];
+    schema.config.id = cpID;
+    const props = {
+      id: cpID,
+      type: itemType,
+      ...schema
+    };
+    const newSub = { id: cpID, type: itemType, displayName: itemDisplayName };
+    setSubTableComponents(id, [...subTableComponents[id], newSub]);
+    setPageComponentSchemas(cpID!, props);
+    // setTimeout(() => {
+    setCurComponentID(cpID!);
+    setCurComponentSchema(props);
+    setShowDeleteButton(false);
+    // }, 0);
+  };
+
+  // 子表单内排序 拖拽选中
+  const onSubStart = (e: any) => {
+    const cpID = e.item.getAttribute('data-id') || '';
+    const curComponentSchema = pageComponentSchemas[cpID] || {};
+    // setTimeout(() => {
+    setCurComponentID(cpID);
+    setCurComponentSchema(curComponentSchema);
+    setShowDeleteButton(true);
+    // }, 0);
+  };
+  // 子表单里的元素 点击事件
+  const onSubComponentClick = (e: React.MouseEvent<HTMLDivElement>, cp: GridItem) => {
+    e.stopPropagation();
+    const curComponentSchema = pageComponentSchemas[cp.id];
+    // setTimeout(() => {
+    setCurComponentID(cp.id);
+    setCurComponentSchema(curComponentSchema);
+    setShowDeleteButton(true);
+    // }, 0);
+  };
+
+  /**
+   * 预览
+   */
+  const [subTableData, setSubTableData] = useState<any[]>([]);
+  const [subTableColumns, setSubTableColumns] = useState<any[]>([]);
+
+  // 表单
+  const { form } = Form.useFormContext();
+
+  /**
+   * 子表单元格配置覆盖
+   */
+  const applySubTableCellOverrides = (cfg: any, type: string) => {
+    if (type === FORM_COMPONENT_TYPES.INPUT_TEXTAREA) {
+      return { ...cfg, minRows: 1 };
+    }
+    return cfg;
+  };
+
+  const refreshSubTableData = () => {
+    const len = subTableDataLength.value[id] || 0;
+    const newData: any[] = [];
+    for (let i = 0; i < len; i++) {
+      newData.push({ key: `${i}` });
+    }
+    setSubTableData(newData);
+  };
 
   useEffect(() => {
-    console.log(form.getFieldValue(`${id}`));
-  }, [form]);
+    getTableColumns();
+  }, []);
 
   useEffect(() => {
-    console.log('subTableDataLength: ', subTableDataLength.value);
-
     let newSubTableData: any[] = [];
-    const newData = columns.reduce((acc, column) => {
-      acc[column.dataIndex] = '';
-      return acc;
-    }, {});
-
     for (let i = 0; i < subTableDataLength.value[id]; i++) {
-      newSubTableData.push({ ...newData, key: `${i}` });
+      newSubTableData.push({ key: `${i}` });
     }
     setSubTableData(newSubTableData);
   }, [subTableDataLength.value]);
 
-  const [subTableData, setSubTableData] = useState<any[]>([]);
-  const [subTableColumns, setSubTableColumns] = useState<any[]>([]);
-
-  useEffect(() => {
-    console.log('subTableData: ', subTableData);
-  }, [subTableData]);
-
-  const handleAdd = () => {
-    console.log('add');
-    const newData = columns.reduce((acc, column) => {
-      acc[column.dataIndex] = '';
-      return acc;
-    }, {});
-    newData.key = subTableData.length;
-
-    setSubTableData((prevData) => {
-      const newDataArray = [...prevData, newData];
-      return newDataArray;
-    });
+  // 获取表格配置 columns
+  const getTableColumns = () => {
+    let tableColumns = [];
+    if (subTableConfig?.showIndex) {
+      const indexColumn = {
+        title: '序号',
+        dataIndex: 'index',
+        width: '62px',
+        align: 'center',
+        fixed: '',
+        headerCellStyle: { textAlign: 'center' },
+        bodyCellStyle: { padding: '0 4px', textAlign: 'center' },
+        render: (_: any, __: any, index: number) => (index + 1)
+      };
+      tableColumns.push(indexColumn);
+    }
+    for (let column of subTableComponents[id] || []) {
+      const displayName = pageComponentSchemas[column.id].config.label.text || column.displayName;
+      const required = pageComponentSchemas[column.id].config?.verify?.required;
+      const tableColumn = {
+        title: (
+          <>
+            {required ? <span style={{ color: 'red', paddingRight: '4px' }}>*</span> : null}
+            {displayName}
+          </>
+        ),
+        dataIndex: column.id,
+        key: column.id,
+        fixed: '',
+        bodyCellStyle: {
+          padding: '4px 0'
+        },
+        render: (_text: string, _record: any, index: number) => {
+          const config = {
+            ...pageComponentSchemas[column.id].config,
+            dataField: [`${id}.${index}.${pageComponentSchemas[column.id].config?.dataField?.[1] || column.id}`]
+          };
+          const finalConfig = applySubTableCellOverrides(config, column.type);
+          const pageSchema = { ...pageComponentSchemas[column.id], config: finalConfig };
+          const editDisabled = (_record.key || _record.key === '0') && !subTableConfig?.editRow;
+          return (
+            <PreviewRender
+              cpId={column.id}
+              cpType={column.type}
+              detailMode={detailMode || editDisabled}
+              pageComponentSchema={pageSchema}
+              runtime={true}
+            />
+          );
+        }
+      };
+      tableColumns.push(tableColumn);
+    }
+    // 左侧列冻结
+    if (subTableConfig?.columnFixed) {
+      tableColumns.forEach((ele, index) => {
+        if (index < subTableConfig.columnFixed) {
+          ele.fixed = 'left';
+        }
+      });
+    }
+    // 操作列
+    if (runtime && !detailMode && subTableConfig?.showOperate) {
+      tableColumns.push({
+        title: '操作',
+        dataIndex: 'action',
+        width: 64,
+        align: 'center',
+        headerCellStyle: { textAlign: 'center' },
+        bodyCellStyle: { padding: '0 4px', textAlign: 'center' },
+        fixed: subTableConfig?.operateFixed ? 'right' : '',
+        render: (_col: any, _record: any, index: number) => {
+          const delDisabled = (_record.key || _record.key === '0') && !subTableConfig?.deleteRow;
+          return (
+            <Button
+              type="text"
+              size="small"
+              status="danger"
+              style={{ padding: '0 4px' }}
+              icon={<IconDelete />}
+              disabled={delDisabled}
+              onClick={() => handleDelete(index)}
+            ></Button>
+          );
+        }
+      });
+    }
+    setSubTableColumns(tableColumns);
   };
 
-  const handleDelete = (key: string, index: number) => {
-    setSubTableData((prevData) => {
-      const filteredData = prevData.filter((item) => item.key !== key);
-      return filteredData.map((_, key) => ({ ..._, key }));
+  // 新增
+  const handleAdd = () => {
+    const keys = subTableComponents[id].map((ele) => ele.id);
+    let newData: any = {};
+    keys.forEach((key) => {
+      newData[key] = undefined;
     });
+    setSubTableData((prevData) => [...prevData, { key: nanoid(), ...newData }]);
+  };
+  // 删除
+  const handleDelete = (index: number) => {
+    setSubTableData((prevData) => prevData.filter((_, i) => i !== index));
 
     const formData = form.getFieldsValue();
 
@@ -107,447 +400,34 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
     form.setFieldsValue(updateFormData);
   };
 
-  useEffect(() => {
-    // console.log('columns', columns);
-    const tableColumns = [];
-
-    for (const column of columns) {
-      // 组件类型与 apps/app-builder/src/pages/Editor/components/panel/components/metadata/component_map.ts 文件下一致
-      const inputType =
-        column.dataType === ENTITY_FIELD_TYPE.TEXT.VALUE ||
-        column.dataType === ENTITY_FIELD_TYPE.ID.VALUE ||
-        column.dataType === ENTITY_FIELD_TYPE.URL.VALUE ||
-        column.dataType === ENTITY_FIELD_TYPE.ADDRESS.VALUE ||
-        column.dataType === ENTITY_FIELD_TYPE.STRUCTURE.VALUE ||
-        column.dataType === ENTITY_FIELD_TYPE.ARRAY.VALUE ||
-        column.dataType === ENTITY_FIELD_TYPE.GEOGRAPHY.VALUE ||
-        column.dataType === ENTITY_FIELD_TYPE.PASSWORD.VALUE ||
-        column.dataType === ENTITY_FIELD_TYPE.ENCRYPTED.VALUE ||
-        column.dataType === ENTITY_FIELD_TYPE.AGGREGATE.VALUE;
-
-      const displayName = column.title;
-      const itemType = COMPONENT_MAP[column.dataType];
-      const cpID = `${itemType}-${uuidv4()}`;
-
-      if (column.dataIndex !== 'index' && column.dataIndex !== 'operation') {
-        const schemaConfig = getComponentConfig(pageComponentSchemas[cpID], itemType);
-        const schema = getComponentSchema(itemType as any);
-
-        schema.config = schemaConfig;
-        schema.config.cpName = displayName;
-        schema.config.id = cpID;
-
-        const props = {
-          id: cpID,
-          type: itemType,
-          ...schema,
-          config: {
-            ...schema.config,
-            label: {
-              ...schema.config.label,
-              display: false
-            },
-            status
-          }
-        };
-        setPageComponentSchemas(cpID, props);
-      }
-
-      if (inputType) {
-        tableColumns.push({
-          ...column,
-          width: 200,
-          id: cpID,
-          type: itemType,
-          displayName,
-          render: (col: any, record: any, index: number) => {
-            return (
-              <div>
-                <FormComp.XInputText
-                  {...FormSchema.XInputTextSchema.config}
-                  label={{ text: col.title, display: false }}
-                  runtime={runtime}
-                  detailMode={detailMode}
-                  dataField={[`${id}.${index}.${column.dataIndex}`]}
-                />
-              </div>
-            );
-          }
-        });
-      } else if (column.dataType === ENTITY_FIELD_TYPE.LONG_TEXT.VALUE) {
-        tableColumns.push({
-          ...column,
-          width: 200,
-          id: cpID,
-          type: itemType,
-          displayName,
-          render: (col: any, record: any, index: number) => {
-            return (
-              <FormComp.XInputTextArea
-                {...FormSchema.XInputTextAreaSchema.config}
-                label={{ text: col.title, display: false }}
-                runtime={runtime}
-                detailMode={detailMode}
-                dataField={[`${id}.${index}.${column.dataIndex}`]}
-              />
-            );
-          }
-        });
-      } else if (column.dataType === ENTITY_FIELD_TYPE.EMAIL.VALUE) {
-        tableColumns.push({
-          ...column,
-          width: 200,
-          id: cpID,
-          type: itemType,
-          displayName,
-          render: (col: any, record: any, index: number) => {
-            return (
-              <FormComp.XInputEmail
-                {...FormSchema.XInputEmailSchema.config}
-                label={{ text: col.title, display: false }}
-                runtime={runtime}
-                detailMode={detailMode}
-                dataField={[`${id}.${index}.${column.dataIndex}`]}
-              />
-            );
-          }
-        });
-      } else if (column.dataType === ENTITY_FIELD_TYPE.PHONE.VALUE) {
-        tableColumns.push({
-          ...column,
-          width: 200,
-          id: cpID,
-          type: itemType,
-          displayName,
-          render: (col: any, record: any, index: number) => {
-            return (
-              <FormComp.XInputPhone
-                {...FormSchema.XInputPhoneSchema.config}
-                label={{ text: col.title, display: false }}
-                runtime={runtime}
-                detailMode={detailMode}
-                dataField={[`${id}.${index}.${column.dataIndex}`]}
-              />
-            );
-          }
-        });
-      } else if (column.dataType === ENTITY_FIELD_TYPE.NUMBER.VALUE) {
-        tableColumns.push({
-          ...column,
-          width: 200,
-          id: cpID,
-          type: itemType,
-          displayName,
-          render: (col: any, record: any, index: number) => {
-            return (
-              <FormComp.XInputNumber
-                {...FormSchema.XInputNumberSchema.config}
-                label={{ text: col.title, display: false }}
-                runtime={runtime}
-                detailMode={detailMode}
-                dataField={[`${id}.${index}.${column.dataIndex}`]}
-              />
-            );
-          }
-        });
-      } else if (column.dataType === ENTITY_FIELD_TYPE.DATE.VALUE) {
-        // DATE_PICKER
-        tableColumns.push({
-          ...column,
-          width: 200,
-          id: cpID,
-          type: itemType,
-          displayName,
-          render: (col: any, record: any, index: number) => {
-            return (
-              <FormComp.XDatePicker
-                {...FormSchema.XDatePickerSchema.config}
-                label={{ text: col.title, display: false }}
-                runtime={runtime}
-                detailMode={detailMode}
-                dataField={[`${id}.${index}.${column.dataIndex}`]}
-              />
-            );
-          }
-        });
-      } else if (column.dataType === ENTITY_FIELD_TYPE.DATETIME.VALUE) {
-        // DATE_TIME_PICKER
-        tableColumns.push({
-          ...column,
-          width: 200,
-          id: cpID,
-          type: itemType,
-          displayName,
-          render: (col: any, record: any, index: number) => {
-            return (
-              <FormComp.XDateTimePicker
-                {...FormSchema.XDateTimePickerSchema.config}
-                label={{ text: col.title, display: false }}
-                runtime={runtime}
-                detailMode={detailMode}
-                dataField={[`${id}.${index}.${column.dataIndex}`]}
-              />
-            );
-          }
-        });
-      } else if (column.dataType === ENTITY_FIELD_TYPE.TIME.VALUE) {
-        // TIME_PICKER
-        tableColumns.push({
-          ...column,
-          width: 200,
-          id: cpID,
-          type: itemType,
-          displayName,
-          render: (col: any, record: any, index: number) => {
-            return (
-              <Form.Item initialValue={col} field={`${id}.${index}.${column.dataIndex}`}>
-                <FormComp.XTimePicker
-                  {...FormSchema.XTimePickerSchema.config}
-                  label={{ text: col.title, display: false }}
-                  runtime={runtime}
-                  detailMode={detailMode}
-                />
-              </Form.Item>
-            );
-          }
-        });
-      } else if (column.dataType === ENTITY_FIELD_TYPE.BOOLEAN.VALUE) {
-        // SWITCH
-        tableColumns.push({
-          ...column,
-          width: 200,
-          id: cpID,
-          type: itemType,
-          displayName,
-          render: (col: any, record: any, index: number) => {
-            return (
-              <FormComp.XSwitch
-                {...FormSchema.XSwitchSchema.config}
-                label={{ text: col.title, display: false }}
-                runtime={runtime}
-                detailMode={detailMode}
-                dataField={[`${id}.${index}.${column.dataIndex}`]}
-              />
-            );
-          }
-        });
-      } else if (column.dataType === ENTITY_FIELD_TYPE.SELECT.VALUE) {
-        // SELECT_ONE
-        tableColumns.push({
-          ...column,
-          width: 200,
-          id: cpID,
-          type: itemType,
-          displayName,
-          render: (col: any, record: any, index: number) => {
-            return (
-              <FormComp.XSelectOne
-                {...FormSchema.XSelectOneSchema.config}
-                label={{ text: col.title, display: false }}
-                runtime={runtime}
-                detailMode={detailMode}
-                dataField={[`${id}.${index}.${column.dataIndex}`]}
-              />
-            );
-          }
-        });
-      } else if (column.dataType === ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE) {
-        // SELECT_MUTIPLE
-        tableColumns.push({
-          ...column,
-          width: 200,
-          id: cpID,
-          type: itemType,
-          displayName,
-          render: (col: any, record: any, index: number) => {
-            return (
-              <FormComp.XSelectMutiple
-                {...FormSchema.XSelectMutipleSchema.config}
-                label={{ text: col.title, display: false }}
-                runtime={runtime}
-                detailMode={detailMode}
-                dataField={[`${id}.${index}.${column.dataIndex}`]}
-              />
-            );
-          }
-        });
-      } else if (column.dataType === ENTITY_FIELD_TYPE.AUTO_CODE.VALUE) {
-        // AUTO_CODE
-        tableColumns.push({
-          ...column,
-          width: 200,
-          id: cpID,
-          type: itemType,
-          displayName,
-          render: (col: any, record: any, index: number) => {
-            return (
-              <FormComp.XAutoCode
-                {...FormSchema.XAutoCodeSchema.config}
-                label={{ text: col.title, display: false }}
-                runtime={runtime}
-                detailMode={detailMode}
-              />
-            );
-          }
-        });
-      } else if (
-        column.dataType === ENTITY_FIELD_TYPE.USER.VALUE ||
-        column.dataType === ENTITY_FIELD_TYPE.MULTI_USER.VALUE
-      ) {
-        // USER_SELECT
-        tableColumns.push({
-          ...column,
-          width: 200,
-          id: cpID,
-          type: itemType,
-          displayName,
-          render: (col: any, record: any, index: number) => {
-            return (
-              <FormComp.XUserSelect
-                {...FormSchema.XUserSelectSchema.config}
-                label={{ text: col.title, display: false }}
-                runtime={runtime}
-                detailMode={detailMode}
-                dataField={[`${id}.${index}.${column.dataIndex}`]}
-              />
-            );
-          }
-        });
-      } else if (
-        column.dataType === ENTITY_FIELD_TYPE.DEPARTMENT.VALUE ||
-        column.dataType === ENTITY_FIELD_TYPE.MULTI_DEPARTMENT.VALUE
-      ) {
-        // DEPT_SELECT
-        tableColumns.push({
-          ...column,
-          width: 200,
-          id: cpID,
-          type: itemType,
-          displayName,
-          render: (col: any, record: any, index: number) => {
-            return (
-              <Form.Item initialValue={col} field={`${id}.${index}.${column.dataIndex}`}>
-                <FormComp.XDeptSelect
-                  {...FormSchema.XDeptSelectSchema.config}
-                  label={{ text: col.title, display: false }}
-                  runtime={runtime}
-                  detailMode={detailMode}
-                />
-              </Form.Item>
-            );
-          }
-        });
-      } else if (column.dataType === ENTITY_FIELD_TYPE.RELATION.VALUE) {
-        // RELATED_FORM
-        tableColumns.push({
-          ...column,
-          width: 200,
-          id: cpID,
-          type: itemType,
-          displayName,
-          render: (col: any, record: any, index: number) => {
-            return (
-              <FormComp.XRelatedForm
-                {...FormSchema.XRelatedFormSchema.config}
-                label={{ text: col.title, display: false }}
-                runtime={runtime}
-                detailMode={detailMode}
-                dataField={[`${id}.${index}.${column.dataIndex}`]}
-              />
-            );
-          }
-        });
-      } else if (column.dataType === ENTITY_FIELD_TYPE.FILE.VALUE) {
-        // FILE_UPLOAD
-        tableColumns.push({
-          ...column,
-          width: 200,
-          id: cpID,
-          type: itemType,
-          displayName,
-          render: (col: any, record: any, index: number) => {
-            return (
-              <FormComp.XFileUpload
-                {...FormSchema.XFileUploadSchema.config}
-                label={{ text: col.title, display: false }}
-                runtime={runtime}
-                detailMode={detailMode}
-                dataField={[`${id}.${index}.${column.dataIndex}`]}
-              />
-            );
-          }
-        });
-      } else if (column.dataType === ENTITY_FIELD_TYPE.IMAGE.VALUE) {
-        // IMG_UPLOAD
-        tableColumns.push({
-          ...column,
-          width: 200,
-          id: cpID,
-          type: itemType,
-          displayName,
-          render: (col: any, record: any, index: number) => {
-            return (
-              <FormComp.XImgUpload
-                {...FormSchema.XImgUploadSchema.config}
-                label={{ text: col.title, display: false }}
-                runtime={runtime}
-                detailMode={detailMode}
-                dataField={[`${id}.${index}.${column.dataIndex}`]}
-              />
-            );
-          }
-        });
-      } else if (
-        column.dataType === ENTITY_FIELD_TYPE.DATA_SELECTION.VALUE ||
-        column.dataType === ENTITY_FIELD_TYPE.MULTI_DATA_SELECTION.VALUE
-      ) {
-        // DATA_SELECT
-        tableColumns.push({
-          ...column,
-          width: 200,
-          id: cpID,
-          type: itemType,
-          displayName,
-          render: (col: any, record: any, index: number) => {
-            return (
-              <FormComp.XUserSelect
-                {...FormSchema.XUserSelectSchema.config}
-                runtime={runtime}
-                detailMode={detailMode}
-                dataField={[`${id}.${index}.${column.dataIndex}`]}
-              />
-            );
-          }
-        });
-      }
-    }
-    tableColumns.push({
-      title: '操作',
-      dataIndex: 'action',
-      width: 100,
-      fixed: 'right',
-      render: (_col: any, record: any, index: number) => {
-        return (
-          <Button type="text" onClick={() => handleDelete(record.key, index)}>
-            删除
-          </Button>
-        );
-      }
-    });
-    setSubTableColumns(tableColumns);
-  }, [columns]);
-
   return (
-    <Layout className="XSubTable">
+    <Layout className="XSubTable" style={runtime ? { border: 'none' } : {}}>
       <Form.Item
-        label={label.display && label.text}
-        layout={layout}
+        label={
+          label.display &&
+          label.text && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+              <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>
+                {verify?.required ? <span style={{ color: 'red', paddingRight: '4px' }}>*</span> : null}
+                {label.text}
+              </span>
+              {!detailMode && (
+                <Button
+                  type="outline"
+                  size="small"
+                  icon={<IconPlus />}
+                  style={{ pointerEvents: runtime ? 'unset' : 'none' }}
+                  onClick={handleAdd}
+                >
+                  新增一项
+                </Button>
+              )}
+            </div>
+          )
+        }
+        labelCol={{ span: 24 }}
+        layout="vertical"
         tooltip={tooltip}
-        labelCol={{
-          style: { width: labelColSpan, flex: 'unset' }
-        }}
-        wrapperCol={{ style: { flex: 1 } }}
-        rules={[{ required: verify?.required }]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           width: '100%',
@@ -555,39 +435,137 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
       >
-        <div
-          className="subTableContent"
-          style={{
-            maxWidth: runtime
-              ? '100%'
-              : `calc(100vw - ${componentMaxWidth + (LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL] === layout && label.display ? labelColSpan : 0) + 2}px)`
-          }}
-        >
-          {
-            <Table
-              columns={subTableColumns}
-              data={subTableData}
-              size="small"
-              scroll={{ x: 'max-content' }}
-              style={{
-                width: '100%'
-              }}
-            />
-          }
-        </div>
-        <div className="subTableFooter">
-          {!detailMode && (
-            <Button
-              className="addButton"
-              type="outline"
-              icon={<IconPlus />}
-              style={{ pointerEvents: runtime ? 'unset' : 'none', marginTop: 10 }}
-              onClick={handleAdd}
-            >
-              新增一项
-            </Button>
-          )}
-        </div>
+        {runtime ? (
+          <>
+            <div className="subTableContent">
+              <Table
+                columns={subTableColumns}
+                data={subTableData}
+                size="small"
+                scroll={{ x: 'max-content' }}
+                style={{ width: '100%' }}
+                border={{
+                  headerCell: true,
+                  wrapper: true
+                }}
+                rowKey={(record: any) => record.key}
+                pagination={false}
+              />
+            </div>
+          </>
+        ) : (
+          <ReactSortable
+            id={`workspace-content-subtable-${id}`}
+            list={subTableComponents[id] || []}
+            setList={(newList) => {
+              const dataFieldPage = subTableComponents[id]?.find(
+                (ele) => pageComponentSchemas[ele.id].config?.dataField?.[0]
+              );
+              // 已有的数据源子表id
+              const dataField = pageComponentSchemas?.[dataFieldPage?.id]?.config?.dataField?.[0];
+              /**
+               * 不允许拖拽主、子表嵌套
+               * 拖拽的子表项必须是同一个子表
+               */
+              const newSubList = (newList || []).filter((ele) => {
+                // 主表、子表
+                const isTable = ele.type === ENTITY_TYPE_VALUE.MAIN || ele.type === ENTITY_TYPE_VALUE.SUB;
+                // 主表数据
+                const isMain = ele.entityID === mainEntity.entityId;
+                // 同一个子表
+                const isSub = !ele.entityID || !dataField || ele.entityID === dataField;
+                return !isTable && !isMain && isSub;
+              });
+
+              // setTimeout(() => {
+              setSubTableComponents(id, newSubList);
+              // }, 0);
+            }}
+            onAdd={onSubAdd}
+            group={{ name: COMPONENT_GROUP_NAME }}
+            sort={true}
+            forceFallback={true}
+            animation={150}
+            fallbackOnBody={true}
+            swapThreshold={0.65}
+            className="XSubTable-content"
+            onStart={onSubStart}
+          >
+            {subTableComponents && subTableComponents[id] &&
+              subTableComponents[id].map((cp: GridItem, index: number) => (
+                <div
+                  key={cp.id}
+                  data-cp-type={cp.type}
+                  data-cp-displayname={cp.displayName}
+                  data-cp-id={cp.id}
+                  className="componentItem"
+                  style={{
+                    borderColor: curComponentID === cp.id ? '#4FAE7B' : 'transparent'
+                  }}
+                  onClick={(e) => {
+                    onSubComponentClick(e, cp);
+                  }}
+                >
+                  <div className="simulate-header-item">
+                    {pageComponentSchemas[cp.id]?.config?.verify?.required ? (
+                      <span style={{ color: 'red', paddingRight: '4px' }}>*</span>
+                    ) : null}
+                    {pageComponentSchemas[cp.id]?.config.label.text || pageComponentSchemas[cp.id]?.config.displayName}
+                  </div>
+                  <EditRender
+                    runtime={runtime}
+                    cpId={cp.id}
+                    cpType={cp.type}
+                    pageComponentSchema={pageComponentSchemas[cp.id]}
+                  />
+
+                  {/* 操作按钮 */}
+                  {curComponentID === cp.id && showDeleteButton && (
+                    <div className="operationArea">
+                      {pageComponentSchemas[cp.id]?.config.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+                        <>
+                          <div
+                            className="copyButton"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              console.debug('取消隐藏组件: ', cp);
+                              handleShowComponent(cp.id);
+                            }}
+                          >
+                            <img src={CompShowIcon} alt="component show" />
+                          </div>
+                          <Divider className="divider" type="vertical" />
+                        </>
+                      )}
+
+                      <div
+                        className="copyButton"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          console.log('复制组件: ', cp);
+                          handleCopyComponent({ ...cp, id: `${cp.type}-${uuidv4()}` }, cp.id, index);
+                        }}
+                      >
+                        <img src={CompCopyIcon} alt="component copy" />
+                      </div>
+                      <Divider className="divider" type="vertical" />
+
+                      <div
+                        className="deleteButton"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          console.log('删除组件: ', cp.id);
+                          handleDeleteComponent(cp.id);
+                        }}
+                      >
+                        <img src={CompDeleteIcon} alt="component delete" />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+          </ReactSortable>
+        )}
       </Form.Item>
     </Layout>
   );

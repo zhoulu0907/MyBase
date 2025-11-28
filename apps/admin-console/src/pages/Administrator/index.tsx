@@ -1,10 +1,19 @@
-import { Space, Table, Button, Modal, Input, Message, Tooltip, Form, Tag, Select } from '@arco-design/web-react';
-import React, { useEffect, useState, useCallback } from 'react';
-import styles from './index.module.less';
-import { IconSearch } from '@arco-design/web-react/icon';
-import { getPlatformAdminListApi, PlatformAdminUserType, createPlatformAdminApi, updatePlatformAdminPasswordApi, updatePlatformAdminMailApi, deletePlatformAdminApi, type PlatformAdminInfo, type cratePlatformAdminReq } from '@onebase/platform-center';
 import { formatTimestamp } from '@/utils/date';
+import { Button, Form, Input, Message, Modal, Select, Space, Table, Tag, Tooltip } from '@arco-design/web-react';
 import Text from '@arco-design/web-react/es/Typography/text';
+import { IconSearch } from '@arco-design/web-react/icon';
+import {
+  PlatformAdminUserType,
+  createPlatformAdminApi,
+  deletePlatformAdminApi,
+  getPlatformAdminListApi,
+  updatePlatformAdminMailApi,
+  updatePlatformAdminPasswordApi,
+  type PlatformAdminInfo,
+  type cratePlatformAdminReq
+} from '@onebase/platform-center';
+import React, { useCallback, useEffect, useState } from 'react';
+import styles from './index.module.less';
 
 const { useForm } = Form;
 const { Option } = Select;
@@ -12,55 +21,58 @@ const { Option } = Select;
 const Administrator: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [createModalVisible, setCreateModalVisible] = useState(false);
-  const [passwordForm, setPasswordForm] = useState({ id: '0', username: '', newPassword: '', confirmPassword: '' });
-  const [emailForm, setEmailForm] = useState({ id: '0', username: '', oldEmail: '', newEmail: '' });
-  // const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
+
   const [modalType, setModalType] = useState<'email' | 'password' | null>(null);
+
   const [createForm] = useForm();
+  const [editForm] = useForm();
+
   const [searchKeyword, setSearchKeyword] = useState('');
   const [searchDebounceTimer, setSearchDebounceTimer] = useState<NodeJS.Timeout | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [dataSource, setDataSource] = useState<PlatformAdminInfo[]>([]);
-  const [total, setTotal] = useState(null)
+  const [total, setTotal] = useState(null);
   const [delVisible, setDelVisible] = useState(false);
   const [currentUser, setCurrentUser] = useState<PlatformAdminInfo | null>(null);
   const columns = [
     // order
-    { 
+    {
       title: '序号',
       dataIndex: 'order',
       key: 'order',
       render: (_text: any, _record: any, index: number) => index + 1,
-      width: '5%',
+      width: '5%'
       // fixed: 'left',
     },
     {
       title: '账号',
       dataIndex: 'username',
-      key: 'username',
+      key: 'username'
     },
     {
       title: '姓名',
       dataIndex: 'nickname',
-      key: 'nickname',
+      key: 'nickname'
     },
     {
       title: '邮箱',
       dataIndex: 'email',
-      key: 'email',
+      key: 'email'
     },
     {
       title: '手机号',
       dataIndex: 'mobile',
       key: 'mobile',
-      width: 130,
+      width: 130
     },
     {
       title: '类型',
       dataIndex: 'adminType',
       key: 'adminType',
       render: (val: PlatformAdminUserType) => (
-        <Tag color={val === PlatformAdminUserType.系统默认账号 ? 'green' : 'gray'}>{val === PlatformAdminUserType.系统默认账号 ? '系统默认账号' : '普通账号'}</Tag>
+        <Tag color={val === PlatformAdminUserType.系统默认账号 ? 'green' : 'gray'}>
+          {val === PlatformAdminUserType.系统默认账号 ? '系统默认账号' : '普通账号'}
+        </Tag>
       )
     },
     {
@@ -68,9 +80,7 @@ const Administrator: React.FC = () => {
       dataIndex: 'createTime',
       key: 'createTime',
       width: 180,
-      render: (text: string) => (
-        <div>{formatTimestamp(text)}</div>
-      )
+      render: (text: string) => <div>{formatTimestamp(text)}</div>
     },
     {
       title: '操作',
@@ -85,7 +95,7 @@ const Administrator: React.FC = () => {
             修改密码
           </Text>
           {record.adminType !== PlatformAdminUserType.系统默认账号 && (
-             <Tooltip
+            <Tooltip
               position="tr"
               trigger="click"
               color="#fff"
@@ -98,12 +108,12 @@ const Administrator: React.FC = () => {
                 }
                 setDelVisible(visible);
               }}
-              content={(
+              content={
                 <div className={styles.tooltipContainer}>
                   <div className={styles.tooltipText}>Are you sure you want to delete?</div>
                   <Space className={styles.tooltipButton}>
-                    <Button 
-                      type="text" 
+                    <Button
+                      type="text"
                       onClick={() => {
                         setDelVisible(false);
                         setCurrentUser(null);
@@ -111,8 +121,8 @@ const Administrator: React.FC = () => {
                     >
                       取消
                     </Button>
-                    <Button 
-                      type="primary" 
+                    <Button
+                      type="primary"
                       onClick={() => {
                         handleDeleteConfirm(record);
                         setDelVisible(false);
@@ -123,12 +133,9 @@ const Administrator: React.FC = () => {
                     </Button>
                   </Space>
                 </div>
-              )}
+              }
             >
-              <Text
-                className={styles.tableBtn}
-                key={`delete-${record.id}`}
-              >
+              <Text className={styles.tableBtn} key={`delete-${record.id}`}>
                 删除
               </Text>
             </Tooltip>
@@ -137,7 +144,6 @@ const Administrator: React.FC = () => {
       )
     }
   ];
-  
 
   const getPlatformAdminList = async (pageNo: number = 1, keyword: string = searchKeyword) => {
     const res = await getPlatformAdminListApi({
@@ -147,7 +153,7 @@ const Administrator: React.FC = () => {
     });
     setDataSource(res.list);
     setTotal(res.total);
-    
+
     // 如果删除后当前页没有数据且不是第一页，则自动跳转到上一页
     if (res.list.length === 0 && pageNo > 1) {
       const prevPage = pageNo - 1;
@@ -156,14 +162,13 @@ const Administrator: React.FC = () => {
     }
   };
 
-  useEffect(() => { 
+  useEffect(() => {
     getPlatformAdminList();
   }, []);
 
-  const addAdmin = () => { 
+  const addAdmin = () => {
     createForm.resetFields();
-    setPasswordForm({ id: '0', username: '', newPassword: '', confirmPassword: '' }); // 重置密码表单状态
-    setEmailForm({ id: '0', username: '', oldEmail: '', newEmail: '' }); // 重置邮箱表单状态
+
     setTimeout(() => {
       setCreateModalVisible(true);
     }, 0);
@@ -180,15 +185,15 @@ const Administrator: React.FC = () => {
         password: values.password,
         email: values.email,
         mobile: values.mobile,
-        adminType: values.adminType,
+        adminType: values.adminType
       };
       // 调用创建管理员的API
       await createPlatformAdminApi(submitData);
-      
+
       Message.success('创建管理员成功');
       setCreateModalVisible(false);
       getPlatformAdminList();
-      setCurrentPage(1)
+      setCurrentPage(1);
     } catch (error) {
       console.error('表单验证失败或创建失败:', error);
       Message.error('创建管理员失败');
@@ -197,13 +202,23 @@ const Administrator: React.FC = () => {
   };
 
   const handleEditEmail = (record: PlatformAdminInfo) => {
-    setEmailForm({ id: record.id, username: record.username, oldEmail: record.email, newEmail: '' });
+    setCurrentUser(record);
+
+    editForm.setFieldValue('username', record.username);
+    editForm.setFieldValue('oldEmail', record.email);
+    editForm.setFieldValue('email', '');
+
     setModalType('email');
     setModalVisible(true);
   };
 
   const handleEditPassword = (record: PlatformAdminInfo) => {
-    setPasswordForm({ id: record.id, username: record.username, newPassword: '', confirmPassword: '' });
+    setCurrentUser(record);
+
+    editForm.setFieldValue('username', record.username);
+    editForm.setFieldValue('password', '');
+    editForm.setFieldValue('confirmPassword', '');
+
     setModalType('password');
     setModalVisible(true);
   };
@@ -212,7 +227,7 @@ const Administrator: React.FC = () => {
     try {
       await deletePlatformAdminApi(record.id);
       Message.success('删除成功');
-      
+
       // 重新获取列表数据
       // 如果当前页只有一条数据，删除后需要回到上一页
       if (dataSource.length === 1 && currentPage > 1) {
@@ -231,34 +246,38 @@ const Administrator: React.FC = () => {
     // setDeleteConfirmVisible(true);
   };
 
-  const handleUpdata = async () => {
-    const { id: passwordId, newPassword, confirmPassword } = passwordForm;
-    const { id: emailId, newEmail } = emailForm;
+  const handleUpdate = async () => {
+    const newPassword = editForm.getFieldValue('password');
+    const confirmPassword = editForm.getFieldValue('confirmPassword');
+
+    const newEmail = editForm.getFieldValue('email');
+    const id = currentUser?.id!;
+
     // modalType
-    if (modalType === 'password') { 
+    if (modalType === 'password') {
       if (!newPassword || newPassword.length < 6) {
         Message.error('新密码至少需要6位');
         return;
       }
-  
+
       if (newPassword !== confirmPassword) {
         Message.error('新密码和确认密码不一致');
         return;
       }
       try {
-        await updatePlatformAdminPasswordApi({id: passwordId, password: confirmPassword});
+        await updatePlatformAdminPasswordApi({ id: id, password: confirmPassword });
         getPlatformAdminList();
         Message.success('密码修改成功');
       } catch (error) {
-        console.log(error)
+        console.log(error);
       }
     } else {
       try {
-        await updatePlatformAdminMailApi({id: emailId, email: newEmail})
+        await updatePlatformAdminMailApi({ id: id, email: newEmail });
         getPlatformAdminList();
         Message.success('邮箱修改成功');
       } catch (error) {
-        console.log(error)
+        console.log(error);
       }
     }
     setModalVisible(false);
@@ -266,7 +285,7 @@ const Administrator: React.FC = () => {
 
   const handleCancelUpdata = () => {
     setModalVisible(false);
-  }
+  };
 
   const handleCreateModalCancel = () => {
     setCreateModalVisible(false);
@@ -275,23 +294,26 @@ const Administrator: React.FC = () => {
     }, 300);
   };
 
-// 处理搜索（带防抖）
-  const handleSearch = useCallback((value: string) => {
-    setSearchKeyword(value);
-    setCurrentPage(1); // 重置到第一页
-    
-    // 清除之前的定时器
-    if (searchDebounceTimer) {
-      clearTimeout(searchDebounceTimer);
-    }
-    
-    // 设置新的定时器
-    const timer = setTimeout(() => {
-      getPlatformAdminList(1, value);
-    }, 500); // 500ms 防抖延迟
-    
-    setSearchDebounceTimer(timer);
-  }, [searchDebounceTimer]);
+  // 处理搜索（带防抖）
+  const handleSearch = useCallback(
+    (value: string) => {
+      setSearchKeyword(value);
+      setCurrentPage(1); // 重置到第一页
+
+      // 清除之前的定时器
+      if (searchDebounceTimer) {
+        clearTimeout(searchDebounceTimer);
+      }
+
+      // 设置新的定时器
+      const timer = setTimeout(() => {
+        getPlatformAdminList(1, value);
+      }, 500); // 500ms 防抖延迟
+
+      setSearchDebounceTimer(timer);
+    },
+    [searchDebounceTimer]
+  );
 
   // 处理分页变化
   const handlePageChange = async (pageNo: number) => {
@@ -307,7 +329,9 @@ const Administrator: React.FC = () => {
     <div className={styles.administrator}>
       <Space direction="vertical" size="large" className={styles.container}>
         <div className={styles.title}>
-          <Button type="primary" onClick={addAdmin}>+ 新建</Button>
+          <Button type="primary" onClick={addAdmin}>
+            + 新建
+          </Button>
           <Input.Search
             placeholder="搜索平台管理员"
             style={{ width: 300 }}
@@ -337,17 +361,21 @@ const Administrator: React.FC = () => {
           title={modalType === 'password' ? '修改密码' : '修改邮箱'}
           onCancel={() => setModalVisible(false)}
           footer={[
-            <Button key="return" onClick={handleCancelUpdata}>取消</Button>,
-            <Button key="submit" type="primary" onClick={handleUpdata}>确定</Button>
+            <Button key="return" onClick={handleCancelUpdata}>
+              取消
+            </Button>,
+            <Button key="submit" type="primary" onClick={handleUpdate}>
+              确定
+            </Button>
           ]}
         >
           {modalType === 'password' ? (
-            <Form layout="vertical">
-              <Form.Item label="账号">
-                <Input value={passwordForm.username} disabled />
+            <Form layout="vertical" form={editForm}>
+              <Form.Item label="账号" field="username">
+                <Input disabled />
               </Form.Item>
-              <Form.Item 
-                label="密码" 
+              <Form.Item
+                label="密码"
                 field="password"
                 rules={[
                   { required: true, message: '请输入密码' },
@@ -355,69 +383,53 @@ const Administrator: React.FC = () => {
                 ]}
                 validateTrigger={['onBlur']}
               >
-                <Input
-                  placeholder="新密码"
-                  type="password"
-                  value={passwordForm.newPassword}
-                  onChange={(value) => setPasswordForm({ ...passwordForm, newPassword: value })}
-                  autoComplete="new-password"
-                />
+                <Input.Password placeholder="新密码" autoComplete="new-password" />
               </Form.Item>
-              <Form.Item 
-                label="确认密码" 
+              <Form.Item
+                label="确认密码"
                 field="confirmPassword"
                 dependencies={['password']}
                 rules={[
                   { required: true, message: '请确认密码' },
                   {
                     validator: (value, cb) => {
-                      const formValues = createForm.getFieldsValue();
+                      const formValues = editForm.getFieldsValue();
                       const password = formValues.password;
                       if (value !== password) {
                         return cb('两次输入的密码不一致');
                       }
                       return cb();
-                    },
-                  },
+                    }
+                  }
                 ]}
                 validateTrigger={['onBlur']}
               >
-                <Input
-                  placeholder="确认密码"
-                  type="password"
-                  value={passwordForm.confirmPassword}
-                  onChange={(value) => setPasswordForm({ ...passwordForm, confirmPassword: value })}
-                  autoComplete="new-password"
-                />
+                <Input.Password placeholder="确认密码" />
               </Form.Item>
             </Form>
           ) : (
-            <Form layout="vertical">
-              <Form.Item label="账号">
-                <Input value={emailForm.username} disabled />
+            <Form layout="vertical" form={editForm}>
+              <Form.Item label="账号" field="username">
+                <Input disabled />
               </Form.Item>
-              <Form.Item label="原邮箱">
-                <Input value={emailForm.oldEmail} disabled />
+              <Form.Item label="原邮箱" field="oldEmail">
+                <Input disabled />
               </Form.Item>
-              <Form.Item 
-                label="邮箱" 
+              <Form.Item
+                label="邮箱"
                 field="email"
                 rules={[
-                  { required: true, message: '请输入邮箱'},
-                  { type: 'email', message: '请输入正确的邮箱格式'}
+                  { required: true, message: '请输入邮箱' },
+                  { type: 'email', message: '请输入正确的邮箱格式' }
                 ]}
                 validateTrigger={['onBlur']}
               >
-                <Input
-                  placeholder="新邮箱"
-                  value={emailForm.newEmail}
-                  onChange={(value) => setEmailForm({ ...emailForm, newEmail: value })}
-                />
+                <Input placeholder="新邮箱" />
               </Form.Item>
             </Form>
           )}
         </Modal>
-        
+
         {/* 新建管理员弹窗 */}
         <Modal
           title="新建管理员"
@@ -427,8 +439,8 @@ const Administrator: React.FC = () => {
           style={{ width: 600 }}
         >
           <Form form={createForm} layout="vertical">
-            <Form.Item 
-              label="账号" 
+            <Form.Item
+              label="账号"
               field="account"
               rules={[
                 { required: true, message: '请输入账号' },
@@ -440,7 +452,7 @@ const Administrator: React.FC = () => {
                     }
                     const pattern = /^[a-zA-Z0-9]+$/;
                     if (!pattern.test(String(value))) {
-                      return cb('用户账号由数字、字母组成')
+                      return cb('用户账号由数字、字母组成');
                     }
                     return cb();
                   }
@@ -450,22 +462,20 @@ const Administrator: React.FC = () => {
             >
               <Input placeholder="请输入账号" autoComplete="off" />
             </Form.Item>
-            <Form.Item 
-              label="姓名" 
+            <Form.Item
+              label="姓名"
               field="nickname"
-              rules={[
-                { required: true, message: '请输入姓名' },
-              ]}
+              rules={[{ required: true, message: '请输入姓名' }]}
               validateTrigger={['onBlur']}
             >
               <Input placeholder="请输入姓名" autoComplete="off" />
             </Form.Item>
-            <Form.Item 
-              label="手机号" 
+            <Form.Item
+              label="手机号"
               field="mobile"
               rules={[
                 { required: true, message: '请输入手机号' },
-                { 
+                {
                   validator: (value, cb) => {
                     const mobileRegex = /^1[3-9]\d{9}$/;
                     if (!mobileRegex.test(value)) {
@@ -479,19 +489,19 @@ const Administrator: React.FC = () => {
             >
               <Input placeholder="请输入手机号" />
             </Form.Item>
-            <Form.Item 
-              label="邮箱" 
+            <Form.Item
+              label="邮箱"
               field="email"
               rules={[
-                { required: true, message: '请输入邮箱'},
-                { type: 'email', message: '请输入正确的邮箱格式'}
+                { required: true, message: '请输入邮箱' },
+                { type: 'email', message: '请输入正确的邮箱格式' }
               ]}
               validateTrigger={['onBlur']}
             >
               <Input placeholder="请输入邮箱" autoComplete="off" />
             </Form.Item>
-            <Form.Item 
-              label="密码" 
+            <Form.Item
+              label="密码"
               field="password"
               rules={[
                 { required: true, message: '请输入密码' },
@@ -501,8 +511,8 @@ const Administrator: React.FC = () => {
             >
               <Input.Password placeholder="请输入密码" autoComplete="new-password" />
             </Form.Item>
-            <Form.Item 
-              label="确认密码" 
+            <Form.Item
+              label="确认密码"
               field="confirmPassword"
               dependencies={['password']}
               rules={[
@@ -515,15 +525,15 @@ const Administrator: React.FC = () => {
                       return cb('两次输入的密码不一致');
                     }
                     return cb();
-                  },
-                },
+                  }
+                }
               ]}
               validateTrigger={['onBlur']}
             >
               <Input.Password placeholder="请再次输入密码" autoComplete="new-password" />
             </Form.Item>
-            <Form.Item 
-              label="类型" 
+            <Form.Item
+              label="类型"
               field="adminType"
               initialValue={PlatformAdminUserType.普通账号}
               rules={[{ required: true, message: '请选择类型' }]}

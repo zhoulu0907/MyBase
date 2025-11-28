@@ -3,7 +3,12 @@ import { getFieldTypes } from '@onebase/app';
 import React, { useEffect } from 'react';
 import { EntityPageContainer } from './main/EntityPageContainer';
 
-const EntityPage: React.FC = ({appId}) => {
+interface EntityPageProps {
+  appId: string;
+  handleMenuClick: (key: string) => void;
+}
+
+const EntityPage: React.FC<EntityPageProps> = ({ appId, handleMenuClick }) => {
   const { setFieldTypes } = useFieldStore();
 
   // 加载字段类型
@@ -21,7 +26,7 @@ const EntityPage: React.FC = ({appId}) => {
 
   return (
     <>
-      <EntityPageContainer appId={appId} />
+      <EntityPageContainer appId={appId} handleMenuClick={handleMenuClick} />
     </>
   );
 };

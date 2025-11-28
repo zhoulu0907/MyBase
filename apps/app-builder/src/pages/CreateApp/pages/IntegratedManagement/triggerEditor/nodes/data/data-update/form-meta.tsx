@@ -22,7 +22,6 @@ import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
 import { validateNodeForm } from '../../utils';
-import { updateDataUpdateOutputs } from './output';
 
 const RadioGroup = Radio.Group;
 
@@ -334,7 +333,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             {updateType === DATA_SOURCE_TYPE.FORM && (
               <Grid.Row>
                 <Grid.Col span={1} style={{ textAlign: 'center', lineHeight: '32px' }}>
-                  从
+                  更新
                 </Grid.Col>
                 <Grid.Col span={19}>
                   <Form.Item
@@ -352,7 +351,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                   </Form.Item>
                 </Grid.Col>
                 <Grid.Col span={4} style={{ textAlign: 'center', lineHeight: '32px' }}>
-                  <span>中查询数据</span>
+                  <span>的数据</span>
                 </Grid.Col>
               </Grid.Row>
             )}
@@ -414,7 +413,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             </Grid.Row>
 
             <Grid.Row>
-              <Form.Item label="更新规则" field="fields">
+              <Form.Item label="更新规则" field="fields" rules={[{ required: true, message: '请填写更新规则' }]}>
                 <FieldEditor nodeId={node.id} fieldList={fieldDataList} form={payloadForm} />
               </Form.Item>
             </Grid.Row>

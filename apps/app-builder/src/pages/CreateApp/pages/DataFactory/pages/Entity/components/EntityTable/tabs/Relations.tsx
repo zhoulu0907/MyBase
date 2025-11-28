@@ -20,11 +20,11 @@ interface RelationData {
   id: string;
   sourceEntityName: string;
   sourceEntityId: string;
-  sourceFieldName: string;
+  sourceFieldDisplayName: string;
   sourceFieldId: string;
   targetEntityName: string;
   targetEntityId: string;
-  targetFieldName: string;
+  targetFieldDisplayName: string;
   targetFieldId: string;
   relationshipType: string;
 }
@@ -52,7 +52,7 @@ const Relations: React.FC<RelationsProps> = ({ entity, activeTab, reloadList }) 
 
   const handleSuccessCallback = (type?: 'new_master_child' | 'relation') => {
     getRelation();
-    // 新建主子关系子表时，需重新加载实体列表
+    // 新建主子关系子表时，需重新加载资产列表
     if (type === 'new_master_child') {
       reloadList();
     }
@@ -94,14 +94,14 @@ const Relations: React.FC<RelationsProps> = ({ entity, activeTab, reloadList }) 
       render: (text: string, record: any, index: number) => index + 1 + (page.pageNo - 1) * page.pageSize
     },
     {
-      title: '源实体',
+      title: '源资产',
       dataIndex: 'sourceEntityName',
       key: 'sourceEntityName'
     },
     {
       title: '源字段',
-      dataIndex: 'sourceFieldName',
-      key: 'sourceFieldName'
+      dataIndex: 'sourceFieldDisplayName',
+      key: 'sourceFieldDisplayName'
     },
     {
       title: '关联类型',
@@ -110,14 +110,14 @@ const Relations: React.FC<RelationsProps> = ({ entity, activeTab, reloadList }) 
       render: (type: string) => <Tag color="purple">{type}</Tag>
     },
     {
-      title: '目标实体',
+      title: '目标资产',
       dataIndex: 'targetEntityName',
       key: 'targetEntityName'
     },
     {
       title: '目标字段',
-      dataIndex: 'targetFieldName',
-      key: 'targetFieldName'
+      dataIndex: 'targetFieldDisplayName',
+      key: 'targetFieldDisplayName'
     },
     {
       title: '操作',

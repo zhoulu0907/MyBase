@@ -274,14 +274,16 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
           <Input placeholder="请输入规则名称" maxLength={50} showWordLimit />
         </Form.Item>
 
-        <ConditionEditor
-          nodeId={entity.id}
-          label="条件设置"
-          required
-          form={form}
-          fields={parentOptions}
-          entityFieldValidationTypes={filterFieldCheckType}
-        />
+        <Form.Item field="conditions" rules={[{ required: true, message: '请添加条件' }]}>
+          <ConditionEditor
+            nodeId={entity.id}
+            label="条件设置"
+            required
+            form={form}
+            fields={parentOptions}
+            entityFieldValidationTypes={filterFieldCheckType}
+          />
+        </Form.Item>
 
         <Form.Item
           label="弹窗提示"

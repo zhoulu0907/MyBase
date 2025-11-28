@@ -1,0 +1,78 @@
+.leftNav {
+  position: absolute;
+  top: 50px;
+  left: 0px;
+  z-index: 999;
+  width: 140px;
+  height: 100%;
+  background-color: #ffffff;
+  // padding: 22px 11px 0px 11px;
+  box-sizing: border-box;
+  height: calc(100% - 50px);
+  .innerNodesBox {
+    overflow: hidden;
+    overflow-y: auto;
+    height: calc(100% - 140px);
+    padding: 0 16px;
+
+    .nodeItem {
+      border: 1px solid rgb(229, 230, 235);
+      color: rgb(78, 89, 105);
+      border-radius: 4px;
+      background: rgb(255, 255, 255);
+      padding: 4px 0px 4px 7px;
+      text-align: left;
+      line-height: 20px;
+      width: 100%;
+      margin-bottom: 15px;
+    }
+  }
+  .process {
+    font-family: PingFang SC;
+    font-weight: 500;
+    line-height: 22px;
+    letter-spacing: 0px;
+    vertical-align: middle;
+    color: #1d2129;
+  }
+  .processNodeTitle {
+    margin-bottom: 20px;
+    margin-top: 12px;
+    padding: 0 16px;
+  }
+  .navTitleColor {
+    color: #86909c;
+    margin-bottom: 8px;
+    margin-top: 12px;
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+  }
+  .line {
+    width: 88px;
+    height: 1px;
+    background-color: #f2f3f5;
+    margin-bottom: 15px;
+  }
+  .remark {
+    margin-left: 10px;
+    width: 45px;
+    height: 45px;
+    font-size: 10px;
+
+    color: #4e5969;
+    .copy {
+      margin-bottom: 13px;
+    }
+    .delete {
+      color: #f53f3f;
+    }
+  }
+}
+.tipContent {
+  font-family: PingFang SC;
+  font-weight: 400;
+  font-size: 10px;
+  line-height: 22px;
+  letter-spacing: 0%;
+}

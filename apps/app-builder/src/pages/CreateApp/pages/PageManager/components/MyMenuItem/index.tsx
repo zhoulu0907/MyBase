@@ -6,15 +6,16 @@ import EditIcon from '@/assets/images/edit_menu_icon.svg';
 import RenameIcon from '@/assets/images/edit_page_name_icon.svg';
 import HiddenIcon from '@/assets/images/eye_off_icon.svg';
 import VisibleIcon from '@/assets/images/eye_on_icon.svg';
-import DynamicIcon from '@/components/DynamicIcon';
-import { menuIconList } from '@/components/MenuIcon/const';
+import SettingIcon from '@/assets/images/task_center/setting-on.svg';
 import { Dropdown, Menu, Message, Tooltip, type FormInstance } from '@arco-design/web-react';
 import { IconEyeInvisible, IconMoreVertical } from '@arco-design/web-react/icon';
-import { getPageSetId, menuSignal, RootParentPage, VisibleType, type GetPageSetIdReq } from '@onebase/app';
-import { EDITOR_TYPES } from '@onebase/ui-kit';
+import { getPageSetId, menuSignal, PageType, RootParentPage, VisibleType, MenuType, type GetPageSetIdReq } from '@onebase/app';
+import { EDITOR_TYPES, webMenuIcons } from '@onebase/ui-kit';
+import { pagesRuntimeSignal } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ReactSVG } from 'react-svg';
 import styles from './index.module.less';
 
 const MenuItem = Menu.Item;
@@ -35,6 +36,7 @@ interface MenuItemProps {
   label: string;
   menuIcon: string;
   isGroup: boolean;
+  menuType?: number;
   onClick?: () => void;
   triggerCreate?: (formType: string) => void;
   triggerRename?: () => void;
@@ -42,9 +44,10 @@ interface MenuItemProps {
   triggerHide?: (menuID: string, isVisible: number) => void;
   triggerDelete?: (menuID: string) => void;
   maxWidth: number;
-  renameForm?: FormInstance;
+  renameForm: FormInstance;
   copyForm?: FormInstance;
   createForm?: FormInstance;
+  style?: React.CSSProperties;
 }
 
 const MyMenuItem: React.FC<MenuItemProps> = ({
@@ -55,6 +58,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
   label,
   menuIcon,
   isGroup,
+  menuType,
   onClick,
   triggerCreate,
   triggerRename,
@@ -64,11 +68,14 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
   maxWidth,
   renameForm,
   copyForm,
-  createForm
+  createForm,
+  style
 }) => {
+  const allWebMenuIcons = webMenuIcons.map((ele) => ele.children).reduce((acc, current) => acc.concat(current), []);
   useSignals();
   const navigate = useNavigate();
   const { curMenu } = menuSignal;
+  const { curPage } = pagesRuntimeSignal;
 
   const [popupVisible, setPopupVisible] = useState(false);
 
@@ -87,22 +94,24 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
           编辑
         </MenuItem>
       )}
-      {(renameForm && triggerRename) && <MenuItem
-        className={styles.menuContent}
-        key="rename"
-        onClick={(e) => {
-          e.stopPropagation();
-          triggerRename();
+      {renameForm && triggerRename && (
+        <MenuItem
+          className={styles.menuContent}
+          key="rename"
+          onClick={(e) => {
+            e.stopPropagation();
+            triggerRename();
 
-          renameForm.resetFields();
-          renameForm.setFieldValue('menuName', menuName);
-          renameForm.setFieldValue('menuId', menuID);
-          renameForm.setFieldValue('menuIcon', menuIcon);
-        }}
-      >
-        <img src={RenameIcon} alt="重命名" />
-        重命名
-      </MenuItem>}
+            renameForm.resetFields();
+            renameForm.setFieldValue('menuName', menuName);
+            renameForm.setFieldValue('menuId', menuID);
+            renameForm.setFieldValue('menuIcon', menuIcon);
+          }}
+        >
+          <img src={RenameIcon} alt="重命名" />
+          重命名
+        </MenuItem>
+      )}
       <MenuItem
         className={styles.menuContent}
         key="visible"
@@ -118,7 +127,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
         )}
         {isVisible === VisibleType.HIDDEN ? '取消隐藏' : '隐藏'}
       </MenuItem>
-      {(!isGroup && copyForm && triggerCopy) && (
+      {!isGroup && copyForm && triggerCopy && (
         <MenuItem
           className={styles.menuContent}
           key="copy"
@@ -134,7 +143,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
           复制
         </MenuItem>
       )}
-      {(isGroup && createForm && triggerCreate) && (
+      {isGroup && createForm && triggerCreate && (
         <MenuItem
           className={styles.menuContent}
           key="createPage"
@@ -150,7 +159,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
         </MenuItem>
       )}
 
-      {(isGroup && createForm && triggerCreate)  && (
+      {isGroup && createForm && triggerCreate && (
         <MenuItem
           className={styles.menuContent}
           key="createGroup"
@@ -165,18 +174,20 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
           新建分组
         </MenuItem>
       )}
-      {triggerDelete && <MenuItem
-        className={styles.menuContent}
-        key="delete"
-        onClick={(e) => {
-          e.stopPropagation();
-          triggerDelete(menuID);
-        }}
-        style={{ color: 'red' }}
-      >
-        <img src={DeleteMenuIcon} alt="删除" />
-        删除
-      </MenuItem>}
+      {triggerDelete && (
+        <MenuItem
+          className={styles.menuContent}
+          key="delete"
+          onClick={(e) => {
+            e.stopPropagation();
+            triggerDelete(menuID);
+          }}
+          style={{ color: 'red' }}
+        >
+          <img src={DeleteMenuIcon} alt="删除" />
+          删除
+        </MenuItem>
+      )}
     </Menu>
   );
 
@@ -191,8 +202,11 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
       return;
     }
 
+    const editorType =
+      curPage.value?.pageSetType === PageType.WORKBENCH ? EDITOR_TYPES.WORKBENCH_EDITOR : EDITOR_TYPES.FORM_EDITOR;
+
     sessionStorage.setItem('EDITOR_PAGE_INFO', JSON.stringify({ id: menuID, name: menuName, icon: menuIcon }));
-    navigate(`/onebase/editor/${EDITOR_TYPES.FORM_EDITOR}?pageSetId=${pageSetId}`);
+    navigate(`/onebase/editor/${editorType}?pageSetId=${pageSetId}`);
   };
 
   return (
@@ -206,22 +220,40 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
       onClick={onClick}
       role="menuitem"
       tabIndex={0}
+      style={style}
     >
       <Tooltip content={menuName} position="top">
-        <div
-          className={styles.menuName}
-          style={{
-            maxWidth: maxWidth + 'px'
-          }}
-        >
-          <DynamicIcon
-            IconComponent={menuIconList.find((icon) => icon.code === menuIcon)?.icon}
-            theme="outline"
-            size="18"
-            fill={curMenu.value?.id === menuID ? 'rgb(var(--primary-6))' : '#333'}
-            style={{ marginRight: 16 }}
-          />
-          {label}
+        <div className={styles.menuName}>
+          {menuIcon.includes('TASK-') ? (
+            // xxx-taskicon 是工作流程任务中心菜单的icon
+            <i className={`iconfont ${menuIcon}`} style={{ marginRight: '16px' }} />
+          ) : (
+            // 正常菜单 icon
+            <ReactSVG
+              className={styles.menuIcon}
+              src={
+                allWebMenuIcons.find((ele) => ele.code === menuIcon)?.icon ||
+                allWebMenuIcons.find((ele) => ele.code === 'FormPageLine')?.icon ||
+                ''
+              }
+              beforeInjection={(svg) => {
+                const fillColor = curMenu.value?.id === menuID ? 'rgb(var(--primary-6))' : '#333';
+                svg.querySelectorAll('*').forEach((el) => el.removeAttribute('fill'));
+                svg.setAttribute('fill', fillColor);
+                svg.setAttribute('width', '18px');
+                svg.setAttribute('height', '18px');
+              }}
+            />
+          )}
+          <span
+            className={styles.name}
+            style={{
+              maxWidth: maxWidth + 'px',
+              color: curMenu.value?.id === menuID ? 'rgb(var(--primary-6))' : '#333'
+            }}
+          >
+            {label}
+          </span>
         </div>
       </Tooltip>
       {isVisible === VisibleType.HIDDEN && (
@@ -240,10 +272,14 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
             trigger="click"
             position="bl"
           >
-            <IconMoreVertical className={styles.moreIcon} onClick={(e) => e.stopPropagation()} />
+            {menuType === MenuType.BPM ? (
+              <img src={SettingIcon} alt="" />
+            ) : (
+              <IconMoreVertical className={styles.moreIcon} onClick={(e) => e.stopPropagation()} />
+            )}
           </Dropdown>
         </div>
-      )}
+     )}
     </div>
   );
 };

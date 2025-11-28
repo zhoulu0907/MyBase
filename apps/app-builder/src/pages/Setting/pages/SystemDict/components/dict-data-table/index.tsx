@@ -1,9 +1,9 @@
+import { PermissionButton as Button } from '@/components/PermissionControl';
 import StatusTag from '@/components/StatusTag';
+import { TENANT_DICT_PERMISSION as ACTIONS } from '@/constants/permission';
 import { Input, Pagination, Table } from '@arco-design/web-react';
 import { type DictData } from '@onebase/platform-center';
-import { TENANT_DICT_PERMISSION as ACTIONS } from '@/constants/permission';
-import { PermissionButton as Button } from '@/components/PermissionControl';
-import styles from '../../index.module.less';
+import s from '../../index.module.less';
 
 interface DictionaryTableProps {
   data: DictData[];
@@ -15,6 +15,7 @@ interface DictionaryTableProps {
   searchValue: string;
   onSearchChange: (value: string) => void;
   onBatchConfig: () => void;
+  loading?: boolean;
 }
 
 export default function DictionaryTable({
@@ -26,7 +27,8 @@ export default function DictionaryTable({
   onPageSizeChange,
   searchValue,
   onSearchChange,
-  onBatchConfig
+  onBatchConfig,
+  loading
 }: DictionaryTableProps) {
   const columns = [
     {
@@ -47,21 +49,21 @@ export default function DictionaryTable({
 
   return (
     <>
-      <div className={styles.tableHeader}>
+      <div className={s.tableHeader}>
         <Button permission={ACTIONS.CREATE} type="primary" onClick={onBatchConfig}>
           字典值配置
         </Button>
         <Input.Search
-          className={styles.searchInput}
           value={searchValue}
           onChange={onSearchChange}
-          placeholder="输入字典值"
+          placeholder="搜索字典值"
+          style={{ width: 200 }}
           allowClear
         />
       </div>
-      <div className={styles.tableContainer}>
-        <Table rowKey="id" columns={columns} data={data} pagination={false} scroll={{ y: 510 }} />
-        <div className={styles.paginationContainer}>
+      <div className={s.tableContainer}>
+        <Table rowKey="id" columns={columns} data={data} pagination={false} scroll={{ y: 510 }} loading={loading} />
+        <div className={s.paginationContainer}>
           <Pagination
             total={total}
             pageSize={pageSize}

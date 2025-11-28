@@ -1,17 +1,17 @@
 import React, { memo, useCallback } from 'react';
-import { Button, Form, Modal } from '@arco-design/web-react';
+import { Button, Form, Modal, Spin } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import { useFieldStore } from '@/store/store_field';
-import FieldConfigPopover from './FieldConfigPopover';
+import FieldConfigPopover from './components/FieldConfigPopover';
 import styles from './index.module.less';
-import SortableTable from './SortableTable';
-import TableColumns from './TableColumns';
+import SortableTable from './components/SortableTable';
+import TableColumns from './components/TableColumns';
 import { useFieldManager } from './hooks/useFieldManager';
 import type { ConfigFieldModalProps } from './types';
 import { FIELD_TYPES_NEED_CONFIG } from './utils/const';
 
 const ConfigFieldModal: React.FC<ConfigFieldModalProps> = memo(
-  ({ visible, setVisible, entity, successCallback }: ConfigFieldModalProps) => {
+  ({ visible, setVisible, entity, successCallback, gotoDictPage, entities }: ConfigFieldModalProps) => {
     // 使用统一的字段管理hook
     const fieldManager = useFieldManager(visible, entity, successCallback, setVisible);
 
@@ -35,6 +35,8 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = memo(
             fields={fieldManager.originFields}
             onConfirm={fieldManager.handleConfigConfirm}
             onCancel={fieldManager.handleConfigCancel}
+            gotoDictPage={gotoDictPage}
+            entities={entities}
           />
         );
       },
@@ -58,7 +60,8 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = memo(
       externalErrors: fieldManager.errors,
       getFieldIndex: fieldManager.getFieldIndex,
       deleteField: fieldManager.deleteField,
-      fields: fieldManager.fields
+      fields: fieldManager.fields,
+      handleConfigConfirm: fieldManager.handleConfigConfirm
     });
 
     return (
@@ -70,35 +73,37 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = memo(
         onCancel={fieldManager.handleCancel}
         okText="保存"
         cancelText="取消"
-        confirmLoading={fieldManager.loading}
-        style={{ width: 1400 }}
+        confirmLoading={fieldManager.submitting}
+        style={{ width: 1260 }}
       >
-        <Form form={fieldManager.form} initialValues={{ fields: fieldManager.activeFields }}>
-          <Form.List field="fields">
-            {() => {
-              return (
-                <div className={styles.fieldConfigContainer} id="field-config-container">
-                  <SortableTable
-                    data={fieldManager.activeFields}
-                    columns={columns}
-                    onSort={({ oldIndex, newIndex }) => fieldManager.moveField(oldIndex, newIndex)}
-                  />
+        <Spin loading={fieldManager.loading} style={{ width: '100%' }}>
+          <Form form={fieldManager.form} initialValues={{ fields: fieldManager.activeFields }} id="field-config-form">
+            <Form.List field="fields">
+              {() => {
+                return (
+                  <div className={styles.fieldConfigContainer} id="field-config-container">
+                    <SortableTable
+                      data={fieldManager.activeFields}
+                      columns={columns}
+                      onSort={({ oldIndex, newIndex }) => fieldManager.moveField(oldIndex, newIndex)}
+                    />
 
-                  <div className={styles.addFieldSection}>
-                    <Button
-                      type="dashed"
-                      icon={<IconPlus />}
-                      onClick={fieldManager.addField}
-                      className={styles.addFieldButton}
-                    >
-                      新增字段
-                    </Button>
+                    <div className={styles.addFieldSection}>
+                      <Button
+                        type="dashed"
+                        icon={<IconPlus />}
+                        onClick={fieldManager.addField}
+                        className={styles.addFieldButton}
+                      >
+                        新增字段
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              );
-            }}
-          </Form.List>
-        </Form>
+                );
+              }}
+            </Form.List>
+          </Form>
+        </Spin>
       </Modal>
     );
   }

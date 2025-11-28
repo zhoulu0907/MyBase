@@ -1,2 +1,13 @@
 // 导出工厂函数和预定义实例
-export { appService, flowService, metadataService, runtimeMetadataService, runtimeFlowService, formulaService } from './factory';
+export {
+  appService,
+  bpmService,
+  etlService,
+  flowService,
+  formulaService,
+  metadataService,
+  runtimeFlowService,
+  runtimeListdataService,
+  runtimeMetadataService,
+  runtimeBpmService
+} from './factory';

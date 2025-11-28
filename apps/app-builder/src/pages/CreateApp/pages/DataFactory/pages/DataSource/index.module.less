@@ -6,6 +6,19 @@
   padding: @spacingXl 0;
 }
 
+.dataSourceContainer {
+  height: calc(100vh - 64px);
+  width: 100%;
+  overflow-y: auto;
+  padding: @spacingMd;
+  background-color: @backgroundColor;
+  box-sizing: border-box;
+  .dataSourceContent {
+    background-color: @white;
+    height: 100%;
+  }
+}
+
 /* 操作头部样式 */
 .operationHeader {
   display: flex;

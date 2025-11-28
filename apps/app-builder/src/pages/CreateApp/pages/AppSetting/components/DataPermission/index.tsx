@@ -102,8 +102,10 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
         // 处理数据过滤条件
         if (permToEdit.dataFilters) {
           // 将后端数据格式转换为condition-editor组件需要的格式
-          const conditionFormat = convertBackendDataToConditionFormat(permToEdit.dataFilters);
-          editingData.filterCondition = conditionFormat;
+          editingData.filterCondition = (permToEdit.dataFilters ?? []).map((item) => ({
+            // 假设原来是 item.conditions 或类似字段，改成你真实的字段名
+            conditions: (item ?? []).map(normalizeCondition)
+          }));
         }
 
         // 处理指定成员或指定部门的情况，将scopeValue从JSON字符串转回数组
@@ -132,6 +134,13 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
       setEditingPermData({ ...initialFormValues });
     }
   };
+
+  const normalizeCondition = (c: any) => ({
+    fieldId: c?.fieldId != null ? String(c.fieldId) : '',
+    op: c?.fieldOperator ?? '',
+    operatorType: c?.fieldValueType ?? 'value',
+    value: c?.fieldValue
+  });
 
   const getSetIdFromMenuId = async () => {
     try {
@@ -576,7 +585,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
                       <span className={styles.name}>操作权限：</span>
                       <Tag>查看</Tag>
                       {perm.operationTags?.map((tag: string) => (
-                        <Tag key={tag}>{OPERATION_OPTIONS[tag]}</Tag>
+                        <Tag key={tag}>{OPERATION_OPTIONS[tag.toLowerCase()]}</Tag>
                       ))}
                     </Space>
                   </Space>

@@ -1,3 +1,4 @@
+import { getPopupContainer } from '@/utils';
 import { Form, Select } from '@arco-design/web-react';
 import { nanoid } from 'nanoid';
 import { memo, useEffect, useState } from 'react';
@@ -7,19 +8,7 @@ import '../index.css';
 import type { XInputSelectOneConfig } from './schema';
 
 const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; detailMode?: boolean }) => {
-  const {
-    label,
-    dataField,
-    tooltip,
-    status,
-    verify,
-    layout,
-    labelColSpan = 0,
-    showSearch,
-    defaultValue,
-    runtime = true,
-    detailMode
-  } = props;
+  const { label, dataField, tooltip, status, verify, layout, defaultOptionsConfig, runtime = true, detailMode } = props;
 
   const { form } = Form.useFormContext();
   const [fieldId, setFieldId] = useState('');
@@ -32,45 +21,37 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
     }
   }, [dataField]);
 
-  const getPopupContainer = (node?: HTMLElement): HTMLElement => {
-    return (
-      (node?.closest('.arco-form-item') as HTMLElement) ||
-      node?.parentNode as HTMLElement ||
-      document.body
-    );
-  };
-
   return (
     <div className="formWrapper">
       <Form.Item
-        label={label.display && label.text}
-        field={
-          dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.SELECT_ONE}_${nanoid()}`
+        label={
+          label.display &&
+          label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
         }
+        field={fieldId ? fieldId : `${FORM_COMPONENT_TYPES.SELECT_ONE}_${nanoid()}`}
         layout={layout}
         tooltip={tooltip}
-        labelCol={{
-          style: { width: labelColSpan, flex: 'unset' }
-        }}
         wrapperCol={{ style: { flex: 1 } }}
-        rules={[{ required: verify?.required }]}
+        rules={[{ required: verify?.required, message:`${label.text}是必填项` }]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
+        initialValue={defaultOptionsConfig?.defaultOptions.find((ele) => ele.isChosen)?.value}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-          <div>{defaultValue.find((item: any) => item.value == fieldValue)?.label || '--'}</div>
+          <div>
+            {(fieldValue && defaultOptionsConfig?.defaultOptions?.find((op) => op.value === fieldValue)?.label) || '--'}
+          </div>
         ) : (
           <Select
             placeholder="请选择"
-            showSearch={showSearch}
             filterOption={(input, option) => {
               return option?.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0;
             }}
             allowClear
-            options={defaultValue}
+            options={defaultOptionsConfig?.defaultOptions}
             getPopupContainer={getPopupContainer}
             style={{
               width: '100%',

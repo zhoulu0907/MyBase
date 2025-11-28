@@ -1,5 +1,5 @@
 import ExecuteFlows from '@/utils/flow';
-import { Button, Drawer, Form, Message } from '@arco-design/web-react';
+import { Form, Message, Modal } from '@arco-design/web-react';
 import {
   CATEGORY_TYPE,
   dataMethodData,
@@ -8,6 +8,7 @@ import {
   getEntityFieldsWithChildren,
   getPageSetId,
   getPageSetMetaData,
+  PageType,
   queryFlowExecForm,
   TRIGGER_EVENTS,
   type AppEntityField,
@@ -16,22 +17,16 @@ import {
   type InsertMethodParams,
   type UpdateMethodParams
 } from '@onebase/app';
+import { fetchSubmitInstance } from '@onebase/app/src/services/app_runtime';
 import { pagesRuntimeSignal } from '@onebase/common';
-import {
-  EDITOR_TYPES,
-  FORM_COMPONENT_TYPES,
-  getComponentWidth,
-  PreviewRender,
-  startLoadPageSet,
-  STATUS_OPTIONS,
-  STATUS_VALUES,
-  useEditorSignalMap,
-  useListEditorSignal,
-  type GridItem
-} from '@onebase/ui-kit';
+import { EDITOR_TYPES, FORM_COMPONENT_TYPES, useEditorSignalMap } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import DetailRuntime from './DetailRuntime';
+import EditRuntime from './EditRuntime';
+import FlowPredict from './flowPredict';
 import styles from './index.module.less';
+import ListRuntime from './ListRuntime';
 
 interface PreviewProps {
   menuId: string;
@@ -42,8 +37,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   useSignals();
 
   const [form] = Form.useForm();
-
-  const { components: listComponents, pageComponentSchemas: listPageComponentSchemas } = useListEditorSignal;
 
   const {
     curPage,
@@ -60,12 +53,15 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   const [pageSetId, setPageSetId] = useState('');
   const [pageType, setPageType] = useState('');
   const [mainMetaData, setMainMetaData] = useState<string>('');
+  const [submitLoading, setSubmitLoading] = useState<boolean>(false);
 
   const [editTargetId, setEditTargetId] = useState('');
 
   // 当前时间戳
   const [detailMode, setDetailMode] = useState(true);
   const [refresh, setRefresh] = useState(Date.now());
+  const [isPredictVisible, setPredictVisible] = useState(false);
+  const [isAdd, setAdd] = useState(false);
 
   useEffect(() => {
     if (drawerVisible.value) {
@@ -101,10 +97,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
   useEffect(() => {
     if (pageSetId) {
-      loadPageSetInfo(pageSetId);
       getMainMetaData(pageSetId);
     }
-    // 优先切换到列表页
     setPageType(EDITOR_TYPES.LIST_EDITOR);
   }, [pageSetId]);
 
@@ -114,16 +108,16 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     setPageSetId(res);
   };
 
-  const loadPageSetInfo = async (pageSetId: string) => {
-    startLoadPageSet({ pageSetId: pageSetId });
-  };
-
   // 信息收集弹窗
   const [flows, setFlows] = useState<any[]>([]);
   const [inputParams, setInputParams] = useState<any>({});
 
+  const [entityParam, setEntityParam] = useState<any>()
+
   // 提交表单
-  const submitForm = async () => {
+  const submitForm = async (isSave = false) => {
+    await form.validate();
+    !isSave && setSubmitLoading(true);
     const fields = form.getFieldsValue();
     console.log('fields: ', fields);
     console.log('mainMetaDataFields: ', mainMetaDataFields.value);
@@ -138,7 +132,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       const field = (mainMetaDataFields.value || []).find((f: AppEntityField) => f.fieldId == key);
       if (field) {
         console.log('field: ', field);
-        formData[field.fieldId] = value;
+        formData[field.fieldId] = value || '';
       }
 
       // 处理子表逻辑
@@ -152,7 +146,13 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
           if (Object.values(item).every((v: any) => v === undefined)) {
             return;
           }
-          subTableRows.push(item);
+          const keys = Object.keys(item);
+          let temp: any = {};
+          for (let key of keys) {
+            const newKey = key.slice(key.lastIndexOf('.') + 1);
+            temp[newKey] = item[key];
+          }
+          subTableRows.push(temp);
         }
         subFormData.push({
           subEntityId: subEntityId,
@@ -192,29 +192,60 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       }
       setEditTargetId('');
       setDrawerVisible(false);
-      setRefresh(Date.now());
+      setTimeout(() => setRefresh(Date.now()), 150);
+
+      setSubmitLoading(false);
+
+      if (curPage?.value?.pageSetType === PageType.BPM) {
+        setPageType(EDITOR_TYPES.FORM_EDITOR);
+      } else {
+        setPageType(EDITOR_TYPES.LIST_EDITOR);
+      }
     } else {
-      const req: InsertMethodParams = {
-        menuId: menuId,
-        entityId: mainMetaData,
-        data: formData,
-        subEntities: subFormData
-      };
+      try {
+        let res = null;
+        if (curPage?.value?.pageSetType === PageType.BPM) {
+          const reqFlow = {
+            isDraft: isSave,
+            formName: curPage?.value?.pages?.find((page: any) => page.pageType === CATEGORY_TYPE.FORM)?.pageName || '',
+            businessId: curPage?.value?.id,
+            entity: {
+              entityId: mainMetaData,
+              data: formData
+            }
+          };
+          res = await fetchSubmitInstance(reqFlow);
+          setPageType(EDITOR_TYPES.FORM_EDITOR);
+        } else {
+          const req: InsertMethodParams = {
+            menuId: menuId,
+            entityId: mainMetaData,
+            data: formData,
+            subEntities: subFormData
+          };
+          res = await dataMethodInsert(req);
 
-      const res = await dataMethodInsert(req);
-      console.log(res);
+          setPageType(EDITOR_TYPES.LIST_EDITOR);
+        }
 
-      const createFlows = (flowRes || []).filter(
-        (ele: any) => ele.recordTriggerEvents && ele.recordTriggerEvents.includes(TRIGGER_EVENTS.CREATE)
-      );
-      setFlows(createFlows);
-
-      if (res) {
-        Message.success('创建成功');
+        const createFlows = (flowRes || []).filter(
+          (ele: any) => ele.recordTriggerEvents && ele.recordTriggerEvents.includes(TRIGGER_EVENTS.CREATE)
+        );
+        setFlows(createFlows);
+        setPredictVisible(false);
+        if (res) {
+          Message.success('创建成功');
+          cancelSubmitForm();
+        }
+        setTimeout(() => setRefresh(Date.now()), 150);
+        setSubmitLoading(false);
+      } catch (error) {
+        Message.error('创建失败');
+        console.error('创建失败', error);
+        setPredictVisible(false);
+        setSubmitLoading(false);
       }
     }
-
-    setPageType(EDITOR_TYPES.LIST_EDITOR);
   };
 
   const cancelSubmitForm = () => {
@@ -222,9 +253,11 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
     setPageType(EDITOR_TYPES.LIST_EDITOR);
     setDetailMode(true);
+    form.resetFields();
   };
 
   const showFromPageData = (id: string, toFormPage: boolean = false) => {
+    setAdd(!id);
     form.resetFields();
 
     if (id && id !== '') {
@@ -298,13 +331,14 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
               pagesRuntimeSignal.setSubTableDataLength(key, (subEntity.subData || []).length);
 
               for (let idx = 0; idx < (subEntity.subData || []).length; idx++) {
-                schema?.config?.columns.forEach((column: any) => {
-                  //   console.log('column: ', column);
-                  //   const fieldName = targetSubEntity.childFields.find(
-                  //     (ele: any) => ele.fieldId == column.dataIndex
-                  //   )?.fieldName;
-                  formValues[`${key}.${idx}.${column.dataIndex}`] = subEntity.subData[idx]?.[column.dataIndex];
-                });
+                const keys = Object.keys((subEntity.subData || [])[idx]);
+                for (let ele in componentSchemas) {
+                  const config = componentSchemas[ele]?.config;
+                  const fieldId = config?.dataField?.[1];
+                  if (keys.includes(fieldId)) {
+                    formValues[`${key}.${idx}.${fieldId}`] = subEntity.subData[idx]?.[fieldId];
+                  }
+                }
               }
             }
           });
@@ -318,146 +352,78 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     return res;
   };
 
+  const onSubmit = () => {
+    if (curPage?.value?.pageSetType === PageType.BPM) {
+      const fields = form.getFieldsValue();
+      const formData:any = {}
+      Object.entries(fields).forEach(([key, value]) => {
+        // 处理主表逻辑
+        const field = (mainMetaDataFields.value || []).find((f: AppEntityField) => f.fieldId == key);
+        if (field) {
+          formData[field.fieldId] = value || '';
+        }
+      })
+      setEntityParam({
+        entityId: mainMetaData,
+        data: formData
+      })
+      setPredictVisible(true);
+    } else {
+      submitForm();
+    }
+  };
+
+  const onSaveSubmit = () => {
+    submitForm(true);
+  };
+
   const toEditMode = () => {
     setDetailMode(false);
   };
 
   return (
-    <div className={styles.previewPage}>
+    <div className={`${styles.previewPage} runtime-preview-formpage`}>
       <div className={styles.content}>
-        {pageType === EDITOR_TYPES.LIST_EDITOR &&
-          listComponents.value.map((cp: GridItem) => (
-            <Fragment key={cp.id}>
-              {listPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
-                <div
-                  key={cp.id}
-                  className={styles.componentItem}
-                  style={{
-                    width: getComponentWidth(listPageComponentSchemas.value[cp.id], cp.type)
-                  }}
-                >
-                  <PreviewRender
-                    cpId={cp.id}
-                    cpType={cp.type}
-                    pageComponentSchema={listPageComponentSchemas.value[cp.id]}
-                    runtime={runtime}
-                    showFromPageData={showFromPageData}
-                    refresh={refresh}
-                  />
-                </div>
-              )}
-            </Fragment>
-          ))}
+        <ListRuntime pageSetId={pageSetId} runtime={runtime} showFromPageData={showFromPageData} refresh={refresh} />
+
+        <DetailRuntime
+          visible={drawerVisible.value}
+          onCancel={() => setDrawerVisible(false)}
+          form={form}
+          detailMode={detailMode}
+          onUpdate={() => submitForm()}
+          onCancelUpdate={cancelSubmitForm}
+          showFromPageData={showFromPageData}
+          editTargetId={editTargetId}
+        />
 
         {pageType == EDITOR_TYPES.FORM_EDITOR && (
-          <Form layout="inline" form={form} requiredSymbol={{ position: 'end' }}>
-            {useEditorSignalMap.get(editPageViewId.value)?.components.value.map((cp: GridItem) => (
-              <Fragment key={cp.id}>
-                {useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id].config.status !==
-                  STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
-                  <div
-                    key={cp.id}
-                    className={styles.componentItem}
-                    style={{
-                      width: getComponentWidth(
-                        useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id],
-                        cp.type
-                      )
-                    }}
-                  >
-                    <PreviewRender
-                      cpId={cp.id}
-                      cpType={cp.type}
-                      pageComponentSchema={
-                        useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id]
-                      }
-                      runtime={true}
-                      showFromPageData={() => {
-                        setPageType(EDITOR_TYPES.FORM_EDITOR);
-                      }}
-                    />
-                  </div>
-                )}
-              </Fragment>
-            ))}
-
-            <div className={styles.footer}>
-              <Button type="primary" onClick={submitForm}>
-                提交
-              </Button>
-              <Button type="default" onClick={cancelSubmitForm}>
-                取消
-              </Button>
-            </div>
-          </Form>
+          <EditRuntime
+            form={form}
+            isAdd={isAdd}
+            submitLoading={submitLoading}
+            onSubmit={onSubmit}
+            onSaveSubmit={onSaveSubmit}
+            onCancel={cancelSubmitForm}
+          />
         )}
 
-        {/* 右侧详情抽屉 */}
-        <Drawer
-          width={'60vw'}
-          title={
-            <div className={styles.drawerTitle}>
-              <div>详情</div>
-              {/* {detailMode && (
-                <Button type="primary" onClick={() => toEditMode()}>
-                  编辑
-                </Button>
-              )} */}
-            </div>
-          }
-          visible={drawerVisible.value}
-          placement="right"
-          onCancel={() => setDrawerVisible(false)}
-          footer={null}
-        >
-          <div className={styles.content}>
-            <Form layout="inline" form={form} requiredSymbol={{ position: 'end' }}>
-              {useEditorSignalMap.get(detailPageViewId.value)?.components.value.map((cp: GridItem) => (
-                <Fragment key={cp.id}>
-                  {useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id].config.status !==
-                    STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
-                    <div
-                      key={cp.id}
-                      className={styles.componentItem}
-                      style={{
-                        width: getComponentWidth(
-                          useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id],
-                          cp.type
-                        )
-                      }}
-                    >
-                      <PreviewRender
-                        cpId={cp.id}
-                        cpType={cp.type}
-                        pageComponentSchema={
-                          useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id]
-                        }
-                        runtime={true}
-                        detailMode={detailMode}
-                        showFromPageData={() => {}}
-                      />
-                    </div>
-                  )}
-                </Fragment>
-              ))}
-
-              {!detailMode && (
-                <div className={styles.footer}>
-                  <Button type="primary" onClick={submitForm}>
-                    更新
-                  </Button>
-                  <Button type="default" onClick={cancelSubmitForm}>
-                    取消
-                  </Button>
-                </div>
-              )}
-            </Form>
-          </div>
-        </Drawer>
       </div>
 
       {/* 信息收集弹窗 */}
       <ExecuteFlows flows={flows} inputParams={inputParams}></ExecuteFlows>
+      {isPredictVisible && (
+        <Modal
+          title=""
+          visible={isPredictVisible}
+          onOk={() => submitForm()}
+          onCancel={() => setPredictVisible(false)}
+          autoFocus={false}
+          focusLock={true}
+        >
+          <FlowPredict businessId={curPage?.value?.id} entityParam={entityParam}/>
+        </Modal>
+      )}
     </div>
   );
 };

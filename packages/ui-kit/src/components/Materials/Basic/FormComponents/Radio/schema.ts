@@ -3,7 +3,7 @@ import {
   baseDefault,
   dataFieldConfig,
   directionConfig,
-  labelColSpanConfig,
+  alignConfig,
   layoutConfig,
   radioDataConfig,
   statusConfig,
@@ -11,36 +11,37 @@ import {
   type ICommonBaseType,
   type TLayoutSelectKeyType,
   type TStatusSelectKeyType,
+  type TAlignSelectKeyType,
   type TWidthSelectKeyType
 } from '../../../common';
 import {
+  ALIGN_VALUES,
+  ALIGN_OPTIONS,
   CONFIG_TYPES,
   LAYOUT_OPTIONS,
   LAYOUT_VALUES,
   STATUS_OPTIONS,
   STATUS_VALUES,
   WIDTH_OPTIONS,
-  WIDTH_VALUES
+  WIDTH_VALUES,
+  COLOR_MODE_TYPES,
+  DEFAULT_OPTIONS_TYPE
 } from '../../../constants';
 import type {
-  IBooleanConfigType,
+  IAlignConfigType,
   IDataFieldConfigType,
   ILabelConfigType,
   ILayoutConfigType,
-  INumberConfigType,
-  IPlaceholderConfigType,
   IRadioDataConfigType,
-  ISelectConfigType,
   IStatusConfigType,
-  ITextAreaConfigType,
   ITextConfigType,
   ITooltipConfigType,
   IVerifyConfigType,
   IWidthConfigType,
   TBooleanDefaultType,
-  TNumberDefaultType,
   TSelectDefaultType,
   TTextAreaDefaultType,
+  TRadioDefaultType,
   TTextDefaultType
 } from '../../../types';
 
@@ -52,18 +53,14 @@ export interface XInputRadioSchema {
 export type TXInputRadioEditData = Array<
   | ITextConfigType
   | ILabelConfigType
-  | IPlaceholderConfigType
   | ITooltipConfigType
-  | IStatusConfigType<TStatusSelectKeyType>
-  | IWidthConfigType<TWidthSelectKeyType>
-  | INumberConfigType
-  | ISelectConfigType<TWidthSelectKeyType | TStatusSelectKeyType>
-  | ITextAreaConfigType
-  | IBooleanConfigType
-  | ILayoutConfigType<TLayoutSelectKeyType>
   | IDataFieldConfigType
   | IRadioDataConfigType
   | IVerifyConfigType
+  | IStatusConfigType<TStatusSelectKeyType>
+  | IAlignConfigType<TAlignSelectKeyType>
+  | ILayoutConfigType<TLayoutSelectKeyType>
+  | IWidthConfigType<TWidthSelectKeyType>
 >;
 
 export interface XInputRadioConfig extends ICommonBaseType {
@@ -78,37 +75,51 @@ export interface XInputRadioConfig extends ICommonBaseType {
   };
 
   /**
-   * 数据字段
-   */
-  dataField: TTextDefaultType[];
-
-  /**
    * 描述信息（鼠标悬浮时显示）
    */
   tooltip?: TTextAreaDefaultType;
 
   /**
-   * 组件状态：可用、隐藏、只读
-   * 可选值: 'default' | 'hidden' | 'readonly'
+   * 数据字段
    */
-  status?: TSelectDefaultType<TStatusSelectKeyType>;
+  dataField: TTextDefaultType[];
 
   /**
-   * 默认值
+   * 选项
    */
-  defaultValue: { label: string; value: any; [property: string]: any }[];
+  defaultOptionsConfig?: {
+    type: string;
+    dictTypeId?: string;
+    disabled?: boolean;
+    defaultOptions: { label: string; value: any;[property: string]: any }[];
+    colorMode?: boolean;
+    colorModeType?: string;
+  }
 
   /**
-   * 字段宽度
+   * 单选框方向：水平（默认）、垂直
+   * 可选值: 'vertical' | 'horizontal'
    */
-  width: TSelectDefaultType<TWidthSelectKeyType>;
+  direction?: TLayoutSelectKeyType;
 
   /**
-   * required：是否必填，未填写时提交报错
-   */
+  * required：是否必填，未填写时提交报错
+  */
   verify: {
     required: TBooleanDefaultType;
   };
+
+  /**
+   * 组件状态：可用、隐藏、只读
+   * 可选值: 'default' | 'hidden' | 'readonly'
+   */
+  status?: TRadioDefaultType<TStatusSelectKeyType>;
+
+  /**
+   * 内容对齐方式：左、中、右
+   * 可选值: 'left' | 'center' | 'right'
+   */
+  align?: TSelectDefaultType<TAlignSelectKeyType>;
 
   /**
    * 表单的布局：水平、垂直（默认）
@@ -117,20 +128,9 @@ export interface XInputRadioConfig extends ICommonBaseType {
   layout?: TLayoutSelectKeyType;
 
   /**
-   * 隐藏时是否提交数据，开启后隐藏状态仍会保存值
+   * 字段宽度
    */
-  saveWithHidden?: TBooleanDefaultType;
-
-  /**
-   * 标题宽度
-   */
-  labelColSpan?: TNumberDefaultType;
-
-  /**
-   * 单选框方向：水平（默认）、垂直
-   * 可选值: 'vertical' | 'horizontal'
-   */
-  direction?: TLayoutSelectKeyType;
+  width: TRadioDefaultType<TWidthSelectKeyType>;
 }
 
 const XRadio: XInputRadioSchema = {
@@ -141,27 +141,29 @@ const XRadio: XInputRadioSchema = {
       name: '标题',
       type: CONFIG_TYPES.LABEL_INPUT
     },
-    ...dataFieldConfig,
     {
       key: 'tooltip',
-      name: '描述信息',
+      name: '字段描述',
       type: CONFIG_TYPES.TOOLTIP_INPUT
     },
-    labelColSpanConfig,
-    layoutConfig,
-    directionConfig,
-    {
-      key: 'saveWithHidden',
-      name: '隐藏时提交数据',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
+    //  数据绑定
+    ...dataFieldConfig,
+    // 选项
     radioDataConfig,
+    directionConfig,
+    // 选项分布方式
     {
       key: 'verify',
       name: '校验',
       type: CONFIG_TYPES.VERIFY
     },
+    // 显示状态
     statusConfig,
+    // 对齐方式
+    alignConfig,
+    // 布局方式
+    layoutConfig,
+    // 字段宽度
     widthConfig
   ],
   config: {
@@ -170,32 +172,44 @@ const XRadio: XInputRadioSchema = {
       text: '单选框',
       display: true
     },
-    dataField: [],
     tooltip: '',
-    width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
-    status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
-    defaultValue: [
-      {
-        label: '选项一',
-        value: '选项一'
-      },
-      {
-        label: '选项二',
-        value: '选项二'
-      },
-      {
-        label: '选项三',
-        value: '选项三'
-      }
-    ],
-    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
-    labelColSpan: 200,
-    saveWithHidden: false,
+    dataField: [],
+    defaultOptionsConfig: {
+      type: DEFAULT_OPTIONS_TYPE.CUSTOM,
+      disabled: false,
+      dictTypeId: '',
+      colorMode: false,
+      colorModeType: COLOR_MODE_TYPES.TAG,
+      defaultOptions: [
+        {
+          label: '选项一',
+          colorType: '',
+          isChosen: false,
+          value: '选项一'
+        },
+        {
+          label: '选项二',
+          colorType: '',
+          isChosen: false,
+          value: '选项二'
+        },
+        {
+          label: '选项三',
+          colorType: '',
+          isChosen: false,
+          value: '选项三'
+        }
+      ],
+    },
     direction: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
     verify: {
-      required: false
-    }
-  }
+      required: false,
+    },
+    status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
+    align: ALIGN_VALUES[ALIGN_OPTIONS.LEFT],
+    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
+    width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
+  },
 };
 
 export default XRadio;

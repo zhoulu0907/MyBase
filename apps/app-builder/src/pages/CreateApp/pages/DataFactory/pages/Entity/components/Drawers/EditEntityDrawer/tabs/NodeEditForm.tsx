@@ -101,14 +101,19 @@ const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onCancel, onSave, suc
 
   const handleDelete = async () => {
     setDeleteLoading(true);
-    const res = await deleteEntity(node.entityId);
 
-    setDeleteLoading(false);
-    setDeleteModalVisible(false);
-    if (res) {
-      onCancel();
-      Message.success('删除成功');
-      successCallback?.();
+    try {
+      const res = await deleteEntity(node.id || node.entityId);
+      if (res) {
+        Message.success('删除成功');
+        onCancel();
+        successCallback?.();
+      }
+    } catch (error) {
+      console.error('删除失败:', error);
+    } finally {
+      setDeleteLoading(false);
+      setDeleteModalVisible(false);
     }
   };
 
@@ -120,7 +125,7 @@ const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onCancel, onSave, suc
   return (
     <div className={styles.nodeEditForm}>
       <div className={styles.header}>
-        <h3>业务实体</h3>
+        <h3>数据资产</h3>
       </div>
 
       <Form form={form} layout="vertical" className={styles.editForm}>
@@ -128,15 +133,15 @@ const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onCancel, onSave, suc
         <div className={styles.formSection}>
           <h4 className={styles.formSectionTitle}>基本设置</h4>
 
-          <Form.Item label="业务实体名称" field="tableName" rules={[...createEntityRules.tableName]}>
-            <Input placeholder="请输入业务实体名称" maxLength={40} disabled />
+          <Form.Item label="数据资产名称" field="tableName" rules={[...createEntityRules.tableName]}>
+            <Input placeholder="请输入数据资产名称" maxLength={40} disabled />
           </Form.Item>
 
           <Form.Item label="业务展示名称" field="displayName" rules={[...createEntityRules.displayName]}>
             <Input placeholder="请输入业务展示名称" maxLength={50} />
           </Form.Item>
 
-          <Form.Item label="业务实体描述" field="description" rules={[...createEntityRules.description]}>
+          <Form.Item label="数据资产描述" field="description" rules={[...createEntityRules.description]}>
             <Input.TextArea placeholder="请输入描述 (选填)" rows={4} maxLength={500} showWordLimit />
           </Form.Item>
         </div>
@@ -188,7 +193,7 @@ const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onCancel, onSave, suc
       </div>
 
       <DeleteConfirmModal
-        content="确定要删除这个业务实体吗？删除后无法恢复。"
+        content="确定要删除这个数据资产吗？删除后无法恢复。"
         visible={deleteModalVisible}
         onVisibleChange={setDeleteModalVisible}
         onConfirm={handleDelete}

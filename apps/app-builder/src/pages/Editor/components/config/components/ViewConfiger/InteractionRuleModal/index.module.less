@@ -1,0 +1,151 @@
+.interactionRuleModal {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+
+  .left {
+    width: 250px;
+    height: 640px;
+    border-right: 1px solid #f2f3f5;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    overflow-y: auto;
+
+    .leftHeader {
+      width: 100%;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      box-sizing: border-box;
+      padding-right: 8px;
+      gap: 4px;
+    }
+
+    .leftContent {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-start;
+      gap: 8px;
+      width: 100%;
+      padding-right: 8px;
+      margin-top: 16px;
+      box-sizing: border-box;
+
+      .ruleItem {
+        width: 100%;
+        height: 36px;
+        background-color: #fff;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        box-sizing: border-box;
+        margin-bottom: 8px;
+        padding: 8px;
+        border-radius: 4px;
+        cursor: pointer;
+
+        .ruleItemName {
+          font-size: 14px;
+          font-weight: 500;
+          color: #272e3b;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .ruleItemEnabled {
+          font-size: 12px;
+          color: #272e3b;
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          justify-content: flex-end;
+          gap: 4px;
+        }
+
+        &:hover {
+          background-color: #f7f8fa;
+        }
+      }
+    }
+  }
+
+  .right {
+    height: 640px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 16px;
+    padding: 16px;
+    box-sizing: border-box;
+
+    overflow-y: auto;
+
+    .ruleCondition {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-start;
+      gap: 16px;
+      padding: 8px;
+      box-sizing: border-box;
+
+      .items {
+        position: relative;
+        margin-left: 10px;
+        padding-left: 20px;
+        padding-top: 15px;
+        padding-bottom: 15px;
+        padding-right: 10px;
+        box-sizing: border-box;
+        width: 98%;
+        display: flex;
+        flex-direction: column;
+
+        align-items: flex-start;
+        justify-content: flex-start;
+        flex-wrap: nowrap;
+        background-color: #ffffff;
+        border: 1px solid #e5e6eb;
+
+        border-radius: 4px;
+        gap: 10px;
+
+        .tag {
+          position: absolute;
+          left: -10px;
+          top: 40%;
+          z-index: 10;
+          border: 1px solid #e5e6eb;
+          background-color: #ffffff;
+          padding: 3px;
+          border-radius: 4px;
+          font-size: 14px;
+          font-weight: 400;
+        }
+      }
+    }
+
+    .ruleAction {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-start;
+      gap: 16px;
+      padding: 8px;
+      box-sizing: border-box;
+    }
+  }
+}

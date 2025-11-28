@@ -304,11 +304,11 @@ const XTable: XTableSchema = {
       name: '固定操作项',
       type: CONFIG_TYPES.SWITCH_INPUT
     },
-    {
-      key: 'saveWithHidden',
-      name: '隐藏时提交数据',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
+    // {
+    //   key: 'saveWithHidden',
+    //   name: '隐藏时提交数据',
+    //   type: CONFIG_TYPES.SWITCH_INPUT
+    // },
     widthConfig,
     statusConfig,
     {
@@ -338,9 +338,9 @@ const XTable: XTableSchema = {
     width: WIDTH_VALUES[WIDTH_OPTIONS.FULL],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     pagePosition: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.BR],
-    pageSize: 5,
+    pageSize: 10,
     metaData: '',
-    labelColSpan: 200,
+    labelColSpan: 100,
     defaultValue: [],
     columns: [],
 

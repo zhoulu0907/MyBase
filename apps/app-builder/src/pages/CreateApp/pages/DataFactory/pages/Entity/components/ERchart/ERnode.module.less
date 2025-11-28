@@ -41,6 +41,15 @@
     display: inline-block;
     position: absolute;
   }
+  .fieldIsNew {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #f5222d;
+    display: inline-block;
+    margin-right: 4px;
+    flex-shrink: 0;
+  }
   .refreshIcon {
     width: 12px;
     height: 12px;
@@ -144,10 +153,15 @@
 
 .fieldName {
   font-weight: 500;
+  flex-shrink: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .fieldType {
   color: #8c8c8c;
+  flex-shrink: 0;
 }
 
 .fieldSection {
@@ -194,6 +208,17 @@
 
 .fieldName {
   font-weight: 500;
+  position: relative;
+}
+
+.field-isNew {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #f5222d;
+  display: inline-block;
+  margin-left: 4px;
+  vertical-align: middle;
 }
 
 .clickableField {

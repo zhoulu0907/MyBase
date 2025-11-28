@@ -1,8 +1,9 @@
 import { useState, useCallback, useEffect } from 'react';
-import { Form, Message } from '@arco-design/web-react';
+import { Form, Message, Modal } from '@arco-design/web-react';
 import { ENTITY_FIELD_TYPE, FIELD_TYPE } from '@onebase/ui-kit';
 import { batchSaveFields } from '@onebase/app';
 import { useAppStore } from '@/store/store_app';
+import { newFieldSignal } from '@/store/singals/new_field';
 import { systemFieldsLength } from '../utils/transform';
 import { useFieldData } from './useFieldData';
 import { useFieldOperations } from './useFieldOperations';
@@ -20,6 +21,7 @@ export const useFieldManager = (
   const [form] = Form.useForm();
   const [configPopoverVisible, setConfigPopoverVisible] = useState<string | null>(null);
   const [constraintsPopoverVisible, setConstraintsPopoverVisible] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   // 使用数据管理hook
   const fieldData = useFieldData(visible, entity, onSuccess);
@@ -60,6 +62,26 @@ export const useFieldManager = (
     getCurrentTableData
   );
 
+  // 字段删除时，关闭相关的 popover
+  const handleDeleteField = useCallback(
+    (id: string) => {
+      if (configPopoverVisible === id) {
+        setConfigPopoverVisible(null);
+      }
+      if (constraintsPopoverVisible === id) {
+        setConstraintsPopoverVisible(null);
+      }
+    },
+    [configPopoverVisible, constraintsPopoverVisible, setConfigPopoverVisible, setConstraintsPopoverVisible]
+  );
+
+  const deleteFieldWithCleanup = useCallback(
+    (id: string) => {
+      fieldOperations.deleteField(id, handleDeleteField);
+    },
+    [fieldOperations, handleDeleteField]
+  );
+
   // 使用验证管理hook
   const fieldValidation = useFieldValidation();
 
@@ -81,15 +103,22 @@ export const useFieldManager = (
 
   // 处理配置确认
   const handleConfigConfirm = useCallback(
-    (fieldType: string, fieldId: string, configData: unknown) => {
+    (fieldType: string, fieldId: string, configData: unknown, dictTypeId?: string) => {
       let fieldConfig = {};
       switch (fieldType) {
         case ENTITY_FIELD_TYPE.SELECT.VALUE:
         case ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE:
-          fieldConfig = { options: configData };
+          if (dictTypeId) {
+            fieldConfig = { dictTypeId, options: [] };
+          } else {
+            fieldConfig = { options: configData };
+          }
           break;
         case ENTITY_FIELD_TYPE.AUTO_CODE.VALUE:
           fieldConfig = { autoNumber: configData };
+          break;
+        case ENTITY_FIELD_TYPE.DATA_SELECTION.VALUE:
+          fieldConfig = { dataSelectionConfig: configData };
           break;
         case 'CONSTRAINTS':
           fieldConfig = { constraints: configData };
@@ -118,12 +147,20 @@ export const useFieldManager = (
 
   // 处理取消
   const handleCancel = useCallback(() => {
-    setVisible?.(false);
-    form.resetFields();
-    setConfigPopoverVisible(null);
-    setConstraintsPopoverVisible(null);
-    fieldValidation.clearErrors();
-  }, [form, setVisible, fieldValidation]);
+    Modal.confirm({
+      title: '确认取消',
+      content: '确定要取消字段配置吗？',
+      okText: '确认',
+      cancelText: '取消',
+      onOk: () => {
+        setVisible?.(false);
+        form.resetFields();
+        setConfigPopoverVisible(null);
+        setConstraintsPopoverVisible(null);
+        fieldValidation.clearErrors();
+      }
+    });
+  }, [form, setVisible]);
 
   // 渲染字段配置 popover 内容
   const renderFieldConfigContent = useCallback(() => {
@@ -132,19 +169,16 @@ export const useFieldManager = (
     return null;
   }, []);
 
-  // 处理表单提交
-  const handleSubmit = useCallback(async () => {
+  // 保存
+  const executeSave = useCallback(async () => {
+    if (!entity?.entityId) {
+      return;
+    }
+
+    setSubmitting(true);
+
     try {
-      // 检查实体是否存在
-      if (!entity?.entityId) {
-        return;
-      }
-
-      // 验证表单
-      const formValues = await form.validate();
-      console.log('formValues', formValues);
-
-      // 获取最新数据，再进行过滤（参考原始版本）
+      // 获取最新数据，再进行过滤
       const mergedFields = getCurrentTableData();
       const nonSystemFields = mergedFields.filter((field) => field.isSystemField === FIELD_TYPE.CUSTOM);
 
@@ -166,13 +200,44 @@ export const useFieldManager = (
         items: fieldDataList
       };
 
-      await batchSaveFields(params);
+      const result = await batchSaveFields(params);
+
+      // 使用接口返回的 createdIds 标记新增字段
+      if (result?.createdIds && Array.isArray(result.createdIds)) {
+        result.createdIds.forEach((fieldId: string) => {
+          newFieldSignal.addNewField(entity.entityId as string, fieldId);
+        });
+      }
+
       Message.success('保存成功');
       setVisible?.(false);
       fieldValidation.clearErrors();
       onSuccess?.();
     } catch (error) {
-      // 手动渲染错误（参考原始版本）
+      console.error('executeSave error', error);
+    } finally {
+      setSubmitting(false);
+    }
+  }, [entity?.entityId, getCurrentTableData, curAppId, setVisible]);
+
+  // 处理表单提交
+  const handleSubmit = useCallback(async () => {
+    // 防止重复点击
+    if (submitting) {
+      return;
+    }
+
+    try {
+      // 检查资产是否存在
+      if (!entity?.entityId) {
+        return;
+      }
+
+      await form.validate();
+
+      await executeSave();
+    } catch (error) {
+      // 手动渲染错误
       const errs = (error && (error as Record<string, unknown>).errors) || [];
       const map: Record<string, string> = {};
       if (typeof errs === 'object') {
@@ -182,7 +247,7 @@ export const useFieldManager = (
       }
       fieldValidation.setAllErrors(map);
     }
-  }, [entity?.entityId, form, getCurrentTableData, curAppId, setVisible, onSuccess, fieldValidation]);
+  }, [submitting, entity?.entityId, form, executeSave]);
 
   return {
     // 数据
@@ -190,11 +255,12 @@ export const useFieldManager = (
     activeFields: fieldData.activeFields,
     originFields: fieldData.originFields,
     loading: fieldData.loading,
+    submitting,
     errors: fieldValidation.errors,
 
     // 操作
     addField: fieldOperations.addField,
-    deleteField: fieldOperations.deleteField,
+    deleteField: deleteFieldWithCleanup,
     updateField: fieldOperations.updateField,
     moveField: fieldOperations.moveField,
     getFieldById: fieldOperations.getFieldById,

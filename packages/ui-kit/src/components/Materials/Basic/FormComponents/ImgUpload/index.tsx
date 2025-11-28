@@ -1,4 +1,4 @@
-import { Form, Message, Upload, Progress, Modal, Grid, Card } from '@arco-design/web-react';
+import { Form, Message, Upload, Progress, Modal, Grid, Card, Watermark } from '@arco-design/web-react';
 import { type UploadItem, type UploadListProps } from '@arco-design/web-react/lib/Upload';
 import { IconPlus, IconDelete, IconImage, IconEye, IconDownload, IconClose } from '@arco-design/web-react/icon';
 import { uploadFile } from '@onebase/platform-center';
@@ -17,9 +17,10 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
     status,
     tooltip,
     listType,
+    uploadType,
+    imageHandle,
     verify,
     layout,
-    labelColSpan = 0,
     runtime = true,
     detailMode
   } = props;
@@ -32,11 +33,11 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
 
     const progressAdapter = onProgress
       ? (progressEvent: ProgressEvent) => {
-          if (progressEvent.lengthComputable) {
-            const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-            onProgress(percent, progressEvent);
-          }
+        if (progressEvent.lengthComputable) {
+          const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          onProgress(percent, progressEvent);
         }
+      }
       : undefined;
 
     const res = await uploadFile(formData, progressAdapter);
@@ -63,13 +64,18 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
   }, [fieldValue]);
 
   // 自定义文件列表展示
-  const renderUploadList = (filesList: UploadItem[], props: UploadListProps) => {
+  const renderUploadList = (filesList: UploadItem[], fileProps: UploadListProps) => {
     if (listType == UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT]) {
       return (
         <div className="uplaodList-text">
           {filesList.map((file) => (
             <div key={file.uid} className="uplaodList-text-item">
-              <img className="uplaodList-text-item-img" src={file.url} alt="" />
+              <Watermark
+                gap={[20, 20]}
+                content={imageHandle?.addWatermark && imageHandle.watermarkText ? imageHandle.watermarkText : ''}
+              >
+                <img className="uplaodList-text-item-img" src={file.url} alt="" />
+              </Watermark>
               <div className="uplaodList-text-item-name">{file.name}</div>
               {file.percent && file.percent !== 100 ? (
                 <div className="uplaodList-text-item-process">
@@ -77,8 +83,8 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
                   <IconClose
                     className="uplaodList-text-item-process-close"
                     onClick={() => {
-                      if (props.onRemove) {
-                        props.onRemove(file);
+                      if (fileProps.onRemove) {
+                        fileProps.onRemove(file);
                       }
                     }}
                   />
@@ -89,7 +95,16 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
                     onClick={() => {
                       Modal.info({
                         title: '预览',
-                        content: <img src={file.url} width="100%" alt="" />
+                        content: (
+                          <Watermark
+                            gap={[20, 20]}
+                            content={
+                              imageHandle?.addWatermark && imageHandle.watermarkText ? imageHandle.watermarkText : ''
+                            }
+                          >
+                            <img src={file.url} width="100%" alt="" />
+                          </Watermark>
+                        )
                       });
                     }}
                   />
@@ -100,13 +115,13 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
                       }
                     }}
                   />
-                  <IconDelete
+                  {!detailMode && <IconDelete
                     onClick={() => {
-                      if (props.onRemove) {
-                        props.onRemove(file);
+                      if (fileProps.onRemove) {
+                        fileProps.onRemove(file);
                       }
                     }}
-                  />
+                  />}
                 </div>
               )}
             </div>
@@ -121,7 +136,12 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
             {filesList.map((file) => (
               <Grid.Col span={12} key={file.uid}>
                 <div className="uplaodList-list-item">
-                  <img className="uplaodList-list-item-img" src={file.url} alt="" />
+                  <Watermark
+                    gap={[20, 20]}
+                    content={imageHandle?.addWatermark && imageHandle.watermarkText ? imageHandle.watermarkText : ''}
+                  >
+                    <img className="uplaodList-list-item-img" src={file.url} alt="" />
+                  </Watermark>
                   <div className="uplaodList-list-item-content">
                     <div className="uplaodList-list-item-name">{file.name}</div>
                     <div className="uplaodList-list-item-size">
@@ -131,8 +151,8 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
                   <IconClose
                     className="uplaodList-list-item-close"
                     onClick={() => {
-                      if (props.onRemove) {
-                        props.onRemove(file);
+                      if (fileProps.onRemove) {
+                        fileProps.onRemove(file);
                       }
                     }}
                   />
@@ -155,7 +175,12 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
               className="uplaodList-card-item"
               cover={
                 <div className="uplaodList-card-item-img">
-                  <img src={file.url} alt="" />
+                  <Watermark
+                    gap={[20, 20]}
+                    content={imageHandle?.addWatermark && imageHandle.watermarkText ? imageHandle.watermarkText : ''}
+                  >
+                    <img src={file.url} alt="" />
+                  </Watermark>
                 </div>
               }
             >
@@ -166,14 +191,14 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
                     <div className="uplaodList-card-item-size">
                       {file?.originFile?.size ? <span>{(file.originFile.size / 1024 / 1024).toFixed(2)}MB</span> : null}
                     </div>
-                    <IconDelete
+                    {!detailMode && <IconDelete
                       style={{ cursor: 'pointer' }}
                       onClick={() => {
-                        if (props.onRemove) {
-                          props.onRemove(file);
+                        if (fileProps.onRemove) {
+                          fileProps.onRemove(file);
                         }
                       }}
-                    />
+                    />}
                   </div>
                 }
               />
@@ -188,15 +213,15 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
   return (
     <div className="formWrapper">
       <Form.Item
-        label={label.display && label.text}
+        label={
+          label.display &&
+          label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
+        }
         field={fieldId}
         layout={layout}
         tooltip={tooltip}
-        labelCol={{
-          style: { width: labelColSpan, flex: 'unset' }
-        }}
         wrapperCol={{ style: { flex: 1 } }}
-        rules={[{ required: verify?.required }]}
+        rules={[{ required: verify?.required, message:`${label.text}是必填项` }]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           margin: 0,
@@ -213,8 +238,8 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
                 ? undefined
                 : verify?.maxCount
           }
-          accept="image/*"
-          listType={listType}
+          accept={verify?.fileFormat || "image/*"}
+          listType={'text'}
           beforeUpload={async (file) => {
             const fileSizeLimit = verify?.maxSize * 1024; // 转换为kb;
             const fileSize = file.size / 1024;
@@ -250,12 +275,12 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
             width: '100%',
             pointerEvents: runtime ? 'unset' : 'none'
           }}
-          disabled={status !== STATUS_VALUES[STATUS_OPTIONS.DEFAULT]}
-          drag
+          disabled={status !== STATUS_VALUES[STATUS_OPTIONS.DEFAULT] || detailMode}
+          drag={uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.LIST]}
           renderUploadList={renderUploadList}
         >
           <div className="uplaodTrigger">
-            {listType == UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT] && (
+            {uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT] && (
               <div className="uplaodTriggerText">
                 <div className="uplaodTriggerText-content">
                   <IconImage />
@@ -263,7 +288,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
                 </div>
               </div>
             )}
-            {listType == UPLOAD_VALUES[UPLOAD_OPTIONS.LIST] && (
+            {uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.LIST] && (
               <div className="uplaodTriggerList">
                 <div className="uplaodTriggerList-content">
                   <IconPlus />
@@ -275,7 +300,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
                 </div>
               </div>
             )}
-            {listType == UPLOAD_VALUES[UPLOAD_OPTIONS.CARD] && (
+            {uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.CARD] && (
               <div className="uplaodTriggerPicture">
                 <div className="uplaodTriggerPicture-content">
                   <IconImage />

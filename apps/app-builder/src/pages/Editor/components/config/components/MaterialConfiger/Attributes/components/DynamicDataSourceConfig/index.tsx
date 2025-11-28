@@ -1,14 +1,16 @@
 import { Button, Form, Select } from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
+import { registerConfigRenderer } from '../../registry';
+import { CONFIG_TYPES } from '@onebase/ui-kit';
 
 import { useAppStore } from '@/store/store_app';
 import { getEntityGraph } from '@onebase/app';
 import DataSelectionProcessConfig from './components/DataSelectionProcessConfig';
-import DropdownRender from './components/DropdownRender';
 import FillingRuleSettingsModal from './components/FillingRuleSettingsModal';
 import styles from './index.module.less';
 import { useResourceStore } from '@/store/store_resource';
 import { hiddenFieldTypes } from '../DynamicTableConfig';
+import { getPopupContainer } from '@onebase/ui-kit';
 
 const FormItem = Form.Item;
 const Option = Select.Option;
@@ -174,6 +176,14 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
     handlePropsChange(ATTR_KEY.DISPLAYFIELDS, displayFields);
   };
 
+  const handleEchoFieldChange = (fieldName: string) => {
+    const option = displayFieldOptions.find((opt: any) => opt.fieldName === fieldName);
+    const displayFields = option
+      ? [{ label: option.displayName, value: option.fieldName }]
+      : [];
+    handlePropsChange(ATTR_KEY.DISPLAYFIELDS, displayFields);
+  };
+
   const handleOKModal = (values: any) => {
     setSelectRule(values);
     handlePropsChange(ATTR_KEY.FILLRULESETTING, values);
@@ -188,7 +198,7 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
           <Select
             placeholder="请选择"
             defaultValue={configs[item.key].entityId}
-            getPopupContainer={(node) => node.parentNode as HTMLElement}
+            getPopupContainer={getPopupContainer}
             onChange={(value) => {
               handleSourceChange(value);
             }}
@@ -201,8 +211,8 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
           </Select>
         </FormItem>
 
-        {/* 数据选择过程 */}
-        {selectedDataSource.entityId && (
+        {/* 数据选择过程（弹窗/下拉 两种模式均显示配置弹窗） */}
+        {selectedDataSource.entityId && (configs?.selectMethod === 'modal' || configs?.selectMethod === 'dropdown') && (
           <div>
             <FormItem layout="vertical" labelAlign="left" label={'数据选择过程'} className={styles.formItem}>
               <Button long onClick={toSetting}>
@@ -221,12 +231,12 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
 
             {/* 数据选择后 */}
             <FormItem layout="vertical" labelAlign="left" label={'数据选择后'} className={styles.formItem}>
-              <FormItem layout="vertical" labelAlign="left" label={'显示在表单中'} className={styles.formItem}>
+              {/* <FormItem layout="vertical" labelAlign="left" label={'显示在表单中'} className={styles.formItem}>
                 <Select
                   value={selected}
                   onChange={(e) => handleSelectedChange(e)}
                   placeholder="设置显示字段"
-                  getPopupContainer={(node) => node.parentNode as HTMLElement}
+                  getPopupContainer={getPopupContainer}
                   renderFormat={() => (selected.length > 0 ? `显示 ${selected.length} 个字段` : '设置显示字段')}
                   dropdownRender={() => (
                     <div className={styles.dropdownRender}>
@@ -240,6 +250,20 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
                     </div>
                   )}
                 />
+              </FormItem> */}
+              <FormItem layout="vertical" labelAlign="left" label={'回显字段'} className={styles.formItem}>
+                <Select
+                  value={configs[ATTR_KEY.DISPLAYFIELDS]?.[0]?.value}
+                  onChange={(e) => handleEchoFieldChange(e)}
+                  placeholder="设置回显字段"
+                  getPopupContainer={getPopupContainer}
+                >
+                  {displayFieldOptions.map((option) => (
+                    <Option key={option.fieldName} value={option.fieldName}>
+                      {option.displayName}
+                    </Option>
+                  ))}
+                </Select>
               </FormItem>
               <FormItem layout="vertical" labelAlign="left" label={'填充到表单字段'} className={styles.noMarginBottom}>
                 <Button long onClick={() => setRuleSettingVisible(true)}>
@@ -262,3 +286,7 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
 };
 
 export default DynamicDataSourceConfig;
+
+registerConfigRenderer(CONFIG_TYPES.SELECT_DATA_SOURCE, ({ id, handlePropsChange, handleMultiPropsChange, item, configs }) => (
+  <DynamicDataSourceConfig id={id} handlePropsChange={handlePropsChange} handleMultiPropsChange={handleMultiPropsChange} item={item} configs={configs} />
+));

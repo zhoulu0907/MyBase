@@ -7,8 +7,8 @@
     .move-box-ul, .move-box-ul > li {
         list-style: none; margin: 0; padding: 0;
     }
-    .ineedtodo-icon, .ihavedone-icon, .icreated-icon, .icopied-icon, .taskproxy-icon {
-        width: 18px; height: 18px; display: inline-block; margin-left: -1px;
+    .TASK-ineedtodo, .TASK-ihavedone, .TASK-icreated, .TASK-icopied, .TASK-taskproxy {
+        width: 18px; height: 18px; display: inline-block; margin-left: -1px; transform: scale(1.15);
     }
     .arco-tree-node-title {
         left: -8px;
@@ -16,76 +16,60 @@
         //     display: flex; align-items: center;
         // }
     }
-    .ineedtodo-icon {
+    .TASK-ineedtodo {
         background: url(@/assets/images/task_center/willdo.svg) no-repeat center;
         background-size: 100% 100%;
     }
-    .ihavedone-icon {
+    .TASK-ihavedone {
         background: url(@/assets/images/task_center/idone.svg) no-repeat center;
         background-size: 100% 100%;
     }
-    .icreated-icon {
+    .TASK-icreated {
         background: url(@/assets/images/task_center/icreated.svg) no-repeat center;
         background-size: 100% 100%;
     }
-    .icopied-icon {
+    .TASK-icopied {
         background: url(@/assets/images/task_center/icopied.svg) no-repeat center;
         background-size: 100% 100%;
     }
-    .taskproxy-icon {
+    .TASK-taskproxy {
         background: url(@/assets/images/task_center/taskproxy.svg) no-repeat center;
         background-size: 100% 100%;
     }
     .arco-tree-node-title-text {
         margin-right: 20px;
+        margin-left: 10px;
         display: block;
         & > div {
             justify-content: space-between; align-items: center;
-            & > div:nth-child(2) {
-                margin: 0 -6px 0 0 !important;
-                & > svg {
-                    display: none;
-                }
-            }
         }
     }
     .arco-tree-node-drag-icon {
-        top: 14px; color: #333;
+        top: 14px; color: #333; right: 18px;
     }
     .arco-tree-node-selected {
         .arco-tree-node-drag-icon {
-            color: rgb(var(--primary-6));
+            color: rgb(var(--primary-6)); right: 18px;
         }
-        .ineedtodo-icon {
+        .TASK-ineedtodo {
             background: url(@/assets/images/task_center/willdo-on.svg) no-repeat center;
             background-size: 100% 100%;
         }
-        .ihavedone-icon {
+        .TASK-ihavedone {
             background: url(@/assets/images/task_center/idone-on.svg) no-repeat center;
             background-size: 100% 100%;
         }
-        .icreated-icon {
+        .TASK-icreated {
             background: url(@/assets/images/task_center/icreated-on.svg) no-repeat center;
             background-size: 100% 100%;
         }
-        .icopied-icon {
+        .TASK-icopied {
             background: url(@/assets/images/task_center/icopied-on.svg) no-repeat center;
             background-size: 100% 100%;
         }
-        .taskproxy-icon {
+        .TASK-taskproxy {
             background: url(@/assets/images/task_center/taskproxy-on.svg) no-repeat center;
             background-size: 100% 100%;
-        }
-        .arco-tree-node-title-text {
-            & > div {
-                & > div:nth-child(2) {
-                    background: url(@/assets/images/task_center/setting-on.svg) no-repeat center;
-                    background-size: 160% auto;
-                    & > svg {
-                        opacity: 0; display: block;
-                    }
-                }
-            }
         }
     }
     .menu-hidden {

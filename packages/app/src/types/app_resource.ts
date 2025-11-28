@@ -1,4 +1,5 @@
 import { ComponentConfig } from './app_component';
+import { InteractionRule } from './view';
 
 export interface GetPageSetIdReq {
   menuId: string;
@@ -83,4 +84,6 @@ export interface PageView {
   created?: boolean;
   //   是否最新更新的视图
   isLatestUpdated?: number;
+
+  interactionRules?: InteractionRule[];
 }

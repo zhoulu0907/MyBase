@@ -1,16 +1,14 @@
 import { Form, Select } from '@arco-design/web-react';
+import { dataMethodPage, menuSignal, type AppEntityField, type PageMethodParam } from '@onebase/app';
 import { nanoid } from 'nanoid';
 import { memo, useState } from 'react';
-// import { useAppEntityStore } from 'src/store/store_entity';
-import { dataMethodPage, menuSignal, type AppEntityField, type PageMethodParam } from '@onebase/app';
 import { STATUS_OPTIONS, STATUS_VALUES } from 'src/components/Materials/constants';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import '../index.css';
 import { type XRelatedFormConfig } from './schema';
+import { getPopupContainer } from '@/utils';
 
 const XRelatedForm = memo((props: XRelatedFormConfig & { runtime?: boolean; detailMode?: boolean }) => {
-  //   const { appEntities } = useAppEntityStore();
-
   const {
     label,
     dataField,
@@ -18,13 +16,7 @@ const XRelatedForm = memo((props: XRelatedFormConfig & { runtime?: boolean; deta
     placeholder,
     tooltip,
     status,
-    // defaultValue,
-    verify,
-    align,
     layout,
-    color,
-    bgColor,
-    labelColSpan = 0,
     runtime = true
   } = props;
 
@@ -44,9 +36,7 @@ const XRelatedForm = memo((props: XRelatedFormConfig & { runtime?: boolean; deta
       pageSize: 100
     };
 
-    console.log(req);
     const res = await dataMethodPage(req);
-    console.log(res);
 
     if (res && res.list) {
       setOptions([
@@ -60,24 +50,19 @@ const XRelatedForm = memo((props: XRelatedFormConfig & { runtime?: boolean; deta
     }
   };
 
-  const getPopupContainer = (node?: HTMLElement): HTMLElement => {
-    return (node?.closest('.arco-form-item') as HTMLElement) || (node?.parentNode as HTMLElement) || document.body;
-  };
-
   return (
     <div className="formWrapper">
       <Form.Item
-        label={label.display && label.text}
+        label={
+          label.display &&
+          label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
+        }
         field={
           dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.RELATED_FORM}_${nanoid()}`
         }
         layout={layout}
         tooltip={tooltip}
-        labelCol={{
-          style: { width: labelColSpan, flex: 'unset' }
-        }}
         wrapperCol={{ style: { flex: 1 } }}
-        rules={[{ required: verify?.required }]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           margin: 0,
@@ -91,9 +76,6 @@ const XRelatedForm = memo((props: XRelatedFormConfig & { runtime?: boolean; deta
           getPopupContainer={getPopupContainer}
           style={{
             width: '100%',
-            color,
-            textAlign: align,
-            backgroundColor: bgColor,
             pointerEvents: runtime ? 'unset' : 'none'
           }}
         />

@@ -2,46 +2,97 @@
   width: 100%;
   min-height: 200px;
   height: 100%;
-  display: flex;
-  flex-direction: column;
-  flex-wrap: nowrap;
-  align-items: flex-start;
-  justify-content: flex-start;
-
-  border-radius: 4px;
+  border: 1px solid #d4d4d4;
+  border-radius: 8px;
   box-sizing: border-box;
-  padding: 6px;
-  position: relative;
+  padding: 10px 5px;
+}
 
-    .arco-form-label-item {
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    
-    label {
-      white-space: nowrap;
+.XSubTable .XSubTable-content {
+  min-height: 150px;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  overflow-x: auto;
+  overflow-y: visible;
+  padding-top: 18px;
+}
+
+.componentItem {
+  overflow: visible;
+  flex: 1 0 auto;
+  cursor: move;
+  box-sizing: border-box;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  transition: border-color 0.2s ease;
+  position: relative;
+  min-width: 50px;
+}
+
+/* 操作 */
+.operationArea {
+  position: absolute;
+  top: -18px;
+  right: 16px;
+  height: 24px;
+  padding: 4px;
+  border: 1px solid #e5e6eb;
+  border-radius: 8px;
+  box-sizing: border-box;
+  background-color: #fff;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 10;
+
+  .divider {
+    margin: 0 4px;
+  }
+
+  .copyButton,
+  .deleteButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+    color: #4e5969;
+    background-color: #fff;
+
+    &:hover {
+      transform: scale(1.1);
     }
   }
 
-  .subTableContent {
-    width: 100%;
-    min-height: 120px;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    align-items: center;
-    justify-content: center;
+  .deleteButton {
+    color: #f53f3f;
   }
+}
 
-  .subTableFooter {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    align-items: flex-start;
-    /* justify-content: center; */
-  }
+.simulate-header-item {
+  box-sizing: border-box;
+  padding: 0 16px;
+  border-right: 1px solid #e5e6eb;
+  background-color: #f2f3f5;
+  line-height: 32px;
+  height: 32px;
+  margin: 4px 0 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
-  .arco-table-td {
-    padding: 0;
-  }
+.subTableContent {
+  width: 100%;
+  min-height: 80px;
+}
+
+.subTableFooter {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  /* justify-content: center; */
 }

@@ -14,6 +14,14 @@ export type TBooleanDefaultType = boolean;
  * 默认基础配置
  * */
 
+export interface ICommonConfigType {
+   key: string;
+   name: string;
+   type: string;
+   /** 配置通用 key value类型 */
+   [key: string]: any;
+}
+
 // 文本输入框配置
 export interface ITextConfigType {
   key: string;
@@ -141,6 +149,14 @@ export interface IStatusConfigType<KeyType> {
   }>;
 }
 
+// 数据选择方式配置（下拉框/弹窗）
+export interface IDataSelectModeConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.DATA_SELECT_MODE;
+  range: Array<any>;
+}
+
 export interface IImageConfigType {
   key: string;
   name: string;
@@ -162,26 +178,6 @@ export interface IWidthConfigType<KeyType> {
     text: string;
     value: KeyType;
   }>;
-}
-
-// 默认值配置
-export interface IDefaultValueConfigType {
-  key: string;
-  name: string;
-  type: typeof CONFIG_TYPES.DEFAULT_VALUE_SELECT;
-  range: Array<{
-    key: string;
-    text: string;
-    value: KeyType;
-  }>;
-}
-
-// 默认值输入配置
-export interface IDefaultValueInputConfigType {
-  key: string;
-  name: string;
-  type: typeof CONFIG_TYPES.DEFAULT_VALUE_INPUT;
-  placeholder?: string;
 }
 
 // 是否必填配置
@@ -322,6 +318,12 @@ export interface IVerifyConfigType {
   type: typeof CONFIG_TYPES.VERIFY;
 }
 
+export interface INumberFormatConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.NUMBER_FORMAT;
+}
+
 // 文本输入框配置
 // export interface ISupportFileTypeConfigType {
 //   key: string;
@@ -334,6 +336,12 @@ export interface ISelectOptionsConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.SELECT_OPTIONS_INPUT;
+  placeholder?: string;
+}
+export interface IMutipleSelectOptionsConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.MUTIPLE_SELECT_OPTIONS_INPUT;
   placeholder?: string;
 }
 
@@ -393,6 +401,11 @@ export interface ICollapsedConfigType<KeyType> {
     value: KeyType;
   }>;
 }
+export interface ICollapsedStyleConfig {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.COLLAPSED_STYLE;
+}
 
 export interface ITableOperationConfigType {
   key: string;
@@ -412,4 +425,67 @@ export interface ITableButtonConfigType<KeyType> {
     text: string;
     value: KeyType;
   }>;
+}
+
+// 自动编号规则配置
+export interface IAutoCodeConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.AUTO_CODE_RULES;
+}
+
+export interface IImageHandleConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.IMAGE_HANDLE;
+}
+
+// 日期格式
+export interface IDateFormatConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.DATE_FORMAT;
+  range?: Array<{
+    label: string;
+    value: KeyType;
+  }>;
+}
+
+// 日期可选范围
+export interface IDateRangeConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.DATE_RANGE;
+}
+
+// 时间格式
+export interface ITimeFormatConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.TIME_FORMAT;
+  range?: Array<{
+    label: string;
+    value: KeyType;
+  }>;
+}
+// 时间可选范围
+export interface ITimeRangeConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.TIME_RANGE;
+}
+
+
+// 填充文本 switch
+export interface ISwitchFillTextConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.SWITCH_FILL_TEXT;
+}
+
+// 默认值
+export interface IDefaultValueConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.DEFAULT_VALUE;
 }

@@ -4,7 +4,7 @@ import { Form } from '@arco-design/web-react';
 import { nanoid } from 'nanoid';
 import { memo } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
-import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES } from '../../../constants';
 import '../index.css';
 import WangEditor from './editor';
 import type { XRichTextConfig } from './schema';
@@ -15,25 +15,24 @@ const XRichText = memo((props: XRichTextConfig & { runtime?: boolean; detailMode
     dataField,
     tooltip,
     status,
-    defaultValue = '',
+    defaultValueConfig = '',
     verify,
     layout,
-    labelColSpan = 0,
     runtime = true
   } = props;
 
   return (
     <div className="formWrapper">
       <Form.Item
-        label={label.display && label.text}
+        label={
+          label.display &&
+          label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
+        }
         field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.RICH_TEXT}_${nanoid()}`}
         layout={layout}
         tooltip={tooltip}
-        labelCol={{
-          style: { width: labelColSpan, flex: 'unset' }
-        }}
         wrapperCol={{ style: { flex: 1 } }}
-        rules={[{ required: verify?.required }]}
+        rules={[{ required: verify?.required, message:`${label.text}是必填项` }]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           margin: 0,
@@ -41,7 +40,7 @@ const XRichText = memo((props: XRichTextConfig & { runtime?: boolean; detailMode
         }}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? (
-          <div dangerouslySetInnerHTML={{ __html: defaultValue }}></div>
+          <div dangerouslySetInnerHTML={{ __html: defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : '' }}></div>
         ) : (
           <WangEditor
             runtime={runtime}

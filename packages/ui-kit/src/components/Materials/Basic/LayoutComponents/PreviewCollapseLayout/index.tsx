@@ -1,23 +1,17 @@
-import { useEffect, useState, memo, Fragment } from 'react';
-import { ReactSortable } from 'react-sortablejs';
-import { Collapse } from '@arco-design/web-react';
-import { useSignals } from '@preact/signals-react/runtime';
-import {
-  COMPONENT_GROUP_NAME,
-  EditRender,
-  getComponentWidth,
-  usePageEditorSignal,
-  type GridItem
-} from '@/index';
-import type { XCollapseLayoutConfig } from './schema';
-import { STATUS_OPTIONS, STATUS_VALUES, COLLAPSED_VALUES, COLLAPSED_OPTIONS } from '../../../constants';
 import IconCollapsedDown from '@/assets/images/collapse_down_icon.svg';
+import { COMPONENT_GROUP_NAME, EDITOR_TYPES, PreviewRender, getComponentWidth, usePageEditorSignal, type GridItem } from '@/index';
+import { Collapse, Tooltip } from '@arco-design/web-react';
+import { useSignals } from '@preact/signals-react/runtime';
+import { Fragment, memo, useEffect, useState } from 'react';
+import { ReactSortable } from 'react-sortablejs';
+import { COLLAPSED_OPTIONS, COLLAPSED_VALUES, STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import './index.css';
+import type { XCollapseLayoutConfig } from './schema';
 
 const CollapseItem = Collapse.Item;
 
-const XPreviewCollapseLayout = memo((props: XCollapseLayoutConfig) => {
-  const { id, label, colCount = 1, status, collapsed } = props;
+const XPreviewCollapseLayout = memo((props: XCollapseLayoutConfig & { detailMode?: boolean }) => {
+  const { id, label, colCount = 1, status, collapsed, collapseStyle, pageType, detailMode } = props;
   useSignals();
 
   const {
@@ -26,8 +20,8 @@ const XPreviewCollapseLayout = memo((props: XCollapseLayoutConfig) => {
     pageComponentSchemas,
     layoutSubComponents,
     setLayoutSubComponents,
-    setShowDeleteButton,
-  } = usePageEditorSignal();
+    setShowDeleteButton
+  } = usePageEditorSignal(pageType || EDITOR_TYPES.FORM_EDITOR);
 
   const colComponents = layoutSubComponents[id] || Array.from({ length: colCount }, () => []);
   const [activeKey, setActiveKey] = useState<string[]>([]);
@@ -41,22 +35,46 @@ const XPreviewCollapseLayout = memo((props: XCollapseLayoutConfig) => {
   }, [colCount, id, colComponents]);
 
   useEffect(() => {
-    setActiveKey(collapsed === COLLAPSED_VALUES[COLLAPSED_OPTIONS.EXPOSED] ? ['1'] : []);
+    setActiveKey(collapsed !== COLLAPSED_VALUES[COLLAPSED_OPTIONS.COLLAPSED] ? ['1'] : []);
   }, [collapsed]);
 
   return (
     <Collapse
-      className='XPreviewCollapseLayout'
+      className="XPreviewCollapseLayout"
       bordered={false}
       activeKey={activeKey}
-      expandIconPosition='right'
-      expandIcon={<img src={IconCollapsedDown} alt='' />}
-      onChange={(_, key) => setActiveKey(key)}
+      expandIconPosition="right"
+      expandIcon={<img src={IconCollapsedDown} alt="" />}
+      onChange={(_, key) => {
+        if (collapsed !== COLLAPSED_VALUES[COLLAPSED_OPTIONS.DISABLED_COLLAPSED]) {
+          setActiveKey(key)
+        }
+      }}
       style={{
-        opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
+        opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1,
+        border: collapseStyle.showBordered ? '1px solid #d4d4d4' : 'none'
       }}
     >
-      <CollapseItem header={label.text} name='1' contentStyle={{ backgroundColor: '#fff', paddingLeft: 13, paddingTop: 20, borderTop: '1px solid #ccc' }}>
+      <CollapseItem
+        header={
+          <Tooltip content={label.text}>
+            <div className="collapse-title">
+              <div className="collapse-title-shape" style={{ backgroundColor: collapseStyle.shapeColor }}></div>
+              <div className="collapse-title-ellipsis" style={{ color: collapseStyle.titleColor }}>
+                {label.text}
+              </div>
+            </div>
+          </Tooltip>
+        }
+        showExpandIcon={collapsed !== COLLAPSED_VALUES[COLLAPSED_OPTIONS.DISABLED_COLLAPSED]}
+        name="1"
+        contentStyle={{
+          backgroundColor: '#fff',
+          paddingLeft: 13,
+          paddingTop: 5,
+          borderTop: collapseStyle.showDivider ? '1px solid #ccc' : 'none'
+        }}
+      >
         {colComponents.map((_colComponents, index) => (
           <div className="item" key={index}>
             <ReactSortable
@@ -74,15 +92,16 @@ const XPreviewCollapseLayout = memo((props: XCollapseLayoutConfig) => {
               {colComponents[index] &&
                 colComponents[index].map((cp: GridItem) => (
                   <Fragment key={cp.id}>
-                    {pageComponentSchemas[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] &&
+                    {pageComponentSchemas[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
                       <div
                         key={cp.id}
                         data-cp-type={cp.type}
                         data-cp-displayname={cp.displayName}
                         data-cp-id={cp.id}
-                        className='componentItem'
+                        className="componentItem"
                         style={{
-                          width: getComponentWidth(pageComponentSchemas[cp.id], cp.type)
+                          width: `calc(${getComponentWidth(pageComponentSchemas[cp.id], cp.type)} - 8px)`,
+                          margin: '4px'
                         }}
                         onClick={(e: React.MouseEvent<HTMLDivElement>) => {
                           e.stopPropagation();
@@ -92,14 +111,15 @@ const XPreviewCollapseLayout = memo((props: XCollapseLayoutConfig) => {
                           setShowDeleteButton(true);
                         }}
                       >
-                        <EditRender
+                        <PreviewRender
                           cpId={cp.id}
                           cpType={cp.type}
-                          runtime={true}
                           pageComponentSchema={pageComponentSchemas[cp.id]}
+                          runtime={true}
+                          detailMode={detailMode}
                         />
                       </div>
-                    }
+                    )}
                   </Fragment>
                 ))}
             </ReactSortable>

@@ -29,10 +29,10 @@ const relationshipTypeMap: Record<string, string> = {
 };
 
 const relationKeyMap: Record<string, string> = {
-  sourceEntityName: '左关联实体',
-  targetEntityName: '右关联实体',
-  sourceFieldName: '左关联字段',
-  targetFieldName: '右关联字段',
+  sourceEntityName: '左关联资产',
+  targetEntityName: '右关联资产',
+  sourceFieldDisplayName: '左关联字段',
+  targetFieldDisplayName: '右关联字段',
   relationshipType: '关联关系'
 };
 
@@ -40,7 +40,7 @@ const DataMethods: React.FC<DataMethodsProps> = ({ node }) => {
   const [relations, setRelations] = useState<DataRelation[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // 获取实体方法数据
+  // 获取资产方法数据
   const loadRelations = async () => {
     if (!node?.entityId) return;
 
@@ -91,7 +91,7 @@ const DataMethods: React.FC<DataMethodsProps> = ({ node }) => {
                 name={relation.id}
                 header={
                   <div className={styles['relation-header']}>
-                    <span className={styles['relation-name']}>{relation.relationName}</span>
+                    <span className={styles['relation-name']}>{relationshipTypeMap[relation.relationshipType]}</span>
                   </div>
                 }
                 className={styles['relation-item']}

@@ -163,7 +163,9 @@ export const EDITOR_TYPES = {
   FORM_EDITOR: 'form_editor',
   LIST_EDITOR: 'list_editor',
   PAGE_SETTING: 'page_setting',
-  METADATA_MANAGE: 'metadata_manage'
+  METADATA_MANAGE: 'metadata_manage',
+  FLOW_EDITOR:'flow_editor',
+  WORKBENCH_EDITOR: 'workbench_editor',
 } as const;
 
 // 编辑器类型联合类型

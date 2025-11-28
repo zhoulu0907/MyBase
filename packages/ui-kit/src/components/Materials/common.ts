@@ -4,6 +4,7 @@ import {
   CONFIG_TYPES,
   DATE_OPTIONS,
   DATE_VALUES,
+  TIME_VALUES,
   FILL_OPTIONS,
   FILL_VALUES,
   LAYOUT_OPTIONS,
@@ -13,7 +14,9 @@ import {
   STATUS_OPTIONS,
   STATUS_VALUES,
   UPLOAD_OPTIONS,
+  UPLOAD_TYPE_OPTIONS,
   UPLOAD_VALUES,
+  UPLOAD_BUTTON_TYPES,
   WIDTH_OPTIONS,
   WIDTH_VALUES,
   TABS_TYPE_OPTIONS,
@@ -36,6 +39,7 @@ import type {
   IRelatedFormDataConfigType,
   ISelectConfigType,
   ISelectOptionsConfigType,
+  IMutipleSelectOptionsConfigType,
   IStatusConfigType,
   ITableDataConfigType,
   ITextConfigType,
@@ -108,7 +112,7 @@ export const widthConfig: IWidthConfigType<TWidthSelectKeyType> = {
 export type TStatusSelectKeyType = (typeof STATUS_VALUES)[keyof typeof STATUS_VALUES];
 export const statusConfig: IStatusConfigType<TStatusSelectKeyType> = {
   key: 'status',
-  name: '组件状态',
+  name: '显示状态',
   type: CONFIG_TYPES.STATUS_RADIO,
   range: [
     {
@@ -154,6 +158,7 @@ export const alignConfig: IAlignConfigType<TAlignSelectKeyType> = {
 };
 
 export type TDateTypeSelectKeyType = (typeof DATE_VALUES)[keyof typeof DATE_VALUES];
+export type TTimeTypeSelectKeyType = (typeof TIME_VALUES)[keyof typeof TIME_VALUES];
 export const dateTypeConfig: IDateTypeConfigType<TDateTypeSelectKeyType> = {
   key: 'dateType',
   name: '日期格式',
@@ -234,23 +239,47 @@ export const listTypeConfig: IStatusConfigType<TUploadSelectKeyType> = {
   name: '展示样式',
   type: CONFIG_TYPES.STATUS_RADIO,
   range: [
+    // {
+    //   key: UPLOAD_OPTIONS.TEXT,
+    //   text: UPLOAD_OPTIONS.TEXT,
+    //   value: UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT]
+    // },
     {
-      key: UPLOAD_OPTIONS.TEXT,
-      text: UPLOAD_OPTIONS.TEXT,
-      value: UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT]
+      key: UPLOAD_OPTIONS.CARD,
+      text: UPLOAD_OPTIONS.CARD,
+      value: UPLOAD_VALUES[UPLOAD_OPTIONS.CARD]
     },
     {
       key: UPLOAD_OPTIONS.LIST,
       text: UPLOAD_OPTIONS.LIST,
       value: UPLOAD_VALUES[UPLOAD_OPTIONS.LIST]
+    }
+  ]
+};
+export const uploadTypeConfig: IStatusConfigType<TUploadSelectKeyType> = {
+  key: 'uploadType',
+  name: '上传方式',
+  type: CONFIG_TYPES.STATUS_RADIO,
+  range: [
+    {
+      key: UPLOAD_OPTIONS.TEXT,
+      text: UPLOAD_TYPE_OPTIONS.TEXT,
+      value: UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT]
+    },
+    {
+      key: UPLOAD_OPTIONS.LIST,
+      text: UPLOAD_TYPE_OPTIONS.LIST,
+      value: UPLOAD_VALUES[UPLOAD_OPTIONS.LIST]
     },
     {
       key: UPLOAD_OPTIONS.CARD,
-      text: UPLOAD_OPTIONS.CARD,
+      text: UPLOAD_TYPE_OPTIONS.CARD,
       value: UPLOAD_VALUES[UPLOAD_OPTIONS.CARD]
     }
   ]
 };
+
+export type TUploadButtonType =  (typeof UPLOAD_BUTTON_TYPES)[keyof typeof UPLOAD_BUTTON_TYPES];
 
 export type TPagePositionSelectKeyType = (typeof PAGINATION_POSITION_VALUES)[keyof typeof PAGINATION_POSITION_VALUES];
 export const pagePositionConfig: ISelectConfigType<TPagePositionSelectKeyType> = {
@@ -318,7 +347,7 @@ export const fillConfig: IStatusConfigType<TFillSelectKeyType> = {
 export const dataFieldConfig: IDataFieldConfigType[] = [
   {
     key: 'dataField',
-    name: '数据字段',
+    name: '数据绑定',
     type: CONFIG_TYPES.FIELD_DATA
   }
 ];
@@ -349,21 +378,27 @@ export const baseDefault = {
 };
 
 export const radioDataConfig: IRadioDataConfigType = {
-  key: 'radioData',
+  key: 'defaultOptionsConfig',
   name: '自定义选项',
   type: CONFIG_TYPES.RADIO_DATA
 };
 
 export const checkboxDataConfig: ICheckboxDataConfigType = {
-  key: 'checkboxData',
+  key: 'defaultOptionsConfig',
   name: '自定义选项',
   type: CONFIG_TYPES.CHECKBOX_DATA
 };
 
 export const selectOptionsConfig: ISelectOptionsConfigType = {
-  key: 'selectOptions',
+  key: 'defaultOptionsConfig',
   name: '自定义选项',
   type: CONFIG_TYPES.SELECT_OPTIONS_INPUT
+};
+
+export const mutipleSelectOptionsConfig: IMutipleSelectOptionsConfigType = {
+  key: 'defaultOptionsConfig',
+  name: '自定义选项',
+  type: CONFIG_TYPES.MUTIPLE_SELECT_OPTIONS_INPUT
 };
 
 export const carouselConfig: ICarouselConfigType = {
@@ -379,8 +414,8 @@ export const selectDataResourceConfig: ISelectDataSourceConfigType = {
 }
 
 export const subTableConfig: ISubTableConfigType = {
-  key: 'subTable',
-  name: '子组件选项',
+  key: 'subTableConfig',
+  name: '展示样式',
   type: CONFIG_TYPES.SUB_TABLE
 };
 
@@ -475,7 +510,7 @@ export const fileConfig: IFileConfigType = {
 export type TCollapsedSelectKeyType = (typeof COLLAPSED_VALUES)[keyof typeof COLLAPSED_VALUES];
 export const collapsedConfig: ICollapsedConfigType<TCollapsedSelectKeyType> = {
   key: 'collapsed',
-  name: '默认展示样式',
+  name: '折叠状态',
   type: CONFIG_TYPES.COLLAPSED,
   range: [
     {
@@ -487,6 +522,11 @@ export const collapsedConfig: ICollapsedConfigType<TCollapsedSelectKeyType> = {
       key: COLLAPSED_OPTIONS.COLLAPSED,
       text: COLLAPSED_OPTIONS.COLLAPSED,
       value: COLLAPSED_VALUES[COLLAPSED_OPTIONS.COLLAPSED]
+    },
+    {
+      key: COLLAPSED_OPTIONS.DISABLED_COLLAPSED,
+      text: COLLAPSED_OPTIONS.DISABLED_COLLAPSED,
+      value: COLLAPSED_VALUES[COLLAPSED_OPTIONS.DISABLED_COLLAPSED]
     }
   ]
 };
@@ -517,3 +557,53 @@ export const tableOperationConfig: ITableOperationConfigType = {
   type: CONFIG_TYPES.TABLE_OPERATION,
   advanced: true,
 };
+
+export const autoCodeConfig: any = {
+  key: 'rules',
+  name: '编号规则配置',
+  type: CONFIG_TYPES.AUTO_CODE_RULES
+}
+
+export const imageHandleConfig: any = {
+  key: 'imageHandle',
+  name: '图片处理',
+  type: CONFIG_TYPES.IMAGE_HANDLE
+}
+
+export const dateRangeConfig: any = {
+  key: 'dateRange',
+  name: '可选范围',
+  type: CONFIG_TYPES.DATE_RANGE
+}
+
+export const timeRangeConfig: any = {
+  key: 'timeRange',
+  name: '可选范围',
+  type: CONFIG_TYPES.TIME_RANGE
+}
+
+export const switchFillTextConfig: any = {
+  key: 'fillText',
+  name: '填充文本',
+  type: CONFIG_TYPES.SWITCH_FILL_TEXT
+}
+
+// 默认值
+export const defaultValueConfig: any = {
+  key: 'defaultValueConfig',
+  name: '默认值',
+  type: CONFIG_TYPES.DEFAULT_VALUE,
+  valueType: 'string'
+}
+
+export const defaultValueModeConfig: any = {
+  key: 'defaultValueMode',
+  name:'默认值',
+  type: CONFIG_TYPES.DEPT_DEFAULT_VALUE
+}
+
+export const selectScopeConfig: any = {
+  key: 'selectScope',
+  name:'可选范围',
+  type: CONFIG_TYPES.DEPT_SELECT_SCOPE
+}

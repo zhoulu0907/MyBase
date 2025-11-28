@@ -1,5 +1,17 @@
-import { CreateFlowMgmtReq, RenameFlowMgmtReq, UpdateFlowMgmtDefinitionReq } from '../types/flow';
 import { type PageParam } from '../types/common';
+import {
+  CreateConnectInstanceReq,
+  CreateFlowMgmtReq,
+  CreateScriptActionReq,
+  DeleteConnectInstanceReq,
+  ListConnectFlowNodeReq,
+  ListConnectInstanceReq,
+  ListScriptActionReq,
+  RenameFlowMgmtReq,
+  UpdateConnectInstanceReq,
+  UpdateFlowMgmtDefinitionReq,
+  UpdateScriptActionReq
+} from '../types/flow';
 import { flowService } from './clients';
 
 export const listFlowMgmt = (params: PageParam) => {
@@ -42,6 +54,10 @@ export const updateFlowMgmtDefinition = (params: UpdateFlowMgmtDefinitionReq) =>
   return flowService.post('/mgmt/update-definition', params);
 };
 
+export const refreshFlowMgmt = (appId: string) => {
+  return flowService.post(`/exec/flow-handler/update?applicationId=${appId}`);
+};
+
 // 分页查询执行日志
 export const getFlowLogPage = (params: any) => {
   return flowService.get('/log/page', params);
@@ -55,4 +71,52 @@ export const getFlowLogDetail = (params: any) => {
 // 统计执行日志
 export const getFlowLogStatistic = (params: any) => {
   return flowService.get('/log/statistic-tody', params);
+};
+
+export const getConnectFlowNodeCategoryList = () => {
+  return flowService.get('/node-category/list');
+};
+
+export const listConnectFlowNode = (params: ListConnectFlowNodeReq) => {
+  return flowService.get('/node-type/page', params);
+};
+
+export const listConnectInstance = (params: ListConnectInstanceReq) => {
+  return flowService.get('/connector/page', params);
+};
+
+export const createConnectInstance = (params: CreateConnectInstanceReq) => {
+  return flowService.post('/connector/create', params);
+};
+
+export const getConnectInstance = (id: string) => {
+  return flowService.get(`/connector/get?id=${id}`);
+};
+
+export const updateConnectInstance = (params: UpdateConnectInstanceReq) => {
+  return flowService.post('/connector/update', params);
+};
+
+export const deleteConnectInstance = (params: DeleteConnectInstanceReq) => {
+  return flowService.post('/connector/delete', params);
+};
+
+export const getScriptAction = (id: string) => {
+  return flowService.get(`/connector/script/get?id=${id}`);
+};
+
+export const listScriptAction = (params: ListScriptActionReq) => {
+  return flowService.get('/connector/script/page', params);
+};
+
+export const createScriptAction = (params: CreateScriptActionReq) => {
+  return flowService.post('/connector/script/create', params);
+};
+
+export const updateScriptAction = (params: UpdateScriptActionReq) => {
+  return flowService.post('/connector/script/update', params);
+};
+
+export const deleteScriptAction = (id: string) => {
+  return flowService.post(`/connector/script/delete?id=${id}`);
 };

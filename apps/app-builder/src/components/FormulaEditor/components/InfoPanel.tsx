@@ -88,7 +88,7 @@ export function InfoPanel({ info }: { info: info | null }) {
             {renderParameters(info.usage)}
             <br />
             {/* 函数简介 */}
-            {info?.summary}
+            {/* {info?.summary} */}
           </Paragraph>
         </Typography>
       }

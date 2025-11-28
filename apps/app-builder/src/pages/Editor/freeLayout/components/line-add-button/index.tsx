@@ -1,0 +1,166 @@
+/**
+ * Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
+ * SPDX-License-Identifier: MIT
+ */
+
+import { useCallback, useState } from 'react';
+
+import { WorkflowNodePanelService, WorkflowNodePanelUtils } from '@flowgram.ai/free-node-panel-plugin';
+import type { LineRenderProps } from '@flowgram.ai/free-lines-plugin';
+import {
+  delay,
+  HistoryService,
+  useService,
+  WorkflowDocument,
+  WorkflowDragService,
+  WorkflowLinesManager,
+  WorkflowNodeEntity,
+  usePlayground,
+  type WorkflowNodeJSON
+} from '@flowgram.ai/free-layout-editor';
+
+import './index.less';
+import { useVisible } from './use-visible';
+import { IconPlusCircle } from './button';
+import { IdList } from '../../editorType';
+
+export const LineAddButton = (props: LineRenderProps) => {
+  const { line, selected, hovered, color } = props;
+  const visible = useVisible({ line, selected, hovered });
+  const nodePanelService = useService<WorkflowNodePanelService>(WorkflowNodePanelService);
+  const document = useService(WorkflowDocument);
+  const dragService = useService(WorkflowDragService);
+  const linesManager = useService(WorkflowLinesManager);
+  const historyService = useService(HistoryService);
+  const playground = usePlayground();
+
+  const { fromPort, toPort } = line;
+
+  const onClick = useCallback(async () => {
+    // calculate the middle point of the line - 计算线条的中点位置
+    const position = {
+      x: (line.position.from.x + line.position.to.x) / 2,
+      y: (line.position.from.y + line.position.to.y) / 2
+    };
+
+    // get container node for the new node - 获取新节点的容器节点
+    const containerNode = fromPort.node.parent;
+
+    // show node selection panel - 显示节点选择面板
+    const result = await nodePanelService.singleSelectNodePanel({
+      position,
+      containerNode,
+      panelProps: {
+        enableScrollClose: true
+      }
+    });
+    if (!result) {
+      return;
+    }
+    const { nodeType, nodeJSON } = result;
+
+    // adjust position for the new node - 调整新节点的位置
+    const nodePosition = WorkflowNodePanelUtils.adjustNodePosition({
+      nodeType,
+      position,
+      fromPort,
+      toPort,
+      containerNode,
+      document,
+      dragService
+    });
+
+    // create new workflow node - 创建新的工作流节点
+    const node: WorkflowNodeEntity = document.createWorkflowNodeByType(
+      nodeType,
+      nodePosition,
+      nodeJSON ?? ({} as WorkflowNodeJSON),
+      containerNode?.id
+    );
+
+    // auto offset subsequent nodes - 自动偏移后续节点
+    if (fromPort && toPort) {
+      WorkflowNodePanelUtils.subNodesAutoOffset({
+        node,
+        fromPort,
+        toPort,
+        containerNode,
+        historyService,
+        dragService,
+        linesManager
+      });
+    }
+
+    // wait for node render - 等待节点渲染
+    await delay(20);
+
+    // build connection lines - 构建连接线
+    WorkflowNodePanelUtils.buildLine({
+      fromPort,
+      node,
+      toPort,
+      linesManager
+    });
+
+    // remove original line - 移除原始线条
+    line.dispose();
+  }, []);
+
+  const handleDeleteLine = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+
+    // 删除连线
+    //    const commandService = useState(CommandService);
+    //    commandService.executeCommand('DELETE', [line]);
+  };
+
+  if (line.id === IdList.START_0_START_1) {
+    return <></>;
+  }
+
+  if (!visible) {
+    return playground.config.readonly ? '' : <div className="line-node" style={{}}></div>;
+  }
+
+  return (
+    <div
+      className="line-add-button"
+      style={{
+        left: '50%',
+        top: '50%',
+        color
+      }}
+      data-testid="sdk.workflow.canvas.line.add"
+      data-line-id={line.id}
+      onClick={onClick}
+    >
+      <IconPlusCircle />
+      {/* todo:连接线删除测试
+      {selected && (
+        <div
+          className="line-delete-button"
+          style={{
+            position:'absolute',
+            left:'20px',
+            width: '18px',
+            height: '18px',
+            backgroundColor: '#ff4d4f',
+            color: 'white',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '12px',
+            cursor: 'pointer',
+            flexShrink: 0
+          }}
+          onClick={handleDeleteLine}
+          title="删除连线"
+        >
+          ×
+        </div>
+      )} */}
+    </div>
+  );
+};

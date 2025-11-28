@@ -1,23 +1,26 @@
+import AvatarSVG from '@/assets/images/avatar.svg';
 import { useI18n } from '@/hooks/useI18n';
-import { menuSignal } from '@/store/menu';
 import { UserPermissionManager } from '@/utils/permission';
-import { Input, Layout, Menu, Tree } from '@arco-design/web-react';
+import { Dropdown, Input, Layout, Menu, Tree } from '@arco-design/web-react';
 import { IconDown, IconSearch } from '@arco-design/web-react/icon';
 import {
+  listApplicationBPMMenu,
   listApplicationMenu,
+  menuSignal,
   MenuType,
   VisibleType,
   type ApplicationMenu,
   type ListApplicationMenuReq
 } from '@onebase/app';
 import { TokenManager } from '@onebase/common';
-import { CodeType, getPermissionInfo, runtimeLogout } from '@onebase/platform-center';
+import { getPermissionInfo } from '@onebase/platform-center';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { AppHeader } from './components/header';
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import RuntimeMenuItem from './components/menuItem';
 import PreviewContainer from './components/preview';
+import './components/TaskCenter/style/taskSide.less';
+import TaskCenterPage from './components/TaskCenter/TaskCenterPage';
 import styles from './index.module.less';
 
 const Sider = Layout.Sider;
@@ -43,8 +46,10 @@ const Runtime: React.FC = () => {
   useSignals();
 
   const navigate = useNavigate();
+  const location = useLocation();
   const { appId } = useParams<{ appId?: string }>();
-  const { tenantId } = useParams<{ tenantId?: string }>();
+  const [search] = useSearchParams();
+  const curMenuId = search.get('curMenu');
   const { t } = useI18n();
 
   const [treeData, setTreeData] = useState<TreeNode[]>([]);
@@ -67,7 +72,7 @@ const Runtime: React.FC = () => {
   }, []);
 
   const getUserInfo = async () => {
-    const res = await getPermissionInfo(CodeType.CORP);
+    const res = await getPermissionInfo();
     UserPermissionManager.setUserPermissionInfo(res);
     // userPermissionSignal.setPermissionInfo(res);
     setNickname(res.user.nickname);
@@ -93,49 +98,53 @@ const Runtime: React.FC = () => {
       applicationId: appID
     };
     const res = await listApplicationMenu(req);
-
+    const bpmRes = await listApplicationBPMMenu(req);
+    let bpmData: any[] = [];
+    if (bpmRes && bpmRes.length > 0) {
+      bpmData = dealPage(bpmRes);
+    }
     // 处理数据
-    const pageList = res && res.length > 0 ? dealPage(res) : [];
+    const resPageList: any[] = res && res.length > 0 ? dealPage(res) : [];
+    const pageList: any[] = bpmData.concat(resPageList);
 
     const treeData = convertMenuToTreeData(pageList, initTreeItemWidth);
     setTreeData(treeData);
-
     // 如果菜单列表不为空，默认选中第一个菜单
     if (pageList && pageList.length > 0) {
-      // 处理第一个菜单为分组的情况 分组里没有页面的情况
-      const currentMenu = dealMenu(pageList);
-      if (currentMenu) {
-        // 默认展开当前页面
-        if (currentMenu.parentId) {
-          const parentCode = dealCode(currentMenu.parentId, pageList);
-          if (parentCode) {
-            setExpandedKeys((prev) => [...prev, parentCode]);
-          }
-        }
-        setCurMenu(currentMenu);
-      }
-    }
-  };
-  // 递归处理 获取第一个页面
-  const dealMenu = (array: ApplicationMenu[]) => {
-    // menu.menuType == MenuType.PAGE
-    for (let item of array) {
-      if (item.menuType == MenuType.PAGE) {
-        return item;
-      } else if (item.children && item.children.length) {
-        return dealMenu(item.children);
+      // 初始化页面没有curMenuId就处理第一个菜单为分组的情况 分组里没有页面的情况
+      const curMenuObj = curMenuId ? findMenuWithParents(pageList, [], curMenuId) : findMenuWithParents(pageList, []);
+      if (curMenuObj) {
+        setExpandedKeys(curMenuObj.parentIds);
+        setCurMenu(curMenuObj.node);
       }
     }
   };
 
-  const dealCode = (id: string, array: ApplicationMenu[]): any => {
-    for (let item of array) {
-      if (item.id == id) {
-        return item.menuCode;
-      } else if (item.children && item.children.length) {
-        return dealMenu(item.children);
+  //返回当前 menu 对象和链路上所有父节点 code
+  const findMenuWithParents = (
+    nodes: ApplicationMenu[],
+    accIds: string[],
+    targetId?: string
+  ): { node: ApplicationMenu; parentIds: string[] } | null => {
+    for (const n of nodes) {
+      if (targetId ? n.id === targetId : n.menuType === MenuType.PAGE) {
+        return { node: n, parentIds: accIds };
+      }
+
+      if (n.children && n.children.length) {
+        const res = findMenuWithParents(n.children, accIds.concat(n.menuCode), targetId);
+        if (res) return res;
       }
     }
+    return null;
+  };
+
+  // 更新当前路由的 curMenu（不刷新页面）
+  const handleCurMenuUrl = (curMenuId: string) => {
+    const sp = new URLSearchParams(location.search);
+    sp.set('curMenu', String(curMenuId));
+    const to = `${location.pathname}?${sp.toString()}`;
+    navigate(to, { replace: true });
   };
 
   const convertMenuToTreeData = (menus: ApplicationMenu[], maxWidth: number): any[] => {
@@ -144,11 +153,12 @@ const Runtime: React.FC = () => {
       title: (
         <RuntimeMenuItem
           menuID={menu.id}
-          menuIcon={menu.menuIcon}
+          menuIcon={menu.menuType === MenuType.BPM ? menu.menuCode : menu.menuIcon}
           maxWidth={maxWidth}
           label={menu.menuName}
           onClick={() => {
-            if (menu.menuType == MenuType.PAGE) {
+            if (menu.menuType == MenuType.PAGE || menu.menuType == MenuType.BPM) {
+              handleCurMenuUrl(menu.id);
               setCurMenu(menu);
             }
           }}
@@ -159,9 +169,8 @@ const Runtime: React.FC = () => {
   };
 
   // 登出处理
-  const handleLogout = async () => {
+  const handleLogout = () => {
     // 清除 token
-    await runtimeLogout();
     TokenManager.clearToken();
     UserPermissionManager.clearUserPermissionInfo();
     // 跳转到登录页
@@ -177,47 +186,67 @@ const Runtime: React.FC = () => {
   );
 
   return (
-    <Layout className={styles.runtimePage}>
-      <AppHeader />
-      <Layout>
-        <Sider className={styles.sider}>
-          <div className={styles.siderHeader}>
-            <div className={styles.siderHeaderInput}>
-              <Input allowClear suffix={<IconSearch />} placeholder={t('app.searchPlaceHolder')} />
+    <div className={styles.runtimePage}>
+      <Layout style={{ height: '100%' }}>
+        <Layout>
+          <Sider className={styles.sider}>
+            <div className={styles.siderHeader}>
+              <div className={styles.siderHeaderInput}>
+                <Input allowClear suffix={<IconSearch />} placeholder={t('app.searchPlaceHolder')} />
+              </div>
             </div>
-          </div>
-          <Tree
-            blockNode
-            draggable
-            treeData={treeData}
-            selectedKeys={[curMenu.value?.menuCode!]}
-            expandedKeys={expandedKeys}
-            onExpand={setExpandedKeys}
-            className={`menuTree ${styles.tree}`}
-            showLine={false}
-            icons={{
-              switcherIcon: <IconDown />,
-              dragIcon: null
-            }}
-            actionOnClick={'expand'}
-            style={{
-              width: '200px',
-              overflow: 'hidden',
-              boxSizing: 'border-box',
-              padding: '4px 8px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 8
-            }}
-          />
-        </Sider>
-        <Content className={styles.content}>
-          <div className={styles.contentBody}>
-            <PreviewContainer menuId={curMenu.value?.id || ''} runtime={true} />
-          </div>
-        </Content>
+            <Tree
+              blockNode
+              draggable
+              treeData={treeData}
+              selectedKeys={[curMenu.value?.menuCode!]}
+              expandedKeys={expandedKeys}
+              onExpand={setExpandedKeys}
+              className={`menuTree ${styles.tree}`}
+              showLine={false}
+              icons={{
+                switcherIcon: <IconDown />,
+                dragIcon: null
+              }}
+              actionOnClick={'expand'}
+              style={{
+                width: '200px',
+                overflow: 'hidden',
+                boxSizing: 'border-box',
+                padding: '4px 8px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 8
+              }}
+            />
+          </Sider>
+          <Content className={styles.content}>
+            <div className={styles.contentHeader}>
+              <div className={styles.contentTitle}>{curMenu.value?.menuName}</div>
+              <div className={styles.userInfo}>
+                {nickname || '未登录'}
+
+                <Dropdown droplist={userMenu} position="bottom">
+                  <div className={styles.userDropdown}>
+                    <img src={AvatarSVG} alt="avatar" />
+                  </div>
+                </Dropdown>
+              </div>
+            </div>
+            {curMenu?.value?.menuCode && curMenu?.value?.menuCode?.indexOf('TASK-') >= 0 ? (
+              <TaskCenterPage curMenuCode={curMenu.value.menuCode} />
+            ) : (
+              <div className={styles.contentBody}>
+                <PreviewContainer menuId={curMenu.value?.id || ''} runtime={true} />
+              </div>
+            )}
+            {/* <div className={styles.contentBody}>
+              <PreviewContainer menuId={curMenu.value?.id || ''} runtime={true} />
+            </div> */}
+          </Content>
+        </Layout>
       </Layout>
-    </Layout>
+    </div>
   );
 };
 

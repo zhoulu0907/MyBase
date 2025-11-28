@@ -3,7 +3,7 @@ import { Form, Grid, Input, Message, Modal, Select, Space } from '@arco-design/w
 import * as ruleService from '@onebase/app';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useAppStore } from '@/store/store_app';
-import { validationTypeMap, ruleTip, validationTypeList, VALIDATION_TYPES } from './rule.ts';
+import { validationTypeMap, ruleTip, validationTypeList, VALIDATION_TYPES, REGEX_LIST } from './rule.ts';
 import styles from '../modal.module.less';
 
 interface RuleFormValues {
@@ -32,19 +32,6 @@ interface CreateRuleModalProps {
   editRule: Partial<RuleFormValues> | null;
 }
 
-const REGEX_LIST = [
-  { label: '手机号码', value: '^1[3-9]\d{9}$' },
-  { label: '电话号码', value: '^(\d{3,4}-)?\d{7,8}$' },
-  { label: '邮箱格式', value: "^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$" },
-  { label: '大写字母', value: '[A-Z]+' },
-  { label: '小写字母', value: '[a-z]+' },
-  { label: '8位字母数字', value: '^[a-zA-Z0-9]{8}$' },
-  { label: '8位数字', value: '^\d{8}$' },
-  { label: '数字', value: '^\d+$' },
-  { label: '邮编', value: '^\d{6}$' },
-  { label: '身份证号（18位）', value: '^[1-9]\d{5}[1-9]\d{3}((0\d)|(1[0-2]))(([0|1|2]\d)|3[0-1])\d{3}([0-9Xx])$' }
-];
-
 const REGEX_OPTIONS = REGEX_LIST.map((item) => {
   return {
     label: (
@@ -70,6 +57,15 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [fieldOptions, setFieldOptions] = useState<{ label: string; value: string }[]>([]);
   const [childEntityOptions, setChildEntityOptions] = useState<{ label: string; value: string }[]>([]);
+
+  const numberValidator = (value: string | undefined, cb: (error?: React.ReactNode) => void) => {
+    if (value && !/^\d+(.\d{1,4})?$/.test(value)) {
+      cb('请输入数字');
+    } else {
+      cb();
+    }
+  };
+
   // 监听校验类型变化，控制格式校验类型字段的显示
   const handleValidationTypeChange = (value: string) => {
     if (value !== 'format') {
@@ -95,7 +91,7 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
         }
       }
     },
-    [form]
+    [form, ruleType]
   );
 
   const handleCreateRule = async (values: RuleFormValues) => {
@@ -195,35 +191,44 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
 
   // 加载字段选项
   const loadFieldOptions = useCallback(async () => {
-    const res = await ruleService.getEntityFieldsWithChildren(entity.id);
+    try {
+      const res = await ruleService.getEntityFieldsWithChildren(entity.id);
 
-    const parentFields = res.parentFields.map((field: { displayName: string; fieldId: string }) => ({
-      label: field.displayName,
-      value: field.fieldId
-    }));
+      const parentFields = res.parentFields.map((field: { displayName: string; fieldId: string }) => ({
+        label: field.displayName,
+        value: field.fieldId
+      }));
 
-    const childEntities = res.childEntities.map((item: { childEntityName: string; childEntityId: string }) => ({
-      label: item.childEntityName,
-      value: item.childEntityId
-    }));
-    setChildEntityOptions(childEntities); // 子表字段选项
-    setFieldOptions(parentFields); // 子表选项
-  }, [entity.id, editRule, ruleType]);
+      const childEntities = res.childEntities.map((item: { childEntityName: string; childEntityId: string }) => ({
+        label: item.childEntityName,
+        value: item.childEntityId
+      }));
+      setChildEntityOptions(childEntities); // 子表字段选项
+      setFieldOptions(parentFields); // 父表字段选项
+    } catch (error) {
+      console.error('加载字段选项失败:', error);
+      throw error;
+    }
+  }, [entity.id]);
 
   // 初始化表单数据
   useEffect(() => {
-    if (visible) {
-      form.setFieldValue('validationType', ruleType);
-      if (editRule) {
-        // 先加载字段选项，再获取规则数据
-        loadFieldOptions().then(() => {
-          handleGetRuleById(editRule?.id || '');
-        });
-      } else {
-        loadFieldOptions();
-      }
+    if (!visible) {
+      return;
     }
-  }, [visible, editRule, form, ruleType]);
+
+    form.setFieldValue('validationType', ruleType);
+
+    const initFormData = async () => {
+      await loadFieldOptions();
+
+      if (editRule?.id) {
+        await handleGetRuleById(editRule.id);
+      }
+    };
+
+    initFormData();
+  }, [visible, editRule?.id, form, ruleType]);
 
   return (
     <Modal
@@ -315,11 +320,17 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
         {ruleType === VALIDATION_TYPES.RANGE && (
           <Form.Item label="范围区间" required>
             <Space align="center" className={styles.rangeSpace}>
-              <Form.Item field="minValue" rules={[{ required: true, message: '请输入范围区间' }]}>
+              <Form.Item
+                field="minValue"
+                rules={[{ required: true, message: '请输入范围区间' }, { validator: numberValidator }]}
+              >
                 <Input placeholder="请输入范围区间" />
               </Form.Item>
               <span>~</span>
-              <Form.Item field="maxValue" rules={[{ required: true, message: '请输入范围区间' }]}>
+              <Form.Item
+                field="maxValue"
+                rules={[{ required: true, message: '请输入范围区间' }, { validator: numberValidator }]}
+              >
                 <Input placeholder="请输入范围区间" />
               </Form.Item>
             </Space>

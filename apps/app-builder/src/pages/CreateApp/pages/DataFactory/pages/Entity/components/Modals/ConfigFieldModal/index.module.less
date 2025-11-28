@@ -23,6 +23,10 @@
         }
       }
     }
+
+    td {
+      padding: 6px 0 !important;
+    }
   }
 
   .requiredDot {
@@ -105,8 +109,7 @@
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  gap: 4px;
-  min-height: 56px;
+  min-height: 52px;
   margin-bottom: 0;
   .arco-form-item-wrapper > .arco-form-message {
     white-space: nowrap;
@@ -122,13 +125,6 @@
     font-size: 16px;
     font-weight: 500;
     color: #333;
-  }
-
-  .fieldTypeConfigFooter {
-    display: flex;
-    justify-content: flex-end;
-    gap: 16px;
-    margin-top: 16px;
   }
 
   .optionItem {
@@ -164,9 +160,60 @@
     }
   }
 
+  .selectDictBtn {
+    width: 100%;
+  }
+
+  // 字典选择相关样式
+  .dictSelectWrapper {
+    margin-bottom: 6px;
+
+    .dictNameInput {
+      width: 100%;
+      cursor: pointer;
+    }
+
+    .editIcon {
+      color: #999;
+      cursor: pointer;
+      font-size: 14px;
+    }
+  }
+
+  // 字典选项列表样式
+  .dictOptionsList {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-fill-2);
+    border-radius: 4px;
+    padding: 4px 12px;
+
+    .dictOptionItem {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .optionDot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+    }
+
+    .moreButtonWrapper {
+      margin-top: 4px;
+
+      .moreButton {
+        padding: 0;
+        height: auto;
+      }
+    }
+  }
+
   .ruleContent {
     display: flex;
-    align-items: center;
+    align-items: baseline;
     gap: 8px;
     margin-bottom: 12px;
 
@@ -187,7 +234,7 @@
 
     .ruleInput {
       // flex: 1;
-      width: 155px;
+      width: 184px;
     }
 
     .editBtn {
@@ -212,6 +259,13 @@
       .addOptionBtn;
     }
   }
+}
+
+.fieldTypeConfigFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-top: 16px;
 }
 
 /* 字段约束配置样式 */
@@ -321,6 +375,12 @@
   }
 }
 
+.ruleInputError {
+  color: #ff4d4f;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
 // 约束状态样式
 .constraintStatus {
   display: flex;
@@ -346,4 +406,9 @@
     height: 24px;
     font-size: 12px;
   }
+}
+
+.regexText {
+  color: #4E5969;
+  margin-left: 8px;
 }

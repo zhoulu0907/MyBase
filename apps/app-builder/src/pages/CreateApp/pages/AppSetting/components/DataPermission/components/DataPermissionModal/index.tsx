@@ -39,14 +39,14 @@ interface IProps {
 const ALLDATA = 'allData';
 const CUSTOMCONDITION = 'customCondition';
 const PERMISSIONSCOPE_DICT = [
-  { value: 'allData', label: '全部数据', disabled: false },
-  { value: 'ownSubmit', label: '本人提交', disabled: false },
-  { value: 'departmentSubmit', label: '本部门提交', disabled: false },
-  { value: 'subDepartmentSubmit', label: '下级部门提交', disabled: false }
+  { value: 'allData', label: '全部数据' },
+  { value: 'ownSubmit', label: '本人提交' },
+  { value: 'departmentSubmit', label: '本部门提交' },
+  { value: 'subDepartmentSubmit', label: '下级部门提交' }
 ];
 const OperationOptions = [
-  { value: 'EDIT', label: '可编辑', disabled: false },
-  { value: 'DELETE', label: '可删除', disabled: false }
+  { value: 'edit', label: '可编辑', disabled: false },
+  { value: 'delete', label: '可删除', disabled: false }
 ];
 const dataPermissionScope: ScopeTypeOption[] = [
   { label: '本人', value: 'self' },
@@ -82,9 +82,8 @@ const DataPermissionModal = (props: IProps) => {
   const Option = Select.Option;
 
   //权限范围
-  const [scopeOptions, setScopeOptions] = useState<any[]>(PERMISSIONSCOPE_DICT);
   const [customChecked, setCustomChecked] = useState(false); //自定义权限
-  const [isCustomDisabled, setIsCustomDisabled] = useState(false);
+  const [scopeTags, setScopeTags] = useState<any[]>([]);
 
   const [checkAll, setCheckAll] = useState<boolean>(); // 操作权限
   const [dataFilters, setDataFilters] = useState<Array<AuthDataFilterVO[]>>(initialFormValues.dataFilters || []);
@@ -160,11 +159,12 @@ const DataPermissionModal = (props: IProps) => {
     }
     setDataFilters(dataFilters);
     const scopeTags = initialFormValues.scopeTags;
+    setScopeTags(scopeTags || []);
     if (scopeTags?.includes(CUSTOMCONDITION)) {
       initialFormValues.customCondition = true;
       setCustomChecked(true);
     }
-    setScopeDisabled(scopeTags || []);
+    resetScope(scopeTags || []);
 
     setCheckAll(initialFormValues.operationTags?.length == OperationOptions.length);
   }, [appEntityFields, dataFilters, initialFormValues, dataPermissionPerson]);
@@ -198,12 +198,12 @@ const DataPermissionModal = (props: IProps) => {
         error: { message: '' }
       }
     });
-    setScopeDisabled(values);
+    resetScope(values);
   };
 
-  const setScopeDisabled = (values: string[]) => {
-    if (values.includes(ALLDATA)) {
-      setScopeOptions((prev) => prev.map((item) => (item.value !== ALLDATA ? { ...item, disabled: true } : item)));
+  const resetScope = (values: string[]) => {
+    const added = values.filter((tag) => !scopeTags.includes(tag));
+    if (added && added.includes(ALLDATA)) {
       form.setFieldsValue({
         scopeTags: [ALLDATA],
         scopeFieldId: undefined,
@@ -216,11 +216,13 @@ const DataPermissionModal = (props: IProps) => {
       setScopeType('');
       setSelectedMembers([]);
       setCustomChecked(false);
+      setScopeTags([ALLDATA]);
     } else {
-      setScopeOptions((prev) => prev.map((item) => ({ ...item, disabled: false })));
+      const allDataIdx = values.indexOf(ALLDATA);
+      if (allDataIdx >= 0) values.splice(allDataIdx, 1);
       form.setFieldValue('scopeTags', values);
+      setScopeTags(values);
     }
-    setIsCustomDisabled(values.includes(ALLDATA));
   };
   // 权限范围选择指定人员/部门
   // 'specifiedDepartment' | 'specifiedPerson' 指定部门/人员
@@ -291,12 +293,19 @@ const DataPermissionModal = (props: IProps) => {
     setCustomChecked(value);
     if (value) {
       const tags = form.getFieldValue('scopeTags');
+      const allDataIdx = tags.indexOf(ALLDATA);
+      if (allDataIdx >= 0) tags.splice(allDataIdx, 1);
       tags.push(CUSTOMCONDITION);
-      form.setFieldValue('scopeTags', tags);
+      form.setFieldsValue({
+        scopeTags: tags,
+        scopeFieldId: dataPermissionPerson[0].PersonId
+      });
+      setScopeTags(tags);
     } else {
       const tags = form.getFieldValue('scopeTags');
       tags.splice(tags.indexOf(CUSTOMCONDITION), 1);
       form.setFieldValue('scopeTags', tags);
+      setScopeTags(tags);
     }
   };
 
@@ -307,9 +316,7 @@ const DataPermissionModal = (props: IProps) => {
     setDataFilters([]);
     setSelectedMembers([]);
     setCheckAll(false);
-    setIsCustomDisabled(false);
     setCustomChecked(false);
-    setScopeOptions(PERMISSIONSCOPE_DICT);
   };
 
   const handleOk = async () => {
@@ -372,30 +379,32 @@ const DataPermissionModal = (props: IProps) => {
         onCancel={handleCancel}
         unmountOnExit={true}
       >
-        <Form form={form} initialValues={initialFormValues} layout="vertical" className={styles.dataPermissionForm}>
+        <Form
+          key={String(modalVisible)}
+          form={form}
+          initialValues={initialFormValues}
+          layout="vertical"
+          className={styles.dataPermissionForm}
+        >
           <FormItem field="groupName" label="权限组名称" rules={[{ required: true, message: '请输入权限组名称' }]}>
-            <Input placeholder="请输入权限组名称" />
+            <Input placeholder="请输入权限组名称" maxLength={40} />
           </FormItem>
           <FormItem field="description" label="说明">
-            <Input placeholder="请输入权限组说明" />
+            <Input placeholder="请输入权限组说明" maxLength={200} />
           </FormItem>
           <FormItem label="权限范围" field="scopeTags" rules={[{ required: true, message: '至少设置一个权限范围' }]}>
             <div className={styles.dataPermissionScope}>
               <FormItem field="scopeTags" noStyle>
-                <CheckboxGroup options={scopeOptions} onChange={(values) => changeScopePermission(values)} />
+                <CheckboxGroup options={PERMISSIONSCOPE_DICT} onChange={(values) => changeScopePermission(values)} />
               </FormItem>
               <div className={styles.scopeRow}>
                 <FormItem field="customCondition" noStyle>
-                  <Checkbox
-                    checked={customChecked}
-                    disabled={isCustomDisabled}
-                    onChange={(checked: boolean) => handleCustomChecked(checked)}
-                  >
+                  <Checkbox checked={customChecked} onChange={(checked: boolean) => handleCustomChecked(checked)}>
                     自定义条件
                   </Checkbox>
                 </FormItem>
                 {customChecked && (
-                  <div className={`${styles.selfRow} ${isCustomDisabled ? styles.disableField : ''}`.trim()}>
+                  <div className={styles.selfRow}>
                     <FormItem field="scopeFieldId" className={styles.scopeRoles}>
                       <Select
                         placeholder="请选择"
@@ -424,7 +433,7 @@ const DataPermissionModal = (props: IProps) => {
                         }}
                       >
                         {dataPermissionScope.map((option) => (
-                          <Option key={option.value} value={option.value}>
+                          <Option key={option.value} value={option.value} title={option.label}>
                             {option.label}
                           </Option>
                         ))}

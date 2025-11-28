@@ -1,5 +1,6 @@
 import CreateGroupIcon from '@/assets/images/addfolder.svg';
 import CreatePageIcon from '@/assets/images/addpage.svg';
+import CreateWorkbenchIcon from '@/assets/images/addworkbench.svg';
 import EditIcon from '@/assets/images/edit_menu_icon.svg';
 import PageManagerGuide from '@/assets/images/page_manaager_guide.svg';
 import { useI18n } from '@/hooks/useI18n';
@@ -35,6 +36,7 @@ import {
   type UpdateApplicationMenuOrderReq,
   type UpdateApplicationMenuVisibleReq
 } from '@onebase/app';
+import { pagesRuntimeSignal } from '@onebase/common';
 import { EDITOR_TYPES } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import { debounce } from 'lodash-es';
@@ -45,9 +47,9 @@ import CopyModal from './components/Modals/CopyModal';
 import CreateModal from './components/Modals/CreateModal';
 import RenameModal from './components/Modals/RenameModal';
 import MyMenuItem from './components/MyMenuItem';
+import TaskCenterPage from './components/TaskCenter/TaskCenterPage';
+import TaskCenterSide from './components/TaskCenter/taskTreeSide';
 import styles from './index.module.less';
-import TaskCenterSide from './components/TaskCenter/taskTreeSide'
-import TaskCenterPage from './components/TaskCenter/TaskCenterPage'
 
 const TreeNode = Tree.Node;
 const MenuItem = Menu.Item;
@@ -70,6 +72,11 @@ interface Options {
   value: string;
 }
 
+const menuStyles = {
+  height: '40px',
+  padding: '9px 12px'
+};
+
 const PageManagerPage: FC = () => {
   useSignals();
 
@@ -90,12 +97,17 @@ const PageManagerPage: FC = () => {
 
   const [title, setTitle] = useState('');
   const [showGuide, setShowGuide] = useState<boolean>(false);
-  const pageTypeOptions = [{ label: '普通表单', value: PageType.NORMAL }];
+  const pageSetTypeOptions = [
+    { label: '普通表单', value: PageType.NORMAL },
+    { label: '流程表单', value: PageType.BPM },
+    { label: '工作台', value: PageType.WORKBENCH }
+  ];
 
   const [treeData, setTreeData] = useState<TreeNode[]>();
   const [entityListOptions, setEntityListOptions] = useState<Options[]>([]);
 
   const { curMenu, setCurMenu } = menuSignal;
+  const { curPage } = pagesRuntimeSignal;
   const [parentPageOptions, setParentPageOptions] = useState<ApplicationMenu[]>([RootParentPage]);
 
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
@@ -115,6 +127,10 @@ const PageManagerPage: FC = () => {
     }, undefined);
 
   useEffect(() => {
+    setCurMenu({} as ApplicationMenu);
+  }, [location.pathname]);
+
+  useEffect(() => {
     if (curAppId !== '') {
       getMenuList();
       getEntityList();
@@ -129,7 +145,12 @@ const PageManagerPage: FC = () => {
 
   // 将接口返回的菜单数据（res）转换为 Tree 组件可用的 treeData 格式
   // TODO(mickey): showOption重构
-  const convertMenuToTreeData = (menus: ApplicationMenu[], maxWidth: number, showOption: boolean = false): any[] => {
+  const convertMenuToTreeData = (
+    menus: ApplicationMenu[],
+    maxWidth: number,
+    showOption: boolean = false,
+    style: React.CSSProperties = menuStyles
+  ): any[] => {
     return menus.map((menu) => ({
       key: menu.id,
       title: (
@@ -156,6 +177,7 @@ const PageManagerPage: FC = () => {
           renameForm={renameForm}
           copyForm={copyForm}
           createForm={createForm}
+          style={style}
         />
       ),
       menuType: menu.menuType,
@@ -173,17 +195,15 @@ const PageManagerPage: FC = () => {
       name: keywords
     };
     const res = await listApplicationMenu(req);
-
     // 为每个children元素补充parentId字段
     const processedRes = addParentIdToChildren(res, RootParentPage.id);
     setParentPageOptions([{ ...RootParentPage, children: processedRes }]);
 
-    const treeData = convertMenuToTreeData(res, initTreeItemWidth, true);
+    const treeData = convertMenuToTreeData(res, initTreeItemWidth, true, menuStyles);
     setTreeData(treeData);
 
     if (res && res.length > 0) {
       setCurMenu(findFirstPage(res));
-
       setSearchResult(false);
     }
 
@@ -226,6 +246,19 @@ const PageManagerPage: FC = () => {
             }}
           />
           {t('createApp.createPage')}
+        </div>
+      </MenuItem>
+      <MenuItem
+        key="workbench"
+        onClick={() => {
+          setVisibleCreateForm('workbench');
+          createForm.resetFields();
+          setTitle(t('createApp.createWorkbench'));
+        }}
+      >
+        <div className={styles.createItem}>
+          <ReactSVG className={styles.customSvg} src={CreateWorkbenchIcon} />
+          {t('createApp.createWorkbench')}
         </div>
       </MenuItem>
       <MenuItem
@@ -300,6 +333,7 @@ const PageManagerPage: FC = () => {
         applicationId: curAppId,
         parentId:
           createForm.getFieldValue('parentId') === RootParentPage.id ? '' : createForm.getFieldValue('parentId'),
+        pageSetType: createForm.getFieldValue('pageSetType'),
         menuName: createForm.getFieldValue('menuName'),
         menuType: MenuType.PAGE,
         menuIcon: createForm.getFieldValue('menuIcon'),
@@ -311,6 +345,10 @@ const PageManagerPage: FC = () => {
       }
       if (visibleCreateForm === 'group') {
         req.menuType = MenuType.GROUP;
+      }
+      if (visibleCreateForm === 'workbench') {
+        req.menuType = MenuType.PAGE;
+        req.pageType = 'workbench';
       }
 
       const menuResp = await createApplicationMenu(req);
@@ -330,7 +368,16 @@ const PageManagerPage: FC = () => {
           'EDITOR_PAGE_INFO',
           JSON.stringify({ id: curMenu.value?.id, name: menuResp.menuName, icon: createForm.getFieldValue('menuIcon') })
         );
-        navigate(`/onebase/editor/${EDITOR_TYPES.FORM_EDITOR}?pageSetId=${pageSetId}`);
+
+        // 根据页面类型跳转到对应的编辑器
+        let editorType: string = EDITOR_TYPES.FORM_EDITOR;
+        if (visibleCreateForm === 'workbench') {
+          editorType = EDITOR_TYPES.WORKBENCH_EDITOR;
+        } else {
+          editorType = EDITOR_TYPES.FORM_EDITOR;
+        }
+
+        navigate(`/onebase/editor/${editorType}?pageSetId=${pageSetId}`);
       }
     });
   };
@@ -406,9 +453,12 @@ const PageManagerPage: FC = () => {
       return;
     }
 
+    const editorType =
+      curPage.value?.pageSetType === PageType.WORKBENCH ? EDITOR_TYPES.WORKBENCH_EDITOR : EDITOR_TYPES.FORM_EDITOR;
+
     // 把编辑页菜单数据保存起来；
     sessionStorage.setItem('EDITOR_PAGE_INFO', JSON.stringify({ id: curMenu.value?.id, name, icon }));
-    navigate(`/onebase/editor/${EDITOR_TYPES.FORM_EDITOR}?pageSetId=${pageSetId}`);
+    navigate(`/onebase/editor/${editorType}?pageSetId=${pageSetId}`);
   };
 
   // 菜单搜索
@@ -423,92 +473,99 @@ const PageManagerPage: FC = () => {
     return () => debouncedSearch.cancel();
   }, [debouncedSearch]);
 
-  // 菜单节点拖拽排序
-  const moveNode = (dragNode: TreeNode, dropNode: TreeNode | null, dropPosition: number): void => {
-    // 移除节点
-    const removeNode = (nodes: TreeNode[], key: string): TreeNode | null => {
-      for (let i = 0; i < nodes.length; i++) {
-        if (nodes[i].key === key) return nodes.splice(i, 1)[0];
-        if (nodes[i].children) {
-          const removed = removeNode(nodes[i].children!, key);
-          if (removed) return removed;
-        }
-      }
-      return null;
-    };
-
-    const dragItem = treeData ? removeNode(treeData, dragNode.key) : null;
-    if (!dragItem) return;
-
-    // 插入节点
-    const insertNode = (
-      nodes: TreeNode[],
-      key: string | null,
-      nodeToInsert: TreeNode,
-      position: number,
-      parentNodes: TreeNode[] = nodes
-    ): boolean => {
-      for (let i = 0; i < nodes.length; i++) {
-        if (nodes[i].key === key) {
-          const dropType = nodes[i].menuType;
-          const dragType = nodeToInsert.menuType;
-
-          // 页面节点不能放到页面节点内部
-          if (dragType === MenuType.PAGE && dropType === MenuType.PAGE && position === 0) {
-            return false;
-          }
-
-          if (dropType === MenuType.GROUP && position === 0) {
-            // 拖到分组节点上 -> 插入 children
-            if (!nodes[i].children) nodes[i].children = [];
-            nodes[i].children!.push(nodeToInsert);
-            setExpandedKeys((prev) => [...prev, nodes[i].key]);
-          } else if (position === -1) {
-            // 放在目标节点前面
-            const index = parentNodes.indexOf(nodes[i]);
-            parentNodes.splice(index, 0, nodeToInsert);
-          } else if (position === 1) {
-            // 放在目标节点后面
-            const index = parentNodes.indexOf(nodes[i]);
-            parentNodes.splice(index + 1, 0, nodeToInsert);
-          }
-
-          return true;
-        }
-
-        if (nodes[i].children && insertNode(nodes[i].children!, key, nodeToInsert, position, nodes[i].children)) {
-          return true;
-        }
-      }
-
-      // 拖到空白处，插入顶层
-      if (key === null && parentNodes === nodes) {
-        nodes.push(nodeToInsert);
-        return true;
-      }
-
-      return false;
-    };
-
-    insertNode(treeData!, dropNode ? dropNode.key : null, dragItem, dropPosition);
-    setTreeData([...treeData!]);
-  };
-
   const buildMenuTree = (nodes: TreeNode[]): { id: string; children: any[] }[] =>
     nodes.map((node) => ({
       id: node.key,
       children: node.children ? buildMenuTree(node.children) : []
     }));
 
-  const findParentNode = (list: TreeNode[], key: string): TreeNode | null => {
-    for (const node of list) {
-      if (node.children?.some((c) => c.key === key)) {
-        return node;
+  const findParentKey = (data: TreeNode[], childKey: string, parentKey: string | null = null): string | null => {
+    for (const item of data) {
+      if (item.key === childKey) {
+        return parentKey;
       }
-      const found = findParentNode(node.children || [], key);
-      if (found) return found;
+      if (item.children) {
+        const result = findParentKey(item.children, childKey, item.key);
+        if (result) return result;
+      }
     }
     return null;
+  };
+
+  // 遍历工具函数
+  const loop = (
+    data: TreeNode[],
+    key: string,
+    callback: (item: TreeNode, index: number, arr: TreeNode[]) => void
+  ): boolean => {
+    return data.some((item, index, arr) => {
+      if (item.key === key) {
+        callback(item, index, arr);
+        return true;
+      }
+      if (item.children) {
+        return loop(item.children, key, callback);
+      }
+      return false;
+    });
+  };
+
+  const handleDrop = async ({ dragNode, dropNode, dropPosition }: any) => {
+    const data = [...treeData!];
+    const dragType = dragNode.props.menuType;
+    const dropType = dropNode.props.menuType;
+
+    // ✅ 规则校验：只允许 PAGE → GROUP
+    if (dropPosition === 0 && !(dragType === MenuType.PAGE && dropType === MenuType.GROUP)) {
+      console.warn('❌ 只能将页面拖入分组下');
+      return;
+    }
+    if (dropType === MenuType.PAGE && dropPosition === 0) {
+      console.warn('❌ 分组不能拖入页面');
+      return;
+    }
+
+    let dragItem: TreeNode | undefined;
+
+    // 从原位置移除
+    loop(data, dragNode.key, (item, index, arr) => {
+      arr.splice(index, 1);
+      dragItem = item;
+    });
+
+    if (!dragItem) return;
+
+    // 新的 parentId（默认 null = 根节点）
+    let newParentId: string | null = null;
+
+    if (dropPosition === 0) {
+      // 拖入节点内部
+      loop(data, dropNode.key, (item) => {
+        item.children = item.children || [];
+        item.children.push(dragItem!);
+      });
+      newParentId = dropNode.key; // ✅ 设置新父节点 id
+      setExpandedKeys([newParentId!]);
+    } else {
+      // 拖入节点前后
+      loop(data, dropNode.key, (_item, index, arr) => {
+        arr.splice(dropPosition < 0 ? index : index + 1, 0, dragItem!);
+      });
+      // 前后拖拽，父节点等于 dropNode 的父节点
+      newParentId = findParentKey(treeData!, dropNode.key);
+    }
+
+    setTreeData([...data]);
+
+    // 生成接口参数
+    const payload: UpdateApplicationMenuOrderReq = {
+      id: dragNode.key,
+      parentId: newParentId ?? '0',
+      menuTree: buildMenuTree(data)
+    };
+
+    console.debug('✅ 更新后的参数:', payload, data);
+    await updateApplicationMenuOrder(payload);
   };
 
   return (
@@ -533,7 +590,17 @@ const PageManagerPage: FC = () => {
               />
             </div>
           </div>
-          <TaskCenterSide setCurMenu={setCurMenu} styles_tree={styles.tree} />
+          <TaskCenterSide
+            curMenu={curMenu}
+            setCurMenu={setCurMenu}
+            styles_tree={styles.tree}
+            curAppId={curAppId}
+            triggerHide={triggerHide}
+            findFirstPage={findFirstPage}
+            setSearchResult={setSearchResult}
+            searchResult={searchResult}
+            setShowGuide={setShowGuide}
+          />
           <Tree
             blockNode
             draggable
@@ -558,33 +625,18 @@ const PageManagerPage: FC = () => {
               gap: 8
             }}
             allowDrop={(info: any) => {
-              const { dragNode, dropNode, dropPosition } = info;
-
-              const dragParent = dragNode?.props?.parentKey;
-              const dropParent = dropNode?.props?.parentKey;
-              const sameParent = dragParent === dropParent;
-
-              // 仅允许同级间上下移动
-              return sameParent && dropPosition !== 0;
-            }}
-            onDrop={async (info: any) => {
               const dragNode = info.dragNode;
               const dropNode = info.dropNode;
               const dropPosition = info.dropPosition;
-              const dropNodeParent = findParentNode(treeData!, dropNode.key);
+              const dragType = dragNode?.props?.menuType;
+              const dropType = dropNode.props?.menuType;
 
-              moveNode(dragNode, dropNode, dropPosition);
-
-              // 生成接口参数
-              const payload: UpdateApplicationMenuOrderReq = {
-                id: dragNode.key,
-                parentId: dropNodeParent?.key || '0',
-                menuTree: buildMenuTree(treeData!)
-              };
-
-              console.debug('✅ 更新后的参数:', payload);
-              await updateApplicationMenuOrder(payload);
+              if (dropPosition === 0) {
+                return dragType === MenuType.PAGE && dropType === MenuType.GROUP;
+              }
+              return true;
             }}
+            onDrop={handleDrop}
           />
         </Sider>
         <Content className={styles.content}>
@@ -612,7 +664,7 @@ const PageManagerPage: FC = () => {
                 </div>
               ) : (
                 <>
-                  {(curMenu.value?.id && curMenu.value?.id?.indexOf('TASK-') < 0) && (
+                  {curMenu.value?.menuCode && curMenu.value?.menuCode?.indexOf('TASK-') < 0 && (
                     <>
                       <div className={styles.contentHeader}>
                         <div className={styles.contentTitle}>{curMenu.value?.menuName}</div>
@@ -625,12 +677,15 @@ const PageManagerPage: FC = () => {
                           {t('createApp.editPage')}
                         </Button>
                       </div>
+
                       <div className={styles.contentBody}>
                         <PreviewContainer menuId={curMenu.value?.id} runtime={true} />
                       </div>
                     </>
                   )}
-                  {curMenu?.id && curMenu?.id?.indexOf('TASK-') >= 0 && <TaskCenterPage curMenuId={curMenu.id}/>}
+                  {curMenu?.value?.menuCode && curMenu?.value?.menuCode?.indexOf('TASK-') >= 0 && (
+                    <TaskCenterPage curMenuId={curMenu.value?.menuCode} />
+                  )}
                 </>
               )}
             </>
@@ -654,7 +709,7 @@ const PageManagerPage: FC = () => {
         handleCopy={handleCopy}
         setVisible={setVisibleCopyForm}
         form={copyForm}
-        treeData={convertMenuToTreeData(parentPageOptions, initTreeItemWidth)}
+        treeData={convertMenuToTreeData(parentPageOptions, initTreeItemWidth, false, { height: '32px' })}
       />
 
       {/* 创建弹窗 */}
@@ -666,10 +721,10 @@ const PageManagerPage: FC = () => {
         }}
         form={createForm}
         entityListOptions={entityListOptions}
-        pageTypeOptions={pageTypeOptions}
+        pageSetTypeOptions={pageSetTypeOptions}
         visibleCreateForm={visibleCreateForm}
         initValue={{ pageType: PageType.NORMAL, menuName: '', parentId: RootParentPage.id }}
-        treeData={convertMenuToTreeData(parentPageOptions, initTreeItemWidth)}
+        treeData={convertMenuToTreeData(parentPageOptions, initTreeItemWidth, false, { height: '32px' })}
       />
     </div>
   );

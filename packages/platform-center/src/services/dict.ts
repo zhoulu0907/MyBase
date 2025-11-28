@@ -1,5 +1,5 @@
 import { PageParam, PageResult } from '../types/common';
-import { DictData, DictDataForm, DictForm, DictItem } from '../types/dict';
+import { BatchConfigDictDataParams, DictData, DictDataForm, DictForm, DictItem } from '../types/dict';
 import { systemService } from './clients';
 
 /**
@@ -19,7 +19,7 @@ export const updateDict = (data: DictForm): Promise<void> => {
 /**
  * 删除字典
  */
-export const deleteDict = (id: number): Promise<void> => {
+export const deleteDict = (id: string): Promise<void> => {
   return systemService.post(`/dict-type/delete?id=${id}`);
 };
 
@@ -40,7 +40,7 @@ export const getAllDictList = (params?: Record<string, any>): Promise<DictItem[]
 /**
  * 获取字典详情
  */
-export const getDictDetail = (id: number): Promise<DictItem> => {
+export const getDictDetail = (id: string): Promise<DictItem> => {
   return systemService.get(`/dict-type/get?id=${id}`);
 };
 
@@ -62,22 +62,22 @@ export const updateDictData = (data: DictDataForm): Promise<void> => {
 /**
  * 更新字典数据状态
  */
-export const updateDictDataStatus = (data: { id: number; status: number }): Promise<void> => {
+export const updateDictDataStatus = (data: { id: string; status: number }): Promise<void> => {
   return systemService.post('/dict-data/update-status', data);
 };
 
 /**
  * 删除字典数据
  */
-export const deleteDictData = (id: number): Promise<void> => {
+export const deleteDictData = (id: string): Promise<void> => {
   return systemService.post(`/dict-data/delete?id=${id}`);
 };
 
 /**
  * 获取字典数据列表-不分页
  */
-export const getAllDictDataList = (params: PageParam & { dictType: string }): Promise<PageResult<DictData>> => {
-  return systemService.get('/dict-data/simple-list', params);
+export const getDictDataListByType = (dictType: string): Promise<DictData[]> => {
+  return systemService.get(`/dict-data/simple-list-by-type?dictType=${dictType}`);
 };
 
 /**
@@ -90,14 +90,14 @@ export const getDictDataListByPage = (params: PageParam & { dictType: string }):
 /**
  * 获取字典数据详情
  */
-export const getDictDataDetail = (id: number): Promise<DictData> => {
+export const getDictDataDetail = (id: string): Promise<DictData> => {
   return systemService.get(`/dict-data/get?id=${id}`);
 };
 
 /**
  * 批量配置字典数据
  */
-export const batchConfigDictData = (data: DictData[]): Promise<void> => {
+export const batchConfigDictData = (data: BatchConfigDictDataParams): Promise<void> => {
   return systemService.post('/dict-data/batch-operate', data);
 };
 

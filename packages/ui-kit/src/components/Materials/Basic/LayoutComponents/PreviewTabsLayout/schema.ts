@@ -75,6 +75,8 @@ export interface XTabsLayoutConfig extends ICommonBaseType {
    * 列数
    */
   colCount: number;
+  // 页面类型
+  pageType?:string;
 }
 
 const defaultValue = [

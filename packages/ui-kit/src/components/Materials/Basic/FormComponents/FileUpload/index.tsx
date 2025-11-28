@@ -1,11 +1,11 @@
-import { Form, Message, Upload, Progress } from '@arco-design/web-react';
+import { Form, Message, Upload, Progress, Button } from '@arco-design/web-react';
 import { type UploadItem, type UploadListProps } from '@arco-design/web-react/lib/Upload';
-import { IconPlus, IconDelete, IconClose, IconDownload, IconFile } from '@arco-design/web-react/icon';
+import { IconPlus, IconDelete, IconClose, IconDownload, IconFile, IconUpload } from '@arco-design/web-react/icon';
 import { uploadFile } from '@onebase/platform-center';
 import { nanoid } from 'nanoid';
 import { memo, useState, useEffect } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
-import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { STATUS_OPTIONS, STATUS_VALUES, UPLOAD_VALUES, UPLOAD_OPTIONS } from '../../../constants';
 import { downloadFileByUrl } from 'src/utils/downloadFile';
 import '../index.css';
 import type { XInputFileUploadConfig } from './schema';
@@ -16,12 +16,12 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
     dataField,
     status,
     tooltip,
-    // showPreview, // todo
-    // showDownload, // todo
-    listType,
+    showDownload,
+    buttonName,
+    buttonType,
+    uploadType,
     verify,
     layout,
-    labelColSpan = 0,
     runtime = true,
     detailMode
   } = props;
@@ -94,20 +94,21 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
               </div>
             ) : (
               <div className="uplaodList-text-item-opera">
-                <IconDownload
+                {showDownload && <IconDownload
                   onClick={() => {
                     if (file.url && file.name) {
                       downloadFileByUrl(file.url, file.name);
                     }
                   }}
-                />
-                <IconDelete
+                />}
+
+                {!detailMode && <IconDelete
                   onClick={() => {
                     if (props.onRemove) {
                       props.onRemove(file);
                     }
                   }}
-                />
+                />}
               </div>
             )}
           </div>
@@ -119,14 +120,14 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
   return (
     <div className="formWrapper">
       <Form.Item
-        label={label.display && label.text}
+        label={
+          label.display &&
+          label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
+        }
         field={fieldId}
         layout={layout}
         tooltip={tooltip}
-        rules={[{ required: verify?.required }]}
-        labelCol={{
-          style: { width: labelColSpan, flex: 'unset' }
-        }}
+        rules={[{ required: verify?.required, message:`${label.text}是必填项` }]}
         wrapperCol={{ style: { flex: 1 } }}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
@@ -144,7 +145,7 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
                 : verify?.maxCount
           }
           accept={verify?.fileFormat}
-          listType={listType}
+          listType='text'
           beforeUpload={async (file) => {
             const fileSizeLimit = verify?.maxSize * 1024; // 转换为kb;
             const fileSize = file.size / 1024;
@@ -177,20 +178,33 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
             width: '100%',
             pointerEvents: runtime ? 'unset' : 'none'
           }}
+          disabled={status !== STATUS_VALUES[STATUS_OPTIONS.DEFAULT] || detailMode}
           showUploadList={{
             removeIcon: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? null : <IconDelete />
           }}
           renderUploadList={renderUploadList}
         >
-          {listType == 'picture-card' && (
-            <div className="arco-upload-trigger-picture">
-              <div className="arco-upload-trigger-picture-text">
-                <IconPlus />
-                <div style={{ marginTop: 10, fontWeight: 600, fontSize: '11px' }}>点击或拖动文件到框内上传</div>
-                <div style={{ marginTop: 5, fontWeight: 600, fontSize: '11px' }}>文件大小不超过{verify?.maxSize}MB</div>
+          <div className="uplaodTrigger">
+            {uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT] && (
+              <Button type={buttonType || 'primary'} >
+                <IconUpload />
+                <span>{buttonName || '点击上传'}</span>
+              </Button>
+            )}
+            {uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.LIST] && (
+              <div className="uplaodTriggerList">
+                <div className="uplaodTriggerList-content">
+                  <IconUpload />
+                  <div className="uplaodTriggerList-tips">{buttonName || '点击或拖拽文件到此处上传'}</div>
+                  <div className="uplaodTriggerList-describe">支持{verify?.fileFormat}格式</div>
+                  <div className="uplaodTriggerList-describe">
+                    最多上传{verify?.maxCount && verify?.maxCount > 0 ? verify?.maxCount : 1}
+                    个文件，单个文件不超过{verify?.maxSize || 10}MB
+                  </div>
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </Upload>
       </Form.Item>
     </div>

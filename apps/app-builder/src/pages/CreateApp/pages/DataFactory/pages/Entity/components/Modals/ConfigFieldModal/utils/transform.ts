@@ -1,9 +1,11 @@
 import {
+  AUTO_CODE_SEQUENCE_DEFAULT_CONFIG,
   AUTO_CODE_NUMBER_MODE,
-  AUTO_CODE_RESET_CYCLE,
   AUTO_CODE_RULE_TYPE,
   DIGIT_DEFAULT,
-  DATE_FORMAT_DEFAULT
+  DATE_FORMAT_DEFAULT,
+  START_VALUE_DEFAULT,
+  CONSTANTS
 } from './const';
 import type { AutoNumberRule, AutoNumberRuleItem, AutoCodeRule } from '../types';
 
@@ -16,12 +18,7 @@ export const convertAutoCodeCompoToAutoNumberRule = (autoCodeRules: AutoCodeRule
   if (!autoCodeRules || autoCodeRules.length === 0) {
     // 返回默认配置
     return {
-      isEnabled: 1,
-      numberMode: AUTO_CODE_NUMBER_MODE.FIXED_DIGITS,
-      digitWidth: DIGIT_DEFAULT,
-      overflowContinue: 1,
-      initialValue: 1,
-      resetCycle: AUTO_CODE_RESET_CYCLE.NONE,
+      ...AUTO_CODE_SEQUENCE_DEFAULT_CONFIG,
       rules: []
     };
   }
@@ -36,12 +33,13 @@ export const convertAutoCodeCompoToAutoNumberRule = (autoCodeRules: AutoCodeRule
       id: rule.id?.startsWith('rule-') ? '' : rule.id,
       itemType: rule.itemType,
       itemOrder: index + 1,
-      isEnabled: 1,
+      isEnabled: CONSTANTS.ENABLED,
       format:
         (rule.config?.dateFormat as string) ||
         (rule.config?.fixedText as string) ||
         (rule.config?.fieldName as string) ||
-        ''
+        '',
+      textValue: rule.config?.fixedText as string
     }));
 
   // 如果有 SEQUENCE 规则，使用其配置；否则使用默认配置
@@ -51,25 +49,17 @@ export const convertAutoCodeCompoToAutoNumberRule = (autoCodeRules: AutoCodeRule
       isEnabled: 1,
       numberMode: (config.numberMode as string) || AUTO_CODE_NUMBER_MODE.FIXED_DIGITS,
       digitWidth: (config.digitWidth as number) || DIGIT_DEFAULT,
-      overflowContinue: config.continueIncrement ? 1 : 0,
-      initialValue: (config.startValue as number) || 1,
-      resetCycle:
-        config.resetCycle === AUTO_CODE_RESET_CYCLE.NONE
-          ? AUTO_CODE_RESET_CYCLE.NONE
-          : (config.resetCycle as string) || AUTO_CODE_RESET_CYCLE.NONE,
-      nextRecordStartValue: (config.nextRecordStartValue as number) || undefined,
+      overflowContinue: (config.overflowContinue as number) || CONSTANTS.ENABLED,
+      initialValue: (config.startValue as number) || START_VALUE_DEFAULT,
+      resetCycle: (config.resetCycle as string) || AUTO_CODE_SEQUENCE_DEFAULT_CONFIG.resetCycle,
+      resetOnInitialChange: (config.resetOnInitialChange as number) || CONSTANTS.ENABLED,
       rules: otherRules
     };
   }
 
   // 没有 SEQUENCE 规则时，使用默认配置
   return {
-    isEnabled: 1,
-    numberMode: AUTO_CODE_NUMBER_MODE.FIXED_DIGITS,
-    digitWidth: DIGIT_DEFAULT,
-    overflowContinue: 1,
-    initialValue: 1,
-    resetCycle: AUTO_CODE_RESET_CYCLE.NONE,
+    ...AUTO_CODE_SEQUENCE_DEFAULT_CONFIG,
     rules: otherRules
   };
 };
@@ -124,15 +114,8 @@ export const convertAutoNumberRuleToAutoCodeComp = (
     id: Date.now().toString(),
     itemType: AUTO_CODE_RULE_TYPE.SEQUENCE,
     config: {
-      numberMode: autoNumberRule.numberMode,
-      digitWidth: autoNumberRule.digitWidth,
-      continueIncrement: autoNumberRule.overflowContinue === 1,
-      startValue: autoNumberRule.initialValue,
-      nextRecordStartValue: autoNumberRule.nextRecordStartValue,
-      resetCycle:
-        autoNumberRule.resetCycle === AUTO_CODE_RESET_CYCLE.NONE
-          ? AUTO_CODE_RESET_CYCLE.NONE
-          : autoNumberRule.resetCycle
+      ...autoNumberRule,
+      startValue: autoNumberRule.initialValue
     }
   };
   rules.push(sequenceRule);
@@ -147,7 +130,7 @@ export const convertAutoNumberRuleToAutoCodeComp = (
 
     switch (rule.itemType) {
       case AUTO_CODE_RULE_TYPE.DATE:
-        autoCodeRule.config = { dateFormat: rule.format || DATE_FORMAT_DEFAULT };
+        autoCodeRule.config = { dateFormat: rule.format || DATE_FORMAT_DEFAULT, fixedText: rule.textValue || '' };
         break;
       case AUTO_CODE_RULE_TYPE.TEXT:
         autoCodeRule.config = { fixedText: rule.format || '' };
