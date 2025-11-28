@@ -10,6 +10,7 @@ import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.core.enums.app.ApplicationStatusEnum;
 import com.cmsr.onebase.module.app.runtime.vo.app.ApplicationRespVO;
 import com.cmsr.onebase.module.app.runtime.vo.tag.TagRespVO;
+import com.mybatisflex.core.tenant.TenantManager;
 import jakarta.annotation.Resource;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -52,7 +53,8 @@ public class AppApplicationServiceImpl implements AppApplicationService {
 
     @Override
     public ApplicationRespVO getApplication(Long id) {
-        AppApplicationDO applicationDO = applicationRepository.getById(id);
+        //TODO 有问题的，绕行了
+        AppApplicationDO applicationDO = TenantManager.withoutTenantCondition(() -> applicationRepository.getById(id));
         if (applicationDO == null) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_NOT_EXIST);
         }
