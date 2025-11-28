@@ -67,8 +67,7 @@ public abstract class AbstractUserDataRepository extends DataRepository<AdminUse
         if (XFromSceneTypeEnum.PLATFORM.getCode().equals(fromSceneType)) {
             configStore.and(Compare.EQUAL, AdminUserDO.USER_TYPE, UserTypeEnum.PLATFORM.getValue());
         } else if (XFromSceneTypeEnum.TENANT.getCode().equals(fromSceneType)) {
-            // todo 暂时注掉，因为PLATFORM类型租户（tenant_id=1）在被空间中开发测试使用，需要返回该租户用户数据
-            // configStore.and(Compare.EQUAL, AdminUserDO.USER_TYPE, UserTypeEnum.TENANT.getValue());
+             configStore.and(Compare.EQUAL, AdminUserDO.USER_TYPE, UserTypeEnum.TENANT.getValue());
         } else if (XFromSceneTypeEnum.CORP.getCode().equals(fromSceneType)) {
             Long corpId = loginUser.getCorpId();
             if (null == corpId) {
