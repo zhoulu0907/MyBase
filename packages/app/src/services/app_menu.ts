@@ -1,16 +1,20 @@
 import {
-    type CopyApplicationMenuReq,
-    type CreateApplicationMenuReq,
-    type DeleteApplicationMenuReq,
-    type ListApplicationMenuReq,
-    type UpdateApplicationMenuNameReq,
-    type UpdateApplicationMenuOrderReq,
-    type UpdateApplicationMenuVisibleReq
+  type CopyApplicationMenuReq,
+  type CreateApplicationMenuReq,
+  type DeleteApplicationMenuReq,
+  type ListApplicationMenuReq,
+  type UpdateApplicationMenuNameReq,
+  type UpdateApplicationMenuOrderReq,
+  type UpdateApplicationMenuVisibleReq
 } from '../types/app_menu';
-import { appService } from './clients';
+import { appService, runtimeAppService } from './clients';
 
 export const listApplicationMenu = (params: ListApplicationMenuReq) => {
   return appService.get('/menu/list', params);
+};
+
+export const runtimeListApplicationMenu = (params: ListApplicationMenuReq) => {
+  return runtimeAppService.get('/menu/list', params);
 };
 
 export const createApplicationMenu = (params: CreateApplicationMenuReq) => {
@@ -19,7 +23,7 @@ export const createApplicationMenu = (params: CreateApplicationMenuReq) => {
 
 export const updateApplicationMenuName = (params: UpdateApplicationMenuNameReq) => {
   return appService.post(`/menu/update-name?id=${params.id}&menuName=${params.menuName}`);
-}
+};
 
 export const updateApplicationMenu = (params: UpdateApplicationMenuNameReq) => {
   return appService.post('/menu/update', params);
@@ -34,7 +38,7 @@ export const updateApplicationMenuOrder = (params: UpdateApplicationMenuOrderReq
 };
 
 export const updateApplicationMenuVisible = (params: UpdateApplicationMenuVisibleReq) => {
-  return appService.post(`/menu/update-visible?id=${params.id}&visible=${params.visible}`,);
+  return appService.post(`/menu/update-visible?id=${params.id}&visible=${params.visible}`);
 };
 
 export const copyApplicationMenu = (params: CopyApplicationMenuReq) => {

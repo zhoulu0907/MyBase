@@ -4,19 +4,18 @@ import { UserPermissionManager } from '@/utils/permission';
 import { Dropdown, Input, Layout, Menu, Tree } from '@arco-design/web-react';
 import { IconDown, IconSearch } from '@arco-design/web-react/icon';
 import {
-  listApplicationBPMMenu,
-  listApplicationMenu,
   menuSignal,
   MenuType,
+  runtimeListApplicationMenu,
   VisibleType,
   type ApplicationMenu,
   type ListApplicationMenuReq
 } from '@onebase/app';
-import { TokenManager } from '@onebase/common';
+import { getHashQueryParam, TokenManager } from '@onebase/common';
 import { getPermissionInfo } from '@onebase/platform-center';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import RuntimeMenuItem from './components/menuItem';
 import PreviewContainer from './components/preview';
 import './components/TaskCenter/style/taskSide.less';
@@ -47,7 +46,10 @@ const Runtime: React.FC = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const { appId } = useParams<{ appId?: string }>();
+
+  const [appId, setAppId] = useState('');
+  const [tenantId, setTenantId] = useState('');
+
   const [search] = useSearchParams();
   const curMenuId = search.get('curMenu');
   const { t } = useI18n();
@@ -62,13 +64,25 @@ const Runtime: React.FC = () => {
   const [nickname, setNickname] = useState('U');
 
   useEffect(() => {
+    // 从 window.location.hash 中解析 redirectURL，再从 redirectURL 解析 appId 和 tenantId
+    const curAppId = getHashQueryParam('appId');
+    const curTenantId = getHashQueryParam('tenantId');
+    if (curAppId) {
+      setAppId(curAppId);
+    }
+
+    if (curTenantId) {
+      setTenantId(curTenantId);
+    }
+  }, []);
+
+  useEffect(() => {
     if (appId) {
       getMenuList(appId);
     }
   }, [appId]);
 
   useEffect(() => {
-    // TODO(mickey): 等马老师提供runtime接口后打开
     // getUserInfo();
   }, []);
 
@@ -98,15 +112,18 @@ const Runtime: React.FC = () => {
     const req: ListApplicationMenuReq = {
       applicationId: appID
     };
-    const res = await listApplicationMenu(req);
-    const bpmRes = await listApplicationBPMMenu(req);
-    let bpmData: any[] = [];
-    if (bpmRes && bpmRes.length > 0) {
-      bpmData = dealPage(bpmRes);
-    }
+    const res = await runtimeListApplicationMenu(req);
+
+    // 等有runtime接口了再开启
+    // const bpmRes = await listApplicationBPMMenu(req);
+    // let bpmData: any[] = [];
+    // if (bpmRes && bpmRes.length > 0) {
+    //   bpmData = dealPage(bpmRes);
+    // }
     // 处理数据
     const resPageList: any[] = res && res.length > 0 ? dealPage(res) : [];
-    const pageList: any[] = bpmData.concat(resPageList);
+    const pageList: any[] = resPageList;
+    // pageList = bpmData.concat(resPageList);
 
     const treeData = convertMenuToTreeData(pageList, initTreeItemWidth);
     setTreeData(treeData);
