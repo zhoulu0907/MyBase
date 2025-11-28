@@ -67,8 +67,8 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     <Menu>
       <Menu.Item key="info" style={{ height: '60px' }}>
         <div className={styles.adminInformation}>
-          <Avatar size={32}>
-            <img src={LogoSVG} />
+          <Avatar size={32} style={{ backgroundColor: '#00b42a' }}>
+                {nickname?.charAt(0) || 'U'}
           </Avatar>
           <Typography.Text>{nickname}</Typography.Text>
         </div>

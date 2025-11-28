@@ -1,6 +1,7 @@
-import { Message, Tabs, Form, Select, Input, Button, Upload, Spin, Image, Avatar } from '@arco-design/web-react';
+import { Message, Tabs, Form, Select, Input, Button, Upload, Spin, Image, Avatar, Modal } from '@arco-design/web-react';
 import { getLoginedUser, updateLoginedUser, updateLoginedUserPwd, uploadFile } from '@onebase/platform-center';
 import React, { useEffect, useRef, useState } from 'react';
+import { Cropper } from "@onebase/common";
 import { useNavigate } from 'react-router-dom';
 import styles from './index.module.less';
 
@@ -153,7 +154,7 @@ const EditPage: React.FC<IEditPageProps> = ({ avatarUrl, setAvatarUrl }) => {
                       marginBottom: 16,
                       display: 'block'
                     }}
-                  />: <Avatar size={96} shape='square' style={{ marginBottom:'12px',backgroundColor: '#009e9e'}}>{defaultNickName}</Avatar>}
+                  />: <Avatar size={96} style={{ marginBottom:'12px',backgroundColor: '#009e9e'}}>{defaultNickName}</Avatar>}
                   <div>
                     <Upload
                       ref={uploadRef}
@@ -180,6 +181,35 @@ const EditPage: React.FC<IEditPageProps> = ({ avatarUrl, setAvatarUrl }) => {
                             msg: '上传失败'
                           });
                         }
+                      }}
+                      beforeUpload={(file) => {
+                        return new Promise((resolve) => {
+                          const modal = Modal.confirm({
+                            title: '裁剪图片',
+                            onCancel: () => {
+                              Message.info('取消上传');
+                              resolve(false);
+                              modal.close();
+                            },
+                            simple: false,
+                            content: (
+                              <Cropper
+                                aspect={1 / 1}
+                                file={file}
+                                onOK={(file: any) => {
+                                  resolve(file);
+                                  modal.close();
+                                }}
+                                onCancel={() => {
+                                  resolve(false);
+                                  Message.info('取消上传');
+                                  modal.close();
+                                }}
+                              />
+                            ),
+                            footer: null
+                          });
+                        });
                       }}
                       style={{
                         display: 'none'

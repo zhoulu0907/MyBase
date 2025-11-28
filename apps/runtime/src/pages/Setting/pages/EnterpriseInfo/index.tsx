@@ -16,7 +16,7 @@ import {
   Upload
 } from '@arco-design/web-react';
 import { IconCamera, IconEdit } from '@arco-design/web-react/icon';
-import { TokenManager } from '@onebase/common';
+import { TokenManager, Cropper } from '@onebase/common';
 import type { CorpDetailResponse, DictData } from '@onebase/platform-center';
 import {
   getCorpDetailByIdApiInCorp,
@@ -189,6 +189,34 @@ const SpaceInfo: React.FC = () => {
                               msg: '上传失败'
                             });
                           }
+                        }}
+                        beforeUpload={(file) => {
+                          return new Promise((resolve) => {
+                            const modal = Modal.confirm({
+                              title: '裁剪图片',
+                              onCancel: () => {
+                                Message.info('取消上传');
+                                resolve(false);
+                                modal.close();
+                              },
+                              simple: false,
+                              content: (
+                                <Cropper
+                                  file={file}
+                                  onOK={(file: any) => {
+                                    resolve(file);
+                                    modal.close();
+                                  }}
+                                  onCancel={() => {
+                                    resolve(false);
+                                    Message.info('取消上传');
+                                    modal.close();
+                                  }}
+                                />
+                              ),
+                              footer: null
+                            });
+                          });
                         }}
                       >
                         <Image

@@ -16,7 +16,7 @@ import {
   Upload
 } from '@arco-design/web-react';
 import { IconCamera, IconCopy, IconEdit } from '@arco-design/web-react/icon';
-import { TokenManager } from '@onebase/common';
+import { TokenManager, Cropper } from '@onebase/common';
 import type { PlatformTenantInfo } from '@onebase/platform-center';
 import {
   getTenantInfo,
@@ -71,11 +71,11 @@ const SpaceInfo: React.FC = () => {
 
     const progressAdapter = onProgress
       ? (progressEvent: ProgressEvent) => {
-          if (progressEvent.lengthComputable) {
-            const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-            onProgress(percent, progressEvent);
-          }
+        if (progressEvent.lengthComputable) {
+          const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          onProgress(percent, progressEvent);
         }
+      }
       : undefined;
 
     const res = await uploadFile(formData, progressAdapter);
@@ -156,7 +156,7 @@ const SpaceInfo: React.FC = () => {
               <div className={styles.infoCardPrimaryLeft}>
                 <div className={styles.avatarSection}>
                   <Tooltip content="修改Logo">
-                    {logoUrl ? (
+                    {
                       <Upload
                         limit={1}
                         accept="image/*"
@@ -181,7 +181,37 @@ const SpaceInfo: React.FC = () => {
                             });
                           }
                         }}
+                        beforeUpload={(file) => {
+                          return new Promise((resolve) => {
+                            const modal = Modal.confirm({
+                              title: '裁剪图片',
+                              onCancel: () => {
+                                Message.info('取消上传');
+                                resolve(false);
+                                modal.close();
+                              },
+                              simple: false,
+                              content: (
+                                <Cropper
+                                  file={file}
+                                  aspect={2 / 1}
+                                  onOK={(file: any) => {
+                                    resolve(file);
+                                    modal.close();
+                                  }}
+                                  onCancel={() => {
+                                    resolve(false);
+                                    Message.info('取消上传');
+                                    modal.close();
+                                  }}
+                                />
+                              ),
+                              footer: null
+                            });
+                          });
+                        }}
                       >
+                        {logoUrl ? 
                         <Image
                           className={styles.reUploadLogo}
                           src={logoUrl}
@@ -189,16 +219,15 @@ const SpaceInfo: React.FC = () => {
                           height={80}
                           preview={false}
                           actions={[<IconCamera />]}
-                        />
+                        /> : 
+                        <Avatar
+                          shape="square"
+                          style={{ width: 160, height: 80, backgroundColor: '#F7F8FA', borderRadius: 12 }}
+                        >
+                          <span className={styles.avatarText}>{spaceInfo.name?.slice(0, 6)}</span>
+                        </Avatar>}
                       </Upload>
-                    ) : (
-                      <Avatar
-                        shape="square"
-                        style={{ width: 160, height: 80, backgroundColor: '#F7F8FA', borderRadius: 12 }}
-                      >
-                        <span className={styles.avatarText}>{spaceInfo.name?.slice(0, 6)}</span>
-                      </Avatar>
-                    )}
+                    }
                   </Tooltip>
                 </div>
                 {/* 名称 & ID */}
