@@ -1,3 +1,4 @@
+import Cropper from '@/components/Cropper';
 import { copyToClipboard, simplifyUrl } from '@/utils/date';
 import { getPlatformFeDomain } from '@/utils/domain';
 import {
@@ -30,7 +31,6 @@ import {
 import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import styles from './index.module.less';
-import Cropper from '@/components/Cropper';
 
 const EditTenant = () => {
   const [form] = Form.useForm();
@@ -70,7 +70,7 @@ const EditTenant = () => {
         tenantAdminUserList: tenantInfo.tenantAdminUserList.map((ten: TenantAdminUserResVO) => ten.platformUserId),
         publishModel: tenantInfo.publishModel === PlatformTenantPublishMode.saas
       };
-      setSaaSChecked(tenantInfo.publishModel === PlatformTenantPublishMode.saas ?  true : false)
+      setSaaSChecked(tenantInfo.publishModel === PlatformTenantPublishMode.saas ? true : false);
       setLogoUrl(tenantInfo.logoUrl);
       form.setFieldsValue(initialValues);
     }
@@ -164,7 +164,7 @@ const EditTenant = () => {
 
   const handleChecked = (value: boolean) => {
     setSaaSChecked(value);
-  }
+  };
 
   /* 获取当前管理员集合 */
   const findMatchingItemsById = (arrA: any[], targetArr: any[]) => {
@@ -184,7 +184,7 @@ const EditTenant = () => {
               {isEdit ? <Input placeholder="输入空间名称" /> : <span>{tenantInfo?.name}</span>}
             </Form.Item>
 
-            <Form.Item label="空间 Logo" field="logoUrl" triggerPropName='fileList'>
+            <Form.Item label="空间 Logo" field="logoUrl" triggerPropName="fileList">
               <Space direction="vertical">
                 {isEdit ? (
                   <>
@@ -228,7 +228,8 @@ const EditTenant = () => {
                             content: (
                               <Cropper
                                 file={file}
-                                onOK={(file:any) => {
+                                aspect={2 / 1}
+                                onOK={(file: any) => {
                                   resolve(file);
                                   modal.close();
                                 }}
@@ -239,7 +240,7 @@ const EditTenant = () => {
                                 }}
                               />
                             ),
-                            footer: null,
+                            footer: null
                           });
                         });
                       }}
@@ -319,8 +320,8 @@ const EditTenant = () => {
                     label: u.nickname || u.username || u.adminNickName || u.adminUserName,
                     value: u.id || u.platformUserId
                   }))}
-                  filterOption={(inputValue:any, option:any) =>{
-                    return option.props.children?.includes(inputValue)
+                  filterOption={(inputValue: any, option: any) => {
+                    return option.props.children?.includes(inputValue);
                   }}
                 ></Select>
               ) : (
@@ -343,7 +344,9 @@ const EditTenant = () => {
 
             <Form.Item label="SaaS 功能" field="publishModel">
               {isEdit ? (
-                <Checkbox checked={saasChecked} onChange={handleChecked}>启用</Checkbox>
+                <Checkbox checked={saasChecked} onChange={handleChecked}>
+                  启用
+                </Checkbox>
               ) : (
                 <span>{tenantInfo?.publishModel === PlatformTenantPublishMode.saas ? '已启用' : '未启用'}</span>
               )}

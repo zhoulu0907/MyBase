@@ -1,4 +1,3 @@
-import Cropper from '@/components/Cropper';
 import { generateTimestampString } from '@/utils/date';
 import { getPlatformFeDomain } from '@/utils/domain';
 import {
@@ -14,7 +13,7 @@ import {
   Upload
 } from '@arco-design/web-react';
 import { IconUpload } from '@arco-design/web-react/icon';
-import { TokenManager } from '@onebase/common';
+import { Cropper, TokenManager } from '@onebase/common';
 import {
   addPlatformTenantApi,
   getPlatformTenantAdminListApi,
@@ -217,6 +216,7 @@ const CreateSpace = () => {
                     content: (
                       <Cropper
                         file={file}
+                        aspect={2 / 1}
                         onOK={(file: any) => {
                           resolve(file);
                           modal.close();

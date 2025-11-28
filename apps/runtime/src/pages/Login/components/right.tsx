@@ -4,7 +4,7 @@ import { PUBLISH_MODULE } from '@/constants/permission';
 import { appInfoSignal } from '@/store/app';
 import { Button, Checkbox, Form, Input, Message, Space, Typography } from '@arco-design/web-react';
 import { IconLock, IconMobile, IconUser } from '@arco-design/web-react/icon';
-import { getApplication } from '@onebase/app';
+import { runtimeGetApplication } from '@onebase/app';
 import {
   getHashQueryParam,
   getOrCreateDeviceInfo,
@@ -34,13 +34,6 @@ import { useRememberMe } from '../../../hooks/useRememberMe';
 import styles from '../index.module.less';
 
 const { Paragraph } = Typography;
-
-interface APP_INFO {
-  appName: string;
-  iconName: string;
-  iconColor: string;
-  id: string;
-}
 
 /**
  * 运行态登录一共有三种模式
@@ -118,7 +111,7 @@ const Right: React.FC = () => {
 
   const handleGetApplication = async () => {
     if (appId) {
-      const res = await getApplication({ id: appId });
+      const res = await runtimeGetApplication({ id: appId });
       if (res) {
         setCurAppInfo(res);
       }

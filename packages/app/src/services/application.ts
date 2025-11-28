@@ -8,7 +8,7 @@ import {
   type UpdateApplicationReq
 } from '../types/application';
 import { type PageParam } from '../types/common';
-import { appService } from './clients';
+import { appService, runtimeAppService } from './clients';
 
 export const listApplication = (params: PageParam) => {
   return appService.get('/application/page', params);
@@ -16,6 +16,10 @@ export const listApplication = (params: PageParam) => {
 
 export const getApplication = (params: GetApplicationReq) => {
   return appService.get(`/application/get?id=${params.id}`);
+};
+
+export const runtimeGetApplication = (params: GetApplicationReq) => {
+  return runtimeAppService.get(`/application/get?id=${params.id}`);
 };
 
 export const createApplication = (params: CreateApplicationReq) => {
