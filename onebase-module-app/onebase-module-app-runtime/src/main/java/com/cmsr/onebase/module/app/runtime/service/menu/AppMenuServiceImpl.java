@@ -8,6 +8,7 @@ import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthPermissionDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppMenuDO;
 import com.cmsr.onebase.module.app.core.dto.auth.UserRoleDTO;
+import com.cmsr.onebase.module.app.core.enums.menu.MenuTypeEnum;
 import com.cmsr.onebase.module.app.core.impl.auth.AppAuthSecurityApiImpl;
 import com.cmsr.onebase.module.app.core.provider.auth.AppAuthPermissionProvider;
 import com.cmsr.onebase.module.app.core.provider.auth.AppAuthRoleProvider;
@@ -53,6 +54,21 @@ public class AppMenuServiceImpl implements AppMenuService {
 
     @Autowired
     private RedissonClient redissonClient;
+
+    @Override
+    public List<MenuListRespVO> listBpmApplicationMenu() {
+        // todo 权限校验
+        Long applicationId = RTSecurityContext.getApplicationId();
+
+        List<AppMenuDO> menuDOS = appMenuRepository.findByApplicationIdAndType(applicationId,
+                Set.of(MenuTypeEnum.BPM.getValue())
+        );
+
+        // 返回菜单
+        return menuDOS.stream()
+                .map(v -> BeanUtils.toBean(v, MenuListRespVO.class))
+                .collect(Collectors.toCollection(LinkedList::new));
+    }
 
     @Override
     public List<MenuListRespVO> listApplicationMenu() {
