@@ -29,35 +29,35 @@ public class MetadataValidationRuleRepository extends ServiceImpl<MetadataValida
      */
     public List<MetadataValidationRuleDefinitionDO> getValidationRulesByFieldId(Long fieldId) {
         QueryWrapper queryWrapper = this.query()
-                .eq("field_id", fieldId)
+                .eq(MetadataValidationRuleDefinitionDO::getFieldId, fieldId)
                 .orderBy(MetadataValidationRuleDefinitionDO::getCreateTime, false);
         return list(queryWrapper);
     }
 
     /**
-     * 根据规则类型获取验证规则列表
+     * 根据逻辑类型获取验证规则列表
      *
-     * @param ruleType 规则类型
+     * @param logicType 逻辑类型
      * @return 验证规则列表
      */
-    public List<MetadataValidationRuleDefinitionDO> getValidationRulesByType(String ruleType) {
+    public List<MetadataValidationRuleDefinitionDO> getValidationRulesByType(String logicType) {
         QueryWrapper queryWrapper = this.query()
-                .eq("rule_type", ruleType)
+                .eq(MetadataValidationRuleDefinitionDO::getLogicType, logicType)
                 .orderBy(MetadataValidationRuleDefinitionDO::getCreateTime, false);
         return list(queryWrapper);
     }
 
     /**
-     * 根据字段ID和规则类型获取验证规则
+     * 根据字段ID和逻辑类型获取验证规则
      *
      * @param fieldId 字段ID
-     * @param ruleType 规则类型
+     * @param logicType 逻辑类型
      * @return 验证规则对象
      */
-    public MetadataValidationRuleDefinitionDO getValidationRuleByFieldAndType(Long fieldId, String ruleType) {
+    public MetadataValidationRuleDefinitionDO getValidationRuleByFieldAndType(Long fieldId, String logicType) {
         QueryWrapper queryWrapper = this.query()
-                .eq("field_id", fieldId)
-                .eq("rule_type", ruleType);
+                .eq(MetadataValidationRuleDefinitionDO::getFieldId, fieldId)
+                .eq(MetadataValidationRuleDefinitionDO::getLogicType, logicType);
         return getOne(queryWrapper);
     }
 

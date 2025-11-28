@@ -18,8 +18,7 @@ public class MetadataAutoNumberStateRepository extends ServiceImpl<MetadataAutoN
     public MetadataAutoNumberStateDO findOneByPeriod(Long configId, String periodKey) {
         QueryWrapper queryWrapper = this.query()
                 .eq(MetadataAutoNumberStateDO::getConfigId, configId)
-                .eq(MetadataAutoNumberStateDO::getPeriodKey, periodKey)
-                .eq(MetadataAutoNumberStateDO::getDeleted, 0);
+                .eq(MetadataAutoNumberStateDO::getPeriodKey, periodKey);
         return getOne(queryWrapper);
     }
 

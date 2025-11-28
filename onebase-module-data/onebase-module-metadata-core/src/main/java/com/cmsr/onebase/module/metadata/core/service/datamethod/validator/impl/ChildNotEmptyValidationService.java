@@ -25,9 +25,8 @@ public class ChildNotEmptyValidationService implements ValidationService {
     public void validate(Long entityId, Long fieldId, MetadataEntityFieldDO field, Object value, Map<String, Object> data, List<MetadataDataMethodSubEntityContext> subEntities) {
 
         QueryWrapper queryWrapper = childNotEmptyRepository.query()
-                .eq("entity_id", entityId)
-                .eq("is_enabled", 1)
-                .eq("deleted", 0);
+                .eq(MetadataValidationChildNotEmptyDO::getEntityId, entityId)
+                .eq(MetadataValidationChildNotEmptyDO::getIsEnabled, 1);
         List<MetadataValidationChildNotEmptyDO> rules = childNotEmptyRepository.list(queryWrapper);
         if(ObjectUtils.isEmpty(rules)){
             log.info("该实体未配置子表空行校验，跳过校验，主实体ID：" + entityId);

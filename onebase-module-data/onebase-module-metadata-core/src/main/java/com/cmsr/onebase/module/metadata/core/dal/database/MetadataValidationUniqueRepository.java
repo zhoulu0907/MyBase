@@ -27,8 +27,7 @@ public class MetadataValidationUniqueRepository extends ServiceImpl<MetadataVali
      */
     public MetadataValidationUniqueDO findOneByFieldId(Long fieldId) {
         QueryWrapper queryWrapper = query()
-                .eq("field_id", fieldId)
-                .eq("deleted", 0);
+                .eq(MetadataValidationUniqueDO::getFieldId, fieldId);
         return getOne(queryWrapper);
     }
 
@@ -40,8 +39,7 @@ public class MetadataValidationUniqueRepository extends ServiceImpl<MetadataVali
      */
     public List<MetadataValidationUniqueDO> findByFieldId(Long fieldId) {
         QueryWrapper queryWrapper = query()
-                .eq("field_id", fieldId)
-                .eq("deleted", 0);
+                .eq(MetadataValidationUniqueDO::getFieldId, fieldId);
         return list(queryWrapper);
     }
 
@@ -64,8 +62,7 @@ public class MetadataValidationUniqueRepository extends ServiceImpl<MetadataVali
      */
     public List<MetadataValidationUniqueDO> findByGroupId(Long groupId) {
         QueryWrapper queryWrapper = query()
-                .eq("group_id", groupId)
-                .eq("deleted", 0);
+                .eq(MetadataValidationUniqueDO::getGroupId, groupId);
         return list(queryWrapper);
     }
 }

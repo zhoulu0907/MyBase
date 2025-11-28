@@ -27,8 +27,7 @@ public class MetadataValidationRangeRepository extends ServiceImpl<MetadataValid
      */
     public List<MetadataValidationRangeDO> findByFieldId(Long fieldId) {
         QueryWrapper queryWrapper = query()
-                .eq("field_id", fieldId)
-                .eq("deleted", 0);
+                .eq(MetadataValidationRangeDO::getFieldId, fieldId);
         return list(queryWrapper);
     }
 
@@ -51,8 +50,7 @@ public class MetadataValidationRangeRepository extends ServiceImpl<MetadataValid
      */
     public List<MetadataValidationRangeDO> findByGroupId(Long groupId) {
         QueryWrapper queryWrapper = query()
-                .eq("group_id", groupId)
-                .eq("deleted", 0);
+                .eq(MetadataValidationRangeDO::getGroupId, groupId);
         return list(queryWrapper);
     }
 }

@@ -81,7 +81,6 @@ public class MetadataEntityFieldRepository extends ServiceImpl<MetadataEntityFie
     public List<MetadataEntityFieldDO> getActiveEntityFieldsByEntityId(Long entityId) {
         QueryWrapper queryWrapper = this.query()
                 .eq(MetadataEntityFieldDO::getEntityId, entityId)
-                .eq(MetadataEntityFieldDO::getDeleted, 0)
                 .orderBy(MetadataEntityFieldDO::getSortOrder, true)
                 .orderBy(MetadataEntityFieldDO::getCreateTime, false);
         return list(queryWrapper);

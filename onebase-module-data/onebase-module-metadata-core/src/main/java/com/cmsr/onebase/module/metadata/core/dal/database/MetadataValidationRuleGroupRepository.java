@@ -35,7 +35,6 @@ public class MetadataValidationRuleGroupRepository extends ServiceImpl<MetadataV
         QueryWrapper queryWrapper = this.query()
                 .like(MetadataValidationRuleGroupDO::getRgName, name, StringUtils.hasText(name))
                 .eq(MetadataValidationRuleGroupDO::getEntityId, entityId, entityId != null)
-                .eq(MetadataValidationRuleGroupDO::getDeleted, 0)
                 .orderBy(MetadataValidationRuleGroupDO::getCreateTime, false);
 
         Page<MetadataValidationRuleGroupDO> pageQuery = Page.of(pageNum, pageSize);
@@ -53,8 +52,7 @@ public class MetadataValidationRuleGroupRepository extends ServiceImpl<MetadataV
     public MetadataValidationRuleGroupDO selectByRgName(String rgName, Long excludeId) {
         QueryWrapper queryWrapper = this.query()
                 .eq(MetadataValidationRuleGroupDO::getRgName, rgName)
-                .ne(MetadataValidationRuleGroupDO::getId, excludeId, excludeId != null)
-                .eq(MetadataValidationRuleGroupDO::getDeleted, 0);
+                .ne(MetadataValidationRuleGroupDO::getId, excludeId, excludeId != null);
         return getOne(queryWrapper);
     }
 }

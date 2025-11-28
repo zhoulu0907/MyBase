@@ -27,8 +27,7 @@ public class MetadataValidationFormatRepository extends ServiceImpl<MetadataVali
      */
     public List<MetadataValidationFormatDO> findByFieldId(Long fieldId) {
         QueryWrapper queryWrapper = query()
-                .eq("field_id", fieldId)
-                .eq("deleted", 0);
+                .eq(MetadataValidationFormatDO::getFieldId, fieldId);
         return list(queryWrapper);
     }
 
@@ -40,9 +39,8 @@ public class MetadataValidationFormatRepository extends ServiceImpl<MetadataVali
      */
     public MetadataValidationFormatDO findRegexByFieldId(Long fieldId) {
         QueryWrapper queryWrapper = query()
-                .eq("field_id", fieldId)
-                .eq("format_code", "REGEX")
-                .eq("deleted", 0);
+                .eq(MetadataValidationFormatDO::getFieldId, fieldId)
+                .eq(MetadataValidationFormatDO::getFormatCode, "REGEX");
         return getOne(queryWrapper);
     }
 
@@ -65,8 +63,7 @@ public class MetadataValidationFormatRepository extends ServiceImpl<MetadataVali
      */
     public List<MetadataValidationFormatDO> findByGroupId(Long groupId) {
         QueryWrapper queryWrapper = query()
-                .eq("group_id", groupId)
-                .eq("deleted", 0);
+                .eq(MetadataValidationFormatDO::getGroupId, groupId);
         return list(queryWrapper);
     }
 }

@@ -348,17 +348,15 @@ public class SelfDefinedValidationService implements ValidationService {
 
     private List<MetadataValidationRuleGroupDO> findActiveRuleGroups(Long entityId) {
         QueryWrapper queryWrapper = ruleGroupRepository.query()
-                .eq("entity_id", entityId)
-                .eq("validation_type", "SELF_DEFINED")
-                .eq("rg_status", 1)
-                .eq("deleted", 0);
+                .eq(MetadataValidationRuleGroupDO::getEntityId, entityId)
+                .eq(MetadataValidationRuleGroupDO::getValidationType, "SELF_DEFINED")
+                .eq(MetadataValidationRuleGroupDO::getRgStatus, 1);
         return ruleGroupRepository.list(queryWrapper);
     }
 
     private Map<Long, String> buildFieldIdToNameMap(Long entityId) {
         QueryWrapper queryWrapper = entityFieldRepository.query()
-                .eq("entity_id", entityId)
-                .eq("deleted", 0);
+                .eq(MetadataEntityFieldDO::getEntityId, entityId);
 
         return entityFieldRepository.list(queryWrapper).stream()
                 .collect(Collectors.toMap(MetadataEntityFieldDO::getId, MetadataEntityFieldDO::getFieldName));

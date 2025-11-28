@@ -22,7 +22,6 @@ public class MetadataEntityFieldOptionRepository extends ServiceImpl<MetadataEnt
     public List<MetadataEntityFieldOptionDO> findAllByFieldId(Long fieldId) {
         QueryWrapper queryWrapper = this.query()
                 .eq(MetadataEntityFieldOptionDO::getFieldId, fieldId)
-                .eq(MetadataEntityFieldOptionDO::getDeleted, 0)
                 .orderBy(MetadataEntityFieldOptionDO::getOptionOrder, true)
                 .orderBy(MetadataEntityFieldOptionDO::getCreateTime, true);
         return list(queryWrapper);

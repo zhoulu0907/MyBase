@@ -20,7 +20,6 @@ public class MetadataAutoNumberResetLogRepository extends ServiceImpl<MetadataAu
     public List<MetadataAutoNumberResetLogDO> listByConfig(Long configId) {
         QueryWrapper queryWrapper = this.query()
                 .eq(MetadataAutoNumberResetLogDO::getConfigId, configId)
-                .eq(MetadataAutoNumberResetLogDO::getDeleted, 0)
                 .orderBy(MetadataAutoNumberResetLogDO::getResetTime, false);
         return list(queryWrapper);
     }

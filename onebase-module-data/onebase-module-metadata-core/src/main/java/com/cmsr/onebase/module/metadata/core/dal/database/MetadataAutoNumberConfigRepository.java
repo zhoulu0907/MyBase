@@ -17,8 +17,7 @@ public class MetadataAutoNumberConfigRepository extends ServiceImpl<MetadataAuto
 
     public MetadataAutoNumberConfigDO findByFieldId(Long fieldId) {
         QueryWrapper queryWrapper = this.query()
-                .eq(MetadataAutoNumberConfigDO::getFieldId, fieldId)
-                .eq(MetadataAutoNumberConfigDO::getDeleted, 0);
+                .eq(MetadataAutoNumberConfigDO::getFieldId, fieldId);
         return getOne(queryWrapper);
     }
 

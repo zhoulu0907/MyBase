@@ -27,8 +27,7 @@ public class MetadataValidationLengthRepository extends ServiceImpl<MetadataVali
      */
     public MetadataValidationLengthDO findOneByFieldId(Long fieldId) {
         QueryWrapper queryWrapper = query()
-                .eq("field_id", fieldId)
-                .eq("deleted", 0);
+                .eq(MetadataValidationLengthDO::getFieldId, fieldId);
         return getOne(queryWrapper);
     }
 
@@ -40,8 +39,7 @@ public class MetadataValidationLengthRepository extends ServiceImpl<MetadataVali
      */
     public List<MetadataValidationLengthDO> findByFieldId(Long fieldId) {
         QueryWrapper queryWrapper = query()
-                .eq("field_id", fieldId)
-                .eq("deleted", 0);
+                .eq(MetadataValidationLengthDO::getFieldId, fieldId);
         return list(queryWrapper);
     }
 
@@ -64,8 +62,7 @@ public class MetadataValidationLengthRepository extends ServiceImpl<MetadataVali
      */
     public List<MetadataValidationLengthDO> findByGroupId(Long groupId) {
         QueryWrapper queryWrapper = query()
-                .eq("group_id", groupId)
-                .eq("deleted", 0);
+                .eq(MetadataValidationLengthDO::getGroupId, groupId);
         return list(queryWrapper);
     }
 }

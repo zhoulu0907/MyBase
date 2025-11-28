@@ -20,7 +20,6 @@ public class MetadataAutoNumberRuleItemRepository extends ServiceImpl<MetadataAu
     public List<MetadataAutoNumberRuleItemDO> listByConfig(Long configId) {
         QueryWrapper queryWrapper = this.query()
                 .eq(MetadataAutoNumberRuleItemDO::getConfigId, configId)
-                .eq(MetadataAutoNumberRuleItemDO::getDeleted, 0)
                 .orderBy(MetadataAutoNumberRuleItemDO::getItemOrder, true)
                 .orderBy(MetadataAutoNumberRuleItemDO::getCreateTime, true);
         return list(queryWrapper);

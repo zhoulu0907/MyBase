@@ -69,7 +69,7 @@ public class MetadataBusinessEntityCoreServiceImpl implements MetadataBusinessEn
             return null;
         }
         QueryWrapper queryWrapper = metadataBusinessEntityRepository.query()
-                .eq("code", code.trim());
+                .eq(MetadataBusinessEntityDO::getCode, code.trim());
         return metadataBusinessEntityRepository.getOne(queryWrapper);
     }
 
@@ -79,7 +79,7 @@ public class MetadataBusinessEntityCoreServiceImpl implements MetadataBusinessEn
             return List.of();
         }
         QueryWrapper queryWrapper = metadataBusinessEntityRepository.query()
-                .eq("datasource_id", datasourceId);
+                .eq(MetadataBusinessEntityDO::getDatasourceId, datasourceId);
         return metadataBusinessEntityRepository.list(queryWrapper);
     }
 

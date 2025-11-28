@@ -56,9 +56,9 @@ public class MetadataEntityFieldCoreServiceImpl implements MetadataEntityFieldCo
     @Override
     public List<MetadataEntityFieldDO> getEntityFieldListByEntityId(Long entityId) {
         QueryWrapper queryWrapper = metadataEntityFieldRepository.query()
-                .eq("entity_id", entityId)
-                .orderBy("sort_order", true)
-                .orderBy("create_time", false);
+                .eq(MetadataEntityFieldDO::getEntityId, entityId)
+                .orderBy(MetadataEntityFieldDO::getSortOrder, true)
+                .orderBy(MetadataEntityFieldDO::getCreateTime, false);
         return metadataEntityFieldRepository.list(queryWrapper);
     }
 
@@ -68,10 +68,9 @@ public class MetadataEntityFieldCoreServiceImpl implements MetadataEntityFieldCo
             return Collections.emptyList();
         }
         QueryWrapper queryWrapper = metadataEntityFieldRepository.query()
-                .in("id", fieldIds)
-                .eq("deleted", 0)
-                .orderBy("sort_order", true)
-                .orderBy("create_time", false);
+                .in(MetadataEntityFieldDO::getId, fieldIds)
+                .orderBy(MetadataEntityFieldDO::getSortOrder, true)
+                .orderBy(MetadataEntityFieldDO::getCreateTime, false);
         List<MetadataEntityFieldDO> list = metadataEntityFieldRepository.list(queryWrapper);
         if (list == null || list.isEmpty()) {
             return Collections.emptyList();
@@ -83,10 +82,10 @@ public class MetadataEntityFieldCoreServiceImpl implements MetadataEntityFieldCo
     public PageResult<MetadataEntityFieldDO> getEntityFieldPage(int pageNum, int pageSize, Long entityId) {
         QueryWrapper queryWrapper = metadataEntityFieldRepository.query();
         if (entityId != null) {
-            queryWrapper.eq("entity_id", entityId);
+            queryWrapper.eq(MetadataEntityFieldDO::getEntityId, entityId);
         }
-        queryWrapper.orderBy("sort_order", true)
-                .orderBy("create_time", false);
+        queryWrapper.orderBy(MetadataEntityFieldDO::getSortOrder, true)
+                .orderBy(MetadataEntityFieldDO::getCreateTime, false);
         Page<MetadataEntityFieldDO> page = metadataEntityFieldRepository.page(Page.of(pageNum, pageSize), queryWrapper);
         return new PageResult<>(page.getRecords(), page.getTotalRow());
     }
@@ -94,8 +93,8 @@ public class MetadataEntityFieldCoreServiceImpl implements MetadataEntityFieldCo
     @Override
     public MetadataEntityFieldDO getEntityFieldByCode(String fieldCode, Long entityId) {
         QueryWrapper queryWrapper = metadataEntityFieldRepository.query()
-                .eq("field_code", fieldCode)
-                .eq("entity_id", entityId);
+                .eq(MetadataEntityFieldDO::getFieldCode, fieldCode)
+                .eq(MetadataEntityFieldDO::getEntityId, entityId);
         return metadataEntityFieldRepository.getOne(queryWrapper);
     }
 
@@ -118,8 +117,7 @@ public class MetadataEntityFieldCoreServiceImpl implements MetadataEntityFieldCo
         }
 
         QueryWrapper queryWrapper = metadataEntityFieldRepository.query()
-                .in("id", fieldIds)
-                .eq("deleted", 0);
+                .in(MetadataEntityFieldDO::getId, fieldIds);
         List<MetadataEntityFieldDO> fields = metadataEntityFieldRepository.list(queryWrapper);
         if (fields == null || fields.isEmpty()) {
             return Collections.emptyMap();
@@ -160,8 +158,7 @@ public class MetadataEntityFieldCoreServiceImpl implements MetadataEntityFieldCo
         }
 
         QueryWrapper queryWrapper = metadataEntityFieldRepository.query()
-                .in("id", fieldIds)
-                .eq("deleted", 0);
+                .in(MetadataEntityFieldDO::getId, fieldIds);
         List<MetadataEntityFieldDO> fields = metadataEntityFieldRepository.list(queryWrapper);
         if (fields == null || fields.isEmpty()) {
             return Collections.emptyMap();

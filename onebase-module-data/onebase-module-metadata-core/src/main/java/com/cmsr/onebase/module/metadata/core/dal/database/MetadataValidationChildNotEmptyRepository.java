@@ -27,8 +27,7 @@ public class MetadataValidationChildNotEmptyRepository extends ServiceImpl<Metad
      */
     public MetadataValidationChildNotEmptyDO findOneByFieldId(Long fieldId) {
         QueryWrapper queryWrapper = query()
-                .eq("field_id", fieldId)
-                .eq("deleted", 0);
+                .eq(MetadataValidationChildNotEmptyDO::getFieldId, fieldId);
         return getOne(queryWrapper);
     }
 
@@ -40,8 +39,7 @@ public class MetadataValidationChildNotEmptyRepository extends ServiceImpl<Metad
      */
     public List<MetadataValidationChildNotEmptyDO> findByFieldId(Long fieldId) {
         QueryWrapper queryWrapper = query()
-                .eq("field_id", fieldId)
-                .eq("deleted", 0);
+                .eq(MetadataValidationChildNotEmptyDO::getFieldId, fieldId);
         return list(queryWrapper);
     }
 
@@ -64,8 +62,7 @@ public class MetadataValidationChildNotEmptyRepository extends ServiceImpl<Metad
      */
     public List<MetadataValidationChildNotEmptyDO> findByGroupId(Long groupId) {
         QueryWrapper queryWrapper = query()
-                .eq("group_id", groupId)
-                .eq("deleted", 0);
+                .eq(MetadataValidationChildNotEmptyDO::getGroupId, groupId);
         return list(queryWrapper);
     }
 }

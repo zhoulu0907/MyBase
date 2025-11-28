@@ -26,18 +26,16 @@ public class MetadataDataSystemMethodCoreServiceImpl implements MetadataDataSyst
     @Override
     public MetadataDataSystemMethodDO getDataMethodByCode(String methodCode) {
         QueryWrapper queryWrapper = metadataDataSystemMethodRepository.query()
-                .eq("method_code", methodCode)
-                .eq("is_enabled", CommonStatusEnum.ENABLE.getStatus())
-                .eq("deleted", 0);
+                .eq(MetadataDataSystemMethodDO::getMethodCode, methodCode)
+                .eq(MetadataDataSystemMethodDO::getIsEnabled, CommonStatusEnum.ENABLE.getStatus());
         return metadataDataSystemMethodRepository.getOne(queryWrapper);
     }
 
     @Override
     public List<MetadataDataSystemMethodDO> getEnabledDataMethodList() {
         QueryWrapper queryWrapper = metadataDataSystemMethodRepository.query()
-                .eq("is_enabled", CommonStatusEnum.ENABLE.getStatus())
-                .eq("deleted", 0)
-                .orderBy("method_code", true);
+                .eq(MetadataDataSystemMethodDO::getIsEnabled, CommonStatusEnum.ENABLE.getStatus())
+                .orderBy(MetadataDataSystemMethodDO::getMethodCode, true);
         return metadataDataSystemMethodRepository.list(queryWrapper);
     }
 
