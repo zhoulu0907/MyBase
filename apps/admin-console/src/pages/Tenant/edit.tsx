@@ -23,7 +23,7 @@ import {
   getPlatformTenantAdminListApi,
   PlatformTenantPublishMode,
   updatePlatformTenantApi,
-  uploadFile,
+  platformUploadFile,
   type TenantAdminUserResVO,
   type UpdateTenantParams,
   type UserVO
@@ -158,7 +158,7 @@ const EditTenant = () => {
         }
       : undefined;
 
-    const res = await uploadFile(formData, progressAdapter);
+    const res = await platformUploadFile(formData, progressAdapter);
     return res;
   };
 

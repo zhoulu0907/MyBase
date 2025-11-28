@@ -1,5 +1,5 @@
 import { Message, Tabs, Form, Select, Input, Button, Upload, Spin, Image, Avatar, Modal } from '@arco-design/web-react';
-import { getLoginedUser, updateLoginedUser, updateLoginedUserPwd, uploadFile } from '@onebase/platform-center';
+import { getLoginedUser, updateLoginedUser, updateLoginedUserPwd, runtimeUploadFile } from '@onebase/platform-center';
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './index.module.less';
@@ -62,7 +62,7 @@ const EditPage: React.FC<IEditPageProps> = ({avatarUrl, setAvatarUrl}) => {
       }
       : undefined;
 
-    const res = await uploadFile(formData, progressAdapter);
+    const res = await runtimeUploadFile(formData, progressAdapter);
     return res;
   };
 

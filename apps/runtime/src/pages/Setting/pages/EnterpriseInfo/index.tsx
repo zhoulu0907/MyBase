@@ -22,7 +22,7 @@ import {
   getCorpDetailByIdApiInCorp,
   getDictDataByType,
   updateCorpApiInCorp,
-  uploadFile
+  runtimeUploadFile
 } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
@@ -126,7 +126,7 @@ const SpaceInfo: React.FC = () => {
         }
       : undefined;
 
-    const res = await uploadFile(formData, progressAdapter);
+    const res = await runtimeUploadFile(formData, progressAdapter);
     return res;
   };
 
