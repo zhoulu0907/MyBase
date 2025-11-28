@@ -58,7 +58,10 @@ const SettingPage: React.FC = () => {
                   <Route path=":enterpriseName" element={<RedirectEnterprise />} />
                   <Route path=":enterpriseName/:activeTab" element={<EnterpriseInfoPage />} />
                 </Route>
-                <Route path="tenant/edit" element={<TenantEditPage setAvatarUrl={setAvatarUrl} avatarUrl={avatarUrl} />} />
+                <Route
+                  path="tenant/edit"
+                  element={<TenantEditPage setAvatarUrl={setAvatarUrl} avatarUrl={avatarUrl} />}
+                />
                 <Route path="" element={<Navigate to="user" replace />} />
               </Routes>
             </div>
