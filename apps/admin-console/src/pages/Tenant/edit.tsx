@@ -1,4 +1,3 @@
-import Cropper from '@/components/Cropper';
 import { copyToClipboard, simplifyUrl } from '@/utils/date';
 import { getPlatformFeDomain } from '@/utils/domain';
 import {
@@ -18,6 +17,7 @@ import {
   Upload
 } from '@arco-design/web-react';
 import { IconCopy, IconUpload } from '@arco-design/web-react/icon';
+import { Cropper } from '@onebase/common';
 import {
   getPlatformTenantAdminInfoApi,
   getPlatformTenantAdminListApi,
