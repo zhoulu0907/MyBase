@@ -940,7 +940,7 @@ public abstract class AbstractUserServiceImpl implements UserService {
         // 按租户ID分组并统计数量
         return userlist.stream()
                 .collect(Collectors.groupingBy(
-                        AdminUserDO::getId,
+                        AdminUserDO::getTenantId,
                         Collectors.summingInt(user -> 1)
                 ));
     }

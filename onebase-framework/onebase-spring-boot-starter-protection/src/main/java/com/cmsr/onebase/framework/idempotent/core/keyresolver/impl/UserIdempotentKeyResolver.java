@@ -22,8 +22,7 @@ public class UserIdempotentKeyResolver implements IdempotentKeyResolver {
         String methodName = joinPoint.getSignature().toString();
         String argsStr = StrUtil.join(",", joinPoint.getArgs());
         Long userId = WebFrameworkUtils.getLoginUserId();
-        Integer userType = WebFrameworkUtils.getLoginUserType();
-        return DigestUtils.md5DigestAsHex((methodName + argsStr + userId + userType).getBytes(StandardCharsets.UTF_8));
+        return DigestUtils.md5DigestAsHex((methodName + argsStr + userId).getBytes(StandardCharsets.UTF_8));
     }
 
 }

@@ -11,7 +11,7 @@ import jakarta.validation.Valid;
  * 提供用户的登录、登出的能力
  *
  */
-public interface AdminAuthService {
+public interface BuildAuthService {
 
     /**
      * 验证账号 + 密码。如果通过，则返回用户

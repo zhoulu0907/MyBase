@@ -140,10 +140,11 @@ public class MetadataDataMethodQueryImpl extends AbstractMetadataDataMethodCoreS
             MetadataEntityFieldDO sourceFieldDO = entityFieldRepository.findById(Long.valueOf(relationshipDO.getSourceFieldId()));
 
             MetadataBusinessEntityDO targetEntity = businessEntityService.getBusinessEntity(relationshipDO.getTargetEntityId());
-            if(targetEntity == null){
+            MetadataEntityFieldDO targetFieldDO = entityFieldRepository.findById(Long.valueOf(relationshipDO.getTargetFieldId()));
+            // 如果关联的实体 或 关联的实体字段 不存在/被删除 跳过子表查询
+            if(targetEntity == null || targetFieldDO == null){
                 continue;
             }
-            MetadataEntityFieldDO targetFieldDO = entityFieldRepository.findById(Long.valueOf(relationshipDO.getTargetFieldId()));
             String tableName = targetEntity.getTableName();
             String fieldName = targetFieldDO.getFieldName();
 

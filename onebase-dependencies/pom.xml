@@ -87,6 +87,7 @@
         <!-- HTTP 客户端相关 -->
         <retrofit2.version>3.0.0</retrofit2.version>
         <okhttp3.version>4.12.0</okhttp3.version>
+        <uuid-creator.version>6.1.1</uuid-creator.version>
     </properties>
 
     <dependencyManagement>
@@ -681,6 +682,12 @@
                 <artifactId>mockwebserver</artifactId>
                 <version>${okhttp3.version}</version>
                 <scope>test</scope>
+            </dependency>
+            <!-- -->
+            <dependency>
+                <groupId>com.github.f4b6a3</groupId>
+                <artifactId>uuid-creator</artifactId>
+                <version>${uuid-creator.version}</version>
             </dependency>
 
             <!-- 测试框架：统一 JUnit 平台与 Jupiter 版本（覆盖 Spring Boot 默认版本），解决 IDE 启动器 1.11.4 解析问题 -->

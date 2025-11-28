@@ -8,7 +8,7 @@ import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2CodeDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.ErrorCodeConstants;
-import com.cmsr.onebase.module.system.service.auth.AdminAuthService;
+import com.cmsr.onebase.module.system.service.auth.BuildAuthService;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.Resource;
@@ -28,7 +28,7 @@ public class OAuth2GrantServiceImpl implements OAuth2GrantService {
     @Resource
     private OAuth2CodeService oauth2CodeService;
     @Resource
-    private AdminAuthService adminAuthService;
+    private BuildAuthService  buildAuthService;
 
     @Override
     public OAuth2AccessTokenDO grantImplicit(Long userId, Integer userType,
@@ -71,7 +71,7 @@ public class OAuth2GrantServiceImpl implements OAuth2GrantService {
     @Override
     public OAuth2AccessTokenDO grantPassword(String username, String password, String clientId, List<String> scopes) {
         // 使用账号 + 密码进行登录
-        AdminUserDO user = adminAuthService.authenticate(username, password);
+        AdminUserDO user = buildAuthService.authenticate(username, password);
         Assert.notNull(user, "用户不能为空！"); // 防御性编程
 
         // 创建访问令牌

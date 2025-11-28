@@ -35,7 +35,7 @@ public class AppApplicationTagRepository extends BaseAppRepository<AppApplicatio
                 .remove();
     }
 
-    public void deleteByByApplicationIdAndTagsNotIn(Long applicationId, List<Long> tagIds) {
+    public void deleteByApplicationIdAndTagsNotIn(Long applicationId, List<Long> tagIds) {
         this.updateChain()
                 .eq(AppApplicationTagDO::getApplicationId, applicationId)
                 .notIn(AppApplicationTagDO::getTagId, tagIds)

@@ -343,10 +343,9 @@ public abstract class AbstractUserDataRepository extends DataRepository<AdminUse
     }
 
 
-    public List<AdminUserDO> getTenantExistUserCountByIds(List<Long> userIds) {
+    public List<AdminUserDO> getTenantExistUserCountByIds(List<Long> tenantIds) {
         DefaultConfigStore configStore = buildUserConfigStore();
-        configStore.in(AdminUserDO.ID, userIds)
-                .eq(AdminUserDO.STATUS, UserStatusEnum.NORMAL.getStatus())
+        configStore.in(AdminUserDO.TENANT_ID, tenantIds)
                 .order(AdminUserDO.ADMIN_TYPE, Order.TYPE.ASC)
                 .order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
         return findAllByConfig(configStore);

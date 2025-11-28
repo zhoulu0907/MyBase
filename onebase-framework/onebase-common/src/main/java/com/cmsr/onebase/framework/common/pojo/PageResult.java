@@ -38,4 +38,8 @@ public final class PageResult<T> implements Serializable {
         return new PageResult<>(total);
     }
 
+    public static <T> PageResult<T> of(com.mybatisflex.core.paginate.Page<T> page) {
+        return new PageResult<>(page.getRecords(), page.getTotalRow());
+    }
+
 }

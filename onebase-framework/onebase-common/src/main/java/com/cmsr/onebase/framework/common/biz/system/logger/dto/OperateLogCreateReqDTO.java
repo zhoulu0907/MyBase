@@ -16,7 +16,6 @@ public class OperateLogCreateReqDTO {
     @NotNull(message = "用户编号不能为空")
     private Long userId;
     @Schema(description = "用户类型，参见 UserTypeEnum 枚举", requiredMode = Schema.RequiredMode.REQUIRED, example = "2" )
-    @NotNull(message = "用户类型不能为空")
     private Integer userType;
     @Schema(description = "操作模块类型", requiredMode = Schema.RequiredMode.REQUIRED, example = "订单")
     @NotEmpty(message = "操作模块类型不能为空")

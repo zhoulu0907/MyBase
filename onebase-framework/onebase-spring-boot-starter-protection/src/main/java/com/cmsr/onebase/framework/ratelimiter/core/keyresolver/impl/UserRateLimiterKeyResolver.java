@@ -1,6 +1,7 @@
 package com.cmsr.onebase.framework.ratelimiter.core.keyresolver.impl;
 
 import cn.hutool.core.util.StrUtil;
+import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.ratelimiter.core.annotation.RateLimiter;
 import com.cmsr.onebase.framework.ratelimiter.core.keyresolver.RateLimiterKeyResolver;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
@@ -22,7 +23,7 @@ public class UserRateLimiterKeyResolver implements RateLimiterKeyResolver {
         String methodName = joinPoint.getSignature().toString();
         String argsStr = StrUtil.join(",", joinPoint.getArgs());
         Long userId = WebFrameworkUtils.getLoginUserId();
-        Integer userType = WebFrameworkUtils.getLoginUserType();
+        Integer userType = SecurityFrameworkUtils.getLoginUserType();
         return DigestUtils.md5DigestAsHex((methodName + argsStr + userId + userType).getBytes(StandardCharsets.UTF_8));
     }
 
