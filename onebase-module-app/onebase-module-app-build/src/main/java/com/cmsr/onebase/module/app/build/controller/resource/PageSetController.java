@@ -1,10 +1,10 @@
-package com.cmsr.onebase.module.app.build.controller.appresource;
+package com.cmsr.onebase.module.app.build.controller.resource;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.module.app.build.service.resource.PageSetService;
-import com.cmsr.onebase.module.app.build.vo.appresource.*;
 import com.cmsr.onebase.module.app.core.dto.appresource.CopyPageSetDTO;
 import com.cmsr.onebase.module.app.core.dto.appresource.CreatePageSetDTO;
+import com.cmsr.onebase.module.app.core.vo.resource.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;

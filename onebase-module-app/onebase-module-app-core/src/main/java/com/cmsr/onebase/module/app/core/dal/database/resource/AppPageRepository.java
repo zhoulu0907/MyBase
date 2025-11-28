@@ -5,8 +5,10 @@ import com.cmsr.onebase.module.app.core.dal.mapper.AppResourcePageMapper;
 import com.cmsr.onebase.module.app.core.enums.appresource.PageEnum;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -29,4 +31,13 @@ public class AppPageRepository extends ServiceImpl<AppResourcePageMapper, AppRes
         return list(queryWrapper);
     }
 
+    public List<AppResourcePageDO> findAllFormPageByPageSetIds(List<Long> pageSetIdList) {
+        if (CollectionUtils.isEmpty(pageSetIdList)) {
+            return Collections.emptyList();
+        }
+        QueryWrapper queryWrapper = this.query()
+                .in(AppResourcePageDO::getPageSetId, pageSetIdList)
+                .eq(AppResourcePageDO::getPageType, PageEnum.FORM.getValue());
+        return list(queryWrapper);
+    }
 }

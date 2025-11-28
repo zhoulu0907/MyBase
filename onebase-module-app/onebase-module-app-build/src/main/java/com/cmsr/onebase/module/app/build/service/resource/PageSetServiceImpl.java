@@ -4,7 +4,6 @@ import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.build.service.AppCommonService;
 import com.cmsr.onebase.module.app.build.util.PageUtils;
-import com.cmsr.onebase.module.app.build.vo.appresource.*;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppComponentRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageSetPageRepository;
@@ -16,6 +15,7 @@ import com.cmsr.onebase.module.app.core.enums.appresource.AppResourceErrorCodeCo
 import com.cmsr.onebase.module.app.core.enums.appresource.PageEnum;
 import com.cmsr.onebase.module.app.core.enums.appresource.PageTypeEnum;
 import com.cmsr.onebase.module.app.core.enums.appresource.PageTypeSetEnum;
+import com.cmsr.onebase.module.app.core.vo.resource.*;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
