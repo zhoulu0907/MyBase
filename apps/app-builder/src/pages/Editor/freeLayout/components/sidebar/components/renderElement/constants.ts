@@ -90,27 +90,27 @@ export const VARIABLE_MAP: Partial<Record<FieldType, FieldType[]>> = {
 
 export const ComplexInfo: ComplexInfo = {
   DATETIME_EQUALS: {
-    type: 'date',
+    type: ElementType.DATE,
     options: DateOperator.EQUALS
   },
   DATETIME_LATER_THAN: {
-    type: 'date',
+    type:  ElementType.DATE,
     options: DateOperator.LATER_THAN
   },
   DATETIME_RANGE: {
-    type: 'dateRange',
+    type:  ElementType.DATE_RANGE,
     options: DateOperator.LATER_RANGE
   },
   DATA_SELECTION_EQUALS: {
-    type: 'select',
+    type: ElementType.SELECT,
     options: approvalResultOptions
   },
   DATA_SELECTION_NOT_EQUALS: {
-    type: 'select',
+    type:  ElementType.SELECT,
     options: approvalResultOptions
   },
   DATA_SELECTION_CONTAINS: {
-    type: 'selectMultiple',
+    type:  ElementType.SELECT_MULTIPLE,
     options: approvalResultOptions
   }
 };
