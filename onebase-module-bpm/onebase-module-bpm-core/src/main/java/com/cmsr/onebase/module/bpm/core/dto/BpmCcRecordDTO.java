@@ -12,6 +12,37 @@ import java.time.LocalDateTime;
 @Data
 public class BpmCcRecordDTO extends BpmFlowCcRecordDO {
     /**
+     * 流程实例id
+     */
+    private Long instanceId;
+
+    /**
+     * 任务表id
+     */
+    private Long taskId;
+
+    /**
+     * 已阅 0，否 1，是
+     */
+    private Integer viewed;
+
+    /**
+     * 已读时间
+     */
+    private LocalDateTime viewedTime;
+
+    /**
+     * 抄送用户ID
+     */
+    private String userId;
+
+    /**
+     * 租户id
+     */
+    private Long tenantId;
+
+
+    /**
      * 应用ID
      */
     @Column(name = "app_id", length = 100)

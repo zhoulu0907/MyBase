@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.bpm.core.service.impl;
 
 import com.cmsr.onebase.module.bpm.core.service.BpmEngineDefExtService;
-import com.cmsr.onebase.module.engine.orm.anyline.entity.FlowDefinition;
+import com.cmsr.onebase.module.engine.orm.mybatisflex.entity.FlowDefinition;
 import jakarta.annotation.Resource;
 import org.dromara.warm.flow.core.entity.Definition;
 import org.dromara.warm.flow.core.service.DefService;

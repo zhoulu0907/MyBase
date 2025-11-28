@@ -27,7 +27,7 @@
         <!-- 流程引擎ORM模块 -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-module-bpm-engine-orm</artifactId>
+            <artifactId>onebase-module-bpm-engine-orm-mybatis-flex</artifactId>
             <version>${revision}</version>
         </dependency>
 

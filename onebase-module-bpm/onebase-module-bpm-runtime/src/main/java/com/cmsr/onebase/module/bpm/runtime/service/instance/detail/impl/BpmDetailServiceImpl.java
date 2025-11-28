@@ -17,13 +17,11 @@ import com.cmsr.onebase.module.bpm.runtime.service.instance.detail.BpmDetailServ
 import com.cmsr.onebase.module.bpm.runtime.service.instance.detail.strategy.InstanceDetailStrategyManager;
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmTaskDetailReqVO;
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmTaskDetailRespVO;
-import com.cmsr.onebase.module.engine.orm.anyline.entity.FlowHisTask;
+import com.cmsr.onebase.module.engine.orm.mybatisflex.entity.FlowHisTask;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.MetadataDataMethodCoreService;
 import jakarta.annotation.Resource;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
@@ -431,10 +429,7 @@ public class BpmDetailServiceImpl implements BpmDetailService {
         Long loginUserId = context.getLoginUserId();
 
         // 先查询直接权限
-        ConfigStore configStore = new DefaultConfigStore();
-        configStore.and(BpmFlowCcRecordDO.TASK_ID, taskId);
-        configStore.and(BpmFlowCcRecordDO.USER_ID, loginUserId);
-        BpmFlowCcRecordDO ccRecord = ccRecordRepository.findOne(configStore);
+        BpmFlowCcRecordDO ccRecord = ccRecordRepository.findOneByTaskIdAndUserId(taskId, String.valueOf(loginUserId));
 
         if (ccRecord != null) {
             // 直接权限，没有代理记录
@@ -452,12 +447,10 @@ public class BpmDetailServiceImpl implements BpmDetailService {
                 .map(BpmFlowAgentInsDO::getPrincipalId)
                 .collect(Collectors.toSet());
 
-        // 查找被代理人的抄送记录
-        ConfigStore agentCcQuery = new DefaultConfigStore();
-        agentCcQuery.and(BpmFlowCcRecordDO.TASK_ID, taskId);
-        agentCcQuery.in(BpmFlowCcRecordDO.USER_ID, principalIds);
+        List<String> principalStrIds = principalIds.stream().map(String::valueOf).toList();
 
-        BpmFlowCcRecordDO agentCcRecord = ccRecordRepository.findOne(agentCcQuery);
+        BpmFlowCcRecordDO agentCcRecord = ccRecordRepository.findOneByTaskIdAndUserIds(taskId, principalStrIds);
+
         if (agentCcRecord == null) {
             throw exception(ErrorCodeConstants.FLOW_PERMISSION_DENY.getCode(), "您没有查看此抄送的任务权限");
         }
@@ -613,11 +606,7 @@ public class BpmDetailServiceImpl implements BpmDetailService {
             userId = context.getAgentIns().getPrincipalId();
         }
 
-        ConfigStore configStore = new DefaultConfigStore();
-        configStore.and(BpmFlowCcRecordDO.TASK_ID, taskId);
-        configStore.and(BpmFlowCcRecordDO.USER_ID, userId);
-
-        BpmFlowCcRecordDO ccRecord = ccRecordRepository.findOne(configStore);
+        BpmFlowCcRecordDO ccRecord = ccRecordRepository.findOneByTaskIdAndUserId(taskId, String.valueOf(userId));
         if (ccRecord == null) {
             return;
         }
@@ -625,7 +614,7 @@ public class BpmDetailServiceImpl implements BpmDetailService {
         if (!BooleanUtils.toBoolean(ccRecord.getViewed())) {
             ccRecord.setViewed(BooleanUtils.toInteger(true));
             ccRecord.setViewedTime(LocalDateTime.now());
-            ccRecordRepository.update(ccRecord);
+            ccRecordRepository.updateById(ccRecord);
         }
     }
 
@@ -637,9 +626,7 @@ public class BpmDetailServiceImpl implements BpmDetailService {
      * @param instanceId 流程实例ID
      */
     private void fillBpmBizExt(BpmTaskDetailRespVO vo, Long instanceId) {
-        ConfigStore configStore = new DefaultConfigStore();
-        configStore.and(BpmFlowInsBizExtDO.INSTANCE_ID, instanceId);
-        BpmFlowInsBizExtDO flowInsExtDO = flowInsExtRepository.findOne(configStore);
+        BpmFlowInsBizExtDO flowInsExtDO = flowInsExtRepository.findOneByInstanceId(instanceId);
 
         if (flowInsExtDO == null) {
             throw exception(ErrorCodeConstants.BPM_BIZ_EXT_NOT_EXIST);

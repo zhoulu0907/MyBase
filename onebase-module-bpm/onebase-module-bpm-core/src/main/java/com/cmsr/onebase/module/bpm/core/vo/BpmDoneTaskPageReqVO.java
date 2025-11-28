@@ -24,9 +24,10 @@ public class BpmDoneTaskPageReqVO extends BpmInsExtQueryPageVO {
 
     @Schema(description = "发起人，支持多个值，格式：1,2,3", example = "3")
     private String initiatorId;
+
    //========================== 内部使用，前端不用传 ==============
     /**
      * 发起人列表
      */
-    private List<String> initiatorIdList;
+    private List<Long> initiatorIdList;
 }

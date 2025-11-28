@@ -240,7 +240,7 @@ public class BpmGlobalListener implements GlobalListener {
         }
 
         // 保存代理用户
-        agentInsRepository.insertBatch(agentInsList);
+        agentInsRepository.saveBatch(agentInsList);
     }
 
     private void handleUnOperatorUsersOnAssignment(ListenerVariable listenerVariable) {
