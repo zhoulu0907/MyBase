@@ -118,29 +118,6 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     </Menu>
   );
 
-  // 用户菜单
-  const userMenu = (
-    <Menu>
-      <Menu.Item key="profile">
-        <div className={styles.userMenuInfo}>
-          <div>{UserPermissionManager.getUserPermissionInfo()?.user.username}</div>
-        </div>
-      </Menu.Item>
-      <Menu.Item
-        key="setting"
-        onClick={() => {
-          navigate('/onebase/setting');
-        }}
-      >
-        {t('header.tenantManagement')}
-      </Menu.Item>
-      <Menu.Item key="logout" onClick={handleLogout}>
-        <IconExport style={{ color: '#F53F3F' }} />
-        <Typography.Text type="error">{t('header.logout')}</Typography.Text>
-      </Menu.Item>
-    </Menu>
-  );
-
   return (
     <Header className={`${styles.header} ${className || ''}`}>
       <div className={styles.headerContent}>
@@ -181,10 +158,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
         <div className={styles.userInfo}>
           {UserPermissionManager.getUserPermissionInfo()?.user?.nickname || '未登录'}
 
-          <Dropdown
-            droplist={location.pathname?.startsWith('/onebase/enterprise-app') ? tenantAdminMenu : userMenu}
-            position="bl"
-          >
+          <Dropdown droplist={tenantAdminMenu} position="bl">
             <div className={styles.userDropdown}>
               <UserProfileAvatar adminInfo={adminInfo} />
             </div>

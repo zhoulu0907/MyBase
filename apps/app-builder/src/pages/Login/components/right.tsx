@@ -115,7 +115,7 @@ const Right: React.FC = () => {
         if (redirectURL) {
           window.location.href = redirectURL;
         } else {
-          navigate('/onebase/enterprise-app');
+          navigate(`/onebase/enterprise-app`);
         }
 
         return;

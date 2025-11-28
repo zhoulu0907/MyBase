@@ -48,3 +48,7 @@ export const copyApplicationMenu = (params: CopyApplicationMenuReq) => {
 export const listApplicationBPMMenu = (params: ListApplicationMenuReq) => {
   return appService.get('/menu/bpm-list', params);
 };
+
+export const runtimeListApplicationBPMMenu = (params: ListApplicationMenuReq) => {
+  return runtimeAppService.get('/menu/bpm-list', params);
+};

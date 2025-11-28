@@ -5,6 +5,7 @@ import { IconDown, IconSearch } from '@arco-design/web-react/icon';
 import {
   menuSignal,
   MenuType,
+  runtimeListApplicationBPMMenu,
   runtimeListApplicationMenu,
   VisibleType,
   type ApplicationMenu,
@@ -113,19 +114,20 @@ const Runtime: React.FC = () => {
       applicationId: appID
     };
     const res = await runtimeListApplicationMenu(req);
-
-    // 等有runtime接口了再开启
-    // const bpmRes = await listApplicationBPMMenu(req);
-    // let bpmData: any[] = [];
-    // if (bpmRes && bpmRes.length > 0) {
-    //   bpmData = dealPage(bpmRes);
-    // }
+    console.log(res);
+    const bpmRes = await runtimeListApplicationBPMMenu(req);
+    console.log(bpmRes);
+    let bpmData: any[] = [];
+    if (bpmRes && bpmRes.length > 0) {
+      bpmData = dealPage(bpmRes);
+    }
     // 处理数据
     const resPageList: any[] = res && res.length > 0 ? dealPage(res) : [];
-    const pageList: any[] = resPageList;
-    // pageList = bpmData.concat(resPageList);
+    console.log(resPageList);
+    const pageList: any[] = bpmData.concat(resPageList);
 
     const treeData = convertMenuToTreeData(pageList, initTreeItemWidth);
+
     setTreeData(treeData);
     // 如果菜单列表不为空，默认选中第一个菜单
     if (pageList && pageList.length > 0) {
@@ -204,59 +206,54 @@ const Runtime: React.FC = () => {
   );
 
   return (
-    <div className={styles.runtimePage}>
-      <Layout style={{ height: '100%' }}>
-        <AppHeader />
-        <Layout>
-          <Sider className={styles.sider}>
-            <div className={styles.siderHeader}>
-              <div className={styles.siderHeaderInput}>
-                <Input allowClear suffix={<IconSearch />} placeholder={t('app.searchPlaceHolder')} />
-              </div>
+    <Layout className={styles.runtimePage}>
+      <AppHeader />
+      <Layout>
+        <Sider className={styles.sider}>
+          <div className={styles.siderHeader}>
+            <div className={styles.siderHeaderInput}>
+              <Input allowClear suffix={<IconSearch />} placeholder={t('app.searchPlaceHolder')} />
             </div>
-            <Tree
-              blockNode
-              draggable
-              treeData={treeData}
-              selectedKeys={[curMenu.value?.menuCode!]}
-              expandedKeys={expandedKeys}
-              onExpand={setExpandedKeys}
-              className={`menuTree ${styles.tree}`}
-              showLine={false}
-              icons={{
-                switcherIcon: <IconDown />,
-                dragIcon: null
-              }}
-              actionOnClick={'expand'}
-              style={{
-                width: '200px',
-                overflow: 'hidden',
-                boxSizing: 'border-box',
-                padding: '4px 8px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 8
-              }}
-            />
-          </Sider>
-          <Content className={styles.content}>
-            <div className={styles.contentHeader}>
-              <div className={styles.contentTitle}>{curMenu.value?.menuName}</div>
-            </div>
-            {curMenu?.value?.menuCode && curMenu?.value?.menuCode?.indexOf('TASK-') >= 0 ? (
-              <TaskCenterPage curMenuCode={curMenu.value.menuCode} />
-            ) : (
-              <div className={styles.contentBody}>
-                <PreviewContainer menuId={curMenu.value?.id || ''} runtime={true} />
-              </div>
-            )}
-            {/* <div className={styles.contentBody}>
+          </div>
+          <Tree
+            blockNode
+            draggable
+            treeData={treeData}
+            selectedKeys={[curMenu.value?.menuCode!]}
+            expandedKeys={expandedKeys}
+            onExpand={setExpandedKeys}
+            className={`menuTree ${styles.tree}`}
+            showLine={false}
+            icons={{
+              switcherIcon: <IconDown />,
+              dragIcon: null
+            }}
+            actionOnClick={'expand'}
+            style={{
+              width: '200px',
+              overflow: 'hidden',
+              boxSizing: 'border-box',
+              padding: '4px 8px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 8
+            }}
+          />
+        </Sider>
+        <Content className={styles.content}>
+          <div className={styles.contentHeader}>
+            <div className={styles.contentTitle}>{curMenu.value?.menuName}</div>
+          </div>
+          {curMenu?.value?.menuCode && curMenu?.value?.menuCode?.indexOf('TASK-') >= 0 ? (
+            <TaskCenterPage curMenuCode={curMenu.value.menuCode} />
+          ) : (
+            <div className={styles.contentBody}>
               <PreviewContainer menuId={curMenu.value?.id || ''} runtime={true} />
-            </div> */}
-          </Content>
-        </Layout>
+            </div>
+          )}
+        </Content>
       </Layout>
-    </div>
+    </Layout>
   );
 };
 

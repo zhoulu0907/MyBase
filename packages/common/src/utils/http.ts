@@ -57,7 +57,6 @@ export class HttpClient {
           _t: Date.now()
         };
 
-        // 自动添加 token 到请求头
         const tokenInfo = TokenManager.getTokenInfo();
         const tenantInfo = TokenManager.getTenantInfo();
         if (tokenInfo?.accessToken) {

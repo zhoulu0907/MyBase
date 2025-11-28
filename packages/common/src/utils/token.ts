@@ -58,6 +58,30 @@ export class TokenManager {
     }
   }
 
+  static setBuilderToken(tokenInfo: TokenInfo, rememberMe: boolean = false): void {
+    const tenantId = tokenInfo.tenantId!;
+    try {
+      // 根据记住我选项选择存储方式
+      if (rememberMe) {
+        // 记住我：使用 localStorage（持久化存储）
+        localStorage.setItem(this.addEnv(`${tenantId}_${this.TOKEN_KEY}`), tokenInfo.accessToken);
+        localStorage.setItem(this.addEnv(`${tenantId}_${this.TOKEN_INFO_KEY}`), JSON.stringify(tokenInfo));
+        localStorage.setItem(this.addEnv(`${tenantId}_${this.REMEMBER_ME_KEY}`), 'true');
+      } else {
+        // 不记住我：使用 sessionStorage（会话存储，关闭浏览器后清除）
+        sessionStorage.setItem(this.addEnv(`${tenantId}_${this.TOKEN_KEY}`), tokenInfo.accessToken);
+        sessionStorage.setItem(this.addEnv(`${tenantId}_${this.TOKEN_INFO_KEY}`), JSON.stringify(tokenInfo));
+        sessionStorage.setItem(this.addEnv(`${tenantId}_${this.REMEMBER_ME_KEY}`), 'false');
+      }
+      if (tenantId) {
+        localStorage.setItem(this.addEnv(`${tenantId}_${this.TENANT_ID}`), tenantId);
+      }
+    } catch (error) {
+      console.error('存储 token 失败:', error);
+      throw new Error('存储 token 失败');
+    }
+  }
+
   /**
    * 获取 token
    * @returns token 字符串或 null
