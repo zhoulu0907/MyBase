@@ -607,3 +607,9 @@ export const selectScopeConfig: any = {
   name:'可选范围',
   type: CONFIG_TYPES.DEPT_SELECT_SCOPE
 }
+
+export const dynamicUserSelectConfig: any = {
+  key: 'defaultValueMode',
+  name:'默认值',
+  type: CONFIG_TYPES.USER_DEFAULT_VALUE
+}

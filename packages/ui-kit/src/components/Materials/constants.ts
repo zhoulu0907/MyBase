@@ -112,6 +112,8 @@ export const CONFIG_TYPES = {
   DEPT_SELECT_SCOPE: 'deptSelectScope',
   // 数据选择方式
   DATA_SELECT_MODE: 'DataSelectMode',
+  //选择人员默认值
+  USER_DEFAULT_VALUE: 'userDefaultValue',
 } as const;
 
 // 状态选项常量
