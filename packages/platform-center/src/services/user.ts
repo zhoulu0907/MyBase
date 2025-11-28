@@ -1,6 +1,6 @@
 import { type PageParam, PageResult } from '../types/common';
 import type { UserProfileRespVO, UserProfileUpdatePwdReq, UserProfileUpdateReq, UserVO } from '../types/user';
-import { systemService } from './clients';
+import { runtimeService, systemService } from './clients';
 
 // 查询用户管理列表
 export const getUserPage = (params: PageParam) => {
@@ -10,6 +10,11 @@ export const getUserPage = (params: PageParam) => {
 // 查询用户详情
 export const getUser = (id: number) => {
   return systemService.get('/user/get?id=' + id);
+};
+
+// 查询用户详情
+export const runTimeGetUser = (id: number) => {
+  return runtimeService.get('/user/get?id=' + id);
 };
 
 // 新增用户
