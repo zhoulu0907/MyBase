@@ -32,14 +32,18 @@ const ListRuntime: React.FC<ListRuntimeProps> = ({ pageSetId, runtime, showFromP
 
   return (
     <>
-      {listComponents.value.map((cp: GridItem) => (
-        <Fragment key={cp.id}>
-          {listPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+      {listComponents.value.map((cp: GridItem) => {
+        const schema = listPageComponentSchemas.value[cp.id];
+        const sanitizedSchema = {
+          ...schema,
+        };
+        return (
+          <Fragment key={cp.id}>
             <div
               key={cp.id}
               className={styles.componentItem}
               style={{
-                width: `calc(${getComponentWidth(listPageComponentSchemas.value[cp.id], cp.type)} - 8px)`,
+                width: `calc(${getComponentWidth(sanitizedSchema, cp.type)} - 8px)`,
                 margin: '4px'
               }}
             >
@@ -47,15 +51,15 @@ const ListRuntime: React.FC<ListRuntimeProps> = ({ pageSetId, runtime, showFromP
                 cpId={cp.id}
                 cpType={cp.type}
                 pageType={EDITOR_TYPES.LIST_EDITOR}
-                pageComponentSchema={listPageComponentSchemas.value[cp.id]}
+                pageComponentSchema={sanitizedSchema}
                 runtime={runtime}
                 showFromPageData={showFromPageData}
                 refresh={refresh}
               />
             </div>
-          )}
-        </Fragment>
-      ))}
+          </Fragment>
+        );
+      })}
     </>
   );
 };

@@ -43,7 +43,7 @@ const WillDo: FC<WillDoProps> = ({ appId }) => {
       ellipsis: true
     },
     {
-      title: '流程状态',
+      title: '当前节点状态',
       dataIndex: 'flowStatus',
       render: (val: FLOWSTATUS_TYPE) => {
         if (val === FLOWSTATUS_TYPE.APPROVED) {

@@ -43,15 +43,3 @@ export const useAppEntityStore = create<appEntityStore>((set) => ({
   clearSubEntities: () => set(() => ({ subEntities: { entities: [] } }))
 }));
 
-// 记录新增节点
-export interface newNodeStore {
-  newNodes: Array<string>;
-  setNewNodes: (newNodes: Array<string>) => void;
-  clearNewNodes: () => void;
-}
-
-export const useNewNodeStore = create<newNodeStore>((set) => ({
-  newNodes: [],
-  setNewNodes: (newNodes: Array<string>) => set(() => ({ newNodes })),
-  clearNewNodes: () => set(() => ({ newNodes: [] }))
-}));

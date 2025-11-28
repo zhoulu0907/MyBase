@@ -31,14 +31,14 @@ export const createETLEditorSignal = () => {
     nodeData.value = {};
   };
 
-  const curDrawerTab = signal<string>(ETLDrawerTab.DATA_PREVIEW);
+  const curDrawerTab = signal<string>(ETLDrawerTab.DATA_CONFIG);
 
   const setCurDrawerTab = (tab: string) => {
     curDrawerTab.value = tab;
   };
 
   const resetCurDrawerTab = () => {
-    curDrawerTab.value = ETLDrawerTab.DATA_PREVIEW;
+    curDrawerTab.value = ETLDrawerTab.DATA_CONFIG;
   };
 
   const graphData = signal<any>({});

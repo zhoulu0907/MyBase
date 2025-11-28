@@ -1,8 +1,7 @@
-import DynamicIcon from '@/components/DynamicIcon';
 import MenuComp from '@/components/MenuIcon';
-import { menuIconList } from '@/components/MenuIcon/const';
 import { Button, Form, Input, Modal, Select, TreeSelect, type FormInstance } from '@arco-design/web-react';
-import { RootParentPage, PageType } from '@onebase/app';
+import { PageType, RootParentPage } from '@onebase/app';
+import { webMenuIcons } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
 
@@ -29,6 +28,8 @@ const CreateModal: React.FC<CreateModalProps> = ({
   treeData,
   entityListOptions
 }) => {
+  const allWebMenuIcons = webMenuIcons.map((ele) => ele.children).reduce((acc, current) => acc.concat(current), []);
+
   const [menuIcon, setMenuIcon] = useState<string>();
   const [visibleMenuIcon, setVisibleMenuIcon] = useState<boolean>(false);
 
@@ -36,7 +37,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
     if (menuIcon) {
       form.setFieldValue('menuIcon', menuIcon);
     } else {
-      form.setFieldValue('menuIcon', iconMap[visibleCreateForm as keyof typeof iconMap]);
+      form.setFieldValue('menuIcon', 'FormPageLine');
     }
   }, [menuIcon, visibleCreateForm]);
 
@@ -149,21 +150,16 @@ const CreateModal: React.FC<CreateModalProps> = ({
                 onClick={() => setVisibleMenuIcon(true)}
               >
                 {menuIcon ? (
-                  <DynamicIcon
-                    IconComponent={menuIconList.find((icon) => icon.code === menuIcon)?.icon}
-                    theme="outline"
-                    size="18"
-                    fill="#333"
+                  <img
+                    style={{ width: 'auto', height: '18px', fill: '#333' }}
+                    src={allWebMenuIcons.find((ele) => ele.code === menuIcon)?.icon}
+                    alt=""
                   />
                 ) : (
-                  <DynamicIcon
-                    IconComponent={
-                      menuIconList.find((icon) => icon.code === iconMap[visibleCreateForm as keyof typeof iconMap])
-                        ?.icon
-                    }
-                    theme="outline"
-                    size="18"
-                    fill="#333"
+                  <img
+                    style={{ width: 'auto', height: '18px', fill: '#333' }}
+                    src={allWebMenuIcons.find((ele) => ele.code === 'FormPageLine')?.icon}
+                    alt=""
                   />
                 )}
               </div>
@@ -173,8 +169,8 @@ const CreateModal: React.FC<CreateModalProps> = ({
             <TreeSelect treeData={treeData} placeholder="请选择父级页面" allowClear />
           </Form.Item>
           {visibleCreateForm === 'page' && (
-            <Form.Item label="业务实体" field="entityId" rules={[{ required: true, message: '请选择业务实体' }]}>
-              <Select options={entityListOptions} placeholder="请选择业务实体" allowClear />
+            <Form.Item label="数据资产" field="entityId" rules={[{ required: true, message: '请选择数据资产' }]}>
+              <Select options={entityListOptions} placeholder="请选择数据资产" allowClear />
             </Form.Item>
           )}
         </Form>

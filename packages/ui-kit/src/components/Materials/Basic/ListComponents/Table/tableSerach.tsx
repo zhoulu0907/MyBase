@@ -2,6 +2,7 @@ import { Button, Form, Input } from '@arco-design/web-react';
 import { IconSearch, IconSync } from '@arco-design/web-react/icon';
 import { useSignals } from '@preact/signals-react/runtime';
 import { memo } from 'react';
+import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import { FORM_COMPONENT_TYPES, FormComp } from 'src/components/Materials';
 import { useFormEditorSignal } from 'src/signals/page_editor';
 import './index.css';
@@ -44,6 +45,7 @@ const TableSearch = memo((props: TableSearchConfig) => {
           layout: 'vertical',
           labelColSpan,
           defaultValue: undefined,
+          status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
           verify: { required: false },
           tooltip: '',
           placeholder: placeholderOverride ?? currentComponentSchemas.config?.placeholder

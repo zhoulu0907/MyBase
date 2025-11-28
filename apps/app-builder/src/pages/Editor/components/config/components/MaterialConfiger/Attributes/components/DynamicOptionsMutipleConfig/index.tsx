@@ -14,6 +14,8 @@ import {
 } from '@arco-design/web-react';
 import { IconDelete, IconDragDotVertical } from '@arco-design/web-react/icon';
 import React, { useEffect, useState } from 'react';
+import { registerConfigRenderer } from '../../registry';
+import { CONFIG_TYPES } from '@onebase/ui-kit';
 import { ReactSortable } from 'react-sortablejs';
 import styles from '../../index.module.less';
 import { COLOR_MODE_TYPES, useAppEntityStore, DEFAULT_OPTIONS_TYPE, getPopupContainer } from '@onebase/ui-kit';
@@ -398,3 +400,7 @@ const DynamicSelectMutipleConfig: React.FC<DynamicSelectMutipleConfigProps> = ({
 };
 
 export default DynamicSelectMutipleConfig;
+
+registerConfigRenderer(CONFIG_TYPES.MUTIPLE_SELECT_OPTIONS_INPUT, ({ id, handlePropsChange, item, configs }) => (
+  <DynamicSelectMutipleConfig id={id} handlePropsChange={handlePropsChange} item={item} configs={configs} />
+));

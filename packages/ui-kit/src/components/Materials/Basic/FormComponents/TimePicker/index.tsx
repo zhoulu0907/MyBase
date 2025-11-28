@@ -2,22 +2,31 @@ import { Form, TimePicker } from '@arco-design/web-react';
 import { memo } from 'react';
 import { STATUS_OPTIONS, STATUS_VALUES, TIME_FORMAT, TIME_12_FORMAT, DEFAULT_VALUE_TYPES } from '../../../constants';
 import '../index.css';
+import { nanoid } from 'nanoid';
+import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import type { XInputTimePickerConfig } from './schema';
 import { getPopupContainer } from '@/utils';
+import dayjs from 'dayjs';
 
 const XTimePicker = memo((props: XInputTimePickerConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const {
     label,
     tooltip,
     status,
+    dataField,
     defaultValueConfig,
     timeRange,
     dateType,
     use24Hours,
     verify,
     layout,
-    runtime = true
+    runtime = true,
+    detailMode
   } = props;
+
+  const { form } = Form.useFormContext();
+  const fieldId = dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.TIME_PICKER}_${nanoid()}`
+  const fieldValue = Form.useWatch(fieldId, form);
 
   // 判断当前 AM PM
   let hourType = '';
@@ -230,6 +239,7 @@ const XTimePicker = memo((props: XInputTimePickerConfig & { runtime?: boolean; d
           label.display &&
           label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
         }
+        field={fieldId ? fieldId : `${FORM_COMPONENT_TYPES.TIME_PICKER}_${nanoid()}`}
         layout={layout}
         tooltip={tooltip}
         wrapperCol={{ style: { flex: 1 } }}
@@ -241,9 +251,9 @@ const XTimePicker = memo((props: XInputTimePickerConfig & { runtime?: boolean; d
         }}
         initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : ''}
       >
-        {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? (
+        {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
           <div>
-            {defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue || '--' : '--'}
+            {dayjs(fieldValue).format(use24Hours ? TIME_FORMAT[dateType] : TIME_12_FORMAT[dateType])}
           </div>
         ) : (
           // use24Hours 24小时制

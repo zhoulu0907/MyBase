@@ -38,6 +38,10 @@ const sortTypeEnum = {
   ASC: 'asc'
 };
 
+const timeType = {
+  CREATE: '创建时间'
+};
+
 const Option = Select.Option;
 const { RangePicker } = DatePicker;
 const flowStatusOptions = Object.values(FLOWSTATUS_TYPE).map((status) => ({
@@ -174,8 +178,14 @@ const TableSearch: FC<any> = ({
       }
     }
     if (params.dateRange) {
-      result.submitTimeStart = params.dateRange[0];
-      result.submitTimeEnd = params.dateRange[1];
+      const [start, end] = params.dateRange;
+      if (uiConfig?.hasFilter?.dateTimeLabel === timeType.CREATE) {
+        result.createTimeStart = start;
+        result.createTimeEnd = end;
+      } else {
+        result.submitTimeStart = start;
+        result.submitTimeEnd = end;
+      }
     }
     return result;
   };

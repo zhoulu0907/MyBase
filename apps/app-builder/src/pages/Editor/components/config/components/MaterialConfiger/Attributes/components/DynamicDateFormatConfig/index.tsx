@@ -1,6 +1,8 @@
 import { Form, Select } from '@arco-design/web-react';
 import { DATE_OPTIONS, DATE_VALUES, getPopupContainer } from '@onebase/ui-kit';
 import { useEffect, useState } from 'react';
+import { registerConfigRenderer } from '../../registry';
+import { CONFIG_TYPES } from '@onebase/ui-kit';
 import styles from '../../index.module.less';
 
 export interface DynamicDateFormatConfigProps {
@@ -45,3 +47,7 @@ const DynamicDateFormatConfig: React.FC<DynamicDateFormatConfigProps> = ({
   );
 };
 export default DynamicDateFormatConfig;
+
+registerConfigRenderer(CONFIG_TYPES.DATE_FORMAT, ({ id, handlePropsChange, handleConfigsChange, item, configs }) => (
+  <DynamicDateFormatConfig id={id} handlePropsChange={handlePropsChange} handleConfigsChange={handleConfigsChange} item={item} configs={configs} />
+));

@@ -86,8 +86,10 @@ export const CONFIG_TYPES = {
   FILE: 'File',
   // 图片处理
   IMAGE_HANDLE: 'ImageHandle',
-  // 折叠面板展开状态
+  // 折叠面板 折叠状态
   COLLAPSED: 'Collapsed',
+  // 折叠面板 样式
+  COLLAPSED_STYLE: 'CollapsedStyle',
   // 自动编号规则
   AUTO_CODE_RULES: 'autoCodeRules',
   // 日期格式
@@ -108,6 +110,8 @@ export const CONFIG_TYPES = {
   DEPT_DEFAULT_VALUE: 'deptDefaultValue',
   //选择部门可选范围
   DEPT_SELECT_SCOPE: 'deptSelectScope',
+  // 数据选择方式
+  DATA_SELECT_MODE: 'DataSelectMode',
 } as const;
 
 // 状态选项常量
@@ -322,12 +326,14 @@ export const TABS_POSITION_VALUES = {
 // 折叠选项常量
 export const COLLAPSED_OPTIONS = {
   EXPOSED: '展开',
-  COLLAPSED: '收起'
+  COLLAPSED: '收起',
+  DISABLED_COLLAPSED: '不折叠'
 } as const;
 
 export const COLLAPSED_VALUES = {
   [COLLAPSED_OPTIONS.EXPOSED]: 'exposed',
-  [COLLAPSED_OPTIONS.COLLAPSED]: 'collapsed'
+  [COLLAPSED_OPTIONS.COLLAPSED]: 'collapsed',
+  [COLLAPSED_OPTIONS.DISABLED_COLLAPSED]: 'noCollapsed',
 } as const;
 
 // 表格的行点击跳转方式

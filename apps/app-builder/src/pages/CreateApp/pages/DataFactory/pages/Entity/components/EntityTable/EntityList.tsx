@@ -26,7 +26,7 @@ const EntityList: React.FC<EntityListProps> = ({
   return (
     <div className={styles.entityList}>
       <div className={styles.header}>
-        <h3>业务实体</h3>
+        <h3>数据资产</h3>
         <Button type="primary" onClick={handleOpenAddModal}>
           <IconPlus />
         </Button>

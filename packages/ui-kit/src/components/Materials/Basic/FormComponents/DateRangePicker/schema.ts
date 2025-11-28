@@ -201,12 +201,14 @@ const XDateRangePicker: XInputDateRangePickerSchema = {
     {
       key: 'startDefaultValueConfig',
       name: '开始日期默认值',
-      type: CONFIG_TYPES.DEFAULT_VALUE
+      type: CONFIG_TYPES.DEFAULT_VALUE,
+      valueType: 'date'
     },
     {
       key: 'endDefaultValueConfig',
       name: '结束日期默认值',
       type: CONFIG_TYPES.DEFAULT_VALUE,
+      valueType: 'date'
     },
     {
       key: 'dateFormat',

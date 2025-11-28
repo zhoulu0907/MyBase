@@ -30,7 +30,7 @@ const DataRules: React.FC<DataRulesProps> = ({ node }) => {
   const [rules, setRules] = useState<DataRule[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // 获取实体规则数据
+  // 获取资产规则数据
   const loadRules = async () => {
     if (!node?.entityId) return;
 

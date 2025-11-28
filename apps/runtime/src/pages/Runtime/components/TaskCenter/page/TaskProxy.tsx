@@ -122,7 +122,7 @@ const TaskProxy = ({ appId }: { appId: string | null }) => {
             onClick={() => fetchAgentRevoke(record)}
             disabled={record.principal.userId !== userInfo?.id}
           >
-            撤消
+            撤销
           </Button>
           <Button
             type="text"

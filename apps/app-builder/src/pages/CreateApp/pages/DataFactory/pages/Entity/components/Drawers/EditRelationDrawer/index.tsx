@@ -23,6 +23,7 @@ interface RelationFormValues {
   targetFieldId?: string;
   relationName?: string;
   id?: string;
+  relationshipId?: string;
   target?: { cell: string; port: string };
   source?: { cell: string; port: string };
 }
@@ -55,7 +56,7 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-  // 初始化实体选项
+  // 初始化资产选项
   useEffect(() => {
     if (visible && curDataSourceId) {
       loadEntities();
@@ -90,7 +91,7 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
         handleEntityChange(relationData?.target?.cell || relationData?.targetEntityId || '', 'right');
       }
     } catch (error) {
-      console.error('加载实体列表失败:', error);
+      console.error('加载资产列表失败:', error);
     }
   };
 
@@ -117,7 +118,7 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
     }
   };
 
-  // 处理实体选择变化
+  // 处理资产选择变化
   const handleEntityChange = (entityId: string, side: 'left' | 'right') => {
     if (entityId) {
       loadFields(entityId, side);
@@ -137,9 +138,9 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
     try {
       const values = await form.validate();
       setSubmitting(true);
-
+      console.log('relationData:  ', relationData);
       const updateData = {
-        id: relationData?.id,
+        id: relationData?.id || relationData?.relationshipId,
         ...values,
         appId: curAppId
       };

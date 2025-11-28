@@ -3,11 +3,12 @@ import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
 import FieldConstraint from './FieldConstraint';
 import { AutoCodeRuleConfig } from './AutoCodeRuleConfig';
 import { MultiPicklistConfig, PicklistConfig } from './PicklistConfig';
+import { DataSelectionConfig } from './DataSelectionConfig';
 import type { FieldConfigPopoverProps } from '../types';
 import styles from '../index.module.less';
 
 const FieldConfigPopover: React.FC<FieldConfigPopoverProps> = React.memo(
-  ({ fieldType, fieldId, field, onConfirm, onCancel, fields, gotoDictPage }) => {
+  ({ fieldType, fieldId, field, onConfirm, onCancel, fields, gotoDictPage, entities }) => {
     // 根据字段类型渲染对应的配置组件
     const configComponent = useMemo(() => {
       switch (fieldType) {
@@ -44,6 +45,18 @@ const FieldConfigPopover: React.FC<FieldConfigPopoverProps> = React.memo(
               initialConfig={field?.autoNumber || field?.autoNumberConfig}
               onCancel={() => onCancel(ENTITY_FIELD_TYPE.AUTO_CODE.VALUE)}
               fields={fields}
+            />
+          );
+
+        case ENTITY_FIELD_TYPE.DATA_SELECTION.VALUE:
+          return (
+            <DataSelectionConfig
+              onConfirm={(dataSelectionConfig) =>
+                onConfirm(ENTITY_FIELD_TYPE.DATA_SELECTION.VALUE, fieldId, dataSelectionConfig)
+              }
+              onCancel={() => onCancel(ENTITY_FIELD_TYPE.DATA_SELECTION.VALUE)}
+              entities={entities}
+              initialDataSelectionConfig={field?.dataSelectionConfig}
             />
           );
 

@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { registerConfigRenderer } from '../../registry';
+import { CONFIG_TYPES } from '@onebase/ui-kit';
 import { Form, Upload, Message } from '@arco-design/web-react';
 import { IconDelete } from '@arco-design/web-react/icon';
 import { uploadFile } from '@onebase/platform-center';
@@ -111,3 +113,7 @@ const DynamicImageConfig: React.FC<DynamicImageConfigProps> = ({ handlePropsChan
 };
 
 export default DynamicImageConfig;
+
+registerConfigRenderer(CONFIG_TYPES.IMAGE, ({ id, handlePropsChange, item, configs }) => (
+  <DynamicImageConfig id={id} handlePropsChange={handlePropsChange} item={item} configs={configs} />
+));

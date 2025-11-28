@@ -128,24 +128,32 @@ const SimpleMode = ({ setCcRecipientsConfigData, copyReceiverConfig }) => {
     setCcRecipientsConfigData('copyReceiverConfig', obj);
   }, [simpleCkType, formRes]);
 
+  function needFormFill(configList: any, formList: any, idField = 'userId') {
+    if (configList?.length !== formList?.length) {
+      return true;
+    }
+    const configIds = configList?.map((item: any) => item[idField]);
+    const isSame =
+      configIds.length === formList.length &&
+      configIds.every((id: any) => formList.includes(id)) &&
+      formList.every((id: any) => configIds.includes(id));
+    return !isSame;
+  }
   useEffect(() => {
-    let curUserList: any = copyReceiverConfig?.users
-    let prevUIdsList: any = prevUserIdsRef?.current;
-    let isChange = false;
-    if (prevUIdsList?.length === curUserList?.length) {
-      for (let u = 0; u < curUserList?.length; u++) {
-        if (curUserList[u]?.userId && prevUIdsList.indexOf(curUserList[u]?.userId) < 0) {
-          isChange = true;
-          break;
-        }
+    const configMap = {
+      role: { key: 'roles', formField: 'role', idField: 'roleId' },
+      user: { key: 'users', formField: 'user', idField: 'userId' }
+    } as const;
+    const config = configMap[copyReceiverConfig?.handlerType as keyof typeof configMap];
+    const dataArray = config ? copyReceiverConfig?.[config.key] : undefined;
+    if (dataArray && dataArray.length > 0) {
+      const formData = form.getFieldsValue([config.formField]);
+      const isChange = needFormFill(dataArray, formData?.[config.formField], config.idField);
+      if (isChange) {
+        setInitData();
       }
-    } else {
-      isChange = true;
     }
-    if (isChange) {
-      setInitData();
-    }
-  }, [copyReceiverConfig?.users]);
+  }, [copyReceiverConfig]);
 
   useEffect(() => {
     initUserData();

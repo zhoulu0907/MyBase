@@ -1,4 +1,5 @@
 import { Button, Form, Modal } from '@arco-design/web-react';
+import { IconFullscreen, IconFullscreenExit } from '@arco-design/web-react/icon';
 import { PageType } from '@onebase/app';
 import { pagesRuntimeSignal } from '@onebase/common';
 import {
@@ -60,13 +61,16 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({ form, isAdd, submitLoading, o
 
   return (
     <Modal
-      getPopupContainer={() => document.querySelector('[class*="previewPage"]') || document.body}
       title={
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>表单信息</div>
-          {/* <Button type="text" onClick={() => setFullScreen(!fullScreen)}>
-            {fullScreen ? '退出全屏' : '全屏'}
-          </Button> */}
+          <div className={styles.titleEditIconArea}>
+            {fullScreen ? (
+              <IconFullscreenExit className={styles.fullscreenIcon} onClick={() => setFullScreen(false)} />
+            ) : (
+              <IconFullscreen className={styles.fullscreenIcon} onClick={() => setFullScreen(true)} />
+            )}
+          </div>
         </div>
       }
       visible
@@ -96,7 +100,9 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({ form, isAdd, submitLoading, o
       focusLock={true}
       style={{ width: fullScreen ? '98vw' : '60vw' }}
       alignCenter
-      wrapClassName={fullScreen ? 'edit-modal edit-modal-fullscreen' : 'edit-modal'}
+      wrapClassName={
+        fullScreen ? 'runtime-preview-formpage edit-modal edit-modal-fullscreen' : 'runtime-preview-formpage edit-modal'
+      }
     >
       <div style={{ height: '100%' }}>
         <Form layout="inline" form={form} onValuesChange={handleFormValuesChange}>

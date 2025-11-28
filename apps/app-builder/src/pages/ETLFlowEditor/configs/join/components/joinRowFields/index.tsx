@@ -1,9 +1,7 @@
+import { useEffect, useState } from 'react';
 import { Button, Form, Grid, Select, type FormInstance } from '@arco-design/web-react';
 import { IconDelete } from '@arco-design/web-react/icon';
 import styles from '../../index.module.less';
-import { useSignals } from '@preact/signals-react/runtime';
-import { etlEditorSignal, ETLJoinType } from '@onebase/common';
-import { useEffect, useState } from 'react';
 
 const { Option } = Select;
 const FormItem = Form.Item;
@@ -19,13 +17,13 @@ interface JoinRowFieldsProps {
   leftFieldList: any[];
   rightFieldList: any[];
   form: FormInstance;
+  payload: any;
+  setPayload: (payload: any) => void;
   remove: (index: number) => void;
 }
 
 const JoinRowFields = (props: JoinRowFieldsProps) => {
-  useSignals();
-  const { curNode, nodeData, setNodeData } = etlEditorSignal;
-  const { index, rowField, leftFieldList, rightFieldList, form, remove } = props;
+  const { index, rowField, leftFieldList, rightFieldList, form, payload, setPayload, remove } = props;
 
   const [finialRightFieldList, setFinialRightFieldList] = useState<any[]>(rightFieldList);
   const [finialLeftFieldList, setFinialLeftFieldList] = useState<any[]>(leftFieldList);
@@ -83,13 +81,11 @@ const JoinRowFields = (props: JoinRowFieldsProps) => {
 
   const setCurNodeData = () => {
     const formValue = form.getFieldsValue();
-    const payload = nodeData.value[curNode.value.id];
     payload.config = {
       ...payload.config,
       ...formValue
     };
-
-    setNodeData(curNode.value.id, payload);
+    setPayload(payload);
   };
 
   return (

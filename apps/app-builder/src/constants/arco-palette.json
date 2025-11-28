@@ -1,18 +1,18 @@
 {
   "light": {
     "red": "#F53F3F",
-    "orangered": "#F77234",
     "orange": "#FF7D00",
-    "gold": "#F7BA1E",
     "yellow":  "#FADC19",
-    "lime": "#9FDB1D",
     "green": "#00B42A",
-    "cyan": "#14C9C9",
     "blue": "#3491FA",
-    "arcoblue": "#165DFF",
     "purple": "#722ED1",
-    "pinkpurple": "#D91AD9",
     "magenta": "#F5319D",
+    "orangered": "#F77234",
+    "gold": "#F7BA1E",
+    "lime": "#9FDB1D",
+    "cyan": "#14C9C9",
+    "arcoblue": "#165DFF",
+    "pinkpurple": "#D91AD9",
     "gray": "#86909c"
   },
   "dark": {
