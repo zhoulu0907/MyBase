@@ -37,6 +37,9 @@ public class MenuListRespVO {
     @Schema(description = "菜单图标")
     private String menuIcon;
 
+    @Schema(description = "是否可见")
+    private Integer isVisible;
+
     @Schema(description = "子菜单")
     public LinkedList<MenuListRespVO> children = null;
 
