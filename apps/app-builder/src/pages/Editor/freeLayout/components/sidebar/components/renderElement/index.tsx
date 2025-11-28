@@ -4,7 +4,16 @@ import { IconLaunch } from '@arco-design/web-react/icon';
 import { FormulaEditor } from '@/components/FormulaEditor';
 import type { ConditionRule } from '../../constants';
 import styles from '../../siderbar-line.module.less';
-import { approvalResultOptions } from '../../constants';
+import { FieldType } from '../../constants';
+import {
+  InputKeyType,
+  NumberKeyType,
+  ScopeKeyType,
+  VARIABLE_MAP,
+  ComplexInfo,
+  OperatorType,
+  ElementType
+} from './constants';
 const Option = Select.Option;
 
 interface RenderElementProps {
@@ -32,16 +41,13 @@ export const RenderElement: React.FC<RenderElementProps> = ({
   setFormulaVisible,
   formSummaryOptions
 }) => {
-  // 变量
-  const variableMap = {
-    TEXT: ['TEXT', 'LONG_TEXT', 'EMAIL', 'PHONE', 'URL']
-  };
   const getVariableOptions = (item: any) => {
     return formSummaryOptions
       .filter((optionItem) => {
+        const fieldType = optionItem.fieldType as FieldType;
         // 如果找不到对应的变量类型，返回所有选项
-        if (!variableMap[item.fieldType as keyof typeof variableMap]) return true;
-        return variableMap[item.fieldType as keyof typeof variableMap].includes(optionItem.fieldType);
+        if (!VARIABLE_MAP[item.fieldType as FieldType]) return true;
+        return VARIABLE_MAP[item.fieldType as FieldType]?.includes(fieldType) ?? false;
       })
       .map((optionItem) => (
         <Option key={optionItem.fieldId} value={optionItem.fieldId}>
@@ -53,97 +59,27 @@ export const RenderElement: React.FC<RenderElementProps> = ({
   const switchKey = `${item.fieldType}_${item.op}`;
   console.log({ switchKey });
 
-  const inputKey: string[] = [
-    'TEXT_EQUALS',
-    'TEXT_NOT_EQUALS',
-    'TEXT_CONTAINS',
-    'TEXT_NOT_CONTAINS',
-    'TEXT_EXISTS_IN',
-    'TEXT_NOT_EXISTS_IN',
-    'LONG_TEXT_EQUALS',
-    'LONG_TEXT_NOT_EQUALS',
-    'LONG_TEXT_CONTAINS',
-    'LONG_TEXT_NOT_CONTAINS',
-    'EMAIL_EQUALS',
-    'EMAIL_NOT_EQUALS',
-    'EMAIL_CONTAINS',
-    'EMAIL_NOT_CONTAINS',
-    'EMAIL_EXISTS_IN',
-    'EMAIL_NOT_EXISTS_IN',
-    'PHONE_EQUALS',
-    'PHONE_NOT_EQUALS',
-    'PHONE_CONTAINS',
-    'PHONE_NOT_CONTAINS',
-    'PHONE_EXISTS_IN',
-    'PHONE_NOT_EXISTS_IN',
-    'URL_EQUALS',
-    'URL_NOT_EQUALS',
-    'URL_CONTAINS',
-    'URL_NOT_CONTAINS',
-    'ADDRESS_EQUALS',
-    'ADDRESS_NOT_EQUALS',
-    'ADDRESS_CONTAINS',
-    'ADDRESS_NOT_CONTAINS',
-    'AUTO_CODE_EQUALS',
-    'AUTO_CODE_NOT_EQUALS',
-    'AUTO_CODE_CONTAINS',
-    'AUTO_CODE_NOT_CONTAINS',
-    'AUTO_CODE_EXISTS_IN',
-    'AUTO_CODE_NOT_EXISTS_IN'
-  ];
-
-  const numberKey: string[] = []; // 数字输入框
-
-  const scopeKey: string[] = []; // 数字范围
-
-  const complexInfo = {
-    DATETIME_EQUALS: {
-      type: 'date',
-      options: 'EQUALS'
-    },
-    DATETIME_LATER_THAN: {
-      type: 'date',
-      options: 'LATER_THAN'
-    },
-    DATETIME_RANGE: {
-      type: 'dateRange',
-      options: 'LATER_RANGE'
-    },
-    DATA_SELECTION_EQUALS: {
-      type: 'select',
-      options: approvalResultOptions
-    },
-    DATA_SELECTION_NOT_EQUALS: {
-      type: 'select',
-      options: approvalResultOptions
-    },
-    DATA_SELECTION_CONTAINS: {
-      type: 'selectMultiple',
-      options: approvalResultOptions
-    }
-  };
-
   let elementTypeInfo: any = { type: '', options: [] };
 
   // 先排除单纯组件  【输入框 数字输入框 数字范围选择组件】
-  if (inputKey.includes(switchKey)) {
-    elementTypeInfo.type = 'input';
-  } else if (numberKey.includes(switchKey)) {
-    elementTypeInfo.type = 'number';
-  } else if (scopeKey.includes(switchKey)) {
-    elementTypeInfo.type = 'scope';
+  if (Object.values(InputKeyType).includes(switchKey as InputKeyType)) {
+    elementTypeInfo.type = ElementType.INPUT;
+  } else if (Object.values(NumberKeyType).includes(switchKey as NumberKeyType)) {
+    elementTypeInfo.type = ElementType.NUMBER;
+  } else if (Object.values(ScopeKeyType).includes(switchKey as ScopeKeyType)) {
+    elementTypeInfo.type = ElementType.SCOPE;
   }
   // 如果没有 就继续处理
   if (!elementTypeInfo.type) {
-    if (switchKey in complexInfo) {
-      elementTypeInfo = complexInfo[switchKey as keyof typeof complexInfo];
+    if (switchKey in ComplexInfo) {
+      elementTypeInfo = ComplexInfo[switchKey as keyof typeof ComplexInfo];
     }
   }
 
   // 如果类型为静态值
-  if (item.operatorType === 'value' || !item.operatorType) {
+  if (item.operatorType === OperatorType.VALUE || !item.operatorType) {
     switch (elementTypeInfo.type) {
-      case 'input':
+      case ElementType.INPUT:
         return (
           <Input
             className={styles.ruleItemInput}
@@ -151,20 +87,20 @@ export const RenderElement: React.FC<RenderElementProps> = ({
             allowClear
             value={item.value}
             disabled={isDisabled}
-            onChange={(value) => onRuleChange(index, 'value', value)}
+            onChange={(value) => onRuleChange(index, OperatorType.VALUE, value)}
           />
         );
-      case 'date':
+      case ElementType.DATE:
         return (
           <DatePicker
             className={styles.ruleItemInput}
             style={{ width: 150 }}
             value={item.value}
             disabled={isDisabled}
-            onChange={(value) => onRuleChange(index, 'value', value)}
+            onChange={(value) => onRuleChange(index, OperatorType.VALUE, value)}
           />
         );
-      case 'dateRange':
+      case ElementType.DATE_RANGE:
         return (
           <DatePicker.RangePicker
             className={styles.ruleItemInput}
@@ -172,12 +108,12 @@ export const RenderElement: React.FC<RenderElementProps> = ({
             value={item.value}
             disabled={isDisabled}
             onChange={(dateString, date) => {
-              onRuleChange(index, 'value', dateString);
+              onRuleChange(index, OperatorType.VALUE, dateString);
             }}
             showTime={false}
           />
         );
-      case 'select':
+      case ElementType.SELECT:
         return (
           <Select
             className={styles.ruleItemSelect}
@@ -185,7 +121,7 @@ export const RenderElement: React.FC<RenderElementProps> = ({
             style={{ width: 150 }}
             showSearch
             disabled={isDisabled}
-            onChange={(value) => onRuleChange(index, 'value', value)}
+            onChange={(value) => onRuleChange(index, OperatorType.VALUE, value)}
             filterOption={(inputValue, option) =>
               option.props.value.toLowerCase().indexOf(inputValue.toLowerCase()) >= 0 ||
               option.props.children.toLowerCase().indexOf(inputValue.toLowerCase()) >= 0
@@ -198,7 +134,7 @@ export const RenderElement: React.FC<RenderElementProps> = ({
             ))}
           </Select>
         );
-      case 'selectMultiple':
+      case ElementType.SELECT_MULTIPLE:
         return (
           <Select
             className={styles.ruleItemSelect}
@@ -207,7 +143,7 @@ export const RenderElement: React.FC<RenderElementProps> = ({
             showSearch
             mode="multiple"
             disabled={isDisabled}
-            onChange={(value) => onRuleChange(index, 'value', value)}
+            onChange={(value) => onRuleChange(index, OperatorType.VALUE, value)}
             filterOption={(inputValue, option) =>
               option.props.value.toLowerCase().indexOf(inputValue.toLowerCase()) >= 0 ||
               option.props.children.toLowerCase().indexOf(inputValue.toLowerCase()) >= 0
@@ -228,21 +164,21 @@ export const RenderElement: React.FC<RenderElementProps> = ({
             allowClear
             value={item.value}
             disabled={isDisabled}
-            onChange={(value) => onRuleChange(index, 'value', value)}
+            onChange={(value) => onRuleChange(index, OperatorType.VALUE, value)}
           />
         );
     }
   }
 
   // 如果类型为变量
-  if (item.operatorType === 'variables') {
+  if (item.operatorType === OperatorType.VARIABLES) {
     return (
       <Select
         className={styles.ruleItemSelect}
         value={item.value}
         style={{ width: 150 }}
         disabled={isDisabled}
-        onChange={(value) => onRuleChange(index, 'value', value)}
+        onChange={(value) => onRuleChange(index, OperatorType.VALUE, value)}
       >
         {getVariableOptions(item)}
       </Select>
@@ -250,7 +186,7 @@ export const RenderElement: React.FC<RenderElementProps> = ({
   }
 
   // 如果类型为公式
-  if (item.operatorType === 'formula') {
+  if (item.operatorType === OperatorType.FORMULA) {
     return (
       <>
         <Button
