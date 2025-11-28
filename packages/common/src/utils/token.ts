@@ -23,8 +23,19 @@ export class TokenManager {
   private static readonly TENANT_ID = 'tenant_id';
   private static readonly LOGIN_URL = 'login_url';
 
+  //  当前身份ID appid、tenant_id 或者两者组合
+  private static readonly CUR_IDENTIFY_ID = 'cur_identify_id';
+
   static addEnv(key: string): string {
-    return `${getEnv()}_${key}`;
+    return `${getEnv()}_${this.getCurIdentifyId()}_${key}`;
+  }
+
+  static setCurIdentifyId(identifyId: string): void {
+    sessionStorage.setItem(this.CUR_IDENTIFY_ID, identifyId);
+  }
+
+  static getCurIdentifyId(): string | null {
+    return sessionStorage.getItem(this.CUR_IDENTIFY_ID);
   }
 
   /**
@@ -51,30 +62,6 @@ export class TokenManager {
         if (tokenInfo.tenantId) {
           sessionStorage.setItem(this.addEnv(this.TENANT_ID), tokenInfo.tenantId);
         }
-      }
-    } catch (error) {
-      console.error('存储 token 失败:', error);
-      throw new Error('存储 token 失败');
-    }
-  }
-
-  static setBuilderToken(tokenInfo: TokenInfo, rememberMe: boolean = false): void {
-    const tenantId = tokenInfo.tenantId!;
-    try {
-      // 根据记住我选项选择存储方式
-      if (rememberMe) {
-        // 记住我：使用 localStorage（持久化存储）
-        localStorage.setItem(this.addEnv(`${tenantId}_${this.TOKEN_KEY}`), tokenInfo.accessToken);
-        localStorage.setItem(this.addEnv(`${tenantId}_${this.TOKEN_INFO_KEY}`), JSON.stringify(tokenInfo));
-        localStorage.setItem(this.addEnv(`${tenantId}_${this.REMEMBER_ME_KEY}`), 'true');
-      } else {
-        // 不记住我：使用 sessionStorage（会话存储，关闭浏览器后清除）
-        sessionStorage.setItem(this.addEnv(`${tenantId}_${this.TOKEN_KEY}`), tokenInfo.accessToken);
-        sessionStorage.setItem(this.addEnv(`${tenantId}_${this.TOKEN_INFO_KEY}`), JSON.stringify(tokenInfo));
-        sessionStorage.setItem(this.addEnv(`${tenantId}_${this.REMEMBER_ME_KEY}`), 'false');
-      }
-      if (tenantId) {
-        localStorage.setItem(this.addEnv(`${tenantId}_${this.TENANT_ID}`), tenantId);
       }
     } catch (error) {
       console.error('存储 token 失败:', error);

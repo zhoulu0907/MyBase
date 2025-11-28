@@ -15,7 +15,7 @@ import { AppStatus, getApplication, menuSignal, type GetApplicationReq } from '@
 import { getRuntimeURL, TokenManager } from '@onebase/common';
 import { appIconMap } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import styles from './header.module.less';
 
 const { Header } = Layout;
@@ -33,14 +33,14 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   const { t } = useI18n();
   const { curAppId, setCurAppId, curAppInfo, setCurAppInfo } = useAppStore();
   const { curMenu } = menuSignal;
-
+  const { tenantId } = useParams();
   // Tab 切换
   // 根据当前路径设置 activeTab
   const getTabKeyFromPath = (pathname: string) => {
-    if (pathname.includes('onebase/create-app/page-manager')) return 'page-manager';
-    if (pathname.includes('onebase/create-app/integrated-management')) return 'integrated-management';
-    if (pathname.includes('onebase/create-app/data-factory')) return 'data-factory';
-    if (pathname.includes('onebase/create-app/app-setting')) return 'app-setting';
+    if (pathname.includes(`onebase/${tenantId}/home/create-app/page-manager`)) return 'page-manager';
+    if (pathname.includes(`onebase/${tenantId}/home/create-app/integrated-management`)) return 'integrated-management';
+    if (pathname.includes(`onebase/${tenantId}/home/create-app/data-factory`)) return 'data-factory';
+    if (pathname.includes(`onebase/${tenantId}/home/create-app/app-setting`)) return 'app-setting';
     return 'page-manager';
   };
   const [activeTab, setActiveTab] = useState(() => getTabKeyFromPath(location.pathname));
@@ -116,7 +116,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
           <div
             className={styles.menuIcon}
             onClick={() => {
-              navigate('/onebase/enterprise-app');
+              navigate(`/onebase/${tenantId}/home/enterprise-app`);
             }}
           >
             {/* <img src={AppIconSVG} alt="application icon" /> */}
@@ -179,16 +179,16 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
           setActiveTab(key);
           switch (key) {
             case 'page-manager':
-              navigate(`/onebase/create-app/page-manager?appId=${curAppId}`);
+              navigate(`/onebase/${tenantId}/home/create-app/page-manager?appId=${curAppId}`);
               break;
             case 'integrated-management':
-              navigate(`/onebase/create-app/integrated-management?appId=${curAppId}`);
+              navigate(`/onebase/${tenantId}/home/create-app/integrated-management?appId=${curAppId}`);
               break;
             case 'data-factory':
-              navigate(`/onebase/create-app/data-factory?appId=${curAppId}`);
+              navigate(`/onebase/${tenantId}/home/create-app/data-factory?appId=${curAppId}`);
               break;
             case 'app-setting':
-              navigate(`/onebase/create-app/app-setting?appId=${curAppId}`);
+              navigate(`/onebase/${tenantId}/home/create-app/app-setting?appId=${curAppId}`);
               break;
             default:
               break;

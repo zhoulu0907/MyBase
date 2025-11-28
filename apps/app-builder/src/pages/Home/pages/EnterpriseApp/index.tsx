@@ -19,7 +19,7 @@ import { listApplication, type Application, type PageParam } from '@onebase/app'
 import { getCommonPaginationList, getRuntimeURL, TokenManager } from '@onebase/common';
 import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import arrowRightUp from '@/assets/images/arrow-right-up.svg';
 import emptyApplicationSVG from '@/assets/images/tenantNoContent.svg';
@@ -43,6 +43,8 @@ import styles from './index.module.less';
 const Option = Select.Option;
 
 const EnterpriseAppPage: React.FC = () => {
+  const { tenantId } = useParams();
+
   const { t } = useI18n();
   const navigate = useNavigate();
   const [pageSize, setPageSize] = useState<number>();
@@ -177,7 +179,7 @@ const EnterpriseAppPage: React.FC = () => {
   };
 
   const handleClickButton = () => {
-    navigate('/onebase/setting/application');
+    navigate(`/onebase/${tenantId}/setting/application`);
   };
 
   const menu = (item: any) => {

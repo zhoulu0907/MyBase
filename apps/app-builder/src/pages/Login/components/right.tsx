@@ -92,6 +92,8 @@ const Right: React.FC = () => {
       const response: TenantLoginResponse = await tenantLogin(loginData, headers);
 
       if (response.accessToken) {
+        TokenManager.setCurIdentifyId(tenantId);
+
         // 使用 TokenManager 存储 token 信息
         console.log('response: ', response);
         TokenManager.setToken(
@@ -115,7 +117,7 @@ const Right: React.FC = () => {
         if (redirectURL) {
           window.location.href = redirectURL;
         } else {
-          navigate(`/onebase/enterprise-app`);
+          navigate(`/onebase/${tenantId}/home/enterprise-app`);
         }
 
         return;

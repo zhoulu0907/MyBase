@@ -41,7 +41,7 @@ import {
 import { getCommonPaginationList } from '@onebase/common';
 import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import emptyApplicationSVG from '@/assets/images/applicationLogo.svg';
 import launchSVG from '@/assets/images/launch.svg';
@@ -71,6 +71,8 @@ const AppManagement: React.FC = () => {
   const [form] = Form.useForm();
   const { t } = useI18n();
   const navigate = useNavigate();
+
+  const { tenantId } = useParams();
 
   const [pageSize, setPageSize] = useState<number>();
   const [pageNo, setPageNo] = useState(1);
@@ -200,7 +202,7 @@ const AppManagement: React.FC = () => {
       setCreateVisible(false);
       Message.success('应用创建成功');
       form.resetFields();
-      navigate(`/onebase/create-app/data-factory?appId=${res.id}`);
+      navigate(`/onebase/${tenantId}/home/create-app/data-factory?appId=${res.id}`);
     } catch (error) {
       return null;
     } finally {
@@ -237,7 +239,7 @@ const AppManagement: React.FC = () => {
     const newWindow = window.open('', '_blank');
     if (newWindow) {
       const baseUrl = getBaseUrl();
-      const href = `${baseUrl}create-app/data-factory?appId=${appId}`;
+      const href = `${baseUrl}home/create-app/data-factory?appId=${appId}`;
       newWindow.location.href = href;
     }
   };

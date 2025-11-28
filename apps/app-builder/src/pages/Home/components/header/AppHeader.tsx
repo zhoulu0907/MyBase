@@ -10,7 +10,7 @@ import { IconExport } from '@arco-design/web-react/icon';
 import { TokenManager } from '@onebase/common';
 import { CodeType, getPermissionInfo } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import styles from './header.module.less';
 
 const { Header } = Layout;
@@ -35,6 +35,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   const { t } = useI18n();
 
   const [adminInfo, setAdminInfo] = useState<IAdminInfo | null>(null);
+  const { tenantId } = useParams();
 
   // Tab 切换
   // 根据当前路径设置 activeTab
@@ -103,7 +104,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
       <Menu.Item
         key="setting"
         onClick={() => {
-          navigate('/onebase/setting');
+          navigate(`/onebase/${tenantId}/setting`);
         }}
       >
         <div className={styles.menu}>

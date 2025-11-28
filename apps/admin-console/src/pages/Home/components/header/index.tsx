@@ -1,11 +1,10 @@
 import LogoSVG from '@/assets/images/ob_logo.svg';
 
 import { useI18n } from '@/hooks/useI18n';
-import { UserPermissionManager } from '@/utils/permission';
 import { Avatar, Dropdown, Layout, Menu, Message, Typography } from '@arco-design/web-react';
 import { IconExport } from '@arco-design/web-react/icon';
 import { TokenManager } from '@onebase/common';
-import { getPermissionInfo } from '@onebase/platform-center';
+import { getPlatformAdminInfoApi } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './index.module.less';
@@ -28,7 +27,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   useEffect(() => {
     if (tokenInfo?.accessToken) {
       // TODO(mickey) 等马老师提供platform的接口后打开
-      //   getInfo();
+      getPlatformAdminInfo();
     }
   }, [tokenInfo]);
 
@@ -38,14 +37,14 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     return formatMobile;
   };
 
-  const getInfo = async () => {
-    const res = await getPermissionInfo();
-    console.log(res);
-    UserPermissionManager.setUserPermissionInfo(res);
-    setNickname(res.user.nickname);
-    const mobile = res.user.mobile;
-    const formatMobile = maskMobile(mobile);
-    setMobile(formatMobile);
+  const getPlatformAdminInfo = async () => {
+    if (tokenInfo?.userId) {
+      const res = await getPlatformAdminInfoApi(tokenInfo?.userId);
+      setNickname(res.nickname);
+      const mobile = res.mobile;
+      const formatMobile = maskMobile(mobile);
+      setMobile(formatMobile);
+    }
   };
 
   // 登出处理

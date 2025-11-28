@@ -7,7 +7,7 @@ import { Button, Dropdown, Layout, Menu, Typography } from '@arco-design/web-rea
 import { IconApps, IconExport } from '@arco-design/web-react/icon';
 import { TokenManager } from '@onebase/common';
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import styles from './header.module.less';
 
 const { Header } = Layout;
@@ -20,6 +20,8 @@ interface HeaderProps {
 const AppHeader: React.FC<HeaderProps> = ({ className, avatarUrl }) => {
   const navigate = useNavigate();
   const { t } = useI18n();
+
+  const { tenantId } = useParams();
 
   // 获取用户信息
   const userPermissionInfo = UserPermissionManager.getUserPermissionInfo();
@@ -59,7 +61,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className, avatarUrl }) => {
   return (
     <Header className={`${styles.header} ${className || ''}`}>
       <div className={styles.headerContent}>
-        <div className={styles.logo} onClick={() => navigate('/onebase/')}>
+        <div className={styles.logo} onClick={() => navigate(`/onebase/${tenantId}/home/enterprise-app`)}>
           <img src={LogoSVG} alt="logo" />
         </div>
 
@@ -67,7 +69,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className, avatarUrl }) => {
           <Button
             type="secondary"
             icon={<IconApps />}
-            onClick={() => navigate('/onebase/enterprise-app')}
+            onClick={() => navigate(`/onebase/${tenantId}/home/enterprise-app`)}
             className={styles.backBtn}
           >
             应用中心

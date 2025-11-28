@@ -12,7 +12,7 @@ import { hasMenu } from '@/utils/permission';
 import { Button, Layout, Menu } from '@arco-design/web-react';
 import { IconMenuFold, IconMenuUnfold } from '@arco-design/web-react/icon';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import type { MenuItemType } from './menuData';
 import styles from './sider.module.less';
 
@@ -38,6 +38,8 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
   const location = useLocation();
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
 
+  const { tenantId } = useParams();
+
   // 默认菜单项
   const menuConfig: MenuGroupConfig[] = [
     {
@@ -48,7 +50,7 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
           key: 'application',
           title: '应用管理',
           icon: <img src={appLicationManageSVG} />,
-          path: '/onebase/setting/application',
+          path: `/onebase/${tenantId}/setting/application`,
           permissionKey: TENANT_MENUS.INFO
         }
       ]
@@ -61,21 +63,21 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
           key: 'user',
           title: '用户管理',
           icon: <img src={userSVG} />,
-          path: '/onebase/setting/user',
+          path: `/onebase/${tenantId}/setting/user`,
           permissionKey: TENANT_MENUS.USER
         },
         {
           key: 'role',
           title: '角色管理',
           icon: <img src={roleSVG} />,
-          path: '/onebase/setting/role',
+          path: `/onebase/${tenantId}/setting/role`,
           permissionKey: TENANT_MENUS.ROLE
         },
         {
           key: 'organization',
           title: '组织管理',
           icon: <img src={organizationSVG} />,
-          path: '/onebase/setting/organization',
+          path: `/onebase/${tenantId}/setting/organization`,
           permissionKey: TENANT_MENUS.DEPT
         }
       ]
@@ -88,28 +90,28 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
           key: 'spaceInfo',
           title: '空间信息',
           icon: <img src={tenantInfoSVG} />,
-          path: '/onebase/setting/spaceInfo',
+          path: `/onebase/${tenantId}/setting/spaceInfo`,
           permissionKey: TENANT_MENUS.INFO
         },
         {
           key: 'system-dict',
           title: '数据字典管理',
           icon: <img src={dictSVG} />,
-          path: '/onebase/setting/system-dict',
+          path: `/onebase/${tenantId}/setting/system-dict`,
           permissionKey: TENANT_MENUS.DICT
         },
         {
           key: 'security',
           title: '安全设置',
           icon: <img src={securitySVG} />,
-          path: '/onebase/setting/security',
+          path: `/onebase/${tenantId}/setting/security`,
           permissionKey: TENANT_MENUS.SECURITY
         },
         {
           key: 'tenant',
           title: '个人中心',
           icon: <img src={userInfoSVG} />,
-          path: '/onebase/setting/tenant',
+          path: `/onebase/${tenantId}/setting/tenant`,
           permissionKey: TENANT_MENUS.INFO
         }
       ]
@@ -122,7 +124,7 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
           key: 'enterprise',
           title: '企业管理',
           icon: <img src={corpSVG} />,
-          path: '/onebase/setting/enterprise',
+          path: `/onebase/${tenantId}/setting/enterprise`,
           permissionKey: TENANT_MENUS.CORP
         }
       ]

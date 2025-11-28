@@ -44,6 +44,10 @@ const AppBreadcrumb: React.FC<BreadcrumbProps> = ({ className, items }) => {
         return;
       }
 
+      if (index == 0) {
+        return;
+      }
+
       currentPath += `/${segment}`;
 
       switch (segment) {

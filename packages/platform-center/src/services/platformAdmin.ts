@@ -11,6 +11,8 @@ export const getPlatformAdminListApi = (params: any) =>
 export const createPlatformAdminApi = (data: cratePlatformAdminReq) =>
   platformService.post('/platform/admin/create', data);
 
+export const getPlatformAdminInfoApi = (id: number | string) => platformService.get(`/platform/admin/get?id=${id}`);
+
 // 删除平台管理员
 export const deletePlatformAdminApi = (id: number | string) => platformService.post(`/platform/admin/delete?id=${id}`);
 
