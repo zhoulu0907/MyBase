@@ -12,6 +12,7 @@
         <module>onebase-module-infra-api</module>
         <module>onebase-module-infra-core</module>
         <module>onebase-module-infra-build</module>
+        <module>onebase-module-infra-platform</module>
         <module>onebase-module-infra-runtime</module>
     </modules>
     <artifactId>onebase-module-infra</artifactId>
