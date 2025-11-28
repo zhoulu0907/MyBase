@@ -1,0 +1,68 @@
+### 获取租户编号 /admin-api/system/get-id-by-name
+GET {{baseUrl}}/system/user/simple-list
+Authorization: Bearer {{token}}
+
+### 创建用户 /admin-api/system/user/create
+POST {{baseUrl}}/system/user/create
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+{
+  "username": "newUserTest",
+  "nickname": "New Test User",
+  "mobile": "13800000000",
+  "email": "newuser@test.com",
+  "password": "13@46qw@ery13@46",
+  "deptId": "100",
+  "status": 1,
+  "sex": 1
+}
+
+### 创建租户 /admin-api/system/tenant/create
+POST {{baseUrl}}/system/user/create
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+{
+  "nickname":"zchtest01",
+  "mobile":"17717808315",
+  "username":"zchtest01",
+  "password":"123456",
+  "status":1
+}
+
+### 获取用户 /admin-api/system/user/get
+GET {{baseUrl}}/system/user/get?id=153935442021842949
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 删除用户 /admin-api/system/user/delete
+POST {{baseUrl}}/system/user/delete?id=142148728892063744
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 获得指定部门的用户简要分页列表（仅直属部门）
+GET {{baseUrl}}/system/user/get-user-by-dept-page?deptId=100
+Authorization: Bearer {{token}}
+
+### 获得指定部门的用户简要分页列表（包含所有下级部门）
+GET {{baseUrl}}/system/user/get-user-by-dept-page?deptId=100&isRecurseSub=true&pageNo=1&pageSize=10
+Authorization: Bearer {{token}}
+
+### 获得指定部门的用户简要分页列表（带关键词搜索）
+GET {{baseUrl}}/system/user/get-user-by-dept-page?deptId=100&isRecurseSub=false&pageNo=1&pageSize=10&keywords=张三
+Authorization: Bearer {{token}}
+
+### 获得指定部门的用户简要分页列表（使用默认分页参数）
+GET {{baseUrl}}/system/user/get-user-by-dept-page?deptId=1
+Authorization: Bearer {{token}}
+
+### 获得指定部门的用户简要分页列表（包含下级部门，使用默认分页）
+GET {{baseUrl}}/system/user/get-user-by-dept-page?deptId=1&isRecurseSub=true
+Authorization: Bearer {{token}}
+
+### 获得指定部门的用户简要分页列表（带关键词搜索，不包含下级部门）
+GET {{baseUrl}}/system/user/get-user-by-dept-page?deptId=1&isRecurseSub=false&keywords=admin
+Authorization: Bearer {{token}}

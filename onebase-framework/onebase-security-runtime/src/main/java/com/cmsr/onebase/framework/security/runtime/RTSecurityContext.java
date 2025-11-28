@@ -22,11 +22,11 @@ public class RTSecurityContext {
     }
 
     public static Long getApplicationId() {
-        return getLoginUser().getApplicationId();
+        return getLoginUser() == null ? null:getLoginUser().getApplicationId();
     }
 
     public static Long getUserId() {
-        return getLoginUser().getId();
+        return getLoginUser() == null ? null : getLoginUser().getId();
     }
 
     public static boolean checkMenuEntity(Long menuId, Long entityId) {
