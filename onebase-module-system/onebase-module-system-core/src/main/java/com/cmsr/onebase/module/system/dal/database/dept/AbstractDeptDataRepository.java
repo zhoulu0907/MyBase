@@ -48,8 +48,7 @@ public abstract class AbstractDeptDataRepository extends DataRepository<DeptDO> 
         String fromSceneType = getXFromSceneType();
         DefaultConfigStore configStore = new DefaultConfigStore();
         if (XFromSceneTypeEnum.TENANT.getCode().equals(fromSceneType)) {
-            // todo 暂时注掉，因为PLATFORM类型租户（tenant_id=1）在被空间中开发测试使用，需要返回该租户用户数据
-            // configStore.and(Compare.EQUAL, DeptDO.DEPT_TYPE, DeptTypeEnum.TENANT.getCode());
+             configStore.and(Compare.EQUAL, DeptDO.DEPT_TYPE, DeptTypeEnum.TENANT.getCode());
         } else if (XFromSceneTypeEnum.CORP.getCode().equals(fromSceneType)) {
             Long corpId = loginUser.getCorpId();
             if (null != corpId) {
