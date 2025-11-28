@@ -397,8 +397,8 @@ const AppManagement: React.FC = () => {
                   暂无数据
                 </div>
               )}
-              {dataList?.map((item, index) => (
-                <div className={styles.appCard} key={index}>
+              {dataList?.map((item, _index) => (
+                <div className={styles.appCard} key={item.id}>
                   <div className={styles.appCardTop}>
                     <div className={styles.appCardHeader}>
                       <div className={styles.appName}>
