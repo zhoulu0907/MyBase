@@ -2,7 +2,6 @@ import LogoSVG from '@/assets/images/ob_logo.svg';
 import { Button, Checkbox, Form, Input, Message, Space, Typography } from '@arco-design/web-react';
 import { IconLock, IconUser } from '@arco-design/web-react/icon';
 import { getOrCreateDeviceInfo, SliderCaptcha, TokenManager, type SliderCaptchaRef } from '@onebase/common';
-import { getOrCreateDeviceInfo, SliderCaptcha, TokenManager, type SliderCaptchaRef } from '@onebase/common';
 import { adminLogin, checkCaptchaApi, getCaptchaApi, type LoginRequest } from '@onebase/platform-center';
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -73,7 +72,6 @@ const Right: React.FC = () => {
             refreshToken: loginResp.refreshToken,
             expiresTime: loginResp.expiresTime,
             tenantId: loginResp.tenantId
-            tenantId: loginResp.tenantId
           },
           rememberMe
         );
@@ -97,16 +95,12 @@ const Right: React.FC = () => {
     const values = await accountForm.getFieldsValue();
 
     const deviceId = await getOrCreateDeviceInfo();
-    const deviceId = await getOrCreateDeviceInfo();
     handleSubmit({
-
       username: values.username,
 
       password: values.password,
 
       captchaVerification: token,
-      deviceId: deviceId
-   ,
       deviceId: deviceId
     });
   };
