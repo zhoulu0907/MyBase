@@ -68,7 +68,8 @@ const Runtime: React.FC = () => {
   }, [appId]);
 
   useEffect(() => {
-    getUserInfo();
+    // TODO(mickey): 等马老师提供runtime接口后打开
+    // getUserInfo();
   }, []);
 
   const getUserInfo = async () => {
