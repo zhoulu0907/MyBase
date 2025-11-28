@@ -163,7 +163,7 @@ export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
           break;
         case NodeType.DATA_CALC:
           const dataCalcFields: ConditionField[] = formInfo.calRules
-            .filter((item: any) => item && item.field && item.value && item.operatorType)
+            ?.filter((item: any) => item && item.field && item.value && item.operatorType)
             .map((item: any) => {
               return {
                 label: item.field,
