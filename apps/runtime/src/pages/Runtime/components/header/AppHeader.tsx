@@ -10,7 +10,7 @@ import { Divider, Dropdown, Layout, Menu, Typography } from '@arco-design/web-re
 import { IconExport } from '@arco-design/web-react/icon';
 import { getApplication, type GetApplicationReq } from '@onebase/app';
 import { TokenManager } from '@onebase/common';
-import { CodeType, getPermissionInfo } from '@onebase/platform-center';
+import { runTimeGetUser } from '@onebase/platform-center';
 import { appIconMap } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -35,8 +35,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
 
   useEffect(() => {
     if (tokenInfo?.accessToken) {
-      // TODO(mickey): 等马老师提供runtime接口后打开
-      //   getInfo();
+        getInfo();
     }
   }, [tokenInfo?.accessToken]);
 
@@ -69,7 +68,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   };
 
   const getInfo = async () => {
-    const res = await getPermissionInfo(CodeType.CORP);
+   const res = await runTimeGetUser(tokenInfo?.userId);
     UserPermissionManager.setUserPermissionInfo(res);
     const mobile = res.user.mobile;
     const formatMobile = maskMobile(mobile);
