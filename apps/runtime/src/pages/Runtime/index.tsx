@@ -1,6 +1,6 @@
 import { useI18n } from '@/hooks/useI18n';
 import { UserPermissionManager } from '@/utils/permission';
-import { Input, Layout, Menu, Tree } from '@arco-design/web-react';
+import { Input, Layout, Tree } from '@arco-design/web-react';
 import { IconDown, IconSearch } from '@arco-design/web-react/icon';
 import {
   menuSignal,
@@ -11,11 +11,11 @@ import {
   type ApplicationMenu,
   type ListApplicationMenuReq
 } from '@onebase/app';
-import { getHashQueryParam, TokenManager } from '@onebase/common';
+import { TokenManager } from '@onebase/common';
 import { getPermissionInfo } from '@onebase/platform-center';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { AppHeader } from './components/header';
 import RuntimeMenuItem from './components/menuItem';
 import PreviewContainer from './components/preview';
@@ -48,8 +48,8 @@ const Runtime: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [appId, setAppId] = useState('');
-  const [tenantId, setTenantId] = useState('');
+  //   const [appId, setAppId] = useState('');
+  //   const [tenantId, setTenantId] = useState('');
 
   const [search] = useSearchParams();
   const curMenuId = search.get('curMenu');
@@ -64,18 +64,33 @@ const Runtime: React.FC = () => {
 
   const [nickname, setNickname] = useState('U');
 
-  useEffect(() => {
-    // 从 window.location.hash 中解析 redirectURL，再从 redirectURL 解析 appId 和 tenantId
-    const curAppId = getHashQueryParam('appId');
-    const curTenantId = getHashQueryParam('tenantId');
-    if (curAppId) {
-      setAppId(curAppId);
-    }
+  //   useEffect(() => {
+  //     // 从 window.location.hash 中解析 redirectURL，再从 redirectURL 解析 appId 和 tenantId
+  //     const curAppId = getHashQueryParam('appId');
+  //     const curTenantId = getHashQueryParam('tenantId');
+  //     if (curAppId) {
+  //       setAppId(curAppId);
+  //     }
 
-    if (curTenantId) {
-      setTenantId(curTenantId);
+  //     if (curTenantId) {
+  //       setTenantId(curTenantId);
+  //     }
+  //   }, []);
+
+  const { appId, tenantId } = useParams();
+
+  useEffect(() => {
+    if (appId && tenantId) {
+      TokenManager.setCurIdentifyId(`${appId}_${tenantId}`);
+    } else {
+      if (appId) {
+        TokenManager.setCurIdentifyId(appId);
+      }
+      if (tenantId) {
+        TokenManager.setCurIdentifyId(tenantId);
+      }
     }
-  }, []);
+  }, [appId, tenantId]);
 
   useEffect(() => {
     if (appId) {
@@ -188,23 +203,6 @@ const Runtime: React.FC = () => {
     }));
   };
 
-  // 登出处理
-  const handleLogout = () => {
-    // 清除 token
-    TokenManager.clearToken();
-    UserPermissionManager.clearUserPermissionInfo();
-    // 跳转到登录页
-    navigate('/login', { replace: true });
-  };
-  // 用户菜单
-  const userMenu = (
-    <Menu>
-      <Menu.Item key="logout" onClick={handleLogout} style={{ color: '#FF0000' }}>
-        {t('header.logout')}
-      </Menu.Item>
-    </Menu>
-  );
-
   return (
     <Layout className={styles.runtimePage}>
       <AppHeader />
@@ -241,9 +239,6 @@ const Runtime: React.FC = () => {
           />
         </Sider>
         <Content className={styles.content}>
-          <div className={styles.contentHeader}>
-            <div className={styles.contentTitle}>{curMenu.value?.menuName}</div>
-          </div>
           {curMenu?.value?.menuCode && curMenu?.value?.menuCode?.indexOf('TASK-') >= 0 ? (
             <TaskCenterPage curMenuCode={curMenu.value.menuCode} />
           ) : (

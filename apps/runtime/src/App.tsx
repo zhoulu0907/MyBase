@@ -15,10 +15,17 @@ function AppContent() {
       <Route path="/:appId/:tenantId/login" element={<Login />} />
 
       <Route path="/onebase/runtime/" element={<Runtime />} />
+
+      <Route path="/onebase/:appId/:tenantId/runtime/" element={<Runtime />} />
+      <Route path="/onebase/:appId/runtime/" element={<Runtime />} />
+
       {/* <Route path="/onebase/runtime/:appId/" element={<Runtime />} />
       <Route path="/onebase/runtime/:appId/:tenantId" element={<Runtime />} /> */}
-      <Route path="/onebase/runtime/my-app" element={<MyAppPage />} />
-      <Route path="/onebase/setting/*" element={<SettingPage />} />
+      {/* <Route path="/onebase/tenant/runtime/my-app" element={<MyAppPage />} />
+      <Route path="/onebase/setting/*" element={<SettingPage />} /> */}
+
+      <Route path="/onebase/:tenantId/runtime/my-app" element={<MyAppPage />} />
+      <Route path="/onebase/:tenantId/setting/*" element={<SettingPage />} />
       {/* 默认重定向到登录页 */}
       <Route path="/" element={<Navigate to="/login" replace />} />
 

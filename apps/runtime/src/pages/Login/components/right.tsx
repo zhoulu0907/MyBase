@@ -187,6 +187,21 @@ const Right: React.FC = () => {
 
       if (response && response.accessToken) {
         // 使用 TokenManager 存储 token 信息
+
+        console.log('appId: ', appId);
+        console.log('tenantId: ', tenantId);
+
+        if (appId && tenantId) {
+          TokenManager.setCurIdentifyId(`${appId}_${tenantId}`);
+        } else {
+          if (appId) {
+            TokenManager.setCurIdentifyId(appId);
+          }
+          if (tenantId) {
+            TokenManager.setCurIdentifyId(tenantId);
+          }
+        }
+
         TokenManager.setToken(
           {
             userId: response.userId,
@@ -217,10 +232,11 @@ const Right: React.FC = () => {
         if (redirectURL) {
           if (!appId) {
             //企业登录
-            navigate('/onebase/runtime/my-app');
+            navigate(`/onebase/${tenantId}/runtime/my-app`);
           } else {
             //saas模式 或者inner模式
-            navigate(`/onebase/runtime/?appId=${appId}&tenantId=${tenantId}`);
+            // navigate(`/onebase/runtime/?appId=${appId}&tenantId=${tenantId}`);
+            navigate(`/onebase/${appId}/${tenantId}/runtime`);
           }
         } else {
           // 跳转到首页

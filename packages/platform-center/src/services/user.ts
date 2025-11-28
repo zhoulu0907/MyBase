@@ -13,7 +13,7 @@ export const getUser = (id: number) => {
 };
 
 // 查询用户详情
-export const runTimeGetUser = (id: number) => {
+export const runTimeGetUser = (id: string) => {
   return runtimeService.get('/user/get?id=' + id);
 };
 

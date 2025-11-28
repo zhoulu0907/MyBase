@@ -1,14 +1,13 @@
-import defaultAvatar from '@/assets/images/default_avatar.png';
 import LogoSVG from '@/assets/images/ob_logo.svg';
+import UserProfileAvatar from '@/components//UserProfileAvatar';
 import { useI18n } from '@/hooks/useI18n';
 import { UserPermissionManager } from '@/utils/permission';
 import { logout } from '@/utils/session';
-import { Avatar, Button, Dropdown, Layout, Menu, Typography } from '@arco-design/web-react';
+import { Button, Dropdown, Layout, Menu, Typography } from '@arco-design/web-react';
 import { IconApps, IconExport } from '@arco-design/web-react/icon';
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import styles from './header.module.less';
-import UserProfileAvatar from '@/components//UserProfileAvatar';
 
 const { Header } = Layout;
 
@@ -20,6 +19,8 @@ interface HeaderProps {
 const AppHeader: React.FC<HeaderProps> = ({ className, avatarUrl }) => {
   const navigate = useNavigate();
   const { t } = useI18n();
+
+  const { tenantId } = useParams();
 
   // 获取用户信息
   const userPermissionInfo = UserPermissionManager.getUserPermissionInfo();
@@ -43,7 +44,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className, avatarUrl }) => {
     <Menu>
       <Menu.Item key="info" style={{ height: '60px' }}>
         <div className={styles.adminInformation}>
-           <UserProfileAvatar adminInfo={userPermissionInfo?.user} avatarUrl={avatarUrl} />
+          <UserProfileAvatar adminInfo={userPermissionInfo?.user} avatarUrl={avatarUrl} />
           <Typography.Text>{userPermissionInfo?.user?.nickname || ''}</Typography.Text>
         </div>
       </Menu.Item>
@@ -66,7 +67,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className, avatarUrl }) => {
           <Button
             type="secondary"
             icon={<IconApps />}
-            onClick={() => navigate('/onebase/runtime/my-app')}
+            onClick={() => navigate(`/onebase/${tenantId}/runtime/my-app`)}
             className={styles.backBtn}
           >
             应用中心

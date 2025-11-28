@@ -5,7 +5,7 @@ import UserProfileAvatar from '@/components/UserProfileAvatar';
 
 import { useI18n } from '@/hooks/useI18n';
 import { appInfoSignal } from '@/store/app';
-import { UserPermissionManager } from '@/utils/permission';
+import { UserPermissionManager, type UserPermissionInfo } from '@/utils/permission';
 import { Divider, Dropdown, Layout, Menu, Typography } from '@arco-design/web-react';
 import { IconExport } from '@arco-design/web-react/icon';
 import { getApplication, type GetApplicationReq } from '@onebase/app';
@@ -13,7 +13,7 @@ import { TokenManager } from '@onebase/common';
 import { runTimeGetUser } from '@onebase/platform-center';
 import { appIconMap } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import styles from './header.module.less';
 
 const { Header } = Layout;
@@ -33,9 +33,11 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   // 获取用户信息
   const tokenInfo = TokenManager.getTokenInfo();
 
+  const { tenantId } = useParams();
+
   useEffect(() => {
     if (tokenInfo?.accessToken) {
-        getInfo();
+      getInfo();
     }
   }, [tokenInfo?.accessToken]);
 
@@ -68,12 +70,25 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   };
 
   const getInfo = async () => {
-   const res = await runTimeGetUser(tokenInfo?.userId);
-    UserPermissionManager.setUserPermissionInfo(res);
-    const mobile = res.user.mobile;
-    const formatMobile = maskMobile(mobile);
-    setMobile(formatMobile);
-    setUserInfo(res.user);
+    // TODO(多租户): 等马老师修复
+    // const res = await getPermissionInfo(CodeType.CORP);
+    if (tokenInfo?.userId) {
+      const res = await runTimeGetUser(tokenInfo?.userId);
+      console.log(res);
+
+      const userPermissionInfo: UserPermissionInfo = {
+        user: res,
+        roles: [],
+        permissions: [],
+        menus: []
+      };
+
+      UserPermissionManager.setUserPermissionInfo(userPermissionInfo);
+      const mobile = res.mobile;
+      const formatMobile = maskMobile(mobile);
+      setMobile(formatMobile);
+      setUserInfo(res);
+    }
   };
 
   // 登出处理
@@ -98,7 +113,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
         <Menu.Item
           key="setting"
           onClick={() => {
-            navigate('/onebase/setting');
+            navigate(`/onebase/${tenantId}/setting`);
           }}
         >
           <div className={styles.headerContent}>
@@ -132,7 +147,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
         )) || <img src={LogoAvatarSVG} />}
 
         <div className={styles.userInfo}>
-          {UserPermissionManager.getUserPermissionInfo()?.user?.nickname || '未登录'}
+          {userInfo?.nickname || '未登录'}
 
           <Dropdown droplist={userMenu} position="bottom">
             <div className={styles.userDropdown}>
