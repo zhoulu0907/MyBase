@@ -94,7 +94,7 @@ public class RepositoryTest {
     public void test7() {
         com.github.pagehelper.Page<Object> page = PageHelper
                 .startPage(1, 1)
-                .doSelectPage(() -> appAuthRoleMapper.selectRoleUsers(46699591748616193L, ""));
+                .doSelectPage(() -> appAuthRoleMapper.selectRoleMembers(46699591748616193L, ""));
         System.out.println(page);
     }
 
