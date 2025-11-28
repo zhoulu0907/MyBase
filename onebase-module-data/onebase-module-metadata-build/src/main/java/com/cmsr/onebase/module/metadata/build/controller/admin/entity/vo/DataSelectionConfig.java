@@ -4,6 +4,8 @@ import lombok.Data;
 
 @Data
 public class DataSelectionConfig {
+    //todo 增加关联关系主键id
+    private Long relationId;
 
     /**
      * 关联的目标实体id

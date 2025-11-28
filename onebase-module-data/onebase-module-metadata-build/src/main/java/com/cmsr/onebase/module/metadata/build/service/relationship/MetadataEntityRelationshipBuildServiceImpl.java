@@ -762,4 +762,12 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
         configStore.order("create_time", Order.TYPE.DESC);
         return entityRelationshipRepository.findAllByConfig(configStore);
     }
+
+    @Override
+    public MetadataEntityRelationshipDO findById(Long id) {
+        if (id == null) {
+            return null;
+        }
+        return entityRelationshipRepository.findById(id);
+    }
 }

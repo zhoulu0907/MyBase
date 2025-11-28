@@ -135,4 +135,12 @@ public interface MetadataEntityRelationshipBuildService {
      * @return 实体关系列表
      */
     List<MetadataEntityRelationshipDO> findBySourceEntityIdAndTargetEntityId(Long sourceEntityId, Long targetEntityId);
+
+    /**
+     * 根据ID查询实体关系
+     *
+     * @param id 实体关系ID
+     * @return 实体关系
+     */
+    MetadataEntityRelationshipDO findById(Long id);
 }
