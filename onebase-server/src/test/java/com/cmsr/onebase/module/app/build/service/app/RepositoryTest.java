@@ -93,8 +93,8 @@ public class RepositoryTest {
     @Test
     public void test7() {
         com.github.pagehelper.Page<Object> page = PageHelper
-                .startPage(1, 10)
-                .doSelectPage(() -> appAuthRoleMapper.selectRoleUsers(46699591748616193L, "管理"));
+                .startPage(1, 1)
+                .doSelectPage(() -> appAuthRoleMapper.selectRoleUsers(46699591748616193L, ""));
         System.out.println(page);
     }
 
