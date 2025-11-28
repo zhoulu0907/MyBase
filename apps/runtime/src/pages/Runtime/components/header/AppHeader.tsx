@@ -35,7 +35,8 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
 
   useEffect(() => {
     if (tokenInfo?.accessToken) {
-      getInfo();
+      // TODO(mickey): 等马老师提供runtime接口后打开
+      //   getInfo();
     }
   }, [tokenInfo?.accessToken]);
 
