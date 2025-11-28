@@ -16,8 +16,6 @@ export enum ElementType {
   SELECT_MULTIPLE = 'selectMultiple'
 }
 
-
-
 export enum DateOperator {
   EQUALS = 'EQUALS',
   LATER_THAN = 'LATER_THAN',
@@ -25,18 +23,20 @@ export enum DateOperator {
 }
 
 interface ComplexInfoItem {
-  type: 'date' | 'dateRange' | 'select' | 'selectMultiple';
+  type: ElementType;
   options: DateOperator | Array<{ label: string; value: string }>;
 }
 
-interface ComplexInfo {
-  DATETIME_EQUALS: ComplexInfoItem;
-  DATETIME_LATER_THAN: ComplexInfoItem;
-  DATETIME_RANGE: ComplexInfoItem;
-  DATA_SELECTION_EQUALS: ComplexInfoItem;
-  DATA_SELECTION_NOT_EQUALS: ComplexInfoItem;
-  DATA_SELECTION_CONTAINS: ComplexInfoItem;
-}
+type ComplexInfo = Record<
+  | 'DATETIME_EQUALS'
+  | 'DATETIME_LATER_THAN'
+  | 'DATETIME_RANGE'
+  | 'DATA_SELECTION_EQUALS'
+  | 'DATA_SELECTION_NOT_EQUALS'
+  | 'DATA_SELECTION_CONTAINS',
+  ComplexInfoItem
+>;
+
 export enum InputKeyType {
   TEXT_EQUALS = 'TEXT_EQUALS',
   TEXT_NOT_EQUALS = 'TEXT_NOT_EQUALS',
@@ -94,11 +94,11 @@ export const ComplexInfo: ComplexInfo = {
     options: DateOperator.EQUALS
   },
   DATETIME_LATER_THAN: {
-    type:  ElementType.DATE,
+    type: ElementType.DATE,
     options: DateOperator.LATER_THAN
   },
   DATETIME_RANGE: {
-    type:  ElementType.DATE_RANGE,
+    type: ElementType.DATE_RANGE,
     options: DateOperator.LATER_RANGE
   },
   DATA_SELECTION_EQUALS: {
@@ -106,11 +106,11 @@ export const ComplexInfo: ComplexInfo = {
     options: approvalResultOptions
   },
   DATA_SELECTION_NOT_EQUALS: {
-    type:  ElementType.SELECT,
+    type: ElementType.SELECT,
     options: approvalResultOptions
   },
   DATA_SELECTION_CONTAINS: {
-    type:  ElementType.SELECT_MULTIPLE,
+    type: ElementType.SELECT_MULTIPLE,
     options: approvalResultOptions
   }
 };
