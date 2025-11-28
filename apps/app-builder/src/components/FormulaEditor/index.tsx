@@ -229,7 +229,7 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
       }
       return content;
     });
-    return newFormula.replace(/,(?=\s*\))/g, '');
+    return newFormula.replace(/,(?=\s*\))/g, '').replace(/,+/g, ',');
   };
 
   /**
