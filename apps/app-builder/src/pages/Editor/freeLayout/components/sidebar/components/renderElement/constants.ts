@@ -155,7 +155,21 @@ export enum ScopeKeyType {
 } // 数字范围
 
 export const VARIABLE_MAP: Partial<Record<FieldType, FieldType[]>> = {
-  [FieldType.TEXT]: [FieldType.TEXT, FieldType.LONG_TEXT, FieldType.EMAIL, FieldType.PHONE, FieldType.URL]
+  [FieldType.TEXT]: [FieldType.TEXT, FieldType.LONG_TEXT, FieldType.EMAIL, FieldType.PHONE, FieldType.URL],
+  [FieldType.LONG_TEXT]: [FieldType.TEXT, FieldType.LONG_TEXT, FieldType.EMAIL, FieldType.PHONE, FieldType.URL],
+  [FieldType.EMAIL]: [FieldType.TEXT, FieldType.LONG_TEXT, FieldType.EMAIL],
+  [FieldType.PHONE]: [FieldType.TEXT, FieldType.LONG_TEXT, FieldType.PHONE],
+  [FieldType.URL]: [FieldType.TEXT, FieldType.LONG_TEXT, FieldType.URL],
+  [FieldType.ADDRESS]: [FieldType.ADDRESS],
+  [FieldType.BOOLEAN]: [FieldType.BOOLEAN],
+  [FieldType.SELECT]: [FieldType.SELECT, FieldType.MULTI_SELECT, FieldType.TEXT, FieldType.LONG_TEXT],
+  [FieldType.MULTI_SELECT]: [FieldType.SELECT, FieldType.MULTI_SELECT, FieldType.TEXT, FieldType.LONG_TEXT],
+  [FieldType.AUTO_CODE]: [FieldType.AUTO_CODE, FieldType.TEXT, FieldType.LONG_TEXT],
+  [FieldType.MULTI_USER]: [FieldType.USER, FieldType.MULTI_USER],
+  [FieldType.MULTI_DEPARTMENT]: [FieldType.DEPARTMENT, FieldType.MULTI_DEPARTMENT],
+  [FieldType.MULTI_DATA_SELECTION]: [FieldType.DATA_SELECTION, FieldType.MULTI_DATA_SELECTION],
+  [FieldType.GEOGRAPHY]: [FieldType.GEOGRAPHY],
+  [FieldType.ID]: [FieldType.ID, FieldType.NUMBER],
 };
 
 export const ComplexInfo: ComplexInfo = {
