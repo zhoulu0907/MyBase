@@ -27,7 +27,7 @@ import {
   type TenantAdminUserResVO,
   type UpdateTenantParams,
   type UserVO
-} from '@onebase/platform-center';
+} from '@onebase/platform-center'; 
 import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import styles from './index.module.less';
@@ -184,7 +184,7 @@ const EditTenant = () => {
               {isEdit ? <Input placeholder="输入空间名称" /> : <span>{tenantInfo?.name}</span>}
             </Form.Item>
 
-            <Form.Item label="空间 Logo" field="logoUrl" triggerPropName="fileList">
+            <Form.Item label="空间 Logo" field="logoUrl">
               <Space direction="vertical">
                 {isEdit ? (
                   <>
@@ -194,7 +194,6 @@ const EditTenant = () => {
                       imagePreview
                       accept="image/*"
                       listType="picture-card"
-                      showUploadList
                       customRequest={async (option) => {
                         const { onProgress, onError, onSuccess, file } = option;
                         try {
@@ -244,10 +243,13 @@ const EditTenant = () => {
                           });
                         });
                       }}
-                      style={{
-                        display: 'none'
-                      }}
-                    />
+                    >
+                    {logoUrl ? (
+                      <Image className={styles.tenantLogo} preview width={160} height={80} src={logoUrl} />
+                    ) : (
+                      <div className={styles.tenantLogo}>{tenantInfo?.name.slice(0, 6)}</div>
+                    )}
+                    </Upload>
                     {isEdit && (
                       <Space>
                         <Button

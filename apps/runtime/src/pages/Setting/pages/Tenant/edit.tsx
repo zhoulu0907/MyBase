@@ -1,8 +1,9 @@
-import { Message, Tabs, Form, Select, Input, Button, Upload, Spin, Image, Avatar } from '@arco-design/web-react';
+import { Message, Tabs, Form, Select, Input, Button, Upload, Spin, Image, Avatar, Modal } from '@arco-design/web-react';
 import { getLoginedUser, updateLoginedUser, updateLoginedUserPwd, uploadFile } from '@onebase/platform-center';
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './index.module.less';
+import { Cropper } from '@onebase/common';
 
 const TabPane = Tabs.TabPane;
 const { Item: FormItem } = Form;
@@ -181,6 +182,34 @@ const EditPage: React.FC<IEditPageProps> = ({avatarUrl, setAvatarUrl}) => {
                             msg: '上传失败'
                           });
                         }
+                      }}
+                      beforeUpload={(file) => {
+                        return new Promise((resolve) => {
+                          const modal = Modal.confirm({
+                            title: '裁剪图片',
+                            onCancel: () => {
+                              Message.info('取消上传');
+                              resolve(false);
+                              modal.close();
+                            },
+                            simple: false,
+                            content: (
+                              <Cropper
+                                file={file}
+                                onOK={(file: any) => {
+                                  resolve(file);
+                                  modal.close();
+                                }}
+                                onCancel={() => {
+                                  resolve(false);
+                                  Message.info('取消上传');
+                                  modal.close();
+                                }}
+                              />
+                            ),
+                            footer: null
+                          });
+                        });
                       }}
                       style={{
                         display: 'none'

@@ -475,7 +475,11 @@ const AppManagement: React.FC = () => {
                         <>
                           <AvatarGroup size={24} maxCount={4} zIndexAscend>
                             {item?.userPhotoList?.map((item) => {
-                              return <Avatar>{item.avatar}</Avatar>;
+                              return <>{item.avatar ? 
+                                <Avatar><img src={item.avatar} alt="avatar" /></Avatar> : 
+                                <Avatar style={{backgroundColor: '#009e9e'}}>{item?.nickName?.charAt(0)}</Avatar>
+                                }
+                              </>;
                             })}
                             {(item?.userPhotoList?.length > 1 && (
                               <>
