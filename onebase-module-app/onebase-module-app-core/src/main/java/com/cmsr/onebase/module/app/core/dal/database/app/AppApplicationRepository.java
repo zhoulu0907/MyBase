@@ -38,10 +38,10 @@ public class AppApplicationRepository extends ServiceImpl<AppApplicationMapper, 
                 .eq(AppApplicationDO::getPublishModel, pageReqVO.getPublishModel(), StringUtils::isNotBlank)
                 .eq(AppApplicationDO::getCreator, userId, filterByUser);
         if (StringUtils.equalsIgnoreCase(pageReqVO.getOrderByTime(), "create")) {
-            queryWrapper = queryWrapper.orderBy(AppApplicationDO::getUpdateTime, false);
+            queryWrapper = queryWrapper.orderBy(AppApplicationDO::getCreateTime, false);
         }
         if (StringUtils.equalsIgnoreCase(pageReqVO.getOrderByTime(), "update")) {
-            queryWrapper = queryWrapper.orderBy(AppApplicationDO::getCreateTime, false);
+            queryWrapper = queryWrapper.orderBy(AppApplicationDO::getUpdateTime, false);
         }
         Page<AppApplicationDO> pageQuery = Page.of(pageReqVO.getPageNo(), pageReqVO.getPageSize());
         Page<AppApplicationDO> pageResult = this.page(pageQuery, queryWrapper);

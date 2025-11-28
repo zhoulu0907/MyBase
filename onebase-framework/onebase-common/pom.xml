@@ -175,6 +175,10 @@
             <groupId>com.alibaba</groupId>
             <artifactId>transmittable-thread-local</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.mybatis-flex</groupId>
+            <artifactId>mybatis-flex-core</artifactId>
+        </dependency>
         <!-- Test 测试相关 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
