@@ -22,7 +22,7 @@ public enum MetadataType {
                 return type;
             }
         }
-        throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.ILLEGAL_METADATA_TYPE);
+        throw ServiceExceptionUtil.exception(EtlErrorCodeConstants.ILLEGAL_METADATA_TYPE);
     }
 
     public static boolean writeable(String metadataType) {

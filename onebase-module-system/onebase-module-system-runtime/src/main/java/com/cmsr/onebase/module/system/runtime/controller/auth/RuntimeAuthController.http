@@ -9,11 +9,9 @@ Content-Type: application/json
 tenant-id: {{adminTenantId}}
 tag: {{tag}}
 
-{
-  "username": "admin",
-  "password": "admin123",
-  "appId":1024
-}
+{"password":"AdminChina2025!","username":"admin","appId":"155296070483476480",
+"captchaVerification":"B/IPY56Fitizbk+iaZMFreS2ac6WF9boqPZOLwDxtq82tjAZwPxJLNKBWDemjc+LACdFcc61IbKV8FbsVueG1rys88pb749urZsNI1olDlA=",
+"deviceId":"50dddd1e2dcbb0f792b0fe3e9028890b"}
 
 > {%
     // 登录成功后自动更新token到环境变量
@@ -34,13 +32,11 @@ tenant-id: {{adminTenantId}}
 tag: {{tag}}
 
 {
-  "mobile": "13800000004",
-  "password": "AdminChina2025!",
-  "appId":1024
+  "mobile": "13300008888",
+  "password": "MH[|Mpk0=TjS$RS",
+  "appId":1024,
+  "deviceId":666
 }
-
-
-
 
 
 ### 请求 /reset-password 接口 => 失败

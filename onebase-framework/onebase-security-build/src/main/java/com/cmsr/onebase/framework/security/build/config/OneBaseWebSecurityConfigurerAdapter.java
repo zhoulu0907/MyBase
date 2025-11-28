@@ -115,7 +115,9 @@ public class OneBaseWebSecurityConfigurerAdapter {
     @Bean
     protected SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         RequestMatcher buildApiMatcher = new OrRequestMatcher(
-                new AntPathRequestMatcher(webProperties.getBuildApi().getPrefix() + "/**")
+                new AntPathRequestMatcher(webProperties.getBuildApi().getPrefix() + "/**"),
+                // 平台管理暂不独立部署，platform相关接口同步初始化
+                new AntPathRequestMatcher(webProperties.getPlatformApi().getPrefix() + "/**")
         );
         httpSecurity.securityMatcher(buildApiMatcher);
 
@@ -140,7 +142,7 @@ public class OneBaseWebSecurityConfigurerAdapter {
                 // ①：全局共享规则
                 .authorizeHttpRequests(c -> c
                     // 1.1 静态资源，可匿名访问
-                    .requestMatchers(HttpMethod.GET, "/*.html", "/*.css", "/*.js","/admin-api/app/application/get/**").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/*.html", "/*.css", "/*.js","/admin-api/app/application/get/**","/runtime/app/application/get/**").permitAll()
                     // 1.2 设置 @PermitAll 无需认证
                     .requestMatchers(HttpMethod.GET, permitAllUrls.get(HttpMethod.GET).toArray(new String[0])).permitAll()
                     .requestMatchers(HttpMethod.POST, permitAllUrls.get(HttpMethod.POST).toArray(new String[0])).permitAll()

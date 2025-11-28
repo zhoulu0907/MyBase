@@ -72,8 +72,7 @@ public class PermissionServiceImpl implements PermissionService {
     private MenuService          menuService;
     @Resource
     private DeptService          deptService;
-    @Resource
-    @Lazy // 延迟，避免循环依赖报错
+    @Resource @Lazy
     private UserService          userService;
     @Resource
     private TenantPackageService tenantPackageService;

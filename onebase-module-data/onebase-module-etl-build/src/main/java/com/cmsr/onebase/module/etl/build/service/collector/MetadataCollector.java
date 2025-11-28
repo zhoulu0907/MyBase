@@ -12,6 +12,7 @@ import org.anyline.metadata.Schema;
 import org.anyline.metadata.Table;
 import org.anyline.proxy.ServiceProxy;
 import org.anyline.service.AnylineService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.sql.DataSource;
@@ -68,6 +69,9 @@ public class MetadataCollector {
             columnData.setDisplayName(columnName);
             String comment = column.getComment();
             columnData.setComment(comment);
+            if (StringUtils.isNotBlank(comment)) {
+                columnData.setDisplayName(comment);
+            }
             columnData.setDeclaration(comment);
             columnData.setType(column.getOriginType().toLowerCase());
             columnData.setPosition(position);

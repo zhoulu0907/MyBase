@@ -5,8 +5,8 @@ import com.cmsr.onebase.module.app.api.auth.AppAuthRoleUser;
 import com.cmsr.onebase.module.app.api.auth.dto.AuthRoleDTO;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleUserRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthRoleDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthRoleUserDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthRoleDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthRoleUserDO;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,18 +34,18 @@ public class AppAuthRoleUserImpl implements AppAuthRoleUser {
 
     @Override
     public List<Long> findUserIdsByRoleIds(List<Long> roleIds) {
-        return appAuthRoleUserRepository.findByByRoleIds(roleIds).stream().map(AuthRoleUserDO::getUserId).toList();
+        return appAuthRoleUserRepository.findByByRoleIds(roleIds).stream().map(AppAuthRoleUserDO::getUserId).toList();
     }
 
     @Override
     public List<Long> findRoleIdsByAppId(Long appId) {
-        return appAuthRoleRepository.findByApplicationId(appId).stream().map(AuthRoleDO::getId).toList();
+        return appAuthRoleRepository.findByApplicationId(appId).stream().map(AppAuthRoleDO::getId).toList();
     }
 
     @Override
     public List<AuthRoleDTO> findRolesByUserId(Long userId) {
-        List<Long> list = appAuthRoleUserRepository.findByUserId(userId).stream().map(AuthRoleUserDO::getRoleId).toList();
-        List<AuthRoleDO> authRoleDOS = appAuthRoleRepository.findAllByIds(list);
+        List<Long> list = appAuthRoleUserRepository.findByUserId(userId).stream().map(AppAuthRoleUserDO::getRoleId).toList();
+        List<AppAuthRoleDO> authRoleDOS = appAuthRoleRepository.listByIds(list);
         List<AuthRoleDTO> authRoleDTOS = BeanUtils.toBean(authRoleDOS, AuthRoleDTO.class);
         return authRoleDTOS;
     }

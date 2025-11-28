@@ -1,11 +1,13 @@
 package com.cmsr.onebase.module.app.build.util.db;
 
 import com.cmsr.onebase.framework.aynline.DataDDLRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.*;
-import org.springframework.stereotype.Component;
-
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourceComponentDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePageDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetPageDO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 /**
  * @ClassName TableInitializer
@@ -32,23 +34,20 @@ public class TableInitializer {
 
         try {
 
-//            dataDDLRepository.createTable(ApplicationDO.class, reset, execute);
-//            dataDDLRepository.createTable(ApplicationTagDO.class, reset, execute);
-//            dataDDLRepository.createTable(MenuDO.class, reset, execute);
-//            dataDDLRepository.createTable(TagDO.class, reset, execute);
-//            dataDDLRepository.createTable(ApplicationTagDO.class, reset, execute);
-//            dataDDLRepository.createTable(AuthRoleDO.class, reset, execute);
+//            dataDDLRepository.createTable(AppApplicationDO.class, reset, execute);
+//            dataDDLRepository.createTable(AppApplicationTagDO.class, reset, execute);
+//            dataDDLRepository.createTable(AppMenuDO.class, reset, execute);
+//            dataDDLRepository.createTable(AppTagDO.class, reset, execute);
+//            dataDDLRepository.createTable(AppApplicationTagDO.class, reset, execute);
+//            dataDDLRepository.createTable(AppAuthRoleDO.class, reset, execute);
 
-//            dataDDLRepository.createTable(VersionDO.class, reset, execute);
-//            dataDDLRepository.createTable(VersionResourceDO.class, reset, execute);
+//            dataDDLRepository.createTable(AppVersionDO.class, reset, execute);
+//            dataDDLRepository.createTable(AppVersionResourceDO.class, reset, execute);
 
-            dataDDLRepository.createTable(ComponentDO.class, reset, execute);
-            dataDDLRepository.createTable(PageDO.class, reset, execute);
-            dataDDLRepository.createTable(PageMetadataDO.class, reset, execute);
-            dataDDLRepository.createTable(PageRefRouterDO.class, reset, execute);
-            dataDDLRepository.createTable(PageSetDO.class, reset, execute);
-            dataDDLRepository.createTable(PageSetLabelDO.class, reset, execute);
-            dataDDLRepository.createTable(PageSetPageDO.class, reset, execute);
+            dataDDLRepository.createTable(AppResourceComponentDO.class, reset, execute);
+            dataDDLRepository.createTable(AppResourcePageDO.class, reset, execute);
+            dataDDLRepository.createTable(AppResourcePagesetDO.class, reset, execute);
+            dataDDLRepository.createTable(AppResourcePagesetPageDO.class, reset, execute);
 
             log.info("数据库表结构初始化完成");
         } catch (Exception e) {

@@ -19,7 +19,6 @@ public class SocialWxaSubscribeMessageSendReqDTO {
     private Long userId;
     @Schema(description = "用户类型", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
     @InEnum(UserTypeEnum.class)
-    @NotNull(message = "用户类型不能为空")
     private Integer userType;
 
     @Schema(description = "消息模版标题", requiredMode = Schema.RequiredMode.REQUIRED, example = "模版标题")

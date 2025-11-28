@@ -5,12 +5,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
-@Schema(description = "数据工厂 - ETL - ETL详情VO")
+@Schema(description = "数据工厂 - Etl - Etl详情VO")
 @Data
 public class WorkflowDetailVO {
 
     @Schema(description = "ETL ID")
     private Long id;
+
+    @Schema(description = "ETL UUID")
+    private String flowUuid;
 
     @Schema(description = "ETL名称")
     private String flowName;

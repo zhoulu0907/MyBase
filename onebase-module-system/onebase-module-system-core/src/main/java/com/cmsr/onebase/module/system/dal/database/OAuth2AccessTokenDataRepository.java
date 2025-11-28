@@ -26,8 +26,13 @@ public class OAuth2AccessTokenDataRepository extends DataRepository<OAuth2Access
     }
 
     public OAuth2AccessTokenDO findByAccessToken(String accessToken) {
+        return findOne(new DefaultConfigStore().eq(OAuth2AccessTokenDO.ACCESS_TOKEN, accessToken));
+    }
+
+    public OAuth2AccessTokenDO findByAccessTokenWithMode(String runMode, String accessToken) {
         return findOne(new DefaultConfigStore()
-                .and(Compare.EQUAL, "access_token", accessToken));
+                .eq(OAuth2AccessTokenDO.RUN_MODE, runMode)
+                .eq(OAuth2AccessTokenDO.ACCESS_TOKEN, accessToken));
     }
 
     public List<OAuth2AccessTokenDO> findListByRefreshToken(String refreshToken) {
@@ -42,7 +47,7 @@ public class OAuth2AccessTokenDataRepository extends DataRepository<OAuth2Access
 
     public PageResult<OAuth2AccessTokenDO> findPage(OAuth2AccessTokenPageReqVO reqVO) {
         DefaultConfigStore configStore = new DefaultConfigStore();
-        
+
         if (reqVO.getUserId() != null) {
             configStore.and(Compare.EQUAL, "user_id", reqVO.getUserId());
         }

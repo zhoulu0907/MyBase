@@ -37,11 +37,6 @@ public class AppAuthRoleController {
         return CommonResult.success(authRoleService.getRoleList(applicationId));
     }
 
-//    @GetMapping("/page-role-users")
-//    @Operation(summary = "获取角色用户列表")
-//    public CommonResult<PageResult<AuthRoleUsersPageRespVO>> pageRoleUsers(@Validated AuthRoleUsersPageReqVO reqVO) {
-//        return CommonResult.success(authRoleService.pageRoleUsers(reqVO));
-//    }
 
     @GetMapping("/page-role-members")
     @Operation(summary = "获取角色成员列表")

@@ -5,9 +5,10 @@ import com.cmsr.onebase.framework.security.runtime.RTSecurityContext;
 import com.cmsr.onebase.module.app.api.security.bo.OperationPermission;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthViewRepository;
 import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthPermissionDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.menu.MenuDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthPermissionDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppMenuDO;
 import com.cmsr.onebase.module.app.core.dto.auth.UserRoleDTO;
+import com.cmsr.onebase.module.app.core.enums.menu.MenuTypeEnum;
 import com.cmsr.onebase.module.app.core.impl.auth.AppAuthSecurityApiImpl;
 import com.cmsr.onebase.module.app.core.provider.auth.AppAuthPermissionProvider;
 import com.cmsr.onebase.module.app.core.provider.auth.AppAuthRoleProvider;
@@ -55,11 +56,26 @@ public class AppMenuServiceImpl implements AppMenuService {
     private RedissonClient redissonClient;
 
     @Override
+    public List<MenuListRespVO> listBpmApplicationMenu() {
+        // todo 权限校验
+        Long applicationId = RTSecurityContext.getApplicationId();
+
+        List<AppMenuDO> menuDOS = appMenuRepository.findByApplicationIdAndType(applicationId,
+                Set.of(MenuTypeEnum.BPM.getValue())
+        );
+
+        // 返回菜单
+        return menuDOS.stream()
+                .map(v -> BeanUtils.toBean(v, MenuListRespVO.class))
+                .collect(Collectors.toCollection(LinkedList::new));
+    }
+
+    @Override
     public List<MenuListRespVO> listApplicationMenu() {
         Long userId = RTSecurityContext.getUserId();
         Long applicationId = RTSecurityContext.getApplicationId();
         UserRoleDTO userRoleDTO = appAuthRoleProvider.findUserRoleByApplication(userId, applicationId);
-        List<MenuDO> menuDOS;
+        List<AppMenuDO> menuDOS;
         if (userRoleDTO.isAdminRole()) {
             menuDOS = appMenuRepository.findVisibleByAppId(applicationId);
         } else {
@@ -81,9 +97,9 @@ public class AppMenuServiceImpl implements AppMenuService {
         return menuListRespList;
     }
 
-    private LinkedList<MenuListRespVO> recursiveGetChildren(Long parentId, List<MenuDO> menuDOS) {
+    private LinkedList<MenuListRespVO> recursiveGetChildren(Long parentId, List<AppMenuDO> menuDOS) {
         LinkedList<MenuListRespVO> children = new LinkedList<>();
-        for (MenuDO menuDO : menuDOS) {
+        for (AppMenuDO menuDO : menuDOS) {
             if (Objects.equals(menuDO.getParentId(), parentId)) {
                 // 只有父菜单的uuid等于当前菜单的父菜单的uuid时，才添加子菜单，继续递归
                 MenuListRespVO child = BeanUtils.toBean(menuDO, MenuListRespVO.class);
@@ -95,9 +111,9 @@ public class AppMenuServiceImpl implements AppMenuService {
     }
 
     private Set<Long> findVisibleMenuIds(Long applicationId, Set<Long> roleIds) {
-        List<AuthPermissionDO> permissions = appAuthPermissionProvider.findPermissions(applicationId, roleIds);
+        List<AppAuthPermissionDO> permissions = appAuthPermissionProvider.findPermissions(applicationId, roleIds);
         Set<Long> result = new HashSet<>();
-        for (AuthPermissionDO permission : permissions) {
+        for (AppAuthPermissionDO permission : permissions) {
             if (NumberUtils.INTEGER_ONE.equals(permission.getIsPageAllowed()))
                 result.add(permission.getMenuId());
         }
