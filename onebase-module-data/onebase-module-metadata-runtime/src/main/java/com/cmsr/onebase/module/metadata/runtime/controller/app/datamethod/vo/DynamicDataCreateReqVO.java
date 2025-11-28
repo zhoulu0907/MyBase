@@ -33,13 +33,15 @@ public class DynamicDataCreateReqVO {
     @NotNull(message = "实体ID不能为空")
     private Long entityId;
 
+    // TODO：数据内容的格式需要指定一下，应该分为 3 个，主实体数据、子表数据、关联表数据
     @Schema(description = "数据内容", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotEmpty(message = "数据内容不能为空")
     private Map<Long, Object> data;
 
+    @Schema(description = "子表数据对象")
+    private List<SubEntityVo> subEntities;
+
     @Schema(description = "方法编码（可选）")
     private String methodCode;
 
-    @Schema(description = "子表数据对象")
-    private List<SubEntityVo> subEntities;
 }

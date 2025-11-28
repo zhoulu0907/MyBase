@@ -597,4 +597,13 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
         return loginUserCtx;
     }
 
+
+
+    @Override
+    protected Map<String, Object> processDataAndSetDefaults(Map<String, Object> data,
+            List<MetadataEntityFieldDO> fields) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'processDataAndSetDefaults'");
+    }
+
 }

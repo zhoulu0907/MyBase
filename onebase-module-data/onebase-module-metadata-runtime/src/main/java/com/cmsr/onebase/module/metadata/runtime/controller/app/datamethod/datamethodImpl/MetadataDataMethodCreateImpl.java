@@ -143,7 +143,7 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
                     case "owner_id":
                     case "ownerid":
                         // 设置为当前登录用户ID
-                        Long currentUserId = WebFrameworkUtils.getLoginUserId();
+                        Long currentUserId = SecurityFrameworkUtils.getLoginUserId();
                         if (currentUserId != null) {
                             processedData.put(fieldName, currentUserId);
                         } else {
@@ -167,7 +167,7 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
                         break;
                     case "creator":
                         // 设置为当前登录用户ID
-                        Long creatorUserId = WebFrameworkUtils.getLoginUserId();
+                        Long creatorUserId = SecurityFrameworkUtils.getLoginUserId();
                         if (creatorUserId != null) {
                             processedData.put(fieldName, creatorUserId);
                         } else {
@@ -177,7 +177,7 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
                         break;
                     case "updater":
                         // 设置为当前登录用户ID
-                        Long updaterUserId = WebFrameworkUtils.getLoginUserId();
+                        Long updaterUserId = SecurityFrameworkUtils.getLoginUserId();
                         if (updaterUserId != null) {
                             processedData.put(fieldName, updaterUserId);
                         } else {

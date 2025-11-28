@@ -403,7 +403,6 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
 
             //5. 处理数据并设置默认值
             Map<String, Object> processedData = processDataAndSetDefaults(requestContext.getData(), fields);
-
             context.setProcessedData(processedData);
 
             // 6. 功能权限校验
@@ -483,10 +482,7 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
         return convertedData;
     }
 
-    protected Map<String, Object> processDataAndSetDefaults(Map<String, Object> data, List<MetadataEntityFieldDO> fields) {
-
-        return null;
-    }
+    protected abstract Map<String, Object> processDataAndSetDefaults(Map<String, Object> data, List<MetadataEntityFieldDO> fields);
 
     // ========== 抽象方法 ==========
 
