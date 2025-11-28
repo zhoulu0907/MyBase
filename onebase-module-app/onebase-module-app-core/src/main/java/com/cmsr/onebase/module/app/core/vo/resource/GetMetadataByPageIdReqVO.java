@@ -1,10 +1,8 @@
-package com.cmsr.onebase.module.app.build.vo.appresource;
+package com.cmsr.onebase.module.app.core.vo.resource;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-
-import java.util.List;
 
 /**
  * @ClassName GetMetadataByPageIdReqVO

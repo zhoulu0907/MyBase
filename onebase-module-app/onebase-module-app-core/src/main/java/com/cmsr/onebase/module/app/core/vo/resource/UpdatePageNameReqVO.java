@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.app.build.vo.appresource;
+package com.cmsr.onebase.module.app.core.vo.resource;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
