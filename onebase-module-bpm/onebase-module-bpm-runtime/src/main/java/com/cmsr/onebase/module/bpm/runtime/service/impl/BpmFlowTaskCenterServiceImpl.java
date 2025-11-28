@@ -15,6 +15,7 @@ import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
 import com.cmsr.onebase.module.bpm.core.enums.BpmBusinessStatusEnum;
 import com.cmsr.onebase.module.bpm.core.service.BpmEngineDefExtService;
 import com.cmsr.onebase.module.bpm.core.vo.*;
+import com.cmsr.onebase.module.bpm.runtime.convert.BpmTaskCenterConvert;
 import com.cmsr.onebase.module.bpm.runtime.service.BpmFlowTaskCenterService;
 import com.cmsr.onebase.module.bpm.runtime.vo.*;
 import com.cmsr.onebase.module.system.api.user.AdminUserApi;
@@ -23,7 +24,6 @@ import com.github.pagehelper.PageHelper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.warm.flow.core.dto.DefJson;
 import org.dromara.warm.flow.core.dto.NodeJson;
@@ -37,7 +37,6 @@ import org.dromara.warm.flow.core.service.TaskService;
 import org.dromara.warm.flow.core.service.UserService;
 import org.dromara.warm.flow.core.service.impl.BpmConstants;
 import org.dromara.warm.flow.core.utils.StreamUtils;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -68,6 +67,8 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
 
     @Resource
     private BpmTaskCenterMapper bpmTaskCenterMapper;
+
+    private final BpmTaskCenterConvert bpmTaskCenterConvert = BpmTaskCenterConvert.INSTANCE;
 
     private List<String> splitToList(String str) {
         if (StringUtils.isBlank(str)) {
@@ -121,7 +122,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         pageReqVO.setFlowStatusList(splitToFlowStatusList(pageReqVO.getFlowStatus()));
 
         // 处理发起人参数
-        pageReqVO.setInitiatorIdList(splitToList(pageReqVO.getInitiatorId()));
+        pageReqVO.setInitiatorIdList(splitToLongList(pageReqVO.getInitiatorId()));
 
         com.github.pagehelper.Page<BpmTodoTaskDTO> pageResult = PageHelper
                 .startPage(pageReqVO.getPageNo(), pageReqVO.getPageSize())
@@ -130,47 +131,17 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         List<BpmFlowTodoTaskVO> todoTaskList = new ArrayList<>();
 
         for (BpmTodoTaskDTO flowTaskExt : pageResult.getResult()) {
-            try {
-                BpmFlowTodoTaskVO todoTaskVO = getBpmFlowTodoTaskVO(flowTaskExt);
-                todoTaskList.add(todoTaskVO);
-            } catch (Exception e) {
-                // 记录日志并跳过异常项
-                throw new RuntimeException(e);
-            }
+            BpmFlowTodoTaskVO todoTaskVO = bpmTaskCenterConvert.toTodoTaskVO(flowTaskExt);
+
+            // 处理代理逻辑
+            handleAgentLogic(todoTaskVO, flowTaskExt.getAgentId(), flowTaskExt.getBpmTitle(), loginUserId);
+            todoTaskList.add(todoTaskVO);
         }
 
         // 返回新的PageResult
         return new PageResult<>(todoTaskList, pageResult.getTotal());
     }
 
-    @NotNull
-    private static BpmFlowTodoTaskVO getBpmFlowTodoTaskVO(BpmTodoTaskDTO flowTaskExt) {
-        Long loginUserId = WebFrameworkUtils.getLoginUserId();
-
-        BpmFlowTodoTaskVO todoTaskVO = new BpmFlowTodoTaskVO();
-        todoTaskVO.setId(flowTaskExt.getId());
-        todoTaskVO.setTaskId(flowTaskExt.getId());
-        todoTaskVO.setInstanceId(flowTaskExt.getInstanceId());
-        todoTaskVO.setFlowStatus(flowTaskExt.getFlowStatus());
-        todoTaskVO.setTaskId(flowTaskExt.getId());
-        todoTaskVO.setNodeCode(flowTaskExt.getNodeCode());
-        todoTaskVO.setProcessTitle(flowTaskExt.getBpmTitle());
-        todoTaskVO.setSubmitTime(flowTaskExt.getSubmitTime());
-        todoTaskVO.setFormSummary(flowTaskExt.getFormSummary());
-        todoTaskVO.setArrivalTime(flowTaskExt.getCreateTime());
-        todoTaskVO.setBusinessId(flowTaskExt.getBindingViewId());
-
-        if (flowTaskExt.getAgentId() != null && Objects.equals(loginUserId, flowTaskExt.getAgentId())) {
-            todoTaskVO.setProcessTitle(BpmConstants.AGENT_TITLE_PREFIX + flowTaskExt.getBpmTitle());
-        }
-
-        todoTaskVO.setInitiator(new UserBasicInfoVO());
-        todoTaskVO.getInitiator().setUserId(flowTaskExt.getInitiatorId());
-        todoTaskVO.getInitiator().setName(flowTaskExt.getInitiatorName());
-        todoTaskVO.getInitiator().setAvatar(flowTaskExt.getInitiatorAvatar());
-
-        return todoTaskVO;
-    }
 
     /**
      * 获取流程已办分页
@@ -197,26 +168,9 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
 
         List<BpmFlowDoneTaskVO> doneTaskList = new ArrayList<>();
         for (BpmDoneTaskDTO doneTaskDTO : pageResult.getResult()) {
-            BpmFlowDoneTaskVO doneTaskVO = new BpmFlowDoneTaskVO();
-            doneTaskVO.setTaskId(doneTaskDTO.getTaskId());
-            doneTaskVO.setHisTaskId(doneTaskDTO.getId());
-            doneTaskVO.setInstanceId(doneTaskDTO.getInstanceId());
-            doneTaskVO.setProcessTitle(doneTaskDTO.getBpmTitle());
-            doneTaskVO.setFormSummary(doneTaskDTO.getFormSummary());
-            doneTaskVO.setHandleTime(doneTaskDTO.getUpdateTime());
-            doneTaskVO.setTaskStatus(doneTaskDTO.getTaskFlowStatus());
-            doneTaskVO.setBusinessId(doneTaskDTO.getBindingViewId());
-
-            doneTaskVO.setInitiator(new UserBasicInfoVO());
-            doneTaskVO.getInitiator().setUserId(doneTaskDTO.getInitiatorId());
-            doneTaskVO.getInitiator().setName(doneTaskDTO.getInitiatorName());
-            doneTaskVO.getInitiator().setAvatar(doneTaskDTO.getInitiatorAvatar());
-
-            // 判断代理执行
-            if (doneTaskDTO.getAgentId() != null && Objects.equals(loginUserId, doneTaskDTO.getAgentId())) {
-                doneTaskVO.setProcessTitle(BpmConstants.AGENT_TITLE_PREFIX + doneTaskDTO.getBpmTitle());
-            }
-
+            BpmFlowDoneTaskVO doneTaskVO = bpmTaskCenterConvert.toDoneTaskVO(doneTaskDTO);
+            // 处理代理逻辑
+            handleAgentLogic(doneTaskVO, doneTaskDTO.getAgentId(), doneTaskDTO.getBpmTitle(), loginUserId);
             doneTaskList.add(doneTaskVO);
         }
 
@@ -240,20 +194,11 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
 
         com.github.pagehelper.Page<BpmMyInstanceDTO> pageResult = PageHelper
                 .startPage(pageReqVO.getPageNo(), pageReqVO.getPageSize())
-                .doSelectPage(() -> bpmTaskCenterMapper.getMyCreatePage(pageReqVO, String.valueOf(loginUserId)));
+                .doSelectPage(() -> bpmTaskCenterMapper.getMyCreatePage(pageReqVO, loginUserId));
 
         List<BpmMyCreatedVO> list = new ArrayList<>();
         for (BpmMyInstanceDTO flowInstance : pageResult.getResult()) {
-            BpmMyCreatedVO bpmMyCreatedVO = new BpmMyCreatedVO();
-            bpmMyCreatedVO.setId(flowInstance.getId());
-            bpmMyCreatedVO.setProcessTitle(flowInstance.getBpmTitle());
-            bpmMyCreatedVO.setFlowStatus(flowInstance.getFlowStatus());
-            bpmMyCreatedVO.setFormSummary(flowInstance.getFormSummary());
-            bpmMyCreatedVO.setSubmitTime(flowInstance.getSubmitTime());
-            bpmMyCreatedVO.setCreateTime(flowInstance.getCreateTime());
-            bpmMyCreatedVO.setUpdateTime(flowInstance.getUpdateTime());
-            bpmMyCreatedVO.setInstanceId(flowInstance.getId());
-            bpmMyCreatedVO.setBusinessId(flowInstance.getBindingViewId());
+            BpmMyCreatedVO bpmMyCreatedVO = bpmTaskCenterConvert.toMyCreatedVO(flowInstance);
 
             //设置当前节点处理人
             List<Task> flowTaskList = taskService.getByInsId(flowInstance.getId());
@@ -265,8 +210,11 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
                 List<Long> processedByIds = userList.stream()
                         .map(user -> Long.valueOf(user.getProcessedBy()))
                         .collect(Collectors.toList());
+
                 CommonResult<List<AdminUserRespDTO>> dtos = adminUserApi.getUserList(processedByIds);
                 List<Map<String, Object>> currentNodeHandler = new ArrayList<>();
+
+                // todo：历史遗留，待修复
                 dtos.getData().forEach(dto -> {
                     Map<String, Object> map = new HashMap<>();
                     map.put("userId", dto.getId());
@@ -274,10 +222,11 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
                     map.put("avatar", dto.getAvatar());
                     currentNodeHandler.add( map);
                 });
+
                 bpmMyCreatedVO.setCurrentNodeHandler(currentNodeHandler);
             }
-            list.add(bpmMyCreatedVO);
 
+            list.add(bpmMyCreatedVO);
         }
 
         return new PageResult<>(list, pageResult.getTotal());
@@ -316,6 +265,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
 
         return nodeVOs;
     }
+
     /**
      * 获取流程抄送分页
      *
@@ -332,48 +282,44 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         pageReqVO.setFlowStatusList(splitToFlowStatusList(pageReqVO.getFlowStatus()));
 
         // 处理发起人参数
-        pageReqVO.setInitiatorIdList(splitToList(pageReqVO.getInitiatorId()));
+        pageReqVO.setInitiatorIdList(splitToLongList(pageReqVO.getInitiatorId()));
 
         com.github.pagehelper.Page<BpmCcRecordDTO> pageResult =  PageHelper
                 .startPage(pageReqVO.getPageNo(), pageReqVO.getPageSize())
                 .doSelectPage(() -> bpmFlowCcRecordRepository.getMapper().getCcPage(pageReqVO, String.valueOf(loginUserId)));
 
         // 转换 BpmCcRecordDTO 列表为 BpmCopyTaskPageResVO 列表
-        List<BpmCcTaskPageResVO> copyTaskList = pageResult.getResult().stream()
-                .map(this::convertToCcTaskVO)
-                .collect(Collectors.toList());
+        List<BpmCcTaskPageResVO> copyTaskList = new ArrayList<>();
+
+        for (BpmCcRecordDTO ccRecord : pageResult.getResult()) {
+            BpmCcTaskPageResVO ccTaskVO = bpmTaskCenterConvert.toCcTaskVO(ccRecord);
+            // 处理代理逻辑
+            handleAgentLogic(ccTaskVO, ccRecord.getAgentId(), ccRecord.getBpmTitle(), loginUserId);
+            copyTaskList.add(ccTaskVO);
+        }
 
         return new PageResult<>(copyTaskList, pageResult.getTotal());
     }
 
-    private BpmCcTaskPageResVO convertToCcTaskVO(BpmCcRecordDTO ccRecord) {
-        BpmCcTaskPageResVO vo = new BpmCcTaskPageResVO();
-        Long loginUserId = WebFrameworkUtils.getLoginUserId();
-
-        // 基本字段映射
-        vo.setId(ccRecord.getId());
-        vo.setProcessTitle(ccRecord.getBpmTitle());
-        vo.setFlowStatus(ccRecord.getFlowStatus());
-        vo.setArrivalTime(ccRecord.getCreateTime());
-        vo.setTaskId(ccRecord.getTaskId());
-        vo.setInstanceId(ccRecord.getInstanceId());
-        vo.setBusinessId(ccRecord.getBindingViewId());
-        vo.setViewed(BooleanUtils.toBoolean(ccRecord.getViewed()));
-
-        // 设置发起人信息
-        UserBasicInfoVO initiator = new UserBasicInfoVO();
-        initiator.setUserId(ccRecord.getInitiatorId());
-        initiator.setName(ccRecord.getInitiatorName());
-        initiator.setAvatar(ccRecord.getInitiatorAvatar());
-
-        // 判断代理执行
-        if (ccRecord.getAgentId() != null && Objects.equals(loginUserId, ccRecord.getAgentId())) {
-            vo.setProcessTitle(BpmConstants.AGENT_TITLE_PREFIX + ccRecord.getBpmTitle());
+    /**
+     * 处理代理逻辑：如果是代理执行，则在流程标题前添加"【代理审批】"前缀
+     *
+     * @param vo 任务VO（待办/已办/抄送）
+     * @param agentId 代理人ID
+     * @param originalTitle 原始流程标题
+     * @param loginUserId 当前登录用户ID
+     */
+    private void handleAgentLogic(Object vo, Long agentId, String originalTitle, Long loginUserId) {
+        if (agentId != null && Objects.equals(loginUserId, agentId)) {
+            String agentTitle = BpmConstants.AGENT_TITLE_PREFIX + originalTitle;
+            if (vo instanceof BpmFlowTodoTaskVO) {
+                ((BpmFlowTodoTaskVO) vo).setProcessTitle(agentTitle);
+            } else if (vo instanceof BpmFlowDoneTaskVO) {
+                ((BpmFlowDoneTaskVO) vo).setProcessTitle(agentTitle);
+            } else if (vo instanceof BpmCcTaskPageResVO) {
+                ((BpmCcTaskPageResVO) vo).setProcessTitle(agentTitle);
+            }
         }
-
-        vo.setInitiator(initiator);
-
-        return vo;
     }
 
 }

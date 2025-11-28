@@ -70,6 +70,7 @@ public class FlowSkip extends WarmFlowBaseEntity implements Skip {
     /**
      * 节点ID
      */
+    @Column(ignore = true)
     private Long nodeId;
 
     /* ==================== 以下为 Skip 接口方法实现 ==================== */

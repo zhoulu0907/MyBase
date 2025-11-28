@@ -44,14 +44,5 @@ public interface BpmTaskCenterMapper {
      * @param userId        当前用户ID
      * @return 结果
      */
-    List<BpmMyInstanceDTO> getMyCreatePage(BpmMyCreatedPageReqVO queryVO, String userId);
-
-//    /**
-//     * 查询当前用户的抄送
-//     *
-//     * @param page         分页
-//     * @param queryWrapper 条件
-//     * @return 结果
-//     */
-//    List<FlowTaskVo> getTaskCopyByPage(@Param("page") Page<FlowTaskVo> page, @Param(Constants.WRAPPER) QueryWrapper<FlowTaskBo> queryWrapper);
+    List<BpmMyInstanceDTO> getMyCreatePage(BpmMyCreatedPageReqVO queryVO, Long userId);
 }

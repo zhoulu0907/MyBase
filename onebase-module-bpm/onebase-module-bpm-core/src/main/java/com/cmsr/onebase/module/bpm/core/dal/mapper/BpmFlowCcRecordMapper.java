@@ -17,9 +17,9 @@ public interface BpmFlowCcRecordMapper extends BaseMapper<BpmFlowCcRecordDO> {
     /**
      * 获取抄送分页列表
      *
-     * @param reqVO
+     * @param queryVO
      * @param userId
      * @return
      */
-    List<BpmCcRecordDTO> getCcPage(BpmCcTaskPageReqVO reqVO, String userId);
+    List<BpmCcRecordDTO> getCcPage(BpmCcTaskPageReqVO queryVO, String userId);
 }

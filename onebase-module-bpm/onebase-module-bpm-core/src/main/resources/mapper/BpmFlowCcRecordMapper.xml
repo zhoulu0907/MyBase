@@ -68,7 +68,7 @@
 
         <!-- flowStatusList -->
         <if test="queryVO != null and queryVO.flowStatusList != null and queryVO.flowStatusList.size() > 0">
-            AND t1.flow_status IN
+            AND t2.flow_status IN
             <foreach collection="queryVO.flowStatusList" item="item" open="(" separator="," close=")">
                 #{item}
             </foreach>
@@ -76,7 +76,7 @@
 
         <!-- nodeCodeList -->
         <if test="queryVO != null and queryVO.nodeCodeList != null and queryVO.nodeCodeList.size() > 0">
-            AND t1.node_code IN
+            AND t2.node_code IN
             <foreach collection="queryVO.nodeCodeList" item="item" open="(" separator="," close=")">
                 #{item}
             </foreach>

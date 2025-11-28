@@ -76,8 +76,10 @@ public class FlowDefinition extends WarmFlowBaseEntity implements Definition {
 
     /* ==================== 以下为非数据库字段 ==================== */
 
+    @Column(ignore = true)
     private List<Node> nodeList = new ArrayList<>();
 
+    @Column(ignore = true)
     private List<User> userList = new ArrayList<>();
 
 

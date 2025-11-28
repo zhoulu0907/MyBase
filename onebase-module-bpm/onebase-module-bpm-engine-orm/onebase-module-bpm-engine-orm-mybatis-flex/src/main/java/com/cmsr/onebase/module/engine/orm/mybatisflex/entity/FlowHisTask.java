@@ -98,16 +98,19 @@ public class FlowHisTask extends WarmFlowBaseEntity implements HisTask {
     /**
      * 业务id
      */
+    @Column(ignore = true)
     private String businessId;
 
     /**
      * 权限标识 permissionFlag的list形式
      */
+    @Column(ignore = true)
     private List<String> permissionList;
 
     /**
      * 流程名称
      */
+    @Column(ignore = true)
     private String flowName;
 
 

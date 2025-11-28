@@ -94,6 +94,7 @@ public class FlowNode extends WarmFlowBaseEntity implements Node {
     /**
      * 跳转条件
      */
+    @Column(ignore = true)
     List<Skip> skipList = new ArrayList<>();
 
     /* ==================== 以下为 Node 接口方法实现 ==================== */

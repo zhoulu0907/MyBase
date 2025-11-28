@@ -64,16 +64,19 @@ public class FlowInstance extends WarmFlowBaseEntity implements Instance {
     /**
      *  审批表单是否自定义（Y是 N否）
      *  */
+    @Column(ignore = true)
     private String formCustom;
 
     /**
      * 审批表单路径
      * */
+    @Column(ignore = true)
     private String formPath;
 
     /**
      * 流程名称
      * */
+    @Column(ignore = true)
     private String flowName;
 
 

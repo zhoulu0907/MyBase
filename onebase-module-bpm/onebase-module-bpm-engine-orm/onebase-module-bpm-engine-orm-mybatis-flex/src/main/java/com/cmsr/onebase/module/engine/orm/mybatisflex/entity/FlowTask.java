@@ -57,22 +57,26 @@ public class FlowTask extends WarmFlowBaseEntity implements Task {
     /**
      * 流程名称
      */
+    @Column(ignore = true)
     private String flowName;
 
     /**
      * 业务id
      */
+    @Column(ignore = true)
     private String businessId;
 
 
     /**
      * 权限标识 permissionFlag的list形式
      */
+    @Column(ignore = true)
     private List<String> permissionList;
 
     /**
      * 流程用户列表
      */
+    @Column(ignore = true)
     private List<User> userList;
 
 

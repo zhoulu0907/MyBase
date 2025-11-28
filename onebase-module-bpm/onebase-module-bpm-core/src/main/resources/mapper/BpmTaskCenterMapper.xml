@@ -156,7 +156,6 @@
             where t.node_type = 1 and t.flow_status != 'draft'
             and t.deleted = 0 and t1.deleted = 0 and t2.deleted = 0 and t3.deleted = 0
             and (t1.processed_by = #{userId} or t4.agent_id = #{userId})
-        ) tf
 
         <!-- 动态条件开始 -->
 
@@ -179,7 +178,7 @@
 
         <!-- flowStatusList -->
         <if test="queryVO != null and queryVO.flowStatusList != null and queryVO.flowStatusList.size() > 0">
-            AND t1.flow_status IN
+            AND t.flow_status IN
             <foreach collection="queryVO.flowStatusList" item="item" open="(" separator="," close=")">
                 #{item}
             </foreach>
@@ -187,7 +186,7 @@
 
         <!-- nodeCodeList -->
         <if test="queryVO != null and queryVO.nodeCodeList != null and queryVO.nodeCodeList.size() > 0">
-            AND t1.node_code IN
+            AND t2.node_code IN
             <foreach collection="queryVO.nodeCodeList" item="item" open="(" separator="," close=")">
                 #{item}
             </foreach>
@@ -250,7 +249,7 @@
               t.updater,
               t.update_time
           from bpm_flow_instance t
-                   inner join bpm_flow_instance_biz_ext t3 on t.id = t3.instance_id
+                inner join bpm_flow_instance_biz_ext t3 on t.id = t3.instance_id
           where t.deleted = 0 and t3.deleted = 0
             <!-- 动态条件开始 -->
             AND t.creator = #{userId}
@@ -274,7 +273,7 @@
 
             <!-- flowStatusList -->
             <if test="queryVO != null and queryVO.flowStatusList != null and queryVO.flowStatusList.size() > 0">
-                AND t1.flow_status IN
+                AND t.flow_status IN
                 <foreach collection="queryVO.flowStatusList" item="item" open="(" separator="," close=")">
                     #{item}
                 </foreach>
@@ -282,7 +281,7 @@
 
             <!-- nodeCodeList -->
             <if test="queryVO != null and queryVO.nodeCodeList != null and queryVO.nodeCodeList.size() > 0">
-                AND t1.node_code IN
+                AND t.node_code IN
                 <foreach collection="queryVO.nodeCodeList" item="item" open="(" separator="," close=")">
                     #{item}
                 </foreach>
@@ -306,6 +305,6 @@
                     ORDER BY t.create_time DESC
                 </otherwise>
             </choose>
-        ) tf where rn = 1
+        ) tf
     </select>
 </mapper>
