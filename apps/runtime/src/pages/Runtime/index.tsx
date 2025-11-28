@@ -1,7 +1,6 @@
-import AvatarSVG from '@/assets/images/avatar.svg';
 import { useI18n } from '@/hooks/useI18n';
 import { UserPermissionManager } from '@/utils/permission';
-import { Dropdown, Input, Layout, Menu, Tree } from '@arco-design/web-react';
+import { Input, Layout, Menu, Tree } from '@arco-design/web-react';
 import { IconDown, IconSearch } from '@arco-design/web-react/icon';
 import {
   menuSignal,
@@ -16,6 +15,7 @@ import { getPermissionInfo } from '@onebase/platform-center';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { AppHeader } from './components/header';
 import RuntimeMenuItem from './components/menuItem';
 import PreviewContainer from './components/preview';
 import './components/TaskCenter/style/taskSide.less';
@@ -206,6 +206,7 @@ const Runtime: React.FC = () => {
   return (
     <div className={styles.runtimePage}>
       <Layout style={{ height: '100%' }}>
+        <AppHeader />
         <Layout>
           <Sider className={styles.sider}>
             <div className={styles.siderHeader}>
@@ -241,15 +242,6 @@ const Runtime: React.FC = () => {
           <Content className={styles.content}>
             <div className={styles.contentHeader}>
               <div className={styles.contentTitle}>{curMenu.value?.menuName}</div>
-              <div className={styles.userInfo}>
-                {nickname || '未登录'}
-
-                <Dropdown droplist={userMenu} position="bottom">
-                  <div className={styles.userDropdown}>
-                    <img src={AvatarSVG} alt="avatar" />
-                  </div>
-                </Dropdown>
-              </div>
             </div>
             {curMenu?.value?.menuCode && curMenu?.value?.menuCode?.indexOf('TASK-') >= 0 ? (
               <TaskCenterPage curMenuCode={curMenu.value.menuCode} />
