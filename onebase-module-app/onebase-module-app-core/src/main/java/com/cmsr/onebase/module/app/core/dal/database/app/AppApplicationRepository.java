@@ -1,138 +1,123 @@
 package com.cmsr.onebase.module.app.core.dal.database.app;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.enums.OwnerTagEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.data.base.BaseDO;
-import com.cmsr.onebase.framework.common.security.dto.LoginUser;
-import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
-import com.cmsr.onebase.module.app.core.dal.dataobject.app.ApplicationDO;
-import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationDO;
+import com.cmsr.onebase.module.app.core.dal.mapper.AppApplicationMapper;
 import com.cmsr.onebase.module.app.core.vo.app.ApplicationPageReqVO;
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Compare;
-import org.anyline.entity.Order;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryMethods;
+import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.core.row.Row;
+import com.mybatisflex.core.tenant.TenantManager;
+import com.mybatisflex.spring.service.impl.ServiceImpl;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
+
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
-import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppApplicationTableDef.APP_APPLICATION;
 
 /**
  * @Author：huangjie
  * @Date：2025/8/6 14:08
  */
 @Repository
-public class AppApplicationRepository extends DataRepository<ApplicationDO> {
+public class AppApplicationRepository extends ServiceImpl<AppApplicationMapper, AppApplicationDO> {
 
-    public AppApplicationRepository() {
-        super(ApplicationDO.class);
-    }
-
-    public PageResult<ApplicationDO> selectPage(ApplicationPageReqVO pageReqVO) {
-        ConfigStore configs = new DefaultConfigStore();
-        if (StringUtils.isNotBlank(pageReqVO.getName())) {
-            configs.and(Compare.LIKE, "app_name", pageReqVO.getName());
-        }
-        if (pageReqVO.getStatus() != null) {
-            configs.and(Compare.EQUAL, ApplicationDO.APP_STATUS, pageReqVO.getStatus());
-        }
-
-        if (StringUtils.isNotBlank(pageReqVO.getPublishModel())) {
-            configs.and(Compare.EQUAL, ApplicationDO.PUBLISH_MODEL, pageReqVO.getPublishModel());
-        }
-        if (pageReqVO.getOwnerTag() != null && pageReqVO.getOwnerTag().equals(OwnerTagEnum.MY.getValue())) {
-            LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
-            if (loginUser != null) {
-                configs.and(Compare.EQUAL, ApplicationDO.CREATOR, loginUser.getId());
-            }
-        }
+    public PageResult<AppApplicationDO> selectPage(ApplicationPageReqVO pageReqVO, Long userId) {
+        boolean filterByUser = pageReqVO.getOwnerTag() != null && pageReqVO.getOwnerTag().equals(OwnerTagEnum.MY.getValue()) && userId != null;
+        QueryWrapper queryWrapper = this.query()
+                .like(AppApplicationDO::getAppName, pageReqVO.getName(), StringUtils::isNotBlank)
+                .eq(AppApplicationDO::getAppStatus, pageReqVO.getStatus(), pageReqVO.getStatus() != null)
+                .eq(AppApplicationDO::getPublishModel, pageReqVO.getPublishModel(), StringUtils::isNotBlank)
+                .eq(AppApplicationDO::getCreator, userId, filterByUser);
         if (StringUtils.equalsIgnoreCase(pageReqVO.getOrderByTime(), "create")) {
-            configs.order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
+            queryWrapper = queryWrapper.orderBy(AppApplicationDO::getCreateTime, false);
         }
         if (StringUtils.equalsIgnoreCase(pageReqVO.getOrderByTime(), "update")) {
-            configs.order(BaseDO.UPDATE_TIME, Order.TYPE.DESC);
+            queryWrapper = queryWrapper.orderBy(AppApplicationDO::getUpdateTime, false);
         }
-        return findPageWithConditions(configs, pageReqVO.getPageNo(), pageReqVO.getPageSize());
+        Page<AppApplicationDO> pageQuery = Page.of(pageReqVO.getPageNo(), pageReqVO.getPageSize());
+        Page<AppApplicationDO> pageResult = this.page(pageQuery, queryWrapper);
+        return new PageResult<>(pageResult.getRecords(), pageResult.getTotalRow());
     }
 
-    public ApplicationDO findOneByAppCode(String appCode) {
-        ConfigStore configs = new DefaultConfigStore();
-        configs.eq("app_code", appCode);
-        return findOne(configs);
+    public long findOneByAppCode(String appCode) {
+        QueryWrapper queryWrapper = this.query().eq(AppApplicationDO::getAppCode, appCode);
+        return count(queryWrapper);
     }
 
-    public ApplicationDO findOneByUid(String uid) {
-        ConfigStore configs = new DefaultConfigStore();
-        configs.eq("app_uid", uid);
-        return findOne(configs);
+    public long findOneByUid(String uid) {
+        QueryWrapper queryWrapper = this.query().eq(AppApplicationDO::getAppUid, uid);
+        return count(queryWrapper);
     }
 
-    public ApplicationDO findByAppCodeAndIdNot(String appCode, Long id) {
-        ConfigStore configs = new DefaultConfigStore();
-        configs.eq("app_code", appCode);
-        configs.ne("id", id);
-        return findOne(configs);
-    }
-
-    public ApplicationDO findByUidAndIdNot(String uid, Long id) {
-        ConfigStore configs = new DefaultConfigStore();
-        configs.eq(ApplicationDO.APP_UID, uid);
-        configs.ne(ApplicationDO.ID, id);
-        return findOne(configs);
+    public long findByAppCodeAndIdNot(String appCode, Long id) {
+        QueryWrapper queryWrapper = this.query().eq(AppApplicationDO::getAppCode, appCode)
+                .ne(AppApplicationDO::getId, id);
+        return count(queryWrapper);
     }
 
     public Long countByTenantId(Long tenantId) {
-        ConfigStore configs = new DefaultConfigStore();
-        configs.eq(ApplicationDO.TENANT_ID, tenantId);
-        return countByConfig(configs);
+        QueryWrapper queryWrapper = this.query().eq(AppApplicationDO::getTenantId, tenantId);
+        return TenantManager.withoutTenantCondition(() -> this.count(queryWrapper));
     }
 
-    public List<ApplicationDO> getSimpleAppList(Integer status) {
-        ConfigStore configStore = new DefaultConfigStore();
-        configStore.eq(ApplicationDO.APP_STATUS, status);
-        configStore.order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
-        return findAllByConfig(configStore);
+    public List<AppApplicationDO> getSimpleAppList(Integer status) {
+        QueryWrapper queryWrapper = this.query().eq(AppApplicationDO::getAppStatus, status)
+                .orderBy(AppApplicationDO::getCreateTime, false);
+        return list(queryWrapper);
     }
 
-    public List<ApplicationDO> findAppApplicationByAppName(String appName) {
-        ConfigStore configStore = new DefaultConfigStore();
-        if (StringUtils.isNotBlank(appName)) {
-            configStore.and(Compare.LIKE, ApplicationDO.APP_NAME, appName);
-        }
-        configStore.order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
-        return findAllByConfig(configStore);
+    public List<AppApplicationDO> findAppApplicationByAppName(String appName) {
+        QueryWrapper queryWrapper = this.query()
+                .like(AppApplicationDO::getAppName, appName, StringUtils::isNotBlank)
+                .orderBy(AppApplicationDO::getUpdateTime, false)
+                .orderBy(AppApplicationDO::getCreateTime, false);
+        return list(queryWrapper);
     }
 
-    public List<ApplicationDO> finAppApplicationAll() {
-        ConfigStore configStore = new DefaultConfigStore();
-        configStore.order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
-        return findAllByConfig(configStore);
+    public Map<Long, Integer> countAppByTenantId() {
+        QueryWrapper queryWrapper = this.query()
+                .select(
+                        APP_APPLICATION.TENANT_ID.as("tenant_id"),
+                        QueryMethods.count(APP_APPLICATION.ID).as("counts")
+                ).groupBy(APP_APPLICATION.TENANT_ID);
+        List<Row> rows = TenantManager.withoutTenantCondition(() -> getMapper().selectRowsByQuery(queryWrapper));
+        Map<Long, Integer> result = rows.stream()
+                .collect(Collectors.toMap(
+                        row -> row.getLong("tenant_id"),
+                        row -> row.getInt("counts")
+                ));
+        return result;
     }
 
-    public List<ApplicationDO> findAppApplicationByAppIds(Collection<Long> appIds) {
-        ConfigStore configStore = new DefaultConfigStore();
-        if (CollectionUtils.isNotEmpty(appIds)) {
-            configStore.in(ApplicationDO.ID, appIds);
-        }
-        configStore.order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
-        return findAllByConfig(configStore);
+    public List<AppApplicationDO> findAppApplicationByAppIds(Collection<Long> appIds) {
+        QueryWrapper queryWrapper = this.query()
+                .in(AppApplicationDO::getId, appIds, CollectionUtils.isNotEmpty(appIds))
+                .orderBy(AppApplicationDO::getUpdateTime, false)
+                .orderBy(AppApplicationDO::getCreateTime, false);
+        return list(queryWrapper);
     }
 
-    public List<ApplicationDO> findMyAppApplicationByAppName(String appName) {
-        ConfigStore configStore = new DefaultConfigStore();
-        if (StringUtils.isNotBlank(appName)) {
-            configStore.and(Compare.LIKE, ApplicationDO.APP_NAME, appName);
-        }
-        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
-        if (loginUser == null) {
-            throw exception(AppErrorCodeConstants.NOT_LOGIN);
-        }
-        configStore.and(Compare.EQUAL, ApplicationDO.CREATOR, loginUser.getId());
-        configStore.order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
-        return findAllByConfig(configStore);
+    public List<AppApplicationDO> findMyAppApplicationByAppName(String appName, Long userId) {
+        QueryWrapper queryWrapper = this.query()
+                .like(AppApplicationDO::getAppName, appName, StringUtils::isNotBlank)
+                .eq(AppApplicationDO::getCreator, userId)
+                .orderBy(AppApplicationDO::getUpdateTime, false)
+                .orderBy(AppApplicationDO::getCreateTime, false);
+        return list(queryWrapper);
+    }
+
+    public void updateAppTimeByApplicationId(Long appId) {
+        this.updateChain().set(AppApplicationDO::getUpdateTime, LocalDateTime.now())
+                .eq(AppApplicationDO::getId, appId)
+                .update();
     }
 }

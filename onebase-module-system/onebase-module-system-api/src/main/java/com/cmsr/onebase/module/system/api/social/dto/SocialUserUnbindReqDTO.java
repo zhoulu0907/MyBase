@@ -22,7 +22,6 @@ public class SocialUserUnbindReqDTO {
     private Long userId;
     @Schema(description = "用户类型", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
     @InEnum(UserTypeEnum.class)
-    @NotNull(message = "用户类型不能为空")
     private Integer userType;
 
     @Schema(description = "社交平台的类型", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")

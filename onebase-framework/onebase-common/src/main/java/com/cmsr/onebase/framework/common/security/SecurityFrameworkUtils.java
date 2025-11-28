@@ -13,6 +13,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.util.StringUtils;
 
 import jakarta.servlet.http.HttpServletRequest;
+
 import java.util.Collections;
 
 /**
@@ -28,13 +29,14 @@ public class SecurityFrameworkUtils {
 
     public static final String LOGIN_USER_HEADER = "login-user";
 
-    private SecurityFrameworkUtils() {}
+    private SecurityFrameworkUtils() {
+    }
 
     /**
      * 从请求中，获得认证 Token
      *
-     * @param request 请求
-     * @param headerName 认证 Token 对应的 Header 名字
+     * @param request       请求
+     * @param headerName    认证 Token 对应的 Header 名字
      * @param parameterName 认证 Token 对应的 Parameter 名字
      * @return 认证 Token
      */
@@ -91,6 +93,22 @@ public class SecurityFrameworkUtils {
         return loginUser != null ? loginUser.getId() : null;
     }
 
+
+    /**
+     * 获得当前用户的编号，从上下文中
+     *
+     * @return 用户编号
+     */
+    @Nullable
+    public static Integer getLoginUserType() {
+        LoginUser loginUser = getLoginUser();
+        if (loginUser != null) {
+            return loginUser.getUserType();
+        }
+        return null;
+    }
+
+
     /**
      * 获得当前用户的昵称，从上下文中
      *
@@ -117,7 +135,7 @@ public class SecurityFrameworkUtils {
      * 设置当前用户
      *
      * @param loginUser 登录用户
-     * @param request 请求
+     * @param request   请求
      */
     public static void setLoginUser(LoginUser loginUser, HttpServletRequest request) {
         // 创建 Authentication，并设置到上下文

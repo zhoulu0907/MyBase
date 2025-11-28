@@ -927,11 +927,11 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         // 构建新的关系数据
         EntityRelationshipSaveReqVO r = new EntityRelationshipSaveReqVO();
         r.setRelationName("数据选择关系");
-        r.setSourceEntityId(full.getEntityId().toString());
-        r.setTargetEntityId(targetEntityId.toString());
+        r.setSourceEntityId(targetEntityId.toString());
+        r.setTargetEntityId(full.getEntityId().toString());
         r.setRelationshipType(RelationshipTypeEnum.ONE_TO_MANY.getRelationshipType());
-        r.setSourceFieldId(fieldId.toString());
-        r.setTargetFieldId(targetFieldId.toString());
+        r.setSourceFieldId(targetFieldId.toString());
+        r.setTargetFieldId(fieldId.toString());
         r.setCascadeType("READ");
         r.setDescription("数据选择的一对多关系");
         r.setAppId(appId);
@@ -2584,27 +2584,29 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         }
 
         DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and(MetadataEntityRelationshipDO.SOURCE_ENTITY_ID, field.getEntityId());
-        configStore.and(MetadataEntityRelationshipDO.SOURCE_FIELD_ID, String.valueOf(field.getId()));
+        configStore.and(MetadataEntityRelationshipDO.TARGET_ENTITY_ID, field.getEntityId());
+        configStore.and(MetadataEntityRelationshipDO.TARGET_FIELD_ID, String.valueOf(field.getId()));
         List<MetadataEntityRelationshipDO> relationships = metadataEntityRelationshipBuildService.findAllByConfig(configStore);
+
         if (relationships == null || relationships.isEmpty()) {
             return null;
         }
         MetadataEntityRelationshipDO relationship = relationships.get(0);
-        if (relationship.getTargetEntityId() == null || relationship.getTargetFieldId() == null) {
+        if (relationship == null || relationship.getSourceEntityId() == null || relationship.getSourceFieldId() == null) {
             return null;
         }
 
         DataSelectionConfig dataSelectionConfig = new DataSelectionConfig();
-        dataSelectionConfig.setTargetEntityId(relationship.getTargetEntityId());
+        dataSelectionConfig.setTargetEntityId(relationship.getSourceEntityId());
         try {
-            dataSelectionConfig.setTargetFieldId(Long.valueOf(relationship.getTargetFieldId()));
+            dataSelectionConfig.setTargetFieldId(Long.valueOf(relationship.getSourceFieldId()));
         } catch (NumberFormatException ex) {
-            log.warn("解析数据选择配置目标字段ID失败，fieldId={}, targetFieldId={}", field.getId(), relationship.getTargetFieldId());
+            log.warn("解析数据选择配置目标字段ID失败，fieldId={}, sourceFieldId={}", field.getId(), relationship.getSourceFieldId());
             return null;
         }
         return dataSelectionConfig;
     }
+
 
     /**
      * 转换自动编号配置DO为响应VO

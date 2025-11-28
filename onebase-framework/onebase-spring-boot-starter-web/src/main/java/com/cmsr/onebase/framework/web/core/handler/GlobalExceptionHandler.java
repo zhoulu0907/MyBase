@@ -13,7 +13,6 @@ import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
-import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
@@ -465,7 +464,7 @@ public class GlobalExceptionHandler {
     private void buildExceptionLog(ApiErrorLogCreateReqDTO errorLog, HttpServletRequest request, Throwable e) {
         // 处理用户信息
         errorLog.setUserId(SecurityFrameworkUtils.getLoginUserId());
-        errorLog.setUserType(WebFrameworkUtils.getLoginUserType(request));
+        errorLog.setUserType(SecurityFrameworkUtils.getLoginUserType());
         // 设置异常字段
         errorLog.setExceptionName(e.getClass().getName());
         errorLog.setExceptionMessage(ExceptionUtils.getMessage(e));

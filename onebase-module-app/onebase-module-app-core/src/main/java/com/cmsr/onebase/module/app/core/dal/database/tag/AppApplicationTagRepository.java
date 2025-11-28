@@ -1,9 +1,9 @@
 package com.cmsr.onebase.module.app.core.dal.database.tag;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.app.ApplicationTagDO;
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
+import com.cmsr.onebase.framework.orm.repo.BaseAppRepository;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationTagDO;
+import com.cmsr.onebase.module.app.core.dal.mapper.AppApplicationTagMapper;
+import com.mybatisflex.core.query.QueryWrapper;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -13,60 +13,53 @@ import java.util.List;
  * @Date：2025/8/6 14:15
  */
 @Repository
-public class AppApplicationTagRepository extends DataRepository<ApplicationTagDO> {
+public class AppApplicationTagRepository extends BaseAppRepository<AppApplicationTagMapper, AppApplicationTagDO> {
 
-    public AppApplicationTagRepository() {
-        super(ApplicationTagDO.class);
+    public List<AppApplicationTagDO> findTagIdsByApplicationIds(List<Long> applicationIds) {
+        QueryWrapper queryWrapper = this.query()
+                .in(AppApplicationTagDO::getApplicationId, applicationIds);
+        return this.list(queryWrapper);
     }
 
     public List<Long> findTagIdsByApplicationId(Long applicationId) {
-        ConfigStore configStore = new DefaultConfigStore();
-        configStore.eq("application_id", applicationId);
-        return findAllByConfig(configStore).stream()
-                .map(ApplicationTagDO::getTagId)
-                .toList();
-    }
-
-    public  List<ApplicationTagDO>  findTagIdsByApplicationIds(List<Long> applicationIds) {
-        ConfigStore configStore = new DefaultConfigStore();
-        configStore.in("application_id", applicationIds);
-        return findAllByConfig(configStore);
+        QueryWrapper queryWrapper = this.query()
+                .select(AppApplicationTagDO::getTagId)
+                .eq(AppApplicationTagDO::getApplicationId, applicationId);
+        return this.objListAs(queryWrapper, Long.class);
     }
 
 
     public void deleteByApplicationId(Long applicationId) {
-        ConfigStore configStore = new DefaultConfigStore();
-        configStore.eq("application_id", applicationId);
-        this.deleteByConfig(configStore);
+        this.updateChain()
+                .eq(AppApplicationTagDO::getApplicationId, applicationId)
+                .remove();
     }
 
-    public void deleteByByApplicationIdAndTagsNotIn(Long applicationId, List<Long> tagIds) {
-        ConfigStore configStore = new DefaultConfigStore();
-        configStore.eq("application_id", applicationId);
-        configStore.notIn("tag_id", tagIds);
-        deleteByConfig(configStore);
+    public void deleteByApplicationIdAndTagsNotIn(Long applicationId, List<Long> tagIds) {
+        this.updateChain()
+                .eq(AppApplicationTagDO::getApplicationId, applicationId)
+                .notIn(AppApplicationTagDO::getTagId, tagIds)
+                .remove();
     }
 
     public void deleteByTagId(Long tagId) {
-        ConfigStore configStore = new DefaultConfigStore();
-        configStore.eq("tag_id", tagId);
-        deleteByConfig(configStore);
+        this.updateChain()
+                .eq(AppApplicationTagDO::getTagId, tagId)
+                .remove();
     }
 
     public void saveAll(Long applicationId, List<Long> tagIds) {
         for (Long tagId : tagIds) {
-            ConfigStore existConfig = new DefaultConfigStore();
-            existConfig.eq("application_id", applicationId);
-            existConfig.eq("tag_id", tagId);
-            long count = this.countByConfig(existConfig);
-            if (count == 0) {
-                ApplicationTagDO applicationTagDO = new ApplicationTagDO();
+            QueryWrapper queryWrapper = this.query()
+                    .eq(AppApplicationTagDO::getApplicationId, applicationId)
+                    .eq(AppApplicationTagDO::getTagId, tagId);
+            boolean exists = exists(queryWrapper);
+            if (!exists) {
+                AppApplicationTagDO applicationTagDO = new AppApplicationTagDO();
                 applicationTagDO.setApplicationId(applicationId);
                 applicationTagDO.setTagId(tagId);
-                this.insert(applicationTagDO);
+                this.save(applicationTagDO);
             }
         }
     }
-
-
 }

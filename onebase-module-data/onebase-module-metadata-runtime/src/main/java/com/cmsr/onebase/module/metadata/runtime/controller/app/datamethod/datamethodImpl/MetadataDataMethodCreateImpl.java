@@ -150,6 +150,8 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
                             log.warn("无法获取当前用户ID，owner_id字段将使用默认值");
                             if (StringUtils.hasText(field.getDefaultValue())) {
                                 processedData.put(fieldName, field.getDefaultValue());
+                            }else{
+                                processedData.put(fieldName, "1");
                             }
                         }
                         break;
@@ -297,7 +299,7 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
         Long entityId = context.getEntityId();
         List<MetadataEntityFieldDO> fields = context.getFields();
 
-        // 5. 获取临时数据源服务
+        // 获取临时数据源服务
         MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
         if (datasource == null) {
             throw exception(DATASOURCE_NOT_EXISTS);
@@ -307,13 +309,13 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
         log.info("成功切换到数据源：{}", datasource.getCode());
         context.setTemporaryService(temporaryService);
 
-        // 6. 动态业务表忽略租户条件 - 使用TenantUtils.executeIgnore包装操作
+        // 动态业务表忽略租户条件 - 使用TenantUtils.executeIgnore包装操作
         TenantUtils.executeIgnore(() -> {
 
             // 先应用存储策略（不包含需要 recordId 的策略，如 DATA_SELECTION）
             applyFieldStorageStrategies(processedData, fields, FieldValueTransformMode.STORE, null);
 
-            // 7. 执行插入
+            // log打印插入数据
             log.info("准备插入数据，processedData: {}", processedData);
             
             // 打印每个字段的详细信息
@@ -338,37 +340,37 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
                 }
             });
 
+            // 获取主键值
+            Object primaryKeyValue = getPrimaryKeyValue(processedData, fields);
+
             // AnyLine开启事务
             TransactionState transactionState = temporaryService.start();
-
-            Object insertResult = temporaryService.insert(quoteTableName(entity.getTableName()), dataRow);
-            log.info("创建数据成功，实体ID: {}, 表名: {}, 插入结果: {}", entityId, entity.getTableName(), insertResult);
-
-            // 8. 获取插入后的主键值，并更新 context
-            Object primaryKeyValue = getPrimaryKeyValue(processedData, fields);
-            if (primaryKeyValue == null && insertResult != null) {
-                // 如果从 processedData 中获取不到主键值，尝试从插入结果中获取
-                primaryKeyValue = insertResult;
-            }
-            if (primaryKeyValue != null) {
-                context.setId(primaryKeyValue);
-                // 现在可以处理需要 recordId 的策略（如 DATA_SELECTION）
-                applyFieldStorageStrategies(processedData, fields, FieldValueTransformMode.STORE, context);
-            }
-
             try {
+                Object insertResult = temporaryService.insert(quoteTableName(entity.getTableName()), dataRow);
+                log.info("创建数据成功，实体ID: {}, 表名: {}, 插入结果: {}", entityId, entity.getTableName(), insertResult);
+
+                // 获取插入后的主键值，并更新 context
+                if (primaryKeyValue == null && insertResult != null) {
+                    // 如果从 processedData 中获取不到主键值，尝试从插入结果中获取
+                    primaryKeyValue = insertResult;
+                }
+                if (primaryKeyValue != null) {
+                    context.setId(primaryKeyValue);
+                    // 现在可以处理需要 recordId 的策略（如 DATA_SELECTION）
+                    applyFieldStorageStrategies(processedData, fields, FieldValueTransformMode.STORE, context);
+                }
                 super.storeData(context);// 子表处理创建嵌套内部事务
                 log.info("子表处理完成，准备提交事务");
                 // 子表处理完成 提交事务
                 temporaryService.commit(transactionState);
             }catch (Exception e){
-                log.info("子表处理出现异常，准备回滚事务：{}",e.getMessage());
-                // 子表处理出现异常 回滚事务
+                log.info("数据插入出现异常，准备回滚事务：{}",e.getMessage());
+                // 数据插入出现异常 回滚事务
                 temporaryService.rollback(transactionState);
-                throw exception(DB_SUBENTITY_OPERATION_ERROR,e.getMessage());
+                throw exception(DB_OPERATION_ERROR_CREATE,e.getMessage());
             }
 
-            // 9. 查询插入后的完整数据
+            // 查询插入后的完整数据
             if (primaryKeyValue == null) {
                 log.warn("无法获取主键值，跳过查询插入后的数据，实体ID: {}, 表名: {}", entityId, entity.getTableName());
                 // 返回插入的数据
@@ -378,7 +380,7 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
             Map<String, Object> resultData = queryDataByIdWithService(temporaryService, quoteTableName(entity.getTableName()), primaryKeyValue, fields);
             applyFieldStorageStrategies(resultData, fields, FieldValueTransformMode.READ, context);
 
-            // 9. 构建响应（移除多表写入逻辑，直接返回结果）
+            // 构建响应（移除多表写入逻辑，直接返回结果）
             return buildDataResponse(entity, resultData, fields);
 
         });

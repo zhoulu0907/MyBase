@@ -32,8 +32,9 @@ public interface OAuth2TokenCommonApi {
 
     @GetMapping(PREFIX + "/check")
     @Operation(summary = "校验访问令牌")
+    @Parameter(name = "runMode", description = "运行模式", required = true, example = "platform/tenant/runtime")
     @Parameter(name = "accessToken", description = "访问令牌", required = true, example = "tudou")
-    CommonResult<OAuth2AccessTokenCheckRespDTO> checkAccessToken(@RequestParam("accessToken") String accessToken);
+    CommonResult<OAuth2AccessTokenCheckRespDTO> checkAccessToken(@RequestParam("runMode") String runMode, @RequestParam("accessToken") String accessToken);
 
     @PostMapping(PREFIX + "/remove")
     @Operation(summary = "移除访问令牌")

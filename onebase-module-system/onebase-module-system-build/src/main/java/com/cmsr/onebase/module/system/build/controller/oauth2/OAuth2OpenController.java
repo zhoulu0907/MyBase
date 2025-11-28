@@ -169,7 +169,7 @@ public class OAuth2OpenController {
                 null, null, null);
 
         // 校验令牌
-        OAuth2AccessTokenDO accessTokenDO = oauth2TokenService.checkAccessToken(token);
+        OAuth2AccessTokenDO accessTokenDO = oauth2TokenService.checkAccessToken(null, token);
         Assert.notNull(accessTokenDO, "访问令牌不能为空"); // 防御性检查
         return success(OAuth2OpenConvert.INSTANCE.convert2(accessTokenDO));
     }

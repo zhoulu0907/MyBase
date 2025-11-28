@@ -2,6 +2,7 @@ package com.cmsr.onebase.framework.security.core.filter;
 
 import com.cmsr.onebase.framework.common.biz.system.oauth2.OAuth2TokenCommonApi;
 import com.cmsr.onebase.framework.common.biz.system.oauth2.dto.OAuth2AccessTokenCheckRespDTO;
+import com.cmsr.onebase.framework.common.enums.RunModeEnum;
 import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
@@ -12,6 +13,7 @@ import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.security.config.SecurityProperties;
 import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.web.config.WebProperties;
 import com.cmsr.onebase.framework.web.core.handler.GlobalExceptionHandler;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import jakarta.servlet.FilterChain;
@@ -49,39 +51,42 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter {
     @SuppressWarnings("NullableProblems")
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
-        // 情况一，基于 header[login-user] 获得用户，例如说来自 Gateway 或者其它服务透传
-        LoginUser loginUser = buildLoginUserByHeader(request);
+        if (isLoginOrLogoutRequest(request)) {
+            // 如果是登录、登出、注册，那么从header中获取租户信息
+            TenantContextHolder.setTenantId(WebFrameworkUtils.getTenantIdFromHeader(request));
+            // 无需获取token和登录用户信息
+        } else {
+            // 其他接口，需要获取token和登录用户信息
+            // 情况一，基于 header[login-user] 获得用户，例如说来自 Gateway 或者其它服务透传
+            LoginUser loginUser = buildLoginUserByHeader(request);
+            // 情况二，基于 Token 获得用户
+            // 注意，这里主要满足直接使用 Nginx 直接转发到 Spring Cloud 服务的场景。
+            String token = null;
+            if (loginUser == null) {
+                token = SecurityFrameworkUtils.obtainAuthorization(request,
+                        securityProperties.getTokenHeader(), securityProperties.getTokenParameter());
+                if (StrUtil.isNotEmpty(token)) {
+                    try {
+                        // 1.1 基于 token 构建登录用户
+                        String runMode = getRunModeByUri(request);
 
-        // 情况二，基于 Token 获得用户
-        // 注意，这里主要满足直接使用 Nginx 直接转发到 Spring Cloud 服务的场景。
-        String token = null;
-        if (loginUser == null) {
-            token = SecurityFrameworkUtils.obtainAuthorization(request,
-                    securityProperties.getTokenHeader(), securityProperties.getTokenParameter());
-            if (StrUtil.isNotEmpty(token)) {
-                Integer userType = WebFrameworkUtils.getLoginUserType(request);
-                try {
-                    // 1.1 基于 token 构建登录用户
-                    loginUser = buildLoginUserByToken(token, userType);
-                    // 1.2 模拟 Login 功能，方便日常开发调试
-                    if (loginUser == null) {
-                        loginUser = mockLoginUser(request, token, userType);
+                        loginUser = buildLoginUserByToken(runMode, token);
+                        // 1.2 模拟 Login 功能，方便日常开发调试
+                        if (loginUser == null) {
+                            loginUser = mockLoginUser(request, token);
+                        }
+                    } catch (Throwable ex) {
+                        CommonResult<?> result = globalExceptionHandler.allExceptionHandler(request, ex);
+                        ServletUtils.writeJSON(response, result);
+                        return;
                     }
-                } catch (Throwable ex) {
-                    CommonResult<?> result = globalExceptionHandler.allExceptionHandler(request, ex);
-                    ServletUtils.writeJSON(response, result);
-                    return;
                 }
             }
-        }
-
-        // 设置当前用户
-        if (loginUser != null) {
-            SecurityFrameworkUtils.setLoginUser(loginUser, request);
-            TenantContextHolder.setTenantId(loginUser.getTenantId());
-
-            // 会话空闲检查：排除登录和登出请求
-            if (!isLoginOrLogoutRequest(request)) {
+            // 设置当前用户
+            if (loginUser != null) {
+                SecurityFrameworkUtils.setLoginUser(loginUser, request);
+                TenantContextHolder.setTenantId(loginUser.getTenantId());
+                // 会话空闲检查：排除登录和登出请求
                 boolean checkSuc = checkAndUpdateSessionIdle(loginUser, token);
                 if (!checkSuc) {
                     log.error("[BuildAuthenticationFilter][长时间内无操作，自动登出。]");
@@ -91,28 +96,22 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
         }
+
         // 继续过滤链
         chain.doFilter(request, response);
     }
 
-    private LoginUser buildLoginUserByToken(String token, Integer userType) {
+    private LoginUser buildLoginUserByToken(String runMode, String token) {
         try {
             // 校验访问令牌
-            OAuth2AccessTokenCheckRespDTO accessToken = oauth2TokenApi.checkAccessToken(token).getCheckedData();
+            OAuth2AccessTokenCheckRespDTO accessToken = oauth2TokenApi.checkAccessToken(runMode, token).getCheckedData();
             if (accessToken == null) {
                 return null;
             }
 
-            // 这里，需要屏蔽用户类型（管理员vs普通用户）匹配逻辑
-            // 注意：只有 /admin-api/* 和 /app-api/* 有 userType，才需要比对用户类型，类似 WebSocket 的 /ws/* 连接地址，是不需要比对用户类型的
-            // if (userType != null
-            //         && ObjUtil.notEqual(accessToken.getUserType(), userType)) {
-            //     throw new AccessDeniedException("错误的用户类型");
-            // }
-            log.info("buildLoginUserByToken userType:{}", userType);
-
             // 构建登录用户
             return new LoginUser().setId(accessToken.getUserId()).setUserType(accessToken.getUserType())
+                    .setRunMode(accessToken.getRunMode())
                     .setCorpId(accessToken.getCorpId())
                     .setInfo(accessToken.getUserInfo()) // 额外的用户信息
                     .setTenantId(accessToken.getTenantId()).setScopes(accessToken.getScopes())
@@ -130,10 +129,9 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter {
      *
      * @param request  请求
      * @param token    模拟的 token，格式为 {@link SecurityProperties#getMockSecret()} + 用户编号
-     * @param userType 用户类型
      * @return 模拟的 LoginUser
      */
-    private LoginUser mockLoginUser(HttpServletRequest request, String token, Integer userType) {
+    private LoginUser mockLoginUser(HttpServletRequest request, String token) {
         if (!securityProperties.getMockEnable()) {
             return null;
         }
@@ -143,7 +141,7 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter {
         }
         // 构建模拟用户
         Long userId = Long.valueOf(token.substring(securityProperties.getMockSecret().length()));
-        return new LoginUser().setId(userId).setUserType(userType)
+        return new LoginUser().setId(userId)
                 .setTenantId(WebFrameworkUtils.getTenantIdFromHeader(request));
     }
 
@@ -155,21 +153,31 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter {
         try {
             loginUserStr = URLDecoder.decode(loginUserStr, StandardCharsets.UTF_8); // 解码，解决中文乱码问题
             LoginUser loginUser = JsonUtils.parseObject(loginUserStr, LoginUser.class);
-
-            // 这里，需要屏蔽用户类型（管理员vs普通用户）匹配逻辑
-            // 注意：只有 /admin-api/* 和 /app-api/* 有 userType，才需要比对用户类型，类似 WebSocket 的 /ws/* 连接地址，是不需要比对用户类型的
-            // Integer userType = WebFrameworkUtils.getLoginUserType(request);
-            // if (userType != null
-            //         && loginUser != null
-            //         && ObjUtil.notEqual(loginUser.getUserType(), userType)) {
-            //     throw new AccessDeniedException("错误的用户类型");
-            // }
-
             return loginUser;
         } catch (Exception ex) {
             log.error("[buildLoginUserByHeader][解析 LoginUser({}) 发生异常]", loginUserStr, ex);
             ;
             throw ex;
+        }
+    }
+
+    /**
+     * 根据请求 URI 判断运行模式
+     *
+     * @param request
+     * @return
+     */
+    private String getRunModeByUri(HttpServletRequest request) {
+        String uri = request.getRequestURI();
+        if (uri == null) {
+            return null;
+        }
+        if (uri.startsWith(WebProperties.PLATFORM)) {
+            return RunModeEnum.PLATFORM.getValue();
+        } else if (uri.startsWith(WebProperties.BUILD)) {
+            return RunModeEnum.BUILD.getValue();
+        } else {
+            return null;
         }
     }
 

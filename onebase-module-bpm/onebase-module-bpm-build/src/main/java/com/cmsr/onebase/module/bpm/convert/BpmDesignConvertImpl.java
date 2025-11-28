@@ -1,15 +1,16 @@
 package com.cmsr.onebase.module.bpm.convert;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
+import com.cmsr.onebase.module.bpm.build.vo.design.BpmDesignVO;
+import com.cmsr.onebase.module.bpm.build.vo.design.strategy.NodeVOStrategyManager;
 import com.cmsr.onebase.module.bpm.core.dto.BpmDefinitionExtDTO;
 import com.cmsr.onebase.module.bpm.core.dto.BpmGlobalConfigDTO;
+import com.cmsr.onebase.module.bpm.core.dto.edge.EdgeExtDTO;
+import com.cmsr.onebase.module.bpm.core.enums.BpmNodeTypeEnum;
 import com.cmsr.onebase.module.bpm.core.enums.VersionStatusEnum;
 import com.cmsr.onebase.module.bpm.core.vo.design.BpmDefJsonVO;
-import com.cmsr.onebase.module.bpm.build.vo.design.BpmDesignVO;
-import com.cmsr.onebase.module.bpm.core.vo.design.node.base.BaseEdgeVO;
+import com.cmsr.onebase.module.bpm.core.vo.design.edge.base.BaseEdgeVO;
 import com.cmsr.onebase.module.bpm.core.vo.design.node.base.BaseNodeVO;
-import com.cmsr.onebase.module.bpm.build.vo.design.strategy.NodeVOStrategyManager;
-import com.cmsr.onebase.module.bpm.core.enums.BpmNodeTypeEnum;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -18,6 +19,7 @@ import org.dromara.warm.flow.core.dto.NodeJson;
 import org.dromara.warm.flow.core.dto.SkipJson;
 import org.dromara.warm.flow.core.enums.NodeType;
 import org.dromara.warm.flow.core.enums.PublishStatus;
+import org.dromara.warm.flow.core.enums.SkipType;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -206,11 +208,14 @@ public class BpmDesignConvertImpl implements BpmDesignConvert {
         for (NodeJson nodeJson : nodeJsonList) {
             for (SkipJson skipJson : nodeJson.getSkipList()) {
                 BaseEdgeVO edgeVO = new BaseEdgeVO();
+
+                if (StringUtils.isNotBlank(skipJson.getExt())) {
+                    edgeVO.setData(JsonUtils.parseObject(skipJson.getExt(), EdgeExtDTO.class));
+                }
+
                 edgeVO.setSourceNodeId(skipJson.getNowNodeCode());
                 edgeVO.setTargetNodeId(skipJson.getNextNodeCode());
                 edgeVO.setName(skipJson.getSkipName());
-                edgeVO.setType(skipJson.getSkipType());
-                edgeVO.setSkipCondition(skipJson.getSkipCondition());
 
                 // 添加边视图到列表
                 if (bpmDefJsonVO.getEdges() == null) {
@@ -287,8 +292,21 @@ public class BpmDesignConvertImpl implements BpmDesignConvert {
             skipJson.setNowNodeCode(sourceNodeCode);
             skipJson.setNextNodeCode(targetNodeCode);
             skipJson.setSkipName(edgeVO.getName());
-            skipJson.setSkipType(edgeVO.getType());
-            skipJson.setSkipCondition(edgeVO.getSkipCondition());
+
+            // 目前场景只有PASS
+            skipJson.setSkipType(SkipType.PASS.getKey());
+
+            // 处理条件分支
+            if (edgeVO.getData() != null) {
+                EdgeExtDTO edgeExtDTO = edgeVO.getData();
+                skipJson.setExt(JsonUtils.toJsonString(edgeExtDTO));
+                skipJson.setPriority(edgeExtDTO.getPriority());
+
+                if (!edgeExtDTO.getIsDefault()) {
+                    skipJson.setSkipCondition(JsonUtils.toJsonString(edgeExtDTO.getCondition()));
+                }
+            }
+
             skipJson.setCoordinate("0,0;0,0;");
 
             // 添加到源节点的跳过列表
