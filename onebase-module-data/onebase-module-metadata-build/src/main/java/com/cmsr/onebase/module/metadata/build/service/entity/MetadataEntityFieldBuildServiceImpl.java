@@ -903,6 +903,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             return;
         }
 
+        Long relationId = item.getDataSelectionConfig().getRelationId();
         Long targetEntityId = item.getDataSelectionConfig().getTargetEntityId();
         Long targetFieldId = item.getDataSelectionConfig().getTargetFieldId();
         
@@ -911,17 +912,21 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             return;
         }
 
-        // 查询数据库中已存在的关系（根据 sourceEntityId 和 sourceFieldId）
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and(MetadataEntityRelationshipDO.SOURCE_ENTITY_ID, full.getEntityId());
-        configStore.and(MetadataEntityRelationshipDO.SOURCE_FIELD_ID, fieldId.toString());
-        List<MetadataEntityRelationshipDO> existingRelations = 
-                metadataEntityRelationshipBuildService.findAllByConfig(configStore);
-
-        // 查找与当前字段相关的关系（应该只有一条）
+        // 查询数据库中已存在的关系
         MetadataEntityRelationshipDO existingRelation = null;
-        if (existingRelations != null && !existingRelations.isEmpty()) {
-            existingRelation = existingRelations.get(0);
+        if (relationId != null) {
+            // 如果传入了relationId，则直接根据ID查询（更新场景）
+            existingRelation = metadataEntityRelationshipBuildService.findById(relationId);
+        } else {
+            // 如果没有传入relationId，则根据sourceEntityId和sourceFieldId查询（新增场景）
+            DefaultConfigStore configStore = new DefaultConfigStore();
+            configStore.and(MetadataEntityRelationshipDO.SOURCE_ENTITY_ID, full.getEntityId());
+            configStore.and(MetadataEntityRelationshipDO.SOURCE_FIELD_ID, fieldId.toString());
+            List<MetadataEntityRelationshipDO> existingRelations = 
+                    metadataEntityRelationshipBuildService.findAllByConfig(configStore);
+            if (existingRelations != null && !existingRelations.isEmpty()) {
+                existingRelation = existingRelations.get(0);
+            }
         }
 
         // 构建新的关系数据
@@ -2597,6 +2602,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         }
 
         DataSelectionConfig dataSelectionConfig = new DataSelectionConfig();
+        dataSelectionConfig.setRelationId(relationship.getId());
         dataSelectionConfig.setTargetEntityId(relationship.getSourceEntityId());
         try {
             dataSelectionConfig.setTargetFieldId(Long.valueOf(relationship.getSourceFieldId()));
