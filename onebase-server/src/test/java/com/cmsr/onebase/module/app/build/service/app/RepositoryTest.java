@@ -8,12 +8,16 @@ import com.cmsr.onebase.module.app.build.vo.app.ApplicationRespVO;
 import com.cmsr.onebase.module.app.core.dal.database.AppSqlQueryRepository;
 import com.cmsr.onebase.module.app.core.dal.database.app.AppApplicationRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthDataGroupRepository;
+import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthPermissionRepository;
 import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthDataGroupDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthPermissionDO;
 import com.cmsr.onebase.module.app.core.dal.mapper.AppAuthRoleMapper;
 import com.cmsr.onebase.module.app.core.impl.auth.AppAuthRoleUserImpl;
 import com.cmsr.onebase.module.app.core.vo.app.AppUserPhotoDTO;
 import com.cmsr.onebase.module.app.core.vo.app.ApplicationPageReqVO;
+import com.cmsr.onebase.module.app.core.vo.auth.AuthPermissionReq;
 import com.cmsr.onebase.server.OneBaseServerApplication;
 import com.github.pagehelper.PageHelper;
 import lombok.Setter;
@@ -54,6 +58,9 @@ public class RepositoryTest {
 
     @Autowired
     private AppApplicationRepository appApplicationRepository;
+
+    @Autowired
+    private AppAuthPermissionRepository appAuthPermissionRepository;
 
     private static final Long APP_ID = 89762669056458752L;
 
@@ -133,5 +140,15 @@ public class RepositoryTest {
     public void test11() {
         Map<Long, Integer> longIntegerMap = appApplicationRepository.countAppByTenantId();
         System.out.println(longIntegerMap);
+    }
+
+    @Test
+    public void test12() {
+        AuthPermissionReq reqVO = new AuthPermissionReq();
+        reqVO.setApplicationId(155325722937688064L);
+        reqVO.setRoleId(155325722937688067L);
+        reqVO.setMenuId(155330550480928768L);
+        AppAuthPermissionDO result = appAuthPermissionRepository.findByQuery(reqVO);
+        System.out.println(result);
     }
 }

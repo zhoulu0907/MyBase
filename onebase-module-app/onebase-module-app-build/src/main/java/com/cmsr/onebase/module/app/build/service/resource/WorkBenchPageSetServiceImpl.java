@@ -68,24 +68,39 @@ public class WorkBenchPageSetServiceImpl implements WorkBenchPageSetService {
         AppResourceWorkbenchPageDO workBenchPageDO = this.buildEmptyWorkbenchPage(pageSetDO);
         appWorkbenchPageRepository.save(workBenchPageDO);
 
+        //2. 创建页面集和页面的关联关系
+        AppResourcePagesetPageDO pageSetPageDO = new AppResourcePagesetPageDO();
+        pageSetPageDO.setPageSetId(pageSetDO.getId());
+        pageSetPageDO.setPageType(PageEnum.WORKBENCH.getValue());
+        pageSetPageDO.setPageId(workBenchPageDO.getId());
+        pageSetPageDO.setIsDefault(1);
+        pageSetPageDO.setDefaultSeq(1);
+        pageSetPageDataRepository.save(pageSetPageDO);
     }
 
     @Override
     public LoadPageSetRespVO loadWorkbenchPageSet(AppResourcePagesetDO pageSetDO, List<AppResourcePagesetPageDO> pageSetPageDOs) {
 
-        List<AppResourceWorkbenchPageDO> pageDOs = pageSetPageDOs.stream()
-                .map(pageSetPageDO -> {
-                    AppResourceWorkbenchPageDO pageDO = appWorkbenchPageRepository.getById(pageSetPageDO.getPageId());
+        List<AppResourceWorkbenchPageDO> pageDOs;
 
-                    if (pageDO == null) {
-                        // 如果找不到对应的页面，记录错误并跳过
-                        System.err.println("Warning: Page not found for pageRef: " + pageSetPageDO.getPageId());
-                        return null;
-                    }
-                    return pageDO;
-                })
-                .filter(pageDO -> pageDO != null) // 过滤掉null值
-                .toList();
+        // 兼容旧数据：如果页面集-页面关联表中没有数据，直接通过pageSetId查询工作台页面
+        if (pageSetPageDOs == null || pageSetPageDOs.isEmpty()) {
+            pageDOs = appWorkbenchPageRepository.findByPageSetId(pageSetDO.getId());
+        } else {
+            pageDOs = pageSetPageDOs.stream()
+                    .map(pageSetPageDO -> {
+                        AppResourceWorkbenchPageDO pageDO = appWorkbenchPageRepository.getById(pageSetPageDO.getPageId());
+
+                        if (pageDO == null) {
+                            // 如果找不到对应的页面，记录错误并跳过
+                            System.err.println("Warning: Page not found for pageRef: " + pageSetPageDO.getPageId());
+                            return null;
+                        }
+                        return pageDO;
+                    })
+                    .filter(pageDO -> pageDO != null) // 过滤掉null值
+                    .toList();
+        }
 
         LoadPageSetRespVO loadPageSetRespVO = new LoadPageSetRespVO();
         loadPageSetRespVO.setId(pageSetDO.getId());
