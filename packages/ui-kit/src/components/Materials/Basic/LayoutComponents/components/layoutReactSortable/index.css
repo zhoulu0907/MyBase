@@ -1,0 +1,63 @@
+.content {
+    height: 100%;
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-content: flex-start;
+}
+
+.componentItem {
+    cursor: move;
+    /* padding: 6px; */
+    box-sizing: border-box;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    transition: border-color 0.2s ease;
+    position: relative;
+
+    &:hover {
+        border-color: #4fae7b;
+    }
+}
+
+.operationArea {
+    position: absolute;
+    top: -18px;
+    right: 16px;
+    height: 24px;
+    padding: 4px;
+    border: 1px solid #e5e6eb;
+    border-radius: 8px;
+    box-sizing: border-box;
+    background-color: #fff;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 10;
+
+    .divider {
+        margin: 0 4px;
+    }
+
+    .copyButton,
+    .deleteButton {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 16px;
+        color: #4e5969;
+        background-color: #fff;
+
+        &:hover {
+            transform: scale(1.1);
+        }
+    }
+
+    .deleteButton {
+        color: #f53f3f;
+    }
+}

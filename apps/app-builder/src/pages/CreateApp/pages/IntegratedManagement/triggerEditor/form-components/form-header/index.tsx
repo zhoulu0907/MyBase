@@ -60,7 +60,7 @@ function DropdownContent(props: { updateTitleEdit: (editing: boolean) => void })
 
   return (
     <Menu>
-      <Menu.Item
+      {/* <Menu.Item
         key="editTitle"
         onClick={(e: Event) => {
           e.stopPropagation();
@@ -69,7 +69,7 @@ function DropdownContent(props: { updateTitleEdit: (editing: boolean) => void })
         }}
       >
         修改节点名称
-      </Menu.Item>
+      </Menu.Item> */}
       <Menu.Item key="copy" onClick={handleCopy} disabled={registry.meta!.copyDisable === true}>
         复制
       </Menu.Item>

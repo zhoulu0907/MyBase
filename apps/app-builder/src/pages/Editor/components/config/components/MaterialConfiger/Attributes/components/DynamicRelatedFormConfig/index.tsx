@@ -2,6 +2,8 @@ import { getPopupContainer, useAppEntityStore } from '@onebase/ui-kit';
 import { Form, Select, Space } from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
 import styles from '../../index.module.less';
+import { registerConfigRenderer } from '../../registry';
+import { CONFIG_TYPES } from '@onebase/ui-kit';
 
 const FormItem = Form.Item;
 
@@ -115,3 +117,7 @@ const DynamicRelatedFormConfig: React.FC<DynamicRelatedFormConfigProps> = ({ han
 };
 
 export default DynamicRelatedFormConfig;
+
+registerConfigRenderer(CONFIG_TYPES.RELATED_FORM_DATA, ({ handlePropsChange, item, configs }) => (
+  <DynamicRelatedFormConfig handlePropsChange={handlePropsChange} item={item} configs={configs} />
+));

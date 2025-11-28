@@ -71,22 +71,24 @@ export interface PageDatasourceReq {
 }
 
 export interface PreviewDatasourceReq {
-  datasourceId: string;
-  tableId: string;
+  datasourceUuid: string;
+  tableUuid: string;
 }
 
 export interface ListTablesReq {
-  id: string;
+  uuid: string;
   writable?: number;
 }
 
 export interface ETLDatasource {
   id: string;
+  uuid: string;
   name: string;
 }
 
 export interface ETLTable {
   id: string;
+  uuid: string;
   name: string;
 }
 
@@ -94,10 +96,12 @@ export interface ELTColumn {
   fieldFqn: string;
   fieldName: string;
   fieldType: string;
+  displayName: string;
 }
 
 export interface ETLDatasourceOption {
   id: string;
+  uuid: string;
   name: string;
 }
 
@@ -106,7 +110,7 @@ export interface ListAppETLDatasourceParams {
   writable: number;
 }
 export interface ListTableColumnsReq {
-  tableId: string;
+  tableUuid: string;
 }
 
 export interface PageETLFlowReq {

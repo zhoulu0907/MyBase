@@ -57,6 +57,15 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [fieldOptions, setFieldOptions] = useState<{ label: string; value: string }[]>([]);
   const [childEntityOptions, setChildEntityOptions] = useState<{ label: string; value: string }[]>([]);
+
+  const numberValidator = (value: string | undefined, cb: (error?: React.ReactNode) => void) => {
+    if (value && !/^\d+(.\d{1,4})?$/.test(value)) {
+      cb('请输入数字');
+    } else {
+      cb();
+    }
+  };
+
   // 监听校验类型变化，控制格式校验类型字段的显示
   const handleValidationTypeChange = (value: string) => {
     if (value !== 'format') {
@@ -311,11 +320,17 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
         {ruleType === VALIDATION_TYPES.RANGE && (
           <Form.Item label="范围区间" required>
             <Space align="center" className={styles.rangeSpace}>
-              <Form.Item field="minValue" rules={[{ required: true, message: '请输入范围区间' }]}>
+              <Form.Item
+                field="minValue"
+                rules={[{ required: true, message: '请输入范围区间' }, { validator: numberValidator }]}
+              >
                 <Input placeholder="请输入范围区间" />
               </Form.Item>
               <span>~</span>
-              <Form.Item field="maxValue" rules={[{ required: true, message: '请输入范围区间' }]}>
+              <Form.Item
+                field="maxValue"
+                rules={[{ required: true, message: '请输入范围区间' }, { validator: numberValidator }]}
+              >
                 <Input placeholder="请输入范围区间" />
               </Form.Item>
             </Space>

@@ -3,6 +3,8 @@ import { getDeptUser, type AuthRoleUsersPageRespVO, type DeptAndUsersRespDTO, ty
 import { AddMembers } from '@onebase/common';
 import { debounce } from 'lodash-es';
 import { useCallback, useEffect, useState } from 'react';
+import { CONFIG_TYPES } from '@onebase/ui-kit';
+import { registerConfigRenderer } from '../../registry';
 
 export interface DynamicSelectScopeConfigProps {
   handlePropsChange: (key: string, value: string | number | boolean | any[]) => void;
@@ -134,3 +136,15 @@ const DynamicSelectScopeConfig: React.FC<DynamicSelectScopeConfigProps> = ({
 };
 
 export default DynamicSelectScopeConfig;
+
+registerConfigRenderer(
+  CONFIG_TYPES.DEPT_SELECT_SCOPE,
+  ({ id, handlePropsChange, item, configs }) => (
+    <DynamicSelectScopeConfig
+      id={id}
+      handlePropsChange={handlePropsChange}
+      item={item}
+      configs={configs}
+    />
+  )
+);

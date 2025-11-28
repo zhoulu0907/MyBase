@@ -45,7 +45,8 @@ const ALLOW_NODE_TYPES = [
   NodeType.IF_BLOCK,
   NodeType.CASE,
   NodeType.CASE_DEFAULT,
-  NodeType.MODAL
+  NodeType.MODAL,
+  NodeType.IPAAS
 ];
 
 const opCodeOptions = [
@@ -431,7 +432,8 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
         NodeType.DATA_UPDATE,
         NodeType.DATA_CALC,
         NodeType.LOOP,
-        NodeType.MODAL
+        NodeType.MODAL,
+        NodeType.IPAAS
       ]),
     []
   );

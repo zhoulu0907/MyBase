@@ -3,7 +3,7 @@ import WillDo from './page/WillDo';
 import Done from './page/IDone'
 import ICreated from './page/ICreated';
 import ICopied from './page/ICopied';
-import TaskProxy from './page/TaskProxy'
+import FlowProxy from './page/FlowProxy'
 
 const TaskCenterPage:FC<any> = ({curMenuId}) => {
     function renderPage() {
@@ -16,7 +16,7 @@ const TaskCenterPage:FC<any> = ({curMenuId}) => {
         } else if (curMenuId === 'TASK-icopied') {
             return <ICopied />
         } else if (curMenuId === 'TASK-taskproxy') {
-            return <TaskProxy />
+            return <FlowProxy />
         } else {
             return <section>123</section>
         }

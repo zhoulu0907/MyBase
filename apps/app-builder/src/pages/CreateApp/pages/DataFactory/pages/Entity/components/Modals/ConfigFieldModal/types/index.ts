@@ -31,6 +31,13 @@ export interface FieldFormValues {
     regexPattern: string;
     regexPrompt: string;
   };
+  dataSelectionConfig?: DataSelectionType;
+}
+
+// 数据选择配置
+export interface DataSelectionType {
+  targetEntityId: string;
+  targetFieldId: string;
 }
 
 // 字段配置弹窗属性
@@ -41,6 +48,7 @@ export interface ConfigFieldModalProps {
   successCallback: () => void;
   initialFields?: FieldFormValues[];
   gotoDictPage?: () => void;
+  entities?: EntityNode[];
 }
 
 // 字段操作接口
@@ -93,6 +101,7 @@ export interface FieldConfigPopoverProps {
   onCancel: (fieldType: string) => void;
   fields: any[];
   gotoDictPage?: () => void;
+  entities?: EntityNode[];
 }
 
 // 可排序表格属性
@@ -152,7 +161,7 @@ export interface AutoCodeRules {
   rules: AutoCodeRule[];
 }
 
-// 实体及子表字段
+// 资产及子表字段
 export interface EntityFieldsWithChildren {
   label: string;
   value: string;

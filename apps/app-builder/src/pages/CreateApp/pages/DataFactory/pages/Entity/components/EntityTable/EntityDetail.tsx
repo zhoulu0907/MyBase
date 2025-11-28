@@ -16,7 +16,7 @@ const EntityDetail: React.FC<EntityDetailProps> = ({ entity, reloadList }) => {
   // TODO(xiaoyi): 1. 改成常量
   const [activeTab, setActiveTab] = useState('fields');
 
-  // 当实体变化时，重置到第一个标签页
+  // 当资产变化时，重置到第一个标签页
   useEffect(() => {
     setActiveTab('fields');
   }, [entity.id]);

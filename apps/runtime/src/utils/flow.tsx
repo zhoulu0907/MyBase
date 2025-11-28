@@ -61,6 +61,7 @@ const ExecuteFlows: React.FC<FlowsProps> = ({ flows, inputParams }) => {
 
     if (res.success) {
       if (res.executionEnd) {
+        // 当前流程结束
         curFlowIndex++;
         await executeSingleFlow('');
         return;

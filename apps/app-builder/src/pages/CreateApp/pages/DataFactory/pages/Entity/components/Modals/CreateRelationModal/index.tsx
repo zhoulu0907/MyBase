@@ -140,7 +140,7 @@ const CreateRelationModal: React.FC<{
                 rules={[{ required: true, message: '请选择本表' }]}
               >
                 <Select
-                  placeholder="请选择业务实体"
+                  placeholder="请选择数据资产"
                   options={leftEntityOptions}
                   onChange={(values) => handleEntityChange(values, 'left')}
                   disabled
@@ -174,7 +174,7 @@ const CreateRelationModal: React.FC<{
                 rules={[{ required: true, message: '请选择关联表' }]}
               >
                 <Select
-                  placeholder="请选择业务实体"
+                  placeholder="请选择数据资产"
                   options={rightEntityOptions}
                   onChange={(values) => handleEntityChange(values, 'right')}
                 />

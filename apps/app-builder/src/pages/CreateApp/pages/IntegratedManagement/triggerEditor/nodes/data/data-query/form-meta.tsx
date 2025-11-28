@@ -26,6 +26,7 @@ import { type FlowNodeJSON } from '../../../typings';
 import { getDataNodeSource, getPrecedingNodes, validateNodeForm } from '../../utils';
 
 const ALLOW_DATANODE_TYPES = [
+  NodeType.DATA_QUERY,
   NodeType.DATA_QUERY_MULTIPLE,
   NodeType.LOOP,
   NodeType.IF,

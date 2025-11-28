@@ -129,7 +129,6 @@ const XSubTable: XSubTableSchema = {
       name: '校验',
       type: CONFIG_TYPES.VERIFY
     },
-    statusConfig,
     subTableConfig,
     layoutConfig,
     widthConfig

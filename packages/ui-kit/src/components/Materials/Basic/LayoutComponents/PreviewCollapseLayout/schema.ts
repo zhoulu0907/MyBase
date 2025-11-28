@@ -1,7 +1,6 @@
 import {
   baseConfig,
   baseDefault,
-  statusConfig,
   widthConfig,
   collapsedConfig,
   type ICommonBaseType,
@@ -21,19 +20,17 @@ import {
   COLLAPSED_VALUES
 } from '../../../constants';
 import type {
-  IBooleanConfigType,
   ILabelConfigType,
-  INumberConfigType,
   ISelectConfigType,
   IStatusConfigType,
-  ITextAreaConfigType,
   ITextConfigType,
   IWidthConfigType,
   TBooleanDefaultType,
   TSelectDefaultType,
   TTextDefaultType,
   TRadioDefaultType,
-  ICollapsedConfigType
+  ICollapsedConfigType,
+  ICollapsedStyleConfig
 } from '../../../types';
 
 export interface XCollapseLayoutSchema {
@@ -47,11 +44,9 @@ export type XCollapseLayoutEditData = Array<
   | ILabelConfigType
   | IStatusConfigType<TStatusSelectKeyType>
   | IWidthConfigType<TWidthSelectKeyType>
-  | INumberConfigType
   | ISelectConfigType<TWidthSelectKeyType | TStatusSelectKeyType>
-  | ITextAreaConfigType
-  | IBooleanConfigType
   | ICollapsedConfigType<TCollapsedSelectKeyType>
+  | ICollapsedStyleConfig
 >;
 
 export interface XCollapseLayoutConfig extends ICommonBaseType {
@@ -64,6 +59,14 @@ export interface XCollapseLayoutConfig extends ICommonBaseType {
     text: TTextDefaultType;
     display: TBooleanDefaultType | null;
   };
+
+  // 样式
+  collapseStyle: {
+    showBordered: boolean;
+    showDivider: boolean;
+    titleColor: string;
+    shapeColor: string;
+  },
 
   /**
    * 组件状态：可用、隐藏、只读
@@ -97,15 +100,42 @@ const XLCollapseLayout: XCollapseLayoutSchema = {
       name: '标题',
       type: CONFIG_TYPES.LABEL_INPUT
     },
+    {
+      key: 'collapseStyle',
+      name: '样式',
+      type: CONFIG_TYPES.COLLAPSED_STYLE
+    },
     collapsedConfig,
-    statusConfig,
+    {
+      key: 'status',
+      name: '显示状态',
+      type: CONFIG_TYPES.STATUS_RADIO,
+      range: [
+        {
+          key: STATUS_OPTIONS.DEFAULT,
+          text: STATUS_OPTIONS.DEFAULT,
+          value: STATUS_VALUES[STATUS_OPTIONS.DEFAULT]
+        },
+        {
+          key: STATUS_OPTIONS.HIDDEN,
+          text: STATUS_OPTIONS.HIDDEN,
+          value: STATUS_VALUES[STATUS_OPTIONS.HIDDEN]
+        }
+      ]
+    },
     widthConfig
   ],
   config: {
     ...baseDefault,
     label: {
-      text: '折叠布局',
+      text: '分组布局',
       display: null,
+    },
+     collapseStyle: {
+      showBordered: true,
+      showDivider: true,
+      titleColor: 'rgb(var(--primary-7))',
+      shapeColor: 'rgb(var(--primary-7))'
     },
     colCount: COLUMN_COUNT_VALUES[COLUMN_COUNT_OPTIONS.ONE],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],

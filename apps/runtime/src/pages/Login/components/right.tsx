@@ -61,17 +61,17 @@ const Right: React.FC = () => {
       form.setFieldValue('account', savedAccount);
     }
 
-    // 如果已经登录了就自动跳转到首
-    if (TokenManager.isTokenValid()) {
-      const redirectURL = getHashQueryParam('redirectURL');
-      if (redirectURL) {
-        window.location.href = redirectURL;
-      } else {
-        // 跳转到首页
-        navigate(`/onebase/runtime/${appId}`);
-      }
-      return;
-    }
+    // // 如果已经登录了就自动跳转到首页
+    // if (TokenManager.isTokenValid()) {
+    //   const redirectURL = getHashQueryParam('redirectURL');
+    //   if (redirectURL) {
+    //     window.location.href = redirectURL;
+    //   } else {
+    //     // 跳转到首页
+    //     navigate(`/onebase/runtime/${appId}`);
+    //   }
+    //   return;
+    // }
 
     handleGetApplication();
   }, []);

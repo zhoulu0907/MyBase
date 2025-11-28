@@ -20,7 +20,7 @@ interface CreateExternalModalProps {
   // 关闭弹窗的回调
   onClose: () => void;
   // 新建外部数据源后的回调
-  onCreate: (datasourceId: string) => void;
+  onCreate: (datasourceUUID: string) => void;
 }
 
 const CreateExternalModal: React.FC<CreateExternalModalProps> = ({ visible, onClose, onCreate }) => {
