@@ -13,7 +13,9 @@ export enum ElementType {
   DATE = 'date',
   DATE_RANGE = 'dateRange',
   SELECT = 'select',
-  SELECT_MULTIPLE = 'selectMultiple'
+  SELECT_MULTIPLE = 'selectMultiple',
+  USER_SELECT = 'userSelect',
+  USER_MULTIPLE = 'userMultiple'
 }
 
 export enum DateOperator {
@@ -33,7 +35,8 @@ type ComplexInfo = Record<
   | 'DATETIME_RANGE'
   | 'DATA_SELECTION_EQUALS'
   | 'DATA_SELECTION_NOT_EQUALS'
-  | 'DATA_SELECTION_CONTAINS',
+  | 'DATA_SELECTION_CONTAINS'
+  | 'USER_EQUALS',
   ComplexInfoItem
 >;
 
@@ -77,11 +80,24 @@ export enum InputKeyType {
 }
 
 export enum NumberKeyType {
-  XXX = 'XXX'
+  NUMBER_EQUALS = 'NUMBER_EQUALS',
+  NUMBER_NOT_EQUALS = 'NUMBER_NOT_EQUALS',
+  NUMBER_GREATER_THAN = 'NUMBER_GREATER_THAN',
+  NUMBER_GREATER_EQUALS = 'NUMBER_GREATER_EQUALS',
+  NUMBER_LESS_THAN = 'NUMBER_LESS_THAN',
+  NUMBER_LESS_EQUALS = 'NUMBER_LESS_EQUALS',
+  AGGREGATE_EQUALS = 'AGGREGATE_EQUALS',
+  AGGREGATE_NOT_EQUALS = 'AGGREGATE_NOT_EQUALS',
+  AGGREGATE_GREATER_THAN = 'AGGREGATE_GREATER_THAN',
+  AGGREGATE_GREATER_EQUALS = 'AGGREGATE_GREATER_EQUALS',
+  AGGREGATE_LESS_THAN = 'AGGREGATE_LESS_THAN',
+  AGGREGATE_LESS_EQUALS = 'AGGREGATE_LESS_EQUALS',
+  ID_EQUALS = 'ID_EQUALS',
+  ID_NOT_EQUALS = 'ID_NOT_EQUALS'
 } // 数字输入框
 
 export enum ScopeKeyType {
-  XXXX = 'XXXX'
+  AGGREGATE_RANGE = 'AGGREGATE_RANGE'
 } // 数字范围
 
 export const VARIABLE_MAP: Partial<Record<FieldType, FieldType[]>> = {
@@ -112,5 +128,9 @@ export const ComplexInfo: ComplexInfo = {
   DATA_SELECTION_CONTAINS: {
     type: ElementType.SELECT_MULTIPLE,
     options: approvalResultOptions
+  },
+  USER_EQUALS: {
+    type: ElementType.USER_SELECT,
+    options: []
   }
 };

@@ -1,10 +1,12 @@
 // render-element.tsx
-import { Input, Select, Button, DatePicker } from '@arco-design/web-react';
+import { Input, Select, Button, DatePicker, InputNumber } from '@arco-design/web-react';
+import { useState, useEffect, useRef } from 'react';
 import { IconLaunch } from '@arco-design/web-react/icon';
 import { FormulaEditor } from '@/components/FormulaEditor';
 import type { ConditionRule } from '../../constants';
 import styles from '../../siderbar-line.module.less';
 import { FieldType } from '../../constants';
+import { getUserPage, type PageParam } from '@onebase/platform-center';
 import {
   InputKeyType,
   NumberKeyType,
@@ -41,6 +43,28 @@ export const RenderElement: React.FC<RenderElementProps> = ({
   setFormulaVisible,
   formSummaryOptions
 }) => {
+  const getUserData = (elementTypeInfo: any) => {
+    const params: PageParam = {
+      pageNo: 1,
+      pageSize: 100
+    };
+    getUserPage(params)
+      .then((res: any) => {
+        if (Array.isArray(res?.list)) {
+          const selectArr: any[] = [];
+          res.list?.forEach((item: any) => {
+            selectArr.push({
+              value: item.id,
+              label: item.nickname
+            });
+          });
+          elementTypeInfo.options = selectArr;
+        }
+      })
+      .catch((err: any) => {
+        console.info('Api getUserPage Error:', err);
+      });
+  };
   const getVariableOptions = (item: any) => {
     return formSummaryOptions
       .filter((optionItem) => {
@@ -69,12 +93,21 @@ export const RenderElement: React.FC<RenderElementProps> = ({
   } else if (Object.values(ScopeKeyType).includes(switchKey as ScopeKeyType)) {
     elementTypeInfo.type = ElementType.SCOPE;
   }
+
   // 如果没有 就继续处理
   if (!elementTypeInfo.type) {
     if (switchKey in ComplexInfo) {
       elementTypeInfo = ComplexInfo[switchKey as keyof typeof ComplexInfo];
     }
   }
+  console.log(elementTypeInfo);
+
+  // 用户选择数据
+  useEffect(() => {
+    if (elementTypeInfo.type === ElementType.USER_SELECT) {
+      getUserData(elementTypeInfo);
+    }
+  }, [elementTypeInfo.type]);
 
   // 如果类型为静态值
   if (item.operatorType === OperatorType.VALUE || !item.operatorType) {
@@ -114,6 +147,7 @@ export const RenderElement: React.FC<RenderElementProps> = ({
           />
         );
       case ElementType.SELECT:
+      case ElementType.USER_SELECT:
         return (
           <Select
             className={styles.ruleItemSelect}
@@ -156,6 +190,8 @@ export const RenderElement: React.FC<RenderElementProps> = ({
             ))}
           </Select>
         );
+      case ElementType.NUMBER:
+        return <InputNumber disabled={isDisabled} className={styles.ruleItemInputNumber} style={{ width: 150 }} />;
       default:
         return (
           <Input

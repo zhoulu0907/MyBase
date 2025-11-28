@@ -129,7 +129,7 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
     {
       label: '表单字段1',
       value: 'field1',
-      type: FieldType.TEXT
+      type: FieldType.NUMBER
     },
     {
       label: '表单字段2',
@@ -291,6 +291,29 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
     const { parentFields } = await getEntityFieldsWithChildren(mainMetaData);
     setFormSummaryOptions(parentFields);
   };
+
+  const handleAddRule = () => {
+    console.log(123123);
+
+    setConditionRule([
+      ...conditionRule,
+      {
+        fieldScope: '',
+        fieldId: '',
+        op: '',
+        operatorType: '',
+        value: '',
+        fieldType: ''
+      }
+    ]);
+  };
+
+  const handleDeleteRule = (index: number) => {
+    if (conditionRule.length <= 1) return;
+    const newRules = conditionRule.filter((_, i) => i !== index);
+    setConditionRule(newRules);
+  };
+
   useEffect(() => {
     getFormSummaryData();
   }, []);
@@ -402,10 +425,16 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
                           }
                         </>
                       )}
-                      <IconClose style={{ marginLeft: '8px', cursor: 'pointer' }} />
+                      <IconClose
+                        onClick={() => handleDeleteRule(index)}
+                        style={{ marginLeft: '8px', cursor: 'pointer' }}
+                      />
                     </div>
                   );
                 })}
+                <div className={styles.addAndRule} onClick={handleAddRule}>
+                  +并且
+                </div>
               </div>
               <Button type="outline">+ 或者</Button>
             </div>
