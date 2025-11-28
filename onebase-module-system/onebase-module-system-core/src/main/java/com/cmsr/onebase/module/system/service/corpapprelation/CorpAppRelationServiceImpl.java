@@ -152,7 +152,7 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
         // }
         Map<Long, ApplicationDTO> applicationMap = getApplicationDoMap(pageReqVO.getAppName());
         List<Long> applicationIds = new ArrayList<>(applicationMap.keySet());
-        if(applicationIds.isEmpty()){
+        if(CollectionUtils.isEmpty(applicationIds)){
             return new PageResult<CorpApplicationRespVO>();
         }
         // 查询原始分页数据
