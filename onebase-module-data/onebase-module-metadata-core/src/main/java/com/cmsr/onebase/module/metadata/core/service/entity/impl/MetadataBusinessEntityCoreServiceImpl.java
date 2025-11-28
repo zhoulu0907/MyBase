@@ -107,4 +107,14 @@ public class MetadataBusinessEntityCoreServiceImpl implements MetadataBusinessEn
             throw exception(BUSINESS_ENTITY_NOT_EXISTS);
         }
     }
+
+    @Override
+    public MetadataBusinessEntityDO getBusinessEntityByTableName(String tableName) {
+        if (tableName == null || tableName.trim().isEmpty()) {
+            return null;
+        }
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.and("table_name", tableName.trim());
+        return metadataBusinessEntityRepository.findOne(configStore);
+    }
 }

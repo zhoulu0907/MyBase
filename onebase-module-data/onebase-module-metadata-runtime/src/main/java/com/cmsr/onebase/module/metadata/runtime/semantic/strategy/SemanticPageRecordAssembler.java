@@ -1,11 +1,11 @@
-package com.cmsr.onebase.module.metadata.runtime.semantic.executor;
+package com.cmsr.onebase.module.metadata.runtime.semantic.strategy;
 
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
 import com.cmsr.onebase.module.metadata.runtime.semantic.adapter.SemanticRequestParser;
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticRecordDTO;
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.enums.SemanticMethodCodeEnum;
-import com.cmsr.onebase.module.metadata.runtime.semantic.vo.SemanticTargetBodyVO;
+import com.cmsr.onebase.module.metadata.runtime.semantic.vo.SemanticPageBodyVO;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Component;
 
@@ -13,22 +13,17 @@ import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionU
 import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.BUSINESS_ENTITY_NOT_EXISTS;
 
 @Component
-public class SemanticDeleteExecutor {
-    @Resource
-    private SemanticDataMethodExecutor semanticDataMethodExecutor;
+public class SemanticPageRecordAssembler {
+
     @Resource
     private SemanticRequestParser semanticRequestParser;
+
     @Resource
     private MetadataBusinessEntityCoreService businessEntityCoreService;
 
-    public Boolean execute(Long entityId, Long menuId, String traceId, SemanticRecordDTO record) {
-        return semanticDataMethodExecutor.executeDelete(entityId, menuId, traceId, record);
-    }
-
-    public Boolean execute(String entityCode, Long menuId, String traceId, SemanticTargetBodyVO body) {
+    public SemanticRecordDTO assemble(String entityCode, SemanticPageBodyVO body, Long menuId, String traceId) {
         MetadataBusinessEntityDO entity = businessEntityCoreService.getBusinessEntityByCode(entityCode);
         if (entity == null) { throw exception(BUSINESS_ENTITY_NOT_EXISTS); }
-        SemanticRecordDTO record = semanticRequestParser.parseTarget(entity, body, menuId, traceId, SemanticMethodCodeEnum.DELETE);
-        return semanticDataMethodExecutor.executeDelete(entity.getId(), menuId, traceId, record);
+        return semanticRequestParser.parsePage(entity, body, menuId, traceId, SemanticMethodCodeEnum.GET_PAGE);
     }
 }

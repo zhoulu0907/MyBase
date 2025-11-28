@@ -7,9 +7,9 @@ import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEnti
 import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.vo.DynamicDataRespVO;
 import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.vo.SubEntityVo;
 import com.cmsr.onebase.module.metadata.runtime.semantic.adapter.SemanticRequestParser;
-import com.cmsr.onebase.module.metadata.runtime.semantic.dto.RecordDTO;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticRecordDTO;
 import com.cmsr.onebase.module.metadata.runtime.semantic.service.SemanticDynamicDataService;
-import com.cmsr.onebase.module.metadata.runtime.semantic.dto.enums.MethodCodeEnum;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.enums.SemanticMethodCodeEnum;
 import com.cmsr.onebase.module.metadata.runtime.semantic.executor.SemanticCreateExecutor;
 import com.cmsr.onebase.module.metadata.runtime.semantic.executor.SemanticUpdateExecutor;
 import com.cmsr.onebase.module.metadata.runtime.semantic.executor.SemanticDeleteExecutor;
@@ -32,9 +32,6 @@ import java.util.stream.Collectors;
  * 委派 {@link com.cmsr.onebase.module.metadata.runtime.service.datamethod.RuntimeDataService} 执行。</p>
  */
 public class SemanticDynamicDataServiceImpl implements SemanticDynamicDataService {
-
-    @Resource(name = "metadataDataMethodCoreServiceImpl")
-    private MetadataDataMethodCoreService coreDataMethodService;
 
     @Resource
     private MetadataBusinessEntityCoreService businessEntityCoreService;
@@ -95,8 +92,7 @@ public class SemanticDynamicDataServiceImpl implements SemanticDynamicDataServic
      * @return 删除成功返回被删除数据ID，失败返回 null
      */
     public Long remove(String entityCode, Long menuId, SemanticTargetBodyVO body, String traceId) {
-        Boolean ok = deleteExecutor.execute(entityCode, menuId, traceId, body);
-        return Boolean.TRUE.equals(ok) ? extractId(semanticRequestParser.parseTarget(parseEntityId(entityCode), body, menuId, traceId, MethodCodeEnum.DELETE)) : null;
+        return deleteExecutor.execute(entityCode, menuId, traceId, body) ? null : null;
     }
 
     @Override
@@ -156,7 +152,7 @@ public class SemanticDynamicDataServiceImpl implements SemanticDynamicDataServic
         return respVO;
     }
 
-    private Long extractId(RecordDTO record) {
+    private Long extractId(SemanticRecordDTO record) {
         Object id = null;
         if (record != null && record.getValue() != null && record.getValue().getData() != null) {
             var v = record.getValue().getData().get("id");

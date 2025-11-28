@@ -59,6 +59,15 @@ public interface MetadataBusinessEntityCoreService {
      */
     MetadataBusinessEntityDO getBusinessEntityByCode(String code);
 
+     /**
+     * 根据表名获得业务实体
+     *
+     * @param tableName 表名
+     * @return 业务实体
+     */
+    MetadataBusinessEntityDO getBusinessEntityByTableName(String tableName);
+
+
     /**
      * 根据数据源ID获得业务实体列表
      *

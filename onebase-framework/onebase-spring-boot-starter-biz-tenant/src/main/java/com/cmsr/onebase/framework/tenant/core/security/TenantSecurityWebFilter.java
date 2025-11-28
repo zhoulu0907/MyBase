@@ -82,6 +82,7 @@ public class TenantSecurityWebFilter extends ApiRequestFilter {
                 return;
             }
             // 3. 校验租户是合法，例如说被禁用、到期
+            
             try {
                 tenantFrameworkService.validTenant(tenantId);
             } catch (Throwable ex) {

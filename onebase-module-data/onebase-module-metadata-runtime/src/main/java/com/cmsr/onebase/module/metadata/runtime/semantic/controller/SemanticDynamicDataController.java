@@ -91,7 +91,7 @@ public class SemanticDynamicDataController {
         return CommonResult.success(resp);
     }
 
-    @PostMapping("/remove")
+    @PostMapping("/delete")
     @Operation(summary = "删除")
     /**
      * 语义删除数据
@@ -103,7 +103,7 @@ public class SemanticDynamicDataController {
      * @param response HTTP 响应对象
      * @return 删除成功返回被删除数据的ID；失败返回 null
      */
-    public CommonResult<Long> remove(@PathVariable("entityCode") String entityCode,
+    public CommonResult<Long> delete(@PathVariable("entityCode") String entityCode,
                                         @RequestParam("menuId") Long menuId,
                                         @RequestBody SemanticTargetBodyVO body,
                                         HttpServletRequest request,

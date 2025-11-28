@@ -14,14 +14,14 @@ import com.cmsr.onebase.module.metadata.core.dal.database.TemporaryDatasourceSer
 import com.cmsr.onebase.module.metadata.core.service.datasource.MetadataDatasourceCoreService;
 import com.cmsr.onebase.module.metadata.core.service.permission.PermissionQueryHelper;
 import com.cmsr.onebase.module.metadata.core.service.permission.builder.PermissionContextBuilder;
-import com.cmsr.onebase.module.metadata.runtime.semantic.dto.RecordDTO;
-import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.EntityValidator;
-import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.FieldLoader;
-import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.OperatorConditionApplier;
-import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.ResponseBuilder;
-import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.RowMapper;
-import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.TableNameQuoter;
-import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.PageRecordAssembler;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticRecordDTO;
+import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticEntityValidator;
+import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticFieldLoader;
+import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticOperatorConditionApplier;
+import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticResponseBuilder;
+import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticRowMapper;
+import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticTableNameQuoter;
+import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticPageRecordAssembler;
 import com.cmsr.onebase.module.metadata.runtime.semantic.vo.SemanticPageBodyVO;
 import jakarta.annotation.Resource;
 import org.anyline.data.param.init.DefaultConfigStore;
@@ -42,37 +42,36 @@ import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.BUS
 
 @Component
 public class SemanticPageExecutor {
-
     @Resource
+    private MetadataDatasourceCoreService semanticMetadataDatasourceCoreService;
     private MetadataDatasourceCoreService metadataDatasourceCoreService;
+    private TemporaryDatasourceService semanticTemporaryDatasourceService;
     @Resource
-    private TemporaryDatasourceService temporaryDatasourceService;
+    private PermissionQueryHelper semanticPermissionQueryHelper;
     @Resource
-    private PermissionQueryHelper permissionQueryHelper;
+    private PermissionContextBuilder semanticPermissionContextBuilder;
     @Resource
-    private PermissionContextBuilder permissionContextBuilder;
+    private SemanticOperatorConditionApplier semanticOperatorConditionApplier;
     @Resource
-    private OperatorConditionApplier operatorConditionApplier;
+    private SemanticRowMapper semanticRowMapper;
     @Resource
-    private RowMapper rowMapper;
+    private SemanticResponseBuilder semanticResponseBuilder;
     @Resource
-    private ResponseBuilder responseBuilder;
-    @Resource
-    private TableNameQuoter tableNameQuoter;
+    private SemanticTableNameQuoter semanticTableNameQuoter;
 
     @Resource
-    private EntityValidator entityValidator;
+    private SemanticEntityValidator semanticEntityValidator;
     @Resource
-    private FieldLoader fieldLoader;
+    private SemanticFieldLoader semanticFieldLoader;
     @Resource
-    private PageRecordAssembler pageRecordAssembler;
+    private SemanticPageRecordAssembler semanticPageRecordAssembler;
     @Resource
-    private MetadataBusinessEntityCoreService businessEntityCoreService;
+    private MetadataBusinessEntityCoreService semanticBusinessEntityCoreService;
 
     public PageResult<Map<String, Object>> execute(MetadataBusinessEntityDO entity,
                                                    List<MetadataEntityFieldDO> fields,
                                                    Long menuId,
-                                                   RecordDTO record) {
+                                                   SemanticRecordDTO record) {
         Integer pageNo = record.getContext() == null ? null : record.getContext().getPageNo();
         Integer pageSize = record.getContext() == null ? null : record.getContext().getPageSize();
         String sortField = null;
@@ -86,7 +85,7 @@ public class SemanticPageExecutor {
 
         MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
         if (datasource == null) { throw exception(DATASOURCE_NOT_EXISTS); }
-        AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
+        AnylineService<?> temporaryService = semanticTemporaryDatasourceService.createTemporaryService(datasource);
 
         boolean hasDeletedField = fields.stream().anyMatch(f -> "deleted".equalsIgnoreCase(f.getFieldName()));
         final String sortFieldFinal = sortField;
@@ -107,7 +106,7 @@ public class SemanticPageExecutor {
                         Object value = cond.get("value");
                         String operator = cond.get("operator") != null ? String.valueOf(cond.get("operator")) : "CONTAINS";
                         if (value == null || !names.contains(fieldName)) { continue; }
-                        operatorConditionApplier.apply(configs, fieldName, operator, value);
+                        semanticOperatorConditionApplier.apply(configs, fieldName, operator, value);
                     } else {
                         if (names.contains(rawKey)) {
                             String fieldType = fields.stream().filter(field -> rawKey.equals(field.getFieldName())).map(MetadataEntityFieldDO::getFieldType).findFirst().orElse("");
@@ -141,10 +140,10 @@ public class SemanticPageExecutor {
                     loginUserCtx.setUserId(loginUser.getId());
                     loginUserCtx.setApplicationId(loginUser.getApplicationId());
                 }
-                permissionContext = permissionContextBuilder.buildPermissionContext(loginUserCtx, menuId, entity.getId());
+                permissionContext = semanticPermissionContextBuilder.buildPermissionContext(loginUserCtx, menuId, entity.getId());
             }
             if (permissionContext != null) {
-                permissionQueryHelper.applyQueryPermissionFilter(configs, permissionContext, loginUserCtx, fields);
+                semanticPermissionQueryHelper.applyQueryPermissionFilter(configs, permissionContext, loginUserCtx, fields);
             }
             Set<String> fieldNames = fields.stream().map(MetadataEntityFieldDO::getFieldName).collect(Collectors.toSet());
             if (fieldNames.contains(sortFieldFinal)) {
@@ -172,7 +171,7 @@ public class SemanticPageExecutor {
                         Object value = cond.get("value");
                         String operator = cond.get("operator") != null ? String.valueOf(cond.get("operator")) : "CONTAINS";
                         if (value == null || !existingFieldNames.contains(fieldName)) { continue; }
-                        operatorConditionApplier.apply(countConfigs, fieldName, operator, value);
+                        semanticOperatorConditionApplier.apply(countConfigs, fieldName, operator, value);
                     } else {
                         if (existingFieldNames.contains(rawKey)) {
                             String fieldType = fields.stream().filter(field -> rawKey.equals(field.getFieldName())).map(MetadataEntityFieldDO::getFieldType).findFirst().orElse("");
@@ -194,14 +193,14 @@ public class SemanticPageExecutor {
                 }
             }
             if (hasDeletedField) { countConfigs.and(Compare.EQUAL, "deleted", 0); }
-            long total = temporaryService.count(tableNameQuoter.quote(entity.getTableName()), countConfigs);
-            DataSet dataSet = temporaryService.querys(tableNameQuoter.quote(entity.getTableName()), configs);
+            long total = temporaryService.count(semanticTableNameQuoter.quote(entity.getTableName()), countConfigs);
+            DataSet dataSet = temporaryService.querys(semanticTableNameQuoter.quote(entity.getTableName()), configs);
             List<Map<String, Object>> list = new ArrayList<>();
             for (int i = 0; i < dataSet.size(); i++) {
                 DataRow row = dataSet.getRow(i);
-                Map<String, Object> data = rowMapper.toMap(row, fields);
-                Map<String, Object> filtered = permissionQueryHelper.filterQueryResult(data, permissionContext, fields);
-                list.add(responseBuilder.build(entity, filtered, fields));
+                Map<String, Object> data = semanticRowMapper.toMap(row, fields);
+                Map<String, Object> filtered = semanticPermissionQueryHelper.filterQueryResult(data, permissionContext, fields);
+                list.add(semanticResponseBuilder.build(entity, filtered, fields));
             }
             return new PageResult<>(list, total);
         });
@@ -210,9 +209,9 @@ public class SemanticPageExecutor {
     public PageResult<Map<String, Object>> execute(Long entityId,
                                                    Long menuId,
                                                    String traceId,
-                                                   RecordDTO record) {
-        MetadataBusinessEntityDO entity = entityValidator.validateExists(entityId);
-        List<MetadataEntityFieldDO> fields = fieldLoader.load(entityId);
+                                                   SemanticRecordDTO record) {
+        MetadataBusinessEntityDO entity = semanticEntityValidator.validateExists(entityId);
+        List<MetadataEntityFieldDO> fields = semanticFieldLoader.load(entityId);
         return execute(entity, fields, menuId, record);
     }
 
@@ -220,7 +219,7 @@ public class SemanticPageExecutor {
                                                    Long menuId,
                                                    String traceId,
                                                    SemanticPageBodyVO body) {
-        RecordDTO record = pageRecordAssembler.assemble(businessEntityCoreService.getBusinessEntity(entityId).getCode(), body, menuId, traceId);
+        SemanticRecordDTO record = semanticPageRecordAssembler.assemble(semanticBusinessEntityCoreService.getBusinessEntity(entityId).getCode(), body, menuId, traceId);
         return execute(entityId, menuId, traceId, record);
     }
 
@@ -228,10 +227,10 @@ public class SemanticPageExecutor {
                                                    Long menuId,
                                                    String traceId,
                                                    SemanticPageBodyVO body) {
-        RecordDTO record = pageRecordAssembler.assemble(entityCode, body, menuId, traceId);
-        MetadataBusinessEntityDO entity = businessEntityCoreService.getBusinessEntityByCode(entityCode);
+        SemanticRecordDTO record = semanticPageRecordAssembler.assemble(entityCode, body, menuId, traceId);
+        MetadataBusinessEntityDO entity = semanticBusinessEntityCoreService.getBusinessEntityByCode(entityCode);
         if (entity == null) { throw exception(BUSINESS_ENTITY_NOT_EXISTS); }
-        List<MetadataEntityFieldDO> fields = fieldLoader.load(entity.getId());
+        List<MetadataEntityFieldDO> fields = semanticFieldLoader.load(entity.getId());
         return execute(entity, fields, menuId, record);
     }
 

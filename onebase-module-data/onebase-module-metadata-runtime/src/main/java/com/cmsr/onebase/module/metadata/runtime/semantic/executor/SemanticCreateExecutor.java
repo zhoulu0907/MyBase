@@ -4,24 +4,24 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusin
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.domain.query.ProcessContext;
 import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
-import com.cmsr.onebase.module.metadata.runtime.semantic.dto.RecordDTO;
-import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.ContextInitializer;
-import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.DataFetcher;
-import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.DataIntegrityValidator;
-import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.DataStoreExecutor;
-import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.validation.ValidationManager;
-import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.DefaultValueProcessor;
-import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.EntityValidator;
-import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.FieldLoader;
-import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.PermissionValidator;
-import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.WorkflowExecutor;
-import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.ProcessLogger;
-import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.ResultFormatter;
-import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.AutoNumberGenerator;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticRecordDTO;
+import com.cmsr.onebase.module.metadata.runtime.semantic.service.impl.SemanticDataCrudService;
+import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticContextInitializer;
+import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticDataFetcher;
+import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticDataIntegrityValidator;
+import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.validation.SemanticValidationManager;
+import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticDefaultValueProcessor;
+import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticEntityValidator;
+import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticFieldLoader;
+import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticPermissionValidator;
+import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticWorkflowExecutor;
+import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticProcessLogger;
+import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticResultFormatter;
+import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticAutoNumberGenerator;
 import com.cmsr.onebase.module.metadata.runtime.semantic.adapter.SemanticRequestParser;
 import com.cmsr.onebase.module.metadata.runtime.semantic.vo.SemanticMergeBodyVO;
-import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.MergeRecordAssembler;
-import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.PermissionContextLoader;
+import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticMergeRecordAssembler;
+import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticPermissionContextLoader;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -36,39 +36,37 @@ import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.*;
 @Component
 public class SemanticCreateExecutor {
     @Resource
-    private EntityValidator entityValidator;
+    private SemanticEntityValidator semanticEntityValidator;
     @Resource
-    private FieldLoader fieldLoader;
+    private SemanticFieldLoader semanticFieldLoader;
     @Resource
-    private ContextInitializer contextInitializer;
+    private SemanticContextInitializer semanticContextInitializer;
     @Resource
-    private DataIntegrityValidator dataIntegrityValidator;
+    private SemanticDataIntegrityValidator semanticDataIntegrityValidator;
     @Resource
-    private DefaultValueProcessor defaultValueProcessor;
+    private SemanticDefaultValueProcessor semanticDefaultValueProcessor;
     @Resource
-    private PermissionValidator permissionValidator;
+    private SemanticPermissionValidator semanticPermissionValidator;
     @Resource
-    private ValidationManager validationManager;
+    private SemanticValidationManager semanticValidationManager;
     @Resource
-    private WorkflowExecutor workflowExecutor;
+    private SemanticWorkflowExecutor semanticWorkflowExecutor;
     @Resource
-    private AutoNumberGenerator autoNumberGenerator;
+    private SemanticAutoNumberGenerator semanticAutoNumberGenerator;
     @Resource
-    private DataStoreExecutor dataStoreExecutor;
+    private SemanticDataCrudService semanticDataCrudService;
     @Resource
-    private DataFetcher dataFetcher;
+    private SemanticDataFetcher semanticDataFetcher;
     @Resource
-    private ResultFormatter resultFormatter;
+    private SemanticResultFormatter semanticResultFormatter;
     @Resource
-    private ProcessLogger processLogger;
+    private SemanticProcessLogger semanticProcessLogger;
     @Resource
     private SemanticRequestParser semanticRequestParser;
     @Resource
-    private com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService businessEntityCoreService;
+    private SemanticMergeRecordAssembler semanticMergeRecordAssembler;
     @Resource
-    private MergeRecordAssembler mergeRecordAssembler;
-    @Resource
-    private PermissionContextLoader permissionContextLoader;
+    private SemanticPermissionContextLoader semanticPermissionContextLoader;
 
     public Map<String, Object> execute(String entityCode, Long menuId, String traceId, SemanticMergeBodyVO body) {
         return doExecuteProcess(entityCode, menuId, traceId, body);
@@ -77,45 +75,45 @@ public class SemanticCreateExecutor {
     public Map<String, Object> doExecuteProcess(String entityCode, Long menuId, String traceId, SemanticMergeBodyVO body) {
         try {
             // 1) 构建 RecordDTO（包含实体校验与基本数据映射）
-            RecordDTO record = mergeRecordAssembler.assemble(entityCode, body, menuId, traceId);
+            SemanticRecordDTO record = semanticMergeRecordAssembler.assemble(entityCode, body, menuId, traceId);
             // // 2) 实体校验：当前使用 MetadataBusinessEntityCoreService.validateEntityExists
             // MetadataBusinessEntityDO entity = businessEntityCoreService.getBusinessEntityByCode(entityCode);
             // if (entity == null) { throw exception(BUSINESS_ENTITY_NOT_EXISTS); }
             // // 3) 字段装载：当前使用 MetadataEntityFieldCoreService.getEntityFieldListByEntityId
             // List<MetadataEntityFieldDO> fields = fieldLoader.load(entity.getId());
             // 4) 上下文初始化：当前类 initializeContext
-            permissionContextLoader.loadPermissionContext(record);
+            semanticPermissionContextLoader.loadPermissionContext(record);
 
            // 5) 数据完整性校验：当前类 validateDataIntegrity
-            dataIntegrityValidator.validate(record);
+            semanticDataIntegrityValidator.validate(record);
 
             // 6) 默认值处理/形态统一：当前类 processDataAndSetDefaults
             // Map<String, Object> processedData = defaultValueProcessor.process(context);
             // context.setProcessedData(processedData);
 
             // 7) 功能权限校验
-            permissionValidator.validate(record);
+            semanticPermissionValidator.validate(record);
             // 8) 数据校验（RecordDTO 简化入口）
-            validationManager.validate(record);
-            
+            semanticValidationManager.validate(record);
+
             // 9) 前置工作流：预留接口（当前为空实现）
-            workflowExecutor.preExecute(record);
+            semanticWorkflowExecutor.preExecute(record);
             
             // // 10) 自动编号：使用 AutoNumberService 等（在核心类中）
             // autoNumberGenerator.generate(context);
 
-            // 11) 数据存储：当前类 storeData（包含子表处理 handleSubEntities）
-            dataStoreExecutor.execute(context);
+            // 11) 数据存储：CRUDQ 服务（RecordDTO 入口）
+            semanticDataCrudService.execute(record);
             
             // 12) 后置工作流：预留接口（当前为空实现）
-            workflowExecutor.postExecute(record);
-            // 13) 数据查询：当前类 getData（queryDataByIdWithService）
-            dataFetcher.fetch(context);
-            // 14) 结果格式化：当前类 formatResult（buildDataResponse）
-            Map<String, Object> result = resultFormatter.format(context);
+            semanticWorkflowExecutor.postExecute(record);
+            // 13) 数据查询：通过 DataCrudService 读取主表数据
+            Map<String, Object> fetchedData = semanticDataCrudService.readById(record);
+            // 14) 结果格式化：直接格式化查询结果，无需写回上下文
+            // Map<String, Object> result = resultFormatter.format(entity, fields, fetchedData, context);
             // 15) 日志记录：当前类 logProcess
-            processLogger.log(context);
-            return result;
+            // processLogger.log(context);
+            return fetchedData;
         } catch (Exception e) {
             log.error("创建数据失败。entityCode={}, traceId={}", entityCode, traceId, e);
             throw e;

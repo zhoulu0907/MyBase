@@ -1,20 +1,32 @@
 package com.cmsr.onebase.module.metadata.runtime.semantic.adapter;
 
+import java.util.*;
+
+import jakarta.annotation.Resource;
+import org.springframework.stereotype.Component;
+
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.relationship.MetadataEntityRelationshipDO;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityRelationshipRepository;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataEntityFieldCoreService;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticEntitySchemaDTO;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticRecordContextDTO;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticRecordDTO;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticRelationSchemaDTO;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticRelationValueDTO;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticRowValueDTO;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticSortRuleDTO;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticValueDTO;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticValueModelDTO;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.enums.SemanticConnectorCardinalityEnum;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.enums.SemanticConnectorTypeEnum;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.enums.SemanticMethodCodeEnum;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.enums.SemanticSortDirectionEnum;
 import com.cmsr.onebase.module.metadata.runtime.semantic.vo.SemanticMergeBodyVO;
-import com.cmsr.onebase.module.metadata.runtime.semantic.vo.SemanticTargetBodyVO;
 import com.cmsr.onebase.module.metadata.runtime.semantic.vo.SemanticPageBodyVO;
-import com.cmsr.onebase.module.metadata.runtime.semantic.dto.*;
-import com.cmsr.onebase.module.metadata.runtime.semantic.dto.enums.ConnectorCardinalityEnum;
-import com.cmsr.onebase.module.metadata.runtime.semantic.dto.enums.ConnectorTypeEnum;
-import jakarta.annotation.Resource;
-import org.springframework.stereotype.Component;
-
-import java.util.*;
+import com.cmsr.onebase.module.metadata.runtime.semantic.vo.SemanticTargetBodyVO;
 
 @Component
 /**
@@ -42,18 +54,23 @@ public class SemanticRequestParser {
      * @param traceId 链路追踪ID
      * @return 统一的记录承载对象
      */
-    private RecordDTO parseFromProps(Long entityId, Map<String, Object> props, RecordContextDTO context) {
-        RecordDTO record = new RecordDTO();
+    private SemanticRecordDTO parseFromProps(MetadataBusinessEntityDO entity, Map<String, Object> props, SemanticRecordContextDTO context) {
+        SemanticRecordDTO record = new SemanticRecordDTO();
         record.setContext(context);
 
-        EntitySchemaDTO entity = new EntitySchemaDTO();
-        entity.setId(entityId);
-        entity.setConnectors(buildConnectorSchemas(entityId));
-        record.setEntity(entity);
+        Long entityId = entity.getId();
+        
+        SemanticEntitySchemaDTO entitySchemaDTO = new SemanticEntitySchemaDTO();
+        entitySchemaDTO.setId(entityId);
+        entitySchemaDTO.setTableName(entity.getTableName());
+        entitySchemaDTO.setCode(entity.getCode());
+        entitySchemaDTO.setDisplayName(entity.getDisplayName());
+        entitySchemaDTO.setConnectors(buildConnectorSchemas(entityId));
+        record.setEntity(entitySchemaDTO);
 
-        ValueModelDTO valueModel = new ValueModelDTO();
-        Map<String, ValueDTO> data = new HashMap<>();
-        Map<String, RelationValueDTO> connectors = new HashMap<>();
+        SemanticValueModelDTO valueModel = new SemanticValueModelDTO();
+        Map<String, SemanticValueDTO> data = new HashMap<>();
+        Map<String, SemanticRelationValueDTO> connectors = new HashMap<>();
 
         Set<String> fieldNames = getFieldNameSet(entityId);
         Map<String, Object> p = props == null ? Map.of() : props;
@@ -61,12 +78,12 @@ public class SemanticRequestParser {
             String key = e.getKey();
             Object raw = e.getValue();
             if (fieldNames.contains(key) || Objects.equals(key, "id") || Objects.equals(key, "deleted")) {
-                ValueDTO v = new ValueDTO();
+                SemanticValueDTO v = new SemanticValueDTO();
                 v.setValue(raw);
                 v.setType(raw == null ? null : guessType(raw));
                 data.put(key, v);
             } else {
-                RelationValueDTO cv = toConnectorValue(raw);
+                SemanticRelationValueDTO cv = toConnectorValue(raw);
                 connectors.put(key, cv);
             }
         }
@@ -84,20 +101,20 @@ public class SemanticRequestParser {
      * @param traceId 链路追踪ID
      * @return RecordDTO
      */
-    public RecordDTO parseMerge(Long entityId, SemanticMergeBodyVO body, Long menuId, String traceId, com.cmsr.onebase.module.metadata.runtime.semantic.dto.enums.MethodCodeEnum methodCode) {
-        RecordContextDTO context = new RecordContextDTO();
+    public SemanticRecordDTO parseMerge(MetadataBusinessEntityDO entity, SemanticMergeBodyVO body, Long menuId, String traceId, SemanticMethodCodeEnum methodCode) {
+        SemanticRecordContextDTO context = new SemanticRecordContextDTO();
         context.setMenuId(menuId);
         context.setTraceId(traceId);
         if (methodCode != null) {
             context.setMethodCode(methodCode);
-            if (methodCode == com.cmsr.onebase.module.metadata.runtime.semantic.dto.enums.MethodCodeEnum.CREATE) {
+            if (methodCode == SemanticMethodCodeEnum.CREATE) {
                 context.setOperationType(com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum.CREATE);
-            } else if (methodCode == com.cmsr.onebase.module.metadata.runtime.semantic.dto.enums.MethodCodeEnum.UPDATE) {
+            } else if (methodCode == SemanticMethodCodeEnum.UPDATE) {
                 context.setOperationType(com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum.UPDATE);
             }
         }
         Map<String, Object> props = body == null ? Map.of() : body.getProperties();
-        return parseFromProps(entityId, props, context);
+        return parseFromProps(entity, props, context);
     }
 
     /**
@@ -108,8 +125,8 @@ public class SemanticRequestParser {
      * @param traceId 链路追踪ID
      * @return RecordDTO
      */
-    public RecordDTO parseTarget(Long entityId, SemanticTargetBodyVO body, Long menuId, String traceId, com.cmsr.onebase.module.metadata.runtime.semantic.dto.enums.MethodCodeEnum methodCode) {
-        RecordContextDTO context = new RecordContextDTO();
+    public SemanticRecordDTO parseTarget(MetadataBusinessEntityDO entity, SemanticTargetBodyVO body, Long menuId, String traceId, SemanticMethodCodeEnum methodCode) {
+        SemanticRecordContextDTO context = new SemanticRecordContextDTO();
         context.setMenuId(menuId);
         context.setTraceId(traceId);
         if (body != null) {
@@ -117,15 +134,15 @@ public class SemanticRequestParser {
             context.setContainSubTable(body.getContainSubTable());
             if (methodCode != null) {
                 context.setMethodCode(methodCode);
-                if (methodCode == com.cmsr.onebase.module.metadata.runtime.semantic.dto.enums.MethodCodeEnum.DELETE) {
+                if (methodCode == SemanticMethodCodeEnum.DELETE) {
                     context.setOperationType(com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum.DELETE);
-                } else if (methodCode == com.cmsr.onebase.module.metadata.runtime.semantic.dto.enums.MethodCodeEnum.GET) {
+                } else if (methodCode == SemanticMethodCodeEnum.GET) {
                     context.setOperationType(com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum.GET);
                 }
             }
         }
         Map<String, Object> props = body == null ? Map.of() : body.getData();
-        return parseFromProps(entityId, props, context);
+        return parseFromProps(entity, props, context);
     }
 
     /**
@@ -136,19 +153,19 @@ public class SemanticRequestParser {
      * @param traceId 链路追踪ID
      * @return RecordDTO
      */
-    public RecordDTO parsePage(Long entityId, SemanticPageBodyVO body, Long menuId, String traceId, com.cmsr.onebase.module.metadata.runtime.semantic.dto.enums.MethodCodeEnum methodCode) {
-        RecordContextDTO context = new RecordContextDTO();
+    public SemanticRecordDTO parsePage(MetadataBusinessEntityDO entity, SemanticPageBodyVO body, Long menuId, String traceId, SemanticMethodCodeEnum methodCode) {
+        SemanticRecordContextDTO context = new SemanticRecordContextDTO();
         context.setMenuId(menuId);
         context.setTraceId(traceId);
         if (body != null) {
             context.setPageNo(body.getPageNo());
             context.setPageSize(body.getPageSize());
             if (body.getSortField() != null) {
-                SortRuleDTO rule = new SortRuleDTO();
+                SemanticSortRuleDTO rule = new SemanticSortRuleDTO();
                 rule.setField(body.getSortField());
                 if (body.getSortDirection() != null) {
                     try {
-                        rule.setDirection(com.cmsr.onebase.module.metadata.runtime.semantic.dto.enums.SortDirectionEnum.valueOf(body.getSortDirection()));
+                        rule.setDirection(SemanticSortDirectionEnum.valueOf(body.getSortDirection()));
                     } catch (IllegalArgumentException ignore) {}
                 }
                 context.setSortBy(List.of(rule));
@@ -158,13 +175,13 @@ public class SemanticRequestParser {
             }
             if (methodCode != null) {
                 context.setMethodCode(methodCode);
-                if (methodCode == com.cmsr.onebase.module.metadata.runtime.semantic.dto.enums.MethodCodeEnum.GET_PAGE) {
+                if (methodCode == SemanticMethodCodeEnum.GET_PAGE) {
                     context.setOperationType(com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum.GET_PAGE);
                 }
             }
         }
         Map<String, Object> props = body == null ? Map.of() : body.getData();
-        return parseFromProps(entityId, props, context);
+        return parseFromProps(entity, props, context);
     }
 
     
@@ -190,14 +207,14 @@ public class SemanticRequestParser {
      * @param sourceEntityId 源实体ID
      * @return 连接器模型列表
      */
-    private List<RelationSchemaDTO> buildConnectorSchemas(Long sourceEntityId) {
+    private List<SemanticRelationSchemaDTO> buildConnectorSchemas(Long sourceEntityId) {
         List<MetadataEntityRelationshipDO> rels = relationshipRepository.getRelationshipsByMasterEntityId(sourceEntityId);
-        List<RelationSchemaDTO> list = new ArrayList<>();
+        List<SemanticRelationSchemaDTO> list = new ArrayList<>();
         if (rels == null) {
             return list;
         }
         for (MetadataEntityRelationshipDO r : rels) {
-            RelationSchemaDTO s = new RelationSchemaDTO();
+            SemanticRelationSchemaDTO s = new SemanticRelationSchemaDTO();
             s.setName(r.getRelationName());
             s.setSourceEntityId(r.getSourceEntityId());
             s.setTargetEntityId(r.getTargetEntityId());
@@ -230,12 +247,12 @@ public class SemanticRequestParser {
      * @param r 关系DO
      * @return 连接器类型
      */
-    private ConnectorTypeEnum resolveConnectorType(MetadataEntityRelationshipDO r) {
+    private SemanticConnectorTypeEnum resolveConnectorType(MetadataEntityRelationshipDO r) {
         var target = businessEntityCoreService.getBusinessEntity(r.getTargetEntityId());
         if (target != null && target.getEntityType() != null && target.getEntityType() == 3) {
-            return ConnectorTypeEnum.SUBTABLE;
+            return SemanticConnectorTypeEnum.SUBTABLE;
         }
-        return ConnectorTypeEnum.RELATION;
+        return SemanticConnectorTypeEnum.RELATION;
     }
 
     /**
@@ -243,14 +260,14 @@ public class SemanticRequestParser {
      * @param r 关系DO
      * @return 基数枚举
      */
-    private ConnectorCardinalityEnum resolveCardinality(MetadataEntityRelationshipDO r) {
+    private SemanticConnectorCardinalityEnum resolveCardinality(MetadataEntityRelationshipDO r) {
         String t = r.getRelationshipType();
-        if (t == null) return ConnectorCardinalityEnum.MANY;
+        if (t == null) return SemanticConnectorCardinalityEnum.MANY;
         t = t.toUpperCase(Locale.ROOT);
         if ("ONE_TO_ONE".equals(t) || "MANY_TO_ONE".equals(t)) {
-            return ConnectorCardinalityEnum.ONE;
+            return SemanticConnectorCardinalityEnum.ONE;
         }
-        return ConnectorCardinalityEnum.MANY;
+        return SemanticConnectorCardinalityEnum.MANY;
     }
 
     /**
@@ -258,13 +275,13 @@ public class SemanticRequestParser {
      * @param raw 原始对象
      * @return 连接器值
      */
-    private RelationValueDTO toConnectorValue(Object raw) {
-        RelationValueDTO v = new RelationValueDTO();
+    private SemanticRelationValueDTO toConnectorValue(Object raw) {
+        SemanticRelationValueDTO v = new SemanticRelationValueDTO();
         if (raw instanceof Map<?, ?> map) {
-            RowValueDTO row = toRowValue(map);
+            SemanticRowValueDTO row = toRowValue(map);
             v.setRow(row);
         } else if (raw instanceof List<?> list) {
-            List<RowValueDTO> rows = new ArrayList<>();
+            List<SemanticRowValueDTO> rows = new ArrayList<>();
             for (Object o : list) {
                 if (o instanceof Map<?, ?> m) {
                     rows.add(toRowValue(m));
@@ -280,8 +297,8 @@ public class SemanticRequestParser {
      * @param map 行映射
      * @return 行值对象
      */
-    private RowValueDTO toRowValue(Map<?, ?> map) {
-        RowValueDTO row = new RowValueDTO();
+    private SemanticRowValueDTO toRowValue(Map<?, ?> map) {
+        SemanticRowValueDTO row = new SemanticRowValueDTO();
         Map<String, Object> fields = new HashMap<>();
         for (Map.Entry<?, ?> e : map.entrySet()) {
             String k = String.valueOf(e.getKey());
