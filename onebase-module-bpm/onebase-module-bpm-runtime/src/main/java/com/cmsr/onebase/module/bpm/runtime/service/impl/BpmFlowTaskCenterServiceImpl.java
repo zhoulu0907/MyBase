@@ -6,30 +6,24 @@ import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowCcRecordRepository;
-import com.cmsr.onebase.module.bpm.core.dal.database.ext.BpmHisTaskExtRepository;
-import com.cmsr.onebase.module.bpm.core.dal.database.ext.BpmInstanceExtRepository;
-import com.cmsr.onebase.module.bpm.core.dal.database.ext.BpmTaskExtRepository;
+import com.cmsr.onebase.module.bpm.core.dal.mapper.BpmTaskCenterMapper;
 import com.cmsr.onebase.module.bpm.core.dto.BpmCcRecordDTO;
 import com.cmsr.onebase.module.bpm.core.dto.BpmDoneTaskDTO;
-import com.cmsr.onebase.module.bpm.core.dto.BpmInstanceDTO;
+import com.cmsr.onebase.module.bpm.core.dto.BpmMyInstanceDTO;
 import com.cmsr.onebase.module.bpm.core.dto.BpmTodoTaskDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
 import com.cmsr.onebase.module.bpm.core.enums.BpmBusinessStatusEnum;
-import com.cmsr.onebase.module.bpm.core.service.BpmEngineDefExtService;
+import com.cmsr.onebase.module.bpm.core.dal.database.ext.BpmFlowDefinitionRepositoryExt;
 import com.cmsr.onebase.module.bpm.core.vo.*;
+import com.cmsr.onebase.module.bpm.runtime.convert.BpmTaskCenterConvert;
 import com.cmsr.onebase.module.bpm.runtime.service.BpmFlowTaskCenterService;
 import com.cmsr.onebase.module.bpm.runtime.vo.*;
 import com.cmsr.onebase.module.system.api.user.AdminUserApi;
 import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
+import com.github.pagehelper.PageHelper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Compare;
-import org.anyline.entity.DefaultPageNavi;
-import org.anyline.entity.PageNavi;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.warm.flow.core.dto.DefJson;
 import org.dromara.warm.flow.core.dto.NodeJson;
@@ -43,10 +37,8 @@ import org.dromara.warm.flow.core.service.TaskService;
 import org.dromara.warm.flow.core.service.UserService;
 import org.dromara.warm.flow.core.service.impl.BpmConstants;
 import org.dromara.warm.flow.core.utils.StreamUtils;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -55,15 +47,6 @@ import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionU
 @Service
 @Slf4j
 public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
-    @Resource
-    private BpmTaskExtRepository taskExtRepository;
-
-    @Resource
-    private BpmHisTaskExtRepository hisTaskExtRepository;
-
-    @Resource
-    private BpmInstanceExtRepository insExtRepository;
-
     @Resource(name = "bpmTaskService")
     private TaskService taskService;
 
@@ -74,13 +57,18 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
     private AdminUserApi adminUserApi;
 
     @Resource
-    private BpmEngineDefExtService engineDefExtService;
+    private BpmFlowDefinitionRepositoryExt defExtService;
 
     @Resource(name = "bpmDefService")
     private DefService defService;
 
     @Resource
     private BpmFlowCcRecordRepository bpmFlowCcRecordRepository;
+
+    @Resource
+    private BpmTaskCenterMapper bpmTaskCenterMapper;
+
+    private final BpmTaskCenterConvert bpmTaskCenterConvert = BpmTaskCenterConvert.INSTANCE;
 
     private List<String> splitToList(String str) {
         if (StringUtils.isBlank(str)) {
@@ -90,6 +78,12 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         return Arrays.stream(str.split(","))
                 .map(String::trim)
                 .filter(StringUtils::isNotBlank)
+                .collect(Collectors.toList());
+    }
+
+    private List<Long> splitToLongList(String str) {
+       return splitToList(str).stream()
+                .map(Long::valueOf)
                 .collect(Collectors.toList());
     }
 
@@ -112,155 +106,6 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
                 .collect(Collectors.toList());
     }
 
-    private void fillPageNavi(ConfigStore condition, Integer pageNo, Integer pageSize) {
-        // 设置分页参数
-        PageNavi navi = new DefaultPageNavi();
-        navi.setCurPage(pageNo);
-        navi.setPageRows(pageSize);
-        condition.setPageNavi(navi);
-    }
-
-    private void fillInsCondition(ConfigStore condition, BpmInsExtQueryPageVO queryVO) {
-        condition.and(Compare.EQUAL, "app_id", queryVO.getAppId());
-
-        // 动态添加其他查询条件
-        if (StringUtils.isNotBlank(queryVO.getKeyword())) {
-            ConfigStore orCondition = new DefaultConfigStore();
-            orCondition.or(Compare.LIKE, "bpm_title", queryVO.getKeyword());
-            orCondition.or(Compare.LIKE, "initiator_name", queryVO.getKeyword());
-            orCondition.or(Compare.LIKE, "form_summary", queryVO.getKeyword());
-            condition.and(orCondition);
-        }
-
-        if (StringUtils.isNotBlank(queryVO.getBusinessId())) {
-            condition.and(Compare.EQUAL, "binding_view_id", queryVO.getBusinessId());
-        }
-
-        // 流程状态条件（支持多个值）
-        List<String> flowStatusList = queryVO.getFlowStatusList();
-        if (CollectionUtils.isNotEmpty(flowStatusList)) {
-            if (flowStatusList.size() == 1) {
-                condition.and(Compare.EQUAL, "flow_status", flowStatusList.get(0));
-            } else {
-                condition.and(Compare.IN, "flow_status", flowStatusList);
-            }
-        }
-
-        // 节点编码条件（支持多个值）
-        List<String> nodeCodeList = queryVO.getNodeCodeList();
-        if (CollectionUtils.isNotEmpty(nodeCodeList)) {
-            if (nodeCodeList.size() == 1) {
-                condition.and(Compare.EQUAL, "node_code", nodeCodeList.get(0));
-            } else {
-                condition.and(Compare.IN, "node_code", nodeCodeList);
-            }
-        }
-    }
-
-    private void fillTimeRange(ConfigStore condition, String fieldName, LocalDateTime start, LocalDateTime end) {
-        if (start != null) {
-            condition.and(Compare.GREAT_EQUAL, fieldName, start);
-        }
-
-        if (end != null) {
-            condition.and(Compare.LESS_EQUAL, fieldName, end);
-        }
-    }
-
-    private void fillOrder(ConfigStore condition, String filedName, String orderType) {
-        if("asc".equals(orderType)){
-            condition.order(filedName + " asc");
-        } else{
-            condition.order(filedName + " desc");
-        }
-    }
-
-    private ConfigStore buildDynamicCondition(BpmTodoTaskPageReqVO reqVO, String userId) {
-        DefaultConfigStore condition = new DefaultConfigStore();
-
-        // 设置分页参数
-        fillPageNavi(condition, reqVO.getPageNo(), reqVO.getPageSize());
-
-        // 填充流程实例条件
-        fillInsCondition(condition, reqVO);
-
-        // 发起人编码条件（支持多个值）
-        fillInitiatorCondition(condition, reqVO.getInitiatorIdList());
-
-        // 填充时间范围条件
-        fillTimeRange(condition, "submit_time", reqVO.getSubmitTimeStart(), reqVO.getSubmitTimeEnd());
-
-        // 填充处理人条件
-        condition.param("userId", userId);
-
-        // 排序
-        fillOrder(condition, "create_time", reqVO.getSortType());
-
-        return condition;
-    }
-
-    private ConfigStore buildDynamicCondition(BpmDoneTaskPageReqVO reqVO, String userId) {
-        DefaultConfigStore condition = new DefaultConfigStore();
-
-        // 设置分页参数
-        fillPageNavi(condition, reqVO.getPageNo(), reqVO.getPageSize());
-
-        // 填充流程实例条件
-        fillInsCondition(condition, reqVO);
-
-        // 发起人编码条件（支持多个值）
-        fillInitiatorCondition(condition, reqVO.getInitiatorIdList());
-
-        // 填充时间范围条件
-        fillTimeRange(condition, "submit_time", reqVO.getSubmitTimeStart(), reqVO.getSubmitTimeEnd());
-
-        // 填充处理人条件
-        condition.param("userId", userId);
-
-        // 排序
-        fillOrder(condition, "update_time", reqVO.getSortType());
-
-        return condition;
-    }
-
-    private void fillInitiatorCondition(ConfigStore condition, List<String> initiatorIdStrList) {
-        List<Long> initiatorIdList = Optional.ofNullable(initiatorIdStrList)
-                .orElse(Collections.emptyList())
-                .stream()
-                .map(Long::valueOf)
-                .collect(Collectors.toList());
-
-        if (CollectionUtils.isNotEmpty(initiatorIdList)) {
-            if (initiatorIdList.size() == 1) {
-                condition.and(Compare.EQUAL, "initiator_id", initiatorIdList.get(0));
-            } else {
-                condition.and(Compare.IN, "initiator_id", initiatorIdList);
-            }
-        }
-    }
-
-    private ConfigStore buildDynamicCondition(BpmMyCreatedPageReqVO reqVO, String userId) {
-        DefaultConfigStore condition = new DefaultConfigStore();
-
-        // 设置分页参数
-        fillPageNavi(condition, reqVO.getPageNo(), reqVO.getPageSize());
-
-        // 填充流程实例条件
-        fillInsCondition(condition, reqVO);
-
-        // 填充时间范围条件
-        fillTimeRange(condition, "create_time", reqVO.getCreateTimeStart(), reqVO.getCreateTimeEnd());
-
-        // 填充处理人条件
-        condition.and(Compare.EQUAL, "creator", Long.valueOf(userId));
-
-        // 排序
-        fillOrder(condition, "create_time", reqVO.getSortType());
-
-        return condition;
-    }
-
-
     /**
      * 获取流程待办分页
      *
@@ -270,6 +115,8 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
     @Override
     public PageResult<BpmFlowTodoTaskVO> getTodoPage(BpmTodoTaskPageReqVO pageReqVO) {
         Long loginUserId = WebFrameworkUtils.getLoginUserId();
+        String loginUserStrId = String.valueOf(loginUserId);
+
         // 处理节点编码参数
         pageReqVO.setNodeCodeList(splitToList(pageReqVO.getNodeCode()));
 
@@ -279,53 +126,24 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         // 处理发起人参数
         pageReqVO.setInitiatorIdList(splitToList(pageReqVO.getInitiatorId()));
 
-        // 构建查询条件
-        ConfigStore condition = buildDynamicCondition(pageReqVO, String.valueOf(loginUserId));
+        com.github.pagehelper.Page<BpmTodoTaskDTO> pageResult = PageHelper
+                .startPage(pageReqVO.getPageNo(), pageReqVO.getPageSize())
+                .doSelectPage(() -> bpmTaskCenterMapper.getTodoTaskPage(pageReqVO, loginUserStrId));
 
-        PageResult<BpmTodoTaskDTO> pageResult = taskExtRepository.getTodoTaskPage(condition);
         List<BpmFlowTodoTaskVO> todoTaskList = new ArrayList<>();
 
-        for (BpmTodoTaskDTO flowTaskExt : pageResult.getList()) {
-            try {
-                BpmFlowTodoTaskVO todoTaskVO = getBpmFlowTodoTaskVO(flowTaskExt);
-                todoTaskList.add(todoTaskVO);
-            } catch (Exception e) {
-                // 记录日志并跳过异常项
-                throw new RuntimeException(e);
-            }
+        for (BpmTodoTaskDTO flowTaskExt : pageResult.getResult()) {
+            BpmFlowTodoTaskVO todoTaskVO = bpmTaskCenterConvert.toTodoTaskVO(flowTaskExt);
+
+            // 处理代理逻辑
+            handleAgentLogic(todoTaskVO, flowTaskExt.getAgentId(), flowTaskExt.getBpmTitle(), loginUserId);
+            todoTaskList.add(todoTaskVO);
         }
+
         // 返回新的PageResult
         return new PageResult<>(todoTaskList, pageResult.getTotal());
     }
 
-    @NotNull
-    private static BpmFlowTodoTaskVO getBpmFlowTodoTaskVO(BpmTodoTaskDTO flowTaskExt) {
-        Long loginUserId = WebFrameworkUtils.getLoginUserId();
-
-        BpmFlowTodoTaskVO todoTaskVO = new BpmFlowTodoTaskVO();
-        todoTaskVO.setId(flowTaskExt.getId());
-        todoTaskVO.setTaskId(flowTaskExt.getId());
-        todoTaskVO.setInstanceId(flowTaskExt.getInstanceId());
-        todoTaskVO.setFlowStatus(flowTaskExt.getFlowStatus());
-        todoTaskVO.setTaskId(flowTaskExt.getId());
-        todoTaskVO.setNodeCode(flowTaskExt.getNodeCode());
-        todoTaskVO.setProcessTitle(flowTaskExt.getBpmTitle());
-        todoTaskVO.setSubmitTime(flowTaskExt.getSubmitTime());
-        todoTaskVO.setFormSummary(flowTaskExt.getFormSummary());
-        todoTaskVO.setArrivalTime(flowTaskExt.getCreateTime());
-        todoTaskVO.setBusinessId(flowTaskExt.getBindingViewId());
-
-        if (flowTaskExt.getAgentId() != null && Objects.equals(loginUserId, flowTaskExt.getAgentId())) {
-            todoTaskVO.setProcessTitle(BpmConstants.AGENT_TITLE_PREFIX + flowTaskExt.getBpmTitle());
-        }
-
-        todoTaskVO.setInitiator(new UserBasicInfoVO());
-        todoTaskVO.getInitiator().setUserId(flowTaskExt.getInitiatorId());
-        todoTaskVO.getInitiator().setName(flowTaskExt.getInitiatorName());
-        todoTaskVO.getInitiator().setAvatar(flowTaskExt.getInitiatorAvatar());
-
-        return todoTaskVO;
-    }
 
     /**
      * 获取流程已办分页
@@ -336,6 +154,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
     @Override
     public PageResult<BpmFlowDoneTaskVO> getDonePage(BpmDoneTaskPageReqVO pageReqVO) {
         Long loginUserId = WebFrameworkUtils.getLoginUserId();
+        String loginUserStrId = String.valueOf(loginUserId);
 
         // 处理节点编码参数
         pageReqVO.setNodeCodeList(splitToList(pageReqVO.getNodeCode()));
@@ -346,33 +165,15 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         // 处理发起人参数
         pageReqVO.setInitiatorIdList(splitToList(pageReqVO.getInitiatorId()));
 
-        // 构建查询条件
-        ConfigStore condition = buildDynamicCondition(pageReqVO, String.valueOf(loginUserId));
-
-        PageResult<BpmDoneTaskDTO> pageResult = hisTaskExtRepository.getDoneTaskPage(condition);
+        com.github.pagehelper.Page<BpmDoneTaskDTO> pageResult = PageHelper
+                .startPage(pageReqVO.getPageNo(), pageReqVO.getPageSize())
+                .doSelectPage(() -> bpmTaskCenterMapper.getDoneTaskPage(pageReqVO, loginUserStrId));
 
         List<BpmFlowDoneTaskVO> doneTaskList = new ArrayList<>();
-        for (BpmDoneTaskDTO flowHisTaskExt : pageResult.getList()) {
-            BpmFlowDoneTaskVO doneTaskVO = new BpmFlowDoneTaskVO();
-            doneTaskVO.setTaskId(flowHisTaskExt.getTaskId());
-            doneTaskVO.setHisTaskId(flowHisTaskExt.getId());
-            doneTaskVO.setInstanceId(flowHisTaskExt.getInstanceId());
-            doneTaskVO.setProcessTitle(flowHisTaskExt.getBpmTitle());
-            doneTaskVO.setFormSummary(flowHisTaskExt.getFormSummary());
-            doneTaskVO.setHandleTime(flowHisTaskExt.getUpdateTime());
-            doneTaskVO.setTaskStatus(flowHisTaskExt.getTaskFlowStatus());
-            doneTaskVO.setBusinessId(flowHisTaskExt.getBindingViewId());
-
-            doneTaskVO.setInitiator(new UserBasicInfoVO());
-            doneTaskVO.getInitiator().setUserId(flowHisTaskExt.getInitiatorId());
-            doneTaskVO.getInitiator().setName(flowHisTaskExt.getInitiatorName());
-            doneTaskVO.getInitiator().setAvatar(flowHisTaskExt.getInitiatorAvatar());
-
-            // 判断代理执行
-            if (flowHisTaskExt.getAgentId() != null && Objects.equals(loginUserId, flowHisTaskExt.getAgentId())) {
-                doneTaskVO.setProcessTitle(BpmConstants.AGENT_TITLE_PREFIX + flowHisTaskExt.getBpmTitle());
-            }
-
+        for (BpmDoneTaskDTO doneTaskDTO : pageResult.getResult()) {
+            BpmFlowDoneTaskVO doneTaskVO = bpmTaskCenterConvert.toDoneTaskVO(doneTaskDTO);
+            // 处理代理逻辑
+            handleAgentLogic(doneTaskVO, doneTaskDTO.getAgentId(), doneTaskDTO.getBpmTitle(), loginUserId);
             doneTaskList.add(doneTaskVO);
         }
 
@@ -394,21 +195,13 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         // 处理流程状态参数
         pageReqVO.setFlowStatusList(splitToFlowStatusList(pageReqVO.getFlowStatus()));
 
-        ConfigStore condition = buildDynamicCondition(pageReqVO, String.valueOf(loginUserId));
-        PageResult<BpmInstanceDTO> pageResult = insExtRepository.getMyCreatePage(condition);
+        com.github.pagehelper.Page<BpmMyInstanceDTO> pageResult = PageHelper
+                .startPage(pageReqVO.getPageNo(), pageReqVO.getPageSize())
+                .doSelectPage(() -> bpmTaskCenterMapper.getMyCreatePage(pageReqVO, loginUserId));
 
         List<BpmMyCreatedVO> list = new ArrayList<>();
-        for (BpmInstanceDTO flowInstance : pageResult.getList()) {
-            BpmMyCreatedVO bpmMyCreatedVO = new BpmMyCreatedVO();
-            bpmMyCreatedVO.setId(flowInstance.getId());
-            bpmMyCreatedVO.setProcessTitle(flowInstance.getBpmTitle());
-            bpmMyCreatedVO.setFlowStatus(flowInstance.getFlowStatus());
-            bpmMyCreatedVO.setFormSummary(flowInstance.getFormSummary());
-            bpmMyCreatedVO.setSubmitTime(flowInstance.getSubmitTime());
-            bpmMyCreatedVO.setCreateTime(flowInstance.getCreateTime());
-            bpmMyCreatedVO.setUpdateTime(flowInstance.getUpdateTime());
-            bpmMyCreatedVO.setInstanceId(flowInstance.getId());
-            bpmMyCreatedVO.setBusinessId(flowInstance.getBindingViewId());
+        for (BpmMyInstanceDTO flowInstance : pageResult.getResult()) {
+            BpmMyCreatedVO bpmMyCreatedVO = bpmTaskCenterConvert.toMyCreatedVO(flowInstance);
 
             //设置当前节点处理人
             List<Task> flowTaskList = taskService.getByInsId(flowInstance.getId());
@@ -420,8 +213,11 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
                 List<Long> processedByIds = userList.stream()
                         .map(user -> Long.valueOf(user.getProcessedBy()))
                         .collect(Collectors.toList());
+
                 CommonResult<List<AdminUserRespDTO>> dtos = adminUserApi.getUserList(processedByIds);
                 List<Map<String, Object>> currentNodeHandler = new ArrayList<>();
+
+                // todo：历史遗留，待修复
                 dtos.getData().forEach(dto -> {
                     Map<String, Object> map = new HashMap<>();
                     map.put("userId", dto.getId());
@@ -429,11 +225,13 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
                     map.put("avatar", dto.getAvatar());
                     currentNodeHandler.add( map);
                 });
+
                 bpmMyCreatedVO.setCurrentNodeHandler(currentNodeHandler);
             }
-            list.add(bpmMyCreatedVO);
 
+            list.add(bpmMyCreatedVO);
         }
+
         return new PageResult<>(list, pageResult.getTotal());
     }
 
@@ -441,7 +239,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
     public List<ListNodesRespVO.NodeVO> listNodes(Long bindingViewId) {
         List<ListNodesRespVO.NodeVO> nodeVOs = new ArrayList<>();
 
-        Definition def = engineDefExtService.getByFormPathAndStatus(String.valueOf(bindingViewId), PublishStatus.PUBLISHED.getKey());
+        Definition def = defExtService.getByFormPathAndStatus(String.valueOf(bindingViewId), PublishStatus.PUBLISHED.getKey());
         if (def == null) {
             // todo：无发布状态的定义，返回空列表，是否要返回历史状态的流程定义数据
             return nodeVOs;
@@ -470,6 +268,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
 
         return nodeVOs;
     }
+
     /**
      * 获取流程抄送分页
      *
@@ -479,6 +278,8 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
     @Override
     public PageResult<BpmCcTaskPageResVO> getCcPage(BpmCcTaskPageReqVO pageReqVO) {
         Long loginUserId = WebFrameworkUtils.getLoginUserId();
+        String loginUserStrId = String.valueOf(loginUserId);
+
         // 处理节点编码参数
         pageReqVO.setNodeCodeList(splitToList(pageReqVO.getNodeCode()));
 
@@ -488,79 +289,42 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         // 处理发起人参数
         pageReqVO.setInitiatorIdList(splitToList(pageReqVO.getInitiatorId()));
 
-        // 构建查询条件
-        ConfigStore condition = buildDynamicCondition(pageReqVO, String.valueOf(loginUserId));
+        com.github.pagehelper.Page<BpmCcRecordDTO> pageResult =  PageHelper
+                .startPage(pageReqVO.getPageNo(), pageReqVO.getPageSize())
+                .doSelectPage(() -> bpmFlowCcRecordRepository.getMapper().getCcPage(pageReqVO, loginUserStrId));
 
-        PageResult<BpmCcRecordDTO> pageResult = bpmFlowCcRecordRepository.getCcPage(condition);
         // 转换 BpmCcRecordDTO 列表为 BpmCopyTaskPageResVO 列表
-        List<BpmCcTaskPageResVO> copyTaskList = pageResult.getList().stream()
-                .map(this::convertToCcTaskVO)
-                .collect(Collectors.toList());
+        List<BpmCcTaskPageResVO> copyTaskList = new ArrayList<>();
+
+        for (BpmCcRecordDTO ccRecord : pageResult.getResult()) {
+            BpmCcTaskPageResVO ccTaskVO = bpmTaskCenterConvert.toCcTaskVO(ccRecord);
+            // 处理代理逻辑
+            handleAgentLogic(ccTaskVO, ccRecord.getAgentId(), ccRecord.getBpmTitle(), loginUserId);
+            copyTaskList.add(ccTaskVO);
+        }
 
         return new PageResult<>(copyTaskList, pageResult.getTotal());
-
     }
 
-    private ConfigStore buildDynamicCondition(BpmCcTaskPageReqVO reqVO, String userId) {
-        DefaultConfigStore condition = new DefaultConfigStore();
-
-        // 设置分页参数
-        fillPageNavi(condition, reqVO.getPageNo(), reqVO.getPageSize());
-
-        // 填充流程实例条件
-        fillInsCondition(condition, reqVO);
-
-        // 发起人编码条件（支持多个值）
-        fillInitiatorCondition(condition, reqVO.getInitiatorIdList());
-
-        // 填充时间范围条件
-        fillTimeRange(condition, "submit_time", reqVO.getSubmitTimeStart(), reqVO.getSubmitTimeEnd());
-
-        // 填充处理人条件
-        condition.param("userId", userId);
-
-        // 填充查看状态条件
-        fillViewed(condition, "viewed", reqVO.getViewed());
-
-        // 排序
-        fillOrder(condition, "create_time", reqVO.getSortType());
-
-        return condition;
-    }
-    private void fillViewed(ConfigStore condition, String fieldName, Boolean viewed) {
-        if (Objects.nonNull(viewed)) {
-            condition.and(Compare.EQUAL, fieldName, viewed ? 1 : 0);
+    /**
+     * 处理代理逻辑：如果是代理执行，则在流程标题前添加"【代理审批】"前缀
+     *
+     * @param vo 任务VO（待办/已办/抄送）
+     * @param agentId 代理人ID
+     * @param originalTitle 原始流程标题
+     * @param loginUserId 当前登录用户ID
+     */
+    private void handleAgentLogic(Object vo, String agentId, String originalTitle, Long loginUserId) {
+        if (agentId != null && Objects.equals(String.valueOf(loginUserId), agentId)) {
+            String agentTitle = BpmConstants.AGENT_TITLE_PREFIX + originalTitle;
+            if (vo instanceof BpmFlowTodoTaskVO) {
+                ((BpmFlowTodoTaskVO) vo).setProcessTitle(agentTitle);
+            } else if (vo instanceof BpmFlowDoneTaskVO) {
+                ((BpmFlowDoneTaskVO) vo).setProcessTitle(agentTitle);
+            } else if (vo instanceof BpmCcTaskPageResVO) {
+                ((BpmCcTaskPageResVO) vo).setProcessTitle(agentTitle);
+            }
         }
-    }
-
-    private BpmCcTaskPageResVO convertToCcTaskVO(BpmCcRecordDTO ccRecord) {
-        BpmCcTaskPageResVO vo = new BpmCcTaskPageResVO();
-        Long loginUserId = WebFrameworkUtils.getLoginUserId();
-
-        // 基本字段映射
-        vo.setId(ccRecord.getId());
-        vo.setProcessTitle(ccRecord.getBpmTitle());
-        vo.setFlowStatus(ccRecord.getFlowStatus());
-        vo.setArrivalTime(ccRecord.getCreateTime());
-        vo.setTaskId(ccRecord.getTaskId());
-        vo.setInstanceId(ccRecord.getInstanceId());
-        vo.setBusinessId(ccRecord.getBindingViewId());
-        vo.setViewed(BooleanUtils.toBoolean(ccRecord.getViewed()));
-
-        // 设置发起人信息
-        UserBasicInfoVO initiator = new UserBasicInfoVO();
-        initiator.setUserId(ccRecord.getInitiatorId());
-        initiator.setName(ccRecord.getInitiatorName());
-        initiator.setAvatar(ccRecord.getInitiatorAvatar());
-
-        // 判断代理执行
-        if (ccRecord.getAgentId() != null && Objects.equals(loginUserId, ccRecord.getAgentId())) {
-            vo.setProcessTitle(BpmConstants.AGENT_TITLE_PREFIX + ccRecord.getBpmTitle());
-        }
-
-        vo.setInitiator(initiator);
-
-        return vo;
     }
 
 }

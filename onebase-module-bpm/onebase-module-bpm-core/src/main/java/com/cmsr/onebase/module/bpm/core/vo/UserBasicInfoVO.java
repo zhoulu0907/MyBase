@@ -13,7 +13,7 @@ public class UserBasicInfoVO {
     /**
      * 用户ID
      */
-    private Long userId;
+    private String userId;
 
     /**
      * 用户名称
