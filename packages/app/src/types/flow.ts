@@ -181,7 +181,8 @@ export enum TypeCode {
 
 export interface ConnectInstance {
   applicationId: string;
-  connectorId: string;
+  id: string;
+  connectorUuid: string;
   connectorName: string;
   typeCode: TypeCode;
   createTime: string;

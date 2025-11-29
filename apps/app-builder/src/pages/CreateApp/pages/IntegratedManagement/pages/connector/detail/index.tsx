@@ -47,7 +47,6 @@ const ConnectorDetailPage: React.FC<ConnectorInstanceDetailProps> = ({}) => {
 
   const handleGetIntanceDetail = async (id: string) => {
     const res = await getConnectInstance(id);
-    console.log('res :', res);
     if (res) {
       setBaseInfo(res);
     }
@@ -75,7 +74,7 @@ const ConnectorDetailPage: React.FC<ConnectorInstanceDetailProps> = ({}) => {
 
     try {
       const res = await updateConnectInstance({
-        connectorId: baseInfo.connectorId,
+        connectorId: baseInfo.id,
         connectorName: editName.trim(),
         description: baseInfo.description
       } as UpdateConnectInstanceReq);
