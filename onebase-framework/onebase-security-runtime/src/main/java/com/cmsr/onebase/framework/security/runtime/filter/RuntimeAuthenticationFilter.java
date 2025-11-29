@@ -1,19 +1,20 @@
 package com.cmsr.onebase.framework.security.runtime.filter;
 
 import cn.hutool.core.util.StrUtil;
+import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
 import com.cmsr.onebase.framework.common.biz.system.oauth2.OAuth2TokenCommonApi;
 import com.cmsr.onebase.framework.common.biz.system.oauth2.dto.OAuth2AccessTokenCheckRespDTO;
 import com.cmsr.onebase.framework.common.enums.RunModeEnum;
 import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
+import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.security.TenantContextHolder;
+import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.common.security.dto.RuntimeLoginUser;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.security.config.SecurityProperties;
-import com.cmsr.onebase.framework.common.security.dto.LoginUser;
-import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.web.core.handler.GlobalExceptionHandler;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import jakarta.servlet.FilterChain;
@@ -87,6 +88,7 @@ public class RuntimeAuthenticationFilter extends OncePerRequestFilter {
             }
             // 设置当前用户
             if (loginUser != null) {
+                ApplicationManager.setApplicationId(loginUser.getApplicationId());
                 SecurityFrameworkUtils.setLoginUser(loginUser, request);
                 // 会话空闲检查：排除登录和登出请求
                 boolean checkSuc = checkAndUpdateSessionIdle(loginUser, token);
@@ -112,7 +114,8 @@ public class RuntimeAuthenticationFilter extends OncePerRequestFilter {
 
             // 构建登录用户
             RuntimeLoginUser loginUser = new RuntimeLoginUser();
-            loginUser.setApplicationId(accessToken.getAppId())
+            loginUser.setApplicationId(accessToken.getAppId());
+            loginUser
                     .setRunMode(accessToken.getRunMode())
                     .setId(accessToken.getUserId()).setUserType(accessToken.getUserType())
                     .setInfo(accessToken.getUserInfo()) // 额外的用户信息
@@ -130,8 +133,8 @@ public class RuntimeAuthenticationFilter extends OncePerRequestFilter {
      * <p>
      * 注意，在线上环境下，一定要关闭该功能！！！
      *
-     * @param request  请求
-     * @param token    模拟的 token，格式为 {@link SecurityProperties#getMockSecret()} + 用户编号
+     * @param request 请求
+     * @param token   模拟的 token，格式为 {@link SecurityProperties#getMockSecret()} + 用户编号
      * @return 模拟的 LoginUser
      */
     private RuntimeLoginUser mockLoginUser(HttpServletRequest request, String token) {
