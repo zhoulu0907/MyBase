@@ -160,7 +160,7 @@ export const renderForm = ({}: FormRenderProps<FlowNodeJSON['data']>) => {
                   <div className={styles.selectedInstanceLeft}>
                     <img src={jsNodeIcon} alt="" className={styles.selectIcon} />
                     <div className={styles.instanceItemText}>
-                      {instanceList.find((item) => item.connectorId === selectedInstanceId)?.connectorName}
+                      {instanceList.find((item) => item.id === selectedInstanceId)?.connectorName}
                     </div>
                   </div>
 
@@ -181,19 +181,16 @@ export const renderForm = ({}: FormRenderProps<FlowNodeJSON['data']>) => {
                 <div className={styles.instanceList}>
                   {instanceList?.map((item: ConnectInstance) => (
                     <div
-                      key={item.connectorId}
+                      key={item.id}
                       className={styles.instanceItem}
                       onClick={() => {
-                        setSelectedInstanceId(item.connectorId);
-                        payloadForm.setFieldValue('instanceId', item.connectorId);
+                        setSelectedInstanceId(item.id);
+                        payloadForm.setFieldValue('instanceId', item.id);
                         setOnSwap(false);
                         setPageNo(1);
                       }}
                       style={{
-                        border:
-                          selectedInstanceId === item.connectorId
-                            ? '2px solid rgb(var(--primary-6))'
-                            : '1px solid #9c9c9c'
+                        border: selectedInstanceId === item.id ? '2px solid rgb(var(--primary-6))' : '1px solid #9c9c9c'
                       }}
                     >
                       <img src={jsNodeIcon} alt="" className={styles.instanceItemIcon} />
