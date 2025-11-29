@@ -16,14 +16,9 @@ import {
   Upload
 } from '@arco-design/web-react';
 import { IconCamera, IconEdit } from '@arco-design/web-react/icon';
-import { TokenManager, Cropper } from '@onebase/common';
+import { Cropper, TokenManager } from '@onebase/common';
 import type { CorpDetailResponse, DictData } from '@onebase/platform-center';
-import {
-  getCorpDetailByIdApiInCorp,
-  getDictDataByType,
-  updateCorpApiInCorp,
-  runtimeUploadFile
-} from '@onebase/platform-center';
+import { getCorpDetailByIdApiInCorp, runtimeUploadFile, updateCorpApiInCorp } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
 
@@ -52,22 +47,22 @@ const SpaceInfo: React.FC = () => {
       const res = await getCorpDetailByIdApiInCorp(id);
       setEnterpriseInfo(res);
       setCorpLogo(res.corpLogo);
-      if (res.id) {
-        await fetchIndustryDict(res.id);
-      }
+      //   if (res.id) {
+      //     await fetchIndustryDict(res.id);
+      //   }
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchIndustryDict = async (id: string) => {
-    try {
-      const res = await getDictDataByType(id);
-      setTndustryDict(res);
-    } catch (error) {
-      console.error('字典数据列表错误', error);
-    }
-  };
+  //   const fetchIndustryDict = async (id: string) => {
+  //     try {
+  //       const res = await getDictDataByType(id);
+  //       setTndustryDict(res);
+  //     } catch (error) {
+  //       console.error('字典数据列表错误', error);
+  //     }
+  //   };
 
   // 重命名
   const handleRenameSubmit = async () => {

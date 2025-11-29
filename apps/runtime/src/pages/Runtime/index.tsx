@@ -100,7 +100,7 @@ const Runtime: React.FC = () => {
 
   useEffect(() => {
     // TODO(多租户)：等马老师提供runtime的接口后打开
-    // getUserInfo();
+    getUserInfo();
   }, []);
 
   const getUserInfo = async () => {
