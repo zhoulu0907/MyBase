@@ -151,7 +151,7 @@ public class BpmVersionMgmtServiceImpl implements BpmVersionMgmtService {
 
             QueryCondition orCondition = QueryCondition.createEmpty();
             orCondition.or(QueryMethods.column("ext::json->>'versionAlias").like(reqVo.getVersionAlias()));
-            orCondition.or(FLOW_DEFINITION.VERSION.like(versionKeyWord));
+            orCondition.or(FLOW_DEFINITION.BPM_VERSION.like(versionKeyWord));
 
             queryWrapper.and(orCondition);
         }

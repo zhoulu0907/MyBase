@@ -125,9 +125,9 @@ public class FlowTask extends WarmFlowBaseEntity implements Task {
     @Override
     public Task setTenantId(String tenantId) {
         if (tenantId != null) {
-            this.tenantId = Long.valueOf(tenantId);
+            this.wfTenantId = Long.valueOf(tenantId);
         } else {
-            this.tenantId = null;
+            this.wfTenantId = null;
         }
 
         return this;

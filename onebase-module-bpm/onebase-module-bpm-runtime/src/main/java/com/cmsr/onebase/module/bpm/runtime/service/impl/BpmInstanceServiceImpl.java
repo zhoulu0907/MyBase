@@ -314,7 +314,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         flowInsExtDO.setFormName(reqVO.getFormName());
         flowInsExtDO.setFormSummary(formSummary);
         flowInsExtDO.setInstanceId(instance.getId());
-        flowInsExtDO.setAppId(extDto.getAppId());
+        flowInsExtDO.setApplicationId(extDto.getAppId());
 
         flowInsExtRepository.save(flowInsExtDO);
 

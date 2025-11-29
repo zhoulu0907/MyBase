@@ -5,7 +5,7 @@ CREATE TABLE bpm_flow_definition
     flow_name       varchar(100) NOT NULL,
     model_value     varchar(40)  NOT NULL DEFAULT 'CLASSICS',
     category        varchar(100) NULL,
-    "version"       varchar(20)  NOT NULL,
+    "bpm_version"       varchar(20)  NOT NULL,
     is_publish      int2         NOT NULL DEFAULT 0,
     form_custom     bpchar(1)    NULL     DEFAULT 'N':: character varying,
     form_path       varchar(100) NULL,
@@ -13,6 +13,8 @@ CREATE TABLE bpm_flow_definition
     listener_type   varchar(100) NULL,
     listener_path   varchar(400) NULL,
     ext             text          NULL,
+    "application_id" int8 NOT NULL,
+    "version_tag"   int8 NOT NULL DEFAULT 0,
     "lock_version" int8 NOT NULL DEFAULT 0,
     "creator" int8 NOT NULL DEFAULT 0,
     "create_time" timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -29,7 +31,7 @@ COMMENT ON COLUMN bpm_flow_definition.flow_code IS '流程编码';
 COMMENT ON COLUMN bpm_flow_definition.flow_name IS '流程名称';
 COMMENT ON COLUMN bpm_flow_definition.model_value IS '设计器模型（CLASSICS经典模型 MIMIC仿钉钉模型）';
 COMMENT ON COLUMN bpm_flow_definition.category IS '流程类别';
-COMMENT ON COLUMN bpm_flow_definition."version" IS '流程版本';
+COMMENT ON COLUMN bpm_flow_definition."bpm_version" IS '流程版本';
 COMMENT ON COLUMN bpm_flow_definition.is_publish IS '是否发布（0未发布 1已发布 9失效）';
 COMMENT ON COLUMN bpm_flow_definition.form_custom IS '审批表单是否自定义（Y是 N否）';
 COMMENT ON COLUMN bpm_flow_definition.form_path IS '审批表单路径';
@@ -44,6 +46,8 @@ COMMENT ON COLUMN bpm_flow_definition.update_time IS '更新时间';
 COMMENT ON COLUMN bpm_flow_definition.updater IS '更新人';
 COMMENT ON COLUMN bpm_flow_definition.deleted IS '删除标志';
 COMMENT ON COLUMN bpm_flow_definition.tenant_id IS '租户id';
+COMMENT ON COLUMN bpm_flow_definition."application_id" IS '应用ID';
+COMMENT ON COLUMN bpm_flow_definition."version_tag" IS '版本标签';
 
 CREATE TABLE bpm_flow_node
 (
@@ -62,7 +66,9 @@ CREATE TABLE bpm_flow_node
     handler_path    varchar(400)  NULL,
     form_custom     bpchar(1)     NULL DEFAULT 'N':: character varying,
     form_path       varchar(100)  NULL,
-    "version"       varchar(20)   NOT NULL,
+    "application_id" int8 NOT NULL,
+    "version_tag"   int8 NOT NULL DEFAULT 0,
+    "bpm_version"       varchar(20)   NOT NULL,
     "lock_version" int8 NOT NULL DEFAULT 0,
     "creator" int8 NOT NULL DEFAULT 0,
     "create_time" timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -90,7 +96,7 @@ COMMENT ON COLUMN bpm_flow_node.handler_type IS '处理器类型';
 COMMENT ON COLUMN bpm_flow_node.handler_path IS '处理器路径';
 COMMENT ON COLUMN bpm_flow_node.form_custom IS '审批表单是否自定义（Y是 N否）';
 COMMENT ON COLUMN bpm_flow_node.form_path IS '审批表单路径';
-COMMENT ON COLUMN bpm_flow_node."version" IS '版本';
+COMMENT ON COLUMN bpm_flow_node."bpm_version" IS '版本';
 COMMENT ON COLUMN bpm_flow_node."lock_version" IS '乐观锁';
 COMMENT ON COLUMN bpm_flow_node.create_time IS '创建时间';
 COMMENT ON COLUMN bpm_flow_node.creator IS '创建人';
@@ -99,7 +105,8 @@ COMMENT ON COLUMN bpm_flow_node.updater IS '更新人';
 COMMENT ON COLUMN bpm_flow_node.ext IS '节点扩展属性';
 COMMENT ON COLUMN bpm_flow_node.deleted IS '删除标志';
 COMMENT ON COLUMN bpm_flow_node.tenant_id IS '租户id';
-
+COMMENT ON COLUMN bpm_flow_node.application_id IS '应用ID';
+COMMENT ON COLUMN bpm_flow_node.version_tag IS '版本标签';
 
 CREATE TABLE bpm_flow_skip
 (
@@ -113,6 +120,8 @@ CREATE TABLE bpm_flow_skip
     skip_type      varchar(40)  NULL,
     skip_condition varchar(200) NULL,
     coordinate     varchar(100) NULL,
+    "application_id" int8 NOT NULL,
+    "version_tag"   int8 NOT NULL DEFAULT 0,
     "ext"          text NULL,
     "priority" int2 NOT NULL DEFAULT 0,
     "lock_version" int8 NOT NULL DEFAULT 0,
@@ -145,6 +154,8 @@ COMMENT ON COLUMN bpm_flow_skip.deleted IS '删除标志';
 COMMENT ON COLUMN bpm_flow_skip.tenant_id IS '租户id';
 COMMENT ON COLUMN bpm_flow_skip."ext" IS '扩展信息';
 COMMENT ON COLUMN bpm_flow_skip."priority" IS '优先级';
+COMMENT ON COLUMN bpm_flow_skip.application_id IS '应用ID';
+COMMENT ON COLUMN bpm_flow_skip.version_tag IS '版本标签';
 
 CREATE TABLE bpm_flow_instance
 (
@@ -328,7 +339,7 @@ CREATE TABLE bpm_flow_instance_biz_ext
     business_data_code           varchar(100) NULL,
     binding_view_id              varchar(100) NOT NULL,
     bpm_title                    varchar(500) NOT NULL,
-    app_id                  int8         NOT NULL,
+    "application_id" int8 NOT NULL,
     initiator_id            varchar(80) NOT NULL,         NULL,
     initiator_name          varchar(100) NULL,
     initiator_avatar        varchar(500) NULL,
@@ -365,7 +376,7 @@ COMMENT ON COLUMN bpm_flow_instance_biz_ext.submit_time IS '发起时间（与cr
 COMMENT ON COLUMN bpm_flow_instance_biz_ext.form_summary IS '表单摘要';
 COMMENT ON COLUMN bpm_flow_instance_biz_ext.form_name IS '流程表单';
 COMMENT ON COLUMN bpm_flow_instance_biz_ext.bpm_version IS '流程版本号';
-COMMENT ON COLUMN bpm_flow_instance_biz_ext.app_id IS '应用ID';
+COMMENT ON COLUMN bpm_flow_instance_biz_ext.application_id IS '应用ID';
 COMMENT ON COLUMN bpm_flow_instance_biz_ext.lock_version IS '乐观锁';
 COMMENT ON COLUMN bpm_flow_instance_biz_ext.creator IS '创建人';
 COMMENT ON COLUMN bpm_flow_instance_biz_ext.create_time IS '创建时间';
@@ -396,6 +407,8 @@ CREATE TABLE bpm_flow_agent
     revoker_id                 varchar(80),
     revoked_time            timestamp(6),
 
+    "application_id" int8 NOT NULL,
+    "version_tag"   int8 NOT NULL DEFAULT 0,
     lock_version            int8         NOT NULL DEFAULT 0,
     creator                 int8         NOT NULL DEFAULT 0,
     create_time             timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -427,7 +440,8 @@ COMMENT ON COLUMN bpm_flow_agent.deleted IS '删除标志';
 COMMENT ON COLUMN bpm_flow_agent.tenant_id IS '租户ID';
 COMMENT ON COLUMN bpm_flow_agent.agent_name IS '代理人用户名称';
 COMMENT ON COLUMN bpm_flow_agent.principal_name IS '被代理人用户名称';
-
+COMMENT ON COLUMN bpm_flow_agent.application_id IS '应用ID';
+COMMENT ON COLUMN bpm_flow_agent.version_tag IS '版本标签';
 
 CREATE TABLE bpm_flow_cc_record
 (

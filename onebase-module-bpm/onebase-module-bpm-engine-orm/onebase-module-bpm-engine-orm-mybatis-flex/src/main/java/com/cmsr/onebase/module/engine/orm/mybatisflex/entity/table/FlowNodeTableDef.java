@@ -8,7 +8,7 @@ import com.mybatisflex.core.table.TableDef;
  * 流程节点表 表定义层。
  *
  * @author liyang
- * @since 2025-11-27
+ * @since 2025-11-29
  */
 public class FlowNodeTableDef extends TableDef {
 
@@ -47,7 +47,7 @@ public class FlowNodeTableDef extends TableDef {
     /**
      * 版本
      */
-    public final QueryColumn VERSION = new QueryColumn(this, "version");
+    public final QueryColumn BPM_VERSION = new QueryColumn(this, "bpm_version");
 
     /**
      * 审批表单路径
@@ -100,6 +100,11 @@ public class FlowNodeTableDef extends TableDef {
     public final QueryColumn UPDATE_TIME = new QueryColumn(this, "update_time");
 
     /**
+     * 版本标签
+     */
+    public final QueryColumn VERSION_TAG = new QueryColumn(this, "version_tag");
+
+    /**
      * 任意结点跳转
      */
     public final QueryColumn ANY_NODE_SKIP = new QueryColumn(this, "any_node_skip");
@@ -135,6 +140,11 @@ public class FlowNodeTableDef extends TableDef {
     public final QueryColumn LISTENER_TYPE = new QueryColumn(this, "listener_type");
 
     /**
+     * 应用ID
+     */
+    public final QueryColumn APPLICATION_ID = new QueryColumn(this, "application_id");
+
+    /**
      * 权限标识（权限类型:权限标识，可以多个，用@@隔开)
      */
     public final QueryColumn PERMISSION_FLAG = new QueryColumn(this, "permission_flag");
@@ -147,7 +157,7 @@ public class FlowNodeTableDef extends TableDef {
     /**
      * 默认字段，不包含逻辑删除或者 large 等字段。
      */
-    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, NODE_TYPE, DEFINITION_ID, NODE_CODE, NODE_NAME, PERMISSION_FLAG, NODE_RATIO, COORDINATE, ANY_NODE_SKIP, LISTENER_TYPE, LISTENER_PATH, HANDLER_TYPE, HANDLER_PATH, FORM_CUSTOM, FORM_PATH, VERSION, LOCK_VERSION, CREATOR, CREATE_TIME, UPDATER, UPDATE_TIME, EXT, DELETED, TENANT_ID};
+    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, NODE_TYPE, DEFINITION_ID, NODE_CODE, NODE_NAME, PERMISSION_FLAG, NODE_RATIO, COORDINATE, ANY_NODE_SKIP, LISTENER_TYPE, LISTENER_PATH, HANDLER_TYPE, HANDLER_PATH, FORM_CUSTOM, FORM_PATH, BPM_VERSION, LOCK_VERSION, CREATOR, CREATE_TIME, UPDATER, UPDATE_TIME, EXT, DELETED, TENANT_ID, APPLICATION_ID, VERSION_TAG};
 
     public FlowNodeTableDef() {
         super("", "bpm_flow_node");

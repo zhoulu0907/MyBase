@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.engine.orm.mybatisflex.entity;
 
-import com.cmsr.onebase.framework.orm.entity.WarmFlowBaseEntity;
+import com.cmsr.onebase.framework.orm.entity.WarmFlowBizEntity;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
 import lombok.Data;
@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 @Data
 @Accessors(chain = true)
 @Table(value = "bpm_flow_skip")
-public class FlowSkip extends WarmFlowBaseEntity implements Skip {
+public class FlowSkip extends WarmFlowBizEntity implements Skip {
     /** 流程定义ID */
     @Column(value = "definition_id", comment = "流程定义ID")
     private Long definitionId;
@@ -118,9 +118,9 @@ public class FlowSkip extends WarmFlowBaseEntity implements Skip {
     @Override
     public Skip setTenantId(String tenantId) {
         if (tenantId != null) {
-            this.tenantId = Long.valueOf(tenantId);
+            this.wfTenantId = Long.valueOf(tenantId);
         } else {
-            this.tenantId = null;
+            this.wfTenantId = null;
         }
 
         return this;
@@ -134,6 +134,16 @@ public class FlowSkip extends WarmFlowBaseEntity implements Skip {
             this.deleted = null;
         }
 
+        return this;
+    }
+
+    public Skip setApplicationId(Long applicationId) {
+        this.applicationId = applicationId;
+        return this;
+    }
+
+    public Skip setVersionTag(Long versionTag) {
+        this.versionTag = versionTag;
         return this;
     }
 }

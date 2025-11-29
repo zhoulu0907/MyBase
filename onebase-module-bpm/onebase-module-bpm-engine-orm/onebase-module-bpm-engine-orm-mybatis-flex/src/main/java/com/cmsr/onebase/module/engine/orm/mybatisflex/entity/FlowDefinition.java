@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.engine.orm.mybatisflex.entity;
 
-import com.cmsr.onebase.framework.orm.entity.WarmFlowBaseEntity;
+import com.cmsr.onebase.framework.orm.entity.WarmFlowBizEntity;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
 import lombok.Data;
@@ -22,7 +22,7 @@ import java.util.List;
 @Data
 @Accessors(chain = true)
 @Table(value = "bpm_flow_definition")
-public class FlowDefinition extends WarmFlowBaseEntity implements Definition {
+public class FlowDefinition extends WarmFlowBizEntity implements Definition {
     /** 流程编码 */
     @Column(value = "flow_code", comment = "流程编码")
     private String flowCode;
@@ -70,8 +70,8 @@ public class FlowDefinition extends WarmFlowBaseEntity implements Definition {
     /**
      * 流程版本
      */
-    @Column(value = "version", comment = "流程版本")
-    private String version;
+    @Column(value = "bpm_version", comment = "流程版本")
+    private String bpmVersion;
 
 
     /* ==================== 以下为非数据库字段 ==================== */
@@ -128,9 +128,9 @@ public class FlowDefinition extends WarmFlowBaseEntity implements Definition {
     @Override
     public Definition setTenantId(String tenantId) {
         if (tenantId != null) {
-            this.tenantId = Long.valueOf(tenantId);
+            this.wfTenantId = Long.valueOf(tenantId);
         } else {
-            this.tenantId = null;
+            this.wfTenantId = null;
         }
 
         return this;
@@ -144,6 +144,27 @@ public class FlowDefinition extends WarmFlowBaseEntity implements Definition {
             this.deleted = null;
         }
 
+        return this;
+    }
+
+    @Override
+    public Definition setVersion(String bpmVersion) {
+        this.bpmVersion = bpmVersion;
+        return this;
+    }
+
+    @Override
+    public String getVersion() {
+        return this.bpmVersion;
+    }
+
+    public Definition setApplicationId(Long applicationId) {
+        this.applicationId = applicationId;
+        return this;
+    }
+
+    public Definition setVersionTag(Long versionTag) {
+        this.versionTag = versionTag;
         return this;
     }
 }

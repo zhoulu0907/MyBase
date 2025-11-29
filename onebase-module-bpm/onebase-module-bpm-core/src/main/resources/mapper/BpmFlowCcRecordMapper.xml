@@ -7,7 +7,7 @@
      <select id="getCcPage" resultType="com.cmsr.onebase.module.bpm.core.dto.BpmCcRecordDTO">
         select * from (
             select
-            t3.app_id,
+            t3.application_id as app_id,
             t3.bpm_title,
             t3.initiator_id,
             t3.initiator_name,
@@ -50,7 +50,7 @@
         and (t.user_id = #{userId} or t4.agent_id = #{userId})
 
         <!-- app_id -->
-        AND t3.app_id = #{queryVO.appId}
+        AND t3.application_id = #{queryVO.appId}
 
         <!-- keyword 模糊搜索 -->
         <if test="queryVO != null and queryVO.keyword != null and queryVO.keyword != ''">
