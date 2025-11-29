@@ -339,7 +339,10 @@ public class TenantServiceImpl implements TenantService {
 
         tenantDataRepository.updateByConfig(row, new DefaultConfigStore().eq(TenantDO.ID, updateObj.getId()));
         // 修改租户管理员
-        if (updateReqVO.getTenantAdminUserUpdateReqVOSList() != null && updateReqVO.getTenantAdminUserUpdateReqVOSList().size() > 0) {
+        if (updateReqVO.getTenantAdminUserUpdateReqVOSList() != null) {
+            if(updateReqVO.getTenantAdminUserUpdateReqVOSList().isEmpty()){
+                throw exception(TENANT_ADMIN_ISNULL);
+            }
             TenantUtils.execute(updateObj.getId(), () -> {
 
                 // 管理员变了，把旧管理员角色移除，并降级为自定义
