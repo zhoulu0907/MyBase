@@ -14,7 +14,7 @@ tenant-id: {{adminTenantId}}
   "mobile": "13800000000",
   "email": "newuser@test.com",
   "password": "13@46qw@ery13@46",
-  "deptId": "100",
+  "deptId": 158401074156142592,
   "status": 1,
   "sex": 1
 }
