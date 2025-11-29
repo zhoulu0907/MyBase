@@ -481,7 +481,7 @@ public abstract class AbstractDeptServiceImpl implements DeptService {
 
     @Override
     public void updateAdminOrDirector(UserAdminOrDirectorUpdateReqVO reqVO) {
-        // todo 验证部分是否存在/启用；最好可以验证空间/企业是否存在此用户
+        // todo 验证部门是否存在/启用；验证空间/企业是否存在此用户
         if (reqVO.getUpdateType().equals(CorpConstant.LEADER_USER_ID)) {
             DataRow row = new DataRow();
             row.put(DeptDO.ADMIN_USER_ID, reqVO.getUserId());
