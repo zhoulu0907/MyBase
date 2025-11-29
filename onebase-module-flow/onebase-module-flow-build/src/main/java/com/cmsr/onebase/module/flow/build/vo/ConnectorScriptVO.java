@@ -13,7 +13,7 @@ public class ConnectorScriptVO {
     private Long id;
 
     @Schema(description = "连接器UUID")
-    private Long connectorUuid;
+    private String connectorUuid;
 
     @Schema(description = "脚本名称")
     private String scriptName;
