@@ -44,7 +44,7 @@ const AppBreadcrumb: React.FC<BreadcrumbProps> = ({ className, items }) => {
         return;
       }
 
-      if (index == 0) {
+      if (index == 0 || index > 2) {
         return;
       }
 
