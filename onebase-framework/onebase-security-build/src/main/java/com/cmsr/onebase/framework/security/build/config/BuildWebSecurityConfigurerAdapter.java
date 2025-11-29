@@ -11,6 +11,7 @@ import com.google.common.collect.Multimap;
 import jakarta.annotation.Resource;
 import jakarta.annotation.security.PermitAll;
 import jakarta.servlet.DispatcherType;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.context.ApplicationContext;
@@ -75,8 +76,8 @@ public class BuildWebSecurityConfigurerAdapter {
     @Resource
     private BuildAuthenticationFilter authenticationTokenFilter;
 
-    @Resource
-    private BuildApplicationContextHeaderFilter applicationFilter;
+    @Autowired
+    private BuildApplicationContextHeaderFilter applicationContextHeaderFilter;
     /**
      * 自定义的权限映射 Bean 们
      *
@@ -164,7 +165,7 @@ public class BuildWebSecurityConfigurerAdapter {
                         .anyRequest().authenticated());
 
         // 添加 Token Filter
-        httpSecurity.addFilterBefore(applicationFilter, BuildApplicationContextHeaderFilter.class);
+        httpSecurity.addFilterBefore(applicationContextHeaderFilter, UsernamePasswordAuthenticationFilter.class);
         httpSecurity.addFilterBefore(authenticationTokenFilter, UsernamePasswordAuthenticationFilter.class);
         return httpSecurity.build();
     }
