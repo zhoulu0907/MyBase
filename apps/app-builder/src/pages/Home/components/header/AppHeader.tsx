@@ -89,7 +89,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
       <Menu.Item key="info" style={{ height: '90px' }}>
         <div className={styles.adminInformation}>
           <UserProfileAvatar adminInfo={adminInfo} />
-          <Typography.Text>{adminInfo?.username}</Typography.Text>
+          <Typography.Text>{adminInfo?.nickname}</Typography.Text>
           <Typography.Text type="secondary">{maskMobile(adminInfo?.mobile)}</Typography.Text>
         </div>
       </Menu.Item>

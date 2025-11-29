@@ -6,7 +6,7 @@ import { formMeta } from './form-meta';
 
 export const JavascriptNodeRegistry: FlowNodeRegistry = {
   type: NodeType.JavaScript,
-  title: '连接器节点',
+  title: 'JS节点',
   category: 'other',
   meta: {
     isStart: false,
@@ -18,7 +18,7 @@ export const JavascriptNodeRegistry: FlowNodeRegistry = {
   },
   info: {
     icon: iconOther,
-    description: '这是连接器节点，用于连接各类API'
+    description: '这是JS节点，用于连接各类API'
   },
   /**
    * Render node via formMeta
