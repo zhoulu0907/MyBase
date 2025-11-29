@@ -23,16 +23,16 @@
             <artifactId>onebase-module-app-core</artifactId>
             <version>${revision}</version>
         </dependency>
-        <dependency>
+         <dependency>
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-module-system-api</artifactId>
             <version>${revision}</version>
         </dependency>
-        <dependency>
+       <!-- <dependency>
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-module-infra-api</artifactId>
             <version>${revision}</version>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-module-metadata-api</artifactId>
@@ -66,10 +66,10 @@
         </dependency>
 
         <!-- 服务保障相关 TODO 开发者：暂时去掉 -->
-<!--        <dependency>-->
-<!--            <groupId>com.cmsr.onebase</groupId>-->
-<!--            <artifactId>onebase-spring-boot-starter-protection</artifactId>-->
-<!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>com.cmsr.onebase</groupId>-->
+        <!--            <artifactId>onebase-spring-boot-starter-protection</artifactId>-->
+        <!--        </dependency>-->
 
         <!-- Test 测试相关 -->
         <dependency>

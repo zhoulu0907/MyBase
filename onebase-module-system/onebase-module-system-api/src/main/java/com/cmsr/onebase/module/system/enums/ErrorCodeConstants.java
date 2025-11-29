@@ -123,6 +123,7 @@ public interface ErrorCodeConstants {
     ErrorCode TENANT_WEBSITE_DUPLICATE = new ErrorCode(1_002_015_005, "租户域名为【{}】的租户已存在");
     ErrorCode TENANT_WEBSITE_IS_NULL = new ErrorCode(1_002_015_006, "租户域名不可为空");
     ErrorCode TENANT_ONLY_GET_SELF = new ErrorCode(1_002_015_007, "只能获取自己所在的租户的信息");
+    ErrorCode TENANT_ADMIN_ISNULL = new ErrorCode(1_002_015_008, "租户管理员不可为空");
 
     // ========== 租户套餐 1-002-016-000 ==========
     ErrorCode TENANT_PACKAGE_NOT_EXISTS = new ErrorCode(1_002_016_000, "租户套餐不存在");

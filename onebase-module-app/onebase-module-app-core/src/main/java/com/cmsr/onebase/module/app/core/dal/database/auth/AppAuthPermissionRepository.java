@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Set;
 
 import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppAuthPermissionTableDef.APP_AUTH_PERMISSION;
-import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppAuthRoleTableDef.APP_AUTH_ROLE;
 
 /**
  * 应用权限功能数据访问层
@@ -24,9 +23,9 @@ public class AppAuthPermissionRepository extends BaseAppRepository<AppAuthPermis
 
     public AppAuthPermissionDO findByQuery(AuthPermissionReq reqVO) {
         QueryWrapper queryWrapper = this.query()
-                .eq(AuthPermissionReq::getApplicationId, reqVO.getApplicationId())
-                .eq(AuthPermissionReq::getRoleId, reqVO.getRoleId())
-                .eq(AuthPermissionReq::getMenuId, reqVO.getMenuId());
+                .and(APP_AUTH_PERMISSION.APPLICATION_ID.eq(reqVO.getApplicationId()))
+                .and(APP_AUTH_PERMISSION.ROLE_ID.eq(reqVO.getRoleId()))
+                .and(APP_AUTH_PERMISSION.MENU_ID.eq(reqVO.getMenuId()));
         return this.getOne(queryWrapper);
     }
 

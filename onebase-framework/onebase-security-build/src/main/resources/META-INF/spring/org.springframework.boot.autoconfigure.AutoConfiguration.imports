@@ -1,3 +1,3 @@
-com.cmsr.onebase.framework.security.build.config.OneBaseSecurityRpcAutoConfiguration
-com.cmsr.onebase.framework.security.build.config.OneBaseSecurityAutoConfiguration
-com.cmsr.onebase.framework.security.build.config.OneBaseWebSecurityConfigurerAdapter
+com.cmsr.onebase.framework.security.build.config.BuildSecurityRpcAutoConfiguration
+com.cmsr.onebase.framework.security.build.config.BuildSecurityAutoConfiguration
+com.cmsr.onebase.framework.security.build.config.BuildWebSecurityConfigurerAdapter

@@ -1,0 +1,23 @@
+## 默认环境变量配置（直接使用local环境配置）
+#@baseUrl = http://localhost:48080/admin-api
+#@adminTenantId = 1
+#@token = 327a71784fa14847867c95e2f5bab8cd
+#@tag = OneBase.local
+
+### 请求 /infra/file/upload 接口 => 成功
+POST {{baseUrl}}/infra/file/upload
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+tenant-id: {{adminTenantId}}
+Authorization: Bearer {{token}}
+
+--WebAppBoundary
+Content-Disposition: form-data; name="file"; filename="p1.jpg"
+Content-Type: image/jpeg
+
+< ./p1.jpg
+--WebAppBoundary--
+
+
+
+
+

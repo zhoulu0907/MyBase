@@ -25,10 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -152,23 +149,25 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
         // }
         Map<Long, ApplicationDTO> applicationMap = getApplicationDoMap(pageReqVO.getAppName());
         List<Long> applicationIds = new ArrayList<>(applicationMap.keySet());
-        if(applicationIds.isEmpty()){
+        if(CollectionUtils.isEmpty(applicationIds)){
             return new PageResult<CorpApplicationRespVO>();
         }
         // 查询原始分页数据
         PageResult<CorpAppRelationDO> pageResult = corpAppRelationDataRepository.selectPage(pageReqVO, applicationIds);
 
+          Map<Long, List<TagVO>> tagMap =new HashMap<Long, List<TagVO>>();
         // 1. 获取应用ID列表
         List<Long> appIds = pageResult.getList().stream()
                 .map(CorpAppRelationDO::getApplicationId)
                 .collect(Collectors.toList());
-
-        // 获取标签列表
-        Map<Long, List<TagVO>> tagMap = appApplicationApi.queryAppTags(appIds);
-
+        if(CollectionUtils.isNotEmpty(appIds)){
+            // 获取标签列表
+            tagMap = appApplicationApi.queryAppTags(appIds);
+        }
+        final    Map<Long, List<TagVO>> finalTagMap=tagMap;
         // 转换为 VO 对象并根据 applicationName 过滤
         List<CorpApplicationRespVO> filteredList = pageResult.getList().stream()
-                .map(corpDO -> convertToRespVO(corpDO, applicationMap, tagMap))
+                .map(corpDO -> convertToRespVO(corpDO, applicationMap, finalTagMap))
                 .collect(Collectors.toList());
         // 返回过滤后的结果和总数
         return new PageResult<>(filteredList, pageResult.getTotal());

@@ -10,6 +10,11 @@
     </parent>
 
     <artifactId>onebase-module-bpm-engine-orm</artifactId>
+    <packaging>pom</packaging>
+    <modules>
+        <module>onebase-module-bpm-engine-orm-anyline</module>
+        <module>onebase-module-bpm-engine-orm-mybatis-flex</module>
+    </modules>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>

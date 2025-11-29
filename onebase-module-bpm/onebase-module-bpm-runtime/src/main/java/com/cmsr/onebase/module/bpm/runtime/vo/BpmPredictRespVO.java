@@ -35,7 +35,7 @@ public class BpmPredictRespVO {
     @Data
     public static class HandlerInfo {
         @Schema(description = "处理人ID")
-        private Long handlerId;
+        private String handlerId;
 
         @Schema(description = "处理人名称")
         private String handlerName;

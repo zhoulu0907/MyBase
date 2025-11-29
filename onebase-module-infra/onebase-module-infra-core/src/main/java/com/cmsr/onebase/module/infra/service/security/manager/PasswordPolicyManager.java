@@ -90,7 +90,7 @@ public class PasswordPolicyManager {
         Set<String> extraSet = parseExtraCharacters(extraCharacter);
 
         // 根据extraCharacter中的值设置大写和特殊符号检查
-        config.setCheckUpperCase(extraSet.contains(SecurityConfigKey.ExtraCharacterOption.uppperCase.getKey()));
+        config.setCheckUpperCase(extraSet.contains(SecurityConfigKey.ExtraCharacterOption.upperCase.getKey()));
         config.setCheckContainSpecialChar(extraSet.contains(SecurityConfigKey.ExtraCharacterOption.specialChar.getKey()));
 
         // 设置历史密码限制

@@ -13,12 +13,10 @@ import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationTagDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppTagDO;
 import jakarta.annotation.Resource;
 import lombok.Setter;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -81,6 +79,9 @@ public class AppApplicationApiImpl implements AppApplicationApi {
 
     @Override
     public Map<Long, List<TagVO>> queryAppTags(List<Long> appIds) {
+        if (CollectionUtils.isEmpty(appIds)) {
+            return Collections.emptyMap();
+        }
         Map<Long, List<TagVO>> tagListMap = new HashMap<>();
         Map<Long, List<Long>> listMap = findTagIdsByApplicationIdsGrouped(appIds);
         listMap.forEach((appId, tagIds) -> {
