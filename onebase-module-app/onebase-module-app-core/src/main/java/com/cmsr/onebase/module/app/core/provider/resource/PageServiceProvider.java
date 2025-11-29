@@ -14,6 +14,7 @@ import com.cmsr.onebase.module.app.core.dto.appresource.PageDTO;
 import com.cmsr.onebase.module.app.core.dto.appresource.PageRespDTO;
 import com.cmsr.onebase.module.app.core.enums.appresource.AppResourceErrorCodeConstants;
 import jakarta.annotation.Resource;
+import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +22,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Setter
 @Service
 public class PageServiceProvider {
 
