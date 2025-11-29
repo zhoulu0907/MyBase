@@ -5,7 +5,7 @@ import com.cmsr.onebase.module.app.api.security.bo.FieldPermissionItem;
 import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
 import com.cmsr.onebase.module.metadata.core.service.permission.exception.PermissionDeniedException;
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticRecordDTO;
-import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticValueDTO;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticFieldValueDTO;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -33,8 +33,8 @@ public class SemanticFieldPermissionChecker implements SemanticRuntimePermission
      * 仅在 CREATE 或 UPDATE 操作时生效
      */
     public boolean supports(SemanticRecordDTO recordDTO) {
-        return recordDTO.getContext().getOperationType() == MetadataDataMethodOpEnum.CREATE
-                || recordDTO.getContext().getOperationType() == MetadataDataMethodOpEnum.UPDATE;
+        return recordDTO.getRecordContext().getOperationType() == MetadataDataMethodOpEnum.CREATE
+                || recordDTO.getRecordContext().getOperationType() == MetadataDataMethodOpEnum.UPDATE;
     }
 
     @Override
@@ -45,16 +45,16 @@ public class SemanticFieldPermissionChecker implements SemanticRuntimePermission
      * 3. 其余：根据可编辑字段集合进行严格或过滤处理
      */
     public void check(SemanticRecordDTO recordDTO) {
-        FieldPermission fp = recordDTO.getContext().getPermissionContext().getFieldPermission();
+        FieldPermission fp = recordDTO.getRecordContext().getPermissionContext().getFieldPermission();
         if (fp.isAllDenied()) { throw new PermissionDeniedException(TYPE, "ALL_DENIED", "无权访问任何字段"); }
         if (fp.isAllAllowed()) { return; }
-        Map<String, SemanticValueDTO> data = recordDTO.getValue().getData();
+        Map<String, SemanticFieldValueDTO> data = recordDTO.getEntityValue().getFieldValueMap();
         Set<Long> editableIds = fp.getFields().stream()
                                     .filter(FieldPermissionItem::isCanEdit)
                                     .map(FieldPermissionItem::getFieldId)
                                     .collect(Collectors.toSet());
         Map<String, Long> nameToId = new HashMap<>();
-        recordDTO.getEntity().getFields()
+        recordDTO.getEntitySchema().getFields()
             .forEach(f -> nameToId.put(f.getFieldName().toLowerCase(), f.getId()));
         if (isStrictMode()) {
             enforceStrictPermission(data, nameToId, editableIds);
@@ -71,7 +71,7 @@ public class SemanticFieldPermissionChecker implements SemanticRuntimePermission
     /**
      * 严格模式：存在不可编辑字段时直接抛错
      */
-    private void enforceStrictPermission(Map<String, SemanticValueDTO> data, Map<String, Long> nameToId, Set<Long> editableIds) {
+    private void enforceStrictPermission(Map<String, SemanticFieldValueDTO> data, Map<String, Long> nameToId, Set<Long> editableIds) {
         for (String key : data.keySet()) {
             Long fid = nameToId.get(key.toLowerCase());
             if (fid == null || !editableIds.contains(fid)) {
@@ -83,7 +83,7 @@ public class SemanticFieldPermissionChecker implements SemanticRuntimePermission
     /**
      * 过滤模式：移除不可编辑字段，减少抛错
      */
-    private void filterNonEditableFields(Map<String, SemanticValueDTO> data, Map<String, Long> nameToId, Set<Long> editableIds) {
+    private void filterNonEditableFields(Map<String, SemanticFieldValueDTO> data, Map<String, Long> nameToId, Set<Long> editableIds) {
         var it = data.entrySet().iterator();
         while (it.hasNext()) {
             var e = it.next();

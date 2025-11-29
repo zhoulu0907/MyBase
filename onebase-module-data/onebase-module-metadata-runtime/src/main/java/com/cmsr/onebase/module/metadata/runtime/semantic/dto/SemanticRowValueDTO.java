@@ -20,5 +20,5 @@ public class SemanticRowValueDTO {
     private Boolean deleted;
 
     @Schema(description = "字段值Map")
-    private Map<String, Object> fields;
+    private Map<String, SemanticFieldValueDTO<Object>> fields;
 }

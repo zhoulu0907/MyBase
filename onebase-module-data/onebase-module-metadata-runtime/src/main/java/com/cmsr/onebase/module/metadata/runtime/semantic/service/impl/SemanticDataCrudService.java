@@ -5,7 +5,7 @@ import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataEntityFieldCoreService;
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticRecordDTO;
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticEntitySchemaDTO;
-import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticValueDTO;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticFieldValueDTO;
 import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticTableNameQuoter;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.row.Db;
@@ -47,7 +47,7 @@ public class SemanticDataCrudService {
      * 根据上下文中的操作类型分派具体 CRUD 方法
      */
     public void execute(SemanticRecordDTO recordDTO) {
-        MetadataDataMethodOpEnum op = recordDTO.getContext().getOperationType();
+        MetadataDataMethodOpEnum op = recordDTO.getRecordContext().getOperationType();
         if (op == MetadataDataMethodOpEnum.CREATE) { create(recordDTO); }
         else if (op == MetadataDataMethodOpEnum.UPDATE) { update(recordDTO); }
         else if (op == MetadataDataMethodOpEnum.DELETE) { delete(recordDTO); }
@@ -57,7 +57,7 @@ public class SemanticDataCrudService {
      * 创建主表数据
      */
     public void create(SemanticRecordDTO recordDTO) {
-        SemanticEntitySchemaDTO entity = recordDTO.getEntity();
+        SemanticEntitySchemaDTO entity = recordDTO.getEntitySchema();
         Map<String, Object> data = extractData(recordDTO);
         Row row = new Row();
         for (Map.Entry<String, Object> e : data.entrySet()) { row.put(e.getKey(), e.getValue()); }
@@ -68,7 +68,7 @@ public class SemanticDataCrudService {
      * 更新主表数据（按主键）
      */
     public void update(SemanticRecordDTO recordDTO) {
-        SemanticEntitySchemaDTO entity = recordDTO.getEntity();
+        SemanticEntitySchemaDTO entity = recordDTO.getEntitySchema();
         List<MetadataEntityFieldDO> fields = metadataEntityFieldCoreService.getEntityFieldListByEntityId(entity.getId());
         Map<String, Object> data = extractData(recordDTO);
         String pkField = getPrimaryKeyFieldName(fields);
@@ -83,7 +83,7 @@ public class SemanticDataCrudService {
      * 删除主表数据（软删优先，物理删回退）
      */
     public void delete(SemanticRecordDTO recordDTO) {
-        SemanticEntitySchemaDTO entity = recordDTO.getEntity();
+        SemanticEntitySchemaDTO entity = recordDTO.getEntitySchema();
         List<MetadataEntityFieldDO> fields = metadataEntityFieldCoreService.getEntityFieldListByEntityId(entity.getId());
         String pkField = getPrimaryKeyFieldName(fields);
         Object id = extractData(recordDTO).get(pkField);
@@ -96,7 +96,7 @@ public class SemanticDataCrudService {
      * 按主键读取一条主表数据
      */
     public Map<String, Object> readById(SemanticRecordDTO recordDTO) {
-        SemanticEntitySchemaDTO entity = recordDTO.getEntity();
+        SemanticEntitySchemaDTO entity = recordDTO.getEntitySchema();
         List<MetadataEntityFieldDO> fields = metadataEntityFieldCoreService.getEntityFieldListByEntityId(entity.getId());
         String pkField = getPrimaryKeyFieldName(fields);
         Object id = extractData(recordDTO).get(pkField);
@@ -115,7 +115,7 @@ public class SemanticDataCrudService {
      * 按主键批量查询主表数据
      */
     public List<Map<String, Object>> queryByIds(SemanticRecordDTO recordDTO, List<Object> ids) {
-        SemanticEntitySchemaDTO entity = recordDTO.getEntity();
+        SemanticEntitySchemaDTO entity = recordDTO.getEntitySchema();
         List<MetadataEntityFieldDO> fields = metadataEntityFieldCoreService.getEntityFieldListByEntityId(entity.getId());
         String pkField = getPrimaryKeyFieldName(fields);
         QueryWrapper qw = QueryWrapper.create().where(pkField + " in (?)", ids);
@@ -177,10 +177,10 @@ public class SemanticDataCrudService {
      */
     private Map<String, Object> extractData(SemanticRecordDTO recordDTO) {
         Map<String, Object> result = new HashMap<>();
-        Map<String, SemanticValueDTO> data = recordDTO.getValue() != null ? recordDTO.getValue().getData() : null;
+        Map<String, SemanticFieldValueDTO<Object>> data = recordDTO.getEntityValue() != null ? recordDTO.getEntityValue().getFieldValueMap() : null;
         if (data == null) { return result; }
-        for (Map.Entry<String, SemanticValueDTO> e : data.entrySet()) {
-            result.put(e.getKey(), e.getValue() == null ? null : e.getValue().getValue());
+        for (Map.Entry<String, SemanticFieldValueDTO<Object>> fieldValueEntry : data.entrySet()) {
+            result.put(fieldValueEntry.getKey(), fieldValueEntry.getValue().getRawValue());
         }
         return result;
     }

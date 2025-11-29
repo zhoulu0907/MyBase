@@ -12,11 +12,11 @@ import lombok.Data;
  */
 public class SemanticRecordDTO {
     @Schema(description = "上下文")
-    private SemanticRecordContextDTO context;
+    private SemanticRecordContextDTO recordContext;
 
     @Schema(description = "实体模型")
-    private SemanticEntitySchemaDTO entity;
+    private SemanticEntitySchemaDTO entitySchema;
 
     @Schema(description = "值模型")
-    private SemanticValueModelDTO value;
+    private SemanticEntityValueDTO entityValue;
 }

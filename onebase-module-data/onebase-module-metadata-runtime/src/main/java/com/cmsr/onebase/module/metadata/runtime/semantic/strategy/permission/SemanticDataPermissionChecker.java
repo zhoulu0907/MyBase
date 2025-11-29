@@ -10,7 +10,7 @@ import com.cmsr.onebase.module.metadata.core.service.permission.exception.Permis
 import com.cmsr.onebase.module.metadata.core.domain.query.MetadataPermissionContext;
 import com.cmsr.onebase.module.metadata.core.domain.query.LoginUserCtx;
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticRecordDTO;
-import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticValueDTO;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticFieldValueDTO;
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticFieldSchemaDTO;
 
 import org.springframework.stereotype.Component;
@@ -57,7 +57,7 @@ public class SemanticDataPermissionChecker implements SemanticRuntimePermissionC
      * 数据权限在 UPDATE/DELETE/GET 操作时生效
      */
     public boolean supports(SemanticRecordDTO recordDTO) {
-        MetadataDataMethodOpEnum op = recordDTO.getContext().getOperationType();
+        MetadataDataMethodOpEnum op = recordDTO.getRecordContext().getOperationType();
         return op == MetadataDataMethodOpEnum.UPDATE || op == MetadataDataMethodOpEnum.DELETE || op == MetadataDataMethodOpEnum.GET;
     }
 
@@ -69,13 +69,13 @@ public class SemanticDataPermissionChecker implements SemanticRuntimePermissionC
      * 3. 逐组判断操作权限 + 范围标签 + 自定义过滤
      */
     public void check(SemanticRecordDTO recordDTO) {
-        MetadataPermissionContext permissionContext = recordDTO.getContext().getPermissionContext();
+        MetadataPermissionContext permissionContext = recordDTO.getRecordContext().getPermissionContext();
         DataPermission dataPermission = permissionContext.getDataPermission();
         if (dataPermission.isAllDenied()) { throw new PermissionDeniedException(TYPE, "ALL_DENIED", "无权访问数据"); }
         if (dataPermission.isAllAllowed()) { return; }
         List<DataPermissionGroup> groups = dataPermission.getGroups();
-        MetadataDataMethodOpEnum operationType = recordDTO.getContext().getOperationType();
-        LoginUserCtx loginUserContext = recordDTO.getContext().getLoginUserCtx();
+        MetadataDataMethodOpEnum operationType = recordDTO.getRecordContext().getOperationType();
+        LoginUserCtx loginUserContext = recordDTO.getRecordContext().getLoginUserCtx();
         Map<String,Object> dataRow = buildDataRow(recordDTO);
         Map<Long,String> fieldIdToNameMap = buildFieldIdToNameMap(recordDTO);
         AdminUserRespDTO currentUser = adminUserApi.getUser(loginUserContext.getUserId()).getCheckedData();
@@ -103,10 +103,10 @@ public class SemanticDataPermissionChecker implements SemanticRuntimePermissionC
      */
     private Map<String,Object> buildDataRow(SemanticRecordDTO recordDTO) {
         Map<String,Object> row = new HashMap<>();
-        Map<String, SemanticValueDTO> data = recordDTO.getValue().getData();
+        Map<String, SemanticFieldValueDTO> data = recordDTO.getEntityValue().getFieldValueMap();
         if (data == null) { return row; }
-        for (Map.Entry<String, SemanticValueDTO> e: data.entrySet()) {
-            row.put(e.getKey(), e.getValue() == null ? null : e.getValue().getValue());
+        for (Map.Entry<String, SemanticFieldValueDTO> e: data.entrySet()) {
+            row.put(e.getKey(), e.getValue() == null ? null : e.getValue().getEntityValue());
         }
         return row;
     }
@@ -116,7 +116,7 @@ public class SemanticDataPermissionChecker implements SemanticRuntimePermissionC
      */
     private Map<Long,String> buildFieldIdToNameMap(SemanticRecordDTO recordDTO) {
         Map<Long,String> map = new HashMap<>();
-        List<SemanticFieldSchemaDTO> fields = recordDTO.getEntity().getFields();
+        List<SemanticFieldSchemaDTO> fields = recordDTO.getEntitySchema().getFields();
         if (fields == null) { return map; }
         for (SemanticFieldSchemaDTO f: fields) {
             if (f.getId() != null && f.getFieldName() != null) { map.put(f.getId(), f.getFieldName()); }

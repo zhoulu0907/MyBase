@@ -76,15 +76,11 @@ public class SemanticCreateExecutor {
         try {
             // 1) 构建 RecordDTO（包含实体校验与基本数据映射）
             SemanticRecordDTO record = semanticMergeRecordAssembler.assemble(entityCode, body, menuId, traceId);
-            // // 2) 实体校验：当前使用 MetadataBusinessEntityCoreService.validateEntityExists
-            // MetadataBusinessEntityDO entity = businessEntityCoreService.getBusinessEntityByCode(entityCode);
-            // if (entity == null) { throw exception(BUSINESS_ENTITY_NOT_EXISTS); }
-            // // 3) 字段装载：当前使用 MetadataEntityFieldCoreService.getEntityFieldListByEntityId
-            // List<MetadataEntityFieldDO> fields = fieldLoader.load(entity.getId());
-            // 4) 上下文初始化：当前类 initializeContext
+
+            // 2) 上下文初始化：当前类 initializeContext
             semanticPermissionContextLoader.loadPermissionContext(record);
 
-           // 5) 数据完整性校验：当前类 validateDataIntegrity
+            // 3) 数据完整性校验：当前类 validateDataIntegrity
             semanticDataIntegrityValidator.validate(record);
 
             // 6) 默认值处理/形态统一：当前类 processDataAndSetDefaults

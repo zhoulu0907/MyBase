@@ -18,8 +18,9 @@ import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticRelationSch
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticRelationValueDTO;
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticRowValueDTO;
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticSortRuleDTO;
-import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticValueDTO;
-import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticValueModelDTO;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticFieldValueDTO;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticEntityValueDTO;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.enums.SemanticFieldTypeEnum;
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.enums.SemanticConnectorCardinalityEnum;
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.enums.SemanticConnectorTypeEnum;
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.enums.SemanticMethodCodeEnum;
@@ -56,7 +57,7 @@ public class SemanticRequestParser {
      */
     private SemanticRecordDTO parseFromProps(MetadataBusinessEntityDO entity, Map<String, Object> props, SemanticRecordContextDTO context) {
         SemanticRecordDTO record = new SemanticRecordDTO();
-        record.setContext(context);
+        record.setRecordContext(context);
 
         Long entityId = entity.getId();
         
@@ -66,10 +67,10 @@ public class SemanticRequestParser {
         entitySchemaDTO.setCode(entity.getCode());
         entitySchemaDTO.setDisplayName(entity.getDisplayName());
         entitySchemaDTO.setConnectors(buildConnectorSchemas(entityId));
-        record.setEntity(entitySchemaDTO);
+        record.setEntitySchema(entitySchemaDTO);
 
-        SemanticValueModelDTO valueModel = new SemanticValueModelDTO();
-        Map<String, SemanticValueDTO> data = new HashMap<>();
+        SemanticEntityValueDTO valueModel = new SemanticEntityValueDTO();
+        Map<String, SemanticFieldValueDTO<Object>> data = new HashMap<>();
         Map<String, SemanticRelationValueDTO> connectors = new HashMap<>();
 
         Set<String> fieldNames = getFieldNameSet(entityId);
@@ -78,18 +79,18 @@ public class SemanticRequestParser {
             String key = e.getKey();
             Object raw = e.getValue();
             if (fieldNames.contains(key) || Objects.equals(key, "id") || Objects.equals(key, "deleted")) {
-                SemanticValueDTO v = new SemanticValueDTO();
-                v.setValue(raw);
-                v.setType(raw == null ? null : guessType(raw));
+                SemanticFieldValueDTO<Object> v = new SemanticFieldValueDTO<>();
+                v.setRawValue(raw);
+                v.setFieldTypeEnum(guessTypeEnum(raw));
                 data.put(key, v);
             } else {
                 SemanticRelationValueDTO cv = toConnectorValue(raw);
                 connectors.put(key, cv);
             }
         }
-        valueModel.setData(data);
+        valueModel.setFieldValueMap(data);
         valueModel.setConnectors(connectors);
-        record.setValue(valueModel);
+        record.setEntityValue(valueModel);
         return record;
     }
 
@@ -279,7 +280,7 @@ public class SemanticRequestParser {
         SemanticRelationValueDTO v = new SemanticRelationValueDTO();
         if (raw instanceof Map<?, ?> map) {
             SemanticRowValueDTO row = toRowValue(map);
-            v.setRow(row);
+            v.setRowValue(row);
         } else if (raw instanceof List<?> list) {
             List<SemanticRowValueDTO> rows = new ArrayList<>();
             for (Object o : list) {
@@ -287,7 +288,7 @@ public class SemanticRequestParser {
                     rows.add(toRowValue(m));
                 }
             }
-            v.setRows(rows);
+            v.setRowValueList(rows);
         }
         return v;
     }
@@ -299,7 +300,7 @@ public class SemanticRequestParser {
      */
     private SemanticRowValueDTO toRowValue(Map<?, ?> map) {
         SemanticRowValueDTO row = new SemanticRowValueDTO();
-        Map<String, Object> fields = new HashMap<>();
+        Map<String, SemanticFieldValueDTO<Object>> fields = new HashMap<>();
         for (Map.Entry<?, ?> e : map.entrySet()) {
             String k = String.valueOf(e.getKey());
             Object val = e.getValue();
@@ -308,7 +309,11 @@ public class SemanticRequestParser {
             } else if ("deleted".equals(k)) {
                 row.setDeleted(val == null ? null : Boolean.valueOf(String.valueOf(val)));
             } else {
-                fields.put(k, val);
+                SemanticFieldValueDTO<Object> v = new SemanticFieldValueDTO<>();
+                v.setRawValue(val);
+                v.setFieldTypeEnum(guessTypeEnum(val));
+                v.setFieldName(k);
+                fields.put(k, v);
             }
         }
         row.setFields(fields);
@@ -320,10 +325,10 @@ public class SemanticRequestParser {
      * @param raw 原始值
      * @return 类型代码
      */
-    private String guessType(Object raw) {
-        if (raw instanceof Number) return "NUMBER";
-        if (raw instanceof Boolean) return "BOOLEAN";
-        // 可扩展为日期判断
-        return "STRING";
+    private SemanticFieldTypeEnum guessTypeEnum(Object raw) {
+        if (raw instanceof Number) return SemanticFieldTypeEnum.NUMBER;
+        if (raw instanceof Boolean) return SemanticFieldTypeEnum.BOOLEAN;
+        if (raw instanceof List<?>) return SemanticFieldTypeEnum.MULTI_SELECT;
+        return SemanticFieldTypeEnum.TEXT;
     }
 }

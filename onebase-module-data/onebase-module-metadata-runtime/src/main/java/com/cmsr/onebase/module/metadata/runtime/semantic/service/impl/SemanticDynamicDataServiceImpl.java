@@ -2,14 +2,11 @@ package com.cmsr.onebase.module.metadata.runtime.semantic.service.impl;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
-import com.cmsr.onebase.module.metadata.core.service.datamethod.MetadataDataMethodCoreService;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
 import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.vo.DynamicDataRespVO;
 import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.vo.SubEntityVo;
 import com.cmsr.onebase.module.metadata.runtime.semantic.adapter.SemanticRequestParser;
-import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticRecordDTO;
 import com.cmsr.onebase.module.metadata.runtime.semantic.service.SemanticDynamicDataService;
-import com.cmsr.onebase.module.metadata.runtime.semantic.dto.enums.SemanticMethodCodeEnum;
 import com.cmsr.onebase.module.metadata.runtime.semantic.executor.SemanticCreateExecutor;
 import com.cmsr.onebase.module.metadata.runtime.semantic.executor.SemanticUpdateExecutor;
 import com.cmsr.onebase.module.metadata.runtime.semantic.executor.SemanticDeleteExecutor;
@@ -150,14 +147,5 @@ public class SemanticDynamicDataServiceImpl implements SemanticDynamicDataServic
         respVO.setFieldType((Map<String, String>) data.get("fieldType"));
         respVO.setSubEntities((List<SubEntityVo>) data.get("subEntities"));
         return respVO;
-    }
-
-    private Long extractId(SemanticRecordDTO record) {
-        Object id = null;
-        if (record != null && record.getValue() != null && record.getValue().getData() != null) {
-            var v = record.getValue().getData().get("id");
-            id = v == null ? null : v.getValue();
-        }
-        return id == null ? null : Long.valueOf(String.valueOf(id));
     }
 }

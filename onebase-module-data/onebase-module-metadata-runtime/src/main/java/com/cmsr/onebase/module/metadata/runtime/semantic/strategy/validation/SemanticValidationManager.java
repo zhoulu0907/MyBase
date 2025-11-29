@@ -5,7 +5,7 @@ import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataEntityFieldCoreService;
 import com.cmsr.onebase.module.metadata.core.service.number.AutoNumberService;
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticRecordDTO;
-import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticValueDTO;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticFieldValueDTO;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Component;
 
@@ -28,10 +28,10 @@ public class SemanticValidationManager {
 
 
     public void validate(SemanticRecordDTO recordDTO) {
-        Long entityId = recordDTO.getEntity().getId();
+        Long entityId = recordDTO.getEntitySchema().getId();
         List<MetadataEntityFieldDO> fields = metadataEntityFieldCoreService.getEntityFieldListByEntityId(entityId);
         Map<String, Object> data = extractData(recordDTO);
-        MetadataDataMethodOpEnum operationType = recordDTO.getContext().getOperationType();
+        MetadataDataMethodOpEnum operationType = recordDTO.getRecordContext().getOperationType();
         validateEntity(fields, data, operationType);
     }
 
@@ -59,10 +59,10 @@ public class SemanticValidationManager {
 
     private Map<String, Object> extractData(SemanticRecordDTO recordDTO) {
         Map<String, Object> result = new HashMap<>();
-        Map<String, SemanticValueDTO> data = recordDTO.getValue() != null ? recordDTO.getValue().getData() : null;
+        Map<String, SemanticFieldValueDTO<Object>> data = recordDTO.getEntityValue() != null ? recordDTO.getEntityValue().getFieldValueMap() : null;
         if (data == null) { return result; }
-        for (Map.Entry<String, SemanticValueDTO> e : data.entrySet()) {
-            result.put(e.getKey(), e.getValue() == null ? null : e.getValue().getValue());
+        for (Map.Entry<String, SemanticFieldValueDTO<Object>> e : data.entrySet()) {
+            result.put(e.getKey(), e.getValue() == null ? null : e.getValue().getRawValue());
         }
         return result;
     }

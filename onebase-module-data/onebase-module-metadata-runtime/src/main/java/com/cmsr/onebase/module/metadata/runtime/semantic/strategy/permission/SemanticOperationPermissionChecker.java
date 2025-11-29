@@ -36,9 +36,9 @@ public class SemanticOperationPermissionChecker implements SemanticRuntimePermis
      * - 新增/编辑/删除：对应 canCreate/canEdit/canDelete
      */
     public void check(SemanticRecordDTO recordDTO) {
-        MetadataPermissionContext pc = recordDTO.getContext().getPermissionContext();
+        MetadataPermissionContext pc = recordDTO.getRecordContext().getPermissionContext();
         OperationPermission op = pc.getOperationPermission();
-        MetadataDataMethodOpEnum type = recordDTO.getContext().getOperationType();
+        MetadataDataMethodOpEnum type = recordDTO.getRecordContext().getOperationType();
         if (!op.isPageAllowed()) { throw new PermissionDeniedException(TYPE, "PAGE_ACCESS", "无权访问页面"); }
         switch (type) {
             case CREATE -> { if (!op.isCanCreate()) throw new PermissionDeniedException(TYPE, "CREATE", "无新增权限"); }

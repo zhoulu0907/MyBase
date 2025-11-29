@@ -16,13 +16,13 @@ public class SemanticPermissionContextLoader {
     private PermissionContextBuilder permissionContextBuilder;
 
     public void loadPermissionContext(SemanticRecordDTO record) {
-        Long ctxMenuId = record.getContext().getMenuId();
+        Long ctxMenuId = record.getRecordContext().getMenuId();
         RuntimeLoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
         LoginUserCtx loginUserCtx = new LoginUserCtx(loginUser.getId(), loginUser.getApplicationId());
-        Long entityId = record.getEntity().getId();
+        Long entityId = record.getEntitySchema().getId();
         MetadataPermissionContext pc = permissionContextBuilder.buildPermissionContext(loginUserCtx, ctxMenuId, entityId);
-        record.getContext().setLoginUserCtx(loginUserCtx);
-        record.getContext().setPermissionContext(pc);
+        record.getRecordContext().setLoginUserCtx(loginUserCtx);
+        record.getRecordContext().setPermissionContext(pc);
     }
 }
 

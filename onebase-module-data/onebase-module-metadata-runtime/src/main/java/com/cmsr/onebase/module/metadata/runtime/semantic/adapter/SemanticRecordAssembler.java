@@ -12,7 +12,7 @@ import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticRelationSch
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticRelationValueDTO;
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticRecordDTO;
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticRowValueDTO;
-import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticValueDTO;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticFieldValueDTO;
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.enums.SemanticMethodCodeEnum;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Component;
@@ -44,14 +44,14 @@ public class SemanticRecordAssembler {
         if (record == null) {
             return req;
         }
-        if (record.getContext() != null) {
-            req.setTraceId(record.getContext().getTraceId());
-            req.setMenuId(record.getContext().getMenuId());
-            req.setMethodCode(codeOf(record.getContext().getMethodCode()));
+        if (record.getRecordContext() != null) {
+            req.setTraceId(record.getRecordContext().getTraceId());
+            req.setMenuId(record.getRecordContext().getMenuId());
+            req.setMethodCode(codeOf(record.getRecordContext().getMethodCode()));
         }
-        Long entityId = record.getEntity() != null ? record.getEntity().getId() : null;
+        Long entityId = record.getEntitySchema() != null ? record.getEntitySchema().getId() : null;
         req.setEntityId(entityId);
-        Map<String, SemanticValueDTO> dtoMap = record.getValue() != null ? record.getValue().getData() : null;
+        Map<String, SemanticFieldValueDTO<Object>> dtoMap = record.getEntityValue() != null ? record.getEntityValue().getFieldValueMap() : null;
         Map<String, Object> nameMap = toNameValueMap(dtoMap);
         Map<Long, Object> idMap = nameMap == null ? new HashMap<>() : EntityFieldDataConverter.convertNameKeyMapToIdKeyMap(entityId, nameMap, fieldCoreService);
         req.setData(idMap);
@@ -69,15 +69,15 @@ public class SemanticRecordAssembler {
         if (record == null) {
             return req;
         }
-        if (record.getContext() != null) {
-            req.setMenuId(record.getContext().getMenuId());
-            req.setMethodCode(codeOf(record.getContext().getMethodCode()));
+        if (record.getRecordContext() != null) {
+            req.setMenuId(record.getRecordContext().getMenuId());
+            req.setMethodCode(codeOf(record.getRecordContext().getMethodCode()));
         }
-        Long entityId = record.getEntity() != null ? record.getEntity().getId() : null;
+        Long entityId = record.getEntitySchema() != null ? record.getEntitySchema().getId() : null;
         req.setEntityId(entityId);
-        Object id = record.getValue() != null && record.getValue().getData() != null ? record.getValue().getData().get("id") : null;
+        Object id = record.getEntityValue() != null && record.getEntityValue().getFieldValueMap() != null ? record.getEntityValue().getFieldValueMap().get("id") : null;
         req.setId(id);
-        Map<String, SemanticValueDTO> dtoMap = record.getValue() != null ? record.getValue().getData() : null;
+        Map<String, SemanticFieldValueDTO<Object>> dtoMap = record.getEntityValue() != null ? record.getEntityValue().getFieldValueMap() : null;
         Map<String, Object> nameMap = toNameValueMap(dtoMap);
         Map<Long, Object> idMap = nameMap == null ? new HashMap<>() : EntityFieldDataConverter.convertNameKeyMapToIdKeyMap(entityId, nameMap, fieldCoreService);
         req.setData(idMap);
@@ -95,14 +95,14 @@ public class SemanticRecordAssembler {
         if (record == null) {
             return req;
         }
-        if (record.getContext() != null) {
-            req.setMenuId(record.getContext().getMenuId());
-            req.setMethodCode(codeOf(record.getContext().getMethodCode()));
+        if (record.getRecordContext() != null) {
+            req.setMenuId(record.getRecordContext().getMenuId());
+            req.setMethodCode(codeOf(record.getRecordContext().getMethodCode()));
         }
-        Long entityId = record.getEntity() != null ? record.getEntity().getId() : null;
+        Long entityId = record.getEntitySchema() != null ? record.getEntitySchema().getId() : null;
         req.setEntityId(entityId);
-        Object id = record.getValue() != null && record.getValue().getData() != null ?
-                (record.getValue().getData().get("id") == null ? null : record.getValue().getData().get("id").getValue()) : null;
+        Object id = record.getEntityValue() != null && record.getEntityValue().getFieldValueMap() != null ?
+                (record.getEntityValue().getFieldValueMap().get("id") == null ? null : record.getEntityValue().getFieldValueMap().get("id").getRawValue()) : null;
         req.setId(id == null ? null : Long.valueOf(String.valueOf(id)));
         return req;
     }
@@ -117,14 +117,14 @@ public class SemanticRecordAssembler {
         if (record == null) {
             return req;
         }
-        if (record.getContext() != null) {
-            req.setMenuId(record.getContext().getMenuId());
-            req.setMethodCode(codeOf(record.getContext().getMethodCode()));
+        if (record.getRecordContext() != null) {
+            req.setMenuId(record.getRecordContext().getMenuId());
+            req.setMethodCode(codeOf(record.getRecordContext().getMethodCode()));
         }
-        Long entityId = record.getEntity() != null ? record.getEntity().getId() : null;
+        Long entityId = record.getEntitySchema() != null ? record.getEntitySchema().getId() : null;
         req.setEntityId(entityId);
-        Object id = record.getValue() != null && record.getValue().getData() != null ?
-                (record.getValue().getData().get("id") == null ? null : record.getValue().getData().get("id").getValue()) : null;
+        Object id = record.getEntityValue() != null && record.getEntityValue().getFieldValueMap() != null ?
+                (record.getEntityValue().getFieldValueMap().get("id") == null ? null : record.getEntityValue().getFieldValueMap().get("id").getRawValue()) : null;
         req.setId(id == null ? null : Long.valueOf(String.valueOf(id)));
         return req;
     }
@@ -139,23 +139,23 @@ public class SemanticRecordAssembler {
         if (record == null) {
             return req;
         }
-        if (record.getContext() != null) {
-            req.setMenuId(record.getContext().getMenuId());
-            req.setPageNo(record.getContext().getPageNo());
-            req.setPageSize(record.getContext().getPageSize());
-            if (record.getContext().getSortBy() != null && !record.getContext().getSortBy().isEmpty()) {
-                var first = record.getContext().getSortBy().get(0);
+        if (record.getRecordContext() != null) {
+            req.setMenuId(record.getRecordContext().getMenuId());
+            req.setPageNo(record.getRecordContext().getPageNo());
+            req.setPageSize(record.getRecordContext().getPageSize());
+            if (record.getRecordContext().getSortBy() != null && !record.getRecordContext().getSortBy().isEmpty()) {
+                var first = record.getRecordContext().getSortBy().get(0);
                 req.setSortField(first.getField());
                 req.setSortDirection(first.getDirection() == null ? null : first.getDirection().name());
             }
-            Map<String, Object> nameFilters = record.getContext().getFilters();
-            Long entityId = record.getEntity() != null ? record.getEntity().getId() : null;
+            Map<String, Object> nameFilters = record.getRecordContext().getFilters();
+            Long entityId = record.getEntitySchema() != null ? record.getEntitySchema().getId() : null;
             Map<Long, Object> idFilters = nameFilters == null ? null :
                     EntityFieldDataConverter.convertNameKeyMapToIdKeyMap(entityId, nameFilters, fieldCoreService);
             req.setFilters(idFilters);
-            req.setMethodCode(codeOf(record.getContext().getMethodCode()));
+            req.setMethodCode(codeOf(record.getRecordContext().getMethodCode()));
         }
-        Long entityId = record.getEntity() != null ? record.getEntity().getId() : null;
+        Long entityId = record.getEntitySchema() != null ? record.getEntitySchema().getId() : null;
         req.setEntityId(entityId);
         return req;
     }
@@ -167,11 +167,11 @@ public class SemanticRecordAssembler {
      */
     private List<SubEntityVo> buildSubEntities(SemanticRecordDTO record) {
         List<SubEntityVo> list = new ArrayList<>();
-        if (record == null || record.getValue() == null || record.getValue().getConnectors() == null) {
+        if (record == null || record.getEntityValue() == null || record.getEntityValue().getConnectors() == null) {
             return list;
         }
-        Map<String, SemanticRelationValueDTO> connectors = record.getValue().getConnectors();
-        List<SemanticRelationSchemaDTO> schemas = record.getEntity() != null ? record.getEntity().getConnectors() : null;
+        Map<String, SemanticRelationValueDTO> connectors = record.getEntityValue().getConnectors();
+        List<SemanticRelationSchemaDTO> schemas = record.getEntitySchema() != null ? record.getEntitySchema().getConnectors() : null;
         Map<String, SemanticRelationSchemaDTO> schemaMap = new HashMap<>();
         if (schemas != null) {
             for (SemanticRelationSchemaDTO s : schemas) {
@@ -196,14 +196,16 @@ public class SemanticRecordAssembler {
             }
             Long targetEntityId = s.getTargetEntityId();
             List<Map<Long, Object>> subDataList = new ArrayList<>();
-            if (v.getRow() != null) {
-                SemanticRowValueDTO row = v.getRow();
-                Map<Long, Object> idKeyMap = EntityFieldDataConverter.convertNameKeyMapToIdKeyMap(targetEntityId, row.getFields(), fieldCoreService);
+            if (v.getRowValue() != null) {
+                SemanticRowValueDTO row = v.getRowValue();
+                Map<String, Object> nameValueMap = toNameValueMap(row.getFields());
+                Map<Long, Object> idKeyMap = EntityFieldDataConverter.convertNameKeyMapToIdKeyMap(targetEntityId, nameValueMap, fieldCoreService);
                 subDataList.add(idKeyMap);
             }
-            if (v.getRows() != null) {
-                for (SemanticRowValueDTO row : v.getRows()) {
-                    Map<Long, Object> idKeyMap = EntityFieldDataConverter.convertNameKeyMapToIdKeyMap(targetEntityId, row.getFields(), fieldCoreService);
+            if (v.getRowValueList() != null) {
+                for (SemanticRowValueDTO row : v.getRowValueList()) {
+                    Map<String, Object> nameValueMap = toNameValueMap(row.getFields());
+                    Map<Long, Object> idKeyMap = EntityFieldDataConverter.convertNameKeyMapToIdKeyMap(targetEntityId, nameValueMap, fieldCoreService);
                     subDataList.add(idKeyMap);
                 }
             }
@@ -220,18 +222,18 @@ public class SemanticRecordAssembler {
      * @param dtoMap 字段值映射
      * @return name->value 映射
      */
-    private Map<String, Object> toNameValueMap(Map<String, SemanticValueDTO> dtoMap) {
+    private Map<String, Object> toNameValueMap(Map<String, SemanticFieldValueDTO<Object>> dtoMap) {
         if (dtoMap == null || dtoMap.isEmpty()) {
             return null;
         }
         Map<String, Object> result = new HashMap<>();
-        for (Map.Entry<String, SemanticValueDTO> e : dtoMap.entrySet()) {
+        for (Map.Entry<String, SemanticFieldValueDTO<Object>> e : dtoMap.entrySet()) {
             if (e == null) {
                 continue;
             }
             String key = e.getKey();
-            SemanticValueDTO v = e.getValue();
-            Object val = v == null ? null : v.getValue();
+            SemanticFieldValueDTO<Object> v = e.getValue();
+            Object val = v == null ? null : v.getStoreValue();
             result.put(key, val);
         }
         return result;

@@ -9,8 +9,8 @@ import java.util.List;
 @Data
 public class SemanticRelationValueDTO {
     @Schema(description = "ONE 基数时的单行值")
-    private SemanticRowValueDTO row;
+    private SemanticRowValueDTO rowValue;
 
     @Schema(description = "MANY 基数时的多行值")
-    private List<SemanticRowValueDTO> rows;
+    private List<SemanticRowValueDTO> rowValueList;
 }

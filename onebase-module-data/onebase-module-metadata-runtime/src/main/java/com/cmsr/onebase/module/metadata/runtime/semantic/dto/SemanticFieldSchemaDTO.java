@@ -19,6 +19,9 @@ public class SemanticFieldSchemaDTO {
     @Schema(description = "字段名称")
     private String fieldName;
 
+    @Schema(description = "字段 UUID")
+    private String fieldUuid;
+
     @Schema(description = "显示名称")
     private String displayName;
 

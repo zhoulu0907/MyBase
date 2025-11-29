@@ -13,17 +13,10 @@ import com.cmsr.onebase.module.metadata.core.dal.database.TemporaryDatasourceSer
 import com.cmsr.onebase.module.metadata.core.service.datasource.MetadataDatasourceCoreService;
 import com.cmsr.onebase.module.metadata.core.service.permission.builder.PermissionContextBuilder;
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticRecordDTO;
-import com.cmsr.onebase.module.metadata.runtime.semantic.util.SemanticExecutorUtils;
 import jakarta.annotation.Resource;
-import org.anyline.service.AnylineService;
-import org.apache.catalina.security.SecurityUtil;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.UUID;
-
-import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.DATASOURCE_NOT_EXISTS;
 
 @Component
 public class SemanticContextInitializer {

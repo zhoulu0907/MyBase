@@ -72,16 +72,16 @@ public class SemanticPageExecutor {
                                                    List<MetadataEntityFieldDO> fields,
                                                    Long menuId,
                                                    SemanticRecordDTO record) {
-        Integer pageNo = record.getContext() == null ? null : record.getContext().getPageNo();
-        Integer pageSize = record.getContext() == null ? null : record.getContext().getPageSize();
+        Integer pageNo = record.getRecordContext() == null ? null : record.getRecordContext().getPageNo();
+        Integer pageSize = record.getRecordContext() == null ? null : record.getRecordContext().getPageSize();
         String sortField = null;
         String sortDirection = null;
-        if (record.getContext() != null && record.getContext().getSortBy() != null && !record.getContext().getSortBy().isEmpty()) {
-            var first = record.getContext().getSortBy().get(0);
+        if (record.getRecordContext() != null && record.getRecordContext().getSortBy() != null && !record.getRecordContext().getSortBy().isEmpty()) {
+            var first = record.getRecordContext().getSortBy().get(0);
             sortField = first.getField();
             sortDirection = first.getDirection() == null ? null : first.getDirection().name();
         }
-        Map<String, Object> filters = record.getContext() == null ? null : record.getContext().getFilters();
+        Map<String, Object> filters = record.getRecordContext() == null ? null : record.getRecordContext().getFilters();
 
         MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
         if (datasource == null) { throw exception(DATASOURCE_NOT_EXISTS); }
