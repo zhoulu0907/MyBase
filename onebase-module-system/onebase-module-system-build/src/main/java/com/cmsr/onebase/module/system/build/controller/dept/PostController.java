@@ -11,7 +11,7 @@ import com.cmsr.onebase.module.system.vo.post.PostRespVO;
 import com.cmsr.onebase.module.system.vo.post.PostSaveReqVO;
 import com.cmsr.onebase.module.system.vo.post.PostSimpleRespVO;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.PostDO;
-import com.cmsr.onebase.module.system.service.dept.PostService;
+import com.cmsr.onebase.module.system.service.post.PostService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;

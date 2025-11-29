@@ -4,6 +4,7 @@ import com.alibaba.nacos.common.utils.CollectionUtils;
 import com.cmsr.onebase.framework.common.biz.system.dict.DictDataCommonApi;
 import com.cmsr.onebase.framework.common.biz.system.dict.dto.DictDataRespDTO;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
+import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
@@ -55,7 +56,7 @@ public class CorpServiceImpl implements CorpService {
     private CorpDataRepository corpDataRepository;
 
     @Resource
-    private UserService corpUserService;
+    private UserService userService;
 
     @Resource
     private PasswordEncoder passwordEncoder;
@@ -199,7 +200,7 @@ public class CorpServiceImpl implements CorpService {
                 .map(CorpDO::getAdminId)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
-        Map<Long, AdminUserDO> userDOMap = corpUserService.getUserMap(adminUserIds);
+        Map<Long, AdminUserDO> userDOMap = userService.getUserMap(adminUserIds);
 
         if (appRelations.isEmpty()) {
             // 无关联应用，直接返回企业基本信息
@@ -282,14 +283,14 @@ public class CorpServiceImpl implements CorpService {
             return null;
         }
         CorpRespVO respVO = BeanUtils.toBean(corpDO, CorpRespVO.class);
-        AdminUserDO userDO = corpUserService.getUser(corpDO.getAdminId());
+        AdminUserDO userDO = userService.getUser(corpDO.getAdminId());
         if (userDO != null) {
             respVO.setAdminName(userDO.getNickname());
             respVO.setAdminEmail(userDO.getEmail());
             respVO.setAdminMobile(userDO.getMobile());
         }
         respVO.setAppCount(getCorpAppCount(id));
-        Long userCountLong = corpUserService.getUserCountByCorpId(id);
+        Long userCountLong = userService.getUserCountByCorpId(id);
         Integer userCount = (userCountLong != null) ? userCountLong.intValue() : 0;
         respVO.setUserCount(userCount);
         return respVO;
@@ -316,7 +317,7 @@ public class CorpServiceImpl implements CorpService {
 
     public CorpAdminUserRespVO createAdminUser(CorpAdminReqVO reqVO, Long corpId) {
         // 2.2.1 判断如果不存在，在进行插入
-        AdminUserDO existUser = corpUserService.getUserByUsername(reqVO.getUsername());
+        AdminUserDO existUser = userService.getUserByUsername(reqVO.getUsername());
         if (existUser != null) {
             throw exception(USER_USERNAME_EXISTS);
         }
@@ -325,7 +326,10 @@ public class CorpServiceImpl implements CorpService {
         String password = PasswordRandomGenerator.generateSecurePassword(15);
         user.setPassword(encodePassword(password)); // 加密密码
         user.setCorpId(corpId);
-        Long userId = corpUserService.createCorpAdminUser(user);
+        // 在空间创建空企业（Tenant）用户
+        user.setUserType(UserTypeEnum.CORP.getValue());
+        Long userId = userService.createCorpAdminUser(user);
+
         CorpAdminUserRespVO vo = new CorpAdminUserRespVO();
         vo.setUsername(reqVO.getUsername());
         vo.setMobile(reqVO.getMobile());

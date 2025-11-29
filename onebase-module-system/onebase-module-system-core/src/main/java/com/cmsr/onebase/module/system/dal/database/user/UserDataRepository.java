@@ -20,6 +20,7 @@ import org.anyline.entity.Compare;
 import org.anyline.entity.Order;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -38,21 +39,29 @@ import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
  * @date 2025-08-18
  */
 @Slf4j
-public abstract class AbstractUserDataRepository extends DataRepository<AdminUserDO> {
+@Repository
+public class UserDataRepository extends DataRepository<AdminUserDO> {
 
     /**
      * 构造方法，指定默认实体类
      */
-    public AbstractUserDataRepository() {
+    public UserDataRepository() {
         super(AdminUserDO.class);
     }
 
+
     /**
-     * 获取当前服务对应的场景类型：空间/企业
+     * 获取登录用户其用户所处的场景类型：平台/空间/企业
      *
      * @return
      */
-    public abstract String getXFromSceneType();
+    public String getSceneByUserType(){
+        String userSceneType = SecurityFrameworkUtils.getSceneByUserType();
+        if (StringUtils.isBlank(userSceneType)) {
+            throw exception(USER_TYPE_EXCEPTION, SecurityFrameworkUtils.getLoginUserType());
+        }
+        return userSceneType;
+    }
 
     private DefaultConfigStore buildUserConfigStore() {
         LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
@@ -61,7 +70,7 @@ public abstract class AbstractUserDataRepository extends DataRepository<AdminUse
             throw exception(USER_NOT_EXISTS);
         }
 
-        String fromSceneType = getXFromSceneType();
+        String fromSceneType = getSceneByUserType();
 
         DefaultConfigStore configStore = new DefaultConfigStore();
         if (XFromSceneTypeEnum.PLATFORM.getCode().equals(fromSceneType)) {
