@@ -367,7 +367,7 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
                 log.info("数据插入出现异常，准备回滚事务：{}",e.getMessage());
                 // 数据插入出现异常 回滚事务
                 temporaryService.rollback(transactionState);
-                throw exception(DB_SUBENTITY_OPERATION_ERROR,e.getMessage());
+                throw exception(DB_OPERATION_ERROR_CREATE,e.getMessage());
             }
 
             // 查询插入后的完整数据

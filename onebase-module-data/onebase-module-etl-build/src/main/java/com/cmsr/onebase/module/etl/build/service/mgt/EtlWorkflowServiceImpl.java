@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.etl.build.service.mgt;
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
+import com.cmsr.onebase.framework.common.util.string.UuidUtils;
 import com.cmsr.onebase.framework.ds.client.DolphinSchedulerClient;
 import com.cmsr.onebase.framework.ds.model.schedule.sub.Schedule;
 import com.cmsr.onebase.framework.ds.model.task.def.HttpTask;
@@ -109,7 +110,7 @@ public class EtlWorkflowServiceImpl implements EtlWorkflowService {
         EtlWorkflowDO workflowDO = new EtlWorkflowDO();
         Long applicationId = createVO.getApplicationId();
         workflowDO.setApplicationId(applicationId);
-        workflowDO.setWorkflowUuid(UuidCreator.getTimeOrderedEpoch().toString());
+        workflowDO.setWorkflowUuid(UuidUtils.getUuid());
         workflowDO.setWorkflowName(createVO.getFlowName());
         workflowDO.setDeclaration(createVO.getDeclaration());
         workflowDO.setConfig(JsonUtils.toJsonString(createVO.getConfig()));

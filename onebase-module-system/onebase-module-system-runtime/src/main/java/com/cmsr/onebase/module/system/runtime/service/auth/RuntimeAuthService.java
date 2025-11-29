@@ -68,4 +68,13 @@ public interface RuntimeAuthService {
      * @return 登录结果
      */
     AuthLoginRespVO appUsernameLogin(@Valid AppUserNameLoginReqVO reqVO);
+
+    /**
+     * 账号登录
+     *
+     * @param reqVO 登录信息
+     * @return 登录结果
+     */
+    AuthLoginRespVO corpLogin(@Valid CorpAuthLoginReqVO reqVO);
+
 }

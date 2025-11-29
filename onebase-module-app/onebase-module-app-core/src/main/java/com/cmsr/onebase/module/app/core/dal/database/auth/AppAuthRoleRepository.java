@@ -10,9 +10,11 @@ import com.cmsr.onebase.module.app.core.vo.app.AppUserPhotoDTO;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.mybatisflex.core.query.QueryWrapper;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -90,6 +92,9 @@ public class AppAuthRoleRepository extends BaseAppRepository<AppAuthRoleMapper, 
     }
 
     public Map<Long, List<AppUserPhotoDTO>> findUserPhotoList(List<Long> appIds) {
+        if (CollectionUtils.isEmpty(appIds)) {
+            return Collections.emptyMap();
+        }
         return mapper.findUserPhotoList(appIds)
                 .stream().collect(Collectors.groupingBy(AppUserPhotoDTO::getApplicationId, Collectors.toList()));
     }

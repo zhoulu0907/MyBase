@@ -7,6 +7,7 @@ import com.cmsr.onebase.framework.security.config.SecurityProperties;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.module.system.enums.logger.LoginLogTypeEnum;
 import com.cmsr.onebase.module.system.runtime.service.auth.RuntimeAuthService;
+import com.cmsr.onebase.module.system.service.permission.PermissionService;
 import com.cmsr.onebase.module.system.vo.auth.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -42,6 +43,9 @@ public class RuntimeAuthController {
     @Resource
     private SecurityProperties securityProperties;
 
+    @Resource
+    private PermissionService permissionService;
+
     @PostMapping("/app-login")
     @PermitAll
     @Operation(summary = "内部用户登录（Inner模式，账密登录）")
@@ -55,6 +59,15 @@ public class RuntimeAuthController {
     @Operation(summary = "外部用户登录（SaaS模式，手机号登录）")
     public CommonResult<AuthLoginRespVO> appMobileLogin(@RequestBody @Valid AppMobileLoginReqVO reqVO) {
         return success(runtimeAuthService.appMobileLogin(reqVO));
+    }
+
+
+
+    @PostMapping("/corp-login")
+    @PermitAll
+    @Operation(summary = "企业登录（手机号）")
+    public CommonResult<AuthLoginRespVO> corpLogin(@RequestBody @Valid CorpAuthLoginReqVO reqVO) {
+        return success(runtimeAuthService.corpLogin(reqVO));
     }
 
     @PostMapping("/logout")
@@ -91,5 +104,11 @@ public class RuntimeAuthController {
     public CommonResult<Boolean> resetPassword(@RequestBody @Valid AuthResetPasswordReqVO reqVO) {
         runtimeAuthService.resetPassword(reqVO);
         return success(true);
+    }
+
+    @GetMapping("/get-permission-info")
+    @Operation(summary = "获取登录用户的权限信息")
+    public CommonResult<AuthPermissionInfoRespVO> getPermissionInfo(@RequestParam(value = "code", required = false) String code) {
+        return success(permissionService.getPermissionInfo(code));
     }
 }

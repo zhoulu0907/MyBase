@@ -2,6 +2,7 @@ package com.cmsr.onebase.framework.security.core.filter;
 
 import com.cmsr.onebase.framework.common.biz.system.oauth2.OAuth2TokenCommonApi;
 import com.cmsr.onebase.framework.common.biz.system.oauth2.dto.OAuth2AccessTokenCheckRespDTO;
+import com.cmsr.onebase.framework.common.enums.RunModeEnum;
 import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
@@ -12,6 +13,7 @@ import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.security.config.SecurityProperties;
 import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.web.config.WebProperties;
 import com.cmsr.onebase.framework.web.core.handler.GlobalExceptionHandler;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import jakarta.servlet.FilterChain;
@@ -64,13 +66,14 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter {
                 token = SecurityFrameworkUtils.obtainAuthorization(request,
                         securityProperties.getTokenHeader(), securityProperties.getTokenParameter());
                 if (StrUtil.isNotEmpty(token)) {
-                    Integer userType = WebFrameworkUtils.getLoginUserType(request);
                     try {
                         // 1.1 基于 token 构建登录用户
-                        loginUser = buildLoginUserByToken(token, userType);
+                        String runMode = getRunModeByUri(request);
+
+                        loginUser = buildLoginUserByToken(runMode, token);
                         // 1.2 模拟 Login 功能，方便日常开发调试
                         if (loginUser == null) {
-                            loginUser = mockLoginUser(request, token, userType);
+                            loginUser = mockLoginUser(request, token);
                         }
                     } catch (Throwable ex) {
                         CommonResult<?> result = globalExceptionHandler.allExceptionHandler(request, ex);
@@ -98,24 +101,17 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter {
         chain.doFilter(request, response);
     }
 
-    private LoginUser buildLoginUserByToken(String token, Integer userType) {
+    private LoginUser buildLoginUserByToken(String runMode, String token) {
         try {
             // 校验访问令牌
-            OAuth2AccessTokenCheckRespDTO accessToken = oauth2TokenApi.checkAccessToken(token).getCheckedData();
+            OAuth2AccessTokenCheckRespDTO accessToken = oauth2TokenApi.checkAccessToken(runMode, token).getCheckedData();
             if (accessToken == null) {
                 return null;
             }
 
-            // 这里，需要屏蔽用户类型（管理员vs普通用户）匹配逻辑
-            // 注意：只有 /admin-api/* 和 /app-api/* 有 userType，才需要比对用户类型，类似 WebSocket 的 /ws/* 连接地址，是不需要比对用户类型的
-            // if (userType != null
-            //         && ObjUtil.notEqual(accessToken.getUserType(), userType)) {
-            //     throw new AccessDeniedException("错误的用户类型");
-            // }
-            log.info("buildLoginUserByToken userType:{}", userType);
-
             // 构建登录用户
             return new LoginUser().setId(accessToken.getUserId()).setUserType(accessToken.getUserType())
+                    .setRunMode(accessToken.getRunMode())
                     .setCorpId(accessToken.getCorpId())
                     .setInfo(accessToken.getUserInfo()) // 额外的用户信息
                     .setTenantId(accessToken.getTenantId()).setScopes(accessToken.getScopes())
@@ -133,10 +129,9 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter {
      *
      * @param request  请求
      * @param token    模拟的 token，格式为 {@link SecurityProperties#getMockSecret()} + 用户编号
-     * @param userType 用户类型
      * @return 模拟的 LoginUser
      */
-    private LoginUser mockLoginUser(HttpServletRequest request, String token, Integer userType) {
+    private LoginUser mockLoginUser(HttpServletRequest request, String token) {
         if (!securityProperties.getMockEnable()) {
             return null;
         }
@@ -146,7 +141,7 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter {
         }
         // 构建模拟用户
         Long userId = Long.valueOf(token.substring(securityProperties.getMockSecret().length()));
-        return new LoginUser().setId(userId).setUserType(userType)
+        return new LoginUser().setId(userId)
                 .setTenantId(WebFrameworkUtils.getTenantIdFromHeader(request));
     }
 
@@ -158,21 +153,31 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter {
         try {
             loginUserStr = URLDecoder.decode(loginUserStr, StandardCharsets.UTF_8); // 解码，解决中文乱码问题
             LoginUser loginUser = JsonUtils.parseObject(loginUserStr, LoginUser.class);
-
-            // 这里，需要屏蔽用户类型（管理员vs普通用户）匹配逻辑
-            // 注意：只有 /admin-api/* 和 /app-api/* 有 userType，才需要比对用户类型，类似 WebSocket 的 /ws/* 连接地址，是不需要比对用户类型的
-            // Integer userType = WebFrameworkUtils.getLoginUserType(request);
-            // if (userType != null
-            //         && loginUser != null
-            //         && ObjUtil.notEqual(loginUser.getUserType(), userType)) {
-            //     throw new AccessDeniedException("错误的用户类型");
-            // }
-
             return loginUser;
         } catch (Exception ex) {
             log.error("[buildLoginUserByHeader][解析 LoginUser({}) 发生异常]", loginUserStr, ex);
             ;
             throw ex;
+        }
+    }
+
+    /**
+     * 根据请求 URI 判断运行模式
+     *
+     * @param request
+     * @return
+     */
+    private String getRunModeByUri(HttpServletRequest request) {
+        String uri = request.getRequestURI();
+        if (uri == null) {
+            return null;
+        }
+        if (uri.startsWith(WebProperties.PLATFORM)) {
+            return RunModeEnum.PLATFORM.getValue();
+        } else if (uri.startsWith(WebProperties.BUILD)) {
+            return RunModeEnum.BUILD.getValue();
+        } else {
+            return null;
         }
     }
 

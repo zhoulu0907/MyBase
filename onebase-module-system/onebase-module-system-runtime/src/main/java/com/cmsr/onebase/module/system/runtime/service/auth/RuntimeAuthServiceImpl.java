@@ -4,32 +4,39 @@ import cn.hutool.core.util.ObjUtil;
 import com.anji.captcha.model.common.ResponseModel;
 import com.anji.captcha.model.vo.CaptchaVO;
 import com.anji.captcha.service.CaptchaService;
+import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
+import com.cmsr.onebase.framework.common.biz.security.dto.LoginFailureResultDTO;
+import com.cmsr.onebase.framework.common.biz.security.dto.PasswordExpiryCheckDTO;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
-import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
+import com.cmsr.onebase.framework.common.enums.RunModeEnum;
+import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
 import com.cmsr.onebase.module.app.api.security.AppAuthSecurityApi;
-import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
-import com.cmsr.onebase.framework.common.biz.security.dto.LoginFailureResultDTO;
 import com.cmsr.onebase.module.system.api.logger.dto.LoginLogCreateReqDTO;
 import com.cmsr.onebase.module.system.api.sms.SmsCodeApi;
 import com.cmsr.onebase.module.system.convert.auth.AuthConvert;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO;
+import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.logger.LoginLogTypeEnum;
 import com.cmsr.onebase.module.system.enums.logger.LoginResultEnum;
 import com.cmsr.onebase.module.system.enums.oauth2.OAuth2ClientConstants;
+import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
 import com.cmsr.onebase.module.system.enums.tenant.TenantCodeEnum;
+import com.cmsr.onebase.module.system.service.corp.CorpService;
 import com.cmsr.onebase.module.system.service.logger.LoginLogService;
 import com.cmsr.onebase.module.system.service.member.MemberService;
 import com.cmsr.onebase.module.system.service.oauth2.OAuth2TokenService;
+import com.cmsr.onebase.module.system.service.permission.RoleService;
 import com.cmsr.onebase.module.system.service.tenant.TenantService;
 import com.cmsr.onebase.module.system.service.user.UserService;
 import com.cmsr.onebase.module.system.vo.CaptchaVerificationReqVO;
 import com.cmsr.onebase.module.system.vo.auth.*;
+import com.cmsr.onebase.module.system.vo.corp.CorpRespVO;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Resource;
 import jakarta.validation.Validator;
@@ -40,7 +47,10 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
@@ -58,9 +68,9 @@ import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 public class RuntimeAuthServiceImpl implements RuntimeAuthService {
 
     @Resource
-    private UserService     userService;
+    private UserService        userService;
     @Resource
-    private LoginLogService loginLogService;
+    private LoginLogService    loginLogService;
     @Resource
     private OAuth2TokenService oauth2TokenService;
     @Resource
@@ -95,6 +105,12 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
     @Resource
     private AppApplicationApi appApplicationApi;
 
+    @Resource
+    private CorpService corpService;
+
+    @Resource
+    private RoleService roleService;
+
     @Override
     public AdminUserDO authenticate(String username, String password) {
         final LoginLogTypeEnum logTypeEnum = LoginLogTypeEnum.LOGIN_USERNAME;
@@ -120,7 +136,7 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         // 检查账号是否被防暴力破解锁定
         securityConfigApi.checkAccountLocked(user.getId());
         // 验证密码
-        checkPasswordMatched(password,user,account,logTypeEnum);
+        checkPasswordMatched(password, user, account, logTypeEnum);
         // 校验是否禁用
         if (CommonStatusEnum.isDisable(user.getStatus())) {
             createLoginLog(user.getId(), account, logTypeEnum, LoginResultEnum.USER_DISABLED);
@@ -138,7 +154,7 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         }
     }
 
-    private void  checkPasswordMatched(String password, AdminUserDO user,String account,LoginLogTypeEnum logTypeEnum){
+    private void checkPasswordMatched(String password, AdminUserDO user, String account, LoginLogTypeEnum logTypeEnum) {
         boolean passwordMatched = userService.isPasswordMatch(password, user.getPassword());
         if (!passwordMatched) {
             Long userId = user.getId();
@@ -150,8 +166,8 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         }
     }
 
-    public boolean   findAdminFlag( Long userId ,Long appId){
-        return  appAuthSecurityApi.isApplicationAdmin(userId,appId);
+    public boolean findAdminFlag(Long userId, Long appId) {
+        return appAuthSecurityApi.isApplicationAdmin(userId, appId);
     }
 
 
@@ -168,12 +184,24 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
 
         // 使用账号密码，进行登录
         AdminUserDO user = authenticate(reqVO.getUsername(), reqVO.getPassword());
-        AuthLoginRespVO authLoginRespVO= createTokenAfterLoginSuccess(reqVO.getAppId(),  user.getId(), reqVO.getUsername(),reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_USERNAME);
+        AuthLoginRespVO authLoginRespVO = createTokenAfterLoginSuccess(reqVO.getAppId(), user.getId(), reqVO.getUsername(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_USERNAME);
         // 设置是否管理员
-        authLoginRespVO.setAdminFlag(findAdminFlag(reqVO.getAppId(),user.getId()));
+        authLoginRespVO.setAdminFlag(findAdminFlag(reqVO.getAppId(), user.getId()));
         return authLoginRespVO;
 
     }
+
+    public boolean findCorpAdminFlag(String roleCode, Long userId) {
+        // 获取权限
+        RoleDO roleDO = roleService.getRoleIdsByCode(roleCode);
+        if (null != roleDO) {
+            // 查询用户是否管理员
+            boolean adminFlag = userService.findAdminByRoleIdAndUserId(roleDO.getId(), userId);
+            return adminFlag;
+        }
+        return false;
+    }
+
 
     @Override
     public AuthLoginRespVO appMobileLogin(AppMobileLoginReqVO reqVO) {
@@ -186,11 +214,73 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         checkPlatformAdminEnableAppCreate();
         // 使用手机密码，进行登录
         AdminUserDO user = mobileAuthenticate(reqVO.getMobile(), reqVO.getPassword());
-        AuthLoginRespVO  authLoginRespVO=  createTokenAfterLoginSuccess(reqVO.getAppId(),  user.getId(), reqVO.getMobile(),reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE);
+        AuthLoginRespVO authLoginRespVO = createTokenAfterLoginSuccess(reqVO.getAppId(), user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE);
         // 设置是否管理员
-        authLoginRespVO.setAdminFlag(findAdminFlag( reqVO.getAppId(),user.getId()));
+        authLoginRespVO.setAdminFlag(findAdminFlag(reqVO.getAppId(), user.getId()));
         return authLoginRespVO;
 
+    }
+
+
+
+    @Override
+    public AuthLoginRespVO corpLogin(CorpAuthLoginReqVO reqVO) {
+        // 校验验证码
+        mobileValidateCaptcha(reqVO);
+
+        // 2. 使用账号密码，进行登录
+        AdminUserDO user = mobileAuthenticate(reqVO.getMobile(), reqVO.getPassword());
+
+        // 验证企业状态是否异常
+        checkCropStatus(user.getCorpId());
+
+        AuthLoginRespVO authLoginRespVO = createCorpAfterLoginSuccess(user.getUserType(), user.getCorpId(), user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE);
+        // 设置是否管理员
+        authLoginRespVO.setAdminFlag(findCorpAdminFlag(RoleCodeEnum.CORP_ADMIN.getCode(), user.getId()));
+        // 回显当前登录用户的企业id
+        authLoginRespVO.setCorpId(user.getCorpId());
+        return authLoginRespVO;
+    }
+
+    private void checkCropStatus(Long corpId) {
+        CorpRespVO corp = corpService.getCorp(corpId);
+        if (null == corp || CommonStatusEnum.DISABLE.getStatus().equals(corp.getStatus())) {
+            throw exception(AUTH_LOGIN_CORP_DELETE_OR_DISABLE);
+        }
+    }
+
+    private AuthLoginRespVO createCorpAfterLoginSuccess(Integer userType, Long corpId, Long userId, String username, String deviceId, LoginLogTypeEnum logType) {
+        // 插入登陆日志
+        createLoginLog(userId, username, logType, LoginResultEnum.SUCCESS);
+        // 创建访问令牌
+        OAuth2AccessTokenDO accessTokenDO = oauth2TokenService.createAccessTokenWithMode(
+                RunModeEnum.BUILD.getValue(), corpId, null,
+                userId, userType,
+                OAuth2ClientConstants.CLIENT_ID_DEFAULT, null);
+
+        // 检查并限制设备数，踢出超限的设备
+        List<String> removedTokens = securityConfigApi.checkAndLimitDevices(userId, deviceId, accessTokenDO.getAccessToken()).getData();
+
+        // 删除被踢出的Token
+        if (removedTokens != null && !removedTokens.isEmpty()) {
+            for (String removedToken : removedTokens) {
+                oauth2TokenService.removeAccessToken(removedToken);
+                log.info("用户[{}]设备数超限，已踢出Token: {}", userId, removedToken);
+            }
+        }
+
+        TenantDO tennantDO = tenantService.getTenant(accessTokenDO.getTenantId());
+        // 构建返回结果
+        AuthLoginRespVO respVO = AuthConvert.INSTANCE.convert(accessTokenDO, tennantDO);
+
+        // 检查密码有效期
+        PasswordExpiryCheckDTO expiryCheckResult = securityConfigApi.checkPasswordExpiry(userId).getData();
+        respVO.setPasswordExpiryInfo(expiryCheckResult);
+
+        // 创建会话空闲检测Key
+        securityConfigApi.createSessionIdleKey(userId, deviceId);
+
+        return respVO;
     }
 
     private void checkPlatformAdminEnableAppCreate() {
@@ -218,7 +308,7 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         reqDTO.setLogType(logTypeEnum.getType());
         reqDTO.setTraceId("n/a");
         reqDTO.setUserId(userId);
-        reqDTO.setUserType(getUserType().getValue());
+        reqDTO.setUserType(getUserType());
         reqDTO.setUsername(username);
         reqDTO.setUserAgent(ServletUtils.getUserAgent());
         reqDTO.setUserIp(ServletUtils.getClientIP());
@@ -267,7 +357,9 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         // 插入登陆日志
         createLoginLog(userId, username, logType, LoginResultEnum.SUCCESS);
         // 创建访问令牌
-        OAuth2AccessTokenDO accessTokenDO = oauth2TokenService.createAppAccessToken(appId, userId, getUserType().getValue(),
+        OAuth2AccessTokenDO accessTokenDO = oauth2TokenService.createAccessTokenWithMode(
+                RunModeEnum.RUNTIME.getValue(), null, appId,
+                userId, getUserType(),
                 OAuth2ClientConstants.CLIENT_ID_DEFAULT, null);
 
         // 校验并限制设备数
@@ -319,7 +411,7 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         reqDTO.setTraceId("n/a");
         reqDTO.setUserId(userId);
         reqDTO.setUserType(userType);
-        if (ObjUtil.equal(getUserType().getValue(), userType)) {
+        if (ObjUtil.equal(getUserType(), userType)) {
             reqDTO.setUsername(getUsername(userId));
         } else {
             reqDTO.setUsername(memberService.getMemberUserMobile(userId));
@@ -338,8 +430,8 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         return user != null ? user.getUsername() : null;
     }
 
-    private UserTypeEnum getUserType() {
-        return UserTypeEnum.THIRD;
+    private Integer getUserType() {
+        return SecurityFrameworkUtils.getLoginUserType();
     }
 
     @Override

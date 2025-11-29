@@ -14,7 +14,7 @@ tenant-id: 1
 #X-From-Scene-Type: platform
 
 ### 获得管理员列表分页 /admin-api/system//admin/page
-GET {{baseUrl}}/system/platform/admin/page
+GET {{baseUrl}}/system/platform/admin/get?id=
 Authorization: Bearer {{token}}
 
 ### 创建用户 /admin-api/system/user/platform-admin/create
@@ -31,7 +31,8 @@ tenant-id: 1
   "nickName": "管理员4",
   "adminType": "2"
 }
-
-
+### 查询用户
+GET {{baseUrl}}/system/platform/admin/get?id=153539738093060096
+Authorization: Bearer {{token}}
 
 

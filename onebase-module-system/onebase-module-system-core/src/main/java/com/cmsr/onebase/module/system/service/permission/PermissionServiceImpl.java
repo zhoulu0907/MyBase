@@ -4,7 +4,9 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.cmsr.onebase.framework.common.biz.system.permission.dto.DeptDataPermissionRespDTO;
+import com.cmsr.onebase.framework.common.enums.CommonPublishModelEnum;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
+import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
@@ -553,6 +555,14 @@ public class PermissionServiceImpl implements PermissionService {
         // 1.3 获得菜单列表
         Set<Long> menuIds = permissionService.getRoleMenuListByRoleId(convertSet(roles, RoleDO::getId));
         List<MenuDO> menuList = menuService.getAllActiveMenuList(menuIds);
+
+        // 1.4检查当前租户是否inner模式，并移除企业权限
+       TenantDO tenantDO= tenantService.getTenant(user.getTenantId());
+        if (CommonPublishModelEnum.InnerModel.getValue().equals(tenantDO.getPublishModel())) {
+            // 排除企业权限
+            menuList.removeIf(menu -> menu.getPermission() != null
+                    && menu.getPermission().startsWith(MenuConstants.MENU_TENANT_CORP));
+        }
 
         return AuthConvert.INSTANCE.convert(user, roles, menuList, code);
     }

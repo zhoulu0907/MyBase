@@ -25,6 +25,8 @@
         <springdoc.version>2.8.3</springdoc.version>
         <!-- DB 相关 -->
         <mybatis-flex.version>1.11.4</mybatis-flex.version>
+        <!-- mybatis 要与 mybatis-flex兼容 -->
+        <mybatis.version>3.5.19</mybatis.version>
         <redisson.version>3.52.0</redisson.version>
         <jetcache.version>2.7.8</jetcache.version>
         <kryo.version>5.6.2</kryo.version>
@@ -87,6 +89,7 @@
         <!-- HTTP 客户端相关 -->
         <retrofit2.version>3.0.0</retrofit2.version>
         <okhttp3.version>4.12.0</okhttp3.version>
+        <uuid-creator.version>6.1.1</uuid-creator.version>
     </properties>
 
     <dependencyManagement>
@@ -196,7 +199,12 @@
                 <artifactId>mybatis-flex-codegen</artifactId>
                 <version>${mybatis-flex.version}</version>
             </dependency>
-
+            <!-- 指定版本避免与mybatis-flex冲突 -->
+            <dependency>
+                <groupId>org.mybatis</groupId>
+                <artifactId>mybatis</artifactId>
+                <version>${mybatis.version}</version>
+            </dependency>
             <dependency>
                 <groupId>com.cmsr.onebase</groupId>
                 <artifactId>onebase-spring-boot-starter-redis</artifactId>
@@ -681,6 +689,12 @@
                 <artifactId>mockwebserver</artifactId>
                 <version>${okhttp3.version}</version>
                 <scope>test</scope>
+            </dependency>
+            <!-- -->
+            <dependency>
+                <groupId>com.github.f4b6a3</groupId>
+                <artifactId>uuid-creator</artifactId>
+                <version>${uuid-creator.version}</version>
             </dependency>
 
             <!-- 测试框架：统一 JUnit 平台与 Jupiter 版本（覆盖 Spring Boot 默认版本），解决 IDE 启动器 1.11.4 解析问题 -->

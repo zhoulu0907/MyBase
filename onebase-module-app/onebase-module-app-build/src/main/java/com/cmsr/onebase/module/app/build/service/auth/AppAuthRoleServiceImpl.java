@@ -86,6 +86,7 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
                 AppAuthRoleUserDO entity = new AppAuthRoleUserDO();
                 entity.setUserId(userId);
                 entity.setRoleId(authRoleDO.getId());
+                appAuthRoleUserRepository.save(entity);
             } else {
                 long count = appAuthRoleUserRepository.countByRoleId(existRole.getId());
                 if (count == 0) {

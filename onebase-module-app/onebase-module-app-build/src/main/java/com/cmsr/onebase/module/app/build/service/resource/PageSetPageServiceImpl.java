@@ -3,10 +3,10 @@ package com.cmsr.onebase.module.app.build.service.resource;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageSetPageRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageSetRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetPageDO;
 import com.cmsr.onebase.module.app.core.dto.appresource.CreatePageSetPageDTO;
 import com.cmsr.onebase.module.app.core.dto.appresource.PageSetPageRespDTO;
+import com.cmsr.onebase.module.app.core.provider.resource.PageSetPageServiceProvider;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
@@ -21,10 +21,13 @@ public class PageSetPageServiceImpl implements PageSetPageService {
     @Resource
     private AppPageSetRepository pageSetDataRepository;
 
+    @Resource
+    private PageSetPageServiceProvider pageSetPageServiceProvider;
+
+
     @Override
     public PageSetPageRespDTO getPageSetPage(Long id) {
-        AppResourcePagesetPageDO pageSetPageDO = pageSetPageDataRepository.getById(id);
-        return BeanUtils.toBean(pageSetPageDO, PageSetPageRespDTO.class);
+        return pageSetPageServiceProvider.getPageSetPage(id);
     }
 
     @Override
@@ -49,8 +52,6 @@ public class PageSetPageServiceImpl implements PageSetPageService {
 
     @Override
     public List<PageSetPageRespDTO> getPageSetPageList(Long pageSetId) {
-        AppResourcePagesetDO pageSetDO = pageSetDataRepository.getById(pageSetId);
-        List<AppResourcePagesetPageDO> pageSetPageDOList = pageSetPageDataRepository.findByPageSetId(pageSetDO.getId());
-        return BeanUtils.toBean(pageSetPageDOList, PageSetPageRespDTO.class);
+        return pageSetPageServiceProvider.getPageSetPageList(pageSetId);
     }
 }

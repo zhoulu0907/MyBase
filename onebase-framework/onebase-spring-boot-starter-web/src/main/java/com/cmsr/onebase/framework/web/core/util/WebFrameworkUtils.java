@@ -4,7 +4,6 @@ import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.enums.RpcConstants;
 import com.cmsr.onebase.framework.common.enums.TerminalEnum;
-import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.enums.XFromSceneTypeEnum;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.web.config.WebProperties;
@@ -72,36 +71,6 @@ public class WebFrameworkUtils {
     public static Long getVisitTenantId(HttpServletRequest request) {
         String tenantId = request.getHeader(HEADER_VISIT_TENANT_ID);
         return NumberUtil.isNumber(tenantId) ? Long.valueOf(tenantId) : null;
-    }
-
-    /**
-     * 获得请求对应的用户类型
-     *
-     * @param request 请求
-     * @return 用户类型
-     */
-    public static Integer getLoginUserType(HttpServletRequest request) {
-        // 获得请求的 URI
-        String uri = request.getRequestURI();
-
-        // 检查 Admin API
-        if (StrUtil.startWith(uri, properties.getBuildApi().getPrefix())) {
-            return UserTypeEnum.THIRD.getValue();
-        }
-        // 检查 App API
-        if (StrUtil.startWith(uri, properties.getRuntimeApi().getPrefix())) {
-            return UserTypeEnum.CORP.getValue();
-        }
-        // 检查 App API
-        if (StrUtil.startWith(uri, properties.getPlatformApi().getPrefix())) {
-            return UserTypeEnum.PLATFORM.getValue();
-        }
-        return null;
-    }
-
-    public static Integer getLoginUserType() {
-        HttpServletRequest request = getRequest();
-        return getLoginUserType(request);
     }
 
     public static Long getLoginUserId() {
