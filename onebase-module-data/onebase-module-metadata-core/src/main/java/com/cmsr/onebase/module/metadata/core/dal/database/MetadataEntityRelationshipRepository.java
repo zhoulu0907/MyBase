@@ -22,6 +22,32 @@ import java.util.List;
 public class MetadataEntityRelationshipRepository extends ServiceImpl<MetadataEntityRelationshipMapper, MetadataEntityRelationshipDO> {
 
     /**
+     * 根据源实体ID查询关系列表
+     *
+     * @param sourceEntityId 源实体ID
+     * @return 实体关系列表
+     */
+    public List<MetadataEntityRelationshipDO> findBySourceEntityId(Long sourceEntityId) {
+        QueryWrapper queryWrapper = this.query()
+                .eq(MetadataEntityRelationshipDO::getSourceEntityId, sourceEntityId)
+                .orderBy(MetadataEntityRelationshipDO::getCreateTime, false);
+        return list(queryWrapper);
+    }
+
+    /**
+     * 根据目标实体ID查询关系列表
+     *
+     * @param targetEntityId 目标实体ID
+     * @return 实体关系列表
+     */
+    public List<MetadataEntityRelationshipDO> findByTargetEntityId(Long targetEntityId) {
+        QueryWrapper queryWrapper = this.query()
+                .eq(MetadataEntityRelationshipDO::getTargetEntityId, targetEntityId)
+                .orderBy(MetadataEntityRelationshipDO::getCreateTime, false);
+        return list(queryWrapper);
+    }
+
+    /**
      * 根据主表实体ID获取关系列表
      *
      * @param masterEntityId 主表实体ID

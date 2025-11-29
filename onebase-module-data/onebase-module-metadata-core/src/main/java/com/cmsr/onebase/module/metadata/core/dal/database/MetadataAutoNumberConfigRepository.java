@@ -26,6 +26,26 @@ public class MetadataAutoNumberConfigRepository extends ServiceImpl<MetadataAuto
                 .eq(MetadataAutoNumberConfigDO::getFieldId, fieldId);
         remove(queryWrapper);
     }
+
+    /**
+     * 插入自动编号配置
+     *
+     * @param config 配置DO
+     * @return 是否成功
+     */
+    public boolean insert(MetadataAutoNumberConfigDO config) {
+        return save(config);
+    }
+
+    /**
+     * 更新自动编号配置
+     *
+     * @param config 配置DO
+     * @return 是否成功
+     */
+    public boolean update(MetadataAutoNumberConfigDO config) {
+        return updateById(config);
+    }
 }
 
 

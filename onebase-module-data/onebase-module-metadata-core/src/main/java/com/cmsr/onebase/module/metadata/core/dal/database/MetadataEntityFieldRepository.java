@@ -22,6 +22,16 @@ import java.util.List;
 public class MetadataEntityFieldRepository extends ServiceImpl<MetadataEntityFieldMapper, MetadataEntityFieldDO> {
 
     /**
+     * 根据ID查询实体字段
+     *
+     * @param id 字段ID
+     * @return 实体字段对象，不存在时返回null
+     */
+    public MetadataEntityFieldDO findById(Long id) {
+        return getById(id);
+    }
+
+    /**
      * 获取实体字段列表
      *
      * @return 实体字段列表

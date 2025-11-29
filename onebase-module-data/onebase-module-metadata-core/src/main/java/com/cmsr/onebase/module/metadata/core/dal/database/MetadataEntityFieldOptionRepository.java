@@ -32,6 +32,36 @@ public class MetadataEntityFieldOptionRepository extends ServiceImpl<MetadataEnt
                 .eq(MetadataEntityFieldOptionDO::getFieldId, fieldId);
         remove(queryWrapper);
     }
+
+    /**
+     * 插入字段选项
+     *
+     * @param option 字段选项DO
+     * @return 受影响行数
+     */
+    public boolean insert(MetadataEntityFieldOptionDO option) {
+        return save(option);
+    }
+
+    /**
+     * 更新字段选项
+     *
+     * @param option 字段选项DO
+     * @return 受影响行数
+     */
+    public boolean update(MetadataEntityFieldOptionDO option) {
+        return updateById(option);
+    }
+
+    /**
+     * 根据ID删除字段选项
+     *
+     * @param id 字段选项ID
+     * @return 受影响行数
+     */
+    public boolean deleteById(Long id) {
+        return removeById(id);
+    }
 }
 
 

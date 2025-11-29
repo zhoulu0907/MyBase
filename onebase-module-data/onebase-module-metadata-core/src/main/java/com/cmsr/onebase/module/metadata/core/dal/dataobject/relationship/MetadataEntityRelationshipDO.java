@@ -18,6 +18,16 @@ import lombok.EqualsAndHashCode;
 public class MetadataEntityRelationshipDO extends BaseTenantEntity {
 
     /**
+     * 源实体ID字段名常量
+     */
+    public static final String SOURCE_ENTITY_ID = "source_entity_id";
+
+    /**
+     * 目标实体ID字段名常量
+     */
+    public static final String TARGET_ENTITY_ID = "target_entity_id";
+
+    /**
      * 关系名称
      */
     @Column(value = "relation_name", comment = "关系名称")
