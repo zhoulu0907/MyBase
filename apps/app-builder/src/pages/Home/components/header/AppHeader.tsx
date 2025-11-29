@@ -5,6 +5,7 @@ import UserProfileAvatar from '@/components/UserProfileAvatar';
 import { useI18n } from '@/hooks/useI18n';
 import { userPermissionSignal } from '@/store/singals/user_permission';
 import { UserPermissionManager } from '@/utils/permission';
+import { logout } from '@/utils/session';
 import { Divider, Dropdown, Layout, Menu, Tabs, Typography } from '@arco-design/web-react';
 import { IconExport } from '@arco-design/web-react/icon';
 import { TokenManager } from '@onebase/common';
@@ -77,18 +78,10 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
 
   // 登出处理
   const handleLogout = async () => {
-    // TODO(mickey): 联调后打开
+    // TODO(mickey): 联调后打开,现在后端登出接口报错
     // await systemLogout();
-    // 清除 token
-    const loginURL = TokenManager.getTokenInfo()?.loginURL;
-    TokenManager.clearToken();
-    UserPermissionManager.clearUserPermissionInfo();
-    // 跳转到登录页
-    if (loginURL) {
-      window.location.href = loginURL;
-    } else {
-      navigate('/login', { replace: true });
-    }
+
+    logout(navigate);
   };
 
   const tenantAdminMenu = (

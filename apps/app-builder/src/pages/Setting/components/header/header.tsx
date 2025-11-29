@@ -3,9 +3,9 @@ import UserProfileAvtar from '@/components/UserProfileAvatar';
 
 import { useI18n } from '@/hooks/useI18n';
 import { UserPermissionManager } from '@/utils/permission';
+import { logout } from '@/utils/session';
 import { Button, Dropdown, Layout, Menu, Typography } from '@arco-design/web-react';
 import { IconApps, IconExport } from '@arco-design/web-react/icon';
-import { TokenManager } from '@onebase/common';
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styles from './header.module.less';
@@ -30,9 +30,8 @@ const AppHeader: React.FC<HeaderProps> = ({ className, avatarUrl }) => {
   const handleLogout = async () => {
     // TODO(mickey): 联调后打开
     // await systemLogout();
-    TokenManager.clearToken();
-    // 跳转到登录页
-    navigate('/login', { replace: true });
+
+    logout(navigate);
   };
 
   const maskMobile = (value: string) => {

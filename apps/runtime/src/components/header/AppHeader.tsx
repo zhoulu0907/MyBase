@@ -6,6 +6,7 @@ import UserProfileAvatar from '@/components/UserProfileAvatar';
 import { useI18n } from '@/hooks/useI18n';
 import { appInfoSignal } from '@/store/app';
 import { UserPermissionManager } from '@/utils/permission';
+import { logout } from '@/utils/session';
 import { Divider, Dropdown, Layout, Menu, Typography } from '@arco-design/web-react';
 import { IconExport } from '@arco-design/web-react/icon';
 import { getApplication, type GetApplicationReq } from '@onebase/app';
@@ -99,9 +100,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
 
   // 登出处理
   const handleLogout = async () => {
-    TokenManager.clearToken();
-    // 跳转到登录页
-    navigate('/login', { replace: true });
+    logout(navigate);
   };
 
   // 用户菜单

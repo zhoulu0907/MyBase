@@ -166,8 +166,8 @@ const AppBreadcrumb: React.FC<BreadcrumbProps> = ({ className, items }) => {
         {breadcrumbItems.map((item, index) => (
           <Breadcrumb.Item
             key={item.key}
-            onClick={() => handleBreadcrumbClick(item)}
-            className={item.path ? styles.clickable : styles.current}
+            // onClick={() => handleBreadcrumbClick(item)}
+            // className={item.path ? styles.clickable : styles.current}
           >
             {item.title}
           </Breadcrumb.Item>

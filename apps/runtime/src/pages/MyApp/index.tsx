@@ -24,10 +24,10 @@ import { useNavigate } from 'react-router-dom';
 import noContentSVG from '@/assets/images/noContent.svg';
 import { DynamicIcon } from '@/components/DynamicIcon';
 
+import { AppHeader } from '@/components/header';
 import { StatusEnumLabel } from '@/constants';
 import type { ApplicationList, TagProps } from '@/types';
 import { appIconMap } from '@onebase/ui-kit';
-import { AppHeader } from '../Runtime/components/header';
 import TagModal from './components/tagModal';
 import {
   appOptions,

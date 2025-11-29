@@ -67,6 +67,11 @@ const Right: React.FC = () => {
       let tid = getHashQueryParam('tenantId', redirectURL) || '';
       setAppId(aid);
       setTenantId(tid);
+    } else {
+      let aid = getHashQueryParam('appId') || '';
+      let tid = getHashQueryParam('tenantId') || '';
+      setAppId(aid);
+      setTenantId(tid);
     }
   }, []);
 

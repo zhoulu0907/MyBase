@@ -1,3 +1,4 @@
+import { AppHeader } from '@/components/header';
 import { useI18n } from '@/hooks/useI18n';
 import { UserPermissionManager } from '@/utils/permission';
 import { Input, Layout, Tree } from '@arco-design/web-react';
@@ -16,7 +17,6 @@ import { getPermissionInfo } from '@onebase/platform-center';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { AppHeader } from './components/header';
 import RuntimeMenuItem from './components/menuItem';
 import PreviewContainer from './components/preview';
 import './components/TaskCenter/style/taskSide.less';
@@ -99,13 +99,13 @@ const Runtime: React.FC = () => {
   }, [appId]);
 
   useEffect(() => {
+    // TODO(多租户)：等马老师提供runtime的接口后打开
     // getUserInfo();
   }, []);
 
   const getUserInfo = async () => {
     const res = await getPermissionInfo();
     UserPermissionManager.setUserPermissionInfo(res);
-    // userPermissionSignal.setPermissionInfo(res);
     setNickname(res.user.nickname);
   };
 

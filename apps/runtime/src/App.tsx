@@ -12,7 +12,6 @@ function AppContent() {
     <Routes>
       {/* 登录页面不需要认证 */}
       <Route path="/login" element={<Login />} />
-      <Route path="/:appId/:tenantId/login" element={<Login />} />
 
       <Route path="/onebase/runtime/" element={<Runtime />} />
 

@@ -300,7 +300,9 @@ const TenantManagement: React.FC = () => {
                   </div>
                   <div className={styles.tenantAddress}>
                     <div>访问地址：</div>
-                    <div className={styles.addressText} onClick={() => handleClick(fullUrl)}>{displayUrl}</div>
+                    <div className={styles.addressText} onClick={() => handleClick(fullUrl)}>
+                      {displayUrl}
+                    </div>
                     <IconCopy onClick={() => copyToClipboard(fullUrl)} style={{ fontSize: 16 }} />
                   </div>
                 </div>

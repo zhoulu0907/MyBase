@@ -38,7 +38,7 @@ import {
   type DeleteApplicationReq,
   type PageParam
 } from '@onebase/app';
-import { getCommonPaginationList } from '@onebase/common';
+import { getCommonPaginationList, getRuntimeURL } from '@onebase/common';
 import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -244,6 +244,15 @@ const AppManagement: React.FC = () => {
     }
   };
 
+  const nagivateToRuntimeApp = (appId: string) => {
+    const appUrl = `${getRuntimeURL()}/#/login?appId=${appId}&tenantId=${tenantId}`;
+
+    const newWindow = window.open('', '_blank');
+    if (newWindow) {
+      newWindow.location.href = appUrl;
+    }
+  };
+
   const getBaseUrl = () => {
     const baseUrl = window.location.href.replace(/setting.*$/, '');
     return baseUrl;
@@ -282,7 +291,7 @@ const AppManagement: React.FC = () => {
           key="1"
           onClick={(e) => {
             e.stopPropagation();
-            nagivateToDataFactory(item.id);
+            nagivateToRuntimeApp(item.id);
           }}
         >
           <div className={styles.menuItem}>
