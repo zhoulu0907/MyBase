@@ -10,6 +10,9 @@ import java.time.LocalDateTime;
 @Data
 public class FlowConnectorVO {
 
+    @Schema(description = "主键ID")
+    private Long id;
+
     @Schema(description = "应用ID")
     private Long applicationId;
 
@@ -37,20 +40,5 @@ public class FlowConnectorVO {
     @Schema(description = "连接器创建时间")
     private LocalDateTime createTime;
 
-//    public JsonNode getConfig() {
-//        if (StringUtils.isBlank(this.config)) {
-//            return null;
-//        }
-//
-//        return JsonUtils.parseTree(this.config);
-//    }
-//
-//    public void setConfig(JsonNode config) {
-//        if (config == null) {
-//            return;
-//        }
-//
-//        this.config = JsonUtils.toJsonString(config);
-//    }
 
 }
