@@ -2,8 +2,8 @@ package com.cmsr.onebase.module.system.dal.database.dept;
 
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.enums.XFromSceneTypeEnum;
-import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.enums.dept.DeptTypeEnum;
 import org.anyline.data.param.init.DefaultConfigStore;
@@ -32,12 +32,24 @@ public abstract class AbstractDeptDataRepository extends DataRepository<DeptDO> 
     }
 
     /**
-     * 获取当前服务对应的场景类型：空间/企业
+     * 获取登录用户其用户所处的场景类型：平台/空间/企业
      *
      * @return
      */
     public abstract String getXFromSceneType();
 
+    // /**
+    //  * 获取登录用户其用户所处的场景类型：平台/空间/企业
+    //  *
+    //  * @return
+    //  */
+    // public String getXFromSceneType(){
+    //     String userSceneType = SecurityFrameworkUtils.getXFromSceneType();
+    //     if (StringUtils.isBlank(userSceneType)) {
+    //         throw exception(USER_TYPE_EXCEPTION, "类型为空");
+    //     }
+    //     return userSceneType;
+    // }
     private DefaultConfigStore buildDeptConfigStore() {
         LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
         if (loginUser == null || loginUser.getId() == null) {
