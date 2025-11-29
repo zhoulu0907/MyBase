@@ -6,6 +6,7 @@ import com.anji.captcha.model.vo.CaptchaVO;
 import com.anji.captcha.service.CaptchaService;
 import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
 import com.cmsr.onebase.framework.common.biz.security.dto.LoginFailureResultDTO;
+import com.cmsr.onebase.framework.common.biz.security.dto.PasswordExpiryCheckDTO;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.RunModeEnum;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
@@ -18,19 +19,24 @@ import com.cmsr.onebase.module.system.api.logger.dto.LoginLogCreateReqDTO;
 import com.cmsr.onebase.module.system.api.sms.SmsCodeApi;
 import com.cmsr.onebase.module.system.convert.auth.AuthConvert;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO;
+import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.logger.LoginLogTypeEnum;
 import com.cmsr.onebase.module.system.enums.logger.LoginResultEnum;
 import com.cmsr.onebase.module.system.enums.oauth2.OAuth2ClientConstants;
+import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
 import com.cmsr.onebase.module.system.enums.tenant.TenantCodeEnum;
+import com.cmsr.onebase.module.system.service.corp.CorpService;
 import com.cmsr.onebase.module.system.service.logger.LoginLogService;
 import com.cmsr.onebase.module.system.service.member.MemberService;
 import com.cmsr.onebase.module.system.service.oauth2.OAuth2TokenService;
+import com.cmsr.onebase.module.system.service.permission.RoleService;
 import com.cmsr.onebase.module.system.service.tenant.TenantService;
 import com.cmsr.onebase.module.system.service.user.UserService;
 import com.cmsr.onebase.module.system.vo.CaptchaVerificationReqVO;
 import com.cmsr.onebase.module.system.vo.auth.*;
+import com.cmsr.onebase.module.system.vo.corp.CorpRespVO;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Resource;
 import jakarta.validation.Validator;
@@ -98,6 +104,12 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
 
     @Resource
     private AppApplicationApi appApplicationApi;
+
+    @Resource
+    private CorpService corpService;
+
+    @Resource
+    private RoleService roleService;
 
     @Override
     public AdminUserDO authenticate(String username, String password) {
@@ -179,6 +191,18 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
 
     }
 
+    public boolean findCorpAdminFlag(String roleCode, Long userId) {
+        // 获取权限
+        RoleDO roleDO = roleService.getRoleIdsByCode(roleCode);
+        if (null != roleDO) {
+            // 查询用户是否管理员
+            boolean adminFlag = userService.findAdminByRoleIdAndUserId(roleDO.getId(), userId);
+            return adminFlag;
+        }
+        return false;
+    }
+
+
     @Override
     public AuthLoginRespVO appMobileLogin(AppMobileLoginReqVO reqVO) {
         // 校验验证码
@@ -195,6 +219,68 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         authLoginRespVO.setAdminFlag(findAdminFlag(reqVO.getAppId(), user.getId()));
         return authLoginRespVO;
 
+    }
+
+
+
+    @Override
+    public AuthLoginRespVO corpLogin(CorpAuthLoginReqVO reqVO) {
+        // 校验验证码
+        mobileValidateCaptcha(reqVO);
+
+        // 2. 使用账号密码，进行登录
+        AdminUserDO user = mobileAuthenticate(reqVO.getMobile(), reqVO.getPassword());
+
+        // 验证企业状态是否异常
+        checkCropStatus(user.getCorpId());
+
+        AuthLoginRespVO authLoginRespVO = createCorpAfterLoginSuccess(user.getUserType(), user.getCorpId(), user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE);
+        // 设置是否管理员
+        authLoginRespVO.setAdminFlag(findCorpAdminFlag(RoleCodeEnum.CORP_ADMIN.getCode(), user.getId()));
+        // 回显当前登录用户的企业id
+        authLoginRespVO.setCorpId(user.getCorpId());
+        return authLoginRespVO;
+    }
+
+    private void checkCropStatus(Long corpId) {
+        CorpRespVO corp = corpService.getCorp(corpId);
+        if (null == corp || CommonStatusEnum.DISABLE.getStatus().equals(corp.getStatus())) {
+            throw exception(AUTH_LOGIN_CORP_DELETE_OR_DISABLE);
+        }
+    }
+
+    private AuthLoginRespVO createCorpAfterLoginSuccess(Integer userType, Long corpId, Long userId, String username, String deviceId, LoginLogTypeEnum logType) {
+        // 插入登陆日志
+        createLoginLog(userId, username, logType, LoginResultEnum.SUCCESS);
+        // 创建访问令牌
+        OAuth2AccessTokenDO accessTokenDO = oauth2TokenService.createAccessTokenWithMode(
+                RunModeEnum.BUILD.getValue(), corpId, null,
+                userId, userType,
+                OAuth2ClientConstants.CLIENT_ID_DEFAULT, null);
+
+        // 检查并限制设备数，踢出超限的设备
+        List<String> removedTokens = securityConfigApi.checkAndLimitDevices(userId, deviceId, accessTokenDO.getAccessToken()).getData();
+
+        // 删除被踢出的Token
+        if (removedTokens != null && !removedTokens.isEmpty()) {
+            for (String removedToken : removedTokens) {
+                oauth2TokenService.removeAccessToken(removedToken);
+                log.info("用户[{}]设备数超限，已踢出Token: {}", userId, removedToken);
+            }
+        }
+
+        TenantDO tennantDO = tenantService.getTenant(accessTokenDO.getTenantId());
+        // 构建返回结果
+        AuthLoginRespVO respVO = AuthConvert.INSTANCE.convert(accessTokenDO, tennantDO);
+
+        // 检查密码有效期
+        PasswordExpiryCheckDTO expiryCheckResult = securityConfigApi.checkPasswordExpiry(userId).getData();
+        respVO.setPasswordExpiryInfo(expiryCheckResult);
+
+        // 创建会话空闲检测Key
+        securityConfigApi.createSessionIdleKey(userId, deviceId);
+
+        return respVO;
     }
 
     private void checkPlatformAdminEnableAppCreate() {
