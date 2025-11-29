@@ -13,9 +13,9 @@ import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetPageDO;
 import com.cmsr.onebase.module.app.core.dto.appresource.PageDTO;
 import com.cmsr.onebase.module.app.core.dto.appresource.PageRespDTO;
 import com.cmsr.onebase.module.app.core.enums.appresource.AppResourceErrorCodeConstants;
-import jakarta.annotation.Resource;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -26,17 +26,17 @@ import java.util.stream.Collectors;
 @Service
 public class PageServiceProvider {
 
-    @Resource
+    @Autowired
     private AppPageRepository pageRepository;
 
-    @Resource
+    @Autowired
     private AppPageSetPageRepository pageSetPageRepository;
 
-    @Resource
+    @Autowired
     private AppPageSetRepository pageSetRepository;
 
-    @Resource
-    private AppMenuRepository menuDataRepository;
+    @Autowired
+    private AppMenuRepository appMenuRepository;
 
 
     public PageRespDTO getPage(Long pageId) {
@@ -48,7 +48,7 @@ public class PageServiceProvider {
     }
 
     public List<PageDTO> getFormPageListByAppId(Long appId) {
-        List<AppMenuDO> menuDOList = menuDataRepository.findByApplicationId(appId);
+        List<AppMenuDO> menuDOList = appMenuRepository.findByApplicationId(appId);
         List<Long> menuIdList = menuDOList.stream().map(AppMenuDO::getId).toList();
         if (CollectionUtils.isEmpty(menuIdList)) {
             return Collections.emptyList();
