@@ -1,4 +1,4 @@
-package com.cmsr.onebase.framework.security.build.service;
+package com.cmsr.onebase.framework.security.service;
 
 /**
  * Security 框架 Service 接口，定义权限相关的校验操作

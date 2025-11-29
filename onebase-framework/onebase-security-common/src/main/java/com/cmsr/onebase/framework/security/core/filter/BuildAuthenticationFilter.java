@@ -108,7 +108,6 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter {
             if (accessToken == null) {
                 return null;
             }
-
             // 构建登录用户
             return new LoginUser().setId(accessToken.getUserId()).setUserType(accessToken.getUserType())
                     .setRunMode(accessToken.getRunMode())
