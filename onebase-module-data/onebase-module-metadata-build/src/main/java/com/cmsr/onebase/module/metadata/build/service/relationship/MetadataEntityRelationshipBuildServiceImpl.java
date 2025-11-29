@@ -749,15 +749,4 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
         }
         return entityRelationshipRepository.getById(id);
     }
-
-    @Override
-    public MetadataEntityRelationshipDO findById(Long id) {
-        if (id == null) {
-            return null;
-        }
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and(MetadataEntityRelationshipDO.ID, id);
-        List<MetadataEntityRelationshipDO> list = entityRelationshipRepository.findAllByConfig(configStore);
-        return list != null && !list.isEmpty() ? list.get(0) : null;
-    }
 }
