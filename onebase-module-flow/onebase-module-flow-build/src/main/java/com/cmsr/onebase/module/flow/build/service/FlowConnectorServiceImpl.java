@@ -9,7 +9,6 @@ import com.cmsr.onebase.module.flow.build.vo.CreateFlowConnectorReqVO;
 import com.cmsr.onebase.module.flow.build.vo.FlowConnectorVO;
 import com.cmsr.onebase.module.flow.build.vo.UpdateFlowConnectorReqVO;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowConnectorRepository;
-import com.cmsr.onebase.module.flow.core.dal.database.FlowNodeTypeRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowConnectorDO;
 import com.cmsr.onebase.module.flow.core.enums.FlowErrorCodeConstants;
 import com.cmsr.onebase.module.flow.core.vo.PageConnectorReqVO;
@@ -33,9 +32,6 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
     @Autowired
     private FlowConnectorRepository connectorRepository;
 
-    @Autowired
-    private FlowNodeTypeRepository nodeTypeRepository;
-
     @Override
     public PageResult<FlowConnectorVO> pageConnectors(PageConnectorReqVO pageReqVO) {
         PageResult<FlowConnectorDO> connectorPage = connectorRepository.selectConnectorPage(pageReqVO);
@@ -50,11 +46,6 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
 
     private FlowConnectorVO convertToVO(FlowConnectorDO connectorDO) {
         FlowConnectorVO connectorVO = BeanUtils.toBean(connectorDO, FlowConnectorVO.class);
-//        if (StringUtils.isBlank(connectorDO.getDescription())) {
-//            connectorVO.setDescription("");
-//        } else {
-//            connectorVO.setDescription(connectorDO.getDescription());
-//        }
         String config = connectorDO.getConfig();
         if (StringUtils.isNotBlank(config)) {
             connectorVO.setConfig(JsonUtils.parseTree(config));
@@ -83,14 +74,14 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
 
     @Override
     public void updateConnector(UpdateFlowConnectorReqVO updateVO) {
-        Long connectorId = updateVO.getConnectorId();
+        Long connectorId = updateVO.getId();
         FlowConnectorDO oldDO = connectorRepository.getById(connectorId);
         if (oldDO == null) {
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
         }
         oldDO.setConnectorName(updateVO.getConnectorName());
         oldDO.setDescription(updateVO.getDescription());
-        oldDO.setConfig(updateVO.getConfigAsStr());
+        oldDO.setConfig(JsonUtils.toJsonString(updateVO.getConfig()));
         connectorRepository.updateById(oldDO);
     }
 

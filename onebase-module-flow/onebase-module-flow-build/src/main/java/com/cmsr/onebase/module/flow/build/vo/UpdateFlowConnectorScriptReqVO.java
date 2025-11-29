@@ -15,7 +15,7 @@ public class UpdateFlowConnectorScriptReqVO {
 
     @Schema(description = "脚本ID")
     @NotNull(message = "脚本ID不能为空")
-    private Long scriptId;
+    private Long id;
 
     @Schema(description = "脚本名称")
     @NotBlank(message = "脚本名称不能为空")

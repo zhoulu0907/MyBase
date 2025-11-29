@@ -16,9 +16,6 @@ public class FlowConnectorVO {
     @Schema(description = "应用ID")
     private Long applicationId;
 
-    @Schema(description = "连接器ID")
-    private Long connectorId;
-
     @Schema(description = "连接器UUID")
     private String connectorUuid;
 

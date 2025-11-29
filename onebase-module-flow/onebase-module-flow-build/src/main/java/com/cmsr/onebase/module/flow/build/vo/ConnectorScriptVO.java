@@ -12,9 +12,6 @@ public class ConnectorScriptVO {
     @Schema(description = "脚本ID")
     private Long id;
 
-    @Schema(description = "脚本ID")
-    private Long scriptId;
-
     @Schema(description = "连接器UUID")
     private Long connectorUuid;
 

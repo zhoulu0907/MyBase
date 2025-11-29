@@ -88,7 +88,7 @@ public class FlowConnectorScriptServiceImpl implements FlowConnectorScriptServic
 
     @Override
     public void updateConnectorScript(UpdateFlowConnectorScriptReqVO updateVO) {
-        Long scriptId = updateVO.getScriptId();
+        Long scriptId = updateVO.getId();
         FlowConnectorScriptDO oldDO = connectorScriptRepository.getById(scriptId);
         if (oldDO == null) {
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_SCRIPT_NOT_EXISTS);
