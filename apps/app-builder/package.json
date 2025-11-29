@@ -11,6 +11,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@antv/g6": "^5.0.50",
     "@antv/x6": "^2.18.1",
     "@antv/x6-react-shape": "^2.2.3",
     "@arco-design/web-react": "^2.66.1",
