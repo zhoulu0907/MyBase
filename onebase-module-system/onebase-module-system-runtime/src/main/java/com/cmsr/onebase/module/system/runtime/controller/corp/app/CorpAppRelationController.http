@@ -1,0 +1,23 @@
+### 企业授权应用分页
+GET {{baseUrl}}/corp/corp-app-relation/corp-applications-page?corpId=1&appName=demo&pageNo=1&pageSize=10
+Authorization: Bearer {{token}}
+
+### 企业应用关系启用 / 禁用
+POST {{baseUrl}}/corp/corp-app-relation/update-status?id=10&status=1
+Authorization: Bearer {{token}}
+### 企业分页查询
+GET {{baseUrl}}/corp/page?corpName=测试企业&industryType=1&status=1&ownerTag=1&pageNo=1&pageSize=10
+Authorization: Bearer {{token}}
+
+### 企业精简信息列表(启用状态)
+GET {{baseUrl}}/corp/simple-list
+Authorization: Bearer {{token}}
+
+### 企业启用/禁用
+POST {{baseUrl}}/corp/update-status?id=1&status=0
+Authorization: Bearer {{token}}
+
+### 获取企业详情
+GET {{baseUrl}}/corp/get?id=1
+Authorization: Bearer {{token}}
+

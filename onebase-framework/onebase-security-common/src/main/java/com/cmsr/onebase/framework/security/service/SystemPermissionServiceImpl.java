@@ -1,4 +1,4 @@
-package com.cmsr.onebase.framework.security.build.service;
+package com.cmsr.onebase.framework.security.service;
 
 import com.cmsr.onebase.framework.common.biz.system.permission.PermissionCommonApi;
 import com.cmsr.onebase.framework.common.core.KeyValue;

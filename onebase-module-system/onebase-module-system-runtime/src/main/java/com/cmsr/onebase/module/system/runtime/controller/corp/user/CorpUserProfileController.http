@@ -1,0 +1,25 @@
+### 获取当前登录用户个人信息
+GET {{baseUrl}}/corp/user/profile/get
+### 修改当前登录用户个人信息
+POST {{baseUrl}}/corp/user/profile/update
+  "nickname": "新的昵称",
+  "email": "profile_update@example.com",
+  "mobile": "13800000009",
+  "sex": 1
+### 修改当前登录用户个人密码
+POST {{baseUrl}}/corp/user/profile/update-password
+  "oldPassword": "oldPwd123",
+  "newPassword": "newPwd456"
+Authorization: Bearer {{token}}
+
+### 获得用户详情
+GET {{baseUrl}}/corp/user/get?id=1
+Authorization: Bearer {{token}}
+
+### 导出用户
+GET {{baseUrl}}/corp/user/export?nickname=test&pageNo=1&pageSize=10
+Authorization: Bearer {{token}}
+
+### 获得指定部门的用户简要分页列表
+GET {{baseUrl}}/corp/user/get-user-page-by-dept?deptId=100&isRecurseSub=true&keywords=it&pageNo=1&pageSize=10
+Authorization: Bearer {{token}}
