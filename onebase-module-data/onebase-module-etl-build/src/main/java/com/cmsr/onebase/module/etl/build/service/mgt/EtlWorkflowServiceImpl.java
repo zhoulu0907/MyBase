@@ -30,9 +30,9 @@ import com.cmsr.onebase.module.etl.core.vo.WorkflowBriefVO;
 import com.cmsr.onebase.module.etl.core.vo.WorkflowPageReqVO;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.NullNode;
-import com.github.f4b6a3.uuid.UuidCreator;
 import com.mybatisflex.core.row.Db;
 import jakarta.annotation.Resource;
+import kong.unirest.core.ContentType;
 import kong.unirest.core.HttpResponse;
 import kong.unirest.core.Unirest;
 import lombok.extern.slf4j.Slf4j;
@@ -370,7 +370,7 @@ public class EtlWorkflowServiceImpl implements EtlWorkflowService {
         executeRequest.setPreviewNodeId(previewReqVO.getNodeId());
         String token = JoseGenerator.generateToken(30);
         HttpResponse<String> response = Unirest.post(flinkServerUrl + "/flink/preview")
-                .header("Content-Type", "application/json")
+                .contentType(ContentType.APPLICATION_JSON)
                 .header("X-Exec-Token", token)
                 .body(executeRequest)
                 .asString();
@@ -392,7 +392,7 @@ public class EtlWorkflowServiceImpl implements EtlWorkflowService {
         executeRequest.setPreviewNodeId(previewReqVO.getNodeId());
         String token = JoseGenerator.generateToken(30);
         HttpResponse<String> response = Unirest.post(flinkServerUrl + "/flink/columns")
-                .header("Content-Type", "application/json")
+                .contentType(ContentType.APPLICATION_JSON)
                 .header("X-Exec-Token", token)
                 .body(executeRequest)
                 .asString();
