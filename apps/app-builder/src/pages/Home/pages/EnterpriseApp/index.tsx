@@ -296,7 +296,7 @@ const EnterpriseAppPage: React.FC = () => {
                     还没有应用，
                     <Link
                       onClick={() => {
-                        navigate('/onebase/setting/application');
+                        navigate(`/onebase/${tenantId}/setting/application`);
                       }}
                       className={styles.linkText}
                     >

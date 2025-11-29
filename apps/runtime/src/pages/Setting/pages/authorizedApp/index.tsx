@@ -6,7 +6,7 @@ import { TokenManager, formatTimeYMDHMS } from '@onebase/common';
 import {
   type corpAppListParams,
   getCorpAuthorizedAppListApiInCorp,
-  updateAuthAppStatus
+  updateAuthAppStatusInCorp
 } from '@onebase/platform-center';
 import { useEffect, useMemo, useState } from 'react';
 import { statusMapping } from '../../../../constants';
@@ -154,7 +154,7 @@ const AuthorizedApplication = () => {
     if (record.showStatus === 2) {
       const params = { id: record.id, status: 1 };
       try {
-        await updateAuthAppStatus(params);
+        await updateAuthAppStatusInCorp(params);
         await fetchCorpAuthorizedList(pageInation.current, pageInation.pageSize);
       } catch (error) {
         Message.error('启用失败');
@@ -168,7 +168,7 @@ const AuthorizedApplication = () => {
           status: 'danger'
         },
         onOk: async () => {
-          await updateAuthAppStatus(params);
+          await updateAuthAppStatusInCorp(params);
           await fetchCorpAuthorizedList(pageInation.current, pageInation.pageSize);
           Message.success('禁用成功');
         }

@@ -2,7 +2,7 @@ import { Avatar, Button, Form, Image, Input, Message, Modal, Select, Spin, Tabs,
 import { Cropper } from '@onebase/common';
 import { getLoginedUser, updateLoginedUser, updateLoginedUserPwd, uploadFile } from '@onebase/platform-center';
 import React, { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import styles from './index.module.less';
 
 const TabPane = Tabs.TabPane;
@@ -14,6 +14,7 @@ interface IEditPageProps {
 }
 
 const ProfileEditPage: React.FC<IEditPageProps> = ({ avatarUrl, setAvatarUrl }) => {
+  const { tenantId } = useParams();
   const nav = useNavigate();
   const [form] = Form.useForm();
   const [passwordForm] = Form.useForm();
@@ -77,7 +78,7 @@ const ProfileEditPage: React.FC<IEditPageProps> = ({ avatarUrl, setAvatarUrl }) 
       };
       await updateLoginedUser(req);
       form.resetFields();
-      nav('/onebase/setting/tenant');
+      nav(`/onebase/${tenantId}/setting/tenant`);
       Message.success('保存成功');
     } catch (error) {
       console.error('保存失败', error);
@@ -93,7 +94,7 @@ const ProfileEditPage: React.FC<IEditPageProps> = ({ avatarUrl, setAvatarUrl }) 
       };
       await updateLoginedUserPwd(req);
       passwordForm.resetFields();
-      nav('/onebase/setting/tenant');
+      nav(`/onebase/${tenantId}/setting/tenant`);
       Message.success('保存成功');
     } catch (error) {
       console.error('保存密码失败', error);

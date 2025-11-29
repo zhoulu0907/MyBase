@@ -9,6 +9,6 @@ export const infraService = createClient('/infra');
 export const runtimeInfraService = createClient('/infra', getRuntimeBackendURL());
 export const platformInfraService = createClient('/infra', getPlatformBackendURL());
 export const appService = createClient('/app');
-export const corpService = createClient('/corp');
+export const corpService = createClient('/corp', getRuntimeBackendURL());
 
 export const runtimeService = createClient('/system', getRuntimeBackendURL());

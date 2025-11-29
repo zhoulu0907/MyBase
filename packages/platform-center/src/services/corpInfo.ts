@@ -1,5 +1,5 @@
 import { corpAppListParams, CorpDetailResponse, updateCorpParams } from '../types';
-import { corpService, runtimeService } from './clients';
+import { corpService } from './clients';
 
 //获得企业详情
 export const getCorpDetailByIdApiInCorp = (id: string): CorpDetailResponse => corpService.get(`/get?id=${id}`);
@@ -9,4 +9,4 @@ export const updateCorpApiInCorp = (data: updateCorpParams) => corpService.post(
 
 //获得企业授权应用列表-分页
 export const getCorpAuthorizedAppListApiInCorp = (data: corpAppListParams) =>
-  runtimeService.get('/corp-app-relation/corp-applications-page', data);
+  corpService.get('/corp-app-relation/corp-applications-page', data);
