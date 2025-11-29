@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.build.service.entity;
 
+import com.cmsr.onebase.framework.aynline.AnylineDdlHelper;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
@@ -1353,51 +1354,48 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
     /**
      * 添加列到表
+     * <p>
+     * 使用 Anyline 原生 API 添加列，自动适配不同数据库（PostgreSQL、达梦、人大金仓等）。
      */
     private void addColumnToTable(MetadataDatasourceDO datasource, String tableName, MetadataEntityFieldDO field) {
         try {
             log.info("开始为表 {} 添加列 {}, 数据源: {} ({})",
                     tableName, field.getFieldName(),
                     datasource.getDatasourceName(), datasource.getDatasourceType());
-            log.info("数据源配置: {}", datasource.getConfig());
 
             // 使用TenantUtils.executeIgnore包装操作，忽略租户条件
             TenantUtils.executeIgnore(() -> {
                 // 创建 AnylineService 实例
                 AnylineService<?> service = temporaryDatasourceService.createTemporaryService(datasource);
 
-                // 验证连接的数据库
-                String currentDb = getCurrentDatabase(service);
-                log.info("当前连接的数据库: {}, 期望连接的数据库: onebase_business", currentDb);
-
                 // 首先检查表是否存在
-                if (!checkTableExists(service, tableName)) {
-                    log.warn("表 {} 不存在，尝试重新创建该表", tableName);
-                    // 表不存在，直接抛出异常
-                    String errorMessage = "表 " + tableName + " 不存在，请先创建表。这通常是由于业务实体创建时表创建失败导致的数据不一致问题。";
+                if (!AnylineDdlHelper.tableExists(service, tableName)) {
+                    String errorMessage = "表 " + tableName + " 不存在，请先创建表。";
                     log.error("添加字段失败: {}", errorMessage);
                     throw new RuntimeException(errorMessage);
                 }
 
                 // 检查列是否已存在
-                if (checkColumnExists(service, tableName, field.getFieldName())) {
+                if (AnylineDdlHelper.columnExists(service, tableName, field.getFieldName())) {
                     log.warn("列 {} 已存在于表 {} 中，跳过添加操作", field.getFieldName(), tableName);
                     return null;
                 }
 
-                // 生成添加列 DDL
-                String addColumnDDL = generateAddColumnDDL(tableName, field);
+                // 使用 Anyline 原生 API 构建 Column 对象
+                String columnType = mapFieldType(field.getFieldType(), field.getDataLength());
+                boolean nullable = field.getIsRequired() == null || !BooleanStatusEnum.isYes(field.getIsRequired());
+                
+                Column column = AnylineDdlHelper.buildColumn(
+                        tableName,
+                        field.getFieldName(),
+                        columnType,
+                        nullable,
+                        formatDefaultValueForAnyline(field.getFieldType(), field.getDefaultValue()),
+                        field.getDescription()
+                );
 
-                // 针对DM数据库：拆分DDL语句，分别执行ALTER TABLE和COMMENT ON COLUMN
-                // DM数据库不支持在同一批处理中执行ALTER TABLE和COMMENT语句
-                String[] sqlStatements = addColumnDDL.split(";\n");
-                for (String sql : sqlStatements) {
-                    if (sql != null && !sql.trim().isEmpty()) {
-                        String trimmedSql = sql.trim();
-                        log.debug("执行DDL语句: {}", trimmedSql);
-                        service.execute(trimmedSql);
-                    }
-                }
+                // 使用 Anyline 原生 API 添加列
+                AnylineDdlHelper.addColumn(service, column);
 
                 log.info("成功为表 {} 添加列: {}", tableName, field.getFieldName());
                 return null;
@@ -1409,42 +1407,27 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
     }
 
     /**
+     * 格式化默认值用于 Anyline Column 设置
+     * <p>
+     * 直接返回原始值，不添加引号（Anyline 会自动处理）
+     */
+    private Object formatDefaultValueForAnyline(String fieldType, String defaultValue) {
+        if (defaultValue == null || defaultValue.trim().isEmpty()) {
+            return null;
+        }
+        // Anyline 会自动处理默认值的类型转换和引号，直接返回原始值
+        return defaultValue;
+    }
+
+    /**
      * 检查表是否存在
      * <p>
      * 使用Anyline元数据API，自动适配不同数据库（PostgreSQL、达梦、金仓等）
      * 避免手动拼接SQL和硬编码LIMIT语法
      */
     private boolean checkTableExists(AnylineService<?> service, String tableName) {
-        try {
-            log.info("检查表是否存在 - 表名: {}", tableName);
-
-            // 关键修复：清除Anyline的元数据缓存
-            // Anyline会缓存表结构信息(默认缓存24小时)，导致刚创建的表查询不到
-            // 使用CacheProxy.clear()清除缓存，强制重新从数据库查询最新的表结构
-            try {
-                org.anyline.proxy.CacheProxy.clear();
-                log.debug("已清除Anyline元数据缓存");
-            } catch (Exception e) {
-                log.warn("清除Anyline元数据缓存失败: {}", e.getMessage());
-            }
-
-            // 使用Anyline元数据API，跨数据库兼容
-            // Anyline会自动处理不同数据库的元数据查询和标识符大小写问题
-            Table<?> table = service.metadata().table(tableName);
-            boolean exists = (table != null);
-
-            if (exists) {
-                log.info("表 {} 存在", tableName);
-            } else {
-                log.debug("表 {} 不存在", tableName);
-            }
-
-            return exists;
-        } catch (Exception e) {
-            // 捕获异常视为表不存在
-            log.debug("检查表 {} 时发生异常: {}", tableName, e.getMessage());
-            return false;
-        }
+        // 委托给 AnylineDdlHelper 处理
+        return AnylineDdlHelper.tableExists(service, tableName);
     }
 
     /**
@@ -1478,107 +1461,36 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
      * @return 如果列存在返回true，否则返回false
      */
     private boolean checkColumnExists(AnylineService<?> service, String tableName, String columnName) {
-        try {
-            log.info("检查列是否存在 - 表名: {}, 列名: {}", tableName, columnName);
-
-            // 关键修复：清除Anyline的元数据缓存
-            // Anyline会缓存表结构信息(默认缓存24小时)，导致刚添加的列查询不到
-            // 使用CacheProxy.clear()清除缓存，强制重新从数据库查询最新的表结构
-            try {
-                org.anyline.proxy.CacheProxy.clear();
-                log.debug("已清除Anyline元数据缓存");
-            } catch (Exception e) {
-                log.warn("清除Anyline元数据缓存失败: {}", e.getMessage());
-            }
-
-            // 使用Anyline元数据API，完全跨数据库兼容
-            // Anyline会自动处理不同数据库的元数据查询、标识符大小写问题
-            Table<?> table = service.metadata().table(tableName);
-            if (table == null) {
-                log.info("表 {} 不存在，因此列 {} 也不存在", tableName, columnName);
-                return false;
-            }
-
-            // 获取所有列
-            LinkedHashMap<String, Column> columns = table.getColumns();
-            if (columns == null || columns.isEmpty()) {
-                log.warn("表 {} 的列信息为空，无法检查列 {} 是否存在", tableName, columnName);
-                return false;
-            }
-
-            log.debug("表 {} 共有 {} 列", tableName, columns.size());
-
-            // 先尝试精确匹配
-            Column column = table.getColumn(columnName);
-            if (column != null) {
-                log.info("通过精确匹配找到列: {} (实际列名: {})", columnName, column.getName());
-                log.info("已存在的列详情: 表名={}, 列名={}, 数据类型={}",
-                        table.getName(), column.getName(), column.getTypeName());
-                return true;
-            }
-
-            log.debug("精确匹配列 {} 失败，尝试小写匹配", columnName);
-
-            // 如果精确匹配失败，尝试小写匹配（PostgreSQL默认将不带引号的标识符转为小写）
-            String lowerColumnName = columnName.toLowerCase();
-            column = table.getColumn(lowerColumnName);
-            if (column != null) {
-                log.info("通过小写匹配找到列: {} (实际列名: {})", columnName, column.getName());
-                log.info("已存在的列详情: 表名={}, 列名={}, 数据类型={}",
-                        table.getName(), column.getName(), column.getTypeName());
-                return true;
-            }
-
-            log.debug("小写匹配列 {} 失败，尝试忽略大小写遍历匹配", columnName);
-
-            // 如果小写匹配也失败，最后尝试忽略大小写遍历匹配（处理其他数据库的大小写问题）
-            for (Column col : columns.values()) {
-                if (col.getName().equalsIgnoreCase(columnName)) {
-                    log.info("通过忽略大小写遍历找到列: {} (实际列名: {})", columnName, col.getName());
-                    log.info("已存在的列详情: 表名={}, 列名={}, 数据类型={}",
-                            table.getName(), col.getName(), col.getTypeName());
-                    return true;
-                }
-            }
-
-            log.info("列 {} 在表 {} 中不存在", columnName, tableName);
-            return false;
-        } catch (Exception e) {
-            log.error("检查列 {} 在表 {} 中是否存在时发生错误: {}", columnName, tableName, e.getMessage(), e);
-            // 发生异常时返回false，让调用方处理
-            // 避免使用备用的硬编码SQL，保持跨数据库兼容性
-            return false;
-        }
+        // 委托给 AnylineDdlHelper 处理
+        return AnylineDdlHelper.columnExists(service, tableName, columnName);
     }
 
     /**
-     * 简单转义 SQL 字面量中的单引号，防止拼接语句时语法错误。
-     * 仅用于把受信任的标识符作为字符串常量参与比较，不用于通用拼接或用户输入。
-     *
-     * @param value 待转义的值
-     * @return 转义后的值（将 ' 替换为 ''）
-     */
-
-    /**
      * 修改表中的列
-     * 
-     * 说明：即使field有ID，也需要检查物理表中列是否真实存在
+     * <p>
+     * 采用混合策略：
+     * - 达梦(DM)数据库：使用 Anyline 原生 API
+     * - PostgreSQL/KingBase：保留手动 DDL 方式，因需要 USING 子句处理类型转换
+     * <p>
+     * 说明：即使 field 有 ID，也需要检查物理表中列是否真实存在
      * 因为可能存在元数据与物理表不一致的情况（如之前物理表操作失败、表被手动重建等）
+     *
+     * @param datasource 数据源信息
+     * @param tableName  表名
+     * @param field      字段信息
      */
     private void alterColumnInTable(MetadataDatasourceDO datasource, String tableName, MetadataEntityFieldDO field) {
         try {
-            // 使用TenantUtils.executeIgnore包装操作，忽略租户条件
             TenantUtils.executeIgnore(() -> {
-                // 创建 AnylineService 实例
                 AnylineService<?> service = temporaryDatasourceService.createTemporaryService(datasource);
 
                 // 先校验表是否存在
-                if (!checkTableExists(service, tableName)) {
+                if (!AnylineDdlHelper.tableExists(service, tableName)) {
                     throw new RuntimeException("表 " + tableName + " 不存在，请先创建表");
                 }
 
-                // 关键修复：必须检查列是否存在，避免元数据与物理表不一致导致的问题
-                boolean columnExists = checkColumnExists(service, tableName, field.getFieldName());
+                // 检查列是否存在，避免元数据与物理表不一致导致的问题
+                boolean columnExists = AnylineDdlHelper.columnExists(service, tableName, field.getFieldName());
 
                 if (!columnExists) {
                     // 列不存在，应该使用ADD操作而非ALTER
@@ -1589,9 +1501,18 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                     // 列存在，正常执行ALTER操作
                     log.info("准备修改表 {} 的列: {}, 字段ID: {}", tableName, field.getFieldName(), field.getId());
 
-                    // 生成并执行修改列 DDL（传入数据库类型以生成兼容的SQL）
-                    String alterColumnDDL = generateAlterColumnDDL(datasource.getDatasourceType(), tableName, field);
-                    service.execute(alterColumnDDL);
+                    // 根据数据库类型选择不同的策略
+                    String datasourceType = datasource.getDatasourceType();
+                    DatabaseType dbType = DatabaseType.valueOf(datasourceType);
+
+                    if (dbType == DatabaseType.DM) {
+                        // 达梦数据库：使用 Anyline 原生 API
+                        alterColumnWithAnyline(service, tableName, field);
+                    } else {
+                        // PostgreSQL/KingBase：使用手动 DDL（需要 USING 子句处理类型转换）
+                        String alterColumnDDL = generateAlterColumnDDL(datasourceType, tableName, field);
+                        AnylineDdlHelper.alterColumnWithDDL(service, tableName, field.getFieldName(), alterColumnDDL);
+                    }
 
                     log.info("成功修改表 {} 的列: {}", tableName, field.getFieldName());
                 }
@@ -1604,7 +1525,35 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
     }
 
     /**
+     * 使用 Anyline 原生 API 修改列（适用于达梦数据库）
+     *
+     * @param service   Anyline 服务实例
+     * @param tableName 表名
+     * @param field     字段信息
+     */
+    private void alterColumnWithAnyline(AnylineService<?> service, String tableName, MetadataEntityFieldDO field) {
+        // 将业务字段类型映射为数据库类型
+        String dbTypeName = mapFieldType(field.getFieldType(), field.getDataLength());
+        // isRequired=1 表示必填，对应 nullable=false
+        boolean nullable = field.getIsRequired() == null || !BooleanStatusEnum.isYes(field.getIsRequired());
+
+        // 构建 Anyline Column 对象
+        Column column = AnylineDdlHelper.buildColumn(
+                field.getFieldName(),
+                dbTypeName,
+                nullable,
+                formatDefaultValueForAnyline(field.getFieldType(), field.getDefaultValue()),
+                field.getDescription()
+        );
+
+        // 使用 Anyline 原生 API 修改列
+        AnylineDdlHelper.alterColumn(service, tableName, column);
+    }
+
+    /**
      * 重命名表中的列
+     * <p>
+     * 使用 Anyline 原生 API 重命名列，自动适配不同数据库。
      */
     private void renameColumnInTable(MetadataDatasourceDO datasource, String tableName, String oldName,
             String newName) {
@@ -1612,25 +1561,12 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             TenantUtils.executeIgnore(() -> {
                 AnylineService<?> service = temporaryDatasourceService.createTemporaryService(datasource);
 
-                if (!checkTableExists(service, tableName)) {
+                if (!AnylineDdlHelper.tableExists(service, tableName)) {
                     throw new RuntimeException("表 " + tableName + " 不存在，请先创建表");
                 }
 
-                boolean oldExists = checkColumnExists(service, tableName, oldName);
-                boolean newExists = checkColumnExists(service, tableName, newName);
-                if (!oldExists) {
-                    log.warn("重命名列时发现旧列不存在：{}.{} -> {}.{}，跳过重命名", tableName, oldName, tableName, newName);
-                    return null;
-                }
-                if (newExists) {
-                    log.info("目标列已存在：{}.{}，跳过重命名", tableName, newName);
-                    return null;
-                }
-
-                String sql = "ALTER TABLE \"" + tableName + "\" RENAME COLUMN \"" + oldName + "\" TO \"" + newName
-                        + "\";";
-                service.execute(sql);
-                log.info("已将表 {} 的列 {} 重命名为 {}", tableName, oldName, newName);
+                // 使用 Anyline 原生 API 重命名列（内部会检查列是否存在）
+                AnylineDdlHelper.renameColumn(service, tableName, oldName, newName);
                 return null;
             });
         } catch (Exception e) {
@@ -1642,7 +1578,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
     /**
      * 从表中删除列
      * <p>
-     * 先检查列是否存在，存在才执行删除，以兼容达梦等数据库
+     * 使用 Anyline 原生 API 删除列，自动适配不同数据库（PostgreSQL、达梦、人大金仓等）。
      */
     private void dropColumnFromTable(MetadataDatasourceDO datasource, String tableName, String fieldName) {
         try {
@@ -1651,18 +1587,8 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 // 创建 AnylineService 实例
                 AnylineService<?> service = temporaryDatasourceService.createTemporaryService(datasource);
 
-                // 检查列是否存在
-                boolean exists = checkColumnExists(service, tableName, fieldName);
-                if (!exists) {
-                    log.info("列 {} 不存在于表 {}，跳过删除操作", fieldName, tableName);
-                    return null;
-                }
-
-                // 生成删除列 DDL
-                String dropColumnDDL = generateDropColumnDDL(tableName, fieldName);
-
-                // 执行删除列语句
-                service.execute(dropColumnDDL);
+                // 使用 Anyline 原生 API 删除列（内部会检查列是否存在）
+                AnylineDdlHelper.dropColumn(service, tableName, fieldName);
 
                 log.info("成功从表 {} 删除列: {}", tableName, fieldName);
                 return null;

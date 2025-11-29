@@ -31,10 +31,13 @@ import com.cmsr.onebase.module.metadata.build.service.relationship.MetadataEntit
 import com.cmsr.onebase.module.metadata.core.util.StatusEnumUtil;
 import com.cmsr.onebase.module.metadata.core.dal.database.TemporaryDatasourceService;
 import com.cmsr.onebase.module.metadata.core.enums.BusinessEntityTypeEnum;
+import com.cmsr.onebase.framework.aynline.AnylineDdlHelper;
 import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.anyline.metadata.Column;
+import org.anyline.metadata.Table;
 import org.anyline.service.AnylineService;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -43,7 +46,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -428,6 +430,8 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
 
     /**
      * 创建物理表
+     * <p>
+     * 使用 Anyline 原生 API 创建表，自动适配不同数据库（PostgreSQL、达梦、人大金仓等）。
      */
     private void createPhysicalTable(MetadataDatasourceDO datasource, String tableName, List<MetadataSystemFieldsDO> systemFields) {
         int maxRetries = 3;
@@ -435,9 +439,8 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
         
         for (int attempt = 1; attempt <= maxRetries; attempt++) {
             try {
-                log.info("=== 开始创建物理表调试信息 (尝试 {}/{}) ===", attempt, maxRetries);
+                log.info("=== 开始创建物理表 (尝试 {}/{}) ===", attempt, maxRetries);
                 log.info("目标表名: {}", tableName);
-                log.info("数据源配置: {}", datasource.getConfig());
                 log.info("数据源类型: {}", datasource.getDatasourceType());
 
                 // 如果不是第一次尝试，先清理失效的连接池缓存
@@ -446,14 +449,13 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
                     temporaryDatasourceService.cleanupInactiveDataSources();
                 }
 
-                // 创建 AnylineService 实例 - 使用新的TemporaryDatasourceService
+                // 创建 AnylineService 实例
                 AnylineService<?> service = temporaryDatasourceService.createTemporaryService(datasource);
 
-                // 生成建表 DDL
-                String createTableDDL = generateCreateTableDDL(tableName, systemFields);
-                log.info("生成的DDL语句: \n{}", createTableDDL);
+                // 使用 Anyline 原生 API 构建 Table 对象
+                Table<?> table = buildTableFromSystemFields(tableName, systemFields);
 
-                // 记录连接的数据库信息（从datasource配置中获取）
+                // 记录连接的数据库信息
                 try {
                     String databaseName = getDatabaseNameFromConfig(datasource);
                     log.info("当前连接的数据库: {} (类型: {})", databaseName, datasource.getDatasourceType());
@@ -461,15 +463,8 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
                     log.debug("无法从配置获取数据库名称: {}", e.getMessage());
                 }
 
-                // 执行建表语句(分两步执行:先创建表,再添加注释)
-                String[] sqlStatements = createTableDDL.split(";\n");
-                for (String sql : sqlStatements) {
-                    String trimmedSql = sql.trim();
-                    if (!trimmedSql.isEmpty()) {
-                        log.debug("执行SQL: {}", trimmedSql);
-                        service.execute(trimmedSql);
-                    }
-                }
+                // 使用 Anyline 原生 API 创建表
+                AnylineDdlHelper.createTable(service, table);
 
                 log.info("=== 物理表创建完成 ===");
                 log.info("成功创建物理表: {}", tableName);
@@ -489,7 +484,6 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
                 
                 if (isConnectionPoolError && attempt < maxRetries) {
                     log.warn("检测到连接池相关错误，将进行第{}次重试", attempt + 1);
-                    // 短暂等待后重试
                     try {
                         Thread.sleep(1000 * attempt); // 递增等待时间
                     } catch (InterruptedException ie) {
@@ -512,24 +506,110 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
     }
 
     /**
-     * 生成创建表的DDL语句
+     * 根据系统字段列表构建 Anyline Table 对象
+     * <p>
+     * 建表规则：
+     * 1. id 字段: 强制 BIGINT NOT NULL 主键
+     * 2. parent_id 字段: 强制允许为空，不作为主键
+     * 3. 其它字段: 按元数据 isRequired 设置 NOT NULL
+     * 4. 主键优先级: id > 第一个 isSnowflakeId=1 的非 parent_id 字段 > 兜底 id
      */
-    private String generateCreateTableDDL(String tableName, List<MetadataSystemFieldsDO> systemFields) {
-        /**
-         * 建表规则强化说明 (2025-09-08 修订):
-         * 1. id 字段: 强制 BIGINT NOT NULL 主键（即使系统字段元数据未配置 required/snowflake 也兜底）
-         * 2. parent_id 字段: 强制允许为空，绝不作为主键，不附加 NOT NULL
-         * 3. 其它字段: 按元数据 isRequired 拼接 NOT NULL
-         * 4. 主键优先级: 如果存在 id 列 => 使用 id；否则选取第一个声明了 isSnowflakeId 的非 parent_id 字段；仍无则兜底 id(自动追加列)
-         */
-        StringJoiner ddl = new StringJoiner("\n");
-        ddl.add("CREATE TABLE IF NOT EXISTS \"" + tableName + "\" (");
+    private Table<?> buildTableFromSystemFields(String tableName, List<MetadataSystemFieldsDO> systemFields) {
+        Table<?> table = new Table<>(tableName);
+        table.setComment("业务实体表");
 
-        StringJoiner columns = new StringJoiner(",\n  ");
         String detectedIdField = null;
         String candidatePk = null;
 
         // 预扫描是否已有 id 列
+        for (MetadataSystemFieldsDO f : systemFields) {
+            if ("id".equalsIgnoreCase(f.getFieldName())) {
+                detectedIdField = f.getFieldName();
+                break;
+            }
+        }
+
+        // 构建列定义
+        for (MetadataSystemFieldsDO field : systemFields) {
+            String fieldName = field.getFieldName();
+            if (fieldName == null || fieldName.trim().isEmpty()) {
+                continue;
+            }
+
+            boolean isParentId = "parent_id".equalsIgnoreCase(fieldName);
+            boolean isId = "id".equalsIgnoreCase(fieldName);
+
+            Column column = new Column(fieldName);
+            column.setTable(table);
+            column.setTypeName(mapFieldType(field.getFieldType()));
+
+            // id 强制 NOT NULL；parent_id 永不加 NOT NULL；其它按 isRequired
+            if (isId) {
+                column.setNullable(false);
+            } else if (isParentId) {
+                column.setNullable(true);
+            } else {
+                column.setNullable(!BooleanStatusEnum.isYes(field.getIsRequired()));
+            }
+
+            // 默认值
+            if (field.getDefaultValue() != null && !field.getDefaultValue().trim().isEmpty()) {
+                column.setDefaultValue(field.getDefaultValue());
+            }
+
+            // 字段注释
+            if (field.getDescription() != null && !field.getDescription().trim().isEmpty()) {
+                column.setComment(field.getDescription());
+            }
+
+            // 主键候选: 优先使用显式 id；否则记录第一个非 parent_id 且 isSnowflakeId=1 的字段
+            if (isId) {
+                candidatePk = fieldName;
+                column.setPrimaryKey(true);
+            } else if (candidatePk == null && !isParentId && BooleanStatusEnum.isYes(field.getIsSnowflakeId())) {
+                candidatePk = fieldName;
+            }
+
+            table.addColumn(column);
+        }
+
+        // 如果没有 id 列且没有其它候选主键 -> 追加一个 id 列
+        if (candidatePk == null) {
+            if (detectedIdField == null) {
+                Column idColumn = new Column("id");
+                idColumn.setTable(table);
+                idColumn.setTypeName("BIGINT");
+                idColumn.setNullable(false);
+                idColumn.setPrimaryKey(true);
+                table.addColumn(idColumn);
+            }
+            candidatePk = "id";
+        }
+
+        // 如果主键不是 id，设置主键
+        if (candidatePk != null && !"id".equalsIgnoreCase(candidatePk)) {
+            Column pkColumn = table.getColumn(candidatePk);
+            if (pkColumn != null) {
+                pkColumn.setPrimaryKey(true);
+            }
+        }
+
+        return table;
+    }
+
+    /**
+     * 生成创建表的DDL语句（保留用于兼容和调试）
+     */
+    @Deprecated
+    private String generateCreateTableDDL(String tableName, List<MetadataSystemFieldsDO> systemFields) {
+        // 保留原有实现，供兼容和调试使用
+        java.util.StringJoiner ddl = new java.util.StringJoiner("\n");
+        ddl.add("CREATE TABLE IF NOT EXISTS \"" + tableName + "\" (");
+
+        java.util.StringJoiner columns = new java.util.StringJoiner(",\n  ");
+        String detectedIdField = null;
+        String candidatePk = null;
+
         for (MetadataSystemFieldsDO f : systemFields) {
             if ("id".equalsIgnoreCase(f.getFieldName())) {
                 detectedIdField = f.getFieldName();
@@ -549,21 +629,18 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
             columnDef.append("\"").append(fieldName).append("\" ");
             columnDef.append(mapFieldType(field.getFieldType()));
 
-            // id 强制 NOT NULL；parent_id 永不加 NOT NULL；其它按 isRequired
             if (isId) {
                 columnDef.append(" NOT NULL");
             } else if (!isParentId && BooleanStatusEnum.isYes(field.getIsRequired())) {
                 columnDef.append(" NOT NULL");
             }
 
-            // 默认值（忽略空白）
             if (field.getDefaultValue() != null && !field.getDefaultValue().trim().isEmpty()) {
                 columnDef.append(" DEFAULT ").append(field.getDefaultValue());
             }
 
-            // 主键候选: 优先使用显式 id；否则记录第一个非 parent_id 且 isSnowflakeId=1 的字段
             if (isId) {
-                candidatePk = fieldName; // 直接锁定
+                candidatePk = fieldName;
             } else if (candidatePk == null && !isParentId && BooleanStatusEnum.isYes(field.getIsSnowflakeId())) {
                 candidatePk = fieldName;
             }
@@ -571,12 +648,11 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
             columns.add(columnDef.toString());
         }
 
-        // 如果没有 id 列且没有其它候选 -> 追加一个 id 列
         if (candidatePk == null) {
             if (detectedIdField == null) {
                 columns.add("\"id\" BIGINT NOT NULL");
             }
-            candidatePk = "id"; // 兜底
+            candidatePk = "id";
         }
 
         ddl.add("  " + columns.toString());
