@@ -28,23 +28,4 @@ public class CreateFlowConnectorReqVO {
     @Schema(description = "连接器可选配置")
     private JsonNode config;
 
-//    public JsonNode getConfig() {
-//        if (StringUtils.isBlank(this.config)) {
-//            return null;
-//        }
-//
-//        return JsonUtils.parseTree(this.config);
-//    }
-//
-//    public String getConfigAsStr() {
-//        return this.config;
-//    }
-//
-//    public void setConfig(JsonNode config) {
-//        if (config == null || config instanceof NullNode) {
-//            return;
-//        }
-//
-//        this.config = JsonUtils.toJsonString(config);
-//    }
 }
