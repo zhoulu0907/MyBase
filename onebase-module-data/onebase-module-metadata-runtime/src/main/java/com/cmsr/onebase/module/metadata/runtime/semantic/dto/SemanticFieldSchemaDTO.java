@@ -1,4 +1,6 @@
 package com.cmsr.onebase.module.metadata.runtime.semantic.dto;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.enums.SemanticFieldTypeEnum;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -28,6 +30,9 @@ public class SemanticFieldSchemaDTO {
     @Schema(description = "字段类型")
     private String fieldType;
 
+    @Schema(description = "字段类型枚举")
+    private SemanticFieldTypeEnum fieldTypeEnum;
+
     @Schema(description = "数据长度")
     private Integer dataLength;
 
@@ -45,4 +50,13 @@ public class SemanticFieldSchemaDTO {
 
     @Schema(description = "是否主键")
     private Boolean isPrimaryKey;
+
+    public void setFieldType(String fieldType) {
+        this.fieldType = fieldType;
+        this.fieldTypeEnum = SemanticFieldTypeEnum.ofCode(fieldType);
+    }
+
+    private void setFieldTypeEnum(SemanticFieldTypeEnum fieldTypeEnum) {
+        this.fieldTypeEnum = fieldTypeEnum;
+    }
 }

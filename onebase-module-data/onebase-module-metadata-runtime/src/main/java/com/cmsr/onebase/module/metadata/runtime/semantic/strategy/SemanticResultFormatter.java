@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.metadata.runtime.semantic.strategy;
 
-import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.domain.query.ProcessContext;
@@ -8,7 +7,6 @@ import com.cmsr.onebase.module.metadata.core.service.datamethod.strategy.FieldVa
 import com.cmsr.onebase.module.metadata.core.service.datamethod.strategy.FieldValueStorageStrategyFactory;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.strategy.FieldValueTransformMode;
 import jakarta.annotation.Resource;
-import org.anyline.service.AnylineService;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -24,17 +22,17 @@ public class SemanticResultFormatter {
         Map<String, Object> processedData = context.getProcessedData();
         MetadataBusinessEntityDO entity = context.getEntity();
         List<MetadataEntityFieldDO> fields = context.getFields();
-        AnylineService<?> temporaryService = context.getTemporaryService();
-        return TenantUtils.executeIgnore(() -> {
-            Object primaryKeyValue = getPrimaryKeyValue(processedData, fields);
-            if (primaryKeyValue == null) {
-                applyFieldStorageStrategies(processedData, fields, FieldValueTransformMode.READ, context);
-                return buildDataResponse(entity, processedData, fields);
-            }
-            Map<String, Object> resultData = dataFetcher.queryDataByIdWithService(temporaryService, entity.getTableName(), primaryKeyValue, fields);
-            applyFieldStorageStrategies(resultData, fields, FieldValueTransformMode.READ, context);
-            return buildDataResponse(entity, resultData, fields);
-        });
+        return new HashMap<>();
+        // return TenantUtils.executeIgnore(() -> {
+        //     Object primaryKeyValue = getPrimaryKeyValue(processedData, fields);
+        //     if (primaryKeyValue == null) {
+        //         applyFieldStorageStrategies(processedData, fields, FieldValueTransformMode.READ, context);
+        //         return buildDataResponse(entity, processedData, fields);
+        //     }
+        //     Map<String, Object> resultData = dataFetcher.queryDataByIdWithService(temporaryService, entity.getTableName(), primaryKeyValue, fields);
+        //     applyFieldStorageStrategies(resultData, fields, FieldValueTransformMode.READ, context);
+        //     return buildDataResponse(entity, resultData, fields);
+        // });
     }
 
     public Map<String, Object> format(MetadataBusinessEntityDO entity,

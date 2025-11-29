@@ -3,7 +3,6 @@ package com.cmsr.onebase.module.metadata.runtime.semantic.service.impl;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.vo.DynamicDataRespVO;
 import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.vo.SubEntityVo;
-import com.cmsr.onebase.module.metadata.runtime.semantic.adapter.SemanticRequestParser;
 import com.cmsr.onebase.module.metadata.runtime.semantic.service.SemanticDynamicDataService;
 import com.cmsr.onebase.module.metadata.runtime.semantic.executor.SemanticCreateExecutor;
 import com.cmsr.onebase.module.metadata.runtime.semantic.executor.SemanticUpdateExecutor;
@@ -31,11 +30,6 @@ import java.util.stream.Collectors;
  * </p>
  */
 public class SemanticDynamicDataServiceImpl implements SemanticDynamicDataService {
-
-    
-
-    @Resource
-    private SemanticRequestParser semanticRequestParser;
 
     @Resource
     private SemanticCreateExecutor createExecutor;
@@ -78,8 +72,9 @@ public class SemanticDynamicDataServiceImpl implements SemanticDynamicDataServic
      * @return 更新后的响应
      */
     public DynamicDataRespVO update(String tableName, Long menuId, SemanticMergeBodyVO body, String traceId) {
-        Map<String, Object> result = updateExecutor.execute(tableName, menuId, traceId, body);
-        return convertToDynamicDataRespVO(result);
+        // Map<String, Object> result = updateExecutor.execute(tableName, menuId, traceId, body);
+        // return convertToDynamicDataRespVO(result);
+        return null;
     }
 
     @Override
@@ -93,7 +88,8 @@ public class SemanticDynamicDataServiceImpl implements SemanticDynamicDataServic
      * @return 删除成功返回被删除数据ID，失败返回 null
      */
     public Long remove(String tableName, Long menuId, SemanticTargetBodyVO body, String traceId) {
-        return deleteExecutor.execute(tableName, menuId, traceId, body) ? null : null;
+        // return deleteExecutor.execute(tableName, menuId, traceId, body) ? null : null;
+        return null;
     }
 
     @Override
@@ -107,8 +103,9 @@ public class SemanticDynamicDataServiceImpl implements SemanticDynamicDataServic
      * @return 详情响应
      */
     public DynamicDataRespVO detail(String tableName, Long menuId, SemanticTargetBodyVO body, String traceId) {
-        Map<String, Object> result = detailExecutor.execute(tableName, menuId, traceId, body);
-        return convertToDynamicDataRespVO(result);
+        // Map<String, Object> result = detailExecutor.execute(tableName, menuId, traceId, body);
+        // return convertToDynamicDataRespVO(result);
+        return null;
     }
 
     @Override

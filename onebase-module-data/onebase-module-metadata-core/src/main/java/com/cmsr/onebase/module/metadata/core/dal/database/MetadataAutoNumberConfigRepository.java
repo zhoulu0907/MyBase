@@ -4,7 +4,12 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.number.MetadataAutoN
 import com.cmsr.onebase.module.metadata.core.dal.mapper.MetadataAutoNumberConfigMapper;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
+
+import java.util.List;
+
 import org.springframework.stereotype.Repository;
+
+
 
 /**
  * 自动编号-配置 仓储
@@ -46,6 +51,12 @@ public class MetadataAutoNumberConfigRepository extends ServiceImpl<MetadataAuto
     public boolean update(MetadataAutoNumberConfigDO config) {
         return updateById(config);
     }
-}
 
+    public List<MetadataAutoNumberConfigDO> listEnabledByFieldIds(List<Long> fieldIds) {
+        QueryWrapper queryWrapper = this.query()
+                .in(MetadataAutoNumberConfigDO::getFieldId, fieldIds)
+                .eq(MetadataAutoNumberConfigDO::getIsEnabled, 1);
+        return list(queryWrapper);
+    }
+}
 

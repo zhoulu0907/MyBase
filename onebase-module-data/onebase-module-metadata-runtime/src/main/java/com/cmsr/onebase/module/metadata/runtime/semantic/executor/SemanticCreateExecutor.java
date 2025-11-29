@@ -15,7 +15,6 @@ import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticWorkfl
 import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticProcessLogger;
 import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticResultFormatter;
 import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticAutoNumberGenerator;
-import com.cmsr.onebase.module.metadata.runtime.semantic.adapter.SemanticRequestParser;
 import com.cmsr.onebase.module.metadata.runtime.semantic.vo.SemanticMergeBodyVO;
 import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticMergeRecordAssembler;
 import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticPermissionContextLoader;
@@ -23,11 +22,7 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Map;
-
-import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.*;
 
 @Slf4j
 @Component
@@ -58,8 +53,6 @@ public class SemanticCreateExecutor {
     private SemanticResultFormatter semanticResultFormatter;
     @Resource
     private SemanticProcessLogger semanticProcessLogger;
-    @Resource
-    private SemanticRequestParser semanticRequestParser;
     @Resource
     private SemanticMergeRecordAssembler semanticMergeRecordAssembler;
     @Resource

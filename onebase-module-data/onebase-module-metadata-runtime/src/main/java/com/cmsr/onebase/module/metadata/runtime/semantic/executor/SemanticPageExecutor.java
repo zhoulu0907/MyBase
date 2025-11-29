@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.metadata.runtime.semantic.executor;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.security.dto.RuntimeLoginUser;
 import com.cmsr.onebase.framework.security.runtime.RTSecurityContext;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
@@ -138,7 +139,7 @@ public class SemanticPageExecutor {
                 if (loginUser != null) {
                     loginUserCtx = new LoginUserCtx();
                     loginUserCtx.setUserId(loginUser.getId());
-                    loginUserCtx.setApplicationId(loginUser.getApplicationId());
+                    loginUserCtx.setApplicationId(ApplicationManager.getApplicationId());
                 }
                 permissionContext = semanticPermissionContextBuilder.buildPermissionContext(loginUserCtx, menuId, entity.getId());
             }

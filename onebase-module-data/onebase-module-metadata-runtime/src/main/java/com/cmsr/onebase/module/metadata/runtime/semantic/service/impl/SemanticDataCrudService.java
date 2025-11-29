@@ -6,6 +6,7 @@ import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
 import com.cmsr.onebase.module.metadata.core.service.datasource.MetadataDatasourceCoreService;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataEntityFieldCoreService;
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticRecordDTO;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.enums.SemanticFieldTypeEnum;
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticEntitySchemaDTO;
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticEntityValueDTO;
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticFieldSchemaDTO;
@@ -17,12 +18,17 @@ import com.mybatisflex.core.row.Row;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 
-import org.anyline.service.AnylineService;
 import org.springframework.stereotype.Service;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.DATASOURCE_NOT_EXISTS;
 
+import com.cmsr.onebase.framework.uid.UidGenerator;
+import com.cmsr.onebase.module.metadata.runtime.semantic.DynamicMetadataRepository;
+import com.cmsr.onebase.module.metadata.core.service.number.AutoNumberService;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -58,6 +64,15 @@ public class SemanticDataCrudService {
     @Resource
     private SemanticTemporaryDatasourceService semanticTemporaryDatasourceService;
 
+    @Resource
+    private DynamicMetadataRepository dynamicMetadataRepository;
+
+    @Resource
+    private UidGenerator uidGenerator;
+
+    @Resource
+    private AutoNumberService autoNumberService;
+
 
     /**
      * 根据上下文中的操作类型分派具体 CRUD 方法
@@ -82,21 +97,34 @@ public class SemanticDataCrudService {
         SemanticEntityValueDTO value = recordDTO.getEntityValue();
         if (entity == null || value == null) { return; }
         List<SemanticFieldSchemaDTO> fields = entity.getFields();
+        // 3. 生成自动编号
+        List<Long> fieldIds = fields.stream()
+                .filter(f -> Objects.equals(f.getFieldTypeEnum(), SemanticFieldTypeEnum.AUTO_CODE))
+                .map(SemanticFieldSchemaDTO::getId)
+                .toList();
+        Map<String, String> autoNumbers = autoNumberService.generateDataNumbers(fieldIds, value.getCurrentEntityRawMap());
+        value.getFieldValueMap().forEach((key, fieldVaue) -> {
+            if (autoNumbers.containsKey(key)) {
+                fieldVaue.setRawValue(autoNumbers.get(key)); 
+            }
+        });
+
+        Map<String, Object> data = extractData(recordDTO);
         Row row = new Row();
-        for (SemanticFieldSchemaDTO f : fields) {
-            String name = f.getFieldName();
+        for (SemanticFieldSchemaDTO field : fields) {
+            SemanticFieldValueDTO fieldValue = value.getFieldValueByTableAndField(entity.getTableName(), field.getFieldName());
+            if (fieldValue == null) { continue; }
+            String name = field.getFieldName();
             if (name == null) { continue; }
-            if (!value.getFieldValueMap().containsKey(name)) { continue; }
-            Object val = value.getFieldValueMap().get(name).getStoreValue();    
-            if (val == null && Objects.equals(f.getIsPrimaryKey(), 1)) { continue; }
-            row.put(name, val);
+            Object storeValue = fieldValue.getStoreValue();
+            if (storeValue == null && Objects.equals(field.getIsPrimaryKey(), 1)) { continue; }
+            row.put(name, storeValue);
         }
-        log.info("table name is {}, create record: {}", entity.getTableName(), row);
         MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
         if (datasource == null) { throw exception(DATASOURCE_NOT_EXISTS); }
         semanticTemporaryDatasourceService.createTemporaryService(datasource);
-        log.info("datasource: {}", datasource);
-        Db.insert(tableNameQuoter.quote(entity.getTableName()), row);
+        
+        dynamicMetadataRepository.insert(entity.getTableName(), row);
     }
 
     /**
@@ -210,6 +238,7 @@ public class SemanticDataCrudService {
     /**
      * 从 RecordDTO 的值模型提取 name->value 映射
      */
+    @Deprecated
     private Map<String, Object> extractData(SemanticRecordDTO recordDTO) {
         Map<String, Object> result = new HashMap<>();
         Map<String, SemanticFieldValueDTO<Object>> data = recordDTO.getEntityValue() != null ? recordDTO.getEntityValue().getFieldValueMap() : null;

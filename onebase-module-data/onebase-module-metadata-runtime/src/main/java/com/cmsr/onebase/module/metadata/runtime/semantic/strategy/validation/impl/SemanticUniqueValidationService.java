@@ -11,11 +11,8 @@ import com.cmsr.onebase.module.metadata.core.service.entity.MetadataEntityFieldC
 import com.cmsr.onebase.module.metadata.runtime.semantic.service.impl.SemanticTemporaryDatasourceService;
 import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.validation.SemanticValidationService;
 import jakarta.annotation.Resource;
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Compare;
-import org.anyline.entity.DataSet;
-import org.anyline.service.AnylineService;
+import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.core.row.Db;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -64,12 +61,9 @@ public class SemanticUniqueValidationService implements SemanticValidationServic
         MetadataBusinessEntityDO entity = metadataBusinessEntityCoreService.getBusinessEntity(entityId);
         MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
         if (datasource == null) { throw exception(DATASOURCE_NOT_EXISTS); }
-        AnylineService<?> temporaryService = semanticTemporaryDatasourceService.createTemporaryService(datasource);
-        ConfigStore configs = new DefaultConfigStore();
-        configs.and(field.getFieldName(), value);
+        semanticTemporaryDatasourceService.createTemporaryService(datasource);
         List<MetadataEntityFieldDO> entityFields = metadataEntityFieldCoreService.getEntityFieldListByEntityId(entityId);
         boolean hasDeletedColumn = entityFields.stream().anyMatch(item -> "deleted".equalsIgnoreCase(item.getFieldName()));
-        if (hasDeletedColumn) { configs.and("deleted", 0); }
         Optional<String> primaryKeyField = entityFields.stream()
                 .filter(item -> item.getIsPrimaryKey() != null && item.getIsPrimaryKey() == 1)
                 .map(MetadataEntityFieldDO::getFieldName)
@@ -79,9 +73,13 @@ public class SemanticUniqueValidationService implements SemanticValidationServic
             if (primaryKeyField.isPresent()) { currentId = data.get(primaryKeyField.get()); }
             if (currentId == null) { currentId = data.get("id"); }
         }
-        if (currentId != null) { configs.and(Compare.NOT_EQUAL, primaryKeyField.orElse("id"), currentId); }
-        DataSet dataSet = temporaryService.querys(quoteTableName(entity.getTableName()), configs);
-        return !dataSet.isEmpty();
+        QueryWrapper qw = QueryWrapper.create()
+                .from(quoteTableName(entity.getTableName()))
+                .where(field.getFieldName() + " = ?", value);
+        if (hasDeletedColumn) { qw.and("deleted = ?", 0); }
+        if (currentId != null) { qw.and(primaryKeyField.orElse("id") + " <> ?", currentId); }
+        long count = Db.selectCountByQuery(quoteTableName(entity.getTableName()), qw);
+        return count > 0;
     }
 
     private String quoteTableName(String tableName) {

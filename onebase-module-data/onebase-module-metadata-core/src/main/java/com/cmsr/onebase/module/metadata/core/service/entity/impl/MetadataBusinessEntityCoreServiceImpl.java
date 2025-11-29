@@ -107,8 +107,8 @@ public class MetadataBusinessEntityCoreServiceImpl implements MetadataBusinessEn
         if (tableName == null || tableName.trim().isEmpty()) {
             return null;
         }
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and("table_name", tableName.trim());
-        return metadataBusinessEntityRepository.findOne(configStore);
+        QueryWrapper queryWrapper = metadataBusinessEntityRepository.query()
+                .eq(MetadataBusinessEntityDO::getTableName, tableName.trim());
+        return metadataBusinessEntityRepository.getOne(queryWrapper);
     }
 }

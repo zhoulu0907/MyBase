@@ -7,8 +7,9 @@ import com.cmsr.onebase.module.metadata.core.enums.OpEnum;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationRuleDefinitionRepository;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationRuleGroupRepository;
 import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.validation.SemanticValidationService;
+import com.mybatisflex.core.query.QueryWrapper;
+
 import jakarta.annotation.Resource;
-import org.anyline.data.param.init.DefaultConfigStore;
 import org.mvel2.MVEL;
 import org.mvel2.ParserContext;
 import org.springframework.stereotype.Component;
@@ -157,19 +158,19 @@ public class SemanticSelfDefinedValidationService implements SemanticValidationS
     }
 
     private List<MetadataValidationRuleGroupDO> findActiveRuleGroups(Long entityId) {
-        DefaultConfigStore cs = new DefaultConfigStore();
-        cs.and(MetadataValidationRuleGroupDO.ENTITY_ID, entityId);
-        cs.and(MetadataValidationRuleGroupDO.VALIDATION_TYPE, "SELF_DEFINED");
-        cs.and(MetadataValidationRuleGroupDO.RG_STATUS, 1);
-        cs.and("deleted", 0);
-        return ruleGroupRepository.findAllByConfig(cs);
+        QueryWrapper queryWrapper = ruleGroupRepository.query()
+                .eq(MetadataValidationRuleGroupDO::getEntityId, entityId)
+                .eq(MetadataValidationRuleGroupDO::getValidationType, "SELF_DEFINED")
+                .eq(MetadataValidationRuleGroupDO::getRgStatus, 1);
+        return ruleGroupRepository.list(queryWrapper);
     }
 
     private Map<Long, String> buildFieldIdToNameMap(Long entityId) {
-        DefaultConfigStore cs = new DefaultConfigStore();
-        cs.and("entity_id", entityId);
-        cs.and("deleted", 0);
-        return entityFieldRepository.findAllByConfig(cs).stream().collect(Collectors.toMap(MetadataEntityFieldDO::getId, MetadataEntityFieldDO::getFieldName));
+        QueryWrapper queryWrapper = entityFieldRepository.query()
+                .eq(MetadataEntityFieldDO::getEntityId, entityId);
+
+        return entityFieldRepository.list(queryWrapper).stream()
+                .collect(Collectors.toMap(MetadataEntityFieldDO::getId, MetadataEntityFieldDO::getFieldName));
     }
 
     private Map<String, Object> buildCompleteContext(MetadataEntityFieldDO field, Object value, Map<String, Object> data, Map<Long, String> fieldIdToNameMap) {

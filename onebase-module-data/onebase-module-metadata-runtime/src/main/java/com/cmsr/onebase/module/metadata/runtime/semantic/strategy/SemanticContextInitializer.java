@@ -63,7 +63,6 @@ public class SemanticContextInitializer {
         // }
         // MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entityDO.getDatasourceId());
         // if (datasource == null) { throw exception(DATASOURCE_NOT_EXISTS); }
-        // AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
         // processContext.setTemporaryService(temporaryService);
         return processContext;
     }
