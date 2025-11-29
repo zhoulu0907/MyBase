@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.engine.orm.mybatisflex.table;
+package com.cmsr.onebase.module.engine.orm.mybatisflex.entity.table;
 
 import com.mybatisflex.core.query.QueryColumn;
 import com.mybatisflex.core.table.TableDef;
@@ -17,7 +17,7 @@ public class FlowSkipTableDef extends TableDef {
     /**
      * 节点跳转关联表
      */
-    public static final FlowSkipTableDef BPM_FLOW_SKIP = new FlowSkipTableDef();
+    public static final FlowSkipTableDef FLOW_SKIP = new FlowSkipTableDef();
 
     /**
      * 主键id

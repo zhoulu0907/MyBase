@@ -2,6 +2,8 @@ package com.cmsr.onebase.module.bpm.core.service.impl;
 
 import com.cmsr.onebase.module.bpm.core.service.BpmEngineDefExtService;
 import com.cmsr.onebase.module.engine.orm.mybatisflex.entity.FlowDefinition;
+import com.cmsr.onebase.module.engine.orm.mybatisflex.repository.FlowDefinitionRepository;
+import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
 import org.dromara.warm.flow.core.entity.Definition;
 import org.dromara.warm.flow.core.service.DefService;
@@ -21,6 +23,9 @@ public class BpmEngineDefExtServiceImpl implements BpmEngineDefExtService {
     @Resource
     private DefService defService;
 
+    @Resource
+    private FlowDefinitionRepository flowDefinitionRepository;
+
     /**
      * 根据表单路径查询流程定义（查询最新的）
      *
@@ -28,9 +33,9 @@ public class BpmEngineDefExtServiceImpl implements BpmEngineDefExtService {
      * @return Definition 返回最新的流程定义，如果不存在返回null
      */
     public Definition getByFormPath(String formPath) {
-        FlowDefinition query = new FlowDefinition();
-        query.setFormPath(formPath);
-        return defService.getOne(query);
+        QueryWrapper queryWrapper = new QueryWrapper();
+        queryWrapper.orderBy(FlowDefinition::getCreateTime, false);
+        return flowDefinitionRepository.getOne(queryWrapper);
     }
 
     /**

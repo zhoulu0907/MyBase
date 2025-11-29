@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.engine.orm.mybatisflex.table;
+package com.cmsr.onebase.module.engine.orm.mybatisflex.entity.table;
 
 import com.mybatisflex.core.query.QueryColumn;
 import com.mybatisflex.core.table.TableDef;
@@ -17,7 +17,7 @@ public class FlowDefinitionTableDef extends TableDef {
     /**
      * 流程定义表
      */
-    public static final FlowDefinitionTableDef BPM_FLOW_DEFINITION = new FlowDefinitionTableDef();
+    public static final FlowDefinitionTableDef FLOW_DEFINITION = new FlowDefinitionTableDef();
 
     /**
      * 主键id

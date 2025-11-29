@@ -1,23 +1,19 @@
 package com.cmsr.onebase.module.bpm.build.service;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
-import com.cmsr.onebase.framework.data.base.BaseEntity;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
-import com.cmsr.onebase.module.bpm.core.vo.design.BpmDefJsonVO;
 import com.cmsr.onebase.module.bpm.build.vo.design.BpmDesignVO;
 import com.cmsr.onebase.module.bpm.build.vo.design.BpmPublishReqVO;
 import com.cmsr.onebase.module.bpm.convert.BpmDesignConvert;
 import com.cmsr.onebase.module.bpm.core.service.BpmEngineDefExtService;
-import com.cmsr.onebase.module.engine.orm.anyline.entity.FlowDefinition;
-import com.cmsr.onebase.module.engine.orm.anyline.repository.FlowDefinitionRepository;
+import com.cmsr.onebase.module.bpm.core.vo.design.BpmDefJsonVO;
+import com.cmsr.onebase.module.engine.orm.mybatisflex.entity.FlowDefinition;
+import com.cmsr.onebase.module.engine.orm.mybatisflex.repository.FlowDefinitionRepository;
+import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Compare;
-import org.anyline.entity.DataRow;
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.warm.flow.core.dto.DefJson;
 import org.dromara.warm.flow.core.entity.Definition;
@@ -176,20 +172,16 @@ public class BpmDesignServiceImpl implements BpmDesignService {
     public BpmDesignVO queryByBusinessId(Long businessId) {
         // 通过业务ID查询流程定义
         // todo：通过业务ID查询流程定义，按创建时间降序查询最新的流程，后续要改成优先查询已发布的流程定义
-        ConfigStore configStore = new DefaultConfigStore();
-        configStore.and(Compare.EQUAL, FlowDefinition.FORM_PATH, String.valueOf(businessId));
         // 按创建时间降序排序，获取最新的流程定义
-        configStore.order(BaseEntity.CREATE_TIME + " DESC");
-
-        FlowDefinition flowDefinition = flowDefinitionRepository.findOne(configStore);
+        Definition definition = defExtService.getByFormPath(String.valueOf(businessId));
 
         // 不存在则返回一个空的流程定义
-        if (flowDefinition == null) {
+        if (definition == null) {
             return new BpmDesignVO();
         }
 
         // 获取defJson结构
-        Long flowId = flowDefinition.getId();
+        Long flowId = definition.getId();
         DefJson defJson = defService.queryDesign(flowId);
         defJson.setId(flowId);
 
@@ -226,13 +218,13 @@ public class BpmDesignServiceImpl implements BpmDesignService {
         String flowCode = existDef.getFlowCode();
 
         // 条件
-        ConfigStore configStore = new DefaultConfigStore();
-        configStore.eq(FlowDefinition.FLOW_CODE, flowCode);
+        QueryWrapper queryWrapper = QueryWrapper.create();
+        queryWrapper.eq(FlowDefinition::getFlowCode, flowCode);
 
         // 更新状态
-        DataRow row = new DataRow();
-        row.put(FlowDefinition.IS_PUBLISH, PublishStatus.EXPIRED.getKey());
-        flowDefinitionRepository.updateByConfig(row, configStore);
+        FlowDefinition updateDef = new FlowDefinition();
+        updateDef.setIsPublish(PublishStatus.EXPIRED.getKey());
+        flowDefinitionRepository.update(updateDef, queryWrapper);
 
         // 更新当前状态为已发布
         existDef.setIsPublish(PublishStatus.PUBLISHED.getKey());

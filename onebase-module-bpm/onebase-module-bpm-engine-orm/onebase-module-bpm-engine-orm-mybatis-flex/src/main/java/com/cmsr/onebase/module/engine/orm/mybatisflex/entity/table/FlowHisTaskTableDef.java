@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.engine.orm.mybatisflex.table;
+package com.cmsr.onebase.module.engine.orm.mybatisflex.entity.table;
 
 import com.mybatisflex.core.query.QueryColumn;
 import com.mybatisflex.core.table.TableDef;
@@ -17,7 +17,7 @@ public class FlowHisTaskTableDef extends TableDef {
     /**
      * 历史任务记录表
      */
-    public static final FlowHisTaskTableDef BPM_FLOW_HIS_TASK = new FlowHisTaskTableDef();
+    public static final FlowHisTaskTableDef FLOW_HIS_TASK = new FlowHisTaskTableDef();
 
     /**
      * 主键id

@@ -3,24 +3,24 @@ package com.cmsr.onebase.module.bpm.build.service;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
-import com.cmsr.onebase.module.bpm.core.dto.BpmDefinitionExtDTO;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
-import com.cmsr.onebase.module.bpm.core.enums.VersionStatusEnum;
 import com.cmsr.onebase.module.bpm.build.vo.vermgmt.BpmDefVersionMgtVO;
 import com.cmsr.onebase.module.bpm.build.vo.vermgmt.BpmDeleteReqVo;
 import com.cmsr.onebase.module.bpm.build.vo.vermgmt.BpmUpdateReqVo;
 import com.cmsr.onebase.module.bpm.build.vo.vermgmt.BpmVersionMgmtPageReqVo;
+import com.cmsr.onebase.module.bpm.core.dto.BpmDefinitionExtDTO;
+import com.cmsr.onebase.module.bpm.core.enums.VersionStatusEnum;
 import com.cmsr.onebase.module.bpm.core.vo.UserBasicInfoVO;
-import com.cmsr.onebase.module.engine.orm.anyline.entity.FlowDefinition;
-import com.cmsr.onebase.module.engine.orm.anyline.repository.FlowDefinitionRepository;
+import com.cmsr.onebase.module.engine.orm.mybatisflex.entity.FlowDefinition;
+import com.cmsr.onebase.module.engine.orm.mybatisflex.repository.FlowDefinitionRepository;
 import com.cmsr.onebase.module.system.api.user.AdminUserApi;
 import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryCondition;
+import com.mybatisflex.core.query.QueryMethods;
+import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Compare;
-import org.anyline.entity.Order;
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.warm.flow.core.entity.Definition;
 import org.dromara.warm.flow.core.entity.Instance;
@@ -39,6 +39,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static com.cmsr.onebase.module.engine.orm.mybatisflex.entity.table.FlowDefinitionTableDef.FLOW_DEFINITION;
 
 /**
  * 流程设计服务实现类
@@ -125,14 +126,14 @@ public class BpmVersionMgmtServiceImpl implements BpmVersionMgmtService {
             reqVo.setSortType("update_time");
         }
 
-        ConfigStore configStore = new DefaultConfigStore();
-        configStore.and(Compare.EQUAL, FlowDefinition.FORM_PATH, String.valueOf(reqVo.getBusinessId()));
+        QueryWrapper queryWrapper = QueryWrapper.create();
+        queryWrapper.eq(FlowDefinition::getFormPath, String.valueOf(reqVo.getBusinessId()));
 
-        if (StringUtils.isNotBlank(reqVo.getVersionStatus()))  {
+        if (StringUtils.isNotBlank(reqVo.getVersionStatus())) {
             VersionStatusEnum versionStatusEnum = VersionStatusEnum.getByCode(reqVo.getVersionStatus());
 
             if (versionStatusEnum != null && versionStatusEnum.toPublishStatus() != null) {
-                configStore.and(Compare.EQUAL, "is_publish", versionStatusEnum.toPublishStatus().getKey());
+                queryWrapper.eq(FlowDefinition::getIsPublish, versionStatusEnum.toPublishStatus().getKey());
             } else {
                 throw exception(ErrorCodeConstants.UNKNOWN_VERSION_STATUS);
             }
@@ -148,10 +149,11 @@ public class BpmVersionMgmtServiceImpl implements BpmVersionMgmtService {
                 versionKeyWord = versionAlias.substring(1);
             }
 
-            ConfigStore orCondition = new DefaultConfigStore();
-            orCondition.or(Compare.LIKE, "ext::json->>'versionAlias'", "%" + reqVo.getVersionAlias() + "%");
-            orCondition.or(Compare.LIKE, "version", "%" + versionKeyWord + "%");
-            configStore.and(orCondition);
+            QueryCondition orCondition = QueryCondition.createEmpty();
+            orCondition.or(QueryMethods.column("ext::json->>'versionAlias").like(reqVo.getVersionAlias()));
+            orCondition.or(FLOW_DEFINITION.VERSION.like(versionKeyWord));
+
+            queryWrapper.and(orCondition);
         }
 
         // 排序：设计中>已发布>历史
@@ -159,11 +161,11 @@ public class BpmVersionMgmtServiceImpl implements BpmVersionMgmtService {
                 "WHEN is_publish = " + PublishStatus.PUBLISHED.getKey() + " THEN 2 " +
                 "WHEN is_publish = " + PublishStatus.EXPIRED.getKey() + " THEN 3 " +
                 "ELSE 4 END";
-        configStore.order(caseOrder);
-        configStore.order(reqVo.getSortType(), Order.TYPE.DESC);
+        queryWrapper.orderBy(caseOrder);
+        queryWrapper.orderBy(QueryMethods.column(reqVo.getSortType()), false);
 
-        PageResult<FlowDefinition> definitions = flowDefinitionRepository.findPageWithConditions(configStore, reqVo.getPageNo(), reqVo.getPageSize());
-        return buildVersionMgmtPageResult(definitions);
+        Page<FlowDefinition> pageResult = flowDefinitionRepository.page(Page.of(reqVo.getPageNo(), reqVo.getPageSize()), queryWrapper);
+        return buildVersionMgmtPageResult(pageResult);
     }
 
     /**
@@ -183,13 +185,13 @@ public class BpmVersionMgmtServiceImpl implements BpmVersionMgmtService {
         }
     }
 
-    private PageResult<BpmDefVersionMgtVO> buildVersionMgmtPageResult(PageResult<FlowDefinition> pageResult) {
-        if (pageResult == null || CollUtil.isEmpty(pageResult.getList())) {
+    private PageResult<BpmDefVersionMgtVO> buildVersionMgmtPageResult(Page<FlowDefinition> pageResult) {
+        if (pageResult == null || CollUtil.isEmpty(pageResult.getRecords())) {
             return PageResult.empty();
         }
         List<BpmDefVersionMgtVO> voList = new ArrayList<>();
         // 获取创建人和修改人去重后一次性查出名称
-        Set<Long> userIds = pageResult.getList().stream()
+        Set<Long> userIds = pageResult.getRecords().stream()
                 .flatMap(definition -> Stream.of(definition.getCreator(), definition.getUpdater()))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
@@ -198,7 +200,7 @@ public class BpmVersionMgmtServiceImpl implements BpmVersionMgmtService {
             // 用户信息
             Map<Long, AdminUserRespDTO> userMap = userResult.getData().stream()
                     .collect(Collectors.toMap(AdminUserRespDTO::getId, user -> user));
-            for (FlowDefinition definition : pageResult.getList()) {
+            for (FlowDefinition definition : pageResult.getRecords()) {
                 BpmDefVersionMgtVO vo = new BpmDefVersionMgtVO();
                 vo.setId(definition.getId());
                 vo.setVersion("V" + definition.getVersion());
@@ -215,7 +217,7 @@ public class BpmVersionMgmtServiceImpl implements BpmVersionMgmtService {
                 voList.add(vo);
             }
         }
-        return new PageResult<>(voList, pageResult.getTotal());
+        return new PageResult<>(voList, pageResult.getTotalRow());
     }
     /**
      * 创建操作人信息
