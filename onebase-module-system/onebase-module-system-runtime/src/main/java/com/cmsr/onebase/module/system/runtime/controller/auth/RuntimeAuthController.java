@@ -61,6 +61,15 @@ public class RuntimeAuthController {
         return success(runtimeAuthService.appMobileLogin(reqVO));
     }
 
+
+
+    @PostMapping("/corp-login")
+    @PermitAll
+    @Operation(summary = "企业登录（手机号）")
+    public CommonResult<AuthLoginRespVO> corpLogin(@RequestBody @Valid CorpAuthLoginReqVO reqVO) {
+        return success(runtimeAuthService.corpLogin(reqVO));
+    }
+
     @PostMapping("/logout")
     @PermitAll
     @Operation(summary = "登出系统")
