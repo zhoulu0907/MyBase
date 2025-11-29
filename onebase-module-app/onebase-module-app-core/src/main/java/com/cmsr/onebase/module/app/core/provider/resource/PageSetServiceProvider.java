@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -92,12 +93,12 @@ public class PageSetServiceProvider {
 
                     if (pageDO == null) {
                         // 如果找不到对应的页面，记录错误并跳过
-                        System.err.println("Warning: Page not found for pageRef: " + pageSetPageDO.getPageId());
+                        log.warn("Page not found for pageRef: {}", pageSetPageDO.getPageId());
                         return null;
                     }
                     return pageDO;
                 })
-                .filter(pageDO -> pageDO != null) // 过滤掉null值
+                .filter(Objects::nonNull) // 过滤掉null值
                 .toList();
 
         LoadPageSetRespVO loadPageSetRespVO = new LoadPageSetRespVO();
