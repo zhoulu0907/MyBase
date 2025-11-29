@@ -1,9 +1,9 @@
 package com.cmsr.onebase.module.bpm.core.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowAgentInsDO;
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
+import com.cmsr.onebase.module.bpm.core.dal.mapper.BpmFlowAgentInsMapper;
+import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.spring.service.impl.ServiceImpl;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -15,26 +15,27 @@ import java.util.List;
  * @date 2025-11-22
  */
 @Repository
-public class BpmFlowAgentInsRepository extends DataRepository<BpmFlowAgentInsDO> {
-    public BpmFlowAgentInsRepository() {
-        super(BpmFlowAgentInsDO.class);
-    }
-
+public class BpmFlowAgentInsRepository extends ServiceImpl<BpmFlowAgentInsMapper, BpmFlowAgentInsDO> {
     public List<BpmFlowAgentInsDO> findAllByTaskIdAndAgentId(Long taskId, String agentId) {
-        ConfigStore configs = new DefaultConfigStore();
+        QueryWrapper queryWrapper = QueryWrapper.create();
+        queryWrapper.eq(BpmFlowAgentInsDO::getTaskId, taskId);
+        queryWrapper.eq(BpmFlowAgentInsDO::getAgentId, agentId);
 
-        configs.eq(BpmFlowAgentInsDO.TASK_ID, taskId);
-        configs.eq(BpmFlowAgentInsDO.AGENT_ID, agentId);
-
-        return findAllByConfig(configs);
+        return list(queryWrapper);
     }
 
     public List<BpmFlowAgentInsDO> findAllByTaskIdsAndAgentId(List<Long> taskIds, String agentId) {
-        ConfigStore configs = new DefaultConfigStore();
+        QueryWrapper queryWrapper = QueryWrapper.create();
+        queryWrapper.in(BpmFlowAgentInsDO::getTaskId, taskIds);
+        queryWrapper.eq(BpmFlowAgentInsDO::getAgentId, agentId);
 
-        configs.in(BpmFlowAgentInsDO.TASK_ID, taskIds);
-        configs.eq(BpmFlowAgentInsDO.AGENT_ID, agentId);
+        return list(queryWrapper);
+    }
 
-        return findAllByConfig(configs);
+    public List<BpmFlowAgentInsDO> findAllByInstanceId(Long instanceId) {
+        QueryWrapper queryWrapper = QueryWrapper.create();
+        queryWrapper.eq(BpmFlowAgentInsDO::getInstanceId, instanceId);
+
+        return list(queryWrapper);
     }
 }

@@ -102,7 +102,7 @@ public class BpmCcNodeListener {
             ccRecords.add(ccRecordDO);
         }
 
-        ccRecordRepository.insertBatch(ccRecords);
+        ccRecordRepository.saveBatch(ccRecords);
 
         // 移除抄送用户信息
         flowVariable.remove(ccUsersKey);

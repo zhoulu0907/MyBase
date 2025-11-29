@@ -113,6 +113,8 @@ CREATE TABLE bpm_flow_skip
     skip_type      varchar(40)  NULL,
     skip_condition varchar(200) NULL,
     coordinate     varchar(100) NULL,
+    "ext"          text NULL,
+    "priority" int2 NOT NULL DEFAULT 0,
     "lock_version" int8 NOT NULL DEFAULT 0,
     "creator" int8 NOT NULL DEFAULT 0,
     "create_time" timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -141,6 +143,8 @@ COMMENT ON COLUMN bpm_flow_skip.update_time IS '更新时间';
 COMMENT ON COLUMN bpm_flow_skip.updater IS '更新人';
 COMMENT ON COLUMN bpm_flow_skip.deleted IS '删除标志';
 COMMENT ON COLUMN bpm_flow_skip.tenant_id IS '租户id';
+COMMENT ON COLUMN bpm_flow_skip."ext" IS '扩展信息';
+COMMENT ON COLUMN bpm_flow_skip."priority" IS '优先级';
 
 CREATE TABLE bpm_flow_instance
 (
@@ -284,7 +288,7 @@ COMMENT ON COLUMN bpm_flow_his_task.tenant_id IS '租户id';
 CREATE TABLE bpm_flow_user
 (
     id           int8        NOT NULL,
-    "type"       bpchar(1)   NOT NULL,
+    "type"       varchar(8)   NOT NULL,
     processed_by varchar(80) NULL,
     associated   int8        NOT NULL,
     "lock_version" int8 NOT NULL DEFAULT 0,
@@ -325,7 +329,7 @@ CREATE TABLE bpm_flow_instance_biz_ext
     binding_view_id              varchar(100) NOT NULL,
     bpm_title                    varchar(500) NOT NULL,
     app_id                  int8         NOT NULL,
-    initiator_id            int8         NULL,
+    initiator_id            varchar(80) NOT NULL,         NULL,
     initiator_name          varchar(100) NULL,
     initiator_avatar        varchar(500) NULL,
     initiator_dept_id       int8         NULL,
@@ -383,13 +387,13 @@ CREATE TABLE bpm_flow_agent
 (
     id                      int8         NOT NULL,
     app_id                  int8         NOT NULL,
-    principal_id            int8         NOT NULL,
+    principal_id            varchar(80)         NOT NULL,
     principal_name          varchar(64)  NOT NULL,
-    agent_id             int8         NOT NULL,
+    agent_id             varchar(80)         NOT NULL,
     agent_name           varchar(64)  NOT NULL,
     start_time              timestamp(6) NOT NULL,
     end_time                timestamp(6) NOT NULL,
-    revoker_id                 int8,
+    revoker_id                 varchar(80),
     revoked_time            timestamp(6),
 
     lock_version            int8         NOT NULL DEFAULT 0,
@@ -498,13 +502,3 @@ COMMENT ON COLUMN bpm_flow_agent_ins.update_time IS '更新时间';
 COMMENT ON COLUMN bpm_flow_agent_ins.updater IS '更新人';
 COMMENT ON COLUMN bpm_flow_agent_ins.deleted IS '删除标志';
 COMMENT ON COLUMN bpm_flow_agent_ins.tenant_id IS '租户id';
-
--- 以下为增量字段更新
-ALTER TABLE "bpm_flow_user" ALTER COLUMN "type" TYPE varchar(8) COLLATE "pg_catalog"."default" USING "type"::varchar(8);
-
--- bpm_flow_skip 新增字段
-ALTER TABLE "bpm_flow_skip" ADD COLUMN "ext" text, ADD COLUMN "priority" int2 NOT NULL DEFAULT 0;
-
-COMMENT ON COLUMN "public"."bpm_flow_skip"."ext" IS '扩展信息';
-
-COMMENT ON COLUMN "public"."bpm_flow_skip"."priority" IS '优先级';

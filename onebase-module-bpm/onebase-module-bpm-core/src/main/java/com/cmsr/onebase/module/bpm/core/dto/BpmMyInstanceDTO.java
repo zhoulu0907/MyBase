@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.bpm.core.dto;
 
-import com.cmsr.onebase.module.engine.orm.anyline.entity.FlowInstance;
+import com.cmsr.onebase.module.engine.orm.mybatisflex.entity.FlowInstance;
 import jakarta.persistence.Column;
 import lombok.Data;
 
@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
  * 流程实例
  */
 @Data
-public class BpmInstanceDTO extends FlowInstance {
+public class BpmMyInstanceDTO extends FlowInstance {
     /**
      * 应用ID
      */

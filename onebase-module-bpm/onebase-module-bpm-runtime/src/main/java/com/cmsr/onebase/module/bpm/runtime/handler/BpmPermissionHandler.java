@@ -57,10 +57,10 @@ public class BpmPermissionHandler implements PermissionHandler {
         // permissions使用了定义的格式
         for (String permission : permissions) {
             try {
-                Set<Long> userIds = permissionResolver.resolveUserIds(permission);
+                Set<String> userIds = permissionResolver.resolveUserIds(permission);
 
                 if (CollectionUtils.isNotEmpty(userIds)) {
-                    convertedPermissions.addAll(userIds.stream().map(String::valueOf).toList());
+                    convertedPermissions.addAll(userIds);
                 }
             } catch (Exception e) {
                 log.warn("解析权限字符串为NodePermFlagDTO失败，permission={}", permission, e);
