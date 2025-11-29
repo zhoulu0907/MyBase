@@ -116,7 +116,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
           <div
             className={styles.menuIcon}
             onClick={() => {
-              navigate(`/onebase/${tenantId}/home/enterprise-app`);
+              navigate(`/onebase/${tenantId}/setting/application`);
             }}
           >
             {/* <img src={AppIconSVG} alt="application icon" /> */}
