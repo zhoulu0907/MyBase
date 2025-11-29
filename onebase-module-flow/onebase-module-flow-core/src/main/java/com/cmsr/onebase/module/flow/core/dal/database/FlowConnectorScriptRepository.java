@@ -17,15 +17,10 @@ import static com.cmsr.onebase.module.flow.core.dal.dataobject.table.FlowConnect
 @Repository
 public class FlowConnectorScriptRepository extends BaseAppRepository<FlowConnectorScriptMapper, FlowConnectorScriptDO> {
 
-    public PageResult<FlowConnectorScriptDO> getConnectorScriptPage(PageConnectorScriptReqVO pageReqVO) {
-        QueryWrapper query = this.query().select(FLOW_CONNECTOR_SCRIPT.ID,
-                        FLOW_CONNECTOR_SCRIPT.CONNECTOR_ID,
-                        FLOW_CONNECTOR_SCRIPT.SCRIPT_NAME,
-                        FLOW_CONNECTOR_SCRIPT.SCRIPT_TYPE,
-                        FLOW_CONNECTOR_SCRIPT.DESCRIPTION,
-                        FLOW_CONNECTOR_SCRIPT.CREATE_TIME,
-                        FLOW_CONNECTOR_SCRIPT.UPDATE_TIME)
-                .where(FLOW_CONNECTOR_SCRIPT.CONNECTOR_ID.eq(pageReqVO.getConnectorId()))
+    public PageResult<FlowConnectorScriptDO> selectConnectorScriptPage(PageConnectorScriptReqVO pageReqVO) {
+        QueryWrapper query = this.query().select(FLOW_CONNECTOR_SCRIPT.ALL_COLUMNS)
+                .where(FLOW_CONNECTOR_SCRIPT.CONNECTOR_UUID.eq(pageReqVO.getConnectorUuid()))
+                .where(FLOW_CONNECTOR_SCRIPT.APPLICATION_ID.eq(pageReqVO.getApplicationId()))
                 .where(FLOW_CONNECTOR_SCRIPT.SCRIPT_NAME.like(pageReqVO.getScriptName()).when(StringUtils.isNotBlank(pageReqVO.getScriptName())))
                 .orderBy(FLOW_CONNECTOR_SCRIPT.UPDATE_TIME, false)
                 .orderBy(FLOW_CONNECTOR_SCRIPT.CREATE_TIME, false);

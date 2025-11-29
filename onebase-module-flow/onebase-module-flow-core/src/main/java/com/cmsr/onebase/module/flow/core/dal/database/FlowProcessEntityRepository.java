@@ -15,11 +15,6 @@ import static com.cmsr.onebase.module.flow.core.dal.dataobject.table.FlowProcess
 @Repository
 public class FlowProcessEntityRepository extends ServiceImpl<FlowProcessEntityMapper, FlowProcessEntityDO> {
 
-    public FlowProcessEntityDO findByProcessId(Long processId) {
-        QueryWrapper query = this.query().where(FLOW_PROCESS_ENTITY.PROCESS_ID.eq(processId));
-        return getOne(query);
-    }
-
     public void deleteByProcessId(Long processId) {
         QueryWrapper query = this.query().where(FLOW_PROCESS_ENTITY.PROCESS_ID.eq(processId));
         remove(query);

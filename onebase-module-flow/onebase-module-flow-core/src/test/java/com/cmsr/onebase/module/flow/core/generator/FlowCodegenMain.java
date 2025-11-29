@@ -51,16 +51,19 @@ public class FlowCodegenMain {
         GlobalConfig globalConfig = new GlobalConfig();
         globalConfig.setGenerateTable(tables);
         globalConfig.setSourceDir(sourceDir);
+
         //生成实体
         globalConfig.setEntityPackage(basePackage + ".dataobject");
         globalConfig.setEntityClassSuffix("DO");
         globalConfig.setEntitySuperClass(BaseBizEntity.class);
+        globalConfig.setEntityWithBaseClassEnable(true);
         globalConfig.setEntityGenerateEnable(true);
         globalConfig.setEntityWithLombok(true);
         globalConfig.setEntityLombokAllArgsConstructorEnable(false);
         globalConfig.setEntityLombokNoArgsConstructorEnable(false);
         globalConfig.setEntityOverwriteEnable(true);
         globalConfig.setEntityJdkVersion(17);
+
         //生成Mapper
         globalConfig.setMapperGenerateEnable(true);
         globalConfig.setMapperPackage(basePackage + ".mapper");

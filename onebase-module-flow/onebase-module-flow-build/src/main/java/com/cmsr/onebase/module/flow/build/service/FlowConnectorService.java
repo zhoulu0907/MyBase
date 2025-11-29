@@ -8,7 +8,7 @@ import com.cmsr.onebase.module.flow.core.vo.PageConnectorReqVO;
 
 public interface FlowConnectorService {
 
-    PageResult<FlowConnectorVO> getConnectorPage(PageConnectorReqVO pageReqVO);
+    PageResult<FlowConnectorVO> pageConnectors(PageConnectorReqVO pageReqVO);
 
     FlowConnectorVO getConnectorDetail(Long connectorId);
 
