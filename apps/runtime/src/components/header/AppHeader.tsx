@@ -105,8 +105,8 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
 
   // 用户菜单
   const userMenu = (
-    <Menu>
-      <Menu.Item key="info" style={{ height: '70px' }}>
+    <Menu style={{ marginRight: '10px' }}>
+      <Menu.Item key="info" style={{ height: '90px' }}>
         <div className={styles.adminInformation}>
           <UserProfileAvatar adminInfo={userInfo} />
           <Typography.Text>{userInfo?.nickname}</Typography.Text>
@@ -152,7 +152,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
         )) || <img src={LogoAvatarSVG} />}
 
         <div className={styles.userInfo}>
-          {userInfo?.nickname || '未登录'}
+          {userInfo?.nickname ? '你好，' + userInfo?.nickname : '未登录'}
 
           <Dropdown droplist={userMenu} position="bottom">
             <div className={styles.userDropdown}>

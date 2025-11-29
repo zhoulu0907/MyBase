@@ -1,19 +1,16 @@
-import { Button, Layout, Menu } from '@arco-design/web-react';
-import {
-  IconMenuFold,
-  IconMenuUnfold,
-} from '@arco-design/web-react/icon';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import type { MenuItemType } from './menuData';
-import styles from './sider.module.less';
-import { hasMenu } from '@/utils/permission';
-import { CORP_MENUS } from '@/constants/permission';
+import authSVG from '@/assets/images/auth-app.svg';
+import buildingLineSVG from '@/assets/images/building-line.svg';
 import organizationSVG from '@/assets/images/organization-chart.svg';
 import userSVG from '@/assets/images/user-group.svg';
-import buildingLineSVG from '@/assets/images/building-line.svg';
 import userInfoSVG from '@/assets/images/userInfo.svg';
-import authSVG from '@/assets/images/auth-app.svg';
+import { CORP_MENUS } from '@/constants/permission';
+import { hasMenu } from '@/utils/permission';
+import { Button, Layout, Menu } from '@arco-design/web-react';
+import { IconMenuFold, IconMenuUnfold } from '@arco-design/web-react/icon';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import type { MenuItemType } from './menuData';
+import styles from './sider.module.less';
 
 const { Sider } = Layout;
 const MenuItem = Menu.Item;
@@ -27,6 +24,7 @@ interface SiderProps {
 }
 
 const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollapse, menuItems = [] }) => {
+  const { tenantId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
@@ -38,35 +36,35 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
         key: 'organization',
         title: '组织管理',
         icon: <img src={organizationSVG} />,
-        path: '/onebase/setting/organization',
+        path: `/onebase/${tenantId}/setting/organization`,
         permissionKey: CORP_MENUS.DEPT
       },
       {
         key: 'user',
         title: '用户管理',
         icon: <img src={userSVG} />,
-        path: '/onebase/setting/user',
+        path: `/onebase/${tenantId}/setting/user`,
         permissionKey: CORP_MENUS.USER
       },
       {
         key: 'enterpriseInfo',
         title: '企业信息',
         icon: <img src={buildingLineSVG} />,
-        path: '/onebase/setting/enterpriseInfo',
+        path: `/onebase/${tenantId}/setting/enterpriseInfo`,
         permissionKey: CORP_MENUS.CORP_INFO
       },
       {
         key: 'authorized-application',
         title: '授权应用',
         icon: <img src={authSVG} />,
-        path: '/onebase/setting/authorized-application',
+        path: `/onebase/${tenantId}/setting/authorized-application`,
         permissionKey: CORP_MENUS.AUTHORIZED
       },
       {
-        key: 'tenant',
+        key: 'profile',
         title: '个人中心',
         icon: <img src={userInfoSVG} />,
-        path: '/onebase/setting/tenant',
+        path: `/onebase/${tenantId}/setting/profile`,
         permissionKey: CORP_MENUS.PROFILE
       }
     ],
@@ -132,45 +130,48 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
   }, [onCollapse, collapsed]);
 
   // 递归渲染菜单项
-  const renderMenuItems = React.useCallback((items: MenuItemType[]): React.ReactNode => {
-    return items
-      .map((item) => {
-        // TODO 后端返回数据暂未更新，暂不开启权限控制
-        const permissionKey = item.permissionKey;
-        if (permissionKey && !hasMenu(permissionKey as any)) return null;
+  const renderMenuItems = React.useCallback(
+    (items: MenuItemType[]): React.ReactNode => {
+      return items
+        .map((item) => {
+          // TODO 后端返回数据暂未更新，暂不开启权限控制
+          const permissionKey = item.permissionKey;
+          if (permissionKey && !hasMenu(permissionKey as any)) return null;
 
-        if (item.children && item.children.length > 0) {
-          const childrenNodes = renderMenuItems(item.children) as React.ReactNode[];
-          const hasChildren = Array.isArray(childrenNodes) && childrenNodes.filter(Boolean).length > 0;
-          if (!hasChildren && !item.path) return null;
+          if (item.children && item.children.length > 0) {
+            const childrenNodes = renderMenuItems(item.children) as React.ReactNode[];
+            const hasChildren = Array.isArray(childrenNodes) && childrenNodes.filter(Boolean).length > 0;
+            if (!hasChildren && !item.path) return null;
+            return (
+              <SubMenu
+                key={item.key}
+                title={
+                  <span>
+                    {item.icon}
+                    <span className={styles.menuTitle}>{item.title}</span>
+                  </span>
+                }
+              >
+                {childrenNodes}
+              </SubMenu>
+            );
+          }
+
           return (
-            <SubMenu
+            <MenuItem
               key={item.key}
-              title={
-                <span>
-                  {item.icon}
-                  <span className={styles.menuTitle}>{item.title}</span>
-                </span>
-              }
+              disabled={item.disabled}
+              style={collapsed ? { padding: '0 10px' } : { display: 'flex', alignItems: 'center' }}
             >
-              {childrenNodes}
-            </SubMenu>
+              {item.icon}
+              <span className={styles.menuTitle}>{item.title}</span>
+            </MenuItem>
           );
-        }
-
-        return (
-          <MenuItem
-            key={item.key}
-            disabled={item.disabled}
-            style={collapsed ? { padding: '0 10px' } : { display: 'flex', alignItems: 'center' }}
-          >
-            {item.icon}
-            <span className={styles.menuTitle}>{item.title}</span>
-          </MenuItem>
-        );
-      })
-      .filter(Boolean);
-  }, [collapsed]);
+        })
+        .filter(Boolean);
+    },
+    [collapsed]
+  );
 
   return (
     <Sider

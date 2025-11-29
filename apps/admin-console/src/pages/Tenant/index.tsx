@@ -151,7 +151,7 @@ const TenantManagement: React.FC = () => {
             <p>
               {data.status === 0
                 ? '启用空间，该空间下的用户可正常进入空间并使用'
-                : '禁用空间，该空间下的用户将无法登陆，再次启用时可恢复正常使用'}
+                : '禁用空间，该空间下的用户将无法登录，再次启用时可恢复正常使用'}
             </p>
           </div>
         </>
@@ -224,7 +224,7 @@ const TenantManagement: React.FC = () => {
           <IconEdit style={iconStyle} />
           编辑
         </Menu.Item>
-        <Menu.Item key="2" onClick={confirmEnable}>
+        <Menu.Item key="2" onClick={() => confirmEnable(data)}>
           <IconRecord style={iconStyle} />
           {data.status === 0 ? '启用' : '禁用'}
         </Menu.Item>

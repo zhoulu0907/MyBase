@@ -65,13 +65,14 @@
     "organization": "组织管理",
     "systemDict": "数据字典管理",
     "business": "企业管理",
-    "createBusiness":"创建企业",
-    "authorizedApplication":"授权应用",
+    "createBusiness": "创建企业",
+    "authorizedApplication": "授权应用",
     "spaceInfo": "空间信息",
     "enterpriseInfo": "企业信息",
     "enterprise": "企业管理",
     "tenant": "个人中心",
+    "profile": "个人中心",
     "edit": "编辑",
-    "createEnterprise":"创建企业"
+    "createEnterprise": "创建企业"
   }
 }

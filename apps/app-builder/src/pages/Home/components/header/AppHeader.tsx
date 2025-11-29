@@ -85,8 +85,8 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   };
 
   const tenantAdminMenu = (
-    <Menu>
-      <Menu.Item key="info" style={{ height: '70px' }}>
+    <Menu style={{ marginRight: '10px' }}>
+      <Menu.Item key="info" style={{ height: '90px' }}>
         <div className={styles.adminInformation}>
           <UserProfileAvatar adminInfo={adminInfo} />
           <Typography.Text>{adminInfo?.username}</Typography.Text>
@@ -150,7 +150,9 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
         </Tabs>
 
         <div className={styles.userInfo}>
-          {UserPermissionManager.getUserPermissionInfo()?.user?.nickname || '未登录'}
+          {UserPermissionManager.getUserPermissionInfo()?.user?.nickname
+            ? '你好，' + UserPermissionManager.getUserPermissionInfo()?.user?.nickname
+            : '未登录'}
 
           <Dropdown droplist={tenantAdminMenu} position="bl">
             <div className={styles.userDropdown}>

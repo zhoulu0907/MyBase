@@ -11,8 +11,6 @@ import OrganizationPage from './pages/Organization';
 import RolePage from './pages/Role';
 import SpaceInfo from './pages/SpaceInfo';
 import SystemDictPage from './pages/SystemDict';
-import TenantPage from './pages/Tenant';
-import TenantEditPage from './pages/Tenant/edit';
 import UserPage from './pages/User';
 
 import styles from './index.module.less';
@@ -20,6 +18,8 @@ import BusinessPage from './pages/Business';
 import EnterpriseInfoPage from './pages/Business/components/enterprise-information';
 import CreateBusinessPage from './pages/Business/createBusiness';
 import RedirectEnterprise from './pages/Business/redirectEnterprise';
+import ProfilePage from './pages/Profile';
+import ProfileEditPage from './pages/Profile/edit';
 import SecurityPage from './pages/Security';
 
 const Content = Layout.Content;
@@ -52,15 +52,15 @@ const SettingPage: React.FC = () => {
                 <Route path="security" element={<SecurityPage />} />
                 <Route path="spaceInfo" element={<SpaceInfo />} />
                 <Route path="enterpriseInfo" element={<EnterpriseInfo />} />
-                <Route path="tenant" element={<TenantPage />} />
+                <Route path="profile" element={<ProfilePage />} />
                 <Route path="enterprise" element={<BusinessPage />}>
                   <Route path="create-enterprise" element={<CreateBusinessPage />} />
                   <Route path=":enterpriseName" element={<RedirectEnterprise />} />
                   <Route path=":enterpriseName/:activeTab" element={<EnterpriseInfoPage />} />
                 </Route>
                 <Route
-                  path="tenant/edit"
-                  element={<TenantEditPage setAvatarUrl={setAvatarUrl} avatarUrl={avatarUrl} />}
+                  path="profile/edit"
+                  element={<ProfileEditPage setAvatarUrl={setAvatarUrl} avatarUrl={avatarUrl} />}
                 />
                 <Route path="" element={<Navigate to="user" replace />} />
               </Routes>

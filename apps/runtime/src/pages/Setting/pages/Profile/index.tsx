@@ -1,18 +1,19 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Avatar, Typography, Grid, Space, Tag, Button, Spin, Image } from '@arco-design/web-react';
-import { getLoginedUserInCorp } from '@onebase/platform-center';
-import type { PostSimpleRespVO } from '@onebase/platform-center';
 import PlaceholderPanel from '@/components/PlaceholderPanel';
-import { hasPermission } from '@/utils/permission';
 import { CORP_INFO_PERMISSION as ACTIONS } from '@/constants/permission';
+import { hasPermission } from '@/utils/permission';
+import { Avatar, Button, Grid, Image, Space, Spin, Tag, Typography } from '@arco-design/web-react';
+import type { PostSimpleRespVO } from '@onebase/platform-center';
+import { getLoginedUserInCorp } from '@onebase/platform-center';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import styles from './index.module.less';
 
 const { Title, Text } = Typography;
 const { Col, Row } = Grid;
 
-const TenantPage: React.FC = () => {
+const ProfilePage: React.FC = () => {
   const nav = useNavigate();
+  const { tenantId } = useParams();
   const [loading, setLoading] = useState(true);
 
   const [userInfo, setUserInfo] = useState<any>(null);
@@ -27,7 +28,7 @@ const TenantPage: React.FC = () => {
       const res = await getLoginedUserInCorp();
       setUserInfo(res);
       if (res?.id) {
-        await fetchIndustryDict(res.id)
+        await fetchIndustryDict(res.id);
       }
     } finally {
       setLoading(false);
@@ -57,16 +58,16 @@ const TenantPage: React.FC = () => {
   }
 
   const handleGoEditPage = () => {
-    nav('/onebase/setting/tenant/edit');
+    nav(`/onebase/${tenantId}/setting/profile/edit`);
   };
 
   const getStatus = (status: number) => {
-    if(status === 0) {
-      return "禁用"
-    }else {
-      return "正常"
+    if (status === 0) {
+      return '禁用';
+    } else {
+      return '正常';
     }
-  }
+  };
   const defaultNickName = userInfo?.nickname?.charAt(0) || 'U';
 
   return (
@@ -79,26 +80,34 @@ const TenantPage: React.FC = () => {
               <Avatar
                 size={80}
                 shape="circle"
-                className={userInfo.avatar ? styles.currentAvatar : styles.defaultAvatar }
-                style={{ border: '1px solid #f0f0f0' ,overflow: 'hidden' }}
+                className={userInfo.avatar ? styles.currentAvatar : styles.defaultAvatar}
+                style={{ border: '1px solid #f0f0f0', overflow: 'hidden', marginRight: '16px' }}
               >
-                {userInfo.avatar ? <Image width={80} height={80} src={userInfo.avatar}   
-                  style={{
-                    objectFit: 'cover',
-                    borderRadius: '50%', // 强制圆形裁剪
-                    display: 'block',     // 避免 inline 元素影响
-                  }}/> : defaultNickName}
+                {userInfo.avatar ? (
+                  <Image
+                    width={80}
+                    height={80}
+                    src={userInfo.avatar}
+                    style={{
+                      objectFit: 'cover',
+                      borderRadius: '50%', // 强制圆形裁剪
+                      display: 'block' // 避免 inline 元素影响
+                    }}
+                  />
+                ) : (
+                  defaultNickName
+                )}
               </Avatar>
               <div>
                 <div className={styles.userTop}>
                   <Title className={styles.username} heading={6}>
                     {userInfo.nickname}
                   </Title>
-                  {
-                    userInfo?.posts?.map((post: PostSimpleRespVO) => <Tag className={styles.userTag} color="cyan" size="small" key={post.id}>
+                  {userInfo?.posts?.map((post: PostSimpleRespVO) => (
+                    <Tag className={styles.userTag} color="cyan" size="small" key={post.id}>
                       {post.name}
-                    </Tag>)
-                  }
+                    </Tag>
+                  ))}
                 </div>
               </div>
             </Space>
@@ -106,12 +115,14 @@ const TenantPage: React.FC = () => {
 
           {/* 右上角编辑按钮 */}
           <Col flex="none">
-            <Button type="secondary" onClick={handleGoEditPage}>编辑</Button>
+            <Button type="secondary" onClick={handleGoEditPage}>
+              编辑
+            </Button>
           </Col>
         </Row>
 
         {/* 下方详细信息区 */}
-        <Row gutter={[0, 12]} align='center' style={{ paddingLeft: 105 }}>
+        <Row gutter={[0, 12]} align="center" style={{ paddingLeft: 105 }}>
           {/* 第一行 */}
           <Col span={8}>
             <Row gutter={8}>
@@ -187,11 +198,9 @@ const TenantPage: React.FC = () => {
         isLoading={loading}
         style={{ display: 'flex', flex: 1, overflow: 'hidden' }}
         spinStyle={{ display: 'flex', flex: 1, overflow: 'hidden' }}
-      >
-      </PlaceholderPanel>
-
+      ></PlaceholderPanel>
     </div>
   );
 };
 
-export default TenantPage;
+export default ProfilePage;

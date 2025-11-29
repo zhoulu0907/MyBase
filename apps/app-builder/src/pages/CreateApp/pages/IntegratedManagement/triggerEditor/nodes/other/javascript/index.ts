@@ -4,8 +4,8 @@ import { type FlowNodeRegistry } from '../../../typings';
 import { generateNodeId } from '../../utils';
 import { formMeta } from './form-meta';
 
-export const IpaasNodeRegistry: FlowNodeRegistry = {
-  type: NodeType.IPAAS,
+export const JavascriptNodeRegistry: FlowNodeRegistry = {
+  type: NodeType.JavaScript,
   title: '连接器节点',
   category: 'other',
   meta: {
@@ -29,10 +29,10 @@ export const IpaasNodeRegistry: FlowNodeRegistry = {
   },
   onAdd(ctx, from) {
     return {
-      id: generateNodeId(NodeType.IPAAS),
-      type: NodeType.IPAAS,
+      id: generateNodeId(NodeType.JavaScript),
+      type: NodeType.JavaScript,
       data: {
-        title: '连接器节点'
+        title: 'JS脚本节点'
       }
     };
   }

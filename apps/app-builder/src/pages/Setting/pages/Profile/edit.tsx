@@ -1,20 +1,19 @@
-import { Message, Tabs, Form, Select, Input, Button, Upload, Spin, Image, Avatar, Modal } from '@arco-design/web-react';
-import { getLoginedUser, updateLoginedUser, updateLoginedUserPwd, runtimeUploadFile } from '@onebase/platform-center';
+import { Avatar, Button, Form, Image, Input, Message, Modal, Select, Spin, Tabs, Upload } from '@arco-design/web-react';
+import { Cropper } from '@onebase/common';
+import { getLoginedUser, updateLoginedUser, updateLoginedUserPwd, uploadFile } from '@onebase/platform-center';
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './index.module.less';
-import { Cropper } from '@onebase/common';
 
 const TabPane = Tabs.TabPane;
 const { Item: FormItem } = Form;
-
 
 interface IEditPageProps {
   avatarUrl: string;
   setAvatarUrl: (data: string) => void;
 }
 
-const EditPage: React.FC<IEditPageProps> = ({avatarUrl, setAvatarUrl}) => {
+const ProfileEditPage: React.FC<IEditPageProps> = ({ avatarUrl, setAvatarUrl }) => {
   const nav = useNavigate();
   const [form] = Form.useForm();
   const [passwordForm] = Form.useForm();
@@ -42,7 +41,7 @@ const EditPage: React.FC<IEditPageProps> = ({avatarUrl, setAvatarUrl}) => {
         email: res.email,
         dept: res.dept?.name,
         id: res.id
-      })
+      });
     } finally {
       setLoading(false);
     }
@@ -55,14 +54,14 @@ const EditPage: React.FC<IEditPageProps> = ({avatarUrl, setAvatarUrl}) => {
 
     const progressAdapter = onProgress
       ? (progressEvent: ProgressEvent) => {
-        if (progressEvent.lengthComputable) {
-          const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          onProgress(percent, progressEvent);
+          if (progressEvent.lengthComputable) {
+            const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            onProgress(percent, progressEvent);
+          }
         }
-      }
       : undefined;
 
-    const res = await runtimeUploadFile(formData, progressAdapter);
+    const res = await uploadFile(formData, progressAdapter);
     return res;
   };
 
@@ -75,7 +74,7 @@ const EditPage: React.FC<IEditPageProps> = ({avatarUrl, setAvatarUrl}) => {
         mobile: values.mobile,
         email: values.email,
         avatar: avatarUrl
-      }
+      };
       await updateLoginedUser(req);
       form.resetFields();
       nav('/onebase/setting/tenant');
@@ -90,8 +89,8 @@ const EditPage: React.FC<IEditPageProps> = ({avatarUrl, setAvatarUrl}) => {
       const values = await passwordForm.validate();
       const req = {
         oldPassword: values.oldPassword,
-        newPassword: values.confirmNewPassword,
-      }
+        newPassword: values.confirmNewPassword
+      };
       await updateLoginedUserPwd(req);
       passwordForm.resetFields();
       nav('/onebase/setting/tenant');
@@ -127,35 +126,39 @@ const EditPage: React.FC<IEditPageProps> = ({avatarUrl, setAvatarUrl}) => {
 
   return (
     <div className={styles.editPage}>
-      <Tabs tabPosition='left'>
-        <TabPane key='tab1' title='基本资料'>
-          <div style={{
-            maxWidth: 600,
-            padding: 32,
-            background: '#fff',
-            borderRadius: 8,
-          }}>
-            <Form
-              form={form}
-              layout="horizontal"
-              onSubmit={handleSubmit}
-            >
+      <Tabs tabPosition="left">
+        <TabPane key="tab1" title="基本资料">
+          <div
+            style={{
+              maxWidth: 600,
+              padding: 32,
+              background: '#fff',
+              borderRadius: 8
+            }}
+          >
+            <Form form={form} layout="horizontal" onSubmit={handleSubmit}>
               <FormItem label="头像" field="avatar">
                 <div>
-                  {avatarUrl ? <Image
-                    width={120}
-                    height={120}
-                    src={avatarUrl}
-                    alt="头像"
-                    style={{
-                      width: 120,
-                      height: 120,
-                      borderRadius: '50%',
-                      objectFit: 'cover',
-                      marginBottom: 16,
-                      display: 'block'
-                    }}
-                  />: <Avatar size={96} style={{ marginBottom:'12px', backgroundColor: '#009e9e'}}>{defaultNickName}</Avatar>}
+                  {avatarUrl ? (
+                    <Image
+                      width={120}
+                      height={120}
+                      src={avatarUrl}
+                      alt="头像"
+                      style={{
+                        width: 120,
+                        height: 120,
+                        borderRadius: '50%',
+                        objectFit: 'cover',
+                        marginBottom: 16,
+                        display: 'block'
+                      }}
+                    />
+                  ) : (
+                    <Avatar size={96} style={{ marginBottom: '12px', backgroundColor: '#009e9e' }}>
+                      {defaultNickName}
+                    </Avatar>
+                  )}
                   <div>
                     <Upload
                       ref={uploadRef}
@@ -195,6 +198,7 @@ const EditPage: React.FC<IEditPageProps> = ({avatarUrl, setAvatarUrl}) => {
                             simple: false,
                             content: (
                               <Cropper
+                                aspect={1 / 1}
                                 file={file}
                                 onOK={(file: any) => {
                                   resolve(file);
@@ -214,23 +218,20 @@ const EditPage: React.FC<IEditPageProps> = ({avatarUrl, setAvatarUrl}) => {
                       style={{
                         display: 'none'
                       }}
+                    ></Upload>
+                    <Button
+                      type="outline"
+                      onClick={() => {
+                        uploadRef.current?.getRootDOMNode()?.querySelector('input[type="file"]').click();
+                      }}
                     >
-                    </Upload>
-                    <Button type="outline" onClick={() => {
-                      uploadRef.current?.getRootDOMNode()?.querySelector('input[type="file"]').click();
-                    }}>
                       修改头像
                     </Button>
                   </div>
                 </div>
               </FormItem>
 
-              <FormItem
-                label="姓名"
-                field="nickname"
-                required
-                rules={[{ required: true, message: '请输入姓名' }]}
-              >
+              <FormItem label="姓名" field="nickname" required rules={[{ required: true, message: '请输入姓名' }]}>
                 <Input placeholder="请输入姓名" />
               </FormItem>
 
@@ -244,7 +245,7 @@ const EditPage: React.FC<IEditPageProps> = ({avatarUrl, setAvatarUrl}) => {
                 required
                 rules={[
                   { required: true, message: '请输入手机号' },
-                  { match: /^1[3-9]\d{9}$/, message: '手机号格式错误' },
+                  { match: /^1[3-9]\d{9}$/, message: '手机号格式错误' }
                 ]}
               >
                 <Input placeholder="请输入手机号" />
@@ -256,15 +257,14 @@ const EditPage: React.FC<IEditPageProps> = ({avatarUrl, setAvatarUrl}) => {
                 required
                 rules={[
                   { required: true, message: '请输入邮箱' },
-                  { type: 'email', message: '邮箱格式错误' },
+                  { type: 'email', message: '邮箱格式错误' }
                 ]}
               >
                 <Input placeholder="请输入邮箱" />
               </FormItem>
 
               <FormItem label="所属部门" field="dept" required disabled>
-                <Select placeholder="请选择所属部门">
-                </Select>
+                <Select placeholder="请选择所属部门"></Select>
               </FormItem>
 
               <FormItem label="OneID" field="id" required disabled>
@@ -280,18 +280,16 @@ const EditPage: React.FC<IEditPageProps> = ({avatarUrl, setAvatarUrl}) => {
           </div>
         </TabPane>
 
-        <TabPane key='tab2' title='修改密码'>
-          <div style={{
-            maxWidth: 600,
-            padding: 32,
-            background: '#fff',
-            borderRadius: 8,
-          }}>
-            <Form
-              form={passwordForm}
-              layout="horizontal"
-              onSubmit={handleSubmitPassword}
-            >
+        <TabPane key="tab2" title="修改密码">
+          <div
+            style={{
+              maxWidth: 600,
+              padding: 32,
+              background: '#fff',
+              borderRadius: 8
+            }}
+          >
+            <Form form={passwordForm} layout="horizontal" onSubmit={handleSubmitPassword}>
               <FormItem
                 label="旧密码"
                 field="oldPassword"
@@ -325,8 +323,8 @@ const EditPage: React.FC<IEditPageProps> = ({avatarUrl, setAvatarUrl}) => {
                         return cb('两次输入的密码不一致');
                       }
                       return cb();
-                    },
-                  },
+                    }
+                  }
                 ]}
               >
                 <Input placeholder="请再次输入新密码" />
@@ -345,4 +343,4 @@ const EditPage: React.FC<IEditPageProps> = ({avatarUrl, setAvatarUrl}) => {
   );
 };
 
-export default EditPage;
+export default ProfileEditPage;

@@ -1,5 +1,5 @@
 import LogoSVG from '@/assets/images/ob_logo.svg';
-import UserProfileAvtar from '@/components/UserProfileAvatar';
+import UserProfileAvatar from '@/components/UserProfileAvatar';
 
 import { useI18n } from '@/hooks/useI18n';
 import { UserPermissionManager } from '@/utils/permission';
@@ -42,14 +42,15 @@ const AppHeader: React.FC<HeaderProps> = ({ className, avatarUrl }) => {
 
   // 用户菜单
   const userMenu = (
-    <Menu>
-      <Menu.Item key="info" style={{ height: '60px' }}>
+    <Menu style={{ marginRight: '10px' }}>
+      <Menu.Item key="info" style={{ height: '90px' }}>
         <div className={styles.adminInformation}>
-          <UserProfileAvtar adminInfo={userPermissionInfo?.user} avatarUrl={avatarUrl} />
+          <UserProfileAvatar adminInfo={userPermissionInfo?.user} avatarUrl={avatarUrl} />
           <Typography.Text>{userPermissionInfo?.user?.nickname || ''}</Typography.Text>
+          <Typography.Text type="secondary">{maskMobile(userPermissionInfo?.user?.mobile || '')}</Typography.Text>
         </div>
       </Menu.Item>
-      <Menu.Item key="profile">{maskMobile(userPermissionInfo?.user?.mobile || '')}</Menu.Item>
+      {/* <Menu.Item key="profile">{maskMobile(userPermissionInfo?.user?.mobile || '')}</Menu.Item> */}
       <Menu.Item key="logout" onClick={handleLogout}>
         <IconExport style={{ color: '#F53F3F' }} />
         <Typography.Text type="error">{t('header.logout')}</Typography.Text>
@@ -78,7 +79,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className, avatarUrl }) => {
 
           <Dropdown droplist={userMenu} position="bottom">
             <div className={styles.userDropdown}>
-              <UserProfileAvtar adminInfo={userPermissionInfo?.user} avatarUrl={avatarUrl} />
+              <UserProfileAvatar adminInfo={userPermissionInfo?.user} avatarUrl={avatarUrl} />
             </div>
           </Dropdown>
         </div>

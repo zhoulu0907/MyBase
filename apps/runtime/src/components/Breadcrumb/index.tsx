@@ -1,6 +1,5 @@
 import { useI18n } from '@/hooks/useI18n';
 import { Breadcrumb } from '@arco-design/web-react';
-import { IconHome } from '@arco-design/web-react/icon';
 import React, { useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styles from './index.module.less';
@@ -51,6 +50,10 @@ const AppBreadcrumb: React.FC<BreadcrumbProps> = ({ className, items }) => {
         return;
       }
 
+      if (index == 0) {
+        return;
+      }
+
       currentPath += `/${segment}`;
 
       // 根据路径生成对应的标题
@@ -83,13 +86,16 @@ const AppBreadcrumb: React.FC<BreadcrumbProps> = ({ className, items }) => {
         case 'tenant':
           title = t('sider.tenant');
           break;
+        case 'profile':
+          title = t('sider.profile');
+          break;
         case 'enterprise':
           title = t('sider.enterprise');
           break;
-        case "create-enterprise":
+        case 'create-enterprise':
           title = t('sider.createEnterprise');
           break;
-        case "authorized-application":
+        case 'authorized-application':
           title = t('sider.authorizedApplication');
           break;
         case 'edit':
@@ -123,15 +129,19 @@ const AppBreadcrumb: React.FC<BreadcrumbProps> = ({ className, items }) => {
   return (
     <div className={`${styles.breadcrumbContainer} ${className || ''}`}>
       <Breadcrumb separator="/">
-        {breadcrumbItems.map((item, index) => (
-          <Breadcrumb.Item
-            key={item.key}
-            onClick={() => handleBreadcrumbClick(item)}
-            className={item.path ? styles.clickable : styles.current}
-          >
-            {index === 0 ? <IconHome className={styles.homeIcon} /> : item.title}
-          </Breadcrumb.Item>
-        ))}
+        {breadcrumbItems.map(
+          (item, index) =>
+            index > 0 && (
+              <Breadcrumb.Item
+                key={item.key}
+                // onClick={() => handleBreadcrumbClick(item)}
+                // className={item.path ? styles.clickable : styles.current}
+              >
+                {/* {index === 0 ? <IconHome className={styles.homeIcon} /> : item.title} */}
+                {item.title}
+              </Breadcrumb.Item>
+            )
+        )}
       </Breadcrumb>
     </div>
   );

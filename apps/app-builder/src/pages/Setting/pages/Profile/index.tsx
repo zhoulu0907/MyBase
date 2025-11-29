@@ -1,31 +1,39 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import dayjs from 'dayjs';
-import { Avatar, Typography, Grid, Space, Tag, Button, Tabs, Pagination, Table, Card, Spin, Image } from '@arco-design/web-react';
-import { getCorpListApi, getLoginedUser, getDictDataByType } from '@onebase/platform-center';
-import type { CorpDetailResponse, DictData, RoleSimpleRespVO, PostSimpleRespVO } from '@onebase/platform-center';
-import PlaceholderPanel from '@/components/PlaceholderPanel';
-import { hasPermission, /* UserPermissionManager */ } from '@/utils/permission';
-import { TENANT_INFO_PERMISSION as ACTIONS } from '@/constants/permission';
-import StatusTag from '@/components/StatusTag';
-import { appIconMap } from '@onebase/ui-kit';
 import DynamicIcon from '@/components/DynamicIcon';
-import styles from './index.module.less';
+import PlaceholderPanel from '@/components/PlaceholderPanel';
+import StatusTag from '@/components/StatusTag';
+import { TENANT_INFO_PERMISSION as ACTIONS } from '@/constants/permission';
+import { hasPermission /* UserPermissionManager */ } from '@/utils/permission';
 import {
-  getApplicationSimple,
-  type Application,
-  type PageParam
-} from '@onebase/app';
+  Avatar,
+  Button,
+  Card,
+  Grid,
+  Image,
+  Pagination,
+  Space,
+  Spin,
+  Table,
+  Tabs,
+  Tag,
+  Typography
+} from '@arco-design/web-react';
+import { getApplicationSimple, type Application, type PageParam } from '@onebase/app';
+import type { CorpDetailResponse, DictData, PostSimpleRespVO, RoleSimpleRespVO } from '@onebase/platform-center';
+import { getCorpListApi, getDictDataByType, getLoginedUser } from '@onebase/platform-center';
+import { appIconMap } from '@onebase/ui-kit';
+import dayjs from 'dayjs';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import styles from './index.module.less';
 
 const TabPane = Tabs.TabPane;
 const { Title, Text } = Typography;
 const { Col, Row } = Grid;
 
-
 const CREATED_TYPE = {
   ENTERPRISE: 'enterprise',
-  APPLICATION: 'application',
-}
+  APPLICATION: 'application'
+};
 
 const leftPanelWidth = 240;
 const SectionPadding = 32 + 64;
@@ -33,8 +41,9 @@ const tabPanelWidth = `calc(100vw - ${leftPanelWidth}px - ${SectionPadding}px`;
 
 type ownerCreateType = 'enterprise' | 'application' | string;
 
-const TenantPage: React.FC = () => {
+const ProfilePage: React.FC = () => {
   const nav = useNavigate();
+  const { tenantId } = useParams();
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -64,7 +73,7 @@ const TenantPage: React.FC = () => {
       const res = await getLoginedUser();
       setUserInfo(res);
       if (res?.id) {
-        await fetchIndustryDict(res.id)
+        await fetchIndustryDict(res.id);
       }
     } finally {
       setLoading(false);
@@ -76,7 +85,7 @@ const TenantPage: React.FC = () => {
     const req: PageParam = {
       pageNo: page,
       pageSize: pageSize,
-      ownerTag: 1, // 我创建的
+      ownerTag: 1 // 我创建的
     };
     const res = await getCorpListApi(req);
     if (res) {
@@ -88,7 +97,7 @@ const TenantPage: React.FC = () => {
   // 我创建的应用
   const getOwnerApplication = async () => {
     const ownerTag = 1;
-    const res = await getApplicationSimple(ownerTag,"");
+    const res = await getApplicationSimple(ownerTag, '');
     setAppData(res);
   };
 
@@ -129,18 +138,22 @@ const TenantPage: React.FC = () => {
         title: '企业LOGO',
         dataIndex: 'corpLogo',
         width: 100,
-        render: (url: any,record: any) => {
-          
-          return url ? 
-            <img 
-              src={url} 
-              style={{ width: 72, height: 36, 
-                borderRadius: 5, 
-                border: '1px solid #F2F3F5', 
-                backgroundColor: '#F7F8FA', 
-                objectFit: 'contain' 
-              }} /> : 
-            <div className={styles.corpLogo}>{record?.corpName || ""}</div> 
+        render: (url: any, record: any) => {
+          return url ? (
+            <img
+              src={url}
+              style={{
+                width: 72,
+                height: 36,
+                borderRadius: 5,
+                border: '1px solid #F2F3F5',
+                backgroundColor: '#F7F8FA',
+                objectFit: 'contain'
+              }}
+            />
+          ) : (
+            <div className={styles.corpLogo}>{record?.corpName || ''}</div>
+          );
         }
       },
       {
@@ -161,12 +174,8 @@ const TenantPage: React.FC = () => {
         width: 100,
         placeholder: '-',
         render: (val: string) => {
-          const getIndustryTypeName = industryDict?.find(data => data.id === val)?.label || '-';
-          return (
-            <Tag color="cyan">
-              {getIndustryTypeName}
-            </Tag>
-          )
+          const getIndustryTypeName = industryDict?.find((data) => data.id === val)?.label || '-';
+          return <Tag color="cyan">{getIndustryTypeName}</Tag>;
         }
       },
       {
@@ -192,16 +201,16 @@ const TenantPage: React.FC = () => {
   };
 
   const handleGoEditPage = () => {
-    nav('/onebase/setting/tenant/edit');
+    nav(`/onebase/${tenantId}/setting/profile/edit`);
   };
 
   const getStatus = (status: number) => {
-    if(status === 0) {
-      return "禁用"
-    }else {
-      return "正常"
+    if (status === 0) {
+      return '禁用';
+    } else {
+      return '正常';
     }
-  }
+  };
 
   const defaultNickName = userInfo?.nickname?.charAt(0) || 'U';
 
@@ -215,40 +224,52 @@ const TenantPage: React.FC = () => {
               <Avatar
                 size={80}
                 shape="circle"
-                className={userInfo.avatar ? styles.currentAvatar : styles.defaultAvatar }
-                style={{ border: '1px solid #f0f0f0' ,overflow: 'hidden' }}
+                className={userInfo.avatar ? styles.currentAvatar : styles.defaultAvatar}
+                style={{ border: '1px solid #f0f0f0', overflow: 'hidden', marginRight: '16px' }}
               >
-                {userInfo.avatar ? <Image width={80} height={80} src={userInfo.avatar}   
-                  style={{
-                    objectFit: 'cover',
-                    borderRadius: '50%', // 强制圆形裁剪
-                    display: 'block',     // 避免 inline 元素影响
-                  }}/> : defaultNickName}
+                {userInfo.avatar ? (
+                  <Image
+                    width={80}
+                    height={80}
+                    src={userInfo.avatar}
+                    style={{
+                      objectFit: 'cover',
+                      borderRadius: '50%', // 强制圆形裁剪
+                      display: 'block' // 避免 inline 元素影响
+                    }}
+                  />
+                ) : (
+                  defaultNickName
+                )}
               </Avatar>
               <div>
                 <div className={styles.userTop}>
                   <Title className={styles.username} heading={6}>
                     {userInfo.nickname}
                   </Title>
-                  {
-                    userInfo?.posts?.map((post: PostSimpleRespVO) => <Tag className={styles.userTag} color="cyan" size="small" key={post.id}>
+                  {userInfo?.posts?.map((post: PostSimpleRespVO) => (
+                    <Tag className={styles.userTag} color="cyan" size="small" key={post.id}>
                       {post.name}
-                    </Tag>)
-                  }
+                    </Tag>
+                  ))}
                 </div>
-                <Text className={styles.userRole} type="secondary">角色：{userInfo?.roles?.map((role: RoleSimpleRespVO) => role.name).join('、')}</Text>
+                <Text className={styles.userRole} type="secondary">
+                  角色：{userInfo?.roles?.map((role: RoleSimpleRespVO) => role.name).join('、')}
+                </Text>
               </div>
             </Space>
           </Col>
 
           {/* 右上角编辑按钮 */}
           <Col flex="none">
-            <Button type="secondary" onClick={handleGoEditPage}>编辑</Button>
+            <Button type="secondary" onClick={handleGoEditPage}>
+              编辑
+            </Button>
           </Col>
         </Row>
 
         {/* 下方详细信息区 */}
-        <Row gutter={[0, 12]} align='center' style={{ paddingLeft: 105 }}>
+        <Row gutter={[0, 12]} align="center" style={{ paddingLeft: 105 }}>
           {/* 第一行 */}
           <Col span={8}>
             <Row gutter={8}>
@@ -326,7 +347,7 @@ const TenantPage: React.FC = () => {
         spinStyle={{ display: 'flex', flex: 1, overflow: 'hidden' }}
       >
         <Tabs className={styles.createTabs} activeTab={curTab} onChange={setCurTab} style={{ maxWidth: tabPanelWidth }}>
-          <TabPane key={CREATED_TYPE.ENTERPRISE} title='我创建的企业'>
+          <TabPane key={CREATED_TYPE.ENTERPRISE} title="我创建的企业">
             <Table
               rowKey="id"
               hover
@@ -357,9 +378,8 @@ const TenantPage: React.FC = () => {
                 sizeOptions={[5, 10, 20]}
               />
             </div>
-
           </TabPane>
-          <TabPane key={CREATED_TYPE.APPLICATION} title='我创建的应用'>
+          <TabPane key={CREATED_TYPE.APPLICATION} title="我创建的应用">
             <Space direction="vertical" size={16}>
               {appData?.map((item, index) => (
                 <Card
@@ -376,7 +396,7 @@ const TenantPage: React.FC = () => {
                     <Col flex="64px" style={{ textAlign: 'center' }}>
                       <div className={styles.myAppIcon} style={{ backgroundColor: item?.iconColor || '#ccc' }}>
                         <DynamicIcon
-                          IconComponent={appIconMap[item?.iconName as keyof typeof appIconMap || 'city-one']}
+                          IconComponent={appIconMap[(item?.iconName as keyof typeof appIconMap) || 'city-one']}
                           theme="outline"
                           size="32"
                           fill="#F2F3F5"
@@ -390,7 +410,15 @@ const TenantPage: React.FC = () => {
                         <Title heading={6} style={{ margin: 0 }}>
                           {item.appName}
                         </Title>
-                        <Text type="secondary" style={{ lineHeight: 1.6, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <Text
+                          type="secondary"
+                          style={{
+                            lineHeight: 1.6,
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
                           {item.description}
                         </Text>
                       </Space>
@@ -399,13 +427,11 @@ const TenantPage: React.FC = () => {
                 </Card>
               ))}
             </Space>
-
           </TabPane>
         </Tabs>
       </PlaceholderPanel>
-
     </div>
   );
 };
 
-export default TenantPage;
+export default ProfilePage;

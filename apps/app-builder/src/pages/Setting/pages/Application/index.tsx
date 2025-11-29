@@ -21,7 +21,6 @@ import {
 import {
   IconDelete,
   IconEdit,
-  IconEmpty,
   IconLeft,
   IconMoreVertical,
   IconPlus,
@@ -394,19 +393,14 @@ const AppManagement: React.FC = () => {
           {/* 我的应用列表 */}
           <Spin className={styles.appListLoading} loading={loading} size={40} tip="加载中..." ref={appContainerRef}>
             <div className={styles.appList}>
-              {applicationEmpty && !loading && (
+              {(applicationFilterEmpty || applicationEmpty) && !loading && (
                 <div className={styles.applicationEmpty}>
                   <img src={emptyApplicationSVG} alt="暂无应用" />
                   <Typography.Text type="secondary">还没有应用</Typography.Text>
                   <Button className={styles.goCreateApplication} onClick={() => setCreateVisible(true)}>
-                    去创建 <IconRight />
+                    去创建
+                    <IconRight style={{ marginLeft: '4px' }} />
                   </Button>
-                </div>
-              )}
-              {applicationFilterEmpty && !loading && (
-                <div className={styles.applicationEmpty}>
-                  <IconEmpty fontSize={56} />
-                  暂无数据
                 </div>
               )}
               {dataList?.map((item, _index) => (
