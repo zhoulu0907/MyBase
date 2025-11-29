@@ -14,10 +14,10 @@ import {
 } from '@onebase/common';
 import {
   checkCaptchaApi,
-  corpLogin,
   getCaptchaApi,
   innerLogin,
   login,
+  runtimeCorpLogin,
   sassLogin,
   type LoginRequest,
   type LoginResponse,
@@ -178,7 +178,7 @@ const Right: React.FC = () => {
           captchaVerification: captchaVerification,
           deviceId: deviceId
         };
-        response = await corpLogin(innerloginData, headers);
+        response = await runtimeCorpLogin(innerloginData, headers);
       } else {
         const loginData: LoginRequest = {
           username: (values as LoginRequest).username!,

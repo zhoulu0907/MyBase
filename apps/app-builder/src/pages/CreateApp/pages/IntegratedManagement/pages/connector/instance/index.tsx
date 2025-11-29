@@ -10,7 +10,7 @@ import {
 import { getCommonPaginationList, getHashQueryParam } from '@onebase/common';
 import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import ConnectInstanceCard from '../../../components/ConnectInstanceCard';
 import styles from './index.module.less';
 
@@ -20,6 +20,7 @@ import styles from './index.module.less';
  */
 const ConnectorInstancesPage: React.FC = () => {
   const navigate = useNavigate();
+  const { tenantId } = useParams();
 
   const [loading, setLoading] = useState(false);
   const [searchInstanceName, setSearchInstanceName] = useState('');
@@ -81,12 +82,12 @@ const ConnectorInstancesPage: React.FC = () => {
 
     console.log('res :', res);
 
-    navigate(`/onebase/create-app/integrated-management/connector-detail?appId=${curAppId}&id=${res}`);
+    navigate(`/onebase/${tenantId}/home/create-app/integrated-management/connector-detail?appId=${curAppId}&id=${res}`);
   };
 
   const handleEdit = (id: string) => {
     const curAppId = getHashQueryParam('appId');
-    navigate(`/onebase/create-app/integrated-management/connector-detail?appId=${curAppId}&id=${id}`);
+    navigate(`/onebase/${tenantId}/home/create-app/integrated-management/connector-detail?appId=${curAppId}&id=${id}`);
   };
 
   const handleDelete = async (id: string) => {
