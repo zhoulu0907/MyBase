@@ -8,7 +8,7 @@ import com.mybatisflex.core.table.TableDef;
  * 代理关系实例表 表定义层。
  *
  * @author liyang
- * @since 2025-11-28
+ * @since 2025-11-29
  */
 public class BpmFlowAgentInsTableDef extends TableDef {
 

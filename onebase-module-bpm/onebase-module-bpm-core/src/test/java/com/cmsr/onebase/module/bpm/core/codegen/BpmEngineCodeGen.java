@@ -42,6 +42,8 @@ public class BpmEngineCodeGen {
         GlobalConfig globalConfig = new GlobalConfig();
         globalConfig.setGenerateTable(tables);
         globalConfig.setSourceDir(sourceDir);
+        // 设置表名前缀，生成类名时会自动移除该前缀
+        globalConfig.setTablePrefix("bpm_");
         //生成实体
         globalConfig.setEntityPackage(basePackage + ".dataobject");
         globalConfig.setEntityClassSuffix("DO");
@@ -68,6 +70,8 @@ public class BpmEngineCodeGen {
         GlobalConfig globalConfig = new GlobalConfig();
         globalConfig.setGenerateTable(tables);
         globalConfig.setSourceDir(sourceDir);
+        // 设置表名前缀，生成类名时会自动移除该前缀
+        globalConfig.setTablePrefix("bpm_");
         //生成表定义
         globalConfig.enableTableDef();
         globalConfig.setTableDefPackage(basePackage + ".dataobject.table");

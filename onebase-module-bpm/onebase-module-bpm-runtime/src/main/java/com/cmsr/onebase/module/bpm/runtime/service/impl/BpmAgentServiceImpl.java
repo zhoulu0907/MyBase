@@ -111,7 +111,7 @@ public class BpmAgentServiceImpl implements BpmAgentService {
         bpmFlowAgentDO.setAgentName(agentUser.getNickname());
         bpmFlowAgentDO.setStartTime(reqVO.getStartTime());
         bpmFlowAgentDO.setEndTime(reqVO.getEndTime());
-        bpmFlowAgentDO.setAppId(reqVO.getAppId());
+        bpmFlowAgentDO.setApplicationId(reqVO.getAppId());
 
         // todo: 更新需要加锁，避免并发问题
         bpmFlowAgentRepository.save(bpmFlowAgentDO);
@@ -200,7 +200,7 @@ public class BpmAgentServiceImpl implements BpmAgentService {
 
         // 校验被代理人在指定时间段内是否已存在"待生效"或"代理中"的代理关系
         List<BpmFlowAgentDO> overlapAgentList = bpmFlowAgentRepository
-                .findAllOverlapAgent(agent.getAppId(), loginUserId, reqVO.getStartTime(), reqVO.getEndTime());
+                .findAllOverlapAgent(agent.getApplicationId(), loginUserId, reqVO.getStartTime(), reqVO.getEndTime());
 
         if (CollectionUtils.isNotEmpty(overlapAgentList)) {
             // 过滤掉当前记录，只保留重叠记录（排除自己）
@@ -292,7 +292,7 @@ public class BpmAgentServiceImpl implements BpmAgentService {
 
     private QueryWrapper buildDynamicQueryWhereCondition(BpmAgentPageReqVO reqVO, String userId) {
         QueryWrapper queryWrapper = QueryWrapper.create();
-        queryWrapper.eq(BpmFlowAgentDO::getAppId, reqVO.getAppId());
+        queryWrapper.eq(BpmFlowAgentDO::getApplicationId, reqVO.getAppId());
 
         QueryCondition userIdCondition = QueryCondition.createEmpty();
         userIdCondition.or(BPM_FLOW_AGENT.CREATOR.eq(userId));

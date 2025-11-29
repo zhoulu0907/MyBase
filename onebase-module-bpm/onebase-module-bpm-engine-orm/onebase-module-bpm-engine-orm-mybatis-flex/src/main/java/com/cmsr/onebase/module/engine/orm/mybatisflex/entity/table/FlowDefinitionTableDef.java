@@ -8,7 +8,7 @@ import com.mybatisflex.core.table.TableDef;
  * 流程定义表 表定义层。
  *
  * @author liyang
- * @since 2025-11-27
+ * @since 2025-11-29
  */
 public class FlowDefinitionTableDef extends TableDef {
 
@@ -47,7 +47,7 @@ public class FlowDefinitionTableDef extends TableDef {
     /**
      * 流程版本
      */
-    public final QueryColumn VERSION = new QueryColumn(this, "version");
+    public final QueryColumn BPM_VERSION = new QueryColumn(this, "bpm_version");
 
     /**
      * 流程类别
@@ -100,6 +100,11 @@ public class FlowDefinitionTableDef extends TableDef {
     public final QueryColumn UPDATE_TIME = new QueryColumn(this, "update_time");
 
     /**
+     * 版本标签
+     */
+    public final QueryColumn VERSION_TAG = new QueryColumn(this, "version_tag");
+
+    /**
      * 乐观锁
      */
     public final QueryColumn LOCK_VERSION = new QueryColumn(this, "lock_version");
@@ -115,6 +120,11 @@ public class FlowDefinitionTableDef extends TableDef {
     public final QueryColumn LISTENER_TYPE = new QueryColumn(this, "listener_type");
 
     /**
+     * 应用ID
+     */
+    public final QueryColumn APPLICATION_ID = new QueryColumn(this, "application_id");
+
+    /**
      * 流程激活状态（0挂起 1激活）
      */
     public final QueryColumn ACTIVITY_STATUS = new QueryColumn(this, "activity_status");
@@ -127,7 +137,7 @@ public class FlowDefinitionTableDef extends TableDef {
     /**
      * 默认字段，不包含逻辑删除或者 large 等字段。
      */
-    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, FLOW_CODE, FLOW_NAME, MODEL_VALUE, CATEGORY, VERSION, IS_PUBLISH, FORM_CUSTOM, FORM_PATH, ACTIVITY_STATUS, LISTENER_TYPE, LISTENER_PATH, EXT, LOCK_VERSION, CREATE_TIME, UPDATER, UPDATE_TIME, DELETED, TENANT_ID, CREATOR};
+    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, FLOW_CODE, FLOW_NAME, MODEL_VALUE, CATEGORY, BPM_VERSION, IS_PUBLISH, FORM_CUSTOM, FORM_PATH, ACTIVITY_STATUS, LISTENER_TYPE, LISTENER_PATH, EXT, LOCK_VERSION, CREATE_TIME, UPDATER, UPDATE_TIME, DELETED, TENANT_ID, CREATOR, APPLICATION_ID, VERSION_TAG};
 
     public FlowDefinitionTableDef() {
         super("", "bpm_flow_definition");

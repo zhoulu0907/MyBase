@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
  * 流程实例扩展信息表 实体类。
  *
  * @author liyang
- * @since 2025-11-28
+ * @since 2025-11-29
  */
 @Data
 @Table("bpm_flow_instance_biz_ext")
@@ -82,6 +82,11 @@ public class BpmFlowInsBizExtDO extends BaseEntity implements Serializable {
     private String bpmVersion;
 
     /**
+     * 乐观锁
+     */
+    private Long lockVersion;
+
+    /**
      * 租户ID
      */
     private Long tenantId;
@@ -89,7 +94,7 @@ public class BpmFlowInsBizExtDO extends BaseEntity implements Serializable {
     /**
      * 应用ID
      */
-    private Long appId;
+    private Long applicationId;
 
     /**
      * 发起人头像

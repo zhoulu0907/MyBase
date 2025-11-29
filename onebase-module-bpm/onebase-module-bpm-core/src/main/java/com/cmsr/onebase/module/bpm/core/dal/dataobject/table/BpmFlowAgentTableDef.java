@@ -8,7 +8,7 @@ import com.mybatisflex.core.table.TableDef;
  * 流程代理表 表定义层。
  *
  * @author liyang
- * @since 2025-11-28
+ * @since 2025-11-29
  */
 public class BpmFlowAgentTableDef extends TableDef {
 
@@ -23,11 +23,6 @@ public class BpmFlowAgentTableDef extends TableDef {
      * 主键ID
      */
     public final QueryColumn ID = new QueryColumn(this, "id");
-
-    /**
-     * 应用ID
-     */
-    public final QueryColumn APP_ID = new QueryColumn(this, "app_id");
 
     /**
      * 代理人用户ID，接受委托代为处理流程任务
@@ -85,6 +80,11 @@ public class BpmFlowAgentTableDef extends TableDef {
     public final QueryColumn UPDATE_TIME = new QueryColumn(this, "update_time");
 
     /**
+     * 版本标签
+     */
+    public final QueryColumn VERSION_TAG = new QueryColumn(this, "version_tag");
+
+    /**
      * 乐观锁
      */
     public final QueryColumn LOCK_VERSION = new QueryColumn(this, "lock_version");
@@ -100,6 +100,11 @@ public class BpmFlowAgentTableDef extends TableDef {
     public final QueryColumn REVOKED_TIME = new QueryColumn(this, "revoked_time");
 
     /**
+     * 应用ID
+     */
+    public final QueryColumn APPLICATION_ID = new QueryColumn(this, "application_id");
+
+    /**
      * 被代理人用户名称（即委托人）
      */
     public final QueryColumn PRINCIPAL_NAME = new QueryColumn(this, "principal_name");
@@ -112,7 +117,7 @@ public class BpmFlowAgentTableDef extends TableDef {
     /**
      * 默认字段，不包含逻辑删除或者 large 等字段。
      */
-    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, APP_ID, PRINCIPAL_ID, PRINCIPAL_NAME, AGENT_ID, AGENT_NAME, START_TIME, END_TIME, REVOKER_ID, REVOKED_TIME, LOCK_VERSION, CREATOR, CREATE_TIME, UPDATER, UPDATE_TIME, DELETED, TENANT_ID};
+    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, PRINCIPAL_ID, PRINCIPAL_NAME, AGENT_ID, AGENT_NAME, START_TIME, END_TIME, REVOKER_ID, REVOKED_TIME, LOCK_VERSION, CREATOR, CREATE_TIME, UPDATER, UPDATE_TIME, DELETED, TENANT_ID, APPLICATION_ID, VERSION_TAG};
 
     public BpmFlowAgentTableDef() {
         super("", "bpm_flow_agent");

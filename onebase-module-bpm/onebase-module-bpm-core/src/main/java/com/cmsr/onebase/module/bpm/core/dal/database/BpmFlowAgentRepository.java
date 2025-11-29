@@ -84,7 +84,7 @@ public class BpmFlowAgentRepository extends ServiceImpl<BpmFlowAgentMapper, BpmF
             queryWrapper.in(BpmFlowAgentDO::getPrincipalId, principalIds);
         }
 
-        queryWrapper.eq(BpmFlowAgentDO::getAppId, appId);
+        queryWrapper.eq(BpmFlowAgentDO::getApplicationId, appId);
         queryWrapper.ge(BpmFlowAgentDO::getEndTime, LocalDateTime.now());
         queryWrapper.le(BpmFlowAgentDO::getStartTime, LocalDateTime.now());
         queryWrapper.isNull(BpmFlowAgentDO::getRevokedTime);
@@ -103,7 +103,7 @@ public class BpmFlowAgentRepository extends ServiceImpl<BpmFlowAgentMapper, BpmF
      */
     public List<BpmFlowAgentDO> findAllOverlapAgent(Long appId, Long principalId, LocalDateTime startTime, LocalDateTime endTime) {
         QueryWrapper queryWrapper = QueryWrapper.create();
-        queryWrapper.eq(BpmFlowAgentDO::getAppId, appId);
+        queryWrapper.eq(BpmFlowAgentDO::getApplicationId, appId);
         // principalId 在 DO 中改为 String，这里统一转为 String 再查询
         queryWrapper.eq(BpmFlowAgentDO::getPrincipalId, String.valueOf(principalId));
 
