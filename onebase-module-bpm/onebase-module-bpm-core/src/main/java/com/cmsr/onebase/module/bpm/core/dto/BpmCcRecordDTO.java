@@ -128,5 +128,5 @@ public class BpmCcRecordDTO extends BpmFlowCcRecordDO {
      * 代理人ID
      */
     @Column(name = "agent_id")
-    private Long agentId;
+    private String agentId;
 }

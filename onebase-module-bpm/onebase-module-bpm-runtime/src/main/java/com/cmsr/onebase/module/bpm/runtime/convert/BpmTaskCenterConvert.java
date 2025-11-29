@@ -115,7 +115,7 @@ public interface BpmTaskCenterConvert {
      */
     default UserBasicInfoVO createInitiator(Long initiatorId, String initiatorName, String initiatorAvatar) {
         UserBasicInfoVO initiator = new UserBasicInfoVO();
-        initiator.setUserId(initiatorId);
+        initiator.setUserId(String.valueOf(initiatorId));
         initiator.setName(initiatorName);
         initiator.setAvatar(initiatorAvatar);
         return initiator;

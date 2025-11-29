@@ -24,11 +24,11 @@ public class BpmPermissionResolver {
     @Resource
     private AppAuthRoleUser appAuthRoleUser;
 
-    public Set<Long> resolveUserIds(String permFlag) {
+    public Set<String> resolveUserIds(String permFlag) {
        return resolveUserIds(permFlag, 0);
     }
 
-    public Set<Long> resolveUserIds(String permFlag, Integer maxUsers) {
+    public Set<String> resolveUserIds(String permFlag, Integer maxUsers) {
         NodePermFlagDTO permFlagDTO = JsonUtils.parseObject(permFlag, NodePermFlagDTO.class);
 
         if (permFlagDTO == null) {
@@ -39,22 +39,22 @@ public class BpmPermissionResolver {
         return resolveUserIds(permFlagDTO, maxUsers);
     }
 
-    public Set<Long> resolveUserIds(NodePermFlagDTO permFlagDTO) {
+    public Set<String> resolveUserIds(NodePermFlagDTO permFlagDTO) {
         return resolveUserIds(permFlagDTO, 0);
     }
 
-    public Set<Long> resolveUserIds(NodePermFlagDTO permFlagDTO, Integer maxUsers) {
-        Set<Long> userIdSet = new HashSet<>();
+    public Set<String> resolveUserIds(NodePermFlagDTO permFlagDTO, Integer maxUsers) {
+        Set<String> userIdSet = new HashSet<>();
 
         if (CollectionUtils.isNotEmpty(permFlagDTO.getUserIds())) {
-            // 处理用户列表
-            userIdSet.addAll(permFlagDTO.getUserIds());
+            // 处理用户列表 todo：进行校验
+            userIdSet.addAll(permFlagDTO.getUserIds().stream().map(String::valueOf).toList());
         } else if (CollectionUtils.isNotEmpty(permFlagDTO.getRoleIds())) {
             // 处理角色列表
             List<Long> userIds = appAuthRoleUser.findUserIdsByRoleIds(permFlagDTO.getRoleIds());
 
             if (CollectionUtils.isNotEmpty(userIds)) {
-                userIdSet.addAll(userIds);
+                userIdSet.addAll(userIds.stream().map(String::valueOf).toList());
             }
         } else {
             // todo: 支持更多类型的权限

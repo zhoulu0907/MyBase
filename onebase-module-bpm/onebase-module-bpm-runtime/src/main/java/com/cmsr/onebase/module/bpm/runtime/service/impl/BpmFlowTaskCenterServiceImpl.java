@@ -13,7 +13,7 @@ import com.cmsr.onebase.module.bpm.core.dto.BpmMyInstanceDTO;
 import com.cmsr.onebase.module.bpm.core.dto.BpmTodoTaskDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
 import com.cmsr.onebase.module.bpm.core.enums.BpmBusinessStatusEnum;
-import com.cmsr.onebase.module.bpm.core.service.BpmEngineDefExtService;
+import com.cmsr.onebase.module.bpm.core.dal.database.ext.BpmFlowDefinitionRepositoryExt;
 import com.cmsr.onebase.module.bpm.core.vo.*;
 import com.cmsr.onebase.module.bpm.runtime.convert.BpmTaskCenterConvert;
 import com.cmsr.onebase.module.bpm.runtime.service.BpmFlowTaskCenterService;
@@ -57,7 +57,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
     private AdminUserApi adminUserApi;
 
     @Resource
-    private BpmEngineDefExtService engineDefExtService;
+    private BpmFlowDefinitionRepositoryExt defExtService;
 
     @Resource(name = "bpmDefService")
     private DefService defService;
@@ -115,6 +115,8 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
     @Override
     public PageResult<BpmFlowTodoTaskVO> getTodoPage(BpmTodoTaskPageReqVO pageReqVO) {
         Long loginUserId = WebFrameworkUtils.getLoginUserId();
+        String loginUserStrId = String.valueOf(loginUserId);
+
         // 处理节点编码参数
         pageReqVO.setNodeCodeList(splitToList(pageReqVO.getNodeCode()));
 
@@ -122,11 +124,11 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         pageReqVO.setFlowStatusList(splitToFlowStatusList(pageReqVO.getFlowStatus()));
 
         // 处理发起人参数
-        pageReqVO.setInitiatorIdList(splitToLongList(pageReqVO.getInitiatorId()));
+        pageReqVO.setInitiatorIdList(splitToList(pageReqVO.getInitiatorId()));
 
         com.github.pagehelper.Page<BpmTodoTaskDTO> pageResult = PageHelper
                 .startPage(pageReqVO.getPageNo(), pageReqVO.getPageSize())
-                .doSelectPage(() -> bpmTaskCenterMapper.getTodoTaskPage(pageReqVO, String.valueOf(loginUserId)));
+                .doSelectPage(() -> bpmTaskCenterMapper.getTodoTaskPage(pageReqVO, loginUserStrId));
 
         List<BpmFlowTodoTaskVO> todoTaskList = new ArrayList<>();
 
@@ -152,6 +154,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
     @Override
     public PageResult<BpmFlowDoneTaskVO> getDonePage(BpmDoneTaskPageReqVO pageReqVO) {
         Long loginUserId = WebFrameworkUtils.getLoginUserId();
+        String loginUserStrId = String.valueOf(loginUserId);
 
         // 处理节点编码参数
         pageReqVO.setNodeCodeList(splitToList(pageReqVO.getNodeCode()));
@@ -160,11 +163,11 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         pageReqVO.setFlowStatusList(splitToFlowStatusList(pageReqVO.getFlowStatus()));
 
         // 处理发起人参数
-        pageReqVO.setInitiatorIdList(splitToLongList(pageReqVO.getInitiatorId()));
+        pageReqVO.setInitiatorIdList(splitToList(pageReqVO.getInitiatorId()));
 
         com.github.pagehelper.Page<BpmDoneTaskDTO> pageResult = PageHelper
                 .startPage(pageReqVO.getPageNo(), pageReqVO.getPageSize())
-                .doSelectPage(() -> bpmTaskCenterMapper.getDoneTaskPage(pageReqVO, String.valueOf(loginUserId)));
+                .doSelectPage(() -> bpmTaskCenterMapper.getDoneTaskPage(pageReqVO, loginUserStrId));
 
         List<BpmFlowDoneTaskVO> doneTaskList = new ArrayList<>();
         for (BpmDoneTaskDTO doneTaskDTO : pageResult.getResult()) {
@@ -236,7 +239,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
     public List<ListNodesRespVO.NodeVO> listNodes(Long bindingViewId) {
         List<ListNodesRespVO.NodeVO> nodeVOs = new ArrayList<>();
 
-        Definition def = engineDefExtService.getByFormPathAndStatus(String.valueOf(bindingViewId), PublishStatus.PUBLISHED.getKey());
+        Definition def = defExtService.getByFormPathAndStatus(String.valueOf(bindingViewId), PublishStatus.PUBLISHED.getKey());
         if (def == null) {
             // todo：无发布状态的定义，返回空列表，是否要返回历史状态的流程定义数据
             return nodeVOs;
@@ -275,6 +278,8 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
     @Override
     public PageResult<BpmCcTaskPageResVO> getCcPage(BpmCcTaskPageReqVO pageReqVO) {
         Long loginUserId = WebFrameworkUtils.getLoginUserId();
+        String loginUserStrId = String.valueOf(loginUserId);
+
         // 处理节点编码参数
         pageReqVO.setNodeCodeList(splitToList(pageReqVO.getNodeCode()));
 
@@ -282,11 +287,11 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         pageReqVO.setFlowStatusList(splitToFlowStatusList(pageReqVO.getFlowStatus()));
 
         // 处理发起人参数
-        pageReqVO.setInitiatorIdList(splitToLongList(pageReqVO.getInitiatorId()));
+        pageReqVO.setInitiatorIdList(splitToList(pageReqVO.getInitiatorId()));
 
         com.github.pagehelper.Page<BpmCcRecordDTO> pageResult =  PageHelper
                 .startPage(pageReqVO.getPageNo(), pageReqVO.getPageSize())
-                .doSelectPage(() -> bpmFlowCcRecordRepository.getMapper().getCcPage(pageReqVO, String.valueOf(loginUserId)));
+                .doSelectPage(() -> bpmFlowCcRecordRepository.getMapper().getCcPage(pageReqVO, loginUserStrId));
 
         // 转换 BpmCcRecordDTO 列表为 BpmCopyTaskPageResVO 列表
         List<BpmCcTaskPageResVO> copyTaskList = new ArrayList<>();
@@ -309,8 +314,8 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
      * @param originalTitle 原始流程标题
      * @param loginUserId 当前登录用户ID
      */
-    private void handleAgentLogic(Object vo, Long agentId, String originalTitle, Long loginUserId) {
-        if (agentId != null && Objects.equals(loginUserId, agentId)) {
+    private void handleAgentLogic(Object vo, String agentId, String originalTitle, Long loginUserId) {
+        if (agentId != null && Objects.equals(String.valueOf(loginUserId), agentId)) {
             String agentTitle = BpmConstants.AGENT_TITLE_PREFIX + originalTitle;
             if (vo instanceof BpmFlowTodoTaskVO) {
                 ((BpmFlowTodoTaskVO) vo).setProcessTitle(agentTitle);

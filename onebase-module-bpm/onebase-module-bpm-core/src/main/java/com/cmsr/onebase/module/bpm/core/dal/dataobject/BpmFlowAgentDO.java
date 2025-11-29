@@ -29,7 +29,7 @@ public class BpmFlowAgentDO extends BaseEntity implements Serializable {
     /**
      * 被代理人用户ID（即委托人），代理关系的发起方
      */
-    private Long principalId;
+    private String principalId;
 
     /**
      * 被代理人用户名称（即委托人）
@@ -39,7 +39,7 @@ public class BpmFlowAgentDO extends BaseEntity implements Serializable {
     /**
      * 代理人用户ID，接受委托代为处理流程任务
      */
-    private Long agentId;
+    private String agentId;
 
     /**
      * 代理人用户名称
@@ -59,7 +59,7 @@ public class BpmFlowAgentDO extends BaseEntity implements Serializable {
     /**
      * 撤销人
      */
-    private Long revokerId;
+    private String revokerId;
 
     /**
      * 撤销时间

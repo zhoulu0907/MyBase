@@ -428,7 +428,7 @@ public class BpmDetailServiceImpl implements BpmDetailService {
     private void validateCcRecordAndSetAgent(Long taskId, InsDetailContext context) {
         Long loginUserId = context.getLoginUserId();
 
-        // 先查询直接权限
+        // 先查询直接权限（抄送记录表 user_id 为 String，这里转为 String 查询）
         BpmFlowCcRecordDO ccRecord = ccRecordRepository.findOneByTaskIdAndUserId(taskId, String.valueOf(loginUserId));
 
         if (ccRecord != null) {
@@ -436,18 +436,18 @@ public class BpmDetailServiceImpl implements BpmDetailService {
             return;
         }
 
-        // 查询代理权限
+        // 查询代理权限（BpmFlowAgentInsDO 中 agentId 为 String，这里仍使用 String 类型）
         List<BpmFlowAgentInsDO> agentInsList = agentInsRepository.findAllByTaskIdAndAgentId(
                 taskId, String.valueOf(loginUserId));
         if (CollectionUtils.isEmpty(agentInsList)) {
             throw exception(ErrorCodeConstants.FLOW_PERMISSION_DENY.getCode(), "您没有查看此抄送的任务权限");
         }
 
-        Set<Long> principalIds = agentInsList.stream()
+        // 被代理人 ID 集合（String）
+        List<String> principalStrIds = agentInsList.stream()
                 .map(BpmFlowAgentInsDO::getPrincipalId)
-                .collect(Collectors.toSet());
-
-        List<String> principalStrIds = principalIds.stream().map(String::valueOf).toList();
+                .distinct()
+                .toList();
 
         BpmFlowCcRecordDO agentCcRecord = ccRecordRepository.findOneByTaskIdAndUserIds(taskId, principalStrIds);
 
@@ -456,7 +456,7 @@ public class BpmDetailServiceImpl implements BpmDetailService {
         }
 
         // 找到代理的抄送记录，设置对应的代理记录到 context
-        Long principalId = Long.valueOf(agentCcRecord.getUserId());
+        String principalId = agentCcRecord.getUserId();
         BpmFlowAgentInsDO agentIns = agentInsList.stream()
                 .filter(agent -> Objects.equals(agent.getPrincipalId(), principalId))
                 .findFirst()
@@ -601,7 +601,7 @@ public class BpmDetailServiceImpl implements BpmDetailService {
         }
 
         // 确定要标记的用户ID（如果是代理，使用被代理人ID）
-        Long userId = context.getLoginUserId();
+        String userId = String.valueOf(context.getLoginUserId());
         if (context.getAgentIns() != null) {
             userId = context.getAgentIns().getPrincipalId();
         }
@@ -695,9 +695,9 @@ public class BpmDetailServiceImpl implements BpmDetailService {
         }
 
         for (BpmFlowAgentInsDO agentInsDO : agentInsDOList) {
-            Long principalId = agentInsDO.getPrincipalId();
+            String principalId = agentInsDO.getPrincipalId();
 
-            User agentUser = userMap.get(String.valueOf(principalId));
+            User agentUser = userMap.get(principalId);
 
             if (agentUser != null) {
                 userContext = new BpmPermissionUserContext(agentUser, agentInsDO);

@@ -95,7 +95,7 @@ public class BpmDoneTaskDTO extends FlowHisTask {
      * 代理人ID
      */
     @Column(name = "agent_id")
-    private Long agentId;
+    private String agentId;
 
     /**
      * 代理人名称

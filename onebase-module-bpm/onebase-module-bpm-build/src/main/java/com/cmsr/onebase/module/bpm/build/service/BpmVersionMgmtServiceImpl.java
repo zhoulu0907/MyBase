@@ -219,6 +219,7 @@ public class BpmVersionMgmtServiceImpl implements BpmVersionMgmtService {
         }
         return new PageResult<>(voList, pageResult.getTotalRow());
     }
+
     /**
      * 创建操作人信息
      * @param user 用户信息
@@ -229,7 +230,7 @@ public class BpmVersionMgmtServiceImpl implements BpmVersionMgmtService {
             return null;
         }
         UserBasicInfoVO operationUser = new UserBasicInfoVO();
-        operationUser.setUserId(user.getId());
+        operationUser.setUserId(String.valueOf(user.getId()));
         operationUser.setName(user.getNickname());
         operationUser.setAvatar(user.getAvatar());
         return operationUser;

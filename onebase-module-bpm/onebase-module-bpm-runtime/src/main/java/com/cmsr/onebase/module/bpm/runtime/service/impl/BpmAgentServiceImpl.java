@@ -49,16 +49,16 @@ public class BpmAgentServiceImpl implements BpmAgentService {
         Page<BpmFlowAgentDO> pageResult = bpmFlowAgentRepository.page(new Page<>(pageReqVO.getPageNo(), pageReqVO.getPageSize()), queryWrapper);
 
         // 结果不为空时 获取代理人，被代理人，创建人信息
-        List<BpmFlowAgentDO> agentList = pageResult.getRecords() != null ?
-                pageResult.getRecords() : Collections.emptyList();
+        List<BpmFlowAgentDO> agentList = pageResult.getRecords() != null
+                ? pageResult.getRecords() : Collections.emptyList();
         Map<Long, AdminUserRespDTO> agentUserInfoMap = queryAgentUser(agentList);
 
         List<BpmAgentPageResVO> list = pageResult.getRecords().stream().map(item -> {
             BpmAgentPageResVO vo = new BpmAgentPageResVO();
             // 代理人
-            vo.setAgent(toAgentUser(agentUserInfoMap.get(item.getAgentId())));
+            vo.setAgent(toAgentUser(agentUserInfoMap.get(Long.valueOf(item.getAgentId()))));
             // 被代理人
-            vo.setPrincipal(toAgentUser(agentUserInfoMap.get(item.getPrincipalId())));
+            vo.setPrincipal(toAgentUser(agentUserInfoMap.get(Long.valueOf(item.getPrincipalId()))));
             //创建人
             vo.setCreator(toAgentUser(agentUserInfoMap.get(item.getCreator())));
             vo.setStartTime(item.getStartTime());
@@ -94,17 +94,18 @@ public class BpmAgentServiceImpl implements BpmAgentService {
         }
 
         // 验证代理人是否存在
-        AdminUserRespDTO agentUser = validateAgentExists(reqVO.getAgentId());
+        AdminUserRespDTO agentUser = validateAgentExists(Long.valueOf(reqVO.getAgentId()));
 
         // 校验被代理人在指定时间段内是否已存在"待生效"或"代理中"的代理关系
-        List<BpmFlowAgentDO> overlapAgentList = bpmFlowAgentRepository.findAllOverlapAgent(reqVO.getAppId(), userId, reqVO.getStartTime(), reqVO.getEndTime());
+        List<BpmFlowAgentDO> overlapAgentList = bpmFlowAgentRepository
+                .findAllOverlapAgent(reqVO.getAppId(), userId, reqVO.getStartTime(), reqVO.getEndTime());
         if (CollectionUtils.isNotEmpty(overlapAgentList)) {
             throw exception(ErrorCodeConstants.AGENT_TIME_CONFLICT);
         }
 
         // 插入数据
         BpmFlowAgentDO bpmFlowAgentDO = new BpmFlowAgentDO();
-        bpmFlowAgentDO.setPrincipalId(userId);
+        bpmFlowAgentDO.setPrincipalId(String.valueOf(userId));
         bpmFlowAgentDO.setPrincipalName(nickname);
         bpmFlowAgentDO.setAgentId(reqVO.getAgentId());
         bpmFlowAgentDO.setAgentName(agentUser.getNickname());
@@ -135,6 +136,7 @@ public class BpmAgentServiceImpl implements BpmAgentService {
     public void revoke( BpmAgentRevokeReqVO reqVO) {
         // 获取当前登录用户信息
         Long loginUserId = WebFrameworkUtils.getLoginUserId();
+        String loginUserIdStr = String.valueOf(loginUserId);
 
         // 查询可撤销的代理记录
         BpmFlowAgentDO agent = bpmFlowAgentRepository.getById(reqVO.getId());
@@ -143,7 +145,7 @@ public class BpmAgentServiceImpl implements BpmAgentService {
         }
 
         // 校验权限：只有创建人或被代理人才能撤销
-        if (!loginUserId.equals(agent.getCreator()) && !loginUserId.equals(agent.getPrincipalId())) {
+        if (!loginUserId.equals(agent.getCreator()) && !loginUserIdStr.equals(agent.getPrincipalId())) {
             throw exception(ErrorCodeConstants.AGENT_REVOKE_NO_PERMISSION);
         }
 
@@ -156,7 +158,7 @@ public class BpmAgentServiceImpl implements BpmAgentService {
 
         // 执行撤销操作：设置撤销时间
         agent.setRevokedTime(LocalDateTime.now());
-        agent.setRevokerId(loginUserId);
+        agent.setRevokerId(loginUserIdStr);
         bpmFlowAgentRepository.updateById(agent);
     }
     /**
@@ -185,7 +187,7 @@ public class BpmAgentServiceImpl implements BpmAgentService {
         }
 
         // 校验权限：只有创建人或被代理人才能编辑
-        if (!loginUserId.equals(agent.getCreator()) && !loginUserId.equals(agent.getPrincipalId())) {
+        if (!loginUserId.equals(agent.getCreator()) && !loginUserId.equals(Long.valueOf(agent.getPrincipalId()))) {
             throw exception(ErrorCodeConstants.AGENT_UPDATE_NO_PERMISSION);
         }
 
@@ -197,7 +199,8 @@ public class BpmAgentServiceImpl implements BpmAgentService {
         }
 
         // 校验被代理人在指定时间段内是否已存在"待生效"或"代理中"的代理关系
-        List<BpmFlowAgentDO> overlapAgentList = bpmFlowAgentRepository.findAllOverlapAgent(agent.getAppId(), loginUserId, reqVO.getStartTime(), reqVO.getEndTime());
+        List<BpmFlowAgentDO> overlapAgentList = bpmFlowAgentRepository
+                .findAllOverlapAgent(agent.getAppId(), loginUserId, reqVO.getStartTime(), reqVO.getEndTime());
 
         if (CollectionUtils.isNotEmpty(overlapAgentList)) {
             // 过滤掉当前记录，只保留重叠记录（排除自己）
@@ -211,7 +214,7 @@ public class BpmAgentServiceImpl implements BpmAgentService {
         }
 
         // 验证代理人是否存在
-        AdminUserRespDTO agentUser = validateAgentExists(reqVO.getAgentId());
+        AdminUserRespDTO agentUser = validateAgentExists(Long.valueOf(reqVO.getAgentId()));
 
         // 执行更新操作
         agent.setAgentId(reqVO.getAgentId());
@@ -263,24 +266,26 @@ public class BpmAgentServiceImpl implements BpmAgentService {
             return null;
         }
         UserBasicInfoVO operationUser = new UserBasicInfoVO();
-        operationUser.setUserId(user.getId());
+        operationUser.setUserId(String.valueOf(user.getId()));
         operationUser.setName(user.getNickname());
         operationUser.setAvatar(user.getAvatar());
         return operationUser;
     }
 
-    private Map<Long, AdminUserRespDTO> queryAgentUser(List<BpmFlowAgentDO>  list) {
+    private Map<Long, AdminUserRespDTO> queryAgentUser(List<BpmFlowAgentDO> list) {
         // 获取创建人和代理人被代理人去重后一次性查出
         Set<Long> userIds = list.stream()
-                .flatMap(item -> Stream.of(item.getCreator(), item.getPrincipalId(), item.getAgentId()))
+                .flatMap(item -> Stream.of(
+                        item.getCreator(),
+                        item.getPrincipalId() != null ? Long.valueOf(item.getPrincipalId()) : null,
+                        item.getAgentId() != null ? Long.valueOf(item.getAgentId()) : null))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
         CommonResult<List<AdminUserRespDTO>> userResult = adminUserApi.getUserList(userIds);
         if (userResult.isSuccess()) {
-            Map<Long, AdminUserRespDTO> userMap = userResult.getData().stream()
+            return userResult.getData().stream()
                     .collect(Collectors.toMap(AdminUserRespDTO::getId, user -> user));
-            return userMap;
-        }else{
+        } else {
             throw exception(ErrorCodeConstants.USER_API_CALL_FAILED);
         }
     }

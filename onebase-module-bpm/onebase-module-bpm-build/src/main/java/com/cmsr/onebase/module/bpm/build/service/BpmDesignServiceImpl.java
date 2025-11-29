@@ -5,7 +5,7 @@ import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.build.vo.design.BpmDesignVO;
 import com.cmsr.onebase.module.bpm.build.vo.design.BpmPublishReqVO;
 import com.cmsr.onebase.module.bpm.convert.BpmDesignConvert;
-import com.cmsr.onebase.module.bpm.core.service.BpmEngineDefExtService;
+import com.cmsr.onebase.module.bpm.core.dal.database.ext.BpmFlowDefinitionRepositoryExt;
 import com.cmsr.onebase.module.bpm.core.vo.design.BpmDefJsonVO;
 import com.cmsr.onebase.module.engine.orm.mybatisflex.entity.FlowDefinition;
 import com.cmsr.onebase.module.engine.orm.mybatisflex.repository.FlowDefinitionRepository;
@@ -42,7 +42,7 @@ public class BpmDesignServiceImpl implements BpmDesignService {
     private DefService defService;
 
     @Resource
-    private BpmEngineDefExtService defExtService;
+    private BpmFlowDefinitionRepositoryExt defExtService;
 
     @Resource
     private FlowDefinitionRepository flowDefinitionRepository;

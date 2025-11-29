@@ -1,28 +1,28 @@
-package com.cmsr.onebase.module.bpm.core.service.impl;
+package com.cmsr.onebase.module.bpm.core.dal.database.ext;
 
-import com.cmsr.onebase.module.bpm.core.service.BpmEngineDefExtService;
 import com.cmsr.onebase.module.engine.orm.mybatisflex.entity.FlowDefinition;
 import com.cmsr.onebase.module.engine.orm.mybatisflex.repository.FlowDefinitionRepository;
 import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
+import lombok.Getter;
 import org.dromara.warm.flow.core.entity.Definition;
-import org.dromara.warm.flow.core.service.DefService;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Repository;
 
 /**
- * BPM流程定义扩展服务
+ * BPM流程定义扩展仓储，基于FlowDefinitionRepository实现
+ *
+ * 由于FlowDefinitionRepository是warmflow的内置仓储，其逻辑与业务无关
+ *
+ * 所以单独创建一个BpmFlowDefinitionRepositoryExt，进行业务功能的扩展
  *
  * 提供根据formPath查询流程定义的便捷方法，供build和runtime模块使用
  *
  * @author liyang
  * @date 2025-10-27
  */
-@Service
-public class BpmEngineDefExtServiceImpl implements BpmEngineDefExtService {
-
-    @Resource
-    private DefService defService;
-
+@Getter
+@Repository
+public class BpmFlowDefinitionRepositoryExt {
     @Resource
     private FlowDefinitionRepository flowDefinitionRepository;
 
@@ -48,6 +48,10 @@ public class BpmEngineDefExtServiceImpl implements BpmEngineDefExtService {
         FlowDefinition query = new FlowDefinition();
         query.setFormPath(formPath);
         query.setIsPublish(isPublish);
-        return defService.getOne(query);
+
+        QueryWrapper queryWrapper = QueryWrapper.create(query);
+        queryWrapper.orderBy(FlowDefinition::getCreateTime, false);
+
+        return flowDefinitionRepository.getOne(queryWrapper);
     }
 }

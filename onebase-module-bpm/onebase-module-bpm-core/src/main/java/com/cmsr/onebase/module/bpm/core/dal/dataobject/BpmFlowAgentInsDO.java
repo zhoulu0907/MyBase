@@ -33,7 +33,7 @@ public class BpmFlowAgentInsDO extends BaseEntity implements Serializable {
     /**
      * 被代理人ID
      */
-    private Long principalId;
+    private String principalId;
 
     /**
      * 被代理人用户名称
@@ -43,7 +43,7 @@ public class BpmFlowAgentInsDO extends BaseEntity implements Serializable {
     /**
      * 代理人ID
      */
-    private Long agentId;
+    private String agentId;
 
     /**
      * 代理人用户名称

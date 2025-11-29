@@ -29,5 +29,5 @@ public class BpmDoneTaskPageReqVO extends BpmInsExtQueryPageVO {
     /**
      * 发起人列表
      */
-    private List<Long> initiatorIdList;
+    private List<String> initiatorIdList;
 }

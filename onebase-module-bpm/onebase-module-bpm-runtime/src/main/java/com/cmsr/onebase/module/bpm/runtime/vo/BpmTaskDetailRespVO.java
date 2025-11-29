@@ -18,7 +18,7 @@ public class BpmTaskDetailRespVO {
 
     @Deprecated
     @Schema(description = "发起人ID")
-    private Long initiatorId;
+    private String initiatorId;
 
     @Deprecated
     @Schema(description = "发起人")
@@ -64,5 +64,5 @@ public class BpmTaskDetailRespVO {
     private String agentName;
 
     @Schema(description = "代理人ID")
-    private Long agentId;
+    private String agentId;
 }

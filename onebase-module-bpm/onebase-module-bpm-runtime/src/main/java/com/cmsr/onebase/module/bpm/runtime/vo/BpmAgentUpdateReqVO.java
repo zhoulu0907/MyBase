@@ -23,7 +23,7 @@ public class BpmAgentUpdateReqVO {
 
     @Schema(description = "代理人ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
     @NotNull(message = "代理人ID不能为空")
-    private Long agentId;
+    private String agentId;
 
     @Schema(description = "代理人名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "张三")
     @NotBlank(message = "代理人名称不能为空")

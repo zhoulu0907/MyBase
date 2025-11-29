@@ -44,7 +44,7 @@ public class BpmFlowInsBizExtDO extends BaseEntity implements Serializable {
     /**
      * 发起人ID
      */
-    private Long initiatorId;
+    private String initiatorId;
 
     /**
      * 发起人名称（冗余字段）

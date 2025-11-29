@@ -64,11 +64,18 @@ public class BpmFlowAgentRepository extends ServiceImpl<BpmFlowAgentMapper, BpmF
      * @param principalId 被代理人ID
      * @return 代理记录列表
      */
-    public List<BpmFlowAgentDO> findAllActiveAgent(Long appId, Long principalId) {
-       return findAllActiveAgent(appId, List.of(principalId));
+    public List<BpmFlowAgentDO> findAllActiveAgent(Long appId, String principalId) {
+        return findAllActiveAgent(appId, List.of(principalId));
     }
 
-    public List<BpmFlowAgentDO> findAllActiveAgent(Long appId, Collection<Long> principalIds) {
+    /**
+     * 根据被代理人ID集合查询有效代理记录
+     *
+     * @param appId        应用 ID
+     * @param principalIds 被代理人 ID 集合
+     * @return 代理记录列表
+     */
+    public List<BpmFlowAgentDO> findAllActiveAgent(Long appId, Collection<String> principalIds) {
         QueryWrapper queryWrapper = QueryWrapper.create();
 
         if (principalIds.size() == 1) {
@@ -97,7 +104,8 @@ public class BpmFlowAgentRepository extends ServiceImpl<BpmFlowAgentMapper, BpmF
     public List<BpmFlowAgentDO> findAllOverlapAgent(Long appId, Long principalId, LocalDateTime startTime, LocalDateTime endTime) {
         QueryWrapper queryWrapper = QueryWrapper.create();
         queryWrapper.eq(BpmFlowAgentDO::getAppId, appId);
-        queryWrapper.eq(BpmFlowAgentDO::getPrincipalId, principalId);
+        // principalId 在 DO 中改为 String，这里统一转为 String 再查询
+        queryWrapper.eq(BpmFlowAgentDO::getPrincipalId, String.valueOf(principalId));
 
         // 记录开始时间 < 新记录结束时间 并且 记录结束时间 > 新记录开始时间
         queryWrapper.le(BpmFlowAgentDO::getStartTime, endTime);
