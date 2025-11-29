@@ -9,6 +9,7 @@ import java.util.List;
  * @Date：2025/7/23 13:40
  */
 public interface AppMenuService {
+
     List<MenuListRespVO> listBpmApplicationMenu(Long applicationId);
 
     void createDefaultBpmMenu(Long applicationId);

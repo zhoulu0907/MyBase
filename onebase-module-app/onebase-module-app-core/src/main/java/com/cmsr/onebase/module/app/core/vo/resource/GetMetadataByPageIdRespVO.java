@@ -1,10 +1,7 @@
-package com.cmsr.onebase.module.app.build.vo.appresource;
+package com.cmsr.onebase.module.app.core.vo.resource;
 
-import com.cmsr.onebase.module.app.core.dto.appresource.PageDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-
-import java.util.List;
 
 /**
  * @ClassName GetMetadataByPageIdRespVO

@@ -1,9 +1,9 @@
 package com.cmsr.onebase.module.app.build.service.resource;
 
-import com.cmsr.onebase.module.app.build.vo.appresource.*;
 import com.cmsr.onebase.module.app.core.dto.appresource.CopyPageSetDTO;
 import com.cmsr.onebase.module.app.core.dto.appresource.CreatePageSetDTO;
 import com.cmsr.onebase.module.app.core.dto.appresource.PageSetRespDTO;
+import com.cmsr.onebase.module.app.core.vo.resource.*;
 
 public interface PageSetService {
 

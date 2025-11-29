@@ -3,10 +3,10 @@ package com.cmsr.onebase.module.app.build.service.resource;
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.build.util.PageUtils;
+import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageSetPageRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageSetRepository;
-import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppMenuDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePageDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetDO;
@@ -16,14 +16,14 @@ import com.cmsr.onebase.module.app.core.enums.appresource.AppResourceErrorCodeCo
 import com.cmsr.onebase.module.app.core.enums.appresource.PageEnum;
 import com.cmsr.onebase.module.app.core.enums.appresource.ViewEnmu;
 import jakarta.annotation.Resource;
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Compare;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class PageServiceImpl implements PageService {
@@ -46,7 +46,6 @@ public class PageServiceImpl implements PageService {
         if (pageDO == null) {
             throw ServiceExceptionUtil.exception(AppResourceErrorCodeConstants.PAGE_NOT_EXIST);
         }
-
         return BeanUtils.toBean(pageDO, PageRespDTO.class);
     }
 
@@ -106,45 +105,31 @@ public class PageServiceImpl implements PageService {
         pageSetPageRepository.deleteByPageId(pageId);
         // 删除页面
         pageRepository.removeById(pageId);
-
         return true;
     }
 
     @Override
     public List<PageDTO> getFormPageListByAppId(Long appId) {
-        ConfigStore configs = new DefaultConfigStore();
-        configs.eq("application_id", appId);
-
         List<AppMenuDO> menuDOList = menuDataRepository.findByApplicationId(appId);
-        List<Long> menuIdList = menuDOList.stream()
-                .map(AppMenuDO::getId)
-                .toList();
+        List<Long> menuIdList = menuDOList.stream().map(AppMenuDO::getId).toList();
+        if (CollectionUtils.isEmpty(menuIdList)) {
+            return Collections.emptyList();
+        }
+        List<AppResourcePagesetDO> pageSetDoList = pageSetRepository.findByMenuIds(menuIdList);
+        if (CollectionUtils.isEmpty(pageSetDoList)) {
+            return Collections.emptyList();
+        }
+        List<Long> pageSetIdList = pageSetDoList.stream()
+                .map(AppResourcePagesetDO::getId)
+                .collect(Collectors.toList());
+        List<AppResourcePageDO> pageDOList = pageRepository.findAllFormPageByPageSetIds(pageSetIdList);
+        List<PageDTO> pageDTOList = BeanUtils.toBean(pageDOList, PageDTO.class);
+        return pageDTOList;
 
-        configs = new DefaultConfigStore();
-        configs.in(Compare.EMPTY_VALUE_SWITCH.BREAK, "menu_id", menuIdList, true, true);
-
-//        List<AppResourcePagesetDO> pageSetDoList = pageSetRepository.findAllByConfig(configs);
-//
-//        List<Long> pageSetIdList = pageSetDoList.stream()
-//                .map(AppResourcePagesetDO::getId)
-//                .collect(Collectors.toList());
-//
-//        configs = new DefaultConfigStore();
-//        configs.in(Compare.EMPTY_VALUE_SWITCH.BREAK, "pageset_id", pageSetIdList, true, true);
-//        configs.eq("page_type", PageEnum.FORM.getValue());
-//        List<AppResourcePageDO> pageDOList = pageRepository.findAllByConfig(configs);
-
-//        List<PageDTO> pageDTOList = BeanUtils.toBean(pageDOList, PageDTO.class);
-
-//        return pageDTOList;
-        return null;
     }
 
     @Override
     public String getMetadataByPageId(Long pageId) {
-        ConfigStore configs = new DefaultConfigStore();
-        configs.eq("page_id", pageId);
-
         AppResourcePagesetPageDO pageSetPageDO = pageSetPageRepository.findByPageId(pageId);
         AppResourcePagesetDO pageSetDO = pageSetRepository.getById(pageSetPageDO.getPageSetId());
 
@@ -155,7 +140,6 @@ public class PageServiceImpl implements PageService {
     public List<PageDTO> listPageView(Long pageSetId) {
         List<AppResourcePageDO> pageDOList = pageRepository.findAllFormPageByPageSetId(pageSetId);
         List<PageDTO> pageDTOList = BeanUtils.toBean(pageDOList, PageDTO.class);
-
         return pageDTOList;
     }
 
