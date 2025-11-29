@@ -77,7 +77,7 @@ public class BuildWebSecurityConfigurerAdapter {
     private BuildAuthenticationFilter authenticationTokenFilter;
 
     @Autowired
-    private BuildApplicationContextHeaderFilter applicationFilter;
+    private BuildApplicationContextHeaderFilter applicationContextHeaderFilter;
     /**
      * 自定义的权限映射 Bean 们
      *
@@ -165,7 +165,7 @@ public class BuildWebSecurityConfigurerAdapter {
                         .anyRequest().authenticated());
 
         // 添加 Token Filter
-        httpSecurity.addFilterBefore(applicationFilter, BuildApplicationContextHeaderFilter.class);
+        httpSecurity.addFilterBefore(applicationContextHeaderFilter, UsernamePasswordAuthenticationFilter.class);
         httpSecurity.addFilterBefore(authenticationTokenFilter, UsernamePasswordAuthenticationFilter.class);
         return httpSecurity.build();
     }
