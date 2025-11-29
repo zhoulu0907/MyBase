@@ -37,23 +37,23 @@ public class CreateFlowConnectorScriptReqVO {
     @Schema(description = "输出参数配置")
     private JsonNode outputParameter;
 
-    public String getInputParameter() {
-        if (this.inputParameter == null || this.inputParameter instanceof NullNode) {
-            return null;
-        }
-        if (this.inputParameter instanceof TextNode) {
-            return this.inputParameter.asText();
-        }
-        return JsonUtils.toJsonString(this.inputParameter);
-    }
-
-    public String getOutputParameter() {
-        if (this.outputParameter == null || this.outputParameter instanceof NullNode) {
-            return null;
-        }
-        if (this.outputParameter instanceof TextNode) {
-            return this.outputParameter.asText();
-        }
-        return JsonUtils.toJsonString(this.outputParameter);
-    }
+//    public String getInputParameter() {
+//        if (this.inputParameter == null || this.inputParameter instanceof NullNode) {
+//            return null;
+//        }
+//        if (this.inputParameter instanceof TextNode) {
+//            return this.inputParameter.asText();
+//        }
+//        return JsonUtils.toJsonString(this.inputParameter);
+//    }
+//
+//    public String getOutputParameter() {
+//        if (this.outputParameter == null || this.outputParameter instanceof NullNode) {
+//            return null;
+//        }
+//        if (this.outputParameter instanceof TextNode) {
+//            return this.outputParameter.asText();
+//        }
+//        return JsonUtils.toJsonString(this.outputParameter);
+//    }
 }

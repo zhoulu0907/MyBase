@@ -1,10 +1,8 @@
 package com.cmsr.onebase.module.flow.build.vo;
 
-import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDateTime;
 
@@ -18,6 +16,9 @@ public class FlowConnectorVO {
     @Schema(description = "连接器ID")
     private Long connectorId;
 
+    @Schema(description = "连接器UUID")
+    private String connectorUuid;
+
     @Schema(description = "连接器类型编号")
     private String typeCode;
 
@@ -28,7 +29,7 @@ public class FlowConnectorVO {
     private String description;
 
     @Schema(description = "连接器可选配置")
-    private String config;
+    private JsonNode config;
 
     @Schema(description = "连接器版本")
     private String connectorVersion;
@@ -36,20 +37,20 @@ public class FlowConnectorVO {
     @Schema(description = "连接器创建时间")
     private LocalDateTime createTime;
 
-    public JsonNode getConfig() {
-        if (StringUtils.isBlank(this.config)) {
-            return null;
-        }
-
-        return JsonUtils.parseTree(this.config);
-    }
-
-    public void setConfig(JsonNode config) {
-        if (config == null) {
-            return;
-        }
-
-        this.config = JsonUtils.toJsonString(config);
-    }
+//    public JsonNode getConfig() {
+//        if (StringUtils.isBlank(this.config)) {
+//            return null;
+//        }
+//
+//        return JsonUtils.parseTree(this.config);
+//    }
+//
+//    public void setConfig(JsonNode config) {
+//        if (config == null) {
+//            return;
+//        }
+//
+//        this.config = JsonUtils.toJsonString(config);
+//    }
 
 }

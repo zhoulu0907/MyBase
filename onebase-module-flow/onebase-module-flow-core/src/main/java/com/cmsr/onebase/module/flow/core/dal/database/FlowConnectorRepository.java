@@ -18,7 +18,7 @@ import static com.cmsr.onebase.module.flow.core.dal.dataobject.table.FlowConnect
 public class FlowConnectorRepository extends BaseAppRepository<FlowConnectorMapper, FlowConnectorDO> {
 
 
-    public PageResult<FlowConnectorDO> getConnectorPage(PageConnectorReqVO pageReqVO) {
+    public PageResult<FlowConnectorDO> selectConnectorPage(PageConnectorReqVO pageReqVO) {
         String connectorName = pageReqVO.getConnectorName();
 
         QueryWrapper query = this.query()
