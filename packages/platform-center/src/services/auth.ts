@@ -1,12 +1,12 @@
 import { type Captcha, type CaptchaCheck } from '@onebase/common';
 import {
+  CodeType,
   Headers,
   LoginRequest,
   RuntimeAccountLoginRequest,
-  RuntimeMobileLoginRequest,
-  TenantLoginRequest,
   RuntimeCorpLoginRequest,
-  CodeType,
+  RuntimeMobileLoginRequest,
+  TenantLoginRequest
 } from '../types';
 import { platformService, runtimeService, systemService } from './clients';
 
@@ -20,6 +20,10 @@ export const tenantLogin = (req: TenantLoginRequest, headers: Headers) => {
 
 export const getPermissionInfo = (code?: CodeType) => {
   return systemService.get(`/auth/get-permission-info?code=${code}`);
+};
+
+export const runtimeGetPermissionInfo = (code?: CodeType) => {
+  return runtimeService.get(`/auth/get-permission-info?code=${code}`);
 };
 
 export const adminLogin = (req: LoginRequest, headers: Headers) => {
@@ -36,7 +40,7 @@ export const sassLogin = (req: RuntimeMobileLoginRequest, headers: Headers) => {
 
 export const corpLogin = (req: RuntimeCorpLoginRequest, headers: Headers) => {
   return systemService.post('/auth/corp-login', req, { headers });
-}
+};
 
 export const platformLogout = () => {
   return platformService.post('/auth/logout');

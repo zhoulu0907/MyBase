@@ -5,12 +5,12 @@ import UserProfileAvatar from '@/components/UserProfileAvatar';
 
 import { useI18n } from '@/hooks/useI18n';
 import { appInfoSignal } from '@/store/app';
-import { UserPermissionManager, type UserPermissionInfo } from '@/utils/permission';
+import { UserPermissionManager } from '@/utils/permission';
 import { Divider, Dropdown, Layout, Menu, Typography } from '@arco-design/web-react';
 import { IconExport } from '@arco-design/web-react/icon';
 import { getApplication, type GetApplicationReq } from '@onebase/app';
 import { TokenManager } from '@onebase/common';
-import { runTimeGetUser } from '@onebase/platform-center';
+import { CodeType, runtimeGetPermissionInfo } from '@onebase/platform-center';
 import { appIconMap } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -71,24 +71,30 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
 
   const getInfo = async () => {
     // TODO(多租户): 等马老师修复
-    // const res = await getPermissionInfo(CodeType.CORP);
-    if (tokenInfo?.userId) {
-      const res = await runTimeGetUser(tokenInfo?.userId);
-      console.log(res);
+    const res = await runtimeGetPermissionInfo(CodeType.CORP);
+    UserPermissionManager.setUserPermissionInfo(res);
+    const mobile = res.mobile;
+    const formatMobile = maskMobile(mobile);
+    setMobile(formatMobile);
+    setUserInfo(res);
 
-      const userPermissionInfo: UserPermissionInfo = {
-        user: res,
-        roles: [],
-        permissions: [],
-        menus: []
-      };
+    // if (tokenInfo?.userId) {
+    //   const res = await runTimeGetUser(tokenInfo?.userId);
+    //   console.log(res);
 
-      UserPermissionManager.setUserPermissionInfo(userPermissionInfo);
-      const mobile = res.mobile;
-      const formatMobile = maskMobile(mobile);
-      setMobile(formatMobile);
-      setUserInfo(res);
-    }
+    //   const userPermissionInfo: UserPermissionInfo = {
+    //     user: res,
+    //     roles: [],
+    //     permissions: [],
+    //     menus: []
+    //   };
+
+    //   UserPermissionManager.setUserPermissionInfo(userPermissionInfo);
+    //   const mobile = res.mobile;
+    //   const formatMobile = maskMobile(mobile);
+    //   setMobile(formatMobile);
+    //   setUserInfo(res);
+    // }
   };
 
   // 登出处理

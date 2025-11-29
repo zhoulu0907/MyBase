@@ -294,6 +294,7 @@ const AppManagement: React.FC = () => {
           key="2"
           onClick={(e) => {
             e.stopPropagation();
+            setAppName('');
             setDeleteApp(item);
             setDeleteVisible(true);
           }}
@@ -477,11 +478,17 @@ const AppManagement: React.FC = () => {
                         <>
                           <AvatarGroup size={24} maxCount={4} zIndexAscend>
                             {item?.userPhotoList?.map((item) => {
-                              return <>{item.avatar ? 
-                                <Avatar><img src={item.avatar} alt="avatar" /></Avatar> : 
-                                <Avatar style={{backgroundColor: '#009e9e'}}>{item?.nickName?.charAt(0)}</Avatar>
-                                }
-                              </>;
+                              return (
+                                <>
+                                  {item.avatar ? (
+                                    <Avatar>
+                                      <img src={item.avatar} alt="avatar" />
+                                    </Avatar>
+                                  ) : (
+                                    <Avatar style={{ backgroundColor: '#009e9e' }}>{item?.nickName?.charAt(0)}</Avatar>
+                                  )}
+                                </>
+                              );
                             })}
                             {(item?.userPhotoList?.length > 1 && (
                               <>
@@ -540,7 +547,7 @@ const AppManagement: React.FC = () => {
       </div>
 
       <Modal
-        title={`确认要删除应用（智慧工厂应用）吗？`}
+        title={`确认要删除应用（${deleteApp?.appName ?? ''}）吗？`}
         visible={deleteVisible}
         onOk={handleDeleteApp}
         onCancel={() => setDeleteVisible(false)}
@@ -568,7 +575,7 @@ const AppManagement: React.FC = () => {
             删除应用，其流程、流程数据、表单、列表、模型、权限组等都会删除，请谨慎操作。
             <br />
             <br />
-            如确定删除，请输入应用名称：智慧工厂应用
+            如确定删除，请输入应用名称：{deleteApp?.appName ?? ''}
           </div>
           <Input value={appName} allowClear placeholder="请输入应用名称" style={{ width: 400 }} onChange={setAppName} />
         </div>
