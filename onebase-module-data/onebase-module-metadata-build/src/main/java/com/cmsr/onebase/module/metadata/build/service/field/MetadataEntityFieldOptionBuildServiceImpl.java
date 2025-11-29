@@ -33,20 +33,20 @@ public class MetadataEntityFieldOptionBuildServiceImpl implements MetadataEntity
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long create(MetadataEntityFieldOptionDO option) {
-        optionRepository.insert(option);
+        optionRepository.save(option);
         return option.getId();
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void update(MetadataEntityFieldOptionDO option) {
-        optionRepository.update(option);
+        optionRepository.updateById(option);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteById(Long id) {
-        optionRepository.deleteById(id);
+        optionRepository.removeById(id);
     }
 
     @Override
@@ -63,7 +63,7 @@ public class MetadataEntityFieldOptionBuildServiceImpl implements MetadataEntity
             MetadataEntityFieldOptionDO upd = new MetadataEntityFieldOptionDO();
             upd.setId(it.getId());
             upd.setOptionOrder(it.getOptionOrder());
-            optionRepository.update(upd);
+            optionRepository.updateById(upd);
         }
     }
 

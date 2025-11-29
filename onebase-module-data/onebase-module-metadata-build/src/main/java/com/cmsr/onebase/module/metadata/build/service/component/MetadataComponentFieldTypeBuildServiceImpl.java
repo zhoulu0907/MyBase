@@ -4,12 +4,9 @@ import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.FieldTypeConfigRespVO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataComponentFieldTypeDO;
+import com.cmsr.onebase.module.metadata.core.dal.database.MetadataComponentFieldTypeRepository;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.DataSet;
-import org.anyline.entity.Order;
-import org.anyline.service.AnylineService;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -27,19 +24,12 @@ import java.util.stream.Collectors;
 public class MetadataComponentFieldTypeBuildServiceImpl implements MetadataComponentFieldTypeBuildService {
 
     @Resource
-    private AnylineService<?> anylineService;
+    private MetadataComponentFieldTypeRepository fieldTypeRepository;
 
     @Override
     public List<MetadataComponentFieldTypeDO> getAllFieldTypes() {
         try {
-            DefaultConfigStore configStore = new DefaultConfigStore();
-            configStore.and(MetadataComponentFieldTypeDO.STATUS, CommonStatusEnum.ENABLE.getStatus()); // 只获取启用的字段类型
-            configStore.and("deleted", 0); // 未删除的记录
-            configStore.order(MetadataComponentFieldTypeDO.SORT_ORDER, Order.TYPE.ASC);
-            configStore.order("create_time", Order.TYPE.ASC);
-
-            DataSet dataSet = anylineService.querys("metadata_component_field_type", configStore);
-            List<MetadataComponentFieldTypeDO> results = dataSet.entity(MetadataComponentFieldTypeDO.class);
+            List<MetadataComponentFieldTypeDO> results = fieldTypeRepository.findAllEnabled();
 
             // 如果数据库中没有数据，返回默认的字段类型配置
             if (results.isEmpty()) {
@@ -67,15 +57,7 @@ public class MetadataComponentFieldTypeBuildServiceImpl implements MetadataCompo
         if (fieldTypeCode == null || fieldTypeCode.trim().isEmpty()) {
             return null;
         }
-
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and(MetadataComponentFieldTypeDO.FIELD_TYPE_CODE, fieldTypeCode);
-        configStore.and(MetadataComponentFieldTypeDO.STATUS, CommonStatusEnum.ENABLE.getStatus());
-        configStore.and("deleted", 0);
-
-        DataSet dataSet = anylineService.querys("metadata_component_field_type", configStore);
-        List<MetadataComponentFieldTypeDO> results = dataSet.entity(MetadataComponentFieldTypeDO.class);
-        return results.isEmpty() ? null : results.get(0);
+        return fieldTypeRepository.findByFieldTypeCode(fieldTypeCode);
     }
 
     @Override
@@ -209,13 +191,13 @@ public class MetadataComponentFieldTypeBuildServiceImpl implements MetadataCompo
      */
     private MetadataComponentFieldTypeDO createDefaultFieldType(String code, String name, String desc,
             String dataType, int sortOrder) {
-        return MetadataComponentFieldTypeDO.builder()
-                .fieldTypeCode(code)
-                .fieldTypeName(name)
-                .fieldTypeDesc(desc)
-                .dataType(dataType)
-                .sortOrder(sortOrder)
-                .status(CommonStatusEnum.ENABLE.getStatus())
-                .build();
+        MetadataComponentFieldTypeDO fieldType = new MetadataComponentFieldTypeDO();
+        fieldType.setFieldTypeCode(code);
+        fieldType.setFieldTypeName(name);
+        fieldType.setFieldTypeDesc(desc);
+        fieldType.setDataType(dataType);
+        fieldType.setSortOrder(sortOrder);
+        fieldType.setStatus(CommonStatusEnum.ENABLE.getStatus());
+        return fieldType;
     }
 }

@@ -112,7 +112,7 @@ public class MetadataValidationLengthBuildServiceImpl implements MetadataValidat
         data.setGroupId(groupId);
         data.setPromptMessage(vo.getPopPrompt());
         // 保存长度校验规则
-        lengthRepository.upsert(data);
+        lengthRepository.saveOrUpdate(data);
         
         // 同步到MetadataEntityFieldDO：如果设置了maxLength，则同步到dataLength字段
         syncToEntityField(vo.getFieldId(), data.getMaxLength());
@@ -200,7 +200,7 @@ public class MetadataValidationLengthBuildServiceImpl implements MetadataValidat
             updateDO.setPromptMessage(reqVO.getPopPrompt());
 
             // 执行更新
-            lengthRepository.update(updateDO);
+            lengthRepository.updateById(updateDO);
 
             // 同步字段 dataLength
             syncToEntityField(existingDO.getFieldId(), updateDO.getMaxLength());
@@ -262,7 +262,7 @@ public class MetadataValidationLengthBuildServiceImpl implements MetadataValidat
             }
             MetadataValidationLengthDO lengthDO = list.get(0);
             fieldId = lengthDO.getFieldId();
-            lengthRepository.deleteById(lengthDO.getId());
+            lengthRepository.removeById(lengthDO.getId());
         }
         
         // 无论子表是否存在，都要删除主表作为兜底（防止脏数据）
@@ -289,7 +289,7 @@ public class MetadataValidationLengthBuildServiceImpl implements MetadataValidat
                 updateField.setDataLength(maxLength); // 将maxLength同步到dataLength
                 
                 // 直接使用字段仓库进行更新
-                entityFieldRepository.update(updateField);
+                entityFieldRepository.updateById(updateField);
             }
         } catch (Exception e) {
             // 记录错误但不影响主流程

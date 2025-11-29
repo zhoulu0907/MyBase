@@ -2,9 +2,9 @@ package com.cmsr.onebase.module.metadata.core.service.entity;
 
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataSystemFieldsDO;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataSystemFieldsRepository;
+import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,7 +23,7 @@ public class MetadataSystemFieldsCoreServiceImpl implements MetadataSystemFields
     private MetadataSystemFieldsRepository metadataSystemFieldsRepository;
 
     @Override
-    public List<MetadataSystemFieldsDO> findAllByConfig(DefaultConfigStore configStore) {
-        return metadataSystemFieldsRepository.findAllByConfig(configStore);
+    public List<MetadataSystemFieldsDO> findAllByConfig(QueryWrapper queryWrapper) {
+        return metadataSystemFieldsRepository.list(queryWrapper);
     }
 }

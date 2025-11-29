@@ -108,7 +108,7 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
             ruleGroup.setRgStatus(StatusEnumUtil.ACTIVE);
         }
 
-        validationRuleGroupRepository.upsert(ruleGroup);
+        validationRuleGroupRepository.saveOrUpdate(ruleGroup);
         Long groupId = ruleGroup.getId();
 
         // 处理规则定义
@@ -130,7 +130,7 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
 
         // 更新校验规则分组
         MetadataValidationRuleGroupDO updateObj = BeanUtils.toBean(updateReqVO, MetadataValidationRuleGroupDO.class);
-        validationRuleGroupRepository.update(updateObj); // 使用update而不是upsert，避免主键冲突
+        validationRuleGroupRepository.updateById(updateObj); // 使用updateById而不是upsert，避免主键冲突
 
         // 处理规则定义：仅当前端传入了新的规则结构时，才删除重建；
         // 否则保留原有规则，便于只更新valMethod/popPrompt/popType等基础信息。
@@ -154,22 +154,22 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
         validationRuleDefinitionService.deleteByGroupId(id);
 
         // 删除校验规则分组
-        validationRuleGroupRepository.deleteById(id);
+        validationRuleGroupRepository.removeById(id);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void safeDeleteGroupDirect(Long groupId) {
         if (groupId == null) { return; }
-        MetadataValidationRuleGroupDO group = validationRuleGroupRepository.findById(groupId);
+        MetadataValidationRuleGroupDO group = validationRuleGroupRepository.getById(groupId);
         if (group == null) { return; }
         validationRuleDefinitionService.deleteByGroupId(groupId);
-        validationRuleGroupRepository.deleteById(groupId);
+        validationRuleGroupRepository.removeById(groupId);
     }
 
     @Override
     public MetadataValidationRuleGroupDO getValidationRuleGroup(Long id) {
-        return validationRuleGroupRepository.findById(id);
+        return validationRuleGroupRepository.getById(id);
     }
 
     @Override
@@ -232,7 +232,7 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
             group.setRgDesc("字段" + fieldId + "的规则组");
             group.setRgStatus(StatusEnumUtil.ACTIVE);
             // 同步entityId
-            var fieldDO = entityFieldRepository.findById(fieldId);
+            var fieldDO = entityFieldRepository.getById(fieldId);
             if (fieldDO != null) {
                 group.setEntityId(fieldDO.getEntityId());
             }
@@ -243,7 +243,7 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
             if (popPrompt != null) {
                 group.setPopPrompt(popPrompt);
             }
-            validationRuleGroupRepository.insert(group);
+            validationRuleGroupRepository.save(group);
         } else {
             // 如果组已存在但缺少validation_type或pop_prompt，则更新
             boolean needUpdate = false;
@@ -256,7 +256,7 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
                 needUpdate = true;
             }
             if (needUpdate) {
-                validationRuleGroupRepository.update(group);
+                validationRuleGroupRepository.updateById(group);
             }
         }
         return group.getId();
@@ -268,7 +268,7 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
      * @param id 校验规则分组编号
      */
     private void validateValidationRuleGroupExists(Long id) {
-        if (validationRuleGroupRepository.findById(id) == null) {
+        if (validationRuleGroupRepository.getById(id) == null) {
             throw exception(ErrorCodeConstants.VALIDATION_RULE_GROUP_NOT_EXISTS);
         }
     }
@@ -437,7 +437,7 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
         vo.setErrorMessage(popPrompt);
 
         // 获取规则组详细信息
-        MetadataValidationRuleGroupDO ruleGroup = validationRuleGroupRepository.findById(groupId);
+        MetadataValidationRuleGroupDO ruleGroup = validationRuleGroupRepository.getById(groupId);
         if (ruleGroup == null) {
             log.info("规则组 {} 不存在，返回空值", groupId);
             vo.setValidationType(null);
@@ -586,7 +586,7 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
 
         try {
             // 使用 entityFieldRepository 查询字段信息，返回displayName而不是fieldName
-            var fieldDO = entityFieldRepository.findById(fieldId);
+            var fieldDO = entityFieldRepository.getById(fieldId);
             return fieldDO != null ? fieldDO.getDisplayName() : null;
         } catch (Exception e) {
             log.error("根据字段ID获取字段显示名称失败，fieldId: {}", fieldId, e);
