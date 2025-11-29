@@ -102,9 +102,6 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
      * 获取实体字段
      */
     protected List<MetadataEntityFieldDO> getEntityFields(Long entityId) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and(MetadataEntityFieldDO.ENTITY_ID, entityId);
-        configStore.and("deleted", 0);
         List<MetadataEntityFieldDO> fields = metadataEntityFieldService.getEntityFieldListByEntityId(entityId);
         if (fields == null || fields.isEmpty()) {
             throw exception(ENTITY_FIELD_NOT_EXISTS);

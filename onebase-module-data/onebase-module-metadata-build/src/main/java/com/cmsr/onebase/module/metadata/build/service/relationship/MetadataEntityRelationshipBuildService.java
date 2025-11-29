@@ -115,10 +115,10 @@ public interface MetadataEntityRelationshipBuildService {
     /**
      * 根据条件查询实体关系列表
      *
-     * @param configStore 查询条件
+     * @param queryWrapper 查询条件
      * @return 实体关系列表
      */
-    List<MetadataEntityRelationshipDO> findAllByConfig(org.anyline.data.param.init.DefaultConfigStore configStore);
+    List<MetadataEntityRelationshipDO> findAllByConfig(com.mybatisflex.core.query.QueryWrapper queryWrapper);
 
     /**
      * 根据字段id删除关联关系 包括字段作为 源字段和目标字段 两种情况

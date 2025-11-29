@@ -37,10 +37,7 @@ public class MybatisFlexConfiguration implements MyBatisFlexCustomizer {
         defaultConfig.setNormalValueOfLogicDelete(0);
         defaultConfig.setDeletedValueOfLogicDelete(System.currentTimeMillis());
 
-//        // setVersionColumn
-//        defaultConfig.setVersionColumn("lock_version");
-
-        // base infomation listener
+        // base information listener
         defaultConfig.setEntityInsertListeners(Map.of(
                 BaseEntity.class, List.of(new DefaultEntityListener())
         ));

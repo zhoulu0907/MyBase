@@ -90,6 +90,7 @@ public class RuntimeAuthenticationFilter extends OncePerRequestFilter {
             if (loginUser != null) {
                 ApplicationManager.setApplicationId(loginUser.getApplicationId());
                 SecurityFrameworkUtils.setLoginUser(loginUser, request);
+                TenantContextHolder.setTenantId(loginUser.getTenantId());
                 // 会话空闲检查：排除登录和登出请求
                 boolean checkSuc = checkAndUpdateSessionIdle(loginUser, token);
                 if (!checkSuc) {
@@ -117,9 +118,12 @@ public class RuntimeAuthenticationFilter extends OncePerRequestFilter {
             loginUser.setApplicationId(accessToken.getAppId());
             loginUser
                     .setRunMode(accessToken.getRunMode())
-                    .setId(accessToken.getUserId()).setUserType(accessToken.getUserType())
+                    .setCorpId(accessToken.getCorpId())
+                    .setId(accessToken.getUserId())
+                    .setUserType(accessToken.getUserType())
                     .setInfo(accessToken.getUserInfo()) // 额外的用户信息
-                    .setTenantId(accessToken.getTenantId()).setScopes(accessToken.getScopes())
+                    .setTenantId(accessToken.getTenantId())
+                    .setScopes(accessToken.getScopes())
                     .setExpiresTime(accessToken.getExpiresTime());
             return loginUser;
         } catch (ServiceException serviceException) {

@@ -1,0 +1,149 @@
+### 新增用户
+
+POST {{baseUrl}}/corp/user/create
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "username": "corpuser001",
+  "nickname": "测试用户001",
+  "password": "AdminChina2025!",
+  "email": "test001@example.com",
+  "mobile": "13800000002",
+  "sex": 1,
+  "status": 1
+}
+
+### 修改用户
+POST {{baseUrl}}/corp/user/update
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "id": 158198008100454400,
+  "username": "updatedUser001",
+  "nickname": "更新测试用户001",
+  "email": "updated001@example.com",
+  "mobile": "13800000002",
+  "sex": 2,
+  "deptId": 158196393192751104,
+  "status": 1
+}
+
+### 删除用户
+POST {{baseUrl}}/corp/user/delete?id=1
+Authorization: Bearer {{token}}
+
+### 重置用户密码
+POST {{baseUrl}}/corp/user/update-password
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "id": 158198008100454400,
+  "password": "AdminChina2025!"
+}
+
+### 修改用户状态
+POST {{baseUrl}}/corp/user/update-status
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "id": 158198008100454400,
+  "status": 1
+}
+
+### 获取用户分页列表
+GET {{baseUrl}}/corp/user/page?nickname=&mobile=138&pageNo=1&pageSize=10
+Authorization: Bearer {{token}}
+
+### 获取简要用户分页列表(启用状态)
+GET {{baseUrl}}/corp/user/simple-page?keywords=&pageNo=1&pageSize=10
+Authorization: Bearer {{token}}
+
+### 获取用户精简信息列表
+GET {{baseUrl}}/corp/user/simple-list
+Authorization: Bearer {{token}}
+
+### 新增用户
+POST {{baseUrl}}/corp/user/create
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "username": "testuser",
+  "password": "password123",
+  "nickname": "Test User",
+  "deptId": 1,
+  "email": "testuser@example.com",
+  "mobile": "13800138000",
+  "sex": 1,
+  "status": 0,
+  "roleIds": [1]
+}
+
+### 修改用户
+POST {{baseUrl}}/corp/user/update
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "id": 1,
+  "username": "testuser_updated",
+  "nickname": "Test User Updated",
+  "deptId": 1,
+  "email": "testuser_updated@example.com",
+  "mobile": "13800138001",
+  "sex": 0,
+  "roleIds": [1, 2]
+}
+
+### 删除用户
+POST {{baseUrl}}/corp/user/delete?id=1
+Authorization: Bearer {{token}}
+
+### 重置用户密码
+POST {{baseUrl}}/corp/user/update-password
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "id": 1,
+  "password": "newPassword456"
+}
+
+### 修改用户状态
+POST {{baseUrl}}/corp/user/update-status
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "id": 1,
+  "status": 1
+}
+
+### 获得用户详情
+GET {{baseUrl}}/corp/user/get?id=1
+Authorization: Bearer {{token}}
+
+### 获得用户分页列表
+GET {{baseUrl}}/corp/user/page?pageNo=1&pageSize=10&username=test
+Authorization: Bearer {{token}}
+
+### 获得简要用户分页列表(启用状态)
+GET {{baseUrl}}/corp/user/simple-page?pageNo=1&pageSize=10&keywords=test
+Authorization: Bearer {{token}}
+
+### 获取用户精简信息列表
+GET {{baseUrl}}/corp/user/simple-list
+Authorization: Bearer {{token}}
+
+### 通过昵称获取用户精简信息列表
+GET {{baseUrl}}/corp/user/simple-list-by-name?userNickName=test
+Authorization: Bearer {{token}}
+
+### 获得指定部门的用户简要分页列表
+GET {{baseUrl}}/corp/user/get-user-page-by-dept?deptId=1&isRecurseSub=true&keywords=test&pageNo=1&pageSize=10
+Authorization: Bearer {{token}}
+

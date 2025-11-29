@@ -1,9 +1,10 @@
 package com.cmsr.onebase.module.metadata.core.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataAppAndDatasourceDO;
+import com.cmsr.onebase.module.metadata.core.dal.mapper.MetadataAppAndDatasourceMapper;
+import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.spring.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -11,21 +12,14 @@ import java.util.List;
 /**
  * 应用与数据源关联关系仓储类
  * <p>
- * 提供应用与数据源关联关系相关的数据库操作接口，继承自DataRepositoryNew获得基础的CRUD能力
+ * 提供应用与数据源关联关系相关的数据库操作接口，继承自ServiceImpl获得基础的CRUD能力
  *
  * @author bty418
  * @date 2025-01-27
  */
 @Repository
 @Slf4j
-public class MetadataAppAndDatasourceRepository extends DataRepository<MetadataAppAndDatasourceDO> {
-
-    /**
-     * 构造方法，指定默认实体类
-     */
-    public MetadataAppAndDatasourceRepository() {
-        super(MetadataAppAndDatasourceDO.class);
-    }
+public class MetadataAppAndDatasourceRepository extends ServiceImpl<MetadataAppAndDatasourceMapper, MetadataAppAndDatasourceDO> {
 
     /**
      * 根据应用ID获取关联的数据源ID列表
@@ -34,9 +28,9 @@ public class MetadataAppAndDatasourceRepository extends DataRepository<MetadataA
      * @return 数据源ID列表
      */
     public List<Long> getDatasourceIdsByApplicationId(Long applicationId) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and(MetadataAppAndDatasourceDO.APPLICATION_ID, applicationId);
-        List<MetadataAppAndDatasourceDO> relations = findAllByConfig(configStore);
+        QueryWrapper queryWrapper = this.query()
+                .eq(MetadataAppAndDatasourceDO::getApplicationId, applicationId);
+        List<MetadataAppAndDatasourceDO> relations = list(queryWrapper);
         return relations.stream()
                 .map(MetadataAppAndDatasourceDO::getDatasourceId)
                 .distinct()
@@ -50,9 +44,9 @@ public class MetadataAppAndDatasourceRepository extends DataRepository<MetadataA
      * @return 应用ID列表
      */
     public List<Long> getApplicationIdsByDatasourceId(Long datasourceId) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and(MetadataAppAndDatasourceDO.DATASOURCE_ID, datasourceId);
-        List<MetadataAppAndDatasourceDO> relations = findAllByConfig(configStore);
+        QueryWrapper queryWrapper = this.query()
+                .eq(MetadataAppAndDatasourceDO::getDatasourceId, datasourceId);
+        List<MetadataAppAndDatasourceDO> relations = list(queryWrapper);
         return relations.stream()
                 .map(MetadataAppAndDatasourceDO::getApplicationId)
                 .distinct()
@@ -67,10 +61,10 @@ public class MetadataAppAndDatasourceRepository extends DataRepository<MetadataA
      * @return 关联关系对象
      */
     public MetadataAppAndDatasourceDO getRelation(Long applicationId, Long datasourceId) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and(MetadataAppAndDatasourceDO.APPLICATION_ID, applicationId);
-        configStore.and(MetadataAppAndDatasourceDO.DATASOURCE_ID, datasourceId);
-        return findOne(configStore);
+        QueryWrapper queryWrapper = this.query()
+                .eq(MetadataAppAndDatasourceDO::getApplicationId, applicationId)
+                .eq(MetadataAppAndDatasourceDO::getDatasourceId, datasourceId);
+        return getOne(queryWrapper);
     }
 
     /**
@@ -112,14 +106,13 @@ public class MetadataAppAndDatasourceRepository extends DataRepository<MetadataA
             return getRelation(applicationId, datasourceId).getId();
         }
 
-        MetadataAppAndDatasourceDO relation = MetadataAppAndDatasourceDO.builder()
-                .applicationId(applicationId)
-                .datasourceId(datasourceId)
-                .datasourceType(datasourceType)
-                .appUid(appUid)
-                .build();
+        MetadataAppAndDatasourceDO relation = new MetadataAppAndDatasourceDO();
+        relation.setApplicationId(applicationId);
+        relation.setDatasourceId(datasourceId);
+        relation.setDatasourceType(datasourceType);
+        relation.setAppUid(appUid);
 
-        insert(relation);
+        save(relation);
         log.info("创建应用{}与数据源{}的关联关系成功，关联ID: {}", applicationId, datasourceId, relation.getId());
         return relation.getId();
     }
@@ -132,13 +125,13 @@ public class MetadataAppAndDatasourceRepository extends DataRepository<MetadataA
      * @return 是否删除成功
      */
     public boolean deleteRelation(Long applicationId, Long datasourceId) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and(MetadataAppAndDatasourceDO.APPLICATION_ID, applicationId);
-        configStore.and(MetadataAppAndDatasourceDO.DATASOURCE_ID, datasourceId);
+        QueryWrapper queryWrapper = this.query()
+                .eq(MetadataAppAndDatasourceDO::getApplicationId, applicationId)
+                .eq(MetadataAppAndDatasourceDO::getDatasourceId, datasourceId);
 
-        long deletedCount = deleteByConfig(configStore);
-        log.info("删除应用{}与数据源{}的关联关系，删除数量: {}", applicationId, datasourceId, deletedCount);
-        return deletedCount > 0;
+        boolean deleted = remove(queryWrapper);
+        log.info("删除应用{}与数据源{}的关联关系，结果: {}", applicationId, datasourceId, deleted);
+        return deleted;
     }
 
     /**
@@ -148,10 +141,11 @@ public class MetadataAppAndDatasourceRepository extends DataRepository<MetadataA
      * @return 删除的关联关系数量
      */
     public long deleteRelationsByApplicationId(Long applicationId) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and(MetadataAppAndDatasourceDO.APPLICATION_ID, applicationId);
+        QueryWrapper queryWrapper = this.query()
+                .eq(MetadataAppAndDatasourceDO::getApplicationId, applicationId);
 
-        long deletedCount = deleteByConfig(configStore);
+        long deletedCount = count(queryWrapper);
+        remove(queryWrapper);
         log.info("删除应用{}的所有关联关系，删除数量: {}", applicationId, deletedCount);
         return deletedCount;
     }
@@ -163,10 +157,11 @@ public class MetadataAppAndDatasourceRepository extends DataRepository<MetadataA
      * @return 删除的关联关系数量
      */
     public long deleteRelationsByDatasourceId(Long datasourceId) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and(MetadataAppAndDatasourceDO.DATASOURCE_ID, datasourceId);
+        QueryWrapper queryWrapper = this.query()
+                .eq(MetadataAppAndDatasourceDO::getDatasourceId, datasourceId);
 
-        long deletedCount = deleteByConfig(configStore);
+        long deletedCount = count(queryWrapper);
+        remove(queryWrapper);
         log.info("删除数据源{}的所有关联关系，删除数量: {}", datasourceId, deletedCount);
         return deletedCount;
     }
@@ -178,9 +173,9 @@ public class MetadataAppAndDatasourceRepository extends DataRepository<MetadataA
      * @return 数据源ID列表
      */
     public List<Long> getDatasourceIdsByAppUid(String appUid) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and(MetadataAppAndDatasourceDO.APP_UID, appUid);
-        List<MetadataAppAndDatasourceDO> relations = findAllByConfig(configStore);
+        QueryWrapper queryWrapper = this.query()
+                .eq(MetadataAppAndDatasourceDO::getAppUid, appUid);
+        List<MetadataAppAndDatasourceDO> relations = list(queryWrapper);
         return relations.stream()
                 .map(MetadataAppAndDatasourceDO::getDatasourceId)
                 .distinct()
@@ -194,9 +189,9 @@ public class MetadataAppAndDatasourceRepository extends DataRepository<MetadataA
      * @return 关联关系列表
      */
     public List<MetadataAppAndDatasourceDO> getRelationsByDatasourceType(String datasourceType) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and(MetadataAppAndDatasourceDO.DATASOURCE_TYPE, datasourceType);
-        return findAllByConfig(configStore);
+        QueryWrapper queryWrapper = this.query()
+                .eq(MetadataAppAndDatasourceDO::getDatasourceType, datasourceType);
+        return list(queryWrapper);
     }
 
     /**
@@ -208,18 +203,14 @@ public class MetadataAppAndDatasourceRepository extends DataRepository<MetadataA
      * @return 是否更新成功
      */
     public boolean updateRelationAppUid(Long applicationId, Long datasourceId, String newAppUid) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and(MetadataAppAndDatasourceDO.APPLICATION_ID, applicationId);
-        configStore.and(MetadataAppAndDatasourceDO.DATASOURCE_ID, datasourceId);
-
-        MetadataAppAndDatasourceDO relation = findOne(configStore);
+        MetadataAppAndDatasourceDO relation = getRelation(applicationId, datasourceId);
         if (relation == null) {
             log.warn("未找到应用{}与数据源{}的关联关系，无法更新appUid", applicationId, datasourceId);
             return false;
         }
 
         relation.setAppUid(newAppUid);
-        update(relation);
+        updateById(relation);
         log.info("成功更新应用{}与数据源{}关联关系的appUid为{}", applicationId, datasourceId, newAppUid);
         return true;
     }

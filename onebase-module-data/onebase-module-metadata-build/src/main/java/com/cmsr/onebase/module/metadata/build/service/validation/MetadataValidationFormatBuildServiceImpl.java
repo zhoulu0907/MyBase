@@ -93,10 +93,10 @@ public class MetadataValidationFormatBuildServiceImpl implements MetadataValidat
                 throw new IllegalStateException("数据异常：同一组存在多条格式校验规则(组ID=" + id + ")");
             }
             MetadataValidationFormatDO existing = list.get(0);
-            formatRepository.deleteById(existing.getId());
+            formatRepository.removeById(existing.getId());
         }
         
-        // 无论子表是否存在，都要删除主表作为兜底（防止脏数据）
+        // 无论子表是否存在，都要删除主表作为兖底（防止脏数据）
         ruleGroupService.safeDeleteGroupDirect(id);
     }
 
@@ -200,7 +200,7 @@ public class MetadataValidationFormatBuildServiceImpl implements MetadataValidat
         }
 
         // 保存格式校验规则
-        formatRepository.upsert(data);
+        formatRepository.saveOrUpdate(data);
         return data.getId();
     }
 
@@ -239,7 +239,7 @@ public class MetadataValidationFormatBuildServiceImpl implements MetadataValidat
         updateObj.setAppId(existing.getAppId());
         updateObj.setGroupId(targetGroupId);
         
-        formatRepository.update(updateObj);
+        formatRepository.updateById(updateObj);
     }
 
     @Override

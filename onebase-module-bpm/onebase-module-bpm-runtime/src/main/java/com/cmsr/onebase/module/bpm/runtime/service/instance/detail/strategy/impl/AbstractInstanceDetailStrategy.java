@@ -16,8 +16,6 @@ import com.cmsr.onebase.module.metadata.api.entity.MetadataEntityFieldApi;
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldQueryReqDTO;
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldRespDTO;
 import jakarta.annotation.Resource;
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -170,9 +168,7 @@ public abstract class AbstractInstanceDetailStrategy<T extends BaseNodeExtDTO> i
         Long pageSetId = MapUtils.getLong(instance.getVariableMap(), BpmConstants.VAR_BINDING_VIEW_ID_KEY);
         if (pageSetId == null) {
             // 兼容旧数据，再去查一次instanceExt表
-            ConfigStore configStore = new DefaultConfigStore();
-            configStore.eq(BpmFlowInsBizExtDO.INSTANCE_ID, instance.getId());
-            BpmFlowInsBizExtDO bizExtDO = bpmFlowInsBizExtRepository.findOne(configStore);
+            BpmFlowInsBizExtDO bizExtDO = bpmFlowInsBizExtRepository.findOneByInstanceId(instance.getId());
 
             if (bizExtDO != null) {
                 pageSetId = Long.valueOf(bizExtDO.getBindingViewId());

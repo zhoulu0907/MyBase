@@ -3,14 +3,13 @@ package com.cmsr.onebase.module.system.runtime.controller.auth;
 
 import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.framework.security.config.SecurityProperties;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.security.config.SecurityProperties;
 import com.cmsr.onebase.module.system.enums.logger.LoginLogTypeEnum;
 import com.cmsr.onebase.module.system.runtime.service.auth.RuntimeAuthService;
 import com.cmsr.onebase.module.system.service.permission.PermissionService;
 import com.cmsr.onebase.module.system.vo.auth.*;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.annotation.security.PermitAll;
@@ -30,7 +29,7 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
  * @author matianyu
  * @date 2025-11
  */
-@Tag(name = "管理后台 - 认证")
+@Tag(name = "Runtime - 登录/认证")
 @RestController
 @RequestMapping("/system/auth")
 @Validated
@@ -61,6 +60,15 @@ public class RuntimeAuthController {
         return success(runtimeAuthService.appMobileLogin(reqVO));
     }
 
+
+
+    @PostMapping("/corp-login")
+    @PermitAll
+    @Operation(summary = "企业登录（手机号）")
+    public CommonResult<AuthLoginRespVO> corpLogin(@RequestBody @Valid CorpAuthLoginReqVO reqVO) {
+        return success(runtimeAuthService.corpLogin(reqVO));
+    }
+
     @PostMapping("/logout")
     @PermitAll
     @Operation(summary = "登出系统")
@@ -73,25 +81,17 @@ public class RuntimeAuthController {
         return success(true);
     }
 
-    @PostMapping("/refresh-token")
+    // @PostMapping("/refresh-token")
+    // @Operation(summary = "刷新令牌")
+    // @Parameter(name = "refreshToken", description = "刷新令牌", required = true)
     @PermitAll
-    @Operation(summary = "刷新令牌")
-    @Parameter(name = "refreshToken", description = "刷新令牌", required = true)
     public CommonResult<AuthLoginRespVO> refreshToken(@RequestParam("refreshToken") String refreshToken) {
         return success(runtimeAuthService.refreshToken(refreshToken));
     }
 
-
-    @PostMapping("/register")
-    @PermitAll
-    @Operation(summary = "注册用户")
-    public CommonResult<AuthLoginRespVO> register(@RequestBody @Valid AuthRegisterReqVO registerReqVO) {
-        return success(runtimeAuthService.register(registerReqVO));
-    }
-
     @PostMapping("/reset-password")
-    @PermitAll
     @Operation(summary = "重置密码")
+    @PermitAll
     public CommonResult<Boolean> resetPassword(@RequestBody @Valid AuthResetPasswordReqVO reqVO) {
         runtimeAuthService.resetPassword(reqVO);
         return success(true);

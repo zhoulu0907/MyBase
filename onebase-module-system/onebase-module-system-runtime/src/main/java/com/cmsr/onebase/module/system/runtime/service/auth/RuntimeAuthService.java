@@ -47,14 +47,6 @@ public interface RuntimeAuthService {
     AuthLoginRespVO refreshToken(String refreshToken);
 
     /**
-     * 用户注册
-     *
-     * @param createReqVO 注册用户
-     * @return 注册结果
-     */
-    AuthLoginRespVO register(AuthRegisterReqVO createReqVO);
-
-    /**
      * 重置密码
      *
      * @param reqVO 验证码信息
@@ -68,4 +60,13 @@ public interface RuntimeAuthService {
      * @return 登录结果
      */
     AuthLoginRespVO appUsernameLogin(@Valid AppUserNameLoginReqVO reqVO);
+
+    /**
+     * 账号登录
+     *
+     * @param reqVO 登录信息
+     * @return 登录结果
+     */
+    AuthLoginRespVO corpLogin(@Valid CorpAuthLoginReqVO reqVO);
+
 }

@@ -1,9 +1,9 @@
 package com.cmsr.onebase.module.metadata.core.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataComponentFieldTypeDO;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Order;
+import com.cmsr.onebase.module.metadata.core.dal.mapper.MetadataComponentFieldTypeMapper;
+import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.spring.service.impl.ServiceImpl;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -15,14 +15,7 @@ import java.util.List;
  * @date 2025-09-12
  */
 @Repository
-public class MetadataComponentFieldTypeRepository extends DataRepository<MetadataComponentFieldTypeDO> {
-
-    /**
-     * 构造方法，指定默认实体类
-     */
-    public MetadataComponentFieldTypeRepository() {
-        super(MetadataComponentFieldTypeDO.class);
-    }
+public class MetadataComponentFieldTypeRepository extends ServiceImpl<MetadataComponentFieldTypeMapper, MetadataComponentFieldTypeDO> {
 
     /**
      * 根据字段类型编码查询字段类型信息
@@ -31,10 +24,10 @@ public class MetadataComponentFieldTypeRepository extends DataRepository<Metadat
      * @return 字段类型DO
      */
     public MetadataComponentFieldTypeDO findByFieldTypeCode(String fieldTypeCode) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and(MetadataComponentFieldTypeDO.FIELD_TYPE_CODE, fieldTypeCode);
-        configStore.and(MetadataComponentFieldTypeDO.STATUS, 1); // 只查询启用状态的
-        return findOne(configStore);
+        QueryWrapper queryWrapper = this.query()
+                .eq(MetadataComponentFieldTypeDO::getFieldTypeCode, fieldTypeCode)
+                .eq(MetadataComponentFieldTypeDO::getStatus, 1); // 只查询启用状态的
+        return getOne(queryWrapper);
     }
 
     /**
@@ -43,9 +36,9 @@ public class MetadataComponentFieldTypeRepository extends DataRepository<Metadat
      * @return 字段类型列表
      */
     public List<MetadataComponentFieldTypeDO> findAllEnabled() {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and(MetadataComponentFieldTypeDO.STATUS, 1); // 只查询启用状态的
-        configStore.order(MetadataComponentFieldTypeDO.SORT_ORDER, Order.TYPE.ASC);
-        return findAllByConfig(configStore);
+        QueryWrapper queryWrapper = this.query()
+                .eq(MetadataComponentFieldTypeDO::getStatus, 1) // 只查询启用状态的
+                .orderBy(MetadataComponentFieldTypeDO::getSortOrder, true);
+        return list(queryWrapper);
     }
 }

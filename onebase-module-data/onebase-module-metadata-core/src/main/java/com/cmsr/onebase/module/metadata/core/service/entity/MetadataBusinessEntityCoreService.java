@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.metadata.core.service.entity;
 
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
+import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.validation.Valid;
 
 import java.util.List;
@@ -79,18 +80,18 @@ public interface MetadataBusinessEntityCoreService {
     /**
      * 根据条件查询业务实体列表
      *
-     * @param configStore 查询条件
+     * @param queryWrapper 查询条件
      * @return 业务实体列表
      */
-    List<MetadataBusinessEntityDO> findAllByConfig(org.anyline.data.param.init.DefaultConfigStore configStore);
+    List<MetadataBusinessEntityDO> findAllByConfig(QueryWrapper queryWrapper);
 
     /**
      * 根据条件统计业务实体数量
      *
-     * @param configStore 查询条件
+     * @param queryWrapper 查询条件
      * @return 业务实体数量
      */
-    long countByConfig(org.anyline.data.param.init.DefaultConfigStore configStore);
+    long countByConfig(QueryWrapper queryWrapper);
 
     // TODO: 以下方法需要在build模块中实现，涉及VO转换
     /*

@@ -185,7 +185,7 @@ public class AppVersionServiceImpl implements AppVersionService {
             v.setCreator(null);
             v.setCreateTime(null);
             v.setDeleted(null);
-            v.setLockVersion(null);
+            //v.setLockVersion(null);
         });
     }
 

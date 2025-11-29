@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.bpm.core.dto;
 
-import com.cmsr.onebase.module.engine.orm.anyline.entity.FlowTask;
+import com.cmsr.onebase.module.engine.orm.mybatisflex.entity.FlowTask;
 import jakarta.persistence.Column;
 import lombok.Data;
 
@@ -92,7 +92,7 @@ public class BpmTodoTaskDTO extends FlowTask {
      * 代理人ID
      */
     @Column(name = "agent_id")
-    private Long agentId;
+    private String agentId;
 
     /**
      * 代理人名称

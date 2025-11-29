@@ -1,13 +1,16 @@
 package com.cmsr.onebase.framework.security.runtime.config;
 
-import com.cmsr.onebase.framework.common.biz.system.oauth2.OAuth2TokenCommonApi;
 import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
+import com.cmsr.onebase.framework.common.biz.system.oauth2.OAuth2TokenCommonApi;
+import com.cmsr.onebase.framework.common.biz.system.permission.PermissionCommonApi;
 import com.cmsr.onebase.framework.security.config.SecurityProperties;
 import com.cmsr.onebase.framework.security.core.context.TransmittableThreadLocalSecurityContextHolderStrategy;
 import com.cmsr.onebase.framework.security.core.handler.AccessDeniedHandlerImpl;
 import com.cmsr.onebase.framework.security.core.handler.AuthenticationEntryPointImpl;
 import com.cmsr.onebase.framework.security.runtime.filter.RemoteCallAuthenticationFilter;
 import com.cmsr.onebase.framework.security.runtime.filter.RuntimeAuthenticationFilter;
+import com.cmsr.onebase.framework.security.service.SystemPermissionService;
+import com.cmsr.onebase.framework.security.service.SystemPermissionServiceImpl;
 import com.cmsr.onebase.framework.web.core.handler.GlobalExceptionHandler;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.config.MethodInvokingFactoryBean;
@@ -60,6 +63,12 @@ public class RuntimeSecurityAutoConfiguration {
     @Bean
     public PasswordEncoder runtimePasswordEncoder() {
         return new BCryptPasswordEncoder(securityProperties.getPasswordEncoderLength());
+    }
+
+
+    @Bean("ss") // 使用 Spring Security 的缩写，方便使用
+    public SystemPermissionService securityFrameworkService(PermissionCommonApi permissionApi) {
+        return new SystemPermissionServiceImpl(permissionApi);
     }
 
     /**

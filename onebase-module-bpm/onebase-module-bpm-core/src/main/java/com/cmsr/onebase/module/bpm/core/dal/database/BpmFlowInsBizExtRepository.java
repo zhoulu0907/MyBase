@@ -1,7 +1,9 @@
 package com.cmsr.onebase.module.bpm.core.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowInsBizExtDO;
+import com.cmsr.onebase.module.bpm.core.dal.mapper.BpmFlowInsBizExtMapper;
+import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.spring.service.impl.ServiceImpl;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -11,8 +13,11 @@ import org.springframework.stereotype.Repository;
  * @date 2025-10-28
  */
 @Repository
-public class BpmFlowInsBizExtRepository extends DataRepository<BpmFlowInsBizExtDO> {
-    public BpmFlowInsBizExtRepository() {
-        super(BpmFlowInsBizExtDO.class);
+public class BpmFlowInsBizExtRepository extends ServiceImpl<BpmFlowInsBizExtMapper, BpmFlowInsBizExtDO> {
+
+    public BpmFlowInsBizExtDO findOneByInstanceId(Long instanceId) {
+        QueryWrapper queryWrapper = QueryWrapper.create();
+        queryWrapper.eq(BpmFlowInsBizExtDO::getInstanceId, instanceId);
+        return getOne(queryWrapper);
     }
 }

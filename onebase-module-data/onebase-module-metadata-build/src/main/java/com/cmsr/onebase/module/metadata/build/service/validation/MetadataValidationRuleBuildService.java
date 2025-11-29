@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.metadata.build.service.validation;
 
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRuleDefinitionDO;
-import org.anyline.data.param.init.DefaultConfigStore;
+import com.mybatisflex.core.query.QueryWrapper;
 
 import java.util.List;
 
@@ -16,9 +16,9 @@ public interface MetadataValidationRuleBuildService {
     /**
      * 根据条件查询校验规则列表
      *
-     * @param configStore 查询条件
+     * @param queryWrapper 查询条件
      * @return 校验规则列表
      */
-    List<MetadataValidationRuleDefinitionDO> findAllByConfig(DefaultConfigStore configStore);
+    List<MetadataValidationRuleDefinitionDO> findAllByConfig(QueryWrapper queryWrapper);
 
 }

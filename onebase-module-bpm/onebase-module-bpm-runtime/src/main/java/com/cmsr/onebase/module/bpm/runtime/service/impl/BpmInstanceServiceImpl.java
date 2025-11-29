@@ -5,6 +5,7 @@ import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowInsBizExtRepository;
+import com.cmsr.onebase.module.bpm.core.dal.database.ext.BpmFlowDefinitionRepositoryExt;
 import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowInsBizExtDO;
 import com.cmsr.onebase.module.bpm.core.dto.BpmDefinitionExtDTO;
 import com.cmsr.onebase.module.bpm.core.dto.BpmGlobalConfigDTO;
@@ -14,7 +15,6 @@ import com.cmsr.onebase.module.bpm.core.enums.BpmBusinessStatusEnum;
 import com.cmsr.onebase.module.bpm.core.enums.BpmEleRunStatusEnum;
 import com.cmsr.onebase.module.bpm.core.enums.BpmNodeApproveStatusEnum;
 import com.cmsr.onebase.module.bpm.core.enums.BpmNodeTypeEnum;
-import com.cmsr.onebase.module.bpm.core.service.BpmEngineDefExtService;
 import com.cmsr.onebase.module.bpm.core.vo.design.BpmDefJsonVO;
 import com.cmsr.onebase.module.bpm.core.vo.design.edge.base.BaseEdgeVO;
 import com.cmsr.onebase.module.bpm.runtime.service.BpmInstanceService;
@@ -70,7 +70,7 @@ import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionU
 @Service
 public class BpmInstanceServiceImpl implements BpmInstanceService {
     @Resource
-    private BpmEngineDefExtService defExtService;
+    private BpmFlowDefinitionRepositoryExt defExtService;
 
     @Resource(name = "bpmDefService")
     private DefService defService;
@@ -306,7 +306,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         flowInsExtDO.setBindingViewId(def.getFormPath());
         flowInsExtDO.setBpmVersion("V" + def.getVersion());
         flowInsExtDO.setBpmTitle(bpmTitle);
-        flowInsExtDO.setInitiatorId(loginUserId);
+        flowInsExtDO.setInitiatorId(String.valueOf(loginUserId));
         flowInsExtDO.setInitiatorAvatar(userRespDTO.getAvatar());
         flowInsExtDO.setInitiatorName(initiatorName);
         flowInsExtDO.setInitiatorDeptId(userRespDTO.getDeptId());
@@ -316,7 +316,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         flowInsExtDO.setInstanceId(instance.getId());
         flowInsExtDO.setAppId(extDto.getAppId());
 
-        flowInsExtRepository.insert(flowInsExtDO);
+        flowInsExtRepository.save(flowInsExtDO);
 
         respVO.setInstanceId(instance.getId());
         respVO.setEntityDataId(entityDataId);

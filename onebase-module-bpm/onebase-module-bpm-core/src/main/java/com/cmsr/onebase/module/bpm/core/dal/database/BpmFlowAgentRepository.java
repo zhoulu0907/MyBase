@@ -1,16 +1,19 @@
 package com.cmsr.onebase.module.bpm.core.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowAgentDO;
+import com.cmsr.onebase.module.bpm.core.dal.mapper.BpmFlowAgentMapper;
 import com.cmsr.onebase.module.bpm.core.enums.BpmAgentStatus;
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Compare;
+import com.mybatisflex.core.query.QueryCondition;
+import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.spring.service.impl.ServiceImpl;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+
+import static com.cmsr.onebase.module.bpm.core.dal.dataobject.table.BpmFlowAgentTableDef.BPM_FLOW_AGENT;
+
 
 /**
  * BPM流程代理仓库
@@ -19,38 +22,34 @@ import java.util.List;
  * @date 2025-11-10
  */
 @Repository
-public class BpmFlowAgentRepository extends DataRepository<BpmFlowAgentDO> {
-    public BpmFlowAgentRepository() {
-        super(BpmFlowAgentDO.class);
-    }
-
-    public ConfigStore buildConditionByAgentStatus(BpmAgentStatus agentStatus) {
-        DefaultConfigStore condition = new DefaultConfigStore();
+public class BpmFlowAgentRepository extends ServiceImpl<BpmFlowAgentMapper, BpmFlowAgentDO> {
+    public QueryCondition buildConditionByAgentStatus(BpmAgentStatus agentStatus) {
+        QueryCondition condition = QueryCondition.createEmpty();
         LocalDateTime now = LocalDateTime.now();
 
         switch (agentStatus) {
             case INACTIVE:
                 // 待生效：当前时间 < 代理生效时间
                 // 同时需要确保未被撤销
-                condition.and(Compare.GREAT, "start_time", now);
-                condition.and(Compare.NULL, "revoked_time");
+                condition.and(BPM_FLOW_AGENT.START_TIME.gt(now));
+                condition.and(BPM_FLOW_AGENT.REVOKED_TIME.isNull());
                 break;
             case ACTIVE:
                 // 代理中：当前时间 >= 代理生效时间 且 当前时间 <= 代理失效时间
                 // 同时需要确保未被撤销
-                condition.and(Compare.LESS_EQUAL, "start_time", now);
-                condition.and(Compare.GREAT_EQUAL, "end_time", now);
-                condition.and(Compare.NULL, "revoked_time");
+                condition.and(BPM_FLOW_AGENT.START_TIME.le(now));
+                condition.and(BPM_FLOW_AGENT.END_TIME.ge(now));
+                condition.and(BPM_FLOW_AGENT.REVOKED_TIME.isNull());
                 break;
             case EXPIRED:
                 // 已失效：当前时间 > 代理失效时间
                 // 同时需要确保未被撤销
-                condition.and(Compare.LESS, "end_time", now);
-                condition.and(Compare.NULL, "revoked_time");
+                condition.and(BPM_FLOW_AGENT.END_TIME.lt(now));
+                condition.and(BPM_FLOW_AGENT.REVOKED_TIME.isNull());
                 break;
             case REVOKED:
                 // 已撤销：撤销时间不为空
-                condition.and(Compare.NOT_NULL, "revoked_time");
+                condition.and(BPM_FLOW_AGENT.REVOKED_TIME.isNotNull());
                 break;
             default:
                 break;
@@ -65,26 +64,32 @@ public class BpmFlowAgentRepository extends DataRepository<BpmFlowAgentDO> {
      * @param principalId 被代理人ID
      * @return 代理记录列表
      */
-    public List<BpmFlowAgentDO> findAllActiveAgent(Long appId, Long principalId) {
-       return findAllActiveAgent(appId, List.of(principalId));
+    public List<BpmFlowAgentDO> findAllActiveAgent(Long appId, String principalId) {
+        return findAllActiveAgent(appId, List.of(principalId));
     }
 
-    public List<BpmFlowAgentDO> findAllActiveAgent(Long appId, Collection<Long> principalIds) {
-        ConfigStore configs = new DefaultConfigStore();
+    /**
+     * 根据被代理人ID集合查询有效代理记录
+     *
+     * @param appId        应用 ID
+     * @param principalIds 被代理人 ID 集合
+     * @return 代理记录列表
+     */
+    public List<BpmFlowAgentDO> findAllActiveAgent(Long appId, Collection<String> principalIds) {
+        QueryWrapper queryWrapper = QueryWrapper.create();
 
         if (principalIds.size() == 1) {
-            configs.in(BpmFlowAgentDO.PRINCIPAL_ID, principalIds);
+            queryWrapper.eq(BpmFlowAgentDO::getPrincipalId, principalIds.iterator().next());
         } else {
-            configs.in(BpmFlowAgentDO.PRINCIPAL_ID, principalIds);
+            queryWrapper.in(BpmFlowAgentDO::getPrincipalId, principalIds);
         }
 
-        configs.eq(BpmFlowAgentDO.APP_ID, appId);
+        queryWrapper.eq(BpmFlowAgentDO::getAppId, appId);
+        queryWrapper.ge(BpmFlowAgentDO::getEndTime, LocalDateTime.now());
+        queryWrapper.le(BpmFlowAgentDO::getStartTime, LocalDateTime.now());
+        queryWrapper.isNull(BpmFlowAgentDO::getRevokedTime);
 
-        configs.ge(BpmFlowAgentDO.END_TIME, LocalDateTime.now());
-        configs.le(BpmFlowAgentDO.START_TIME, LocalDateTime.now());
-        configs.isNull(BpmFlowAgentDO.REVOKED_TIME);
-
-        return findAllByConfig(configs);
+        return list(queryWrapper);
     }
 
     /**
@@ -97,15 +102,16 @@ public class BpmFlowAgentRepository extends DataRepository<BpmFlowAgentDO> {
      * @return
      */
     public List<BpmFlowAgentDO> findAllOverlapAgent(Long appId, Long principalId, LocalDateTime startTime, LocalDateTime endTime) {
-        ConfigStore configs = new DefaultConfigStore();
-        configs.eq(BpmFlowAgentDO.APP_ID, appId);
-        configs.eq(BpmFlowAgentDO.PRINCIPAL_ID, principalId);
+        QueryWrapper queryWrapper = QueryWrapper.create();
+        queryWrapper.eq(BpmFlowAgentDO::getAppId, appId);
+        // principalId 在 DO 中改为 String，这里统一转为 String 再查询
+        queryWrapper.eq(BpmFlowAgentDO::getPrincipalId, String.valueOf(principalId));
 
         // 记录开始时间 < 新记录结束时间 并且 记录结束时间 > 新记录开始时间
-        configs.and(Compare.LESS, BpmFlowAgentDO.START_TIME, endTime);
-        configs.and(Compare.GREAT, BpmFlowAgentDO.END_TIME, startTime);
+        queryWrapper.le(BpmFlowAgentDO::getStartTime, endTime);
+        queryWrapper.gt(BpmFlowAgentDO::getEndTime, startTime);
 
-        ConfigStore statusConfig = new DefaultConfigStore();
+        QueryCondition statusConfig = QueryCondition.createEmpty();
 
         // 待生效的记录
         statusConfig.or(buildConditionByAgentStatus(BpmAgentStatus.INACTIVE));
@@ -113,8 +119,8 @@ public class BpmFlowAgentRepository extends DataRepository<BpmFlowAgentDO> {
         // 已生效的记录
         statusConfig.or(buildConditionByAgentStatus(BpmAgentStatus.ACTIVE));
 
-        configs.and(statusConfig);
+        queryWrapper.and(statusConfig);
 
-        return findAllByConfig(configs);
+        return list(queryWrapper);
     }
 }
