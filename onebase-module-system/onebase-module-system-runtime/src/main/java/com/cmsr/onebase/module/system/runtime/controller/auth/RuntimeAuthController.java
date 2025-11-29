@@ -29,7 +29,7 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
  * @author matianyu
  * @date 2025-11
  */
-@Tag(name = "管理后台 - 认证")
+@Tag(name = "Runtime - 登录/认证")
 @RestController
 @RequestMapping("/system/auth")
 @Validated

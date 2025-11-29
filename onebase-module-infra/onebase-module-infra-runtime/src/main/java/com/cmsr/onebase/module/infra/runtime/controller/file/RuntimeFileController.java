@@ -20,10 +20,9 @@ import com.cmsr.onebase.module.infra.service.file.FileService;
 
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
-@Tag(name = "runtime- 文件存储")
+@Tag(name = "Runtime- 文件服务")
 @RestController
 @RequestMapping("/infra/file")
-
 @Validated
 @Slf4j
 public class RuntimeFileController {
