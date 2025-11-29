@@ -48,7 +48,7 @@ public class FlowConnectorScriptServiceImpl implements FlowConnectorScriptServic
         PageResult<FlowConnectorScriptDO> pageDO = connectorScriptRepository.selectConnectorScriptPage(pageReqVO);
         List<ConnectorScriptVO> voList = new ArrayList<>();
         for (FlowConnectorScriptDO scriptDO : pageDO.getList()) {
-            ConnectorScriptVO scriptVO = convertToVO(scriptDO);
+            ConnectorScriptVO scriptVO = BeanUtils.toBean(scriptDO, ConnectorScriptVO.class);
             voList.add(scriptVO);
         }
         return new PageResult<>(voList, pageDO.getTotal());
@@ -60,13 +60,7 @@ public class FlowConnectorScriptServiceImpl implements FlowConnectorScriptServic
         if (scriptDO == null) {
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_SCRIPT_NOT_EXISTS);
         }
-        return convertToVO(scriptDO);
-    }
-
-    private ConnectorScriptVO convertToVO(FlowConnectorScriptDO connectorScriptDO) {
-        ConnectorScriptVO connectorScriptVO = BeanUtils.toBean(connectorScriptDO, ConnectorScriptVO.class);
-
-        return connectorScriptVO;
+        return BeanUtils.toBean(scriptDO, ConnectorScriptVO.class);
     }
 
     @Override
@@ -97,8 +91,8 @@ public class FlowConnectorScriptServiceImpl implements FlowConnectorScriptServic
         oldDO.setScriptType(updateVO.getScriptType());
         oldDO.setDescription(updateVO.getDescription());
         oldDO.setRawScript(updateVO.getRawScript());
-        oldDO.setInputParameter(updateVO.getInputParameter());
-        oldDO.setOutputParameter(updateVO.getOutputParameter());
+        oldDO.setInputParameter(JsonUtils.toJsonString(updateVO.getInputParameter()));
+        oldDO.setOutputParameter(JsonUtils.toJsonString(updateVO.getOutputParameter()));
 
         connectorScriptRepository.updateById(oldDO);
     }
