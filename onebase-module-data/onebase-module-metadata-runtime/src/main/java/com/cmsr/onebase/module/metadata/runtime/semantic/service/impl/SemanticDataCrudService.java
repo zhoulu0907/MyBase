@@ -1,17 +1,27 @@
 package com.cmsr.onebase.module.metadata.runtime.semantic.service.impl;
 
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
+import com.cmsr.onebase.module.metadata.core.service.datasource.MetadataDatasourceCoreService;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataEntityFieldCoreService;
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticRecordDTO;
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticEntitySchemaDTO;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticEntityValueDTO;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticFieldSchemaDTO;
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticFieldValueDTO;
 import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticTableNameQuoter;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.row.Db;
 import com.mybatisflex.core.row.Row;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
+
+import org.anyline.service.AnylineService;
 import org.springframework.stereotype.Service;
+
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.DATASOURCE_NOT_EXISTS;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,6 +44,7 @@ import java.util.Optional;
  * </p>
  */
 @Service
+@Slf4j
 public class SemanticDataCrudService {
 
     @Resource
@@ -41,6 +52,11 @@ public class SemanticDataCrudService {
     @Resource
     private MetadataEntityFieldCoreService metadataEntityFieldCoreService;
 
+    @Resource
+    private MetadataDatasourceCoreService metadataDatasourceCoreService;
+
+    @Resource
+    private SemanticTemporaryDatasourceService semanticTemporaryDatasourceService;
 
 
     /**
@@ -57,10 +73,29 @@ public class SemanticDataCrudService {
      * 创建主表数据
      */
     public void create(SemanticRecordDTO recordDTO) {
+        // 1. 将执行前触发放到此处
+        // 2. 创建单据号，填充系统字段等相关信息
+        // 2.1 增加对应的 Service 处理子表等相关内容
+        // 2.2 将数据库相关内容放到 子集 service 里面的 repo 中
+        // 3. 将执行后触发放到此处
         SemanticEntitySchemaDTO entity = recordDTO.getEntitySchema();
-        Map<String, Object> data = extractData(recordDTO);
+        SemanticEntityValueDTO value = recordDTO.getEntityValue();
+        if (entity == null || value == null) { return; }
+        List<SemanticFieldSchemaDTO> fields = entity.getFields();
         Row row = new Row();
-        for (Map.Entry<String, Object> e : data.entrySet()) { row.put(e.getKey(), e.getValue()); }
+        for (SemanticFieldSchemaDTO f : fields) {
+            String name = f.getFieldName();
+            if (name == null) { continue; }
+            if (!value.getFieldValueMap().containsKey(name)) { continue; }
+            Object val = value.getFieldValueMap().get(name).getStoreValue();    
+            if (val == null && Objects.equals(f.getIsPrimaryKey(), 1)) { continue; }
+            row.put(name, val);
+        }
+        log.info("table name is {}, create record: {}", entity.getTableName(), row);
+        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
+        if (datasource == null) { throw exception(DATASOURCE_NOT_EXISTS); }
+        semanticTemporaryDatasourceService.createTemporaryService(datasource);
+        log.info("datasource: {}", datasource);
         Db.insert(tableNameQuoter.quote(entity.getTableName()), row);
     }
 
@@ -180,7 +215,9 @@ public class SemanticDataCrudService {
         Map<String, SemanticFieldValueDTO<Object>> data = recordDTO.getEntityValue() != null ? recordDTO.getEntityValue().getFieldValueMap() : null;
         if (data == null) { return result; }
         for (Map.Entry<String, SemanticFieldValueDTO<Object>> fieldValueEntry : data.entrySet()) {
-            result.put(fieldValueEntry.getKey(), fieldValueEntry.getValue().getRawValue());
+            SemanticFieldValueDTO<Object> v = fieldValueEntry.getValue();
+            Object store = v == null ? null : v.getStoreValue();
+            result.put(fieldValueEntry.getKey(), store);
         }
         return result;
     }

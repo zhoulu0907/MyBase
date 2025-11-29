@@ -9,6 +9,7 @@ import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEnti
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataEntityFieldCoreService;
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticEntitySchemaDTO;
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticEntityValueDTO;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticFieldSchemaDTO;
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticFieldValueDTO;
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticRecordContextDTO;
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticRecordDTO;
@@ -51,14 +52,14 @@ public class SemanticMergeRecordAssembler {
     /**
      * 按实体编码装配合并请求
      *
-     * @param entityCode 实体编码
+     * @param tableName  表名称
      * @param body       合并请求体（顶层属性为主实体字段或连接器名）
      * @param menuId     菜单ID
      * @param traceId    链路追踪ID
      * @return 统一记录对象
      */
-    public SemanticRecordDTO assemble(String entityCode, SemanticMergeBodyVO body, Long menuId, String traceId) {
-        MetadataBusinessEntityDO entity = businessEntityCoreService.getBusinessEntityByCode(entityCode);
+    public SemanticRecordDTO assemble(String tableName, SemanticMergeBodyVO body, Long menuId, String traceId) {
+        MetadataBusinessEntityDO entity = businessEntityCoreService.getBusinessEntityByTableName(tableName);
         if (entity == null) { throw exception(BUSINESS_ENTITY_NOT_EXISTS); }
         return parseMerge(entity, body, menuId, traceId, SemanticMethodCodeEnum.CREATE);
     }
@@ -102,12 +103,15 @@ public class SemanticMergeRecordAssembler {
         record.setRecordContext(context);
 
         Long entityId = entity.getId();
+        List<MetadataEntityFieldDO> entityFields = fieldCoreService.getEntityFieldListByEntityId(entityId);
 
         SemanticEntitySchemaDTO entitySchema = new SemanticEntitySchemaDTO();
         entitySchema.setId(entityId);
         entitySchema.setTableName(entity.getTableName());
         entitySchema.setCode(entity.getCode());
         entitySchema.setDisplayName(entity.getDisplayName());
+        entitySchema.setDatasourceId(entity.getDatasourceId());
+        entitySchema.setFields(buildFieldSchemas(entityFields));
         entitySchema.setConnectors(buildConnectorSchemas(entityId));
         record.setEntitySchema(entitySchema);
 
@@ -115,30 +119,26 @@ public class SemanticMergeRecordAssembler {
         Map<String, SemanticFieldValueDTO<Object>> entityFieldValues = new HashMap<>();
         Map<String, SemanticRelationValueDTO> relationValues = new HashMap<>();
 
-        Set<String> entityFieldNameSet = getFieldNameSet(entityId);
-        Map<String, MetadataEntityFieldDO> entityFieldMetaByName = buildFieldMetaMap(entityId);
+        Set<String> entityFieldNameSet = getFieldNameSet(entityFields);
+        Map<String, MetadataEntityFieldDO> entityFieldMetaByName = buildFieldMetaMap(entityFields);
         Map<String, Object> properties = props == null ? Map.of() : props;
-        for (Map.Entry<String, Object> entry : properties.entrySet()) {
-            String propName = entry.getKey();
-            Object propRawValue = entry.getValue();
-            if (entityFieldNameSet.contains(propName) || Objects.equals(propName, "id") || Objects.equals(propName, "deleted")) {
-                MetadataEntityFieldDO fieldMeta = entityFieldMetaByName.get(propName);
-                SemanticFieldValueDTO<Object> fieldValueDto = toFieldValue(propRawValue, fieldMeta, propName);
-                entityFieldValues.put(propName, fieldValueDto);
+        properties.forEach((propName, propRawValue) -> {
+            if (entityFieldNameSet.contains(propName) || "id".equals(propName)) {
+                entityFieldValues.put(propName, toFieldValue(propRawValue, entityFieldMetaByName.get(propName), propName));
             } else {
-                SemanticRelationValueDTO relationValueDto = toConnectorValue(propName, propRawValue, entitySchema.getConnectors());
-                relationValues.put(propName, relationValueDto);
+                relationValues.put(propName, toConnectorValue(propName, propRawValue, entitySchema.getConnectors()));
             }
-        }
+        });
         entityValue.setFieldValueMap(entityFieldValues);
         entityValue.setConnectors(relationValues);
         record.setEntityValue(entityValue);
         return record;
     }
 
-    private Set<String> getFieldNameSet(Long entityId) {
-        List<MetadataEntityFieldDO> fields = fieldCoreService.getEntityFieldListByEntityId(entityId);
+
+    private Set<String> getFieldNameSet(List<MetadataEntityFieldDO> fields) {
         Set<String> fieldNameSet = new HashSet<>();
+        if (fields == null) return fieldNameSet;
         for (MetadataEntityFieldDO field : fields) {
             if (field.getFieldName() != null) {
                 fieldNameSet.add(field.getFieldName());
@@ -172,6 +172,27 @@ public class SemanticMergeRecordAssembler {
             connectorSchemas.add(schema);
         }
         return connectorSchemas;
+    }
+
+    private List<SemanticFieldSchemaDTO> buildFieldSchemas(List<MetadataEntityFieldDO> fields) {
+        List<SemanticFieldSchemaDTO> list = new ArrayList<>();
+        if (fields == null) { return list; }
+        for (MetadataEntityFieldDO f : fields) {
+            SemanticFieldSchemaDTO s = new SemanticFieldSchemaDTO();
+            s.setId(f.getId());
+            s.setFieldCode(f.getFieldCode());
+            s.setFieldName(f.getFieldName());
+            s.setDisplayName(f.getDisplayName());
+            s.setFieldType(f.getFieldType());
+            s.setDataLength(f.getDataLength());
+            s.setDecimalPlaces(f.getDecimalPlaces());
+            s.setIsRequired(f.getIsRequired() == null ? null : f.getIsRequired() == 1);
+            s.setIsUnique(f.getIsUnique() == null ? null : f.getIsUnique() == 1);
+            s.setIsSystemField(f.getIsSystemField() == null ? null : f.getIsSystemField() == 1);
+            s.setIsPrimaryKey(f.getIsPrimaryKey() == null ? null : f.getIsPrimaryKey() == 1);
+            list.add(s);
+        }
+        return list;
     }
 
     private Long toLongSafe(String text) {
@@ -263,11 +284,6 @@ public class SemanticMergeRecordAssembler {
      * 构造字段值DTO：设置原始值、字段标识与类型枚举/基础类型
      */
     private SemanticFieldValueDTO<Object> toFieldValue(Object raw, MetadataEntityFieldDO entityFieldDO, String fieldName) {
-        SemanticFieldValueDTO<Object> v = new SemanticFieldValueDTO<>();
-        v.setRawValue(raw);
-        v.setFieldId(entityFieldDO == null ? null : entityFieldDO.getId());
-        v.setFieldName(entityFieldDO == null ? fieldName : entityFieldDO.getFieldName());
-
         SemanticFieldTypeEnum typeEnum = null;
         if (entityFieldDO != null && entityFieldDO.getFieldType() != null) {
             typeEnum = SemanticFieldTypeEnum.ofCode(entityFieldDO.getFieldType());
@@ -275,8 +291,14 @@ public class SemanticMergeRecordAssembler {
         if (typeEnum == null) {
             typeEnum = guessEnumByRaw(raw);
         }
-        v.setFieldTypeEnum(typeEnum);
-        return v;
+        if (typeEnum == null) {
+            typeEnum = SemanticFieldTypeEnum.TEXT;
+        }
+        SemanticFieldValueDTO<Object> fieldValueDTO = SemanticFieldValueDTO.<Object>of(typeEnum);
+        fieldValueDTO.setRawValue(raw);
+        fieldValueDTO.setFieldId(entityFieldDO == null ? null : entityFieldDO.getId());
+        fieldValueDTO.setFieldName(entityFieldDO == null ? fieldName : entityFieldDO.getFieldName());
+        return fieldValueDTO;
     }
 
     /**
@@ -297,6 +319,10 @@ public class SemanticMergeRecordAssembler {
      */
     private Map<String, MetadataEntityFieldDO> buildFieldMetaMap(Long entityId) {
         List<MetadataEntityFieldDO> fields = fieldCoreService.getEntityFieldListByEntityId(entityId);
+        return buildFieldMetaMap(fields);
+    }
+
+    private Map<String, MetadataEntityFieldDO> buildFieldMetaMap(List<MetadataEntityFieldDO> fields) {
         Map<String, MetadataEntityFieldDO> map = new HashMap<>();
         if (fields != null) {
             for (MetadataEntityFieldDO f : fields) {

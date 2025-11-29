@@ -48,7 +48,7 @@ public class SemanticFieldPermissionChecker implements SemanticRuntimePermission
         FieldPermission fp = recordDTO.getRecordContext().getPermissionContext().getFieldPermission();
         if (fp.isAllDenied()) { throw new PermissionDeniedException(TYPE, "ALL_DENIED", "无权访问任何字段"); }
         if (fp.isAllAllowed()) { return; }
-        Map<String, SemanticFieldValueDTO> data = recordDTO.getEntityValue().getFieldValueMap();
+        Map<String, SemanticFieldValueDTO<Object>> data = recordDTO.getEntityValue().getFieldValueMap();
         Set<Long> editableIds = fp.getFields().stream()
                                     .filter(FieldPermissionItem::isCanEdit)
                                     .map(FieldPermissionItem::getFieldId)
@@ -71,7 +71,7 @@ public class SemanticFieldPermissionChecker implements SemanticRuntimePermission
     /**
      * 严格模式：存在不可编辑字段时直接抛错
      */
-    private void enforceStrictPermission(Map<String, SemanticFieldValueDTO> data, Map<String, Long> nameToId, Set<Long> editableIds) {
+    private void enforceStrictPermission(Map<String, SemanticFieldValueDTO<Object>> data, Map<String, Long> nameToId, Set<Long> editableIds) {
         for (String key : data.keySet()) {
             Long fid = nameToId.get(key.toLowerCase());
             if (fid == null || !editableIds.contains(fid)) {
@@ -83,7 +83,7 @@ public class SemanticFieldPermissionChecker implements SemanticRuntimePermission
     /**
      * 过滤模式：移除不可编辑字段，减少抛错
      */
-    private void filterNonEditableFields(Map<String, SemanticFieldValueDTO> data, Map<String, Long> nameToId, Set<Long> editableIds) {
+    private void filterNonEditableFields(Map<String, SemanticFieldValueDTO<Object>> data, Map<String, Long> nameToId, Set<Long> editableIds) {
         var it = data.entrySet().iterator();
         while (it.hasNext()) {
             var e = it.next();

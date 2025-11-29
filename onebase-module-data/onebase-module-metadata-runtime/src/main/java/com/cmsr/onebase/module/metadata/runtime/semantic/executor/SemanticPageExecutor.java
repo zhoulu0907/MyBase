@@ -10,11 +10,11 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntit
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
 import com.cmsr.onebase.module.metadata.core.domain.query.LoginUserCtx;
 import com.cmsr.onebase.module.metadata.core.domain.query.MetadataPermissionContext;
-import com.cmsr.onebase.module.metadata.core.dal.database.TemporaryDatasourceService;
 import com.cmsr.onebase.module.metadata.core.service.datasource.MetadataDatasourceCoreService;
 import com.cmsr.onebase.module.metadata.core.service.permission.PermissionQueryHelper;
 import com.cmsr.onebase.module.metadata.core.service.permission.builder.PermissionContextBuilder;
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticRecordDTO;
+import com.cmsr.onebase.module.metadata.runtime.semantic.service.impl.SemanticTemporaryDatasourceService;
 import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticEntityValidator;
 import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticFieldLoader;
 import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticOperatorConditionApplier;
@@ -45,7 +45,7 @@ public class SemanticPageExecutor {
     @Resource
     private MetadataDatasourceCoreService semanticMetadataDatasourceCoreService;
     private MetadataDatasourceCoreService metadataDatasourceCoreService;
-    private TemporaryDatasourceService semanticTemporaryDatasourceService;
+    private SemanticTemporaryDatasourceService semanticTemporaryDatasourceService;
     @Resource
     private PermissionQueryHelper semanticPermissionQueryHelper;
     @Resource

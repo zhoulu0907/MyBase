@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.regex.Pattern;
 
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.enums.SemanticFieldTypeEnum;
 import com.cmsr.onebase.module.metadata.runtime.semantic.type.RefType;
@@ -31,7 +34,7 @@ public class SemanticFieldValueDTO<T> {
     private T rawValue;
 
     @Schema(description = "字段类型枚举")
-    private SemanticFieldTypeEnum fieldTypeEnum;
+    private final SemanticFieldTypeEnum fieldTypeEnum;
 
     @Schema(description = "字段 ID")
     private Long fieldId;
@@ -178,7 +181,7 @@ public class SemanticFieldValueDTO<T> {
         }
         if (fieldTypeEnum.isRefType()) {
             Object raw = rawValue;
-            if (raw instanceof RefType r) return r.getId();
+            if (raw instanceof RefType r) return r.getStoreData();
             return raw;
         }
         return rawValue;
@@ -186,7 +189,7 @@ public class SemanticFieldValueDTO<T> {
 
     private String extractStoreScalar(Object o) {
         if (o == null) return null;
-        if (o instanceof RefType r) return r.getId();
+        if (o instanceof RefType r) return String.valueOf(r.getStoreData());
         return String.valueOf(o);
     }
 
@@ -208,5 +211,213 @@ public class SemanticFieldValueDTO<T> {
 
     private String escapeJson(String s) {
         return s.replace("\\", "\\\\").replace("\"", "\\\"");
+    }
+
+    private SemanticFieldValueDTO(SemanticFieldTypeEnum fieldTypeEnum) {
+        this.fieldTypeEnum = Objects.requireNonNull(fieldTypeEnum, "fieldTypeEnum 不能为空");
+    }
+
+    public static <T> SemanticFieldValueDTO<T> of(SemanticFieldTypeEnum fieldTypeEnum) {
+        return new SemanticFieldValueDTO<>(fieldTypeEnum);
+    }
+
+    public void setRawValue(T rawValue) {
+        if (this.fieldTypeEnum == null) {
+            throw new IllegalStateException("fieldTypeEnum 未设置");
+        }
+        Object normalized = normalizeValue(rawValue, this.fieldTypeEnum);
+        T casted = (T) normalized;
+        this.rawValue = casted;
+    }
+
+    private Object normalizeValue(Object value, SemanticFieldTypeEnum type) {
+        if (value == null) return null;
+        if (type.isListType()) {
+            return normalizeList(value, type);
+        }
+        return normalizeScalar(value, type);
+    }
+
+    private List<?> normalizeList(Object value, SemanticFieldTypeEnum type) {
+        List<Object> items = new ArrayList<>();
+        if (value instanceof List<?> list) {
+            for (Object o : list) items.add(normalizeScalar(o, type));
+        } else if (value instanceof Collection<?> col) {
+            for (Object o : col) items.add(normalizeScalar(o, type));
+        } else if (value instanceof Object[] arr) {
+            for (Object o : Arrays.asList(arr)) items.add(normalizeScalar(o, type));
+        } else if (value instanceof String s) {
+            String[] parts = s.split(",");
+            for (String p : parts) items.add(normalizeScalar(p.trim(), type));
+        } else {
+            items.add(normalizeScalar(value, type));
+        }
+        return items;
+    }
+
+    private Object normalizeScalar(Object value, SemanticFieldTypeEnum type) {
+        if (type.isRefType()) {
+            Class<?> biz = type.getBizJavaType();
+            if (biz.isInstance(value)) return value;
+            if (value instanceof Map<?,?> m) {
+                Map<String, Object> map = (Map<String, Object>) m;
+                Object ref = RefType.fromMap(map, (Class<? extends RefType>) biz);
+                if (ref == null) throw err("RefType 转换失败", biz);
+                return ref;
+            }
+            if (value instanceof Number || value instanceof String) {
+                Object ref = RefType.fromId((Class<? extends RefType>) biz, value);
+                if (ref == null) throw err("RefType 构造失败", biz);
+                return ref;
+            }
+            throw err("非法的引用类型值", biz);
+        }
+        Class<?> rawType = type.getRawJavaType();
+        if (rawType == String.class) {
+            String s = value instanceof String ? ((String) value).trim() : String.valueOf(value);
+            if (type == SemanticFieldTypeEnum.EMAIL) {
+                if (!isValidEmail(s)) throw err("邮箱格式不正确", String.class);
+            } else if (type == SemanticFieldTypeEnum.PHONE) {
+                if (!isValidPhone(s)) throw err("电话号码格式不正确", String.class);
+            } else if (type == SemanticFieldTypeEnum.URL) {
+                if (!isValidUrl(s)) throw err("URL 格式不正确", String.class);
+            } else if (type == SemanticFieldTypeEnum.GEOGRAPHY) {
+                s = normalizeGeographyString(value);
+            }
+            return s;
+        }
+        if (rawType == BigDecimal.class) {
+            BigDecimal b = toBigDecimal(value);
+            if (b == null) throw err("数值类型转换失败", BigDecimal.class);
+            return b;
+        }
+        if (rawType == Long.class) {
+            BigDecimal b = toBigDecimal(value);
+            if (b == null) throw err("Long 类型转换失败", Long.class);
+            return b.longValue();
+        }
+        if (rawType == Integer.class) {
+            BigDecimal b = toBigDecimal(value);
+            if (b == null) throw err("Integer 类型转换失败", Integer.class);
+            return b.intValue();
+        }
+        if (rawType == Double.class) {
+            BigDecimal b = toBigDecimal(value);
+            if (b == null) throw err("Double 类型转换失败", Double.class);
+            return b.doubleValue();
+        }
+        if (rawType == Float.class) {
+            BigDecimal b = toBigDecimal(value);
+            if (b == null) throw err("Float 类型转换失败", Float.class);
+            return b.floatValue();
+        }
+        if (rawType == Short.class) {
+            BigDecimal b = toBigDecimal(value);
+            if (b == null) throw err("Short 类型转换失败", Short.class);
+            return b.shortValue();
+        }
+        if (rawType == Byte.class) {
+            BigDecimal b = toBigDecimal(value);
+            if (b == null) throw err("Byte 类型转换失败", Byte.class);
+            return b.byteValue();
+        }
+        if (rawType == java.time.LocalDate.class) {
+            if (value instanceof java.time.LocalDate) return value;
+            if (value instanceof String s) {
+                java.time.LocalDate d = parseLocalDate(s.trim());
+                if (d == null) throw err("LocalDate 解析失败", java.time.LocalDate.class);
+                return d;
+            }
+            throw err("非法的 LocalDate 值", java.time.LocalDate.class);
+        }
+        if (rawType == java.time.LocalDateTime.class) {
+            if (value instanceof java.time.LocalDateTime) return value;
+            if (value instanceof String s) {
+                java.time.LocalDateTime dt = parseLocalDateTime(s.trim());
+                if (dt == null) throw err("LocalDateTime 解析失败", java.time.LocalDateTime.class);
+                return dt;
+            }
+            if (value instanceof Number n) {
+                long epoch = n.longValue();
+                if (String.valueOf(epoch).length() <= 10) epoch *= 1000;
+                java.time.Instant inst = java.time.Instant.ofEpochMilli(epoch);
+                return java.time.LocalDateTime.ofInstant(inst, java.time.ZoneId.systemDefault());
+            }
+            throw err("非法的 LocalDateTime 值", java.time.LocalDateTime.class);
+        }
+        if (rawType == Boolean.class) {
+            if (value instanceof Boolean) return value;
+            if (value instanceof String s) {
+                String t = s.trim().toLowerCase();
+                if ("true".equals(t) || "1".equals(t) || "yes".equals(t) || "y".equals(t) || "on".equals(t) || "t".equals(t)) return Boolean.TRUE;
+                if ("false".equals(t) || "0".equals(t) || "no".equals(t) || "n".equals(t) || "off".equals(t) || "f".equals(t)) return Boolean.FALSE;
+            }
+            throw err("布尔类型转换失败", Boolean.class);
+        }
+        if (rawType.isInstance(value)) return value;
+        throw err("不支持的原始类型", rawType);
+    }
+
+    private boolean isValidEmail(String s) {
+        if (s == null || s.isEmpty()) return false;
+        return Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$").matcher(s).matches();
+    }
+
+    private boolean isValidPhone(String s) {
+        if (s == null || s.isEmpty()) return false;
+        return Pattern.compile("^\\+?[0-9\\-]{5,20}$").matcher(s).matches();
+    }
+
+    private boolean isValidUrl(String s) {
+        if (s == null || s.isEmpty()) return false;
+        String p = "^(https?|ftp)://.+";
+        return Pattern.compile(p, Pattern.CASE_INSENSITIVE).matcher(s).matches();
+    }
+
+    private String normalizeGeographyString(Object value) {
+        if (value instanceof String str) {
+            String s = str.trim();
+            return s;
+        }
+        if (value instanceof Map<?,?> m) {
+            Object lat = m.get("lat");
+            Object lng = m.get("lng");
+            if (lat == null || lng == null) throw err("地理位置缺少坐标", String.class);
+            return String.valueOf(lat) + "," + String.valueOf(lng);
+        }
+        throw err("非法的地理位置值", String.class);
+    }
+
+    private java.time.LocalDate parseLocalDate(String s) {
+        try { return java.time.LocalDate.parse(s); } catch (Exception ignore) {}
+        String[] fmts = {"yyyy-MM-dd","yyyy/MM/dd","yyyyMMdd"};
+        for (String f : fmts) {
+            try { return java.time.LocalDate.parse(s, java.time.format.DateTimeFormatter.ofPattern(f)); } catch (Exception ignore) {}
+        }
+        return null;
+    }
+
+    private java.time.LocalDateTime parseLocalDateTime(String s) {
+        try { return java.time.LocalDateTime.parse(s); } catch (Exception ignore) {}
+        String[] fmts = {"yyyy-MM-dd HH:mm:ss","yyyy/MM/dd HH:mm:ss","yyyyMMddHHmmss","yyyy-MM-dd'T'HH:mm:ss"};
+        for (String f : fmts) {
+            try { return java.time.LocalDateTime.parse(s, java.time.format.DateTimeFormatter.ofPattern(f)); } catch (Exception ignore) {}
+        }
+        try {
+            long epoch = Long.parseLong(s);
+            if (String.valueOf(epoch).length() <= 10) epoch *= 1000;
+            java.time.Instant inst = java.time.Instant.ofEpochMilli(epoch);
+            return java.time.LocalDateTime.ofInstant(inst, java.time.ZoneId.systemDefault());
+        } catch (Exception ignore) {}
+        return null;
+    }
+
+    private IllegalArgumentException err(String base, Class<?> expected) {
+        String code = fieldTypeEnum == null ? null : fieldTypeEnum.getCode();
+        String name = fieldTypeEnum == null ? null : fieldTypeEnum.getName();
+        String exp = expected == null ? null : expected.getSimpleName();
+        String fn = fieldName;
+        String msg = base + " [field=" + fn + ", type=" + code + ", typeName=" + name + (exp == null ? "" : ", expected=" + exp) + "]";
+        return new IllegalArgumentException(msg);
     }
 }

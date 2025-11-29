@@ -1,11 +1,8 @@
 package com.cmsr.onebase.module.metadata.runtime.semantic.executor;
 
-import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
-import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
-import com.cmsr.onebase.module.metadata.core.domain.query.ProcessContext;
-import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticRecordDTO;
 import com.cmsr.onebase.module.metadata.runtime.semantic.service.impl.SemanticDataCrudService;
+import com.cmsr.onebase.module.metadata.runtime.semantic.service.impl.SemanticTemporaryDatasourceService;
 import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticContextInitializer;
 import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticDataFetcher;
 import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticDataIntegrityValidator;
@@ -68,14 +65,14 @@ public class SemanticCreateExecutor {
     @Resource
     private SemanticPermissionContextLoader semanticPermissionContextLoader;
 
-    public Map<String, Object> execute(String entityCode, Long menuId, String traceId, SemanticMergeBodyVO body) {
-        return doExecuteProcess(entityCode, menuId, traceId, body);
+    public Map<String, Object> execute(String tableName, Long menuId, String traceId, SemanticMergeBodyVO body) {
+        return doExecuteProcess(tableName, menuId, traceId, body);
     }
 
-    public Map<String, Object> doExecuteProcess(String entityCode, Long menuId, String traceId, SemanticMergeBodyVO body) {
+    public Map<String, Object> doExecuteProcess(String tableName, Long menuId, String traceId, SemanticMergeBodyVO body) {
         try {
             // 1) 构建 RecordDTO（包含实体校验与基本数据映射）
-            SemanticRecordDTO record = semanticMergeRecordAssembler.assemble(entityCode, body, menuId, traceId);
+            SemanticRecordDTO record = semanticMergeRecordAssembler.assemble(tableName, body, menuId, traceId);
 
             // 2) 上下文初始化：当前类 initializeContext
             semanticPermissionContextLoader.loadPermissionContext(record);
@@ -83,27 +80,24 @@ public class SemanticCreateExecutor {
             // 3) 数据完整性校验：当前类 validateDataIntegrity
             semanticDataIntegrityValidator.validate(record);
 
-            // 6) 默认值处理/形态统一：当前类 processDataAndSetDefaults
-            // Map<String, Object> processedData = defaultValueProcessor.process(context);
-            // context.setProcessedData(processedData);
-
-            // 7) 功能权限校验
+            // 4) 功能权限校验
             semanticPermissionValidator.validate(record);
-            // 8) 数据校验（RecordDTO 简化入口）
+            
+            // 5) 数据校验（RecordDTO 简化入口）
             semanticValidationManager.validate(record);
 
-            // 9) 前置工作流：预留接口（当前为空实现）
+            // 6) 前置工作流：预留接口（当前为空实现）
             semanticWorkflowExecutor.preExecute(record);
             
-            // // 10) 自动编号：使用 AutoNumberService 等（在核心类中）
+            // 7) 自动编号：使用 AutoNumberService 等（在核心类中）
             // autoNumberGenerator.generate(context);
 
-            // 11) 数据存储：CRUDQ 服务（RecordDTO 入口）
+            // 8) 数据存储：CRUDQ 服务（RecordDTO 入口）
             semanticDataCrudService.execute(record);
             
-            // 12) 后置工作流：预留接口（当前为空实现）
+            // 9) 后置工作流：预留接口（当前为空实现）
             semanticWorkflowExecutor.postExecute(record);
-            // 13) 数据查询：通过 DataCrudService 读取主表数据
+            // 10) 数据查询：通过 DataCrudService 读取主表数据
             Map<String, Object> fetchedData = semanticDataCrudService.readById(record);
             // 14) 结果格式化：直接格式化查询结果，无需写回上下文
             // Map<String, Object> result = resultFormatter.format(entity, fields, fetchedData, context);
@@ -111,7 +105,7 @@ public class SemanticCreateExecutor {
             // processLogger.log(context);
             return fetchedData;
         } catch (Exception e) {
-            log.error("创建数据失败。entityCode={}, traceId={}", entityCode, traceId, e);
+            log.error("创建数据失败。tableName={}, traceId={}", tableName, traceId, e);
             throw e;
         }
     }

@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.metadata.runtime.semantic.strategy.validation.impl;
 
-import com.cmsr.onebase.module.metadata.core.dal.database.TemporaryDatasourceService;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
@@ -9,6 +8,7 @@ import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationUniq
 import com.cmsr.onebase.module.metadata.core.service.datasource.MetadataDatasourceCoreService;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataEntityFieldCoreService;
+import com.cmsr.onebase.module.metadata.runtime.semantic.service.impl.SemanticTemporaryDatasourceService;
 import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.validation.SemanticValidationService;
 import jakarta.annotation.Resource;
 import org.anyline.data.param.ConfigStore;
@@ -34,7 +34,7 @@ public class SemanticUniqueValidationService implements SemanticValidationServic
     @Resource
     protected MetadataDatasourceCoreService metadataDatasourceCoreService;
     @Resource
-    protected TemporaryDatasourceService temporaryDatasourceService;
+    protected SemanticTemporaryDatasourceService semanticTemporaryDatasourceService;
     @Resource
     protected MetadataEntityFieldCoreService metadataEntityFieldCoreService;
 
@@ -64,7 +64,7 @@ public class SemanticUniqueValidationService implements SemanticValidationServic
         MetadataBusinessEntityDO entity = metadataBusinessEntityCoreService.getBusinessEntity(entityId);
         MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
         if (datasource == null) { throw exception(DATASOURCE_NOT_EXISTS); }
-        AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
+        AnylineService<?> temporaryService = semanticTemporaryDatasourceService.createTemporaryService(datasource);
         ConfigStore configs = new DefaultConfigStore();
         configs.and(field.getFieldName(), value);
         List<MetadataEntityFieldDO> entityFields = metadataEntityFieldCoreService.getEntityFieldListByEntityId(entityId);

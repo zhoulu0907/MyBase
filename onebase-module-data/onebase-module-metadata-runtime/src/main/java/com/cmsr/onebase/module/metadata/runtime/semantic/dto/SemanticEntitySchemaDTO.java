@@ -26,6 +26,9 @@ public class SemanticEntitySchemaDTO {
     @Schema(description = "主表名")
     private String tableName;
 
+    @Schema(description = "数据源ID")
+    private Long datasourceId;
+
     @Schema(description = "字段模型列表")
     private List<SemanticFieldSchemaDTO> fields;
 

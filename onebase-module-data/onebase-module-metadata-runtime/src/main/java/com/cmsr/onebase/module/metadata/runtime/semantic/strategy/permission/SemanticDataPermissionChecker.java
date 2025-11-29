@@ -103,10 +103,10 @@ public class SemanticDataPermissionChecker implements SemanticRuntimePermissionC
      */
     private Map<String,Object> buildDataRow(SemanticRecordDTO recordDTO) {
         Map<String,Object> row = new HashMap<>();
-        Map<String, SemanticFieldValueDTO> data = recordDTO.getEntityValue().getFieldValueMap();
+        Map<String, SemanticFieldValueDTO<Object>> data = recordDTO.getEntityValue().getFieldValueMap();
         if (data == null) { return row; }
-        for (Map.Entry<String, SemanticFieldValueDTO> e: data.entrySet()) {
-            row.put(e.getKey(), e.getValue() == null ? null : e.getValue().getEntityValue());
+        for (Map.Entry<String, SemanticFieldValueDTO<Object>> e: data.entrySet()) {
+            row.put(e.getKey(), e.getValue() == null ? null : e.getValue().getStoreValue());
         }
         return row;
     }

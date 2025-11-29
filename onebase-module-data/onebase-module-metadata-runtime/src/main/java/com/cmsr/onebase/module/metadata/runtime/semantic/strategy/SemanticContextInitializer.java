@@ -1,18 +1,13 @@
 package com.cmsr.onebase.module.metadata.runtime.semantic.strategy;
 
-import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
-import com.cmsr.onebase.framework.common.security.dto.RuntimeLoginUser;
-import com.cmsr.onebase.framework.security.runtime.RTSecurityContext;
-import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
-import com.cmsr.onebase.module.metadata.core.domain.query.LoginUserCtx;
-import com.cmsr.onebase.module.metadata.core.domain.query.MetadataPermissionContext;
 import com.cmsr.onebase.module.metadata.core.domain.query.ProcessContext;
-import com.cmsr.onebase.module.metadata.core.dal.database.TemporaryDatasourceService;
 import com.cmsr.onebase.module.metadata.core.service.datasource.MetadataDatasourceCoreService;
 import com.cmsr.onebase.module.metadata.core.service.permission.builder.PermissionContextBuilder;
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticRecordDTO;
+import com.cmsr.onebase.module.metadata.runtime.semantic.service.impl.SemanticTemporaryDatasourceService;
+
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Component;
 
@@ -23,7 +18,7 @@ public class SemanticContextInitializer {
     @Resource
     private MetadataDatasourceCoreService metadataDatasourceCoreService;
     @Resource
-    private TemporaryDatasourceService temporaryDatasourceService;
+    private SemanticTemporaryDatasourceService semanticTemporaryDatasourceService;
     @Resource
     private PermissionContextBuilder permissionContextBuilder;
 

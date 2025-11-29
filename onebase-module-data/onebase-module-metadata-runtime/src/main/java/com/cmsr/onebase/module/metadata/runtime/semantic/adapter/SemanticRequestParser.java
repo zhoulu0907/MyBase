@@ -66,6 +66,7 @@ public class SemanticRequestParser {
         entitySchemaDTO.setTableName(entity.getTableName());
         entitySchemaDTO.setCode(entity.getCode());
         entitySchemaDTO.setDisplayName(entity.getDisplayName());
+        entitySchemaDTO.setDatasourceId(entity.getDatasourceId());
         entitySchemaDTO.setConnectors(buildConnectorSchemas(entityId));
         record.setEntitySchema(entitySchemaDTO);
 
@@ -79,9 +80,8 @@ public class SemanticRequestParser {
             String key = e.getKey();
             Object raw = e.getValue();
             if (fieldNames.contains(key) || Objects.equals(key, "id") || Objects.equals(key, "deleted")) {
-                SemanticFieldValueDTO<Object> v = new SemanticFieldValueDTO<>();
+                SemanticFieldValueDTO<Object> v = SemanticFieldValueDTO.<Object>of(guessTypeEnum(raw));
                 v.setRawValue(raw);
-                v.setFieldTypeEnum(guessTypeEnum(raw));
                 data.put(key, v);
             } else {
                 SemanticRelationValueDTO cv = toConnectorValue(raw);
@@ -309,9 +309,8 @@ public class SemanticRequestParser {
             } else if ("deleted".equals(k)) {
                 row.setDeleted(val == null ? null : Boolean.valueOf(String.valueOf(val)));
             } else {
-                SemanticFieldValueDTO<Object> v = new SemanticFieldValueDTO<>();
+                SemanticFieldValueDTO<Object> v = SemanticFieldValueDTO.<Object>of(guessTypeEnum(val));
                 v.setRawValue(val);
-                v.setFieldTypeEnum(guessTypeEnum(val));
                 v.setFieldName(k);
                 fields.put(k, v);
             }

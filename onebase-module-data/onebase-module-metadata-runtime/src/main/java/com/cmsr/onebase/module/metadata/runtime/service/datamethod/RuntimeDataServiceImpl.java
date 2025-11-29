@@ -3,11 +3,6 @@ package com.cmsr.onebase.module.metadata.runtime.service.datamethod;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityFieldRepository;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityRelationshipRepository;
-import com.cmsr.onebase.module.metadata.core.dal.database.TemporaryDatasourceService;
-import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
-import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
-import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
-import com.cmsr.onebase.module.metadata.core.dal.dataobject.relationship.MetadataEntityRelationshipDO;
 import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodRequestContext;
 import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodSubEntityContext;
 import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
@@ -17,6 +12,8 @@ import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEnti
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataEntityFieldCoreService;
 import com.cmsr.onebase.module.metadata.core.util.EntityFieldDataConverter;
 import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.vo.*;
+import com.cmsr.onebase.module.metadata.core.dal.database.TemporaryDatasourceService;
+
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
