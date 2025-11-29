@@ -33,13 +33,13 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 public class CorpDeptController {
 
     @Resource
-    private DeptService corpDeptService;
+    private DeptService deptService;
 
     @PostMapping("/create")
     @Operation(summary = "创建部门")
     @PreAuthorize("@ss.hasPermission('corp:dept:create')")
     public CommonResult<Long> createDept(@Valid @RequestBody DeptSaveReqVO createReqVO) {
-        Long deptId = corpDeptService.createDept(createReqVO);
+        Long deptId = deptService.createDept(createReqVO);
         return success(deptId);
     }
 
@@ -47,7 +47,7 @@ public class CorpDeptController {
     @Operation(summary = "更新部门")
     @PreAuthorize("@ss.hasPermission('corp:dept:update')")
     public CommonResult<Boolean> updateDept(@Valid @RequestBody DeptSaveReqVO updateReqVO) {
-        corpDeptService.updateDept(updateReqVO);
+        deptService.updateDept(updateReqVO);
         return success(true);
     }
 
@@ -55,7 +55,7 @@ public class CorpDeptController {
     @Operation(summary = "修改部门用户管理员/主管")
     @PreAuthorize("@ss.hasPermission('corp:user:update')")
     public CommonResult<Boolean> updateAdminOrDirector(@Valid @RequestBody UserAdminOrDirectorUpdateReqVO reqVO) {
-        corpDeptService.updateAdminOrDirector(reqVO);
+        deptService.updateAdminOrDirector(reqVO);
         return success(true);
     }
 
@@ -64,7 +64,7 @@ public class CorpDeptController {
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
     @PreAuthorize("@ss.hasPermission('corp:dept:delete')")
     public CommonResult<Boolean> deleteDept(@RequestParam("id") Long id) {
-        corpDeptService.deleteDept(id);
+        deptService.deleteDept(id);
         return success(true);
     }
 
@@ -72,7 +72,7 @@ public class CorpDeptController {
     @Operation(summary = "获取部门列表")
     @PreAuthorize("@ss.hasPermission('corp:dept:query')")
     public CommonResult<List<DeptRespVO>> getDeptList(DeptListReqVO reqVO) {
-        List<DeptRespVO> respList = corpDeptService.getDeptListWithUserCount(reqVO);
+        List<DeptRespVO> respList = deptService.getDeptListWithUserCount(reqVO);
         return success(respList);
     }
 
@@ -80,7 +80,7 @@ public class CorpDeptController {
     @PreAuthorize("@ss.hasPermission('corp:dept:query')")
     @Operation(summary = "获取部门精简信息列表", description = "只包含被开启的部门，主要用于前端的下拉选项")
     public CommonResult<List<DeptSimpleRespVO>> getSimpleDeptList() {
-        List<DeptDO> list = corpDeptService.getDeptList(
+        List<DeptDO> list = deptService.getDeptList(
                 new DeptListReqVO().setStatus(CommonStatusEnum.ENABLE.getStatus()));
         return success(BeanUtils.toBean(list, DeptSimpleRespVO.class));
     }
@@ -90,7 +90,7 @@ public class CorpDeptController {
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
     @PreAuthorize("@ss.hasPermission('corp:dept:query')")
     public CommonResult<DeptRespVO> getDept(@RequestParam("id") Long id) {
-        DeptRespVO dept = corpDeptService.getDeptWithUserCountAndLeader(id);
+        DeptRespVO dept = deptService.getDeptWithUserCountAndLeader(id);
         return success(dept);
     }
 
@@ -98,7 +98,7 @@ public class CorpDeptController {
     @Operation(summary = "指定/搜索获取部门和用户信息")
     @PreAuthorize("@ss.hasPermission('corp:dept:query')")
     public CommonResult<DeptAndUsersRespVO> getDeptAndUsers(@Valid DeptAndUsersReqVO reqVO) {
-        DeptAndUsersRespVO result = corpDeptService.getDeptAndUsers(reqVO);
+        DeptAndUsersRespVO result = deptService.getDeptAndUsers(reqVO);
         return success(result);
     }
 
@@ -107,7 +107,7 @@ public class CorpDeptController {
     @PreAuthorize("@ss.hasPermission('corp:dept:query')")
     public CommonResult<List<DeptSimpleRespVO>> getParentDeptsListById(@RequestParam("id") Long id,
                                                                        @RequestParam("idType") String idType) {
-        List<DeptDO> deptDOList = corpDeptService.getParentDeptsListById(id,idType);
+        List<DeptDO> deptDOList = deptService.getParentDeptsListById(id,idType);
         return success(BeanUtils.toBean(deptDOList, DeptSimpleRespVO.class));
     }
 
