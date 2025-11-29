@@ -79,7 +79,7 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
             }
             
             // 获取字段信息用于生成默认提示语
-            MetadataEntityFieldDO field = entityFieldRepository.findById(req.getFieldId());
+            MetadataEntityFieldDO field = entityFieldRepository.getById(req.getFieldId());
             if (field == null) {
                 throw new IllegalStateException("字段" + req.getFieldId() + "不存在，无法同步长度校验配置");
             }
@@ -126,7 +126,7 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
             }
         } else if ("REGEX".equalsIgnoreCase(type)) {
             // 获取字段信息用于生成默认提示语
-            MetadataEntityFieldDO field = entityFieldRepository.findById(req.getFieldId());
+            MetadataEntityFieldDO field = entityFieldRepository.getById(req.getFieldId());
             if (field == null) {
                 throw new IllegalStateException("字段" + req.getFieldId() + "不存在，无法同步格式校验配置");
             }
@@ -168,7 +168,7 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
         } else if ("REQUIRED".equalsIgnoreCase(type)) {
             // 同步必填到 required 表
             MetadataValidationRequiredDO exist = requiredService.getByFieldId(req.getFieldId());
-            MetadataEntityFieldDO field = entityFieldRepository.findById(req.getFieldId());
+            MetadataEntityFieldDO field = entityFieldRepository.getById(req.getFieldId());
             if (field == null) {
                 throw new IllegalStateException("字段" + req.getFieldId() + "不存在，无法同步必填校验配置");
             }
@@ -203,7 +203,7 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
             }
         } else if ("UNIQUE".equalsIgnoreCase(type)) {
             MetadataValidationUniqueDO exist = uniqueService.getByFieldId(req.getFieldId());
-            MetadataEntityFieldDO field = entityFieldRepository.findById(req.getFieldId());
+            MetadataEntityFieldDO field = entityFieldRepository.getById(req.getFieldId());
             if (field == null) {
                 throw new IllegalStateException("字段" + req.getFieldId() + "不存在，无法同步唯一性校验配置");
             }
@@ -282,7 +282,7 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
     private String buildRuleGroupName(Long fieldId, String validationType) {
         try {
             // 获取字段信息
-            MetadataEntityFieldDO field = entityFieldRepository.findById(fieldId);
+            MetadataEntityFieldDO field = entityFieldRepository.getById(fieldId);
             if (field == null) {
                 log.warn("构建规则组名称失败，字段不存在: fieldId={}", fieldId);
                 return getValidationTypeName(validationType) + "-未知字段-未知实体";

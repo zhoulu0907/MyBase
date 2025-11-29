@@ -112,4 +112,17 @@ public class MetadataEntityRelationshipRepository extends ServiceImpl<MetadataEn
                 .eq(MetadataEntityRelationshipDO::getSourceEntityId, sourceEntityId);
         return getOne(queryWrapper);
     }
+
+    /**
+     * 根据应用ID获取实体关系列表
+     *
+     * @param appId 应用ID
+     * @return 实体关系列表
+     */
+    public List<MetadataEntityRelationshipDO> getRelationshipsByAppId(Long appId) {
+        QueryWrapper queryWrapper = this.query()
+                .eq(MetadataEntityRelationshipDO::getAppId, appId)
+                .orderBy(MetadataEntityRelationshipDO::getCreateTime, false);
+        return list(queryWrapper);
+    }
 }

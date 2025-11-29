@@ -25,20 +25,20 @@ public class AutoNumberRuleBuildServiceImpl implements AutoNumberRuleBuildServic
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long add(MetadataAutoNumberRuleItemDO ruleItem) {
-        ruleItemRepository.insert(ruleItem);
+        ruleItemRepository.save(ruleItem);
         return ruleItem.getId();
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void update(MetadataAutoNumberRuleItemDO ruleItem) {
-        ruleItemRepository.update(ruleItem);
+        ruleItemRepository.updateById(ruleItem);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteById(Long id) {
-        ruleItemRepository.deleteById(id);
+        ruleItemRepository.removeById(id);
     }
 
     @Override
@@ -70,7 +70,7 @@ public class AutoNumberRuleBuildServiceImpl implements AutoNumberRuleBuildServic
         for (int i = 0; i < items.size(); i++) {
             MetadataAutoNumberRuleItemDO item = items.get(i);
             item.setItemOrder(i + 1);
-            ruleItemRepository.update(item);
+            ruleItemRepository.updateById(item);
         }
     }
 }

@@ -172,10 +172,10 @@ public interface MetadataEntityFieldBuildService {
     /**
      * 根据条件查询实体字段列表
      *
-     * @param configStore 查询条件
+     * @param queryWrapper 查询条件
      * @return 实体字段列表
      */
-    List<MetadataEntityFieldDO> findAllByConfig(org.anyline.data.param.init.DefaultConfigStore configStore);
+    List<MetadataEntityFieldDO> findAllByConfig(com.mybatisflex.core.query.QueryWrapper queryWrapper);
 
     // ==================== 新增方法：处理包含自动编号的业务逻辑 ====================
 

@@ -1,7 +1,9 @@
 package com.cmsr.onebase.module.metadata.core.dal.database;
 
+import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
 import com.cmsr.onebase.module.metadata.core.dal.mapper.MetadataDatasourceMapper;
+import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -93,5 +95,20 @@ public class MetadataDatasourceRepository extends ServiceImpl<MetadataDatasource
                 .eq(MetadataDatasourceDO::getAppId, appId)
                 .ne(MetadataDatasourceDO::getId, id, id != null);
         return count(queryWrapper) == 0;
+    }
+
+    /**
+     * 分页查询数据源
+     *
+     * @param queryWrapper 查询条件
+     * @param pageNo 页码
+     * @param pageSize 每页数量
+     * @return 分页结果
+     */
+    public PageResult<MetadataDatasourceDO> getDatasourcePage(QueryWrapper queryWrapper, int pageNo, int pageSize) {
+        // 添加排序
+        queryWrapper.orderBy(MetadataDatasourceDO::getCreateTime, false);
+        Page<MetadataDatasourceDO> page = page(new Page<>(pageNo, pageSize), queryWrapper);
+        return new PageResult<>(page.getRecords(), page.getTotalRow());
     }
 }

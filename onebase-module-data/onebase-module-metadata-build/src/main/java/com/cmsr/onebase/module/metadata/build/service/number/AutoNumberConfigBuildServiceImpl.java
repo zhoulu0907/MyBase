@@ -41,11 +41,11 @@ public class AutoNumberConfigBuildServiceImpl implements AutoNumberConfigBuildSe
     public Long upsert(MetadataAutoNumberConfigDO config) {
         if (config.getId() != null) {
             // 更新
-            configRepository.update(config);
+            configRepository.updateById(config);
             return config.getId();
         } else {
             // 新增
-            configRepository.insert(config);
+            configRepository.save(config);
             return config.getId();
         }
     }

@@ -113,4 +113,18 @@ public class MetadataEntityFieldRepository extends ServiceImpl<MetadataEntityFie
                 .eq(MetadataEntityFieldDO::getDictTypeId, dictTypeId);
         return count(queryWrapper);
     }
+
+    /**
+     * 根据应用ID获取实体字段列表
+     *
+     * @param appId 应用ID
+     * @return 实体字段列表
+     */
+    public List<MetadataEntityFieldDO> getEntityFieldListByAppId(Long appId) {
+        QueryWrapper queryWrapper = this.query()
+                .eq(MetadataEntityFieldDO::getAppId, appId)
+                .orderBy(MetadataEntityFieldDO::getSortOrder, true)
+                .orderBy(MetadataEntityFieldDO::getCreateTime, false);
+        return list(queryWrapper);
+    }
 }

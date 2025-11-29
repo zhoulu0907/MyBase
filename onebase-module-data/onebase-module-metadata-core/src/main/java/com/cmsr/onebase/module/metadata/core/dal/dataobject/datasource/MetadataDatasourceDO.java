@@ -3,8 +3,11 @@ package com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource;
 import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 /**
  * 数据源表 DO
@@ -15,6 +18,9 @@ import lombok.EqualsAndHashCode;
 @Table(value = "metadata_datasource")
 @Data
 @EqualsAndHashCode(callSuper = true)
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class MetadataDatasourceDO extends BaseTenantEntity {
 
     /**

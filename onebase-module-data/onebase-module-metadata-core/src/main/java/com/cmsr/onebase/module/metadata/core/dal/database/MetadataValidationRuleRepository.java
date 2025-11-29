@@ -71,4 +71,14 @@ public class MetadataValidationRuleRepository extends ServiceImpl<MetadataValida
                 .orderBy(MetadataValidationRuleDefinitionDO::getCreateTime, false);
         return list(queryWrapper);
     }
+
+    /**
+     * 根据条件查询验证规则列表
+     *
+     * @param queryWrapper 查询条件
+     * @return 验证规则列表
+     */
+    public List<MetadataValidationRuleDefinitionDO> listByCondition(QueryWrapper queryWrapper) {
+        return list(queryWrapper);
+    }
 }
