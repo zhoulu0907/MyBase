@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.system.service.dept;
+package com.cmsr.onebase.module.system.service.post;
 
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;

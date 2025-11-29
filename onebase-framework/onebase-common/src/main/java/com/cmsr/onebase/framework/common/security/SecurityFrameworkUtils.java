@@ -115,7 +115,7 @@ public class SecurityFrameworkUtils {
      *
      * @return 场景类型
      */
-    public static String getXFromSceneType(){
+    public static String getSceneByUserType(){
         Integer loginUserType = getLoginUserType();
         if (loginUserType == null) {
             return null;
@@ -127,7 +127,6 @@ public class SecurityFrameworkUtils {
         }else if(Objects.equals(UserTypeEnum.CORP.getValue(), loginUserType)){
             return XFromSceneTypeEnum.CORP.getCode();
         }else{
-            // throw exception(USER_TYPE_EXCEPTION, loginUserType);
             return null;
         }
     }

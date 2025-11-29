@@ -135,7 +135,7 @@ public class AdminUserDO extends TenantBaseDO {
     private LocalDateTime loginDate;
 
     /**
-     * 用户类型
+     * 用户类型 see {@link com.cmsr.onebase.framework.common.enums.UserTypeEnum}
      */
     @Column(name = USER_TYPE)
     private Integer userType;

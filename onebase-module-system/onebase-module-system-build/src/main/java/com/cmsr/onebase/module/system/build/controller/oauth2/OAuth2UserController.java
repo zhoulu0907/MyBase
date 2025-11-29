@@ -10,7 +10,7 @@ import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.PostDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.service.dept.DeptService;
-import com.cmsr.onebase.module.system.service.dept.PostService;
+import com.cmsr.onebase.module.system.service.post.PostService;
 import com.cmsr.onebase.module.system.service.user.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
