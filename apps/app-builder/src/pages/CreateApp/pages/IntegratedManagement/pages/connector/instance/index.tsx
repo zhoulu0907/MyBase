@@ -91,9 +91,7 @@ const ConnectorInstancesPage: React.FC = () => {
   };
 
   const handleDelete = async (id: string) => {
-    const res = await deleteConnectInstance({
-      id: id
-    });
+    const res = await deleteConnectInstance(id);
     if (res) {
       Message.success('删除成功');
       getConnectInstanceList();

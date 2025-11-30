@@ -195,10 +195,6 @@ export interface UpdateConnectInstanceReq {
   description?: string;
 }
 
-export interface DeleteConnectInstanceReq {
-  id: string;
-}
-
 export interface ListScriptActionReq {
   pageNo: number;
   pageSize: number;
