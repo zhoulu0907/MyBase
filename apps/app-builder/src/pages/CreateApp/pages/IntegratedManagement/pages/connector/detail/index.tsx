@@ -74,7 +74,7 @@ const ConnectorDetailPage: React.FC<ConnectorInstanceDetailProps> = ({}) => {
 
     try {
       const res = await updateConnectInstance({
-        connectorId: baseInfo.id,
+        id: baseInfo.id,
         connectorName: editName.trim(),
         description: baseInfo.description
       } as UpdateConnectInstanceReq);

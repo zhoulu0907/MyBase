@@ -204,20 +204,19 @@ export const renderForm = ({}: FormRenderProps<FlowNodeJSON['data']>) => {
                 <div className={styles.actionList}>
                   {actionList?.map((item: ScriptActionItem) => (
                     <div
-                      key={item.scriptId}
+                      key={item.id}
                       className={styles.actionItem}
                       onClick={() => {
-                        setSelectedActionId(item.scriptId);
-                        payloadForm.setFieldValue('actionId', item.scriptId);
+                        setSelectedActionId(item.id);
+                        payloadForm.setFieldValue('actionId', item.id);
                         // 如果选中的 actionId 与当前不同，清空 inputParameterFields 参数配置
-                        if (item.scriptId !== selectedActionId) {
+                        if (item.id !== selectedActionId) {
                           payloadForm.setFieldValue('inputParameterFields', []);
                         }
                         setCurrentStep(2);
                       }}
                       style={{
-                        border:
-                          selectedActionId === item.scriptId ? '2px solid rgb(var(--primary-6))' : '1px solid #9c9c9c'
+                        border: selectedActionId === item.id ? '2px solid rgb(var(--primary-6))' : '1px solid #9c9c9c'
                       }}
                     >
                       <div className={styles.actionItemName}>{item.scriptName}</div>

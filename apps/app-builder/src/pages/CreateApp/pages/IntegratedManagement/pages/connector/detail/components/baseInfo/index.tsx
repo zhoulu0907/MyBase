@@ -16,7 +16,7 @@ const ConnectorBaseInfo: React.FC<ConnectorBaseInfoProps> = ({ baseInfo }) => {
 
   const updateBaseInfo = async () => {
     const res = await updateConnectInstance({
-      connectorId: baseInfo?.id,
+      id: baseInfo?.id,
       connectorName: baseInfo?.connectorName,
       description: description
     } as UpdateConnectInstanceReq);
