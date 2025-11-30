@@ -91,8 +91,8 @@ public class FlowConnectorScriptServiceImpl implements FlowConnectorScriptServic
         oldDO.setScriptType(updateVO.getScriptType());
         oldDO.setDescription(updateVO.getDescription());
         oldDO.setRawScript(updateVO.getRawScript());
-        oldDO.setInputParameter(JsonUtils.toJsonString(updateVO.getInputParameter()));
-        oldDO.setOutputParameter(JsonUtils.toJsonString(updateVO.getOutputParameter()));
+        oldDO.setInputParameter(jsonNodeToString(updateVO.getInputParameter()));
+        oldDO.setOutputParameter(jsonNodeToString(updateVO.getOutputParameter()));
 
         connectorScriptRepository.updateById(oldDO);
     }
