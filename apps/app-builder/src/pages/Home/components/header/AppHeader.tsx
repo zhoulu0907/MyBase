@@ -1,13 +1,17 @@
 import LogoSVG from '@/assets/images/app_header_logo.svg';
-import AvatarSVG from '@/assets/images/avatar.svg';
+import spaceShipLine from '@/assets/images/space-ship-line.svg';
+import UserProfileAvatar from '@/components/UserProfileAvatar';
+
 import { useI18n } from '@/hooks/useI18n';
 import { userPermissionSignal } from '@/store/singals/user_permission';
 import { UserPermissionManager } from '@/utils/permission';
-import { Dropdown, Layout, Menu, Tabs } from '@arco-design/web-react';
+import { logout } from '@/utils/session';
+import { Divider, Dropdown, Layout, Menu, Tabs, Typography } from '@arco-design/web-react';
+import { IconExport } from '@arco-design/web-react/icon';
 import { TokenManager } from '@onebase/common';
-import { getPermissionInfo } from '@onebase/platform-center';
+import { CodeType, getPermissionInfo } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import styles from './header.module.less';
 
 const { Header } = Layout;
@@ -16,12 +20,23 @@ interface HeaderProps {
   className?: string;
 }
 
+export interface IAdminInfo {
+  avatar: string;
+  deptId: string;
+  email: string;
+  id: string;
+  nickname: string;
+  username: string;
+  mobile: string;
+}
+
 const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useI18n();
 
-  const [nickname, setNickname] = useState('U');
+  const [adminInfo, setAdminInfo] = useState<IAdminInfo | null>(null);
+  const { tenantId } = useParams();
 
   // Tab 切换
   // 根据当前路径设置 activeTab
@@ -44,42 +59,55 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     if (tokenInfo?.accessToken) {
       getInfo();
     }
-  }, [tokenInfo]);
+  }, [tokenInfo?.accessToken]);
 
   const getInfo = async () => {
-    const res = await getPermissionInfo();
+    const res = await getPermissionInfo(CodeType.TENANT);
     UserPermissionManager.setUserPermissionInfo(res);
     userPermissionSignal.setPermissionInfo(res);
-    setNickname(res.user.nickname);
+    if (res.user) {
+      setAdminInfo(res.user);
+    }
+  };
+
+  const maskMobile = (value?: string) => {
+    let reg = /(\d{3})\d{4}(\d{4})/;
+    const formatMobile = value?.replace(reg, '$1****$2');
+    return formatMobile;
   };
 
   // 登出处理
-  const handleLogout = () => {
-    // 清除 token
-    TokenManager.clearToken();
-    UserPermissionManager.clearUserPermissionInfo();
-    // 跳转到登录页
-    navigate('/login', { replace: true });
+  const handleLogout = async () => {
+    // TODO(mickey): 联调后打开,现在后端登出接口报错
+    // await systemLogout();
+
+    logout(navigate);
   };
 
-  // 用户菜单
-  const userMenu = (
-    <Menu>
-      <Menu.Item key="profile">
-        <div className={styles.userMenuInfo}>
-          <div>{UserPermissionManager.getUserPermissionInfo()?.user.username}</div>
+  const tenantAdminMenu = (
+    <Menu style={{ marginRight: '10px' }}>
+      <Menu.Item key="info" style={{ height: '90px' }}>
+        <div className={styles.adminInformation}>
+          <UserProfileAvatar adminInfo={adminInfo} />
+          <Typography.Text>{adminInfo?.nickname}</Typography.Text>
+          <Typography.Text type="secondary">{maskMobile(adminInfo?.mobile)}</Typography.Text>
         </div>
       </Menu.Item>
+      <Divider style={{ margin: '4px 0' }} />
       <Menu.Item
         key="setting"
         onClick={() => {
-          navigate('/onebase/setting');
+          navigate(`/onebase/${tenantId}/setting`);
         }}
       >
-        {t('header.tenantManagement')}
+        <div className={styles.menu}>
+          <img src={spaceShipLine} />
+          {t('header.tenantManagementBackend')}
+        </div>
       </Menu.Item>
-      <Menu.Item key="logout" onClick={handleLogout} style={{ color: '#FF0000' }}>
-        {t('header.logout')}
+      <Menu.Item key="logout" onClick={handleLogout}>
+        <IconExport style={{ color: '#F53F3F' }} />
+        <Typography.Text type="error">{t('header.logout')}</Typography.Text>
       </Menu.Item>
     </Menu>
   );
@@ -122,11 +150,13 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
         </Tabs>
 
         <div className={styles.userInfo}>
-          {UserPermissionManager.getUserPermissionInfo()?.user?.nickname || '未登录'}
+          {UserPermissionManager.getUserPermissionInfo()?.user?.nickname
+            ? '你好，' + UserPermissionManager.getUserPermissionInfo()?.user?.nickname
+            : '未登录'}
 
-          <Dropdown droplist={userMenu} position="bl">
+          <Dropdown droplist={tenantAdminMenu} position="bl">
             <div className={styles.userDropdown}>
-              <img src={AvatarSVG} alt="avatar" />
+              <UserProfileAvatar adminInfo={adminInfo} />
             </div>
           </Dropdown>
         </div>

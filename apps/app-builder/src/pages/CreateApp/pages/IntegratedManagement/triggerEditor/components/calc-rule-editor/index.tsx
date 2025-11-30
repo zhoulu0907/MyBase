@@ -45,7 +45,7 @@ const CaclRuleEditor: React.FC<CalcRuleEditorProps> = ({ form, nodeId }) => {
   const openFormulaEditor = (fieldKey: string) => {
     setCurrentFieldName(form.getFieldValue(fieldKey)?.field);
     setFormulaVisible(true);
-    setFormulaData(form.getFieldValue(fieldKey)?.formulaData);
+    setFormulaData(form.getFieldValue(fieldKey)?.value?.formulaData);
     setFormulaFieldKey(`${fieldKey}.value`);
   };
 

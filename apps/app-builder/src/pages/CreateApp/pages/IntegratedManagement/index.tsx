@@ -2,7 +2,7 @@ import { useAppStore } from '@/store';
 import { Menu } from '@arco-design/web-react';
 import { IconBranch, IconCommon, IconLink, IconPlayCircle, IconRefresh, IconTool } from '@arco-design/web-react/icon';
 import React, { useMemo } from 'react';
-import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom';
 import styles from './index.module.less';
 import ConnectorPage from './pages/connector/connectorNode';
 import ConnectorDetailPage from './pages/connector/detail';
@@ -26,6 +26,8 @@ const ROUTE_PATHS = {
 const IntegratedManagementPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { tenantId } = useParams();
+
   const { curAppId } = useAppStore();
 
   // 根据路径映射到菜单 key
@@ -59,7 +61,9 @@ const IntegratedManagementPage: React.FC = () => {
           <MenuItem
             key="flow"
             onClick={() =>
-              navigate(`/onebase/create-app/integrated-management/${ROUTE_PATHS.FLOW_MANAGEMENT}?appId=${curAppId}`)
+              navigate(
+                `/onebase/${tenantId}/home/create-app/integrated-management/${ROUTE_PATHS.FLOW_MANAGEMENT}?appId=${curAppId}`
+              )
             }
           >
             <IconBranch /> 流程管理
@@ -76,7 +80,9 @@ const IntegratedManagementPage: React.FC = () => {
           <MenuItem
             key="record"
             onClick={() =>
-              navigate(`/onebase/create-app/integrated-management/${ROUTE_PATHS.FLOW_EXECUTE_RECORD}?appId=${curAppId}`)
+              navigate(
+                `/onebase/${tenantId}/home/create-app/integrated-management/${ROUTE_PATHS.FLOW_EXECUTE_RECORD}?appId=${curAppId}`
+              )
             }
           >
             <IconRefresh /> 执行记录
@@ -92,7 +98,9 @@ const IntegratedManagementPage: React.FC = () => {
             <Menu.Item
               key="connectors-list"
               onClick={() =>
-                navigate(`/onebase/create-app/integrated-management/${ROUTE_PATHS.CONNECTOR}?appId=${curAppId}`)
+                navigate(
+                  `/onebase/${tenantId}/home/create-app/integrated-management/${ROUTE_PATHS.CONNECTOR}?appId=${curAppId}`
+                )
               }
             >
               <IconLink />
@@ -102,7 +110,7 @@ const IntegratedManagementPage: React.FC = () => {
               key="connector-instances"
               onClick={() =>
                 navigate(
-                  `/onebase/create-app/integrated-management/${ROUTE_PATHS.CONNECTOR_INSTANCES}?appId=${curAppId}`
+                  `/onebase/${tenantId}/home/create-app/integrated-management/${ROUTE_PATHS.CONNECTOR_INSTANCES}?appId=${curAppId}`
                 )
               }
             >

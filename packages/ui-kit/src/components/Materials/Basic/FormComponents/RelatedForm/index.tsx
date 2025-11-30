@@ -1,3 +1,4 @@
+import { getPopupContainer } from '@/utils';
 import { Form, Select } from '@arco-design/web-react';
 import { dataMethodPage, menuSignal, type AppEntityField, type PageMethodParam } from '@onebase/app';
 import { nanoid } from 'nanoid';
@@ -6,7 +7,6 @@ import { STATUS_OPTIONS, STATUS_VALUES } from 'src/components/Materials/constant
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import '../index.css';
 import { type XRelatedFormConfig } from './schema';
-import { getPopupContainer } from '@/utils';
 
 const XRelatedForm = memo((props: XRelatedFormConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const {
@@ -43,9 +43,7 @@ const XRelatedForm = memo((props: XRelatedFormConfig & { runtime?: boolean; deta
         ...(res.list || []).map((item: any) => ({
           label: item[relatedField.displayName],
           value: item[relatedField.fieldId]
-        })),
-        // TODO(mickey): remove
-        { label: '牛逼', value: 233333 }
+        }))
       ]);
     }
   };

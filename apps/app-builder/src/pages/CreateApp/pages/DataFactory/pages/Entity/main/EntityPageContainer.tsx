@@ -1,13 +1,14 @@
-import { useResourceStore } from '@/store/store_resource';
 import { newFieldSignal } from '@/store/singals/new_field';
+import { useResourceStore } from '@/store/store_resource';
 import { Message, Radio, Tag } from '@arco-design/web-react';
-import { IconCopy, IconMindMapping, IconNav } from '@arco-design/web-react/icon';
+import { IconApps, IconCopy, IconMindMapping, IconNav } from '@arco-design/web-react/icon';
 import { getDatasourceList } from '@onebase/app';
 import dayjs from 'dayjs';
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import EntityTable from '../components/EntityTable';
 import styles from '../index.module.less';
 import { EntityERContainer } from './EntityERContainer';
+import { KnowledgeGraphContainer } from './KnowledgeGraphContainer';
 
 export interface DatasourceRecord {
   id: string;
@@ -23,7 +24,8 @@ export interface DatasourceRecord {
 
 const PAGE_TYPE = {
   ER_CHART: 'ER_CHART',
-  ENTITY_TABLE: 'ENTITY_TABLE'
+  ENTITY_TABLE: 'ENTITY_TABLE',
+  KNOWLEDGE_GRAPH: 'KNOWLEDGE_GRAPH'
 };
 
 export const EntityPageContainer: React.FC<{ appId: string; handleMenuClick: (key: string) => void }> = ({
@@ -129,6 +131,9 @@ export const EntityPageContainer: React.FC<{ appId: string; handleMenuClick: (ke
             <Radio value={PAGE_TYPE.ENTITY_TABLE}>
               <IconNav />
             </Radio>
+            <Radio value={PAGE_TYPE.KNOWLEDGE_GRAPH}>
+              <IconApps />
+            </Radio>
           </Radio.Group>
         </div>
       </div>
@@ -149,6 +154,11 @@ export const EntityPageContainer: React.FC<{ appId: string; handleMenuClick: (ke
       {activeTab === PAGE_TYPE.ENTITY_TABLE && (
         <div className={styles.entityPageContent}>
           <EntityTable />
+        </div>
+      )}
+      {activeTab === PAGE_TYPE.KNOWLEDGE_GRAPH && (
+        <div className={styles.entityPageContent}>
+          <KnowledgeGraphContainer datasourceId={dsData?.id} />
         </div>
       )}
     </div>

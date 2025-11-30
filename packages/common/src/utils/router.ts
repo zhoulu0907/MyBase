@@ -3,8 +3,10 @@
  * @param {string} key 需要获取的参数名
  * @returns {string | null} 参数值，未找到返回 null
  */
-export function getHashQueryParam(key: string): string | null {
-  const hash = window.location.hash;
+export function getHashQueryParam(key: string, hash?: string): string | null {
+  if (!hash) {
+    hash = window.location.hash;
+  }
   const queryIndex = hash.indexOf('?');
   if (queryIndex !== -1) {
     const queryString = hash.substring(queryIndex + 1);
