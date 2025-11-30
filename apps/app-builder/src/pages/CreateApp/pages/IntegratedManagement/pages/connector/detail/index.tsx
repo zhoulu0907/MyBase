@@ -8,7 +8,7 @@ import {
 } from '@onebase/app';
 import { getHashQueryParam } from '@onebase/common';
 import React, { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import ScriptActionListPage from '../action/list';
 import ConnectorBaseInfo from './components/baseInfo';
 import styles from './index.module.less';
@@ -17,6 +17,7 @@ interface ConnectorInstanceDetailProps {}
 
 const ConnectorDetailPage: React.FC<ConnectorInstanceDetailProps> = ({}) => {
   const navigate = useNavigate();
+  const { tenantId } = useParams();
   const [activeKey, setActiveKey] = useState<'base' | 'action' | 'logic'>('base');
 
   const [baseInfo, setBaseInfo] = useState<ConnectInstance>();
@@ -46,7 +47,6 @@ const ConnectorDetailPage: React.FC<ConnectorInstanceDetailProps> = ({}) => {
 
   const handleGetIntanceDetail = async (id: string) => {
     const res = await getConnectInstance(id);
-    console.log('res :', res);
     if (res) {
       setBaseInfo(res);
     }
@@ -74,7 +74,7 @@ const ConnectorDetailPage: React.FC<ConnectorInstanceDetailProps> = ({}) => {
 
     try {
       const res = await updateConnectInstance({
-        connectorId: baseInfo.connectorId,
+        id: baseInfo.id,
         connectorName: editName.trim(),
         description: baseInfo.description
       } as UpdateConnectInstanceReq);
@@ -95,7 +95,7 @@ const ConnectorDetailPage: React.FC<ConnectorInstanceDetailProps> = ({}) => {
 
   const handleGoBack = () => {
     const appId = getHashQueryParam('appId');
-    navigate(`/onebase/create-app/integrated-management/connector-instances?appId=${appId}`);
+    navigate(`/onebase/${tenantId}/home/create-app/integrated-management/connector-instances?appId=${appId}`);
   };
 
   return (

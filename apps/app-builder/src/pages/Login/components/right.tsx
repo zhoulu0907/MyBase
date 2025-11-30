@@ -1,4 +1,5 @@
 import LogoSVG from '@/assets/images/ob_logo.svg';
+
 import { Button, Checkbox, Form, Input, Message, Space, Typography } from '@arco-design/web-react';
 import { IconLock, IconUser } from '@arco-design/web-react/icon';
 import {
@@ -8,7 +9,13 @@ import {
   TokenManager,
   type SliderCaptchaRef
 } from '@onebase/common';
-import { checkCaptchaApi, getCaptchaApi, login, type LoginRequest, type LoginResponse } from '@onebase/platform-center';
+import {
+  checkCaptchaApi,
+  getCaptchaApi,
+  tenantLogin,
+  type LoginRequest,
+  type TenantLoginResponse
+} from '@onebase/platform-center';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useI18n } from '../../../hooks/useI18n';
@@ -40,15 +47,14 @@ const Right: React.FC = () => {
     }
 
     // 如果已经登录了就自动跳转到首页
-    if (TokenManager.isTokenValid()) {
-      const redirectURL = getHashQueryParam('redirectURL');
-      if (redirectURL) {
-        window.location.href = redirectURL;
-      } else {
-        // 跳转到首页
-        navigate('/onebase/my-app');
-      }
-    }
+    // if (TokenManager.isTokenValid()) {
+    //   const redirectURL = getHashQueryParam('redirectURL');
+    //   if (redirectURL) {
+    //     window.location.href = redirectURL;
+    //   } else {
+    //     navigate('/onebase/enterprise-app');
+    //   }
+    // }
   }, []);
 
   // 处理记住我状态变化
@@ -71,7 +77,7 @@ const Right: React.FC = () => {
       }
 
       const headers = {
-        'Tenant-Id': tenantId
+        'X-Tenant-Id': tenantId
       };
 
       const deviceId = await getOrCreateDeviceInfo();
@@ -83,17 +89,21 @@ const Right: React.FC = () => {
         deviceId: deviceId
       };
 
-      const response: LoginResponse = await login(loginData, headers);
+      const response: TenantLoginResponse = await tenantLogin(loginData, headers);
 
       if (response.accessToken) {
+        TokenManager.setCurIdentifyId(tenantId);
+
         // 使用 TokenManager 存储 token 信息
+        console.log('response: ', response);
         TokenManager.setToken(
           {
             userId: response.userId,
             accessToken: response.accessToken,
             refreshToken: response.refreshToken,
             expiresTime: response.expiresTime,
-            tenantId: response.tenantId
+            tenantId: response.tenantId,
+            loginURL: window.location.href // 当前地址
           },
           rememberMe
         );
@@ -107,8 +117,7 @@ const Right: React.FC = () => {
         if (redirectURL) {
           window.location.href = redirectURL;
         } else {
-          // 跳转到首页
-          navigate('/onebase/my-app');
+          navigate(`/onebase/${tenantId}/home/enterprise-app`);
         }
 
         return;
@@ -129,8 +138,9 @@ const Right: React.FC = () => {
 
   // 验证码验证成功回调
   const handleCaptchaSuccess = async (token: string) => {
-    const values = await accountForm.getFieldsValue();
     const deviceId = await getOrCreateDeviceInfo();
+
+    const values = await accountForm.getFieldsValue();
     handleSubmit({
       username: values.username,
       password: values.password,
@@ -144,6 +154,7 @@ const Right: React.FC = () => {
     try {
       // 先验证表单
       await accountForm.validate();
+
       const deviceId = await getOrCreateDeviceInfo();
 
       if (accountForm.getFieldValue('captchaVerification')) {
@@ -168,7 +179,7 @@ const Right: React.FC = () => {
     <div className={styles.loginPageRight}>
       <div className={styles.loginFormContainer}>
         <img src={LogoSVG} alt="logo" />
-        <h1 className={styles.title}>欢迎登录数智化底座</h1>
+        <h1 className={styles.title}>欢迎登录空间管理系统</h1>
 
         <Form
           form={accountForm}
@@ -237,13 +248,7 @@ const Right: React.FC = () => {
       <div className={styles.loginFooter}>
         <Paragraph className={styles.footerText}>
           登录即表示同意
-          <Button type="text" size="small">
-            《用户协议》
-          </Button>
-          和
-          <Button type="text" size="small">
-            《隐私政策》
-          </Button>
+          <span>《用户协议》</span>和<span>《隐私政策》</span>
         </Paragraph>
       </div>
     </div>

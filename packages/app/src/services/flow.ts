@@ -3,7 +3,6 @@ import {
   CreateConnectInstanceReq,
   CreateFlowMgmtReq,
   CreateScriptActionReq,
-  DeleteConnectInstanceReq,
   ListConnectFlowNodeReq,
   ListConnectInstanceReq,
   ListScriptActionReq,
@@ -97,8 +96,8 @@ export const updateConnectInstance = (params: UpdateConnectInstanceReq) => {
   return flowService.post('/connector/update', params);
 };
 
-export const deleteConnectInstance = (params: DeleteConnectInstanceReq) => {
-  return flowService.post('/connector/delete', params);
+export const deleteConnectInstance = (id: string) => {
+  return flowService.post(`/connector/delete?id=${id}`);
 };
 
 export const getScriptAction = (id: string) => {
