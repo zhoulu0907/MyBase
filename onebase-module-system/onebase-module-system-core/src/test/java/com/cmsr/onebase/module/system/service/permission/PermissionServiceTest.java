@@ -94,7 +94,7 @@ public class PermissionServiceTest {
     @Test
     public void testHasAnyPermissions_Normal() {
         // 准备数据
-        String permission = "system:user:query";
+        String permission = "tenant:user:query";
 
         // 创建用户
         AdminUserDO user = createTestUser(null, "testuser");
@@ -124,7 +124,7 @@ public class PermissionServiceTest {
     @Test
     public void testHasAnyPermissions_NoPermission() {
         // 准备数据
-        String permission = "system:user:query";
+        String permission = "tenant:user:query";
 
         // 创建用户（但不分配任何角色）
         AdminUserDO user = createTestUser(null, "testuser");

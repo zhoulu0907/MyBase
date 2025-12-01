@@ -16,7 +16,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 @Slf4j
 public class TenantVisitContextInterceptor implements HandlerInterceptor {
 
-    private static final String PERMISSION = "system:tenant:visit";
+    private static final String PERMISSION = "tenant:tenant:visit";
 
     private final TenantProperties tenantProperties;
 

@@ -20,6 +20,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -48,6 +49,7 @@ public class TenantUserProfileController {
 
     @GetMapping("/get")
     @Operation(summary = "获得登录用户信息")
+    @PreAuthorize("@ss.hasPermission('tenant:profile:query')")
     public CommonResult<UserProfileRespVO> getUserProfile() {
         // 获得用户基本信息
         AdminUserDO user = userService.getUser(getLoginUserId());
@@ -62,6 +64,7 @@ public class TenantUserProfileController {
 
     @PostMapping("/update")
     @Operation(summary = "修改用户个人信息")
+    @PreAuthorize("@ss.hasPermission('tenant:profile:query')")
     public CommonResult<Boolean> updateUserProfile(@Valid @RequestBody UserProfileUpdateReqVO reqVO) {
         userService.updateUserProfile(getLoginUserId(), reqVO);
         return success(true);
@@ -69,6 +72,7 @@ public class TenantUserProfileController {
 
     @PostMapping("/update-password")
     @Operation(summary = "修改用户个人密码")
+    @PreAuthorize("@ss.hasPermission('tenant:profile:reset-pwd')")
     public CommonResult<Boolean> updateUserProfilePassword(@Valid @RequestBody UserProfileUpdatePasswordReqVO reqVO) {
         userService.updateUserPassword(getLoginUserId(), reqVO);
         return success(true);
