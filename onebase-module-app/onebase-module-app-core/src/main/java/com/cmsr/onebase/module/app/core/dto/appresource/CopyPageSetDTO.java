@@ -10,10 +10,10 @@ public class CopyPageSetDTO {
 
     @Schema(description = "菜单编码", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
     @NotNull(message = "菜单ID不能为空")
-    private Long menuId;
+    private String menuUuid;
 
     @Schema(description = "复制后的新菜单编码", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
     @NotNull(message = "复制后的新菜单编码不能为空")
-    private Long newMenuId;
+    private String newMenuUuid;
 
 }

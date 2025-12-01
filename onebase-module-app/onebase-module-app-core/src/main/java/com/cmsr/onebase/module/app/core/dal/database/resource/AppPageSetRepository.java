@@ -13,6 +13,12 @@ import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppResourceP
 @Repository
 public class AppPageSetRepository extends BaseBizRepository<AppResourcePagesetMapper, AppResourcePagesetDO> {
 
+    public AppResourcePagesetDO getByUuid(String pageSetUuid) {
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_RESOURCE_PAGESET.PAGESET_UUID.eq(pageSetUuid));
+        return getOne(queryWrapper);
+    }
+
     public AppResourcePagesetDO findPageSetByMenuUuid(String menuUuid) {
         QueryWrapper queryWrapper = this.query()
                 .where(APP_RESOURCE_PAGESET.MENU_UUID.eq(menuUuid));
@@ -37,5 +43,4 @@ public class AppPageSetRepository extends BaseBizRepository<AppResourcePagesetMa
                 .and(APP_RESOURCE_PAGESET.PAGESET_TYPE.eq(pageSetType, pageSetType != null));
         return list(queryWrapper);
     }
-
 }

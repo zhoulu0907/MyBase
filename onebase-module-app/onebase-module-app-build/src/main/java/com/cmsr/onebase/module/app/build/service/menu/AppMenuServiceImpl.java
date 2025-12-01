@@ -386,7 +386,7 @@ public class AppMenuServiceImpl implements AppMenuService {
         // 删除菜单
         appMenuRepository.removeById(id);
         // 删除页面
-        pageSetService.deletePageSet(menuDO.getId());
+        pageSetService.deletePageSet(menuDO.getMenuUuid());
     }
 
     private boolean validateMenuGroupHasChildren(Long id) {

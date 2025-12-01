@@ -1,14 +1,16 @@
 package com.cmsr.onebase.module.app.build.util;
 
 
+import com.cmsr.onebase.framework.common.util.string.UuidUtils;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePageDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourceWorkbenchPageDO;
 
 public class PageUtils {
 
-    public static AppResourcePageDO initPage(Long pageSetId, String pageName, String routerPath, String pageType, Boolean openViewMode ) {
+    public static AppResourcePageDO initPage(String pageSetUuid, String pageName, String routerPath, String pageType, Boolean openViewMode) {
         AppResourcePageDO pageDO = new AppResourcePageDO();
-        pageDO.setPageSetId(pageSetId);
+        pageDO.setPageUuid(UuidUtils.getUuid());
+        pageDO.setPageUuid(pageSetUuid);
         pageDO.setPageName(pageName);
         pageDO.setTitle(pageName);
         pageDO.setLayout("horizontal");
@@ -26,7 +28,7 @@ public class PageUtils {
             pageDO.setEditViewMode(1);
             pageDO.setIsDefaultDetailViewMode(1);
             pageDO.setIsDefaultEditViewMode(1);
-        }else{
+        } else {
             pageDO.setDetailViewMode(0);
             pageDO.setEditViewMode(0);
             pageDO.setIsDefaultDetailViewMode(0);
@@ -37,9 +39,10 @@ public class PageUtils {
     }
 
 
-    public static AppResourceWorkbenchPageDO initWorkbenchPage(Long pageSetId, String pageName, String routerPath, String pageType, Boolean openViewMode ) {
+    public static AppResourceWorkbenchPageDO initWorkbenchPage(String pageSetUuid, String pageName, String routerPath, String pageType, Boolean openViewMode) {
         AppResourceWorkbenchPageDO pageDO = new AppResourceWorkbenchPageDO();
-        pageDO.setPageSetId(pageSetId);
+        pageDO.setPageUuid(UuidUtils.getUuid());
+        pageDO.setPageSetUuid(pageSetUuid);
         pageDO.setPageName(pageName);
         pageDO.setTitle(pageName);
         pageDO.setLayout("horizontal");
@@ -57,7 +60,7 @@ public class PageUtils {
             pageDO.setEditViewMode(1);
             pageDO.setIsDefaultDetailViewMode(1);
             pageDO.setIsDefaultEditViewMode(1);
-        }else{
+        } else {
             pageDO.setDetailViewMode(0);
             pageDO.setEditViewMode(0);
             pageDO.setIsDefaultDetailViewMode(0);

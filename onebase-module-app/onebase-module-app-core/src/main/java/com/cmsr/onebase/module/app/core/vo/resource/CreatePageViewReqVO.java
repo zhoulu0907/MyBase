@@ -12,9 +12,9 @@ import lombok.Data;
  */
 @Data
 public class CreatePageViewReqVO {
-    @Schema(description = "pageSetId", requiredMode = Schema.RequiredMode.REQUIRED, example = "xxx")
+    @Schema(description = "pageSetUuid", requiredMode = Schema.RequiredMode.REQUIRED, example = "xxx")
     @NotNull(message = "页面集id不能为空")
-    private Long pageSetId;
+    private String pageSetUuid;
 
     @Schema(description = "viewType", requiredMode = Schema.RequiredMode.REQUIRED, example = "xxx")
     @NotNull(message = "视图类型")

@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Setter
@@ -35,19 +36,19 @@ public class WorkBenchPageSetServiceProvider {
 
         // 兼容旧数据：如果页面集-页面关联表中没有数据，直接通过pageSetId查询工作台页面
         if (pageSetPageDOs == null || pageSetPageDOs.isEmpty()) {
-            pageDOs = appWorkbenchPageRepository.findByPageSetId(pageSetDO.getId());
+            pageDOs = appWorkbenchPageRepository.findByPageSetUuid(pageSetDO.getPageSetUuid());
         } else {
             pageDOs = pageSetPageDOs.stream()
                     .map(pageSetPageDO -> {
-                        AppResourceWorkbenchPageDO pageDO = appWorkbenchPageRepository.getById(pageSetPageDO.getPageId());
+                        AppResourceWorkbenchPageDO pageDO = appWorkbenchPageRepository.getByUuid(pageSetPageDO.getPageUuid());
                         if (pageDO == null) {
                             // 如果找不到对应的页面，记录错误并跳过
-                            log.warn("Warning: Page not found for pageRef: {}", pageSetPageDO.getPageId());
+                            log.warn("Warning: Page not found for pageRef: {}", pageSetPageDO.getPageUuid());
                             return null;
                         }
                         return pageDO;
                     })
-                    .filter(pageDO -> pageDO != null) // 过滤掉null值
+                    .filter(Objects::nonNull) // 过滤掉null值
                     .toList();
         }
 
@@ -58,7 +59,7 @@ public class WorkBenchPageSetServiceProvider {
 
         // 读取每个页面的组件和配置
         pageDOs.forEach(pageDO -> {
-            List<AppResourceWorkbenchComponentDO> componentDOs = appWorkbenchComponentRepository.findByPageId(pageDO.getId());
+            List<AppResourceWorkbenchComponentDO> componentDOs = appWorkbenchComponentRepository.findByPageUuid(pageDO.getPageUuid());
 
             PageDTO pageDTO = BeanUtils.toBean(pageDO, PageDTO.class);
             pageDTO.setComponents(componentDOs.stream()

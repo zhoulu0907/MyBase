@@ -13,7 +13,9 @@ import java.util.List;
  * @Date 2025/9/1 18:54
  */
 @Data
-public class GetComponentPageListByPageIdRespVO {
+public class QueryComponentListRespVO {
+
     @Schema(description = "list")
     private List<ComponentDTO> list;
+
 }

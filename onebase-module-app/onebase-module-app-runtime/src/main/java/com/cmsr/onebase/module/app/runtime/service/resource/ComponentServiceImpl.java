@@ -14,8 +14,8 @@ public class ComponentServiceImpl implements ComponentService {
     private ComponentServiceProvider componentServiceProvider;
 
     @Override
-    public List<ComponentDTO> listComponent(Long pageId) {
-        return componentServiceProvider.listComponent(pageId);
+    public List<ComponentDTO> listComponent(String pageUuid) {
+        return componentServiceProvider.listComponent(pageUuid);
     }
 
 }

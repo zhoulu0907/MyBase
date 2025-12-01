@@ -26,7 +26,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -42,7 +41,7 @@ public class PageSetServiceProvider {
     private AppPageSetPageRepository pageSetPageDataRepository;
 
     @Resource
-    private AppPageRepository pageDataRepository;
+    private AppPageRepository pageRepository;
 
     @Resource
     private AppComponentRepository componentDataRepository;
@@ -50,16 +49,17 @@ public class PageSetServiceProvider {
     @Resource
     private AppMenuRepository appMenuRepository;
 
-    public Long getPageSetId(Long menuId) {
-        AppResourcePagesetDO pageSetDO = pageSetDataRepository.findPageSetByMenuId(menuId);
-        return pageSetDO.getId();
+    public String getPageSetIdByMenuUuid(String menuUuid) {
+        AppResourcePagesetDO pageSetDO = pageSetDataRepository.findPageSetByMenuUuid(menuUuid);
+        return pageSetDO.getPageSetUuid();
     }
 
 
     public Long getAppId(Long pageSetId) {
         AppResourcePagesetDO pageSetDO = pageSetDataRepository.getById(pageSetId);
-        Long menuId = pageSetDO.getMenuId();
-        AppMenuDO menuDO = appMenuRepository.getById(menuId);
+        String menuUuid = pageSetDO.getMenuUuid();
+        // TODO: refactor this
+        AppMenuDO menuDO = appMenuRepository.getById(menuUuid);
         return menuDO.getApplicationId();
     }
 
@@ -78,7 +78,7 @@ public class PageSetServiceProvider {
         }
 
         // 读取页面集中的页面
-        List<AppResourcePagesetPageDO> pageSetPageDOs = pageSetPageDataRepository.findByPageSetId(pageSetDO.getId());
+        List<AppResourcePagesetPageDO> pageSetPageDOs = pageSetPageDataRepository.findByPageSetUuid(pageSetDO.getPageSetUuid());
 
         if (PageTypeSetEnum.isWorkBenchType(pageSetDO.getPageSetType())) {
             /**
@@ -89,11 +89,11 @@ public class PageSetServiceProvider {
 
         List<AppResourcePageDO> pageDOs = pageSetPageDOs.stream()
                 .map(pageSetPageDO -> {
-                    AppResourcePageDO pageDO = pageDataRepository.getById(pageSetPageDO.getPageId());
+                    AppResourcePageDO pageDO = pageRepository.getByUuid(pageSetPageDO.getPageUuid());
 
                     if (pageDO == null) {
                         // 如果找不到对应的页面，记录错误并跳过
-                        log.warn("Page not found for pageRef: {}", pageSetPageDO.getPageId());
+                        log.warn("Page not found for pageRef: {}", pageSetPageDO.getPageUuid());
                         return null;
                     }
                     return pageDO;
@@ -108,7 +108,7 @@ public class PageSetServiceProvider {
 
         // 读取每个页面的组件和配置
         pageDOs.forEach(pageDO -> {
-            List<AppResourceComponentDO> componentDOs = componentDataRepository.findByPageId(pageDO.getId());
+            List<AppResourceComponentDO> componentDOs = componentDataRepository.findByPageUuid(pageDO.getPageUuid());
 
             PageDTO pageDTO = BeanUtils.toBean(pageDO, PageDTO.class);
             pageDTO.setComponents(componentDOs.stream()
@@ -153,13 +153,13 @@ public class PageSetServiceProvider {
             return respVO;
         }
 
-        List<Long> menuIds = menuDOS.stream().map(AppMenuDO::getId).collect(Collectors.toList());
+        List<String> menuUuids = menuDOS.stream().map(AppMenuDO::getMenuUuid).toList();
         List<AppResourcePagesetDO> pageSetDOs;
 
         if (pageSetType != null) {
-            pageSetDOs = pageSetDataRepository.findByMenuIdAndType(menuIds, pageSetType);
+            pageSetDOs = pageSetDataRepository.findByMenuUuidAndType(menuUuids, pageSetType);
         } else {
-            pageSetDOs = pageSetDataRepository.findByMenuIds(menuIds);
+            pageSetDOs = pageSetDataRepository.findByMenuUuids(menuUuids);
         }
 
         respVO.setPageSets(pageSetDOs.stream()

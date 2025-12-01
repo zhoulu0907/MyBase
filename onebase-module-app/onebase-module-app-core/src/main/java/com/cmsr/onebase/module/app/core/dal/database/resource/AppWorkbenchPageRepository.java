@@ -32,4 +32,9 @@ public class AppWorkbenchPageRepository extends BaseBizRepository<AppResourceWor
         return list(queryWrapper);
     }
 
+    public AppResourceWorkbenchPageDO getByUuid(String pageUuid) {
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_RESOURCE_WORKBENCH_PAGE.PAGE_UUID.eq(pageUuid));
+        return getOne(queryWrapper);
+    }
 }

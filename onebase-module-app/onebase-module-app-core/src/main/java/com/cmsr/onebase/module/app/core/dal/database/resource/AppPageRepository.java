@@ -8,6 +8,7 @@ import com.mybatisflex.core.query.QueryWrapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -19,6 +20,12 @@ import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppResourceP
  */
 @Repository
 public class AppPageRepository extends BaseBizRepository<AppResourcePageMapper, AppResourcePageDO> {
+
+    public AppResourcePageDO getByUuid(String pageUuid) {
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_RESOURCE_PAGE.PAGE_UUID.eq(pageUuid));
+        return getOne(queryWrapper);
+    }
 
     public void updatePageName(Long pageId, String pageName) {
         this.updateChain()
@@ -42,5 +49,14 @@ public class AppPageRepository extends BaseBizRepository<AppResourcePageMapper, 
                 .where(APP_RESOURCE_PAGE.PAGESET_UUID.in(pageSetUuidList))
                 .and(APP_RESOURCE_PAGE.PAGE_TYPE.eq(PageEnum.FORM.getValue()));
         return list(queryWrapper);
+    }
+
+    public void deleteByUuidList(Collection<String> pageUuids) {
+        if (CollectionUtils.isEmpty(pageUuids)) {
+            return;
+        }
+        this.updateChain()
+                .where(APP_RESOURCE_PAGE.PAGE_UUID.in(pageUuids))
+                .remove();
     }
 }

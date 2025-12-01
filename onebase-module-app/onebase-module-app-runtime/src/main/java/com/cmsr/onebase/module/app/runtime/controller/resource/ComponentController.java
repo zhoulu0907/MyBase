@@ -2,8 +2,8 @@ package com.cmsr.onebase.module.app.runtime.controller.resource;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.module.app.core.dto.appresource.ComponentDTO;
-import com.cmsr.onebase.module.app.core.vo.resource.GetComponentListByPageIdReqVO;
-import com.cmsr.onebase.module.app.core.vo.resource.GetComponentPageListByPageIdRespVO;
+import com.cmsr.onebase.module.app.core.vo.resource.QueryComponentListReqVO;
+import com.cmsr.onebase.module.app.core.vo.resource.QueryComponentListRespVO;
 import com.cmsr.onebase.module.app.runtime.service.resource.ComponentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -32,11 +32,11 @@ public class ComponentController {
 
     @PostMapping("/list")
     @Operation(summary = "根据page_id获取表单字段")
-    public CommonResult<GetComponentPageListByPageIdRespVO> getFormPageListByAppId(@RequestBody GetComponentListByPageIdReqVO getComponentListByPageIdReqVO) {
-        List<ComponentDTO> components = componentService.listComponent(getComponentListByPageIdReqVO.getPageId());
+    public CommonResult<QueryComponentListRespVO> getFormPageListByAppId(@RequestBody QueryComponentListReqVO queryComponentListReqVO) {
+        List<ComponentDTO> components = componentService.listComponent(queryComponentListReqVO.getPageUuid());
 
-        GetComponentPageListByPageIdRespVO getComponentPageListByPageIdRespVO = new GetComponentPageListByPageIdRespVO();
-        getComponentPageListByPageIdRespVO.setList(components);
-        return CommonResult.success(getComponentPageListByPageIdRespVO);
+        QueryComponentListRespVO queryComponentListRespVO = new QueryComponentListRespVO();
+        queryComponentListRespVO.setList(components);
+        return CommonResult.success(queryComponentListRespVO);
     }
 }
