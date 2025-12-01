@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.app.core.dal.dataobject;
 
-import com.cmsr.onebase.framework.orm.entity.BaseAppEntity;
+import com.cmsr.onebase.framework.orm.entity.BaseBizEntity;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
 import lombok.Data;
@@ -11,7 +11,7 @@ import lombok.Data;
  */
 @Data
 @Table(value = "app_auth_view")
-public class AppAuthViewDO extends BaseAppEntity {
+public class AppAuthViewDO extends BaseBizEntity {
 
     @Column(value = "role_id", comment = "角色id")
     private Long roleId;
