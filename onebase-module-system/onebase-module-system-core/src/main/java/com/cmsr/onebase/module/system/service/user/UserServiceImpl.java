@@ -186,15 +186,26 @@ public class UserServiceImpl implements UserService {
         return user.getId();
     }
 
-    @Override
-    @CacheEvict(value = RedisKeyConstants.USER_FIND_BY_DEPT_IDS, allEntries = true, beforeInvocation = true)
-    public Long createCorpAdminUser(AdminUserDO userDO) {
+    public  void validateCorpAdminUser(AdminUserDO userDO){
         // 校验用户名唯一
         validateUsernameUnique(null, userDO.getUsername());
         // 校验手机号唯一
         validateMobileUnique(null, userDO.getMobile());
         // 校验邮箱唯一
         validateEmailUnique(null, userDO.getEmail());
+    }
+
+    @Override
+    public void checkCorpAdminUser(AdminUserDO adminUserDO) {
+        validateCorpAdminUser(adminUserDO);
+    }
+
+    @Override
+    @CacheEvict(value = RedisKeyConstants.USER_FIND_BY_DEPT_IDS, allEntries = true, beforeInvocation = true)
+    public Long createCorpAdminUser(AdminUserDO userDO) {
+
+        // 验证企业管理员信息
+        validateCorpAdminUser(userDO);
 
         userDO.setStatus(CommonStatusEnum.ENABLE.getStatus()); // 默认开启
         if (userDO.getAdminType() == null) {

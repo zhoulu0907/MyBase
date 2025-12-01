@@ -112,12 +112,8 @@ public class CorpServiceImpl implements CorpService {
 
 
     public Long createCorp(CorpReqVO reqVO) {
-        // 用于校验企业名称是否已存在
-        validCorpNameDuplicate(reqVO.getCorpName());
-        // 用于校验企业ID是否已存在
-        validCorpIdDuplicate(reqVO.getCorpCode());
-        // 用于校验企业用户数量是否超过限制（如大于500）
-        validCorpUserCountDuplicate(reqVO.getUserLimit());
+        // 验证企业基本信息
+        validCorp(reqVO);
 
         CorpDO corpDO = BeanUtils.toBean(reqVO, CorpDO.class);
         corpDO.setTenantId(TenantContextHolder.getTenantId());
@@ -396,6 +392,27 @@ public class CorpServiceImpl implements CorpService {
     @Override
     public List<CorpDO> getSimpleCorpList(Integer staus) {
         return corpDataRepository.getSimpleCorpList(staus);
+    }
+
+    public void validCorp(CorpReqVO corpReqVO){
+        // 用于校验企业名称是否已存在
+        validCorpNameDuplicate(corpReqVO.getCorpName());
+        // 用于校验企业ID是否已存在
+        validCorpIdDuplicate(corpReqVO.getCorpCode());
+        // 用于校验企业用户数量是否超过限制（如大于500）
+        validCorpUserCountDuplicate(corpReqVO.getUserLimit());
+    }
+
+
+    @Override
+    public void checkCorp(CorpReqVO corpReqVO) {
+        validCorp(corpReqVO);
+    }
+
+    @Override
+    public void checkCorpAdminUser(CorpAdminReqVO corpAdminReqVO) {
+        AdminUserDO user = BeanUtils.toBean(corpAdminReqVO, AdminUserDO.class);
+        userService.checkCorpAdminUser(user);
     }
 
 }
