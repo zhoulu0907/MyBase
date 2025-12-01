@@ -27,6 +27,13 @@ public class DatasourceFactory {
         Properties connectionProperties = JsonUtils.parseObject(datasourceDO.getConfig(), Properties.class);
         String connectMode = (String) connectionProperties.getOrDefault("connectMode", "default");
         String jdbcConnection = (String) connectionProperties.get("jdbcUrl");
+        if (StringUtils.isBlank(jdbcConnection)) {
+            if (StringUtils.equalsIgnoreCase(connectMode, "default")) {
+                jdbcConnection = buildJdbcConnectionString(datasourceDO.getDatasourceType(), connectionProperties);
+            } else {
+                throw new IllegalStateException();
+            }
+        }
         // 2. 创建DataSource
         String username = (String) connectionProperties.get("username");
         String password = (String) connectionProperties.get("password");
