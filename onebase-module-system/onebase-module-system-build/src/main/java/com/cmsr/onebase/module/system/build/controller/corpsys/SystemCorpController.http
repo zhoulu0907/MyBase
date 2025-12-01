@@ -102,7 +102,7 @@ tenant-id: {{adminTenantId}}
 
 
 
-### 请求 /delete 接口 => 成功
+### 请求 /check-corp 接口 => 成功
 POST {{baseUrl}}/system/corp/check-corp
 Content-Type: application/json
 Authorization: Bearer {{token}}
@@ -120,7 +120,7 @@ tenant-id: {{adminTenantId}}
 
 
 
-### 请求 /delete 接口 => 成功
+### 请求 /check-corp-admin-user 接口 => 成功
 POST {{baseUrl}}/system/corp/check-corp-admin-user
 Content-Type: application/json
 Authorization: Bearer {{token}}
