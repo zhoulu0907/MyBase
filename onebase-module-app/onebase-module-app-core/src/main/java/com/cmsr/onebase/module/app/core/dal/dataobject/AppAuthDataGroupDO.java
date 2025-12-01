@@ -32,7 +32,7 @@ public class AppAuthDataGroupDO extends BaseBizEntity {
     private String scopeTags;
 
     @Column(value = "scope_field_uuid", comment = "字段id")
-    private Long scopeFieldUuid;
+    private String scopeFieldUuid;
 
     @Column(value = "scope_level", comment = "字段对应的权限范围")
     private String scopeLevel;

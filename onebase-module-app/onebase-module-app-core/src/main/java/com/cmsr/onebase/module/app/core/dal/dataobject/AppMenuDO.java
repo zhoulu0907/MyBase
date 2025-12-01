@@ -20,7 +20,7 @@ public class AppMenuDO extends BaseBizEntity {
     private String parentUuid;
 
     @Column(value = "entity_uuid", comment = "实体id")
-    private Long entityUuid;
+    private String entityUuid;
 
     @Column(value = "menu_code", comment = "菜单编码")
     private String menuCode;

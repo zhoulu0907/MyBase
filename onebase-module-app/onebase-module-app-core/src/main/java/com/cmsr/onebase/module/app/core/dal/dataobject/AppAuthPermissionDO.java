@@ -15,10 +15,10 @@ import lombok.Data;
 public class AppAuthPermissionDO extends BaseBizEntity {
 
     @Column(value = "role_uuid", comment = "角色id")
-    private Long roleUuid;
+    private String roleUuid;
 
     @Column(value = "menu_uuid", comment = "菜单id")
-    private Long menuUuid;
+    private String menuUuid;
 
     @Column(value = "is_page_allowed", comment = "页面是否可访问")
     private Integer isPageAllowed;

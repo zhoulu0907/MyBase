@@ -15,13 +15,13 @@ import lombok.Data;
 public class AppAuthFieldDO extends BaseBizEntity {
 
     @Column(value = "role_uuid", comment = "角色id")
-    private Long roleUuid;
+    private String roleUuid;
 
     @Column(value = "menu_uuid", comment = "菜单id")
-    private Long menuUuid;
+    private String menuUuid;
 
     @Column(value = "field_uuid", comment = "字段id")
-    private Long fieldUuid;
+    private String fieldUuid;
 
     @Column(value = "is_can_read", comment = "是否可阅读")
     private Integer isCanRead;
