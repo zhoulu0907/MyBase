@@ -1,11 +1,14 @@
-import { Button, Checkbox, Form, Input, Toast } from '@arco-design/mobile-react';
+import { Button, Form, Input, Toast } from '@arco-design/mobile-react';
 import { useForm } from '@arco-design/mobile-react/esm/form';
-import IconSquareChecked from '@arco-design/mobile-react/esm/icon/IconSquareChecked';
-import IconSquareUnchecked from '@arco-design/mobile-react/esm/icon/IconSquareUnchecked';
-import IconSquareDisabled from '@arco-design/mobile-react/esm/icon/IconSquareDisabled';
 import { getHashQueryParam, TokenManager, type SliderCaptchaRef, getOrCreateDeviceInfo } from '@onebase/common';
 import { SliderCaptcha } from './Captcha';
-import { checkCaptchaApi, getCaptchaApi, login, type LoginRequest, type LoginResponse } from '@onebase/platform-center';
+import {
+  checkCaptchaApi,
+  getCaptchaApi,
+  tenantLogin,
+  type LoginRequest,
+  type LoginResponse
+} from '@onebase/platform-center';
 import { getApplication } from '@onebase/app';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -57,7 +60,7 @@ const Right: React.FC = () => {
         window.location.href = redirectURL;
       } else {
         // 跳转到首页
-        navigate(`/onebase/runtime-home/${appId}`);
+        navigate(`/onebase/runtime-home/${appId}/${tenantId}`);
       }
       return;
     }
@@ -116,9 +119,11 @@ const Right: React.FC = () => {
         deviceId: values.deviceId
       };
 
-      const response: LoginResponse = await login(loginData, headers);
+      const response: LoginResponse = await tenantLogin(loginData, headers);
 
       if (response.accessToken) {
+        TokenManager.setCurIdentifyId(tenantId || '1');
+
         // 使用 TokenManager 存储 token 信息
         TokenManager.setToken(
           {
@@ -140,7 +145,7 @@ const Right: React.FC = () => {
           window.location.href = redirectURL;
         } else {
           // 跳转到首页
-          navigate(`/onebase/runtime-home/${appId}`);
+          navigate(`/onebase/runtime-home/${appId}/${tenantId}`);
         }
 
         return;
@@ -194,8 +199,8 @@ const Right: React.FC = () => {
           } else {
             callback();
           }
-        },
-      },
+        }
+      }
     ],
     username: [
       {
@@ -208,33 +213,30 @@ const Right: React.FC = () => {
           } else {
             callback();
           }
-        },
-      },
-    ],
-  }
+        }
+      }
+    ]
+  };
+
   const toSubmit = () => {
     form.submit();
   };
-  const squareIcon = {
-    normal: <IconSquareUnchecked />,
-    active: <IconSquareChecked />,
-    disabled: <IconSquareDisabled />,
-    activeDisabled: <IconSquareChecked />,
-  }
+
   const getAppIcon = () => {
     if (!appInfo.iconName) {
       return <img src={logoIcon} alt="logo" className={styles.loginLogo} />;
     }
     return (
       <DynamicIcon
-          IconComponent={menuIconList.find((icon) => icon.code === appInfo.iconName)?.icon}
-          theme="filled"
-          size="0.88rem"
-          fill="#fff"
-          style={{ padding: '0.2rem', marginRight: '0.08rem', backgroundColor: appInfo.iconColor || '#009E9E' }}
-        />
+        IconComponent={menuIconList.find((icon) => icon.code === appInfo.iconName)?.icon}
+        theme="filled"
+        size="0.88rem"
+        fill="#fff"
+        style={{ padding: '0.2rem', marginRight: '0.08rem', backgroundColor: appInfo.iconColor || '#009E9E' }}
+      />
     );
-  }
+  };
+
   return (
     <div className={styles.loginPageRight}>
       <div className={styles.titleContainer}>
@@ -269,14 +271,6 @@ const Right: React.FC = () => {
             <Input type="password" placeholder={t('auth.password')} clearable={false} />
           </Form.Item>
           <div className={styles.rememberMeContainer}>
-            {/* <Checkbox
-              value={rememberMe ? 2 : 1}
-              checked={rememberMe}
-              defaultCheck={true}
-              style={{ display: 'flex' }}
-              icons={squareIcon}
-              onChange={handleRememberMeChange}
-            >{t('auth.rememberMe')}</Checkbox> */}
             <div className={styles.forgotPassword}> {t('auth.accountRegistration')}</div>
             <div className={styles.forgotPassword}> {t('auth.forgotPassword')}</div>
           </div>
