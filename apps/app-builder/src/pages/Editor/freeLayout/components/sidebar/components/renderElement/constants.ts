@@ -19,10 +19,11 @@ export enum ElementType {
   USER_SELECT = 'userSelect',
   USER_SELECT_MULTIPLE = 'userSelectMultiple',
   DEPARTMENT_SELECT = 'departmentSelect',
-  DEPARTMENT_SELECT_MULTIPLE = 'departmentSelectMultiple',
+  DEPARTMENT_CONTAINS = 'departmentMoreSelect',
+  DEPARTMENT_SELECT_MULTIPLE = 'departmentSelectMultiple'
 }
 
-export enum DateOperator {
+export enum DataOperator {
   EQUALS = 'EQUALS',
   LATER_THAN = 'LATER_THAN',
   LATER_RANGE = 'LATER_RANGE',
@@ -35,7 +36,7 @@ export enum DateOperator {
 
 interface ComplexInfoItem {
   type: ElementType;
-  options: DateOperator | Array<{ label: string; value: string }>;
+  options: DataOperator | Array<{ label: string; value: string }>;
 }
 
 type ComplexInfo = Record<
@@ -61,9 +62,9 @@ type ComplexInfo = Record<
   | 'MULTI_NOT_CONTAINS_ALL'
   | 'MULTI_CONTAINS_ANY'
   | 'MULTI_NOT_CONTAINS_ANY'
-  | 'USER_SELECT'
+  | 'USER_EQUALS'
   | 'USER_NOT_EQUALS'
-  | 'USER_SELECT_MULTIPLE'
+  | 'USER_CONTAINS'
   | 'USER_NOT_CONTAINS'
   | 'USER_EXISTS_IN'
   | 'USER_NOT_EXISTS_IN'
@@ -73,9 +74,9 @@ type ComplexInfo = Record<
   | 'MULTI_USER_NOT_CONTAINS'
   | 'MULTI_USER_EXISTS_IN'
   | 'MULTI_USER_NOT_EXISTS_IN'
-  | 'DEPARTMENT_SELECT'
+  | 'DEPARTMENT_EQUALS'
   | 'DEPARTMENT_NOT_EQUALS'
-  | 'DEPARTMENT_SELECT_MULTIPLE'
+  | 'DEPARTMENT_CONTAINS'
   | 'DEPARTMENT_NOT_CONTAINS'
   | 'DEPARTMENT_EXISTS_IN'
   | 'DEPARTMENT_NOT_EXISTS_IN'
@@ -96,7 +97,13 @@ type ComplexInfo = Record<
   | 'MULTI_DATA_SELECTION_CONTAINS'
   | 'MULTI_DATA_SELECTION_NOT_CONTAINS'
   | 'MULTI_DATA_SELECTION_EXISTS_IN'
-  | 'MULTI_DATA_SELECTION_NOT_EXISTS_IN',
+  | 'MULTI_DATA_SELECTION_NOT_EXISTS_IN'
+  | 'DATA_SELECTION_RESULT_EQUALS'
+  | 'DATA_SELECTION_RESULT_NOT_EQUALS'
+  | 'DATA_SELECTION_RESULT_CONTAINS'
+  | 'DATA_SELECTION_RESULT_NOT_CONTAINS'
+  | 'DATA_SELECTION_RESULT_EXISTS_IN'
+  | 'DATA_SELECTION_RESULT_NOT_EXISTS_IN',
   ComplexInfoItem
 >;
 
@@ -168,42 +175,74 @@ export const ComplexInfo: ComplexInfo = {
   // 日期时间_等于
   DATETIME_EQUALS: {
     type: ElementType.DATE,
-    options: DateOperator.EQUALS
+    options: DataOperator.EQUALS
   },
   // 日期时间_晚于
   DATETIME_LATER_THAN: {
     type: ElementType.DATE,
-    options: DateOperator.LATER_THAN
+    options: DataOperator.LATER_THAN
   },
   // 日期时间_范围
   DATETIME_RANGE: {
     type: ElementType.DATE_RANGE,
-    options: DateOperator.LATER_RANGE
+    options: DataOperator.LATER_RANGE
   },
   // 日期时间_早于
   DATETIME_EARLIER_THAN: {
     type: ElementType.DATE,
-    options: DateOperator.DATETIME_EARLIER_THAN
+    options: DataOperator.DATETIME_EARLIER_THAN
   },
   // 日期_等于
   DATE_EQUALS: {
     type: ElementType.DATE,
-    options: DateOperator.DATE_EQUALS
+    options: DataOperator.DATE_EQUALS
   },
   // 日期_晚于
   DATE_LATER_THAN: {
     type: ElementType.DATE,
-    options: DateOperator.DATE_LATER_THAN
+    options: DataOperator.DATE_LATER_THAN
   },
   // 日期_早于
   DATE_EARLIER_THAN: {
     type: ElementType.DATE,
-    options: DateOperator.DATE_EARLIER_THAN
+    options: DataOperator.DATE_EARLIER_THAN
   },
   // 日期_范围
   DATE_RANGE: {
     type: ElementType.DATE_RANGE,
-    options: DateOperator.DATE_RANGE
+    options: DataOperator.DATE_RANGE
+  },
+
+  // 审批结果_等于
+  DATA_SELECTION_RESULT_EQUALS: {
+    type: ElementType.SELECT,
+    options: approvalResultOptions
+  },
+  // 审批结果_不等于
+  DATA_SELECTION_RESULT_NOT_EQUALS: {
+    type: ElementType.SELECT,
+    options: approvalResultOptions
+  },
+  // 审批结果_包含
+  DATA_SELECTION_RESULT_CONTAINS: {
+    type: ElementType.SELECT_MULTIPLE,
+    options: approvalResultOptions
+  },
+  // 审批结果_不包含
+  DATA_SELECTION_RESULT_NOT_CONTAINS: {
+    type: ElementType.SELECT_MULTIPLE,
+    options: approvalResultOptions
+  },
+
+  // 审批结果_存在
+  DATA_SELECTION_RESULT_EXISTS_IN: {
+    type: ElementType.SELECT_MULTIPLE,
+    options: approvalResultOptions
+  },
+  // 审批结果_不存在
+  DATA_SELECTION_RESULT_NOT_EXISTS_IN: {
+    type: ElementType.SELECT_MULTIPLE,
+    options: approvalResultOptions
   },
 
   // 数据单选_等于
@@ -295,7 +334,7 @@ export const ComplexInfo: ComplexInfo = {
   },
 
   // 用户单选_等于
-  USER_SELECT: {
+  USER_EQUALS: {
     type: ElementType.USER_SELECT,
     options: []
   },
@@ -305,7 +344,7 @@ export const ComplexInfo: ComplexInfo = {
     options: []
   },
   // 用户单选_包含
-  USER_SELECT_MULTIPLE: {
+  USER_CONTAINS: {
     type: ElementType.USER_SELECT_MULTIPLE,
     options: []
   },
@@ -356,7 +395,7 @@ export const ComplexInfo: ComplexInfo = {
   },
 
   // 部门单选_等于
-  DEPARTMENT_SELECT: {
+  DEPARTMENT_EQUALS: {
     type: ElementType.DEPARTMENT_SELECT,
     options: []
   },
@@ -366,7 +405,7 @@ export const ComplexInfo: ComplexInfo = {
     options: []
   },
   // 部门单选_包含
-  DEPARTMENT_SELECT_MULTIPLE: {
+  DEPARTMENT_CONTAINS: {
     type: ElementType.DEPARTMENT_SELECT_MULTIPLE,
     options: []
   },
@@ -415,9 +454,6 @@ export const ComplexInfo: ComplexInfo = {
     type: ElementType.DEPARTMENT_SELECT_MULTIPLE,
     options: []
   },
-
-
-
 
   // 数据多选_等于
   MULTI_DATA_SELECTION_EQUALS: {

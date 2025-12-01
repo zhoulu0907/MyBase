@@ -73,7 +73,7 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
     {
       label: '审批结果',
       value: PreNode.APPROVAL_RESULT,
-      type: FieldType.DATA_SELECTION
+      type: FieldType.DATA_SELECTION_RESULT
     },
     {
       label: '审批⼈',
@@ -249,6 +249,9 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
           break;
         case FieldType.ID:
           options = idOpOption;
+          break;
+        case FieldType.DATA_SELECTION_RESULT:
+          options = dataSelectionOpOption;
           break;
         default:
           options = [];

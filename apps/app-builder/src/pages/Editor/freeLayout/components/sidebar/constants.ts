@@ -183,7 +183,8 @@ export const enum FieldType {
   PASSWORD = 'PASSWORD',
   ENCRYPTED = 'ENCRYPTED',
   AGGREGATE = 'AGGREGATE',
-  ID = 'ID'
+  ID = 'ID',
+  DATA_SELECTION_RESULT = 'DATA_SELECTION_RESULT'
 }
 
 export const enum PreNode {
@@ -431,7 +432,7 @@ export const approvalResultOptions = [
   {
     label: '自动跳过',
     value: 'post_auto_skipped'
-  },
+  }
   // {
   //   label: '自动抄送',
   //   value: 'post_auto_cc'
