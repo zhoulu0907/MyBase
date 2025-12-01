@@ -27,14 +27,14 @@ public class AppPageRepository extends BaseBizRepository<AppResourcePageMapper, 
                 .update();
     }
 
-    public List<AppResourcePageDO> findAllFormPageByPageSetId(String pageSetUuid) {
+    public List<AppResourcePageDO> findAllFormPageByPageSetUuid(String pageSetUuid) {
         QueryWrapper queryWrapper = this.query()
                 .where(APP_RESOURCE_PAGE.PAGESET_UUID.eq(pageSetUuid))
                 .and(APP_RESOURCE_PAGE.PAGE_TYPE.eq(PageEnum.FORM.getValue()));
         return list(queryWrapper);
     }
 
-    public List<AppResourcePageDO> findAllFormPageByPageSetIds(List<String> pageSetUuidList) {
+    public List<AppResourcePageDO> findAllFormPageByPageSetUuids(List<String> pageSetUuidList) {
         if (CollectionUtils.isEmpty(pageSetUuidList)) {
             return Collections.emptyList();
         }

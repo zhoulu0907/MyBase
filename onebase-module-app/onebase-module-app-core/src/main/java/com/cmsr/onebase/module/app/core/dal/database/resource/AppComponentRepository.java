@@ -4,21 +4,25 @@ import com.cmsr.onebase.framework.orm.repo.BaseBizRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourceComponentDO;
 import com.cmsr.onebase.module.app.core.dal.mapper.AppResourceComponentMapper;
 import com.mybatisflex.core.query.QueryWrapper;
-import com.mybatisflex.spring.service.impl.ServiceImpl;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppResourceComponentTableDef.APP_RESOURCE_COMPONENT;
+
 @Repository
 public class AppComponentRepository extends BaseBizRepository<AppResourceComponentMapper, AppResourceComponentDO> {
 
-    public void deleteComponentByPageId(Long pageId) {
-        QueryWrapper queryWrapper = query().eq(AppResourceComponentDO::getPageId, pageId);
+    public void deleteComponentByPageUuid(String pageUuid) {
+        QueryWrapper queryWrapper = query()
+                .where(APP_RESOURCE_COMPONENT.PAGE_UUID.eq(pageUuid));
         this.remove(queryWrapper);
     }
 
-    public List<AppResourceComponentDO> findByPageId(Long pageId) {
-        QueryWrapper queryWrapper = query().eq(AppResourceComponentDO::getPageId, pageId).orderBy(AppResourceComponentDO::getComponentIndex, true);
+    public List<AppResourceComponentDO> findByPageUuid(String pageUuid) {
+        QueryWrapper queryWrapper = query()
+                .where(APP_RESOURCE_COMPONENT.PAGE_UUID.eq(pageUuid))
+                .orderBy(APP_RESOURCE_COMPONENT.COMPONENT_INDEX, true);
         return this.list(queryWrapper);
     }
 }
