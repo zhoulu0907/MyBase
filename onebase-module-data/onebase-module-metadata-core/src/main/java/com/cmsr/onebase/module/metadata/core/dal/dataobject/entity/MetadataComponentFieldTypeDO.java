@@ -1,12 +1,10 @@
 package com.cmsr.onebase.module.metadata.core.dal.dataobject.entity;
 
-import com.cmsr.onebase.framework.data.base.BaseDO;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
+import com.cmsr.onebase.framework.orm.entity.BaseEntity;
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 /**
  * 元数据组件字段类型表 DO
@@ -16,59 +14,49 @@ import lombok.experimental.SuperBuilder;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-@SuperBuilder
-@NoArgsConstructor
-@AllArgsConstructor
-@Table(name = "metadata_component_field_type")
-public class MetadataComponentFieldTypeDO extends BaseDO {
-
-    // 列名常量
-    public static final String FIELD_TYPE_CODE = "field_type_code";
-    public static final String FIELD_TYPE_NAME = "field_type_name";
-    public static final String FIELD_TYPE_DESC = "field_type_desc";
-    public static final String DATA_TYPE        = "data_type";
-    public static final String SORT_ORDER      = "sort_order";
-    public static final String STATUS          = "status";
-    public static final String TYPE            = "type";
-
-    public MetadataComponentFieldTypeDO setId(Long id) {
-        super.setId(id);
-        return this;
-    }
+@Table(value = "metadata_component_field_type")
+public class MetadataComponentFieldTypeDO extends BaseEntity {
 
     /**
      * 字段类型编码
      */
+    @Column(value = "field_type_code", comment = "字段类型编码")
     private String fieldTypeCode;
 
     /**
      * 字段类型名称
      */
+    @Column(value = "field_type_name", comment = "字段类型名称")
     private String fieldTypeName;
 
     /**
      * 字段类型描述
      */
+    @Column(value = "field_type_desc", comment = "字段类型描述")
     private String fieldTypeDesc;
 
     /**
      * jdbc数据类型
      */
+    @Column(value = "data_type", comment = "jdbc数据类型")
     private String dataType;
 
     /**
      * 排序顺序
      */
+    @Column(value = "sort_order", comment = "排序顺序")
     private Integer sortOrder;
 
     /**
      * 状态：1-启用，0-禁用
      */
+    @Column(value = "status", comment = "状态：1-启用，0-禁用")
     private Integer status;
 
     /**
      * 类型（给应用过滤用）
      */
+    @Column(value = "type", comment = "类型")
     private Integer type;
 
 }

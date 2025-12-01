@@ -132,7 +132,7 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
         // 处理代理的场景，更新为代理人已执行
         if (agentInsDO != null) {
             agentInsDO.setIsExecutor(BooleanUtils.toInteger(true));
-            agentInsRepository.update(agentInsDO);
+            agentInsRepository.updateById(agentInsDO);
         }
 
         FieldPermCfgDTO fieldPermConfig = extDTO.getFieldPermConfig();

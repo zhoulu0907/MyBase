@@ -100,10 +100,10 @@ public interface MetadataBusinessEntityBuildService {
     /**
      * 根据条件查询业务实体列表
      *
-     * @param configStore 查询条件
+     * @param queryWrapper 查询条件
      * @return 业务实体列表
      */
-    List<MetadataBusinessEntityDO> findAllByConfig(org.anyline.data.param.init.DefaultConfigStore configStore);
+    List<MetadataBusinessEntityDO> findAllByConfig(com.mybatisflex.core.query.QueryWrapper queryWrapper);
 
     /**
      * 创建业务实体并返回响应VO

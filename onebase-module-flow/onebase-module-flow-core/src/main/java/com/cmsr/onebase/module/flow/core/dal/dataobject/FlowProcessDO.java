@@ -1,13 +1,16 @@
 package com.cmsr.onebase.module.flow.core.dal.dataobject;
 
-import com.cmsr.onebase.framework.orm.entity.BaseAppEntity;
+import com.cmsr.onebase.framework.orm.entity.BaseBizEntity;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
 import lombok.Data;
 
 @Data
 @Table(value = "flow_process")
-public class FlowProcessDO extends BaseAppEntity {
+public class FlowProcessDO extends BaseBizEntity {
+
+    @Column(value = "process_uuid")
+    private String processUuid;
 
     /**
      * 流程名称
@@ -40,4 +43,9 @@ public class FlowProcessDO extends BaseAppEntity {
     @Column(value = "trigger_type")
     private String triggerType;
 
+    @Column(value = "trigger_config")
+    private String triggerConfig;
+
+    @Column(value = "lock_version")
+    private Long lockVersion;
 }

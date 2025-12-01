@@ -14,17 +14,17 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
 {
-  "name": "test001",
-  "tenantCode": "tenant_20251122141303",
+  "name": "test002",
+  "tenantCode": "tenant_002",
   "status": 1,
   "accountCount": 100,
-  "website": "test001.onebase.com",
+  "website": "test002.onebase.com",
   "publishModel": "saas",
   "tenantAdminUserReqVOList": [
     {
       "adminNickName": "admin",
       "adminUserName": "admin",
-      "adminMobile": "18000001111",
+      "adminMobile": "18000001112",
       "platformUserId": "1"
     }
   ]

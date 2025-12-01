@@ -195,7 +195,7 @@ public class BpmGlobalListener implements GlobalListener {
         Map<String, Object> variable = listenerVariable.getVariable();
         Task task = listenerVariable.getTask();
 
-        Set<Long> approvalUserIds = new HashSet<>();
+        Set<String> approvalUserIds = new HashSet<>();
 
         for (User user : task.getUserList()) {
             // 只处理审批人类型的用户
@@ -203,7 +203,7 @@ public class BpmGlobalListener implements GlobalListener {
                 continue;
             }
 
-            approvalUserIds.add(Long.valueOf(user.getProcessedBy()));
+            approvalUserIds.add(user.getProcessedBy());
         }
 
         // 如果没有审批人类型的用户，则直接返回
@@ -240,7 +240,7 @@ public class BpmGlobalListener implements GlobalListener {
         }
 
         // 保存代理用户
-        agentInsRepository.insertBatch(agentInsList);
+        agentInsRepository.saveBatch(agentInsList);
     }
 
     private void handleUnOperatorUsersOnAssignment(ListenerVariable listenerVariable) {

@@ -9,12 +9,12 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
 {
-  "username": "newUserGsp5",
-  "nickname": "NewTestGsp5",
-  "mobile": "13800000008",
-  "email": "newusergsp5@test.com",
-  "password": "13@46qw@ery13@46gsp5",
-  "deptId": "100",
+  "username": "newUserTest",
+  "nickname": "New Test User",
+  "mobile": "13800000000",
+  "email": "newuser@test.com",
+  "password": "13@46qw@ery13@46",
+  "deptId": 158401074156142592,
   "status": 1,
   "sex": 1
 }

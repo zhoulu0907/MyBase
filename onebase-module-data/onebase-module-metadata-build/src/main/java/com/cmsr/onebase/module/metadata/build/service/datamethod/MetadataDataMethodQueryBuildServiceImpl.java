@@ -10,10 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Order;
-import org.springframework.util.StringUtils;
-
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.method.MetadataDataSystemMethodDO;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
@@ -21,7 +17,6 @@ import com.cmsr.onebase.module.metadata.core.service.datamethod.MetadataDataMeth
 import com.cmsr.onebase.module.metadata.core.service.datamethod.MetadataDataSystemMethodCoreService;
 import com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants;
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
-import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 
 @Service
 @Slf4j
@@ -44,17 +39,7 @@ public class MetadataDataMethodQueryBuildServiceImpl implements MetadataDataMeth
             throw exception(ErrorCodeConstants.BUSINESS_ENTITY_NOT_EXISTS);
         }
 
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and(MetadataDataSystemMethodDO.IS_ENABLED, CommonStatusEnum.ENABLE.getStatus());
-        configStore.and("deleted", 0);
-        if (StringUtils.hasText(queryVO.getMethodType())) {
-            configStore.and(MetadataDataSystemMethodDO.METHOD_TYPE, queryVO.getMethodType());
-        }
-        if (StringUtils.hasText(queryVO.getKeyword())) {
-            configStore.and(MetadataDataSystemMethodDO.METHOD_NAME, "%" + queryVO.getKeyword() + "%", "like");
-        }
-        configStore.order(MetadataDataSystemMethodDO.METHOD_CODE, Order.TYPE.ASC);
-
+        // 获取启用的数据方法列表
         List<MetadataDataSystemMethodDO> methodDOList = metadataDataSystemMethodCoreService.getEnabledDataMethodList();
         return methodDOList.stream().map(methodDO -> {
             DataMethodRespVO vo = new DataMethodRespVO();

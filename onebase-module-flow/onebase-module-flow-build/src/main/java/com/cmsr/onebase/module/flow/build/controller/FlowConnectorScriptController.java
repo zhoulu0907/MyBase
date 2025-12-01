@@ -23,8 +23,8 @@ public class FlowConnectorScriptController {
 
     @Operation(summary = "分页查询脚本连接器动作")
     @GetMapping("/page")
-    public CommonResult<PageResult<ConnectorScriptVO>> getConnectorScriptPage(@Valid PageConnectorScriptReqVO pageReqVO) {
-        PageResult<ConnectorScriptVO> pageResult = connectorScriptService.getConnectorScriptPage(pageReqVO);
+    public CommonResult<PageResult<ConnectorScriptVO>> pageConnectorScripts(@Valid PageConnectorScriptReqVO pageReqVO) {
+        PageResult<ConnectorScriptVO> pageResult = connectorScriptService.pageConnectorScripts(pageReqVO);
         return CommonResult.success(pageResult);
     }
 

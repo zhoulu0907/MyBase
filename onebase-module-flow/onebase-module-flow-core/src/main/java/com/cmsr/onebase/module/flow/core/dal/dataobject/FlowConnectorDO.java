@@ -11,6 +11,9 @@ import lombok.EqualsAndHashCode;
 @Table(value = "flow_connector")
 public class FlowConnectorDO extends BaseAppEntity {
 
+    @Column(value = "connector_uuid")
+    private String connectorUuid;
+
     @Column(value = "connector_name")
     private String connectorName;
 

@@ -12,8 +12,4 @@ public class FlowProcessEntityDO extends BaseTenantEntity {
     @Column(value = "process_id")
     private Long processId;
 
-    @Column(value = "entity_id")
-    private Long entityId;
-
-
 }

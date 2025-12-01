@@ -4,13 +4,14 @@ import com.alibaba.nacos.common.utils.CollectionUtils;
 import com.cmsr.onebase.framework.common.biz.system.dict.DictDataCommonApi;
 import com.cmsr.onebase.framework.common.biz.system.dict.dto.DictDataRespDTO;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
+import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
-import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
 import com.cmsr.onebase.module.system.dal.database.CorpDataRepository;
@@ -20,7 +21,6 @@ import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.corp.CorpConstant;
 import com.cmsr.onebase.module.system.service.corpapprelation.CorpAppRelationService;
 import com.cmsr.onebase.module.system.service.user.UserService;
-import com.cmsr.onebase.module.system.util.encrypt.PasswordRandomGenerator;
 import com.cmsr.onebase.module.system.vo.corp.*;
 import com.cmsr.onebase.module.system.vo.corpapprelation.AppAuthTimeReqVO;
 import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppRelationPageReqVO;
@@ -56,11 +56,14 @@ import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
 @Slf4j
 public class CorpServiceImpl implements CorpService {
 
+    // 租户管理员设置默认密码
+    private static final String CORP_ADMIN_PASSWORD = "CorpChina2025!";
+
     @Resource
     private CorpDataRepository corpDataRepository;
 
     @Resource
-    private UserService corpUserService;
+    private UserService userService;
 
     @Resource
     private PasswordEncoder passwordEncoder;
@@ -230,7 +233,7 @@ public class CorpServiceImpl implements CorpService {
                 .map(CorpDO::getAdminId)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
-        Map<Long, AdminUserDO> userDOMap = corpUserService.getUserMap(adminUserIds);
+        Map<Long, AdminUserDO> userDOMap = userService.getUserMap(adminUserIds);
 
         if (appRelations.isEmpty()) {
             // 无关联应用，直接返回企业基本信息
@@ -313,14 +316,14 @@ public class CorpServiceImpl implements CorpService {
             return null;
         }
         CorpRespVO respVO = BeanUtils.toBean(corpDO, CorpRespVO.class);
-        AdminUserDO userDO = corpUserService.getUser(corpDO.getAdminId());
+        AdminUserDO userDO = userService.getUser(corpDO.getAdminId());
         if (userDO != null) {
             respVO.setAdminName(userDO.getNickname());
             respVO.setAdminEmail(userDO.getEmail());
             respVO.setAdminMobile(userDO.getMobile());
         }
         respVO.setAppCount(getCorpAppCount(id));
-        Long userCountLong = corpUserService.getUserCountByCorpId(id);
+        Long userCountLong = userService.getUserCountByCorpId(id);
         Integer userCount = (userCountLong != null) ? userCountLong.intValue() : 0;
         respVO.setUserCount(userCount);
         return respVO;
@@ -347,16 +350,21 @@ public class CorpServiceImpl implements CorpService {
 
     public CorpAdminUserRespVO createAdminUser(CorpAdminReqVO reqVO, Long corpId) {
         // 2.2.1 判断如果不存在，在进行插入
-        AdminUserDO existUser = corpUserService.getUserByUsername(reqVO.getUsername());
+        AdminUserDO existUser = userService.getUserByUsername(reqVO.getUsername());
         if (existUser != null) {
             throw exception(USER_USERNAME_EXISTS);
         }
         // 插入用户
         AdminUserDO user = BeanUtils.toBean(reqVO, AdminUserDO.class);
-        String password = PasswordRandomGenerator.generateSecurePassword(15);
-        user.setPassword(encodePassword(password)); // 加密密码
+        // 暂时注掉使用默认，方便测试
+        // String password = PasswordRandomGenerator.generateSecurePassword(15);
+        String password = CORP_ADMIN_PASSWORD;
+        user.setPassword(encodePassword(CORP_ADMIN_PASSWORD)); // 加密密码
         user.setCorpId(corpId);
-        Long userId = corpUserService.createCorpAdminUser(user);
+        // 在空间创建空企业（Tenant）用户
+        user.setUserType(UserTypeEnum.CORP.getValue());
+        Long userId = userService.createCorpAdminUser(user);
+
         CorpAdminUserRespVO vo = new CorpAdminUserRespVO();
         vo.setUsername(reqVO.getUsername());
         vo.setMobile(reqVO.getMobile());

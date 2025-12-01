@@ -3,7 +3,10 @@ package com.cmsr.onebase.framework.common.security;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
+import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
+import com.cmsr.onebase.framework.common.enums.XFromSceneTypeEnum;
 import com.cmsr.onebase.framework.common.security.dto.LoginUser;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -12,9 +15,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.util.StringUtils;
 
-import jakarta.servlet.http.HttpServletRequest;
-
 import java.util.Collections;
+import java.util.Objects;
 
 /**
  * 安全服务工具类
@@ -108,6 +110,26 @@ public class SecurityFrameworkUtils {
         return null;
     }
 
+    /**
+     * 获取登录用户其用户所处的场景类型：平台/空间/企业
+     *
+     * @return 场景类型
+     */
+    public static String getSceneByUserType(){
+        Integer loginUserType = getLoginUserType();
+        if (loginUserType == null) {
+            return null;
+        }
+        if(Objects.equals(UserTypeEnum.PLATFORM.getValue(), loginUserType)){
+            return XFromSceneTypeEnum.PLATFORM.getCode();
+        }else if(Objects.equals(UserTypeEnum.TENANT.getValue(), loginUserType)){
+            return XFromSceneTypeEnum.TENANT.getCode();
+        }else if(Objects.equals(UserTypeEnum.CORP.getValue(), loginUserType)){
+            return XFromSceneTypeEnum.CORP.getCode();
+        }else{
+            return null;
+        }
+    }
 
     /**
      * 获得当前用户的昵称，从上下文中

@@ -8,7 +8,7 @@ import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.module.system.api.sms.SmsCodeApi;
 import com.cmsr.onebase.module.system.api.sms.dto.code.SmsCodeSendReqDTO;
 import com.cmsr.onebase.module.system.api.sms.dto.code.SmsCodeUseReqDTO;
-import com.cmsr.onebase.module.system.dal.database.user.AdminUserDataRepository;
+import com.cmsr.onebase.module.system.dal.database.user.UserDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.service.logger.LoginLogService;
@@ -66,7 +66,7 @@ public class BuildAuthServiceTest {
     private BuildAuthService buildAuthService;
 
     @Resource
-    private AdminUserDataRepository adminUserDataRepository;
+    private UserDataRepository userDataRepository;
 
     @Mock
     private UserService userService;
@@ -113,7 +113,7 @@ public class BuildAuthServiceTest {
      */
     @AfterEach
     public void tearDown() {
-        adminUserDataRepository.deleteByConfig(new DefaultConfigStore());
+        userDataRepository.deleteByConfig(new DefaultConfigStore());
     }
 
     /**

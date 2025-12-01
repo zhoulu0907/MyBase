@@ -1,41 +1,69 @@
 package com.cmsr.onebase.module.metadata.core.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationFormatDO;
+import com.cmsr.onebase.module.metadata.core.dal.mapper.MetadataValidationFormatMapper;
+import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.spring.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+/**
+ * 格式验证规则仓储类
+ *
+ * @author matianyu
+ * @date 2025-08-11
+ */
 @Repository
 @Slf4j
-public class MetadataValidationFormatRepository extends DataRepository<MetadataValidationFormatDO> {
-    public MetadataValidationFormatRepository() { super(MetadataValidationFormatDO.class); }
+public class MetadataValidationFormatRepository extends ServiceImpl<MetadataValidationFormatMapper, MetadataValidationFormatDO> {
 
+    /**
+     * 根据字段ID查询格式验证规则列表
+     *
+     * @param fieldId 字段ID
+     * @return 格式验证规则列表
+     */
     public List<MetadataValidationFormatDO> findByFieldId(Long fieldId) {
-        DefaultConfigStore cs = new DefaultConfigStore();
-        cs.and(MetadataValidationFormatDO.FIELD_ID, fieldId);
-        cs.and("deleted", 0);
-        return findAllByConfig(cs);
+        QueryWrapper queryWrapper = query()
+                .eq(MetadataValidationFormatDO::getFieldId, fieldId);
+        return list(queryWrapper);
     }
 
+    /**
+     * 根据字段ID查询正则表达式格式验证规则
+     *
+     * @param fieldId 字段ID
+     * @return 正则表达式格式验证规则
+     */
     public MetadataValidationFormatDO findRegexByFieldId(Long fieldId) {
-        DefaultConfigStore cs = new DefaultConfigStore();
-        cs.and(MetadataValidationFormatDO.FIELD_ID, fieldId);
-        cs.and(MetadataValidationFormatDO.FORMAT_CODE, "REGEX");
-        cs.and("deleted", 0);
-        return findOne(cs);
+        QueryWrapper queryWrapper = query()
+                .eq(MetadataValidationFormatDO::getFieldId, fieldId)
+                .eq(MetadataValidationFormatDO::getFormatCode, "REGEX");
+        return getOne(queryWrapper);
     }
 
+    /**
+     * 根据字段ID删除格式验证规则
+     *
+     * @param fieldId 字段ID
+     */
     public void deleteByFieldId(Long fieldId) {
-        for (var item : findByFieldId(fieldId)) { deleteById(item.getId()); }
+        for (var item : findByFieldId(fieldId)) {
+            removeById(item.getId());
+        }
     }
 
+    /**
+     * 根据组ID查询格式验证规则列表
+     *
+     * @param groupId 组ID
+     * @return 格式验证规则列表
+     */
     public List<MetadataValidationFormatDO> findByGroupId(Long groupId) {
-        DefaultConfigStore cs = new DefaultConfigStore();
-        cs.and("group_id", groupId);
-        cs.and("deleted", 0);
-        return findAllByConfig(cs);
+        QueryWrapper queryWrapper = query()
+                .eq(MetadataValidationFormatDO::getGroupId, groupId);
+        return list(queryWrapper);
     }
 }

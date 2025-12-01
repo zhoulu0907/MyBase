@@ -1,10 +1,8 @@
 package com.cmsr.onebase.framework.web.core.util;
 
 import cn.hutool.core.util.NumberUtil;
-import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.enums.RpcConstants;
 import com.cmsr.onebase.framework.common.enums.TerminalEnum;
-import com.cmsr.onebase.framework.common.enums.XFromSceneTypeEnum;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.web.config.WebProperties;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,18 +16,14 @@ import org.springframework.web.context.request.ServletRequestAttributes;
  */
 public class WebFrameworkUtils {
 
-    private static final String REQUEST_ATTRIBUTE_LOGIN_USER_ID   = "login_user_id";
-    private static final String REQUEST_ATTRIBUTE_LOGIN_USER_TYPE = "login_user_type";
-
     @Deprecated
     public static final String HEADER_TENANT_ID       = "tenant-id";
     public static final String HEADER_VISIT_TENANT_ID = "X-Visit-Tenant-Id";
 
 
     public static final String HEADER_X_TENANT_ID = "X-Tenant-Id";
-    public static final String HEADER_X_CORP_ID   = "X-Corp-Id";
-    public static final String HEADER_X_APP_ID    = "X-App-Id";
-    public static final String X_From_Scene_Type  = "X-From-Scene-Type";
+    // public static final String HEADER_X_CORP_ID   = "X-Corp-Id";
+    // public static final String HEADER_X_APP_ID    = "X-App-Id";
 
     /**
      * 终端的 Header
@@ -122,25 +116,9 @@ public class WebFrameworkUtils {
      *
      * @return
      */
-    public static Long getCorpIdFromHeader() {
-        HttpServletRequest request = getRequest();
-        String corpID = request.getHeader(HEADER_X_CORP_ID);
-        return NumberUtil.isNumber(corpID) ? Long.valueOf(corpID) : null;
-    }
-
-    @Deprecated
-    public static String getXFromSceneTypeFromHeader() {
-        HttpServletRequest request = getRequest();
-        String fromType = request.getHeader(X_From_Scene_Type);
-        // TODO 后期更新前端后，取消默认平台, 不允许空，并校验和用户实际类型（user_type）一致
-        if (StringUtils.isBlank(fromType)) {
-            String uri = request.getRequestURI();
-            // 检查 Admin API
-            if (StrUtil.startWith(uri, properties.getPlatformApi().getPrefix())) {
-                fromType = XFromSceneTypeEnum.PLATFORM.getCode();
-            }
-        }
-        return fromType == null ? XFromSceneTypeEnum.TENANT.getCode() : fromType;
-    }
-
+    // public static Long getCorpIdFromHeader() {
+    //     HttpServletRequest request = getRequest();
+    //     String corpID = request.getHeader(HEADER_X_CORP_ID);
+    //     return NumberUtil.isNumber(corpID) ? Long.valueOf(corpID) : null;
+    // }
 }
