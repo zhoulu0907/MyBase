@@ -219,6 +219,11 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
           const permissionKey = item.permissionKey;
           if (permissionKey && !hasMenu(permissionKey as any)) return null;
 
+          // 如果 children length === 0，则不渲染这个菜单
+          if (item.children && item.children.length === 0) {
+            return null;
+          }
+
           if (item.children && item.children.length > 0) {
             const childrenNodes = renderMenuItems(item.children) as React.ReactNode[];
             const hasChildren = Array.isArray(childrenNodes) && childrenNodes.filter(Boolean).length > 0;
