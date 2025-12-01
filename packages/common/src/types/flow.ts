@@ -29,7 +29,7 @@ export enum NodeType {
   DATA_QUERY_MULTIPLE = 'dataQueryMultiple',
   DATA_UPDATE = 'dataUpdate',
 
-  IPAAS = 'ipaas',
+  JavaScript = 'javascript',
   JSON = 'json',
   LOG = 'log',
   MESSAGE = 'message',
@@ -52,5 +52,5 @@ export enum FLOW_MODAL_TYPE {
 // 弹窗取消后
 export enum FLOW_MODAL_CANCEL {
   STOP = 0, // 事件终止
-  CONTINUE = 1, // 事件继续执行
+  CONTINUE = 1 // 事件继续执行
 }

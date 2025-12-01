@@ -6,8 +6,9 @@ export {
   flowService,
   formulaService,
   metadataService,
+  runtimeAppService,
+  runtimeBpmService,
   runtimeFlowService,
   runtimeListdataService,
-  runtimeMetadataService,
-  runtimeBpmService
+  runtimeMetadataService
 } from './factory';

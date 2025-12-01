@@ -49,7 +49,7 @@ const CreateScriptActionPage: React.FC<CreateScriptActionPageProps> = ({ onSucce
 
   useEffect(() => {
     if (editData) {
-      handleGetScriptAction(editData.scriptId);
+      handleGetScriptAction(editData.id);
     }
   }, [editData, form]);
 
@@ -95,7 +95,7 @@ const CreateScriptActionPage: React.FC<CreateScriptActionPageProps> = ({ onSucce
 
     if (isEdit && editData) {
       const req: UpdateScriptActionReq = {
-        scriptId: editData.scriptId,
+        id: editData.id,
         scriptName: form.getFieldValue('scriptName'),
         description: form.getFieldValue('description'),
         inputParameter: inputParameterValue || '',
@@ -401,13 +401,13 @@ const CreateScriptActionPage: React.FC<CreateScriptActionPageProps> = ({ onSucce
             </Form.Item>
           </Row>
         )}
-        <Row>
-          <Col span={1}>
+        <Row gutter={16}>
+          <Col span={1.5}>
             <Button type="primary" onClick={handleSubmit}>
               {isEdit ? '更新' : '保存'}
             </Button>
           </Col>
-          <Col span={1}>
+          <Col span={1.5}>
             <Button onClick={handleCancel}>取消</Button>
           </Col>
         </Row>

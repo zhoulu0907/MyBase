@@ -41,12 +41,32 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
   const { curAppId } = useAppStore();
 
   useEffect(() => {
-    setFormula(initialFormula);
-  }, [initialFormula]);
-
-  useEffect(() => {
     curAppId && retrievedEntityListByApp();
   }, [curAppId]);
+
+  //监听显示,数据初始化
+  useEffect(() => {
+    if (visible) {
+      init();
+    }
+  }, [visible]);
+
+  /**
+   * 组件挂载时初始化函数列表
+   */
+  useEffect(() => {
+    getFuncList();
+  }, []);
+
+  const init = () => {
+    // 公式初始化
+    setFormula(initialFormula);
+    // 变量初始化
+    setVariableSearch('')
+    // 常用函数初始化
+    setFunctionSearch('')
+  };
+
   /**
    * 获取变量一级列表
    */
@@ -139,8 +159,8 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
     const newFields =
       variables?.[0]?.fields?.filter(
         (v) =>
-          v.fieldName.toLowerCase().includes(variableSearch.toLowerCase()) ||
-          v.fieldName.toLowerCase().includes(variableSearch.toLowerCase())
+          v.displayName.toLowerCase().includes(variableSearch.toLowerCase()) ||
+          v.displayName.toLowerCase().includes(variableSearch.toLowerCase())
       ) || [];
     variables[0].fields = newFields;
     return variables;
@@ -229,7 +249,7 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
       }
       return content;
     });
-    return newFormula.replace(/,(?=\s*\))/g, '');
+    return newFormula.replace(/,(?=\s*\))/g, '').replace(/,+/g, ',');
   };
 
   /**
@@ -287,14 +307,6 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
     },
     []
   );
-
-  /**
-   * 组件挂载时初始化函数列表
-   */
-  useEffect(() => {
-    if (!visible) return;
-    getFuncList();
-  }, [visible]);
 
   /**点击调试页面的返回按钮 */
   const handleGoBack = () => {
@@ -388,6 +400,7 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
       okButtonProps={{
         disabled: !formula
       }}
+      unmountOnExit
     >
       {/* 内容区域 */}
       <div className={styles.contentWrapper}>

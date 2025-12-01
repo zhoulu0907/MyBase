@@ -142,7 +142,7 @@ const ETLFlowCard: React.FC<ETLFlowCardProps> = ({ data, handleEdit, handleDelet
           )}
         </div>
         <div className={styles.cardFooterRight}>
-          <IconEdit />
+          <IconEdit onClick={() => toFlowEditor(data.id)} />
           <Dropdown
             position="bl"
             trigger="click"

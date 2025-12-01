@@ -11,7 +11,7 @@ import styles from './index.module.less';
 import AppCenterPage from './pages/AppCenter';
 import HelpCenterPage from './pages/HelpCenter';
 import MallCenterPage from './pages/MallCenter';
-import MyAppPage from './pages/MyApp';
+import EnterpriseAppPage from './pages/EnterpriseApp';
 
 const Content = Layout.Content;
 
@@ -29,8 +29,8 @@ const Home: React.FC = () => {
           <Content className={styles.content}>
             <div className={styles.contentInner}>
               <Routes>
-                <Route path="/" element={<Navigate to="my-app" replace />} />
-                <Route path="my-app" element={<MyAppPage />} />
+                <Route path="/" element={<Navigate to="enterprise-app" replace />} />
+                <Route path="enterprise-app" element={<EnterpriseAppPage />} />
                 <Route path="app-center" element={<AppCenterPage />} />
                 <Route path="mall-center" element={<MallCenterPage />} />
                 <Route path="help-center" element={<HelpCenterPage />} />

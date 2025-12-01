@@ -5,7 +5,7 @@ import LightText from './LightText';
 import styles from './VariableList.module.less';
 import type { VariablesList, ChildVariablesField } from '@onebase/app';
 import { cloneDeep } from 'lodash-es';
-import { FIELD_TAG_TYPE } from '@onebase/ui-kit';
+import { FIELD_TAG_TYPE, FIELD_TYPE } from '@onebase/ui-kit';
 
 interface VariableListProps {
   variables: VariablesList[]; //变量数组，包含所有可展示的变量
@@ -137,7 +137,7 @@ export function VariableList({ variables, searchValue, onSearchChange, onInsertV
             size="small"
             className={styles.listSection}
             dataSource={(filteredVariables?.[0]?.fields || variables?.[0]?.fields || []).filter(
-              (ele) => !disableTagTypes.includes(ele.fieldType)
+              (ele) => !disableTagTypes.includes(ele.fieldType) && ele.isSystemField !== FIELD_TYPE.SYSTEM
             )}
             render={(variable, index) => (
               <List.Item key={index} className={styles.variableItem} onClick={() => handleVariableClick(variable)}>

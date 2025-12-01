@@ -164,7 +164,7 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
         </div>
 
         <div className={styles.rightBody}>
-          <div className={styles.entityHeader}>业务实体</div>
+          <div className={styles.entityHeader}>数据资产</div>
           <div className={styles.entityListWrapper}>
             <div className={styles.entityList}>
               <Collapse
