@@ -379,7 +379,7 @@ const PageManagerPage: FC = () => {
           editorType = EDITOR_TYPES.FORM_EDITOR;
         }
 
-        navigate(`/onebase/${tenantId}/editor/${editorType}?pageSetId=${pageSetId}`);
+        navigate(`/onebase/${tenantId}/editor/${editorType}?pageSetId=${pageSetId}&appId=${curAppId}`);
       }
     });
   };
@@ -460,7 +460,7 @@ const PageManagerPage: FC = () => {
 
     // 把编辑页菜单数据保存起来；
     sessionStorage.setItem('EDITOR_PAGE_INFO', JSON.stringify({ id: curMenu.value?.id, name, icon }));
-    navigate(`/onebase/${tenantId}/editor/${editorType}?pageSetId=${pageSetId}`);
+    navigate(`/onebase/${tenantId}/editor/${editorType}?pageSetId=${pageSetId}&appId=${curAppId}`);
   };
 
   // 菜单搜索
