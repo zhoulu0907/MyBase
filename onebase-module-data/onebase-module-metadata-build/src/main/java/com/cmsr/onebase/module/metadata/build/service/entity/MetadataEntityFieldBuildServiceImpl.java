@@ -786,9 +786,9 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
                 validateValidationRuleUniqueness(fieldId, origin.getEntityId());
 
-                //特别处理：如果数据选择类型的字段发生了变化，需要额外同步到 关联关系表中
-                if ("DATA_SELECTION".equals(item.getFieldType())) {
-
+                // 特别处理：如果数据选择类型的字段发生了变化，需要额外同步到关联关系表中
+                if ("DATA_SELECTION".equalsIgnoreCase(item.getFieldType()) 
+                        || "MULTI_DATA_SELECTION".equalsIgnoreCase(item.getFieldType())) {
                     processEntityRelation(reqVO.getAppId(), fieldId, fullForRelated, item);
                 }
             }
@@ -866,8 +866,9 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
                 validateValidationRuleUniqueness(fieldId, toCreate.getEntityId());
 
-                //特别处理：如果数据选择类型的字段发生了变化，需要额外同步到 关联关系表中
-                if ("DATA_SELECTION".equals(item.getFieldType())) {
+                // 特别处理：如果数据选择类型的字段发生了变化，需要额外同步到关联关系表中
+                if ("DATA_SELECTION".equalsIgnoreCase(item.getFieldType())
+                        || "MULTI_DATA_SELECTION".equalsIgnoreCase(item.getFieldType())) {
                     processEntityRelation(reqVO.getAppId(), fieldId, toCreate, item);
                 }
 
@@ -917,16 +918,24 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             }
         }
 
+        // 根据字段类型确定关系类型：DATA_SELECTION 使用 DATA_SELECT，MULTI_DATA_SELECTION 使用 DATA_SELECT_MULTI
+        String relationshipType;
+        if ("MULTI_DATA_SELECTION".equalsIgnoreCase(item.getFieldType())) {
+            relationshipType = RelationshipTypeEnum.DATA_SELECT_MULTI.getRelationshipType();
+        } else {
+            relationshipType = RelationshipTypeEnum.DATA_SELECT.getRelationshipType();
+        }
+
         // 构建新的关系数据
         EntityRelationshipSaveReqVO r = new EntityRelationshipSaveReqVO();
         r.setRelationName("数据选择关系");
         r.setSourceEntityId(targetEntityId.toString());
         r.setTargetEntityId(full.getEntityId().toString());
-        r.setRelationshipType(RelationshipTypeEnum.ONE_TO_MANY.getRelationshipType());
+        r.setRelationshipType(relationshipType);
         r.setSourceFieldId(targetFieldId.toString());
         r.setTargetFieldId(fieldId.toString());
         r.setCascadeType("READ");
-        r.setDescription("数据选择的一对多关系");
+        r.setDescription("数据选择关系");
         r.setAppId(appId);
 
         // 比较数据：如果数据库中的关系和请求的数据一样，则忽略

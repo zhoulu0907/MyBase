@@ -13,6 +13,7 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusin
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.relationship.MetadataEntityRelationshipDO;
 import com.cmsr.onebase.module.metadata.core.domain.query.ProcessContext;
+import com.cmsr.onebase.module.metadata.core.enums.RelationshipTypeEnum;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.AbstractMetadataDataMethodCoreService;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
 import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.vo.ProcessedSubEntityVo;
@@ -204,10 +205,12 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
             if("DELETE".equals(relationshipDO.getCascadeType())){
                 continue;
             }
-            if (relationshipDO.getRelationshipType().equals("MANY_TO_ONE")) {
+            String relType = relationshipDO.getRelationshipType();
+            // 使用枚举的辅助方法判断关系类型语义
+            if (RelationshipTypeEnum.isManyToOneType(relType)) {
                 log.info("被删除表和关联表是多对一关系，无需对一方删除: 源实体ID: {}, 关联实体ID： {}", relationshipDO.getSourceEntityId(), relationshipDO.getTargetEntityId());
                 return;
-            } else if (relationshipDO.getRelationshipType().equals("ONE_TO_ONE") || relationshipDO.getRelationshipType().equals("ONE_TO_MANY") || relationshipDO.getRelationshipType().equals("MANY_TO_MANY")) {
+            } else if (RelationshipTypeEnum.isOneToOneType(relType) || RelationshipTypeEnum.isOneToManyType(relType) || RelationshipTypeEnum.isManyToManyType(relType)) {
                 MetadataBusinessEntityDO sourceEntity = businessEntityService.getBusinessEntity(relationshipDO.getSourceEntityId());
                 if (sourceEntity.getEntityType() == 3) {
                     log.info("被删除表类型是多对多的中间表，表名：{}，无需对其他关联表删除", sourceEntity.getTableName());
@@ -269,10 +272,12 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
             if("DELETE".equals(relationshipDO.getCascadeType())){
                 continue;
             }
-            if (relationshipDO.getRelationshipType().equals("ONE_TO_MANY")) {
+            String relType = relationshipDO.getRelationshipType();
+            // 使用枚举的辅助方法判断关系类型语义
+            if (RelationshipTypeEnum.isOneToManyType(relType)) {
                 log.info("关联表和被删除表是一对多关系，无需对一方删除: 源实体ID: {}, 关联实体ID： {}", relationshipDO.getSourceEntityId(), relationshipDO.getTargetEntityId());
                 return;
-            } else if (relationshipDO.getRelationshipType().equals("ONE_TO_ONE") || relationshipDO.getRelationshipType().equals("MANY_TO_ONE") || relationshipDO.getRelationshipType().equals("MANY_TO_MANY")) {
+            } else if (RelationshipTypeEnum.isOneToOneType(relType) || RelationshipTypeEnum.isManyToOneType(relType) || RelationshipTypeEnum.isManyToManyType(relType)) {
                 MetadataBusinessEntityDO targetEntity = businessEntityService.getBusinessEntity(relationshipDO.getTargetEntityId());
                 if (targetEntity.getEntityType() == 3) {
                     log.info("被删除表类型是多对多的中间表，表名：{}，无需对其他关联表删除", targetEntity.getTableName());

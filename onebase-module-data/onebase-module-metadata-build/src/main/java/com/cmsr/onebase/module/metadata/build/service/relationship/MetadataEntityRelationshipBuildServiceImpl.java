@@ -64,6 +64,9 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long createEntityRelationship(@Valid EntityRelationshipSaveReqVO createReqVO) {
+        // 校验关系类型必须是枚举中定义的值
+        validateRelationshipType(createReqVO.getRelationshipType());
+        
         // 插入实体关系
         MetadataEntityRelationshipDO entityRelationship = BeanUtils.toBean(createReqVO, MetadataEntityRelationshipDO.class);
         entityRelationship.setSourceEntityId(Long.valueOf(createReqVO.getSourceEntityId()));
@@ -81,6 +84,9 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
         if (!StringUtils.hasText(updateReqVO.getId())) {
             throw new IllegalArgumentException("更新操作必须提供实体关系ID");
         }
+        
+        // 校验关系类型必须是枚举中定义的值
+        validateRelationshipType(updateReqVO.getRelationshipType());
         
         // 校验存在
         validateEntityRelationshipExists(Long.valueOf(updateReqVO.getId()));
@@ -237,6 +243,22 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
     private void validateEntityRelationshipExists(Long id) {
         if (entityRelationshipRepository.getById(id) == null) {
             throw new IllegalArgumentException("实体关系不存在");
+        }
+    }
+
+    /**
+     * 校验关系类型是否有效
+     * 关系类型必须是 RelationshipTypeEnum 枚举中定义的值
+     *
+     * @param relationshipType 关系类型
+     */
+    private void validateRelationshipType(String relationshipType) {
+        if (!StringUtils.hasText(relationshipType)) {
+            throw new IllegalArgumentException("关系类型不能为空");
+        }
+        if (!RelationshipTypeEnum.isValidType(relationshipType)) {
+            throw new IllegalArgumentException("无效的关系类型: " + relationshipType + 
+                    "，有效值为: " + String.join(", ", RelationshipTypeEnum.getAllTypes()));
         }
     }
 
@@ -413,16 +435,16 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
         Long parentIdFieldId = getEntityIdField(Long.valueOf(createReqVO.getParentEntityId()));
         Long childParentIdFieldId = getOrCreateParentIdField(childEntityId);
 
-        // 3. 创建主子关系
+        // 3. 创建主子关系，使用 SUBTABLE_ONE_TO_MANY 关系类型
         EntityRelationshipSaveReqVO relationshipReqVO = BeanUtils.toBean(createReqVO, EntityRelationshipSaveReqVO.class, req -> {
             req.setRelationName("主子关系");
             req.setSourceEntityId(createReqVO.getParentEntityId());
             req.setTargetEntityId(String.valueOf(childEntityId));
-            req.setRelationshipType(RelationshipTypeEnum.ONE_TO_MANY.getRelationshipType());
+            req.setRelationshipType(RelationshipTypeEnum.SUBTABLE_ONE_TO_MANY.getRelationshipType());
             req.setSourceFieldId(String.valueOf(parentIdFieldId));
             req.setTargetFieldId(String.valueOf(childParentIdFieldId));
             req.setCascadeType(CascadeTypeEnum.ALL.getCascadeType()); // 默认级联新增、删除、查询
-            req.setDescription("系统自动创建的主子关系");
+            req.setDescription("系统自动创建的主子表关系");
         });
 
         Long relationshipId = createEntityRelationship(relationshipReqVO);
@@ -434,7 +456,7 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
         result.setChildEntityId(childEntityId);
         result.setSourceFieldId(parentIdFieldId);
         result.setTargetFieldId(childParentIdFieldId);
-        result.setRelationshipType(RelationshipTypeEnum.ONE_TO_MANY.getRelationshipType());
+        result.setRelationshipType(RelationshipTypeEnum.SUBTABLE_ONE_TO_MANY.getRelationshipType());
         result.setCascadeType(CascadeTypeEnum.ALL.getCascadeType());
         result.setAppId(Long.valueOf(createReqVO.getAppId()));
 
