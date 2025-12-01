@@ -58,12 +58,27 @@ public class AppMenuServiceImpl implements AppMenuService {
 
     @Override
     public List<MenuListRespVO> listBpmApplicationMenu() {
-        // todo 权限校验
+        Long userId = RTSecurityContext.getUserId();
         Long applicationId = ApplicationManager.getApplicationId();
-
-        List<AppMenuDO> menuDOS = appMenuRepository.findByApplicationIdAndType(applicationId,
-                Set.of(MenuTypeEnum.BPM.getValue())
-        );
+        UserRoleDTO userRoleDTO = appAuthRoleProvider.findUserRoleByApplication(userId, applicationId);
+        List<AppMenuDO> menuDOS;
+        if (userRoleDTO.isAdminRole()) {
+            // 获取应用下所有可见的BPM类型菜单
+            menuDOS = appMenuRepository.findByApplicationIdAndType(applicationId,
+                    Set.of(MenuTypeEnum.BPM.getValue()));
+            // 额外过滤只保留可见的菜单
+            menuDOS = menuDOS.stream()
+                    .filter(menu -> menu.getIsVisible() == 1)
+                    .collect(Collectors.toList());
+        } else {
+            // 非管理员需要根据权限过滤菜单
+            Set<Long> menuIds = findVisibleMenuIds(applicationId, userRoleDTO.getRoleIds());
+            menuDOS = appMenuRepository.findVisibleByAppIdAndMenuIds(applicationId, menuIds);
+            // 过滤出BPM类型的菜单
+            menuDOS = menuDOS.stream()
+                    .filter(menu -> MenuTypeEnum.BPM.getValue().equals(menu.getMenuType()))
+                    .collect(Collectors.toList());
+        }
 
         // 返回菜单
         return menuDOS.stream()
