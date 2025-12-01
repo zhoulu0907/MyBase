@@ -43,8 +43,7 @@ export default forwardRef(function RoleList({ activeId, onSelect, onAdd }: RoleL
         if (searchValue) params.name = searchValue;
 
         const res = await getRolePage(params);
-        const newRoleList = res.list || [];
-
+        const newRoleList = (res.list || []).reverse();
         if (append) {
           setRoleList((prev) => [...prev, ...newRoleList]);
         } else {
@@ -137,7 +136,7 @@ export default forwardRef(function RoleList({ activeId, onSelect, onAdd }: RoleL
     return roleList.filter((role) => role.name?.toLowerCase().includes(searchValue.toLowerCase()));
   }, [roleList, searchValue]);
 
-  const listTitle = `全部(${filteredRoleList?.length})`;
+  const listTitle = `全部角色(${filteredRoleList?.length})`;
 
   const roleListItems = useMemo(() => {
     return filteredRoleList?.map((item) => (
@@ -164,7 +163,7 @@ export default forwardRef(function RoleList({ activeId, onSelect, onAdd }: RoleL
           onChange={handleSearchChange}
           placeholder="输入角色名称"
           allowClear
-          style={{ borderRadius: 24 }}
+          style={{ borderRadius: '24px', marginBottom: '8px' }}
         />
       </div>
       <ListItem title={listTitle}>

@@ -7,7 +7,6 @@ import { usePlayground, usePlaygroundTools, useRefresh } from '@flowgram.ai/fixe
 import { FitView } from './fit-view';
 import { Minimap } from './minimap';
 import { MinimapSwitch } from './minimap-switch';
-import { Save } from './save';
 import { ToolContainer, ToolSection } from './styles';
 import { SwitchVertical } from './switch-vertical';
 import { ZoomSelect } from './zoom-select';
@@ -48,7 +47,7 @@ export const Tools = () => {
             onClick={() => tools.redo()}
           />
         </Tooltip>
-        <Save disabled={playground.config.readonly} />
+        {/* <Save disabled={playground.config.readonly} /> */}
         {/* <Run /> */}
       </ToolSection>
     </ToolContainer>

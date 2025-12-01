@@ -95,12 +95,12 @@ const ScriptActionListPage: React.FC = () => {
   };
 
   const handleEdit = (record: ScriptActionItem) => {
-    setEditingScriptId(record.scriptId);
+    setEditingScriptId(record.id);
   };
 
   const getEditingData = () => {
     if (!editingScriptId || !actionList) return undefined;
-    return actionList.find((item) => item.scriptId === editingScriptId);
+    return actionList.find((item) => item.id === editingScriptId);
   };
 
   const columns: TableColumnProps[] = [
@@ -138,7 +138,7 @@ const ScriptActionListPage: React.FC = () => {
           <Button type="text" size="mini" onClick={() => handleEdit(record)}>
             编辑
           </Button>
-          <Popconfirm title="确定删除吗？" content="删除后不可恢复" onOk={() => handleDelete(record.scriptId)}>
+          <Popconfirm title="确定删除吗？" content="删除后不可恢复" onOk={() => handleDelete(record.id)}>
             <Button type="text" size="mini" status="danger">
               删除
             </Button>
@@ -178,13 +178,7 @@ const ScriptActionListPage: React.FC = () => {
           <div className={styles.content}>
             <Spin loading={loading} size={40} style={{ width: '100%', height: '100%' }} tip="加载中...">
               <div className={styles.tableContainer}>
-                <Table
-                  rowKey="scriptId"
-                  columns={columns}
-                  data={actionList || []}
-                  pagination={false}
-                  loading={loading}
-                />
+                <Table rowKey="id" columns={columns} data={actionList || []} pagination={false} loading={loading} />
               </div>
             </Spin>
           </div>
