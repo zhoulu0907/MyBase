@@ -9,6 +9,7 @@ import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.security.TenantContextHolder;
+import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.common.util.date.DateUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
@@ -45,6 +46,8 @@ import com.cmsr.onebase.module.system.service.user.UserService;
 import com.cmsr.onebase.module.system.vo.role.RoleInsertReqVO;
 import com.cmsr.onebase.module.system.vo.tenant.*;
 import com.cmsr.onebase.module.system.vo.user.UserInsertReqVO;
+import com.mzt.logapi.context.LogRecordContext;
+import com.mzt.logapi.starter.annotation.LogRecord;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -63,6 +66,7 @@ import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
+import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
 import static java.util.Collections.singleton;
 
 /**
@@ -165,6 +169,8 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @LogRecord(type = SYSTEM_TENANT_TYPE, subType = SYSTEM_TENANT_CREATE_SUB_TYPE, bizNo = "{{#tenant.id}}",
+            success = SYSTEM_TENANT_CREATE_SUCCESS)
     public Long createTenant(TenantInsertReqVO createReqVO) {
         // 校验租户名称是否重复
         validTenantNameDuplicate(createReqVO.getName(), null);
@@ -220,6 +226,13 @@ public class TenantServiceImpl implements TenantService {
             // 创建用户，并分配角色
             createSystemUser(roleId, createReqVO);
         });
+
+        // 记录操作日志上下文
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+
+        LogRecordContext.putVariable("loginUser", loginUser);
+        LogRecordContext.putVariable("tenant", tenant);
+
         return tenant.getId();
     }
 
@@ -274,6 +287,8 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @LogRecord(type = SYSTEM_TENANT_TYPE, subType = SYSTEM_TENANT_UPDATE_SUB_TYPE, bizNo = "{{#tenant.id}}",
+            success = SYSTEM_TENANT_UPDATE_SUCCESS)
     public void updateTenant(@Valid TenantUpdateReqVO updateReqVO) {
         // 校验存在
         TenantDO tenant = validateUpdateTenant(updateReqVO.getId());
@@ -403,6 +418,13 @@ public class TenantServiceImpl implements TenantService {
                 });
             });
         }
+
+        // 记录操作日志上下文
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+
+        LogRecordContext.putVariable("loginUser", loginUser);
+        LogRecordContext.putVariable("tenant", tenantDataRepository.findById(updateObj.getId()));
+
     }
 
     private Long getAdminRoleAndDeleteOldUserRole(TenantDO tenant) {
@@ -479,11 +501,19 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
+    @LogRecord(type = SYSTEM_TENANT_TYPE, subType = SYSTEM_TENANT_DELETE_SUB_TYPE, bizNo = "{{#tenant.id}}",
+            success = SYSTEM_TENANT_DELETE_SUCCESS)
     public void deleteTenant(Long id) {
         // 校验存在
-        validateUpdateTenant(id);
+        TenantDO tenant = validateUpdateTenant(id);
         // 删除
         tenantDataRepository.deleteById(id);
+
+        // 记录操作日志上下文
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+
+        LogRecordContext.putVariable("loginUser", loginUser);
+        LogRecordContext.putVariable("tenant", tenant);
     }
 
     private TenantDO validateUpdateTenant(Long id) {

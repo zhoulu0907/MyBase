@@ -1,7 +1,10 @@
 package com.cmsr.onebase.framework.orm.config;
 
 import com.cmsr.onebase.framework.orm.entity.BaseEntity;
+import com.cmsr.onebase.framework.orm.entity.WarmFlowBaseEntity;
+import com.mybatisflex.annotation.InsertListener;
 import com.mybatisflex.annotation.KeyType;
+import com.mybatisflex.annotation.UpdateListener;
 import com.mybatisflex.core.FlexGlobalConfig;
 import com.mybatisflex.core.audit.AuditManager;
 import com.mybatisflex.core.keygen.KeyGeneratorFactory;
@@ -13,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -37,16 +41,17 @@ public class MybatisFlexConfiguration implements MyBatisFlexCustomizer {
         defaultConfig.setNormalValueOfLogicDelete(0);
         defaultConfig.setDeletedValueOfLogicDelete(System.currentTimeMillis());
 
-//        // setVersionColumn
-//        defaultConfig.setVersionColumn("lock_version");
+        Map<Class<?>, List<InsertListener>> insertListenerMap = new HashMap<>();
+        insertListenerMap.put(BaseEntity.class, List.of(new DefaultEntityListener()));
+        insertListenerMap.put(WarmFlowBaseEntity.class, List.of(new DefaultEntityListener()));
 
-        // base infomation listener
-        defaultConfig.setEntityInsertListeners(Map.of(
-                BaseEntity.class, List.of(new DefaultEntityListener())
-        ));
-        defaultConfig.setEntityUpdateListeners(Map.of(
-                BaseEntity.class, List.of(new DefaultEntityListener())
-        ));
+        Map<Class<?>, List<UpdateListener>> updateListenerMap = new HashMap<>();
+        updateListenerMap.put(BaseEntity.class, List.of(new DefaultEntityListener()));
+        updateListenerMap.put(WarmFlowBaseEntity.class, List.of(new DefaultEntityListener()));
+
+        // base information listener
+        defaultConfig.setEntityInsertListeners(insertListenerMap);
+        defaultConfig.setEntityUpdateListeners(updateListenerMap);
 
         // key generators
         KeyGeneratorFactory.register(SNOWFLAKE_ID_GENERATOR, snowflakeIdGenerator);

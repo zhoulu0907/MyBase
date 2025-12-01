@@ -15,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.dromara.warm.flow.core.dto.FlowParams;
 import org.dromara.warm.flow.core.entity.Instance;
 import org.dromara.warm.flow.core.entity.Node;
@@ -27,7 +26,7 @@ import org.dromara.warm.flow.core.service.InsService;
 import org.dromara.warm.flow.core.service.NodeService;
 import org.dromara.warm.flow.core.service.TaskService;
 import org.dromara.warm.flow.core.service.UserService;
-import org.dromara.warm.flow.core.service.impl.BpmConstants;
+import com.cmsr.onebase.module.bpm.core.enums.BpmConstants;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -195,7 +194,7 @@ public class BpmGlobalListener implements GlobalListener {
         Map<String, Object> variable = listenerVariable.getVariable();
         Task task = listenerVariable.getTask();
 
-        Set<Long> approvalUserIds = new HashSet<>();
+        Set<String> approvalUserIds = new HashSet<>();
 
         for (User user : task.getUserList()) {
             // 只处理审批人类型的用户
@@ -203,7 +202,7 @@ public class BpmGlobalListener implements GlobalListener {
                 continue;
             }
 
-            approvalUserIds.add(Long.valueOf(user.getProcessedBy()));
+            approvalUserIds.add(user.getProcessedBy());
         }
 
         // 如果没有审批人类型的用户，则直接返回
@@ -240,7 +239,7 @@ public class BpmGlobalListener implements GlobalListener {
         }
 
         // 保存代理用户
-        agentInsRepository.insertBatch(agentInsList);
+        agentInsRepository.saveBatch(agentInsList);
     }
 
     private void handleUnOperatorUsersOnAssignment(ListenerVariable listenerVariable) {

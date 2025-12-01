@@ -1,6 +1,7 @@
 package com.cmsr.onebase.framework.security.build.config;
 
 import cn.hutool.core.collection.CollUtil;
+import com.cmsr.onebase.framework.security.build.filter.BuildApplicationContextHeaderFilter;
 import com.cmsr.onebase.framework.security.config.AuthorizeRequestsCustomizer;
 import com.cmsr.onebase.framework.security.config.SecurityProperties;
 import com.cmsr.onebase.framework.security.core.filter.BuildAuthenticationFilter;
@@ -10,6 +11,7 @@ import com.google.common.collect.Multimap;
 import jakarta.annotation.Resource;
 import jakarta.annotation.security.PermitAll;
 import jakarta.servlet.DispatcherType;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.context.ApplicationContext;
@@ -54,7 +56,7 @@ import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.
 public class BuildWebSecurityConfigurerAdapter {
 
     @Resource
-    private WebProperties      webProperties;
+    private WebProperties webProperties;
     @Resource
     private SecurityProperties securityProperties;
 
@@ -67,13 +69,15 @@ public class BuildWebSecurityConfigurerAdapter {
      * 权限不够处理器 Bean
      */
     @Resource
-    private AccessDeniedHandler       accessDeniedHandler;
+    private AccessDeniedHandler accessDeniedHandler;
     /**
      * Token 认证过滤器 Bean
      */
     @Resource
     private BuildAuthenticationFilter authenticationTokenFilter;
 
+    @Autowired
+    private BuildApplicationContextHeaderFilter applicationContextHeaderFilter;
     /**
      * 自定义的权限映射 Bean 们
      *
@@ -97,7 +101,7 @@ public class BuildWebSecurityConfigurerAdapter {
 
     /**
      * 配置 URL 的安全配置
-     *
+     * <p>
      * anyRequest          |   匹配所有请求路径
      * access              |   SpringEl表达式结果为true时可以访问
      * anonymous           |   匿名可以访问
@@ -141,17 +145,17 @@ public class BuildWebSecurityConfigurerAdapter {
         httpSecurity
                 // ①：全局共享规则
                 .authorizeHttpRequests(c -> c
-                    // 1.1 静态资源，可匿名访问
-                    .requestMatchers(HttpMethod.GET, "/*.html", "/*.css", "/*.js","/admin-api/app/application/get/**","/runtime/app/application/get/**").permitAll()
-                    // 1.2 设置 @PermitAll 无需认证
-                    .requestMatchers(HttpMethod.GET, permitAllUrls.get(HttpMethod.GET).toArray(new String[0])).permitAll()
-                    .requestMatchers(HttpMethod.POST, permitAllUrls.get(HttpMethod.POST).toArray(new String[0])).permitAll()
-                    .requestMatchers(HttpMethod.PUT, permitAllUrls.get(HttpMethod.PUT).toArray(new String[0])).permitAll()
-                    .requestMatchers(HttpMethod.DELETE, permitAllUrls.get(HttpMethod.DELETE).toArray(new String[0])).permitAll()
-                    .requestMatchers(HttpMethod.HEAD, permitAllUrls.get(HttpMethod.HEAD).toArray(new String[0])).permitAll()
-                    .requestMatchers(HttpMethod.PATCH, permitAllUrls.get(HttpMethod.PATCH).toArray(new String[0])).permitAll()
-                    // 1.3 基于 onebase.security.permit-all-urls 无需认证
-                    .requestMatchers(securityProperties.getPermitAllUrls().toArray(new String[0])).permitAll()
+                        // 1.1 静态资源，可匿名访问
+                        .requestMatchers(HttpMethod.GET, "/*.html", "/*.css", "/*.js", "/admin-api/app/application/get/**", "/runtime/app/application/get/**").permitAll()
+                        // 1.2 设置 @PermitAll 无需认证
+                        .requestMatchers(HttpMethod.GET, permitAllUrls.get(HttpMethod.GET).toArray(new String[0])).permitAll()
+                        .requestMatchers(HttpMethod.POST, permitAllUrls.get(HttpMethod.POST).toArray(new String[0])).permitAll()
+                        .requestMatchers(HttpMethod.PUT, permitAllUrls.get(HttpMethod.PUT).toArray(new String[0])).permitAll()
+                        .requestMatchers(HttpMethod.DELETE, permitAllUrls.get(HttpMethod.DELETE).toArray(new String[0])).permitAll()
+                        .requestMatchers(HttpMethod.HEAD, permitAllUrls.get(HttpMethod.HEAD).toArray(new String[0])).permitAll()
+                        .requestMatchers(HttpMethod.PATCH, permitAllUrls.get(HttpMethod.PATCH).toArray(new String[0])).permitAll()
+                        // 1.3 基于 onebase.security.permit-all-urls 无需认证
+                        .requestMatchers(securityProperties.getPermitAllUrls().toArray(new String[0])).permitAll()
                 )
                 // ②：每个项目的自定义规则
                 .authorizeHttpRequests(c -> authorizeRequestsCustomizers.forEach(customizer -> customizer.customize(c)))
@@ -161,6 +165,7 @@ public class BuildWebSecurityConfigurerAdapter {
                         .anyRequest().authenticated());
 
         // 添加 Token Filter
+        httpSecurity.addFilterBefore(applicationContextHeaderFilter, UsernamePasswordAuthenticationFilter.class);
         httpSecurity.addFilterBefore(authenticationTokenFilter, UsernamePasswordAuthenticationFilter.class);
         return httpSecurity.build();
     }

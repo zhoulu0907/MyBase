@@ -76,8 +76,6 @@ public class BpmDesignConvertImpl implements BpmDesignConvert {
             BpmDefinitionExtDTO extDto = JsonUtils.parseObject(ext, BpmDefinitionExtDTO.class);
 
             if (extDto != null) {
-                flowDesignVO.setVersionAlias(extDto.getVersionAlias());
-
                 if (extDto.getGlobalConfig() != null) {
                     flowDesignVO.setGlobalConfig(extDto.getGlobalConfig());
                 } else {
@@ -90,9 +88,11 @@ public class BpmDesignConvertImpl implements BpmDesignConvert {
             }
         }
 
-        // 设置默认版本备注
-        if (StringUtils.isBlank(flowDesignVO.getVersionAlias())) {
+        // 设置版本备注
+        if (StringUtils.isBlank(defJson.getVersionAlias())) {
             flowDesignVO.setVersionAlias(defaultVersionAlias);
+        } else {
+            flowDesignVO.setVersionAlias(defJson.getVersionAlias());
         }
 
         // 转换节点配置
@@ -123,11 +123,11 @@ public class BpmDesignConvertImpl implements BpmDesignConvert {
         // 构建ext
         BpmDefinitionExtDTO extDto = new BpmDefinitionExtDTO();
         if (flowDesignVO.getVersionAlias() != null) {
-            extDto.setVersionAlias(flowDesignVO.getVersionAlias());
             extDto.setAppId(flowDesignVO.getAppId());
             extDto.setGlobalConfig(flowDesignVO.getGlobalConfig());
         }
 
+        defJson.setVersionAlias(flowDesignVO.getVersionAlias());
         defJson.setExt(JsonUtils.toJsonString(extDto));
 
         // 固定值

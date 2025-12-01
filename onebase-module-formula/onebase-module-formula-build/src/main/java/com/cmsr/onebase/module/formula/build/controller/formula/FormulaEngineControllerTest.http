@@ -270,7 +270,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "SUM(1,2,3,4)" }
+{"formula":"SUM(数学成绩,语文成绩)","parameters":{"数学成绩":68,"语文成绩":70}}
 
 ### ABS
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -326,7 +326,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "COUNTA('a',null,'',123,true)" }
+{ "formula": "COUNTA('张三','李四','王五','下单')" }
 
 ### COS
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -382,7 +382,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
- { "formula": "COUNT(1,2,'a',3)" }
+ { "formula": "COUNT(1,2,4,3)" }
 
 ### LOG
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -518,7 +518,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "WEEKDAY('2025-10-27')" }
+{ "formula": "WEEKDAY('2025-11-18')" }
 
 ### SECOND
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -590,7 +590,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "EDATE('2025-01-01',3)" }
+{ "formula": "EDATE('2025-11-18',3)" }
 
 ### WORKDAY
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -614,7 +614,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "TODAY('abc')" }
+{ "formula": "TODAY()" }
 
 ### WEEKNUM
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -630,7 +630,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "DATEDIF('2020-01-01','2025-10-27','Y')" }
+{ "formula": "DATEDIF('2024-11-18 09:23:50','2025-11-18 09:23:55','d')" }
 
 ### NOT
 POST {{baseUrl}}/formula/engine/execute-formula

@@ -42,7 +42,7 @@ public class MetadataDatasourceCoreServiceImpl implements MetadataDatasourceCore
         datasource.setUpdateTime(now);
 
         // 插入数据源
-        metadataDatasourceRepository.insert(datasource);
+        metadataDatasourceRepository.save(datasource);
 
         log.info("创建数据源成功，ID: {}，创建人: {}，创建时间: {}",
                 datasource.getId(), currentUserId, now);
@@ -53,16 +53,15 @@ public class MetadataDatasourceCoreServiceImpl implements MetadataDatasourceCore
     @Transactional(rollbackFor = Exception.class)
     public Long createDefaultDatasource(Long appId, String appUid, String datasourceType, String configJson) {
         // 构建默认数据源DO
-        MetadataDatasourceDO datasource = MetadataDatasourceDO.builder()
-                .datasourceName("默认数据源")
-                .code("default_" + System.currentTimeMillis()) // 确保编码唯一
-                .datasourceType(datasourceType)
-                .config(configJson)
-                .description("系统默认数据源")
-                .runMode(1)
-                .datasourceOrigin(0) // 系统默认
-                .appId(appId) // 设置应用ID - 修复数据插入失败问题
-                .build();
+        MetadataDatasourceDO datasource = new MetadataDatasourceDO();
+        datasource.setDatasourceName("默认数据源");
+        datasource.setCode("default_" + System.currentTimeMillis());
+        datasource.setDatasourceType(datasourceType);
+        datasource.setConfig(configJson);
+        datasource.setDescription("系统默认数据源");
+        datasource.setRunMode(1);
+        datasource.setDatasourceOrigin(0);
+        datasource.setAppId(appId);
 
         // 创建数据源
         Long datasourceId = createDatasource(datasource);
@@ -95,7 +94,7 @@ public class MetadataDatasourceCoreServiceImpl implements MetadataDatasourceCore
         datasource.setUpdateTime(LocalDateTime.now());
 
         // 更新数据源
-        metadataDatasourceRepository.update(datasource);
+        metadataDatasourceRepository.updateById(datasource);
 
         log.info("更新数据源成功，ID: {}，更新人: {}", datasource.getId(), currentUserId);
     }
@@ -107,7 +106,7 @@ public class MetadataDatasourceCoreServiceImpl implements MetadataDatasourceCore
         validateDatasourceExists(id);
 
         // 删除数据源
-        metadataDatasourceRepository.deleteById(id);
+        metadataDatasourceRepository.removeById(id);
 
         log.info("删除数据源成功，ID: {}", id);
     }

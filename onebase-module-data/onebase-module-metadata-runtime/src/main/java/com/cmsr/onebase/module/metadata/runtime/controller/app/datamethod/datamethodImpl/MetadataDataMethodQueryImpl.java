@@ -131,9 +131,7 @@ public class MetadataDataMethodQueryImpl extends AbstractMetadataDataMethodCoreS
 
         //查询子表数据
         Long sourceEntityId = entityId;
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and(MetadataEntityRelationshipDO.SOURCE_ENTITY_ID, sourceEntityId);
-        List<MetadataEntityRelationshipDO> relationships = entityRelationshipRepository.findAllByConfig(configStore);
+        List<MetadataEntityRelationshipDO> relationships = entityRelationshipRepository.findBySourceEntityId(sourceEntityId);
         List<String> subTableIds = new ArrayList<String>();
         List subEntities = new ArrayList();
         for(MetadataEntityRelationshipDO relationshipDO:relationships){

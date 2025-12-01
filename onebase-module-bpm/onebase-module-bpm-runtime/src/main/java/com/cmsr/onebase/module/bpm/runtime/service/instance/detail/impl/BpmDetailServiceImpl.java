@@ -17,13 +17,11 @@ import com.cmsr.onebase.module.bpm.runtime.service.instance.detail.BpmDetailServ
 import com.cmsr.onebase.module.bpm.runtime.service.instance.detail.strategy.InstanceDetailStrategyManager;
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmTaskDetailReqVO;
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmTaskDetailRespVO;
-import com.cmsr.onebase.module.engine.orm.anyline.entity.FlowHisTask;
+import com.cmsr.onebase.module.engine.orm.mybatisflex.entity.FlowHisTask;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.MetadataDataMethodCoreService;
 import jakarta.annotation.Resource;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
@@ -35,7 +33,7 @@ import org.dromara.warm.flow.core.service.HisTaskService;
 import org.dromara.warm.flow.core.service.InsService;
 import org.dromara.warm.flow.core.service.TaskService;
 import org.dromara.warm.flow.core.service.UserService;
-import org.dromara.warm.flow.core.service.impl.BpmConstants;
+import com.cmsr.onebase.module.bpm.core.enums.BpmConstants;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -430,40 +428,35 @@ public class BpmDetailServiceImpl implements BpmDetailService {
     private void validateCcRecordAndSetAgent(Long taskId, InsDetailContext context) {
         Long loginUserId = context.getLoginUserId();
 
-        // 先查询直接权限
-        ConfigStore configStore = new DefaultConfigStore();
-        configStore.and(BpmFlowCcRecordDO.TASK_ID, taskId);
-        configStore.and(BpmFlowCcRecordDO.USER_ID, loginUserId);
-        BpmFlowCcRecordDO ccRecord = ccRecordRepository.findOne(configStore);
+        // 先查询直接权限（抄送记录表 user_id 为 String，这里转为 String 查询）
+        BpmFlowCcRecordDO ccRecord = ccRecordRepository.findOneByTaskIdAndUserId(taskId, String.valueOf(loginUserId));
 
         if (ccRecord != null) {
             // 直接权限，没有代理记录
             return;
         }
 
-        // 查询代理权限
+        // 查询代理权限（BpmFlowAgentInsDO 中 agentId 为 String，这里仍使用 String 类型）
         List<BpmFlowAgentInsDO> agentInsList = agentInsRepository.findAllByTaskIdAndAgentId(
                 taskId, String.valueOf(loginUserId));
         if (CollectionUtils.isEmpty(agentInsList)) {
             throw exception(ErrorCodeConstants.FLOW_PERMISSION_DENY.getCode(), "您没有查看此抄送的任务权限");
         }
 
-        Set<Long> principalIds = agentInsList.stream()
+        // 被代理人 ID 集合（String）
+        List<String> principalStrIds = agentInsList.stream()
                 .map(BpmFlowAgentInsDO::getPrincipalId)
-                .collect(Collectors.toSet());
+                .distinct()
+                .toList();
 
-        // 查找被代理人的抄送记录
-        ConfigStore agentCcQuery = new DefaultConfigStore();
-        agentCcQuery.and(BpmFlowCcRecordDO.TASK_ID, taskId);
-        agentCcQuery.in(BpmFlowCcRecordDO.USER_ID, principalIds);
+        BpmFlowCcRecordDO agentCcRecord = ccRecordRepository.findOneByTaskIdAndUserIds(taskId, principalStrIds);
 
-        BpmFlowCcRecordDO agentCcRecord = ccRecordRepository.findOne(agentCcQuery);
         if (agentCcRecord == null) {
             throw exception(ErrorCodeConstants.FLOW_PERMISSION_DENY.getCode(), "您没有查看此抄送的任务权限");
         }
 
         // 找到代理的抄送记录，设置对应的代理记录到 context
-        Long principalId = Long.valueOf(agentCcRecord.getUserId());
+        String principalId = agentCcRecord.getUserId();
         BpmFlowAgentInsDO agentIns = agentInsList.stream()
                 .filter(agent -> Objects.equals(agent.getPrincipalId(), principalId))
                 .findFirst()
@@ -608,16 +601,12 @@ public class BpmDetailServiceImpl implements BpmDetailService {
         }
 
         // 确定要标记的用户ID（如果是代理，使用被代理人ID）
-        Long userId = context.getLoginUserId();
+        String userId = String.valueOf(context.getLoginUserId());
         if (context.getAgentIns() != null) {
             userId = context.getAgentIns().getPrincipalId();
         }
 
-        ConfigStore configStore = new DefaultConfigStore();
-        configStore.and(BpmFlowCcRecordDO.TASK_ID, taskId);
-        configStore.and(BpmFlowCcRecordDO.USER_ID, userId);
-
-        BpmFlowCcRecordDO ccRecord = ccRecordRepository.findOne(configStore);
+        BpmFlowCcRecordDO ccRecord = ccRecordRepository.findOneByTaskIdAndUserId(taskId, String.valueOf(userId));
         if (ccRecord == null) {
             return;
         }
@@ -625,7 +614,7 @@ public class BpmDetailServiceImpl implements BpmDetailService {
         if (!BooleanUtils.toBoolean(ccRecord.getViewed())) {
             ccRecord.setViewed(BooleanUtils.toInteger(true));
             ccRecord.setViewedTime(LocalDateTime.now());
-            ccRecordRepository.update(ccRecord);
+            ccRecordRepository.updateById(ccRecord);
         }
     }
 
@@ -637,9 +626,7 @@ public class BpmDetailServiceImpl implements BpmDetailService {
      * @param instanceId 流程实例ID
      */
     private void fillBpmBizExt(BpmTaskDetailRespVO vo, Long instanceId) {
-        ConfigStore configStore = new DefaultConfigStore();
-        configStore.and(BpmFlowInsBizExtDO.INSTANCE_ID, instanceId);
-        BpmFlowInsBizExtDO flowInsExtDO = flowInsExtRepository.findOne(configStore);
+        BpmFlowInsBizExtDO flowInsExtDO = flowInsExtRepository.findOneByInstanceId(instanceId);
 
         if (flowInsExtDO == null) {
             throw exception(ErrorCodeConstants.BPM_BIZ_EXT_NOT_EXIST);
@@ -708,9 +695,9 @@ public class BpmDetailServiceImpl implements BpmDetailService {
         }
 
         for (BpmFlowAgentInsDO agentInsDO : agentInsDOList) {
-            Long principalId = agentInsDO.getPrincipalId();
+            String principalId = agentInsDO.getPrincipalId();
 
-            User agentUser = userMap.get(String.valueOf(principalId));
+            User agentUser = userMap.get(principalId);
 
             if (agentUser != null) {
                 userContext = new BpmPermissionUserContext(agentUser, agentInsDO);

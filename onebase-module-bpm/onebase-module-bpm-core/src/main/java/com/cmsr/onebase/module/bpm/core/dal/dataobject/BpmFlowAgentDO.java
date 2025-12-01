@@ -1,90 +1,68 @@
 package com.cmsr.onebase.module.bpm.core.dal.dataobject;
 
-import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
-import jakarta.persistence.Column;
-import jakarta.persistence.Table;
+import com.cmsr.onebase.framework.orm.entity.BaseBizEntity;
+import com.mybatisflex.annotation.Table;
 import lombok.Data;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * 流程代理表
+ * 流程代理表 实体类。
  *
  * @author liyang
- * @date 2025-11-10
+ * @since 2025-11-29
  */
 @Data
-@Table(name = "bpm_flow_agent")
-public class BpmFlowAgentDO extends TenantBaseDO {
-    public static final String PRINCIPAL_ID = "principal_id";
+@Table("bpm_flow_agent")
+public class BpmFlowAgentDO extends BaseBizEntity implements Serializable {
 
-    public static final String AGENT_ID = "agent_id";
-
-    public static final String APP_ID = "app_id";
-
-    public static final String START_TIME = "start_time";
-
-    public static final String END_TIME = "end_time";
-
-    public static final String REVOKED_TIME = "revoked_time";
-
-    public static final String AGENT_NAME = "agent_name";
-
-    public static final String PRINCIPAL_NAME = "principal_name";
-
-    public static final String REVOKED_ID = "revoked_id";
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     /**
-     * 应用ID
+     * 被代理人用户ID（即委托人），代理关系的发起方
      */
-    @Column(name = APP_ID, length = 100)
-    private Long appId;
+    private String principalId;
 
     /**
-     * 被代理人用户ID
+     * 被代理人用户名称（即委托人）
      */
-    @Column(name = PRINCIPAL_ID)
-    private Long principalId;
-
-    /**
-    *被代理人用户名称
-     */
-    @Column(name = PRINCIPAL_NAME)
     private String principalName;
 
     /**
-     * 代理人用户ID
+     * 代理人用户ID，接受委托代为处理流程任务
      */
-    @Column(name = AGENT_ID)
-    private Long agentId;
+    private String agentId;
 
     /**
      * 代理人用户名称
      */
-    @Column(name = AGENT_NAME)
     private String agentName;
 
     /**
-     * 代理开始时间
+     * 代理生效开始时间
      */
-    @Column(name = START_TIME)
     private LocalDateTime startTime;
 
     /**
-     * 代理结束时间
+     * 代理结束时间，必须晚于开始时间
      */
-    @Column(name = END_TIME)
     private LocalDateTime endTime;
 
     /**
-     * 撤销人ID
+     * 撤销人
      */
-    @Column(name = REVOKED_ID)
-    private Long revokerId;
+    private String revokerId;
 
     /**
      * 撤销时间
      */
-    @Column(name = REVOKED_TIME)
     private LocalDateTime revokedTime;
+
+    /**
+     * 乐观锁
+     */
+    private Long lockVersion;
 }

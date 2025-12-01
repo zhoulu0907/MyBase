@@ -1,59 +1,53 @@
 package com.cmsr.onebase.module.bpm.core.dal.dataobject;
-import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
-import jakarta.persistence.Column;
-import jakarta.persistence.Table;
+
+import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
+import com.mybatisflex.annotation.Table;
 import lombok.Data;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * 流程抄送记录表
+ * 流程抄送记录表 实体类。
  *
+ * @author liyang
+ * @since 2025-11-29
  */
 @Data
-@Table(name = "bpm_flow_cc_record")
-public class BpmFlowCcRecordDO extends TenantBaseDO {
+@Table("bpm_flow_cc_record")
+public class BpmFlowCcRecordDO extends BaseTenantEntity implements Serializable {
 
-    public static final String INSTANCE_ID = "instance_id";
-
-    public static final String TASK_ID = "task_id";
-
-    public static final String VIEWED = "viewed";
-
-    public static final String VIEWED_TIME = "viewed_time";
-
-    public static final String USER_ID = "user_id";
-
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     /**
      * 流程实例id
      */
-    @Column(name = "instance_id")
     private Long instanceId;
 
     /**
      * 任务表id
      */
-    @Column(name = "task_id")
     private Long taskId;
 
     /**
      * 已阅 0，否 1，是
      */
-    @Column(name = "viewed")
     private Integer viewed;
 
     /**
      * 已读时间
      */
-    @Column(name = "viewed_time")
     private LocalDateTime viewedTime;
 
     /**
      * 抄送用户ID
      */
-    @Column(name = "user_id", length = 80)
     private String userId;
 
-
+    /**
+     * 乐观锁
+     */
+    private Long lockVersion;
 }

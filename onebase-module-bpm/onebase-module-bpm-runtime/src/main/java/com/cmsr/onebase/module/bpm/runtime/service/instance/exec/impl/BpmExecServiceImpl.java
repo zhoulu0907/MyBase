@@ -23,7 +23,7 @@ import org.dromara.warm.flow.core.entity.User;
 import org.dromara.warm.flow.core.service.InsService;
 import org.dromara.warm.flow.core.service.TaskService;
 import org.dromara.warm.flow.core.service.UserService;
-import org.dromara.warm.flow.core.service.impl.BpmConstants;
+import com.cmsr.onebase.module.bpm.core.enums.BpmConstants;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -101,9 +101,9 @@ public class BpmExecServiceImpl implements BpmExecService {
                 // 查找对应的被代理人User
                 for (User user : users) {
                     String processedBy = user.getProcessedBy();
-                    Long principalId = agentInsDO.getPrincipalId();
+                    String principalId = agentInsDO.getPrincipalId();
 
-                    if (Objects.equals(processedBy, String.valueOf(principalId))) {
+                    if (Objects.equals(processedBy, principalId)) {
                         // 说明是当前登录用户拥有被代理人权限
                         permissionUserContexts.add(new BpmPermissionUserContext(user, agentInsDO));
                         break;

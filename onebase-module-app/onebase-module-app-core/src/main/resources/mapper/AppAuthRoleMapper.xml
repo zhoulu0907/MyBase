@@ -37,7 +37,7 @@
         app_auth_role_dept aard
         left join system_dept d on aard.dept_id = d.id
         where
-        aard.role_id = #{roleid}
+        aard.role_id = #{roleId}
         <if test="memberName != null">
             and d.name like '%'|| #{memberName} ||'%'
         </if>
@@ -77,7 +77,7 @@
         app_auth_role_dept aard
         left join system_dept d on aard.dept_id = d.id
         where
-        aard.role_id = #{roleid}
+        aard.role_id = #{roleId}
         <if test="memberName != null">
             and d.name like '%'|| #{memberName} ||'%'
         </if>
@@ -104,7 +104,7 @@
         and su.deleted = 0
         where
         r.application_id in
-        <foreach item="item" index="index" collection="appIds" open="(" separator="," close=")">
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
             #{item}
         </foreach>
         and su.id is not null

@@ -1,16 +1,19 @@
 package com.cmsr.onebase.module.flow.core.dal.database;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.orm.repo.BaseAppRepository;
+import com.cmsr.onebase.framework.orm.repo.BaseBizRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
 import com.cmsr.onebase.module.flow.core.dal.mapper.FlowProcessMapper;
 import com.cmsr.onebase.module.flow.core.vo.PageFlowProcessReqVO;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.core.row.Row;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.module.flow.core.dal.dataobject.table.FlowProcessTableDef.FLOW_PROCESS;
 
@@ -19,8 +22,26 @@ import static com.cmsr.onebase.module.flow.core.dal.dataobject.table.FlowProcess
  * @Date：2025/8/29 14:35
  */
 @Repository
-public class FlowProcessRepository extends BaseAppRepository<FlowProcessMapper, FlowProcessDO> {
+public class FlowProcessRepository extends BaseBizRepository<FlowProcessMapper, FlowProcessDO> {
 
+    public String selectProcessName(Long processId) {
+        QueryWrapper query = this.query()
+                .select(FLOW_PROCESS.PROCESS_NAME)
+                .where(FLOW_PROCESS.ID.eq(processId));
+        return getObjAs(query, String.class);
+    }
+
+    public Map<Long, String> selectProcessNames(List<Long> processIds) {
+        QueryWrapper query = this.query()
+                .select(FLOW_PROCESS.ID, FLOW_PROCESS.PROCESS_NAME)
+                .where(FLOW_PROCESS.ID.in(processIds));
+        List<Row> rows = listAs(query, Row.class);
+        return rows.stream()
+                .collect(Collectors.toMap(
+                        row -> row.getLong(FLOW_PROCESS.ID.getName()),
+                        row -> row.getString(FLOW_PROCESS.PROCESS_NAME.getName())
+                ));
+    }
 
     public PageResult<FlowProcessDO> findPageByQuery(PageFlowProcessReqVO reqVO) {
         QueryWrapper query = this.query()
@@ -57,5 +78,6 @@ public class FlowProcessRepository extends BaseAppRepository<FlowProcessMapper, 
                 .where(FLOW_PROCESS.ID.eq(id));
         return getObjAs(query, String.class);
     }
+
 
 }

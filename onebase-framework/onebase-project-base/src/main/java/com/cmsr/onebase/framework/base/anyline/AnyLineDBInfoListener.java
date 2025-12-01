@@ -84,6 +84,7 @@ public class AnyLineDBInfoListener implements DMListener {
         TENANT_IGNORE_TABLES.add("flow_connector_script");
         TENANT_IGNORE_TABLES.add("etl_flink_mapping");
         TENANT_IGNORE_TABLES.add("etl_flink_function");
+        TENANT_IGNORE_TABLES.add("formula_function");
         // 可以根据需要添加更多表
     }
 

@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.app.runtime.service.menu;
 
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.security.runtime.RTSecurityContext;
 import com.cmsr.onebase.module.app.api.security.bo.OperationPermission;
@@ -8,6 +9,7 @@ import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthPermissionDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppMenuDO;
 import com.cmsr.onebase.module.app.core.dto.auth.UserRoleDTO;
+import com.cmsr.onebase.module.app.core.enums.menu.MenuTypeEnum;
 import com.cmsr.onebase.module.app.core.impl.auth.AppAuthSecurityApiImpl;
 import com.cmsr.onebase.module.app.core.provider.auth.AppAuthPermissionProvider;
 import com.cmsr.onebase.module.app.core.provider.auth.AppAuthRoleProvider;
@@ -17,6 +19,7 @@ import com.cmsr.onebase.module.app.runtime.vo.menu.MenuListRespVO;
 import com.cmsr.onebase.module.app.runtime.vo.menu.MenuPermissionVO;
 import jakarta.annotation.Resource;
 import lombok.Setter;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
@@ -55,9 +58,28 @@ public class AppMenuServiceImpl implements AppMenuService {
     private RedissonClient redissonClient;
 
     @Override
+    public List<MenuListRespVO> listBpmApplicationMenu() {
+        Long applicationId = ApplicationManager.getApplicationId();
+
+        // 获取应用下所有可见的BPM类型菜单
+        List<AppMenuDO> menuDOS = appMenuRepository.findByApplicationIdAndType(applicationId,
+                Set.of(MenuTypeEnum.BPM.getValue()));
+
+        // 额外过滤只保留可见的菜单
+        menuDOS = menuDOS.stream()
+                .filter(menu -> BooleanUtils.toBoolean(menu.getIsVisible()))
+                .toList();
+
+        // 返回菜单
+        return menuDOS.stream()
+                .map(v -> BeanUtils.toBean(v, MenuListRespVO.class))
+                .collect(Collectors.toCollection(LinkedList::new));
+    }
+
+    @Override
     public List<MenuListRespVO> listApplicationMenu() {
         Long userId = RTSecurityContext.getUserId();
-        Long applicationId = RTSecurityContext.getApplicationId();
+        Long applicationId = ApplicationManager.getApplicationId();
         UserRoleDTO userRoleDTO = appAuthRoleProvider.findUserRoleByApplication(userId, applicationId);
         List<AppMenuDO> menuDOS;
         if (userRoleDTO.isAdminRole()) {
@@ -107,7 +129,7 @@ public class AppMenuServiceImpl implements AppMenuService {
     @Override
     public MenuPermissionVO getMenuPermission(Long menuId) {
         Long userId = RTSecurityContext.getUserId();
-        Long applicationId = RTSecurityContext.getApplicationId();
+        Long applicationId = ApplicationManager.getApplicationId();
         MenuPermissionVO menuPermissionVO = new MenuPermissionVO();
         menuPermissionVO.setOperationPermission(appAuthSecurityApi.getMenuOperationPermission(userId, applicationId, menuId));
         menuPermissionVO.setFieldPermission(appAuthSecurityApi.getMenuFieldPermission(userId, applicationId, menuId));

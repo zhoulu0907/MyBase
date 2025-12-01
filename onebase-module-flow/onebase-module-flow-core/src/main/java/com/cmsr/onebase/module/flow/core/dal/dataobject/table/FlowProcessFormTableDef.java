@@ -8,7 +8,7 @@ import com.mybatisflex.core.table.TableDef;
  *  表定义层。
  *
  * @author HuangJie
- * @since 2025-11-25
+ * @since 2025-11-29
  */
 public class FlowProcessFormTableDef extends TableDef {
 
@@ -21,9 +21,6 @@ public class FlowProcessFormTableDef extends TableDef {
 
     
     public final QueryColumn ID = new QueryColumn(this, "id");
-
-    
-    public final QueryColumn PAGE_ID = new QueryColumn(this, "page_id");
 
     
     public final QueryColumn CREATOR = new QueryColumn(this, "creator");
@@ -46,9 +43,6 @@ public class FlowProcessFormTableDef extends TableDef {
     
     public final QueryColumn UPDATE_TIME = new QueryColumn(this, "update_time");
 
-    
-    public final QueryColumn LOCK_VERSION = new QueryColumn(this, "lock_version");
-
     /**
      * 所有字段。
      */
@@ -57,7 +51,7 @@ public class FlowProcessFormTableDef extends TableDef {
     /**
      * 默认字段，不包含逻辑删除或者 large 等字段。
      */
-    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, PROCESS_ID, PAGE_ID, LOCK_VERSION, CREATOR, CREATE_TIME, UPDATER, UPDATE_TIME, DELETED, TENANT_ID};
+    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, PROCESS_ID, CREATOR, CREATE_TIME, UPDATER, UPDATE_TIME, DELETED, TENANT_ID};
 
     public FlowProcessFormTableDef() {
         super("", "flow_process_form");

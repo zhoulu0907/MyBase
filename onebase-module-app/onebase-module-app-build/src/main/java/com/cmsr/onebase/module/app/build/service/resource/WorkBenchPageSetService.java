@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.app.build.service.resource;
 
-import com.cmsr.onebase.module.app.build.vo.appresource.LoadPageSetRespVO;
-import com.cmsr.onebase.module.app.build.vo.appresource.SavePageSetReqVO;
+import com.cmsr.onebase.module.app.core.vo.resource.LoadPageSetRespVO;
+import com.cmsr.onebase.module.app.core.vo.resource.SavePageSetReqVO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetPageDO;
 

@@ -8,7 +8,7 @@ import com.mybatisflex.core.table.TableDef;
  *  表定义层。
  *
  * @author HuangJie
- * @since 2025-11-25
+ * @since 2025-11-29
  */
 public class FlowNodeTypeTableDef extends TableDef {
 

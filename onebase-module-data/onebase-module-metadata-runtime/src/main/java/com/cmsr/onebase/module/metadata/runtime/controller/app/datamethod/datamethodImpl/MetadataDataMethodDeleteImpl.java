@@ -1,7 +1,6 @@
 package com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.datamethodImpl;
 
 import cn.hutool.core.util.ObjectUtil;
-import com.cmsr.onebase.framework.common.util.object.ObjectUtils;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.flow.api.FlowProcessExecApiImpl;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerReqDTO;
@@ -23,7 +22,6 @@ import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.data.transaction.TransactionState;
 import org.anyline.entity.DataRow;
 import org.anyline.entity.DataSet;
-import org.anyline.entity.Order;
 import org.anyline.service.AnylineService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -325,21 +323,20 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
 
     /**
      * 根据被删除的数据实体Id查询对应的关联关系
-     * @param entityId type
-     * @return
+     *
+     * @param entityId 实体ID
+     * @param type     类型：SOURCE-被删除表是源表，TARGET-被删除表是目标表
+     * @return 关联关系列表
      */
-    private List<MetadataEntityRelationshipDO> getRelationShipByEntityId(Long entityId, String type){
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        if(type.equals("SOURCE")){
-            //被删除表是源表
-            configStore.and(MetadataEntityRelationshipDO.SOURCE_ENTITY_ID, entityId);
-        }else if(type.equals("TARGET")){
-            //被删除表是目标表
-            configStore.and(MetadataEntityRelationshipDO.TARGET_ENTITY_ID, entityId);
+    private List<MetadataEntityRelationshipDO> getRelationShipByEntityId(Long entityId, String type) {
+        if ("SOURCE".equals(type)) {
+            // 被删除表是源表
+            return entityRelationshipRepository.findBySourceEntityId(entityId);
+        } else if ("TARGET".equals(type)) {
+            // 被删除表是目标表
+            return entityRelationshipRepository.findByTargetEntityId(entityId);
         }
-        configStore.order("create_time", Order.TYPE.DESC);
-        List<MetadataEntityRelationshipDO> relationships = entityRelationshipRepository.findAllByConfig(configStore);
-        return relationships;
+        return java.util.Collections.emptyList();
     }
 
     /**

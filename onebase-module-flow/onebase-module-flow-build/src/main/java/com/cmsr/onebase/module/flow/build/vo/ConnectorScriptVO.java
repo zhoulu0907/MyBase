@@ -10,10 +10,10 @@ import java.time.LocalDateTime;
 public class ConnectorScriptVO {
 
     @Schema(description = "脚本ID")
-    private Long scriptId;
+    private Long id;
 
-    @Schema(description = "连接器ID")
-    private Long connectorId;
+    @Schema(description = "连接器UUID")
+    private String connectorUuid;
 
     @Schema(description = "脚本名称")
     private String scriptName;
@@ -32,6 +32,9 @@ public class ConnectorScriptVO {
 
     @Schema(description = "输出参数")
     private String outputParameter;
+
+    @Schema(description = "应用ID")
+    private Long applicationId;
 
     private LocalDateTime createTime;
 

@@ -8,7 +8,7 @@ import com.cmsr.onebase.module.flow.core.vo.PageConnectorScriptReqVO;
 
 public interface FlowConnectorScriptService {
 
-    PageResult<ConnectorScriptVO> getConnectorScriptPage(PageConnectorScriptReqVO pageReqVO);
+    PageResult<ConnectorScriptVO> pageConnectorScripts(PageConnectorScriptReqVO pageReqVO);
 
     ConnectorScriptVO getConnectorScript(Long scriptId);
 

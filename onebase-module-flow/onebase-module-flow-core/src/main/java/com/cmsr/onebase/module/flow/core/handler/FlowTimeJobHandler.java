@@ -60,6 +60,10 @@ public class FlowTimeJobHandler {
     @Autowired
     private RedissonClient redissonClient;
 
+    @Setter
+    @Autowired
+    private FlowGraphBuilder flowGraphBuilder;
+
     public void initAllJob() {
         List<FlowProcessDO> flowProcessDOS = TenantManager.withoutTenantCondition(() -> flowProcessRepository.findAllByEnableStatus(FlowEnableStatusEnum.ENABLE.getStatus()));
         for (FlowProcessDO flowProcessDO : flowProcessDOS) {
@@ -114,7 +118,7 @@ public class FlowTimeJobHandler {
                 && FlowJobStatusEnum.isDeployed(flowProcessTimeDO.getJobStatus())) {
             return;
         }
-        JsonGraph jsonGraph = FlowGraphBuilder.build(flowProcessDO.getProcessDefinition());
+        JsonGraph jsonGraph = flowGraphBuilder.build(flowProcessDO.getProcessDefinition());
         StartTimeNodeData startTimeNodeData = (StartTimeNodeData) jsonGraph.getStartNode().getData();
         JobCreateRequest jobCreateRequest = consumerSettingParams(startTimeNodeData);
         RemoteCallRequest remoteCallRequest = new RemoteCallRequest();
@@ -154,7 +158,7 @@ public class FlowTimeJobHandler {
                 && FlowJobStatusEnum.isDeployed(flowProcessDateFieldDO.getJobStatus())) {
             return;
         }
-        JsonGraph jsonGraph = FlowGraphBuilder.build(flowProcessDO.getProcessDefinition());
+        JsonGraph jsonGraph = flowGraphBuilder.build(flowProcessDO.getProcessDefinition());
         StartDateFieldNodeData startDateFieldNodeData = (StartDateFieldNodeData) jsonGraph.getStartNode().getData();
         JobCreateRequest jobCreateRequest = consumerSettingParams(startDateFieldNodeData);
         RemoteCallRequest remoteCallRequest = new RemoteCallRequest();
