@@ -35,7 +35,7 @@ import org.dromara.warm.flow.core.enums.PublishStatus;
 import org.dromara.warm.flow.core.service.DefService;
 import org.dromara.warm.flow.core.service.TaskService;
 import org.dromara.warm.flow.core.service.UserService;
-import org.dromara.warm.flow.core.service.impl.BpmConstants;
+import com.cmsr.onebase.module.bpm.core.enums.BpmConstants;
 import org.dromara.warm.flow.core.utils.StreamUtils;
 import org.springframework.stereotype.Service;
 
