@@ -9,13 +9,14 @@ const MenuItem = Menu.Item;
 const SubMenu = Menu.SubMenu;
 
 interface FunctionListProps {
+  functionLoading: boolean;
   functions: FunctionItem[]; //函数项数组，包含所有可展示的函数
   searchValue: string; // 搜索框的值，用于过滤函数列表
   onSearchChange: (value: string) => void; // 搜索框值变化回调，用于更新搜索值
   onChooseFunction: (func: FunctionItem) => void; // 选择函数回调，用于将选中的函数传递给父组件
 }
 
-export function FunctionList({ functions, searchValue, onSearchChange, onChooseFunction }: FunctionListProps) {
+export function FunctionList({ functions, functionLoading, searchValue, onSearchChange, onChooseFunction }: FunctionListProps) {
   const functionCategoryList = ['常用函数'];
   //控制函数列表是否展开/折叠
   const [isExpanded, setIsExpanded] = useState(true);
@@ -104,7 +105,7 @@ export function FunctionList({ functions, searchValue, onSearchChange, onChooseF
       </div>
       {isExpanded && (
         <div className={styles.listSection}>
-          {!functions.length ? (
+          {functionLoading ? (
             <div className={styles.loadingFunction}>
               <Spin size={18} tip="加载函数列表..."></Spin>
             </div>

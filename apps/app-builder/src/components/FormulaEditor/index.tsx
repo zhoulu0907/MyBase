@@ -33,6 +33,7 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
   const [formula, setFormula] = useState(initialFormula); //公式的值
   const [variableSearch, setVariableSearch] = useState('');
   const [functionSearch, setFunctionSearch] = useState('');
+  const [functionLoading, setFunctionLoading] = useState(false);
   const [funcList, setFuncList] = useState<FunctionItem[]>([]); //公式编辑器中的函数列表展示
   const editorRef = useRef<{ insertAtPosition: (text: string, type: string, position?: number) => void } | null>(null);
   const [info, setInfo] = useState<info | null>(null);
@@ -130,9 +131,11 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
    * 初始化函数列表
    */
   const getFuncList = async () => {
+    setFunctionLoading(true);
     const res = await getFormulaFunctionSimpleList();
     if (res) {
       setFuncList(res);
+      setFunctionLoading(false);
     }
     // setFuncList(mockFunctions)
   };
@@ -431,6 +434,7 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
             <Col xs={20} sm={16} md={8} lg={8} xl={8} xxl={8}>
               <FunctionList
                 functions={functionSearch ? filteredFunctions : funcList}
+                functionLoading = {functionLoading}
                 searchValue={functionSearch}
                 onSearchChange={setFunctionSearch}
                 onChooseFunction={handleChooseFunction}
