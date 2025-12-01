@@ -37,7 +37,12 @@ public interface LogRecordConstants {
     String LOGIN_USER_TENANT_SUCCESS = "空间用户【{{#user.nickname}}】登录";
     String LOGIN_USER_CORP_SUB_TYPE =  "企业用户登录";
     String LOGIN_USER_CORP_SUCCESS = "企业用户【{{#user.nickname}}】登录";
-
+    String LOGIN_USER_PLATFORM_SUB_TYPE = "平台用户登录";
+    String LOGIN_USER_PLATFORM_SUCCESS = "平台用户【{{#user.nickname}}】登录";
+    String LOGIN_USER_APP_SUB_TYPE = "应用登录-内部模式";
+    String LOGIN_USER_APP_SUCCESS = "应用登录-内部模式用户【{{#user.nickname}}】登录";
+    String LOGIN_USER_SAAS_SUB_TYPE = "应用-Saas模式-登录";
+    String LOGIN_USER_SAAS_SUCCESS = "应用-Saas模式用户【{{#user.nickname}}】登录";
     // ======================= LOGOUT 登出 =======================
 
     String LOGOUT_USER_SUB_TYPE = "用户登出";
