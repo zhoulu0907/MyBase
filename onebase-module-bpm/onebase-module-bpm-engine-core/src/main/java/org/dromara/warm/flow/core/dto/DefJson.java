@@ -74,6 +74,11 @@ public class DefJson {
     private String version;
 
     /**
+     * 流程版本备注
+     */
+    private String versionAlias;
+
+    /**
      * 是否发布（0未开启 1开启）
      */
     private Integer isPublish;
@@ -156,6 +161,7 @@ public class DefJson {
                 .setFlowName(definition.getFlowName())
                 .setModelValue(definition.getModelValue())
                 .setVersion(definition.getVersion())
+                .setVersionAlias(definition.getVersionAlias())
                 .setIsPublish(definition.getIsPublish())
                 .setCategory(definition.getCategory())
                 .setFormCustom(definition.getFormCustom())
@@ -219,6 +225,7 @@ public class DefJson {
                 .setFlowName(defJson.getFlowName())
                 .setModelValue(defJson.getModelValue())
                 .setVersion(defJson.getVersion())
+                .setVersionAlias(defJson.getVersionAlias())
                 .setCategory(defJson.getCategory())
                 .setFormCustom(defJson.getFormCustom())
                 .setFormPath(defJson.getFormPath())

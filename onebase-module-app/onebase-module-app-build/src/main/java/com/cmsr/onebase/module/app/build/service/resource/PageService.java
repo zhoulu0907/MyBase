@@ -16,12 +16,10 @@ public interface PageService {
 
     Boolean updatePageName(UpdatePageNameDTO updatePageNameVO);
 
-    Boolean deletePage(Long pageId);
-
     List<PageDTO> getFormPageListByAppId(Long appId);
 
-    String getMetadataByPageId(Long pageId);
+    String getMetadataByPageUuid(String pageUuid);
 
-    List<PageDTO> listPageView(Long pageSetId);
+    List<PageDTO> listPageView(String pageSetUuid);
 
 }

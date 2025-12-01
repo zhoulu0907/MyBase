@@ -12,7 +12,7 @@ import lombok.EqualsAndHashCode;
 public class AppResourcePagesetDO extends BaseBizEntity {
 
     @Column("pageset_uuid")
-    private String pagesetUuid;
+    private String pageSetUuid;
 
     @Column("menu_uuid")
     private String menuUuid;

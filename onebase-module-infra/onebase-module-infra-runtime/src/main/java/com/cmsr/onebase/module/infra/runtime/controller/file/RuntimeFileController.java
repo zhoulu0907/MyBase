@@ -2,8 +2,11 @@ package com.cmsr.onebase.module.infra.runtime.controller.file;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import cn.hutool.core.io.IoUtil;
+import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.infra.dal.dataobject.file.FileDO;
 import com.cmsr.onebase.module.infra.dal.vo.app.AppFileUploadReqVO;
 import com.cmsr.onebase.module.infra.dal.vo.file.file.FileCreateReqVO;
+import com.cmsr.onebase.module.infra.dal.vo.file.file.FileListRespVO;
 import com.cmsr.onebase.module.infra.dal.vo.file.file.FilePresignedUrlRespVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -11,12 +14,16 @@ import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.annotation.security.PermitAll;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import com.cmsr.onebase.module.infra.service.file.FileService;
+
+import java.util.Collection;
+import java.util.List;
 
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
@@ -59,4 +66,20 @@ public class RuntimeFileController {
         return success(fileService.createFile(createReqVO));
     }
 
+    @GetMapping("/list-by-ids")
+    @Operation(summary = "根据文件 ID 列表获取文件详情列表")
+    @PermitAll
+    @Parameter(name = "ids", description = "文件 ID 列表", required = true)
+    public CommonResult<List<FileListRespVO>> getFileListByIds(@RequestParam("ids") Collection<Long> ids) {
+        List<FileDO> fileList = fileService.getFileListByIds(ids);
+        return success(BeanUtils.toBean(fileList, FileListRespVO.class));
+    }
+
+    @GetMapping("/download/{id}")
+    @Operation(summary = "获取文件内容")
+    @PermitAll
+    @Parameter(name = "id", description = "文件编号", required = true)
+    public void getFileContent(@PathVariable("id") Long id, HttpServletResponse response) throws Exception {
+        fileService.getFileContent(id, response);
+    }
 }

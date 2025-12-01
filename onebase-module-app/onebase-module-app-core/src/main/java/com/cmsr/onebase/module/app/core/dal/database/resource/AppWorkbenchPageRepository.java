@@ -1,40 +1,40 @@
 package com.cmsr.onebase.module.app.core.dal.database.resource;
 
+import com.cmsr.onebase.framework.orm.repo.BaseBizRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourceWorkbenchPageDO;
 import com.cmsr.onebase.module.app.core.dal.mapper.AppResourceWorkbenchPageMapper;
 import com.mybatisflex.core.query.QueryWrapper;
-import com.mybatisflex.spring.service.impl.ServiceImpl;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppResourceWorkbenchPageTableDef.APP_RESOURCE_WORKBENCH_PAGE;
+
 @Repository
-public class AppWorkbenchPageRepository extends ServiceImpl<AppResourceWorkbenchPageMapper, AppResourceWorkbenchPageDO> {
+public class AppWorkbenchPageRepository extends BaseBizRepository<AppResourceWorkbenchPageMapper, AppResourceWorkbenchPageDO> {
 
     public void updatePageName(Long pageId, String pageName) {
-        AppResourceWorkbenchPageDO pageDO = new AppResourceWorkbenchPageDO();
-        pageDO.setPageName(pageName);
-        pageDO.setId(pageId);
-        updateById(pageDO, true);
-    }
-
-    public void deletePageByIds(List<Long> pageIds) {
-        this.removeByIds(pageIds);
-    }
-
-    public List<AppResourceWorkbenchPageDO> findByPageIds(List<Long> pageIds) {
-        return this.listByIds(pageIds);
+        this.updateChain()
+                .set(APP_RESOURCE_WORKBENCH_PAGE.PAGE_NAME, pageName)
+                .where(APP_RESOURCE_WORKBENCH_PAGE.ID.eq(pageId))
+                .update();
     }
 
     /**
      * 根据页面集ID查询工作台页面
      *
-     * @param pageSetId 页面集ID
+     * @param pageSetUuid 页面集ID
      * @return 工作台页面列表
      */
-    public List<AppResourceWorkbenchPageDO> findByPageSetId(Long pageSetId) {
-        QueryWrapper queryWrapper = this.query().eq(AppResourceWorkbenchPageDO::getPageSetId, pageSetId);
+    public List<AppResourceWorkbenchPageDO> findByPageSetUuid(String pageSetUuid) {
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_RESOURCE_WORKBENCH_PAGE.PAGESET_UUID.eq(pageSetUuid));
         return list(queryWrapper);
     }
 
+    public AppResourceWorkbenchPageDO getByUuid(String pageUuid) {
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_RESOURCE_WORKBENCH_PAGE.PAGE_UUID.eq(pageUuid));
+        return getOne(queryWrapper);
+    }
 }

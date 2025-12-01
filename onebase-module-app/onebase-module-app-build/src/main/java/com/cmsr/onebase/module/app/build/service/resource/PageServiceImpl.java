@@ -12,7 +12,7 @@ import com.cmsr.onebase.module.app.core.dto.appresource.*;
 import com.cmsr.onebase.module.app.core.enums.appresource.PageEnum;
 import com.cmsr.onebase.module.app.core.enums.appresource.ViewEnmu;
 import com.cmsr.onebase.module.app.core.provider.resource.PageServiceProvider;
-import jakarta.annotation.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,19 +22,19 @@ import java.util.UUID;
 @Service
 public class PageServiceImpl implements PageService {
 
-    @Resource
+    @Autowired
     private AppPageRepository pageRepository;
 
-    @Resource
+    @Autowired
     private AppPageSetPageRepository pageSetPageRepository;
 
-    @Resource
+    @Autowired
     private AppPageSetRepository pageSetRepository;
 
-    @Resource(name = "appMenuRepository")
+    @Autowired
     private AppMenuRepository menuDataRepository;
 
-    @Resource
+    @Autowired
     private PageServiceProvider pageServiceProvider;
 
     @Override
@@ -56,7 +56,7 @@ public class PageServiceImpl implements PageService {
         String formRouterPath = formPageCode + "/form";
         String formPageType = PageEnum.FORM.getValue();
         Boolean formOpenViewMode = false;
-        AppResourcePageDO formPageDO = PageUtils.initPage(createPageViewDTO.getPageSetId(), formPageName, formRouterPath, formPageType, formOpenViewMode);
+        AppResourcePageDO formPageDO = PageUtils.initPage(createPageViewDTO.getPageSetUuid(), formPageName, formRouterPath, formPageType, formOpenViewMode);
 
         String viewType = createPageViewDTO.getViewType();
 
@@ -74,9 +74,9 @@ public class PageServiceImpl implements PageService {
         pageRepository.save(formPageDO);
 
         AppResourcePagesetPageDO formPageSetPageDO = new AppResourcePagesetPageDO();
-        formPageSetPageDO.setPageSetId(createPageViewDTO.getPageSetId());
+        formPageSetPageDO.setPageSetUuid(createPageViewDTO.getPageSetUuid());
         formPageSetPageDO.setPageType(formPageType);
-        formPageSetPageDO.setPageId(formPageDO.getId());
+        formPageSetPageDO.setPageUuid(formPageDO.getPageUuid());
         formPageSetPageDO.setIsDefault(0);
         formPageSetPageDO.setDefaultSeq(1);
 
@@ -92,28 +92,18 @@ public class PageServiceImpl implements PageService {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
-    public Boolean deletePage(Long pageId) {
-        // 删除页面集关联的页面
-        pageSetPageRepository.deleteByPageId(pageId);
-        // 删除页面
-        pageRepository.removeById(pageId);
-        return true;
-    }
-
-    @Override
     public List<PageDTO> getFormPageListByAppId(Long appId) {
         return pageServiceProvider.getFormPageListByAppId(appId);
     }
 
     @Override
-    public String getMetadataByPageId(Long pageId) {
-        return pageServiceProvider.getMetadataByPageId(pageId);
+    public String getMetadataByPageUuid(String pageUuid) {
+        return pageServiceProvider.getMetadataByPageUuid(pageUuid);
     }
 
     @Override
-    public List<PageDTO> listPageView(Long pageSetId) {
-        return pageServiceProvider.listPageView(pageSetId);
+    public List<PageDTO> listPageView(String pageSetUuid) {
+        return pageServiceProvider.listPageView(pageSetUuid);
     }
 
 }

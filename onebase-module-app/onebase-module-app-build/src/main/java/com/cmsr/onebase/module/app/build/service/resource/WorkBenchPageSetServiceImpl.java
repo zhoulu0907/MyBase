@@ -2,21 +2,20 @@ package com.cmsr.onebase.module.app.build.service.resource;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.framework.common.util.string.UuidUtils;
 import com.cmsr.onebase.module.app.build.util.PageUtils;
-import com.cmsr.onebase.module.app.core.provider.resource.WorkBenchPageSetServiceProvider;
-import com.cmsr.onebase.module.app.core.vo.resource.LoadPageSetRespVO;
-import com.cmsr.onebase.module.app.core.vo.resource.SavePageSetReqVO;
 import com.cmsr.onebase.module.app.core.dal.database.app.AppApplicationRepository;
 import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.*;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetPageDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourceWorkbenchPageDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourceWorkbenchComponentDO;
-import com.cmsr.onebase.module.app.core.dto.appresource.ComponentDTO;
-import com.cmsr.onebase.module.app.core.dto.appresource.PageDTO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourceWorkbenchPageDO;
 import com.cmsr.onebase.module.app.core.enums.appresource.AppResourceErrorCodeConstants;
 import com.cmsr.onebase.module.app.core.enums.appresource.PageEnum;
+import com.cmsr.onebase.module.app.core.provider.resource.WorkBenchPageSetServiceProvider;
+import com.cmsr.onebase.module.app.core.vo.resource.LoadPageSetRespVO;
+import com.cmsr.onebase.module.app.core.vo.resource.SavePageSetReqVO;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -73,9 +72,9 @@ public class WorkBenchPageSetServiceImpl implements WorkBenchPageSetService {
 
         //2. 创建页面集和页面的关联关系
         AppResourcePagesetPageDO pageSetPageDO = new AppResourcePagesetPageDO();
-        pageSetPageDO.setPageSetId(pageSetDO.getId());
+        pageSetPageDO.setPageSetUuid(pageSetDO.getPageSetUuid());
         pageSetPageDO.setPageType(PageEnum.WORKBENCH.getValue());
-        pageSetPageDO.setPageId(workBenchPageDO.getId());
+        pageSetPageDO.setPageUuid(workBenchPageDO.getPageUuid());
         pageSetPageDO.setIsDefault(1);
         pageSetPageDO.setDefaultSeq(1);
         pageSetPageDataRepository.save(pageSetPageDO);
@@ -89,7 +88,8 @@ public class WorkBenchPageSetServiceImpl implements WorkBenchPageSetService {
     private AppResourceWorkbenchPageDO buildEmptyWorkbenchPage(AppResourcePagesetDO pageSetDO) {
         String pageName = StringUtils.isBlank(pageSetDO.getDisplayName()) ? pageSetDO.getPageSetName() : pageSetDO.getDisplayName();
         AppResourceWorkbenchPageDO workBenchPageDO = new AppResourceWorkbenchPageDO();
-        workBenchPageDO.setPageSetId(pageSetDO.getId());
+        workBenchPageDO.setPageUuid(UuidUtils.getUuid());
+        workBenchPageDO.setPageSetUuid(pageSetDO.getPageSetUuid());
         workBenchPageDO.setPageName(pageName);
         workBenchPageDO.setTitle(pageName);
         workBenchPageDO.setPageType(PageEnum.WORKBENCH.getValue());
@@ -107,7 +107,6 @@ public class WorkBenchPageSetServiceImpl implements WorkBenchPageSetService {
     }
 
     public void saveWorkbenchPage(SavePageSetReqVO savePageSetReqVO, AppResourcePagesetDO pageSetDO) {
-
         savePageSetReqVO.getPages().forEach(page -> {
             if (Boolean.TRUE.equals(page.getCreated())) {
                 // 插入新的视图
@@ -117,7 +116,7 @@ public class WorkBenchPageSetServiceImpl implements WorkBenchPageSetService {
                 String pageType = PageEnum.FORM.getValue();
                 Boolean openViewMode = false;
 
-                AppResourceWorkbenchPageDO pageDO = PageUtils.initWorkbenchPage(savePageSetReqVO.getId(), pageName, routerPath, pageType,
+                AppResourceWorkbenchPageDO pageDO = PageUtils.initWorkbenchPage(pageSetDO.getPageSetUuid(), pageName, routerPath, pageType,
                         openViewMode);
                 pageDO.setId(page.getId());
 
@@ -125,9 +124,9 @@ public class WorkBenchPageSetServiceImpl implements WorkBenchPageSetService {
 
                 // 插入页面集合页面关系
                 AppResourcePagesetPageDO pageSetPageDO = new AppResourcePagesetPageDO();
-                pageSetPageDO.setPageSetId(savePageSetReqVO.getId());
+                pageSetPageDO.setPageSetUuid(pageSetDO.getPageSetUuid());
                 pageSetPageDO.setPageType(pageType);
-                pageSetPageDO.setPageId(pageDO.getId());
+                pageSetPageDO.setPageUuid(pageDO.getPageUuid());
                 pageSetPageDO.setIsDefault(0);
                 pageSetPageDO.setDefaultSeq(1);
                 pageSetPageDataRepository.save(pageSetPageDO);
@@ -151,13 +150,13 @@ public class WorkBenchPageSetServiceImpl implements WorkBenchPageSetService {
             workbenchPageRepository.updateById(finalPageDO);
 
             // 删除已有的component
-            componentDataRepository.deleteComponentByPageId(finalPageDO.getId());
+            componentDataRepository.deleteComponentByPageUuid(finalPageDO.getPageUuid());
 
             // 插入新的component
             List<AppResourceWorkbenchComponentDO> componentDOs = new ArrayList<>();
             for (int idx = 0; idx < page.getComponents().size(); idx++) {
                 AppResourceWorkbenchComponentDO componentDO = BeanUtils.toBean(page.getComponents().get(idx), AppResourceWorkbenchComponentDO.class);
-                componentDO.setPageId(finalPageDO.getId());
+                componentDO.setPageUuid(finalPageDO.getPageUuid());
                 componentDO.setComponentIndex(idx);
                 componentDOs.add(componentDO);
             }

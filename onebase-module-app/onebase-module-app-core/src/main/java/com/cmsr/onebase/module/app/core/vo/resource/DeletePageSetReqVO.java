@@ -9,5 +9,5 @@ public class DeletePageSetReqVO {
 
     @Schema(description = "菜单id", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
     @NotNull(message = "菜单id不能为空")
-    private Long menuId;
+    private String menuUuid;
 }

@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Setter
 @Service
@@ -49,33 +48,33 @@ public class PageServiceProvider {
 
     public List<PageDTO> getFormPageListByAppId(Long appId) {
         List<AppMenuDO> menuDOList = appMenuRepository.findByApplicationId(appId);
-        List<Long> menuIdList = menuDOList.stream().map(AppMenuDO::getId).toList();
-        if (CollectionUtils.isEmpty(menuIdList)) {
+        List<String> menuUuidList = menuDOList.stream().map(AppMenuDO::getMenuUuid).toList();
+        if (CollectionUtils.isEmpty(menuUuidList)) {
             return Collections.emptyList();
         }
-        List<AppResourcePagesetDO> pageSetDoList = pageSetRepository.findByMenuIds(menuIdList);
+        List<AppResourcePagesetDO> pageSetDoList = pageSetRepository.findByMenuUuids(menuUuidList);
         if (CollectionUtils.isEmpty(pageSetDoList)) {
             return Collections.emptyList();
         }
-        List<Long> pageSetIdList = pageSetDoList.stream()
-                .map(AppResourcePagesetDO::getId)
-                .collect(Collectors.toList());
-        List<AppResourcePageDO> pageDOList = pageRepository.findAllFormPageByPageSetIds(pageSetIdList);
+        List<String> pageSetUuidList = pageSetDoList.stream()
+                .map(AppResourcePagesetDO::getPageSetUuid)
+                .toList();
+        List<AppResourcePageDO> pageDOList = pageRepository.findAllFormPageByPageSetUuids(pageSetUuidList);
         List<PageDTO> pageDTOList = BeanUtils.toBean(pageDOList, PageDTO.class);
         return pageDTOList;
 
     }
 
-    public String getMetadataByPageId(Long pageId) {
-        AppResourcePagesetPageDO pageSetPageDO = pageSetPageRepository.findByPageId(pageId);
-        AppResourcePagesetDO pageSetDO = pageSetRepository.getById(pageSetPageDO.getPageSetId());
+    public String getMetadataByPageUuid(String pageUuid) {
+        AppResourcePagesetPageDO pageSetPageDO = pageSetPageRepository.findByPageUuid(pageUuid);
+        AppResourcePagesetDO pageSetDO = pageSetRepository.getByUuid(pageSetPageDO.getPageSetUuid());
 
         return pageSetDO.getMainMetadata();
     }
 
 
-    public List<PageDTO> listPageView(Long pageSetId) {
-        List<AppResourcePageDO> pageDOList = pageRepository.findAllFormPageByPageSetId(pageSetId);
+    public List<PageDTO> listPageView(String pageSetUuid) {
+        List<AppResourcePageDO> pageDOList = pageRepository.findAllFormPageByPageSetUuid(pageSetUuid);
         List<PageDTO> pageDTOList = BeanUtils.toBean(pageDOList, PageDTO.class);
         return pageDTOList;
     }

@@ -7,7 +7,7 @@ import com.cmsr.onebase.module.app.core.vo.resource.*;
 
 public interface PageSetService {
 
-    Long getPageSetId(Long menuId);
+    String getPageSetIdByMenuUuid(String menuUuid);
 
     Long getAppId(Long pageSetId);
 
@@ -15,7 +15,7 @@ public interface PageSetService {
 
     String createPageSet(CreatePageSetDTO createPageSetDTO);
 
-    void deletePageSet(Long menuId);
+    void deletePageSet(String menuUuid);
 
     String copyPageSet(CopyPageSetDTO copyPageSetDTO);
 

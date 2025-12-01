@@ -28,7 +28,7 @@ public class PageSetPageServiceProvider {
 
     public List<PageSetPageRespDTO> getPageSetPageList(Long pageSetId) {
         AppResourcePagesetDO pageSetDO = pageSetDataRepository.getById(pageSetId);
-        List<AppResourcePagesetPageDO> pageSetPageDOList = pageSetPageDataRepository.findByPageSetId(pageSetDO.getId());
+        List<AppResourcePagesetPageDO> pageSetPageDOList = pageSetPageDataRepository.findByPageSetUuid(pageSetDO.getPageSetUuid());
         return BeanUtils.toBean(pageSetPageDOList, PageSetPageRespDTO.class);
     }
 }

@@ -23,11 +23,10 @@ public class PageSetController {
 
     @GetMapping("/id")
     @Operation(summary = "获取页面集id")
-    public CommonResult<Long> getPageSetCode(@RequestParam Long menuId) {
+    public CommonResult<String> getPageSetCode(@RequestParam String menuUuid) {
+        String pageSetUuid = pageSetService.getPageSetIdByMenuUuid(menuUuid);
 
-        Long pageSetId = pageSetService.getPageSetId(menuId);
-
-        return CommonResult.success(pageSetId);
+        return CommonResult.success(pageSetUuid);
     }
 
     @GetMapping("/app_id")
@@ -64,7 +63,7 @@ public class PageSetController {
     @PostMapping("/delete")
     @Operation(summary = "删除页面集")
     public CommonResult<Boolean> deletePageSet(@RequestBody DeletePageSetReqVO deletePageSetReqVO) {
-        pageSetService.deletePageSet(deletePageSetReqVO.getMenuId());
+        pageSetService.deletePageSet(deletePageSetReqVO.getMenuUuid());
         return CommonResult.success(true);
     }
 

@@ -6,6 +6,7 @@ import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourceComponentDO;
 import com.cmsr.onebase.module.app.core.dto.appresource.ComponentDTO;
 import jakarta.annotation.Resource;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,11 +15,11 @@ import java.util.List;
 @Service
 public class ComponentServiceProvider {
 
-    @Resource
+    @Autowired
     private AppComponentRepository appComponentDataRepository;
 
-    public List<ComponentDTO> listComponent(Long pageId) {
-        List<AppResourceComponentDO> componentDOS = appComponentDataRepository.findByPageId(pageId);
+    public List<ComponentDTO> listComponent(String pageUuid) {
+        List<AppResourceComponentDO> componentDOS = appComponentDataRepository.findByPageUuid(pageUuid);
         return BeanUtils.toBean(componentDOS, ComponentDTO.class);
     }
 

@@ -118,6 +118,14 @@ public interface Definition extends RootEntity {
     Definition setVersion(String version);
 
     /**
+     * 获取流程定义的版本号
+     * @return 版本号
+     */
+    String getVersionAlias();
+
+    Definition setVersionAlias(String versionAlias);
+
+    /**
      * 获取是否发布状态 (0未发布 1已发布 9已失效)
      * @return 发布状态
      */
