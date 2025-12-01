@@ -23,14 +23,8 @@ import {
   DeleteConfirmModal
 } from '../components/Modals';
 import type { DatasourceRecord } from './EntityPageContainer';
+import { RELATIONSHIP_TYPE_LABEL_MAP, type RelationshipType } from '@/pages/CreateApp/pages/DataFactory/utils/types';
 import styles from '../index.module.less';
-
-const relationshipTypeMap: Record<string, string> = {
-  ONE_TO_ONE: '1:1',
-  ONE_TO_MANY: '1:N',
-  MANY_TO_ONE: 'N:1',
-  MANY_TO_MANY: 'M:N'
-};
 
 export const EntityERContainer: React.FC<{
   refreshEntityList: boolean;
@@ -78,7 +72,7 @@ export const EntityERContainer: React.FC<{
               const relationItem = item as Record<string, unknown>;
               return {
                 ...relationItem,
-                label: relationshipTypeMap[(relationItem?.relationshipType as string) || '']
+                label: RELATIONSHIP_TYPE_LABEL_MAP[(relationItem?.relationshipType as RelationshipType) || '']
               };
             }) || []
         });

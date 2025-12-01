@@ -3,6 +3,7 @@ import { useResourceStore } from '@/store/store_resource';
 import { Form, Message, Modal, Select, Grid } from '@arco-design/web-react';
 import { createRelation, getEntityFields, getEntityList } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
+import { RELATIONSHIP_OPTIONS } from '@/pages/CreateApp/pages/DataFactory/utils/types';
 import styles from '../modal.module.less';
 
 interface RelationFormValues {
@@ -22,14 +23,6 @@ interface FieldOption {
   label: string;
   value: string;
 }
-
-// 关联关系类型选项
-const relationTypes = [
-  { label: '一对一', value: 'ONE_TO_ONE' },
-  { label: '一对多', value: 'ONE_TO_MANY' },
-  { label: '多对一', value: 'MANY_TO_ONE' },
-  { label: '多对多', value: 'MANY_TO_MANY' }
-];
 
 const CreateRelationModal: React.FC<{
   visible: boolean;
@@ -161,7 +154,7 @@ const CreateRelationModal: React.FC<{
             required
             rules={[{ required: true, message: '请选择关联关系' }]}
           >
-            <Select placeholder="请选择关联关系" options={relationTypes} />
+            <Select placeholder="请选择关联关系" options={RELATIONSHIP_OPTIONS} />
           </Form.Item>
 
           {/* 关联表 */}
