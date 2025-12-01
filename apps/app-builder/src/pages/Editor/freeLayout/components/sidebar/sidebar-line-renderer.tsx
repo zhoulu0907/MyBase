@@ -129,12 +129,12 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
     {
       label: '表单字段1',
       value: 'field1',
-      type: FieldType.NUMBER
+      type: FieldType.AGGREGATE
     },
     {
       label: '表单字段2',
       value: 'field2',
-      type: FieldType.TEXT
+      type: FieldType.ENCRYPTED
     }
   ];
 

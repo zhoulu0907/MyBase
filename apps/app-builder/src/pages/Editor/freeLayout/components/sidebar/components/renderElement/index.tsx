@@ -5,7 +5,7 @@ import { IconLaunch } from '@arco-design/web-react/icon';
 import { FormulaEditor } from '@/components/FormulaEditor';
 import type { ConditionRule } from '../../constants';
 import styles from '../../siderbar-line.module.less';
-import { FieldType } from '../../constants';
+import { FieldType, approvalResultOptions } from '../../constants';
 import { getUserPage, type PageParam } from '@onebase/platform-center';
 import {
   InputKeyType,
@@ -104,13 +104,17 @@ export const RenderElement: React.FC<RenderElementProps> = ({
 
   // 用户选择数据
   useEffect(() => {
-    if (elementTypeInfo.type === ElementType.USER_SELECT) {
+    if (elementTypeInfo.type === ElementType.USER_SELECT || elementTypeInfo.type === ElementType.USER_SELECT_MULTIPLE) {
       getUserData(elementTypeInfo);
     }
   }, [elementTypeInfo.type]);
 
   // 如果类型为静态值
   if (item.operatorType === OperatorType.VALUE || !item.operatorType) {
+    // mock
+    if (!elementTypeInfo.options.length) {
+      elementTypeInfo.options = approvalResultOptions;
+    }
     switch (elementTypeInfo.type) {
       case ElementType.INPUT:
         return (
@@ -148,6 +152,7 @@ export const RenderElement: React.FC<RenderElementProps> = ({
         );
       case ElementType.SELECT:
       case ElementType.USER_SELECT:
+      case ElementType.DEPARTMENT_SELECT:
         return (
           <Select
             className={styles.ruleItemSelect}
@@ -169,6 +174,8 @@ export const RenderElement: React.FC<RenderElementProps> = ({
           </Select>
         );
       case ElementType.SELECT_MULTIPLE:
+      case ElementType.USER_SELECT_MULTIPLE:
+      case ElementType.DEPARTMENT_SELECT_MULTIPLE:
         return (
           <Select
             className={styles.ruleItemSelect}

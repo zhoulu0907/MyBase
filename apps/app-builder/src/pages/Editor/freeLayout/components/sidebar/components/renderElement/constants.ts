@@ -14,16 +14,12 @@ export enum ElementType {
   DATE_RANGE = 'dateRange',
   SELECT = 'select',
   SELECT_MULTIPLE = 'selectMultiple',
-  QUERY_SELECT1_ONE = 'querySelect1One',
-  QUERY_SELECT1_MORE = 'querySelect1More',
-  QUERY_SELECT2_MORE = 'querySelect2More',
-  USER_EQUALS = 'userSelect',
-  USER_CONTAINS = 'userContainsSelect',
-  MULTI_USER_CONTAINS = 'multiUserContainSelect',
-  DEPARTMENT_EQUALS = 'departmentSelect',
-  DEPARTMENT_CONTAINS = 'departmentMoreSelect',
-  MULTI_DEPARTMENT_EQUALS = 'multiDepartmentMoreSelect',
-  MULTI_DATA_SELECTION_EQUALS = 'multiDataMoreSelect'
+  LIST_SELECT = 'listSelect',
+  LIST_SELECT_MULTIPLE = 'listSelectMultiple',
+  USER_SELECT = 'userSelect',
+  USER_SELECT_MULTIPLE = 'userSelectMultiple',
+  DEPARTMENT_SELECT = 'departmentSelect',
+  DEPARTMENT_SELECT_MULTIPLE = 'departmentSelectMultiple',
 }
 
 export enum DateOperator {
@@ -34,7 +30,7 @@ export enum DateOperator {
   DATE_EQUALS = 'DATE_EQUALS',
   DATE_LATER_THAN = 'DATE_LATER_THAN',
   DATE_EARLIER_THAN = 'DATE_EARLIER_THAN',
-  DATE_RANGE = 'DATE_RANGE',
+  DATE_RANGE = 'DATE_RANGE'
 }
 
 interface ComplexInfoItem {
@@ -65,10 +61,9 @@ type ComplexInfo = Record<
   | 'MULTI_NOT_CONTAINS_ALL'
   | 'MULTI_CONTAINS_ANY'
   | 'MULTI_NOT_CONTAINS_ANY'
-
-  | 'USER_EQUALS'
+  | 'USER_SELECT'
   | 'USER_NOT_EQUALS'
-  | 'USER_CONTAINS'
+  | 'USER_SELECT_MULTIPLE'
   | 'USER_NOT_CONTAINS'
   | 'USER_EXISTS_IN'
   | 'USER_NOT_EXISTS_IN'
@@ -78,9 +73,9 @@ type ComplexInfo = Record<
   | 'MULTI_USER_NOT_CONTAINS'
   | 'MULTI_USER_EXISTS_IN'
   | 'MULTI_USER_NOT_EXISTS_IN'
-  | 'DEPARTMENT_EQUALS'
+  | 'DEPARTMENT_SELECT'
   | 'DEPARTMENT_NOT_EQUALS'
-  | 'DEPARTMENT_CONTAINS'
+  | 'DEPARTMENT_SELECT_MULTIPLE'
   | 'DEPARTMENT_NOT_CONTAINS'
   | 'DEPARTMENT_EXISTS_IN'
   | 'DEPARTMENT_NOT_EXISTS_IN'
@@ -101,9 +96,7 @@ type ComplexInfo = Record<
   | 'MULTI_DATA_SELECTION_CONTAINS'
   | 'MULTI_DATA_SELECTION_NOT_CONTAINS'
   | 'MULTI_DATA_SELECTION_EXISTS_IN'
-  | 'MULTI_DATA_SELECTION_NOT_EXISTS_IN'
-  
-  ,
+  | 'MULTI_DATA_SELECTION_NOT_EXISTS_IN',
   ComplexInfoItem
 >;
 
@@ -172,242 +165,288 @@ export const VARIABLE_MAP: Partial<Record<FieldType, FieldType[]>> = {
 };
 
 export const ComplexInfo: ComplexInfo = {
+  // 日期时间_等于
   DATETIME_EQUALS: {
     type: ElementType.DATE,
     options: DateOperator.EQUALS
   },
+  // 日期时间_晚于
   DATETIME_LATER_THAN: {
     type: ElementType.DATE,
     options: DateOperator.LATER_THAN
   },
+  // 日期时间_范围
   DATETIME_RANGE: {
     type: ElementType.DATE_RANGE,
     options: DateOperator.LATER_RANGE
   },
+  // 日期时间_早于
   DATETIME_EARLIER_THAN: {
     type: ElementType.DATE,
     options: DateOperator.DATETIME_EARLIER_THAN
   },
-  DATA_SELECTION_EQUALS: {
-    type: ElementType.SELECT,
-    options: approvalResultOptions
-  },
-  DATA_SELECTION_NOT_EQUALS: {
-    type: ElementType.SELECT,
-    options: approvalResultOptions
-  },
-  DATA_SELECTION_CONTAINS: {
-    type: ElementType.SELECT_MULTIPLE,
-    options: approvalResultOptions
-  },
+  // 日期_等于
   DATE_EQUALS: {
     type: ElementType.DATE,
     options: DateOperator.DATE_EQUALS
   },
+  // 日期_晚于
   DATE_LATER_THAN: {
     type: ElementType.DATE,
     options: DateOperator.DATE_LATER_THAN
   },
+  // 日期_早于
   DATE_EARLIER_THAN: {
     type: ElementType.DATE,
     options: DateOperator.DATE_EARLIER_THAN
   },
+  // 日期_范围
   DATE_RANGE: {
-    type: ElementType.DATE,
+    type: ElementType.DATE_RANGE,
     options: DateOperator.DATE_RANGE
   },
-  SELECT_EQUALS: {
-    type: ElementType.QUERY_SELECT1_ONE,
+
+  // 数据单选_等于
+  DATA_SELECTION_EQUALS: {
+    type: ElementType.SELECT,
     options: []
   },
-  SELECT_NOT_EQUALS: {
-    type: ElementType.QUERY_SELECT1_ONE,
+  // 数据单选_不等于
+  DATA_SELECTION_NOT_EQUALS: {
+    type: ElementType.SELECT,
     options: []
   },
-  SELECT_CONTAINS: {
-    type: ElementType.QUERY_SELECT1_MORE,
+  // 数据单选_包含
+  DATA_SELECTION_CONTAINS: {
+    type: ElementType.SELECT_MULTIPLE,
     options: []
   },
-  SELECT_NOT_CONTAINS: {
-    type: ElementType.QUERY_SELECT1_MORE,
-    options: []
-  },
-  SELECT_EXISTS_IN: {
-    type: ElementType.QUERY_SELECT1_MORE,
-    options: []
-  },
-  SELECT_NOT_EXISTS_IN: {
-    type: ElementType.QUERY_SELECT1_MORE,
-    options: []
-  },
-  MULTI_SELECT_EQUALS: {
-    type: ElementType.QUERY_SELECT2_MORE,
-    options: []
-  },
-  MULTI_CONTAINS_ALL: {
-    type: ElementType.QUERY_SELECT2_MORE,
-    options: []
-  },
-  MULTI_NOT_CONTAINS_ALL: {
-    type: ElementType.QUERY_SELECT2_MORE,
-    options: []
-  },
-  MULTI_CONTAINS_ANY: {
-    type: ElementType.QUERY_SELECT2_MORE,
-    options: []
-  },
-  MULTI_NOT_CONTAINS_ANY: {
-    type: ElementType.QUERY_SELECT2_MORE,
-    options: []
-  },
-  // user 1
-  USER_EQUALS: {
-    type: ElementType.USER_EQUALS,
-    options: []
-  },
-  USER_NOT_EQUALS: {
-    type: ElementType.USER_EQUALS,
-    options: []
-  },
-  USER_CONTAINS: {
-    type: ElementType.USER_CONTAINS,
-    options: []
-  },
-  USER_NOT_CONTAINS: {
-    type: ElementType.USER_CONTAINS,
-    options: []
-  },
-  USER_EXISTS_IN: {
-    type: ElementType.USER_CONTAINS,
-    options: []
-  },
-  USER_NOT_EXISTS_IN: {
-    type: ElementType.USER_CONTAINS,
-    options: []
-  },
-  // user 2
-  MULTI_USER_EQUALS: {
-    type: ElementType.MULTI_USER_CONTAINS,
-    options: []
-  },
-  MULTI_USER_NOT_EQUALS: {
-    type: ElementType.MULTI_USER_CONTAINS,
-    options: []
-  },
-  MULTI_USER_CONTAINS: {
-    type: ElementType.MULTI_USER_CONTAINS,
-    options: []
-  },
-  MULTI_USER_NOT_CONTAINS: {
-    type: ElementType.MULTI_USER_CONTAINS,
-    options: []
-  },
-  MULTI_USER_EXISTS_IN: {
-    type: ElementType.MULTI_USER_CONTAINS,
-    options: []
-  },
-  MULTI_USER_NOT_EXISTS_IN: {
-    type: ElementType.MULTI_USER_CONTAINS,
-    options: []
-  },
-  // user 3
-  DEPARTMENT_EQUALS: {
-    type: ElementType.DEPARTMENT_EQUALS,
-    options: []
-  },
-  DEPARTMENT_NOT_EQUALS: {
-    type: ElementType.DEPARTMENT_EQUALS,
-    options: []
-  },
-  DEPARTMENT_CONTAINS: {
-    type: ElementType.DEPARTMENT_CONTAINS,
-    options: []
-  },
-  DEPARTMENT_NOT_CONTAINS: {
-    type: ElementType.DEPARTMENT_CONTAINS,
-    options: []
-  },
-  DEPARTMENT_EXISTS_IN: {
-    type: ElementType.DEPARTMENT_CONTAINS,
-    options: []
-  },
-  DEPARTMENT_NOT_EXISTS_IN: {
-    type: ElementType.DEPARTMENT_CONTAINS,
-    options: []
-  },
-  // user 4
-  MULTI_DEPARTMENT_EQUALS: {
-    type: ElementType.MULTI_DEPARTMENT_EQUALS,
-    options: []
-  },
-  MULTI_DEPARTMENT_NOT_EQUALS: {
-    type: ElementType.MULTI_DEPARTMENT_EQUALS,
-    options: []
-  },
-  MULTI_DEPARTMENT_CONTAINS: {
-    type: ElementType.MULTI_DEPARTMENT_EQUALS,
-    options: []
-  },
-  MULTI_DEPARTMENT_NOT_CONTAINS: {
-    type: ElementType.MULTI_DEPARTMENT_EQUALS,
-    options: []
-  },
-  MULTI_DEPARTMENT_EXISTS_IN: {
-    type: ElementType.MULTI_DEPARTMENT_EQUALS,
-    options: []
-  },
-  MULTI_DEPARTMENT_NOT_EXISTS_IN: {
-    type: ElementType.MULTI_DEPARTMENT_EQUALS,
-    options: []
-  },
-  // user 5
-  // DATA_SELECTION_EQUALS: {
-  //   type: ElementType.SELECT_MULTIPLE,
-  //   options: []
-  // },
-  // DATA_SELECTION_NOT_EQUALS: {
-  //   type: ElementType.SELECT_MULTIPLE,
-  //   options: []
-  // },
-  // DATA_SELECTION_CONTAINS: {
-  //   type: ElementType.SELECT_MULTIPLE,
-  //   options: []
-  // },
+  // 数据单选_不包含
   DATA_SELECTION_NOT_CONTAINS: {
     type: ElementType.SELECT_MULTIPLE,
     options: []
   },
+  // 数据单选_存在
   DATA_SELECTION_EXISTS_IN: {
     type: ElementType.SELECT_MULTIPLE,
     options: []
   },
+  // 数据单选_不存在
   DATA_SELECTION_NOT_EXISTS_IN: {
     type: ElementType.SELECT_MULTIPLE,
     options: []
   },
-  // user 6
+
+  // 单选列表_等于
+  SELECT_EQUALS: {
+    type: ElementType.LIST_SELECT,
+    options: []
+  },
+  // 单选列表_不等于
+  SELECT_NOT_EQUALS: {
+    type: ElementType.LIST_SELECT,
+    options: []
+  },
+  // 单选列表_包含
+  SELECT_CONTAINS: {
+    type: ElementType.LIST_SELECT_MULTIPLE,
+    options: []
+  },
+  // 单选列表_不包含
+  SELECT_NOT_CONTAINS: {
+    type: ElementType.LIST_SELECT_MULTIPLE,
+    options: []
+  },
+  // 单选列表_存在
+  SELECT_EXISTS_IN: {
+    type: ElementType.LIST_SELECT_MULTIPLE,
+    options: []
+  },
+  // 单选列表_不存在
+  SELECT_NOT_EXISTS_IN: {
+    type: ElementType.LIST_SELECT_MULTIPLE,
+    options: []
+  },
+
+  // 多选列表_等于
+  MULTI_SELECT_EQUALS: {
+    type: ElementType.LIST_SELECT_MULTIPLE,
+    options: []
+  },
+  // 多选列表_包含全部
+  MULTI_CONTAINS_ALL: {
+    type: ElementType.LIST_SELECT_MULTIPLE,
+    options: []
+  },
+  // 多选列表_不包含全部
+  MULTI_NOT_CONTAINS_ALL: {
+    type: ElementType.LIST_SELECT_MULTIPLE,
+    options: []
+  },
+  // 多选列表_包含任意
+  MULTI_CONTAINS_ANY: {
+    type: ElementType.LIST_SELECT_MULTIPLE,
+    options: []
+  },
+  // 多选列表_不包含任意
+  MULTI_NOT_CONTAINS_ANY: {
+    type: ElementType.LIST_SELECT_MULTIPLE,
+    options: []
+  },
+
+  // 用户单选_等于
+  USER_SELECT: {
+    type: ElementType.USER_SELECT,
+    options: []
+  },
+  // 用户单选_不等于
+  USER_NOT_EQUALS: {
+    type: ElementType.USER_SELECT,
+    options: []
+  },
+  // 用户单选_包含
+  USER_SELECT_MULTIPLE: {
+    type: ElementType.USER_SELECT_MULTIPLE,
+    options: []
+  },
+  // 用户单选_不包含
+  USER_NOT_CONTAINS: {
+    type: ElementType.USER_SELECT_MULTIPLE,
+    options: []
+  },
+  // 用户单选_存在
+  USER_EXISTS_IN: {
+    type: ElementType.USER_SELECT_MULTIPLE,
+    options: []
+  },
+  // 用户单选_不存在
+  USER_NOT_EXISTS_IN: {
+    type: ElementType.USER_SELECT_MULTIPLE,
+    options: []
+  },
+  // 用户多选_等于
+  MULTI_USER_EQUALS: {
+    type: ElementType.USER_SELECT_MULTIPLE,
+    options: []
+  },
+  // 用户多选_不等于
+  MULTI_USER_NOT_EQUALS: {
+    type: ElementType.USER_SELECT_MULTIPLE,
+    options: []
+  },
+  // 用户多选_包含
+  MULTI_USER_CONTAINS: {
+    type: ElementType.USER_SELECT_MULTIPLE,
+    options: []
+  },
+  // 用户多选_不包含
+  MULTI_USER_NOT_CONTAINS: {
+    type: ElementType.USER_SELECT_MULTIPLE,
+    options: []
+  },
+  // 用户多选_存在
+  MULTI_USER_EXISTS_IN: {
+    type: ElementType.USER_SELECT_MULTIPLE,
+    options: []
+  },
+  // 用户多选_不存在
+  MULTI_USER_NOT_EXISTS_IN: {
+    type: ElementType.USER_SELECT_MULTIPLE,
+    options: []
+  },
+
+  // 部门单选_等于
+  DEPARTMENT_SELECT: {
+    type: ElementType.DEPARTMENT_SELECT,
+    options: []
+  },
+  // 部门单选_不等于
+  DEPARTMENT_NOT_EQUALS: {
+    type: ElementType.DEPARTMENT_SELECT,
+    options: []
+  },
+  // 部门单选_包含
+  DEPARTMENT_SELECT_MULTIPLE: {
+    type: ElementType.DEPARTMENT_SELECT_MULTIPLE,
+    options: []
+  },
+  // 部门单选_不包含
+  DEPARTMENT_NOT_CONTAINS: {
+    type: ElementType.DEPARTMENT_SELECT_MULTIPLE,
+    options: []
+  },
+  // 部门单选_存在
+  DEPARTMENT_EXISTS_IN: {
+    type: ElementType.DEPARTMENT_SELECT_MULTIPLE,
+    options: []
+  },
+  // 部门单选_不存在
+  DEPARTMENT_NOT_EXISTS_IN: {
+    type: ElementType.DEPARTMENT_SELECT_MULTIPLE,
+    options: []
+  },
+  // 部门多选_等于
+  MULTI_DEPARTMENT_EQUALS: {
+    type: ElementType.DEPARTMENT_SELECT_MULTIPLE,
+    options: []
+  },
+  // 部门多选_不等于
+  MULTI_DEPARTMENT_NOT_EQUALS: {
+    type: ElementType.DEPARTMENT_SELECT_MULTIPLE,
+    options: []
+  },
+  // 部门多选_包含
+  MULTI_DEPARTMENT_CONTAINS: {
+    type: ElementType.DEPARTMENT_SELECT_MULTIPLE,
+    options: []
+  },
+  // 部门多选_不包含
+  MULTI_DEPARTMENT_NOT_CONTAINS: {
+    type: ElementType.DEPARTMENT_SELECT_MULTIPLE,
+    options: []
+  },
+  // 部门多选_存在
+  MULTI_DEPARTMENT_EXISTS_IN: {
+    type: ElementType.DEPARTMENT_SELECT_MULTIPLE,
+    options: []
+  },
+  // 部门多选_不存在
+  MULTI_DEPARTMENT_NOT_EXISTS_IN: {
+    type: ElementType.DEPARTMENT_SELECT_MULTIPLE,
+    options: []
+  },
+
+
+
+
+  // 数据多选_等于
   MULTI_DATA_SELECTION_EQUALS: {
-    type: ElementType.MULTI_DATA_SELECTION_EQUALS,
+    type: ElementType.SELECT_MULTIPLE,
     options: []
   },
+  // 数据多选_不等于
   MULTI_DATA_SELECTION_NOT_EQUALS: {
-    type: ElementType.MULTI_DATA_SELECTION_EQUALS,
+    type: ElementType.SELECT_MULTIPLE,
     options: []
   },
+  // 数据多选_包含
   MULTI_DATA_SELECTION_CONTAINS: {
-    type: ElementType.MULTI_DATA_SELECTION_EQUALS,
+    type: ElementType.SELECT_MULTIPLE,
     options: []
   },
+  // 数据多选_不包含
   MULTI_DATA_SELECTION_NOT_CONTAINS: {
-    type: ElementType.MULTI_DATA_SELECTION_EQUALS,
+    type: ElementType.SELECT_MULTIPLE,
     options: []
   },
+  // 数据多选_存在
   MULTI_DATA_SELECTION_EXISTS_IN: {
-    type: ElementType.MULTI_DATA_SELECTION_EQUALS,
+    type: ElementType.SELECT_MULTIPLE,
     options: []
   },
+  // 数据多选_不存在
   MULTI_DATA_SELECTION_NOT_EXISTS_IN: {
-    type: ElementType.MULTI_DATA_SELECTION_EQUALS,
+    type: ElementType.SELECT_MULTIPLE,
     options: []
   }
 };
