@@ -8,17 +8,18 @@ tenant-id: {{adminTenantId}}
 {
   "corpReqVO": {
     "corpLogo": "https://static.example.com/logo/corp-test-001.png",
-    "corpName": "测试企业1",
+    "corpName": "测试企业2",
     "industryType": 1,
+    "corpCode": 222,
     "status": 0,
     "address": "北京市海淀区中关村大街1号创新大厦8层",
     "userLimit": 100
   },
   "corpAdminReqVO": {
-    "username": "corp_admin1",
+    "username": "corp1_admin1",
     "nickname": "企业管理员",
-    "email": "corp_admin1@test.com",
-    "mobile": "13800001111"
+    "email": "corp_1admin1@test.com",
+    "mobile": "13801001111"
   }
 }
 
@@ -34,12 +35,12 @@ tenant-id: {{adminTenantId}}
 ### 请求 /login 接口 => 成功
 POST {{baseUrl}}/system/auth/corp-login
 Content-Type: application/json
-tenant-id: {{adminTenantId}}
+tenant-id:158088726951460864
 tag: {{tag}}
 
 {
-  "mobile": "13800001111",
-  "password": "<$KKy2XfYV1}frV",
+  "mobile": "15890635400",
+  "password": "CorpChina2025!",
   "deviceId":666
 }
 
@@ -97,4 +98,37 @@ tenant-id: {{adminTenantId}}
 {
   "id": 1,
   "status": 0
+}
+
+
+
+### 请求 /delete 接口 => 成功
+POST {{baseUrl}}/system/corp/check-corp
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+{
+   "corpLogo": "https://static.example.com/logo/corp-test-001.png",
+    "corpName": "测试企业2",
+    "industryType": 1,
+    "status": 0,
+    "corpCode": 111,
+    "address": "北京市海淀区中关村大街1号创新大厦8层",
+    "userLimit": 100
+}
+
+
+
+### 请求 /delete 接口 => 成功
+POST {{baseUrl}}/system/corp/check-corp-admin-user
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+{
+    "username": "test123",
+    "nickname": "企业管理员",
+    "email": "corp_admin1@test.com",
+    "mobile": "13800001111"
 }
