@@ -14,7 +14,7 @@ import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticFieldValueD
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticRelationSchemaDTO;
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticRelationValueDTO;
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticRowValueDTO;
-import com.cmsr.onebase.module.metadata.runtime.semantic.dto.enums.SemanticConnectorTypeEnum;
+import com.cmsr.onebase.module.metadata.core.enums.RelationshipTypeEnum;
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.enums.SemanticConnectorCardinalityEnum;
 import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticTableNameQuoter;
 import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticWorkflowExecutor;
@@ -120,6 +120,7 @@ public class SemanticDataCrudService {
         dynamicMetadataRepository.insert(entity.getTableName(), row);
 
         recordDTO.getEntityValue().setId(row.get("id"));
+        recordDTO.getEntitySchema().setId(Long.valueOf(row.get("id").toString()));
 
         Long parentId = (Long) row.get("id");
         
@@ -202,10 +203,10 @@ public class SemanticDataCrudService {
                 Map<String, SemanticRelationValueDTO> connVals = new HashMap<>();
                 for (SemanticRelationSchemaDTO c : connectors) {
                     if (c == null || c.getTargetEntityTableName() == null) { continue; }
-                    if (c.getType() == SemanticConnectorTypeEnum.SUBTABLE) {
+                    if (RelationshipTypeEnum.isSubtableRelationship(c.getRelationshipType().getRelationshipType())) {
                         SemanticRelationValueDTO rv = readSubtableConnector(c, id);
                         if (rv != null) { connVals.put(c.getTargetEntityTableName(), rv); }
-                    } else {
+                    } else if (RelationshipTypeEnum.isConnectorRelationTable(c.getRelationshipType().getRelationshipType())) {
                         SemanticRelationValueDTO rv = readRelationConnector(c, id);
                         if (rv != null) { connVals.put(c.getTargetEntityTableName(), rv); }
                     }
@@ -214,9 +215,9 @@ public class SemanticDataCrudService {
             }
 
             semanticRefResolver.enrich(entity, resultVal);
-
+            log.info("read record result resultVal: {}", resultVal);
             recordDTO.setResultValue(resultVal);
-            Map<String, Object> resultData = recordDTO.getResultValue().getCurrentEntityRawValueForJson();
+            Map<String, Object> resultData = recordDTO.getResultValue().getGlobalRawMapForJson();
             log.info("read record result: {}", resultData);
             return resultData;
         } catch (Exception e) {
@@ -232,13 +233,14 @@ public class SemanticDataCrudService {
         List<Row> rows = dynamicMetadataRepository.selectListByQuery(c.getTargetEntityTableName(), qw);
         if (rows == null || rows.isEmpty()) { return null; }
         SemanticRelationValueDTO relation = new SemanticRelationValueDTO();
+        List<SemanticFieldSchemaDTO> attrs = c.getRelationAttributes();
         if (c.getCardinality() == SemanticConnectorCardinalityEnum.ONE) {
             Row r = rows.get(0);
-            SemanticRowValueDTO rowDto = SemanticValueAssembler.toRowValue(r, null, null, null);
+            SemanticRowValueDTO rowDto = SemanticValueAssembler.toRowValue(r, attrs, c.getTargetEntityTableName());
             relation.setRowValue(rowDto);
         } else {
             List<SemanticRowValueDTO> list = new ArrayList<>();
-            for (Row r : rows) { list.add(SemanticValueAssembler.toRowValue(r, null, null, null)); }
+            for (Row r : rows) { list.add(SemanticValueAssembler.toRowValue(r, attrs, c.getTargetEntityTableName())); }
             relation.setRowValueList(list);
         }
         return relation;
@@ -253,11 +255,11 @@ public class SemanticDataCrudService {
         List<SemanticFieldSchemaDTO> attrs = c.getRelationAttributes();
         if (c.getCardinality() == SemanticConnectorCardinalityEnum.ONE) {
             Row r = rows.get(0);
-            SemanticRowValueDTO rowDto = SemanticValueAssembler.toRowValue(r, null, attrs, c.getTargetEntityTableName());
+            SemanticRowValueDTO rowDto = SemanticValueAssembler.toRowValue(r, attrs, c.getTargetEntityTableName());
             relation.setRowValue(rowDto);
         } else {
             List<SemanticRowValueDTO> list = new ArrayList<>();
-            for (Row r : rows) { list.add(SemanticValueAssembler.toRowValue(r, null, attrs, c.getTargetEntityTableName())); }
+            for (Row r : rows) { list.add(SemanticValueAssembler.toRowValue(r, attrs, c.getTargetEntityTableName())); }
             relation.setRowValueList(list);
         }
         return relation;
@@ -334,8 +336,7 @@ public class SemanticDataCrudService {
         Map<String, List<Row>> batches = new HashMap<>();
         for (SemanticRelationSchemaDTO c : connectors) {
             if (c == null || c.getTargetEntityTableName() == null) { continue; }
-            //TODO: 现在设置的type 默认是 RELATION，先注释掉 
-            // if (c.getType() != SemanticConnectorTypeEnum.SUBTABLE) { continue; }
+            if (!RelationshipTypeEnum.isSubtableRelationship(c.getRelationshipType().getRelationshipType())) { continue; }
             if (c.getCardinality() == SemanticConnectorCardinalityEnum.ONE) {
                 Map<String, SemanticFieldValueDTO<Object>> subDto = recordDTO.getEntityValue().getConnectorDTOObject(c.getTargetEntityTableName());
                 applyConnectorAutoNumbers(c, subDto);
@@ -358,7 +359,7 @@ public class SemanticDataCrudService {
         Map<String, List<Row>> batches = new HashMap<>();
         for (SemanticRelationSchemaDTO c : connectors) {
             if (c == null || c.getTargetEntityTableName() == null) { continue; }
-            if (c.getType() == SemanticConnectorTypeEnum.SUBTABLE) { continue; }
+            if (RelationshipTypeEnum.isSubtableRelationship(c.getRelationshipType().getRelationshipType())) { continue; }
             if (c.getCardinality() == SemanticConnectorCardinalityEnum.ONE) {
                 Map<String, SemanticFieldValueDTO<Object>> relDto = recordDTO.getEntityValue().getConnectorDTOObject(c.getTargetEntityTableName());
                 applyConnectorAutoNumbers(c, relDto);

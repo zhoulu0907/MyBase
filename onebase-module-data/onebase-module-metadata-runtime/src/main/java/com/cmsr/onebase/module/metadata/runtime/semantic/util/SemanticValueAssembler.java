@@ -123,44 +123,29 @@ public class SemanticValueAssembler {
      * @param tableName  表名，用于填充字段的来源信息
      * @return 语义行值 {@link SemanticRowValueDTO}
      */
-    public static SemanticRowValueDTO toRowValue(Row r, List<MetadataEntityFieldDO> fields, List<SemanticFieldSchemaDTO> attrs, String tableName) {
+    public static SemanticRowValueDTO toRowValue(Row r, List<SemanticFieldSchemaDTO> attrs, String tableName) {
         SemanticRowValueDTO rowDto = new SemanticRowValueDTO();
         rowDto.setId(r.get("id"));
         Object del = r.get("deleted");
         rowDto.setDeleted(del == null ? null : ("1".equals(String.valueOf(del)) || Integer.valueOf(1).equals(del)));
         Map<String, SemanticFieldValueDTO<Object>> fv = new java.util.LinkedHashMap<>();
-        Map<String, SemanticFieldSchemaDTO> attrByName = new HashMap<>();
-        if (attrs != null) { for (SemanticFieldSchemaDTO a : attrs) { if (a.getFieldName() != null) attrByName.put(a.getFieldName(), a); } }
-        if (fields != null) {
-            for (MetadataEntityFieldDO f : fields) {
-                String name = f.getFieldName();
-                if (name == null) { continue; }
-                if (attrByName.isEmpty() || attrByName.containsKey(name)) {
-                    SemanticFieldTypeEnum type = SemanticFieldTypeEnum.ofCode(f.getFieldType());
-                    SemanticFieldValueDTO<Object> v = SemanticFieldValueDTO.ofType(type);
-                    v.setFieldId(f.getId());
-                    v.setFieldName(name);
-                    v.setRawValue(r.get(name));
-                    v.setTableName(tableName);
-                    fv.put(name, v);
-                }
-            }
-        } else {
-            for (Map.Entry<String, Object> e : r.entrySet()) {
-                String name = e.getKey();
-                if (name == null) { continue; }
-                if ("id".equalsIgnoreCase(name) || "deleted".equalsIgnoreCase(name)) { continue; }
-                if (attrByName.isEmpty() || attrByName.containsKey(name)) {
-                    SemanticFieldTypeEnum type = guessEnumByRaw(e.getValue());
-                    if (type == null) { type = SemanticFieldTypeEnum.TEXT; }
-                    SemanticFieldValueDTO<Object> v = SemanticFieldValueDTO.ofType(type);
-                    v.setFieldName(name);
-                    v.setRawValue(e.getValue());
-                    v.setTableName(tableName);
-                    fv.put(name, v);
-                }
-            }
+        
+        for (SemanticFieldSchemaDTO a : attrs) {
+            if (a == null) { continue; }
+            String name = a.getFieldName();
+            if (name == null) { continue; }
+            Object raw = r.get(name);
+            SemanticFieldTypeEnum type = a.getFieldTypeEnum() != null ? a.getFieldTypeEnum() : guessEnumByRaw(raw);
+            if (type == null) { type = SemanticFieldTypeEnum.TEXT; }
+            SemanticFieldValueDTO<Object> v = SemanticFieldValueDTO.ofType(type);
+            v.setFieldId(a.getId());
+            v.setFieldUuid(a.getFieldUuid());
+            v.setFieldName(name);
+            v.setRawValue(raw);
+            v.setTableName(tableName);
+            fv.put(name, v);
         }
+        
         rowDto.setFields(fv);
         return rowDto;
     }

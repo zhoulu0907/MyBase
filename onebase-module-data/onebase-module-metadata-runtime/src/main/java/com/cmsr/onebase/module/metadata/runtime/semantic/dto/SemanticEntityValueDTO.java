@@ -176,6 +176,22 @@ public class SemanticEntityValueDTO {
         return result;
     }
 
+    public Map<String, Object> getGlobalRawMapForJson() {
+        Map<String, Object> result = new LinkedHashMap<>();
+        Map<String, Object> self = getCurrentEntityRawValueForJson();
+        if (self != null) {
+            for (Map.Entry<String, Object> e : self.entrySet()) {
+                result.put(e.getKey(), e.getValue());
+            }
+        }
+        if (connectors != null) {
+            for (String name : connectors.keySet()) {
+                result.put(name, isConnectorMany(name) ? getConnectorRawListForJson(name) : getConnectorRawObjectForJson(name));
+            }
+        }
+        return result;
+    }
+
     /**
      * 获取单行关联的原始值Map
      *
@@ -192,6 +208,21 @@ public class SemanticEntityValueDTO {
         if (fields != null) {
             for (Map.Entry<String, SemanticFieldValueDTO<Object>> e : fields.entrySet()) {
                 obj.put(e.getKey(), e.getValue() == null ? null : e.getValue().getRawValue());
+            }
+        }
+        return obj;
+    }
+
+    public Map<String, Object> getConnectorRawObjectForJson(String connectorName) {
+        if (connectorName == null || connectors == null) return null;
+        SemanticRelationValueDTO relation = connectors.get(connectorName);
+        if (relation == null || relation.getRowValue() == null) return null;
+        SemanticRowValueDTO row = relation.getRowValue();
+        Map<String, Object> obj = new LinkedHashMap<>();
+        Map<String, SemanticFieldValueDTO<Object>> fields = row.getFields();
+        if (fields != null) {
+            for (Map.Entry<String, SemanticFieldValueDTO<Object>> e : fields.entrySet()) {
+                obj.put(e.getKey(), e.getValue() == null ? null : e.getValue().getRawValueForJson());
             }
         }
         return obj;
@@ -232,6 +263,25 @@ public class SemanticEntityValueDTO {
             if (fields != null) {
                 for (Map.Entry<String, SemanticFieldValueDTO<Object>> e : fields.entrySet()) {
                     obj.put(e.getKey(), e.getValue() == null ? null : e.getValue().getRawValue());
+                }
+            }
+            list.add(obj);
+        }
+        return list;
+    }
+
+    public List<Map<String, Object>> getConnectorRawListForJson(String connectorName) {
+        if (connectorName == null || connectors == null) return null;
+        SemanticRelationValueDTO relation = connectors.get(connectorName);
+        if (relation == null || relation.getRowValueList() == null) return null;
+        List<SemanticRowValueDTO> rows = relation.getRowValueList();
+        List<Map<String, Object>> list = new ArrayList<>();
+        for (SemanticRowValueDTO row : rows) {
+            Map<String, Object> obj = new LinkedHashMap<>();
+            Map<String, SemanticFieldValueDTO<Object>> fields = row.getFields();
+            if (fields != null) {
+                for (Map.Entry<String, SemanticFieldValueDTO<Object>> e : fields.entrySet()) {
+                    obj.put(e.getKey(), e.getValue() == null ? null : e.getValue().getRawValueForJson());
                 }
             }
             list.add(obj);
