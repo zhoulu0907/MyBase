@@ -305,4 +305,11 @@ public interface UserService {
     boolean findAdminByRoleIdAndUserId(Long roleId, Long userId);
 
     Long getUserCountByCorpId(Long id);
+    /**
+     * 验证企业用户信息
+     *
+     * @param corpAdminReqVO 分页条件
+     * @return 用户简要信息分页列表
+     */
+    void checkCorpAdminUser(AdminUserDO corpAdminReqVO);
 }

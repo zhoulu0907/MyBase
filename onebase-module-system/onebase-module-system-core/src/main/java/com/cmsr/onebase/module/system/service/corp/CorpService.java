@@ -4,6 +4,7 @@ package com.cmsr.onebase.module.system.service.corp;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.system.dal.dataobject.corp.CorpDO;
 import com.cmsr.onebase.module.system.vo.corp.*;
+import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -68,4 +69,14 @@ public interface CorpService {
      *
      */
     List<CorpDO> getSimpleCorpList(Integer staus);
+    /**
+     * 验证企业基本信息
+     *
+     */
+    void checkCorp(@Valid CorpReqVO corpReqVO);
+    /**
+     * 验证企业管理员
+     *
+     */
+    void checkCorpAdminUser(@Valid CorpAdminReqVO corpAdminReqVO);
 }

@@ -93,4 +93,22 @@ public class SystemCorpController {
         return success(corp);
     }
 
+
+    @PostMapping("/check-corp")
+    @Operation(summary = "验证企业基本信息")
+    @PreAuthorize("@ss.hasPermission('tenant:corp:query')")
+    public CommonResult<Boolean> checkCorp(@RequestBody @Valid CorpReqVO corpReqVO) {
+        corpService.checkCorp(corpReqVO);
+        return success(true);
+    }
+
+
+    @PostMapping("/check-corp-admin-user")
+    @Operation(summary = "验证企业管理员")
+    @PreAuthorize("@ss.hasPermission('tenant:corp:query')")
+    public CommonResult<Boolean> checkCorpAdminUsr(@RequestBody @Valid CorpAdminReqVO corpAdminReqVO) {
+        corpService.checkCorpAdminUser(corpAdminReqVO);
+        return success(true);
+    }
+
 }

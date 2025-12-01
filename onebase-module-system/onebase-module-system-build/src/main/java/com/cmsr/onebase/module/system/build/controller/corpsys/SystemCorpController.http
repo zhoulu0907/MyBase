@@ -99,3 +99,36 @@ tenant-id: {{adminTenantId}}
   "id": 1,
   "status": 0
 }
+
+
+
+### 请求 /check-corp 接口 => 成功
+POST {{baseUrl}}/system/corp/check-corp
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+{
+   "corpLogo": "https://static.example.com/logo/corp-test-001.png",
+    "corpName": "测试企业2",
+    "industryType": 1,
+    "status": 0,
+    "corpCode": 111,
+    "address": "北京市海淀区中关村大街1号创新大厦8层",
+    "userLimit": 100
+}
+
+
+
+### 请求 /check-corp-admin-user 接口 => 成功
+POST {{baseUrl}}/system/corp/check-corp-admin-user
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+{
+    "username": "test123",
+    "nickname": "企业管理员",
+    "email": "corp_admin1@test.com",
+    "mobile": "13800001111"
+}
