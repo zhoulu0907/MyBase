@@ -54,6 +54,15 @@ public class EntityRelationshipRespVO {
     @Schema(description = "目标字段展示名称", example = "用户ID")
     private String targetFieldDisplayName;
 
+    @Schema(description = "选择字段ID（数据选择关系类型时使用）", example = "3011")
+    private String selectFieldId;
+
+    @Schema(description = "选择字段名称", example = "name")
+    private String selectFieldName;
+
+    @Schema(description = "选择字段展示名称", example = "名称")
+    private String selectFieldDisplayName;
+
     @Schema(description = "级联类型", example = "READ")
     private String cascadeType;
 
