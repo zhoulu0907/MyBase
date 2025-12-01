@@ -51,8 +51,8 @@ public enum RoleCodeEnum {
         add("tenant:profile:update");  // 个人中心修改
         add("tenant:profile:reset-pwd"); //修改密码
 
-        add("tenant:corp"); // 空间信息查看
-        add("tenant:corp:query"); // 空间信息查看
+        add("tenant:corp"); // 企业查询列表
+        add("tenant:corp:query"); // 个人中心-我创建的企业 使用查询
 
         add("tenant:user"); // 用户查看
         add("tenant:user:query"); // 用户查看
