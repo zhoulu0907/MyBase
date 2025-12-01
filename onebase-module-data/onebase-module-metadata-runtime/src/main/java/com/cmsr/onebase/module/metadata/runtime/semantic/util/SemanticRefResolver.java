@@ -30,12 +30,16 @@ import com.cmsr.onebase.module.metadata.runtime.semantic.dto.enums.SemanticField
 import com.cmsr.onebase.module.metadata.runtime.semantic.type.RefType;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.field.MetadataEntityFieldOptionDO;
+import com.cmsr.onebase.module.metadata.core.enums.RelationshipTypeEnum;
 import com.cmsr.onebase.module.system.api.user.AdminUserApi;
 import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
+import com.mybatisflex.core.row.Row;
 import com.cmsr.onebase.module.system.api.dept.DeptApi;
 import com.cmsr.onebase.module.system.api.dept.dto.DeptRespDTO;
 import com.cmsr.onebase.module.system.api.dict.DictDataApi;
 import com.cmsr.onebase.framework.common.biz.system.dict.dto.DictDataRespDTO;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dal.database.DynamicMetadataRepository;
+import com.cmsr.onebase.module.metadata.runtime.semantic.service.impl.SemanticTemporaryDatasourceService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 
@@ -54,6 +58,12 @@ public class SemanticRefResolver {
     private DeptApi deptApi;
     @Resource
     private DictDataApi dictDataApi;
+
+    @Resource
+    private DynamicMetadataRepository dynamicMetadataRepository;
+
+    @Resource
+    private SemanticTemporaryDatasourceService semanticTemporaryDatasourceService;
 
     /**
      * 对实体值进行语义增强
@@ -89,7 +99,30 @@ public class SemanticRefResolver {
                 ? new HashMap<>()
                 : buildDictLabelCacheByFieldId(entity, selectFieldIds, fieldSchemaMap);
 
-        forEachRow(value, fields -> applyToFields(fields, users, depts, fieldSchemaMap, fieldOptionsCache, dictLabelCacheByFieldId));
+        Map<Long, DataSelectMeta> dataSelectMetaBySourceFieldId = buildDataSelectMeta(entity);
+        Map<String, Set<Object>> idsByTable = collectDataSelectIdsByTable(value, dataSelectMetaBySourceFieldId);
+        Map<String, String> pkFieldByTable = new HashMap<>();
+        for (Map.Entry<Long, DataSelectMeta> e : dataSelectMetaBySourceFieldId.entrySet()) {
+            DataSelectMeta meta = e.getValue();
+            if (meta != null && meta.tableName != null && meta.pkField != null) {
+                pkFieldByTable.putIfAbsent(meta.tableName, meta.pkField);
+            }
+        }
+        Map<String, Map<Object, Row>> mainsByTable = new HashMap<>();
+        
+        for (Map.Entry<String, Set<Object>> e : idsByTable.entrySet()) {
+            String table = e.getKey();
+            String pk = pkFieldByTable.get(table);
+            if (pk == null) continue;
+            List<Object> ids = new ArrayList<>(e.getValue());
+            if (ids.isEmpty()) continue;
+            List<Row> mains = dynamicMetadataRepository.selectMainByIds(table, pk, ids);
+            Map<Object, Row> rowById = new HashMap<>();
+            for (Row r : mains) { rowById.put(r.get(pk), r); }
+            mainsByTable.put(table, rowById);
+        }
+
+        forEachRow(value, fields -> applyToFields(fields, users, depts, fieldSchemaMap, fieldOptionsCache, dictLabelCacheByFieldId, dataSelectMetaBySourceFieldId, mainsByTable));
     }
 
     /**
@@ -260,7 +293,7 @@ public class SemanticRefResolver {
      * @param fieldSchemaMap    字段Schema缓存
      * @param fieldOptionsCache 字段选项缓存
      */
-    private void applyToFields(Map<String, SemanticFieldValueDTO<Object>> fields, Map<Long, AdminUserRespDTO> users, Map<Long, DeptRespDTO> depts, Map<Long, MetadataEntityFieldDO> fieldSchemaMap, Map<Long, List<MetadataEntityFieldOptionDO>> fieldOptionsCache, Map<Long, Map<String, String>> dictLabelCacheByFieldId) {
+    private void applyToFields(Map<String, SemanticFieldValueDTO<Object>> fields, Map<Long, AdminUserRespDTO> users, Map<Long, DeptRespDTO> depts, Map<Long, MetadataEntityFieldDO> fieldSchemaMap, Map<Long, List<MetadataEntityFieldOptionDO>> fieldOptionsCache, Map<Long, Map<String, String>> dictLabelCacheByFieldId, Map<Long, DataSelectMeta> dataSelectMetaBySourceFieldId, Map<String, Map<Object, Row>> mainsByTable) {
         if (fields == null) return;
         for (Map.Entry<String, SemanticFieldValueDTO<Object>> e : fields.entrySet()) {
             SemanticFieldValueDTO<Object> v = e.getValue();
@@ -272,7 +305,7 @@ public class SemanticRefResolver {
             } else if (t == SemanticFieldTypeEnum.DEPARTMENT || t == SemanticFieldTypeEnum.MULTI_DEPARTMENT) {
                 applyDept(v, depts);
             } else if (t == SemanticFieldTypeEnum.DATA_SELECTION || t == SemanticFieldTypeEnum.MULTI_DATA_SELECTION) {
-                applyDataSelection(v);
+                applyDataSelectionUnified(v, dataSelectMetaBySourceFieldId, mainsByTable);
             } else if (t == SemanticFieldTypeEnum.SELECT || t == SemanticFieldTypeEnum.MULTI_SELECT) {
                 applyDict(v, fieldSchemaMap, fieldOptionsCache, dictLabelCacheByFieldId);
             }
@@ -338,7 +371,37 @@ public class SemanticRefResolver {
     /**
      * 解析数据选择字段：从引用值里提取 `id/name`
      */
-    private void applyDataSelection(SemanticFieldValueDTO<Object> v) {
+    private void applyDataSelectionUnified(SemanticFieldValueDTO<Object> v, Map<Long, DataSelectMeta> metaByFieldId, Map<String, Map<Object, Row>> mainsByTable) {
+        Long fieldId = v.getFieldId();
+        DataSelectMeta meta = fieldId == null ? null : metaByFieldId.get(fieldId);
+        if (meta == null) { applyDataSelectionFallback(v); return; }
+        if (v.isListType()) {
+            List<?> list = v.getValueAsBizList();
+            if (list == null) return;
+            List<Map<String, Object>> mapped = new ArrayList<>();
+            Map<Object, Row> byId = mainsByTable.get(meta.tableName);
+            for (Object o : list) {
+                Object idObj = extractId(o);
+                Row r = byId == null ? null : byId.get(idObj);
+                Map<String, Object> m = new HashMap<>();
+                m.put("id", idObj);
+                if (r != null && meta.selectFieldName != null) { m.put("name", r.get(meta.selectFieldName)); }
+                mapped.add(m);
+            }
+            v.setRawValue(mapped);
+        } else {
+            Object one = v.getValueAsBizType();
+            Object idObj = extractId(one);
+            Map<Object, Row> byId = mainsByTable.get(meta.tableName);
+            Row r = byId == null ? null : byId.get(idObj);
+            Map<String, Object> m = new HashMap<>();
+            m.put("id", idObj);
+            if (r != null && meta.selectFieldName != null) { m.put("name", r.get(meta.selectFieldName)); }
+            v.setRawValue(m);
+        }
+    }
+
+    private void applyDataSelectionFallback(SemanticFieldValueDTO<Object> v) {
         if (v.isListType()) {
             List<?> list = v.getValueAsBizList();
             if (list == null) return;
@@ -348,7 +411,6 @@ public class SemanticRefResolver {
                 Map<String, Object> m = new HashMap<>();
                 m.put("id", id);
                 String name = extractName(o);
-                if (name == null) name = extractValueString(o);
                 if (name != null) m.put("name", name);
                 mapped.add(m);
             }
@@ -359,10 +421,64 @@ public class SemanticRefResolver {
             Map<String, Object> m = new HashMap<>();
             m.put("id", id);
             String name = extractName(one);
-            if (name == null) name = extractValueString(one);
             if (name != null) m.put("name", name);
             v.setRawValue(m);
         }
+    }
+
+    private Map<Long, DataSelectMeta> buildDataSelectMeta(SemanticEntitySchemaDTO entity) {
+        Map<Long, DataSelectMeta> map = new HashMap<>();
+        if (entity == null || entity.getConnectors() == null) return map;
+        for (SemanticRelationSchemaDTO c : entity.getConnectors()) {
+            if (c == null || c.getRelationshipType() == null) continue;
+            if (!RelationshipTypeEnum.isDataSelectRelationship(c.getRelationshipType().getRelationshipType())) continue;
+            String pkField = getPrimaryKeyNameFromConnector(c);
+            Long selectFieldId = c.getSelectFieldId() == null ? null : Long.valueOf(c.getSelectFieldId());
+            String selectFieldName = getFieldNameByIdFromConnector(c, selectFieldId);
+            Long sourceFieldId = c.getSourceKeyFieldId();
+            if (sourceFieldId == null || pkField == null) continue;
+            DataSelectMeta meta = new DataSelectMeta();
+            meta.tableName = c.getTargetEntityTableName();
+            meta.pkField = pkField;
+            meta.selectFieldName = selectFieldName;
+            map.put(sourceFieldId, meta);
+        }
+        return map;
+    }
+
+    private Map<String, Set<Object>> collectDataSelectIdsByTable(SemanticEntityValueDTO value, Map<Long, DataSelectMeta> metaByFieldId) {
+        Map<String, Set<Object>> idsByTable = new HashMap<>();
+        forEachRow(value, fields -> {
+            if (fields == null) return;
+            for (SemanticFieldValueDTO<Object> v : fields.values()) {
+                if (v == null) continue;
+                SemanticFieldTypeEnum t = v.getFieldTypeEnum();
+                if (t != SemanticFieldTypeEnum.DATA_SELECTION && t != SemanticFieldTypeEnum.MULTI_DATA_SELECTION) continue;
+                Long fieldId = v.getFieldId();
+                DataSelectMeta meta = fieldId == null ? null : metaByFieldId.get(fieldId);
+                if (meta == null || meta.tableName == null) continue;
+                if (v.isListType()) {
+                    List<?> list = v.getValueAsBizList();
+                    if (list != null) {
+                        for (Object o : list) {
+                            Object idObj = extractId(o);
+                            idsByTable.computeIfAbsent(meta.tableName, k -> new HashSet<>()).add(idObj);
+                        }
+                    }
+                } else {
+                    Object one = v.getValueAsBizType();
+                    Object idObj = extractId(one);
+                    idsByTable.computeIfAbsent(meta.tableName, k -> new HashSet<>()).add(idObj);
+                }
+            }
+        });
+        return idsByTable;
+    }
+
+    private static class DataSelectMeta {
+        String tableName;
+        String pkField;
+        String selectFieldName;
     }
 
     /**
@@ -401,6 +517,119 @@ public class SemanticRefResolver {
         }
     }
 
+    private void applyDataSelectionAssignments(SemanticEntitySchemaDTO entity, SemanticEntityValueDTO value) {
+        if (entity == null || value == null || entity.getConnectors() == null) return;
+        Object parentId = value.getId();
+        if (parentId == null) return;
+        Map<String, Set<Object>> idsByTable = new HashMap<>();
+        Map<String, String> pkFieldByTable = new HashMap<>();
+        List<ConnectorAssign> assigns = new ArrayList<>();
+
+        for (SemanticRelationSchemaDTO c : entity.getConnectors()) {
+            if (c == null || c.getRelationshipType() == null) continue;
+            if (!RelationshipTypeEnum.isDataSelectRelationship(c.getRelationshipType().getRelationshipType())) continue;
+            String relationKey = getFieldNameByIdFromConnector(c, c.getTargetKeyFieldId());
+            Long selectFieldId = c.getSelectFieldId() == null ? null : Long.valueOf(c.getSelectFieldId());
+            String selectFieldName = getFieldNameByIdFromConnector(c, selectFieldId);
+            String pkField = getPrimaryKeyNameFromConnector(c);
+            if (relationKey == null || pkField == null) continue;
+            List<Row> rows = dynamicMetadataRepository.selectRelationRowsByParent(c.getTargetEntityTableName(), relationKey, parentId);
+            if (rows == null || rows.isEmpty()) continue;
+            List<Object> ids = new ArrayList<>();
+            for (var r : rows) { ids.add(r.get(pkField)); }
+            idsByTable.computeIfAbsent(c.getTargetEntityTableName(), k -> new HashSet<>()).addAll(ids);
+            pkFieldByTable.putIfAbsent(c.getTargetEntityTableName(), pkField);
+
+            Long sourceFieldId = c.getSourceKeyFieldId();
+            String sourceFieldName = resolveSourceFieldName(entity, sourceFieldId);
+            if (sourceFieldName == null) continue;
+
+            ConnectorAssign a = new ConnectorAssign();
+            a.tableName = c.getTargetEntityTableName();
+            a.pkField = pkField;
+            a.selectFieldName = selectFieldName;
+            a.sourceFieldId = sourceFieldId;
+            a.sourceFieldName = sourceFieldName;
+            a.single = c.getRelationshipType() == RelationshipTypeEnum.DATA_SELECT;
+            a.ids = ids;
+            assigns.add(a);
+        }
+
+        Map<String, Map<Object, Row>> mainsByTable = new HashMap<>();
+        for (Map.Entry<String, Set<Object>> e : idsByTable.entrySet()) {
+            String table = e.getKey();
+            String pk = pkFieldByTable.get(table);
+            if (pk == null) continue;
+            List<Object> ids = new ArrayList<>(e.getValue());
+            if (ids.isEmpty()) continue;
+            List<Row> mains = dynamicMetadataRepository.selectMainByIds(table, pk, ids);
+            Map<Object, Row> byId = new HashMap<>();
+            for (var r : mains) { byId.put(r.get(pk), r); }
+            mainsByTable.put(table, byId);
+        }
+
+        for (ConnectorAssign a : assigns) {
+            Map<Object, Row> byId = mainsByTable.get(a.tableName);
+            if (byId == null) continue;
+            List<Map<String, Object>> list = new ArrayList<>();
+            for (Object idObj : a.ids) {
+                Row r = byId.get(idObj);
+                if (r == null) continue;
+                Map<String, Object> m = new HashMap<>();
+                m.put("id", r.get(a.pkField));
+                if (a.selectFieldName != null) { m.put("name", r.get(a.selectFieldName)); }
+                list.add(m);
+            }
+            SemanticFieldValueDTO<Object> v;
+            if (a.single) {
+                Map<String, Object> one = list.isEmpty() ? null : list.get(0);
+                v = SemanticFieldValueDTO.ofType(SemanticFieldTypeEnum.DATA_SELECTION);
+                v.setRawValue(one);
+            } else {
+                v = SemanticFieldValueDTO.ofType(SemanticFieldTypeEnum.MULTI_DATA_SELECTION);
+                v.setRawValue(list);
+            }
+            v.setFieldId(a.sourceFieldId);
+            v.setFieldName(a.sourceFieldName);
+            if (value.getFieldValueMap() == null) { value.setFieldValueMap(new HashMap<>()); }
+            value.getFieldValueMap().put(a.sourceFieldName, v);
+        }
+    }
+
+    private static class ConnectorAssign {
+        String tableName;
+        String pkField;
+        String selectFieldName;
+        Long sourceFieldId;
+        String sourceFieldName;
+        boolean single;
+        List<Object> ids;
+    }
+
+    private String resolveSourceFieldName(SemanticEntitySchemaDTO entity, Long fieldId) {
+        if (entity == null || entity.getFields() == null || fieldId == null) return null;
+        for (SemanticFieldSchemaDTO f : entity.getFields()) {
+            if (f != null && fieldId.equals(f.getId())) return f.getFieldName();
+        }
+        return null;
+    }
+
+    private String getPrimaryKeyNameFromConnector(SemanticRelationSchemaDTO c) {
+        if (c == null || c.getRelationAttributes() == null) return null;
+        for (SemanticFieldSchemaDTO f : c.getRelationAttributes()) {
+            if (f != null && Boolean.TRUE.equals(f.getIsPrimaryKey())) return f.getFieldName();
+        }
+        return "id";
+    }
+
+    private String getFieldNameByIdFromConnector(SemanticRelationSchemaDTO c, Long fieldId) {
+        if (c == null || c.getRelationAttributes() == null || fieldId == null) return null;
+        for (SemanticFieldSchemaDTO f : c.getRelationAttributes()) {
+            if (f != null && fieldId.equals(f.getId())) return f.getFieldName();
+        }
+        return null;
+    }
+
     /**
      * 提取引用名：支持 `RefType` 与 `{name: ...}` Map
      */
@@ -410,15 +639,6 @@ public class SemanticRefResolver {
         if (o instanceof Map<?,?> m) {
             Object n = m.get("name");
             return n == null ? null : String.valueOf(n);
-        }
-        return null;
-    }
-
-    private String extractValueString(Object o) {
-        if (o == null) return null;
-        if (o instanceof Map<?,?> m) {
-            Object v = m.get("value");
-            return v == null ? null : String.valueOf(v);
         }
         return null;
     }

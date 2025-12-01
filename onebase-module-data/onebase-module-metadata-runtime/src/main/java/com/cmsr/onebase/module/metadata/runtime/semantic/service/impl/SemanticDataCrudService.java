@@ -180,11 +180,7 @@ public class SemanticDataCrudService {
         semanticTemporaryDatasourceService.switchMybatisFlex(entity.getDatasourceId());
         try {
             log.info("read record: table={}, {}={}", entity.getTableName(), pkField, id);
-            QueryWrapper qw = QueryWrapper.create()
-                                .where(new QueryColumn(pkField).eq(String.valueOf(id)));
-            if (hasDeletedField(entity.getFields())) { qw.and(new QueryColumn("deleted").eq("0")); }
-            log.info("read record: table={}, {}={}", entity.getTableName(), pkField, id);
-            Row row = dynamicMetadataRepository.selectOneByQuery(entity.getTableName(), qw);
+            Row row = dynamicMetadataRepository.selectMainById(entity.getTableName(), pkField, id, hasDeletedField(entity.getFields()));
             if (row == null) { return null; }
 
             Map<String, Object> result = new HashMap<>();
@@ -229,8 +225,7 @@ public class SemanticDataCrudService {
     }
 
     private SemanticRelationValueDTO readSubtableConnector(SemanticRelationSchemaDTO c, Object parentId) {
-        QueryWrapper qw = QueryWrapper.create().where(new QueryColumn("parent_id").eq(String.valueOf(parentId)));
-        List<Row> rows = dynamicMetadataRepository.selectListByQuery(c.getTargetEntityTableName(), qw);
+        List<Row> rows = dynamicMetadataRepository.selectSubtableRowsByParent(c.getTargetEntityTableName(), parentId);
         if (rows == null || rows.isEmpty()) { return null; }
         SemanticRelationValueDTO relation = new SemanticRelationValueDTO();
         List<SemanticFieldSchemaDTO> attrs = c.getRelationAttributes();
@@ -248,8 +243,7 @@ public class SemanticDataCrudService {
 
     private SemanticRelationValueDTO readRelationConnector(SemanticRelationSchemaDTO c, Object parentId) {
         String srcKey = "parent_id";
-        QueryWrapper qw = QueryWrapper.create().where(new QueryColumn(srcKey).eq(String.valueOf(parentId)));
-        List<Row> rows = dynamicMetadataRepository.selectListByQuery(c.getTargetEntityTableName(), qw);
+        List<Row> rows = dynamicMetadataRepository.selectRelationRowsByParent(c.getTargetEntityTableName(), srcKey, parentId);
         if (rows == null || rows.isEmpty()) { return null; }
         SemanticRelationValueDTO relation = new SemanticRelationValueDTO();
         List<SemanticFieldSchemaDTO> attrs = c.getRelationAttributes();
@@ -271,7 +265,7 @@ public class SemanticDataCrudService {
     public List<Map<String, Object>> queryByIds(SemanticRecordDTO recordDTO, List<Object> ids) {
         SemanticEntitySchemaDTO entity = recordDTO.getEntitySchema();
         String pkField = getPrimaryKeyFieldName(entity.getFields());
-        QueryWrapper qw = QueryWrapper.create().where(pkField + " in (?)", ids);
+        QueryWrapper qw = QueryWrapper.create().where(new QueryColumn(pkField).in(ids));
         List<Row> rows = Db.selectListByQuery(tableNameQuoter.quote(entity.getTableName()), qw);
         List<Map<String, Object>> result = new ArrayList<>();
         for (Row row : rows) {

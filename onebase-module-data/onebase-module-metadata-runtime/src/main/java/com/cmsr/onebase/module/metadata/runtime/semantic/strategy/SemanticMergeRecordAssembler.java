@@ -206,6 +206,7 @@ public class SemanticMergeRecordAssembler {
             schema.setTargetEntityId(relationship.getTargetEntityId());
             schema.setSourceKeyFieldId(toLongSafe(relationship.getSourceFieldId()));
             schema.setTargetKeyFieldId(toLongSafe(relationship.getTargetFieldId()));
+            schema.setSelectFieldId(relationship.getSelectFieldId());
             schema.setRelationshipType(RelationshipTypeEnum.getByType(relationship.getRelationshipType()));
             schema.setCardinality(resolveCardinality(relationship));
 

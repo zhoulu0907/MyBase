@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.metadata.runtime.semantic.dal.database;
 import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticTableNameQuoter;
 import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.core.query.QueryColumn;
 import com.mybatisflex.core.row.Db;
 import com.mybatisflex.core.row.Row;
 import jakarta.annotation.Resource;
@@ -76,5 +77,46 @@ public class DynamicMetadataRepository {
 
     public List<Row> selectListByQuery(String tableName, QueryWrapper qw) {
         return Db.selectListByQuery(tableNameQuoter.quote(tableName), qw);
+    }
+
+    public Row selectMainById(String tableName, String pkField, Object id, boolean filterDeleted) {
+        QueryWrapper qw = QueryWrapper.create().where(new QueryColumn(pkField).eq(String.valueOf(id)));
+        if (filterDeleted) { qw.and(new QueryColumn("deleted").eq("0")); }
+        return selectOneByQuery(tableName, qw);
+    }
+
+    public Row selectMainById(String tableName, String pkField, Object id) {
+        return selectMainById(tableName, pkField, id, true);
+    }
+
+    public List<Row> selectMainByIds(String tableName, String pkField, List<?> ids, boolean filterDeleted) {
+        if (ids == null || ids.isEmpty()) { return List.of(); }
+        QueryWrapper qw = QueryWrapper.create().where(new QueryColumn(pkField).in(ids));
+        if (filterDeleted) { qw.and(new QueryColumn("deleted").eq("0")); }
+        return selectListByQuery(tableName, qw);
+    }
+
+    public List<Row> selectMainByIds(String tableName, String pkField, List<?> ids) {
+        return selectMainByIds(tableName, pkField, ids, true);
+    }
+
+    public List<Row> selectSubtableRowsByParent(String tableName, Object parentId) {
+        return selectSubtableRowsByParent(tableName, parentId, true);
+    }
+
+    public List<Row> selectSubtableRowsByParent(String tableName, Object parentId, boolean filterDeleted) {
+        QueryWrapper qw = QueryWrapper.create().where(new QueryColumn("parent_id").eq(String.valueOf(parentId)));
+        if (filterDeleted) { qw.and(new QueryColumn("deleted").eq("0")); }
+        return selectListByQuery(tableName, qw);
+    }
+
+    public List<Row> selectRelationRowsByParent(String tableName, String relationKey, Object relationValue) {
+        return selectRelationRowsByParent(tableName, relationKey, relationValue, true);
+    }
+
+    public List<Row> selectRelationRowsByParent(String tableName, String relationKey, Object relationValue, boolean filterDeleted) {
+        QueryWrapper qw = QueryWrapper.create().where(new QueryColumn(relationKey).eq(String.valueOf(relationValue)));
+        if (filterDeleted) { qw.and(new QueryColumn("deleted").eq("0")); }
+        return selectListByQuery(tableName, qw);
     }
 }

@@ -56,8 +56,8 @@ public class MetadataBusinessEntityDO extends BaseTenantEntity {
     /**
      * 运行模式：0 编辑态，1 运行态
      */
-    @Column(value = "run_mode", comment = "运行模式：0 编辑态，1 运行态")
-    private Integer runMode;
+    // @Column(value = "run_mode", comment = "运行模式：0 编辑态，1 运行态")
+    // private Integer runMode;
 
     /**
      * 应用ID
