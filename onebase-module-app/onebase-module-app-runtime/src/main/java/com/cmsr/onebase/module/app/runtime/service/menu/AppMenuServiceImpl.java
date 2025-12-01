@@ -19,6 +19,7 @@ import com.cmsr.onebase.module.app.runtime.vo.menu.MenuListRespVO;
 import com.cmsr.onebase.module.app.runtime.vo.menu.MenuPermissionVO;
 import jakarta.annotation.Resource;
 import lombok.Setter;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
@@ -58,17 +59,17 @@ public class AppMenuServiceImpl implements AppMenuService {
 
     @Override
     public List<MenuListRespVO> listBpmApplicationMenu() {
-        Long userId = RTSecurityContext.getUserId();
         Long applicationId = ApplicationManager.getApplicationId();
-        List<AppMenuDO> menuDOS;
 
         // 获取应用下所有可见的BPM类型菜单
-        menuDOS = appMenuRepository.findByApplicationIdAndType(applicationId,
+        List<AppMenuDO> menuDOS = appMenuRepository.findByApplicationIdAndType(applicationId,
                 Set.of(MenuTypeEnum.BPM.getValue()));
+
         // 额外过滤只保留可见的菜单
         menuDOS = menuDOS.stream()
-                .filter(menu -> menu.getIsVisible() == 1)
-                .collect(Collectors.toList());
+                .filter(menu -> BooleanUtils.toBoolean(menu.getIsVisible()))
+                .toList();
+
         // 返回菜单
         return menuDOS.stream()
                 .map(v -> BeanUtils.toBean(v, MenuListRespVO.class))
