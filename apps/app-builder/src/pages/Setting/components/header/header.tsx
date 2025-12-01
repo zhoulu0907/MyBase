@@ -50,7 +50,6 @@ const AppHeader: React.FC<HeaderProps> = ({ className, avatarUrl }) => {
           <Typography.Text type="secondary">{maskMobile(userPermissionInfo?.user?.mobile || '')}</Typography.Text>
         </div>
       </Menu.Item>
-      {/* <Menu.Item key="profile">{maskMobile(userPermissionInfo?.user?.mobile || '')}</Menu.Item> */}
       <Menu.Item key="logout" onClick={handleLogout}>
         <IconExport style={{ color: '#F53F3F' }} />
         <Typography.Text type="error">{t('header.logout')}</Typography.Text>

@@ -34,7 +34,6 @@ function AppContent() {
 
   useEffect(() => {
     if (tenantId) {
-      console.log('set curIdentifyId: ', tenantId);
       TokenManager.setCurIdentifyId(tenantId);
     }
   }, [tenantId, location.pathname]);
