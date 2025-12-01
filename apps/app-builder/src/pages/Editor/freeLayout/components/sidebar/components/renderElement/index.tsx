@@ -5,7 +5,7 @@ import { IconLaunch } from '@arco-design/web-react/icon';
 import { FormulaEditor } from '@/components/FormulaEditor';
 import type { ConditionRule } from '../../constants';
 import styles from '../../siderbar-line.module.less';
-import { FieldType, approvalResultOptions } from '../../constants';
+import { FieldType, approvalResultOptions, Operator } from '../../constants';
 import { getUserPage, type PageParam } from '@onebase/platform-center';
 import {
   InputKeyType,
@@ -66,6 +66,18 @@ export const RenderElement: React.FC<RenderElementProps> = ({
       });
   };
   const getVariableOptions = (item: any) => {
+    console.log(VARIABLE_MAP[item.fieldType as FieldType], item);
+    const OPS = [Operator.CONTAINS, Operator.NOT_CONTAINS, Operator.EXISTS_IN, Operator.NOT_EXISTS_IN] as const;
+    if (item.fieldType === FieldType.USER && OPS.includes(item.op as (typeof OPS)[number])) {
+      item.fieldType = FieldType.MULTI_USER;
+    }
+    if (item.fieldType === FieldType.DEPARTMENT && OPS.includes(item.op as (typeof OPS)[number])) {
+      item.fieldType = FieldType.MULTI_DEPARTMENT;
+    }
+    if (item.fieldType === FieldType.DATA_SELECTION && OPS.includes(item.op as (typeof OPS)[number])) {
+      item.fieldType = FieldType.MULTI_DATA_SELECTION;
+    }
+
     return formSummaryOptions
       .filter((optionItem) => {
         const fieldType = optionItem.fieldType as FieldType;

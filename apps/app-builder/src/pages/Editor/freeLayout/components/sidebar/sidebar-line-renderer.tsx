@@ -129,12 +129,12 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
     {
       label: '表单字段1',
       value: 'field1',
-      type: FieldType.AGGREGATE
+      type: FieldType.USER
     },
     {
       label: '表单字段2',
       value: 'field2',
-      type: FieldType.ENCRYPTED
+      type: FieldType.DATE
     }
   ];
 
@@ -311,10 +311,33 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
     ]);
   };
 
-  const handleDeleteRule = (index: number) => {
+  const handleDeleteRule = (index: number, item: any) => {
+    console.log(item);
+
     if (conditionRule.length <= 1) return;
     const newRules = conditionRule.filter((_, i) => i !== index);
     setConditionRule(newRules);
+  };
+
+  const RANGE_TYPES = [FieldType.NUMBER, FieldType.DATE, FieldType.DATETIME, FieldType.AGGREGATE] as const;
+
+  const renderVariables = (item: { fieldType: string; op: string }) => {
+    return !RANGE_TYPES.includes(item.fieldType as (typeof RANGE_TYPES)[number]) || item.op !== Operator.RANGE;
+  };
+
+  const renderFormula = (item: { fieldType: string; op: string }) => {
+    const disabledTypes = [
+      FieldType.ADDRESS,
+      FieldType.DATA_SELECTION,
+      FieldType.MULTI_DATA_SELECTION,
+      FieldType.GEOGRAPHY,
+      FieldType.ID
+    ];
+    const rangeTypes = [FieldType.NUMBER, FieldType.DATE, FieldType.DATETIME, FieldType.AGGREGATE];
+    return (
+      !disabledTypes.includes(item.fieldType as FieldType) &&
+      !(rangeTypes.includes(item.fieldType as FieldType) && item.op === Operator.RANGE)
+    );
   };
 
   useEffect(() => {
@@ -408,9 +431,10 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
                             disabled={!item.fieldScope || !item.fieldScope || !item.op}
                             onChange={(value) => handleRuleChange(index, 'operatorType', value)}
                           >
-                            <Option value={'value'}>静态值</Option>
-                            <Option value={'variables'}>变量</Option>
-                            <Option value={'formula'}>公式</Option>
+                            {item.fieldType !== FieldType.GEOGRAPHY && <Option value={'value'}>静态值</Option>}
+                            {renderVariables(item) && <Option value={'variables'}>变量</Option>}
+
+                            {renderFormula(item) && <Option value={'formula'}>公式</Option>}
                           </Select>
                           {
                             <RenderElement
@@ -429,7 +453,7 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
                         </>
                       )}
                       <IconClose
-                        onClick={() => handleDeleteRule(index)}
+                        onClick={() => handleDeleteRule(index, item)}
                         style={{ marginLeft: '8px', cursor: 'pointer' }}
                       />
                     </div>

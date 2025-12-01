@@ -36,7 +36,7 @@ export enum DataOperator {
 
 interface ComplexInfoItem {
   type: ElementType;
-  options: DataOperator | Array<{ label: string; value: string }>;
+  options: DataOperator | Array<{ label: string; value: string | boolean }>;
 }
 
 type ComplexInfo = Record<
@@ -103,7 +103,8 @@ type ComplexInfo = Record<
   | 'DATA_SELECTION_RESULT_CONTAINS'
   | 'DATA_SELECTION_RESULT_NOT_CONTAINS'
   | 'DATA_SELECTION_RESULT_EXISTS_IN'
-  | 'DATA_SELECTION_RESULT_NOT_EXISTS_IN',
+  | 'DATA_SELECTION_RESULT_NOT_EXISTS_IN'
+  | 'BOOLEAN_EQUALS',
   ComplexInfoItem
 >;
 
@@ -183,6 +184,10 @@ export const VARIABLE_MAP: Partial<Record<FieldType, FieldType[]>> = {
   [FieldType.MULTI_DATA_SELECTION]: [FieldType.DATA_SELECTION, FieldType.MULTI_DATA_SELECTION],
   [FieldType.GEOGRAPHY]: [FieldType.GEOGRAPHY],
   [FieldType.ID]: [FieldType.ID, FieldType.NUMBER],
+  [FieldType.NUMBER]: [FieldType.NUMBER, FieldType.AGGREGATE],
+  [FieldType.DATE]: [FieldType.DATE],
+  [FieldType.DATETIME]: [FieldType.DATETIME],
+  [FieldType.USER]: [FieldType.USER]
 };
 
 export const ComplexInfo: ComplexInfo = {
@@ -498,5 +503,18 @@ export const ComplexInfo: ComplexInfo = {
   MULTI_DATA_SELECTION_NOT_EXISTS_IN: {
     type: ElementType.SELECT_MULTIPLE,
     options: []
+  },
+  BOOLEAN_EQUALS: {
+    type: ElementType.SELECT,
+    options: [
+      {
+        value: true,
+        label: '是'
+      },
+      {
+        value: false,
+        label: '否'
+      }
+    ]
   }
 };
