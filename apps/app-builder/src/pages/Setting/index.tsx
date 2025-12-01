@@ -62,7 +62,7 @@ const SettingPage: React.FC = () => {
                   path="profile/edit"
                   element={<ProfileEditPage setAvatarUrl={setAvatarUrl} avatarUrl={avatarUrl} />}
                 />
-                <Route path="" element={<Navigate to="user" replace />} />
+                <Route path="" element={<Navigate to="application" replace />} />
               </Routes>
             </div>
           </Content>
