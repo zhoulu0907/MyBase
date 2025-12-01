@@ -5,7 +5,7 @@ import { craeteETLFlow, getETLFlow, updateETLFlow } from '@onebase/app';
 import { etlEditorSignal, getHashQueryParam } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import NodeConfigPage from './components/drawer';
 import ETLFlowPanel from './components/panel';
 import { useEditorProps } from './hooks/use-editor-props';
@@ -14,6 +14,8 @@ import { FlowNodeRegistries } from './nodes';
 
 const ETLFlowEditorPage: React.FC = () => {
   useSignals();
+
+  const { tenantId } = useParams();
 
   const navigate = useNavigate();
   const refWrapper = useRef<HTMLDivElement>(null);
@@ -32,7 +34,7 @@ const ETLFlowEditorPage: React.FC = () => {
   const backToDataFactory = () => {
     const appId = getHashQueryParam('appId');
 
-    navigate(`/onebase/create-app/data-factory?appId=${appId}`);
+    navigate(`/onebase/${tenantId}/home/create-app/data-factory?appId=${appId}`);
   };
 
   useEffect(() => {
@@ -142,7 +144,7 @@ const ETLFlowEditorPage: React.FC = () => {
 
       Message.success('创建成功');
       const appId = getHashQueryParam('appId');
-      navigate(`/onebase/etl_editor?flowId=${res}&appId=${appId}`);
+      navigate(`/onebase/${tenantId}/etl_editor?flowId=${res}&appId=${appId}`);
     }
   };
 

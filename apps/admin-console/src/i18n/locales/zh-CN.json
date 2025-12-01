@@ -53,7 +53,7 @@
   "breadcrumb": {
     "onebase": "首页",
     "platformInfo": "平台信息",
-    "tenant": "租户管理",
+    "tenant": "空间管理",
     "administrator": "平台管理员",
     "user": "用户管理",
     "content": "内容管理",
@@ -64,7 +64,9 @@
     "article": "文章管理",
     "media": "媒体管理",
     "general": "常规设置",
-    "security": "安全设置"
+    "security": "安全设置",
+    "create": "创建空间",
+    "edit": "编辑"
   },
   "platformInfo": {
     "title": "平台信息",

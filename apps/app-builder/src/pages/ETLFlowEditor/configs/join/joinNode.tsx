@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Checkbox, Form, Grid, Input, Layout, Select, Table } from '@arco-design/web-react';
+import { Checkbox, Form, Input, Layout, Table } from '@arco-design/web-react';
 import useForm from '@arco-design/web-react/es/Form/useForm';
 import { useSignals } from '@preact/signals-react/runtime';
 import { ETLDrawerTab, etlEditorSignal } from '@onebase/common';
@@ -7,6 +7,7 @@ import JoinRow from './components/joinRow';
 import styles from './index.module.less';
 import DataRemark from '../../components/dataRemark';
 import { setNodeDataAndResetDownstream } from '../utils';
+import { cloneDeep } from 'lodash-es';
 
 type Row = {
   isSelected?: boolean;
@@ -20,10 +21,13 @@ type Row = {
   nodeName: string;
 };
 
-export const JoinNodeConfig: React.FC = () => {
+type JoinNodeConfigProps = { onRegisterSave?: (fn: () => void) => void };
+
+export const JoinNodeConfig: React.FC<JoinNodeConfigProps> = ({ onRegisterSave }) => {
   useSignals();
 
   const { curNode, curDrawerTab, nodeData, graphData } = etlEditorSignal;
+  const [newPayload, setNewPayload] = useState<any>(cloneDeep(nodeData.value[curNode.value.id]));
   const [form] = useForm();
   const [finalNodeList, setFinalNodeList] = useState<any[]>([]);
 
@@ -36,17 +40,25 @@ export const JoinNodeConfig: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    onRegisterSave?.(handleSaveInner);
+  }, [onRegisterSave]);
+
+  const handleSaveInner = () => {
+    setNodeDataAndResetDownstream(newPayload, curNode.value.id, graphData.value, nodeData.value);
+  };
+
+  useEffect(() => {
     if (curDrawerTab.value === ETLDrawerTab.FIELD_CONFIG) {
       const nodeListDetail = nodeData.value;
-      const curNodeDetailConfig = nodeListDetail[curNode.value.id]?.config;
+      const curNodeDetailConfig = newPayload?.config;
       const leftNodeId = curNodeDetailConfig?.leftNodeId;
       const rightNodeId = curNodeDetailConfig?.rightNodeId;
       let allFieldList = [];
       if (curNodeDetailConfig?.mappings?.length > 0) {
         allFieldList = curNodeDetailConfig?.mappings;
       } else if (leftNodeId && rightNodeId) {
-        const leftFiledList = nodeListDetail[leftNodeId]?.output.fields;
-        const rightFiledList = nodeListDetail[rightNodeId]?.output.fields;
+        const leftFiledList = nodeListDetail[leftNodeId]?.output?.fields;
+        const rightFiledList = nodeListDetail[rightNodeId]?.output?.fields;
         const finalLeftFiledList = leftFiledList?.map((field: any) => ({
           fieldType: field.fieldType,
           fieldFqn: field.fieldFqn,
@@ -82,7 +94,7 @@ export const JoinNodeConfig: React.FC = () => {
   };
 
   const setCurNodeData = (rows: Row[], selectedRow?: Row[]) => {
-    const payload = nodeData.value[curNode.value.id];
+    const payload = newPayload;
     payload.config = {
       ...payload.config,
       mappings: rows
@@ -103,7 +115,7 @@ export const JoinNodeConfig: React.FC = () => {
       };
     }
 
-    setNodeDataAndResetDownstream(payload, curNode.value.id, graphData.value, nodeData.value);
+    setNewPayload(payload);
   };
 
   const selectedRowKeys = rows.filter((r) => r.isSelected).map((r) => r.fieldFqn) as (string | number)[];
@@ -147,8 +159,8 @@ export const JoinNodeConfig: React.FC = () => {
             <Checkbox>合并连接字段</Checkbox>
           </div>
 
-          <Form form={form} className={styles.content} initialValues={{ ...nodeData.value[curNode.value.id]?.config }}>
-            <JoinRow finalNodeList={finalNodeList} form={form} />
+          <Form form={form} className={styles.content} initialValues={newPayload?.config}>
+            <JoinRow finalNodeList={finalNodeList} form={form} payload={newPayload} setPayload={setNewPayload} />
             {/* <Form.List field="joinList">
               {(joinList, { add: addRow }) => {
                 return (

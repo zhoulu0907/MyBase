@@ -20,7 +20,7 @@ interface CreateExternalModalProps {
   // 关闭弹窗的回调
   onClose: () => void;
   // 新建外部数据源后的回调
-  onCreate: (datasourceId: string) => void;
+  onCreate: (datasourceUUID: string) => void;
 }
 
 const CreateExternalModal: React.FC<CreateExternalModalProps> = ({ visible, onClose, onCreate }) => {
@@ -36,8 +36,11 @@ const CreateExternalModal: React.FC<CreateExternalModalProps> = ({ visible, onCl
 
   const [testConnectionSuccess, setTestConnectionSuccess] = useState(false);
 
+  const connectMode = Form.useWatch('connectMode', form);
+
   useEffect(() => {
     if (visible) {
+      setSelectedDataSourceType('');
       handleGetSupportedDataSource();
     }
     setCurrentStep(1);
@@ -49,20 +52,6 @@ const CreateExternalModal: React.FC<CreateExternalModalProps> = ({ visible, onCl
     }
     if (currentStep == 2 && selectedDataSourceType != '') {
       form.setFieldValue('datasourceType', selectedDataSourceType);
-
-      form.setFieldsValue({
-        datasourceName: '夏源铭测试数据连接',
-        datasourceType: 'PostgreSQL',
-        host: '10.0.104.38',
-        port: 5432,
-        database: 'sakila',
-        username: 'postgres',
-        password: 'onebase@2025',
-        connectMode: 'default',
-        applicationId: 1234567890,
-        readonly: 0,
-        withCollect: 1
-      });
     }
   }, [selectedDataSourceType, currentStep]);
 
@@ -91,6 +80,8 @@ const CreateExternalModal: React.FC<CreateExternalModalProps> = ({ visible, onCl
 
     if (selectedDataSourceType && currentStep == 1) {
       setCurrentStep(2);
+
+      form.setFieldValue('connectMode', 'default');
       return;
     }
 
@@ -110,6 +101,7 @@ const CreateExternalModal: React.FC<CreateExternalModalProps> = ({ visible, onCl
           config: {
             host: values.host,
             port: parseInt(values.port),
+            jdbcUrl: values.jdbcUrl,
             database: values.database,
             username: values.username,
             password: values.password,
@@ -161,6 +153,7 @@ const CreateExternalModal: React.FC<CreateExternalModalProps> = ({ visible, onCl
           host: values.host,
           port: parseInt(values.port),
           database: values.database,
+          jdbcUrl: values.jdbcUrl,
           username: values.username,
           password: values.password,
           connectMode: values.connectMode
@@ -269,30 +262,42 @@ const CreateExternalModal: React.FC<CreateExternalModalProps> = ({ visible, onCl
                 </Col>
                 <Col span={12}>
                   <Form.Item label="连接模式" field={'connectMode'} required>
-                    <Radio.Group defaultValue="default">
+                    <Radio.Group>
                       <Radio value="default">默认</Radio>
                       <Radio value="profession">专业</Radio>
                     </Radio.Group>
                   </Form.Item>
                 </Col>
               </Row>
-              <Row gutter={8}>
-                <Col span={12}>
-                  <Form.Item label="主机地址" field={'host'} required>
-                    <Input placeholder="请输入主机地址" />
+              {connectMode == 'default' && (
+                <>
+                  <Row gutter={8}>
+                    <Col span={12}>
+                      <Form.Item label="主机地址" field={'host'} required>
+                        <Input placeholder="请输入主机地址" />
+                      </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                      <Form.Item label="端口" field={'port'} required>
+                        <Input type="number" placeholder="请输入端口号" />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                  <Row>
+                    <Form.Item label="数据库名" field={'database'} required>
+                      <Input placeholder="请输入数据库名" />
+                    </Form.Item>
+                  </Row>
+                </>
+              )}
+
+              {connectMode == 'profession' && (
+                <Row>
+                  <Form.Item label="JDBC URL" field={'jdbcUrl'} required>
+                    <Input placeholder="请输入JDBC URL" />
                   </Form.Item>
-                </Col>
-                <Col span={12}>
-                  <Form.Item label="端口" field={'port'} required>
-                    <Input type="number" placeholder="请输入端口号" />
-                  </Form.Item>
-                </Col>
-              </Row>
-              <Row>
-                <Form.Item label="数据库名" field={'database'} required>
-                  <Input placeholder="请输入数据库名" />
-                </Form.Item>
-              </Row>
+                </Row>
+              )}
               <Row gutter={8}>
                 <Col span={12}>
                   <Form.Item label="用户名" field={'username'} required>

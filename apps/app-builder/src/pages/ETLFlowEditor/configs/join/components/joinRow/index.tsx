@@ -8,7 +8,6 @@ import RightJoinIcon from '@/assets/images/etl/right_join.svg';
 import InnerJoinIcon from '@/assets/images/etl/inner_join.svg';
 import JoinRowFields from '../joinRowFields';
 import styles from '../../index.module.less';
-import { setNodeDataAndResetDownstream } from '../../../utils';
 
 const { Option } = Select;
 const FormItem = Form.Item;
@@ -28,12 +27,14 @@ const NODETYPE = {
 interface JoinRowProps {
   finalNodeList: any[];
   form: FormInstance;
+  payload: any;
+  setPayload: (payload: any) => void;
 }
 
 const JoinRow = (props: JoinRowProps) => {
   useSignals();
   const { curNode, nodeData, graphData, setNodeData } = etlEditorSignal;
-  const { finalNodeList, form } = props;
+  const { finalNodeList, form, payload, setPayload } = props;
 
   // Join Type
   const [curSelectJoin, setCurSelectJoin] = useState(JOINOPTIONS[0].key);
@@ -45,7 +46,7 @@ const JoinRow = (props: JoinRowProps) => {
   const [rightFieldList, setRightFieldList] = useState<any[]>([]);
 
   useEffect(() => {
-    const joinType = nodeData.value[curNode.value.id]?.config?.joinType;
+    const joinType = payload?.config?.joinType;
     form.setFieldValue('joinType', joinType || JOINOPTIONS[0].key);
     setCurSelectJoin(joinType || JOINOPTIONS[0].key);
     setCurSelectJoinObj(JOINOPTIONS.find((option) => option.key === joinType) || JOINOPTIONS[0]);
@@ -53,9 +54,10 @@ const JoinRow = (props: JoinRowProps) => {
 
   useEffect(() => {
     const nodeListDetail = nodeData.value;
-    if (finalNodeList.length > 0) {
-      const leftNodeId = nodeListDetail[curNode.value.id]?.config[NODETYPE.LEFT];
-      const rightNodeId = nodeListDetail[curNode.value.id]?.config[NODETYPE.RIGHT];
+    const curNodeConfig = payload?.config;
+    if (finalNodeList.length > 0 && curNodeConfig) {
+      const leftNodeId = curNodeConfig[NODETYPE.LEFT];
+      const rightNodeId = curNodeConfig[NODETYPE.RIGHT];
       const leftFieldList = nodeListDetail[leftNodeId]?.output ? nodeListDetail[leftNodeId]?.output.fields : [];
       setLeftFieldList(leftFieldList);
       const rigthFieldList = nodeListDetail[rightNodeId]?.output ? nodeListDetail[rightNodeId]?.output.fields : [];
@@ -86,11 +88,6 @@ const JoinRow = (props: JoinRowProps) => {
         }));
         form.setFieldValue('fieldPairs', finalFieldPairs);
       }
-      const payload = nodeData.value[curNode.value.id];
-      payload.config = {
-        ...payload.config,
-        mappings: []
-      };
     } else {
       if (nodeType === NODETYPE.LEFT) {
         setLeftFieldList(leftFieldList);
@@ -103,12 +100,11 @@ const JoinRow = (props: JoinRowProps) => {
 
   const setCurNodeData = () => {
     const formValue = form.getFieldsValue();
-    const payload = nodeData.value[curNode.value.id];
     payload.config = {
       ...payload.config,
       ...formValue
     };
-    setNodeDataAndResetDownstream(payload, curNode.value.id, graphData.value, nodeData.value);
+    setPayload(payload);
   };
 
   return (
@@ -188,6 +184,8 @@ const JoinRow = (props: JoinRowProps) => {
                     leftFieldList={leftFieldList}
                     rightFieldList={rightFieldList}
                     form={form}
+                    payload={payload}
+                    setPayload={setPayload}
                     remove={remove}
                   />
                 );

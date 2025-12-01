@@ -1,5 +1,5 @@
 import { Button, Layout, Menu } from '@arco-design/web-react';
-import { IconDesktop, IconFile, IconMenuFold, IconMenuUnfold, IconUser } from '@arco-design/web-react/icon';
+import { IconList, IconMenuFold, IconMenuUnfold, IconUser, IconUserGroup } from '@arco-design/web-react/icon';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import type { MenuItemType } from './menuData';
@@ -27,19 +27,19 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
       {
         key: 'platform-info',
         title: '平台信息',
-        icon: <IconDesktop />,
+        icon: <IconUserGroup />,
         path: '/onebase/platform-info'
       },
       {
         key: 'tenant',
-        title: '租户管理',
-        icon: <IconFile />,
+        title: '空间管理',
+        icon: <IconUser />,
         path: '/onebase/tenant'
       },
       {
         key: 'administrator',
         title: '平台管理员',
-        icon: <IconUser />,
+        icon: <IconList />,
         path: '/onebase/administrator'
       }
     ],
@@ -54,7 +54,7 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
   // 查找选中菜单项的函数
   const findSelectedKeys = React.useCallback((items: MenuItemType[], path: string): string[] => {
     for (const item of items) {
-      if (item.path === path) {
+      if (path === item.path || path.startsWith(item.path + '/')) {
         return [item.key];
       }
       if (item.children) {

@@ -6,14 +6,12 @@ import {
   dataMethodInsert,
   dataMethodUpdate,
   getEntityFieldsWithChildren,
-  getPageSetId,
   getPageSetMetaData,
   PageType,
   queryFlowExecForm,
   TRIGGER_EVENTS,
   type AppEntityField,
   type DataMethodParam,
-  type GetPageSetIdReq,
   type InsertMethodParams,
   type UpdateMethodParams
 } from '@onebase/app';
@@ -103,16 +101,17 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   }, [pageSetId]);
 
   const handleGetPageSetId = async (menuId: string) => {
-    const req: GetPageSetIdReq = { menuId: menuId };
-    const res = await getPageSetId(req);
-    setPageSetId(res);
+    // TODO(mickey多租户): 待runtime接口提供后打开
+    // const req: GetPageSetIdReq = { menuId: menuId };
+    // const res = await getPageSetId(req);
+    // setPageSetId(res);
   };
 
   // 信息收集弹窗
   const [flows, setFlows] = useState<any[]>([]);
   const [inputParams, setInputParams] = useState<any>({});
 
-  const [entityParam, setEntityParam] = useState<any>()
+  const [entityParam, setEntityParam] = useState<any>();
 
   // 提交表单
   const submitForm = async (isSave = false) => {
@@ -355,18 +354,18 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   const onSubmit = () => {
     if (curPage?.value?.pageSetType === PageType.BPM) {
       const fields = form.getFieldsValue();
-      const formData:any = {}
+      const formData: any = {};
       Object.entries(fields).forEach(([key, value]) => {
         // 处理主表逻辑
         const field = (mainMetaDataFields.value || []).find((f: AppEntityField) => f.fieldId == key);
         if (field) {
           formData[field.fieldId] = value || '';
         }
-      })
+      });
       setEntityParam({
         entityId: mainMetaData,
         data: formData
-      })
+      });
       setPredictVisible(true);
     } else {
       submitForm();
@@ -407,7 +406,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
             onCancel={cancelSubmitForm}
           />
         )}
-
       </div>
 
       {/* 信息收集弹窗 */}
@@ -421,7 +419,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
           autoFocus={false}
           focusLock={true}
         >
-          <FlowPredict businessId={curPage?.value?.id} entityParam={entityParam}/>
+          <FlowPredict businessId={curPage?.value?.id} entityParam={entityParam} />
         </Modal>
       )}
     </div>

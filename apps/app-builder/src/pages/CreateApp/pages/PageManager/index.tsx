@@ -41,7 +41,7 @@ import { EDITOR_TYPES } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import { debounce } from 'lodash-es';
 import { useCallback, useEffect, useState, type FC } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
 import CopyModal from './components/Modals/CopyModal';
 import CreateModal from './components/Modals/CreateModal';
@@ -82,6 +82,8 @@ const PageManagerPage: FC = () => {
 
   const { t } = useI18n();
   const navigate = useNavigate();
+
+  const { tenantId } = useParams();
 
   const { curAppId } = useAppStore();
 
@@ -377,7 +379,7 @@ const PageManagerPage: FC = () => {
           editorType = EDITOR_TYPES.FORM_EDITOR;
         }
 
-        navigate(`/onebase/editor/${editorType}?pageSetId=${pageSetId}`);
+        navigate(`/onebase/${tenantId}/editor/${editorType}?pageSetId=${pageSetId}&appId=${curAppId}`);
       }
     });
   };
@@ -458,7 +460,7 @@ const PageManagerPage: FC = () => {
 
     // 把编辑页菜单数据保存起来；
     sessionStorage.setItem('EDITOR_PAGE_INFO', JSON.stringify({ id: curMenu.value?.id, name, icon }));
-    navigate(`/onebase/editor/${editorType}?pageSetId=${pageSetId}`);
+    navigate(`/onebase/${tenantId}/editor/${editorType}?pageSetId=${pageSetId}&appId=${curAppId}`);
   };
 
   // 菜单搜索

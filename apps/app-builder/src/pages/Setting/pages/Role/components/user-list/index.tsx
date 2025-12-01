@@ -5,6 +5,7 @@ import { addRoleUsers, getUserPage, removeRoleUsers } from '@onebase/platform-ce
 import { debounce } from 'lodash-es';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import UserSelectModal from './UserSelectModal';
+import styles from '../../index.module.less';
 
 interface UserListProps {
   selectedRoleId?: number;
@@ -106,8 +107,9 @@ const UserList: React.FC<UserListProps> = ({ selectedRoleId = undefined }: UserL
     }
 
     Modal.confirm({
-      title: `提示`,
-      content: `确认要将用户 ${record.nickname} 从该角色下删除吗？`,
+      title: `确认要移除角色用户（${record.nickname}）吗？`,
+      content: '移除该角色用户后，该角色用户将失去该角色赋予的权限，请谨慎操作。',
+      okButtonProps: { status: 'danger' },
       onOk: async () => {
         try {
           await removeRoleUsers(selectedRoleId, [record.id]);
@@ -155,7 +157,7 @@ const UserList: React.FC<UserListProps> = ({ selectedRoleId = undefined }: UserL
         </Space>
         <div style={{ flex: 1 }} />
         <Input
-          style={{ width: 220, marginRight: 12, borderRadius: 24 }}
+          className={styles.userListInput}
           prefix={<IconSearch />}
           placeholder="输入用户名称"
           value={searchValue}

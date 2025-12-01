@@ -1,7 +1,10 @@
+import { DynamicIcon } from '@/components/DynamicIcon';
+
+import { PUBLISH_MODULE } from '@/constants/permission';
+import { appInfoSignal } from '@/store/app';
 import { Button, Checkbox, Form, Input, Message, Space, Typography } from '@arco-design/web-react';
-import { IconLock, IconUser } from '@arco-design/web-react/icon';
-import type { IIconBase } from '@icon-park/react/lib/runtime';
-import { getApplication } from '@onebase/app';
+import { IconLock, IconMobile, IconUser } from '@arco-design/web-react/icon';
+import { runtimeGetApplication } from '@onebase/app';
 import {
   getHashQueryParam,
   getOrCreateDeviceInfo,
@@ -9,45 +12,68 @@ import {
   TokenManager,
   type SliderCaptchaRef
 } from '@onebase/common';
-import { checkCaptchaApi, getCaptchaApi, login, type LoginRequest, type LoginResponse } from '@onebase/platform-center';
+import {
+  checkCaptchaApi,
+  getCaptchaApi,
+  innerLogin,
+  login,
+  runtimeCorpLogin,
+  sassLogin,
+  type LoginRequest,
+  type LoginResponse,
+  type RuntimeAccountLoginRequest,
+  type RuntimeCorpLoginRequest,
+  type RuntimeMobileLoginRequest
+} from '@onebase/platform-center';
 import { appIconMap } from '@onebase/ui-kit';
+import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useI18n } from '../../../hooks/useI18n';
 import { useRememberMe } from '../../../hooks/useRememberMe';
 import styles from '../index.module.less';
 
-interface DynamicIconProps extends IIconBase {
-  IconComponent: React.ComponentType<any>;
-  theme?: 'outline' | 'filled' | 'two-tone' | 'multi-color';
-  size?: number | string;
-  fill?: string;
-  style?: React.CSSProperties;
-}
-
-interface APP_INFO {
-  appName: string;
-  iconName: string;
-  iconColor: string;
-}
-
 const { Paragraph } = Typography;
 
+/**
+ * 运行态登录一共有三种模式
+1.企业登录（手机号 + 密码）仅需传递tenantId.
+2.空间应用saas模式登录 （手机号 + 密码） 需传递appId+ tenantId
+3.空间应用inner模式登录（账号+ 密码） 需传递appId+ tenantId
+4.原本的登录模式（账号+密码） 需传递appId
+ * @returns
+ */
+
 const Right: React.FC = () => {
+  useSignals();
+
+  const { curAppInfo, setCurAppInfo } = appInfoSignal;
+
   const navigate = useNavigate();
   const [form] = Form.useForm();
   const { t } = useI18n();
   const sliderCaptchaRef = useRef<SliderCaptchaRef>(null);
 
-  const [appInfo, setAppInfo] = useState<APP_INFO>({
-    appName: '',
-    iconName: '',
-    iconColor: ''
-  });
+  const [appId, setAppId] = useState('');
+  const [tenantId, setTenantId] = useState('');
 
-  // 从路由中获取 appid 参数
-  const { appId } = useParams<{ appId?: string }>();
-  const { tenantId } = useParams<{ tenantId?: string }>();
+  useEffect(() => {
+    // 从 window.location.hash 中解析 redirectURL，再从 redirectURL 解析 appId 和 tenantId
+    const rawHash = window.location.hash;
+    const prefix = '#/login?redirectURL=';
+    if (rawHash.startsWith(prefix)) {
+      const redirectURL = rawHash.replace(prefix, '');
+      let aid = getHashQueryParam('appId', redirectURL) || '';
+      let tid = getHashQueryParam('tenantId', redirectURL) || '';
+      setAppId(aid);
+      setTenantId(tid);
+    } else {
+      let aid = getHashQueryParam('appId') || '';
+      let tid = getHashQueryParam('tenantId') || '';
+      setAppId(aid);
+      setTenantId(tid);
+    }
+  }, []);
 
   // 使用记住我hook
   const { rememberMe, savedAccount, saveRememberMe } = useRememberMe();
@@ -62,34 +88,37 @@ const Right: React.FC = () => {
     }
 
     // 如果已经登录了就自动跳转到首
-    if (TokenManager.isTokenValid()) {
-      const redirectURL = getHashQueryParam('redirectURL');
-      if (redirectURL) {
-        window.location.href = redirectURL;
-      } else {
-        // 跳转到首页
-        navigate(`/onebase/runtime/${appId}`);
-      }
-      return;
-    }
-
-    handleGetApplication();
+    // if (TokenManager.isTokenValid()) {
+    //   const redirectURL = getHashQueryParam('redirectURL');
+    //   if (redirectURL) {
+    //     window.location.href = redirectURL;
+    //   } else {
+    //     //企业登录
+    //     if (!appId && tenantId) {
+    //       navigate(`/onebase/runtime/my-app`);
+    //     }
+    //     if (appId && !tenantId) {
+    //       navigate(`/onebase/runtime/?appId=${appId}`);
+    //     }
+    //     if (appId && tenantId) {
+    //       navigate(`/onebase/runtime/?appId=${appId}&tenantId=${tenantId}`);
+    //     }
+    //   }
+    //   return;
+    // }
   }, []);
 
-  const handleGetApplication = async () => {
-    const redirectURL = getHashQueryParam('redirectURL');
-    if (redirectURL) {
-      const startIndex = redirectURL.indexOf('/runtime/');
-      const runtimeLength = '/runtime/'.length;
-      const endRedirectURL = redirectURL.slice(startIndex + runtimeLength);
-      const endIndex = endRedirectURL?.indexOf('/');
-      const applicationId = redirectURL.slice(startIndex + runtimeLength, startIndex + runtimeLength + endIndex);
+  useEffect(() => {
+    if (appId) {
+      handleGetApplication();
+    }
+  }, [appId]);
 
-      if (applicationId) {
-        const res = await getApplication({ id: applicationId });
-        if (res) {
-          setAppInfo({ appName: res.appName || '', iconName: res.iconName || '', iconColor: res.iconColor || '' });
-        }
+  const handleGetApplication = async () => {
+    if (appId) {
+      const res = await runtimeGetApplication({ id: appId });
+      if (res) {
+        setCurAppInfo(res);
       }
     }
   };
@@ -101,7 +130,9 @@ const Right: React.FC = () => {
   };
 
   // 账号密码登录
-  const handleAccountLogin = async (values: LoginRequest) => {
+  const handleRuntimeLogin = async (
+    values: RuntimeAccountLoginRequest | RuntimeMobileLoginRequest | LoginRequest | RuntimeCorpLoginRequest
+  ) => {
     setLoading(true);
 
     try {
@@ -114,43 +145,107 @@ const Right: React.FC = () => {
       }
 
       const headers = {
-        'Tenant-Id': tenantId || '1'
+        'X-Tenant-Id': tenantId
       };
+
+      let response: LoginResponse | null = null;
 
       const deviceId = await getOrCreateDeviceInfo();
 
-      const loginData: LoginRequest = {
-        username: values.username!,
-        password: values.password!,
-        captchaVerification: captchaVerification,
-        deviceId: deviceId
-      };
+      if (curAppInfo.value.publishModel === PUBLISH_MODULE.SASS) {
+        const sassloginData: RuntimeMobileLoginRequest = {
+          password: values.password!,
+          mobile: (values as RuntimeMobileLoginRequest).mobile!,
+          appId: appId,
+          captchaVerification: captchaVerification,
+          deviceId: deviceId
+        };
 
-      const response: LoginResponse = await login(loginData, headers);
+        response = await sassLogin(sassloginData, headers);
+      } else if (curAppInfo.value.publishModel === PUBLISH_MODULE.INNER) {
+        const innerloginData: RuntimeAccountLoginRequest = {
+          password: values.password!,
+          username: (values as RuntimeAccountLoginRequest).username!,
+          appId: appId,
+          captchaVerification: captchaVerification,
+          deviceId: deviceId
+        };
+        response = await innerLogin(innerloginData, headers);
+      } else if (!appId) {
+        const innerloginData: RuntimeCorpLoginRequest = {
+          password: values.password!,
+          mobile: (values as RuntimeCorpLoginRequest).mobile!,
+          captchaVerification: captchaVerification,
+          deviceId: deviceId
+        };
+        response = await runtimeCorpLogin(innerloginData, headers);
+      } else {
+        const loginData: LoginRequest = {
+          username: (values as LoginRequest).username!,
+          password: values.password!,
+          captchaVerification: captchaVerification,
+          deviceId: deviceId
+        };
 
-      if (response.accessToken) {
+        response = await login(loginData, headers);
+      }
+
+      if (response && response.accessToken) {
         // 使用 TokenManager 存储 token 信息
+
+        console.log('appId: ', appId);
+        console.log('tenantId: ', tenantId);
+
+        if (appId && tenantId) {
+          TokenManager.setCurIdentifyId(`${appId}_${tenantId}`);
+        } else {
+          if (appId) {
+            TokenManager.setCurIdentifyId(appId);
+          }
+          if (tenantId) {
+            TokenManager.setCurIdentifyId(tenantId);
+          }
+        }
+
         TokenManager.setToken(
           {
             userId: response.userId,
             accessToken: response.accessToken,
             refreshToken: response.refreshToken,
             expiresTime: response.expiresTime,
-            tenantId: response.tenantId
+            tenantId: response.tenantId,
+            adminFlag: response.adminFlag,
+            corpId: response.corpId,
+            loginURL: window.location.href // 当前地址
           },
           rememberMe
         );
 
         // 保存记住我状态和账号信息
-        saveRememberMe(values.username!, rememberMe);
+        if (curAppInfo.value.publishModel === PUBLISH_MODULE.INNER) {
+          saveRememberMe((values as RuntimeAccountLoginRequest).username!, rememberMe);
+        } else if (curAppInfo.value.publishModel === PUBLISH_MODULE.SASS) {
+          saveRememberMe((values as RuntimeMobileLoginRequest).mobile!, rememberMe);
+        } else if (!appId) {
+          saveRememberMe((values as RuntimeCorpLoginRequest).mobile!, rememberMe);
+        } else {
+          saveRememberMe((values as LoginRequest).username!, rememberMe);
+        }
 
         Message.success(t('auth.loginSuccess'));
         const redirectURL = getHashQueryParam('redirectURL');
         if (redirectURL) {
-          window.location.href = redirectURL;
+          if (!appId) {
+            //企业登录
+            navigate(`/onebase/${tenantId}/runtime/my-app`);
+          } else {
+            //saas模式 或者inner模式
+            // navigate(`/onebase/runtime/?appId=${appId}&tenantId=${tenantId}`);
+            navigate(`/onebase/${appId}/${tenantId}/runtime`);
+          }
         } else {
           // 跳转到首页
-          navigate(`/onebase/runtime/${appId}`);
+          navigate(`/onebase/runtime/?appId=${appId}`);
         }
 
         return;
@@ -165,15 +260,47 @@ const Right: React.FC = () => {
   };
 
   // 表单提交处理
-  const handleSubmit = (_values: LoginRequest) => {
-    handleAccountLogin(_values);
+  const handleSubmit = (
+    _values: RuntimeAccountLoginRequest | RuntimeMobileLoginRequest | LoginRequest | RuntimeCorpLoginRequest
+  ) => {
+    handleRuntimeLogin(_values);
   };
 
   // 验证码验证成功回调
   const handleCaptchaSuccess = async (token: string) => {
     const values = await form.getFieldsValue();
-    console.log('values:', values);
-    handleSubmit({ username: values.username, password: values.password, captchaVerification: token });
+
+    const deviceId = await getOrCreateDeviceInfo();
+
+    if (curAppInfo.value.publishModel === PUBLISH_MODULE.SASS) {
+      handleSubmit({
+        mobile: values.mobile,
+        password: values.password,
+        captchaVerification: token,
+        deviceId: deviceId
+      } as RuntimeMobileLoginRequest);
+    } else if (curAppInfo.value.publishModel === PUBLISH_MODULE.INNER) {
+      handleSubmit({
+        username: values.username,
+        password: values.password,
+        captchaVerification: token,
+        deviceId: deviceId
+      } as RuntimeAccountLoginRequest);
+    } else if (!appId) {
+      handleSubmit({
+        mobile: values.mobile,
+        password: values.password,
+        captchaVerification: token,
+        deviceId: deviceId
+      } as RuntimeCorpLoginRequest);
+    } else {
+      handleSubmit({
+        username: values.username,
+        password: values.password,
+        captchaVerification: token,
+        deviceId: deviceId
+      } as LoginRequest);
+    }
   };
 
   // 登录按钮点击事件 - 先验证滑块验证码
@@ -190,30 +317,25 @@ const Right: React.FC = () => {
     }
   };
 
-  const DynamicIcon = ({ IconComponent, ...rest }: DynamicIconProps) => {
-    if (!IconComponent) return null;
-    return <IconComponent {...rest} />;
-  };
-
   return (
     <div className={styles.loginPageRight}>
       <div className={styles.loginFormContainer}>
-        {appInfo.iconName && (
+        {curAppInfo.value.iconName && (
           <div className={styles.appInfo}>
             <div
               className={styles.appIcon}
               style={{
-                background: appInfo.iconColor || 'transparent'
+                background: curAppInfo.value.iconColor || 'transparent'
               }}
             >
               <DynamicIcon
-                IconComponent={appIconMap[appInfo.iconName as keyof typeof appIconMap]}
+                IconComponent={appIconMap[curAppInfo.value.iconName as keyof typeof appIconMap]}
                 theme="outline"
                 size="40"
                 fill="#F2F3F5"
               />
             </div>
-            <div className={styles.appName}>{appInfo.appName}</div>
+            <div className={styles.appName}>{curAppInfo.value.appName}</div>
           </div>
         )}
         <h1 className={styles.title}>欢迎登录</h1>
@@ -226,17 +348,23 @@ const Right: React.FC = () => {
           requiredSymbol={false}
           className={styles.loginForm}
         >
-          <Form.Item
-            field="username"
-            label="用户名"
-            initialValue=""
-            rules={[
-              { required: true, message: '请输入账号' },
-              { minLength: 3, message: '账号至少3个字符' }
-            ]}
-          >
-            <Input placeholder={t('auth.userAccount')} allowClear size="large" prefix={<IconUser />} />
-          </Form.Item>
+          {((curAppInfo.value.publishModel === PUBLISH_MODULE.SASS || !appId) && (
+            <Form.Item label="手机号" field="mobile" rules={[{ required: true, message: '请输入手机号' }]}>
+              <Input placeholder="输入手机号" maxLength={11} prefix={<IconMobile />} />
+            </Form.Item>
+          )) || (
+            <Form.Item
+              field="username"
+              label="用户名"
+              initialValue=""
+              rules={[
+                { required: true, message: '请输入账号' },
+                { minLength: 3, message: '账号至少3个字符' }
+              ]}
+            >
+              <Input placeholder={t('auth.userAccount')} allowClear size="large" prefix={<IconUser />} />
+            </Form.Item>
+          )}
 
           <Form.Item
             field="password"
@@ -281,13 +409,7 @@ const Right: React.FC = () => {
       <div className={styles.loginFooter}>
         <Paragraph className={styles.footerText}>
           登录即表示同意
-          <Button type="text" size="small">
-            《用户协议》
-          </Button>
-          和
-          <Button type="text" size="small">
-            《隐私政策》
-          </Button>
+          <span>《用户协议》</span>和<span>《隐私政策》</span>
         </Paragraph>
       </div>
     </div>

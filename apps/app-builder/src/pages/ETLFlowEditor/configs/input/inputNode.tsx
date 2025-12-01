@@ -8,8 +8,11 @@ import DataRemark from '../../components/dataRemark';
 import { setNodeDataAndResetDownstream } from '../utils';
 import DatasourceModal from './components/datasourceModal';
 import styles from './index.module.less';
+import { cloneDeep } from 'lodash-es';
 
-export const InputNodeConfig: React.FC = () => {
+type InputNodeConfigProps = { onRegisterSave?: (fn: () => void) => void };
+
+export const InputNodeConfig: React.FC<InputNodeConfigProps> = ({ onRegisterSave }) => {
   useSignals();
 
   const { curDrawerTab, nodeData, curNode, graphData } = etlEditorSignal;
@@ -26,15 +29,24 @@ export const InputNodeConfig: React.FC = () => {
 
   const [curColumns, setCurColumns] = useState<ELTColumn[]>([]);
   const [selectedColumns, setSelectColumns] = useState<ELTColumn[]>(
-    nodeData.value[curNode.value.id]?.config?.fields || []
+    cloneDeep(nodeData.value[curNode.value.id]?.config?.fields) || []
   );
+  const [newPayload, setNewPayload] = useState<any>(cloneDeep(nodeData.value[curNode.value.id]));
 
   useEffect(() => {
-    if (nodeData.value[curNode.value.id]?.config?.datasourceId && nodeData.value[curNode.value.id]?.config?.tableId) {
-      handleListETLTables(nodeData.value[curNode.value.id]?.config?.datasourceId);
-      handlelistETLTableColumns(nodeData.value[curNode.value.id]?.config?.tableId);
+    onRegisterSave?.(handleSaveInner);
+  }, [onRegisterSave]);
+
+  const handleSaveInner = () => {
+    setNodeDataAndResetDownstream(newPayload, curNode.value.id, graphData.value, nodeData.value);
+  };
+
+  useEffect(() => {
+    if (newPayload?.config?.datasourceUUID && newPayload?.config?.tableUUID) {
+      handleListETLTables(newPayload?.config?.datasourceUUID);
+      handlelistETLTableColumns(newPayload?.config?.tableUUID);
     }
-  }, [nodeData.value[curNode.value.id]?.config?.tableId]);
+  }, [newPayload?.config?.tableUUID]);
 
   useEffect(() => {
     if (curDrawerTab.value == ETLDrawerTab.DATA_PREVIEW) {
@@ -43,7 +55,7 @@ export const InputNodeConfig: React.FC = () => {
   }, [curDrawerTab.value]);
 
   useEffect(() => {
-    let payload = nodeData.value[curNode.value.id];
+    let payload = newPayload;
 
     payload.config = {
       ...payload.config,
@@ -59,30 +71,31 @@ export const InputNodeConfig: React.FC = () => {
       }))
     };
 
-    setNodeDataAndResetDownstream(payload, curNode.value.id, graphData.value, nodeData.value);
+    setNewPayload(payload);
   }, [selectedColumns]);
 
-  const handleListETLTables = async (datasourceId: string) => {
-    const res = await listETLTables({ id: datasourceId });
+  const handleListETLTables = async (datasourceUuid: string) => {
+    const res = await listETLTables({ uuid: datasourceUuid });
+    console.log(res);
     setTables(res);
   };
 
-  const handlelistETLTableColumns = async (tableId: string) => {
-    const res = await listETLTableColumns({ tableId });
+  const handlelistETLTableColumns = async (tableUuid: string) => {
+    const res = await listETLTableColumns({ tableUuid });
     console.log(res);
     setCurColumns(res);
   };
 
   const handlePreviewData = async () => {
-    const datasourceId = nodeData.value[curNode.value.id]?.config?.datasourceId;
-    const tableId = nodeData.value[curNode.value.id]?.config?.tableId;
+    const datasourceUUID = newPayload?.config?.datasourceUUID;
+    const tableUUID = newPayload?.config?.tableUUID;
 
-    if (!datasourceId || !tableId) {
+    if (!datasourceUUID || !tableUUID) {
       return;
     }
     const res = await previewETLDatasource({
-      datasourceId: datasourceId,
-      tableId: tableId
+      datasourceUuid: datasourceUUID,
+      tableUuid: tableUUID
     });
 
     console.log('res: ', res);
@@ -92,24 +105,25 @@ export const InputNodeConfig: React.FC = () => {
   };
 
   const handleOk = () => {
-    const payload = nodeData.value[curNode.value.id];
-    if (payload?.config?.tableId) {
-      handlelistETLTableColumns(payload?.config?.tableId);
+    const payload = newPayload;
+    if (payload?.config?.tableUUID) {
+      handlelistETLTableColumns(payload?.config?.tableUUID);
     }
 
     setIsModalVisible(false);
   };
 
-  const handleUpdate = (tableId: string, columns: ELTColumn[]) => {
+  const handleUpdate = (datasourceUUID: string, tableUUID: string, columns: ELTColumn[]) => {
     setCurColumns(columns);
 
-    if (tableId !== nodeData.value[curNode.value.id]?.config?.tableId) {
+    if (tableUUID !== newPayload?.config?.tableUUID) {
       setSelectColumns([]);
-      let payload = nodeData.value[curNode.value.id];
+      let payload = newPayload;
 
       payload.config = {
         ...payload.config,
-        tableId: tableId,
+        datasourceUUID: datasourceUUID,
+        tableUUID: tableUUID,
         fields: []
       };
 
@@ -117,7 +131,8 @@ export const InputNodeConfig: React.FC = () => {
         verified: true,
         fields: []
       };
-      setNodeDataAndResetDownstream(payload, curNode.value.id, graphData.value, nodeData.value);
+
+      setNewPayload(payload);
     }
   };
 
@@ -133,10 +148,10 @@ export const InputNodeConfig: React.FC = () => {
               </Button>
             </div>
           </div>
-          {nodeData.value[curNode.value.id]?.config?.tableId && (
+          {newPayload?.config?.tableUUID && (
             <div className={styles.dataSourceContent}>
               <div className={styles.dataSourceName}>
-                {tables.find((table: ETLTable) => table.id === nodeData.value[curNode.value.id]?.config?.tableId)?.name}
+                {tables.find((table: ETLTable) => table.uuid === newPayload?.config?.tableUUID)?.name}
               </div>
 
               <div className={styles.columnContent}>

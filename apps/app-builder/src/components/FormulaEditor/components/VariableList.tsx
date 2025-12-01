@@ -5,7 +5,7 @@ import LightText from './LightText';
 import styles from './VariableList.module.less';
 import type { VariablesList, ChildVariablesField } from '@onebase/app';
 import { cloneDeep } from 'lodash-es';
-import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
+import { FIELD_TAG_TYPE, FIELD_TYPE } from '@onebase/ui-kit';
 
 interface VariableListProps {
   variables: VariablesList[]; //变量数组，包含所有可展示的变量
@@ -16,6 +16,16 @@ interface VariableListProps {
 
 export function VariableList({ variables, searchValue, onSearchChange, onInsertVariable }: VariableListProps) {
   const [filteredVariables, setFilteredVariables] = useState<VariablesList[]>([]);
+
+  // 文件、图片、位置、关联关系、密码、加密字段类型的不适合在函数公式中进行计算
+  const disableTagTypes = [
+    FIELD_TAG_TYPE.FILE.VALUE,
+    FIELD_TAG_TYPE.IMAGE.VALUE,
+    FIELD_TAG_TYPE.GEOGRAPHY.VALUE,
+    FIELD_TAG_TYPE.RELATION.VALUE,
+    FIELD_TAG_TYPE.PASSWORD.VALUE,
+    FIELD_TAG_TYPE.ENCRYPTED.VALUE
+  ];
   /**
    * 处理搜索框值变化
    * @param value - 搜索框输入的值
@@ -44,8 +54,8 @@ export function VariableList({ variables, searchValue, onSearchChange, onInsertV
    * @returns 颜色名称
    */
   const getTypeColor = useCallback((type: string) => {
-    for (let ele in ENTITY_FIELD_TYPE) {
-      const item = ENTITY_FIELD_TYPE[ele as keyof typeof ENTITY_FIELD_TYPE];
+    for (let ele in FIELD_TAG_TYPE) {
+      const item = FIELD_TAG_TYPE[ele as keyof typeof FIELD_TAG_TYPE];
       if (item.VALUE === type) {
         return item.COLOR;
       }
@@ -55,8 +65,8 @@ export function VariableList({ variables, searchValue, onSearchChange, onInsertV
 
   // 字段列表中标签类型名称展示中文
   const getTypeName = useCallback((variable: ChildVariablesField) => {
-    for (let ele in ENTITY_FIELD_TYPE) {
-      const item = ENTITY_FIELD_TYPE[ele as keyof typeof ENTITY_FIELD_TYPE];
+    for (let ele in FIELD_TAG_TYPE) {
+      const item = FIELD_TAG_TYPE[ele as keyof typeof FIELD_TAG_TYPE];
       if (item.VALUE === variable.fieldType) {
         return item.LABEL;
       }
@@ -126,7 +136,9 @@ export function VariableList({ variables, searchValue, onSearchChange, onInsertV
           <List
             size="small"
             className={styles.listSection}
-            dataSource={filteredVariables?.[0]?.fields || variables?.[0]?.fields || []}
+            dataSource={(filteredVariables?.[0]?.fields || variables?.[0]?.fields || []).filter(
+              (ele) => !disableTagTypes.includes(ele.fieldType) && ele.isSystemField !== FIELD_TYPE.SYSTEM
+            )}
             render={(variable, index) => (
               <List.Item key={index} className={styles.variableItem} onClick={() => handleVariableClick(variable)}>
                 <div className={styles.variableInfo}>

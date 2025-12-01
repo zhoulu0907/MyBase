@@ -1,0 +1,162 @@
+.header {
+  width: 100%;
+  height: 64px;
+  background: #fff;
+  border-bottom: 1px solid #e5e6eb;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.headerContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.adminInformation {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+}
+
+.appInfo {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  .menuIcon {
+    margin-right: 16px;
+    cursor: pointer;
+
+    img {
+      display: block;
+    }
+
+    &:hover {
+      border-radius: 4px;
+      background-color: #f2f3f5;
+    }
+  }
+
+  .myAppIcon {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    img {
+      width: 16px;
+      filter: brightness(0) invert(1);
+    }
+  }
+
+  .appName {
+    margin-left: 8px;
+    margin-right: 4px;
+    white-space: nowrap;
+  }
+
+  .appStatusDeveloping {
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 0px;
+    line-height: 32px;
+    color: #3491fa;
+    background: #e8f7ff;
+
+    width: 44px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+
+  .appStatusPublished {
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 0px;
+    line-height: 32px;
+    color: #00b42a66;
+    background: #e8ffea;
+
+    width: 44px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+
+  .appStatusEditAfterPublished {
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 0px;
+    line-height: 32px;
+    color: #ff7d00;
+    background: #fff7e8;
+
+    width: 44px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+}
+
+.icon {
+  width: 32px;
+  height: 32px;
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.visitButton {
+  width: 72px;
+  height: 32px;
+
+  .visitButtonContent {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+  }
+}
+
+.userDropdown {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: #f2f3f5;
+  }
+}
+
+.username {
+  font-size: 14px;
+  color: #1d2129;
+  font-weight: 500;
+}

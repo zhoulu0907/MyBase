@@ -1,7 +1,7 @@
 import { useState, type FC, forwardRef, useImperativeHandle } from 'react';
 import { Form, Input, Upload, Message, Button } from '@arco-design/web-react';
 import { IconFileImage, IconAttachment } from '@arco-design/web-react/icon';
-import { uploadFile } from '@onebase/platform-center';
+import { runtimeUploadFile } from '@onebase/platform-center';
 import { fetchExecTask } from '@onebase/app/src/services/app_runtime';
 
 import '../style/detailOkConfirm.less';
@@ -61,7 +61,7 @@ const DetailOKConfirm: FC = forwardRef((props: any, ref: any) => {
             }
           : undefined;
     
-        const res = await uploadFile(formData, progressAdapter);
+        const res = await runtimeUploadFile(formData, progressAdapter);
         return res;
     };
 

@@ -80,10 +80,13 @@ export default function DictionaryTypeModal({
         <Form.Item label="字典名称" field="name" rules={rules.name}>
           <Input placeholder="请输入字典名称" maxLength={30} allowClear />
         </Form.Item>
-        <Form.Item label="描述" field="remark">
-          <Input.TextArea placeholder="请输入描述" maxLength={100} allowClear />
+        <Form.Item label="字典编码" field="type" rules={[{ required: true, message: '请输入字典编码' }]}>
+          <Input placeholder="请输入字典编码" maxLength={32} allowClear />
         </Form.Item>
-        <Form.Item label="是否启用">
+        <Form.Item label="字典描述" field="remark">
+          <Input.TextArea placeholder="请输入字典描述" maxLength={100} allowClear />
+        </Form.Item>
+        <Form.Item label="是否启用" layout="horizontal" labelCol={{ span: 3.5 }}>
           <Switch checked={statusCheckedValue} onChange={setStatusCheckedValue} />
         </Form.Item>
       </Form>

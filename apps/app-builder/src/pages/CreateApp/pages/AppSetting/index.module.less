@@ -20,12 +20,30 @@
     overflow-y: hidden;
   }
 
+  .menuIcon {
+    display: flex;
+    align-items: center;
+    margin-right: 16px;
+    & > div {
+      display: flex;
+      align-items: center;
+    }
+  }
+  
+  .rightContent {
+    flex: 1;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+  }
+
   .content {
     // height: calc(100vh - 64px - 86px);
     height: 100%;
     padding: 26px 26px;
     box-sizing: border-box;
     background-color: #f7f8fa;
+    flex: 1;
   }
 
   .footer {

@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import { listToTree } from '@/utils/tree';
 import { Input, Message, Modal, Space, Table } from '@arco-design/web-react';
 import { IconPlus, IconSearch, IconCaretDown, IconCaretRight } from '@arco-design/web-react/icon';
@@ -18,6 +19,8 @@ const OrganizationPage: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalLoading, setModalLoading] = useState(false);
   const [editRecord, setEditRecord] = useState<any>(null);
+  const [isSubDept, setIsSubDept] = useState<boolean>(false); // 子部门
+  const [modalType, setModalType] = useState<'create' | 'edit'>(); // 子部门
 
   const columns = [
     {
@@ -25,30 +28,40 @@ const OrganizationPage: React.FC = () => {
       dataIndex: 'name'
     },
     {
-      title: '部门描述',
-      dataIndex: 'remark',
+      title: '管理员',
+      dataIndex: 'adminUserName',
       placeholder: '-'
     },
     {
-      title: '管理员',
+      title: '部门主管',
       dataIndex: 'leaderUserName',
       placeholder: '-'
     },
     {
       title: '用户数量',
       dataIndex: 'userCount',
-      align: 'center' as const
+      placeholder: '-',
+      sorter: (a: DeptVO, b: DeptVO) => a.userCount - b.userCount
+    },
+    {
+      title: '创建时间',
+      dataIndex: 'createTime',
+      placeholder: '-',
+      render: (_: any, record: DeptVO) => dayjs(record?.createTime).format('YYYY-MM-DD HH:mm:ss')
     },
     {
       title: '操作',
       dataIndex: 'operations',
-      width: 150,
+      width: 242,
       render: (_: any, record: any) => (
         <Space size="mini">
-          <Button permission={ACTIONS.UPDATE} type="text" onClick={() => handleEdit(record)}>
+          <Button permission={ACTIONS.SUB_DEPT} type="text" onClick={(e) => handleAddSubDepart(e, record)}>
+            添加子部门
+          </Button>
+          <Button permission={ACTIONS.UPDATE} type="text" onClick={(e) => handleEdit(e, record)}>
             编辑
           </Button>
-          <Button permission={ACTIONS.DELETE} type="text" onClick={() => handleDelete(record)}>
+          <Button permission={ACTIONS.DELETE} type="text" onClick={(e) => handleDelete(e, record)}>
             删除
           </Button>
         </Space>
@@ -57,22 +70,37 @@ const OrganizationPage: React.FC = () => {
   ];
 
   const filteredColumns = useMemo(() => {
-    const allowOps = hasAnyPermission([ACTIONS.UPDATE, ACTIONS.DELETE]);
+    const allowOps = hasAnyPermission([ACTIONS.SUB_DEPT, ACTIONS.UPDATE, ACTIONS.DELETE]);
     if (allowOps) return columns;
     return columns.filter((column) => column.dataIndex !== 'operations');
   }, [columns]);
 
-  const handleEdit = (record: any) => {
+  const handleAddSubDepart = (e: any, record: DeptVO) => {
+    e.stopPropagation();
+    setIsSubDept(true);
+    setModalType('create');
+    setEditRecord({ parentId: record?.id });
+    setModalVisible(true);
+  };
+
+  const handleEdit = (e: any, record: DeptVO) => {
+    e.stopPropagation();
+    setModalType('edit');
+    setIsSubDept(record?.children.length === 0);
     setEditRecord(record);
     setModalVisible(true);
   };
 
-  const handleDelete = (record: DeptVO) => {
+  const handleDelete = (e: any, record: DeptVO) => {
+    e.stopPropagation();
     Modal.confirm({
-      title: '确认删除',
-      content: `确定要删除部门 "${record.name}" 吗？此操作不可恢复。`,
+      title: `确认要删除部门（${record.name}）吗？`,
+      content: '删除部门后，该部门下的用户将转移到其他部门，请谨慎操作。',
       okText: '确认',
       cancelText: '取消',
+      okButtonProps: {
+        status: 'danger',
+      },
       onOk: async () => {
         deleteDept(record.id).then(() => {
           Message.success('删除成功');
@@ -84,6 +112,8 @@ const OrganizationPage: React.FC = () => {
 
   const handleAdd = () => {
     setEditRecord(null);
+    setIsSubDept(false);
+    setModalType('create');
     setModalVisible(true);
   };
 
@@ -144,17 +174,17 @@ const OrganizationPage: React.FC = () => {
       <div className={styles.pageHeader}>
         <div className={styles.leftContent}>
           <Button permission={ACTIONS.CREATE} type="primary" onClick={handleAdd} icon={<IconPlus />}>
-            添加
+            添加部门
           </Button>
         </div>
         <div className={styles.rightContent}>
           <Input
+            className={styles.inputSearch}
             placeholder="请输入部门名称"
             prefix={<IconSearch />}
             value={searchValue}
             onChange={handleSearch}
             onPressEnter={(e) => handleSearch(e.target.value)}
-            style={{ width: 300 }}
           />
         </div>
       </div>
@@ -184,6 +214,8 @@ const OrganizationPage: React.FC = () => {
         onConfirm={handleModalConfirm}
         loading={modalLoading}
         initialValues={editRecord || undefined}
+        isSubDept={isSubDept}
+        modalType={modalType}
       />
     </div>
   );
