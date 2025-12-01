@@ -41,7 +41,7 @@ public class PostController {
 
     @PostMapping("/create")
     @Operation(summary = "创建岗位")
-    @PreAuthorize("@ss.hasPermission('tenant:dept:create')")
+    @PreAuthorize("@ss.hasPermission('tenant:post:create')")
     public CommonResult<Long> createPost(@Valid @RequestBody PostSaveReqVO createReqVO) {
         Long postId = postService.createPost(createReqVO);
         return success(postId);
@@ -49,7 +49,7 @@ public class PostController {
 
     @PostMapping("/update")
     @Operation(summary = "修改岗位")
-    @PreAuthorize("@ss.hasPermission('tenant:dept:update')")
+    @PreAuthorize("@ss.hasPermission('tenant:post:update')")
     public CommonResult<Boolean> updatePost(@Valid @RequestBody PostSaveReqVO updateReqVO) {
         postService.updatePost(updateReqVO);
         return success(true);
@@ -57,7 +57,7 @@ public class PostController {
 
     @PostMapping("/delete")
     @Operation(summary = "删除岗位")
-    @PreAuthorize("@ss.hasPermission('tenant:dept:delete')")
+    @PreAuthorize("@ss.hasPermission('tenant:post:delete')")
     public CommonResult<Boolean> deletePost(@RequestParam("id") Long id) {
         postService.deletePost(id);
         return success(true);
@@ -66,7 +66,7 @@ public class PostController {
     @GetMapping(value = "/get")
     @Operation(summary = "获得岗位信息")
     @Parameter(name = "id", description = "岗位编号", required = true, example = "1024")
-    @PreAuthorize("@ss.hasPermission('tenant:dept:query')")
+    @PreAuthorize("@ss.hasPermission('tenant:post:query')")
     public CommonResult<PostRespVO> getPost(@RequestParam("id") Long id) {
         PostDO post = postService.getPost(id);
         return success(BeanUtils.toBean(post, PostRespVO.class));
@@ -85,7 +85,7 @@ public class PostController {
 
     @GetMapping("/page")
     @Operation(summary = "获得岗位分页列表")
-    @PreAuthorize("@ss.hasPermission('tenant:dept:query')")
+    @PreAuthorize("@ss.hasPermission('tenant:post:query')")
     public CommonResult<PageResult<PostRespVO>> getPostPage(@Validated PostPageReqVO pageReqVO) {
         PageResult<PostDO> pageResult = postService.getPostPage(pageReqVO);
         return success(BeanUtils.toBean(pageResult, PostRespVO.class));
@@ -93,7 +93,7 @@ public class PostController {
 
     @GetMapping("/export")
     @Operation(summary = "岗位管理")
-    @PreAuthorize("@ss.hasPermission('tenant:dept:export')")
+    @PreAuthorize("@ss.hasPermission('tenant:post:export')")
     public void export(HttpServletResponse response, @Validated PostPageReqVO reqVO) throws IOException {
         reqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
         List<PostDO> list = postService.getPostPage(reqVO).getList();
