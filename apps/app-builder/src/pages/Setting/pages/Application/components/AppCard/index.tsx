@@ -79,7 +79,7 @@ const AppCard: React.FC<AppCardProps> = ({
             <div className={styles.appCardInfo}>
               <div className={styles.infoHeader}>
                 <Tooltip content={item.appName}>
-                  <div className={styles.appTitle}>{item.appName}asdddddddddddddddddddddddddddddd</div>
+                  <div className={styles.appTitle}>{item.appName}</div>
                 </Tooltip>
 
                 <div className={styles.tagWrapper}>
