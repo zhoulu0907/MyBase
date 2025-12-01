@@ -1,17 +1,17 @@
 import React from 'react';
 import {
   FORM_COMPONENT_TYPES,
-  FormComp,
   LAYOUT_COMPONENT_TYPES,
   LIST_COMPONENT_TYPES,
   // LayoutComp,
   SHOW_COMPONENT_TYPES,
-  ShowComp,
   getComponentConfig,
   ALIGN_OPTIONS,
   ALIGN_VALUES,
 } from '@onebase/ui-kit';
 import { ListComp } from '@/components/Materials/Basic/ListComponents';
+import { FormComp } from '@/components/Materials/Basic/FormComponents';
+import { ShowComp } from '@/components/Materials/Basic/ShowComponents';
 
 /**
  * 组件渲染的通用属性
