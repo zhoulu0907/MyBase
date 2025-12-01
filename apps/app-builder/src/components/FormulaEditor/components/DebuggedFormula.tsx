@@ -34,13 +34,22 @@ export function DebuggedFormula(props: DebuggedFormulaProps) {
         // 遍历每个字段名，提取所有行的该字段值
         fieldNames.forEach((fieldName) => {
           // 生成目标 key：表格标识 + 字段名（如 "tableRows$数据查询节点(多条)111.任务名称"）
-          const targetKey = `${newTableKey}.${fieldName}`;
+          const targetKey = `${newTableKey}.${fieldName}`; 
           result[targetKey] = (rows as any)?.map((row: any) => row[fieldName] || '');
         });
       }
     });
     return result;
   };
+
+  const withSingleEscapedChar = (char: string) => {
+    const isSingleEscapedChar = /^[\x00-\x1F\\"]$/;
+    if (isSingleEscapedChar.test(char)) {
+      return JSON.stringify(char).slice(1, -1);
+    } 
+    return char;
+  }
+
 
   const handleFormula = async () => {
     setLoading(true);
@@ -58,7 +67,6 @@ export function DebuggedFormula(props: DebuggedFormulaProps) {
           };
         }
       });
-      console.log('22', newValidFieldResult, formattedTableData);
       const data = await debugFormula({
         formula: formula,
         parameters: { ...(newValidFieldResult || {}), ...(formattedTableData || {}) }
@@ -85,7 +93,7 @@ export function DebuggedFormula(props: DebuggedFormulaProps) {
           case 'Long':
           case 'String':
           default:
-            setDisplayValue(data.result);
+            setDisplayValue(withSingleEscapedChar(data.result));
         }
       }
       console.log(data, 'data');
