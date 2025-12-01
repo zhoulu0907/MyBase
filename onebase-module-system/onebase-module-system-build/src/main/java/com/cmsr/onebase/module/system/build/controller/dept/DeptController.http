@@ -26,14 +26,14 @@ tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
 {
-  "id": 100,
+  "id": 158401074156142592,
   "name": "测试部门-更新",
   "parentId": 0,
   "sort": 1,
   "leaderUserId": 3385310182593531904,
   "phone": "13012345678",
   "email": "test@example.com",
-  "status": 0
+  "status": 1
 }
 
 ### 请求 /update 接口 => 成功
@@ -41,15 +41,16 @@ POST {{baseUrl}}/system/dept/update-dept-admin-or-director
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
+
 {
   "userId": 1001,
-  "deptId": 9,
+  "deptId": 158401074156142592,
   "updateType": "admin1"
 }
 
 
 ### 请求 /get-dept-users 接口 => 成功
-GET {{baseUrl}}/system/dept/get-dept-users?deptId=100&keywords=
+GET {{baseUrl}}/system/dept/get-dept-users?deptId=158401074156142592&keywords=
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 

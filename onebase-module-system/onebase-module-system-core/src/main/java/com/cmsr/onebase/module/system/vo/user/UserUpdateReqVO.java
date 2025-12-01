@@ -70,13 +70,4 @@ public class UserUpdateReqVO {
     @DiffLogField(name = "用户头像")
     private String avatar;
 
-    @Schema(description = "用户类型", example = "1")
-    @DiffLogField(name = "用户类型")
-    private Integer userType;
-
-    @Schema(description = "管理员类型", example = "2")
-    @DiffLogField(name = "管理员类型")
-    private Integer adminType;
-
-
 }

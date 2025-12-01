@@ -7,9 +7,9 @@ import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
-import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
 import com.cmsr.onebase.module.system.dal.database.CorpDataRepository;
@@ -19,7 +19,6 @@ import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.corp.CorpConstant;
 import com.cmsr.onebase.module.system.service.corpapprelation.CorpAppRelationService;
 import com.cmsr.onebase.module.system.service.user.UserService;
-import com.cmsr.onebase.module.system.util.encrypt.PasswordRandomGenerator;
 import com.cmsr.onebase.module.system.vo.corp.*;
 import com.cmsr.onebase.module.system.vo.corpapprelation.AppAuthTimeReqVO;
 import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppRelationPageReqVO;
@@ -51,6 +50,9 @@ import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 @Validated
 @Slf4j
 public class CorpServiceImpl implements CorpService {
+
+    // 租户管理员设置默认密码
+    private static final String CORP_ADMIN_PASSWORD = "CorpChina2025!";
 
     @Resource
     private CorpDataRepository corpDataRepository;
@@ -323,8 +325,10 @@ public class CorpServiceImpl implements CorpService {
         }
         // 插入用户
         AdminUserDO user = BeanUtils.toBean(reqVO, AdminUserDO.class);
-        String password = PasswordRandomGenerator.generateSecurePassword(15);
-        user.setPassword(encodePassword(password)); // 加密密码
+        // 暂时注掉使用默认，方便测试
+        // String password = PasswordRandomGenerator.generateSecurePassword(15);
+        String password = CORP_ADMIN_PASSWORD;
+        user.setPassword(encodePassword(CORP_ADMIN_PASSWORD)); // 加密密码
         user.setCorpId(corpId);
         // 在空间创建空企业（Tenant）用户
         user.setUserType(UserTypeEnum.CORP.getValue());
