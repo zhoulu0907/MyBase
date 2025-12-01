@@ -61,7 +61,7 @@ public class DatasourceFactory {
         }
         DatabaseType parseType = null;
         for (DatabaseType dbType : DatabaseType.values()) {
-            if (dbType.title().equalsIgnoreCase(databaseType)) {
+            if (dbType.name().equalsIgnoreCase(databaseType)) {
                 parseType = dbType;
                 break;
             }
