@@ -3,6 +3,7 @@ package com.cmsr.onebase.framework.web.config;
 import com.cmsr.onebase.framework.common.biz.infra.logger.ApiErrorLogCommonApi;
 import com.cmsr.onebase.framework.common.enums.WebFilterOrderEnum;
 import com.cmsr.onebase.framework.web.core.filter.CacheRequestBodyFilter;
+import com.cmsr.onebase.framework.web.core.filter.LogMdcFilter;
 import com.cmsr.onebase.framework.web.core.handler.GlobalExceptionHandler;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import jakarta.annotation.Resource;
@@ -108,6 +109,14 @@ public class OneBaseWebAutoConfiguration implements WebMvcConfigurer {
     @Bean
     public FilterRegistrationBean<CacheRequestBodyFilter> requestBodyCacheFilter() {
         return createFilterBean(new CacheRequestBodyFilter(), WebFilterOrderEnum.REQUEST_BODY_CACHE_FILTER);
+    }
+
+    /**
+     * 创建 LogMdcFilter Bean，用于在日志中添加请求相关信息
+     */
+    @Bean
+    public FilterRegistrationBean<LogMdcFilter> logMdcFilter() {
+        return createFilterBean(new LogMdcFilter(), WebFilterOrderEnum.REQUEST_BODY_CACHE_FILTER + 1);
     }
 
 

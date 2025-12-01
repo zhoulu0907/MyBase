@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.infra.service.file;
 
+import cn.hutool.core.util.URLUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.io.file.FileNameUtil;
@@ -17,18 +18,26 @@ import com.cmsr.onebase.module.infra.framework.file.core.client.s3.FilePresigned
 import com.cmsr.onebase.module.infra.framework.file.core.utils.FileTypeUtils;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+
+import java.util.Collection;
+import java.util.List;
 
 import static cn.hutool.core.date.DatePattern.PURE_DATE_PATTERN;
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.infra.enums.ErrorCodeConstants.FILE_NOT_EXISTS;
+import static com.cmsr.onebase.module.infra.framework.file.core.utils.FileTypeUtils.writeAttachment;
 
 /**
  * 文件 Service 实现类
  *
  */
 @Service
+@Slf4j
 public class FileServiceImpl implements FileService {
 
     /**
@@ -169,5 +178,38 @@ public class FileServiceImpl implements FileService {
         Assert.notNull(client, "客户端({}) 不能为空", configId);
         return client.getContent(path);
     }
+
+
+    @Override
+    public List<FileDO> getFileListByIds(Collection<Long> ids) {
+        return fileDataRepository.findAllByIds(ids);
+    }
+
+    @Override
+    public void getFileContent(Long id, HttpServletResponse response) throws Exception {
+
+        // 获取文件信息
+        FileDO file = fileDataRepository.findById(id);
+        if (file == null) {
+            throw exception(FILE_NOT_EXISTS);
+        }
+
+        if (StrUtil.isEmpty(file.getPath())) {
+            throw new IllegalArgumentException("文件路径为空，该文件无法下载");
+        }
+        // 解码，解决中文路径的问题 https://gitee.com/zhijiantianya/onebase_v3/pulls/807/
+        String path = URLUtil.decode(file.getPath());
+
+        // 获取文件内容
+        byte[] content = getFileContent(file.getConfigId(), path);
+        if (content == null) {
+            log.warn("[getFileContent][configId({}) path({}) 文件不存在]", file.getConfigId(), path);
+            response.setStatus(HttpStatus.NOT_FOUND.value());
+            return;
+        }
+
+        writeAttachment(response, path, content);
+    }
+
 
 }
