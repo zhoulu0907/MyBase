@@ -9,6 +9,7 @@ import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
@@ -156,6 +157,15 @@ public class UserServiceImpl implements UserService {
         // 2. 创建企业时，在空间创建企业管理员，指定 usertype = corp；
         if (user.getUserType() == null) {
             user.setUserType(SecurityFrameworkUtils.getLoginUserType());
+            LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+            if (loginUser == null || loginUser.getId() == null) {
+                // 立即失败，抛出异常，防止数据越权
+                throw exception(USER_NOT_EXISTS);
+            }
+            if(UserTypeEnum.CORP.getValue().equals(user.getUserType())){
+                user.setCorpId(loginUser.getCorpId());
+            }
+
         }
         userDataRepository.insert(user);
         // 2.1.1 保存初始密码历史记录
