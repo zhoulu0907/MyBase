@@ -1,21 +1,57 @@
 import { type Captcha, type CaptchaCheck } from '@onebase/common';
-import { Headers, LoginRequest } from '../types';
-import { systemService } from './clients';
+import {
+  CodeType,
+  Headers,
+  LoginRequest,
+  RuntimeAccountLoginRequest,
+  RuntimeCorpLoginRequest,
+  RuntimeMobileLoginRequest,
+  TenantLoginRequest
+} from '../types';
+import { platformService, runtimeService, systemService } from './clients';
 
 export const login = (req: LoginRequest, headers: Headers) => {
-  return systemService.post('/auth/login', req, { headers });
+  return platformService.post('/auth/login', req, { headers });
 };
 
-export const getPermissionInfo = () => {
-  return systemService.get('/auth/get-permission-info');
+export const tenantLogin = (req: TenantLoginRequest, headers: Headers) => {
+  return systemService.post('/auth/tenant-login', req, { headers });
+};
+
+export const getPermissionInfo = (code?: CodeType) => {
+  return systemService.get(`/auth/get-permission-info?code=${code}`);
+};
+
+export const runtimeGetPermissionInfo = (code?: CodeType) => {
+  return runtimeService.get(`/auth/get-permission-info?code=${code}`);
 };
 
 export const adminLogin = (req: LoginRequest, headers: Headers) => {
-  return systemService.post('/auth/admin-login', req, { headers });
+  return platformService.post('/auth/login', req, { headers });
 };
 
-export const logout = () => {
+export const innerLogin = (req: RuntimeAccountLoginRequest, headers: Headers) => {
+  return runtimeService.post('/auth/app-login', req, { headers });
+};
+
+export const sassLogin = (req: RuntimeMobileLoginRequest, headers: Headers) => {
+  return runtimeService.post('/auth/app-login-mobile', req, { headers });
+};
+
+export const runtimeCorpLogin = (req: RuntimeCorpLoginRequest, headers: Headers) => {
+  return runtimeService.post('/auth/corp-login', req, { headers });
+};
+
+export const platformLogout = () => {
+  return platformService.post('/auth/logout');
+};
+
+export const systemLogout = () => {
   return systemService.post('/auth/logout');
+};
+
+export const runtimeLogout = () => {
+  return runtimeService.post('/auth/logout');
 };
 
 // 获取验证码 /system/captcha/get

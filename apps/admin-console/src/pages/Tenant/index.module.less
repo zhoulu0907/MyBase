@@ -1,8 +1,214 @@
 .tenant {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
   .toolbar {
     margin-bottom: 24px;
     display: flex;
     justify-content: space-between;
+
+    .inputSearch {
+      width: 240px;
+
+      & span {
+        border-radius: 16px;
+      }
+    }
+  }
+
+  .tenantList {
+    flex: 1;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 24px;
+
+    .tenantItem {
+      min-width: 1140px;
+      height: 112px;
+      border-radius: 24px;
+      background: #fff;
+      padding: 16px;
+      border: 2px solid transparent;
+      box-sizing: border-box;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+
+      &:hover {
+        border: 2px solid #009e9e;
+        box-shadow:
+          0 12px 48px 16px rgba(0, 0, 0, 0.03),
+          0 9px 28px 0 rgba(0, 0, 0, 0.05),
+          0 6px 16px -8px rgba(0, 0, 0, 0.08);
+      }
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      .left {
+        display: flex;
+        align-items: center;
+
+        .right {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+
+        .tenantLogo {
+          width: 160px;
+          height: 80px;
+          margin-right: 16px;
+          border-radius: 12px;
+          border: 1px solid #f2f3f5;
+          background: #f7f8fa;
+          display: inline-flex;
+          justify-content: center;
+          align-items: center;
+        }
+
+        .tenantBaseInfo {
+          display: flex;
+          flex-direction: column;
+
+          .tenantName {
+            width: 240px;
+            display: flex;
+            flex-direction: row;
+            gap: 4px;
+
+            .tenantNameText {
+              color: #1d2129;
+              font-family: 'PingFang SC';
+              font-size: 16px;
+              font-style: normal;
+              font-weight: 500;
+              line-height: 24px;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+              overflow: hidden;
+            }
+          }
+
+          .tenantID,
+          .tenantAddress {
+            display: flex;
+            color: #86909c;
+            font-family: 'PingFang SC';
+            font-size: 12px;
+            font-style: normal;
+            font-weight: 400;
+            line-height: 20px;
+          }
+
+          .idText {
+            overflow: hidden;
+            color: #4e5969;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-family: 'PingFang SC';
+            font-size: 12px;
+            font-style: normal;
+            font-weight: 400;
+            line-height: 20px;
+          }
+
+          .addressText {
+            width: 164px;
+            overflow: hidden;
+            color: #009e9e;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-family: 'PingFang SC';
+            font-size: 12px;
+            font-style: normal;
+            font-weight: 400;
+            line-height: 20px;
+          }
+
+          .tenantAddress {
+            display: flex;
+            align-items: center;
+          }
+        }
+      }
+
+      .center {
+        display: flex;
+        align-items: center;
+
+        & > div {
+          width: 112px;
+          padding: 4px 8px;
+          box-sizing: border-box;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .createTime {
+          width: 136px;
+        }
+
+        .rowName {
+          color: #4e5969;
+          text-align: center;
+          font-family: 'PingFang SC';
+          font-size: 14px;
+          font-style: normal;
+          font-weight: 400;
+          line-height: 22px;
+        }
+
+        .rowValue16 {
+          color: #272e3b;
+          text-align: center;
+          font-family: 'PingFang SC';
+          font-size: 16px;
+          font-style: normal;
+          font-weight: 500;
+          line-height: 24px;
+        }
+
+        .rowValue14 {
+          color: #4e5969;
+          text-align: center;
+          font-family: 'PingFang SC';
+          font-size: 14px;
+          font-style: normal;
+          font-weight: 400;
+          line-height: 22px;
+        }
+
+        .rowValue12 {
+          color: #6b7785;
+          text-align: center;
+          font-family: 'PingFang SC';
+          font-size: 12px;
+          font-style: normal;
+          font-weight: 400;
+          line-height: 20px;
+        }
+
+        .flexRow {
+          display: flex;
+          align-items: center;
+        }
+      }
+
+      .right {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+    }
   }
 }
 .aWebsite {
@@ -42,5 +248,74 @@
   &:hover {
     color: #00b42a;
     cursor: pointer;
+  }
+}
+
+.createPage {
+  width: 600px;
+  margin: 100px auto;
+}
+
+.editPage {
+  width: 100%;
+  display: flex;
+
+  .basicInfoForm {
+    width: 540px;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: flex-start;
+  }
+
+  .urlWrapper {
+    display: flex;
+    align-items: center;
+
+    .url {
+      width: 220px;
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .copyIcon {
+      font-size: 16px;
+    }
+  }
+
+  :global(.arco-upload-list-item-picture) {
+    width: 160px;
+    height: 80px;
+    border: 1px solid #f2f3f5;
+    border-radius: 12px;
+    background: #f7f8fa;
+  }
+
+  .tenantLogo {
+    width: 160px;
+    height: 80px;
+    margin-right: 16px;
+    border-radius: 12px;
+    border: 1px solid #f2f3f5;
+    background: #f7f8fa;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .tagWrapper {
+    display: flex;
+    gap: 12px;
+
+    .adminTag {
+      padding: 4px 8px 4px 4px;
+      span {
+        display: flex;
+        align-items: center;
+      }
+    }
   }
 }

@@ -1,7 +1,8 @@
 import { Message } from '@arco-design/web-react';
 import '@icon-park/react/styles/index.css';
-import { NotFoundPage } from '@onebase/common';
-import { Navigate, Route, HashRouter as Router, Routes } from 'react-router-dom';
+import { NotFoundPage, TokenManager } from '@onebase/common';
+import { useEffect } from 'react';
+import { Navigate, Route, HashRouter as Router, Routes, useLocation, useMatch } from 'react-router-dom';
 import { EditorPage } from './pages/Editor';
 import { ETLFlowEditorPage } from './pages/ETLFlowEditor';
 import Home from './pages/Home';
@@ -26,6 +27,18 @@ function AppContent() {
     getContainer: () => document.body
   });
 
+  const location = useLocation();
+  // 使用 useMatch 匹配包含 tenantId 的路由模式
+  const match = useMatch('/onebase/:tenantId/*');
+  const tenantId = match?.params.tenantId;
+
+  useEffect(() => {
+    if (tenantId) {
+      console.log('set curIdentifyId: ', tenantId);
+      TokenManager.setCurIdentifyId(tenantId);
+    }
+  }, [tenantId, location.pathname]);
+
   return (
     <Routes>
       {/* 登录页面不需要认证 */}
@@ -33,7 +46,7 @@ function AppContent() {
 
       {/* 需要认证的路由 */}
       <Route
-        path="/onebase/*"
+        path="/onebase/:tenantId/home/*"
         element={
           // <AuthGuard>
           <Home />
@@ -41,7 +54,7 @@ function AppContent() {
         }
       />
       <Route
-        path="/onebase/setting/*"
+        path="/onebase/:tenantId/setting/*"
         element={
           // <AuthGuard>
           <SettingPage />
@@ -49,13 +62,13 @@ function AppContent() {
         }
       />
 
-      <Route path="/onebase/editor/*" element={<EditorPage />} />
-      <Route path="/onebase/etl_editor/*" element={<ETLFlowEditorPage />} />
+      <Route path="/onebase/:tenantId/editor/*" element={<EditorPage />} />
+      <Route path="/onebase/:tenantId/etl_editor/*" element={<ETLFlowEditorPage />} />
 
       {/* 默认重定向到登录页 */}
       <Route path="/" element={<Navigate to="/login" replace />} />
 
-      <Route path="/tenant/*" element={<Login />} />
+      <Route path="/tenant/:tenantId/*" element={<Login />} />
 
       {/* 404页面 */}
       <Route path="*" element={<NotFoundPage />} />

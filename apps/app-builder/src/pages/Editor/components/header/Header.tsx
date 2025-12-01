@@ -8,8 +8,6 @@ import defaultPageSettingSVG from '@/assets/images/page_setting_default_icon.svg
 import activeWorkbenchDesignSVG from '@/assets/images/workbench_design_active_icon.svg';
 // import defaultWorkbenchDesignSVG from '@/assets/images/workbench_design_default_icon.svg';
 import previewSVG from '@/assets/images/preview_icon.svg';
-import { appIconMap, useAppEntityStore } from '@onebase/ui-kit';
-import { getEntityFields } from '@onebase/app';
 import DynamicIcon from '@/components/DynamicIcon';
 import { useI18n } from '@/hooks/useI18n';
 import RenameModal from '@/pages/CreateApp/pages/PageManager/components/Modals/RenameModal';
@@ -17,46 +15,49 @@ import VersionModal from '@/pages/CreateApp/pages/PageManager/components/Modals/
 import { useBasicEditorStore } from '@/store';
 import { useFlowEditorStor } from '@/store/index';
 import { useAppStore } from '@/store/store_app';
+import { useResourceStore } from '@/store/store_resource';
 import { Breadcrumb, Button, Form, Message, Tabs } from '@arco-design/web-react';
 import { IconArrowLeft } from '@arco-design/web-react/icon';
-import type { WorkflowJSON } from './headerType';
-import { VersionListSelect } from './versionList';
 import {
-  PageType,
   AppStatus,
   ENTITY_TYPE,
+  fetchPublish,
   getAppIdByPageSetId,
   getApplication,
   getDatasourceList,
+  getEntityFields,
   getEntityFieldsWithChildren,
   getPageSetMetaData,
-  updateApplicationMenu,
-  fetchPublish,
+  PageType,
   save,
+  updateApplicationMenu,
   type ChildEntity,
   type GetApplicationReq,
   type UpdateApplicationMenuNameReq
 } from '@onebase/app';
 import { getHashQueryParam, pagesRuntimeSignal } from '@onebase/common';
 import {
+  appIconMap,
   EDITOR_TYPES,
   startLoadPageSet,
   startSavePageSet,
+  useAppEntityStore,
+  useFlowPageEditorSignal,
   useFormEditorSignal,
   useListEditorSignal,
   usePageEditorSignal,
   usePageViewEditorSignal,
-  useFlowPageEditorSignal,
   type SavePageSetParams
 } from '@onebase/ui-kit';
 import { cloneDeep } from 'lodash-es';
-import { useEffect, useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import PartPreview from '../partPreview';
-import FlowView from '../flowView';
-import styles from './index.module.less';
-import { useResourceStore } from '@/store/store_resource';
+import { useEffect, useRef, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { VersionStatus } from '../constants';
+import FlowView from '../flowView';
+import PartPreview from '../partPreview';
+import type { WorkflowJSON } from './headerType';
+import styles from './index.module.less';
+import { VersionListSelect } from './versionList';
 
 const BreadcrumbItem = Breadcrumb.Item;
 const sourceNodeIDMap = new Map();
@@ -118,6 +119,9 @@ export default function EditorHeader() {
   const { curViewId } = usePageViewEditorSignal;
   const { flowId, setFlowId } = useFlowPageEditorSignal;
   const { isEditMode, setIsEditMode } = useBasicEditorStore();
+
+  const { tenantId } = useParams();
+
   const {
     components: formComponents,
     pageComponentSchemas: formPageComponentSchemas,
@@ -394,7 +398,7 @@ export default function EditorHeader() {
 
     clearAllData();
 
-    navigate(`/onebase/create-app/page-manager?appId=${appId}`);
+    navigate(`/onebase/${tenantId}/home/create-app/page-manager?appId=${appId}`);
   };
 
   const toPreview = () => {
@@ -486,22 +490,22 @@ export default function EditorHeader() {
             clearCurComponentID();
             switch (key) {
               case EDITOR_TYPES.FORM_EDITOR:
-                navigate(`/onebase/editor/${EDITOR_TYPES.FORM_EDITOR}?pageSetId=${pageSetId}`);
+                navigate(`/onebase/${tenantId}/editor/${EDITOR_TYPES.FORM_EDITOR}?pageSetId=${pageSetId}`);
                 break;
               case EDITOR_TYPES.LIST_EDITOR:
-                navigate(`/onebase/editor/${EDITOR_TYPES.LIST_EDITOR}?pageSetId=${pageSetId}`);
+                navigate(`/onebase/${tenantId}/editor/${EDITOR_TYPES.LIST_EDITOR}?pageSetId=${pageSetId}`);
                 break;
               case EDITOR_TYPES.PAGE_SETTING:
-                navigate(`/onebase/editor/${EDITOR_TYPES.PAGE_SETTING}?pageSetId=${pageSetId}`);
+                navigate(`/onebase/${tenantId}/editor/${EDITOR_TYPES.PAGE_SETTING}?pageSetId=${pageSetId}`);
                 break;
               case EDITOR_TYPES.METADATA_MANAGE:
-                navigate(`/onebase/editor/${EDITOR_TYPES.METADATA_MANAGE}?pageSetId=${pageSetId}`);
+                navigate(`/onebase/${tenantId}/editor/${EDITOR_TYPES.METADATA_MANAGE}?pageSetId=${pageSetId}`);
                 break;
               case EDITOR_TYPES.FLOW_EDITOR:
-                navigate(`/onebase/editor/${EDITOR_TYPES.FLOW_EDITOR}?pageSetId=${pageSetId}`);
+                navigate(`/onebase/${tenantId}/editor/${EDITOR_TYPES.FLOW_EDITOR}?pageSetId=${pageSetId}`);
                 break;
               case EDITOR_TYPES.WORKBENCH_EDITOR:
-                navigate(`/onebase/editor/${EDITOR_TYPES.WORKBENCH_EDITOR}?pageSetId=${pageSetId}`);
+                navigate(`/onebase/${tenantId}/editor/${EDITOR_TYPES.WORKBENCH_EDITOR}?pageSetId=${pageSetId}`);
                 break;
               default:
                 break;

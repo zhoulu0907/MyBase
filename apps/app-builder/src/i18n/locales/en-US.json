@@ -112,14 +112,26 @@
   },
   "sider": {
     "platformInfo": "Platform Info",
+    "application": "Application Management",
     "user": "User Management",
     "role": "Role Management",
     "organization": "Organization Management",
     "systemDict": "System Dictionary",
-    "tenant": "Tenant Info"
+    "security": "Security Settings",
+    "business": "Business",
+    "createBusiness": "Create Business",
+    "authorizedApplication": "Authorized Application",
+    "spaceInfo": "Space Info",
+    "enterpriseInfo": "Enterprise Info",
+    "enterprise": "Enterprise Management",
+    "tenant": "Personal Center",
+    "profile": "Personal Center",
+    "edit": "Edit",
+    "createEnterprise": "Create Enterprise"
   },
   "myApp": {
-    "createApp": "Create App"
+    "createApp": "Create App",
+    "applicationManagement": "Application Management"
   },
   "editor": {
     "material": "Material",

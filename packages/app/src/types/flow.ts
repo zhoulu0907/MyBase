@@ -181,7 +181,8 @@ export enum TypeCode {
 
 export interface ConnectInstance {
   applicationId: string;
-  connectorId: string;
+  id: string;
+  connectorUuid: string;
   connectorName: string;
   typeCode: TypeCode;
   createTime: string;
@@ -189,13 +190,9 @@ export interface ConnectInstance {
 }
 
 export interface UpdateConnectInstanceReq {
-  connectorId: string;
+  id: string;
   connectorName: string;
   description?: string;
-}
-
-export interface DeleteConnectInstanceReq {
-  id: string;
 }
 
 export interface ListScriptActionReq {
@@ -216,7 +213,7 @@ export interface CreateScriptActionReq {
 }
 
 export interface UpdateScriptActionReq {
-  scriptId: string; // 脚本ID，必需
+  id: string; // 脚本ID，必需
   scriptName: string; // 动作名称，必需
   scriptType?: string; // 脚本类型，可选
   description?: string; // 描述，可选
@@ -226,9 +223,9 @@ export interface UpdateScriptActionReq {
 }
 
 export interface ScriptActionItem {
+  id: string;
   connectorId: string;
   craeteTime: string;
   description: string;
-  scriptId: string;
   scriptName: string;
 }

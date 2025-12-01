@@ -1,8 +1,13 @@
+import {
+  jsonToJsonSchema,
+  schemaToFormData
+} from '@/pages/CreateApp/pages/IntegratedManagement/pages/connector/action/create/util';
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { Button } from '@arco-design/web-react';
 import { getNodeForm, useClientContext } from '@flowgram.ai/fixed-layout-editor';
 import { type ConditionField, DATA_SOURCE_TYPE, getEntityFields, getEntityFieldsWithChildren } from '@onebase/app';
 import { NodeType } from '@onebase/common';
+import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
 import { updateLoopOutputs } from '../../nodes/control/loop/output';
 import { updateDataAddOutputs } from '../../nodes/data/data-add/output';
 import { updateDataCalcOutputs } from '../../nodes/data/data-calc/output';
@@ -11,6 +16,7 @@ import { updateDataQueryMultipleOutputs } from '../../nodes/data/data-query-mult
 import { updateDataQueryOutputs } from '../../nodes/data/data-query/output';
 import { updateDataUpdateOutputs } from '../../nodes/data/data-update/output';
 import { updateModalOutputs } from '../../nodes/interaction/modal/output';
+import { updateJavascriptOutputs } from '../../nodes/other/javascript/output';
 import {
   clearDataOriginNodeId,
   getDataNodeSource,
@@ -107,6 +113,23 @@ export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
             break;
           }
 
+          case NodeType.JavaScript: {
+            const noChange = formInfo.inputParameterFields.every((item: any) => {
+              return originalNodeData.inputParameterFields?.find(
+                (ele: any) => ele.name === item.name && ele.type === item.type
+              );
+            });
+
+            if (
+              !noChange ||
+              (originalNodeData.inputParameterFields &&
+                formInfo.inputParameterFields.length !== originalNodeData.inputParameterFields.length)
+            ) {
+              clearDataOriginNodeId(nodeId.value);
+            }
+            break;
+          }
+
           // TODO(chenyongqiang): 补充其他节点类型
 
           default:
@@ -140,7 +163,7 @@ export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
           break;
         case NodeType.DATA_CALC:
           const dataCalcFields: ConditionField[] = formInfo.calRules
-            .filter((item: any) => item && item.field && item.value && item.operatorType)
+            ?.filter((item: any) => item && item.field && item.value && item.operatorType)
             .map((item: any) => {
               return {
                 label: item.field,
@@ -269,6 +292,20 @@ export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
               };
             });
           updateModalOutputs(curNode.id, modalFields);
+          break;
+        case NodeType.JavaScript:
+          const outputParameter = JSON.parse(formInfo.outputParameter || '{}');
+          const schema = jsonToJsonSchema(formInfo.outputParameter || '{}');
+          const newFormData = schemaToFormData(schema, outputParameter);
+          const jsFields: ConditionField[] = newFormData.map((item: any) => {
+            // ? 类型处理
+            return {
+              label: item.name,
+              value: item.name,
+              fieldType: item.type === 'number' ? ENTITY_FIELD_TYPE.NUMBER.VALUE : ENTITY_FIELD_TYPE.TEXT.VALUE
+            };
+          });
+          updateJavascriptOutputs(curNode.id, jsFields);
           break;
         default:
           break;

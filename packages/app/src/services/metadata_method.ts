@@ -1,4 +1,5 @@
 // 实体管理服务
+import { getEnv } from '@onebase/common';
 import { DataMethodParam, DeleteMethodParam, InsertMethodParams, PageMethodParam, UpdateMethodParams } from '../types';
 import { runtimeMetadataService } from './clients';
 
@@ -7,6 +8,17 @@ export const dataMethodInsert = (params: InsertMethodParams) => {
 };
 
 export const dataMethodPage = (params: PageMethodParam) => {
+  const env = getEnv();
+  if (env !== 'runtime') {
+    return {
+      code: 0,
+      msg: 'success',
+      data: {
+        list: [],
+        total: 0
+      }
+    };
+  }
   return runtimeMetadataService.post(`/data-method/data/page`, params);
 };
 

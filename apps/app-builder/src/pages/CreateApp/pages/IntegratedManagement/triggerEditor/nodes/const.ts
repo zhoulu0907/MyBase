@@ -34,7 +34,7 @@ export enum NodeTypeName {
   dataUpdate = '数据更新',
 
   // 其他节点
-  ipaas = '连接器',
+  javascript = 'JS脚本',
   json = 'JSON',
   log = '日志',
   message = '消息',

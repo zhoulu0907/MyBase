@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { registerConfigRenderer } from '../../registry';
-import { CONFIG_TYPES } from '@onebase/ui-kit';
-import { Form, Upload, Message } from '@arco-design/web-react';
+import { Form, Message, Upload } from '@arco-design/web-react';
 import { IconDelete } from '@arco-design/web-react/icon';
 import { uploadFile } from '@onebase/platform-center';
+import { CONFIG_TYPES } from '@onebase/ui-kit';
+import React, { useState } from 'react';
 import styles from '../../index.module.less';
+import { registerConfigRenderer } from '../../registry';
 
 export interface DynamicImageConfigProps {
   handlePropsChange: (key: string, value: string | number | boolean | any[]) => void;
@@ -64,7 +64,7 @@ const DynamicImageConfig: React.FC<DynamicImageConfigProps> = ({ handlePropsChan
               }}
               customRequest={async (option) => {
                 const { onProgress, onError, onSuccess, file } = option;
-                
+
                 try {
                   const uploadImgUrl = await handleUpload(file, onProgress);
                   if (uploadImgUrl !== '') {

@@ -1,5 +1,5 @@
 import { type PageParam } from '../types/common';
-import { GetDeptsByIdReq, type DeptForm, type DeptVO } from '../types/dept';
+import { GetDeptsByIdReq, type DeptForm, type DeptVO, type UpdateAdminOrDirectorReq } from '../types/dept';
 import { systemService } from './clients';
 
 // 查询部门（精简)列表
@@ -40,6 +40,11 @@ export const deleteDept = async (id: number) => {
 // 批量删除部门
 export const deleteDeptList = async (ids: number[]) => {
   return await systemService.post('/dept/delete-list', { ids });
+};
+
+// 修改用户管理员/主管
+export const updateAdminOrDirector = (data: UpdateAdminOrDirectorReq) => {
+  return systemService.post('/dept/update-dept-admin-or-director', data);
 };
 
 // 根据用户ID获取其所属部门及其父部门列表

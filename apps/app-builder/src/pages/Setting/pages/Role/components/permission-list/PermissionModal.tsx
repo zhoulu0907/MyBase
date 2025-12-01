@@ -5,6 +5,7 @@ import type { Permission } from '@onebase/platform-center';
 import { getAllPermissions } from '@onebase/platform-center';
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { PERMISSION_TYPES } from '@/constants/permission';
+import styles from '../../index.module.less'
 
 const Search = Input.Search;
 const CheckboxGroup = Checkbox.Group;
@@ -35,7 +36,7 @@ const PermissionConfigModal: React.FC<PermissionConfigModalProps> = ({
   const loadPermissions = async () => {
     setLoading(true);
     try {
-      const data = await getAllPermissions();
+      const data = await getAllPermissions("tenant");
       // 接口返回三层：模块、功能、操作，需筛选出后两层数据
       const filteredData = data.filter(item => item.type !== PERMISSION_TYPES.MODULE);
       const tree = listToTree(filteredData);
@@ -261,8 +262,8 @@ const PermissionConfigModal: React.FC<PermissionConfigModalProps> = ({
         >
           <span>权限配置</span>
           <Search
+            className={styles.permissionInput}
             placeholder="请输入权限名称"
-            style={{ marginRight: 32, width: 200 }}
             allowClear
             value={searchValue}
             onChange={(value) => setSearchValue(value)}
@@ -282,7 +283,7 @@ const PermissionConfigModal: React.FC<PermissionConfigModalProps> = ({
         columns={columns}
         data={filteredPermissions}
         loading={loading}
-        pagination={false}
+      // pagination={false}
       />
     </Modal>
   );
