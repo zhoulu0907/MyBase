@@ -16,7 +16,7 @@ import org.dromara.warm.flow.core.entity.Task;
 import org.dromara.warm.flow.core.enums.SkipType;
 import org.dromara.warm.flow.core.listener.ListenerVariable;
 import org.dromara.warm.flow.core.service.TaskService;
-import org.dromara.warm.flow.core.service.impl.BpmConstants;
+import com.cmsr.onebase.module.bpm.core.enums.BpmConstants;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
