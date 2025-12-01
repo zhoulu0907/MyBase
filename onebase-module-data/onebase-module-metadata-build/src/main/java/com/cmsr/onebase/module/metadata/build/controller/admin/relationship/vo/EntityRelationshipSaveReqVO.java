@@ -43,6 +43,9 @@ public class EntityRelationshipSaveReqVO {
     @NotNull(message = "目标字段ID不能为空")
     private String targetFieldId;
 
+    @Schema(description = "选择字段ID（数据选择关系类型时使用，表示关联表中用于展示给用户的字段ID）", example = "3011")
+    private String selectFieldId;
+
     @Schema(description = "级联类型", example = "READ")
     private String cascadeType;
 

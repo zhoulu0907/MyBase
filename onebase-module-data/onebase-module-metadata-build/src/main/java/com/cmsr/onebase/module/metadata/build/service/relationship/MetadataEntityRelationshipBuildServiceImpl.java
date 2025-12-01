@@ -291,6 +291,10 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
         result.setSourceFieldDisplayName(getFieldDisplayNameById(relationshipDO.getSourceFieldId()));
         result.setTargetFieldDisplayName(getFieldDisplayNameById(relationshipDO.getTargetFieldId()));
 
+        // 查询选择字段的名称和展示名称（数据选择关系类型时使用）
+        result.setSelectFieldName(getFieldNameById(relationshipDO.getSelectFieldId()));
+        result.setSelectFieldDisplayName(getFieldDisplayNameById(relationshipDO.getSelectFieldId()));
+
         // 验证关键字段
         if (result.getId() == null) {
             log.error("转换后的响应VO中id字段为空，原始DO的id: {}", relationshipDO.getId());
