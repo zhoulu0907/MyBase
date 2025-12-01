@@ -1,9 +1,8 @@
-import appPermissionSVG from '@/assets/images/app_auth.svg';
-import appPermissionActiveSVG from '@/assets/images/app_auth_active.svg';
-import baseSettingSVG from '@/assets/images/base_setting.svg';
-import baseSettingActiveSVG from '@/assets/images/base_setting_active.svg';
-import appReleaseSVG from '@/assets/images/app_release.svg';
-import appReleaseActiveSVG from '@/assets/images/app_release_active.svg';
+import baseSettingSVG from '@/assets/images/appRelease/base_setting.svg';
+import appPermissionSVG from '@/assets/images/appRelease/app_auth.svg';
+import appReleaseSVG from '@/assets/images/appRelease/app_release.svg';
+import navigatorSettingSVG from '@/assets/images/appRelease/navigator_setting.svg';
+import { ReactSVG } from 'react-svg';
 import { type Options } from '@/components/CreateApp/const';
 import { Button, Form, Layout, Menu, Message } from '@arco-design/web-react';
 import { IconMenuFold } from '@arco-design/web-react/icon';
@@ -15,25 +14,52 @@ import {
   type UpdateApplicationReq
 } from '@onebase/app';
 import { useEffect, useState, type FC } from 'react';
-import AppPermission from './components/AppPermission';
 import BasicSetting from './components/BasicSetting';
-import { useAppStore } from '@/store/store_app';
-import styles from './index.module.less';
+import AppPermission from './components/AppPermission';
 import AppReleasePage from '../AppRelease';
+import NavigatorSetting from './components/NavigatorSetting';
+import { useAppStore } from '@/store/store_app';
+import AppBreadcrumb from '@/components/Breadcrumb';
+import styles from './index.module.less';
 
-const MenuItem = Menu.Item;
 const Sider = Layout.Sider;
 const Content = Layout.Content;
 const Footer = Layout.Footer;
 
+interface BreadcrumbItemType {
+  key: string;
+  title: string;
+  path?: string;
+}
+
 const AppSettingPage: FC = () => {
   const [form] = Form.useForm();
   const { curAppId, curAppInfo, setCurAppInfo } = useAppStore();
+  const menuData = [
+    { title: '基础设置', icon: baseSettingSVG, key: 'baseSetting' },
+    { title: '应用权限', icon: appPermissionSVG, key: 'appPermission' },
+    { title: '应用发布', icon: appReleaseSVG, key: 'appRelease' },
+    { title: '导航设置', icon: navigatorSettingSVG, key: 'navigatorSetting' }
+  ];
 
   const [appData, setAppData] = useState<Application>();
   const [activeTab, setActiveTab] = useState('baseSetting');
   const [collapsed, setCollapsed] = useState<boolean>(false);
   const [saveLoading, setSaveLoading] = useState<boolean>(false); // 保存按钮状态
+  const [breadcrumbItems, setBreadcrumbItems] = useState<BreadcrumbItemType[]>([
+    { key: 'app-setting', title: '应用发布' },
+    { key: 'baseSetting', title: '基础设置' }
+  ]); // 菜单路径
+
+  useEffect(() => {
+    const currentBreadcrumb = menuData.find((ele) => ele.key === activeTab);
+    if (currentBreadcrumb) {
+      setBreadcrumbItems([
+        { key: 'app-setting', title: '应用发布' },
+        { key: currentBreadcrumb.key, title: currentBreadcrumb.title }
+      ]);
+    }
+  }, [activeTab]);
 
   useEffect(() => {
     if (curAppId) {
@@ -110,37 +136,33 @@ const AppSettingPage: FC = () => {
             onCollapse={() => setCollapsed((prev) => !prev)}
           >
             <Menu defaultSelectedKeys={[activeTab]} onClickMenuItem={setActiveTab}>
-              <MenuItem key="baseSetting" style={{ display: 'flex' }}>
-                <img
-                  src={activeTab === 'baseSetting' ? baseSettingActiveSVG : baseSettingSVG}
-                  alt="基础设置"
-                  style={{ marginRight: 16 }}
-                />
-                基础设置
-              </MenuItem>
-              <MenuItem key="appPermission" style={{ display: 'flex' }}>
-                <img
-                  src={activeTab === 'appPermission' ? appPermissionActiveSVG : appPermissionSVG}
-                  alt="应用权限"
-                  style={{ marginRight: 16 }}
-                />
-                应用权限
-              </MenuItem>
-              <MenuItem key="appRelease" style={{ display: 'flex' }}>
-                <img
-                  src={activeTab === 'appRelease' ? appReleaseActiveSVG : appReleaseSVG}
-                  alt="应用发布"
-                  style={{ marginRight: 16 }}
-                />
-                应用发布
-              </MenuItem>
+              {menuData.map((item) => (
+                <Menu.Item key={item.key} style={{ display: 'flex' }}>
+                  <ReactSVG
+                    className={styles.menuIcon}
+                    src={item.icon}
+                    beforeInjection={(svg) => {
+                      const fillColor = activeTab === item.key ? 'rgb(var(--primary-6))' : '#4e5969';
+                      svg.querySelectorAll('*').forEach((el) => el.removeAttribute('fill'));
+                      svg.setAttribute('fill', fillColor);
+                      svg.setAttribute('width', '18px');
+                      svg.setAttribute('height', '18px');
+                    }}
+                  />
+                  {item.title}
+                </Menu.Item>
+              ))}
             </Menu>
           </Sider>
-          <Content className={styles.content}>
-            {activeTab === 'baseSetting' && <BasicSetting form={form} data={appData!} />}
-            {activeTab === 'appPermission' && <AppPermission />}
-            {activeTab === 'appRelease' && <AppReleasePage />}
-          </Content>
+          <div className={styles.rightContent}>
+            <AppBreadcrumb items={breadcrumbItems} />
+            <Content className={styles.content}>
+              {activeTab === 'baseSetting' && <BasicSetting form={form} data={appData!} />}
+              {activeTab === 'appPermission' && <AppPermission />}
+              {activeTab === 'appRelease' && <AppReleasePage />}
+              {activeTab === 'navigatorSetting' && <NavigatorSetting />}
+            </Content>
+          </div>
         </Layout>
         {activeTab === 'baseSetting' && (
           <Footer className={styles.footer}>
