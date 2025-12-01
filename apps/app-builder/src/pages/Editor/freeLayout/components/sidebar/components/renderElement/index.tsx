@@ -25,10 +25,6 @@ interface RenderElementProps {
   isDisabled: boolean;
   onRuleChange: (groupIndex: number, index: number, field: string, value: any) => void;
   onOpenFormula: (index: number) => void;
-  formulaVisible: boolean;
-  formulaData: string;
-  onFormulaConfirm: (formulaData: string, formattedFormula: string, params: any) => void;
-  setFormulaVisible: (visible: boolean) => void;
   formSummaryOptions: any[];
 }
 
@@ -39,10 +35,6 @@ export const RenderElement: React.FC<RenderElementProps> = ({
   isDisabled,
   onRuleChange,
   onOpenFormula,
-  formulaVisible,
-  formulaData,
-  onFormulaConfirm,
-  setFormulaVisible,
   formSummaryOptions
 }) => {
   const getUserData = (elementTypeInfo: any) => {
@@ -255,12 +247,6 @@ export const RenderElement: React.FC<RenderElementProps> = ({
           {item.value ? '已设置公式' : 'ƒx 编辑公式'}
           {item.value ? <IconLaunch /> : ''}
         </Button>
-        <FormulaEditor
-          initialFormula={formulaData}
-          visible={formulaVisible}
-          onConfirm={onFormulaConfirm}
-          onCancel={() => setFormulaVisible(false)}
-        />
       </>
     );
   }

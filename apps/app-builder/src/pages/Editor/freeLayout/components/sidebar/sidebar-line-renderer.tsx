@@ -9,6 +9,7 @@ import { Form, Switch, Input, Select, Button } from '@arco-design/web-react';
 import { IconClose } from '@arco-design/web-react/icon';
 import close from '../../assets/close.svg';
 import BottomBtn from '../bottomBtn';
+import { FormulaEditor } from '@/components/FormulaEditor';
 import { getEntityFieldsWithChildren, getPageSetMetaData } from '@onebase/app';
 import type { FieldOption, OpOptions, ConditionRule } from './constants';
 import { FieldType, Operator, preNodeOptions, instanceOptions, entityOptions } from './constants';
@@ -50,6 +51,7 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
   const [formulaData, setFormulaData] = useState<string>('');
   const [formSummaryOptions, setFormSummaryOptions] = useState<any[]>([]);
   const [currentIndex, setCurrentIndex] = useState<any>(0);
+  const [currentEditingRule, setCurrentEditingRule] = useState<{ groupIndex: number; ruleIndex: number } | null>(null);
   const [conditionGroups, setConditionGroups] = useState<ConditionRule[][]>([
     [
       {
@@ -102,18 +104,32 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
     setConditionGroups(newGroups);
   };
 
-  const openFormulaEditor = (index: any) => {
-    // setCurrentIndex(index);
-    // setFormulaData(conditionRule[currentIndex].value.formulaData || '');
-    // 设置数据的index
+  const openFormulaEditor = (item: any, groupIndex: number, ruleIndex: number) => {
+    setCurrentEditingRule({ groupIndex, ruleIndex });
+    setFormulaData(item.value?.formulaData || '');
     setFormulaVisible(true);
   };
 
   const handleFormulaConfirm = (formulaData: string, formattedFormula: string, params: any) => {
-    console.log(formulaData, formattedFormula, params);
+    if (!currentEditingRule) return;
 
-    // conditionRule[currentIndex].value = { formulaData: formulaData, formula: formattedFormula, parameters: params };
+    const { groupIndex, ruleIndex } = currentEditingRule;
+    const newGroups = [...conditionGroups];
+    const newRules = [...newGroups[groupIndex]];
+
+    newRules[ruleIndex] = {
+      ...newRules[ruleIndex],
+      value: {
+        formulaData,
+        formula: formattedFormula,
+        parameters: params
+      }
+    };
+
+    newGroups[groupIndex] = newRules;
+    setConditionGroups(newGroups);
     setFormulaVisible(false);
+    setCurrentEditingRule(null);
   };
 
   const renderFieldIdOptions = (item: any) => {
@@ -274,6 +290,8 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
 
     // 如果当前组只有一条规则，则删除整个组
     if (newGroups[groupIndex].length <= 1) {
+      // 如果只有一个组，则不允许删除
+      if (newGroups.length <= 1) return;
       // 删除整个组
       setConditionGroups(newGroups.filter((_, i) => i !== groupIndex));
       return;
@@ -340,7 +358,8 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
           >
             <Input placeholder="请输入分支名称" />
           </FormItem>
-          <div className={styles.directionColumn}>
+          {/* <div className={styles.directionColumn}> */}
+          <FormItem className={styles.directionColumn} label="条件规则" field="conditionRule">
             <div className={styles.conditionRule}>
               {conditionGroups.map((group, groupIndex) => (
                 <div key={groupIndex} className={styles.conditionRuleItem}>
@@ -404,11 +423,7 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
                                 groupIndex={groupIndex}
                                 isDisabled={!item.fieldScope || !item.fieldId || !item.op || !item.operatorType}
                                 onRuleChange={handleRuleChange}
-                                onOpenFormula={openFormulaEditor}
-                                formulaVisible={formulaVisible}
-                                formulaData={formulaData}
-                                onFormulaConfirm={handleFormulaConfirm}
-                                setFormulaVisible={setFormulaVisible}
+                                onOpenFormula={() => openFormulaEditor(item, groupIndex, index)}
                                 formSummaryOptions={formSummaryOptions}
                               />
                             }
@@ -431,11 +446,19 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
                 + 或者
               </Button>
             </div>
-            {/* </FormItem> */}
-          </div>
+          </FormItem>
+          {/* </div> */}
         </Form>
       </div>
       <BottomBtn handleSubmit={handleSubmit} />
+      <FormulaEditor
+        initialFormula={formulaData}
+        visible={formulaVisible}
+        onConfirm={(formulaData, formattedFormula, params) =>
+          handleFormulaConfirm(formulaData, formattedFormula, params)
+        }
+        onCancel={() => setFormulaVisible(false)}
+      />
     </div>
 
     // </NodeRenderContext.Provider>
