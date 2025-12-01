@@ -2,13 +2,11 @@ package com.cmsr.onebase.module.bpm.build.service;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.build.vo.vermgmt.BpmDefVersionMgtVO;
 import com.cmsr.onebase.module.bpm.build.vo.vermgmt.BpmDeleteReqVo;
 import com.cmsr.onebase.module.bpm.build.vo.vermgmt.BpmUpdateReqVo;
 import com.cmsr.onebase.module.bpm.build.vo.vermgmt.BpmVersionMgmtPageReqVo;
-import com.cmsr.onebase.module.bpm.core.dto.BpmDefinitionExtDTO;
 import com.cmsr.onebase.module.bpm.core.enums.VersionStatusEnum;
 import com.cmsr.onebase.module.bpm.core.vo.UserBasicInfoVO;
 import com.cmsr.onebase.module.engine.orm.mybatisflex.entity.FlowDefinition;
@@ -19,6 +17,7 @@ import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryCondition;
 import com.mybatisflex.core.query.QueryMethods;
 import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.core.query.RawQueryOrderBy;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -150,18 +149,14 @@ public class BpmVersionMgmtServiceImpl implements BpmVersionMgmtService {
             }
 
             QueryCondition orCondition = QueryCondition.createEmpty();
-            orCondition.or(QueryMethods.column("ext::json->>'versionAlias").like(reqVo.getVersionAlias()));
+            orCondition.or(FLOW_DEFINITION.BPM_VERSION_ALIAS.like(reqVo.getVersionAlias()));
             orCondition.or(FLOW_DEFINITION.BPM_VERSION.like(versionKeyWord));
 
             queryWrapper.and(orCondition);
         }
 
         // 排序：设计中>已发布>历史
-        String caseOrder = "CASE WHEN is_publish = " + PublishStatus.UNPUBLISHED.getKey() + " THEN 1 " +
-                "WHEN is_publish = " + PublishStatus.PUBLISHED.getKey() + " THEN 2 " +
-                "WHEN is_publish = " + PublishStatus.EXPIRED.getKey() + " THEN 3 " +
-                "ELSE 4 END";
-        queryWrapper.orderBy(caseOrder);
+        queryWrapper.orderBy(FlowDefinition::getIsPublish, true);
         queryWrapper.orderBy(QueryMethods.column(reqVo.getSortType()), false);
 
         Page<FlowDefinition> pageResult = flowDefinitionRepository.page(Page.of(reqVo.getPageNo(), reqVo.getPageSize()), queryWrapper);
@@ -176,13 +171,14 @@ public class BpmVersionMgmtServiceImpl implements BpmVersionMgmtService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateVersionAliasById(BpmUpdateReqVo reqVo) {
-        Definition definition = defService.getById(String.valueOf(reqVo.getId()));
-        if (definition != null) {
-            BpmDefinitionExtDTO extDTO = JsonUtils.parseObject(definition.getExt(), BpmDefinitionExtDTO.class);
-            extDTO.setVersionAlias(reqVo.getVersionAlias());
-            definition.setExt(JsonUtils.toJsonString(extDTO));
-            defService.updateById(definition);
+        Definition definition = defService.getById(reqVo.getId());
+
+        if (definition == null) {
+            throw exception(ErrorCodeConstants.FLOW_NOT_EXISTS);
         }
+
+        definition.setVersionAlias(reqVo.getVersionAlias());
+        defService.updateById(definition);
     }
 
     private PageResult<BpmDefVersionMgtVO> buildVersionMgmtPageResult(Page<FlowDefinition> pageResult) {
@@ -204,8 +200,7 @@ public class BpmVersionMgmtServiceImpl implements BpmVersionMgmtService {
                 BpmDefVersionMgtVO vo = new BpmDefVersionMgtVO();
                 vo.setId(definition.getId());
                 vo.setVersion("V" + definition.getVersion());
-                BpmDefinitionExtDTO extDTO = JsonUtils.parseObject(definition.getExt(), BpmDefinitionExtDTO.class);
-                vo.setVersionAlias(extDTO.getVersionAlias());
+                vo.setVersionAlias(definition.getBpmVersionAlias());
                 VersionStatusEnum versionStatusEnum = VersionStatusEnum.toVersionStatusEnum(definition.getIsPublish());
                 vo.setVersionStatus(versionStatusEnum.getName());
                 vo.setCreateTime(definition.getCreateTime());
