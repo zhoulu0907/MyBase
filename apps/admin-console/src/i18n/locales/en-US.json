@@ -62,7 +62,9 @@
     "article": "Article Management",
     "media": "Media Management",
     "general": "General Settings",
-    "security": "Security Settings"
+    "security": "Security Settings",
+    "create": "Create Space",
+    "edit": "Edit"
   },
   "platformInfo": {
     "title": "Platform Information",

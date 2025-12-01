@@ -29,7 +29,7 @@ const ConnectInstanceCard: React.FC<CardProps> = ({ data, onEdit, onDelete }) =>
     <div
       className={styles.card}
       onClick={() => {
-        handleEdit(data.connectorId);
+        handleEdit(data.id);
       }}
     >
       <div className={styles.cardHeader}>
@@ -68,7 +68,7 @@ const ConnectInstanceCard: React.FC<CardProps> = ({ data, onEdit, onDelete }) =>
             size="small"
             onClick={(e) => {
               e.stopPropagation();
-              handleEdit(data.connectorId);
+              handleEdit(data.id);
             }}
           >
             编辑
@@ -87,7 +87,7 @@ const ConnectInstanceCard: React.FC<CardProps> = ({ data, onEdit, onDelete }) =>
                     key="delete"
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleDelete(data.connectorId);
+                      handleDelete(data.id);
                     }}
                   >
                     删除

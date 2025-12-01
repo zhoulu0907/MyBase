@@ -50,7 +50,7 @@ const Administrator: React.FC = () => {
       key: 'username'
     },
     {
-      title: '昵称',
+      title: '姓名',
       dataIndex: 'nickname',
       key: 'nickname'
     },
@@ -333,7 +333,7 @@ const Administrator: React.FC = () => {
             + 新建
           </Button>
           <Input.Search
-            placeholder="搜索账号/邮箱"
+            placeholder="搜索平台管理员"
             style={{ width: 300 }}
             allowClear
             value={searchKeyword}
@@ -463,12 +463,12 @@ const Administrator: React.FC = () => {
               <Input placeholder="请输入账号" autoComplete="off" />
             </Form.Item>
             <Form.Item
-              label="昵称"
+              label="姓名"
               field="nickname"
-              rules={[{ required: true, message: '请输入昵称' }]}
+              rules={[{ required: true, message: '请输入姓名' }]}
               validateTrigger={['onBlur']}
             >
-              <Input placeholder="请输入昵称" autoComplete="off" />
+              <Input placeholder="请输入姓名" autoComplete="off" />
             </Form.Item>
             <Form.Item
               label="手机号"

@@ -17,18 +17,118 @@ export interface LoginRequest {
   captchaVerification?: string | null;
 
   /**
-   * 设备ID
+   * 设备id
+   */
+  deviceId: string;
+}
+
+export interface TenantLoginRequest {
+  /**
+   * 账号
+   */
+  username: string;
+  /**
+   * 密码
+   */
+  password: string;
+  /**
+   * 验证码
+   */
+  captchaVerification?: string | null;
+  /**
+   * 设备id
+   */
+  deviceId: string;
+}
+
+export interface RuntimeAccountLoginRequest {
+  /**
+   * 应用id
+   */
+  appId: string;
+
+  /**
+   * 账号
+   */
+  username: string;
+  /**
+   * 密码
+   */
+  password: string;
+  /**
+   * 验证码
+   */
+  captchaVerification?: string | null;
+  /**
+   * 设备id
+   */
+  deviceId: string;
+}
+
+export interface RuntimeCorpLoginRequest {
+  /**
+   * 手机号
+   */
+  mobile: string;
+  /**
+   * 密码
+   */
+  password: string;
+  /**
+   * 验证码
+   */
+  captchaVerification?: string | null;
+
+  /**
+   * 设备id
+   */
+  deviceId: string;
+}
+
+export interface RuntimeMobileLoginRequest {
+  /**
+   * 应用id
+   */
+  appId: string;
+
+  /**
+   * 手机号
+   */
+  mobile: string;
+  /**
+   * 密码
+   */
+  password: string;
+  /**
+   * 验证码
+   */
+  captchaVerification?: string | null;
+
+  /**
+   * 设备id
    */
   deviceId: string;
 }
 
 export interface LoginResponse {
-  userId: number; // 用户ID
+  userId: string; // 用户ID
   accessToken: string; // 访问令牌
   refreshToken: string; // 刷新令牌
   expiresTime: number; // 令牌过期时间（时间戳，毫秒）
   tenantId: string; // 租户id
   tenantWebsite: string; // 租户网址
+  adminFlag: boolean; // 是否是管理员
+  corpId: string; // 企业id
+}
+
+export interface TenantLoginResponse {
+  userId: string; // 用户ID
+  accessToken: string; // 访问令牌
+  refreshToken: string; // 刷新令牌
+  expiresTime: number; // 令牌过期时间（时间戳，毫秒）
+  tenantId: string; // 租户id
+  tenantWebsite: string; // 租户网址
+  corpId: string; // 企业id
 }
 
 /**
@@ -71,4 +171,4 @@ export interface MenuInfo {
 /**
  * 登录的租户id
  */
-export type Headers = Record<'Tenant-Id', string>;
+export type Headers = Record<'X-Tenant-Id', string>;

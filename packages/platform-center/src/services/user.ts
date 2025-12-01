@@ -1,6 +1,6 @@
 import { type PageParam, PageResult } from '../types/common';
-import { type UserVO } from '../types/user';
-import { systemService } from './clients';
+import type { UserProfileRespVO, UserProfileUpdatePwdReq, UserProfileUpdateReq, UserVO } from '../types/user';
+import { runtimeService, systemService } from './clients';
 
 // 查询用户管理列表
 export const getUserPage = (params: PageParam) => {
@@ -10,6 +10,11 @@ export const getUserPage = (params: PageParam) => {
 // 查询用户详情
 export const getUser = (id: number) => {
   return systemService.get('/user/get?id=' + id);
+};
+
+// 查询用户详情
+export const runTimeGetUser = (id: string) => {
+  return runtimeService.get('/user/get?id=' + id);
 };
 
 // 新增用户
@@ -67,8 +72,27 @@ export const getSimpleUserList = (): Promise<UserVO[]> => {
   return systemService.get('/user/simple-list');
 };
 
-
 // 分页获取用户精简信息列表
 export const getSimpleUserPage = (params: PageParam): Promise<PageResult<UserVO>> => {
   return systemService.get('/user/simple-page', params);
+};
+
+// 获得登录用户信息
+export const getLoginedUser = (): Promise<UserProfileRespVO> => {
+  return systemService.get('/user/profile/get');
+};
+
+// 修改用户个人信息
+export const updateLoginedUser = (data: UserProfileUpdateReq) => {
+  return systemService.post('/user/profile/update', data);
+};
+
+// 修改用户个人密码
+export const updateLoginedUserPwd = (data: UserProfileUpdatePwdReq) => {
+  return systemService.post('/user/profile/update-password', data);
+};
+
+// 获得用户列表-支持搜索 用于设置管理员和主管
+export const getSimpleUser = (userNickName: string) => {
+  return systemService.get(`/user/simple-list-by-name?userNickName=${userNickName}`);
 };

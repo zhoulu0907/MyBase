@@ -1,6 +1,5 @@
 import { useI18n } from '@/hooks/useI18n';
 import { Breadcrumb } from '@arco-design/web-react';
-import { IconHome } from '@arco-design/web-react/icon';
 import React, { useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styles from './index.module.less';
@@ -34,30 +33,71 @@ const AppBreadcrumb: React.FC<BreadcrumbProps> = ({ className, items }) => {
       return [];
     }
 
-    const result: BreadcrumbItemType[] = [
-      {
-        key: 'onebase',
-        title: '',
-        path: '/onebase'
-      }
-    ];
+    const result: BreadcrumbItemType[] = [];
 
     // 如果路径以/onebase开头，移除/onebase
     const segments = pathSegments[0] === 'onebase' ? pathSegments.slice(1) : pathSegments;
 
-    let currentPath = '/onebase';
+    let currentPath = '/onebase/setting';
     segments.forEach((segment, index) => {
       if (segment == 'setting') {
         return;
       }
 
+      if (index == 0 || index > 2) {
+        return;
+      }
+
       currentPath += `/${segment}`;
+
+      switch (segment) {
+        case 'platform-info':
+          break;
+        case 'application':
+          result.push({
+            key: 'onebase',
+            title: '应用管理',
+            path: '/onebase'
+          });
+          break;
+        case 'user':
+        case 'role':
+        case 'organization':
+          result.push({
+            key: 'onebase',
+            title: '应用管理',
+            path: '/onebase'
+          });
+          break;
+        case 'spaceInfo':
+        case 'system-dict':
+        case 'security':
+        case 'tenant':
+          result.push({
+            key: 'onebase',
+            title: '系统配置',
+            path: '/onebase'
+          });
+          break;
+        case 'enterprise':
+          result.push({
+            key: 'onebase',
+            title: '扩展功能',
+            path: '/onebase'
+          });
+          break;
+        default:
+          break;
+      }
 
       // 根据路径生成对应的标题
       let title: string;
       switch (segment) {
         case 'platform-info':
           title = t('sider.platformInfo');
+          break;
+        case 'application':
+          title = t('sider.application');
           break;
         case 'user':
           title = t('sider.user');
@@ -71,11 +111,32 @@ const AppBreadcrumb: React.FC<BreadcrumbProps> = ({ className, items }) => {
         case 'system-dict':
           title = t('sider.systemDict');
           break;
-        case 'tenant':
-          title = t('sider.tenant');
+        case 'security':
+          title = t('sider.security');
+          break;
+        case 'spaceInfo':
+          title = t('sider.spaceInfo');
+          break;
+        case 'enterpriseInfo':
+          title = t('sider.enterpriseInfo');
+          break;
+        case 'profile':
+          title = t('sider.profile');
+          break;
+        case 'enterprise':
+          title = t('sider.enterprise');
+          break;
+        case 'create-enterprise':
+          title = t('sider.createEnterprise');
+          break;
+        case 'authorized-application':
+          title = t('sider.authorizedApplication');
+          break;
+        case 'edit':
+          title = t('sider.edit');
           break;
         default:
-          title = segment;
+          title = decodeURIComponent(segment);
       }
 
       result.push({
@@ -105,10 +166,10 @@ const AppBreadcrumb: React.FC<BreadcrumbProps> = ({ className, items }) => {
         {breadcrumbItems.map((item, index) => (
           <Breadcrumb.Item
             key={item.key}
-            onClick={() => handleBreadcrumbClick(item)}
-            className={item.path ? styles.clickable : styles.current}
+            // onClick={() => handleBreadcrumbClick(item)}
+            // className={item.path ? styles.clickable : styles.current}
           >
-            {index === 0 ? <IconHome className={styles.homeIcon} /> : item.title}
+            {item.title}
           </Breadcrumb.Item>
         ))}
       </Breadcrumb>

@@ -1,17 +1,19 @@
-@sider-width: 220px;
+@sider-width: 200px;
 @content-header-height: 48px;
+@header-height: 64px;
 
 .runtimePage {
   width: 100vw;
   height: calc(100vh);
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
+  background-color: #f2f3f5;
 
   .sider {
     width: @sider-width;
-    height: 100%;
+    height: calc(100vh - @header-height);
     box-sizing: border-box;
 
     .siderHeader {
@@ -31,36 +33,21 @@
   }
 
   .content {
+    background-color: transparent;
     width: calc(100vw - @sider-width);
     height: 100%;
     box-sizing: border-box;
+    padding: 16px;
     overflow-y: auto;
-
-    .contentHeader {
-      width: 100%;
-      height: @content-header-height;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 24px;
-      box-sizing: border-box;
-      background-color: #fff;
-      border-bottom: 0.5px solid #e5e5e5;
-
-      .contentTitle {
-        font-size: 18px;
-      }
-    }
 
     .contentBody {
       width: 100%;
-      height: calc(100vh - @content-header-height);
+      height: calc(100vh - @header-height - 32px);
       background-color: #f2f3f5;
-      box-sizing: border-box;
-      padding: 16px;
     }
   }
 }
+
 .userInfo {
   display: flex;
   align-items: center;

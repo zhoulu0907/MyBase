@@ -1,0 +1,113 @@
+.welcome {
+  padding: 24px;
+  background-color: #ffffff;
+  height: auto;
+
+  .welcomeHeader {
+    margin-bottom: 32px;
+
+    .welcomeTitle {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+      color: #1d2129;
+
+      .titleIcon {
+        margin-right: 12px;
+        color: #165dff;
+        font-size: 24px;
+      }
+    }
+
+    .welcomeSubtitle {
+      font-size: 16px;
+      color: #86909c;
+    }
+  }
+
+  .quickAccess {
+    margin-bottom: 32px;
+
+    .sectionTitle {
+      margin-bottom: 16px;
+      color: #1d2129;
+    }
+
+    .cardGrid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .quickCard {
+      cursor: pointer;
+      transition: all 0.3s ease;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      .cardContent {
+        text-align: center;
+        padding: 8px;
+
+        .cardIcon {
+          font-size: 32px;
+          color: #165dff;
+          margin-bottom: 12px;
+        }
+      }
+    }
+  }
+
+  .overviewCard {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+
+    :global(.arco-card-header) {
+      border-bottom: 1px solid #e5e6eb;
+      padding: 16px 24px;
+    }
+
+    :global(.arco-card-body) {
+      padding: 24px;
+    }
+  }
+
+  .overviewGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 24px;
+  }
+
+  .overviewItem {
+    text-align: center;
+    padding: 20px;
+    background: #f7f8fa;
+    border-radius: 8px;
+    border: 1px solid #e5e6eb;
+
+    .overviewLabel {
+      color: #86909c;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .overviewValue {
+      color: #1d2129;
+      font-size: 24px;
+      font-weight: 600;
+    }
+  }
+
+  .statusRunning {
+    color: #00b42a;
+    font-weight: 500;
+    background-color: #e8ffea;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+  }
+}

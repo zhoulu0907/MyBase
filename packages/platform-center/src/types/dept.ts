@@ -25,21 +25,20 @@ export interface DeptTree extends DeptVO {
 
 export type DeptForm = Partial<DeptVO>;
 
-export interface DeptListWithSearchReq {
+/**
+ * UserAdminOrDirectorUpdateReqVO
+ */
+export interface UpdateAdminOrDirectorReq {
   /**
-   * 部门ID
+   * 部门Id
    */
-  deptId?: string;
+  deptId: string;
   /**
-   * 排除的roleIDs
+   * 管理员类型
    */
-  excludeRoleIds?: string;
+  updateType: string;
   /**
-   * 排除的userIDs
+   * 用户id
    */
-  excludeUserIds?: string;
-  /**
-   * 搜索关键词
-   */
-  keywords?: string;
+  userId: string;
 }

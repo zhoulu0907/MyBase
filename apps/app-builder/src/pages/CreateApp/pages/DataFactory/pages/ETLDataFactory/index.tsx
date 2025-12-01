@@ -12,7 +12,7 @@ import {
 } from '@onebase/app';
 import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import ETLFlowCard from './components/card';
 import EditModal from './components/editModal';
 import styles from './index.module.less';
@@ -24,6 +24,7 @@ const EtlDataFactoryPage: React.FC = () => {
   const [searchETLFlowType, setSearchETLFlowType] = useState<ETL_SCHEDULE_STRATEGY>(ETL_SCHEDULE_STRATEGY.ALL);
 
   const navigate = useNavigate();
+  const { tenantId } = useParams();
 
   const [loading, setLoading] = useState(false);
 
@@ -90,10 +91,10 @@ const EtlDataFactoryPage: React.FC = () => {
 
   const handleToEditor = (flowId?: string) => {
     if (flowId) {
-      navigate(`/onebase/etl_editor?flowId=${flowId}&appId=${curAppId}`);
+      navigate(`/onebase/${tenantId}/etl_editor?flowId=${flowId}&appId=${curAppId}`);
       return;
     }
-    navigate(`/onebase/etl_editor?appId=${curAppId}`);
+    navigate(`/onebase/${tenantId}/etl_editor?appId=${curAppId}`);
   };
 
   const handleDeleteFlow = async (flowId: string) => {
