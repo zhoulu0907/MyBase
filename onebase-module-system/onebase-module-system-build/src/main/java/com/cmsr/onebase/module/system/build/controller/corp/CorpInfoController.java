@@ -30,7 +30,7 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 @RestController
 @RequestMapping("/corp")
 @Validated
-public class CorpInnerController {
+public class CorpInfoController {
 
     @Resource
     private CorpService corpService;
