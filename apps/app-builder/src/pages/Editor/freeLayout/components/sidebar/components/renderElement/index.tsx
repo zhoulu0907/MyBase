@@ -21,8 +21,9 @@ const Option = Select.Option;
 interface RenderElementProps {
   item: ConditionRule;
   index: number;
+  groupIndex: number;
   isDisabled: boolean;
-  onRuleChange: (index: number, field: string, value: any) => void;
+  onRuleChange: (groupIndex: number, index: number, field: string, value: any) => void;
   onOpenFormula: (index: number) => void;
   formulaVisible: boolean;
   formulaData: string;
@@ -34,6 +35,7 @@ interface RenderElementProps {
 export const RenderElement: React.FC<RenderElementProps> = ({
   item,
   index,
+  groupIndex,
   isDisabled,
   onRuleChange,
   onOpenFormula,
@@ -66,7 +68,7 @@ export const RenderElement: React.FC<RenderElementProps> = ({
       });
   };
   const getVariableOptions = (item: any) => {
-    console.log(VARIABLE_MAP[item.fieldType as FieldType], item);
+    // console.log(VARIABLE_MAP[item.fieldType as FieldType], item);
     const OPS = [Operator.CONTAINS, Operator.NOT_CONTAINS, Operator.EXISTS_IN, Operator.NOT_EXISTS_IN] as const;
     if (item.fieldType === FieldType.USER && OPS.includes(item.op as (typeof OPS)[number])) {
       item.fieldType = FieldType.MULTI_USER;
@@ -93,7 +95,7 @@ export const RenderElement: React.FC<RenderElementProps> = ({
   };
 
   const switchKey = `${item.fieldType}_${item.op}`;
-  console.log({ switchKey });
+  // console.log({ switchKey });
 
   let elementTypeInfo: any = { type: '', options: [] };
 
@@ -112,7 +114,7 @@ export const RenderElement: React.FC<RenderElementProps> = ({
       elementTypeInfo = ComplexInfo[switchKey as keyof typeof ComplexInfo];
     }
   }
-  console.log(elementTypeInfo);
+  // console.log(elementTypeInfo);
 
   // 用户选择数据
   useEffect(() => {
@@ -123,10 +125,10 @@ export const RenderElement: React.FC<RenderElementProps> = ({
 
   // 如果类型为静态值
   if (item.operatorType === OperatorType.VALUE || !item.operatorType) {
-    // mock
-    if (!elementTypeInfo.options.length) {
-      elementTypeInfo.options = approvalResultOptions;
-    }
+    // // mock
+    // if (!elementTypeInfo.options.length) {
+    //   elementTypeInfo.options = approvalResultOptions;
+    // }
     switch (elementTypeInfo.type) {
       case ElementType.INPUT:
         return (
@@ -136,7 +138,7 @@ export const RenderElement: React.FC<RenderElementProps> = ({
             allowClear
             value={item.value}
             disabled={isDisabled}
-            onChange={(value) => onRuleChange(index, OperatorType.VALUE, value)}
+            onChange={(value) => onRuleChange(groupIndex, index, OperatorType.VALUE, value)}
           />
         );
       case ElementType.DATE:
@@ -146,7 +148,7 @@ export const RenderElement: React.FC<RenderElementProps> = ({
             style={{ width: 150 }}
             value={item.value}
             disabled={isDisabled}
-            onChange={(value) => onRuleChange(index, OperatorType.VALUE, value)}
+            onChange={(value) => onRuleChange(groupIndex, index, OperatorType.VALUE, value)}
           />
         );
       case ElementType.DATE_RANGE:
@@ -157,7 +159,7 @@ export const RenderElement: React.FC<RenderElementProps> = ({
             value={item.value}
             disabled={isDisabled}
             onChange={(dateString, date) => {
-              onRuleChange(index, OperatorType.VALUE, dateString);
+              onRuleChange(groupIndex, index, OperatorType.VALUE, dateString);
             }}
             showTime={false}
           />
@@ -172,7 +174,7 @@ export const RenderElement: React.FC<RenderElementProps> = ({
             style={{ width: 150 }}
             showSearch
             disabled={isDisabled}
-            onChange={(value) => onRuleChange(index, OperatorType.VALUE, value)}
+            onChange={(value) => onRuleChange(groupIndex, index, OperatorType.VALUE, value)}
             filterOption={(inputValue, option) =>
               option.props.value.toLowerCase().indexOf(inputValue.toLowerCase()) >= 0 ||
               option.props.children.toLowerCase().indexOf(inputValue.toLowerCase()) >= 0
@@ -196,7 +198,7 @@ export const RenderElement: React.FC<RenderElementProps> = ({
             showSearch
             mode="multiple"
             disabled={isDisabled}
-            onChange={(value) => onRuleChange(index, OperatorType.VALUE, value)}
+            onChange={(value) => onRuleChange(groupIndex, index, OperatorType.VALUE, value)}
             filterOption={(inputValue, option) =>
               option.props.value.toLowerCase().indexOf(inputValue.toLowerCase()) >= 0 ||
               option.props.children.toLowerCase().indexOf(inputValue.toLowerCase()) >= 0
@@ -219,7 +221,7 @@ export const RenderElement: React.FC<RenderElementProps> = ({
             allowClear
             value={item.value}
             disabled={isDisabled}
-            onChange={(value) => onRuleChange(index, OperatorType.VALUE, value)}
+            onChange={(value) => onRuleChange(groupIndex, index, OperatorType.VALUE, value)}
           />
         );
     }
@@ -233,7 +235,7 @@ export const RenderElement: React.FC<RenderElementProps> = ({
         value={item.value}
         style={{ width: 150 }}
         disabled={isDisabled}
-        onChange={(value) => onRuleChange(index, OperatorType.VALUE, value)}
+        onChange={(value) => onRuleChange(groupIndex, index, OperatorType.VALUE, value)}
       >
         {getVariableOptions(item)}
       </Select>

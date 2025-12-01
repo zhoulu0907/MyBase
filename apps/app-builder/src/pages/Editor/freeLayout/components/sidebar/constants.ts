@@ -438,3 +438,72 @@ export const approvalResultOptions = [
   //   value: 'post_auto_cc'
   // }
 ];
+
+export const preNodeOptions = [
+  {
+    label: '审批结果',
+    value: PreNode.APPROVAL_RESULT,
+    type: FieldType.DATA_SELECTION_RESULT
+  },
+  {
+    label: '审批⼈',
+    value: PreNode.APPROVER_ID,
+    type: FieldType.USER
+  },
+  {
+    label: '审批时间',
+    value: PreNode.APPROVAL_TIME,
+    type: FieldType.DATETIME
+  },
+  {
+    label: '审批⼈部⻔',
+    value: PreNode.APPROVER_DEPT_ID,
+    type: FieldType.DEPARTMENT
+  }
+];
+
+export const instanceOptions = [
+  {
+    label: '流程标题',
+    value: Instance.BPM_TITLE,
+    type: FieldType.TEXT
+  },
+  {
+    label: '发起⼈',
+    value: Instance.INITIATOR_ID,
+    type: FieldType.USER
+  },
+  {
+    label: '发起部⻔',
+    value: Instance.INITIATOR_DEPT_ID,
+    type: FieldType.DEPARTMENT
+  },
+  {
+    label: '发起时间',
+    value: Instance.SUBMIT_TIME,
+    type: FieldType.DATETIME
+  },
+  {
+    label: '创建时间',
+    value: Instance.CREATE_TIME,
+    type: FieldType.DATETIME
+  },
+  {
+    label: '更新时间',
+    value: Instance.UPDATE_TIME,
+    type: FieldType.DATETIME
+  }
+];
+
+export const entityOptions = [
+  {
+    label: '表单字段1',
+    value: 'field1',
+    type: FieldType.USER
+  },
+  {
+    label: '表单字段2',
+    value: 'field2',
+    type: FieldType.DATE
+  }
+];
