@@ -73,6 +73,12 @@ public class FlowDefinition extends WarmFlowBizEntity implements Definition {
     @Column(value = "bpm_version", comment = "流程版本")
     private String bpmVersion;
 
+    /**
+     * 流程版本备注
+     */
+    @Column(value = "bpm_version_alias", comment = "流程版本备注")
+    private String bpmVersionAlias;
+
 
     /* ==================== 以下为非数据库字段 ==================== */
 
@@ -150,6 +156,17 @@ public class FlowDefinition extends WarmFlowBizEntity implements Definition {
     @Override
     public Definition setVersion(String bpmVersion) {
         this.bpmVersion = bpmVersion;
+        return this;
+    }
+
+    @Override
+    public String getVersionAlias() {
+        return this.bpmVersionAlias;
+    }
+
+    @Override
+    public Definition setVersionAlias(String versionAlias) {
+        this.bpmVersionAlias = versionAlias;
         return this;
     }
 
