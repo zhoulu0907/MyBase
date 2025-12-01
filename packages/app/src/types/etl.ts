@@ -108,7 +108,7 @@ export interface ETLDatasourceOption {
 
 export interface ListAppETLDatasourceParams {
   applicationId: string;
-  writable: number;
+  writable?: number;
 }
 export interface ListTableColumnsReq {
   tableUuid: string;

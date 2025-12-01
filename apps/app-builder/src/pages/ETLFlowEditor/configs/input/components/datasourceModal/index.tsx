@@ -85,8 +85,7 @@ const DatasourceModal: React.FC<DatasourceModalProps> = ({ isModalVisible, onClo
       return;
     }
     const res = await listAppETLDatasource({
-      applicationId: curAppId,
-      writable: 0
+      applicationId: curAppId
     });
     console.log(res);
     setAllDatasources(res);
