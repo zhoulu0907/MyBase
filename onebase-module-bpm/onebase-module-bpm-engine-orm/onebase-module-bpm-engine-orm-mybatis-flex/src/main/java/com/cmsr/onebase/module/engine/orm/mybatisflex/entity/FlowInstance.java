@@ -125,9 +125,9 @@ public class FlowInstance extends WarmFlowBaseEntity implements Instance {
     @Override
     public Instance setTenantId(String tenantId) {
         if (tenantId != null) {
-            this.tenantId = Long.valueOf(tenantId);
+            this.wfTenantId = Long.valueOf(tenantId);
         } else {
-            this.tenantId = null;
+            this.wfTenantId = null;
         }
 
         return this;

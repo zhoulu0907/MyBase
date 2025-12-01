@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.bpm.core.dal.dataobject;
 
-import com.cmsr.onebase.framework.orm.entity.BaseEntity;
+import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
 import com.mybatisflex.annotation.Table;
 import lombok.Data;
 
@@ -11,11 +11,11 @@ import java.io.Serializable;
  * 代理关系实例表 实体类。
  *
  * @author liyang
- * @since 2025-11-28
+ * @since 2025-11-29
  */
 @Data
 @Table("bpm_flow_agent_ins")
-public class BpmFlowAgentInsDO extends BaseEntity implements Serializable {
+public class BpmFlowAgentInsDO extends BaseTenantEntity implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
@@ -56,8 +56,7 @@ public class BpmFlowAgentInsDO extends BaseEntity implements Serializable {
     private Integer isExecutor;
 
     /**
-     * 租户id
+     * 乐观锁
      */
-    private Long tenantId;
-
+    private Long lockVersion;
 }

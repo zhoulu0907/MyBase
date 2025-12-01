@@ -50,7 +50,7 @@ import org.dromara.warm.flow.core.enums.SkipType;
 import org.dromara.warm.flow.core.service.DefService;
 import org.dromara.warm.flow.core.service.InsService;
 import org.dromara.warm.flow.core.service.TaskService;
-import org.dromara.warm.flow.core.service.impl.BpmConstants;
+import com.cmsr.onebase.module.bpm.core.enums.BpmConstants;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -314,7 +314,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         flowInsExtDO.setFormName(reqVO.getFormName());
         flowInsExtDO.setFormSummary(formSummary);
         flowInsExtDO.setInstanceId(instance.getId());
-        flowInsExtDO.setAppId(extDto.getAppId());
+        flowInsExtDO.setApplicationId(extDto.getAppId());
 
         flowInsExtRepository.save(flowInsExtDO);
 

@@ -10,11 +10,6 @@ import lombok.Data;
  */
 @Data
 public class BpmDefinitionExtDTO {
-     /**
-      * 流程版本备注
-      */
-    private String versionAlias;
-
     /**
      * 应用ID
      */

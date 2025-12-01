@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.engine.orm.mybatisflex.entity;
 
-import com.cmsr.onebase.framework.orm.entity.WarmFlowBaseEntity;
+import com.cmsr.onebase.framework.orm.entity.WarmFlowBizEntity;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
 import lombok.Data;
@@ -22,7 +22,7 @@ import java.util.List;
 @Data
 @Accessors(chain = true)
 @Table(value = "bpm_flow_node")
-public class FlowNode extends WarmFlowBaseEntity implements Node {
+public class FlowNode extends WarmFlowBizEntity implements Node {
     /** 节点类型（0开始 1中间 2结束 3互斥网关 4并行网关） */
     @Column(value = "node_type", comment = "节点类型（0开始 1中间 2结束 3互斥网关 4并行网关）")
     private Integer nodeType;
@@ -86,8 +86,8 @@ public class FlowNode extends WarmFlowBaseEntity implements Node {
     /**
      * 版本
      */
-    @Column(value = "version", comment = "版本")
-    private String version;
+    @Column(value = "bpm_version", comment = "版本")
+    private String bpmVersion;
 
     /* ==================== 以下为非数据库字段 ==================== */
 
@@ -142,9 +142,9 @@ public class FlowNode extends WarmFlowBaseEntity implements Node {
     @Override
     public Node setTenantId(String tenantId) {
         if (tenantId != null) {
-            this.tenantId = Long.valueOf(tenantId);
+            this.wfTenantId = Long.valueOf(tenantId);
         } else {
-            this.tenantId = null;
+            this.wfTenantId = null;
         }
 
         return this;
@@ -158,6 +158,27 @@ public class FlowNode extends WarmFlowBaseEntity implements Node {
             this.deleted = null;
         }
 
+        return this;
+    }
+
+    @Override
+    public Node setVersion(String bpmVersion) {
+        this.bpmVersion = bpmVersion;
+        return this;
+    }
+
+    @Override
+    public String getVersion() {
+        return this.bpmVersion;
+    }
+
+    public Node setApplicationId(Long applicationId) {
+        this.applicationId = applicationId;
+        return this;
+    }
+
+    public Node setVersionTag(Long versionTag) {
+        this.versionTag = versionTag;
         return this;
     }
 }

@@ -8,26 +8,21 @@ import com.mybatisflex.core.table.TableDef;
  * 流程实例扩展信息表 表定义层。
  *
  * @author liyang
- * @since 2025-11-28
+ * @since 2025-11-29
  */
-public class BpmFlowInstanceBizExtTableDef extends TableDef {
+public class BpmFlowInsBizExtTableDef extends TableDef {
 
     private static final long serialVersionUID = 1L;
 
     /**
      * 流程实例扩展信息表
      */
-    public static final BpmFlowInstanceBizExtTableDef BPM_FLOW_INSTANCE_BIZ_EXT = new BpmFlowInstanceBizExtTableDef();
+    public static final BpmFlowInsBizExtTableDef BPM_FLOW_INSTANCE_BIZ_EXT = new BpmFlowInsBizExtTableDef();
 
     /**
      * 主键ID
      */
     public final QueryColumn ID = new QueryColumn(this, "id");
-
-    /**
-     * 应用ID
-     */
-    public final QueryColumn APP_ID = new QueryColumn(this, "app_id");
 
     /**
      * 创建人
@@ -100,6 +95,11 @@ public class BpmFlowInstanceBizExtTableDef extends TableDef {
     public final QueryColumn LOCK_VERSION = new QueryColumn(this, "lock_version");
 
     /**
+     * 应用ID
+     */
+    public final QueryColumn APPLICATION_ID = new QueryColumn(this, "application_id");
+
+    /**
      * 绑定视图ID（与流程实例表的form_path字段保持一致）
      */
     public final QueryColumn BINDING_VIEW_ID = new QueryColumn(this, "binding_view_id");
@@ -142,19 +142,19 @@ public class BpmFlowInstanceBizExtTableDef extends TableDef {
     /**
      * 默认字段，不包含逻辑删除或者 large 等字段。
      */
-    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, INSTANCE_ID, BUSINESS_DATA_ID, BUSINESS_DATA_CODE, BPM_TITLE, INITIATOR_ID, INITIATOR_NAME, INITIATOR_DEPT_ID, INITIATOR_DEPT_NAME, SUBMIT_TIME, FORM_SUMMARY, FORM_NAME, BPM_VERSION, LOCK_VERSION, CREATOR, CREATE_TIME, UPDATER, UPDATE_TIME, DELETED, TENANT_ID, APP_ID, INITIATOR_AVATAR, BINDING_VIEW_ID};
+    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, INSTANCE_ID, BUSINESS_DATA_ID, BUSINESS_DATA_CODE, BPM_TITLE, INITIATOR_ID, INITIATOR_NAME, INITIATOR_DEPT_ID, INITIATOR_DEPT_NAME, SUBMIT_TIME, FORM_SUMMARY, FORM_NAME, BPM_VERSION, LOCK_VERSION, CREATOR, CREATE_TIME, UPDATER, UPDATE_TIME, DELETED, TENANT_ID, APPLICATION_ID, INITIATOR_AVATAR, BINDING_VIEW_ID};
 
-    public BpmFlowInstanceBizExtTableDef() {
+    public BpmFlowInsBizExtTableDef() {
         super("", "bpm_flow_instance_biz_ext");
     }
 
-    private BpmFlowInstanceBizExtTableDef(String schema, String name, String alisa) {
+    private BpmFlowInsBizExtTableDef(String schema, String name, String alisa) {
         super(schema, name, alisa);
     }
 
-    public BpmFlowInstanceBizExtTableDef as(String alias) {
+    public BpmFlowInsBizExtTableDef as(String alias) {
         String key = getNameWithSchema() + "." + alias;
-        return getCache(key, k -> new BpmFlowInstanceBizExtTableDef("", "bpm_flow_instance_biz_ext", alias));
+        return getCache(key, k -> new BpmFlowInsBizExtTableDef("", "bpm_flow_instance_biz_ext", alias));
     }
 
 }

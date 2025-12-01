@@ -56,17 +56,19 @@ public class WarmFlowBaseEntity {
     @Column(value = "lock_version", comment = "乐观锁")
     protected Long lockVersion;
 
+    @Getter
+    @Setter
     @Column(value = "tenant_id", comment = "租户ID", tenantId = true)
-    protected Long tenantId;
+    protected Long wfTenantId;
 
     /**
      * 多租户转成字符串
      */
     public String getTenantId() {
-        if (tenantId == null) {
+        if (wfTenantId == null) {
             return null;
         }
-        return String.valueOf(tenantId);
+        return String.valueOf(wfTenantId);
     }
 
     /**
@@ -99,5 +101,27 @@ public class WarmFlowBaseEntity {
             return null;
         }
         return String.valueOf(creator);
+    }
+
+    // =============== 以下实现set函数提供给Mybatis-flex的Listener使用 =================
+
+    public void setIdByListener(Long id) {
+        this.id = id;
+    }
+
+    public void setTenantIdByListener(Long tenantId) {
+        this.wfTenantId = tenantId;
+    }
+
+    public void setDeletedByListener(Long delFlag) {
+        this.deleted = delFlag;
+    }
+
+    public void setCreateTimeByListener(LocalDateTime createTime) {
+        this.createTime = createTime;
+    }
+
+    public void setUpdateTimeByListener(LocalDateTime updateTime) {
+        this.updateTime = updateTime;
     }
 }

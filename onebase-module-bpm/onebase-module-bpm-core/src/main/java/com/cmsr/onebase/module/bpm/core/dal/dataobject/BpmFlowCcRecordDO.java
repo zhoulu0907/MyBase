@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.bpm.core.dal.dataobject;
 
-import com.cmsr.onebase.framework.orm.entity.BaseEntity;
+import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
 import com.mybatisflex.annotation.Table;
 import lombok.Data;
 
@@ -12,11 +12,11 @@ import java.time.LocalDateTime;
  * 流程抄送记录表 实体类。
  *
  * @author liyang
- * @since 2025-11-28
+ * @since 2025-11-29
  */
 @Data
 @Table("bpm_flow_cc_record")
-public class BpmFlowCcRecordDO extends BaseEntity implements Serializable {
+public class BpmFlowCcRecordDO extends BaseTenantEntity implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
@@ -47,8 +47,7 @@ public class BpmFlowCcRecordDO extends BaseEntity implements Serializable {
     private String userId;
 
     /**
-     * 租户id
+     * 乐观锁
      */
-    private Long tenantId;
-
+    private Long lockVersion;
 }

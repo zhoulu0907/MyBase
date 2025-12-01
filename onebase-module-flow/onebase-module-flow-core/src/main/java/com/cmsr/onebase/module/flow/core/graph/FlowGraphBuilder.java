@@ -1,26 +1,45 @@
 package com.cmsr.onebase.module.flow.core.graph;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
+import com.cmsr.onebase.module.flow.context.FieldTypeProvider;
 import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraphNode;
+import com.cmsr.onebase.module.flow.context.graph.nodes.ScriptNodeData;
+import com.cmsr.onebase.module.flow.core.dal.database.FlowConnectorScriptRepository;
+import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowConnectorScriptDO;
+import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * @Author：huangjie
  * @Date：2025/9/28 15:12
  */
+@Component
 public class FlowGraphBuilder {
 
-    public static JsonGraph build(String json) {
+    @Setter
+    @Autowired
+    private ObjectProvider<FieldTypeProvider> objectProvider;
+
+    @Autowired
+    private FlowConnectorScriptRepository connectorScriptRepository;
+
+    public JsonGraph build(String json) {
         JsonGraph jsonGraph = JsonUtils.parseObject(json, JsonGraph.class);
         addJsonGraphLoopVariable(jsonGraph);
+        complementJsonGraphNodeData(jsonGraph);
+        FieldTypeProvider fieldTypeProvider = objectProvider.getObject();
+        fieldTypeProvider.completeFieldType(jsonGraph);
         return jsonGraph;
     }
 
-    private static void addJsonGraphLoopVariable(JsonGraph jsonGraph) {
+    private void addJsonGraphLoopVariable(JsonGraph jsonGraph) {
         if (jsonGraph == null || jsonGraph.getNodes() == null) {
             return;
         }
@@ -29,7 +48,16 @@ public class FlowGraphBuilder {
         }
     }
 
-    private static void recursiveNode(JsonGraphNode node, InLoopDepth loopDeepMap) {
+    private void complementJsonGraphNodeData(JsonGraph jsonGraph) {
+        if (jsonGraph == null || jsonGraph.getNodes() == null) {
+            return;
+        }
+        for (JsonGraphNode node : jsonGraph.getNodes()) {
+            recursivelyComplementNode(node);
+        }
+    }
+
+    private void recursiveNode(JsonGraphNode node, InLoopDepth loopDeepMap) {
         if (StringUtils.equals(node.getType(), "loop")) {
             loopDeepMap = new InLoopDepth(loopDeepMap);
             for (String key : loopDeepMap.keySet()) {
@@ -44,6 +72,18 @@ public class FlowGraphBuilder {
         if (CollectionUtils.isNotEmpty(node.getBlocks())) {
             for (JsonGraphNode childNode : node.getBlocks()) {
                 recursiveNode(childNode, loopDeepMap);
+            }
+        }
+    }
+
+    private void recursivelyComplementNode(JsonGraphNode node) {
+        if (node.getData() instanceof ScriptNodeData scriptNodeData) {
+            FlowConnectorScriptDO connectorScriptDO = connectorScriptRepository.getById(scriptNodeData.getActionId());
+            scriptNodeData.setScript(connectorScriptDO.getRawScript());
+        }
+        if (CollectionUtils.isNotEmpty(node.getBlocks())) {
+            for (JsonGraphNode child : node.getBlocks()) {
+                recursivelyComplementNode(child);
             }
         }
     }

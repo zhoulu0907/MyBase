@@ -14,16 +14,16 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
 {
-  "name": "租户001",
-  "tenantCode": "tenant_001",
-  "website": "tenant_001",
-  "accountCount": 10,
+  "name": "租户1Test009",
+  "tenantCode": "tenant_test0039",
+  "website": "tenant_test0039",
+  "accountCount": 2,
   "status": 1,
   "tenantAdminUserReqVOList": [
     {
-      "adminUserName": "user001",
-      "adminMobile": "13800000001",
-      "adminNickName": "租户001管理员"
+      "adminUserName": "test009",
+      "adminMobile": "13800000009",
+      "adminNickName": "租户t009管理员"
     }
   ]
 }
@@ -35,11 +35,17 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
 {
-  "id": "9856984310087680",
-  "name": "测试2101",
-  "accountCount": "2",
-  "adminUserName": "",
-  "status": 0
+  "id": "153771975565377536",
+  "name": "租户1Test0099",
+  "accountCount": "4",
+  "status": 0,
+  "tenantAdminUserUpdateReqVOSList": [
+    {
+      "adminUserName": "test0099",
+      "adminMobile": "13800000008",
+      "adminNickName": "租户t008管理员"
+    }
+  ]
 }
 
 ### 获取租户分页 /admin-api/system/tenant/page
@@ -68,6 +74,12 @@ tenant-id: {{adminTenantId}}
 
 ### 获得租户详情 /admin-api/system/tenant/get
 GET {{baseUrl}}/system/tenant/get?id=141778811947483136
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 删除租户 /admin-api/system/tenant/delete
+POST {{baseUrl}}/system/tenant/delete?id=153771975565377536
 Content-Type: application/json
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}

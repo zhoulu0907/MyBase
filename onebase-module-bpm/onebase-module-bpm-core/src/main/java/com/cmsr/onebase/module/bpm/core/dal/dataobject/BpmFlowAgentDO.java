@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.bpm.core.dal.dataobject;
 
-import com.cmsr.onebase.framework.orm.entity.BaseEntity;
+import com.cmsr.onebase.framework.orm.entity.BaseBizEntity;
 import com.mybatisflex.annotation.Table;
 import lombok.Data;
 
@@ -12,19 +12,14 @@ import java.time.LocalDateTime;
  * 流程代理表 实体类。
  *
  * @author liyang
- * @since 2025-11-28
+ * @since 2025-11-29
  */
 @Data
 @Table("bpm_flow_agent")
-public class BpmFlowAgentDO extends BaseEntity implements Serializable {
+public class BpmFlowAgentDO extends BaseBizEntity implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
-
-    /**
-     * 应用ID
-     */
-    private Long appId;
 
     /**
      * 被代理人用户ID（即委托人），代理关系的发起方
@@ -67,8 +62,7 @@ public class BpmFlowAgentDO extends BaseEntity implements Serializable {
     private LocalDateTime revokedTime;
 
     /**
-     * 租户ID
+     * 乐观锁
      */
-    private Long tenantId;
-
+    private Long lockVersion;
 }

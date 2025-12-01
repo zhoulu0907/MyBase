@@ -7,9 +7,11 @@ import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
+import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
-import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
 import com.cmsr.onebase.module.system.dal.database.CorpDataRepository;
@@ -19,10 +21,11 @@ import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.corp.CorpConstant;
 import com.cmsr.onebase.module.system.service.corpapprelation.CorpAppRelationService;
 import com.cmsr.onebase.module.system.service.user.UserService;
-import com.cmsr.onebase.module.system.util.encrypt.PasswordRandomGenerator;
 import com.cmsr.onebase.module.system.vo.corp.*;
 import com.cmsr.onebase.module.system.vo.corpapprelation.AppAuthTimeReqVO;
 import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppRelationPageReqVO;
+import com.mzt.logapi.context.LogRecordContext;
+import com.mzt.logapi.starter.annotation.LogRecord;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.init.DefaultConfigStore;
@@ -39,6 +42,7 @@ import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
+import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
 
 
 /**
@@ -51,6 +55,9 @@ import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 @Validated
 @Slf4j
 public class CorpServiceImpl implements CorpService {
+
+    // 租户管理员设置默认密码
+    private static final String CORP_ADMIN_PASSWORD = "CorpChina2025!";
 
     @Resource
     private CorpDataRepository corpDataRepository;
@@ -70,9 +77,10 @@ public class CorpServiceImpl implements CorpService {
     @Resource
     private DictDataCommonApi dictDataApi;
 
-
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @LogRecord(type = SYSTEM_CORP_TYPE, subType = SYSTEM_CORP_CREATE_SUB_TYPE, bizNo = "{{#corpId}}",
+            success = SYSTEM_CORP_CREATE_SUCCESS)
     public CorpAdminUserRespVO createCorpCombined(CorpCombinedVo corpCombineReqVO) {
         // 保存基础数据
         Long corpId = createCorp(corpCombineReqVO.getCorpReqVO());
@@ -84,6 +92,13 @@ public class CorpServiceImpl implements CorpService {
         createListCorpAppRelation(appAuthTimeReqVO, corpId);
         // 更新企业管理员Id
         updateCorpAdminIdById(corpId, vo.getId());
+
+        // 记录操作日志上下文
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+
+        LogRecordContext.putVariable("loginUser", loginUser);
+        LogRecordContext.putVariable("corpName", corpCombineReqVO.getCorpReqVO().getCorpName());
+        LogRecordContext.putVariable("corpId", corpId);
         return vo;
     }
 
@@ -134,6 +149,8 @@ public class CorpServiceImpl implements CorpService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @LogRecord(type = SYSTEM_CORP_TYPE, subType = SYSTEM_CORP_UPDATE_SUB_TYPE, bizNo = "{{#corp.id}}",
+            success = SYSTEM_CORP_UPDATE_SUCCESS)
     public void updateCorp(CorpUpdateReqVO reqVO) {
         validCorpUserCountDuplicate(reqVO.getUserLimit());
         CorpDO checkCorp = corpDataRepository.findById(reqVO.getId());
@@ -142,6 +159,12 @@ public class CorpServiceImpl implements CorpService {
         }
         CorpDO corpDO = BeanUtils.toBean(reqVO, CorpDO.class);
         corpDataRepository.update(corpDO);
+
+        // 记录操作日志上下文
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+
+        LogRecordContext.putVariable("loginUser", loginUser);
+        LogRecordContext.putVariable("corp", corpDO);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -156,11 +179,21 @@ public class CorpServiceImpl implements CorpService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @LogRecord(type = SYSTEM_CORP_TYPE, subType = SYSTEM_CORP_DELETE_SUB_TYPE, bizNo = "{{#corp.id}}",
+            success = SYSTEM_CORP_DELETE_SUCCESS)
     public void deleteCorp(Long id) {
+        // 查询企业
+        CorpDO corp = corpDataRepository.findById(id);
         // 删除企业
         corpDataRepository.deleteById(id);
         // 删除关联关系
         corpAppRelationService.deleteCorpAppRelationByCorpId(id);
+
+        // 记录操作日志上下文
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+
+        LogRecordContext.putVariable("loginUser", loginUser);
+        LogRecordContext.putVariable("corp", corp);
     }
 
 
@@ -323,8 +356,10 @@ public class CorpServiceImpl implements CorpService {
         }
         // 插入用户
         AdminUserDO user = BeanUtils.toBean(reqVO, AdminUserDO.class);
-        String password = PasswordRandomGenerator.generateSecurePassword(15);
-        user.setPassword(encodePassword(password)); // 加密密码
+        // 暂时注掉使用默认，方便测试
+        // String password = PasswordRandomGenerator.generateSecurePassword(15);
+        String password = CORP_ADMIN_PASSWORD;
+        user.setPassword(encodePassword(CORP_ADMIN_PASSWORD)); // 加密密码
         user.setCorpId(corpId);
         // 在空间创建空企业（Tenant）用户
         user.setUserType(UserTypeEnum.CORP.getValue());

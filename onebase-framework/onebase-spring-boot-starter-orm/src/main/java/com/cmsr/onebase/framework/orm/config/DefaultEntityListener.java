@@ -3,6 +3,7 @@ package com.cmsr.onebase.framework.orm.config;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.orm.entity.BaseBizEntity;
 import com.cmsr.onebase.framework.orm.entity.BaseEntity;
+import com.cmsr.onebase.framework.orm.entity.WarmFlowBaseEntity;
 import com.mybatisflex.annotation.InsertListener;
 import com.mybatisflex.annotation.UpdateListener;
 
@@ -19,7 +20,15 @@ public class DefaultEntityListener implements InsertListener, UpdateListener {
             LocalDateTime now = LocalDateTime.now();
             baseEntity.setCreateTime(now);
             baseEntity.setUpdateTime(now);
+        } else if (o instanceof WarmFlowBaseEntity wfBaseEntity) {
+            Long userId = SecurityFrameworkUtils.getLoginUserId();
+            wfBaseEntity.setCreator(userId);
+            wfBaseEntity.setUpdater(userId);
+            LocalDateTime now = LocalDateTime.now();
+            wfBaseEntity.setCreateTimeByListener(now);
+            wfBaseEntity.setUpdateTimeByListener(now);
         }
+
         if (o instanceof BaseBizEntity bizEntity) {
             // TODO: set version properties for biz entity if absent
             if (bizEntity.getVersionTag() == null) {

@@ -8,7 +8,7 @@ import com.mybatisflex.core.table.TableDef;
  *  表定义层。
  *
  * @author HuangJie
- * @since 2025-11-25
+ * @since 2025-11-29
  */
 public class FlowConnectorScriptTableDef extends TableDef {
 
@@ -50,13 +50,13 @@ public class FlowConnectorScriptTableDef extends TableDef {
     public final QueryColumn UPDATE_TIME = new QueryColumn(this, "update_time");
 
     
-    public final QueryColumn CONNECTOR_ID = new QueryColumn(this, "connector_id");
-
-    
     public final QueryColumn DESCRIPTION = new QueryColumn(this, "description");
 
     
-    public final QueryColumn LOCK_VERSION = new QueryColumn(this, "lock_version");
+    public final QueryColumn APPLICATION_ID = new QueryColumn(this, "application_id");
+
+    
+    public final QueryColumn CONNECTOR_UUID = new QueryColumn(this, "connector_uuid");
 
     
     public final QueryColumn INPUT_PARAMETER = new QueryColumn(this, "input_parameter");
@@ -72,7 +72,7 @@ public class FlowConnectorScriptTableDef extends TableDef {
     /**
      * 默认字段，不包含逻辑删除或者 large 等字段。
      */
-    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, CONNECTOR_ID, SCRIPT_NAME, SCRIPT_TYPE, DESCRIPTION, RAW_SCRIPT, INPUT_PARAMETER, OUTPUT_PARAMETER, LOCK_VERSION, CREATOR, CREATE_TIME, UPDATER, UPDATE_TIME, DELETED, TENANT_ID};
+    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, CONNECTOR_UUID, SCRIPT_NAME, SCRIPT_TYPE, DESCRIPTION, RAW_SCRIPT, INPUT_PARAMETER, OUTPUT_PARAMETER, APPLICATION_ID, CREATOR, CREATE_TIME, UPDATER, UPDATE_TIME, DELETED, TENANT_ID};
 
     public FlowConnectorScriptTableDef() {
         super("", "flow_connector_script");

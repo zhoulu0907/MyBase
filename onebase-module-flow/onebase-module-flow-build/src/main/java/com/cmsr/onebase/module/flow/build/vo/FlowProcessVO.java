@@ -22,6 +22,9 @@ public class FlowProcessVO implements Serializable {
     @Schema(description = "流程ID")
     private Long id;
 
+    @Schema(description = "流程UUID", example = "1234567890")
+    private String processUuid;
+
     @Schema(description = "应用ID", required = true, example = "1")
     @NotNull(message = "应用ID不能为空")
     private Long applicationId;
@@ -55,5 +58,5 @@ public class FlowProcessVO implements Serializable {
     private LocalDateTime updateTime;
 
     @Schema(description = "触发配置，比如表单触发pageId等")
-    private Map<String,Object> triggerConfig;
+    private Map<String, Object> triggerConfig;
 }

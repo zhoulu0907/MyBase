@@ -6,8 +6,6 @@ import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
 import static com.cmsr.onebase.module.flow.core.dal.dataobject.table.FlowProcessFormTableDef.FLOW_PROCESS_FORM;
 
 /**
@@ -16,16 +14,6 @@ import static com.cmsr.onebase.module.flow.core.dal.dataobject.table.FlowProcess
  */
 @Repository
 public class FlowProcessFormRepository extends ServiceImpl<FlowProcessFormMapper, FlowProcessFormDO> {
-
-    public FlowProcessFormDO findByProcessId(Long processId) {
-        QueryWrapper query = this.query().where(FLOW_PROCESS_FORM.PROCESS_ID.eq(processId));
-        return getOne(query);
-    }
-
-    public List<FlowProcessFormDO> findByPageId(Long pageId) {
-        QueryWrapper query = this.query().where(FLOW_PROCESS_FORM.PAGE_ID.eq(pageId));
-        return list(query);
-    }
 
     public void deleteByProcessId(Long processId) {
         QueryWrapper query = this.query().where(FLOW_PROCESS_FORM.PROCESS_ID.eq(processId));

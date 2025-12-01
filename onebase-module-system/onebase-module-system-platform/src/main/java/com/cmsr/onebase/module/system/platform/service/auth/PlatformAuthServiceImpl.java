@@ -31,6 +31,10 @@ import com.cmsr.onebase.module.system.vo.auth.AuthLoginReqVO;
 import com.cmsr.onebase.module.system.vo.auth.AuthLoginRespVO;
 import com.cmsr.onebase.module.system.vo.auth.AuthResetPasswordReqVO;
 import com.cmsr.onebase.module.system.vo.auth.UserLoginReqVO;
+import com.cmsr.onebase.module.system.vo.auth.*;
+import com.google.common.annotations.VisibleForTesting;
+import com.mzt.logapi.context.LogRecordContext;
+import com.mzt.logapi.starter.annotation.LogRecord;
 import jakarta.annotation.Resource;
 import jakarta.validation.Validator;
 import lombok.Setter;
@@ -45,6 +49,7 @@ import java.util.Objects;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
+import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
 
 /**
  * Auth Service 实现类
@@ -130,6 +135,8 @@ public class PlatformAuthServiceImpl implements PlatformAuthService {
 
 
     @Override
+    @LogRecord(type = LOGIN_USER_TYPE, subType = LOGIN_USER_PLATFORM_SUB_TYPE, bizNo = "{{#user.id}}",
+            success = LOGIN_USER_PLATFORM_SUCCESS)
     public AuthLoginRespVO login(AuthLoginReqVO reqVO) {
         // 校验验证码
         validateCaptcha(reqVO);
@@ -153,6 +160,7 @@ public class PlatformAuthServiceImpl implements PlatformAuthService {
 
         // 使用账号密码，进行登录
         AdminUserDO user = authenticate(reqVO.getUsername(), reqVO.getPassword());
+        LogRecordContext.putVariable("user", user);
         return createTokenAfterLoginSuccess(user.getId(), user.getUserType(), reqVO.getUsername(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_USERNAME);
     }
 

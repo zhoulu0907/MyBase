@@ -12,8 +12,4 @@ public class FlowProcessFormDO extends BaseTenantEntity {
     @Column(value = "process_id")
     private Long processId;
 
-    @Column(value = "page_id")
-    private Long pageId;
-
-
 }
