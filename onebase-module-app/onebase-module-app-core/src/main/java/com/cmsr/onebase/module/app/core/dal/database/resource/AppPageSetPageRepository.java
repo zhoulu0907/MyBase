@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.app.core.dal.database.resource;
 
+import com.cmsr.onebase.framework.orm.repo.BaseBizRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetPageDO;
 import com.cmsr.onebase.module.app.core.dal.mapper.AppResourcePagesetPageMapper;
 import com.mybatisflex.core.query.QueryWrapper;
@@ -9,7 +10,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public class AppPageSetPageRepository extends ServiceImpl<AppResourcePagesetPageMapper, AppResourcePagesetPageDO> {
+public class AppPageSetPageRepository extends BaseBizRepository<AppResourcePagesetPageMapper, AppResourcePagesetPageDO> {
 
     public void deleteByPageId(Long pageId) {
         this.updateChain().eq(AppResourcePagesetPageDO::getPageId, pageId)

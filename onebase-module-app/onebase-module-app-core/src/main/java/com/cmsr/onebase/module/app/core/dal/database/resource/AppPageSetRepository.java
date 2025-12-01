@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.app.core.dal.database.resource;
 
+import com.cmsr.onebase.framework.orm.repo.BaseBizRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetDO;
 import com.cmsr.onebase.module.app.core.dal.mapper.AppResourcePagesetMapper;
 import com.mybatisflex.core.query.QueryWrapper;
@@ -9,7 +10,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public class AppPageSetRepository extends ServiceImpl<AppResourcePagesetMapper, AppResourcePagesetDO> {
+public class AppPageSetRepository extends BaseBizRepository<AppResourcePagesetMapper, AppResourcePagesetDO> {
 
     public AppResourcePagesetDO findPageSetByMenuId(Long menuId) {
         QueryWrapper queryWrapper = this.query().eq(AppResourcePagesetDO::getMenuId, menuId);

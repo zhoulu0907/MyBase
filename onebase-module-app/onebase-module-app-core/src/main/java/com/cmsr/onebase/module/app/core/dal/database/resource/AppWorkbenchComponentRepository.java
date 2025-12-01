@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.app.core.dal.database.resource;
 
+import com.cmsr.onebase.framework.orm.repo.BaseBizRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourceWorkbenchComponentDO;
 import com.cmsr.onebase.module.app.core.dal.mapper.AppResourceWorkbenchComponentMapper;
 import com.mybatisflex.core.query.QueryWrapper;
@@ -11,7 +12,7 @@ import java.util.List;
 import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppResourceWorkbenchComponentTableDef.APP_RESOURCE_WORKBENCH_COMPONENT;
 
 @Repository
-public class AppWorkbenchComponentRepository extends ServiceImpl<AppResourceWorkbenchComponentMapper, AppResourceWorkbenchComponentDO> {
+public class AppWorkbenchComponentRepository extends BaseBizRepository<AppResourceWorkbenchComponentMapper, AppResourceWorkbenchComponentDO> {
 
 
     public void deleteComponentByPageId(Long pageId) {

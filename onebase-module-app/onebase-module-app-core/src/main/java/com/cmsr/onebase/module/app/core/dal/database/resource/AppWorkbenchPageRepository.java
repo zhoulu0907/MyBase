@@ -1,15 +1,15 @@
 package com.cmsr.onebase.module.app.core.dal.database.resource;
 
+import com.cmsr.onebase.framework.orm.repo.BaseBizRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourceWorkbenchPageDO;
 import com.cmsr.onebase.module.app.core.dal.mapper.AppResourceWorkbenchPageMapper;
 import com.mybatisflex.core.query.QueryWrapper;
-import com.mybatisflex.spring.service.impl.ServiceImpl;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
-public class AppWorkbenchPageRepository extends ServiceImpl<AppResourceWorkbenchPageMapper, AppResourceWorkbenchPageDO> {
+public class AppWorkbenchPageRepository extends BaseBizRepository<AppResourceWorkbenchPageMapper, AppResourceWorkbenchPageDO> {
 
     public void updatePageName(Long pageId, String pageName) {
         AppResourceWorkbenchPageDO pageDO = new AppResourceWorkbenchPageDO();
