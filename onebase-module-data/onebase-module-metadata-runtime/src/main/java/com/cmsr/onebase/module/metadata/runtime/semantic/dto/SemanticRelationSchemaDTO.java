@@ -40,6 +40,20 @@ public class SemanticRelationSchemaDTO {
     @Schema(description = "目标字段ID")
     private Long targetKeyFieldId;
 
+
+       /**
+     * 选择字段id
+     * <p>
+     * 该字段主要用于当关系类型relationshipType为数据选择时：
+     * - targetFieldId存的是关联表的主键字段id
+     * - selectFieldId存的是关联表中被选择的字段id（用于展示给用户的字段）
+     * <p>
+     * 用户动态建的实体中存的是关联表主键id，通过id查到一条或多条数据后，
+     * 需要把selectFieldId对应的字段值取出来展示给用户。因此需要存储该字段。
+     */
+    @Schema(description = "选择字段id")
+    private String selectFieldId;
+
     @Schema(description = "关系属性字段模型")
     private List<SemanticFieldSchemaDTO> relationAttributes;
 }

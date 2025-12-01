@@ -348,6 +348,7 @@ public class SemanticRefResolver {
                 Map<String, Object> m = new HashMap<>();
                 m.put("id", id);
                 String name = extractName(o);
+                if (name == null) name = extractValueString(o);
                 if (name != null) m.put("name", name);
                 mapped.add(m);
             }
@@ -358,6 +359,7 @@ public class SemanticRefResolver {
             Map<String, Object> m = new HashMap<>();
             m.put("id", id);
             String name = extractName(one);
+            if (name == null) name = extractValueString(one);
             if (name != null) m.put("name", name);
             v.setRawValue(m);
         }
@@ -408,6 +410,15 @@ public class SemanticRefResolver {
         if (o instanceof Map<?,?> m) {
             Object n = m.get("name");
             return n == null ? null : String.valueOf(n);
+        }
+        return null;
+    }
+
+    private String extractValueString(Object o) {
+        if (o == null) return null;
+        if (o instanceof Map<?,?> m) {
+            Object v = m.get("value");
+            return v == null ? null : String.valueOf(v);
         }
         return null;
     }

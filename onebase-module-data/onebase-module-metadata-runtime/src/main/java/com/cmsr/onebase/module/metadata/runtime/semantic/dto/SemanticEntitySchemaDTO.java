@@ -5,6 +5,8 @@ import lombok.Data;
 
 import java.util.List;
 
+import com.mybatisflex.annotation.Column;
+
 @Schema(description = "实体模型 DTO")
 @Data
 /**
