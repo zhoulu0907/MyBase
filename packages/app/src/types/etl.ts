@@ -39,6 +39,7 @@ export interface ETLDatasourceConfig {
   host: string;
   port: number;
   database: string;
+  jdbcUrl: string;
   username: string;
   password: string;
   connectMode?: string;
