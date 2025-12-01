@@ -14,11 +14,13 @@ import java.nio.charset.StandardCharsets;
  */
 public class JsonFileGraphTest {
 
+    private FlowGraphBuilder flowGraphBuilder = new FlowGraphBuilder();
+
     public void testToFlowChain(String fileName) throws IOException {
         ClassPathResource resource = new ClassPathResource("graphjson/" + fileName);
         String json = StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8);
 
-        JsonGraph jsonGraph = FlowGraphBuilder.build(json);
+        JsonGraph jsonGraph = flowGraphBuilder.build(json);
         String flowChain = FlowChainBuilder.toFlowChain(jsonGraph);
         System.out.println(flowChain);
     }

@@ -1,22 +1,34 @@
 package com.cmsr.onebase.module.flow.core.graph;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
+import com.cmsr.onebase.module.flow.context.FieldTypeProvider;
 import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraphNode;
+import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * @Author：huangjie
  * @Date：2025/9/28 15:12
  */
+@Component
 public class FlowGraphBuilder {
 
-    public static JsonGraph build(String json) {
+    @Setter
+    @Autowired
+    private ObjectProvider<FieldTypeProvider> objectProvider;
+
+    public JsonGraph build(String json) {
         JsonGraph jsonGraph = JsonUtils.parseObject(json, JsonGraph.class);
         addJsonGraphLoopVariable(jsonGraph);
+        FieldTypeProvider fieldTypeProvider = objectProvider.getObject();
+        fieldTypeProvider.completeFieldType(jsonGraph);
         return jsonGraph;
     }
 

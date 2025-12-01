@@ -38,6 +38,10 @@ public class FlowCacheHandler {
     @Autowired
     private FlowProcessCache flowProcessCache;
 
+    @Setter
+    @Autowired
+    private FlowGraphBuilder flowGraphBuilder;
+
 
     public void initAllProcess() {
         List<FlowProcessDO> flowProcessDOS = TenantManager.withoutTenantCondition(() -> flowProcessRepository.findAllByEnableStatus(FlowEnableStatusEnum.ENABLE.getStatus()));
@@ -79,7 +83,7 @@ public class FlowCacheHandler {
 
     private void onProcessUpdate(FlowProcessDO processDO) {
         log.info("处理流程更新事件：{}", processDO.getId());
-        JsonGraph jsonGraph = FlowGraphBuilder.build(processDO.getProcessDefinition());
+        JsonGraph jsonGraph = flowGraphBuilder.build(processDO.getProcessDefinition());
         if (jsonGraph == null) {
             log.error("流程定义错误：{}", processDO);
             return;

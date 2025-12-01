@@ -43,13 +43,7 @@ public class FlowProcessCache {
 
     private ConcurrentHashMap<Long, StartDateFieldNodeData> startDateFieldNodeDataCache = new ConcurrentHashMap<>();
 
-    @Setter
-    @Autowired
-    private ObjectProvider<FieldTypeProvider> objectProvider;
-
     public void update(Long applicationId, Long processId, JsonGraph jsonGraph) {
-        FieldTypeProvider fieldTypeProvider = objectProvider.getObject();
-        fieldTypeProvider.completeFieldType(jsonGraph);
         Map<String, NodeData> flowNodeData = jsonGraph.getNodeData();
         flowNodeDataCache.put(processId, flowNodeData);
         JsonGraphNode startNode = jsonGraph.getStartNode();
