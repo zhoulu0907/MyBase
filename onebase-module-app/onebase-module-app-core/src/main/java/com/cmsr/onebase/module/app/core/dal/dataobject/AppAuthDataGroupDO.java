@@ -16,7 +16,7 @@ public class AppAuthDataGroupDO extends BaseBizEntity {
     @Column(value = "role_uuid", comment = "角色id")
     private String roleUuid;
 
-    @Column(value = "menu_id", comment = "菜单id")
+    @Column(value = "menu_uuid", comment = "菜单id")
     private String menuUuid;
 
     @Column(value = "group_name", comment = "组名称")

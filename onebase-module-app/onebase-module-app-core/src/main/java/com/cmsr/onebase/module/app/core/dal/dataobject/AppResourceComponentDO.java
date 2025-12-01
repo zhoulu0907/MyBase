@@ -18,7 +18,7 @@ public class AppResourceComponentDO extends BaseBizEntity {
      * 页面编码
      */
     @Column(value = "page_uuid", comment = "页面UUID")
-    private Long pageUuid;
+    private String pageUuid;
 
     /**
      * 组件编码
