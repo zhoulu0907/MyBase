@@ -33,12 +33,12 @@ public class FieldConstraintSaveReqVO {
     @Schema(description = "是否启用：0-是，1-否")
     private Integer isEnabled;
 
-    @Schema(description = "运行模式：0 编辑态，1 运行态")
-    private Integer runMode;
+    @Schema(description = "版本标识")
+    private Long versionTag;
 
     @Schema(description = "应用ID", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull
-    private Long appId;
+    private Long applicationId;
 }
 
 

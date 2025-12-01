@@ -47,8 +47,8 @@ public class MetadataAutoNumberStateDO extends BaseTenantEntity {
     /**
      * 应用ID
      */
-    @Column(value = "app_id", comment = "应用ID")
-    private Long appId;
+    @Column(value = "application_id", comment = "应用ID")
+    private Long applicationId;
 }
 
 

@@ -108,7 +108,7 @@ public class MetadataValidationRangeBuildServiceImpl implements MetadataValidati
         // 转换VO为DO并设置必要字段
         MetadataValidationRangeDO data = BeanUtils.toBean(vo, MetadataValidationRangeDO.class);
         data.setEntityId(field.getEntityId());
-        data.setAppId(field.getAppId());
+        data.setApplicationId(field.getApplicationId());
         data.setGroupId(groupId);
         
         // 设置默认值
@@ -171,7 +171,7 @@ public class MetadataValidationRangeBuildServiceImpl implements MetadataValidati
         updateDO.setId(existingDO.getId());
         updateDO.setFieldId(existingDO.getFieldId());
         updateDO.setEntityId(existingDO.getEntityId());
-        updateDO.setAppId(existingDO.getAppId());
+        updateDO.setApplicationId(existingDO.getApplicationId());
         updateDO.setGroupId(targetGroupId);
         rangeRepository.updateById(updateDO);
     }

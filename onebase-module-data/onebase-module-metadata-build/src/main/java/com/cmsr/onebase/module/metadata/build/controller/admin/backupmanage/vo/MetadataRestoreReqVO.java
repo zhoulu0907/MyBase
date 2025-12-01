@@ -23,7 +23,7 @@ public class MetadataRestoreReqVO {
 
     @Schema(description = "目标应用ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
     @NotNull(message = "目标应用ID不能为空")
-    private Long targetAppId;
+    private Long targetApplicationId;
 
     @Schema(description = "数据源列表", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "数据源列表不能为空")

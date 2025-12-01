@@ -123,7 +123,7 @@ public class AutoNumberStateManager {
         state.setPeriodKey(periodKey);
         state.setCurrentValue(config.getInitialValue() - 1);
         state.setLastResetTime(LocalDateTime.now());
-        state.setAppId(config.getAppId());
+        state.setApplicationId(config.getApplicationId());
 
         stateRepository.save(state);
         log.debug("Created initial state for config: {}, periodKey: {}", config.getId(), periodKey);
@@ -160,7 +160,7 @@ public class AutoNumberStateManager {
         resetLog.setResetReason(resetReason);
         resetLog.setOperator(operator);
         resetLog.setResetTime(LocalDateTime.now());
-        resetLog.setAppId(state.getAppId());
+        resetLog.setApplicationId(state.getApplicationId());
 
         resetLogRepository.save(resetLog);
         log.info("Reset sequence for config: {}, periodKey: {}, from: {} to: {}, reason: {}", 

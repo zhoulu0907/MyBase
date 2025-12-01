@@ -39,7 +39,7 @@ public class AutoNumberStateBuildServiceImpl implements AutoNumberStateBuildServ
             st.setPeriodKey(periodKey);
             long start = cfg.getInitialValue() != null ? cfg.getInitialValue() : 1L;
             st.setCurrentValue(start - 1); // 初始化为初始值-1，后续+1再使用
-            st.setAppId(cfg.getAppId());
+            st.setApplicationId(cfg.getApplicationId());
             stateRepository.save(st);
         }
         long next = st.getCurrentValue() + 1;
@@ -82,7 +82,7 @@ public class AutoNumberStateBuildServiceImpl implements AutoNumberStateBuildServ
         log.setNextValue(nextValue);
         log.setOperator(operator);
         log.setResetReason(reason);
-        log.setAppId(st != null ? st.getAppId() : null);
+        log.setApplicationId(st != null ? st.getApplicationId() : null);
         resetLogRepository.save(log);
     }
 

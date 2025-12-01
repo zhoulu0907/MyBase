@@ -54,11 +54,11 @@ public class EntityFieldRespVO {
     @Schema(description = "校验规则配置", example = "1")
     private String validationRulesId;
 
-    @Schema(description = "运行模式", example = "0")
-    private Integer runMode;
+    @Schema(description = "版本标识", example = "0")
+    private Long versionTag;
 
     @Schema(description = "应用ID", example = "1")
-    private String appId;
+    private String applicationId;
 
     @Schema(description = "字段状态，0：开启，1：关闭", example = "0")
     private Integer status;

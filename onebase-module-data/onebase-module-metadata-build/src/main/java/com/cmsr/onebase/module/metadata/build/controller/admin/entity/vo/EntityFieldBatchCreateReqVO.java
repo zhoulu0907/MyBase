@@ -29,6 +29,6 @@ public class EntityFieldBatchCreateReqVO {
 
     @Schema(description = "应用ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "12345")
     @NotNull(message = "应用ID不能为空")
-    private String appId;
+    private String applicationId;
 
 }

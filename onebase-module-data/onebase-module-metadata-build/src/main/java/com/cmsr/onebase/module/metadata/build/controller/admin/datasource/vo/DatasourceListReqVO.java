@@ -14,6 +14,6 @@ import lombok.Data;
 public class DatasourceListReqVO {
 
     @Schema(description = "应用ID", example = "545161214364356608")
-    private String appId;
+    private String applicationId;
 
 }

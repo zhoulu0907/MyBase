@@ -114,8 +114,8 @@ public class DatasourceController {
         List<MetadataDatasourceDO> list;
 
         // 根据是否传入appId来决定查询方式
-        if (reqVO.getAppId() != null && !reqVO.getAppId().trim().isEmpty()) {
-            list = datasourceBuildService.getDatasourceListByAppId(Long.valueOf(reqVO.getAppId()));
+        if (reqVO.getApplicationId() != null && !reqVO.getApplicationId().trim().isEmpty()) {
+            list = datasourceBuildService.getDatasourceListByAppId(Long.valueOf(reqVO.getApplicationId()));
         } else {
             list = datasourceBuildService.getDatasourceList();
         }

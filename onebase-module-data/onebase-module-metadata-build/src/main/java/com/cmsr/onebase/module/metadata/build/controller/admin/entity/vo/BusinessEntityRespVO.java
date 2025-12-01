@@ -28,11 +28,11 @@ public class BusinessEntityRespVO {
     @Schema(description = "对应数据表名", example = "sys_user")
     private String tableName;
 
-    @Schema(description = "运行模式", example = "0")
-    private Integer runMode;
+    @Schema(description = "版本标识", example = "0")
+    private Long versionTag;
 
     @Schema(description = "应用ID", example = "1")
-    private String appId;
+    private String applicationId;
 
     @Schema(description = "前端显示配置json", example = "{\"showFields\":[\"name\",\"code\"]}")
     private String displayConfig;

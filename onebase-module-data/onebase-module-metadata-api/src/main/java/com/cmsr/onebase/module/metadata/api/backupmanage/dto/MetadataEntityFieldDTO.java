@@ -60,11 +60,11 @@ public class MetadataEntityFieldDTO {
     @Schema(description = "校验规则配置")
     private String validationRules;
 
-    @Schema(description = "运行模式")
-    private Integer runMode;
+    @Schema(description = "版本标识")
+    private Long versionTag;
 
     @Schema(description = "应用ID")
-    private Long appId;
+    private Long applicationId;
 
     @Schema(description = "字段状态")
     private Integer status;

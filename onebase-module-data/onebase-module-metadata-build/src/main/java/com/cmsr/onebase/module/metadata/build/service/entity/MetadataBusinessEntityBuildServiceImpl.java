@@ -116,7 +116,7 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
         }
 
         // 校验编码唯一性（只有当code不为空时才校验）
-        Long appId = safeParseLong(createReqVO.getAppId());
+        Long appId = safeParseLong(createReqVO.getApplicationId());
         if (CharSequenceUtil.isNotEmpty(createReqVO.getCode()) && appId != null) {
             validateBusinessEntityCodeUniqueWithLock(null, createReqVO.getCode(), appId);
         }
@@ -126,7 +126,7 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
 
         // 插入业务实体
         MetadataBusinessEntityDO businessEntity = BeanUtils.toBean(createReqVO, MetadataBusinessEntityDO.class);
-        businessEntity.setAppId(appId);
+        businessEntity.setApplicationId(appId);
         businessEntity.setDatasourceId(safeParseLong(createReqVO.getDatasourceId()));
 
         // 处理code字段：如果为空或空字符串，则生成UUID
@@ -202,7 +202,7 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
         try {
             QueryWrapper queryWrapper = QueryWrapper.create()
                     .eq(MetadataBusinessEntityDO::getCode, code)
-                    .eq(MetadataBusinessEntityDO::getAppId, appId)
+                    .eq(MetadataBusinessEntityDO::getApplicationId, appId)
                     .ne(MetadataBusinessEntityDO::getId, id, id != null);
 
             // 先进行普通查询，如果存在则抛出异常
@@ -373,8 +373,8 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
             entityField.setIsUnique(isUnique); // parent_id 强制不是唯一
             entityField.setSortOrder(sortOrder++);
             entityField.setValidationRules(null); // 系统字段暂不设置校验规则
-            entityField.setRunMode(0); // 默认编辑态
-            entityField.setAppId(appId);
+            entityField.setVersionTag(0L); // 默认编辑态
+            entityField.setApplicationId(appId);
             entityField.setStatus(0); // 默认开启
             entityField.setFieldCode(generateFieldCode(systemField.getFieldName())); // 生成字段编码
 
@@ -694,7 +694,7 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
     public void updateBusinessEntity(@Valid BusinessEntitySaveReqVO updateReqVO) {
         // 安全转换 ID 和 appId
         Long id = safeParseLong(updateReqVO.getId());
-        Long appId = safeParseLong(updateReqVO.getAppId());
+        Long appId = safeParseLong(updateReqVO.getApplicationId());
         Long datasourceId = safeParseLong(updateReqVO.getDatasourceId());
         
         // 校验存在
@@ -713,7 +713,7 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
         // 更新业务实体
         MetadataBusinessEntityDO updateObj = BeanUtils.toBean(updateReqVO, MetadataBusinessEntityDO.class);
         updateObj.setId(id);
-        updateObj.setAppId(appId);
+        updateObj.setApplicationId(appId);
         updateObj.setDatasourceId(datasourceId);
 
         // 处理code字段：如果为空或空字符串，则生成UUID
@@ -783,11 +783,11 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
         if (pageReqVO.getDatasourceId() != null) {
             queryWrapper.eq(MetadataBusinessEntityDO::getDatasourceId, pageReqVO.getDatasourceId());
         }
-        if (pageReqVO.getRunMode() != null) {
-            queryWrapper.eq(MetadataBusinessEntityDO::getRunMode, pageReqVO.getRunMode());
+        if (pageReqVO.getVersionTag() != null) {
+            queryWrapper.eq(MetadataBusinessEntityDO::getVersionTag, pageReqVO.getVersionTag());
         }
-        if (pageReqVO.getAppId() != null) {
-            queryWrapper.eq(MetadataBusinessEntityDO::getAppId, pageReqVO.getAppId());
+        if (pageReqVO.getApplicationId() != null) {
+            queryWrapper.eq(MetadataBusinessEntityDO::getApplicationId, pageReqVO.getApplicationId());
         }
         if (pageReqVO.getStatus() != null) {
             queryWrapper.eq(MetadataBusinessEntityDO::getStatus, pageReqVO.getStatus());
@@ -1079,7 +1079,7 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
     @Override
     public BusinessEntityRespVO createBusinessEntityWithResponse(@Valid BusinessEntitySaveReqVO reqVO) {
         // 修改企业主表更新时间
-        Long appId = Long.valueOf(reqVO.getAppId());
+        Long appId = Long.valueOf(reqVO.getApplicationId());
         appApplicationApi.updateAppTimeById(appId);
 
         Long id = createBusinessEntity(reqVO);
@@ -1180,7 +1180,7 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
             createPhysicalTable(datasource, entity.getTableName(), systemFields);
 
             // 6. 保存实体字段信息到 metadata_entity_field 表（如果还没有保存的话）
-            saveEntityFields(entityId, systemFields, entity.getAppId());
+            saveEntityFields(entityId, systemFields, entity.getApplicationId());
 
             log.info("成功重新创建业务实体 {} 的物理表: {}", entity.getDisplayName(), entity.getTableName());
         } catch (Exception e) {
