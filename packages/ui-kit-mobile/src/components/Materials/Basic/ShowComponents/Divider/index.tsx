@@ -2,8 +2,9 @@ import { memo } from 'react';
 import { ShowSchema } from '@onebase/ui-kit';
 import '../index.css';
 import './index.css'
+type XDividerConfig = typeof ShowSchema.XDividerSchema.config;
 
-const XDivider = memo((props: ShowSchema.XDividerConfig) => {
+const XDivider = memo((props: XDividerConfig) => {
   const { content, align, margin } = props;
 
   return (

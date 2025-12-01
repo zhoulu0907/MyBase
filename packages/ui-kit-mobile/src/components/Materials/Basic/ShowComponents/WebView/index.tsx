@@ -1,8 +1,9 @@
 import { memo, useState } from 'react';
 import { STATUS_OPTIONS, STATUS_VALUES, ShowSchema } from '@onebase/ui-kit';
 import styles from './index.module.css';
+type XWebViewConfig = typeof ShowSchema.XWebViewSchema.config;
 
-const XWebView = memo((props: ShowSchema.XWebViewConfig & { runtime?: boolean; detailMode?: boolean }) => {
+const XWebView = memo((props: XWebViewConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const { status, title, webViewUrl, runtime = true } = props;
 
   const [iframeError, setIframeError] = useState(false);

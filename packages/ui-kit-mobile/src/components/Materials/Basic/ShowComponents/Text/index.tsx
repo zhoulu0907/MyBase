@@ -2,8 +2,9 @@ import { memo } from 'react';
 import { STATUS_OPTIONS, STATUS_VALUES, ShowSchema } from '@onebase/ui-kit';
 import '../index.css';
 import './index.css'
+type XTextConfig = typeof ShowSchema.XTextSchema.config;
 
-const XText = memo((props: ShowSchema.XTextConfig & { runtime?: boolean; detailMode?: boolean }) => {
+const XText = memo((props: XTextConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const { status, content, color } = props;
 
   return (
