@@ -237,7 +237,7 @@ public class DataSelectionFieldValueStorageStrategy implements FieldValueStorage
             return null;
         }
 
-        MetadataEntityFieldDO targetField = entityFieldRepository.findById(Long.valueOf(relationship.getTargetFieldId()));
+        MetadataEntityFieldDO targetField = entityFieldRepository.getById(Long.valueOf(relationship.getTargetFieldId()));
         if (targetField == null) {
             log.warn("DATA_SELECTION 字段存储时，目标字段不存在，目标字段ID：{}", relationship.getTargetFieldId());
             return null;
@@ -302,7 +302,7 @@ public class DataSelectionFieldValueStorageStrategy implements FieldValueStorage
             return null;
         }
 
-        MetadataEntityFieldDO targetField = entityFieldRepository.findById(Long.valueOf(relationship.getTargetFieldId()));
+        MetadataEntityFieldDO targetField = entityFieldRepository.getById(Long.valueOf(relationship.getTargetFieldId()));
         if (targetField == null) {
             log.warn("DATA_SELECTION 字段读取时，目标字段不存在，目标字段ID：{}", relationship.getTargetFieldId());
             return null;
@@ -340,15 +340,7 @@ public class DataSelectionFieldValueStorageStrategy implements FieldValueStorage
      */
     private MetadataEntityRelationshipDO findRelationshipBySourceFieldId(Long sourceFieldId, Long sourceEntityId) {
         try {
-            DefaultConfigStore configStore = new DefaultConfigStore();
-            configStore.and(MetadataEntityRelationshipDO.SOURCE_FIELD_ID, String.valueOf(sourceFieldId));
-            configStore.and(MetadataEntityRelationshipDO.SOURCE_ENTITY_ID, sourceEntityId);
-            List<MetadataEntityRelationshipDO> relationships = entityRelationshipRepository.findAllByConfig(configStore);
-            if (CollectionUtils.isEmpty(relationships)) {
-                return null;
-            }
-            // 返回第一个匹配的关联关系
-            return relationships.get(0);
+            return entityRelationshipRepository.findBySourceFieldAndEntity(sourceFieldId, sourceEntityId);
         } catch (Exception ex) {
             log.warn("查询关联关系失败，源字段ID：{}，源实体ID：{}，原因：{}", sourceFieldId, sourceEntityId, ex.getMessage());
             return null;

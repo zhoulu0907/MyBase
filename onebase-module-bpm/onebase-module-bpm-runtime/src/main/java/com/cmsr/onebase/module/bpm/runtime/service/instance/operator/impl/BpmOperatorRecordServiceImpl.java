@@ -18,16 +18,15 @@ import com.cmsr.onebase.module.bpm.core.utils.BpmUtil;
 import com.cmsr.onebase.module.bpm.runtime.service.common.permission.BpmPermissionResolver;
 import com.cmsr.onebase.module.bpm.runtime.service.instance.operator.BpmOperatorRecordService;
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmOperatorRecordRespVO;
-import com.cmsr.onebase.module.engine.orm.anyline.entity.FlowHisTask;
-import com.cmsr.onebase.module.engine.orm.anyline.entity.FlowTask;
-import com.cmsr.onebase.module.engine.orm.anyline.repository.FlowHisTaskRepository;
-import com.cmsr.onebase.module.engine.orm.anyline.repository.FlowTaskRepository;
+import com.cmsr.onebase.module.engine.orm.mybatisflex.entity.FlowHisTask;
+import com.cmsr.onebase.module.engine.orm.mybatisflex.entity.FlowTask;
+import com.cmsr.onebase.module.engine.orm.mybatisflex.repository.FlowHisTaskRepository;
+import com.cmsr.onebase.module.engine.orm.mybatisflex.repository.FlowTaskRepository;
 import com.cmsr.onebase.module.system.api.user.AdminUserApi;
 import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
+import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -127,12 +126,12 @@ public class BpmOperatorRecordServiceImpl implements BpmOperatorRecordService {
     }
 
     private List<HisTask> findAllHisTaskByInsId(Long instanceId) {
-        ConfigStore configs = new DefaultConfigStore();
-        configs.and(FlowHisTask.INSTANCE_ID, instanceId);
-        configs.order(FlowHisTask.NODE_TYPE);
-        configs.order(FlowHisTask.CREATE_TIME);
+        QueryWrapper queryWrapper = QueryWrapper.create();
+        queryWrapper.eq(FlowTask::getInstanceId, instanceId);
+        queryWrapper.orderBy(FlowHisTask::getNodeType, true);
+        queryWrapper.orderBy(FlowHisTask::getCreateTime, true);
 
-        List<FlowHisTask> flowHisTasks = hisTaskRepository.findAllByConfig(configs);
+        List<FlowHisTask> flowHisTasks = hisTaskRepository.list(queryWrapper);
 
         if (CollectionUtils.isEmpty(flowHisTasks)) {
             return new ArrayList<>();
@@ -142,12 +141,12 @@ public class BpmOperatorRecordServiceImpl implements BpmOperatorRecordService {
     }
 
     private List<Task> findAllTaskByInsId(Long instanceId) {
-        ConfigStore configs = new DefaultConfigStore();
-        configs.and(FlowHisTask.INSTANCE_ID, instanceId);
-        configs.order(FlowHisTask.NODE_TYPE);
-        configs.order(FlowHisTask.CREATE_TIME);
+        QueryWrapper queryWrapper = QueryWrapper.create();
+        queryWrapper.eq(FlowTask::getInstanceId, instanceId);
+        queryWrapper.orderBy(FlowHisTask::getNodeType, true);
+        queryWrapper.orderBy(FlowHisTask::getCreateTime, true);
 
-        List<FlowTask> flowTasks = taskRepository.findAllByConfig(configs);
+        List<FlowTask> flowTasks = taskRepository.list(queryWrapper);
 
         if (CollectionUtils.isEmpty(flowTasks)) {
             return new ArrayList<>();
@@ -167,12 +166,9 @@ public class BpmOperatorRecordServiceImpl implements BpmOperatorRecordService {
             return;
         }
 
-        // 查找代理信息
-        ConfigStore configs = new DefaultConfigStore();
-        configs.and(BpmFlowAgentInsDO.INSTANCE_ID, instance.getId());
-
-        List<BpmFlowAgentInsDO> agentInsDOs = agentInsRepository.findAllByConfig(configs);
-        Map<Long, List<BpmFlowAgentInsDO>> agentExecutorMap = new HashMap<>();
+        // 查找代理信息（BpmFlowAgentInsDO 中 principalId 为 String）
+        List<BpmFlowAgentInsDO> agentInsDOs = agentInsRepository.findAllByInstanceId(instance.getId());
+        Map<String, List<BpmFlowAgentInsDO>> agentExecutorMap = new HashMap<>();
 
         if (CollectionUtils.isNotEmpty(agentInsDOs)) {
             for (BpmFlowAgentInsDO agentInsDO : agentInsDOs) {
@@ -185,7 +181,8 @@ public class BpmOperatorRecordServiceImpl implements BpmOperatorRecordService {
                 if (agentExecutorList != null) {
                     agentExecutorList.add(agentInsDO);
                 } else {
-                    agentExecutorMap.put(agentInsDO.getPrincipalId(), new ArrayList<>(Collections.singletonList(agentInsDO)));
+                    agentExecutorMap.put(agentInsDO.getPrincipalId(),
+                            new ArrayList<>(Collections.singletonList(agentInsDO)));
                 }
             }
         }
@@ -238,12 +235,12 @@ public class BpmOperatorRecordServiceImpl implements BpmOperatorRecordService {
             operatorInfo.setTaskStatus(hisTask.getFlowStatus());
 
             // 设置代理信息
-            List<BpmFlowAgentInsDO> agentInsDOList = agentExecutorMap.get(Long.valueOf(hisTask.getApprover()));
+            List<BpmFlowAgentInsDO> agentInsDOList = agentExecutorMap.get(hisTask.getApprover());
 
             if (CollectionUtils.isNotEmpty(agentInsDOList)) {
                 for (BpmFlowAgentInsDO agentInsDO : agentInsDOList) {
                     if (Objects.equals(agentInsDO.getTaskId(), taskId)) {
-                        operatorInfo.setAgent(String.valueOf(agentInsDOList.get(0).getAgentId()));
+                        operatorInfo.setAgent(agentInsDOList.get(0).getAgentId());
                         break;
                     }
                 }
@@ -434,12 +431,12 @@ public class BpmOperatorRecordServiceImpl implements BpmOperatorRecordService {
                 record.setDisplayStatus(BpmNodeApproveStatusEnum.CURR_PENDING_SUBMIT.getCode());
             } else if (Objects.equals(bizNodeType, BpmNodeTypeEnum.APPROVER.getCode())) {
                 // 解析权限标志
-                Set<Long> userIds = permissionResolver.resolveUserIds(nextNode.getPermissionFlag(), BpmConstants.MAX_NODE_APPROVER_USERS);
+                Set<String> userIds = permissionResolver.resolveUserIds(nextNode.getPermissionFlag(), BpmConstants.MAX_NODE_APPROVER_USERS);
 
                 if (CollectionUtils.isNotEmpty(userIds)) {
-                    for (Long userId : userIds) {
+                    for (String userId : userIds) {
                         BpmOperatorRecordRespVO.OperatorInfo operatorInfo = new BpmOperatorRecordRespVO.OperatorInfo();
-                        operatorInfo.setOperator(String.valueOf(userId));
+                        operatorInfo.setOperator(userId);
                         operatorInfo.setTaskStatus(BpmNodeApproveStatusEnum.PRE_APPROVAL.getCode());
                         record.getOperators().add(operatorInfo);
                     }
@@ -447,12 +444,12 @@ public class BpmOperatorRecordServiceImpl implements BpmOperatorRecordService {
 
                 record.setDisplayStatus(BpmNodeApproveStatusEnum.PRE_APPROVAL.getCode());
             } else if (Objects.equals(bizNodeType, BpmNodeTypeEnum.CC.getCode())) {
-                Set<Long> userIds = permissionResolver.resolveUserIds(nextNode.getPermissionFlag(), BpmConstants.MAX_NODE_CC_USERS);
+                Set<String> userIds = permissionResolver.resolveUserIds(nextNode.getPermissionFlag(), BpmConstants.MAX_NODE_CC_USERS);
 
                 if (CollectionUtils.isNotEmpty(userIds)) {
-                    for (Long userId : userIds) {
+                    for (String userId : userIds) {
                         BpmOperatorRecordRespVO.OperatorInfo operatorInfo = new BpmOperatorRecordRespVO.OperatorInfo();
-                        operatorInfo.setOperator(String.valueOf(userId));
+                        operatorInfo.setOperator(userId);
                         operatorInfo.setTaskStatus(BpmNodeApproveStatusEnum.PRE_AUTO_CC.getCode());
                         record.getOperators().add(operatorInfo);
                     }

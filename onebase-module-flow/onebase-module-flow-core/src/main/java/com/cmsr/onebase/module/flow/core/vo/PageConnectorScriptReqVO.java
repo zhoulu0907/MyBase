@@ -10,8 +10,13 @@ import lombok.Data;
 public class PageConnectorScriptReqVO extends PageParam {
 
     @Schema(description = "连接器ID")
-    @NotNull(message = "连接器ID不能为空")
     private Long connectorId;
+
+    @Schema(description = "连接器UUID")
+    private String connectorUuid;
+
+    @Schema(description = "应用ID")
+    private Long applicationId;
 
     @Schema(description = "脚本名称")
     private String scriptName;

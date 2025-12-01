@@ -184,7 +184,7 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
 
         // 使用账号密码，进行登录
         AdminUserDO user = authenticate(reqVO.getUsername(), reqVO.getPassword());
-        AuthLoginRespVO authLoginRespVO = createTokenAfterLoginSuccess(reqVO.getAppId(), user.getId(), reqVO.getUsername(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_USERNAME);
+        AuthLoginRespVO authLoginRespVO = createAfterLoginSuccess(user.getUserType(), user.getCorpId(), reqVO.getAppId(), user.getId(), reqVO.getUsername(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_USERNAME);
         // 设置是否管理员
         authLoginRespVO.setAdminFlag(findAdminFlag(reqVO.getAppId(), user.getId()));
         return authLoginRespVO;
@@ -214,7 +214,7 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         checkPlatformAdminEnableAppCreate();
         // 使用手机密码，进行登录
         AdminUserDO user = mobileAuthenticate(reqVO.getMobile(), reqVO.getPassword());
-        AuthLoginRespVO authLoginRespVO = createTokenAfterLoginSuccess(reqVO.getAppId(), user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE);
+        AuthLoginRespVO authLoginRespVO = createAfterLoginSuccess(user.getUserType(), user.getCorpId(), reqVO.getAppId(), user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE);
         // 设置是否管理员
         authLoginRespVO.setAdminFlag(findAdminFlag(reqVO.getAppId(), user.getId()));
         return authLoginRespVO;
@@ -234,7 +234,7 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         // 验证企业状态是否异常
         checkCropStatus(user.getCorpId());
 
-        AuthLoginRespVO authLoginRespVO = createCorpAfterLoginSuccess(user.getUserType(), user.getCorpId(), user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE);
+        AuthLoginRespVO authLoginRespVO = createAfterLoginSuccess(user.getUserType(), user.getCorpId(), null, user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE);
         // 设置是否管理员
         authLoginRespVO.setAdminFlag(findCorpAdminFlag(RoleCodeEnum.CORP_ADMIN.getCode(), user.getId()));
         // 回显当前登录用户的企业id
@@ -249,12 +249,12 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         }
     }
 
-    private AuthLoginRespVO createCorpAfterLoginSuccess(Integer userType, Long corpId, Long userId, String username, String deviceId, LoginLogTypeEnum logType) {
+    private AuthLoginRespVO createAfterLoginSuccess(Integer userType, Long corpId, Long appId, Long userId, String username, String deviceId, LoginLogTypeEnum logType) {
         // 插入登陆日志
         createLoginLog(userId, username, logType, LoginResultEnum.SUCCESS);
         // 创建访问令牌
         OAuth2AccessTokenDO accessTokenDO = oauth2TokenService.createAccessTokenWithMode(
-                RunModeEnum.BUILD.getValue(), corpId, null,
+                RunModeEnum.RUNTIME.getValue(), corpId, appId,
                 userId, userType,
                 OAuth2ClientConstants.CLIENT_ID_DEFAULT, null);
 
@@ -353,36 +353,6 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         return captchaService.verification(captchaVO);
     }
 
-    private AuthLoginRespVO createTokenAfterLoginSuccess(Long appId, Long userId, String username, String deviceId, LoginLogTypeEnum logType) {
-        // 插入登陆日志
-        createLoginLog(userId, username, logType, LoginResultEnum.SUCCESS);
-        // 创建访问令牌
-        OAuth2AccessTokenDO accessTokenDO = oauth2TokenService.createAccessTokenWithMode(
-                RunModeEnum.RUNTIME.getValue(), null, appId,
-                userId, getUserType(),
-                OAuth2ClientConstants.CLIENT_ID_DEFAULT, null);
-
-        // 校验并限制设备数
-        List<String> removedTokens = securityConfigApi.checkAndLimitDevices(
-                userId,
-                deviceId,
-                accessTokenDO.getAccessToken()
-        ).getData();
-
-        // 删除被踢出的令牌
-        if (removedTokens != null && !removedTokens.isEmpty()) {
-            for (String removedToken : removedTokens) {
-                oauth2TokenService.removeAccessToken(removedToken);
-            }
-        }
-
-        // 创建会话空闲检测Key
-        securityConfigApi.createSessionIdleKey(userId, deviceId);
-
-        TenantDO tennantDO = tenantService.getTenant(accessTokenDO.getTenantId());
-        // 构建返回结果
-        return AuthConvert.INSTANCE.convert(accessTokenDO, tennantDO);
-    }
 
     @Override
     public AuthLoginRespVO refreshToken(String refreshToken) {
@@ -432,18 +402,6 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
 
     private Integer getUserType() {
         return SecurityFrameworkUtils.getLoginUserType();
-    }
-
-    @Override
-    public AuthLoginRespVO register(AuthRegisterReqVO registerReqVO) {
-        // 1. 校验验证码
-        validateCaptcha(registerReqVO);
-
-        // 2. 校验用户名是否已存在
-        Long userId = userService.registerUser(registerReqVO);
-
-        // 3. 创建 Token 令牌，记录登录日志
-        return createTokenAfterLoginSuccess(registerReqVO.getAppId(), userId, registerReqVO.getUsername(), registerReqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_USERNAME);
     }
 
     @VisibleForTesting

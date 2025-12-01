@@ -5,7 +5,7 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.system.dal.database.RoleDataRepository;
 import com.cmsr.onebase.module.system.dal.database.UserRoleDataRepository;
 import com.cmsr.onebase.module.system.dal.database.dept.DeptDataRepository;
-import com.cmsr.onebase.module.system.dal.database.user.AdminUserDataRepository;
+import com.cmsr.onebase.module.system.dal.database.user.UserDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.UserRoleDO;
@@ -64,7 +64,7 @@ public class UserServiceTest {
     private PermissionService permissionService;
 
     @Resource
-    private AdminUserDataRepository adminUserDataRepository;
+    private UserDataRepository userDataRepository;
 
     @Resource
     private DeptDataRepository deptDataRepository;
@@ -110,7 +110,7 @@ public class UserServiceTest {
     @AfterEach
     public void tearDown() {
         userRoleDataRepository.deleteByConfig(new DefaultConfigStore());
-        adminUserDataRepository.deleteByConfig(new DefaultConfigStore());
+        userDataRepository.deleteByConfig(new DefaultConfigStore());
         roleDataRepository.deleteByConfig(new DefaultConfigStore());
         deptDataRepository.deleteByConfig(new DefaultConfigStore());
     }
@@ -348,7 +348,7 @@ public class UserServiceTest {
         if (createTime != null) {
             user.setCreateTime(createTime);
         }
-        return adminUserDataRepository.insert(user);
+        return userDataRepository.insert(user);
     }
 
     /**

@@ -6,11 +6,11 @@ import com.cmsr.onebase.module.metadata.core.dal.database.MetadataComponentField
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataComponentFieldTypeDO;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataEntityFieldCoreService;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Compare;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -34,32 +34,32 @@ public class MetadataEntityFieldCoreServiceImpl implements MetadataEntityFieldCo
 
     @Override
     public Long createEntityField(@Valid MetadataEntityFieldDO entityField) {
-        metadataEntityFieldRepository.insert(entityField);
+        metadataEntityFieldRepository.save(entityField);
         return entityField.getId();
     }
 
     @Override
     public void updateEntityField(@Valid MetadataEntityFieldDO entityField) {
-        metadataEntityFieldRepository.update(entityField);
+        metadataEntityFieldRepository.updateById(entityField);
     }
 
     @Override
     public void deleteEntityField(Long id) {
-        metadataEntityFieldRepository.deleteById(id);
+        metadataEntityFieldRepository.removeById(id);
     }
 
     @Override
     public MetadataEntityFieldDO getEntityField(Long id) {
-        return metadataEntityFieldRepository.findById(id);
+        return metadataEntityFieldRepository.getById(id);
     }
 
     @Override
     public List<MetadataEntityFieldDO> getEntityFieldListByEntityId(Long entityId) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and("entity_id", entityId);
-        configStore.order("sort_order", "ASC");
-        configStore.order("create_time", "DESC");
-        return metadataEntityFieldRepository.findAllByConfig(configStore);
+        QueryWrapper queryWrapper = metadataEntityFieldRepository.query()
+                .eq(MetadataEntityFieldDO::getEntityId, entityId)
+                .orderBy(MetadataEntityFieldDO::getSortOrder, true)
+                .orderBy(MetadataEntityFieldDO::getCreateTime, false);
+        return metadataEntityFieldRepository.list(queryWrapper);
     }
 
     @Override
@@ -67,37 +67,35 @@ public class MetadataEntityFieldCoreServiceImpl implements MetadataEntityFieldCo
         if (fieldIds == null || fieldIds.isEmpty()) {
             return Collections.emptyList();
         }
-        DefaultConfigStore cs = new DefaultConfigStore();
-        cs.and(Compare.IN, "id", fieldIds);
-        cs.and("deleted", 0);
-        // 不强制排序按传入顺序，仍按 sort_order + create_time 保持与实体字段列表接口一致
-        cs.order("sort_order", "ASC");
-        cs.order("create_time", "DESC");
-        List<MetadataEntityFieldDO> list = metadataEntityFieldRepository.findAllByConfig(cs);
+        QueryWrapper queryWrapper = metadataEntityFieldRepository.query()
+                .in(MetadataEntityFieldDO::getId, fieldIds)
+                .orderBy(MetadataEntityFieldDO::getSortOrder, true)
+                .orderBy(MetadataEntityFieldDO::getCreateTime, false);
+        List<MetadataEntityFieldDO> list = metadataEntityFieldRepository.list(queryWrapper);
         if (list == null || list.isEmpty()) {
             return Collections.emptyList();
         }
-        // 为了按照入参顺序返回，可进行一次稳定排序(可选)。此处保留原有排序语义，不再调整顺序。
         return list;
     }
 
     @Override
     public PageResult<MetadataEntityFieldDO> getEntityFieldPage(int pageNum, int pageSize, Long entityId) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
+        QueryWrapper queryWrapper = metadataEntityFieldRepository.query();
         if (entityId != null) {
-            configStore.and("entity_id", entityId);
+            queryWrapper.eq(MetadataEntityFieldDO::getEntityId, entityId);
         }
-        configStore.order("sort_order", "ASC");
-        configStore.order("create_time", "DESC");
-        return metadataEntityFieldRepository.findPageWithConditions(configStore, pageNum, pageSize);
+        queryWrapper.orderBy(MetadataEntityFieldDO::getSortOrder, true)
+                .orderBy(MetadataEntityFieldDO::getCreateTime, false);
+        Page<MetadataEntityFieldDO> page = metadataEntityFieldRepository.page(Page.of(pageNum, pageSize), queryWrapper);
+        return new PageResult<>(page.getRecords(), page.getTotalRow());
     }
 
     @Override
     public MetadataEntityFieldDO getEntityFieldByCode(String fieldCode, Long entityId) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and("field_code", fieldCode);
-        configStore.and("entity_id", entityId);
-        return metadataEntityFieldRepository.findOne(configStore);
+        QueryWrapper queryWrapper = metadataEntityFieldRepository.query()
+                .eq(MetadataEntityFieldDO::getFieldCode, fieldCode)
+                .eq(MetadataEntityFieldDO::getEntityId, entityId);
+        return metadataEntityFieldRepository.getOne(queryWrapper);
     }
 
     @Override
@@ -107,7 +105,7 @@ public class MetadataEntityFieldCoreServiceImpl implements MetadataEntityFieldCo
         }
 
         for (MetadataEntityFieldDO field : entityFields) {
-            metadataEntityFieldRepository.insert(field);
+            metadataEntityFieldRepository.save(field);
         }
         return entityFields.size();
     }
@@ -118,10 +116,9 @@ public class MetadataEntityFieldCoreServiceImpl implements MetadataEntityFieldCo
             return Collections.emptyMap();
         }
 
-        DefaultConfigStore cs = new DefaultConfigStore();
-        cs.and(Compare.IN, "id", fieldIds);
-        cs.and("deleted", 0);
-        List<MetadataEntityFieldDO> fields = metadataEntityFieldRepository.findAllByConfig(cs);
+        QueryWrapper queryWrapper = metadataEntityFieldRepository.query()
+                .in(MetadataEntityFieldDO::getId, fieldIds);
+        List<MetadataEntityFieldDO> fields = metadataEntityFieldRepository.list(queryWrapper);
         if (fields == null || fields.isEmpty()) {
             return Collections.emptyMap();
         }
@@ -160,10 +157,9 @@ public class MetadataEntityFieldCoreServiceImpl implements MetadataEntityFieldCo
             return Collections.emptyMap();
         }
 
-        DefaultConfigStore cs = new DefaultConfigStore();
-        cs.and(Compare.IN, "id", fieldIds);
-        cs.and("deleted", 0);
-        List<MetadataEntityFieldDO> fields = metadataEntityFieldRepository.findAllByConfig(cs);
+        QueryWrapper queryWrapper = metadataEntityFieldRepository.query()
+                .in(MetadataEntityFieldDO::getId, fieldIds);
+        List<MetadataEntityFieldDO> fields = metadataEntityFieldRepository.list(queryWrapper);
         if (fields == null || fields.isEmpty()) {
             return Collections.emptyMap();
         }

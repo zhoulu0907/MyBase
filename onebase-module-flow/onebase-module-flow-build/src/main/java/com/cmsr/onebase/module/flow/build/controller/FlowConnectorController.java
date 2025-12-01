@@ -26,7 +26,7 @@ public class FlowConnectorController {
     @Operation(summary = "分页查询连接器")
     @GetMapping("/page")
     public CommonResult<PageResult<FlowConnectorVO>> pageQuery(@Valid PageConnectorReqVO pageConnectorReqVO) {
-        PageResult<FlowConnectorVO> connectorPage = connectorService.getConnectorPage(pageConnectorReqVO);
+        PageResult<FlowConnectorVO> connectorPage = connectorService.pageConnectors(pageConnectorReqVO);
         return CommonResult.success(connectorPage);
     }
 
@@ -46,7 +46,7 @@ public class FlowConnectorController {
 
     @Operation(summary = "更新连接器")
     @PostMapping("/update")
-    public CommonResult<Boolean> updateConnectorBreif(@RequestBody @Valid UpdateFlowConnectorReqVO updateVO) {
+    public CommonResult<Boolean> updateConnector(@RequestBody @Valid UpdateFlowConnectorReqVO updateVO) {
         connectorService.updateConnector(updateVO);
         return CommonResult.success(Boolean.TRUE);
     }

@@ -65,7 +65,6 @@ public interface ErrorCodeConstants {
     ErrorCode DEPT_NOT_ENABLE = new ErrorCode(1_002_004_006, "部门({})不处于开启状态，不允许选择");
     ErrorCode DEPT_PARENT_IS_CHILD = new ErrorCode(1_002_004_007, "不能设置自己的子部门为父部门");
     ErrorCode DEPT_DEL_FAILD_EXISTS_USERS = new ErrorCode(1_002_004_008, "请先移除部门内所有人员再进行删除部门操作");
-    ErrorCode DEPT_TYPE_EXCEPTION = new ErrorCode(1_002_004_009, "部门类型异常:{}");
 
     // ========== 岗位模块 1-002-005-000 ==========
     ErrorCode POST_NOT_FOUND = new ErrorCode(1_002_005_000, "当前岗位不存在");
@@ -123,6 +122,7 @@ public interface ErrorCodeConstants {
     ErrorCode TENANT_WEBSITE_DUPLICATE = new ErrorCode(1_002_015_005, "租户域名为【{}】的租户已存在");
     ErrorCode TENANT_WEBSITE_IS_NULL = new ErrorCode(1_002_015_006, "租户域名不可为空");
     ErrorCode TENANT_ONLY_GET_SELF = new ErrorCode(1_002_015_007, "只能获取自己所在的租户的信息");
+    ErrorCode TENANT_ADMIN_ISNULL = new ErrorCode(1_002_015_008, "租户管理员不可为空");
 
     // ========== 租户套餐 1-002-016-000 ==========
     ErrorCode TENANT_PACKAGE_NOT_EXISTS = new ErrorCode(1_002_016_000, "租户套餐不存在");

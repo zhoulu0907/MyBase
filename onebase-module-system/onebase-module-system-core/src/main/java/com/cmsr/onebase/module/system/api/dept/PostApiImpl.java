@@ -4,7 +4,7 @@ import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.system.api.dept.dto.PostRespDTO;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.PostDO;
-import com.cmsr.onebase.module.system.service.dept.PostService;
+import com.cmsr.onebase.module.system.service.post.PostService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RestController;
 
