@@ -71,7 +71,7 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
         MetadataEntityRelationshipDO entityRelationship = BeanUtils.toBean(createReqVO, MetadataEntityRelationshipDO.class);
         entityRelationship.setSourceEntityId(Long.valueOf(createReqVO.getSourceEntityId()));
         entityRelationship.setTargetEntityId(Long.valueOf(createReqVO.getTargetEntityId()));
-        entityRelationship.setAppId(Long.valueOf(createReqVO.getAppId()));
+        entityRelationship.setApplicationId(Long.valueOf(createReqVO.getApplicationId()));
         entityRelationshipRepository.save(entityRelationship);
 
         return entityRelationship.getId();
@@ -96,7 +96,7 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
         updateObj.setId(Long.valueOf(updateReqVO.getId()));
         updateObj.setSourceEntityId(Long.valueOf(updateReqVO.getSourceEntityId()));
         updateObj.setTargetEntityId(Long.valueOf(updateReqVO.getTargetEntityId()));
-        updateObj.setAppId(Long.valueOf(updateReqVO.getAppId()));
+        updateObj.setApplicationId(Long.valueOf(updateReqVO.getApplicationId()));
         entityRelationshipRepository.updateById(updateObj);
     }
 
@@ -139,13 +139,13 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
         QueryWrapper queryWrapper = entityRelationshipRepository.query();
 
         // 添加查询条件
-        if (pageReqVO.getAppId() != null) {
-            queryWrapper.eq(MetadataEntityRelationshipDO::getAppId, pageReqVO.getAppId());
+        if (pageReqVO.getApplicationId() != null) {
+            queryWrapper.eq(MetadataEntityRelationshipDO::getApplicationId, pageReqVO.getApplicationId());
         }
 
         // 添加调试日志，查看 entityId 的值
         log.info("接收到的请求参数: entityId={}, appId={}, pageNo={}, pageSize={}",
-                pageReqVO.getEntityId(), pageReqVO.getAppId(), pageReqVO.getPageNo(), pageReqVO.getPageSize());
+                pageReqVO.getEntityId(), pageReqVO.getApplicationId(), pageReqVO.getPageNo(), pageReqVO.getPageSize());
         log.info("entityId为空检查: entityId==null:{}, StringUtils.hasText:{}",
                 pageReqVO.getEntityId() == null, StringUtils.hasText(pageReqVO.getEntityId()));
 
@@ -158,10 +158,10 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
             List<MetadataEntityRelationshipDO> existingRelations = entityRelationshipRepository.getRelationshipsByEntityId(entityIdLong);
 
             // 如果需要过滤appId
-            if (StringUtils.hasText(pageReqVO.getAppId())) {
-                Long appId = Long.valueOf(pageReqVO.getAppId());
+            if (StringUtils.hasText(pageReqVO.getApplicationId())) {
+                Long appId = Long.valueOf(pageReqVO.getApplicationId());
                 existingRelations = existingRelations.stream()
-                        .filter(r -> appId.equals(r.getAppId()))
+                        .filter(r -> appId.equals(r.getApplicationId()))
                         .toList();
             }
 
@@ -462,7 +462,7 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
         result.setTargetFieldId(childParentIdFieldId);
         result.setRelationshipType(RelationshipTypeEnum.SUBTABLE_ONE_TO_MANY.getRelationshipType());
         result.setCascadeType(CascadeTypeEnum.ALL.getCascadeType());
-        result.setAppId(Long.valueOf(createReqVO.getAppId()));
+        result.setApplicationId(Long.valueOf(createReqVO.getApplicationId()));
 
         // 设置实体名称
         result.setParentEntityName(getEntityNameById(Long.valueOf(createReqVO.getParentEntityId())));
@@ -494,7 +494,7 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
             req.setCode(createReqVO.getChildTableCode());
             req.setDescription(createReqVO.getChildTableDescription());
             req.setEntityType(1); // 自建表
-            req.setRunMode(0); // 默认运行模式
+            req.setVersionTag(0L); // 默认运行模式
             // 关键修复：使用主表的datasourceId，确保主子表在同一个数据源下
             req.setDatasourceId(String.valueOf(parentEntity.getDatasourceId()));
         });
@@ -644,7 +644,7 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
 
         // 1. 根据appId查询该应用下的所有实体
         QueryWrapper queryWrapper = QueryWrapper.create()
-                .eq(MetadataBusinessEntityDO::getAppId, appId)
+                .eq(MetadataBusinessEntityDO::getApplicationId, appId)
                 .orderBy(MetadataBusinessEntityDO::getCreateTime, true);
 
         List<MetadataBusinessEntityDO> entities = businessEntityService.findAllByConfig(queryWrapper);

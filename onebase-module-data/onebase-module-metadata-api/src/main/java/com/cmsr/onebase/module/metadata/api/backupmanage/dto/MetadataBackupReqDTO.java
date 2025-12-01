@@ -14,6 +14,6 @@ import lombok.Data;
 public class MetadataBackupReqDTO {
 
     @Schema(description = "应用ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
-    private Long appId;
+    private Long applicationId;
 
 }

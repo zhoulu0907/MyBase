@@ -108,7 +108,7 @@ public class MetadataValidationLengthBuildServiceImpl implements MetadataValidat
         // 转换VO为DO并设置必要字段
         MetadataValidationLengthDO data = BeanUtils.toBean(vo, MetadataValidationLengthDO.class);
         data.setEntityId(field.getEntityId());
-        data.setAppId(field.getAppId());
+        data.setApplicationId(field.getApplicationId());
         data.setGroupId(groupId);
         data.setPromptMessage(vo.getPopPrompt());
         // 保存长度校验规则
@@ -195,7 +195,7 @@ public class MetadataValidationLengthBuildServiceImpl implements MetadataValidat
             updateDO.setId(existingDO.getId()); // 保留原记录主键
             updateDO.setFieldId(existingDO.getFieldId());
             updateDO.setEntityId(existingDO.getEntityId());
-            updateDO.setAppId(existingDO.getAppId());
+            updateDO.setApplicationId(existingDO.getApplicationId());
             updateDO.setGroupId(targetGroupId);
             updateDO.setPromptMessage(reqVO.getPopPrompt());
 

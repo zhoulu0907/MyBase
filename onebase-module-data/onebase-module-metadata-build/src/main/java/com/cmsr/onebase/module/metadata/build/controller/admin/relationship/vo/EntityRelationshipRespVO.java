@@ -70,10 +70,10 @@ public class EntityRelationshipRespVO {
     private String description;
 
     @Schema(description = "应用ID", example = "1001")
-    private Long appId;
+    private Long applicationId;
 
-    @Schema(description = "运行模式：0 编辑态，1 运行态", example = "0")
-    private Integer runMode;
+    @Schema(description = "版本标识", example = "0")
+    private Long versionTag;
 
     @Schema(description = "创建时间", example = "2025-07-28T10:30:00")
     private LocalDateTime createTime;

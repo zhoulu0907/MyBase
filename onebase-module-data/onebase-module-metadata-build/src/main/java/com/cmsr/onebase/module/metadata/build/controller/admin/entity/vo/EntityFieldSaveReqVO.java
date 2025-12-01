@@ -62,7 +62,7 @@ public class EntityFieldSaveReqVO {
 
     @Schema(description = "应用ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "12345")
     @NotNull(message = "应用ID不能为空")
-    private String appId;
+    private String applicationId;
 
 
     @Schema(description = "字段选项列表（当字段为单/多选时可传入，若提供则整体替换）")

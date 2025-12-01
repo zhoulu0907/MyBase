@@ -55,16 +55,16 @@ public class MetadataDatasourceDO extends BaseTenantEntity {
     private String description;
 
     /**
-     * 运行模式：0 编辑态，1 运行态
+     * 版本标识
      */
-    @Column(value = "run_mode", comment = "运行模式：0 编辑态，1 运行态")
-    private Integer runMode;
+    @Column(value = "version_tag", comment = "版本标识")
+    private Long versionTag;
 
     /**
      * 应用ID
      */
-    @Column(value = "app_id", comment = "应用ID")
-    private Long appId;
+    @Column(value = "application_id", comment = "应用ID")
+    private Long applicationId;
 
     /**
      * 数据源来源：0：系统默认，1：自有数据源，2：外部数据源
