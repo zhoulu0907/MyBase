@@ -184,11 +184,11 @@ public class AppApplicationServiceImpl implements AppApplicationService {
     private void createDatasource(Long appId, String appUid, DatasourceSaveReqDTO datasourceSaveReq) {
         if (datasourceSaveReq == null || datasourceSaveReq.getName() == null) {
             DatasourceCreateDefaultReqDTO defaultReq = new DatasourceCreateDefaultReqDTO();
-            defaultReq.setAppId(appId);
+            defaultReq.setApplicationId(appId);
             defaultReq.setAppUid(appUid);
             metadataDatasourceApi.createDefaultDatasource(defaultReq);
         } else {
-            datasourceSaveReq.setAppId(appId);
+            datasourceSaveReq.setApplicationId(appId);
             datasourceSaveReq.setAppUid(appUid);
             metadataDatasourceApi.createDatasource(datasourceSaveReq);
         }
