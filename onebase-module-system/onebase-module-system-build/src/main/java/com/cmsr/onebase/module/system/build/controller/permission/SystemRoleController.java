@@ -39,14 +39,14 @@ public class SystemRoleController {
 
     @PostMapping("/create")
     @Operation(summary = "创建角色")
-    @PreAuthorize("@ss.hasPermission('system:role:create')")
+    @PreAuthorize("@ss.hasPermission('tenant:role:create')")
     public CommonResult<Long> createRole(@Valid @RequestBody RoleInsertReqVO createReqVO) {
         return success(roleService.createRole(createReqVO, null));
     }
 
     @PostMapping("/update")
     @Operation(summary = "修改角色")
-    @PreAuthorize("@ss.hasPermission('system:role:update')")
+    @PreAuthorize("@ss.hasPermission('tenant:role:update')")
     public CommonResult<Boolean> updateRole(@Valid @RequestBody RoleUpdateReqVO updateReqVO) {
         roleService.updateRole(updateReqVO);
         return success(true);
@@ -55,7 +55,7 @@ public class SystemRoleController {
     @PostMapping("/delete")
     @Operation(summary = "删除角色")
     @Parameter(name = "id", description = "角色编号", required = true, example = "1024")
-    @PreAuthorize("@ss.hasPermission('system:role:delete')")
+    @PreAuthorize("@ss.hasPermission('tenant:role:delete')")
     public CommonResult<Boolean> deleteRole(@RequestParam("id") Long id) {
         roleService.deleteRole(id);
         return success(true);
@@ -63,7 +63,7 @@ public class SystemRoleController {
 
     @GetMapping("/get")
     @Operation(summary = "获得角色信息")
-    @PreAuthorize("@ss.hasPermission('system:role:query')")
+    @PreAuthorize("@ss.hasPermission('tenant:role:query')")
     public CommonResult<RoleRespVO> getRole(@RequestParam("id") Long id) {
         RoleDO role = roleService.getRole(id);
         return success(BeanUtils.toBean(role, RoleRespVO.class));
@@ -71,7 +71,7 @@ public class SystemRoleController {
 
     @GetMapping("/page")
     @Operation(summary = "获得角色分页")
-    @PreAuthorize("@ss.hasPermission('system:role:query')")
+    @PreAuthorize("@ss.hasPermission('tenant:role:query')")
     public CommonResult<PageResult<RoleRespVO>> getRolePage(RolePageReqVO pageReqVO) {
         PageResult<RoleDO> pageResult = roleService.findRolePageOnlyTenant(pageReqVO);
         return success(BeanUtils.toBean(pageResult, RoleRespVO.class));
@@ -87,7 +87,7 @@ public class SystemRoleController {
 
     @GetMapping("/export-excel")
     @Operation(summary = "导出角色 Excel")
-    //@PreAuthorize("@ss.hasPermission('system:role:export')")
+    //@PreAuthorize("@ss.hasPermission('tenant:role:export')")
     public void export(HttpServletResponse response, @Validated RolePageReqVO exportReqVO) throws IOException {
         exportReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
         List<RoleDO> list = roleService.findRolePageOnlyTenant(exportReqVO).getList();

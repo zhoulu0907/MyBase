@@ -33,7 +33,10 @@ import org.anyline.entity.DataRow;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.*;
@@ -54,6 +57,7 @@ import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
 @Service
 @Validated
 @Slf4j
+@EnableTransactionManagement
 public class CorpServiceImpl implements CorpService {
 
     // 租户管理员设置默认密码
