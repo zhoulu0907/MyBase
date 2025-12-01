@@ -1,4 +1,3 @@
-// ========== 组件导入区域 ==========
 import XInputText from './InputText';
 import XInputTextArea from './InputTextArea';
 import XInputEmail from './InputEmail';
@@ -21,8 +20,7 @@ import XDeptSelect from './DeptSelect';
 import XUserSelect from './UserSelect';
 import XSubTable from './SubTable';
 
-// ========== 导出对象 ==========
-export const FormComp = {
+export const FormComp: any = {
   XInputText,
   XInputTextArea,
   XInputEmail,
@@ -44,4 +42,8 @@ export const FormComp = {
   XDeptSelect,
   XUserSelect,
   XSubTable
-} as const;
+};
+
+export { XInputText, XInputTextArea, XInputEmail, XInputPhone, XInputNumber, XDatePicker, XDateRangePicker, XDateTimePicker, XTimePicker, XSelectOne, XSelectMutiple, XCheckbox, XRadio, XSwitch, XImgUpload, XCarouselForm, XFileUpload, XAutoCode, XDeptSelect, XUserSelect, XSubTable };
+
+export type FormComponentType = typeof FormComp;
