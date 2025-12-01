@@ -36,8 +36,8 @@ const SettingPage: React.FC = () => {
           <Content className={styles.content}>
             <div className={styles.contentInner}>
               <Routes>
-                <Route path="user" element={<UserPage />} />
                 <Route path="organization" element={<OrganizationPage />} />
+                <Route path="user" element={<UserPage />} />
                 <Route path="enterpriseInfo" element={<EnterpriseInfo />} />
                 <Route path="authorized-application" element={<AuthorizedApplication />} />
                 <Route path="profile" element={<ProfilePage />} />
@@ -45,7 +45,7 @@ const SettingPage: React.FC = () => {
                   path="profile/edit"
                   element={<ProfileEditPage setAvatarUrl={setAvatarUrl} avatarUrl={avatarUrl} />}
                 />
-                <Route path="" element={<Navigate to="user" replace />} />
+                <Route path="" element={<Navigate to="organization" replace />} />
               </Routes>
             </div>
           </Content>

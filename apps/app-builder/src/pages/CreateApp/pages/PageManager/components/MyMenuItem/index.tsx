@@ -7,6 +7,7 @@ import RenameIcon from '@/assets/images/edit_page_name_icon.svg';
 import HiddenIcon from '@/assets/images/eye_off_icon.svg';
 import VisibleIcon from '@/assets/images/eye_on_icon.svg';
 import SettingIcon from '@/assets/images/task_center/setting-on.svg';
+import { useAppStore } from '@/store';
 import { Dropdown, Menu, Message, Tooltip, type FormInstance } from '@arco-design/web-react';
 import { IconEyeInvisible, IconMoreVertical } from '@arco-design/web-react/icon';
 import {
@@ -82,6 +83,9 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
   const allWebMenuIcons = webMenuIcons.map((ele) => ele.children).reduce((acc, current) => acc.concat(current), []);
   useSignals();
   const navigate = useNavigate();
+
+  const { curAppId } = useAppStore();
+
   const { curMenu } = menuSignal;
   const { curPage } = pagesRuntimeSignal;
   const { tenantId } = useParams();
@@ -215,7 +219,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
       curPage.value?.pageSetType === PageType.WORKBENCH ? EDITOR_TYPES.WORKBENCH_EDITOR : EDITOR_TYPES.FORM_EDITOR;
 
     sessionStorage.setItem('EDITOR_PAGE_INFO', JSON.stringify({ id: menuID, name: menuName, icon: menuIcon }));
-    navigate(`/onebase/${tenantId}/editor/${editorType}?pageSetId=${pageSetId}`);
+    navigate(`/onebase/${tenantId}/editor/${editorType}?pageSetId=${pageSetId}&appId=${curAppId}`);
   };
 
   return (

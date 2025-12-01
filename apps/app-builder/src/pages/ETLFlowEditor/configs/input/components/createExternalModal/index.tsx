@@ -49,20 +49,6 @@ const CreateExternalModal: React.FC<CreateExternalModalProps> = ({ visible, onCl
     }
     if (currentStep == 2 && selectedDataSourceType != '') {
       form.setFieldValue('datasourceType', selectedDataSourceType);
-
-      form.setFieldsValue({
-        datasourceName: '夏源铭测试数据连接',
-        datasourceType: 'PostgreSQL',
-        host: '10.0.104.38',
-        port: 5432,
-        database: 'sakila',
-        username: 'postgres',
-        password: 'onebase@2025',
-        connectMode: 'default',
-        applicationId: 1234567890,
-        readonly: 0,
-        withCollect: 1
-      });
     }
   }, [selectedDataSourceType, currentStep]);
 

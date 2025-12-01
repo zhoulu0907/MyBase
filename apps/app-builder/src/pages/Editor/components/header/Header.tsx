@@ -490,22 +490,34 @@ export default function EditorHeader() {
             clearCurComponentID();
             switch (key) {
               case EDITOR_TYPES.FORM_EDITOR:
-                navigate(`/onebase/${tenantId}/editor/${EDITOR_TYPES.FORM_EDITOR}?pageSetId=${pageSetId}`);
+                navigate(
+                  `/onebase/${tenantId}/editor/${EDITOR_TYPES.FORM_EDITOR}?pageSetId=${pageSetId}&appId=${curAppId}`
+                );
                 break;
               case EDITOR_TYPES.LIST_EDITOR:
-                navigate(`/onebase/${tenantId}/editor/${EDITOR_TYPES.LIST_EDITOR}?pageSetId=${pageSetId}`);
+                navigate(
+                  `/onebase/${tenantId}/editor/${EDITOR_TYPES.LIST_EDITOR}?pageSetId=${pageSetId}&appId=${curAppId}`
+                );
                 break;
               case EDITOR_TYPES.PAGE_SETTING:
-                navigate(`/onebase/${tenantId}/editor/${EDITOR_TYPES.PAGE_SETTING}?pageSetId=${pageSetId}`);
+                navigate(
+                  `/onebase/${tenantId}/editor/${EDITOR_TYPES.PAGE_SETTING}?pageSetId=${pageSetId}&appId=${curAppId}`
+                );
                 break;
               case EDITOR_TYPES.METADATA_MANAGE:
-                navigate(`/onebase/${tenantId}/editor/${EDITOR_TYPES.METADATA_MANAGE}?pageSetId=${pageSetId}`);
+                navigate(
+                  `/onebase/${tenantId}/editor/${EDITOR_TYPES.METADATA_MANAGE}?pageSetId=${pageSetId}&appId=${curAppId}`
+                );
                 break;
               case EDITOR_TYPES.FLOW_EDITOR:
-                navigate(`/onebase/${tenantId}/editor/${EDITOR_TYPES.FLOW_EDITOR}?pageSetId=${pageSetId}`);
+                navigate(
+                  `/onebase/${tenantId}/editor/${EDITOR_TYPES.FLOW_EDITOR}?pageSetId=${pageSetId}&appId=${curAppId}`
+                );
                 break;
               case EDITOR_TYPES.WORKBENCH_EDITOR:
-                navigate(`/onebase/${tenantId}/editor/${EDITOR_TYPES.WORKBENCH_EDITOR}?pageSetId=${pageSetId}`);
+                navigate(
+                  `/onebase/${tenantId}/editor/${EDITOR_TYPES.WORKBENCH_EDITOR}?pageSetId=${pageSetId}&appId=${curAppId}`
+                );
                 break;
               default:
                 break;
