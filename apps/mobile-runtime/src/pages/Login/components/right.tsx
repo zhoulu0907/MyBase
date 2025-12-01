@@ -11,7 +11,7 @@ import {
 } from '@onebase/platform-center';
 import { getApplication } from '@onebase/app';
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { DynamicIcon, menuIconList } from '@onebase/common';
 import { useI18n } from '../../../hooks/useI18n';
 import { useRememberMe } from '../../../hooks/useRememberMe';
@@ -37,9 +37,11 @@ const Right: React.FC = () => {
     iconColor: ''
   });
 
-  // 从路由中获取 appid 参数
-  const { appId } = useParams<{ appId?: string }>();
-  const { tenantId } = useParams<{ tenantId?: string }>();
+  // 从路由中获取 appid 参数 TODO待优化
+  const hash = window.location.hash;
+  const match = hash.match(/\/runtime-home\/([^\/]+)\/([^\/]+)/);
+  const appId = match ? match[1] : '';
+  const tenantId = match ? match[2] : '1';
 
   // 使用记住我hook
   const { rememberMe, savedAccount, saveRememberMe } = useRememberMe();
@@ -109,7 +111,7 @@ const Right: React.FC = () => {
       }
 
       const headers = {
-        'Tenant-Id': tenantId || '1'
+        'X-Tenant-Id': tenantId
       };
 
       const loginData: LoginRequest = {
@@ -122,8 +124,6 @@ const Right: React.FC = () => {
       const response: LoginResponse = await tenantLogin(loginData, headers);
 
       if (response.accessToken) {
-        TokenManager.setCurIdentifyId(tenantId || '1');
-
         // 使用 TokenManager 存储 token 信息
         TokenManager.setToken(
           {

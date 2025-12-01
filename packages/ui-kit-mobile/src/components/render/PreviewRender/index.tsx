@@ -184,6 +184,17 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
             detailMode={detailMode}
           />
         );
+      case FORM_COMPONENT_TYPES.USER_MULTIPLE_SELECT:
+        return (
+          <FormComp.XUserSelect
+            cpName={cpId}
+            id={cpId}
+            {...componentConfig}
+            runtime={runtime}
+            detailMode={detailMode}
+            isMultiple
+          />
+        );
       case FORM_COMPONENT_TYPES.DEPT_SELECT:
         return (
           <FormComp.XDeptSelect
@@ -193,6 +204,18 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
             runtime={runtime}
             detailMode={detailMode}
             form={form}
+          />
+        );
+      case FORM_COMPONENT_TYPES.DEPT_MULTIPLE_SELECT:
+        return (
+          <FormComp.XDeptSelect
+            cpName={cpId}
+            id={cpId}
+            {...componentConfig}
+            runtime={runtime}
+            detailMode={detailMode}
+            form={form}
+            isMultiple
           />
         );
       case FORM_COMPONENT_TYPES.FILE_UPLOAD:

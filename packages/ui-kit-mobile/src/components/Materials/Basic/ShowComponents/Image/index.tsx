@@ -3,6 +3,7 @@ import { Image } from '@arco-design/mobile-react';
 import { STATUS_OPTIONS, STATUS_VALUES, ShowSchema } from '@onebase/ui-kit';
 import '../index.css';
 import './index.css';
+type XImageConfig = typeof ShowSchema.XImageSchema.config;
 
 const LoadFailPlaceholder = () => {
   return (
@@ -14,7 +15,7 @@ const LoadFailPlaceholder = () => {
   );
 }
 
-const XImage = memo((props: ShowSchema.XImageConfig & { runtime?: boolean; detailMode?: boolean }) => {
+const XImage = memo((props: XImageConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const { status, fillStyle, maxHeight, runtime = true, imageConfig, detailMode } = props;
 
   return (

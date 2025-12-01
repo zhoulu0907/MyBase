@@ -3,7 +3,9 @@ import { IconDownload } from '@arco-design/mobile-react/esm/icon';
 import { downloadFileByUrl, ShowSchema, STATUS_OPTIONS, STATUS_VALUES } from '@onebase/ui-kit';
 import styles from './index.module.css';
 
-const XFile = memo((props: ShowSchema.XFileConfig & { runtime?: boolean; detailMode?: boolean }) => {
+type XFileConfig = typeof ShowSchema.XFileSchema.config;
+
+const XFile = memo((props: XFileConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const { status, runtime = true, fileConfig } = props;
 
   const downloadFile = async (item: any) => {

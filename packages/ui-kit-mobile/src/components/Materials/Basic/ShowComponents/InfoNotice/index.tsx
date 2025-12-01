@@ -3,7 +3,9 @@ import { NoticeBar } from '@arco-design/mobile-react';
 import IconNotice from '@arco-design/mobile-react/esm/icon/IconNotice';
 import { STATUS_OPTIONS, STATUS_VALUES, ShowSchema } from '@onebase/ui-kit';
 
-const XInfoNotice = memo((props: ShowSchema.XInfoNoticeConfig & { runtime?: boolean; detailMode?: boolean }) => {
+type XInfoNoticeConfig = typeof ShowSchema.XInfoNoticeSchema.config;
+
+const XInfoNotice = memo((props: XInfoNoticeConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const { status, content, runtime = true } = props;
 
   return (
