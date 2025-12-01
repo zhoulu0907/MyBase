@@ -103,6 +103,8 @@ const XLoadMore = memo(
     }, [showOpearate, columns, fixedOpearate, props?.xTableSelectProps?.selectedDataId]);
 
     useEffect(() => {
+            console.warn('b11=====22==', finalColumns, metaData)
+
       if (finalColumns && metaData) {
         handlePage();
       }
@@ -206,7 +208,7 @@ const XLoadMore = memo(
 
       const mainMetaData = await getEntityFieldsWithChildren(metaData);
 
-      const { list, total } = res;
+      const { list = [], total = 0 } = res;
 
       const newTableData = (list || []).map((item: any) => {
         const newItem = item.data;
