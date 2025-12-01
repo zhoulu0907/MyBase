@@ -14,6 +14,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.validation.annotation.Validated;
 import org.apache.commons.lang3.StringUtils;
+
+import java.util.Map;
 import java.util.UUID;
 import org.springframework.web.bind.annotation.*;
 
@@ -49,7 +51,7 @@ public class SemanticDynamicDataController {
      * @param response HTTP 响应对象，用于回写 `X-Trace-Id`
      * @return 创建后的动态数据响应
      */
-    public CommonResult<DynamicDataRespVO> create(@PathVariable("tableName") String tableName,
+    public CommonResult<Map<String, Object>> create(@PathVariable("tableName") String tableName,
                                                   @RequestParam("menuId") Long menuId,
                                                   @RequestBody SemanticMergeBodyVO body,
                                                   HttpServletRequest request,
@@ -58,7 +60,7 @@ public class SemanticDynamicDataController {
         if (StringUtils.isBlank(traceId)) {
             traceId = UUID.randomUUID().toString();
         }
-        DynamicDataRespVO resp = semanticDynamicDataService.create(tableName, menuId, body, traceId);
+        Map<String, Object> resp = semanticDynamicDataService.create(tableName, menuId, body, traceId);
         if (traceId != null) {
             response.setHeader("X-Trace-Id", traceId);
         }

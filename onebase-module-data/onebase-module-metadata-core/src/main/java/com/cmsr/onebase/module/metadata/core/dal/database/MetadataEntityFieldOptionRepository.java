@@ -7,6 +7,7 @@ import com.mybatisflex.spring.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -22,6 +23,18 @@ public class MetadataEntityFieldOptionRepository extends ServiceImpl<MetadataEnt
     public List<MetadataEntityFieldOptionDO> findAllByFieldId(Long fieldId) {
         QueryWrapper queryWrapper = this.query()
                 .eq(MetadataEntityFieldOptionDO::getFieldId, fieldId)
+                .orderBy(MetadataEntityFieldOptionDO::getOptionOrder, true)
+                .orderBy(MetadataEntityFieldOptionDO::getCreateTime, true);
+        return list(queryWrapper);
+    }
+
+    public List<MetadataEntityFieldOptionDO> findAllByFieldIds(Collection<Long> fieldIds) {
+        if (fieldIds == null || fieldIds.isEmpty()) {
+            return java.util.Collections.emptyList();
+        }
+        QueryWrapper queryWrapper = this.query()
+                .in(MetadataEntityFieldOptionDO::getFieldId, fieldIds)
+                .orderBy(MetadataEntityFieldOptionDO::getFieldId, true)
                 .orderBy(MetadataEntityFieldOptionDO::getOptionOrder, true)
                 .orderBy(MetadataEntityFieldOptionDO::getCreateTime, true);
         return list(queryWrapper);
@@ -63,5 +76,4 @@ public class MetadataEntityFieldOptionRepository extends ServiceImpl<MetadataEnt
         return removeById(id);
     }
 }
-
 

@@ -8,6 +8,9 @@ import java.util.List;
 @Schema(description = "关联值 DTO")
 @Data
 public class SemanticRelationValueDTO {
+    @Schema(description = "关联对象ID（ONE时为行ID，MANY为空或未使用）")
+    private Object id;
+
     @Schema(description = "ONE 基数时的单行值")
     private SemanticRowValueDTO rowValue;
 

@@ -19,4 +19,7 @@ public class SemanticRecordDTO {
 
     @Schema(description = "值模型")
     private SemanticEntityValueDTO entityValue;
+
+    @Schema(description = "结果值模型")
+    private SemanticEntityValueDTO resultValue;
 }

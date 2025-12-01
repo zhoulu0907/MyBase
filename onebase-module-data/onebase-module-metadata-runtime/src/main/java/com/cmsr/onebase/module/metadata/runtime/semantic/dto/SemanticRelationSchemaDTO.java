@@ -11,7 +11,7 @@ import com.cmsr.onebase.module.metadata.runtime.semantic.dto.enums.SemanticConne
 @Data
 public class SemanticRelationSchemaDTO {
     @Schema(description = "关联名称")
-    private String name;
+    private String relationName;
 
     @Schema(description = "关联类型")
     private SemanticConnectorTypeEnum type;
@@ -27,6 +27,15 @@ public class SemanticRelationSchemaDTO {
 
     @Schema(description = "目标实体ID")
     private Long targetEntityId;
+
+    @Schema(description = "目标实体编码")
+    private String targetEntityCode;
+
+    @Schema(description = "目标实体显示名称")
+    private String targetEntityDisplayName;
+
+    @Schema(description = "目标实体表名")
+    private String targetEntityTableName;
 
     @Schema(description = "源字段ID")
     private Long sourceKeyFieldId;

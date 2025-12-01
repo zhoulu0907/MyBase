@@ -65,4 +65,11 @@ public class MetadataValidationUniqueRepository extends ServiceImpl<MetadataVali
                 .eq(MetadataValidationUniqueDO::getGroupId, groupId);
         return list(queryWrapper);
     }
+
+    public List<MetadataValidationUniqueDO> findByFieldIds(java.util.Collection<Long> fieldIds) {
+        if (fieldIds == null || fieldIds.isEmpty()) { return java.util.Collections.emptyList(); }
+        QueryWrapper queryWrapper = query()
+                .in(MetadataValidationUniqueDO::getFieldId, fieldIds);
+        return list(queryWrapper);
+    }
 }

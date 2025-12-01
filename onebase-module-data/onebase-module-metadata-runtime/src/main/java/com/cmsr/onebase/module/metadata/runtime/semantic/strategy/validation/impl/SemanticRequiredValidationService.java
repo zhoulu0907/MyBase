@@ -1,33 +1,44 @@
 package com.cmsr.onebase.module.metadata.runtime.semantic.strategy.validation.impl;
 
-import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRequiredDO;
-import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationRequiredRepository;
 import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.validation.SemanticValidationService;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticFieldSchemaDTO;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.enums.SemanticFieldTypeEnum;
+import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.validation.SemanticValidationContext;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
 
 @Component
 public class SemanticRequiredValidationService implements SemanticValidationService {
-    private final MetadataValidationRequiredRepository requiredRepository;
-    public SemanticRequiredValidationService(MetadataValidationRequiredRepository requiredRepository) { this.requiredRepository = requiredRepository; }
+    public SemanticRequiredValidationService() { }
 
     @Override
-    public void validate(MetadataEntityFieldDO field, Object value, Map<String, Object> data) {
-        List<MetadataValidationRequiredDO> rules = requiredRepository.findByFieldId(field.getId());
-        if (rules.isEmpty()) { return; }
-        boolean hasEnabledRule = rules.stream().anyMatch(rule -> rule.getIsEnabled() != null && rule.getIsEnabled() == 1);
-        if (!hasEnabledRule) { return; }
-        if (value == null || String.valueOf(value).trim().isEmpty()) {
-            String errorMessage = rules.stream()
-                    .filter(rule -> rule.getIsEnabled() != null && rule.getIsEnabled() == 1)
-                    .map(MetadataValidationRequiredDO::getPromptMessage)
-                    .filter(msg -> msg != null && !msg.trim().isEmpty())
-                    .findFirst()
-                    .orElse("字段[" + field.getDisplayName() + "]为必填字段");
-            throw new IllegalArgumentException(errorMessage);
+    public void validateEntity(List<SemanticFieldSchemaDTO> fields, Map<String, Object> data, MetadataDataMethodOpEnum operationType, SemanticValidationContext context) {
+        for (SemanticFieldSchemaDTO field : fields) {
+            if (field.getIsSystemField() != null && field.getIsSystemField()) { continue; }
+            if (field.getIsPrimaryKey() != null && field.getIsPrimaryKey()) { continue; }
+            Object value = data.get(field.getFieldName());
+            if (operationType == MetadataDataMethodOpEnum.UPDATE && value == null) { continue; }
+            if (field.getFieldTypeEnum() == SemanticFieldTypeEnum.AUTO_CODE) { continue; }
+            if (!supports(field.getFieldType())) { continue; }
+            List<MetadataValidationRequiredDO> rules = context.getRequiredRules().getOrDefault(field.getId(), Collections.emptyList());
+            if (rules.isEmpty()) { continue; }
+            boolean hasEnabledRule = rules.stream().anyMatch(rule -> rule.getIsEnabled() != null && rule.getIsEnabled() == 1);
+            if (!hasEnabledRule) { continue; }
+            if (value == null || String.valueOf(value).trim().isEmpty()) {
+                String errorMessage = rules.stream()
+                        .filter(rule -> rule.getIsEnabled() != null && rule.getIsEnabled() == 1)
+                        .map(MetadataValidationRequiredDO::getPromptMessage)
+                        .filter(msg -> msg != null && !msg.trim().isEmpty())
+                        .findFirst()
+                        .orElse("字段[" + field.getDisplayName() + "]为必填字段");
+                String prefix = context.getTableName() != null ? "表[" + context.getTableName() + "] " : "";
+                throw new IllegalArgumentException(prefix + errorMessage);
+            }
         }
     }
 

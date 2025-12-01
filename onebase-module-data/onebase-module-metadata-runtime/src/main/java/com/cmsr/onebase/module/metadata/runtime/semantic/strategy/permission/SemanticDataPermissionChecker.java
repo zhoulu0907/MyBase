@@ -10,7 +10,6 @@ import com.cmsr.onebase.module.metadata.core.service.permission.exception.Permis
 import com.cmsr.onebase.module.metadata.core.domain.query.MetadataPermissionContext;
 import com.cmsr.onebase.module.metadata.core.domain.query.LoginUserCtx;
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticRecordDTO;
-import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticFieldValueDTO;
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticFieldSchemaDTO;
 
 import org.springframework.stereotype.Component;
@@ -24,7 +23,6 @@ import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
 import com.cmsr.onebase.module.system.api.dept.DeptApi;
 import com.cmsr.onebase.module.system.api.dept.dto.DeptRespDTO;
 import java.util.Map;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.Objects;
@@ -76,8 +74,8 @@ public class SemanticDataPermissionChecker implements SemanticRuntimePermissionC
         List<DataPermissionGroup> groups = dataPermission.getGroups();
         MetadataDataMethodOpEnum operationType = recordDTO.getRecordContext().getOperationType();
         LoginUserCtx loginUserContext = recordDTO.getRecordContext().getLoginUserCtx();
-        Map<String,Object> dataRow = buildDataRow(recordDTO);
-        Map<Long,String> fieldIdToNameMap = buildFieldIdToNameMap(recordDTO);
+        Map<String,Object> dataRow = recordDTO.getEntityValue().getCurrentEntityRawMap();
+        java.util.List<com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticFieldSchemaDTO> fields = recordDTO.getEntitySchema().getFields();
         AdminUserRespDTO currentUser = adminUserApi.getUser(loginUserContext.getUserId()).getCheckedData();
         boolean hasPermission = false;
         for (DataPermissionGroup group : groups) {
@@ -88,8 +86,8 @@ public class SemanticDataPermissionChecker implements SemanticRuntimePermissionC
                 default -> false;
             };
             if (!canOperate) { continue; }
-            boolean matchesScope = checkScopeTags(group, dataRow, currentUser, fieldIdToNameMap)
-                    && checkFilters(group, dataRow, fieldIdToNameMap);
+            boolean matchesScope = checkScopeTags(group, dataRow, currentUser, fields)
+                    && checkFilters(group, dataRow, fields);
             if (matchesScope) { hasPermission = true; break; }
         }
         if (!hasPermission) {
@@ -101,34 +99,11 @@ public class SemanticDataPermissionChecker implements SemanticRuntimePermissionC
     /**
      * 从值模型构建数据行：字段名 -> 原始值
      */
-    private Map<String,Object> buildDataRow(SemanticRecordDTO recordDTO) {
-        Map<String,Object> row = new HashMap<>();
-        Map<String, SemanticFieldValueDTO<Object>> data = recordDTO.getEntityValue().getFieldValueMap();
-        if (data == null) { return row; }
-        for (Map.Entry<String, SemanticFieldValueDTO<Object>> e: data.entrySet()) {
-            row.put(e.getKey(), e.getValue() == null ? null : e.getValue().getStoreValue());
-        }
-        return row;
-    }
-
-    /**
-     * 构建字段ID到字段名的映射，供范围/过滤条件解析
-     */
-    private Map<Long,String> buildFieldIdToNameMap(SemanticRecordDTO recordDTO) {
-        Map<Long,String> map = new HashMap<>();
-        List<SemanticFieldSchemaDTO> fields = recordDTO.getEntitySchema().getFields();
-        if (fields == null) { return map; }
-        for (SemanticFieldSchemaDTO f: fields) {
-            if (f.getId() != null && f.getFieldName() != null) { map.put(f.getId(), f.getFieldName()); }
-        }
-        return map;
-    }
-
     /**
      * 检查范围标签，只要命中任意标签即认为范围匹配
      */
     private boolean checkScopeTags(DataPermissionGroup group, Map<String,Object> dataRow,
-                                   AdminUserRespDTO currentUser, Map<Long,String> fieldIdToNameMap) {
+                                   AdminUserRespDTO currentUser, List<SemanticFieldSchemaDTO> fields) {
         List<DataPermissionTag> scopeTags = group.getScopTags();
         if (scopeTags != null && scopeTags.contains(DataPermissionTag.ALL_DATA)) { return true; }
         if (scopeTags == null || scopeTags.isEmpty()) { return true; }
@@ -138,7 +113,7 @@ public class SemanticDataPermissionChecker implements SemanticRuntimePermissionC
                 case OWN_SUBMIT -> { Object creator = dataRow.get("creator"); if (creator != null && String.valueOf(creator).equals(String.valueOf(currentUser.getId()))) { return true; } }
                 case DEPARTMENT_SUBMIT -> { if (checkDepartmentMatch(dataRow, currentUser.getDeptId())) { return true; } }
                 case SUB_DEPARTMENT_SUBMIT -> { if (checkSubDepartmentMatch(dataRow, currentUser.getDeptId())) { return true; } }
-                case CUSTOM_CONDITION -> { return checkScopeLevel(group, dataRow, currentUser, fieldIdToNameMap); }
+                case CUSTOM_CONDITION -> { return checkScopeLevel(group, dataRow, currentUser, fields); }
                 default -> {}
             }
         }
@@ -175,11 +150,14 @@ public class SemanticDataPermissionChecker implements SemanticRuntimePermissionC
      * 检查范围级别，需结合 scopeFieldId 的字段值进行判断
      */
     private boolean checkScopeLevel(DataPermissionGroup group, Map<String,Object> dataRow,
-                                    AdminUserRespDTO currentUser, Map<Long,String> fieldIdToNameMap) {
+                                    AdminUserRespDTO currentUser, List<SemanticFieldSchemaDTO> fields) {
         DataPermissionLevel scopeLevel = group.getScopeLevel();
         Long scopeFieldId = group.getScopeFieldId();
         String scopeValue = group.getScopeValue();
-        String fieldName = fieldIdToNameMap.get(scopeFieldId);
+        String fieldName = null;
+        if (fields != null && scopeFieldId != null) {
+            for (SemanticFieldSchemaDTO f : fields) { if (scopeFieldId.equals(f.getId())) { fieldName = f.getFieldName(); break; } }
+        }
         Object fieldValue = dataRow.get(fieldName);
         return switch (scopeLevel) {
             case SELF -> fieldValue != null && String.valueOf(fieldValue).equals(String.valueOf(currentUser.getId()));
@@ -229,14 +207,14 @@ public class SemanticDataPermissionChecker implements SemanticRuntimePermissionC
     /**
      * AND(OR(...)) 自定义过滤条件检查
      */
-    private boolean checkFilters(DataPermissionGroup group, Map<String,Object> dataRow, Map<Long,String> fieldIdToNameMap) {
+    private boolean checkFilters(DataPermissionGroup group, Map<String,Object> dataRow, List<SemanticFieldSchemaDTO> fields) {
         List<List<DataPermissionFilter>> filters = group.getFilters();
         if (filters == null || filters.isEmpty()) { return true; }
         for (List<DataPermissionFilter> orConditionGroup : filters) {
             boolean orConditionMatched = false;
             if (orConditionGroup == null || orConditionGroup.isEmpty()) { continue; }
             for (DataPermissionFilter filter : orConditionGroup) {
-                if (evaluateFilter(filter, dataRow, fieldIdToNameMap)) {
+                if (evaluateFilter(filter, dataRow, fields)) {
                     orConditionMatched = true;
                     break;
                 }
@@ -249,9 +227,12 @@ public class SemanticDataPermissionChecker implements SemanticRuntimePermissionC
     /**
      * 单个过滤条件的评估，支持 EQ/NE/IN/NIN 等基础操作符
      */
-    private boolean evaluateFilter(DataPermissionFilter filter, Map<String,Object> dataRow, Map<Long,String> fieldIdToNameMap) {
+    private boolean evaluateFilter(DataPermissionFilter filter, Map<String,Object> dataRow, List<SemanticFieldSchemaDTO> fields) {
         if (filter == null || filter.getFieldId() == null) { return false; }
-        String fieldName = fieldIdToNameMap.get(filter.getFieldId());
+        String fieldName = null;
+        if (fields != null) {
+            for (SemanticFieldSchemaDTO f : fields) { if (filter.getFieldId().equals(f.getId())) { fieldName = f.getFieldName(); break; } }
+        }
         if (fieldName == null) { return false; }
         Object currentFieldValue = dataRow.get(fieldName);
         String operator = filter.getFieldOperator();

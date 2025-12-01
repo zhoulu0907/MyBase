@@ -1,53 +1,48 @@
 package com.cmsr.onebase.module.metadata.runtime.semantic.strategy.validation.impl;
 
-import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
-import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
-import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationUniqueDO;
-import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationUniqueRepository;
-import com.cmsr.onebase.module.metadata.core.service.datasource.MetadataDatasourceCoreService;
-import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
-import com.cmsr.onebase.module.metadata.core.service.entity.MetadataEntityFieldCoreService;
-import com.cmsr.onebase.module.metadata.runtime.semantic.service.impl.SemanticTemporaryDatasourceService;
 import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.validation.SemanticValidationService;
-import jakarta.annotation.Resource;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticFieldSchemaDTO;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticEntitySchemaDTO;
+import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.validation.SemanticValidationContext;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.enums.SemanticFieldTypeEnum;
+import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticTableNameQuoter;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.row.Db;
+import com.mybatisflex.core.row.Row;
+import jakarta.annotation.Resource;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.DATASOURCE_NOT_EXISTS;
-
 @Component
 public class SemanticUniqueValidationService implements SemanticValidationService {
-    private final MetadataValidationUniqueRepository uniqueRepository;
+    public SemanticUniqueValidationService() { }
 
     @Resource
-    protected MetadataBusinessEntityCoreService metadataBusinessEntityCoreService;
-    @Resource
-    protected MetadataDatasourceCoreService metadataDatasourceCoreService;
-    @Resource
-    protected SemanticTemporaryDatasourceService semanticTemporaryDatasourceService;
-    @Resource
-    protected MetadataEntityFieldCoreService metadataEntityFieldCoreService;
-
-    public SemanticUniqueValidationService(MetadataValidationUniqueRepository uniqueRepository) { this.uniqueRepository = uniqueRepository; }
+    private SemanticTableNameQuoter semanticTableNameQuoter;
 
     @Override
-    public void validate(MetadataEntityFieldDO field, Object value, Map<String, Object> data) {
-        if (value == null) { return; }
-        List<MetadataValidationUniqueDO> rules = uniqueRepository.findByFieldId(field.getId());
-        if (rules.isEmpty()) { return; }
-        boolean hasEnabledRule = rules.stream().anyMatch(rule -> rule.getIsEnabled() != null && rule.getIsEnabled() == 1);
-        if (!hasEnabledRule) { return; }
-        for (MetadataValidationUniqueDO rule : rules) {
-            if (rule.getIsEnabled() == null || rule.getIsEnabled() != 1) { continue; }
-            boolean isExist = validateDateExistByField(field.getEntityId(), field, value, data);
-            if (isExist) { throw new IllegalArgumentException("字段[" + field.getDisplayName() + "]值已存在"); }
+    public void validateEntity(java.util.List<SemanticFieldSchemaDTO> fields, Map<String, Object> data, MetadataDataMethodOpEnum operationType, SemanticValidationContext context) {
+        for (SemanticFieldSchemaDTO field : fields) {
+            if (field.getIsSystemField() != null && field.getIsSystemField()) { continue; }
+            if (field.getIsPrimaryKey() != null && field.getIsPrimaryKey()) { continue; }
+            Object value = data.get(field.getFieldName());
+            if (operationType == MetadataDataMethodOpEnum.UPDATE && value == null) { continue; }
+            if (field.getFieldTypeEnum() == SemanticFieldTypeEnum.AUTO_CODE) { continue; }
+            List<MetadataValidationUniqueDO> rules = context.getUniqueRules().getOrDefault(field.getId(), java.util.Collections.emptyList());
+            if (rules.isEmpty()) { continue; }
+            boolean hasEnabledRule = rules.stream().anyMatch(rule -> rule.getIsEnabled() != null && rule.getIsEnabled() == 1);
+            if (!hasEnabledRule) { continue; }
+            Boolean exist = context.getUniqueExists().get(field.getId());
+            boolean isExist = exist != null && exist;
+            if (isExist) {
+                String prefix = context.getTableName() != null ? "表[" + context.getTableName() + "] " : "";
+                throw new IllegalArgumentException(prefix + "字段[" + field.getDisplayName() + "]值已存在");
+            }
         }
     }
 
@@ -57,34 +52,65 @@ public class SemanticUniqueValidationService implements SemanticValidationServic
     @Override
     public boolean supports(String fieldType) { return true; }
 
-    private boolean validateDateExistByField(Long entityId, MetadataEntityFieldDO field, Object value, Map<String, Object> data) {
-        MetadataBusinessEntityDO entity = metadataBusinessEntityCoreService.getBusinessEntity(entityId);
-        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
-        if (datasource == null) { throw exception(DATASOURCE_NOT_EXISTS); }
-        semanticTemporaryDatasourceService.createTemporaryService(datasource);
-        List<MetadataEntityFieldDO> entityFields = metadataEntityFieldCoreService.getEntityFieldListByEntityId(entityId);
-        boolean hasDeletedColumn = entityFields.stream().anyMatch(item -> "deleted".equalsIgnoreCase(item.getFieldName()));
-        Optional<String> primaryKeyField = entityFields.stream()
-                .filter(item -> item.getIsPrimaryKey() != null && item.getIsPrimaryKey() == 1)
-                .map(MetadataEntityFieldDO::getFieldName)
-                .findFirst();
-        Object currentId = null;
-        if (data != null) {
-            if (primaryKeyField.isPresent()) { currentId = data.get(primaryKeyField.get()); }
-            if (currentId == null) { currentId = data.get("id"); }
-        }
-        QueryWrapper qw = QueryWrapper.create()
-                .from(quoteTableName(entity.getTableName()))
-                .where(field.getFieldName() + " = ?", value);
-        if (hasDeletedColumn) { qw.and("deleted = ?", 0); }
-        if (currentId != null) { qw.and(primaryKeyField.orElse("id") + " <> ?", currentId); }
-        long count = Db.selectCountByQuery(quoteTableName(entity.getTableName()), qw);
-        return count > 0;
-    }
+    public Map<Long, Boolean> checkUniqueExistsBatch(SemanticEntitySchemaDTO entity, List<SemanticFieldSchemaDTO> fields, Map<String, Object> data, Map<Long, List<MetadataValidationUniqueDO>> uniqueRules) {
+        java.util.Map<Long, Boolean> result = new java.util.HashMap<>();
+        if (fields == null || fields.isEmpty() || data == null) { return result; }
 
-    private String quoteTableName(String tableName) {
-        if (tableName == null || tableName.trim().isEmpty()) { return tableName; }
-        if (tableName.startsWith("\"") && tableName.endsWith("\"")) { return tableName; }
-        return "\"" + tableName + "\"";
+        java.util.List<SemanticFieldSchemaDTO> candidates = new java.util.ArrayList<>();
+        java.util.Map<String, Object> targetValuesByName = new java.util.HashMap<>();
+        for (SemanticFieldSchemaDTO f : fields) {
+            List<MetadataValidationUniqueDO> urs = uniqueRules.get(f.getId());
+            if (urs == null || urs.isEmpty()) { continue; }
+            boolean enabled = urs.stream().anyMatch(u -> u.getIsEnabled() != null && u.getIsEnabled() == 1);
+            if (!enabled) { continue; }
+            Object value = data.get(f.getFieldName());
+            if (value == null) { continue; }
+            candidates.add(f);
+            targetValuesByName.put(f.getFieldName(), value);
+            result.put(f.getId(), false);
+        }
+
+        if (candidates.isEmpty()) { return result; }
+
+        boolean hasDeletedColumn = fields.stream().anyMatch(item -> "deleted".equalsIgnoreCase(item.getFieldName()));
+        Optional<String> primaryKeyField = fields.stream()
+                .filter(item -> item.getIsPrimaryKey() != null && item.getIsPrimaryKey())
+                .map(SemanticFieldSchemaDTO::getFieldName)
+                .findFirst();
+        String pkName = primaryKeyField.orElse("id");
+        Object currentId = data.get(pkName);
+
+        StringBuilder orCond = new StringBuilder();
+        java.util.List<Object> params = new java.util.ArrayList<>();
+        for (int i = 0; i < candidates.size(); i++) {
+            SemanticFieldSchemaDTO f = candidates.get(i);
+            if (i == 0) { orCond.append("("); } else { orCond.append(" OR "); }
+            orCond.append(f.getFieldName()).append(" = ?");
+            params.add(targetValuesByName.get(f.getFieldName()));
+        }
+        orCond.append(")");
+
+        QueryWrapper qw = QueryWrapper.create()
+                .from(semanticTableNameQuoter.quote(entity.getTableName()))
+                .where(orCond.toString(), params.toArray());
+        if (hasDeletedColumn) { qw.and("deleted = ?", 0); }
+        if (currentId != null) { qw.and(pkName + " <> ?", currentId); }
+
+        qw.select(pkName);
+        for (SemanticFieldSchemaDTO f : candidates) { qw.select(f.getFieldName()); }
+
+        java.util.List<Row> rows = Db.selectListByQuery(semanticTableNameQuoter.quote(entity.getTableName()), qw);
+        if (rows == null || rows.isEmpty()) { return result; }
+
+        for (Row row : rows) {
+            for (SemanticFieldSchemaDTO f : candidates) {
+                Object dbVal = row.get(f.getFieldName());
+                Object targetVal = targetValuesByName.get(f.getFieldName());
+                if (dbVal != null && targetVal != null && String.valueOf(dbVal).equals(String.valueOf(targetVal))) {
+                    result.put(f.getId(), true);
+                }
+            }
+        }
+        return result;
     }
 }

@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.metadata.runtime.semantic.service.impl;
 
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
+import com.cmsr.onebase.module.metadata.core.service.datasource.MetadataDatasourceCoreService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +14,9 @@ import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
 
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.DATASOURCE_NOT_EXISTS;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -24,11 +28,18 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.mybatisflex.core.FlexGlobalConfig;
 import com.mybatisflex.core.datasource.FlexDataSource;
+import com.zaxxer.hikari.HikariDataSource;
+
+import jakarta.annotation.Resource;
+
 import com.mybatisflex.core.datasource.DataSourceKey;
 
 @Service
 @Slf4j
 public class SemanticTemporaryDatasourceService {
+
+    @Resource
+    private MetadataDatasourceCoreService metadataDatasourceCoreService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -343,4 +354,85 @@ public class SemanticTemporaryDatasourceService {
             return "SELECT 1";
         }
     }
+
+    public synchronized String switchMybatisFlex(Long datasourceId) {
+        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(datasourceId);
+        if (datasource == null) { throw exception(DATASOURCE_NOT_EXISTS); }
+        Map<String, Object> config = parseAndNormalizeConfig(datasource.getConfig());
+        config.put("datasourceType", datasource.getDatasourceType());
+        String key = datasource.getCode();
+
+        DataSource cachedDataSource = datasourceCache.get(key);
+        if (cachedDataSource != null && isDataSourceActive(cachedDataSource)) {
+            trySwitchMybatisFlex(key, cachedDataSource);
+            return key;
+        }
+
+        try {
+            String url = (String) config.get("url");
+            String username = (String) config.get("username");
+            String password = (String) config.get("password");
+            String datasourceType = (String) config.get("datasourceType");
+
+            if (url == null || url.trim().isEmpty()) {
+                String host = (String) config.get("host");
+                Object portObj = config.get("port");
+                String database = (String) config.get("database");
+                if (host != null && !host.trim().isEmpty()) {
+                    if (portObj == null) { throw new IllegalArgumentException("数据源配置缺少必填参数：port"); }
+                    int port;
+                    if (portObj instanceof Integer) { port = (Integer) portObj; }
+                    else if (portObj instanceof String) { port = Integer.parseInt((String) portObj); }
+                    else { throw new IllegalArgumentException("端口号类型错误，应为Integer或String: " + portObj.getClass()); }
+                    url = buildJdbcUrl(datasourceType, host, port, database);
+                }
+            }
+
+            if (url == null || url.trim().isEmpty()) { throw new RuntimeException("无法构建数据源连接URL，请检查配置信息"); }
+
+            Map<String, Object> dsConfig = new HashMap<>();
+            dsConfig.put("url", url);
+            dsConfig.put("username", username != null ? username : "");
+            dsConfig.put("password", password != null ? password : "");
+            dsConfig.put("driver", getDriverByType(datasourceType));
+            dsConfig.put("type", "com.zaxxer.hikari.HikariDataSource");
+            dsConfig.put("minimum-idle", 1);
+            dsConfig.put("maximum-pool-size", 5);
+            dsConfig.put("connection-timeout", 30000);
+            dsConfig.put("idle-timeout", 300000);
+            dsConfig.put("max-lifetime", 1800000);
+            dsConfig.put("leak-detection-threshold", 60000);
+
+            DataSource dataSource = DataSourceUtil.build(dsConfig);
+
+            FlexGlobalConfig flexConfig = FlexGlobalConfig.getDefaultConfig();
+            if (flexConfig != null) {
+                FlexDataSource flexDataSource = flexConfig.getDataSource();
+                if (flexDataSource != null) { flexDataSource.addDataSource(key, dataSource); }
+            }
+            DataSourceKey.use(key);
+            datasourceCache.put(key, dataSource);
+            return key;
+        } catch (Exception e) {
+            throw new RuntimeException("切换 MyBatis-Flex 数据源失败: " + e.getMessage(), e);
+        }
+    }
+
+    public void clearMybatisFlex() {
+        try {
+            DataSourceKey.clear();
+        } catch (Exception e) {
+            log.warn("清除当前 MyBatis-Flex 数据源上下文失败: {}", e.getMessage());
+        }
+    }
+
+    public void removeTemporaryDataSource(String key) {
+        DataSource ds = datasourceCache.remove(key);
+        if (ds instanceof HikariDataSource) {
+            try { ((HikariDataSource) ds).close(); } catch (Exception ignore) {}
+        }
+        serviceCache.remove(key);
+    }
+
+    
 }

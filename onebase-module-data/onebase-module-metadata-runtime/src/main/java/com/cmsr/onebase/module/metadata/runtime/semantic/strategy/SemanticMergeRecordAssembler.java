@@ -5,6 +5,8 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntit
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.relationship.MetadataEntityRelationshipDO;
 import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityRelationshipRepository;
+import com.cmsr.onebase.framework.common.util.object.ObjectUtils;
+import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityFieldOptionRepository;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataEntityFieldCoreService;
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticEntitySchemaDTO;
@@ -25,6 +27,7 @@ import jakarta.annotation.Resource;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import com.mybatisflex.core.query.QueryWrapper;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.BUSINESS_ENTITY_NOT_EXISTS;
@@ -48,6 +51,9 @@ public class SemanticMergeRecordAssembler {
 
     @Resource
     private MetadataEntityRelationshipRepository relationshipRepository;
+
+    @Resource
+    private MetadataEntityFieldOptionRepository fieldOptionRepository;
 
     /**
      * 按实体编码装配合并请求
@@ -156,12 +162,24 @@ public class SemanticMergeRecordAssembler {
     private List<SemanticRelationSchemaDTO> buildConnectorSchemas(Long sourceEntityId) {
         List<MetadataEntityRelationshipDO> relationships = relationshipRepository.getRelationshipsByMasterEntityId(sourceEntityId);
         List<SemanticRelationSchemaDTO> connectorSchemas = new ArrayList<>();
-        if (relationships == null) {
-            return connectorSchemas;
+        if (relationships == null || relationships.isEmpty()) { return connectorSchemas; }
+
+        Set<Long> targetIds = new HashSet<>();
+        for (MetadataEntityRelationshipDO r : relationships) { if (r.getTargetEntityId() != null) { targetIds.add(r.getTargetEntityId()); } }
+
+        Map<Long, MetadataBusinessEntityDO> targetEntityMap = new HashMap<>();
+        if (!targetIds.isEmpty()) {
+            QueryWrapper qw = new QueryWrapper();
+            qw.in(MetadataBusinessEntityDO::getId, targetIds);
+            List<MetadataBusinessEntityDO> targets = businessEntityCoreService.findAllByConfig(qw);
+            if (targets != null) {
+                for (MetadataBusinessEntityDO t : targets) { if (t != null && t.getId() != null) { targetEntityMap.put(t.getId(), t); } }
+            }
         }
+
         for (MetadataEntityRelationshipDO relationship : relationships) {
             SemanticRelationSchemaDTO schema = new SemanticRelationSchemaDTO();
-            schema.setName(relationship.getRelationName());
+            schema.setRelationName(relationship.getRelationName());
             schema.setSourceEntityId(relationship.getSourceEntityId());
             schema.setTargetEntityId(relationship.getTargetEntityId());
             schema.setSourceKeyFieldId(toLongSafe(relationship.getSourceFieldId()));
@@ -169,6 +187,13 @@ public class SemanticMergeRecordAssembler {
             schema.setType(resolveConnectorType(relationship));
             schema.setRelationshipType(relationship.getRelationshipType());
             schema.setCardinality(resolveCardinality(relationship));
+
+            MetadataBusinessEntityDO target = relationship.getTargetEntityId() == null ? null : targetEntityMap.get(relationship.getTargetEntityId());
+            if (target != null) {
+                schema.setTargetEntityCode(target.getCode());
+                schema.setTargetEntityDisplayName(target.getDisplayName());
+                schema.setTargetEntityTableName(target.getTableName());
+            }
             connectorSchemas.add(schema);
         }
         return connectorSchemas;
@@ -177,6 +202,7 @@ public class SemanticMergeRecordAssembler {
     private List<SemanticFieldSchemaDTO> buildFieldSchemas(List<MetadataEntityFieldDO> fields) {
         List<SemanticFieldSchemaDTO> list = new ArrayList<>();
         if (fields == null) { return list; }
+        Map<Long, SemanticFieldSchemaDTO> byId = new HashMap<>();
         for (MetadataEntityFieldDO f : fields) {
             SemanticFieldSchemaDTO s = new SemanticFieldSchemaDTO();
             s.setId(f.getId());
@@ -190,7 +216,31 @@ public class SemanticMergeRecordAssembler {
             s.setIsUnique(f.getIsUnique() == null ? null : f.getIsUnique() == 1);
             s.setIsSystemField(f.getIsSystemField() == null ? null : f.getIsSystemField() == 1);
             s.setIsPrimaryKey(f.getIsPrimaryKey() == null ? null : f.getIsPrimaryKey() == 1);
+            s.setDictTypeId(f.getDictTypeId());
             list.add(s);
+            if (s.getId() != null) { byId.put(s.getId(), s); }
+        }
+        List<Long> selectFieldIds = new ArrayList<>();
+        for (SemanticFieldSchemaDTO s : list) {
+            if ((s.getFieldTypeEnum() == SemanticFieldTypeEnum.SELECT
+                    || s.getFieldTypeEnum() == SemanticFieldTypeEnum.MULTI_SELECT)
+                    && ObjectUtils.isBlank(s.getDictTypeId())) {
+                if (s.getDictTypeId() == null && s.getId() != null) {
+                     selectFieldIds.add(s.getId()); 
+                }
+            }
+        }
+        if (!selectFieldIds.isEmpty()) {
+            var options = fieldOptionRepository.findAllByFieldIds(selectFieldIds);
+            if (options != null) {
+                for (var opt : options) {
+                    Long fid = opt.getFieldId();
+                    SemanticFieldSchemaDTO s = fid == null ? null : byId.get(fid);
+                    if (s == null) { continue; }
+                    if (s.getFieldOptions() == null) { s.setFieldOptions(new ArrayList<>()); }
+                    s.getFieldOptions().add(opt);
+                }
+            }
         }
         return list;
     }
@@ -236,7 +286,7 @@ public class SemanticMergeRecordAssembler {
         Long targetEntityId = null;
         if (connectorSchemas != null) {
             for (SemanticRelationSchemaDTO schema : connectorSchemas) {
-                if (Objects.equals(connectorName, schema.getName())) {
+                if (Objects.equals(connectorName, schema.getTargetEntityTableName())) {
                     targetEntityId = schema.getTargetEntityId();
                     break;
                 }
@@ -294,7 +344,7 @@ public class SemanticMergeRecordAssembler {
         if (typeEnum == null) {
             typeEnum = SemanticFieldTypeEnum.TEXT;
         }
-        SemanticFieldValueDTO<Object> fieldValueDTO = SemanticFieldValueDTO.<Object>of(typeEnum);
+        SemanticFieldValueDTO<Object> fieldValueDTO = SemanticFieldValueDTO.<Object>ofType(typeEnum);
         fieldValueDTO.setRawValue(raw);
         fieldValueDTO.setFieldId(entityFieldDO == null ? null : entityFieldDO.getId());
         fieldValueDTO.setFieldName(entityFieldDO == null ? fieldName : entityFieldDO.getFieldName());

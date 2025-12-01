@@ -17,9 +17,50 @@ POST {{base}}/metadata/{{tableName}}/create?menuId={{menuId}}
 Content-Type: application/json
 X-Trace-Id: {{traceId}}
 X-Tenant-Id: {{tenantId}}
-login-user: {"id":"155019577667616820","applicationId":"156456639374295040"}
+login-user: {"id":"155019577667616820","applicationId":"156456639374295040","tenantId":"153935442021842944"}
 
 {
+  "b90w_sub": [
+    {
+      "text": "项目A-基础配置",
+      "long_text": "该配置适用于项目A的一期部署，包含核心功能参数设置、外部接口关联规则及数据校验标准，支持系统快速接入第三方服务，保障数据传输的安全性和一致性。",
+      "url": "https://config.example.com/projectA/v1/setting",
+      "multi_select": {
+        "id": "dict_601_001",
+        "name": "基础配置类"
+      },
+      "data_select": {
+        "id": "156740193117405184",
+        "name": "X表-业务类型A"
+      }
+    },
+    {
+      "text": "客户B-定制需求",
+      "long_text": "客户B为制造业龙头企业，需求围绕生产数据可视化展开，需关联设备台账表的设备编号字段，同步展示设备运行状态、维护记录等信息，长文本字段用于存储定制化开发的特殊说明和接口文档链接。",
+      "url": "https://custom.example.com/customerB/visualization",
+      "multi_select": {
+        "id": "dict_601_002",
+        "name": "定制开发类"
+      },
+      "data_select": {
+        "id": "156740193117405183",
+        "name": "X表-设备台账"
+      }
+    },
+    {
+      "text": "系统C-数据同步",
+      "long_text": "用于系统C与外部数据源的实时同步配置，关联数据字典表的同步规则字段，定义数据增量同步的频率、字段映射关系及异常处理机制，长文本字段记录同步日志的存储路径和查询方式。",
+      "url": "https://sync.example.com/systemC/data/syncRule",
+      "multi_select": {
+        "id": "dict_601_003",
+        "name": "数据同步类"
+      },
+      "data_select": {
+        "id": "15674019311740512",
+        "name": "X表-同步规则"
+      }
+    }
+  ],
   "text": "企业客户基础信息",
   "long_text": "该客户为高新技术企业，主要从事人工智能算法研发，合作意向为产品定制开发及技术支持服务，预计合作周期12个月。",
   "email": "contact@techcorp.com",
@@ -31,21 +72,17 @@ login-user: {"id":"155019577667616820","applicationId":"156456639374295040"}
   "datetime": "2025-11-28T10:20:45",
   "boolean": true,
   "select": {
-    "id": "select_001",
-    "name": "A级客户"
+    "id": "选项1A",
+    "name": "选项1A"
   },
   "multi_select": [
     {
-      "id": "select_002",
-      "name": "重点客户"
+      "id": "选项1B",
+      "name": "选项1B"
     },
     {
-      "id": "select_003",
-      "name": "长期合作"
-    },
-    {
-      "id": "select_004",
-      "name": "高潜力"
+      "id": "选项3B",
+      "name": "选项3B"
     }
   ],
   "auto_code": "SYS202511280001",
@@ -78,25 +115,25 @@ login-user: {"id":"155019577667616820","applicationId":"156456639374295040"}
   "idid": "100001",
   "multi_user": [
     {
-      "id": "user_34567890",
+      "id": "34567890",
       "name": "赵六"
     },
     {
-      "id": "user_45678901",
+      "id": "5678901",
       "name": "孙七"
     },
     {
-      "id": "user_56789012",
+      "id": "56789012",
       "name": "周八"
     }
   ],
   "multi_department": [
     {
-      "id": "dept_002",
+      "id": "312312312313",
       "name": "销售一部"
     },
     {
-      "id": "dept_003",
+      "id": "3123123123131111",
       "name": "技术支持部"
     },
     {
@@ -106,15 +143,15 @@ login-user: {"id":"155019577667616820","applicationId":"156456639374295040"}
   ],
   "multi_data_selection": [
     {
-      "id": "data_002",
+      "id": "1002",
       "name": "算法开发"
     },
     {
-      "id": "data_003",
+      "id": "1003",
       "name": "系统集成"
     },
     {
-      "id": "data_004",
+      "id": "1004",
       "name": "技术培训"
     }
   ]

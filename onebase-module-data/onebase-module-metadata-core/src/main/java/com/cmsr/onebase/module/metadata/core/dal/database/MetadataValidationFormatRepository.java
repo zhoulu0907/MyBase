@@ -66,4 +66,11 @@ public class MetadataValidationFormatRepository extends ServiceImpl<MetadataVali
                 .eq(MetadataValidationFormatDO::getGroupId, groupId);
         return list(queryWrapper);
     }
+
+    public List<MetadataValidationFormatDO> findByFieldIds(java.util.Collection<Long> fieldIds) {
+        if (fieldIds == null || fieldIds.isEmpty()) { return java.util.Collections.emptyList(); }
+        QueryWrapper queryWrapper = query()
+                .in(MetadataValidationFormatDO::getFieldId, fieldIds);
+        return list(queryWrapper);
+    }
 }

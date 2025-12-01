@@ -71,4 +71,12 @@ public class MetadataValidationRuleDefinitionRepository extends ServiceImpl<Meta
                 .orderBy(MetadataValidationRuleDefinitionDO::getId, true);
         return list(queryWrapper);
     }
+
+    public List<MetadataValidationRuleDefinitionDO> selectByGroupIds(java.util.Collection<Long> groupIds) {
+        if (groupIds == null || groupIds.isEmpty()) { return java.util.Collections.emptyList(); }
+        QueryWrapper queryWrapper = this.query()
+                .in(MetadataValidationRuleDefinitionDO::getGroupId, groupIds)
+                .orderBy(MetadataValidationRuleDefinitionDO::getId, true);
+        return list(queryWrapper);
+    }
 }

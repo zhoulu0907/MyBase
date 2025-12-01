@@ -1,6 +1,10 @@
 package com.cmsr.onebase.module.metadata.runtime.semantic.dto;
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.enums.SemanticFieldTypeEnum;
 
+import java.util.List;
+
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.field.MetadataEntityFieldOptionDO;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -50,6 +54,12 @@ public class SemanticFieldSchemaDTO {
 
     @Schema(description = "是否主键")
     private Boolean isPrimaryKey;
+
+    @Schema(description = "关联的字典类型ID")
+    private Long dictTypeId;
+
+    @Schema(description = "字段选项列表")
+    private List<MetadataEntityFieldOptionDO> fieldOptions;
 
     public void setFieldType(String fieldType) {
         this.fieldType = fieldType;

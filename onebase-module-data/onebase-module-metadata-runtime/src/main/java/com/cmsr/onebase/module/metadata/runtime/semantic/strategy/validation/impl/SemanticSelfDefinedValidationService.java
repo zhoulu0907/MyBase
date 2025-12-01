@@ -1,15 +1,14 @@
 package com.cmsr.onebase.module.metadata.runtime.semantic.strategy.validation.impl;
 
-import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRuleDefinitionDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRuleGroupDO;
 import com.cmsr.onebase.module.metadata.core.enums.OpEnum;
-import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationRuleDefinitionRepository;
-import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationRuleGroupRepository;
 import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.validation.SemanticValidationService;
-import com.mybatisflex.core.query.QueryWrapper;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticFieldSchemaDTO;
+import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.validation.SemanticValidationContext;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.enums.SemanticFieldTypeEnum;
 
-import jakarta.annotation.Resource;
 import org.mvel2.MVEL;
 import org.mvel2.ParserContext;
 import org.springframework.stereotype.Component;
@@ -23,12 +22,6 @@ import java.util.stream.Collectors;
 
 @Component
 public class SemanticSelfDefinedValidationService implements SemanticValidationService {
-    @Resource
-    private MetadataValidationRuleGroupRepository ruleGroupRepository;
-    @Resource
-    private MetadataValidationRuleDefinitionRepository ruleDefinitionRepository;
-    @Resource
-    private com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityFieldRepository entityFieldRepository;
 
     private final ParserContext parserContext;
 
@@ -42,23 +35,32 @@ public class SemanticSelfDefinedValidationService implements SemanticValidationS
     }
 
     @Override
-    public void validate(MetadataEntityFieldDO field, Object value, Map<String, Object> data) {
-        List<MetadataValidationRuleGroupDO> ruleGroups = findActiveRuleGroups(field.getEntityId());
+    public void validateEntity(java.util.List<SemanticFieldSchemaDTO> fields, Map<String, Object> data, MetadataDataMethodOpEnum operationType, SemanticValidationContext context) {
+        List<MetadataValidationRuleGroupDO> ruleGroups = context.getSelfDefinedRuleGroups();
         if (ruleGroups.isEmpty()) { return; }
-        Map<Long, String> fieldIdToNameMap = buildFieldIdToNameMap(field.getEntityId());
-        Map<String, Object> context = buildCompleteContext(field, value, data, fieldIdToNameMap);
-        for (MetadataValidationRuleGroupDO ruleGroup : ruleGroups) { validateRuleGroup(ruleGroup, context, fieldIdToNameMap, field); }
+        Map<Long, String> fieldIdToNameMap = context.getFieldIdToNameMap();
+        for (SemanticFieldSchemaDTO field : fields) {
+            if (field.getIsSystemField() != null && field.getIsSystemField()) { continue; }
+            if (field.getIsPrimaryKey() != null && field.getIsPrimaryKey()) { continue; }
+            Object value = data.get(field.getFieldName());
+            if (operationType == MetadataDataMethodOpEnum.UPDATE && value == null) { continue; }
+            if (field.getFieldTypeEnum() == SemanticFieldTypeEnum.AUTO_CODE) { continue; }
+            if (!supports(field.getFieldType())) { continue; }
+            Map<String, Object> contextMap = buildCompleteContext(field, value, data, fieldIdToNameMap);
+            for (MetadataValidationRuleGroupDO ruleGroup : ruleGroups) { validateRuleGroup(ruleGroup, contextMap, fieldIdToNameMap, field, context); }
+        }
     }
 
-    private void validateRuleGroup(MetadataValidationRuleGroupDO ruleGroup, Map<String, Object> context, Map<Long, String> fieldIdToNameMap, MetadataEntityFieldDO field) {
-        List<MetadataValidationRuleDefinitionDO> rules = ruleDefinitionRepository.selectByGroupId(ruleGroup.getId());
+    private void validateRuleGroup(MetadataValidationRuleGroupDO ruleGroup, Map<String, Object> context, Map<Long, String> fieldIdToNameMap, SemanticFieldSchemaDTO field, SemanticValidationContext svcContext) {
+        List<MetadataValidationRuleDefinitionDO> rules = svcContext.getRuleDefinitionsByGroup().getOrDefault(ruleGroup.getId(), java.util.Collections.emptyList());
         if (rules.isEmpty()) { return; }
         String expression = buildExpression(rules, fieldIdToNameMap);
         Serializable compiled = MVEL.compileExpression(expression, parserContext);
         Object result = MVEL.executeExpression(compiled, context);
         if (Boolean.TRUE.equals(result)) {
             String message = Optional.ofNullable(ruleGroup.getPopPrompt()).filter(s -> !s.trim().isEmpty()).orElse("字段[" + field.getDisplayName() + "]不满足自定义校验规则：" + ruleGroup.getRgName());
-            throw new IllegalArgumentException(message);
+            String prefix = svcContext.getTableName() != null ? "表[" + svcContext.getTableName() + "] " : "";
+            throw new IllegalArgumentException(prefix + message);
         }
     }
 
@@ -157,23 +159,9 @@ public class SemanticSelfDefinedValidationService implements SemanticValidationS
         return allRules.stream().filter(rule -> parentId.equals(rule.getParentRuleId())).collect(Collectors.toList());
     }
 
-    private List<MetadataValidationRuleGroupDO> findActiveRuleGroups(Long entityId) {
-        QueryWrapper queryWrapper = ruleGroupRepository.query()
-                .eq(MetadataValidationRuleGroupDO::getEntityId, entityId)
-                .eq(MetadataValidationRuleGroupDO::getValidationType, "SELF_DEFINED")
-                .eq(MetadataValidationRuleGroupDO::getRgStatus, 1);
-        return ruleGroupRepository.list(queryWrapper);
-    }
+    
 
-    private Map<Long, String> buildFieldIdToNameMap(Long entityId) {
-        QueryWrapper queryWrapper = entityFieldRepository.query()
-                .eq(MetadataEntityFieldDO::getEntityId, entityId);
-
-        return entityFieldRepository.list(queryWrapper).stream()
-                .collect(Collectors.toMap(MetadataEntityFieldDO::getId, MetadataEntityFieldDO::getFieldName));
-    }
-
-    private Map<String, Object> buildCompleteContext(MetadataEntityFieldDO field, Object value, Map<String, Object> data, Map<Long, String> fieldIdToNameMap) {
+    private Map<String, Object> buildCompleteContext(SemanticFieldSchemaDTO field, Object value, Map<String, Object> data, Map<Long, String> fieldIdToNameMap) {
         Map<String, Object> context = new HashMap<>();
         for (String fieldName : fieldIdToNameMap.values()) { context.put(fieldName, null); }
         if (data != null) { context.putAll(data); }

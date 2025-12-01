@@ -6,12 +6,17 @@ import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
 import com.cmsr.onebase.module.metadata.core.service.permission.exception.PermissionDeniedException;
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticRecordDTO;
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticFieldValueDTO;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticRelationSchemaDTO;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticEntityValueDTO;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticFieldSchemaDTO;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.enums.SemanticConnectorCardinalityEnum;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * 字段权限校验器
@@ -61,6 +66,31 @@ public class SemanticFieldPermissionChecker implements SemanticRuntimePermission
         } else {
             filterNonEditableFields(data, nameToId, editableIds);
         }
+
+        SemanticEntityValueDTO value = recordDTO.getEntityValue();
+        List<SemanticRelationSchemaDTO> connectors = recordDTO.getEntitySchema().getConnectors();
+        if (connectors != null && value != null) {
+            for (SemanticRelationSchemaDTO c : connectors) {
+                List<SemanticFieldSchemaDTO> attrs = c.getRelationAttributes();
+                Map<String, Long> connNameToId = new HashMap<>();
+                if (attrs != null) { attrs.forEach(f -> connNameToId.put(f.getFieldName().toLowerCase(), f.getId())); }
+                if (c.getCardinality() == SemanticConnectorCardinalityEnum.ONE) {
+                    Map<String, Object> row = value.getConnectorRawObject(c.getTargetEntityTableName());
+                    if (row != null) {
+                        if (isStrictMode()) { enforceStrictPermissionForConnector(row, connNameToId, editableIds); }
+                        else { filterNonEditableFieldsForConnector(row, connNameToId, editableIds); }
+                    }
+                } else if (c.getCardinality() == SemanticConnectorCardinalityEnum.MANY) {
+                    List<Map<String, Object>> list = value.getConnectorRawList(c.getTargetEntityTableName());
+                    if (list != null && !list.isEmpty()) {
+                        for (Map<String, Object> row : list) {
+                            if (isStrictMode()) { enforceStrictPermissionForConnector(row, connNameToId, editableIds); }
+                            else { filterNonEditableFieldsForConnector(row, connNameToId, editableIds); }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -85,6 +115,26 @@ public class SemanticFieldPermissionChecker implements SemanticRuntimePermission
      */
     private void filterNonEditableFields(Map<String, SemanticFieldValueDTO<Object>> data, Map<String, Long> nameToId, Set<Long> editableIds) {
         var it = data.entrySet().iterator();
+        while (it.hasNext()) {
+            var e = it.next();
+            Long fid = nameToId.get(e.getKey().toLowerCase());
+            if (fid == null || !editableIds.contains(fid)) {
+                it.remove();
+            }
+        }
+    }
+
+    private void enforceStrictPermissionForConnector(Map<String, Object> row, Map<String, Long> nameToId, Set<Long> editableIds) {
+        for (String key : row.keySet()) {
+            Long fid = nameToId.get(key.toLowerCase());
+            if (fid == null || !editableIds.contains(fid)) {
+                throw new PermissionDeniedException(TYPE, "FIELD_EDIT", "无权编辑字段:" + key);
+            }
+        }
+    }
+
+    private void filterNonEditableFieldsForConnector(Map<String, Object> row, Map<String, Long> nameToId, Set<Long> editableIds) {
+        var it = row.entrySet().iterator();
         while (it.hasNext()) {
             var e = it.next();
             Long fid = nameToId.get(e.getKey().toLowerCase());

@@ -1,5 +1,8 @@
 package com.cmsr.onebase.module.metadata.runtime.semantic.service;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.vo.DynamicDataRespVO;
 import com.cmsr.onebase.module.metadata.runtime.semantic.vo.SemanticMergeBodyVO;
@@ -22,7 +25,7 @@ public interface SemanticDynamicDataService {
      * @param traceId 链路追踪ID
      * @return 创建后的响应
      */
-    DynamicDataRespVO create(String tableName, Long menuId, SemanticMergeBodyVO body, String traceId);
+    Map<String, Object> create(String tableName, Long menuId, SemanticMergeBodyVO body, String traceId);
 
     /**
      * 更新数据

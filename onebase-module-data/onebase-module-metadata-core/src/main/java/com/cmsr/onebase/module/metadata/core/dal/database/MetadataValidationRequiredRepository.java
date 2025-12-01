@@ -65,4 +65,11 @@ public class MetadataValidationRequiredRepository extends ServiceImpl<MetadataVa
             removeById(item.getId());
         }
     }
+
+    public List<MetadataValidationRequiredDO> findByFieldIds(java.util.Collection<Long> fieldIds) {
+        if (fieldIds == null || fieldIds.isEmpty()) { return java.util.Collections.emptyList(); }
+        QueryWrapper queryWrapper = query()
+                .in(MetadataValidationRequiredDO::getFieldId, fieldIds);
+        return list(queryWrapper);
+    }
 }

@@ -53,4 +53,11 @@ public class MetadataValidationRangeRepository extends ServiceImpl<MetadataValid
                 .eq(MetadataValidationRangeDO::getGroupId, groupId);
         return list(queryWrapper);
     }
+
+    public List<MetadataValidationRangeDO> findByFieldIds(java.util.Collection<Long> fieldIds) {
+        if (fieldIds == null || fieldIds.isEmpty()) { return java.util.Collections.emptyList(); }
+        QueryWrapper queryWrapper = query()
+                .in(MetadataValidationRangeDO::getFieldId, fieldIds);
+        return list(queryWrapper);
+    }
 }

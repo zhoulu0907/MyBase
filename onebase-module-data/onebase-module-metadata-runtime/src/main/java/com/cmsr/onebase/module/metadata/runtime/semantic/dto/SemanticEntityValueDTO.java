@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * 值模型 DTO
@@ -15,6 +16,9 @@ import java.util.ArrayList;
 @Schema(description = "值模型 DTO")
 @Data
 public class SemanticEntityValueDTO {
+    @Schema(description = "主实体ID")
+    private Object id;
+
     @Schema(description = "主实体字段值")
     private Map<String, SemanticFieldValueDTO<Object>> fieldValueMap;
 
@@ -116,6 +120,22 @@ public class SemanticEntityValueDTO {
         return getConnectorFieldValueAt(tableName, index, fieldName);
     }
 
+     /**
+     * 获取当前实体（主表）原始值Map
+     *
+     * <p>键为字段名，值为原始值；不含关联对象。</p>
+     */
+    public Map<String, Object> getCurrentEntityRawValueForJson() {
+        Map<String, Object> result = new HashMap<>();
+        if (fieldValueMap == null) return result;
+        for (Map.Entry<String, SemanticFieldValueDTO<Object>> entry : fieldValueMap.entrySet()) {
+            String name = entry.getKey();
+            SemanticFieldValueDTO<Object> v = entry.getValue();
+            result.put(name, v == null ? null : v.getRawValueForJson());
+        }
+        return result;
+    }
+
     /**
      * 获取当前实体（主表）原始值Map
      *
@@ -215,6 +235,19 @@ public class SemanticEntityValueDTO {
                 }
             }
             list.add(obj);
+        }
+        return list;
+    }
+
+    public List<Map<String, SemanticFieldValueDTO<Object>>> getConnectorDTOList(String connectorName) {
+        if (connectorName == null || connectors == null) return null;
+        SemanticRelationValueDTO relation = connectors.get(connectorName);
+        if (relation == null || relation.getRowValueList() == null) return null;
+        List<SemanticRowValueDTO> rows = relation.getRowValueList();
+        List<Map<String, SemanticFieldValueDTO<Object>>> list = new ArrayList<>();
+        for (SemanticRowValueDTO row : rows) {
+            Map<String, SemanticFieldValueDTO<Object>> fields = row.getFields();
+            list.add(fields == null ? new LinkedHashMap<>() : fields);
         }
         return list;
     }

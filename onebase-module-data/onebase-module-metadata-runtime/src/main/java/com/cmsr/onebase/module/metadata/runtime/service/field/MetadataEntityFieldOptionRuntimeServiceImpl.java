@@ -10,7 +10,11 @@ import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -28,6 +32,19 @@ public class MetadataEntityFieldOptionRuntimeServiceImpl implements MetadataEnti
     @Override
     public List<MetadataEntityFieldOptionDO> listByFieldId(Long fieldId) {
         return optionRepository.findAllByFieldId(fieldId);
+    }
+
+    @Override
+    public Map<Long, List<MetadataEntityFieldOptionDO>> listByFieldIds(Collection<Long> fieldIds) {
+        List<MetadataEntityFieldOptionDO> all = optionRepository.findAllByFieldIds(fieldIds);
+        Map<Long, java.util.List<MetadataEntityFieldOptionDO>> map = new HashMap<>();
+        if (all != null) {
+            for (MetadataEntityFieldOptionDO o : all) {
+                if (o == null || o.getFieldId() == null) continue;
+                map.computeIfAbsent(o.getFieldId(), k -> new ArrayList<>()).add(o);
+            }
+        }
+        return map;
     }
 
     @Override
@@ -130,4 +147,3 @@ public class MetadataEntityFieldOptionRuntimeServiceImpl implements MetadataEnti
         return BeanUtils.toBean(req, MetadataEntityFieldOptionDO.class);
     }
 }
-

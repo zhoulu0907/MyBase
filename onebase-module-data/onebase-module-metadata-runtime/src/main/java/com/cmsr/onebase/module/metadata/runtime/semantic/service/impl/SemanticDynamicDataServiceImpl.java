@@ -14,6 +14,8 @@ import com.cmsr.onebase.module.metadata.runtime.semantic.vo.SemanticTargetBodyVO
 import com.cmsr.onebase.module.metadata.runtime.semantic.vo.SemanticPageBodyVO;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -56,9 +58,9 @@ public class SemanticDynamicDataServiceImpl implements SemanticDynamicDataServic
      * @param traceId   链路追踪ID
      * @return 创建后的响应
      */
-    public DynamicDataRespVO create(String tableName, Long menuId, SemanticMergeBodyVO body, String traceId) {
+    public Map<String, Object> create(String tableName, Long menuId, SemanticMergeBodyVO body, String traceId) {
         Map<String, Object> result = createExecutor.execute(tableName, menuId, traceId, body);
-        return convertToDynamicDataRespVO(result);
+        return result;
     }
 
     @Override
@@ -126,9 +128,6 @@ public class SemanticDynamicDataServiceImpl implements SemanticDynamicDataServic
         return new PageResult<>(list, page.getTotal());
     }
 
-    
-
-    @SuppressWarnings("unchecked")
     private DynamicDataRespVO convertToDynamicDataRespVO(Map<String, Object> data) {
         DynamicDataRespVO respVO = new DynamicDataRespVO();
         Object eid = data.get("entityId");

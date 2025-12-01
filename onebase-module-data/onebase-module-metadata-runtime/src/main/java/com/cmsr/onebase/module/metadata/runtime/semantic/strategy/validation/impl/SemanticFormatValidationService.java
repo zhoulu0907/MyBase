@@ -1,37 +1,48 @@
 package com.cmsr.onebase.module.metadata.runtime.semantic.strategy.validation.impl;
 
-import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationFormatDO;
-import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationFormatRepository;
 import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.validation.SemanticValidationService;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticFieldSchemaDTO;
+import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.validation.SemanticValidationContext;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.enums.SemanticFieldTypeEnum;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+import java.util.Collections;
 
 @Component
 public class SemanticFormatValidationService implements SemanticValidationService {
-    private final MetadataValidationFormatRepository formatRepository;
-    public SemanticFormatValidationService(MetadataValidationFormatRepository formatRepository) { this.formatRepository = formatRepository; }
+    public SemanticFormatValidationService() { }
 
     @Override
-    public void validate(MetadataEntityFieldDO field, Object value, Map<String, Object> data) {
-        if (value == null) { return; }
-        List<MetadataValidationFormatDO> rules = formatRepository.findByFieldId(field.getId());
-        if (rules.isEmpty()) { return; }
-        boolean hasEnabledRule = rules.stream().anyMatch(rule -> rule.getIsEnabled() != null && rule.getIsEnabled() == 1);
-        if (!hasEnabledRule) { return; }
-        String stringValue = value.toString();
-        for (MetadataValidationFormatDO rule : rules) {
-            if (rule.getIsEnabled() == null || rule.getIsEnabled() != 1) { continue; }
-            String regexPattern = rule.getRegexPattern();
-            if (regexPattern == null || regexPattern.trim().isEmpty()) { continue; }
-            boolean isValid = isValidRegex(stringValue, regexPattern, rule.getFlags());
-            if (!isValid) {
-                String errorMessage = rule.getPromptMessage() != null && !rule.getPromptMessage().trim().isEmpty()
-                        ? rule.getPromptMessage() : "字段[" + field.getDisplayName() + "]格式不正确";
-                throw new IllegalArgumentException(errorMessage);
+    public void validateEntity(List<SemanticFieldSchemaDTO> fields, Map<String, Object> data, MetadataDataMethodOpEnum operationType, SemanticValidationContext context) {
+        for (SemanticFieldSchemaDTO field : fields) {
+            if (field.getIsSystemField() != null && field.getIsSystemField()) { continue; }
+            if (field.getIsPrimaryKey() != null && field.getIsPrimaryKey()) { continue; }
+            Object value = data.get(field.getFieldName());
+            if (operationType == MetadataDataMethodOpEnum.UPDATE && value == null) { continue; }
+            if (field.getFieldTypeEnum() == SemanticFieldTypeEnum.AUTO_CODE) { continue; }
+            if (!supports(field.getFieldType())) { continue; }
+            if (value == null) { continue; }
+            List<MetadataValidationFormatDO> rules = context.getFormatRules().getOrDefault(field.getId(), Collections.emptyList());
+            if (rules.isEmpty()) { continue; }
+            boolean hasEnabledRule = rules.stream().anyMatch(rule -> rule.getIsEnabled() != null && rule.getIsEnabled() == 1);
+            if (!hasEnabledRule) { continue; }
+            String stringValue = value.toString();
+            for (MetadataValidationFormatDO rule : rules) {
+                if (rule.getIsEnabled() == null || rule.getIsEnabled() != 1) { continue; }
+                String regexPattern = rule.getRegexPattern();
+                if (regexPattern == null || regexPattern.trim().isEmpty()) { continue; }
+                boolean isValid = isValidRegex(stringValue, regexPattern, rule.getFlags());
+                if (!isValid) {
+                    String errorMessage = rule.getPromptMessage() != null && !rule.getPromptMessage().trim().isEmpty()
+                            ? rule.getPromptMessage() : "字段[" + field.getDisplayName() + "]格式不正确";
+                    String prefix = context.getTableName() != null ? "表[" + context.getTableName() + "] " : "";
+                    throw new IllegalArgumentException(prefix + errorMessage);
+                }
             }
         }
     }

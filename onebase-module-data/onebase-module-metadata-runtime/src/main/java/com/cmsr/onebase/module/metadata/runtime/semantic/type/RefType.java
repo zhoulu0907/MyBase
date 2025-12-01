@@ -3,6 +3,9 @@ package com.cmsr.onebase.module.metadata.runtime.semantic.type;
 import lombok.Data;
 import java.util.Map;
 import java.util.Objects;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 
@@ -11,6 +14,7 @@ public abstract class RefType {
     private String id;
     private String name;
 
+    @JsonIgnore
     public Object getStoreData() {
         return this.id;
     };
@@ -88,4 +92,5 @@ public abstract class RefType {
         }
         return null;
     }
+
 }

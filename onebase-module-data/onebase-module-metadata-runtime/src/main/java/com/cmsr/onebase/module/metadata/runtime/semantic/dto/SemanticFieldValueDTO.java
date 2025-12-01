@@ -8,6 +8,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Pattern;
+import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.enums.SemanticFieldTypeEnum;
 import com.cmsr.onebase.module.metadata.runtime.semantic.type.RefType;
@@ -47,6 +58,40 @@ public class SemanticFieldValueDTO<T> {
 
     @Schema(description = "字段名称")
     private String tableName;
+
+    @JsonIgnore
+    public T getRawValue() {
+        return rawValue;
+    }
+
+    private SemanticFieldValueDTO(SemanticFieldTypeEnum fieldTypeEnum) {
+        this.fieldTypeEnum = Objects.requireNonNull(fieldTypeEnum, "fieldTypeEnum 不能为空");
+    }
+
+    @JsonGetter("rawValue")
+    public Object getRawValueForJson() {
+        Object raw = rawValue;
+        if (fieldTypeEnum != null && fieldTypeEnum.isListType()) {
+            if (raw == null) return null;
+            if (raw instanceof List<?> list) {
+                List<Object> out = new ArrayList<>(list.size());
+                for (Object o : list) {
+                    out.add(formatScalarForJson(o));
+                }
+                return out;
+            }
+            return formatScalarForJson(raw);
+        }
+        return formatScalarForJson(raw);
+    }
+
+    private Object formatScalarForJson(Object v) {
+        if (v == null) return null;
+        if (v instanceof LocalDate d) return d.toString();
+        if (v instanceof LocalDateTime dt) return dt.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        if (v instanceof RefType) return v;
+        return v;
+    }
 
     /**
      * 按指定类型返回值（非列表）
@@ -113,9 +158,20 @@ public class SemanticFieldValueDTO<T> {
             return result;
         }
         if (raw instanceof String s) {
-            String[] parts = s.split(",");
-            for (String p : parts) { result.add(castValue(p.trim(), elementType)); }
-            return result;
+            if (JsonUtils.isJson(s)) {
+                if (JsonUtils.isJsonObject(s)) {
+                    E obj = JsonUtils.parseObject(s, new TypeReference<E>(){});
+                    result.add(obj);
+                } else {
+                    result = JsonUtils.parseObject(s, new TypeReference<List<E>>(){});
+                }
+                return result;
+            } else {
+                String[] parts = s.split(",");
+                for (String p : parts) { result.add(castValue(p.trim(), elementType)); }
+                return result;
+            }
+          
         }
         return null;
     }
@@ -213,11 +269,7 @@ public class SemanticFieldValueDTO<T> {
         return s.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 
-    private SemanticFieldValueDTO(SemanticFieldTypeEnum fieldTypeEnum) {
-        this.fieldTypeEnum = Objects.requireNonNull(fieldTypeEnum, "fieldTypeEnum 不能为空");
-    }
-
-    public static <T> SemanticFieldValueDTO<T> of(SemanticFieldTypeEnum fieldTypeEnum) {
+    public static <T> SemanticFieldValueDTO<T> ofType(SemanticFieldTypeEnum fieldTypeEnum) {
         return new SemanticFieldValueDTO<>(fieldTypeEnum);
     }
 
@@ -247,8 +299,21 @@ public class SemanticFieldValueDTO<T> {
         } else if (value instanceof Object[] arr) {
             for (Object o : Arrays.asList(arr)) items.add(normalizeScalar(o, type));
         } else if (value instanceof String s) {
-            String[] parts = s.split(",");
-            for (String p : parts) items.add(normalizeScalar(p.trim(), type));
+            String str = s.trim();
+            if (JsonUtils.isJson(str)) {
+                if (JsonUtils.isJsonObject(str)) {
+                    Map<String, Object> obj = JsonUtils.parseObject(str, new TypeReference<Map<String, Object>>(){});
+                    if (obj != null) items.add(normalizeScalar(obj, type));
+                } else {
+                    List<Object> arrList = JsonUtils.parseObject(str, new TypeReference<List<Object>>(){});
+                    if (arrList != null) {
+                        for (Object o : arrList) items.add(normalizeScalar(o, type));
+                    }
+                }
+            } else {
+                String[] parts = str.split(",");
+                for (String p : parts) items.add(normalizeScalar(p.trim(), type));
+            }
         } else {
             items.add(normalizeScalar(value, type));
         }
@@ -279,8 +344,6 @@ public class SemanticFieldValueDTO<T> {
                 if (!isValidEmail(s)) throw err("邮箱格式不正确", String.class);
             } else if (type == SemanticFieldTypeEnum.PHONE) {
                 if (!isValidPhone(s)) throw err("电话号码格式不正确", String.class);
-            } else if (type == SemanticFieldTypeEnum.URL) {
-                if (!isValidUrl(s)) throw err("URL 格式不正确", String.class);
             } else if (type == SemanticFieldTypeEnum.GEOGRAPHY) {
                 s = normalizeGeographyString(value);
             }
@@ -321,29 +384,44 @@ public class SemanticFieldValueDTO<T> {
             if (b == null) throw err("Byte 类型转换失败", Byte.class);
             return b.byteValue();
         }
-        if (rawType == java.time.LocalDate.class) {
-            if (value instanceof java.time.LocalDate) return value;
+        if (rawType == LocalDate.class) {
+            if (value instanceof LocalDate) return value;
             if (value instanceof String s) {
-                java.time.LocalDate d = parseLocalDate(s.trim());
-                if (d == null) throw err("LocalDate 解析失败", java.time.LocalDate.class);
+                LocalDate d = parseLocalDate(s.trim());
+                if (d == null) throw err("LocalDate 解析失败", LocalDate.class);
                 return d;
             }
-            throw err("非法的 LocalDate 值", java.time.LocalDate.class);
+            if (value instanceof Date d) {
+                if (d instanceof java.sql.Date sd) {
+                    return sd.toLocalDate();
+                }
+                return Instant.ofEpochMilli(d.getTime()).atZone(ZoneId.systemDefault()).toLocalDate();
+            }
+            throw err("非法的 LocalDate 值", LocalDate.class);
         }
-        if (rawType == java.time.LocalDateTime.class) {
-            if (value instanceof java.time.LocalDateTime) return value;
+        if (rawType == LocalDateTime.class) {
+            if (value instanceof LocalDateTime) return value;
             if (value instanceof String s) {
-                java.time.LocalDateTime dt = parseLocalDateTime(s.trim());
-                if (dt == null) throw err("LocalDateTime 解析失败", java.time.LocalDateTime.class);
+                LocalDateTime dt = parseLocalDateTime(s.trim());
+                if (dt == null) throw err("LocalDateTime 解析失败", LocalDateTime.class);
                 return dt;
             }
             if (value instanceof Number n) {
                 long epoch = n.longValue();
                 if (String.valueOf(epoch).length() <= 10) epoch *= 1000;
-                java.time.Instant inst = java.time.Instant.ofEpochMilli(epoch);
-                return java.time.LocalDateTime.ofInstant(inst, java.time.ZoneId.systemDefault());
+                Instant inst = Instant.ofEpochMilli(epoch);
+                return LocalDateTime.ofInstant(inst, ZoneId.systemDefault());
             }
-            throw err("非法的 LocalDateTime 值", java.time.LocalDateTime.class);
+            if (value instanceof Date d) {
+                if (d instanceof java.sql.Timestamp ts) {
+                    return ts.toLocalDateTime();
+                }
+                if (d instanceof java.sql.Date sd) {
+                    return sd.toLocalDate().atStartOfDay();
+                }
+                return LocalDateTime.ofInstant(Instant.ofEpochMilli(d.getTime()), ZoneId.systemDefault());
+            }
+            throw err("非法的 LocalDateTime 值", LocalDateTime.class);
         }
         if (rawType == Boolean.class) {
             if (value instanceof Boolean) return value;
@@ -368,12 +446,6 @@ public class SemanticFieldValueDTO<T> {
         return Pattern.compile("^\\+?[0-9\\-]{5,20}$").matcher(s).matches();
     }
 
-    private boolean isValidUrl(String s) {
-        if (s == null || s.isEmpty()) return false;
-        String p = "^(https?|ftp)://.+";
-        return Pattern.compile(p, Pattern.CASE_INSENSITIVE).matcher(s).matches();
-    }
-
     private String normalizeGeographyString(Object value) {
         if (value instanceof String str) {
             String s = str.trim();
@@ -388,26 +460,26 @@ public class SemanticFieldValueDTO<T> {
         throw err("非法的地理位置值", String.class);
     }
 
-    private java.time.LocalDate parseLocalDate(String s) {
-        try { return java.time.LocalDate.parse(s); } catch (Exception ignore) {}
+    private LocalDate parseLocalDate(String s) {
+        try { return LocalDate.parse(s); } catch (Exception ignore) {}
         String[] fmts = {"yyyy-MM-dd","yyyy/MM/dd","yyyyMMdd"};
         for (String f : fmts) {
-            try { return java.time.LocalDate.parse(s, java.time.format.DateTimeFormatter.ofPattern(f)); } catch (Exception ignore) {}
+            try { return LocalDate.parse(s, DateTimeFormatter.ofPattern(f)); } catch (Exception ignore) {}
         }
         return null;
     }
 
-    private java.time.LocalDateTime parseLocalDateTime(String s) {
-        try { return java.time.LocalDateTime.parse(s); } catch (Exception ignore) {}
+    private LocalDateTime parseLocalDateTime(String s) {
+        try { return LocalDateTime.parse(s); } catch (Exception ignore) {}
         String[] fmts = {"yyyy-MM-dd HH:mm:ss","yyyy/MM/dd HH:mm:ss","yyyyMMddHHmmss","yyyy-MM-dd'T'HH:mm:ss"};
         for (String f : fmts) {
-            try { return java.time.LocalDateTime.parse(s, java.time.format.DateTimeFormatter.ofPattern(f)); } catch (Exception ignore) {}
+            try { return LocalDateTime.parse(s, DateTimeFormatter.ofPattern(f)); } catch (Exception ignore) {}
         }
         try {
             long epoch = Long.parseLong(s);
             if (String.valueOf(epoch).length() <= 10) epoch *= 1000;
-            java.time.Instant inst = java.time.Instant.ofEpochMilli(epoch);
-            return java.time.LocalDateTime.ofInstant(inst, java.time.ZoneId.systemDefault());
+            Instant inst = Instant.ofEpochMilli(epoch);
+            return LocalDateTime.ofInstant(inst, ZoneId.systemDefault());
         } catch (Exception ignore) {}
         return null;
     }

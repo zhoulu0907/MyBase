@@ -39,6 +39,12 @@
             <version>${revision}</version>
         </dependency>
 
+           <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-bpm-engine-core</artifactId>
+            <version>${revision}</version>
+        </dependency>
+
         <!-- DB 相关 -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
