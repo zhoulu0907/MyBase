@@ -285,7 +285,7 @@ const AppManagement: React.FC = () => {
 
   const menu = (item: any) => {
     return (
-      <Menu onPointerEnter={clearTimer} onPointerLeave={() => startCloseTimer(80)}>
+      <Menu style={{ marginRight: '10px' }} onPointerEnter={clearTimer} onPointerLeave={() => startCloseTimer(80)}>
         <Menu.Item
           key="1"
           onClick={(e) => {
@@ -480,17 +480,15 @@ const AppManagement: React.FC = () => {
                       {item?.userPhotoList && item?.userPhotoList.length > 0 && (
                         <>
                           <AvatarGroup size={24} maxCount={4} zIndexAscend>
-                            {item?.userPhotoList?.map((item) => {
-                              return (
-                                <>
-                                  {item.avatar ? (
-                                    <Avatar>
-                                      <img src={item.avatar} alt="avatar" />
-                                    </Avatar>
-                                  ) : (
-                                    <Avatar style={{ backgroundColor: '#009e9e' }}>{item?.nickName?.charAt(0)}</Avatar>
-                                  )}
-                                </>
+                            {item?.userPhotoList?.map((item, index) => {
+                              return item.avatar ? (
+                                <Avatar key={index}>
+                                  <img src={item.avatar} alt="avatar" />
+                                </Avatar>
+                              ) : (
+                                <Avatar key={index} style={{ backgroundColor: '#009e9e' }}>
+                                  {item?.nickName?.charAt(0)}
+                                </Avatar>
                               );
                             })}
                             {(item?.userPhotoList?.length > 1 && (
@@ -520,7 +518,6 @@ const AppManagement: React.FC = () => {
                           position="bottom"
                           popupVisible={optionVisibleId === item.id}
                           onVisibleChange={(v) => handleOptionVisibleChange(v, item.id)}
-                          getPopupContainer={(node) => node.parentNode as HTMLElement}
                         >
                           <IconMoreVertical
                             className={styles.operationIcon}
