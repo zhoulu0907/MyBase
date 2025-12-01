@@ -34,6 +34,10 @@ public class MenuCreateReqVO {
     @Schema(description = "页面集类型 1-普通表单 2-流程表单 3-工作台")
     private Integer pageSetType;
 
+    //TODO 等前端切换，待删除
     @Schema(description = "实体编码")
-    private Long entityId;
+    private String entityId;
+
+    @Schema(description = "实体编码")
+    private String entityUuid;
 }

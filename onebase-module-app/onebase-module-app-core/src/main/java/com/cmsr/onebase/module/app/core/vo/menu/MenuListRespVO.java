@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.app.build.vo.menu;
+package com.cmsr.onebase.module.app.core.vo.menu;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -17,11 +17,14 @@ public class MenuListRespVO {
     @Schema(description = "菜单id")
     private Long id;
 
-    @Schema(description = "父节点编码")
-    private Long parentId;
+    @Schema(description = "菜单UUID")
+    private String menuUuid;
 
-    @Schema(description = "实体Id")
-    private Long entityId;
+    @Schema(description = "父节点编码")
+    private String parentUuid;
+
+    @Schema(description = "实体UUID")
+    private String entityUuid;
 
     @Schema(description = "菜单编码")
     private String menuCode;

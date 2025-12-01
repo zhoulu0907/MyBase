@@ -24,13 +24,13 @@ public class AppMenuTableDef extends TableDef {
      */
     public final QueryColumn ID = new QueryColumn(this, "id");
 
-    
+
     public final QueryColumn CREATOR = new QueryColumn(this, "creator");
 
-    
+
     public final QueryColumn DELETED = new QueryColumn(this, "deleted");
 
-    
+
     public final QueryColumn UPDATER = new QueryColumn(this, "updater");
 
     /**
@@ -58,25 +58,30 @@ public class AppMenuTableDef extends TableDef {
      */
     public final QueryColumn MENU_TYPE = new QueryColumn(this, "menu_type");
 
-    
+
     public final QueryColumn MENU_UUID = new QueryColumn(this, "menu_uuid");
 
-    
+
     public final QueryColumn TENANT_ID = new QueryColumn(this, "tenant_id");
 
-    
+    /**
+     * 是否可见
+     */
+    public final QueryColumn IS_VISIBLE = new QueryColumn(this, "is_visible");
+
+
     public final QueryColumn CREATE_TIME = new QueryColumn(this, "create_time");
 
-    
+
     public final QueryColumn ENTITY_UUID = new QueryColumn(this, "entity_uuid");
 
-    
+
     public final QueryColumn PARENT_UUID = new QueryColumn(this, "parent_uuid");
 
-    
+
     public final QueryColumn UPDATE_TIME = new QueryColumn(this, "update_time");
 
-    
+
     public final QueryColumn VERSION_TAG = new QueryColumn(this, "version_tag");
 
     /**
@@ -97,7 +102,7 @@ public class AppMenuTableDef extends TableDef {
     /**
      * 默认字段，不包含逻辑删除或者 large 等字段。
      */
-    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, MENU_UUID, APPLICATION_ID, VERSION_TAG, ENTITY_UUID, PARENT_UUID, MENU_CODE, MENU_SORT, MENU_TYPE, MENU_NAME, MENU_ICON, ACTION_TARGET, CREATOR, CREATE_TIME, UPDATER, UPDATE_TIME, DELETED, TENANT_ID};
+    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, MENU_UUID, APPLICATION_ID, VERSION_TAG, ENTITY_UUID, PARENT_UUID, MENU_CODE, MENU_SORT, MENU_TYPE, MENU_NAME, MENU_ICON, ACTION_TARGET, CREATOR, IS_VISIBLE, CREATE_TIME, UPDATER, UPDATE_TIME, DELETED, TENANT_ID};
 
     public AppMenuTableDef() {
         super("", "app_menu");

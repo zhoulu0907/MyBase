@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,7 +24,7 @@ import org.springframework.web.bind.annotation.*;
 @Validated
 public class AppAuthPermissionController {
 
-    @Resource
+    @Autowired
     private AppAuthPermissionService authPermissionService;
 
 

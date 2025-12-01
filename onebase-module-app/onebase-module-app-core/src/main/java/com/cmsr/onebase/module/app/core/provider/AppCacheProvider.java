@@ -62,7 +62,7 @@ public class AppCacheProvider {
         roleMenuChanged(permissionReq.getApplicationId(), permissionReq.getRoleId(), permissionReq.getMenuId());
     }
 
-    public void roleMenuChanged(Long applicationId, Long roleId, Long menuId) {
+    public void roleMenuChanged(Long applicationId, String roleUuid, String menuId) {
         List<Long> userIds = findAllUserIds(roleId);
         for (Long userId : userIds) {
             allCacheKeys(userId, applicationId, menuId).forEach(key -> {

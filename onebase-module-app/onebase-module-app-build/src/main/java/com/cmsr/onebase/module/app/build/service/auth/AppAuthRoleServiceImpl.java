@@ -3,13 +3,14 @@ package com.cmsr.onebase.module.app.build.service.auth;
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.framework.common.util.string.UuidUtils;
 import com.cmsr.onebase.module.app.build.service.AppCommonService;
 import com.cmsr.onebase.module.app.build.util.AuthUtils;
 import com.cmsr.onebase.module.app.build.vo.auth.*;
+import com.cmsr.onebase.module.app.core.dal.database.AppSqlQueryRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleDeptRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleUserRepository;
-import com.cmsr.onebase.module.app.core.dal.database.AppSqlQueryRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthRoleDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthRoleDeptDO;
@@ -21,9 +22,9 @@ import com.cmsr.onebase.module.app.core.provider.AppCacheProvider;
 import com.cmsr.onebase.module.system.api.dept.DeptApi;
 import com.cmsr.onebase.module.system.api.dept.dto.DeptAndUsersReqDTO;
 import com.cmsr.onebase.module.system.api.dept.dto.DeptAndUsersRespDTO;
-import jakarta.annotation.Resource;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,25 +39,25 @@ import java.util.List;
 @Service
 public class AppAuthRoleServiceImpl implements AppAuthRoleService {
 
-    @Resource
+    @Autowired
     private AppAuthRoleRepository appAuthRoleRepository;
 
-    @Resource
+    @Autowired
     private AppAuthRoleUserRepository appAuthRoleUserRepository;
 
-    @Resource
+    @Autowired
     private AppAuthRoleDeptRepository appAuthRoleDeptRepository;
 
-    @Resource
+    @Autowired
     private AppCommonService appCommonService;
 
-    @Resource
+    @Autowired
     private DeptApi deptApi;
 
-    @Resource
+    @Autowired
     private AppCacheProvider appCacheProvider;
 
-    @Resource
+    @Autowired
     private AppSqlQueryRepository appSqlQueryRepository;
 
     @Override
@@ -78,6 +79,7 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
             if (existRole == null) {
                 AppAuthRoleDO authRoleDO = new AppAuthRoleDO();
                 authRoleDO.setApplicationId(applicationId);
+                authRoleDO.setRoleUuid(UuidUtils.getUuid());
                 authRoleDO.setRoleCode(AuthRoleTypeEnum.SYSTEM_ADMIN.getCode());
                 authRoleDO.setRoleName(AuthRoleTypeEnum.SYSTEM_ADMIN.getName());
                 authRoleDO.setRoleType(AuthRoleTypeEnum.SYSTEM_ADMIN.getValue());
@@ -102,6 +104,7 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
             if (existRole == null) {
                 AppAuthRoleDO authRoleDO = new AppAuthRoleDO();
                 authRoleDO.setApplicationId(applicationId);
+                authRoleDO.setRoleUuid(UuidUtils.getUuid());
                 authRoleDO.setRoleCode(AuthRoleTypeEnum.SYSTEM_USER.getCode());
                 authRoleDO.setRoleName(AuthRoleTypeEnum.SYSTEM_USER.getName());
                 authRoleDO.setRoleType(AuthRoleTypeEnum.SYSTEM_USER.getValue());
@@ -113,6 +116,7 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
             if (existRole == null) {
                 AppAuthRoleDO authRoleDO = new AppAuthRoleDO();
                 authRoleDO.setApplicationId(applicationId);
+                authRoleDO.setRoleUuid(UuidUtils.getUuid());
                 authRoleDO.setRoleCode(AuthRoleTypeEnum.OUTER_USER.getCode());
                 authRoleDO.setRoleName(AuthRoleTypeEnum.OUTER_USER.getName());
                 authRoleDO.setRoleType(AuthRoleTypeEnum.OUTER_USER.getValue());
@@ -151,6 +155,7 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
         checkRoleNameExists(reqVO.getApplicationId(), reqVO.getRoleName());
         AppAuthRoleDO authRoleDO = new AppAuthRoleDO();
         authRoleDO.setApplicationId(reqVO.getApplicationId());
+        authRoleDO.setRoleUuid(UuidUtils.getUuid());
         authRoleDO.setRoleType(AuthRoleTypeEnum.CUSTOM_ROLE.getValue());
         authRoleDO.setRoleName(reqVO.getRoleName());
         authRoleDO.setRoleCode(AuthUtils.createRoleCode());
