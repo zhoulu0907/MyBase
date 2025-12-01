@@ -1,11 +1,94 @@
 ### 默认环境变量配置（直接使用local环境配置）
-@baseUrl = http://localhost:48080/admin-api
-@adminTenantId = 1
-@token = b47d4590651041a1a106ae3235acf2e5
-@tag = OneBase.local
+#@baseUrl = http://localhost:48080/admin-api
+#@adminTenantId = 1
+#@token = 8f91f9b7fee64ea08c08d59561b7dbff
+#@tag = OneBase.local
 
 
-### 请求 /menu/list 接口 => 成功
-GET {{baseUrl}}/system/permission/list-role-menus?roleId=544780755528716288
+### 获得角色拥有的菜单详细信息列表 => 成功
+GET {{baseUrl}}/system/permission/list-role-menus?roleId=1
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
+
+### 赋予角色权限 => 成功
+POST {{baseUrl}}/system/permission/assign-role-menu
+Authorization: Bearer {{token}}
+Content-Type: application/json
+tenant-id: {{adminTenantId}}
+
+{
+  "roleId": 153753404126560256,
+  "menuIds": [153757303956865024, 153758145770455040]
+}
+
+### 赋予角色数据权限 => 成功
+POST {{baseUrl}}/system/permission/assign-role-data-scope
+Authorization: Bearer {{token}}
+Content-Type: application/json
+tenant-id: {{adminTenantId}}
+
+{
+  "roleId": 153753404126560256,
+  "dataScope": 1,
+  "dataScopeDeptIds": [1, 2, 3]
+}
+
+### 获得用户拥有的角色编号列表 => 成功
+GET {{baseUrl}}/system/permission/list-user-roles?userId=1
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 赋予用户角色 => 成功
+POST {{baseUrl}}/system/permission/assign-user-roles
+Authorization: Bearer {{token}}
+Content-Type: application/json
+tenant-id: {{adminTenantId}}
+
+{
+  "userId": 153748662482665472,
+  "roleIds": [153753404126560256, 153752579492839424]
+}
+
+### 为角色分配用户 => 成功
+POST {{baseUrl}}/system/permission/add-role-users
+Authorization: Bearer {{token}}
+Content-Type: application/json
+tenant-id: {{adminTenantId}}
+
+{
+  "roleId": 153753404126560256,
+  "userIds": [152043165326016512, 152043955599998976]
+}
+
+### 从角色中移除用户 => 成功
+POST {{baseUrl}}/system/permission/delete-role-users
+Authorization: Bearer {{token}}
+Content-Type: application/json
+tenant-id: {{adminTenantId}}
+
+{
+  "roleId": 153753404126560256,
+  "userIds": [152043165326016512,152043955599998976]
+}
+
+### 为角色分配菜单&权限 => 成功
+POST {{baseUrl}}/system/permission/add-role-menus
+Authorization: Bearer {{token}}
+Content-Type: application/json
+tenant-id: {{adminTenantId}}
+
+{
+  "roleId": 153753404126560256,
+  "menuIds": [152035073607630848, 152037014932848640]
+}
+
+### 从角色中移除菜单&权限 => 成功
+POST {{baseUrl}}/system/permission/delete-role-menus
+Authorization: Bearer {{token}}
+Content-Type: application/json
+tenant-id: {{adminTenantId}}
+
+{
+  "roleId": 153753404126560256,
+  "menuIds": [152037014932848640,152035073607630848]
+}

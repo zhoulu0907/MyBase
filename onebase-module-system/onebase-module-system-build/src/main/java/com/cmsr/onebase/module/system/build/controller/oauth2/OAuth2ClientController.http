@@ -1,4 +1,4 @@
-### 请求 /login 接口 => 成功
+### 请求 /create 接口 => 创建 OAuth2 客户端
 POST {{baseUrl}}/system/oauth2-client/create
 Content-Type: application/json
 Authorization: Bearer {{token}}
@@ -7,7 +7,7 @@ tenant-id: {{adminTenantId}}
 {
   "id": "1",
   "secret": "admin123",
-  "name": "用户",
+  "name": "用户Gsp",
   "logo": "https://www.aaa.com/images/favicon.ico",
   "description": "我是描述",
   "status": 0,
@@ -21,3 +21,44 @@ tenant-id: {{adminTenantId}}
   "resource_ids": ["1024"],
   "additionalInformation": "{}"
 }
+
+### 请求 /update 接口 => 更新 OAuth2 客户端
+POST {{baseUrl}}/system/oauth2-client/update
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+{
+  "id": 1,
+  "clientId": "updated_client",
+  "secret": "updated_secret",
+  "name": "更新客户端",
+  "logo": "https://www.cmsr.com/updated_logo.png",
+  "description": "更新的描述",
+  "status": 0,
+  "accessTokenValiditySeconds": 180,
+  "refreshTokenValiditySeconds": 8640,
+  "redirectUris": ["https://www.cmsr.com/callback"],
+  "authorizedGrantTypes": ["authorization_code"],
+  "scopes": ["read", "write"],
+  "authorities": ["system:user:query", "system:user:create"],
+  "resourceIds": ["1024", "1025"],
+  "additionalInformation": "{\"updated\": true}"
+}
+
+### 请求 /delete 接口 => 删除 OAuth2 客户端
+POST {{baseUrl}}/system/oauth2-client/delete?id=1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 请求 /get 接口 => 获取 OAuth2 客户端
+GET {{baseUrl}}/system/oauth2-client/get?id=1
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 请求 /page 接口 => 获取 OAuth2 客户端分页
+GET {{baseUrl}}/system/oauth2-client/page?pageNo=1&pageSize=10&name=测试&status=0
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+

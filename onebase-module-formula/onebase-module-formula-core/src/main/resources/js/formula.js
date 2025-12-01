@@ -8028,20 +8028,37 @@ function _typeof(o) {
     unit = unit.toUpperCase();
     start_date = parseDate(start_date);
     end_date = parseDate(end_date);
+    
+    if (start_date instanceof Error) {
+      return start_date;
+    }
+    
+    if (end_date instanceof Error) {
+      return end_date;
+    }
+    
+    var diffMs = end_date.getTime() - start_date.getTime();
+    var diffSeconds = Math.floor(diffMs / 1000);
+    var diffMinutes = Math.floor(diffMs / (1000 * 60));
+    var diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    var diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    
     var start_date_year = start_date.getFullYear();
     var start_date_month = start_date.getMonth();
     var start_date_day = start_date.getDate();
     var end_date_year = end_date.getFullYear();
     var end_date_month = end_date.getMonth();
     var end_date_day = end_date.getDate();
+    
     var result;
+    
     switch (unit) {
      case "Y":
       result = Math.floor(YEARFRAC(start_date, end_date));
       break;
 
-     case "D":
-      result = DAYS(end_date, start_date);
+     case "Y":
+      result = Math.floor(YEARFRAC(start_date, end_date));
       break;
 
      case "M":
@@ -8049,6 +8066,22 @@ function _typeof(o) {
       if (end_date_day < start_date_day) {
         result--;
       }
+      break;
+
+     case "D":
+      result = diffDays;
+      break;
+      
+     case "H":
+      result = diffHours;
+      break;
+      
+     case "N": // 分钟
+      result = diffMinutes;
+      break;
+      
+     case "S":
+      result = diffSeconds;
       break;
 
      case "MD":

@@ -8,6 +8,7 @@ import com.cmsr.onebase.framework.common.enums.CommonPublishModelEnum;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.security.TenantContextHolder;
+import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
@@ -35,6 +36,8 @@ import com.cmsr.onebase.module.system.vo.permission.PermissionMenuRespVO;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.Sets;
+import com.mzt.logapi.context.LogRecordContext;
+import com.mzt.logapi.starter.annotation.LogRecord;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.init.DefaultConfigStore;
@@ -48,12 +51,14 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils.getLoginUserId;
 import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertSet;
 import static com.cmsr.onebase.framework.common.util.json.JsonUtils.toJsonString;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.USER_NOT_EXISTS;
+import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
 
 /**
  * 权限 Service 实现类
@@ -238,6 +243,8 @@ public class PermissionServiceImpl implements PermissionService {
             @CacheEvict(value = RedisKeyConstants.PERMISSION_MENU_ID_LIST,
                     allEntries = true) // allEntries 清空所有缓存，主要一次更新涉及到的 menuIds 较多，反倒批量会更快
     })
+    @LogRecord(type = SYSTEM_PERMISSION_TYPE, subType = SYSTEM_PERMISSION_ASSIGN_ROLE_MENU_SUB_TYPE, bizNo = "{{#role.id}}",
+            success = SYSTEM_PERMISSION_ASSIGN_ROLE_MENU_SUCCESS)
     public void assignRoleMenu(Long roleId, Set<Long> menuIds) {
         // 获得角色拥有菜单编号
         Set<Long> dbMenuIds = convertSet(roleMenuDataRepository.findListByRoleId(roleId), RoleMenuDO::getMenuId);
@@ -258,6 +265,15 @@ public class PermissionServiceImpl implements PermissionService {
         if (CollUtil.isNotEmpty(deleteMenuIds)) {
             roleMenuDataRepository.deleteByRoleIdAndMenuIds(roleId, deleteMenuIds);
         }
+        // 3. 记录操作日志上下文
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+        List<MenuDO> allActiveMenuList = menuService.getAllActiveMenuList(menuIds);
+        Stream<String> menuNames = allActiveMenuList.stream().map(men -> men.getName());
+        RoleDO role = roleService.getRole(roleId);
+
+        LogRecordContext.putVariable("loginUser", loginUser);
+        LogRecordContext.putVariable("role", role);
+        LogRecordContext.putVariable("menuNames", menuNames.collect(Collectors.joining(",")));
     }
 
     @Override
@@ -345,7 +361,10 @@ public class PermissionServiceImpl implements PermissionService {
 
     @Override
     @CacheEvict(value = RedisKeyConstants.USER_ROLE_ID_LIST, key = "#userId")
+    @LogRecord(type = SYSTEM_PERMISSION_TYPE, subType = SYSTEM_PERMISSION_ASSIGN_USER_ROLES_SUB_TYPE, bizNo = "{{#user.id}}",
+            success = SYSTEM_PERMISSION_ASSIGN_USER_ROLES_SUCCESS)
     public void assignUserRoles(Long userId, Set<Long> roleIds) {
+        AdminUserDO user = userService.getUser(userId);
         // 获得角色拥有角色编号
         Set<Long> dbRoleIds = convertSet(userRoleDataRepository.findListByUserId(userId), UserRoleDO::getRoleId);
         // 计算新增和删除的角色编号
@@ -364,6 +383,15 @@ public class PermissionServiceImpl implements PermissionService {
         if (!CollUtil.isEmpty(deleteRoleIds)) {
             userRoleDataRepository.deleteByUserIdAndRoleIds(userId, deleteRoleIds);
         }
+
+        List<RoleDO> roleList = roleService.getRoleList(roleIds);
+
+        // 记录操作日志上下文
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+
+        LogRecordContext.putVariable("loginUser", loginUser);
+        LogRecordContext.putVariable("user", user);
+        LogRecordContext.putVariable("roleNames", roleList.stream().map(RoleDO::getName).collect(Collectors.joining(",")));
     }
 
     @Override
@@ -407,8 +435,18 @@ public class PermissionServiceImpl implements PermissionService {
     // ========== 用户-部门的相关方法  ==========
 
     @Override
+    @LogRecord(type = SYSTEM_PERMISSION_TYPE, subType = SYSTEM_PERMISSION_ASSIGN_ROLE_DATA_SCOPE_SUB_TYPE, bizNo = "{{#role.id}}",
+            success = SYSTEM_PERMISSION_ASSIGN_ROLE_DATA_SCOPE_SUCCESS)
     public void assignRoleDataScope(Long roleId, Integer dataScope, Set<Long> dataScopeDeptIds) {
         roleService.updateRoleDataScope(roleId, dataScope, dataScopeDeptIds);
+
+        // 记录操作日志上下文
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+        RoleDO role = roleService.getRole(roleId);
+
+        LogRecordContext.putVariable("loginUser", loginUser);
+        LogRecordContext.putVariable("role", role);
+        LogRecordContext.putVariable("dataScopeDeptIds", dataScopeDeptIds);
     }
 
     @Override
@@ -468,7 +506,12 @@ public class PermissionServiceImpl implements PermissionService {
     }
 
     @Override
+    @LogRecord(type = SYSTEM_PERMISSION_TYPE, subType = SYSTEM_PERMISSIONSUB_ADD_ROLE_USERS_TYPE, bizNo = "{{#role.id}}",
+            success = SYSTEM_PERMISSION_ADD_ROLE_USERS__SUCCESS)
     public long addRoleUsers(Long roleId, Set<Long> userIds) {
+
+        RoleDO role = roleService.getRole(roleId);
+        roleService.validateRoleList(Collections.singleton(roleId));
         if (CollUtil.isEmpty(userIds)) {
             return 0;
         }
@@ -484,19 +527,43 @@ public class PermissionServiceImpl implements PermissionService {
                 .collect(Collectors.toList());
 
         List<UserRoleDO> insertedList = userRoleDataRepository.upsertBatch(userRoleList);
+        List<AdminUserDO> userList = userService.getUserList(userIds);
+
+        // 记录操作日志上下文
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+
+        LogRecordContext.putVariable("loginUser", loginUser);
+        LogRecordContext.putVariable("role", role);
+        LogRecordContext.putVariable("userNames", userList.stream().map(AdminUserDO::getNickname)
+                .collect(Collectors.joining(",")));
         return CollUtil.isEmpty(insertedList) ? 0 : insertedList.size();
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     @TenantIgnore
+    @LogRecord(type = SYSTEM_PERMISSION_TYPE, subType = SYSTEM_PERMISSION_DELETE_ROLE_USERS_SUB_TYPE, bizNo = "{{#role.id}}",
+            success = SYSTEM_PERMISSION_DELETE_ROLE_USERS__SUCCESS)
     public long deleteRoleUsers(Long roleId, Set<Long> userIds) {
         // 参数校验
         if (CollUtil.isEmpty(userIds)) {
             return 0;
         }
+
+        long deleted = userRoleDataRepository.deleteByRoleIdAndUserIds(roleId, userIds);
+
+        RoleDO role = roleService.getRole(roleId);
+
+        // 记录操作日志上下文
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+        List<AdminUserDO> userList = userService.getUserList(userIds);
+
+        LogRecordContext.putVariable("loginUser", loginUser);
+        LogRecordContext.putVariable("role", role);
+        LogRecordContext.putVariable("userNames", userList.stream().map(AdminUserDO::getNickname)
+                .collect(Collectors.joining(",")));
         // 删除指定角色下的指定用户关系
-        return userRoleDataRepository.deleteByRoleIdAndUserIds(roleId, userIds);
+        return deleted;
     }
 
     @Override
@@ -506,11 +573,14 @@ public class PermissionServiceImpl implements PermissionService {
     }
 
     @Override
+    @LogRecord(type = SYSTEM_PERMISSION_TYPE, subType = SYSTEM_PERMISSION_ADD_ROLE_MENUS_SUB_TYPE, bizNo = "{{#role.id}}",
+            success = SYSTEM_PERMISSION_ADD_ROLE_MENUS_SUCCESS)
     public long addRoleMenus(Long roleId, Set<Long> menuIds) {
         if (CollUtil.isEmpty(menuIds)) {
             return 0;
         }
-
+        RoleDO role = roleService.getRole(roleId);
+        roleService.validateRoleList(Collections.singleton(roleId));
         // 批量插入新的角色菜单关系
         List<RoleMenuDO> roleMenuList = menuIds.stream()
                 .map(menuId -> {
@@ -522,19 +592,41 @@ public class PermissionServiceImpl implements PermissionService {
                 .collect(Collectors.toList());
 
         List<RoleMenuDO> insertedList = roleMenuDataRepository.upsertBatch(roleMenuList);
+        // 记录操作日志上下文
+        List<MenuDO> allActiveMenuList = menuService.getAllActiveMenuList(menuIds);
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+
+        LogRecordContext.putVariable("loginUser", loginUser);
+        LogRecordContext.putVariable("role", role);
+        LogRecordContext.putVariable("menuNames", allActiveMenuList.stream().map(MenuDO::getName)
+                .collect(Collectors.joining(",")));
+
         return CollUtil.isEmpty(insertedList) ? 0 : insertedList.size();
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @LogRecord(type = SYSTEM_PERMISSION_TYPE, subType = SYSTEM_PERMISSION_DELETE_ROLE_MENUS_SUB_TYPE, bizNo = "{{#roleId}}",
+            success = SYSTEM_PERMISSION_DELETE_ROLE_MENUS_SUCCESS)
     public long deleteRoleMenus(Long roleId, Set<Long> menuIds) {
         // 参数校验
         if (CollUtil.isEmpty(menuIds)) {
             return 0;
         }
+        RoleDO role = roleService.getRole(roleId);
+        roleService.validateRoleList(Collections.singleton(roleId));
 
         // 删除指定角色下的指定菜单关系
-        return roleMenuDataRepository.deleteByRoleIdAndMenuIds(roleId, menuIds);
+        long deleted = roleMenuDataRepository.deleteByRoleIdAndMenuIds(roleId, menuIds);
+        // 记录操作日志上下文
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+        List<MenuDO> allActiveMenuList = menuService.getAllActiveMenuList(menuIds);
+
+        LogRecordContext.putVariable("loginUser", loginUser);
+        LogRecordContext.putVariable("role", role);
+        LogRecordContext.putVariable("menuNames", allActiveMenuList.stream().map(MenuDO::getName)
+                .collect(Collectors.joining(",")));
+        return deleted;
     }
 
     @Override

@@ -26,14 +26,14 @@ tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
 {
-  "id": 158401074156142592,
-  "name": "测试部门-更新",
+  "id": 153815681152909312,
+  "name": "测试部门Gsp123-更新",
   "parentId": 0,
   "sort": 1,
   "leaderUserId": 3385310182593531904,
-  "phone": "13012345678",
-  "email": "test@example.com",
-  "status": 1
+  "phone": "13012345610",
+  "email": "testGsp123@example.com",
+  "status": 0
 }
 
 ### 请求 /update 接口 => 成功

@@ -38,6 +38,8 @@ import com.cmsr.onebase.module.system.vo.CaptchaVerificationReqVO;
 import com.cmsr.onebase.module.system.vo.auth.*;
 import com.cmsr.onebase.module.system.vo.corp.CorpRespVO;
 import com.google.common.annotations.VisibleForTesting;
+import com.mzt.logapi.context.LogRecordContext;
+import com.mzt.logapi.starter.annotation.LogRecord;
 import jakarta.annotation.Resource;
 import jakarta.validation.Validator;
 import lombok.Setter;
@@ -54,6 +56,7 @@ import java.util.Set;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
+import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
 
 /**
  * Auth Service 实现类
@@ -172,6 +175,8 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
 
 
     @Override
+    @LogRecord(type = LOGIN_USER_TYPE, subType = LOGIN_USER_APP_SUB_TYPE, bizNo = "{{#user.id}}",
+            success = LOGIN_USER_APP_SUCCESS)
     public AuthLoginRespVO appUsernameLogin(AppUserNameLoginReqVO reqVO) {
         // 校验验证码
         validateCaptcha(reqVO);
@@ -186,7 +191,8 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         AdminUserDO user = authenticate(reqVO.getUsername(), reqVO.getPassword());
         AuthLoginRespVO authLoginRespVO = createAfterLoginSuccess(user.getUserType(), user.getCorpId(), reqVO.getAppId(), user.getId(), reqVO.getUsername(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_USERNAME);
         // 设置是否管理员
-        authLoginRespVO.setAdminFlag(findAdminFlag(reqVO.getAppId(), user.getId()));
+        authLoginRespVO.setAdminFlag(findAdminFlag(reqVO.getAppId(),user.getId()));
+        LogRecordContext.putVariable("user", user);
         return authLoginRespVO;
 
     }
@@ -204,6 +210,8 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
 
 
     @Override
+    @LogRecord(type = LOGIN_USER_TYPE, subType = LOGIN_USER_SAAS_SUB_TYPE, bizNo = "{{#user.id}}",
+            success = LOGIN_USER_SAAS_SUCCESS)
     public AuthLoginRespVO appMobileLogin(AppMobileLoginReqVO reqVO) {
         // 校验验证码
         mobileValidateCaptcha(reqVO);
@@ -216,7 +224,8 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         AdminUserDO user = mobileAuthenticate(reqVO.getMobile(), reqVO.getPassword());
         AuthLoginRespVO authLoginRespVO = createAfterLoginSuccess(user.getUserType(), user.getCorpId(), reqVO.getAppId(), user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE);
         // 设置是否管理员
-        authLoginRespVO.setAdminFlag(findAdminFlag(reqVO.getAppId(), user.getId()));
+        authLoginRespVO.setAdminFlag(findAdminFlag( reqVO.getAppId(),user.getId()));
+        LogRecordContext.putVariable("user", user);
         return authLoginRespVO;
 
     }

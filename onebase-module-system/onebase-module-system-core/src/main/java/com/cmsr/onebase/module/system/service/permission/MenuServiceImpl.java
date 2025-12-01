@@ -1,9 +1,11 @@
 package com.cmsr.onebase.module.system.service.permission;
 
-import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
+import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
+import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.system.dal.database.MenuDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO;
@@ -14,6 +16,8 @@ import com.cmsr.onebase.module.system.vo.menu.SystemMenuListReqVO;
 import com.cmsr.onebase.module.system.vo.menu.SystemMenuSaveVO;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
+import com.mzt.logapi.context.LogRecordContext;
+import com.mzt.logapi.starter.annotation.LogRecord;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.ConfigStore;
@@ -31,6 +35,8 @@ import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.
 import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertMap;
 import static com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO.ID_ROOT;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
+import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
+
 
 /**
  * 菜单 Service 实现
@@ -51,6 +57,8 @@ public class MenuServiceImpl implements MenuService {
     @Override
     @CacheEvict(value = RedisKeyConstants.PERMISSION_MENU_ID_LIST, key = "#createReqVO.permission",
             condition = "#createReqVO.permission != null")
+    @LogRecord(type = SYSTEM_MENU_TYPE, subType = SYSTEM_MENU_CREATE_SUB_TYPE, bizNo = "{{#menu.id}}",
+            success = SYSTEM_MENU_CREATE_SUCCESS)
     public Long createMenu(SystemMenuSaveVO createReqVO) {
         // 校验父菜单存在
         validateParentMenu(createReqVO.getParentId(), null);
@@ -62,6 +70,12 @@ public class MenuServiceImpl implements MenuService {
         MenuDO menu = BeanUtils.toBean(createReqVO, MenuDO.class);
         initMenuProperty(menu);
         menuDataRepository.insert(menu);
+
+        // 记录操作日志上下文
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+
+        LogRecordContext.putVariable("loginUser", loginUser);
+        LogRecordContext.putVariable("menu", menu);
         // 返回
         return menu.getId();
     }
@@ -69,9 +83,12 @@ public class MenuServiceImpl implements MenuService {
     @Override
     @CacheEvict(value = RedisKeyConstants.PERMISSION_MENU_ID_LIST,
             allEntries = true) // allEntries 清空所有缓存，因为 permission 如果变更，涉及到新老两个 permission。直接清理，简单有效
+    @LogRecord(type = SYSTEM_MENU_TYPE, subType = SYSTEM_MENU_UPDATE_SUB_TYPE, bizNo = "{{#menu.id}}",
+            success = SYSTEM_MENU_UPDATE_SUCCESS)
     public void updateMenu(SystemMenuSaveVO updateReqVO) {
         // 校验更新的菜单是否存在
-        if (menuDataRepository.findById(updateReqVO.getId()) == null) {
+        MenuDO menu = menuDataRepository.findById(updateReqVO.getId());
+        if (menu== null) {
             throw exception(MENU_NOT_EXISTS);
         }
         // 校验父菜单存在
@@ -84,25 +101,39 @@ public class MenuServiceImpl implements MenuService {
         MenuDO updateObj = BeanUtils.toBean(updateReqVO, MenuDO.class);
         initMenuProperty(updateObj);
         menuDataRepository.update(updateObj);
+        // 记录操作日志上下文
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+
+        LogRecordContext.putVariable("loginUser", loginUser);
+        LogRecordContext.putVariable("menu", menu);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     @CacheEvict(value = RedisKeyConstants.PERMISSION_MENU_ID_LIST,
             allEntries = true) // allEntries 清空所有缓存，因为此时不知道 id 对应的 permission 是多少。直接清理，简单有效
+    @LogRecord(type = SYSTEM_MENU_TYPE, subType = SYSTEM_MENU_DELETE_SUB_TYPE, bizNo = "{{#menu.id}}",
+            success = SYSTEM_MENU_DELETE_SUCCESS)
     public void deleteMenu(Long id) {
+        MenuDO menu = menuDataRepository.findById(id);
         // 校验是否还有子菜单
         if (menuDataRepository.countByParentId(id) > 0) {
             throw exception(MENU_EXISTS_CHILDREN);
         }
         // 校验删除的菜单是否存在
-        if (menuDataRepository.findById(id) == null) {
+        if (menu == null) {
             throw exception(MENU_NOT_EXISTS);
         }
         // 标记删除
         menuDataRepository.deleteById(id);
         // 删除授予给角色的权限
         permissionService.processMenuDeleted(id);
+
+        // 记录操作日志上下文
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+
+        LogRecordContext.putVariable("loginUser", loginUser);
+        LogRecordContext.putVariable("menu", menu);
     }
 
     @Override
