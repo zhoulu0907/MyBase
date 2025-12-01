@@ -8,17 +8,17 @@ tenant-id: {{adminTenantId}}
 {
   "corpReqVO": {
     "corpLogo": "https://static.example.com/logo/corp-test-001.png",
-    "corpName": "测试企业1",
+    "corpName": "测试企业Gsp125",
     "industryType": 1,
     "status": 0,
-    "address": "北京市海淀区中关村大街1号创新大厦8层",
+    "address": "北京市海淀区中关村大街1号创新大厦9层",
     "userLimit": 100
   },
   "corpAdminReqVO": {
-    "username": "corp_admin1",
+    "username": "corp_adminGsp125",
     "nickname": "企业管理员",
-    "email": "corp_admin1@test.com",
-    "mobile": "13800001111"
+    "email": "corp_adminGsp125@test.com",
+    "mobile": "13800001121"
   }
 }
 
@@ -67,12 +67,13 @@ POST {{baseUrl}}/system/corp/update
 Content-Type: application/json
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
+
 {
-    "id": 115175715731800064,
-    "corpId": "mn-100100-up",
-    "corpName": "admin123-up111",
+    "id": 153812434157633536,
+    "corpCode": "xxx",
+    "corpName": "admin220-up127",
     "industryType": 1,
-    "address": "admin123-up",
+    "address": "admin128-up",
     "status": 1,
     "userLimit":200
 }
@@ -85,7 +86,7 @@ tenant-id: {{adminTenantId}}
 
 
 ### 请求 /delete 接口 => 成功
-POST {{baseUrl}}/system/corp/delete?id=117
+POST {{baseUrl}}/system/corp/delete?id=153806232224792576
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 

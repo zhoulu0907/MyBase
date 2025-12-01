@@ -29,6 +29,9 @@ public class OperateLogServiceImpl implements OperateLogService {
     @Override
     public void createOperateLog(OperateLogCreateReqDTO createReqDTO) {
         OperateLogDO log = BeanUtils.toBean(createReqDTO, OperateLogDO.class);
+        if (log.getUserId() == null) {
+            log.setUserId(0L);
+        }
         operateLogRepository.insert(log);
     }
 
