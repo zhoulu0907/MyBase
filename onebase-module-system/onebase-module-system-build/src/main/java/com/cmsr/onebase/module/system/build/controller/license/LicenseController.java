@@ -50,7 +50,7 @@ public class LicenseController {
      * @return License主键ID
      */
     @PostMapping("/createLicenseFile")
-    @PreAuthorize("@ss.hasPermission('system:license:create')")
+    @PreAuthorize("@ss.hasPermission('tenant:license:create')")
     @Operation(summary = "创建License文件")
     public void createLicenseFile(@RequestBody LicenseSaveReqVO reqVO, HttpServletResponse response) {
         licenseService.createLicenseFile(reqVO, response);
@@ -62,7 +62,7 @@ public class LicenseController {
     //  * @param reqVO License更新请求参数
     //  */
     // @PostMapping("/update")
-    // @PreAuthorize("@ss.hasPermission('system:license:update')")
+    // @PreAuthorize("@ss.hasPermission('tenant:license:update')")
     // @Operation(summary = "更新License")
     // public void updateLicense(@RequestBody LicenseSaveReqVO reqVO) {
     //     licenseService.updateLicense(reqVO);
@@ -74,7 +74,7 @@ public class LicenseController {
     //  * @param id License主键ID
     //  */
     // @PostMapping("/delete")
-    // @PreAuthorize("@ss.hasPermission('system:license:delete')")
+    // @PreAuthorize("@ss.hasPermission('tenant:license:delete')")
     // @Operation(summary = "删除License")
     // public void deleteLicense(@RequestParam("id") Long id) {
     //     licenseService.deleteLicense(id);
@@ -87,7 +87,7 @@ public class LicenseController {
      * @return License详情
      */
     @GetMapping("/get")
-    @PreAuthorize("@ss.hasPermission('system:license:query')")
+    @PreAuthorize("@ss.hasPermission('tenant:license:query')")
     @Operation(summary = "获取License详情")
     public LicenseRespVO getLicense(@RequestParam("id") Long id) {
         LicenseDO license = licenseService.getLicense(id);
@@ -101,7 +101,7 @@ public class LicenseController {
      * @return 分页结果
      */
     @GetMapping("/page")
-    @PreAuthorize("@ss.hasPermission('system:license:query')")
+    @PreAuthorize("@ss.hasPermission('tenant:license:query')")
     @Operation(summary = "分页查询License")
     public CommonResult<PageResult<LicensePageRespVO>> getLicensePage(@Valid LicensePageReqVO reqVO) {
         PageResult<LicenseDO> pageResult = licenseService.getLicensePage(reqVO);
@@ -115,7 +115,7 @@ public class LicenseController {
      * @return License列表
      */
     @GetMapping("/simple-list")
-    @PreAuthorize("@ss.hasPermission('system:license:query')")
+    @PreAuthorize("@ss.hasPermission('tenant:license:query')")
     @Operation(summary = "获取全部License（精简信息）")
     public List<LicensePageRespVO> getSimpleLicenseList() {
         List<LicenseDO> list = licenseService.getSimpleLicenseList();
@@ -126,7 +126,7 @@ public class LicenseController {
     @PostMapping("/import")
     @Operation(summary = "导入凭证")
     @Parameter(name = "file", description = "加密的license.lic.sm4文件", required = true)
-    @PreAuthorize("@ss.hasPermission('system:license:query')")
+    @PreAuthorize("@ss.hasPermission('tenant:license:query')")
     public CommonResult<Long> importLicense(@RequestParam("file") MultipartFile file) {
         Long licenseId = licenseService.importLicense(file);
         return CommonResult.success(licenseId);

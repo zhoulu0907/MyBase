@@ -34,7 +34,7 @@ public class LicenseCheckHandler {
     /**
      * Redis Key：当前有效的 License
      */
-    public static final  String LICENSE_KEY       = "system:license:current";
+    public static final  String LICENSE_KEY       = "tenant:license:current";
     /**
      * Redis 缓存过期时间（默认 5 分钟）
      */

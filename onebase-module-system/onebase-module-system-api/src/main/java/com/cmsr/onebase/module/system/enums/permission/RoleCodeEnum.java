@@ -46,6 +46,14 @@ public enum RoleCodeEnum {
         add("tenant:app:query");  //应用查看
         add("tenant:app:update"); // 应用修改
 
+        add("tenant:profile"); // 个人中心
+        add("tenant:profile:query");  // 个人中心查看
+        add("tenant:profile:update");  // 个人中心修改
+        add("tenant:profile:reset-pwd"); //修改密码
+
+        add("tenant:corp"); // 空间信息查看
+        add("tenant:corp:query"); // 空间信息查看
+
         add("tenant:user"); // 用户查看
         add("tenant:user:query"); // 用户查看
 
@@ -55,16 +63,13 @@ public enum RoleCodeEnum {
         add("tenant:dept");  //组织查看
         add("tenant:dept:query");  //组织查看
 
-        add("tenant:info"); // 空间信息查看
-        add("tenant:info:query"); // 空间信息查看
+        add("tenant:space"); // 空间信息查看
+        add("tenant:space:query"); // 空间信息查看
 
         add("tenant:dict"); // 数据字典查看
         add("tenant:dict:query"); // 数据字典查看
 
-        add("tenant:profile"); // 个人中心
-        add("tenant:profile:query");  // 个人中心查看
-        add("tenant:profile:update");  // 个人中心修改
-        add("tenant:profile:reset-pwd"); //修改密码
+
     }};
 
     public static boolean isSuperAdmin(String code) {
