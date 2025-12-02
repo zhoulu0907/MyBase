@@ -49,11 +49,11 @@ public class AppPageSetRepository extends BaseBizRepository<AppResourcePagesetMa
         return list(queryWrapper);
     }
 
-    public void deletePageSetByMenuUuid(String menuUuid) {
-        QueryWrapper queryWrapper = this.query()
-                .where(APP_RESOURCE_PAGESET.MENU_UUID.eq(menuUuid));
-        remove(queryWrapper);
-    }
+//    public void deletePageSetByMenuUuid(String menuUuid) {
+//        QueryWrapper queryWrapper = this.query()
+//                .where(APP_RESOURCE_PAGESET.MENU_UUID.eq(menuUuid));
+//        remove(queryWrapper);
+//    }
 
     public List<AppResourcePagesetDO> findByMenuUuidAndType(Long applicationId,List<String> menuUuids, Integer pageSetType) {
         QueryWrapper queryWrapper = this.query()
