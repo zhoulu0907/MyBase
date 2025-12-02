@@ -127,8 +127,7 @@ const Right: React.FC = () => {
       }
 
       const headers = {
-        'X-Tenant-Id': tenantId,
-        'X-Mobile-Flag': '1'
+        'X-Tenant-Id': tenantId
       };
 
       const loginData: LoginRequest = {
@@ -171,6 +170,7 @@ const Right: React.FC = () => {
       }
     } catch (error: any) {
       console.error('登录失败:', error);
+      Toast.error(error.message || '登录失败');
     } finally {
       setLoading(false);
     }
