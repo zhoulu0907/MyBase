@@ -1,0 +1,13 @@
+
+### 默认环境变量配置（直接使用local环境配置）
+
+
+### 请求 system/dict-data/simple-list-by-type 接口 => 成功
+GET {{baseUrl}}/system/dict-data/simple-list-by-type?dictTypeId= 157
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 请求 system/dict-data/simple-list-by-type 接口 => 成功
+GET {{baseUrl}}/system/dict-data/simple-list-by-type?dictType= ai_platform
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
