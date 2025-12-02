@@ -72,6 +72,16 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
         entityRelationship.setSourceEntityId(Long.valueOf(createReqVO.getSourceEntityId()));
         entityRelationship.setTargetEntityId(Long.valueOf(createReqVO.getTargetEntityId()));
         entityRelationship.setApplicationId(Long.valueOf(createReqVO.getApplicationId()));
+        // 转换字段ID为Long类型
+        if (StringUtils.hasText(createReqVO.getSourceFieldId())) {
+            entityRelationship.setSourceFieldId(Long.valueOf(createReqVO.getSourceFieldId()));
+        }
+        if (StringUtils.hasText(createReqVO.getTargetFieldId())) {
+            entityRelationship.setTargetFieldId(Long.valueOf(createReqVO.getTargetFieldId()));
+        }
+        if (StringUtils.hasText(createReqVO.getSelectFieldId())) {
+            entityRelationship.setSelectFieldId(Long.valueOf(createReqVO.getSelectFieldId()));
+        }
         entityRelationshipRepository.save(entityRelationship);
 
         return entityRelationship.getId();
@@ -97,6 +107,16 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
         updateObj.setSourceEntityId(Long.valueOf(updateReqVO.getSourceEntityId()));
         updateObj.setTargetEntityId(Long.valueOf(updateReqVO.getTargetEntityId()));
         updateObj.setApplicationId(Long.valueOf(updateReqVO.getApplicationId()));
+        // 转换字段ID为Long类型
+        if (StringUtils.hasText(updateReqVO.getSourceFieldId())) {
+            updateObj.setSourceFieldId(Long.valueOf(updateReqVO.getSourceFieldId()));
+        }
+        if (StringUtils.hasText(updateReqVO.getTargetFieldId())) {
+            updateObj.setTargetFieldId(Long.valueOf(updateReqVO.getTargetFieldId()));
+        }
+        if (StringUtils.hasText(updateReqVO.getSelectFieldId())) {
+            updateObj.setSelectFieldId(Long.valueOf(updateReqVO.getSelectFieldId()));
+        }
         entityRelationshipRepository.updateById(updateObj);
     }
 
@@ -172,7 +192,7 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
             }
 
             // 使用 OR 条件：(source_entity_id = entityId OR target_entity_id = entityId)
-            queryWrapper.eq(MetadataEntityRelationshipDO::getSourceEntityId, entityIdLong)
+            queryWrapper.where(MetadataEntityRelationshipDO::getSourceEntityId).eq(entityIdLong)
                     .or(MetadataEntityRelationshipDO::getTargetEntityId).eq(entityIdLong);
 
             log.info("查询实体相关关系，实体ID: {}，找到 {} 条相关记录", pageReqVO.getEntityId(), existingRelations.size());
@@ -378,17 +398,14 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
      * @param fieldId 字段ID
      * @return 字段名称
      */
-    private String getFieldNameById(String fieldId) {
-        if (!StringUtils.hasText(fieldId)) {
+    private String getFieldNameById(Long fieldId) {
+        if (fieldId == null) {
             return null;
         }
 
         try {
-            MetadataEntityFieldDO field = entityFieldService.getEntityField(fieldId);
+            MetadataEntityFieldDO field = entityFieldService.getEntityField(String.valueOf(fieldId));
             return field != null ? field.getFieldName() : null;
-        } catch (NumberFormatException e) {
-            log.warn("无效的字段ID: {}", fieldId);
-            return null;
         } catch (Exception e) {
             log.warn("获取字段名称失败，字段ID: {}, 错误: {}", fieldId, e.getMessage());
             return null;
@@ -401,17 +418,14 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
      * @param fieldId 字段ID
      * @return 字段展示名称
      */
-    private String getFieldDisplayNameById(String fieldId) {
-        if (!StringUtils.hasText(fieldId)) {
+    private String getFieldDisplayNameById(Long fieldId) {
+        if (fieldId == null) {
             return null;
         }
 
         try {
-            MetadataEntityFieldDO field = entityFieldService.getEntityField(fieldId);
+            MetadataEntityFieldDO field = entityFieldService.getEntityField(String.valueOf(fieldId));
             return field != null ? field.getDisplayName() : null;
-        } catch (NumberFormatException e) {
-            log.warn("无效的字段ID: {}", fieldId);
-            return null;
         } catch (Exception e) {
             log.warn("获取字段展示名称失败，字段ID: {}, 错误: {}", fieldId, e.getMessage());
             return null;

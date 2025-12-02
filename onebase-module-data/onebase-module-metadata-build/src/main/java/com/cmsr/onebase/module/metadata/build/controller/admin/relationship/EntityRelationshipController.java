@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.metadata.build.controller.admin.relationship;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.module.metadata.build.controller.admin.relationship.vo.CascadeTypeRespVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.relationship.vo.EntityRelationshipPageReqVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.relationship.vo.EntityRelationshipRespVO;
@@ -130,6 +131,7 @@ public class EntityRelationshipController {
     @Parameter(name = "appId", description = "应用ID", required = true, example = "1001")
     @PreAuthorize("@ss.hasPermission('metadata:entity-relationship:query')")
     public CommonResult<AppEntitiesRespVO> getAppEntitiesWithFields(@RequestParam("appId") Long appId) {
+        appId = ApplicationManager.getApplicationId();
         AppEntitiesRespVO result = entityRelationshipService.getAppEntitiesWithFields(appId);
         return success(result);
     }

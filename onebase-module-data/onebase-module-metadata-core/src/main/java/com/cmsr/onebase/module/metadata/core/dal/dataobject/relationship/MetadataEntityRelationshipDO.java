@@ -55,13 +55,13 @@ public class MetadataEntityRelationshipDO extends BaseTenantEntity {
      * 源字段id
      */
     @Column(value = "source_field_id", comment = "源字段id")
-    private String sourceFieldId;
+    private Long sourceFieldId;
 
     /**
      * 目标字段id
      */
     @Column(value = "target_field_id", comment = "目标字段id")
-    private String targetFieldId;
+    private Long targetFieldId;
 
     /**
      * 选择字段id
@@ -74,7 +74,7 @@ public class MetadataEntityRelationshipDO extends BaseTenantEntity {
      * 需要把selectFieldId对应的字段值取出来展示给用户。因此需要存储该字段。
      */
     @Column(value = "select_field_id", comment = "选择字段id")
-    private String selectFieldId;
+    private Long selectFieldId;
 
     /**
      * 级联操作类型(read,all,delete,none)

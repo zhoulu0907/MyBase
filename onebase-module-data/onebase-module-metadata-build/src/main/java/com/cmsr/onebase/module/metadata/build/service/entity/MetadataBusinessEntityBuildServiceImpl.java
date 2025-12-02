@@ -985,16 +985,16 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
      * @param fieldId 字段ID
      * @return 字段名称
      */
-    private String getFieldNameById(String fieldId) {
+    private String getFieldNameById(Long fieldId) {
         if (fieldId == null) {
             return null;
         }
 
         try {
-            MetadataEntityFieldDO field = metadataEntityFieldBuildService.getEntityField(fieldId);
+            MetadataEntityFieldDO field = metadataEntityFieldBuildService.getEntityField(String.valueOf(fieldId));
             return field != null ? field.getFieldName() : null;
-        } catch (NumberFormatException e) {
-            log.warn("无效的字段ID: {}", fieldId);
+        } catch (Exception e) {
+            log.warn("获取字段名称失败，字段ID: {}, 错误: {}", fieldId, e.getMessage());
             return null;
         }
     }
@@ -1027,11 +1027,11 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
             rel.setRelationshipId(relationshipDO.getId().toString());
             rel.setSourceEntityId(relationshipDO.getSourceEntityId().toString());
             rel.setSourceEntityName(sourceEntity.getDisplayName());
-            rel.setSourceFieldId(relationshipDO.getSourceFieldId().toString());
+            rel.setSourceFieldId(String.valueOf(relationshipDO.getSourceFieldId()));
             rel.setSourceFieldName(getFieldNameById(relationshipDO.getSourceFieldId()));
             rel.setTargetEntityId(relationshipDO.getTargetEntityId().toString());
             rel.setTargetEntityName(targetEntity.getDisplayName());
-            rel.setTargetFieldId(relationshipDO.getTargetFieldId().toString());
+            rel.setTargetFieldId(String.valueOf(relationshipDO.getTargetFieldId()));
             rel.setTargetFieldName(getFieldNameById(relationshipDO.getTargetFieldId()));
         });
 

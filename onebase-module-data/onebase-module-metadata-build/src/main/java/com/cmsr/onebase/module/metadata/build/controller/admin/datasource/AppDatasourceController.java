@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.metadata.build.controller.admin.datasource;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.module.metadata.build.controller.admin.datasource.vo.DatasourceRespVO;
 import org.modelmapper.ModelMapper;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
@@ -47,6 +48,7 @@ public class AppDatasourceController {
             @Parameter(name = "appUid", description = "应用UID", example = "app-123")
             @RequestParam(value = "appUid", required = false) String appUid) {
 
+        applicationId = ApplicationManager.getApplicationId();
         Long relationId = appAndDatasourceService.createRelation(applicationId, datasourceId, datasourceType, appUid);
         return success(relationId.toString());
     }
@@ -60,6 +62,7 @@ public class AppDatasourceController {
             @Parameter(name = "datasourceId", description = "数据源ID", required = true, example = "1024")
             @RequestParam("datasourceId") Long datasourceId) {
 
+        applicationId = ApplicationManager.getApplicationId();
         boolean success = appAndDatasourceService.deleteRelation(applicationId, datasourceId);
         return success(success);
     }
@@ -71,6 +74,7 @@ public class AppDatasourceController {
             @Parameter(name = "applicationId", description = "应用ID", required = true, example = "1")
             @RequestParam("applicationId") Long applicationId) {
 
+        applicationId = ApplicationManager.getApplicationId();
         List<MetadataDatasourceDO> datasources = appAndDatasourceService.getDatasourcesByApplicationId(applicationId);
         List<DatasourceRespVO> respList = datasources.stream()
                 .map(datasource -> modelMapper.map(datasource, DatasourceRespVO.class))
@@ -98,6 +102,7 @@ public class AppDatasourceController {
             @Parameter(name = "datasourceId", description = "数据源ID", required = true, example = "1024")
             @RequestParam("datasourceId") Long datasourceId) {
 
+        applicationId = ApplicationManager.getApplicationId();
         boolean exists = appAndDatasourceService.isRelationExists(applicationId, datasourceId);
         return success(exists);
     }
@@ -123,6 +128,7 @@ public class AppDatasourceController {
             @Parameter(name = "applicationId", description = "应用ID", required = true, example = "1")
             @RequestParam("applicationId") Long applicationId) {
 
+        applicationId = ApplicationManager.getApplicationId();
         long deletedCount = appAndDatasourceService.deleteRelationsByApplicationId(applicationId);
         return success(deletedCount);
     }

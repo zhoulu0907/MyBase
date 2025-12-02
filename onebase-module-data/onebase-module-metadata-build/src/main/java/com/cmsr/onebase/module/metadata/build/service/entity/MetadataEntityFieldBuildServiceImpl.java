@@ -910,7 +910,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             if (existingRelations != null && !existingRelations.isEmpty()) {
                 // 过滤出 targetFieldId 匹配的关系
                 for (MetadataEntityRelationshipDO rel : existingRelations) {
-                    if (rel.getTargetFieldId() != null && rel.getTargetFieldId().equals(fieldId.toString())) {
+                    if (rel.getTargetFieldId() != null && rel.getTargetFieldId().equals(fieldId)) {
                         existingRelation = rel;
                         break;
                     }
@@ -941,17 +941,17 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         // 比较数据：如果数据库中的关系和请求的数据一样，则忽略
         if (existingRelation != null) {
             boolean isSame = Objects.equals(existingRelation.getTargetEntityId(), targetEntityId)
-                    && Objects.equals(existingRelation.getTargetFieldId(), targetFieldId.toString());
+                    && Objects.equals(existingRelation.getTargetFieldId(), fieldId);
             
             if (isSame) {
                 log.debug("数据选择关系未变化，忽略更新。sourceEntityId={}, fieldId={}, targetEntityId={}, targetFieldId={}",
-                        full.getEntityId(), fieldId, targetEntityId, targetFieldId);
+                        full.getEntityId(), fieldId, targetEntityId, fieldId);
                 return;
             } else {
                 // 数据不同，更新关系
                 log.info("数据选择关系已变化，更新关系。sourceEntityId={}, fieldId={}, 原targetEntityId={}, 原targetFieldId={}, 新targetEntityId={}, 新targetFieldId={}",
                         full.getEntityId(), fieldId, existingRelation.getTargetEntityId(), existingRelation.getTargetFieldId(),
-                        targetEntityId, targetFieldId);
+                        targetEntityId, fieldId);
                 r.setId(existingRelation.getId().toString());
                 metadataEntityRelationshipBuildService.updateEntityRelationship(r);
             }
@@ -2512,7 +2512,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         MetadataEntityRelationshipDO relationship = null;
         if (relationships != null) {
             for (MetadataEntityRelationshipDO rel : relationships) {
-                if (rel.getTargetFieldId() != null && rel.getTargetFieldId().equals(String.valueOf(field.getId()))) {
+                if (rel.getTargetFieldId() != null && rel.getTargetFieldId().equals(field.getId())) {
                     relationship = rel;
                     break;
                 }
@@ -2526,12 +2526,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         DataSelectionConfig dataSelectionConfig = new DataSelectionConfig();
         dataSelectionConfig.setRelationId(relationship.getId());
         dataSelectionConfig.setTargetEntityId(relationship.getSourceEntityId());
-        try {
-            dataSelectionConfig.setTargetFieldId(Long.valueOf(relationship.getSourceFieldId()));
-        } catch (NumberFormatException ex) {
-            log.warn("解析数据选择配置目标字段ID失败，fieldId={}, sourceFieldId={}", field.getId(), relationship.getSourceFieldId());
-            return null;
-        }
+        dataSelectionConfig.setTargetFieldId(relationship.getSourceFieldId());
         return dataSelectionConfig;
     }
 
