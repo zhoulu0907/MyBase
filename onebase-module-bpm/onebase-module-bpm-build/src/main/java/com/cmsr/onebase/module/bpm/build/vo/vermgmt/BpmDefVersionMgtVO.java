@@ -18,13 +18,13 @@ public class BpmDefVersionMgtVO {
     private Long id;
 
     @Schema(description = "流程版本")
-    private String version;
+    private String bpmVersion;
 
     @Schema(description = "流程版本备注")
-    private String versionAlias;
+    private String bpmVersionAlias;
 
     @Schema(description = "版本状态")
-    private String versionStatus;
+    private String bpmVersionStatus;
 
     @Schema(description = "创建人")
     private UserBasicInfoVO creator;
