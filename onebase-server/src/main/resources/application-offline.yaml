@@ -1,0 +1,48 @@
+server:
+  port: 48081
+
+spring:
+  application:
+    name: onebase-v3-local
+  main:
+    allow-circular-references: true
+
+  # 禁用数据源自动配置
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+
+  # 禁用SQL初始化
+  sql:
+    init:
+      mode: never
+
+# 禁用Redis和数据库配置
+anyline:
+  is-debug: true
+  is-log-sql: false
+  datasource:
+    enabled: false
+
+# 禁用缓存
+spring:
+  cache:
+    type: NONE
+
+# 禁用各种外部依赖
+onebase:
+  captcha:
+    enable: false
+  scheduler:
+    enable: false
+  tenant:
+    enable: false
+
+# 日志配置
+logging:
+  level:
+    root: INFO
+    com.cmsr.onebase: DEBUG
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
