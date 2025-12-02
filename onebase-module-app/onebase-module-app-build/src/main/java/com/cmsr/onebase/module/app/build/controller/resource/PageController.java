@@ -58,7 +58,7 @@ public class PageController {
     @PostMapping("/metadata")
     @Operation(summary = "根据page_id获取页面绑定的元数据id")
     public CommonResult<GetMetadataByPageIdRespVO> getMetadataByPageId(@RequestBody GetMetadataByPageIdReqVO getMetadataByPageIdReqVO) {
-        String metadata = pageService.getMetadataByPageUuid(getMetadataByPageIdReqVO.getPageUuid());
+        String metadata = pageService.getMetadataByPageId(getMetadataByPageIdReqVO.getPageId());
 
         GetMetadataByPageIdRespVO getMetadataByPageIdRespVO = new GetMetadataByPageIdRespVO();
         getMetadataByPageIdRespVO.setMetadata(metadata);
@@ -77,7 +77,7 @@ public class PageController {
     @PostMapping("/view/list")
     @Operation(summary = "视图列表")
     public CommonResult<ListPageViewRespVO> listPageView(@RequestBody ListPageViewReqVO listPageViewReqVO) {
-        List<PageDTO> pages = pageService.listPageView(listPageViewReqVO.getPageSetUuid());
+        List<PageDTO> pages = pageService.listPageView(listPageViewReqVO.getPageSetId());
 
         ListPageViewRespVO listPageViewRespVO = new ListPageViewRespVO();
         listPageViewRespVO.setPages(pages);

@@ -14,5 +14,5 @@ import lombok.Data;
 public class ListPageViewReqVO {
     @Schema(description = "pageSetId", requiredMode = Schema.RequiredMode.REQUIRED, example = "xxx")
     @NotNull(message = "页面集id不能为空")
-    private String pageSetUuid;
+    private Long pageSetId;
 }

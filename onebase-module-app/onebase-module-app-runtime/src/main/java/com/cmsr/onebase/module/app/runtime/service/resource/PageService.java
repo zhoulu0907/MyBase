@@ -12,8 +12,8 @@ public interface PageService {
 
     List<PageDTO> getFormPageListByAppId(Long appId);
 
-    String getMetadataByPageId(String pageUuid);
+    String getMetadataByPageId(Long pageId);
 
-    List<PageDTO> listPageView(String pageSetUuid);
+    List<PageDTO> listPageView(Long pageSetId);
 
 }

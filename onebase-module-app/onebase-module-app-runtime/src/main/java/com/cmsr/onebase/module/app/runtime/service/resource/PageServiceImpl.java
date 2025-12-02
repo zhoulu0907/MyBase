@@ -26,12 +26,12 @@ public class PageServiceImpl implements PageService {
     }
 
     @Override
-    public String getMetadataByPageId(String pageId) {
-        return pageServiceProvider.getMetadataByPageUuid(pageId);
+    public String getMetadataByPageId(Long pageId) {
+        return pageServiceProvider.getMetadataByPageId(pageId);
     }
 
     @Override
-    public List<PageDTO> listPageView(String pageSetId) {
+    public List<PageDTO> listPageView(Long pageSetId) {
         return pageServiceProvider.listPageView(pageSetId);
     }
 
