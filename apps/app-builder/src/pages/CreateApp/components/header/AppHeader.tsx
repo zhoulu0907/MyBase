@@ -193,6 +193,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
               break;
           }
         }}
+        inkBarSize={{width:0,height:0}}
         size="large"
         renderTabTitle={(tabTitle, info) => {
           const currentIndex = tabsList.findIndex((tab) => tab === info.key);
