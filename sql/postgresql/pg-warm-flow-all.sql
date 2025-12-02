@@ -6,6 +6,7 @@ CREATE TABLE bpm_flow_definition
     model_value     varchar(40)  NOT NULL DEFAULT 'CLASSICS',
     category        varchar(100) NULL,
     "bpm_version"       varchar(20)  NOT NULL,
+    "bpm_version_alias" varchar(500)  NOT NULL,
     is_publish      int2         NOT NULL DEFAULT 0,
     form_custom     bpchar(1)    NULL     DEFAULT 'N':: character varying,
     form_path       varchar(100) NULL,
@@ -32,6 +33,7 @@ COMMENT ON COLUMN bpm_flow_definition.flow_name IS '流程名称';
 COMMENT ON COLUMN bpm_flow_definition.model_value IS '设计器模型（CLASSICS经典模型 MIMIC仿钉钉模型）';
 COMMENT ON COLUMN bpm_flow_definition.category IS '流程类别';
 COMMENT ON COLUMN bpm_flow_definition."bpm_version" IS '流程版本';
+COMMENT ON COLUMN bpm_flow_definition."bpm_version_alias" IS '流程版本备注';
 COMMENT ON COLUMN bpm_flow_definition.is_publish IS '是否发布（0未发布 1已发布 9失效）';
 COMMENT ON COLUMN bpm_flow_definition.form_custom IS '审批表单是否自定义（Y是 N否）';
 COMMENT ON COLUMN bpm_flow_definition.form_path IS '审批表单路径';

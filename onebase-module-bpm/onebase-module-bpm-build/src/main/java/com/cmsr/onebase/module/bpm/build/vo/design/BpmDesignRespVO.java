@@ -4,6 +4,7 @@ import com.cmsr.onebase.module.bpm.core.dto.BpmGlobalConfigDTO;
 import com.cmsr.onebase.module.bpm.core.vo.design.BpmDefJsonVO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 /**
@@ -16,13 +17,38 @@ import lombok.Data;
  */
 
 @Data
-@Schema(description = "流程信息请求VO")
-public class BpmDesignVO extends BpmDefinitionVO {
+@Schema(description = "流程信息保存请求VO")
+public class BpmDesignRespVO {
+    @Schema(description = "主键id")
+    private Long id;
+
+    @Schema(description = "流程编码")
+    private String flowCode;
+
+    @Schema(description = "流程名称")
+    private String flowName;
+
+    @Schema(description = "流程版本")
+    private String bpmVersion;
+
+    @Schema(description = "流程版本备注")
+    private String bpmVersionAlias;
+
+    @Schema(description = "版本状态")
+    private String bpmVersionStatus;
+
+    /**
+     * 业务ID，用于关联业务系统的业务数据
+     *
+     * 此处为菜单UUID
+     */
+    @Schema(description = "业务ID")
+    private String businessId;
+
     /**
      * 流程定义JSON
      */
     @Schema(description = "流程定义JSON")
-    @NotBlank(message = "流程定义JSON不能为空")
     private String bpmDefJson;
 
     /**
@@ -30,13 +56,4 @@ public class BpmDesignVO extends BpmDefinitionVO {
      */
     @Schema(description = "全局配置")
     private BpmGlobalConfigDTO globalConfig = new BpmGlobalConfigDTO();
-
-    /**
-     * 流程定义JSONVO
-     *
-     * 不返回给前端展示，用于解析和校验bpmDefJson后存储使用
-     *
-     */
-    @Schema(description = "流程定义JSONVO")
-    private BpmDefJsonVO bpmDefJsonVO;
 }

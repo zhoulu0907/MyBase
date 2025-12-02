@@ -134,7 +134,7 @@ public class MetadataEntityRelationshipRepository extends ServiceImpl<MetadataEn
      */
     public MetadataEntityRelationshipDO findBySourceFieldAndEntity(Long sourceFieldId, Long sourceEntityId) {
         QueryWrapper queryWrapper = this.query()
-                .eq(MetadataEntityRelationshipDO::getSourceFieldId, String.valueOf(sourceFieldId))
+                .eq(MetadataEntityRelationshipDO::getSourceFieldId, sourceFieldId)
                 .eq(MetadataEntityRelationshipDO::getSourceEntityId, sourceEntityId);
         return getOne(queryWrapper);
     }
@@ -147,7 +147,7 @@ public class MetadataEntityRelationshipRepository extends ServiceImpl<MetadataEn
      */
     public List<MetadataEntityRelationshipDO> getRelationshipsByAppId(Long appId) {
         QueryWrapper queryWrapper = this.query()
-                .eq(MetadataEntityRelationshipDO::getAppId, appId)
+                .eq(MetadataEntityRelationshipDO::getApplicationId, appId)
                 .orderBy(MetadataEntityRelationshipDO::getCreateTime, false);
         return list(queryWrapper);
     }

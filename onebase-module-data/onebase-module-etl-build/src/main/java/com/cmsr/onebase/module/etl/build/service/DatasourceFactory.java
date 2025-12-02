@@ -26,13 +26,14 @@ public class DatasourceFactory {
         // 1. 获取数据库类型
         Properties connectionProperties = JsonUtils.parseObject(datasourceDO.getConfig(), Properties.class);
         String connectMode = (String) connectionProperties.getOrDefault("connectMode", "default");
-        String jdbcConnection;
-        if (StringUtils.equalsIgnoreCase("default", connectMode)) {
-            jdbcConnection = buildJdbcConnectionString(datasourceDO.getDatasourceType(), connectionProperties);
-        } else {
-            jdbcConnection = (String) connectionProperties.get("jdbcUrl");
+        String jdbcConnection = (String) connectionProperties.get("jdbcUrl");
+        if (StringUtils.isBlank(jdbcConnection)) {
+            if (StringUtils.equalsIgnoreCase(connectMode, "default")) {
+                jdbcConnection = buildJdbcConnectionString(datasourceDO.getDatasourceType(), connectionProperties);
+            } else {
+                throw new IllegalStateException();
+            }
         }
-
         // 2. 创建DataSource
         String username = (String) connectionProperties.get("username");
         String password = (String) connectionProperties.get("password");
@@ -61,7 +62,7 @@ public class DatasourceFactory {
         }
         DatabaseType parseType = null;
         for (DatabaseType dbType : DatabaseType.values()) {
-            if (dbType.title().equalsIgnoreCase(databaseType)) {
+            if (dbType.name().equalsIgnoreCase(databaseType)) {
                 parseType = dbType;
                 break;
             }

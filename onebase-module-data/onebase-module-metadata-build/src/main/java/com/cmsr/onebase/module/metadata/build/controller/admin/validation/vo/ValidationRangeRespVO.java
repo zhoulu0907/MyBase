@@ -26,7 +26,7 @@ public class ValidationRangeRespVO {
     private Long entityId;
 
     @Schema(description = "应用ID", example = "1")
-    private String appId;
+    private String applicationId;
 
     @Schema(description = "规则组ID", example = "1")
     private Long groupId;
@@ -49,6 +49,6 @@ public class ValidationRangeRespVO {
     @Schema(description = "提示信息", example = "数值必须在0-100之间")
     private String promptMessage;
 
-    @Schema(description = "运行模式", example = "1")
-    private Integer runMode;
+    @Schema(description = "版本标识", example = "1")
+    private Long versionTag;
 }

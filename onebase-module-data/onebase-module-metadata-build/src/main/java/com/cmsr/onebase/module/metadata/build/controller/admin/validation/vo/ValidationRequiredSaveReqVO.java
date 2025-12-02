@@ -31,8 +31,8 @@ public class ValidationRequiredSaveReqVO {
     @Schema(description = "提示信息")
     private String promptMessage;
 
-    @Schema(description = "运行模式")
-    private Integer runMode;
+    @Schema(description = "版本标识")
+    private Long versionTag;
 
     @Schema(description = "校验方式", example = "POP")
     private String valMethod;

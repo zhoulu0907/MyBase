@@ -49,7 +49,7 @@ public class ParentChildRelationshipRespVO {
     private String cascadeType;
 
     @Schema(description = "应用ID", example = "12345")
-    private Long appId;
+    private Long applicationId;
 
     @Schema(description = "创建时间", example = "2024-01-01 10:00:00")
     private LocalDateTime createTime;

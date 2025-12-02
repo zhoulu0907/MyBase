@@ -110,7 +110,7 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
             d.setMaxLength(req.getMaxLength());
             d.setTrimBefore(1);
             d.setPromptMessage(prompt);
-            d.setRunMode(req.getRunMode());
+            d.setVersionTag(req.getVersionTag());
             if (d.getId() == null) {
                 // 将DO转换为VO
                 ValidationLengthSaveReqVO lengthVO = BeanUtils.toBean(d, ValidationLengthSaveReqVO.class);
@@ -148,7 +148,7 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
             d.setRegexPattern(req.getRegexPattern());
             d.setFlags(null);
             d.setPromptMessage(prompt);
-            d.setRunMode(req.getRunMode());
+            d.setVersionTag(req.getVersionTag());
             if (d.getId() == null) {
                 // 将DO转换为VO
                 ValidationFormatSaveReqVO formatVO = BeanUtils.toBean(d, ValidationFormatSaveReqVO.class);
@@ -187,7 +187,7 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
                 requiredVO.setIsEnabled(req.getIsEnabled());
                 requiredVO.setPromptMessage(prompt);
                 requiredVO.setPopPrompt(prompt); // 设置popPrompt确保errorMessage字段能正确返回
-                requiredVO.setRunMode(req.getRunMode());
+                requiredVO.setVersionTag(req.getVersionTag());
                 requiredVO.setRgName(buildRequiredGroupName(req.getFieldId()));
                 requiredService.create(requiredVO);
             } else {
@@ -197,7 +197,7 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
                 requiredUpdateVO.setIsEnabled(req.getIsEnabled());
                 requiredUpdateVO.setPromptMessage(prompt);
                 requiredUpdateVO.setPopPrompt(prompt); // 设置popPrompt确保errorMessage字段能正确返回
-                requiredUpdateVO.setRunMode(req.getRunMode());
+                requiredUpdateVO.setVersionTag(req.getVersionTag());
                 requiredUpdateVO.setRgName(buildRequiredGroupName(req.getFieldId()));
                 requiredService.update(requiredUpdateVO);
             }
@@ -224,7 +224,7 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
                 uniqueVO.setFieldId(req.getFieldId());
                 uniqueVO.setIsEnabled(enableFlag);
                 uniqueVO.setPromptMessage(prompt);
-                uniqueVO.setRunMode(req.getRunMode());
+                uniqueVO.setVersionTag(req.getVersionTag());
                 uniqueVO.setPopPrompt(prompt);
                 uniqueVO.setRgName(defaultGroupName);
                 uniqueService.create(uniqueVO);
@@ -244,7 +244,7 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
                 uniqueUpdateVO.setId(groupId);
                 uniqueUpdateVO.setIsEnabled(enableFlag);
                 uniqueUpdateVO.setPromptMessage(prompt);
-                uniqueUpdateVO.setRunMode(req.getRunMode());
+                uniqueUpdateVO.setVersionTag(req.getVersionTag());
                 uniqueUpdateVO.setPopPrompt(prompt);
                 uniqueUpdateVO.setRgName(groupName);
                 uniqueService.update(uniqueUpdateVO);

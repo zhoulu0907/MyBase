@@ -50,6 +50,11 @@ public class FlowDefinitionTableDef extends TableDef {
     public final QueryColumn BPM_VERSION = new QueryColumn(this, "bpm_version");
 
     /**
+     * 流程版本备注
+     */
+    public final QueryColumn BPM_VERSION_ALIAS = new QueryColumn(this, "bpm_version_alias");
+
+    /**
      * 流程类别
      */
     public final QueryColumn CATEGORY = new QueryColumn(this, "category");

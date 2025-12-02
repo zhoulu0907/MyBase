@@ -9,6 +9,7 @@ import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
@@ -157,6 +158,14 @@ public class UserServiceImpl implements UserService {
         if (user.getUserType() == null) {
             user.setUserType(SecurityFrameworkUtils.getLoginUserType());
         }
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+        if (loginUser == null || loginUser.getId() == null) {
+            // 立即失败，抛出异常，防止数据越权
+            throw exception(USER_NOT_EXISTS);
+        }
+        if(UserTypeEnum.CORP.getValue().equals(user.getUserType())){
+            user.setCorpId(loginUser.getCorpId());
+        }
         userDataRepository.insert(user);
         // 2.1.1 保存初始密码历史记录
         securityConfigApi.savePasswordHistory(user.getId(), user.getPassword());
@@ -177,15 +186,26 @@ public class UserServiceImpl implements UserService {
         return user.getId();
     }
 
-    @Override
-    @CacheEvict(value = RedisKeyConstants.USER_FIND_BY_DEPT_IDS, allEntries = true, beforeInvocation = true)
-    public Long createCorpAdminUser(AdminUserDO userDO) {
+    public  void validateCorpAdminUser(AdminUserDO userDO){
         // 校验用户名唯一
         validateUsernameUnique(null, userDO.getUsername());
         // 校验手机号唯一
         validateMobileUnique(null, userDO.getMobile());
         // 校验邮箱唯一
         validateEmailUnique(null, userDO.getEmail());
+    }
+
+    @Override
+    public void checkCorpAdminUser(AdminUserDO adminUserDO) {
+        validateCorpAdminUser(adminUserDO);
+    }
+
+    @Override
+    @CacheEvict(value = RedisKeyConstants.USER_FIND_BY_DEPT_IDS, allEntries = true, beforeInvocation = true)
+    public Long createCorpAdminUser(AdminUserDO userDO) {
+
+        // 验证企业管理员信息
+        validateCorpAdminUser(userDO);
 
         userDO.setStatus(CommonStatusEnum.ENABLE.getStatus()); // 默认开启
         if (userDO.getAdminType() == null) {

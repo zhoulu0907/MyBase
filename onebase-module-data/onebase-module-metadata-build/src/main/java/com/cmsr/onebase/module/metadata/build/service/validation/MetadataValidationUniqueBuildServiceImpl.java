@@ -110,7 +110,7 @@ public class MetadataValidationUniqueBuildServiceImpl implements MetadataValidat
         // 转换VO为DO并设置必要字段
         MetadataValidationUniqueDO data = BeanUtils.toBean(vo, MetadataValidationUniqueDO.class);
         data.setEntityId(field.getEntityId());
-        data.setAppId(field.getAppId());
+        data.setApplicationId(field.getApplicationId());
         data.setGroupId(groupId);
 
         // 保存唯一性校验规则
@@ -167,7 +167,7 @@ public class MetadataValidationUniqueBuildServiceImpl implements MetadataValidat
         updateObj.setId(existing.getId());
         updateObj.setFieldId(existing.getFieldId());
         updateObj.setEntityId(existing.getEntityId());
-        updateObj.setAppId(existing.getAppId());
+        updateObj.setApplicationId(existing.getApplicationId());
         updateObj.setGroupId(targetGroupId);
         uniqueRepository.updateById(updateObj);
         boolean isFieldUnique = updateObj.getIsEnabled() != null && updateObj.getIsEnabled() == 1;

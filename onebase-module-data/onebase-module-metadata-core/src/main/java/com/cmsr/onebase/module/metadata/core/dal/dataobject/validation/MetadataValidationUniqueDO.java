@@ -33,9 +33,9 @@ public class MetadataValidationUniqueDO extends BaseTenantEntity {
     @Column(value = "prompt_message", comment = "提示信息")
     private String promptMessage;
 
-    @Column(value = "run_mode", comment = "运行模式")
-    private Integer runMode;
+    @Column(value = "version_tag", comment = "版本标识")
+    private Long versionTag;
 
-    @Column(value = "app_id", comment = "应用ID")
-    private Long appId;
+    @Column(value = "application_id", comment = "应用ID")
+    private Long applicationId;
 }

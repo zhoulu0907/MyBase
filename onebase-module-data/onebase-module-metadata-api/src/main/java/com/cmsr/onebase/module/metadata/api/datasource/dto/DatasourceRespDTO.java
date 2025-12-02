@@ -33,11 +33,11 @@ public class DatasourceRespDTO {
     @Schema(description = "描述", example = "用户相关数据的数据源")
     private String description;
 
-    @Schema(description = "运行模式", example = "0")
-    private Integer runMode;
+    @Schema(description = "版本标识", example = "0")
+    private Long versionTag;
 
     @Schema(description = "应用ID", example = "1")
-    private Long appId;
+    private Long applicationId;
     
     @Schema(description = "数据源来源，0：系统默认，1：自有数据源，2：外部数据源", example = "1")
     private Integer datasourceOrigin;

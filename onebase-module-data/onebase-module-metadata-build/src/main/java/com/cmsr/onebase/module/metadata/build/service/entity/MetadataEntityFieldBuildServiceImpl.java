@@ -342,9 +342,9 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             entityField.setSortOrder(fieldItem.getSortOrder() != null ? fieldItem.getSortOrder() : 0);
             entityField.setIsSystemField(StatusEnumUtil.NO); // 0-不是系统字段
             entityField.setIsPrimaryKey(StatusEnumUtil.NO); // 0-不是主键
-            entityField.setAppId(Long.valueOf(reqVO.getAppId()));
+            entityField.setApplicationId(Long.valueOf(reqVO.getApplicationId()));
             // 设置默认运行模式，防止后续约束/自动编号处理中出现空指针
-            entityField.setRunMode(0);
+            entityField.setVersionTag(0L);
 
             metadataEntityFieldRepository.save(entityField);
             fieldIds.add(entityField.getId().toString());
@@ -632,9 +632,9 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                             item.getId(), existing.getEntityId(), reqVO.getEntityId());
                     throw new IllegalArgumentException("字段不属于当前实体，禁止跨实体删除");
                 }
-                if (!existing.getAppId().equals(Long.valueOf(reqVO.getAppId()))) {
+                if (!existing.getApplicationId().equals(Long.valueOf(reqVO.getApplicationId()))) {
                     log.error("安全校验失败：尝试跨应用删除字段。fieldId={}, 字段归属appId={}, 请求appId={}",
-                            item.getId(), existing.getAppId(), reqVO.getAppId());
+                            item.getId(), existing.getApplicationId(), reqVO.getApplicationId());
                     throw new IllegalArgumentException("字段不属于当前应用，禁止跨应用删除");
                 }
 
@@ -690,9 +690,9 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                             item.getId(), origin.getEntityId(), reqVO.getEntityId());
                     throw new IllegalArgumentException("字段不属于当前实体，禁止跨实体操作");
                 }
-                if (!origin.getAppId().equals(Long.valueOf(reqVO.getAppId()))) {
+                if (!origin.getApplicationId().equals(Long.valueOf(reqVO.getApplicationId()))) {
                     log.error("安全校验失败：尝试跨应用操作字段。fieldId={}, 字段归属appId={}, 请求appId={}",
-                            item.getId(), origin.getAppId(), reqVO.getAppId());
+                            item.getId(), origin.getApplicationId(), reqVO.getApplicationId());
                     throw new IllegalArgumentException("字段不属于当前应用，禁止跨应用操作");
                 }
 
@@ -786,10 +786,10 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
                 validateValidationRuleUniqueness(fieldId, origin.getEntityId());
 
-                //特别处理：如果数据选择类型的字段发生了变化，需要额外同步到 关联关系表中
-                if ("DATA_SELECTION".equals(item.getFieldType())) {
-
-                    processEntityRelation(reqVO.getAppId(), fieldId, fullForRelated, item);
+                // 特别处理：如果数据选择类型的字段发生了变化，需要额外同步到关联关系表中
+                if ("DATA_SELECTION".equalsIgnoreCase(item.getFieldType()) 
+                        || "MULTI_DATA_SELECTION".equalsIgnoreCase(item.getFieldType())) {
+                    processEntityRelation(reqVO.getApplicationId(), fieldId, fullForRelated, item);
                 }
             }
         }
@@ -802,7 +802,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 // 原因：fieldName 在跨应用、跨表中不具备唯一性，存在安全风险
                 // 策略：更新操作必须明确提供字段 ID，未提供 ID 时一律作为新增处理
                 log.info("未提供字段ID，将作为新增字段处理: fieldName={}, entityId={}, appId={}",
-                        item.getFieldName(), reqVO.getEntityId(), reqVO.getAppId());
+                        item.getFieldName(), reqVO.getEntityId(), reqVO.getApplicationId());
 
                 // 新增字段的情况
                 validateEntityFieldNameUnique(null, reqVO.getEntityId(), item.getFieldName());
@@ -813,7 +813,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
                 MetadataEntityFieldDO toCreate = new MetadataEntityFieldDO();
                 toCreate.setEntityId(Long.valueOf(reqVO.getEntityId()));
-                toCreate.setAppId(Long.valueOf(reqVO.getAppId()));
+                toCreate.setApplicationId(Long.valueOf(reqVO.getApplicationId()));
                 toCreate.setFieldName(item.getFieldName());
                 toCreate.setDisplayName(item.getDisplayName());
                 toCreate.setFieldType(item.getFieldType());
@@ -828,7 +828,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 toCreate.setIsSystemField(
                         item.getIsSystemField() != null ? item.getIsSystemField() : StatusEnumUtil.YES);
                 toCreate.setIsPrimaryKey(StatusEnumUtil.NO);
-                toCreate.setRunMode(0);
+                toCreate.setVersionTag(0L);
                 toCreate.setDictTypeId(item.getDictTypeId());
 
                 metadataEntityFieldRepository.save(toCreate);
@@ -866,9 +866,10 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
                 validateValidationRuleUniqueness(fieldId, toCreate.getEntityId());
 
-                //特别处理：如果数据选择类型的字段发生了变化，需要额外同步到 关联关系表中
-                if ("DATA_SELECTION".equals(item.getFieldType())) {
-                    processEntityRelation(reqVO.getAppId(), fieldId, toCreate, item);
+                // 特别处理：如果数据选择类型的字段发生了变化，需要额外同步到关联关系表中
+                if ("DATA_SELECTION".equalsIgnoreCase(item.getFieldType())
+                        || "MULTI_DATA_SELECTION".equalsIgnoreCase(item.getFieldType())) {
+                    processEntityRelation(reqVO.getApplicationId(), fieldId, toCreate, item);
                 }
 
 
@@ -909,7 +910,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             if (existingRelations != null && !existingRelations.isEmpty()) {
                 // 过滤出 targetFieldId 匹配的关系
                 for (MetadataEntityRelationshipDO rel : existingRelations) {
-                    if (rel.getTargetFieldId() != null && rel.getTargetFieldId().equals(fieldId.toString())) {
+                    if (rel.getTargetFieldId() != null && rel.getTargetFieldId().equals(fieldId)) {
                         existingRelation = rel;
                         break;
                     }
@@ -917,31 +918,40 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             }
         }
 
+        // 根据字段类型确定关系类型：DATA_SELECTION 使用 DATA_SELECT，MULTI_DATA_SELECTION 使用 DATA_SELECT_MULTI
+        String relationshipType;
+        if ("MULTI_DATA_SELECTION".equalsIgnoreCase(item.getFieldType())) {
+            relationshipType = RelationshipTypeEnum.DATA_SELECT_MULTI.getRelationshipType();
+        } else {
+            relationshipType = RelationshipTypeEnum.DATA_SELECT.getRelationshipType();
+        }
+
         // 构建新的关系数据
         EntityRelationshipSaveReqVO r = new EntityRelationshipSaveReqVO();
         r.setRelationName("数据选择关系");
         r.setSourceEntityId(targetEntityId.toString());
         r.setTargetEntityId(full.getEntityId().toString());
-        r.setRelationshipType(RelationshipTypeEnum.ONE_TO_MANY.getRelationshipType());
+        r.setRelationshipType(relationshipType);
         r.setSourceFieldId(targetFieldId.toString());
         r.setTargetFieldId(fieldId.toString());
         r.setCascadeType("READ");
-        r.setDescription("数据选择的一对多关系");
-        r.setAppId(appId);
+        r.setDescription("数据选择关系");
+        r.setApplicationId(appId);
 
         // 比较数据：如果数据库中的关系和请求的数据一样，则忽略
+        // 注意：前端传的targetEntityId/targetFieldId实际存储在关系的sourceEntityId/sourceFieldId字段中
         if (existingRelation != null) {
-            boolean isSame = Objects.equals(existingRelation.getTargetEntityId(), targetEntityId)
-                    && Objects.equals(existingRelation.getTargetFieldId(), targetFieldId.toString());
+            boolean isSame = Objects.equals(existingRelation.getSourceEntityId(), targetEntityId)
+                    && Objects.equals(existingRelation.getSourceFieldId(), targetFieldId);
             
             if (isSame) {
-                log.debug("数据选择关系未变化，忽略更新。sourceEntityId={}, fieldId={}, targetEntityId={}, targetFieldId={}",
+                log.debug("数据选择关系未变化，忽略更新。currentEntityId={}, fieldId={}, targetEntityId={}, targetFieldId={}",
                         full.getEntityId(), fieldId, targetEntityId, targetFieldId);
                 return;
             } else {
                 // 数据不同，更新关系
-                log.info("数据选择关系已变化，更新关系。sourceEntityId={}, fieldId={}, 原targetEntityId={}, 原targetFieldId={}, 新targetEntityId={}, 新targetFieldId={}",
-                        full.getEntityId(), fieldId, existingRelation.getTargetEntityId(), existingRelation.getTargetFieldId(),
+                log.info("数据选择关系已变化，更新关系。currentEntityId={}, fieldId={}, 原targetEntityId={}, 原targetFieldId={}, 新targetEntityId={}, 新targetFieldId={}",
+                        full.getEntityId(), fieldId, existingRelation.getSourceEntityId(), existingRelation.getSourceFieldId(),
                         targetEntityId, targetFieldId);
                 r.setId(existingRelation.getId().toString());
                 metadataEntityRelationshipBuildService.updateEntityRelationship(r);
@@ -1008,9 +1018,9 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         // 插入实体字段
         MetadataEntityFieldDO entityField = BeanUtils.toBean(createReqVO, MetadataEntityFieldDO.class);
         entityField.setEntityId(Long.valueOf(createReqVO.getEntityId()));
-        entityField.setAppId(Long.valueOf(createReqVO.getAppId()));
+        entityField.setApplicationId(Long.valueOf(createReqVO.getApplicationId()));
         entityField.setIsSystemField(1); // 手动创建的字段不是系统字段：1-不是
-        entityField.setRunMode(0); // 默认编辑态
+        entityField.setVersionTag(0L); // 默认编辑态
         entityField.setStatus(0); // 默认开启
         // 如果没有提供fieldCode，则根据fieldName生成
         if (entityField.getFieldCode() == null || entityField.getFieldCode().trim().isEmpty()) {
@@ -1063,7 +1073,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         MetadataEntityFieldDO updateObj = BeanUtils.toBean(updateReqVO, MetadataEntityFieldDO.class);
         updateObj.setId(Long.valueOf(updateReqVO.getId()));
         updateObj.setEntityId(Long.valueOf(updateReqVO.getEntityId()));
-        updateObj.setAppId(Long.valueOf(updateReqVO.getAppId()));
+        updateObj.setApplicationId(Long.valueOf(updateReqVO.getApplicationId()));
         // 如果没有提供fieldCode，则根据fieldName生成
         if (updateObj.getFieldCode() == null || updateObj.getFieldCode().trim().isEmpty()) {
             updateObj.setFieldCode(generateFieldCode(updateReqVO.getFieldName()));
@@ -1235,11 +1245,11 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         if (pageReqVO.getIsRequired() != null) {
             queryWrapper.eq(MetadataEntityFieldDO::getIsRequired, pageReqVO.getIsRequired());
         }
-        if (pageReqVO.getRunMode() != null) {
-            queryWrapper.eq(MetadataEntityFieldDO::getRunMode, pageReqVO.getRunMode());
+        if (pageReqVO.getVersionTag() != null) {
+            queryWrapper.eq(MetadataEntityFieldDO::getVersionTag, pageReqVO.getVersionTag());
         }
-        if (pageReqVO.getAppId() != null && !pageReqVO.getAppId().trim().isEmpty()) {
-            queryWrapper.eq(MetadataEntityFieldDO::getAppId, Long.valueOf(pageReqVO.getAppId().trim()));
+        if (pageReqVO.getApplicationId() != null && !pageReqVO.getApplicationId().trim().isEmpty()) {
+            queryWrapper.eq(MetadataEntityFieldDO::getApplicationId, Long.valueOf(pageReqVO.getApplicationId().trim()));
         }
         if (pageReqVO.getFieldCode() != null && !pageReqVO.getFieldCode().trim().isEmpty()) {
             queryWrapper.like(MetadataEntityFieldDO::getFieldCode, pageReqVO.getFieldCode());
@@ -2101,7 +2111,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                             updateObj.setOptionOrder(opt.getOptionOrder());
                             updateObj.setIsEnabled(opt.getIsEnabled());
                             updateObj.setDescription(opt.getDescription());
-                            updateObj.setAppId(entityField.getAppId());
+                            updateObj.setApplicationId(entityField.getApplicationId());
                             fieldOptionService.update(updateObj);
                             processedOptionIds.add(optionId);
                             continue;
@@ -2126,7 +2136,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                     updateObj.setOptionOrder(opt.getOptionOrder());
                     updateObj.setIsEnabled(opt.getIsEnabled());
                     updateObj.setDescription(opt.getDescription());
-                    updateObj.setAppId(entityField.getAppId());
+                    updateObj.setApplicationId(entityField.getApplicationId());
                     fieldOptionService.update(updateObj);
                     processedOptionIds.add(existingByValue.getId());
                 } else {
@@ -2138,7 +2148,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                     d.setOptionOrder(opt.getOptionOrder());
                     d.setIsEnabled(opt.getIsEnabled());
                     d.setDescription(opt.getDescription());
-                    d.setAppId(entityField.getAppId());
+                    d.setApplicationId(entityField.getApplicationId());
                     fieldOptionService.create(d);
                     log.debug("新增字段选项: fieldId={}, optionValue={}", fieldId, opt.getOptionValue());
                 }
@@ -2221,8 +2231,8 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 enabledValue = CommonStatusEnum.ENABLED.getStatus();
             }
             req.setIsEnabled(enabledValue);
-            req.setRunMode(entityField != null && entityField.getRunMode() != null ? entityField.getRunMode() : 0);
-            req.setAppId(entityField != null ? entityField.getAppId() : null);
+            req.setVersionTag(entityField != null && entityField.getVersionTag() != null ? entityField.getVersionTag() : 0L);
+            req.setApplicationId(entityField != null ? entityField.getApplicationId() : null);
             fieldConstraintService.saveFieldConstraintConfig(req);
         }
 
@@ -2235,8 +2245,8 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             req.setRegexPattern(constraints.getRegexPattern());
             req.setPromptMessage(constraints.getRegexPrompt());
             req.setIsEnabled(constraints.getRegexEnabled());
-            req.setRunMode(entityField != null && entityField.getRunMode() != null ? entityField.getRunMode() : 0);
-            req.setAppId(entityField != null ? entityField.getAppId() : null);
+            req.setVersionTag(entityField != null && entityField.getVersionTag() != null ? entityField.getVersionTag() : 0L);
+            req.setApplicationId(entityField != null ? entityField.getApplicationId() : null);
             fieldConstraintService.saveFieldConstraintConfig(req);
         }
 
@@ -2250,8 +2260,8 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 req.setConstraintType("REQUIRED");
                 req.setIsEnabled(entityField.getIsRequired());
                 req.setPromptMessage(null);
-                req.setRunMode(entityField.getRunMode() != null ? entityField.getRunMode() : 0);
-                req.setAppId(entityField.getAppId());
+                req.setVersionTag(entityField.getVersionTag() != null ? entityField.getVersionTag() : 0L);
+                req.setApplicationId(entityField.getApplicationId());
                 fieldConstraintService.saveFieldConstraintConfig(req);
             } else {
                 // isRequired = 0 时删除已有的必填约束配置
@@ -2268,8 +2278,8 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 req.setConstraintType("UNIQUE");
                 req.setIsEnabled(entityField.getIsUnique());
                 req.setPromptMessage(null);
-                req.setRunMode(entityField.getRunMode() != null ? entityField.getRunMode() : 0);
-                req.setAppId(entityField.getAppId());
+                req.setVersionTag(entityField.getVersionTag() != null ? entityField.getVersionTag() : 0L);
+                req.setApplicationId(entityField.getApplicationId());
                 fieldConstraintService.saveFieldConstraintConfig(req);
             } else {
                 // isUnique = 0 时删除已有的唯一性约束配置
@@ -2307,8 +2317,8 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             config.setResetCycle(autoNumber.getResetCycle());
             config.setResetOnInitialChange(
                     autoNumber.getResetOnInitialChange() != null ? autoNumber.getResetOnInitialChange() : 0);
-            config.setRunMode(entityField != null && entityField.getRunMode() != null ? entityField.getRunMode() : 0);
-            config.setAppId(entityField != null ? entityField.getAppId() : null);
+            config.setVersionTag(entityField != null && entityField.getVersionTag() != null ? entityField.getVersionTag() : 0L);
+            config.setApplicationId(entityField != null ? entityField.getApplicationId() : null);
 
             Long configId = autoNumberConfigBuildService.upsert(config);
 
@@ -2360,7 +2370,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                             rule.setRefFieldId(refFieldId);
                             rule.setIsEnabled(
                                     ruleReq.getIsEnabled() != null ? ruleReq.getIsEnabled() : StatusEnumUtil.ENABLED);
-                            rule.setAppId(entityField != null ? entityField.getAppId() : null);
+                            rule.setApplicationId(entityField != null ? entityField.getApplicationId() : null);
 
                             autoNumberRuleBuildService.update(rule);
                             processedRuleIds.add(ruleReq.getId());
@@ -2400,7 +2410,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                     }
                     rule.setRefFieldId(refFieldId);
                     rule.setIsEnabled(ruleReq.getIsEnabled() != null ? ruleReq.getIsEnabled() : StatusEnumUtil.ENABLED);
-                    rule.setAppId(entityField != null ? entityField.getAppId() : null);
+                    rule.setApplicationId(entityField != null ? entityField.getApplicationId() : null);
 
                     Long newRuleId = autoNumberRuleBuildService.add(rule);
                     log.info("新增自动编号规则项，id={}, configId={}, itemOrder={}",
@@ -2503,7 +2513,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         MetadataEntityRelationshipDO relationship = null;
         if (relationships != null) {
             for (MetadataEntityRelationshipDO rel : relationships) {
-                if (rel.getTargetFieldId() != null && rel.getTargetFieldId().equals(String.valueOf(field.getId()))) {
+                if (rel.getTargetFieldId() != null && rel.getTargetFieldId().equals(field.getId())) {
                     relationship = rel;
                     break;
                 }
@@ -2517,12 +2527,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         DataSelectionConfig dataSelectionConfig = new DataSelectionConfig();
         dataSelectionConfig.setRelationId(relationship.getId());
         dataSelectionConfig.setTargetEntityId(relationship.getSourceEntityId());
-        try {
-            dataSelectionConfig.setTargetFieldId(Long.valueOf(relationship.getSourceFieldId()));
-        } catch (NumberFormatException ex) {
-            log.warn("解析数据选择配置目标字段ID失败，fieldId={}, sourceFieldId={}", field.getId(), relationship.getSourceFieldId());
-            return null;
-        }
+        dataSelectionConfig.setTargetFieldId(relationship.getSourceFieldId());
         return dataSelectionConfig;
     }
 
@@ -2541,8 +2546,8 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         vo.setInitialValue(config.getInitialValue());
         vo.setResetCycle(config.getResetCycle());
         vo.setResetOnInitialChange(config.getResetOnInitialChange());
-        vo.setRunMode(config.getRunMode());
-        vo.setAppId(config.getAppId());
+        vo.setVersionTag(config.getVersionTag());
+        vo.setApplicationId(config.getApplicationId());
         vo.setCreateTime(config.getCreateTime());
         vo.setUpdateTime(config.getUpdateTime());
         return vo;
@@ -2561,7 +2566,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         vo.setTextValue(rule.getTextValue());
         vo.setRefFieldId(rule.getRefFieldId());
         vo.setIsEnabled(rule.getIsEnabled());
-        vo.setAppId(rule.getAppId());
+        vo.setApplicationId(rule.getApplicationId());
         vo.setCreateTime(rule.getCreateTime());
         vo.setUpdateTime(rule.getUpdateTime());
         return vo;
@@ -2588,8 +2593,8 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         vo.setIsUnique(field.getIsUnique());
         vo.setSortOrder(field.getSortOrder());
         vo.setValidationRulesId(field.getValidationRules());
-        vo.setRunMode(field.getRunMode());
-        vo.setAppId(field.getAppId() != null ? String.valueOf(field.getAppId()) : null);
+        vo.setVersionTag(field.getVersionTag());
+        vo.setApplicationId(field.getApplicationId() != null ? String.valueOf(field.getApplicationId()) : null);
         vo.setStatus(field.getStatus());
         vo.setFieldCode(field.getFieldCode());
         vo.setDictTypeId(field.getDictTypeId());
@@ -2629,7 +2634,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                     updateReqVO.setIsEnabled(1); // 启用长度校验
                     updateReqVO.setPromptMessage(existingDO.getPromptMessage()); // 保持原有提示信息
                     updateReqVO.setTrimBefore(existingDO.getTrimBefore()); // 保持原有设置
-                    updateReqVO.setRunMode(entityField.getRunMode() != null ? entityField.getRunMode() : 0);
+                    updateReqVO.setVersionTag(entityField.getVersionTag() != null ? entityField.getVersionTag() : 0L);
                     validationLengthService.update(updateReqVO);
                 } else {
                     // 如果没有数据，那么新增一条记录
@@ -2653,7 +2658,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                     saveReqVO.setPromptMessage(promptMsg);
                     // 设置popPrompt确保errorMessage字段能正确返回
                     saveReqVO.setPopPrompt(promptMsg);
-                    saveReqVO.setRunMode(entityField.getRunMode() != null ? entityField.getRunMode() : 0);
+                    saveReqVO.setVersionTag(entityField.getVersionTag() != null ? entityField.getVersionTag() : 0L);
 
                     validationLengthService.create(saveReqVO);
                 }

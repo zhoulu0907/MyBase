@@ -68,16 +68,16 @@ public class MetadataAutoNumberConfigDO extends BaseTenantEntity {
     private Integer isEnabled;
 
     /**
-     * 运行模式
+     * 版本标识
      */
-    @Column(value = "run_mode", comment = "运行模式")
-    private Integer runMode;
+    @Column(value = "version_tag", comment = "版本标识")
+    private Long versionTag;
 
     /**
      * 应用ID
      */
-    @Column(value = "app_id", comment = "应用ID")
-    private Long appId;
+    @Column(value = "application_id", comment = "应用ID")
+    private Long applicationId;
 }
 
 

@@ -16,7 +16,7 @@ import java.util.List;
 public class MetadataRestoreReqDTO {
 
     @Schema(description = "目标应用ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
-    private Long targetAppId;
+    private Long targetApplicationId;
 
     @Schema(description = "数据源列表", requiredMode = Schema.RequiredMode.REQUIRED)
     private List<MetadataDatasourceDTO> datasourceList;

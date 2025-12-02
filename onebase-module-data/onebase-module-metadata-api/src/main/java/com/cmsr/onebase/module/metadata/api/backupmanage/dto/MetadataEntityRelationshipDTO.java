@@ -42,11 +42,11 @@ public class MetadataEntityRelationshipDTO {
     @Schema(description = "关系描述")
     private String description;
 
-    @Schema(description = "运行模式")
-    private Integer runMode;
+    @Schema(description = "版本标识")
+    private Long versionTag;
 
     @Schema(description = "应用ID")
-    private Long appId;
+    private Long applicationId;
 
     @Schema(description = "创建时间")
     private LocalDateTime createTime;

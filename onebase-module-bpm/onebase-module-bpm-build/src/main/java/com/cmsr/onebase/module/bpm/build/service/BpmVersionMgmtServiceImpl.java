@@ -2,13 +2,11 @@ package com.cmsr.onebase.module.bpm.build.service;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.build.vo.vermgmt.BpmDefVersionMgtVO;
 import com.cmsr.onebase.module.bpm.build.vo.vermgmt.BpmDeleteReqVo;
 import com.cmsr.onebase.module.bpm.build.vo.vermgmt.BpmUpdateReqVo;
 import com.cmsr.onebase.module.bpm.build.vo.vermgmt.BpmVersionMgmtPageReqVo;
-import com.cmsr.onebase.module.bpm.core.dto.BpmDefinitionExtDTO;
 import com.cmsr.onebase.module.bpm.core.enums.VersionStatusEnum;
 import com.cmsr.onebase.module.bpm.core.vo.UserBasicInfoVO;
 import com.cmsr.onebase.module.engine.orm.mybatisflex.entity.FlowDefinition;
@@ -81,7 +79,7 @@ public class BpmVersionMgmtServiceImpl implements BpmVersionMgmtService {
         ids.add(reqVo.getId());
 
         // 校验流程是否存在
-        Definition existDef = defService.getById(String.valueOf(reqVo.getId()));
+        Definition existDef = defService.getById(reqVo.getId());
 
         if (existDef == null) {
             return;
@@ -127,10 +125,10 @@ public class BpmVersionMgmtServiceImpl implements BpmVersionMgmtService {
         }
 
         QueryWrapper queryWrapper = QueryWrapper.create();
-        queryWrapper.eq(FlowDefinition::getFormPath, String.valueOf(reqVo.getBusinessId()));
+        queryWrapper.eq(FlowDefinition::getFormPath, reqVo.getBusinessId());
 
-        if (StringUtils.isNotBlank(reqVo.getVersionStatus())) {
-            VersionStatusEnum versionStatusEnum = VersionStatusEnum.getByCode(reqVo.getVersionStatus());
+        if (StringUtils.isNotBlank(reqVo.getBpmVersionStatus())) {
+            VersionStatusEnum versionStatusEnum = VersionStatusEnum.getByCode(reqVo.getBpmVersionStatus());
 
             if (versionStatusEnum != null && versionStatusEnum.toPublishStatus() != null) {
                 queryWrapper.eq(FlowDefinition::getIsPublish, versionStatusEnum.toPublishStatus().getKey());
@@ -139,9 +137,9 @@ public class BpmVersionMgmtServiceImpl implements BpmVersionMgmtService {
             }
         }
 
-        String versionAlias = reqVo.getVersionAlias();
+        String versionAlias = reqVo.getBpmVersionAlias();
 
-        if (StringUtils.isNotBlank(reqVo.getVersionAlias())) {
+        if (StringUtils.isNotBlank(versionAlias)) {
             String versionKeyWord = versionAlias;
 
             // 去除首字母的V用于版本搜索
@@ -150,18 +148,14 @@ public class BpmVersionMgmtServiceImpl implements BpmVersionMgmtService {
             }
 
             QueryCondition orCondition = QueryCondition.createEmpty();
-            orCondition.or(QueryMethods.column("ext::json->>'versionAlias").like(reqVo.getVersionAlias()));
+            orCondition.or(FLOW_DEFINITION.BPM_VERSION_ALIAS.like(versionAlias));
             orCondition.or(FLOW_DEFINITION.BPM_VERSION.like(versionKeyWord));
 
             queryWrapper.and(orCondition);
         }
 
         // 排序：设计中>已发布>历史
-        String caseOrder = "CASE WHEN is_publish = " + PublishStatus.UNPUBLISHED.getKey() + " THEN 1 " +
-                "WHEN is_publish = " + PublishStatus.PUBLISHED.getKey() + " THEN 2 " +
-                "WHEN is_publish = " + PublishStatus.EXPIRED.getKey() + " THEN 3 " +
-                "ELSE 4 END";
-        queryWrapper.orderBy(caseOrder);
+        queryWrapper.orderBy(FlowDefinition::getIsPublish, true);
         queryWrapper.orderBy(QueryMethods.column(reqVo.getSortType()), false);
 
         Page<FlowDefinition> pageResult = flowDefinitionRepository.page(Page.of(reqVo.getPageNo(), reqVo.getPageSize()), queryWrapper);
@@ -176,13 +170,14 @@ public class BpmVersionMgmtServiceImpl implements BpmVersionMgmtService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateVersionAliasById(BpmUpdateReqVo reqVo) {
-        Definition definition = defService.getById(String.valueOf(reqVo.getId()));
-        if (definition != null) {
-            BpmDefinitionExtDTO extDTO = JsonUtils.parseObject(definition.getExt(), BpmDefinitionExtDTO.class);
-            extDTO.setVersionAlias(reqVo.getVersionAlias());
-            definition.setExt(JsonUtils.toJsonString(extDTO));
-            defService.updateById(definition);
+        Definition definition = defService.getById(reqVo.getId());
+
+        if (definition == null) {
+            throw exception(ErrorCodeConstants.FLOW_NOT_EXISTS);
         }
+
+        definition.setVersionAlias(reqVo.getBpmVersionAlias());
+        defService.updateById(definition);
     }
 
     private PageResult<BpmDefVersionMgtVO> buildVersionMgmtPageResult(Page<FlowDefinition> pageResult) {
@@ -203,11 +198,10 @@ public class BpmVersionMgmtServiceImpl implements BpmVersionMgmtService {
             for (FlowDefinition definition : pageResult.getRecords()) {
                 BpmDefVersionMgtVO vo = new BpmDefVersionMgtVO();
                 vo.setId(definition.getId());
-                vo.setVersion("V" + definition.getVersion());
-                BpmDefinitionExtDTO extDTO = JsonUtils.parseObject(definition.getExt(), BpmDefinitionExtDTO.class);
-                vo.setVersionAlias(extDTO.getVersionAlias());
+                vo.setBpmVersion("V" + definition.getVersion());
+                vo.setBpmVersionAlias(definition.getBpmVersionAlias());
                 VersionStatusEnum versionStatusEnum = VersionStatusEnum.toVersionStatusEnum(definition.getIsPublish());
-                vo.setVersionStatus(versionStatusEnum.getName());
+                vo.setBpmVersionStatus(versionStatusEnum.getCode());
                 vo.setCreateTime(definition.getCreateTime());
                 vo.setUpdateTime(definition.getUpdateTime());
                 // 创建人
