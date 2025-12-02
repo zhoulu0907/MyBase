@@ -3,7 +3,6 @@ package com.cmsr.onebase.module.app.core.dal.database.menu;
 import com.cmsr.onebase.framework.orm.repo.BaseBizRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppMenuDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePageDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetPageDO;
 import com.cmsr.onebase.module.app.core.dal.mapper.AppMenuMapper;
 import com.mybatisflex.core.query.QueryWrapper;
 import org.springframework.stereotype.Repository;
@@ -13,8 +12,6 @@ import java.util.Set;
 
 import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppMenuTableDef.APP_MENU;
 import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppResourcePageTableDef.APP_RESOURCE_PAGE;
-import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppResourcePagesetPageTableDef.APP_RESOURCE_PAGESET_PAGE;
-import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppResourcePagesetTableDef.APP_RESOURCE_PAGESET;
 
 /**
  * @Author：huangjie
@@ -78,25 +75,25 @@ public class AppMenuRepository extends BaseBizRepository<AppMenuMapper, AppMenuD
         return list(queryWrapper);
     }
 
-    public List<AppResourcePagesetPageDO> findPagesetPageByMenuId(Long menuId) {
-        QueryWrapper queryWrapper = QueryWrapper.create()
-                .select(
-                        APP_RESOURCE_PAGESET_PAGE.ALL_COLUMNS
-                ).from(APP_RESOURCE_PAGESET_PAGE)
-                .leftJoin(APP_RESOURCE_PAGESET)
-                .on(APP_RESOURCE_PAGESET_PAGE.PAGESET_UUID.eq(APP_RESOURCE_PAGESET.PAGESET_UUID)
-                        .and(APP_RESOURCE_PAGESET_PAGE.APPLICATION_ID.eq(APP_RESOURCE_PAGESET.APPLICATION_ID))
-                        .and(APP_RESOURCE_PAGESET_PAGE.VERSION_TAG.eq(APP_RESOURCE_PAGESET.VERSION_TAG))
-                )
-                .leftJoin(APP_MENU)
-                .on(APP_RESOURCE_PAGESET.MENU_UUID.eq(APP_MENU.MENU_UUID)
-                        .and(APP_RESOURCE_PAGESET.APPLICATION_ID.eq(APP_MENU.APPLICATION_ID))
-                        .and(APP_RESOURCE_PAGESET.VERSION_TAG.eq(APP_MENU.VERSION_TAG))
-                )
-                .where(APP_MENU.ID.eq(menuId));
-        //.where(APP_MENU.IS_VISIBLE.eq(1));
-        return this.listAs(queryWrapper, AppResourcePagesetPageDO.class);
-    }
+//    public List<AppResourcePagesetPageDO> findPagesetPageByMenuId(Long menuId) {
+//        QueryWrapper queryWrapper = QueryWrapper.create()
+//                .select(
+//                        APP_RESOURCE_PAGESET_PAGE.ALL_COLUMNS
+//                ).from(APP_RESOURCE_PAGESET_PAGE)
+//                .leftJoin(APP_RESOURCE_PAGESET)
+//                .on(APP_RESOURCE_PAGESET_PAGE.PAGESET_UUID.eq(APP_RESOURCE_PAGESET.PAGESET_UUID)
+//                        .and(APP_RESOURCE_PAGESET_PAGE.APPLICATION_ID.eq(APP_RESOURCE_PAGESET.APPLICATION_ID))
+//                        .and(APP_RESOURCE_PAGESET_PAGE.VERSION_TAG.eq(APP_RESOURCE_PAGESET.VERSION_TAG))
+//                )
+//                .leftJoin(APP_MENU)
+//                .on(APP_RESOURCE_PAGESET.MENU_UUID.eq(APP_MENU.MENU_UUID)
+//                        .and(APP_RESOURCE_PAGESET.APPLICATION_ID.eq(APP_MENU.APPLICATION_ID))
+//                        .and(APP_RESOURCE_PAGESET.VERSION_TAG.eq(APP_MENU.VERSION_TAG))
+//                )
+//                .where(APP_MENU.ID.eq(menuId));
+//        //.where(APP_MENU.IS_VISIBLE.eq(1));
+//        return this.listAs(queryWrapper, AppResourcePagesetPageDO.class);
+//    }
 
     public List<AppResourcePageDO> findPagesByMenuId(Long menuId) {
         QueryWrapper queryWrapper = QueryWrapper.create()

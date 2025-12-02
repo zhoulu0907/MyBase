@@ -4,12 +4,10 @@ import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageRepository;
-import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageSetPageRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageSetRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppMenuDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePageDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetPageDO;
 import com.cmsr.onebase.module.app.core.dto.appresource.PageDTO;
 import com.cmsr.onebase.module.app.core.dto.appresource.PageRespDTO;
 import com.cmsr.onebase.module.app.core.enums.appresource.AppResourceErrorCodeConstants;
@@ -27,9 +25,6 @@ public class PageServiceProvider {
 
     @Autowired
     private AppPageRepository pageRepository;
-
-    @Autowired
-    private AppPageSetPageRepository pageSetPageRepository;
 
     @Autowired
     private AppPageSetRepository pageSetRepository;
@@ -66,8 +61,8 @@ public class PageServiceProvider {
     }
 
     public String getMetadataByPageUuid(String pageUuid) {
-        AppResourcePagesetPageDO pageSetPageDO = pageSetPageRepository.findByPageUuid(pageUuid);
-        AppResourcePagesetDO pageSetDO = pageSetRepository.getByUuid(pageSetPageDO.getPageSetUuid());
+        AppResourcePageDO pageDO = pageRepository.getByUuid(pageUuid);
+        AppResourcePagesetDO pageSetDO = pageSetRepository.getByUuid(pageDO.getPageSetUuid());
 
         return pageSetDO.getMainMetadata();
     }

@@ -7,6 +7,7 @@ import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePageDO;
 import jakarta.annotation.Resource;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -30,6 +31,8 @@ public class AppResourceImpl implements AppResourceApi {
         if (pageSetId == null) {
             throw new IllegalArgumentException("页面集ID不能为空");
         }
+        // TODO: 后续改为使用Uuid
+        pageRepository.queryChain().eq(AppResourcePageDO::getPage)
         // 读取页面集中的页面
         List<AppResourcePageDO> pageDOS = pageRepository.findAllFormPageByPageSetId(pageSetId);
         return BeanUtils.toBean(pageDOS, PageRespDTO.class);

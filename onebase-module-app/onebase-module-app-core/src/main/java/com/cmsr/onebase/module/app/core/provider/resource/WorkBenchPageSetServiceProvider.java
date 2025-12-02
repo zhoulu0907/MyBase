@@ -4,7 +4,6 @@ import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppWorkbenchComponentRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppWorkbenchPageRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetPageDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourceWorkbenchComponentDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourceWorkbenchPageDO;
 import com.cmsr.onebase.module.app.core.dto.appresource.ComponentDTO;
@@ -17,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Slf4j
 @Setter
@@ -30,27 +28,12 @@ public class WorkBenchPageSetServiceProvider {
     @Resource
     private AppWorkbenchComponentRepository appWorkbenchComponentRepository;
 
-    public LoadPageSetRespVO loadWorkbenchPageSet(AppResourcePagesetDO pageSetDO, List<AppResourcePagesetPageDO> pageSetPageDOs) {
+    public LoadPageSetRespVO loadWorkbenchPageSet(AppResourcePagesetDO pageSetDO) {
 
         List<AppResourceWorkbenchPageDO> pageDOs;
 
         // 兼容旧数据：如果页面集-页面关联表中没有数据，直接通过pageSetId查询工作台页面
-        if (pageSetPageDOs == null || pageSetPageDOs.isEmpty()) {
-            pageDOs = appWorkbenchPageRepository.findByPageSetUuid(pageSetDO.getPageSetUuid());
-        } else {
-            pageDOs = pageSetPageDOs.stream()
-                    .map(pageSetPageDO -> {
-                        AppResourceWorkbenchPageDO pageDO = appWorkbenchPageRepository.getByUuid(pageSetPageDO.getPageUuid());
-                        if (pageDO == null) {
-                            // 如果找不到对应的页面，记录错误并跳过
-                            log.warn("Warning: Page not found for pageRef: {}", pageSetPageDO.getPageUuid());
-                            return null;
-                        }
-                        return pageDO;
-                    })
-                    .filter(Objects::nonNull) // 过滤掉null值
-                    .toList();
-        }
+        pageDOs = appWorkbenchPageRepository.findByPageSetUuid(pageSetDO.getPageSetUuid());
 
         LoadPageSetRespVO loadPageSetRespVO = new LoadPageSetRespVO();
         loadPageSetRespVO.setId(pageSetDO.getId());

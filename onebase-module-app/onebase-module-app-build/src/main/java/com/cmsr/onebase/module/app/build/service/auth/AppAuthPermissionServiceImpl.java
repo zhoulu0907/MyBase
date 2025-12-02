@@ -11,7 +11,6 @@ import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthPermissionRepos
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthViewRepository;
 import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageRepository;
-import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageSetPageRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageSetRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.*;
 import com.cmsr.onebase.module.app.core.enums.auth.AuthDefaultFactory;
@@ -55,9 +54,6 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
 
     @Resource
     private AppPageSetRepository appPageSetRepository;
-
-    @Resource
-    private AppPageSetPageRepository appPageSetPageRepository;
 
     @Resource
     private AppPageRepository appPageRepository;

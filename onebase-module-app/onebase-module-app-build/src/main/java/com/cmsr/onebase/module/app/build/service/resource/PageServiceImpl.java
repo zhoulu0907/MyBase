@@ -4,17 +4,14 @@ import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.build.util.PageUtils;
 import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageRepository;
-import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageSetPageRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageSetRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePageDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetPageDO;
 import com.cmsr.onebase.module.app.core.dto.appresource.*;
 import com.cmsr.onebase.module.app.core.enums.appresource.PageEnum;
 import com.cmsr.onebase.module.app.core.enums.appresource.ViewEnmu;
 import com.cmsr.onebase.module.app.core.provider.resource.PageServiceProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -24,9 +21,6 @@ public class PageServiceImpl implements PageService {
 
     @Autowired
     private AppPageRepository pageRepository;
-
-    @Autowired
-    private AppPageSetPageRepository pageSetPageRepository;
 
     @Autowired
     private AppPageSetRepository pageSetRepository;
@@ -72,15 +66,6 @@ public class PageServiceImpl implements PageService {
         }
 
         pageRepository.save(formPageDO);
-
-        AppResourcePagesetPageDO formPageSetPageDO = new AppResourcePagesetPageDO();
-        formPageSetPageDO.setPageSetUuid(createPageViewDTO.getPageSetUuid());
-        formPageSetPageDO.setPageType(formPageType);
-        formPageSetPageDO.setPageUuid(formPageDO.getPageUuid());
-        formPageSetPageDO.setIsDefault(0);
-        formPageSetPageDO.setDefaultSeq(1);
-
-        pageSetPageRepository.save(formPageSetPageDO);
 
         return formPageDO.getId();
     }

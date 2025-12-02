@@ -8,7 +8,6 @@ import com.cmsr.onebase.module.app.core.dal.database.app.AppApplicationRepositor
 import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.*;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetPageDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourceWorkbenchComponentDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourceWorkbenchPageDO;
 import com.cmsr.onebase.module.app.core.enums.appresource.AppResourceErrorCodeConstants;
@@ -42,9 +41,6 @@ public class WorkBenchPageSetServiceImpl implements WorkBenchPageSetService {
     private AppPageSetRepository pageSetDataRepository;
 
     @Resource
-    private AppPageSetPageRepository pageSetPageDataRepository;
-
-    @Resource
     private AppPageRepository pageDataRepository;
 
     @Resource
@@ -69,20 +65,11 @@ public class WorkBenchPageSetServiceImpl implements WorkBenchPageSetService {
         //1. 初始化工作台页面配置（空页面配置）
         AppResourceWorkbenchPageDO workBenchPageDO = this.buildEmptyWorkbenchPage(pageSetDO);
         appWorkbenchPageRepository.save(workBenchPageDO);
-
-        //2. 创建页面集和页面的关联关系
-        AppResourcePagesetPageDO pageSetPageDO = new AppResourcePagesetPageDO();
-        pageSetPageDO.setPageSetUuid(pageSetDO.getPageSetUuid());
-        pageSetPageDO.setPageType(PageEnum.WORKBENCH.getValue());
-        pageSetPageDO.setPageUuid(workBenchPageDO.getPageUuid());
-        pageSetPageDO.setIsDefault(1);
-        pageSetPageDO.setDefaultSeq(1);
-        pageSetPageDataRepository.save(pageSetPageDO);
     }
 
     @Override
-    public LoadPageSetRespVO loadWorkbenchPageSet(AppResourcePagesetDO pageSetDO, List<AppResourcePagesetPageDO> pageSetPageDOs) {
-        return workBenchPageSetServiceProvider.loadWorkbenchPageSet(pageSetDO, pageSetPageDOs);
+    public LoadPageSetRespVO loadWorkbenchPageSet(AppResourcePagesetDO pageSetDO) {
+        return workBenchPageSetServiceProvider.loadWorkbenchPageSet(pageSetDO);
     }
 
     private AppResourceWorkbenchPageDO buildEmptyWorkbenchPage(AppResourcePagesetDO pageSetDO) {
@@ -121,15 +108,6 @@ public class WorkBenchPageSetServiceImpl implements WorkBenchPageSetService {
                 pageDO.setId(page.getId());
 
                 workbenchPageRepository.save(pageDO);
-
-                // 插入页面集合页面关系
-                AppResourcePagesetPageDO pageSetPageDO = new AppResourcePagesetPageDO();
-                pageSetPageDO.setPageSetUuid(pageSetDO.getPageSetUuid());
-                pageSetPageDO.setPageType(pageType);
-                pageSetPageDO.setPageUuid(pageDO.getPageUuid());
-                pageSetPageDO.setIsDefault(0);
-                pageSetPageDO.setDefaultSeq(1);
-                pageSetPageDataRepository.save(pageSetPageDO);
 
                 page.setId(pageDO.getId());
             }

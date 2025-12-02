@@ -5,9 +5,11 @@ import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppComponentRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageRepository;
-import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageSetPageRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageSetRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.*;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppMenuDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourceComponentDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePageDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetDO;
 import com.cmsr.onebase.module.app.core.dto.appresource.ComponentDTO;
 import com.cmsr.onebase.module.app.core.dto.appresource.PageDTO;
 import com.cmsr.onebase.module.app.core.dto.appresource.PageSetRespDTO;
@@ -36,9 +38,6 @@ public class PageSetServiceProvider {
 
     @Resource
     private AppPageSetRepository pageSetDataRepository;
-
-    @Resource
-    private AppPageSetPageRepository pageSetPageDataRepository;
 
     @Resource
     private AppPageRepository pageRepository;
@@ -78,27 +77,26 @@ public class PageSetServiceProvider {
         }
 
         // 读取页面集中的页面
-        List<AppResourcePagesetPageDO> pageSetPageDOs = pageSetPageDataRepository.findByPageSetUuid(pageSetDO.getPageSetUuid());
+        List<String> pageUuidList = pageRepository.findPageUuidsByPageSetUuid(pageSetDO.getPageSetUuid());
 
         if (PageTypeSetEnum.isWorkBenchType(pageSetDO.getPageSetType())) {
             /**
              * 加载工作台页面配置
              */
-            return workBenchPageSetService.loadWorkbenchPageSet(pageSetDO, pageSetPageDOs);
+            return workBenchPageSetService.loadWorkbenchPageSet(pageSetDO);
         }
 
-        List<AppResourcePageDO> pageDOs = pageSetPageDOs.stream()
-                .map(pageSetPageDO -> {
-                    AppResourcePageDO pageDO = pageRepository.getByUuid(pageSetPageDO.getPageUuid());
-
+        List<AppResourcePageDO> pageDOs = pageUuidList.stream()
+                .map(pageUuid -> {
+                    AppResourcePageDO pageDO = pageRepository.getByUuid(pageUuid);
                     if (pageDO == null) {
                         // 如果找不到对应的页面，记录错误并跳过
-                        log.warn("Page not found for pageRef: {}", pageSetPageDO.getPageUuid());
+                        log.warn("Page not found for pageRef: {}", pageUuid);
                         return null;
                     }
                     return pageDO;
                 })
-                .filter(Objects::nonNull) // 过滤掉null值
+                .filter(Objects::nonNull)
                 .toList();
 
         LoadPageSetRespVO loadPageSetRespVO = new LoadPageSetRespVO();
