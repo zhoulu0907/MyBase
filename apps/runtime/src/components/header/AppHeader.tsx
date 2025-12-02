@@ -71,7 +71,6 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   };
 
   const getInfo = async () => {
-    // TODO(多租户): 等马老师修复
     const res = await runtimeGetPermissionInfo(CodeType.CORP);
     console.log(res);
     UserPermissionManager.setUserPermissionInfo(res);

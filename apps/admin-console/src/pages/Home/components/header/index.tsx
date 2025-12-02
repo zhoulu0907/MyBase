@@ -26,7 +26,6 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
 
   useEffect(() => {
     if (tokenInfo?.accessToken) {
-      // TODO(mickey) 等马老师提供platform的接口后打开
       getPlatformAdminInfo();
     }
   }, [tokenInfo]);

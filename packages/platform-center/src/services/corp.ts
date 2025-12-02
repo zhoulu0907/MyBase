@@ -1,9 +1,24 @@
 //企业管理
-import { CorpDetailResponse, corpListParams, corpStatusParams, createCorpParams, updateCorpParams } from '../types';
+import {
+  checkCorpAdminUserParams,
+  checkCorpParams,
+  CorpDetailResponse,
+  corpListParams,
+  corpStatusParams,
+  createCorpParams,
+  updateCorpParams
+} from '../types';
 import { systemService } from './clients';
 
 // 创建企业
 export const createCorpApi = (data: createCorpParams) => systemService.post('/corp/create', data);
+
+// 验证企业基本信息
+export const checkCorpApi = (data: checkCorpParams) => systemService.post('/corp/check-corp', data);
+
+// 验证企业管理员
+export const checkCorpAdminUserApi = (data: checkCorpAdminUserParams) =>
+  systemService.post('/corp/check-corp-admin-user', data);
 
 //更新企业
 export const updateCorpApi = (data: updateCorpParams) => systemService.post('/corp/update', data);

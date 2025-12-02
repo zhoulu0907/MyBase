@@ -99,7 +99,6 @@ const Runtime: React.FC = () => {
   }, [appId]);
 
   useEffect(() => {
-    // TODO(多租户)：等马老师提供runtime的接口后打开
     getUserInfo();
   }, []);
 
