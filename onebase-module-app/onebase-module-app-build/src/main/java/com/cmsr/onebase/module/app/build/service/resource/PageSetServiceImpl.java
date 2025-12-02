@@ -79,6 +79,9 @@ public class PageSetServiceImpl implements PageSetService {
             createPageSetDTO.setApplicationId(ApplicationManager.getApplicationId());
         }
         AppMenuDO appMenuDO = appMenuRepository.getById(createPageSetDTO.getMenuId());
+        if (appMenuDO == null) {
+            throw ServiceExceptionUtil.exception(AppResourceErrorCodeConstants.APP_RESOURCE_MENU_NOT_EXIST);
+        }
         String menuUuid = appMenuDO.getMenuUuid();
         //
         AppResourcePagesetDO pageSetDO = BeanUtils.toBean(createPageSetDTO, AppResourcePagesetDO.class);

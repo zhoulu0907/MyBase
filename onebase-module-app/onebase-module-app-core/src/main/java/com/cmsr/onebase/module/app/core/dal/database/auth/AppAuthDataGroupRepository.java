@@ -24,8 +24,8 @@ public class AppAuthDataGroupRepository extends BaseBizRepository<AppAuthDataGro
     public List<AppAuthDataGroupDO> findByQuery(AuthPermissionReq reqVO) {
         QueryWrapper queryWrapper = this.query()
                 .where(APP_AUTH_DATA_GROUP.APPLICATION_ID.eq(reqVO.getApplicationId()))
-                .where(APP_AUTH_DATA_GROUP.ROLE_UUID.eq(reqVO.getRoleId()))
-                .where(APP_AUTH_DATA_GROUP.MENU_UUID.eq(reqVO.getMenuId()))
+                .where(APP_AUTH_DATA_GROUP.ROLE_UUID.eq(reqVO.getRoleUuid()))
+                .where(APP_AUTH_DATA_GROUP.MENU_UUID.eq(reqVO.getMenuUuid()))
                 .orderBy(APP_AUTH_DATA_GROUP.GROUP_ORDER, true);
         return this.list(queryWrapper);
     }
