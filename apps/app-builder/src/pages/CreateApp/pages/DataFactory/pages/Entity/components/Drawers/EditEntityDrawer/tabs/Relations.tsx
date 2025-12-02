@@ -2,7 +2,7 @@ import { type EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/inter
 import { Collapse, Empty, Spin } from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
 import { getEntityRelations } from '@onebase/app';
-import { RELATIONSHIP_TYPE_MAP, type RelationshipType } from '@/pages/CreateApp/pages/DataFactory/utils/types';
+import { ALL_RELATIONSHIP_TYPE_MAP, type RelationshipType } from '@/pages/CreateApp/pages/DataFactory/utils/types';
 import styles from './Relations.module.less';
 
 // 数据方法接口定义
@@ -86,7 +86,7 @@ const DataMethods: React.FC<DataMethodsProps> = ({ node }) => {
                 header={
                   <div className={styles['relation-header']}>
                     <span className={styles['relation-name']}>
-                      {RELATIONSHIP_TYPE_MAP[relation.relationshipType as RelationshipType]}
+                      {ALL_RELATIONSHIP_TYPE_MAP[relation.relationshipType as RelationshipType]}
                     </span>
                   </div>
                 }
@@ -98,7 +98,7 @@ const DataMethods: React.FC<DataMethodsProps> = ({ node }) => {
                       <div className={styles.label}>{relationKeyMap[key]}:</div>
                       {key === 'relationshipType' ? (
                         <div className={styles.text}>
-                          {RELATIONSHIP_TYPE_MAP[relation[key as keyof DataRelation] as RelationshipType]}
+                          {ALL_RELATIONSHIP_TYPE_MAP[relation[key as keyof DataRelation] as RelationshipType]}
                         </div>
                       ) : (
                         <div className={styles.text}>{relation[key as keyof DataRelation]}</div>
