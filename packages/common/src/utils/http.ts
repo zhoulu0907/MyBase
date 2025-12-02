@@ -1,4 +1,5 @@
 import { Message } from '@arco-design/web-react';
+import { Toast } from '@arco-design/mobile-react';
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { BaseResponse, RequestConfig, RequestInterceptor, ResponseInterceptor } from '../types';
 import { getHashQueryParam } from './router';
@@ -108,7 +109,12 @@ export class HttpClient {
         const { data } = response;
         if (data && typeof data === 'object') {
           if (data.code !== 0) {
-            Message.error(data.msg || '请求失败');
+            if (response.config.headers['X-Mobile-Flag']) {
+              Toast.error(data.msg || '请求失败');
+            } else {
+              Message.error(data.msg || '请求失败');
+            }
+
             if (data.code === 401) {
               const loginURL = TokenManager.getTokenInfo()?.loginURL;
 

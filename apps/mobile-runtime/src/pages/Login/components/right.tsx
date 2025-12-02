@@ -127,7 +127,8 @@ const Right: React.FC = () => {
       }
 
       const headers = {
-        'X-Tenant-Id': tenantId
+        'X-Tenant-Id': tenantId,
+        'X-Mobile-Flag': '1'
       };
 
       const loginData: LoginRequest = {

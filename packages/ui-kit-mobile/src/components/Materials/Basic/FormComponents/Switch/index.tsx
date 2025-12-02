@@ -29,6 +29,7 @@ const XSwitch = memo((props: XSwitchConfig & { runtime?: boolean; detailMode?: b
     // 非只读模式，渲染Switch组件
     return (
       <Switch
+        platform="android"
         text={{ on: fillText?.display ? fillText.checkedText : '', off: fillText?.display ? fillText.uncheckedText : '' }}
       />
     );
