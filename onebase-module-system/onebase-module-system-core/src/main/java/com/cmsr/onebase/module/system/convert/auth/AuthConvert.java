@@ -12,6 +12,7 @@ import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.permission.MenuTypeEnum;
+import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
 import com.cmsr.onebase.module.system.vo.auth.*;
 import org.apache.commons.lang3.StringUtils;
 import org.mapstruct.Mapper;
@@ -35,13 +36,18 @@ public interface AuthConvert {
     AuthLoginRespVO convert(OAuth2AccessTokenDO bean);
 
     default AuthPermissionInfoRespVO convert(AdminUserDO user, List<RoleDO> roleList, List<MenuDO> menuList, String expectCode) {
+
+        Set<String> allPermissions = new HashSet<>();
+        allPermissions.addAll(RoleCodeEnum.globalDefaultPermissionCodes);
+        // 权限标识信息,过滤 permission 以 expectCode 为开头的权限
+        allPermissions.addAll( convertSet(menuList, MenuDO::getPermission).stream().filter(
+                permission -> StringUtils.isBlank(expectCode) || permission.startsWith(expectCode)
+        ).collect(Collectors.toSet()));
+
         return AuthPermissionInfoRespVO.builder()
                 .user(BeanUtils.toBean(user, AuthPermissionInfoRespVO.UserVO.class))
                 .roles(convertSet(roleList, RoleDO::getId))
-                // 权限标识信息,过滤 permission 以 expectCode 为开头的权限
-                .permissions(convertSet(menuList, MenuDO::getPermission).stream().filter(
-                        permission -> StringUtils.isBlank(expectCode) || permission.startsWith(expectCode)
-                ).collect(Collectors.toSet()))
+                .permissions(allPermissions)
                 // 菜单树，过滤以expectCode为开头的权限
                 .menus(buildMenuTree(menuList, expectCode))
                 .build();
