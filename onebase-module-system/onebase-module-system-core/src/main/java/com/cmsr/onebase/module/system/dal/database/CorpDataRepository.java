@@ -89,9 +89,12 @@ public class CorpDataRepository extends DataRepository<CorpDO> {
         return findAllByConfig(configStore);
     }
 
-    public  List<CorpDO> getExistCorpCount(Integer status) {
+    public  List<CorpDO> getExistCorpCount(Integer status,Long corpId) {
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.eq(CorpDO.STATUS, status);
+        if (null != corpId) {
+            configStore.notIn(CorpDO.ID,  corpId);
+        }
         return findAllByConfig(configStore);
     }
 }

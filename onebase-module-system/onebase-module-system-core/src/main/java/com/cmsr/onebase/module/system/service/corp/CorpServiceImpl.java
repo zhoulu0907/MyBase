@@ -133,16 +133,16 @@ public class CorpServiceImpl implements CorpService {
         return corpDataRepository.insert(corpDO).getId();
     }
 
-    private Integer getExistCorpCount() {
+    private Integer getExistCorpCount(Long corpId) {
         List<CorpDO> corpList = corpDataRepository.getExistCorpCount(
-                TenantStatusEnum.NORMAL.getStatus());
+                TenantStatusEnum.NORMAL.getStatus(), corpId);
         return corpList.stream()
                 .filter(corp -> corp.getUserLimit() != null)
                 .mapToInt(CorpDO::getUserLimit)
                 .sum();
     }
 
-    private void validCorpUserCountLimit(Integer userCount) {
+    private void validCorpUserCountLimit(Integer userCount,Long corpId) {
         if (userCount != null && userCount > CorpConstant.USER_LIMIT) {
             throw exception(CORP_USER_LIMIT_COUNT, userCount);
         }
@@ -152,7 +152,7 @@ public class CorpServiceImpl implements CorpService {
         // 空间用户总数
         Integer tenantAccountCount = tenantDO.getAccountCount();
         // 获取企业已存在数量
-        Integer existCorpCount = getExistCorpCount();
+        Integer existCorpCount = getExistCorpCount(corpId);
         if (existCorpCount + userCount > tenantAccountCount) {
             Integer remainingCount = tenantAccountCount - existCorpCount;
             throw exception(CORP_USER_LIMIT_COUNT_CHECK, tenantAccountCount, remainingCount);
@@ -184,7 +184,7 @@ public class CorpServiceImpl implements CorpService {
     @LogRecord(type = SYSTEM_CORP_TYPE, subType = SYSTEM_CORP_UPDATE_SUB_TYPE, bizNo = "{{#corp.id}}",
             success = SYSTEM_CORP_UPDATE_SUCCESS)
     public void updateCorp(CorpUpdateReqVO reqVO) {
-        validCorpUserCountLimit(reqVO.getUserLimit());
+        validCorpUserCountLimit(reqVO.getUserLimit(), reqVO.getId());
         CorpDO checkCorp = corpDataRepository.findById(reqVO.getId());
         if (checkCorp == null) {
             throw exception(CORP_NO_EXISTS, reqVO.getCorpName());
@@ -437,7 +437,7 @@ public class CorpServiceImpl implements CorpService {
         // 用于校验企业ID是否已存在
         validCorpIdDuplicate(corpReqVO.getCorpCode());
         // 用于校验企业用户数量是否超过限制（如大于500）
-        validCorpUserCountLimit(corpReqVO.getUserLimit());
+        validCorpUserCountLimit(corpReqVO.getUserLimit(),null);
     }
 
 
