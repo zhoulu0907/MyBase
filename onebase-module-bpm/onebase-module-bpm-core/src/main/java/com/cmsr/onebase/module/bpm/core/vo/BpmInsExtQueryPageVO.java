@@ -27,7 +27,7 @@ public class BpmInsExtQueryPageVO extends PageParam  {
     @NotNull(message = "应用ID不能为空")
     private Long appId;
 
-    @Schema(description = "业务id，实际对应pageSetId", example = "32636263636323")
+    @Schema(description = "业务id，实际对应menuUuid", example = "32636263636323")
     private String businessId;
 
     @Schema(description = "排序方式：desc-最新处理的, asc-最早处理的",

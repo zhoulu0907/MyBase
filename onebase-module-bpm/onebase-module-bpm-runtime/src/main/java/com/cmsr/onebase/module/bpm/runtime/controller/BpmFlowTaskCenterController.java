@@ -59,7 +59,7 @@ public class BpmFlowTaskCenterController {
 
     @GetMapping("/list-nodes")
     @Operation(summary = "查询节点列表信息")
-    public CommonResult<List<ListNodesRespVO.NodeVO>> listNodes(@RequestParam("businessId") Long bindingViewId) {
+    public CommonResult<List<ListNodesRespVO.NodeVO>> listNodes(@RequestParam("businessId") String bindingViewId) {
         log.info("查询节点列表信息: {}", bindingViewId);
         List<ListNodesRespVO.NodeVO> nodes = flowTaskCenterService.listNodes(bindingViewId);
         return success(nodes);

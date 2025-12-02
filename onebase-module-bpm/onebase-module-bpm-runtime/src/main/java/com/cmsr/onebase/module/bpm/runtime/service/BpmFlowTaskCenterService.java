@@ -41,7 +41,8 @@ public interface BpmFlowTaskCenterService {
      * @param bindingViewId 绑定视图Id
      * @return
      */
-    List<ListNodesRespVO.NodeVO> listNodes(Long bindingViewId);
+    List<ListNodesRespVO.NodeVO> listNodes(String bindingViewId);
+
     /**
      * 获取流程抄送我的流程
      *

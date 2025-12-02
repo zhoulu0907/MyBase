@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.bpm.runtime.service.impl;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
@@ -106,6 +107,17 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
                 .collect(Collectors.toList());
     }
 
+    private void fillAppId(BpmInsExtQueryPageVO queryPageVO) {
+        // todo: 后续放到全局的Repository中
+        Long appId = ApplicationManager.getApplicationId();
+
+        if (appId == null) {
+            throw new IllegalArgumentException("应用ID不能为空");
+        }
+
+        queryPageVO.setAppId(appId);
+    }
+
     /**
      * 获取流程待办分页
      *
@@ -116,6 +128,8 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
     public PageResult<BpmFlowTodoTaskVO> getTodoPage(BpmTodoTaskPageReqVO pageReqVO) {
         Long loginUserId = WebFrameworkUtils.getLoginUserId();
         String loginUserStrId = String.valueOf(loginUserId);
+
+        fillAppId(pageReqVO);
 
         // 处理节点编码参数
         pageReqVO.setNodeCodeList(splitToList(pageReqVO.getNodeCode()));
@@ -156,6 +170,8 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         Long loginUserId = WebFrameworkUtils.getLoginUserId();
         String loginUserStrId = String.valueOf(loginUserId);
 
+        fillAppId(pageReqVO);
+
         // 处理节点编码参数
         pageReqVO.setNodeCodeList(splitToList(pageReqVO.getNodeCode()));
 
@@ -188,6 +204,8 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
      */
     public PageResult<BpmMyCreatedVO> getMyCreatedPage(BpmMyCreatedPageReqVO pageReqVO) {
         Long loginUserId = WebFrameworkUtils.getLoginUserId();
+
+        fillAppId(pageReqVO);
 
         // 处理节点编码参数
         pageReqVO.setNodeCodeList(splitToList(pageReqVO.getNodeCode()));
@@ -236,10 +254,10 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
     }
 
     @Override
-    public List<ListNodesRespVO.NodeVO> listNodes(Long bindingViewId) {
+    public List<ListNodesRespVO.NodeVO> listNodes(String bindingViewId) {
         List<ListNodesRespVO.NodeVO> nodeVOs = new ArrayList<>();
 
-        Definition def = defExtService.getByFormPathAndStatus(String.valueOf(bindingViewId), PublishStatus.PUBLISHED.getKey());
+        Definition def = defExtService.getByFormPathAndStatus(bindingViewId, PublishStatus.PUBLISHED.getKey());
         if (def == null) {
             // todo：无发布状态的定义，返回空列表，是否要返回历史状态的流程定义数据
             return nodeVOs;
@@ -279,6 +297,8 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
     public PageResult<BpmCcTaskPageResVO> getCcPage(BpmCcTaskPageReqVO pageReqVO) {
         Long loginUserId = WebFrameworkUtils.getLoginUserId();
         String loginUserStrId = String.valueOf(loginUserId);
+
+        fillAppId(pageReqVO);
 
         // 处理节点编码参数
         pageReqVO.setNodeCodeList(splitToList(pageReqVO.getNodeCode()));
