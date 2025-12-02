@@ -182,6 +182,10 @@ public interface Definition extends RootEntity {
 
     Definition setListenerPath(String listenerPath);
 
+    Long getApplicationId();
+
+    Definition setApplicationId(Long applicationId);
+
     default Definition copy() {
         return FlowEngine.newDef()
             .setTenantId(String.valueOf(this.getTenantId()))
@@ -191,6 +195,8 @@ public interface Definition extends RootEntity {
             .setModelValue(this.getModelValue())
             .setCategory(this.getCategory())
             .setVersion(this.getVersion())
+            .setVersionAlias(this.getVersionAlias())
+            .setApplicationId(this.getApplicationId())
             .setFormCustom(this.getFormCustom())
             .setFormPath(this.getFormPath())
             .setListenerType(this.getListenerType())
