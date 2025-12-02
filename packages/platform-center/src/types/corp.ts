@@ -123,7 +123,7 @@ export interface CorpDetailResponse {
   /**
    * 联系人邮箱
    */
-  email?: string;
+  adminEmail?: string;
   /**
    * 企业Id
    */
@@ -135,7 +135,7 @@ export interface CorpDetailResponse {
   /**
    * 联系人电话
    */
-  mobile?: string;
+  adminMobile?: string;
   /**
    * 状态
    */

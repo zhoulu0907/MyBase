@@ -1,5 +1,31 @@
-import type { MenuInfo, UserInfo } from '@onebase/platform-center';
-import { ALL_PERMISSION_CODE } from '../constants/permission';
+import { ALL_PERMISSION_CODE } from 'src/constants';
+
+export interface UserInfo {
+  id: number; // 用户ID
+  nickname: string; // 昵称
+  avatar: string; // 头像URL
+  deptId: number; // 部门ID
+  username: string; // 用户名
+  email: string; // 邮箱
+}
+
+/**
+ * 菜单信息结构
+ */
+export interface MenuInfo {
+  id: number;
+  parentId: number;
+  name: string;
+  path: string;
+  component: string | null;
+  componentName: string | null;
+  icon: string;
+  visible: boolean;
+  keepAlive: boolean;
+  alwaysShow: boolean;
+  permission?: string;
+  children: MenuInfo[] | null;
+}
 
 export interface UserPermissionInfo {
   user: UserInfo; // 用户信息

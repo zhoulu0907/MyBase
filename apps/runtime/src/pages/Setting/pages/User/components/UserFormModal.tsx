@@ -1,10 +1,9 @@
 import { emailValidator, phoneValidator } from '@/utils/validator';
 import { Button, Form, Grid, Input, Message, Modal, Switch, TreeSelect } from '@arco-design/web-react';
+import { CORP_DEPT_QUERY, hasPermission } from '@onebase/common';
 import type { SimpleRoleVO, UserVO } from '@onebase/platform-center';
 import { createUserInCorp, getUserInCorp, StatusEnum, updateUserInCorp } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
-import { hasPermission } from '@/utils/permission';
-import { CORP_DEPT_QUERY } from '@/constants/permission';
 
 const Row = Grid.Row;
 const Col = Grid.Col;
@@ -96,7 +95,9 @@ export default function UserFormModal({
 
   return (
     <Modal
-      title={<div style={{ textAlign: 'left' }}>{isDetail ? '用户详情' : mode === 'create' ? '新建用户' : '编辑用户'}</div>}
+      title={
+        <div style={{ textAlign: 'left' }}>{isDetail ? '用户详情' : mode === 'create' ? '新建用户' : '编辑用户'}</div>
+      }
       visible={visible}
       onCancel={onCancel}
       onOk={handleSubmit}
@@ -107,10 +108,10 @@ export default function UserFormModal({
       footer={
         isDetail
           ? [
-            <Button key="close" onClick={onCancel}>
-              关闭
-            </Button>
-          ]
+              <Button key="close" onClick={onCancel}>
+                关闭
+              </Button>
+            ]
           : undefined
       }
     >
@@ -137,15 +138,13 @@ export default function UserFormModal({
               <Input placeholder="请输入" autoComplete="new-password" />
             </Form.Item>
           </Col>
-          {mode === 'create' && <Col span={12}>
-            <Form.Item
-              label="密码"
-              field="password"
-              rules={[{ required: true, message: '请输入密码' }]}
-            >
-              <Input.Password placeholder="请输入" autoComplete="new-password" />
-            </Form.Item>
-          </Col>}
+          {mode === 'create' && (
+            <Col span={12}>
+              <Form.Item label="密码" field="password" rules={[{ required: true, message: '请输入密码' }]}>
+                <Input.Password placeholder="请输入" autoComplete="new-password" />
+              </Form.Item>
+            </Col>
+          )}
         </Row>
         <Row gutter={24}>
           <Col span={12}>
@@ -171,7 +170,13 @@ export default function UserFormModal({
         </Row>
         <Row gutter={24} justify="start">
           <Col span={12}>
-            <Form.Item label="启用状态" triggerPropName="checked" layout="horizontal" labelCol={{ span: 6 }} wrapperCol={{ span: 12 }} >
+            <Form.Item
+              label="启用状态"
+              triggerPropName="checked"
+              layout="horizontal"
+              labelCol={{ span: 6 }}
+              wrapperCol={{ span: 12 }}
+            >
               <Switch checked={statusCheckedValue} onChange={setStatusCheckedValue} />
             </Form.Item>
           </Col>

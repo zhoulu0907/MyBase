@@ -38,6 +38,3 @@ export const getCorpSimpleDetailsListApi = () => systemService.get('/corp/simple
 
 //获得详情
 export const getCorpDetailByIdApi = (id: number): CorpDetailResponse => systemService.get(`/corp/get?id=${id}`);
-
-//获取行业类型
-export const getIndustryType = (type: string) => systemService.get(`dict-data/simple-list-by-type?dictType=${type}`);

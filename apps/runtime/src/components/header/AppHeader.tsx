@@ -5,12 +5,11 @@ import UserProfileAvatar from '@/components/UserProfileAvatar';
 
 import { useI18n } from '@/hooks/useI18n';
 import { appInfoSignal } from '@/store/app';
-import { UserPermissionManager } from '@/utils/permission';
 import { logout } from '@/utils/session';
 import { Divider, Dropdown, Layout, Menu, Typography } from '@arco-design/web-react';
 import { IconExport } from '@arco-design/web-react/icon';
 import { getApplication, type GetApplicationReq } from '@onebase/app';
-import { TokenManager } from '@onebase/common';
+import { TokenManager, UserPermissionManager } from '@onebase/common';
 import { CodeType, runtimeGetPermissionInfo } from '@onebase/platform-center';
 import { appIconMap } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';

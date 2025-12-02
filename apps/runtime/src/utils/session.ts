@@ -1,6 +1,5 @@
-import { TokenManager } from '@onebase/common';
+import { TokenManager, UserPermissionManager } from '@onebase/common';
 import type { NavigateFunction } from 'react-router-dom';
-import { UserPermissionManager } from './permission';
 
 export const logout = (navigate: NavigateFunction) => {
   const loginURL = TokenManager.getTokenInfo()?.loginURL;

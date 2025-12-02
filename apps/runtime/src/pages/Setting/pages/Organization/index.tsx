@@ -1,15 +1,21 @@
-import dayjs from 'dayjs';
+import { PermissionButton as Button } from '@/components/PermissionControl';
+import PlaceholderPanel from '@/components/PlaceholderPanel';
 import { listToTree } from '@/utils/tree';
 import { Input, Message, Modal, Space, Table } from '@arco-design/web-react';
-import { IconPlus, IconSearch, IconCaretDown, IconCaretRight } from '@arco-design/web-react/icon';
-import { createCorpDept, deleteCorpDept, getCorpDeptList, updateCorpDept, type DeptForm, type DeptVO } from '@onebase/platform-center';
+import { IconCaretDown, IconCaretRight, IconPlus, IconSearch } from '@arco-design/web-react/icon';
+import { CORP_DEPT_PERMISSION as ACTIONS, hasAnyPermission, hasPermission } from '@onebase/common';
+import {
+  createCorpDept,
+  deleteCorpDept,
+  getCorpDeptList,
+  updateCorpDept,
+  type DeptForm,
+  type DeptVO
+} from '@onebase/platform-center';
+import dayjs from 'dayjs';
 import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import OrganizationModal from './components/OrganizationModal';
-import PlaceholderPanel from '@/components/PlaceholderPanel';
-import { PermissionButton as Button } from '@/components/PermissionControl';
-import { hasAnyPermission, hasPermission } from '@/utils/permission';
-import { CORP_DEPT_PERMISSION as ACTIONS } from '@/constants/permission';
 import styles from './index.module.less';
 
 const OrganizationPage: React.FC = () => {
@@ -99,7 +105,7 @@ const OrganizationPage: React.FC = () => {
       okText: '确认',
       cancelText: '取消',
       okButtonProps: {
-        status: 'danger',
+        status: 'danger'
       },
       onOk: async () => {
         deleteCorpDept(record.id).then(() => {
