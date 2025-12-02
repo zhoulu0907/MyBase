@@ -51,7 +51,7 @@ export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
       console.log('original nodeData: ', originalNodeData);
       console.log('formInfo', formInfo);
 
-      let param = { ...nodeData.value[nodeId.value], ...formInfo };
+      let param = { ...formInfo };
       const curNode = searchNodeById(nodeId.value, nodes.value);
 
       if (originalNodeData) {
