@@ -32,25 +32,18 @@ public class PageServiceImpl implements PageService {
     private PageServiceProvider pageServiceProvider;
 
     @Override
-    public PageRespDTO getPage(Long pageId) {
-        return pageServiceProvider.getPage(pageId);
-    }
-
-    @Override
-    public Long createPage(CreatePageDTO createPageDTO) {
-        AppResourcePageDO pageDO = BeanUtils.toBean(createPageDTO, AppResourcePageDO.class);
-        pageRepository.save(pageDO);
-        return pageDO.getId();
-    }
-
-    @Override
     public Long createPageView(CreatePageViewDTO createPageViewDTO) {
         String formPageCode = UUID.randomUUID().toString();
         String formPageName = createPageViewDTO.getViewName();
         String formRouterPath = formPageCode + "/form";
         String formPageType = PageEnum.FORM.getValue();
         Boolean formOpenViewMode = false;
-        AppResourcePageDO formPageDO = PageUtils.initPage(createPageViewDTO.getPageSetUuid(), formPageName, formRouterPath, formPageType, formOpenViewMode);
+        AppResourcePageDO formPageDO = PageUtils.initPage(
+                createPageViewDTO.getPageSetUuid(),
+                formPageName,
+                formRouterPath,
+                formPageType,
+                formOpenViewMode);
 
         String viewType = createPageViewDTO.getViewType();
 

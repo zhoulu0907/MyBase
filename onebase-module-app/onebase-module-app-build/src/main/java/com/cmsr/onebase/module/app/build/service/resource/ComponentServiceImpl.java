@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.app.build.service.resource;
 
-import com.cmsr.onebase.module.app.core.dal.database.resource.AppComponentRepository;
 import com.cmsr.onebase.module.app.core.dto.appresource.ComponentDTO;
 import com.cmsr.onebase.module.app.core.provider.resource.ComponentServiceProvider;
 import lombok.Setter;
@@ -12,9 +11,6 @@ import java.util.List;
 @Setter
 @Service
 public class ComponentServiceImpl implements ComponentService {
-
-    @Autowired
-    private AppComponentRepository appComponentDataRepository;
 
     @Autowired
     private ComponentServiceProvider componentServiceProvider;

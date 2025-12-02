@@ -10,7 +10,7 @@ public class PageUtils {
     public static AppResourcePageDO initPage(String pageSetUuid, String pageName, String routerPath, String pageType, Boolean openViewMode) {
         AppResourcePageDO pageDO = new AppResourcePageDO();
         pageDO.setPageUuid(UuidUtils.getUuid());
-        pageDO.setPageUuid(pageSetUuid);
+        pageDO.setPageSetUuid(pageSetUuid);
         pageDO.setPageName(pageName);
         pageDO.setTitle(pageName);
         pageDO.setLayout("horizontal");

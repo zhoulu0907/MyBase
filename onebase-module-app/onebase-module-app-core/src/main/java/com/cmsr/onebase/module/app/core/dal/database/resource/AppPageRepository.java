@@ -27,6 +27,13 @@ public class AppPageRepository extends BaseBizRepository<AppResourcePageMapper, 
         return getOne(queryWrapper);
     }
 
+    public String getPageSetUuidByPageUuid(String pageUuid) {
+        QueryWrapper queryWrapper = this.query()
+                .select(APP_RESOURCE_PAGE.PAGESET_UUID)
+                .where(APP_RESOURCE_PAGE.PAGE_UUID.eq(pageUuid));
+        return getObjAs(queryWrapper, String.class);
+    }
+
     public void updatePageName(Long pageId, String pageName) {
         this.updateChain()
                 .set(APP_RESOURCE_PAGE.PAGE_NAME, pageName)

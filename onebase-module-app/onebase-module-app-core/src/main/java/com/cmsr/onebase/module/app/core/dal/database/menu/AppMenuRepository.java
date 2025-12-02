@@ -32,7 +32,15 @@ public class AppMenuRepository extends BaseBizRepository<AppMenuMapper, AppMenuD
         QueryWrapper queryWrapper = this.query()
                 .eq(AppMenuDO::getApplicationId, applicationId)
                 .orderBy(AppMenuDO::getMenuSort, true);
-        return list(queryWrapper);
+        return this.list(queryWrapper);
+    }
+
+    public List<String> findMenuUuidListByApplication(Long applicationId) {
+        QueryWrapper queryWrapper = this.query()
+                .select(APP_MENU.MENU_UUID)
+                .where(APP_MENU.APPLICATION_ID.eq(applicationId))
+                .orderBy(APP_MENU.MENU_SORT, true);
+        return this.objListAs(queryWrapper, String.class);
     }
 
     public long countByParentId(Long applicationId, String menuUuid) {
