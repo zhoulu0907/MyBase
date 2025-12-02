@@ -12,6 +12,7 @@ import java.util.Set;
 
 import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppMenuTableDef.APP_MENU;
 import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppResourcePageTableDef.APP_RESOURCE_PAGE;
+import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppResourcePagesetTableDef.APP_RESOURCE_PAGESET;
 
 /**
  * @Author：huangjie
@@ -108,12 +109,17 @@ public class AppMenuRepository extends BaseBizRepository<AppMenuMapper, AppMenuD
                 .select(
                         APP_RESOURCE_PAGE.ALL_COLUMNS
                 ).from(APP_RESOURCE_PAGE)
+                .leftJoin(APP_RESOURCE_PAGESET)
+                .on(APP_RESOURCE_PAGE.PAGESET_UUID.eq(APP_RESOURCE_PAGESET.PAGESET_UUID)
+                        .and(APP_RESOURCE_PAGE.APPLICATION_ID.eq(APP_RESOURCE_PAGESET.APPLICATION_ID))
+                        .and(APP_RESOURCE_PAGE.VERSION_TAG.eq(APP_RESOURCE_PAGESET.VERSION_TAG)))
                 .leftJoin(APP_MENU)
-                .on(APP_RESOURCE_PAGE.MENU_UUID.eq(APP_MENU.MENU_UUID)
+                .on(APP_RESOURCE_PAGESET.MENU_UUID.eq(APP_MENU.MENU_UUID)
                         .and(APP_RESOURCE_PAGE.APPLICATION_ID.eq(APP_MENU.APPLICATION_ID))
                         .and(APP_RESOURCE_PAGE.VERSION_TAG.eq(APP_MENU.VERSION_TAG))
                 )
                 .where(APP_MENU.ID.eq(menuId));
+        return this.listAs(queryWrapper, AppResourcePageDO.class);
     }
 
 
