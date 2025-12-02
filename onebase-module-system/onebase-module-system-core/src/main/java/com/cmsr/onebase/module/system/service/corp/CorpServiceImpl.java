@@ -17,9 +17,11 @@ import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
 import com.cmsr.onebase.module.system.dal.database.CorpDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.corp.CorpDO;
 import com.cmsr.onebase.module.system.dal.dataobject.corpapprelation.CorpAppRelationDO;
+import com.cmsr.onebase.module.system.dal.dataobject.dict.DictDataDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.corp.CorpConstant;
 import com.cmsr.onebase.module.system.service.corpapprelation.CorpAppRelationService;
+import com.cmsr.onebase.module.system.service.dict.DictDataService;
 import com.cmsr.onebase.module.system.service.user.UserService;
 import com.cmsr.onebase.module.system.vo.corp.*;
 import com.cmsr.onebase.module.system.vo.corpapprelation.AppAuthTimeReqVO;
@@ -80,6 +82,9 @@ public class CorpServiceImpl implements CorpService {
 
     @Resource
     private DictDataCommonApi dictDataApi;
+
+    @Resource
+    private DictDataService dictDataService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -326,6 +331,11 @@ public class CorpServiceImpl implements CorpService {
         Long userCountLong = userService.getUserCountByCorpId(id);
         Integer userCount = (userCountLong != null) ? userCountLong.intValue() : 0;
         respVO.setUserCount(userCount);
+
+        DictDataDO dictData = dictDataService.getDictData(respVO.getIndustryType());
+        if (null != dictData) {
+            respVO.setIndustryTypeName(dictData.getLabel());
+        }
         return respVO;
     }
 
