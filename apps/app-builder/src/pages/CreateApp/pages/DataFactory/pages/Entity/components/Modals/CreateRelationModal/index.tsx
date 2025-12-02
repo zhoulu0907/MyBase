@@ -98,7 +98,7 @@ const CreateRelationModal: React.FC<{
       const params = {
         ...values,
         relationName: values.relationshipType,
-        appId: curAppId
+        applicationId: curAppId
       };
 
       const res = await createRelation(params);

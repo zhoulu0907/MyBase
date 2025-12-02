@@ -135,7 +135,7 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
       const updateData = {
         id: relationData?.id || relationData?.relationshipId,
         ...values,
-        appId: curAppId
+        applicationId: curAppId
       };
 
       await updateRelation(updateData);

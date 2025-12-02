@@ -141,7 +141,7 @@ export const EntityERContainer: React.FC<{
       displayConfig: JSON.stringify({ x, y }),
       code: data.code,
       datasourceId: curDataSourceId,
-      appId: curAppId
+      applicationId: curAppId
     };
     const res = await updateEntity(params as unknown as UpdateEntityReqVO);
     if (res) {
@@ -157,7 +157,7 @@ export const EntityERContainer: React.FC<{
       tableName: data.tableName,
       displayName: data.entityName,
       datasourceId: curDataSourceId,
-      appId: curAppId
+      applicationId: curAppId
     };
     const res = await updateEntity(params as unknown as UpdateEntityReqVO);
     if (res) {
@@ -174,7 +174,7 @@ export const EntityERContainer: React.FC<{
       tableName: data.tableName,
       description: data.description,
       datasourceId: curDataSourceId,
-      appId: curAppId
+      applicationId: curAppId
     };
     const res = await updateEntity(params as unknown as UpdateEntityReqVO);
     if (res) {
