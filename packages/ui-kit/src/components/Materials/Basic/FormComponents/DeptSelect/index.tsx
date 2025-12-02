@@ -33,17 +33,22 @@ const XDeptSelect = memo((props: XInputDeptSelectConfig & { runtime?: boolean; d
   }, []);
 
   useEffect(() => {
-    if (runtime === true && fieldValue) {
+    if (runtime && fieldValue) {
       setCurrentSelectDept(fieldValue?.deptName);
       runtimeEditRef.current = true;
     } else {
       setCurrentSelectDept('');
+      form.setFieldValue(fieldName, undefined);
     }
   }, [fieldValue]);
 
   useEffect(() => {
     getCurDeptTree(deptTree);
-    form.setFieldValue(fieldName, undefined);
+    if(defaultDeptValue) {
+      handleChange(defaultDeptValue);
+    } else {
+      form.setFieldValue(fieldName, undefined);
+    }
   }, [selectScope]);
 
   useEffect(() => {

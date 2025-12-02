@@ -1,10 +1,10 @@
 import LogoSVG from '@/assets/images/ob_logo.svg';
+
 import { useI18n } from '@/hooks/useI18n';
-import { UserPermissionManager } from '@/utils/permission';
-import { Avatar, Dropdown, Layout, Menu, Message } from '@arco-design/web-react';
-import { IconPoweroff, IconUser } from '@arco-design/web-react/icon';
+import { Avatar, Dropdown, Layout, Menu, Message, Typography } from '@arco-design/web-react';
+import { IconExport } from '@arco-design/web-react/icon';
 import { TokenManager } from '@onebase/common';
-import { getPermissionInfo, logout } from '@onebase/platform-center';
+import { getPlatformAdminInfoApi } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './index.module.less';
@@ -20,26 +20,36 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   const { t } = useI18n();
 
   const [nickname, setNickname] = useState('U');
+  const [mobile, setMobile] = useState<string>('');
   // 获取用户信息
   const tokenInfo = TokenManager.getTokenInfo();
 
   useEffect(() => {
     if (tokenInfo?.accessToken) {
-      getInfo();
+      getPlatformAdminInfo();
     }
   }, [tokenInfo]);
 
-  const getInfo = async () => {
-    const res = await getPermissionInfo();
-    console.log(res);
-    UserPermissionManager.setUserPermissionInfo(res);
-    setNickname(res.user.nickname);
+  const maskMobile = (value: string) => {
+    let reg = /(\d{3})\d{4}(\d{4})/;
+    const formatMobile = value.replace(reg, '$1****$2');
+    return formatMobile;
+  };
+
+  const getPlatformAdminInfo = async () => {
+    if (tokenInfo?.userId) {
+      const res = await getPlatformAdminInfoApi(tokenInfo?.userId);
+      setNickname(res.nickname);
+      const mobile = res.mobile;
+      const formatMobile = maskMobile(mobile);
+      setMobile(formatMobile);
+    }
   };
 
   // 登出处理
   const handleLogout = async () => {
     try {
-      await logout();
+      //   await platformLogout();
       // 清除 token
       TokenManager.clearToken();
       // 跳转到登录页
@@ -53,13 +63,18 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   // 用户菜单
   const userMenu = (
     <Menu>
-      <Menu.Item key="profile">
-        <IconUser />
-        {t('header.profile')}
+      <Menu.Item key="info" style={{ height: '60px' }}>
+        <div className={styles.adminInformation}>
+          <Avatar size={32} style={{ backgroundColor: '#009E9E' }}>
+            {nickname?.charAt(0) || 'U'}
+          </Avatar>
+          <Typography.Text>{nickname}</Typography.Text>
+        </div>
       </Menu.Item>
+      <Menu.Item key="profile">{mobile}</Menu.Item>
       <Menu.Item key="logout" onClick={handleLogout}>
-        <IconPoweroff />
-        {t('header.logout')}
+        <IconExport style={{ color: '#F53F3F' }} />
+        <Typography.Text type="error">{t('header.logout')}</Typography.Text>
       </Menu.Item>
     </Menu>
   );
@@ -74,7 +89,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
         <div className={styles.userInfo}>
           <Dropdown droplist={userMenu} position="bottom">
             <div className={styles.userDropdown}>
-              <Avatar size={32} style={{ backgroundColor: '#00b42a' }}>
+              <Avatar size={32} style={{ backgroundColor: '#009E9E' }}>
                 {nickname?.charAt(0) || 'U'}
               </Avatar>
             </div>

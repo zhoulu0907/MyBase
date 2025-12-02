@@ -1,4 +1,6 @@
 import { Form, Checkbox, TimePicker, Message } from '@arco-design/web-react';
+import { CONFIG_TYPES, getPopupContainer } from '@onebase/ui-kit';
+import { registerConfigRenderer } from '../../registry';
 import styles from '../../index.module.less';
 
 export interface DynamicTimeRangeConfigProps {
@@ -26,6 +28,7 @@ const DynamicTimeRangeConfig: React.FC<DynamicTimeRangeConfigProps> = ({ handleP
             </Checkbox>
             <TimePicker
               value={configs[dateRangeKey]['earliestValue']}
+              getPopupContainer={getPopupContainer}
               format="HH:mm:ss"
               style={{ marginTop: '8px', marginBottom: '8px', width: '100%' }}
               placeholder="请选择"
@@ -60,6 +63,7 @@ const DynamicTimeRangeConfig: React.FC<DynamicTimeRangeConfigProps> = ({ handleP
             </Checkbox>
             <TimePicker
               value={configs[dateRangeKey]['latestValue']}
+              getPopupContainer={getPopupContainer}
               placeholder="请选择"
               format="HH:mm:ss"
               style={{ marginTop: '8px', marginBottom: '8px', width: '100%' }}
@@ -86,3 +90,15 @@ const DynamicTimeRangeConfig: React.FC<DynamicTimeRangeConfigProps> = ({ handleP
   );
 };
 export default DynamicTimeRangeConfig;
+
+registerConfigRenderer(
+  CONFIG_TYPES.TIME_RANGE,
+  ({ id, handlePropsChange, item, configs }) => (
+    <DynamicTimeRangeConfig
+      id={id}
+      handlePropsChange={handlePropsChange}
+      item={item}
+      configs={configs}
+    />
+  )
+);

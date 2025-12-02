@@ -38,7 +38,7 @@ const DEFAULT_CONFIG: LayoutConfig = {
 
 /**
  * 自动布局算法
- * 1. 无关联关系的节点统一排列在第一排，实体顶端对齐、横向等间距分布
+ * 1. 无关联关系的节点统一排列在第一排，资产顶端对齐、横向等间距分布
  * 2. 有关联关系的节点根据拓扑排序算法分层，有sourceid的节点放左边，有targetid的放右边
  */
 export class AutoLayout {

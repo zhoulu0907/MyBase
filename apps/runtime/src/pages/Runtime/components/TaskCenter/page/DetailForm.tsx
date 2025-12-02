@@ -98,17 +98,19 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
       } = {};
       Object.keys(pageComponentSchemas).forEach((key) => {
         const originalItem = pageComponentSchemas[key];
-        const secondDataField = originalItem.config.dataField[1];
-
-        const nodeConfig = fieldPerm?.[secondDataField];
-        const formConfig = originalItem.config.status;
-        const viewMode = ViewModeMap[detailData?.pageView?.viewMode as keyof typeof ViewModeMap];
-        const newStatus = parseStatus(nodeConfig, formConfig, viewMode);
+        const secondDataField = originalItem?.config?.dataField?.[1];
+        let newStatus = originalItem?.config?.status;
+        if (secondDataField) {
+          const nodeConfig = fieldPerm?.[secondDataField];
+          const formConfig = originalItem?.config?.status;
+          const viewMode = ViewModeMap[detailData?.pageView?.viewMode as keyof typeof ViewModeMap];
+          newStatus = parseStatus(nodeConfig, formConfig, viewMode);
+        }
 
         updatedData[key] = {
           ...originalItem,
           config: {
-            ...originalItem.config,
+            ...(originalItem?.config || {}),
             status: newStatus
           }
         };
@@ -208,7 +210,7 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
     return dataObj;
   };
 
-  const parseData =  () => {
+  const parseData = () => {
     startLoadPageSet({ pageSetId: pageSetId });
   };
 
@@ -232,7 +234,7 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
         {newCompents &&
           useEditorSignalMap.get(editPageViewId.value)?.components.value.map((cp: GridItem) => (
             <Fragment key={cp.id}>
-              {newCompents && newCompents[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+              {newCompents?.[cp.id]?.config?.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
                 <div
                   key={cp.id}
                   style={{

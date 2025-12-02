@@ -1,8 +1,8 @@
+import { PermissionButton as Button } from '@/components/PermissionControl';
 import StatusTag from '@/components/StatusTag';
 import { Input, Pagination, Table } from '@arco-design/web-react';
+import { TENANT_DICT_PERMISSION as ACTIONS } from '@onebase/common';
 import { type DictData } from '@onebase/platform-center';
-import { TENANT_DICT_PERMISSION as ACTIONS } from '@/constants/permission';
-import { PermissionButton as Button } from '@/components/PermissionControl';
 import s from '../../index.module.less';
 
 interface DictionaryTableProps {

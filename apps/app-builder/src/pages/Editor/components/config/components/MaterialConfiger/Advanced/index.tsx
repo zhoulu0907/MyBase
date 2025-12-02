@@ -1,5 +1,5 @@
 import { Form, Switch } from '@arco-design/web-react';
-import { CONFIG_TYPES, usePageEditorSignal } from '@onebase/ui-kit';
+import { CONFIG_TYPES, usePageEditorSignal, getComponentSchema, hasComponentSchema } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useState } from 'react';
 import AdvancedTableConfig from './components/AdvancedTableConfig';
@@ -13,7 +13,7 @@ interface AdvancedProps {
 
 const Advanced = ({ cpID }: AdvancedProps) => {
   useSignals();
-  const { curComponentSchema, setCurComponentSchema, setPageComponentSchemas } = usePageEditorSignal();
+  const { curComponentSchema, setCurComponentSchema, setPageComponentSchemas, components, pageComponentSchemas } = usePageEditorSignal();
 
   const [editData, setEditData] = useState<any>([]);
   const [configs, setConfigs] = useState<any>({});
@@ -23,7 +23,7 @@ const Advanced = ({ cpID }: AdvancedProps) => {
 
     const newCurComponentSchema = {
       id: cpID,
-      type: curComponentSchema.type,
+      type: curComponentSchema.type || resolveType(),
       editData: curComponentSchema.editData,
       config: {
         ...curComponentSchema.config,
@@ -50,7 +50,7 @@ const Advanced = ({ cpID }: AdvancedProps) => {
 
     const newCurComponentSchema = {
       id: cpID,
-      type: curComponentSchema.type,
+      type: curComponentSchema.type || resolveType(),
       editData: curComponentSchema.editData,
       config: {
         ...curComponentSchema.config,
@@ -63,13 +63,25 @@ const Advanced = ({ cpID }: AdvancedProps) => {
     setPageComponentSchemas(cpID, newCurComponentSchema);
   };
 
+  const resolveType = () => {
+    const t1 = curComponentSchema?.type;
+    if (t1 && hasComponentSchema(t1)) return t1 as any;
+    const t2 = components?.find((c: any) => c.id === cpID)?.type;
+    if (t2 && hasComponentSchema(t2)) return t2 as any;
+    const t3 = pageComponentSchemas?.[cpID]?.type;
+    if (t3 && hasComponentSchema(t3)) return t3 as any;
+    const prefix = (cpID || '').split('-')[0];
+    if (prefix && hasComponentSchema(prefix)) return prefix as any;
+    return null;
+  };
+
   useEffect(() => {
     if (!cpID) {
       return;
     }
-    // console.debug('curComponentSchema------', curComponentSchema);
-
-    setEditData(curComponentSchema.editData);
+    const type = resolveType();
+    const defaultSchema = type ? getComponentSchema(type as any) : { editData: curComponentSchema.editData || [] };
+    setEditData(defaultSchema.editData);
     setConfigs(curComponentSchema.config);
   }, [cpID, curComponentSchema]);
 

@@ -19,11 +19,8 @@
       padding: @panel-padding;
     }
     .searchInput {
-      .arco-input-group {
-        border-radius: 24px !important;
-        & > .arco-input-inner-wrapper {
-          border-radius: 24px !important;
-        }
+      :global(.arco-input-inner-wrapper) {
+        border-radius: 24px;
       }
     }
 
@@ -68,5 +65,23 @@
         color: #8c8c8c;
       }
     }
+  }
+
+  .userListInput {
+    width: 220px;
+    margin-right: 12px;
+
+    :global(.arco-input-inner-wrapper) {
+      border-radius: 24px !important;
+    }
+  }
+}
+
+.permissionInput {
+  width: 200px;
+  margin-right: 32px;
+
+  :global(.arco-input-inner-wrapper) {
+    border-radius: 24px;
   }
 }

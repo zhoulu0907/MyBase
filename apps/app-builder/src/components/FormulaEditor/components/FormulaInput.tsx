@@ -9,12 +9,13 @@ import { defaultExtenstion } from '../utils/defaultLine';
 import type { VariablesList } from '@onebase/app';
 
 interface FormulaInputProps {
-  value: string;  // 当前公式的值
+  value: string; // 当前公式的值
+  fieldName?: string;
   onChange: (value: string) => void; // 公式变化时的回调函数
   onCopy: () => void; // 复制成功后的回调函数
   onDebug: () => void; // 调试按钮点击回调函数
   filteredVariables: VariablesList[]; // 过滤后的变量列表
-  filteredFunctions: FunctionItem[];  // 过滤后的函数列表
+  filteredFunctions: FunctionItem[]; // 过滤后的函数列表
   onEditorReady?: (editor: { insertAtPosition: (text: string, type?: string, position?: number) => void }) => void; // 编辑器就绪回调
 }
 
@@ -28,6 +29,7 @@ interface FormulaError {
 let isBlurred = false;
 export function FormulaInput({
   value,
+  fieldName,
   onChange,
   onCopy,
   onDebug,
@@ -45,82 +47,77 @@ export function FormulaInput({
    * @param {string} text - 要插入的文本内容
    * @param {string} type - 文本类型，可选，默认值为 'text'
    * @param {number} position - 插入位置，可选，默认值为当前光标位置
-   * 
-  */
-  const insertAtPosition = useCallback(
-    (text: string, type?: string, position?: number) => {
-      // 获取编辑器实例
-      if (!updateRef.current || !updateRef.current.view) {
-        console.warn('编辑器实例未准备好');
-        return;
+   *
+   */
+  const insertAtPosition = useCallback((text: string, type?: string, position?: number) => {
+    // 获取编辑器实例
+    if (!updateRef.current || !updateRef.current.view) {
+      console.warn('编辑器实例未准备好');
+      return;
+    }
+    const view = updateRef.current.view;
+    const state = view.state;
+    const [range] = state?.selection?.ranges || [];
+
+    // 根据类型格式化插入文本
+    let insertText = text;
+    if (type === 'var') {
+      // 如果已经是[[...]]格式，不再重复添加
+      if (!text.startsWith('[[') && !text.endsWith(']]')) {
+        insertText = `[[${text}]]`;
       }
-      const view = updateRef.current.view;
-      const state = view.state;
-      const [range] = state?.selection?.ranges || [];
-
-      // 根据类型格式化插入文本
-      let insertText = text;
-      if (type === 'var') {
-        // 如果已经是[[...]]格式，不再重复添加
-        if (!text.startsWith('[[') && !text.endsWith(']]')) {
-          insertText = `[[${text}]]`;
-        }
-      } else if (type === 'fn') {
-        // 确保函数格式正确并包含括号
-        if (!text.startsWith('{{')) {
-          // 提取函数名（去掉可能的括号）
-          const funcName = text.includes('()') ? text.replace('()', '') : text;
-          insertText = `{{${funcName}}}()`;
-        } else if (!text.includes('()')) {
-          // 如果已经有{{}}但没有括号，添加括号
-          insertText = `${text}()`;
-        }
+    } else if (type === 'fn') {
+      // 确保函数格式正确并包含括号
+      if (!text.startsWith('{{')) {
+        // 提取函数名（去掉可能的括号）
+        const funcName = text.includes('()') ? text.replace('()', '') : text;
+        insertText = `{{${funcName}}}()`;
+      } else if (!text.includes('()')) {
+        // 如果已经有{{}}但没有括号，添加括号
+        insertText = `${text}()`;
       }
+    }
 
-      // 确定插入位置
-      let insertFrom = range?.from || 0;
-      let insertTo = range?.to || insertFrom;
+    // 确定插入位置
+    let insertFrom = range?.from || 0;
+    let insertTo = range?.to || insertFrom;
 
-      // 如果指定了位置参数，则使用指定位置
-      if (typeof position === 'number' && position >= 0 && position <= state.doc.length) {
-        insertFrom = position;
-        insertTo = position;
+    // 如果指定了位置参数，则使用指定位置
+    if (typeof position === 'number' && position >= 0 && position <= state.doc.length) {
+      insertFrom = position;
+      insertTo = position;
+    }
+
+    // 确定光标位置
+    let cursorPosition = insertFrom + insertText.length;
+
+    // 如果是函数类型，确保光标位于括号中间
+    if (type === 'fn' && !isBlurred) {
+      // 在最终的插入文本中查找左括号位置
+      const leftBracketPos = insertText.indexOf('(');
+      if (leftBracketPos !== -1) {
+        // 将光标设置在括号中间
+        cursorPosition = insertFrom + leftBracketPos + 1;
       }
+    }
+    if (isBlurred) {
+      // cursorPosition = state.doc.length + insertText.length;
+    }
 
-      // 确定光标位置
-      let cursorPosition = insertFrom + insertText.length;
-
-      
-
-      // 如果是函数类型，确保光标位于括号中间
-      if (type === 'fn' && !isBlurred) {
-        // 在最终的插入文本中查找左括号位置
-        const leftBracketPos = insertText.indexOf('(');
-        if (leftBracketPos !== -1) {
-          // 将光标设置在括号中间
-          cursorPosition = insertFrom + leftBracketPos + 1;
-        }
+    view.dispatch({
+      changes: {
+        from: insertFrom,
+        to: insertTo,
+        insert: insertText
+      },
+      selection: {
+        anchor: cursorPosition
       }
-      if(isBlurred) {
-        // cursorPosition = state.doc.length + insertText.length;
-      }
-
-      view.dispatch({
-        changes: {
-          from: insertFrom,
-          to: insertTo,
-          insert: insertText,
-        },
-        selection: {
-          anchor: cursorPosition,
-        }
-      });
-      isBlurred = false;
-      // 聚焦并插入文本
-      view.focus();
-
-    }, []
-  );
+    });
+    isBlurred = false;
+    // 聚焦并插入文本
+    view.focus();
+  }, []);
 
   /**
    * 检查公式的语法是否正确。
@@ -290,17 +287,17 @@ export function FormulaInput({
     //处理失焦的时候改变光标位置以及插入的位置
     blurHandlerExtension,
     //设置首行-显示单行文本和两个按钮
-    defaultExtenstion(handleCopy, onDebug, value),
+    defaultExtenstion(handleCopy, onDebug, value, fieldName),
     EditorView.updateListener.of((update) => {
       updateRef.current = update;
     }),
     EditorView.lineWrapping,
     //覆盖codemirror原本的样式
     EditorView.baseTheme({
-        ".cm-gutterElement":{display: "none"},
-        ".cm-content": {padding: 0},
-        ".cm-gutters.cm-gutters-before": {borderRightWidth:0}
-      })
+      '.cm-gutterElement': { display: 'none' },
+      '.cm-content': { padding: 0 },
+      '.cm-gutters.cm-gutters-before': { borderRightWidth: 0 }
+    })
   ];
 
   return (

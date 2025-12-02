@@ -1,21 +1,15 @@
 import { Input } from '@arco-design/web-react';
 import { IconEdit } from '@arco-design/web-react/icon';
-import { etlEditorSignal } from '@onebase/common';
-import React, { useEffect, useState } from 'react';
+import React, { useState, type Dispatch } from 'react';
 import styles from './index.module.less';
 
 interface NodeTitleProps {
   title: string;
+  onChange: Dispatch<any>;
 }
 
-const NodeTitle: React.FC<NodeTitleProps> = ({ title }) => {
-  const { curNode, nodeData, setNodeData } = etlEditorSignal;
+const NodeTitle: React.FC<NodeTitleProps> = ({ title, onChange }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [titleValue, setTitleValue] = useState(title);
-
-  useEffect(() => {
-    setTitleValue(title);
-  }, [title]);
 
   const handleEdit = () => {
     if (isEditing) {
@@ -27,21 +21,14 @@ const NodeTitle: React.FC<NodeTitleProps> = ({ title }) => {
 
   const handleBlur = () => {
     setIsEditing(false);
-    console.log('titleValue: ', titleValue);
-    console.log('curNode.value.id: ', curNode.value.id);
-
-    setNodeData(curNode.value.id, {
-      ...nodeData.value[curNode.value.id],
-      title: titleValue
-    });
   };
   const handleChange = (value: string) => {
-    setTitleValue(value);
+    onChange(value);
   };
 
   return (
     <div className={styles.nodeTitle}>
-      {isEditing ? <Input value={titleValue} onChange={handleChange} onBlur={handleBlur} /> : <span>{titleValue}</span>}
+      {isEditing ? <Input value={title} onChange={handleChange} onBlur={handleBlur} /> : <span>{title}</span>}
       <IconEdit onClick={handleEdit} />
     </div>
   );

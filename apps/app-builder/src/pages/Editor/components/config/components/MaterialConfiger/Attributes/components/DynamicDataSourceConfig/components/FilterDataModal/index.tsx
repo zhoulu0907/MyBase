@@ -54,7 +54,9 @@ const FilterDataModal: React.FC<FilterDataModalProps> = ({ visible, item, config
       const newValidationTypes = await getFieldCheckTypeApi(fieldIds);
       setValidationTypes(newValidationTypes);
     }
-    payloadForm.setFieldValue(PROPSNAME.FILTERCONDITION, configs[PROPSNAME.FILTERCONDITION]);
+    setTimeout(() => {
+      payloadForm.setFieldValue(PROPSNAME.FILTERCONDITION, configs[PROPSNAME.FILTERCONDITION]);
+    }, 0);
   };
 
   const handleOkModal = () => {

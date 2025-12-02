@@ -30,13 +30,14 @@ const ICopied: FC = ({ appId }: any) => {
       title: '流程标题',
       dataIndex: 'processTitle'
     },
-    {
+     {
       title: '发起人',
-      dataIndex: 'salary',
-      render: (val, record) => (
+      dataIndex: 'initiator',
+      ellipsis: true,
+      render: (obj: any) => (
         <span className="flex-bw-center">
-          <div className="photo-img">{record?.avatar && <img src={record?.avatar} />}</div>
-          {val}
+          <div className="photo-img">{obj?.avatar && <img src={obj?.avatar} />}</div>
+          {obj?.name}
         </span>
       )
     },

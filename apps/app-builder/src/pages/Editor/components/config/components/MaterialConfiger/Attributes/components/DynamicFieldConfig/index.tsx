@@ -14,6 +14,8 @@ import {
   getPopupContainer
 } from '@onebase/ui-kit';
 import { getDictDetail, getDictDataListByType } from '@onebase/platform-center';
+import { registerConfigRenderer } from '../../registry';
+import { CONFIG_TYPES } from '@onebase/ui-kit';
 
 const FormItem = Form.Item;
 
@@ -236,3 +238,7 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
 };
 
 export default DynamicFieldConfig;
+
+registerConfigRenderer(CONFIG_TYPES.FIELD_DATA, ({ handlePropsChange, handleConfigsChange, item, configs }) => (
+  <DynamicFieldConfig handlePropsChange={handlePropsChange} handleConfigsChange={handleConfigsChange} item={item} configs={configs} />
+));

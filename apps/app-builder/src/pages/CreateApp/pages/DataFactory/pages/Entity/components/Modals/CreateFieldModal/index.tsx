@@ -31,7 +31,7 @@ const CreateFieldModal: React.FC<{
       const res = await createField({
         entityId: entity.entityId,
         displayName: entity.entityName,
-        appId: curAppId,
+        applicationId: curAppId,
         ...values,
         isSystemField: FIELD_TYPE.CUSTOM
       });

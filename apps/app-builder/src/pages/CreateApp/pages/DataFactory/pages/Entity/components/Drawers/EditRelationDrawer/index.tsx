@@ -3,8 +3,9 @@ import { useResourceStore } from '@/store/store_resource';
 import { Button, Drawer, Form, Message, Select, Space, Spin } from '@arco-design/web-react';
 import { deleteRelation, getEntityFields, getEntityList, updateRelation } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
-import styles from './index.module.less';
+import { ALL_RELATIONSHIP_OPTIONS } from '@/pages/CreateApp/pages/DataFactory/utils/types';
 import { DeleteConfirmModal } from '../../Modals';
+import styles from './index.module.less';
 interface EntityOption {
   label: string;
   value: string;
@@ -23,6 +24,7 @@ interface RelationFormValues {
   targetFieldId?: string;
   relationName?: string;
   id?: string;
+  relationshipId?: string;
   target?: { cell: string; port: string };
   source?: { cell: string; port: string };
 }
@@ -33,14 +35,6 @@ interface EditRelationDrawerProps {
   relationData?: RelationFormValues; // 关联关系数据
   onSuccess?: () => void;
 }
-
-// 关联关系类型选项
-const relationTypes = [
-  { label: '一对一', value: 'ONE_TO_ONE' },
-  { label: '一对多', value: 'ONE_TO_MANY' },
-  { label: '多对一', value: 'MANY_TO_ONE' },
-  { label: '多对多', value: 'MANY_TO_MANY' }
-];
 
 const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVisible, relationData, onSuccess }) => {
   const { curAppId } = useAppStore();
@@ -55,7 +49,7 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-  // 初始化实体选项
+  // 初始化资产选项
   useEffect(() => {
     if (visible && curDataSourceId) {
       loadEntities();
@@ -90,7 +84,7 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
         handleEntityChange(relationData?.target?.cell || relationData?.targetEntityId || '', 'right');
       }
     } catch (error) {
-      console.error('加载实体列表失败:', error);
+      console.error('加载资产列表失败:', error);
     }
   };
 
@@ -117,7 +111,7 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
     }
   };
 
-  // 处理实体选择变化
+  // 处理资产选择变化
   const handleEntityChange = (entityId: string, side: 'left' | 'right') => {
     if (entityId) {
       loadFields(entityId, side);
@@ -137,11 +131,11 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
     try {
       const values = await form.validate();
       setSubmitting(true);
-
+      console.log('relationData:  ', relationData);
       const updateData = {
-        id: relationData?.id,
+        id: relationData?.id || relationData?.relationshipId,
         ...values,
-        appId: curAppId
+        applicationId: curAppId
       };
 
       await updateRelation(updateData);
@@ -240,7 +234,7 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
             required
             rules={[{ required: true, message: '请选择关联关系' }]}
           >
-            <Select placeholder="请选择关联关系" options={relationTypes} allowClear />
+            <Select placeholder="请选择关联关系" options={ALL_RELATIONSHIP_OPTIONS} allowClear />
           </Form.Item>
 
           {/* 关联表 */}

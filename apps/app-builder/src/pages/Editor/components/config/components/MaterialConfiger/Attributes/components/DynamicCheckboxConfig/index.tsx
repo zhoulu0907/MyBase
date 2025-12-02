@@ -14,6 +14,8 @@ import {
 } from '@arco-design/web-react';
 import { IconDelete, IconDragDotVertical } from '@arco-design/web-react/icon';
 import React, { useEffect, useState } from 'react';
+import { registerConfigRenderer } from '../../registry';
+import { CONFIG_TYPES } from '@onebase/ui-kit';
 import { ReactSortable } from 'react-sortablejs';
 import styles from '../../index.module.less';
 import { COLOR_MODE_TYPES, useAppEntityStore, DEFAULT_OPTIONS_TYPE, getPopupContainer } from '@onebase/ui-kit';
@@ -62,6 +64,8 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
             type: DEFAULT_OPTIONS_TYPE.DICT,
             disabled: true,
             dictTypeId: currentMainField.dictTypeId,
+            colorMode: true,
+            colorModeType: COLOR_MODE_TYPES.POINT,
             defaultOptions: dictOptions.map((e: any) => {
               if (configs[checkboxKey].defaultOptions?.length) {
                 const oldOption = configs[checkboxKey].defaultOptions.find((ele: any) => ele.value === e.value);
@@ -103,6 +107,8 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
             type: DEFAULT_OPTIONS_TYPE.DICT,
             disabled: true,
             dictTypeId: currentSubField.dictTypeId,
+            colorMode: true,
+            colorModeType: COLOR_MODE_TYPES.POINT,
             defaultOptions: dictOptions.map((e: any) => {
               if (configs[checkboxKey].defaultOptions?.length) {
                 const oldOption = configs[checkboxKey].defaultOptions.find((ele: any) => ele.value === e.value);
@@ -143,7 +149,9 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
       handlePropsChange(checkboxKey, {
         ...configs[checkboxKey],
         defaultOptions: dictOptions,
-        dictTypeId: dict.id
+        dictTypeId: dict.id,
+        colorMode: true,
+        colorModeType: COLOR_MODE_TYPES.POINT
       });
       setSelectDisabled(false);
     }
@@ -166,7 +174,7 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
               if (value === DEFAULT_OPTIONS_TYPE.CUSTOM) {
                 setSelectDisabled(false);
               }
-              handlePropsChange(checkboxKey, { ...configs[checkboxKey], type: value });
+              handlePropsChange(checkboxKey, { ...configs[checkboxKey], type: value, defaultOptions: [] });
             }}
             options={[
               { label: '自定义', value: DEFAULT_OPTIONS_TYPE.CUSTOM },
@@ -192,7 +200,11 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
                   name: 'table-col-item'
                 }}
                 swap
-                sort={!configs[checkboxKey].disabled && !selectDisabled}
+                sort={
+                  !configs[checkboxKey].disabled &&
+                  !selectDisabled &&
+                  configs[checkboxKey].type !== DEFAULT_OPTIONS_TYPE.DICT
+                }
                 handle=".table-col-item-handle"
                 className={styles.componentCollapseContent}
                 forceFallback={true}
@@ -249,7 +261,11 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
                         />
                         <Input
                           size="small"
-                          disabled={selectDisabled}
+                          disabled={
+                            configs[checkboxKey].disabled ||
+                            selectDisabled ||
+                            configs[checkboxKey].type === DEFAULT_OPTIONS_TYPE.DICT
+                          }
                           value={configs[checkboxKey].defaultOptions[idx].label}
                           onChange={(e) => {
                             const newList = [...configs[checkboxKey].defaultOptions];
@@ -266,7 +282,11 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
                         {configs[checkboxKey]['colorMode'] && (
                           <ColorPicker
                             size="mini"
-                            disabled={selectDisabled}
+                            disabled={
+                              configs[checkboxKey].disabled ||
+                              selectDisabled ||
+                              configs[checkboxKey].type === DEFAULT_OPTIONS_TYPE.DICT
+                            }
                             value={configs[checkboxKey].defaultOptions[idx].colorType || 'rgb(var(--primary-7))'}
                             onChange={(e) => {
                               const newList = [...configs[checkboxKey].defaultOptions];
@@ -279,23 +299,25 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
                             }}
                           ></ColorPicker>
                         )}
-                        {!configs[checkboxKey].disabled && !selectDisabled && (
-                          <Button
-                            icon={<IconDelete />}
-                            shape="circle"
-                            size="mini"
-                            status="danger"
-                            disabled={configs[checkboxKey]?.defaultOptions?.length <= 2}
-                            className={styles.tableColumnItemButton}
-                            onClick={() => {
-                              const newList = [...configs[checkboxKey].defaultOptions];
-                              newList.splice(idx, 1);
-                              const newConfig = { ...configs[checkboxKey], defaultOptions: newList };
-                              handlePropsChange(checkboxKey, newConfig);
-                              remove(idx);
-                            }}
-                          />
-                        )}
+                        {!configs[checkboxKey].disabled &&
+                          !selectDisabled &&
+                          configs[checkboxKey].type !== DEFAULT_OPTIONS_TYPE.DICT && (
+                            <Button
+                              icon={<IconDelete />}
+                              shape="circle"
+                              size="mini"
+                              status="danger"
+                              disabled={configs[checkboxKey]?.defaultOptions?.length <= 2}
+                              className={styles.tableColumnItemButton}
+                              onClick={() => {
+                                const newList = [...configs[checkboxKey].defaultOptions];
+                                newList.splice(idx, 1);
+                                const newConfig = { ...configs[checkboxKey], defaultOptions: newList };
+                                handlePropsChange(checkboxKey, newConfig);
+                                remove(idx);
+                              }}
+                            />
+                          )}
                       </Space>
                     </div>
                   </Tooltip>
@@ -337,7 +359,11 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
           </Grid.Col>
           <Grid.Col span={4}>
             <Switch
-              disabled={configs[checkboxKey].disabled || selectDisabled}
+              disabled={
+                configs[checkboxKey].disabled ||
+                selectDisabled ||
+                configs[checkboxKey].type === DEFAULT_OPTIONS_TYPE.DICT
+              }
               size="small"
               checked={configs[checkboxKey].colorMode}
               onChange={(value) => {
@@ -347,7 +373,11 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
           </Grid.Col>
           <Grid.Col span={14}>
             <Radio.Group
-              disabled={configs[checkboxKey].disabled || selectDisabled}
+              disabled={
+                configs[checkboxKey].disabled ||
+                selectDisabled ||
+                configs[checkboxKey].type !== DEFAULT_OPTIONS_TYPE.DICT
+              }
               value={configs[checkboxKey].colorModeType}
               onChange={(value) => {
                 handlePropsChange(checkboxKey, { ...configs[checkboxKey], colorModeType: value });
@@ -385,3 +415,7 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
 };
 
 export default DynamicCheckboxConfig;
+
+registerConfigRenderer(CONFIG_TYPES.CHECKBOX_DATA, ({ id, handlePropsChange, item, configs }) => (
+  <DynamicCheckboxConfig id={id} handlePropsChange={handlePropsChange} item={item} configs={configs} />
+));

@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  admin-console:
+    image: ${IMAGE_NAME_ADMIN_CONSOLE:-onebase-v3-fe/admin-console:latest}
+    container_name: onebase-admin-console
+    ports:
+      - '${ADMIN_CONSOLE_PORT:-4400}:80'
+    restart: unless-stopped
+    networks:
+      - onebase-network
+    healthcheck:
+      test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost/']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    volumes:
+      - ./config/console_config.js:/usr/share/nginx/html/config.js
+
+  app-builder:
+    image: ${IMAGE_NAME_APP_BUILDER:-onebase-v3-fe/app-builder:latest}
+    container_name: onebase-app-builder
+    ports:
+      - '${APP_BUILDER_PORT:-4399}:80'
+    restart: unless-stopped
+    networks:
+      - onebase-network
+    healthcheck:
+      test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost/']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    volumes:
+      - ./config/builder_config.js:/usr/share/nginx/html/config.js
+
+  runtime:
+    image: ${IMAGE_NAME_RUNTIME:-onebase-v3-fe/runtime:latest}
+    container_name: onebase-runtime
+    ports:
+      - '${RUNTIME_PORT:-9527}:80'
+    restart: unless-stopped
+    networks:
+      - onebase-network
+    healthcheck:
+      test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost/']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    volumes:
+      - ./config/runtime_config.js:/usr/share/nginx/html/config.js
+
+networks:
+  onebase-network:
+    driver: bridge

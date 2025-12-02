@@ -1,0 +1,44 @@
+.createScriptActionPage {
+  width: 100%;
+  height: calc(100vh - 150px);
+  box-sizing: border-box;
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 8px;
+
+  /* 自定义滚动条样式 */
+  &::-webkit-scrollbar {
+    width: 5px;
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #e0e0e0;
+    border-radius: 0px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .title {
+    width: 100%;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 24px;
+    letter-spacing: 0%;
+    margin-bottom: 20px;
+  }
+
+  .editor {
+    width: 100%;
+    height: 100%;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    border: 1px solid #e5e6eb;
+  }
+}

@@ -1,5 +1,6 @@
 import { Divider, Layout, Form, Button, Table } from '@arco-design/web-react';
 import { IconPlus, IconDelete } from '@arco-design/web-react/icon';
+import { nanoid } from 'nanoid';
 import { type XSubTableConfig } from './schema';
 import { useSignals } from '@preact/signals-react/runtime';
 import { usePageEditorSignal } from 'src/hooks/useSignal';
@@ -9,7 +10,7 @@ import { getComponentSchema } from '../../../schema';
 import { FORM_COMPONENT_TYPES, ENTITY_COMPONENT_TYPES } from '../../../componentTypes';
 import EditRender from 'src/components/render/EditRender';
 import { COMPONENT_GROUP_NAME, EDITOR_TYPES, type GridItem } from 'src/utils/const';
-import { STATUS_OPTIONS, STATUS_VALUES, COLOR_MODE_TYPES, DEFAULT_OPTIONS_TYPE } from '../../../constants';
+import { STATUS_OPTIONS, STATUS_VALUES, COLOR_MODE_TYPES, DEFAULT_OPTIONS_TYPE, DEFAULT_VALUE_TYPES } from '../../../constants';
 import { v4 as uuidv4 } from 'uuid';
 import CompDeleteIcon from '@/assets/images/app_delete.svg';
 import CompCopyIcon from '@/assets/images/copy_comp_icon.svg';
@@ -61,9 +62,11 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
     schema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT];
 
     setPageComponentSchemas(componentId, schema);
+    // setTimeout(() => {
     setCurComponentID(componentId);
     setCurComponentSchema(schema);
     setShowDeleteButton(false);
+    // }, 0);
   };
   // 复制组件
   const handleCopyComponent = (comp: any, originId: string, index: number) => {
@@ -138,9 +141,15 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
     if (currentField) {
       // 数据长度 dataLength
       // 小数位数 decimalPlaces
-      // 默认值 defaultValue
-      const defaultValueConfig = { ...schema.config.defaultValue, customValue: currentField.defaultValue };
-      schema.config.defaultValueConfig = defaultValueConfig;
+      // 默认值 defaultValue => defaultValueConfig
+      if (schema.config.defaultValueConfig) {
+        const defaultValueConfig = {
+          ...schema.config.defaultValueConfig,
+          type: DEFAULT_VALUE_TYPES.CUSTOM,
+          customValue: currentField.defaultValue
+        };
+        schema.config.defaultValueConfig = defaultValueConfig;
+      }
       // 字段描述 description
       schema.config.tooltip = currentField.description;
       // 是否必填：1-是，0-不是 isRequired
@@ -208,26 +217,32 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
     const newSub = { id: cpID, type: itemType, displayName: itemDisplayName };
     setSubTableComponents(id, [...subTableComponents[id], newSub]);
     setPageComponentSchemas(cpID!, props);
+    // setTimeout(() => {
     setCurComponentID(cpID!);
     setCurComponentSchema(props);
     setShowDeleteButton(false);
+    // }, 0);
   };
 
   // 子表单内排序 拖拽选中
   const onSubStart = (e: any) => {
     const cpID = e.item.getAttribute('data-id') || '';
-    setCurComponentID(cpID);
     const curComponentSchema = pageComponentSchemas[cpID] || {};
+    // setTimeout(() => {
+    setCurComponentID(cpID);
     setCurComponentSchema(curComponentSchema);
     setShowDeleteButton(true);
+    // }, 0);
   };
   // 子表单里的元素 点击事件
   const onSubComponentClick = (e: React.MouseEvent<HTMLDivElement>, cp: GridItem) => {
     e.stopPropagation();
-    setCurComponentID(cp.id);
     const curComponentSchema = pageComponentSchemas[cp.id];
+    // setTimeout(() => {
+    setCurComponentID(cp.id);
     setCurComponentSchema(curComponentSchema);
     setShowDeleteButton(true);
+    // }, 0);
   };
 
   /**
@@ -367,7 +382,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
     keys.forEach((key) => {
       newData[key] = undefined;
     });
-    setSubTableData((prevData) => [...prevData, newData]);
+    setSubTableData((prevData) => [...prevData, { key: nanoid(), ...newData }]);
   };
   // 删除
   const handleDelete = (index: number) => {
@@ -392,7 +407,10 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
           label.display &&
           label.text && (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-              <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
+              <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>
+                {verify?.required ? <span style={{ color: 'red', paddingRight: '4px' }}>*</span> : null}
+                {label.text}
+              </span>
               {!detailMode && (
                 <Button
                   type="outline"
@@ -407,8 +425,9 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
             </div>
           )
         }
+        labelCol={{ span: 24 }}
         layout="vertical"
-        rules={[{ required: verify?.required, message:`${label.text}是必填项` }]}
+        rules={[{ required: verify?.required, message: `${label.text}是必填项` }]}
         tooltip={tooltip}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
@@ -430,7 +449,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                   headerCell: true,
                   wrapper: true
                 }}
-                rowKey="id"
+                rowKey={(record: any) => record.key}
                 pagination={false}
               />
             </div>
@@ -459,7 +478,9 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                 return !isTable && !isMain && isSub;
               });
 
+              // setTimeout(() => {
               setSubTableComponents(id, newSubList);
+              // }, 0);
             }}
             onAdd={onSubAdd}
             group={{ name: COMPONENT_GROUP_NAME }}
@@ -471,7 +492,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
             className="XSubTable-content"
             onStart={onSubStart}
           >
-            {subTableComponents[id] &&
+            {subTableComponents && subTableComponents[id] &&
               subTableComponents[id].map((cp: GridItem, index: number) => (
                 <div
                   key={cp.id}
@@ -487,10 +508,10 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                   }}
                 >
                   <div className="simulate-header-item">
-                    {pageComponentSchemas[cp.id].config?.verify?.required ? (
+                    {pageComponentSchemas[cp.id]?.config?.verify?.required ? (
                       <span style={{ color: 'red', paddingRight: '4px' }}>*</span>
                     ) : null}
-                    {pageComponentSchemas[cp.id].config.label.text || pageComponentSchemas[cp.id].config.displayName}
+                    {pageComponentSchemas[cp.id]?.config.label.text || pageComponentSchemas[cp.id]?.config.displayName}
                   </div>
                   <EditRender
                     runtime={runtime}
@@ -502,7 +523,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                   {/* 操作按钮 */}
                   {curComponentID === cp.id && showDeleteButton && (
                     <div className="operationArea">
-                      {pageComponentSchemas[cp.id].config.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+                      {pageComponentSchemas[cp.id]?.config.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
                         <>
                           <div
                             className="copyButton"

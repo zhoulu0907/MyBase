@@ -1,13 +1,14 @@
-import { useResourceStore } from '@/store/store_resource';
 import { newFieldSignal } from '@/store/singals/new_field';
+import { useResourceStore } from '@/store/store_resource';
 import { Message, Radio, Tag } from '@arco-design/web-react';
-import { IconCopy, IconMindMapping, IconNav } from '@arco-design/web-react/icon';
+import { IconApps, IconCopy, IconMindMapping, IconNav } from '@arco-design/web-react/icon';
 import { getDatasourceList } from '@onebase/app';
 import dayjs from 'dayjs';
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import EntityTable from '../components/EntityTable';
 import styles from '../index.module.less';
 import { EntityERContainer } from './EntityERContainer';
+import { KnowledgeGraphContainer } from './KnowledgeGraphContainer';
 
 export interface DatasourceRecord {
   id: string;
@@ -16,18 +17,19 @@ export interface DatasourceRecord {
   datasourceType: string;
   description: string;
   runMode: number;
-  appId: string;
+  applicationId: string;
   creator: string;
   createTime: string;
 }
 
 const PAGE_TYPE = {
   ER_CHART: 'ER_CHART',
-  ENTITY_TABLE: 'ENTITY_TABLE'
+  ENTITY_TABLE: 'ENTITY_TABLE',
+  KNOWLEDGE_GRAPH: 'KNOWLEDGE_GRAPH'
 };
 
-export const EntityPageContainer: React.FC<{ appId: string; handleMenuClick: (key: string) => void }> = ({
-  appId,
+export const EntityPageContainer: React.FC<{ applicationId: string; handleMenuClick: (key: string) => void }> = ({
+  applicationId,
   handleMenuClick
 }) => {
   const [activeTab, setActiveTab] = useState(PAGE_TYPE.ER_CHART);
@@ -38,13 +40,13 @@ export const EntityPageContainer: React.FC<{ appId: string; handleMenuClick: (ke
   const prevAppIdRef = useRef<string>('');
 
   const getAppResources = useCallback(
-    async (appId: string) => {
-      if (!appId) {
+    async (applicationId: string) => {
+      if (!applicationId) {
         return;
       }
 
       try {
-        const params = { appId };
+        const params = { applicationId };
         const res = await getDatasourceList(params);
 
         if (res?.length > 0) {
@@ -63,16 +65,16 @@ export const EntityPageContainer: React.FC<{ appId: string; handleMenuClick: (ke
         clearCurDataSourceId();
       }
     },
-    [appId]
+    [applicationId]
   );
 
   useEffect(() => {
-    console.log('curAppId', appId, prevAppIdRef.current);
-    if (!appId) {
+    console.log('curAppId', applicationId, prevAppIdRef.current);
+    if (!applicationId) {
       return;
     }
 
-    if (prevAppIdRef.current && prevAppIdRef.current !== appId) {
+    if (prevAppIdRef.current && prevAppIdRef.current !== applicationId) {
       console.log('应用切换，清理旧状态');
       setDsData(null);
       clearCurDataSourceId();
@@ -81,10 +83,10 @@ export const EntityPageContainer: React.FC<{ appId: string; handleMenuClick: (ke
       newFieldSignal.clearAllNewFields();
     }
 
-    prevAppIdRef.current = appId;
+    prevAppIdRef.current = applicationId;
 
-    getAppResources(appId);
-  }, [appId]);
+    getAppResources(applicationId);
+  }, [applicationId]);
 
   useEffect(() => {
     return () => {
@@ -129,6 +131,9 @@ export const EntityPageContainer: React.FC<{ appId: string; handleMenuClick: (ke
             <Radio value={PAGE_TYPE.ENTITY_TABLE}>
               <IconNav />
             </Radio>
+            <Radio value={PAGE_TYPE.KNOWLEDGE_GRAPH}>
+              <IconApps />
+            </Radio>
           </Radio.Group>
         </div>
       </div>
@@ -149,6 +154,11 @@ export const EntityPageContainer: React.FC<{ appId: string; handleMenuClick: (ke
       {activeTab === PAGE_TYPE.ENTITY_TABLE && (
         <div className={styles.entityPageContent}>
           <EntityTable />
+        </div>
+      )}
+      {activeTab === PAGE_TYPE.KNOWLEDGE_GRAPH && (
+        <div className={styles.entityPageContent}>
+          <KnowledgeGraphContainer datasourceId={dsData?.id} />
         </div>
       )}
     </div>

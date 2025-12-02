@@ -81,8 +81,8 @@ export interface EntityERProps {
   onStatusChange?: (data: Partial<EntityNode>) => void;
 }
 
-// 实体列表
-// 实体详情
+// 资产列表
+// 资产详情
 export interface Entity {
   id: string;
   tableName?: string;
@@ -96,35 +96,35 @@ export interface Entity {
   methods?: EntityMethod[];
 }
 
-// 实体列表
+// 资产列表
 export interface EntityListItem {
   id: string;
   displayName: string;
   code: string;
 }
 
-// 实体关系
+// 资产关系
 export interface EntityRelation {
   id: string;
   displayName: string;
   code: string;
 }
 
-// 实体规则
+// 资产规则
 export interface EntityRule {
   id: string;
   displayName: string;
   code: string;
 }
 
-// 实体方法
+// 资产方法
 export interface EntityMethod {
   id: string;
   displayName: string;
   code: string;
 }
 
-// 实体字段
+// 资产字段
 export interface EntityField {
   id: string;
   displayName: string;

@@ -1,7 +1,8 @@
 import { Form, Checkbox, Input, InputNumber, Grid } from '@arco-design/web-react';
 import { useEffect, useState } from 'react';
-import { DEFAULT_VALUE_TYPES, DEFAULT_VALUE_TYPES_LABELS } from '@onebase/ui-kit';
+import { DEFAULT_VALUE_TYPES, DEFAULT_VALUE_TYPES_LABELS, CONFIG_TYPES } from '@onebase/ui-kit';
 import styles from '../../index.module.less';
+import { registerConfigRenderer } from '../../registry';
 
 export interface DynamicVerifyConfigProps {
   handlePropsChange: (key: string, value: any) => void;
@@ -171,3 +172,15 @@ const DynamicVerifyConfig: React.FC<DynamicVerifyConfigProps> = ({ handlePropsCh
   );
 };
 export default DynamicVerifyConfig;
+
+registerConfigRenderer(
+  CONFIG_TYPES.VERIFY,
+  ({ id, handlePropsChange, item, configs }) => (
+    <DynamicVerifyConfig
+      id={id}
+      handlePropsChange={handlePropsChange}
+      item={item}
+      configs={configs}
+    />
+  )
+);
