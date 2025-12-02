@@ -19,7 +19,7 @@ interface FieldDetail {
   isSystemField: number;
   entityId: string;
   entityName: string;
-  appId: string;
+  applicationId: string;
   displayName: string;
 }
 
@@ -118,7 +118,7 @@ const EditFieldDrawer: React.FC<EditFieldDrawerProps> = ({ visible, setVisible, 
       }
 
       const updateData = {
-        appId: curAppId,
+        applicationId: curAppId,
         id: fieldDetail.id,
         entityId: fieldDetail.entityId,
         fieldCode: values.fieldCode,

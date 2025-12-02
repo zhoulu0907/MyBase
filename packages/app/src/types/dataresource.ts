@@ -17,7 +17,7 @@ export interface DatasourceSaveReqVO {
   config: DatasourceConfig;
   description?: string;
   runMode?: number;
-  appId: string;
+  applicationId: string;
   lockVersion?: number;
   datasourceOrigin?: number;
 }
@@ -50,5 +50,5 @@ export interface GetDatasourcePageParams {
   code?: string;
   datasourceType?: string;
   runMode?: number;
-  appId: string;
+  applicationId: string;
 }

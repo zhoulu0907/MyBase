@@ -35,7 +35,7 @@ const DataFields: React.FC<DataFieldsProps> = ({ entity, activeTab }) => {
         entityId: entity.id,
         pageNo: page.pageNo,
         pageSize: page.pageSize,
-        appId: curAppId
+        applicationId: curAppId
       };
       const response = await getEntityFieldsPage(params);
       console.log('getEntityFields', response);

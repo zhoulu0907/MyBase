@@ -60,8 +60,12 @@ export const DataSelectionConfig: React.FC<DataSelectionConfigProps> = ({
 
   const handleConfirm = () => {
     const config = form.getFieldsValue();
-    console.log('handleConfirm', config);
-    onConfirm(config);
+    const dataSelectionConfig = {
+      targetEntityId: config.targetEntityId,
+      targetFieldId: config.targetFieldId,
+      relationId: initialDataSelectionConfig?.relationId || config?.relationId || ''
+    };
+    onConfirm(dataSelectionConfig);
   };
 
   useEffect(() => {
