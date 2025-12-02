@@ -54,7 +54,7 @@ public enum RoleCodeEnum {
     /**
      * 应用开发者权限编码列表(建议未来迁移到数据库配置)
      */
-    private final Set<String> devloperPermissionCodes = new HashSet<>() {{
+    public static final Set<String> devloperPermissionCodes = new HashSet<>() {{
 
         add("tenant"); // 一级
         add("tenant:app"); // 应用管理
@@ -91,7 +91,7 @@ public enum RoleCodeEnum {
     /**
      * 空间全部用户的默认权限(建议未来迁移到数据库配置)
      */
-    private final Set<String> tenantDefaultPermissionCodes = new HashSet<>() {{
+    public static final Set<String> tenantDefaultPermissionCodes = new HashSet<>() {{
 
         add("tenant"); // 一级
         add("tenant:app"); // 应用管理
@@ -122,7 +122,7 @@ public enum RoleCodeEnum {
     /**
      * 企业全部用户的默认权限(建议未来迁移到数据库配置)
      */
-    private final Set<String> corpDefaultPermissionCodes = new HashSet<String>() {{
+    public static final Set<String> corpDefaultPermissionCodes = new HashSet<>() {{
 
         add("corp"); // 一级
 

@@ -6,10 +6,10 @@ import cn.hutool.extra.spring.SpringUtil;
 import com.cmsr.onebase.framework.common.biz.system.permission.dto.DeptDataPermissionRespDTO;
 import com.cmsr.onebase.framework.common.enums.CommonPublishModelEnum;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
+import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.common.security.dto.LoginUser;
-import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.system.convert.auth.AuthConvert;
@@ -41,6 +41,7 @@ import com.mzt.logapi.starter.annotation.LogRecord;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.init.DefaultConfigStore;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
@@ -63,34 +64,22 @@ import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
 /**
  * 权限 Service 实现类
  */
-@Service
-@Slf4j
-public class PermissionServiceImpl implements PermissionService {
+@Service @Slf4j public class PermissionServiceImpl implements PermissionService {
 
-    @Resource
-    private RoleService          roleService;
-    @Resource
-    private MenuService          menuService;
-    @Resource
-    private DeptService          deptService;
-    @Resource @Lazy
-    private UserService          userService;
-    @Resource
-    private TenantPackageService tenantPackageService;
-    @Resource
-    @Lazy // 延迟，避免循环依赖报错
-    private TenantService        tenantService;
+    @Resource private RoleService roleService;
+    @Resource private MenuService menuService;
+    @Resource private DeptService deptService;
+    @Resource @Lazy private UserService userService;
+    @Resource private TenantPackageService tenantPackageService;
+    @Resource @Lazy // 延迟，避免循环依赖报错
+    private TenantService tenantService;
 
-    @Resource
-    private PermissionService permissionService;
+    @Resource private PermissionService permissionService;
 
-    @Resource
-    private UserRoleDataRepository userRoleDataRepository;
-    @Resource
-    private RoleMenuDataRepository roleMenuDataRepository;
+    @Resource private UserRoleDataRepository userRoleDataRepository;
+    @Resource private RoleMenuDataRepository roleMenuDataRepository;
 
-    @Override
-    public boolean isPlatformSuperAdmin(Long userId) {
+    @Override public boolean isPlatformSuperAdmin(Long userId) {
         // 获得当前登录的角色。如果为空，说明没有权限
         List<RoleDO> roles = getEnableUserRoleListByUserIdFromCache(userId);
         if (CollUtil.isEmpty(roles)) {
@@ -99,17 +88,26 @@ public class PermissionServiceImpl implements PermissionService {
         return roleService.hasAnySuperOrTenantAdmin(convertSet(roles, RoleDO::getId));
     }
 
-    @Override
-    public boolean hasAnyPermissions(Long userId, String... permissions) {
+    @Override public boolean hasAnyPermissions(Long userId, String... permissions) {
         // 如果为空，说明已经有权限
         if (ArrayUtil.isEmpty(permissions)) {
             return true;
         }
 
-        // 获得当前登录的角色。如果为空，说明没有权限
+        // 获得当前登录的角色为空
         List<RoleDO> roles = getEnableUserRoleListByUserIdFromCache(userId);
         if (CollUtil.isEmpty(roles)) {
-            return false;
+            // 没有任何角色的用户，拥有系统默认的基础权限
+            Integer userType = SecurityFrameworkUtils.getLoginUserType();
+            if (UserTypeEnum.TENANT.getValue().equals(userType)) {
+                // 空间用户的默认基础权限
+                return CollectionUtils.containsAny(RoleCodeEnum.tenantDefaultPermissionCodes, permissions);
+            } else if (UserTypeEnum.CORP.getValue().equals(userType)) {
+                // 企业用户的默认基础权限
+                return CollectionUtils.containsAny(RoleCodeEnum.corpDefaultPermissionCodes, permissions);
+            } else {
+                return false;
+            }
         }
 
         // 情况一：如果是平台管理员，赋予所有权限
@@ -124,32 +122,16 @@ public class PermissionServiceImpl implements PermissionService {
             // 读取 tenant package，获取租户所有的权限点 tenantAllPermissions
             TenantDO tenant = tenantService.getTenant(TenantContextHolder.getRequiredTenantId());
             TenantPackageDO tenantPackage = tenantPackageService.getTenantPackage(tenant.getPackageId());
-            Set<String> tenantAllPermissions = null;
             if (PackageTypeEnum.ALL.getCode().equals(tenantPackage.getCode())) {
-                // 若是 PackageTypeEnum.ALL, tenantAllPermissions = tenant、app开头的权限
-                // List<MenuDO> menuList = menuService.getMenuList();
-                // 过滤出permission字段值为app和tenant开头的菜单项
-                // tenantAllPermissions = menuList.stream()
-                //         .filter(menu -> menu.getPermission() != null &&
-                //                 (menu.getPermission().startsWith(MenuConstants.MENU_APP)
-                //                         || menu.getPermission().startsWith(MenuConstants.MENU_TENANT)
-                //                 || menu.getPermission().startsWith(MenuConstants.MENU_SYSTEM)))
-                //         .map(MenuDO::getPermission)
-                //         .collect(Collectors.toSet());
                 // 租户管理员拥有所有权限
                 return true;
             } else {
                 // 不是All，tenantAllPermissions = package下写入的所有权限点
                 Set<Long> menuIds = tenantPackage.getMenuIds();
                 List<MenuDO> menuList = menuService.getAllActiveMenuList(menuIds);
-                tenantAllPermissions = menuList.stream().map(MenuDO::getPermission).filter(Objects::nonNull)
-                        .collect(Collectors.toSet());
-            }
-            // permissions 和 tenantAllPermissions对比，命中一个即返回true
-            for (String permission : permissions) {
-                if (tenantAllPermissions.contains(permission)) {
-                    return true;
-                }
+                Set<String> tenantAllPermissions = menuList.stream().map(MenuDO::getPermission).filter(Objects::nonNull).collect(Collectors.toSet());
+                // permissions 和 tenantAllPermissions对比，命中一个即返回true
+                return CollectionUtils.containsAny(tenantAllPermissions, permissions);
             }
         }
 
@@ -158,25 +140,15 @@ public class PermissionServiceImpl implements PermissionService {
         if (isCorpAdmin) {
             Set<Long> menuIds = getAllCorpActiveMenuIds();
             List<MenuDO> menuList = menuService.getAllActiveMenuList(menuIds);
-            Set<String> tenantAllPermissions = menuList.stream().map(MenuDO::getPermission).filter(Objects::nonNull)
-                    .collect(Collectors.toSet());
+            Set<String> corpAllPermissions = menuList.stream().map(MenuDO::getPermission).filter(Objects::nonNull).collect(Collectors.toSet());
             // permissions 和 tenantAllPermissions对比，命中一个即返回true
-            for (String permission : permissions) {
-                if (tenantAllPermissions.contains(permission)) {
-                    return true;
-                }
-            }
+            return CollectionUtils.containsAny(corpAllPermissions, permissions);
         }
         // 情况二：如果是开发管理员，赋予所有开发相关权限
         boolean isDevAdmin = roleService.hasAnyDevloperAdmin(convertSet(roles, RoleDO::getId));
         if (isDevAdmin) {
             // 所有开发者的权限
-            Set<String> menuCodes = RoleCodeEnum.APP_DEVELOPER.getDevloperPermissionCodes();
-            for (String permission : permissions) {
-                if (menuCodes.contains(permission)) {
-                    return true;
-                }
-            }
+            return CollectionUtils.containsAny(RoleCodeEnum.corpDefaultPermissionCodes, permissions);
         }
 
         // 情况三：遍历判断每个权限，如果有一满足，说明有权限
@@ -216,8 +188,7 @@ public class PermissionServiceImpl implements PermissionService {
         return false;
     }
 
-    @Override
-    public boolean hasAnyRoles(Long userId, String... roles) {
+    @Override public boolean hasAnyRoles(Long userId, String... roles) {
         // 如果为空，说明已经有权限
         if (ArrayUtil.isEmpty(roles)) {
             return true;
@@ -236,15 +207,11 @@ public class PermissionServiceImpl implements PermissionService {
 
     // ========== 角色-菜单的相关方法  ==========
 
-    @Override
-    @Caching(evict = {
-            @CacheEvict(value = RedisKeyConstants.MENU_ROLE_ID_LIST,
-                    allEntries = true),
-            @CacheEvict(value = RedisKeyConstants.PERMISSION_MENU_ID_LIST,
-                    allEntries = true) // allEntries 清空所有缓存，主要一次更新涉及到的 menuIds 较多，反倒批量会更快
+    @Override @Caching(evict = {@CacheEvict(value = RedisKeyConstants.MENU_ROLE_ID_LIST, allEntries = true),
+        @CacheEvict(value = RedisKeyConstants.PERMISSION_MENU_ID_LIST, allEntries = true)
+        // allEntries 清空所有缓存，主要一次更新涉及到的 menuIds 较多，反倒批量会更快
     })
-    @LogRecord(type = SYSTEM_PERMISSION_TYPE, subType = SYSTEM_PERMISSION_ASSIGN_ROLE_MENU_SUB_TYPE, bizNo = "{{#role.id}}",
-            success = SYSTEM_PERMISSION_ASSIGN_ROLE_MENU_SUCCESS)
+    @LogRecord(type = SYSTEM_PERMISSION_TYPE, subType = SYSTEM_PERMISSION_ASSIGN_ROLE_MENU_SUB_TYPE, bizNo = "{{#role.id}}", success = SYSTEM_PERMISSION_ASSIGN_ROLE_MENU_SUCCESS)
     public void assignRoleMenu(Long roleId, Set<Long> menuIds) {
         // 获得角色拥有菜单编号
         Set<Long> dbMenuIds = convertSet(roleMenuDataRepository.findListByRoleId(roleId), RoleMenuDO::getMenuId);
@@ -254,7 +221,7 @@ public class PermissionServiceImpl implements PermissionService {
         Collection<Long> deleteMenuIds = CollUtil.subtract(dbMenuIds, menuIdList);
         // 执行新增和删除。对于已经授权的菜单，不用做任何处理
         if (CollUtil.isNotEmpty(createMenuIds)) {
-//            bug fixed: class java.lang.String cannot be cast to class java.lang.Long
+            //            bug fixed: class java.lang.String cannot be cast to class java.lang.Long
             List<RoleMenuDO> entities = new ArrayList<>();
             for (Object menuId : createMenuIds) {
                 Long mId = Long.parseLong(menuId.toString());
@@ -276,31 +243,38 @@ public class PermissionServiceImpl implements PermissionService {
         LogRecordContext.putVariable("menuNames", menuNames.collect(Collectors.joining(",")));
     }
 
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    @Caching(evict = {
-            @CacheEvict(value = RedisKeyConstants.MENU_ROLE_ID_LIST,
-                    allEntries = true), // allEntries 清空所有缓存，此处无法方便获得 roleId 对应的 menu 缓存们
-            @CacheEvict(value = RedisKeyConstants.USER_ROLE_ID_LIST,
-                    allEntries = true) // allEntries 清空所有缓存，此处无法方便获得 roleId 对应的 user 缓存们
-    })
-    public void processRoleDeleted(Long roleId) {
+    @Override @Transactional(rollbackFor = Exception.class)
+    @Caching(evict = {@CacheEvict(value = RedisKeyConstants.MENU_ROLE_ID_LIST, allEntries = true),
+        // allEntries 清空所有缓存，此处无法方便获得 roleId 对应的 menu 缓存们
+        @CacheEvict(value = RedisKeyConstants.USER_ROLE_ID_LIST, allEntries = true)
+        // allEntries 清空所有缓存，此处无法方便获得 roleId 对应的 user 缓存们
+    }) public void processRoleDeleted(Long roleId) {
         // 标记删除 UserRole
         userRoleDataRepository.deleteByRoleId(roleId);
         // 标记删除 RoleMenu
         roleMenuDataRepository.deleteByRoleId(roleId);
     }
 
-    @Override
-    @CacheEvict(value = RedisKeyConstants.MENU_ROLE_ID_LIST, key = "#menuId")
+    @Override @CacheEvict(value = RedisKeyConstants.MENU_ROLE_ID_LIST, key = "#menuId")
     public void processMenuDeleted(Long menuId) {
         roleMenuDataRepository.deleteByMenuId(menuId);
     }
 
-    @Override
-    public Set<Long> getRoleMenuListByRoleId(Collection<Long> roleIds) {
+    @Override public Set<Long> getRoleMenuListByRoleId(Collection<Long> roleIds) {
         if (CollUtil.isEmpty(roleIds)) {
-            return Collections.emptySet();
+            // 没有任何角色的用户，返回系统默认的基础权限
+            Integer userType = SecurityFrameworkUtils.getLoginUserType();
+            if (UserTypeEnum.TENANT.getValue().equals(userType)) {
+                // 空间用户的默认基础权限
+                List<MenuDO> menudoList = menuService.getAllActiveMenuListByCodes(RoleCodeEnum.tenantDefaultPermissionCodes);
+                return convertSet(menudoList, MenuDO::getId);
+            } else if (UserTypeEnum.CORP.getValue().equals(userType)) {
+                // 企业用户的默认基础权限
+                List<MenuDO> menudoList = menuService.getAllActiveMenuListByCodes(RoleCodeEnum.corpDefaultPermissionCodes);
+                return convertSet(menudoList, MenuDO::getId);
+            } else {
+                return Collections.emptySet();
+            }
         }
 
         // 如果是平台、空间管理员的情况下，获取全部菜单编号
@@ -313,8 +287,7 @@ public class PermissionServiceImpl implements PermissionService {
         }
         // 如果是开发管理员的情况下，获取开发菜单编号
         if (roleService.hasAnyDevloperAdmin(roleIds)) {
-            Set<String> menuCode = RoleCodeEnum.APP_DEVELOPER.getDevloperPermissionCodes();
-            List<MenuDO> menudoList = menuService.getAllActiveMenuListByCodes(menuCode);
+            List<MenuDO> menudoList = menuService.getAllActiveMenuListByCodes(RoleCodeEnum.devloperPermissionCodes);
             return convertSet(menudoList, MenuDO::getId);
         }
 
@@ -322,47 +295,36 @@ public class PermissionServiceImpl implements PermissionService {
         return convertSet(roleMenuDataRepository.findListByRoleIds(roleIds), RoleMenuDO::getMenuId);
     }
 
-    @Override
-    public Set<Long> getAllCorpActiveMenuIds() {
+    @Override public Set<Long> getAllCorpActiveMenuIds() {
         // 获取所有权限
         List<MenuDO> menuList = menuService.getAllEnableMenuList();
         // 过滤出 tenantAllPermissions = tenant、app开头的菜单项
         Set<Long> tenantAllPermissions = menuList.stream()
-                .filter(menu -> menu.getPermission() != null
-                        && menu.getPermission().startsWith(MenuConstants.MENU_CORP))
-                .map(MenuDO::getId)
-                .collect(Collectors.toSet());
+            .filter(menu -> menu.getPermission() != null && menu.getPermission().startsWith(MenuConstants.MENU_CORP))
+            .map(MenuDO::getId).collect(Collectors.toSet());
         return tenantAllPermissions;
     }
 
-    @Override
-    public Set<Long> getAllValidActiveMenuIds() {
+    @Override public Set<Long> getAllValidActiveMenuIds() {
         // 获取所有权限
         List<MenuDO> menuList = menuService.getAllEnableMenuList();
         // 过滤出 tenantAllPermissions = tenant、app开头的菜单项
-        Set<Long> tenantAllPermissions = menuList.stream()
-                .filter(menu -> menu.getPermission() != null
-                        && (menu.getPermission().startsWith(MenuConstants.MENU_TENANT)
-                        || menu.getPermission().startsWith(MenuConstants.MENU_CORP)
-                        || menu.getPermission().startsWith(MenuConstants.MENU_SYSTEM)))
-                .map(MenuDO::getId)
-                .collect(Collectors.toSet());
+        Set<Long> tenantAllPermissions = menuList.stream().filter(
+            menu -> menu.getPermission() != null && (menu.getPermission().startsWith(MenuConstants.MENU_TENANT)
+                || menu.getPermission().startsWith(MenuConstants.MENU_CORP) || menu.getPermission()
+                .startsWith(MenuConstants.MENU_SYSTEM))).map(MenuDO::getId).collect(Collectors.toSet());
         return tenantAllPermissions;
     }
 
-
-    @Override
-    @Cacheable(value = RedisKeyConstants.MENU_ROLE_ID_LIST, key = "#menuId")
+    @Override @Cacheable(value = RedisKeyConstants.MENU_ROLE_ID_LIST, key = "#menuId")
     public Set<Long> getMenuRoleIdListByMenuIdFromCache(Long menuId) {
         return convertSet(roleMenuDataRepository.findListByMenuId(menuId), RoleMenuDO::getRoleId);
     }
 
     // ========== 用户-角色的相关方法  ==========
 
-    @Override
-    @CacheEvict(value = RedisKeyConstants.USER_ROLE_ID_LIST, key = "#userId")
-    @LogRecord(type = SYSTEM_PERMISSION_TYPE, subType = SYSTEM_PERMISSION_ASSIGN_USER_ROLES_SUB_TYPE, bizNo = "{{#user.id}}",
-            success = SYSTEM_PERMISSION_ASSIGN_USER_ROLES_SUCCESS)
+    @Override @CacheEvict(value = RedisKeyConstants.USER_ROLE_ID_LIST, key = "#userId")
+    @LogRecord(type = SYSTEM_PERMISSION_TYPE, subType = SYSTEM_PERMISSION_ASSIGN_USER_ROLES_SUB_TYPE, bizNo = "{{#user.id}}", success = SYSTEM_PERMISSION_ASSIGN_USER_ROLES_SUCCESS)
     public void assignUserRoles(Long userId, Set<Long> roleIds) {
         AdminUserDO user = userService.getUser(userId);
         // 获得角色拥有角色编号
@@ -373,7 +335,8 @@ public class PermissionServiceImpl implements PermissionService {
         Collection<Long> deleteRoleIds = CollUtil.subtract(dbRoleIds, roleIdList);
         // 执行新增和删除。对于已经授权的角色，不用做任何处理
         if (!CollUtil.isEmpty(createRoleIds)) {
-            userRoleDataRepository.insertBatch(CollectionUtils.convertList(createRoleIds, roleId -> {
+            userRoleDataRepository.insertBatch(
+                com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertList(createRoleIds, roleId -> {
                 UserRoleDO entity = new UserRoleDO();
                 entity.setUserId(userId);
                 entity.setRoleId(roleId);
@@ -391,28 +354,25 @@ public class PermissionServiceImpl implements PermissionService {
 
         LogRecordContext.putVariable("loginUser", loginUser);
         LogRecordContext.putVariable("user", user);
-        LogRecordContext.putVariable("roleNames", roleList.stream().map(RoleDO::getName).collect(Collectors.joining(",")));
+        LogRecordContext.putVariable("roleNames",
+            roleList.stream().map(RoleDO::getName).collect(Collectors.joining(",")));
     }
 
-    @Override
-    @CacheEvict(value = RedisKeyConstants.USER_ROLE_ID_LIST, key = "#userId")
+    @Override @CacheEvict(value = RedisKeyConstants.USER_ROLE_ID_LIST, key = "#userId")
     public void processUserDeleted(Long userId) {
         userRoleDataRepository.deleteByUserId(userId);
     }
 
-    @Override
-    public Set<Long> getRoleIdsListByUserId(Long userId) {
+    @Override public Set<Long> getRoleIdsListByUserId(Long userId) {
         return convertSet(userRoleDataRepository.findListByUserId(userId), UserRoleDO::getRoleId);
     }
 
-    @Override
-    @Cacheable(value = RedisKeyConstants.USER_ROLE_ID_LIST, key = "#userId")
+    @Override @Cacheable(value = RedisKeyConstants.USER_ROLE_ID_LIST, key = "#userId")
     public Set<Long> getUserRoleIdListByUserIdFromCache(Long userId) {
         return getRoleIdsListByUserId(userId);
     }
 
-    @Override
-    public Set<Long> getUserIdsListByRoleIds(Collection<Long> roleIds) {
+    @Override public Set<Long> getUserIdsListByRoleIds(Collection<Long> roleIds) {
         return convertSet(userRoleDataRepository.findListByRoleIds(roleIds), UserRoleDO::getUserId);
     }
 
@@ -422,8 +382,7 @@ public class PermissionServiceImpl implements PermissionService {
      * @param userId 用户编号
      * @return 用户拥有的角色
      */
-    @VisibleForTesting
-    List<RoleDO> getEnableUserRoleListByUserIdFromCache(Long userId) {
+    @VisibleForTesting List<RoleDO> getEnableUserRoleListByUserIdFromCache(Long userId) {
         // 获得用户拥有的角色编号
         Set<Long> roleIds = getSelf().getUserRoleIdListByUserIdFromCache(userId);
         // 获得角色数组，并移除被禁用的
@@ -435,8 +394,7 @@ public class PermissionServiceImpl implements PermissionService {
     // ========== 用户-部门的相关方法  ==========
 
     @Override
-    @LogRecord(type = SYSTEM_PERMISSION_TYPE, subType = SYSTEM_PERMISSION_ASSIGN_ROLE_DATA_SCOPE_SUB_TYPE, bizNo = "{{#role.id}}",
-            success = SYSTEM_PERMISSION_ASSIGN_ROLE_DATA_SCOPE_SUCCESS)
+    @LogRecord(type = SYSTEM_PERMISSION_TYPE, subType = SYSTEM_PERMISSION_ASSIGN_ROLE_DATA_SCOPE_SUB_TYPE, bizNo = "{{#role.id}}", success = SYSTEM_PERMISSION_ASSIGN_ROLE_DATA_SCOPE_SUCCESS)
     public void assignRoleDataScope(Long roleId, Integer dataScope, Set<Long> dataScopeDeptIds) {
         roleService.updateRoleDataScope(roleId, dataScope, dataScopeDeptIds);
 
@@ -449,8 +407,7 @@ public class PermissionServiceImpl implements PermissionService {
         LogRecordContext.putVariable("dataScopeDeptIds", dataScopeDeptIds);
     }
 
-    @Override
-    public DeptDataPermissionRespDTO getDeptDataPermission(Long userId) {
+    @Override public DeptDataPermissionRespDTO getDeptDataPermission(Long userId) {
         // 获得用户的角色
         List<RoleDO> roles = getEnableUserRoleListByUserIdFromCache(userId);
 
@@ -484,7 +441,7 @@ public class PermissionServiceImpl implements PermissionService {
             }
             // 情况三，DEPT_ONLY
             if (Objects.equals(role.getDataScope(), DataScopeEnum.DEPT_ONLY.getScope())) {
-                CollectionUtils.addIfNotNull(result.getDeptIds(), userDeptId.get());
+                com.cmsr.onebase.framework.common.util.collection.CollectionUtils.addIfNotNull(result.getDeptIds(), userDeptId.get());
                 continue;
             }
             // 情况四，DEPT_DEPT_AND_CHILD
@@ -506,8 +463,7 @@ public class PermissionServiceImpl implements PermissionService {
     }
 
     @Override
-    @LogRecord(type = SYSTEM_PERMISSION_TYPE, subType = SYSTEM_PERMISSIONSUB_ADD_ROLE_USERS_TYPE, bizNo = "{{#role.id}}",
-            success = SYSTEM_PERMISSION_ADD_ROLE_USERS__SUCCESS)
+    @LogRecord(type = SYSTEM_PERMISSION_TYPE, subType = SYSTEM_PERMISSIONSUB_ADD_ROLE_USERS_TYPE, bizNo = "{{#role.id}}", success = SYSTEM_PERMISSION_ADD_ROLE_USERS__SUCCESS)
     public long addRoleUsers(Long roleId, Set<Long> userIds) {
 
         RoleDO role = roleService.getRole(roleId);
@@ -517,14 +473,12 @@ public class PermissionServiceImpl implements PermissionService {
         }
 
         // 批量插入新的用户角色关系
-        List<UserRoleDO> userRoleList = userIds.stream()
-                .map(userId -> {
-                    UserRoleDO userRole = new UserRoleDO();
-                    userRole.setUserId(userId);
-                    userRole.setRoleId(roleId);
-                    return userRole;
-                })
-                .collect(Collectors.toList());
+        List<UserRoleDO> userRoleList = userIds.stream().map(userId -> {
+            UserRoleDO userRole = new UserRoleDO();
+            userRole.setUserId(userId);
+            userRole.setRoleId(roleId);
+            return userRole;
+        }).collect(Collectors.toList());
 
         List<UserRoleDO> insertedList = userRoleDataRepository.upsertBatch(userRoleList);
         List<AdminUserDO> userList = userService.getUserList(userIds);
@@ -534,16 +488,13 @@ public class PermissionServiceImpl implements PermissionService {
 
         LogRecordContext.putVariable("loginUser", loginUser);
         LogRecordContext.putVariable("role", role);
-        LogRecordContext.putVariable("userNames", userList.stream().map(AdminUserDO::getNickname)
-                .collect(Collectors.joining(",")));
+        LogRecordContext.putVariable("userNames",
+            userList.stream().map(AdminUserDO::getNickname).collect(Collectors.joining(",")));
         return CollUtil.isEmpty(insertedList) ? 0 : insertedList.size();
     }
 
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    @TenantIgnore
-    @LogRecord(type = SYSTEM_PERMISSION_TYPE, subType = SYSTEM_PERMISSION_DELETE_ROLE_USERS_SUB_TYPE, bizNo = "{{#role.id}}",
-            success = SYSTEM_PERMISSION_DELETE_ROLE_USERS__SUCCESS)
+    @Override @Transactional(rollbackFor = Exception.class) @TenantIgnore
+    @LogRecord(type = SYSTEM_PERMISSION_TYPE, subType = SYSTEM_PERMISSION_DELETE_ROLE_USERS_SUB_TYPE, bizNo = "{{#role.id}}", success = SYSTEM_PERMISSION_DELETE_ROLE_USERS__SUCCESS)
     public long deleteRoleUsers(Long roleId, Set<Long> userIds) {
         // 参数校验
         if (CollUtil.isEmpty(userIds)) {
@@ -560,21 +511,19 @@ public class PermissionServiceImpl implements PermissionService {
 
         LogRecordContext.putVariable("loginUser", loginUser);
         LogRecordContext.putVariable("role", role);
-        LogRecordContext.putVariable("userNames", userList.stream().map(AdminUserDO::getNickname)
-                .collect(Collectors.joining(",")));
+        LogRecordContext.putVariable("userNames",
+            userList.stream().map(AdminUserDO::getNickname).collect(Collectors.joining(",")));
         // 删除指定角色下的指定用户关系
         return deleted;
     }
 
-    @Override
-    public UserRoleDO getUserRoleByUserAndRoleId(Long userId, Long roleId) {
-        return userRoleDataRepository.findOne(new DefaultConfigStore()
-                .eq(UserRoleDO.USER_ID, userId).eq(UserRoleDO.ROLE_ID, roleId));
+    @Override public UserRoleDO getUserRoleByUserAndRoleId(Long userId, Long roleId) {
+        return userRoleDataRepository.findOne(
+            new DefaultConfigStore().eq(UserRoleDO.USER_ID, userId).eq(UserRoleDO.ROLE_ID, roleId));
     }
 
     @Override
-    @LogRecord(type = SYSTEM_PERMISSION_TYPE, subType = SYSTEM_PERMISSION_ADD_ROLE_MENUS_SUB_TYPE, bizNo = "{{#role.id}}",
-            success = SYSTEM_PERMISSION_ADD_ROLE_MENUS_SUCCESS)
+    @LogRecord(type = SYSTEM_PERMISSION_TYPE, subType = SYSTEM_PERMISSION_ADD_ROLE_MENUS_SUB_TYPE, bizNo = "{{#role.id}}", success = SYSTEM_PERMISSION_ADD_ROLE_MENUS_SUCCESS)
     public long addRoleMenus(Long roleId, Set<Long> menuIds) {
         if (CollUtil.isEmpty(menuIds)) {
             return 0;
@@ -582,14 +531,12 @@ public class PermissionServiceImpl implements PermissionService {
         RoleDO role = roleService.getRole(roleId);
         roleService.validateRoleList(Collections.singleton(roleId));
         // 批量插入新的角色菜单关系
-        List<RoleMenuDO> roleMenuList = menuIds.stream()
-                .map(menuId -> {
-                    RoleMenuDO roleMenu = new RoleMenuDO();
-                    roleMenu.setRoleId(roleId);
-                    roleMenu.setMenuId(menuId);
-                    return roleMenu;
-                })
-                .collect(Collectors.toList());
+        List<RoleMenuDO> roleMenuList = menuIds.stream().map(menuId -> {
+            RoleMenuDO roleMenu = new RoleMenuDO();
+            roleMenu.setRoleId(roleId);
+            roleMenu.setMenuId(menuId);
+            return roleMenu;
+        }).collect(Collectors.toList());
 
         List<RoleMenuDO> insertedList = roleMenuDataRepository.upsertBatch(roleMenuList);
         // 记录操作日志上下文
@@ -598,16 +545,14 @@ public class PermissionServiceImpl implements PermissionService {
 
         LogRecordContext.putVariable("loginUser", loginUser);
         LogRecordContext.putVariable("role", role);
-        LogRecordContext.putVariable("menuNames", allActiveMenuList.stream().map(MenuDO::getName)
-                .collect(Collectors.joining(",")));
+        LogRecordContext.putVariable("menuNames",
+            allActiveMenuList.stream().map(MenuDO::getName).collect(Collectors.joining(",")));
 
         return CollUtil.isEmpty(insertedList) ? 0 : insertedList.size();
     }
 
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    @LogRecord(type = SYSTEM_PERMISSION_TYPE, subType = SYSTEM_PERMISSION_DELETE_ROLE_MENUS_SUB_TYPE, bizNo = "{{#roleId}}",
-            success = SYSTEM_PERMISSION_DELETE_ROLE_MENUS_SUCCESS)
+    @Override @Transactional(rollbackFor = Exception.class)
+    @LogRecord(type = SYSTEM_PERMISSION_TYPE, subType = SYSTEM_PERMISSION_DELETE_ROLE_MENUS_SUB_TYPE, bizNo = "{{#roleId}}", success = SYSTEM_PERMISSION_DELETE_ROLE_MENUS_SUCCESS)
     public long deleteRoleMenus(Long roleId, Set<Long> menuIds) {
         // 参数校验
         if (CollUtil.isEmpty(menuIds)) {
@@ -624,13 +569,12 @@ public class PermissionServiceImpl implements PermissionService {
 
         LogRecordContext.putVariable("loginUser", loginUser);
         LogRecordContext.putVariable("role", role);
-        LogRecordContext.putVariable("menuNames", allActiveMenuList.stream().map(MenuDO::getName)
-                .collect(Collectors.joining(",")));
+        LogRecordContext.putVariable("menuNames",
+            allActiveMenuList.stream().map(MenuDO::getName).collect(Collectors.joining(",")));
         return deleted;
     }
 
-    @Override
-    public AuthPermissionInfoRespVO getPermissionInfo(String code) {
+    @Override public AuthPermissionInfoRespVO getPermissionInfo(String code) {
         // 1.1 获得用户信息
         AdminUserDO user = userService.getUser(getLoginUserId());
         if (user == null) {
@@ -649,11 +593,11 @@ public class PermissionServiceImpl implements PermissionService {
         List<MenuDO> menuList = menuService.getAllActiveMenuList(menuIds);
 
         // 1.4检查当前租户是否inner模式，并移除企业权限
-       TenantDO tenantDO= tenantService.getTenant(user.getTenantId());
+        TenantDO tenantDO = tenantService.getTenant(user.getTenantId());
         if (CommonPublishModelEnum.InnerModel.getValue().equals(tenantDO.getPublishModel())) {
             // 排除企业权限
-            menuList.removeIf(menu -> menu.getPermission() != null
-                    && menu.getPermission().startsWith(MenuConstants.MENU_TENANT_CORP));
+            menuList.removeIf(menu -> menu.getPermission() != null && menu.getPermission()
+                .startsWith(MenuConstants.MENU_TENANT_CORP));
         }
 
         return AuthConvert.INSTANCE.convert(user, roles, menuList, code);
@@ -674,8 +618,7 @@ public class PermissionServiceImpl implements PermissionService {
      * @param menuIds 菜单ID集合
      * @return 菜单详细信息列表
      */
-    @Override
-    public List<PermissionMenuRespVO> getMenuDetailListByIds(Set<Long> menuIds) {
+    @Override public List<PermissionMenuRespVO> getMenuDetailListByIds(Set<Long> menuIds) {
         if (CollUtil.isEmpty(menuIds)) {
             return Collections.emptyList();
         }
