@@ -1,0 +1,29 @@
+.materialCard {
+  width: 118px;
+  height: 36px;
+  padding: 8px 12px;
+  box-sizing: border-box;
+  border-radius: 4px;
+  border: 1px solid #e5e6eb;
+  background: #fff;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: center;
+
+  .text {
+    color: rgb(79, 79, 79);
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 20px;
+    white-space: nowrap;
+    position: unset;
+  }
+}
+
+.icon {
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+    overflow: hidden;
+}

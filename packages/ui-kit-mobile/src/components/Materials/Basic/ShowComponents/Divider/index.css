@@ -1,0 +1,25 @@
+.dividerWrapper {
+  height: 0.8rem;
+  position: relative;
+  display: flex;
+  align-items: center;
+  &.left::before, &.right::after  {
+    flex-basis: 0.48rem;
+    flex-grow: 0;
+  }
+  span {
+    box-sizing: border-box;
+    padding: 0 0.32rem;
+    font-size: 0.28rem;
+    line-height: 2;
+    color: #909399;
+  }
+  &::before, &::after {
+    content: '';
+    height: 0;
+    flex: 1;
+    border-bottom: 1px;
+    border-bottom-style: solid;
+    border-bottom-color: #E4E7ED;
+  }
+}
