@@ -21,8 +21,7 @@ import java.util.List;
 @Data
 public class MetadataRestoreReqVO {
 
-    @Schema(description = "目标应用ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
-    @NotNull(message = "目标应用ID不能为空")
+    @Schema(description = "目标应用ID", example = "1")
     private Long targetApplicationId;
 
     @Schema(description = "数据源列表", requiredMode = Schema.RequiredMode.REQUIRED)

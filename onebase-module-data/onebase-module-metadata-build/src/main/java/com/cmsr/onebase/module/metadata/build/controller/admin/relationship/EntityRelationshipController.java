@@ -128,9 +128,9 @@ public class EntityRelationshipController {
 
     @PostMapping("/app-entities")
     @Operation(summary = "根据应用ID查询所有实体及字段信息")
-    @Parameter(name = "appId", description = "应用ID", required = true, example = "1001")
+    @Parameter(name = "appId", description = "应用ID", required = false, example = "1001")
     @PreAuthorize("@ss.hasPermission('metadata:entity-relationship:query')")
-    public CommonResult<AppEntitiesRespVO> getAppEntitiesWithFields(@RequestParam("appId") Long appId) {
+    public CommonResult<AppEntitiesRespVO> getAppEntitiesWithFields(@RequestParam(value = "appId", required = false) Long appId) {
         appId = ApplicationManager.getApplicationId();
         AppEntitiesRespVO result = entityRelationshipService.getAppEntitiesWithFields(appId);
         return success(result);
