@@ -1,6 +1,5 @@
 import { AppHeader } from '@/components/header';
 import { useI18n } from '@/hooks/useI18n';
-import { UserPermissionManager } from '@/utils/permission';
 import { Input, Layout, Tree } from '@arco-design/web-react';
 import { IconDown, IconSearch } from '@arco-design/web-react/icon';
 import {
@@ -12,7 +11,7 @@ import {
   type ApplicationMenu,
   type ListApplicationMenuReq
 } from '@onebase/app';
-import { TokenManager } from '@onebase/common';
+import { TokenManager, UserPermissionManager } from '@onebase/common';
 import { runtimeGetPermissionInfo } from '@onebase/platform-center';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
@@ -99,7 +98,6 @@ const Runtime: React.FC = () => {
   }, [appId]);
 
   useEffect(() => {
-    // TODO(多租户)：等马老师提供runtime的接口后打开
     getUserInfo();
   }, []);
 

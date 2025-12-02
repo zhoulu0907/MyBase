@@ -58,6 +58,23 @@ export interface createCorpParams {
   corpReqVO: CorpBasicInfo;
 }
 
+export interface checkCorpParams {
+  corpLogo?: string;
+  corpName: string;
+  corpCode: string;
+  industryType: number;
+  status?: number;
+  address?: string;
+  userLimit: number;
+}
+
+export interface checkCorpAdminUserParams {
+  username: string;
+  email: string;
+  mobile: string;
+  nickname: string;
+}
+
 export interface corpListParams {
   pageNo: number;
   pageSize: number;
@@ -106,7 +123,7 @@ export interface CorpDetailResponse {
   /**
    * 联系人邮箱
    */
-  email?: string;
+  adminEmail?: string;
   /**
    * 企业Id
    */
@@ -118,7 +135,7 @@ export interface CorpDetailResponse {
   /**
    * 联系人电话
    */
-  mobile?: string;
+  adminMobile?: string;
   /**
    * 状态
    */

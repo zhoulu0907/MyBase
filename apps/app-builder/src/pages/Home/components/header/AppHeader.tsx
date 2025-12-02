@@ -4,11 +4,10 @@ import UserProfileAvatar from '@/components/UserProfileAvatar';
 
 import { useI18n } from '@/hooks/useI18n';
 import { userPermissionSignal } from '@/store/singals/user_permission';
-import { UserPermissionManager } from '@/utils/permission';
 import { logout } from '@/utils/session';
 import { Divider, Dropdown, Layout, Menu, Tabs, Typography } from '@arco-design/web-react';
 import { IconExport } from '@arco-design/web-react/icon';
-import { TokenManager } from '@onebase/common';
+import { TokenManager, UserPermissionManager } from '@onebase/common';
 import { CodeType, getPermissionInfo } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';

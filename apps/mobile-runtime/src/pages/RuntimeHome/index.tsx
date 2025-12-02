@@ -1,13 +1,13 @@
 import { TabBar } from '@arco-design/mobile-react';
-import { IconUser, IconHome } from '@arco-design/mobile-react/esm/icon';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { IconHome, IconUser } from '@arco-design/mobile-react/esm/icon';
 import { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 // import { TokenManager } from '@onebase/common';
-import { UserPermissionManager } from '@/utils/permission';
+import { UserPermissionManager } from '@onebase/common';
 import { getPermissionInfo } from '@onebase/platform-center';
-import styles from './index.module.less';
 import Home from './components/home';
 import Me from './components/me';
+import styles from './index.module.less';
 export default function RuntimeHome() {
   const [nickname, setNickname] = useState('-');
   const [username, setUsername] = useState('-');

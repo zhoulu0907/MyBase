@@ -1,7 +1,5 @@
 import PlaceholderPanel from '@/components/PlaceholderPanel';
 
-import { TENANT_INFO_PERMISSION as ACTIONS } from '@/constants/permission';
-import { hasPermission } from '@/utils/permission';
 import {
   Avatar,
   Form,
@@ -16,7 +14,7 @@ import {
   Upload
 } from '@arco-design/web-react';
 import { IconCamera, IconCopy, IconEdit } from '@arco-design/web-react/icon';
-import { TokenManager, Cropper } from '@onebase/common';
+import { TENANT_INFO_PERMISSION as ACTIONS, Cropper, hasPermission, TokenManager } from '@onebase/common';
 import type { PlatformTenantInfo } from '@onebase/platform-center';
 import {
   getTenantInfo,
@@ -71,11 +69,11 @@ const SpaceInfo: React.FC = () => {
 
     const progressAdapter = onProgress
       ? (progressEvent: ProgressEvent) => {
-        if (progressEvent.lengthComputable) {
-          const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          onProgress(percent, progressEvent);
+          if (progressEvent.lengthComputable) {
+            const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            onProgress(percent, progressEvent);
+          }
         }
-      }
       : undefined;
 
     const res = await uploadFile(formData, progressAdapter);
@@ -211,21 +209,23 @@ const SpaceInfo: React.FC = () => {
                           });
                         }}
                       >
-                        {logoUrl ? 
-                        <Image
-                          className={styles.reUploadLogo}
-                          src={logoUrl}
-                          width={160}
-                          height={80}
-                          preview={false}
-                          actions={[<IconCamera />]}
-                        /> : 
-                        <Avatar
-                          shape="square"
-                          style={{ width: 160, height: 80, backgroundColor: '#F7F8FA', borderRadius: 12 }}
-                        >
-                          <span className={styles.avatarText}>{spaceInfo.name?.slice(0, 6)}</span>
-                        </Avatar>}
+                        {logoUrl ? (
+                          <Image
+                            className={styles.reUploadLogo}
+                            src={logoUrl}
+                            width={160}
+                            height={80}
+                            preview={false}
+                            actions={[<IconCamera />]}
+                          />
+                        ) : (
+                          <Avatar
+                            shape="square"
+                            style={{ width: 160, height: 80, backgroundColor: '#F7F8FA', borderRadius: 12 }}
+                          >
+                            <span className={styles.avatarText}>{spaceInfo.name?.slice(0, 6)}</span>
+                          </Avatar>
+                        )}
                       </Upload>
                     }
                   </Tooltip>
