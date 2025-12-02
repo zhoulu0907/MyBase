@@ -18,6 +18,7 @@ import { useRememberMe } from '../../../hooks/useRememberMe';
 import styles from '../index.module.less';
 import { ValidatorType } from '@arco-design/mobile-utils';
 import logoIcon from '../../../assets/images/logo-icon.svg';
+import { IconEyeInvisible, IconEyeVisible } from '@arco-design/mobile-react/esm/icon';
 
 interface APP_INFO {
   appName: string;
@@ -39,12 +40,13 @@ const Right: React.FC = () => {
 
   // 从路由中获取 appid 参数 TODO待优化
   const hash = window.location.hash;
-  const match = hash.match(/\/runtime-home\/([^\/]+)\/([^\/]+)/);
+  const match = hash.match(/\/runtime-home\/([^\/]+)\/([^/?]+)/);
   const appId = match ? match[1] : '';
   const tenantId = match ? match[2] : '1';
 
   // 使用记住我hook
   const { rememberMe, savedAccount, saveRememberMe } = useRememberMe();
+  const [showPassword, setShowPassword] = useState(false); // 显示密码
 
   // 状态管理
   const [loading, setLoading] = useState(false);
@@ -237,6 +239,12 @@ const Right: React.FC = () => {
     );
   };
 
+  // 根据状态确定 Input 的 type
+  const inputType = showPassword ? 'text' : 'password';
+
+  // 根据状态确定显示的图标
+  const EyeIcon = showPassword ? IconEyeVisible : IconEyeInvisible;
+
   return (
     <div className={styles.loginPageRight}>
       <div className={styles.titleContainer}>
@@ -268,7 +276,7 @@ const Right: React.FC = () => {
             className={styles.passwordItem}
             rules={rules.password}
           >
-            <Input type="password" placeholder={t('auth.password')} clearable={false} />
+            <Input type={inputType} placeholder={t('auth.password')} clearable suffix={<div className={styles.togglePassword} onClick={() => setShowPassword(prev => !prev)}><EyeIcon /></div>} />
           </Form.Item>
           <div className={styles.rememberMeContainer}>
             <div className={styles.forgotPassword}> {t('auth.accountRegistration')}</div>
