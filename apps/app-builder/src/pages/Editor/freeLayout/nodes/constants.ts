@@ -24,7 +24,7 @@ export enum WorkflowNodeType {
   APPROVER = 'approver',
   CCRECIPIENTS = 'cc',
   BRANCH_IN = 'branch-in',
-  CONDITIONAL_BRANCH = 'conditional-branch',
-  SINK_NODE_BRANCH='sink-node-branch',
-  PARALLEL_BRANCH='parallel-branch',
+  CONDITIONAL_BRANCH = 'condtion',
+  SINK_NODE_BRANCH = 'sink-node-branch',
+  PARALLEL_BRANCH = 'parallel-branch'
 }

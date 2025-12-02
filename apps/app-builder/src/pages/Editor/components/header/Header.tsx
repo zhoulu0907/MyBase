@@ -167,6 +167,14 @@ export default function EditorHeader() {
     const appId = await getAppIdByPageSetId({ pageSetId });
     const data = editorRef?.document.toJSON();
     const currentJsonData = normalizeNodes(data);
+    currentJsonData.edges?.forEach((item) => {
+      if (item.data) {
+        item.name = item.data.name;
+      }
+    });
+
+    console.log(currentJsonData);
+    // return;
     const { id, flowCode, flowName, version, versionAlias, versionStatus, businessId } = flowData;
     const params = {
       id: isCreate ? '' : id || '',

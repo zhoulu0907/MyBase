@@ -2,13 +2,14 @@
  * Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
  * SPDX-License-Identifier: MIT
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, startTransition, useContext } from 'react';
 import { useLocation } from 'react-router-dom';
 import { type WorkflowLineEntity } from '@flowgram.ai/free-layout-editor';
-import { Form, Switch, Input, Select, Button } from '@arco-design/web-react';
+import { Form, Switch, Input, Select, Button, Message } from '@arco-design/web-react';
 import { IconClose } from '@arco-design/web-react/icon';
 import close from '../../assets/close.svg';
 import BottomBtn from '../bottomBtn';
+import { SidebarContext } from '../../context';
 import { FormulaEditor } from '@/components/FormulaEditor';
 import { getEntityFieldsWithChildren, getPageSetMetaData } from '@onebase/app';
 import type { FieldOption, OpOptions, ConditionRule } from './constants';
@@ -50,7 +51,6 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
   const [formulaVisible, setFormulaVisible] = useState<boolean>(false);
   const [formulaData, setFormulaData] = useState<string>('');
   const [formSummaryOptions, setFormSummaryOptions] = useState<any[]>([]);
-  const [currentIndex, setCurrentIndex] = useState<any>(0);
   const [currentEditingRule, setCurrentEditingRule] = useState<{ groupIndex: number; ruleIndex: number } | null>(null);
   const [conditionGroups, setConditionGroups] = useState<ConditionRule[][]>([
     [
@@ -68,12 +68,71 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const pageSetId = searchParams.get('pageSetId') || '';
+  const { setLineData } = useContext(SidebarContext);
   const { line } = props;
-
-  const handleClose = () => {};
-  function handleSubmit() {
-    console.log(conditionGroups);
-  }
+  const handleClose = useCallback(() => {
+    startTransition(() => {
+      setLineData(undefined);
+    });
+  }, []);
+  const handleSubmit = () => {
+    form.validate(['name']).then((values) => {
+      // // 验证每个条件规则
+      const isValid = conditionGroups.every((group) =>
+        group.every((item) => {
+          // 如果选择了 IS_EMPTY 或 IS_NOT_EMPTY，只需要验证前三个字段
+          if (item.op === Operator.IS_EMPTY || item.op === Operator.IS_NOT_EMPTY) {
+            return item.fieldScope && item.fieldId && item.op;
+          }
+          // 其他情况需要验证所有字段
+          return item.fieldScope && item.fieldId && item.op && item.operatorType && item.value;
+        })
+      );
+      if (!isValid) {
+        // 可以在这里添加提示信息
+        // Message.warning('请检查条件规则是否填写完整');
+        form.setFields({
+          condition: {
+            error: {
+              message: '请检查条件规则是否填写完整',
+              type: 'error'
+            }
+          }
+        });
+        return;
+      } else {
+        form.setFields({
+          condition: {
+            value: conditionGroups
+          }
+        });
+        const fromValue = form.getFieldsValue();
+        // line.lineData = {
+        //   name: '条件线',
+        //   priority: 1,
+        //   isDefault: false,
+        //   condition: [
+        //     [
+        //       {
+        //         fieldScope: 'entity',
+        //         fieldId: 'id',
+        //         op: 'EQUALS',
+        //         operatorType: 'value',
+        //         value: 'test'
+        //       }
+        //     ]
+        //   ]
+        // };
+        console.log(fromValue);
+        line.lineData = {
+          ...fromValue,
+          priority: 1
+        };
+        Message.success('保存成功');
+        handleClose();
+      }
+    });
+  };
   // 规则改变
   const handleRuleChange = (groupIndex: number, ruleIndex: number, field: string, value: any, item?: any) => {
     const newGroups = [...conditionGroups];
@@ -346,20 +405,38 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
       </div>
       <div className={styles.sidebarLineContent}>
         <Form form={form} autoComplete="off">
-          <FormItem className={styles.directionRow} label="默认分支" field="isDefault">
-            <Switch size="small" />
+          <FormItem
+            className={styles.directionRow}
+            // label="默认分支"
+            // field="isDefault"
+            // triggerPropName="checked"
+            // initialValue={line.lineData?.isDefault || false}
+          >
+            <FormItem
+              label="默认分支"
+              field="isDefault"
+              triggerPropName="checked"
+              initialValue={line.lineData?.isDefault || false}
+            >
+              <Switch size="small" />
+            </FormItem>
             <span className={styles.formTips}>开启后，若其他所有分支条件均不满足，则该分支将被执行</span>
           </FormItem>
           <FormItem
             rules={[{ required: true, message: '请输入分支名称' }]}
             className={styles.directionColumn}
             label="分支名称"
-            field="branchName"
+            field="name"
           >
             <Input placeholder="请输入分支名称" />
           </FormItem>
           {/* <div className={styles.directionColumn}> */}
-          <FormItem className={styles.directionColumn} label="条件规则" field="conditionRule">
+          <FormItem
+            rules={[{ required: true, message: '请填写条件规则' }]}
+            className={styles.directionColumn}
+            label="条件规则"
+            field="condition"
+          >
             <div className={styles.conditionRule}>
               {conditionGroups.map((group, groupIndex) => (
                 <div key={groupIndex} className={styles.conditionRuleItem}>
@@ -450,7 +527,7 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
           {/* </div> */}
         </Form>
       </div>
-      <BottomBtn handleSubmit={handleSubmit} />
+      <BottomBtn handleSubmit={handleSubmit} submitOnly />
       <FormulaEditor
         initialFormula={formulaData}
         visible={formulaVisible}
