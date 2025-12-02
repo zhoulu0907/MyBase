@@ -129,21 +129,21 @@ public class MetadataEntityFieldApiImpl implements MetadataEntityFieldApi {
         if (fields == null || fields.isEmpty()) {
             return new ArrayList<>();
         }
-        // 按 entityId 分组，批量获取实体信息减少重复查询
-        Map<Long, List<MetadataEntityFieldDO>> groupByEntity = new java.util.HashMap<>();
+        // 按 entityUuid 分组，批量获取实体信息减少重复查询
+        Map<String, List<MetadataEntityFieldDO>> groupByEntity = new java.util.HashMap<>();
         for (MetadataEntityFieldDO f : fields) {
-            if (f.getEntityId() == null) {
+            if (f.getEntityUuid() == null) {
                 continue;
             }
-            groupByEntity.computeIfAbsent(f.getEntityId(), k -> new ArrayList<>()).add(f);
+            groupByEntity.computeIfAbsent(f.getEntityUuid(), k -> new ArrayList<>()).add(f);
         }
-        Map<Long, MetadataBusinessEntityDO> entityCache = new java.util.HashMap<>();
+        Map<String, MetadataBusinessEntityDO> entityCache = new java.util.HashMap<>();
         List<EntityFieldRespDTO> result = new ArrayList<>(fields.size());
         for (MetadataEntityFieldDO f : fields) {
             MetadataBusinessEntityDO entity = null;
-            if (f.getEntityId() != null) {
-                entity = entityCache.computeIfAbsent(f.getEntityId(),
-                        id -> metadataBusinessEntityCoreService.getBusinessEntity(id));
+            if (f.getEntityUuid() != null) {
+                entity = entityCache.computeIfAbsent(f.getEntityUuid(),
+                        uuid -> metadataBusinessEntityCoreService.getBusinessEntityByUuid(uuid));
             }
             String entityDisplayName = entity != null ? entity.getDisplayName() : null;
             String tableName = entity != null ? entity.getTableName() : null;
@@ -163,7 +163,13 @@ public class MetadataEntityFieldApiImpl implements MetadataEntityFieldApi {
     private EntityFieldRespDTO convertToRespDTO(MetadataEntityFieldDO f, String entityDisplayName, String tableName) {
         EntityFieldRespDTO dto = new EntityFieldRespDTO();
         dto.setId(f.getId());
-        dto.setEntityId(f.getEntityId());
+        // 通过entityUuid获取实体ID（如果需要）
+        if (f.getEntityUuid() != null) {
+            MetadataBusinessEntityDO entity = metadataBusinessEntityCoreService.getBusinessEntityByUuid(f.getEntityUuid());
+            if (entity != null) {
+                dto.setEntityId(entity.getId());
+            }
+        }
         dto.setEntityDisplayName(entityDisplayName);
         dto.setTableName(tableName);
         dto.setFieldName(f.getFieldName());
@@ -179,7 +185,7 @@ public class MetadataEntityFieldApiImpl implements MetadataEntityFieldApi {
         dto.setSortOrder(f.getSortOrder());
         dto.setFieldCode(f.getFieldCode());
         dto.setVersionTag(f.getVersionTag());
-        dto.setApplicationId(f.getApplicationId());
+        dto.setApplicationUuid(f.getApplicationUuid());
         dto.setCreateTime(f.getCreateTime());
         dto.setUpdateTime(f.getUpdateTime());
         return dto;

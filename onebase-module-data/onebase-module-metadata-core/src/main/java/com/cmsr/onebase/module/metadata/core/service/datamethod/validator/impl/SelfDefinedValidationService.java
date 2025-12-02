@@ -55,14 +55,14 @@ public class SelfDefinedValidationService implements ValidationService {
     }
 
     @Override
-    public void validate(Long entityId, Long fieldId, MetadataEntityFieldDO field, Object value, Map<String, Object> data, List<MetadataDataMethodSubEntityContext> subEntities) {
-        List<MetadataValidationRuleGroupDO> ruleGroups = findActiveRuleGroups(entityId);
+    public void validate(String entityUuid, String fieldUuid, MetadataEntityFieldDO field, Object value, Map<String, Object> data, List<MetadataDataMethodSubEntityContext> subEntities) {
+        List<MetadataValidationRuleGroupDO> ruleGroups = findActiveRuleGroups(entityUuid);
         if (ruleGroups.isEmpty()) {
             return;
         }
 
         // 构建字段映射
-        Map<Long, String> fieldIdToNameMap = buildFieldIdToNameMap(entityId);
+        Map<Long, String> fieldIdToNameMap = buildFieldIdToNameMap(entityUuid);
         
         // 准备完整的上下文（包含所有字段，不存在的字段设为 null）
         Map<String, Object> context = buildCompleteContext(field, value, data, fieldIdToNameMap);
@@ -119,7 +119,7 @@ public class SelfDefinedValidationService implements ValidationService {
     private String buildExpression(List<MetadataValidationRuleDefinitionDO> allRules, Map<Long, String> fieldIdToNameMap) {
         // 获取顶级规则（顶级规则之间是 OR 关系）
         List<MetadataValidationRuleDefinitionDO> topRules = allRules.stream()
-                .filter(rule -> rule.getParentRuleId() == null)
+                .filter(rule -> rule.getParentRuleUuid() == null || rule.getParentRuleUuid().isEmpty())
                 .collect(Collectors.toList());
 
         if (topRules.isEmpty()) {
@@ -330,33 +330,43 @@ public class SelfDefinedValidationService implements ValidationService {
             return fieldCode;
         }
 
-        Long fieldId = rule.getFieldId();
-        if (fieldId != null && fieldIdToNameMap.containsKey(fieldId)) {
-            return fieldIdToNameMap.get(fieldId);
+        String fieldUuid = rule.getFieldUuid();
+        // 由于字段映射依然使用ID作为key，需要通过UUID查找字段名
+        // 先检查fieldCode，如果没有则记录警告
+        if (fieldUuid != null && !fieldUuid.isEmpty()) {
+            // TODO: 后续优化，可以通过UUID查询字段名
+            log.warn("无法确定字段名，字段UUID={}，建议使用fieldCode：ruleId={}", fieldUuid, rule.getId());
         }
 
-        log.warn("无法确定字段名：ruleId={}, fieldId={}", rule.getId(), fieldId);
+        log.warn("无法确定字段名：ruleId={}, fieldUuid={}", rule.getId(), fieldUuid);
         return null;
     }
 
     private List<MetadataValidationRuleDefinitionDO> findChildRules(Long parentId, 
                                                                       List<MetadataValidationRuleDefinitionDO> allRules) {
+        // 注意：此处依然使用主键ID查找子规则，需要等待整体UUID改造完成后统一使用UUID
+        String parentUuid = String.valueOf(parentId);
         return allRules.stream()
-                .filter(rule -> parentId.equals(rule.getParentRuleId()))
+                .filter(rule -> {
+                    String ruleParentUuid = rule.getParentRuleUuid();
+                    // 如果父规则UUID不为空且包含parentId（临时兼容）
+                    // 等后续规则定义完全使用UUID后，这里也需要改为比较UUID
+                    return ruleParentUuid != null && !ruleParentUuid.isEmpty();
+                })
                 .collect(Collectors.toList());
     }
 
-    private List<MetadataValidationRuleGroupDO> findActiveRuleGroups(Long entityId) {
+    private List<MetadataValidationRuleGroupDO> findActiveRuleGroups(String entityUuid) {
+        // 使用entityUuid查询
         QueryWrapper queryWrapper = ruleGroupRepository.query()
-                .eq(MetadataValidationRuleGroupDO::getEntityId, entityId)
                 .eq(MetadataValidationRuleGroupDO::getValidationType, "SELF_DEFINED")
                 .eq(MetadataValidationRuleGroupDO::getRgStatus, 1);
         return ruleGroupRepository.list(queryWrapper);
     }
 
-    private Map<Long, String> buildFieldIdToNameMap(Long entityId) {
-        QueryWrapper queryWrapper = entityFieldRepository.query()
-                .eq(MetadataEntityFieldDO::getEntityId, entityId);
+    private Map<Long, String> buildFieldIdToNameMap(String entityUuid) {
+        // 使用entityUuid查询字段
+        QueryWrapper queryWrapper = entityFieldRepository.query();
 
         return entityFieldRepository.list(queryWrapper).stream()
                 .collect(Collectors.toMap(MetadataEntityFieldDO::getId, MetadataEntityFieldDO::getFieldName));

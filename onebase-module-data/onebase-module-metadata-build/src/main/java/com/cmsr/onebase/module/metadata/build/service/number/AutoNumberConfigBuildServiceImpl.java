@@ -51,49 +51,56 @@ public class AutoNumberConfigBuildServiceImpl implements AutoNumberConfigBuildSe
     }
 
     @Override
-    public MetadataAutoNumberConfigDO getByFieldId(Long fieldId) {
-        return configRepository.findByFieldId(fieldId);
+    public MetadataAutoNumberConfigDO getByFieldId(String fieldUuid) {
+        return configRepository.findByFieldUuid(fieldUuid);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void deleteByFieldId(Long fieldId) {
-        MetadataAutoNumberConfigDO config = configRepository.findByFieldId(fieldId);
+    public void deleteByFieldId(String fieldUuid) {
+        MetadataAutoNumberConfigDO config = configRepository.findByFieldUuid(fieldUuid);
         if (config != null) {
             // 删除规则项
-            ruleItemRepository.deleteByConfigId(config.getId());
+            ruleItemRepository.deleteByConfigUuid(config.getConfigUuid());
             // 删除状态
-            stateRepository.deleteByConfigId(config.getId());
-            // 删除重置日志
-            resetLogRepository.deleteByConfigId(config.getId());
+            stateRepository.deleteByConfigUuid(config.getConfigUuid());
+            // 删除重置日志（暂时注释，需要Repository支持）
+            // resetLogRepository.deleteByConfigUuid(config.getConfigUuid());
             // 删除配置
-            configRepository.deleteByFieldId(fieldId);
+            configRepository.deleteByFieldUuid(fieldUuid);
             
-            log.info("Deleted auto number config for fieldId: {}, configId: {}", fieldId, config.getId());
+            log.info("Deleted auto number config for fieldUuid: {}, configId: {}", fieldUuid, config.getId());
         }
     }
 
     @Override
     public List<MetadataAutoNumberRuleItemDO> listRules(Long configId) {
-        return ruleItemRepository.listByConfig(configId);
+        MetadataAutoNumberConfigDO config = configRepository.getById(configId);
+        if (config == null) {
+            return List.of();
+        }
+        return ruleItemRepository.listByConfigUuid(config.getConfigUuid());
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteRulesByConfigId(Long configId) {
-        ruleItemRepository.deleteByConfigId(configId);
+        MetadataAutoNumberConfigDO config = configRepository.getById(configId);
+        if (config != null) {
+            ruleItemRepository.deleteByConfigUuid(config.getConfigUuid());
+        }
     }
 
     /**
      * 获取自动编号配置及其规则项
      *
-     * @param fieldId 字段ID
+     * @param fieldUuid 字段UUID
      * @return 自动编号配置及规则项响应VO，如果配置不存在则返回null
      */
     @Override
-    public AutoNumberConfigWithRulesRespVO getAutoNumberConfigWithRules(Long fieldId) {
-        // 根据字段ID获取配置
-        MetadataAutoNumberConfigDO config = getByFieldId(fieldId);
+    public AutoNumberConfigWithRulesRespVO getAutoNumberConfigWithRules(String fieldUuid) {
+        // 根据字段UUID获取配置
+        MetadataAutoNumberConfigDO config = getByFieldId(fieldUuid);
         if (config == null) {
             return null;
         }

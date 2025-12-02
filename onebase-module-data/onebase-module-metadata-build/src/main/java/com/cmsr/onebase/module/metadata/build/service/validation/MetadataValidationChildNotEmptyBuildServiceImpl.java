@@ -27,13 +27,13 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
     @Resource private MetadataValidationRuleGroupBuildService ruleGroupService; // 其他服务
 
     @Override
-    public MetadataValidationChildNotEmptyDO getByFieldId(Long fieldId) {
-        return childNotEmptyRepository.findOneByFieldId(fieldId);
+    public MetadataValidationChildNotEmptyDO getByFieldId(String fieldUuid) {
+        return childNotEmptyRepository.findOneByFieldUuid(fieldUuid);
     }
 
     @Override
-    public ValidationChildNotEmptyRespVO getByFieldIdWithRgName(Long fieldId) {
-        MetadataValidationChildNotEmptyDO validationDO = childNotEmptyRepository.findOneByFieldId(fieldId);
+    public ValidationChildNotEmptyRespVO getByFieldIdWithRgName(String fieldUuid) {
+        MetadataValidationChildNotEmptyDO validationDO = childNotEmptyRepository.findOneByFieldUuid(fieldUuid);
         if (validationDO == null) {
             return null;
         }
@@ -42,8 +42,8 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
         ValidationChildNotEmptyRespVO respVO = BeanUtils.toBean(validationDO, ValidationChildNotEmptyRespVO.class);
 
         // 获取规则组信息，包括提示语等字段
-        if (validationDO.getGroupId() != null) {
-            MetadataValidationRuleGroupDO ruleGroup = ruleGroupService.getValidationRuleGroup(validationDO.getGroupId());
+        if (validationDO.getGroupUuid() != null) {
+            MetadataValidationRuleGroupDO ruleGroup = ruleGroupService.getValidationRuleGroupByUuid(validationDO.getGroupUuid());
             if (ruleGroup != null) {
                 respVO.setRgName(ruleGroup.getRgName());
                 respVO.setPromptMessage(ruleGroup.getPopPrompt());
@@ -234,16 +234,16 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void deleteByFieldId(Long fieldId) {
+    public void deleteByFieldId(String fieldUuid) {
         // 先获取要删除的记录，以便后续删除关联的校验规则分组
-        MetadataValidationChildNotEmptyDO recordToDelete = childNotEmptyRepository.findOneByFieldId(fieldId);
+        MetadataValidationChildNotEmptyDO recordToDelete = childNotEmptyRepository.findOneByFieldUuid(fieldUuid);
         
         // 删除子表非空校验记录
-        childNotEmptyRepository.deleteByFieldId(fieldId);
+        childNotEmptyRepository.deleteByFieldUuid(fieldUuid);
         
         // 删除关联的校验规则分组
-        if (recordToDelete != null && recordToDelete.getGroupId() != null) {
-            ruleGroupService.safeDeleteGroupDirect(recordToDelete.getGroupId());
+        if (recordToDelete != null && recordToDelete.getGroupUuid() != null) {
+            ruleGroupService.safeDeleteGroupDirect(recordToDelete.getGroupUuid());
         }
     }
 }

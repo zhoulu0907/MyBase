@@ -24,10 +24,12 @@ public class MetadataAppAndDatasourceDO extends BaseTenantEntity {
     private Long applicationId;
 
     /**
-     * 数据源ID
+     * 数据源UUID
+     * <p>
+     * 关联 metadata_datasource.datasource_uuid
      */
-    @Column(value = "datasource_id", comment = "数据源ID")
-    private Long datasourceId;
+    @Column(value = "datasource_uuid", comment = "数据源UUID")
+    private String datasourceUuid;
 
     /**
      * 数据源类型(POSTGRESQL,MYSQL,KINGBASE,TDENGINE,CLICKHOUSE等)

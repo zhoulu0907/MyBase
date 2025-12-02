@@ -2,19 +2,27 @@ package com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo;
 
 import lombok.Data;
 
+/**
+ * 数据选择配置
+ *
+ * @author matianyu
+ * @date 2025-07-25
+ */
 @Data
 public class DataSelectionConfig {
-    //todo 增加关联关系主键id
+    /**
+     * 关联关系主键id
+     */
     private Long relationId;
 
     /**
-     * 关联的目标实体id
+     * 关联的目标实体UUID
      */
-    private Long targetEntityId;
+    private String targetEntityUuid;
 
     /**
-     * 关联的目标字段id
+     * 关联的目标字段UUID
      */
-    private Long targetFieldId;
+    private String targetFieldUuid;
 
 }

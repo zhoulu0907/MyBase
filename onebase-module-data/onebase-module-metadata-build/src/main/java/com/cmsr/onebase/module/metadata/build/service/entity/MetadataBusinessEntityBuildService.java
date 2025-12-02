@@ -73,20 +73,20 @@ public interface MetadataBusinessEntityBuildService {
     MetadataBusinessEntityDO getBusinessEntityByCode(String code);
 
     /**
-     * 根据数据源ID获得业务实体列表
+     * 根据数据源UUID获得业务实体列表
      *
-     * @param datasourceId 数据源ID
+     * @param datasourceUuid 数据源UUID
      * @return 业务实体列表
      */
-    List<MetadataBusinessEntityDO> getBusinessEntityListByDatasourceId(Long datasourceId);
+    List<MetadataBusinessEntityDO> getBusinessEntityListByDatasourceUuid(String datasourceUuid);
 
     /**
-     * 根据数据源ID获取ER图数据
+     * 根据数据源UUID获取ER图数据
      *
-     * @param datasourceId 数据源ID
+     * @param datasourceUuid 数据源UUID
      * @return ER图数据
      */
-    ERDiagramRespVO getERDiagramByDatasourceId(Long datasourceId);
+    ERDiagramRespVO getERDiagramByDatasourceUuid(String datasourceUuid);
 
     /**
      * 根据应用ID获取实体列表（仅包含ID和名称）
@@ -130,12 +130,12 @@ public interface MetadataBusinessEntityBuildService {
     PageResult<BusinessEntityRespVO> getBusinessEntityPageWithResponse(BusinessEntityPageReqVO pageReqVO);
 
     /**
-     * 根据数据源ID获得业务实体列表（带关系类型）
+     * 根据数据源UUID获得业务实体列表（带关系类型）
      *
-     * @param datasourceId 数据源ID
+     * @param datasourceUuid 数据源UUID
      * @return 业务实体响应VO列表
      */
-    List<BusinessEntityRespVO> getBusinessEntityListByDatasourceIdWithRelationType(Long datasourceId);
+    List<BusinessEntityRespVO> getBusinessEntityListByDatasourceUuidWithRelationType(String datasourceUuid);
 
     /**
      * 重新创建业务实体的物理表

@@ -19,6 +19,14 @@ import lombok.EqualsAndHashCode;
 public class MetadataValidationRuleGroupDO extends BaseTenantEntity {
 
     /**
+     * 规则组UUID
+     * <p>
+     * 用于跨应用、跨版本的唯一标识，与 application_id、version_tag 组成联合唯一约束
+     */
+    @Column(value = "group_uuid", comment = "规则组UUID")
+    private String groupUuid;
+
+    /**
      * 规则组名称，如"客户信用评级规则"
      */
     @Column(value = "rg_name", comment = "规则组名称")
@@ -62,8 +70,10 @@ public class MetadataValidationRuleGroupDO extends BaseTenantEntity {
     private String validationType;
 
     /**
-     * 实体 id
+     * 实体UUID
+     * <p>
+     * 关联 metadata_business_entity.entity_uuid
      */
-    @Column(value = "entity_id", comment = "实体ID")
-    private Long entityId;
+    @Column(value = "entity_uuid", comment = "实体UUID")
+    private String entityUuid;
 }

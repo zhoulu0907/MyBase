@@ -20,10 +20,20 @@ import lombok.EqualsAndHashCode;
 public class MetadataEntityFieldDO extends BaseTenantEntity {
 
     /**
-     * 实体ID
+     * 字段UUID
+     * <p>
+     * 用于跨应用、跨版本的唯一标识，与 application_id、version_tag 组成联合唯一约束
      */
-    @Column(value = "entity_id", comment = "实体ID")
-    private Long entityId;
+    @Column(value = "field_uuid", comment = "字段UUID")
+    private String fieldUuid;
+
+    /**
+     * 实体UUID
+     * <p>
+     * 关联 metadata_business_entity.entity_uuid
+     */
+    @Column(value = "entity_uuid", comment = "实体UUID")
+    private String entityUuid;
 
     /**
      * 字段名称
@@ -120,6 +130,14 @@ public class MetadataEntityFieldDO extends BaseTenantEntity {
     private Long applicationId;
 
     /**
+     * 应用UUID
+     * <p>
+     * 关联 application.application_uuid
+     */
+    @Column(value = "application_uuid", comment = "应用UUID")
+    private String applicationUuid;
+
+    /**
      * 字段状态：1-开启，0-关闭
      * @see CommonStatusEnum
      */
@@ -138,5 +156,69 @@ public class MetadataEntityFieldDO extends BaseTenantEntity {
      */
     @Column(value = "dict_type_id", comment = "关联的字典类型ID")
     private Long dictTypeId;
+
+    // ==================== 向后兼容方法 ====================
+    
+    /**
+     * 获取实体ID（兼容旧代码）
+     * @deprecated 请使用 {@link #getEntityUuid()} 代替
+     * @return 实体UUID
+     */
+    @Deprecated
+    public String getEntityId() {
+        return this.entityUuid;
+    }
+
+    /**
+     * 设置实体ID（兼容旧代码）
+     * @deprecated 请使用 {@link #setEntityUuid(String)} 代替
+     * @param entityId 实体UUID
+     */
+    @Deprecated
+    public void setEntityId(String entityId) {
+        this.entityUuid = entityId;
+    }
+
+    /**
+     * 设置实体ID（兼容旧代码，Long类型）
+     * @deprecated 请使用 {@link #setEntityUuid(String)} 代替
+     * @param entityId 实体ID（将被忽略，因为已改用UUID）
+     */
+    @Deprecated
+    public void setEntityId(Long entityId) {
+        // 为兼容旧代码，不做任何操作
+        // 新代码应该使用 setEntityUuid()
+    }
+
+    /**
+     * 获取应用ID（兼容旧代码）
+     * @deprecated 请使用 {@link #getApplicationUuid()} 代替
+     * @return 应用UUID
+     */
+    @Deprecated
+    public String getApplicationId() {
+        return this.applicationUuid;
+    }
+
+    /**
+     * 设置应用ID（兼容旧代码）
+     * @deprecated 请使用 {@link #setApplicationUuid(String)} 代替
+     * @param applicationId 应用UUID
+     */
+    @Deprecated
+    public void setApplicationId(String applicationId) {
+        this.applicationUuid = applicationId;
+    }
+
+    /**
+     * 设置应用ID（兼容旧代码，Long类型）
+     * @deprecated 请使用 {@link #setApplicationUuid(String)} 代替
+     * @param applicationId 应用ID（将被忽略，因为已改用UUID）
+     */
+    @Deprecated
+    public void setApplicationId(Long applicationId) {
+        // 为兼容旧代码，不做任何操作
+        // 新代码应该使用 setApplicationUuid()
+    }
 
 }

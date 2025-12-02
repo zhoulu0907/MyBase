@@ -15,7 +15,7 @@ import java.util.List;
  */
 public interface MetadataEntityFieldOptionBuildService {
 
-    List<MetadataEntityFieldOptionDO> listByFieldId(Long fieldId);
+    List<MetadataEntityFieldOptionDO> listByFieldId(String fieldUuid);
 
     Long create(MetadataEntityFieldOptionDO option);
 
@@ -23,17 +23,17 @@ public interface MetadataEntityFieldOptionBuildService {
 
     void deleteById(Long id);
 
-    void deleteByFieldId(Long fieldId);
+    void deleteByFieldId(String fieldUuid);
 
-    void batchSort(Long fieldId, List<MetadataEntityFieldOptionDO> optionsInOrder);
+    void batchSort(String fieldUuid, List<MetadataEntityFieldOptionDO> optionsInOrder);
 
     /**
      * 获取字段选项列表
      *
-     * @param fieldId 字段ID
+     * @param fieldUuid 字段UUID
      * @return 选项列表响应VO
      */
-    List<FieldOptionRespVO> getFieldOptionList(Long fieldId);
+    List<FieldOptionRespVO> getFieldOptionList(String fieldUuid);
 
     /**
      * 创建字段选项

@@ -310,7 +310,7 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
         for (MetadataEntityFieldDO field : fields) {
             try {
                 // 检查字段是否配置了自动编号
-                if (autoNumberService.hasAutoNumber(field.getId())) {
+                if (autoNumberService.hasAutoNumber(field.getFieldUuid())) {
                     String fieldName = field.getFieldName();
 
                     // 如果用户没有提供值，则生成自动编号
@@ -321,15 +321,15 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
                         // 准备上下文数据，将当前的processedData作为上下文传递
                         Map<String, Object> contextData = new HashMap<>(processedData);
 
-                        // 为字段引用规则准备数据，使用字段ID作为key
+                        // 为字段引用规则准备数据，使用字段UUID作为key
                         for (MetadataEntityFieldDO f : fields) {
                             if (f.getFieldName() != null && processedData.containsKey(f.getFieldName())) {
-                                contextData.put("field_" + f.getId(), processedData.get(f.getFieldName()));
+                                contextData.put("field_" + f.getFieldUuid(), processedData.get(f.getFieldName()));
                             }
                         }
 
                         // 生成自动编号
-                        String autoNumber = autoNumberService.generateNumber(field.getId(), contextData);
+                        String autoNumber = autoNumberService.generateNumber(field.getFieldUuid(), contextData);
                         processedData.put(fieldName, autoNumber);
 
                         log.info("为字段 " + fieldName + " 生成自动编号: " + autoNumber);
@@ -515,7 +515,7 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
         processContext.setId(requestContext.getId());
         processContext.setSubEntities(requestContext.getSubEntities());
         // 5. 获取临时数据源服务
-        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entityDO.getDatasourceId());
+        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasourceByUuid(entityDO.getDatasourceUuid());
         if (datasource == null) {
             throw exception(DATASOURCE_NOT_EXISTS);
         }
@@ -550,6 +550,7 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
      */
     protected void validateData(ProcessContext context) {
         Long entityId = context.getEntityId();
+        String entityUuid = context.getEntity().getEntityUuid();
         Map<String, Object> data = context.getData();
         List<MetadataEntityFieldDO> fields = context.getFields();
         Object id = context.getId();
@@ -575,7 +576,7 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
 
         // 使用校验管理器执行所有字段的校验
         List<MetadataDataMethodSubEntityContext> subEntities = context.getSubEntities();
-        validationManager.validateEntity(entityId, fields, dataForValidation, subEntities, operationType);
+        validationManager.validateEntity(entityUuid, fields, dataForValidation, subEntities, operationType);
 
         log.info("数据校验完成：entityId={}", entityId);
     }

@@ -22,9 +22,12 @@ public class EntityFieldSaveReqVO {
     @Schema(description = "字段ID", example = "3001")
     private String id;
 
-    @Schema(description = "实体ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "2001")
-    @NotNull(message = "实体ID不能为空")
-    private String entityId;
+    @Schema(description = "字段UUID（更新时可用于定位记录）", example = "01onal1s-0000-0000-0000-000000000003")
+    private String fieldUuid;
+
+    @Schema(description = "实体UUID", requiredMode = Schema.RequiredMode.REQUIRED, example = "01onal1s-0000-0000-0000-000000000002")
+    @NotNull(message = "实体UUID不能为空")
+    private String entityUuid;
 
     @Schema(description = "字段名", requiredMode = Schema.RequiredMode.REQUIRED, example = "username")
     @NotBlank(message = "字段名不能为空")

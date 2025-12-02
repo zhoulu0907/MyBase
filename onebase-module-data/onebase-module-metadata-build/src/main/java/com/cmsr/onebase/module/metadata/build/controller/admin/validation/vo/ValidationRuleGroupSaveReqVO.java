@@ -21,6 +21,9 @@ public class ValidationRuleGroupSaveReqVO {
     @Schema(description = "规则组编号（新增时不传，修改时必传）", example = "1024")
     private Long id;
 
+    @Schema(description = "规则组UUID（更新时可用于定位记录）", example = "01onal1s-0000-0000-0000-000000000006")
+    private String groupUuid;
+
     @Schema(description = "规则组名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "客户信用评级规则")
     @NotBlank(message = "规则组名称不能为空")
     @Size(max = 100, message = "规则组名称长度不能超过100个字符")
@@ -50,9 +53,9 @@ public class ValidationRuleGroupSaveReqVO {
     private List<List<ValidationRuleDefinitionVO>> valueRules;
 
     /**
-     * 业务实体ID
+     * 业务实体UUID
      */
-    @Schema(description = "业务实体ID", example = "51515658843258880")
-    private Long entityId;
+    @Schema(description = "业务实体UUID", example = "01onal1s-0000-0000-0000-000000000002")
+    private String entityUuid;
 
 }

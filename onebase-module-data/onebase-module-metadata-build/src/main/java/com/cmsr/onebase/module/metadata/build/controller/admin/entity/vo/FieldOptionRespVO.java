@@ -10,8 +10,13 @@ import lombok.Data;
 public class FieldOptionRespVO {
     @Schema(description = "选项ID")
     private String id;
-    @Schema(description = "字段ID")
-    private Long fieldId;
+
+    @Schema(description = "选项UUID", example = "01onal1s-0000-0000-0000-000000000004")
+    private String optionUuid;
+
+    @Schema(description = "字段UUID", example = "01onal1s-0000-0000-0000-000000000003")
+    private String fieldUuid;
+
     @Schema(description = "显示名称")
     private String optionLabel;
     @Schema(description = "选项值")

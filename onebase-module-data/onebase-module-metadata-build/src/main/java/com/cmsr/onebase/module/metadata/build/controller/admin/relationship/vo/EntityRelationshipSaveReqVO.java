@@ -19,32 +19,35 @@ public class EntityRelationshipSaveReqVO {
     @Schema(description = "关系ID（更新时必填）", example = "5001")
     private String id;
 
+    @Schema(description = "关系UUID（更新时可用于定位记录）", example = "01onal1s-0000-0000-0000-000000000005")
+    private String relationshipUuid;
+
     @Schema(description = "关系名称", example = "用户订单关系")
     @Size(max = 100, message = "关系名称长度不能超过100个字符")
     private String relationName;
 
-    @Schema(description = "源实体ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "2001")
-    @NotNull(message = "源实体ID不能为空")
-    private String sourceEntityId;
+    @Schema(description = "源实体UUID", requiredMode = Schema.RequiredMode.REQUIRED, example = "01onal1s-0000-0000-0000-000000000002")
+    @NotNull(message = "源实体UUID不能为空")
+    private String sourceEntityUuid;
 
-    @Schema(description = "目标实体ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "2002")
-    @NotNull(message = "目标实体ID不能为空")
-    private String targetEntityId;
+    @Schema(description = "目标实体UUID", requiredMode = Schema.RequiredMode.REQUIRED, example = "01onal1s-0000-0000-0000-000000000003")
+    @NotNull(message = "目标实体UUID不能为空")
+    private String targetEntityUuid;
 
     @Schema(description = "关系类型", requiredMode = Schema.RequiredMode.REQUIRED, example = "ONE_TO_MANY")
     @NotBlank(message = "关系类型不能为空")
     private String relationshipType;
 
-    @Schema(description = "源字段ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "3001")
-    @NotNull(message = "源字段ID不能为空")
-    private String sourceFieldId;
+    @Schema(description = "源字段UUID", requiredMode = Schema.RequiredMode.REQUIRED, example = "01onal1s-0000-0000-0000-000000000010")
+    @NotNull(message = "源字段UUID不能为空")
+    private String sourceFieldUuid;
 
-    @Schema(description = "目标字段ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "3010")
-    @NotNull(message = "目标字段ID不能为空")
-    private String targetFieldId;
+    @Schema(description = "目标字段UUID", requiredMode = Schema.RequiredMode.REQUIRED, example = "01onal1s-0000-0000-0000-000000000011")
+    @NotNull(message = "目标字段UUID不能为空")
+    private String targetFieldUuid;
 
-    @Schema(description = "选择字段ID（数据选择关系类型时使用，表示关联表中用于展示给用户的字段ID）", example = "3011")
-    private String selectFieldId;
+    @Schema(description = "选择字段UUID（数据选择关系类型时使用，表示关联表中用于展示给用户的字段UUID）", example = "01onal1s-0000-0000-0000-000000000012")
+    private String selectFieldUuid;
 
     @Schema(description = "级联类型", example = "READ")
     private String cascadeType;

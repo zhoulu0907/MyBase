@@ -61,12 +61,20 @@ public interface MetadataDatasourceCoreService {
     MetadataDatasourceDO getDatasourceByCode(String code);
 
     /**
+     * 根据UUID获取数据源
+     *
+     * @param datasourceUuid 数据源UUID
+     * @return 数据源DO
+     */
+    MetadataDatasourceDO getDatasourceByUuid(String datasourceUuid);
+
+    /**
      * 创建应用与数据源的关联关系
      *
      * @param appId 应用ID
-     * @param datasourceId 数据源ID
+     * @param datasourceUuid 数据源UUID
      * @param datasourceType 数据源类型
      * @param appUid 应用UID
      */
-    void createAppDatasourceRelation(Long appId, Long datasourceId, String datasourceType, String appUid);
+    void createAppDatasourceRelation(Long appId, String datasourceUuid, String datasourceType, String appUid);
 }

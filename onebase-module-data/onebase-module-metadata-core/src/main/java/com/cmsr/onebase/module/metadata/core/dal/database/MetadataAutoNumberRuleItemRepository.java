@@ -17,17 +17,28 @@ import java.util.List;
 @Repository
 public class MetadataAutoNumberRuleItemRepository extends ServiceImpl<MetadataAutoNumberRuleItemMapper, MetadataAutoNumberRuleItemDO> {
 
-    public List<MetadataAutoNumberRuleItemDO> listByConfig(Long configId) {
+    /**
+     * 根据配置UUID获取规则项列表
+     *
+     * @param configUuid 配置UUID
+     * @return 规则项列表
+     */
+    public List<MetadataAutoNumberRuleItemDO> listByConfigUuid(String configUuid) {
         QueryWrapper queryWrapper = this.query()
-                .eq(MetadataAutoNumberRuleItemDO::getConfigId, configId)
+                .eq(MetadataAutoNumberRuleItemDO::getConfigUuid, configUuid)
                 .orderBy(MetadataAutoNumberRuleItemDO::getItemOrder, true)
                 .orderBy(MetadataAutoNumberRuleItemDO::getCreateTime, true);
         return list(queryWrapper);
     }
 
-    public void deleteByConfigId(Long configId) {
+    /**
+     * 根据配置UUID删除规则项
+     *
+     * @param configUuid 配置UUID
+     */
+    public void deleteByConfigUuid(String configUuid) {
         QueryWrapper queryWrapper = this.query()
-                .eq(MetadataAutoNumberRuleItemDO::getConfigId, configId);
+                .eq(MetadataAutoNumberRuleItemDO::getConfigUuid, configUuid);
         remove(queryWrapper);
     }
 }

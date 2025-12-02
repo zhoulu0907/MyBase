@@ -6,6 +6,7 @@ import com.cmsr.onebase.module.metadata.build.controller.admin.datasource.vo.Dat
 import org.modelmapper.ModelMapper;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
 import com.cmsr.onebase.module.metadata.core.service.datasource.MetadataAppAndDatasourceCoreService;
+import com.cmsr.onebase.module.metadata.core.service.datasource.MetadataDatasourceCoreService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,6 +34,8 @@ public class AppDatasourceController {
     @Resource
     private MetadataAppAndDatasourceCoreService appAndDatasourceService;
     @Resource
+    private MetadataDatasourceCoreService datasourceCoreService;
+    @Resource
     private ModelMapper modelMapper;
 
     @PostMapping("/create-relation")
@@ -49,7 +52,9 @@ public class AppDatasourceController {
             @RequestParam(value = "appUid", required = false) String appUid) {
 
         applicationId = ApplicationManager.getApplicationId();
-        Long relationId = appAndDatasourceService.createRelation(applicationId, datasourceId, datasourceType, appUid);
+        // 通过datasourceId获取datasourceUuid
+        MetadataDatasourceDO datasource = datasourceCoreService.getDatasource(datasourceId);
+        Long relationId = appAndDatasourceService.createRelation(applicationId, datasource.getDatasourceUuid(), datasourceType, appUid);
         return success(relationId.toString());
     }
 
@@ -63,7 +68,9 @@ public class AppDatasourceController {
             @RequestParam("datasourceId") Long datasourceId) {
 
         applicationId = ApplicationManager.getApplicationId();
-        boolean success = appAndDatasourceService.deleteRelation(applicationId, datasourceId);
+        // 通过datasourceId获取datasourceUuid
+        MetadataDatasourceDO datasource = datasourceCoreService.getDatasource(datasourceId);
+        boolean success = appAndDatasourceService.deleteRelation(applicationId, datasource.getDatasourceUuid());
         return success(success);
     }
 
@@ -89,7 +96,9 @@ public class AppDatasourceController {
             @Parameter(name = "datasourceId", description = "数据源ID", required = true, example = "1024")
             @RequestParam("datasourceId") Long datasourceId) {
 
-        List<Long> applicationIds = appAndDatasourceService.getApplicationIdsByDatasourceId(datasourceId);
+        // 通过datasourceId获取datasourceUuid
+        MetadataDatasourceDO datasource = datasourceCoreService.getDatasource(datasourceId);
+        List<Long> applicationIds = appAndDatasourceService.getApplicationIdsByDatasourceUuid(datasource.getDatasourceUuid());
         return success(applicationIds);
     }
 
@@ -103,7 +112,9 @@ public class AppDatasourceController {
             @RequestParam("datasourceId") Long datasourceId) {
 
         applicationId = ApplicationManager.getApplicationId();
-        boolean exists = appAndDatasourceService.isRelationExists(applicationId, datasourceId);
+        // 通过datasourceId获取datasourceUuid
+        MetadataDatasourceDO datasource = datasourceCoreService.getDatasource(datasourceId);
+        boolean exists = appAndDatasourceService.isRelationExists(applicationId, datasource.getDatasourceUuid());
         return success(exists);
     }
 
@@ -140,7 +151,9 @@ public class AppDatasourceController {
             @Parameter(name = "datasourceId", description = "数据源ID", required = true, example = "1024")
             @RequestParam("datasourceId") Long datasourceId) {
 
-        long deletedCount = appAndDatasourceService.deleteRelationsByDatasourceId(datasourceId);
+        // 通过datasourceId获取datasourceUuid
+        MetadataDatasourceDO datasource = datasourceCoreService.getDatasource(datasourceId);
+        long deletedCount = appAndDatasourceService.deleteRelationsByDatasourceUuid(datasource.getDatasourceUuid());
         return success(deletedCount);
     }
 }

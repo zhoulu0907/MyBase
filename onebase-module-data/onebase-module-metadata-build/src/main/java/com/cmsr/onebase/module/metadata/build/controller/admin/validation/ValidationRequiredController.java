@@ -25,11 +25,11 @@ public class ValidationRequiredController {
     @Resource private MetadataValidationRequiredBuildService requiredService;
 
     @PostMapping("/get-by-field")
-    @Operation(summary = "根据字段ID获取必填校验")
-    @Parameter(name = "id", description = "字段ID", required = true)
+    @Operation(summary = "根据字段UUID获取必填校验")
+    @Parameter(name = "id", description = "字段UUID", required = true)
     @PreAuthorize("@ss.hasPermission('metadata:validation-required:query')")
-    public CommonResult<ValidationRequiredRespVO> getByField(@RequestParam("id") Long id) {
-        return success(requiredService.getByFieldIdWithRgName(id));
+    public CommonResult<ValidationRequiredRespVO> getByField(@RequestParam("id") String fieldUuid) {
+        return success(requiredService.getByFieldIdWithRgName(fieldUuid));
     }
 
     @PostMapping("/create")
@@ -48,11 +48,11 @@ public class ValidationRequiredController {
     }
 
     @PostMapping("/delete-by-field")
-    @Operation(summary = "按字段删除必填校验")
-    @Parameter(name = "id", description = "字段ID", required = true)
+    @Operation(summary = "按字段UUID删除必填校验")
+    @Parameter(name = "id", description = "字段UUID", required = true)
     @PreAuthorize("@ss.hasPermission('metadata:validation-required:delete')")
-    public CommonResult<Boolean> deleteByField(@RequestParam("id") Long id) {
-        requiredService.deleteByFieldId(id);
+    public CommonResult<Boolean> deleteByField(@RequestParam("id") String fieldUuid) {
+        requiredService.deleteByFieldId(fieldUuid);
         return success(true);
     }
 

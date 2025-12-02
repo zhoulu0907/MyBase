@@ -121,11 +121,11 @@ public interface MetadataEntityRelationshipBuildService {
     List<MetadataEntityRelationshipDO> findAllByConfig(com.mybatisflex.core.query.QueryWrapper queryWrapper);
 
     /**
-     * 根据字段id删除关联关系 包括字段作为 源字段和目标字段 两种情况
-     * @param fieldId
+     * 根据字段UUID删除关联关系 包括字段作为 源字段和目标字段 两种情况
+     * @param fieldUuid
      * @return
      */
-    void deleteRelationShipByFieldId(Long fieldId);
+    void deleteRelationShipByFieldId(String fieldUuid);
 
     /**
      * 根据源实体ID和目标实体ID查找关系
@@ -133,8 +133,19 @@ public interface MetadataEntityRelationshipBuildService {
      * @param sourceEntityId 源实体ID
      * @param targetEntityId 目标实体ID
      * @return 实体关系列表
+     * @deprecated 请使用 {@link #findBySourceEntityUuidAndTargetEntityUuid(String, String)} 代替
      */
+    @Deprecated
     List<MetadataEntityRelationshipDO> findBySourceEntityIdAndTargetEntityId(Long sourceEntityId, Long targetEntityId);
+
+    /**
+     * 根据源实体UUID和目标实体UUID查找关系
+     *
+     * @param sourceEntityUuid 源实体UUID
+     * @param targetEntityUuid 目标实体UUID
+     * @return 实体关系列表
+     */
+    List<MetadataEntityRelationshipDO> findBySourceEntityUuidAndTargetEntityUuid(String sourceEntityUuid, String targetEntityUuid);
 
     /**
      * 根据ID查询实体关系

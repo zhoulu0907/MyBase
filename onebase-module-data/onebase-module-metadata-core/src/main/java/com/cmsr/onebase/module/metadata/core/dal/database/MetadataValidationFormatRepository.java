@@ -20,50 +20,50 @@ import java.util.List;
 public class MetadataValidationFormatRepository extends ServiceImpl<MetadataValidationFormatMapper, MetadataValidationFormatDO> {
 
     /**
-     * 根据字段ID查询格式验证规则列表
+     * 根据字段UUID查询格式验证规则列表
      *
-     * @param fieldId 字段ID
+     * @param fieldUuid 字段UUID
      * @return 格式验证规则列表
      */
-    public List<MetadataValidationFormatDO> findByFieldId(Long fieldId) {
+    public List<MetadataValidationFormatDO> findByFieldUuid(String fieldUuid) {
         QueryWrapper queryWrapper = query()
-                .eq(MetadataValidationFormatDO::getFieldId, fieldId);
+                .eq(MetadataValidationFormatDO::getFieldUuid, fieldUuid);
         return list(queryWrapper);
     }
 
     /**
-     * 根据字段ID查询正则表达式格式验证规则
+     * 根据字段UUID查询正则表达式格式验证规则
      *
-     * @param fieldId 字段ID
+     * @param fieldUuid 字段UUID
      * @return 正则表达式格式验证规则
      */
-    public MetadataValidationFormatDO findRegexByFieldId(Long fieldId) {
+    public MetadataValidationFormatDO findRegexByFieldUuid(String fieldUuid) {
         QueryWrapper queryWrapper = query()
-                .eq(MetadataValidationFormatDO::getFieldId, fieldId)
+                .eq(MetadataValidationFormatDO::getFieldUuid, fieldUuid)
                 .eq(MetadataValidationFormatDO::getFormatCode, "REGEX");
         return getOne(queryWrapper);
     }
 
     /**
-     * 根据字段ID删除格式验证规则
+     * 根据字段UUID删除格式验证规则
      *
-     * @param fieldId 字段ID
+     * @param fieldUuid 字段UUID
      */
-    public void deleteByFieldId(Long fieldId) {
-        for (var item : findByFieldId(fieldId)) {
+    public void deleteByFieldUuid(String fieldUuid) {
+        for (var item : findByFieldUuid(fieldUuid)) {
             removeById(item.getId());
         }
     }
 
     /**
-     * 根据组ID查询格式验证规则列表
+     * 根据组UUID查询格式验证规则列表
      *
-     * @param groupId 组ID
+     * @param groupUuid 组UUID
      * @return 格式验证规则列表
      */
-    public List<MetadataValidationFormatDO> findByGroupId(Long groupId) {
+    public List<MetadataValidationFormatDO> findByGroupUuid(String groupUuid) {
         QueryWrapper queryWrapper = query()
-                .eq(MetadataValidationFormatDO::getGroupId, groupId);
+                .eq(MetadataValidationFormatDO::getGroupUuid, groupUuid);
         return list(queryWrapper);
     }
 }

@@ -25,11 +25,11 @@ public class ValidationLengthController {
     @Resource private MetadataValidationLengthBuildService lengthService;
 
     @PostMapping("/get-by-field")
-    @Operation(summary = "根据字段ID获取长度校验")
-    @Parameter(name = "id", description = "字段ID", required = true)
+    @Operation(summary = "根据字段UUID获取长度校验")
+    @Parameter(name = "id", description = "字段UUID", required = true)
     @PreAuthorize("@ss.hasPermission('metadata:validation-length:query')")
-    public CommonResult<ValidationLengthRespVO> getByFieldId(@RequestParam("id") Long id) {
-        return success(lengthService.getByFieldIdWithRgName(id));
+    public CommonResult<ValidationLengthRespVO> getByFieldId(@RequestParam("id") String fieldUuid) {
+        return success(lengthService.getByFieldIdWithRgName(fieldUuid));
     }
 
     @PostMapping("/create")
@@ -48,11 +48,11 @@ public class ValidationLengthController {
     }
 
     @PostMapping("/delete-by-field")
-    @Operation(summary = "按字段删除长度校验")
-    @Parameter(name = "id", description = "字段ID", required = true)
+    @Operation(summary = "按字段UUID删除长度校验")
+    @Parameter(name = "id", description = "字段UUID", required = true)
     @PreAuthorize("@ss.hasPermission('metadata:validation-length:delete')")
-    public CommonResult<Boolean> deleteByField(@RequestParam("id") Long id) {
-        lengthService.deleteByFieldId(id);
+    public CommonResult<Boolean> deleteByField(@RequestParam("id") String fieldUuid) {
+        lengthService.deleteByFieldId(fieldUuid);
         return success(true);
     }
 

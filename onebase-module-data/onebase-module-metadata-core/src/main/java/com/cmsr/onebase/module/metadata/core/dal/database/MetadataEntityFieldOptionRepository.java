@@ -19,17 +19,28 @@ import java.util.List;
 @Slf4j
 public class MetadataEntityFieldOptionRepository extends ServiceImpl<MetadataEntityFieldOptionMapper, MetadataEntityFieldOptionDO> {
 
-    public List<MetadataEntityFieldOptionDO> findAllByFieldId(Long fieldId) {
+    /**
+     * 根据字段UUID获取字段选项列表
+     *
+     * @param fieldUuid 字段UUID
+     * @return 字段选项列表
+     */
+    public List<MetadataEntityFieldOptionDO> findAllByFieldUuid(String fieldUuid) {
         QueryWrapper queryWrapper = this.query()
-                .eq(MetadataEntityFieldOptionDO::getFieldId, fieldId)
+                .eq(MetadataEntityFieldOptionDO::getFieldUuid, fieldUuid)
                 .orderBy(MetadataEntityFieldOptionDO::getOptionOrder, true)
                 .orderBy(MetadataEntityFieldOptionDO::getCreateTime, true);
         return list(queryWrapper);
     }
 
-    public void deleteByFieldId(Long fieldId) {
+    /**
+     * 根据字段UUID删除字段选项
+     *
+     * @param fieldUuid 字段UUID
+     */
+    public void deleteByFieldUuid(String fieldUuid) {
         QueryWrapper queryWrapper = this.query()
-                .eq(MetadataEntityFieldOptionDO::getFieldId, fieldId);
+                .eq(MetadataEntityFieldOptionDO::getFieldUuid, fieldUuid);
         remove(queryWrapper);
     }
 

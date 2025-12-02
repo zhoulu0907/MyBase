@@ -30,10 +30,10 @@ public class AutoNumberConfigController {
     private AutoNumberConfigBuildService configService;
 
     @PostMapping("/get")
-    @Operation(summary = "按字段ID获取自动编号配置与规则")
+    @Operation(summary = "按字段UUID获取自动编号配置与规则")
     @PreAuthorize("@ss.hasPermission('metadata:auto-number:query')")
-    public CommonResult<AutoNumberConfigWithRulesRespVO> get(@RequestParam("fieldId") Long fieldId) {
-        AutoNumberConfigWithRulesRespVO result = configService.getAutoNumberConfigWithRules(fieldId);
+    public CommonResult<AutoNumberConfigWithRulesRespVO> get(@RequestParam("fieldId") String fieldUuid) {
+        AutoNumberConfigWithRulesRespVO result = configService.getAutoNumberConfigWithRules(fieldUuid);
         return success(result);
     }
 

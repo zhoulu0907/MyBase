@@ -16,20 +16,23 @@ public class ValidationFormatRespVO {
     @Schema(description = "主键ID", example = "1")
     private Long id;
 
+    @Schema(description = "格式校验UUID", example = "01onal1s-0000-0000-0000-000000000009")
+    private String formatUuid;
+
     @Schema(description = "规则组名称", example = "用户信息校验")
     private String rgName;
 
-    @Schema(description = "字段ID", example = "1")
-    private Long fieldId;
+    @Schema(description = "字段UUID", example = "01onal1s-0000-0000-0000-000000000003")
+    private String fieldUuid;
 
-    @Schema(description = "实体ID", example = "1")
-    private Long entityId;
+    @Schema(description = "实体UUID", example = "01onal1s-0000-0000-0000-000000000002")
+    private String entityUuid;
 
     @Schema(description = "应用ID", example = "1")
     private String applicationId;
 
-    @Schema(description = "规则组ID", example = "1")
-    private Long groupId;
+    @Schema(description = "规则组UUID", example = "01onal1s-0000-0000-0000-000000000006")
+    private String groupUuid;
 
     @Schema(description = "是否启用", example = "1")
     private Integer isEnabled;

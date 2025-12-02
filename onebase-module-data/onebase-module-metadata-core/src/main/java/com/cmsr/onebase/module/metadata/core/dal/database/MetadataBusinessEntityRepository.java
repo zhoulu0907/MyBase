@@ -82,14 +82,14 @@ public class MetadataBusinessEntityRepository extends ServiceImpl<MetadataBusine
     }
 
     /**
-     * 根据数据源ID获取业务实体列表
+     * 根据数据源UUID获取业务实体列表
      *
-     * @param datasourceId 数据源ID
+     * @param datasourceUuid 数据源UUID
      * @return 业务实体列表
      */
-    public List<MetadataBusinessEntityDO> getBusinessEntityListByDatasourceId(Long datasourceId) {
+    public List<MetadataBusinessEntityDO> getBusinessEntityListByDatasourceUuid(String datasourceUuid) {
         QueryWrapper queryWrapper = this.query()
-                .eq(MetadataBusinessEntityDO::getDatasourceId, datasourceId)
+                .eq(MetadataBusinessEntityDO::getDatasourceUuid, datasourceUuid)
                 .orderBy(MetadataBusinessEntityDO::getCreateTime, false);
         return list(queryWrapper);
     }

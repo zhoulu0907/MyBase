@@ -13,8 +13,8 @@ import lombok.Data;
 @Data
 public class EntityFieldInfoRespVO {
 
-    @Schema(description = "字段ID", example = "1001")
-    private String fieldId;
+    @Schema(description = "字段UUID", example = "uuid-1001")
+    private String fieldUuid;
 
     @Schema(description = "字段名称", example = "用户名")
     private String fieldName;

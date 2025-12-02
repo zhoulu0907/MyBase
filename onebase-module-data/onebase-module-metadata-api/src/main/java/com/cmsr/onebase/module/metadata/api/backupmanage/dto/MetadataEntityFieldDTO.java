@@ -18,8 +18,11 @@ public class MetadataEntityFieldDTO {
     @Schema(description = "主键ID")
     private Long id;
 
-    @Schema(description = "实体ID")
-    private Long entityId;
+    @Schema(description = "字段UUID")
+    private String fieldUuid;
+
+    @Schema(description = "实体UUID")
+    private String entityUuid;
 
     @Schema(description = "字段名称")
     private String fieldName;
@@ -63,8 +66,8 @@ public class MetadataEntityFieldDTO {
     @Schema(description = "版本标识")
     private Long versionTag;
 
-    @Schema(description = "应用ID")
-    private Long applicationId;
+    @Schema(description = "应用UUID")
+    private String applicationUuid;
 
     @Schema(description = "字段状态")
     private Integer status;

@@ -20,49 +20,49 @@ import java.util.List;
 public class MetadataValidationLengthRepository extends ServiceImpl<MetadataValidationLengthMapper, MetadataValidationLengthDO> {
 
     /**
-     * 根据字段ID查询单条长度验证规则
+     * 根据字段UUID查询单条长度验证规则
      *
-     * @param fieldId 字段ID
+     * @param fieldUuid 字段UUID
      * @return 长度验证规则
      */
-    public MetadataValidationLengthDO findOneByFieldId(Long fieldId) {
+    public MetadataValidationLengthDO findOneByFieldUuid(String fieldUuid) {
         QueryWrapper queryWrapper = query()
-                .eq(MetadataValidationLengthDO::getFieldId, fieldId);
+                .eq(MetadataValidationLengthDO::getFieldUuid, fieldUuid);
         return getOne(queryWrapper);
     }
 
     /**
-     * 根据字段ID查询长度验证规则列表
+     * 根据字段UUID查询长度验证规则列表
      *
-     * @param fieldId 字段ID
+     * @param fieldUuid 字段UUID
      * @return 长度验证规则列表
      */
-    public List<MetadataValidationLengthDO> findByFieldId(Long fieldId) {
+    public List<MetadataValidationLengthDO> findByFieldUuid(String fieldUuid) {
         QueryWrapper queryWrapper = query()
-                .eq(MetadataValidationLengthDO::getFieldId, fieldId);
+                .eq(MetadataValidationLengthDO::getFieldUuid, fieldUuid);
         return list(queryWrapper);
     }
 
     /**
-     * 根据字段ID删除长度验证规则
+     * 根据字段UUID删除长度验证规则
      *
-     * @param fieldId 字段ID
+     * @param fieldUuid 字段UUID
      */
-    public void deleteByFieldId(Long fieldId) {
-        for (var item : findByFieldId(fieldId)) {
+    public void deleteByFieldUuid(String fieldUuid) {
+        for (var item : findByFieldUuid(fieldUuid)) {
             removeById(item.getId());
         }
     }
 
     /**
-     * 根据组ID查询长度验证规则列表
+     * 根据组UUID查询长度验证规则列表
      *
-     * @param groupId 组ID
+     * @param groupUuid 组UUID
      * @return 长度验证规则列表
      */
-    public List<MetadataValidationLengthDO> findByGroupId(Long groupId) {
+    public List<MetadataValidationLengthDO> findByGroupUuid(String groupUuid) {
         QueryWrapper queryWrapper = query()
-                .eq(MetadataValidationLengthDO::getGroupId, groupId);
+                .eq(MetadataValidationLengthDO::getGroupUuid, groupUuid);
         return list(queryWrapper);
     }
 }

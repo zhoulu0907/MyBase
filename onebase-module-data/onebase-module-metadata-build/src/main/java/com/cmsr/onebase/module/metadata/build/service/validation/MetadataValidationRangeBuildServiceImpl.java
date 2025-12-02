@@ -29,14 +29,14 @@ public class MetadataValidationRangeBuildServiceImpl implements MetadataValidati
     @Resource private MetadataEntityFieldBuildService entityFieldService; // 其他服务
 
     @Override
-    public MetadataValidationRangeDO getByFieldId(Long fieldId) {
+    public MetadataValidationRangeDO getByFieldId(String fieldUuid) {
         // 当前每字段至多一条，若未来支持多条，可调整为取最新或抛错
-        return rangeRepository.findByFieldId(fieldId).stream().findFirst().orElse(null);
+        return rangeRepository.findByFieldUuid(fieldUuid).stream().findFirst().orElse(null);
     }
 
     @Override
-    public ValidationRangeRespVO getByFieldIdWithRgName(Long fieldId) {
-        MetadataValidationRangeDO rangeDO = getByFieldId(fieldId);
+    public ValidationRangeRespVO getByFieldIdWithRgName(String fieldUuid) {
+        MetadataValidationRangeDO rangeDO = getByFieldId(fieldUuid);
         if (rangeDO == null) {
             return null;
         }
@@ -61,15 +61,15 @@ public class MetadataValidationRangeBuildServiceImpl implements MetadataValidati
     @Transactional(rollbackFor = Exception.class)
     public Long create(ValidationRangeSaveReqVO vo) {
         Assert.notNull(vo, "vo不能为空");
-        Assert.notNull(vo.getFieldId(), "字段ID不能为空");
+        Assert.notNull(vo.getFieldUuid(), "字段UUID不能为空");
         Assert.hasText(vo.getRgName(), "规则组名称不能为空");
 
         // 获取字段信息
-        MetadataEntityFieldDO field = entityFieldService.getEntityField(String.valueOf(vo.getFieldId()));
+        MetadataEntityFieldDO field = entityFieldService.getEntityFieldByUuid(vo.getFieldUuid());
         Assert.notNull(field, "字段不存在");
 
         // 检查同一字段是否已存在范围校验规则
-        MetadataValidationRangeDO existingRule = getByFieldId(vo.getFieldId());
+        MetadataValidationRangeDO existingRule = getByFieldId(vo.getFieldUuid());
         if (existingRule != null) {
             throw new IllegalStateException("该字段已存在范围校验规则，同一字段只能有一条范围校验规则");
         }
@@ -80,7 +80,7 @@ public class MetadataValidationRangeBuildServiceImpl implements MetadataValidati
         boolean needCreateGroup = false;
         if (existingGroup != null) {
             var groupRangeList = rangeRepository.findByGroupId(existingGroup.getId());
-            boolean reused = groupRangeList.stream().anyMatch(u -> !u.getFieldId().equals(vo.getFieldId()));
+            boolean reused = groupRangeList.stream().anyMatch(u -> !u.getFieldUuid().equals(vo.getFieldUuid()));
             if (reused) {
                 needCreateGroup = true;
             } else {
@@ -149,7 +149,7 @@ public class MetadataValidationRangeBuildServiceImpl implements MetadataValidati
         Assert.notEmpty(list, "当前范围校验规则不存在(组ID=" + groupIdParam + ")");
         if (list.size() > 1) { throw new IllegalStateException("数据异常：同一组存在多条范围校验规则(组ID=" + groupIdParam + ")"); }
         MetadataValidationRangeDO existingDO = list.get(0);
-        MetadataEntityFieldDO entityFieldDO = entityFieldService.getEntityField(String.valueOf(existingDO.getFieldId()));
+        MetadataEntityFieldDO entityFieldDO = entityFieldService.getEntityFieldByUuid(existingDO.getFieldUuid());
         Assert.notNull(entityFieldDO, "字段不存在");
         Long targetGroupId = groupIdParam; // 不迁移组，但同步组配置
         var groupDO = ruleGroupService.getValidationRuleGroup(groupIdParam);
@@ -169,7 +169,7 @@ public class MetadataValidationRangeBuildServiceImpl implements MetadataValidati
         }
         MetadataValidationRangeDO updateDO = BeanUtils.toBean(reqVO, MetadataValidationRangeDO.class);
         updateDO.setId(existingDO.getId());
-        updateDO.setFieldId(existingDO.getFieldId());
+        updateDO.setFieldUuid(existingDO.getFieldUuid());
         updateDO.setEntityId(existingDO.getEntityId());
         updateDO.setApplicationId(existingDO.getApplicationId());
         updateDO.setGroupId(targetGroupId);
@@ -178,12 +178,12 @@ public class MetadataValidationRangeBuildServiceImpl implements MetadataValidati
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void deleteByFieldId(Long fieldId) {
+    public void deleteByFieldId(String fieldUuid) {
         // 先获取要删除的记录，以便后续删除关联的校验规则分组
-        MetadataValidationRangeDO recordToDelete = getByFieldId(fieldId);
+        MetadataValidationRangeDO recordToDelete = getByFieldId(fieldUuid);
         
         // 删除范围校验记录
-        rangeRepository.deleteByFieldId(fieldId);
+        rangeRepository.deleteByFieldUuid(fieldUuid);
         
         // 删除关联的校验规则分组
         if (recordToDelete != null && recordToDelete.getGroupId() != null) {

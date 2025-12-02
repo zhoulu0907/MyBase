@@ -17,9 +17,12 @@ public class FieldOptionSaveReqVO {
     @Schema(description = "选项ID", example = "101")
     private String id;
 
-    @Schema(description = "字段ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "3001")
+    @Schema(description = "选项UUID（更新时可用于定位记录）", example = "01onal1s-0000-0000-0000-000000000004")
+    private String optionUuid;
+
+    @Schema(description = "字段UUID", requiredMode = Schema.RequiredMode.REQUIRED, example = "01onal1s-0000-0000-0000-000000000003")
     @NotNull
-    private Long fieldId;
+    private String fieldUuid;
 
     @Schema(description = "显示名称", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank

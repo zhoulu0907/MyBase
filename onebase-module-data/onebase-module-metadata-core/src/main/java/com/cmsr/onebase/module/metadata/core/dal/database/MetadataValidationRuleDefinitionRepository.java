@@ -29,45 +29,57 @@ public class MetadataValidationRuleDefinitionRepository extends ServiceImpl<Meta
      */
     public List<MetadataValidationRuleDefinitionDO> selectByGroupId(Long groupId) {
         QueryWrapper queryWrapper = this.query()
-                .eq(MetadataValidationRuleDefinitionDO::getGroupId, groupId)
                 .orderBy(MetadataValidationRuleDefinitionDO::getId, true);
         return list(queryWrapper);
     }
 
     /**
-     * 根据父规则ID查询子规则
+     * 根据规则组UUID查询所有规则定义
      *
-     * @param parentRuleId 父规则ID
+     * @param groupUuid 规则组UUID
+     * @return 规则定义列表
+     */
+    public List<MetadataValidationRuleDefinitionDO> selectByGroupUuid(String groupUuid) {
+        QueryWrapper queryWrapper = this.query()
+                .eq(MetadataValidationRuleDefinitionDO::getGroupUuid, groupUuid)
+                .orderBy(MetadataValidationRuleDefinitionDO::getId, true);
+        return list(queryWrapper);
+    }
+
+    /**
+     * 根据父规则UUID查询子规则
+     *
+     * @param parentRuleUuid 父规则UUID
      * @return 子规则列表
      */
-    public List<MetadataValidationRuleDefinitionDO> selectByParentRuleId(Long parentRuleId) {
+    public List<MetadataValidationRuleDefinitionDO> selectByParentRuleUuid(String parentRuleUuid) {
         QueryWrapper queryWrapper = this.query()
-                .eq(MetadataValidationRuleDefinitionDO::getParentRuleId, parentRuleId)
+                .eq(MetadataValidationRuleDefinitionDO::getParentRuleUuid, parentRuleUuid)
                 .orderBy(MetadataValidationRuleDefinitionDO::getId, true);
         return list(queryWrapper);
     }
 
     /**
-     * 根据规则组ID删除所有规则定义
+     * 根据规则组UUID删除所有规则定义
      *
-     * @param groupId 规则组ID
+     * @param groupUuid 规则组UUID
      */
-    public void deleteByGroupId(Long groupId) {
+    public void deleteByGroupUuid(String groupUuid) {
         QueryWrapper queryWrapper = this.query()
-                .eq(MetadataValidationRuleDefinitionDO::getGroupId, groupId);
+                .eq(MetadataValidationRuleDefinitionDO::getGroupUuid, groupUuid);
         remove(queryWrapper);
     }
 
     /**
-     * 根据规则组ID查询顶级规则（parent_rule_id为NULL的规则）
+     * 根据规则组UUID查询顶级规则（parent_rule_uuid为NULL的规则）
      *
-     * @param groupId 规则组ID
+     * @param groupUuid 规则组UUID
      * @return 顶级规则列表
      */
-    public List<MetadataValidationRuleDefinitionDO> selectTopLevelRulesByGroupId(Long groupId) {
+    public List<MetadataValidationRuleDefinitionDO> selectTopLevelRulesByGroupUuid(String groupUuid) {
         QueryWrapper queryWrapper = this.query()
-                .eq(MetadataValidationRuleDefinitionDO::getGroupId, groupId)
-                .isNull(MetadataValidationRuleDefinitionDO::getParentRuleId)
+                .eq(MetadataValidationRuleDefinitionDO::getGroupUuid, groupUuid)
+                .isNull(MetadataValidationRuleDefinitionDO::getParentRuleUuid)
                 .orderBy(MetadataValidationRuleDefinitionDO::getId, true);
         return list(queryWrapper);
     }

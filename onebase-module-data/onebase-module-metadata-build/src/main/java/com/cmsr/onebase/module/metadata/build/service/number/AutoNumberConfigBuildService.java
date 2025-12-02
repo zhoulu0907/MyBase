@@ -23,19 +23,19 @@ public interface AutoNumberConfigBuildService {
     Long upsert(MetadataAutoNumberConfigDO config);
 
     /**
-     * 根据字段ID获取自动编号配置
+     * 根据字段UUID获取自动编号配置
      *
-     * @param fieldId 字段ID
+     * @param fieldUuid 字段UUID
      * @return 配置信息
      */
-    MetadataAutoNumberConfigDO getByFieldId(Long fieldId);
+    MetadataAutoNumberConfigDO getByFieldId(String fieldUuid);
 
     /**
-     * 根据字段ID删除自动编号配置
+     * 根据字段UUID删除自动编号配置
      *
-     * @param fieldId 字段ID
+     * @param fieldUuid 字段UUID
      */
-    void deleteByFieldId(Long fieldId);
+    void deleteByFieldId(String fieldUuid);
 
     /**
      * 根据配置ID获取规则项列表
@@ -55,10 +55,10 @@ public interface AutoNumberConfigBuildService {
     /**
      * 获取自动编号配置及其规则项（Controller使用）
      *
-     * @param fieldId 字段ID
+     * @param fieldUuid 字段UUID
      * @return 配置和规则项的响应VO，如果配置不存在则返回null
      */
-    AutoNumberConfigWithRulesRespVO getAutoNumberConfigWithRules(Long fieldId);
+    AutoNumberConfigWithRulesRespVO getAutoNumberConfigWithRules(String fieldUuid);
 
     /**
      * 保存自动编号配置（Controller使用）

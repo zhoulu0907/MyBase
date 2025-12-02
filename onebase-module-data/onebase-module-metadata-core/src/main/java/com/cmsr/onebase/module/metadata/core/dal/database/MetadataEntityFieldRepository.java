@@ -32,6 +32,21 @@ public class MetadataEntityFieldRepository extends ServiceImpl<MetadataEntityFie
     }
 
     /**
+     * 根据字段UUID查询实体字段
+     *
+     * @param fieldUuid 字段UUID
+     * @return 实体字段对象，不存在时返回null
+     */
+    public MetadataEntityFieldDO getByFieldUuid(String fieldUuid) {
+        if (fieldUuid == null || fieldUuid.isEmpty()) {
+            return null;
+        }
+        QueryWrapper queryWrapper = this.query()
+                .eq(MetadataEntityFieldDO::getFieldUuid, fieldUuid);
+        return getOne(queryWrapper);
+    }
+
+    /**
      * 获取实体字段列表
      *
      * @return 实体字段列表
@@ -44,67 +59,81 @@ public class MetadataEntityFieldRepository extends ServiceImpl<MetadataEntityFie
     }
 
     /**
-     * 根据实体ID获取实体字段列表
+     * 根据实体UUID获取实体字段列表
      *
-     * @param entityId 实体ID
+     * @param entityUuid 实体UUID
      * @return 实体字段列表
      */
-    public List<MetadataEntityFieldDO> getEntityFieldListByEntityId(Long entityId) {
+    public List<MetadataEntityFieldDO> getEntityFieldListByEntityUuid(String entityUuid) {
         QueryWrapper queryWrapper = this.query()
-                .eq(MetadataEntityFieldDO::getEntityId, entityId)
+                .eq(MetadataEntityFieldDO::getEntityUuid, entityUuid)
                 .orderBy(MetadataEntityFieldDO::getSortOrder, true)
                 .orderBy(MetadataEntityFieldDO::getCreateTime, false);
         return list(queryWrapper);
     }
 
     /**
-     * 根据实体ID获取实体字段列表（字符串格式）
+     * 根据实体ID获取实体字段列表（通过数据库ID查询）
      *
      * @param entityId 实体ID（字符串格式）
      * @return 实体字段列表
+     * @deprecated 请使用 {@link #getEntityFieldListByEntityUuid(String)} 代替
      */
+    @Deprecated
     public List<MetadataEntityFieldDO> getEntityFieldListByEntityId(String entityId) {
         Long longEntityId = Long.valueOf(entityId);
         return getEntityFieldListByEntityId(longEntityId);
     }
 
     /**
-     * 根据实体ID和字段名获取字段
+     * 根据实体ID获取实体字段列表（通过数据库ID查询）
      *
-     * @param entityId  实体ID
+     * @param entityId 实体ID
+     * @return 实体字段列表
+     * @deprecated 请使用 {@link #getEntityFieldListByEntityUuid(String)} 代替
+     */
+    @Deprecated
+    public List<MetadataEntityFieldDO> getEntityFieldListByEntityId(Long entityId) {
+        return list(query().eq(MetadataEntityFieldDO::getId, entityId));
+    }
+
+    /**
+     * 根据实体UUID和字段名获取字段
+     *
+     * @param entityUuid  实体UUID
      * @param fieldName 字段名
      * @return 实体字段对象
      */
-    public MetadataEntityFieldDO getEntityFieldByName(Long entityId, String fieldName) {
+    public MetadataEntityFieldDO getEntityFieldByName(String entityUuid, String fieldName) {
         QueryWrapper queryWrapper = this.query()
-                .eq(MetadataEntityFieldDO::getEntityId, entityId)
+                .eq(MetadataEntityFieldDO::getEntityUuid, entityUuid)
                 .eq(MetadataEntityFieldDO::getFieldName, fieldName);
         return getOne(queryWrapper);
     }
 
     /**
-     * 根据实体ID获取未删除的字段列表
+     * 根据实体UUID获取未删除的字段列表
      *
-     * @param entityId 实体ID
+     * @param entityUuid 实体UUID
      * @return 实体字段列表
      */
-    public List<MetadataEntityFieldDO> getActiveEntityFieldsByEntityId(Long entityId) {
+    public List<MetadataEntityFieldDO> getActiveEntityFieldsByEntityUuid(String entityUuid) {
         QueryWrapper queryWrapper = this.query()
-                .eq(MetadataEntityFieldDO::getEntityId, entityId)
+                .eq(MetadataEntityFieldDO::getEntityUuid, entityUuid)
                 .orderBy(MetadataEntityFieldDO::getSortOrder, true)
                 .orderBy(MetadataEntityFieldDO::getCreateTime, false);
         return list(queryWrapper);
     }
 
     /**
-     * 根据实体ID获取ID字段
+     * 根据实体UUID获取ID字段
      *
-     * @param entityId 实体ID
+     * @param entityUuid 实体UUID
      * @return ID字段对象
      */
-    public MetadataEntityFieldDO getIdFieldByEntityId(Long entityId) {
+    public MetadataEntityFieldDO getIdFieldByEntityUuid(String entityUuid) {
         QueryWrapper queryWrapper = this.query()
-                .eq(MetadataEntityFieldDO::getEntityId, entityId)
+                .eq(MetadataEntityFieldDO::getEntityUuid, entityUuid)
                 .eq(MetadataEntityFieldDO::getFieldName, "id");
         return getOne(queryWrapper);
     }

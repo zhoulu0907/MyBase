@@ -46,6 +46,14 @@ public interface MetadataBusinessEntityCoreService {
     MetadataBusinessEntityDO getBusinessEntity(Long id);
 
     /**
+     * 根据UUID获得业务实体
+     *
+     * @param entityUuid 业务实体UUID
+     * @return 业务实体DO
+     */
+    MetadataBusinessEntityDO getBusinessEntityByUuid(String entityUuid);
+
+    /**
      * 获得业务实体列表
      *
      * @return 业务实体列表
@@ -61,12 +69,12 @@ public interface MetadataBusinessEntityCoreService {
     MetadataBusinessEntityDO getBusinessEntityByCode(String code);
 
     /**
-     * 根据数据源ID获得业务实体列表
+     * 根据数据源UUID获得业务实体列表
      *
-     * @param datasourceId 数据源ID
+     * @param datasourceUuid 数据源UUID
      * @return 业务实体列表
      */
-    List<MetadataBusinessEntityDO> getBusinessEntityListByDatasourceId(Long datasourceId);
+    List<MetadataBusinessEntityDO> getBusinessEntityListByDatasourceUuid(String datasourceUuid);
 
     /**
      * 根据条件查询业务实体列表

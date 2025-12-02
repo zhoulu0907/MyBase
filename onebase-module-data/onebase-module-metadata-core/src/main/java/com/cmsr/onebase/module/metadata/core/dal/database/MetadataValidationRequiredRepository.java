@@ -20,48 +20,48 @@ import java.util.List;
 public class MetadataValidationRequiredRepository extends ServiceImpl<MetadataValidationRequiredMapper, MetadataValidationRequiredDO> {
 
     /**
-     * 根据字段ID查询单条必填验证规则
+     * 根据字段UUID查询单条必填验证规则
      *
-     * @param fieldId 字段ID
+     * @param fieldUuid 字段UUID
      * @return 必填验证规则
      */
-    public MetadataValidationRequiredDO findOneByFieldId(Long fieldId) {
+    public MetadataValidationRequiredDO findOneByFieldUuid(String fieldUuid) {
         QueryWrapper queryWrapper = query()
-                .eq(MetadataValidationRequiredDO::getFieldId, fieldId);
+                .eq(MetadataValidationRequiredDO::getFieldUuid, fieldUuid);
         return getOne(queryWrapper);
     }
 
     /**
-     * 根据字段ID查询必填验证规则列表
+     * 根据字段UUID查询必填验证规则列表
      *
-     * @param fieldId 字段ID
+     * @param fieldUuid 字段UUID
      * @return 必填验证规则列表
      */
-    public List<MetadataValidationRequiredDO> findByFieldId(Long fieldId) {
+    public List<MetadataValidationRequiredDO> findByFieldUuid(String fieldUuid) {
         QueryWrapper queryWrapper = query()
-                .eq(MetadataValidationRequiredDO::getFieldId, fieldId);
+                .eq(MetadataValidationRequiredDO::getFieldUuid, fieldUuid);
         return list(queryWrapper);
     }
 
     /**
-     * 根据组ID查询必填验证规则列表
+     * 根据组UUID查询必填验证规则列表
      *
-     * @param groupId 组ID
+     * @param groupUuid 组UUID
      * @return 必填验证规则列表
      */
-    public List<MetadataValidationRequiredDO> findByGroupId(Long groupId) {
+    public List<MetadataValidationRequiredDO> findByGroupUuid(String groupUuid) {
         QueryWrapper queryWrapper = query()
-                .eq(MetadataValidationRequiredDO::getGroupId, groupId);
+                .eq(MetadataValidationRequiredDO::getGroupUuid, groupUuid);
         return list(queryWrapper);
     }
 
     /**
-     * 根据字段ID删除必填验证规则
+     * 根据字段UUID删除必填验证规则
      *
-     * @param fieldId 字段ID
+     * @param fieldUuid 字段UUID
      */
-    public void deleteByFieldId(Long fieldId) {
-        for (var item : findByFieldId(fieldId)) {
+    public void deleteByFieldUuid(String fieldUuid) {
+        for (var item : findByFieldUuid(fieldUuid)) {
             removeById(item.getId());
         }
     }
