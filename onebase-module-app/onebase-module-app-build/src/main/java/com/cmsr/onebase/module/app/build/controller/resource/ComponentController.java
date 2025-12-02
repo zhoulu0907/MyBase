@@ -3,8 +3,8 @@ package com.cmsr.onebase.module.app.build.controller.resource;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.module.app.build.service.resource.ComponentService;
 import com.cmsr.onebase.module.app.core.dto.appresource.ComponentDTO;
-import com.cmsr.onebase.module.app.core.vo.resource.QueryComponentListRespVO;
 import com.cmsr.onebase.module.app.core.vo.resource.QueryComponentListReqVO;
+import com.cmsr.onebase.module.app.core.vo.resource.QueryComponentListRespVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +34,7 @@ public class ComponentController {
     @PostMapping("/list")
     @Operation(summary = "根据page_uuid获取表单字段")
     public CommonResult<QueryComponentListRespVO> getComponentListByPageUuid(@RequestBody QueryComponentListReqVO queryComponentListReqVO) {
-        List<ComponentDTO> components = componentService.listComponent(queryComponentListReqVO.getPageUuid());
+        List<ComponentDTO> components = componentService.listComponent(queryComponentListReqVO.getPageId());
 
         QueryComponentListRespVO queryComponentListRespVO = new QueryComponentListRespVO();
         queryComponentListRespVO.setList(components);

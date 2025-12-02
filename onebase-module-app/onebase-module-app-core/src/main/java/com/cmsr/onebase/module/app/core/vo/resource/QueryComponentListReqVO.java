@@ -13,8 +13,8 @@ import lombok.Data;
 @Data
 public class QueryComponentListReqVO {
 
-    @Schema(description = "Page Uuid", requiredMode = Schema.RequiredMode.REQUIRED, example = "xxx")
+    @Schema(description = "PageId", requiredMode = Schema.RequiredMode.REQUIRED, example = "xxx")
     @NotNull(message = "页面id不能为空")
-    private String pageUuid;
+    private Long pageId;
 
 }

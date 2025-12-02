@@ -33,7 +33,7 @@ public class ComponentController {
     @PostMapping("/list")
     @Operation(summary = "根据page_id获取表单字段")
     public CommonResult<QueryComponentListRespVO> getComponentListByPageUuid(@RequestBody QueryComponentListReqVO queryComponentListReqVO) {
-        List<ComponentDTO> components = componentService.listComponent(queryComponentListReqVO.getPageUuid());
+        List<ComponentDTO> components = componentService.listComponent(queryComponentListReqVO.getPageId());
 
         QueryComponentListRespVO queryComponentListRespVO = new QueryComponentListRespVO();
         queryComponentListRespVO.setList(components);

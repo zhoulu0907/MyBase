@@ -6,6 +6,7 @@ import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageSetRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePageDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetDO;
 import com.cmsr.onebase.module.app.core.dto.appresource.PageDTO;
 import com.cmsr.onebase.module.app.core.dto.appresource.PageRespDTO;
 import com.cmsr.onebase.module.app.core.enums.appresource.AppResourceErrorCodeConstants;
@@ -53,15 +54,18 @@ public class PageServiceProvider {
         return pageDTOList;
     }
 
-    public String getMetadataByPageUuid(String pageUuid) {
-        String pageSetUuid = pageRepository.getPageSetUuidByPageUuid(pageUuid);
+    public String getMetadataByPageId(Long pageId) {
+        AppResourcePageDO pageDO = pageRepository.getById(pageId);
+        String pageSetUuid = pageDO.getPageSetUuid();
         String mainMetadata = pageSetRepository.getMainMetadataByUuid(pageSetUuid);
 
         return mainMetadata;
     }
 
 
-    public List<PageDTO> listPageView(String pageSetUuid) {
+    public List<PageDTO> listPageView(Long pageSetId) {
+        AppResourcePagesetDO pageSetDO = pageSetRepository.getById(pageSetId);
+        String pageSetUuid = pageSetDO.getPageSetUuid();
         List<AppResourcePageDO> pageDOList = pageRepository.findAllFormPageByPageSetUuid(pageSetUuid);
         List<PageDTO> pageDTOList = BeanUtils.toBean(pageDOList, PageDTO.class);
         return pageDTOList;
