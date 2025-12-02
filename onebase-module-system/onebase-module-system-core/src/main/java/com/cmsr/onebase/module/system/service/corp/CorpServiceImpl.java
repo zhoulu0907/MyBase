@@ -18,10 +18,13 @@ import com.cmsr.onebase.module.system.dal.database.CorpDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.corp.CorpDO;
 import com.cmsr.onebase.module.system.dal.dataobject.corpapprelation.CorpAppRelationDO;
 import com.cmsr.onebase.module.system.dal.dataobject.dict.DictDataDO;
+import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.corp.CorpConstant;
+import com.cmsr.onebase.module.system.enums.tenant.TenantStatusEnum;
 import com.cmsr.onebase.module.system.service.corpapprelation.CorpAppRelationService;
 import com.cmsr.onebase.module.system.service.dict.DictDataService;
+import com.cmsr.onebase.module.system.service.tenant.TenantService;
 import com.cmsr.onebase.module.system.service.user.UserService;
 import com.cmsr.onebase.module.system.vo.corp.*;
 import com.cmsr.onebase.module.system.vo.corpapprelation.AppAuthTimeReqVO;
@@ -33,12 +36,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.DataRow;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.*;
@@ -86,6 +89,10 @@ public class CorpServiceImpl implements CorpService {
     @Resource
     private DictDataService dictDataService;
 
+    @Resource
+    @Lazy
+    private TenantService tenantService;
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     @LogRecord(type = SYSTEM_CORP_TYPE, subType = SYSTEM_CORP_CREATE_SUB_TYPE, bizNo = "{{#corpId}}",
@@ -126,9 +133,29 @@ public class CorpServiceImpl implements CorpService {
         return corpDataRepository.insert(corpDO).getId();
     }
 
-    private void validCorpUserCountDuplicate(Integer userCount) {
+    private Integer getExistCorpCount() {
+        List<CorpDO> corpList = corpDataRepository.getExistCorpCount(
+                TenantStatusEnum.NORMAL.getStatus());
+        return corpList.stream()
+                .filter(corp -> corp.getUserLimit() != null)
+                .mapToInt(CorpDO::getUserLimit)
+                .sum();
+    }
+
+    private void validCorpUserCountLimit(Integer userCount) {
         if (userCount != null && userCount > CorpConstant.USER_LIMIT) {
             throw exception(CORP_USER_LIMIT_COUNT, userCount);
+        }
+        // 验证同一空间内企业数据是否超出限制
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+        TenantDO tenantDO = tenantService.getTenant(loginUser.getTenantId());
+        // 空间用户总数
+        Integer tenantAccountCount = tenantDO.getAccountCount();
+        // 获取企业已存在数量
+        Integer existCorpCount = getExistCorpCount();
+        if (existCorpCount + userCount > tenantAccountCount) {
+            Integer remainingCount = tenantAccountCount - existCorpCount;
+            throw exception(CORP_USER_LIMIT_COUNT_CHECK, tenantAccountCount, remainingCount);
         }
     }
 
@@ -157,7 +184,7 @@ public class CorpServiceImpl implements CorpService {
     @LogRecord(type = SYSTEM_CORP_TYPE, subType = SYSTEM_CORP_UPDATE_SUB_TYPE, bizNo = "{{#corp.id}}",
             success = SYSTEM_CORP_UPDATE_SUCCESS)
     public void updateCorp(CorpUpdateReqVO reqVO) {
-        validCorpUserCountDuplicate(reqVO.getUserLimit());
+        validCorpUserCountLimit(reqVO.getUserLimit());
         CorpDO checkCorp = corpDataRepository.findById(reqVO.getId());
         if (checkCorp == null) {
             throw exception(CORP_NO_EXISTS, reqVO.getCorpName());
@@ -410,7 +437,7 @@ public class CorpServiceImpl implements CorpService {
         // 用于校验企业ID是否已存在
         validCorpIdDuplicate(corpReqVO.getCorpCode());
         // 用于校验企业用户数量是否超过限制（如大于500）
-        validCorpUserCountDuplicate(corpReqVO.getUserLimit());
+        validCorpUserCountLimit(corpReqVO.getUserLimit());
     }
 
 

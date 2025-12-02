@@ -189,5 +189,5 @@ public interface ErrorCodeConstants {
 
     ErrorCode AUTH_LOGIN_CORP_DELETE_OR_DISABLE = new ErrorCode(1_002_025_010, "你的的账号所属企业已被删除或禁用，暂时无法登录。");
     ErrorCode AUTH_LOGIN_TENANT_DELETE_OR_DISABLE = new ErrorCode(1_002_025_011, "你的的账号所属空间已被删除或禁用，暂时无法登录。");
-
+    ErrorCode CORP_USER_LIMIT_COUNT_CHECK = new ErrorCode(1_002_003_013, "空间可分配人员数量不足，人员上限是{}, 剩余{}");
 }

@@ -6,6 +6,8 @@ import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.module.system.dal.dataobject.corp.CorpDO;
+import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
+import com.cmsr.onebase.module.system.enums.tenant.TenantCodeEnum;
 import com.cmsr.onebase.module.system.vo.corp.CorpPageReqVO;
 import org.anyline.entity.Compare;
 import org.anyline.entity.Order;
@@ -84,6 +86,12 @@ public class CorpDataRepository extends DataRepository<CorpDO> {
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.eq(CorpDO.STATUS, staus)
                 .order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
+        return findAllByConfig(configStore);
+    }
+
+    public  List<CorpDO> getExistCorpCount(Integer status) {
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.eq(CorpDO.STATUS, status);
         return findAllByConfig(configStore);
     }
 }
