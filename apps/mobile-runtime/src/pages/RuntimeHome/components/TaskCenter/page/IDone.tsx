@@ -1,5 +1,6 @@
 import { useState, useEffect, type FC } from 'react';
 import { Table, type TableColumnProps, Button, Link } from '@arco-design/web-react';
+import avatar from '@assets/images/avatar.svg';
 import TableSearch from './TableSearch';
 import DetailPop from './DetailPop';
 import { getDonePageList } from '@onebase/app/src/services/app_runtime';
@@ -18,7 +19,7 @@ const IDone: FC = ({ appId }) => {
       dataIndex: 'initiator',
       render: (val, record) => (
         <span className="flex-bw-center">
-          <img src="/src/assets/images/avatar.svg" />
+          <img src={avatar} />
           {val}
         </span>
       )

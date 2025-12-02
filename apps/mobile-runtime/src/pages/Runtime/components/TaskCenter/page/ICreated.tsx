@@ -2,6 +2,7 @@ import { useState, useEffect,type FC } from 'react';
 import { Table, type TableColumnProps, Button, Tag, Space, Radio } from '@arco-design/web-react';
 import { getMyCreatePageList } from '@onebase/app/src/services/app_runtime';
 import { LISTTYPE, FLOWSTATUS_TYPE, FlowStatusMap } from '@onebase/app';
+import avatar from '@assets/images/avatar.svg';
 import dayjs from 'dayjs';
 import TaskList from './TaskList';
 import TableSearch from './TableSearch';
@@ -65,7 +66,7 @@ const ICreated: FC = ({ appId }) => {
             <span className="flex-bw-center">
               {userNames.length > 0 ? (
                 <>
-                  <img src="/src/assets/images/avatar.svg" />
+                  <img src={avatar} />
                   {userNames.join('、')}
                 </>
               ) : (

@@ -3,7 +3,7 @@ import { nanoid } from 'nanoid';
 import { Form, Input } from '@arco-design/mobile-react';
 import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, FormSchema } from '@onebase/ui-kit';
 type XautoCodeConfig = typeof FormSchema.XAutoCodeSchema.config;
-import './index.css';
+import '../index.css';
 
 const XautoCode = memo((props: XautoCodeConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const {
@@ -23,8 +23,8 @@ const XautoCode = memo((props: XautoCodeConfig & { runtime?: boolean; detailMode
     : `${FORM_COMPONENT_TYPES.INPUT_EMAIL}_${nanoid()}`;
 
   return (
-    <div className="inputAutoWrapper">
       <Form.Item
+        className="inputTextWrapper inputAutoWrapper"
         label={label.display && label.text}
         field={fieldId}
         style={{
@@ -38,10 +38,10 @@ const XautoCode = memo((props: XautoCodeConfig & { runtime?: boolean; detailMode
           <Input
             readOnly={true}
             placeholder={placeholder}
+            inputStyle={{ textAlign: 'right' }}
           />
         )}
       </Form.Item>
-    </div>
   );
 });
 
