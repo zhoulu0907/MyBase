@@ -9,20 +9,23 @@ interface DrawerInitPageProps {
   refWrapper: React.RefObject<HTMLDivElement>;
 }
 
-type ConfigRef = {
-  save: () => void;
-};
-
 const NodeConfigPage: React.FC<DrawerInitPageProps> = ({ refWrapper }) => {
   useSignals();
 
-  const { curNode, setCurNode, clearCurNode } = etlEditorSignal;
+  const { curNode, nodeData, setCurNode, clearCurNode } = etlEditorSignal;
   const configRef = useRef<(() => void) | null>(null);
 
-  const handleOk = async () => {
+  const handleOk = (title: string) => {
     // 直接调用当前 config 的保存方法
     try {
       configRef.current?.();
+      etlEditorSignal.nodeData.value = {
+        ...nodeData.value,
+        [curNode.value.id]: {
+          ...(nodeData.value[curNode.value.id] || {}),
+          title,
+        },
+      };
       // 保存成功后再关 Drawer
       etlEditorSignal.clearCurNode();
       configRef.current = null;
