@@ -49,16 +49,6 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
   // 获取组件配置
   const componentConfig = getComponentConfig(pageComponentSchema, cpType);
 
-  // console.warn('b11=======111====', {
-  //   cpId,
-  //   cpType,
-  //   pageComponentSchema,
-  //   runtime,
-  //   detailMode,
-  //   showFromPageData,
-  //   refresh
-  // })
-  // console.warn('b11=======222====', componentConfig)
   componentConfig.align = ALIGN_VALUES[ALIGN_OPTIONS.RIGHT];
   componentConfig.width = '100%';
   // 渲染对应的组件

@@ -3,6 +3,7 @@ import { Table, type TableColumnProps, Button, Tag, Space, Radio } from '@arco-d
 import TableSearch from './TableSearch';
 import DetailPop from './DetailPop'
 import TaskList from './TaskList';
+import avatar from '@assets/images/avatar.svg';
 import '../style/tcPage.less'
 
 const radioList = [
@@ -23,7 +24,7 @@ const ICopied:FC = () => {
             dataIndex: 'salary',
             render: (val, record) => (
                 <span className='flex-bw-center'>
-                    <img src="/src/assets/images/avatar.svg" />{val}
+                    <img src={avatar} />{val}
                 </span>
             ),
         },

@@ -36,10 +36,8 @@ interface ComponentRenderProps {
  */
 const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pageComponentSchema, runtime }) => {
   // 获取组件配置
-  // console.warn('aaaaaaaa==0000000==', cpType)
 
   const componentConfig = getComponentConfig(pageComponentSchema, cpType);
-  // console.warn('aaaaaaaa==1111==', componentConfig)
   componentConfig.align = ALIGN_VALUES[ALIGN_OPTIONS.RIGHT];
 
   // 渲染对应的组件

@@ -1,5 +1,6 @@
 import { useState, type FC } from 'react';
 import { Table, type TableColumnProps, Button, Tag, Space, Radio } from '@arco-design/web-react';
+import avatar from '@assets/images/avatar.svg';
 import TableSearch from './TableSearch';
 import DetailPop from './DetailPop'
 import '../style/tcPage.less'
@@ -22,7 +23,7 @@ const ICopied:FC = () => {
             dataIndex: 'salary',
             render: (val, record) => (
                 <span className='flex-bw-center'>
-                    <img src="/src/assets/images/avatar.svg" />{val}
+                    <img src={avatar} />{val}
                 </span>
             ),
         },

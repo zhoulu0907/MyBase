@@ -1,6 +1,7 @@
 import { useState, type FC } from 'react';
 import { Table, type TableColumnProps, Button, Tag, Radio, Space } from '@arco-design/web-react';
 import { IconPlusCircle } from '@arco-design/web-react/icon'
+import avatar from '@assets/images/avatar.svg';
 import TableSearch from './TableSearch';
 import EditProxyModal from '../modal/editProxyForm'
 import '../style/tcPage.less'
@@ -23,7 +24,7 @@ const WillDo:FC = () => {
             dataIndex: 'name',
             render: (val, record) => (
                 <span className='flex-bw-center'>
-                    <img src="/src/assets/images/avatar.svg" />{val}
+                    <img src={avatar} />{val}
                 </span>
             ),
         },
@@ -32,7 +33,7 @@ const WillDo:FC = () => {
             dataIndex: 'salary',
             render: (val, record) => (
                 <span className='flex-bw-center'>
-                    <img src="/src/assets/images/avatar.svg" />{val}
+                    <img src={avatar} />{val}
                 </span>
             ),
         },
@@ -58,7 +59,7 @@ const WillDo:FC = () => {
             dataIndex: 'email',
             render: (val, record) => (
                 <span className='flex-bw-center'>
-                    <img src="/src/assets/images/avatar.svg" />{val}
+                    <img src={avatar} />{val}
                 </span>
             ),
         },

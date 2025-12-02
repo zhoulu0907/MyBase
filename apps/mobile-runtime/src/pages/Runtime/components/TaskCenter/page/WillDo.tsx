@@ -1,5 +1,6 @@
 import { useState, type FC, useEffect } from 'react';
 import { Table, type TableColumnProps, Button, Tag, Link } from '@arco-design/web-react';
+import avatar from '@assets/images/avatar.svg';
 import TableSearch from './TableSearch';
 import DetailPop from './DetailPop';
 import BatchApproveModal from '../modal/batchApprove';
@@ -32,7 +33,7 @@ const WillDo: FC = ({ appId }) => {
       dataIndex: 'initiator',
       render: (val, record) => (
         <span className="flex-bw-center">
-          <img src="/src/assets/images/avatar.svg" />
+          <img src={avatar} />
           {val}
         </span>
       )

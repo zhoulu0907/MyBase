@@ -103,8 +103,6 @@ const XLoadMore = memo(
     }, [showOpearate, columns, fixedOpearate, props?.xTableSelectProps?.selectedDataId]);
 
     useEffect(() => {
-            console.warn('b11=====22==', finalColumns, metaData)
-
       if (finalColumns && metaData) {
         handlePage();
       }

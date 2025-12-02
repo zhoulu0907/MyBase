@@ -6,6 +6,7 @@ import BatchApproveModal from '../modal/batchApprove';
 import { FLOWSTATUS_TYPE, FlowStatusMap, LISTTYPE } from '@onebase/app';
 import { getTodoPageList } from '@onebase/app/src/services/app_runtime';
 import dayjs from 'dayjs';
+import avatar from '@assets/images/avatar.svg';
 import '../style/tcPage.less';
 
  const getTimeAgo = (time) => {
@@ -31,7 +32,7 @@ const WillDo: FC = ({ appId }) => {
       dataIndex: 'initiator',
       render: (val, record) => (
         <span className="flex-bw-center">
-          <img src="/src/assets/images/avatar.svg" />
+          <img src={avatar} />
           {val}
         </span>
       )

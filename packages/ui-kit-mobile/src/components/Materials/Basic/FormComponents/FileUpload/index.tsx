@@ -40,10 +40,6 @@ const XFileUpload = memo((props: XFileUploadConfig & { runtime?: boolean; detail
 
     try {
       const res = await uploadFile(formData);
-
-      console.warn('aabb=-00===ssss=', file)
-      console.warn('aabb=-11===ssss=', res)
-
       return {
         name: file.name,
         response: res
