@@ -163,7 +163,7 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         AppApplicationDO applicationDO = BeanUtils.toBean(createReqVO, AppApplicationDO.class);
         applicationDO.setId(null);
         applicationDO.setAppUid(findAndCreateAppUid());
-        applicationDO.setVersionNumber(VersionUtils.INIT_VERSION);
+//        applicationDO.setVersionNumber(VersionUtils.INIT_VERSION);
         applicationDO.setAppStatus(ApplicationStatusEnum.EDITING.getValue());
         if (StringUtils.isNoneBlank(createReqVO.getAppCode())) {
             applicationDO.setAppCode(createReqVO.getAppCode());
@@ -236,7 +236,7 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         if (applicationDO == null) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_NOT_EXIST);
         }
-        applicationDO.setVersionNumber(versionNumber);
+//        applicationDO.setVersionNumber(versionNumber);
         applicationDO.setVersionUrl(versionUrl);
         applicationRepository.updateById(applicationDO);
     }
