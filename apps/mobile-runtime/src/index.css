@@ -1,6 +1,9 @@
 :root {
   width: 100vw;
-  height: 100vh;
+  height: 100dvh;
+}
+.arco-message-wrapper {
+  display: none;
 }
 
 /* .react-grid-item.react-grid-placeholder {

@@ -170,6 +170,7 @@ const Right: React.FC = () => {
       }
     } catch (error: any) {
       console.error('登录失败:', error);
+      Toast.error(error.message || '登录失败');
     } finally {
       setLoading(false);
     }
