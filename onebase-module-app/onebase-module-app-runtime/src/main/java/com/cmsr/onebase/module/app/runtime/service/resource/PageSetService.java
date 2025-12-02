@@ -8,7 +8,7 @@ import com.cmsr.onebase.module.app.core.vo.resource.LoadPageSetRespVO;
 
 public interface PageSetService {
 
-    String getPageSetId(String menuUuid);
+    Long getPageSetId(Long menuId);
 
     Long getAppId(Long pageSetId);
 

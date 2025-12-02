@@ -24,10 +24,9 @@ public class PageSetController {
 
     @GetMapping("/id")
     @Operation(summary = "获取页面集id")
-    public CommonResult<String> getPageSetCode(@RequestParam String menuUuid) {
-        String pageSetUuid = pageSetService.getPageSetId(menuUuid);
-
-        return CommonResult.success(pageSetUuid);
+    public CommonResult<Long> getPageSetCode(@RequestParam Long menuId) {
+        Long pageSetId = pageSetService.getPageSetId(menuId);
+        return CommonResult.success(pageSetId);
     }
 
     @GetMapping("/app_id")

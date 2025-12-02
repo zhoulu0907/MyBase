@@ -1,12 +1,14 @@
 package com.cmsr.onebase.module.app.build.service.resource;
 
-import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.module.app.build.util.PageUtils;
 import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageSetRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePageDO;
-import com.cmsr.onebase.module.app.core.dto.appresource.*;
+import com.cmsr.onebase.module.app.core.dto.appresource.CreatePageViewDTO;
+import com.cmsr.onebase.module.app.core.dto.appresource.PageDTO;
+import com.cmsr.onebase.module.app.core.dto.appresource.UpdatePageNameDTO;
 import com.cmsr.onebase.module.app.core.enums.appresource.PageEnum;
 import com.cmsr.onebase.module.app.core.enums.appresource.ViewEnmu;
 import com.cmsr.onebase.module.app.core.provider.resource.PageServiceProvider;
@@ -33,12 +35,14 @@ public class PageServiceImpl implements PageService {
 
     @Override
     public Long createPageView(CreatePageViewDTO createPageViewDTO) {
+        Long applicationId = ApplicationManager.getApplicationId();
         String formPageCode = UUID.randomUUID().toString();
         String formPageName = createPageViewDTO.getViewName();
         String formRouterPath = formPageCode + "/form";
         String formPageType = PageEnum.FORM.getValue();
         Boolean formOpenViewMode = false;
         AppResourcePageDO formPageDO = PageUtils.initPage(
+                applicationId,
                 createPageViewDTO.getPageSetUuid(),
                 formPageName,
                 formRouterPath,

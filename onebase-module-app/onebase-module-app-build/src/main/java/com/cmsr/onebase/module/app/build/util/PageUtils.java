@@ -7,8 +7,9 @@ import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourceWorkbenchPageD
 
 public class PageUtils {
 
-    public static AppResourcePageDO initPage(String pageSetUuid, String pageName, String routerPath, String pageType, Boolean openViewMode) {
+    public static AppResourcePageDO initPage(Long applicationId, String pageSetUuid, String pageName, String routerPath, String pageType, Boolean openViewMode) {
         AppResourcePageDO pageDO = new AppResourcePageDO();
+        pageDO.setApplicationId(applicationId);
         pageDO.setPageUuid(UuidUtils.getUuid());
         pageDO.setPageSetUuid(pageSetUuid);
         pageDO.setPageName(pageName);

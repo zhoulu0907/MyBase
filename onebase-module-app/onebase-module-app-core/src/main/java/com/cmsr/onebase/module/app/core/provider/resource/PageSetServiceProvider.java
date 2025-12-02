@@ -21,6 +21,7 @@ import com.cmsr.onebase.module.app.core.vo.resource.ListPageSetRespVO;
 import com.cmsr.onebase.module.app.core.vo.resource.LoadPageSetReqVO;
 import com.cmsr.onebase.module.app.core.vo.resource.LoadPageSetRespVO;
 import jakarta.annotation.Resource;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+@Setter
 @Service
 @Slf4j
 public class PageSetServiceProvider {
@@ -37,7 +39,7 @@ public class PageSetServiceProvider {
     private WorkBenchPageSetServiceProvider workBenchPageSetService;
 
     @Resource
-    private AppPageSetRepository pageSetDataRepository;
+    private AppPageSetRepository appPageSetRepository;
 
     @Resource
     private AppPageRepository pageRepository;
@@ -48,33 +50,36 @@ public class PageSetServiceProvider {
     @Resource
     private AppMenuRepository appMenuRepository;
 
-    public String getPageSetUuidByMenuUuid(String menuUuid) {
-        String pageSetUuid = pageSetDataRepository.findPageSetUuidByMenuUuid(menuUuid);
-        return pageSetUuid;
+    public Long getPageSetIdByMenuId(Long menuId) {
+        AppMenuDO appMenuDO = appMenuRepository.getById(menuId);
+        AppResourcePagesetDO pagesetDO = appPageSetRepository.findPageSetByAppIdAndMenuUuid(
+                appMenuDO.getApplicationId(),
+                appMenuDO.getMenuUuid());
+        return pagesetDO.getId();
     }
 
 
     public Long getAppId(Long pageSetId) {
-        AppResourcePagesetDO pageSetDO = pageSetDataRepository.getById(pageSetId);
+        AppResourcePagesetDO pageSetDO = appPageSetRepository.getById(pageSetId);
         return pageSetDO.getApplicationId();
     }
 
 
     public String getMainMetadata(Long pageSetId) {
-        AppResourcePagesetDO pageSetDO = pageSetDataRepository.getById(pageSetId);
+        AppResourcePagesetDO pageSetDO = appPageSetRepository.getById(pageSetId);
         return pageSetDO.getMainMetadata();
     }
 
 
     public LoadPageSetRespVO loadPageSet(LoadPageSetReqVO loadPageSetReqVO) {
-        AppResourcePagesetDO pageSetDO = pageSetDataRepository.getById(loadPageSetReqVO.getId());
+        AppResourcePagesetDO pageSetDO = appPageSetRepository.getById(loadPageSetReqVO.getId());
 
         if (pageSetDO == null) {
             throw ServiceExceptionUtil.exception(AppResourceErrorCodeConstants.PAGE_SET_NOT_EXIST);
         }
 
         // 读取页面集中的页面
-        List<String> pageUuidList = pageRepository.findPageUuidsByPageSetUuid(pageSetDO.getPageSetUuid());
+        List<String> pageUuidList = pageRepository.findIdsByAppIdAndPageSetUuid(pageSetDO.getPageSetUuid());
 
         if (PageTypeSetEnum.isWorkBenchType(pageSetDO.getPageSetType())) {
             /**
@@ -120,7 +125,7 @@ public class PageSetServiceProvider {
 
 
     public PageSetRespDTO getPageSet(Long pageSetId) {
-        AppResourcePagesetDO pageSetDO = pageSetDataRepository.getById(pageSetId);
+        AppResourcePagesetDO pageSetDO = appPageSetRepository.getById(pageSetId);
         if (pageSetDO == null) {
             throw ServiceExceptionUtil.exception(AppResourceErrorCodeConstants.PAGE_SET_NOT_EXIST);
         }
@@ -152,9 +157,9 @@ public class PageSetServiceProvider {
         List<AppResourcePagesetDO> pageSetDOs;
 
         if (pageSetType != null) {
-            pageSetDOs = pageSetDataRepository.findByMenuUuidAndType(menuUuids, pageSetType);
+            pageSetDOs = appPageSetRepository.findByMenuUuidAndType(menuUuids, pageSetType);
         } else {
-            pageSetDOs = pageSetDataRepository.findByMenuUuids(menuUuids);
+            pageSetDOs = appPageSetRepository.findByMenuUuids(menuUuids);
         }
 
         respVO.setPageSets(pageSetDOs.stream()

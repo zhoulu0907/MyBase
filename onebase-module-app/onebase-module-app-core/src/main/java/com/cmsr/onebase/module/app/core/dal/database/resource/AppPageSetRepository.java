@@ -27,8 +27,9 @@ public class AppPageSetRepository extends BaseBizRepository<AppResourcePagesetMa
         return objListAs(queryWrapper, String.class);
     }
 
-    public AppResourcePagesetDO findPageSetByMenuUuid(String menuUuid) {
+    public AppResourcePagesetDO findPageSetByAppIdAndMenuUuid(Long applicationId, String menuUuid) {
         QueryWrapper queryWrapper = this.query()
+                .where(APP_RESOURCE_PAGESET.APPLICATION_ID.eq(applicationId))
                 .where(APP_RESOURCE_PAGESET.MENU_UUID.eq(menuUuid));
         return getOne(queryWrapper);
     }

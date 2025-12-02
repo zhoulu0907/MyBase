@@ -1,12 +1,15 @@
 package com.cmsr.onebase.module.app.build.service.resource;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.common.util.string.UuidUtils;
 import com.cmsr.onebase.module.app.build.util.PageUtils;
+import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppComponentRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageSetRepository;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppMenuDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourceComponentDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePageDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetDO;
@@ -17,6 +20,7 @@ import com.cmsr.onebase.module.app.core.enums.appresource.PageEnum;
 import com.cmsr.onebase.module.app.core.enums.appresource.PageTypeSetEnum;
 import com.cmsr.onebase.module.app.core.provider.resource.PageSetServiceProvider;
 import com.cmsr.onebase.module.app.core.vo.resource.*;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@Setter
 @Service
 @Validated
 @Slf4j
@@ -48,9 +53,12 @@ public class PageSetServiceImpl implements PageSetService {
     @Autowired
     private PageSetServiceProvider pageSetServiceProvider;
 
+    @Autowired
+    private AppMenuRepository appMenuRepository;
+
     @Override
-    public String getPageSetIdByMenuUuid(String menuUuid) {
-        return pageSetServiceProvider.getPageSetUuidByMenuUuid(menuUuid);
+    public Long getPageSetIdByMenuId(Long menuId) {
+        return pageSetServiceProvider.getPageSetIdByMenuId(menuId);
     }
 
     @Override
@@ -66,8 +74,15 @@ public class PageSetServiceImpl implements PageSetService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String createPageSet(CreatePageSetDTO createPageSetDTO) {
-        AppResourcePagesetDO pageSetDO = BeanUtils.toBean(createPageSetDTO, AppResourcePagesetDO.class);
+        if (createPageSetDTO.getApplicationId() == null) {
+            createPageSetDTO.setApplicationId(ApplicationManager.getApplicationId());
+        }
+        AppMenuDO appMenuDO = appMenuRepository.getById(createPageSetDTO.getMenuId());
+        String menuUuid = appMenuDO.getMenuUuid();
         String pageSetUuid = UuidUtils.getUuid();
+        AppResourcePagesetDO pageSetDO = BeanUtils.toBean(createPageSetDTO, AppResourcePagesetDO.class);
+        pageSetDO.setMenuUuid(menuUuid);
+        pageSetDO.setApplicationId(pageSetDO.getApplicationId());
         pageSetDO.setPageSetUuid(pageSetUuid);
         pageSetDO.setPageSetCode(UUID.randomUUID().toString());
         pageSetDO.setPageSetType(createPageSetDTO.getPageSetType());
@@ -91,6 +106,7 @@ public class PageSetServiceImpl implements PageSetService {
         String formPageType = PageEnum.FORM.getValue();
         Boolean formOpenViewMode = true;
         AppResourcePageDO formPageDO = PageUtils.initPage(
+                createPageSetDTO.getApplicationId(),
                 pageSetUuid,
                 formPageName,
                 formRouterPath,
@@ -104,52 +120,52 @@ public class PageSetServiceImpl implements PageSetService {
         String listPageType = PageEnum.LIST.getValue();
         Boolean listOpenViewMode = false;
         AppResourcePageDO listPageDO = PageUtils.initPage(
+                createPageSetDTO.getApplicationId(),
                 pageSetUuid,
                 listPageName,
                 listRouterPath,
                 listPageType,
                 listOpenViewMode);
         pageRepository.save(listPageDO);
-
         return pageSetDO.getPageSetCode();
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void deletePageSet(String menuUuid) {
+    public void deletePageSetByMenuId(Long menuId) {
+        AppMenuDO appMenuDO = appMenuRepository.getById(menuId);
         // 找到页面集
-        AppResourcePagesetDO pageSetDO = pageSetRepository.findPageSetByMenuUuid(menuUuid);
-
+        AppResourcePagesetDO pageSetDO = pageSetRepository.findPageSetByAppIdAndMenuUuid(appMenuDO.getApplicationId(), appMenuDO.getMenuUuid());
         // 删除页面集关联的页面
-        List<String> pageUuidList = pageRepository.findPageUuidsByPageSetUuid(pageSetDO.getPageSetUuid());
-
-        // 删除页面
-        pageRepository.deleteByUuidList(pageUuidList);
+        List<Long> pageIds = pageRepository.findIdsByAppIdAndPageSetUuid(appMenuDO.getApplicationId(), pageSetDO.getPageSetUuid());
         // 删除页面集
-        pageSetRepository.deletePageSetByMenuUuid(menuUuid);
+        pageSetRepository.removeById(pageSetDO);
+        // 删除页面
+        pageRepository.removeByIds(pageIds);
+
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String copyPageSet(CopyPageSetDTO copyPageSetDTO) {
-        String oldMenuUuid = copyPageSetDTO.getMenuUuid();
-        String newMenuUuid = copyPageSetDTO.getNewMenuUuid();
-        AppResourcePagesetDO oldPageSetDO = pageSetRepository.findPageSetByMenuUuid(oldMenuUuid);
+        Long oldMenuUuid = copyPageSetDTO.getMenuId();
+        Long newMenuUuid = copyPageSetDTO.getNewMenuId();
+
+        AppResourcePagesetDO oldPageSetDO = pageSetRepository.getById(oldMenuUuid);
         if (oldPageSetDO == null) {
             throw ServiceExceptionUtil.exception(AppResourceErrorCodeConstants.PAGE_SET_NOT_EXIST);
         }
-
         // 复制页面集
         String newPageSetUuid = UuidUtils.getUuid();
         AppResourcePagesetDO newPageSetDO = BeanUtils.toBean(oldPageSetDO, AppResourcePagesetDO.class);
-        newPageSetDO.setId(null);
+        newPageSetDO.setId(newMenuUuid);
         newPageSetDO.setPageSetUuid(newPageSetUuid);
         newPageSetDO.setPageSetCode(UUID.randomUUID().toString());
-        newPageSetDO.setMenuUuid(newMenuUuid);
+        newPageSetDO.setMenuUuid(UuidUtils.getUuid());
         pageSetRepository.save(newPageSetDO);
 
         // 复制页面其余内容
-        List<String> pageUuidList = pageRepository.findPageUuidsByPageSetUuid(oldPageSetDO.getPageSetUuid());
+        List<String> pageUuidList = pageRepository.findIdsByAppIdAndPageSetUuid(oldPageSetDO.getPageSetUuid());
         if (CollectionUtils.isEmpty(pageUuidList)) {
             return newPageSetDO.getPageSetCode();
         }
@@ -185,6 +201,7 @@ public class PageSetServiceImpl implements PageSetService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean savePageSet(SavePageSetReqVO savePageSetReqVO) {
+        Long applicationId = ApplicationManager.getApplicationId();
         AppResourcePagesetDO pageSetDO = pageSetRepository.getById(savePageSetReqVO.getId());
 
         if (pageSetDO == null) {
@@ -208,7 +225,11 @@ public class PageSetServiceImpl implements PageSetService {
                 Boolean openViewMode = false;
 
                 AppResourcePageDO pageDO = PageUtils.initPage(
-                        pageSetDO.getPageSetUuid(), pageName, routerPath, pageType,
+                        applicationId,
+                        pageSetDO.getPageSetUuid(),
+                        pageName,
+                        routerPath,
+                        pageType,
                         openViewMode);
                 pageDO.setId(page.getId());
                 pageDO.setInteractionRules(page.getInteractionRules());

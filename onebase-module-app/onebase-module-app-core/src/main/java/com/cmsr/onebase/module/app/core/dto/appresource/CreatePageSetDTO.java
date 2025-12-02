@@ -8,6 +8,9 @@ import lombok.Data;
 @Data
 public class CreatePageSetDTO {
 
+    @Schema(description = "应用id", requiredMode = Schema.RequiredMode.REQUIRED, example = "xxxxx")
+    private Long applicationId;
+
     @Schema(description = "页面集名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "首页页面集")
     @NotNull(message = "页面集名称不能为空")
     private String pageSetName;
@@ -18,7 +21,7 @@ public class CreatePageSetDTO {
 
     @Schema(description = "菜单id", requiredMode = Schema.RequiredMode.REQUIRED, example = "xxxxx")
     @NotNull(message = "菜单id不能为空")
-    private String menuUuid;
+    private Long menuId;
 
     @Schema(description = "页面集类型 1-普通表单 2-流程表单 3-工作台", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
     @NotNull(message = "页面集类型不能为空")

@@ -2,12 +2,11 @@ package com.cmsr.onebase.module.app.build.service.resource;
 
 import com.cmsr.onebase.module.app.core.dto.appresource.CopyPageSetDTO;
 import com.cmsr.onebase.module.app.core.dto.appresource.CreatePageSetDTO;
-import com.cmsr.onebase.module.app.core.dto.appresource.PageSetRespDTO;
 import com.cmsr.onebase.module.app.core.vo.resource.*;
 
 public interface PageSetService {
 
-    String getPageSetIdByMenuUuid(String menuUuid);
+    Long getPageSetIdByMenuId(Long menuId);
 
     Long getAppId(Long pageSetId);
 
@@ -15,7 +14,7 @@ public interface PageSetService {
 
     String createPageSet(CreatePageSetDTO createPageSetDTO);
 
-    void deletePageSet(String menuUuid);
+    void deletePageSetByMenuId(Long menuId);
 
     String copyPageSet(CopyPageSetDTO copyPageSetDTO);
 

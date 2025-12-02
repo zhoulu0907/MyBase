@@ -234,7 +234,7 @@ public class AppMenuServiceImpl implements AppMenuService {
         AppMenuDO menuDO = new AppMenuDO();
         String menuUuid = UuidUtils.getUuid();
         menuDO.setMenuUuid(menuUuid);
-        menuDO.setApplicationId(createReqVO.getApplicationId());
+        menuDO.setApplicationId(applicationDO.getId());
         menuDO.setParentUuid(validateParentMenuId(createReqVO.getParentId()));
         menuDO.setMenuCode(MenuUtils.generateMenuCode());
         menuDO.setMenuType(createReqVO.getMenuType());
@@ -246,6 +246,7 @@ public class AppMenuServiceImpl implements AppMenuService {
         appMenuRepository.save(menuDO);
         // 创建页面集
         CreatePageSetDTO createPageSetDTO = new CreatePageSetDTO();
+        createPageSetDTO.setApplicationId(applicationDO.getId());
         createPageSetDTO.setMenuUuid(menuUuid);
         createPageSetDTO.setPageSetType(createReqVO.getPageSetType());
         createPageSetDTO.setPageSetName(menuDO.getMenuName());
@@ -386,7 +387,7 @@ public class AppMenuServiceImpl implements AppMenuService {
         // 删除菜单
         appMenuRepository.removeById(id);
         // 删除页面
-        pageSetService.deletePageSet(menuDO.getMenuUuid());
+        pageSetService.deletePageSetByMenuId(menuDO);
     }
 
     private boolean validateMenuGroupHasChildren(Long applicationId, String menuUuid) {
