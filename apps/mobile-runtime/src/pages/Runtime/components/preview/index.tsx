@@ -61,6 +61,18 @@ interface PreviewProps {
   runtime: boolean;
 }
 
+const colorConfig = {
+  normal: 'rgb(var(--primary-6))',
+  active: 'rgb(var(--primary-9))',
+  disabled: 'rgb(var(--primary-1))'
+};
+
+const ghostBgColor = {
+  normal: '#FFF',
+  active: 'rgb(var(--primary-6))',
+  disabled: '#FFF'
+};
+
 const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   useSignals();
 
@@ -425,28 +437,28 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
             !listComponents.value?.length ? (
               <div className={styles.noData}>暂无数据</div>
             ) :
-            listComponents.value.map((cp: GridItem) => (
-              <Fragment key={cp.id}>
-                {listPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
-                  <div
-                    key={cp.id}
-                    className={styles.componentItem}
-                    style={{
-                      width: '100%'
-                    }}
-                  >
-                    <PreviewRender
-                      cpId={cp.id}
-                      cpType={cp.type}
-                      pageComponentSchema={listPageComponentSchemas.value[cp.id]}
-                      runtime={runtime}
-                      showFromPageData={showFromPageData}
-                      refresh={refresh}
-                    />
-                  </div>
-                )}
-              </Fragment>
-            ))
+              listComponents.value.map((cp: GridItem) => (
+                <Fragment key={cp.id}>
+                  {listPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+                    <div
+                      key={cp.id}
+                      className={styles.componentItem}
+                      style={{
+                        width: '100%'
+                      }}
+                    >
+                      <PreviewRender
+                        cpId={cp.id}
+                        cpType={cp.type}
+                        pageComponentSchema={listPageComponentSchemas.value[cp.id]}
+                        runtime={runtime}
+                        showFromPageData={showFromPageData}
+                        refresh={refresh}
+                      />
+                    </div>
+                  )}
+                </Fragment>
+              ))
           )
         }
 
@@ -475,10 +487,23 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
             ))}
 
             <div className={styles.footer}>
-              <Button style={{ flex: 2 }} type="ghost" onClick={cancelSubmitForm}>
+              <Button
+                type="ghost"
+                color={colorConfig}
+                bgColor={ghostBgColor}
+                borderColor={colorConfig}
+                onClick={cancelSubmitForm}
+                style={{ flex: 2 }}
+              >
                 取消
               </Button>
-              <Button style={{ flex: 5 }} type="primary" onClick={submitForm}>
+              <Button
+                type="primary"
+                bgColor={colorConfig}
+                borderColor={colorConfig}
+                onClick={submitForm}
+                style={{ flex: 5 }}
+              >
                 提交
               </Button>
             </div>

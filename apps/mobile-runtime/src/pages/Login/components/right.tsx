@@ -75,19 +75,33 @@ const Right: React.FC = () => {
   const handleGetApplication = async () => {
     const redirectURL = getHashQueryParam('redirectURL');
     if (redirectURL) {
-      let startIndex = redirectURL.indexOf('/runtime/');
-      const runtimeLength = startIndex === -1 ? '/runtime-home/'.length : '/runtime/'.length;
-      if (startIndex === -1) {
-        startIndex = redirectURL.indexOf('/runtime-home/');
-      }
-      const endRedirectURL = redirectURL.slice(startIndex + runtimeLength);
-      const endIndex = endRedirectURL?.indexOf('?');
-      let applicationId = redirectURL.slice(startIndex + runtimeLength, startIndex + runtimeLength + endIndex);
-      applicationId = applicationId.split('/')[0];
-      if (applicationId) {
-        const res = await getApplication({ id: applicationId });
-        if (res) {
-          setAppInfo({ appName: res.appName || '', iconName: res.iconName || '', iconColor: res.iconColor || '' });
+      // let startIndex = redirectURL.indexOf('/runtime/');
+      // const runtimeLength = startIndex === -1 ? '/runtime-home/'.length : '/runtime/'.length;
+      // if (startIndex === -1) {
+      //   startIndex = redirectURL.indexOf('/runtime-home/');
+      // }
+      // const endRedirectURL = redirectURL.slice(startIndex + runtimeLength);
+      // const endIndex = endRedirectURL?.indexOf('?');
+      // let applicationId = redirectURL.slice(startIndex + runtimeLength, startIndex + runtimeLength + endIndex);
+      // applicationId = applicationId.split('/')[0];
+      // if (applicationId) {
+      //   const res = await getApplication({ id: applicationId });
+      //   if (res) {
+      //     setAppInfo({ appName: res.appName || '', iconName: res.iconName || '', iconColor: res.iconColor || '' });
+      //   }
+      // }
+
+      const regex = /\/runtime-home\/([^\/]+)\/([^/?]+)/;
+      const match = redirectURL.match(regex);
+      let applicationId = '';
+
+      if (match) {
+        applicationId = match[1];
+        if (applicationId) {
+          const res = await getApplication({ id: applicationId });
+          if (res) {
+            setAppInfo({ appName: res.appName || '', iconName: res.iconName || '', iconColor: res.iconColor || '' });
+          }
         }
       }
     }
@@ -234,7 +248,11 @@ const Right: React.FC = () => {
         theme="filled"
         size="0.88rem"
         fill="#fff"
-        style={{ padding: '0.2rem', marginRight: '0.08rem', backgroundColor: appInfo.iconColor || '#009E9E' }}
+        style={{
+          padding: '0.2rem',
+          marginRight: '0.08rem',
+          backgroundColor: appInfo.iconColor || 'rgb(var(--primary-6))'
+        }}
       />
     );
   };

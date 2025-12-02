@@ -182,7 +182,7 @@
     }
 
     .arco-button.arco-button-type-primary {
-      background-color: #009E9E;
+      background-color: rgb(var(--primary-6));
     }
   }
 }
