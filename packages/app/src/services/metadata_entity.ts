@@ -258,17 +258,17 @@ export const getEntityGraph = (datasourceId: string) => {
   return metadataService.post('/business-entity/er-diagram?datasourceId=' + datasourceId);
 };
 
-export const getEntityListByApp = (appId: string) => {
-  return metadataService.post(`/business-entity/list-by-app?appId=${appId}`);
+export const getEntityListByApp = (applicationId: string) => {
+  return metadataService.post(`/business-entity/list-by-app?applicationId=${applicationId}`);
 };
 
 /**
  * 根据应用ID查询所有实体及字段信息
- * @param appId 应用ID
+ * @param applicationId 应用ID
  * @returns 实体及字段信息
  */
-export const getAppEntities = (appId: string) => {
-  return metadataService.post(`/entity-relationship/app-entities?appId=${appId}`);
+export const getAppEntities = (applicationId: string) => {
+  return metadataService.post(`/entity-relationship/app-entities?applicationId=${applicationId}`);
 };
 
 /**

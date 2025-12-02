@@ -3,8 +3,9 @@ import { useResourceStore } from '@/store/store_resource';
 import { Button, Drawer, Form, Message, Select, Space, Spin } from '@arco-design/web-react';
 import { deleteRelation, getEntityFields, getEntityList, updateRelation } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
-import styles from './index.module.less';
+import { ALL_RELATIONSHIP_OPTIONS } from '@/pages/CreateApp/pages/DataFactory/utils/types';
 import { DeleteConfirmModal } from '../../Modals';
+import styles from './index.module.less';
 interface EntityOption {
   label: string;
   value: string;
@@ -34,14 +35,6 @@ interface EditRelationDrawerProps {
   relationData?: RelationFormValues; // 关联关系数据
   onSuccess?: () => void;
 }
-
-// 关联关系类型选项
-const relationTypes = [
-  { label: '一对一', value: 'ONE_TO_ONE' },
-  { label: '一对多', value: 'ONE_TO_MANY' },
-  { label: '多对一', value: 'MANY_TO_ONE' },
-  { label: '多对多', value: 'MANY_TO_MANY' }
-];
 
 const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVisible, relationData, onSuccess }) => {
   const { curAppId } = useAppStore();
@@ -142,7 +135,7 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
       const updateData = {
         id: relationData?.id || relationData?.relationshipId,
         ...values,
-        appId: curAppId
+        applicationId: curAppId
       };
 
       await updateRelation(updateData);
@@ -241,7 +234,7 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
             required
             rules={[{ required: true, message: '请选择关联关系' }]}
           >
-            <Select placeholder="请选择关联关系" options={relationTypes} allowClear />
+            <Select placeholder="请选择关联关系" options={ALL_RELATIONSHIP_OPTIONS} allowClear />
           </Form.Item>
 
           {/* 关联表 */}
