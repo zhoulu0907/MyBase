@@ -312,7 +312,7 @@ public class BpmAgentServiceImpl implements BpmAgentService {
         queryWrapper.eq(BpmFlowAgentDO::getApplicationId, reqVO.getAppId());
 
         QueryCondition userIdCondition = QueryCondition.createEmpty();
-        userIdCondition.or(BPM_FLOW_AGENT.CREATOR.eq(userId));
+        userIdCondition.and(BPM_FLOW_AGENT.CREATOR.eq(userId));
         userIdCondition.or(BPM_FLOW_AGENT.PRINCIPAL_ID.eq(userId));
 
         queryWrapper.and(userIdCondition);

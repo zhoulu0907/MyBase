@@ -40,10 +40,18 @@ public class BpmDesignRespVO {
     /**
      * 业务ID，用于关联业务系统的业务数据
      *
-     * 此处为菜单UUID
+     * 此处为菜单ID
      */
     @Schema(description = "业务ID")
-    private String businessId;
+    private Long businessId;
+
+    /**
+     * 业务ID，用于关联业务系统的业务数据
+     *
+     * 此处为菜单Uuid
+     */
+    @Schema(description = "业务UUID")
+    private String businessUuid;
 
     /**
      * 流程定义JSON

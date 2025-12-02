@@ -118,6 +118,11 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         queryPageVO.setAppId(appId);
     }
 
+    private void fillBusinessUuid(BpmInsExtQueryPageVO queryPageVO) {
+        // todo：需要获取菜单UUID
+        queryPageVO.setBusinessUuid(String.valueOf(queryPageVO.getBusinessId()));
+    }
+
     /**
      * 获取流程待办分页
      *
@@ -130,6 +135,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         String loginUserStrId = String.valueOf(loginUserId);
 
         fillAppId(pageReqVO);
+        fillBusinessUuid(pageReqVO);
 
         // 处理节点编码参数
         pageReqVO.setNodeCodeList(splitToList(pageReqVO.getNodeCode()));

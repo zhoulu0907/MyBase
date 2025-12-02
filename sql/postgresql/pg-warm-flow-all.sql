@@ -120,7 +120,7 @@ CREATE TABLE bpm_flow_skip
     next_node_type int2         NULL,
     skip_name      varchar(100) NULL,
     skip_type      varchar(40)  NULL,
-    skip_condition varchar(200) NULL,
+    skip_condition text NULL,
     coordinate     varchar(100) NULL,
     "application_id" int8 NOT NULL,
     "version_tag"   int8 NOT NULL DEFAULT 0,

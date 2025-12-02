@@ -2,9 +2,13 @@ package com.cmsr.onebase.module.app.core.impl.resource;
 
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.api.appresource.AppResourceApi;
+import com.cmsr.onebase.module.app.api.appresource.dto.AppMenuRespDTO;
 import com.cmsr.onebase.module.app.api.appresource.dto.PageRespDTO;
+import com.cmsr.onebase.module.app.api.appresource.dto.AppPagesetRespDTO;
+import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageSetRepository;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppMenuDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePageDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetDO;
 import lombok.Setter;
@@ -28,6 +32,9 @@ public class AppResourceImpl implements AppResourceApi {
     @Autowired
     private AppPageSetRepository pageSetRepository;
 
+    @Autowired
+    private AppMenuRepository appMenuRepository;
+
     @Override
     public List<PageRespDTO> findPageListByPageSetId(Long pageSetId) {
         List<PageRespDTO> pageRespDTOs = new ArrayList<>();
@@ -38,5 +45,38 @@ public class AppResourceImpl implements AppResourceApi {
         // 读取页面集中的页面
         List<AppResourcePageDO> pageDOS = pageRepository.findAllFormPageByAppIdAndPageSetUuid(pagesetDO.getApplicationId(), pagesetDO.getPageSetUuid());
         return BeanUtils.toBean(pageDOS, PageRespDTO.class);
+    }
+
+    @Override
+    public AppPagesetRespDTO getPageSetByMenuUuidAndAppId(String menuUuid, Long applicationId) {
+        AppResourcePagesetDO pagesetDO = pageSetRepository.findPageSetByAppIdAndMenuUuid(applicationId, menuUuid);
+
+        if (pagesetDO != null) {
+            return BeanUtils.toBean(pagesetDO, AppPagesetRespDTO.class);
+        }
+
+        return null;
+    }
+
+    @Override
+    public AppMenuRespDTO getAppMenuById(Long menuId) {
+        AppMenuDO appMenuDO = appMenuRepository.getById(menuId);
+
+        if (appMenuDO != null) {
+            return BeanUtils.toBean(appMenuDO, AppMenuRespDTO.class);
+        }
+
+        return null;
+    }
+
+    @Override
+    public AppMenuRespDTO getAppMenuByUuidAndAppId(String menuUuid, Long applicationId) {
+        AppMenuDO appMenuDO = appMenuRepository.findByAppIdAndMenuUuid(applicationId, menuUuid);
+
+        if (appMenuDO != null) {
+            return BeanUtils.toBean(appMenuDO, AppMenuRespDTO.class);
+        }
+
+        return null;
     }
 }

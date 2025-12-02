@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.bpm.core.dal.database.ext;
 
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.module.engine.orm.mybatisflex.entity.FlowDefinition;
 import com.cmsr.onebase.module.engine.orm.mybatisflex.repository.FlowDefinitionRepository;
 import com.mybatisflex.core.query.QueryWrapper;
@@ -35,6 +36,7 @@ public class BpmFlowDefinitionRepositoryExt {
     public Definition getByFormPath(String formPath) {
         QueryWrapper queryWrapper = new QueryWrapper();
         queryWrapper.eq(FlowDefinition::getFormPath,formPath);
+        queryWrapper.eq(FlowDefinition::getApplicationId, ApplicationManager.getApplicationId());
         queryWrapper.orderBy(FlowDefinition::getCreateTime, false);
         return flowDefinitionRepository.getOne(queryWrapper);
     }
@@ -49,6 +51,7 @@ public class BpmFlowDefinitionRepositoryExt {
         FlowDefinition query = new FlowDefinition();
         query.setFormPath(formPath);
         query.setIsPublish(isPublish);
+        query.setApplicationId(ApplicationManager.getApplicationId());
 
         QueryWrapper queryWrapper = QueryWrapper.create(query);
         queryWrapper.orderBy(FlowDefinition::getCreateTime, false);

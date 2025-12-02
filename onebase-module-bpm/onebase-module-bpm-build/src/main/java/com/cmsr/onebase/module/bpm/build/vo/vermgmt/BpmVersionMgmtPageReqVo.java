@@ -17,7 +17,7 @@ public class BpmVersionMgmtPageReqVo extends PageParam {
 
     @Schema(description = "业务ID", required = true, example = "113771690916872193")
     @NotNull(message = "业务ID不能为空")
-    private String businessId;
+    private Long businessId;
 
     @Schema(description = "流程版本备注")
     private String bpmVersionAlias;
