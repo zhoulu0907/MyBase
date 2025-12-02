@@ -1,13 +1,12 @@
 package com.cmsr.onebase.module.system.dal.database;
 
 import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.OwnerTagEnum;
 import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.module.system.dal.dataobject.corp.CorpDO;
-import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
-import com.cmsr.onebase.module.system.enums.tenant.TenantCodeEnum;
 import com.cmsr.onebase.module.system.vo.corp.CorpPageReqVO;
 import org.anyline.entity.Compare;
 import org.anyline.entity.Order;
@@ -24,7 +23,8 @@ import java.util.List;
  * @date 2025-08-20
  */
 @Repository
-public class CorpDataRepository extends DataRepository<CorpDO> {
+public class
+CorpDataRepository extends DataRepository<CorpDO> {
 
     public CorpDataRepository() {
         super(CorpDO.class);
@@ -89,12 +89,9 @@ public class CorpDataRepository extends DataRepository<CorpDO> {
         return findAllByConfig(configStore);
     }
 
-    public  List<CorpDO> getExistCorpCount(Integer status,Long corpId) {
+    public  List<CorpDO> getAllEnableCorp() {
         DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.eq(CorpDO.STATUS, status);
-        if (null != corpId) {
-            configStore.notIn(CorpDO.ID,  corpId);
-        }
+        configStore.eq(CorpDO.STATUS, CommonStatusEnum.ENABLE.getStatus());
         return findAllByConfig(configStore);
     }
 }

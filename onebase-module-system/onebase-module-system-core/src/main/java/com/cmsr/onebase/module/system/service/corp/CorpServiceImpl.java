@@ -21,7 +21,6 @@ import com.cmsr.onebase.module.system.dal.dataobject.dict.DictDataDO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.corp.CorpConstant;
-import com.cmsr.onebase.module.system.enums.tenant.TenantStatusEnum;
 import com.cmsr.onebase.module.system.service.corpapprelation.CorpAppRelationService;
 import com.cmsr.onebase.module.system.service.dict.DictDataService;
 import com.cmsr.onebase.module.system.service.tenant.TenantService;
@@ -36,7 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.DataRow;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.context.annotation.Bean;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -46,6 +45,7 @@ import org.springframework.validation.annotation.Validated;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -125,7 +125,7 @@ public class CorpServiceImpl implements CorpService {
 
     public Long createCorp(CorpReqVO reqVO) {
         // 验证企业基本信息
-        validCorp(reqVO);
+        validCreateCorp(reqVO);
 
         CorpDO corpDO = BeanUtils.toBean(reqVO, CorpDO.class);
         corpDO.setTenantId(TenantContextHolder.getTenantId());
@@ -133,10 +133,10 @@ public class CorpServiceImpl implements CorpService {
         return corpDataRepository.insert(corpDO).getId();
     }
 
-    private Integer getExistCorpCount(Long corpId) {
-        List<CorpDO> corpList = corpDataRepository.getExistCorpCount(
-                TenantStatusEnum.NORMAL.getStatus(), corpId);
+    private Integer getExistUserLimitExcludeCorp(Long corpId) {
+        List<CorpDO> corpList = corpDataRepository.getAllEnableCorp();
         return corpList.stream()
+                .filter(corp -> !Objects.equals(corp.getId(), corpId))
                 .filter(corp -> corp.getUserLimit() != null)
                 .mapToInt(CorpDO::getUserLimit)
                 .sum();
@@ -150,12 +150,12 @@ public class CorpServiceImpl implements CorpService {
         LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
         TenantDO tenantDO = tenantService.getTenant(loginUser.getTenantId());
         // 空间用户总数
-        Integer tenantAccountCount = tenantDO.getAccountCount();
+        Integer tenantUserLimit = tenantDO.getAccountCount();
         // 获取企业已存在数量
-        Integer existCorpCount = getExistCorpCount(corpId);
-        if (existCorpCount + userCount > tenantAccountCount) {
-            Integer remainingCount = tenantAccountCount - existCorpCount;
-            throw exception(CORP_USER_LIMIT_COUNT_CHECK, tenantAccountCount, remainingCount);
+        Integer existUserLimit = getExistUserLimitExcludeCorp(corpId);
+        if (existUserLimit + userCount > tenantUserLimit) {
+            Integer remainingCount = tenantUserLimit - existUserLimit;
+            throw exception(CORP_USER_LIMIT_COUNT_CHECK, tenantUserLimit, remainingCount);
         }
     }
 
@@ -184,11 +184,16 @@ public class CorpServiceImpl implements CorpService {
     @LogRecord(type = SYSTEM_CORP_TYPE, subType = SYSTEM_CORP_UPDATE_SUB_TYPE, bizNo = "{{#corp.id}}",
             success = SYSTEM_CORP_UPDATE_SUCCESS)
     public void updateCorp(CorpUpdateReqVO reqVO) {
-        validCorpUserCountLimit(reqVO.getUserLimit(), reqVO.getId());
         CorpDO checkCorp = corpDataRepository.findById(reqVO.getId());
         if (checkCorp == null) {
             throw exception(CORP_NO_EXISTS, reqVO.getCorpName());
         }
+
+        // todo 检查1：不能小于企业已有开启状态的用户实际数量
+
+        // 检查2：不能大于空间下可用的用户数量
+        validCorpUserCountLimit(reqVO.getUserLimit(), reqVO.getId());
+
         CorpDO corpDO = BeanUtils.toBean(reqVO, CorpDO.class);
         corpDataRepository.update(corpDO);
 
@@ -431,7 +436,7 @@ public class CorpServiceImpl implements CorpService {
         return corpDataRepository.getSimpleCorpList(staus);
     }
 
-    public void validCorp(CorpReqVO corpReqVO){
+    public void validCreateCorp(CorpReqVO corpReqVO){
         // 用于校验企业名称是否已存在
         validCorpNameDuplicate(corpReqVO.getCorpName());
         // 用于校验企业ID是否已存在
@@ -443,7 +448,7 @@ public class CorpServiceImpl implements CorpService {
 
     @Override
     public void checkCorp(CorpReqVO corpReqVO) {
-        validCorp(corpReqVO);
+        validCreateCorp(corpReqVO);
     }
 
     @Override
