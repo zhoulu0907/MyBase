@@ -259,7 +259,7 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
           字段配置
         </Button>
         <Popover
-          trigger="hover"
+          trigger="click"
           position="rt"
           content={
             <Space direction="vertical">
@@ -271,6 +271,7 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
               </Button>
             </Space>
           }
+          className={styles.relationPopover}
         >
           <Button type="text" className={styles.nodeFooterButton}>
             添加关系
