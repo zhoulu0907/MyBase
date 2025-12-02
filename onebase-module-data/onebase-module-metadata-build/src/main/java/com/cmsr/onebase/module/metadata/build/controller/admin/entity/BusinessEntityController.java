@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.metadata.build.controller.admin.entity;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.BusinessEntityPageReqVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.BusinessEntityRespVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.BusinessEntitySaveReqVO;
@@ -103,6 +104,7 @@ public class BusinessEntityController {
     @Parameter(name = "appId", description = "应用ID", required = true, example = "1024")
     @PreAuthorize("@ss.hasPermission('metadata:business-entity:query')")
     public CommonResult<List<SimpleEntityRespVO>> getSimpleEntityListByAppId(@RequestParam("appId") Long appId) {
+        appId = ApplicationManager.getApplicationId();
         List<SimpleEntityRespVO> result = businessEntityService.getSimpleEntityListByAppId(appId);
         return success(result);
     }

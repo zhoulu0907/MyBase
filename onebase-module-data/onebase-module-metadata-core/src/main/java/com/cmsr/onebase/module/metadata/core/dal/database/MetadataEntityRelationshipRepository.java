@@ -134,7 +134,7 @@ public class MetadataEntityRelationshipRepository extends ServiceImpl<MetadataEn
      */
     public MetadataEntityRelationshipDO findBySourceFieldAndEntity(Long sourceFieldId, Long sourceEntityId) {
         QueryWrapper queryWrapper = this.query()
-                .eq(MetadataEntityRelationshipDO::getSourceFieldId, String.valueOf(sourceFieldId))
+                .eq(MetadataEntityRelationshipDO::getSourceFieldId, sourceFieldId)
                 .eq(MetadataEntityRelationshipDO::getSourceEntityId, sourceEntityId);
         return getOne(queryWrapper);
     }
