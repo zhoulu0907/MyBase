@@ -25,7 +25,7 @@ public class AppAuthViewRepository extends BaseBizRepository<AppAuthViewMapper, 
         QueryWrapper queryWrapper = this.query()
                 .where(APP_AUTH_VIEW.APPLICATION_ID.eq(reqVO.getApplicationId()))
                 .where(APP_AUTH_VIEW.ROLE_UUID.eq(reqVO.getRoleUuid()))
-                .where(APP_AUTH_VIEW.MENU_UUID.eq(reqVO.getMenuId()));
+                .where(APP_AUTH_VIEW.MENU_UUID.eq(reqVO.getMenuUuid()));
         return this.list(queryWrapper);
     }
 
@@ -35,7 +35,7 @@ public class AppAuthViewRepository extends BaseBizRepository<AppAuthViewMapper, 
         this.updateChain()
                 .where(APP_AUTH_VIEW.APPLICATION_ID.eq(reqVO.getApplicationId()))
                 .where(APP_AUTH_VIEW.ROLE_UUID.eq(reqVO.getRoleUuid()))
-                .where(APP_AUTH_VIEW.MENU_UUID.eq(reqVO.getMenuId()))
+                .where(APP_AUTH_VIEW.MENU_UUID.eq(reqVO.getMenuUuid()))
                 .remove();
     }
 

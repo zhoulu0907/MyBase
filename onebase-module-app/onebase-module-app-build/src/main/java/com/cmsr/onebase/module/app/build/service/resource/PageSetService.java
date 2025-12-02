@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.app.build.service.resource;
 
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppMenuDO;
 import com.cmsr.onebase.module.app.core.dto.appresource.CopyPageSetDTO;
 import com.cmsr.onebase.module.app.core.dto.appresource.CreatePageSetDTO;
 import com.cmsr.onebase.module.app.core.vo.resource.*;
@@ -17,6 +18,8 @@ public interface PageSetService {
     void deletePageSetByMenuId(Long menuId);
 
     String copyPageSet(CopyPageSetDTO copyPageSetDTO);
+
+    String copyPageSet(CopyPageSetDTO copyPageSetDTO, AppMenuDO appMenuDO);
 
     Boolean savePageSet(SavePageSetReqVO savePageSetReqVO);
 

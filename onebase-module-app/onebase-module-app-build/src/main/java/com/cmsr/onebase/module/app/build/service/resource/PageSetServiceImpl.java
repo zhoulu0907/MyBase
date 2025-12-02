@@ -149,16 +149,22 @@ public class PageSetServiceImpl implements PageSetService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String copyPageSet(CopyPageSetDTO copyPageSetDTO) {
-        Long oldMenuUuid = copyPageSetDTO.getMenuId();
-        Long newMenuUuid = copyPageSetDTO.getNewMenuId();
-        AppResourcePagesetDO oldPageSetDO = pageSetRepository.getById(oldMenuUuid);
+        Long oldMenuId = copyPageSetDTO.getMenuId();
+        AppMenuDO appMenuDO = appMenuRepository.getById(oldMenuId);
+        return copyPageSet(copyPageSetDTO, appMenuDO);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public String copyPageSet(CopyPageSetDTO copyPageSetDTO, AppMenuDO appMenuDO) {
+        Long applicationId = appMenuDO.getApplicationId();
+        AppResourcePagesetDO oldPageSetDO = pageSetRepository.findPageSetByAppIdAndMenuUuid(applicationId, appMenuDO.getMenuUuid());
         if (oldPageSetDO == null) {
             throw ServiceExceptionUtil.exception(AppResourceErrorCodeConstants.PAGE_SET_NOT_EXIST);
         }
-        Long applicationId = oldPageSetDO.getApplicationId();
         // 复制页面集
         AppResourcePagesetDO newPageSetDO = BeanUtils.toBean(oldPageSetDO, AppResourcePagesetDO.class);
-        newPageSetDO.setId(newMenuUuid);
+        newPageSetDO.setId(null);
         newPageSetDO.setPageSetUuid(UuidUtils.getUuid());
         newPageSetDO.setPageSetCode(UUID.randomUUID().toString());
         newPageSetDO.setMenuUuid(UuidUtils.getUuid());
@@ -260,6 +266,8 @@ public class PageSetServiceImpl implements PageSetService {
             List<AppResourceComponentDO> componentDOs = new ArrayList<>();
             for (int idx = 0; idx < page.getComponents().size(); idx++) {
                 AppResourceComponentDO componentDO = BeanUtils.toBean(page.getComponents().get(idx), AppResourceComponentDO.class);
+                componentDO.setComponentUuid(UuidUtils.getUuid());
+                componentDO.setApplicationId(applicationId);
                 componentDO.setPageUuid(finalPageDO.getPageUuid());
                 componentDO.setComponentIndex(idx);
                 componentDOs.add(componentDO);

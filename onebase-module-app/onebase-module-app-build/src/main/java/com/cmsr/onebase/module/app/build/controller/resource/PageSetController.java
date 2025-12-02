@@ -23,7 +23,7 @@ public class PageSetController {
 
     @GetMapping("/id")
     @Operation(summary = "获取页面集id")
-    public CommonResult<Long> getPageSetCode(@RequestParam(value = "id") Long menuId) {
+    public CommonResult<Long> getPageSetCode(@RequestParam(value = "menuId") Long menuId) {
         Long pageSetId = pageSetService.getPageSetIdByMenuId(menuId);
         return CommonResult.success(pageSetId);
     }
@@ -66,7 +66,6 @@ public class PageSetController {
     @Operation(summary = "保存页面集")
     public CommonResult<Boolean> savePageSet(@RequestBody SavePageSetReqVO savePageSetReqVO) {
         pageSetService.savePageSet(savePageSetReqVO);
-
         return CommonResult.success(true);
     }
 
