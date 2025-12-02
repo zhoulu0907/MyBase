@@ -583,7 +583,7 @@ import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
         // 1.2 获得角色列表
         Set<Long> roleIds = permissionService.getRoleIdsListByUserId(getLoginUserId());
         if (CollUtil.isEmpty(roleIds)) {
-            return AuthConvert.INSTANCE.convert(user, Collections.emptyList(), Collections.emptyList(), code);
+           // return AuthConvert.INSTANCE.convert(user, Collections.emptyList(), Collections.emptyList(), code);
         }
         List<RoleDO> roles = roleService.getRoleList(roleIds);
         roles.removeIf(role -> !CommonStatusEnum.ENABLE.getStatus().equals(role.getStatus())); // 移除禁用的角色
