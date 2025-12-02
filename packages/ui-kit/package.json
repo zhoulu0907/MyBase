@@ -13,7 +13,6 @@
     "@icon-park/react": "^1.4.2",
     "@onebase/app": "workspace:*",
     "@onebase/common": "workspace:*",
-    "@onebase/ui-kit": "workspace:*",
     "@onebase/platform-center": "workspace:*",
     "@preact/signals-react": "^3.2.1",
     "@tanstack/react-table": "^8.21.3",

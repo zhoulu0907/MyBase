@@ -2,7 +2,7 @@
   "name": "onebase-platform-fe",
   "scripts": {
     "build:admin-console": "pnpm --filter ./packages/common... build && pnpm --filter ./packages/platform-center... build && pnpm --filter ./apps/admin-console... devops_build",
-    "build:app-builder": "pnpm --filter ./packages/common... build && pnpm --filter ./packages/app... build && pnpm --filter ./packages/platform-center... build && pnpm --filter ./packages/ui-kit... build && pnpm --filter ./apps/app-builder... devops_build",
+    "build:app-builder": "pnpm --filter ./packages/common... build && pnpm --filter ./packages/app... build && pnpm --filter ./packages/platform-center... build && pnpm --filter ./packages/ui-kit... build && pnpm --filter ./packages/ui-kit-mobile... build && pnpm --filter ./apps/app-builder... devops_build",
     "build:mobile-editor": "pnpm --filter ./packages/common... build && pnpm --filter ./packages/app... build && pnpm --filter ./packages/platform-center... build && pnpm --filter ./packages/ui-kit... build && pnpm --filter ./packages/ui-kit-mobile... build && pnpm --filter ./apps/mobile-editor... devops_build",
     "build:runtime": "pnpm --filter ./packages/common... build && pnpm --filter ./packages/app... build && pnpm --filter ./packages/platform-center... build && pnpm --filter ./packages/ui-kit... build && pnpm --filter ./apps/runtime... devops_build"
   }
