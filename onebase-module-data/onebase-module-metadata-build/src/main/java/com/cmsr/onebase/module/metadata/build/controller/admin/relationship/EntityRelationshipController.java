@@ -47,6 +47,8 @@ public class EntityRelationshipController {
     @Operation(summary = "创建实体间的关联关系")
     @PreAuthorize("@ss.hasPermission('metadata:entity-relationship:create')")
     public CommonResult<EntityRelationshipRespVO> createEntityRelationship(@Valid @RequestBody EntityRelationshipSaveReqVO reqVO) {
+        // 从请求头获取应用ID
+        reqVO.setApplicationId(String.valueOf(ApplicationManager.getApplicationId()));
         Long id = entityRelationshipService.createEntityRelationship(reqVO);
         EntityRelationshipRespVO result = entityRelationshipService.getEntityRelationshipDetail(id);
         return success(result);
@@ -77,6 +79,8 @@ public class EntityRelationshipController {
     @Operation(summary = "更新实体关系信息")
     //@PreAuthorize("@ss.hasPermission('metadata:entity-relationship:update')")
     public CommonResult<Boolean> updateEntityRelationship(@Valid @RequestBody EntityRelationshipSaveReqVO reqVO) {
+        // 从请求头获取应用ID
+        reqVO.setApplicationId(String.valueOf(ApplicationManager.getApplicationId()));
         entityRelationshipService.updateEntityRelationship(reqVO);
         return success(true);
     }
@@ -110,6 +114,8 @@ public class EntityRelationshipController {
     @Operation(summary = "创建主子关系", description = "自动创建主子关系，默认使用主表id和子表parent_id关联，一对多关系，级联新增删除查询")
     @PreAuthorize("@ss.hasPermission('metadata:entity-relationship:create')")
     public CommonResult<ParentChildRelationshipRespVO> createParentChildRelationship(@Valid @RequestBody ParentChildRelationshipSaveReqVO reqVO) {
+        // 从请求头获取应用ID
+        reqVO.setApplicationId(String.valueOf(ApplicationManager.getApplicationId()));
         ParentChildRelationshipRespVO result = entityRelationshipService.createParentChildRelationship(reqVO);
         return success(result);
     }
