@@ -25,7 +25,7 @@ GET {{baseUrl}}/formula/function/get?id=1
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
-### ��求 /update 接口 => 更新函数
+### 请求 /update 接口 => 更新函数
 POST {{baseUrl}}/formula/function/update
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
@@ -99,3 +99,13 @@ Content-Type: application/json
   "version": "1.0.0",
   "status": 1
 }
+
+### 请求 /group-by-type 接口 => 根据类型获取函数分组列表
+GET {{baseUrl}}/formula/function/list-group-by-type
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 带参数请求 /group-by-type 接口 => 根据类型获取函数分组列表
+GET {{baseUrl}}/formula/function/list-group-by-type?type=NUMBER&status=1
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
