@@ -23,7 +23,5 @@ public interface PageSetService {
 
     LoadPageSetRespVO loadPageSet(LoadPageSetReqVO loadPageSetReqVO);
 
-    PageSetRespDTO getPageSet(Long pageSetId);
-
     ListPageSetRespVO listPageSet(ListPageSetReqVO listPageSetReqVO);
 }

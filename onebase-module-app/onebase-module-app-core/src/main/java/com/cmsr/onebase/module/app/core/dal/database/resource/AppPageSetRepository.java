@@ -33,6 +33,13 @@ public class AppPageSetRepository extends BaseBizRepository<AppResourcePagesetMa
         return getOne(queryWrapper);
     }
 
+    public String findPageSetUuidByMenuUuid(String menuUuid) {
+        QueryWrapper queryWrapper = this.query()
+                .select(APP_RESOURCE_PAGESET.PAGESET_UUID)
+                .where(APP_RESOURCE_PAGESET.MENU_UUID.eq(menuUuid));
+        return this.getObjAs(queryWrapper, String.class);
+    }
+
     public List<AppResourcePagesetDO> findByMenuUuids(List<String> menuUuids) {
         QueryWrapper queryWrapper = this.query()
                 .where(APP_RESOURCE_PAGESET.MENU_UUID.in(menuUuids));

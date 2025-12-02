@@ -48,18 +48,15 @@ public class PageSetServiceProvider {
     @Resource
     private AppMenuRepository appMenuRepository;
 
-    public String getPageSetIdByMenuUuid(String menuUuid) {
-        AppResourcePagesetDO pageSetDO = pageSetDataRepository.findPageSetByMenuUuid(menuUuid);
-        return pageSetDO.getPageSetUuid();
+    public String getPageSetUuidByMenuUuid(String menuUuid) {
+        String pageSetUuid = pageSetDataRepository.findPageSetUuidByMenuUuid(menuUuid);
+        return pageSetUuid;
     }
 
 
     public Long getAppId(Long pageSetId) {
         AppResourcePagesetDO pageSetDO = pageSetDataRepository.getById(pageSetId);
-        String menuUuid = pageSetDO.getMenuUuid();
-        // TODO: refactor this
-        AppMenuDO menuDO = appMenuRepository.getById(menuUuid);
-        return menuDO.getApplicationId();
+        return pageSetDO.getApplicationId();
     }
 
 
@@ -102,9 +99,9 @@ public class PageSetServiceProvider {
         LoadPageSetRespVO loadPageSetRespVO = new LoadPageSetRespVO();
         loadPageSetRespVO.setId(pageSetDO.getId());
         loadPageSetRespVO.setPageSetType(pageSetDO.getPageSetType());
-        List<PageDTO> pageDTOs = new ArrayList<>();
 
         // 读取每个页面的组件和配置
+        List<PageDTO> pageDTOs = new ArrayList<>();
         pageDOs.forEach(pageDO -> {
             List<AppResourceComponentDO> componentDOs = componentDataRepository.findByPageUuid(pageDO.getPageUuid());
 

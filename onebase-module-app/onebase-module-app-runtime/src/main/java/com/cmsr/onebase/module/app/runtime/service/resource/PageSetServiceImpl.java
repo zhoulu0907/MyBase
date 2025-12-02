@@ -21,7 +21,7 @@ public class PageSetServiceImpl implements PageSetService {
 
     @Override
     public String getPageSetId(String menuUuid) {
-        return pageSetServiceProvider.getPageSetIdByMenuUuid(menuUuid);
+        return pageSetServiceProvider.getPageSetUuidByMenuUuid(menuUuid);
     }
 
     @Override

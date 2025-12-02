@@ -3,9 +3,7 @@ package com.cmsr.onebase.module.app.build.service.resource;
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.common.util.string.UuidUtils;
-import com.cmsr.onebase.module.app.build.service.AppCommonService;
 import com.cmsr.onebase.module.app.build.util.PageUtils;
-import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppComponentRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageSetRepository;
@@ -14,13 +12,11 @@ import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePageDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetDO;
 import com.cmsr.onebase.module.app.core.dto.appresource.CopyPageSetDTO;
 import com.cmsr.onebase.module.app.core.dto.appresource.CreatePageSetDTO;
-import com.cmsr.onebase.module.app.core.dto.appresource.PageSetRespDTO;
 import com.cmsr.onebase.module.app.core.enums.appresource.AppResourceErrorCodeConstants;
 import com.cmsr.onebase.module.app.core.enums.appresource.PageEnum;
 import com.cmsr.onebase.module.app.core.enums.appresource.PageTypeSetEnum;
 import com.cmsr.onebase.module.app.core.provider.resource.PageSetServiceProvider;
 import com.cmsr.onebase.module.app.core.vo.resource.*;
-import com.mybatisflex.core.row.Db;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +50,7 @@ public class PageSetServiceImpl implements PageSetService {
 
     @Override
     public String getPageSetIdByMenuUuid(String menuUuid) {
-        return pageSetServiceProvider.getPageSetIdByMenuUuid(menuUuid);
+        return pageSetServiceProvider.getPageSetUuidByMenuUuid(menuUuid);
     }
 
     @Override
@@ -70,9 +66,9 @@ public class PageSetServiceImpl implements PageSetService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String createPageSet(CreatePageSetDTO createPageSetDTO) {
-
         AppResourcePagesetDO pageSetDO = BeanUtils.toBean(createPageSetDTO, AppResourcePagesetDO.class);
-        pageSetDO.setPageSetUuid(UuidUtils.getUuid());
+        String pageSetUuid = UuidUtils.getUuid();
+        pageSetDO.setPageSetUuid(pageSetUuid);
         pageSetDO.setPageSetCode(UUID.randomUUID().toString());
         pageSetDO.setPageSetType(createPageSetDTO.getPageSetType());
         pageSetRepository.save(pageSetDO);
@@ -94,7 +90,11 @@ public class PageSetServiceImpl implements PageSetService {
         String formRouterPath = formPageCode + "/form";
         String formPageType = PageEnum.FORM.getValue();
         Boolean formOpenViewMode = true;
-        AppResourcePageDO formPageDO = PageUtils.initPage(pageSetDO.getPageSetUuid(), formPageName, formRouterPath, formPageType,
+        AppResourcePageDO formPageDO = PageUtils.initPage(
+                pageSetUuid,
+                formPageName,
+                formRouterPath,
+                formPageType,
                 formOpenViewMode);
         pageRepository.save(formPageDO);
 
@@ -102,9 +102,12 @@ public class PageSetServiceImpl implements PageSetService {
         String listPageName = pageSetDO.getPageSetName() + "_列表";
         String listRouterPath = listPageCode + "/list";
         String listPageType = PageEnum.LIST.getValue();
-        ;
         Boolean listOpenViewMode = false;
-        AppResourcePageDO listPageDO = PageUtils.initPage(pageSetDO.getPageSetUuid(), listPageName, listRouterPath, listPageType,
+        AppResourcePageDO listPageDO = PageUtils.initPage(
+                pageSetUuid,
+                listPageName,
+                listRouterPath,
+                listPageType,
                 listOpenViewMode);
         pageRepository.save(listPageDO);
 
@@ -112,21 +115,18 @@ public class PageSetServiceImpl implements PageSetService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void deletePageSet(String menuUuid) {
-
         // 找到页面集
         AppResourcePagesetDO pageSetDO = pageSetRepository.findPageSetByMenuUuid(menuUuid);
 
         // 删除页面集关联的页面
         List<String> pageUuidList = pageRepository.findPageUuidsByPageSetUuid(pageSetDO.getPageSetUuid());
 
-        Db.tx(() -> {
-            // 删除页面
-            pageRepository.deleteByUuidList(pageUuidList);
-            // 删除页面集
-            pageSetRepository.deletePageSetByMenuUuid(menuUuid);
-            return true;
-        });
+        // 删除页面
+        pageRepository.deleteByUuidList(pageUuidList);
+        // 删除页面集
+        pageSetRepository.deletePageSetByMenuUuid(menuUuid);
     }
 
     @Override
@@ -198,7 +198,6 @@ public class PageSetServiceImpl implements PageSetService {
             workBenchPageSetService.saveWorkbenchPage(savePageSetReqVO, pageSetDO);
             return true;
         }
-
         savePageSetReqVO.getPages().forEach(page -> {
             if (Boolean.TRUE.equals(page.getCreated())) {
                 // 插入新的视图
@@ -208,11 +207,11 @@ public class PageSetServiceImpl implements PageSetService {
                 String pageType = PageEnum.FORM.getValue();
                 Boolean openViewMode = false;
 
-                AppResourcePageDO pageDO = PageUtils.initPage(pageSetDO.getPageSetUuid(), pageName, routerPath, pageType,
+                AppResourcePageDO pageDO = PageUtils.initPage(
+                        pageSetDO.getPageSetUuid(), pageName, routerPath, pageType,
                         openViewMode);
                 pageDO.setId(page.getId());
                 pageDO.setInteractionRules(page.getInteractionRules());
-
                 pageRepository.save(pageDO);
 
                 page.setId(pageDO.getId());
@@ -236,8 +235,10 @@ public class PageSetServiceImpl implements PageSetService {
 
             // 删除已有的component
             componentRepository.deleteComponentByPageUuid(finalPageDO.getPageUuid());
-
             // 插入新的component
+            if (CollectionUtils.isEmpty(page.getComponents())) {
+                return;
+            }
             List<AppResourceComponentDO> componentDOs = new ArrayList<>();
             for (int idx = 0; idx < page.getComponents().size(); idx++) {
                 AppResourceComponentDO componentDO = BeanUtils.toBean(page.getComponents().get(idx), AppResourceComponentDO.class);
@@ -257,11 +258,6 @@ public class PageSetServiceImpl implements PageSetService {
     @Override
     public LoadPageSetRespVO loadPageSet(LoadPageSetReqVO loadPageSetReqVO) {
         return pageSetServiceProvider.loadPageSet(loadPageSetReqVO);
-    }
-
-    @Override
-    public PageSetRespDTO getPageSet(Long pageSetId) {
-        return pageSetServiceProvider.getPageSet(pageSetId);
     }
 
     @Override

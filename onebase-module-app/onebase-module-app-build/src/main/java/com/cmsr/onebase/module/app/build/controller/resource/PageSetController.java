@@ -45,7 +45,6 @@ public class PageSetController {
     @PostMapping("/create")
     @Operation(summary = "创建页面集")
     public CommonResult<String> createPageSet(@RequestBody CreatePageSetDTO createPageSetDTO) {
-
         String pageSetCode = pageSetService.createPageSet(createPageSetDTO);
 
         return CommonResult.success(pageSetCode);
@@ -54,7 +53,6 @@ public class PageSetController {
     @PostMapping("/copy")
     @Operation(summary = "复制页面集")
     public CommonResult<String> copyPageSet(@RequestBody CopyPageSetDTO copyPageSetDTO) {
-
         String pageSetCode = pageSetService.copyPageSet(copyPageSetDTO);
 
         return CommonResult.success(pageSetCode);
@@ -70,7 +68,6 @@ public class PageSetController {
     @PostMapping("/save")
     @Operation(summary = "保存页面集")
     public CommonResult<Boolean> savePageSet(@RequestBody SavePageSetReqVO savePageSetReqVO) {
-
         pageSetService.savePageSet(savePageSetReqVO);
 
         return CommonResult.success(true);
@@ -79,7 +76,6 @@ public class PageSetController {
     @PostMapping("/load")
     @Operation(summary = "载入页面集")
     public CommonResult<LoadPageSetRespVO> loadPageSet(@RequestBody LoadPageSetReqVO loadPageSetReqVO) {
-
         LoadPageSetRespVO loadPageSetRespVO = pageSetService.loadPageSet(loadPageSetReqVO);
 
         return CommonResult.success(loadPageSetRespVO);
@@ -88,7 +84,6 @@ public class PageSetController {
     @GetMapping("/list")
     @Operation(summary = "查询页面集列表")
     public CommonResult<ListPageSetRespVO> listPageSet(@Valid ListPageSetReqVO listPageSetReqVO) {
-
         ListPageSetRespVO listPageSetRespVO = pageSetService.listPageSet(listPageSetReqVO);
 
         return CommonResult.success(listPageSetRespVO);
