@@ -84,7 +84,7 @@ public class BpmDesignServiceImpl implements BpmDesignService {
     @Transactional(rollbackFor = Exception.class)
     public Long save(BpmDesignSaveReqVO flowDesignVO) {
         Long flowId = flowDesignVO.getId();
-        String menuUuid = flowDesignVO.getMenuUuid();
+        String businessId = flowDesignVO.getBusinessId();
 
         Long applicationId = ApplicationManager.getApplicationId();
 
@@ -112,7 +112,7 @@ public class BpmDesignServiceImpl implements BpmDesignService {
         // 数据校验和转换
         if (flowId == null) {
             // 先查询是否存在已经设计中的流程
-            Definition existDef = defExtService.getByFormPathAndStatus(menuUuid, PublishStatus.UNPUBLISHED.getKey());
+            Definition existDef = defExtService.getByFormPathAndStatus(businessId, PublishStatus.UNPUBLISHED.getKey());
 
             // 只能存在一个设计态的流程
             if (existDef != null) {
@@ -120,7 +120,7 @@ public class BpmDesignServiceImpl implements BpmDesignService {
             }
 
             // 查询对应表单下任意一个流程
-            Definition anyDef = defExtService.getByFormPath(menuUuid);
+            Definition anyDef = defExtService.getByFormPath(businessId);
 
             if (anyDef == null) {
                 // 检测flowCode
