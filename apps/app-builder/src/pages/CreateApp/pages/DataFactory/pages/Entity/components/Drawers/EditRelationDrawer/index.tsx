@@ -3,7 +3,7 @@ import { useResourceStore } from '@/store/store_resource';
 import { Button, Drawer, Form, Message, Select, Space, Spin } from '@arco-design/web-react';
 import { deleteRelation, getEntityFields, getEntityList, updateRelation } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
-import { RELATIONSHIP_OPTIONS } from '@/pages/CreateApp/pages/DataFactory/utils/types';
+import { ALL_RELATIONSHIP_OPTIONS } from '@/pages/CreateApp/pages/DataFactory/utils/types';
 import { DeleteConfirmModal } from '../../Modals';
 import styles from './index.module.less';
 interface EntityOption {
@@ -234,7 +234,7 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
             required
             rules={[{ required: true, message: '请选择关联关系' }]}
           >
-            <Select placeholder="请选择关联关系" options={RELATIONSHIP_OPTIONS} allowClear />
+            <Select placeholder="请选择关联关系" options={ALL_RELATIONSHIP_OPTIONS} allowClear />
           </Form.Item>
 
           {/* 关联表 */}
