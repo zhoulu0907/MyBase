@@ -8,7 +8,7 @@ import com.mybatisflex.core.table.TableDef;
  *  表定义层。
  *
  * @author HuangJie
- * @since 2025-11-26
+ * @since 2025-12-01
  */
 public class AppResourcePagesetTableDef extends TableDef {
 
@@ -23,9 +23,6 @@ public class AppResourcePagesetTableDef extends TableDef {
     public final QueryColumn ID = new QueryColumn(this, "id");
 
     
-    public final QueryColumn MENU_ID = new QueryColumn(this, "menu_id");
-
-    
     public final QueryColumn CREATOR = new QueryColumn(this, "creator");
 
     
@@ -35,6 +32,9 @@ public class AppResourcePagesetTableDef extends TableDef {
     public final QueryColumn UPDATER = new QueryColumn(this, "updater");
 
     
+    public final QueryColumn MENU_UUID = new QueryColumn(this, "menu_uuid");
+
+    
     public final QueryColumn TENANT_ID = new QueryColumn(this, "tenant_id");
 
     
@@ -42,6 +42,9 @@ public class AppResourcePagesetTableDef extends TableDef {
 
     
     public final QueryColumn UPDATE_TIME = new QueryColumn(this, "update_time");
+
+    
+    public final QueryColumn VERSION_TAG = new QueryColumn(this, "version_tag");
 
     
     public final QueryColumn DESCRIPTION = new QueryColumn(this, "description");
@@ -62,7 +65,13 @@ public class AppResourcePagesetTableDef extends TableDef {
     public final QueryColumn PAGESET_TYPE = new QueryColumn(this, "pageset_type");
 
     
+    public final QueryColumn PAGESET_UUID = new QueryColumn(this, "pageset_uuid");
+
+    
     public final QueryColumn MAIN_METADATA = new QueryColumn(this, "main_metadata");
+
+    
+    public final QueryColumn APPLICATION_ID = new QueryColumn(this, "application_id");
 
     /**
      * 所有字段。
@@ -72,7 +81,7 @@ public class AppResourcePagesetTableDef extends TableDef {
     /**
      * 默认字段，不包含逻辑删除或者 large 等字段。
      */
-    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{PAGESET_CODE, MENU_ID, MAIN_METADATA, PAGESET_NAME, DISPLAY_NAME, DESCRIPTION, TENANT_ID, ID, CREATE_TIME, UPDATE_TIME, CREATOR, UPDATER, DELETED, LOCK_VERSION, PAGESET_TYPE};
+    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, PAGESET_UUID, APPLICATION_ID, VERSION_TAG, MENU_UUID, PAGESET_CODE, PAGESET_TYPE, MAIN_METADATA, PAGESET_NAME, DISPLAY_NAME, DESCRIPTION, TENANT_ID, CREATE_TIME, UPDATE_TIME, CREATOR, UPDATER, DELETED, LOCK_VERSION};
 
     public AppResourcePagesetTableDef() {
         super("", "app_resource_pageset");

@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.app.core.dal.dataobject;
 
-import com.cmsr.onebase.framework.orm.entity.BaseAppEntity;
+import com.cmsr.onebase.framework.orm.entity.BaseBizEntity;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
 import lombok.Data;
@@ -11,13 +11,16 @@ import lombok.Data;
  */
 @Data
 @Table(value = "app_menu")
-public class AppMenuDO extends BaseAppEntity {
+public class AppMenuDO extends BaseBizEntity {
 
-    @Column(value = "parent_id", comment = "父节点编码")
-    private Long parentId;
+    @Column(value = "menu_uuid", comment = "菜单id")
+    private String menuUuid;
 
-    @Column(value = "entity_id", comment = "实体id")
-    private Long entityId;
+    @Column(value = "parent_uuid", comment = "父节点编码")
+    private String parentUuid;
+
+    @Column(value = "entity_uuid", comment = "实体id")
+    private String entityUuid;
 
     @Column(value = "menu_code", comment = "菜单编码")
     private String menuCode;

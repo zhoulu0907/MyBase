@@ -13,7 +13,6 @@ import com.cmsr.onebase.module.app.build.vo.version.VersionPageRespVO;
 import com.cmsr.onebase.module.app.core.dal.database.app.AppApplicationRepository;
 import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageRepository;
-import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageSetPageRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageSetRepository;
 import com.cmsr.onebase.module.app.core.dal.database.version.AppVersionRepository;
 import com.cmsr.onebase.module.app.core.dal.database.version.AppVersionResourceRepository;
@@ -57,8 +56,8 @@ public class AppVersionServiceImpl implements AppVersionService {
     @Resource
     private AppPageSetRepository pageSetRepository;
 
-    @Resource
-    private AppPageSetPageRepository pageSetPageRepository;
+//    @Resource
+//    private AppPageSetPageRepository pageSetPageRepository;
 
     @Resource
     private AppPageRepository pageRepository;
@@ -120,25 +119,27 @@ public class AppVersionServiceImpl implements AppVersionService {
     }
 
     private List<Long> backupPageSet(Long applicationId, Long versionId, List<Long> menuIds) {
-        List<AppResourcePagesetDO> pageSetDOS = pageSetRepository.findByMenuIds(menuIds);
-        AppVersionResourceDO versionResourceDO = new AppVersionResourceDO();
-        versionResourceDO.setApplicationId(applicationId);
-        versionResourceDO.setVersionId(versionId);
-        versionResourceDO.setResType(ResTypeEnum.PAGE_SET.getValue());
-        versionResourceDO.setResData(JsonUtils.toJsonString(pageSetDOS));
-        versionResourceRepository.save(versionResourceDO);
-        return pageSetDOS.stream().map(BaseEntity::getId).toList();
+//        List<AppResourcePagesetDO> pageSetDOS = pageSetRepository.findByMenuIds(menuIds);
+//        AppVersionResourceDO versionResourceDO = new AppVersionResourceDO();
+//        versionResourceDO.setApplicationId(applicationId);
+//        versionResourceDO.setVersionId(versionId);
+//        versionResourceDO.setResType(ResTypeEnum.PAGE_SET.getValue());
+//        versionResourceDO.setResData(JsonUtils.toJsonString(pageSetDOS));
+//        versionResourceRepository.save(versionResourceDO);
+//        return pageSetDOS.stream().map(BaseEntity::getId).toList();
+        return null;
     }
 
     private List<Long> backupPageSetPage(Long applicationId, Long versionId, List<Long> pageSetIds) {
-        List<AppResourcePagesetPageDO> pageSetPageDOs = pageSetPageRepository.findByPageSetIds(pageSetIds);
-        AppVersionResourceDO versionResourceDO = new AppVersionResourceDO();
-        versionResourceDO.setApplicationId(applicationId);
-        versionResourceDO.setVersionId(versionId);
-        versionResourceDO.setResType(ResTypeEnum.PAGE_SET_PAGE.getValue());
-        versionResourceDO.setResData(JsonUtils.toJsonString(pageSetPageDOs));
-        versionResourceRepository.save(versionResourceDO);
-        return pageSetPageDOs.stream().map(BaseEntity::getId).toList();
+        return null;
+        //            List<AppResourcePagesetPageDO> pageSetPageDOs = pageSetPageRepository.findByPageSetIds(pageSetIds);
+//            AppVersionResourceDO versionResourceDO = new AppVersionResourceDO();
+//            versionResourceDO.setApplicationId(applicationId);
+//            versionResourceDO.setVersionId(versionId);
+//            versionResourceDO.setResType(ResTypeEnum.PAGE_SET_PAGE.getValue());
+//            versionResourceDO.setResData(JsonUtils.toJsonString(pageSetPageDOs));
+//            versionResourceRepository.save(versionResourceDO);
+//            return pageSetPageDOs.stream().map(BaseEntity::getId).toList();
     }
 
     private List<Long> backupPage(Long applicationId, Long versionId, List<Long> pageIds) {
@@ -155,14 +156,14 @@ public class AppVersionServiceImpl implements AppVersionService {
     @Transactional
     @Override
     public void restoreApplicationVersion(Long versionId) {
-        AppVersionDO applicationVersionDO = validateApplicationVersionExist(versionId);
-        Long applicationId = applicationVersionDO.getApplicationId();
-        // 更新到主表
-        AppApplicationDO applicationDO = applicationRepository.getById(applicationId);
-        applicationDO.setVersionNumber(applicationVersionDO.getVersionNumber());
-        applicationRepository.updateById(applicationDO);
-        // 恢复菜单
-        restoreMenu(applicationDO.getId(), versionId);
+//        AppVersionDO applicationVersionDO = validateApplicationVersionExist(versionId);
+//        Long applicationId = applicationVersionDO.getApplicationId();
+//        // 更新到主表
+//        AppApplicationDO applicationDO = applicationRepository.getById(applicationId);
+//        applicationDO.setVersionNumber(applicationVersionDO.getVersionNumber());
+//        applicationRepository.updateById(applicationDO);
+//        // 恢复菜单
+//        restoreMenu(applicationDO.getId(), versionId);
     }
 
     private void restoreMenu(Long applicationId, Long versionId) {

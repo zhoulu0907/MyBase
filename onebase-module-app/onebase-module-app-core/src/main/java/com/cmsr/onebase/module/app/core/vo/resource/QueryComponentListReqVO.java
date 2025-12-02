@@ -11,8 +11,10 @@ import lombok.Data;
  * @Date 2025/9/1 18:54
  */
 @Data
-public class GetComponentListByPageIdReqVO {
-    @Schema(description = "pageId", requiredMode = Schema.RequiredMode.REQUIRED, example = "xxx")
+public class QueryComponentListReqVO {
+
+    @Schema(description = "PageId", requiredMode = Schema.RequiredMode.REQUIRED, example = "xxx")
     @NotNull(message = "页面id不能为空")
     private Long pageId;
+
 }

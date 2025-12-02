@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.app.core.dal.dataobject;
 
 import com.cmsr.onebase.framework.orm.entity.BaseAppEntity;
+import com.cmsr.onebase.framework.orm.entity.BaseBizEntity;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
 import lombok.Data;
@@ -12,6 +13,9 @@ import lombok.Data;
 @Data
 @Table(value = "app_auth_role")
 public class AppAuthRoleDO extends BaseAppEntity {
+
+    @Column(value = "role_uuid", comment = "角色id")
+    private String roleUuid;
 
     @Column(value = "role_code", comment = "角色编码")
     private String roleCode;

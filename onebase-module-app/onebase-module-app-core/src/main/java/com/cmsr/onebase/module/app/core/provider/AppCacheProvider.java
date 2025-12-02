@@ -1,12 +1,13 @@
 package com.cmsr.onebase.module.app.core.provider;
 
 import com.cmsr.onebase.module.app.core.dal.database.AppSqlQueryRepository;
+import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleUserRepository;
 import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthRoleDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthRoleUserDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppMenuDO;
 import com.cmsr.onebase.module.app.core.utils.CacheUtils;
-import com.cmsr.onebase.module.app.core.vo.auth.AuthPermissionReq;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RedissonClient;
@@ -36,6 +37,9 @@ public class AppCacheProvider {
     @Autowired
     private AppSqlQueryRepository appSqlQueryRepository;
 
+    @Autowired
+    private AppAuthRoleRepository appAuthRoleRepository;
+
     private List<Long> findAllMenuIds(Long applicationId) {
         return appMenuRepository.findByApplicationId(applicationId)
                 .stream().map(AppMenuDO::getId).toList();
@@ -44,6 +48,15 @@ public class AppCacheProvider {
     private List<Long> findAllUserIds(Long roleId) {
         return appAuthRoleUserRepository.findByRoleId(roleId)
                 .stream().map(AppAuthRoleUserDO::getUserId).toList();
+    }
+
+    private List<Long> findAllUserIds(Long applicationId, String roleUuid) {
+        AppAuthRoleDO authRoleDO = appAuthRoleRepository.findByAppIdAndRoleUuid(applicationId, roleUuid);
+        return findAllUserIds(authRoleDO.getId());
+    }
+
+    private Long findMenuId(Long applicationId, String menuUuid) {
+        return appMenuRepository.findByAppIdAndMenuUuid(applicationId, menuUuid).getId();
     }
 
     public void usersChanged(Long applicationId, List<Long> userIds) {
@@ -58,9 +71,18 @@ public class AppCacheProvider {
         }
     }
 
-    public void roleMenuChanged(AuthPermissionReq permissionReq) {
-        roleMenuChanged(permissionReq.getApplicationId(), permissionReq.getRoleId(), permissionReq.getMenuId());
+
+    public void roleMenuChanged(Long applicationId, String roleUuid, String menuUuid) {
+        List<Long> userIds = findAllUserIds(applicationId, roleUuid);
+        Long menuId = findMenuId(applicationId, menuUuid);
+        for (Long userId : userIds) {
+            allCacheKeys(userId, applicationId, menuId).forEach(key -> {
+                log.info("roleMenuChanged 删除缓存：{}", key);
+                redissonClient.getBucket(key).delete();
+            });
+        }
     }
+
 
     public void roleMenuChanged(Long applicationId, Long roleId, Long menuId) {
         List<Long> userIds = findAllUserIds(roleId);

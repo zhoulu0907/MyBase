@@ -8,7 +8,7 @@ import com.mybatisflex.core.table.TableDef;
  * 应用管理表 表定义层。
  *
  * @author HuangJie
- * @since 2025-11-26
+ * @since 2025-12-01
  */
 public class AppApplicationTableDef extends TableDef {
 
@@ -99,11 +99,6 @@ public class AppApplicationTableDef extends TableDef {
     public final QueryColumn PUBLISH_MODEL = new QueryColumn(this, "publish_model");
 
     /**
-     * 当前版本
-     */
-    public final QueryColumn VERSION_NUMBER = new QueryColumn(this, "version_number");
-
-    /**
      * 所有字段。
      */
     public final QueryColumn ALL_COLUMNS = new QueryColumn(this, "*");
@@ -111,7 +106,7 @@ public class AppApplicationTableDef extends TableDef {
     /**
      * 默认字段，不包含逻辑删除或者 large 等字段。
      */
-    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, APP_UID, APP_NAME, APP_CODE, APP_MODE, THEME_COLOR, ICON_NAME, ICON_COLOR, VERSION_NUMBER, APP_STATUS, VERSION_URL, DESCRIPTION, LOCK_VERSION, CREATOR, CREATE_TIME, UPDATER, UPDATE_TIME, DELETED, TENANT_ID, PUBLISH_MODEL};
+    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, APP_UID, APP_NAME, APP_CODE, APP_MODE, THEME_COLOR, ICON_NAME, ICON_COLOR, APP_STATUS, VERSION_URL, DESCRIPTION, LOCK_VERSION, CREATOR, CREATE_TIME, UPDATER, UPDATE_TIME, DELETED, TENANT_ID, PUBLISH_MODEL};
 
     public AppApplicationTableDef() {
         super("", "app_application");

@@ -8,6 +8,9 @@ import lombok.Data;
 @Data
 public class CreatePageSetDTO {
 
+    @Schema(description = "应用id", requiredMode = Schema.RequiredMode.REQUIRED, example = "xxxxx")
+    private Long applicationId;
+
     @Schema(description = "页面集名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "首页页面集")
     @NotNull(message = "页面集名称不能为空")
     private String pageSetName;

@@ -8,7 +8,7 @@ import com.mybatisflex.core.table.TableDef;
  *  表定义层。
  *
  * @author HuangJie
- * @since 2025-11-26
+ * @since 2025-12-01
  */
 public class AppVersionTableDef extends TableDef {
 
@@ -80,7 +80,7 @@ public class AppVersionTableDef extends TableDef {
     /**
      * 默认字段，不包含逻辑删除或者 large 等字段。
      */
-    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, APPLICATION_ID, VERSION_NAME, VERSION_NUMBER, LOCK_VERSION, CREATOR, CREATE_TIME, UPDATER, UPDATE_TIME, DELETED, TENANT_ID, VERSION_DESCRIPTION, ENVIRONMENT, OPERATION_TYPE, VERSION_URL};
+    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, APPLICATION_ID, VERSION_NAME, VERSION_NUMBER, VERSION_DESCRIPTION, ENVIRONMENT, OPERATION_TYPE, VERSION_URL, LOCK_VERSION, CREATOR, CREATE_TIME, UPDATER, UPDATE_TIME, DELETED, TENANT_ID};
 
     public AppVersionTableDef() {
         super("", "app_version");
