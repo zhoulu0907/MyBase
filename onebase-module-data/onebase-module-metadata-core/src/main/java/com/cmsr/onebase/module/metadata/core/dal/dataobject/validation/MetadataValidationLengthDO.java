@@ -1,47 +1,50 @@
 package com.cmsr.onebase.module.metadata.core.dal.dataobject.validation;
 
-import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
-import jakarta.persistence.Table;
-import lombok.*;
-import lombok.experimental.SuperBuilder;
+import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Table;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * 字段校验-长度规则 DO
  * 对应表：metadata_validation_length
+ *
+ * @author bty418
+ * @date 2025-08-18
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-@ToString(callSuper = true)
-@SuperBuilder
-@NoArgsConstructor
-@AllArgsConstructor
-@Table(name = "metadata_validation_length")
-public class MetadataValidationLengthDO extends TenantBaseDO {
+@Table(value = "metadata_validation_length")
+public class MetadataValidationLengthDO extends BaseTenantEntity {
 
-    public static final String GROUP_ID       = "group_id";
-    public static final String ENTITY_ID      = "entity_id";
-    public static final String FIELD_ID       = "field_id";
-    public static final String IS_ENABLED     = "is_enabled";
-    public static final String MIN_LENGTH     = "min_length";
-    public static final String MAX_LENGTH     = "max_length";
-    public static final String TRIM_BEFORE    = "trim_before";
-    public static final String PROMPT_MESSAGE = "prompt_message";
-    public static final String RUN_MODE       = "run_mode";
-    public static final String APP_ID         = "app_id";
-
-    public MetadataValidationLengthDO setId(Long id) {
-        super.setId(id);
-        return this;
-    }
-
+    @Column(value = "group_id", comment = "规则组ID")
     private Long groupId;
+
+    @Column(value = "entity_id", comment = "实体ID")
     private Long entityId;
+
+    @Column(value = "field_id", comment = "字段ID")
     private Long fieldId;
+
+    @Column(value = "is_enabled", comment = "是否启用：1-启用，0-禁用")
     private Integer isEnabled;
+
+    @Column(value = "min_length", comment = "最小长度")
     private Integer minLength;
+
+    @Column(value = "max_length", comment = "最大长度")
     private Integer maxLength;
+
+    @Column(value = "trim_before", comment = "校验前是否去空格")
     private Integer trimBefore;
+
+    @Column(value = "prompt_message", comment = "提示信息")
     private String promptMessage;
-    private Integer runMode;
-    private Long appId;
+
+    @Column(value = "version_tag", comment = "版本标识")
+    private Long versionTag;
+
+    @Column(value = "application_id", comment = "应用ID")
+    private Long applicationId;
 }

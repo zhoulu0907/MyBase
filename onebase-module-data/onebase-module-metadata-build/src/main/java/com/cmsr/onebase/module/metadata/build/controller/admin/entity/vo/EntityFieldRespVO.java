@@ -54,11 +54,11 @@ public class EntityFieldRespVO {
     @Schema(description = "校验规则配置", example = "1")
     private String validationRulesId;
 
-    @Schema(description = "运行模式", example = "0")
-    private Integer runMode;
+    @Schema(description = "版本标识", example = "0")
+    private Long versionTag;
 
     @Schema(description = "应用ID", example = "1")
-    private String appId;
+    private String applicationId;
 
     @Schema(description = "字段状态，0：开启，1：关闭", example = "0")
     private Integer status;
@@ -77,4 +77,7 @@ public class EntityFieldRespVO {
 
     @Schema(description = "关联的字典类型ID,用于SELECT/MULTI_SELECT字段复用系统字典", example = "1001")
     private Long dictTypeId;
+
+    @Schema(description = "数据选择配置，目标表的配置; 数据单选时使用")
+    private DataSelectionConfig dataSelectionConfig;
 }

@@ -5,21 +5,14 @@ import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.build.service.AppCommonService;
 import com.cmsr.onebase.module.app.build.util.AuthUtils;
 import com.cmsr.onebase.module.app.build.vo.auth.*;
-import com.cmsr.onebase.module.app.core.dal.database.appresource.AppPageRepository;
-import com.cmsr.onebase.module.app.core.dal.database.appresource.AppPageSetPageRepository;
-import com.cmsr.onebase.module.app.core.dal.database.appresource.AppPageSetRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthDataGroupRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthFieldRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthPermissionRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthViewRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.PageDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.PageSetDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.PageSetPageDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthDataGroupDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthFieldDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthPermissionDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthViewDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.menu.MenuDO;
+import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
+import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageRepository;
+import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageSetRepository;
+import com.cmsr.onebase.module.app.core.dal.dataobject.*;
 import com.cmsr.onebase.module.app.core.enums.auth.AuthDefaultFactory;
 import com.cmsr.onebase.module.app.core.provider.AppCacheProvider;
 import com.cmsr.onebase.module.app.core.vo.auth.AuthPermissionReq;
@@ -63,9 +56,6 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
     private AppPageSetRepository appPageSetRepository;
 
     @Resource
-    private AppPageSetPageRepository appPageSetPageRepository;
-
-    @Resource
     private AppPageRepository appPageRepository;
 
     @Resource
@@ -77,22 +67,26 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
     @Resource
     private AppCacheProvider appCacheProvider;
 
+    @Resource
+    private AppMenuRepository appMenuRepository;
+
     @Override
     public AuthDetailFunctionPermissionVO getFunctionPermission(AuthPermissionReq reqVO) {
         appCommonService.validateApplicationExist(reqVO.getApplicationId());
-        appCommonService.validateRoleExist(reqVO.getRoleId());
-        appCommonService.validateMenuExist(reqVO.getMenuId());
+        AppAuthRoleDO appAuthRoleDO = appCommonService.validateRoleExist(reqVO.getRoleId());
+        AppMenuDO appMenuDO = appCommonService.validateMenuExist(reqVO.getMenuId());
+        reqVO.setRoleUuid(appAuthRoleDO.getRoleUuid());
+        reqVO.setMenuUuid(appMenuDO.getMenuUuid());
         //
         AuthDetailFunctionPermissionVO functionPermissionVO = new AuthDetailFunctionPermissionVO();
-        AuthPermissionDO authPermissionDO = authPermissionRepository.findByQuery(reqVO);
+        AppAuthPermissionDO authPermissionDO = authPermissionRepository.findByQuery(reqVO);
         if (authPermissionDO == null) {
             authPermissionDO = AuthDefaultFactory.createAuthPermissionDO(reqVO);
         }
         // 页面权限
         functionPermissionVO.setIsPageAllowed(authPermissionDO.getIsPageAllowed());
         // 操作权限
-        List<String> operationTags = JsonUtils.parseObject(authPermissionDO.getOperationTags(), new TypeReference<List<String>>() {
-        });
+        List<String> operationTags = JsonUtils.parseArray(authPermissionDO.getOperationTags(), String.class);
         functionPermissionVO.setAuthOperationTags(operationTags);
         // 视图权限
         AuthDetailViewVO authDetailViewVO = new AuthDetailViewVO();
@@ -107,14 +101,17 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
     @Override
     public AuthDetailDataPermissionVO getDataPermission(AuthPermissionReq reqVO) {
         appCommonService.validateApplicationExist(reqVO.getApplicationId());
-        appCommonService.validateRoleExist(reqVO.getRoleId());
+        AppAuthRoleDO appAuthRoleDO = appCommonService.validateRoleExist(reqVO.getRoleId());
+        AppMenuDO appMenuDO = appCommonService.validateMenuExist(reqVO.getMenuId());
+        reqVO.setRoleUuid(appAuthRoleDO.getRoleUuid());
+        reqVO.setMenuUuid(appMenuDO.getMenuUuid());
         //
         AuthDetailDataPermissionVO dataPermissionVO = new AuthDetailDataPermissionVO();
         //数据权限
-        List<AuthDataGroupDO> authDataGroupDOS = authDataGroupRepository.findByQuery(reqVO);
+        List<AppAuthDataGroupDO> authDataGroupDOS = authDataGroupRepository.findByQuery(reqVO);
         if (CollectionUtils.isEmpty(authDataGroupDOS)) {
-            AuthDataGroupDO authDataGroupDO = AuthDefaultFactory.createAuthDataGroupDO(reqVO);
-            authDataGroupRepository.insert(authDataGroupDO);
+            AppAuthDataGroupDO authDataGroupDO = AuthDefaultFactory.createAuthDataGroupDO(reqVO);
+            authDataGroupRepository.save(authDataGroupDO);
             authDataGroupDOS = List.of(authDataGroupDO);
         }
         List<AuthDataGroupVO> authDataGroupVOS = authDataGroupDOS.stream().map(authDataGroupDO -> {
@@ -145,17 +142,20 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
     @Override
     public AuthDetailFieldPermissionVO getFieldPermission(AuthPermissionReq reqVO) {
         appCommonService.validateApplicationExist(reqVO.getApplicationId());
-        appCommonService.validateRoleExist(reqVO.getRoleId());
-        MenuDO menuDO = appCommonService.validateMenuExist(reqVO.getMenuId());
-        Long entityId = menuDO.getEntityId();
+        AppAuthRoleDO appAuthRoleDO = appCommonService.validateRoleExist(reqVO.getRoleId());
+        AppMenuDO appMenuDO = appCommonService.validateMenuExist(reqVO.getMenuId());
+        reqVO.setRoleUuid(appAuthRoleDO.getRoleUuid());
+        reqVO.setMenuUuid(appMenuDO.getMenuUuid());
+        //
+        String entityUuid = appMenuDO.getEntityUuid();
         //
         AuthDetailFieldPermissionVO fieldPermissionVO = new AuthDetailFieldPermissionVO();
-        AuthPermissionDO authPermissionDO = authPermissionRepository.findByQuery(reqVO);
+        AppAuthPermissionDO authPermissionDO = authPermissionRepository.findByQuery(reqVO);
         if (authPermissionDO == null) {
             authPermissionDO = AuthDefaultFactory.createAuthPermissionDO(reqVO);
         }
         fieldPermissionVO.setIsAllFieldsAllowed(authPermissionDO.getIsAllFieldsAllowed());
-        Pair<List<AuthFieldVO>, List<AuthFieldVO>> fieldDOPair = queryAuthFields(entityId, reqVO);
+        Pair<List<AuthFieldVO>, List<AuthFieldVO>> fieldDOPair = queryAuthFields(entityUuid, reqVO);
         fieldPermissionVO.setAuthFieldsRD(fieldDOPair.getLeft());
         fieldPermissionVO.setAuthFieldsDL(fieldDOPair.getRight());
         return fieldPermissionVO;
@@ -163,42 +163,66 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
 
     @Override
     public void updatePageAllowed(AuthUpdatePageAllowedReqVO reqVO) {
-        AuthPermissionDO authPermissionDO = authPermissionRepository.findByQuery(reqVO.getPermissionReq());
+        //
+        AuthPermissionReq permissionReq = reqVO.getPermissionReq();
+        appCommonService.validateApplicationExist(permissionReq.getApplicationId());
+        AppAuthRoleDO appAuthRoleDO = appCommonService.validateRoleExist(permissionReq.getRoleId());
+        AppMenuDO appMenuDO = appCommonService.validateMenuExist(permissionReq.getMenuId());
+        permissionReq.setRoleUuid(appAuthRoleDO.getRoleUuid());
+        permissionReq.setMenuUuid(appMenuDO.getMenuUuid());
+        //
+        AppAuthPermissionDO authPermissionDO = authPermissionRepository.findByQuery(permissionReq);
         if (authPermissionDO == null) {
-            authPermissionDO = AuthDefaultFactory.createAuthPermissionDO(reqVO.getPermissionReq());
+            authPermissionDO = AuthDefaultFactory.createAuthPermissionDO(permissionReq);
             authPermissionDO.setIsPageAllowed(reqVO.getIsPageAllowed());
-            authPermissionRepository.insert(authPermissionDO);
+            authPermissionRepository.save(authPermissionDO);
         } else {
             authPermissionDO.setIsPageAllowed(reqVO.getIsPageAllowed());
-            authPermissionRepository.update(authPermissionDO);
+            authPermissionRepository.updateById(authPermissionDO);
         }
-        appCacheProvider.roleMenuChanged(reqVO.getPermissionReq());
+        appCacheProvider.roleMenuChanged(permissionReq.getApplicationId(), permissionReq.getRoleId(), permissionReq.getMenuId());
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateOperation(AuthUpdateOperationReqVO reqVO) {
-        AuthPermissionDO authPermissionDO = authPermissionRepository.findByQuery(reqVO.getPermissionReq());
+        //
+        AuthPermissionReq permissionReq = reqVO.getPermissionReq();
+        appCommonService.validateApplicationExist(permissionReq.getApplicationId());
+        AppAuthRoleDO appAuthRoleDO = appCommonService.validateRoleExist(permissionReq.getRoleId());
+        AppMenuDO appMenuDO = appCommonService.validateMenuExist(permissionReq.getMenuId());
+        permissionReq.setRoleUuid(appAuthRoleDO.getRoleUuid());
+        permissionReq.setMenuUuid(appMenuDO.getMenuUuid());
+        //
+        AppAuthPermissionDO authPermissionDO = authPermissionRepository.findByQuery(permissionReq);
         if (authPermissionDO == null) {
-            authPermissionDO = AuthDefaultFactory.createAuthPermissionDO(reqVO.getPermissionReq());
+            authPermissionDO = AuthDefaultFactory.createAuthPermissionDO(permissionReq);
             authPermissionDO.setOperationTags(JsonUtils.toJsonString(reqVO.getOperationTags()));
-            authPermissionRepository.insert(authPermissionDO);
+            authPermissionRepository.save(authPermissionDO);
         } else {
             authPermissionDO.setOperationTags(JsonUtils.toJsonString(reqVO.getOperationTags()));
-            authPermissionRepository.update(authPermissionDO);
+            authPermissionRepository.updateById(authPermissionDO);
         }
-        appCacheProvider.roleMenuChanged(reqVO.getPermissionReq());
+        appCacheProvider.roleMenuChanged(permissionReq.getApplicationId(), permissionReq.getRoleId(), permissionReq.getMenuId());
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateDataGroup(AuthUpdateDataGroupReqVO reqVO) {
+        //
+        AuthPermissionReq permissionReq = reqVO.getPermissionReq();
+        appCommonService.validateApplicationExist(permissionReq.getApplicationId());
+        AppAuthRoleDO appAuthRoleDO = appCommonService.validateRoleExist(permissionReq.getRoleId());
+        AppMenuDO appMenuDO = appCommonService.validateMenuExist(permissionReq.getMenuId());
+        permissionReq.setRoleUuid(appAuthRoleDO.getRoleUuid());
+        permissionReq.setMenuUuid(appMenuDO.getMenuUuid());
+        //
         Long dataGroupId = reqVO.getAuthDataGroup().getId();
         if (dataGroupId == null || dataGroupId <= 0) {
-            AuthDataGroupDO authDataGroupDO = new AuthDataGroupDO();
-            authDataGroupDO.setApplicationId(reqVO.getPermissionReq().getApplicationId());
-            authDataGroupDO.setRoleId(reqVO.getPermissionReq().getRoleId());
-            authDataGroupDO.setMenuId(reqVO.getPermissionReq().getMenuId());
+            AppAuthDataGroupDO authDataGroupDO = new AppAuthDataGroupDO();
+            authDataGroupDO.setApplicationId(permissionReq.getApplicationId());
+            authDataGroupDO.setRoleUuid(permissionReq.getRoleUuid());
+            authDataGroupDO.setMenuUuid(permissionReq.getMenuUuid());
             BeanUtils.copyProperties(reqVO.getAuthDataGroup(), authDataGroupDO);
             if (reqVO.getAuthDataGroup().getScopeTags() != null) {
                 authDataGroupDO.setScopeTags(JsonUtils.toJsonString(reqVO.getAuthDataGroup().getScopeTags()));
@@ -210,13 +234,13 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
                 authDataGroupDO.setDataFilter(JsonUtils.toJsonString(reqVO.getAuthDataGroup().getDataFilters()));
             }
             if (!reqVO.getAuthDataGroup().getScopeTags().contains("customCondition")) {
-                authDataGroupDO.setScopeFieldId(null);
+                authDataGroupDO.setScopeFieldUuid(null);
                 authDataGroupDO.setScopeLevel(null);
                 authDataGroupDO.setScopeValue(null);
             }
-            authDataGroupRepository.insert(authDataGroupDO);
+            authDataGroupRepository.save(authDataGroupDO);
         } else {
-            AuthDataGroupDO authDataGroupDO = authDataGroupRepository.findById(dataGroupId);
+            AppAuthDataGroupDO authDataGroupDO = authDataGroupRepository.getById(dataGroupId);
             BeanUtils.copyProperties(reqVO.getAuthDataGroup(), authDataGroupDO);
             if (reqVO.getAuthDataGroup().getScopeTags() != null) {
                 authDataGroupDO.setScopeTags(JsonUtils.toJsonString(reqVO.getAuthDataGroup().getScopeTags()));
@@ -228,128 +252,139 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
                 authDataGroupDO.setDataFilter(JsonUtils.toJsonString(reqVO.getAuthDataGroup().getDataFilters()));
             }
             if (!reqVO.getAuthDataGroup().getScopeTags().contains("customCondition")) {
-                authDataGroupDO.setScopeFieldId(null);
+                authDataGroupDO.setScopeFieldUuid(null);
                 authDataGroupDO.setScopeLevel(null);
                 authDataGroupDO.setScopeValue(null);
             }
-            authDataGroupRepository.updateAuthDataGroup(authDataGroupDO);
+            authDataGroupRepository.updateById(authDataGroupDO, false);
         }
-        appCacheProvider.roleMenuChanged(reqVO.getPermissionReq());
+        appCacheProvider.roleMenuChanged(permissionReq.getApplicationId(), permissionReq.getRoleId(), permissionReq.getMenuId());
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteDataGroup(Long id) {
-        AuthDataGroupDO dataGroupDO = authDataGroupRepository.findById(id);
-        authDataGroupRepository.deleteById(id);
-        appCacheProvider.roleMenuChanged(dataGroupDO.getApplicationId(), dataGroupDO.getRoleId(), dataGroupDO.getMenuId());
+        AppAuthDataGroupDO dataGroupDO = authDataGroupRepository.getById(id);
+        authDataGroupRepository.removeById(id);
+        appCacheProvider.roleMenuChanged(dataGroupDO.getApplicationId(), dataGroupDO.getRoleUuid(), dataGroupDO.getMenuUuid());
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateField(AuthUpdateFieldReqVO reqVO) {
-        AuthPermissionDO authPermissionDO = authPermissionRepository.findByQuery(reqVO.getPermissionReq());
+        //
+        AuthPermissionReq permissionReq = reqVO.getPermissionReq();
+        appCommonService.validateApplicationExist(permissionReq.getApplicationId());
+        AppAuthRoleDO appAuthRoleDO = appCommonService.validateRoleExist(permissionReq.getRoleId());
+        AppMenuDO appMenuDO = appCommonService.validateMenuExist(permissionReq.getMenuId());
+        permissionReq.setRoleUuid(appAuthRoleDO.getRoleUuid());
+        permissionReq.setMenuUuid(appMenuDO.getMenuUuid());
+        //
+        AppAuthPermissionDO authPermissionDO = authPermissionRepository.findByQuery(permissionReq);
         if (authPermissionDO == null) {
-            authPermissionDO = AuthDefaultFactory.createAuthPermissionDO(reqVO.getPermissionReq());
+            authPermissionDO = AuthDefaultFactory.createAuthPermissionDO(permissionReq);
             authPermissionDO.setIsAllFieldsAllowed(reqVO.getIsAllFieldsAllowed());
-            authPermissionRepository.insert(authPermissionDO);
+            authPermissionRepository.save(authPermissionDO);
         } else {
             authPermissionDO.setIsAllFieldsAllowed(reqVO.getIsAllFieldsAllowed());
-            authPermissionRepository.update(authPermissionDO);
+            authPermissionRepository.updateById(authPermissionDO);
         }
         if (authPermissionDO != null && reqVO.getIsAllFieldsAllowed() == 1) {
-            authFieldRepository.deleteByQuery(reqVO.getPermissionReq());
+            authFieldRepository.deleteByQuery(permissionReq);
         }
         if (authPermissionDO != null && reqVO.getIsAllFieldsAllowed() == 0 && CollectionUtils.isNotEmpty(reqVO.getAuthFields())) {
             for (AuthFieldVO authField : reqVO.getAuthFields()) {
-                upsetAuthField(reqVO.getPermissionReq(), authField);
+                upsetAuthField(permissionReq, authField);
             }
         }
-        appCacheProvider.roleMenuChanged(reqVO.getPermissionReq());
+        appCacheProvider.roleMenuChanged(permissionReq.getApplicationId(), permissionReq.getRoleId(), permissionReq.getMenuId());
     }
 
     private void upsetAuthField(AuthPermissionReq permissionReq, AuthFieldVO authFieldVO) {
-        AuthFieldDO authFieldDO = null;
+        AppAuthFieldDO authFieldDO = null;
         if (authFieldVO.getId() != null) {
-            authFieldDO = authFieldRepository.findById(authFieldVO.getId());
+            authFieldDO = authFieldRepository.getById(authFieldVO.getId());
         }
         if (authFieldDO == null) {
-            authFieldDO = authFieldRepository.findByQuery(permissionReq, authFieldVO.getFieldId());
-        }
-        if (authFieldDO == null) {
-            authFieldDO = new AuthFieldDO();
+            authFieldDO = new AppAuthFieldDO();
             authFieldDO.setApplicationId(permissionReq.getApplicationId());
-            authFieldDO.setRoleId(permissionReq.getRoleId());
-            authFieldDO.setMenuId(permissionReq.getMenuId());
-            authFieldDO.setFieldId(authFieldVO.getFieldId());
+            authFieldDO.setRoleUuid(permissionReq.getRoleUuid());
+            authFieldDO.setMenuUuid(permissionReq.getMenuUuid());
+            authFieldDO.setFieldUuid(authFieldVO.getFieldUuid());
             authFieldDO.setIsCanRead(authFieldVO.getIsCanRead());
             authFieldDO.setIsCanEdit(authFieldVO.getIsCanEdit());
             authFieldDO.setIsCanDownload(authFieldVO.getIsCanDownload());
-            authFieldRepository.insert(authFieldDO);
+            authFieldRepository.save(authFieldDO);
         } else {
             authFieldDO.setIsCanRead(authFieldVO.getIsCanRead());
             authFieldDO.setIsCanEdit(authFieldVO.getIsCanEdit());
             authFieldDO.setIsCanDownload(authFieldVO.getIsCanDownload());
-            authFieldRepository.update(authFieldDO);
+            authFieldRepository.updateById(authFieldDO);
         }
     }
 
     @Override
     public void updateView(AuthUpdateViewReqVO reqVO) {
-        AuthPermissionDO authPermissionDO = authPermissionRepository.findByQuery(reqVO.getPermissionReq());
+        //
+        AuthPermissionReq permissionReq = reqVO.getPermissionReq();
+        appCommonService.validateApplicationExist(permissionReq.getApplicationId());
+        AppAuthRoleDO appAuthRoleDO = appCommonService.validateRoleExist(permissionReq.getRoleId());
+        AppMenuDO appMenuDO = appCommonService.validateMenuExist(permissionReq.getMenuId());
+        permissionReq.setRoleUuid(appAuthRoleDO.getRoleUuid());
+        permissionReq.setMenuUuid(appMenuDO.getMenuUuid());
+        //
+        AppAuthPermissionDO authPermissionDO = authPermissionRepository.findByQuery(permissionReq);
         if (authPermissionDO == null) {
-            authPermissionDO = AuthDefaultFactory.createAuthPermissionDO(reqVO.getPermissionReq());
+            authPermissionDO = AuthDefaultFactory.createAuthPermissionDO(permissionReq);
             authPermissionDO.setIsAllViewsAllowed(reqVO.getIsAllViewsAllowed());
-            authPermissionRepository.insert(authPermissionDO);
+            authPermissionRepository.save(authPermissionDO);
         } else {
             authPermissionDO.setIsAllViewsAllowed(reqVO.getIsAllViewsAllowed());
-            authPermissionRepository.update(authPermissionDO);
+            authPermissionRepository.updateById(authPermissionDO);
         }
         if (authPermissionDO != null && reqVO.getIsAllViewsAllowed() == 1) {
-            authViewRepository.deleteByQuery(reqVO.getPermissionReq());
+            authViewRepository.deleteByQuery(permissionReq);
         }
         if (authPermissionDO != null && reqVO.getIsAllViewsAllowed() == 0 && CollectionUtils.isNotEmpty(reqVO.getAuthViews())) {
             for (AuthViewVO authView : reqVO.getAuthViews()) {
-                upsetViewField(reqVO.getPermissionReq(), authView);
+                upsetViewField(permissionReq, authView);
             }
         }
-        appCacheProvider.roleMenuChanged(reqVO.getPermissionReq());
+        appCacheProvider.roleMenuChanged(permissionReq.getApplicationId(), permissionReq.getRoleId(), permissionReq.getMenuId());
     }
 
 
     private void upsetViewField(AuthPermissionReq permissionReq, AuthViewVO authViewVO) {
-        AuthViewDO authViewDO = null;
+        AppAuthViewDO authViewDO = null;
         if (authViewVO.getId() != null) {
-            authViewDO = authViewRepository.findById(authViewVO.getId());
+            authViewDO = authViewRepository.getById(authViewVO.getId());
         }
         if (authViewDO == null) {
-            authViewDO = authViewRepository.findByQuery(permissionReq, authViewVO.getViewId());
-        }
-        if (authViewDO == null) {
-            authViewDO = new AuthViewDO();
+            authViewDO = new AppAuthViewDO();
             authViewDO.setApplicationId(permissionReq.getApplicationId());
-            authViewDO.setRoleId(permissionReq.getRoleId());
-            authViewDO.setMenuId(permissionReq.getMenuId());
-            authViewDO.setViewId(authViewVO.getViewId());
+            authViewDO.setRoleUuid(permissionReq.getRoleUuid());
+            authViewDO.setMenuUuid(permissionReq.getMenuUuid());
+            authViewDO.setViewUuid(authViewVO.getViewUuid());
             authViewDO.setIsAllowed(authViewVO.getIsAllowed());
-            authViewRepository.insert(authViewDO);
+            authViewRepository.save(authViewDO);
         } else {
-            authViewDO.setViewId(authViewVO.getViewId());
+            authViewDO.setViewUuid(authViewVO.getViewUuid());
             authViewDO.setIsAllowed(authViewVO.getIsAllowed());
-            authViewRepository.update(authViewDO);
+            authViewRepository.updateById(authViewDO);
         }
     }
 
 
     private List<AuthViewVO> queryAuthViews(Long menuId, AuthPermissionReq reqVO) {
-        List<AuthViewDO> viewDOS = authViewRepository.findByQuery(reqVO);
-        List<PageDO> pages = queryAlFormPages(menuId);
-        List<Pair<PageDO, AuthViewDO>> pairs = AuthUtils.leftOuterJoin(pages, viewDOS, (page, view) -> page.getId().equals(view.getViewId()));
+        List<AppAuthViewDO> viewDOS = authViewRepository.findByQuery(reqVO);
+        List<AppResourcePageDO> pages = appMenuRepository.findPagesByMenuId(menuId);
+        List<Pair<AppResourcePageDO, AppAuthViewDO>> pairs =
+                AuthUtils.leftOuterJoin(pages, viewDOS, (page, view) -> page.getPageUuid().equals(view.getViewUuid()));
         return pairs.stream().map(pair -> {
-            PageDO pageDO = pair.getLeft();
-            AuthViewDO viewDO = pair.getRight();
+            AppResourcePageDO pageDO = pair.getLeft();
+            AppAuthViewDO viewDO = pair.getRight();
             AuthViewVO authViewVO = new AuthViewVO();
-            authViewVO.setViewId(pageDO.getId());
+            authViewVO.setViewUuid(pageDO.getPageUuid());
             authViewVO.setViewDisplayName(pageDO.getPageName());
             if (viewDO != null) {
                 authViewVO.setIsAllowed(viewDO.getIsAllowed());
@@ -358,36 +393,38 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
         }).toList();
     }
 
+//    //TODO 查询所有表单页面
+//    private List<AppResourcePageDO> queryAlFormPages(Long menuId) {
+//        List<AppResourcePagesetDO> pageSetDOS = appPageSetRepository.findByMenuIds(List.of(menuId));
+//        if (CollectionUtils.isEmpty(pageSetDOS)) {
+//            return Collections.emptyList();
+//        }
+//        List<Long> pageSetIds = pageSetDOS.stream().map(pageSetDO -> pageSetDO.getId()).toList();
+//        List<AppResourcePagesetPageDO> pageSetPageDOS = appPageSetPageRepository.findByPageSetIds(pageSetIds);
+//        if (CollectionUtils.isEmpty(pageSetPageDOS)) {
+//            return Collections.emptyList();
+//        }
+//        List<Long> pageIds = pageSetPageDOS.stream().map(pageSetPageDO -> pageSetPageDO.getPageId()).toList();
+//        List<AppResourcePageDO> pageDOS = appPageRepository.listByIds(pageIds);
+//        if (CollectionUtils.isEmpty(pageDOS)) {
+//            return Collections.emptyList();
+//        }
+//        return pageDOS.stream().filter(pageDO -> "form".equals(pageDO.getPageType())).toList();
+//    }
 
-    private List<PageDO> queryAlFormPages(Long menuId) {
-        List<PageSetDO> pageSetDOS = appPageSetRepository.findByMenuId(List.of(menuId));
-        if (CollectionUtils.isEmpty(pageSetDOS)) {
-            return Collections.emptyList();
-        }
-        List<Long> pageSetIds = pageSetDOS.stream().map(pageSetDO -> pageSetDO.getId()).toList();
-        List<PageSetPageDO> pageSetPageDOS = appPageSetPageRepository.findByPageSetIds(pageSetIds);
-        if (CollectionUtils.isEmpty(pageSetPageDOS)) {
-            return Collections.emptyList();
-        }
-        List<Long> pageIds = pageSetPageDOS.stream().map(pageSetPageDO -> pageSetPageDO.getPageId()).toList();
-        List<PageDO> pageDOS = appPageRepository.findByPageIds(pageIds);
-        if (CollectionUtils.isEmpty(pageDOS)) {
-            return Collections.emptyList();
-        }
-        return pageDOS.stream().filter(pageDO -> "form".equals(pageDO.getPageType())).toList();
-    }
-
-    private Pair<List<AuthFieldVO>, List<AuthFieldVO>> queryAuthFields(Long entityId, AuthPermissionReq reqVO) {
-        List<EntityFieldRespDTO> entityFieldRespDTOS = getEntityFieldRespDTOS(entityId);
-        List<AuthFieldDO> authFieldDOS = authFieldRepository.findByQuery(reqVO);
-        List<Pair<EntityFieldRespDTO, AuthFieldDO>> pairs = AuthUtils.leftOuterJoin(entityFieldRespDTOS, authFieldDOS,
-                (entityFieldRespDTO, authFieldDO) -> Objects.equals(entityFieldRespDTO.getId(), authFieldDO.getFieldId()));
+    private Pair<List<AuthFieldVO>, List<AuthFieldVO>> queryAuthFields(String entityUuid, AuthPermissionReq reqVO) {
+        List<EntityFieldRespDTO> entityFieldRespDTOS = getEntityFieldRespDTOS(entityUuid);
+        List<AppAuthFieldDO> authFieldDOS = authFieldRepository.findByQuery(reqVO);
+        List<Pair<EntityFieldRespDTO, AppAuthFieldDO>> pairs = AuthUtils.leftOuterJoin(entityFieldRespDTOS, authFieldDOS,
+                //TODO 匹配字段用UUID
+                (entityFieldRespDTO, authFieldDO) -> Objects.equals(entityFieldRespDTO.getId().toString(), authFieldDO.getFieldUuid()));
         List<AuthFieldVO> fieldVOS = pairs.stream().map(pair -> {
             EntityFieldRespDTO entityField = pair.getLeft();
-            AuthFieldDO authFieldDO = pair.getRight();
+            AppAuthFieldDO authFieldDO = pair.getRight();
             //
             AuthFieldVO authFieldVO = new AuthFieldVO();
-            authFieldVO.setFieldId(entityField.getId());
+            //TODO 匹配字段用UUID
+            authFieldVO.setFieldUuid(entityField.getId().toString());
             authFieldVO.setFieldType(entityField.getFieldType());
             authFieldVO.setFieldDisplayName(entityField.getDisplayName());
             if (authFieldDO != null) {
@@ -407,9 +444,10 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
         return Pair.of(authFieldsRD, authFieldsDL);
     }
 
-    private List<EntityFieldRespDTO> getEntityFieldRespDTOS(Long entityId) {
+    private List<EntityFieldRespDTO> getEntityFieldRespDTOS(String entityUuid) {
         EntityFieldQueryReqDTO reqDTO = new EntityFieldQueryReqDTO();
-        reqDTO.setEntityId(entityId);
+        //TODO 匹配字段用UUID
+        reqDTO.setEntityId(Long.parseLong(entityUuid));
         reqDTO.setIsSystemField(0);
         List<EntityFieldRespDTO> entityFieldRespDTOS = metadataEntityFieldApi.getEntityFieldList(reqDTO);
         return entityFieldRespDTOS;

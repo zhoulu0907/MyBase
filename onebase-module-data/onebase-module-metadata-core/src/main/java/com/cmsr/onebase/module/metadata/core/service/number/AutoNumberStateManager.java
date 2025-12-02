@@ -66,7 +66,7 @@ public class AutoNumberStateManager {
         // 更新状态
         state.setCurrentValue(nextValue);
         state.setUpdateTime(LocalDateTime.now());
-        stateRepository.update(state);
+        stateRepository.updateById(state);
 
         log.debug("Generated next sequence: {} for config: {}, periodKey: {}", nextValue, config.getId(), periodKey);
         return nextValue;
@@ -118,15 +118,14 @@ public class AutoNumberStateManager {
      * @return 初始状态
      */
     private MetadataAutoNumberStateDO createInitialState(MetadataAutoNumberConfigDO config, String periodKey) {
-        MetadataAutoNumberStateDO state = MetadataAutoNumberStateDO.builder()
-                .configId(config.getId())
-                .periodKey(periodKey)
-                .currentValue(config.getInitialValue() - 1) // 减1，因为获取下一个序号时会加1
-                .lastResetTime(LocalDateTime.now())
-                .appId(config.getAppId())
-                .build();
+        MetadataAutoNumberStateDO state = new MetadataAutoNumberStateDO();
+        state.setConfigId(config.getId());
+        state.setPeriodKey(periodKey);
+        state.setCurrentValue(config.getInitialValue() - 1);
+        state.setLastResetTime(LocalDateTime.now());
+        state.setApplicationId(config.getApplicationId());
 
-        stateRepository.insert(state);
+        stateRepository.save(state);
         log.debug("Created initial state for config: {}, periodKey: {}", config.getId(), periodKey);
         return state;
     }
@@ -150,21 +149,20 @@ public class AutoNumberStateManager {
         state.setCurrentValue(nextValue);
         state.setLastResetTime(LocalDateTime.now());
         state.setUpdateTime(LocalDateTime.now());
-        stateRepository.update(state);
+        stateRepository.updateById(state);
 
         // 记录重置日志
-        MetadataAutoNumberResetLogDO resetLog = MetadataAutoNumberResetLogDO.builder()
-                .configId(state.getConfigId())
-                .periodKey(periodKey)
-                .prevValue(prevValue)
-                .nextValue(nextValue + 1) // 记录的是下一个可用的序号
-                .resetReason(resetReason)
-                .operator(operator)
-                .resetTime(LocalDateTime.now())
-                .appId(state.getAppId())
-                .build();
+        MetadataAutoNumberResetLogDO resetLog = new MetadataAutoNumberResetLogDO();
+        resetLog.setConfigId(state.getConfigId());
+        resetLog.setPeriodKey(periodKey);
+        resetLog.setPrevValue(prevValue);
+        resetLog.setNextValue(nextValue + 1);
+        resetLog.setResetReason(resetReason);
+        resetLog.setOperator(operator);
+        resetLog.setResetTime(LocalDateTime.now());
+        resetLog.setApplicationId(state.getApplicationId());
 
-        resetLogRepository.insert(resetLog);
+        resetLogRepository.save(resetLog);
         log.info("Reset sequence for config: {}, periodKey: {}, from: {} to: {}, reason: {}", 
                 state.getConfigId(), periodKey, prevValue, nextValue + 1, resetReason);
     }

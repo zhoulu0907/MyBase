@@ -116,6 +116,7 @@ onebase:
     ignore-urls:
       - /jmreport/* # 积木报表，无法携带租户编号
       - /runtime/flow/remote-call/*
+      - /runtime/app/application/get/**
     ignore-visit-urls:
       - /admin-api/system/user/profile/**
       - /admin-api/system/auth/**
@@ -153,3 +154,12 @@ anyline:
   is-log-sql-param: false
   is-log-sql-when-error: true
   is-log-sql-param-when-error: true
+
+mybatis-flex:
+  print-sql: true
+  configuration:
+    mapUnderscoreToCamelCase: true
+pagehelper:
+  helperDialect: postgresql
+  reasonable: false
+  defaultCount: true

@@ -65,7 +65,7 @@ public interface MetadataEntityFieldCoreService {
     /**
      * 获得实体字段分页
      *
-     * @param pageNum 页码
+     * @param pageNum  页码
      * @param pageSize 页大小
      * @param entityId 实体编号
      * @return 实体字段分页
@@ -76,7 +76,7 @@ public interface MetadataEntityFieldCoreService {
      * 根据字段编码获得实体字段
      *
      * @param fieldCode 字段编码
-     * @param entityId 实体编号
+     * @param entityId  实体编号
      * @return 实体字段
      */
     MetadataEntityFieldDO getEntityFieldByCode(String fieldCode, Long entityId);
@@ -91,7 +91,8 @@ public interface MetadataEntityFieldCoreService {
 
     /**
      * 根据字段ID列表返回对应的JDBC数据类型
-     * 先查 metadata_entity_field 获取字段类型编码，再查 metadata_component_field_type 获取 data_type
+     * 先查 metadata_entity_field 获取字段类型编码，再查 metadata_component_field_type 获取
+     * data_type
      *
      * @param fieldIds 字段ID列表
      * @return 字段ID到JDBC类型的映射
@@ -100,24 +101,40 @@ public interface MetadataEntityFieldCoreService {
 
     /**
      * 根据字段ID列表返回对应的JDBC数据类型和字段类型信息
-     * 先查 metadata_entity_field 获取字段类型编码，再查 metadata_component_field_type 获取 data_type
+     * 先查 metadata_entity_field 获取字段类型编码，再查 metadata_component_field_type 获取
+     * data_type
      *
      * @param fieldIds 字段ID列表
      * @return 字段JDBC类型和字段类型信息映射
      */
     Map<Long, Map<String, String>> getFieldJdbcTypesWithFieldType(List<Long> fieldIds);
 
+    /**
+     * 根据字典类型ID统计引用该字典的字段数量
+     * 用于在删除字典前验证是否有字段引用
+     *
+     * @param dictTypeId 字典类型ID
+     * @return 引用该字典的字段数量
+     */
+    long countByDictTypeId(Long dictTypeId);
+
     // TODO: 以下方法需要在build模块中实现，涉及VO转换
     /*
-    List<FieldTypeConfigRespVO> getFieldTypeConfigs();
-    EntityFieldBatchCreateRespVO batchCreateEntityFields(@Valid EntityFieldBatchCreateReqVO reqVO);
-    EntityFieldDetailRespVO getEntityFieldDetail(Long id);
-    EntityFieldBatchUpdateRespVO batchUpdateEntityFields(@Valid EntityFieldBatchUpdateReqVO reqVO);
-    void batchSortEntityFields(@Valid EntityFieldBatchSortReqVO reqVO);
-    PageResult<EntityFieldRespVO> getEntityFieldPage(EntityFieldPageReqVO pageReqVO);
-    EntityFieldBatchSaveRespVO batchSaveEntityFields(@Valid EntityFieldBatchSaveReqVO reqVO);
-    EntityFieldRespVO saveEntityField(@Valid EntityFieldSaveReqVO reqVO);
-    List<EntityFieldRespVO> getEntityFieldListByQuery(EntityFieldQueryReqVO reqVO);
-    EntityFieldValidationTypesRespVO getEntityFieldValidationTypes(@Valid EntityFieldValidationTypesReqVO reqVO);
-    */
+     * List<FieldTypeConfigRespVO> getFieldTypeConfigs();
+     * EntityFieldBatchCreateRespVO batchCreateEntityFields(@Valid
+     * EntityFieldBatchCreateReqVO reqVO);
+     * EntityFieldDetailRespVO getEntityFieldDetail(Long id);
+     * EntityFieldBatchUpdateRespVO batchUpdateEntityFields(@Valid
+     * EntityFieldBatchUpdateReqVO reqVO);
+     * void batchSortEntityFields(@Valid EntityFieldBatchSortReqVO reqVO);
+     * PageResult<EntityFieldRespVO> getEntityFieldPage(EntityFieldPageReqVO
+     * pageReqVO);
+     * EntityFieldBatchSaveRespVO batchSaveEntityFields(@Valid
+     * EntityFieldBatchSaveReqVO reqVO);
+     * EntityFieldRespVO saveEntityField(@Valid EntityFieldSaveReqVO reqVO);
+     * List<EntityFieldRespVO> getEntityFieldListByQuery(EntityFieldQueryReqVO
+     * reqVO);
+     * EntityFieldValidationTypesRespVO getEntityFieldValidationTypes(@Valid
+     * EntityFieldValidationTypesReqVO reqVO);
+     */
 }

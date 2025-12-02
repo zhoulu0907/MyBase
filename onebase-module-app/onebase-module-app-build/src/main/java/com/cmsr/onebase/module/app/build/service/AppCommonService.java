@@ -2,13 +2,13 @@ package com.cmsr.onebase.module.app.build.service;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.framework.data.base.BaseDO;
+import com.cmsr.onebase.framework.orm.entity.BaseEntity;
 import com.cmsr.onebase.module.app.core.dal.database.app.AppApplicationRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleRepository;
 import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.app.ApplicationDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthRoleDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.menu.MenuDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthRoleDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppMenuDO;
 import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
 import com.cmsr.onebase.module.system.api.user.AdminUserApi;
 import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
@@ -42,40 +42,40 @@ public class AppCommonService {
     @Resource
     private AdminUserApi adminUserApi;
 
-    public ApplicationDO validateApplicationExist(Long id) {
-        ApplicationDO applicationDO = applicationRepository.findById(id);
+    public AppApplicationDO validateApplicationExist(Long id) {
+        AppApplicationDO applicationDO = applicationRepository.getById(id);
         if (applicationDO == null) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_NOT_EXIST);
         }
         return applicationDO;
     }
 
-    public AuthRoleDO validateRoleExist(Long id) {
-        AuthRoleDO authRoleDO = authRoleRepository.findById(id);
+    public AppAuthRoleDO validateRoleExist(Long id) {
+        AppAuthRoleDO authRoleDO = authRoleRepository.getById(id);
         if (authRoleDO == null) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_AUTH_ROLE_NOT_EXISTS);
         }
         return authRoleDO;
     }
 
-    public MenuDO validateMenuExist(Long id) {
-        MenuDO menuDO = menuRepository.findById(id);
+    public AppMenuDO validateMenuExist(Long id) {
+        AppMenuDO menuDO = menuRepository.getById(id);
         if (menuDO == null) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_MENU_NOT_EXIST);
         }
         return menuDO;
     }
 
-    public UserHelper getUserHelper(BaseDO baseDO) {
+    public UserHelper getUserHelper(BaseEntity baseDO) {
         Set<Long> ids = new HashSet<>();
         ids.add(baseDO.getCreator());
         ids.add(baseDO.getUpdater());
         return getUserHelper(ids);
     }
 
-    public UserHelper getUserHelper(List<? extends BaseDO> baseDOS) {
-        Set<Long> ids1 = baseDOS.stream().map(BaseDO::getCreator).collect(Collectors.toSet());
-        Set<Long> ids2 = baseDOS.stream().map(BaseDO::getUpdater).collect(Collectors.toSet());
+    public UserHelper getUserHelper(List<? extends BaseEntity> baseDOS) {
+        Set<Long> ids1 = baseDOS.stream().map(BaseEntity::getCreator).collect(Collectors.toSet());
+        Set<Long> ids2 = baseDOS.stream().map(BaseEntity::getUpdater).collect(Collectors.toSet());
         Set<Long> ids = new HashSet<>();
         ids.addAll(ids1);
         ids.addAll(ids2);

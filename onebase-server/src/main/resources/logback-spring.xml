@@ -14,7 +14,7 @@
             </layout>
         </encoder>-->
         <encoder>
-            <pattern>%d [%thread] %-5level %logger{35} -%kvp- %msg %n</pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg %n</pattern>
         </encoder>
     </appender>
 
@@ -27,7 +27,7 @@
             </layout>
         </encoder>-->
         <encoder>
-            <pattern>%d [%thread] %-5level %logger{35} -%kvp- %msg%n</pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - trace_id=%X{trace_id:-} - req.method=%X{req_method:-} - req.host=%X{req_host:-} - req.path=%X{req_path:-} - req.query=%X{req_query:-} - req.ua=%X{req_ua:-} - req.ip=%X{req_ip:-} - req.body_len=%X{req_body_len:-} - resp.status=%X{resp_status:-} - resp.body_len=%X{resp_body_len:-} - latency_ms=%X{latency_ms:-} - error_code=%X{error_code:-} - log_ver=%X{log_ver:-} - %msg %n</pattern>
         </encoder>
         <!-- 日志文件名 -->
         <file>${LOG_FILE}</file>

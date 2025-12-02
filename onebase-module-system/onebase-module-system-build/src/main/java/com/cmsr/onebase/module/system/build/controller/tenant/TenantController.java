@@ -31,6 +31,7 @@ import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.
 @Tag(name = "管理后台 - 租户")
 @RestController
 @RequestMapping("/system/tenant")
+@Deprecated
 @Component("oldTenantController")
 public class TenantController {
 
@@ -128,7 +129,7 @@ public class TenantController {
 
     @GetMapping("/page")
     @Operation(summary = "获得租户分页")
-    @PreAuthorize("@ss.hasPermission('system:tenant:query')")
+    @PreAuthorize("@ss.hasPermission('tenant:tenant:query')")
     public CommonResult<PageResult<TenantRespVO>> getTenantPage(@Valid TenantPageReqVO pageVO) {
         PageResult<TenantRespVO> pageResult = tenantService.getTenantPage(pageVO);
         return success(BeanUtils.toBean(pageResult, TenantRespVO.class));

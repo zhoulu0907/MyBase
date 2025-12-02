@@ -1,10 +1,10 @@
 package com.cmsr.onebase.module.metadata.core.dal.dataobject.field;
 
-import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
-import jakarta.persistence.Column;
-import jakarta.persistence.Table;
-import lombok.*;
-import lombok.experimental.SuperBuilder;
+import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Table;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * 实体字段-选项值（用于单选/多选） DO
@@ -16,64 +16,50 @@ import lombok.experimental.SuperBuilder;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-@ToString(callSuper = true)
-@SuperBuilder
-@NoArgsConstructor
-@AllArgsConstructor
-@Table(name = "metadata_entity_field_option")
-public class MetadataEntityFieldOptionDO extends TenantBaseDO {
-
-    // 列名常量
-    public static final String FIELD_ID = "field_id";
-    public static final String OPTION_LABEL = "option_label";
-    public static final String OPTION_VALUE = "option_value";
-    public static final String OPTION_ORDER = "option_order";
-    public static final String IS_ENABLED = "is_enabled";
-    public static final String DESCRIPTION = "description";
-    public static final String APP_ID = "app_id";
+@Table(value = "metadata_entity_field_option")
+public class MetadataEntityFieldOptionDO extends BaseTenantEntity {
 
     /**
      * 关联字段ID（metadata_entity_field.id）
      */
-    @Column(name = FIELD_ID)
+    @Column(value = "field_id", comment = "关联字段ID")
     private Long fieldId;
 
     /**
      * 选项显示名称
      */
-    @Column(name = OPTION_LABEL)
+    @Column(value = "option_label", comment = "选项显示名称")
     private String optionLabel;
 
     /**
      * 选项值（字段内唯一）
      */
-    @Column(name = OPTION_VALUE)
+    @Column(value = "option_value", comment = "选项值")
     private String optionValue;
 
     /**
      * 选项排序
      */
-    @Column(name = OPTION_ORDER)
+    @Column(value = "option_order", comment = "选项排序")
     private Integer optionOrder;
 
     /**
      * 是否启用：1-启用，0-禁用
-     * @see CommonStatusEnum
      */
-    @Column(name = IS_ENABLED)
+    @Column(value = "is_enabled", comment = "是否启用：1-启用，0-禁用")
     private Integer isEnabled;
 
     /**
      * 说明
      */
-    @Column(name = DESCRIPTION)
+    @Column(value = "description", comment = "说明")
     private String description;
 
     /**
      * 应用ID
      */
-    @Column(name = APP_ID)
-    private Long appId;
+    @Column(value = "application_id", comment = "应用ID")
+    private Long applicationId;
 }
 
 

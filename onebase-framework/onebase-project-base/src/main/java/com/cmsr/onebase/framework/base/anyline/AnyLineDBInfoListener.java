@@ -7,7 +7,7 @@ import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.framework.data.base.BaseEntity;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
-import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
 import com.cmsr.onebase.framework.uid.UidGenerator;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
@@ -84,6 +84,7 @@ public class AnyLineDBInfoListener implements DMListener {
         TENANT_IGNORE_TABLES.add("flow_connector_script");
         TENANT_IGNORE_TABLES.add("etl_flink_mapping");
         TENANT_IGNORE_TABLES.add("etl_flink_function");
+        TENANT_IGNORE_TABLES.add("formula_function");
         // 可以根据需要添加更多表
     }
 

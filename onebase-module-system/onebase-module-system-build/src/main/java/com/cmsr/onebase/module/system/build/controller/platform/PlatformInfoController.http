@@ -5,7 +5,7 @@
 
 ### 获得平台信息 /system/platform/get-platform-info
 GET {{baseUrl}}/system/platform/get-platform-info
-Authorization: Bearer {{token}}
+#Authorization: Bearer {{token}}
 
 ### 获得管理员列表 /admin-api/system/admin-list
 GET {{baseUrl}}/system/platform/admin/list

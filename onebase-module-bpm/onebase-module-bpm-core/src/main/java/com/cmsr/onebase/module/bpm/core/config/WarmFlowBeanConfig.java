@@ -6,8 +6,8 @@ import com.cmsr.onebase.module.bpm.core.expression.ListenerStrategySpel;
 import com.cmsr.onebase.module.bpm.core.expression.VariableStrategySpel;
 import com.cmsr.onebase.module.bpm.core.helper.SpelHelper;
 import com.cmsr.onebase.module.bpm.core.utils.SpringUtil;
-import com.cmsr.onebase.module.engine.orm.anyline.dao.*;
-import com.cmsr.onebase.module.engine.orm.anyline.entity.*;
+import com.cmsr.onebase.module.engine.orm.mybatisflex.dao.*;
+import com.cmsr.onebase.module.engine.orm.mybatisflex.entity.*;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.warm.flow.core.FlowEngine;
 import org.dromara.warm.flow.core.config.WarmFlow;
@@ -50,12 +50,12 @@ public class WarmFlowBeanConfig {
      * 配置流程定义 DAO
      */
     @Bean
-    public FlowDefinitionDao definitionDao() {
+    public FlowDefinitionDao bpmDefinitionDao() {
         return new FlowDefinitionDaoImpl();
     }
 
     @Bean
-    public FlowNodeDao nodeDao() {
+    public FlowNodeDao bpmNodeDao() {
         return new FlowNodeDaoImpl();
     }
 
@@ -92,7 +92,7 @@ public class WarmFlowBeanConfig {
      * 配置流程定义服务
      */
     @Bean
-    public DefService flowDefinitionService(FlowDefinitionDao definitionDao) {
+    public DefService bpmDefService(FlowDefinitionDao definitionDao) {
         return new DefServiceImpl().setDao(definitionDao);
     }
 
@@ -100,7 +100,7 @@ public class WarmFlowBeanConfig {
      * 配置节点服务
      */
     @Bean
-    public NodeService flowNodeService(FlowNodeDao flowNodeDao) {
+    public NodeService bpmNodeService(FlowNodeDao flowNodeDao) {
         return new NodeServiceImpl().setDao(flowNodeDao);
     }
 
@@ -108,7 +108,7 @@ public class WarmFlowBeanConfig {
      * 配置实例服务
      */
     @Bean
-    public InsService flowInsService(FlowInstanceDao flowInstanceDao) {
+    public InsService bpmInsService(FlowInstanceDao flowInstanceDao) {
         return new InsServiceImpl().setDao(flowInstanceDao);
     }
 
@@ -116,7 +116,7 @@ public class WarmFlowBeanConfig {
      * 配置任务服务
      */
     @Bean
-    public TaskService flowTaskService(FlowTaskDao flowTaskDao) {
+    public TaskService bpmTaskService(FlowTaskDao flowTaskDao) {
         return new TaskServiceImpl().setDao(flowTaskDao);
     }
 
@@ -124,7 +124,7 @@ public class WarmFlowBeanConfig {
      * 配置历史任务服务
      */
     @Bean
-    public HisTaskService flowHisTaskService(FlowHisTaskDao flowHisTaskDao) {
+    public HisTaskService bpmHisTaskService(FlowHisTaskDao flowHisTaskDao) {
         return new HisTaskServiceImpl().setDao(flowHisTaskDao);
     }
 
@@ -133,7 +133,7 @@ public class WarmFlowBeanConfig {
      * 使用@Primary注解，让WarmFlow的UserService成为主要Bean
      */
     @Bean
-    public UserService flowUserService(FlowUserDao flowUserDao) {
+    public UserService bpmUserService(FlowUserDao flowUserDao) {
         return new UserServiceImpl().setDao(flowUserDao);
     }
 
@@ -141,7 +141,7 @@ public class WarmFlowBeanConfig {
      * 配置流程跳过服务
      */
     @Bean
-    public SkipService flowSkipService(FlowSkipDao flowSkipDao) {
+    public SkipService bpmSkipService(FlowSkipDao flowSkipDao) {
         return new SkipServiceImpl().setDao(flowSkipDao);
     }
 
@@ -163,7 +163,7 @@ public class WarmFlowBeanConfig {
      * 配置图表服务
      */
     @Bean
-    public ChartService chartService() {
+    public ChartService bpmChartService() {
         return new ChartServiceImpl();
     }
 

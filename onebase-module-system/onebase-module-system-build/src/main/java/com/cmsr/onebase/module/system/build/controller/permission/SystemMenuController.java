@@ -33,7 +33,7 @@ public class SystemMenuController {
 
     @PostMapping("/create")
     @Operation(summary = "创建权限")
-    @PreAuthorize("@ss.hasPermission('system:menu:create')")
+    @PreAuthorize("@ss.hasPermission('tenant:menu:create')")
     public CommonResult<Long> createMenu(@Valid @RequestBody SystemMenuSaveVO createReqVO) {
         Long menuId = menuService.createMenu(createReqVO);
         return success(menuId);
@@ -41,7 +41,7 @@ public class SystemMenuController {
 
     @PostMapping("/update")
     @Operation(summary = "修改权限")
-    @PreAuthorize("@ss.hasPermission('system:menu:update')")
+    @PreAuthorize("@ss.hasPermission('tenant:menu:update')")
     public CommonResult<Boolean> updateMenu(@Valid @RequestBody SystemMenuSaveVO updateReqVO) {
         menuService.updateMenu(updateReqVO);
         return success(true);
@@ -50,7 +50,7 @@ public class SystemMenuController {
     @PostMapping("/delete")
     @Operation(summary = "删除权限")
     @Parameter(name = "id", description = "菜单编号", required= true, example = "1024")
-    @PreAuthorize("@ss.hasPermission('system:menu:delete')")
+    @PreAuthorize("@ss.hasPermission('tenant:menu:delete')")
     public CommonResult<Boolean> deleteMenu(@RequestParam("id") Long id) {
         menuService.deleteMenu(id);
         return success(true);
@@ -58,7 +58,7 @@ public class SystemMenuController {
 
     @GetMapping("/list")
     @Operation(summary = "获取菜单&权限列表", description = "用于【菜单管理】界面")
-    @PreAuthorize("@ss.hasPermission('system:menu:query')")
+    @PreAuthorize("@ss.hasPermission('tenant:menu:query')")
     public CommonResult<List<SystemMenuRespVO>> getMenuList(SystemMenuListReqVO reqVO) {
         List<MenuDO> list = menuService.getAllActiveMenuList(reqVO);
         list.sort(Comparator.comparing(MenuDO::getSort));
@@ -77,7 +77,7 @@ public class SystemMenuController {
 
     @GetMapping("/get")
     @Operation(summary = "获取菜单&权限信息")
-    @PreAuthorize("@ss.hasPermission('system:menu:query')")
+    @PreAuthorize("@ss.hasPermission('tenant:menu:query')")
     public CommonResult<SystemMenuRespVO> getMenu(Long id) {
         MenuDO menu = menuService.getMenu(id);
         return success(BeanUtils.toBean(menu, SystemMenuRespVO.class));

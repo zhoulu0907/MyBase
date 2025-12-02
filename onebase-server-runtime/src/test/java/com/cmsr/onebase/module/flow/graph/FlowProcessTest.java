@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.flow.graph;
 
-import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.module.flow.api.FlowProcessExecApiImpl;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerReqDTO;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerRespDTO;
@@ -47,10 +47,13 @@ public class FlowProcessTest {
     @Autowired
     private FlowProcessExecService flowProcessExecService;
 
+    @Autowired
+    private FlowGraphBuilder flowGraphBuilder;
+
     public void testToFlowChain(Long id) throws IOException {
-        FlowProcessDO flowProcessDO = flowProcessRepository.findById(id);
+        FlowProcessDO flowProcessDO = flowProcessRepository.getById(id);
         String json = flowProcessDO.getProcessDefinition();
-        JsonGraph jsonGraph = FlowGraphBuilder.build(json);
+        JsonGraph jsonGraph = flowGraphBuilder.build(json);
         String flowChain = FlowChainBuilder.toFlowChain(jsonGraph);
         System.out.println(flowChain);
     }
@@ -128,5 +131,22 @@ public class FlowProcessTest {
         reqVO.setInputParams(inputParams);
         FormTriggerRespVO respVO = flowProcessExecService.triggerForm(reqVO);
         System.out.println(respVO);
+    }
+
+    @Test
+    public void testSimple5() throws IOException {
+        TenantContextHolder.setIgnore(true);
+        EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
+        reqDTO.setTraceId(UUID.randomUUID().toString());
+        reqDTO.setEntityId(46999363287089152L);
+        reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_CREATE);
+        reqDTO.setFieldData(Map.of(
+                "46999569445519360", "9年级145班",
+                "50026937276661762", LocalDate.now().minusYears(10),
+                "50028191407505411", 30
+        ));
+        //reqDTO.setChangedFieldIds(List.of(46999569445519360L));
+        EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
+        System.out.println(respDTO);
     }
 }

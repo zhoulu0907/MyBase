@@ -5,13 +5,16 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.enums.CommonPublishModelEnum;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
+import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
+import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.common.util.date.DateUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.tenant.config.TenantProperties;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
-import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.system.api.user.AdminUserRoleApi;
@@ -43,6 +46,8 @@ import com.cmsr.onebase.module.system.service.user.UserService;
 import com.cmsr.onebase.module.system.vo.role.RoleInsertReqVO;
 import com.cmsr.onebase.module.system.vo.tenant.*;
 import com.cmsr.onebase.module.system.vo.user.UserInsertReqVO;
+import com.mzt.logapi.context.LogRecordContext;
+import com.mzt.logapi.starter.annotation.LogRecord;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -61,6 +66,7 @@ import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
+import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
 import static java.util.Collections.singleton;
 
 /**
@@ -163,6 +169,8 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @LogRecord(type = SYSTEM_TENANT_TYPE, subType = SYSTEM_TENANT_CREATE_SUB_TYPE, bizNo = "{{#tenant.id}}",
+            success = SYSTEM_TENANT_CREATE_SUCCESS)
     public Long createTenant(TenantInsertReqVO createReqVO) {
         // 校验租户名称是否重复
         validTenantNameDuplicate(createReqVO.getName(), null);
@@ -210,13 +218,21 @@ public class TenantServiceImpl implements TenantService {
         tenant = tenantDataRepository.insert(tenant);
 
         // 创建租户的管理员1
-        TenantDO finalTenant = tenant;
         TenantUtils.execute(tenant.getId(), () -> {
             // 创建管理员角色
             Long roleId = createTenantAdminRole();
+            //  开发者角色 判断是否存在开发者，不存在就新增开发者角色
+            createDeveloperAdminRole();
             // 创建用户，并分配角色
             createSystemUser(roleId, createReqVO);
         });
+
+        // 记录操作日志上下文
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+
+        LogRecordContext.putVariable("loginUser", loginUser);
+        LogRecordContext.putVariable("tenant", tenant);
+
         return tenant.getId();
     }
 
@@ -238,6 +254,8 @@ public class TenantServiceImpl implements TenantService {
             reqVO.setAdminType(AdminTypeEnum.SYSTEM.getType());
             reqVO.setPassword(TENANT_ADMIN_PASSWORD);
             reqVO.setPlatformUserId(adminUserReqVO.getPlatformUserId());
+            // 通过平台创建空间（Tenant）用户
+            reqVO.setUserType(UserTypeEnum.TENANT.getValue());
             // 创建用户
             Long userId = userService.createUser(reqVO);
             // 分配 管理员角色
@@ -254,8 +272,23 @@ public class TenantServiceImpl implements TenantService {
         return roleId;
     }
 
+
+    private void createDeveloperAdminRole() {
+        RoleDO roleDO= roleService.getRoleByCode(RoleCodeEnum.APP_DEVELOPER.getCode());
+        if(roleDO==null) {
+            // 创建角色
+            RoleInsertReqVO reqVO = new RoleInsertReqVO();
+            reqVO.setName(RoleCodeEnum.APP_DEVELOPER.getName()).setCode(RoleCodeEnum.APP_DEVELOPER.getCode())
+                    .setSort(0).setRemark("系统自动生成");
+              roleService.createRole(reqVO, RoleTypeEnum.SYSTEM.getType());
+        }
+    }
+
+
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @LogRecord(type = SYSTEM_TENANT_TYPE, subType = SYSTEM_TENANT_UPDATE_SUB_TYPE, bizNo = "{{#tenant.id}}",
+            success = SYSTEM_TENANT_UPDATE_SUCCESS)
     public void updateTenant(@Valid TenantUpdateReqVO updateReqVO) {
         // 校验存在
         TenantDO tenant = validateUpdateTenant(updateReqVO.getId());
@@ -300,9 +333,7 @@ public class TenantServiceImpl implements TenantService {
 
         DataRow row = new DataRow();
         row.put(TenantDO.ID, updateObj.getId());
-        if (updateObj.getAdminUserId() != null) {
-            // row.put(TenantDO.ADMIN_USER_ID, updateObj.getAdminUserId());
-        }
+
         if (StringUtils.isNotEmpty(updateObj.getName())) {
             row.put(TenantDO.NAME, updateObj.getName());
         }
@@ -315,9 +346,20 @@ public class TenantServiceImpl implements TenantService {
         if (updateObj.getStatus() != null) {
             row.put(TenantDO.STATUS, updateObj.getStatus());
         }
+        if (StringUtils.isNotEmpty(updateObj.getPublishModel()) ) {
+            row.put(TenantDO.PUBLISH_MODEL, updateObj.getPublishModel());
+        }
+
+        if (StringUtils.isNotEmpty(updateObj.getLogoUrl()) ) {
+            row.put(TenantDO.LOGO_URL, updateObj.getLogoUrl());
+        }
+
         tenantDataRepository.updateByConfig(row, new DefaultConfigStore().eq(TenantDO.ID, updateObj.getId()));
         // 修改租户管理员
-        if (updateReqVO.getTenantAdminUserUpdateReqVOSList() != null && updateReqVO.getTenantAdminUserUpdateReqVOSList().size() > 0) {
+        if (updateReqVO.getTenantAdminUserUpdateReqVOSList() != null) {
+            if(updateReqVO.getTenantAdminUserUpdateReqVOSList().isEmpty()){
+                throw exception(TENANT_ADMIN_ISNULL);
+            }
             TenantUtils.execute(updateObj.getId(), () -> {
 
                 // 管理员变了，把旧管理员角色移除，并降级为自定义
@@ -376,6 +418,13 @@ public class TenantServiceImpl implements TenantService {
                 });
             });
         }
+
+        // 记录操作日志上下文
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+
+        LogRecordContext.putVariable("loginUser", loginUser);
+        LogRecordContext.putVariable("tenant", tenantDataRepository.findById(updateObj.getId()));
+
     }
 
     private Long getAdminRoleAndDeleteOldUserRole(TenantDO tenant) {
@@ -452,11 +501,19 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
+    @LogRecord(type = SYSTEM_TENANT_TYPE, subType = SYSTEM_TENANT_DELETE_SUB_TYPE, bizNo = "{{#tenant.id}}",
+            success = SYSTEM_TENANT_DELETE_SUCCESS)
     public void deleteTenant(Long id) {
         // 校验存在
-        validateUpdateTenant(id);
+        TenantDO tenant = validateUpdateTenant(id);
         // 删除
         tenantDataRepository.deleteById(id);
+
+        // 记录操作日志上下文
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+
+        LogRecordContext.putVariable("loginUser", loginUser);
+        LogRecordContext.putVariable("tenant", tenant);
     }
 
     private TenantDO validateUpdateTenant(Long id) {
@@ -480,6 +537,15 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     public TenantRespVO getTenantWithAppCount(Long id) {
+        // 仅允许获取自己的租户信息(平台管理员除外)
+        boolean isPlatformAdmin = permissionService.isPlatformSuperAdmin(SecurityFrameworkUtils.getLoginUserId());
+        if (!isPlatformAdmin) {
+            Long loginTenantId = TenantContextHolder.getTenantId();
+            if (!Objects.equals(loginTenantId, id)) {
+                throw exception(TENANT_ONLY_GET_SELF);
+            }
+        }
+
         Map<Long, Integer> corpCountMap = findCorpCount();
         TenantDO tenantDO = getTenant(id);
         // 查询当前租户下的已有的正常状态的用户数量
@@ -546,8 +612,8 @@ public class TenantServiceImpl implements TenantService {
      * @return
      */
     @TenantIgnore
-    public Map<Integer, Integer> findAppCount() {
-        return appApplicationApi.findAppApplicationAll();
+    public Map<Long, Integer> findAppCount() {
+        return appApplicationApi.countAppByTenantId();
     }
 
     @TenantIgnore
@@ -561,7 +627,7 @@ public class TenantServiceImpl implements TenantService {
         List<Long> tenantIds = CollectionUtils.convertList(tenantDOList, TenantDO::getId);
         Map<Long, Integer> existUserCountMap = userService.getTenantExistUserCountByIds(tenantIds);
         Map<Long, Integer> coupCountMap = findCorpCount();
-        Map<Integer, Integer> appCountMap = findAppCount();
+        Map<Long, Integer> appCountMap = findAppCount();
         // 转换为VO并设置昵称
 
         List<TenantRespVO> tenantRespVOList = tenantDOPageResult.getList().stream()
@@ -581,7 +647,7 @@ public class TenantServiceImpl implements TenantService {
                     tenantRespVO.setCorpCount(corpCount);
 
                     Integer appCount = appCountMap.get(tenantDO.getId());
-                    if (corpCount == null) {
+                    if (appCount == null) {
                         appCount = CorpConstant.ZERO; // 默认值处理
                     }
                     tenantRespVO.setAppCount(appCount);

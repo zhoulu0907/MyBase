@@ -101,6 +101,12 @@
             <artifactId>onebase-spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- MyBatis-Flex 代码生成器 -->
+        <dependency>
+            <groupId>com.mybatis-flex</groupId>
+            <artifactId>mybatis-flex-codegen</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-core</artifactId>

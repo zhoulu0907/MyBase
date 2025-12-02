@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.metadata.core.service.datamethod.validator.impl;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRequiredDO;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationRequiredRepository;
+import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodSubEntityContext;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.validator.ValidationService;
 import org.springframework.stereotype.Component;
 
@@ -27,7 +28,7 @@ public class RequiredValidationService implements ValidationService {
     }
 
     @Override
-    public void validate(Long entityId, Long fieldId, MetadataEntityFieldDO field, Object value, Map<String, Object> data) {
+    public void validate(Long entityId, Long fieldId, MetadataEntityFieldDO field, Object value, Map<String, Object> data, List<MetadataDataMethodSubEntityContext> subEntities) {
         // 查询必填规则
         List<MetadataValidationRequiredDO> rules = requiredRepository.findByFieldId(fieldId);
         

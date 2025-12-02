@@ -6,6 +6,7 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusin
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationUniqueDO;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationUniqueRepository;
+import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodSubEntityContext;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.validator.ValidationService;
 import com.cmsr.onebase.module.metadata.core.service.datasource.MetadataDatasourceCoreService;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
@@ -56,7 +57,7 @@ public class UniqueValidationService implements ValidationService {
     }
 
     @Override
-    public void validate(Long entityId, Long fieldId, MetadataEntityFieldDO field, Object value, Map<String, Object> data) {
+    public void validate(Long entityId, Long fieldId, MetadataEntityFieldDO field, Object value, Map<String, Object> data, List<MetadataDataMethodSubEntityContext> subEntities) {
         if (value == null) {
             return; // 空值不校验唯一性
         }

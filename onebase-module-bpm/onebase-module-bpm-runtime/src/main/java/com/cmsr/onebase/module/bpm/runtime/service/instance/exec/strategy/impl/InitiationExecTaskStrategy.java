@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.bpm.runtime.service.instance.exec.strategy.impl;
 
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
+import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowAgentInsDO;
 import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowInsBizExtDO;
 import com.cmsr.onebase.module.bpm.core.dto.node.InitiationNodeExtDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeBtnCfgDTO;
@@ -12,8 +13,6 @@ import com.cmsr.onebase.module.bpm.runtime.vo.EntityVO;
 import com.cmsr.onebase.module.bpm.runtime.vo.ExecTaskReqVO;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.ConditionDTO;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.UpdateDataReqDTO;
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
 import org.apache.commons.collections4.MapUtils;
 import org.dromara.warm.flow.core.dto.FlowParams;
 import org.dromara.warm.flow.core.entity.Task;
@@ -41,7 +40,7 @@ public class InitiationExecTaskStrategy extends AbstractExecTaskStrategy<Initiat
     }
 
     @Override
-    public void execute(User matchedUser, Task task, InitiationNodeExtDTO extDTO, ExecTaskReqVO reqVO) {
+    public void execute(User matchedUser, BpmFlowAgentInsDO agentInsDO, Task task, InitiationNodeExtDTO extDTO, ExecTaskReqVO reqVO) {
         String buttonType = reqVO.getButtonType();
 
         // 获取按钮权限
@@ -77,15 +76,12 @@ public class InitiationExecTaskStrategy extends AbstractExecTaskStrategy<Initiat
 
             // 只更新首次提交时间
             if (isFirst) {
-                ConfigStore configs = new DefaultConfigStore();
-                configs.eq("instance_id", task.getInstanceId());
-
                 // todo: 不应该为空
-                BpmFlowInsBizExtDO insBizExtDO = insBizExtRepository.findOne(configs);
+                BpmFlowInsBizExtDO insBizExtDO = insBizExtRepository.findOneByInstanceId(task.getInstanceId());
 
                 if (insBizExtDO != null) {
                     insBizExtDO.setSubmitTime(LocalDateTime.now());
-                    insBizExtRepository.update(insBizExtDO);
+                    insBizExtRepository.updateById(insBizExtDO);
                 }
             }
         } else {

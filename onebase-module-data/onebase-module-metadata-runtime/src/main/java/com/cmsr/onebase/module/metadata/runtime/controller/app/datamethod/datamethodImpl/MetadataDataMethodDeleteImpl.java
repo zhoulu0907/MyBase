@@ -1,7 +1,6 @@
 package com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.datamethodImpl;
 
 import cn.hutool.core.util.ObjectUtil;
-import com.cmsr.onebase.framework.common.util.object.ObjectUtils;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.flow.api.FlowProcessExecApiImpl;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerReqDTO;
@@ -14,6 +13,7 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusin
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.relationship.MetadataEntityRelationshipDO;
 import com.cmsr.onebase.module.metadata.core.domain.query.ProcessContext;
+import com.cmsr.onebase.module.metadata.core.enums.RelationshipTypeEnum;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.AbstractMetadataDataMethodCoreService;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
 import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.vo.ProcessedSubEntityVo;
@@ -23,7 +23,6 @@ import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.data.transaction.TransactionState;
 import org.anyline.entity.DataRow;
 import org.anyline.entity.DataSet;
-import org.anyline.entity.Order;
 import org.anyline.service.AnylineService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -131,41 +130,40 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
 
             // AnyLine开启事务
             TransactionState transactionState = temporaryService.start();
+            try{
+                long deleteCount;
+                if (hasDeletedField) {
+                    // 软删除：更新deleted字段为删除时间戳
+                    DataRow updateData = new DataRow();
+                    updateData.put("deleted", String.valueOf(System.currentTimeMillis()));
 
-            long deleteCount;
-            if (hasDeletedField) {
-                // 软删除：更新deleted字段为删除时间戳
-                DataRow updateData = new DataRow();
-                updateData.put("deleted", String.valueOf(System.currentTimeMillis()));
+                    // 修改时间
+                    LocalDateTime dateTime = LocalDateTime.now();
+                    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                    String now = dateTime.format(dateTimeFormatter);
+                    updateData.put("updated_time", now);
 
-                // 修改时间
-                LocalDateTime dateTime = LocalDateTime.now();
-                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-                String now = dateTime.format(dateTimeFormatter);
-                updateData.put("updated_time", now);
-
-                deleteCount = temporaryService.update(quoteTableName(entity.getTableName()), updateData, configStore);
-                log.info("软删除数据成功，实体ID: {}, 表名: {}, 删除记录数: {}", entityId, entity.getTableName(), deleteCount);
-            } else {
-                // 物理删除：直接删除记录
-                deleteCount = temporaryService.delete(quoteTableName(entity.getTableName()), configStore);
-                log.info("物理删除数据成功，实体ID: {}, 表名: {}, 删除记录数: {}", entityId, entity.getTableName(), deleteCount);
-            }
-            boolean ok = deleteCount > 0;
-            if(ok){
-                try {
-                    super.storeData(context);// 子表处理创建嵌套内部事务
-                    log.info("子表处理完成，准备提交事务");
-                    // 子表处理完成 提交事务
-                    temporaryService.commit(transactionState);
-                }catch (Exception e){
-                    log.info("子表处理出现异常，准备回滚事务：{}",e.getMessage());
-                    // 子表处理出现异常 回滚事务
-                    temporaryService.rollback(transactionState);
-                    throw exception(DB_SUBENTITY_OPERATION_ERROR,e.getMessage());
+                    deleteCount = temporaryService.update(quoteTableName(entity.getTableName()), updateData, configStore);
+                    log.info("软删除数据成功，实体ID: {}, 表名: {}, 删除记录数: {}", entityId, entity.getTableName(), deleteCount);
+                } else {
+                    // 物理删除：直接删除记录
+                    deleteCount = temporaryService.delete(quoteTableName(entity.getTableName()), configStore);
+                    log.info("物理删除数据成功，实体ID: {}, 表名: {}, 删除记录数: {}", entityId, entity.getTableName(), deleteCount);
                 }
+                boolean ok = deleteCount > 0;
+                if(ok){
+                        super.storeData(context);// 子表处理创建嵌套内部事务
+                        log.info("子表处理完成，准备提交事务");
+                        // 子表处理完成 提交事务
+                        temporaryService.commit(transactionState);
+                }
+                return ok;
+            }catch (Exception e){
+                log.info("数据删除出现异常，准备回滚事务：{}",e.getMessage());
+                // 数据删除出现异常 回滚事务
+                temporaryService.rollback(transactionState);
+                throw exception(DB_OPERATION_ERROR_DELETE,e.getMessage());
             }
-            return ok;
         });
     }
 
@@ -207,10 +205,12 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
             if("DELETE".equals(relationshipDO.getCascadeType())){
                 continue;
             }
-            if (relationshipDO.getRelationshipType().equals("MANY_TO_ONE")) {
+            String relType = relationshipDO.getRelationshipType();
+            // 使用枚举的辅助方法判断关系类型语义
+            if (RelationshipTypeEnum.isManyToOneType(relType)) {
                 log.info("被删除表和关联表是多对一关系，无需对一方删除: 源实体ID: {}, 关联实体ID： {}", relationshipDO.getSourceEntityId(), relationshipDO.getTargetEntityId());
                 return;
-            } else if (relationshipDO.getRelationshipType().equals("ONE_TO_ONE") || relationshipDO.getRelationshipType().equals("ONE_TO_MANY") || relationshipDO.getRelationshipType().equals("MANY_TO_MANY")) {
+            } else if (RelationshipTypeEnum.isOneToOneType(relType) || RelationshipTypeEnum.isOneToManyType(relType) || RelationshipTypeEnum.isManyToManyType(relType)) {
                 MetadataBusinessEntityDO sourceEntity = businessEntityService.getBusinessEntity(relationshipDO.getSourceEntityId());
                 if (sourceEntity.getEntityType() == 3) {
                     log.info("被删除表类型是多对多的中间表，表名：{}，无需对其他关联表删除", sourceEntity.getTableName());
@@ -272,10 +272,12 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
             if("DELETE".equals(relationshipDO.getCascadeType())){
                 continue;
             }
-            if (relationshipDO.getRelationshipType().equals("ONE_TO_MANY")) {
+            String relType = relationshipDO.getRelationshipType();
+            // 使用枚举的辅助方法判断关系类型语义
+            if (RelationshipTypeEnum.isOneToManyType(relType)) {
                 log.info("关联表和被删除表是一对多关系，无需对一方删除: 源实体ID: {}, 关联实体ID： {}", relationshipDO.getSourceEntityId(), relationshipDO.getTargetEntityId());
                 return;
-            } else if (relationshipDO.getRelationshipType().equals("ONE_TO_ONE") || relationshipDO.getRelationshipType().equals("MANY_TO_ONE") || relationshipDO.getRelationshipType().equals("MANY_TO_MANY")) {
+            } else if (RelationshipTypeEnum.isOneToOneType(relType) || RelationshipTypeEnum.isManyToOneType(relType) || RelationshipTypeEnum.isManyToManyType(relType)) {
                 MetadataBusinessEntityDO targetEntity = businessEntityService.getBusinessEntity(relationshipDO.getTargetEntityId());
                 if (targetEntity.getEntityType() == 3) {
                     log.info("被删除表类型是多对多的中间表，表名：{}，无需对其他关联表删除", targetEntity.getTableName());
@@ -326,21 +328,20 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
 
     /**
      * 根据被删除的数据实体Id查询对应的关联关系
-     * @param entityId type
-     * @return
+     *
+     * @param entityId 实体ID
+     * @param type     类型：SOURCE-被删除表是源表，TARGET-被删除表是目标表
+     * @return 关联关系列表
      */
-    private List<MetadataEntityRelationshipDO> getRelationShipByEntityId(Long entityId, String type){
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        if(type.equals("SOURCE")){
-            //被删除表是源表
-            configStore.and(MetadataEntityRelationshipDO.SOURCE_ENTITY_ID, entityId);
-        }else if(type.equals("TARGET")){
-            //被删除表是目标表
-            configStore.and(MetadataEntityRelationshipDO.TARGET_ENTITY_ID, entityId);
+    private List<MetadataEntityRelationshipDO> getRelationShipByEntityId(Long entityId, String type) {
+        if ("SOURCE".equals(type)) {
+            // 被删除表是源表
+            return entityRelationshipRepository.findBySourceEntityId(entityId);
+        } else if ("TARGET".equals(type)) {
+            // 被删除表是目标表
+            return entityRelationshipRepository.findByTargetEntityId(entityId);
         }
-        configStore.order("create_time", Order.TYPE.DESC);
-        List<MetadataEntityRelationshipDO> relationships = entityRelationshipRepository.findAllByConfig(configStore);
-        return relationships;
+        return java.util.Collections.emptyList();
     }
 
     /**

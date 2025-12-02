@@ -8,7 +8,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "CONCATENATE('Hello',' ','World')" }
+{ "formula": "CONCATENATE(0)" }
 
 ### LEFT
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -16,7 +16,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "LEFT('abcdef',3)" }
+{ "formula": "LEFT1()" }
 
 ### LOWER
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -24,7 +24,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "LOWER('ABCDEF')" }
+{ "formula": "LOWER('1234')" }
 
 ### RIGHT
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -72,7 +72,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "TEXT(1234.5,'$#,##0.00')" }
+{ "formula": "TEXT(2025-11-19,'D')" }
 
 ### UPPER
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -80,7 +80,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "UPPER('hello')" }
+{ "formula": "UPPER(LEFT('Hello World',5))" }
 
 ### TRIM
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -120,7 +120,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "RMBCAP(123.45)" }
+{ "formula": "RMBCAP(-1)" }
 
 ### UUID
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -136,7 +136,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "REGEXREPLACE('abc12312345678','\\\\d{11}','X')" }
+{ "formula": "REGEXREPLACE('abc12312345678','X')" }
 
 ### REGEXMATCH
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -189,7 +189,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "TEXTSPLIT('a#b#c','#')" }
+{ "formula": "TEXTSPLIT('a#b#c','c')" }
 
 ### GETUSER
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -270,7 +270,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "SUM(1,2,3,4)" }
+{"formula":"SUM(数学成绩, 语文成绩)","parameters":{"数学成绩":68,"语文成绩":70}}
 
 ### ABS
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -310,7 +310,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "ROUNDUP(2.123,2)" }
+{ "formula": "ROUND(SQRT(POWER(3,2)+POWER(4,'a','c')),'abc')" }
 
 ### ROUNDDOWN
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -326,7 +326,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "COUNTA('a',null,'',123,true)" }
+{ "formula": "COUNTA('张三','李四','王五','下单')" }
 
 ### COS
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -382,7 +382,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
- { "formula": "COUNT(1,2,'a',3)" }
+ { "formula": "COUNT(1,2,4,3)" }
 
 ### LOG
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -454,7 +454,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "CEILING(2.3,1)" }
+{ "formula": "CEILING(10.3,2)" }
 
 ### MIN
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -518,7 +518,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "WEEKDAY('2025-10-27')" }
+{ "formula": "WEEKDAY('2025-11-18')" }
 
 ### SECOND
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -574,7 +574,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "TIME(12,30,0)" }
+{ "formula": "TIME(30,0)" }
 
 ### TIMESTAMP
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -590,7 +590,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "EDATE('2025-01-01',3)" }
+{ "formula": "EDATE('2025-11-18',3)" }
 
 ### WORKDAY
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -606,7 +606,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "HOUR('2025-10-27 14:15:00')" }
+{ "formula": "HOUR('2025-10-27')" }
 
 ### TODAY
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -630,7 +630,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "DATEDIF('2020-01-01','2025-10-27','Y')" }
+{ "formula": "DATEDIF('2024-11-18 09:23:50','2025-11-18 09:23:55','d')" }
 
 ### NOT
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -678,7 +678,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "XOR(true,false,true)" }
+{ "formula": "XOR(false,true)" }
 
 ### AND
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -694,7 +694,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "IF(1>0,'yes','no')" }
+{ "formula": "IF(AND(GT(5,3), OR1(GT(2,3), EQ(a,4))), 'OK', 'NO')" }
 
 ### RANDOMBETWEEN
 POST {{baseUrl}}/formula/engine/execute-formula

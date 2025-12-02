@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.system.service.dict;
 import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.metadata.api.entity.MetadataEntityFieldApi;
 import com.cmsr.onebase.module.system.dal.database.DictTypeRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.dict.DictTypeDO;
 import com.cmsr.onebase.module.system.enums.dict.DictOwnerTypeEnum;
@@ -35,6 +36,9 @@ public class DictTypeServiceImpl implements DictTypeService {
     @Resource
     private DictTypeRepository dictTypeRepository;
 
+    @Resource
+    private MetadataEntityFieldApi metadataEntityFieldApi;
+
     @Override
     public PageResult<DictTypeDO> getDictTypePage(DictTypePageReqVO pageReqVO) {
         return dictTypeRepository.findPage(pageReqVO);
@@ -59,13 +63,14 @@ public class DictTypeServiceImpl implements DictTypeService {
 
         // 插入字典类型
         DictTypeDO dictType = BeanUtils.toBean(createReqVO, DictTypeDO.class);
-        
+
         // 如果未指定字典所有者类型，默认为租户类型
         if (StrUtil.isEmpty(dictType.getDictOwnerType())) {
             dictType.setDictOwnerType(DictOwnerTypeEnum.TENANT.getType());
         }
-        
-        dictType.setDeletedTime(LocalDateTime.ofInstant(Instant.ofEpochMilli(0), ZoneId.systemDefault())); // 唯一索引，避免 null 值
+
+        dictType.setDeletedTime(LocalDateTime.ofInstant(Instant.ofEpochMilli(0), ZoneId.systemDefault())); // 唯一索引，避免
+                                                                                                           // null 值
         dictTypeRepository.insert(dictType);
         return dictType.getId();
     }
@@ -91,6 +96,11 @@ public class DictTypeServiceImpl implements DictTypeService {
         // 校验是否有字典数据
         if (dictDataService.getDictDataCountByDictType(dictType.getType()) > 0) {
             throw exception(DICT_TYPE_HAS_CHILDREN);
+        }
+        // 校验是否有实体字段引用
+        long fieldCount = metadataEntityFieldApi.countByDictTypeId(id);
+        if (fieldCount > 0) {
+            throw exception(DICT_TYPE_HAS_ENTITY_FIELD_REFERENCE);
         }
         // 删除字典类型（软删除）
         dictTypeRepository.deleteById(id);

@@ -18,7 +18,7 @@ public enum ScheduleType {
 
     public static ScheduleType of(String scheduleType) {
         if (StringUtils.isBlank(scheduleType)) {
-            throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.ILLEGAL_SCHEDULE_TYPE);
+            throw ServiceExceptionUtil.exception(EtlErrorCodeConstants.ILLEGAL_SCHEDULE_TYPE);
         }
 
         for (ScheduleType type : ScheduleType.values()) {
@@ -26,7 +26,7 @@ public enum ScheduleType {
                 return type;
             }
         }
-        throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.ILLEGAL_SCHEDULE_TYPE);
+        throw ServiceExceptionUtil.exception(EtlErrorCodeConstants.ILLEGAL_SCHEDULE_TYPE);
     }
 
     public enum Fixed {

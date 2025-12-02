@@ -1,6 +1,8 @@
 package com.cmsr.onebase.module.system.vo.user;
 
 import cn.hutool.core.util.ObjUtil;
+import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
+import com.cmsr.onebase.framework.common.validation.InEnum;
 import com.cmsr.onebase.framework.common.validation.Mobile;
 import com.cmsr.onebase.module.system.framework.operatelog.core.DeptParseFunction;
 import com.cmsr.onebase.module.system.framework.operatelog.core.PostParseFunction;
@@ -81,6 +83,10 @@ public class UserInsertReqVO {
     @Schema(description = "来自平台克隆的用户id", example = "")
     private Long platformUserId;
 
+
+    @Schema(description = "类型", example = "1")
+    @InEnum(value= UserTypeEnum.class, message = "用户类型不正确：{value}")
+    private Integer userType;
 
     @AssertTrue(message = "密码不能为空")
     @JsonIgnore

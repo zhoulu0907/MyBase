@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+@Schema(description = "数据工厂 - 数据源 - 分页查询数据源请求VO")
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class DatasourcePageReqVO extends PageParam {
@@ -15,7 +16,7 @@ public class DatasourcePageReqVO extends PageParam {
     private Long applicationId;
 
     @Schema(description = "数据源编号")
-    private String datasourceCode;
+    private String datasourceUuid;
 
     @Schema(description = "数据源名称信息")
     private String datasourceName;

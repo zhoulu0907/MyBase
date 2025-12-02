@@ -109,6 +109,14 @@ public interface Skip extends RootEntity {
 
     Skip setCoordinate(String coordinate);
 
+    String getExt();
+
+    Skip setExt(String ext);
+
+    Integer getPriority();
+
+    Skip setPriority(Integer priority);
+
     default Skip copy() {
         return FlowEngine.newSkip()
             .setTenantId(getTenantId())
@@ -121,7 +129,9 @@ public interface Skip extends RootEntity {
             .setSkipName(getSkipName())
             .setSkipType(getSkipType())
             .setSkipCondition(getSkipCondition())
-            .setCoordinate(getCoordinate());
+            .setCoordinate(getCoordinate())
+            .setExt(this.getExt())
+            .setPriority(getPriority());
     }
 
 }

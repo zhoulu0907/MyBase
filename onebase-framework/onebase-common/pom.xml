@@ -45,6 +45,10 @@
             <optional>true</optional>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
         <!-- Web 相关 -->
         <dependency>
             <groupId>org.springframework</groupId>
@@ -121,6 +125,10 @@
             <artifactId>jsch</artifactId> <!-- 解决 sftp 连接 -->
         </dependency>
         <dependency>
+            <groupId>com.github.f4b6a3</groupId>
+            <artifactId>uuid-creator</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.angus</groupId>
             <artifactId>jakarta.mail</artifactId>
         </dependency>
@@ -163,6 +171,14 @@
             <artifactId>jakarta.persistence-api</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>transmittable-thread-local</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.mybatis-flex</groupId>
+            <artifactId>mybatis-flex-core</artifactId>
+        </dependency>
         <!-- Test 测试相关 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

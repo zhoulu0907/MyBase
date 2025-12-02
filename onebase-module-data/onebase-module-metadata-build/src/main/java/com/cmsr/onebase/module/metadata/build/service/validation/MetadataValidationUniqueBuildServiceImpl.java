@@ -110,11 +110,11 @@ public class MetadataValidationUniqueBuildServiceImpl implements MetadataValidat
         // 转换VO为DO并设置必要字段
         MetadataValidationUniqueDO data = BeanUtils.toBean(vo, MetadataValidationUniqueDO.class);
         data.setEntityId(field.getEntityId());
-        data.setAppId(field.getAppId());
+        data.setApplicationId(field.getApplicationId());
         data.setGroupId(groupId);
 
         // 保存唯一性校验规则
-        uniqueRepository.upsert(data);
+        uniqueRepository.saveOrUpdate(data);
         
         // 同步更新字段的唯一性状态为唯一
         syncFieldUniqueStatus(vo.getFieldId(), true);
@@ -167,9 +167,9 @@ public class MetadataValidationUniqueBuildServiceImpl implements MetadataValidat
         updateObj.setId(existing.getId());
         updateObj.setFieldId(existing.getFieldId());
         updateObj.setEntityId(existing.getEntityId());
-        updateObj.setAppId(existing.getAppId());
+        updateObj.setApplicationId(existing.getApplicationId());
         updateObj.setGroupId(targetGroupId);
-        uniqueRepository.update(updateObj);
+        uniqueRepository.updateById(updateObj);
         boolean isFieldUnique = updateObj.getIsEnabled() != null && updateObj.getIsEnabled() == 1;
         syncFieldUniqueStatus(existing.getFieldId(), isFieldUnique);
     }
@@ -221,7 +221,7 @@ public class MetadataValidationUniqueBuildServiceImpl implements MetadataValidat
             }
             MetadataValidationUniqueDO uniqueDO = list.get(0);
             Long fieldId = uniqueDO.getFieldId();
-            uniqueRepository.deleteById(uniqueDO.getId());
+            uniqueRepository.removeById(uniqueDO.getId());
             if (fieldId != null) {
                 syncFieldUniqueStatus(fieldId, false);
             }
@@ -239,11 +239,11 @@ public class MetadataValidationUniqueBuildServiceImpl implements MetadataValidat
      */
     private void syncFieldUniqueStatus(Long fieldId, boolean unique) {
         try {
-            MetadataEntityFieldDO field = entityFieldRepository.findById(fieldId);
+            MetadataEntityFieldDO field = entityFieldRepository.getById(fieldId);
             if (field != null && field.getIsUnique() != (unique ? 1 : 0)) {
                 field.setIsUnique(unique ? 1 : 0);
                 // 使用直接更新而不是 upsert，避免主键冲突
-                entityFieldRepository.update(field);
+                entityFieldRepository.updateById(field);
             }
         } catch (Exception e) {
             // 如果更新失败，记录日志但不中断流程

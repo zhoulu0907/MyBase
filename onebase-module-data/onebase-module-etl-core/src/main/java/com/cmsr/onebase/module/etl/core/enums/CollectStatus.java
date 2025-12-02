@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.etl.core.enums;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
+import com.mybatisflex.annotation.EnumValue;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 
@@ -12,6 +13,7 @@ public enum CollectStatus {
     REQUIRED("required", "需重新采集");
 
     @Getter
+    @EnumValue
     private final String value;
 
     @Getter
@@ -28,6 +30,6 @@ public enum CollectStatus {
                 return status;
             }
         }
-        throw ServiceExceptionUtil.exception(ETLErrorCodeConstants.INVALID_COLLECT_STATUS);
+        throw ServiceExceptionUtil.exception(EtlErrorCodeConstants.INVALID_COLLECT_STATUS);
     }
 }

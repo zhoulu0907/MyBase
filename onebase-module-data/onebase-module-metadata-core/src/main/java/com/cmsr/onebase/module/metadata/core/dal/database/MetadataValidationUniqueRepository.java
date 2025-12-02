@@ -1,40 +1,68 @@
 package com.cmsr.onebase.module.metadata.core.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationUniqueDO;
+import com.cmsr.onebase.module.metadata.core.dal.mapper.MetadataValidationUniqueMapper;
+import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.spring.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+/**
+ * 唯一性验证规则仓储类
+ *
+ * @author matianyu
+ * @date 2025-08-11
+ */
 @Repository
 @Slf4j
-public class MetadataValidationUniqueRepository extends DataRepository<MetadataValidationUniqueDO> {
-    public MetadataValidationUniqueRepository() { super(MetadataValidationUniqueDO.class); }
+public class MetadataValidationUniqueRepository extends ServiceImpl<MetadataValidationUniqueMapper, MetadataValidationUniqueDO> {
 
+    /**
+     * 根据字段ID查询单条唯一性验证规则
+     *
+     * @param fieldId 字段ID
+     * @return 唯一性验证规则
+     */
     public MetadataValidationUniqueDO findOneByFieldId(Long fieldId) {
-        DefaultConfigStore cs = new DefaultConfigStore();
-        cs.and(MetadataValidationUniqueDO.FIELD_ID, fieldId);
-        cs.and("deleted", 0);
-        return findOne(cs);
+        QueryWrapper queryWrapper = query()
+                .eq(MetadataValidationUniqueDO::getFieldId, fieldId);
+        return getOne(queryWrapper);
     }
 
+    /**
+     * 根据字段ID查询唯一性验证规则列表
+     *
+     * @param fieldId 字段ID
+     * @return 唯一性验证规则列表
+     */
     public List<MetadataValidationUniqueDO> findByFieldId(Long fieldId) {
-        DefaultConfigStore cs = new DefaultConfigStore();
-        cs.and(MetadataValidationUniqueDO.FIELD_ID, fieldId);
-        cs.and("deleted", 0);
-        return findAllByConfig(cs);
+        QueryWrapper queryWrapper = query()
+                .eq(MetadataValidationUniqueDO::getFieldId, fieldId);
+        return list(queryWrapper);
     }
 
+    /**
+     * 根据字段ID删除唯一性验证规则
+     *
+     * @param fieldId 字段ID
+     */
     public void deleteByFieldId(Long fieldId) {
-        for (var item : findByFieldId(fieldId)) { deleteById(item.getId()); }
+        for (var item : findByFieldId(fieldId)) {
+            removeById(item.getId());
+        }
     }
 
+    /**
+     * 根据组ID查询唯一性验证规则列表
+     *
+     * @param groupId 组ID
+     * @return 唯一性验证规则列表
+     */
     public List<MetadataValidationUniqueDO> findByGroupId(Long groupId) {
-        DefaultConfigStore cs = new DefaultConfigStore();
-        cs.and("group_id", groupId);
-        cs.and("deleted", 0);
-        return findAllByConfig(cs);
+        QueryWrapper queryWrapper = query()
+                .eq(MetadataValidationUniqueDO::getGroupId, groupId);
+        return list(queryWrapper);
     }
 }

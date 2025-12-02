@@ -113,11 +113,11 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
         // 转换VO为DO并设置必要字段
         MetadataValidationRequiredDO data = BeanUtils.toBean(vo, MetadataValidationRequiredDO.class);
         data.setEntityId(field.getEntityId());
-        data.setAppId(field.getAppId());
+        data.setApplicationId(field.getApplicationId());
         data.setGroupId(groupId);
 
         // 保存必填校验规则
-        requiredRepository.upsert(data);
+        requiredRepository.saveOrUpdate(data);
         
         // 同步更新字段的必填状态为必填
         syncFieldRequiredStatus(vo.getFieldId(), true);
@@ -175,9 +175,9 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
         updateDO.setId(existingDO.getId());
         updateDO.setFieldId(existingDO.getFieldId());
         updateDO.setEntityId(existingDO.getEntityId());
-        updateDO.setAppId(existingDO.getAppId());
+        updateDO.setApplicationId(existingDO.getApplicationId());
         updateDO.setGroupId(targetGroupId);
-        requiredRepository.update(updateDO);
+        requiredRepository.updateById(updateDO);
 
         boolean isFieldRequired = updateDO.getIsEnabled() != null && updateDO.getIsEnabled() == 1;
         syncFieldRequiredStatus(existingDO.getFieldId(), isFieldRequired);
@@ -230,7 +230,7 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
             }
             MetadataValidationRequiredDO requiredDO = list.get(0);
             Long fieldId = requiredDO.getFieldId();
-            requiredRepository.deleteById(requiredDO.getId());
+            requiredRepository.removeById(requiredDO.getId());
             if (fieldId != null) {
                 syncFieldRequiredStatus(fieldId, false);
             }
@@ -247,10 +247,10 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
      * @param required 是否必填
      */
     private void syncFieldRequiredStatus(Long fieldId, boolean required) {
-        MetadataEntityFieldDO field = entityFieldRepository.findById(fieldId);
+        MetadataEntityFieldDO field = entityFieldRepository.getById(fieldId);
         if (field != null && field.getIsRequired() != (required ? 1 : 0)) {
             field.setIsRequired(required ? 1 : 0);
-            entityFieldRepository.update(field); // 使用update而不是upsert，避免主键冲突
+            entityFieldRepository.updateById(field); // 使用updateById而不是upsert，避免主键冲突
         }
     }
 }

@@ -14,5 +14,6 @@ public interface AppResourceErrorCodeConstants {
 
     ErrorCode PAGE_TYPE_ERROR = new ErrorCode(20003, "页面类型错误");
 
+    ErrorCode APP_RESOURCE_MENU_NOT_EXIST = new ErrorCode(20004, "菜单不存在");
 
 }

@@ -40,7 +40,7 @@ import static com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeC
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertList;
-import static com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils.getLoginUserId;
+import static com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils.getLoginUserId;
 
 /**
  * 提供给外部应用调用为主
@@ -169,7 +169,7 @@ public class OAuth2OpenController {
                 null, null, null);
 
         // 校验令牌
-        OAuth2AccessTokenDO accessTokenDO = oauth2TokenService.checkAccessToken(token);
+        OAuth2AccessTokenDO accessTokenDO = oauth2TokenService.checkAccessToken(null, token);
         Assert.notNull(accessTokenDO, "访问令牌不能为空"); // 防御性检查
         return success(OAuth2OpenConvert.INSTANCE.convert2(accessTokenDO));
     }

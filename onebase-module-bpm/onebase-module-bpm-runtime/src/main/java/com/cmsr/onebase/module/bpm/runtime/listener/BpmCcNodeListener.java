@@ -16,7 +16,7 @@ import org.dromara.warm.flow.core.entity.Task;
 import org.dromara.warm.flow.core.enums.SkipType;
 import org.dromara.warm.flow.core.listener.ListenerVariable;
 import org.dromara.warm.flow.core.service.TaskService;
-import org.dromara.warm.flow.core.service.impl.BpmConstants;
+import com.cmsr.onebase.module.bpm.core.enums.BpmConstants;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
@@ -35,7 +35,7 @@ public class BpmCcNodeListener {
     @Resource
     private BpmCcNodeListener self;
 
-    @Resource
+    @Resource(name = "bpmTaskService")
     private TaskService taskService;
 
     @Resource
@@ -102,7 +102,7 @@ public class BpmCcNodeListener {
             ccRecords.add(ccRecordDO);
         }
 
-        ccRecordRepository.insertBatch(ccRecords);
+        ccRecordRepository.saveBatch(ccRecords);
 
         // 移除抄送用户信息
         flowVariable.remove(ccUsersKey);

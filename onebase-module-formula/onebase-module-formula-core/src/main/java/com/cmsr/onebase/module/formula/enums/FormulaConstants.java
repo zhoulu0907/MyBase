@@ -9,7 +9,8 @@ public class FormulaConstants {
             // 文本函数
             "LEFT", "RIGHT", "MID", "LEN", "UPPER", "LOWER", "PROPER", "TRIM",
             "CONCATENATE", "FIND", "REPLACE", "SUBSTITUTE", "SEARCH", "EXACT",
-            "CLEAN", "CODE", "CHAR", "REPT", "TEXT", "VALUE", "FIXED",
+            "CLEAN", "CODE", "CHAR", "REPT", "TEXT", "VALUE", "FIXED","TEXTJOIN",
+            "RMBCAP","UUID", "ENCODEURL","TEXTSPLIT",
 
             // 数学和三角函数
             "SUM", "SUMIF", "SUMIFS", "AVERAGE", "AVERAGEIF", "AVERAGEIFS",
@@ -22,13 +23,15 @@ public class FormulaConstants {
             "GCD", "LCM", "RAND", "RANDBETWEEN",
 
             // 逻辑函数
-            "IF", "AND", "OR", "NOT", "IFERROR", "IFNA", "TRUE", "FALSE",
+            "IF", "IFS","AND", "OR", "NOT", "IFERROR", "IFNA", "TRUE", "FALSE","XOR",
+            "AND","RANDOMBETWEEN","ISBLANK",
 
             // 日期时间函数
             "TODAY", "NOW", "DATE", "TIME", "YEAR", "MONTH", "DAY",
             "HOUR", "MINUTE", "SECOND", "WEEKDAY", "WEEKNUM",
             "DATEDIF", "DATEVALUE", "TIMEVALUE", "DAYS", "DAYS360",
-            "NETWORKDAYS", "WORKDAY", "EDATE", "EOMONTH",
+            "NETWORKDAYS", "WORKDAY", "EDATE", "EOMONTH","ISOWEEKNUM",
+            "TIME","TIMESTAMP",
 
             // 查找和引用函数
             "INDEX", "MATCH", "VLOOKUP", "HLOOKUP", "LOOKUP", "CHOOSE",
@@ -56,10 +59,13 @@ public class FormulaConstants {
             "DGET", "DMAX", "DMIN", "DSUM", "DAVERAGE", "DCOUNT", "DCOUNTA",
 
             // 其他常用函数
-            "TRANSPOSE", "UNIQUE", "SORT", "FILTER", "SUMPRODUCT",
+            "TRANSPOSE", "UNIQUE", "SORT", "FILTER", "SUMPRODUCT","PRODUCT",
 
             // 正则表达式函数
-            "REGEXEXTRACTALL", "REGEXEXTRACT", "REGEXMATCH", "REGEXREPLACE"
+            "REGEXEXTRACTALL", "REGEXEXTRACT", "REGEXMATCH", "REGEXREPLACE",
+
+            // 人员函数
+            "GETUSER", "GETDEPT", "GETUPDEPT", "GETROLE", "GETSUPERVISOR", "ISINROLE", "ISINDEPT"
     };
 
     /**

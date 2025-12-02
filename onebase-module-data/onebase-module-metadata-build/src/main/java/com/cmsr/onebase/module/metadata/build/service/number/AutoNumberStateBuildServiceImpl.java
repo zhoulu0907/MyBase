@@ -39,8 +39,8 @@ public class AutoNumberStateBuildServiceImpl implements AutoNumberStateBuildServ
             st.setPeriodKey(periodKey);
             long start = cfg.getInitialValue() != null ? cfg.getInitialValue() : 1L;
             st.setCurrentValue(start - 1); // 初始化为初始值-1，后续+1再使用
-            st.setAppId(cfg.getAppId());
-            stateRepository.insert(st);
+            st.setApplicationId(cfg.getApplicationId());
+            stateRepository.save(st);
         }
         long next = st.getCurrentValue() + 1;
         // 溢出控制（仅当 FIXED_DIGITS 且不继续递增时回绕）
@@ -54,7 +54,7 @@ public class AutoNumberStateBuildServiceImpl implements AutoNumberStateBuildServ
         MetadataAutoNumberStateDO upd = new MetadataAutoNumberStateDO();
         upd.setId(st.getId());
         upd.setCurrentValue(next);
-        stateRepository.update(upd);
+        stateRepository.updateById(upd);
         return next;
     }
 
@@ -68,12 +68,12 @@ public class AutoNumberStateBuildServiceImpl implements AutoNumberStateBuildServ
             st.setConfigId(configId);
             st.setPeriodKey(periodKey);
             st.setCurrentValue(nextValue);
-            stateRepository.insert(st);
+            stateRepository.save(st);
         } else {
             MetadataAutoNumberStateDO upd = new MetadataAutoNumberStateDO();
             upd.setId(st.getId());
             upd.setCurrentValue(nextValue);
-            stateRepository.update(upd);
+            stateRepository.updateById(upd);
         }
         MetadataAutoNumberResetLogDO log = new MetadataAutoNumberResetLogDO();
         log.setConfigId(configId);
@@ -82,8 +82,8 @@ public class AutoNumberStateBuildServiceImpl implements AutoNumberStateBuildServ
         log.setNextValue(nextValue);
         log.setOperator(operator);
         log.setResetReason(reason);
-        log.setAppId(st != null ? st.getAppId() : null);
-        resetLogRepository.insert(log);
+        log.setApplicationId(st != null ? st.getApplicationId() : null);
+        resetLogRepository.save(log);
     }
 
     private String buildPeriodKey(String cycle, java.time.LocalDateTime now) {

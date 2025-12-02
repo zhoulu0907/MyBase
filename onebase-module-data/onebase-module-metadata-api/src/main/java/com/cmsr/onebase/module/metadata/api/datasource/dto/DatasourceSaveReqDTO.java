@@ -17,7 +17,7 @@ public class DatasourceSaveReqDTO {
 
     @Schema(description = "应用ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
     @NotNull(message = "应用ID不能为空")
-    private Long appId;
+    private Long applicationId;
 
     @Schema(description = "应用唯一标识", requiredMode = Schema.RequiredMode.REQUIRED, example = "my-app")
     @NotBlank(message = "应用唯一标识不能为空")

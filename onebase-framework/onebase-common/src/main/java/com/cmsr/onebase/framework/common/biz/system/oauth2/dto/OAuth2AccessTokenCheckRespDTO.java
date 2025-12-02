@@ -1,5 +1,7 @@
 package com.cmsr.onebase.framework.common.biz.system.oauth2.dto;
 
+import com.cmsr.onebase.framework.common.enums.RunModeEnum;
+import com.cmsr.onebase.framework.common.validation.InEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -30,10 +32,15 @@ public class OAuth2AccessTokenCheckRespDTO implements Serializable {
     @Schema(description = "过期时间", requiredMode = Schema.RequiredMode.REQUIRED)
     private LocalDateTime expiresTime;
 
-    @Schema(description = "企业ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
+    @Schema(description = "企业ID",  example = "1024")
     private Long corpId;
 
-    @Schema(description = "应用ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
+    @Schema(description = "应用ID", example = "1024")
     private Long appId;
+
+
+    @Schema(description = "运行模式", example = "platform/build/runtime")
+    @InEnum(value = RunModeEnum.class, message = "运行模式值必须是{value}")
+    private String runMode;
 
 }

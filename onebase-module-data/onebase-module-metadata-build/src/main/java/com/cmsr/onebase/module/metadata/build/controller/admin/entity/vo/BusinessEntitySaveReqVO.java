@@ -37,11 +37,11 @@ public class BusinessEntitySaveReqVO {
     @Size(max = 128, message = "数据表名长度不能超过128个字符")
     private String tableName;
 
-    @Schema(description = "运行模式", example = "0")
-    private Integer runMode;
+    @Schema(description = "版本标识", example = "0")
+    private Long versionTag;
 
     @Schema(description = "应用ID", example = "1")
-    private String appId;
+    private String applicationId;
 
     @Schema(description = "版本锁标识", example = "0")
     private Integer lockVersion;

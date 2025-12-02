@@ -87,9 +87,8 @@ wx:
 liteflow:
   enable: true
   print-banner: true
-rocketmq:
-  endpoints: 10.0.104.38:8081
+  js-server-address: http://10.0.104.41:28392
 
 metadata:
   runtime:
-    enable-auth-check: true
+    enable-auth-check: false

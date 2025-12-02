@@ -54,14 +54,14 @@ public class MetadataDatasourceApiImpl implements MetadataDatasourceApi {
 
             // 调用 core 模块的基础服务，使用MetadataConfig中配置的数据源类型
             Long datasourceId = metadataDatasourceCoreService.createDefaultDatasource(
-                    reqDTO.getAppId(),
+                    reqDTO.getApplicationId(),
                     reqDTO.getAppUid(),
                     metadataConfig.getDefaultDatasourceType(),  // 使用配置的数据源类型
                     configJson
             );
 
             log.info("创建默认数据源成功，数据源ID: {}，应用ID: {}，类型: {}", 
-                    datasourceId, reqDTO.getAppId(), metadataConfig.getDefaultDatasourceType());
+                    datasourceId, reqDTO.getApplicationId(), metadataConfig.getDefaultDatasourceType());
             return datasourceId;
         } catch (Exception e) {
             log.error("创建默认数据源失败", e);
@@ -83,7 +83,7 @@ public class MetadataDatasourceApiImpl implements MetadataDatasourceApi {
                     .datasourceType(reqDTO.getDatasourceType())
                     .config(configJson)
                     .description(reqDTO.getRemark())
-                    .runMode(1)
+                    .versionTag(1L)
                     .datasourceOrigin(1)
                     .build();
 
@@ -92,13 +92,13 @@ public class MetadataDatasourceApiImpl implements MetadataDatasourceApi {
 
             // 创建关联关系
             metadataDatasourceCoreService.createAppDatasourceRelation(
-                    reqDTO.getAppId(),
+                    reqDTO.getApplicationId(),
                     datasourceId,
                     reqDTO.getDatasourceType(),
                     reqDTO.getAppUid()
             );
 
-            log.info("创建数据源成功，数据源ID: {}，应用ID: {}", datasourceId, reqDTO.getAppId());
+            log.info("创建数据源成功，数据源ID: {}，应用ID: {}", datasourceId, reqDTO.getApplicationId());
             return datasourceId;
         } catch (Exception e) {
             log.error("创建数据源失败", e);

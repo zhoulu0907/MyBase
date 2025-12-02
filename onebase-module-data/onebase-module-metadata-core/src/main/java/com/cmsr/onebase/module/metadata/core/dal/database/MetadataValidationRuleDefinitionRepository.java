@@ -1,11 +1,10 @@
 package com.cmsr.onebase.module.metadata.core.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRuleDefinitionDO;
+import com.cmsr.onebase.module.metadata.core.dal.mapper.MetadataValidationRuleDefinitionMapper;
+import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.spring.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Order;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -13,21 +12,14 @@ import java.util.List;
 /**
  * 校验规则定义仓储类
  * <p>
- * 提供校验规则定义相关的数据库操作接口，继承自DataRepositoryNew获得基础的CRUD能力
+ * 提供校验规则定义相关的数据库操作接口，继承自ServiceImpl获得基础的CRUD能力
  *
  * @author bty418
  * @date 2025-01-25
  */
 @Repository
 @Slf4j
-public class MetadataValidationRuleDefinitionRepository extends DataRepository<MetadataValidationRuleDefinitionDO> {
-
-    /**
-     * 构造方法，指定默认实体类
-     */
-    public MetadataValidationRuleDefinitionRepository() {
-        super(MetadataValidationRuleDefinitionDO.class);
-    }
+public class MetadataValidationRuleDefinitionRepository extends ServiceImpl<MetadataValidationRuleDefinitionMapper, MetadataValidationRuleDefinitionDO> {
 
     /**
      * 根据规则组ID查询所有规则定义
@@ -36,10 +28,10 @@ public class MetadataValidationRuleDefinitionRepository extends DataRepository<M
      * @return 规则定义列表
      */
     public List<MetadataValidationRuleDefinitionDO> selectByGroupId(Long groupId) {
-        ConfigStore configStore = new DefaultConfigStore();
-        configStore.eq("group_id", groupId);
-        configStore.order("id", Order.TYPE.ASC);
-        return findAllByConfig(configStore);
+        QueryWrapper queryWrapper = this.query()
+                .eq(MetadataValidationRuleDefinitionDO::getGroupId, groupId)
+                .orderBy(MetadataValidationRuleDefinitionDO::getId, true);
+        return list(queryWrapper);
     }
 
     /**
@@ -49,10 +41,10 @@ public class MetadataValidationRuleDefinitionRepository extends DataRepository<M
      * @return 子规则列表
      */
     public List<MetadataValidationRuleDefinitionDO> selectByParentRuleId(Long parentRuleId) {
-        ConfigStore configStore = new DefaultConfigStore();
-        configStore.eq("parent_rule_id", parentRuleId);
-        configStore.order("id", Order.TYPE.ASC);
-        return findAllByConfig(configStore);
+        QueryWrapper queryWrapper = this.query()
+                .eq(MetadataValidationRuleDefinitionDO::getParentRuleId, parentRuleId)
+                .orderBy(MetadataValidationRuleDefinitionDO::getId, true);
+        return list(queryWrapper);
     }
 
     /**
@@ -61,9 +53,9 @@ public class MetadataValidationRuleDefinitionRepository extends DataRepository<M
      * @param groupId 规则组ID
      */
     public void deleteByGroupId(Long groupId) {
-        ConfigStore configStore = new DefaultConfigStore();
-        configStore.eq("group_id", groupId);
-        deleteByConfig(configStore);
+        QueryWrapper queryWrapper = this.query()
+                .eq(MetadataValidationRuleDefinitionDO::getGroupId, groupId);
+        remove(queryWrapper);
     }
 
     /**
@@ -73,11 +65,10 @@ public class MetadataValidationRuleDefinitionRepository extends DataRepository<M
      * @return 顶级规则列表
      */
     public List<MetadataValidationRuleDefinitionDO> selectTopLevelRulesByGroupId(Long groupId) {
-        ConfigStore configStore = new DefaultConfigStore();
-        configStore.eq("group_id", groupId);
-        configStore.isNull("parent_rule_id");
-        configStore.order("id", Order.TYPE.ASC);
-        return findAllByConfig(configStore);
+        QueryWrapper queryWrapper = this.query()
+                .eq(MetadataValidationRuleDefinitionDO::getGroupId, groupId)
+                .isNull(MetadataValidationRuleDefinitionDO::getParentRuleId)
+                .orderBy(MetadataValidationRuleDefinitionDO::getId, true);
+        return list(queryWrapper);
     }
-
 }

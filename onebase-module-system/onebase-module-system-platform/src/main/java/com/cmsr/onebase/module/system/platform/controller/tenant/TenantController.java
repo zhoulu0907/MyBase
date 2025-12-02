@@ -7,7 +7,6 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.excel.core.util.ExcelUtils;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
-import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.module.system.convert.tenant.TenantConvert;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
 import com.cmsr.onebase.module.system.service.tenant.TenantService;
@@ -35,6 +34,38 @@ public class TenantController {
 
     @Resource
     private TenantService tenantService;
+
+    @PostMapping("/create")
+    @Operation(summary = "创建租户")
+    @PreAuthorize("@ss.hasPermission('tenant:space:create')")
+    public CommonResult<Long> createTenant(@Valid @RequestBody TenantInsertReqVO createReqVO) {
+        return success(tenantService.createTenant(createReqVO));
+    }
+
+    @PostMapping("/update")
+    @Operation(summary = "更新租户")
+    @PreAuthorize("@ss.hasPermission('tenant:space:update')")
+    public CommonResult<Boolean> updateTenant(@Valid @RequestBody TenantUpdateReqVO updateReqVO) {
+        tenantService.updateTenant(updateReqVO);
+        return success(true);
+    }
+
+    @PostMapping("/delete")
+    @Operation(summary = "删除租户")
+    @Parameter(name = "id", description = "编号", required = true, example = "1024")
+    @PreAuthorize("@ss.hasPermission('tenant:space:delete')")
+    public CommonResult<Boolean> deleteTenant(@RequestParam("id") Long id) {
+        tenantService.deleteTenant(id);
+        return success(true);
+    }
+
+    @GetMapping("/get")
+    @Operation(summary = "获得租户(安全考虑仅获取用户所属租户)")
+    @Parameter(name = "id", description = "编号", required = true, example = "1024")
+    @PreAuthorize("@ss.hasPermission('tenant:space:query')")
+    public CommonResult<TenantRespVO> getTenant(@RequestParam("id") Long id) {
+        return success(tenantService.getTenantWithAppCount(id));
+    }
 
     @GetMapping("/get-id-by-name")
     @PermitAll
@@ -69,41 +100,6 @@ public class TenantController {
         return success(TenantConvert.INSTANCE.convertToSimpleRespVO(tenant));
     }
 
-    @PostMapping("/create")
-    @Operation(summary = "创建租户")
-    @PreAuthorize("@ss.hasPermission('tenant:space:create')")
-    public CommonResult<Long> createTenant(@Valid @RequestBody TenantInsertReqVO createReqVO) {
-        return success(tenantService.createTenant(createReqVO));
-    }
-
-    @PostMapping("/update")
-    @Operation(summary = "更新租户")
-    @PreAuthorize("@ss.hasPermission('tenant:space:update')")
-    public CommonResult<Boolean> updateTenant(@Valid @RequestBody TenantUpdateReqVO updateReqVO) {
-        tenantService.updateTenant(updateReqVO);
-        return success(true);
-    }
-
-    @PostMapping("/delete")
-    @Operation(summary = "删除租户")
-    @Parameter(name = "id", description = "编号", required = true, example = "1024")
-    @PreAuthorize("@ss.hasPermission('tenant:space:delete')")
-    public CommonResult<Boolean> deleteTenant(@RequestParam("id") Long id) {
-        tenantService.deleteTenant(id);
-        return success(true);
-    }
-
-    @GetMapping("/get")
-    @Operation(summary = "获得租户(安全考虑仅获取用户所属租户)")
-    @Parameter(name = "id", description = "编号", required = true, example = "1024")
-    @PreAuthorize("@ss.hasPermission('tenant:space:query')")
-    public CommonResult<TenantRespVO> getTenant(@RequestParam("id") Long id) {
-        if(null == id ){
-            id= TenantContextHolder.getTenantId();
-        }
-        return success(tenantService.getTenantWithAppCount(id));
-    }
-
     @GetMapping("/get-allocatable-count")
     @Operation(summary = "获得租户可分配数量")
     @PreAuthorize("@ss.hasPermission('tenant:space:query')")
@@ -122,7 +118,7 @@ public class TenantController {
 
     @GetMapping("/get-tenant-exist-user-count")
     @Operation(summary = "获得当前已有的用户数量和")
-    @PreAuthorize("@ss.hasPermission(tenant:space:query')")
+    @PreAuthorize("@ss.hasPermission('tenant:space:query')")
     public CommonResult<Long> getTenantExistUserCount(@RequestParam Long id) {
         Long userCount = tenantService.getTenantExistUserCount(id);
         return success(userCount);

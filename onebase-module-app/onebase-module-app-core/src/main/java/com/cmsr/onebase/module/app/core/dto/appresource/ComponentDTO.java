@@ -4,6 +4,8 @@ import lombok.Data;
 
 @Data
 public class ComponentDTO {
+    private String componenetUuid;
+
     /**
      * 组件编码
      */

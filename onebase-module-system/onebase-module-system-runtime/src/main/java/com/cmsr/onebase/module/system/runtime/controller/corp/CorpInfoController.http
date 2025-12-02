@@ -1,0 +1,16 @@
+### 获得企业列表-分页
+GET {{baseUrl}}/corp/page?pageNo=1&pageSize=10
+Authorization: Bearer {{token}}
+
+### 获取企业精简信息列表-不分页
+GET {{baseUrl}}/corp/simple-list
+Authorization: Bearer {{token}}
+
+### 企业启用/禁用
+POST {{baseUrl}}/corp/update-status?id=1&status=1
+Authorization: Bearer {{token}}
+
+### 获得企业详情
+GET {{baseUrl}}/corp/get?id=1
+Authorization: Bearer {{token}}
+

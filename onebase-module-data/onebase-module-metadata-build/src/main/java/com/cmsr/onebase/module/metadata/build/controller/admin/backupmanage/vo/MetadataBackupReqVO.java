@@ -14,8 +14,7 @@ import lombok.Data;
 @Data
 public class MetadataBackupReqVO {
 
-    @Schema(description = "应用ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
-    @NotNull(message = "应用ID不能为空")
-    private Long appId;
+    @Schema(description = "应用ID", example = "1")
+    private Long applicationId;
 
 }

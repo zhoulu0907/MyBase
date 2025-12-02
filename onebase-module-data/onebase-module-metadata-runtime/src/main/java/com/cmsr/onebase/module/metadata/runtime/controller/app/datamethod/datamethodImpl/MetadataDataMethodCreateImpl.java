@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.datamethodImpl;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
-import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import com.cmsr.onebase.module.flow.api.FlowProcessExecApiImpl;
@@ -18,8 +18,8 @@ import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodSubE
 import com.cmsr.onebase.module.metadata.core.domain.query.ProcessContext;
 import com.cmsr.onebase.module.metadata.core.enums.BooleanStatusEnum;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.AbstractMetadataDataMethodCoreService;
+import com.cmsr.onebase.module.metadata.core.service.datamethod.strategy.FieldValueTransformMode;
 import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.vo.ProcessedSubEntityVo;
-import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.vo.SubEntityVo;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.transaction.TransactionState;
@@ -27,7 +27,6 @@ import org.anyline.entity.DataRow;
 import org.anyline.service.AnylineService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -65,7 +64,7 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
     public void validateDataIntegrity(Map<String, Object> data, List<MetadataEntityFieldDO> fields) {
         // 将字段ID转换为字段名后再校验
         Map<String, Object> convertedData = convertFieldIdToFieldName(data, fields);
-        
+
         for (MetadataEntityFieldDO field : fields) {
             // 跳过系统字段和主键字段 - 使用新的枚举值：1-是，0-否
             if (BooleanStatusEnum.isYes(field.getIsSystemField()) ||
@@ -151,6 +150,8 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
                             log.warn("无法获取当前用户ID，owner_id字段将使用默认值");
                             if (StringUtils.hasText(field.getDefaultValue())) {
                                 processedData.put(fieldName, field.getDefaultValue());
+                            }else{
+                                processedData.put(fieldName, "1");
                             }
                         }
                         break;
@@ -217,27 +218,27 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
      */
     private void processComplexTypeFields(List<MetadataEntityFieldDO> fields, Map<String, Object> processedData) {
         log.info("开始处理复杂类型字段，字段数量: {}", fields.size());
-        
+
         for (MetadataEntityFieldDO field : fields) {
             String fieldName = field.getFieldName();
             String fieldType = field.getFieldType();
-            
+
             if (fieldName == null || fieldType == null) {
                 continue;
             }
-            
+
             Object fieldValue = processedData.get(fieldName);
             if (fieldValue == null) {
                 continue;
             }
-            
-            log.info("检查字段 {} (类型: {}), 值类型: {}, 值: {}", 
+
+            log.info("检查字段 {} (类型: {}), 值类型: {}, 值: {}",
                     fieldName, fieldType, fieldValue.getClass().getName(), fieldValue);
-            
+
             // 判断是否需要JSON序列化的字段类型
             boolean needsSerialization = needsJsonSerialization(fieldType, fieldValue);
             log.info("字段 {} 是否需要JSON序列化: {}", fieldName, needsSerialization);
-            
+
             if (needsSerialization) {
                 try {
                     // 将复杂对象序列化为JSON字符串
@@ -250,13 +251,13 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
                 }
             }
         }
-        
+
         log.info("复杂类型字段处理完成，最终数据: {}", processedData);
     }
 
     /**
      * 判断字段类型是否需要JSON序列化
-     * 
+     *
      * @param fieldType 字段类型
      * @param fieldValue 字段值
      * @return 是否需要序列化
@@ -265,9 +266,9 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
         if (fieldType == null) {
             return false;
         }
-        
+
         String upperFieldType = fieldType.toUpperCase();
-        
+
         // 字段类型包含以下关键字的需要JSON序列化
         boolean isComplexType = upperFieldType.contains("SELECT") ||       // 选择类型（包括SELECT、MULTI_SELECT、DATA_SELECTION等）
                                 upperFieldType.contains("MULTI") ||        // 多选类型（包括MULTI_USER、MULTI_DEPARTMENT等）
@@ -282,10 +283,10 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
                                 upperFieldType.contains("GEO") ||           // 地理位置（简写）
                                 upperFieldType.equals("JSONB") ||           // JSONB类型
                                 upperFieldType.equals("JSON");              // JSON类型
-        
+
         // 同时判断值是否为复杂对象（List或Map）
         boolean isComplexValue = fieldValue instanceof List || fieldValue instanceof Map;
-        
+
         return isComplexType && isComplexValue;
     }
 
@@ -298,7 +299,7 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
         Long entityId = context.getEntityId();
         List<MetadataEntityFieldDO> fields = context.getFields();
 
-        // 5. 获取临时数据源服务
+        // 获取临时数据源服务
         MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
         if (datasource == null) {
             throw exception(DATASOURCE_NOT_EXISTS);
@@ -306,13 +307,17 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
 
         AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
         log.info("成功切换到数据源：{}", datasource.getCode());
+        context.setTemporaryService(temporaryService);
 
-        // 6. 动态业务表忽略租户条件 - 使用TenantUtils.executeIgnore包装操作
+        // 动态业务表忽略租户条件 - 使用TenantUtils.executeIgnore包装操作
         TenantUtils.executeIgnore(() -> {
 
-            // 7. 执行插入
+            // 先应用存储策略（不包含需要 recordId 的策略，如 DATA_SELECTION）
+            applyFieldStorageStrategies(processedData, fields, FieldValueTransformMode.STORE, null);
+
+            // log打印插入数据
             log.info("准备插入数据，processedData: {}", processedData);
-            
+
             // 打印每个字段的详细信息
             processedData.forEach((key, value) -> {
                 if (value != null) {
@@ -321,9 +326,9 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
                     log.info("插入前字段 {} 的值为null", key);
                 }
             });
-            
+
             DataRow dataRow = new DataRow(processedData);
-            
+
             // 检查DataRow中的数据
             log.info("DataRow创建后的数据: {}", dataRow);
             processedData.forEach((key, value) -> {
@@ -335,29 +340,37 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
                 }
             });
 
+            // 获取主键值
+            Object primaryKeyValue = getPrimaryKeyValue(processedData, fields);
+
             // AnyLine开启事务
             TransactionState transactionState = temporaryService.start();
-
-            Object insertResult = temporaryService.insert(quoteTableName(entity.getTableName()), dataRow);
-            log.info("创建数据成功，实体ID: {}, 表名: {}, 插入结果: {}", entityId, entity.getTableName(), insertResult);
-
             try {
+                Object insertResult = temporaryService.insert(quoteTableName(entity.getTableName()), dataRow);
+                log.info("创建数据成功，实体ID: {}, 表名: {}, 插入结果: {}", entityId, entity.getTableName(), insertResult);
+
+                // 获取插入后的主键值，并更新 context
+                if (primaryKeyValue == null && insertResult != null) {
+                    // 如果从 processedData 中获取不到主键值，尝试从插入结果中获取
+                    primaryKeyValue = insertResult;
+                }
+                if (primaryKeyValue != null) {
+                    context.setId(primaryKeyValue);
+                    // 现在可以处理需要 recordId 的策略（如 DATA_SELECTION）
+                    applyFieldStorageStrategies(processedData, fields, FieldValueTransformMode.STORE, context);
+                }
                 super.storeData(context);// 子表处理创建嵌套内部事务
                 log.info("子表处理完成，准备提交事务");
                 // 子表处理完成 提交事务
                 temporaryService.commit(transactionState);
             }catch (Exception e){
-                log.info("子表处理出现异常，准备回滚事务：{}",e.getMessage());
-                // 子表处理出现异常 回滚事务
+                log.info("数据插入出现异常，准备回滚事务：{}",e.getMessage());
+                // 数据插入出现异常 回滚事务
                 temporaryService.rollback(transactionState);
-                throw exception(DB_SUBENTITY_OPERATION_ERROR,e.getMessage());
+                throw exception(DB_OPERATION_ERROR_CREATE,e.getMessage());
             }
 
-            // 8. 查询插入后的完整数据
-            Object primaryKeyValue = getPrimaryKeyValue(processedData, fields);
-            log.info("从处理数据中获取主键值: {}, 插入结果: {}", primaryKeyValue, insertResult);
-
-            // 确保主键值不为null
+            // 查询插入后的完整数据
             if (primaryKeyValue == null) {
                 log.warn("无法获取主键值，跳过查询插入后的数据，实体ID: {}, 表名: {}", entityId, entity.getTableName());
                 // 返回插入的数据
@@ -365,8 +378,9 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
             }
 
             Map<String, Object> resultData = queryDataByIdWithService(temporaryService, quoteTableName(entity.getTableName()), primaryKeyValue, fields);
+            applyFieldStorageStrategies(resultData, fields, FieldValueTransformMode.READ, context);
 
-            // 9. 构建响应（移除多表写入逻辑，直接返回结果）
+            // 构建响应（移除多表写入逻辑，直接返回结果）
             return buildDataResponse(entity, resultData, fields);
 
         });
@@ -391,16 +405,16 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
             }
             List<Map<Long, Object>> subData = subEntityContext.getSubData();
 
-            String parentRelFieldId = relationshipDOS.stream().filter(relationshipDO ->
+            String parentRelFieldId = String.valueOf(relationshipDOS.stream().filter(relationshipDO ->
                             (subEntityId).equals(relationshipDO.getTargetEntityId())).
-                    map(MetadataEntityRelationshipDO::getSourceFieldId).findFirst().orElse(null);
+                    map(MetadataEntityRelationshipDO::getSourceFieldId).findFirst().orElse(null));
             MetadataEntityFieldDO parentEntityFieldDO = entityFieldRepository.findById(Long.valueOf(parentRelFieldId));
             String parentFiledName = parentEntityFieldDO.getFieldName();// 主表关联字段名称
             Object parentValue = parentData.get(parentFiledName);
 
-            String subRelFieldId = relationshipDOS.stream().filter(relationshipDO ->
+            String subRelFieldId = String.valueOf(relationshipDOS.stream().filter(relationshipDO ->
                             (subEntityId).equals(relationshipDO.getTargetEntityId())).
-                    map(MetadataEntityRelationshipDO::getTargetFieldId).findFirst().orElse(null);
+                    map(MetadataEntityRelationshipDO::getTargetFieldId).findFirst().orElse(null));
             MetadataEntityFieldDO subEntityFieldDO = entityFieldRepository.findById(Long.valueOf(subRelFieldId));
             String subRelFieldName = subEntityFieldDO.getFieldName();// 子表关联字段名称
 

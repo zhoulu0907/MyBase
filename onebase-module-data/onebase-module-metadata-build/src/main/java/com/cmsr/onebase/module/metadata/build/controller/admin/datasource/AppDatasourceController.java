@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.metadata.build.controller.admin.datasource;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.module.metadata.build.controller.admin.datasource.vo.DatasourceRespVO;
 import org.modelmapper.ModelMapper;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
@@ -38,8 +39,8 @@ public class AppDatasourceController {
     @Operation(summary = "创建应用与数据源的关联关系")
     @PreAuthorize("@ss.hasPermission('metadata:datasource:create')")
     public CommonResult<String> createRelation(
-            @Parameter(name = "applicationId", description = "应用ID", required = true, example = "1")
-            @RequestParam("applicationId") Long applicationId,
+            @Parameter(name = "applicationId", description = "应用ID", required = false, example = "1")
+            @RequestParam(value = "applicationId", required = false) Long applicationId,
             @Parameter(name = "datasourceId", description = "数据源ID", required = true, example = "1024")
             @RequestParam("datasourceId") Long datasourceId,
             @Parameter(name = "datasourceType", description = "数据源类型", required = true, example = "POSTGRESQL")
@@ -47,6 +48,7 @@ public class AppDatasourceController {
             @Parameter(name = "appUid", description = "应用UID", example = "app-123")
             @RequestParam(value = "appUid", required = false) String appUid) {
 
+        applicationId = ApplicationManager.getApplicationId();
         Long relationId = appAndDatasourceService.createRelation(applicationId, datasourceId, datasourceType, appUid);
         return success(relationId.toString());
     }
@@ -55,11 +57,12 @@ public class AppDatasourceController {
     @Operation(summary = "删除应用与数据源的关联关系")
     @PreAuthorize("@ss.hasPermission('metadata:datasource:delete')")
     public CommonResult<Boolean> deleteRelation(
-            @Parameter(name = "applicationId", description = "应用ID", required = true, example = "1")
-            @RequestParam("applicationId") Long applicationId,
+            @Parameter(name = "applicationId", description = "应用ID", required = false, example = "1")
+            @RequestParam(value = "applicationId", required = false) Long applicationId,
             @Parameter(name = "datasourceId", description = "数据源ID", required = true, example = "1024")
             @RequestParam("datasourceId") Long datasourceId) {
 
+        applicationId = ApplicationManager.getApplicationId();
         boolean success = appAndDatasourceService.deleteRelation(applicationId, datasourceId);
         return success(success);
     }
@@ -68,9 +71,10 @@ public class AppDatasourceController {
     @Operation(summary = "根据应用ID获取关联的数据源列表")
     @PreAuthorize("@ss.hasPermission('metadata:datasource:query')")
     public CommonResult<List<DatasourceRespVO>> getDatasourcesByApplicationId(
-            @Parameter(name = "applicationId", description = "应用ID", required = true, example = "1")
-            @RequestParam("applicationId") Long applicationId) {
+            @Parameter(name = "applicationId", description = "应用ID", required = false, example = "1")
+            @RequestParam(value = "applicationId", required = false) Long applicationId) {
 
+        applicationId = ApplicationManager.getApplicationId();
         List<MetadataDatasourceDO> datasources = appAndDatasourceService.getDatasourcesByApplicationId(applicationId);
         List<DatasourceRespVO> respList = datasources.stream()
                 .map(datasource -> modelMapper.map(datasource, DatasourceRespVO.class))
@@ -93,11 +97,12 @@ public class AppDatasourceController {
     @Operation(summary = "检查应用和数据源是否已关联")
     @PreAuthorize("@ss.hasPermission('metadata:datasource:query')")
     public CommonResult<Boolean> checkRelation(
-            @Parameter(name = "applicationId", description = "应用ID", required = true, example = "1")
-            @RequestParam("applicationId") Long applicationId,
+            @Parameter(name = "applicationId", description = "应用ID", required = false, example = "1")
+            @RequestParam(value = "applicationId", required = false) Long applicationId,
             @Parameter(name = "datasourceId", description = "数据源ID", required = true, example = "1024")
             @RequestParam("datasourceId") Long datasourceId) {
 
+        applicationId = ApplicationManager.getApplicationId();
         boolean exists = appAndDatasourceService.isRelationExists(applicationId, datasourceId);
         return success(exists);
     }
@@ -120,9 +125,10 @@ public class AppDatasourceController {
     @Operation(summary = "根据应用ID删除所有关联关系")
     @PreAuthorize("@ss.hasPermission('metadata:datasource:delete')")
     public CommonResult<Long> deleteRelationsByApplicationId(
-            @Parameter(name = "applicationId", description = "应用ID", required = true, example = "1")
-            @RequestParam("applicationId") Long applicationId) {
+            @Parameter(name = "applicationId", description = "应用ID", required = false, example = "1")
+            @RequestParam(value = "applicationId", required = false) Long applicationId) {
 
+        applicationId = ApplicationManager.getApplicationId();
         long deletedCount = appAndDatasourceService.deleteRelationsByApplicationId(applicationId);
         return success(deletedCount);
     }

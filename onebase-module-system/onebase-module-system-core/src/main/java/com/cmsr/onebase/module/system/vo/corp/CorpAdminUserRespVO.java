@@ -16,4 +16,6 @@ public class CorpAdminUserRespVO {
     @Schema(description = "企业管理员手机号")
     private String mobile;
 
+    @Schema(description = "企业id")
+    private Long corpId;
 }

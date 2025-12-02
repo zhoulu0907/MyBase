@@ -6,7 +6,7 @@ import com.cmsr.onebase.module.app.api.security.bo.DataPermissionGroup;
 import com.cmsr.onebase.module.app.api.security.bo.DataPermissionLevel;
 import com.cmsr.onebase.module.app.api.security.bo.DataPermissionTag;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthDataGroupRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthDataGroupDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthDataGroupDO;
 import com.cmsr.onebase.module.app.core.enums.auth.AuthDefaultFactory;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Setter;
@@ -33,14 +33,14 @@ public class AppAuthDataGroupProvider {
     private AppAuthDataGroupRepository appAuthDataGroupRepository;
 
     public List<DataPermissionGroup> findDataGroups(Long applicationId, Set<Long> roleIds, Long menuId) {
-        List<AuthDataGroupDO> authDataGroupDOS = appAuthDataGroupRepository.findByAppIdAndRoleIdsAndMenuId(applicationId, roleIds, menuId);
+        List<AppAuthDataGroupDO> authDataGroupDOS = appAuthDataGroupRepository.findByAppIdAndRoleIdsAndMenuId(applicationId, roleIds, menuId);
         return authDataGroupDOS.stream().map(authDataGroupDO -> {
             DataPermissionGroup dataPermissionGroup = new DataPermissionGroup();
             if (authDataGroupDO.getId() == null) {
                 authDataGroupDO = AuthDefaultFactory.createAuthDataGroupDO();
             }
             dataPermissionGroup.setScopTags(toDataPermissionTags(authDataGroupDO.getScopeTags()));
-            dataPermissionGroup.setScopeFieldId(authDataGroupDO.getScopeFieldId());
+            dataPermissionGroup.setScopeFieldUuid(authDataGroupDO.getScopeFieldUuid());
             dataPermissionGroup.setScopeLevel(DataPermissionLevel.fromCode(authDataGroupDO.getScopeLevel()));
             dataPermissionGroup.setScopeValue(authDataGroupDO.getScopeValue());
             dataPermissionGroup.setFilters(toDataPermissionFilter(authDataGroupDO.getDataFilter()));

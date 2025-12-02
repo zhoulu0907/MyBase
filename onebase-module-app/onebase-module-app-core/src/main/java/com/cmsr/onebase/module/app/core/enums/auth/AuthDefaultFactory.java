@@ -2,8 +2,8 @@ package com.cmsr.onebase.module.app.core.enums.auth;
 
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
-import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthDataGroupDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthPermissionDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthDataGroupDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthPermissionDO;
 import com.cmsr.onebase.module.app.core.vo.auth.AuthPermissionReq;
 import org.apache.commons.lang3.math.NumberUtils;
 
@@ -52,12 +52,12 @@ public class AuthDefaultFactory {
 
     private static final String DEFAULT_DATA_FILTER = JsonUtils.toJsonString(List.of());
 
-    //应用 AuthPermissionDO
-    public static AuthPermissionDO createAuthPermissionDO(AuthPermissionReq req) {
-        AuthPermissionDO ap = new AuthPermissionDO();
+    //应用 AppAuthPermissionDO
+    public static AppAuthPermissionDO createAuthPermissionDO(AuthPermissionReq req) {
+        AppAuthPermissionDO ap = new AppAuthPermissionDO();
         ap.setApplicationId(req.getApplicationId());
-        ap.setRoleId(req.getRoleId());
-        ap.setMenuId(req.getMenuId());
+        ap.setRoleUuid(req.getRoleUuid());
+        ap.setMenuUuid(req.getMenuUuid());
         ap.setIsPageAllowed(NumberUtils.INTEGER_ONE);
         ap.setIsAllViewsAllowed(NumberUtils.INTEGER_ONE);
         ap.setIsAllFieldsAllowed(NumberUtils.INTEGER_ONE);
@@ -65,8 +65,8 @@ public class AuthDefaultFactory {
         return ap;
     }
 
-    public static AuthPermissionDO createAuthPermissionDO() {
-        AuthPermissionDO ap = new AuthPermissionDO();
+    public static AppAuthPermissionDO createAuthPermissionDO() {
+        AppAuthPermissionDO ap = new AppAuthPermissionDO();
         ap.setIsPageAllowed(NumberUtils.INTEGER_ONE);
         ap.setIsAllViewsAllowed(NumberUtils.INTEGER_ONE);
         ap.setIsAllFieldsAllowed(NumberUtils.INTEGER_ONE);
@@ -75,20 +75,20 @@ public class AuthDefaultFactory {
     }
 
     //数据组权限 authDataGroupDOS
-    public static AuthDataGroupDO createAuthDataGroupDO(AuthPermissionReq req) {
-        AuthDataGroupDO adg = new AuthDataGroupDO();
+    public static AppAuthDataGroupDO createAuthDataGroupDO(AuthPermissionReq req) {
+        AppAuthDataGroupDO adg = new AppAuthDataGroupDO();
         adg.setGroupName("默认权限");
         adg.setApplicationId(req.getApplicationId());
-        adg.setRoleId(req.getRoleId());
-        adg.setMenuId(req.getMenuId());
+        adg.setRoleUuid(req.getRoleUuid());
+        adg.setMenuUuid(req.getMenuUuid());
         adg.setScopeTags(JsonUtils.toJsonString(List.of(OWN_SUBMIT)));
         adg.setDataFilter(DEFAULT_DATA_FILTER);
         adg.setOperationTags(JsonUtils.toJsonString(List.of(EDIT, DELETE)));
         return adg;
     }
 
-    public static AuthDataGroupDO createAuthDataGroupDO() {
-        AuthDataGroupDO adg = new AuthDataGroupDO();
+    public static AppAuthDataGroupDO createAuthDataGroupDO() {
+        AppAuthDataGroupDO adg = new AppAuthDataGroupDO();
         adg.setGroupName("默认权限");
         adg.setScopeTags(JsonUtils.toJsonString(List.of(OWN_SUBMIT)));
         adg.setDataFilter(DEFAULT_DATA_FILTER);

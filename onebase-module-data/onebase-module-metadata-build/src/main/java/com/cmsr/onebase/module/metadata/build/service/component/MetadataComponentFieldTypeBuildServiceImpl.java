@@ -4,12 +4,9 @@ import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.FieldTypeConfigRespVO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataComponentFieldTypeDO;
+import com.cmsr.onebase.module.metadata.core.dal.database.MetadataComponentFieldTypeRepository;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.DataSet;
-import org.anyline.entity.Order;
-import org.anyline.service.AnylineService;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -27,19 +24,12 @@ import java.util.stream.Collectors;
 public class MetadataComponentFieldTypeBuildServiceImpl implements MetadataComponentFieldTypeBuildService {
 
     @Resource
-    private AnylineService<?> anylineService;
+    private MetadataComponentFieldTypeRepository fieldTypeRepository;
 
     @Override
     public List<MetadataComponentFieldTypeDO> getAllFieldTypes() {
         try {
-            DefaultConfigStore configStore = new DefaultConfigStore();
-            configStore.and(MetadataComponentFieldTypeDO.STATUS, CommonStatusEnum.ENABLE.getStatus()); // 只获取启用的字段类型
-            configStore.and("deleted", 0); // 未删除的记录
-            configStore.order(MetadataComponentFieldTypeDO.SORT_ORDER, Order.TYPE.ASC);
-            configStore.order("create_time", Order.TYPE.ASC);
-
-            DataSet dataSet = anylineService.querys("metadata_component_field_type", configStore);
-            List<MetadataComponentFieldTypeDO> results = dataSet.entity(MetadataComponentFieldTypeDO.class);
+            List<MetadataComponentFieldTypeDO> results = fieldTypeRepository.findAllEnabled();
 
             // 如果数据库中没有数据，返回默认的字段类型配置
             if (results.isEmpty()) {
@@ -67,15 +57,7 @@ public class MetadataComponentFieldTypeBuildServiceImpl implements MetadataCompo
         if (fieldTypeCode == null || fieldTypeCode.trim().isEmpty()) {
             return null;
         }
-
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and(MetadataComponentFieldTypeDO.FIELD_TYPE_CODE, fieldTypeCode);
-        configStore.and(MetadataComponentFieldTypeDO.STATUS, CommonStatusEnum.ENABLE.getStatus());
-        configStore.and("deleted", 0);
-
-        DataSet dataSet = anylineService.querys("metadata_component_field_type", configStore);
-        List<MetadataComponentFieldTypeDO> results = dataSet.entity(MetadataComponentFieldTypeDO.class);
-        return results.isEmpty() ? null : results.get(0);
+        return fieldTypeRepository.findByFieldTypeCode(fieldTypeCode);
     }
 
     @Override
@@ -97,11 +79,14 @@ public class MetadataComponentFieldTypeBuildServiceImpl implements MetadataCompo
             case "BIGINT":
                 return "BIGINT";
             case "VARCHAR":
+                // VARCHAR类型才使用dataLength
                 return "VARCHAR(" + (dataLength != null && dataLength > 0 ? dataLength : 255) + ")";
             case "TEXT":
             case "LONGVARCHAR":
-                // LONGVARCHAR 类型映射为 TEXT，用于存储较长的文本数据
-                // 包括：单选列表、多选列表、结构化对象、数组列表、文件、图片、地理位置、用户多选、部门多选、数据多选等
+                // TEXT/LONGVARCHAR 类型固定映射为 TEXT，不受 dataLength 影响
+                // 包括：TEXT、LONG_TEXT、单选列表、多选列表、结构化对象、数组列表、
+                // 文件、图片、地理位置、用户多选、部门多选、数据多选等
+                // 这些类型不应受 dataLength 限制，因为它们可能存储较长或可变长度的数据
                 return "TEXT";
             case "TIMESTAMP":
                 return "TIMESTAMP";
@@ -145,9 +130,8 @@ public class MetadataComponentFieldTypeBuildServiceImpl implements MetadataCompo
                     case "BIGINT":
                     case "DECIMAL":
                         respVO.setSupportLength(true);
-                        respVO.setDefaultLength(fieldTypeCode.equals("VARCHAR") ? 255 :
-                                               fieldTypeCode.equals("INTEGER") ? 11 :
-                                               fieldTypeCode.equals("BIGINT") ? 20 : 10);
+                        respVO.setDefaultLength(fieldTypeCode.equals("VARCHAR") ? 255
+                                : fieldTypeCode.equals("INTEGER") ? 11 : fieldTypeCode.equals("BIGINT") ? 20 : 10);
                         respVO.setMaxLength(fieldTypeCode.equals("VARCHAR") ? 4000 : null);
                         break;
                     default:
@@ -206,14 +190,14 @@ public class MetadataComponentFieldTypeBuildServiceImpl implements MetadataCompo
      * 创建默认字段类型对象
      */
     private MetadataComponentFieldTypeDO createDefaultFieldType(String code, String name, String desc,
-                                                              String dataType, int sortOrder) {
-        return MetadataComponentFieldTypeDO.builder()
-                .fieldTypeCode(code)
-                .fieldTypeName(name)
-                .fieldTypeDesc(desc)
-                .dataType(dataType)
-                .sortOrder(sortOrder)
-                .status(CommonStatusEnum.ENABLE.getStatus())
-                .build();
+            String dataType, int sortOrder) {
+        MetadataComponentFieldTypeDO fieldType = new MetadataComponentFieldTypeDO();
+        fieldType.setFieldTypeCode(code);
+        fieldType.setFieldTypeName(name);
+        fieldType.setFieldTypeDesc(desc);
+        fieldType.setDataType(dataType);
+        fieldType.setSortOrder(sortOrder);
+        fieldType.setStatus(CommonStatusEnum.ENABLE.getStatus());
+        return fieldType;
     }
 }

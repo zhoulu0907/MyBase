@@ -1,13 +1,15 @@
 package com.cmsr.onebase.module.app.core.provider.auth;
 
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthPermissionRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthPermissionDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthPermissionDO;
 import com.cmsr.onebase.module.app.core.enums.auth.AuthDefaultFactory;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -23,8 +25,11 @@ public class AppAuthPermissionProvider {
     @Autowired
     private AppAuthPermissionRepository appAuthPermissionRepository;
 
-    public List<AuthPermissionDO> findPermissions(Long applicationId, Set<Long> roleIds) {
-        List<AuthPermissionDO> permissionDOS = appAuthPermissionRepository.findByAppIdAndRoleIds(applicationId, roleIds);
+    public List<AppAuthPermissionDO> findPermissions(Long applicationId, Set<Long> roleIds) {
+        if (CollectionUtils.isEmpty(roleIds)) {
+            return Collections.emptyList();
+        }
+        List<AppAuthPermissionDO> permissionDOS = appAuthPermissionRepository.findByAppIdAndRoleIds(applicationId, roleIds);
         return permissionDOS.stream().map(permissionDO -> {
             if (permissionDO.getId() == null) {
                 return AuthDefaultFactory.createAuthPermissionDO();
@@ -34,8 +39,11 @@ public class AppAuthPermissionProvider {
         }).toList();
     }
 
-    public List<AuthPermissionDO> findPermissions(Long applicationId, Set<Long> roleIds, Long menuId) {
-        List<AuthPermissionDO> permissionDOS = appAuthPermissionRepository.findByAppIdAndRoleIdsAndMenuId(applicationId, roleIds, menuId);
+    public List<AppAuthPermissionDO> findPermissions(Long applicationId, Set<Long> roleIds, Long menuId) {
+        if (CollectionUtils.isEmpty(roleIds)) {
+            return Collections.emptyList();
+        }
+        List<AppAuthPermissionDO> permissionDOS = appAuthPermissionRepository.findByAppIdAndRoleIdsAndMenuId(applicationId, roleIds, menuId);
         return permissionDOS.stream().map(permissionDO -> {
             if (permissionDO.getId() == null) {
                 return AuthDefaultFactory.createAuthPermissionDO();

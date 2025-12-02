@@ -24,7 +24,7 @@ import java.io.IOException;
 import java.util.List;
 
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
-import static com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils.getLoginUserId;
+import static com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils.getLoginUserId;
 
 @Tag(name = "管理后台 - API 错误日志")
 @RestController

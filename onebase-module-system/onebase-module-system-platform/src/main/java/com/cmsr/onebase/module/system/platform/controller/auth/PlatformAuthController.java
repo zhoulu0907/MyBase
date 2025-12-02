@@ -3,13 +3,12 @@ package com.cmsr.onebase.module.system.platform.controller.auth;
 
 import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.security.config.SecurityProperties;
-import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import com.cmsr.onebase.module.system.enums.logger.LoginLogTypeEnum;
 import com.cmsr.onebase.module.system.platform.service.auth.PlatformAuthService;
 import com.cmsr.onebase.module.system.vo.auth.AuthLoginReqVO;
 import com.cmsr.onebase.module.system.vo.auth.AuthLoginRespVO;
-import com.cmsr.onebase.module.system.vo.auth.AuthRegisterReqVO;
 import com.cmsr.onebase.module.system.vo.auth.AuthResetPasswordReqVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -69,14 +68,6 @@ public class PlatformAuthController {
     @Parameter(name = "refreshToken", description = "刷新令牌", required = true)
     public CommonResult<AuthLoginRespVO> refreshToken(@RequestParam("refreshToken") String refreshToken) {
         return success(platformAuthService.refreshToken(refreshToken));
-    }
-
-
-    @PostMapping("/register")
-    @PermitAll
-    @Operation(summary = "注册用户")
-    public CommonResult<AuthLoginRespVO> register(@RequestBody @Valid AuthRegisterReqVO registerReqVO) {
-        return success(platformAuthService.register(registerReqVO));
     }
 
     @PostMapping("/reset-password")

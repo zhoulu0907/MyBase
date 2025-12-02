@@ -1,13 +1,10 @@
 package com.cmsr.onebase.framework.web.core.util;
 
+import cn.hutool.core.util.NumberUtil;
 import com.cmsr.onebase.framework.common.enums.RpcConstants;
 import com.cmsr.onebase.framework.common.enums.TerminalEnum;
-import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
-import cn.hutool.core.util.NumberUtil;
-import cn.hutool.core.util.StrUtil;
-import com.cmsr.onebase.framework.common.enums.XFromSceneTypeEnum;
+import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.web.config.WebProperties;
-import jakarta.servlet.ServletRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.context.request.RequestAttributes;
@@ -19,18 +16,14 @@ import org.springframework.web.context.request.ServletRequestAttributes;
  */
 public class WebFrameworkUtils {
 
-    private static final String REQUEST_ATTRIBUTE_LOGIN_USER_ID   = "login_user_id";
-    private static final String REQUEST_ATTRIBUTE_LOGIN_USER_TYPE = "login_user_type";
-
     @Deprecated
     public static final String HEADER_TENANT_ID       = "tenant-id";
     public static final String HEADER_VISIT_TENANT_ID = "X-Visit-Tenant-Id";
 
 
     public static final String HEADER_X_TENANT_ID = "X-Tenant-Id";
-    public static final String HEADER_X_CORP_ID   = "X-Corp-Id";
-    public static final String HEADER_X_APP_ID    = "X-App-Id";
-    public static final String X_From_Scene_Type  = "X-From-Scene-Type";
+    // public static final String HEADER_X_CORP_ID   = "X-Corp-Id";
+    // public static final String HEADER_X_APP_ID    = "X-App-Id";
 
     /**
      * 终端的 Header
@@ -52,7 +45,7 @@ public class WebFrameworkUtils {
      * @param request 请求
      * @return 租户编号
      */
-    public static Long getTenantId(HttpServletRequest request) {
+    public static Long getTenantIdFromHeader(HttpServletRequest request) {
         // 启用 X-Tenant-Id 读取租户ID
         String tenantId = request.getHeader(HEADER_X_TENANT_ID);
         // 读取 HEADER_TENANT_ID（老租户ID字段） 后续删除
@@ -74,73 +67,8 @@ public class WebFrameworkUtils {
         return NumberUtil.isNumber(tenantId) ? Long.valueOf(tenantId) : null;
     }
 
-    public static void setLoginUserId(ServletRequest request, Long userId) {
-        request.setAttribute(REQUEST_ATTRIBUTE_LOGIN_USER_ID, userId);
-    }
-
-    /**
-     * 设置用户类型
-     *
-     * @param request  请求
-     * @param userType 用户类型
-     */
-    public static void setLoginUserType(ServletRequest request, Integer userType) {
-        request.setAttribute(REQUEST_ATTRIBUTE_LOGIN_USER_TYPE, userType);
-    }
-
-    /**
-     * 获得当前用户的编号，从请求中
-     * 注意：该方法仅限于 framework 框架使用！！！
-     *
-     * @param request 请求
-     * @return 用户编号
-     */
-    public static Long getLoginUserId(HttpServletRequest request) {
-        if (request == null) {
-            return null;
-        }
-        return (Long) request.getAttribute(REQUEST_ATTRIBUTE_LOGIN_USER_ID);
-    }
-
-    /**
-     * 获得请求对应的用户类型
-     *
-     * @param request 请求
-     * @return 用户类型
-     */
-    public static Integer getLoginUserType(HttpServletRequest request) {
-        // 获得请求的 URI
-        String uri = request.getRequestURI();
-
-        // 对于runtime metadata相关接口，不进行用户类型检查，允许任何类型用户访问
-        // todo: 确认为什么返回null
-        if (StrUtil.startWith(uri, "/runtime/metadata/")) {
-            return null;
-        }
-
-        // 检查 Admin API
-        if (StrUtil.startWith(uri, properties.getBuildApi().getPrefix())) {
-            return UserTypeEnum.THIRD.getValue();
-        }
-        // 检查 App API
-        if (StrUtil.startWith(uri, properties.getRuntimeApi().getPrefix())) {
-            return UserTypeEnum.CORP.getValue();
-        }
-        // 检查 App API
-        if (StrUtil.startWith(uri, properties.getPlatformApi().getPrefix())) {
-            return UserTypeEnum.PLATFORM.getValue();
-        }
-        return null;
-    }
-
-    public static Integer getLoginUserType() {
-        HttpServletRequest request = getRequest();
-        return getLoginUserType(request);
-    }
-
     public static Long getLoginUserId() {
-        HttpServletRequest request = getRequest();
-        return getLoginUserId(request);
+        return SecurityFrameworkUtils.getLoginUserId();
     }
 
     public static Integer getTerminal() {
@@ -188,24 +116,9 @@ public class WebFrameworkUtils {
      *
      * @return
      */
-    public static Long getCorpId() {
-        HttpServletRequest request = getRequest();
-        String corpID = request.getHeader(HEADER_X_CORP_ID);
-        return NumberUtil.isNumber(corpID) ? Long.valueOf(corpID) : null;
-    }
-
-    public static String getXFromSceneType() {
-        HttpServletRequest request = getRequest();
-        String fromType = request.getHeader(X_From_Scene_Type);
-        // TODO 后期更新前端后，取消默认平台, 不允许空，并校验和用户实际类型（user_type）一致
-        if (StringUtils.isBlank(fromType)) {
-            String uri = request.getRequestURI();
-            // 检查 Admin API
-            if (StrUtil.startWith(uri, properties.getPlatformApi().getPrefix())) {
-                fromType = XFromSceneTypeEnum.PLATFORM.getCode();
-            }
-        }
-        return fromType == null ? XFromSceneTypeEnum.TENANT.getCode() : fromType;
-    }
-
+    // public static Long getCorpIdFromHeader() {
+    //     HttpServletRequest request = getRequest();
+    //     String corpID = request.getHeader(HEADER_X_CORP_ID);
+    //     return NumberUtil.isNumber(corpID) ? Long.valueOf(corpID) : null;
+    // }
 }

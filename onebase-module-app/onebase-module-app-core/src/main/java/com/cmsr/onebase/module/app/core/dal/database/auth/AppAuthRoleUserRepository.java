@@ -1,11 +1,12 @@
 package com.cmsr.onebase.module.app.core.dal.database.auth;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageParam;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthRoleUserDO;
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthRoleUserDO;
+import com.cmsr.onebase.module.app.core.dal.mapper.AppAuthRoleUserMapper;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.spring.service.impl.ServiceImpl;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -17,90 +18,89 @@ import java.util.List;
  * @date 2025-08-05
  */
 @Repository
-public class AppAuthRoleUserRepository extends DataRepository<AuthRoleUserDO> {
-
-    public AppAuthRoleUserRepository() {
-        super(AuthRoleUserDO.class);
-    }
+public class AppAuthRoleUserRepository extends ServiceImpl<AppAuthRoleUserMapper, AppAuthRoleUserDO> {
 
     public void addRoleUser(Long roleId, List<Long> userIds) {
         for (Long userId : userIds) {
-            ConfigStore configStore = new DefaultConfigStore();
-            configStore.eq("role_id", roleId);
-            configStore.eq("user_id", userId);
-            if (this.countByConfig(configStore) == 0) {
-                AuthRoleUserDO authRoleUserDO = new AuthRoleUserDO();
+            QueryWrapper queryWrapper = this.query()
+                    .eq(AppAuthRoleUserDO::getRoleId, roleId)
+                    .eq(AppAuthRoleUserDO::getUserId, userId);
+            boolean exists = this.exists(queryWrapper);
+            if (!exists) {
+                AppAuthRoleUserDO authRoleUserDO = new AppAuthRoleUserDO();
                 authRoleUserDO.setRoleId(roleId);
                 authRoleUserDO.setUserId(userId);
-                this.insert(authRoleUserDO);
+                this.save(authRoleUserDO);
             }
         }
 
     }
 
-    public List<AuthRoleUserDO> findByRoleId(Long roleId) {
-        ConfigStore configStore = new DefaultConfigStore();
-        configStore.eq("role_id", roleId);
-        return findAllByConfig(configStore);
+    public List<AppAuthRoleUserDO> findByRoleId(Long roleId) {
+        QueryWrapper queryWrapper = this.query()
+                .eq(AppAuthRoleUserDO::getRoleId, roleId);
+        return this.list(queryWrapper);
     }
 
     public long countByRoleId(Long roleId) {
-        ConfigStore configStore = new DefaultConfigStore();
-        configStore.eq("role_id", roleId);
-        return countByConfig(configStore);
+        QueryWrapper queryWrapper = this.query()
+                .eq(AppAuthRoleUserDO::getRoleId, roleId);
+        return count(queryWrapper);
     }
 
-    public List<AuthRoleUserDO> findByByRoleIds(List<Long> roleIds) {
-        ConfigStore configStore = new DefaultConfigStore();
-        configStore.in("role_id", roleIds);
-        return findAllByConfig(configStore);
+    public List<AppAuthRoleUserDO> findByByRoleIds(List<Long> roleIds) {
+        QueryWrapper queryWrapper = this.query()
+                .in(AppAuthRoleUserDO::getRoleId, roleIds);
+        return list(queryWrapper);
     }
 
-    public PageResult<AuthRoleUserDO> findByRoleId(Long roleId, PageParam pageParam) {
-        ConfigStore configStore = new DefaultConfigStore();
-        configStore.eq("role_id", roleId);
-        return this.findPageWithConditions(configStore, pageParam.getPageNo(), pageParam.getPageSize());
+    public PageResult<AppAuthRoleUserDO> findByRoleId(Long roleId, PageParam pageParam) {
+        QueryWrapper queryWrapper = this.query()
+                .eq(AppAuthRoleUserDO::getRoleId, roleId);
+        Page<AppAuthRoleUserDO> pageQuery = Page.of(pageParam.getPageNo(), pageParam.getPageSize());
+        Page<AppAuthRoleUserDO> pageResult = this.page(pageQuery, queryWrapper);
+        return new PageResult<>(pageResult.getRecords(), pageResult.getTotalRow());
     }
 
 
     public void deleteRoleUser(Long roleId, List<Long> userIds) {
-        ConfigStore configStore = new DefaultConfigStore();
-        configStore.eq("role_id", roleId);
-        configStore.in("user_id", userIds);
-        this.deleteByConfig(configStore);
+        this.updateChain()
+                .eq(AppAuthRoleUserDO::getRoleId, roleId)
+                .in(AppAuthRoleUserDO::getUserId, userIds)
+                .remove();
     }
 
     public void deleteRoleUser(Long roleId, Long userId) {
-        ConfigStore configStore = new DefaultConfigStore();
-        configStore.eq("role_id", roleId);
-        configStore.eq("user_id", userId);
-        this.deleteByConfig(configStore);
+        this.updateChain()
+                .eq(AppAuthRoleUserDO::getRoleId, roleId)
+                .eq(AppAuthRoleUserDO::getUserId, userId)
+                .remove();
     }
 
     public void deleteByRoleId(Long roleId) {
-        ConfigStore configStore = new DefaultConfigStore();
-        configStore.eq("role_id", roleId);
-        this.deleteByConfig(configStore);
+        this.updateChain()
+                .eq(AppAuthRoleUserDO::getRoleId, roleId)
+                .remove();
     }
 
 
     public void deleteByUserId(Long userId) {
-        ConfigStore configStore = new DefaultConfigStore();
-        configStore.eq("user_id", userId);
-        this.deleteByConfig(configStore);
+        this.updateChain()
+                .eq(AppAuthRoleUserDO::getUserId, userId)
+                .remove();
     }
 
-    public List<AuthRoleUserDO> findByUserId(Long userId) {
-        ConfigStore configStore = new DefaultConfigStore();
-        configStore.eq("user_id", userId);
-        return findAllByConfig(configStore);
+    public List<AppAuthRoleUserDO> findByUserId(Long userId) {
+        QueryWrapper queryWrapper = this.query()
+                .eq(AppAuthRoleUserDO::getUserId, userId);
+        return list(queryWrapper);
     }
 
-    public List<AuthRoleUserDO>  findAdminByRoleIdAndUserId(Long roleId,Long userId){
-        ConfigStore configStore = new DefaultConfigStore();
-        configStore.eq(AuthRoleUserDO.USER_ID, userId);
-        configStore.eq(AuthRoleUserDO.ROLE_ID, roleId);
-        return findAllByConfig(configStore);
+    public List<AppAuthRoleUserDO> findAdminByRoleIdAndUserId(Long roleId, Long userId) {
+        QueryWrapper queryWrapper = this.query()
+                .eq(AppAuthRoleUserDO::getUserId, userId)
+                .eq(AppAuthRoleUserDO::getRoleId, roleId);
+        return list(queryWrapper);
     }
 
 

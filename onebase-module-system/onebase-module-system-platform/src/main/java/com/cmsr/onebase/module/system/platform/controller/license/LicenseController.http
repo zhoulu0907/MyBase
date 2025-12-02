@@ -14,7 +14,7 @@ tenant-id: {{adminTenantId}}
 GET {{baseUrl}}/system/license/page?pageNum=1&pageSize=10
 Content-Type: application/json
 Authorization: Bearer {{token}}
-tenant-id: {{adminTenantId}}
+#tenant-id: {{adminTenantId}}
 
 ### 导出凭证
 GET {{baseUrl}}/system/license/export?id=49906575113453568

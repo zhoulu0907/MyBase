@@ -1,0 +1,68 @@
+package com.cmsr.onebase.module.app.core.dal.dataobject;
+
+import com.cmsr.onebase.framework.orm.entity.BaseBizEntity;
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Table;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+@Table(value = "app_resource_component")
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class AppResourceComponentDO extends BaseBizEntity {
+
+    @Column(value = "component_uuid", comment = "组件UUID")
+    private String componentUuid;
+
+    /**
+     * 页面编码
+     */
+    @Column(value = "page_uuid", comment = "页面UUID")
+    private String pageUuid;
+
+    /**
+     * 组件编码
+     */
+    @Column(value = "component_code", comment = "组件编码")
+    private String componentCode;
+
+    /**
+     * 组件索引
+     */
+    @Column(value = "component_index", comment = "组件索引")
+    private Integer componentIndex;
+
+    /**
+     * 组件类型
+     */
+    @Column(value = "component_type", comment = "组件类型")
+    private String componentType;
+
+    /**
+     * 配置
+     */
+    @Column(value = "config", comment = "配置")
+    private String config;
+
+    /**
+     * 编辑数据
+     */
+    @Column(value = "edit_data", comment = "编辑数据")
+    private String editData;
+
+    @Column(value = "parent_code", comment = "父组件编码")
+    private String parentCode;
+
+    /**
+     * 块索引
+     */
+    @Column(value = "block_index", comment = "块索引")
+    private Integer blockIndex;
+
+    /**
+     * 容器索引
+     */
+    @Column(value = "container_index", comment = "容器索引")
+    private Integer containerIndex;
+
+}

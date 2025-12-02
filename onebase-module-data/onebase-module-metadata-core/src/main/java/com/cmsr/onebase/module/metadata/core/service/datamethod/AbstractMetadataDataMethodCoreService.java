@@ -7,9 +7,13 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataD
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodRequestContext;
+import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodSubEntityContext;
 import com.cmsr.onebase.module.metadata.core.domain.query.MetadataPermissionContext;
 import com.cmsr.onebase.module.metadata.core.domain.query.ProcessContext;
 import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
+import com.cmsr.onebase.module.metadata.core.service.datamethod.strategy.FieldValueStorageStrategy;
+import com.cmsr.onebase.module.metadata.core.service.datamethod.strategy.FieldValueStorageStrategyFactory;
+import com.cmsr.onebase.module.metadata.core.service.datamethod.strategy.FieldValueTransformMode;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.validator.ValidationManager;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataEntityFieldCoreService;
@@ -32,6 +36,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -70,6 +75,8 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
     protected com.cmsr.onebase.module.metadata.core.service.permission.PermissionManager permissionManager;
     @Resource
     protected com.cmsr.onebase.module.metadata.core.service.permission.PermissionQueryHelper permissionQueryHelper;
+    @Resource
+    protected FieldValueStorageStrategyFactory fieldValueStorageStrategyFactory;
 
     // ========== 公共方法 ==========
 
@@ -95,9 +102,6 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
      * 获取实体字段
      */
     protected List<MetadataEntityFieldDO> getEntityFields(Long entityId) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and(MetadataEntityFieldDO.ENTITY_ID, entityId);
-        configStore.and("deleted", 0);
         List<MetadataEntityFieldDO> fields = metadataEntityFieldService.getEntityFieldListByEntityId(entityId);
         if (fields == null || fields.isEmpty()) {
             throw exception(ENTITY_FIELD_NOT_EXISTS);
@@ -402,8 +406,11 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
 
             // 6. 功能权限校验
             if (requestContext.isEnableAuthCheck()) {
-                validatePermission(context);//todo 暂未实现
+                validatePermission(context);
             }
+
+            // 9. 数据编号
+            generateDataNumber(context);
 
             // 7. 初步数据校验------数据校验规则 ----核心功能!!!
             validateData(context);
@@ -411,8 +418,7 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
             // 10. 前置自动化工作流触发
             executePreWorkflow(context);
 
-            // 9. 数据编号
-            generateDataNumber(context);
+
 
             // 10. 数据存储
             storeData(context);
@@ -568,7 +574,8 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
         }
 
         // 使用校验管理器执行所有字段的校验
-        validationManager.validateEntity(entityId, fields, dataForValidation, operationType);
+        List<MetadataDataMethodSubEntityContext> subEntities = context.getSubEntities();
+        validationManager.validateEntity(entityId, fields, dataForValidation, subEntities, operationType);
 
         log.info("数据校验完成：entityId={}", entityId);
     }
@@ -622,8 +629,29 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
     }
 
     protected Map<String, Object> getData(ProcessContext context) {
+        MetadataBusinessEntityDO entity = context.getEntity();
+        List<MetadataEntityFieldDO> fields = context.getFields();
+        AnylineService<?> temporaryService = context.getTemporaryService();
+        Object id = context.getId();
+        if (entity == null || CollectionUtils.isEmpty(fields) || temporaryService == null || id == null) {
+            return null;
+        }
 
-        return null;
+        return TenantUtils.executeIgnore(() -> {
+            Map<String, Object> resultData = queryDataByIdWithService(
+                    temporaryService,
+                    quoteTableName(entity.getTableName()),
+                    id,
+                    fields
+            );
+            if (resultData == null) {
+                return null;
+            }
+            applyFieldStorageStrategies(resultData, fields, FieldValueTransformMode.READ, context);
+            Map<String, Object> filtered = filterQueryResultFields(resultData, context);
+            context.setProcessedData(filtered);
+            return filtered;
+        });
     }
 
     /**
@@ -642,11 +670,13 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
             // 确保主键值不为null
             if (primaryKeyValue == null) {
                 log.warn("无法获取主键值，跳过查询插入后的数据，实体ID: {}, 表名: {}", entityId, entity.getTableName());
+                applyFieldStorageStrategies(processedData, fields, FieldValueTransformMode.READ, context);
                 // 返回插入的数据
                 return buildDataResponse(entity, processedData, fields);
             }
 
             Map<String, Object> resultData = queryDataByIdWithService(temporaryService, quoteTableName(entity.getTableName()), primaryKeyValue, fields);
+            applyFieldStorageStrategies(resultData, fields, FieldValueTransformMode.READ, context);
             // 9. 构建响应（移除多表写入逻辑，直接返回结果）
             return buildDataResponse(entity, resultData, fields);
 
@@ -694,6 +724,56 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
             };
         }
         return newData;
+    }
+
+    /**
+     * 根据字段类型应用存储策略，确保字段值形态一致
+     *
+     * @param data   待处理的数据
+     * @param fields 字段定义
+     */
+    protected void applyFieldStorageStrategies(Map<String, Object> data, List<MetadataEntityFieldDO> fields) {
+        applyFieldStorageStrategies(data, fields, FieldValueTransformMode.STORE);
+    }
+
+    protected void applyFieldStorageStrategies(Map<String, Object> data, List<MetadataEntityFieldDO> fields,
+                                               FieldValueTransformMode mode) {
+        applyFieldStorageStrategies(data, fields, mode, null);
+    }
+
+    /**
+     * 根据字段类型应用存储策略，确保字段值形态一致（带完整上下文）
+     *
+     * @param data    待处理的数据
+     * @param fields  字段定义
+     * @param mode    转换模式
+     * @param context 处理上下文（可选，某些策略需要访问上下文）
+     */
+    protected void applyFieldStorageStrategies(Map<String, Object> data, List<MetadataEntityFieldDO> fields,
+                                               FieldValueTransformMode mode, ProcessContext context) {
+        if (data == null || data.isEmpty() || CollectionUtils.isEmpty(fields) || fieldValueStorageStrategyFactory == null) {
+            return;
+        }
+        Map<String, MetadataEntityFieldDO> fieldMap = fields.stream()
+                .filter(field -> field.getFieldName() != null && !field.getFieldName().isEmpty())
+                .collect(Collectors.toMap(MetadataEntityFieldDO::getFieldName,
+                        Function.identity(), (origin, duplicate) -> origin));
+        for (Map.Entry<String, Object> entry : data.entrySet()) {
+            MetadataEntityFieldDO metadataField = fieldMap.get(entry.getKey());
+            if (metadataField == null) {
+                continue;
+            }
+            FieldValueStorageStrategy strategy = fieldValueStorageStrategyFactory.getStrategy(metadataField.getFieldType());
+            Object transformedValue;
+            if (context != null) {
+                // 使用带上下文的方法，允许策略访问 ProcessContext
+                transformedValue = strategy.transform(entry.getValue(), mode, context, metadataField);
+            } else {
+                // 使用无上下文的方法，保持向后兼容
+                transformedValue = strategy.transform(entry.getValue(), mode);
+            }
+            entry.setValue(transformedValue);
+        }
     }
 
     // ========== 权限查询辅助方法 ==========

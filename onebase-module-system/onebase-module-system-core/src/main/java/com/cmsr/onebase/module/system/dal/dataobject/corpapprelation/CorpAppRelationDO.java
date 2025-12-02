@@ -22,7 +22,7 @@ public class CorpAppRelationDO extends TenantBaseDO {
     public static final String CORP_ID                  = "corp_id";
     public static final String TENANT_ID                = "tenant_id";
     public static final String STATUS                   = "status";
-    public static final String EXPIRES_TIME             = "expiresTime";
+    public static final String EXPIRES_TIME             = "expires_time";
 
     /**
      * 应用id

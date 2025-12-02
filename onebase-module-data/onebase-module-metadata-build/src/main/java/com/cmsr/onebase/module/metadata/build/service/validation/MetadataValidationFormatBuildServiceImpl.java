@@ -47,7 +47,7 @@ public class MetadataValidationFormatBuildServiceImpl implements MetadataValidat
         respVO.setFormatType(formatDO.getFormatCode());        // formatCode -> formatType
         respVO.setFormatValue(formatDO.getRegexPattern());     // regexPattern -> formatValue
         respVO.setIgnoreCase(formatDO.getFlags() != null && formatDO.getFlags().contains("i") ? 1 : 0); // flags -> ignoreCase
-        respVO.setAppId(formatDO.getAppId() != null ? String.valueOf(formatDO.getAppId()) : null); // Long -> String
+        respVO.setApplicationId(formatDO.getApplicationId() != null ? String.valueOf(formatDO.getApplicationId()) : null); // Long -> String
 
         // 获取规则组信息，包括提示语等字段
         var ruleGroup = ruleGroupService.getValidationRuleGroup(formatDO.getGroupId());
@@ -71,7 +71,7 @@ public class MetadataValidationFormatBuildServiceImpl implements MetadataValidat
         respVO.setFormatType(formatDO.getFormatCode());        // formatCode -> formatType
         respVO.setFormatValue(formatDO.getRegexPattern());     // regexPattern -> formatValue
         respVO.setIgnoreCase(formatDO.getFlags() != null && formatDO.getFlags().contains("i") ? 1 : 0); // flags -> ignoreCase
-        respVO.setAppId(formatDO.getAppId() != null ? String.valueOf(formatDO.getAppId()) : null); // Long -> String
+        respVO.setApplicationId(formatDO.getApplicationId() != null ? String.valueOf(formatDO.getApplicationId()) : null); // Long -> String
         
         // 获取规则组信息，包括提示语等字段
         var ruleGroup = ruleGroupService.getValidationRuleGroup(formatDO.getGroupId());
@@ -93,10 +93,10 @@ public class MetadataValidationFormatBuildServiceImpl implements MetadataValidat
                 throw new IllegalStateException("数据异常：同一组存在多条格式校验规则(组ID=" + id + ")");
             }
             MetadataValidationFormatDO existing = list.get(0);
-            formatRepository.deleteById(existing.getId());
+            formatRepository.removeById(existing.getId());
         }
         
-        // 无论子表是否存在，都要删除主表作为兜底（防止脏数据）
+        // 无论子表是否存在，都要删除主表作为兖底（防止脏数据）
         ruleGroupService.safeDeleteGroupDirect(id);
     }
 
@@ -151,7 +151,7 @@ public class MetadataValidationFormatBuildServiceImpl implements MetadataValidat
         // 转换VO为DO并设置必要字段
         MetadataValidationFormatDO data = BeanUtils.toBean(vo, MetadataValidationFormatDO.class);
         data.setEntityId(field.getEntityId());
-        data.setAppId(field.getAppId());
+        data.setApplicationId(field.getApplicationId());
         data.setGroupId(groupId);
         
         // 设置默认值
@@ -200,7 +200,7 @@ public class MetadataValidationFormatBuildServiceImpl implements MetadataValidat
         }
 
         // 保存格式校验规则
-        formatRepository.upsert(data);
+        formatRepository.saveOrUpdate(data);
         return data.getId();
     }
 
@@ -236,10 +236,10 @@ public class MetadataValidationFormatBuildServiceImpl implements MetadataValidat
         updateObj.setId(existing.getId());
         updateObj.setFieldId(existing.getFieldId());
         updateObj.setEntityId(existing.getEntityId());
-        updateObj.setAppId(existing.getAppId());
+        updateObj.setApplicationId(existing.getApplicationId());
         updateObj.setGroupId(targetGroupId);
         
-        formatRepository.update(updateObj);
+        formatRepository.updateById(updateObj);
     }
 
     @Override

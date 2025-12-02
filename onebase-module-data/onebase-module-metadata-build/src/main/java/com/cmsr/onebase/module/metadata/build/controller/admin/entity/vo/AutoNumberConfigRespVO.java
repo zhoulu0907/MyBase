@@ -44,11 +44,11 @@ public class AutoNumberConfigRespVO {
     @Schema(description = "是否启用(1-启用, 0-禁用)", example = "1")
     private Integer isEnabled;
 
-    @Schema(description = "运行模式", example = "1")
-    private Integer runMode;
+    @Schema(description = "版本标识", example = "1")
+    private Long versionTag;
 
     @Schema(description = "应用ID", example = "1")
-    private Long appId;
+    private Long applicationId;
 
     @Schema(description = "创建时间")
     private LocalDateTime createTime;

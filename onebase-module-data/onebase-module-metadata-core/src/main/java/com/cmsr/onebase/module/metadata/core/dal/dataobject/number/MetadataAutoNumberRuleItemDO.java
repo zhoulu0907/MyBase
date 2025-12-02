@@ -1,52 +1,70 @@
 package com.cmsr.onebase.module.metadata.core.dal.dataobject.number;
 
-import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
-import jakarta.persistence.Column;
-import jakarta.persistence.Table;
-import lombok.*;
-import lombok.experimental.SuperBuilder;
+import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Table;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
 /**
  * 自动编号-规则项 DO
  * 对应表：metadata_auto_number_rule_item
+ *
+ * @author bty418
+ * @date 2025-08-18
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-@ToString(callSuper = true)
-@SuperBuilder
-@NoArgsConstructor
-@AllArgsConstructor
-@Table(name = "metadata_auto_number_rule_item")
-public class MetadataAutoNumberRuleItemDO extends TenantBaseDO {
+@Table(value = "metadata_auto_number_rule_item")
+public class MetadataAutoNumberRuleItemDO extends BaseTenantEntity {
 
-    public static final String CONFIG_ID = "config_id";
-    public static final String ITEM_TYPE = "item_type";
-    public static final String ITEM_ORDER = "item_order";
-    public static final String FORMAT = "format";
-    public static final String TEXT_VALUE = "text_value";
-    public static final String REF_FIELD_ID = "ref_field_id";
-    public static final String IS_ENABLED = "is_enabled";
-    public static final String APP_ID = "app_id";
-
-    @Column(name = CONFIG_ID)
+    /**
+     * 配置ID
+     */
+    @Column(value = "config_id", comment = "配置ID")
     private Long configId;
-    @Column(name = ITEM_TYPE)
+
+    /**
+     * 项类型
+     */
+    @Column(value = "item_type", comment = "项类型")
     private String itemType;
-    @Column(name = ITEM_ORDER)
+
+    /**
+     * 项顺序
+     */
+    @Column(value = "item_order", comment = "项顺序")
     private Integer itemOrder;
-    @Column(name = FORMAT)
+
+    /**
+     * 格式
+     */
+    @Column(value = "format", comment = "格式")
     private String format;
-    @Column(name = TEXT_VALUE)
+
+    /**
+     * 文本值
+     */
+    @Column(value = "text_value", comment = "文本值")
     private String textValue;
-    @Column(name = REF_FIELD_ID)
+
+    /**
+     * 引用字段ID
+     */
+    @Column(value = "ref_field_id", comment = "引用字段ID")
     private Long refFieldId;
+
     /**
      * 是否启用：1-启用，0-禁用
-     * @see CommonStatusEnum
      */
-    @Column(name = IS_ENABLED)
+    @Column(value = "is_enabled", comment = "是否启用：1-启用，0-禁用")
     private Integer isEnabled;
-    @Column(name = APP_ID)
-    private Long appId;
+
+    /**
+     * 应用ID
+     */
+    @Column(value = "application_id", comment = "应用ID")
+    private Long applicationId;
 }
 
 

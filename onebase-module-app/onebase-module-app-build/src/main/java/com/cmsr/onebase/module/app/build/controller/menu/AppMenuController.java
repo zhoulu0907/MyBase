@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.app.build.controller.menu;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.module.app.build.service.menu.AppMenuService;
 import com.cmsr.onebase.module.app.build.vo.menu.*;
+import com.cmsr.onebase.module.app.core.vo.menu.MenuListRespVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
@@ -25,6 +26,13 @@ public class AppMenuController {
 
     @Resource
     private AppMenuService appMenuService;
+
+    @GetMapping("/bpm-list")
+    @Operation(summary = "BPM应用菜单列表")
+    public CommonResult<List<MenuListRespVO>> listBpmApplicationMenu(
+            @RequestParam("applicationId") Long applicationId) {
+        return success(appMenuService.listBpmApplicationMenu(applicationId));
+    }
 
     @GetMapping("/list")
     @Operation(summary = "应用菜单列表")

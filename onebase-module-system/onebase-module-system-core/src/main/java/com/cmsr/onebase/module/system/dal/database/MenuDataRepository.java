@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.system.dal.database;
 
 import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.module.system.vo.menu.SystemMenuListReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO;
 import org.anyline.data.param.init.DefaultConfigStore;
@@ -9,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * 菜单数据访问层
@@ -86,6 +88,19 @@ public class MenuDataRepository extends DataRepository<MenuDO> {
             configStore.eq(MenuDO.STATUS, reqVO.getStatus());
         }
 
+        return findAllByConfig(configStore);
+    }
+
+    /**
+     * 根据code查询菜单列表
+     *
+     * @param codes 查询条件
+     * @return 菜单列表
+     */
+    public List<MenuDO> findAllEnableByCodes(Set<String> codes) {
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.in(MenuDO.PERMISSION, codes);
+        configStore.eq(MenuDO.STATUS, CommonStatusEnum.ENABLE.getStatus());
         return findAllByConfig(configStore);
     }
 }

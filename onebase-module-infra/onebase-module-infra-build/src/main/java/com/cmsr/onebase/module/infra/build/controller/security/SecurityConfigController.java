@@ -1,8 +1,8 @@
 package com.cmsr.onebase.module.infra.build.controller.security;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
-import com.cmsr.onebase.module.infra.api.security.SecurityConfigApi;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
+import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
 import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigBatchUpdateReqVO;
 import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigCategoryRespVO;
 import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigItemRespVO;
@@ -40,7 +40,7 @@ public class SecurityConfigController {
 
     @GetMapping("/categories")
     @Operation(summary = "获取所有安全配置分类")
-    @PreAuthorize("@ss.hasPermission('infra:security-config:query')")
+    @PreAuthorize("@ss.hasPermission('tenant:security:query')")
     public CommonResult<List<SecurityConfigCategoryRespVO>> getAllCategories() {
         List<SecurityConfigCategoryRespVO> categories = securityConfigService.getAllCategories();
         return success(categories);
@@ -49,7 +49,7 @@ public class SecurityConfigController {
     @GetMapping("/items")
     @Operation(summary = "根据分类ID获取获取当前租户的安全配置项")
     @Parameter(name = "categoryId", description = "分类ID", required = true, example = "1")
-    @PreAuthorize("@ss.hasPermission('infra:security-config:query')")
+    @PreAuthorize("@ss.hasPermission('tenant:security:query')")
     public CommonResult<List<SecurityConfigItemRespVO>> getTenantConfigItems(@RequestParam("categoryId") Long categoryId) {
         Long tenantId = TenantContextHolder.getTenantId();
         List<SecurityConfigItemRespVO> items = securityConfigService.getTenantConfigItems(tenantId, categoryId);
@@ -58,7 +58,7 @@ public class SecurityConfigController {
 
     @GetMapping("/tenant-items")
     @Operation(summary = "获取当前租户的所有安全配置项")
-    @PreAuthorize("@ss.hasPermission('infra:security-config:query')")
+    @PreAuthorize("@ss.hasPermission('tenant:security:query')")
     public CommonResult<List<SecurityConfigItemRespVO>> getSecurityConfigsByTenant() {
         Long tenantId = TenantContextHolder.getTenantId();
         List<SecurityConfigItemRespVO> items = securityConfigService.getSecurityConfigsByTenant(tenantId);
@@ -67,7 +67,7 @@ public class SecurityConfigController {
 
     @PostMapping("/batch-update")
     @Operation(summary = "批量更新租户安全配置")
-    @PreAuthorize("@ss.hasPermission('infra:security-config:update')")
+    @PreAuthorize("@ss.hasPermission('tenant:security:update')")
     public CommonResult<Boolean> batchUpdateConfig(@Valid @RequestBody SecurityConfigBatchUpdateReqVO batchUpdateReqVO) {
         Long tenantId = TenantContextHolder.getTenantId();
         securityConfigService.batchUpdateConfig(tenantId, batchUpdateReqVO.getConfigs());
@@ -76,7 +76,7 @@ public class SecurityConfigController {
 
     @PostMapping("/weak-password/check")
     @Operation(summary = "弱密码校验")
-    @PreAuthorize("@ss.hasPermission('infra:security-config:query')")
+    @PreAuthorize("@ss.hasPermission('tenant:security:query')")
     public CommonResult<Boolean> checkWeakPassword(@RequestParam("password") String password) {
         securityConfigApi.validatePassword(password);
         return success(true);

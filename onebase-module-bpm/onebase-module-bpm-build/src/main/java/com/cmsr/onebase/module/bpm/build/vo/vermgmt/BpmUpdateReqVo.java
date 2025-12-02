@@ -28,6 +28,6 @@ public class BpmUpdateReqVo implements Serializable {
      */
     @Schema(description = "流程版本备注", required = true, example = "流程版本备注V1")
     @NotNull(message = "流程版本备注不能为空")
-    private String versionAlias;
+    private String bpmVersionAlias;
 
 }

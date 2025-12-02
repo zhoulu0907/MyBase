@@ -1,22 +1,15 @@
 package com.cmsr.onebase.module.flow.core.dal.dataobject;
 
-import com.cmsr.onebase.framework.data.base.BaseDO;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Table;
 import lombok.Data;
 
 @Data
-@Entity
-@Table(name = "flow_process_entity")
-public class FlowProcessEntityDO extends BaseDO {
+@Table(value = "flow_process_entity")
+public class FlowProcessEntityDO extends BaseTenantEntity {
 
-
-    @Column(name = "process_id", length = 19, nullable = false)
+    @Column(value = "process_id")
     private Long processId;
-
-    @Column(name = "entity_id", length = 19, nullable = false)
-    private Long entityId;
-
 
 }

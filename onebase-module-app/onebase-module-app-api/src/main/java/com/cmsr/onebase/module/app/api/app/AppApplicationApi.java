@@ -1,5 +1,8 @@
 package com.cmsr.onebase.module.app.api.app;
 
+import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
+import com.cmsr.onebase.module.app.api.app.dto.TagVO;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -12,11 +15,13 @@ public interface AppApplicationApi {
 
     Long countApplicationByTenantId(Long tenantId);
 
-    List findAppApplicationByAppName(String appName);
+    List<ApplicationDTO> findAppApplicationByAppName(String appName);
 
-    List findAppApplicationByAppIds(Collection<Long> appIds);
+    List<ApplicationDTO> findAppApplicationByAppIds(Collection<Long> appIds);
 
-    Map<Integer,Integer> findAppApplicationAll();
+    Map<Long, Integer> countAppByTenantId();
 
-    void  updateAppTimeById(Long appId);
+    void updateAppTimeById(Long appId);
+
+    Map<Long, List<TagVO>> queryAppTags(List<Long> appIds);
 }

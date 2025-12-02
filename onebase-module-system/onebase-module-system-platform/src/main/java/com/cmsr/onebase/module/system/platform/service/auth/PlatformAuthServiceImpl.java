@@ -1,16 +1,15 @@
 package com.cmsr.onebase.module.system.platform.service.auth;
 
-import cn.hutool.core.util.ObjUtil;
 import com.anji.captcha.model.common.ResponseModel;
 import com.anji.captcha.model.vo.CaptchaVO;
 import com.anji.captcha.service.CaptchaService;
+import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
+import com.cmsr.onebase.framework.common.biz.security.dto.LoginFailureResultDTO;
+import com.cmsr.onebase.framework.common.biz.security.dto.PasswordExpiryCheckDTO;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
-import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
+import com.cmsr.onebase.framework.common.enums.RunModeEnum;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
-import com.cmsr.onebase.module.infra.api.security.SecurityConfigApi;
-import com.cmsr.onebase.module.infra.api.security.dto.LoginFailureResultDTO;
-import com.cmsr.onebase.module.infra.api.security.dto.PasswordExpiryCheckDTO;
 import com.cmsr.onebase.module.system.api.logger.dto.LoginLogCreateReqDTO;
 import com.cmsr.onebase.module.system.api.sms.SmsCodeApi;
 import com.cmsr.onebase.module.system.convert.auth.AuthConvert;
@@ -20,7 +19,6 @@ import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.logger.LoginLogTypeEnum;
 import com.cmsr.onebase.module.system.enums.logger.LoginResultEnum;
 import com.cmsr.onebase.module.system.enums.oauth2.OAuth2ClientConstants;
-import com.cmsr.onebase.module.system.enums.sms.SmsSceneEnum;
 import com.cmsr.onebase.module.system.enums.tenant.TenantCodeEnum;
 import com.cmsr.onebase.module.system.service.logger.LoginLogService;
 import com.cmsr.onebase.module.system.service.member.MemberService;
@@ -29,11 +27,15 @@ import com.cmsr.onebase.module.system.service.permission.PermissionService;
 import com.cmsr.onebase.module.system.service.tenant.TenantService;
 import com.cmsr.onebase.module.system.service.user.UserService;
 import com.cmsr.onebase.module.system.vo.CaptchaVerificationReqVO;
+import com.cmsr.onebase.module.system.vo.auth.AuthLoginReqVO;
+import com.cmsr.onebase.module.system.vo.auth.AuthLoginRespVO;
+import com.cmsr.onebase.module.system.vo.auth.AuthResetPasswordReqVO;
+import com.cmsr.onebase.module.system.vo.auth.UserLoginReqVO;
 import com.cmsr.onebase.module.system.vo.auth.*;
 import com.google.common.annotations.VisibleForTesting;
+import com.mzt.logapi.context.LogRecordContext;
+import com.mzt.logapi.starter.annotation.LogRecord;
 import jakarta.annotation.Resource;
-
-import java.util.List;
 import jakarta.validation.Validator;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -42,11 +44,12 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Objects;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static com.cmsr.onebase.framework.common.util.servlet.ServletUtils.getClientIP;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
+import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
 
 /**
  * Auth Service 实现类
@@ -57,34 +60,34 @@ import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 public class PlatformAuthServiceImpl implements PlatformAuthService {
 
     @Resource
-    private UserService     userService;
+    private UserService        userService;
     @Resource
-    private LoginLogService loginLogService;
+    private LoginLogService    loginLogService;
     @Resource
     private OAuth2TokenService oauth2TokenService;
     @Resource
-    private MemberService memberService;
+    private MemberService      memberService;
     @Resource
-    private Validator validator;
+    private Validator          validator;
     @Resource
-    private CaptchaService captchaService;
+    private CaptchaService     captchaService;
     @Resource
-    private SmsCodeApi smsCodeApi;
+    private SmsCodeApi         smsCodeApi;
     /**
      * 验证码的开关，默认为 true
      */
     @Value("${onebase.captcha.enable:true}")
     @Setter // 为了单测：开启或者关闭验证码
-    private Boolean captchaEnable;
+    private Boolean            captchaEnable;
     /**
      * 平台租户验证开关，默认为 false
      */
     @Value("${onebase.platform-tenant.enable-create-app:false}")
     @Setter // 为了单测：开启或者关闭验证码
-    private Boolean       platformTenantEnableCreateApp;
+    private Boolean            platformTenantEnableCreateApp;
 
     @Resource
-    private TenantService tenantService;
+    private TenantService     tenantService;
     @Resource
     private PermissionService permissionService;
     @Resource
@@ -99,20 +102,12 @@ public class PlatformAuthServiceImpl implements PlatformAuthService {
         return user;
     }
 
-    public AdminUserDO mobileAuthenticate(String mobile, String password) {
-        final LoginLogTypeEnum logTypeEnum = LoginLogTypeEnum.LOGIN_USERNAME;
-        // 校验账号是否存在
-        AdminUserDO user = userService.getUserByMobile(mobile);
-        checkUserPsdAndStatus(mobile, password, user, logTypeEnum);
-        return user;
-    }
-
     private void checkUserPsdAndStatus(String account, String password, AdminUserDO user, LoginLogTypeEnum logTypeEnum) {
         if (user == null) {
             createLoginLog(null, account, logTypeEnum, LoginResultEnum.BAD_CREDENTIALS);
             throw exception(AUTH_LOGIN_BAD_CREDENTIALS);
         }
-        
+
         Long userId = user.getId();
 
         // 检查账号是否被防暴力破解锁定
@@ -140,24 +135,8 @@ public class PlatformAuthServiceImpl implements PlatformAuthService {
 
 
     @Override
-    public AuthLoginRespVO adminLogin(UserLoginReqVO reqVO) {
-        // 1. 校验验证码
-        validateCaptcha(reqVO);
-
-        // 2. 使用账号密码，进行登录
-        AdminUserDO user = authenticate(reqVO.getUsername(), reqVO.getPassword());
-
-        // 3. 校验是否是平台管理员
-        boolean isAdmin = permissionService.isPlatformSuperAdmin(user.getId());
-        if (!isAdmin) {
-            throw exception(AUTH_LOGIN_USER_NOT_ADMIN_ERROR);
-        }
-
-        // 4. 创建 Token 令牌，记录登录日志
-        return createTokenAfterLoginSuccess(user.getId(), reqVO.getUsername(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_USERNAME);
-    }
-
-    @Override
+    @LogRecord(type = LOGIN_USER_TYPE, subType = LOGIN_USER_PLATFORM_SUB_TYPE, bizNo = "{{#user.id}}",
+            success = LOGIN_USER_PLATFORM_SUCCESS)
     public AuthLoginRespVO login(AuthLoginReqVO reqVO) {
         // 校验验证码
         validateCaptcha(reqVO);
@@ -181,50 +160,8 @@ public class PlatformAuthServiceImpl implements PlatformAuthService {
 
         // 使用账号密码，进行登录
         AdminUserDO user = authenticate(reqVO.getUsername(), reqVO.getPassword());
-        return createTokenAfterLoginSuccess(user.getId(), reqVO.getUsername(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_USERNAME);
-    }
-
-    @Override
-    public AuthLoginRespVO corpLogin(CorpAuthLoginReqVO reqVO) {
-        // 校验验证码
-        mobileValidateCaptcha(reqVO);
-
-        // 2. 使用账号密码，进行登录
-        AdminUserDO user = mobileAuthenticate(reqVO.getMobile(), reqVO.getPassword());
-        return createCorpAfterLoginSuccess(user.getCorpId(), user.getId(), reqVO.getMobile(), reqVO.getDeviceId(),LoginLogTypeEnum.LOGIN_MOBILE);
-    }
-
-    @Override
-    public void sendSmsCode(AuthSmsSendReqVO reqVO) {
-        // 如果是重置密码场景，需要校验图形验证码是否正确
-        if (Objects.equals(SmsSceneEnum.ADMIN_MEMBER_RESET_PASSWORD.getScene(), reqVO.getScene())) {
-            ResponseModel response = doValidateCaptcha(reqVO);
-            if (!response.isSuccess()) {
-                throw exception(AUTH_REGISTER_CAPTCHA_CODE_ERROR, response.getRepMsg());
-            }
-        }
-
-        // 登录场景，验证是否存在
-        if (userService.getUserByMobile(reqVO.getMobile()) == null) {
-            throw exception(AUTH_MOBILE_NOT_EXISTS);
-        }
-        // 发送验证码
-        smsCodeApi.sendSmsCode(AuthConvert.INSTANCE.convert(reqVO).setCreateIp(getClientIP()));
-    }
-
-    @Override
-    public AuthLoginRespVO smsLogin(AuthSmsLoginReqVO reqVO) {
-        // 校验验证码
-        smsCodeApi.useSmsCode(AuthConvert.INSTANCE.convert(reqVO, SmsSceneEnum.ADMIN_MEMBER_LOGIN.getScene(), getClientIP())).checkError();
-
-        // 获得用户信息
-        AdminUserDO user = userService.getUserByMobile(reqVO.getMobile());
-        if (user == null) {
-            throw exception(USER_NOT_EXISTS);
-        }
-
-        // 创建 Token 令牌，记录登录日志
-        return createTokenAfterLoginSuccess(user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE);
+        LogRecordContext.putVariable("user", user);
+        return createTokenAfterLoginSuccess(user.getId(), user.getUserType(), reqVO.getUsername(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_USERNAME);
     }
 
     private void createLoginLog(Long userId, String username,
@@ -234,7 +171,6 @@ public class PlatformAuthServiceImpl implements PlatformAuthService {
         reqDTO.setLogType(logTypeEnum.getType());
         reqDTO.setTraceId("n/a");
         reqDTO.setUserId(userId);
-        reqDTO.setUserType(getUserType().getValue());
         reqDTO.setUsername(username);
         reqDTO.setUserAgent(ServletUtils.getUserAgent());
         reqDTO.setUserIp(ServletUtils.getClientIP());
@@ -256,16 +192,6 @@ public class PlatformAuthServiceImpl implements PlatformAuthService {
         }
     }
 
-    void mobileValidateCaptcha(MobileLoginReqVO reqVO) {
-        ResponseModel response = doValidateCaptcha(reqVO);
-        // 校验验证码
-        if (!response.isSuccess()) {
-            // 创建登录失败日志（验证码不正确)
-            createLoginLog(null, reqVO.getMobile(), LoginLogTypeEnum.LOGIN_USERNAME, LoginResultEnum.CAPTCHA_CODE_ERROR);
-            throw exception(AUTH_LOGIN_CAPTCHA_CODE_ERROR, response.getRepMsg());
-        }
-    }
-
     private ResponseModel doValidateCaptcha(CaptchaVerificationReqVO reqVO) {
         // 如果验证码关闭，则不进行校验
         if (!captchaEnable) {
@@ -277,15 +203,13 @@ public class PlatformAuthServiceImpl implements PlatformAuthService {
         return captchaService.verification(captchaVO);
     }
 
-    private AuthLoginRespVO createTokenAfterLoginSuccess(Long userId, String username, String deviceId, LoginLogTypeEnum logType) {
-        return createCorpAfterLoginSuccess(null, userId, username, deviceId, logType);
-    }
-
-    private AuthLoginRespVO createCorpAfterLoginSuccess(Long corpId, Long userId, String username, String deviceId, LoginLogTypeEnum logType) {
+    private AuthLoginRespVO createTokenAfterLoginSuccess(Long userId, Integer userType, String username, String deviceId, LoginLogTypeEnum logType) {
         // 插入登陆日志
         createLoginLog(userId, username, logType, LoginResultEnum.SUCCESS);
         // 创建访问令牌
-        OAuth2AccessTokenDO accessTokenDO = oauth2TokenService.createCorpAccessToken(corpId, userId, getUserType().getValue(),
+        OAuth2AccessTokenDO accessTokenDO = oauth2TokenService.createAccessTokenWithMode(
+                RunModeEnum.PLATFORM.getValue(), null, null,
+                userId, userType,
                 OAuth2ClientConstants.CLIENT_ID_DEFAULT, null);
 
         // 检查并限制设备数，踢出超限的设备
@@ -340,11 +264,7 @@ public class PlatformAuthServiceImpl implements PlatformAuthService {
         reqDTO.setTraceId("n/a");
         reqDTO.setUserId(userId);
         reqDTO.setUserType(userType);
-        if (ObjUtil.equal(getUserType().getValue(), userType)) {
-            reqDTO.setUsername(getUsername(userId));
-        } else {
-            reqDTO.setUsername(memberService.getMemberUserMobile(userId));
-        }
+        reqDTO.setUsername(getUsername(userId));
         reqDTO.setUserAgent(ServletUtils.getUserAgent());
         reqDTO.setUserIp(ServletUtils.getClientIP());
         reqDTO.setResult(LoginResultEnum.SUCCESS.getResult());
@@ -357,31 +277,6 @@ public class PlatformAuthServiceImpl implements PlatformAuthService {
         }
         AdminUserDO user = userService.getUser(userId);
         return user != null ? user.getUsername() : null;
-    }
-
-    private UserTypeEnum getUserType() {
-        return UserTypeEnum.THIRD;
-    }
-
-    @Override
-    public AuthLoginRespVO register(AuthRegisterReqVO registerReqVO) {
-        // 1. 校验验证码
-        validateCaptcha(registerReqVO);
-
-        // 2. 校验用户名是否已存在
-        Long userId = userService.registerUser(registerReqVO);
-
-        // 3. 创建 Token 令牌，记录登录日志
-        return createTokenAfterLoginSuccess(userId, registerReqVO.getUsername(), registerReqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_USERNAME);
-    }
-
-    @VisibleForTesting
-    void validateCaptcha(AuthRegisterReqVO reqVO) {
-        ResponseModel response = doValidateCaptcha(reqVO);
-        // 验证不通过
-        if (!response.isSuccess()) {
-            throw exception(AUTH_REGISTER_CAPTCHA_CODE_ERROR, response.getRepMsg());
-        }
     }
 
     @Override

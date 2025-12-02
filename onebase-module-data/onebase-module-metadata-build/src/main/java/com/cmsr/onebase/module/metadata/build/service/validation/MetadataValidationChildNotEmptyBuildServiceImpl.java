@@ -9,8 +9,8 @@ import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationChil
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationChildNotEmptyDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRuleGroupDO;
 import com.cmsr.onebase.module.metadata.core.util.StatusEnumUtil;
+import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
-import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -55,7 +55,7 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
 
     @Override
     public ValidationChildNotEmptyRespVO getById(Long id) {
-        MetadataValidationChildNotEmptyDO validationDO = childNotEmptyRepository.findById(id);
+        MetadataValidationChildNotEmptyDO validationDO = childNotEmptyRepository.getById(id);
         if (validationDO == null) {
             var group = ruleGroupService.getValidationRuleGroup(id);
             if (group != null) {
@@ -88,13 +88,13 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
     @Transactional(rollbackFor = Exception.class)
     public void deleteById(Long id) {
         // 先尝试按主键ID查找记录
-        MetadataValidationChildNotEmptyDO existing = childNotEmptyRepository.findById(id);
+        MetadataValidationChildNotEmptyDO existing = childNotEmptyRepository.getById(id);
         Long groupIdToDelete = null;
         
         if (existing != null) {
             // 按主键ID找到了记录
             groupIdToDelete = existing.getGroupId();
-            childNotEmptyRepository.deleteById(id);
+            childNotEmptyRepository.removeById(id);
         } else {
             // 按主键ID未找到，尝试按groupId查找
             var list = childNotEmptyRepository.findByGroupId(id);
@@ -103,7 +103,7 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
                     throw new IllegalStateException("数据异常：同一组存在多条子表非空校验规则(组ID=" + id + ")");
                 }
                 MetadataValidationChildNotEmptyDO validationDO = list.get(0);
-                childNotEmptyRepository.deleteById(validationDO.getId());
+                childNotEmptyRepository.removeById(validationDO.getId());
             }
             // 将id作为groupId删除
             groupIdToDelete = id;
@@ -124,10 +124,10 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
         Assert.hasText(vo.getRgName(), "规则组名称不能为空");
 
         // 检查同一父实体和子实体是否已存在子表非空校验规则
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and(MetadataValidationChildNotEmptyDO.ENTITY_ID, vo.getEntityId());
-        configStore.and(MetadataValidationChildNotEmptyDO.CHILD_ENTITY_ID, vo.getChildEntityId());
-        List<MetadataValidationChildNotEmptyDO> existingRules = childNotEmptyRepository.findAllByConfig(configStore);
+        QueryWrapper queryWrapper = childNotEmptyRepository.query()
+                .eq(MetadataValidationChildNotEmptyDO::getEntityId, vo.getEntityId())
+                .eq(MetadataValidationChildNotEmptyDO::getChildEntityId, vo.getChildEntityId());
+        List<MetadataValidationChildNotEmptyDO> existingRules = childNotEmptyRepository.list(queryWrapper);
         if (!existingRules.isEmpty()) {
             throw new IllegalStateException("该父子实体关系已存在子表非空校验规则，同一关系只能有一条子表非空校验规则");
         }
@@ -171,8 +171,8 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
         data.setGroupId(groupId);
         // fieldId设置为null，不再使用
         data.setFieldId(null);
-        // appId暂时设置为null，如果需要可以从其他地方获取
-        data.setAppId(null);
+        // applicationId暂时设置为null，如果需要可以从其他地方获取
+        data.setApplicationId(null);
         
         // 设置默认值
         if (data.getIsEnabled() == null) {
@@ -181,9 +181,10 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
         if (data.getMinRows() == null) {
             data.setMinRows(1); // 默认最少1行
         }
-
+        // 提示信息
+        data.setPromptMessage(vo.getPopPrompt());
         // 保存子表非空校验规则
-        childNotEmptyRepository.upsert(data);
+        childNotEmptyRepository.saveOrUpdate(data);
         return data.getId();
     }
 
@@ -222,11 +223,13 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
         updateObj.setId(existing.getId());
         updateObj.setEntityId(vo.getEntityId());
         updateObj.setChildEntityId(vo.getChildEntityId());
-        updateObj.setAppId(existing.getAppId());
+        updateObj.setApplicationId(existing.getApplicationId());
         updateObj.setGroupId(targetGroupId);
         // fieldId保持不变，设置为null或保留原值
         updateObj.setFieldId(null);
-        childNotEmptyRepository.update(updateObj);
+        // 提示信息
+        updateObj.setPromptMessage(vo.getPopPrompt());
+        childNotEmptyRepository.updateById(updateObj);
     }
 
     @Override

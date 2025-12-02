@@ -108,7 +108,7 @@ public class MetadataValidationRangeBuildServiceImpl implements MetadataValidati
         // 转换VO为DO并设置必要字段
         MetadataValidationRangeDO data = BeanUtils.toBean(vo, MetadataValidationRangeDO.class);
         data.setEntityId(field.getEntityId());
-        data.setAppId(field.getAppId());
+        data.setApplicationId(field.getApplicationId());
         data.setGroupId(groupId);
         
         // 设置默认值
@@ -135,7 +135,7 @@ public class MetadataValidationRangeBuildServiceImpl implements MetadataValidati
         }
 
         // 保存范围校验规则
-        rangeRepository.upsert(data);
+        rangeRepository.saveOrUpdate(data);
         return data.getId();
     }
 
@@ -171,9 +171,9 @@ public class MetadataValidationRangeBuildServiceImpl implements MetadataValidati
         updateDO.setId(existingDO.getId());
         updateDO.setFieldId(existingDO.getFieldId());
         updateDO.setEntityId(existingDO.getEntityId());
-        updateDO.setAppId(existingDO.getAppId());
+        updateDO.setApplicationId(existingDO.getApplicationId());
         updateDO.setGroupId(targetGroupId);
-        rangeRepository.update(updateDO);
+        rangeRepository.updateById(updateDO);
     }
 
     @Override
@@ -222,10 +222,10 @@ public class MetadataValidationRangeBuildServiceImpl implements MetadataValidati
                 throw new IllegalStateException("数据异常：同一组存在多条范围校验规则(组ID=" + id + ")");
             }
             MetadataValidationRangeDO rangeDO = list.get(0);
-            rangeRepository.deleteById(rangeDO.getId());
+            rangeRepository.removeById(rangeDO.getId());
         }
         
-        // 无论子表是否存在，都要删除主表作为兜底（防止脏数据）
+        // 无论子表是否存在，都要删除主表作为兖底（防止脏数据）
         ruleGroupService.safeDeleteGroupDirect(id);
     }
 

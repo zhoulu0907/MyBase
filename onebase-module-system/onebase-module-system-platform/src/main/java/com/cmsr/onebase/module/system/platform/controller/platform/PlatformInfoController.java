@@ -42,21 +42,21 @@ public class PlatformInfoController {
     private TenantService tenantService;
 
     @Resource
-    private UserService platformUserService;
+    private UserService userService;
 
     /**
      * 根据状态查询出enable的license记录
      */
     @GetMapping("/get-platform-info")
     @Operation(summary = "根据状态查询出enable的license记录")
-    @PreAuthorize("@ss.hasPermission('system:platform-info:get')")
+    @PreAuthorize("@ss.hasPermission('tenant:user:query')")
     public CommonResult<PlatformInfoRespVo> getPlatformInfo() {
 
         LicenseDO license = licenseService.getLatestActiveLicense();
         PlatformInfoRespVo platformInfoRespVo = BeanUtils.toBean(license, PlatformInfoRespVo.class);
         Integer tenantCount = tenantService.getTenantCountByStatus(TenantStatusEnum.NORMAL.getStatus());
-        Integer userCount = platformUserService.getUserCountByStatus(UserStatusEnum.NORMAL.getStatus());
-        AdminUserDO user = platformUserService.getUser(platformInfoRespVo.getCreator());
+        Integer userCount = userService.getUserCountByStatus(UserStatusEnum.NORMAL.getStatus());
+        AdminUserDO user = userService.getUser(platformInfoRespVo.getCreator());
 
         platformInfoRespVo.setAdminUser(user.getUsername());
         platformInfoRespVo.setActualTenantCount(tenantCount);
@@ -69,44 +69,44 @@ public class PlatformInfoController {
 
     @PostMapping("/admin/create")
     @Operation(summary = "新增平台管理员用户")
-    @PreAuthorize("@ss.hasPermission('system:platform-admin:create')")
+    @PreAuthorize("@ss.hasPermission('tenant:user:create')")
     public CommonResult<Long> createPlatformAdmin(@Valid @RequestBody UserInsertReqVO reqVO) {
-        Long userId = platformUserService.createPlatformUser(reqVO);
+        Long userId = userService.createPlatformUser(reqVO);
         return success(userId);
     }
 
     @GetMapping("/admin/page")
     @Operation(summary = "获得平台管理员列表分页")
-    @PreAuthorize("@ss.hasPermission('system:platform-admin:query')")
+    @PreAuthorize("@ss.hasPermission('tenant:user:query')")
     public CommonResult<PageResult<UserRespVO>> getPlatformAdminPage(@Valid UserPageReqVO pageReqVO) {
         // 获得用户分页列表
-        PageResult<AdminUserDO> pageResult = platformUserService.getUserPage(pageReqVO);
+        PageResult<AdminUserDO> pageResult = userService.getUserPage(pageReqVO);
         return success(BeanUtils.toBean(pageResult, UserRespVO.class));
     }
 
     @PostMapping("/admin/update-email")
     @Operation(summary = "修改平台管理员邮箱")
-    @PreAuthorize("@ss.hasPermission('system:platform-admin:update')")
+    @PreAuthorize("@ss.hasPermission('tenant:user:update')")
     public CommonResult<Boolean> updatePlatformAdmin(@Valid @RequestBody UserUpdateEmailReqVO reqVO) {
-        platformUserService.updatePlatformUserEmail(reqVO.getId(), reqVO.getEmail());
+        userService.updatePlatformUserEmail(reqVO.getId(), reqVO.getEmail());
         return success(true);
     }
 
     @PostMapping("/admin/update-password")
     @Operation(summary = "重置平台用户密码")
-    @PreAuthorize("@ss.hasPermission('system:platform-admin:update-password')")
+    @PreAuthorize("@ss.hasPermission('tenant:user:update-password')")
     public CommonResult<Boolean> updatePlatformUserPassword(@Valid @RequestBody UserUpdatePasswordReqVO reqVO) {
-        platformUserService.updateUserPassword(reqVO.getId(), reqVO.getPassword());
+        userService.updateUserPassword(reqVO.getId(), reqVO.getPassword());
         return success(true);
     }
 
     @GetMapping("/admin/list")
     @Operation(summary = "获得所有平台管理员列表")
-    @PreAuthorize("@ss.hasPermission('system:platform-admin:query')")
-    public CommonResult<List<UserRespVO>> getPlatformAdminList() {
-
+    @PreAuthorize("@ss.hasPermission('tenant:user:query')")
+    public CommonResult<List<UserRespVO>> getPlatformAdminList(UserSearchReqVO userSearchReqVO) {
+        userSearchReqVO.setStatus(UserStatusEnum.NORMAL.getStatus());
         // 获取所有平台管理员用户
-        List<AdminUserDO> userList = platformUserService.getPlatformAdminListByStatus(UserStatusEnum.NORMAL.getStatus());
+        List<AdminUserDO> userList = userService.getPlatformAdminListByStatus(userSearchReqVO);
         // 转换为响应对象
         List<UserRespVO> respList = BeanUtils.toBean(userList, UserRespVO.class);
 
@@ -116,14 +116,24 @@ public class PlatformInfoController {
     @PostMapping("/admin/delete")
     @Operation(summary = "删除平台管理员")
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
-    @PreAuthorize("@ss.hasPermission('system:platform-admin:delete')")
+    @PreAuthorize("@ss.hasPermission('tenant:user:delete')")
     public CommonResult<Boolean> deletePlatformAdmin(@RequestParam("id") Long id) {
-        AdminUserDO adminUserDO = platformUserService.getUser(id);
+        AdminUserDO adminUserDO = userService.getUser(id);
         if (AdminTypeEnum.SYSTEM.getType().equals(adminUserDO.getAdminType())) {
             throw exception(USER_PASSWORD_NOT_ALLOW_DEL);
         }
-        platformUserService.deleteUser(id);
+        userService.deleteUser(id);
         return success(true);
+    }
+
+
+    @GetMapping("/admin/get")
+    @Operation(summary = "获取平台管理员")
+    @Parameter(name = "id", description = "编号", required = true, example = "1024")
+    @PreAuthorize("@ss.hasPermission('tenant:user:query')")
+    public CommonResult<UserRespVO> getPlatformAdmin(@RequestParam("id") Long id) {
+        AdminUserDO adminUserDO = userService.getUser(id);
+        return success(BeanUtils.toBean(adminUserDO, UserRespVO.class));
     }
 
 }

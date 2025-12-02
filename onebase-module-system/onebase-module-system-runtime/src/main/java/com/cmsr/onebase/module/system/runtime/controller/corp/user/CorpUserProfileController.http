@@ -1,0 +1,26 @@
+
+### 获取当前登录用户个人信息
+GET {{baseUrl}}/corp/user/profile/get
+Authorization: Bearer {{token}}
+
+### 修改当前登录用户个人信息
+POST {{baseUrl}}/corp/user/profile/update
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "nickname": "新的昵称",
+  "email": "profile_update@example.com",
+  "mobile": "13800000009",
+  "sex": 1
+}
+
+### 修改当前登录用户个人密码
+POST {{baseUrl}}/corp/user/profile/update-password
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "oldPassword": "oldPwd123",
+  "newPassword": "newPwd456"
+}

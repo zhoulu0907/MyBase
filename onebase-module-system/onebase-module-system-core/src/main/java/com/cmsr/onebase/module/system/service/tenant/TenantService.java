@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.system.service.tenant;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.module.system.vo.tenant.TenantPageReqVO;
 import com.cmsr.onebase.module.system.vo.tenant.TenantInsertReqVO;
 import com.cmsr.onebase.module.system.vo.tenant.TenantRespVO;

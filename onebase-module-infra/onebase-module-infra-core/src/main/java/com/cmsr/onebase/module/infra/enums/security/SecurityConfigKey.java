@@ -91,7 +91,7 @@ public enum SecurityConfigKey {
     }
 
     public enum ExtraCharacterOption implements OptionEnum {
-        uppperCase("uppperCase"),
+        upperCase("upperCase"),
         specialChar("specialChar");
 
         private final String key;

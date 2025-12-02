@@ -6,7 +6,7 @@ import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
 import com.cmsr.onebase.module.bpm.core.enums.BpmNodeTypeEnum;
-import com.cmsr.onebase.module.bpm.core.service.BpmEngineDefExtService;
+import com.cmsr.onebase.module.bpm.core.dal.database.ext.BpmFlowDefinitionRepositoryExt;
 import com.cmsr.onebase.module.bpm.runtime.service.common.permission.BpmPermissionResolver;
 import com.cmsr.onebase.module.bpm.runtime.service.instance.predict.BpmPredictService;
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmPredictReqVO;
@@ -22,7 +22,7 @@ import org.dromara.warm.flow.core.enums.NodeType;
 import org.dromara.warm.flow.core.enums.PublishStatus;
 import org.dromara.warm.flow.core.enums.SkipType;
 import org.dromara.warm.flow.core.service.NodeService;
-import org.dromara.warm.flow.core.service.impl.BpmConstants;
+import com.cmsr.onebase.module.bpm.core.enums.BpmConstants;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -40,7 +40,7 @@ import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionU
 @Service
 public class BpmPredictServiceImpl implements BpmPredictService {
     @Resource
-    private BpmEngineDefExtService defExtService;
+    private BpmFlowDefinitionRepositoryExt defExtService;
 
     @Resource
     private NodeService nodeService;
@@ -100,21 +100,21 @@ public class BpmPredictServiceImpl implements BpmPredictService {
 
             // 获取业务节点类型
             String bizNodeType = nodeExtDTO.getNodeType();
-            Set<Long> handlerIds = new HashSet<>();
+            Set<String> handlerIds = new HashSet<>();
 
             if (Objects.equals(bizNodeType, BpmNodeTypeEnum.INITIATION.getCode())) {
                 // 发起节点的处理人是当前登录用户
-                handlerIds.add(loginUserId);
+                handlerIds.add(String.valueOf(loginUserId));
             } else if (Objects.equals(bizNodeType, BpmNodeTypeEnum.APPROVER.getCode())) {
                 // 解析权限标志
-                Set<Long> approverUserIds = permissionResolver.resolveUserIds(currentNode.getPermissionFlag(), BpmConstants.MAX_NODE_APPROVER_USERS);
+                Set<String> approverUserIds = permissionResolver.resolveUserIds(currentNode.getPermissionFlag(), BpmConstants.MAX_NODE_APPROVER_USERS);
 
                 if (CollectionUtils.isNotEmpty(approverUserIds)) {
                     handlerIds.addAll(approverUserIds);
                 }
             } else if (Objects.equals(bizNodeType, BpmNodeTypeEnum.CC.getCode())) {
                 // 解析权限标志
-                Set<Long> ccUserIds = permissionResolver.resolveUserIds(currentNode.getPermissionFlag(), BpmConstants.MAX_NODE_CC_USERS);
+                Set<String> ccUserIds = permissionResolver.resolveUserIds(currentNode.getPermissionFlag(), BpmConstants.MAX_NODE_CC_USERS);
 
                 if (CollectionUtils.isNotEmpty(ccUserIds)) {
                     handlerIds.addAll(ccUserIds);
@@ -125,9 +125,9 @@ public class BpmPredictServiceImpl implements BpmPredictService {
                 continue;
             }
 
-            allUserIds.addAll(handlerIds);
+            allUserIds.addAll(handlerIds.stream().map(Long::valueOf).collect(Collectors.toSet()));
 
-            for (Long userId : handlerIds) {
+            for (String userId : handlerIds) {
                 BpmPredictRespVO.HandlerInfo handlerInfo = new BpmPredictRespVO.HandlerInfo();
                 handlerInfo.setHandlerId(userId);
                 nodeInfo.getHandlers().add(handlerInfo);
@@ -140,9 +140,9 @@ public class BpmPredictServiceImpl implements BpmPredictService {
         CommonResult<List<AdminUserRespDTO>> userResult = adminUserApi.getUserList(allUserIds);
 
         if (userResult.isSuccess()) {
-            // 构建用户ID到用户信息的映射
-            Map<Long, AdminUserRespDTO> userMap = userResult.getData().stream()
-                    .collect(Collectors.toMap(AdminUserRespDTO::getId, v -> v));
+            // 构建用户ID到用户信息的映射（key 使用 String）
+            Map<String, AdminUserRespDTO> userMap = userResult.getData().stream()
+                    .collect(Collectors.toMap(user -> String.valueOf(user.getId()), v -> v));
 
             for (BpmPredictRespVO.NodeInfo node : nodes) {
                 for (BpmPredictRespVO.HandlerInfo handler : node.getHandlers()) {

@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.metadata.build.controller.admin.entity;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.BusinessEntityPageReqVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.BusinessEntityRespVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.BusinessEntitySaveReqVO;
@@ -42,6 +43,8 @@ public class BusinessEntityController {
     @Operation(summary = "创建业务实体")
     @PreAuthorize("@ss.hasPermission('metadata:business-entity:create')")
     public CommonResult<BusinessEntityRespVO> createBusinessEntity(@Valid @RequestBody BusinessEntitySaveReqVO reqVO) {
+        // 从请求头获取应用ID
+        reqVO.setApplicationId(String.valueOf(ApplicationManager.getApplicationId()));
         BusinessEntityRespVO result = businessEntityService.createBusinessEntityWithResponse(reqVO);
         return success(result);
     }
@@ -50,6 +53,8 @@ public class BusinessEntityController {
     @Operation(summary = "更新业务实体信息")
     @PreAuthorize("@ss.hasPermission('metadata:business-entity:update')")
     public CommonResult<Boolean> updateBusinessEntity(@Valid @RequestBody BusinessEntitySaveReqVO reqVO) {
+        // 从请求头获取应用ID
+        reqVO.setApplicationId(String.valueOf(ApplicationManager.getApplicationId()));
         businessEntityService.updateBusinessEntity(reqVO);
         return success(true);
     }
@@ -100,9 +105,10 @@ public class BusinessEntityController {
 
     @PostMapping("/list-by-app")
     @Operation(summary = "根据应用ID获取实体列表", description = "返回实体ID和名称，用于下拉选择等场景")
-    @Parameter(name = "appId", description = "应用ID", required = true, example = "1024")
+    @Parameter(name = "appId", description = "应用ID", required = false, example = "1024")
     @PreAuthorize("@ss.hasPermission('metadata:business-entity:query')")
-    public CommonResult<List<SimpleEntityRespVO>> getSimpleEntityListByAppId(@RequestParam("appId") Long appId) {
+    public CommonResult<List<SimpleEntityRespVO>> getSimpleEntityListByAppId(@RequestParam(value = "appId", required = false) Long appId) {
+        appId = ApplicationManager.getApplicationId();
         List<SimpleEntityRespVO> result = businessEntityService.getSimpleEntityListByAppId(appId);
         return success(result);
     }

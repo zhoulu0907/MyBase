@@ -50,8 +50,8 @@ public class RTPermissionService implements ApplicationContextAware {
         }
     }
 
-    public boolean checkMenuEntity(Long applicationId, Long menuId, Long entityId) {
-        return appAuthSecurityApi.checkMenuEntity(applicationId, menuId, entityId);
+    public boolean checkMenuEntity(Long applicationId, Long menuId, String entityUuid) {
+        return appAuthSecurityApi.checkMenuEntity(applicationId, menuId, entityUuid);
     }
 
     public OperationPermission getMenuOperation(Long userId, Long applicationId, Long menuId) {

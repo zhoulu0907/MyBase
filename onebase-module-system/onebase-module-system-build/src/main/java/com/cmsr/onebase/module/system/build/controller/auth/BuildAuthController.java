@@ -1,18 +1,12 @@
 package com.cmsr.onebase.module.system.build.controller.auth;
 
 
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
-import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.security.config.SecurityProperties;
-import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
-import com.cmsr.onebase.module.system.convert.auth.AuthConvert;
-import com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO;
-import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
-import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.logger.LoginLogTypeEnum;
-import com.cmsr.onebase.module.system.service.auth.AdminAuthService;
+import com.cmsr.onebase.module.system.service.auth.BuildAuthService;
 import com.cmsr.onebase.module.system.service.permission.MenuService;
 import com.cmsr.onebase.module.system.service.permission.PermissionService;
 import com.cmsr.onebase.module.system.service.permission.RoleService;
@@ -29,13 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
-import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertSet;
-import static com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils.getLoginUserId;
 
 /**
  *  编辑态登录认证相关接口
@@ -53,7 +41,7 @@ import static com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUti
 public class BuildAuthController {
 
     @Resource
-    private AdminAuthService authService;
+    private BuildAuthService authService;
     @Resource
     private UserService      userService;
     @Resource
@@ -119,26 +107,7 @@ public class BuildAuthController {
     @GetMapping("/get-permission-info")
     @Operation(summary = "获取登录用户的权限信息")
     public CommonResult<AuthPermissionInfoRespVO> getPermissionInfo(@RequestParam(value = "code", required = false) String code) {
-        // 1.1 获得用户信息
-        AdminUserDO user = userService.getUser(getLoginUserId());
-        if (user == null) {
-            return success(null);
-        }
-        // 1.2 获得角色列表
-        Set<Long> roleIds = permissionService.getRoleIdsListByUserId(getLoginUserId());
-        if (CollUtil.isEmpty(roleIds)) {
-            return success(AuthConvert.INSTANCE.convert(user, Collections.emptyList(), Collections.emptyList(), code));
-        }
-        List<RoleDO> roles = roleService.getRoleList(roleIds);
-        roles.removeIf(role -> !CommonStatusEnum.ENABLE.getStatus().equals(role.getStatus())); // 移除禁用的角色
-
-        // 1.3 获得菜单列表
-        Set<Long> menuIds = permissionService.getRoleMenuListByRoleId(convertSet(roles, RoleDO::getId));
-        List<MenuDO> menuList = menuService.getAllActiveMenuList(menuIds);
-        // menuList = menuService.filterDisableMenus(menuList);
-
-        // 2. 拼接结果返回
-        return success(AuthConvert.INSTANCE.convert(user, roles, menuList, code));
+        return success(permissionService.getPermissionInfo(code));
     }
 
     @PostMapping("/register")
@@ -148,7 +117,7 @@ public class BuildAuthController {
         return success(authService.register(registerReqVO));
     }
 
-    // ========== 短信登录相关 ==========
+    // ========== 短信登录相关(暂不支持) ==========
 
     @PostMapping("/sms-login")
     @PermitAll

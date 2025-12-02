@@ -19,14 +19,13 @@ import com.cmsr.onebase.module.metadata.core.dal.database.MetadataDatasourceRepo
 import org.anyline.metadata.type.DatabaseType;
 import com.cmsr.onebase.module.metadata.core.service.datasource.MetadataAppAndDatasourceCoreService;
 import com.cmsr.onebase.module.metadata.core.service.datasource.MetadataDatasourceCoreService;
-import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.module.system.api.user.AdminUserApi;
 import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
+import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Order;
 import org.anyline.metadata.Column;
 import org.anyline.metadata.Table;
 import org.anyline.service.AnylineService;
@@ -54,7 +53,6 @@ import java.util.UUID;
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.DATASOURCE_NOT_EXISTS;
 import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.DATASOURCE_CODE_DUPLICATE;
-import org.anyline.entity.Compare;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataAppAndDatasourceDO;
 
 /**
@@ -231,7 +229,7 @@ public class MetadataDatasourceBuildServiceImpl implements MetadataDatasourceBui
     @Transactional(rollbackFor = Exception.class)
     public Long createDatasource(@Valid DatasourceSaveReqVO createReqVO) {
         // 校验必填参数
-        if (createReqVO.getAppId() == null || createReqVO.getAppId().trim().isEmpty()) {
+        if (createReqVO.getApplicationId() == null || createReqVO.getApplicationId().trim().isEmpty()) {
             throw new IllegalArgumentException("应用ID不能为空");
         }
         if (createReqVO.getAppUid() == null || createReqVO.getAppUid().trim().isEmpty()) {
@@ -240,7 +238,7 @@ public class MetadataDatasourceBuildServiceImpl implements MetadataDatasourceBui
 
         // 校验编码唯一性(创建时ID为null,所以传null;appId需要安全转换)
         Long id = (createReqVO.getId() != null && !createReqVO.getId().trim().isEmpty()) ? Long.valueOf(createReqVO.getId()) : null;
-        Long appId = Long.valueOf(createReqVO.getAppId());
+        Long appId = Long.valueOf(createReqVO.getApplicationId());
         String appUid = createReqVO.getAppUid();
         validateDatasourceCodeUnique(id, createReqVO.getCode(), appId);
 
@@ -301,9 +299,9 @@ public class MetadataDatasourceBuildServiceImpl implements MetadataDatasourceBui
         reqVO.setDatasourceType(metadataConfig.getDefaultDatasourceType());
         reqVO.setConfig(config);
         reqVO.setDescription(metadataConfig.getDefaultDatasourceDescription());
-        reqVO.setRunMode(metadataConfig.getDefaultDatasourceRunMode());
+        reqVO.setVersionTag(Long.valueOf(metadataConfig.getDefaultDatasourceRunMode()));
         reqVO.setDatasourceOrigin(metadataConfig.getDefaultDatasourceDatasourceOrigin());
-        reqVO.setAppId(String.valueOf(appId));
+        reqVO.setApplicationId(String.valueOf(appId));
         // 关键：传递 appUid，确保关联表插入不为 null
         reqVO.setAppUid(appUid);
 
@@ -320,7 +318,7 @@ public class MetadataDatasourceBuildServiceImpl implements MetadataDatasourceBui
     public void updateDatasource(@Valid DatasourceSaveReqVO updateReqVO) {
         // 安全转换ID和AppID
         Long id = (updateReqVO.getId() != null && !updateReqVO.getId().trim().isEmpty()) ? Long.valueOf(updateReqVO.getId()) : null;
-        Long appId = (updateReqVO.getAppId() != null && !updateReqVO.getAppId().trim().isEmpty()) ? Long.valueOf(updateReqVO.getAppId()) : null;
+        Long appId = (updateReqVO.getApplicationId() != null && !updateReqVO.getApplicationId().trim().isEmpty()) ? Long.valueOf(updateReqVO.getApplicationId()) : null;
 
         // 校验存在
         if (id == null) {
@@ -343,7 +341,7 @@ public class MetadataDatasourceBuildServiceImpl implements MetadataDatasourceBui
         updateObj.setUpdateTime(LocalDateTime.now());
 
         // 不再设置appId，因为关联关系由关联表维护
-        metadataDatasourceRepository.update(updateObj);
+        metadataDatasourceRepository.updateById(updateObj);
 
         // 如果 appUid 发生变化，同步更新关联表（使用之前安全转换的id和appId）
         String newAppUid = updateReqVO.getAppUid();
@@ -372,12 +370,12 @@ public class MetadataDatasourceBuildServiceImpl implements MetadataDatasourceBui
         log.info("删除数据源{}相关联的关系数量: {}", id, deletedRelations);
 
         // 删除数据源
-        metadataDatasourceRepository.deleteById(id);
+        metadataDatasourceRepository.removeById(id);
         log.info("删除数据源成功，ID: {}", id);
     }
 
     private void validateDatasourceExists(Long id) {
-        if (metadataDatasourceRepository.findById(id) == null) {
+        if (metadataDatasourceRepository.getById(id) == null) {
             throw exception(DATASOURCE_NOT_EXISTS);
         }
     }
@@ -405,12 +403,12 @@ public class MetadataDatasourceBuildServiceImpl implements MetadataDatasourceBui
     @Override
     public PageResult<MetadataDatasourceDO> getDatasourcePage(DatasourcePageReqVO pageReqVO) {
         // 如果指定了应用ID，需要通过关联表查询
-        if (pageReqVO.getAppId() != null && !pageReqVO.getAppId().trim().isEmpty()) {
+        if (pageReqVO.getApplicationId() != null && !pageReqVO.getApplicationId().trim().isEmpty()) {
             Long appId;
             try {
-                appId = Long.valueOf(pageReqVO.getAppId());
+                appId = Long.valueOf(pageReqVO.getApplicationId());
             } catch (NumberFormatException e) {
-                throw new IllegalArgumentException("应用ID格式不正确: " + pageReqVO.getAppId());
+                throw new IllegalArgumentException("应用ID格式不正确: " + pageReqVO.getApplicationId());
             }
 
             // 获取应用关联的数据源列表
@@ -432,8 +430,8 @@ public class MetadataDatasourceBuildServiceImpl implements MetadataDatasourceBui
                             !pageReqVO.getDatasourceType().equals(datasource.getDatasourceType())) {
                             return false;
                         }
-                        if (pageReqVO.getRunMode() != null &&
-                            !pageReqVO.getRunMode().equals(datasource.getRunMode())) {
+                        if (pageReqVO.getVersionTag() != null &&
+                            !pageReqVO.getVersionTag().equals(datasource.getVersionTag())) {
                             return false;
                         }
                         // TODO: 支持数据源来源过滤
@@ -463,35 +461,33 @@ public class MetadataDatasourceBuildServiceImpl implements MetadataDatasourceBui
             return new PageResult<>(pageData, (long) filteredDatasources.size());
         }
 
-        // 如果没有指定应用ID，查询所有数据源
-        DefaultConfigStore configStore = new DefaultConfigStore();
+        // 如果没有指定应用ID，使用Repository查询所有数据源
+        QueryWrapper queryWrapper = QueryWrapper.create();
 
         // 添加查询条件
         if (pageReqVO.getDatasourceName() != null) {
-            configStore.and(Compare.LIKE, MetadataDatasourceDO.DATASOURCE_NAME, "%" + pageReqVO.getDatasourceName() + "%");
+            queryWrapper.like(MetadataDatasourceDO::getDatasourceName, pageReqVO.getDatasourceName());
         }
         if (pageReqVO.getCode() != null) {
-            configStore.and(Compare.LIKE, MetadataDatasourceDO.CODE, "%" + pageReqVO.getCode() + "%");
+            queryWrapper.like(MetadataDatasourceDO::getCode, pageReqVO.getCode());
         }
         if (pageReqVO.getDatasourceType() != null) {
-            configStore.and(MetadataDatasourceDO.DATASOURCE_TYPE, pageReqVO.getDatasourceType());
+            queryWrapper.eq(MetadataDatasourceDO::getDatasourceType, pageReqVO.getDatasourceType());
         }
         if (pageReqVO.getDatasourceOrigin() != null) {
-            configStore.and(MetadataDatasourceDO.DATASOURCE_ORIGIN, pageReqVO.getDatasourceOrigin());
+            queryWrapper.eq(MetadataDatasourceDO::getDatasourceOrigin, pageReqVO.getDatasourceOrigin());
         }
-        if (pageReqVO.getRunMode() != null) {
-            configStore.and(MetadataDatasourceDO.RUN_MODE, pageReqVO.getRunMode());
+        if (pageReqVO.getVersionTag() != null) {
+            queryWrapper.eq(MetadataDatasourceDO::getVersionTag, pageReqVO.getVersionTag());
         }
 
         // 分页查询
-        return metadataDatasourceRepository.findPageWithConditions(configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());
+        return metadataDatasourceRepository.getDatasourcePage(queryWrapper, pageReqVO.getPageNo(), pageReqVO.getPageSize());
     }
 
     @Override
     public List<MetadataDatasourceDO> getDatasourceList() {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.order("create_time", Order.TYPE.DESC);
-        return metadataDatasourceRepository.findAllByConfig(configStore);
+        return metadataDatasourceRepository.getDatasourceList();
     }
 
     @Override
@@ -504,11 +500,6 @@ public class MetadataDatasourceBuildServiceImpl implements MetadataDatasourceBui
     public MetadataDatasourceDO getDatasourceByCode(String code) {
         // 使用 core 模块的基础服务
         return metadataDatasourceCoreService.getDatasourceByCode(code);
-    }
-
-    @Override
-    public List<MetadataDatasourceDO> findAllByConfig(DefaultConfigStore configStore) {
-        return metadataDatasourceRepository.findAllByConfig(configStore);
     }
 
     @Override

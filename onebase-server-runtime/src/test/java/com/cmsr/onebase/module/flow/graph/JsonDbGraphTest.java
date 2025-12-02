@@ -23,10 +23,13 @@ public class JsonDbGraphTest {
     @Autowired
     private FlowProcessRepository flowProcessRepository;
 
+    @Autowired
+    private FlowGraphBuilder flowGraphBuilder;
+
     public void testToFlowChain(Long id) throws IOException {
-        FlowProcessDO flowProcessDO = flowProcessRepository.findById(id);
+        FlowProcessDO flowProcessDO = flowProcessRepository.getById(id);
         String json = flowProcessDO.getProcessDefinition();
-        JsonGraph jsonGraph = FlowGraphBuilder.build(json);
+        JsonGraph jsonGraph = flowGraphBuilder.build(json);
         String flowChain = FlowChainBuilder.toFlowChain(jsonGraph);
         System.out.println(flowChain);
     }

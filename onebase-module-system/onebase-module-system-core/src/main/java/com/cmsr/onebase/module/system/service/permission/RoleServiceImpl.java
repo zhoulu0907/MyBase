@@ -2,6 +2,8 @@ package com.cmsr.onebase.module.system.service.permission;
 
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.system.dal.database.RoleDataRepository;
@@ -80,7 +82,10 @@ public class RoleServiceImpl implements RoleService {
         role.setDataScope(DataScopeEnum.ALL.getScope()); // 默认可查看所有数据。
         roleDataRepository.insert(role);
 
-        // 3. 记录操作日志上下文
+        // 记录操作日志上下文
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+
+        LogRecordContext.putVariable("loginUser", loginUser);
         LogRecordContext.putVariable("role", role);
         return role.getId();
     }
@@ -100,6 +105,9 @@ public class RoleServiceImpl implements RoleService {
         roleDataRepository.update(updateObj);
 
         // 3. 记录操作日志上下文
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+
+        LogRecordContext.putVariable("loginUser", loginUser);
         LogRecordContext.putVariable(DiffParseFunction.OLD_OBJECT, BeanUtils.toBean(role, RoleInsertReqVO.class));
         LogRecordContext.putVariable("role", role);
     }
@@ -133,6 +141,9 @@ public class RoleServiceImpl implements RoleService {
         permissionService.processRoleDeleted(id);
 
         // 3. 记录操作日志上下文
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+
+        LogRecordContext.putVariable("loginUser", loginUser);
         LogRecordContext.putVariable("role", role);
     }
 
@@ -301,9 +312,20 @@ public class RoleServiceImpl implements RoleService {
         return roleDataRepository.getRoleIdsByCodeAndTenantId(code, id);
     }
 
-    @TenantIgnore
-    public RoleDO getRoleByCodeIgnoreTenant(String code) {
-        return roleDataRepository.getRoleByCodeIgnoreTenant(code);
+    public RoleDO getRoleByCode(String code) {
+        return roleDataRepository.getRoleByCode(code);
+    }
+
+    @Override
+    public boolean hasAnyDevloperAdmin(Collection<Long> roleIds) {
+        if (CollectionUtils.isEmpty(roleIds)) {
+            return false;
+        }
+        // 通过代理对象调用，确保 @Cacheable 生效
+        return roleIds.stream().anyMatch(id -> {
+            RoleDO role = roleService.getRoleFromCache(id);
+            return role != null && (RoleCodeEnum.isDevloperAdmin(role.getCode()));
+        });
     }
 
 }

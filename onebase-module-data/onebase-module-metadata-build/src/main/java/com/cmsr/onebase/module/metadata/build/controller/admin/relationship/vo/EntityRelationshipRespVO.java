@@ -54,6 +54,15 @@ public class EntityRelationshipRespVO {
     @Schema(description = "目标字段展示名称", example = "用户ID")
     private String targetFieldDisplayName;
 
+    @Schema(description = "选择字段ID（数据选择关系类型时使用）", example = "3011")
+    private String selectFieldId;
+
+    @Schema(description = "选择字段名称", example = "name")
+    private String selectFieldName;
+
+    @Schema(description = "选择字段展示名称", example = "名称")
+    private String selectFieldDisplayName;
+
     @Schema(description = "级联类型", example = "READ")
     private String cascadeType;
 
@@ -61,10 +70,10 @@ public class EntityRelationshipRespVO {
     private String description;
 
     @Schema(description = "应用ID", example = "1001")
-    private Long appId;
+    private Long applicationId;
 
-    @Schema(description = "运行模式：0 编辑态，1 运行态", example = "0")
-    private Integer runMode;
+    @Schema(description = "版本标识", example = "0")
+    private Long versionTag;
 
     @Schema(description = "创建时间", example = "2025-07-28T10:30:00")
     private LocalDateTime createTime;

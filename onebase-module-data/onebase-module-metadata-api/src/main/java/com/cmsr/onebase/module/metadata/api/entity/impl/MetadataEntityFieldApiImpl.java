@@ -97,8 +97,9 @@ public class MetadataEntityFieldApiImpl implements MetadataEntityFieldApi {
     @Override
     public List<EntityFieldJdbcTypeRespDTO> getFieldJdbcTypes(@Valid @RequestBody EntityFieldJdbcTypeReqDTO reqDTO) {
         List<Long> fieldIds = reqDTO != null ? reqDTO.getFieldIds() : null;
-        Map<Long, Map<String, String>> fieldTypeInfo = metadataEntityFieldService.getFieldJdbcTypesWithFieldType(fieldIds);
-        
+        Map<Long, Map<String, String>> fieldTypeInfo = metadataEntityFieldService
+                .getFieldJdbcTypesWithFieldType(fieldIds);
+
         List<EntityFieldJdbcTypeRespDTO> result = new ArrayList<>();
         for (Map.Entry<Long, Map<String, String>> entry : fieldTypeInfo.entrySet()) {
             Long fieldId = entry.getKey();
@@ -106,7 +107,7 @@ public class MetadataEntityFieldApiImpl implements MetadataEntityFieldApi {
             String jdbcType = typeInfo.get("jdbcType");
             String fieldType = typeInfo.get("fieldType");
             String fieldName = typeInfo.get("fieldName");
-            
+
             EntityFieldJdbcTypeRespDTO dto = new EntityFieldJdbcTypeRespDTO();
             dto.setFieldId(fieldId);
             dto.setFieldName(fieldName);
@@ -114,7 +115,7 @@ public class MetadataEntityFieldApiImpl implements MetadataEntityFieldApi {
             dto.setFieldType(fieldType);
             result.add(dto);
         }
-        
+
         return result;
     }
 
@@ -131,7 +132,9 @@ public class MetadataEntityFieldApiImpl implements MetadataEntityFieldApi {
         // 按 entityId 分组，批量获取实体信息减少重复查询
         Map<Long, List<MetadataEntityFieldDO>> groupByEntity = new java.util.HashMap<>();
         for (MetadataEntityFieldDO f : fields) {
-            if (f.getEntityId() == null) { continue; }
+            if (f.getEntityId() == null) {
+                continue;
+            }
             groupByEntity.computeIfAbsent(f.getEntityId(), k -> new ArrayList<>()).add(f);
         }
         Map<Long, MetadataBusinessEntityDO> entityCache = new java.util.HashMap<>();
@@ -139,7 +142,8 @@ public class MetadataEntityFieldApiImpl implements MetadataEntityFieldApi {
         for (MetadataEntityFieldDO f : fields) {
             MetadataBusinessEntityDO entity = null;
             if (f.getEntityId() != null) {
-                entity = entityCache.computeIfAbsent(f.getEntityId(), id -> metadataBusinessEntityCoreService.getBusinessEntity(id));
+                entity = entityCache.computeIfAbsent(f.getEntityId(),
+                        id -> metadataBusinessEntityCoreService.getBusinessEntity(id));
             }
             String entityDisplayName = entity != null ? entity.getDisplayName() : null;
             String tableName = entity != null ? entity.getTableName() : null;
@@ -150,9 +154,10 @@ public class MetadataEntityFieldApiImpl implements MetadataEntityFieldApi {
 
     /**
      * DO -> DTO 转换公共方法，便于多处复用
-     * @param f 字段DO
+     * 
+     * @param f                 字段DO
      * @param entityDisplayName 实体显示名称
-     * @param tableName 表名
+     * @param tableName         表名
      * @return EntityFieldRespDTO
      */
     private EntityFieldRespDTO convertToRespDTO(MetadataEntityFieldDO f, String entityDisplayName, String tableName) {
@@ -173,11 +178,16 @@ public class MetadataEntityFieldApiImpl implements MetadataEntityFieldApi {
         dto.setIsPrimaryKey(f.getIsPrimaryKey());
         dto.setSortOrder(f.getSortOrder());
         dto.setFieldCode(f.getFieldCode());
-        dto.setRunMode(f.getRunMode());
-        dto.setAppId(f.getAppId());
+        dto.setVersionTag(f.getVersionTag());
+        dto.setApplicationId(f.getApplicationId());
         dto.setCreateTime(f.getCreateTime());
         dto.setUpdateTime(f.getUpdateTime());
         return dto;
+    }
+
+    @Override
+    public long countByDictTypeId(Long dictTypeId) {
+        return metadataEntityFieldService.countByDictTypeId(dictTypeId);
     }
 
 }

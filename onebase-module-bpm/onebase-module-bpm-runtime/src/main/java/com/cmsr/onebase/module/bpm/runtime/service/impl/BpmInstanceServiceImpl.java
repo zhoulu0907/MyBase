@@ -1,24 +1,26 @@
 package com.cmsr.onebase.module.bpm.runtime.service.impl;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
-import com.cmsr.onebase.module.app.api.auth.AppAuthRoleUser;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowInsBizExtRepository;
+import com.cmsr.onebase.module.bpm.core.dal.database.ext.BpmFlowDefinitionRepositoryExt;
 import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowInsBizExtDO;
 import com.cmsr.onebase.module.bpm.core.dto.BpmDefinitionExtDTO;
 import com.cmsr.onebase.module.bpm.core.dto.BpmGlobalConfigDTO;
 import com.cmsr.onebase.module.bpm.core.dto.PageViewGroupDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
-import com.cmsr.onebase.module.bpm.core.enums.*;
-import com.cmsr.onebase.module.bpm.core.service.BpmEngineDefExtService;
-import com.cmsr.onebase.module.bpm.core.utils.BpmUtil;
+import com.cmsr.onebase.module.bpm.core.enums.BpmBusinessStatusEnum;
+import com.cmsr.onebase.module.bpm.core.enums.BpmEleRunStatusEnum;
+import com.cmsr.onebase.module.bpm.core.enums.BpmNodeApproveStatusEnum;
+import com.cmsr.onebase.module.bpm.core.enums.BpmNodeTypeEnum;
 import com.cmsr.onebase.module.bpm.core.vo.design.BpmDefJsonVO;
-import com.cmsr.onebase.module.bpm.core.vo.design.node.base.BaseEdgeVO;
+import com.cmsr.onebase.module.bpm.core.vo.design.edge.base.BaseEdgeVO;
 import com.cmsr.onebase.module.bpm.runtime.service.BpmInstanceService;
 import com.cmsr.onebase.module.bpm.runtime.service.instance.detail.BpmDetailService;
-import com.cmsr.onebase.module.bpm.runtime.service.instance.exec.strategy.ExecTaskStrategyManager;
+import com.cmsr.onebase.module.bpm.runtime.service.instance.exec.impl.BpmExecServiceImpl;
 import com.cmsr.onebase.module.bpm.runtime.service.instance.operator.BpmOperatorRecordService;
 import com.cmsr.onebase.module.bpm.runtime.service.instance.predict.BpmPredictService;
 import com.cmsr.onebase.module.bpm.runtime.utils.PageViewUtil;
@@ -44,11 +46,12 @@ import org.dromara.warm.flow.core.dto.SkipJson;
 import org.dromara.warm.flow.core.entity.Definition;
 import org.dromara.warm.flow.core.entity.Instance;
 import org.dromara.warm.flow.core.entity.Task;
-import org.dromara.warm.flow.core.entity.User;
 import org.dromara.warm.flow.core.enums.PublishStatus;
 import org.dromara.warm.flow.core.enums.SkipType;
-import org.dromara.warm.flow.core.service.*;
-import org.dromara.warm.flow.core.service.impl.BpmConstants;
+import org.dromara.warm.flow.core.service.DefService;
+import org.dromara.warm.flow.core.service.InsService;
+import org.dromara.warm.flow.core.service.TaskService;
+import com.cmsr.onebase.module.bpm.core.enums.BpmConstants;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -68,19 +71,16 @@ import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionU
 @Service
 public class BpmInstanceServiceImpl implements BpmInstanceService {
     @Resource
-    private BpmEngineDefExtService defExtService;
+    private BpmFlowDefinitionRepositoryExt defExtService;
 
-    @Resource
+    @Resource(name = "bpmDefService")
     private DefService defService;
 
-    @Resource
+    @Resource(name = "bpmInsService")
     private InsService insService;
 
-    @Resource
+    @Resource(name = "bpmTaskService")
     private TaskService taskService;
-
-    @Resource
-    private UserService userService;
 
     @Resource
     private DataMethodApi dataMethodApi;
@@ -90,15 +90,6 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
 
     @Resource
     private AdminUserApi adminUserApi;
-
-    @Resource
-    private AppAuthRoleUser appAuthRoleUser;
-
-    @Resource
-    private NodeService nodeService;
-
-    @Resource
-    private ExecTaskStrategyManager execTaskStrategyManager;
 
     @Resource
     protected MetadataEntityFieldApi metadataEntityFieldApi;
@@ -114,6 +105,10 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
 
     @Resource
     private BpmPredictService predictService;
+
+    @Resource
+    private BpmExecServiceImpl bpmExecService;
+
 
     private String buildFormSummary(EntityVO entityVO, BpmDefinitionExtDTO defExtDTO) {
         StringBuilder sb = new StringBuilder();
@@ -173,6 +168,11 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
     public BpmSubmitRespVO submit(BpmSubmitReqVO reqVO) {
         BpmSubmitRespVO respVO = new BpmSubmitRespVO();
         String entityDataId = null;
+        Long applicationId = ApplicationManager.getApplicationId();
+
+        if (applicationId == null) {
+            throw new IllegalArgumentException("缺少应用ID");
+        }
 
         Definition def = defExtService.getByFormPathAndStatus(String.valueOf(reqVO.getBusinessId()), PublishStatus.PUBLISHED.getKey());
         if (def == null) {
@@ -227,7 +227,6 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
 
         // 传应用ID和实体ID
         BpmDefinitionExtDTO extDto = JsonUtils.parseObject(def.getExt(), BpmDefinitionExtDTO.class);
-        variables.put(BpmConstants.VAR_APP_ID_KEY, extDto.getAppId());
         variables.put(BpmConstants.VAR_ENTITY_ID_KEY, entityId);
         variables.put(BpmConstants.VAR_BINDING_VIEW_ID_KEY, reqVO.getBusinessId());
         variables.put(BpmConstants.VAR_PAGE_VIEW_GROUP_KEY, JsonUtils.toJsonString(pageViewGroupDTO));
@@ -312,7 +311,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         flowInsExtDO.setBindingViewId(def.getFormPath());
         flowInsExtDO.setBpmVersion("V" + def.getVersion());
         flowInsExtDO.setBpmTitle(bpmTitle);
-        flowInsExtDO.setInitiatorId(loginUserId);
+        flowInsExtDO.setInitiatorId(String.valueOf(loginUserId));
         flowInsExtDO.setInitiatorAvatar(userRespDTO.getAvatar());
         flowInsExtDO.setInitiatorName(initiatorName);
         flowInsExtDO.setInitiatorDeptId(userRespDTO.getDeptId());
@@ -320,9 +319,9 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         flowInsExtDO.setFormName(reqVO.getFormName());
         flowInsExtDO.setFormSummary(formSummary);
         flowInsExtDO.setInstanceId(instance.getId());
-        flowInsExtDO.setAppId(extDto.getAppId());
+        flowInsExtDO.setApplicationId(applicationId);
 
-        flowInsExtRepository.insert(flowInsExtDO);
+        flowInsExtRepository.save(flowInsExtDO);
 
         respVO.setInstanceId(instance.getId());
         respVO.setEntityDataId(entityDataId);
@@ -330,81 +329,9 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         return respVO;
     }
 
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public void execTask(ExecTaskReqVO reqVO) {
-        String taskId = reqVO.getTaskId();
-        User matchedUser = null;
-
-        BpmActionButtonEnum buttonEnum = BpmActionButtonEnum.getByCode(reqVO.getButtonType());
-        if (buttonEnum == null) {
-            throw exception(ErrorCodeConstants.UNSUPPORT_ACTION_BUTTON_TYPE);
-        }
-
-        // 查找task是否存在
-        Task task = taskService.getById(taskId);
-        if (task == null) {
-            throw exception(ErrorCodeConstants.FLOW_TASK_NOT_EXISTS);
-        }
-
-        Instance instance = insService.getById(task.getInstanceId());
-
-        if (instance == null) {
-            throw exception(ErrorCodeConstants.FLOW_INSTANCE_NOT_EXISTS);
-        }
-
-        if (instance.getBusinessId() == null) {
-            throw exception(ErrorCodeConstants.FLOW_NOT_BIND_ENTITY_ID);
-        }
-
-        Long entityDataId = Long.parseLong(instance.getBusinessId());
-
-        // 忽略前端传的entityDataId，使用流程实例绑定的实体数据ID
-        if (reqVO.getEntity() != null) {
-            reqVO.getEntity().setId(entityDataId);
-        }
-
-        String taskNodeCode = task.getNodeCode();
-        BaseNodeExtDTO extDTO = BpmUtil.getNodeExtDTOByNodeCode(taskNodeCode, instance.getDefJson());
-
-        if (extDTO == null) {
-            throw exception(ErrorCodeConstants.FLOW_NODE_NOT_EXISTS);
-        }
-
-        // 校验实体ID
-        if (reqVO.getEntity() != null) {
-            Long entityId = MapUtils.getLong(instance.getVariableMap(), BpmConstants.VAR_ENTITY_ID_KEY);
-
-            if (entityId == null) {
-                throw exception(ErrorCodeConstants.FLOW_NOT_BIND_ENTITY_ID);
-            }
-
-            if (!entityId.equals(reqVO.getEntity().getEntityId())) {
-                throw exception(ErrorCodeConstants.INVALID_ENTITY_ID);
-            }
-        }
-
-        List<User> users = userService.getByAssociateds(List.of(task.getId()),
-                BpmUserTypeEnum.APPROVAL.getCode(),
-                BpmUserTypeEnum.TRANSFER.getCode(),
-                BpmUserTypeEnum.DEPUTE.getCode(),
-                BpmUserTypeEnum.AGENT.getCode());
-        Long loginUserId = WebFrameworkUtils.getLoginUserId();
-
-        for (User user : users) {
-            if (user.getProcessedBy().equals(String.valueOf(loginUserId))) {
-                // 说明是当前登录用户拥有权限
-                matchedUser = user;
-                break;
-            }
-        }
-
-        if (matchedUser == null) {
-            throw exception(ErrorCodeConstants.FLOW_PERMISSION_DENY);
-        }
-
-        // 执行
-        execTaskStrategyManager.execute(matchedUser, task, extDTO, reqVO);
+        bpmExecService.execTask(reqVO);
     }
 
     @Override
@@ -504,8 +431,6 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
                 edgeVO.setSourceNodeId(skipJson.getNowNodeCode());
                 edgeVO.setTargetNodeId(skipJson.getNextNodeCode());
                 edgeVO.setName(skipJson.getSkipName());
-                edgeVO.setType(skipJson.getSkipType());
-                edgeVO.setSkipCondition(skipJson.getSkipCondition());
 
                 // 设置状态
                 BpmEleRunStatusEnum eleRunStatus = BpmEleRunStatusEnum.chartStatusToEleRunStatus(skipJson.getStatus());

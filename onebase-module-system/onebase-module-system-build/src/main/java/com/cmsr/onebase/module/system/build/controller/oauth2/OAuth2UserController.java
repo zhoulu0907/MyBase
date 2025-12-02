@@ -10,7 +10,7 @@ import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.PostDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.service.dept.DeptService;
-import com.cmsr.onebase.module.system.service.dept.PostService;
+import com.cmsr.onebase.module.system.service.post.PostService;
 import com.cmsr.onebase.module.system.service.user.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -24,7 +24,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
-import static com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils.getLoginUserId;
+import static com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils.getLoginUserId;
 
 /**
  * 提供给外部应用调用为主

@@ -19,6 +19,30 @@ tenant-id: {{adminTenantId}}
 
 response_type=code&client_id=default&scope={"user.read": true}&redirect_uri=https://www.aaa.com&auto_approve=false
 
+### 请求 /authorize 接口 => 自动授权场景(autoApprove=true)
+POST {{baseUrl}}/system/oauth2/authorize
+Content-Type: application/x-www-form-urlencoded
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+response_type=code&client_id=default&scope={"user.read":true}&redirect_uri=https://www.cmsr.com&auto_approve=true&state=123456
+
+### 请求 /authorize 接口 => 手动授权通过场景(approved=true)
+POST {{baseUrl}}/system/oauth2/authorize
+Content-Type: application/x-www-form-urlencoded
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+response_type=code&client_id=default&scope={"user.read":true,"user.write":true}&redirect_uri=https://www.cmsr.com&auto_approve=false&state=abcdef
+
+### 请求 /authorize 接口 => 手动授权拒绝场景(approved=false)
+POST {{baseUrl}}/system/oauth2/authorize
+Content-Type: application/x-www-form-urlencoded
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+response_type=token&client_id=default&scope={"user.read":false}&redirect_uri=https://www.cmsr.com&auto_approve=false&state=test123
+
 ### 请求 /system/oauth2/token + code 接口 => 成功
 POST {{baseUrl}}/system/oauth2/token
 Content-Type: application/x-www-form-urlencoded

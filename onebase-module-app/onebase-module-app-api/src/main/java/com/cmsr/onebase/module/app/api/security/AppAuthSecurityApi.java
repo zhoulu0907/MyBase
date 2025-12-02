@@ -9,9 +9,9 @@ import com.cmsr.onebase.module.app.api.security.bo.OperationPermission;
  */
 public interface AppAuthSecurityApi {
 
-    boolean checkMenuEntity(Long applicationId, Long menuId, Long entityId);
-
     boolean isApplicationAdmin(Long userId, Long applicationId);
+
+    boolean checkMenuEntity(Long applicationId, Long menuId,  String entityUuid);
 
     OperationPermission getMenuOperationPermission(Long userId, Long applicationId, Long menuId);
 

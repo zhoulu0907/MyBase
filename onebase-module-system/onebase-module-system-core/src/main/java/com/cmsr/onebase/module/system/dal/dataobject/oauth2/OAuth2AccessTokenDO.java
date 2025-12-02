@@ -13,7 +13,7 @@ import java.util.Map;
 
 /**
  * OAuth2 访问令牌 DO
- *
+ * <p>
  * 如下字段，暂时未使用，暂时不支持：
  * user_name、authentication（用户信息）
  *
@@ -23,60 +23,61 @@ import java.util.Map;
 @Accessors(chain = true)
 public class OAuth2AccessTokenDO extends TenantBaseDO {
 
-    public static final String ACCESS_TOKEN  = "access_token";
-    public static final String REFRESH_TOKEN = "refresh_token";
-    public static final String USER_ID       = "user_id";
-    public static final String USER_TYPE     = "user_type";
-    public static final String USER_INFO     = "user_info";
-    public static final String CLIENT_ID     = "client_id";
-    public static final String SCOPES        = "scopes";
-    public static final String EXPIRES_TIME  = "expires_time";
-    public static final String CORP_ID       = "corp_id";
-    public static final String APP_ID        = "app_id";
+    public static final String              ACCESS_TOKEN  = "access_token";
+    public static final String              REFRESH_TOKEN = "refresh_token";
+    public static final String              USER_ID       = "user_id";
+    public static final String              USER_TYPE     = "user_type";
+    public static final String              USER_INFO     = "user_info";
+    public static final String              CLIENT_ID     = "client_id";
+    public static final String              SCOPES        = "scopes";
+    public static final String              EXPIRES_TIME  = "expires_time";
+    public static final String              CORP_ID       = "corp_id";
+    public static final String              APP_ID        = "app_id";
+    public static final String              RUN_MODE      = "run_mode";
     /**
      * 访问令牌
      */
     @Column(name = ACCESS_TOKEN)
-    private String accessToken;
+    private             String              accessToken;
     /**
      * 刷新令牌
      */
     @Column(name = REFRESH_TOKEN)
-    private String refreshToken;
+    private             String              refreshToken;
     /**
      * 用户编号
      */
     @Column(name = USER_ID)
-    private Long userId;
+    private             Long                userId;
     /**
      * 用户类型
-     *
+     * <p>
      * 枚举 {@link UserTypeEnum}
      */
     @Column(name = USER_TYPE)
-    private Integer userType;
+    private             Integer             userType;
     /**
      * 用户信息
      */
     @Column(name = USER_INFO)
-    private Map<String, String> userInfo;
+    private             Map<String, String> userInfo;
     /**
      * 客户端编号
-     *
+     * <p>
      * 关联 {@link OAuth2ClientDO#getId()}
      */
     @Column(name = CLIENT_ID)
-    private String clientId;
+    private             String              clientId;
     /**
      * 授权范围
      */
     @Column(name = SCOPES)
-    private List<String> scopes;
+    private             List<String>        scopes;
     /**
      * 过期时间
      */
     @Column(name = EXPIRES_TIME)
-    private LocalDateTime expiresTime;
+    private             LocalDateTime       expiresTime;
 
     /**
      * 企业ID
@@ -89,4 +90,10 @@ public class OAuth2AccessTokenDO extends TenantBaseDO {
      */
     @Column(name = APP_ID)
     private Long appId;
+
+    /**
+     * 运行模式 see {@link com.cmsr.onebase.framework.common.enums.RunModeEnum}
+     */
+    @Column(name = RUN_MODE)
+    private String runMode;
 }

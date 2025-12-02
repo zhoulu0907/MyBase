@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.datamethodImpl;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
-import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import com.cmsr.onebase.module.flow.api.FlowProcessExecApiImpl;
@@ -18,6 +18,7 @@ import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodSubE
 import com.cmsr.onebase.module.metadata.core.domain.query.ProcessContext;
 import com.cmsr.onebase.module.metadata.core.enums.BooleanStatusEnum;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.AbstractMetadataDataMethodCoreService;
+import com.cmsr.onebase.module.metadata.core.service.datamethod.strategy.FieldValueTransformMode;
 import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.vo.ProcessedSubEntityVo;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -65,7 +66,7 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
         Map<String, Object> convertedData = convertFieldIdToFieldName(data, fields);
 
         List<String> toDeletedKeys = new ArrayList<>();
-        
+
         // 更新时不校验必填，只校验数据类型等
         for (Map.Entry<String, Object> entry : convertedData.entrySet()) {
             String fieldName = entry.getKey();
@@ -144,16 +145,16 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
         for (MetadataEntityFieldDO field : fields) {
             String fieldName = field.getFieldName();
             String fieldType = field.getFieldType();
-            
+
             if (fieldName == null || fieldType == null) {
                 continue;
             }
-            
+
             Object fieldValue = processedData.get(fieldName);
             if (fieldValue == null) {
                 continue;
             }
-            
+
             // 判断是否需要JSON序列化的字段类型
             if (needsJsonSerialization(fieldType, fieldValue)) {
                 try {
@@ -171,7 +172,7 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
 
     /**
      * 判断字段类型是否需要JSON序列化
-     * 
+     *
      * @param fieldType 字段类型
      * @param fieldValue 字段值
      * @return 是否需要序列化
@@ -180,9 +181,9 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
         if (fieldType == null) {
             return false;
         }
-        
+
         String upperFieldType = fieldType.toUpperCase();
-        
+
         // 字段类型包含以下关键字的需要JSON序列化
         boolean isComplexType = upperFieldType.contains("SELECT") ||       // 选择类型（包括SELECT、MULTI_SELECT、DATA_SELECTION等）
                                 upperFieldType.contains("MULTI") ||        // 多选类型（包括MULTI_USER、MULTI_DEPARTMENT等）
@@ -197,10 +198,10 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
                                 upperFieldType.contains("GEO") ||           // 地理位置（简写）
                                 upperFieldType.equals("JSONB") ||           // JSONB类型
                                 upperFieldType.equals("JSON");              // JSON类型
-        
+
         // 同时判断值是否为复杂对象（List或Map）
         boolean isComplexValue = fieldValue instanceof List || fieldValue instanceof Map;
-        
+
         return isComplexType && isComplexValue;
     }
 
@@ -218,6 +219,9 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
         AnylineService<?> temporaryService = context.getTemporaryService();
         Object id = context.getId();
 
+        // 应用存储策略（传入 context，允许策略访问完整上下文信息）
+        applyFieldStorageStrategies(processedData, fields, FieldValueTransformMode.STORE, context);
+
         TenantUtils.executeIgnore(() -> {
             // 1. 校验数据存在
             validateDataExistsWithService(temporaryService, quoteTableName(entity.getTableName()), id, fields);
@@ -234,19 +238,18 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
 
             // AnyLine开启事务
             TransactionState transactionState = temporaryService.start();
-
-            long updateCount = temporaryService.update(quoteTableName(entity.getTableName()), dataRow, configStore);
-            log.info("更新数据成功，实体ID: {}, 表名: {}, 更新记录数: {}", entityId, entity.getTableName(), updateCount);
             try {
+                long updateCount = temporaryService.update(quoteTableName(entity.getTableName()), dataRow, configStore);
+                log.info("更新数据成功，实体ID: {}, 表名: {}, 更新记录数: {}", entityId, entity.getTableName(), updateCount);
                 super.storeData(context);// 子表处理创建嵌套内部事务
                 log.info("子表处理完成，准备提交事务");
                 // 子表处理完成 提交事务
                 temporaryService.commit(transactionState);
             }catch (Exception e){
-                log.info("子表处理出现异常，准备回滚事务：{}",e.getMessage());
-                // 子表处理出现异常 回滚事务
+                log.info("数据更新出现异常，准备回滚事务：{}",e.getMessage());
+                // 数据更新出现异常 回滚事务
                 temporaryService.rollback(transactionState);
-                throw exception(DB_SUBENTITY_OPERATION_ERROR,e.getMessage());
+                throw exception(DB_OPERATION_ERROR_UPDATE,e.getMessage());
             }
 
             return null;
@@ -268,16 +271,16 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
             Long subEntityId = subEntityContext.getEntityId();
             List<Map<Long, Object>> subData = subEntityContext.getSubData();
 
-            String parentRelFieldId = relationshipDOS.stream().filter(relationshipDO ->
+            String parentRelFieldId = String.valueOf(relationshipDOS.stream().filter(relationshipDO ->
                             (subEntityId).equals(relationshipDO.getTargetEntityId())).
-                    map(MetadataEntityRelationshipDO::getSourceFieldId).findFirst().orElse(null);
+                    map(MetadataEntityRelationshipDO::getSourceFieldId).findFirst().orElse(null));
             MetadataEntityFieldDO parentEntityFieldDO = entityFieldRepository.findById(Long.valueOf(parentRelFieldId));
             String parentFiledName = parentEntityFieldDO.getFieldName();// 主表关联字段名称
 
 
-            String subRelFieldId = relationshipDOS.stream().filter(relationshipDO ->
+            String subRelFieldId = String.valueOf(relationshipDOS.stream().filter(relationshipDO ->
                             (subEntityId).equals(relationshipDO.getTargetEntityId())).
-                    map(MetadataEntityRelationshipDO::getTargetFieldId).findFirst().orElse(null);
+                    map(MetadataEntityRelationshipDO::getTargetFieldId).findFirst().orElse(null));
             MetadataEntityFieldDO subEntityFieldDO = entityFieldRepository.findById(Long.valueOf(subRelFieldId));
             String subRelFieldName = subEntityFieldDO.getFieldName();// 子表关联字段名称
 

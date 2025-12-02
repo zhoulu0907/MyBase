@@ -6,6 +6,7 @@ import com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 菜单 Service 接口
@@ -90,5 +91,11 @@ public interface MenuService {
      * @return 菜单数组
      */
     List<MenuDO> getAllActiveMenuList(Collection<Long> ids);
-
+    /**
+     * 获得菜单数组
+     *
+     * @param menuCodes 菜单编号数组
+     * @return 菜单数组
+     */
+    List<MenuDO> getAllActiveMenuListByCodes(Set<String> menuCodes);
 }
