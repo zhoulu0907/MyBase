@@ -82,8 +82,8 @@ public class AppMenuServiceImpl implements AppMenuService {
         if (userRoleDTO.isAdminRole()) {
             menuDOS = appMenuRepository.findVisibleByAppId(applicationId);
         } else {
-            Set<Long> menuIds = findVisibleMenuIds(applicationId, userRoleDTO.getRoleIds());
-            menuDOS = appMenuRepository.findVisibleByAppIdAndMenuIds(applicationId, menuIds);
+            Set<String> menuUuids = findVisibleMenuUuids(applicationId, userRoleDTO.getRoleIds());
+            menuDOS = appMenuRepository.findVisibleByAppIdAndMenuIds(applicationId, menuUuids);
         }
         List<MenuListRespVO> menuListRespList = new ArrayList<>();
         // 把第一层的菜单添加到列表中
@@ -113,9 +113,9 @@ public class AppMenuServiceImpl implements AppMenuService {
         return children.isEmpty() ? null : children;
     }
 
-    private Set<Long> findVisibleMenuIds(Long applicationId, Set<Long> roleIds) {
+    private Set<String> findVisibleMenuUuids(Long applicationId, Set<Long> roleIds) {
         List<AppAuthPermissionDO> permissions = appAuthPermissionProvider.findPermissions(applicationId, roleIds);
-        Set<Long> result = new HashSet<>();
+        Set<String> result = new HashSet<>();
         for (AppAuthPermissionDO permission : permissions) {
             if (NumberUtils.INTEGER_ONE.equals(permission.getIsPageAllowed()))
                 result.add(permission.getMenuUuid());
@@ -130,20 +130,20 @@ public class AppMenuServiceImpl implements AppMenuService {
         MenuPermissionVO menuPermissionVO = new MenuPermissionVO();
         menuPermissionVO.setOperationPermission(appAuthSecurityApi.getMenuOperationPermission(userId, applicationId, menuId));
         menuPermissionVO.setFieldPermission(appAuthSecurityApi.getMenuFieldPermission(userId, applicationId, menuId));
-        //menuPermissionVO.setViewIds(findMenuViews(userId, applicationId, menuId));
+        menuPermissionVO.setViewUuids(findMenuViews(userId, applicationId, menuId));
         return menuPermissionVO;
     }
 
-//    /**
-//     * 要缓存
-//     */
-//    public Set<String> findMenuViews(Long userId, Long applicationId, Long menuId) {
+    /**
+     * 要缓存
+     */
+    public Set<String> findMenuViews(Long userId, Long applicationId, Long menuId) {
 //        String redisKey = CacheUtils.keyForPagePermission(userId, applicationId, menuId);
 //        RBucket<Set<String>> bucket = redissonClient.getBucket(redisKey, CacheUtils.KRYO5_CODEC);
 //        if (bucket.isExists()) {
 //            return bucket.get();
 //        }
-//        //
+        //
 //        UserRoleDTO userRoleDTO = appAuthRoleProvider.findUserRoleByApplication(userId, applicationId);
 //        if (userRoleDTO.isAdminRole()) {
 //            return findMenuAllViews(applicationId, menuId);
@@ -155,11 +155,12 @@ public class AppMenuServiceImpl implements AppMenuService {
 //        Set<Long> roleIds = userRoleDTO.getRoleIds();
 //        Set<Long> result = appAuthViewRepository.findByAppIdAndRoleIdsAndMenuId(applicationId, roleIds, menuId)
 //                .stream().map(viewDO -> viewDO.getViewId()).collect(Collectors.toSet());
-//        //
+        //
 //        bucket.set(result, CacheUtils.CACHE_EXPIRE_TIME);
 //        return result;
-//    }
-//
+        return Collections.emptySet();
+    }
+
 //    private Set<String> findMenuAllViews(Long applicationId, Long menuId) {
 //        return appMenuRepository.findPageIdsByAppIdAndMenuId(applicationId, menuId);
 //    }

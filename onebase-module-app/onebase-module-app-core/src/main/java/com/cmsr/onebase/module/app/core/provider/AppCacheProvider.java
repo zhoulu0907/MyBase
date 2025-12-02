@@ -56,7 +56,7 @@ public class AppCacheProvider {
     }
 
     private Long findMenuId(Long applicationId, String menuUuid) {
-        return appMenuRepository.findByAppIdAndMenuUuid(applicationId, menuUuid);
+        return appMenuRepository.findByAppIdAndMenuUuid(applicationId, menuUuid).getId();
     }
 
     public void usersChanged(Long applicationId, List<Long> userIds) {

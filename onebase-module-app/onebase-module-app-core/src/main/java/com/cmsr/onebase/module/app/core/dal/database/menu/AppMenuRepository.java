@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Set;
 
 import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppMenuTableDef.APP_MENU;
+import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppResourcePageTableDef.APP_RESOURCE_PAGE;
 import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppResourcePagesetPageTableDef.APP_RESOURCE_PAGESET_PAGE;
 import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppResourcePagesetTableDef.APP_RESOURCE_PAGESET;
 
@@ -44,6 +45,13 @@ public class AppMenuRepository extends BaseBizRepository<AppMenuMapper, AppMenuD
         return count(queryWrapper);
     }
 
+    public AppMenuDO findByAppIdAndMenuUuid(Long applicationId, String menuUuid) {
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_MENU.APPLICATION_ID.eq(applicationId))
+                .where(APP_MENU.MENU_UUID.eq(menuUuid));
+        return this.getOne(queryWrapper);
+    }
+
     public void deleteByApplicationId(Long applicationId) {
         this.updateChain()
                 .eq(AppMenuDO::getApplicationId, applicationId)
@@ -62,11 +70,11 @@ public class AppMenuRepository extends BaseBizRepository<AppMenuMapper, AppMenuD
         return list(queryWrapper);
     }
 
-    public List<AppMenuDO> findVisibleByAppIdAndMenuIds(Long applicationId, Set<Long> menuIds) {
+    public List<AppMenuDO> findVisibleByAppIdAndMenuIds(Long applicationId, Set<String> menuUuids) {
         QueryWrapper queryWrapper = this.query()
-                .eq(AppMenuDO::getApplicationId, applicationId)
-                .in(AppMenuDO::getId, menuIds)
-                .eq(AppMenuDO::getIsVisible, 1);
+                .where(APP_MENU.APPLICATION_ID.eq(applicationId))
+                .where(APP_MENU.MENU_UUID.in(menuUuids))
+                .where(APP_MENU.IS_VISIBLE.eq(1));
         return list(queryWrapper);
     }
 
@@ -91,12 +99,17 @@ public class AppMenuRepository extends BaseBizRepository<AppMenuMapper, AppMenuD
     }
 
     public List<AppResourcePageDO> findPagesByMenuId(Long menuId) {
-        // TODO: 2025/8/6
-        return null;
+        QueryWrapper queryWrapper = QueryWrapper.create()
+                .select(
+                        APP_RESOURCE_PAGE.ALL_COLUMNS
+                ).from(APP_RESOURCE_PAGE)
+                .leftJoin(APP_MENU)
+                .on(APP_RESOURCE_PAGE.MENU_UUID.eq(APP_MENU.MENU_UUID)
+                        .and(APP_RESOURCE_PAGE.APPLICATION_ID.eq(APP_MENU.APPLICATION_ID))
+                        .and(APP_RESOURCE_PAGE.VERSION_TAG.eq(APP_MENU.VERSION_TAG))
+                )
+                .where(APP_MENU.ID.eq(menuId));
     }
 
 
-    public Long findByAppIdAndMenuUuid(Long applicationId, String menuUuid) {
-        return null;
-    }
 }
