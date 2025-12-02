@@ -67,6 +67,8 @@ public class DatasourceController {
     @Operation(summary = "新增数据源")
     @PreAuthorize("@ss.hasPermission('metadata:datasource:create')")
     public CommonResult<String> createDatasource(@Valid @RequestBody DatasourceSaveReqVO reqVO) {
+        // 从请求头获取应用ID
+        reqVO.setApplicationId(String.valueOf(ApplicationManager.getApplicationId()));
         Long id = datasourceBuildService.createDatasource(reqVO);
         return success(id.toString());
     }
@@ -75,6 +77,8 @@ public class DatasourceController {
     @Operation(summary = "修改数据源")
     @PreAuthorize("@ss.hasPermission('metadata:datasource:update')")
     public CommonResult<Boolean> updateDatasource(@Valid @RequestBody DatasourceSaveReqVO reqVO) {
+        // 从请求头获取应用ID
+        reqVO.setApplicationId(String.valueOf(ApplicationManager.getApplicationId()));
         datasourceBuildService.updateDatasource(reqVO);
         return success(true);
     }

@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.metadata.build.controller.admin.entity;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.EntityFieldBatchCreateReqVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.EntityFieldBatchCreateRespVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.EntityFieldBatchSortReqVO;
@@ -60,6 +61,8 @@ public class EntityFieldController {
     @Operation(summary = "批量为业务实体创建字段")
     @PreAuthorize("@ss.hasPermission('metadata:entity-field:create')")
     public CommonResult<EntityFieldBatchCreateRespVO> batchCreateEntityFields(@Valid @RequestBody EntityFieldBatchCreateReqVO reqVO) {
+        // 从请求头获取应用ID
+        reqVO.setApplicationId(String.valueOf(ApplicationManager.getApplicationId()));
         EntityFieldBatchCreateRespVO result = entityFieldService.batchCreateEntityFields(reqVO);
         return success(result);
     }
@@ -68,6 +71,8 @@ public class EntityFieldController {
     @Operation(summary = "为业务实体创建新字段")
     @PreAuthorize("@ss.hasPermission('metadata:entity-field:create')")
     public CommonResult<EntityFieldRespVO> createEntityField(@Valid @RequestBody EntityFieldSaveReqVO reqVO) {
+        // 从请求头获取应用ID
+        reqVO.setApplicationId(String.valueOf(ApplicationManager.getApplicationId()));
         EntityFieldRespVO result = entityFieldService.createEntityFieldWithRelated(reqVO);
         return success(result);
     }
@@ -106,6 +111,8 @@ public class EntityFieldController {
     @Operation(summary = "更新实体字段信息")
     @PreAuthorize("@ss.hasPermission('metadata:entity-field:update')")
     public CommonResult<Boolean> updateEntityField(@Valid @RequestBody EntityFieldSaveReqVO reqVO) {
+        // 从请求头获取应用ID
+        reqVO.setApplicationId(String.valueOf(ApplicationManager.getApplicationId()));
         Boolean result = entityFieldService.updateEntityFieldWithRelated(reqVO);
         return success(result);
     }
@@ -129,6 +136,8 @@ public class EntityFieldController {
     @Operation(summary = "批量保存实体字段（增删改）")
     @PreAuthorize("@ss.hasPermission('metadata:entity-field:update')")
     public CommonResult<EntityFieldBatchSaveRespVO> batchSave(@Valid @RequestBody EntityFieldBatchSaveReqVO reqVO) {
+        // 从请求头获取应用ID
+        reqVO.setApplicationId(String.valueOf(ApplicationManager.getApplicationId()));
         EntityFieldBatchSaveRespVO resp = entityFieldService.batchSaveEntityFields(reqVO);
         return success(resp);
     }
