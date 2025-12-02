@@ -40,8 +40,7 @@ public class DatasourceSaveReqVO {
     @Schema(description = "版本标识", example = "0")
     private Long versionTag;
 
-    @Schema(description = "应用ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
-    @NotNull(message = "应用ID不能为空")
+    @Schema(description = "应用ID", example = "1")
     private String applicationId;
 
     @Schema(description = "应用唯一UID（用于与数据源建立关联时的外部标识，可选）", example = "app_8df0f2a6")
