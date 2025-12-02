@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.bpm.convert;
 
-import com.cmsr.onebase.module.bpm.build.vo.design.BpmDesignVO;
+import com.cmsr.onebase.module.bpm.build.vo.design.BpmDesignRespVO;
+import com.cmsr.onebase.module.bpm.build.vo.design.BpmDesignSaveReqVO;
 import org.dromara.warm.flow.core.dto.DefJson;
 
 /**
@@ -14,7 +15,7 @@ public interface BpmDesignConvert {
      * @param defJson 流程定义JSON
      * @return 流程设计视图对象
      */
-    BpmDesignVO toFlowDesignVO(DefJson defJson);
+    BpmDesignRespVO toDesignRespVO(DefJson defJson);
 
     /**
      * 将流程设计视图对象转换为流程定义JSON
@@ -22,7 +23,7 @@ public interface BpmDesignConvert {
      * @param bpmDesignVO 流程设计视图对象
      * @return 流程定义JSON
      */
-    DefJson toDefJson(BpmDesignVO bpmDesignVO);
+    DefJson toDefJson(BpmDesignSaveReqVO bpmDesignVO);
 
     /**
      * 复制通用字段数据，如version
