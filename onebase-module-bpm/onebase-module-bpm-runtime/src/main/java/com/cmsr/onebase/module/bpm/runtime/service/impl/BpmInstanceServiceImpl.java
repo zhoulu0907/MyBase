@@ -188,7 +188,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         }
 
         // 详情视图页面和编辑视图页面
-        PageViewGroupDTO pageViewGroupDTO = pageViewUtil.findPageViewGroup(reqVO.getBusinessId());
+        PageViewGroupDTO pageViewGroupDTO = pageViewUtil.findPageViewGroupByMenuUuid(reqVO.getBusinessId());
 
         if (pageViewGroupDTO == null) {
             throw exception(ErrorCodeConstants.MISSING_EDIT_OR_DETAIL_PAGE_VIEW);
@@ -352,7 +352,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
     @Override
     public BpmPreviewRespVO flowPreview(BpmPreviewReqVO reqVO) {
         Long instanceId = reqVO.getInstanceId();
-        Long businessId = reqVO.getBusinessId();
+        String businessId = reqVO.getBusinessId();
 
         BpmPreviewRespVO respVO = new BpmPreviewRespVO();
 
@@ -380,7 +380,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
             defJson = FlowEngine.jsonConvert.strToBean(defJsonStr, DefJson.class);
         } else {
             // 查询已发布的流程定义
-            Definition definition = defExtService.getByFormPathAndStatus(String.valueOf(businessId), PublishStatus.PUBLISHED.getKey());
+            Definition definition = defExtService.getByFormPathAndStatus(businessId, PublishStatus.PUBLISHED.getKey());
             if (definition == null) {
                 log.error(ErrorCodeConstants.PUBLISHED_FLOW_NOT_EXISTS.getMsg());
                 throw exception(ErrorCodeConstants.PUBLISHED_FLOW_NOT_EXISTS);

@@ -165,19 +165,22 @@ public abstract class AbstractInstanceDetailStrategy<T extends BaseNodeExtDTO> i
     }
 
     protected Long getPageSetId(Instance instance) {
-        Long pageSetId = MapUtils.getLong(instance.getVariableMap(), BpmConstants.VAR_BINDING_VIEW_ID_KEY);
-        if (pageSetId == null) {
+        String menuUuid = MapUtils.getString(instance.getVariableMap(), BpmConstants.VAR_BINDING_VIEW_ID_KEY);
+        if (menuUuid == null) {
             // 兼容旧数据，再去查一次instanceExt表
             BpmFlowInsBizExtDO bizExtDO = bpmFlowInsBizExtRepository.findOneByInstanceId(instance.getId());
 
             if (bizExtDO != null) {
-                pageSetId = Long.valueOf(bizExtDO.getBindingViewId());
+                menuUuid = bizExtDO.getBindingViewId();
             }
         }
 
-        if (pageSetId == null) {
+        if (menuUuid == null) {
             throw exception(ErrorCodeConstants.MISSING_BINDING_VIEW_ID);
         }
+
+        // todo 通过menuUuid查询页面集ID
+        Long pageSetId = null;
 
         return pageSetId;
     }

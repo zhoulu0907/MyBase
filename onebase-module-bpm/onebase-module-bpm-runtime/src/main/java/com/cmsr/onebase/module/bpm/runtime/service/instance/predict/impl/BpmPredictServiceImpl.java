@@ -53,11 +53,11 @@ public class BpmPredictServiceImpl implements BpmPredictService {
 
     @Override
     public List<BpmPredictRespVO.NodeInfo> flowPredict(BpmPredictReqVO reqVO) {
-        Long businessId = reqVO.getBusinessId();
+        String businessId = reqVO.getBusinessId();
         Long loginUserId = WebFrameworkUtils.getLoginUserId();
         List<BpmPredictRespVO.NodeInfo> nodes = new ArrayList<>();
 
-        Definition definition = defExtService.getByFormPathAndStatus(String.valueOf(businessId), PublishStatus.PUBLISHED.getKey());
+        Definition definition = defExtService.getByFormPathAndStatus(businessId, PublishStatus.PUBLISHED.getKey());
         if (definition == null) {
             log.error(ErrorCodeConstants.PUBLISHED_FLOW_NOT_EXISTS.getMsg());
             throw exception(ErrorCodeConstants.PUBLISHED_FLOW_NOT_EXISTS);

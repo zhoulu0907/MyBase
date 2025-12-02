@@ -22,6 +22,14 @@ public class PageViewUtil {
     @Resource
     private AppResourceApi appResourceApi;
 
+    public PageViewGroupDTO findPageViewGroupByMenuUuid(String menuUuid){
+        Long pageSetId = null;
+
+        // todo 通过菜单uuid查询页面视图
+
+        return findPageViewGroup(pageSetId);
+    }
+
     public PageViewGroupDTO findPageViewGroup(Long pageSetId){
         // 详情视图页面和编辑视图页面
         PageViewDTO editPageView = null;
