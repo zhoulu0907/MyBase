@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.metadata.build.controller.admin.datasource;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.module.metadata.build.controller.admin.datasource.vo.*;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
 import com.cmsr.onebase.module.metadata.build.service.datasource.MetadataDatasourceBuildService;
@@ -66,6 +67,8 @@ public class DatasourceController {
     @Operation(summary = "新增数据源")
     @PreAuthorize("@ss.hasPermission('metadata:datasource:create')")
     public CommonResult<String> createDatasource(@Valid @RequestBody DatasourceSaveReqVO reqVO) {
+        // 从请求头获取应用ID
+        reqVO.setApplicationId(String.valueOf(ApplicationManager.getApplicationId()));
         Long id = datasourceBuildService.createDatasource(reqVO);
         return success(id.toString());
     }
@@ -74,6 +77,8 @@ public class DatasourceController {
     @Operation(summary = "修改数据源")
     @PreAuthorize("@ss.hasPermission('metadata:datasource:update')")
     public CommonResult<Boolean> updateDatasource(@Valid @RequestBody DatasourceSaveReqVO reqVO) {
+        // 从请求头获取应用ID
+        reqVO.setApplicationId(String.valueOf(ApplicationManager.getApplicationId()));
         datasourceBuildService.updateDatasource(reqVO);
         return success(true);
     }
@@ -113,9 +118,10 @@ public class DatasourceController {
     public CommonResult<List<DatasourceRespVO>> getDatasourceList(@Valid @RequestBody DatasourceListReqVO reqVO) {
         List<MetadataDatasourceDO> list;
 
-        // 根据是否传入appId来决定查询方式
-        if (reqVO.getApplicationId() != null && !reqVO.getApplicationId().trim().isEmpty()) {
-            list = datasourceBuildService.getDatasourceListByAppId(Long.valueOf(reqVO.getApplicationId()));
+        // 使用请求头中的应用ID
+        Long applicationId = ApplicationManager.getApplicationId();
+        if (applicationId != null) {
+            list = datasourceBuildService.getDatasourceListByAppId(applicationId);
         } else {
             list = datasourceBuildService.getDatasourceList();
         }

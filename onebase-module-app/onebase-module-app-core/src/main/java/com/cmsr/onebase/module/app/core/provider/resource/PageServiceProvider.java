@@ -75,7 +75,7 @@ public class PageServiceProvider {
 
 
     public List<PageDTO> listPageView(Long pageSetId) {
-        List<AppResourcePageDO> pageDOList = pageRepository.findAllFormPageByPageSetId(pageSetId);
+        List<AppResourcePageDO> pageDOList = pageRepository.findAllViewPageByPageSetId(pageSetId);
         List<PageDTO> pageDTOList = BeanUtils.toBean(pageDOList, PageDTO.class);
         return pageDTOList;
     }

@@ -4,6 +4,7 @@ import com.cmsr.onebase.module.bpm.core.dto.BpmGlobalConfigDTO;
 import com.cmsr.onebase.module.bpm.core.vo.design.BpmDefJsonVO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 /**
@@ -16,8 +17,36 @@ import lombok.Data;
  */
 
 @Data
-@Schema(description = "流程信息请求VO")
-public class BpmDesignVO extends BpmDefinitionVO {
+@Schema(description = "流程信息保存请求VO")
+public class BpmDesignSaveReqVO {
+    /**
+     * 保存必填字段
+     * 新增可以为空
+     */
+    @Schema(description = "主键id")
+    private Long id;
+
+    @Schema(description = "应用ID")
+    private Long appId;
+
+    @Schema(description = "流程编码")
+    private String flowCode;
+
+    @Schema(description = "流程名称")
+    private String flowName;
+
+    @Schema(description = "流程版本备注")
+    private String bpmVersionAlias;
+
+    /**
+     * 业务UUID，用于关联业务系统的业务数据
+     *
+     * 通常为表单UUID
+     */
+    @NotNull(message = "菜单UUID不能为空")
+    @Schema(description = "菜单UUID")
+    private String menuUuid;
+
     /**
      * 流程定义JSON
      */

@@ -34,8 +34,7 @@ public class ParentChildRelationshipSaveReqVO {
     @Size(max = 512, message = "子表描述长度不能超过512个字符")
     private String childTableDescription;
 
-    @Schema(description = "应用ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "12345")
-    @NotNull(message = "应用ID不能为空")
+    @Schema(description = "应用ID", example = "12345")
     private String applicationId;
 
     @Schema(description = "数据源ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")

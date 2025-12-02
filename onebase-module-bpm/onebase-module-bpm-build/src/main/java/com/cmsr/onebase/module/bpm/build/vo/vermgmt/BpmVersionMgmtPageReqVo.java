@@ -17,13 +17,13 @@ public class BpmVersionMgmtPageReqVo extends PageParam {
 
     @Schema(description = "表单ID", required = true, example = "113771690916872193")
     @NotNull(message = "表单ID不能为空")
-    private Long businessId;
+    private Long menuUuid;
 
     @Schema(description = "流程版本备注")
-    private String versionAlias;
+    private String bpmVersionAlias;
 
     @Schema(description = "流程版本状态")
-    private String versionStatus;
+    private String bpmVersionStatus;
 
     @Schema(description = "排序方式：update_time-按更新时间排序, create_time-按创建时间排序",
             example = "update_time", defaultValue = "update_time")

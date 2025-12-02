@@ -40,4 +40,16 @@ public class AppPageRepository extends ServiceImpl<AppResourcePageMapper, AppRes
                 .eq(AppResourcePageDO::getPageType, PageEnum.FORM.getValue());
         return list(queryWrapper);
     }
+
+    /**
+     * 根据pageSetId查询所有视图(list)页面
+     *
+     * @param pageSetId 页面集ID
+     * @return 视图页面列表
+     */
+    public List<AppResourcePageDO> findAllViewPageByPageSetId(Long pageSetId) {
+        QueryWrapper queryWrapper = this.query().eq(AppResourcePageDO::getPageSetId, pageSetId)
+                .eq(AppResourcePageDO::getPageType, PageEnum.LIST.getValue());
+        return list(queryWrapper);
+    }
 }

@@ -27,8 +27,7 @@ public class EntityFieldBatchCreateReqVO {
     @Valid
     private List<EntityFieldCreateItemVO> fields;
 
-    @Schema(description = "应用ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "12345")
-    @NotNull(message = "应用ID不能为空")
+    @Schema(description = "应用ID", example = "12345")
     private String applicationId;
 
 }
