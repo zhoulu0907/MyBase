@@ -12,7 +12,7 @@ public class FieldPermissionItem {
     /**
      * 字段ID
      */
-    private Long fieldId;
+    private String fieldUuid;
 
     /**
      * 可读
@@ -28,4 +28,8 @@ public class FieldPermissionItem {
      * 可下载
      */
     private boolean canDownload;
+
+    public Long getFieldId() {
+        return fieldUuid == null ? null : Long.parseLong(fieldUuid);
+    }
 }

@@ -40,7 +40,7 @@ public class AppAuthDataGroupProvider {
                 authDataGroupDO = AuthDefaultFactory.createAuthDataGroupDO();
             }
             dataPermissionGroup.setScopTags(toDataPermissionTags(authDataGroupDO.getScopeTags()));
-            dataPermissionGroup.setScopeFieldId(authDataGroupDO.getScopeFieldId());
+            dataPermissionGroup.setScopeFieldUuid(authDataGroupDO.getScopeFieldUuid());
             dataPermissionGroup.setScopeLevel(DataPermissionLevel.fromCode(authDataGroupDO.getScopeLevel()));
             dataPermissionGroup.setScopeValue(authDataGroupDO.getScopeValue());
             dataPermissionGroup.setFilters(toDataPermissionFilter(authDataGroupDO.getDataFilter()));

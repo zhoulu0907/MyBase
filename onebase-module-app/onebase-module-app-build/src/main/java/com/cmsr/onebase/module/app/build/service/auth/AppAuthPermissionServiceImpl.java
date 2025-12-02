@@ -168,62 +168,65 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
     @Override
     public void updatePageAllowed(AuthUpdatePageAllowedReqVO reqVO) {
         //
-        appCommonService.validateApplicationExist(reqVO.getPermissionReq().getApplicationId());
-        AppAuthRoleDO appAuthRoleDO = appCommonService.validateRoleExist(reqVO.getPermissionReq().getRoleId());
-        AppMenuDO appMenuDO = appCommonService.validateMenuExist(reqVO.getPermissionReq().getMenuId());
-        reqVO.getPermissionReq().setRoleUuid(appAuthRoleDO.getRoleUuid());
-        reqVO.getPermissionReq().setMenuUuid(appMenuDO.getMenuUuid());
+        AuthPermissionReq permissionReq = reqVO.getPermissionReq();
+        appCommonService.validateApplicationExist(permissionReq.getApplicationId());
+        AppAuthRoleDO appAuthRoleDO = appCommonService.validateRoleExist(permissionReq.getRoleId());
+        AppMenuDO appMenuDO = appCommonService.validateMenuExist(permissionReq.getMenuId());
+        permissionReq.setRoleUuid(appAuthRoleDO.getRoleUuid());
+        permissionReq.setMenuUuid(appMenuDO.getMenuUuid());
         //
-        AppAuthPermissionDO authPermissionDO = authPermissionRepository.findByQuery(reqVO.getPermissionReq());
+        AppAuthPermissionDO authPermissionDO = authPermissionRepository.findByQuery(permissionReq);
         if (authPermissionDO == null) {
-            authPermissionDO = AuthDefaultFactory.createAuthPermissionDO(reqVO.getPermissionReq());
+            authPermissionDO = AuthDefaultFactory.createAuthPermissionDO(permissionReq);
             authPermissionDO.setIsPageAllowed(reqVO.getIsPageAllowed());
             authPermissionRepository.save(authPermissionDO);
         } else {
             authPermissionDO.setIsPageAllowed(reqVO.getIsPageAllowed());
             authPermissionRepository.updateById(authPermissionDO);
         }
-        appCacheProvider.roleMenuChanged(reqVO.getPermissionReq());
+        appCacheProvider.roleMenuChanged(permissionReq.getApplicationId(), permissionReq.getRoleId(), permissionReq.getMenuId());
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateOperation(AuthUpdateOperationReqVO reqVO) {
         //
-        appCommonService.validateApplicationExist(reqVO.getPermissionReq().getApplicationId());
-        AppAuthRoleDO appAuthRoleDO = appCommonService.validateRoleExist(reqVO.getPermissionReq().getRoleId());
-        AppMenuDO appMenuDO = appCommonService.validateMenuExist(reqVO.getPermissionReq().getMenuId());
-        reqVO.getPermissionReq().setRoleUuid(appAuthRoleDO.getRoleUuid());
-        reqVO.getPermissionReq().setMenuUuid(appMenuDO.getMenuUuid());
+        AuthPermissionReq permissionReq = reqVO.getPermissionReq();
+        appCommonService.validateApplicationExist(permissionReq.getApplicationId());
+        AppAuthRoleDO appAuthRoleDO = appCommonService.validateRoleExist(permissionReq.getRoleId());
+        AppMenuDO appMenuDO = appCommonService.validateMenuExist(permissionReq.getMenuId());
+        permissionReq.setRoleUuid(appAuthRoleDO.getRoleUuid());
+        permissionReq.setMenuUuid(appMenuDO.getMenuUuid());
         //
-        AppAuthPermissionDO authPermissionDO = authPermissionRepository.findByQuery(reqVO.getPermissionReq());
+        AppAuthPermissionDO authPermissionDO = authPermissionRepository.findByQuery(permissionReq);
         if (authPermissionDO == null) {
-            authPermissionDO = AuthDefaultFactory.createAuthPermissionDO(reqVO.getPermissionReq());
+            authPermissionDO = AuthDefaultFactory.createAuthPermissionDO(permissionReq);
             authPermissionDO.setOperationTags(JsonUtils.toJsonString(reqVO.getOperationTags()));
             authPermissionRepository.save(authPermissionDO);
         } else {
             authPermissionDO.setOperationTags(JsonUtils.toJsonString(reqVO.getOperationTags()));
             authPermissionRepository.updateById(authPermissionDO);
         }
-        appCacheProvider.roleMenuChanged(reqVO.getPermissionReq());
+        appCacheProvider.roleMenuChanged(permissionReq.getApplicationId(), permissionReq.getRoleId(), permissionReq.getMenuId());
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateDataGroup(AuthUpdateDataGroupReqVO reqVO) {
         //
-        appCommonService.validateApplicationExist(reqVO.getPermissionReq().getApplicationId());
-        AppAuthRoleDO appAuthRoleDO = appCommonService.validateRoleExist(reqVO.getPermissionReq().getRoleId());
-        AppMenuDO appMenuDO = appCommonService.validateMenuExist(reqVO.getPermissionReq().getMenuId());
-        reqVO.getPermissionReq().setRoleUuid(appAuthRoleDO.getRoleUuid());
-        reqVO.getPermissionReq().setMenuUuid(appMenuDO.getMenuUuid());
+        AuthPermissionReq permissionReq = reqVO.getPermissionReq();
+        appCommonService.validateApplicationExist(permissionReq.getApplicationId());
+        AppAuthRoleDO appAuthRoleDO = appCommonService.validateRoleExist(permissionReq.getRoleId());
+        AppMenuDO appMenuDO = appCommonService.validateMenuExist(permissionReq.getMenuId());
+        permissionReq.setRoleUuid(appAuthRoleDO.getRoleUuid());
+        permissionReq.setMenuUuid(appMenuDO.getMenuUuid());
         //
         Long dataGroupId = reqVO.getAuthDataGroup().getId();
         if (dataGroupId == null || dataGroupId <= 0) {
             AppAuthDataGroupDO authDataGroupDO = new AppAuthDataGroupDO();
-            authDataGroupDO.setApplicationId(reqVO.getPermissionReq().getApplicationId());
-            authDataGroupDO.setRoleUuid(reqVO.getPermissionReq().getRoleUuid());
-            authDataGroupDO.setMenuUuid(reqVO.getPermissionReq().getMenuUuid());
+            authDataGroupDO.setApplicationId(permissionReq.getApplicationId());
+            authDataGroupDO.setRoleUuid(permissionReq.getRoleUuid());
+            authDataGroupDO.setMenuUuid(permissionReq.getMenuUuid());
             BeanUtils.copyProperties(reqVO.getAuthDataGroup(), authDataGroupDO);
             if (reqVO.getAuthDataGroup().getScopeTags() != null) {
                 authDataGroupDO.setScopeTags(JsonUtils.toJsonString(reqVO.getAuthDataGroup().getScopeTags()));
@@ -259,7 +262,7 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
             }
             authDataGroupRepository.updateById(authDataGroupDO, false);
         }
-        appCacheProvider.roleMenuChanged(reqVO.getPermissionReq());
+        appCacheProvider.roleMenuChanged(permissionReq.getApplicationId(), permissionReq.getRoleId(), permissionReq.getMenuId());
     }
 
     @Override
@@ -274,15 +277,16 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
     @Transactional(rollbackFor = Exception.class)
     public void updateField(AuthUpdateFieldReqVO reqVO) {
         //
-        appCommonService.validateApplicationExist(reqVO.getPermissionReq().getApplicationId());
-        AppAuthRoleDO appAuthRoleDO = appCommonService.validateRoleExist(reqVO.getPermissionReq().getRoleId());
-        AppMenuDO appMenuDO = appCommonService.validateMenuExist(reqVO.getPermissionReq().getMenuId());
-        reqVO.getPermissionReq().setRoleUuid(appAuthRoleDO.getRoleUuid());
-        reqVO.getPermissionReq().setMenuUuid(appMenuDO.getMenuUuid());
+        AuthPermissionReq permissionReq = reqVO.getPermissionReq();
+        appCommonService.validateApplicationExist(permissionReq.getApplicationId());
+        AppAuthRoleDO appAuthRoleDO = appCommonService.validateRoleExist(permissionReq.getRoleId());
+        AppMenuDO appMenuDO = appCommonService.validateMenuExist(permissionReq.getMenuId());
+        permissionReq.setRoleUuid(appAuthRoleDO.getRoleUuid());
+        permissionReq.setMenuUuid(appMenuDO.getMenuUuid());
         //
-        AppAuthPermissionDO authPermissionDO = authPermissionRepository.findByQuery(reqVO.getPermissionReq());
+        AppAuthPermissionDO authPermissionDO = authPermissionRepository.findByQuery(permissionReq);
         if (authPermissionDO == null) {
-            authPermissionDO = AuthDefaultFactory.createAuthPermissionDO(reqVO.getPermissionReq());
+            authPermissionDO = AuthDefaultFactory.createAuthPermissionDO(permissionReq);
             authPermissionDO.setIsAllFieldsAllowed(reqVO.getIsAllFieldsAllowed());
             authPermissionRepository.save(authPermissionDO);
         } else {
@@ -290,23 +294,20 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
             authPermissionRepository.updateById(authPermissionDO);
         }
         if (authPermissionDO != null && reqVO.getIsAllFieldsAllowed() == 1) {
-            authFieldRepository.deleteByQuery(reqVO.getPermissionReq());
+            authFieldRepository.deleteByQuery(permissionReq);
         }
         if (authPermissionDO != null && reqVO.getIsAllFieldsAllowed() == 0 && CollectionUtils.isNotEmpty(reqVO.getAuthFields())) {
             for (AuthFieldVO authField : reqVO.getAuthFields()) {
-                upsetAuthField(reqVO.getPermissionReq(), authField);
+                upsetAuthField(permissionReq, authField);
             }
         }
-        appCacheProvider.roleMenuChanged(reqVO.getPermissionReq());
+        appCacheProvider.roleMenuChanged(permissionReq.getApplicationId(), permissionReq.getRoleId(), permissionReq.getMenuId());
     }
 
     private void upsetAuthField(AuthPermissionReq permissionReq, AuthFieldVO authFieldVO) {
         AppAuthFieldDO authFieldDO = null;
         if (authFieldVO.getId() != null) {
             authFieldDO = authFieldRepository.getById(authFieldVO.getId());
-        }
-        if (authFieldDO == null) {
-            authFieldDO = authFieldRepository.findByQuery(permissionReq, authFieldVO.getFieldId());
         }
         if (authFieldDO == null) {
             authFieldDO = new AppAuthFieldDO();
@@ -329,15 +330,16 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
     @Override
     public void updateView(AuthUpdateViewReqVO reqVO) {
         //
-        appCommonService.validateApplicationExist(reqVO.getPermissionReq().getApplicationId());
-        AppAuthRoleDO appAuthRoleDO = appCommonService.validateRoleExist(reqVO.getPermissionReq().getRoleId());
-        AppMenuDO appMenuDO = appCommonService.validateMenuExist(reqVO.getPermissionReq().getMenuId());
-        reqVO.getPermissionReq().setRoleUuid(appAuthRoleDO.getRoleUuid());
-        reqVO.getPermissionReq().setMenuUuid(appMenuDO.getMenuUuid());
+        AuthPermissionReq permissionReq = reqVO.getPermissionReq();
+        appCommonService.validateApplicationExist(permissionReq.getApplicationId());
+        AppAuthRoleDO appAuthRoleDO = appCommonService.validateRoleExist(permissionReq.getRoleId());
+        AppMenuDO appMenuDO = appCommonService.validateMenuExist(permissionReq.getMenuId());
+        permissionReq.setRoleUuid(appAuthRoleDO.getRoleUuid());
+        permissionReq.setMenuUuid(appMenuDO.getMenuUuid());
         //
-        AppAuthPermissionDO authPermissionDO = authPermissionRepository.findByQuery(reqVO.getPermissionReq());
+        AppAuthPermissionDO authPermissionDO = authPermissionRepository.findByQuery(permissionReq);
         if (authPermissionDO == null) {
-            authPermissionDO = AuthDefaultFactory.createAuthPermissionDO(reqVO.getPermissionReq());
+            authPermissionDO = AuthDefaultFactory.createAuthPermissionDO(permissionReq);
             authPermissionDO.setIsAllViewsAllowed(reqVO.getIsAllViewsAllowed());
             authPermissionRepository.save(authPermissionDO);
         } else {
@@ -345,14 +347,14 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
             authPermissionRepository.updateById(authPermissionDO);
         }
         if (authPermissionDO != null && reqVO.getIsAllViewsAllowed() == 1) {
-            authViewRepository.deleteByQuery(reqVO.getPermissionReq());
+            authViewRepository.deleteByQuery(permissionReq);
         }
         if (authPermissionDO != null && reqVO.getIsAllViewsAllowed() == 0 && CollectionUtils.isNotEmpty(reqVO.getAuthViews())) {
             for (AuthViewVO authView : reqVO.getAuthViews()) {
-                upsetViewField(reqVO.getPermissionReq(), authView);
+                upsetViewField(permissionReq, authView);
             }
         }
-        appCacheProvider.roleMenuChanged(reqVO.getPermissionReq());
+        appCacheProvider.roleMenuChanged(permissionReq.getApplicationId(), permissionReq.getRoleId(), permissionReq.getMenuId());
     }
 
 
@@ -379,7 +381,7 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
 
     private List<AuthViewVO> queryAuthViews(Long menuId, AuthPermissionReq reqVO) {
         List<AppAuthViewDO> viewDOS = authViewRepository.findByQuery(reqVO);
-        List<AppResourcePageDO> pages = appMenuRepository.findPagesByMenuId (menuId);
+        List<AppResourcePageDO> pages = appMenuRepository.findPagesByMenuId(menuId);
         List<Pair<AppResourcePageDO, AppAuthViewDO>> pairs =
                 AuthUtils.leftOuterJoin(pages, viewDOS, (page, view) -> page.getPageUuid().equals(view.getViewUuid()));
         return pairs.stream().map(pair -> {
@@ -425,7 +427,6 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
             AppAuthFieldDO authFieldDO = pair.getRight();
             //
             AuthFieldVO authFieldVO = new AuthFieldVO();
-            authFieldVO.setFieldId(entityField.getId());
             //TODO 匹配字段用UUID
             authFieldVO.setFieldUuid(entityField.getId().toString());
             authFieldVO.setFieldType(entityField.getFieldType());

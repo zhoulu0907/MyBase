@@ -50,14 +50,14 @@ public class AppAuthSecurityApiImpl implements AppAuthSecurityApi {
     private AppAuthFieldProvider appAuthFieldProvider;
 
     @Override
-    public boolean checkMenuEntity(Long applicationId, Long menuId, Long entityId) {
+    public boolean checkMenuEntity(Long applicationId, Long menuId, String entityUuid) {
         AppMenuDO menuDO = appMenuProvider.findByMenuId(menuId);
         if (menuDO == null) {
             return false;
         }
         if (menuDO.getApplicationId().equals(applicationId)
                 && menuDO.getId().equals(menuId)
-                && menuDO.getEntityId().equals(entityId)) {
+                && menuDO.getEntityUuid().equals(entityUuid)) {
             return true;
         }
         return false;

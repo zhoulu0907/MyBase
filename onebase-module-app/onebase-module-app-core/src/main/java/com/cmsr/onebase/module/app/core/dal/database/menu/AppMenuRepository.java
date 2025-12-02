@@ -96,4 +96,7 @@ public class AppMenuRepository extends BaseBizRepository<AppMenuMapper, AppMenuD
     }
 
 
+    public Long findByAppIdAndMenuUuid(Long applicationId, String menuUuid) {
+        return null;
+    }
 }

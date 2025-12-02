@@ -33,17 +33,17 @@ public class AppAuthViewRepository extends BaseBizRepository<AppAuthViewMapper, 
 
     public void deleteByQuery(AuthPermissionReq reqVO) {
         this.updateChain()
-                .eq(AppAuthViewDO::getApplicationId, reqVO.getApplicationId())
-                .eq(AppAuthViewDO::getRoleId, reqVO.getRoleId())
-                .eq(AppAuthViewDO::getViewId, reqVO.getMenuId())
+                .where(APP_AUTH_VIEW.APPLICATION_ID.eq(reqVO.getApplicationId()))
+                .where(APP_AUTH_VIEW.ROLE_UUID.eq(reqVO.getRoleUuid()))
+                .where(APP_AUTH_VIEW.MENU_UUID.eq(reqVO.getMenuId()))
                 .remove();
     }
 
-    public List<AppAuthViewDO> findByAppIdAndRoleIdsAndMenuId(Long applicationId, Set<Long> roleIds, Long menuId) {
-        QueryWrapper queryWrapper = this.query()
-                .eq(AppAuthViewDO::getApplicationId, applicationId)
-                .in(AppAuthViewDO::getRoleId, roleIds)
-                .eq(AppAuthViewDO::getMenuId, menuId);
-        return this.list(queryWrapper);
-    }
+//    public List<AppAuthViewDO> findByAppIdAndRoleIdsAndMenuId(Long applicationId, Set<Long> roleIds, Long menuId) {
+//        QueryWrapper queryWrapper = this.query()
+//                .eq(AppAuthViewDO::getApplicationId, applicationId)
+//                .in(AppAuthViewDO::getRoleId, roleIds)
+//                .eq(AppAuthViewDO::getMenuId, menuId);
+//        return this.list(queryWrapper);
+//    }
 }
