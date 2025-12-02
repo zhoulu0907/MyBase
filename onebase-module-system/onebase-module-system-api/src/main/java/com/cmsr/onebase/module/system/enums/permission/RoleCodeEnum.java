@@ -123,6 +123,9 @@ public enum RoleCodeEnum {
      * 企业全部用户的默认权限(建议未来迁移到数据库配置)
      */
     public static final Set<String> corpDefaultPermissionCodes = new HashSet<>() {{
+        add("tenant"); // 一级
+        add("tenant:app"); // 应用管理
+        add("tenant:app:query");  //应用查看
 
         add("corp"); // 一级
 
@@ -132,4 +135,15 @@ public enum RoleCodeEnum {
         add("corp:dept"); // 二级 部门
         add("corp:dept:query"); // 三级 部门查看
     }};
+
+
+    /**
+     * 全部用户的默认权限(建议未来迁移到数据库配置)
+     */
+    public static final Set<String> globalDefaultPermissionCodes = new HashSet<>() {{
+        add("tenant"); // 一级
+        add("tenant:app"); // 应用管理
+        add("tenant:app:query");  //应用查看
+    }};
+
 }
