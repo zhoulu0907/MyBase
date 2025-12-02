@@ -72,4 +72,5 @@ public class MetadataValidationChildNotEmptyDO extends BaseTenantEntity {
 
     @Column(value = "application_id", comment = "应用ID")
     private Long applicationId;
+
 }

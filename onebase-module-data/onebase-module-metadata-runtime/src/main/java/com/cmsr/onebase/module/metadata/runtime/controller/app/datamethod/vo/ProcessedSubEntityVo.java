@@ -18,7 +18,7 @@ public class ProcessedSubEntityVo {
 
     private String id; //删除/修改操作时的数据行id
 
-    private Long subEntityId; //子表对应的实体id
+    private String subEntityId; //子表对应的实体UUID
 
     private Map subData; //子表数据
 

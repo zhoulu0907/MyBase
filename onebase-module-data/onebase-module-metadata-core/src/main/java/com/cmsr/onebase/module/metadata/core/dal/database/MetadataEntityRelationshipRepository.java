@@ -193,4 +193,22 @@ public class MetadataEntityRelationshipRepository extends ServiceImpl<MetadataEn
         log.warn("使用已弃用的方法 getRelationshipsByFieldId，建议迁移到 getRelationshipsByFieldUuid");
         return List.of();
     }
+
+    /**
+     * 根据源实体ID查询关系列表（兼容旧代码）
+     * @deprecated 请使用 {@link #findBySourceEntityUuid(String)}
+     */
+    @Deprecated
+    public List<MetadataEntityRelationshipDO> findBySourceEntityId(Long sourceEntityId) {
+        return findBySourceEntityUuid(sourceEntityId != null ? String.valueOf(sourceEntityId) : null);
+    }
+
+    /**
+     * 根据目标实体ID查询关系列表（兼容旧代码）
+     * @deprecated 请使用 {@link #findByTargetEntityUuid(String)}
+     */
+    @Deprecated
+    public List<MetadataEntityRelationshipDO> findByTargetEntityId(Long targetEntityId) {
+        return findByTargetEntityUuid(targetEntityId != null ? String.valueOf(targetEntityId) : null);
+    }
 }

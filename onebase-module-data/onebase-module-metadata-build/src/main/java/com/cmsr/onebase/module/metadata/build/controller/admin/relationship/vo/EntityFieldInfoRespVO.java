@@ -28,4 +28,13 @@ public class EntityFieldInfoRespVO {
 
     @Schema(description = "显示名称", example = "用户名")
     private String displayName;
+
+    /**
+     * 设置字段ID（兼容旧代码）
+     * @deprecated 请使用 setFieldUuid()
+     */
+    @Deprecated
+    public void setFieldId(String fieldId) {
+        this.fieldUuid = fieldId;
+    }
 }

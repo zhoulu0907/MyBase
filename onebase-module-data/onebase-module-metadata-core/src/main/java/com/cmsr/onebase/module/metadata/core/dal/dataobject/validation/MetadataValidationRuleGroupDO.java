@@ -76,4 +76,5 @@ public class MetadataValidationRuleGroupDO extends BaseTenantEntity {
      */
     @Column(value = "entity_uuid", comment = "实体UUID")
     private String entityUuid;
+
 }

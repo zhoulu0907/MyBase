@@ -41,6 +41,29 @@ public class MetadataAutoNumberRuleItemRepository extends ServiceImpl<MetadataAu
                 .eq(MetadataAutoNumberRuleItemDO::getConfigUuid, configUuid);
         remove(queryWrapper);
     }
+
+    // ==================== 向后兼容方法 ====================
+
+    /**
+     * 根据配置ID获取规则项列表（兼容旧代码）
+     * @deprecated 请使用 listByConfigUuid(String)
+     * @param configId 配置ID
+     * @return 规则项列表
+     */
+    @Deprecated
+    public List<MetadataAutoNumberRuleItemDO> listByConfig(Long configId) {
+        return listByConfigUuid(configId != null ? String.valueOf(configId) : null);
+    }
+
+    /**
+     * 根据配置ID删除规则项（兼容旧代码）
+     * @deprecated 请使用 deleteByConfigUuid(String)
+     * @param configId 配置ID
+     */
+    @Deprecated
+    public void deleteByConfigId(Long configId) {
+        deleteByConfigUuid(configId != null ? String.valueOf(configId) : null);
+    }
 }
 
 

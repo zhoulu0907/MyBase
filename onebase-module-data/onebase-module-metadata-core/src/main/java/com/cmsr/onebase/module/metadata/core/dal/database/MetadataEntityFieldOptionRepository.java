@@ -73,6 +73,29 @@ public class MetadataEntityFieldOptionRepository extends ServiceImpl<MetadataEnt
     public boolean deleteById(Long id) {
         return removeById(id);
     }
+
+    // ==================== 向后兼容方法 ====================
+
+    /**
+     * 根据字段ID获取字段选项列表（兼容旧代码）
+     * @deprecated 请使用 findAllByFieldUuid(String)
+     * @param fieldId 字段ID
+     * @return 字段选项列表
+     */
+    @Deprecated
+    public List<MetadataEntityFieldOptionDO> findAllByFieldId(Long fieldId) {
+        return findAllByFieldUuid(fieldId != null ? String.valueOf(fieldId) : null);
+    }
+
+    /**
+     * 根据字段ID删除字段选项（兼容旧代码）
+     * @deprecated 请使用 deleteByFieldUuid(String)
+     * @param fieldId 字段ID
+     */
+    @Deprecated
+    public void deleteByFieldId(Long fieldId) {
+        deleteByFieldUuid(fieldId != null ? String.valueOf(fieldId) : null);
+    }
 }
 
 

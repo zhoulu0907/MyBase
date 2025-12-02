@@ -54,6 +54,18 @@ public interface MetadataBusinessEntityCoreService {
     MetadataBusinessEntityDO getBusinessEntityByUuid(String entityUuid);
 
     /**
+     * 根据UUID或ID获得业务实体 - 兼容方法
+     *
+     * @param entityUuidOrId 业务实体UUID或ID字符串
+     * @return 业务实体DO
+     * @deprecated 请使用 {@link #getBusinessEntityByUuid(String)} 方法
+     */
+    @Deprecated
+    default MetadataBusinessEntityDO getBusinessEntity(String entityUuidOrId) {
+        return getBusinessEntityByUuid(entityUuidOrId);
+    }
+
+    /**
      * 获得业务实体列表
      *
      * @return 业务实体列表

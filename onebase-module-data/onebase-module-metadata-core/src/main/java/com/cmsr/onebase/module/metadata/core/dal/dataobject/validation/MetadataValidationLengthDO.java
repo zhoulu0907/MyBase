@@ -71,15 +71,4 @@ public class MetadataValidationLengthDO extends BaseTenantEntity {
     @Column(value = "application_id", comment = "应用ID")
     private Long applicationId;
 
-    // ==================== 向后兼容方法 ====================
-
-    /**
-     * 获取规则组ID（兼容旧代码）
-     * @deprecated 请使用 {@link #getGroupUuid()} 代替
-     * @return 规则组UUID
-     */
-    @Deprecated
-    public String getGroupId() {
-        return this.groupUuid;
-    }
 }

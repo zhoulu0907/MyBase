@@ -25,9 +25,14 @@ public class MetadataDataMethodRequestContext {
      */
     private ClientTypeEnum clientTypeEnum = ClientTypeEnum.RUNTIME;
     /**
-     * 实体ID
+     * 实体ID（兼容字段，建议使用entityUuid）
      */
     private Long entityId;
+    
+    /**
+     * 实体UUID
+     */
+    private String entityUuid;
     /**
      * 数据ID
      */

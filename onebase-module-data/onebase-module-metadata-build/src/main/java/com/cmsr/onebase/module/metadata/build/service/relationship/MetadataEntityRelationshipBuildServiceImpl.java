@@ -190,18 +190,19 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
                 return new PageResult<>(List.of(), 0L);
             }
 
-            // 使用 OR 条件：(source_entity_id = entityId OR target_entity_id = entityId)
-            queryWrapper.where(MetadataEntityRelationshipDO::getSourceEntityId).eq(entityIdLong)
-                    .or(MetadataEntityRelationshipDO::getTargetEntityId).eq(entityIdLong);
+            // 使用 OR 条件：(source_entity_uuid = entityUuid OR target_entity_uuid = entityUuid)
+            String entityUuid = pageReqVO.getEntityId();
+            queryWrapper.where(MetadataEntityRelationshipDO::getSourceEntityUuid).eq(entityUuid)
+                    .or(MetadataEntityRelationshipDO::getTargetEntityUuid).eq(entityUuid);
 
             log.info("查询实体相关关系，实体ID: {}，找到 {} 条相关记录", pageReqVO.getEntityId(), existingRelations.size());
         } else {
-            // 如果没有传入 entityId，则使用精确的源实体ID和目标实体ID查询
+            // 如果没有传入 entityId，则使用精确的源实体UUID和目标实体UUID查询
             if (StringUtils.hasText(pageReqVO.getSourceEntityId())) {
-                queryWrapper.eq(MetadataEntityRelationshipDO::getSourceEntityId, Long.valueOf(pageReqVO.getSourceEntityId()));
+                queryWrapper.eq(MetadataEntityRelationshipDO::getSourceEntityUuid, pageReqVO.getSourceEntityId());
             }
             if (StringUtils.hasText(pageReqVO.getTargetEntityId())) {
-                queryWrapper.eq(MetadataEntityRelationshipDO::getTargetEntityId, Long.valueOf(pageReqVO.getTargetEntityId()));
+                queryWrapper.eq(MetadataEntityRelationshipDO::getTargetEntityUuid, pageReqVO.getTargetEntityId());
             }
         }
 
@@ -353,14 +354,14 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
             return List.of();
         }
 
-        List<Long> entityIds = entities.stream()
-                .map(MetadataBusinessEntityDO::getId)
+        List<String> entityUuids = entities.stream()
+                .map(MetadataBusinessEntityDO::getEntityUuid)
                 .toList();
 
         // 查询涉及这些实体的所有关系 - 使用 OR + IN
         QueryWrapper queryWrapper = entityRelationshipRepository.query()
-                .in(MetadataEntityRelationshipDO::getSourceEntityId, entityIds)
-                .or(MetadataEntityRelationshipDO::getTargetEntityId).in(entityIds)
+                .in(MetadataEntityRelationshipDO::getSourceEntityUuid, entityUuids)
+                .or(MetadataEntityRelationshipDO::getTargetEntityUuid).in(entityUuids)
                 .orderBy(MetadataEntityRelationshipDO::getCreateTime, false);
 
         List<MetadataEntityRelationshipDO> relationships = entityRelationshipRepository.list(queryWrapper);
@@ -531,7 +532,7 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
             req.setEntityType(1); // 自建表
             req.setVersionTag(0L); // 默认运行模式
             // 关键修复：使用主表的datasourceUuid，确保主子表在同一个数据源下
-            req.setDatasourceId(parentEntity.getDatasourceUuid());
+            req.setDatasourceUuid(parentEntity.getDatasourceUuid());
         });
 
         Long childEntityId = businessEntityBuildService.createBusinessEntity(entityReqVO);
@@ -613,7 +614,7 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
 
         // 3. 查询以该实体为源实体的所有关系（即该实体作为父表的关系）
         QueryWrapper queryWrapper = entityRelationshipRepository.query()
-                .eq(MetadataEntityRelationshipDO::getSourceEntityId, entityId);
+                .eq(MetadataEntityRelationshipDO::getSourceEntityUuid, entity.getEntityUuid());
         // 增加关系类型筛选条件
         if (StringUtils.hasText(relationshipType)) {
             queryWrapper.eq(MetadataEntityRelationshipDO::getRelationshipType, relationshipType);
@@ -645,14 +646,14 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
      * @return 子表信息
      */
     private ChildEntityInfoRespVO convertToChildEntityInfo(MetadataEntityRelationshipDO relationshipDO) {
-        // 获取目标实体信息
-        MetadataBusinessEntityDO targetEntity = businessEntityService.getBusinessEntity(relationshipDO.getTargetEntityId());
+        // 获取目标实体信息（使用UUID查询）
+        MetadataBusinessEntityDO targetEntity = businessEntityService.getBusinessEntityByUuid(relationshipDO.getTargetEntityUuid());
         // 关联的目标实体为空（不存在或被删除）直接跳过后续处理
         if (targetEntity == null) {
             return null;
         }
         ChildEntityInfoRespVO childInfo = BeanUtils.toBean(relationshipDO, ChildEntityInfoRespVO.class, info -> {
-                info.setChildEntityId(relationshipDO.getTargetEntityId());
+                info.setChildEntityId(relationshipDO.getTargetEntityUuid());
                 info.setRelationshipId(String.valueOf(relationshipDO.getId()));
                 info.setRelationshipName(relationshipDO.getRelationName());
                 info.setRelationshipType(relationshipDO.getRelationshipType());
@@ -782,12 +783,12 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
     }
 
     /**
-     * 根据字段id删除关联关系 包括字段作为 源字段和目标字段 两种情况
-     * @param fieldId 字段ID
+     * 根据字段UUID删除关联关系 包括字段作为 源字段和目标字段 两种情况
+     * @param fieldUuid 字段UUID
      */
     @Override
-    public void deleteRelationShipByFieldId(Long fieldId){
-        List<MetadataEntityRelationshipDO> relationships = entityRelationshipRepository.getRelationshipsByFieldId(fieldId);
+    public void deleteRelationShipByFieldId(String fieldUuid){
+        List<MetadataEntityRelationshipDO> relationships = entityRelationshipRepository.getRelationshipsByFieldUuid(fieldUuid);
         List<Long> ids = relationships.stream().map(MetadataEntityRelationshipDO::getId).collect(Collectors.toList());
         for(Long id : ids){
             entityRelationshipRepository.removeById(id);
@@ -797,9 +798,10 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
     @Override
     @Deprecated
     public List<MetadataEntityRelationshipDO> findBySourceEntityIdAndTargetEntityId(Long sourceEntityId, Long targetEntityId) {
+        // 此方法已废弃，请使用 findBySourceEntityUuidAndTargetEntityUuid
         QueryWrapper queryWrapper = entityRelationshipRepository.query()
-                .eq(MetadataEntityRelationshipDO::getSourceEntityId, sourceEntityId)
-                .eq(MetadataEntityRelationshipDO::getTargetEntityId, targetEntityId)
+                .eq(MetadataEntityRelationshipDO::getSourceEntityUuid, String.valueOf(sourceEntityId))
+                .eq(MetadataEntityRelationshipDO::getTargetEntityUuid, String.valueOf(targetEntityId))
                 .orderBy(MetadataEntityRelationshipDO::getCreateTime, false);
         return entityRelationshipRepository.list(queryWrapper);
     }

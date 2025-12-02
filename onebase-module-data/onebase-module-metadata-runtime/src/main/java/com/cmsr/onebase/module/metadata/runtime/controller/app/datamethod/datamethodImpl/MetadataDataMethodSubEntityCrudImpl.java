@@ -27,7 +27,7 @@ public class MetadataDataMethodSubEntityCrudImpl {
     public Map<String, Object>  doInsert(ProcessedSubEntityVo processedSubEntityVo){
 
         MetadataDataMethodRequestContext methodCoreContext = new MetadataDataMethodRequestContext();
-        methodCoreContext.setEntityId(processedSubEntityVo.getSubEntityId());
+        methodCoreContext.setEntityUuid(processedSubEntityVo.getSubEntityId());
         methodCoreContext.setData(processedSubEntityVo.getSubData());
         methodCoreContext.setMethodCode("");
         methodCoreContext.setTraceId(processedSubEntityVo.getTraceId());
@@ -43,7 +43,7 @@ public class MetadataDataMethodSubEntityCrudImpl {
     public Map<String, Object>  doUpdate(ProcessedSubEntityVo processedSubEntityVo){
 
         MetadataDataMethodRequestContext methodCoreContext = new MetadataDataMethodRequestContext();
-        methodCoreContext.setEntityId(processedSubEntityVo.getSubEntityId());
+        methodCoreContext.setEntityUuid(processedSubEntityVo.getSubEntityId());
         methodCoreContext.setId(processedSubEntityVo.getId());
         methodCoreContext.setData(processedSubEntityVo.getSubData());
         methodCoreContext.setMethodCode("");
@@ -59,7 +59,7 @@ public class MetadataDataMethodSubEntityCrudImpl {
     public void doDelete(ProcessedSubEntityVo processedSubEntityVo){
 
         MetadataDataMethodRequestContext methodCoreContext = new MetadataDataMethodRequestContext();
-        methodCoreContext.setEntityId(processedSubEntityVo.getSubEntityId());
+        methodCoreContext.setEntityUuid(processedSubEntityVo.getSubEntityId());
         methodCoreContext.setId(processedSubEntityVo.getId());
         methodCoreContext.setMethodCode("");
         methodCoreContext.setMenuId(processedSubEntityVo.getMenuId());

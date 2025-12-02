@@ -58,4 +58,24 @@ public class ValidationRuleGroupSaveReqVO {
     @Schema(description = "业务实体UUID", example = "01onal1s-0000-0000-0000-000000000002")
     private String entityUuid;
 
+    // ==================== 向后兼容方法 ====================
+
+    /**
+     * 设置业务实体ID（兼容旧代码）
+     * @deprecated 请使用 setEntityUuid()
+     */
+    @Deprecated
+    public void setEntityId(Long entityId) {
+        this.entityUuid = entityId != null ? String.valueOf(entityId) : null;
+    }
+
+    /**
+     * 设置业务实体ID（兼容旧代码）
+     * @deprecated 请使用 setEntityUuid()
+     */
+    @Deprecated
+    public void setEntityId(String entityId) {
+        this.entityUuid = entityId;
+    }
+
 }

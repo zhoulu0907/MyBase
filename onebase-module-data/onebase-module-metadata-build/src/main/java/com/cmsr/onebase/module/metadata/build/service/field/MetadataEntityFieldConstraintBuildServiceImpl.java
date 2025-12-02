@@ -32,6 +32,7 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
     @Resource private MetadataValidationUniqueBuildService uniqueService;
     @Resource private MetadataValidationRangeBuildService rangeService;
     @Resource private MetadataValidationChildNotEmptyBuildService childNotEmptyService;
+    @Resource private MetadataValidationRuleGroupBuildService validationRuleGroupService;
     @Resource private MetadataEntityFieldRepository entityFieldRepository;
     @Resource private MetadataBusinessEntityCoreService metadataBusinessEntityCoreService;
 
@@ -196,7 +197,12 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
             } else {
                 // 直接创建UpdateReqVO对象，避免DO到VO的转换问题
                 ValidationRequiredUpdateReqVO requiredUpdateVO = new ValidationRequiredUpdateReqVO();
-                requiredUpdateVO.setId(exist.getGroupUuid());
+                // 需要通过groupUuid获取规则组ID
+                var ruleGroup = validationRuleGroupService.getValidationRuleGroupByUuid(exist.getGroupUuid());
+                if (ruleGroup == null) {
+                    throw new IllegalStateException("字段" + req.getFieldUuid() + "的规则组不存在，无法更新必填校验");
+                }
+                requiredUpdateVO.setId(ruleGroup.getId());
                 requiredUpdateVO.setIsEnabled(req.getIsEnabled());
                 requiredUpdateVO.setPromptMessage(prompt);
                 requiredUpdateVO.setPopPrompt(prompt); // 设置popPrompt确保errorMessage字段能正确返回
@@ -240,11 +246,16 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
                 if (groupUuid == null) {
                     throw new IllegalStateException("字段" + req.getFieldUuid() + "缺少唯一性规则组，无法更新");
                 }
+                // 通过groupUuid获取规则组ID
+                var ruleGroup = validationRuleGroupService.getValidationRuleGroupByUuid(groupUuid);
+                if (ruleGroup == null) {
+                    throw new IllegalStateException("字段" + req.getFieldUuid() + "的规则组不存在，无法更新唯一性校验");
+                }
                 String groupName = (respVO != null && StringUtils.hasText(respVO.getRgName()))
                         ? respVO.getRgName()
                         : defaultGroupName;
                 ValidationUniqueUpdateReqVO uniqueUpdateVO = new ValidationUniqueUpdateReqVO();
-                uniqueUpdateVO.setId(groupUuid);
+                uniqueUpdateVO.setId(ruleGroup.getId());
                 uniqueUpdateVO.setIsEnabled(enableFlag);
                 uniqueUpdateVO.setPromptMessage(prompt);
                 uniqueUpdateVO.setVersionTag(req.getVersionTag());

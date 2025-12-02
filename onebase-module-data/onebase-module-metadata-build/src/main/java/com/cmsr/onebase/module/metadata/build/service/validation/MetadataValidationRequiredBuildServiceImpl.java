@@ -56,7 +56,7 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
         ValidationRequiredRespVO respVO = BeanUtils.toBean(requiredDO, ValidationRequiredRespVO.class);
 
         // 获取规则组信息，包括提示语等字段
-        var ruleGroup = validationRuleGroupService.getValidationRuleGroup(requiredDO.getGroupId());
+        var ruleGroup = validationRuleGroupService.getValidationRuleGroupByUuid(requiredDO.getGroupUuid());
         if (ruleGroup != null) {
             respVO.setRgName(ruleGroup.getRgName());
             respVO.setPromptMessage(ruleGroup.getPopPrompt());
@@ -106,15 +106,15 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
             groupVO.setPopType(vo.getPopType());
             groupVO.setValidationType("REQUIRED");
             // 修复：同步entityId到规则组
-            groupVO.setEntityId(field.getEntityId());
+            groupVO.setEntityId(field.getEntityUuid());
             groupId = validationRuleGroupService.createValidationRuleGroup(groupVO);
         }
 
         // 转换VO为DO并设置必要字段
         MetadataValidationRequiredDO data = BeanUtils.toBean(vo, MetadataValidationRequiredDO.class);
-        data.setEntityId(field.getEntityId());
-        data.setApplicationId(field.getApplicationId());
-        data.setGroupId(groupId);
+        data.setEntityUuid(field.getEntityUuid());
+        data.setApplicationId(field.getApplicationIdLong());
+        data.setGroupUuid(String.valueOf(groupId));
 
         // 保存必填校验规则
         requiredRepository.saveOrUpdate(data);
@@ -153,7 +153,7 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
             updateGroupVO.setRgDesc(groupDO.getRgDesc());
             updateGroupVO.setRgStatus(groupDO.getRgStatus());
             updateGroupVO.setValidationType(groupDO.getValidationType());
-            updateGroupVO.setEntityId(groupDO.getEntityId());
+            updateGroupVO.setEntityId(groupDO.getEntityUuid());
             if (reqVO.getPopPrompt() != null && !reqVO.getPopPrompt().equals(groupDO.getPopPrompt())) {
                 updateGroupVO.setPopPrompt(reqVO.getPopPrompt());
                 needGroupUpdate = true;
@@ -174,9 +174,9 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
         MetadataValidationRequiredDO updateDO = BeanUtils.toBean(reqVO, MetadataValidationRequiredDO.class);
         updateDO.setId(existingDO.getId());
         updateDO.setFieldUuid(existingDO.getFieldUuid());
-        updateDO.setEntityId(existingDO.getEntityId());
+        updateDO.setEntityUuid(existingDO.getEntityUuid());
         updateDO.setApplicationId(existingDO.getApplicationId());
-        updateDO.setGroupId(targetGroupId);
+        updateDO.setGroupUuid(String.valueOf(targetGroupId));
         requiredRepository.updateById(updateDO);
 
         boolean isFieldRequired = updateDO.getIsEnabled() != null && updateDO.getIsEnabled() == 1;
@@ -193,8 +193,8 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
         requiredRepository.deleteByFieldUuid(fieldUuid);
         
         // 删除关联的校验规则分组
-        if (recordToDelete != null && recordToDelete.getGroupId() != null) {
-            validationRuleGroupService.safeDeleteGroupDirect(recordToDelete.getGroupId());
+        if (recordToDelete != null && recordToDelete.getGroupUuid() != null) {
+            validationRuleGroupService.safeDeleteGroupDirect(Long.valueOf(recordToDelete.getGroupUuid()));
         }
         
         // 同步更新字段的必填状态为非必填
@@ -210,7 +210,7 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
         ValidationRequiredRespVO respVO = BeanUtils.toBean(requiredDO, ValidationRequiredRespVO.class);
         
         // 获取规则组信息，包括提示语等字段
-        var ruleGroup = validationRuleGroupService.getValidationRuleGroup(requiredDO.getGroupId());
+        var ruleGroup = validationRuleGroupService.getValidationRuleGroupByUuid(requiredDO.getGroupUuid());
         if (ruleGroup != null) {
             respVO.setRgName(ruleGroup.getRgName());
             respVO.setPromptMessage(ruleGroup.getPopPrompt());

@@ -64,6 +64,21 @@ public class MetadataBusinessEntityCoreServiceImpl implements MetadataBusinessEn
         return metadataBusinessEntityRepository.getById(id);
     }
 
+    /**
+     * 根据实体ID（String）获取业务实体（兼容旧代码）
+     * @deprecated 请使用 getBusinessEntityByUuid(String)
+     * @param id 实体ID（可能是Long字符串或UUID）
+     * @return 业务实体DO
+     */
+    @Deprecated
+    public MetadataBusinessEntityDO getBusinessEntity(String id) {
+        if (id == null || id.trim().isEmpty()) {
+            return null;
+        }
+        // 尝试按UUID查询
+        return getBusinessEntityByUuid(id);
+    }
+
     @Override
     public MetadataBusinessEntityDO getBusinessEntityByUuid(String entityUuid) {
         if (entityUuid == null || entityUuid.trim().isEmpty()) {

@@ -32,6 +32,21 @@ public class MetadataEntityFieldRepository extends ServiceImpl<MetadataEntityFie
     }
 
     /**
+     * 根据ID（String）查询实体字段（兼容旧代码）
+     * @deprecated 请使用 getByFieldUuid(String)
+     * @param id 字段ID（可能是Long字符串或UUID）
+     * @return 实体字段对象
+     */
+    @Deprecated
+    public MetadataEntityFieldDO findById(String id) {
+        if (id == null || id.isEmpty()) {
+            return null;
+        }
+        // 尝试按UUID查询
+        return getByFieldUuid(id);
+    }
+
+    /**
      * 根据字段UUID查询实体字段
      *
      * @param fieldUuid 字段UUID
@@ -44,6 +59,15 @@ public class MetadataEntityFieldRepository extends ServiceImpl<MetadataEntityFie
         QueryWrapper queryWrapper = this.query()
                 .eq(MetadataEntityFieldDO::getFieldUuid, fieldUuid);
         return getOne(queryWrapper);
+    }
+
+    /**
+     * 根据UUID查询实体字段（兼容旧代码）
+     * @deprecated 请使用 getByFieldUuid()
+     */
+    @Deprecated
+    public MetadataEntityFieldDO getByUuid(String uuid) {
+        return getByFieldUuid(uuid);
     }
 
     /**

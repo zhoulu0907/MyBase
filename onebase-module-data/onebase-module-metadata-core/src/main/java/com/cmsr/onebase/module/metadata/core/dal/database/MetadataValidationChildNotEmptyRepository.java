@@ -65,4 +65,16 @@ public class MetadataValidationChildNotEmptyRepository extends ServiceImpl<Metad
                 .eq(MetadataValidationChildNotEmptyDO::getGroupUuid, groupUuid);
         return list(queryWrapper);
     }
+
+    /**
+     * 根据组ID查询子记录非空验证规则列表（兼容旧代码）
+     *
+     * @deprecated 请使用 findByGroupUuid(String)
+     * @param groupId 组ID
+     * @return 子记录非空验证规则列表
+     */
+    @Deprecated
+    public List<MetadataValidationChildNotEmptyDO> findByGroupId(Long groupId) {
+        return findByGroupUuid(groupId != null ? String.valueOf(groupId) : null);
+    }
 }

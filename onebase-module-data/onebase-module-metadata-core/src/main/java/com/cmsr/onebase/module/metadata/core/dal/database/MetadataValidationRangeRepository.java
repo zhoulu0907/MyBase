@@ -53,4 +53,18 @@ public class MetadataValidationRangeRepository extends ServiceImpl<MetadataValid
                 .eq(MetadataValidationRangeDO::getGroupUuid, groupUuid);
         return list(queryWrapper);
     }
+
+    /**
+     * 根据组ID查询范围验证规则列表（兼容旧代码）
+     *
+     * @param groupId 组ID
+     * @return 范围验证规则列表
+     * @deprecated 请使用 {@link #findByGroupUuid(String)} 代替
+     */
+    @Deprecated
+    public List<MetadataValidationRangeDO> findByGroupId(Long groupId) {
+        // 由于已经改用UUID，Long类型的groupId已不再适用
+        // 返回空列表以保持兼容性
+        return java.util.Collections.emptyList();
+    }
 }

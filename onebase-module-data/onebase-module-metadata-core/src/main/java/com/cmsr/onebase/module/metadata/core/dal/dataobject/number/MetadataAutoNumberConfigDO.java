@@ -89,38 +89,5 @@ public class MetadataAutoNumberConfigDO extends BaseTenantEntity {
     @Column(value = "application_id", comment = "应用ID")
     private Long applicationId;
 
-    // ==================== 向后兼容方法 ====================
-    
-    /**
-     * 获取字段ID（兼容旧代码）
-     * @deprecated 请使用 {@link #getFieldUuid()} 代替
-     * @return 字段UUID
-     */
-    @Deprecated
-    public String getFieldId() {
-        return this.fieldUuid;
-    }
-
-    /**
-     * 设置字段ID（兼容旧代码）
-     * @deprecated 请使用 {@link #setFieldUuid(String)} 代替
-     * @param fieldId 字段UUID
-     */
-    @Deprecated
-    public void setFieldId(String fieldId) {
-        this.fieldUuid = fieldId;
-    }
-
-    /**
-     * 设置字段ID（兼容旧代码，Long类型）
-     * @deprecated 请使用 {@link #setFieldUuid(String)} 代替
-     * @param fieldId 字段ID（将转换为字符串作为UUID使用）
-     */
-    @Deprecated
-    public void setFieldId(Long fieldId) {
-        // 为兼容旧代码，转换为字符串
-        this.fieldUuid = fieldId != null ? String.valueOf(fieldId) : null;
-    }
 }
-
 

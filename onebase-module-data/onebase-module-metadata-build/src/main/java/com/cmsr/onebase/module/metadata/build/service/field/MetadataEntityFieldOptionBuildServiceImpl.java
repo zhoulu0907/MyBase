@@ -103,7 +103,7 @@ public class MetadataEntityFieldOptionBuildServiceImpl implements MetadataEntity
             option.setOptionOrder(item.getOptionOrder());
             return option;
         }).collect(Collectors.toList());
-        batchSort(req.getFieldId(), options);
+        batchSort(req.getFieldUuid(), options);
     }
 
     /**

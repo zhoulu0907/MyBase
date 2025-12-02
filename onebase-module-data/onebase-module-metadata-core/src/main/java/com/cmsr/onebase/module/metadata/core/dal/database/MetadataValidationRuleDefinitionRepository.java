@@ -83,4 +83,15 @@ public class MetadataValidationRuleDefinitionRepository extends ServiceImpl<Meta
                 .orderBy(MetadataValidationRuleDefinitionDO::getId, true);
         return list(queryWrapper);
     }
+
+    // ====== 兼容旧代码的方法 ======
+
+    /**
+     * 根据规则组ID删除所有规则定义（兼容旧代码）
+     * @deprecated 请使用 deleteByGroupUuid()
+     */
+    @Deprecated
+    public void deleteByGroupId(Long groupId) {
+        deleteByGroupUuid(String.valueOf(groupId));
+    }
 }

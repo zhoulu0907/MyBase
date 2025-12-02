@@ -65,4 +65,15 @@ public class MetadataValidationRequiredRepository extends ServiceImpl<MetadataVa
             removeById(item.getId());
         }
     }
+
+    // ====== 兼容旧代码的方法 ======
+
+    /**
+     * 根据组ID查询必填验证规则列表（兼容旧代码）
+     * @deprecated 请使用 findByGroupUuid()
+     */
+    @Deprecated
+    public List<MetadataValidationRequiredDO> findByGroupId(Long groupId) {
+        return findByGroupUuid(String.valueOf(groupId));
+    }
 }

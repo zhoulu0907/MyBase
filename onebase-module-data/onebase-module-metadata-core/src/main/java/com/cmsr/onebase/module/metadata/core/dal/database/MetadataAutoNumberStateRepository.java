@@ -63,6 +63,18 @@ public class MetadataAutoNumberStateRepository extends ServiceImpl<MetadataAutoN
     public MetadataAutoNumberStateDO selectByConfigUuidAndPeriodKey(String configUuid, String periodKey) {
         return findOneByPeriod(configUuid, periodKey);
     }
+
+    // ==================== 向后兼容方法 ====================
+
+    /**
+     * 根据配置ID删除状态（兼容旧代码）
+     * @deprecated 请使用 deleteByConfigUuid(String)
+     * @param configId 配置ID
+     */
+    @Deprecated
+    public void deleteByConfigId(Long configId) {
+        deleteByConfigUuid(configId != null ? String.valueOf(configId) : null);
+    }
 }
 
 

@@ -55,4 +55,19 @@ public class MetadataValidationRuleGroupRepository extends ServiceImpl<MetadataV
                 .ne(MetadataValidationRuleGroupDO::getId, excludeId, excludeId != null);
         return getOne(queryWrapper);
     }
+
+    /**
+     * 根据规则组UUID查询
+     *
+     * @param groupUuid 规则组UUID
+     * @return 校验规则分组对象
+     */
+    public MetadataValidationRuleGroupDO getByGroupUuid(String groupUuid) {
+        if (groupUuid == null || groupUuid.isEmpty()) {
+            return null;
+        }
+        QueryWrapper queryWrapper = this.query()
+                .eq(MetadataValidationRuleGroupDO::getGroupUuid, groupUuid);
+        return getOne(queryWrapper);
+    }
 }

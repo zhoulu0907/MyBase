@@ -47,6 +47,21 @@ public class MetadataBusinessEntityRepository extends ServiceImpl<MetadataBusine
     }
 
     /**
+     * 根据实体UUID获取业务实体
+     *
+     * @param entityUuid 实体UUID
+     * @return 业务实体对象
+     */
+    public MetadataBusinessEntityDO getByEntityUuid(String entityUuid) {
+        if (entityUuid == null || entityUuid.trim().isEmpty()) {
+            return null;
+        }
+        QueryWrapper queryWrapper = this.query()
+                .eq(MetadataBusinessEntityDO::getEntityUuid, entityUuid);
+        return getOne(queryWrapper);
+    }
+
+    /**
      * 根据编码获取业务实体
      *
      * @param code 实体编码

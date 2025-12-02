@@ -775,6 +775,11 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
     }
 
     @Override
+    public MetadataBusinessEntityDO getBusinessEntityByUuid(String entityUuid) {
+        return metadataBusinessEntityRepository.getByEntityUuid(entityUuid);
+    }
+
+    @Override
     public PageResult<MetadataBusinessEntityDO> getBusinessEntityPage(BusinessEntityPageReqVO pageReqVO) {
         QueryWrapper queryWrapper = QueryWrapper.create();
 

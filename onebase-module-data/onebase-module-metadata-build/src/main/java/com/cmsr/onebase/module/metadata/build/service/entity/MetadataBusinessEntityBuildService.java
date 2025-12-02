@@ -50,6 +50,14 @@ public interface MetadataBusinessEntityBuildService {
     MetadataBusinessEntityDO getBusinessEntity(Long id);
 
     /**
+     * 根据实体UUID获得业务实体
+     *
+     * @param entityUuid 实体UUID
+     * @return 业务实体
+     */
+    MetadataBusinessEntityDO getBusinessEntityByUuid(String entityUuid);
+
+    /**
      * 获得业务实体分页
      *
      * @param pageReqVO 分页查询

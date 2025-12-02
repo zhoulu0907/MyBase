@@ -88,6 +88,21 @@ public class MetadataDatasourceCoreServiceImpl implements MetadataDatasourceCore
         return datasource;
     }
 
+    /**
+     * 根据数据源ID（String）获取数据源（兼容旧代码）
+     * @deprecated 请使用 getDatasourceByUuid(String)
+     * @param id 数据源ID（可能是Long字符串或UUID）
+     * @return 数据源DO
+     */
+    @Deprecated
+    public MetadataDatasourceDO getDatasource(String id) {
+        if (id == null || id.trim().isEmpty()) {
+            throw exception(DATASOURCE_NOT_EXISTS);
+        }
+        // 尝试按UUID查询
+        return getDatasourceByUuid(id);
+    }
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateDatasource(@Valid MetadataDatasourceDO datasource) {

@@ -99,10 +99,38 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
     }
 
     /**
+     * 校验实体存在 - 通过UUID
+     * 
+     * @param entityUuid 实体UUID
+     * @return 业务实体DO
+     */
+    protected MetadataBusinessEntityDO validateEntityExists(String entityUuid) {
+        MetadataBusinessEntityDO entity = metadataBusinessEntityCoreService.getBusinessEntityByUuid(entityUuid);
+        if (entity == null) {
+            throw exception(BUSINESS_ENTITY_NOT_EXISTS);
+        }
+        return entity;
+    }
+
+    /**
      * 获取实体字段
      */
     protected List<MetadataEntityFieldDO> getEntityFields(Long entityId) {
         List<MetadataEntityFieldDO> fields = metadataEntityFieldService.getEntityFieldListByEntityId(entityId);
+        if (fields == null || fields.isEmpty()) {
+            throw exception(ENTITY_FIELD_NOT_EXISTS);
+        }
+        return fields;
+    }
+
+    /**
+     * 获取实体字段 - 通过UUID
+     * 
+     * @param entityUuid 实体UUID
+     * @return 实体字段列表
+     */
+    protected List<MetadataEntityFieldDO> getEntityFields(String entityUuid) {
+        List<MetadataEntityFieldDO> fields = metadataEntityFieldService.getEntityFieldListByEntityUuid(entityUuid);
         if (fields == null || fields.isEmpty()) {
             throw exception(ENTITY_FIELD_NOT_EXISTS);
         }
