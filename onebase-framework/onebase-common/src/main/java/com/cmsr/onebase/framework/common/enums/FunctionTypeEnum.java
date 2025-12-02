@@ -19,7 +19,6 @@ public enum FunctionTypeEnum implements ArrayValuable<String> {
     DATE("DATE", "日期函数"),
     USER("USER", "人员函数"),
     LOGIC("LOGIC", "逻辑函数"),
-    BOOL("BOOL", "布尔函数"),
     COMMON("COMMON", "常用函数")
     ;
 
