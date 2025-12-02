@@ -939,19 +939,20 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         r.setApplicationId(appId);
 
         // 比较数据：如果数据库中的关系和请求的数据一样，则忽略
+        // 注意：前端传的targetEntityId/targetFieldId实际存储在关系的sourceEntityId/sourceFieldId字段中
         if (existingRelation != null) {
-            boolean isSame = Objects.equals(existingRelation.getTargetEntityId(), targetEntityId)
-                    && Objects.equals(existingRelation.getTargetFieldId(), fieldId);
+            boolean isSame = Objects.equals(existingRelation.getSourceEntityId(), targetEntityId)
+                    && Objects.equals(existingRelation.getSourceFieldId(), targetFieldId);
             
             if (isSame) {
-                log.debug("数据选择关系未变化，忽略更新。sourceEntityId={}, fieldId={}, targetEntityId={}, targetFieldId={}",
-                        full.getEntityId(), fieldId, targetEntityId, fieldId);
+                log.debug("数据选择关系未变化，忽略更新。currentEntityId={}, fieldId={}, targetEntityId={}, targetFieldId={}",
+                        full.getEntityId(), fieldId, targetEntityId, targetFieldId);
                 return;
             } else {
                 // 数据不同，更新关系
-                log.info("数据选择关系已变化，更新关系。sourceEntityId={}, fieldId={}, 原targetEntityId={}, 原targetFieldId={}, 新targetEntityId={}, 新targetFieldId={}",
-                        full.getEntityId(), fieldId, existingRelation.getTargetEntityId(), existingRelation.getTargetFieldId(),
-                        targetEntityId, fieldId);
+                log.info("数据选择关系已变化，更新关系。currentEntityId={}, fieldId={}, 原targetEntityId={}, 原targetFieldId={}, 新targetEntityId={}, 新targetFieldId={}",
+                        full.getEntityId(), fieldId, existingRelation.getSourceEntityId(), existingRelation.getSourceFieldId(),
+                        targetEntityId, targetFieldId);
                 r.setId(existingRelation.getId().toString());
                 metadataEntityRelationshipBuildService.updateEntityRelationship(r);
             }

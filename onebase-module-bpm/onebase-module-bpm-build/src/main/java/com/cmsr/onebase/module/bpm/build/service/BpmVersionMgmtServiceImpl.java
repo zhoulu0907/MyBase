@@ -125,7 +125,7 @@ public class BpmVersionMgmtServiceImpl implements BpmVersionMgmtService {
         }
 
         QueryWrapper queryWrapper = QueryWrapper.create();
-        queryWrapper.eq(FlowDefinition::getFormPath, reqVo.getMenuUuid());
+        queryWrapper.eq(FlowDefinition::getFormPath, reqVo.getBusinessId());
 
         if (StringUtils.isNotBlank(reqVo.getBpmVersionStatus())) {
             VersionStatusEnum versionStatusEnum = VersionStatusEnum.getByCode(reqVo.getBpmVersionStatus());

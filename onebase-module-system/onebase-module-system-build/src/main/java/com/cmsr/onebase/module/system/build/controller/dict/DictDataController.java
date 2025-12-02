@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.system.build.controller.dict;
 
+import cn.hutool.core.io.FileMagicNumber;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageParam;

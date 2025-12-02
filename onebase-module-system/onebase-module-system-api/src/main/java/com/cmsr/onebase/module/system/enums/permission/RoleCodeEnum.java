@@ -33,10 +33,28 @@ public enum RoleCodeEnum {
      */
     private final String name;
 
+    public static boolean isSuperAdmin(String code) {
+        return ObjectUtils.equalsAny(code, SUPER_ADMIN.getCode());
+    }
+
+
+    public static boolean isTenantAdmin(String code) {
+        return ObjectUtils.equalsAny(code, TENANT_ADMIN.getCode());
+    }
+
+    public static boolean isCorpAdmin(String code) {
+        return ObjectUtils.equalsAny(code, CORP_ADMIN.getCode());
+    }
+
+    public static boolean isDevloperAdmin(String code) {
+        return ObjectUtils.equalsAny(code, APP_DEVELOPER.getCode());
+    }
+
+
     /**
      * 应用开发者权限编码列表(建议未来迁移到数据库配置)
      */
-    private final Set<String> devloperPermissionCodes = new HashSet<String>() {{
+    private final Set<String> devloperPermissionCodes = new HashSet<>() {{
 
         add("tenant"); // 一级
         add("tenant:app"); // 应用管理
@@ -68,24 +86,50 @@ public enum RoleCodeEnum {
 
         add("tenant:dict"); // 数据字典查看
         add("tenant:dict:query"); // 数据字典查看
-
-
     }};
 
-    public static boolean isSuperAdmin(String code) {
-        return ObjectUtils.equalsAny(code, SUPER_ADMIN.getCode());
-    }
+    /**
+     * 空间全部用户的默认权限(建议未来迁移到数据库配置)
+     */
+    private final Set<String> tenantDefaultPermissionCodes = new HashSet<>() {{
 
+        add("tenant"); // 一级
+        add("tenant:app"); // 应用管理
+        add("tenant:app:query");  //应用查看
 
-    public static boolean isTenantAdmin(String code) {
-        return ObjectUtils.equalsAny(code, TENANT_ADMIN.getCode());
-    }
+        add("tenant:profile"); // 个人中心
+        add("tenant:profile:query");  // 个人中心查看
 
-    public static boolean isCorpAdmin(String code) {
-        return ObjectUtils.equalsAny(code, CORP_ADMIN.getCode());
-    }
+        add("tenant:corp"); // 企业查询列表
+        add("tenant:corp:query"); // 个人中心-我创建的企业 使用查询
 
-    public static boolean isDevloperAdmin(String code) {
-        return ObjectUtils.equalsAny(code, APP_DEVELOPER.getCode());
-    }
+        add("tenant:user"); // 用户查看
+        add("tenant:user:query"); // 用户查看
+
+        add("tenant:role");  // 角色查看
+        add("tenant:role:query");  // 角色查看
+
+        add("tenant:dept");  //组织查看
+        add("tenant:dept:query");  //组织查看
+
+        add("tenant:space"); // 空间信息查看
+        add("tenant:space:query"); // 空间信息查看
+
+        add("tenant:dict"); // 数据字典查看
+        add("tenant:dict:query"); // 数据字典查看
+    }};
+
+    /**
+     * 企业全部用户的默认权限(建议未来迁移到数据库配置)
+     */
+    private final Set<String> corpDefaultPermissionCodes = new HashSet<String>() {{
+
+        add("corp"); // 一级
+
+        add("corp:user"); // 二级 用户
+        add("corp:user:query"); // 三级 用户查看
+
+        add("corp:dept"); // 二级 部门
+        add("corp:dept:query"); // 三级 部门查看
+    }};
 }
