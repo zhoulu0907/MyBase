@@ -352,7 +352,8 @@ public class UserDataRepository extends DataRepository<AdminUserDO> {
 
 
     public List<AdminUserDO> getTenantExistUserCountByIds(List<Long> tenantIds) {
-        DefaultConfigStore configStore = buildUserConfigStore();
+      // 平台获取用户统计，不需要分用户类型
+        DefaultConfigStore configStore =new  DefaultConfigStore();
         configStore.in(AdminUserDO.TENANT_ID, tenantIds)
                 .order(AdminUserDO.ADMIN_TYPE, Order.TYPE.ASC)
                 .order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
