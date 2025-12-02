@@ -56,8 +56,8 @@ public class AuthDefaultFactory {
     public static AppAuthPermissionDO createAuthPermissionDO(AuthPermissionReq req) {
         AppAuthPermissionDO ap = new AppAuthPermissionDO();
         ap.setApplicationId(req.getApplicationId());
-        ap.setRoleId(req.getRoleId());
-        ap.setMenuId(req.getMenuId());
+        ap.setRoleUuid(req.getRoleUuid());
+        ap.setMenuUuid(req.getMenuUuid());
         ap.setIsPageAllowed(NumberUtils.INTEGER_ONE);
         ap.setIsAllViewsAllowed(NumberUtils.INTEGER_ONE);
         ap.setIsAllFieldsAllowed(NumberUtils.INTEGER_ONE);
@@ -79,8 +79,8 @@ public class AuthDefaultFactory {
         AppAuthDataGroupDO adg = new AppAuthDataGroupDO();
         adg.setGroupName("默认权限");
         adg.setApplicationId(req.getApplicationId());
-        adg.setRoleId(req.getRoleId());
-        adg.setMenuId(req.getMenuId());
+        adg.setRoleUuid(req.getRoleUuid());
+        adg.setMenuUuid(req.getMenuUuid());
         adg.setScopeTags(JsonUtils.toJsonString(List.of(OWN_SUBMIT)));
         adg.setDataFilter(DEFAULT_DATA_FILTER);
         adg.setOperationTags(JsonUtils.toJsonString(List.of(EDIT, DELETE)));

@@ -16,10 +16,18 @@ public class AuthPermissionReq {
     @Schema(description = "应用Id")
     private Long applicationId;
 
+    //TODO 等前端切换，再删除
     @Schema(description = "角色Id")
     private Long roleId;
 
+    @Schema(description = "角色uuid")
+    private String roleUuid;
+
+    //TODO 等前端切换，再删除
     @Schema(description = "菜单Id")
     private Long menuId;
+
+    @Schema(description = "菜单uuid")
+    private String menuUuid;
 
 }

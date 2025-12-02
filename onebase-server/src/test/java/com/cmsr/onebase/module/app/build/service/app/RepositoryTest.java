@@ -10,7 +10,6 @@ import com.cmsr.onebase.module.app.core.dal.database.app.AppApplicationRepositor
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthDataGroupRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthPermissionRepository;
 import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthDataGroupDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthPermissionDO;
 import com.cmsr.onebase.module.app.core.dal.mapper.AppAuthRoleMapper;
@@ -94,7 +93,7 @@ public class RepositoryTest {
     @Test
     public void test6() {
         TenantContextHolder.setTenantId(1L);
-        var result = appMenuRepository.findPageIdsByAppIdAndMenuId(89762669056458752L, 89763253172011008L);
+//        var result = appMenuRepository.findPagesetPageByMenuId(89763253172011008L);
     }
 
     @Test

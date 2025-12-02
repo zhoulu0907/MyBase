@@ -1,5 +1,6 @@
 package com.cmsr.onebase.framework.orm.repo;
 
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.orm.entity.BaseBizEntity;
 import com.mybatisflex.core.BaseMapper;
 import com.mybatisflex.core.paginate.Page;
@@ -20,6 +21,7 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
 
     protected QueryWrapper injectBizFilter(QueryWrapper queryWrapper) {
         // TODO: add filters like applicationId, versionFlag
+        Long applicationId = ApplicationManager.getApplicationId();
 //        Long applicationId = XXXXX;
 //        var versionStatus = 0,1,xxxxxxx;
 //        return queryWrapper

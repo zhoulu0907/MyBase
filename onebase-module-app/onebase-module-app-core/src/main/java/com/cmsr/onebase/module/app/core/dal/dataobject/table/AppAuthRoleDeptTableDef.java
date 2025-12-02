@@ -8,7 +8,7 @@ import com.mybatisflex.core.table.TableDef;
  * 角色部门表 表定义层。
  *
  * @author HuangJie
- * @since 2025-11-26
+ * @since 2025-12-01
  */
 public class AppAuthRoleDeptTableDef extends TableDef {
 

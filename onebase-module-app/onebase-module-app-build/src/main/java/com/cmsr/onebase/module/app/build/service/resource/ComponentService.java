@@ -8,8 +8,6 @@ import java.util.List;
 @Service
 public interface ComponentService {
 
-    Boolean deleteComponent(Long id);
-
     List<ComponentDTO> listComponent(Long pageId);
 
 }

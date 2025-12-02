@@ -8,7 +8,7 @@ import com.mybatisflex.core.table.TableDef;
  * 应用角色 表定义层。
  *
  * @author HuangJie
- * @since 2025-11-26
+ * @since 2025-12-01
  */
 public class AppAuthRoleTableDef extends TableDef {
 
@@ -24,13 +24,13 @@ public class AppAuthRoleTableDef extends TableDef {
      */
     public final QueryColumn ID = new QueryColumn(this, "id");
 
-    
+
     public final QueryColumn CREATOR = new QueryColumn(this, "creator");
 
-    
+
     public final QueryColumn DELETED = new QueryColumn(this, "deleted");
 
-    
+
     public final QueryColumn UPDATER = new QueryColumn(this, "updater");
 
     /**
@@ -48,21 +48,25 @@ public class AppAuthRoleTableDef extends TableDef {
      */
     public final QueryColumn ROLE_TYPE = new QueryColumn(this, "role_type");
 
-    
+
+    public final QueryColumn ROLE_UUID = new QueryColumn(this, "role_uuid");
+
+
     public final QueryColumn TENANT_ID = new QueryColumn(this, "tenant_id");
 
-    
+
     public final QueryColumn CREATE_TIME = new QueryColumn(this, "create_time");
 
-    
+
     public final QueryColumn UPDATE_TIME = new QueryColumn(this, "update_time");
+
 
     /**
      * 描述
      */
     public final QueryColumn DESCRIPTION = new QueryColumn(this, "description");
 
-    
+
     public final QueryColumn LOCK_VERSION = new QueryColumn(this, "lock_version");
 
     /**
@@ -78,7 +82,7 @@ public class AppAuthRoleTableDef extends TableDef {
     /**
      * 默认字段，不包含逻辑删除或者 large 等字段。
      */
-    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, APPLICATION_ID, ROLE_CODE, ROLE_NAME, ROLE_TYPE, DESCRIPTION, LOCK_VERSION, CREATOR, CREATE_TIME, UPDATER, UPDATE_TIME, DELETED, TENANT_ID};
+    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, ROLE_UUID, APPLICATION_ID, ROLE_CODE, ROLE_NAME, ROLE_TYPE, DESCRIPTION, LOCK_VERSION, CREATOR, CREATE_TIME, UPDATER, UPDATE_TIME, DELETED, TENANT_ID};
 
     public AppAuthRoleTableDef() {
         super("", "app_auth_role");

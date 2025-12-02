@@ -6,6 +6,7 @@ import com.cmsr.onebase.module.formula.vo.function.FunctionInsertReqVO;
 import com.cmsr.onebase.module.formula.vo.function.FunctionListReqVO;
 import com.cmsr.onebase.module.formula.vo.function.FunctionPageReqVO;
 import com.cmsr.onebase.module.formula.vo.function.FunctionUpdateReqVO;
+import com.cmsr.onebase.module.formula.vo.function.FunctionGroupRespVo;
 
 import java.util.Collection;
 import java.util.List;
@@ -78,5 +79,13 @@ public interface FormulaFunctionService {
      * @param ids 函数编号列表
      */
     void validateFunctionList(Collection<Long> ids);
+
+    /**
+     * 根据类型查询函数分组列表
+     *
+     * @param reqVO 函数类型
+     * @return 函数分组列表
+     */
+    List<FunctionGroupRespVo> getFunctionListGroupByType(FunctionListReqVO reqVO);
 
 }

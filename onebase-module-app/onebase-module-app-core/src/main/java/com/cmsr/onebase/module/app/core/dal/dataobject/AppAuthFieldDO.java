@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.app.core.dal.dataobject;
 
 import com.cmsr.onebase.framework.orm.entity.BaseAppEntity;
+import com.cmsr.onebase.framework.orm.entity.BaseBizEntity;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
 import lombok.Data;
@@ -11,16 +12,16 @@ import lombok.Data;
  */
 @Data
 @Table(value = "app_auth_field")
-public class AppAuthFieldDO extends BaseAppEntity {
+public class AppAuthFieldDO extends BaseBizEntity {
 
-    @Column(value = "role_id", comment = "角色id")
-    private Long roleId;
+    @Column(value = "role_uuid", comment = "角色id")
+    private String roleUuid;
 
-    @Column(value = "menu_id", comment = "菜单id")
-    private Long menuId;
+    @Column(value = "menu_uuid", comment = "菜单id")
+    private String menuUuid;
 
-    @Column(value = "field_id", comment = "字段id")
-    private Long fieldId;
+    @Column(value = "field_uuid", comment = "字段id")
+    private String fieldUuid;
 
     @Column(value = "is_can_read", comment = "是否可阅读")
     private Integer isCanRead;

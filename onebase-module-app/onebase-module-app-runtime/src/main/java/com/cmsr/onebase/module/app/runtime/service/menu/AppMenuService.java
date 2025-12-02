@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.app.runtime.service.menu;
 
-import com.cmsr.onebase.module.app.runtime.vo.menu.MenuListRespVO;
+import com.cmsr.onebase.module.app.core.vo.menu.MenuListRespVO;
 import com.cmsr.onebase.module.app.runtime.vo.menu.MenuPermissionVO;
 
 import java.util.List;

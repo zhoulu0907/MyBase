@@ -1,19 +1,17 @@
 package com.cmsr.onebase.module.app.core.dal.database.menu;
 
-import com.cmsr.onebase.framework.orm.repo.BaseAppRepository;
+import com.cmsr.onebase.framework.orm.repo.BaseBizRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppMenuDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetPageDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePageDO;
 import com.cmsr.onebase.module.app.core.dal.mapper.AppMenuMapper;
 import com.mybatisflex.core.query.QueryWrapper;
 import org.springframework.stereotype.Repository;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppMenuTableDef.APP_MENU;
-import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppResourcePagesetPageTableDef.APP_RESOURCE_PAGESET_PAGE;
+import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppResourcePageTableDef.APP_RESOURCE_PAGE;
 import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppResourcePagesetTableDef.APP_RESOURCE_PAGESET;
 
 /**
@@ -21,7 +19,7 @@ import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppResourceP
  * @Date：2025/8/6 9:31
  */
 @Repository
-public class AppMenuRepository extends BaseAppRepository<AppMenuMapper, AppMenuDO> {
+public class AppMenuRepository extends BaseBizRepository<AppMenuMapper, AppMenuDO> {
 
     public List<AppMenuDO> findByApplicationIdAndType(Long applicationId, Set<Integer> menuTypes) {
         QueryWrapper queryWrapper = this.query()
@@ -35,12 +33,29 @@ public class AppMenuRepository extends BaseAppRepository<AppMenuMapper, AppMenuD
         QueryWrapper queryWrapper = this.query()
                 .eq(AppMenuDO::getApplicationId, applicationId)
                 .orderBy(AppMenuDO::getMenuSort, true);
-        return list(queryWrapper);
+        return this.list(queryWrapper);
     }
 
-    public long countByParentId(Long id) {
-        QueryWrapper queryWrapper = this.query().eq(AppMenuDO::getParentId, id);
+    public List<String> findMenuUuidListByApplication(Long applicationId) {
+        QueryWrapper queryWrapper = this.query()
+                .select(APP_MENU.MENU_UUID)
+                .where(APP_MENU.APPLICATION_ID.eq(applicationId))
+                .orderBy(APP_MENU.MENU_SORT, true);
+        return this.objListAs(queryWrapper, String.class);
+    }
+
+    public long countByParentId(Long applicationId, String menuUuid) {
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_MENU.APPLICATION_ID.eq(applicationId))
+                .where(APP_MENU.MENU_UUID.eq(menuUuid));
         return count(queryWrapper);
+    }
+
+    public AppMenuDO findByAppIdAndMenuUuid(Long applicationId, String menuUuid) {
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_MENU.APPLICATION_ID.eq(applicationId))
+                .where(APP_MENU.MENU_UUID.eq(menuUuid));
+        return this.getOne(queryWrapper);
     }
 
     public void deleteByApplicationId(Long applicationId) {
@@ -61,27 +76,50 @@ public class AppMenuRepository extends BaseAppRepository<AppMenuMapper, AppMenuD
         return list(queryWrapper);
     }
 
-    public List<AppMenuDO> findVisibleByAppIdAndMenuIds(Long applicationId, Set<Long> menuIds) {
+    public List<AppMenuDO> findVisibleByAppIdAndMenuIds(Long applicationId, Set<String> menuUuids) {
         QueryWrapper queryWrapper = this.query()
-                .eq(AppMenuDO::getApplicationId, applicationId)
-                .in(AppMenuDO::getId, menuIds)
-                .eq(AppMenuDO::getIsVisible, 1);
+                .where(APP_MENU.APPLICATION_ID.eq(applicationId))
+                .where(APP_MENU.MENU_UUID.in(menuUuids))
+                .where(APP_MENU.IS_VISIBLE.eq(1));
         return list(queryWrapper);
     }
 
-    public Set<Long> findPageIdsByAppIdAndMenuId(Long applicationId, Long menuId) {
+//    public List<AppResourcePagesetPageDO> findPagesetPageByMenuId(Long menuId) {
+//        QueryWrapper queryWrapper = QueryWrapper.create()
+//                .select(
+//                        APP_RESOURCE_PAGESET_PAGE.ALL_COLUMNS
+//                ).from(APP_RESOURCE_PAGESET_PAGE)
+//                .leftJoin(APP_RESOURCE_PAGESET)
+//                .on(APP_RESOURCE_PAGESET_PAGE.PAGESET_UUID.eq(APP_RESOURCE_PAGESET.PAGESET_UUID)
+//                        .and(APP_RESOURCE_PAGESET_PAGE.APPLICATION_ID.eq(APP_RESOURCE_PAGESET.APPLICATION_ID))
+//                        .and(APP_RESOURCE_PAGESET_PAGE.VERSION_TAG.eq(APP_RESOURCE_PAGESET.VERSION_TAG))
+//                )
+//                .leftJoin(APP_MENU)
+//                .on(APP_RESOURCE_PAGESET.MENU_UUID.eq(APP_MENU.MENU_UUID)
+//                        .and(APP_RESOURCE_PAGESET.APPLICATION_ID.eq(APP_MENU.APPLICATION_ID))
+//                        .and(APP_RESOURCE_PAGESET.VERSION_TAG.eq(APP_MENU.VERSION_TAG))
+//                )
+//                .where(APP_MENU.ID.eq(menuId));
+//        //.where(APP_MENU.IS_VISIBLE.eq(1));
+//        return this.listAs(queryWrapper, AppResourcePagesetPageDO.class);
+//    }
+
+    public List<AppResourcePageDO> findPagesByMenuId(Long menuId) {
         QueryWrapper queryWrapper = QueryWrapper.create()
                 .select(
-                        APP_RESOURCE_PAGESET_PAGE.PAGE_ID
-                ).from(AppResourcePagesetPageDO.class)
-                .leftJoin(AppResourcePagesetDO.class)
-                .on(APP_RESOURCE_PAGESET_PAGE.PAGESET_ID.eq(APP_RESOURCE_PAGESET.ID))
-                .leftJoin(AppMenuDO.class)
-                .on(APP_RESOURCE_PAGESET.MENU_ID.eq(APP_MENU.ID))
-                .where(APP_MENU.IS_VISIBLE.eq(1))
-                .and(APP_MENU.APPLICATION_ID.eq(applicationId))
-                .and(APP_MENU.ID.eq(menuId));
-        return new HashSet<>(this.objListAs(queryWrapper, Long.class));
+                        APP_RESOURCE_PAGE.ALL_COLUMNS
+                ).from(APP_RESOURCE_PAGE)
+                .leftJoin(APP_RESOURCE_PAGESET)
+                .on(APP_RESOURCE_PAGE.PAGESET_UUID.eq(APP_RESOURCE_PAGESET.PAGESET_UUID)
+                        .and(APP_RESOURCE_PAGE.APPLICATION_ID.eq(APP_RESOURCE_PAGESET.APPLICATION_ID))
+                        .and(APP_RESOURCE_PAGE.VERSION_TAG.eq(APP_RESOURCE_PAGESET.VERSION_TAG)))
+                .leftJoin(APP_MENU)
+                .on(APP_RESOURCE_PAGESET.MENU_UUID.eq(APP_MENU.MENU_UUID)
+                        .and(APP_RESOURCE_PAGE.APPLICATION_ID.eq(APP_MENU.APPLICATION_ID))
+                        .and(APP_RESOURCE_PAGE.VERSION_TAG.eq(APP_MENU.VERSION_TAG))
+                )
+                .where(APP_MENU.ID.eq(menuId));
+        return this.listAs(queryWrapper, AppResourcePageDO.class);
     }
 
 
