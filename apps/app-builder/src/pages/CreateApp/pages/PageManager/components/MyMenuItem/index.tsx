@@ -246,7 +246,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
               className={styles.menuIcon}
               src={
                 allWebMenuIcons.find((ele) => ele.code === menuIcon)?.icon ||
-                allWebMenuIcons.find((ele) => ele.code === 'FormPageLine')?.icon ||
+                allWebMenuIcons.find((ele) => ele.code === 'FormPage')?.icon ||
                 ''
               }
               beforeInjection={(svg) => {

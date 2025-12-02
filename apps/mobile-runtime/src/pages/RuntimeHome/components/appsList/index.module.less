@@ -82,6 +82,21 @@
   }
 }
 
+.menuIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 0.8rem;
+  height: 0.8rem;
+  border-radius: 0.16rem;
+  background-color: rgb(var(--primary-1));
+
+  & > div {
+    display: flex;
+    align-items: center;
+  }
+}
+
 .tabs {
   :global(.arco-tab-cell-container-wrap.vertical) {
     height: 0.84rem;
@@ -127,7 +142,7 @@
     background: linear-gradient(
       301deg,
       var(--Semantic-Success-600, #00b42a) 25.06%,
-      var(--Brand-Builder-Builder_600, #009e9e) 87.47%
+      var(--Brand-Builder-Builder_600, rgb(var(--primary-6))) 87.47%
     );
   }
 }
