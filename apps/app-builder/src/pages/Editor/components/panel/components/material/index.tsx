@@ -3,12 +3,15 @@ import IconCollapsed from '@/assets/images/collapsed_left_icon.svg';
 import IconSearchForm from '@/assets/images/search_form_icon.svg';
 import MaterialCard from '@/components/MaterialCard';
 import { useI18n } from '@/hooks/useI18n';
+import { useSignals } from '@preact/signals-react/runtime';
 import { Collapse, Input, Layout, Tabs } from '@arco-design/web-react';
 import { CATEGORY_TYPE } from '@onebase/app';
-import { allTemplate, COMPONENT_GROUP_NAME, EDITOR_TYPES, type EditorType } from '@onebase/ui-kit';
-import React, { useEffect, useState } from 'react';
+import { allTemplate, COMPONENT_GROUP_NAME, EDITOR_TYPES, FORM_COMPONENT_TYPES, LAYOUT_COMPONENT_TYPES, LIST_COMPONENT_TYPES, type EditorType } from '@onebase/ui-kit';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import { v4 as uuidv4 } from 'uuid';
+import { EditMode } from '@onebase/common';
+import { currentEditorSignal } from '@onebase/ui-kit/src/signals/current_editor';
 import styles from './index.module.less';
 
 const Sider = Layout.Sider;
@@ -31,7 +34,11 @@ interface MaterialContainerProps {
 }
 
 const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab, childCollapsed, setChildCollapsed }) => {
+  useSignals();
   const { t } = useI18n();
+
+  const { editMode } = currentEditorSignal;
+
   const [activeComponentTab, setActiveComponentTab] = useState('base-component');
 
   const [baseItems, setBaseItems] = useState<{ key: CategoryKey; items: any[] }[]>([]);
@@ -55,13 +62,24 @@ const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab, childC
     show: t('editor.show', '展示组件')
   };
 
-  const baseCategories: { key: CategoryKey; items: any[] }[] = [
-    // { key: CATEGORY_TYPE.NAVIGATE, items: baseNavigateItems },
-    { key: CATEGORY_TYPE.LAYOUT, items: baseLayoutItems },
-    { key: CATEGORY_TYPE.FORM, items: baseFormItems },
-    { key: CATEGORY_TYPE.LIST, items: baseListItems },
-    { key: CATEGORY_TYPE.SHOW, items: baseShowItems }
-  ];
+  const baseCategories: { key: CategoryKey; items: any[] }[] = useMemo(() => {
+    return [
+      // { key: CATEGORY_TYPE.NAVIGATE, items: baseNavigateItems },
+      {
+        key: CATEGORY_TYPE.LAYOUT,
+        items: editMode.value === EditMode.MOBILE ? baseLayoutItems.filter(item => item.type === LAYOUT_COMPONENT_TYPES.COLLAPSE_LAYOUT) : baseLayoutItems
+      },
+      {
+        key: CATEGORY_TYPE.FORM,
+        items: editMode.value === EditMode.MOBILE ? baseFormItems.filter(item => item.type !== FORM_COMPONENT_TYPES.RICH_TEXT) : baseFormItems
+      },
+      {
+        key: CATEGORY_TYPE.LIST,
+        items: editMode.value === EditMode.MOBILE ? baseListItems.filter(item => [LIST_COMPONENT_TYPES.TABLE, LIST_COMPONENT_TYPES.CAROUSEL].includes(item.type)) : baseListItems
+      },
+      { key: CATEGORY_TYPE.SHOW, items: baseShowItems }
+    ];
+  }, [editMode.value]);
 
   useEffect(() => {
     const lowerKeyword = keyword.toLowerCase();
@@ -88,7 +106,7 @@ const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab, childC
       .filter((cat) => cat.items.length > 0); // 去掉空的分类
 
     setBaseItems(newBaseItems);
-  }, [keyword]);
+  }, [keyword, editMode.value]);
 
   useEffect(() => {
     if (!keyword) return setComponents(baseCategories); // 没关键词直接返回原数据
@@ -105,7 +123,7 @@ const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab, childC
       .filter((category) => category.items.length > 0); // 移除没有匹配项的分类
 
     setComponents(filterData);
-  }, [keyword]);
+  }, [keyword, editMode.value]);
 
   return (
     <div>
@@ -188,7 +206,7 @@ const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab, childC
                         ) : (
                           <ReactSortable
                             list={baseItems.find((c) => c.key === cat.key)?.items || []}
-                            setList={() => {}}
+                            setList={() => { }}
                             group={{
                               name: COMPONENT_GROUP_NAME,
                               pull: 'clone',
@@ -209,11 +227,11 @@ const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab, childC
                                 prev.map((c) =>
                                   c.key === cat.key
                                     ? {
-                                        ...c,
-                                        items: c.items.map((item) =>
-                                          item.type === cpType ? { ...item, id: `${e.item.id}` } : item
-                                        )
-                                      }
+                                      ...c,
+                                      items: c.items.map((item) =>
+                                        item.type === cpType ? { ...item, id: `${e.item.id}` } : item
+                                      )
+                                    }
                                     : c
                                 )
                               );

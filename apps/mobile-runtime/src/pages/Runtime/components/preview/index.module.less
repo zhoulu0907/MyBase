@@ -1,0 +1,105 @@
+.previewPage {
+  width: 100%;
+  height: 100%;
+  // background-color: #fff;
+  background-color: #f7f8fa;
+
+  display: block;
+  box-sizing: border-box;
+  position: relative;
+
+  overflow-y: auto;
+  // padding-bottom: 0.36rem;
+
+  .noData {
+    font-size: 0.28rem;
+    color: #86909C;
+    text-align: center;
+    line-height: 2.6rem;
+    flex: 1;
+  }
+  .previewTitle {
+    font-size: 0.18rem;
+    background-color: #fff;
+  }
+
+  /* 自定义滚动条样式 */
+  &::-webkit-scrollbar {
+    width: 5px;
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #e0e0e0;
+    border-radius: 0px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+.content {
+  background-color: #f7f8fa;
+  min-height: calc(100vh - 0.9rem);
+  // padding-bottom: 0.4rem;
+
+  // min-width: 348px;
+  // min-height: calc(100vh - 48px - 32px);
+  width: 100%;
+  // padding: 16px;
+  box-sizing: border-box;
+  border-radius: 4px;
+
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-content: flex-start;
+}
+
+.formWrapper {
+  margin: 0.24rem;
+  width: calc(100% - 0.48rem);
+  background-color: #fff;
+  border-radius: 8px;
+  margin-bottom: 1.2rem;
+}
+// 组件样式
+.componentItem {
+  // padding: 6px;
+  box-sizing: border-box;
+  // border: 1px dashed transparent;
+  border-radius: 8px;
+  transition: border-color 0.2s ease;
+  position: relative;
+  .formWrapper {
+    padding: 0.06rem;
+  }
+}
+
+.footer {
+  width: 100vw;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0.16rem 0.2rem;
+  box-sizing: border-box;
+  gap: 0.16rem;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #fff;
+  z-index: 3;
+  @media screen and (min-width: 900px) {
+    width: 450px;
+    left: calc(50% - 225px);
+  }
+}
+
+.drawerTitle {
+  display: flex;
+  width: 100%;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}

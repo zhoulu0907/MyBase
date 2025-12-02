@@ -17,7 +17,7 @@ export interface DatasourceRecord {
   datasourceType: string;
   description: string;
   runMode: number;
-  appId: string;
+  applicationId: string;
   creator: string;
   createTime: string;
 }
@@ -28,8 +28,8 @@ const PAGE_TYPE = {
   KNOWLEDGE_GRAPH: 'KNOWLEDGE_GRAPH'
 };
 
-export const EntityPageContainer: React.FC<{ appId: string; handleMenuClick: (key: string) => void }> = ({
-  appId,
+export const EntityPageContainer: React.FC<{ applicationId: string; handleMenuClick: (key: string) => void }> = ({
+  applicationId,
   handleMenuClick
 }) => {
   const [activeTab, setActiveTab] = useState(PAGE_TYPE.ER_CHART);
@@ -40,13 +40,13 @@ export const EntityPageContainer: React.FC<{ appId: string; handleMenuClick: (ke
   const prevAppIdRef = useRef<string>('');
 
   const getAppResources = useCallback(
-    async (appId: string) => {
-      if (!appId) {
+    async (applicationId: string) => {
+      if (!applicationId) {
         return;
       }
 
       try {
-        const params = { appId };
+        const params = { applicationId };
         const res = await getDatasourceList(params);
 
         if (res?.length > 0) {
@@ -65,16 +65,16 @@ export const EntityPageContainer: React.FC<{ appId: string; handleMenuClick: (ke
         clearCurDataSourceId();
       }
     },
-    [appId]
+    [applicationId]
   );
 
   useEffect(() => {
-    console.log('curAppId', appId, prevAppIdRef.current);
-    if (!appId) {
+    console.log('curAppId', applicationId, prevAppIdRef.current);
+    if (!applicationId) {
       return;
     }
 
-    if (prevAppIdRef.current && prevAppIdRef.current !== appId) {
+    if (prevAppIdRef.current && prevAppIdRef.current !== applicationId) {
       console.log('应用切换，清理旧状态');
       setDsData(null);
       clearCurDataSourceId();
@@ -83,10 +83,10 @@ export const EntityPageContainer: React.FC<{ appId: string; handleMenuClick: (ke
       newFieldSignal.clearAllNewFields();
     }
 
-    prevAppIdRef.current = appId;
+    prevAppIdRef.current = applicationId;
 
-    getAppResources(appId);
-  }, [appId]);
+    getAppResources(applicationId);
+  }, [applicationId]);
 
   useEffect(() => {
     return () => {

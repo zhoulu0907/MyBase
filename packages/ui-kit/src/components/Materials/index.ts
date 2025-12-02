@@ -1,5 +1,6 @@
-export { FormComp, LayoutComp, ListComp, NavigateComp, ShowComp } from './Basic';
+export { FormComp, FormSchema, LayoutComp, ListComp, ListSchema, NavigateComp, ShowComp, ShowSchema } from './Basic';
 export * from './common';
+export * from './types';
 export * from './Workbench/workbenchShared';
 export {
   ALL_COMPONENT_TYPES,
@@ -7,7 +8,8 @@ export {
   FORM_COMPONENT_TYPES,
   LAYOUT_COMPONENT_TYPES,
   LIST_COMPONENT_TYPES,
-  SHOW_COMPONENT_TYPES
+  SHOW_COMPONENT_TYPES,
+  ComponentType
 } from './componentTypes';
 export * from './constants';
 export {

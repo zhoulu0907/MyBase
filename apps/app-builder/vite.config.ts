@@ -27,5 +27,15 @@ export default defineConfig({
       '@workflow/images': path.join(__dirname, './src/assets/images')
     }
   },
-  assetsInclude: ['**/*.svg']
+  assetsInclude: ['**/*.svg'],
+  css: {
+    preprocessorOptions: {
+      less: {
+        javascriptEnabled: true,
+        modifyVars: {
+          prefix: 'pc'
+        }
+      }
+    }
+  }
 });

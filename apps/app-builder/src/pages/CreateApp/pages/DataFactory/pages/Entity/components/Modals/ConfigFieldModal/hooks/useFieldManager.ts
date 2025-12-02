@@ -184,7 +184,7 @@ export const useFieldManager = (
 
       const fieldDataList = nonSystemFields.map((field: FieldFormValues) => {
         const fieldData = {
-          appId: curAppId,
+          applicationId: curAppId,
           entityId: entity.entityId,
           ...field,
           isSystemField: FIELD_TYPE.CUSTOM,
@@ -195,7 +195,7 @@ export const useFieldManager = (
       });
 
       const params = {
-        appId: curAppId,
+        applicationId: curAppId,
         entityId: entity.entityId,
         items: fieldDataList
       };

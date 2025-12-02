@@ -38,6 +38,7 @@ export interface FieldFormValues {
 export interface DataSelectionType {
   targetEntityId: string;
   targetFieldId: string;
+  relationId?: string;
 }
 
 // 字段配置弹窗属性

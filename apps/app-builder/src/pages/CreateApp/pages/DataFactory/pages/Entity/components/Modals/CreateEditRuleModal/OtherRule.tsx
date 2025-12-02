@@ -98,7 +98,7 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
     const params = {
       ...values,
       entityId: entity.id,
-      appId: curAppId
+      applicationId: curAppId
     };
 
     let res;
@@ -133,7 +133,7 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
       isEnabled: 0, // 启用
       id: editRule?.id,
       entityId: entity.id,
-      appId: curAppId
+      applicationId: curAppId
     };
 
     const ruleHandlers = {

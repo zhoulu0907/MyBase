@@ -4,11 +4,11 @@ import React, { useEffect } from 'react';
 import { EntityPageContainer } from './main/EntityPageContainer';
 
 interface EntityPageProps {
-  appId: string;
+  applicationId: string;
   handleMenuClick: (key: string) => void;
 }
 
-const EntityPage: React.FC<EntityPageProps> = ({ appId, handleMenuClick }) => {
+const EntityPage: React.FC<EntityPageProps> = ({ applicationId, handleMenuClick }) => {
   const { setFieldTypes } = useFieldStore();
 
   // 加载字段类型
@@ -26,7 +26,7 @@ const EntityPage: React.FC<EntityPageProps> = ({ appId, handleMenuClick }) => {
 
   return (
     <>
-      <EntityPageContainer appId={appId} handleMenuClick={handleMenuClick} />
+      <EntityPageContainer applicationId={applicationId} handleMenuClick={handleMenuClick} />
     </>
   );
 };

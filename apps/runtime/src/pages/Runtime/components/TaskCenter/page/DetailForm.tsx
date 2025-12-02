@@ -210,7 +210,7 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
     return dataObj;
   };
 
-  const parseData =  () => {
+  const parseData = () => {
     startLoadPageSet({ pageSetId: pageSetId });
   };
 
