@@ -43,6 +43,8 @@ public class BusinessEntityController {
     @Operation(summary = "创建业务实体")
     @PreAuthorize("@ss.hasPermission('metadata:business-entity:create')")
     public CommonResult<BusinessEntityRespVO> createBusinessEntity(@Valid @RequestBody BusinessEntitySaveReqVO reqVO) {
+        // 从请求头获取应用ID
+        reqVO.setApplicationId(String.valueOf(ApplicationManager.getApplicationId()));
         BusinessEntityRespVO result = businessEntityService.createBusinessEntityWithResponse(reqVO);
         return success(result);
     }
@@ -51,6 +53,8 @@ public class BusinessEntityController {
     @Operation(summary = "更新业务实体信息")
     @PreAuthorize("@ss.hasPermission('metadata:business-entity:update')")
     public CommonResult<Boolean> updateBusinessEntity(@Valid @RequestBody BusinessEntitySaveReqVO reqVO) {
+        // 从请求头获取应用ID
+        reqVO.setApplicationId(String.valueOf(ApplicationManager.getApplicationId()));
         businessEntityService.updateBusinessEntity(reqVO);
         return success(true);
     }
