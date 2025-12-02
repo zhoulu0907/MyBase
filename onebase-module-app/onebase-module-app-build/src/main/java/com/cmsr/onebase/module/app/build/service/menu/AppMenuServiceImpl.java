@@ -241,7 +241,7 @@ public class AppMenuServiceImpl implements AppMenuService {
         menuDO.setMenuIcon(createReqVO.getMenuIcon());
         menuDO.setMenuSort(generateMenuSort(applicationDO.getId()));
         menuDO.setIsVisible(NumberUtils.INTEGER_ONE);
-        menuDO.setEntityUuid(createReqVO.getEntityUuid() != null ? createReqVO.getEntityUuid() : String.valueOf(createReqVO.getEntityId()));
+        menuDO.setEntityUuid(createReqVO.getEntityUuid());
         appMenuRepository.save(menuDO);
         // 创建页面集
         CreatePageSetDTO createPageSetDTO = new CreatePageSetDTO();
@@ -250,7 +250,7 @@ public class AppMenuServiceImpl implements AppMenuService {
         createPageSetDTO.setPageSetType(createReqVO.getPageSetType());
         createPageSetDTO.setPageSetName(menuDO.getMenuName());
         createPageSetDTO.setDisplayName(menuDO.getMenuName());
-        createPageSetDTO.setMainMetadata(String.valueOf(createReqVO.getEntityId()));
+        createPageSetDTO.setMainMetadata(String.valueOf(createReqVO.getEntityUuid()));
         pageSetService.createPageSet(createPageSetDTO);
         // 返回结果
         MenuCreateRespVO menuCreateRespVO = BeanUtils.toBean(menuDO, MenuCreateRespVO.class);
