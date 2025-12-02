@@ -55,8 +55,8 @@ public class WorkflowProvider {
     }
 
     private void complementJdbcInputInformation(JdbcInputConfig jdbcInputConfig) throws Exception {
-        String datasourceUuid = jdbcInputConfig.getDatasourceUuid();
-        String tableUuid = jdbcInputConfig.getTableUuid();
+        String datasourceUuid = jdbcInputConfig.getDatasourceUUID();
+        String tableUuid = jdbcInputConfig.getTableUUID();
 
         EtlTable etlTable = queryProvider.findTableByUuid(tableUuid);
         EtlDataSource etlDataSource = queryProvider.findConnectPropertiesByUuid(datasourceUuid);
@@ -105,8 +105,8 @@ public class WorkflowProvider {
 
 
     private void complementJdbcOutputInformation(JdbcOutputConfig jdbcOutputConfig) throws Exception {
-        String datasourceUuid = jdbcOutputConfig.getDatasourceUuid();
-        String tableUuid = jdbcOutputConfig.getTableUuid();
+        String datasourceUuid = jdbcOutputConfig.getDatasourceUUID();
+        String tableUuid = jdbcOutputConfig.getTableUUID();
 
         EtlDataSource etlDataSource = queryProvider.findConnectPropertiesByUuid(datasourceUuid);
         EtlTable etlTable = queryProvider.findTableByUuid(tableUuid);

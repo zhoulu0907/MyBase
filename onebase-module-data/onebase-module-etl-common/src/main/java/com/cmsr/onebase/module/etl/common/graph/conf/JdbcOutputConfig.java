@@ -10,9 +10,9 @@ import java.util.List;
 @ToString(callSuper = true)
 public class JdbcOutputConfig extends NodeConfig {
 
-    private String datasourceUuid;
+    private String datasourceUUID;
 
-    private String tableUuid;
+    private String tableUUID;
 
     /**
      * 界面配置，部分从数据库补充

@@ -13,12 +13,12 @@ public class JdbcInputConfig extends NodeConfig {
     /**
      * 来自界面定义
      */
-    private String datasourceUuid;
+    private String datasourceUUID;
 
     /**
      * 来自界面定义
      */
-    private String tableUuid;
+    private String tableUUID;
 
     /**
      * 来自界面定义，需要补充类型和精度
