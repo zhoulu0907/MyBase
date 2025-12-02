@@ -56,7 +56,7 @@ public class BpmDesignConvertImpl implements BpmDesignConvert {
         respVO.setFlowName(defJson.getFlowName());
         respVO.setId(defJson.getId());
 
-        respVO.setMenuUuid(defJson.getFormPath());
+        respVO.setBusinessId(defJson.getFormPath());
         respVO.setBpmVersion("V" + defJson.getVersion());
 
         Integer isPublish = defJson.getIsPublish();
@@ -117,7 +117,7 @@ public class BpmDesignConvertImpl implements BpmDesignConvert {
         defJson.setId(flowDesignVO.getId());
         defJson.setFlowCode(flowDesignVO.getFlowCode());
         defJson.setFlowName(flowDesignVO.getFlowName());
-        defJson.setFormPath(flowDesignVO.getMenuUuid());
+        defJson.setFormPath(flowDesignVO.getBusinessId());
 
         // 构建ext
         BpmDefinitionExtDTO extDto = new BpmDefinitionExtDTO();
@@ -249,7 +249,7 @@ public class BpmDesignConvertImpl implements BpmDesignConvert {
             NodeJson nodeJson = new NodeJson();
             nodeJson.setNodeCode(nodeVO.getId());
             nodeJson.setNodeName(nodeVO.getName());
-            nodeJson.setFormPath(flowDesignVO.getMenuUuid());
+            nodeJson.setFormPath(flowDesignVO.getBusinessId());
 
             // 设置节点类型
             BpmNodeTypeEnum bpmNodeType = BpmNodeTypeEnum.getByCode(nodeVO.getType());
