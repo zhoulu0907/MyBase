@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.app.build.vo.menu;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -36,8 +37,6 @@ public class MenuCreateReqVO {
 
     //TODO 等前端切换，待删除
     @Schema(description = "实体编码")
-    private String entityId;
-
-    @Schema(description = "实体编码")
+    @JsonAlias(value = {"entityId", "entityUuid"})
     private String entityUuid;
 }

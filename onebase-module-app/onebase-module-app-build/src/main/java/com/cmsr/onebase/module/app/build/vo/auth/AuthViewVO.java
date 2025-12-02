@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.app.build.vo.auth;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -15,6 +16,8 @@ public class AuthViewVO {
     private Long id;
 
     @Schema(description = "实体uuid")
+    //TODO 暂时做兼容，前端改成 viewUuid
+    @JsonAlias(value = {"viewId", "viewUuid"})
     private String viewUuid;
 
     @Schema(description = "实体名称")
