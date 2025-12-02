@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.bpm.runtime.service.impl;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
@@ -167,6 +168,11 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
     public BpmSubmitRespVO submit(BpmSubmitReqVO reqVO) {
         BpmSubmitRespVO respVO = new BpmSubmitRespVO();
         String entityDataId = null;
+        Long applicationId = ApplicationManager.getApplicationId();
+
+        if (applicationId == null) {
+            throw new IllegalArgumentException("缺少应用ID");
+        }
 
         Definition def = defExtService.getByFormPathAndStatus(String.valueOf(reqVO.getBusinessId()), PublishStatus.PUBLISHED.getKey());
         if (def == null) {
@@ -221,7 +227,6 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
 
         // 传应用ID和实体ID
         BpmDefinitionExtDTO extDto = JsonUtils.parseObject(def.getExt(), BpmDefinitionExtDTO.class);
-        variables.put(BpmConstants.VAR_APP_ID_KEY, extDto.getAppId());
         variables.put(BpmConstants.VAR_ENTITY_ID_KEY, entityId);
         variables.put(BpmConstants.VAR_BINDING_VIEW_ID_KEY, reqVO.getBusinessId());
         variables.put(BpmConstants.VAR_PAGE_VIEW_GROUP_KEY, JsonUtils.toJsonString(pageViewGroupDTO));
@@ -314,7 +319,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         flowInsExtDO.setFormName(reqVO.getFormName());
         flowInsExtDO.setFormSummary(formSummary);
         flowInsExtDO.setInstanceId(instance.getId());
-        flowInsExtDO.setApplicationId(extDto.getAppId());
+        flowInsExtDO.setApplicationId(applicationId);
 
         flowInsExtRepository.save(flowInsExtDO);
 

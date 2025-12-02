@@ -34,6 +34,7 @@ public class BpmFlowDefinitionRepositoryExt {
      */
     public Definition getByFormPath(String formPath) {
         QueryWrapper queryWrapper = new QueryWrapper();
+        queryWrapper.eq(FlowDefinition::getFormPath,formPath);
         queryWrapper.orderBy(FlowDefinition::getCreateTime, false);
         return flowDefinitionRepository.getOne(queryWrapper);
     }

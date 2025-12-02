@@ -40,7 +40,7 @@ public class FieldOptionSaveReqVO {
 
     @Schema(description = "应用ID", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull
-    private Long appId;
+    private Long applicationId;
 }
 
 

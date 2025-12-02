@@ -1,7 +1,8 @@
 package com.cmsr.onebase.module.bpm.convert;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
-import com.cmsr.onebase.module.bpm.build.vo.design.BpmDesignVO;
+import com.cmsr.onebase.module.bpm.build.vo.design.BpmDesignRespVO;
+import com.cmsr.onebase.module.bpm.build.vo.design.BpmDesignSaveReqVO;
 import com.cmsr.onebase.module.bpm.build.vo.design.strategy.NodeVOStrategyManager;
 import com.cmsr.onebase.module.bpm.core.dto.BpmDefinitionExtDTO;
 import com.cmsr.onebase.module.bpm.core.dto.BpmGlobalConfigDTO;
@@ -45,26 +46,27 @@ public class BpmDesignConvertImpl implements BpmDesignConvert {
      * @param defJson WarmFlow的DefJson
      * @return BpmDesignVO
      */
-    public BpmDesignVO toFlowDesignVO(DefJson defJson) {
+    public BpmDesignRespVO toDesignRespVO(DefJson defJson) {
         if (defJson == null) {
             return null;
         }
 
-        BpmDesignVO flowDesignVO = new BpmDesignVO();
-        flowDesignVO.setBusinessId(Long.valueOf(defJson.getFormPath()));
-        flowDesignVO.setFlowCode(defJson.getFlowCode());
-        flowDesignVO.setFlowName(defJson.getFlowName());
-        flowDesignVO.setId(defJson.getId());
-        flowDesignVO.setVersion("V" + defJson.getVersion());
+        BpmDesignRespVO respVO = new BpmDesignRespVO();
+        respVO.setFlowCode(defJson.getFlowCode());
+        respVO.setFlowName(defJson.getFlowName());
+        respVO.setId(defJson.getId());
+
+        respVO.setMenuUuid(defJson.getFormPath());
+        respVO.setBpmVersion("V" + defJson.getVersion());
 
         Integer isPublish = defJson.getIsPublish();
 
         if (isPublish.equals(PublishStatus.PUBLISHED.getKey())) {
-            flowDesignVO.setVersionStatus(VersionStatusEnum.PUBLISHED.getCode());
+            respVO.setBpmVersionStatus(VersionStatusEnum.PUBLISHED.getCode());
         } else if (isPublish.equals(PublishStatus.UNPUBLISHED.getKey())) {
-            flowDesignVO.setVersionStatus(VersionStatusEnum.DESIGNING.getCode());
+            respVO.setBpmVersionStatus(VersionStatusEnum.DESIGNING.getCode());
         } else if (isPublish.equals(PublishStatus.EXPIRED.getKey())) {
-            flowDesignVO.setVersionStatus(VersionStatusEnum.PREVIOUS.getCode());
+            respVO.setBpmVersionStatus(VersionStatusEnum.PREVIOUS.getCode());
         }
 
         String ext = defJson.getExt();
@@ -77,28 +79,25 @@ public class BpmDesignConvertImpl implements BpmDesignConvert {
 
             if (extDto != null) {
                 if (extDto.getGlobalConfig() != null) {
-                    flowDesignVO.setGlobalConfig(extDto.getGlobalConfig());
+                    respVO.setGlobalConfig(extDto.getGlobalConfig());
                 } else {
                     // 返回默认值
-                    flowDesignVO.setGlobalConfig(new BpmGlobalConfigDTO());
+                    respVO.setGlobalConfig(new BpmGlobalConfigDTO());
                 }
-
-                // todo：应用ID校验
-                flowDesignVO.setAppId(extDto.getAppId());
             }
         }
 
         // 设置版本备注
         if (StringUtils.isBlank(defJson.getVersionAlias())) {
-            flowDesignVO.setVersionAlias(defaultVersionAlias);
+            respVO.setBpmVersionAlias(defaultVersionAlias);
         } else {
-            flowDesignVO.setVersionAlias(defJson.getVersionAlias());
+            respVO.setBpmVersionAlias(defJson.getVersionAlias());
         }
 
         // 转换节点配置
-        flowDesignVO.setBpmDefJson(nodeJsonListToBpmDefJson(defJson.getNodeList()));
+        respVO.setBpmDefJson(nodeJsonListToBpmDefJson(defJson.getNodeList()));
 
-        return flowDesignVO;
+        return respVO;
     }
 
     /**
@@ -109,7 +108,7 @@ public class BpmDesignConvertImpl implements BpmDesignConvert {
      * @return DefJson
      */
     @Override
-    public DefJson toDefJson(BpmDesignVO flowDesignVO) {
+    public DefJson toDefJson(BpmDesignSaveReqVO flowDesignVO) {
         if (flowDesignVO == null) {
            return null;
         }
@@ -118,16 +117,13 @@ public class BpmDesignConvertImpl implements BpmDesignConvert {
         defJson.setId(flowDesignVO.getId());
         defJson.setFlowCode(flowDesignVO.getFlowCode());
         defJson.setFlowName(flowDesignVO.getFlowName());
-        defJson.setFormPath(String.valueOf(flowDesignVO.getBusinessId()));
+        defJson.setFormPath(flowDesignVO.getMenuUuid());
 
         // 构建ext
         BpmDefinitionExtDTO extDto = new BpmDefinitionExtDTO();
-        if (flowDesignVO.getVersionAlias() != null) {
-            extDto.setAppId(flowDesignVO.getAppId());
-            extDto.setGlobalConfig(flowDesignVO.getGlobalConfig());
-        }
+        extDto.setGlobalConfig(flowDesignVO.getGlobalConfig());
 
-        defJson.setVersionAlias(flowDesignVO.getVersionAlias());
+        defJson.setVersionAlias(flowDesignVO.getBpmVersionAlias());
         defJson.setExt(JsonUtils.toJsonString(extDto));
 
         // 固定值
@@ -229,7 +225,7 @@ public class BpmDesignConvertImpl implements BpmDesignConvert {
         return JsonUtils.toJsonString(bpmDefJsonVO);
     }
 
-    private List<NodeJson> toNodeJsonList(BpmDesignVO flowDesignVO) {
+    private List<NodeJson> toNodeJsonList(BpmDesignSaveReqVO flowDesignVO) {
         if (flowDesignVO == null) {
             return null;
         }
@@ -253,7 +249,7 @@ public class BpmDesignConvertImpl implements BpmDesignConvert {
             NodeJson nodeJson = new NodeJson();
             nodeJson.setNodeCode(nodeVO.getId());
             nodeJson.setNodeName(nodeVO.getName());
-            nodeJson.setFormPath(String.valueOf(flowDesignVO.getBusinessId()));
+            nodeJson.setFormPath(flowDesignVO.getMenuUuid());
 
             // 设置节点类型
             BpmNodeTypeEnum bpmNodeType = BpmNodeTypeEnum.getByCode(nodeVO.getType());

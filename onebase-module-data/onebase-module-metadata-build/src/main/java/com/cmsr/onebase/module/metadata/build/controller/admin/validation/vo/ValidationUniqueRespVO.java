@@ -26,7 +26,7 @@ public class ValidationUniqueRespVO {
     private Long entityId;
 
     @Schema(description = "应用ID", example = "1")
-    private String appId;
+    private String applicationId;
 
     @Schema(description = "规则组ID", example = "1")
     private Long groupId;
@@ -40,6 +40,6 @@ public class ValidationUniqueRespVO {
     @Schema(description = "提示信息", example = "该值已存在，请输入其他值")
     private String promptMessage;
 
-    @Schema(description = "运行模式", example = "1")
-    private Integer runMode;
+    @Schema(description = "版本标识", example = "1")
+    private Long versionTag;
 }

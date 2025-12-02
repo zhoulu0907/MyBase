@@ -64,7 +64,7 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
     public void validateDataIntegrity(Map<String, Object> data, List<MetadataEntityFieldDO> fields) {
         // 将字段ID转换为字段名后再校验
         Map<String, Object> convertedData = convertFieldIdToFieldName(data, fields);
-        
+
         for (MetadataEntityFieldDO field : fields) {
             // 跳过系统字段和主键字段 - 使用新的枚举值：1-是，0-否
             if (BooleanStatusEnum.isYes(field.getIsSystemField()) ||
@@ -218,27 +218,27 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
      */
     private void processComplexTypeFields(List<MetadataEntityFieldDO> fields, Map<String, Object> processedData) {
         log.info("开始处理复杂类型字段，字段数量: {}", fields.size());
-        
+
         for (MetadataEntityFieldDO field : fields) {
             String fieldName = field.getFieldName();
             String fieldType = field.getFieldType();
-            
+
             if (fieldName == null || fieldType == null) {
                 continue;
             }
-            
+
             Object fieldValue = processedData.get(fieldName);
             if (fieldValue == null) {
                 continue;
             }
-            
-            log.info("检查字段 {} (类型: {}), 值类型: {}, 值: {}", 
+
+            log.info("检查字段 {} (类型: {}), 值类型: {}, 值: {}",
                     fieldName, fieldType, fieldValue.getClass().getName(), fieldValue);
-            
+
             // 判断是否需要JSON序列化的字段类型
             boolean needsSerialization = needsJsonSerialization(fieldType, fieldValue);
             log.info("字段 {} 是否需要JSON序列化: {}", fieldName, needsSerialization);
-            
+
             if (needsSerialization) {
                 try {
                     // 将复杂对象序列化为JSON字符串
@@ -251,13 +251,13 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
                 }
             }
         }
-        
+
         log.info("复杂类型字段处理完成，最终数据: {}", processedData);
     }
 
     /**
      * 判断字段类型是否需要JSON序列化
-     * 
+     *
      * @param fieldType 字段类型
      * @param fieldValue 字段值
      * @return 是否需要序列化
@@ -266,9 +266,9 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
         if (fieldType == null) {
             return false;
         }
-        
+
         String upperFieldType = fieldType.toUpperCase();
-        
+
         // 字段类型包含以下关键字的需要JSON序列化
         boolean isComplexType = upperFieldType.contains("SELECT") ||       // 选择类型（包括SELECT、MULTI_SELECT、DATA_SELECTION等）
                                 upperFieldType.contains("MULTI") ||        // 多选类型（包括MULTI_USER、MULTI_DEPARTMENT等）
@@ -283,10 +283,10 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
                                 upperFieldType.contains("GEO") ||           // 地理位置（简写）
                                 upperFieldType.equals("JSONB") ||           // JSONB类型
                                 upperFieldType.equals("JSON");              // JSON类型
-        
+
         // 同时判断值是否为复杂对象（List或Map）
         boolean isComplexValue = fieldValue instanceof List || fieldValue instanceof Map;
-        
+
         return isComplexType && isComplexValue;
     }
 
@@ -317,7 +317,7 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
 
             // log打印插入数据
             log.info("准备插入数据，processedData: {}", processedData);
-            
+
             // 打印每个字段的详细信息
             processedData.forEach((key, value) -> {
                 if (value != null) {
@@ -326,9 +326,9 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
                     log.info("插入前字段 {} 的值为null", key);
                 }
             });
-            
+
             DataRow dataRow = new DataRow(processedData);
-            
+
             // 检查DataRow中的数据
             log.info("DataRow创建后的数据: {}", dataRow);
             processedData.forEach((key, value) -> {
@@ -405,16 +405,16 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
             }
             List<Map<Long, Object>> subData = subEntityContext.getSubData();
 
-            String parentRelFieldId = relationshipDOS.stream().filter(relationshipDO ->
+            String parentRelFieldId = String.valueOf(relationshipDOS.stream().filter(relationshipDO ->
                             (subEntityId).equals(relationshipDO.getTargetEntityId())).
-                    map(MetadataEntityRelationshipDO::getSourceFieldId).findFirst().orElse(null);
+                    map(MetadataEntityRelationshipDO::getSourceFieldId).findFirst().orElse(null));
             MetadataEntityFieldDO parentEntityFieldDO = entityFieldRepository.findById(Long.valueOf(parentRelFieldId));
             String parentFiledName = parentEntityFieldDO.getFieldName();// 主表关联字段名称
             Object parentValue = parentData.get(parentFiledName);
 
-            String subRelFieldId = relationshipDOS.stream().filter(relationshipDO ->
+            String subRelFieldId = String.valueOf(relationshipDOS.stream().filter(relationshipDO ->
                             (subEntityId).equals(relationshipDO.getTargetEntityId())).
-                    map(MetadataEntityRelationshipDO::getTargetFieldId).findFirst().orElse(null);
+                    map(MetadataEntityRelationshipDO::getTargetFieldId).findFirst().orElse(null));
             MetadataEntityFieldDO subEntityFieldDO = entityFieldRepository.findById(Long.valueOf(subRelFieldId));
             String subRelFieldName = subEntityFieldDO.getFieldName();// 子表关联字段名称
 

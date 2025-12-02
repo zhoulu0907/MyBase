@@ -1,8 +1,10 @@
 package com.cmsr.onebase.module.bpm.build.service;
 
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
-import com.cmsr.onebase.module.bpm.build.vo.design.BpmDesignVO;
+import com.cmsr.onebase.module.bpm.build.vo.design.BpmDesignRespVO;
+import com.cmsr.onebase.module.bpm.build.vo.design.BpmDesignSaveReqVO;
 import com.cmsr.onebase.module.bpm.build.vo.design.BpmPublishReqVO;
 import com.cmsr.onebase.module.bpm.convert.BpmDesignConvert;
 import com.cmsr.onebase.module.bpm.core.dal.database.ext.BpmFlowDefinitionRepositoryExt;
@@ -80,9 +82,17 @@ public class BpmDesignServiceImpl implements BpmDesignService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Long save(BpmDesignVO flowDesignVO) {
+    public Long save(BpmDesignSaveReqVO flowDesignVO) {
         Long flowId = flowDesignVO.getId();
-        Long businessId = flowDesignVO.getBusinessId();
+        String menuUuid = flowDesignVO.getMenuUuid();
+
+        Long applicationId = ApplicationManager.getApplicationId();
+
+        if (applicationId == null) {
+            throw new IllegalArgumentException("应用ID为空");
+        }
+
+        flowDesignVO.setAppId(applicationId);
 
         // 流程编码代表流程唯一标识，流程的多个版本编码也一样；只有多流程的场景才会有不同编码，暂时忽略
         String flowCode = flowDesignVO.getFlowCode();
@@ -102,7 +112,7 @@ public class BpmDesignServiceImpl implements BpmDesignService {
         // 数据校验和转换
         if (flowId == null) {
             // 先查询是否存在已经设计中的流程
-            Definition existDef = defExtService.getByFormPathAndStatus(String.valueOf(businessId), PublishStatus.UNPUBLISHED.getKey());
+            Definition existDef = defExtService.getByFormPathAndStatus(menuUuid, PublishStatus.UNPUBLISHED.getKey());
 
             // 只能存在一个设计态的流程
             if (existDef != null) {
@@ -110,7 +120,7 @@ public class BpmDesignServiceImpl implements BpmDesignService {
             }
 
             // 查询对应表单下任意一个流程
-            Definition anyDef = defExtService.getByFormPath(String.valueOf(businessId));
+            Definition anyDef = defExtService.getByFormPath(menuUuid);
 
             if (anyDef == null) {
                 // 检测flowCode
@@ -153,7 +163,7 @@ public class BpmDesignServiceImpl implements BpmDesignService {
     }
 
     @Override
-    public BpmDesignVO queryById(Long id) {
+    public BpmDesignRespVO queryById(Long id) {
         // 流程不存在时，直接查询defJson结构会报错，先查Definition表
         Definition definition = defService.getById(id);
 
@@ -165,19 +175,19 @@ public class BpmDesignServiceImpl implements BpmDesignService {
         DefJson defJson = defService.queryDesign(id);
         defJson.setId(id);
 
-        return bpmDesignConvert.toFlowDesignVO(defJson);
+        return bpmDesignConvert.toDesignRespVO(defJson);
     }
 
     @Override
-    public BpmDesignVO queryByBusinessId(Long businessId) {
+    public BpmDesignRespVO queryByMenuUuid(String menuUuid) {
         // 通过业务ID查询流程定义
         // todo：通过业务ID查询流程定义，按创建时间降序查询最新的流程，后续要改成优先查询已发布的流程定义
         // 按创建时间降序排序，获取最新的流程定义
-        Definition definition = defExtService.getByFormPath(String.valueOf(businessId));
+        Definition definition = defExtService.getByFormPath(menuUuid);
 
         // 不存在则返回一个空的流程定义
         if (definition == null) {
-            return new BpmDesignVO();
+            return new BpmDesignRespVO();
         }
 
         // 获取defJson结构
@@ -185,7 +195,7 @@ public class BpmDesignServiceImpl implements BpmDesignService {
         DefJson defJson = defService.queryDesign(flowId);
         defJson.setId(flowId);
 
-        return bpmDesignConvert.toFlowDesignVO(defJson);
+        return bpmDesignConvert.toDesignRespVO(defJson);
     }
 
     /**

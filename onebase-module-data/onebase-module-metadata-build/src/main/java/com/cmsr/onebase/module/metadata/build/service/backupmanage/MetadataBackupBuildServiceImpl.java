@@ -57,7 +57,7 @@ public class MetadataBackupBuildServiceImpl implements MetadataBackupBuildServic
         log.info("开始备份应用ID为 {} 的元数据", appId);
 
         MetadataBackupRespVO backupRespVO = new MetadataBackupRespVO();
-        backupRespVO.setAppId(appId);
+        backupRespVO.setApplicationId(appId);
         backupRespVO.setBackupTime(LocalDateTime.now());
 
         // 1. 备份数据源
@@ -97,28 +97,28 @@ public class MetadataBackupBuildServiceImpl implements MetadataBackupBuildServic
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void restoreMetadata(MetadataRestoreReqVO restoreReqVO) {
-        Long targetAppId = restoreReqVO.getTargetAppId();
-        log.info("开始恢复元数据到应用ID为 {} 的应用", targetAppId);
+        Long targetApplicationId = restoreReqVO.getTargetApplicationId();
+        log.info("开始恢复元数据到应用ID为 {} 的应用", targetApplicationId);
 
         // 1. 软删除现有的元数据
-        softDeleteExistingMetadata(targetAppId);
+        softDeleteExistingMetadata(targetApplicationId);
 
         // 2. 恢复数据源
-        restoreDatasources(restoreReqVO.getDatasourceList(), targetAppId);
+        restoreDatasources(restoreReqVO.getDatasourceList(), targetApplicationId);
 
         // 3. 恢复业务实体
-        restoreBusinessEntities(restoreReqVO.getBusinessEntityList(), targetAppId);
+        restoreBusinessEntities(restoreReqVO.getBusinessEntityList(), targetApplicationId);
 
         // 4. 恢复实体字段
-        restoreEntityFields(restoreReqVO.getEntityFieldList(), targetAppId);
+        restoreEntityFields(restoreReqVO.getEntityFieldList(), targetApplicationId);
 
         // 5. 恢复实体关系
-        restoreEntityRelationships(restoreReqVO.getEntityRelationshipList(), targetAppId);
+        restoreEntityRelationships(restoreReqVO.getEntityRelationshipList(), targetApplicationId);
 
         // 6. 恢复校验规则
-        restoreValidationRules(restoreReqVO.getValidationRuleList(), targetAppId);
+        restoreValidationRules(restoreReqVO.getValidationRuleList(), targetApplicationId);
 
-        log.info("完成恢复元数据到应用ID为 {} 的应用", targetAppId);
+        log.info("完成恢复元数据到应用ID为 {} 的应用", targetApplicationId);
     }
 
     /**
@@ -171,14 +171,14 @@ public class MetadataBackupBuildServiceImpl implements MetadataBackupBuildServic
      * 恢复数据源
      *
      * @param datasourceList 数据源列表
-     * @param targetAppId    目标应用ID
+     * @param targetApplicationId    目标应用ID
      */
-    private void restoreDatasources(List<MetadataDatasourceDO> datasourceList, Long targetAppId) {
+    private void restoreDatasources(List<MetadataDatasourceDO> datasourceList, Long targetApplicationId) {
         log.info("开始恢复数据源，数量: {}", datasourceList.size());
         for (MetadataDatasourceDO datasource : datasourceList) {
             // 重置ID，让数据库自动生成新ID
             datasource.setId(null);
-            datasource.setAppId(targetAppId);
+            datasource.setApplicationId(targetApplicationId);
             datasource.setDeleted(0L);
             datasource.setCreateTime(LocalDateTime.now());
             datasource.setUpdateTime(LocalDateTime.now());
@@ -191,14 +191,14 @@ public class MetadataBackupBuildServiceImpl implements MetadataBackupBuildServic
      * 恢复业务实体
      *
      * @param businessEntityList 业务实体列表
-     * @param targetAppId        目标应用ID
+     * @param targetApplicationId        目标应用ID
      */
-    private void restoreBusinessEntities(List<MetadataBusinessEntityDO> businessEntityList, Long targetAppId) {
+    private void restoreBusinessEntities(List<MetadataBusinessEntityDO> businessEntityList, Long targetApplicationId) {
         log.info("开始恢复业务实体，数量: {}", businessEntityList.size());
         for (MetadataBusinessEntityDO entity : businessEntityList) {
             // 重置ID，让数据库自动生成新ID
             entity.setId(null);
-            entity.setAppId(targetAppId);
+            entity.setApplicationId(targetApplicationId);
             entity.setDeleted(0L);
             entity.setCreateTime(LocalDateTime.now());
             entity.setUpdateTime(LocalDateTime.now());
@@ -211,14 +211,14 @@ public class MetadataBackupBuildServiceImpl implements MetadataBackupBuildServic
      * 恢复实体字段
      *
      * @param entityFieldList 实体字段列表
-     * @param targetAppId     目标应用ID
+     * @param targetApplicationId     目标应用ID
      */
-    private void restoreEntityFields(List<MetadataEntityFieldDO> entityFieldList, Long targetAppId) {
+    private void restoreEntityFields(List<MetadataEntityFieldDO> entityFieldList, Long targetApplicationId) {
         log.info("开始恢复实体字段，数量: {}", entityFieldList.size());
         for (MetadataEntityFieldDO field : entityFieldList) {
             // 重置ID，让数据库自动生成新ID
             field.setId(null);
-            field.setAppId(targetAppId);
+            field.setApplicationId(targetApplicationId);
             field.setDeleted(0L);
             field.setCreateTime(LocalDateTime.now());
             field.setUpdateTime(LocalDateTime.now());
@@ -231,14 +231,14 @@ public class MetadataBackupBuildServiceImpl implements MetadataBackupBuildServic
      * 恢复实体关系
      *
      * @param entityRelationshipList 实体关系列表
-     * @param targetAppId            目标应用ID
+     * @param targetApplicationId            目标应用ID
      */
-    private void restoreEntityRelationships(List<MetadataEntityRelationshipDO> entityRelationshipList, Long targetAppId) {
+    private void restoreEntityRelationships(List<MetadataEntityRelationshipDO> entityRelationshipList, Long targetApplicationId) {
         log.info("开始恢复实体关系，数量: {}", entityRelationshipList.size());
         for (MetadataEntityRelationshipDO relationship : entityRelationshipList) {
             // 重置ID，让数据库自动生成新ID
             relationship.setId(null);
-            relationship.setAppId(targetAppId);
+            relationship.setApplicationId(targetApplicationId);
             relationship.setDeleted(0L);
             relationship.setCreateTime(LocalDateTime.now());
             relationship.setUpdateTime(LocalDateTime.now());
@@ -251,9 +251,9 @@ public class MetadataBackupBuildServiceImpl implements MetadataBackupBuildServic
      * 恢复校验规则
      *
      * @param validationRuleList 校验规则列表
-     * @param targetAppId        目标应用ID
+     * @param targetApplicationId        目标应用ID
      */
-    private void restoreValidationRules(List<MetadataValidationRuleDefinitionDO> validationRuleList, Long targetAppId) {
+    private void restoreValidationRules(List<MetadataValidationRuleDefinitionDO> validationRuleList, Long targetApplicationId) {
         log.info("开始恢复校验规则，数量: {}", validationRuleList.size());
         for (MetadataValidationRuleDefinitionDO rule : validationRuleList) {
             // 重置ID，让数据库自动生成新ID

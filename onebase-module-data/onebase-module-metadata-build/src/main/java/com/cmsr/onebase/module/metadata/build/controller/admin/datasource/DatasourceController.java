@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.metadata.build.controller.admin.datasource;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.module.metadata.build.controller.admin.datasource.vo.*;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
 import com.cmsr.onebase.module.metadata.build.service.datasource.MetadataDatasourceBuildService;
@@ -113,9 +114,10 @@ public class DatasourceController {
     public CommonResult<List<DatasourceRespVO>> getDatasourceList(@Valid @RequestBody DatasourceListReqVO reqVO) {
         List<MetadataDatasourceDO> list;
 
-        // 根据是否传入appId来决定查询方式
-        if (reqVO.getAppId() != null && !reqVO.getAppId().trim().isEmpty()) {
-            list = datasourceBuildService.getDatasourceListByAppId(Long.valueOf(reqVO.getAppId()));
+        // 使用请求头中的应用ID
+        Long applicationId = ApplicationManager.getApplicationId();
+        if (applicationId != null) {
+            list = datasourceBuildService.getDatasourceListByAppId(applicationId);
         } else {
             list = datasourceBuildService.getDatasourceList();
         }

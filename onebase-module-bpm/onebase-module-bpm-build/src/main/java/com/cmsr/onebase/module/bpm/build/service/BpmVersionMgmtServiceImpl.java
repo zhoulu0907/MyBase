@@ -17,7 +17,6 @@ import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryCondition;
 import com.mybatisflex.core.query.QueryMethods;
 import com.mybatisflex.core.query.QueryWrapper;
-import com.mybatisflex.core.query.RawQueryOrderBy;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -80,7 +79,7 @@ public class BpmVersionMgmtServiceImpl implements BpmVersionMgmtService {
         ids.add(reqVo.getId());
 
         // 校验流程是否存在
-        Definition existDef = defService.getById(String.valueOf(reqVo.getId()));
+        Definition existDef = defService.getById(reqVo.getId());
 
         if (existDef == null) {
             return;
@@ -126,10 +125,10 @@ public class BpmVersionMgmtServiceImpl implements BpmVersionMgmtService {
         }
 
         QueryWrapper queryWrapper = QueryWrapper.create();
-        queryWrapper.eq(FlowDefinition::getFormPath, String.valueOf(reqVo.getBusinessId()));
+        queryWrapper.eq(FlowDefinition::getFormPath, reqVo.getMenuUuid());
 
-        if (StringUtils.isNotBlank(reqVo.getVersionStatus())) {
-            VersionStatusEnum versionStatusEnum = VersionStatusEnum.getByCode(reqVo.getVersionStatus());
+        if (StringUtils.isNotBlank(reqVo.getBpmVersionStatus())) {
+            VersionStatusEnum versionStatusEnum = VersionStatusEnum.getByCode(reqVo.getBpmVersionStatus());
 
             if (versionStatusEnum != null && versionStatusEnum.toPublishStatus() != null) {
                 queryWrapper.eq(FlowDefinition::getIsPublish, versionStatusEnum.toPublishStatus().getKey());
@@ -138,9 +137,9 @@ public class BpmVersionMgmtServiceImpl implements BpmVersionMgmtService {
             }
         }
 
-        String versionAlias = reqVo.getVersionAlias();
+        String versionAlias = reqVo.getBpmVersionAlias();
 
-        if (StringUtils.isNotBlank(reqVo.getVersionAlias())) {
+        if (StringUtils.isNotBlank(versionAlias)) {
             String versionKeyWord = versionAlias;
 
             // 去除首字母的V用于版本搜索
@@ -149,7 +148,7 @@ public class BpmVersionMgmtServiceImpl implements BpmVersionMgmtService {
             }
 
             QueryCondition orCondition = QueryCondition.createEmpty();
-            orCondition.or(FLOW_DEFINITION.BPM_VERSION_ALIAS.like(reqVo.getVersionAlias()));
+            orCondition.or(FLOW_DEFINITION.BPM_VERSION_ALIAS.like(versionAlias));
             orCondition.or(FLOW_DEFINITION.BPM_VERSION.like(versionKeyWord));
 
             queryWrapper.and(orCondition);
@@ -177,7 +176,7 @@ public class BpmVersionMgmtServiceImpl implements BpmVersionMgmtService {
             throw exception(ErrorCodeConstants.FLOW_NOT_EXISTS);
         }
 
-        definition.setVersionAlias(reqVo.getVersionAlias());
+        definition.setVersionAlias(reqVo.getBpmVersionAlias());
         defService.updateById(definition);
     }
 
@@ -199,10 +198,10 @@ public class BpmVersionMgmtServiceImpl implements BpmVersionMgmtService {
             for (FlowDefinition definition : pageResult.getRecords()) {
                 BpmDefVersionMgtVO vo = new BpmDefVersionMgtVO();
                 vo.setId(definition.getId());
-                vo.setVersion("V" + definition.getVersion());
-                vo.setVersionAlias(definition.getBpmVersionAlias());
+                vo.setBpmVersion("V" + definition.getVersion());
+                vo.setBpmVersionAlias(definition.getBpmVersionAlias());
                 VersionStatusEnum versionStatusEnum = VersionStatusEnum.toVersionStatusEnum(definition.getIsPublish());
-                vo.setVersionStatus(versionStatusEnum.getName());
+                vo.setBpmVersionStatus(versionStatusEnum.getCode());
                 vo.setCreateTime(definition.getCreateTime());
                 vo.setUpdateTime(definition.getUpdateTime());
                 // 创建人

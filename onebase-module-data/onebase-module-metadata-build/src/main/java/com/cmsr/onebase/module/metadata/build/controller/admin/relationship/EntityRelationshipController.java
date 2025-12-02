@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.metadata.build.controller.admin.relationship;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.module.metadata.build.controller.admin.relationship.vo.CascadeTypeRespVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.relationship.vo.EntityRelationshipPageReqVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.relationship.vo.EntityRelationshipRespVO;
@@ -56,7 +57,7 @@ public class EntityRelationshipController {
     @PreAuthorize("@ss.hasPermission('metadata:entity-relationship:query')")
     public CommonResult<PageResult<EntityRelationshipRespVO>> getEntityRelationshipPage(@Valid @RequestBody EntityRelationshipPageReqVO pageReqVO) {
         log.info("控制器接收到的分页请求参数: entityId={}, appId={}, pageNo={}, pageSize={}",
-                pageReqVO.getEntityId(), pageReqVO.getAppId(), pageReqVO.getPageNo(), pageReqVO.getPageSize());
+                pageReqVO.getEntityId(), pageReqVO.getApplicationId(), pageReqVO.getPageNo(), pageReqVO.getPageSize());
         log.info("控制器参数详细信息: pageReqVO={}", pageReqVO);
 
         PageResult<EntityRelationshipRespVO> result = entityRelationshipService.getEntityRelationshipPage(pageReqVO);
@@ -127,9 +128,10 @@ public class EntityRelationshipController {
 
     @PostMapping("/app-entities")
     @Operation(summary = "根据应用ID查询所有实体及字段信息")
-    @Parameter(name = "appId", description = "应用ID", required = true, example = "1001")
+    @Parameter(name = "appId", description = "应用ID", required = false, example = "1001")
     @PreAuthorize("@ss.hasPermission('metadata:entity-relationship:query')")
-    public CommonResult<AppEntitiesRespVO> getAppEntitiesWithFields(@RequestParam("appId") Long appId) {
+    public CommonResult<AppEntitiesRespVO> getAppEntitiesWithFields(@RequestParam(value = "appId", required = false) Long appId) {
+        appId = ApplicationManager.getApplicationId();
         AppEntitiesRespVO result = entityRelationshipService.getAppEntitiesWithFields(appId);
         return success(result);
     }

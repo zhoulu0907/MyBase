@@ -46,7 +46,7 @@ public class MetadataEntityRelationshipDO extends BaseTenantEntity {
     private Long targetEntityId;
 
     /**
-     * 关系类型(ONE_TO_ONE,ONE_TO_MANY,MANY_TO_ONE,MANY_TO_MANY)
+     * 关系类型
      */
     @Column(value = "relationship_type", comment = "关系类型")
     private String relationshipType;
@@ -55,13 +55,26 @@ public class MetadataEntityRelationshipDO extends BaseTenantEntity {
      * 源字段id
      */
     @Column(value = "source_field_id", comment = "源字段id")
-    private String sourceFieldId;
+    private Long sourceFieldId;
 
     /**
      * 目标字段id
      */
     @Column(value = "target_field_id", comment = "目标字段id")
-    private String targetFieldId;
+    private Long targetFieldId;
+
+    /**
+     * 选择字段id
+     * <p>
+     * 该字段主要用于当关系类型relationshipType为数据选择时：
+     * - targetFieldId存的是关联表的主键字段id
+     * - selectFieldId存的是关联表中被选择的字段id（用于展示给用户的字段）
+     * <p>
+     * 用户动态建的实体中存的是关联表主键id，通过id查到一条或多条数据后，
+     * 需要把selectFieldId对应的字段值取出来展示给用户。因此需要存储该字段。
+     */
+    @Column(value = "select_field_id", comment = "选择字段id")
+    private Long selectFieldId;
 
     /**
      * 级联操作类型(read,all,delete,none)
@@ -76,15 +89,15 @@ public class MetadataEntityRelationshipDO extends BaseTenantEntity {
     private String description;
 
     /**
-     * 运行模式：0 编辑态，1 运行态
+     * 版本标识
      */
-    @Column(value = "run_mode", comment = "运行模式：0 编辑态，1 运行态")
-    private Integer runMode;
+    @Column(value = "version_tag", comment = "版本标识")
+    private Long versionTag;
 
     /**
      * 应用ID
      */
-    @Column(value = "app_id", comment = "应用ID")
-    private Long appId;
+    @Column(value = "application_id", comment = "应用ID")
+    private Long applicationId;
 
 }

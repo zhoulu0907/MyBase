@@ -1,13 +1,10 @@
 package com.cmsr.onebase.module.bpm.build.service;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.bpm.build.vo.design.BpmDefinitionVO;
 import com.cmsr.onebase.module.bpm.build.vo.vermgmt.BpmDefVersionMgtVO;
 import com.cmsr.onebase.module.bpm.build.vo.vermgmt.BpmDeleteReqVo;
 import com.cmsr.onebase.module.bpm.build.vo.vermgmt.BpmUpdateReqVo;
 import com.cmsr.onebase.module.bpm.build.vo.vermgmt.BpmVersionMgmtPageReqVo;
-
-import java.util.List;
 
 
 /**

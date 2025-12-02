@@ -171,8 +171,8 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
         data.setGroupId(groupId);
         // fieldId设置为null，不再使用
         data.setFieldId(null);
-        // appId暂时设置为null，如果需要可以从其他地方获取
-        data.setAppId(null);
+        // applicationId暂时设置为null，如果需要可以从其他地方获取
+        data.setApplicationId(null);
         
         // 设置默认值
         if (data.getIsEnabled() == null) {
@@ -223,7 +223,7 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
         updateObj.setId(existing.getId());
         updateObj.setEntityId(vo.getEntityId());
         updateObj.setChildEntityId(vo.getChildEntityId());
-        updateObj.setAppId(existing.getAppId());
+        updateObj.setApplicationId(existing.getApplicationId());
         updateObj.setGroupId(targetGroupId);
         // fieldId保持不变，设置为null或保留原值
         updateObj.setFieldId(null);

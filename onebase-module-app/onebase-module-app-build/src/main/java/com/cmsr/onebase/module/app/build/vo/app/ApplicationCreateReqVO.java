@@ -37,7 +37,7 @@ public class ApplicationCreateReqVO {
     @Schema(description = "图标类型")
     private String iconName;
 
-    @Schema(description = "图标颜色")
+    @Schema(description = "图标颜色", maxLength = 32)
     private String iconColor;
 
     @Schema(description = "应用描述")

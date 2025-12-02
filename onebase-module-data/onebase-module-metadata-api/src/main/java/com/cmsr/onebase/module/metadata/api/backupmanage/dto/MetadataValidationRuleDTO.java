@@ -51,11 +51,11 @@ public class MetadataValidationRuleDTO {
     @Schema(description = "执行顺序")
     private Integer sortOrder;
 
-    @Schema(description = "运行模式")
-    private Integer runMode;
+    @Schema(description = "版本标识")
+    private Long versionTag;
 
     @Schema(description = "应用ID")
-    private Long appId;
+    private Long applicationId;
 
     @Schema(description = "创建时间")
     private LocalDateTime createTime;

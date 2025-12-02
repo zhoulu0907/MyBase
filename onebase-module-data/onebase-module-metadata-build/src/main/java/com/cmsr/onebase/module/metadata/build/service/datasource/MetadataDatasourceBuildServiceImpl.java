@@ -229,7 +229,7 @@ public class MetadataDatasourceBuildServiceImpl implements MetadataDatasourceBui
     @Transactional(rollbackFor = Exception.class)
     public Long createDatasource(@Valid DatasourceSaveReqVO createReqVO) {
         // 校验必填参数
-        if (createReqVO.getAppId() == null || createReqVO.getAppId().trim().isEmpty()) {
+        if (createReqVO.getApplicationId() == null || createReqVO.getApplicationId().trim().isEmpty()) {
             throw new IllegalArgumentException("应用ID不能为空");
         }
         if (createReqVO.getAppUid() == null || createReqVO.getAppUid().trim().isEmpty()) {
@@ -238,7 +238,7 @@ public class MetadataDatasourceBuildServiceImpl implements MetadataDatasourceBui
 
         // 校验编码唯一性(创建时ID为null,所以传null;appId需要安全转换)
         Long id = (createReqVO.getId() != null && !createReqVO.getId().trim().isEmpty()) ? Long.valueOf(createReqVO.getId()) : null;
-        Long appId = Long.valueOf(createReqVO.getAppId());
+        Long appId = Long.valueOf(createReqVO.getApplicationId());
         String appUid = createReqVO.getAppUid();
         validateDatasourceCodeUnique(id, createReqVO.getCode(), appId);
 
@@ -299,9 +299,9 @@ public class MetadataDatasourceBuildServiceImpl implements MetadataDatasourceBui
         reqVO.setDatasourceType(metadataConfig.getDefaultDatasourceType());
         reqVO.setConfig(config);
         reqVO.setDescription(metadataConfig.getDefaultDatasourceDescription());
-        reqVO.setRunMode(metadataConfig.getDefaultDatasourceRunMode());
+        reqVO.setVersionTag(Long.valueOf(metadataConfig.getDefaultDatasourceRunMode()));
         reqVO.setDatasourceOrigin(metadataConfig.getDefaultDatasourceDatasourceOrigin());
-        reqVO.setAppId(String.valueOf(appId));
+        reqVO.setApplicationId(String.valueOf(appId));
         // 关键：传递 appUid，确保关联表插入不为 null
         reqVO.setAppUid(appUid);
 
@@ -318,7 +318,7 @@ public class MetadataDatasourceBuildServiceImpl implements MetadataDatasourceBui
     public void updateDatasource(@Valid DatasourceSaveReqVO updateReqVO) {
         // 安全转换ID和AppID
         Long id = (updateReqVO.getId() != null && !updateReqVO.getId().trim().isEmpty()) ? Long.valueOf(updateReqVO.getId()) : null;
-        Long appId = (updateReqVO.getAppId() != null && !updateReqVO.getAppId().trim().isEmpty()) ? Long.valueOf(updateReqVO.getAppId()) : null;
+        Long appId = (updateReqVO.getApplicationId() != null && !updateReqVO.getApplicationId().trim().isEmpty()) ? Long.valueOf(updateReqVO.getApplicationId()) : null;
 
         // 校验存在
         if (id == null) {
@@ -403,12 +403,12 @@ public class MetadataDatasourceBuildServiceImpl implements MetadataDatasourceBui
     @Override
     public PageResult<MetadataDatasourceDO> getDatasourcePage(DatasourcePageReqVO pageReqVO) {
         // 如果指定了应用ID，需要通过关联表查询
-        if (pageReqVO.getAppId() != null && !pageReqVO.getAppId().trim().isEmpty()) {
+        if (pageReqVO.getApplicationId() != null && !pageReqVO.getApplicationId().trim().isEmpty()) {
             Long appId;
             try {
-                appId = Long.valueOf(pageReqVO.getAppId());
+                appId = Long.valueOf(pageReqVO.getApplicationId());
             } catch (NumberFormatException e) {
-                throw new IllegalArgumentException("应用ID格式不正确: " + pageReqVO.getAppId());
+                throw new IllegalArgumentException("应用ID格式不正确: " + pageReqVO.getApplicationId());
             }
 
             // 获取应用关联的数据源列表
@@ -430,8 +430,8 @@ public class MetadataDatasourceBuildServiceImpl implements MetadataDatasourceBui
                             !pageReqVO.getDatasourceType().equals(datasource.getDatasourceType())) {
                             return false;
                         }
-                        if (pageReqVO.getRunMode() != null &&
-                            !pageReqVO.getRunMode().equals(datasource.getRunMode())) {
+                        if (pageReqVO.getVersionTag() != null &&
+                            !pageReqVO.getVersionTag().equals(datasource.getVersionTag())) {
                             return false;
                         }
                         // TODO: 支持数据源来源过滤
@@ -477,8 +477,8 @@ public class MetadataDatasourceBuildServiceImpl implements MetadataDatasourceBui
         if (pageReqVO.getDatasourceOrigin() != null) {
             queryWrapper.eq(MetadataDatasourceDO::getDatasourceOrigin, pageReqVO.getDatasourceOrigin());
         }
-        if (pageReqVO.getRunMode() != null) {
-            queryWrapper.eq(MetadataDatasourceDO::getRunMode, pageReqVO.getRunMode());
+        if (pageReqVO.getVersionTag() != null) {
+            queryWrapper.eq(MetadataDatasourceDO::getVersionTag, pageReqVO.getVersionTag());
         }
 
         // 分页查询
