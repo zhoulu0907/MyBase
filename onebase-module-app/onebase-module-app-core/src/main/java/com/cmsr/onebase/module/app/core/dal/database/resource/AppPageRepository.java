@@ -21,18 +21,18 @@ import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppResourceP
 @Repository
 public class AppPageRepository extends BaseBizRepository<AppResourcePageMapper, AppResourcePageDO> {
 
-    public AppResourcePageDO getByUuid(String pageUuid) {
-        QueryWrapper queryWrapper = this.query()
-                .where(APP_RESOURCE_PAGE.PAGE_UUID.eq(pageUuid));
-        return getOne(queryWrapper);
-    }
+//    public AppResourcePageDO getByUuid(String pageUuid) {
+//        QueryWrapper queryWrapper = this.query()
+//                .where(APP_RESOURCE_PAGE.PAGE_UUID.eq(pageUuid));
+//        return getOne(queryWrapper);
+//    }
 
-    public String getPageSetUuidByPageUuid(String pageUuid) {
-        QueryWrapper queryWrapper = this.query()
-                .select(APP_RESOURCE_PAGE.PAGESET_UUID)
-                .where(APP_RESOURCE_PAGE.PAGE_UUID.eq(pageUuid));
-        return getObjAs(queryWrapper, String.class);
-    }
+//    public String getPageSetUuidByPageUuid(String pageUuid) {
+//        QueryWrapper queryWrapper = this.query()
+//                .select(APP_RESOURCE_PAGE.PAGESET_UUID)
+//                .where(APP_RESOURCE_PAGE.PAGE_UUID.eq(pageUuid));
+//        return getObjAs(queryWrapper, String.class);
+//    }
 
     public void updatePageName(Long pageId, String pageName) {
         this.updateChain()
@@ -41,31 +41,33 @@ public class AppPageRepository extends BaseBizRepository<AppResourcePageMapper, 
                 .update();
     }
 
-    public List<AppResourcePageDO> findAllFormPageByPageSetUuid(String pageSetUuid) {
+    public List<AppResourcePageDO> findAllFormPageByAppIdAndPageSetUuid(Long applicationId, String pageSetUuid) {
         QueryWrapper queryWrapper = this.query()
+                .where(APP_RESOURCE_PAGE.APPLICATION_ID.eq(applicationId))
                 .where(APP_RESOURCE_PAGE.PAGESET_UUID.eq(pageSetUuid))
                 .and(APP_RESOURCE_PAGE.PAGE_TYPE.eq(PageEnum.FORM.getValue()));
         return list(queryWrapper);
     }
 
-    public List<AppResourcePageDO> findAllFormPageByPageSetUuids(List<String> pageSetUuidList) {
+    public List<AppResourcePageDO> findAllFormPageByPageSetUuids(Long applicationId, List<String> pageSetUuidList) {
         if (CollectionUtils.isEmpty(pageSetUuidList)) {
             return Collections.emptyList();
         }
         QueryWrapper queryWrapper = this.query()
+                .where(APP_RESOURCE_PAGE.APPLICATION_ID.eq(applicationId))
                 .where(APP_RESOURCE_PAGE.PAGESET_UUID.in(pageSetUuidList))
                 .and(APP_RESOURCE_PAGE.PAGE_TYPE.eq(PageEnum.FORM.getValue()));
         return list(queryWrapper);
     }
 
-    public void deleteByUuidList(Collection<String> pageUuids) {
-        if (CollectionUtils.isEmpty(pageUuids)) {
-            return;
-        }
-        this.updateChain()
-                .where(APP_RESOURCE_PAGE.PAGE_UUID.in(pageUuids))
-                .remove();
-    }
+//    public void deleteByUuidList(Collection<String> pageUuids) {
+//        if (CollectionUtils.isEmpty(pageUuids)) {
+//            return;
+//        }
+//        this.updateChain()
+//                .where(APP_RESOURCE_PAGE.PAGE_UUID.in(pageUuids))
+//                .remove();
+//    }
 
     public List<Long> findIdsByAppIdAndPageSetUuid(Long applicationId, String pageSetUuid) {
         QueryWrapper queryWrapper = this.query()

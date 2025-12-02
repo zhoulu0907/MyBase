@@ -232,8 +232,7 @@ public class AppMenuServiceImpl implements AppMenuService {
         AppApplicationDO applicationDO = appCommonService.validateApplicationExist(createReqVO.getApplicationId());
         // 创建菜单
         AppMenuDO menuDO = new AppMenuDO();
-        String menuUuid = UuidUtils.getUuid();
-        menuDO.setMenuUuid(menuUuid);
+        menuDO.setMenuUuid(UuidUtils.getUuid());
         menuDO.setApplicationId(applicationDO.getId());
         menuDO.setParentUuid(validateParentMenuId(createReqVO.getParentId()));
         menuDO.setMenuCode(MenuUtils.generateMenuCode());
@@ -247,7 +246,7 @@ public class AppMenuServiceImpl implements AppMenuService {
         // 创建页面集
         CreatePageSetDTO createPageSetDTO = new CreatePageSetDTO();
         createPageSetDTO.setApplicationId(applicationDO.getId());
-        createPageSetDTO.setMenuUuid(menuUuid);
+        createPageSetDTO.setMenuId(menuDO.getId());
         createPageSetDTO.setPageSetType(createReqVO.getPageSetType());
         createPageSetDTO.setPageSetName(menuDO.getMenuName());
         createPageSetDTO.setDisplayName(menuDO.getMenuName());
@@ -357,19 +356,17 @@ public class AppMenuServiceImpl implements AppMenuService {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_MENU_GROUP_NOT_ALLOW_COPY);
         }
         Long sourceMenuId = menuDO.getId();
-        String sourceMenuUuid = menuDO.getMenuUuid();
         // 复制菜单
-        String newMenuUuid = UuidUtils.getUuid();
         menuDO.setId(null);
-        menuDO.setMenuUuid(newMenuUuid);
+        menuDO.setMenuUuid(UuidUtils.getUuid());
         menuDO.setMenuName(copyReqVO.getMenuName());
         menuDO.setParentUuid(validateParentMenuId(copyReqVO.getParentId()));
         menuDO.setMenuCode(MenuUtils.generateMenuCode());
         appMenuRepository.save(menuDO);
         // 复制页面
         CopyPageSetDTO copyPageSetDTO = new CopyPageSetDTO();
-        copyPageSetDTO.setMenuUuid(sourceMenuUuid);
-        copyPageSetDTO.setNewMenuUuid(newMenuUuid);
+        copyPageSetDTO.setMenuId(sourceMenuId);
+        copyPageSetDTO.setNewMenuId(menuDO.getId());
         pageSetService.copyPageSet(copyPageSetDTO);
         //
         MenuCreateRespVO menuCreateRespVO = BeanUtils.toBean(menuDO, MenuCreateRespVO.class);
@@ -387,7 +384,7 @@ public class AppMenuServiceImpl implements AppMenuService {
         // 删除菜单
         appMenuRepository.removeById(id);
         // 删除页面
-        pageSetService.deletePageSetByMenuId(menuDO);
+        pageSetService.deletePageSetByMenuId(menuDO.getId());
     }
 
     private boolean validateMenuGroupHasChildren(Long applicationId, String menuUuid) {

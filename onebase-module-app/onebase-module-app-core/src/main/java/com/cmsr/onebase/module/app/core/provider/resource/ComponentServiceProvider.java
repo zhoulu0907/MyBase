@@ -29,7 +29,7 @@ public class ComponentServiceProvider {
         if (pageDO == null) {
             throw ServiceExceptionUtil.exception(AppResourceErrorCodeConstants.PAGE_NOT_EXIST);
         }
-        List<AppResourceComponentDO> componentDOS = appComponentDataRepository.findByPageUuid(pageDO.getPageUuid());
+        List<AppResourceComponentDO> componentDOS = appComponentDataRepository.findByAppIdAndPageUuid(pageDO.getApplicationId(), pageDO.getPageUuid());
         return BeanUtils.toBean(componentDOS, ComponentDTO.class);
     }
 

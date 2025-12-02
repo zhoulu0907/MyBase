@@ -6,18 +6,21 @@ import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageSetRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePageDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetDO;
 import com.cmsr.onebase.module.app.core.dto.appresource.CreatePageViewDTO;
 import com.cmsr.onebase.module.app.core.dto.appresource.PageDTO;
 import com.cmsr.onebase.module.app.core.dto.appresource.UpdatePageNameDTO;
 import com.cmsr.onebase.module.app.core.enums.appresource.PageEnum;
 import com.cmsr.onebase.module.app.core.enums.appresource.ViewEnmu;
 import com.cmsr.onebase.module.app.core.provider.resource.PageServiceProvider;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
 
+@Setter
 @Service
 public class PageServiceImpl implements PageService {
 
@@ -35,15 +38,19 @@ public class PageServiceImpl implements PageService {
 
     @Override
     public Long createPageView(CreatePageViewDTO createPageViewDTO) {
+        AppResourcePagesetDO pagesetDO = pageSetRepository.getById(createPageViewDTO.getPageSetId());
+        String pageSetUuid = pagesetDO.getPageSetUuid();
+
         Long applicationId = ApplicationManager.getApplicationId();
-        String formPageCode = UUID.randomUUID().toString();
         String formPageName = createPageViewDTO.getViewName();
+        //TODO formPageCode formRouterPath 这两个可以删除
+        String formPageCode = UUID.randomUUID().toString();
         String formRouterPath = formPageCode + "/form";
         String formPageType = PageEnum.FORM.getValue();
         Boolean formOpenViewMode = false;
         AppResourcePageDO formPageDO = PageUtils.initPage(
                 applicationId,
-                createPageViewDTO.getPageSetUuid(),
+                pageSetUuid,
                 formPageName,
                 formRouterPath,
                 formPageType,
@@ -61,9 +68,7 @@ public class PageServiceImpl implements PageService {
         if (viewType.equals(ViewEnmu.DETAIL.getValue())) {
             formPageDO.setDetailViewMode(1);
         }
-
         pageRepository.save(formPageDO);
-
         return formPageDO.getId();
     }
 
@@ -79,13 +84,13 @@ public class PageServiceImpl implements PageService {
     }
 
     @Override
-    public String getMetadataByPageUuid(String pageUuid) {
-        return pageServiceProvider.getMetadataByPageUuid(pageUuid);
+    public String getMetadataByPageId(Long pageId) {
+        return pageServiceProvider.getMetadataByPageId(pageId);
     }
 
     @Override
-    public List<PageDTO> listPageView(String pageSetUuid) {
-        return pageServiceProvider.listPageView(pageSetUuid);
+    public List<PageDTO> listPageView(Long pageSetId) {
+        return pageServiceProvider.listPageView(pageSetId);
     }
 
 }

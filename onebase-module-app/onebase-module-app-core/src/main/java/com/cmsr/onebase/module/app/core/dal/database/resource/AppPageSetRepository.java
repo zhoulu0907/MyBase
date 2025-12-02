@@ -14,15 +14,16 @@ import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppResourceP
 @Repository
 public class AppPageSetRepository extends BaseBizRepository<AppResourcePagesetMapper, AppResourcePagesetDO> {
 
-    public AppResourcePagesetDO getByUuid(String pageSetUuid) {
-        QueryWrapper queryWrapper = this.query()
-                .where(APP_RESOURCE_PAGESET.PAGESET_UUID.eq(pageSetUuid));
-        return getOne(queryWrapper);
-    }
+//    public AppResourcePagesetDO getByUuid(String pageSetUuid) {
+//        QueryWrapper queryWrapper = this.query()
+//                .where(APP_RESOURCE_PAGESET.PAGESET_UUID.eq(pageSetUuid));
+//        return getOne(queryWrapper);
+//    }
 
-    public List<String> findPageSetUuidListByMenuUuids(Collection<String> menuUuids) {
+    public List<String> findPageSetUuidListByMenuUuids(Long applicationId, Collection<String> menuUuids) {
         QueryWrapper queryWrapper = this.query()
                 .select(APP_RESOURCE_PAGESET.PAGESET_UUID)
+                .where(APP_RESOURCE_PAGESET.APPLICATION_ID.eq(applicationId))
                 .where(APP_RESOURCE_PAGESET.MENU_UUID.in(menuUuids));
         return objListAs(queryWrapper, String.class);
     }
@@ -34,15 +35,16 @@ public class AppPageSetRepository extends BaseBizRepository<AppResourcePagesetMa
         return getOne(queryWrapper);
     }
 
-    public String findPageSetUuidByMenuUuid(String menuUuid) {
-        QueryWrapper queryWrapper = this.query()
-                .select(APP_RESOURCE_PAGESET.PAGESET_UUID)
-                .where(APP_RESOURCE_PAGESET.MENU_UUID.eq(menuUuid));
-        return this.getObjAs(queryWrapper, String.class);
-    }
+//    public String findPageSetUuidByMenuUuid(String menuUuid) {
+//        QueryWrapper queryWrapper = this.query()
+//                .select(APP_RESOURCE_PAGESET.PAGESET_UUID)
+//                .where(APP_RESOURCE_PAGESET.MENU_UUID.eq(menuUuid));
+//        return this.getObjAs(queryWrapper, String.class);
+//    }
 
-    public List<AppResourcePagesetDO> findByMenuUuids(List<String> menuUuids) {
+    public List<AppResourcePagesetDO> findByMenuUuids(Long applicationId, List<String> menuUuids) {
         QueryWrapper queryWrapper = this.query()
+                .where(APP_RESOURCE_PAGESET.APPLICATION_ID.eq(applicationId))
                 .where(APP_RESOURCE_PAGESET.MENU_UUID.in(menuUuids));
         return list(queryWrapper);
     }
@@ -53,16 +55,18 @@ public class AppPageSetRepository extends BaseBizRepository<AppResourcePagesetMa
         remove(queryWrapper);
     }
 
-    public List<AppResourcePagesetDO> findByMenuUuidAndType(List<String> menuUuids, Integer pageSetType) {
+    public List<AppResourcePagesetDO> findByMenuUuidAndType(Long applicationId,List<String> menuUuids, Integer pageSetType) {
         QueryWrapper queryWrapper = this.query()
+                .where(APP_RESOURCE_PAGESET.APPLICATION_ID.eq(applicationId))
                 .where(APP_RESOURCE_PAGESET.MENU_UUID.in(menuUuids))
-                .and(APP_RESOURCE_PAGESET.PAGESET_TYPE.eq(pageSetType, pageSetType != null));
+                .where(APP_RESOURCE_PAGESET.PAGESET_TYPE.eq(pageSetType, pageSetType != null));
         return list(queryWrapper);
     }
 
-    public String getMainMetadataByUuid(String pageSetUuid) {
+    public String getMainMetadataByAppIdAndUuid(Long applicationId, String pageSetUuid) {
         QueryWrapper queryWrapper = this.query()
                 .select(APP_RESOURCE_PAGESET.MAIN_METADATA)
+                .where(APP_RESOURCE_PAGESET.APPLICATION_ID.eq(applicationId))
                 .where(APP_RESOURCE_PAGESET.PAGESET_UUID.eq(pageSetUuid));
         return this.getObjAs(queryWrapper, String.class);
     }

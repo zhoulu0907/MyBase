@@ -26,15 +26,18 @@ public class AppWorkbenchPageRepository extends BaseBizRepository<AppResourceWor
      * @param pageSetUuid 页面集ID
      * @return 工作台页面列表
      */
-    public List<AppResourceWorkbenchPageDO> findByPageSetUuid(String pageSetUuid) {
+    public List<AppResourceWorkbenchPageDO> findByPageSetUuid(Long applicationId, String pageSetUuid) {
         QueryWrapper queryWrapper = this.query()
+                .where(APP_RESOURCE_WORKBENCH_PAGE.APPLICATION_ID.eq(applicationId))
                 .where(APP_RESOURCE_WORKBENCH_PAGE.PAGESET_UUID.eq(pageSetUuid));
         return list(queryWrapper);
     }
 
-    public AppResourceWorkbenchPageDO getByUuid(String pageUuid) {
+    public AppResourceWorkbenchPageDO getByUuid(Long applicationId, String pageUuid) {
         QueryWrapper queryWrapper = this.query()
+                .where(APP_RESOURCE_WORKBENCH_PAGE.APPLICATION_ID.eq(applicationId))
                 .where(APP_RESOURCE_WORKBENCH_PAGE.PAGE_UUID.eq(pageUuid));
         return getOne(queryWrapper);
     }
+
 }

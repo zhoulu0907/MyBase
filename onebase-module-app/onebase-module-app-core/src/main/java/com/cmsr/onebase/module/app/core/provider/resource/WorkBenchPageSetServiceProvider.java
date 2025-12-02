@@ -33,7 +33,7 @@ public class WorkBenchPageSetServiceProvider {
         List<AppResourceWorkbenchPageDO> pageDOs;
 
         // 兼容旧数据：如果页面集-页面关联表中没有数据，直接通过pageSetId查询工作台页面
-        pageDOs = appWorkbenchPageRepository.findByPageSetUuid(pageSetDO.getPageSetUuid());
+        pageDOs = appWorkbenchPageRepository.findByPageSetUuid(pageSetDO.getApplicationId(), pageSetDO.getPageSetUuid());
 
         LoadPageSetRespVO loadPageSetRespVO = new LoadPageSetRespVO();
         loadPageSetRespVO.setId(pageSetDO.getId());
@@ -42,7 +42,7 @@ public class WorkBenchPageSetServiceProvider {
 
         // 读取每个页面的组件和配置
         pageDOs.forEach(pageDO -> {
-            List<AppResourceWorkbenchComponentDO> componentDOs = appWorkbenchComponentRepository.findByPageUuid(pageDO.getPageUuid());
+            List<AppResourceWorkbenchComponentDO> componentDOs = appWorkbenchComponentRepository.findByPageUuid(pageDO.getApplicationId(), pageDO.getPageUuid());
 
             PageDTO pageDTO = BeanUtils.toBean(pageDO, PageDTO.class);
             pageDTO.setComponents(componentDOs.stream()

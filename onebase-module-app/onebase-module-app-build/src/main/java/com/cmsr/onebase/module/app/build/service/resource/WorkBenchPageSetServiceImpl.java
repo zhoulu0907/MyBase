@@ -94,6 +94,7 @@ public class WorkBenchPageSetServiceImpl implements WorkBenchPageSetService {
     }
 
     public void saveWorkbenchPage(SavePageSetReqVO savePageSetReqVO, AppResourcePagesetDO pageSetDO) {
+        Long applicationId = pageSetDO.getApplicationId();
         savePageSetReqVO.getPages().forEach(page -> {
             if (Boolean.TRUE.equals(page.getCreated())) {
                 // 插入新的视图
@@ -128,7 +129,7 @@ public class WorkBenchPageSetServiceImpl implements WorkBenchPageSetService {
             workbenchPageRepository.updateById(finalPageDO);
 
             // 删除已有的component
-            componentDataRepository.deleteComponentByPageUuid(finalPageDO.getPageUuid());
+            componentDataRepository.deleteComponentByPageUuid(applicationId, finalPageDO.getPageUuid());
 
             // 插入新的component
             List<AppResourceWorkbenchComponentDO> componentDOs = new ArrayList<>();

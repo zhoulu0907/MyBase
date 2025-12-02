@@ -150,11 +150,11 @@ public class PageSetServiceImpl implements PageSetService {
     public String copyPageSet(CopyPageSetDTO copyPageSetDTO) {
         Long oldMenuUuid = copyPageSetDTO.getMenuId();
         Long newMenuUuid = copyPageSetDTO.getNewMenuId();
-
         AppResourcePagesetDO oldPageSetDO = pageSetRepository.getById(oldMenuUuid);
         if (oldPageSetDO == null) {
             throw ServiceExceptionUtil.exception(AppResourceErrorCodeConstants.PAGE_SET_NOT_EXIST);
         }
+        Long applicationId = oldPageSetDO.getApplicationId();
         // 复制页面集
         String newPageSetUuid = UuidUtils.getUuid();
         AppResourcePagesetDO newPageSetDO = BeanUtils.toBean(oldPageSetDO, AppResourcePagesetDO.class);
@@ -165,23 +165,24 @@ public class PageSetServiceImpl implements PageSetService {
         pageSetRepository.save(newPageSetDO);
 
         // 复制页面其余内容
-        List<String> pageUuidList = pageRepository.findIdsByAppIdAndPageSetUuid(oldPageSetDO.getPageSetUuid());
-        if (CollectionUtils.isEmpty(pageUuidList)) {
+        List<Long> pageIdList = pageRepository.findIdsByAppIdAndPageSetUuid(applicationId, oldPageSetDO.getPageSetUuid());
+        if (CollectionUtils.isEmpty(pageIdList)) {
             return newPageSetDO.getPageSetCode();
         }
-        for (String pageUuid : pageUuidList) {
-            AppResourcePageDO pageDO = pageRepository.getByUuid(pageUuid);
+        for (Long pageId : pageIdList) {
+            AppResourcePageDO pageDO = pageRepository.getById(pageId);
             if (pageDO == null) {
                 throw ServiceExceptionUtil.exception(AppResourceErrorCodeConstants.PAGE_NOT_EXIST);
             }
             String newPageUuid = UuidUtils.getUuid();
             AppResourcePageDO newPageDO = BeanUtils.toBean(pageDO, AppResourcePageDO.class);
             newPageDO.setId(null);
+            newPageDO.setApplicationId(applicationId);
             newPageDO.setPageUuid(newPageUuid);
             newPageDO.setPageSetUuid(newPageSetUuid);
             pageRepository.save(newPageDO);
 
-            List<AppResourceComponentDO> componentDOs = componentRepository.findByPageUuid(pageUuid);
+            List<AppResourceComponentDO> componentDOs = componentRepository.findByAppIdAndPageUuid(applicationId, pageDO.getPageUuid());
             if (CollectionUtils.isEmpty(componentDOs)) {
                 continue;
             }
@@ -189,25 +190,23 @@ public class PageSetServiceImpl implements PageSetService {
                 String newComponentUuid = UuidUtils.getUuid();
                 AppResourceComponentDO newComponentDO = BeanUtils.toBean(componentDO, AppResourceComponentDO.class);
                 newComponentDO.setId(null);
+                newComponentDO.setApplicationId(applicationId);
                 newComponentDO.setComponentUuid(newComponentUuid);
                 newComponentDO.setPageUuid(newPageDO.getPageUuid());
                 componentRepository.save(newComponentDO);
             }
         }
-
         return newPageSetDO.getPageSetCode();
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean savePageSet(SavePageSetReqVO savePageSetReqVO) {
-        Long applicationId = ApplicationManager.getApplicationId();
         AppResourcePagesetDO pageSetDO = pageSetRepository.getById(savePageSetReqVO.getId());
-
+        Long applicationId = pageSetDO.getApplicationId();
         if (pageSetDO == null) {
             throw ServiceExceptionUtil.exception(AppResourceErrorCodeConstants.PAGE_SET_NOT_EXIST);
         }
-
         if (PageTypeSetEnum.isWorkBenchType(pageSetDO.getPageSetType())) {
             /**
              * 保存工作台页面配置
@@ -255,7 +254,7 @@ public class PageSetServiceImpl implements PageSetService {
             pageRepository.updateById(finalPageDO);
 
             // 删除已有的component
-            componentRepository.deleteComponentByPageUuid(finalPageDO.getPageUuid());
+            componentRepository.deleteComponentByPageUuid(applicationId, finalPageDO.getPageUuid());
             // 插入新的component
             if (CollectionUtils.isEmpty(page.getComponents())) {
                 return;

@@ -13,14 +13,16 @@ import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppResourceC
 @Repository
 public class AppComponentRepository extends BaseBizRepository<AppResourceComponentMapper, AppResourceComponentDO> {
 
-    public void deleteComponentByPageUuid(String pageUuid) {
+    public void deleteComponentByPageUuid(Long applicationId, String pageUuid) {
         QueryWrapper queryWrapper = query()
+                .where(APP_RESOURCE_COMPONENT.APPLICATION_ID.eq(applicationId))
                 .where(APP_RESOURCE_COMPONENT.PAGE_UUID.eq(pageUuid));
         this.remove(queryWrapper);
     }
 
-    public List<AppResourceComponentDO> findByPageUuid(String pageUuid) {
+    public List<AppResourceComponentDO> findByAppIdAndPageUuid(Long applicationId, String pageUuid) {
         QueryWrapper queryWrapper = query()
+                .where(APP_RESOURCE_COMPONENT.APPLICATION_ID.eq(applicationId))
                 .where(APP_RESOURCE_COMPONENT.PAGE_UUID.eq(pageUuid))
                 .orderBy(APP_RESOURCE_COMPONENT.COMPONENT_INDEX, true);
         return this.list(queryWrapper);

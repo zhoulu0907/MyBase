@@ -31,17 +31,12 @@ public class AppResourceImpl implements AppResourceApi {
     @Override
     public List<PageRespDTO> findPageListByPageSetId(Long pageSetId) {
         List<PageRespDTO> pageRespDTOs = new ArrayList<>();
-
         if (pageSetId == null) {
             throw new IllegalArgumentException("页面集ID不能为空");
         }
-        // TODO: 后续改为使用Uuid
-        String pageSetUuid = pageSetRepository.queryChain()
-                .select(AppResourcePagesetDO::getPageSetUuid)
-                .eq(AppResourcePagesetDO::getId, pageSetId)
-                .objAs(String.class);
+        AppResourcePagesetDO pagesetDO = pageSetRepository.getById(pageSetId);
         // 读取页面集中的页面
-        List<AppResourcePageDO> pageDOS = pageRepository.findAllFormPageByPageSetUuid(pageSetUuid);
+        List<AppResourcePageDO> pageDOS = pageRepository.findAllFormPageByAppIdAndPageSetUuid(pagesetDO.getApplicationId(), pagesetDO.getPageSetUuid());
         return BeanUtils.toBean(pageDOS, PageRespDTO.class);
     }
 }

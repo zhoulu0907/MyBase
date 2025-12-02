@@ -10,6 +10,7 @@ import com.cmsr.onebase.module.app.core.vo.resource.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
+import lombok.Setter;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,6 +25,7 @@ import java.util.List;
  * @Author mickey
  * @Date 2025/8/4 10:17
  */
+@Setter
 @Tag(name = "应用资源管理-页面管理")
 @RestController
 @RequestMapping("/app/resource/page")
