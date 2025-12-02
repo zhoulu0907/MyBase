@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.bpm.runtime.service.impl;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
@@ -10,7 +11,7 @@ import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowAgentDO;
 import com.cmsr.onebase.module.bpm.core.enums.BpmAgentStatus;
 import com.cmsr.onebase.module.bpm.core.vo.UserBasicInfoVO;
 import com.cmsr.onebase.module.bpm.runtime.service.BpmAgentService;
-import com.cmsr.onebase.module.bpm.runtime.vo.*;
+import com.cmsr.onebase.module.bpm.runtime.vo.agent.*;
 import com.cmsr.onebase.module.system.api.user.AdminUserApi;
 import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
 import com.mybatisflex.core.paginate.Page;
@@ -42,6 +43,14 @@ public class BpmAgentServiceImpl implements BpmAgentService {
     public PageResult<BpmAgentPageResVO> getAgentPage(BpmAgentPageReqVO pageReqVO) {
         // 获取当前登录用户ID
         Long loginUserId = WebFrameworkUtils.getLoginUserId();
+
+        // todo：后续在全局数据插入时处理
+        Long applicationId = ApplicationManager.getApplicationId();
+        if (applicationId == null) {
+            throw new IllegalArgumentException("应用ID不能为空");
+        }
+
+        pageReqVO.setAppId(applicationId);
 
         // 构建查询条件
         QueryWrapper queryWrapper = buildDynamicQueryWhereCondition(pageReqVO, String.valueOf(loginUserId));
@@ -83,6 +92,14 @@ public class BpmAgentServiceImpl implements BpmAgentService {
         Long userId = WebFrameworkUtils.getLoginUserId();
         String nickname = SecurityFrameworkUtils.getLoginUserNickname();
         LocalDateTime now = LocalDateTime.now();
+
+        // todo：后续在全局数据插入时处理
+        Long applicationId = ApplicationManager.getApplicationId();
+        if (applicationId == null) {
+            throw new IllegalArgumentException("应用ID不能为空");
+        }
+
+        reqVO.setAppId(applicationId);
 
         // 校验开始时间必须小于结束时间
         if (!reqVO.getStartTime().isBefore(reqVO.getEndTime())) {

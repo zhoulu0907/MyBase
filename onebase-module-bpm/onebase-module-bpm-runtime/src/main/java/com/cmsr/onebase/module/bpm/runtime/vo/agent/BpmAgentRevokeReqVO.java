@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.bpm.runtime.vo;
+package com.cmsr.onebase.module.bpm.runtime.vo.agent;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;

@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.bpm.runtime.vo;
+package com.cmsr.onebase.module.bpm.runtime.vo.agent;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
