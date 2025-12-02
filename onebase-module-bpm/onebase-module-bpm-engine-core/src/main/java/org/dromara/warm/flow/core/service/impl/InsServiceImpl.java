@@ -82,6 +82,10 @@ public class InsServiceImpl extends WarmServiceImpl<FlowInstanceDao<Instance>, I
         // 设置流程实例对象
         Instance instance = setStartInstance(nextNodes.get(0), businessId, flowParams);
 
+        // 设置审批表单路径和是否自定义
+        instance.setFormPath(flowCombine.getDefinition().getFormPath());
+        instance.setFormCustom(flowCombine.getDefinition().getFormCustom());
+
         // 设置历史任务
         HisTask hisTask = setHisTask(nextNodes, flowParams, startNode, instance.getId());
 
