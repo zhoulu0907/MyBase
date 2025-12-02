@@ -1,10 +1,14 @@
-package com.cmsr.onebase.module.metadata.runtime.semantic.util;
+package com.cmsr.onebase.module.metadata.runtime.semantic.strategy;
 
 import com.cmsr.onebase.framework.uid.UidGenerator;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.*;
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.enums.SemanticFieldTypeEnum;
 import com.mybatisflex.core.row.Row;
+
+import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.List;
@@ -26,6 +30,8 @@ import java.util.Map;
  * 只在入参范围内操作，因此可被并发安全地调用。
  * </p>
  */
+@Component
+@Slf4j
 public class SemanticValueAssembler {
     /**
      * 基于语义实体模型与实体值，构建主表数据行。
@@ -39,9 +45,10 @@ public class SemanticValueAssembler {
      * @param uidGenerator 主键生成器，用于生成系统字段中的 `id`
      * @return 构建完成的主表 {@link Row}
      */
-    public static Row buildMainRow(SemanticEntitySchemaDTO entity, SemanticEntityValueDTO value, UidGenerator uidGenerator) {
+    public Row buildMainRow(SemanticEntitySchemaDTO entity, SemanticEntityValueDTO value, UidGenerator uidGenerator) {
         Row row = new Row();
         List<SemanticFieldSchemaDTO> fields = entity.getFields();
+        log.info("构建主表数据行。entity={}, value={}", entity, value);
         if (fields != null) {
             for (SemanticFieldSchemaDTO field : fields) {
                 SemanticFieldValueDTO fieldValue = value.getFieldValueByTableAndField(entity.getTableName(), field.getFieldName());
@@ -67,7 +74,7 @@ public class SemanticValueAssembler {
      * @param row          需填充的 {@link Row}
      * @param uidGenerator 主键生成器，用于生成 `id`
      */
-    public static void fillSystemFields(Row row, UidGenerator uidGenerator) {
+    public void fillSystemFields(Row row, UidGenerator uidGenerator) {
         row.set("id", uidGenerator.getUID());
         row.put("creator", null);
         row.put("created_time", null);
@@ -89,7 +96,7 @@ public class SemanticValueAssembler {
      * @param row    数据库数据行
      * @return 语义实体值 {@link SemanticEntityValueDTO}
      */
-    public static SemanticEntityValueDTO toEntityValue(SemanticEntitySchemaDTO entity, Row row) {
+    public SemanticEntityValueDTO toEntityValue(SemanticEntitySchemaDTO entity, Row row) {
         SemanticEntityValueDTO resultVal = new SemanticEntityValueDTO();
         Map<String, SemanticFieldValueDTO<Object>> fvMap = new HashMap<>();
         List<SemanticFieldSchemaDTO> schemaFields = entity.getFields();
@@ -123,7 +130,7 @@ public class SemanticValueAssembler {
      * @param tableName  表名，用于填充字段的来源信息
      * @return 语义行值 {@link SemanticRowValueDTO}
      */
-    public static SemanticRowValueDTO toRowValue(Row r, List<SemanticFieldSchemaDTO> attrs, String tableName) {
+    public SemanticRowValueDTO toRowValue(Row r, List<SemanticFieldSchemaDTO> attrs, String tableName) {
         SemanticRowValueDTO rowDto = new SemanticRowValueDTO();
         rowDto.setId(r.get("id"));
         Object del = r.get("deleted");
@@ -159,7 +166,7 @@ public class SemanticValueAssembler {
      * @param raw 原始值
      * @return 推断得到的 {@link SemanticFieldTypeEnum}，若入参为空返回 {@code null}
      */
-    private static SemanticFieldTypeEnum guessEnumByRaw(Object raw) {
+    private SemanticFieldTypeEnum guessEnumByRaw(Object raw) {
         if (raw == null) return null;
         if (raw instanceof Boolean) return SemanticFieldTypeEnum.BOOLEAN;
         if (raw instanceof java.time.LocalDate) return SemanticFieldTypeEnum.DATE;
@@ -180,7 +187,7 @@ public class SemanticValueAssembler {
      * @param uidGenerator 主键生成器，用于生成 `id`
      * @return 子表 {@link Row}
      */
-    public static Row buildSubRow(Map<String, SemanticFieldValueDTO<Object>> data, Long parentId, UidGenerator uidGenerator) {
+    public Row buildSubRow(Map<String, SemanticFieldValueDTO<Object>> data, Long parentId, UidGenerator uidGenerator) {
         Row subRow = new Row();
         if (data != null) {
             for (Map.Entry<String, SemanticFieldValueDTO<Object>> e : data.entrySet()) {
@@ -211,7 +218,7 @@ public class SemanticValueAssembler {
      * @param uidGenerator 主键生成器，用于生成 `id`
      * @return 关系表 {@link Row}
      */
-    public static Row buildRelationRow(Map<String, SemanticFieldValueDTO<Object>> data, UidGenerator uidGenerator) {
+    public Row buildRelationRow(Map<String, SemanticFieldValueDTO<Object>> data, UidGenerator uidGenerator) {
         Row relRow = new Row();
         if (data != null) {
             for (Map.Entry<String, SemanticFieldValueDTO<Object>> e : data.entrySet()) {

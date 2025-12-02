@@ -17,7 +17,7 @@ import java.util.List;
 public class MetadataBackupRespDTO {
 
     @Schema(description = "应用ID", example = "1")
-    private Long appId;
+    private Long applicationId;
 
     @Schema(description = "备份时间")
     private LocalDateTime backupTime;

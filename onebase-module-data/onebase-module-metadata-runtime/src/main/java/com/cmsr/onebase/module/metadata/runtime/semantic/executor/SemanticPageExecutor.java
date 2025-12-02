@@ -21,7 +21,6 @@ import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticFieldL
 import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticOperatorConditionApplier;
 import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticResponseBuilder;
 import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticRowMapper;
-import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticTableNameQuoter;
 import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticPageRecordAssembler;
 import com.cmsr.onebase.module.metadata.runtime.semantic.vo.SemanticPageBodyVO;
 import jakarta.annotation.Resource;
@@ -57,8 +56,6 @@ public class SemanticPageExecutor {
     private SemanticRowMapper semanticRowMapper;
     @Resource
     private SemanticResponseBuilder semanticResponseBuilder;
-    @Resource
-    private SemanticTableNameQuoter semanticTableNameQuoter;
 
     @Resource
     private SemanticEntityValidator semanticEntityValidator;
@@ -102,7 +99,7 @@ public class SemanticPageExecutor {
                     if (rawVal == null) { continue; }
                     if ("deleted".equalsIgnoreCase(rawKey) || "tenant_id".equalsIgnoreCase(rawKey)) { continue; }
                     if (rawVal instanceof Map) {
-                        @SuppressWarnings("unchecked") Map<String,Object> cond = (Map<String,Object>) rawVal;
+                        Map<String,Object> cond = (Map<String,Object>) rawVal;
                         String fieldName = (String) cond.getOrDefault("fieldName", rawKey);
                         Object value = cond.get("value");
                         String operator = cond.get("operator") != null ? String.valueOf(cond.get("operator")) : "CONTAINS";
@@ -194,8 +191,8 @@ public class SemanticPageExecutor {
                 }
             }
             if (hasDeletedField) { countConfigs.and(Compare.EQUAL, "deleted", 0); }
-            long total = temporaryService.count(semanticTableNameQuoter.quote(entity.getTableName()), countConfigs);
-            DataSet dataSet = temporaryService.querys(semanticTableNameQuoter.quote(entity.getTableName()), configs);
+            long total = temporaryService.count(entity.getTableName(), countConfigs);
+            DataSet dataSet = temporaryService.querys(entity.getTableName(), configs);
             List<Map<String, Object>> list = new ArrayList<>();
             for (int i = 0; i < dataSet.size(); i++) {
                 DataRow row = dataSet.getRow(i);

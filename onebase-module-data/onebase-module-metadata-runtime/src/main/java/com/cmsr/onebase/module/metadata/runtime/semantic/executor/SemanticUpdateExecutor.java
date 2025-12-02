@@ -1,26 +1,76 @@
 package com.cmsr.onebase.module.metadata.runtime.semantic.executor;
 
-import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticRecordDTO;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.enums.SemanticMethodCodeEnum;
+import com.cmsr.onebase.module.metadata.runtime.semantic.service.impl.SemanticDataCrudService;
+import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticDataIntegrityValidator;
+import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.validation.SemanticValidationManager;
+import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticPermissionValidator;
+import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticProcessLogger;
+import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticMergeRecordAssembler;
+import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticPermissionContextLoader;
+import com.cmsr.onebase.module.metadata.runtime.semantic.vo.SemanticMergeBodyVO;
+import com.cmsr.onebase.framework.uid.UidGenerator;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
+
+@Slf4j
 @Component
 public class SemanticUpdateExecutor {
     @Resource
-    private SemanticDataMethodExecutor semanticDataMethodExecutor;
+    private SemanticDataIntegrityValidator semanticDataIntegrityValidator;
     @Resource
-    private MetadataBusinessEntityCoreService businessEntityCoreService;
+    private SemanticPermissionValidator semanticPermissionValidator;
+    @Resource
+    private SemanticValidationManager semanticValidationManager;
+    @Resource
+    private SemanticDataCrudService semanticDataCrudService;
+    @Resource
+    private SemanticMergeRecordAssembler semanticMergeRecordAssembler;
+    @Resource
+    private SemanticPermissionContextLoader semanticPermissionContextLoader;
+    @Resource
+    private SemanticProcessLogger semanticProcessLogger;
 
-    public Map<String, Object> execute(Long entityId, Long menuId, String traceId, SemanticRecordDTO record) {
-        return semanticDataMethodExecutor.executeUpdate(entityId, menuId, traceId, record);
+    public Map<String, Object> execute(String tableName, Long menuId, String traceId, SemanticMergeBodyVO body) {
+        return doExecuteProcess(tableName, menuId, traceId, body);
     }
 
-    // public Map<String, Object> execute(String entityCode, Long menuId, String traceId, SemanticMergeBodyVO body) {
-    //     MetadataBusinessEntityDO entity = businessEntityCoreService.getBusinessEntityByCode(entityCode);
-    //     if (entity == null) { throw exception(BUSINESS_ENTITY_NOT_EXISTS); }
-    //     SemanticRecordDTO record = semanticRequestParser.parseMerge(entity, body, menuId, traceId, SemanticMethodCodeEnum.UPDATE);
-    //     return semanticDataMethodExecutor.executeUpdate(entity.getId(), menuId, traceId, record);
-    // }
+    public Map<String, Object> doExecuteProcess(String tableName, Long menuId, String traceId, SemanticMergeBodyVO body) {
+        try {
+            // 1) 构建 RecordDTO（包含实体校验与基本数据映射）
+            SemanticRecordDTO record = semanticMergeRecordAssembler.assemble(tableName, body, menuId, traceId);
+            record.getRecordContext().setMethodCode(SemanticMethodCodeEnum.UPDATE);
+            record.getRecordContext().setOperationType(MetadataDataMethodOpEnum.UPDATE);
+            
+            // 2) 权限上下文初始化：当前类 initializeContext
+            semanticPermissionContextLoader.loadPermissionContext(record);
+            
+            // 3) 数据完整性校验：当前类 validateDataIntegrity
+            semanticDataIntegrityValidator.validate(record);
+            
+            // 4) 功能权限校验
+            semanticPermissionValidator.validate(record);
+            
+            // // 5) 数据校验（RecordDTO 简化入口）
+            // semanticValidationManager.validate(record);
+            
+            // 6) 数据存储：CRUDQ 服务（RecordDTO 入口）
+            semanticDataCrudService.update(record);
+            
+            // 7) 数据查询：通过 DataCrudService 读取主表数据
+            Map<String, Object> result = semanticDataCrudService.readById(record);
+            
+            // 8) 日志记录：当前类 logProcess
+            semanticProcessLogger.log(record);
+            return result;
+        } catch (Exception e) {
+            log.error("更新数据失败。tableName={}, traceId={}", tableName, traceId, e);
+            throw e;
+        }
+    }
 }

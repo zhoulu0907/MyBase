@@ -159,7 +159,7 @@ public class SemanticDataMethodExecutor {
             // 13. 结果格式化（ResultFormatter）
             Map<String, Object> result = semanticResultFormatter.format(context);
             // 14. 日志记录（ProcessLogger）
-            semanticProcessLogger.log(context);
+            // semanticProcessLogger.log(context);
             return result;
         } catch (Exception e) {
             log.error("执行元数据系统方法失败。entityId={}, op={}, traceId={}",
@@ -251,7 +251,7 @@ public class SemanticDataMethodExecutor {
     /**
      * 日志记录（ProcessLogger）
      */
-    protected void logProcess(ProcessContext context) { semanticProcessLogger.log(context); }
+    // protected void logProcess(ProcessContext context) { semanticProcessLogger.log(context); }
 
     /**
      * 上下文初始化（ContextInitializer）

@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.metadata.runtime.semantic.service.impl;
 
-import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
 import com.cmsr.onebase.module.metadata.core.service.datasource.MetadataDatasourceCoreService;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataEntityFieldCoreService;
@@ -16,10 +15,9 @@ import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticRelationVal
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticRowValueDTO;
 import com.cmsr.onebase.module.metadata.core.enums.RelationshipTypeEnum;
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.enums.SemanticConnectorCardinalityEnum;
-import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticTableNameQuoter;
+import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticRefResolver;
+import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticValueAssembler;
 import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticWorkflowExecutor;
-import com.cmsr.onebase.module.metadata.runtime.semantic.util.SemanticRefResolver;
-import com.cmsr.onebase.module.metadata.runtime.semantic.util.SemanticValueAssembler;
 import com.mybatisflex.core.query.QueryColumn;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.row.Db;
@@ -58,8 +56,6 @@ import java.util.Optional;
 public class SemanticDataCrudService {
 
     @Resource
-    private SemanticTableNameQuoter tableNameQuoter;
-    @Resource
     private MetadataEntityFieldCoreService metadataEntityFieldCoreService;
 
     @Resource
@@ -85,6 +81,8 @@ public class SemanticDataCrudService {
 
     @Resource
     private SemanticRefResolver semanticRefResolver;
+    @Resource
+    private SemanticValueAssembler semanticValueAssembler;
 
 
     /**
@@ -112,7 +110,7 @@ public class SemanticDataCrudService {
         List<SemanticFieldSchemaDTO> fields = entity.getFields();
         generateAndApplyAutoNumbers(fields, value);
 
-        Row row = SemanticValueAssembler.buildMainRow(entity, value, uidGenerator);
+        Row row = semanticValueAssembler.buildMainRow(entity, value, uidGenerator);
 
         // 切换到目标数据源
         semanticTemporaryDatasourceService.switchMybatisFlex(entity.getDatasourceId());
@@ -143,31 +141,77 @@ public class SemanticDataCrudService {
      * 更新主表数据（按主键）
      */
     public void update(SemanticRecordDTO recordDTO) {
+        semanticWorkflowExecutor.preExecute(recordDTO);
         SemanticEntitySchemaDTO entity = recordDTO.getEntitySchema();
-        List<MetadataEntityFieldDO> fields = metadataEntityFieldCoreService.getEntityFieldListByEntityId(entity.getId());
-        
-
-
-        // Map<String, Object> data = extractData(recordDTO);
-        // String pkField = getPrimaryKeyFieldName(fields);
-        // Object id = data.get(pkField);
-        // QueryWrapper qw = QueryWrapper.create().where(pkField + " = ?", id);
-        // Row row = new Row();
-        // for (Map.Entry<String, Object> e : data.entrySet()) { row.put(e.getKey(), e.getValue()); }
-        // Db.updateByQuery(tableNameQuoter.quote(entity.getTableName()), row, qw);
+        SemanticEntityValueDTO value = recordDTO.getEntityValue();
+        if (entity == null || value == null) { return; }
+        String pkField = getPrimaryKeyFieldName(entity.getFields());
+        Object id = value.getId() != null ? value.getId() : value.getCurrentEntityRawMap().get(pkField);
+        if (id == null) { return; }
+        Row row = buildUpdateRow(entity, value);
+        row.remove(pkField);
+        semanticTemporaryDatasourceService.switchMybatisFlex(entity.getDatasourceId());
+        try {
+            QueryWrapper qw = QueryWrapper.create().where(new QueryColumn(pkField).eq(String.valueOf(id)));
+            dynamicMetadataRepository.updateByQuery(entity.getTableName(), row, qw);
+        } finally {
+            semanticTemporaryDatasourceService.clearMybatisFlex();
+        }
+        semanticWorkflowExecutor.postExecute(recordDTO);
     }
 
     /**
      * 删除主表数据（软删优先，物理删回退）
      */
     public void delete(SemanticRecordDTO recordDTO) {
-        // SemanticEntitySchemaDTO entity = recordDTO.getEntitySchema();
-        // List<MetadataEntityFieldDO> fields = metadataEntityFieldCoreService.getEntityFieldListByEntityId(entity.getId());
-        // String pkField = getPrimaryKeyFieldName(fields);
-        // Object id = extractData(recordDTO).get(pkField);
-        // QueryWrapper qw = QueryWrapper.create().where(pkField + " = ?", id);
-        // if (hasDeletedField(fields)) { softDelete(entity.getTableName(), qw); }
-        // else { Db.deleteByQuery(tableNameQuoter.quote(entity.getTableName()), qw); }
+        semanticWorkflowExecutor.preExecute(recordDTO);
+        SemanticEntitySchemaDTO entity = recordDTO.getEntitySchema();
+        SemanticEntityValueDTO value = recordDTO.getEntityValue();
+        if (entity == null || value == null) { return; }
+        String pkField = getPrimaryKeyFieldName(entity.getFields());
+        Object id = value.getId() != null ? value.getId() : value.getCurrentEntityRawMap().get(pkField);
+        if (id == null) { return; }
+        semanticTemporaryDatasourceService.switchMybatisFlex(entity.getDatasourceId());
+        try {
+            QueryWrapper qw = QueryWrapper.create().where(new QueryColumn(pkField).eq(String.valueOf(id)));
+            if (hasDeletedField(entity.getFields())) {
+                dynamicMetadataRepository.softDeleteByQuery(entity.getTableName(), qw);
+            } else {
+                dynamicMetadataRepository.deleteByQuery(entity.getTableName(), qw);
+            }
+        } finally {
+            semanticTemporaryDatasourceService.clearMybatisFlex();
+        }
+        semanticWorkflowExecutor.postExecute(recordDTO);
+    }
+
+    private Row buildUpdateRow(SemanticEntitySchemaDTO entity, SemanticEntityValueDTO value) {
+        Row row = new Row();
+        List<SemanticFieldSchemaDTO> fieldsDto = entity.getFields();
+        if (fieldsDto != null) {
+            for (SemanticFieldSchemaDTO f : fieldsDto) {
+                String name = f.getFieldName();
+                if (name == null) { continue; }
+                SemanticFieldValueDTO<Object> v = value.getFieldValueByTableAndField(entity.getTableName(), name);
+                if (v == null) { continue; }
+                Object sv = v.getStoreValue();
+                if (sv != null) { row.put(name, sv); }
+            }
+            boolean hasUpdatedTime = fieldsDto.stream().anyMatch(f -> {
+                String n = f.getFieldName();
+                return n != null && ("updated_time".equalsIgnoreCase(n) || "updatetime".equalsIgnoreCase(n));
+            });
+            boolean hasUpdater = fieldsDto.stream().anyMatch(f -> {
+                String n = f.getFieldName();
+                return n != null && ("updater".equalsIgnoreCase(n));
+            });
+            if (hasUpdatedTime) {
+                if (!row.containsKey("updated_time")) { row.put("updated_time", null); }
+                if (!row.containsKey("updatetime")) { row.put("updatetime", null); }
+            }
+            if (hasUpdater && !row.containsKey("updater")) { row.put("updater", null); }
+        }
+        return row;
     }
 
     /**
@@ -192,7 +236,7 @@ public class SemanticDataCrudService {
                 }
             }
 
-            SemanticEntityValueDTO resultVal = SemanticValueAssembler.toEntityValue(entity, row);
+            SemanticEntityValueDTO resultVal = semanticValueAssembler.toEntityValue(entity, row);
 
             List<SemanticRelationSchemaDTO> connectors = entity.getConnectors();
             if (connectors != null && !connectors.isEmpty()) {
@@ -231,11 +275,11 @@ public class SemanticDataCrudService {
         List<SemanticFieldSchemaDTO> attrs = c.getRelationAttributes();
         if (c.getCardinality() == SemanticConnectorCardinalityEnum.ONE) {
             Row r = rows.get(0);
-            SemanticRowValueDTO rowDto = SemanticValueAssembler.toRowValue(r, attrs, c.getTargetEntityTableName());
+            SemanticRowValueDTO rowDto = semanticValueAssembler.toRowValue(r, attrs, c.getTargetEntityTableName());
             relation.setRowValue(rowDto);
         } else {
             List<SemanticRowValueDTO> list = new ArrayList<>();
-            for (Row r : rows) { list.add(SemanticValueAssembler.toRowValue(r, attrs, c.getTargetEntityTableName())); }
+            for (Row r : rows) { list.add(semanticValueAssembler.toRowValue(r, attrs, c.getTargetEntityTableName())); }
             relation.setRowValueList(list);
         }
         return relation;
@@ -249,11 +293,11 @@ public class SemanticDataCrudService {
         List<SemanticFieldSchemaDTO> attrs = c.getRelationAttributes();
         if (c.getCardinality() == SemanticConnectorCardinalityEnum.ONE) {
             Row r = rows.get(0);
-            SemanticRowValueDTO rowDto = SemanticValueAssembler.toRowValue(r, attrs, c.getTargetEntityTableName());
+            SemanticRowValueDTO rowDto = semanticValueAssembler.toRowValue(r, attrs, c.getTargetEntityTableName());
             relation.setRowValue(rowDto);
         } else {
             List<SemanticRowValueDTO> list = new ArrayList<>();
-            for (Row r : rows) { list.add(SemanticValueAssembler.toRowValue(r, attrs, c.getTargetEntityTableName())); }
+            for (Row r : rows) { list.add(semanticValueAssembler.toRowValue(r, attrs, c.getTargetEntityTableName())); }
             relation.setRowValueList(list);
         }
         return relation;
@@ -266,7 +310,7 @@ public class SemanticDataCrudService {
         SemanticEntitySchemaDTO entity = recordDTO.getEntitySchema();
         String pkField = getPrimaryKeyFieldName(entity.getFields());
         QueryWrapper qw = QueryWrapper.create().where(new QueryColumn(pkField).in(ids));
-        List<Row> rows = Db.selectListByQuery(tableNameQuoter.quote(entity.getTableName()), qw);
+        List<Row> rows = Db.selectListByQuery(entity.getTableName(), qw);
         List<Map<String, Object>> result = new ArrayList<>();
         for (Row row : rows) {
             Map<String, Object> map = new HashMap<>();
@@ -334,14 +378,14 @@ public class SemanticDataCrudService {
             if (c.getCardinality() == SemanticConnectorCardinalityEnum.ONE) {
                 Map<String, SemanticFieldValueDTO<Object>> subDto = recordDTO.getEntityValue().getConnectorDTOObject(c.getTargetEntityTableName());
                 applyConnectorAutoNumbers(c, subDto);
-                if (subDto != null && !subDto.isEmpty()) { batches.computeIfAbsent(c.getTargetEntityTableName(), k -> new ArrayList<>()).add(SemanticValueAssembler.buildSubRow(subDto, parentId, uidGenerator)); }
+                if (subDto != null && !subDto.isEmpty()) { batches.computeIfAbsent(c.getTargetEntityTableName(), k -> new ArrayList<>()).add(semanticValueAssembler.buildSubRow(subDto, parentId, uidGenerator)); }
             } else if (c.getCardinality() == SemanticConnectorCardinalityEnum.MANY) {
                 List<Map<String, SemanticFieldValueDTO<Object>>> list = recordDTO.getEntityValue().getConnectorDTOList(c.getTargetEntityTableName());
                 if (list != null) {
                     List<Row> rows = batches.computeIfAbsent(c.getTargetEntityTableName(), k -> new ArrayList<>());
                     for (Map<String, SemanticFieldValueDTO<Object>> subDto : list) { 
                         applyConnectorAutoNumbers(c, subDto);
-                        if (subDto != null && !subDto.isEmpty()) { rows.add(SemanticValueAssembler.buildSubRow(subDto, parentId, uidGenerator)); }
+                        if (subDto != null && !subDto.isEmpty()) { rows.add(semanticValueAssembler.buildSubRow(subDto, parentId, uidGenerator)); }
                     }
                 }
             }
@@ -357,14 +401,14 @@ public class SemanticDataCrudService {
             if (c.getCardinality() == SemanticConnectorCardinalityEnum.ONE) {
                 Map<String, SemanticFieldValueDTO<Object>> relDto = recordDTO.getEntityValue().getConnectorDTOObject(c.getTargetEntityTableName());
                 applyConnectorAutoNumbers(c, relDto);
-                if (relDto != null && !relDto.isEmpty()) { batches.computeIfAbsent(c.getTargetEntityTableName(), k -> new ArrayList<>()).add(SemanticValueAssembler.buildRelationRow(relDto, uidGenerator)); }
+                if (relDto != null && !relDto.isEmpty()) { batches.computeIfAbsent(c.getTargetEntityTableName(), k -> new ArrayList<>()).add(semanticValueAssembler.buildRelationRow(relDto, uidGenerator)); }
             } else if (c.getCardinality() == SemanticConnectorCardinalityEnum.MANY) {
                 List<Map<String, SemanticFieldValueDTO<Object>>> list = recordDTO.getEntityValue().getConnectorDTOList(c.getTargetEntityTableName());
                 if (list != null) {
                     List<Row> rows = batches.computeIfAbsent(c.getTargetEntityTableName(), k -> new ArrayList<>());
                     for (Map<String, SemanticFieldValueDTO<Object>> relDto : list) { 
                         applyConnectorAutoNumbers(c, relDto);
-                        if (relDto != null && !relDto.isEmpty()) { rows.add(SemanticValueAssembler.buildRelationRow(relDto, uidGenerator)); }
+                        if (relDto != null && !relDto.isEmpty()) { rows.add(semanticValueAssembler.buildRelationRow(relDto, uidGenerator)); }
                     }
                 }
             }

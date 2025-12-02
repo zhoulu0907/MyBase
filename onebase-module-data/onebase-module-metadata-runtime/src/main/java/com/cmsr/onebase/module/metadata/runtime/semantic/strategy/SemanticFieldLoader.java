@@ -11,6 +11,7 @@ import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionU
 import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.ENTITY_FIELD_NOT_EXISTS;
 
 @Component
+@Deprecated
 public class SemanticFieldLoader {
     @Resource
     private MetadataEntityFieldCoreService metadataEntityFieldService;
@@ -21,4 +22,3 @@ public class SemanticFieldLoader {
         return fields;
     }
 }
-

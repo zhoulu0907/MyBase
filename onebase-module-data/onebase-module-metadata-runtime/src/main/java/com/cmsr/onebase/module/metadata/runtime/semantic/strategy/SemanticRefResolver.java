@@ -1,4 +1,37 @@
-package com.cmsr.onebase.module.metadata.runtime.semantic.util;
+package com.cmsr.onebase.module.metadata.runtime.semantic.strategy;
+
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticEntityValueDTO;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticEntitySchemaDTO;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticFieldSchemaDTO;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticRelationSchemaDTO;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticFieldValueDTO;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticRelationValueDTO;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticRowValueDTO;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.enums.SemanticFieldTypeEnum;
+import com.cmsr.onebase.module.metadata.runtime.semantic.type.RefType;
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.field.MetadataEntityFieldOptionDO;
+import com.cmsr.onebase.module.metadata.core.enums.RelationshipTypeEnum;
+import com.cmsr.onebase.module.system.api.user.AdminUserApi;
+import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
+import com.mybatisflex.core.row.Row;
+import com.cmsr.onebase.module.system.api.dept.DeptApi;
+import com.cmsr.onebase.module.system.api.dept.dto.DeptRespDTO;
+import com.cmsr.onebase.module.system.api.dict.DictDataApi;
+import com.cmsr.onebase.framework.common.biz.system.dict.dto.DictDataRespDTO;
+import com.cmsr.onebase.module.infra.api.file.FileApi;
+import com.cmsr.onebase.module.infra.api.file.dto.FileListRespDTO;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dal.database.DynamicMetadataRepository;
+import com.cmsr.onebase.module.metadata.runtime.semantic.service.impl.SemanticTemporaryDatasourceService;
+import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.stereotype.Component;
+
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * 语义引用解析器
@@ -19,36 +52,6 @@ package com.cmsr.onebase.module.metadata.runtime.semantic.util;
  *   <li>安全：日志避免输出敏感数据，仅输出必要调试信息</li>
  * </ul>
  */
-import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticEntityValueDTO;
-import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticEntitySchemaDTO;
-import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticFieldSchemaDTO;
-import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticRelationSchemaDTO;
-import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticFieldValueDTO;
-import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticRelationValueDTO;
-import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticRowValueDTO;
-import com.cmsr.onebase.module.metadata.runtime.semantic.dto.enums.SemanticFieldTypeEnum;
-import com.cmsr.onebase.module.metadata.runtime.semantic.type.RefType;
-import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
-import com.cmsr.onebase.module.metadata.core.dal.dataobject.field.MetadataEntityFieldOptionDO;
-import com.cmsr.onebase.module.metadata.core.enums.RelationshipTypeEnum;
-import com.cmsr.onebase.module.system.api.user.AdminUserApi;
-import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
-import com.mybatisflex.core.row.Row;
-import com.cmsr.onebase.module.system.api.dept.DeptApi;
-import com.cmsr.onebase.module.system.api.dept.dto.DeptRespDTO;
-import com.cmsr.onebase.module.system.api.dict.DictDataApi;
-import com.cmsr.onebase.framework.common.biz.system.dict.dto.DictDataRespDTO;
-import com.cmsr.onebase.module.metadata.runtime.semantic.dal.database.DynamicMetadataRepository;
-import com.cmsr.onebase.module.metadata.runtime.semantic.service.impl.SemanticTemporaryDatasourceService;
-import jakarta.annotation.Resource;
-import lombok.extern.slf4j.Slf4j;
-
-import org.springframework.stereotype.Component;
-
-import java.math.BigDecimal;
-import java.util.*;
-import java.util.function.Consumer;
-
 @Component
 @Slf4j
 public class SemanticRefResolver {
@@ -58,6 +61,8 @@ public class SemanticRefResolver {
     private DeptApi deptApi;
     @Resource
     private DictDataApi dictDataApi;
+    @Resource
+    private FileApi fileApi;
 
     @Resource
     private DynamicMetadataRepository dynamicMetadataRepository;
@@ -79,50 +84,37 @@ public class SemanticRefResolver {
      * @param value  值模型（包含主实体与关系行的字段值）
      */
     public void enrich(SemanticEntitySchemaDTO entity, SemanticEntityValueDTO value) {
-        if (value == null) return;
         Set<Long> userIds = new HashSet<>();
         Set<Long> deptIds = new HashSet<>();
         Set<Long> dataSelectIds = new HashSet<>();
         Set<Long> selectFieldIds = new HashSet<>();
+        Set<Long> fileIds = new HashSet<>();
 
-        forEachRow(value, fields -> collectFromFields(fields, userIds, deptIds, dataSelectIds, selectFieldIds));
+        forEachRow(value, fields -> collectFromFields(fields, userIds, deptIds, dataSelectIds, selectFieldIds, fileIds));
 
-        Map<Long, AdminUserRespDTO> users = userIds.isEmpty() ? Collections.emptyMap() : adminUserApi.getUserMap(userIds);
-        Map<Long, DeptRespDTO> depts = deptIds.isEmpty() ? Collections.emptyMap() : deptApi.getDeptMap(deptIds);
-
+        // 构建用户缓存（按收集的用户ID批量查询，供 USER/MULTI_USER 解析）
+        Map<Long, AdminUserRespDTO> users = buildUserCache(userIds);
+        // 构建部门缓存（按收集的部门ID批量查询，供 DEPARTMENT/MULTI_DEPARTMENT 解析）
+        Map<Long, DeptRespDTO> depts = buildDeptCache(deptIds);
+        // 构建字段Schema缓存（主实体字段与关系属性），用于字典解析等场景
         Map<Long, MetadataEntityFieldDO> fieldSchemaMap = buildFieldSchemaMap(entity);
-        Map<Long, List<MetadataEntityFieldOptionDO>> fieldOptionsCache = selectFieldIds.isEmpty()
-                ? new HashMap<>()
-                : buildOptionsCacheFromEntity(entity, selectFieldIds);
+        // 构建字段选项缓存（仅针对 SELECT/MULTI_SELECT 且未绑定系统字典的字段）
+        Map<Long, List<MetadataEntityFieldOptionDO>> fieldOptionsCache = buildOptionsCacheFromEntity(entity, selectFieldIds);
+        // 构建字典标签缓存（按字段ID聚合系统字典的 id/value -> label 映射）
+        Map<Long, Map<String, String>> dictLabelCacheByFieldId = buildDictLabelCacheByFieldId(entity, selectFieldIds, fieldSchemaMap);
+        // 构建数据选择上下文（关系元信息 + 主数据缓存），供 DATA_SELECTION/MULTI_DATA_SELECTION 解析
+        DataSelectionContext dataSelection = buildDataSelectionContext(entity, value);
 
-        Map<Long, Map<String, String>> dictLabelCacheByFieldId = selectFieldIds.isEmpty()
-                ? new HashMap<>()
-                : buildDictLabelCacheByFieldId(entity, selectFieldIds, fieldSchemaMap);
+        log.info("dataSelectIds: {} \n dataSelection: {}", dataSelectIds, dataSelection);
 
-        Map<Long, DataSelectMeta> dataSelectMetaBySourceFieldId = buildDataSelectMeta(entity);
-        Map<String, Set<Object>> idsByTable = collectDataSelectIdsByTable(value, dataSelectMetaBySourceFieldId);
-        Map<String, String> pkFieldByTable = new HashMap<>();
-        for (Map.Entry<Long, DataSelectMeta> e : dataSelectMetaBySourceFieldId.entrySet()) {
-            DataSelectMeta meta = e.getValue();
-            if (meta != null && meta.tableName != null && meta.pkField != null) {
-                pkFieldByTable.putIfAbsent(meta.tableName, meta.pkField);
-            }
-        }
-        Map<String, Map<Object, Row>> mainsByTable = new HashMap<>();
-        
-        for (Map.Entry<String, Set<Object>> e : idsByTable.entrySet()) {
-            String table = e.getKey();
-            String pk = pkFieldByTable.get(table);
-            if (pk == null) continue;
-            List<Object> ids = new ArrayList<>(e.getValue());
-            if (ids.isEmpty()) continue;
-            List<Row> mains = dynamicMetadataRepository.selectMainByIds(table, pk, ids);
-            Map<Object, Row> rowById = new HashMap<>();
-            for (Row r : mains) { rowById.put(r.get(pk), r); }
-            mainsByTable.put(table, rowById);
-        }
+        // 构建文件缓存（按收集的文件ID批量查询，供 FILE/IMAGE 解析）
+        Map<Long, FileListRespDTO> files = buildFileCache(fileIds);
 
-        forEachRow(value, fields -> applyToFields(fields, users, depts, fieldSchemaMap, fieldOptionsCache, dictLabelCacheByFieldId, dataSelectMetaBySourceFieldId, mainsByTable));
+        ResolveContext context = new ResolveContext(users, depts, fieldSchemaMap, fieldOptionsCache, dictLabelCacheByFieldId, dataSelection.metaByFieldId, dataSelection.mainsByTable, files);
+
+        if (log.isDebugEnabled()) { log.debug("mainsByTable: {}", dataSelection.mainsByTable); }
+
+        forEachRow(value, fields -> applyToFields(fields, context));
     }
 
     /**
@@ -147,6 +139,15 @@ public class SemanticRefResolver {
         }
     }
 
+    /**
+     * 构建字段选项缓存
+     *
+     * <p>从实体与关系属性中提取已定义的字段选项，以字段ID为键缓存，供字典解析使用。</p>
+     *
+     * @param entity         实体Schema
+     * @param selectFieldIds 需要解析的字典字段ID集合
+     * @return 字段ID到其选项列表的映射
+     */
     private Map<Long, List<MetadataEntityFieldOptionDO>> buildOptionsCacheFromEntity(SemanticEntitySchemaDTO entity, Set<Long> selectFieldIds) {
         Map<Long, List<MetadataEntityFieldOptionDO>> map = new HashMap<>();
         if (entity != null && entity.getFields() != null) {
@@ -171,7 +172,7 @@ public class SemanticRefResolver {
                 }
             }
         }
-        log.info("fieldOptionsCache: {}", map);
+        if (log.isDebugEnabled()) { log.debug("fieldOptionsCache: {}", map); }
         return map;
     }
 
@@ -186,12 +187,7 @@ public class SemanticRefResolver {
         if (entity != null && entity.getFields() != null) {
             for (var f : entity.getFields()) {
                 if (f != null && f.getId() != null) {
-                    MetadataEntityFieldDO stub = new MetadataEntityFieldDO();
-                    stub.setId(f.getId());
-                    stub.setFieldName(f.getFieldName());
-                    stub.setFieldType(f.getFieldType());
-                    stub.setDictTypeId(f.getDictTypeId());
-                    map.put(f.getId(), stub);
+                    map.put(f.getId(), toFieldStub(f));
                 }
             }
         }
@@ -201,17 +197,24 @@ public class SemanticRefResolver {
                 if (attrs == null) continue;
                 for (var f : attrs) {
                     if (f != null && f.getId() != null) {
-                        MetadataEntityFieldDO stub = new MetadataEntityFieldDO();
-                        stub.setId(f.getId());
-                        stub.setFieldName(f.getFieldName());
-                        stub.setFieldType(f.getFieldType());
-                        stub.setDictTypeId(f.getDictTypeId());
-                        map.put(f.getId(), stub);
+                        map.put(f.getId(), toFieldStub(f));
                     }
                 }
             }
         }
         return map;
+    }
+
+    /**
+     * 将运行时字段Schema转换为轻量副本，便于解析阶段快速访问
+     */
+    private MetadataEntityFieldDO toFieldStub(SemanticFieldSchemaDTO f) {
+        MetadataEntityFieldDO stub = new MetadataEntityFieldDO();
+        stub.setId(f.getId());
+        stub.setFieldName(f.getFieldName());
+        stub.setFieldType(f.getFieldType());
+        stub.setDictTypeId(f.getDictTypeId());
+        return stub;
     }
 
     /**
@@ -223,7 +226,7 @@ public class SemanticRefResolver {
      * @param dataSelectIds   收集的数据选择ID集合
      * @param selectFieldIds  收集的字典字段ID集合
      */
-    private void collectFromFields(Map<String, SemanticFieldValueDTO<Object>> fields, Set<Long> userIds, Set<Long> deptIds, Set<Long> dataSelectIds, Set<Long> selectFieldIds) {
+    private void collectFromFields(Map<String, SemanticFieldValueDTO<Object>> fields, Set<Long> userIds, Set<Long> deptIds, Set<Long> dataSelectIds, Set<Long> selectFieldIds, Set<Long> fileIds) {
         if (fields == null) return;
         for (SemanticFieldValueDTO<Object> v : fields.values()) {
             if (v == null) continue;
@@ -238,9 +241,12 @@ public class SemanticRefResolver {
             } else if (t == SemanticFieldTypeEnum.SELECT || t == SemanticFieldTypeEnum.MULTI_SELECT) {
                 Long fid = v.getFieldId();
                 if (fid != null) selectFieldIds.add(fid);
+            } else if (t == SemanticFieldTypeEnum.FILE || t == SemanticFieldTypeEnum.IMAGE) {
+                collectIds(v, fileIds);
             }
         }
     }
+
 
     /**
      * 从字段值中提取并加入ID集合
@@ -285,87 +291,205 @@ public class SemanticRefResolver {
     }
 
     /**
+     * 统一处理列表或单值映射
+     *
+     * <p>根据字段是否为列表，分别对每个元素或单个值应用映射器，最终写入 rawValue。</p>
+     *
+     * @param v      字段值
+     * @param mapper 单元素到标准输出 Map 的映射函数
+     */
+    private void mapListOrSingle(SemanticFieldValueDTO<Object> v, Function<Object, Map<String, Object>> mapper) {
+        if (v.isListType()) {
+            List<?> list = v.getValueAsBizList();
+            if (list == null) return;
+            List<Map<String, Object>> mapped = new ArrayList<>();
+            for (Object o : list) { mapped.add(mapper.apply(o)); }
+            v.setRawValue(mapped);
+        } else {
+            Object one = v.getValueAsBizType();
+            v.setRawValue(mapper.apply(one));
+        }
+    }
+
+    /**
      * 应用字段解析（用户、部门、数据选择、字典）
      *
-     * @param fields            字段值集合
-     * @param users             用户缓存
-     * @param depts             部门缓存
-     * @param fieldSchemaMap    字段Schema缓存
-     * @param fieldOptionsCache 字段选项缓存
+     * <p>根据字段类型对当前字段值进行语义增强，使用上下文内的批量缓存避免重复查询。</p>
+     *
+     * @param fields 字段值集合
+     * @param ctx    解析上下文（含用户/部门/字典/数据选择等缓存）
      */
-    private void applyToFields(Map<String, SemanticFieldValueDTO<Object>> fields, Map<Long, AdminUserRespDTO> users, Map<Long, DeptRespDTO> depts, Map<Long, MetadataEntityFieldDO> fieldSchemaMap, Map<Long, List<MetadataEntityFieldOptionDO>> fieldOptionsCache, Map<Long, Map<String, String>> dictLabelCacheByFieldId, Map<Long, DataSelectMeta> dataSelectMetaBySourceFieldId, Map<String, Map<Object, Row>> mainsByTable) {
-        if (fields == null) return;
+    private void applyToFields(Map<String, SemanticFieldValueDTO<Object>> fields, ResolveContext ctx) {
+        if (fields == null || ctx == null) return;
         for (Map.Entry<String, SemanticFieldValueDTO<Object>> e : fields.entrySet()) {
             SemanticFieldValueDTO<Object> v = e.getValue();
             if (v == null) continue;
             SemanticFieldTypeEnum t = v.getFieldTypeEnum();
             if (t == null || !t.isRefType()) continue;
             if (t == SemanticFieldTypeEnum.USER || t == SemanticFieldTypeEnum.MULTI_USER) {
-                applyUser(v, users);
+                applyUser(v, ctx.users);
             } else if (t == SemanticFieldTypeEnum.DEPARTMENT || t == SemanticFieldTypeEnum.MULTI_DEPARTMENT) {
-                applyDept(v, depts);
+                applyDept(v, ctx.depts);
             } else if (t == SemanticFieldTypeEnum.DATA_SELECTION || t == SemanticFieldTypeEnum.MULTI_DATA_SELECTION) {
-                applyDataSelectionUnified(v, dataSelectMetaBySourceFieldId, mainsByTable);
+                applyDataSelectionUnified(v, ctx.dataSelectMetaBySourceFieldId, ctx.mainsByTable);
             } else if (t == SemanticFieldTypeEnum.SELECT || t == SemanticFieldTypeEnum.MULTI_SELECT) {
-                applyDict(v, fieldSchemaMap, fieldOptionsCache, dictLabelCacheByFieldId);
+                applyDict(v, ctx.fieldSchemaMap, ctx.fieldOptionsCache, ctx.dictLabelCacheByFieldId);
+            } else if (t == SemanticFieldTypeEnum.FILE || t == SemanticFieldTypeEnum.IMAGE) {
+                mapListOrSingle(v, o -> {
+                    Long id = toLong(extractId(o));
+                    return mapFileInfo(id, id == null ? null : ctx.files.get(id));
+                });
             }
         }
+    }
+
+
+    /**
+     * 构建文件信息缓存
+     *
+     * @param fileIds 需查询的文件ID集合
+     * @return 文件ID到文件详情的映射
+     */
+    private Map<Long, FileListRespDTO> buildFileCache(Set<Long> fileIds) {
+        if (fileIds == null || fileIds.isEmpty()) return Collections.emptyMap();
+        List<FileListRespDTO> list = fileApi.getFileListByIds(fileIds).getCheckedData();
+        if (list == null || list.isEmpty()) return Collections.emptyMap();
+        Map<Long, FileListRespDTO> map = new HashMap<>();
+        for (FileListRespDTO f : list) {
+            if (f.getId() != null) map.put(f.getId(), f);
+        }
+        return map;
+    }
+
+    /**
+     * 构建用户缓存
+     *
+     * <p>按已收集的用户ID批量查询，供 USER/MULTI_USER 字段解析使用。</p>
+     *
+     * @param userIds 用户ID集合
+     * @return 用户ID到用户信息的映射
+     */
+    private Map<Long, AdminUserRespDTO> buildUserCache(Set<Long> userIds) {
+        return userIds == null || userIds.isEmpty() ? Collections.emptyMap() : adminUserApi.getUserMap(userIds);
+    }
+
+    /**
+     * 构建部门缓存
+     *
+     * <p>按已收集的部门ID批量查询，供 DEPARTMENT/MULTI_DEPARTMENT 字段解析使用。</p>
+     *
+     * @param deptIds 部门ID集合
+     * @return 部门ID到部门信息的映射
+     */
+    private Map<Long, DeptRespDTO> buildDeptCache(Set<Long> deptIds) {
+        return deptIds == null || deptIds.isEmpty() ? Collections.emptyMap() : deptApi.getDeptMap(deptIds);
+    }
+
+    /**
+     * 从数据选择元信息构建表主键字段名映射
+     *
+     * @param metaByFieldId 源字段ID到数据选择元信息映射
+     * @return 表名到主键字段名的映射
+     */
+    private Map<String, String> buildPkFieldByTableFromMeta(Map<Long, DataSelectMeta> metaByFieldId) {
+        Map<String, String> pkFieldByTable = new HashMap<>();
+        if (metaByFieldId == null || metaByFieldId.isEmpty()) return pkFieldByTable;
+        for (Map.Entry<Long, DataSelectMeta> e : metaByFieldId.entrySet()) {
+            DataSelectMeta meta = e.getValue();
+            if (meta != null && meta.tableName != null && meta.pkField != null) {
+                pkFieldByTable.putIfAbsent(meta.tableName, meta.pkField);
+            }
+        }
+        return pkFieldByTable;
+    }
+
+    /**
+     * 构建各目标表的主数据缓存
+     *
+     * <p>根据按表收集的引用ID与主键字段名，批量查询并构建 `{id -> Row}` 映射。</p>
+     *
+     * @param idsByTable     表名到引用ID集合的映射
+     * @param pkFieldByTable 表名到主键字段名的映射
+     * @return 表名到 `(主键值 -> Row)` 的映射
+     */
+    private Map<String, Map<Object, Row>> buildMainsByTable(Map<String, Set<Object>> idsByTable, Map<String, String> pkFieldByTable) {
+        Map<String, Map<Object, Row>> mainsByTable = new HashMap<>();
+        if (idsByTable == null || idsByTable.isEmpty()) return mainsByTable;
+        if (log.isDebugEnabled()) { log.debug("idsByTable: {}", idsByTable); }
+        for (Map.Entry<String, Set<Object>> e : idsByTable.entrySet()) {
+            String table = e.getKey();
+            String pk = pkFieldByTable.get(table);
+            if (pk == null) continue;
+            List<Object> ids = new ArrayList<>(e.getValue());
+            if (ids.isEmpty()) continue;
+            List<Row> mains = dynamicMetadataRepository.selectMainByIds(table, pk, ids);
+            Map<Object, Row> rowById = new HashMap<>();
+            for (Row r : mains) { rowById.put(r.get(pk), r); }
+            mainsByTable.put(table, rowById);
+        }
+        return mainsByTable;
+    }
+
+    /**
+     * 构建数据选择上下文
+     *
+     * <p>封装数据选择的关系元信息与主数据缓存，供 DATA_SELECTION/MULTI_DATA_SELECTION 解析。</p>
+     *
+     * @param entity 实体Schema
+     * @param value  值模型
+     * @return 数据选择上下文
+     */
+    private DataSelectionContext buildDataSelectionContext(SemanticEntitySchemaDTO entity, SemanticEntityValueDTO value) {
+        Map<Long, DataSelectMeta> metaByFieldId = buildDataSelectMeta(entity);
+        Map<String, Set<Object>> idsByTable = collectDataSelectIdsByTable(value, metaByFieldId);
+        Map<String, String> pkFieldByTable = buildPkFieldByTableFromMeta(metaByFieldId);
+        Map<String, Map<Object, Row>> mainsByTable = buildMainsByTable(idsByTable, pkFieldByTable);
+        return new DataSelectionContext(metaByFieldId, mainsByTable);
+    }
+
+    
+
+    /**
+     * 构建文件字段的标准输出结构
+     */
+    private Map<String, Object> mapFileInfo(Long id, FileListRespDTO info) {
+        Map<String, Object> m = new HashMap<>();
+        m.put("id", id);
+        if (info != null) {
+            m.put("name", info.getName());
+            m.put("path", info.getPath());
+            m.put("type", info.getType());
+            m.put("size", info.getSize());
+        }
+        return m;
     }
 
     /**
      * 解析用户字段：输出 `{id, name}` 或列表
      */
     private void applyUser(SemanticFieldValueDTO<Object> v, Map<Long, AdminUserRespDTO> users) {
-        if (v.isListType()) {
-            List<?> list = v.getValueAsBizList();
-            if (list == null) return;
-            List<Map<String,Object>> mapped = new ArrayList<>();
-            for (Object o : list) {
-                Long id = toLong(extractId(o));
-                Map<String,Object> m = new HashMap<>();
-                m.put("id", id);
-                AdminUserRespDTO u = id == null ? null : users.get(id);
-                if (u != null) m.put("name", u.getNickname());
-                mapped.add(m);
-            }
-            v.setRawValue(mapped);
-        } else {
-            Object one = v.getValueAsBizType();
-            Long id = toLong(extractId(one));
-            Map<String,Object> m = new HashMap<>();
-            m.put("id", id);
-            AdminUserRespDTO u = id == null ? null : users.get(id);
-            if (u != null) m.put("name", u.getNickname());
-            v.setRawValue(m);
-        }
+        applyEntityRef(v, users, AdminUserRespDTO::getNickname);
     }
 
     /**
      * 解析部门字段：输出 `{id, name}` 或列表
      */
     private void applyDept(SemanticFieldValueDTO<Object> v, Map<Long, DeptRespDTO> depts) {
-        if (v.isListType()) {
-            List<?> list = v.getValueAsBizList();
-            if (list == null) return;
-            List<Map<String,Object>> mapped = new ArrayList<>();
-            for (Object o : list) {
-                Long id = toLong(extractId(o));
-                Map<String,Object> m = new HashMap<>();
-                m.put("id", id);
-                DeptRespDTO d = id == null ? null : depts.get(id);
-                if (d != null) m.put("name", d.getName());
-                mapped.add(m);
-            }
-            v.setRawValue(mapped);
-        } else {
-            Object one = v.getValueAsBizType();
-            Long id = toLong(extractId(one));
-            Map<String,Object> m = new HashMap<>();
+        applyEntityRef(v, depts, DeptRespDTO::getName);
+    }
+
+    /**
+     * 通用引用类型解析：将 ID 映射为 `{id, name}`
+     */
+    private <T> void applyEntityRef(SemanticFieldValueDTO<Object> v, Map<Long, T> cache, Function<T, String> nameExtractor) {
+        mapListOrSingle(v, o -> {
+            Long id = toLong(extractId(o));
+            Map<String, Object> m = new HashMap<>();
             m.put("id", id);
-            DeptRespDTO d = id == null ? null : depts.get(id);
-            if (d != null) m.put("name", d.getName());
-            v.setRawValue(m);
-        }
+            T dto = id == null ? null : cache.get(id);
+            if (dto != null) m.put("name", nameExtractor.apply(dto));
+            return m;
+        });
     }
 
     /**
@@ -375,61 +499,44 @@ public class SemanticRefResolver {
         Long fieldId = v.getFieldId();
         DataSelectMeta meta = fieldId == null ? null : metaByFieldId.get(fieldId);
         if (meta == null) { applyDataSelectionFallback(v); return; }
-        if (v.isListType()) {
-            List<?> list = v.getValueAsBizList();
-            if (list == null) return;
-            List<Map<String, Object>> mapped = new ArrayList<>();
-            Map<Object, Row> byId = mainsByTable.get(meta.tableName);
-            for (Object o : list) {
-                Object idObj = extractId(o);
-                Row r = byId == null ? null : byId.get(idObj);
-                Map<String, Object> m = new HashMap<>();
-                m.put("id", idObj);
-                if (r != null && meta.selectFieldName != null) { m.put("name", r.get(meta.selectFieldName)); }
-                mapped.add(m);
-            }
-            v.setRawValue(mapped);
-        } else {
-            Object one = v.getValueAsBizType();
-            Object idObj = extractId(one);
-            Map<Object, Row> byId = mainsByTable.get(meta.tableName);
+        Map<Object, Row> byId = mainsByTable.get(meta.tableName);
+        mapListOrSingle(v, o -> {
+            Object idObj = extractId(o);
             Row r = byId == null ? null : byId.get(idObj);
             Map<String, Object> m = new HashMap<>();
             m.put("id", idObj);
             if (r != null && meta.selectFieldName != null) { m.put("name", r.get(meta.selectFieldName)); }
-            v.setRawValue(m);
-        }
+            return m;
+        });
     }
 
+    /**
+     * 数据选择字段的回退解析
+     *
+     * <p>在缺少关系元信息或主数据缓存时，尝试从值中直接提取 `id/name`。</p>
+     */
     private void applyDataSelectionFallback(SemanticFieldValueDTO<Object> v) {
-        if (v.isListType()) {
-            List<?> list = v.getValueAsBizList();
-            if (list == null) return;
-            List<Map<String, Object>> mapped = new ArrayList<>();
-            for (Object o : list) {
-                Long id = toLong(extractId(o));
-                Map<String, Object> m = new HashMap<>();
-                m.put("id", id);
-                String name = extractName(o);
-                if (name != null) m.put("name", name);
-                mapped.add(m);
-            }
-            v.setRawValue(mapped);
-        } else {
-            Object one = v.getValueAsBizType();
-            Long id = toLong(extractId(one));
+        mapListOrSingle(v, o -> {
+            Long id = toLong(extractId(o));
             Map<String, Object> m = new HashMap<>();
             m.put("id", id);
-            String name = extractName(one);
+            String name = extractName(o);
             if (name != null) m.put("name", name);
-            v.setRawValue(m);
-        }
+            return m;
+        });
     }
 
+    /**
+     * 构建数据选择关系的元信息缓存
+     *
+     * @param entity 实体Schema
+     * @return 源字段ID到目标表/主键/显示字段等元信息的映射
+     */
     private Map<Long, DataSelectMeta> buildDataSelectMeta(SemanticEntitySchemaDTO entity) {
         Map<Long, DataSelectMeta> map = new HashMap<>();
         if (entity == null || entity.getConnectors() == null) return map;
         for (SemanticRelationSchemaDTO c : entity.getConnectors()) {
+            if (log.isDebugEnabled()) { log.debug("connector: {}", c); }
             if (c == null || c.getRelationshipType() == null) continue;
             if (!RelationshipTypeEnum.isDataSelectRelationship(c.getRelationshipType().getRelationshipType())) continue;
             String pkField = getPrimaryKeyNameFromConnector(c);
@@ -446,6 +553,13 @@ public class SemanticRefResolver {
         return map;
     }
 
+    /**
+     * 按表收集数据选择字段的引用ID集合
+     *
+     * @param value        值模型
+     * @param metaByFieldId 源字段ID到数据选择元信息映射
+     * @return 表名到引用ID集合的映射
+     */
     private Map<String, Set<Object>> collectDataSelectIdsByTable(SemanticEntityValueDTO value, Map<Long, DataSelectMeta> metaByFieldId) {
         Map<String, Set<Object>> idsByTable = new HashMap<>();
         forEachRow(value, fields -> {
@@ -482,6 +596,21 @@ public class SemanticRefResolver {
     }
 
     /**
+     * 数据选择解析上下文
+     *
+     * <p>包含：源字段ID到选择关系元信息的映射，以及目标表主数据缓存。</p>
+     */
+    private static class DataSelectionContext {
+        final Map<Long, DataSelectMeta> metaByFieldId;
+        final Map<String, Map<Object, Row>> mainsByTable;
+
+        DataSelectionContext(Map<Long, DataSelectMeta> metaByFieldId, Map<String, Map<Object, Row>> mainsByTable) {
+            this.metaByFieldId = metaByFieldId;
+            this.mainsByTable = mainsByTable;
+        }
+    }
+
+    /**
      * 解析字典字段：
      * <ul>
      *   <li>绑定系统字典（`dictTypeId != null`）：直接使用值的字符串表示作为显示名</li>
@@ -493,127 +622,24 @@ public class SemanticRefResolver {
         MetadataEntityFieldDO field = fieldId == null ? null : fieldSchemaMap.get(fieldId);
         Long dictTypeId = field == null ? null : field.getDictTypeId();
 
-        if (v.isListType()) {
-            List<?> list = v.getValueAsBizList();
-            if (list == null) return;
-            List<Map<String, Object>> mapped = new ArrayList<>();
-            for (Object o : list) {
-                Object idOrVal = extractIdOrValue(o);
-                Map<String, Object> m = new HashMap<>();
-                m.put("id", idOrVal);
-                String label = resolveDictLabelOrOption(dictTypeId, fieldId, idOrVal, fieldOptionsCache, dictLabelCacheByFieldId);
-                if (label != null) m.put("name", label);
-                mapped.add(m);
-            }
-            v.setRawValue(mapped);
-        } else {
-            Object one = v.getValueAsBizType();
-            Object idOrVal = extractIdOrValue(one);
+        mapListOrSingle(v, o -> {
+            Object idOrVal = extractIdOrValue(o);
             Map<String, Object> m = new HashMap<>();
             m.put("id", idOrVal);
             String label = resolveDictLabelOrOption(dictTypeId, fieldId, idOrVal, fieldOptionsCache, dictLabelCacheByFieldId);
             if (label != null) m.put("name", label);
-            v.setRawValue(m);
-        }
+            return m;
+        });
     }
 
-    private void applyDataSelectionAssignments(SemanticEntitySchemaDTO entity, SemanticEntityValueDTO value) {
-        if (entity == null || value == null || entity.getConnectors() == null) return;
-        Object parentId = value.getId();
-        if (parentId == null) return;
-        Map<String, Set<Object>> idsByTable = new HashMap<>();
-        Map<String, String> pkFieldByTable = new HashMap<>();
-        List<ConnectorAssign> assigns = new ArrayList<>();
+    
 
-        for (SemanticRelationSchemaDTO c : entity.getConnectors()) {
-            if (c == null || c.getRelationshipType() == null) continue;
-            if (!RelationshipTypeEnum.isDataSelectRelationship(c.getRelationshipType().getRelationshipType())) continue;
-            String relationKey = getFieldNameByIdFromConnector(c, c.getTargetKeyFieldId());
-            Long selectFieldId = c.getSelectFieldId() == null ? null : Long.valueOf(c.getSelectFieldId());
-            String selectFieldName = getFieldNameByIdFromConnector(c, selectFieldId);
-            String pkField = getPrimaryKeyNameFromConnector(c);
-            if (relationKey == null || pkField == null) continue;
-            List<Row> rows = dynamicMetadataRepository.selectRelationRowsByParent(c.getTargetEntityTableName(), relationKey, parentId);
-            if (rows == null || rows.isEmpty()) continue;
-            List<Object> ids = new ArrayList<>();
-            for (var r : rows) { ids.add(r.get(pkField)); }
-            idsByTable.computeIfAbsent(c.getTargetEntityTableName(), k -> new HashSet<>()).addAll(ids);
-            pkFieldByTable.putIfAbsent(c.getTargetEntityTableName(), pkField);
-
-            Long sourceFieldId = c.getSourceKeyFieldId();
-            String sourceFieldName = resolveSourceFieldName(entity, sourceFieldId);
-            if (sourceFieldName == null) continue;
-
-            ConnectorAssign a = new ConnectorAssign();
-            a.tableName = c.getTargetEntityTableName();
-            a.pkField = pkField;
-            a.selectFieldName = selectFieldName;
-            a.sourceFieldId = sourceFieldId;
-            a.sourceFieldName = sourceFieldName;
-            a.single = c.getRelationshipType() == RelationshipTypeEnum.DATA_SELECT;
-            a.ids = ids;
-            assigns.add(a);
-        }
-
-        Map<String, Map<Object, Row>> mainsByTable = new HashMap<>();
-        for (Map.Entry<String, Set<Object>> e : idsByTable.entrySet()) {
-            String table = e.getKey();
-            String pk = pkFieldByTable.get(table);
-            if (pk == null) continue;
-            List<Object> ids = new ArrayList<>(e.getValue());
-            if (ids.isEmpty()) continue;
-            List<Row> mains = dynamicMetadataRepository.selectMainByIds(table, pk, ids);
-            Map<Object, Row> byId = new HashMap<>();
-            for (var r : mains) { byId.put(r.get(pk), r); }
-            mainsByTable.put(table, byId);
-        }
-
-        for (ConnectorAssign a : assigns) {
-            Map<Object, Row> byId = mainsByTable.get(a.tableName);
-            if (byId == null) continue;
-            List<Map<String, Object>> list = new ArrayList<>();
-            for (Object idObj : a.ids) {
-                Row r = byId.get(idObj);
-                if (r == null) continue;
-                Map<String, Object> m = new HashMap<>();
-                m.put("id", r.get(a.pkField));
-                if (a.selectFieldName != null) { m.put("name", r.get(a.selectFieldName)); }
-                list.add(m);
-            }
-            SemanticFieldValueDTO<Object> v;
-            if (a.single) {
-                Map<String, Object> one = list.isEmpty() ? null : list.get(0);
-                v = SemanticFieldValueDTO.ofType(SemanticFieldTypeEnum.DATA_SELECTION);
-                v.setRawValue(one);
-            } else {
-                v = SemanticFieldValueDTO.ofType(SemanticFieldTypeEnum.MULTI_DATA_SELECTION);
-                v.setRawValue(list);
-            }
-            v.setFieldId(a.sourceFieldId);
-            v.setFieldName(a.sourceFieldName);
-            if (value.getFieldValueMap() == null) { value.setFieldValueMap(new HashMap<>()); }
-            value.getFieldValueMap().put(a.sourceFieldName, v);
-        }
-    }
-
-    private static class ConnectorAssign {
-        String tableName;
-        String pkField;
-        String selectFieldName;
-        Long sourceFieldId;
-        String sourceFieldName;
-        boolean single;
-        List<Object> ids;
-    }
-
-    private String resolveSourceFieldName(SemanticEntitySchemaDTO entity, Long fieldId) {
-        if (entity == null || entity.getFields() == null || fieldId == null) return null;
-        for (SemanticFieldSchemaDTO f : entity.getFields()) {
-            if (f != null && fieldId.equals(f.getId())) return f.getFieldName();
-        }
-        return null;
-    }
-
+    /**
+     * 从关系属性中解析主键字段名
+     *
+     * @param c 关系Schema
+     * @return 主键字段名，默认 `id`
+     */
     private String getPrimaryKeyNameFromConnector(SemanticRelationSchemaDTO c) {
         if (c == null || c.getRelationAttributes() == null) return null;
         for (SemanticFieldSchemaDTO f : c.getRelationAttributes()) {
@@ -622,6 +648,13 @@ public class SemanticRefResolver {
         return "id";
     }
 
+    /**
+     * 在关系属性中根据字段ID获取字段名
+     *
+     * @param c       关系Schema
+     * @param fieldId 字段ID
+     * @return 字段名或 null
+     */
     private String getFieldNameByIdFromConnector(SemanticRelationSchemaDTO c, Long fieldId) {
         if (c == null || c.getRelationAttributes() == null || fieldId == null) return null;
         for (SemanticFieldSchemaDTO f : c.getRelationAttributes()) {
@@ -688,6 +721,16 @@ public class SemanticRefResolver {
         return null;
     }
 
+    /**
+     * 构建字典显示标签缓存（按字段ID）
+     *
+     * <p>合并系统字典数据（id/value -> label），用于 SELECT/MULTI_SELECT 的显示名解析。</p>
+     *
+     * @param entity         实体Schema
+     * @param selectFieldIds 需要解析的字典字段ID集合
+     * @param fieldSchemaMap 字段Schema缓存
+     * @return 字段ID到`(值->标签)`映射
+     */
     private Map<Long, Map<String, String>> buildDictLabelCacheByFieldId(SemanticEntitySchemaDTO entity, Set<Long> selectFieldIds, Map<Long, MetadataEntityFieldDO> fieldSchemaMap) {
         Map<Long, Map<String, String>> result = new HashMap<>();
         if (selectFieldIds == null || selectFieldIds.isEmpty()) return result;
@@ -704,7 +747,7 @@ public class SemanticRefResolver {
 
         Map<Long, List<DictDataRespDTO>> dictDataBatch = dictDataApi.getDictDataListByTypeIds(dictTypeIds).getCheckedData();
         
-        log.info("dictDataBatch: {}", dictDataBatch);
+        if (log.isDebugEnabled()) { log.debug("dictDataBatch: {}", dictDataBatch); }
         if (dictDataBatch == null || dictDataBatch.isEmpty()) return result;
 
         for (Map.Entry<Long, Long> entry : fieldIdToDictTypeId.entrySet()) {
@@ -720,5 +763,39 @@ public class SemanticRefResolver {
             result.put(fieldId, labelMap);
         }
         return result;
+    }
+
+    /**
+     * 统一解析上下文
+     *
+     * <p>聚合各类型所需的缓存：用户、部门、字段Schema与选项、字典标签、数据选择关系与主数据、文件。</p>
+     */
+    private static class ResolveContext {
+        final Map<Long, AdminUserRespDTO> users;
+        final Map<Long, DeptRespDTO> depts;
+        final Map<Long, MetadataEntityFieldDO> fieldSchemaMap;
+        final Map<Long, List<MetadataEntityFieldOptionDO>> fieldOptionsCache;
+        final Map<Long, Map<String, String>> dictLabelCacheByFieldId;
+        final Map<Long, DataSelectMeta> dataSelectMetaBySourceFieldId;
+        final Map<String, Map<Object, Row>> mainsByTable;
+        final Map<Long, FileListRespDTO> files;
+
+        ResolveContext(Map<Long, AdminUserRespDTO> users,
+                       Map<Long, DeptRespDTO> depts,
+                       Map<Long, MetadataEntityFieldDO> fieldSchemaMap,
+                       Map<Long, List<MetadataEntityFieldOptionDO>> fieldOptionsCache,
+                       Map<Long, Map<String, String>> dictLabelCacheByFieldId,
+                       Map<Long, DataSelectMeta> dataSelectMetaBySourceFieldId,
+                       Map<String, Map<Object, Row>> mainsByTable,
+                       Map<Long, FileListRespDTO> files) {
+            this.users = users;
+            this.depts = depts;
+            this.fieldSchemaMap = fieldSchemaMap;
+            this.fieldOptionsCache = fieldOptionsCache;
+            this.dictLabelCacheByFieldId = dictLabelCacheByFieldId;
+            this.dataSelectMetaBySourceFieldId = dataSelectMetaBySourceFieldId;
+            this.mainsByTable = mainsByTable;
+            this.files = files;
+        }
     }
 }

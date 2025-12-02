@@ -5,6 +5,7 @@ import org.anyline.entity.Compare;
 import org.springframework.stereotype.Component;
 
 @Component
+@Deprecated
 public class SemanticOperatorConditionApplier {
     public void apply(ConfigStore configs, String fieldName, String operator, Object value) {
         if (operator == null) { configs.and(Compare.LIKE, fieldName, value); return; }
@@ -39,4 +40,3 @@ public class SemanticOperatorConditionApplier {
         }
     }
 }
-

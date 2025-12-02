@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 @Component
+@Deprecated
 public class SemanticAutoNumberGenerator {
     @Resource
     private AutoNumberService autoNumberService;

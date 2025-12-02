@@ -37,11 +37,11 @@ public class MetadataBackupController {
     @Operation(summary = "备份元数据", description = "根据应用ID备份所有相关的元数据信息")
     @PreAuthorize("@ss.hasPermission('metadata:backup:backup')")
     public CommonResult<MetadataBackupRespVO> backupMetadata(@Valid @RequestBody MetadataBackupReqVO backupReqVO) {
-        log.info("收到备份元数据请求，应用ID: {}", backupReqVO.getAppId());
+        log.info("收到备份元数据请求，应用ID: {}", backupReqVO.getApplicationId());
 
-        MetadataBackupRespVO result = metadataBackupBuildService.backupMetadata(backupReqVO.getAppId());
+        MetadataBackupRespVO result = metadataBackupBuildService.backupMetadata(backupReqVO.getApplicationId());
 
-        log.info("完成备份元数据，应用ID: {}", backupReqVO.getAppId());
+        log.info("完成备份元数据，应用ID: {}", backupReqVO.getApplicationId());
         return CommonResult.success(result);
     }
 
@@ -49,11 +49,11 @@ public class MetadataBackupController {
     @Operation(summary = "恢复元数据", description = "将备份的元数据恢复到指定应用中")
     @PreAuthorize("@ss.hasPermission('metadata:backup:restore')")
     public CommonResult<Boolean> restoreMetadata(@Valid @RequestBody MetadataRestoreReqVO restoreReqVO) {
-        log.info("收到恢复元数据请求，目标应用ID: {}", restoreReqVO.getTargetAppId());
+        log.info("收到恢复元数据请求，目标应用ID: {}", restoreReqVO.getTargetApplicationId());
 
         metadataBackupBuildService.restoreMetadata(restoreReqVO);
 
-        log.info("完成恢复元数据，目标应用ID: {}", restoreReqVO.getTargetAppId());
+        log.info("完成恢复元数据，目标应用ID: {}", restoreReqVO.getTargetApplicationId());
         return CommonResult.success(true);
     }
 

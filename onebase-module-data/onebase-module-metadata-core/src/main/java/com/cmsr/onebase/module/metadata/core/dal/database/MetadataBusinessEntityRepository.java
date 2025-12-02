@@ -102,7 +102,7 @@ public class MetadataBusinessEntityRepository extends ServiceImpl<MetadataBusine
      */
     public List<MetadataBusinessEntityDO> getSimpleEntityListByAppId(Long appId) {
         QueryWrapper queryWrapper = this.query()
-                .eq(MetadataBusinessEntityDO::getAppId, appId)
+                .eq(MetadataBusinessEntityDO::getApplicationId, appId)
                 .orderBy(MetadataBusinessEntityDO::getCreateTime, true);
         return list(queryWrapper);
     }
@@ -132,7 +132,7 @@ public class MetadataBusinessEntityRepository extends ServiceImpl<MetadataBusine
     public boolean isBusinessEntityCodeUnique(Long id, String code, Long appId) {
         QueryWrapper queryWrapper = this.query()
                 .eq(MetadataBusinessEntityDO::getCode, code)
-                .eq(MetadataBusinessEntityDO::getAppId, appId)
+                .eq(MetadataBusinessEntityDO::getApplicationId, appId)
                 .ne(MetadataBusinessEntityDO::getId, id, id != null);
         return count(queryWrapper) == 0;
     }

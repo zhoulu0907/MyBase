@@ -19,11 +19,11 @@ public class DatasourcePageReqVO extends PageParam {
     @Schema(description = "数据源类型", example = "POSTGRESQL")
     private String datasourceType;
 
-    @Schema(description = "运行模式", example = "0")
-    private Integer runMode;
+    @Schema(description = "版本标识", example = "0")
+    private Long versionTag;
 
     @Schema(description = "应用ID", example = "1")
-    private String appId;
+    private String applicationId;
 
     @Schema(description = "数据源来源", example = "1")
     private Integer datasourceOrigin;

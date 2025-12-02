@@ -77,7 +77,7 @@ public class MetadataDatasourceRepository extends ServiceImpl<MetadataDatasource
      */
     public List<MetadataDatasourceDO> getDatasourceListByAppId(Long appId) {
         QueryWrapper queryWrapper = this.query()
-                .eq(MetadataDatasourceDO::getAppId, appId);
+                .eq(MetadataDatasourceDO::getApplicationId, appId);
         return list(queryWrapper);
     }
 
@@ -92,7 +92,7 @@ public class MetadataDatasourceRepository extends ServiceImpl<MetadataDatasource
     public boolean isDatasourceCodeUnique(Long id, String code, Long appId) {
         QueryWrapper queryWrapper = this.query()
                 .eq(MetadataDatasourceDO::getCode, code)
-                .eq(MetadataDatasourceDO::getAppId, appId)
+                .eq(MetadataDatasourceDO::getApplicationId, appId)
                 .ne(MetadataDatasourceDO::getId, id, id != null);
         return count(queryWrapper) == 0;
     }

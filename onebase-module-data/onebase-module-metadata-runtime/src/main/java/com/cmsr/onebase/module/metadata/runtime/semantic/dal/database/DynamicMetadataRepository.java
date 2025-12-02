@@ -1,5 +1,4 @@
 package com.cmsr.onebase.module.metadata.runtime.semantic.dal.database;
-import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticTableNameQuoter;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.query.QueryColumn;
 import com.mybatisflex.core.row.Db;
@@ -16,8 +15,6 @@ import java.util.List;
 @Repository
 public class DynamicMetadataRepository {
 
-    @Resource
-    private SemanticTableNameQuoter tableNameQuoter;
 
     @Resource
     private UidGenerator uidGenerator;
@@ -47,7 +44,7 @@ public class DynamicMetadataRepository {
             if (row.containsKey("ownerdept") && row.get("ownerdept") == null) { row.set("ownerdept", userDeptId); }
         }
 
-        return Db.insert(tableNameQuoter.quote(tableName), row);
+        return Db.insert(tableName, row);
     }
 
     public int insertBatch(String tableName, List<Row> rows) {
@@ -58,25 +55,32 @@ public class DynamicMetadataRepository {
     }
 
     public int updateByQuery(String tableName, Row row, QueryWrapper qw) {
-        return Db.updateByQuery(tableNameQuoter.quote(tableName), row, qw);
+        String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        Long userId = SecurityFrameworkUtils.getLoginUserId();
+        if (row.containsKey("updated_time")) { row.set("updated_time", now); }
+        if (row.containsKey("updatetime")) { row.set("updatetime", now); }
+        if (userId != null) {
+            if (row.containsKey("updater") && row.get("updater") == null) { row.set("updater", userId); }
+        }
+        return Db.updateByQuery(tableName, row, qw);
     }
 
     public int softDeleteByQuery(String tableName, QueryWrapper qw) {
         Row update = new Row();
         update.put("deleted", 1);
-        return Db.updateByQuery(tableNameQuoter.quote(tableName), update, qw);
+        return Db.updateByQuery(tableName, update, qw);
     }
 
     public int deleteByQuery(String tableName, QueryWrapper qw) {
-        return Db.deleteByQuery(tableNameQuoter.quote(tableName), qw);
+        return Db.deleteByQuery(tableName, qw);
     }
 
     public Row selectOneByQuery(String tableName, QueryWrapper qw) {
-        return Db.selectOneByQuery(tableNameQuoter.quote(tableName), qw);
+        return Db.selectOneByQuery(tableName, qw);
     }
 
     public List<Row> selectListByQuery(String tableName, QueryWrapper qw) {
-        return Db.selectListByQuery(tableNameQuoter.quote(tableName), qw);
+        return Db.selectListByQuery(tableName, qw);
     }
 
     public Row selectMainById(String tableName, String pkField, Object id, boolean filterDeleted) {

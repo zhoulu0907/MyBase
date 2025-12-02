@@ -33,8 +33,8 @@ public class ValidationRequiredUpdateReqVO {
     @Schema(description = "提示信息", example = "该字段为必填项")
     private String promptMessage;
 
-    @Schema(description = "运行模式", example = "1")
-    private Integer runMode;
+    @Schema(description = "版本标识", example = "1")
+    private Long versionTag;
 
     @Schema(description = "校验方式", example = "POP")
     private String valMethod;

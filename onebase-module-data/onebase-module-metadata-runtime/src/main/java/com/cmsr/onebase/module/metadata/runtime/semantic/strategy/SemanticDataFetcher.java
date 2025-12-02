@@ -23,13 +23,12 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Component
+@Deprecated
 public class SemanticDataFetcher {
     @Resource
     private FieldPermissionFilter fieldPermissionFilter;
     @Resource
     private FieldValueStorageStrategyFactory fieldValueStorageStrategyFactory;
-    @Resource
-    private SemanticTableNameQuoter tableNameQuoter;
 
     public Map<String, Object> fetch(ProcessContext context) {
         MetadataBusinessEntityDO entity = context.getEntity();
@@ -38,7 +37,7 @@ public class SemanticDataFetcher {
         Object id = context.getId();
         if (entity == null || fields == null || fields.isEmpty() || temporaryService == null || id == null) { return null; }
         return TenantUtils.executeIgnore(() -> {
-            Map<String, Object> resultData = queryDataByIdWithService(temporaryService, tableNameQuoter.quote(entity.getTableName()), id, fields);
+            Map<String, Object> resultData = queryDataByIdWithService(temporaryService, entity.getTableName(), id, fields);
             if (resultData == null) { return null; }
             applyFieldStorageStrategies(resultData, fields, FieldValueTransformMode.READ, context);
             Map<String, Object> filtered = filterQueryResultFields(resultData, context);
@@ -142,4 +141,3 @@ public class SemanticDataFetcher {
         return isComplexType && looksLikeJson;
     }
 }
-

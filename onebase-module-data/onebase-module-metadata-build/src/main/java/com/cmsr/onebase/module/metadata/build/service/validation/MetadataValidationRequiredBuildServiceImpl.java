@@ -113,7 +113,7 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
         // 转换VO为DO并设置必要字段
         MetadataValidationRequiredDO data = BeanUtils.toBean(vo, MetadataValidationRequiredDO.class);
         data.setEntityId(field.getEntityId());
-        data.setAppId(field.getAppId());
+        data.setApplicationId(field.getApplicationId());
         data.setGroupId(groupId);
 
         // 保存必填校验规则
@@ -175,7 +175,7 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
         updateDO.setId(existingDO.getId());
         updateDO.setFieldId(existingDO.getFieldId());
         updateDO.setEntityId(existingDO.getEntityId());
-        updateDO.setAppId(existingDO.getAppId());
+        updateDO.setApplicationId(existingDO.getApplicationId());
         updateDO.setGroupId(targetGroupId);
         requiredRepository.updateById(updateDO);
 

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 
 @Component
+@Deprecated
 public class SemanticResultFormatter {
     @Resource
     private FieldValueStorageStrategyFactory fieldValueStorageStrategyFactory;

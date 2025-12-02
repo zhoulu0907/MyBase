@@ -7,7 +7,6 @@ import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticEntitySchem
 import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.validation.SemanticValidationContext;
 import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.enums.SemanticFieldTypeEnum;
-import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticTableNameQuoter;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.row.Db;
 import com.mybatisflex.core.row.Row;
@@ -22,8 +21,6 @@ import java.util.Optional;
 public class SemanticUniqueValidationService implements SemanticValidationService {
     public SemanticUniqueValidationService() { }
 
-    @Resource
-    private SemanticTableNameQuoter semanticTableNameQuoter;
 
     @Override
     public void validateEntity(java.util.List<SemanticFieldSchemaDTO> fields, Map<String, Object> data, MetadataDataMethodOpEnum operationType, SemanticValidationContext context) {
@@ -91,7 +88,7 @@ public class SemanticUniqueValidationService implements SemanticValidationServic
         orCond.append(")");
 
         QueryWrapper qw = QueryWrapper.create()
-                .from(semanticTableNameQuoter.quote(entity.getTableName()))
+                .from(entity.getTableName())
                 .where(orCond.toString(), params.toArray());
         if (hasDeletedColumn) { qw.and("deleted = ?", 0); }
         if (currentId != null) { qw.and(pkName + " <> ?", currentId); }
@@ -99,7 +96,7 @@ public class SemanticUniqueValidationService implements SemanticValidationServic
         qw.select(pkName);
         for (SemanticFieldSchemaDTO f : candidates) { qw.select(f.getFieldName()); }
 
-        java.util.List<Row> rows = Db.selectListByQuery(semanticTableNameQuoter.quote(entity.getTableName()), qw);
+        java.util.List<Row> rows = Db.selectListByQuery(entity.getTableName(), qw);
         if (rows == null || rows.isEmpty()) { return result; }
 
         for (Row row : rows) {

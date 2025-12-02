@@ -132,7 +132,7 @@ public class MetadataEntityFieldRepository extends ServiceImpl<MetadataEntityFie
      */
     public List<MetadataEntityFieldDO> getEntityFieldListByAppId(Long appId) {
         QueryWrapper queryWrapper = this.query()
-                .eq(MetadataEntityFieldDO::getAppId, appId)
+                .eq(MetadataEntityFieldDO::getApplicationId, appId)
                 .orderBy(MetadataEntityFieldDO::getSortOrder, true)
                 .orderBy(MetadataEntityFieldDO::getCreateTime, false);
         return list(queryWrapper);

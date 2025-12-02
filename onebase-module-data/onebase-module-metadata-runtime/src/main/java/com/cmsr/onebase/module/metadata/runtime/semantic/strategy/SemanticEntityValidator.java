@@ -9,6 +9,7 @@ import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionU
 import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.BUSINESS_ENTITY_NOT_EXISTS;
 
 @Component
+@Deprecated
 public class SemanticEntityValidator {
     @Resource
     private MetadataBusinessEntityCoreService metadataBusinessEntityCoreService;
@@ -19,4 +20,3 @@ public class SemanticEntityValidator {
         return entity;
     }
 }
-

@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 @Component
+@Deprecated
 public class SemanticRowMapper {
     public Map<String, Object> toMap(DataRow dataRow, List<MetadataEntityFieldDO> fields) {
         Map<String, Object> resultMap = new HashMap<>();
@@ -55,4 +56,3 @@ public class SemanticRowMapper {
         return isComplexType && looksLikeJson;
     }
 }
-

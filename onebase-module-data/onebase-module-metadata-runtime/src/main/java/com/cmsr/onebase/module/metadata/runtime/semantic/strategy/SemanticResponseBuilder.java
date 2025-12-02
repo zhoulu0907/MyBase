@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 @Component
+@Deprecated
 public class SemanticResponseBuilder {
     public Map<String, Object> build(MetadataBusinessEntityDO entity, Map<String, Object> data, List<MetadataEntityFieldDO> fields) {
         Map<String, Object> response = new HashMap<>();

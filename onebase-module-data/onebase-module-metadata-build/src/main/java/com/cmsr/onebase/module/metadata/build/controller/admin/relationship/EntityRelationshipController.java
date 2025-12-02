@@ -56,7 +56,7 @@ public class EntityRelationshipController {
     @PreAuthorize("@ss.hasPermission('metadata:entity-relationship:query')")
     public CommonResult<PageResult<EntityRelationshipRespVO>> getEntityRelationshipPage(@Valid @RequestBody EntityRelationshipPageReqVO pageReqVO) {
         log.info("控制器接收到的分页请求参数: entityId={}, appId={}, pageNo={}, pageSize={}",
-                pageReqVO.getEntityId(), pageReqVO.getAppId(), pageReqVO.getPageNo(), pageReqVO.getPageSize());
+                pageReqVO.getEntityId(), pageReqVO.getApplicationId(), pageReqVO.getPageNo(), pageReqVO.getPageSize());
         log.info("控制器参数详细信息: pageReqVO={}", pageReqVO);
 
         PageResult<EntityRelationshipRespVO> result = entityRelationshipService.getEntityRelationshipPage(pageReqVO);

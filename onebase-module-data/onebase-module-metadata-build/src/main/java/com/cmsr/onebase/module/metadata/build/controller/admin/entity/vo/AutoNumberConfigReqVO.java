@@ -48,8 +48,8 @@ public class AutoNumberConfigReqVO {
     @Schema(description = "是否启用(1-启用, 0-禁用)", example = "1")
     private Integer isEnabled;
 
-    @Schema(description = "运行模式", example = "1")
-    private Integer runMode;
+    @Schema(description = "版本标识", example = "1")
+    private Long versionTag;
 
     @Schema(description = "规则项列表", requiredMode = Schema.RequiredMode.REQUIRED)
     @JsonProperty("rules")

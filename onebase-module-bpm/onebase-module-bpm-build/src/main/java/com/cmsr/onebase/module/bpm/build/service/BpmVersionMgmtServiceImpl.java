@@ -80,7 +80,7 @@ public class BpmVersionMgmtServiceImpl implements BpmVersionMgmtService {
         ids.add(reqVo.getId());
 
         // 校验流程是否存在
-        Definition existDef = defService.getById(String.valueOf(reqVo.getId()));
+        Definition existDef = defService.getById(reqVo.getId());
 
         if (existDef == null) {
             return;

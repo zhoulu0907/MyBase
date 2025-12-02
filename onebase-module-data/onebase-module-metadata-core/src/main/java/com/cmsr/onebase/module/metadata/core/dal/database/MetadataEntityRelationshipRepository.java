@@ -147,7 +147,7 @@ public class MetadataEntityRelationshipRepository extends ServiceImpl<MetadataEn
      */
     public List<MetadataEntityRelationshipDO> getRelationshipsByAppId(Long appId) {
         QueryWrapper queryWrapper = this.query()
-                .eq(MetadataEntityRelationshipDO::getAppId, appId)
+                .eq(MetadataEntityRelationshipDO::getApplicationId, appId)
                 .orderBy(MetadataEntityRelationshipDO::getCreateTime, false);
         return list(queryWrapper);
     }

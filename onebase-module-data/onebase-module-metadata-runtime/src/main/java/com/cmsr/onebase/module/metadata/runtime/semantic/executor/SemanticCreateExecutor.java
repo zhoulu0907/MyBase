@@ -5,6 +5,7 @@ import com.cmsr.onebase.module.metadata.runtime.semantic.service.impl.SemanticDa
 import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticDataIntegrityValidator;
 import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.validation.SemanticValidationManager;
 import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticPermissionValidator;
+import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticProcessLogger;
 import com.cmsr.onebase.module.metadata.runtime.semantic.vo.SemanticMergeBodyVO;
 import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticMergeRecordAssembler;
 import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticPermissionContextLoader;
@@ -31,6 +32,9 @@ public class SemanticCreateExecutor {
     @Resource
     private SemanticPermissionContextLoader semanticPermissionContextLoader;
     @Resource
+    private SemanticProcessLogger semanticProcessLogger;
+
+    @Resource
     private UidGenerator uidGenerator;
 
     public Map<String, Object> execute(String tableName, Long menuId, String traceId, SemanticMergeBodyVO body) {
@@ -54,20 +58,14 @@ public class SemanticCreateExecutor {
             // 5) 数据校验（RecordDTO 简化入口）
             semanticValidationManager.validate(record);
 
-            // // 6) 前置工作流：预留接口
-            // semanticWorkflowExecutor.preExecute(record);
-
-            // 8) 数据存储：CRUDQ 服务（RecordDTO 入口）
+            // 6) 数据存储：CRUDQ 服务（RecordDTO 入口）
             semanticDataCrudService.create(record);;
             
-            // // 9) 后置工作流：预留接口
-            // semanticWorkflowExecutor.postExecute(record);
-            // 10) 数据查询：通过 DataCrudService 读取主表数据
+            // 7) 数据查询：通过 DataCrudService 读取主表数据
             Map<String, Object> result = semanticDataCrudService.readById(record);
-            // 14) 结果格式化：直接格式化查询结果，无需写回上下文
-            // Map<String, Object> result = resultFormatter.format(entity, fields, fetchedData, context);
-            // 15) 日志记录：当前类 logProcess
-            // processLogger.log(context);
+            
+            // 8) 日志记录：当前类 logProcess
+            semanticProcessLogger.log(record);
             return result;
         } catch (Exception e) {
             log.error("创建数据失败。tableName={}, traceId={}", tableName, traceId, e);

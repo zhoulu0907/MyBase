@@ -80,7 +80,7 @@ public class RuntimeDataServiceCreateDataTest {
                 log.info("\n实体ID: {}", entityId);
                 log.info("实体名称: {}", entity.getDisplayName());
                 log.info("表名: {}", entity.getTableName());
-                log.info("应用ID: {}", entity.getAppId());
+                log.info("应用ID: {}", entity.getApplicationId());
 
                 // 查询该实体的字段
                 List<MetadataEntityFieldDO> fields = metadataEntityFieldCoreService.getEntityFieldListByEntityId(entityId);
