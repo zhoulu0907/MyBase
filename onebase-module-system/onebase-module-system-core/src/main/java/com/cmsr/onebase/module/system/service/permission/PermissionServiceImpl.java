@@ -64,22 +64,35 @@ import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
 /**
  * 权限 Service 实现类
  */
-@Service @Slf4j public class PermissionServiceImpl implements PermissionService {
+@Service
+@Slf4j
+public class PermissionServiceImpl implements PermissionService {
 
-    @Resource private RoleService roleService;
-    @Resource private MenuService menuService;
-    @Resource private DeptService deptService;
-    @Resource @Lazy private UserService userService;
-    @Resource private TenantPackageService tenantPackageService;
-    @Resource @Lazy // 延迟，避免循环依赖报错
+    @Resource
+    private RoleService roleService;
+    @Resource
+    private MenuService menuService;
+    @Resource
+    private DeptService deptService;
+    @Resource
+    @Lazy
+    private UserService userService;
+    @Resource
+    private TenantPackageService tenantPackageService;
+    @Resource
+    @Lazy // 延迟，避免循环依赖报错
     private TenantService tenantService;
 
-    @Resource private PermissionService permissionService;
+    @Resource
+    private PermissionService permissionService;
 
-    @Resource private UserRoleDataRepository userRoleDataRepository;
-    @Resource private RoleMenuDataRepository roleMenuDataRepository;
+    @Resource
+    private UserRoleDataRepository userRoleDataRepository;
+    @Resource
+    private RoleMenuDataRepository roleMenuDataRepository;
 
-    @Override public boolean isPlatformSuperAdmin(Long userId) {
+    @Override
+    public boolean isPlatformSuperAdmin(Long userId) {
         // 获得当前登录的角色。如果为空，说明没有权限
         List<RoleDO> roles = getEnableUserRoleListByUserIdFromCache(userId);
         if (CollUtil.isEmpty(roles)) {
@@ -88,7 +101,8 @@ import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
         return roleService.hasAnySuperOrTenantAdmin(convertSet(roles, RoleDO::getId));
     }
 
-    @Override public boolean hasAnyPermissions(Long userId, String... permissions) {
+    @Override
+    public boolean hasAnyPermissions(Long userId, String... permissions) {
         // 如果为空，说明已经有权限
         if (ArrayUtil.isEmpty(permissions)) {
             return true;
@@ -188,7 +202,8 @@ import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
         return false;
     }
 
-    @Override public boolean hasAnyRoles(Long userId, String... roles) {
+    @Override
+    public boolean hasAnyRoles(Long userId, String... roles) {
         // 如果为空，说明已经有权限
         if (ArrayUtil.isEmpty(roles)) {
             return true;
@@ -207,9 +222,10 @@ import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
 
     // ========== 角色-菜单的相关方法  ==========
 
-    @Override @Caching(evict = {@CacheEvict(value = RedisKeyConstants.MENU_ROLE_ID_LIST, allEntries = true),
-        @CacheEvict(value = RedisKeyConstants.PERMISSION_MENU_ID_LIST, allEntries = true)
-        // allEntries 清空所有缓存，主要一次更新涉及到的 menuIds 较多，反倒批量会更快
+    @Override
+    @Caching(evict = {@CacheEvict(value = RedisKeyConstants.MENU_ROLE_ID_LIST, allEntries = true),
+            @CacheEvict(value = RedisKeyConstants.PERMISSION_MENU_ID_LIST, allEntries = true)
+            // allEntries 清空所有缓存，主要一次更新涉及到的 menuIds 较多，反倒批量会更快
     })
     @LogRecord(type = SYSTEM_PERMISSION_TYPE, subType = SYSTEM_PERMISSION_ASSIGN_ROLE_MENU_SUB_TYPE, bizNo = "{{#role.id}}", success = SYSTEM_PERMISSION_ASSIGN_ROLE_MENU_SUCCESS)
     public void assignRoleMenu(Long roleId, Set<Long> menuIds) {
@@ -243,24 +259,28 @@ import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
         LogRecordContext.putVariable("menuNames", menuNames.collect(Collectors.joining(",")));
     }
 
-    @Override @Transactional(rollbackFor = Exception.class)
+    @Override
+    @Transactional(rollbackFor = Exception.class)
     @Caching(evict = {@CacheEvict(value = RedisKeyConstants.MENU_ROLE_ID_LIST, allEntries = true),
-        // allEntries 清空所有缓存，此处无法方便获得 roleId 对应的 menu 缓存们
-        @CacheEvict(value = RedisKeyConstants.USER_ROLE_ID_LIST, allEntries = true)
-        // allEntries 清空所有缓存，此处无法方便获得 roleId 对应的 user 缓存们
-    }) public void processRoleDeleted(Long roleId) {
+            // allEntries 清空所有缓存，此处无法方便获得 roleId 对应的 menu 缓存们
+            @CacheEvict(value = RedisKeyConstants.USER_ROLE_ID_LIST, allEntries = true)
+            // allEntries 清空所有缓存，此处无法方便获得 roleId 对应的 user 缓存们
+    })
+    public void processRoleDeleted(Long roleId) {
         // 标记删除 UserRole
         userRoleDataRepository.deleteByRoleId(roleId);
         // 标记删除 RoleMenu
         roleMenuDataRepository.deleteByRoleId(roleId);
     }
 
-    @Override @CacheEvict(value = RedisKeyConstants.MENU_ROLE_ID_LIST, key = "#menuId")
+    @Override
+    @CacheEvict(value = RedisKeyConstants.MENU_ROLE_ID_LIST, key = "#menuId")
     public void processMenuDeleted(Long menuId) {
         roleMenuDataRepository.deleteByMenuId(menuId);
     }
 
-    @Override public Set<Long> getRoleMenuListByRoleId(Collection<Long> roleIds) {
+    @Override
+    public Set<Long> getRoleMenuListByRoleId(Collection<Long> roleIds) {
         if (CollUtil.isEmpty(roleIds)) {
             // 没有任何角色的用户，返回系统默认的基础权限
             Integer userType = SecurityFrameworkUtils.getLoginUserType();
@@ -295,35 +315,39 @@ import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
         return convertSet(roleMenuDataRepository.findListByRoleIds(roleIds), RoleMenuDO::getMenuId);
     }
 
-    @Override public Set<Long> getAllCorpActiveMenuIds() {
+    @Override
+    public Set<Long> getAllCorpActiveMenuIds() {
         // 获取所有权限
         List<MenuDO> menuList = menuService.getAllEnableMenuList();
         // 过滤出 tenantAllPermissions = tenant、app开头的菜单项
         Set<Long> tenantAllPermissions = menuList.stream()
-            .filter(menu -> menu.getPermission() != null && menu.getPermission().startsWith(MenuConstants.MENU_CORP))
-            .map(MenuDO::getId).collect(Collectors.toSet());
+                .filter(menu -> menu.getPermission() != null && menu.getPermission().startsWith(MenuConstants.MENU_CORP))
+                .map(MenuDO::getId).collect(Collectors.toSet());
         return tenantAllPermissions;
     }
 
-    @Override public Set<Long> getAllValidActiveMenuIds() {
+    @Override
+    public Set<Long> getAllValidActiveMenuIds() {
         // 获取所有权限
         List<MenuDO> menuList = menuService.getAllEnableMenuList();
         // 过滤出 tenantAllPermissions = tenant、app开头的菜单项
         Set<Long> tenantAllPermissions = menuList.stream().filter(
-            menu -> menu.getPermission() != null && (menu.getPermission().startsWith(MenuConstants.MENU_TENANT)
-                || menu.getPermission().startsWith(MenuConstants.MENU_CORP) || menu.getPermission()
-                .startsWith(MenuConstants.MENU_SYSTEM))).map(MenuDO::getId).collect(Collectors.toSet());
+                menu -> menu.getPermission() != null && (menu.getPermission().startsWith(MenuConstants.MENU_TENANT)
+                        || menu.getPermission().startsWith(MenuConstants.MENU_CORP) || menu.getPermission()
+                        .startsWith(MenuConstants.MENU_SYSTEM))).map(MenuDO::getId).collect(Collectors.toSet());
         return tenantAllPermissions;
     }
 
-    @Override @Cacheable(value = RedisKeyConstants.MENU_ROLE_ID_LIST, key = "#menuId")
+    @Override
+    @Cacheable(value = RedisKeyConstants.MENU_ROLE_ID_LIST, key = "#menuId")
     public Set<Long> getMenuRoleIdListByMenuIdFromCache(Long menuId) {
         return convertSet(roleMenuDataRepository.findListByMenuId(menuId), RoleMenuDO::getRoleId);
     }
 
     // ========== 用户-角色的相关方法  ==========
 
-    @Override @CacheEvict(value = RedisKeyConstants.USER_ROLE_ID_LIST, key = "#userId")
+    @Override
+    @CacheEvict(value = RedisKeyConstants.USER_ROLE_ID_LIST, key = "#userId")
     @LogRecord(type = SYSTEM_PERMISSION_TYPE, subType = SYSTEM_PERMISSION_ASSIGN_USER_ROLES_SUB_TYPE, bizNo = "{{#user.id}}", success = SYSTEM_PERMISSION_ASSIGN_USER_ROLES_SUCCESS)
     public void assignUserRoles(Long userId, Set<Long> roleIds) {
         AdminUserDO user = userService.getUser(userId);
@@ -336,12 +360,12 @@ import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
         // 执行新增和删除。对于已经授权的角色，不用做任何处理
         if (!CollUtil.isEmpty(createRoleIds)) {
             userRoleDataRepository.insertBatch(
-                com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertList(createRoleIds, roleId -> {
-                UserRoleDO entity = new UserRoleDO();
-                entity.setUserId(userId);
-                entity.setRoleId(roleId);
-                return entity;
-            }));
+                    com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertList(createRoleIds, roleId -> {
+                        UserRoleDO entity = new UserRoleDO();
+                        entity.setUserId(userId);
+                        entity.setRoleId(roleId);
+                        return entity;
+                    }));
         }
         if (!CollUtil.isEmpty(deleteRoleIds)) {
             userRoleDataRepository.deleteByUserIdAndRoleIds(userId, deleteRoleIds);
@@ -355,24 +379,28 @@ import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
         LogRecordContext.putVariable("loginUser", loginUser);
         LogRecordContext.putVariable("user", user);
         LogRecordContext.putVariable("roleNames",
-            roleList.stream().map(RoleDO::getName).collect(Collectors.joining(",")));
+                roleList.stream().map(RoleDO::getName).collect(Collectors.joining(",")));
     }
 
-    @Override @CacheEvict(value = RedisKeyConstants.USER_ROLE_ID_LIST, key = "#userId")
+    @Override
+    @CacheEvict(value = RedisKeyConstants.USER_ROLE_ID_LIST, key = "#userId")
     public void processUserDeleted(Long userId) {
         userRoleDataRepository.deleteByUserId(userId);
     }
 
-    @Override public Set<Long> getRoleIdsListByUserId(Long userId) {
+    @Override
+    public Set<Long> getRoleIdsListByUserId(Long userId) {
         return convertSet(userRoleDataRepository.findListByUserId(userId), UserRoleDO::getRoleId);
     }
 
-    @Override @Cacheable(value = RedisKeyConstants.USER_ROLE_ID_LIST, key = "#userId")
+    @Override
+    @Cacheable(value = RedisKeyConstants.USER_ROLE_ID_LIST, key = "#userId")
     public Set<Long> getUserRoleIdListByUserIdFromCache(Long userId) {
         return getRoleIdsListByUserId(userId);
     }
 
-    @Override public Set<Long> getUserIdsListByRoleIds(Collection<Long> roleIds) {
+    @Override
+    public Set<Long> getUserIdsListByRoleIds(Collection<Long> roleIds) {
         return convertSet(userRoleDataRepository.findListByRoleIds(roleIds), UserRoleDO::getUserId);
     }
 
@@ -382,7 +410,8 @@ import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
      * @param userId 用户编号
      * @return 用户拥有的角色
      */
-    @VisibleForTesting List<RoleDO> getEnableUserRoleListByUserIdFromCache(Long userId) {
+    @VisibleForTesting
+    List<RoleDO> getEnableUserRoleListByUserIdFromCache(Long userId) {
         // 获得用户拥有的角色编号
         Set<Long> roleIds = getSelf().getUserRoleIdListByUserIdFromCache(userId);
         // 获得角色数组，并移除被禁用的
@@ -407,7 +436,8 @@ import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
         LogRecordContext.putVariable("dataScopeDeptIds", dataScopeDeptIds);
     }
 
-    @Override public DeptDataPermissionRespDTO getDeptDataPermission(Long userId) {
+    @Override
+    public DeptDataPermissionRespDTO getDeptDataPermission(Long userId) {
         // 获得用户的角色
         List<RoleDO> roles = getEnableUserRoleListByUserIdFromCache(userId);
 
@@ -489,11 +519,13 @@ import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
         LogRecordContext.putVariable("loginUser", loginUser);
         LogRecordContext.putVariable("role", role);
         LogRecordContext.putVariable("userNames",
-            userList.stream().map(AdminUserDO::getNickname).collect(Collectors.joining(",")));
+                userList.stream().map(AdminUserDO::getNickname).collect(Collectors.joining(",")));
         return CollUtil.isEmpty(insertedList) ? 0 : insertedList.size();
     }
 
-    @Override @Transactional(rollbackFor = Exception.class) @TenantIgnore
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    @TenantIgnore
     @LogRecord(type = SYSTEM_PERMISSION_TYPE, subType = SYSTEM_PERMISSION_DELETE_ROLE_USERS_SUB_TYPE, bizNo = "{{#role.id}}", success = SYSTEM_PERMISSION_DELETE_ROLE_USERS__SUCCESS)
     public long deleteRoleUsers(Long roleId, Set<Long> userIds) {
         // 参数校验
@@ -512,14 +544,15 @@ import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
         LogRecordContext.putVariable("loginUser", loginUser);
         LogRecordContext.putVariable("role", role);
         LogRecordContext.putVariable("userNames",
-            userList.stream().map(AdminUserDO::getNickname).collect(Collectors.joining(",")));
+                userList.stream().map(AdminUserDO::getNickname).collect(Collectors.joining(",")));
         // 删除指定角色下的指定用户关系
         return deleted;
     }
 
-    @Override public UserRoleDO getUserRoleByUserAndRoleId(Long userId, Long roleId) {
+    @Override
+    public UserRoleDO getUserRoleByUserAndRoleId(Long userId, Long roleId) {
         return userRoleDataRepository.findOne(
-            new DefaultConfigStore().eq(UserRoleDO.USER_ID, userId).eq(UserRoleDO.ROLE_ID, roleId));
+                new DefaultConfigStore().eq(UserRoleDO.USER_ID, userId).eq(UserRoleDO.ROLE_ID, roleId));
     }
 
     @Override
@@ -546,12 +579,13 @@ import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
         LogRecordContext.putVariable("loginUser", loginUser);
         LogRecordContext.putVariable("role", role);
         LogRecordContext.putVariable("menuNames",
-            allActiveMenuList.stream().map(MenuDO::getName).collect(Collectors.joining(",")));
+                allActiveMenuList.stream().map(MenuDO::getName).collect(Collectors.joining(",")));
 
         return CollUtil.isEmpty(insertedList) ? 0 : insertedList.size();
     }
 
-    @Override @Transactional(rollbackFor = Exception.class)
+    @Override
+    @Transactional(rollbackFor = Exception.class)
     @LogRecord(type = SYSTEM_PERMISSION_TYPE, subType = SYSTEM_PERMISSION_DELETE_ROLE_MENUS_SUB_TYPE, bizNo = "{{#roleId}}", success = SYSTEM_PERMISSION_DELETE_ROLE_MENUS_SUCCESS)
     public long deleteRoleMenus(Long roleId, Set<Long> menuIds) {
         // 参数校验
@@ -570,11 +604,12 @@ import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
         LogRecordContext.putVariable("loginUser", loginUser);
         LogRecordContext.putVariable("role", role);
         LogRecordContext.putVariable("menuNames",
-            allActiveMenuList.stream().map(MenuDO::getName).collect(Collectors.joining(",")));
+                allActiveMenuList.stream().map(MenuDO::getName).collect(Collectors.joining(",")));
         return deleted;
     }
 
-    @Override public AuthPermissionInfoRespVO getPermissionInfo(String code) {
+    @Override
+    public AuthPermissionInfoRespVO getPermissionInfo(String code) {
         // 1.1 获得用户信息
         AdminUserDO user = userService.getUser(getLoginUserId());
         if (user == null) {
@@ -582,9 +617,6 @@ import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
         }
         // 1.2 获得角色列表
         Set<Long> roleIds = permissionService.getRoleIdsListByUserId(getLoginUserId());
-        if (CollUtil.isEmpty(roleIds)) {
-           // return AuthConvert.INSTANCE.convert(user, Collections.emptyList(), Collections.emptyList(), code);
-        }
         List<RoleDO> roles = roleService.getRoleList(roleIds);
         roles.removeIf(role -> !CommonStatusEnum.ENABLE.getStatus().equals(role.getStatus())); // 移除禁用的角色
 
@@ -597,7 +629,7 @@ import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
         if (CommonPublishModelEnum.InnerModel.getValue().equals(tenantDO.getPublishModel())) {
             // 排除企业权限
             menuList.removeIf(menu -> menu.getPermission() != null && menu.getPermission()
-                .startsWith(MenuConstants.MENU_TENANT_CORP));
+                    .startsWith(MenuConstants.MENU_TENANT_CORP));
         }
 
         return AuthConvert.INSTANCE.convert(user, roles, menuList, code);
@@ -618,7 +650,8 @@ import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
      * @param menuIds 菜单ID集合
      * @return 菜单详细信息列表
      */
-    @Override public List<PermissionMenuRespVO> getMenuDetailListByIds(Set<Long> menuIds) {
+    @Override
+    public List<PermissionMenuRespVO> getMenuDetailListByIds(Set<Long> menuIds) {
         if (CollUtil.isEmpty(menuIds)) {
             return Collections.emptyList();
         }
