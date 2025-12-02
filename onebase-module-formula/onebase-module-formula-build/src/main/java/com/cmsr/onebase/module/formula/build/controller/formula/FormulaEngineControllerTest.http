@@ -72,7 +72,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "TEXT(1234.5,'$#,##0.00')" }
+{ "formula": "TEXT(2025-11-19,'D')" }
 
 ### UPPER
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -120,7 +120,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "RMBCAP(123.45)" }
+{ "formula": "RMBCAP(-1)" }
 
 ### UUID
 POST {{baseUrl}}/formula/engine/execute-formula

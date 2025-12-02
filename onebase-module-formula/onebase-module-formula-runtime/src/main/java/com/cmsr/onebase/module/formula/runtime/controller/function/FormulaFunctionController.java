@@ -93,4 +93,12 @@ public class FormulaFunctionController {
         return success(BeanUtils.toBean(list, FunctionSimpleRespVO.class));
     }
 
+    @GetMapping("/list-group-by-type")
+    @Operation(summary = "根据类型获取函数分组列表")
+    @PreAuthorize("@ss.hasPermission('formula:function:query')")
+    public CommonResult<List<FunctionGroupRespVo>> getFunctionListGroupByType(@Valid FunctionListReqVO reqVO) {
+        List<FunctionGroupRespVo> functionListGroupByType = functionService.getFunctionListGroupByType(reqVO);
+        return success(functionListGroupByType);
+    }
+
 }

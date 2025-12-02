@@ -4614,6 +4614,16 @@ function _typeof(o) {
       return number;
     }
     
+    // 检查输入是否包含非法字符
+    if (isNaN(number) || !isFinite(number)) {
+      return "输入包含非法字符!";
+    }
+    
+    // 检查金额是否超过限制 (小于1万亿)
+    if (Math.abs(number) >= 1000000000000) {
+      return "数额太大，转换金额上限小于1万亿!";
+    }
+    
     // 检查是否为负数
     var isNegative = number < 0;
     number = Math.abs(number);
@@ -4629,7 +4639,7 @@ function _typeof(o) {
     
     // 转换整数部分
     function convertInteger(num) {
-      if (num === 0) return "零";
+      if (num === 0) return "";
       
       var str = "";
       var zero = false;
@@ -4673,7 +4683,7 @@ function _typeof(o) {
     
     // 转换小数部分
     function convertDecimal(decimal) {
-      if (decimal === 0) return "整";
+      if (decimal === 0) return "";
       
       var str = "";
       var jiao = Math.floor(decimal / 10);
@@ -4697,23 +4707,33 @@ function _typeof(o) {
         result += "负";
       }
       
-      result += convertInteger(integerPart);
-      
-      // 添加元
-      if (integerPart > 0) {
-        result += "元";
-      }
-      
-      result += convertDecimal(decimalPart);
-      
-      // 如果没有小数部分，添加"整"
-      if (decimalPart === 0 && integerPart > 0) {
-        result += "整";
-      }
+      var integerStr = convertInteger(integerPart);
+      var decimalStr = convertDecimal(decimalPart);
       
       // 特殊情况：0
       if (integerPart === 0 && decimalPart === 0) {
-        result = "人民币零元整";
+        return "人民币零元整";
+      }
+      
+      // 整数部分处理
+      if (integerPart > 0) {
+        result += integerStr + "元";
+      }
+      
+      // 小数部分处理
+      if (decimalPart === 0) {
+        // 没有小数部分
+        if (integerPart > 0) {
+          result += "整";
+        }
+      } else {
+        // 有小数部分
+        result += decimalStr;
+      }
+      
+      // 特殊处理：只有小数部分的情况
+      if (integerPart === 0 && decimalPart > 0) {
+        result = "人民币" + decimalStr;
       }
       
       return result;
