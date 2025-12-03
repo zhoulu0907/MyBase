@@ -206,13 +206,13 @@ const DataPermissionModal = (props: IProps) => {
     if (added && added.includes(ALLDATA)) {
       form.setFieldsValue({
         scopeTags: [ALLDATA],
-        scopeFieldId: undefined,
+        scopeFieldUuid: undefined,
         scopeLevel: undefined,
         scopeValue: undefined,
         customCondition: false
       });
       initialFormValues.scopeLevel = undefined;
-      initialFormValues.scopeFieldId = undefined;
+      initialFormValues.scopeFieldUuid = undefined;
       setScopeType('');
       setSelectedMembers([]);
       setCustomChecked(false);
@@ -298,7 +298,7 @@ const DataPermissionModal = (props: IProps) => {
       tags.push(CUSTOMCONDITION);
       form.setFieldsValue({
         scopeTags: tags,
-        scopeFieldId: dataPermissionPerson[0].PersonId
+        scopeFieldUuid: dataPermissionPerson[0].PersonId
       });
       setScopeTags(tags);
     } else {
@@ -326,7 +326,7 @@ const DataPermissionModal = (props: IProps) => {
       const formValues = await form.getFieldsValue();
       // 如果开启自定义范围，先检查基础配置是否完整
       if (formValues.customCondition) {
-        if (!formValues.scopeFieldId || !formValues.scopeLevel) {
+        if (!formValues.scopeFieldUuid || !formValues.scopeLevel) {
           form.setFields({
             scopeTags: {
               error: { message: '自定义权限范围时请配置条件' }
@@ -405,7 +405,7 @@ const DataPermissionModal = (props: IProps) => {
                 </FormItem>
                 {customChecked && (
                   <div className={styles.selfRow}>
-                    <FormItem field="scopeFieldId" className={styles.scopeRoles}>
+                    <FormItem field="scopeFieldUuid" className={styles.scopeRoles}>
                       <Select
                         placeholder="请选择"
                         onChange={(value) => {
