@@ -32,4 +32,10 @@ public class FlowConnectorScriptDO extends BaseAppEntity {
     @Column(value = "output_parameter")
     private String outputParameter;
 
+    @Column(value = "input_schema")
+    private String inputSchema;
+
+    @Column(value = "output_schema")
+    private String outputSchema;
+
 }

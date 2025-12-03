@@ -52,7 +52,7 @@ public class ApplicationManager {
         applicationIdBooleanHolder.set(Boolean.TRUE);
     }
 
-    private static boolean isIgnoreApplicationCondition() {
+    public static boolean isIgnoreApplicationCondition() {
         return Boolean.TRUE.equals(applicationIdBooleanHolder.get());
     }
 
@@ -93,7 +93,7 @@ public class ApplicationManager {
         versionTagBooleanHolder.set(Boolean.TRUE);
     }
 
-    private static boolean isIgnoreVersionTagCondition() {
+    public static boolean isIgnoreVersionTagCondition() {
         return Boolean.TRUE.equals(versionTagBooleanHolder.get());
     }
 

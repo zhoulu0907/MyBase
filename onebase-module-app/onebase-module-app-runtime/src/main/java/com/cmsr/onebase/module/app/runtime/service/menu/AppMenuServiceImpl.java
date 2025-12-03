@@ -75,7 +75,7 @@ public class AppMenuServiceImpl implements AppMenuService {
 
     @Override
     public List<MenuListRespVO> listApplicationMenu() {
-        Long userId = RTSecurityContext.getUserId();
+        Long userId = RTSecurityContext.getRequiredUserId();
         Long applicationId = ApplicationManager.getApplicationId();
         UserRoleDTO userRoleDTO = appAuthRoleProvider.findUserRoleByApplication(userId, applicationId);
         List<AppMenuDO> menuDOS;
@@ -125,7 +125,7 @@ public class AppMenuServiceImpl implements AppMenuService {
 
     @Override
     public MenuPermissionVO getMenuPermission(Long menuId) {
-        Long userId = RTSecurityContext.getUserId();
+        Long userId = RTSecurityContext.getRequiredUserId();
         Long applicationId = ApplicationManager.getApplicationId();
         MenuPermissionVO menuPermissionVO = new MenuPermissionVO();
         menuPermissionVO.setOperationPermission(appAuthSecurityApi.getMenuOperationPermission(userId, applicationId, menuId));

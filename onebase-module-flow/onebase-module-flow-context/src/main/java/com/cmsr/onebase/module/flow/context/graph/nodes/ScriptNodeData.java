@@ -25,4 +25,8 @@ public class ScriptNodeData extends NodeData implements Serializable {
 
     private String outputParameter;
 
+    private String inputSchema;
+
+    private String outputSchema;
+
 }

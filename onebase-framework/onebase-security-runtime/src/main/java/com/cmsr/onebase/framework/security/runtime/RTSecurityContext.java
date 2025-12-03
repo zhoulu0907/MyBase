@@ -2,6 +2,7 @@ package com.cmsr.onebase.framework.security.runtime;
 
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.common.security.dto.RuntimeLoginUser;
 import com.cmsr.onebase.framework.security.runtime.service.RTPermissionService;
 import com.cmsr.onebase.module.app.api.security.bo.DataPermission;
@@ -25,8 +26,16 @@ public class RTSecurityContext {
         return SecurityFrameworkUtils.getLoginUser();
     }
 
-    public static Long getUserId() {
-        return getLoginUser() == null ? null : getLoginUser().getId();
+    public static Long getRequiredUserId() {
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+        if (loginUser == null) {
+            throw new RuntimeException("用户未登录");
+        }
+        Long userId = loginUser.getId();
+        if (userId == null) {
+            throw new RuntimeException("用户未登录");
+        }
+        return userId;
     }
 
     public static boolean checkMenuEntity(Long menuId, String entityUuid) {
@@ -35,22 +44,19 @@ public class RTSecurityContext {
     }
 
     public static OperationPermission getMenuOperation(Long menuId) {
-        RuntimeLoginUser runtimeLoginUser = getLoginUser();
-        Long userId = runtimeLoginUser.getId();
+        Long userId = getRequiredUserId();
         Long applicationId = ApplicationManager.getApplicationId();
         return RTPermissionService.getInstance().getMenuOperation(userId, applicationId, menuId);
     }
 
     public static DataPermission getMenuDataPermission(Long menuId) {
-        RuntimeLoginUser runtimeLoginUser = getLoginUser();
-        Long userId = runtimeLoginUser.getId();
+        Long userId = getRequiredUserId();
         Long applicationId = ApplicationManager.getApplicationId();
         return RTPermissionService.getInstance().getMenuDataPermission(userId, applicationId, menuId);
     }
 
     public static FieldPermission getMenuFieldPermission(Long menuId) {
-        RuntimeLoginUser runtimeLoginUser = getLoginUser();
-        Long userId = runtimeLoginUser.getId();
+        Long userId = getRequiredUserId();
         Long applicationId = ApplicationManager.getApplicationId();
         return RTPermissionService.getInstance().getMenuFieldPermission(userId, applicationId, menuId);
     }

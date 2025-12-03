@@ -4,10 +4,7 @@ import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.orm.entity.BaseBizEntity;
 import com.mybatisflex.core.BaseMapper;
 import com.mybatisflex.core.paginate.Page;
-import com.mybatisflex.core.query.CPI;
-import com.mybatisflex.core.query.QueryCondition;
-import com.mybatisflex.core.query.QueryMethods;
-import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.core.query.*;
 import com.mybatisflex.core.util.CollectionUtil;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -20,13 +17,20 @@ import java.util.List;
 public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity> extends ServiceImpl<M, T> {
 
     protected QueryWrapper injectBizFilter(QueryWrapper queryWrapper) {
-        // TODO: add filters like applicationId, versionFlag
+        List<QueryTable> queryTables = CPI.getQueryTables(queryWrapper);
+        if (queryTables.size() > 1) {
+            log.warn("查询条件包含多个表，跳过条件注入");
+            return queryWrapper;
+        }
         Long applicationId = ApplicationManager.getApplicationId();
-//        Long applicationId = XXXXX;
-//        var versionStatus = 0,1,xxxxxxx;
-//        return queryWrapper
-//                .eq("version_flag", versionFlag);
-        log.debug("注入SQL查询条件");
+        Long versionTag = ApplicationManager.getVersionTag();
+        QueryTable table = queryTables.get(0);
+        queryWrapper = queryWrapper.and(
+                new QueryColumn(table, BaseBizEntity.APPLICATION_ID)
+                        .eq(applicationId).when(!ApplicationManager.isIgnoreApplicationCondition()));
+        queryWrapper = queryWrapper.and(
+                new QueryColumn(table, BaseBizEntity.VERSION_TAG)
+                        .eq(versionTag).when(!ApplicationManager.isIgnoreVersionTagCondition()));
         return queryWrapper;
     }
 

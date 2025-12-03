@@ -39,7 +39,6 @@ public class FormulaEngineController {
 
     @PostMapping("/debug-formula")
     @Operation(summary = "调试公式计算")
-    @PreAuthorize("@ss.hasPermission('formula:engine:execute')")
     public CommonResult<FormulaExecuteRespVO> debugFormula(@Valid @RequestBody FormulaExecuteReqVO reqVO) {
         long startTime = System.currentTimeMillis();
         log.info("debugFormula --> formula: {}" ,reqVO.getFormula());
@@ -57,7 +56,6 @@ public class FormulaEngineController {
 
     @PostMapping("/execute-formula")
     @Operation(summary = "执行公式计算")
-    @PreAuthorize("@ss.hasPermission('formula:engine:execute')")
     public CommonResult<FormulaExecuteRespDTO> executeFormula(@Valid @RequestBody FormulaExecuteReqDTO reqDTO) {
         long startTime = System.currentTimeMillis();
         log.info("executeFormula --> formula"+reqDTO.getFormula());
@@ -77,7 +75,6 @@ public class FormulaEngineController {
 
     @PostMapping("/validate")
     @Operation(summary = "验证公式语法")
-    @PreAuthorize("@ss.hasPermission('formula:engine:validate')")
     public CommonResult<Boolean> validateFormula(@Valid @RequestBody FormulaValidateReqVO reqVO) {
         boolean isValid = formulaEngineService.validateFormula(reqVO.getFormula());
 
