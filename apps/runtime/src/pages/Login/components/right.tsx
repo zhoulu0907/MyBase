@@ -1,6 +1,5 @@
 import { DynamicIcon } from '@/components/DynamicIcon';
 
-import { PUBLISH_MODULE } from '@/constants/permission';
 import { appInfoSignal } from '@/store/app';
 import { Button, Checkbox, Form, Input, Message, Space, Typography } from '@arco-design/web-react';
 import { IconLock, IconMobile, IconUser } from '@arco-design/web-react/icon';
@@ -8,6 +7,7 @@ import { runtimeGetApplication } from '@onebase/app';
 import {
   getHashQueryParam,
   getOrCreateDeviceInfo,
+  PUBLISH_MODULE,
   SliderCaptcha,
   TokenManager,
   type SliderCaptchaRef

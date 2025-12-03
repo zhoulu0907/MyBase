@@ -1,10 +1,10 @@
+import { listToTree } from '@/utils/tree';
 import { Button, Message, Modal, Table } from '@arco-design/web-react';
+import { PERMISSION_TYPES } from '@onebase/common';
+import type { Permission } from '@onebase/platform-center';
 import { configureRolePermissions, getConfiguredPermissions, removeRolePermission } from '@onebase/platform-center';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import PermissionConfigModal from './PermissionModal';
-import type { Permission } from '@onebase/platform-center';
-import { listToTree } from '@/utils/tree';
-import { PERMISSION_TYPES } from '@/constants/permission';
 
 interface PermissionListProps {
   selectedRoleId?: number;

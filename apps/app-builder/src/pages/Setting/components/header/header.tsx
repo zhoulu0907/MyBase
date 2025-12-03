@@ -2,10 +2,10 @@ import LogoSVG from '@/assets/images/ob_logo.svg';
 import UserProfileAvatar from '@/components/UserProfileAvatar';
 
 import { useI18n } from '@/hooks/useI18n';
-import { UserPermissionManager } from '@/utils/permission';
 import { logout } from '@/utils/session';
 import { Button, Dropdown, Layout, Menu, Typography } from '@arco-design/web-react';
 import { IconApps, IconExport } from '@arco-design/web-react/icon';
+import { UserPermissionManager } from '@onebase/common';
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styles from './header.module.less';

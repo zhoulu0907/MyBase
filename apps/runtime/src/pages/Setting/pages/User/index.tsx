@@ -1,8 +1,7 @@
 import PlaceholderPanel from '@/components/PlaceholderPanel';
-import { CORP_USER_QUERY } from '@/constants/permission';
-import { hasPermission } from '@/utils/permission';
 import { listToTree } from '@/utils/tree';
 import { Layout } from '@arco-design/web-react';
+import { CORP_USER_QUERY, hasPermission } from '@onebase/common';
 import { getCorpDeptList, getUserPageInCorp } from '@onebase/platform-center';
 import { useEffect, useState } from 'react';
 import DeptTreeCmp from './components/DeptTree';

@@ -1,8 +1,6 @@
 import DynamicIcon from '@/components/DynamicIcon';
 import PlaceholderPanel from '@/components/PlaceholderPanel';
 import StatusTag from '@/components/StatusTag';
-import { TENANT_INFO_PERMISSION as ACTIONS } from '@/constants/permission';
-import { hasPermission /* UserPermissionManager */ } from '@/utils/permission';
 import {
   Avatar,
   Button,
@@ -18,6 +16,7 @@ import {
   Typography
 } from '@arco-design/web-react';
 import { getApplicationSimple, type Application, type PageParam } from '@onebase/app';
+import { TENANT_INFO_PERMISSION as ACTIONS, hasPermission /* UserPermissionManager */ } from '@onebase/common';
 import type { CorpDetailResponse, DictData, PostSimpleRespVO, RoleSimpleRespVO } from '@onebase/platform-center';
 import { getCorpListApi, getDictDataByType, getLoginedUser } from '@onebase/platform-center';
 import { appIconMap } from '@onebase/ui-kit';
@@ -53,7 +52,7 @@ const ProfilePage: React.FC = () => {
   const [userInfo, setUserInfo] = useState<any>(null);
   const [appData, setAppData] = useState<Application[]>([]);
   const [corpData, setCorpData] = useState<CorpDetailResponse[]>([]);
-  const [industryDict, setTndustryDict] = useState<DictData[] | null>(null);
+  const [industryDict, setIndustryDict] = useState<DictData[] | null>(null);
 
   useEffect(() => {
     fetchUserInfo();
@@ -104,7 +103,7 @@ const ProfilePage: React.FC = () => {
   const fetchIndustryDict = async (id: string) => {
     try {
       const res = await getDictDataByType(id);
-      setTndustryDict(res);
+      setIndustryDict(res);
     } catch (error) {
       console.error('字典数据列表错误', error);
     }

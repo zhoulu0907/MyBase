@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react';
-import { Table, type TableColumnProps, Button, Tag, Radio, Space } from '@arco-design/web-react';
+import { Button, Radio, Space, Table, Tag, type TableColumnProps } from '@arco-design/web-react';
 import { IconPlusCircle } from '@arco-design/web-react/icon';
-import TableSearch from './TableSearch';
-import EditProxyModal from '../modal/editProxyForm';
 import { agentPage, agentRevoke } from '@onebase/app/src/services';
-import { UserPermissionManager } from '@/utils/permission';
+import { UserPermissionManager } from '@onebase/common';
 import dayjs from 'dayjs';
+import { useEffect, useState } from 'react';
+import EditProxyModal from '../modal/editProxyForm';
 import '../style/tcPage.less';
+import TableSearch from './TableSearch';
 
 enum AgentStatus {
   'active' = '代理中',

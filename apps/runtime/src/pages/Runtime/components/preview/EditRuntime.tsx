@@ -130,7 +130,7 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({ form, isAdd, submitLoading, o
                       useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id]
                     }
                     runtime={true}
-                    showFromPageData={() => {}}
+                    showFromPageData={() => { }}
                     cpState={cpStates[cp.id]}
                   />
                 </div>

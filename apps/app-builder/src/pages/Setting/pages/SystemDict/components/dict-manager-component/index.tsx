@@ -2,39 +2,36 @@
  * 抽取字典管理模块为独立组件
  */
 import InfoPanel from '@/components/InfoPanel';
+import { PermissionButton as Button } from '@/components/PermissionControl';
+import StatusTag, { StatusLabelEnum } from '@/components/StatusTag';
+import BatchConfigModal from '@/pages/Setting/pages/SystemDict/components/batch-config-modal';
+import DictDataModal from '@/pages/Setting/pages/SystemDict/components/dict-data-modal';
 import DictionaryTable from '@/pages/Setting/pages/SystemDict/components/dict-data-table';
 import DictList from '@/pages/Setting/pages/SystemDict/components/dict-list';
+import DictModal from '@/pages/Setting/pages/SystemDict/components/dict-modal';
+import { useAppStore } from '@/store/store_app';
 import { Divider, Empty, Layout, Message, Modal, Space, Tabs } from '@arco-design/web-react';
+import { TENANT_DICT_PERMISSION as ACTIONS, TokenManager } from '@onebase/common';
 import {
-  StatusEnum,
-  type DictData,
-  type DictItem,
-  type PageParam,
-  type BatchConfigDictDataParams,
-  type PageResult
-} from '@onebase/platform-center';
-import { TokenManager } from '@onebase/common';
-import {
+  batchConfigDictData,
   createDict,
   createDictData,
   deleteDict,
   deleteDictData,
   getAllDictList,
   getDictDataListByPage,
+  StatusEnum,
   updateDict,
   updateDictData,
   updateDictDataStatus,
-  batchConfigDictData
+  type BatchConfigDictDataParams,
+  type DictData,
+  type DictItem,
+  type PageParam,
+  type PageResult
 } from '@onebase/platform-center';
 import { debounce } from 'lodash-es';
 import { useEffect, useState } from 'react';
-import DictDataModal from '@/pages/Setting/pages/SystemDict/components/dict-data-modal';
-import DictModal from '@/pages/Setting/pages/SystemDict/components/dict-modal';
-import BatchConfigModal from '@/pages/Setting/pages/SystemDict/components/batch-config-modal';
-import { TENANT_DICT_PERMISSION as ACTIONS } from '@/constants/permission';
-import { PermissionButton as Button } from '@/components/PermissionControl';
-import StatusTag, { StatusLabelEnum } from '@/components/StatusTag';
-import { useAppStore } from '@/store/store_app';
 import styles from '../../index.module.less';
 
 const Sider = Layout.Sider;
@@ -600,11 +597,11 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
           initialValues={
             editDict
               ? {
-                type: editDict.type,
-                name: editDict.name,
-                remark: editDict.remark,
-                status: editDict.status
-              }
+                  type: editDict.type,
+                  name: editDict.name,
+                  remark: editDict.remark,
+                  status: editDict.status
+                }
               : undefined
           }
           onOk={handleDictModalOk}
@@ -621,13 +618,13 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
         initialValues={
           editItem
             ? {
-              label: editItem.label,
-              value: editItem.value,
-              remark: editItem.remark,
-              sort: editItem.sort,
-              status: editItem.status,
-              dictType: editItem.dictType
-            }
+                label: editItem.label,
+                value: editItem.value,
+                remark: editItem.remark,
+                sort: editItem.sort,
+                status: editItem.status,
+                dictType: editItem.dictType
+              }
             : undefined
         }
         onOk={handleDictDataModalOk}

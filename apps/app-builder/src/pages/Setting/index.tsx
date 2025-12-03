@@ -6,7 +6,6 @@ import AppHeader from './components/header';
 import AppSider from './components/sider';
 
 import ApplicationPage from './pages/Application';
-import EnterpriseInfo from './pages/EnterpriseInfo';
 import OrganizationPage from './pages/Organization';
 import RolePage from './pages/Role';
 import SpaceInfo from './pages/SpaceInfo';
@@ -51,7 +50,6 @@ const SettingPage: React.FC = () => {
                 <Route path="system-dict" element={<SystemDictPage />} />
                 <Route path="security" element={<SecurityPage />} />
                 <Route path="spaceInfo" element={<SpaceInfo />} />
-                <Route path="enterpriseInfo" element={<EnterpriseInfo />} />
                 <Route path="profile" element={<ProfilePage />} />
                 <Route path="enterprise" element={<BusinessPage />}>
                   <Route path="create-enterprise" element={<CreateBusinessPage />} />
