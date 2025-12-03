@@ -1,4 +1,5 @@
 import { getDictDataListByType, getDictDetail } from '@onebase/platform-center';
+import classNames from 'classnames';
 import {
   EDITOR_TYPES,
   FORM_COMPONENT_TYPES,
@@ -27,7 +28,6 @@ import {
   DEFAULT_OPTIONS_TYPE,
   type GridItem
 } from '@onebase/ui-kit';
-
 import EmptyIcon from '@/assets/images/empty.svg';
 import MobileIcon from '@/assets/images/mobile_icon.svg';
 import MobileActiveIcon from '@/assets/images/mobile_icon_active.svg';
@@ -40,6 +40,8 @@ import PrevActiveIcon from '@/assets/images/prev_icon_active.svg';
 import CompDeleteIcon from '@/assets/images/app_delete.svg';
 import CompCopyIcon from '@/assets/images/copy_comp_icon.svg';
 import CompShowIcon from '@/assets/images/eye_off_icon.svg';
+import { EditMode } from '@onebase/common';
+import { currentEditorSignal } from '@onebase/ui-kit/src/signals/current_editor';
 
 import { Divider, Form } from '@arco-design/web-react';
 import { ENTITY_TYPE, ENTITY_TYPE_VALUE, type AppEntityField } from '@onebase/app';
@@ -93,6 +95,13 @@ export default function EditorWorkspace() {
   } = usePageEditorSignal();
 
   const [pageMode, setPageMode] = useState<string>('pc');
+  const { editMode, setEditMode } = currentEditorSignal;
+  
+  useEffect(() => {
+    if (editMode.value === EditMode.MOBILE) {
+      document.documentElement.style.fontSize = '48px';
+    }
+  }, [editMode.value]);
 
   useEffect(() => {
     if (components.length === 0) {
@@ -273,15 +282,15 @@ export default function EditorWorkspace() {
           </div>
           <Divider type="vertical" />
           <div className={styles.pageModeCtrl}>
-            {pageMode === 'pc' && (
+            {editMode.value !== EditMode.MOBILE && (
               <>
                 <img className={styles.pageModeIcon} src={PCActiveIcon} />
-                <img className={styles.pageModeIcon} src={MobileIcon} onClick={() => setPageMode('mobile')} />
+                <img className={styles.pageModeIcon} src={MobileIcon} onClick={() => setEditMode(EditMode.MOBILE)} />
               </>
             )}
-            {pageMode === 'mobile' && (
+            {editMode.value === EditMode.MOBILE && (
               <>
-                <img className={styles.pageModeIcon} src={PCIcon} onClick={() => setPageMode('pc')} />
+                <img className={styles.pageModeIcon} src={PCIcon} onClick={() => setEditMode(EditMode.PC)} />
                 <img className={styles.pageModeIcon} src={MobileActiveIcon} />
               </>
             )}

@@ -32,7 +32,7 @@ const DataRules: React.FC<DataRulesProps> = ({ entity, activeTab }) => {
         entityId: entity.id,
         pageNo: page.pageNo,
         pageSize: page.pageSize,
-        appId: curAppId
+        applicationId: curAppId
       };
       const response = await ruleService.getEntityRules(params);
       console.log('getEntityRules', response);

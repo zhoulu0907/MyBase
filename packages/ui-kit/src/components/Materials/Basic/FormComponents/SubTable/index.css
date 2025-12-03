@@ -9,6 +9,9 @@
 }
 
 .XSubTable .XSubTable-content {
+  background-size: 100% 32px;
+  background-position: 0 22px;
+  background-repeat: no-repeat;
   min-height: 150px;
   width: 100%;
   box-sizing: border-box;
@@ -16,12 +19,22 @@
   overflow-x: auto;
   overflow-y: visible;
   padding-top: 18px;
+  flex: 1;
 }
 
 .componentItem {
   overflow: visible;
   flex: 1 0 auto;
   cursor: move;
+  box-sizing: border-box;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  transition: border-color 0.2s ease;
+  position: relative;
+  min-width: 50px;
+}
+.componentItem2 {
+  overflow: visible;
   box-sizing: border-box;
   border: 1px solid transparent;
   border-radius: 8px;

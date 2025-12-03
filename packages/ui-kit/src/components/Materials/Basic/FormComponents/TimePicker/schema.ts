@@ -228,7 +228,8 @@ const XTimePicker: XInputTimePickerSchema = {
     dataField: [],
     defaultValueConfig: {
       type: DEFAULT_VALUE_TYPES.CUSTOM,
-      customValue: ''
+      customValue: '',
+      formulaValue: ''
     },
     dateType: TIME_VALUES[TIME_OPTIONS.SECOND],
     use24Hours: true,

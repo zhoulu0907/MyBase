@@ -2,22 +2,22 @@
 
 .edit-field-drawer {
   .drawer-style();
-  .arco-drawer-header {
+  .pc-drawer-header {
     border-bottom: 1px solid #e5e5e5;
     padding: 16px 24px;
 
-    .arco-drawer-title {
+    .pc-drawer-title {
       font-size: 16px;
       font-weight: 500;
       color: #1d2129;
     }
   }
 
-  .arco-drawer-body {
+  .pc-drawer-body {
     padding: 24px;
   }
 
-  :global(.arco-drawer-footer) {
+  :global(.pc-drawer-footer) {
     .form-footer-style();
     .flex-between();
   }
@@ -36,22 +36,22 @@
     .form-section-title();
   }
 
-  .arco-form-item {
+  .pc-form-item {
     margin-bottom: 16px;
 
-    .arco-form-item-label > label {
+    .pc-form-item-label > label {
       color: rgb(29, 33, 41) !important;
     }
 
-    .arco-form-item-control {
-      .arco-input,
-      .arco-textarea,
-      .arco-select {
+    .pc-form-item-control {
+      .pc-input,
+      .pc-textarea,
+      .pc-select {
         border-radius: 4px;
       }
 
-      .arco-checkbox {
-        .arco-checkbox-label {
+      .pc-checkbox {
+        .pc-checkbox-label {
           color: #4e5969;
         }
       }
@@ -104,10 +104,10 @@
 }
 
 // 表单验证样式
-.arco-form-item-error {
-  .arco-input,
-  .arco-textarea,
-  .arco-select {
+.pc-form-item-error {
+  .pc-input,
+  .pc-textarea,
+  .pc-select {
     border-color: #f53f3f;
 
     &:focus {
@@ -117,16 +117,16 @@
   }
 }
 
-.arco-form-item-error-tip {
+.pc-form-item-error-tip {
   color: #f53f3f;
   font-size: 12px;
   margin-top: 4px;
 }
 
 // 禁用状态样式
-.arco-input[disabled],
-.arco-textarea[disabled],
-.arco-select[disabled] {
+.pc-input[disabled],
+.pc-textarea[disabled],
+.pc-select[disabled] {
   background-color: #f5f5f5;
   color: #8c8c8c;
   cursor: not-allowed;

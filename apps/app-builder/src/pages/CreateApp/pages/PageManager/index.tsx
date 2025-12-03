@@ -6,7 +6,6 @@ import PageManagerGuide from '@/assets/images/page_manaager_guide.svg';
 import { useI18n } from '@/hooks/useI18n';
 import PreviewContainer from '@/pages/Runtime/components/preview';
 import { useAppStore } from '@/store/store_app';
-import { useBasicEditorStore } from '@/store/store_editor';
 import { addParentIdToChildren } from '@/utils/menu';
 import { Button, Dropdown, Form, Input, Layout, Menu, Message, Tree } from '@arco-design/web-react';
 import { IconDown, IconEmpty, IconPlus, IconSearch } from '@arco-design/web-react/icon';
@@ -49,6 +48,7 @@ import RenameModal from './components/Modals/RenameModal';
 import MyMenuItem from './components/MyMenuItem';
 import TaskCenterPage from './components/TaskCenter/TaskCenterPage';
 import TaskCenterSide from './components/TaskCenter/taskTreeSide';
+import { currentEditorSignal } from '@onebase/ui-kit/src/signals/current_editor';
 import styles from './index.module.less';
 
 const TreeNode = Tree.Node;
@@ -118,7 +118,7 @@ const PageManagerPage: FC = () => {
   const initTreeItemWidth = 146;
   const cutTreeItemWidth = 25;
 
-  const { clearIsEditMode } = useBasicEditorStore();
+  const { clearEditMode } = currentEditorSignal;
 
   const findFirstPage: any = (nodes: ApplicationMenu[]) =>
     nodes.reduce((found, node) => {
@@ -137,7 +137,7 @@ const PageManagerPage: FC = () => {
       getMenuList();
       getEntityList();
     }
-    clearIsEditMode();
+    clearEditMode();
   }, [curAppId]);
 
   useEffect(() => {

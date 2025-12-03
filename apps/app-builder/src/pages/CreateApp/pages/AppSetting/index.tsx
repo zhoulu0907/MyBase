@@ -34,6 +34,7 @@ interface BreadcrumbItemType {
 
 const AppSettingPage: FC = () => {
   const [form] = Form.useForm();
+  const [navigatorForm] = Form.useForm();
   const { curAppId, curAppInfo, setCurAppInfo } = useAppStore();
   const menuData = [
     { title: '基础设置', icon: baseSettingSVG, key: 'baseSetting' },
@@ -43,6 +44,7 @@ const AppSettingPage: FC = () => {
   ];
 
   const [appData, setAppData] = useState<Application>();
+  const [navigatorData, setNavigatorData] = useState<any>();
   const [activeTab, setActiveTab] = useState('baseSetting');
   const [collapsed, setCollapsed] = useState<boolean>(false);
   const [saveLoading, setSaveLoading] = useState<boolean>(false); // 保存按钮状态
@@ -64,6 +66,7 @@ const AppSettingPage: FC = () => {
   useEffect(() => {
     if (curAppId) {
       getApplicationData();
+      getNavigatorData();
     }
   }, [curAppId]);
 
@@ -75,15 +78,21 @@ const AppSettingPage: FC = () => {
     setAppData(res);
   };
 
+  // todo 接口获取数据
+  const getNavigatorData = async () => {
+    setNavigatorData({});
+  };
+
   const handleSave = () => {
     switch (activeTab) {
       case 'baseSetting':
         handleSaveApp();
         break;
-
       case 'appPermission':
         break;
-
+      case 'navigatorSetting':
+        handleSaveNavigator()
+        break;
       default:
         break;
     }
@@ -125,6 +134,14 @@ const AppSettingPage: FC = () => {
     });
   };
 
+  // 导航设置
+  const handleSaveNavigator = async ()=>{
+    await navigatorForm.validate();
+    const param = navigatorForm.getFieldsValue();
+    console.log('param',param)
+    // todo 接口保存
+  }
+
   return (
     <div className={styles.appSettingPage}>
       <Layout style={{ height: '100%' }}>
@@ -160,17 +177,17 @@ const AppSettingPage: FC = () => {
               {activeTab === 'baseSetting' && <BasicSetting form={form} data={appData!} />}
               {activeTab === 'appPermission' && <AppPermission />}
               {activeTab === 'appRelease' && <AppReleasePage />}
-              {activeTab === 'navigatorSetting' && <NavigatorSetting />}
+              {activeTab === 'navigatorSetting' && <NavigatorSetting form={navigatorForm} data={navigatorData} />}
             </Content>
+            {(activeTab === 'baseSetting' || activeTab === 'navigatorSetting') && (
+              <Footer className={styles.footer}>
+                <Button type="primary" loading={saveLoading} onClick={handleSave}>
+                  保存
+                </Button>
+              </Footer>
+            )}
           </div>
         </Layout>
-        {activeTab === 'baseSetting' && (
-          <Footer className={styles.footer}>
-            <Button type="primary" loading={saveLoading} onClick={handleSave}>
-              保存
-            </Button>
-          </Footer>
-        )}
       </Layout>
     </div>
   );

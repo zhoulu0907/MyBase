@@ -57,7 +57,7 @@ const CreateEntityModal: React.FC<{
         entityType: 1, // 实体类型 1:自建表，2:复用已有表
         description: values.description,
         datasourceId: curDataSourceId,
-        appId: curAppId,
+        applicationId: curAppId,
         displayConfig: JSON.stringify({
           x,
           y

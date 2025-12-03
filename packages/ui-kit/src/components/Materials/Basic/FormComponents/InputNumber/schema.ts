@@ -227,7 +227,8 @@ const XInputNumber: XInputNumberSchema = {
     dataField: [],
     defaultValueConfig: {
       type: DEFAULT_VALUE_TYPES.CUSTOM,
-      customValue: ''
+      customValue: '',
+      formulaValue: ''
     },
     numberFormat: {
       showUnit: false,

@@ -1,0 +1,331 @@
+import { Button, Form, Input, Toast } from '@arco-design/mobile-react';
+import { useForm } from '@arco-design/mobile-react/esm/form';
+import { getHashQueryParam, TokenManager, type SliderCaptchaRef, getOrCreateDeviceInfo } from '@onebase/common';
+import { SliderCaptcha } from './Captcha';
+import {
+  checkCaptchaApi,
+  getCaptchaApi,
+  tenantLogin,
+  type LoginRequest,
+  type LoginResponse
+} from '@onebase/platform-center';
+import { getApplication } from '@onebase/app';
+import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { DynamicIcon, menuIconList } from '@onebase/common';
+import { useI18n } from '../../../hooks/useI18n';
+import { useRememberMe } from '../../../hooks/useRememberMe';
+import styles from '../index.module.less';
+import { ValidatorType } from '@arco-design/mobile-utils';
+import logoIcon from '../../../assets/images/logo-icon.svg';
+import { IconEyeInvisible, IconEyeVisible } from '@arco-design/mobile-react/esm/icon';
+
+interface APP_INFO {
+  appName: string;
+  iconName: string;
+  iconColor: string;
+}
+
+const Right: React.FC = () => {
+  const navigate = useNavigate();
+  const [form] = useForm();
+  const { t } = useI18n();
+  const sliderCaptchaRef = useRef<SliderCaptchaRef>(null);
+
+  const [appInfo, setAppInfo] = useState<APP_INFO>({
+    appName: '',
+    iconName: '',
+    iconColor: ''
+  });
+
+  // 从路由中获取 appid 参数 TODO待优化
+  const hash = window.location.hash;
+  const match = hash.match(/\/runtime-home\/([^\/]+)\/([^/?]+)/);
+  const appId = match ? match[1] : '';
+  const tenantId = match ? match[2] : '1';
+
+  // 使用记住我hook
+  const { rememberMe, savedAccount, saveRememberMe } = useRememberMe();
+  const [showPassword, setShowPassword] = useState(false); // 显示密码
+
+  // 状态管理
+  const [loading, setLoading] = useState(false);
+
+  // 组件初始化时设置保存的账号
+  useEffect(() => {
+    if (savedAccount) {
+      form.setFieldValue('account', savedAccount);
+    }
+
+    // 如果已经登录了就自动跳转到首
+    if (TokenManager.isTokenValid()) {
+      const redirectURL = getHashQueryParam('redirectURL');
+      if (redirectURL) {
+        window.location.href = redirectURL;
+      } else {
+        // 跳转到首页
+        navigate(`/onebase/runtime-home/${appId}/${tenantId}`);
+      }
+      return;
+    }
+
+    handleGetApplication();
+  }, []);
+
+  const handleGetApplication = async () => {
+    const redirectURL = getHashQueryParam('redirectURL');
+    if (redirectURL) {
+      // let startIndex = redirectURL.indexOf('/runtime/');
+      // const runtimeLength = startIndex === -1 ? '/runtime-home/'.length : '/runtime/'.length;
+      // if (startIndex === -1) {
+      //   startIndex = redirectURL.indexOf('/runtime-home/');
+      // }
+      // const endRedirectURL = redirectURL.slice(startIndex + runtimeLength);
+      // const endIndex = endRedirectURL?.indexOf('?');
+      // let applicationId = redirectURL.slice(startIndex + runtimeLength, startIndex + runtimeLength + endIndex);
+      // applicationId = applicationId.split('/')[0];
+      // if (applicationId) {
+      //   const res = await getApplication({ id: applicationId });
+      //   if (res) {
+      //     setAppInfo({ appName: res.appName || '', iconName: res.iconName || '', iconColor: res.iconColor || '' });
+      //   }
+      // }
+
+      const regex = /\/runtime-home\/([^\/]+)\/([^/?]+)/;
+      const match = redirectURL.match(regex);
+      let applicationId = '';
+
+      if (match) {
+        applicationId = match[1];
+        if (applicationId) {
+          const res = await getApplication({ id: applicationId });
+          if (res) {
+            setAppInfo({ appName: res.appName || '', iconName: res.iconName || '', iconColor: res.iconColor || '' });
+          }
+        }
+      }
+    }
+  };
+
+  // 处理记住我状态变化
+  const handleRememberMeChange = (checked: boolean) => {
+    const account = form.getFieldValue('account') || '';
+    saveRememberMe(account, checked);
+  };
+
+  // 账号密码登录
+  const handleAccountLogin = async (values: LoginRequest) => {
+    setLoading(true);
+
+    try {
+      const captchaVerification = values.captchaVerification;
+      // 如果没有验证码token，则先进行验证码验证
+      if (!captchaVerification) {
+        // 显示滑块验证码
+        sliderCaptchaRef.current?.showCaptcha();
+        return;
+      }
+
+      const headers = {
+        'X-Tenant-Id': tenantId
+      };
+
+      const loginData: LoginRequest = {
+        username: values.username!,
+        password: values.password!,
+        captchaVerification: captchaVerification,
+        deviceId: values.deviceId
+      };
+
+      const response: LoginResponse = await tenantLogin(loginData, headers);
+
+      if (response.accessToken) {
+        // 使用 TokenManager 存储 token 信息
+        TokenManager.setToken(
+          {
+            userId: response.userId,
+            accessToken: response.accessToken,
+            refreshToken: response.refreshToken,
+            expiresTime: response.expiresTime,
+            tenantId: response.tenantId
+          },
+          rememberMe
+        );
+
+        // 保存记住我状态和账号信息
+        saveRememberMe(values.username!, rememberMe);
+
+        Toast.success(t('auth.loginSuccess'));
+        const redirectURL = getHashQueryParam('redirectURL');
+        if (redirectURL) {
+          window.location.href = redirectURL;
+        } else {
+          // 跳转到首页
+          navigate(`/onebase/runtime-home/${appId}/${tenantId}`);
+        }
+
+        return;
+      } else {
+        Toast.error(t('auth.loginFailed'));
+      }
+    } catch (error: any) {
+      console.error('登录失败:', error);
+      Toast.error(error.message || '登录失败');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 表单提交处理
+  const handleSubmit = (_values: LoginRequest) => {
+    handleAccountLogin(_values);
+  };
+
+  // 验证码验证成功回调
+  const handleCaptchaSuccess = async (token: string) => {
+    const values = await form.getFieldsValue();
+    console.log('values:', values);
+
+    const deviceId = await getOrCreateDeviceInfo();
+    handleSubmit({ username: values.username, password: values.password, captchaVerification: token, deviceId });
+  };
+
+  // 登录按钮点击事件 - 先验证滑块验证码
+  const handleLoginClick = async () => {
+    try {
+      // 先验证表单
+      await form.validateFields();
+
+      // 显示滑块验证码
+      sliderCaptchaRef.current?.showCaptcha();
+    } catch (error) {
+      console.error('表单验证失败:', error);
+      Toast.error('请检查表单填写是否正确');
+    }
+  };
+
+  const rules = {
+    password: [
+      {
+        type: ValidatorType.Custom,
+        validator: (val: string, callback: (error?: string) => void) => {
+          if (!val) {
+            callback('请输入密码');
+          } else if (val.length < 6) {
+            callback('密码至少6个字符');
+          } else {
+            callback();
+          }
+        }
+      }
+    ],
+    username: [
+      {
+        type: ValidatorType.Custom,
+        validator: (val: string, callback: (error?: string) => void) => {
+          if (!val) {
+            callback('请输入账号');
+          } else if (val.length < 3) {
+            callback('账号至少3个字符');
+          } else {
+            callback();
+          }
+        }
+      }
+    ]
+  };
+
+  const toSubmit = () => {
+    form.submit();
+  };
+
+  const getAppIcon = () => {
+    if (!appInfo.iconName) {
+      return <img src={logoIcon} alt="logo" className={styles.loginLogo} />;
+    }
+    return (
+      <DynamicIcon
+        IconComponent={menuIconList.find((icon) => icon.code === appInfo.iconName)?.icon}
+        theme="filled"
+        size="0.88rem"
+        fill="#fff"
+        style={{
+          padding: '0.2rem',
+          marginRight: '0.08rem',
+          backgroundColor: appInfo.iconColor || 'rgb(var(--primary-6))'
+        }}
+      />
+    );
+  };
+
+  // 根据状态确定 Input 的 type
+  const inputType = showPassword ? 'text' : 'password';
+
+  // 根据状态确定显示的图标
+  const EyeIcon = showPassword ? IconEyeVisible : IconEyeInvisible;
+
+  return (
+    <div className={styles.loginPageRight}>
+      <div className={styles.titleContainer}>
+        {getAppIcon()}
+        <h1 className={styles.title}>欢迎登录{appInfo.appName ? ` ${appInfo.appName} 应用` : 'Onebase'}</h1>
+      </div>
+      <div className={styles.loginFormContainer}>
+        <Form
+          form={form}
+          layout="vertical"
+          onSubmit={handleLoginClick}
+          // autoComplete="off"
+          // requiredSymbol={false}
+          className={styles.loginForm}
+        >
+          <Form.Item
+            field="username"
+            label="账号"
+            initialValue=""
+            rules={rules.username}
+          >
+            <Input placeholder={t('auth.userAccount')} clearable={false} />
+          </Form.Item>
+
+          <Form.Item
+            field="password"
+            label="密码"
+            initialValue=""
+            className={styles.passwordItem}
+            rules={rules.password}
+          >
+            <Input type={inputType} placeholder={t('auth.password')} clearable suffix={<div className={styles.togglePassword} onClick={() => setShowPassword(prev => !prev)}><EyeIcon /></div>} />
+          </Form.Item>
+          <div className={styles.rememberMeContainer}>
+            <div className={styles.forgotPassword}> {t('auth.accountRegistration')}</div>
+            <div className={styles.forgotPassword}> {t('auth.forgotPassword')}</div>
+          </div>
+          <Button type="primary" onClick={toSubmit} loading={loading} size="large" className={styles.loginButton}>
+            {t('auth.loginButton')}
+          </Button>
+        </Form>
+      </div>
+
+      {/* 滑块验证码组件 */}
+      <SliderCaptcha
+        ref={sliderCaptchaRef}
+        getCaptchaApi={getCaptchaApi}
+        checkCaptchaApi={checkCaptchaApi}
+        onSuccess={handleCaptchaSuccess}
+        onError={() => setLoading(false)}
+      />
+
+      <div className={styles.loginFooter}>
+        <div className={styles.footerText}>
+          登录即表示同意
+          <span onClick={() => navigate('/onebase/runtime-home/protocol')}>《用户协议》</span>
+          和
+          <span onClick={() => navigate('/onebase/runtime-home/privacy')}>《隐私政策》</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Right;

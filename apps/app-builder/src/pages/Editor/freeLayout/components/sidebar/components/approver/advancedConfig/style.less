@@ -1,30 +1,32 @@
 .heigher-config {
-    .title-box {
-        font-size: 16px;
-        font-weight: 600;
-        margin-bottom: 6px;
-    }
-    .arco-radio {
-        line-height: 32px;
-    }
-    
+  .title-box {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .pc-radio {
+    line-height: 32px;
+  }
 }
 .time-modal {
-    width: 645px;
+  width: 645px;
+  .form-item-wrapper {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+  }
+  .gray-outer {
+    background: var(--color-fill-2);
+    border-radius: 4px;
+    padding: 16px 16px 4px;
     .form-item-wrapper {
-        flex-direction: row;
-        align-items: center;
-        gap: 10px;
+      margin-top: 12px;
     }
-    .gray-outer {
-        background: var(--color-fill-2);
-        border-radius: 4px;
-        padding: 16px 16px 4px;
-        .form-item-wrapper {
-            margin-top: 12px;
-        }
-    }
-    .arco-textarea, .arco-input, .arco-select-view {
-        background: #fff; border: 1px solid rgba(229, 230, 235, 1);
-    }
+  }
+  .pc-textarea,
+  .pc-input,
+  .pc-select-view {
+    background: #fff;
+    border: 1px solid rgba(229, 230, 235, 1);
+  }
 }

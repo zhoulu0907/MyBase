@@ -265,12 +265,7 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
 
   return (
     <>
-      {!menuId ? (
-        <div className={styles.permissionEmpty}>
-          <IconEmpty fontSize={50} />
-          暂无页面字段权限，请先添加页面
-        </div>
-      ) : (
+      {menuId && (
         <div className={styles.fieldPermissions}>
           <Form
             form={form}

@@ -51,3 +51,8 @@ export const updateAdminOrDirector = (data: UpdateAdminOrDirectorReq) => {
 export const getDeptsById = async (params: GetDeptsByIdReq) => {
   return await systemService.get(`/dept/get-depts-by-id?id=${params.id}&idType=${params.idType}`);
 };
+
+// 指定/搜索获取部门和用户信息
+export const getDeptWithSearch = (params: UpdateAdminOrDirectorReq) => {
+  return systemService.get('/dept/get-dept-users', params);
+};

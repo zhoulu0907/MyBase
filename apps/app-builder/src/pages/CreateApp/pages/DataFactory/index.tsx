@@ -13,7 +13,7 @@ import EtlDataFactoryPage from './pages/ETLDataFactory';
 const DataFactoryPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('check-entity');
   const [appId, setAppId] = useState('');
-  const { setCurAppId, curAppId, clearCurAppId } = useAppStore();
+  const { setCurAppId, clearCurAppId } = useAppStore();
   const [collapsed, setCollapsed] = useState(false);
 
   const handleMenuClick = (key: string) => {
@@ -92,7 +92,7 @@ const DataFactoryPage: React.FC = () => {
       {/* 右侧内容 */}
       <Layout.Content className={styles.content}>
         {activeTab === 'data-source' && <DataSourcePage />}
-        {activeTab === 'check-entity' && <EntityPage appId={appId} handleMenuClick={handleMenuClick} />}
+        {activeTab === 'check-entity' && <EntityPage applicationId={appId} handleMenuClick={handleMenuClick} />}
         {activeTab === 'data-dict' && <DataDictPage />}
         {activeTab === 'data-factory' && <EtlDataFactoryPage />}
         {activeTab === 'datasource-management' && <DataSourceManagementPage />}

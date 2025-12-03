@@ -1,8 +1,9 @@
 import { type EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 import { Collapse, Empty, Spin } from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
-import styles from './Relations.module.less';
 import { getEntityRelations } from '@onebase/app';
+import { ALL_RELATIONSHIP_TYPE_MAP, type RelationshipType } from '@/pages/CreateApp/pages/DataFactory/utils/types';
+import styles from './Relations.module.less';
 
 // 数据方法接口定义
 interface DataRelation {
@@ -20,13 +21,6 @@ interface DataRelation {
 interface DataMethodsProps {
   node: EntityNode;
 }
-
-const relationshipTypeMap: Record<string, string> = {
-  ONE_TO_ONE: '一对一',
-  ONE_TO_MANY: '一对多',
-  MANY_TO_ONE: '多对一',
-  MANY_TO_MANY: '多对多'
-};
 
 const relationKeyMap: Record<string, string> = {
   sourceEntityName: '左关联资产',
@@ -91,7 +85,9 @@ const DataMethods: React.FC<DataMethodsProps> = ({ node }) => {
                 name={relation.id}
                 header={
                   <div className={styles['relation-header']}>
-                    <span className={styles['relation-name']}>{relationshipTypeMap[relation.relationshipType]}</span>
+                    <span className={styles['relation-name']}>
+                      {ALL_RELATIONSHIP_TYPE_MAP[relation.relationshipType as RelationshipType]}
+                    </span>
                   </div>
                 }
                 className={styles['relation-item']}
@@ -102,7 +98,7 @@ const DataMethods: React.FC<DataMethodsProps> = ({ node }) => {
                       <div className={styles.label}>{relationKeyMap[key]}:</div>
                       {key === 'relationshipType' ? (
                         <div className={styles.text}>
-                          {relationshipTypeMap[relation[key as keyof DataRelation] as keyof typeof relationshipTypeMap]}
+                          {ALL_RELATIONSHIP_TYPE_MAP[relation[key as keyof DataRelation] as RelationshipType]}
                         </div>
                       ) : (
                         <div className={styles.text}>{relation[key as keyof DataRelation]}</div>

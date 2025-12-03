@@ -1,0 +1,28 @@
+.fileUploadWrapperOBMobile {
+  padding-bottom: 0.24rem;
+  .arco-form-label-item {
+    margin: 0.24rem 0;
+  }
+  .arco-image-picker-error {
+    font-size: 0.14rem;
+    line-height: 0.24rem;
+    color: #ff4d4f;
+  }
+  .uplaodList-text-item {
+    min-height: 1rem;
+     margin-top: 0.2rem;
+     padding: 0 0.24rem;
+     .arco-icon {
+       font-size: 0.4rem !important;
+     }
+     .uplaodList-text-item-name {
+        margin: 0 0.12rem;
+        font-size: 0.32rem;
+     }
+     .uplaodList-text-item-opera {
+       height: 1rem;
+       display: flex;
+       align-items: center;
+     }
+  }
+}

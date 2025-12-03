@@ -35,7 +35,7 @@ const DataFields: React.FC<DataFieldsProps> = ({ entity, activeTab }) => {
         entityId: entity.id,
         pageNo: page.pageNo,
         pageSize: page.pageSize,
-        appId: curAppId
+        applicationId: curAppId
       };
       const response = await getEntityFieldsPage(params);
       console.log('getEntityFields', response);
@@ -169,6 +169,7 @@ const DataFields: React.FC<DataFieldsProps> = ({ entity, activeTab }) => {
     {
       title: '操作',
       key: 'operation',
+      width: 80,
       render: (_, record) => (
         <Space>
           {record.isSystemField === FIELD_TYPE.CUSTOM && (

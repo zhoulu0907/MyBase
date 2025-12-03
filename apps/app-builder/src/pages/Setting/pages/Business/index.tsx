@@ -18,7 +18,7 @@ import {
   deleteCorpApi,
   disabledCorpApi,
   getCorpListApi,
-  getIndustryType,
+  getDictDataListByType,
   type corpListParams
 } from '@onebase/platform-center';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -169,7 +169,7 @@ const BusinessPage: React.FC = () => {
 
   const fetchIndustryType = async () => {
     try {
-      const res = await getIndustryType('industry_type');
+      const res = await getDictDataListByType('industry_type');
       setIndustryOptions(res);
     } catch (error) {
       Message.error('获取行业类型列表失败');

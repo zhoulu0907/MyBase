@@ -251,11 +251,13 @@ const XDateRangePicker: XInputDateRangePickerSchema = {
     dataField: [],
     startDefaultValueConfig: {
       type: DEFAULT_VALUE_TYPES.CUSTOM,
-      customValue: ''
+      customValue: '',
+      formulaValue: ''
     },
     endDefaultValueConfig: {
       type: DEFAULT_VALUE_TYPES.CUSTOM,
-      customValue: ''
+      customValue: '',
+      formulaValue: ''
     },
     dateType: DATE_VALUES[DATE_OPTIONS.DATE],
     dateRange: {
