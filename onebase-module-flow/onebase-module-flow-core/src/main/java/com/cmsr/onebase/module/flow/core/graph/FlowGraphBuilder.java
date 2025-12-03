@@ -81,6 +81,8 @@ public class FlowGraphBuilder {
         if (node.getData() instanceof ScriptNodeData scriptNodeData) {
             FlowConnectorScriptDO connectorScriptDO = TenantManager.withoutTenantCondition(() -> connectorScriptRepository.getById(scriptNodeData.getActionId()));
             scriptNodeData.setScript(connectorScriptDO.getRawScript());
+            scriptNodeData.setInputSchema(connectorScriptDO.getInputSchema());
+            scriptNodeData.setOutputSchema(connectorScriptDO.getOutputSchema());
         }
         if (CollectionUtils.isNotEmpty(node.getBlocks())) {
             for (JsonGraphNode child : node.getBlocks()) {

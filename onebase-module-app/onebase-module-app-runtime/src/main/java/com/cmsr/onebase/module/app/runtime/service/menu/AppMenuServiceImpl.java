@@ -17,6 +17,7 @@ import com.cmsr.onebase.module.app.core.vo.menu.MenuListRespVO;
 import com.cmsr.onebase.module.app.runtime.vo.menu.MenuPermissionVO;
 import jakarta.annotation.Resource;
 import lombok.Setter;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.redisson.api.RedissonClient;
@@ -75,16 +76,28 @@ public class AppMenuServiceImpl implements AppMenuService {
 
     @Override
     public List<MenuListRespVO> listApplicationMenu() {
-        Long userId = RTSecurityContext.getUserId();
-        Long applicationId = ApplicationManager.getApplicationId();
+        Long userId = RTSecurityContext.getRequiredUserId();
+        Long applicationId = ApplicationManager.getRequiredApplicationId();
         UserRoleDTO userRoleDTO = appAuthRoleProvider.findUserRoleByApplication(userId, applicationId);
         List<AppMenuDO> menuDOS;
         if (userRoleDTO.isAdminRole()) {
-            menuDOS = appMenuRepository.findVisibleByAppId(applicationId);
+            menuDOS = appMenuRepository.findVisibleByAppId(applicationId,
+                    Set.of(MenuTypeEnum.PAGE.getValue(), MenuTypeEnum.GROUP.getValue()));
         } else {
             Set<String> menuUuids = findVisibleMenuUuids(applicationId, userRoleDTO.getRoleIds());
-            menuDOS = appMenuRepository.findVisibleByAppIdAndMenuIds(applicationId, menuUuids);
+            if (CollectionUtils.isEmpty(menuUuids)) {
+                return Collections.emptyList();
+            }
+            menuDOS = appMenuRepository.findVisibleByAppIdAndMenuIds(applicationId, menuUuids,
+                    Set.of(MenuTypeEnum.PAGE.getValue(), MenuTypeEnum.GROUP.getValue()));
         }
+        if (CollectionUtils.isEmpty(menuDOS)) {
+            return Collections.emptyList();
+        }
+        return convertToMenuListRespVOS(menuDOS);
+    }
+
+    private List<MenuListRespVO> convertToMenuListRespVOS(List<AppMenuDO> menuDOS) {
         List<MenuListRespVO> menuListRespList = new ArrayList<>();
         // 把第一层的菜单添加到列表中
         LinkedList<MenuListRespVO> levelOneMenus = menuDOS.stream()
@@ -125,7 +138,7 @@ public class AppMenuServiceImpl implements AppMenuService {
 
     @Override
     public MenuPermissionVO getMenuPermission(Long menuId) {
-        Long userId = RTSecurityContext.getUserId();
+        Long userId = RTSecurityContext.getRequiredUserId();
         Long applicationId = ApplicationManager.getApplicationId();
         MenuPermissionVO menuPermissionVO = new MenuPermissionVO();
         menuPermissionVO.setOperationPermission(appAuthSecurityApi.getMenuOperationPermission(userId, applicationId, menuId));

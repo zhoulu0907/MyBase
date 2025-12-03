@@ -23,6 +23,17 @@ public class ApplicationManager {
         applicationIdHolder.set(applicationId);
     }
 
+    public static Long getRequiredApplicationId() {
+        if (isIgnoreApplicationCondition()) {
+            return null;
+        }
+        Long id = applicationIdHolder.get();
+        if (id == null) {
+            throw new RuntimeException("未设置应用ID");
+        }
+        return id;
+    }
+
     public static Long getApplicationId() {
         if (isIgnoreApplicationCondition()) {
             return null;
@@ -48,11 +59,11 @@ public class ApplicationManager {
         }
     }
 
-    private static void ignoreApplicationCondition() {
+    public static void ignoreApplicationCondition() {
         applicationIdBooleanHolder.set(Boolean.TRUE);
     }
 
-    private static boolean isIgnoreApplicationCondition() {
+    public static boolean isIgnoreApplicationCondition() {
         return Boolean.TRUE.equals(applicationIdBooleanHolder.get());
     }
 
@@ -89,11 +100,11 @@ public class ApplicationManager {
         }
     }
 
-    private static void ignoreVersionTagCondition() {
+    public static void ignoreVersionTagCondition() {
         versionTagBooleanHolder.set(Boolean.TRUE);
     }
 
-    private static boolean isIgnoreVersionTagCondition() {
+    public static boolean isIgnoreVersionTagCondition() {
         return Boolean.TRUE.equals(versionTagBooleanHolder.get());
     }
 
