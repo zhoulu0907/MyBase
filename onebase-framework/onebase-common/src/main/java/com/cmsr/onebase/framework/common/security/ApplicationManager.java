@@ -13,7 +13,11 @@ public class ApplicationManager {
 
     private static final ThreadLocal<Long> applicationIds = new ThreadLocal<>();
 
-    private static final ThreadLocal<Boolean> ignoreFlags = new ThreadLocal<>();
+    private static final ThreadLocal<Boolean> applicationIdHolder = new ThreadLocal<>();
+
+    private static final ThreadLocal<Long> versionTags = new ThreadLocal<>();
+
+    private static final ThreadLocal<Boolean> versionTagHolder = new ThreadLocal<>();
 
     public static void setApplicationId(Long applicationId) {
         applicationIds.set(applicationId);
@@ -23,12 +27,9 @@ public class ApplicationManager {
         if (isIgnoreApplicationCondition()) {
             return null;
         }
-        return applicationIds != null ? applicationIds.get() : null;
+        return applicationIds.get();
     }
 
-    /**
-     * 忽略 tenant 条件
-     */
     public static <T> T withoutApplicationCondition(Supplier<T> supplier) {
         try {
             ignoreApplicationCondition();
@@ -38,9 +39,6 @@ public class ApplicationManager {
         }
     }
 
-    /**
-     * 忽略 tenant 条件
-     */
     public static void withoutApplicationCondition(Runnable runnable) {
         try {
             ignoreApplicationCondition();
@@ -50,27 +48,56 @@ public class ApplicationManager {
         }
     }
 
-
-    /**
-     * 忽略 tenant 条件
-     */
     public static void ignoreApplicationCondition() {
-        ignoreFlags.set(Boolean.TRUE);
+        applicationIdHolder.set(Boolean.TRUE);
     }
 
-    /**
-     * 是否忽略 tenant 条件
-     */
     public static boolean isIgnoreApplicationCondition() {
-        return Boolean.TRUE.equals(ignoreFlags.get());
+        return Boolean.TRUE.equals(applicationIdHolder.get());
     }
 
-    /**
-     * 恢复 tenant 条件
-     */
     public static void restoreApplicationCondition() {
-        ignoreFlags.remove();
+        applicationIdHolder.remove();
     }
 
+    public static void setVersionTag(Long versionTag) {
+        versionTags.set(versionTag);
+    }
 
+    public static Long getVersionTag() {
+        if (isIgnoreVersionTagCondition()) {
+            return null;
+        }
+        return versionTags.get();
+    }
+
+    public static <T> T withoutVersionTagCondition(Supplier<T> supplier) {
+        try {
+            ignoreApplicationCondition();
+            return supplier.get();
+        } finally {
+            restoreApplicationCondition();
+        }
+    }
+
+    public static void withoutVersionTagCondition(Runnable runnable) {
+        try {
+            ignoreApplicationCondition();
+            runnable.run();
+        } finally {
+            restoreApplicationCondition();
+        }
+    }
+
+    public static void ignoreVersionTagCondition() {
+        versionTagHolder.set(Boolean.TRUE);
+    }
+
+    public static boolean isIgnoreVersionTagCondition() {
+        return Boolean.TRUE.equals(versionTagHolder.get());
+    }
+
+    public static void restoreVersionTagCondition() {
+        versionTagHolder.remove();
+    }
 }
