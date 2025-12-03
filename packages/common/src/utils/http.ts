@@ -67,7 +67,11 @@ export class HttpClient {
           }
         }
 
-        const appId = getHashQueryParam('appId');
+        let appId = getHashQueryParam('appId');
+        if (!appId) {
+          appId = TokenManager.getCurAppId();
+        }
+
         // 如果获取到 appId 且 header 中未设置，则自动添加
         if (appId && !config.headers['X-Application-Id']) {
           config.headers['X-Application-Id'] = appId;
