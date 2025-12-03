@@ -108,7 +108,7 @@ const CreateExternalModal: React.FC<CreateExternalModalProps> = ({ visible, onCl
             connectMode: values.connectMode
           },
           declaration: values.declaration,
-          readonly: values.readonly,
+          readonly: values.readonly ? 1 : 0,
           withCollect: 1
         });
 
