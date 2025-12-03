@@ -39,7 +39,7 @@ const XRadio = memo((props: XRadioConfig & { runtime?: boolean; detailMode?: boo
 
   return (
     <Form.Item
-      className="inputTextWrapper"
+      className="inputTextWrapperOBMobile radioWrapperOBMobile"
       label={label.display && label.text}
       field={fieldId}
       layout={layout}

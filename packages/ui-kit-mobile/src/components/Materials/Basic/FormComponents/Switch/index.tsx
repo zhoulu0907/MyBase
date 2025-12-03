@@ -37,7 +37,7 @@ const XSwitch = memo((props: XSwitchConfig & { runtime?: boolean; detailMode?: b
 
   return (
     <Form.Item
-      className="inputTextWrapper switchWrapper"
+      className="inputTextWrapperOBMobile switchWrapperOBMobile"
       field={fieldId}
       label={label.display ? label.text : undefined}
       initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : ''}

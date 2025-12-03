@@ -49,7 +49,7 @@ const XImgUpload = memo((props: XImgUploadConfig & { runtime?: boolean; detailMo
   return (
     <div>
       <Form.Item
-        className="inputTextWrapper ImgUploadWrapper"
+        className="inputTextWrapperOBMobile ImgUploadWrapperOBMobile"
         label={
           label.display && label.text
         }

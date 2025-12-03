@@ -114,7 +114,7 @@ const XFileUpload = memo((props: XFileUploadConfig & { runtime?: boolean; detail
   return (
     <div>
       <Form.Item
-        className="inputTextWrapper fileUploadWrapper"
+        className="inputTextWrapperOBMobile fileUploadWrapperOBMobile"
         label={
           label.display && label.text
         }

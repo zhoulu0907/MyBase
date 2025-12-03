@@ -70,7 +70,7 @@ const XInputPhone = memo((props: XInputPhoneConfig & { runtime?: boolean; detail
 
   return (
     <Form.Item
-      className="inputTextWrapper"
+      className="inputTextWrapperOBMobile"
       field={fieldId}
       rules={rules}
       label={label.display ? label.text : undefined}

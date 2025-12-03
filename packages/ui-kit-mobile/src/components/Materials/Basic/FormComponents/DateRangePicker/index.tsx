@@ -65,7 +65,7 @@ const XDateRangePicker = memo((props: XDateRangePickerConfig & { runtime?: boole
 
   return (
     <Form.Item
-      className="inputTextWrapper"
+      className="inputTextWrapperOBMobile"
       label={label.display && label.text}
       field={fieldId}
       rules={rules}

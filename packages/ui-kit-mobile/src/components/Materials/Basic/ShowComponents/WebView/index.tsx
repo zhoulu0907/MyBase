@@ -64,7 +64,7 @@ const XWebView = memo((props: XWebViewConfig & { runtime?: boolean; detailMode?:
         padding: '0.18rem'
       }}
     >
-      <div className={styles.iframeTitle}>{title}</div>
+      <div className={styles.iframeTitleOBMobile}>{title}</div>
       <iframe
         src={validUrl}
         style={{

@@ -8,9 +8,9 @@ const XText = memo((props: XTextConfig & { runtime?: boolean; detailMode?: boole
   const { status, content, color } = props;
 
   return (
-    <div className="formWrapper">
+    <div className="formWrapperOBMobile">
       <div
-        className="formWrapper--text"
+        className="formWrapper--textOBMobile"
         style={{
           color,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
