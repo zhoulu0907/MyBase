@@ -27,7 +27,7 @@ interface DatasourceModalProps {
   // （可选）确定按钮的回调
   onOk?: () => void;
 
-  onUpdate: (datasourceUUID: string, tableUUID: string, columns: ELTColumn[]) => void;
+  onUpdate: (datasourceUuid: string, tableUuid: string, columns: ELTColumn[]) => void;
 }
 
 const DatasourceModal: React.FC<DatasourceModalProps> = ({ isModalVisible, onClose, onOk, onUpdate }) => {
@@ -38,17 +38,17 @@ const DatasourceModal: React.FC<DatasourceModalProps> = ({ isModalVisible, onClo
   const [activeTab, setActiveTab] = useState('external');
   const [allDatasources, setAllDatasources] = useState<ETLDatasource[]>([]);
   const [curDatasourceUUID, setCurDatasourceUUID] = useState<string>(
-    nodeData.value[curNode.value.id]?.config?.datasourceUUID || ''
+    nodeData.value[curNode.value.id]?.config?.datasourceUuid || ''
   );
   const [curTables, setCurTables] = useState<ETLTable[]>([]);
-  const [selectedTableUUID, setSelectedTableUUID] = useState(nodeData.value[curNode.value.id]?.config?.tableUUID || '');
+  const [selectedTableUUID, setSelectedTableUUID] = useState(nodeData.value[curNode.value.id]?.config?.tableUuid || '');
 
   const [columns, setColumns] = useState<ELTColumn[]>([]);
 
   useEffect(() => {
     if (isModalVisible) {
       handleListETLDatasources();
-      setSelectedTableUUID(nodeData.value[curNode.value.id]?.config?.tableUUID || '');
+      setSelectedTableUUID(nodeData.value[curNode.value.id]?.config?.tableUuid || '');
     }
   }, [isModalVisible]);
 
@@ -66,9 +66,9 @@ const DatasourceModal: React.FC<DatasourceModalProps> = ({ isModalVisible, onClo
 
   const [createExternalModalVisible, setCreateExternalModalVisible] = useState(false);
 
-  const handleListETLTables = async (datasourceUUID: string) => {
+  const handleListETLTables = async (datasourceUuid: string) => {
     const res = await listETLTables({
-      uuid: datasourceUUID
+      uuid: datasourceUuid
     });
 
     setCurTables(res);
@@ -95,9 +95,9 @@ const DatasourceModal: React.FC<DatasourceModalProps> = ({ isModalVisible, onClo
     setCreateExternalModalVisible(false);
   };
 
-  const handleCreateExternalModalCreate = (datasourceUUID: string) => {
+  const handleCreateExternalModalCreate = (datasourceUuid: string) => {
     setCreateExternalModalVisible(false);
-    setCurDatasourceUUID(datasourceUUID);
+    setCurDatasourceUUID(datasourceUuid);
   };
 
   const handleTableSelect = (tableUuid: string) => {

@@ -1,22 +1,5 @@
-import {
-  Dialog,
-  Sticky,
-  Ellipsis,
-  SearchBar,
-  Toast,
-  Button,
-  LoadMore,
-  Dropdown,
-} from '@arco-design/mobile-react';
-import { memo, useEffect, useState } from 'react';
-import {
-  BUTTON_OPTIONS,
-  BUTTON_VALUES,
-  RedirectMethod,
-  ENTITY_FIELD_TYPE
-} from '@onebase/ui-kit';
-import { useFormEditorSignal } from 'src/signals/page_editor';
 import filterIcon from '@/assets/images/filter.svg';
+import { Button, Dialog, Dropdown, Ellipsis, LoadMore, SearchBar, Sticky, Toast } from '@arco-design/mobile-react';
 import { useForm } from '@arco-design/mobile-react/esm/form';
 import {
   dataMethodDelete,
@@ -28,7 +11,9 @@ import {
   type PageMethodParam
 } from '@onebase/app';
 import { pagesRuntimeSignal } from '@onebase/common';
+import { BUTTON_OPTIONS, BUTTON_VALUES, ENTITY_FIELD_TYPE, RedirectMethod, useFormEditorSignal } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
+import { memo, useEffect, useState } from 'react';
 import './index.css';
 import type { XLoadMoreConfig } from './schema';
 
@@ -88,9 +73,9 @@ const XLoadMore = memo(
 
     const onReachBottom = (cb: Function) => {
       if (!tableData.length) return;
-      setTablePageNo(prevPageNo => prevPageNo + 1);
+      setTablePageNo((prevPageNo) => prevPageNo + 1);
       cb('prepare');
-    }
+    };
 
     useEffect(() => {
       if (refresh) {
@@ -119,10 +104,10 @@ const XLoadMore = memo(
               const dataFieldInfo = mainMetaData.parentFields.find(
                 (field: AppEntityField) => field.fieldId === column.id
               );
-              const result = item[dataFieldInfo.fieldName] || ''
+              const result = item[dataFieldInfo.fieldName] || '';
               if (!result) return '';
               if (typeof result === 'object') {
-                return JSON.stringify(result)
+                return JSON.stringify(result);
               }
               // if (['EMAIL', 'LONG_TEXT', 'TEXT', 'PHONE', 'NUMBER', 'DATE', 'DATETIME', 'URL', 'ADDRESS', 'AUTO_CODE', 'USER']
               //   .includes(dataFieldInfo.fieldType)) {
@@ -155,7 +140,7 @@ const XLoadMore = memo(
               // }
               return result || '-';
             }
-          }
+          };
         });
       }
       newColumns = newColumns.filter((v) => v.dataIndex !== 'op');
@@ -248,7 +233,8 @@ const XLoadMore = memo(
 
             // 部门
             const departmentField = mainMetaData.parentFields.find(
-              (field: AppEntityField) => field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.DEPARTMENT.VALUE
+              (field: AppEntityField) =>
+                field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.DEPARTMENT.VALUE
             );
             if (departmentField && newItem[key]) {
               newItem[key] = newItem[key].deptName || '-';
@@ -278,7 +264,7 @@ const XLoadMore = memo(
         cancelText: '取消',
         onOk: () => {
           handleDelete(id);
-        },
+        }
       });
     };
     const handleDelete = async (id: string) => {
@@ -329,37 +315,44 @@ const XLoadMore = memo(
 
     const [form] = useForm();
 
-    const noEdit = advancedButtonPermission === BUTTON_VALUES[BUTTON_OPTIONS.HIDDEN] && !hasOperationPermission
-      || advancedButtonPermission === BUTTON_VALUES[BUTTON_OPTIONS.DISABLED] && !hasOperationPermission;
+    const noEdit =
+      (advancedButtonPermission === BUTTON_VALUES[BUTTON_OPTIONS.HIDDEN] && !hasOperationPermission) ||
+      (advancedButtonPermission === BUTTON_VALUES[BUTTON_OPTIONS.DISABLED] && !hasOperationPermission);
     const getItemBtns = (item: any) => {
       if (noEdit) return;
       return (
         <div className="list-body-item-btns">
-          <Button color="#1D2129" borderColor="#86909C" type="ghost" size="mini" className="list-body-item-btn" onClick={() => handleDeleteAction(item.id)}>
+          <Button
+            color="#1D2129"
+            borderColor="#86909C"
+            type="ghost"
+            size="mini"
+            className="list-body-item-btn"
+            onClick={() => handleDeleteAction(item.id)}
+          >
             删除
           </Button>
           <Button type="primary" size="mini" className="list-body-item-btn" onClick={() => handleEdit(item.id, true)}>
             编辑
           </Button>
         </div>
-      )
-    }
+      );
+    };
 
     const [value, setValue] = useState([]);
 
     const filterDropdown = () => {
       return (
-        <Dropdown
-          showDropdown={showDropdown}
-          onCancel={() => setShowDropdown(false)}
-        >
+        <Dropdown showDropdown={showDropdown} onCancel={() => setShowDropdown(false)}>
           <div style={{ padding: '0.32rem' }}>
             <div className="demo-dropdown-option-desc">Group 1</div>
             <Dropdown.Options
               useColumn={3}
               multiple={true}
               selectedValue={value[0] || []}
-              onOptionClick={() => { console.info('click 1'); }}
+              onOptionClick={() => {
+                console.info('click 1');
+              }}
               onOptionChange={(val, item) => {
                 console.info('change 1', val, item);
                 setValue((oldValue) => {
@@ -371,20 +364,20 @@ const XLoadMore = memo(
                 {
                   label: 'Option 1',
                   value: 0,
-                  disabled: false,
+                  disabled: false
                 },
                 {
                   label: 'Option 2',
-                  value: 1,
+                  value: 1
                 },
                 {
                   label: 'Option 3',
                   value: 2,
-                  disabled: true,
+                  disabled: true
                 },
                 {
                   label: 'Option 4',
-                  value: 3,
+                  value: 3
                 }
               ]}
             ></Dropdown.Options>
@@ -393,7 +386,9 @@ const XLoadMore = memo(
               useColumn={3}
               multiple={true}
               selectedValue={value[1] || []}
-              onOptionClick={() => { console.info('click 2'); }}
+              onOptionClick={() => {
+                console.info('click 2');
+              }}
               onOptionChange={(val, item) => {
                 console.info('change 2', val, item);
                 setValue((oldValue) => {
@@ -405,21 +400,24 @@ const XLoadMore = memo(
                 {
                   label: 'Option 5',
                   value: 0,
-                  disabled: false,
+                  disabled: false
                 },
                 {
                   label: 'Option 6',
-                  value: 1,
-                }]}
+                  value: 1
+                }
+              ]}
             ></Dropdown.Options>
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <Button type='ghost' style={{ marginRight: "0.16rem", flex: 1 }}>重置</Button>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <Button type="ghost" style={{ marginRight: '0.16rem', flex: 1 }}>
+                重置
+              </Button>
               <Button style={{ flex: 1 }}>确定</Button>
             </div>
           </div>
         </Dropdown>
-      )
-    }
+      );
+    };
 
     const getBottomBar = () => {
       if (editMode) {
@@ -431,43 +429,46 @@ const XLoadMore = memo(
       if (loading || tablePageNo * pageSize >= (tableTotal || Number.MAX_SAFE_INTEGER)) {
         return tableTotal ? <div className="total-data">共{tableTotal}条数据</div> : null;
       }
-      return <LoadMore
-        getData={onReachBottom}
-        getDataAtFirst={false}
-        threshold={200}
-        blockWhenLoading={false}
-        trigger={manuClick ? 'click' : 'scroll'}
-        throttle={300}
-      />
-    }
+      return (
+        <LoadMore
+          getData={onReachBottom}
+          getDataAtFirst={false}
+          threshold={200}
+          blockWhenLoading={false}
+          trigger={manuClick ? 'click' : 'scroll'}
+          throttle={300}
+        />
+      );
+    };
 
     return (
       <div className="loadmore-list-wrapper">
-        {searchItems?.length ? <Sticky topOffset={0.88 * window.ROOT_FONT_SIZE} className="list-search-header">
-          {searchItems?.length ? (
-            <SearchBar actionButton={null} placeholder={`请输入${searchItems[0].label}`} />
-          ) : <div className="filter-title">筛选过滤</div>}
-          <img className="filter-icon" src={filterIcon} alt="" onClick={() => setShowDropdown(true)} />
-          {filterDropdown()}
-        </Sticky> : null}
-        {showAddBtn && (
-          <div className="list-create-btn" onClick={handleCreate}>
-          </div>
-        )}
+        {searchItems?.length ? (
+          <Sticky topOffset={0.88 * window.ROOT_FONT_SIZE} className="list-search-header">
+            {searchItems?.length ? (
+              <SearchBar actionButton={null} placeholder={`请输入${searchItems[0].label}`} />
+            ) : (
+              <div className="filter-title">筛选过滤</div>
+            )}
+            <img className="filter-icon" src={filterIcon} alt="" onClick={() => setShowDropdown(true)} />
+            {filterDropdown()}
+          </Sticky>
+        ) : null}
+        {showAddBtn && <div className="list-create-btn" onClick={handleCreate}></div>}
         <div className="list-body-wrapper">
-          {
-            (editMode ? [{}] : tableData).map((item, index) => (
-              <div key={index} className="list-body-item-wrapper" onClick={() => handleRowClick(item)}>
-                {(finalColumns?.length ? finalColumns : [{}, {}])?.map((col, index) => {
-                  return <div className="list-body-item-element" key={index}>
+          {(editMode ? [{}] : tableData).map((item, index) => (
+            <div key={index} className="list-body-item-wrapper" onClick={() => handleRowClick(item)}>
+              {(finalColumns?.length ? finalColumns : [{}, {}])?.map((col, index) => {
+                return (
+                  <div className="list-body-item-element" key={index}>
                     <Ellipsis className="list-body-item-title" text={(col.title || '') + '：'} />
                     <Ellipsis className="list-body-item-content" text={col.render?.(item, index)} />
                   </div>
-                })}
-                {getItemBtns(item)}
-              </div>
-            ))
-          }
+                );
+              })}
+              {getItemBtns(item)}
+            </div>
+          ))}
           {getBottomBar()}
         </div>
       </div>
