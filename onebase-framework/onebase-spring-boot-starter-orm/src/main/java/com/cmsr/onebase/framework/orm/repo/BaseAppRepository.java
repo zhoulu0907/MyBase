@@ -1,12 +1,10 @@
 package com.cmsr.onebase.framework.orm.repo;
 
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.orm.entity.BaseAppEntity;
 import com.mybatisflex.core.BaseMapper;
 import com.mybatisflex.core.paginate.Page;
-import com.mybatisflex.core.query.CPI;
-import com.mybatisflex.core.query.QueryCondition;
-import com.mybatisflex.core.query.QueryMethods;
-import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.core.query.*;
 import com.mybatisflex.core.util.CollectionUtil;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -19,9 +17,16 @@ import java.util.List;
 public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity> extends ServiceImpl<M, T> {
 
     protected QueryWrapper injectBizFilter(QueryWrapper queryWrapper) {
-//        Long applicationId = XXX;
-//        queryWrapper.eq("application_id", applicationId);
-        log.debug("注入SQL查询条件");
+        List<QueryTable> queryTables = CPI.getQueryTables(queryWrapper);
+        if (queryTables.size() > 1) {
+            log.warn("查询条件包含多个表，跳过条件注入");
+            return queryWrapper;
+        }
+        Long applicationId = ApplicationManager.getApplicationId();
+        QueryTable table = queryTables.get(0);
+        queryWrapper = queryWrapper.and(
+                new QueryColumn(table, BaseAppEntity.APPLICATION_ID)
+                        .eq(applicationId).when(!ApplicationManager.isIgnoreApplicationCondition()));
         return queryWrapper;
     }
 
