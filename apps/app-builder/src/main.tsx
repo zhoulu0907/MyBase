@@ -13,7 +13,8 @@ import './index.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ConfigProvider prefixCls="pc">
+    {/* <ConfigProvider prefixCls="pc"> */}
+    <ConfigProvider>
       <ErrorBoundary FallbackComponent={ErrorPage}>
         <App />
       </ErrorBoundary>
