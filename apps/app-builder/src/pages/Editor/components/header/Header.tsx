@@ -3,6 +3,8 @@ import activeFormDesignSVG from '@/assets/images/form_design_active_icon.svg';
 import defaultFormDesignSVG from '@/assets/images/form_design_default_icon.svg';
 import activeListDesignSVG from '@/assets/images/list_design_active_icon.svg';
 import defaultListDesignSVG from '@/assets/images/list_design_default_icon.svg';
+import defaultFlowDesignSVG from '@/assets/images/flow-default-icon.svg';
+import activeFlowDesignSVG from '@/assets/images/flow-active-icon.svg'
 import activePageSettingSVG from '@/assets/images/page_setting_active_icon.svg';
 import defaultPageSettingSVG from '@/assets/images/page_setting_default_icon.svg';
 import activeWorkbenchDesignSVG from '@/assets/images/workbench_design_active_icon.svg';
@@ -80,8 +82,8 @@ const baseTabData = [
     key: EDITOR_TYPES.FLOW_EDITOR,
     title: '流程设计',
     alt: 'flow Design',
-    defaultIcon: defaultListDesignSVG,
-    activeIcon: activeListDesignSVG
+    defaultIcon: defaultFlowDesignSVG,
+    activeIcon: activeFlowDesignSVG
   },
   {
     key: EDITOR_TYPES.WORKBENCH_EDITOR,

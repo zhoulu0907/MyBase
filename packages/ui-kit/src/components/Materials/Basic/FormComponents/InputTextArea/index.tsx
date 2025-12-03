@@ -1,14 +1,21 @@
+// ===== 导入 begin =====
 import { Form, Input } from '@arco-design/web-react';
 import { nanoid } from 'nanoid';
 import { memo, useEffect, useState } from 'react';
+
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES } from '../../../constants';
-import '../index.css';
 import type { XInputTextAreaConfig } from './schema';
+
+import '../index.css';
+import { useFormFieldWatch } from '../useFormField';
+// ===== 导入 end =====
 
 const TextArea = Input.TextArea;
 
+// ===== 组件定义 begin =====
 const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; detailMode?: boolean }) => {
+  // ===== 外部 props begin =====
   const {
     label,
     dataField,
@@ -23,17 +30,27 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; 
     runtime = true,
     detailMode
   } = props;
+  // ===== 外部 props end =====
 
-  const { form } = Form.useFormContext();
+  // ===== 内部状态 & 回显begin =====
   const [fieldId, setFieldId] = useState('');
-
-  const fieldValue = Form.useWatch(fieldId, form);
-
+  
   useEffect(() => {
     if (dataField.length > 0) {
       setFieldId(dataField[dataField.length - 1]);
     }
   }, [dataField]);
+  // =====  内部状态 & 回显 end =====
+
+  // ===== 表单上下文与字段名与值读取 begin =====
+  const {
+    form,
+    fieldValue
+  } = useFormFieldWatch(fieldId);
+  // ===== 表单上下文与字段名与值读取 end =====
+
+  // ===== 外部事件：选择数据 begin =====
+  // ===== 外部事件：选择数据 end =====
 
   return (
     <div className="formWrapper">
@@ -47,7 +64,7 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; 
         }
         layout={layout}
         tooltip={tooltip}
-        wrapperCol={{ style: { flex: 1 } }}
+        labelCol={layout === 'horizontal' ? { style: { width: 200, flex: 'unset' } } : {}}
         rules={[
           { required: verify?.required, message:`${label.text}是必填项` },
           {

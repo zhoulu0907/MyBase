@@ -1,9 +1,8 @@
-import ExecuteFlows from '@/utils/flow';
-import { Button, PopupSwiper, Form, Toast } from '@arco-design/mobile-react';
+// import ExecuteFlows from '@/utils/flow';
+import { Button, Form, PopupSwiper, Toast } from '@arco-design/mobile-react';
 import { useForm } from '@arco-design/mobile-react/esm/form';
 
 import {
-  PageType,
   CATEGORY_TYPE,
   dataMethodData,
   dataMethodInsert,
@@ -11,6 +10,7 @@ import {
   getEntityFieldsWithChildren,
   getPageSetId,
   getPageSetMetaData,
+  PageType,
   queryFlowExecForm,
   TRIGGER_EVENTS,
   type AppEntityField,
@@ -20,19 +20,6 @@ import {
   type UpdateMethodParams
 } from '@onebase/app';
 import { pagesRuntimeSignal } from '@onebase/common';
-// import {
-//   EDITOR_TYPES,
-//   FORM_COMPONENT_TYPES,
-//   getComponentWidth,
-//   PreviewRender,
-//   startLoadPageSet,
-//   STATUS_OPTIONS,
-//   STATUS_VALUES,
-//   useEditorSignalMap,
-//   useListEditorSignal,
-//   useFormEditorSignal,
-//   type GridItem
-// } from '@onebase/ui-kit';
 
 import {
   EDITOR_TYPES,
@@ -43,23 +30,30 @@ import {
   type GridItem
 } from '@onebase/ui-kit';
 
-import {
-  PreviewRender,
-  startLoadPageSet,
-  useEditorSignalMap,
-  useListEditorSignal,
-  useFormEditorSignal
-} from '@onebase/ui-kit-mobile';
+import CustomNav from '@/pages/components/Nav';
 import { fetchSubmitInstance } from '@onebase/app/src/services/app_runtime';
+import { startLoadPageSet, useEditorSignalMap, useListEditorSignal } from '@onebase/ui-kit';
+import { PreviewRender } from '@onebase/ui-kit-mobile';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { Fragment, useEffect, useState } from 'react';
 import styles from './index.module.less';
-import CustomNav from '@/pages/components/Nav';
 
 interface PreviewProps {
   menuId: string;
   runtime: boolean;
 }
+
+const colorConfig = {
+  normal: 'rgb(var(--primary-6))',
+  active: 'rgb(var(--primary-9))',
+  disabled: 'rgb(var(--primary-1))'
+};
+
+const ghostBgColor = {
+  normal: '#FFF',
+  active: 'rgb(var(--primary-6))',
+  disabled: '#FFF'
+};
 
 const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   useSignals();
@@ -175,20 +169,21 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                 url: item.response
               };
             }
-            return item
+            return item;
           });
         }
       }
-      !(typeof value === 'object') && Object.values(listPageComponentSchemas.value).forEach((item) => {
-        if (!item.config.columns || item.config.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]) {
-          return;
-        }
-        const indexTmp = item.config.columns.findIndex((col: any) => col.id === field?.fieldId);
+      !(typeof value === 'object') &&
+        Object.values(listPageComponentSchemas.value).forEach((item) => {
+          if (!item.config.columns || item.config.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]) {
+            return;
+          }
+          const indexTmp = item.config.columns.findIndex((col: any) => col.id === field?.fieldId);
 
-        if (indexTmp === -1) {
-          delete formData[field?.fieldId];
-        }
-      });
+          if (indexTmp === -1) {
+            delete formData[field?.fieldId];
+          }
+        });
 
       // 处理子表逻辑
       if (key.startsWith(FORM_COMPONENT_TYPES.SUB_TABLE)) {
@@ -343,13 +338,23 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
       // 只处理第一个数据对象（通常为单条数据）
       const dataItem = Array.isArray(res.data) ? res.data[0] : res.data;
-      const arrayType = ['DATE', 'DATETIME', 'SELECT', 'MULTI_SELECT', 'MULTI_DEPARTMENT', 'DATA_SELECTION', 'MULTI_DATA_SELECTION', 'MULTI_USER', 'USER']; // 表单回显需要数组格式数据；
+      const arrayType = [
+        'DATE',
+        'DATETIME',
+        'SELECT',
+        'MULTI_SELECT',
+        'MULTI_DEPARTMENT',
+        'DATA_SELECTION',
+        'MULTI_DATA_SELECTION',
+        'MULTI_USER',
+        'USER'
+      ]; // 表单回显需要数组格式数据；
 
       if (dataItem && typeof dataItem === 'object') {
         Object.entries(dataItem).forEach(([fieldName, value]) => {
           const fieldID = fieldIdNameMap[fieldName];
           if (fieldID) {
-            const fieldType = mainMetaDataFields.value.find(v => v.fieldId === fieldID)?.fieldType;
+            const fieldType = mainMetaDataFields.value.find((v) => v.fieldId === fieldID)?.fieldType;
             if (arrayType.includes(fieldType)) {
               formValues[fieldID] = [value];
               return;
@@ -421,10 +426,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
       <div className={styles.content}>
         {pageType === EDITOR_TYPES.LIST_EDITOR &&
-          (
-            !listComponents.value?.length ? (
-              <div className={styles.noData}>暂无数据</div>
-            ) :
+          (!listComponents.value?.length ? (
+            <div className={styles.noData}>暂无数据</div>
+          ) : (
             listComponents.value.map((cp: GridItem) => (
               <Fragment key={cp.id}>
                 {listPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
@@ -447,8 +451,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                 )}
               </Fragment>
             ))
-          )
-        }
+          ))}
 
         {pageType == EDITOR_TYPES.FORM_EDITOR && (
           <Form layout="inline" form={form} className={styles.formWrapper}>
@@ -475,10 +478,23 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
             ))}
 
             <div className={styles.footer}>
-              <Button style={{ flex: 2 }} type="ghost" onClick={cancelSubmitForm}>
+              <Button
+                type="ghost"
+                color={colorConfig}
+                bgColor={ghostBgColor}
+                borderColor={colorConfig}
+                onClick={cancelSubmitForm}
+                style={{ flex: 2 }}
+              >
                 取消
               </Button>
-              <Button style={{ flex: 5 }} type="primary" onClick={submitForm}>
+              <Button
+                type="primary"
+                bgColor={colorConfig}
+                borderColor={colorConfig}
+                onClick={submitForm}
+                style={{ flex: 5 }}
+              >
                 提交
               </Button>
             </div>
@@ -549,7 +565,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       </div>
 
       {/* 信息收集弹窗 */}
-      <ExecuteFlows flows={flows} inputParams={inputParams}></ExecuteFlows>
+      {/* <ExecuteFlows flows={flows} inputParams={inputParams}></ExecuteFlows> */}
     </div>
   );
 };

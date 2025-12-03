@@ -192,7 +192,8 @@ const XInputEmail: XInputEmailSchema = {
     dataField: [],
     defaultValueConfig: {
       type: DEFAULT_VALUE_TYPES.CUSTOM,
-      customValue: ''
+      customValue: '',
+      formulaValue: ''
     },
     verify: {
       required: false,

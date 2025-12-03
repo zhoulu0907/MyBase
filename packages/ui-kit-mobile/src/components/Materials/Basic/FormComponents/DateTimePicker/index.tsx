@@ -44,7 +44,7 @@ const XDateTimePicker = memo((props: XDateTimePickerConfig & { runtime?: boolean
 
   return (
     <Form.Item
-      className="inputTextWrapper"
+      className="inputTextWrapperOBMobile"
       label={label.display && label.text}
       field={fieldId}
       rules={rules}

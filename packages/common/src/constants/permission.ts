@@ -26,7 +26,8 @@ export const TENANT_MENUS = {
   INFO: 'tenant:info',
   BUSINESS: 'tenant:business',
   AUTHORIZED: 'tenant:authorized',
-  CORP: 'tenant:corp'
+  CORP: 'tenant:corp',
+  PROFILE: 'tenant:profile'
 };
 
 /** 空间管理-用户管理 */
@@ -93,12 +94,22 @@ export const TENANT_DICT_PERMISSION = {
   STATUS: TENANT_DICT_STATUS
 };
 
-/** 租户管理-租户信息 */
+/** 租户管理-空间信息 */
 export const TENANT_INFO_QUERY = 'tenant:info:query';
 export const TENANT_INFO_UPDATE = 'tenant:info:update';
 export const TENANT_INFO_PERMISSION = {
   QUERY: TENANT_INFO_QUERY,
   UPDATE: TENANT_INFO_UPDATE
+};
+
+/**租户管理-租户个人信息 */
+export const TENANT_PROFILE_QUERY = 'tenant:profile:query';
+export const TENANT_PROFILE_UPDATE = 'tenant:profile:update';
+export const TENANT_PROFILE_RESETPWD = 'tenant:profile:reset-pwd';
+export const TENANT_PROFILE_PERMISSION = {
+  QUERY: TENANT_PROFILE_QUERY,
+  UPDATE: TENANT_PROFILE_UPDATE,
+  RESETPWD: TENANT_PROFILE_RESETPWD
 };
 
 /** 数据权限-权限范围 */

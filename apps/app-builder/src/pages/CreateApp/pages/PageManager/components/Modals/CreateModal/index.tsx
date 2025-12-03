@@ -37,7 +37,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
     if (menuIcon) {
       form.setFieldValue('menuIcon', menuIcon);
     } else {
-      form.setFieldValue('menuIcon', 'FormPageLine');
+      form.setFieldValue('menuIcon', 'FormPage');
     }
   }, [menuIcon, visibleCreateForm]);
 
@@ -158,7 +158,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
                 ) : (
                   <img
                     style={{ width: 'auto', height: '18px', fill: '#333' }}
-                    src={allWebMenuIcons.find((ele) => ele.code === 'FormPageLine')?.icon}
+                    src={allWebMenuIcons.find((ele) => ele.code === 'FormPage')?.icon}
                     alt=""
                   />
                 )}

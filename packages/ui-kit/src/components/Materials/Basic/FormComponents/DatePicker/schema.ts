@@ -244,7 +244,8 @@ const XDatePicker: XInputDatePickerSchema = {
     dataField: [],
     defaultValueConfig: {
       type: DEFAULT_VALUE_TYPES.CUSTOM,
-      customValue: ''
+      customValue: '',
+      formulaValue: ''
     },
     dateType: DATE_VALUES[DATE_OPTIONS.DATE],
     dateRange: {

@@ -24,7 +24,7 @@ const XautoCode = memo((props: XautoCodeConfig & { runtime?: boolean; detailMode
 
   return (
       <Form.Item
-        className="inputTextWrapper inputAutoWrapper"
+        className="inputTextWrapperOBMobile inputAutoWrapperOBMobile"
         label={label.display && label.text}
         field={fieldId}
         style={{

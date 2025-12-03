@@ -46,7 +46,6 @@ const EntityList: React.FC<EntityListProps> = ({
                 <Popover
                   trigger="hover"
                   position="right"
-                  className={styles['more-icon-popover']}
                   content={
                     <Space direction="vertical">
                       <Button type="text" onClick={() => handleClickEdit(entity)}>

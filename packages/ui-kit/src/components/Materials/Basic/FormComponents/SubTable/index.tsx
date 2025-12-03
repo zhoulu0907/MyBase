@@ -427,7 +427,6 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
         }
         labelCol={{ span: 24 }}
         layout="vertical"
-        rules={[{ required: verify?.required, message: `${label.text}是必填项` }]}
         tooltip={tooltip}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
@@ -455,117 +454,128 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
             </div>
           </>
         ) : (
-          <ReactSortable
-            id={`workspace-content-subtable-${id}`}
-            list={subTableComponents[id] || []}
-            setList={(newList) => {
-              const dataFieldPage = subTableComponents[id]?.find(
-                (ele) => pageComponentSchemas[ele.id].config?.dataField?.[0]
-              );
-              // 已有的数据源子表id
-              const dataField = pageComponentSchemas?.[dataFieldPage?.id]?.config?.dataField?.[0];
-              /**
-               * 不允许拖拽主、子表嵌套
-               * 拖拽的子表项必须是同一个子表
-               */
-              const newSubList = (newList || []).filter((ele) => {
-                // 主表、子表
-                const isTable = ele.type === ENTITY_TYPE_VALUE.MAIN || ele.type === ENTITY_TYPE_VALUE.SUB;
-                // 主表数据
-                const isMain = ele.entityID === mainEntity.entityId;
-                // 同一个子表
-                const isSub = !ele.entityID || !dataField || ele.entityID === dataField;
-                return !isTable && !isMain && isSub;
-              });
+          <div style={{ width: '100%', display: 'flex' }}>
+            {subTableConfig?.showIndex && <div className="componentItem2" style={{ width: '62px', paddingTop: '18px' }}>
+              <div className="simulate-header-item">序号</div>
+            </div>}
 
-              // setTimeout(() => {
-              setSubTableComponents(id, newSubList);
-              // }, 0);
-            }}
-            onAdd={onSubAdd}
-            group={{ name: COMPONENT_GROUP_NAME }}
-            sort={true}
-            forceFallback={true}
-            animation={150}
-            fallbackOnBody={true}
-            swapThreshold={0.65}
-            className="XSubTable-content"
-            onStart={onSubStart}
-          >
-            {subTableComponents && subTableComponents[id] &&
-              subTableComponents[id].map((cp: GridItem, index: number) => (
-                <div
-                  key={cp.id}
-                  data-cp-type={cp.type}
-                  data-cp-displayname={cp.displayName}
-                  data-cp-id={cp.id}
-                  className="componentItem"
-                  style={{
-                    borderColor: curComponentID === cp.id ? '#4FAE7B' : 'transparent'
-                  }}
-                  onClick={(e) => {
-                    onSubComponentClick(e, cp);
-                  }}
-                >
-                  <div className="simulate-header-item">
-                    {pageComponentSchemas[cp.id]?.config?.verify?.required ? (
-                      <span style={{ color: 'red', paddingRight: '4px' }}>*</span>
-                    ) : null}
-                    {pageComponentSchemas[cp.id]?.config.label.text || pageComponentSchemas[cp.id]?.config.displayName}
-                  </div>
-                  <EditRender
-                    runtime={runtime}
-                    cpId={cp.id}
-                    cpType={cp.type}
-                    pageComponentSchema={pageComponentSchemas[cp.id]}
-                  />
+            <ReactSortable
+              id={`workspace-content-subtable-${id}`}
+              list={subTableComponents[id] || []}
+              setList={(newList) => {
+                const dataFieldPage = subTableComponents[id]?.find(
+                  (ele) => pageComponentSchemas[ele.id].config?.dataField?.[0]
+                );
+                // 已有的数据源子表id
+                const dataField = pageComponentSchemas?.[dataFieldPage?.id]?.config?.dataField?.[0];
+                /**
+                 * 不允许拖拽主、子表嵌套
+                 * 拖拽的子表项必须是同一个子表
+                 */
+                const newSubList = (newList || []).filter((ele) => {
+                  // 主表、子表
+                  const isTable = ele.type === ENTITY_TYPE_VALUE.MAIN || ele.type === ENTITY_TYPE_VALUE.SUB || ele.type === 'XSubTable';
+                  // 主表数据
+                  const isMain = ele.entityID === mainEntity.entityId;
+                  // 同一个子表
+                  const isSub = !ele.entityID || !dataField || ele.entityID === dataField;
+                  return !isTable && !isMain && isSub;
+                });
 
-                  {/* 操作按钮 */}
-                  {curComponentID === cp.id && showDeleteButton && (
-                    <div className="operationArea">
-                      {pageComponentSchemas[cp.id]?.config.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
-                        <>
-                          <div
-                            className="copyButton"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              console.debug('取消隐藏组件: ', cp);
-                              handleShowComponent(cp.id);
-                            }}
-                          >
-                            <img src={CompShowIcon} alt="component show" />
-                          </div>
-                          <Divider className="divider" type="vertical" />
-                        </>
-                      )}
-
-                      <div
-                        className="copyButton"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          console.log('复制组件: ', cp);
-                          handleCopyComponent({ ...cp, id: `${cp.type}-${uuidv4()}` }, cp.id, index);
-                        }}
-                      >
-                        <img src={CompCopyIcon} alt="component copy" />
-                      </div>
-                      <Divider className="divider" type="vertical" />
-
-                      <div
-                        className="deleteButton"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          console.log('删除组件: ', cp.id);
-                          handleDeleteComponent(cp.id);
-                        }}
-                      >
-                        <img src={CompDeleteIcon} alt="component delete" />
-                      </div>
+                // setTimeout(() => {
+                setSubTableComponents(id, newSubList);
+                // }, 0);
+              }}
+              onAdd={onSubAdd}
+              group={{ name: COMPONENT_GROUP_NAME }}
+              sort={true}
+              forceFallback={true}
+              animation={150}
+              fallbackOnBody={true}
+              swapThreshold={0.65}
+              className="XSubTable-content"
+              onStart={onSubStart}
+              style={{ backgroundImage: subTableComponents[id]?.length ? 'none' : 'linear-gradient(180deg, #f2f3f5 0%, #f2f3f5 100%)' }}
+            >
+              {subTableComponents && subTableComponents[id] &&
+                subTableComponents[id].map((cp: GridItem, index: number) => (
+                  <div
+                    key={cp.id}
+                    data-cp-type={cp.type}
+                    data-cp-displayname={cp.displayName}
+                    data-cp-id={cp.id}
+                    className="componentItem"
+                    style={{
+                      borderColor: curComponentID === cp.id ? '#4FAE7B' : 'transparent'
+                    }}
+                    onClick={(e) => {
+                      onSubComponentClick(e, cp);
+                    }}
+                  >
+                    <div className="simulate-header-item">
+                      {pageComponentSchemas[cp.id]?.config?.verify?.required ? (
+                        <span style={{ color: 'red', paddingRight: '4px' }}>*</span>
+                      ) : null}
+                      {pageComponentSchemas[cp.id]?.config.label.text || pageComponentSchemas[cp.id]?.config.displayName}
                     </div>
-                  )}
-                </div>
-              ))}
-          </ReactSortable>
+                    <EditRender
+                      runtime={runtime}
+                      cpId={cp.id}
+                      cpType={cp.type}
+                      pageComponentSchema={pageComponentSchemas[cp.id]}
+                    />
+
+                    {/* 操作按钮 */}
+                    {curComponentID === cp.id && showDeleteButton && (
+                      <div className="operationArea">
+                        {pageComponentSchemas[cp.id]?.config.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+                          <>
+                            <div
+                              className="copyButton"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                console.debug('取消隐藏组件: ', cp);
+                                handleShowComponent(cp.id);
+                              }}
+                            >
+                              <img src={CompShowIcon} alt="component show" />
+                            </div>
+                            <Divider className="divider" type="vertical" />
+                          </>
+                        )}
+
+                        <div
+                          className="copyButton"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            console.log('复制组件: ', cp);
+                            handleCopyComponent({ ...cp, id: `${cp.type}-${uuidv4()}` }, cp.id, index);
+                          }}
+                        >
+                          <img src={CompCopyIcon} alt="component copy" />
+                        </div>
+                        <Divider className="divider" type="vertical" />
+
+                        <div
+                          className="deleteButton"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            console.log('删除组件: ', cp.id);
+                            handleDeleteComponent(cp.id);
+                          }}
+                        >
+                          <img src={CompDeleteIcon} alt="component delete" />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+            </ReactSortable>
+            {subTableConfig?.showOperate && <div className="componentItem2" style={{ width: '64px', paddingTop: '18px' }}>
+              <div className="simulate-header-item">操作</div>
+            </div>}
+
+          </div>
         )}
       </Form.Item>
     </Layout>

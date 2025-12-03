@@ -207,7 +207,8 @@ const XInputPhone: XInputPhoneSchema = {
     dataField: [],
     defaultValueConfig: {
       type: DEFAULT_VALUE_TYPES.CUSTOM,
-      customValue: ''
+      customValue: '',
+      formulaValue: ''
     },
     phoneType: PHONE_TYPE.MOBILE,
     verify: {

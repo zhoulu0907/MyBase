@@ -1,12 +1,19 @@
+// ===== 导入 begin =====
 import { Form, InputNumber } from '@arco-design/web-react';
 import { nanoid } from 'nanoid';
 import { memo, useEffect, useState } from 'react';
+
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { DEFAULT_VALUE_TYPES, STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-import '../index.css';
 import type { XInputNumberConfig } from './schema';
 
+import '../index.css';
+import { useFormFieldWatch } from '../useFormField';
+// ===== 导入 end =====
+
+// ===== 组件定义 begin =====
 const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; detailMode?: boolean }) => {
+  // ===== 外部 props begin =====
   const {
     label,
     placeholder,
@@ -22,45 +29,61 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
     detailMode,
     numberFormat
   } = props;
+    const { showUnit, unitValue, showPrecision, precision, showPercent, useThousandsSeparator } = numberFormat;
+  // ===== 外部 props end =====
 
-  const { showUnit, unitValue, showPrecision, precision, showPercent, useThousandsSeparator } = numberFormat;
-
-  const { form } = Form.useFormContext();
+  // ===== 内部状态 & 回显begin =====
   const [fieldId, setFieldId] = useState('');
-
-  const fieldValue = Form.useWatch(fieldId, form);
 
   useEffect(() => {
     if (dataField.length > 0) {
       setFieldId(dataField[dataField.length - 1]);
     }
   }, [dataField]);
+  // =====  内部状态 & 回显 end =====
 
-  const detailValue = (value: number) => {
-    let result = (value || '').toString();
-    if (!value) {
-      return result;
-    } else {
-      value = Number(value);
-    }
-    if (showPercent) {
-      value = value * 100;
-    }
-    if (showPrecision && value) {
-      result = Number(value).toFixed(precision);
-    }
-    if (useThousandsSeparator) {
-      result = `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-    }
-    if (showPercent) {
-      result = `${result}%`;
-    }
-    if (showUnit) {
-      result = `${result}${unitValue}`;
-    }
+  // ===== 表单上下文与字段名与值读取 begin =====
+  const {
+    form,
+    fieldValue
+  } = useFormFieldWatch(fieldId);
+  // ===== 表单上下文与字段名与值读取 end =====
+  
+  // ===== 外部事件：选择数据 begin =====
+  // ===== 外部事件：选择数据 end =====
 
-    return (result || '').toString();
-  };
+  // ===== 内部事件 =====
+  // ===== 内部事件 =====
+
+  // ===== 方法：帮助方法 begin =====
+  const helpers = {
+    detailValue: (value: number) => {
+      let result = (value || '').toString();
+      if (!value) {
+        return result;
+      } else {
+        value = Number(value);
+      }
+      if (showPercent) {
+        value = value * 100;
+      }
+      if (showPrecision && value) {
+        result = Number(value).toFixed(precision);
+      }
+      if (useThousandsSeparator) {
+        result = `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      }
+      if (showPercent) {
+        result = `${result}%`;
+      }
+      if (showUnit) {
+        result = `${result}${unitValue}`;
+      }
+
+      return (result || '').toString();
+    }
+  }
+  // ===== 方法：帮助方法 end =====
 
   return (
     <div className="formWrapper">
@@ -72,7 +95,7 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
         field={fieldId ? fieldId : `${FORM_COMPONENT_TYPES.INPUT_NUMBER}_${nanoid()}`}
         layout={layout}
         tooltip={tooltip}
-        wrapperCol={{ style: { flex: 1 } }}
+        labelCol={layout === 'horizontal' ? { style: { width: 200, flex: 'unset' } } : {}}
         rules={[
           {
             required: verify?.required,
@@ -87,7 +110,7 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
         initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : ''}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-          <div>{detailValue(fieldValue) || '--'}</div>
+          <div>{helpers.detailValue(fieldValue) || '--'}</div>
         ) : (
           <InputNumber
             placeholder={placeholder}

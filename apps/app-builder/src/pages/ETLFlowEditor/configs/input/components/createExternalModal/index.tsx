@@ -20,7 +20,7 @@ interface CreateExternalModalProps {
   // 关闭弹窗的回调
   onClose: () => void;
   // 新建外部数据源后的回调
-  onCreate: (datasourceUUID: string) => void;
+  onCreate: (datasourceUuid: string) => void;
 }
 
 const CreateExternalModal: React.FC<CreateExternalModalProps> = ({ visible, onClose, onCreate }) => {
@@ -108,7 +108,7 @@ const CreateExternalModal: React.FC<CreateExternalModalProps> = ({ visible, onCl
             connectMode: values.connectMode
           },
           declaration: values.declaration,
-          readonly: values.readonly,
+          readonly: values.readonly ? 1 : 0,
           withCollect: 1
         });
 

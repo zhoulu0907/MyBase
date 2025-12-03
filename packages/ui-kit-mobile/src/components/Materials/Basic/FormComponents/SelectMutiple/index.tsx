@@ -54,7 +54,7 @@ const XSelectMutiple = memo((props: XSelectMutipleConfig & { runtime?: boolean; 
 
   return (
     <Form.Item
-      className="inputTextWrapper"
+      className="inputTextWrapperOBMobile"
       label={label.display && label.text}
       field={fieldId}
       rules={rules}
@@ -68,7 +68,7 @@ const XSelectMutiple = memo((props: XSelectMutipleConfig & { runtime?: boolean; 
         <div>--</div>
       ) : (
         <Checkbox.Group
-          className="selectCheckout"
+          className="selectCheckoutOBMobile"
           layout='block'
           icons={squareIcon}
           options={options}

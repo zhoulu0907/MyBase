@@ -2,13 +2,13 @@ import { Button, Table } from '@arco-design/web-react';
 import { listETLTableColumns, listETLTables, previewETLDatasource, type ELTColumn, type ETLTable } from '@onebase/app';
 import { ETLDrawerTab, etlEditorSignal } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
+import { cloneDeep } from 'lodash-es';
 import React, { useEffect, useState } from 'react';
 import DataPreview from '../../components/dataPreview';
 import DataRemark from '../../components/dataRemark';
 import { setNodeDataAndResetDownstream } from '../utils';
 import DatasourceModal from './components/datasourceModal';
 import styles from './index.module.less';
-import { cloneDeep } from 'lodash-es';
 
 type InputNodeConfigProps = { onRegisterSave?: (fn: () => void) => void };
 
@@ -42,11 +42,11 @@ export const InputNodeConfig: React.FC<InputNodeConfigProps> = ({ onRegisterSave
   };
 
   useEffect(() => {
-    if (newPayload?.config?.datasourceUUID && newPayload?.config?.tableUUID) {
-      handleListETLTables(newPayload?.config?.datasourceUUID);
-      handlelistETLTableColumns(newPayload?.config?.tableUUID);
+    if (newPayload?.config?.datasourceUuid && newPayload?.config?.tableUuid) {
+      handleListETLTables(newPayload?.config?.datasourceUuid);
+      handlelistETLTableColumns(newPayload?.config?.tableUuid);
     }
-  }, [newPayload?.config?.tableUUID]);
+  }, [newPayload?.config?.tableUuid]);
 
   useEffect(() => {
     if (curDrawerTab.value == ETLDrawerTab.DATA_PREVIEW) {
@@ -87,15 +87,15 @@ export const InputNodeConfig: React.FC<InputNodeConfigProps> = ({ onRegisterSave
   };
 
   const handlePreviewData = async () => {
-    const datasourceUUID = newPayload?.config?.datasourceUUID;
-    const tableUUID = newPayload?.config?.tableUUID;
+    const datasourceUuid = newPayload?.config?.datasourceUuid;
+    const tableUuid = newPayload?.config?.tableUuid;
 
-    if (!datasourceUUID || !tableUUID) {
+    if (!datasourceUuid || !tableUuid) {
       return;
     }
     const res = await previewETLDatasource({
-      datasourceUuid: datasourceUUID,
-      tableUuid: tableUUID
+      datasourceUuid: datasourceUuid,
+      tableUuid: tableUuid
     });
 
     console.log('res: ', res);
@@ -106,24 +106,24 @@ export const InputNodeConfig: React.FC<InputNodeConfigProps> = ({ onRegisterSave
 
   const handleOk = () => {
     const payload = newPayload;
-    if (payload?.config?.tableUUID) {
-      handlelistETLTableColumns(payload?.config?.tableUUID);
+    if (payload?.config?.tableUuid) {
+      handlelistETLTableColumns(payload?.config?.tableUuid);
     }
 
     setIsModalVisible(false);
   };
 
-  const handleUpdate = (datasourceUUID: string, tableUUID: string, columns: ELTColumn[]) => {
+  const handleUpdate = (datasourceUuid: string, tableUuid: string, columns: ELTColumn[]) => {
     setCurColumns(columns);
 
-    if (tableUUID !== newPayload?.config?.tableUUID) {
+    if (tableUuid !== newPayload?.config?.tableUuid) {
       setSelectColumns([]);
       let payload = newPayload;
 
       payload.config = {
         ...payload.config,
-        datasourceUUID: datasourceUUID,
-        tableUUID: tableUUID,
+        datasourceUuid: datasourceUuid,
+        tableUuid: tableUuid,
         fields: []
       };
 
@@ -148,10 +148,10 @@ export const InputNodeConfig: React.FC<InputNodeConfigProps> = ({ onRegisterSave
               </Button>
             </div>
           </div>
-          {newPayload?.config?.tableUUID && (
+          {newPayload?.config?.tableUuid && (
             <div className={styles.dataSourceContent}>
               <div className={styles.dataSourceName}>
-                {tables.find((table: ETLTable) => table.uuid === newPayload?.config?.tableUUID)?.name}
+                {tables.find((table: ETLTable) => table.uuid === newPayload?.config?.tableUuid)?.name}
               </div>
 
               <div className={styles.columnContent}>

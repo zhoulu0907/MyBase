@@ -4,13 +4,13 @@
  */
 export const getPopupContainer = (
   node?: HTMLElement,
-  className: string = '.arco-form-item'
+  className: string = '.pc-form-item'
 ): HTMLElement => {
   if (!node) return document.body;
 
   // 优先查找传入的 className
   const container =
-    node.closest(className) || node.closest('.arco-form-item') || node.parentElement;
+    node.closest(className) || node.closest('.pc-form-item') || node.parentElement;
 
   return (container as HTMLElement) || document.body;
 };

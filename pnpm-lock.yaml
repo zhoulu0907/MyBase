@@ -128,9 +128,6 @@ importers:
       '@antv/x6-react-shape':
         specifier: ^2.2.3
         version: 2.2.3(@antv/x6@2.18.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@arco-design/mobile-react':
-        specifier: ^2.38.2
-        version: 2.38.2(@types/react-dom@18.3.7(@types/react@18.3.23))(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react-transition-group@4.4.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       '@arco-design/web-react':
         specifier: ^2.66.1
         version: 2.66.1(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -224,9 +221,6 @@ importers:
       '@onebase/ui-kit':
         specifier: workspace:*
         version: link:../../packages/ui-kit
-      '@onebase/ui-kit-mobile':
-        specifier: workspace:*
-        version: link:../../packages/ui-kit-mobile
       '@preact/signals-react':
         specifier: ^3.2.1
         version: 3.2.1(react@18.3.1)
@@ -619,6 +613,9 @@ importers:
       axios:
         specifier: ^1.10.0
         version: 1.10.0
+      crypto-js:
+        specifier: ^4.2.0
+        version: 4.2.0
       dayjs:
         specifier: ^1.11.13
         version: 1.11.13
@@ -670,6 +667,9 @@ importers:
       react-sortablejs:
         specifier: ^6.1.4
         version: 6.1.4(@types/sortablejs@1.15.8)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sortablejs@1.15.6)
+      react-svg:
+        specifier: ^16.3.0
+        version: 16.3.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       sm-crypto:
         specifier: ^0.3.13
         version: 0.3.13
@@ -4104,7 +4104,7 @@ packages:
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
 
   '@types/json5@0.0.29':
-    resolution: {integrity: sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ==}
+    resolution: {integrity: sha1-7ihweulOEdK4J7y+UnC86n8+ce4=}
 
   '@types/less@3.0.8':
     resolution: {integrity: sha512-Gjm4+H9noDJgu5EdT3rUw5MhPBag46fiOy27BefvWkNL8mlZnKnCaVVVTLKj6RYXed9b62CPKnPav9govyQDzA==}
@@ -6227,7 +6227,7 @@ packages:
     engines: {node: '>=0.8.19'}
 
   inflight@1.0.6:
-    resolution: {integrity: sha512-k92I/b08q4wvFscXCLvqfsHCrjrF7yiXsQuIVvVE7N82W3+aqpzuUdBbfhWcy/FZR3/4IgflMgKLOsvPDrGCJA==}
+    resolution: {integrity: sha1-Sb1jMdfQLQwJvJEKEHW6gWW1bfk=}
     deprecated: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
 
   inherits@2.0.3:
@@ -7246,7 +7246,7 @@ packages:
     engines: {node: '>=20.0.0'}
 
   p-finally@1.0.0:
-    resolution: {integrity: sha512-LICb2p9CB7FS+0eR1oqWnHhp0FljGLZCWBE9aix0Uye9W8LTQPwMTYVGWQWIw9RdQiDg4+epXQODwIYJtSJaow==}
+    resolution: {integrity: sha1-P7z7FbiZpEEjs0ttzBi3JDNqLK4=}
     engines: {node: '>=4'}
 
   p-limit@3.1.0:
@@ -7304,7 +7304,7 @@ packages:
     engines: {node: '>=8'}
 
   path-is-absolute@1.0.1:
-    resolution: {integrity: sha512-AVbw3UJ2e9bq64vSaS9Am0fje1Pa8pbGqTTsmXfaIiMpnr5DlDhfJOuLj9Sf95ZPVDAUerDfEk88MPmPe7UCQg==}
+    resolution: {integrity: sha1-F0uSaHNVNP+8es5r9TpanhtcX18=}
     engines: {node: '>=0.10.0'}
 
   path-key@3.1.1:
@@ -7864,7 +7864,7 @@ packages:
     engines: {node: '>= 0.4'}
 
   setimmediate@1.0.5:
-    resolution: {integrity: sha512-MATJdZp8sLqDl/68LfQmbP8zKPLQNV6BIZoIgrscFDQ+RsvK/BxeDQOgyxKKoh0y/8h3BqVFnCqQ/gd+reiIXA==}
+    resolution: {integrity: sha1-KQy7Iy4waULX1+qbg3Mqt4VvgoU=}
 
   shallowequal@1.1.0:
     resolution: {integrity: sha512-y0m1JoUZSlPAjXVtPPW70aZWfIL/dSP7AFkRnniLCrK/8MDKog3TySTBmckD+RObVxH0v4Tox67+F14PdED2oQ==}
@@ -8604,7 +8604,7 @@ packages:
     engines: {node: '>=12'}
 
   wrappy@1.0.2:
-    resolution: {integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==}
+    resolution: {integrity: sha1-tSQ9jz7BqjXxNkYFvA0QNuMKtp8=}
 
   yallist@3.1.1:
     resolution: {integrity: sha512-a4UGQaWPH59mOXUYnAG2ewncQS4i4F43Tv3JoAM+s2VDAmS9NsK8GpDMLrCHPksFT7h3K6TOoUNn2pb7RoXx4g==}

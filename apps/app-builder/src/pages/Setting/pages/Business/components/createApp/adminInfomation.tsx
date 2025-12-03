@@ -27,14 +27,14 @@ export const AdminInformation:React.FC<IAdminInfoProps> = ({adminValues, onDataC
         >
             <Form.Item
                 label="姓名"
-                field="username"
+                field="nickname"
                 rules={[{ required: true, message: '请输入姓名' }]}
             >
                 <Input placeholder="输入姓名" />
             </Form.Item>
             <Form.Item
                 label="账号"
-                field="nickname"
+                field="username"
                 rules={[{ required: true, message: '请输入账号' }]}
             >
                 <Input placeholder="输入账号" />

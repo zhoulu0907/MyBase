@@ -1,4 +1,4 @@
-.collapse {
+.collapseOBMobile {
   :global(.arco-collapse-header) {
     flex-direction: row-reverse;
     justify-content: flex-end;
@@ -17,7 +17,7 @@
     display: none;
   }
 
-  :global(.inputTextWrapper) {
+  :global(.inputTextWrapperOBMobile) {
     border: none !important;
   }
 
@@ -47,7 +47,7 @@
 
 }
 
-.onAdd {
+.onAddOBMobile {
   text-align: center;
   color: rgb(var(--primary-6));
   font-family: "PingFang SC";

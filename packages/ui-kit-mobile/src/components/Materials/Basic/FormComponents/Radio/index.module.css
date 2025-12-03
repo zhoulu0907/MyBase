@@ -1,5 +1,7 @@
-.radioCell {
-  :global(.arco-cell-inner) {
-    height: auto;
+.radioWrapperOBMobile {
+  .radioCell {
+    :global(.arco-cell-inner) {
+      height: auto;
+    }
   }
 }

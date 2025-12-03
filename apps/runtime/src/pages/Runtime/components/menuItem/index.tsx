@@ -33,7 +33,7 @@ const RuntimeMenuItem: React.FC<MenuItemProps> = ({ label, menuID, menuIcon, onC
           maxWidth: maxWidth + 'px'
         }}
       >
-        {menuIcon.includes('TASK-')  ? (
+        {menuIcon.includes('TASK-') ? (
           // TASK-XXX 是工作流程任务中心菜单的icon
           <i className={`iconfont ${menuIcon}`} style={{ marginRight: '16px' }} />
         ) : (
@@ -42,7 +42,7 @@ const RuntimeMenuItem: React.FC<MenuItemProps> = ({ label, menuID, menuIcon, onC
             className={styles.menuIcon}
             src={
               allWebMenuIcons.find((ele) => ele.code === menuIcon)?.icon ||
-              allWebMenuIcons.find((ele) => ele.code === 'FormPageLine')?.icon ||
+              allWebMenuIcons.find((ele) => ele.code === 'FormPage')?.icon ||
               ''
             }
             beforeInjection={(svg) => {
