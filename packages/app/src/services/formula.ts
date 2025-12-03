@@ -6,7 +6,7 @@ import { formulaService } from './clients';
  * @returns 函数精简信息列表
  */
 export const getFormulaFunctionSimpleList = () => {
-  return formulaService.get('/function/simple-list');
+  return formulaService.get('/function/list-group-by-type');
 };
 
 /**
