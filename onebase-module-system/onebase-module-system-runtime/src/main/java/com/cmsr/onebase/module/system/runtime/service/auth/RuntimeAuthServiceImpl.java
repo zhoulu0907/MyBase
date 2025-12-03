@@ -170,7 +170,11 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
     }
 
     public boolean findAdminFlag(Long userId, Long appId) {
-        return appAuthSecurityApi.isApplicationAdmin(userId, appId);
+        try {
+            return appAuthSecurityApi.isApplicationAdmin(userId, appId);
+        } catch (Exception e) {
+            return false;
+        }
     }
 
 

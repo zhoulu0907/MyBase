@@ -65,9 +65,8 @@ public class AppAuthSecurityApiImpl implements AppAuthSecurityApi {
 
     @Override
     public boolean isApplicationAdmin(Long userId, Long applicationId) {
-        return  false;
-        // UserRoleDTO userRoleDTO = appAuthRoleProvider.findUserRoleByApplication(userId, applicationId);
-        // return userRoleDTO != null && userRoleDTO.isAdminRole();
+        UserRoleDTO userRoleDTO = appAuthRoleProvider.findUserRoleByApplication(userId, applicationId);
+        return userRoleDTO != null && userRoleDTO.isAdminRole();
     }
 
     @Override
