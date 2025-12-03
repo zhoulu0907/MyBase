@@ -8,6 +8,7 @@ import com.mybatisflex.core.query.*;
 import com.mybatisflex.core.util.CollectionUtil;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -18,19 +19,23 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
 
     protected QueryWrapper injectBizFilter(QueryWrapper queryWrapper) {
         List<QueryTable> queryTables = CPI.getQueryTables(queryWrapper);
-        if (queryTables.size() > 1) {
+        if (CollectionUtils.isNotEmpty(queryTables) && queryTables.size() > 1) {
             log.warn("查询条件包含多个表，跳过条件注入");
             return queryWrapper;
         }
+        QueryColumn applicationColumn;
+        QueryColumn versionTagColumn;
+        if (CollectionUtils.isEmpty(queryTables)) {
+            applicationColumn = new QueryColumn(BaseBizEntity.APPLICATION_ID);
+            versionTagColumn = new QueryColumn(BaseBizEntity.VERSION_TAG);
+        } else {
+            applicationColumn = new QueryColumn(queryTables.get(0), BaseBizEntity.APPLICATION_ID);
+            versionTagColumn = new QueryColumn(queryTables.get(0), BaseBizEntity.VERSION_TAG);
+        }
         Long applicationId = ApplicationManager.getApplicationId();
         Long versionTag = ApplicationManager.getVersionTag();
-        QueryTable table = queryTables.get(0);
-        queryWrapper = queryWrapper.and(
-                new QueryColumn(table, BaseBizEntity.APPLICATION_ID)
-                        .eq(applicationId).when(!ApplicationManager.isIgnoreApplicationCondition()));
-        queryWrapper = queryWrapper.and(
-                new QueryColumn(table, BaseBizEntity.VERSION_TAG)
-                        .eq(versionTag).when(!ApplicationManager.isIgnoreVersionTagCondition()));
+        queryWrapper = queryWrapper.and(applicationColumn.eq(applicationId).when(!ApplicationManager.isIgnoreApplicationCondition()));
+        queryWrapper = queryWrapper.and(versionTagColumn.eq(versionTag).when(!ApplicationManager.isIgnoreVersionTagCondition()));
         return queryWrapper;
     }
 
