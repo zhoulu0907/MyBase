@@ -127,8 +127,8 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
         field={fieldId}
         layout={layout}
         tooltip={tooltip}
+        labelCol={layout === 'horizontal' ? { style: { width: 200, flex: 'unset' } } : {}}
         rules={[{ required: verify?.required, message: `${label.text}是必填项` }]}
-        wrapperCol={{ style: { flex: 1 } }}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           margin: 0,

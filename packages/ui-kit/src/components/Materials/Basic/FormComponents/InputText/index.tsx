@@ -42,9 +42,9 @@ const XInputText = memo((props: XInputTextConfig & { runtime?: boolean; detailMo
         field={fieldId ? fieldId : `${FORM_COMPONENT_TYPES.INPUT_TEXT}_${nanoid()}`}
         layout={layout}
         tooltip={tooltip}
-        wrapperCol={{ style: { flex: 1 } }}
+        labelCol={layout === 'horizontal' ? { style: { width: 200, flex: 'unset' } } : {}}
         rules={[
-          { required: verify?.required, message:`${label.text}是必填项` },
+          { required: verify?.required, message: `${label.text}是必填项` },
           {
             validator: (value, callback) => {
               if (verify.lengthLimit) {

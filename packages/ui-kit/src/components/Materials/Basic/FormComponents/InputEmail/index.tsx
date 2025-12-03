@@ -44,7 +44,7 @@ const XInputEmail = memo((props: XInputEmailConfig & { runtime?: boolean; detail
         }
         layout={layout}
         tooltip={tooltip}
-        wrapperCol={{ style: { flex: 1 } }}
+        labelCol={layout === 'horizontal' ? { style: { width: 200, flex: 'unset' } } : {}}
         rules={[
           { required: verify?.required, message:`${label.text}是必填项` },
           {

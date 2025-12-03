@@ -40,8 +40,8 @@ const XSwitch = memo((props: XInputSwitchConfig & { runtime?: boolean; detailMod
         field={fieldId ? fieldId : `${FORM_COMPONENT_TYPES.SWITCH}_${nanoid()}`}
         layout={layout}
         tooltip={tooltip}
+        labelCol={layout === 'horizontal' ? { style: { width: 200, flex: 'unset' } } : {}}
         triggerPropName="checked"
-        wrapperCol={{ style: { flex: 1 } }}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           margin: 0,

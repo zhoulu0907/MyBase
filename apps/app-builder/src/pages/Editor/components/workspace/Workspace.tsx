@@ -817,7 +817,7 @@ export default function EditorWorkspace() {
 
       {editMode.value !== EditMode.MOBILE ? <Form
         labelCol={{
-          style: { width: 200, flex: 'unset' }
+          style: { flex: 'unset' }
         }}
       >
         <div
