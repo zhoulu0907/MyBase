@@ -169,6 +169,7 @@ const DataFields: React.FC<DataFieldsProps> = ({ entity, activeTab }) => {
     {
       title: '操作',
       key: 'operation',
+      width: 80,
       render: (_, record) => (
         <Space>
           {record.isSystemField === FIELD_TYPE.CUSTOM && (
