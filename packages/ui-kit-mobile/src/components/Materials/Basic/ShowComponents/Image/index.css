@@ -1,7 +1,8 @@
-.imageStyle img {
-  max-height: var(--maxHeight, none);
-}
-
-.arco-image-error {
-  border-radius: 8px;
+.imageStyleOBMobile {
+   img {
+    max-height: var(--maxHeight, none);
+  }
+  :global(.arco-image-error) {
+    border-radius: 8px;
+  }
 }

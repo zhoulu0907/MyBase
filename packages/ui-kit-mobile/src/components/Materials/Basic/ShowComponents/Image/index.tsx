@@ -20,7 +20,7 @@ const XImage = memo((props: XImageConfig & { runtime?: boolean; detailMode?: boo
 
   return (
     <Image
-      className="formWrapper imageStyle"
+      className="formWrapperOBMobile imageStyleOBMobile"
       width='100%'
       height={300}
       showLoading={true}

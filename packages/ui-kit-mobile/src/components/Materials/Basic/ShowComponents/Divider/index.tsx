@@ -9,7 +9,7 @@ const XDivider = memo((props: XDividerConfig) => {
 
   return (
     <div
-      className={`formWrapper dividerWrapper ${align}`}
+      className={`formWrapperOBMobile dividerWrapperOBMobile ${align}`}
       style={{
         margin: `${margin}px 0`,
       }}

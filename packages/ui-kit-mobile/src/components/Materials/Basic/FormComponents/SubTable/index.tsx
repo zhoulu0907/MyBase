@@ -70,7 +70,7 @@ const XSubTable = memo(
 
     return (
       <Form.Item
-        className="inputTextWrapper"
+        className="inputTextWrapperOBMobile"
         field=""
         rules={rules}
         layout="vertical"
@@ -83,7 +83,7 @@ const XSubTable = memo(
         <>
           {subTableData.map((item, index) => (
             <Collapse
-              className={styles.collapse}
+              className={styles.collapseOBMobile}
               key={item.key}
               header={
                 <div className={styles.collapseHeader}>
@@ -121,7 +121,7 @@ const XSubTable = memo(
               }
             />
           ))}
-          <div className={styles.onAdd} onClick={handleAdd}>
+          <div className={styles.onAddOBMobile} onClick={handleAdd}>
             <IconAdd />
             新增一项
           </div>

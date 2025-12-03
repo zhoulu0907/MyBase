@@ -49,7 +49,7 @@ const XUserSelect = memo((props: XUserSelectConfig & { runtime?: boolean; detail
 
   return (
     <Form.Item
-      className="inputTextWrapper"
+      className="inputTextWrapperOBMobile"
       label={label.display && label.text}
       field={fieldId}
       rules={rules}

@@ -4,7 +4,7 @@ import '../index.css';
 const XPlaceholder = memo(() => {
   return (
     <div
-      className='formWrapper'
+      className='formWrapperOBMobile'
       style={{
         height: '0.96rem'
       }}

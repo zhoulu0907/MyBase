@@ -1,5 +1,4 @@
 import { Button, Drawer, Form } from '@arco-design/web-react';
-import { Form as MobileForm } from '@arco-design/mobile-react';
 import {
   EDITOR_TYPES,
   getComponentWidth,
@@ -12,16 +11,6 @@ import {
 } from '@onebase/ui-kit';
 import classNames from 'classnames';
 
-import {
-  // EDITOR_TYPES,
-  // getComponentWidth,
-  PreviewRender as MobilePreviewRender,
-  // STATUS_OPTIONS,
-  // STATUS_VALUES,
-  // useFormEditorSignal,
-  // useListEditorSignal,
-  // type GridItem
-} from '@onebase/ui-kit-mobile';
 import React, { Fragment } from 'react';
 import styles from './index.module.less';
 import { currentEditorSignal } from '@onebase/ui-kit/src/signals/current_editor';
@@ -42,43 +31,30 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
   const { components: listComponents, pageComponentSchemas: listPageComponentSchemas } = useListEditorSignal;
   const { editMode } = currentEditorSignal;
 
-  const getFormContent = (isMobile: boolean) => {
+  const getFormContent = () => {
     return (
       formComponents.value.map((cp: GridItem) => (
-                    <Fragment key={cp.id}>
-                      {formPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
-                        <div
-                          key={cp.id}
-                          className={styles.componentItem}
-                          style={{
-                            width: 
-                            isMobile ? `calc(100% - 8px)` : `calc(${getComponentWidth(formPageComponentSchemas.value[cp.id], cp.type)} - 8px)`,
-                            margin: '4px'
-                          }}
-                        >
-                          {
-                            isMobile ? (
-                              <MobilePreviewRender
-                                cpId={cp.id}
-                                cpType={cp.type}
-                                pageComponentSchema={formPageComponentSchemas.value[cp.id]}
-                                runtime={true}
-                                preview={true}
-                              />
-                            ) : (
-                              <PreviewRender
-                                cpId={cp.id}
-                                cpType={cp.type}
-                                pageComponentSchema={formPageComponentSchemas.value[cp.id]}
-                                runtime={true}
-                                preview={true}
-                              />
-                            )
-                          }
-                        </div>
-                      )}
-                    </Fragment>
-                  ))
+        <Fragment key={cp.id}>
+          {formPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+            <div
+              key={cp.id}
+              className={styles.componentItem}
+              style={{
+                width: `calc(${getComponentWidth(formPageComponentSchemas.value[cp.id], cp.type)} - 8px)`,
+                margin: '4px'
+              }}
+            >
+              <PreviewRender
+                cpId={cp.id}
+                cpType={cp.type}
+                pageComponentSchema={formPageComponentSchemas.value[cp.id]}
+                runtime={true}
+                preview={true}
+              />
+            </div>
+          )}
+        </Fragment>
+      ))
     )
   }
   return (
@@ -109,7 +85,7 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
                   >
                     {
                       editMode.value === EditMode.MOBILE ? (
-                        <MobilePreviewRender
+                        <PreviewRender
                           cpId={cp.id}
                           cpType={cp.type}
                           pageComponentSchema={listPageComponentSchemas.value[cp.id]}
@@ -135,12 +111,12 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
             <div className={styles.fromContain}>
               <div className={styles.previewForm}>
                 {editMode.value === EditMode.MOBILE ? (
-                  <MobileForm layout="inline">
-                    {getFormContent(true)}
-                  </MobileForm>
+                  <Form layout="inline">
+                    {getFormContent()}
+                  </Form>
                 ) : (
                   <Form layout="inline">
-                    {getFormContent(false)}
+                    {getFormContent()}
                   </Form>
                 )}
               </div>

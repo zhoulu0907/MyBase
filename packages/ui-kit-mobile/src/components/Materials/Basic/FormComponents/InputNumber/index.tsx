@@ -92,7 +92,7 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
 
   return (
     <Form.Item
-      className="inputTextWrapper"
+      className="inputTextWrapperOBMobile"
       field={fieldId}
       rules={rules}
       label={label.display ? label.text : undefined}

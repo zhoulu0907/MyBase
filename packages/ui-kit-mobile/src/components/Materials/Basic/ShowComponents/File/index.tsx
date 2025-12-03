@@ -23,7 +23,7 @@ const XFile = memo((props: XFileConfig & { runtime?: boolean; detailMode?: boole
       }>
       {(!fileConfig || fileConfig.length == 0) && <span>静态文件</span>}
       {fileConfig?.map((item: any, index: number) => (
-        <div className={styles.fileItem} key={index} onClick={() => downloadFile(item)}>
+        <div className={styles.fileItemOBMobile} key={index} onClick={() => downloadFile(item)}>
           <div className={styles.fileItemName}>{item.name}</div>
           <IconDownload className={styles.fileItemIcon} />
         </div>

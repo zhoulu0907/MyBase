@@ -40,7 +40,6 @@ const SliderCaptcha = forwardRef<SliderCaptchaRef, SliderCaptchaProps>(
       contentWidth: '350px',
       barHeight: '40px'
     });
-    console.warn(window.innerWidth)
 
     // AES加密函数
     const aesEncrypt = (word: string, keyWord: string = 'XwKsGlMcdPMEhR1B') => {
