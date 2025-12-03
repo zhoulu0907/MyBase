@@ -1,4 +1,4 @@
-import { Form, Radio, TreeSelect, Button } from '@arco-design/web-react';
+import { Form, Radio, TreeSelect, type FormInstance } from '@arco-design/web-react';
 import { listApplicationMenu, type ListApplicationMenuReq, MenuType } from '@onebase/app';
 import { getPopupContainer } from '@onebase/ui-kit';
 import { useAppStore } from '@/store';
@@ -10,18 +10,25 @@ import mobileLayout1 from '@/assets/images/appRelease/mobile_layout1.svg';
 import mobileLayout2 from '@/assets/images/appRelease/mobile_layout2.svg';
 import styles from './index.module.less';
 
-const NavigatorSetting = () => {
+interface IProps {
+  form: FormInstance;
+  data?: any;
+}
+const NavigatorSetting = (props: IProps) => {
   const { curAppId } = useAppStore();
-  const [form] = Form.useForm();
+  const { form, data } = props;
   const webHomeType = Form.useWatch('webHomeType', form);
   const mobileHomeType = Form.useWatch('mobileHomeType', form);
 
   const [menuTree, setMenuTree] = useState<any[]>([]);
-  const [saveLoading, setSaveLoading] = useState<boolean>(false);
 
   useEffect(() => {
     getPages();
   }, []);
+
+  useEffect(() => {
+    form.setFieldsValue(data);
+  }, [data]);
 
   // 获取下拉页面
   const getPages = async () => {
@@ -29,7 +36,6 @@ const NavigatorSetting = () => {
       applicationId: curAppId
     };
     const res = await listApplicationMenu(params);
-    console.log('获取菜单 res:', res);
     const newMenuData = [...res];
     handlemenuData(newMenuData);
     setMenuTree(newMenuData);
@@ -44,13 +50,6 @@ const NavigatorSetting = () => {
         }
       }
     });
-  };
-
-  // 表单保存
-  const handleSave = () => {
-    const param = form.getFieldsValue();
-    console.log('param',param)
-    // todo 接口保存
   };
 
   return (
@@ -80,27 +79,36 @@ const NavigatorSetting = () => {
           </Radio.Group>
         </Form.Item>
 
-        <Form.Item label="导航布局" field="webLayoutType">
+        <Form.Item label="导航布局" field="webLayoutType" initialValue={1}>
           <Radio.Group>
             <Radio value={1}>
               {({ checked }) => (
-                <div className={styles.radioContainer} style={{ borderColor: checked ? '#009E9E' : 'transparent' }}>
-                  <img className={styles.radioLayout} src={webLayout1} alt="" />
-                </div>
+                <>
+                  <div className={styles.radioContainer} style={{ borderColor: checked ? '#009E9E' : 'transparent' }}>
+                    <img className={styles.radioLayout} src={webLayout1} alt="" />
+                  </div>
+                  <div className={styles.radioTips}>侧边导航</div>
+                </>
               )}
             </Radio>
             <Radio value={2}>
               {({ checked }) => (
-                <div className={styles.radioContainer} style={{ borderColor: checked ? '#009E9E' : 'transparent' }}>
-                  <img className={styles.radioLayout} src={webLayout2} alt="" />
-                </div>
+                <>
+                  <div className={styles.radioContainer} style={{ borderColor: checked ? '#009E9E' : 'transparent' }}>
+                    <img className={styles.radioLayout} src={webLayout2} alt="" />
+                  </div>
+                  <div className={styles.radioTips}>顶部导航</div>
+                </>
               )}
             </Radio>
             <Radio value={3}>
               {({ checked }) => (
-                <div className={styles.radioContainer} style={{ borderColor: checked ? '#009E9E' : 'transparent' }}>
-                  <img className={styles.radioLayout} src={webLayout3} alt="" />
-                </div>
+                <>
+                  <div className={styles.radioContainer} style={{ borderColor: checked ? '#009E9E' : 'transparent' }}>
+                    <img className={styles.radioLayout} src={webLayout3} alt="" />
+                  </div>
+                  <div className={styles.radioTips}>厂字导航</div>
+                </>
               )}
             </Radio>
           </Radio.Group>
@@ -130,36 +138,36 @@ const NavigatorSetting = () => {
           </Radio.Group>
         </Form.Item>
 
-        <Form.Item label="导航布局" field="mobileLayoutType">
+        <Form.Item label="导航布局" field="mobileLayoutType" initialValue={1}>
           <Radio.Group>
             <Radio value={1}>
               {({ checked }) => (
-                <div
-                  className={styles.radioMobileContainer}
-                  style={{ borderColor: checked ? '#009E9E' : 'transparent' }}
-                >
-                  <img className={styles.radioLayout} src={mobileLayout1} alt="" />
-                </div>
+                <>
+                  <div
+                    className={styles.radioMobileContainer}
+                    style={{ borderColor: checked ? '#009E9E' : 'transparent' }}
+                  >
+                    <img className={styles.radioLayout} src={mobileLayout1} alt="" />
+                  </div>
+                  <div className={styles.radioTips}>网格式菜单</div>
+                </>
               )}
             </Radio>
             <Radio value={2}>
               {({ checked }) => (
-                <div
-                  className={styles.radioMobileContainer}
-                  style={{ borderColor: checked ? '#009E9E' : 'transparent' }}
-                >
-                  <img className={styles.radioLayout} src={mobileLayout2} alt="" />
-                </div>
+                <>
+                  <div
+                    className={styles.radioMobileContainer}
+                    style={{ borderColor: checked ? '#009E9E' : 'transparent' }}
+                  >
+                    <img className={styles.radioLayout} src={mobileLayout2} alt="" />
+                  </div>
+                  <div className={styles.radioTips}>列表式菜单</div>
+                </>
               )}
             </Radio>
           </Radio.Group>
         </Form.Item>
-      </div>
-
-      <div className={styles.navigatorFooter}>
-        <Button type="primary" loading={saveLoading} onClick={handleSave}>
-        保存
-      </Button>
       </div>
     </Form>
   );

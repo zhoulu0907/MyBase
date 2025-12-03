@@ -1,13 +1,12 @@
 import ListItem from '@/components/ListItem';
+import { PermissionButton as Button } from '@/components/PermissionControl';
+import PlaceholderPanel from '@/components/PlaceholderPanel';
+import StatusTag from '@/components/StatusTag';
 import { Input } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
+import { TENANT_DICT_PERMISSION as ACTIONS, hasPermission } from '@onebase/common';
 import { type DictItem } from '@onebase/platform-center';
 import styles from '../../index.module.less';
-import PlaceholderPanel from '@/components/PlaceholderPanel';
-import { hasPermission } from '@/utils/permission';
-import { TENANT_DICT_PERMISSION as ACTIONS } from '@/constants/permission';
-import { PermissionButton as Button } from '@/components/PermissionControl';
-import StatusTag from '@/components/StatusTag';
 
 interface DictionaryListProps {
   list: DictItem[];

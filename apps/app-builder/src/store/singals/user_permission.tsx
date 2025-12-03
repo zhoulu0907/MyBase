@@ -1,4 +1,4 @@
-import type { UserPermissionInfo } from '@/utils/permission';
+import type { UserPermissionInfo } from '@onebase/common';
 import { signal } from '@preact/signals-react';
 
 export const createUserPermissionSignal = () => {

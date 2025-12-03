@@ -8,11 +8,10 @@ import DynamicIcon from '@/components/DynamicIcon';
 
 import { useI18n } from '@/hooks/useI18n';
 import { useAppStore } from '@/store/store_app';
-import { UserPermissionManager } from '@/utils/permission';
 import { Button, Layout, Menu, Tabs, Tooltip } from '@arco-design/web-react';
 import { IconArrowLeft } from '@arco-design/web-react/icon';
 import { AppStatus, getApplication, menuSignal, type GetApplicationReq } from '@onebase/app';
-import { getRuntimeURL, TokenManager } from '@onebase/common';
+import { getRuntimeURL, TokenManager, UserPermissionManager } from '@onebase/common';
 import { appIconMap } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -194,6 +193,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
               break;
           }
         }}
+        inkBarSize={{ width: 0, height: 0 }}
         size="large"
         renderTabTitle={(tabTitle, info) => {
           const currentIndex = tabsList.findIndex((tab) => tab === info.key);

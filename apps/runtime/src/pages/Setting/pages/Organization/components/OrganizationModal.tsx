@@ -1,10 +1,9 @@
 import { listToTree } from '@/utils/tree';
 import { Form, Grid, Input, Modal, Select, TreeSelect } from '@arco-design/web-react';
+import { CORP_USER_QUERY, hasPermission } from '@onebase/common';
 import type { DeptForm, UserVO } from '@onebase/platform-center';
 import { getCorpSimpleDeptList, getSimpleUserPageInCorp } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
-import { hasPermission } from '@/utils/permission';
-import { CORP_USER_QUERY } from '@/constants/permission';
 
 const { Row, Col } = Grid;
 const FormItem = Form.Item;
@@ -76,7 +75,11 @@ const DepartmentModal: React.FC<DepartmentModalProps> = (props) => {
 
   return (
     <Modal
-      title={<div style={{ textAlign: 'left' }}>{modalType === 'edit' ? `编辑${isSubDept ? '子' : ''}部门` : `新建${isSubDept ? '子' : ''}部门`}</div>}
+      title={
+        <div style={{ textAlign: 'left' }}>
+          {modalType === 'edit' ? `编辑${isSubDept ? '子' : ''}部门` : `新建${isSubDept ? '子' : ''}部门`}
+        </div>
+      }
       visible={visible}
       onConfirm={handleConfirm}
       onCancel={onCancel}
@@ -86,7 +89,11 @@ const DepartmentModal: React.FC<DepartmentModalProps> = (props) => {
       <Form form={form} layout="vertical">
         <Row gutter={24}>
           <Col span={12}>
-            <FormItem label={`${isSubDept ? '子' : ''}部门名称`} field="name" rules={[{ required: true, message: `请输入${isSubDept ? '子' : ''}部门名称` }]}>
+            <FormItem
+              label={`${isSubDept ? '子' : ''}部门名称`}
+              field="name"
+              rules={[{ required: true, message: `请输入${isSubDept ? '子' : ''}部门名称` }]}
+            >
               <Input placeholder="请输入部门名称" />
             </FormItem>
           </Col>
@@ -111,7 +118,7 @@ const DepartmentModal: React.FC<DepartmentModalProps> = (props) => {
           <Col span={12}>
             <FormItem label="管理员" field="adminUserId">
               <Select
-                placeholder={hasUserQueryPermission ? "请选择管理员" : "无权限"}
+                placeholder={hasUserQueryPermission ? '请选择管理员' : '无权限'}
                 allowClear
                 showSearch
                 disabled={!hasUserQueryPermission}
@@ -132,7 +139,7 @@ const DepartmentModal: React.FC<DepartmentModalProps> = (props) => {
             {/* todo 部门主管调整 */}
             <FormItem label="部门主管" field="leaderUserId">
               <Select
-                placeholder={hasUserQueryPermission ? "请选择部门主管" : "无权限"}
+                placeholder={hasUserQueryPermission ? '请选择部门主管' : '无权限'}
                 allowClear
                 showSearch
                 disabled={!hasUserQueryPermission}

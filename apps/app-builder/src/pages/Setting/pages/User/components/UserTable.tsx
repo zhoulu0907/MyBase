@@ -1,20 +1,27 @@
+import { PermissionButton as Button } from '@/components/PermissionControl';
+import PlaceholderPanel from '@/components/PlaceholderPanel';
 import StatusTag, { getStatusLabel } from '@/components/StatusTag';
 import { Dropdown, Input, Menu, Message, Modal, Pagination, Select, Space, Table, Tag } from '@arco-design/web-react';
 import { IconDownload, IconMoreVertical, IconPlus, IconUpload } from '@arco-design/web-react/icon';
+import { type AuthRoleUsersPageRespVO } from '@onebase/app';
+import { TENANT_USER_PERMISSION as ACTIONS, AddMembers, hasAllPermissions, hasPermission } from '@onebase/common';
 import type { PageParam, UpdateAdminOrDirectorReq, UserVO } from '@onebase/platform-center';
-import { deleteUser, getUserPage, resetUserPassword, StatusEnum, updateUserStatus, UserType, PlatformTenantStatus, getSimpleUser, updateAdminOrDirector, getSimpleUserList } from '@onebase/platform-center';
+import {
+  deleteUser,
+  getSimpleUser,
+  getUserPage,
+  PlatformTenantStatus,
+  resetUserPassword,
+  StatusEnum,
+  updateAdminOrDirector,
+  updateUserStatus,
+  UserType
+} from '@onebase/platform-center';
 import { debounce } from 'lodash-es';
 import { useCallback, useEffect, useState } from 'react';
 import s from '../index.module.less';
 import PasswordModal from './PasswordModal';
 import UserFormModal from './UserFormModal';
-import PlaceholderPanel from '@/components/PlaceholderPanel';
-import { PermissionButton as Button } from '@/components/PermissionControl';
-import { hasPermission, hasAllPermissions } from '@/utils/permission';
-import { TENANT_USER_PERMISSION as ACTIONS } from '@/constants/permission';
-import { AddMembers } from '@onebase/common';
-import { type AuthRoleUsersPageRespVO } from '@onebase/app';
-
 
 interface DataItem {
   id: string;
@@ -40,7 +47,7 @@ interface SelectOptions {
 const statusOptions: SelectOptions[] = [
   {
     label: '全部状态',
-    value: '',
+    value: ''
   },
   {
     label: '已启用',
@@ -49,17 +56,17 @@ const statusOptions: SelectOptions[] = [
   {
     label: '已禁用',
     value: PlatformTenantStatus.disabled
-  },
+  }
 ];
 
 export enum UserRole {
   ADMIN = 'admin',
-  DIRECTOR = 'director',
+  DIRECTOR = 'director'
 }
 
 export const RoleLabelMap: Record<UserRole, string> = {
   [UserRole.ADMIN]: '管理员',
-  [UserRole.DIRECTOR]: '主管',
+  [UserRole.DIRECTOR]: '主管'
 };
 
 export default function UserTable({
@@ -140,7 +147,6 @@ export default function UserTable({
     //   await exportUser('用户数据', params);
     //   Message.success('用户导出成功');
     // } catch (error) {
-
     // }
   };
 
@@ -296,7 +302,7 @@ export default function UserTable({
                 position="br"
                 trigger="click"
               >
-                <Button type='text' icon={<IconMoreVertical />}></Button>
+                <Button type="text" icon={<IconMoreVertical />}></Button>
               </Dropdown>
             ) : (
               <>
@@ -320,12 +326,12 @@ export default function UserTable({
   };
 
   /**
- * 在树形数据中根据 ID 递归查找名称
- *
- * @param {Array<Object>} dataArray - 要搜索的树形数据数组
- * @param {string} targetId - 要查找的目标 ID
- * @returns {string | null} - 找到的名称，如果未找到则返回 null
- */
+   * 在树形数据中根据 ID 递归查找名称
+   *
+   * @param {Array<Object>} dataArray - 要搜索的树形数据数组
+   * @param {string} targetId - 要查找的目标 ID
+   * @returns {string | null} - 找到的名称，如果未找到则返回 null
+   */
   const findNameById = (dataArray: DataItem[], targetId: string): string | null => {
     if (!Array.isArray(dataArray) || dataArray.length === 0) {
       return null;
@@ -344,7 +350,7 @@ export default function UserTable({
       }
     }
     return null;
-  }
+  };
 
   // 设置主管/管理员
   const handleSetAdminOrDirector = async (updateType: UserRole) => {
