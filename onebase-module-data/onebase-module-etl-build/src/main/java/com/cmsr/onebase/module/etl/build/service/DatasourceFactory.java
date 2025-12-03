@@ -13,7 +13,7 @@ import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
-import java.util.Properties;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,7 +24,7 @@ public class DatasourceFactory {
 
     public DataSource constructDataSource(EtlDatasourceDO datasourceDO, boolean oneshot) {
         // 1. 获取数据库类型
-        Properties connectionProperties = JsonUtils.parseObject(datasourceDO.getConfig(), Properties.class);
+        Map<String, Object> connectionProperties = JsonUtils.parseObject(datasourceDO.getConfig(), Map.class);
         String connectMode = (String) connectionProperties.getOrDefault("connectMode", "default");
         String jdbcConnection = (String) connectionProperties.get("jdbcUrl");
         if (StringUtils.isBlank(jdbcConnection)) {
@@ -77,7 +77,7 @@ public class DatasourceFactory {
         return parseType;
     }
 
-    public static String buildJdbcConnectionString(String databaseType, Properties connectionProperties) {
+    public static String buildJdbcConnectionString(String databaseType, Map<String, Object> connectionProperties) {
         DatabaseType dbType = parseDatabaseType(databaseType);
         // 直接使用Anyline提供的URL模板
         String jdbcTemplate = dbType.url();
