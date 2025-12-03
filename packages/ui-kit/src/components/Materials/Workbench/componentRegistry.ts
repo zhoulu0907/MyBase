@@ -1,10 +1,11 @@
 import type { ComponentType } from 'react';
 
-import { WorkbenchComp } from './WorkbenchBasicComponents';
-import WorkbenchSchema from './WorkbenchBasicComponents/schema';
+import { WorkbenchAdvancedComp } from './WorkbenchAdvancedComponents';
+import { WorkbenchBasicComp } from './WorkbenchBasicComponents';
+import { workbenchSchema } from './schema';
 import { WORKBENCH_COMPONENT_TYPE_VALUES, type WorkbenchComponentType } from './componentTypes';
 
-type WorkbenchSchemaCollection = typeof WorkbenchSchema;
+type WorkbenchSchemaCollection = typeof workbenchSchema;
 
 type WorkbenchComponentSchemaBase = {
   config: {
@@ -31,13 +32,18 @@ interface WorkbenchComponentDefinition {
  * 用于自动注册工作台组件的组件和 schema，避免手动维护
  */
 
+const workbenchComponentImplementations = {
+  ...WorkbenchBasicComp,
+  ...WorkbenchAdvancedComp
+};
+
 export const WORKBENCH_COMPONENT_REGISTRY: Record<WorkbenchComponentType, WorkbenchComponentDefinition> =
   WORKBENCH_COMPONENT_TYPE_VALUES.reduce((acc, componentType) => {
-    const component = WorkbenchComp[componentType as keyof typeof WorkbenchComp];
-    const schema = WorkbenchSchema[componentType as keyof typeof WorkbenchSchema] as WorkbenchComponentSchema;
-
+    const component =
+      workbenchComponentImplementations[componentType as keyof typeof workbenchComponentImplementations];
+    const schema = workbenchSchema[componentType as keyof typeof workbenchSchema] as WorkbenchComponentSchema;
     if (!component || !schema) {
-      throw new Error(`工作台组件 "${componentType}" 未正确注册，请检查 WorkbenchComp 和 schema 定义`);
+      throw new Error(`工作台组件 "${componentType}" 未正确注册，请检查组件实现和 schema 定义`);
     }
 
     acc[componentType] = { component, schema };

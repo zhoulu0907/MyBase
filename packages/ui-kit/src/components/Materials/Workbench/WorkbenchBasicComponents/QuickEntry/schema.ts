@@ -19,6 +19,7 @@ import {
   WORKBENCH_WIDTH_OPTIONS,
   WORKBENCH_WIDTH_VALUES
 } from '../../constants';
+import { QUICK_ENTRY_THEME_OPTIONS, QUICK_ENTRY_THEME_VALUES } from '../constants';
 import type { IQuickEntryConfigType, QuickEntryPropsConfig } from '../../types';
 export interface XQuickEntrySchema {
   editData: TXQuickEntryEditData;
@@ -51,7 +52,7 @@ const XQuickEntry: XQuickEntrySchema = {
         showMore: true
       },
       styleConfig: {
-        theme: '样式一'
+        theme: QUICK_ENTRY_THEME_VALUES[QUICK_ENTRY_THEME_OPTIONS.THEME_1]
       },
       groupConfig: {
         enableGroup: false,
@@ -65,7 +66,8 @@ const XQuickEntry: XQuickEntrySchema = {
                 entryType: '应用菜单',
                 menuId: '客户信息',
                 linkAddress: 'https://example.com',
-                group: '分组1'
+                group: '分组1',
+                entryDesc: '客户管理'
               },
               {
                 entryName: '工时管理',
@@ -73,7 +75,8 @@ const XQuickEntry: XQuickEntrySchema = {
                 entryType: '应用菜单',
                 menuId: '工时信息',
                 linkAddress: 'https://example.com',
-                group: '分组1'
+                group: '分组1',
+                entryDesc: '工时管理'
               },
               {
                 entryName: '项目管理',
@@ -81,7 +84,8 @@ const XQuickEntry: XQuickEntrySchema = {
                 entryType: '应用菜单',
                 menuId: '项目信息',
                 linkAddress: 'https://example.com',
-                group: '分组1'
+                group: '分组1',
+                entryDesc: '项目管理'
               }
             ]
           },

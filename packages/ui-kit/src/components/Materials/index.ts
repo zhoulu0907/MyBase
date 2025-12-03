@@ -25,19 +25,4 @@ export type { EditConfig } from './types';
 export { COMPONENT_MAP, COMPONENT_FIELD_MAP } from './componentsMap';
 
 // 导出 Workbench 相关内容
-export {
-  WorkbenchComp,
-  ALL_WORKBENCH_COMPONENT_TYPES,
-  WORKBENCH_COMPONENT_TYPES,
-  WORKBENCH_COMPONENT_TYPE_VALUES,
-  WORKBENCH_COMPONENT_MAP,
-  getAvailableWorkbenchComponentTypes,
-  getWorkbenchComponentConfig,
-  getWorkbenchComponentSchema,
-  getWorkbenchComponentWidth,
-  hasWorkbenchComponentSchema,
-  workbenchSchema,
-  workbenchTemplate,
-  WORKBENCH_COMPONENT_TYPE_DISPLAY_NAME_MAP
-} from './Workbench';
-export type { WorkbenchComponentSchema, WorkbenchComponentType } from './Workbench';
+export * from './Workbench';

@@ -1,16 +1,28 @@
 import { cloneDeep } from 'lodash-es';
 
-import { WORKBENCH_COMPONENT_REGISTRY, type WorkbenchComponentSchema } from './componentRegistry';
+import type { WorkbenchComponentSchema } from './componentRegistry';
 export type { WorkbenchComponentSchema } from './componentRegistry';
-import WorkbenchSchema from './WorkbenchBasicComponents/schema';
+import WorkbenchSchemaBasic from './WorkbenchBasicComponents/schema';
+import WorkbenchSchemaAdvanced from './WorkbenchAdvancedComponents/schema';
 import { WORKBENCH_COMPONENT_TYPE_VALUES, type WorkbenchComponentType } from './componentTypes';
 
 type WorkbenchComponentSchemaMap = Record<WorkbenchComponentType, WorkbenchComponentSchema>;
 
+export const workbenchSchema = {
+  ...WorkbenchSchemaBasic,
+  ...WorkbenchSchemaAdvanced
+};
+
 // 创建组件配置映射
 const workbenchComponentSchemaMap: WorkbenchComponentSchemaMap = WORKBENCH_COMPONENT_TYPE_VALUES.reduce(
   (acc, componentType) => {
-    acc[componentType] = WORKBENCH_COMPONENT_REGISTRY[componentType].schema;
+    const schema = workbenchSchema[componentType as keyof typeof workbenchSchema];
+
+    if (!schema) {
+      throw new Error(`未找到工作台组件类型 "${componentType}" 的 schema 定义`);
+    }
+
+    acc[componentType] = schema as WorkbenchComponentSchema;
     return acc;
   },
   {} as WorkbenchComponentSchemaMap
@@ -63,7 +75,7 @@ export function getWorkbenchComponentWidth(
   const resolvedSchema = schema?.config?.width
     ? (schema as WorkbenchComponentSchema)
     : getWorkbenchComponentSchema(itemType);
-  return resolvedSchema.config.width;
+  return resolvedSchema.config.width || '';
 }
 
 /**
@@ -79,7 +91,3 @@ export function getWorkbenchComponentConfig(
   const resolvedSchema = schema?.config ? (schema as WorkbenchComponentSchema) : getWorkbenchComponentSchema(itemType);
   return resolvedSchema.config;
 }
-
-export const workbenchSchema = {
-  ...WorkbenchSchema
-};

@@ -8,6 +8,23 @@ import { WORKBENCH_CONFIG_TYPES } from './constants';
  * Workbench 特有类型定义
  */
 
+// 默认值类型
+export type TWbColorDefaultType = string;
+
+// 颜色配置
+export interface IWbColorConfigType {
+  key: string;
+  name: string;
+  type: typeof WORKBENCH_CONFIG_TYPES.WB_COLOR;
+}
+
+// 富文本内容配置
+export interface IWbRichTextContentConfigType {
+  key: string;
+  name: string;
+  type: typeof WORKBENCH_CONFIG_TYPES.WB_RICH_TEXT_CONTENT;
+}
+
 /**
  * 快捷入口标题配置
  */
@@ -34,6 +51,7 @@ export interface QuickEntryEntryConfig {
   menuId?: string;
   linkAddress?: string;
   group?: string;
+  entryDesc?: string;
 }
 
 /**
@@ -68,4 +86,12 @@ export interface IQuickEntryConfigType {
   key: string;
   name: string;
   type: typeof WORKBENCH_CONFIG_TYPES.QUICK_ENTRY;
+}
+
+// 工作台轮播内容配置
+export interface ICarouselContentConfigType {
+  key: string;
+  name: string;
+  type: typeof WORKBENCH_CONFIG_TYPES.CAROUSEL_CONTENT;
+  meta?: Record<string, any>;
 }

@@ -2,8 +2,13 @@
  * Workbench 模块统一导出
  */
 
+import { WorkbenchBasicComp } from './WorkbenchBasicComponents';
+import { WorkbenchAdvancedComp } from './WorkbenchAdvancedComponents';
+
 // 组件导出
-export { WorkbenchComp } from './WorkbenchBasicComponents';
+export const WorkbenchComp = { ...WorkbenchBasicComp, ...WorkbenchAdvancedComp };
+export { QUICK_ENTRY_THEME_OPTIONS, QUICK_ENTRY_THEME_VALUES } from './WorkbenchBasicComponents';
+export { WORKBENCH_CONFIG_TYPES } from './constants';
 
 // 类型常量导出
 export {

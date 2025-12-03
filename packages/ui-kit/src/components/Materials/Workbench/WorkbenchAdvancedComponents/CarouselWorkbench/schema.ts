@@ -1,0 +1,187 @@
+import {
+  baseConfig,
+  baseDefault,
+  type ICommonBaseType,
+  type TLayoutSelectKeyType,
+  type TStatusSelectKeyType
+} from '../../../common';
+import { WORKBENCH_CONFIG_TYPES } from '../../constants';
+import type {
+  IBooleanConfigType,
+  ILabelConfigType,
+  ILayoutConfigType,
+  INumberConfigType,
+  IStatusConfigType,
+  ITextAreaConfigType,
+  ITextConfigType,
+  ITooltipConfigType,
+  IVerifyConfigType,
+  TBooleanDefaultType,
+  TNumberDefaultType,
+  TTextDefaultType
+} from '../../../types';
+import type { ICarouselContentConfigType } from '../../types';
+import SlideOne from '@/assets/workbench/carousel/slide-1.svg';
+import SlideTwo from '@/assets/workbench/carousel/slide-2.svg';
+import SlideThree from '@/assets/workbench/carousel/slide-3.svg';
+
+export interface XCarouselSchema {
+  editData: TXCarouselEditData;
+  config: XCarouselConfig;
+}
+
+export type TXCarouselEditData = Array<
+  | ITextConfigType
+  | IBooleanConfigType
+  | INumberConfigType
+  | ICarouselContentConfigType
+  | IVerifyConfigType
+  | TTextDefaultType
+  | IStatusConfigType<TStatusSelectKeyType>
+  | ILayoutConfigType<TLayoutSelectKeyType>
+  | ITextAreaConfigType
+  | ILabelConfigType
+  | ITooltipConfigType
+>;
+
+interface Images {
+  image: string;
+  text?: string;
+  url?: string;
+}
+
+export interface XCarouselConfig extends ICommonBaseType {
+  /**
+   * 输入框标题
+   * text：标题
+   * display：是否显示
+   */
+  label: {
+    text: TTextDefaultType;
+    display: TBooleanDefaultType;
+  };
+  /**
+   * 轮播间隔，单位秒
+   */
+  interval?: TNumberDefaultType;
+  /**
+   * 图片列表
+   */
+  carouselConfig: Images[];
+
+  /**
+   * required：是否必填，未填写时提交报错
+   * maxCount：最大上传数量，默认：10
+   * maxSize：最大图片大小单位MB，默认：5
+   */
+  verify: {
+    required: TBooleanDefaultType;
+    maxCount: TNumberDefaultType;
+    maxSize: TNumberDefaultType;
+  };
+  /**
+   * 数据源模式（静态/动态）
+   */
+  dataSourceMode: 'static' | 'dynamic';
+  /**
+   * 动态内容来源（表单/实体）
+   */
+  contentSource?: string;
+  /**
+   * 轮播图片字段
+   */
+  imageField?: string;
+  /**
+   * 链接字段
+   */
+  linkField?: string;
+  /**
+   * 筛选条件
+   */
+  filterCondition?: any[];
+  /**
+   * 显示条数
+   */
+  displayCount: number;
+}
+
+const DEFAULT_CAROUSEL_CONTENT: Images[] = [
+  {
+    image: SlideOne,
+    text: 'Welcome to Workbench',
+    url: ''
+  },
+  {
+    image: SlideTwo,
+    text: 'Launch New Campaigns',
+    url: ''
+  }
+];
+
+const carouselContentConfig: ICarouselContentConfigType = {
+  key: 'carouselContent',
+  name: '轮播内容',
+  type: WORKBENCH_CONFIG_TYPES.CAROUSEL_CONTENT,
+  meta: {
+    modeField: {
+      key: 'dataSourceMode',
+      defaultValue: 'static',
+      options: [
+        { key: 'dynamic', text: '动态数据源', value: 'dynamic' },
+        { key: 'static', text: '静态数据源', value: 'static' }
+      ]
+    },
+    dynamicFields: [
+      { key: 'contentSource', label: '内容来源', placeholder: '请选择表单' },
+      { key: 'imageField', label: '轮播图片', placeholder: '请选择字段' },
+      { key: 'linkField', label: '链接地址', placeholder: '请选择字段' }
+    ],
+    filterField: {
+      key: 'filterCondition',
+      label: '筛选条件',
+      buttonText: '设置条件'
+    },
+    displayCountField: {
+      key: 'displayCount',
+      label: '显示条数',
+      min: 1,
+      max: 50,
+      defaultValue: 10
+    },
+    staticFieldKey: 'carouselConfig'
+  }
+};
+
+const XCarousel: XCarouselSchema = {
+  editData: [
+    ...baseConfig,
+    {
+      key: 'label',
+      name: '标题名称',
+      type: WORKBENCH_CONFIG_TYPES.LABEL_INPUT
+    },
+    carouselContentConfig
+  ],
+  config: {
+    ...baseDefault,
+    label: {
+      text: '轮播图',
+      display: true
+    },
+    carouselConfig: DEFAULT_CAROUSEL_CONTENT,
+    interval: 3,
+    verify: {
+      required: false,
+      maxCount: 10,
+      maxSize: 5
+    },
+    dataSourceMode: 'static',
+    contentSource: '',
+    imageField: '',
+    linkField: '',
+    filterCondition: [],
+    displayCount: DEFAULT_CAROUSEL_CONTENT.length
+  }
+};
+
+export default XCarousel;

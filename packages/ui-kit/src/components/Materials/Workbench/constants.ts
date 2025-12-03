@@ -20,7 +20,11 @@ export const WORKBENCH_CONFIG_TYPES = {
   STATUS_RADIO: CONFIG_TYPES.STATUS_RADIO,
   WIDTH_RADIO: CONFIG_TYPES.WIDTH_RADIO,
   FORM_LAYOUT: CONFIG_TYPES.FORM_LAYOUT,
-  QUICK_ENTRY: 'QuickEntry' as const
+  // 工作台专属配置类型
+  QUICK_ENTRY: 'QuickEntry' as const,
+  CAROUSEL_CONTENT: 'CarouselContent' as const,
+  WB_COLOR: 'WbColor' as const,
+  WB_RICH_TEXT_CONTENT: 'WbRichTextContent' as const,
 } as const;
 
 /**

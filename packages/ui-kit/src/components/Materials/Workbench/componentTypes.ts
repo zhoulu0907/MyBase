@@ -32,6 +32,24 @@ const WORKBENCH_COMPONENT_DEFINITIONS: ReadonlyArray<WorkbenchComponentDefinitio
     size: { h: 36, w: 118 },
     description: '待办中心组件开发中，当前为占位实现',
     isPlaceholder: true
+  },
+  {
+    key: 'RICH_TEXT_WORKBENCH',
+    type: 'XRichTextEditorWorkbench',
+    displayName: '富文本',
+    icon: 'rich_text_editor_workbench_cp.svg',
+    category: 'basic',
+    size: { h: 36, w: 118 },
+    description: '富文本编辑器组件开发中，当前为占位实现',
+    isPlaceholder: true
+  },
+  {
+    key: 'CAROUSEL_WORKBENCH',
+    type: 'XCarouselWorkbench',
+    displayName: '轮播图',
+    icon: 'carousel_workbench_cp.svg',
+    category: 'advanced',
+    size: { h: 36, w: 118 }
   }
 ] as const;
 
