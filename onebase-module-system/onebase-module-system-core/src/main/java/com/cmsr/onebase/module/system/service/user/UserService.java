@@ -312,4 +312,6 @@ public interface UserService {
      * @return 用户简要信息分页列表
      */
     void checkCorpAdminUser(AdminUserDO corpAdminReqVO);
+
+    Map<Long, Integer> getCorpExistUserCountByCorpIds(List<Long> corpIds);
 }

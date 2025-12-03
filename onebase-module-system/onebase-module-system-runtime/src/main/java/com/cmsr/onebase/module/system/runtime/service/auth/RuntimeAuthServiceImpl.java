@@ -169,16 +169,6 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         }
     }
 
-    public boolean findAdminFlag(Long userId, Long appId) {
-        try {
-            return appAuthSecurityApi.isApplicationAdmin(userId, appId);
-        } catch (Exception e) {
-            log.error("Login findAdminFlag error, userId={}, appId={}", userId, appId, e);
-            return false;
-        }
-    }
-
-
     @Override
     @LogRecord(type = LOGIN_USER_TYPE, subType = LOGIN_USER_APP_SUB_TYPE, bizNo = "{{#user.id}}",
             success = LOGIN_USER_APP_SUCCESS)
