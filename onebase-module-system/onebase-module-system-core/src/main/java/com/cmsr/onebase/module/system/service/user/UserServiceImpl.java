@@ -935,6 +935,19 @@ public class UserServiceImpl implements UserService {
                 ));
     }
 
+
+    @Override
+    public Map<Long, Integer> getCorpExistUserCountByCorpIds(List<Long> corpIds) {
+        List<AdminUserDO> userlist = userDataRepository.getCorpExistUserCountByCorpIds(corpIds);
+        // 按租户ID分组并统计数量
+        return userlist.stream()
+                .collect(Collectors.groupingBy(
+                        AdminUserDO::getCorpId,
+                        Collectors.summingInt(user -> 1)
+                ));
+    }
+
+
     /**
      * 校验角色ID列表的有效性
      *
