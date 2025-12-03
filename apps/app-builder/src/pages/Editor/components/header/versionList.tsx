@@ -1,11 +1,12 @@
-import { useEffect, useState, forwardRef, useImperativeHandle, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
 import { useFlowEditorStor } from '@/store/index';
-import { Breadcrumb, Button, Form, Message, Tabs, Select } from '@arco-design/web-react';
-import { IconArrowLeft, IconSettings } from '@arco-design/web-react/icon';
-import { getVersionMgmt, getByBusinessId } from '@onebase/app';
+import { Select } from '@arco-design/web-react';
+import { IconSettings } from '@arco-design/web-react/icon';
+import { getByBusinessId, getVersionMgmt } from '@onebase/app';
+import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import type { VersionType } from '../constants';
 import { VersionStatus } from '../constants';
+import { BpmVersionStatus } from './bpm/constants';
 import styles from './index.module.less';
 const Option = Select.Option;
 
@@ -68,19 +69,20 @@ export const VersionListSelect = forwardRef(
           <Option key={item.id} value={item.id}>
             <div className={styles.versionOption}>
               <span className={styles.versionName}>
-                {item.versionAlias || '未命名'}
-                {item.version}
+                {item.bpmVersionAlias || '未命名'}
+                {item.bpmVersion}
               </span>
               <span
                 className={`${styles.versionStatus} ${
-                  item.versionStatus === VersionStatus.DESIGNING
+                  item.bpmVersionStatus === BpmVersionStatus.DESIGNING.VALUE
                     ? styles.designing
-                    : item.versionStatus === VersionStatus.PUBLISHED
+                    : item.bpmVersionStatus === BpmVersionStatus.PUBLISHED.VALUE
                       ? styles.published
                       : styles.history
                 }`}
               >
-                {item.versionStatus}
+                {Object.values(BpmVersionStatus).find((status) => status.VALUE === item.bpmVersionStatus)?.LABEL ||
+                  item.bpmVersionStatus}
               </span>
             </div>
           </Option>

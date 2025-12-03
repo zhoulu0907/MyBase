@@ -46,7 +46,6 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     // 例子: /onebase/runtime/123944716126027776/141778708868268032
     // match[1] 是 appId, match[2] 是 tenantId
     const match = location.pathname.match(/\/onebase\/runtime\/(\d+)\/(\d+)/);
-    console.log('match: ', match);
     if (match && match[1]) {
       console.log('match[1]: ', match[1]);
       handleGetApplication(match[1]);
@@ -71,7 +70,6 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
 
   const getInfo = async () => {
     const res = await runtimeGetPermissionInfo(CodeType.CORP);
-    console.log(res);
     UserPermissionManager.setUserPermissionInfo(res);
     const mobile = res.user?.mobile;
     const formatMobile = maskMobile(mobile);
