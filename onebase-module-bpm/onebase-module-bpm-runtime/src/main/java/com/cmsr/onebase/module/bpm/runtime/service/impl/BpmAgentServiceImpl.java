@@ -3,7 +3,6 @@ package com.cmsr.onebase.module.bpm.runtime.service.impl;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
-import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowAgentRepository;
@@ -47,13 +46,13 @@ public class BpmAgentServiceImpl implements BpmAgentService {
         // todo：后续在全局数据插入时处理
         Long applicationId = ApplicationManager.getApplicationId();
         if (applicationId == null) {
-            throw new IllegalArgumentException("应用ID不能为空");
+            throw exception(ErrorCodeConstants.MISSING_APPLICATION_ID);
         }
 
         pageReqVO.setAppId(applicationId);
 
         // 构建查询条件
-        QueryWrapper queryWrapper = buildDynamicQueryWhereCondition(pageReqVO, String.valueOf(loginUserId));
+        QueryWrapper queryWrapper = buildDynamicQueryWhereCondition(pageReqVO, loginUserId);
 
         Page<BpmFlowAgentDO> pageResult = bpmFlowAgentRepository.page(new Page<>(pageReqVO.getPageNo(), pageReqVO.getPageSize()), queryWrapper);
 
@@ -90,7 +89,6 @@ public class BpmAgentServiceImpl implements BpmAgentService {
     @Transactional(rollbackFor = Exception.class)
     public Long create(BpmAgentInsertReqVO reqVO) {
         Long userId = WebFrameworkUtils.getLoginUserId();
-        String nickname = SecurityFrameworkUtils.getLoginUserNickname();
         LocalDateTime now = LocalDateTime.now();
 
         // todo：后续在全局数据插入时处理
@@ -110,6 +108,9 @@ public class BpmAgentServiceImpl implements BpmAgentService {
             throw exception(ErrorCodeConstants.AGENT_END_TIME_BEFORE_NOW);
         }
 
+        // 验证被代理人是否存在，todo：暂时忽略前端传的被代理人信息，取当前登录用户
+        AdminUserRespDTO principalUser = validateAgentExists(userId);
+
         // 验证代理人是否存在
         AdminUserRespDTO agentUser = validateAgentExists(Long.valueOf(reqVO.getAgentId()));
 
@@ -123,7 +124,7 @@ public class BpmAgentServiceImpl implements BpmAgentService {
         // 插入数据
         BpmFlowAgentDO bpmFlowAgentDO = new BpmFlowAgentDO();
         bpmFlowAgentDO.setPrincipalId(String.valueOf(userId));
-        bpmFlowAgentDO.setPrincipalName(nickname);
+        bpmFlowAgentDO.setPrincipalName(principalUser.getNickname());
         bpmFlowAgentDO.setAgentId(reqVO.getAgentId());
         bpmFlowAgentDO.setAgentName(agentUser.getNickname());
         bpmFlowAgentDO.setStartTime(reqVO.getStartTime());
@@ -150,7 +151,7 @@ public class BpmAgentServiceImpl implements BpmAgentService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void revoke( BpmAgentRevokeReqVO reqVO) {
+    public void revoke(BpmAgentRevokeReqVO reqVO) {
         // 获取当前登录用户信息
         Long loginUserId = WebFrameworkUtils.getLoginUserId();
         String loginUserIdStr = String.valueOf(loginUserId);
@@ -159,6 +160,10 @@ public class BpmAgentServiceImpl implements BpmAgentService {
         BpmFlowAgentDO agent = bpmFlowAgentRepository.getById(reqVO.getId());
         if (agent == null) {
             throw exception(ErrorCodeConstants.AGENT_NOT_EXISTS);
+        }
+
+        if (!Objects.equals(agent.getApplicationId(), ApplicationManager.getApplicationId())) {
+            throw exception(ErrorCodeConstants.APPLICATION_ID_MISMATCH);
         }
 
         // 校验权限：只有创建人或被代理人才能撤销
@@ -201,6 +206,10 @@ public class BpmAgentServiceImpl implements BpmAgentService {
         BpmFlowAgentDO agent = bpmFlowAgentRepository.getById(reqVO.getId());
         if (agent == null) {
             throw exception(ErrorCodeConstants.AGENT_NOT_EXISTS);
+        }
+
+        if (!Objects.equals(agent.getApplicationId(), ApplicationManager.getApplicationId())) {
+            throw exception(ErrorCodeConstants.APPLICATION_ID_MISMATCH);
         }
 
         // 校验权限：只有创建人或被代理人才能编辑
@@ -307,21 +316,19 @@ public class BpmAgentServiceImpl implements BpmAgentService {
         }
     }
 
-    private QueryWrapper buildDynamicQueryWhereCondition(BpmAgentPageReqVO reqVO, String userId) {
+    private QueryWrapper buildDynamicQueryWhereCondition(BpmAgentPageReqVO reqVO, Long userId) {
         QueryWrapper queryWrapper = QueryWrapper.create();
         queryWrapper.eq(BpmFlowAgentDO::getApplicationId, reqVO.getAppId());
 
-        QueryCondition userIdCondition = QueryCondition.createEmpty();
-        userIdCondition.and(BPM_FLOW_AGENT.CREATOR.eq(userId));
-        userIdCondition.or(BPM_FLOW_AGENT.PRINCIPAL_ID.eq(userId));
+        QueryCondition userIdCondition = BPM_FLOW_AGENT.CREATOR.eq(userId)
+                .or(BPM_FLOW_AGENT.PRINCIPAL_ID.eq(String.valueOf(userId)));
 
         queryWrapper.and(userIdCondition);
 
         // 动态添加其他查询条件
         if (StringUtils.isNotBlank(reqVO.getPersonName())) {
-            QueryCondition orCondition = QueryCondition.createEmpty();
-            orCondition.or(BPM_FLOW_AGENT.PRINCIPAL_NAME.like(reqVO.getPersonName()));
-            orCondition.or(BPM_FLOW_AGENT.AGENT_NAME.like(reqVO.getPersonName()));
+            QueryCondition orCondition = BPM_FLOW_AGENT.PRINCIPAL_NAME.like(reqVO.getPersonName())
+                    .or(BPM_FLOW_AGENT.AGENT_NAME.like(reqVO.getPersonName()));
             queryWrapper.and(orCondition);
         }
 

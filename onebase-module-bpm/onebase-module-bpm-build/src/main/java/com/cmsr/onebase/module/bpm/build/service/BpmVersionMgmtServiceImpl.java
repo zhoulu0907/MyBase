@@ -172,9 +172,8 @@ public class BpmVersionMgmtServiceImpl implements BpmVersionMgmtService {
                 versionKeyWord = versionAlias.substring(1);
             }
 
-            QueryCondition orCondition = QueryCondition.createEmpty();
-            orCondition.or(FLOW_DEFINITION.BPM_VERSION_ALIAS.like(versionAlias));
-            orCondition.or(FLOW_DEFINITION.BPM_VERSION.like(versionKeyWord));
+            QueryCondition orCondition = FLOW_DEFINITION.BPM_VERSION_ALIAS.like(versionAlias)
+                    .or(FLOW_DEFINITION.BPM_VERSION.like(versionKeyWord));
 
             queryWrapper.and(orCondition);
         }
