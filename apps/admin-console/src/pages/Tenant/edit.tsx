@@ -110,6 +110,7 @@ const EditTenant = () => {
               adminNickName: user?.nickname || '',
               adminUserName: user?.username || '',
               adminMobile: user?.mobile || '',
+              adminEmail: user?.email || '',
               platformUserId: user.id
             };
           } else {

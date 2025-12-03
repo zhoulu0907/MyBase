@@ -4,13 +4,15 @@ import LightText from './LightText';
 import { useCallback, useState } from 'react';
 import type { FunctionItem, FunctionListProps } from '../utils/types';
 import styles from './FunctionList.module.less';
-import { funtionGroupList, type functionType } from '../utils/formula';
+import { functionType, funtionGroupList } from '../utils/formula';
 const CollapseItem = Collapse.Item;
 
 export function FunctionList({
+  activeKey,
   functions,
   functionLoading,
   searchValue,
+  setActiveKey,
   onSearchChange,
   onChooseFunction
 }: FunctionListProps) {
@@ -46,6 +48,10 @@ export function FunctionList({
     return funtionGroupList?.find((item) => item.type === type)?.label || '';
   };
 
+  const handleChange = (key: string, keys: string[]) => {
+    setActiveKey(keys);
+  }
+
   return (
     <div className={styles.functionList}>
       <div className={styles.searchSection}>
@@ -63,7 +69,7 @@ export function FunctionList({
             <Spin size={18} tip="加载函数列表..."></Spin>
           </div>
         ) : (
-          <Collapse accordion>
+          <Collapse activeKey={activeKey} onChange={handleChange} accordion>
             {functions?.map((group, index) => (
               <CollapseItem
                 key={index}
@@ -76,7 +82,7 @@ export function FunctionList({
                   bordered={false}
                   dataSource={group.functions}
                   virtualListProps={{
-                    height: 150,
+                    height: 150
                   }}
                   render={(item, index) => (
                     <List.Item

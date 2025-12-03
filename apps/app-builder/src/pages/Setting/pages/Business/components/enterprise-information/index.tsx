@@ -264,7 +264,7 @@ const EnterpriseInfoPage: React.FC = () => {
           value={
             isImageFailed ? (
               <Button type="dashed" style={{ width: '160px', height: '80px', backgroundColor: '#F2F3F5' }}>
-                中国移动
+                {formData?.corpName}
               </Button>
             ) : (
               <Image alt="头像" src={avatarUrl} onError={handleImageError} width={160} height={80} />
@@ -409,10 +409,10 @@ const EnterpriseInfoPage: React.FC = () => {
             {/* 编辑按钮 */}
             {isEdited ? (
               <Space>
-                <Button icon={<IconEdit />} onClick={handleCancel}>
+                <Button onClick={handleCancel}>
                   取消
                 </Button>
-                <Button type="primary" icon={<IconEdit />} onClick={handleSubmitInfo}>
+                <Button type="primary" onClick={handleSubmitInfo}>
                   保存修改
                 </Button>
               </Space>

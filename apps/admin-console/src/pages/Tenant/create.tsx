@@ -23,16 +23,13 @@ import {
   type CreateTenantParams,
   type UserVO
 } from '@onebase/platform-center';
-import { debounce } from 'lodash-es';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './index.module.less';
 
 const CreateSpace = () => {
   const [form] = Form.useForm();
   const nav = useNavigate();
-  const [fetching, setFetching] = useState(false);
-  const refFetchId: any = useRef(null);
   const [adminList, setAdminList] = useState<UserVO[]>([]);
   const [logoUrl, setLogoUrl] = useState<string>(); // logo
 
@@ -84,6 +81,7 @@ const CreateSpace = () => {
           adminNickName: user?.nickname || '',
           adminUserName: user?.username || '',
           adminMobile: user?.mobile || '',
+          adminEmail: user?.email || '',
           platformUserId: user?.id
         };
       });
@@ -139,27 +137,6 @@ const CreateSpace = () => {
     const res = await platformUploadFile(formData, progressAdapter);
     return res;
   };
-
-  const debouncedFetchUser = useCallback(
-    debounce(async (inputValue: string) => {
-      refFetchId.current = Date.now();
-      const fetchId = refFetchId.current;
-      setFetching(true);
-      try {
-        const adminListResp = await getPlatformTenantAdminListApi(inputValue);
-        if (refFetchId.current === fetchId) {
-          setAdminList(adminListResp);
-        } else {
-          setAdminList(adminList);
-        }
-      } catch (error) {
-        console.error('Error fetching adminList:', error);
-      } finally {
-        setFetching(false);
-      }
-    }, 500),
-    []
-  );
 
   return (
     <div className={styles.createPage}>
