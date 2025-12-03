@@ -162,7 +162,7 @@ public class PermissionServiceImpl implements PermissionService {
         boolean isDevAdmin = roleService.hasAnyDevloperAdmin(convertSet(roles, RoleDO::getId));
         if (isDevAdmin) {
             // 所有开发者的权限
-            return CollectionUtils.containsAny(RoleCodeEnum.corpDefaultPermissionCodes, permissions);
+            return CollectionUtils.containsAny(RoleCodeEnum.devloperPermissionCodes, permissions);
         }
 
         // 情况三：遍历判断每个权限，如果有一满足，说明有权限
