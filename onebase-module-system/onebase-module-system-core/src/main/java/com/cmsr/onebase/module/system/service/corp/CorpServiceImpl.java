@@ -205,12 +205,12 @@ public class CorpServiceImpl implements CorpService {
     }
 
     private void validCorpExistUserCount(Integer userLimit) {
-        List<Long> tenantIds=new ArrayList<>();
+        List<Long> tenantIds = new ArrayList<>();
         LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
         tenantIds.add(loginUser.getTenantId());
         // 获取已存在的空间用户数
         Map<Long, Integer> existUserCountMap = userService.getTenantExistUserCountByIds(tenantIds);
-        Integer existUserCount= existUserCountMap.get(loginUser.getTenantId())==null?CorpConstant.ZERO:existUserCountMap.get(loginUser.getTenantId());
+        Integer existUserCount = existUserCountMap.get(loginUser.getTenantId()) == null ? CorpConstant.ZERO : existUserCountMap.get(loginUser.getTenantId());
         if (userLimit < existUserCount) {
             throw exception(CORP_USER_EXITES_LIMIT_COUNT_CHECK, existUserCount);
         }
