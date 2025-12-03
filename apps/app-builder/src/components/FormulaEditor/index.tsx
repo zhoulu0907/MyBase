@@ -19,6 +19,7 @@ import { IconLeft } from '@arco-design/web-react/icon';
 import { NodeType } from '@onebase/common';
 import { getPrecedingNodes } from '@/pages/CreateApp/pages/IntegratedManagement/triggerEditor/nodes/utils';
 import { triggerNodeOutputSignal } from '@/store/singals/trigger_node_output';
+import { functionType } from './utils/formula';
 
 const Row = Grid.Row;
 const Col = Grid.Col;
@@ -31,6 +32,7 @@ const Col = Grid.Col;
  */
 export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initialFormula = '' }: FormulaEditorProps) {
   const [formula, setFormula] = useState(initialFormula); //公式的值
+  const [activeKey, setActiveKey] = useState<string[]>([functionType.COMMON]);
   const [variableSearch, setVariableSearch] = useState('');
   const [functionSearch, setFunctionSearch] = useState('');
   const [functionLoading, setFunctionLoading] = useState<boolean>(false);
@@ -72,7 +74,7 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
   /**
    * 获取变量一级列表
    */
-  const nodeTypes = [NodeType.DATA_QUERY, NodeType.DATA_QUERY_MULTIPLE, NodeType.DATA_CALC];
+  const nodeTypes = [NodeType.START_FORM, NodeType.START_ENTITY, NodeType.DATA_QUERY, NodeType.DATA_QUERY_MULTIPLE, NodeType.DATA_CALC];
 
   const retrievedEntityListByApp = async () => {
     const nodes = getPrecedingNodes(curAppId, triggerEditorSignal.nodes.value, nodeTypes);
@@ -184,8 +186,10 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
     if (!functionSearch) return funcList;
     let filteredData: functionGroup[] = [];
     funcList?.forEach((item: functionGroup) => {
-      const functionIndex: number = item.functions?.findIndex(
-        (f) => f.name.toLowerCase().includes(functionSearch.toLowerCase()));
+      const functionIndex: number = item.functions?.findIndex((f) =>
+        f.name.toLowerCase().includes(functionSearch.toLowerCase())||
+        f.summary.toLowerCase().includes(functionSearch.toLowerCase())
+      );
       if (functionIndex >= 0) {
         filteredData.push({
           type: item.type,
@@ -193,6 +197,10 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
         });
       }
     });
+    const currentActiveKey = filteredData?.[0]?.type;
+    if (currentActiveKey) {
+      setActiveKey([currentActiveKey]);
+    }
     return filteredData;
   }, [functionSearch]);
 
@@ -449,6 +457,8 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
             </Col>
             <Col xs={20} sm={16} md={8} lg={8} xl={8} xxl={8}>
               <FunctionList
+                activeKey={activeKey}
+                setActiveKey={setActiveKey}
                 functions={functionSearch ? filteredFunctions : funcList}
                 functionLoading={functionLoading}
                 searchValue={functionSearch}

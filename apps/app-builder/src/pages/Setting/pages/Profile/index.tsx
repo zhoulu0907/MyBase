@@ -16,7 +16,7 @@ import {
   Typography
 } from '@arco-design/web-react';
 import { getApplicationSimple, type Application, type PageParam } from '@onebase/app';
-import { TENANT_INFO_PERMISSION as ACTIONS, hasPermission /* UserPermissionManager */ } from '@onebase/common';
+import { TENANT_PROFILE_PERMISSION as ACTIONS, hasPermission /* UserPermissionManager */ } from '@onebase/common';
 import type { CorpDetailResponse, DictData, PostSimpleRespVO, RoleSimpleRespVO } from '@onebase/platform-center';
 import { getCorpListApi, getDictDataByType, getLoginedUser } from '@onebase/platform-center';
 import { appIconMap } from '@onebase/ui-kit';
