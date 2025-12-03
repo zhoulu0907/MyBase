@@ -71,12 +71,12 @@ public class FlowProcessTest {
     public void testSimple2() throws IOException {
         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
         reqDTO.setTraceId(UUID.randomUUID().toString());
-        reqDTO.setEntityId(46999363287089152L);
+        reqDTO.setEntityId(162955646465703936L);
         reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_CREATE);
         reqDTO.setFieldData(Map.of(
-                "46999569445519360", "6年级3班",
-                "50026937276661762", LocalDate.now().minusYears(10),
-                "50028191407505411", 30
+//                "46999569445519360", "6年级3班",
+//                "50026937276661762", LocalDate.now().minusYears(10),
+//                "50028191407505411", 30
         ));
         //reqDTO.setChangedFieldIds(List.of(46999569445519360L));
         EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);

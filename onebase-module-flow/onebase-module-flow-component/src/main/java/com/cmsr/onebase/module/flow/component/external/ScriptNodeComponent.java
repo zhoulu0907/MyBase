@@ -7,6 +7,7 @@ import com.cmsr.onebase.module.flow.context.ConditionsProvider;
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
 import com.cmsr.onebase.module.flow.context.VariableContext;
 import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
+import com.cmsr.onebase.module.flow.context.enums.JdbcTypeEnum;
 import com.cmsr.onebase.module.flow.context.express.ExpressionItem;
 import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
 import com.cmsr.onebase.module.flow.context.graph.nodes.ScriptNodeData;
@@ -51,6 +52,7 @@ public class ScriptNodeComponent extends SkippableNodeComponent {
 
         // 2. 从空间中读取变量
         List<ConditionItem> conditionItems = nodeData.getInputParameterFields();
+        settingToJdbcType(conditionItems);
         List<ExpressionItem> expressionItems = conditionsProvider.formatConditionItemsForValue(conditionItems, expressionContext);
 
         Map<String, Object> inputData = expressionItems.stream().collect(Collectors.toMap(ExpressionItem::getKey, ExpressionItem::getValue));
@@ -79,8 +81,16 @@ public class ScriptNodeComponent extends SkippableNodeComponent {
         }
     }
 
+    private void settingToJdbcType(List<ConditionItem> conditionItems) {
+        for (ConditionItem conditionItem : conditionItems) {
+            //String fieldType = conditionItem.getFieldType();
+            conditionItem.setJdbcType(JdbcTypeEnum.VARCHAR.getCode());
+        }
+    }
+
+
     @Data
-    protected static class JsRequest {
+    public static class JsRequest {
 
         private String inputJson;
 
@@ -89,4 +99,6 @@ public class ScriptNodeComponent extends SkippableNodeComponent {
         private String outputJson;
 
     }
+
+
 }
