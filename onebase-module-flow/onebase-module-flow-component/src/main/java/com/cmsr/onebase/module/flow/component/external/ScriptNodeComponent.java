@@ -2,6 +2,8 @@ package com.cmsr.onebase.module.flow.component.external;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.flow.component.SkippableNodeComponent;
+import com.cmsr.onebase.module.flow.component.utils.PropertyDefine;
+import com.cmsr.onebase.module.flow.component.utils.SchemaParser;
 import com.cmsr.onebase.module.flow.component.utils.VariableProvider;
 import com.cmsr.onebase.module.flow.context.ConditionsProvider;
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
@@ -59,8 +61,9 @@ public class ScriptNodeComponent extends SkippableNodeComponent {
         // 3. 执行Http调用
         JsRequest jsRequest = new JsRequest();
         jsRequest.setScript(nodeData.getScript());
-        jsRequest.setInputJson(JsonUtils.toJsonString(inputData));
-        jsRequest.setOutputJson(nodeData.getOutputParameter());
+        PropertyDefine inputDef = JsonUtils.parseObject(nodeData.getInputSchema(), PropertyDefine.class);
+        Map<String, Object> parsedInputParams = SchemaParser.parseBySchemaDef(inputData, inputDef);
+        jsRequest.setInputJson(JsonUtils.toJsonString(parsedInputParams));
 
         String invokeUrl = jsServerAddress + INVOKE_SUFFIX_URI;
         HttpResponse<JsonNode> nodeHttpResponse = Unirest.post(invokeUrl)
@@ -72,7 +75,10 @@ public class ScriptNodeComponent extends SkippableNodeComponent {
         if (nodeHttpResponse.isSuccess()) {
             System.out.println("node服务器调用成功");
             JSONObject result = nodeHttpResponse.getBody().getObject().getJSONObject("data");
-            variableContext.putNodeVariables(this.getTag(), result.toMap());
+            PropertyDefine outputDef = JsonUtils.parseObject(nodeData.getOutputSchema(), PropertyDefine.class);
+            Map<String, Object> resultMap = result.toMap();
+            Map<String, Object> parsedResult = SchemaParser.parseBySchemaDef(resultMap, outputDef);
+            variableContext.putNodeVariables(this.getTag(), parsedResult);
         } else {
             int httpStatus = nodeHttpResponse.getStatus();
             String errMsg = nodeHttpResponse.getBody().getObject().getString("msg");

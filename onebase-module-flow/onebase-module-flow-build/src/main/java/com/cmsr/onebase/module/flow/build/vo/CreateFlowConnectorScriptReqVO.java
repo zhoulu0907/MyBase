@@ -1,10 +1,7 @@
 package com.cmsr.onebase.module.flow.build.vo;
 
-import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.NullNode;
 import io.swagger.v3.oas.annotations.media.Schema;
-import com.fasterxml.jackson.databind.node.TextNode;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -36,5 +33,11 @@ public class CreateFlowConnectorScriptReqVO {
 
     @Schema(description = "输出参数配置")
     private JsonNode outputParameter;
+
+    @Schema(description = "输入参数配置")
+    private JsonNode inputSchema;
+
+    @Schema(description = "输出参数配置")
+    private JsonNode outputSchema;
 
 }
