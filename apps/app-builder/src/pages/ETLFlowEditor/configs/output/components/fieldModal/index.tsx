@@ -166,8 +166,15 @@ const FieldModal: React.FC<FieldModalProps> = ({ isModalVisible, onClose, onOk, 
   const getAvailableTargetOptions = (currentIndex: number) => {
     const targetType = fieldMappings[currentIndex]?.sourceFieldType;
 
+    const selectedIds = new Set(
+      fieldMappings
+        .filter((_, idx) => idx !== currentIndex)
+        .map((mapping) => mapping.targetFieldName)
+        .filter((id) => !!id)
+    );
+
     return targetColumns
-      .filter((column) => !targetType || column.fieldType === targetType)
+      .filter((column) => (!targetType || column.fieldType === targetType) && !selectedIds.has(column.fieldFqn))
       .map((column) => ({
         label: column.fieldName,
         value: column.fieldFqn

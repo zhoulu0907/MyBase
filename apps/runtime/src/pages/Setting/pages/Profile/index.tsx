@@ -1,7 +1,6 @@
 import PlaceholderPanel from '@/components/PlaceholderPanel';
-import { CORP_INFO_PERMISSION as ACTIONS } from '@/constants/permission';
-import { hasPermission } from '@/utils/permission';
 import { Avatar, Button, Grid, Image, Space, Spin, Tag, Typography } from '@arco-design/web-react';
+import { CORP_INFO_PERMISSION as ACTIONS, hasPermission } from '@onebase/common';
 import type { PostSimpleRespVO } from '@onebase/platform-center';
 import { getLoginedUserInCorp } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';

@@ -9,11 +9,11 @@ import {
 } from '@onebase/app';
 import { ETLDrawerTab, etlEditorSignal, getHashQueryParam } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
+import { cloneDeep } from 'lodash-es';
 import React, { useEffect, useState } from 'react';
 import DataRemark from '../../components/dataRemark';
 import FieldModal, { type FieldMapping } from './components/fieldModal';
 import styles from './index.module.less';
-import { cloneDeep } from 'lodash-es';
 
 const Row = Grid.Row;
 const Col = Grid.Col;
@@ -30,10 +30,10 @@ export const OutputNodeConfig: React.FC<OutputNodeConfigProps> = ({ onRegisterSa
   const [datasourceOptions, setDatasourceOptions] = useState<ETLDatasourceOption[]>([]);
   const [datasourceType, setDatasourceType] = useState<string>('external');
   const [selectDatasourceUUID, setSelectDatasourceUUID] = useState<string>(
-    cloneDeep(nodeData.value[curNode.value.id]?.config?.datasourceUUID) || ''
+    cloneDeep(nodeData.value[curNode.value.id]?.config?.datasourceUuid) || ''
   );
   const [selectTableUUID, setSelectTableUUID] = useState<string>(
-    cloneDeep(nodeData.value[curNode.value.id]?.config?.tableUUID) || ''
+    cloneDeep(nodeData.value[curNode.value.id]?.config?.tableUuid) || ''
   );
   const [tableOptions, setTableOptions] = useState<ETLTable[]>([]);
   const [targetColumns, setTargetColumns] = useState<ELTColumn[]>([]);
@@ -77,8 +77,8 @@ export const OutputNodeConfig: React.FC<OutputNodeConfigProps> = ({ onRegisterSa
     const payload = newPayload;
     payload.config = {
       datasourceType: value,
-      datasourceUUID: '',
-      tableUUID: '',
+      datasourceUuid: '',
+      tableUuid: '',
       fields: []
     };
     payload.output = {
@@ -95,8 +95,8 @@ export const OutputNodeConfig: React.FC<OutputNodeConfigProps> = ({ onRegisterSa
     const payload = newPayload;
     payload.config = {
       ...payload.config,
-      datasourceUUID: value,
-      tableUUID: '',
+      datasourceUuid: value,
+      tableUuid: '',
       fields: []
     };
 
@@ -142,7 +142,7 @@ export const OutputNodeConfig: React.FC<OutputNodeConfigProps> = ({ onRegisterSa
     const payload = newPayload;
     payload.config = {
       ...payload.config,
-      tableUUID: tableUuid,
+      tableUuid: tableUuid,
       fields: []
     };
     payload.output = {

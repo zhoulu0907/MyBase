@@ -8,3 +8,4 @@ export * from './list';
 export * from './router';
 export * from './token';
 export * from './tree';
+export * from './userPermission';

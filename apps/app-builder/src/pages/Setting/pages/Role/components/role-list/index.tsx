@@ -1,9 +1,9 @@
 import ListItem from '@/components/ListItem';
 import { PermissionButton as Button } from '@/components/PermissionControl';
 import PlaceholderPanel from '@/components/PlaceholderPanel';
-import { TENANT_ROLE_PERMISSION as ACTIONS } from '@/constants/permission';
 import { Input, Spin, Tag } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
+import { TENANT_ROLE_PERMISSION as ACTIONS } from '@onebase/common';
 import type { PageParam } from '@onebase/platform-center';
 import { getRolePage, RoleType, type RoleVO } from '@onebase/platform-center';
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
