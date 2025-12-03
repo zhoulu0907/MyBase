@@ -6,7 +6,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,7 +26,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class BpmEngineController {
     @PostMapping("/execute")
     @Operation(summary = "执行流程")
-    @PreAuthorize("@ss.hasPermission('bpm:engine:execute')")
     public CommonResult<Boolean> execute(@Valid @RequestBody BpmExecuteReqVO reqVO) {
         long startTime = System.currentTimeMillis();
         // Object result = bpmEngineService.executeFormulaWithParams(reqVO.getFormula(), reqVO.getParameters());
