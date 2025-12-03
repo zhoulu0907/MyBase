@@ -1,4 +1,4 @@
-import ExecuteFlows from '@/utils/flow';
+// import ExecuteFlows from '@/utils/flow';
 import { Button, Form, PopupSwiper, Toast } from '@arco-design/mobile-react';
 import { useForm } from '@arco-design/mobile-react/esm/form';
 
@@ -459,21 +459,21 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
               <Fragment key={cp.id}>
                 {useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id].config.status !==
                   STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
-                  <div key={cp.id} className={styles.componentItem} style={{ width: '100%' }}>
-                    <PreviewRender
-                      cpId={cp.id}
-                      cpType={cp.type}
-                      pageComponentSchema={
-                        useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id]
-                      }
-                      form={form}
-                      runtime={true}
-                      showFromPageData={() => {
-                        setPageType(EDITOR_TYPES.FORM_EDITOR);
-                      }}
-                    />
-                  </div>
-                )}
+                    <div key={cp.id} className={styles.componentItem} style={{ width: '100%' }}>
+                      <PreviewRender
+                        cpId={cp.id}
+                        cpType={cp.type}
+                        pageComponentSchema={
+                          useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id]
+                        }
+                        form={form}
+                        runtime={true}
+                        showFromPageData={() => {
+                          setPageType(EDITOR_TYPES.FORM_EDITOR);
+                        }}
+                      />
+                    </div>
+                  )}
               </Fragment>
             ))}
 
@@ -524,28 +524,28 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                 <Fragment key={cp.id}>
                   {useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id].config.status !==
                     STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
-                    <div
-                      key={cp.id}
-                      className={styles.componentItem}
-                      style={{
-                        width: getComponentWidth(
-                          useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id],
-                          cp.type
-                        )
-                      }}
-                    >
-                      <PreviewRender
-                        cpId={cp.id}
-                        cpType={cp.type}
-                        pageComponentSchema={
-                          useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id]
-                        }
-                        runtime={true}
-                        detailMode={detailMode}
-                        showFromPageData={() => {}}
-                      />
-                    </div>
-                  )}
+                      <div
+                        key={cp.id}
+                        className={styles.componentItem}
+                        style={{
+                          width: getComponentWidth(
+                            useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id],
+                            cp.type
+                          )
+                        }}
+                      >
+                        <PreviewRender
+                          cpId={cp.id}
+                          cpType={cp.type}
+                          pageComponentSchema={
+                            useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id]
+                          }
+                          runtime={true}
+                          detailMode={detailMode}
+                          showFromPageData={() => { }}
+                        />
+                      </div>
+                    )}
                 </Fragment>
               ))}
 
@@ -565,7 +565,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       </div>
 
       {/* 信息收集弹窗 */}
-      <ExecuteFlows flows={flows} inputParams={inputParams}></ExecuteFlows>
+      {/* <ExecuteFlows flows={flows} inputParams={inputParams}></ExecuteFlows> */}
     </div>
   );
 };

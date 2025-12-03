@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import PreviewContainer from './components/preview';
-import TaskCenterPage from './components/TaskCenter/TaskCenterPage';
+// import TaskCenterPage from './components/TaskCenter/TaskCenterPage';
 import styles from './index.module.less';
 import { menuSignal } from '@onebase/app';
 
@@ -25,7 +25,7 @@ const Runtime: React.FC = () => {
   return (
     <div className={styles.runtimePage}>
       {curMenuId.indexOf('TASK-') >= 0 ? (
-        <TaskCenterPage curMenuId={curMenuId} />
+        <></> // <TaskCenterPage curMenuId={curMenuId} />
       ) : (
         <PreviewContainer menuId={curMenuId || ''} runtime={true} />
       )}
