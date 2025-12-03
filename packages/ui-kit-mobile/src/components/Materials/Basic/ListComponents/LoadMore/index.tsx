@@ -442,7 +442,7 @@ const XLoadMore = memo(
     };
 
     return (
-      <div className="loadmore-list-wrapper">
+      <div className="loadmore-list-wrapper-OBMobile">
         {searchItems?.length ? (
           <Sticky topOffset={0.88 * window.ROOT_FONT_SIZE} className="list-search-header">
             {searchItems?.length ? (

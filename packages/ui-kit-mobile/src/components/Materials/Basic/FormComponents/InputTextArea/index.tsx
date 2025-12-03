@@ -74,7 +74,7 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; 
 
   return (
     <Form.Item
-      className={`inputTextWrapper inputTextAreaWrapper ${verify?.lengthLimit ? 'showStatistics' : ''}`}
+      className={`inputTextWrapperOBMobile inputTextAreaWrapperOBMobile ${verify?.lengthLimit ? 'showStatistics' : ''}`}
       field={fieldId}
       rules={rules}
       label={label.display ? label.text : undefined}

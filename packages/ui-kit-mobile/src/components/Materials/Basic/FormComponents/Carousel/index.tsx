@@ -22,7 +22,7 @@ const XCarousel = memo((props: XCarouselConfig & { runtime?: boolean; detailMode
   } = props;
 
   return (
-    <div className={`inputTextWrapper ${styles.carouselWrapper}`}>
+    <div className={`inputTextWrapperOBMobile ${styles.carouselWrapperOBMobile}`}>
       <div className={styles.label}>
         {label.display && label.text ? label.text : ''}
       </div>

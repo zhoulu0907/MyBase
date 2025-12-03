@@ -39,7 +39,7 @@ const XSelectOne = memo((props: XSelectOneConfig & { runtime?: boolean; detailMo
 
   return (
     <Form.Item
-      className="inputTextWrapper"
+      className="inputTextWrapperOBMobile"
       label={label.display && label.text}
       field={fieldId}
       rules={rules}

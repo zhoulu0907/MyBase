@@ -40,7 +40,7 @@ const XCheckbox = memo((props: XCheckboxConfig & { runtime?: boolean; detailMode
     // 非只读模式，渲染Input组件
     return (
       <CheckboxGroup
-        className={styles.checkboxGroup}
+        className={styles.checkboxGroupOBMobile}
         layout='block'
         icons={squareIcon}
         defaultValue={defaultOptionsConfig?.defaultOptions?.filter((op) => op.chosen).map((op) => op.value)}
@@ -62,7 +62,7 @@ const XCheckbox = memo((props: XCheckboxConfig & { runtime?: boolean; detailMode
 
   return (
     <Form.Item
-      className="inputTextWrapper"
+      className="inputTextWrapperOBMobile"
       field={fieldId}
       label={label.display && label.text}
       rules={rules}
