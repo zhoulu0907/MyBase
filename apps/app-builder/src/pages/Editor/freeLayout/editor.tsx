@@ -40,6 +40,8 @@ export const Editor = () => {
     try {
       let currentJsonData = {};
       const res = await getDataById({ id: currentFlowId });
+      console.log(JSON.parse(res.bpmDefJson));
+
       if (res.globalConfig) {
         setConfigData(res.globalConfig);
       }
@@ -48,6 +50,7 @@ export const Editor = () => {
       } else {
         const bpmDefJson = JSON.parse(res.bpmDefJson);
         currentJsonData = normalizeNodes(bpmDefJson);
+        console.log(currentJsonData);
       }
       if (res.businessId) {
         setFlowData(res);
@@ -78,6 +81,12 @@ export const Editor = () => {
 
   const normalizeNodes = (obj: WorkflowJSON | undefined) => {
     obj?.edges.forEach((item) => {
+      if (item.targetNodeID.includes('branch')) {
+        item.targetPortID = 'input-top';
+      }
+      if (item.sourceNodeID.includes('branch')) {
+        item.sourcePortID = 'output-bottom';
+      }
       if (item?.type) {
         sourceNodeIDMap.set(item.sourceNodeID + item.targetNodeID, item.type);
       } else {
@@ -85,6 +94,12 @@ export const Editor = () => {
       }
     });
     const newNodes = obj?.nodes.map((node) => {
+      if (node.id.includes('branch') && node.meta) {
+        node.meta.defaultPorts = [
+          { type: 'input', portID: 'input-top', location: 'top' },
+          { type: 'output', portID: 'output-bottom', location: 'bottom' }
+        ];
+      }
       if ('name' in node) {
         return { ...node, data: { ...(node.data || {}), name: node.name } };
       } else if (node.data && 'name' in node.data) {
