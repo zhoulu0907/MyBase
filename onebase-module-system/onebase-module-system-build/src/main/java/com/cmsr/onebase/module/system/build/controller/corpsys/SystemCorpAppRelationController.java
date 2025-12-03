@@ -37,7 +37,7 @@ public class SystemCorpAppRelationController {
     private CorpAppRelationService corpAppRelationService;
 
     @PostMapping("/create")
-    @PreAuthorize("@ss.hasPermission('tenant:corp:create')")
+    @PreAuthorize("@ss.hasPermission('tenant:corp:app-auth')")
     @Operation(summary = "新增企业应用关联")
     public CommonResult<Boolean> createCorpAppRelation(@Valid @RequestBody CorpAppRelationInertReqVO corpAppRelationInertReqVO) {
         corpAppRelationService.createCorpAppRelation(corpAppRelationInertReqVO);
@@ -45,7 +45,7 @@ public class SystemCorpAppRelationController {
     }
 
     @PostMapping("/update")
-    @PreAuthorize("@ss.hasPermission('tenant:corp:update')")
+    @PreAuthorize("@ss.hasPermission('tenant:corp:app-auth')")
     @Operation(summary = "更新企业应用关联")
     public CommonResult<Boolean> updateCorpAppRelation(@Valid @RequestBody CorpAppRelationUpdateReqVO updateReqVO) {
         corpAppRelationService.updateCorpAppRelation(updateReqVO);
@@ -54,14 +54,14 @@ public class SystemCorpAppRelationController {
 
     @PostMapping("/update-status")
     @Operation(summary = "企业启用/禁用")
-    @PreAuthorize("@ss.hasPermission('tenant:corp:enable')")
+    @PreAuthorize("@ss.hasPermission('tenant:corp:app-auth')")
     public CommonResult<Boolean> updateStatus(@RequestParam("id") Long id, @RequestParam("status") Long status) {
         corpAppRelationService.updateStatus(id, status);
         return success(true);
     }
 
     @PostMapping("/delete")
-    @PreAuthorize("@ss.hasPermission('tenant:corp:delete')")
+    @PreAuthorize("@ss.hasPermission('tenant:corp:app-auth')")
     @Operation(summary = "删除应用授权企业")
     public CommonResult<Boolean> deleteCorpAppRelation(@RequestParam("id") Long id) {
         corpAppRelationService.deleteCorpAppRelation(id);
@@ -70,7 +70,7 @@ public class SystemCorpAppRelationController {
 
     @GetMapping("/corp-applications-page")
     @Operation(summary = "获得企业授权应用列表-分页")
-    @PreAuthorize("@ss.hasPermission('tenant:corp:query')")
+    @PreAuthorize("@ss.hasPermission('tenant:corp:app-auth')")
     public CommonResult<PageResult<CorpApplicationRespVO>> getCorpAppRelationPage(@Valid CorpAppPageReqVO corpAppPageReqVO) {
         PageResult<CorpApplicationRespVO> pageResult = corpAppRelationService.getCorpAppRelationPage(corpAppPageReqVO);
         return success(pageResult);
@@ -78,7 +78,7 @@ public class SystemCorpAppRelationController {
 
     @PostMapping("/corp-no-relation-app-list")
     @Operation(summary = "获取企业未关联应用", description = "主要用于前端的下拉选项")
-    @PreAuthorize("@ss.hasPermission('tenant:corp:query')")
+    @PreAuthorize("@ss.hasPermission('tenant:corp:app-auth')")
     public CommonResult<List<ApplicationDTO>> getCorpNoRelationAppList(CorpRelationAppReqVO relationAppReqVO) {
         List<ApplicationDTO>  applicationsList=  corpAppRelationService.getCorpNoRelationAppList(relationAppReqVO);
         return success( applicationsList);
