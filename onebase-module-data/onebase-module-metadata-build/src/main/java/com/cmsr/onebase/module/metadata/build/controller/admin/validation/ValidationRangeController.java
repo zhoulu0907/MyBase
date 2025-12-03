@@ -24,10 +24,10 @@ public class ValidationRangeController {
     @Resource private MetadataValidationRangeBuildService rangeService;
 
     @PostMapping("/get-by-field")
-    @Operation(summary = "根据字段ID获取范围校验")
-    @Parameter(name = "id", description = "字段ID", required = true)
-    public CommonResult<ValidationRangeRespVO> getByField(@RequestParam("id") Long id) {
-        return success(rangeService.getByFieldIdWithRgName(id));
+    @Operation(summary = "根据字段UUID获取范围校验")
+    @Parameter(name = "id", description = "字段UUID", required = true)
+    public CommonResult<ValidationRangeRespVO> getByField(@RequestParam("id") String fieldUuid) {
+        return success(rangeService.getByFieldIdWithRgName(fieldUuid));
     }
 
     @PostMapping("/create")
@@ -44,10 +44,10 @@ public class ValidationRangeController {
     }
 
     @PostMapping("/delete-by-field")
-    @Operation(summary = "按字段删除范围校验")
-    @Parameter(name = "id", description = "字段ID", required = true)
-    public CommonResult<Boolean> deleteByField(@RequestParam("id") Long id) {
-        rangeService.deleteByFieldId(id);
+    @Operation(summary = "按字段UUID删除范围校验")
+    @Parameter(name = "id", description = "字段UUID", required = true)
+    public CommonResult<Boolean> deleteByField(@RequestParam("id") String fieldUuid) {
+        rangeService.deleteByFieldId(fieldUuid);
         return success(true);
     }
 

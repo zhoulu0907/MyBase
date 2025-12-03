@@ -24,10 +24,10 @@ public class ValidationFormatController {
     @Resource private MetadataValidationFormatBuildService formatService;
 
     @PostMapping("/get-regex-by-field")
-    @Operation(summary = "根据字段ID获取正则格式校验")
-    @Parameter(name = "id", description = "字段ID", required = true)
-    public CommonResult<ValidationFormatRespVO> getRegexByField(@RequestParam("id") Long id) {
-        return success(formatService.getRegexByFieldIdWithRgName(id));
+    @Operation(summary = "根据字段UUID获取正则格式校验")
+    @Parameter(name = "id", description = "字段UUID", required = true)
+    public CommonResult<ValidationFormatRespVO> getRegexByField(@RequestParam("id") String fieldUuid) {
+        return success(formatService.getRegexByFieldIdWithRgName(fieldUuid));
     }
 
     @GetMapping("/get")
@@ -51,10 +51,10 @@ public class ValidationFormatController {
     }
 
     @PostMapping("/delete-by-field")
-    @Operation(summary = "按字段删除格式校验")
-    @Parameter(name = "id", description = "字段ID", required = true)
-    public CommonResult<Boolean> deleteByField(@RequestParam("id") Long id) {
-        formatService.deleteByFieldId(id);
+    @Operation(summary = "按字段UUID删除格式校验")
+    @Parameter(name = "id", description = "字段UUID", required = true)
+    public CommonResult<Boolean> deleteByField(@RequestParam("id") String fieldUuid) {
+        formatService.deleteByFieldId(fieldUuid);
         return success(true);
     }
 
