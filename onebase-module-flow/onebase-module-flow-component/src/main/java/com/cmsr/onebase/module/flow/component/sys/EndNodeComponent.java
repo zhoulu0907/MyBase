@@ -7,8 +7,6 @@ import com.yomahub.liteflow.core.NodeComponent;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.Optional;
-
 /**
  * @Author：huangjie
  * @Date：2025/9/5 9:24
@@ -26,7 +24,7 @@ public class EndNodeComponent extends NodeComponent {
         EndNodeData nodeData = (EndNodeData) executeContext.getNodeData(this.getTag());
         // 设置异常终止，默认为正常终止，所以尽量设置为 true
         if (StringUtils.equalsIgnoreCase(nodeData.getStatusCode(), "false")) {
-            executeContext.setAbnormalTermination(Optional.of(Boolean.FALSE));
+            executeContext.setAbnormalTermination(Boolean.TRUE);
             executeContext.setTerminationMessage(nodeData.getPrompt());
         }
     }

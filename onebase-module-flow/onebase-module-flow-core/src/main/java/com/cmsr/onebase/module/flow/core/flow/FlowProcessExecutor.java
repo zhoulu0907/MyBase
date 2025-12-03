@@ -59,12 +59,11 @@ public class FlowProcessExecutor {
      * 执行新流程（基于traceId和输入参数）
      */
     public ExecutorResult execute(String traceId, Long processId, Map<String, Object> inputParams) {
+        if (StringUtils.isEmpty(traceId)) {
+            return ExecutorResult.error(processId, "traceId不能为空");
+        }
         if (!flowProcessCache.isProcessExist(processId)) {
             return ExecutorResult.error(processId, "流程不存在: " + processId);
-        }
-        // TODO 让调用方必须生成一个traceId，这个地方做为空判断异常
-        if (StringUtils.isEmpty(traceId)) {
-            traceId = FlowUtils.generateTraceId();
         }
         FlowExecutionLogDO executionLog = createNewExecutionLog(processId);
         ExecuteContext executeContext = new ExecuteContext();
@@ -237,8 +236,7 @@ public class FlowProcessExecutor {
         result.setExecutionEndNodeType(executeContext.getExecutionEndNodeType());
         result.setExecutionEndNodeTag(executeContext.getExecutionEndNodeTag());
         result.setOutputParams(variableContext.getOutputParams());
-        if (executeContext.getAbnormalTermination().isPresent()
-                && !executeContext.getAbnormalTermination().get()) {
+        if (Boolean.TRUE.equals(executeContext.getAbnormalTermination())) {
             result.setSuccess(false);
             if (executeContext.getTerminationMessage() != null) {
                 result.setMessage(executeContext.getTerminationMessage());
