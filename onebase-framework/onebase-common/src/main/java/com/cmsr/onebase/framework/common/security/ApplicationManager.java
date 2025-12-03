@@ -59,7 +59,7 @@ public class ApplicationManager {
         }
     }
 
-    private static void ignoreApplicationCondition() {
+    public static void ignoreApplicationCondition() {
         applicationIdBooleanHolder.set(Boolean.TRUE);
     }
 
@@ -100,7 +100,7 @@ public class ApplicationManager {
         }
     }
 
-    private static void ignoreVersionTagCondition() {
+    public static void ignoreVersionTagCondition() {
         versionTagBooleanHolder.set(Boolean.TRUE);
     }
 

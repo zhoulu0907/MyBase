@@ -8,6 +8,7 @@ import com.mybatisflex.core.query.*;
 import com.mybatisflex.core.util.CollectionUtil;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -18,15 +19,18 @@ public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity>
 
     protected QueryWrapper injectBizFilter(QueryWrapper queryWrapper) {
         List<QueryTable> queryTables = CPI.getQueryTables(queryWrapper);
-        if (queryTables.size() > 1) {
+        if (CollectionUtils.isNotEmpty(queryTables) && queryTables.size() > 1) {
             log.warn("查询条件包含多个表，跳过条件注入");
             return queryWrapper;
         }
+        QueryColumn applicationColumn;
+        if (CollectionUtils.isEmpty(queryTables)) {
+            applicationColumn = new QueryColumn(BaseAppEntity.APPLICATION_ID);
+        } else {
+            applicationColumn = new QueryColumn(queryTables.get(0), BaseAppEntity.APPLICATION_ID);
+        }
         Long applicationId = ApplicationManager.getApplicationId();
-        QueryTable table = queryTables.get(0);
-        queryWrapper = queryWrapper.and(
-                new QueryColumn(table, BaseAppEntity.APPLICATION_ID)
-                        .eq(applicationId).when(!ApplicationManager.isIgnoreApplicationCondition()));
+        queryWrapper = queryWrapper.and(applicationColumn.eq(applicationId).when(!ApplicationManager.isIgnoreApplicationCondition()));
         return queryWrapper;
     }
 
