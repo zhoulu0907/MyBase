@@ -12,7 +12,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -35,7 +34,6 @@ public class DataMethodController {
 
     @PostMapping("/list")
     @Operation(summary = "查询业务实体的数据方法列表")
-    @PreAuthorize("@ss.hasPermission('metadata:data-method:query')")
     public CommonResult<List<DataMethodRespVO>> getDataMethodList(@Valid @RequestBody DataMethodQueryReqVO reqVO) {
     DataMethodQueryVO queryVO = new DataMethodQueryVO(reqVO.getEntityId(), reqVO.getMethodType(), reqVO.getKeyword());
         List<DataMethodRespVO> methods = dataMethodService.getDataMethodList(queryVO);
@@ -44,7 +42,6 @@ public class DataMethodController {
 
     @PostMapping("/detail")
     @Operation(summary = "获取指定数据方法的详细信息")
-    @PreAuthorize("@ss.hasPermission('metadata:data-method:query')")
     public CommonResult<DataMethodDetailRespVO> getDataMethodDetail(@Valid @RequestBody DataMethodDetailQueryReqVO reqVO) {
     DataMethodDetailRespVO detail = dataMethodService.getDataMethodDetail(reqVO.getEntityId(), reqVO.getMethodCode());
         return success(detail);
