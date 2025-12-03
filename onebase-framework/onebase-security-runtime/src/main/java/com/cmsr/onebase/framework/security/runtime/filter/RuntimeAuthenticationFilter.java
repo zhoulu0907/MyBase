@@ -101,6 +101,7 @@ public class RuntimeAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
         }
+        ApplicationManager.setVersionTag(1L);
         // 继续过滤链
         chain.doFilter(request, response);
     }

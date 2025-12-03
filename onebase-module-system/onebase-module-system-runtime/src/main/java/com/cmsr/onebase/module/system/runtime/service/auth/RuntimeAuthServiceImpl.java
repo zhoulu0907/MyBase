@@ -170,7 +170,11 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
     }
 
     public boolean findAdminFlag(Long userId, Long appId) {
-        return appAuthSecurityApi.isApplicationAdmin(userId, appId);
+        try {
+            return appAuthSecurityApi.isApplicationAdmin(userId, appId);
+        } catch (Exception e) {
+            return false;
+        }
     }
 
 
@@ -191,7 +195,7 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         AdminUserDO user = authenticate(reqVO.getUsername(), reqVO.getPassword());
         AuthLoginRespVO authLoginRespVO = createAfterLoginSuccess(user.getUserType(), user.getCorpId(), reqVO.getAppId(), user.getId(), reqVO.getUsername(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_USERNAME);
         // 设置是否管理员
-        authLoginRespVO.setAdminFlag(findAdminFlag(reqVO.getAppId(),user.getId()));
+        authLoginRespVO.setAdminFlag(findAdminFlag(user.getId(),reqVO.getAppId()));
         LogRecordContext.putVariable("user", user);
         return authLoginRespVO;
 
@@ -224,7 +228,7 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         AdminUserDO user = mobileAuthenticate(reqVO.getMobile(), reqVO.getPassword());
         AuthLoginRespVO authLoginRespVO = createAfterLoginSuccess(user.getUserType(), user.getCorpId(), reqVO.getAppId(), user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE);
         // 设置是否管理员
-        authLoginRespVO.setAdminFlag(findAdminFlag( reqVO.getAppId(),user.getId()));
+        authLoginRespVO.setAdminFlag(findAdminFlag(user.getId(), reqVO.getAppId()));
         LogRecordContext.putVariable("user", user);
         return authLoginRespVO;
 
