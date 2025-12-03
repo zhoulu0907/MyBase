@@ -7,11 +7,17 @@ interface MaterialCardProps {
   type: string;
   icon: string;
   id: string;
+  layout?: 'column' | 'row';
 }
 
-const MaterialCard: React.FC<MaterialCardProps> = ({ displayName, icon, type, id }) => {
+const MaterialCard: React.FC<MaterialCardProps> = ({ displayName, icon, type, id, layout = 'row' }) => {
   return (
-    <div className={styles.materialCard} data-cp-type={type} data-cp-displayname={displayName} data-cp-id={id}>
+    <div
+      className={`${styles.materialCard} ${styles[layout]}`}
+      data-cp-type={type}
+      data-cp-displayname={displayName}
+      data-cp-id={id}
+    >
       <div className={styles.icon}>{ICON_Map[icon]}</div>
       <div className={styles.text}>{displayName}</div>
     </div>

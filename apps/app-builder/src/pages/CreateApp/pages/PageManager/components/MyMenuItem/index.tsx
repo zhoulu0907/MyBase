@@ -46,6 +46,7 @@ interface MenuItemProps {
   menuIcon: string;
   isGroup: boolean;
   menuType?: number;
+  pageSetType: number;
   onClick?: () => void;
   triggerCreate?: (formType: string) => void;
   triggerRename?: () => void;
@@ -68,6 +69,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
   menuIcon,
   isGroup,
   menuType,
+  pageSetType,
   onClick,
   triggerCreate,
   triggerRename,
@@ -215,8 +217,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
       return;
     }
 
-    const editorType =
-      curPage.value?.pageSetType === PageType.WORKBENCH ? EDITOR_TYPES.WORKBENCH_EDITOR : EDITOR_TYPES.FORM_EDITOR;
+    const editorType = pageSetType == PageType.WORKBENCH ? EDITOR_TYPES.WORKBENCH_EDITOR : EDITOR_TYPES.FORM_EDITOR;
 
     sessionStorage.setItem('EDITOR_PAGE_INFO', JSON.stringify({ id: menuID, name: menuName, icon: menuIcon }));
     navigate(`/onebase/${tenantId}/editor/${editorType}?pageSetId=${pageSetId}&appId=${curAppId}`);

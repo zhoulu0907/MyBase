@@ -163,6 +163,7 @@ const PageManagerPage: FC = () => {
           menuCode={menu.menuCode}
           menuName={menu.menuName}
           menuIcon={menu.menuIcon}
+          pageSetType={menu.pageSetType}
           isGroup={menu.menuType == MenuType.GROUP}
           maxWidth={maxWidth}
           label={menu.menuName}
