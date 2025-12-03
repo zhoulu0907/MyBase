@@ -251,6 +251,7 @@ public class TenantServiceImpl implements TenantService {
             reqVO.setUsername(adminUserReqVO.getAdminUserName());
             reqVO.setNickname(adminUserReqVO.getAdminNickName());
             reqVO.setMobile(adminUserReqVO.getAdminMobile());
+            reqVO.setEmail(adminUserReqVO.getAdminEmail());
             reqVO.setAdminType(AdminTypeEnum.SYSTEM.getType());
             reqVO.setPassword(TENANT_ADMIN_PASSWORD);
             reqVO.setPlatformUserId(adminUserReqVO.getPlatformUserId());
