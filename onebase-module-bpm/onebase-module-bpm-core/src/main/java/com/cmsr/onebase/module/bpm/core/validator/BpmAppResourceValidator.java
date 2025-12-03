@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.bpm.build.validator;
+package com.cmsr.onebase.module.bpm.core.validator;
 
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.module.app.api.appresource.AppResourceApi;

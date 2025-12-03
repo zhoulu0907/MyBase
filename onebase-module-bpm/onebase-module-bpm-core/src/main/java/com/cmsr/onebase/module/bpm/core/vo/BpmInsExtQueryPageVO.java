@@ -2,7 +2,6 @@ package com.cmsr.onebase.module.bpm.core.vo;
 
 import com.cmsr.onebase.framework.common.pojo.PageParam;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -24,7 +23,6 @@ public class BpmInsExtQueryPageVO extends PageParam  {
     private String keyword;
 
     @Schema(description = "应用ID", example = "1332334434343")
-    @NotNull(message = "应用ID不能为空")
     private Long appId;
 
     @Schema(description = "业务id，实际对应menuId", example = "32636263636323")

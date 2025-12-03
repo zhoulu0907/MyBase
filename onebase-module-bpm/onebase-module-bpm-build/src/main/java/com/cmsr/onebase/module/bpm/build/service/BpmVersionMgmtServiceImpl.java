@@ -6,7 +6,7 @@ import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.module.app.api.appresource.AppResourceApi;
 import com.cmsr.onebase.module.app.api.appresource.dto.AppMenuRespDTO;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
-import com.cmsr.onebase.module.bpm.build.validator.BpmAppResourceValidator;
+import com.cmsr.onebase.module.bpm.core.validator.BpmAppResourceValidator;
 import com.cmsr.onebase.module.bpm.build.vo.vermgmt.BpmDefVersionMgtVO;
 import com.cmsr.onebase.module.bpm.build.vo.vermgmt.BpmDeleteReqVo;
 import com.cmsr.onebase.module.bpm.build.vo.vermgmt.BpmUpdateReqVo;

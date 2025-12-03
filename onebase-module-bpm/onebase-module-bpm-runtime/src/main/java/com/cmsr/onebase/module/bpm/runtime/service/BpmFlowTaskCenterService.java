@@ -38,10 +38,10 @@ public interface BpmFlowTaskCenterService {
     /**
      * 获取流程节点列表
      *
-     * @param bindingViewId 绑定视图Id
+     * @param businessId 业务Id
      * @return
      */
-    List<ListNodesRespVO.NodeVO> listNodes(String bindingViewId);
+    List<ListNodesRespVO.NodeVO> listNodes(Long businessId);
 
     /**
      * 获取流程抄送我的流程
