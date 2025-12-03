@@ -73,10 +73,10 @@ export class TokenManager {
    * 获取 token
    * @returns token 字符串或 null
    */
-  static getToken(key: string): string | null {
+  static getToken(): string | null {
     try {
       // 优先从 sessionStorage 获取，然后从 localStorage 获取
-      let token = sessionStorage.getItem(this.addEnv(key));
+      let token = sessionStorage.getItem(this.addEnv(this.TOKEN_KEY));
       if (!token) {
         token = localStorage.getItem(this.addEnv(this.TOKEN_KEY));
       }
