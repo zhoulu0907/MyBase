@@ -1,11 +1,11 @@
-import { useState } from 'react';
-import Header from '../../../header';
-import BottomBtn from '../../../bottomBtn';
 import { Table } from '@arco-design/web-react';
 import { IconDragDotVertical } from '@arco-design/web-react/icon';
+import { useState } from 'react';
 import { SortableContainer, SortableElement, SortableHandle } from 'react-sortable-hoc';
-import type { BranchData, ApproveDrawerProps, TableComponents, SortEndHandler } from './indexType';
+import BottomBtn from '../../../bottomBtn';
+import Header from '../../../header';
 import styles from './index.module.less';
+import type { BranchData, SortEndHandler, TableComponents } from './indexType';
 
 const arrayMoveMutate = (array: any, from: any, to: any) => {
   const startIndex = to < 0 ? array.length + to : to;
@@ -100,7 +100,7 @@ export default function ApproveDreawer() {
     <SortableWrapper
       useDragHandle
       onSortEnd={onSortEnd}
-      helperContainer={() => document.querySelector('.arco-drag-table-container-2 table tbody')}
+      helperContainer={() => document.querySelector('.pc-drag-table-container-2 table tbody')}
       updateBeforeSortStart={({ node }) => {
         const tds = node.querySelectorAll('td');
         tds.forEach((td) => {
