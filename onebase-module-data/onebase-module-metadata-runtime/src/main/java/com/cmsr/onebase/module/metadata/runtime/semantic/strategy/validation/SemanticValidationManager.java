@@ -25,8 +25,6 @@ import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticFieldSchema
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticEntityValueDTO;
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticRelationSchemaDTO;
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.enums.SemanticConnectorCardinalityEnum;
-import com.cmsr.onebase.module.metadata.runtime.semantic.service.impl.SemanticTemporaryDatasourceService;
-import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticTableNameQuoter;
 import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.validation.impl.SemanticUniqueValidationService;
 import jakarta.annotation.Resource;
 import com.mybatisflex.core.query.QueryWrapper;
@@ -82,10 +80,6 @@ public class SemanticValidationManager {
     private MetadataBusinessEntityCoreService metadataBusinessEntityCoreService;
     @Resource
     private MetadataDatasourceCoreService metadataDatasourceCoreService;
-    @Resource
-    private SemanticTemporaryDatasourceService semanticTemporaryDatasourceService;
-    @Resource
-    private SemanticTableNameQuoter semanticTableNameQuoter;
 
     /**
      * 构造函数

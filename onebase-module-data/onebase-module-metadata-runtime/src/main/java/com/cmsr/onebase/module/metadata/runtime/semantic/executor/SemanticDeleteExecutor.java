@@ -43,18 +43,13 @@ public class SemanticDeleteExecutor {
 
     public Boolean doExecuteProcess(String tableName, Long menuId, String traceId, SemanticTargetBodyVO body) {
         try {
-            // 1) 提取目标ID并构建合并请求体（便于统一装配）
-            SemanticMergeBodyVO merge = new SemanticMergeBodyVO();
-            Object id = body == null || body.getData() == null ? null : body.getData().get("id");
-            if (id == null) { throw exception(BUSINESS_ENTITY_NOT_EXISTS); }
-            merge.set("id", id);
+
+            // 1) 构建 RecordDTO（包含实体校验与基本数据映射）
+            SemanticRecordDTO record = semanticMergeRecordAssembler.assembleTargetBody(tableName, body, menuId, traceId,
+                    SemanticMethodCodeEnum.DELETE,
+                    MetadataDataMethodOpEnum.DELETE);
             
-            // 2) 构建 RecordDTO（包含实体校验与基本数据映射）
-            SemanticRecordDTO record = semanticMergeRecordAssembler.assemble(tableName, merge, menuId, traceId);
-            record.getRecordContext().setMethodCode(SemanticMethodCodeEnum.DELETE);
-            record.getRecordContext().setOperationType(MetadataDataMethodOpEnum.DELETE);
-            
-            // 3) 权限上下文初始化：当前类 initializeContext
+            // 2) 权限上下文初始化：当前类 initializeContext
             semanticPermissionContextLoader.loadPermissionContext(record);
             
             // 4) 数据完整性校验：当前类 validateDataIntegrity

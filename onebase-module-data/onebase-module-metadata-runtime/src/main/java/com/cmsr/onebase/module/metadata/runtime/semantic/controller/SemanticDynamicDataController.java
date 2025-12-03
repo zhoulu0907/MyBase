@@ -2,7 +2,6 @@ package com.cmsr.onebase.module.metadata.runtime.semantic.controller;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.vo.DynamicDataRespVO;
 import com.cmsr.onebase.module.metadata.runtime.semantic.service.SemanticDynamicDataService;
 import com.cmsr.onebase.module.metadata.runtime.semantic.vo.SemanticMergeBodyVO;
 import com.cmsr.onebase.module.metadata.runtime.semantic.vo.SemanticTargetBodyVO;
@@ -20,7 +19,7 @@ import java.util.UUID;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/metadata/{tableName}")
+@RequestMapping("/runtime/metadata/{tableName}")
 @Validated
 @Tag(name = "动态数据(语义)", description = "基于RecordDTO的动态数据接口")
 /**
@@ -79,7 +78,7 @@ public class SemanticDynamicDataController {
      * @param response HTTP 响应对象
      * @return 更新后的动态数据响应
      */
-    public CommonResult<DynamicDataRespVO> update(@PathVariable("tableName") String tableName,
+    public CommonResult<Map<String, Object>> update(@PathVariable("tableName") String tableName,
                                                   @RequestParam("menuId") Long menuId,
                                                   @RequestBody SemanticMergeBodyVO body,
                                                   HttpServletRequest request,
@@ -88,7 +87,7 @@ public class SemanticDynamicDataController {
         if (StringUtils.isBlank(traceId)) {
             traceId = UUID.randomUUID().toString();
         }
-        DynamicDataRespVO resp = semanticDynamicDataService.update(tableName, menuId, body, traceId);
+        Map<String, Object> resp = semanticDynamicDataService.update(tableName, menuId, body, traceId);
         if (traceId != null) response.setHeader("X-Trace-Id", traceId);
         return CommonResult.success(resp);
     }
@@ -103,9 +102,9 @@ public class SemanticDynamicDataController {
      * @param body 目标请求体，`data.id` 为删除主键，支持可选方法编码
      * @param request HTTP 请求对象
      * @param response HTTP 响应对象
-     * @return 删除成功返回被删除数据的ID；失败返回 null
+     * @return 删除是否成功
      */
-    public CommonResult<Long> delete(@PathVariable("tableName") String tableName,
+    public CommonResult<Boolean> delete(@PathVariable("tableName") String tableName,
                                         @RequestParam("menuId") Long menuId,
                                         @RequestBody SemanticTargetBodyVO body,
                                         HttpServletRequest request,
@@ -114,9 +113,9 @@ public class SemanticDynamicDataController {
         if (StringUtils.isBlank(traceId)) {
             traceId = UUID.randomUUID().toString();
         }
-        Long deletedId = semanticDynamicDataService.remove(tableName, menuId, body, traceId);
+        boolean ok = semanticDynamicDataService.delete(tableName, menuId, body, traceId);
         if (traceId != null) response.setHeader("X-Trace-Id", traceId);
-        return CommonResult.success(deletedId);
+        return CommonResult.success(ok);
     }
 
     @PostMapping("/detail")
@@ -131,7 +130,7 @@ public class SemanticDynamicDataController {
      * @param response HTTP 响应对象
      * @return 详情动态数据响应
      */
-    public CommonResult<DynamicDataRespVO> detail(@PathVariable("tableName") String tableName,
+    public CommonResult<Map<String, Object>> detail(@PathVariable("tableName") String tableName,
                                                   @RequestParam("menuId") Long menuId,
                                                   @RequestBody SemanticTargetBodyVO body,
                                                   HttpServletRequest request,
@@ -140,7 +139,7 @@ public class SemanticDynamicDataController {
         if (StringUtils.isBlank(traceId)) {
             traceId = UUID.randomUUID().toString();
         }
-        DynamicDataRespVO resp = semanticDynamicDataService.detail(tableName, menuId, body, traceId);
+        Map<String, Object> resp = semanticDynamicDataService.detail(tableName, menuId, body, traceId);
         if (traceId != null) response.setHeader("X-Trace-Id", traceId);
         return CommonResult.success(resp);
     }
@@ -157,7 +156,7 @@ public class SemanticDynamicDataController {
      * @param response HTTP 响应对象
      * @return 分页结果
      */
-    public CommonResult<PageResult<DynamicDataRespVO>> page(@PathVariable("tableName") String tableName,
+    public CommonResult<PageResult<Map<String, Object>>> page(@PathVariable("tableName") String tableName,
                                                             @RequestParam("menuId") Long menuId,
                                                             @RequestBody SemanticPageBodyVO body,
                                                             HttpServletRequest request,
@@ -166,10 +165,9 @@ public class SemanticDynamicDataController {
         if (StringUtils.isBlank(traceId)) {
             traceId = UUID.randomUUID().toString();
         }
-        PageResult<DynamicDataRespVO> resp = semanticDynamicDataService.page(tableName, menuId, body, traceId);
+        PageResult<Map<String, Object>> resp = semanticDynamicDataService.page(tableName, menuId, body, traceId);
         if (traceId != null) response.setHeader("X-Trace-Id", traceId);
         return CommonResult.success(resp);
     }
 
-    // 保留控制器轻薄，业务逻辑在 SemanticDynamicDataService 中实现
 }

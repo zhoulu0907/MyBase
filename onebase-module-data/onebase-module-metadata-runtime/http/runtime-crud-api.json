@@ -1,0 +1,508 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "OneBase Semantic Dynamic Data API",
+    "version": "1.0.0",
+    "description": "基于 RecordDTO 的动态数据 CRUD 与分页接口（语义化请求体）"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "Local"
+    }
+  ],
+  "tags": [
+    { "name": "动态数据(语义)" }
+  ],
+  "paths": {
+    "/metadata/{tableName}/create": {
+      "post": {
+        "tags": ["动态数据(语义)"],
+        "summary": "创建",
+        "parameters": [
+          { "$ref": "#/components/parameters/TableName" },
+          { "$ref": "#/components/parameters/MenuId" },
+          { "$ref": "#/components/parameters/TraceIdHeader" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/SemanticMergeBodyVO" },
+              "examples": {
+                "create_full": {
+                  "value": {
+                    "b90w_sub": [
+                      {
+                        "text": "项目A-基础配置",
+                        "long_text": "该配置适用于项目A的一期部署，包含核心功能参数设置、外部接口关联规则及数据校验标准，支持系统快速接入第三方服务，保障数据传输的安全性和一致性。",
+                        "url": "https://config.example.com/projectA/v1/setting",
+                        "multi_select": { "id": "dict_601_001", "name": "基础配置类" },
+                        "data_select": { "id": "156740193117405184", "name": "X表-业务类型A" }
+                      },
+                      {
+                        "text": "客户B-定制需求",
+                        "long_text": "客户B为制造业龙头企业，需求围绕生产数据可视化展开，需关联设备台账表的设备编号字段，同步展示设备运行状态、维护记录等信息，长文本字段用于存储定制化开发的特殊说明和接口文档链接。",
+                        "url": "https://custom.example.com/customerB/visualization",
+                        "multi_select": { "id": "dict_601_002", "name": "定制开发类" },
+                        "data_select": { "id": "156740193117405183", "name": "X表-设备台账" }
+                      },
+                      {
+                        "text": "系统C-数据同步",
+                        "long_text": "用于系统C与外部数据源的实时同步配置，关联数据字典表的同步规则字段，定义数据增量同步的频率、字段映射关系及异常处理机制，长文本字段记录同步日志的存储路径和查询方式。",
+                        "url": "https://sync.example.com/systemC/data/syncRule",
+                        "multi_select": { "id": "dict_601_003", "name": "数据同步类" },
+                        "data_select": { "id": "15674019311740512", "name": "X表-同步规则" }
+                      }
+                    ],
+                    "text": "企业客户基础信息",
+                    "long_text": "该客户为高新技术企业，主要从事人工智能算法研发，合作意向为产品定制开发及技术支持服务，预计合作周期12个月。",
+                    "email": "contact@techcorp.com",
+                    "phone": "13912345678",
+                    "url": "https://www.techcorp.com",
+                    "address": "广东省深圳市南山区科技园南区8栋15层",
+                    "number": 198.75,
+                    "date": "2025-11-28",
+                    "datetime": "2025-11-28T10:20:45",
+                    "boolean": true,
+                    "select": { "id": "选项1A", "name": "选项1A" },
+                    "multi_select": [ { "id": "选项1B", "name": "选项1B" }, { "id": "选项3B", "name": "选项3B" } ],
+                    "auto_code": "SYS202511280001",
+                    "user": { "id": "34567890", "name": "赵六" },
+                    "department": { "id": "002", "name": "销售一部" },
+                    "data_selection": { "id": "001", "name": "产品定制服务" },
+                    "file": { "id": "00001", "name": "techcorp_agreement.pdf", "url": "/uploads/contract/20251128/techcorp_agreement.pdf" },
+                    "image": { "id": "00002", "name": "techcorp_logo.png", "url": "/uploads/logo/techcorp_logo.png" },
+                    "geography": "113.946608,22.548857",
+                    "password": "$2a$10$7Zx5wYH6Gf7Dc8E9B0A1S2D3F4G5H6J7K8L9M0N1O",
+                    "encrypted": "EncryptedData_78901234567890abcdef",
+                    "aggregate": 1568000.00,
+                    "idid": "100001",
+                    "multi_user": [ { "id": "34567890", "name": "赵六" }, { "id": "5678901", "name": "孙七" }, { "id": "56789012", "name": "周八" } ],
+                    "multi_department": [ { "id": "312312312313", "name": "销售一部" }, { "id": "3123123123131111", "name": "技术支持部" }, { "id": "dept_004", "name": "客户成功部" } ],
+                    "multi_data_selection": [ { "id": "1002", "name": "算法开发" }, { "id": "1003", "name": "系统集成" }, { "id": "1004", "name": "技术培训" } ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "创建后的动态数据响应",
+            "headers": { "X-Trace-Id": { "$ref": "#/components/headers/XTraceId" } },
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/CommonResultObject" },
+                "examples": {
+                  "success_full": {
+                    "value": {
+                      "code": 0,
+                      "msg": "",
+                      "data": {
+                        "id": 162745519484436480,
+                        "text": "企业客户基础信息",
+                        "long_text": "该客户为高新技术企业，主要从事人工智能算法研发，合作意向为产品定制开发及技术支持服务，预计合作周期12个月。",
+                        "email": "contact@techcorp.com",
+                        "phone": "13912345678",
+                        "url": "https://www.techcorp.com",
+                        "address": "广东省深圳市南山区科技园南区8栋15层",
+                        "number": 198.75,
+                        "date": "2025-11-28",
+                        "datetime": "2025-11-28T10:20:45",
+                        "boolean": true,
+                        "select": { "id": "选项1A", "name": "选项1A" },
+                        "multi_select": [ { "id": "选项1B", "name": "选项1B" }, { "id": "选项3B", "name": "选项3B" } ],
+                        "auto_code": "SYS202511280001",
+                        "user": { "id": "34567890", "name": "赵六" },
+                        "department": { "id": "002", "name": "销售一部" },
+                        "data_selection": { "id": "001", "name": "产品定制服务" },
+                        "file": { "id": "00001", "name": "techcorp_agreement.pdf", "url": "/uploads/contract/20251128/techcorp_agreement.pdf" },
+                        "image": { "id": "00002", "name": "techcorp_logo.png", "url": "/uploads/logo/techcorp_logo.png" },
+                        "geography": "113.946608,22.548857",
+                        "password": "$2a$10$7Zx5wYH6Gf7Dc8E9B0A1S2D3F4G5H6J7K8L9M0N1O",
+                        "encrypted": "EncryptedData_78901234567890abcdef",
+                        "aggregate": 1568000.00,
+                        "idid": "100001",
+                        "multi_user": [ { "id": "34567890", "name": "赵六" }, { "id": "5678901", "name": "孙七" }, { "id": "56789012", "name": "周八" } ],
+                        "multi_department": [ { "id": "312312312313", "name": "销售一部" }, { "id": "3123123123131111", "name": "技术支持部" }, { "id": "dept_004", "name": "客户成功部" } ],
+                        "multi_data_selection": [ { "id": "1002", "name": "算法开发" }, { "id": "1003", "name": "系统集成" }, { "id": "1004", "name": "技术培训" } ],
+                        "b90w_sub": [
+                          {
+                            "text": "项目A-基础配置",
+                            "long_text": "该配置适用于项目A的一期部署，包含核心功能参数设置、外部接口关联规则及数据校验标准，支持系统快速接入第三方服务，保障数据传输的安全性和一致性。",
+                            "url": "https://config.example.com/projectA/v1/setting",
+                            "multi_select": { "id": "dict_601_001", "name": "基础配置类" },
+                            "data_select": { "id": "156740193117405184", "name": "X表-业务类型A" }
+                          },
+                          {
+                            "text": "客户B-定制需求",
+                            "long_text": "客户B为制造业龙头企业，需求围绕生产数据可视化展开，需关联设备台账表的设备编号字段，同步展示设备运行状态、维护记录等信息，长文本字段用于存储定制化开发的特殊说明和接口文档链接。",
+                            "url": "https://custom.example.com/customerB/visualization",
+                            "multi_select": { "id": "dict_601_002", "name": "定制开发类" },
+                            "data_select": { "id": "156740193117405183", "name": "X表-设备台账" }
+                          },
+                          {
+                            "text": "系统C-数据同步",
+                            "long_text": "用于系统C与外部数据源的实时同步配置，关联数据字典表的同步规则字段，定义数据增量同步的频率、字段映射关系及异常处理机制，长文本字段记录同步日志的存储路径和查询方式。",
+                            "url": "https://sync.example.com/systemC/data/syncRule",
+                            "multi_select": { "id": "dict_601_003", "name": "数据同步类" },
+                            "data_select": { "id": "15674019311740512", "name": "X表-同步规则" }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/metadata/{tableName}/update": {
+      "post": {
+        "tags": ["动态数据(语义)"],
+        "summary": "更新",
+        "parameters": [
+          { "$ref": "#/components/parameters/TableName" },
+          { "$ref": "#/components/parameters/MenuId" },
+          { "$ref": "#/components/parameters/TraceIdHeader" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/SemanticMergeBodyVO" },
+              "examples": {
+                "update_full": {
+                  "value": {
+                    "id": 1001,
+                    "name": "示例名称-更新",
+                    "status": 2,
+                    "description": "完整更新示例",
+                    "updateTime": "2025-12-02T12:00:00Z",
+                    "connector_user": { "id": 2002, "name": "李四" },
+                    "connector_orders": [
+                      { "id": 3001, "amount": 189.99, "currency": "CNY" },
+                      { "id": 3003, "amount": 99.00, "currency": "CNY" }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "更新后的动态数据响应",
+            "headers": { "X-Trace-Id": { "$ref": "#/components/headers/XTraceId" } },
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/CommonResultObject" },
+                "examples": {
+                  "success_full": {
+                    "value": {
+                      "code": 0,
+                      "msg": "",
+                      "data": {
+                        "id": 1001,
+                        "name": "示例名称-更新",
+                        "status": 2,
+                        "description": "完整更新示例",
+                        "updateTime": "2025-12-02T12:00:00Z",
+                        "connector_user": { "id": 2002, "name": "李四" },
+                        "connector_orders": [
+                          { "id": 3001, "amount": 189.99, "currency": "CNY" },
+                          { "id": 3003, "amount": 99.00, "currency": "CNY" }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/metadata/{tableName}/delete": {
+      "post": {
+        "tags": ["动态数据(语义)"],
+        "summary": "删除",
+        "parameters": [
+          { "$ref": "#/components/parameters/TableName" },
+          { "$ref": "#/components/parameters/MenuId" },
+          { "$ref": "#/components/parameters/TraceIdHeader" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/SemanticTargetBodyVO" },
+              "examples": {
+                "delete_full": {
+                  "value": {
+                    "id": 1001,
+                    "containSubTable": false,
+                    "containRelation": false,
+                    "methodCode": "SOFT_DELETE"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "删除是否成功",
+            "headers": { "X-Trace-Id": { "$ref": "#/components/headers/XTraceId" } },
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/CommonResultBoolean" },
+                "examples": {
+                  "success_full": {
+                    "value": { "code": 0, "msg": "", "data": true }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/metadata/{tableName}/detail": {
+      "post": {
+        "tags": ["动态数据(语义)"],
+        "summary": "详情",
+        "parameters": [
+          { "$ref": "#/components/parameters/TableName" },
+          { "$ref": "#/components/parameters/MenuId" },
+          { "$ref": "#/components/parameters/TraceIdHeader" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/SemanticTargetBodyVO" },
+              "examples": {
+                "detail_full": {
+                  "value": {
+                    "id": 1001,
+                    "containSubTable": true,
+                    "containRelation": true,
+                    "methodCode": "READ_DETAIL"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "详情动态数据响应",
+            "headers": { "X-Trace-Id": { "$ref": "#/components/headers/XTraceId" } },
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/CommonResultObject" },
+                "examples": {
+                  "success_full": {
+                    "value": {
+                      "code": 0,
+                      "msg": "",
+                      "data": {
+                        "id": 1001,
+                        "name": "示例名称",
+                        "status": 1,
+                        "description": "详情完整示例",
+                        "createTime": "2025-12-02T10:00:00Z",
+                        "updateTime": "2025-12-02T12:00:00Z",
+                        "connector_user": { "id": 2001, "name": "张三" },
+                        "connector_orders": [
+                          { "id": 3001, "amount": 199.99, "currency": "CNY" },
+                          { "id": 3002, "amount": 299.00, "currency": "CNY" }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/metadata/{tableName}/page": {
+      "post": {
+        "tags": ["动态数据(语义)"],
+        "summary": "分页",
+        "parameters": [
+          { "$ref": "#/components/parameters/TableName" },
+          { "$ref": "#/components/parameters/MenuId" },
+          { "$ref": "#/components/parameters/TraceIdHeader" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/SemanticPageBodyVO" },
+              "examples": {
+                "page_full": {
+                  "value": {
+                    "data": { "status": 1, "keyword": "示例" },
+                    "pageNo": 1,
+                    "pageSize": 20,
+                    "sortField": "updateTime",
+                    "sortDirection": "DESC",
+                    "filters": { "status": 1, "dateRange": ["2025-12-01", "2025-12-02"] }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "分页结果",
+            "headers": { "X-Trace-Id": { "$ref": "#/components/headers/XTraceId" } },
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/CommonResultPageResultObject" },
+                "examples": {
+                  "success_full": {
+                    "value": {
+                      "code": 0,
+                      "msg": "",
+                      "data": {
+                        "list": [
+                          {
+                            "id": 1001,
+                            "name": "示例名称A",
+                            "status": 1,
+                            "description": "分页记录A",
+                            "updateTime": "2025-12-02T12:00:00Z",
+                            "connector_user": { "id": 2001, "name": "张三" },
+                            "connector_orders": [ { "id": 3001, "amount": 189.99, "currency": "CNY" } ]
+                          },
+                          {
+                            "id": 1002,
+                            "name": "示例名称B",
+                            "status": 2,
+                            "description": "分页记录B",
+                            "updateTime": "2025-12-02T11:00:00Z",
+                            "connector_user": { "id": 2002, "name": "李四" },
+                            "connector_orders": [ { "id": 3002, "amount": 299.00, "currency": "CNY" } ]
+                          }
+                        ],
+                        "total": 2
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "TableName": {
+        "name": "tableName",
+        "in": "path",
+        "required": true,
+        "schema": { "type": "string" },
+        "description": "表名，用于解析实体ID",
+        "example": "user"
+      },
+      "MenuId": {
+        "name": "menuId",
+        "in": "query",
+        "required": true,
+        "schema": { "type": "integer", "format": "int64" },
+        "description": "菜单ID（用于权限与上下文）",
+        "example": 1
+      },
+      "TraceIdHeader": {
+        "name": "X-Trace-Id",
+        "in": "header",
+        "required": false,
+        "schema": { "type": "string" },
+        "description": "链路追踪ID（可传入；若缺失由服务生成并在响应头返回）",
+        "example": "b3d7c3d8-1234-4f6a-9abc-ef0123456789"
+      }
+    },
+    "headers": {
+      "XTraceId": { "description": "链路追踪ID", "schema": { "type": "string" } }
+    },
+    "schemas": {
+      "CommonResultObject": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "integer" },
+          "msg": { "type": "string" },
+          "data": { "type": "object", "additionalProperties": true }
+        },
+        "required": ["code", "data", "msg"]
+      },
+      "CommonResultBoolean": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "integer" },
+          "msg": { "type": "string" },
+          "data": { "type": "boolean" }
+        },
+        "required": ["code", "data", "msg"]
+      },
+      "CommonResultPageResultObject": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "integer" },
+          "msg": { "type": "string" },
+          "data": { "$ref": "#/components/schemas/PageResultObject" }
+        },
+        "required": ["code", "data", "msg"]
+      },
+      "PageResultObject": {
+        "type": "object",
+        "properties": {
+          "list": { "type": "array", "items": { "type": "object", "additionalProperties": true } },
+          "total": { "type": "integer", "format": "int64" }
+        },
+        "required": ["list", "total"]
+      },
+      "SemanticMergeBodyVO": {
+        "type": "object",
+        "additionalProperties": true,
+        "description": "顶层键为业务字段或连接器名称，用于创建/更新"
+      },
+      "SemanticTargetBodyVO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "oneOf": [ { "type": "integer", "format": "int64" }, { "type": "string" } ],
+            "description": "目标数据主键id"
+          },
+          "containSubTable": { "type": "boolean", "description": "是否包含子表(详情用)" },
+          "containRelation": { "type": "boolean", "description": "是否包含关系(详情用)" },
+          "methodCode": { "type": "string", "description": "方法编码" }
+        },
+        "required": ["id"],
+        "description": "删除/详情场景请求体"
+      },
+      "SemanticPageBodyVO": {
+        "type": "object",
+        "properties": {
+          "data": { "type": "object", "additionalProperties": true, "description": "业务数据包装" },
+          "pageNo": { "type": "integer" },
+          "pageSize": { "type": "integer" },
+          "sortField": { "type": "string" },
+          "sortDirection": { "type": "string", "enum": ["ASC", "DESC"] },
+          "filters": { "type": "object", "additionalProperties": true }
+        },
+        "description": "分页参数、排序与过滤"
+      }
+    }
+  }
+}

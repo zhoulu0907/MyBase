@@ -22,7 +22,6 @@ import com.cmsr.onebase.framework.common.biz.system.dict.dto.DictDataRespDTO;
 import com.cmsr.onebase.module.infra.api.file.FileApi;
 import com.cmsr.onebase.module.infra.api.file.dto.FileListRespDTO;
 import com.cmsr.onebase.module.metadata.runtime.semantic.dal.database.DynamicMetadataRepository;
-import com.cmsr.onebase.module.metadata.runtime.semantic.service.impl.SemanticTemporaryDatasourceService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 
@@ -66,9 +65,6 @@ public class SemanticRefResolver {
 
     @Resource
     private DynamicMetadataRepository dynamicMetadataRepository;
-
-    @Resource
-    private SemanticTemporaryDatasourceService semanticTemporaryDatasourceService;
 
     /**
      * 对实体值进行语义增强
@@ -115,6 +111,30 @@ public class SemanticRefResolver {
         if (log.isDebugEnabled()) { log.debug("mainsByTable: {}", dataSelection.mainsByTable); }
 
         forEachRow(value, fields -> applyToFields(fields, context));
+    }
+
+    public void enrichBatch(SemanticEntitySchemaDTO entity, List<SemanticEntityValueDTO> values) {
+        if (values == null || values.isEmpty()) { return; }
+        Set<Long> userIds = new HashSet<>();
+        Set<Long> deptIds = new HashSet<>();
+        Set<Long> dataSelectIds = new HashSet<>();
+        Set<Long> selectFieldIds = new HashSet<>();
+        Set<Long> fileIds = new HashSet<>();
+
+        for (SemanticEntityValueDTO v : values) {
+            forEachRow(v, fields -> collectFromFields(fields, userIds, deptIds, dataSelectIds, selectFieldIds, fileIds));
+        }
+
+        Map<Long, AdminUserRespDTO> users = buildUserCache(userIds);
+        Map<Long, DeptRespDTO> depts = buildDeptCache(deptIds);
+        Map<Long, MetadataEntityFieldDO> fieldSchemaMap = buildFieldSchemaMap(entity);
+        Map<Long, List<MetadataEntityFieldOptionDO>> fieldOptionsCache = buildOptionsCacheFromEntity(entity, selectFieldIds);
+        Map<Long, Map<String, String>> dictLabelCacheByFieldId = buildDictLabelCacheByFieldId(entity, selectFieldIds, fieldSchemaMap);
+        DataSelectionContext dataSelection = buildDataSelectionContext(entity, values.get(0));
+        Map<Long, FileListRespDTO> files = buildFileCache(fileIds);
+
+        ResolveContext context = new ResolveContext(users, depts, fieldSchemaMap, fieldOptionsCache, dictLabelCacheByFieldId, dataSelection.metaByFieldId, dataSelection.mainsByTable, files);
+        for (SemanticEntityValueDTO v : values) { forEachRow(v, fields -> applyToFields(fields, context)); }
     }
 
     /**

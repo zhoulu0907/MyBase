@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.vo.DynamicDataRespVO;
 import com.cmsr.onebase.module.metadata.runtime.semantic.vo.SemanticMergeBodyVO;
 import com.cmsr.onebase.module.metadata.runtime.semantic.vo.SemanticTargetBodyVO;
 import com.cmsr.onebase.module.metadata.runtime.semantic.vo.SemanticPageBodyVO;
@@ -35,7 +34,7 @@ public interface SemanticDynamicDataService {
      * @param traceId 链路追踪ID
      * @return 更新后的响应
      */
-    DynamicDataRespVO update(String tableName, Long menuId, SemanticMergeBodyVO body, String traceId);
+    Map<String, Object> update(String tableName, Long menuId, SemanticMergeBodyVO body, String traceId);
 
     /**
      * 删除数据
@@ -43,9 +42,9 @@ public interface SemanticDynamicDataService {
      * @param menuId 菜单ID
      * @param body 目标请求体，包含待删除主键
      * @param traceId 链路追踪ID
-     * @return 删除成功返回被删除数据ID，失败返回 null
+     * @return 删除成功返回 true，失败返回 false
      */
-    Long remove(String tableName, Long menuId, SemanticTargetBodyVO body, String traceId);
+    boolean delete(String tableName, Long menuId, SemanticTargetBodyVO body, String traceId);
 
     /**
      * 查询详情
@@ -55,7 +54,7 @@ public interface SemanticDynamicDataService {
      * @param traceId 链路追踪ID
      * @return 详情响应
      */
-    DynamicDataRespVO detail(String tableName, Long menuId, SemanticTargetBodyVO body, String traceId);
+    Map<String, Object> detail(String tableName, Long menuId, SemanticTargetBodyVO body, String traceId);
 
     /**
      * 分页查询
@@ -65,5 +64,5 @@ public interface SemanticDynamicDataService {
      * @param traceId 链路追踪ID
      * @return 分页响应
      */
-    PageResult<DynamicDataRespVO> page(String tableName, Long menuId, SemanticPageBodyVO body, String traceId);
+    PageResult<Map<String, Object>> page(String tableName, Long menuId, SemanticPageBodyVO body, String traceId);
 }

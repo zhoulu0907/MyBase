@@ -6,7 +6,6 @@ import com.cmsr.onebase.module.metadata.core.domain.query.ProcessContext;
 import com.cmsr.onebase.module.metadata.core.service.datasource.MetadataDatasourceCoreService;
 import com.cmsr.onebase.module.metadata.core.service.permission.builder.PermissionContextBuilder;
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticRecordDTO;
-import com.cmsr.onebase.module.metadata.runtime.semantic.service.impl.SemanticTemporaryDatasourceService;
 
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Component;
@@ -18,8 +17,6 @@ import java.util.List;
 public class SemanticContextInitializer {
     @Resource
     private MetadataDatasourceCoreService metadataDatasourceCoreService;
-    @Resource
-    private SemanticTemporaryDatasourceService semanticTemporaryDatasourceService;
     @Resource
     private PermissionContextBuilder permissionContextBuilder;
 

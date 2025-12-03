@@ -43,9 +43,8 @@ public class SemanticUpdateExecutor {
     public Map<String, Object> doExecuteProcess(String tableName, Long menuId, String traceId, SemanticMergeBodyVO body) {
         try {
             // 1) 构建 RecordDTO（包含实体校验与基本数据映射）
-            SemanticRecordDTO record = semanticMergeRecordAssembler.assemble(tableName, body, menuId, traceId);
-            record.getRecordContext().setMethodCode(SemanticMethodCodeEnum.UPDATE);
-            record.getRecordContext().setOperationType(MetadataDataMethodOpEnum.UPDATE);
+            SemanticRecordDTO record = semanticMergeRecordAssembler.assembleMergeBody(tableName, body, menuId, traceId,
+                    SemanticMethodCodeEnum.UPDATE, MetadataDataMethodOpEnum.UPDATE);
             
             // 2) 权限上下文初始化：当前类 initializeContext
             semanticPermissionContextLoader.loadPermissionContext(record);

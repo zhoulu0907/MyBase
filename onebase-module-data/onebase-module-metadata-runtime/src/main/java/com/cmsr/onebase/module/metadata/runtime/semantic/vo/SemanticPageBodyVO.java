@@ -3,7 +3,9 @@ package com.cmsr.onebase.module.metadata.runtime.semantic.vo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+import java.util.List;
 import java.util.Map;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticSortRuleDTO;
 
 @Schema(description = "分页请求体：data 与分页排序过滤")
 @Data
@@ -24,11 +26,8 @@ public class SemanticPageBodyVO {
     @Schema(description = "分页大小")
     private Integer pageSize;
 
-    @Schema(description = "排序字段")
-    private String sortField;
-
-    @Schema(description = "排序方向 ASC/DESC")
-    private String sortDirection;
+    @Schema(description = "多字段排序规则")
+    private List<SemanticSortRuleDTO> sortBy;
 
     @Schema(description = "过滤条件")
     private Map<String, Object> filters;

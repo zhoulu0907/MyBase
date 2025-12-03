@@ -1,8 +1,6 @@
 package com.cmsr.onebase.module.metadata.runtime.semantic.service.impl;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.vo.DynamicDataRespVO;
-import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.vo.SubEntityVo;
 import com.cmsr.onebase.module.metadata.runtime.semantic.service.SemanticDynamicDataService;
 import com.cmsr.onebase.module.metadata.runtime.semantic.executor.SemanticCreateExecutor;
 import com.cmsr.onebase.module.metadata.runtime.semantic.executor.SemanticUpdateExecutor;
@@ -15,7 +13,6 @@ import com.cmsr.onebase.module.metadata.runtime.semantic.vo.SemanticPageBodyVO;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -73,10 +70,9 @@ public class SemanticDynamicDataServiceImpl implements SemanticDynamicDataServic
      * @param traceId   链路追踪ID
      * @return 更新后的响应
      */
-    public DynamicDataRespVO update(String tableName, Long menuId, SemanticMergeBodyVO body, String traceId) {
-        // Map<String, Object> result = updateExecutor.execute(tableName, menuId, traceId, body);
-        // return convertToDynamicDataRespVO(result);
-        return null;
+    public Map<String, Object> update(String tableName, Long menuId, SemanticMergeBodyVO body, String traceId) {
+        Map<String, Object> result = updateExecutor.execute(tableName, menuId, traceId, body);
+        return result;
     }
 
     @Override
@@ -89,9 +85,8 @@ public class SemanticDynamicDataServiceImpl implements SemanticDynamicDataServic
      * @param traceId   链路追踪ID
      * @return 删除成功返回被删除数据ID，失败返回 null
      */
-    public Long remove(String tableName, Long menuId, SemanticTargetBodyVO body, String traceId) {
-        // return deleteExecutor.execute(tableName, menuId, traceId, body) ? null : null;
-        return null;
+    public boolean delete(String tableName, Long menuId, SemanticTargetBodyVO body, String traceId) {
+        return deleteExecutor.execute(tableName, menuId, traceId, body);
     }
 
     @Override
@@ -104,10 +99,9 @@ public class SemanticDynamicDataServiceImpl implements SemanticDynamicDataServic
      * @param traceId   链路追踪ID
      * @return 详情响应
      */
-    public DynamicDataRespVO detail(String tableName, Long menuId, SemanticTargetBodyVO body, String traceId) {
-        // Map<String, Object> result = detailExecutor.execute(tableName, menuId, traceId, body);
-        // return convertToDynamicDataRespVO(result);
-        return null;
+    public Map<String, Object> detail(String tableName, Long menuId, SemanticTargetBodyVO body, String traceId) {
+        Map<String, Object> result = detailExecutor.execute(tableName, menuId, traceId, body);
+        return result;
     }
 
     @Override
@@ -120,30 +114,8 @@ public class SemanticDynamicDataServiceImpl implements SemanticDynamicDataServic
      * @param traceId   链路追踪ID
      * @return 分页响应
      */
-    public PageResult<DynamicDataRespVO> page(String tableName, Long menuId, SemanticPageBodyVO body, String traceId) {
+    public PageResult<Map<String, Object>> page(String tableName, Long menuId, SemanticPageBodyVO body, String traceId) {
         PageResult<Map<String, Object>> page = pageExecutor.execute(tableName, menuId, traceId, body);
-        List<DynamicDataRespVO> list = page.getList().stream()
-                .map(this::convertToDynamicDataRespVO)
-                .collect(Collectors.toList());
-        return new PageResult<>(list, page.getTotal());
-    }
-
-    private DynamicDataRespVO convertToDynamicDataRespVO(Map<String, Object> data) {
-        DynamicDataRespVO respVO = new DynamicDataRespVO();
-        Object eid = data.get("entityId");
-        if (eid instanceof String) {
-            try {
-                respVO.setEntityId(Long.valueOf((String) eid));
-            } catch (NumberFormatException ex) {
-                respVO.setEntityId(null);
-            }
-        } else if (eid instanceof Number) {
-            respVO.setEntityId(((Number) eid).longValue());
-        }
-        respVO.setEntityName((String) data.get("entityName"));
-        respVO.setData((Map<String, Object>) data.get("data"));
-        respVO.setFieldType((Map<String, String>) data.get("fieldType"));
-        respVO.setSubEntities((List<SubEntityVo>) data.get("subEntities"));
-        return respVO;
+        return page;
     }
 }

@@ -1,13 +1,15 @@
 package com.cmsr.onebase.module.metadata.runtime.semantic.executor;
 
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticRecordDTO;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
 import com.cmsr.onebase.module.metadata.runtime.semantic.service.impl.SemanticDataCrudService;
 import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticDataIntegrityValidator;
-import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.validation.SemanticValidationManager;
 import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticPermissionValidator;
 import com.cmsr.onebase.module.metadata.runtime.semantic.vo.SemanticMergeBodyVO;
+import com.cmsr.onebase.module.metadata.runtime.semantic.vo.SemanticTargetBodyVO;
 import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticMergeRecordAssembler;
 import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticPermissionContextLoader;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.enums.SemanticMethodCodeEnum;
 import lombok.extern.slf4j.Slf4j;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Component;
@@ -29,14 +31,17 @@ public class SemanticDetailExecutor {
     private SemanticPermissionContextLoader semanticPermissionContextLoader;
     // no uid generator needed for detail
 
-    public Map<String, Object> execute(String tableName, Long menuId, String traceId, SemanticMergeBodyVO body) {
-        return doExecuteProcess(tableName, menuId, traceId, body);
+    public Map<String, Object> execute(String tableName, Long menuId, String traceId, SemanticTargetBodyVO target) {
+        Map<String, Object> result = doExecuteProcess(tableName, menuId, traceId, target);
+        return result;
     }
 
-    public Map<String, Object> doExecuteProcess(String tableName, Long menuId, String traceId, SemanticMergeBodyVO body) {
+    public Map<String, Object> doExecuteProcess(String tableName, Long menuId, String traceId, SemanticTargetBodyVO body) {
         try {
             // 1) 构建 RecordDTO（包含实体校验与基本数据映射）
-            SemanticRecordDTO record = semanticMergeRecordAssembler.assemble(tableName, body, menuId, traceId);
+            SemanticRecordDTO record = semanticMergeRecordAssembler.assembleTargetBody(tableName, body, menuId, traceId,
+                    SemanticMethodCodeEnum.GET,
+                    MetadataDataMethodOpEnum.GET);
 
             // 2) 权限上下文初始化：当前类 initializeContext
             semanticPermissionContextLoader.loadPermissionContext(record);

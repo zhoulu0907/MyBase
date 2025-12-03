@@ -1,6 +1,8 @@
 package com.cmsr.onebase.module.metadata.runtime.semantic.executor;
 
+import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
 import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticRecordDTO;
+import com.cmsr.onebase.module.metadata.runtime.semantic.dto.enums.SemanticMethodCodeEnum;
 import com.cmsr.onebase.module.metadata.runtime.semantic.service.impl.SemanticDataCrudService;
 import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticDataIntegrityValidator;
 import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.validation.SemanticValidationManager;
@@ -44,7 +46,8 @@ public class SemanticCreateExecutor {
     public Map<String, Object> doExecuteProcess(String tableName, Long menuId, String traceId, SemanticMergeBodyVO body) {
         try {
             // 1) 构建 RecordDTO（包含实体校验与基本数据映射）
-            SemanticRecordDTO record = semanticMergeRecordAssembler.assemble(tableName, body, menuId, traceId);
+            SemanticRecordDTO record = semanticMergeRecordAssembler.assembleMergeBody(tableName, body, menuId, traceId,
+                    SemanticMethodCodeEnum.CREATE, MetadataDataMethodOpEnum.CREATE);
 
             // 2) 权限上下文初始化：当前类 initializeContext
             semanticPermissionContextLoader.loadPermissionContext(record);
@@ -59,7 +62,7 @@ public class SemanticCreateExecutor {
             semanticValidationManager.validate(record);
 
             // 6) 数据存储：CRUDQ 服务（RecordDTO 入口）
-            semanticDataCrudService.create(record);;
+            semanticDataCrudService.create(record);
             
             // 7) 数据查询：通过 DataCrudService 读取主表数据
             Map<String, Object> result = semanticDataCrudService.readById(record);

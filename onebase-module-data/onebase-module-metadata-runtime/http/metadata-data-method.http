@@ -1,6 +1,6 @@
 @host = localhost
 @port = 48080
-@prefix = 
+@prefix = /runtime
 
 @base = http://{{host}}:{{port}}{{prefix}}
 
@@ -158,47 +158,61 @@ login-user: {"id":"155019577667616820","applicationId":"156456639374295040","ten
 }
 
 ### 语义更新（包含主键 id）
-POST {{base}}/metadata/{{entityCode}}/update?menuId={{menuId}}
+POST {{base}}/metadata/{{tableName}}/update?menuId={{menuId}}
 Content-Type: application/json
 X-Trace-Id: {{traceId}}
+X-Tenant-Id: {{tenantId}}
+login-user: {"id":"155019577667616820","applicationId":"156456639374295040","tenantId":"153935442021842944"}
 
 {
-  "id": 1,
-  "order_source": "phone"
+  "id": 162745519484436480,
+  "text": "企业客户基础信息A"
 }
 
 ### 语义删除（data 中包含 id）
-POST {{base}}/metadata/{{entityCode}}/remove?menuId={{menuId}}
+POST {{base}}/metadata/{{tableName}}/delete?menuId={{menuId}}
 Content-Type: application/json
 X-Trace-Id: {{traceId}}
+X-Tenant-Id: {{tenantId}}
+login-user: {"id":"155019577667616820","applicationId":"156456639374295040","tenantId":"153935442021842944"}
 
 {
-  "data": { "id": 1 }
+  "id": 162776219910963200
 }
 
 ### 语义详情（支持包含子表/关系）
-POST {{base}}/metadata/{{entityCode}}/detail?menuId={{menuId}}
+POST {{base}}/metadata/{{tableName}}/detail?menuId={{menuId}}
 Content-Type: application/json
 X-Trace-Id: {{traceId}}
+X-Tenant-Id: {{tenantId}}
+login-user: {"id":"155019577667616820","applicationId":"156456639374295040","tenantId":"153935442021842944"}
 
 {
-  "data": { "id": 1 },
-  "containSubTable": true,
-  "containRelation": true
+  "id": 162745519484436480
 }
 
+# ,
+#   "containSubTable": true,
+#   "containRelation": true
+
 ### 语义分页（分页/排序/过滤在 body 中）
-POST {{base}}/metadata/{{entityCode}}/page?menuId={{menuId}}
+POST {{base}}/metadata/{{tableName}}/page?menuId={{menuId}}
 Content-Type: application/json
 X-Trace-Id: {{traceId}}
+X-Tenant-Id: {{tenantId}}
+login-user: {"id":"155019577667616820","applicationId":"156456639374295040","tenantId":"153935442021842944"}
 
 {
   "data": {},
   "pageNo": 1,
-  "pageSize": 10,
-  "sortField": "{{sortFieldName}}",
-  "sortDirection": "desc",
+  "pageSize": 20,
+  "sortBy": [
+    { "field": "id", "direction": "DESC" },
+    { "field": "updated_time", "direction": "ASC" }
+  ],
   "filters": {
-    "order_source": "web"
   }
 }
+
+# 示例 filters 结构：
+# { "id": 162745519484436480, "status": 1, "name": "客户", "updated_time": "2025-11-28", "amount": 100.00 }

@@ -66,6 +66,7 @@ public class SemanticFieldSchemaDTO {
         this.fieldTypeEnum = SemanticFieldTypeEnum.ofCode(fieldType);
     }
 
+    @SuppressWarnings("unused")
     private void setFieldTypeEnum(SemanticFieldTypeEnum fieldTypeEnum) {
         this.fieldTypeEnum = fieldTypeEnum;
     }
