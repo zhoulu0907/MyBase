@@ -6,6 +6,7 @@ import { useEffect, useState, useCallback, startTransition, useContext } from 'r
 import { useLocation } from 'react-router-dom';
 import { type WorkflowLineEntity } from '@flowgram.ai/free-layout-editor';
 import { Form, Switch, Input, Select, Button, Message } from '@arco-design/web-react';
+import { useClientContext } from '@flowgram.ai/free-layout-editor';
 import { IconClose } from '@arco-design/web-react/icon';
 import close from '../../assets/close.svg';
 import BottomBtn from '../bottomBtn';
@@ -66,6 +67,7 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
   ]);
   const [form] = Form.useForm();
   const location = useLocation();
+  const ctx = useClientContext();
   const searchParams = new URLSearchParams(location.search);
   const pageSetId = searchParams.get('pageSetId') || '';
   const { setLineData } = useContext(SidebarContext);
@@ -108,10 +110,55 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
           }
         });
         const fromValue = form.getFieldsValue();
+        let priority = line.lineData?.priority;
+        if (!priority) {
+          const allLines = ctx.document.linesManager.getAllLines();
+          const conditionalBranchLines = allLines.filter((lineItem: any) =>
+            lineItem.info.from.includes('conditional_branch')
+          );
+
+          // 找到原有的默认分支
+          const existingDefaultBranch = conditionalBranchLines.find(
+            (lineItem) => lineItem.lineData?.isDefault && lineItem.id !== line.id
+          );
+
+          // 计算最高优先级（当前分支数量）
+          const maxPriority = conditionalBranchLines.length;
+
+          if (fromValue.isDefault) {
+            // 如果当前分支被设置为默认分支
+            // 将原有默认分支的优先级降低
+            if (existingDefaultBranch) {
+              existingDefaultBranch.lineData = {
+                ...existingDefaultBranch.lineData,
+                priority: maxPriority - 1,
+                isDefault: false
+              };
+            }
+            // 当前分支获得最高优先级
+            priority = maxPriority;
+          } else {
+            // 如果当前分支不是默认分支
+            if (existingDefaultBranch) {
+              // 确保默认分支具有最高优先级
+              existingDefaultBranch.lineData = {
+                ...existingDefaultBranch.lineData,
+                priority: maxPriority
+              };
+              // 当前分支优先级为最高优先级减1
+              priority = maxPriority - 1;
+            } else {
+              // 如果没有默认分支，使用当前分支数量作为优先级
+              priority = conditionalBranchLines.length;
+            }
+          }
+        }
         line.lineData = {
           ...fromValue,
-          priority: 1
+          priority
         };
+
+        console.log(line.lineData);
         Message.success('保存成功');
         handleClose();
       }
@@ -391,9 +438,7 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
       </div>
       <div className={styles.sidebarLineContent}>
         <Form form={form} autoComplete="off">
-          <FormItem
-            className={styles.directionRow}
-          >
+          <FormItem className={styles.directionRow}>
             <FormItem
               label="默认分支"
               field="isDefault"

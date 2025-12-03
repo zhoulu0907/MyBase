@@ -177,7 +177,7 @@ export default function EditorHeader() {
       }
     });
 
-    console.log(currentJsonData);
+    // console.log(currentJsonData);
     // return;
     const { id, flowCode, flowName, version, versionAlias, versionStatus, businessId } = flowData;
     const params = {
