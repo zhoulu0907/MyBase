@@ -583,6 +583,7 @@ public class TenantServiceImpl implements TenantService {
                                 .setAdminMobile(uservo.getMobile())
                                 .setAdminUserId(uservo.getId())
                                 .setAdminNickName(uservo.getNickname())
+                                .setAdminEmail(uservo.getEmail())
                                 .setPlatformUserId(uservo.getPlatformUserId())
 
                         )
