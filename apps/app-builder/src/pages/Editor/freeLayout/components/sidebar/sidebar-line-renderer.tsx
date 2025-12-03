@@ -80,20 +80,15 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
   }, []);
   const handleSubmit = () => {
     form.validate(['name']).then((values) => {
-      // // 验证每个条件规则
       const isValid = conditionGroups.every((group) =>
         group.every((item) => {
-          // 如果选择了 IS_EMPTY 或 IS_NOT_EMPTY，只需要验证前三个字段
           if (item.op === Operator.IS_EMPTY || item.op === Operator.IS_NOT_EMPTY) {
             return item.fieldScope && item.fieldId && item.op;
           }
-          // 其他情况需要验证所有字段
           return item.fieldScope && item.fieldId && item.op && item.operatorType && item.value;
         })
       );
       if (!isValid) {
-        // 可以在这里添加提示信息
-        // Message.warning('请检查条件规则是否填写完整');
         form.setFields({
           condition: {
             error: {
@@ -114,20 +109,14 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
         if (!priority) {
           const allLines = ctx.document.linesManager.getAllLines();
           const conditionalBranchLines = allLines.filter((lineItem: any) =>
-            lineItem.info.from.includes('conditional_branch')
+            lineItem.info.from.includes(line.info.from)
           );
-
-          // 找到原有的默认分支
           const existingDefaultBranch = conditionalBranchLines.find(
             (lineItem) => lineItem.lineData?.isDefault && lineItem.id !== line.id
           );
-
-          // 计算最高优先级（当前分支数量）
           const maxPriority = conditionalBranchLines.length;
 
           if (fromValue.isDefault) {
-            // 如果当前分支被设置为默认分支
-            // 将原有默认分支的优先级降低
             if (existingDefaultBranch) {
               existingDefaultBranch.lineData = {
                 ...existingDefaultBranch.lineData,
@@ -135,20 +124,15 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
                 isDefault: false
               };
             }
-            // 当前分支获得最高优先级
             priority = maxPriority;
           } else {
-            // 如果当前分支不是默认分支
             if (existingDefaultBranch) {
-              // 确保默认分支具有最高优先级
               existingDefaultBranch.lineData = {
                 ...existingDefaultBranch.lineData,
                 priority: maxPriority
               };
-              // 当前分支优先级为最高优先级减1
               priority = maxPriority - 1;
             } else {
-              // 如果没有默认分支，使用当前分支数量作为优先级
               priority = conditionalBranchLines.length;
             }
           }
@@ -157,8 +141,6 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
           ...fromValue,
           priority
         };
-
-        console.log(line.lineData);
         Message.success('保存成功');
         handleClose();
       }
@@ -377,15 +359,11 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
   // 修改删除规则的函数
   const handleDeleteRule = (groupIndex: number, ruleIndex: number) => {
     const newGroups = [...conditionGroups];
-
-    // 如果当前组只有一条规则，则删除整个组
     if (newGroups[groupIndex].length <= 1) {
       if (newGroups.length <= 1) return;
       setConditionGroups(newGroups.filter((_, i) => i !== groupIndex));
       return;
     }
-
-    // 否则只删除当前规则
     newGroups[groupIndex] = newGroups[groupIndex].filter((_, i) => i !== ruleIndex);
     setConditionGroups(newGroups);
   };
@@ -419,7 +397,6 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
     }
   }, []);
   return (
-    // <NodeRenderContext.Provider value={contextValue}>
     <div
       style={{
         borderRadius: 8,
@@ -562,7 +539,5 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
         onCancel={() => setFormulaVisible(false)}
       />
     </div>
-
-    // </NodeRenderContext.Provider>
   );
 }

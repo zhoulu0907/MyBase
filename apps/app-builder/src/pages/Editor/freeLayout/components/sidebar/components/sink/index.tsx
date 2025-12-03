@@ -42,14 +42,12 @@ const data = [
   }
 ];
 export default function ApproveDreawer() {
-  const [editValue, setEditValue] = useState('');
-
   function handleSubmit() {
     // handleConfigSubmit(data);
   }
   return (
     <>
-      <Header changeName={(name) => setEditValue(name)} />
+      <Header />
       <div className={styles.sink}>
         <div className={styles.configTitle}>
           上游分支<span className={styles.titleTips}>等待所有应到达的上游分支完成，合并为一条路径后继续流程</span>

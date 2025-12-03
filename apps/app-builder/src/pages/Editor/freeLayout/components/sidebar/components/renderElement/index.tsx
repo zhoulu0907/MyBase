@@ -73,7 +73,6 @@ export const RenderElement: React.FC<RenderElementProps> = ({
     return formSummaryOptions
       .filter((optionItem) => {
         const fieldType = optionItem.fieldType as FieldType;
-        // 如果找不到对应的变量类型，返回所有选项
         if (!VARIABLE_MAP[item.fieldType as FieldType]) return true;
         return VARIABLE_MAP[item.fieldType as FieldType]?.includes(fieldType) ?? false;
       })
@@ -87,7 +86,6 @@ export const RenderElement: React.FC<RenderElementProps> = ({
   const switchKey = `${item.fieldType}_${item.op}`;
   let elementTypeInfo: any = { type: '', options: [] };
 
-  // 先排除单纯组件  【输入框 数字输入框 数字范围选择组件】
   if (Object.values(InputKeyType).includes(switchKey as InputKeyType)) {
     elementTypeInfo.type = ElementType.INPUT;
   } else if (Object.values(NumberKeyType).includes(switchKey as NumberKeyType)) {
@@ -96,7 +94,6 @@ export const RenderElement: React.FC<RenderElementProps> = ({
     elementTypeInfo.type = ElementType.SCOPE;
   }
 
-  // 如果没有 就继续处理
   if (!elementTypeInfo.type) {
     if (switchKey in ComplexInfo) {
       elementTypeInfo = ComplexInfo[switchKey as keyof typeof ComplexInfo];
