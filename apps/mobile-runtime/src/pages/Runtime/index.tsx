@@ -1,8 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import PreviewContainer from './components/preview';
-// import TaskCenterPage from './components/TaskCenter/TaskCenterPage';
-import styles from './index.module.less';
 import { menuSignal } from '@onebase/app';
 
 const Runtime: React.FC = () => {
@@ -18,19 +16,14 @@ const Runtime: React.FC = () => {
       menuName: curMenuId,
       menuIcon: '',
       isVisible: 1,
-      children: [],
-    })
+      children: []
+    });
   }, [curMenuId]);
 
-  return (
-    <div className={styles.runtimePage}>
-      {curMenuId.indexOf('TASK-') >= 0 ? (
-        <></> // <TaskCenterPage curMenuId={curMenuId} />
-      ) : (
-        <PreviewContainer menuId={curMenuId || ''} runtime={true} />
-      )}
-    </div>
-  );
+  const renderContent =
+    curMenuId.indexOf('TASK-') >= 0 ? null : <PreviewContainer menuId={curMenuId || ''} runtime={true} />;
+
+  return <div>{renderContent}</div>;
 };
 
 export default Runtime;
