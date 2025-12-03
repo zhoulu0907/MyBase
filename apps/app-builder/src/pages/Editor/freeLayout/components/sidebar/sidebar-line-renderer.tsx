@@ -12,7 +12,7 @@ import BottomBtn from '../bottomBtn';
 import { SidebarContext } from '../../context';
 import { FormulaEditor } from '@/components/FormulaEditor';
 import { getEntityFieldsWithChildren, getPageSetMetaData } from '@onebase/app';
-import type { FieldOption, OpOptions, ConditionRule } from './constants';
+import type { ConditionRule } from './constants';
 import { FieldType, Operator, preNodeOptions, instanceOptions, entityOptions } from './constants';
 import {
   textOpOption,
@@ -70,6 +70,7 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
   const pageSetId = searchParams.get('pageSetId') || '';
   const { setLineData } = useContext(SidebarContext);
   const { line } = props;
+
   const handleClose = useCallback(() => {
     startTransition(() => {
       setLineData(undefined);
@@ -107,23 +108,6 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
           }
         });
         const fromValue = form.getFieldsValue();
-        // line.lineData = {
-        //   name: '条件线',
-        //   priority: 1,
-        //   isDefault: false,
-        //   condition: [
-        //     [
-        //       {
-        //         fieldScope: 'entity',
-        //         fieldId: 'id',
-        //         op: 'EQUALS',
-        //         operatorType: 'value',
-        //         value: 'test'
-        //       }
-        //     ]
-        //   ]
-        // };
-        console.log(fromValue);
         line.lineData = {
           ...fromValue,
           priority: 1
@@ -349,9 +333,7 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
 
     // 如果当前组只有一条规则，则删除整个组
     if (newGroups[groupIndex].length <= 1) {
-      // 如果只有一个组，则不允许删除
       if (newGroups.length <= 1) return;
-      // 删除整个组
       setConditionGroups(newGroups.filter((_, i) => i !== groupIndex));
       return;
     }
@@ -384,6 +366,10 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
 
   useEffect(() => {
     getFormSummaryData();
+    if (line.lineData) {
+      form.setFieldsValue(line.lineData);
+      setConditionGroups(line.lineData.condition);
+    }
   }, []);
   return (
     // <NodeRenderContext.Provider value={contextValue}>
@@ -407,10 +393,6 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
         <Form form={form} autoComplete="off">
           <FormItem
             className={styles.directionRow}
-            // label="默认分支"
-            // field="isDefault"
-            // triggerPropName="checked"
-            // initialValue={line.lineData?.isDefault || false}
           >
             <FormItem
               label="默认分支"
@@ -430,7 +412,6 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
           >
             <Input placeholder="请输入分支名称" />
           </FormItem>
-          {/* <div className={styles.directionColumn}> */}
           <FormItem
             rules={[{ required: true, message: '请填写条件规则' }]}
             className={styles.directionColumn}
@@ -524,7 +505,6 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
               </Button>
             </div>
           </FormItem>
-          {/* </div> */}
         </Form>
       </div>
       <BottomBtn handleSubmit={handleSubmit} submitOnly />

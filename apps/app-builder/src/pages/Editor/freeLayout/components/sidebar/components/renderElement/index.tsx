@@ -1,11 +1,10 @@
 // render-element.tsx
 import { Input, Select, Button, DatePicker, InputNumber } from '@arco-design/web-react';
-import { useState, useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { IconLaunch } from '@arco-design/web-react/icon';
-import { FormulaEditor } from '@/components/FormulaEditor';
 import type { ConditionRule } from '../../constants';
 import styles from '../../siderbar-line.module.less';
-import { FieldType, approvalResultOptions, Operator } from '../../constants';
+import { FieldType, Operator } from '../../constants';
 import { getUserPage, type PageParam } from '@onebase/platform-center';
 import {
   InputKeyType,
@@ -60,7 +59,6 @@ export const RenderElement: React.FC<RenderElementProps> = ({
       });
   };
   const getVariableOptions = (item: any) => {
-    // console.log(VARIABLE_MAP[item.fieldType as FieldType], item);
     const OPS = [Operator.CONTAINS, Operator.NOT_CONTAINS, Operator.EXISTS_IN, Operator.NOT_EXISTS_IN] as const;
     if (item.fieldType === FieldType.USER && OPS.includes(item.op as (typeof OPS)[number])) {
       item.fieldType = FieldType.MULTI_USER;
@@ -87,8 +85,6 @@ export const RenderElement: React.FC<RenderElementProps> = ({
   };
 
   const switchKey = `${item.fieldType}_${item.op}`;
-  // console.log({ switchKey });
-
   let elementTypeInfo: any = { type: '', options: [] };
 
   // 先排除单纯组件  【输入框 数字输入框 数字范围选择组件】
@@ -106,7 +102,6 @@ export const RenderElement: React.FC<RenderElementProps> = ({
       elementTypeInfo = ComplexInfo[switchKey as keyof typeof ComplexInfo];
     }
   }
-  // console.log(elementTypeInfo);
 
   // 用户选择数据
   useEffect(() => {
@@ -117,10 +112,6 @@ export const RenderElement: React.FC<RenderElementProps> = ({
 
   // 如果类型为静态值
   if (item.operatorType === OperatorType.VALUE || !item.operatorType) {
-    // // mock
-    // if (!elementTypeInfo.options.length) {
-    //   elementTypeInfo.options = approvalResultOptions;
-    // }
     switch (elementTypeInfo.type) {
       case ElementType.INPUT:
         return (
