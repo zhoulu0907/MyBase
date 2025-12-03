@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,10 +24,10 @@ public class ValidationRequiredController {
     @Resource private MetadataValidationRequiredBuildService requiredService;
 
     @PostMapping("/get-by-field")
-    @Operation(summary = "根据字段UUID获取必填校验")
-    @Parameter(name = "id", description = "字段UUID", required = true)
-    public CommonResult<ValidationRequiredRespVO> getByField(@RequestParam("id") String fieldUuid) {
-        return success(requiredService.getByFieldIdWithRgName(fieldUuid));
+    @Operation(summary = "根据字段ID获取必填校验")
+    @Parameter(name = "id", description = "字段ID", required = true)
+    public CommonResult<ValidationRequiredRespVO> getByField(@RequestParam("id") Long id) {
+        return success(requiredService.getByFieldIdWithRgName(id));
     }
 
     @PostMapping("/create")
@@ -45,10 +44,10 @@ public class ValidationRequiredController {
     }
 
     @PostMapping("/delete-by-field")
-    @Operation(summary = "按字段UUID删除必填校验")
-    @Parameter(name = "id", description = "字段UUID", required = true)
-    public CommonResult<Boolean> deleteByField(@RequestParam("id") String fieldUuid) {
-        requiredService.deleteByFieldId(fieldUuid);
+    @Operation(summary = "按字段删除必填校验")
+    @Parameter(name = "id", description = "字段ID", required = true)
+    public CommonResult<Boolean> deleteByField(@RequestParam("id") Long id) {
+        requiredService.deleteByFieldId(id);
         return success(true);
     }
 

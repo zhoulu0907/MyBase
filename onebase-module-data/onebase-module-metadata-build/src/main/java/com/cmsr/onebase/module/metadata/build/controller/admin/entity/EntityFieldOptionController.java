@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,9 +32,9 @@ public class EntityFieldOptionController {
     private MetadataEntityFieldOptionBuildService optionService;
 
     @PostMapping("/list")
-    @Operation(summary = "按字段UUID获取选项列表")
-    public CommonResult<List<FieldOptionRespVO>> list(@RequestParam("fieldId") String fieldUuid) {
-        List<FieldOptionRespVO> result = optionService.getFieldOptionList(fieldUuid);
+    @Operation(summary = "按字段ID获取选项列表")
+    public CommonResult<List<FieldOptionRespVO>> list(@RequestParam("fieldId") Long fieldId) {
+        List<FieldOptionRespVO> result = optionService.getFieldOptionList(fieldId);
         return success(result);
     }
 

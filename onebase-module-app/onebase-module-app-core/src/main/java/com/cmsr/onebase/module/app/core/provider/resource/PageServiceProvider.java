@@ -73,18 +73,18 @@ public class PageServiceProvider {
         AppResourcePagesetDO pageSetDO = pageSetRepository.getById(pageSetId);
         Long applicationId = pageSetDO.getApplicationId();
         String pageSetUuid = pageSetDO.getPageSetUuid();
+        Integer pageSetType = pageSetDO.getPageSetType();
 
-        // 根据页面集类型判断查询哪种页面表
-        if (PageTypeSetEnum.isWorkBenchType(pageSetDO.getPageSetType())) {
-            // 工作台类型：从工作台页面表查询
-            List<AppResourceWorkbenchPageDO> workbenchPageDOList = workbenchPageRepository.findByPageSetUuid(applicationId, pageSetUuid);
+        // 根据页面集类型查询不同的表
+        if (PageTypeSetEnum.isWorkBenchType(pageSetType)) {
+            // 工作台类型，查询工作台页面表
+            List<AppResourceWorkbenchPageDO> workbenchPageDOList = workbenchPageRepository.findByPageSetUuid(applicationId,pageSetUuid);
             return BeanUtils.toBean(workbenchPageDOList, PageDTO.class);
+        } else {
+            // 普通表单或流程表单类型，查询普通页面表
+            List<AppResourcePageDO> pageDOList = pageRepository.findAllFormPageByAppIdAndPageSetUuid(applicationId, pageSetUuid);
+            return BeanUtils.toBean(pageDOList, PageDTO.class);
         }
-
-        // 普通表单类型：从普通页面表查询
-        List<AppResourcePageDO> pageDOList = pageRepository.findAllFormPageByAppIdAndPageSetUuid(applicationId, pageSetUuid);
-        List<PageDTO> pageDTOList = BeanUtils.toBean(pageDOList, PageDTO.class);
-        return pageDTOList;
     }
 
 

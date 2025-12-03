@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,10 +24,10 @@ public class ValidationUniqueController {
     @Resource private MetadataValidationUniqueBuildService uniqueService;
 
     @PostMapping("/get-by-field")
-    @Operation(summary = "根据字段UUID获取唯一性校验")
-    @Parameter(name = "id", description = "字段UUID", required = true)
-    public CommonResult<ValidationUniqueRespVO> getByField(@RequestParam("id") String fieldUuid) {
-        return success(uniqueService.getByFieldIdWithRgName(fieldUuid));
+    @Operation(summary = "根据字段ID获取唯一性校验")
+    @Parameter(name = "id", description = "字段ID", required = true)
+    public CommonResult<ValidationUniqueRespVO> getByField(@RequestParam("id") Long id) {
+        return success(uniqueService.getByFieldIdWithRgName(id));
     }
     @PostMapping("/create")
     @Operation(summary = "创建唯一性校验")
@@ -44,10 +43,10 @@ public class ValidationUniqueController {
     }
 
     @PostMapping("/delete-by-field")
-    @Operation(summary = "按字段UUID删除唯一性校验")
-    @Parameter(name = "id", description = "字段UUID", required = true)
-    public CommonResult<Boolean> deleteByField(@RequestParam("id") String fieldUuid) {
-        uniqueService.deleteByFieldId(fieldUuid);
+    @Operation(summary = "按字段删除唯一性校验")
+    @Parameter(name = "id", description = "字段ID", required = true)
+    public CommonResult<Boolean> deleteByField(@RequestParam("id") Long id) {
+        uniqueService.deleteByFieldId(id);
         return success(true);
     }
 
