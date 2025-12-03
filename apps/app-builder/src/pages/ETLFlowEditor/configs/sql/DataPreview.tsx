@@ -60,23 +60,7 @@ const DataPreview: React.FC<DataPreviewProps> = ({}) => {
     console.log('res: ', res);
 
     if (res) {
-      const previewData = {
-        columns: res.columns.map((column: any) => ({
-          title: column.displayName,
-          dataIndex: column.fieldFqn,
-          key: column.fieldFqn
-        })),
-        data: res.data.map((row: any[]) => {
-          const obj: any = {};
-          res.columns.forEach((col: any, idx: number) => {
-            obj[col.fieldFqn] = row[idx];
-          });
-          return obj;
-        })
-      };
-
-      console.log('previewData: ', previewData);
-      setPreviewData(previewData);
+      setPreviewData(res);
     }
   };
 

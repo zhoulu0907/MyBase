@@ -6,7 +6,6 @@ import PageManagerGuide from '@/assets/images/page_manaager_guide.svg';
 import { useI18n } from '@/hooks/useI18n';
 import PreviewContainer from '@/pages/Runtime/components/preview';
 import { useAppStore } from '@/store/store_app';
-import { useBasicEditorStore } from '@/store/store_editor';
 import { addParentIdToChildren } from '@/utils/menu';
 import { Button, Dropdown, Form, Input, Layout, Menu, Message, Tree } from '@arco-design/web-react';
 import { IconDown, IconEmpty, IconPlus, IconSearch } from '@arco-design/web-react/icon';
@@ -41,7 +40,7 @@ import { EDITOR_TYPES } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import { debounce } from 'lodash-es';
 import { useCallback, useEffect, useState, type FC } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
 import CopyModal from './components/Modals/CopyModal';
 import CreateModal from './components/Modals/CreateModal';
@@ -49,6 +48,7 @@ import RenameModal from './components/Modals/RenameModal';
 import MyMenuItem from './components/MyMenuItem';
 import TaskCenterPage from './components/TaskCenter/TaskCenterPage';
 import TaskCenterSide from './components/TaskCenter/taskTreeSide';
+import { currentEditorSignal } from '@onebase/ui-kit/src/signals/current_editor';
 import styles from './index.module.less';
 
 const TreeNode = Tree.Node;
@@ -83,6 +83,8 @@ const PageManagerPage: FC = () => {
   const { t } = useI18n();
   const navigate = useNavigate();
 
+  const { tenantId } = useParams();
+
   const { curAppId } = useAppStore();
 
   const [createForm] = Form.useForm();
@@ -116,7 +118,7 @@ const PageManagerPage: FC = () => {
   const initTreeItemWidth = 146;
   const cutTreeItemWidth = 25;
 
-  const { clearIsEditMode } = useBasicEditorStore();
+  const { clearEditMode } = currentEditorSignal;
 
   const findFirstPage: any = (nodes: ApplicationMenu[]) =>
     nodes.reduce((found, node) => {
@@ -135,7 +137,7 @@ const PageManagerPage: FC = () => {
       getMenuList();
       getEntityList();
     }
-    clearIsEditMode();
+    clearEditMode();
   }, [curAppId]);
 
   useEffect(() => {
@@ -195,7 +197,6 @@ const PageManagerPage: FC = () => {
       name: keywords
     };
     const res = await listApplicationMenu(req);
-
     // 为每个children元素补充parentId字段
     const processedRes = addParentIdToChildren(res, RootParentPage.id);
     setParentPageOptions([{ ...RootParentPage, children: processedRes }]);
@@ -378,7 +379,7 @@ const PageManagerPage: FC = () => {
           editorType = EDITOR_TYPES.FORM_EDITOR;
         }
 
-        navigate(`/onebase/editor/${editorType}?pageSetId=${pageSetId}`);
+        navigate(`/onebase/${tenantId}/editor/${editorType}?pageSetId=${pageSetId}&appId=${curAppId}`);
       }
     });
   };
@@ -459,7 +460,7 @@ const PageManagerPage: FC = () => {
 
     // 把编辑页菜单数据保存起来；
     sessionStorage.setItem('EDITOR_PAGE_INFO', JSON.stringify({ id: curMenu.value?.id, name, icon }));
-    navigate(`/onebase/editor/${editorType}?pageSetId=${pageSetId}`);
+    navigate(`/onebase/${tenantId}/editor/${editorType}?pageSetId=${pageSetId}&appId=${curAppId}`);
   };
 
   // 菜单搜索
@@ -591,7 +592,17 @@ const PageManagerPage: FC = () => {
               />
             </div>
           </div>
-          <TaskCenterSide setCurMenu={setCurMenu} styles_tree={styles.tree} />
+          <TaskCenterSide
+            curMenu={curMenu}
+            setCurMenu={setCurMenu}
+            styles_tree={styles.tree}
+            curAppId={curAppId}
+            triggerHide={triggerHide}
+            findFirstPage={findFirstPage}
+            setSearchResult={setSearchResult}
+            searchResult={searchResult}
+            setShowGuide={setShowGuide}
+          />
           <Tree
             blockNode
             draggable
@@ -655,7 +666,7 @@ const PageManagerPage: FC = () => {
                 </div>
               ) : (
                 <>
-                  {curMenu.value?.id && curMenu.value?.id?.indexOf('TASK-') < 0 && (
+                  {curMenu.value?.menuCode && curMenu.value?.menuCode?.indexOf('TASK-') < 0 && (
                     <>
                       <div className={styles.contentHeader}>
                         <div className={styles.contentTitle}>{curMenu.value?.menuName}</div>
@@ -674,8 +685,8 @@ const PageManagerPage: FC = () => {
                       </div>
                     </>
                   )}
-                  {curMenu?.value?.id && curMenu?.value?.id?.indexOf('TASK-') >= 0 && (
-                    <TaskCenterPage curMenuId={curMenu.value?.id} />
+                  {curMenu?.value?.menuCode && curMenu?.value?.menuCode?.indexOf('TASK-') >= 0 && (
+                    <TaskCenterPage curMenuId={curMenu.value?.menuCode} />
                   )}
                 </>
               )}
@@ -700,7 +711,7 @@ const PageManagerPage: FC = () => {
         handleCopy={handleCopy}
         setVisible={setVisibleCopyForm}
         form={copyForm}
-        treeData={convertMenuToTreeData(parentPageOptions, initTreeItemWidth)}
+        treeData={convertMenuToTreeData(parentPageOptions, initTreeItemWidth, false, { height: '32px' })}
       />
 
       {/* 创建弹窗 */}
@@ -715,7 +726,7 @@ const PageManagerPage: FC = () => {
         pageSetTypeOptions={pageSetTypeOptions}
         visibleCreateForm={visibleCreateForm}
         initValue={{ pageType: PageType.NORMAL, menuName: '', parentId: RootParentPage.id }}
-        treeData={convertMenuToTreeData(parentPageOptions, initTreeItemWidth)}
+        treeData={convertMenuToTreeData(parentPageOptions, initTreeItemWidth, false, { height: '32px' })}
       />
     </div>
   );

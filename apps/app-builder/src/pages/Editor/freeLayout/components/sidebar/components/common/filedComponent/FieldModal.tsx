@@ -25,10 +25,10 @@ export default function FieldModal({
   const [ckedKey, setCkedKey] = useState(curKeyArr);
   const [checkedItem, setCheckedItem] = useState([]);
 
-  const invertKey = invert.map((item: any) => {
+  const invertKey = invert?.map((item: any) => {
     return item.fieldId;
   });
-  const useCkOptions = ckOptions.map((item: any) => {
+  const useCkOptions = ckOptions?.map((item: any) => {
     return {
       label: item.displayName,
       value: item.fieldId,
@@ -93,7 +93,7 @@ export default function FieldModal({
               checked={ckedKey.length === useCkOptions.length}
               onChange={(e:boolean) => {
                 if (e) {
-                  handleCheckChange(useCkOptions.map((item:any) => item.value));
+                  handleCheckChange(useCkOptions?.map((item:any) => item.value));
                 } else {
                   handleCheckChange([]);
                 }
@@ -117,7 +117,7 @@ export default function FieldModal({
             </span>
           </div>
           <div className="check-group-outer">
-            {checkedItem.map((item: any, i: number) => {
+            {checkedItem?.map((item: any, i: number) => {
               return (
                 <div className="flex-btw arco-checkbox li" key={i}>
                   <span>{item?.label}</span>

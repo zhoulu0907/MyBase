@@ -57,10 +57,11 @@ const Right: React.FC = () => {
         return;
       }
       const headers = {
-        'Tenant-Id': tenantId
+        'X-Tenant-Id': tenantId
       };
       const loginResp = await adminLogin(values, headers);
       // 显示成功消息并跳转
+      console.log('loginResp: ', loginResp);
       if (loginResp.accessToken) {
         Message.success(t('auth.loginSuccess'));
         // 存储 token 信息（需要导入相应的 token 管理工具）
@@ -92,10 +93,13 @@ const Right: React.FC = () => {
   const handleCaptchaSuccess = async (token: string) => {
     // 验证码通过后重新提交表单
     const values = await accountForm.getFieldsValue();
+
     const deviceId = await getOrCreateDeviceInfo();
     handleSubmit({
       username: values.username,
+
       password: values.password,
+
       captchaVerification: token,
       deviceId: deviceId
     });
@@ -108,10 +112,14 @@ const Right: React.FC = () => {
       await accountForm.validate();
 
       if (accountForm.getFieldValue('captchaVerification')) {
+        // TODO(mickey): refactor
+        const deviceId = await getOrCreateDeviceInfo();
+
         handleAccountLogin({
           username: accountForm.getFieldValue('username'),
           password: accountForm.getFieldValue('password'),
-          captchaVerification: accountForm.getFieldValue('captchaVerification')
+          captchaVerification: accountForm.getFieldValue('captchaVerification'),
+          deviceId: deviceId
         });
         return;
       }
@@ -128,7 +136,7 @@ const Right: React.FC = () => {
     <div className={styles.loginPageRight}>
       <div className={styles.loginFormContainer}>
         <img src={LogoSVG} alt="logo" />
-        <h1 className={styles.title}>欢迎登录数智化底座</h1>
+        <h1 className={styles.title}>欢迎登录平台管理系统</h1>
         <Form
           form={accountForm}
           layout="vertical"
@@ -200,13 +208,7 @@ const Right: React.FC = () => {
       <div className={styles.loginFooter}>
         <Paragraph className={styles.footerText}>
           登录即表示同意
-          <Button type="text" size="small">
-            《用户协议》
-          </Button>
-          和
-          <Button type="text" size="small">
-            《隐私政策》
-          </Button>
+          <span>《用户协议》</span>和<span>《隐私政策》</span>
         </Paragraph>
       </div>
     </div>

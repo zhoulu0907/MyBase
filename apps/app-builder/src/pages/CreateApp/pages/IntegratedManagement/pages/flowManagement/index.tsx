@@ -31,8 +31,8 @@ import {
 import { getCommonPaginationList } from '@onebase/common';
 import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import FlowCard from './components/card';
+import { useNavigate, useParams } from 'react-router-dom';
+import FlowCard from '../../components/card';
 import styles from './index.module.less';
 
 const RadioGroup = Radio.Group;
@@ -46,6 +46,8 @@ const Option = Select.Option;
  */
 const FlowManagementPage: React.FC = () => {
   const navigate = useNavigate();
+
+  const { tenantId } = useParams();
 
   const [form] = Form.useForm();
   const [modalVisible, setModalVisible] = useState('');
@@ -88,7 +90,7 @@ const FlowManagementPage: React.FC = () => {
   }, [debouncedSearch]);
 
   const toFlowEditor = (appId: string, flowId: string) => {
-    navigate(`/onebase/create-app/integrated-management/flow-editor?appId=${appId}&flowId=${flowId}`);
+    navigate(`/onebase/${tenantId}/home/create-app/integrated-management/flow-editor?appId=${appId}&flowId=${flowId}`);
   };
 
   const handleGetEntityListByApp = async () => {
@@ -320,7 +322,9 @@ const FlowManagementPage: React.FC = () => {
                   data={item}
                   handleEdit={handleEditFlow}
                   handleDelete={handleDeleteFlow}
-                  refreshList={getFlowMgmtList}
+                  refreshList={() => {
+                    getFlowMgmtList(searchFlowProcessName, searchFlowProccessStatus, searchTriggerType);
+                  }}
                   toFlowEditor={toFlowEditor}
                 />
               ))}

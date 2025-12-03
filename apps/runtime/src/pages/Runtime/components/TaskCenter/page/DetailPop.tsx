@@ -9,6 +9,9 @@ import DetailOKConfirm from './DetailOKConfirm';
 import { getFormDetail, getOperatorRecord, fetchExecTask } from '@onebase/app/src/services/app_runtime';
 import PreviewContainer from './DetailForm';
 import FlowView from '../../../../../../../app-builder/src/pages/Editor/components/flowView';
+import {
+  type FetchExecTaskReq
+} from '@onebase/app';
 const Row = Grid.Row;
 const Col = Grid.Col;
 
@@ -38,10 +41,21 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
 
   const [popupVisibleMap, setPopupVisibleMap] = useState<any>({});
   const setPopupVisibleByIndex = (index: number, visible: boolean) => {
-    setPopupVisibleMap((prev: any) => ({
-      ...prev,
-      [index]: visible
-    }));
+    setPopupVisibleMap((prev: any) => {
+      if (visible) {
+        const newState: any = {};
+        Object.keys(prev).forEach((key) => {
+          newState[key] = false;
+        });
+        newState[index] = true;
+        return newState;
+      } else {
+        return {
+          ...prev,
+          [index]: false
+        };
+      }
+    });
   };
   function toggleFullScreen(type: string) {
     if (type === 'FULLSCREEN') {
@@ -53,7 +67,7 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
   function renderTitle() {
     return (
       <>
-        <span>{rowData?.processTitle} </span>
+        <span>{detailData?.processTitle}</span>
         <div>
           {drawWidth !== '100%' ? (
             <IconFullscreen onClick={() => toggleFullScreen('FULLSCREEN')} />
@@ -70,7 +84,7 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
     const buttonType = value?.buttonType;
     const entityData = await formRef.current.getFormData();
     try {
-      const req = {
+      const req:FetchExecTaskReq = {
         buttonType,
         taskId: detailData?.taskId,
         instanceId: rowData?.instanceId,
@@ -84,7 +98,9 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
   const handleConfirmOK = async (value: any) => {
     const entityData = await formRef.current.getFormData();
 
-    confirmRef.current.childMethod({ value, entityData });
+    if (confirmRef?.current?.childMethod) {
+      confirmRef.current.childMethod({ value, entityData });
+    }
   };
 
   function handlePreview() {

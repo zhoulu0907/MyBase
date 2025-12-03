@@ -4,7 +4,8 @@ import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
 export const FIELD_TYPES_NEED_CONFIG = [
   ENTITY_FIELD_TYPE.SELECT.VALUE,
   ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE,
-  ENTITY_FIELD_TYPE.AUTO_CODE.VALUE
+  ENTITY_FIELD_TYPE.AUTO_CODE.VALUE,
+  ENTITY_FIELD_TYPE.DATA_SELECTION.VALUE
 ];
 
 // 自动编号规则类型
@@ -38,8 +39,8 @@ export const CONSTANTS = {
   DISABLED: 0
 } as const;
 
-// 自动编号默认配置
-export const AUTO_CODE_NUMBER_DEFAULT_CONFIG = {
+// 自动编号SEQUENCE类型默认配置
+export const AUTO_CODE_SEQUENCE_DEFAULT_CONFIG = {
   isEnabled: CONSTANTS.ENABLED,
   numberMode: AUTO_CODE_NUMBER_MODE.FIXED_DIGITS,
   digitWidth: DIGIT_DEFAULT,
@@ -48,6 +49,17 @@ export const AUTO_CODE_NUMBER_DEFAULT_CONFIG = {
   initialValue: START_VALUE_DEFAULT,
   resetCycle: AUTO_CODE_RESET_CYCLE.NONE
 } as const;
+
+// 自动编号初始规则
+export const AUTO_CODE_INITIAL_RULES = [
+  {
+    id: 'rule-1',
+    itemType: AUTO_CODE_RULE_TYPE.SEQUENCE,
+    config: {
+      ...AUTO_CODE_SEQUENCE_DEFAULT_CONFIG
+    }
+  }
+];
 
 // 日期格式值
 export const DATE_FORMAT_VALUES = {

@@ -1,10 +1,11 @@
 import { listToTree } from '@/utils/tree';
 import { Checkbox, Input, Modal, Table } from '@arco-design/web-react';
 import type { ColumnProps } from '@arco-design/web-react/es/Table';
+import { PERMISSION_TYPES } from '@onebase/common';
 import type { Permission } from '@onebase/platform-center';
 import { getAllPermissions } from '@onebase/platform-center';
-import React, { useEffect, useMemo, useState, useCallback } from 'react';
-import { PERMISSION_TYPES } from '@/constants/permission';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import styles from '../../index.module.less';
 
 const Search = Input.Search;
 const CheckboxGroup = Checkbox.Group;
@@ -35,9 +36,9 @@ const PermissionConfigModal: React.FC<PermissionConfigModalProps> = ({
   const loadPermissions = async () => {
     setLoading(true);
     try {
-      const data = await getAllPermissions();
+      const data = await getAllPermissions('tenant');
       // 接口返回三层：模块、功能、操作，需筛选出后两层数据
-      const filteredData = data.filter(item => item.type !== PERMISSION_TYPES.MODULE);
+      const filteredData = data.filter((item) => item.type !== PERMISSION_TYPES.MODULE);
       const tree = listToTree(filteredData);
       setTableData(tree as Permission[]);
     } finally {
@@ -69,12 +70,15 @@ const PermissionConfigModal: React.FC<PermissionConfigModalProps> = ({
   useEffect(() => {
     // 初始化选中状态
     if (configuredPermissions?.length) {
-      const initSelectedActions = configuredPermissions.reduce((acc, cur) => {
-        if (cur.children?.length) {
-          acc[cur.id] = cur.children.map(action => action.id);
-        }
-        return acc;
-      }, {} as Record<string, string[]>);
+      const initSelectedActions = configuredPermissions.reduce(
+        (acc, cur) => {
+          if (cur.children?.length) {
+            acc[cur.id] = cur.children.map((action) => action.id);
+          }
+          return acc;
+        },
+        {} as Record<string, string[]>
+      );
       setSelectedActions(initSelectedActions);
     }
   }, [visible, configuredPermissions, tableData, filteredPermissions]);
@@ -245,9 +249,7 @@ const PermissionConfigModal: React.FC<PermissionConfigModalProps> = ({
       return res;
     }, []);
     onConfirm(data);
-  }, [
-    selectedActions
-  ]);
+  }, [selectedActions]);
 
   return (
     <Modal
@@ -261,8 +263,8 @@ const PermissionConfigModal: React.FC<PermissionConfigModalProps> = ({
         >
           <span>权限配置</span>
           <Search
+            className={styles.permissionInput}
             placeholder="请输入权限名称"
-            style={{ marginRight: 32, width: 200 }}
             allowClear
             value={searchValue}
             onChange={(value) => setSearchValue(value)}
@@ -282,7 +284,7 @@ const PermissionConfigModal: React.FC<PermissionConfigModalProps> = ({
         columns={columns}
         data={filteredPermissions}
         loading={loading}
-        pagination={false}
+        // pagination={false}
       />
     </Modal>
   );

@@ -6,7 +6,7 @@ import {
   AUTO_CODE_NUMBER_MODE,
   AUTO_CODE_RESET_CYCLE,
   CONSTANTS,
-  AUTO_CODE_NUMBER_DEFAULT_CONFIG
+  AUTO_CODE_SEQUENCE_DEFAULT_CONFIG
 } from '../utils/const';
 import styles from '../index.module.less';
 
@@ -27,7 +27,7 @@ const AutoCodeNumberSettingsModal: React.FC<AutoCodeNumberSettingsModalProps> = 
   const numberMode = Form.useWatch(['numberMode'], form)?.numberMode;
 
   const initialValues = {
-    ...AUTO_CODE_NUMBER_DEFAULT_CONFIG,
+    ...AUTO_CODE_SEQUENCE_DEFAULT_CONFIG,
     rules: []
   };
 

@@ -1,6 +1,7 @@
 import { Form, Grid, Checkbox, Select, DatePicker, Message } from '@arco-design/web-react';
 import { useEffect, useState } from 'react';
-import { WEEK_OPTIONS, WEEK_OPTIONS_LABEL, DATE_EXTREME_TYPE, DATE_DYNAMIC_TYPE, getPopupContainer } from '@onebase/ui-kit';
+import { WEEK_OPTIONS, WEEK_OPTIONS_LABEL, DATE_EXTREME_TYPE, DATE_DYNAMIC_TYPE, getPopupContainer, CONFIG_TYPES } from '@onebase/ui-kit';
+import { registerConfigRenderer } from '../../registry';
 import styles from '../../index.module.less';
 
 export interface DynamicDateRangeConfigProps {
@@ -140,6 +141,7 @@ const DynamicDateRangeConfig: React.FC<DynamicDateRangeConfigProps> = ({ handleP
                 {configs[dateRangeKey]['earliestType'] === DATE_EXTREME_TYPE.STATIC && (
                   <DatePicker
                     format="YYYY-MM-DD"
+                    getPopupContainer={getPopupContainer}
                     value={configs[dateRangeKey]['earliestStaticValue']}
                     onChange={(value) => {
                       // 校验最早可选日期不得晚于最晚可选日期
@@ -199,6 +201,7 @@ const DynamicDateRangeConfig: React.FC<DynamicDateRangeConfigProps> = ({ handleP
                 {configs[dateRangeKey]['latestType'] === DATE_EXTREME_TYPE.STATIC && (
                   <DatePicker
                     format="YYYY-MM-DD"
+                    getPopupContainer={getPopupContainer}
                     value={configs[dateRangeKey]['latestStaticValue']}
                     onChange={(value) => {
                       // 校验最早可选日期不得晚于最晚可选日期 earliestLimit earliestLimit
@@ -235,3 +238,15 @@ const DynamicDateRangeConfig: React.FC<DynamicDateRangeConfigProps> = ({ handleP
   );
 };
 export default DynamicDateRangeConfig;
+
+registerConfigRenderer(
+  CONFIG_TYPES.DATE_RANGE,
+  ({ id, handlePropsChange, item, configs }) => (
+    <DynamicDateRangeConfig
+      id={id}
+      handlePropsChange={handlePropsChange}
+      item={item}
+      configs={configs}
+    />
+  )
+);

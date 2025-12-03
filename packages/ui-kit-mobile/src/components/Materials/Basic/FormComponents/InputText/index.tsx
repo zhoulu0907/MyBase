@@ -1,0 +1,93 @@
+import { memo } from 'react';
+import { nanoid } from 'nanoid';
+import { Input, Form } from '@arco-design/mobile-react';
+import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
+
+import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES, FormSchema } from '@onebase/ui-kit';
+type XInputTextConfig = typeof FormSchema.XInputTextSchema.config;
+
+import '../index.css';
+
+const XInputText = memo((props: XInputTextConfig & { runtime?: boolean; detailMode?: boolean }) => {
+  const {
+    label,
+    dataField,
+    placeholder,
+    defaultValueConfig,
+    status,
+    verify,
+    align,
+    layout,
+    runtime = true,
+    detailMode
+  } = props;
+
+  // 生成唯一的字段ID
+  const fieldId = dataField && dataField.length > 0
+    ? dataField[dataField.length - 1]
+    : `${FORM_COMPONENT_TYPES.INPUT_TEXT}_${nanoid()}`;
+
+  // 根据是否为只读模式确定内容
+  const renderContent = () => {
+    // 非只读模式，渲染Input组件
+    return (
+      <Input
+        placeholder={placeholder}
+        maxLength={verify?.lengthLimit ? verify?.maxLength : undefined}
+        inputStyle={{
+          textAlign: align
+        }}
+        style={{
+          width: '100%'
+        }}
+      />
+    );
+  };
+
+  const rules: ITypeRules<ValidatorType.Custom>[] = [
+    {
+      type: ValidatorType.Custom,
+      validator: (value, callback) => {
+        if (!value && verify?.required) {
+          callback(`${label.text}是必填项`);
+        }
+
+        if (value && verify?.lengthLimit) {
+          if (value.length < verify?.minLength!) {
+            callback(`字数不能小于${verify?.minLength}`);
+          } else if (value.length > verify?.maxLength!) {
+            callback(`字数不能大于${verify?.maxLength}`);
+          }
+        }
+      }
+    }
+  ];
+
+  return (
+    <Form.Item
+      className="inputTextWrapper"
+      field={fieldId}
+      rules={rules}
+      label={label.display ? label.text : undefined}
+      initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : ''}
+      style={{
+        pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
+        opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
+      }}
+    >
+      {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
+        // 只读模式，渲染文本内容
+        <div style={{
+          textAlign: align,
+          padding: '8px'
+        }}>
+          --
+        </div>
+      ) : (
+        renderContent()
+      )}
+    </Form.Item>
+  );
+});
+
+export default XInputText;

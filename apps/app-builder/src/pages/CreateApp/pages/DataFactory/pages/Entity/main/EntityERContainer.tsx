@@ -2,6 +2,7 @@ import type { EdgeData, Entity, EntityERProps, EntityNode } from '@/pages/Create
 import { useAppStore } from '@/store/store_app';
 import { useResourceStore } from '@/store/store_resource';
 import { newFieldSignal } from '@/store/singals/new_field';
+import { useGraphEntitytore } from '@onebase/ui-kit';
 import { Button, Message } from '@arco-design/web-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import EditEntityDrawer from '../components/Drawers/EditEntityDrawer';
@@ -9,7 +10,7 @@ import EditFieldDrawer from '../components/Drawers/EditFieldDrawer';
 import EditRelationDrawer from '../components/Drawers/EditRelationDrawer';
 import { MODAL_TYPE, useModalManager } from '../hooks/useModalManager';
 // import FieldDetailDrawer from '../components/Drawers/FieldDetailDrawer';
-import ERchart from '../components/ERchart';
+import ERchart, { type ERchartRef } from '../components/ERchart';
 import CreateEntityModal from '../components/Modals/CreateEntityModal';
 // import CreateFieldModal from '../components/Modals/CreateFieldModal';
 
@@ -22,14 +23,8 @@ import {
   DeleteConfirmModal
 } from '../components/Modals';
 import type { DatasourceRecord } from './EntityPageContainer';
+import { RELATIONSHIP_TYPE_LABEL_MAP, type RelationshipType } from '@/pages/CreateApp/pages/DataFactory/utils/types';
 import styles from '../index.module.less';
-
-const relationshipTypeMap: Record<string, string> = {
-  ONE_TO_ONE: '1:1',
-  ONE_TO_MANY: '1:N',
-  MANY_TO_ONE: 'N:1',
-  MANY_TO_MANY: 'M:N'
-};
 
 export const EntityERContainer: React.FC<{
   refreshEntityList: boolean;
@@ -41,6 +36,7 @@ export const EntityERContainer: React.FC<{
 }> = ({ refreshEntityList, setRefreshEntityList, onlyUpdateNode, setOnlyUpdateNode, dsData, handleMenuClick }) => {
   const { curAppId } = useAppStore();
   const { curDataSourceId } = useResourceStore();
+  const setCurEntityId = useGraphEntitytore((state) => state.setCurEntityId);
 
   // 使用统一的弹窗/抽屉管理器
   const { openModal, closeModal, isModalOpen, getModalData, setModalDataValue } = useModalManager();
@@ -48,7 +44,7 @@ export const EntityERContainer: React.FC<{
   const [data, setData] = useState<EntityERProps['data']>({ nodes: [], edges: [] });
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [updateRelationOptions, setUpdateRelationOptions] = useState(false);
-  const chartRef = useRef<any>(null);
+  const chartRef = useRef<ERchartRef | null>(null);
   const prevDataSourceIdRef = useRef<string>('');
 
   const loadEntityList = useCallback(async (dataSourceId: string) => {
@@ -76,7 +72,7 @@ export const EntityERContainer: React.FC<{
               const relationItem = item as Record<string, unknown>;
               return {
                 ...relationItem,
-                label: relationshipTypeMap[(relationItem?.relationshipType as string) || '']
+                label: RELATIONSHIP_TYPE_LABEL_MAP[(relationItem?.relationshipType as RelationshipType) || '']
               };
             }) || []
         });
@@ -91,16 +87,23 @@ export const EntityERContainer: React.FC<{
 
   // 打开节点编辑抽屉
   const handleOpenNodeEditDrawer = (editData: Partial<EntityNode>) => {
+    if (editData?.entityId) {
+      setCurEntityId(editData.entityId);
+    }
     openModal(MODAL_TYPE.EDIT_ENTITY, { editingNode: editData as unknown as EntityNode });
   };
 
   // 打开批量添加字段弹窗
   const handleOpenFieldConfigModal = (node: EntityNode) => {
+    if (node?.entityId) {
+      setCurEntityId(node.entityId);
+    }
     openModal(MODAL_TYPE.CONFIG_FIELD, { nodedata: node as unknown as EntityNode });
   };
 
   // 打开节点添加关联关系弹窗
   const handleOpenRelationModal = (id: string) => {
+    setCurEntityId(id);
     setUpdateRelationOptions(true);
     setOnlyUpdateNode(false);
     openModal(MODAL_TYPE.CREATE_RELATION, { selectedEntityId: id });
@@ -108,6 +111,7 @@ export const EntityERContainer: React.FC<{
 
   // 打开节点添加主子关系弹窗
   const handleOpenMasterModal = (id: string) => {
+    setCurEntityId(id);
     setOnlyUpdateNode(false);
     openModal(MODAL_TYPE.CREATE_MASTER_DETAIL, { selectedEntityId: id });
   };
@@ -137,7 +141,7 @@ export const EntityERContainer: React.FC<{
       displayConfig: JSON.stringify({ x, y }),
       code: data.code,
       datasourceId: curDataSourceId,
-      appId: curAppId
+      applicationId: curAppId
     };
     const res = await updateEntity(params as unknown as UpdateEntityReqVO);
     if (res) {
@@ -153,7 +157,7 @@ export const EntityERContainer: React.FC<{
       tableName: data.tableName,
       displayName: data.entityName,
       datasourceId: curDataSourceId,
-      appId: curAppId
+      applicationId: curAppId
     };
     const res = await updateEntity(params as unknown as UpdateEntityReqVO);
     if (res) {
@@ -170,7 +174,7 @@ export const EntityERContainer: React.FC<{
       tableName: data.tableName,
       description: data.description,
       datasourceId: curDataSourceId,
-      appId: curAppId
+      applicationId: curAppId
     };
     const res = await updateEntity(params as unknown as UpdateEntityReqVO);
     if (res) {
@@ -273,7 +277,7 @@ export const EntityERContainer: React.FC<{
         }}
       >
         <IconPlus />
-        创建业务实体
+        创建数据资产
       </Button>
 
       {/* 交互弹窗、抽屉、模态框 */}
@@ -297,6 +301,7 @@ export const EntityERContainer: React.FC<{
         entity={getModalData('nodedata') as EntityNode}
         successCallback={handleSuccessCallback}
         gotoDictPage={gotoDictPage}
+        entities={data.nodes}
       />
       <CreateRelationModal
         visible={isModalOpen(MODAL_TYPE.CREATE_RELATION)}
@@ -330,7 +335,7 @@ export const EntityERContainer: React.FC<{
         onConfirm={confirmDelete}
         confirmLoading={deleteLoading}
         title="确认删除"
-        content="确定要删除这个业务实体吗？删除后无法恢复。"
+        content="确定要删除这个数据资产吗？删除后无法恢复。"
         okText="确认删除"
         cancelText="取消"
       />

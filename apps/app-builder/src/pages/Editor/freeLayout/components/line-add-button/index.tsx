@@ -118,7 +118,7 @@ export const LineAddButton = (props: LineRenderProps) => {
   };
 
   useEffect(() => {
-    if (selected && !selectLine ) {//&& line.id.includes('branch')
+    if (selected && !selectLine && line.id.includes('branch')) {
       setLineData(line);
     }
     setSelectLine(false);
@@ -126,7 +126,7 @@ export const LineAddButton = (props: LineRenderProps) => {
 
   if (line.id === IdList.START_0_START_1) {
     return <></>;
-  }0
+  }
 
   if (!visible) {
     return playground.config.readonly ? '' : <div className="line-node" style={{}}></div>;

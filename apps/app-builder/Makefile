@@ -1,11 +1,11 @@
-# Admin Console - Makefile
-# 管理控制台应用的便捷命令
+# App Builder - Makefile
+# App Builder 应用的便捷命令
 
 .PHONY: help install dev build clean lint preview
 
 # 默认目标
 help:
-	@echo "Admin Console - 可用命令:"
+	@echo "App Builder - 可用命令:"
 	@echo ""
 	@echo "安装依赖:"
 	@echo "  make install     - 安装依赖"

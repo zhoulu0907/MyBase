@@ -8,11 +8,14 @@
   .popupContainer {
     border-radius: 4px;
     border: 1px solid #e5e6eb;
+    height: 50vh;
+    display: flex;
+    flex-direction: column;
 
     .content {
-        display: flex;
-        min-width: 0;
-        min-height: 400px;
+      display: flex;
+      min-width: 0;
+      min-height: 400px;
 
         .leftTree {
             min-width: 250px;
@@ -22,12 +25,12 @@
             padding: 4px;
         }
 
-        .rightFlexTable {
-            flex: 1;
-            min-width: 0;
-            overflow-x: auto;
-            padding: 4px;
-        }
+      .rightFlexTable {
+        flex: 1;
+        min-width: 0;
+        overflow: auto;
+        padding: 4px;
+      }
     }
 
     .bottomDiv{
@@ -35,4 +38,30 @@
         padding: 4px;
     }
   }
+}
+
+.filterDataModal .rightFlexTable {
+  flex: 1;
+  min-width: 0;
+  overflow: auto;
+}
+
+.dataSelectClearIcon {
+  cursor: pointer;
+}
+
+.dataSelectTrigger {
+  cursor: pointer;
+}
+
+.formItemNoMargin {
+  margin: 0;
+}
+
+.formItemHiddenGhost {
+  opacity: 0.5;
+}
+
+.dataSelectReadonly {
+  display: block;
 }

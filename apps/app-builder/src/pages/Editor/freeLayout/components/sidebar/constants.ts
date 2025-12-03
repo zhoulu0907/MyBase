@@ -1,189 +1,31 @@
-/*********************
-   *TEXT: '常规文本',  [等于
-不等于
-包含
-不包含
-存在于
-不存在于
-为空
-不为空]
-    LONG_TEXT: '长文本', [等于
-不等于
-包含
-不包含
-为空
-不为空]
-    EMAIL: '邮箱地址',[等于
-不等于
-包含
-不包含
-存在于
-不存在于
-为空
-不为空]
-    PHONE: '电话号码',[等于
-不等于
-包含
-不包含
-存在于
-不存在于
-为空
-不为空]
-    URL: '网址链接',[等于
-不等于
-包含
-不包含
-为空
-不为空]
-    ADDRESS: '详细地址',[等于
-不等于
-包含
-不包含
-为空
-不为空]
-    NUMBER: '通用数字',[等于
-不等于
-大于
-大于等于
-小于
-小于等于
-范围
-为空
-不为空]
-    DATE: '日期',[等于
-晚于
-早于
-范围
-为空
-不为空]
-    DATETIME: '日期时间',[等于
-晚于
-早于
-范围
-为空
-不为空]
-    BOOLEAN: '布尔值',[等于]
-
-    SELECT: '单选列表',[等于
-包含全部
-不包含全部
-包含任一
-不包含任一
-为空
-不为空]
-    MULTI_SELECT: '多选列表',[等于
-    包含全部
-不包含全部
-包含任一
-不包含任一
-为空
-不为空]
-    AUTO_CODE: '自动编码',[等于
-不等于
-包含
-不包含
-存在于
-不存在于
-为空
-不为空]
-    USER: '用户单选',[等于
-不等于
-包含
-不包含
-存在于
-不存在于
-为空
-不为空]
-    MULTI_USER: '用户多选',[等于
-包含全部
-不包含全部
-包含任一
-不包含任一
-为空
-不为空]
-    DEPARTMENT: '部门单选',[等于
-不等于
-包含
-不包含
-存在于
-不存在于
-为空
-不为空]
-    MULTI_DEPARTMENT: '部门多选',[等于
-包含全部
-不包含全部
-包含任一
-不包含任一
-为空
-不为空]
-    DATA_SELECTION: '数据单选',[等于
-不等于
-包含
-不包含
-存在于
-不存在于
-为空
-不为空]
-    MULTI_DATA_SELECTION: '数据多选',[等于
-包含全部
-不包含全部
-包含任一
-不包含任一
-为空
-不为空]
-    FILE: '文件',[为空
-不为空]
-    IMAGE: '图片',[为空
-不为空]
-    GEOGRAPHY: '地理位置',[等于
-不等于
-为空
-不为空]
-    PASSWORD: '密码',[为空
-不为空]
-    ENCRYPTED: '加密字段',[为空
-不为空]
-    AGGREGATE: '聚合统计',[等于
-不等于
-大于
-大于等于
-小于
-小于等于
-范围
-为空
-不为空]
-    ID: '数据标识'[等于
-不等于
-为空
-不为空]
-   */
 export const enum FieldType {
-  TEXT = 'TEXT',
-  LONG_TEXT = 'LONG_TEXT',
-  EMAIL = 'EMAIL',
-  PHONE = 'PHONE',
-  URL = 'URL',
-  ADDRESS = 'ADDRESS',
-  NUMBER = 'NUMBER',
-  DATE = 'DATE',
-  DATETIME = 'DATETIME',
-  BOOLEAN = 'BOOLEAN',
-  SELECT = 'SELECT',
-  MULTI_SELECT = 'MULTI_SELECT',
-  AUTO_CODE = 'AUTO_CODE',
+  TEXT = 'TEXT', // 常规文本
+  LONG_TEXT = 'LONG_TEXT', // 长文本
+  EMAIL = 'EMAIL', // 邮箱地址
+  PHONE = 'PHONE', // 电话号码
+  URL = 'URL', // 网址链接
+  ADDRESS = 'ADDRESS', // 详细地址
+  NUMBER = 'NUMBER', // 通用数字
+  DATE = 'DATE', // 日期
+  DATETIME = 'DATETIME', // 日期时间
+  BOOLEAN = 'BOOLEAN', // 布尔值
+  SELECT = 'SELECT', // 单选列表
+  MULTI_SELECT = 'MULTI_SELECT', // 多选列表
+  AUTO_CODE = 'AUTO_CODE', // 自动编码
   USER = 'USER',
-  MULTI_USER = 'MULTI_USER',
+  MULTI_USER = 'MULTI_USER', // 用户多选
   DEPARTMENT = 'DEPARTMENT',
-  MULTI_DEPARTMENT = 'MULTI_DEPARTMENT',
+  MULTI_DEPARTMENT = 'MULTI_DEPARTMENT', // 部门多选
   DATA_SELECTION = 'DATA_SELECTION',
-  MULTI_DATA_SELECTION = 'MULTI_DATA_SELECTION',
+  MULTI_DATA_SELECTION = 'MULTI_DATA_SELECTION', // 数据多选
   FILE = 'FILE',
   IMAGE = 'IMAGE',
-  GEOGRAPHY = 'GEOGRAPHY',
+  GEOGRAPHY = 'GEOGRAPHY', // 地理位置
   PASSWORD = 'PASSWORD',
   ENCRYPTED = 'ENCRYPTED',
   AGGREGATE = 'AGGREGATE',
-  ID = 'ID'
+  ID = 'ID', // 数据标识
+  DATA_SELECTION_RESULT = 'DATA_SELECTION_RESULT'
 }
 
 export const enum PreNode {
@@ -431,9 +273,78 @@ export const approvalResultOptions = [
   {
     label: '自动跳过',
     value: 'post_auto_skipped'
-  },
+  }
   // {
   //   label: '自动抄送',
   //   value: 'post_auto_cc'
   // }
+];
+
+export const preNodeOptions = [
+  {
+    label: '审批结果',
+    value: PreNode.APPROVAL_RESULT,
+    type: FieldType.DATA_SELECTION_RESULT
+  },
+  {
+    label: '审批⼈',
+    value: PreNode.APPROVER_ID,
+    type: FieldType.USER
+  },
+  {
+    label: '审批时间',
+    value: PreNode.APPROVAL_TIME,
+    type: FieldType.DATETIME
+  },
+  {
+    label: '审批⼈部⻔',
+    value: PreNode.APPROVER_DEPT_ID,
+    type: FieldType.DEPARTMENT
+  }
+];
+
+export const instanceOptions = [
+  {
+    label: '流程标题',
+    value: Instance.BPM_TITLE,
+    type: FieldType.TEXT
+  },
+  {
+    label: '发起⼈',
+    value: Instance.INITIATOR_ID,
+    type: FieldType.USER
+  },
+  {
+    label: '发起部⻔',
+    value: Instance.INITIATOR_DEPT_ID,
+    type: FieldType.DEPARTMENT
+  },
+  {
+    label: '发起时间',
+    value: Instance.SUBMIT_TIME,
+    type: FieldType.DATETIME
+  },
+  {
+    label: '创建时间',
+    value: Instance.CREATE_TIME,
+    type: FieldType.DATETIME
+  },
+  {
+    label: '更新时间',
+    value: Instance.UPDATE_TIME,
+    type: FieldType.DATETIME
+  }
+];
+
+export const entityOptions = [
+  {
+    label: '表单字段1',
+    value: 'field1',
+    type: FieldType.USER
+  },
+  {
+    label: '表单字段2',
+    value: 'field2',
+    type: FieldType.DATE
+  }
 ];

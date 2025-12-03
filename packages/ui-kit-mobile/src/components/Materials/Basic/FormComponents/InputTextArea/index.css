@@ -1,0 +1,52 @@
+.inputTextAreaWrapper {
+  .arco-input-wrap.textarea {
+    padding: 0;
+    border: none !important;
+  }
+
+  .arco-input-prefix {
+    line-height: 1.08rem;
+    height: 1.08rem;
+    padding-right: 0.32rem;
+    font-size: 0.32rem;
+  }
+
+  .arco-input-wrap {
+    &textarea {
+      height: auto;
+    }
+
+    height: auto;
+  }
+
+  .arco-input-container .arco-input-label {
+    min-width: 1.76rem;
+  }
+
+  &.showStatistics {
+    .arco-textarea {
+      margin-bottom: 0.8rem;
+    }
+  }
+
+  .arco-textarea {
+    line-height: 0.48rem;
+    height: 0.96rem;
+    padding: 0;
+    margin: 0.32rem 0;
+    font-size: 0.32rem;
+
+    &:hover,
+    &:focus {
+      border: none;
+      background-color: transparent !important;
+    }
+  }
+
+  .arco-input-container .statistic-text {
+    color: #86909C;
+    font-size: 0.28rem;
+    bottom: 0.32rem;
+    right: 0.32rem;
+  }
+}

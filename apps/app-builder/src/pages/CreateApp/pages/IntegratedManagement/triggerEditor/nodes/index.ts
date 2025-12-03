@@ -20,7 +20,7 @@ import { NavigateNodeRegistry } from './interaction/navigate';
 import { RefreshNodeRegistry } from './interaction/refresh';
 import { TooltipNodeRegistry } from './interaction/tooltip';
 import { DataMapperNodeRegistry } from './other/data-mapper';
-import { IpaasNodeRegistry } from './other/ipaas';
+import { JavascriptNodeRegistry } from './other/javascript';
 import { JsonNodeRegistry } from './other/json';
 import { LogNodeRegistry } from './other/log';
 import { MessageNodeRegistry } from './other/message';
@@ -57,7 +57,7 @@ export const FlowNodeRegistries: FlowNodeRegistry[] = [
   DataQueryMultipleNodeRegistry,
   DataUpdateNodeRegistry,
 
-  IpaasNodeRegistry,
+  JavascriptNodeRegistry,
   JsonNodeRegistry,
   LogNodeRegistry,
   MessageNodeRegistry,

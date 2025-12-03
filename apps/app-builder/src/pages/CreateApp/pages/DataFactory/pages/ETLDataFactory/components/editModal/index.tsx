@@ -125,7 +125,7 @@ const EditModal: React.FC<EditModalProps> = ({ initData, visible, onOk, onCancel
 
   return (
     <Modal
-      title="新建流程"
+      title="更新规则"
       visible={visible}
       onOk={handleSubmit}
       onCancel={handleCancel}

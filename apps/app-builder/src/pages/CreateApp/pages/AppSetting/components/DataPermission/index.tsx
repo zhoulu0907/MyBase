@@ -26,7 +26,7 @@ import DataPermissionModal from './components/DataPermissionModal';
 
 import type { TreeSelectDataType } from '@arco-design/web-react/es/TreeSelect/interface';
 import styles from './index.module.less';
-import { OPERATION_OPTIONS, PERMISSION_SCOPE } from '@/constants/permission';
+import { OPERATION_OPTIONS,PERMISSION_SCOPE } from '@onebase/common';
 
 const initialFormValues: AuthDataGroupVO = {
   id: '',

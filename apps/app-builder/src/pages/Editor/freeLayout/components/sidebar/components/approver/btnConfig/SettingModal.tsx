@@ -1,5 +1,6 @@
-import { Modal, Radio, Select, Message } from '@arco-design/web-react';
 import { useState } from 'react';
+import { Modal, Radio, Select, Message, Tooltip } from '@arco-design/web-react';
+import { IconQuestionCircle } from '@arco-design/web-react/icon';
 
 const RadioGroup = Radio.Group;
 const Option = Select.Option;
@@ -28,7 +29,15 @@ export default function SettingModal({settingsShow, setSettingShow}:any) {
         <div className='arco-row'>
             <span style={{paddingRight: '16px'}}>可回退至</span>
             <RadioGroup defaultValue='LAST-NODE' style={{ marginBottom: 20 }} onChange={handleRadio}>
-                <Radio value='LAST-NODE'>上一节点</Radio>
+                <Radio value='LAST-NODE'>上一节点
+                    <Tooltip
+                        position="top"
+                        trigger="hover"
+                        content="流转到上一个人工处理节点，而非流程图中的上一个节点"
+                    >
+                        <IconQuestionCircle style={{ fontSize: '15px', position: 'relative', left: '4px', top: '1px', color: '#AAAEB3' }} />
+                    </Tooltip>
+                </Radio>
                 <Radio value='SELECT-NODE'>指定节点</Radio>
             </RadioGroup>
         </div>

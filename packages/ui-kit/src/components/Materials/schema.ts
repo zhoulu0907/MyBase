@@ -1,5 +1,5 @@
 import { cloneDeep } from 'lodash-es';
-import BasicSchema from './Basic/schema';
+import { baseSchema as BasicSchema } from './Basic/schema';
 import { ALL_COMPONENT_TYPES, type ComponentType } from './componentTypes';
 
 // 定义组件配置的类型
@@ -22,7 +22,9 @@ const componentSchemaMap: Partial<Record<ComponentType, ComponentSchema>> = {
   [ALL_COMPONENT_TYPES.SELECT_ONE]: BasicSchema.XSelectOne,
   [ALL_COMPONENT_TYPES.SELECT_MUTIPLE]: BasicSchema.XSelectMutiple,
   [ALL_COMPONENT_TYPES.USER_SELECT]: BasicSchema.XUserSelect,
+  [ALL_COMPONENT_TYPES.USER_MULTIPLE_SELECT]: BasicSchema.XUserSelect,
   [ALL_COMPONENT_TYPES.DEPT_SELECT]: BasicSchema.XDeptSelect,
+  [ALL_COMPONENT_TYPES.DEPT_MULTIPLE_SELECT]: BasicSchema.XDeptSelect,
   [ALL_COMPONENT_TYPES.FILE_UPLOAD]: BasicSchema.XFileUpload,
   [ALL_COMPONENT_TYPES.IMG_UPLOAD]: BasicSchema.XImgUpload,
   [ALL_COMPONENT_TYPES.AUTO_CODE]: BasicSchema.XAutoCode,

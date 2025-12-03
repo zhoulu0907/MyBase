@@ -1,9 +1,8 @@
 import InfoPanel from '@/components/InfoPanel';
 import { PermissionButton as Button } from '@/components/PermissionControl';
 import PlaceholderPanel from '@/components/PlaceholderPanel';
-import { TENANT_ROLE_PERMISSION as ACTIONS } from '@/constants/permission';
-import { hasPermission } from '@/utils/permission';
-import { Divider, Empty, Layout, Message, Popconfirm, Space, Tabs } from '@arco-design/web-react';
+import { Divider, Empty, Layout, Message, Modal, Space, Tabs } from '@arco-design/web-react';
+import { TENANT_ROLE_PERMISSION as ACTIONS, hasPermission } from '@onebase/common';
 import { RoleType } from '@onebase/platform-center';
 import { createRole, deleteRole, updateRole } from '@onebase/platform-center/src/services/role';
 import type { RoleVO } from '@onebase/platform-center/src/types/role';
@@ -105,39 +104,44 @@ export default function RolePage() {
     setActiveTab(key);
   }, []);
 
+  // 删除角色
+  const handleDelete = (record: Partial<RoleVO> | null) => {
+    if (!record?.id) return;
+    Modal.confirm({
+      title: `确认要删除角色（${record?.name}）吗？`,
+      content: '删除角色后，该角色下关联的用户将失去该角色赋予的权限，请谨慎操作。',
+      okButtonProps: { status: 'danger' },
+      onOk: async () => {
+        try {
+          handleDeleteRole(record.id!).then(() => {
+            roleListRef.current?.refresh?.();
+          });
+          Message.success('用户移除成功');
+        } catch (error) {
+          Message.error('移除用户失败，请重试');
+        }
+      }
+    });
+  };
+
   // 编辑/删除角色按钮
   const OperationButtons = useMemo(
     () => (
       <Space size="small">
-        <Button permission={ACTIONS.UPDATE} type="secondary" onClick={() => openRoleModal(activeRole || null)}>
+        <Button type="secondary" permission={ACTIONS.UPDATE} onClick={() => openRoleModal(activeRole || null)}>
           编辑
         </Button>
-        <Popconfirm
-          position="br"
-          focusLock
-          title={<div style={{ fontWeight: '700' }}>"移除成员"</div>}
-          content={
-            <>
-              <div>确定要移除这个成员吗？</div>
-              <div>该角色下关联的用户将失去该角色赋予的权限!</div>
-            </>
-          }
-          onOk={() => {
-            if (activeRole?.id) {
-              handleDeleteRole(activeRole.id).then(() => {
-                roleListRef.current?.refresh?.();
-              });
-            }
-          }}
-          style={{ backgroundColor: '#ccc' }}
+        <Button
+          type="secondary"
+          permission={ACTIONS.DELETE}
+          disabled={activeRole?.type === RoleType.SYSTEM}
+          onClick={() => handleDelete(activeRole || null)}
         >
-          <Button type="secondary" permission={ACTIONS.DELETE} disabled={activeRole?.type === RoleType.SYSTEM}>
-            删除
-          </Button>
-        </Popconfirm>
+          删除
+        </Button>
       </Space>
     ),
-    [activeRole, openRoleModal, handleDeleteRole]
+    [activeRole, openRoleModal, handleDelete]
   );
 
   return (
@@ -161,6 +165,7 @@ export default function RolePage() {
               <Header>
                 <InfoPanel
                   title={activeRole?.name}
+                  type={activeRole?.type}
                   description={activeRole?.remark}
                   rightChildren={OperationButtons}
                   wrapperClassName={styles.infoPanel}

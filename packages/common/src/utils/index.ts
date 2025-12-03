@@ -1,5 +1,6 @@
 export * from './base';
 export * from './date';
+export * from './env';
 export * from './fingerprint';
 export * from './http';
 export * from './httpClient';
@@ -7,3 +8,4 @@ export * from './list';
 export * from './router';
 export * from './token';
 export * from './tree';
+export * from './userPermission';

@@ -57,12 +57,20 @@ export class HttpClient {
           _t: Date.now()
         };
 
-        // 自动添加 token 到请求头
         const tokenInfo = TokenManager.getTokenInfo();
         const tenantInfo = TokenManager.getTenantInfo();
         if (tokenInfo?.accessToken) {
           config.headers['Authorization'] = `Bearer ${tokenInfo.accessToken}`;
-          config.headers['Tenant-Id'] = tenantInfo?.tenantId;
+
+          if (config.headers['X-Tenant-Id'] == undefined || config.headers['X-Tenant-Id'] === '') {
+            config.headers['X-Tenant-Id'] = tenantInfo?.tenantId;
+          }
+        }
+
+        const appId = getHashQueryParam('appId');
+        // 如果获取到 appId 且 header 中未设置，则自动添加
+        if (appId && !config.headers['X-Application-Id']) {
+          config.headers['X-Application-Id'] = appId;
         }
 
         // 执行自定义请求拦截器
@@ -102,24 +110,18 @@ export class HttpClient {
           if (data.code !== 0) {
             Message.error(data.msg || '请求失败');
             if (data.code === 401) {
+              const loginURL = TokenManager.getTokenInfo()?.loginURL;
+
               TokenManager.clearToken();
 
-              const redirectURL = getHashQueryParam('redirectURL') || window.location.href;
-
-              // 使用 URL 构造器解析，获取 hash 前的地址路径
-              let basePath = redirectURL;
-              try {
-                const urlObj = new URL(redirectURL);
-                // 不包含 hash，仅取协议、主机、端口和 pathname、search 部分
-                basePath = urlObj.origin + urlObj.pathname + urlObj.search;
-                console.log(urlObj);
-              } catch (e) {
-                // fallback：不合法 URL 则按原先逻辑处理
-                const hashIndex = redirectURL.indexOf('#');
-                basePath = hashIndex !== -1 ? redirectURL.substring(0, hashIndex) : redirectURL;
+              // 跳转到登录页
+              if (loginURL) {
+                window.location.href = loginURL;
+              } else {
+                const redirectURL = getHashQueryParam('redirectURL') || window.location.href;
+                //   window.location.href = '/#/login';
+                window.location.href = `/#/login?redirectURL=${redirectURL}`;
               }
-
-              window.location.href = `${basePath}#/login?redirectURL=${redirectURL}`;
             }
             return Promise.reject(new Error(data.msg || '请求失败'));
           }

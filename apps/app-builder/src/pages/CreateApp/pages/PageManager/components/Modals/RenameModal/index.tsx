@@ -3,6 +3,7 @@ import { Form, Input, Modal, Button, type FormInstance } from '@arco-design/web-
 import MenuComp from '@/components/MenuIcon';
 import styles from './index.module.less';
 import DynamicIcon from '@/components/DynamicIcon';
+import { webMenuIcons } from '@onebase/ui-kit';
 import { menuIconList } from '@/components/MenuIcon/const';
 
 /**
@@ -19,6 +20,7 @@ interface RenameModalProps {
 }
 
 const RenameModal: React.FC<RenameModalProps> = ({ title, visible, handleRename, setVisible, form }) => {
+  const allWebMenuIcons = webMenuIcons.map((ele) => ele.children).reduce((acc, current) => acc.concat(current), []);
   const [menuIcon, setMenuIcon] = useState<string>();
   const [visibleMenuIcon, setVisibleMenuIcon] = useState<boolean>(false);
 
@@ -85,11 +87,10 @@ const RenameModal: React.FC<RenameModalProps> = ({ title, visible, handleRename,
                 }}
                 onClick={() => setVisibleMenuIcon(true)}
               >
-                <DynamicIcon
-                  IconComponent={menuIconList.find(icon => icon.code === (menuIcon || form.getFieldValue('menuIcon')))?.icon}
-                  theme="outline"
-                  size="18"
-                  fill="#333"
+                <img
+                  style={{ width: 'auto', height: '18px', fill: '#333' }}
+                  src={allWebMenuIcons.find((ele) => ele.code === (menuIcon || form.getFieldValue('menuIcon')))?.icon}
+                  alt=""
                 />
               </div>
             </div>

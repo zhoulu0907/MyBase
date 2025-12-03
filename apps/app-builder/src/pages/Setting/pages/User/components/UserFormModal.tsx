@@ -1,10 +1,9 @@
 import { emailValidator, phoneValidator } from '@/utils/validator';
-import { Button, Form, Grid, Input, Message, Modal, Select, Switch, TreeSelect } from '@arco-design/web-react';
+import { Button, Form, Grid, Input, Message, Modal, Switch, TreeSelect } from '@arco-design/web-react';
+import { hasPermission, TENANT_DEPT_QUERY } from '@onebase/common';
 import type { SimpleRoleVO, UserVO } from '@onebase/platform-center';
-import { createUser, getSimpleRoleList, getUser, StatusEnum, updateUser } from '@onebase/platform-center';
+import { createUser, getUser, StatusEnum, updateUser } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
-import { hasPermission } from '@/utils/permission';
-import { TENANT_ROLE_QUERY, TENANT_DEPT_QUERY } from '@/constants/permission';
 
 const Row = Grid.Row;
 const Col = Grid.Col;
@@ -34,9 +33,7 @@ export default function UserFormModal({
 }: UserFormModalProps) {
   const [form] = Form.useForm();
   const [loading, setLoading] = React.useState(false);
-  const [roleList, setRoleList] = useState<SimpleRoleVO[]>([]);
   const [statusCheckedValue, setStatusCheckedValue] = useState(false);
-  const [hasRoleQueryPermission, setHasRoleQueryPermission] = useState(true);
   const [hasDeptQueryPermission, setHasDeptQueryPermission] = useState(true);
 
   useEffect(() => {
@@ -59,17 +56,8 @@ export default function UserFormModal({
     }
 
     // 检查是否有角色/部门查询权限
-    const rolePermission = hasPermission(TENANT_ROLE_QUERY);
-    setHasRoleQueryPermission(rolePermission);
     const deptPermission = hasPermission(TENANT_DEPT_QUERY);
     setHasDeptQueryPermission(deptPermission);
-
-    // 只有在有权限的情况下才调用角色查询接口
-    if (rolePermission) {
-      getSimpleRoleList().then((res) => {
-        setRoleList(res);
-      });
-    }
 
     // 在编辑模式下获取用户信息并设置角色ID为初始值
     if (mode === 'edit' && initialValues?.id) {
@@ -107,7 +95,9 @@ export default function UserFormModal({
 
   return (
     <Modal
-      title={isDetail ? '用户详情' : mode === 'create' ? '新建用户' : '编辑用户'}
+      title={
+        <div style={{ textAlign: 'left' }}>{isDetail ? '用户详情' : mode === 'create' ? '新建用户' : '编辑用户'}</div>
+      }
       visible={visible}
       onCancel={onCancel}
       onOk={handleSubmit}
@@ -148,17 +138,13 @@ export default function UserFormModal({
               <Input placeholder="请输入" autoComplete="new-password" />
             </Form.Item>
           </Col>
-          <Col span={12}>
-            {mode === 'create' && (
-              <Form.Item
-                label="密码"
-                field="password"
-                rules={mode === 'create' && !isDetail ? [{ required: true, message: '请输入密码' }] : []}
-              >
+          {mode === 'create' && (
+            <Col span={12}>
+              <Form.Item label="密码" field="password" rules={[{ required: true, message: '请输入密码' }]}>
                 <Input.Password placeholder="请输入" autoComplete="new-password" />
               </Form.Item>
-            )}
-          </Col>
+            </Col>
+          )}
         </Row>
         <Row gutter={24}>
           <Col span={12}>
@@ -182,31 +168,15 @@ export default function UserFormModal({
             </Form.Item>
           </Col>
         </Row>
-        <Row gutter={24}>
+        <Row gutter={24} justify="start">
           <Col span={12}>
-            <Form.Item label="角色" field="roleIds">
-              <Select
-                placeholder={hasRoleQueryPermission ? '请选择' : '无权限'}
-                mode="multiple"
-                showSearch
-                filterOption={(input, option) => {
-                  return option.props.children.includes(input);
-                }}
-                disabled={!hasRoleQueryPermission}
-              >
-                {roleList.map((role) => (
-                  <Select.Option key={role.id} value={role.id}>
-                    {role.name}
-                  </Select.Option>
-                ))}
-              </Select>
-            </Form.Item>
-          </Col>
-        </Row>
-        <Row gutter={24}>
-          <Col span={12}>
-            <span style={{ marginRight: 8 }}>启用状态</span>
-            <Form.Item label=" " style={{ marginBottom: 0 }} triggerPropName="checked">
+            <Form.Item
+              label="启用状态"
+              triggerPropName="checked"
+              layout="horizontal"
+              labelCol={{ span: 6 }}
+              wrapperCol={{ span: 12 }}
+            >
               <Switch checked={statusCheckedValue} onChange={setStatusCheckedValue} />
             </Form.Item>
           </Col>

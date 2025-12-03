@@ -7,15 +7,17 @@ import { Divider, Button } from '@arco-design/web-react';
 import styles from './index.module.less';
 import { SidebarContext } from '../../context';
 
-export default function BottomBtn({ handleSubmit }: any) {
-  const { setNodeId } = useContext(SidebarContext);
+export default function BottomBtn({ handleSubmit, submitOnly }: any) {
+  const { setNodeId, setLineData } = useContext(SidebarContext);
   const handleClose = () => {
     setNodeId(undefined);
+    setLineData(undefined);
   };
   const submit = () => {
     handleSubmit();
-    handleClose();
+    !submitOnly && handleClose();
   };
+
   return (
     <div className={styles.bottomBtn}>
       <Divider />

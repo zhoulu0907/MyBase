@@ -1,10 +1,10 @@
+import { listToTree } from '@/utils/tree';
 import { Button, Message, Modal, Table } from '@arco-design/web-react';
+import { PERMISSION_TYPES } from '@onebase/common';
+import type { Permission } from '@onebase/platform-center';
 import { configureRolePermissions, getConfiguredPermissions, removeRolePermission } from '@onebase/platform-center';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import PermissionConfigModal from './PermissionModal';
-import type { Permission } from '@onebase/platform-center';
-import { listToTree } from '@/utils/tree';
-import { PERMISSION_TYPES } from '@/constants/permission';
 
 interface PermissionListProps {
   selectedRoleId?: number;
@@ -55,8 +55,9 @@ const PermissionList: React.FC<PermissionListProps> = ({ selectedRoleId }) => {
       const permissionIds = getPermissionIds(id, data);
 
       Modal.confirm({
-        title: '确认移除',
-        content: `确定要移除权限 "${permissions.find((p) => p.id === id)?.name}" 及其所有子权限吗？`,
+        title: `确认要移除权限功能（${permissions.find((p) => p.id === id)?.name}）吗？`,
+        content: '移除该权限功能后，关联该权限功能的角色用户将失去权限，请谨慎操作。',
+        okButtonProps: { status: 'danger' },
         okText: '确认',
         cancelText: '取消',
         onOk: () => {
@@ -132,8 +133,8 @@ const PermissionList: React.FC<PermissionListProps> = ({ selectedRoleId }) => {
       rowKey: 'id',
       columns,
       data: permissions.filter((record) => record.children && record.children.length > 0),
-      pagination: false,
-      scroll: { y: 400 },
+      // pagination: false,
+      scroll: { y: 500 },
       border: false,
       loading,
       childrenColumnName: 'actions'

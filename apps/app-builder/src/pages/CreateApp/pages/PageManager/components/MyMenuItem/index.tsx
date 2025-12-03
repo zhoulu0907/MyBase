@@ -6,16 +6,25 @@ import EditIcon from '@/assets/images/edit_menu_icon.svg';
 import RenameIcon from '@/assets/images/edit_page_name_icon.svg';
 import HiddenIcon from '@/assets/images/eye_off_icon.svg';
 import VisibleIcon from '@/assets/images/eye_on_icon.svg';
-import DynamicIcon from '@/components/DynamicIcon';
-import { menuIconList } from '@/components/MenuIcon/const';
+import SettingIcon from '@/assets/images/task_center/setting-on.svg';
+import { useAppStore } from '@/store';
 import { Dropdown, Menu, Message, Tooltip, type FormInstance } from '@arco-design/web-react';
 import { IconEyeInvisible, IconMoreVertical } from '@arco-design/web-react/icon';
-import { getPageSetId, menuSignal, PageType, RootParentPage, VisibleType, type GetPageSetIdReq } from '@onebase/app';
-import { EDITOR_TYPES } from '@onebase/ui-kit';
+import {
+  getPageSetId,
+  menuSignal,
+  MenuType,
+  PageType,
+  RootParentPage,
+  VisibleType,
+  type GetPageSetIdReq
+} from '@onebase/app';
 import { pagesRuntimeSignal } from '@onebase/common';
+import { EDITOR_TYPES, webMenuIcons } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import { ReactSVG } from 'react-svg';
 import styles from './index.module.less';
 
 const MenuItem = Menu.Item;
@@ -36,6 +45,7 @@ interface MenuItemProps {
   label: string;
   menuIcon: string;
   isGroup: boolean;
+  menuType?: number;
   onClick?: () => void;
   triggerCreate?: (formType: string) => void;
   triggerRename?: () => void;
@@ -57,6 +67,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
   label,
   menuIcon,
   isGroup,
+  menuType,
   onClick,
   triggerCreate,
   triggerRename,
@@ -69,10 +80,15 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
   createForm,
   style
 }) => {
+  const allWebMenuIcons = webMenuIcons.map((ele) => ele.children).reduce((acc, current) => acc.concat(current), []);
   useSignals();
   const navigate = useNavigate();
+
+  const { curAppId } = useAppStore();
+
   const { curMenu } = menuSignal;
   const { curPage } = pagesRuntimeSignal;
+  const { tenantId } = useParams();
 
   const [popupVisible, setPopupVisible] = useState(false);
 
@@ -203,7 +219,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
       curPage.value?.pageSetType === PageType.WORKBENCH ? EDITOR_TYPES.WORKBENCH_EDITOR : EDITOR_TYPES.FORM_EDITOR;
 
     sessionStorage.setItem('EDITOR_PAGE_INFO', JSON.stringify({ id: menuID, name: menuName, icon: menuIcon }));
-    navigate(`/onebase/editor/${editorType}?pageSetId=${pageSetId}`);
+    navigate(`/onebase/${tenantId}/editor/${editorType}?pageSetId=${pageSetId}&appId=${curAppId}`);
   };
 
   return (
@@ -221,16 +237,26 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
     >
       <Tooltip content={menuName} position="top">
         <div className={styles.menuName}>
-          <DynamicIcon
-            IconComponent={menuIconList.find((icon) => icon.code === menuIcon)?.icon}
-            theme="outline"
-            size="18"
-            fill={curMenu.value?.id === menuID ? 'rgb(var(--primary-6))' : '#333'}
-            style={{ marginRight: 16 }}
-          />
-          {/* xxx-taskicon 是工作流程任务中心菜单的icon */}
-          {menuIcon.indexOf('-taskicon') > 0 && (
+          {menuIcon.includes('TASK-') ? (
+            // xxx-taskicon 是工作流程任务中心菜单的icon
             <i className={`iconfont ${menuIcon}`} style={{ marginRight: '16px' }} />
+          ) : (
+            // 正常菜单 icon
+            <ReactSVG
+              className={styles.menuIcon}
+              src={
+                allWebMenuIcons.find((ele) => ele.code === menuIcon)?.icon ||
+                allWebMenuIcons.find((ele) => ele.code === 'FormPageLine')?.icon ||
+                ''
+              }
+              beforeInjection={(svg) => {
+                const fillColor = curMenu.value?.id === menuID ? 'rgb(var(--primary-6))' : '#333';
+                svg.querySelectorAll('*').forEach((el) => el.removeAttribute('fill'));
+                svg.setAttribute('fill', fillColor);
+                svg.setAttribute('width', '18px');
+                svg.setAttribute('height', '18px');
+              }}
+            />
           )}
           <span
             className={styles.name}
@@ -259,7 +285,11 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
             trigger="click"
             position="bl"
           >
-            <IconMoreVertical className={styles.moreIcon} onClick={(e) => e.stopPropagation()} />
+            {menuType === MenuType.BPM ? (
+              <img src={SettingIcon} alt="" />
+            ) : (
+              <IconMoreVertical className={styles.moreIcon} onClick={(e) => e.stopPropagation()} />
+            )}
           </Dropdown>
         </div>
       )}

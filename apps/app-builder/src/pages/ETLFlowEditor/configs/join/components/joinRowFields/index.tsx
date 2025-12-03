@@ -1,9 +1,7 @@
+import { useEffect, useState } from 'react';
 import { Button, Form, Grid, Select, type FormInstance } from '@arco-design/web-react';
 import { IconDelete } from '@arco-design/web-react/icon';
 import styles from '../../index.module.less';
-import { useSignals } from '@preact/signals-react/runtime';
-import { etlEditorSignal, ETLJoinType } from '@onebase/common';
-import { useEffect, useState } from 'react';
 
 const { Option } = Select;
 const FormItem = Form.Item;
@@ -19,13 +17,13 @@ interface JoinRowFieldsProps {
   leftFieldList: any[];
   rightFieldList: any[];
   form: FormInstance;
+  payload: any;
+  setPayload: (payload: any) => void;
   remove: (index: number) => void;
 }
 
 const JoinRowFields = (props: JoinRowFieldsProps) => {
-  useSignals();
-  const { curNode, nodeData, setNodeData } = etlEditorSignal;
-  const { index, rowField, leftFieldList, rightFieldList, form, remove } = props;
+  const { index, rowField, leftFieldList, rightFieldList, form, payload, setPayload, remove } = props;
 
   const [finialRightFieldList, setFinialRightFieldList] = useState<any[]>(rightFieldList);
   const [finialLeftFieldList, setFinialLeftFieldList] = useState<any[]>(leftFieldList);
@@ -83,64 +81,13 @@ const JoinRowFields = (props: JoinRowFieldsProps) => {
 
   const setCurNodeData = () => {
     const formValue = form.getFieldsValue();
-    const payload = nodeData.value[curNode.value.id];
-    let fields = [];
     payload.config = {
       ...payload.config,
       ...formValue
     };
-    if (formValue?.fieldPairs?.length > 0) {
-      fields = generateOutputFields(formValue);
-      payload.output = {
-        verified: true,
-        fields
-      };
-    } else {
-      payload.output = {
-        verified: false
-      };
-    }
-
-    setNodeData(curNode.value.id, payload);
+    setPayload(payload);
   };
 
-  const generateOutputFields = (formValue: any) => {
-    if (formValue.joinType === ETLJoinType.RIGHT_JOIN) {
-      const rightFields = rightFieldList.map((field) => ({
-        fqn: curNode.value.id + `.${field.fieldName}`,
-        fieldName: field.fieldName,
-        fieldType: field.fieldType
-      }));
-
-      const fieldPairsSet = new Set(formValue.fieldPairs.map((pair: any) => pair.leftFieldFqn));
-      const leftFields = leftFieldList
-        .filter((field: any) => !fieldPairsSet.has(field.fieldFqn))
-        .map((item: any) => ({
-          fqn: curNode.value.id + `.${item.fieldName}`,
-          fieldName: item.fieldName,
-          fieldType: item.fieldType
-        }));
-
-      return leftFields.concat(rightFields);
-    } else {
-      const leftFields = leftFieldList.map((field) => ({
-        fqn: curNode.value.id + `.${field.fieldName}`,
-        fieldName: field.fieldName,
-        fieldType: field.fieldType
-      }));
-
-      const fieldPairsSet = new Set(formValue.fieldPairs.map((pair: any) => pair.rightFieldFqn));
-      const rightFields = rightFieldList
-        .filter((field: any) => !fieldPairsSet.has(field.fieldFqn))
-        .map((item: any) => ({
-          fqn: curNode.value.id + `.${item.fieldName}`,
-          fieldName: item.fieldName,
-          fieldType: item.fieldType
-        }));
-
-      return leftFields.concat(rightFields);
-    }
-  };
   return (
     <>
       <Grid.Row className={styles.fieldRow}>

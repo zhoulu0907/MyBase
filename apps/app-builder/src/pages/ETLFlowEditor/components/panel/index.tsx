@@ -5,6 +5,7 @@ import NodeSQLIcon from '@/assets/images/etl/node_sql.svg';
 import NodeUnionIcon from '@/assets/images/etl/node_union.svg';
 import { useService, WorkflowDragService } from '@flowgram.ai/free-layout-editor';
 import { etlEditorSignal, ETLNodeType } from '@onebase/common';
+import { useSignals } from '@preact/signals-react/runtime';
 import React from 'react';
 import styles from './index.module.less';
 import { generateNodeId } from './utils';
@@ -51,6 +52,8 @@ const NodeList = [
   }
 ];
 const ETLFlowPanel: React.FC = () => {
+  useSignals();
+
   const startDragSerivce = useService<WorkflowDragService>(WorkflowDragService);
   const { setNodeData } = etlEditorSignal;
 
