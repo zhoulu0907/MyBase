@@ -193,8 +193,6 @@ const Right: React.FC = () => {
       if (response && response.accessToken) {
         // 使用 TokenManager 存储 token 信息
 
-        console.log('appId: ', appId);
-        console.log('tenantId: ', tenantId);
 
         if (appId && tenantId) {
           TokenManager.setCurIdentifyId(`${appId}_${tenantId}`);
