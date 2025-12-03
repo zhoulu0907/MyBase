@@ -80,6 +80,8 @@ public class WorkBenchPageSetServiceImpl implements WorkBenchPageSetService {
         workBenchPageDO.setPageName(pageName);
         workBenchPageDO.setTitle(pageName);
         workBenchPageDO.setPageType(PageEnum.WORKBENCH.getValue());
+        // 设置applicationId，从pageSetDO继承
+        workBenchPageDO.setApplicationId(pageSetDO.getApplicationId());
         //补全必填字段
         workBenchPageDO.setLayout("horizontal");
         workBenchPageDO.setWidth("auto");

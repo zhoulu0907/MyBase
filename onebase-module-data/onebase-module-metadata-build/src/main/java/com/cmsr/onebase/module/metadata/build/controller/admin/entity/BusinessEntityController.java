@@ -41,7 +41,6 @@ public class BusinessEntityController {
 
     @PostMapping("/create")
     @Operation(summary = "创建业务实体")
-    @PreAuthorize("@ss.hasPermission('metadata:business-entity:create')")
     public CommonResult<BusinessEntityRespVO> createBusinessEntity(@Valid @RequestBody BusinessEntitySaveReqVO reqVO) {
         // 从请求头获取应用ID
         reqVO.setApplicationId(String.valueOf(ApplicationManager.getApplicationId()));
@@ -51,7 +50,6 @@ public class BusinessEntityController {
 
     @PostMapping("/update")
     @Operation(summary = "更新业务实体信息")
-    @PreAuthorize("@ss.hasPermission('metadata:business-entity:update')")
     public CommonResult<Boolean> updateBusinessEntity(@Valid @RequestBody BusinessEntitySaveReqVO reqVO) {
         // 从请求头获取应用ID
         reqVO.setApplicationId(String.valueOf(ApplicationManager.getApplicationId()));
@@ -62,7 +60,6 @@ public class BusinessEntityController {
     @PostMapping("/delete")
     @Operation(summary = "软删除业务实体")
     @Parameter(name = "id", description = "业务实体ID", required = true, example = "1024")
-    @PreAuthorize("@ss.hasPermission('metadata:business-entity:delete')")
     public CommonResult<Boolean> deleteBusinessEntity(@RequestParam("id") Long id) {
         businessEntityService.deleteBusinessEntity(id);
         return success(true);
@@ -71,7 +68,6 @@ public class BusinessEntityController {
     @PostMapping("/get")
     @Operation(summary = "根据ID获取业务实体详细信息")
     @Parameter(name = "id", description = "业务实体ID", required = true, example = "1024")
-    @PreAuthorize("@ss.hasPermission('metadata:business-entity:query')")
     public CommonResult<BusinessEntityRespVO> getBusinessEntity(@RequestParam("id") Long id) {
         BusinessEntityRespVO result = businessEntityService.getBusinessEntityDetail(id);
         return success(result);
@@ -79,7 +75,6 @@ public class BusinessEntityController {
 
     @PostMapping("/page")
     @Operation(summary = "分页查询业务实体列表")
-    @PreAuthorize("@ss.hasPermission('metadata:business-entity:query')")
     public CommonResult<PageResult<BusinessEntityRespVO>> getBusinessEntityPage(@Valid BusinessEntityPageReqVO pageReqVO) {
         PageResult<BusinessEntityRespVO> result = businessEntityService.getBusinessEntityPageWithResponse(pageReqVO);
         return success(result);
@@ -88,7 +83,6 @@ public class BusinessEntityController {
     @PostMapping("/list-by-datasource")
     @Operation(summary = "根据数据源获得业务实体列表")
     @Parameter(name = "datasourceUuid", description = "数据源UUID", required = true, example = "01onal1s-0000-0000-0000-000000000001")
-    @PreAuthorize("@ss.hasPermission('metadata:business-entity:query')")
     public CommonResult<List<BusinessEntityRespVO>> getBusinessEntityListByDatasourceUuid(@RequestParam("datasourceUuid") String datasourceUuid) {
         List<BusinessEntityRespVO> result = businessEntityService.getBusinessEntityListByDatasourceUuidWithRelationType(datasourceUuid);
         return success(result);
@@ -97,7 +91,6 @@ public class BusinessEntityController {
     @PostMapping("/er-diagram")
     @Operation(summary = "根据数据源UUID获取ER图数据", description = "获取指定数据源下所有实体信息、字段信息以及实体间的关联关系，用于前端绘制ER图")
     @Parameter(name = "datasourceUuid", description = "数据源UUID", required = true, example = "01onal1s-0000-0000-0000-000000000001")
-    @PreAuthorize("@ss.hasPermission('metadata:business-entity:query')")
     public CommonResult<ERDiagramRespVO> getERDiagramByDatasourceUuid(@RequestParam("datasourceUuid") String datasourceUuid) {
         ERDiagramRespVO result = businessEntityService.getERDiagramByDatasourceUuid(datasourceUuid);
         return success(result);
@@ -106,7 +99,6 @@ public class BusinessEntityController {
     @PostMapping("/list-by-app")
     @Operation(summary = "根据应用ID获取实体列表", description = "返回实体ID和名称，用于下拉选择等场景")
     @Parameter(name = "appId", description = "应用ID", required = false, example = "1024")
-    @PreAuthorize("@ss.hasPermission('metadata:business-entity:query')")
     public CommonResult<List<SimpleEntityRespVO>> getSimpleEntityListByAppId(@RequestParam(value = "appId", required = false) Long appId) {
         appId = ApplicationManager.getApplicationId();
         List<SimpleEntityRespVO> result = businessEntityService.getSimpleEntityListByAppId(appId);

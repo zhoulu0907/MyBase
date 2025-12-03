@@ -36,7 +36,6 @@ public class ValidationRuleGroupController {
 
     @PostMapping("/page")
     @Operation(summary = "获得校验规则分组分页")
-    @PreAuthorize("@ss.hasPermission('metadata:validation-rule-group:query')")
     public CommonResult<PageResult<ValidationRuleGroupSimpleRespVO>> getValidationRuleGroupPage(@Valid @RequestBody ValidationRuleGroupPageReqVO pageReqVO) {
         // TODO: 优化校验规则聚合逻辑
         // 当前逻辑：分别查询七种校验类型然后合并
@@ -48,7 +47,6 @@ public class ValidationRuleGroupController {
     @PostMapping("/delete")
     @Operation(summary = "统一删除规则组及其下规则（按ID）")
     @Parameter(name = "id", description = "规则组ID", required = true)
-    @PreAuthorize("@ss.hasPermission('metadata:validation-rule-group:delete')")
     public CommonResult<Boolean> unifiedDelete(@RequestParam("id") Long id) {
         validationRuleGroupService.deleteValidationRuleGroup(id);
         return success(true);

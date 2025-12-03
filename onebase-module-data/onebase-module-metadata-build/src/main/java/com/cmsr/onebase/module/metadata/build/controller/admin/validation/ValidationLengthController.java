@@ -27,21 +27,18 @@ public class ValidationLengthController {
     @PostMapping("/get-by-field")
     @Operation(summary = "根据字段UUID获取长度校验")
     @Parameter(name = "id", description = "字段UUID", required = true)
-    @PreAuthorize("@ss.hasPermission('metadata:validation-length:query')")
     public CommonResult<ValidationLengthRespVO> getByFieldId(@RequestParam("id") String fieldUuid) {
         return success(lengthService.getByFieldIdWithRgName(fieldUuid));
     }
 
     @PostMapping("/create")
     @Operation(summary = "创建长度校验")
-    @PreAuthorize("@ss.hasPermission('metadata:validation-length:create')")
     public CommonResult<Long> create(@Valid @RequestBody ValidationLengthSaveReqVO vo) {
         return success(lengthService.create(vo));
     }
 
     @PostMapping("/update")
     @Operation(summary = "更新长度校验")
-    @PreAuthorize("@ss.hasPermission('metadata:validation-length:update')")
     public CommonResult<Boolean> update(@Valid @RequestBody ValidationLengthUpdateReqVO vo) {
         lengthService.update(vo);
         return success(true);
@@ -50,7 +47,6 @@ public class ValidationLengthController {
     @PostMapping("/delete-by-field")
     @Operation(summary = "按字段UUID删除长度校验")
     @Parameter(name = "id", description = "字段UUID", required = true)
-    @PreAuthorize("@ss.hasPermission('metadata:validation-length:delete')")
     public CommonResult<Boolean> deleteByField(@RequestParam("id") String fieldUuid) {
         lengthService.deleteByFieldId(fieldUuid);
         return success(true);
@@ -59,7 +55,6 @@ public class ValidationLengthController {
     @GetMapping("/get")
     @Operation(summary = "根据规则组ID获取长度校验")
     @Parameter(name = "id", description = "规则组ID (兼容字段: 前端传的就是组ID)", required = true)
-    @PreAuthorize("@ss.hasPermission('metadata:validation-length:query')")
     public CommonResult<ValidationLengthRespVO> get(@RequestParam("id") Long id) {
         return success(lengthService.getById(id));
     }
@@ -67,7 +62,6 @@ public class ValidationLengthController {
     @PostMapping("/delete")
     @Operation(summary = "按规则组ID删除长度校验")
     @Parameter(name = "id", description = "规则组ID (兼容字段: 前端传的就是组ID)", required = true)
-    @PreAuthorize("@ss.hasPermission('metadata:validation-length:delete')")
     public CommonResult<Boolean> delete(@RequestParam("id") Long id) {
         lengthService.deleteById(id);
         return success(true);

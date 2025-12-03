@@ -42,7 +42,6 @@ public class ValidationSelfDefinedController {
 
     @PostMapping("/create")
     @Operation(summary = "创建自定义校验规则组")
-    @PreAuthorize("@ss.hasPermission('metadata:validation-self-defined:create')")
     public CommonResult<Long> create(@Valid @RequestBody ValidationRuleGroupSaveReqVO createReqVO) {
         createReqVO.setValidationType("SELF_DEFINED");
         return success(validationRuleGroupService.createValidationRuleGroup(createReqVO));
@@ -50,7 +49,6 @@ public class ValidationSelfDefinedController {
 
     @PostMapping("/update")
     @Operation(summary = "更新自定义校验规则组")
-    @PreAuthorize("@ss.hasPermission('metadata:validation-self-defined:update')")
     public CommonResult<Boolean> update(@Valid @RequestBody ValidationRuleGroupSaveReqVO updateReqVO) {
         updateReqVO.setValidationType("SELF_DEFINED");
         validationRuleGroupService.updateValidationRuleGroup(updateReqVO);
@@ -60,7 +58,6 @@ public class ValidationSelfDefinedController {
     @PostMapping("/delete")
     @Operation(summary = "删除自定义校验规则组")
     @Parameter(name = "id", description = "编号", required = true)
-    @PreAuthorize("@ss.hasPermission('metadata:validation-self-defined:delete')")
     public CommonResult<Boolean> delete(@RequestParam("id") Long id) {
         validationRuleGroupService.deleteValidationRuleGroup(id);
         return success(true);
@@ -69,7 +66,6 @@ public class ValidationSelfDefinedController {
     @PostMapping("/get")
     @Operation(summary = "获得自定义校验规则组详情")
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
-    @PreAuthorize("@ss.hasPermission('metadata:validation-self-defined:query')")
     public CommonResult<ValidationRuleGroupRespVO> get(@RequestParam("id") Long id) {
         MetadataValidationRuleGroupDO ruleGroup = validationRuleGroupService.getValidationRuleGroup(id);
         ValidationRuleGroupRespVO respVO = modelMapper.map(ruleGroup, ValidationRuleGroupRespVO.class);

@@ -31,7 +31,6 @@ public class AutoNumberConfigController {
 
     @PostMapping("/get")
     @Operation(summary = "按字段UUID获取自动编号配置与规则")
-    @PreAuthorize("@ss.hasPermission('metadata:auto-number:query')")
     public CommonResult<AutoNumberConfigWithRulesRespVO> get(@RequestParam("fieldId") String fieldUuid) {
         AutoNumberConfigWithRulesRespVO result = configService.getAutoNumberConfigWithRules(fieldUuid);
         return success(result);
@@ -39,7 +38,6 @@ public class AutoNumberConfigController {
 
     @PostMapping("/upsert")
     @Operation(summary = "保存/更新自动编号配置")
-    @PreAuthorize("@ss.hasPermission('metadata:auto-number:update')")
     public CommonResult<Long> upsert(@Valid @RequestBody MetadataAutoNumberConfigDO req) {
         Long id = configService.saveAutoNumberConfig(req);
         return success(id);

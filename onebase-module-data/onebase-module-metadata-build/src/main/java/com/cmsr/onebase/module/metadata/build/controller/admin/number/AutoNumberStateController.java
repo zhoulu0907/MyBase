@@ -22,7 +22,6 @@ public class AutoNumberStateController {
 
     @PostMapping("/next")
     @Operation(summary = "获取下一编号计数（仅测试/预览用途）")
-    @PreAuthorize("@ss.hasPermission('metadata:auto-number:preview')")
     public CommonResult<Long> next(@RequestParam("configId") Long configId) {
         long val = stateService.nextNumber(configId, java.time.LocalDateTime.now());
         return success(val);
@@ -30,7 +29,6 @@ public class AutoNumberStateController {
 
     @PostMapping("/reset")
     @Operation(summary = "手动重置到指定下一编号")
-    @PreAuthorize("@ss.hasPermission('metadata:auto-number:update')")
     public CommonResult<Boolean> reset(@RequestParam("configId") Long configId,
                                        @RequestParam("periodKey") String periodKey,
                                        @RequestParam("nextValue") Long nextValue,
