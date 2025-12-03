@@ -59,9 +59,6 @@ public class UserUpdateReqVO {
     @Schema(description = "状态", example = "1")
     private Integer status;
 
-    @Schema(description = "角色Ids", example = "[1,2]")
-    private Set<Long> roleIds;
-
     @Schema(description = "用户性别，参见 SexEnum 枚举类", example = "1")
     @DiffLogField(name = "用户性别", function = SexParseFunction.NAME)
     private Integer sex;
