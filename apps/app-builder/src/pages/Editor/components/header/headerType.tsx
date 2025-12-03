@@ -2,6 +2,7 @@ import type { WorkflowNodeJSON, WorkflowEdgeJSON } from '@flowgram.ai/free-layou
 
 export interface ExtendedWorkflowEdgeJSON extends WorkflowEdgeJSON {
   type?: string;
+  name?: string;
 }
 
 export interface WorkflowJSON {

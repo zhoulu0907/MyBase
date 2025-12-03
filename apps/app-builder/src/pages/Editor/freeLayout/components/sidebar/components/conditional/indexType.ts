@@ -1,10 +1,9 @@
 // 定义数据类型
 export interface BranchData {
-  key: string;
-  name: string;
-  salary: string;
-  address: string;
-  email: string;
+  name: any;
+  toNodeName: any;
+  isDefault: string;
+  priority: any;
 }
 
 // 定义组件Props类型
