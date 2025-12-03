@@ -200,8 +200,7 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
         field={fieldName}
         layout={layout}
         tooltip={tooltip}
-        labelCol={{ style: { width: labelColSpan, flex: 'unset' } }}
-        wrapperCol={{ style: { flex: 1 } }}
+        labelCol={layout === 'horizontal' ? { style: { width: 200, flex: 'unset' } } : {}}
         rules={[{ required: verify?.required, message: `${label.text}是必填项` }]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
@@ -236,8 +235,7 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
       field={fieldName}
       layout={layout}
       tooltip={tooltip}
-      labelCol={{ style: { width: labelColSpan, flex: 'unset' } }}
-      wrapperCol={{ style: { flex: 1 } }}
+      labelCol={layout === 'horizontal' ? { style: { width: 200, flex: 'unset' } } : {}}
       rules={[{ required: verify?.required }]}
       hidden={false}
       style={{

@@ -220,8 +220,8 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
         field={fieldId}
         layout={layout}
         tooltip={tooltip}
-        wrapperCol={{ style: { flex: 1 } }}
-        rules={[{ required: verify?.required, message:`${label.text}是必填项` }]}
+        labelCol={layout === 'horizontal' ? { style: { width: 200, flex: 'unset' } } : {}}
+        rules={[{ required: verify?.required, message: `${label.text}是必填项` }]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           margin: 0,
@@ -279,36 +279,38 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
           drag={uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.LIST]}
           renderUploadList={renderUploadList}
         >
-          <div className="uplaodTrigger">
-            {uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT] && (
-              <div className="uplaodTriggerText">
-                <div className="uplaodTriggerText-content">
-                  <IconImage />
-                  <span className="uplaodTriggerText-tips">图片上传</span>
-                </div>
-              </div>
-            )}
-            {uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.LIST] && (
-              <div className="uplaodTriggerList">
-                <div className="uplaodTriggerList-content">
-                  <IconPlus />
-                  <div className="uplaodTriggerList-tips">点击或拖拽文件到此处上传</div>
-                  <div className="uplaodTriggerList-describe">
-                    最多可上传{verify?.maxCount && verify?.maxCount > 0 ? verify?.maxCount : 1}
-                    张图片，单张图片大小不超过{verify?.maxSize || 10}MB
+          {!detailMode && (
+            <div className="uplaodTrigger">
+              {uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT] && (
+                <div className="uplaodTriggerText">
+                  <div className="uplaodTriggerText-content">
+                    <IconImage />
+                    <span className="uplaodTriggerText-tips">图片上传</span>
                   </div>
                 </div>
-              </div>
-            )}
-            {uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.CARD] && (
-              <div className="uplaodTriggerPicture">
-                <div className="uplaodTriggerPicture-content">
-                  <IconImage />
-                  <div className="uplaodTriggerPicture-tips">图片上传</div>
+              )}
+              {uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.LIST] && (
+                <div className="uplaodTriggerList">
+                  <div className="uplaodTriggerList-content">
+                    <IconPlus />
+                    <div className="uplaodTriggerList-tips">点击或拖拽文件到此处上传</div>
+                    <div className="uplaodTriggerList-describe">
+                      最多可上传{verify?.maxCount && verify?.maxCount > 0 ? verify?.maxCount : 1}
+                      张图片，单张图片大小不超过{verify?.maxSize || 10}MB
+                    </div>
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
+              )}
+              {uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.CARD] && (
+                <div className="uplaodTriggerPicture">
+                  <div className="uplaodTriggerPicture-content">
+                    <IconImage />
+                    <div className="uplaodTriggerPicture-tips">图片上传</div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </Upload>
       </Form.Item>
     </div>

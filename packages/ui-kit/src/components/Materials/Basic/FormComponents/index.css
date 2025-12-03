@@ -3,7 +3,7 @@
   padding: 6px;
   box-sizing: border-box;
 
-  .arco-form-label-item {
+  .pc-form-label-item {
 
     label {
       display: flex;
@@ -12,7 +12,7 @@
 
       .labelText {
         display: inline-block;
-        width: 100%;
+        width: calc(100% - 14px);
         white-space: nowrap;
         text-overflow: ellipsis;
         overflow: hidden;
@@ -20,7 +20,7 @@
 
       .tooltipLabelText {
         display: inline-block;
-        max-width: calc(100% - 18px);
+        max-width: calc(100% - 32px);
         white-space: nowrap;
         text-overflow: ellipsis;
         overflow: hidden;

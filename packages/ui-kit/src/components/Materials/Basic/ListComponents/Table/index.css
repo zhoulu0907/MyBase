@@ -26,7 +26,7 @@
 }
 
 .tableFormItem {
-  .arco-form-label-item {
+  .pc-form-label-item {
     width: 100px;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -82,11 +82,11 @@
   align-items: center;
 }
 
-.searchActions .arco-form-item {
+.searchActions .pc-form-item {
   margin-bottom: 0;
 }
 
-.searchActions-alone .arco-form-label-item {
+.searchActions-alone .pc-form-label-item {
   display: none;
 }
 

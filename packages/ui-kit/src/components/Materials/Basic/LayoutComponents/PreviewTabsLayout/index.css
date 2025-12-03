@@ -3,11 +3,11 @@
   border: 1px solid transparent;
   overflow: visible;
 
-  .arco-tabs-content {
+  .pc-tabs-content {
     overflow: visible !important;
   }
 
-  .arco-tabs-content .arco-tabs-content-item.arco-tabs-content-item-active {
+  .pc-tabs-content .pc-tabs-content-item.pc-tabs-content-item-active {
     overflow: visible !important;
   }
 
