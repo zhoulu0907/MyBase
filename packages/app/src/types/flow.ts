@@ -210,6 +210,8 @@ export interface CreateScriptActionReq {
   rawScript: string; // 原始脚本内容，必需
   inputParameter?: string; // 入参，可选
   outputParameter?: string; // 出参，可选
+  inputSchema?: any; // 入参Schema，可选
+  outputSchema?: any; // 出参Schema，可选
 }
 
 export interface UpdateScriptActionReq {
@@ -220,6 +222,8 @@ export interface UpdateScriptActionReq {
   rawScript: string; // 原始脚本内容，必需
   inputParameter?: string; // 入参，可选
   outputParameter?: string; // 出参，可选
+  inputSchema?: any; // 入参Schema，可选
+  outputSchema?: any; // 出参Schema，可选
 }
 
 export interface ScriptActionItem {

@@ -85,7 +85,11 @@ export function schemaToFormData(schema: any, jsonValue?: any): any[] {
 
     return Object.keys(properties).map((key) => {
       const propertySchema = properties[key];
-      const propertyType = propertySchema.type || 'string';
+      const oldPropertyType = propertySchema.type || 'string';
+
+      // 如果 schema 中已经定义了自定义类型（不是标准的 string/number/boolean），直接使用
+      // 这样可以保留 DATE、EMAIL、PHONE、ID 等自定义类型
+      const propertyType = oldPropertyType;
       const propertyValue = objectValue[key];
 
       const formItem: any = {
@@ -104,7 +108,9 @@ export function schemaToFormData(schema: any, jsonValue?: any): any[] {
       // 递归处理嵌套的数组类型
       else if (propertyType === 'array' && propertySchema.items) {
         const itemsSchema = propertySchema.items;
-        const itemsType = itemsSchema.type || 'string';
+        const oldItemsType = itemsSchema.type || 'string';
+        // 直接使用类型
+        const itemsType = oldItemsType;
         const arrayValue = Array.isArray(propertyValue) ? propertyValue : [];
 
         // 数组类型的 children 包含数组中的所有项
