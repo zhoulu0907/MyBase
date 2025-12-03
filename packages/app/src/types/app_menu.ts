@@ -10,6 +10,7 @@ export interface ApplicationMenu {
   menuSort: number;
   menuType: number;
   menuName: string;
+  pageSetType: number;
   menuIcon: string;
   isVisible: number;
   children: ApplicationMenu[];
@@ -40,7 +41,8 @@ export enum CATEGORY_TYPE {
   LAYOUT = 'layout',
   FORM = 'form',
   LIST = 'list',
-  SHOW = 'show'
+  SHOW = 'show',
+  WORKBENCH = 'workbench'
 }
 
 export const RootParentPage = {
