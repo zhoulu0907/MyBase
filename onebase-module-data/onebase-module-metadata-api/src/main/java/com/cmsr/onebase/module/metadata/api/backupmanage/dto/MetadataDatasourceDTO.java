@@ -18,6 +18,9 @@ public class MetadataDatasourceDTO {
     @Schema(description = "主键ID")
     private Long id;
 
+    @Schema(description = "数据源UUID")
+    private String datasourceUuid;
+
     @Schema(description = "数据源名称")
     private String datasourceName;
 

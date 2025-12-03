@@ -18,6 +18,9 @@ public class DatasourceRespDTO {
     @Schema(description = "数据源编号", example = "1024")
     private Long id;
 
+    @Schema(description = "数据源UUID", example = "01onal1s-0000-0000-0000-000000000001")
+    private String datasourceUuid;
+
     @Schema(description = "数据源名称", example = "用户数据库")
     private String datasourceName;
 

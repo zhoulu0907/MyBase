@@ -15,33 +15,65 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class MetadataAutoNumberStateRepository extends ServiceImpl<MetadataAutoNumberStateMapper, MetadataAutoNumberStateDO> {
 
-    public MetadataAutoNumberStateDO findOneByPeriod(Long configId, String periodKey) {
+    /**
+     * 根据配置UUID和周期键查询状态
+     *
+     * @param configUuid 配置UUID
+     * @param periodKey 周期键
+     * @return 状态对象
+     */
+    public MetadataAutoNumberStateDO findOneByPeriod(String configUuid, String periodKey) {
         QueryWrapper queryWrapper = this.query()
-                .eq(MetadataAutoNumberStateDO::getConfigId, configId)
+                .eq(MetadataAutoNumberStateDO::getConfigUuid, configUuid)
                 .eq(MetadataAutoNumberStateDO::getPeriodKey, periodKey);
         return getOne(queryWrapper);
     }
 
-    public void deleteByConfigId(Long configId) {
+    /**
+     * 根据配置UUID删除状态
+     *
+     * @param configUuid 配置UUID
+     */
+    public void deleteByConfigUuid(String configUuid) {
         QueryWrapper queryWrapper = this.query()
-                .eq(MetadataAutoNumberStateDO::getConfigId, configId);
+                .eq(MetadataAutoNumberStateDO::getConfigUuid, configUuid);
         remove(queryWrapper);
     }
 
     /**
      * 使用行锁查询状态（防止并发）
+     *
+     * @param configUuid 配置UUID
+     * @param periodKey 周期键
+     * @return 状态对象
      */
-    public MetadataAutoNumberStateDO selectByConfigIdAndPeriodKeyForUpdate(Long configId, String periodKey) {
+    public MetadataAutoNumberStateDO selectByConfigUuidAndPeriodKeyForUpdate(String configUuid, String periodKey) {
         // 注意：此处简化实现，实际应用中可能需要在Service层使用@Transactional和手动SQL来实现FOR UPDATE
         // 当前先返回普通查询结果，后续可根据需要优化
-        return findOneByPeriod(configId, periodKey);
+        return findOneByPeriod(configUuid, periodKey);
     }
 
     /**
      * 普通查询状态（不加锁）
+     *
+     * @param configUuid 配置UUID
+     * @param periodKey 周期键
+     * @return 状态对象
      */
-    public MetadataAutoNumberStateDO selectByConfigIdAndPeriodKey(Long configId, String periodKey) {
-        return findOneByPeriod(configId, periodKey);
+    public MetadataAutoNumberStateDO selectByConfigUuidAndPeriodKey(String configUuid, String periodKey) {
+        return findOneByPeriod(configUuid, periodKey);
+    }
+
+    // ==================== 向后兼容方法 ====================
+
+    /**
+     * 根据配置ID删除状态（兼容旧代码）
+     * @deprecated 请使用 deleteByConfigUuid(String)
+     * @param configId 配置ID
+     */
+    @Deprecated
+    public void deleteByConfigId(Long configId) {
+        deleteByConfigUuid(configId != null ? String.valueOf(configId) : null);
     }
 }
 

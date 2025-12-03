@@ -11,6 +11,7 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntit
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRequiredDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRuleGroupDO;
 import com.cmsr.onebase.module.metadata.build.service.entity.MetadataEntityFieldBuildService;
+import com.cmsr.onebase.module.metadata.core.util.MetadataIdUuidConverter;
 import com.cmsr.onebase.module.metadata.core.util.StatusEnumUtil;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -40,14 +41,17 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
     @Resource
     private MetadataValidationRuleGroupBuildService validationRuleGroupService;
 
+    @Resource
+    private MetadataIdUuidConverter idUuidConverter;
+
     @Override
-    public MetadataValidationRequiredDO getByFieldId(Long fieldId) {
-        return requiredRepository.findOneByFieldId(fieldId);
+    public MetadataValidationRequiredDO getByFieldId(String fieldUuid) {
+        return requiredRepository.findOneByFieldUuid(fieldUuid);
     }
 
     @Override
-    public ValidationRequiredRespVO getByFieldIdWithRgName(Long fieldId) {
-        MetadataValidationRequiredDO requiredDO = requiredRepository.findOneByFieldId(fieldId);
+    public ValidationRequiredRespVO getByFieldIdWithRgName(String fieldUuid) {
+        MetadataValidationRequiredDO requiredDO = requiredRepository.findOneByFieldUuid(fieldUuid);
         if (requiredDO == null) {
             return null;
         }
@@ -56,7 +60,7 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
         ValidationRequiredRespVO respVO = BeanUtils.toBean(requiredDO, ValidationRequiredRespVO.class);
 
         // 获取规则组信息，包括提示语等字段
-        var ruleGroup = validationRuleGroupService.getValidationRuleGroup(requiredDO.getGroupId());
+        var ruleGroup = validationRuleGroupService.getValidationRuleGroupByUuid(requiredDO.getGroupUuid());
         if (ruleGroup != null) {
             respVO.setRgName(ruleGroup.getRgName());
             respVO.setPromptMessage(ruleGroup.getPopPrompt());
@@ -69,15 +73,16 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
     @Transactional(rollbackFor = Exception.class)
     public Long create(ValidationRequiredSaveReqVO vo) {
         Assert.notNull(vo, "vo不能为空");
-        Assert.notNull(vo.getFieldId(), "字段ID不能为空");
+        // ID与UUID兼容处理：优先使用UUID，若为空则通过ID转换
+        vo.setFieldUuid(idUuidConverter.resolveFieldUuid(vo.getFieldUuid(), vo.getFieldId()));
         Assert.hasText(vo.getRgName(), "规则组名称不能为空");
 
         // 获取字段信息
-        MetadataEntityFieldDO field = entityFieldService.getEntityField(String.valueOf(vo.getFieldId()));
+        MetadataEntityFieldDO field = entityFieldService.getEntityFieldByUuid(vo.getFieldUuid());
         Assert.notNull(field, "字段不存在");
 
         // 检查同一字段是否已存在必填校验规则
-        MetadataValidationRequiredDO existingRule = requiredRepository.findOneByFieldId(vo.getFieldId());
+        MetadataValidationRequiredDO existingRule = requiredRepository.findOneByFieldUuid(vo.getFieldUuid());
         if (existingRule != null) {
             throw new IllegalStateException("该字段已存在必填校验规则，同一字段只能有一条必填校验规则");
         }
@@ -88,7 +93,7 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
         boolean canReuse = false;
         if (existingGroup != null) {
             var groupRequiredList = requiredRepository.findByGroupId(existingGroup.getId());
-            if (groupRequiredList.isEmpty() || (groupRequiredList.size() == 1 && groupRequiredList.get(0).getFieldId().equals(vo.getFieldId()))) {
+            if (groupRequiredList.isEmpty() || (groupRequiredList.size() == 1 && groupRequiredList.get(0).getFieldUuid().equals(vo.getFieldUuid()))) {
                 canReuse = true;
             }
         }
@@ -106,21 +111,21 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
             groupVO.setPopType(vo.getPopType());
             groupVO.setValidationType("REQUIRED");
             // 修复：同步entityId到规则组
-            groupVO.setEntityId(field.getEntityId());
+            groupVO.setEntityId(field.getEntityUuid());
             groupId = validationRuleGroupService.createValidationRuleGroup(groupVO);
         }
 
         // 转换VO为DO并设置必要字段
         MetadataValidationRequiredDO data = BeanUtils.toBean(vo, MetadataValidationRequiredDO.class);
-        data.setEntityId(field.getEntityId());
+        data.setEntityUuid(field.getEntityUuid());
         data.setApplicationId(field.getApplicationId());
-        data.setGroupId(groupId);
+        data.setGroupUuid(String.valueOf(groupId));
 
         // 保存必填校验规则
         requiredRepository.saveOrUpdate(data);
         
         // 同步更新字段的必填状态为必填
-        syncFieldRequiredStatus(vo.getFieldId(), true);
+        syncFieldRequiredStatus(vo.getFieldUuid(), true);
         
         return data.getId();
     }
@@ -139,7 +144,7 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
         MetadataValidationRequiredDO existingDO = list.get(0);
 
         // 查询字段信息
-        MetadataEntityFieldDO entityFieldDO = entityFieldService.getEntityField(String.valueOf(existingDO.getFieldId()));
+        MetadataEntityFieldDO entityFieldDO = entityFieldService.getEntityFieldByUuid(existingDO.getFieldUuid());
         Assert.notNull(entityFieldDO, "字段不存在");
 
         // 保留原 groupId，并同步可能更新的组级配置(popPrompt/valMethod/popType)
@@ -153,7 +158,7 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
             updateGroupVO.setRgDesc(groupDO.getRgDesc());
             updateGroupVO.setRgStatus(groupDO.getRgStatus());
             updateGroupVO.setValidationType(groupDO.getValidationType());
-            updateGroupVO.setEntityId(groupDO.getEntityId());
+            updateGroupVO.setEntityId(groupDO.getEntityUuid());
             if (reqVO.getPopPrompt() != null && !reqVO.getPopPrompt().equals(groupDO.getPopPrompt())) {
                 updateGroupVO.setPopPrompt(reqVO.getPopPrompt());
                 needGroupUpdate = true;
@@ -173,32 +178,32 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
 
         MetadataValidationRequiredDO updateDO = BeanUtils.toBean(reqVO, MetadataValidationRequiredDO.class);
         updateDO.setId(existingDO.getId());
-        updateDO.setFieldId(existingDO.getFieldId());
-        updateDO.setEntityId(existingDO.getEntityId());
+        updateDO.setFieldUuid(existingDO.getFieldUuid());
+        updateDO.setEntityUuid(existingDO.getEntityUuid());
         updateDO.setApplicationId(existingDO.getApplicationId());
-        updateDO.setGroupId(targetGroupId);
+        updateDO.setGroupUuid(String.valueOf(targetGroupId));
         requiredRepository.updateById(updateDO);
 
         boolean isFieldRequired = updateDO.getIsEnabled() != null && updateDO.getIsEnabled() == 1;
-        syncFieldRequiredStatus(existingDO.getFieldId(), isFieldRequired);
+        syncFieldRequiredStatus(existingDO.getFieldUuid(), isFieldRequired);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void deleteByFieldId(Long fieldId) {
+    public void deleteByFieldId(String fieldUuid) {
         // 先获取要删除的记录，以便后续删除关联的校验规则分组
-        MetadataValidationRequiredDO recordToDelete = requiredRepository.findOneByFieldId(fieldId);
+        MetadataValidationRequiredDO recordToDelete = requiredRepository.findOneByFieldUuid(fieldUuid);
         
         // 删除必填校验记录
-        requiredRepository.deleteByFieldId(fieldId);
+        requiredRepository.deleteByFieldUuid(fieldUuid);
         
         // 删除关联的校验规则分组
-        if (recordToDelete != null && recordToDelete.getGroupId() != null) {
-            validationRuleGroupService.safeDeleteGroupDirect(recordToDelete.getGroupId());
+        if (recordToDelete != null && recordToDelete.getGroupUuid() != null) {
+            validationRuleGroupService.safeDeleteGroupDirect(Long.valueOf(recordToDelete.getGroupUuid()));
         }
         
         // 同步更新字段的必填状态为非必填
-        syncFieldRequiredStatus(fieldId, false);
+        syncFieldRequiredStatus(fieldUuid, false);
     }
 
     @Override
@@ -210,7 +215,7 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
         ValidationRequiredRespVO respVO = BeanUtils.toBean(requiredDO, ValidationRequiredRespVO.class);
         
         // 获取规则组信息，包括提示语等字段
-        var ruleGroup = validationRuleGroupService.getValidationRuleGroup(requiredDO.getGroupId());
+        var ruleGroup = validationRuleGroupService.getValidationRuleGroupByUuid(requiredDO.getGroupUuid());
         if (ruleGroup != null) {
             respVO.setRgName(ruleGroup.getRgName());
             respVO.setPromptMessage(ruleGroup.getPopPrompt());
@@ -229,10 +234,10 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
                 throw new IllegalStateException("数据异常：同一组存在多条必填校验规则(组ID=" + id + ")");
             }
             MetadataValidationRequiredDO requiredDO = list.get(0);
-            Long fieldId = requiredDO.getFieldId();
+            String fieldUuid = requiredDO.getFieldUuid();
             requiredRepository.removeById(requiredDO.getId());
-            if (fieldId != null) {
-                syncFieldRequiredStatus(fieldId, false);
+            if (fieldUuid != null) {
+                syncFieldRequiredStatus(fieldUuid, false);
             }
         }
         
@@ -243,11 +248,11 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
     /**
      * 同步字段的必填状态到字段表
      * 
-     * @param fieldId 字段ID
+     * @param fieldUuid 字段UUID
      * @param required 是否必填
      */
-    private void syncFieldRequiredStatus(Long fieldId, boolean required) {
-        MetadataEntityFieldDO field = entityFieldRepository.getById(fieldId);
+    private void syncFieldRequiredStatus(String fieldUuid, boolean required) {
+        MetadataEntityFieldDO field = entityFieldRepository.getByUuid(fieldUuid);
         if (field != null && field.getIsRequired() != (required ? 1 : 0)) {
             field.setIsRequired(required ? 1 : 0);
             entityFieldRepository.updateById(field); // 使用updateById而不是upsert，避免主键冲突

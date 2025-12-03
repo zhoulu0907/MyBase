@@ -21,10 +21,20 @@ import java.time.LocalDateTime;
 public class MetadataAutoNumberStateDO extends BaseTenantEntity {
 
     /**
-     * 配置ID
+     * 状态UUID
+     * <p>
+     * 用于跨应用、跨版本的唯一标识，与 application_id、version_tag 组成联合唯一约束
      */
-    @Column(value = "config_id", comment = "配置ID")
-    private Long configId;
+    @Column(value = "state_uuid", comment = "状态UUID")
+    private String stateUuid;
+
+    /**
+     * 配置UUID
+     * <p>
+     * 关联 metadata_auto_number_config.config_uuid
+     */
+    @Column(value = "config_uuid", comment = "配置UUID")
+    private String configUuid;
 
     /**
      * 周期键
@@ -49,6 +59,14 @@ public class MetadataAutoNumberStateDO extends BaseTenantEntity {
      */
     @Column(value = "application_id", comment = "应用ID")
     private Long applicationId;
+
+    /**
+     * 版本标识
+     * <p>
+     * 用于跨应用、跨版本的唯一标识，与 application_id 组成联合唯一约束
+     */
+    @Column(value = "version_tag", comment = "版本标识")
+    private Long versionTag;
 }
 
 

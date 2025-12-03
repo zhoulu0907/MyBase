@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.metadata.core.service.entity.impl;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.util.string.UuidUtils;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityFieldRepository;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataComponentFieldTypeRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
@@ -34,7 +35,12 @@ public class MetadataEntityFieldCoreServiceImpl implements MetadataEntityFieldCo
 
     @Override
     public Long createEntityField(@Valid MetadataEntityFieldDO entityField) {
+        // 生成 UUID
+        if (entityField.getFieldUuid() == null || entityField.getFieldUuid().isEmpty()) {
+            entityField.setFieldUuid(UuidUtils.getUuid());
+        }
         metadataEntityFieldRepository.save(entityField);
+        log.info("创建实体字段成功，ID: {}，UUID: {}", entityField.getId(), entityField.getFieldUuid());
         return entityField.getId();
     }
 
@@ -54,9 +60,31 @@ public class MetadataEntityFieldCoreServiceImpl implements MetadataEntityFieldCo
     }
 
     @Override
-    public List<MetadataEntityFieldDO> getEntityFieldListByEntityId(Long entityId) {
+    public MetadataEntityFieldDO getEntityFieldByUuid(String fieldUuid) {
+        if (fieldUuid == null || fieldUuid.trim().isEmpty()) {
+            return null;
+        }
         QueryWrapper queryWrapper = metadataEntityFieldRepository.query()
-                .eq(MetadataEntityFieldDO::getEntityId, entityId)
+                .eq(MetadataEntityFieldDO::getFieldUuid, fieldUuid.trim());
+        return metadataEntityFieldRepository.getOne(queryWrapper);
+    }
+
+    @Override
+    public List<MetadataEntityFieldDO> getEntityFieldListByEntityId(Long entityId) {
+        // TODO: 未来应完全迁移到使用 entityUuid 查询，当前保留兼容性
+        QueryWrapper queryWrapper = metadataEntityFieldRepository.query()
+                .orderBy(MetadataEntityFieldDO::getSortOrder, true)
+                .orderBy(MetadataEntityFieldDO::getCreateTime, false);
+        return metadataEntityFieldRepository.list(queryWrapper);
+    }
+
+    @Override
+    public List<MetadataEntityFieldDO> getEntityFieldListByEntityUuid(String entityUuid) {
+        if (entityUuid == null || entityUuid.isEmpty()) {
+            return Collections.emptyList();
+        }
+        QueryWrapper queryWrapper = metadataEntityFieldRepository.query()
+                .eq(MetadataEntityFieldDO::getEntityUuid, entityUuid)
                 .orderBy(MetadataEntityFieldDO::getSortOrder, true)
                 .orderBy(MetadataEntityFieldDO::getCreateTime, false);
         return metadataEntityFieldRepository.list(queryWrapper);
@@ -80,10 +108,8 @@ public class MetadataEntityFieldCoreServiceImpl implements MetadataEntityFieldCo
 
     @Override
     public PageResult<MetadataEntityFieldDO> getEntityFieldPage(int pageNum, int pageSize, Long entityId) {
+        // TODO: 未来应完全迁移到使用 entityUuid 查询
         QueryWrapper queryWrapper = metadataEntityFieldRepository.query();
-        if (entityId != null) {
-            queryWrapper.eq(MetadataEntityFieldDO::getEntityId, entityId);
-        }
         queryWrapper.orderBy(MetadataEntityFieldDO::getSortOrder, true)
                 .orderBy(MetadataEntityFieldDO::getCreateTime, false);
         Page<MetadataEntityFieldDO> page = metadataEntityFieldRepository.page(Page.of(pageNum, pageSize), queryWrapper);
@@ -92,9 +118,23 @@ public class MetadataEntityFieldCoreServiceImpl implements MetadataEntityFieldCo
 
     @Override
     public MetadataEntityFieldDO getEntityFieldByCode(String fieldCode, Long entityId) {
+        // TODO: 未来应完全迁移到使用 entityUuid 查询
+        QueryWrapper queryWrapper = metadataEntityFieldRepository.query()
+                .eq(MetadataEntityFieldDO::getFieldCode, fieldCode);
+        return metadataEntityFieldRepository.getOne(queryWrapper);
+    }
+
+    /**
+     * 根据字段编码和实体UUID获取字段
+     *
+     * @param fieldCode 字段编码
+     * @param entityUuid 实体UUID
+     * @return 实体字段
+     */
+    public MetadataEntityFieldDO getEntityFieldByCodeAndEntityUuid(String fieldCode, String entityUuid) {
         QueryWrapper queryWrapper = metadataEntityFieldRepository.query()
                 .eq(MetadataEntityFieldDO::getFieldCode, fieldCode)
-                .eq(MetadataEntityFieldDO::getEntityId, entityId);
+                .eq(MetadataEntityFieldDO::getEntityUuid, entityUuid);
         return metadataEntityFieldRepository.getOne(queryWrapper);
     }
 
@@ -105,6 +145,10 @@ public class MetadataEntityFieldCoreServiceImpl implements MetadataEntityFieldCo
         }
 
         for (MetadataEntityFieldDO field : entityFields) {
+            // 生成 UUID
+            if (field.getFieldUuid() == null || field.getFieldUuid().isEmpty()) {
+                field.setFieldUuid(UuidUtils.getUuid());
+            }
             metadataEntityFieldRepository.save(field);
         }
         return entityFields.size();

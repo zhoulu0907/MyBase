@@ -73,7 +73,7 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
             }
 
             // 跳过自动编号字段，自动编号字段不进行必填等任何校验
-            if (autoNumberService.hasAutoNumber(field.getId())) {
+            if (autoNumberService.hasAutoNumber(field.getFieldUuid())) {
                 log.debug("字段[{}]是自动编号字段，跳过校验", field.getFieldName());
                 continue;
             }
@@ -300,7 +300,7 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
         List<MetadataEntityFieldDO> fields = context.getFields();
 
         // 获取临时数据源服务
-        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
+        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceUuid());
         if (datasource == null) {
             throw exception(DATASOURCE_NOT_EXISTS);
         }
@@ -399,27 +399,27 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
         //查询子表和主表的关联字段 构建关联条件后插入数据库
         List<MetadataDataMethodSubEntityContext> subEntityVos = context.getSubEntities();
         for(MetadataDataMethodSubEntityContext subEntityContext: subEntityVos){
-            Long subEntityId  = subEntityContext.getEntityId();
-            if(ObjectUtils.isEmpty(subEntityId)){
-                throw exception(DB_SUBENTITY_OPERATION_ERROR,"subEntityId 参数不能为空");
+            String subEntityUuid = subEntityContext.getEntityUuid();
+            if(ObjectUtils.isEmpty(subEntityUuid)){
+                throw exception(DB_SUBENTITY_OPERATION_ERROR,"subEntityUuid 参数不能为空");
             }
             List<Map<Long, Object>> subData = subEntityContext.getSubData();
 
-            String parentRelFieldId = String.valueOf(relationshipDOS.stream().filter(relationshipDO ->
-                            (subEntityId).equals(relationshipDO.getTargetEntityId())).
-                    map(MetadataEntityRelationshipDO::getSourceFieldId).findFirst().orElse(null));
-            MetadataEntityFieldDO parentEntityFieldDO = entityFieldRepository.findById(Long.valueOf(parentRelFieldId));
+            String parentRelFieldUuid = relationshipDOS.stream().filter(relationshipDO ->
+                            (subEntityUuid).equals(relationshipDO.getTargetEntityUuid())).
+                    map(MetadataEntityRelationshipDO::getSourceFieldUuid).findFirst().orElse(null);
+            MetadataEntityFieldDO parentEntityFieldDO = entityFieldRepository.getByFieldUuid(parentRelFieldUuid);
             String parentFiledName = parentEntityFieldDO.getFieldName();// 主表关联字段名称
             Object parentValue = parentData.get(parentFiledName);
 
-            String subRelFieldId = String.valueOf(relationshipDOS.stream().filter(relationshipDO ->
-                            (subEntityId).equals(relationshipDO.getTargetEntityId())).
-                    map(MetadataEntityRelationshipDO::getTargetFieldId).findFirst().orElse(null));
-            MetadataEntityFieldDO subEntityFieldDO = entityFieldRepository.findById(Long.valueOf(subRelFieldId));
+            String subRelFieldUuid = relationshipDOS.stream().filter(relationshipDO ->
+                            (subEntityUuid).equals(relationshipDO.getTargetEntityUuid())).
+                    map(MetadataEntityRelationshipDO::getTargetFieldUuid).findFirst().orElse(null);
+            MetadataEntityFieldDO subEntityFieldDO = entityFieldRepository.getByFieldUuid(subRelFieldUuid);
             String subRelFieldName = subEntityFieldDO.getFieldName();// 子表关联字段名称
 
-            List<MetadataEntityFieldDO> subEntityFields = getEntityFields(subEntityId);
-            MetadataBusinessEntityDO subEntity = validateEntityExists(subEntityId);
+            List<MetadataEntityFieldDO> subEntityFields = getEntityFields(subEntityUuid);
+            MetadataBusinessEntityDO subEntity = validateEntityExists(subEntityUuid);
 
             // 逐条插入子表数据
             for(Map<Long,Object> row: subData){
@@ -437,7 +437,7 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
 
                 ProcessedSubEntityVo processedSubEntityVo = new ProcessedSubEntityVo();
                 processedSubEntityVo.setTraceId(context.getTraceId());
-                processedSubEntityVo.setSubEntityId(subEntityId);
+                processedSubEntityVo.setSubEntityId(subEntityUuid);
                 processedSubEntityVo.setSubData(nameValueParis);
 
                 Map<String, Object> resultData = metadataDataMethodSubEntityCrudImpl.doInsert(processedSubEntityVo);

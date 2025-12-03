@@ -22,30 +22,30 @@ import java.util.List;
 public class MetadataAppAndDatasourceRepository extends ServiceImpl<MetadataAppAndDatasourceMapper, MetadataAppAndDatasourceDO> {
 
     /**
-     * 根据应用ID获取关联的数据源ID列表
+     * 根据应用ID获取关联的数据源UUID列表
      *
      * @param applicationId 应用ID
-     * @return 数据源ID列表
+     * @return 数据源UUID列表
      */
-    public List<Long> getDatasourceIdsByApplicationId(Long applicationId) {
+    public List<String> getDatasourceUuidsByApplicationId(Long applicationId) {
         QueryWrapper queryWrapper = this.query()
                 .eq(MetadataAppAndDatasourceDO::getApplicationId, applicationId);
         List<MetadataAppAndDatasourceDO> relations = list(queryWrapper);
         return relations.stream()
-                .map(MetadataAppAndDatasourceDO::getDatasourceId)
+                .map(MetadataAppAndDatasourceDO::getDatasourceUuid)
                 .distinct()
                 .toList();
     }
 
     /**
-     * 根据数据源ID获取关联的应用ID列表
+     * 根据数据源UUID获取关联的应用ID列表
      *
-     * @param datasourceId 数据源ID
+     * @param datasourceUuid 数据源UUID
      * @return 应用ID列表
      */
-    public List<Long> getApplicationIdsByDatasourceId(Long datasourceId) {
+    public List<Long> getApplicationIdsByDatasourceUuid(String datasourceUuid) {
         QueryWrapper queryWrapper = this.query()
-                .eq(MetadataAppAndDatasourceDO::getDatasourceId, datasourceId);
+                .eq(MetadataAppAndDatasourceDO::getDatasourceUuid, datasourceUuid);
         List<MetadataAppAndDatasourceDO> relations = list(queryWrapper);
         return relations.stream()
                 .map(MetadataAppAndDatasourceDO::getApplicationId)
@@ -54,28 +54,28 @@ public class MetadataAppAndDatasourceRepository extends ServiceImpl<MetadataAppA
     }
 
     /**
-     * 根据应用ID和数据源ID查询关联关系
+     * 根据应用ID和数据源UUID查询关联关系
      *
      * @param applicationId 应用ID
-     * @param datasourceId 数据源ID
+     * @param datasourceUuid 数据源UUID
      * @return 关联关系对象
      */
-    public MetadataAppAndDatasourceDO getRelation(Long applicationId, Long datasourceId) {
+    public MetadataAppAndDatasourceDO getRelation(Long applicationId, String datasourceUuid) {
         QueryWrapper queryWrapper = this.query()
                 .eq(MetadataAppAndDatasourceDO::getApplicationId, applicationId)
-                .eq(MetadataAppAndDatasourceDO::getDatasourceId, datasourceId);
+                .eq(MetadataAppAndDatasourceDO::getDatasourceUuid, datasourceUuid);
         return getOne(queryWrapper);
     }
 
     /**
-     * 根据应用ID与数据源ID获取 appUid
+     * 根据应用ID与数据源UUID获取 appUid
      *
      * @param applicationId 应用ID
-     * @param datasourceId 数据源ID
+     * @param datasourceUuid 数据源UUID
      * @return appUid，未找到时返回 null
      */
-    public String getAppUidByAppIdAndDatasourceId(Long applicationId, Long datasourceId) {
-        MetadataAppAndDatasourceDO relation = getRelation(applicationId, datasourceId);
+    public String getAppUidByAppIdAndDatasourceUuid(Long applicationId, String datasourceUuid) {
+        MetadataAppAndDatasourceDO relation = getRelation(applicationId, datasourceUuid);
         return relation != null ? relation.getAppUid() : null;
     }
 
@@ -83,37 +83,37 @@ public class MetadataAppAndDatasourceRepository extends ServiceImpl<MetadataAppA
      * 检查应用和数据源是否已关联
      *
      * @param applicationId 应用ID
-     * @param datasourceId 数据源ID
+     * @param datasourceUuid 数据源UUID
      * @return 是否已关联
      */
-    public boolean isRelationExists(Long applicationId, Long datasourceId) {
-        return getRelation(applicationId, datasourceId) != null;
+    public boolean isRelationExists(Long applicationId, String datasourceUuid) {
+        return getRelation(applicationId, datasourceUuid) != null;
     }
 
     /**
      * 创建应用与数据源的关联关系
      *
      * @param applicationId 应用ID
-     * @param datasourceId 数据源ID
+     * @param datasourceUuid 数据源UUID
      * @param datasourceType 数据源类型
      * @param appUid 应用UID
      * @return 关联关系ID
      */
-    public Long createRelation(Long applicationId, Long datasourceId, String datasourceType, String appUid) {
+    public Long createRelation(Long applicationId, String datasourceUuid, String datasourceType, String appUid) {
         // 检查关联关系是否已存在
-        if (isRelationExists(applicationId, datasourceId)) {
-            log.warn("应用{}与数据源{}的关联关系已存在", applicationId, datasourceId);
-            return getRelation(applicationId, datasourceId).getId();
+        if (isRelationExists(applicationId, datasourceUuid)) {
+            log.warn("应用{}与数据源{}的关联关系已存在", applicationId, datasourceUuid);
+            return getRelation(applicationId, datasourceUuid).getId();
         }
 
         MetadataAppAndDatasourceDO relation = new MetadataAppAndDatasourceDO();
         relation.setApplicationId(applicationId);
-        relation.setDatasourceId(datasourceId);
+        relation.setDatasourceUuid(datasourceUuid);
         relation.setDatasourceType(datasourceType);
         relation.setAppUid(appUid);
 
         save(relation);
-        log.info("创建应用{}与数据源{}的关联关系成功，关联ID: {}", applicationId, datasourceId, relation.getId());
+        log.info("创建应用{}与数据源{}的关联关系成功，关联ID: {}", applicationId, datasourceUuid, relation.getId());
         return relation.getId();
     }
 
@@ -121,16 +121,16 @@ public class MetadataAppAndDatasourceRepository extends ServiceImpl<MetadataAppA
      * 删除应用与数据源的关联关系
      *
      * @param applicationId 应用ID
-     * @param datasourceId 数据源ID
+     * @param datasourceUuid 数据源UUID
      * @return 是否删除成功
      */
-    public boolean deleteRelation(Long applicationId, Long datasourceId) {
+    public boolean deleteRelation(Long applicationId, String datasourceUuid) {
         QueryWrapper queryWrapper = this.query()
                 .eq(MetadataAppAndDatasourceDO::getApplicationId, applicationId)
-                .eq(MetadataAppAndDatasourceDO::getDatasourceId, datasourceId);
+                .eq(MetadataAppAndDatasourceDO::getDatasourceUuid, datasourceUuid);
 
         boolean deleted = remove(queryWrapper);
-        log.info("删除应用{}与数据源{}的关联关系，结果: {}", applicationId, datasourceId, deleted);
+        log.info("删除应用{}与数据源{}的关联关系，结果: {}", applicationId, datasourceUuid, deleted);
         return deleted;
     }
 
@@ -151,33 +151,33 @@ public class MetadataAppAndDatasourceRepository extends ServiceImpl<MetadataAppA
     }
 
     /**
-     * 根据数据源ID删除所有关联关系
+     * 根据数据源UUID删除所有关联关系
      *
-     * @param datasourceId 数据源ID
+     * @param datasourceUuid 数据源UUID
      * @return 删除的关联关系数量
      */
-    public long deleteRelationsByDatasourceId(Long datasourceId) {
+    public long deleteRelationsByDatasourceUuid(String datasourceUuid) {
         QueryWrapper queryWrapper = this.query()
-                .eq(MetadataAppAndDatasourceDO::getDatasourceId, datasourceId);
+                .eq(MetadataAppAndDatasourceDO::getDatasourceUuid, datasourceUuid);
 
         long deletedCount = count(queryWrapper);
         remove(queryWrapper);
-        log.info("删除数据源{}的所有关联关系，删除数量: {}", datasourceId, deletedCount);
+        log.info("删除数据源{}的所有关联关系，删除数量: {}", datasourceUuid, deletedCount);
         return deletedCount;
     }
 
     /**
-     * 根据应用UID获取关联的数据源ID列表
+     * 根据应用UID获取关联的数据源UUID列表
      *
      * @param appUid 应用UID
-     * @return 数据源ID列表
+     * @return 数据源UUID列表
      */
-    public List<Long> getDatasourceIdsByAppUid(String appUid) {
+    public List<String> getDatasourceUuidsByAppUid(String appUid) {
         QueryWrapper queryWrapper = this.query()
                 .eq(MetadataAppAndDatasourceDO::getAppUid, appUid);
         List<MetadataAppAndDatasourceDO> relations = list(queryWrapper);
         return relations.stream()
-                .map(MetadataAppAndDatasourceDO::getDatasourceId)
+                .map(MetadataAppAndDatasourceDO::getDatasourceUuid)
                 .distinct()
                 .toList();
     }
@@ -198,20 +198,20 @@ public class MetadataAppAndDatasourceRepository extends ServiceImpl<MetadataAppA
      * 更新应用与数据源关联关系中的appUid
      *
      * @param applicationId 应用ID
-     * @param datasourceId 数据源ID
+     * @param datasourceUuid 数据源UUID
      * @param newAppUid 新的应用UID
      * @return 是否更新成功
      */
-    public boolean updateRelationAppUid(Long applicationId, Long datasourceId, String newAppUid) {
-        MetadataAppAndDatasourceDO relation = getRelation(applicationId, datasourceId);
+    public boolean updateRelationAppUid(Long applicationId, String datasourceUuid, String newAppUid) {
+        MetadataAppAndDatasourceDO relation = getRelation(applicationId, datasourceUuid);
         if (relation == null) {
-            log.warn("未找到应用{}与数据源{}的关联关系，无法更新appUid", applicationId, datasourceId);
+            log.warn("未找到应用{}与数据源{}的关联关系，无法更新appUid", applicationId, datasourceUuid);
             return false;
         }
 
         relation.setAppUid(newAppUid);
         updateById(relation);
-        log.info("成功更新应用{}与数据源{}关联关系的appUid为{}", applicationId, datasourceId, newAppUid);
+        log.info("成功更新应用{}与数据源{}关联关系的appUid为{}", applicationId, datasourceUuid, newAppUid);
         return true;
     }
 }

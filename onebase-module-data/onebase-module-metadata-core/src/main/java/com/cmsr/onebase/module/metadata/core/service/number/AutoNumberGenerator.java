@@ -50,7 +50,7 @@ public class AutoNumberGenerator {
 
         // 2. 获取规则项列表
         List<MetadataAutoNumberRuleItemDO> ruleItems = ruleItemRepository
-                .listByConfig(config.getId());
+                .listByConfigUuid(config.getConfigUuid());
         
         // 3. 生成周期键
         String periodKey = ruleEngine.generatePeriodKey(config.getResetCycle(), LocalDateTime.now());
@@ -116,7 +116,7 @@ public class AutoNumberGenerator {
     public String preview(MetadataAutoNumberConfigDO config, Map<String, Object> contextData) {
         // 1. 获取规则项列表
         List<MetadataAutoNumberRuleItemDO> ruleItems = ruleItemRepository
-                .listByConfig(config.getId());
+                .listByConfigUuid(config.getConfigUuid());
         
         if (ruleItems.isEmpty()) {
             return "无有效规则项";

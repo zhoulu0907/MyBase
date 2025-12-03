@@ -20,10 +20,20 @@ import lombok.EqualsAndHashCode;
 public class MetadataEntityFieldDO extends BaseTenantEntity {
 
     /**
-     * 实体ID
+     * 字段UUID
+     * <p>
+     * 用于跨应用、跨版本的唯一标识，与 application_id、version_tag 组成联合唯一约束
      */
-    @Column(value = "entity_id", comment = "实体ID")
-    private Long entityId;
+    @Column(value = "field_uuid", comment = "字段UUID")
+    private String fieldUuid;
+
+    /**
+     * 实体UUID
+     * <p>
+     * 关联 metadata_business_entity.entity_uuid
+     */
+    @Column(value = "entity_uuid", comment = "实体UUID")
+    private String entityUuid;
 
     /**
      * 字段名称

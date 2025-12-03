@@ -2,7 +2,6 @@ package com.cmsr.onebase.module.metadata.build.controller.admin.datamethod.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import jakarta.validation.constraints.NotNull;
 
 /**
  * 数据方法查询请求 VO
@@ -14,9 +13,11 @@ import jakarta.validation.constraints.NotNull;
 @Data
 public class DataMethodQueryReqVO {
 
-    @Schema(description = "实体ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
-    @NotNull(message = "实体ID不能为空")
-    private Long entityId;
+    @Schema(description = "实体UUID", example = "entity-xxxx-xxxx-xxxx")
+    private String entityUuid;
+
+    @Schema(description = "实体ID（兼容旧版，与entityUuid二选一）", example = "164329365983232001")
+    private String entityId;
 
     @Schema(description = "方法类型", example = "query")
     private String methodType;

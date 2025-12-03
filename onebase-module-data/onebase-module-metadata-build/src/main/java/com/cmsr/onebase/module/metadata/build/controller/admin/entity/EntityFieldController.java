@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.metadata.build.controller.admin.entity;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
+import com.cmsr.onebase.module.metadata.core.util.MetadataIdUuidConverter;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.EntityFieldBatchCreateReqVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.EntityFieldBatchCreateRespVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.EntityFieldBatchSortReqVO;
@@ -49,6 +50,9 @@ public class EntityFieldController {
 
     @Resource
     private ModelMapper modelMapper;
+
+    @Resource
+    private MetadataIdUuidConverter idUuidConverter;
 
     @PostMapping("/field-types")
     @Operation(summary = "获取系统支持的字段类型列表")
@@ -110,9 +114,10 @@ public class EntityFieldController {
     }
     @PostMapping("/delete")
     @Operation(summary = "软删除实体字段")
-    @Parameter(name = "id", description = "字段ID", required = true, example = "1024")
-    public CommonResult<Boolean> deleteEntityField(@RequestParam("id") Long id) {
-        entityFieldService.deleteEntityField(String.valueOf(id));
+    @Parameter(name = "id", description = "字段ID或UUID", required = true, example = "1024")
+    public CommonResult<Boolean> deleteEntityField(@RequestParam("id") String id) {
+        Long resolvedId = idUuidConverter.resolveFieldId(id);
+        entityFieldService.deleteEntityField(String.valueOf(resolvedId));
         return success(true);
     }
 

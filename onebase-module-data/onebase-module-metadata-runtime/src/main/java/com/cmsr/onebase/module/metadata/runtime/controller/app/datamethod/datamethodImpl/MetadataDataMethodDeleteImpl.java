@@ -75,7 +75,7 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
         List<MetadataEntityFieldDO> fields = context.getFields();
 
         // 获取临时数据源服务
-        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
+        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceUuid());
         if (datasource == null) {
             throw exception(DATASOURCE_NOT_EXISTS);
         }
@@ -101,7 +101,7 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
         Long entityId = context.getEntityId();
         List<MetadataEntityFieldDO> fields = context.getFields();
         // 获取临时数据源服务
-        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
+        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceUuid());
         if (datasource == null) {
             throw exception(DATASOURCE_NOT_EXISTS);
         }
@@ -208,25 +208,25 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
             String relType = relationshipDO.getRelationshipType();
             // 使用枚举的辅助方法判断关系类型语义
             if (RelationshipTypeEnum.isManyToOneType(relType)) {
-                log.info("被删除表和关联表是多对一关系，无需对一方删除: 源实体ID: {}, 关联实体ID： {}", relationshipDO.getSourceEntityId(), relationshipDO.getTargetEntityId());
+                log.info("被删除表和关联表是多对一关系，无需对一方删除: 源实体UUID: {}, 关联实体UUID： {}", relationshipDO.getSourceEntityUuid(), relationshipDO.getTargetEntityUuid());
                 return;
             } else if (RelationshipTypeEnum.isOneToOneType(relType) || RelationshipTypeEnum.isOneToManyType(relType) || RelationshipTypeEnum.isManyToManyType(relType)) {
-                MetadataBusinessEntityDO sourceEntity = businessEntityService.getBusinessEntity(relationshipDO.getSourceEntityId());
+                MetadataBusinessEntityDO sourceEntity = businessEntityService.getBusinessEntity(relationshipDO.getSourceEntityUuid());
                 if (sourceEntity.getEntityType() == 3) {
                     log.info("被删除表类型是多对多的中间表，表名：{}，无需对其他关联表删除", sourceEntity.getTableName());
                     return;
                 }
-                MetadataEntityFieldDO sourceFieldDO = entityFieldRepository.findById(Long.valueOf(relationshipDO.getSourceFieldId()));
+                MetadataEntityFieldDO sourceFieldDO = entityFieldRepository.getByFieldUuid(relationshipDO.getSourceFieldUuid());
                 if ("parent_id".equals(sourceFieldDO.getFieldName())) {
                     log.info("被删除表是子表，表名：{}，无需对主表删除", sourceEntity.getTableName());
                     return;
                 }
 
-                // 子表实体id
-                Long subEntityId = relationshipDO.getTargetEntityId();
+                // 子表实体uuid
+                String subEntityId = relationshipDO.getTargetEntityUuid();
 
                 // 构建查询子表关联条件
-                MetadataEntityFieldDO targetEntityFieldDO = entityFieldRepository.findById(Long.valueOf(relationshipDO.getTargetFieldId()));
+                MetadataEntityFieldDO targetEntityFieldDO = entityFieldRepository.getByFieldUuid(relationshipDO.getTargetFieldUuid());
                 String targetField = targetEntityFieldDO.getFieldName();
                 Map deletedData = context.getProcessedData();
                 Object value = deletedData.get(sourceFieldDO.getFieldName());
@@ -236,7 +236,7 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
                 DefaultConfigStore deleteConfig = new DefaultConfigStore();
                 deleteConfig.and(targetField, value);
                 deleteConfig.and("deleted",0);
-                MetadataBusinessEntityDO targetEntity = businessEntityService.getBusinessEntity(relationshipDO.getTargetEntityId());
+                MetadataBusinessEntityDO targetEntity = businessEntityService.getBusinessEntity(relationshipDO.getTargetEntityUuid());
                 DataSet dateSet = temporaryService.querys(quoteTableName(targetEntity.getTableName()), deleteConfig);
 
                 // 待删除数据行的id集合
@@ -275,25 +275,25 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
             String relType = relationshipDO.getRelationshipType();
             // 使用枚举的辅助方法判断关系类型语义
             if (RelationshipTypeEnum.isOneToManyType(relType)) {
-                log.info("关联表和被删除表是一对多关系，无需对一方删除: 源实体ID: {}, 关联实体ID： {}", relationshipDO.getSourceEntityId(), relationshipDO.getTargetEntityId());
+                log.info("关联表和被删除表是一对多关系，无需对一方删除: 源实体UUID: {}, 关联实体UUID： {}", relationshipDO.getSourceEntityUuid(), relationshipDO.getTargetEntityUuid());
                 return;
             } else if (RelationshipTypeEnum.isOneToOneType(relType) || RelationshipTypeEnum.isManyToOneType(relType) || RelationshipTypeEnum.isManyToManyType(relType)) {
-                MetadataBusinessEntityDO targetEntity = businessEntityService.getBusinessEntity(relationshipDO.getTargetEntityId());
+                MetadataBusinessEntityDO targetEntity = businessEntityService.getBusinessEntity(relationshipDO.getTargetEntityUuid());
                 if (targetEntity.getEntityType() == 3) {
                     log.info("被删除表类型是多对多的中间表，表名：{}，无需对其他关联表删除", targetEntity.getTableName());
                     return;
                 }
-                MetadataEntityFieldDO targetFieldDO = entityFieldRepository.findById(Long.valueOf(relationshipDO.getTargetFieldId()));
+                MetadataEntityFieldDO targetFieldDO = entityFieldRepository.getByFieldUuid(relationshipDO.getTargetFieldUuid());
                 if ("parent_id".equals(targetFieldDO.getFieldName())) {
                     log.info("被删除表是子表，表名：{}，无需对主表删除", targetEntity.getTableName());
                     return;
                 }
 
-                // 子表实体id
-                Long subEntityId = relationshipDO.getSourceEntityId();
+                // 子表实体uuid
+                String subEntityId = relationshipDO.getSourceEntityUuid();
 
                 // 构建查询子表关联条件
-                MetadataEntityFieldDO sourceEntityFieldDO = entityFieldRepository.findById(Long.valueOf(relationshipDO.getSourceFieldId()));
+                MetadataEntityFieldDO sourceEntityFieldDO = entityFieldRepository.getByFieldUuid(relationshipDO.getSourceFieldUuid());
                 String sourceField = sourceEntityFieldDO.getFieldName();
                 Map deletedData = context.getProcessedData();
                 Object value = deletedData.get(targetFieldDO.getFieldName());
@@ -303,7 +303,7 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
                 DefaultConfigStore deleteConfig = new DefaultConfigStore();
                 deleteConfig.and(sourceField, value);
                 deleteConfig.and("deleted",0);
-                MetadataBusinessEntityDO sourceEntity = businessEntityService.getBusinessEntity(relationshipDO.getSourceEntityId());
+                MetadataBusinessEntityDO sourceEntity = businessEntityService.getBusinessEntity(relationshipDO.getSourceEntityUuid());
                 DataSet dateSet = temporaryService.querys(quoteTableName(sourceEntity.getTableName()), deleteConfig);
 
                 // 待删除数据行的id集合
@@ -387,7 +387,7 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
         configStore.and(primaryKeyField, id);
         configStore.and("deleted",0);
 
-        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
+        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceUuid());
         if (datasource == null) {
             throw exception(DATASOURCE_NOT_EXISTS);
         }

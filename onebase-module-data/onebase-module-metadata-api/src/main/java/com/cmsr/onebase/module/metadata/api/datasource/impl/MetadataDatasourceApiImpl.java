@@ -90,10 +90,10 @@ public class MetadataDatasourceApiImpl implements MetadataDatasourceApi {
             // 调用 core 模块的基础服务创建数据源
             Long datasourceId = metadataDatasourceCoreService.createDatasource(datasource);
 
-            // 创建关联关系
+            // 创建关联关系（使用数据源UUID）
             metadataDatasourceCoreService.createAppDatasourceRelation(
                     reqDTO.getApplicationId(),
-                    datasourceId,
+                    datasource.getDatasourceUuid(),
                     reqDTO.getDatasourceType(),
                     reqDTO.getAppUid()
             );

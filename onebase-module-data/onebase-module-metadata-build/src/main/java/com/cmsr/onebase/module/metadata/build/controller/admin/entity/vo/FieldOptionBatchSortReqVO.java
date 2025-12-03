@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 import java.util.List;
@@ -11,9 +11,9 @@ import java.util.List;
  */
 @Data
 public class FieldOptionBatchSortReqVO {
-    @Schema(description = "字段ID", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull
-    private Long fieldId;
+    @Schema(description = "字段UUID", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotBlank(message = "字段UUID不能为空")
+    private String fieldUuid;
 
     @Schema(description = "排序项")
     private List<SortItemDTO> items;

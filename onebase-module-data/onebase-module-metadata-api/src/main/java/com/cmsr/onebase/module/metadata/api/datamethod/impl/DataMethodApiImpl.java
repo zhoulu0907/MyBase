@@ -7,12 +7,14 @@ import com.cmsr.onebase.module.metadata.api.datamethod.DataMethodApi;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.*;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityFieldRepository;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityRelationshipRepository;
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.relationship.MetadataEntityRelationshipDO;
 import com.cmsr.onebase.module.metadata.core.domain.query.*;
 import com.cmsr.onebase.module.metadata.core.enums.ClientTypeEnum;
 import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
 import com.cmsr.onebase.module.metadata.core.enums.OpEnum;
+import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
 import com.cmsr.onebase.module.metadata.core.service.entity.impl.MetadataEntityFieldCoreServiceImpl;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
@@ -61,6 +63,9 @@ public class DataMethodApiImpl implements DataMethodApi {
 
     @Resource
     private MetadataEntityRelationshipRepository entityRelationshipRepository;
+
+    @Resource
+    private MetadataBusinessEntityCoreService metadataBusinessEntityCoreService;
 
 
     /**
@@ -182,6 +187,13 @@ public class DataMethodApiImpl implements DataMethodApi {
         if("subEntity".equals(reqDTO.getUpdateType())){
             Long subEntityId = reqDTO.getEntityId(); // 要修改的实体的实体id 此时为子表实体
             Long parentEntityId = reqDTO.getParentEntityId();// 子表对应的主表实体id
+            
+            // 获取实体UUID用于比较
+            MetadataBusinessEntityDO subEntity = metadataBusinessEntityCoreService.getBusinessEntity(subEntityId);
+            MetadataBusinessEntityDO parentEntity = metadataBusinessEntityCoreService.getBusinessEntity(parentEntityId);
+            String subEntityUuid = subEntity.getEntityUuid();
+            String parentEntityUuid = parentEntity.getEntityUuid();
+            
             List<List<ConditionDTO>> conditionDTOs = reqDTO.getConditionDTO();
             for(List<ConditionDTO> list: conditionDTOs){
                 for(ConditionDTO conditionDTO : list){
@@ -189,8 +201,8 @@ public class DataMethodApiImpl implements DataMethodApi {
                     //判断字段属于主表还是属于子表
                     boolean isMainEntityField = false;
                     MetadataEntityFieldDO metadataEntityFieldDO = metadataEntityFieldCoreServiceImpl.getEntityField(fieldId);
-                    Long entityId = metadataEntityFieldDO.getEntityId();
-                    if(Objects.equals(entityId,parentEntityId)){
+                    String fieldEntityUuid = metadataEntityFieldDO.getEntityUuid();
+                    if(Objects.equals(fieldEntityUuid, parentEntityUuid)){
                         isMainEntityField = true;
                     }
                     if(isMainEntityField){
@@ -199,7 +211,7 @@ public class DataMethodApiImpl implements DataMethodApi {
                         queryRequest.setEntityId(reqDTO.getParentEntityId());
 
                         List<List<ConditionDTO>> newConditonsGroup = new ArrayList<>();
-                        List<ConditionDTO> newConditons = new ArrayList();
+                        List<ConditionDTO> newConditons = new ArrayList<>();
                         newConditons.add(conditionDTO);
                         newConditonsGroup.add(newConditons);
 
@@ -207,7 +219,7 @@ public class DataMethodApiImpl implements DataMethodApi {
                         queryRequest.setLimit(1000);
                         QueryResult result = metadataQueryService.queryByConditions(queryRequest);
 
-                        List<String> ids = new ArrayList<String>();
+                        List<String> ids = new ArrayList<>();
                         List<RowData> rowDatas = result.getRowDataList();
                         if(ObjectUtils.isEmpty(rowDatas)){
                             ids.add(""); // 父表查询没有结果 sql拼接为 parent_id = NULL
@@ -217,11 +229,16 @@ public class DataMethodApiImpl implements DataMethodApi {
                             }
                         }
 
-                        // 重新组装条件
-                        List<MetadataEntityRelationshipDO> relationshipDOS = entityRelationshipRepository.getRelationshipsBySlaveEntityId(subEntityId);
-                        List<MetadataEntityRelationshipDO> relationships = relationshipDOS.stream().filter(relationship -> parentEntityId.equals(relationship.getSourceEntityId())).toList();
+                        // 重新组装条件（使用UUID版本的方法）
+                        List<MetadataEntityRelationshipDO> relationshipDOS = entityRelationshipRepository.getRelationshipsBySlaveEntityUuid(subEntityUuid);
+                        List<MetadataEntityRelationshipDO> relationships = relationshipDOS.stream()
+                                .filter(relationship -> parentEntityUuid.equals(relationship.getSourceEntityUuid()))
+                                .toList();
                         MetadataEntityRelationshipDO relationship = relationships.get(0); // 过滤之后只有一条关系
-                        conditionDTO.setFieldId(Long.valueOf(relationship.getTargetFieldId()));// 子表关联字段id
+                        // 通过目标字段UUID获取字段ID（条件DTO仍使用字段ID）
+                        String targetFieldUuid = relationship.getTargetFieldUuid();
+                        MetadataEntityFieldDO targetField = metadataEntityFieldCoreServiceImpl.getEntityFieldByUuid(targetFieldUuid);
+                        conditionDTO.setFieldId(targetField.getId());// 子表关联字段id
                         conditionDTO.setOperator(OpEnum.EXISTS_IN.name());// in
                         conditionDTO.setFieldValue(ids);// 主表id集合
                     }

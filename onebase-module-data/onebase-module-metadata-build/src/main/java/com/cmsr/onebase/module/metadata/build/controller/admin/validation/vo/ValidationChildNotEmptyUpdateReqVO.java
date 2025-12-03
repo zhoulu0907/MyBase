@@ -23,13 +23,13 @@ public class ValidationChildNotEmptyUpdateReqVO {
     @NotBlank(message = "规则组名称不能为空")
     private String rgName;
 
-    @Schema(description = "父实体ID", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "父实体ID不能为空")
-    private Long entityId;
+    @Schema(description = "父实体UUID", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotBlank(message = "父实体UUID不能为空")
+    private String entityUuid;
 
-    @Schema(description = "子实体ID", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "子实体ID不能为空")
-    private Long childEntityId;
+    @Schema(description = "子实体UUID", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotBlank(message = "子实体UUID不能为空")
+    private String childEntityUuid;
 
     @Schema(description = "是否启用", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
     @NotNull(message = "是否启用不能为空")

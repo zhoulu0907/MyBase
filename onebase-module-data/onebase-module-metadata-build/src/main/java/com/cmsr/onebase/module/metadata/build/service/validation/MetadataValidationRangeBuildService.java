@@ -12,11 +12,11 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataV
  * @date 2025-08-27
  */
 public interface MetadataValidationRangeBuildService {
-    MetadataValidationRangeDO getByFieldId(Long fieldId);
-    ValidationRangeRespVO getByFieldIdWithRgName(Long fieldId);
+    MetadataValidationRangeDO getByFieldId(String fieldUuid);
+    ValidationRangeRespVO getByFieldIdWithRgName(String fieldUuid);
     Long create(ValidationRangeSaveReqVO vo);
     void update(ValidationRangeUpdateReqVO reqVO);
-    void deleteByFieldId(Long fieldId);
+    void deleteByFieldId(String fieldUuid);
 
     /**
      * 按主键ID查询范围校验配置（包含规则组名称）

@@ -20,49 +20,61 @@ import java.util.List;
 public class MetadataValidationChildNotEmptyRepository extends ServiceImpl<MetadataValidationChildNotEmptyMapper, MetadataValidationChildNotEmptyDO> {
 
     /**
-     * 根据字段ID查询单条子记录非空验证规则
+     * 根据字段UUID查询单条子记录非空验证规则
      *
-     * @param fieldId 字段ID
+     * @param fieldUuid 字段UUID
      * @return 子记录非空验证规则
      */
-    public MetadataValidationChildNotEmptyDO findOneByFieldId(Long fieldId) {
+    public MetadataValidationChildNotEmptyDO findOneByFieldUuid(String fieldUuid) {
         QueryWrapper queryWrapper = query()
-                .eq(MetadataValidationChildNotEmptyDO::getFieldId, fieldId);
+                .eq(MetadataValidationChildNotEmptyDO::getFieldUuid, fieldUuid);
         return getOne(queryWrapper);
     }
 
     /**
-     * 根据字段ID查询子记录非空验证规则列表
+     * 根据字段UUID查询子记录非空验证规则列表
      *
-     * @param fieldId 字段ID
+     * @param fieldUuid 字段UUID
      * @return 子记录非空验证规则列表
      */
-    public List<MetadataValidationChildNotEmptyDO> findByFieldId(Long fieldId) {
+    public List<MetadataValidationChildNotEmptyDO> findByFieldUuid(String fieldUuid) {
         QueryWrapper queryWrapper = query()
-                .eq(MetadataValidationChildNotEmptyDO::getFieldId, fieldId);
+                .eq(MetadataValidationChildNotEmptyDO::getFieldUuid, fieldUuid);
         return list(queryWrapper);
     }
 
     /**
-     * 根据字段ID删除子记录非空验证规则
+     * 根据字段UUID删除子记录非空验证规则
      *
-     * @param fieldId 字段ID
+     * @param fieldUuid 字段UUID
      */
-    public void deleteByFieldId(Long fieldId) {
-        for (var item : findByFieldId(fieldId)) {
+    public void deleteByFieldUuid(String fieldUuid) {
+        for (var item : findByFieldUuid(fieldUuid)) {
             removeById(item.getId());
         }
     }
 
     /**
-     * 根据组ID查询子记录非空验证规则列表
+     * 根据组UUID查询子记录非空验证规则列表
      *
+     * @param groupUuid 组UUID
+     * @return 子记录非空验证规则列表
+     */
+    public List<MetadataValidationChildNotEmptyDO> findByGroupUuid(String groupUuid) {
+        QueryWrapper queryWrapper = query()
+                .eq(MetadataValidationChildNotEmptyDO::getGroupUuid, groupUuid);
+        return list(queryWrapper);
+    }
+
+    /**
+     * 根据组ID查询子记录非空验证规则列表（兼容旧代码）
+     *
+     * @deprecated 请使用 findByGroupUuid(String)
      * @param groupId 组ID
      * @return 子记录非空验证规则列表
      */
+    @Deprecated
     public List<MetadataValidationChildNotEmptyDO> findByGroupId(Long groupId) {
-        QueryWrapper queryWrapper = query()
-                .eq(MetadataValidationChildNotEmptyDO::getGroupId, groupId);
-        return list(queryWrapper);
+        return findByGroupUuid(groupId != null ? String.valueOf(groupId) : null);
     }
 }

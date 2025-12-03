@@ -7,6 +7,7 @@ import com.cmsr.onebase.module.metadata.build.controller.admin.datamethod.vo.Dat
 import com.cmsr.onebase.module.metadata.build.controller.admin.datamethod.vo.DataMethodRespVO;
 import com.cmsr.onebase.module.metadata.build.service.datamethod.MetadataDataMethodQueryBuildService;
 import com.cmsr.onebase.module.metadata.build.service.datamethod.vo.DataMethodQueryVO;
+import com.cmsr.onebase.module.metadata.core.util.MetadataIdUuidConverter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
@@ -32,10 +33,15 @@ public class DataMethodController {
     @Resource
     private MetadataDataMethodQueryBuildService dataMethodService;
 
+    @Resource
+    private MetadataIdUuidConverter idUuidConverter;
+
     @PostMapping("/list")
     @Operation(summary = "查询业务实体的数据方法列表")
     public CommonResult<List<DataMethodRespVO>> getDataMethodList(@Valid @RequestBody DataMethodQueryReqVO reqVO) {
-    DataMethodQueryVO queryVO = new DataMethodQueryVO(reqVO.getEntityId(), reqVO.getMethodType(), reqVO.getKeyword());
+        // ID与UUID兼容处理
+        String entityUuid = idUuidConverter.resolveEntityUuid(reqVO.getEntityUuid(), reqVO.getEntityId());
+        DataMethodQueryVO queryVO = new DataMethodQueryVO(entityUuid, reqVO.getMethodType(), reqVO.getKeyword());
         List<DataMethodRespVO> methods = dataMethodService.getDataMethodList(queryVO);
         return success(methods);
     }
@@ -43,7 +49,9 @@ public class DataMethodController {
     @PostMapping("/detail")
     @Operation(summary = "获取指定数据方法的详细信息")
     public CommonResult<DataMethodDetailRespVO> getDataMethodDetail(@Valid @RequestBody DataMethodDetailQueryReqVO reqVO) {
-    DataMethodDetailRespVO detail = dataMethodService.getDataMethodDetail(reqVO.getEntityId(), reqVO.getMethodCode());
+        // ID与UUID兼容处理
+        String entityUuid = idUuidConverter.resolveEntityUuid(reqVO.getEntityUuid(), reqVO.getEntityId());
+        DataMethodDetailRespVO detail = dataMethodService.getDataMethodDetail(entityUuid, reqVO.getMethodCode());
         return success(detail);
     }
 }
