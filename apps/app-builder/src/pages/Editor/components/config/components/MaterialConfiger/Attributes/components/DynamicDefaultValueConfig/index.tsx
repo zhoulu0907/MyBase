@@ -1,8 +1,9 @@
 import { Form, Select, Input, Button, Switch, DatePicker, TimePicker } from '@arco-design/web-react';
 import { useEffect, useState } from 'react';
+import { IconLaunch } from '@arco-design/web-react/icon';
 import { registerConfigRenderer } from '../../registry';
-import { CONFIG_TYPES } from '@onebase/ui-kit';
-import { DEFAULT_VALUE_TYPES, DEFAULT_VALUE_TYPES_LABELS, getPopupContainer } from '@onebase/ui-kit';
+import { CONFIG_TYPES, DEFAULT_VALUE_TYPES, DEFAULT_VALUE_TYPES_LABELS, getPopupContainer } from '@onebase/ui-kit';
+import { FormulaEditor } from '@/components/FormulaEditor';
 import styles from '../../index.module.less';
 
 export interface DynamicDefaultValueConfigProps {
@@ -23,7 +24,10 @@ const DynamicDefaultValueConfig: React.FC<DynamicDefaultValueConfigProps> = ({
   const [defaultValueConfig, setDefaultValueConfig] = useState({
     type: '',
     customValue: undefined,
+    formulaValue: undefined
   });
+  // 公式计算弹窗
+  const [formulaVisible, setFormulaVisible] = useState<boolean>(false);
 
   useEffect(() => {
     setDefaultValueConfig((prev) => ({ ...prev, ...configs[defaultValueConfigKey] }));
@@ -32,6 +36,17 @@ const DynamicDefaultValueConfig: React.FC<DynamicDefaultValueConfigProps> = ({
   const handleChange = (key: string, value: boolean | string) => {
     const newConfig = { ...configs[defaultValueConfigKey], [key]: value };
     handlePropsChange(defaultValueConfigKey, newConfig);
+  };
+
+  // 打开公式编辑器弹窗
+  const openFormulaEditor = () => {
+    setFormulaVisible(true);
+  };
+
+  // 公式编辑器弹窗确定
+  const handleFormulaConfirm = (formulaData: string) => {
+    setFormulaVisible(false);
+    handleChange('formulaValue', formulaData)
   };
 
   return (
@@ -91,8 +106,25 @@ const DynamicDefaultValueConfig: React.FC<DynamicDefaultValueConfigProps> = ({
           )}
         </Form.Item>
       )}
-      {/* TODO 公式计算 */}
-      {defaultValueConfig?.type === DEFAULT_VALUE_TYPES.FORMULA && <Button>设置公式</Button>}
+      {/* 公式计算 */}
+      {defaultValueConfig?.type === DEFAULT_VALUE_TYPES.FORMULA && (
+        <Button onClick={openFormulaEditor} long style={{marginBottom:'20px'}}>
+          {defaultValueConfig?.formulaValue ? (
+            <>
+              <span>已设置公式</span>
+              <IconLaunch />
+            </>
+          ) : (
+            <>ƒx 编辑公式</>
+          )}
+        </Button>
+      )}
+      <FormulaEditor
+        initialFormula={defaultValueConfig?.formulaValue}
+        visible={formulaVisible}
+        onCancel={() => setFormulaVisible(false)}
+        onConfirm={handleFormulaConfirm}
+      />
     </>
   );
 };
