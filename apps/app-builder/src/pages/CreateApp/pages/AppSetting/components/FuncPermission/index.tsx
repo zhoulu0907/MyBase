@@ -64,15 +64,15 @@ const FuncPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
       const authViews = funcPermission.authViewVO.authViews ?? [];
       const viewOptions: Array<any> = [];
       const viewDefaultChecked: Array<number | undefined> = [];
-      authViews.forEach((view) => {
+      authViews.forEach((view: any) => {
         viewOptions.push({
           label: view.viewDisplayName,
-          value: view.viewId,
+          value: view.viewUuid,
           isAllowed: view.isAllowed
         });
 
         if (view.isAllowed === FunPermissionViewVisit.canVisit) {
-          viewDefaultChecked.push(view.viewId);
+          viewDefaultChecked.push(view.viewUuid);
         }
       });
       setViewPermIndeterminate(!!(viewDefaultChecked.length && viewDefaultChecked.length !== authViews.length));
@@ -191,7 +191,7 @@ const FuncPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
     if (!isAllViewsAllowed) {
       const viewPermission = viewPermissionOptions?.map((item: any) => ({
         viewDisplayName: item.label,
-        viewId: item.value,
+        viewUuid: item.value,
         isAllowed: authViews.includes(item.value)
           ? FunViewCustomPermission.canViewAllowed
           : FunViewCustomPermission.notViewAllowed
@@ -203,12 +203,7 @@ const FuncPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
 
   return (
     <>
-      {!menuId ? (
-        <div className={styles.permissionEmpty}>
-          <IconEmpty fontSize={50} />
-          暂无页面功能权限，请先添加页面
-        </div>
-      ) : (
+      {menuId && (
         <Form form={form}>
           <div className={styles.formItem}>
             <div className={styles.itemHeader}>
