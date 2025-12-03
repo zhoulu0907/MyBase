@@ -417,7 +417,7 @@ const EnterpriseInfoPage: React.FC = () => {
                 </Button>
               </Space>
             ) : (
-              <Button icon={<IconEdit />} onClick={toggleEdit}>
+              <Button onClick={toggleEdit}>
                 编辑
               </Button>
             )}

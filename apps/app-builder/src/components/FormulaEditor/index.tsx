@@ -74,7 +74,7 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
   /**
    * 获取变量一级列表
    */
-  const nodeTypes = [NodeType.DATA_QUERY, NodeType.DATA_QUERY_MULTIPLE, NodeType.DATA_CALC];
+  const nodeTypes = [NodeType.START_FORM, NodeType.START_ENTITY, NodeType.DATA_QUERY, NodeType.DATA_QUERY_MULTIPLE, NodeType.DATA_CALC];
 
   const retrievedEntityListByApp = async () => {
     const nodes = getPrecedingNodes(curAppId, triggerEditorSignal.nodes.value, nodeTypes);
