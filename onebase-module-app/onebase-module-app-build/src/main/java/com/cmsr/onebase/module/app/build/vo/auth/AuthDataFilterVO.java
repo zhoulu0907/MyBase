@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.app.build.vo.auth;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -12,7 +13,7 @@ import lombok.Data;
 public class AuthDataFilterVO {
 
     @Schema(description = "字段id")
-    private Long fieldId;
+    private String fieldUuid;
 
     @Schema(description = "比较操作符号")
     private String fieldOperator;
