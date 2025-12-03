@@ -26,14 +26,14 @@ import DataPermissionModal from './components/DataPermissionModal';
 
 import type { TreeSelectDataType } from '@arco-design/web-react/es/TreeSelect/interface';
 import styles from './index.module.less';
-import { OPERATION_OPTIONS,PERMISSION_SCOPE } from '@onebase/common';
+import { OPERATION_OPTIONS, PERMISSION_SCOPE } from '@onebase/common';
 
 const initialFormValues: AuthDataGroupVO = {
   id: '',
   groupName: '',
   description: '',
   scopeTags: ['ownSubmit'],
-  scopeFieldId: undefined,
+  scopeFieldUuid: undefined,
   scopeLevel: undefined,
   scopeValue: '',
   dataFilters: [],
@@ -102,7 +102,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
         // 处理数据过滤条件
         if (permToEdit.dataFilters) {
           // 将后端数据格式转换为condition-editor组件需要的格式
-          editingData.filterCondition = (permToEdit.dataFilters ?? []).map((item) => ({
+          editingData.filterCondition = (permToEdit.dataFilters ?? []).map((item: any) => ({
             // 假设原来是 item.conditions 或类似字段，改成你真实的字段名
             conditions: (item ?? []).map(normalizeCondition)
           }));
@@ -521,12 +521,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
   };
   return (
     <>
-      {!menuId ? (
-        <div className={styles.permissionEmpty}>
-          <IconEmpty fontSize={50} />
-          暂无页面权限权限，请先添加页面
-        </div>
-      ) : (
+      {menuId && (
         <div className={styles.dataPermission}>
           {DataPermission.length > 0 &&
             DataPermission.map((perm, index) => (

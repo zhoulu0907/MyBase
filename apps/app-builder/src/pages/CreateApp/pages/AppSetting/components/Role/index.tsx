@@ -148,24 +148,17 @@ const RoleInfo = (props: IProps) => {
                   <InputSearch placeholder="搜索分组或页面" onChange={debouncedSearch} />
                 </div>
                 <div className={styles.menu}>
-                  {menuList?.length === 0 ? (
-                    <div className={styles.menuEmpty}>
-                      <IconEmpty fontSize={36} />
-                      暂无数据
-                    </div>
-                  ) : (
-                    <Spin className={styles.loading} loading={menuLoading}>
-                      <Menu
-                        openKeys={openKeys}
-                        selectedKeys={[activeMenuId]}
-                        defaultSelectedKeys={[findFirstPage(menuList)?.id]}
-                        onClickMenuItem={handleSelectMenu}
-                        onClickSubMenu={(_, openKeys) => handleOpenChange(openKeys)}
-                      >
-                        {renderMenuItems(menuList || [])}
-                      </Menu>
-                    </Spin>
-                  )}
+                  <Spin className={styles.loading} loading={menuLoading}>
+                    <Menu
+                      openKeys={openKeys}
+                      selectedKeys={[activeMenuId]}
+                      defaultSelectedKeys={[findFirstPage(menuList)?.id]}
+                      onClickMenuItem={handleSelectMenu}
+                      onClickSubMenu={(_, openKeys) => handleOpenChange(openKeys)}
+                    >
+                      {renderMenuItems(menuList || [])}
+                    </Menu>
+                  </Spin>
                 </div>
               </div>
 
@@ -184,6 +177,13 @@ const RoleInfo = (props: IProps) => {
                   </Tabs>
                 </div>
               )}
+            </div>
+          )}
+          {/* TODO */}
+          {!activeMenuId && (
+            <div className={styles.permissionEmpty}>
+              <IconEmpty fontSize={50} />
+              暂无页面{activeTab === '1' ? '功能' : activeTab === '2' ? '数据' : '字段'}权限，请先添加页面
             </div>
           )}
         </>

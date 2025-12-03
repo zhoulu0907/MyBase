@@ -13,7 +13,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { FormulaInput, FunctionList, InfoPanel, VariableList, DebuggedFormula } from './components';
 import styles from './index.module.less';
-import type { FormulaEditorProps, FunctionItem, info } from './utils/types';
+import type { FormulaEditorProps, functionGroup, FunctionItem, info } from './utils/types';
 import { useAppStore } from '@/store';
 import { IconLeft } from '@arco-design/web-react/icon';
 import { NodeType } from '@onebase/common';
@@ -33,8 +33,9 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
   const [formula, setFormula] = useState(initialFormula); //公式的值
   const [variableSearch, setVariableSearch] = useState('');
   const [functionSearch, setFunctionSearch] = useState('');
-  const [functionLoading, setFunctionLoading] = useState(false);
-  const [funcList, setFuncList] = useState<FunctionItem[]>([]); //公式编辑器中的函数列表展示
+  const [functionLoading, setFunctionLoading] = useState<boolean>(false);
+  const [variableLoading, setVariableLoading] = useState<boolean>(false);
+  const [funcList, setFuncList] = useState<functionGroup[]>([]); //公式编辑器中的函数列表展示
   const editorRef = useRef<{ insertAtPosition: (text: string, type: string, position?: number) => void } | null>(null);
   const [info, setInfo] = useState<info | null>(null);
   const [variables, setVariables] = useState<VariablesList[]>([]); //公式编辑器中的左侧变量列表展示
@@ -63,9 +64,9 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
     // 公式初始化
     setFormula(initialFormula);
     // 变量初始化
-    setVariableSearch('')
+    setVariableSearch('');
     // 常用函数初始化
-    setFunctionSearch('')
+    setFunctionSearch('');
   };
 
   /**
@@ -123,7 +124,9 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
         setVariables(result as any);
       }
     } catch (error) {
-      console.error('加载变量列表失败:', error);
+      Message.error('加载变量列表失败');
+    } finally {
+      setVariableLoading(false);
     }
   };
 
@@ -132,12 +135,16 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
    */
   const getFuncList = async () => {
     setFunctionLoading(true);
-    const res = await getFormulaFunctionSimpleList();
-    if (res) {
-      setFuncList(res);
+    try {
+      const res = await getFormulaFunctionSimpleList();
+      if (res) {
+        setFuncList(res);
+      }
+    } catch (error) {
+      Message.error('获取函数列表失败');
+    } finally {
       setFunctionLoading(false);
     }
-    // setFuncList(mockFunctions)
   };
 
   /**
@@ -175,11 +182,18 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
    */
   const filteredFunctions = useMemo(() => {
     if (!functionSearch) return funcList;
-    return funcList.filter(
-      (f) =>
-        f.name.toLowerCase().includes(functionSearch.toLowerCase()) ||
-        f.summary.toLowerCase().includes(functionSearch.toLowerCase())
-    );
+    let filteredData: functionGroup[] = [];
+    funcList?.forEach((item: functionGroup) => {
+      const functionIndex: number = item.functions?.findIndex(
+        (f) => f.name.toLowerCase().includes(functionSearch.toLowerCase()));
+      if (functionIndex >= 0) {
+        filteredData.push({
+          type: item.type,
+          functions: [item.functions[functionIndex]]
+        });
+      }
+    });
+    return filteredData;
   }, [functionSearch]);
 
   /**
@@ -411,6 +425,7 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
         <FormulaInput
           fieldName={fieldName}
           value={formula}
+          isDebugMode={isDebugMode}
           onChange={setFormula}
           onCopy={handleCopy}
           onDebug={handleClickDebug}
@@ -425,6 +440,7 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
           <Row>
             <Col xs={2} sm={4} md={8} lg={8} xl={8} xxl={8}>
               <VariableList
+                variableLoading={variableLoading}
                 variables={variableSearch ? filteredVariables : variables}
                 searchValue={variableSearch}
                 onSearchChange={setVariableSearch}
@@ -434,7 +450,7 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
             <Col xs={20} sm={16} md={8} lg={8} xl={8} xxl={8}>
               <FunctionList
                 functions={functionSearch ? filteredFunctions : funcList}
-                functionLoading = {functionLoading}
+                functionLoading={functionLoading}
                 searchValue={functionSearch}
                 onSearchChange={setFunctionSearch}
                 onChooseFunction={handleChooseFunction}
