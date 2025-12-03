@@ -122,7 +122,8 @@ public abstract class WarmDaoImpl<U extends WarmMapper<T>, T extends RootEntity>
 
     @Override
     public int delete(T entity) {
-        return getRepository().removeById(entity) ? 1 : 0;
+        QueryWrapper queryWrapper = QueryWrapper.create(entity);
+        return getRepository().remove(queryWrapper) ? 1 : 0;
     }
 
     @Override

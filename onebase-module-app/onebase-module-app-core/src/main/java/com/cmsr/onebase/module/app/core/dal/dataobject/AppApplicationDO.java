@@ -34,9 +34,6 @@ public class AppApplicationDO extends BaseTenantEntity {
     @Column(value = "icon_color", comment = "图标颜色")
     private String iconColor;
 
-    @Column(value = "version_number", comment = "版本号")
-    private String versionNumber;
-
     @Column(value = "version_url", comment = "版本URL")
     private String versionUrl;
 

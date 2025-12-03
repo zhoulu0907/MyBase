@@ -12,6 +12,7 @@ import lombok.Data;
  */
 @Data
 public class GetFormPageListByAppIdReqVO {
+    // TODO: replace with applicationManager?
     @Schema(description = "appId", requiredMode = Schema.RequiredMode.REQUIRED, example = "xxx")
     @NotNull(message = "应用id不能为空")
     private Long appId;

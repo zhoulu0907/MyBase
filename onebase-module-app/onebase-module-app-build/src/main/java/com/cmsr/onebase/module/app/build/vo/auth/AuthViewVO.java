@@ -14,8 +14,8 @@ public class AuthViewVO {
     @Schema(description = "主键Id")
     private Long id;
 
-    @Schema(description = "实体id")
-    private Long viewId;
+    @Schema(description = "实体uuid")
+    private String viewUuid;
 
     @Schema(description = "实体名称")
     private String viewDisplayName;

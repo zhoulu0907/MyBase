@@ -36,7 +36,6 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 @Service
 @Slf4j
@@ -153,7 +152,11 @@ public class EtlDatasourceServiceImpl implements EtlDatasourceService {
     private void complementJdbcDatasourceProperties(EtlDatasourceDO datasourceDO) {
         String datasourceType = datasourceDO.getDatasourceType();
         DatabaseType databaseType = DatasourceFactory.parseDatabaseType(datasourceType);
-        Properties connectionProperties = JsonUtils.parseObject(datasourceDO.getConfig(), Properties.class);
+        Map connectionProperties = JsonUtils.parseObject(datasourceDO.getConfig(), Map.class);
+        String connectMode = (String) connectionProperties.getOrDefault("connectMode", "default");
+        if (StringUtils.equalsIgnoreCase(connectMode, "default")) {
+            return;
+        }
         connectionProperties.put("driver", databaseType.driver());
         String jdbcUrl = DatasourceFactory.buildJdbcConnectionString(datasourceType, connectionProperties);
         connectionProperties.put("jdbcUrl", jdbcUrl);

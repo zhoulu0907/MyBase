@@ -8,7 +8,7 @@ import com.mybatisflex.core.table.TableDef;
  *  表定义层。
  *
  * @author HuangJie
- * @since 2025-11-26
+ * @since 2025-12-01
  */
 public class AppResourceWorkbenchComponentTableDef extends TableDef {
 
@@ -26,9 +26,6 @@ public class AppResourceWorkbenchComponentTableDef extends TableDef {
     public final QueryColumn CONFIG = new QueryColumn(this, "config");
 
     
-    public final QueryColumn PAGE_ID = new QueryColumn(this, "page_id");
-
-    
     public final QueryColumn CREATOR = new QueryColumn(this, "creator");
 
     
@@ -39,6 +36,9 @@ public class AppResourceWorkbenchComponentTableDef extends TableDef {
 
     
     public final QueryColumn EDIT_DATA = new QueryColumn(this, "edit_data");
+
+    
+    public final QueryColumn PAGE_UUID = new QueryColumn(this, "page_uuid");
 
     
     public final QueryColumn TENANT_ID = new QueryColumn(this, "tenant_id");
@@ -56,13 +56,22 @@ public class AppResourceWorkbenchComponentTableDef extends TableDef {
     public final QueryColumn UPDATE_TIME = new QueryColumn(this, "update_time");
 
     
+    public final QueryColumn VERSION_TAG = new QueryColumn(this, "version_tag");
+
+    
     public final QueryColumn LOCK_VERSION = new QueryColumn(this, "lock_version");
+
+    
+    public final QueryColumn APPLICATION_ID = new QueryColumn(this, "application_id");
 
     
     public final QueryColumn COMPONENT_CODE = new QueryColumn(this, "component_code");
 
     
     public final QueryColumn COMPONENT_TYPE = new QueryColumn(this, "component_type");
+
+    
+    public final QueryColumn COMPONENT_UUID = new QueryColumn(this, "component_uuid");
 
     
     public final QueryColumn COMPONENT_INDEX = new QueryColumn(this, "component_index");
@@ -78,7 +87,7 @@ public class AppResourceWorkbenchComponentTableDef extends TableDef {
     /**
      * 默认字段，不包含逻辑删除或者 large 等字段。
      */
-    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{COMPONENT_CODE, PAGE_ID, COMPONENT_TYPE, CONFIG, EDIT_DATA, PARENT_CODE, BLOCK_INDEX, CONTAINER_INDEX, TENANT_ID, ID, CREATE_TIME, UPDATE_TIME, CREATOR, UPDATER, DELETED, LOCK_VERSION, COMPONENT_INDEX};
+    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, COMPONENT_UUID, APPLICATION_ID, VERSION_TAG, PAGE_UUID, COMPONENT_INDEX, COMPONENT_CODE, COMPONENT_TYPE, CONFIG, EDIT_DATA, PARENT_CODE, BLOCK_INDEX, CONTAINER_INDEX, CREATE_TIME, UPDATE_TIME, CREATOR, UPDATER, DELETED, LOCK_VERSION, TENANT_ID};
 
     public AppResourceWorkbenchComponentTableDef() {
         super("", "app_resource_workbench_component");

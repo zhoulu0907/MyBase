@@ -17,6 +17,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppAuthRoleTableDef.APP_AUTH_ROLE;
@@ -63,16 +64,13 @@ public class AppAuthRoleRepository extends BaseAppRepository<AppAuthRoleMapper, 
 
     public List<AppAuthRoleDO> findByUserIdAndApplicationId(Long userId, Long applicationId) {
         QueryWrapper queryWrapper = this.query()
-                .select(
-                        APP_AUTH_ROLE.ID,
-                        APP_AUTH_ROLE.ROLE_CODE,
-                        APP_AUTH_ROLE.ROLE_TYPE,
-                        APP_AUTH_ROLE.ROLE_NAME
-                )
-                .from(APP_AUTH_ROLE_USER, APP_AUTH_ROLE)
-                .where(APP_AUTH_ROLE_USER.ROLE_ID.eq(APP_AUTH_ROLE.ID))
-                .and(APP_AUTH_ROLE_USER.USER_ID.eq(userId));
-        return this.listAs(queryWrapper, AppAuthRoleDO.class);
+                .select(APP_AUTH_ROLE.ALL_COLUMNS)
+                .from(APP_AUTH_ROLE)
+                .leftJoin(APP_AUTH_ROLE_USER)
+                .on(APP_AUTH_ROLE.ID.eq(APP_AUTH_ROLE_USER.ROLE_ID))
+                .where(APP_AUTH_ROLE.APPLICATION_ID.eq(applicationId)
+                        .and(APP_AUTH_ROLE_USER.USER_ID.eq(userId)));
+        return list(queryWrapper);
     }
 
     public PageResult<RoleMemberDTO> findRoleMembers(Long roleId, String memberName, String memberType, PageParam pageParam) {
@@ -97,5 +95,21 @@ public class AppAuthRoleRepository extends BaseAppRepository<AppAuthRoleMapper, 
         }
         return mapper.findUserPhotoList(appIds)
                 .stream().collect(Collectors.groupingBy(AppUserPhotoDTO::getApplicationId, Collectors.toList()));
+    }
+
+
+    public List<String> findUuidsByAppIdAndRoleIds(Long applicationId, Set<Long> roleIds) {
+        QueryWrapper queryWrapper = this.query()
+                .select(APP_AUTH_ROLE.ROLE_UUID)
+                .where(APP_AUTH_ROLE.APPLICATION_ID.eq(applicationId))
+                .where(APP_AUTH_ROLE.ID.in(roleIds));
+        return this.objListAs(queryWrapper, String.class);
+    }
+
+    public AppAuthRoleDO findByAppIdAndRoleUuid(Long applicationId, String roleUuid) {
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_AUTH_ROLE.APPLICATION_ID.eq(applicationId))
+                .where(APP_AUTH_ROLE.ROLE_UUID.eq(roleUuid));
+        return getOne(queryWrapper);
     }
 }

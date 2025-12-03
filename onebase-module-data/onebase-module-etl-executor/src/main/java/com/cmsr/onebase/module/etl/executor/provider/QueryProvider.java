@@ -34,12 +34,12 @@ public class QueryProvider {
 
     public EtlTable findTableByUuid(String tableUuid) throws Exception {
         String sql = """
-                select datasource_id, table_name, meta_info from etl_table where table_uuid = ?  and deleted = ?
+                select datasource_uuid, table_name, meta_info from etl_table where table_uuid = ?  and deleted = ?
                 """;
         return runner.query(sql, resultSet -> {
                     EtlTable etlTable = new EtlTable();
                     if (resultSet.next()) {
-                        etlTable.setDatasourceId(resultSet.getLong("datasource_id"));
+                        etlTable.setDatasourceUuid(resultSet.getString("datasource_uuid"));
                         etlTable.setTableName(resultSet.getString("table_name"));
                         etlTable.setMetaInfo(resultSet.getString("meta_info"));
                         return etlTable;

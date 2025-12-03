@@ -72,7 +72,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "TEXT(1234.5,'$#,##0.00')" }
+{ "formula": "TEXT(2025-11-19,'D')" }
 
 ### UPPER
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -120,7 +120,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "RMBCAP(123.45)" }
+{ "formula": "RMBCAP(-1)" }
 
 ### UUID
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -270,7 +270,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{"formula":"SUM(数学成绩,语文成绩)","parameters":{"数学成绩":68,"语文成绩":70}}
+{"formula":"SUM(数学成绩, 语文成绩)","parameters":{"数学成绩":68,"语文成绩":70}}
 
 ### ABS
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -454,7 +454,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "CEILING(2.3,1)" }
+{ "formula": "CEILING(10.3,2)" }
 
 ### MIN
 POST {{baseUrl}}/formula/engine/execute-formula

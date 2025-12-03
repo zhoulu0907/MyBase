@@ -14,6 +14,9 @@ public class TenantAdminUserResVO {
     @Schema(description = "管理员手机", requiredMode = Schema.RequiredMode.REQUIRED, example = "adminMobile")
     private String adminMobile;
 
+    @Schema(description = "管理员邮箱", example = "user@abc.com")
+    private String adminEmail;
+
     @Schema(description = "管理员id", requiredMode = Schema.RequiredMode.REQUIRED, example = "adminUserId")
     private Long adminUserId;
 

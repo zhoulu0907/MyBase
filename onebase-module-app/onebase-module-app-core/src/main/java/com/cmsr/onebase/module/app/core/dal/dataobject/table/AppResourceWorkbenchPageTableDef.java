@@ -8,7 +8,7 @@ import com.mybatisflex.core.table.TableDef;
  *  表定义层。
  *
  * @author HuangJie
- * @since 2025-11-26
+ * @since 2025-12-01
  */
 public class AppResourceWorkbenchPageTableDef extends TableDef {
 
@@ -50,10 +50,10 @@ public class AppResourceWorkbenchPageTableDef extends TableDef {
     public final QueryColumn PAGE_TYPE = new QueryColumn(this, "page_type");
 
     
-    public final QueryColumn TENANT_ID = new QueryColumn(this, "tenant_id");
+    public final QueryColumn PAGE_UUID = new QueryColumn(this, "page_uuid");
 
     
-    public final QueryColumn PAGESET_ID = new QueryColumn(this, "pageset_id");
+    public final QueryColumn TENANT_ID = new QueryColumn(this, "tenant_id");
 
     
     public final QueryColumn CREATE_TIME = new QueryColumn(this, "create_time");
@@ -68,13 +68,22 @@ public class AppResourceWorkbenchPageTableDef extends TableDef {
     public final QueryColumn UPDATE_TIME = new QueryColumn(this, "update_time");
 
     
+    public final QueryColumn VERSION_TAG = new QueryColumn(this, "version_tag");
+
+    
     public final QueryColumn LOCK_VERSION = new QueryColumn(this, "lock_version");
+
+    
+    public final QueryColumn PAGESET_UUID = new QueryColumn(this, "pageset_uuid");
 
     
     public final QueryColumn EDIT_VIEW_MODE = new QueryColumn(this, "edit_view_mode");
 
     
     public final QueryColumn MAIN_METADATA = new QueryColumn(this, "main_metadata");
+
+    
+    public final QueryColumn APPLICATION_ID = new QueryColumn(this, "application_id");
 
     
     public final QueryColumn DETAIL_VIEW_MODE = new QueryColumn(this, "detail_view_mode");
@@ -102,7 +111,7 @@ public class AppResourceWorkbenchPageTableDef extends TableDef {
     /**
      * 默认字段，不包含逻辑删除或者 large 等字段。
      */
-    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{PAGESET_ID, PAGE_NAME, PAGE_TYPE, TITLE, LAYOUT, WIDTH, MARGIN, BACKGROUND_COLOR, MAIN_METADATA, ROUTER_PATH, ROUTER_NAME, ROUTER_META_TITLE, TENANT_ID, ID, CREATE_TIME, UPDATE_TIME, CREATOR, UPDATER, DELETED, LOCK_VERSION, EDIT_VIEW_MODE, DETAIL_VIEW_MODE, IS_DEFAULT_EDIT_VIEW_MODE, IS_DEFAULT_DETAIL_VIEW_MODE, IS_LATEST_UPDATED};
+    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, PAGE_UUID, APPLICATION_ID, VERSION_TAG, PAGESET_UUID, EDIT_VIEW_MODE, DETAIL_VIEW_MODE, IS_DEFAULT_EDIT_VIEW_MODE, IS_DEFAULT_DETAIL_VIEW_MODE, IS_LATEST_UPDATED, PAGE_NAME, PAGE_TYPE, TITLE, LAYOUT, WIDTH, MARGIN, BACKGROUND_COLOR, MAIN_METADATA, ROUTER_PATH, ROUTER_NAME, ROUTER_META_TITLE, CREATE_TIME, UPDATE_TIME, CREATOR, UPDATER, DELETED, LOCK_VERSION, TENANT_ID};
 
     public AppResourceWorkbenchPageTableDef() {
         super("", "app_resource_workbench_page");

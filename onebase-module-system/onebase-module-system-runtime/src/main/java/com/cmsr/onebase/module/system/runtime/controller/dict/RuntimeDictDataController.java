@@ -26,7 +26,7 @@ import java.util.List;
 
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
-@Tag(name = "管理后台 - 字典数据")
+@Tag(name = "企业服务 - 字典数据")
 @RestController
 @RequestMapping("/system/dict-data")
 @Validated
@@ -55,6 +55,16 @@ public class RuntimeDictDataController {
         }
         List<DictDataDO> list = dictDataService.getDictDataList(CommonStatusEnum.ENABLE.getStatus(), dictType);
         return success(BeanUtils.toBean(list, DictDataSimpleRespVO.class));
+    }
+
+
+    @GetMapping(value = "/get")
+    @Operation(summary = "/查询字典数据详细")
+    @Parameter(name = "id", description = "编号", required = true, example = "1024")
+    @PreAuthorize("@ss.hasPermission('tenant:dict:query')")
+    public CommonResult<DictDataRespVO> getDictData(@RequestParam("id") Long id) {
+        DictDataDO dictData = dictDataService.getDictData(id);
+        return success(BeanUtils.toBean(dictData, DictDataRespVO.class));
     }
 
 }

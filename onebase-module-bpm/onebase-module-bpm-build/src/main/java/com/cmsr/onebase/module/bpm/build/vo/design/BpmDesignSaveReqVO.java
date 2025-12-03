@@ -41,11 +41,10 @@ public class BpmDesignSaveReqVO {
     /**
      * 业务UUID，用于关联业务系统的业务数据
      *
-     * 通常为表单UUID
      */
-    @NotNull(message = "菜单UUID不能为空")
-    @Schema(description = "菜单UUID")
-    private String menuUuid;
+    @NotBlank(message = "业务不能为空")
+    @Schema(description = "业务ID，当前菜单UUID")
+    private String businessId;
 
     /**
      * 流程定义JSON

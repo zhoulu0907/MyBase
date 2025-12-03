@@ -17,6 +17,6 @@ public class MenuPermissionVO {
 
     private FieldPermission fieldPermission;
 
-    private Set<Long> viewIds;
+    private Set<String> viewUuids;
 
 }

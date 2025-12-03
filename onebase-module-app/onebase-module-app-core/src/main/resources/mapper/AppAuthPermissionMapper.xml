@@ -7,15 +7,11 @@
     <select id="findByAppIdAndRoleIdsAndMenuId"
             resultType="com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthPermissionDO">
         select
-        r.role_code,
-        r.role_type,
-        g.*
+        r.role_code, r.role_type,g.*
         from
-        app_auth_role r
-        left join app_auth_permission g
-        on
-        r.application_id = g.application_id
-        and r.id = g.role_id
+        app_auth_role r left join app_auth_permission g
+        on r.application_id = g.application_id
+        and r.role_uuid = g.role_uuid
         where
         r.deleted = 0
         and (g.deleted = 0 or g.deleted is null)
@@ -36,7 +32,7 @@
         left join app_auth_permission g
         on
         r.application_id = g.application_id
-        and r.id = g.role_id
+        and r.role_uuid = g.role_uuid
         where
         r.deleted = 0
         and (g.deleted = 0 or g.deleted is null)

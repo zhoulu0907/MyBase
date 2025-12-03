@@ -13,6 +13,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import java.util.Collections;
 
 /**
+ * 为什么给数据模块要用菜单id作为条件查询？
+ * 因为一个实体可以配置多个菜单，权限的配置是以菜单来的。用户在不同的菜单可有不同的权限。
+ *
  * @Author：huangjie
  * @Date：2025/10/17 12:30
  */
@@ -26,9 +29,9 @@ public class RTSecurityContext {
         return getLoginUser() == null ? null : getLoginUser().getId();
     }
 
-    public static boolean checkMenuEntity(Long menuId, Long entityId) {
+    public static boolean checkMenuEntity(Long menuId, String entityUuid) {
         Long applicationId = ApplicationManager.getApplicationId();
-        return RTPermissionService.getInstance().checkMenuEntity(applicationId, menuId, entityId);
+        return RTPermissionService.getInstance().checkMenuEntity(applicationId, menuId, entityUuid);
     }
 
     public static OperationPermission getMenuOperation(Long menuId) {

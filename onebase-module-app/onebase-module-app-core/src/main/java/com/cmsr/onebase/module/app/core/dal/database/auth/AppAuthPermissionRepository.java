@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.app.core.dal.database.auth;
 
-import com.cmsr.onebase.framework.orm.repo.BaseAppRepository;
+import com.cmsr.onebase.framework.orm.repo.BaseBizRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthPermissionDO;
 import com.cmsr.onebase.module.app.core.dal.mapper.AppAuthPermissionMapper;
 import com.cmsr.onebase.module.app.core.vo.auth.AuthPermissionReq;
@@ -19,13 +19,13 @@ import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppAuthPermi
  * @date 2025-08-05
  */
 @Repository
-public class AppAuthPermissionRepository extends BaseAppRepository<AppAuthPermissionMapper, AppAuthPermissionDO> {
+public class AppAuthPermissionRepository extends BaseBizRepository<AppAuthPermissionMapper, AppAuthPermissionDO> {
 
     public AppAuthPermissionDO findByQuery(AuthPermissionReq reqVO) {
         QueryWrapper queryWrapper = this.query()
                 .and(APP_AUTH_PERMISSION.APPLICATION_ID.eq(reqVO.getApplicationId()))
-                .and(APP_AUTH_PERMISSION.ROLE_ID.eq(reqVO.getRoleId()))
-                .and(APP_AUTH_PERMISSION.MENU_ID.eq(reqVO.getMenuId()));
+                .and(APP_AUTH_PERMISSION.ROLE_UUID.eq(reqVO.getRoleUuid()))
+                .and(APP_AUTH_PERMISSION.MENU_UUID.eq(reqVO.getMenuUuid()));
         return this.getOne(queryWrapper);
     }
 
