@@ -66,8 +66,8 @@ public class MetadataEntityFieldDTO {
     @Schema(description = "版本标识")
     private Long versionTag;
 
-    @Schema(description = "应用UUID")
-    private String applicationUuid;
+    @Schema(description = "应用ID")
+    private Long applicationId;
 
     @Schema(description = "字段状态")
     private Integer status;

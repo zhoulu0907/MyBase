@@ -70,12 +70,12 @@ public class MetadataEntityFieldOptionDO extends BaseTenantEntity {
     private Long applicationId;
 
     /**
-     * 应用UUID
+     * 版本标识
      * <p>
-     * 关联 application.application_uuid
+     * 用于跨应用、跨版本的唯一标识，与 application_id 组成联合唯一约束
      */
-    @Column(value = "application_uuid", comment = "应用UUID")
-    private String applicationUuid;
+    @Column(value = "version_tag", comment = "版本标识")
+    private Long versionTag;
 
 }
 

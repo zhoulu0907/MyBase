@@ -35,9 +35,8 @@ public class FieldConstraintSaveReqVO {
     @Schema(description = "版本标识")
     private Long versionTag;
 
-    @Schema(description = "应用UUID", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotBlank
-    private String applicationUuid;
+    @Schema(description = "应用ID", requiredMode = Schema.RequiredMode.REQUIRED)
+    private Long applicationId;
 }
 
 

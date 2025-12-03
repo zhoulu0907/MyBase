@@ -60,8 +60,8 @@ public class EntityFieldRespVO {
     @Schema(description = "版本标识", example = "0")
     private Long versionTag;
 
-    @Schema(description = "应用UUID", example = "01onal1s-0000-0000-0000-000000000001")
-    private String applicationUuid;
+    @Schema(description = "应用ID", example = "1001")
+    private Long applicationId;
 
     @Schema(description = "字段状态，0：开启，1：关闭", example = "0")
     private Integer status;

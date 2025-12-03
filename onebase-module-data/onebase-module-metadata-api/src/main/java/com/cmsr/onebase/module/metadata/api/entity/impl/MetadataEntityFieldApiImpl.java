@@ -185,7 +185,7 @@ public class MetadataEntityFieldApiImpl implements MetadataEntityFieldApi {
         dto.setSortOrder(f.getSortOrder());
         dto.setFieldCode(f.getFieldCode());
         dto.setVersionTag(f.getVersionTag());
-        dto.setApplicationUuid(f.getApplicationUuid());
+        dto.setApplicationId(f.getApplicationId());
         dto.setCreateTime(f.getCreateTime());
         dto.setUpdateTime(f.getUpdateTime());
         return dto;

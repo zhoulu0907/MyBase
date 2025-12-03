@@ -130,14 +130,6 @@ public class MetadataEntityFieldDO extends BaseTenantEntity {
     private Long applicationId;
 
     /**
-     * 应用UUID
-     * <p>
-     * 关联 application.application_uuid
-     */
-    @Column(value = "application_uuid", comment = "应用UUID")
-    private String applicationUuid;
-
-    /**
      * 字段状态：1-开启，0-关闭
      * @see CommonStatusEnum
      */
@@ -156,13 +148,5 @@ public class MetadataEntityFieldDO extends BaseTenantEntity {
      */
     @Column(value = "dict_type_id", comment = "关联的字典类型ID")
     private Long dictTypeId;
-
-    /**
-     * 获取真正的应用ID（Long类型）
-     * @return 应用ID
-     */
-    public Long getApplicationIdLong() {
-        return this.applicationId;
-    }
 
 }

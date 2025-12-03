@@ -93,4 +93,18 @@ public class MetadataValidationRuleDefinitionDO extends BaseTenantEntity {
     @Column(value = "status", comment = "状态：1-激活，0-非激活")
     private Integer status;
 
+    /**
+     * 应用ID
+     */
+    @Column(value = "application_id", comment = "应用ID")
+    private Long applicationId;
+
+    /**
+     * 版本标识
+     * <p>
+     * 用于跨应用、跨版本的唯一标识，与 application_id 组成联合唯一约束
+     */
+    @Column(value = "version_tag", comment = "版本标识")
+    private Long versionTag;
+
 }
