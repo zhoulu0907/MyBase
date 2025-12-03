@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,21 +26,18 @@ public class ValidationRequiredController {
     @PostMapping("/get-by-field")
     @Operation(summary = "根据字段ID获取必填校验")
     @Parameter(name = "id", description = "字段ID", required = true)
-    @PreAuthorize("@ss.hasPermission('metadata:validation-required:query')")
     public CommonResult<ValidationRequiredRespVO> getByField(@RequestParam("id") Long id) {
         return success(requiredService.getByFieldIdWithRgName(id));
     }
 
     @PostMapping("/create")
     @Operation(summary = "创建必填校验")
-    @PreAuthorize("@ss.hasPermission('metadata:validation-required:create')")
     public CommonResult<Long> create(@Valid @RequestBody ValidationRequiredSaveReqVO vo) {
         return success(requiredService.create(vo));
     }
 
     @PostMapping("/update")
     @Operation(summary = "更新必填校验")
-    @PreAuthorize("@ss.hasPermission('metadata:validation-required:update')")
     public CommonResult<Boolean> update(@Valid @RequestBody ValidationRequiredUpdateReqVO vo) {
         requiredService.update(vo);
         return success(true);
@@ -50,7 +46,6 @@ public class ValidationRequiredController {
     @PostMapping("/delete-by-field")
     @Operation(summary = "按字段删除必填校验")
     @Parameter(name = "id", description = "字段ID", required = true)
-    @PreAuthorize("@ss.hasPermission('metadata:validation-required:delete')")
     public CommonResult<Boolean> deleteByField(@RequestParam("id") Long id) {
         requiredService.deleteByFieldId(id);
         return success(true);
@@ -59,7 +54,6 @@ public class ValidationRequiredController {
     @GetMapping("/get")
     @Operation(summary = "根据主键ID获取必填校验")
     @Parameter(name = "id", description = "必填校验规则主键ID", required = true)
-    @PreAuthorize("@ss.hasPermission('metadata:validation-required:query')")
     public CommonResult<ValidationRequiredRespVO> get(@RequestParam("id") Long id) {
         return success(requiredService.getById(id));
     }
@@ -67,7 +61,6 @@ public class ValidationRequiredController {
     @PostMapping("/delete")
     @Operation(summary = "按主键ID删除必填校验")
     @Parameter(name = "id", description = "必填校验规则主键ID", required = true)
-    @PreAuthorize("@ss.hasPermission('metadata:validation-required:delete')")
     public CommonResult<Boolean> delete(@RequestParam("id") Long id) {
         requiredService.deleteById(id);
         return success(true);

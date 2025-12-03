@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,21 +26,18 @@ public class ValidationRangeController {
     @PostMapping("/get-by-field")
     @Operation(summary = "根据字段ID获取范围校验")
     @Parameter(name = "id", description = "字段ID", required = true)
-    @PreAuthorize("@ss.hasPermission('metadata:validation-range:query')")
     public CommonResult<ValidationRangeRespVO> getByField(@RequestParam("id") Long id) {
         return success(rangeService.getByFieldIdWithRgName(id));
     }
 
     @PostMapping("/create")
     @Operation(summary = "创建范围校验")
-    @PreAuthorize("@ss.hasPermission('metadata:validation-range:create')")
     public CommonResult<Long> create(@Valid @RequestBody ValidationRangeSaveReqVO vo) {
         return success(rangeService.create(vo));
     }
 
     @PostMapping("/update")
     @Operation(summary = "更新范围校验")
-    @PreAuthorize("@ss.hasPermission('metadata:validation-range:update')")
     public CommonResult<Boolean> update(@Valid @RequestBody ValidationRangeUpdateReqVO vo) {
         rangeService.update(vo);
         return success(true);
@@ -50,7 +46,6 @@ public class ValidationRangeController {
     @PostMapping("/delete-by-field")
     @Operation(summary = "按字段删除范围校验")
     @Parameter(name = "id", description = "字段ID", required = true)
-    @PreAuthorize("@ss.hasPermission('metadata:validation-range:delete')")
     public CommonResult<Boolean> deleteByField(@RequestParam("id") Long id) {
         rangeService.deleteByFieldId(id);
         return success(true);
@@ -59,7 +54,6 @@ public class ValidationRangeController {
     @GetMapping("/get")
     @Operation(summary = "根据主键ID获取范围校验")
     @Parameter(name = "id", description = "范围校验规则主键ID", required = true)
-    @PreAuthorize("@ss.hasPermission('metadata:validation-range:query')")
     public CommonResult<ValidationRangeRespVO> get(@RequestParam("id") Long id) {
         return success(rangeService.getById(id));
     }
@@ -67,7 +61,6 @@ public class ValidationRangeController {
     @PostMapping("/delete")
     @Operation(summary = "按主键ID删除范围校验")
     @Parameter(name = "id", description = "范围校验规则主键ID", required = true)
-    @PreAuthorize("@ss.hasPermission('metadata:validation-range:delete')")
     public CommonResult<Boolean> delete(@RequestParam("id") Long id) {
         rangeService.deleteById(id);
         return success(true);
