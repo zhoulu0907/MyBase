@@ -54,15 +54,15 @@ public class ValidationRequiredController {
     @GetMapping("/get")
     @Operation(summary = "根据主键ID获取必填校验")
     @Parameter(name = "id", description = "必填校验规则主键ID", required = true)
-    public CommonResult<ValidationRequiredRespVO> get(@RequestParam("id") Long id) {
-        return success(requiredService.getById(id));
+    public CommonResult<ValidationRequiredRespVO> get(@RequestParam("id") String id) {
+        return success(requiredService.getById(Long.parseLong(id)));
     }
 
     @PostMapping("/delete")
     @Operation(summary = "按主键ID删除必填校验")
     @Parameter(name = "id", description = "必填校验规则主键ID", required = true)
-    public CommonResult<Boolean> delete(@RequestParam("id") Long id) {
-        requiredService.deleteById(id);
+    public CommonResult<Boolean> delete(@RequestParam("id") String id) {
+        requiredService.deleteById(Long.parseLong(id));
         return success(true);
     }
 }

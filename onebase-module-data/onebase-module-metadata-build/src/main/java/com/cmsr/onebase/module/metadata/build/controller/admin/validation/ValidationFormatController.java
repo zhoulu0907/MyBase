@@ -33,8 +33,8 @@ public class ValidationFormatController {
     @GetMapping("/get")
     @Operation(summary = "根据主键ID获取格式校验")
     @Parameter(name = "id", description = "校验规则ID", required = true)
-    public CommonResult<ValidationFormatRespVO> get(@RequestParam("id") Long id) {
-        return success(formatService.getById(id));
+    public CommonResult<ValidationFormatRespVO> get(@RequestParam("id") String id) {
+        return success(formatService.getById(Long.parseLong(id)));
     }
 
     @PostMapping("/create")
@@ -61,8 +61,8 @@ public class ValidationFormatController {
     @PostMapping("/delete")
     @Operation(summary = "根据主键ID删除格式校验")
     @Parameter(name = "id", description = "校验规则ID", required = true)
-    public CommonResult<Boolean> delete(@RequestParam("id") Long id) {
-        formatService.deleteById(id);
+    public CommonResult<Boolean> delete(@RequestParam("id") String id) {
+        formatService.deleteById(Long.parseLong(id));
         return success(true);
     }
 }

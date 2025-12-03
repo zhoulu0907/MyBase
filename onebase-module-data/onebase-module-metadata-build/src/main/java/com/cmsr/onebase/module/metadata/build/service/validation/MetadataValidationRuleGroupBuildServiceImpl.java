@@ -189,8 +189,11 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
 
     @Override
     public PageResult<MetadataValidationRuleGroupDO> getValidationRuleGroupPage(ValidationRuleGroupPageReqVO pageReqVO) {
-        // entityId Long 转换为 entityUuid String
-        String entityUuid = pageReqVO.getEntityId() != null ? String.valueOf(pageReqVO.getEntityId()) : null;
+        // 优先使用entityUuid，若为空则使用entityId
+        String entityUuid = pageReqVO.getEntityUuid();
+        if (entityUuid == null && pageReqVO.getEntityId() != null) {
+            entityUuid = pageReqVO.getEntityId();
+        }
         return validationRuleGroupRepository.selectPage(
                 pageReqVO.getPageNo(),
                 pageReqVO.getPageSize(),
@@ -201,8 +204,11 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
 
     @Override
     public PageResult<ValidationRuleGroupSimpleRespVO> getValidationRuleGroupPageSimple(ValidationRuleGroupPageReqVO pageReqVO) {
-        // entityId Long 转换为 entityUuid String
-        String entityUuid = pageReqVO.getEntityId() != null ? String.valueOf(pageReqVO.getEntityId()) : null;
+        // 优先使用entityUuid，若为空则使用entityId
+        String entityUuid = pageReqVO.getEntityUuid();
+        if (entityUuid == null && pageReqVO.getEntityId() != null) {
+            entityUuid = pageReqVO.getEntityId();
+        }
         PageResult<MetadataValidationRuleGroupDO> page = validationRuleGroupRepository.selectPage(
                 pageReqVO.getPageNo(),
                 pageReqVO.getPageSize(),

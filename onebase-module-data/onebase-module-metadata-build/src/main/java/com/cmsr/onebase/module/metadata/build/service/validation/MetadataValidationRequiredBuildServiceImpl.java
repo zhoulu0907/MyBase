@@ -11,6 +11,7 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntit
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRequiredDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRuleGroupDO;
 import com.cmsr.onebase.module.metadata.build.service.entity.MetadataEntityFieldBuildService;
+import com.cmsr.onebase.module.metadata.core.util.MetadataIdUuidConverter;
 import com.cmsr.onebase.module.metadata.core.util.StatusEnumUtil;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +40,9 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
 
     @Resource
     private MetadataValidationRuleGroupBuildService validationRuleGroupService;
+
+    @Resource
+    private MetadataIdUuidConverter idUuidConverter;
 
     @Override
     public MetadataValidationRequiredDO getByFieldId(String fieldUuid) {
@@ -69,7 +73,8 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
     @Transactional(rollbackFor = Exception.class)
     public Long create(ValidationRequiredSaveReqVO vo) {
         Assert.notNull(vo, "vo不能为空");
-        Assert.notNull(vo.getFieldUuid(), "字段UUID不能为空");
+        // ID与UUID兼容处理：优先使用UUID，若为空则通过ID转换
+        vo.setFieldUuid(idUuidConverter.resolveFieldUuid(vo.getFieldUuid(), vo.getFieldId()));
         Assert.hasText(vo.getRgName(), "规则组名称不能为空");
 
         // 获取字段信息

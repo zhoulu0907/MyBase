@@ -8,6 +8,7 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataD
 import com.cmsr.onebase.module.metadata.build.service.datasource.MetadataDatasourceBuildService;
 import com.cmsr.onebase.module.metadata.build.service.datasource.vo.ColumnQueryVO;
 import com.cmsr.onebase.module.metadata.build.service.datasource.vo.TableQueryVO;
+import com.cmsr.onebase.module.metadata.core.util.MetadataIdUuidConverter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -34,6 +35,9 @@ public class DatasourceController {
 
     @Resource
     private MetadataDatasourceBuildService datasourceBuildService;
+
+    @Resource
+    private MetadataIdUuidConverter idUuidConverter;
 
     @PostMapping("/types")
     @Operation(summary = "获取所有支持的数据源类型")
@@ -80,17 +84,19 @@ public class DatasourceController {
 
     @PostMapping("/delete")
     @Operation(summary = "删除数据源")
-    @Parameter(name = "id", description = "编号", required = true, example = "1024")
-    public CommonResult<Boolean> deleteDatasource(@RequestParam("id") Long id) {
-        datasourceBuildService.deleteDatasource(id);
+    @Parameter(name = "id", description = "数据源标识（支持Long ID或UUID）", required = true, example = "1024")
+    public CommonResult<Boolean> deleteDatasource(@RequestParam("id") String id) {
+        Long datasourceId = idUuidConverter.resolveDatasourceId(id);
+        datasourceBuildService.deleteDatasource(datasourceId);
         return success(true);
     }
 
     @PostMapping("/get")
     @Operation(summary = "获得数据源详情")
-    @Parameter(name = "id", description = "编号", required = true, example = "1024")
-    public CommonResult<DatasourceRespVO> getDatasource(@RequestParam("id") Long id) {
-        MetadataDatasourceDO datasource = datasourceBuildService.getDatasource(id);
+    @Parameter(name = "id", description = "数据源标识（支持Long ID或UUID）", required = true, example = "1024")
+    public CommonResult<DatasourceRespVO> getDatasource(@RequestParam("id") String id) {
+        Long datasourceId = idUuidConverter.resolveDatasourceId(id);
+        MetadataDatasourceDO datasource = datasourceBuildService.getDatasource(datasourceId);
         return success(datasourceBuildService.buildDatasourceRespVO(datasource));
     }
 

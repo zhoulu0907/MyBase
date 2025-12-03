@@ -53,15 +53,15 @@ public class ValidationUniqueController {
     @GetMapping("/get")
     @Operation(summary = "根据主键ID获取唯一性校验")
     @Parameter(name = "id", description = "唯一性校验规则主键ID", required = true)
-    public CommonResult<ValidationUniqueRespVO> get(@RequestParam("id") Long id) {
-        return success(uniqueService.getById(id));
+    public CommonResult<ValidationUniqueRespVO> get(@RequestParam("id") String id) {
+        return success(uniqueService.getById(Long.parseLong(id)));
     }
 
     @PostMapping("/delete")
     @Operation(summary = "按主键ID删除唯一性校验")
     @Parameter(name = "id", description = "唯一性校验规则主键ID", required = true)
-    public CommonResult<Boolean> delete(@RequestParam("id") Long id) {
-        uniqueService.deleteById(id);
+    public CommonResult<Boolean> delete(@RequestParam("id") String id) {
+        uniqueService.deleteById(Long.parseLong(id));
         return success(true);
     }
 }

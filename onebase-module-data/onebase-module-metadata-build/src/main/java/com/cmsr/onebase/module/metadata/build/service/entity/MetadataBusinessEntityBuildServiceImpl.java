@@ -31,6 +31,7 @@ import com.cmsr.onebase.module.metadata.build.service.relationship.MetadataEntit
 import com.cmsr.onebase.module.metadata.core.util.StatusEnumUtil;
 import com.cmsr.onebase.module.metadata.core.dal.database.TemporaryDatasourceService;
 import com.cmsr.onebase.module.metadata.core.enums.BusinessEntityTypeEnum;
+import com.cmsr.onebase.module.metadata.core.util.MetadataIdUuidConverter;
 import com.cmsr.onebase.framework.aynline.AnylineDdlHelper;
 import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
@@ -79,6 +80,9 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
     private MetadataEntityFieldOptionBuildService fieldOptionService;
 
     @Resource
+    private MetadataIdUuidConverter idUuidConverter;
+
+    @Resource
     private AppApplicationApi appApplicationApi;
 
     // 系统字段缓存，避免频繁查询数据库
@@ -109,6 +113,11 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
     @Transactional(rollbackFor = Exception.class)
 
     public Long createBusinessEntity(@Valid BusinessEntitySaveReqVO createReqVO) {
+        // ID转UUID兼容处理：支持前端传入datasourceId或datasourceUuid
+        String resolvedDatasourceUuid = idUuidConverter.resolveDatasourceUuidOptional(
+                createReqVO.getDatasourceUuid(), createReqVO.getDatasourceId());
+        createReqVO.setDatasourceUuid(resolvedDatasourceUuid);
+
         // 预先获取系统字段信息，避免在事务中查询
         List<MetadataSystemFieldsDO> systemFields = null;
         if (BusinessEntityTypeEnum.needCreatePhysicalTable(createReqVO.getEntityType())) {
@@ -697,6 +706,11 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateBusinessEntity(@Valid BusinessEntitySaveReqVO updateReqVO) {
+        // ID转UUID兼容处理：支持前端传入datasourceId或datasourceUuid
+        String resolvedDatasourceUuid = idUuidConverter.resolveDatasourceUuidOptional(
+                updateReqVO.getDatasourceUuid(), updateReqVO.getDatasourceId());
+        updateReqVO.setDatasourceUuid(resolvedDatasourceUuid);
+
         // 安全转换 ID 和 appId
         Long id = safeParseLong(updateReqVO.getId());
         Long appId = safeParseLong(updateReqVO.getApplicationId());

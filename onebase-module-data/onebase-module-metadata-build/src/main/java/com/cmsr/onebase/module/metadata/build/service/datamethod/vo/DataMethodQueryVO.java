@@ -16,8 +16,15 @@ import lombok.NoArgsConstructor;
 public class DataMethodQueryVO {
 
     /**
-     * 实体ID
+     * 实体UUID（优先使用）
      */
+    private String entityUuid;
+
+    /**
+     * 实体ID（兼容旧版）
+     * @deprecated 请使用 entityUuid
+     */
+    @Deprecated
     private Long entityId;
 
     /**
@@ -29,4 +36,13 @@ public class DataMethodQueryVO {
      * 关键词
      */
     private String keyword;
+
+    /**
+     * 构造方法（仅使用entityUuid）
+     */
+    public DataMethodQueryVO(String entityUuid, String methodType, String keyword) {
+        this.entityUuid = entityUuid;
+        this.methodType = methodType;
+        this.keyword = keyword;
+    }
 }

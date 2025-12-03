@@ -10,6 +10,7 @@ import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityFieldRep
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationUniqueDO;
 import com.cmsr.onebase.module.metadata.build.service.entity.MetadataEntityFieldBuildService;
+import com.cmsr.onebase.module.metadata.core.util.MetadataIdUuidConverter;
 import com.cmsr.onebase.module.metadata.core.util.StatusEnumUtil;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +32,7 @@ public class MetadataValidationUniqueBuildServiceImpl implements MetadataValidat
     @Resource private MetadataEntityFieldRepository entityFieldRepository; // 字段仓库
     @Resource private MetadataValidationRuleGroupBuildService ruleGroupService; // 其他服务
     @Resource private MetadataEntityFieldBuildService entityFieldService; // 其他服务
+    @Resource private MetadataIdUuidConverter idUuidConverter; // ID转UUID工具
 
     @Override
     public MetadataValidationUniqueDO getByFieldId(String fieldUuid) {
@@ -61,7 +63,8 @@ public class MetadataValidationUniqueBuildServiceImpl implements MetadataValidat
     @Transactional(rollbackFor = Exception.class)
     public Long create(ValidationUniqueSaveReqVO vo) {
         Assert.notNull(vo, "vo不能为空");
-        Assert.notNull(vo.getFieldUuid(), "字段UUID不能为空");
+        // ID与UUID兼容处理：优先使用UUID，若为空则通过ID转换
+        vo.setFieldUuid(idUuidConverter.resolveFieldUuid(vo.getFieldUuid(), vo.getFieldId()));
         Assert.hasText(vo.getRgName(), "规则组名称不能为空");
 
         // 获取字段信息

@@ -22,6 +22,7 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntit
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.relationship.MetadataEntityRelationshipDO;
 import com.cmsr.onebase.module.metadata.core.enums.CascadeTypeEnum;
 import com.cmsr.onebase.module.metadata.core.enums.RelationshipTypeEnum;
+import com.cmsr.onebase.module.metadata.core.util.MetadataIdUuidConverter;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
 import com.cmsr.onebase.module.metadata.build.service.entity.MetadataBusinessEntityBuildService;
 import com.cmsr.onebase.module.metadata.build.service.entity.MetadataEntityFieldBuildService;
@@ -62,9 +63,25 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
     @Resource
     private MetadataEntityFieldBuildService entityFieldService;
 
+    @Resource
+    private MetadataIdUuidConverter idUuidConverter;
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long createEntityRelationship(@Valid EntityRelationshipSaveReqVO createReqVO) {
+        // ID转UUID兼容处理：支持前端传入xxxId或xxxUuid
+        createReqVO.setSourceEntityUuid(idUuidConverter.resolveEntityUuid(
+                createReqVO.getSourceEntityUuid(), createReqVO.getSourceEntityId()));
+        createReqVO.setTargetEntityUuid(idUuidConverter.resolveEntityUuid(
+                createReqVO.getTargetEntityUuid(), createReqVO.getTargetEntityId()));
+        createReqVO.setSourceFieldUuid(idUuidConverter.resolveFieldUuid(
+                createReqVO.getSourceFieldUuid(), createReqVO.getSourceFieldId()));
+        createReqVO.setTargetFieldUuid(idUuidConverter.resolveFieldUuid(
+                createReqVO.getTargetFieldUuid(), createReqVO.getTargetFieldId()));
+        // selectFieldUuid是可选字段
+        createReqVO.setSelectFieldUuid(idUuidConverter.resolveFieldUuidOptional(
+                createReqVO.getSelectFieldUuid(), createReqVO.getSelectFieldId()));
+
         // 校验关系类型必须是枚举中定义的值
         validateRelationshipType(createReqVO.getRelationshipType());
         
@@ -93,6 +110,18 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateEntityRelationship(@Valid EntityRelationshipSaveReqVO updateReqVO) {
+        // ID转UUID兼容处理：支持前端传入xxxId或xxxUuid
+        updateReqVO.setSourceEntityUuid(idUuidConverter.resolveEntityUuidOptional(
+                updateReqVO.getSourceEntityUuid(), updateReqVO.getSourceEntityId()));
+        updateReqVO.setTargetEntityUuid(idUuidConverter.resolveEntityUuidOptional(
+                updateReqVO.getTargetEntityUuid(), updateReqVO.getTargetEntityId()));
+        updateReqVO.setSourceFieldUuid(idUuidConverter.resolveFieldUuidOptional(
+                updateReqVO.getSourceFieldUuid(), updateReqVO.getSourceFieldId()));
+        updateReqVO.setTargetFieldUuid(idUuidConverter.resolveFieldUuidOptional(
+                updateReqVO.getTargetFieldUuid(), updateReqVO.getTargetFieldId()));
+        updateReqVO.setSelectFieldUuid(idUuidConverter.resolveFieldUuidOptional(
+                updateReqVO.getSelectFieldUuid(), updateReqVO.getSelectFieldId()));
+
         // 校验ID不能为空
         if (!StringUtils.hasText(updateReqVO.getId())) {
             throw new IllegalArgumentException("更新操作必须提供实体关系ID");
@@ -457,7 +486,25 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
     @Override
     @Transactional(rollbackFor = Exception.class)
     public ParentChildRelationshipRespVO createParentChildRelationship(@Valid ParentChildRelationshipSaveReqVO createReqVO) {
-        log.info("开始创建主子关系，主表实体ID: {}, 子表实体ID: {}", createReqVO.getParentEntityId(), createReqVO.getChildEntityId());
+        // ID转UUID兼容处理：支持前端传入xxxId或xxxUuid
+        String parentEntityUuid = idUuidConverter.resolveEntityUuid(
+                createReqVO.getParentEntityUuid(), createReqVO.getParentEntityId());
+        String childEntityUuid = idUuidConverter.resolveEntityUuidOptional(
+                createReqVO.getChildEntityUuid(), createReqVO.getChildEntityId());
+        String datasourceUuid = idUuidConverter.resolveDatasourceUuidOptional(
+                createReqVO.getDatasourceUuid(), createReqVO.getDatasourceId());
+        
+        // 更新VO中的UUID字段
+        createReqVO.setParentEntityUuid(parentEntityUuid);
+        createReqVO.setChildEntityUuid(childEntityUuid);
+        createReqVO.setDatasourceUuid(datasourceUuid);
+        // 同时更新ID字段为解析后的UUID，便于后续逻辑兼容
+        createReqVO.setParentEntityId(parentEntityUuid);
+        if (childEntityUuid != null) {
+            createReqVO.setChildEntityId(childEntityUuid);
+        }
+
+        log.info("开始创建主子关系，主表实体UUID: {}, 子表实体UUID: {}", parentEntityUuid, childEntityUuid);
 
         // 1. 获取或创建子表实体
         Long childEntityId;

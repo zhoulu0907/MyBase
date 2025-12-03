@@ -35,6 +35,9 @@ public class BusinessEntitySaveReqVO {
     @Schema(description = "数据源UUID", example = "01onal1s-0000-0000-0000-000000000001")
     private String datasourceUuid;
 
+    @Schema(description = "数据源ID（兼容旧版，与datasourceUuid二选一）", example = "164329365983232001")
+    private String datasourceId;
+
     @Schema(description = "对应数据表名", requiredMode = Schema.RequiredMode.REQUIRED, example = "sys_user")
     @ValidTableName
     @Size(max = 128, message = "数据表名长度不能超过128个字符")

@@ -42,6 +42,7 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.number.MetadataAutoN
 import com.cmsr.onebase.module.metadata.core.enums.BusinessEntityTypeEnum;
 import com.cmsr.onebase.module.metadata.core.enums.BooleanStatusEnum;
 import com.cmsr.onebase.module.metadata.core.enums.CommonStatusEnum;
+import com.cmsr.onebase.module.metadata.core.util.MetadataIdUuidConverter;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -140,6 +141,9 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
     private MetadataValidationFormatRepository validationFormatRepository;
     @Resource
     private MetadataValidationRuleGroupBuildService validationRuleGroupService;
+
+    @Resource
+    private MetadataIdUuidConverter idUuidConverter;
 
     @Resource
     private ModelMapper modelMapper;
@@ -296,6 +300,10 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
     @Override
     @Transactional(rollbackFor = Exception.class)
     public EntityFieldBatchCreateRespVO batchCreateEntityFields(@Valid EntityFieldBatchCreateReqVO reqVO) {
+        // ID转UUID兼容处理：支持前端传入entityId(实际为reqVO.getEntityId())或entityUuid
+        String resolvedEntityUuid = idUuidConverter.resolveEntityUuid(reqVO.getEntityId(), null);
+        reqVO.setEntityId(resolvedEntityUuid);
+
         EntityFieldBatchCreateRespVO result = new EntityFieldBatchCreateRespVO();
         List<String> fieldIds = new ArrayList<>();
         int successCount = 0;
@@ -598,6 +606,11 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
     @Override
     @Transactional(rollbackFor = Exception.class)
     public EntityFieldBatchSaveRespVO batchSaveEntityFields(@Valid EntityFieldBatchSaveReqVO reqVO) {
+        // ID转UUID兼容处理：支持前端传入entityId(实际为reqVO.getEntityId())或entityUuid
+        // 注意：reqVO.getEntityId()字段名虽然叫entityId，但实际可能传入UUID或Long ID
+        String resolvedEntityUuid = idUuidConverter.resolveEntityUuid(reqVO.getEntityId(), null);
+        reqVO.setEntityId(resolvedEntityUuid);
+
         EntityFieldBatchSaveRespVO resp = new EntityFieldBatchSaveRespVO();
 
         // 1. 获取实体与数据源
@@ -1016,6 +1029,11 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long createEntityField(@Valid EntityFieldSaveReqVO createReqVO) {
+        // ID转UUID兼容处理：支持前端传入entityId或entityUuid
+        String resolvedEntityUuid = idUuidConverter.resolveEntityUuid(
+                createReqVO.getEntityUuid(), createReqVO.getEntityId());
+        createReqVO.setEntityUuid(resolvedEntityUuid);
+
         // 校验字段名不能与系统保留字段冲突
         validateFieldNameNotSystemReserved(createReqVO.getFieldName());
         // 校验字段名唯一性
@@ -1068,6 +1086,13 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateEntityField(@Valid EntityFieldSaveReqVO updateReqVO) {
+        // ID转UUID兼容处理：支持前端传入entityId或entityUuid
+        String resolvedEntityUuid = idUuidConverter.resolveEntityUuidOptional(
+                updateReqVO.getEntityUuid(), updateReqVO.getEntityId());
+        if (resolvedEntityUuid != null) {
+            updateReqVO.setEntityUuid(resolvedEntityUuid);
+        }
+
         // 校验存在
         validateEntityFieldExists(updateReqVO.getId());
         // 校验字段名不能与系统保留字段冲突

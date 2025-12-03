@@ -112,6 +112,21 @@ public class MetadataEntityRelationshipRepository extends ServiceImpl<MetadataEn
     }
 
     /**
+     * 根据关系UUID查询关系
+     *
+     * @param relationshipUuid 关系UUID
+     * @return 实体关系对象
+     */
+    public MetadataEntityRelationshipDO findByRelationshipUuid(String relationshipUuid) {
+        if (relationshipUuid == null || relationshipUuid.trim().isEmpty()) {
+            return null;
+        }
+        QueryWrapper queryWrapper = this.query()
+                .eq(MetadataEntityRelationshipDO::getRelationshipUuid, relationshipUuid);
+        return getOne(queryWrapper);
+    }
+
+    /**
      * 根据字段UUID获取所有相关的关系（包括主表和从表）
      *
      * @param fieldUuid 字段UUID

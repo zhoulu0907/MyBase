@@ -57,19 +57,20 @@ public class ValidationSelfDefinedController {
     @PostMapping("/delete")
     @Operation(summary = "删除自定义校验规则组")
     @Parameter(name = "id", description = "编号", required = true)
-    public CommonResult<Boolean> delete(@RequestParam("id") Long id) {
-        validationRuleGroupService.deleteValidationRuleGroup(id);
+    public CommonResult<Boolean> delete(@RequestParam("id") String id) {
+        validationRuleGroupService.deleteValidationRuleGroup(Long.parseLong(id));
         return success(true);
     }
 
     @PostMapping("/get")
     @Operation(summary = "获得自定义校验规则组详情")
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
-    public CommonResult<ValidationRuleGroupRespVO> get(@RequestParam("id") Long id) {
-        MetadataValidationRuleGroupDO ruleGroup = validationRuleGroupService.getValidationRuleGroup(id);
+    public CommonResult<ValidationRuleGroupRespVO> get(@RequestParam("id") String id) {
+        Long resolvedId = Long.parseLong(id);
+        MetadataValidationRuleGroupDO ruleGroup = validationRuleGroupService.getValidationRuleGroup(resolvedId);
         ValidationRuleGroupRespVO respVO = modelMapper.map(ruleGroup, ValidationRuleGroupRespVO.class);
         if (respVO != null) {
-            respVO.setValueRules(validationRuleGroupService.buildValueRulesStructure(id));
+            respVO.setValueRules(validationRuleGroupService.buildValueRulesStructure(resolvedId));
         }
         return success(respVO);
     }

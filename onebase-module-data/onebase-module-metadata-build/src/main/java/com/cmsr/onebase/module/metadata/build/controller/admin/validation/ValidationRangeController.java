@@ -54,15 +54,15 @@ public class ValidationRangeController {
     @GetMapping("/get")
     @Operation(summary = "根据主键ID获取范围校验")
     @Parameter(name = "id", description = "范围校验规则主键ID", required = true)
-    public CommonResult<ValidationRangeRespVO> get(@RequestParam("id") Long id) {
-        return success(rangeService.getById(id));
+    public CommonResult<ValidationRangeRespVO> get(@RequestParam("id") String id) {
+        return success(rangeService.getById(Long.parseLong(id)));
     }
 
     @PostMapping("/delete")
     @Operation(summary = "按主键ID删除范围校验")
     @Parameter(name = "id", description = "范围校验规则主键ID", required = true)
-    public CommonResult<Boolean> delete(@RequestParam("id") Long id) {
-        rangeService.deleteById(id);
+    public CommonResult<Boolean> delete(@RequestParam("id") String id) {
+        rangeService.deleteById(Long.parseLong(id));
         return success(true);
     }
 }

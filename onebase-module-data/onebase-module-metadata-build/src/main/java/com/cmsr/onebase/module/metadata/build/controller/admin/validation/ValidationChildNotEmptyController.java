@@ -33,8 +33,8 @@ public class ValidationChildNotEmptyController {
     @GetMapping("/get")
     @Operation(summary = "根据主键ID获取子表非空校验")
     @Parameter(name = "id", description = "校验规则ID", required = true)
-    public CommonResult<ValidationChildNotEmptyRespVO> get(@RequestParam("id") Long id) {
-        return success(childNotEmptyService.getById(id));
+    public CommonResult<ValidationChildNotEmptyRespVO> get(@RequestParam("id") String id) {
+        return success(childNotEmptyService.getById(Long.parseLong(id)));
     }
 
     @PostMapping("/create")
@@ -61,8 +61,8 @@ public class ValidationChildNotEmptyController {
     @PostMapping("/delete")
     @Operation(summary = "根据主键ID删除子表非空校验")
     @Parameter(name = "id", description = "校验规则ID", required = true)
-    public CommonResult<Boolean> delete(@RequestParam("id") Long id) {
-        childNotEmptyService.deleteById(id);
+    public CommonResult<Boolean> delete(@RequestParam("id") String id) {
+        childNotEmptyService.deleteById(Long.parseLong(id));
         return success(true);
     }
 }

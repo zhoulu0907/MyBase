@@ -54,15 +54,15 @@ public class ValidationLengthController {
     @GetMapping("/get")
     @Operation(summary = "根据规则组ID获取长度校验")
     @Parameter(name = "id", description = "规则组ID (兼容字段: 前端传的就是组ID)", required = true)
-    public CommonResult<ValidationLengthRespVO> get(@RequestParam("id") Long id) {
-        return success(lengthService.getById(id));
+    public CommonResult<ValidationLengthRespVO> get(@RequestParam("id") String id) {
+        return success(lengthService.getById(Long.parseLong(id)));
     }
 
     @PostMapping("/delete")
     @Operation(summary = "按规则组ID删除长度校验")
     @Parameter(name = "id", description = "规则组ID (兼容字段: 前端传的就是组ID)", required = true)
-    public CommonResult<Boolean> delete(@RequestParam("id") Long id) {
-        lengthService.deleteById(id);
+    public CommonResult<Boolean> delete(@RequestParam("id") String id) {
+        lengthService.deleteById(Long.parseLong(id));
         return success(true);
     }
 }

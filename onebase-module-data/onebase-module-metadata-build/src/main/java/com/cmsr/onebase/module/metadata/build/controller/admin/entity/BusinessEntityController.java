@@ -9,6 +9,7 @@ import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.Busines
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.ERDiagramRespVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.SimpleEntityRespVO;
 import com.cmsr.onebase.module.metadata.build.service.entity.MetadataBusinessEntityBuildService;
+import com.cmsr.onebase.module.metadata.core.util.MetadataIdUuidConverter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -38,6 +39,9 @@ public class BusinessEntityController {
     @Resource
     private MetadataBusinessEntityBuildService businessEntityService;
 
+    @Resource
+    private MetadataIdUuidConverter idUuidConverter;
+
     @PostMapping("/create")
     @Operation(summary = "创建业务实体")
     public CommonResult<BusinessEntityRespVO> createBusinessEntity(@Valid @RequestBody BusinessEntitySaveReqVO reqVO) {
@@ -58,17 +62,19 @@ public class BusinessEntityController {
 
     @PostMapping("/delete")
     @Operation(summary = "软删除业务实体")
-    @Parameter(name = "id", description = "业务实体ID", required = true, example = "1024")
-    public CommonResult<Boolean> deleteBusinessEntity(@RequestParam("id") Long id) {
-        businessEntityService.deleteBusinessEntity(id);
+    @Parameter(name = "id", description = "业务实体标识（支持Long ID或UUID）", required = true, example = "1024")
+    public CommonResult<Boolean> deleteBusinessEntity(@RequestParam("id") String id) {
+        Long entityId = idUuidConverter.resolveEntityId(id);
+        businessEntityService.deleteBusinessEntity(entityId);
         return success(true);
     }
 
     @PostMapping("/get")
     @Operation(summary = "根据ID获取业务实体详细信息")
-    @Parameter(name = "id", description = "业务实体ID", required = true, example = "1024")
-    public CommonResult<BusinessEntityRespVO> getBusinessEntity(@RequestParam("id") Long id) {
-        BusinessEntityRespVO result = businessEntityService.getBusinessEntityDetail(id);
+    @Parameter(name = "id", description = "业务实体标识（支持Long ID或UUID）", required = true, example = "1024")
+    public CommonResult<BusinessEntityRespVO> getBusinessEntity(@RequestParam("id") String id) {
+        Long entityId = idUuidConverter.resolveEntityId(id);
+        BusinessEntityRespVO result = businessEntityService.getBusinessEntityDetail(entityId);
         return success(result);
     }
 

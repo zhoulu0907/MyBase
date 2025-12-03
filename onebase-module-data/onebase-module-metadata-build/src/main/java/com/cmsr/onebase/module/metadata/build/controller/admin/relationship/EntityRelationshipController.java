@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.metadata.build.controller.admin.relationship;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
+import com.cmsr.onebase.module.metadata.core.util.MetadataIdUuidConverter;
 import com.cmsr.onebase.module.metadata.build.controller.admin.relationship.vo.CascadeTypeRespVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.relationship.vo.EntityRelationshipPageReqVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.relationship.vo.EntityRelationshipRespVO;
@@ -42,6 +43,9 @@ public class EntityRelationshipController {
     @Resource
     private MetadataEntityRelationshipBuildService entityRelationshipService;
 
+    @Resource
+    private MetadataIdUuidConverter idUuidConverter;
+
     @PostMapping("/create")
     @Operation(summary = "创建实体间的关联关系")
     public CommonResult<EntityRelationshipRespVO> createEntityRelationship(@Valid @RequestBody EntityRelationshipSaveReqVO reqVO) {
@@ -65,9 +69,10 @@ public class EntityRelationshipController {
 
     @PostMapping("/get")
     @Operation(summary = "根据ID获取关系详细信息")
-    @Parameter(name = "id", description = "关系ID", required = true, example = "5001")
-    public CommonResult<EntityRelationshipRespVO> getEntityRelationship(@RequestParam("id") Long id) {
-        EntityRelationshipRespVO result = entityRelationshipService.getEntityRelationshipDetail(id);
+    @Parameter(name = "id", description = "关系ID或UUID", required = true, example = "5001")
+    public CommonResult<EntityRelationshipRespVO> getEntityRelationship(@RequestParam("id") String id) {
+        Long resolvedId = idUuidConverter.resolveRelationshipId(id);
+        EntityRelationshipRespVO result = entityRelationshipService.getEntityRelationshipDetail(resolvedId);
         return success(result);
     }
 
@@ -82,9 +87,10 @@ public class EntityRelationshipController {
 
     @PostMapping("/delete")
     @Operation(summary = "软删除实体关系")
-    @Parameter(name = "id", description = "关系ID", required = true, example = "5001")
-    public CommonResult<Boolean> deleteEntityRelationship(@RequestParam("id") Long id) {
-        entityRelationshipService.deleteEntityRelationship(id);
+    @Parameter(name = "id", description = "关系ID或UUID", required = true, example = "5001")
+    public CommonResult<Boolean> deleteEntityRelationship(@RequestParam("id") String id) {
+        Long resolvedId = idUuidConverter.resolveRelationshipId(id);
+        entityRelationshipService.deleteEntityRelationship(resolvedId);
         return success(true);
     }
 
