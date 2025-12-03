@@ -71,8 +71,9 @@ public class AppMenuRepository extends BaseBizRepository<AppMenuMapper, AppMenuD
     }
 
     public List<AppMenuDO> findVisibleByAppId(Long applicationId) {
-        QueryWrapper queryWrapper = this.query().eq(AppMenuDO::getApplicationId, applicationId)
-                .eq(AppMenuDO::getIsVisible, 1);
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_MENU.APPLICATION_ID.eq(applicationId))
+                .where(APP_MENU.IS_VISIBLE.eq(1));
         return list(queryWrapper);
     }
 
