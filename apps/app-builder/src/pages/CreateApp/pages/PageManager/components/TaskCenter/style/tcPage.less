@@ -12,10 +12,10 @@
     }
     .title-batch-box {
         margin-top: -8px; margin-bottom: 24px;
-        .arco-btn-outline:nth-child(2) {
+        .pc-btn-outline:nth-child(2) {
             margin-right: 16px; margin-left: 32px;
         }
-        .arco-btn-outline {
+        .pc-btn-outline {
             border-color: rgba(134, 144, 156, 1); color: rgba(134, 144, 156, 1);
         }
     }
@@ -68,13 +68,13 @@
             margin-top: 16px;
         }
     }
-    .arco-select.mid-select {
-        .arco-select-view {
+    .pc-select.mid-select {
+        .pc-select-view {
             background-color: #fff !important;
         }
     }
     .end-select {
-        .arco-select-view {
+        .pc-select-view {
             background-color: #fff !important;
             border: 1px solid var(--color-neutral-3);
         }
@@ -82,29 +82,29 @@
     .fisrt-input-tag {
         border: 1px solid var(--color-neutral-3);
         border-radius: var(--border-radius-small);
-        .arco-input-tag-addbefore {
+        .pc-input-tag-addbefore {
             border: none; padding-right: 0;
         }
     }
 }
 .task-tb-box {
-    .arco-table-cell .flex-bw-center {
+    .pc-table-cell .flex-bw-center {
         justify-content: flex-start;
         & > img {
             margin-right: 6px;
         }
     }
     &.created-tb {
-        .arco-link-is-warning {
+        .pc-link-is-warning {
             color: #86909c;
         }
     }
     &.task-proxy-tb {
-        .arco-tag-gray {
+        .pc-tag-gray {
             color: rgb(var(--gray-10));
         }
-        .arco-table-td:last-child {
-            .arco-btn-text:last-child {
+        .pc-table-td:last-child {
+            .pc-btn-text:last-child {
                 margin-left: 2px;
                 &::before {
                     content: ''; position: absolute; left: -2px; top: 7px;
@@ -118,37 +118,37 @@
 .draw-detail-pop {
     min-width: 1060px;
     background-color: rgba(242, 243, 245, 1);
-    .arco-drawer-content {
+    .pc-drawer-content {
         padding: 0;
     }
-    .arco-drawer-footer {
+    .pc-drawer-footer {
         background: #fff;
         display: flex;
         justify-content: center;
         padding: 8px 14px;
         margin-top: 10px;
-        .arco-btn-text {
+        .pc-btn-text {
             display: flex; align-items: center;
             position: absolute; left: 0;
         }
     }
-    .arco-drawer-header {
+    .pc-drawer-header {
         background: #fff; border: none;
     }
-    .arco-drawer-header-title {
+    .pc-drawer-header-title {
         flex: 1; 
         margin-right: 26px;
-        .arco-icon-fullscreen, .arco-icon-fullscreen-exit {
+        .pc-icon-fullscreen, .pc-icon-fullscreen-exit {
             margin-right: 8px;
         }
-        .arco-icon {
+        .pc-icon {
             cursor: pointer;
         }
     }
-    .arco-drawer-close-icon {
+    .pc-drawer-close-icon {
         font-size: 17px; top: 16px;
     }
-    .flex-bw-center, .arco-drawer-header-title {
+    .flex-bw-center, .pc-drawer-header-title {
         display: flex; align-items: center; justify-content: space-between;
     }
 }
@@ -191,7 +191,7 @@
     }
     .draw-right {
         width: 38.7%; background: #fff;
-        .arco-drawer-header-title {
+        .pc-drawer-header-title {
             margin-right: 0;
         }
     }
@@ -216,10 +216,10 @@
         }
         .fj-rgt-btns {
             margin-left: 16px;
-            & > .arco-icon-eye {
+            & > .pc-icon-eye {
                 margin-right: 8px;
             }
-            & > .arco-icon {
+            & > .pc-icon {
                 cursor: pointer;
             }
         }
@@ -230,13 +230,13 @@
         }
     }
     .detail-left-tb {
-        .arco-table-th {
-            .arco-table-th-item-title {
+        .pc-table-th {
+            .pc-table-th-item-title {
                 &::after {
                     content: '*'; color: red;
                 }
             }
-            &:nth-child(1) .arco-table-th-item-title{
+            &:nth-child(1) .pc-table-th-item-title{
                 display: none;
             }
         }
@@ -252,42 +252,42 @@
                 }
             }
         }
-        .arco-steps-item-finish {
-            .arco-steps-item-tail {
+        .pc-steps-item-finish {
+            .pc-steps-item-tail {
                 &::after {
                     background: rgb(var(--primary-6)) !important;
                 }
             }
         }
-        .arco-steps-item-description {
+        .pc-steps-item-description {
             font-size: 13px; color: #333;
         }
-        .arco-steps-item {
+        .pc-steps-item {
             display: flex; margin-right: 0;
             .photo-img {
                 width: 40px; height: 40px; min-width: 40px;
             }
         }
-        .arco-steps-icon {
+        .pc-steps-icon {
             width: 16px; height: 16px; font-size: small; line-height: 16px;
-            & > .arco-icon {
+            & > .pc-icon {
                 display: none;
             }
         }
-        .arco-steps-icon {
+        .pc-steps-icon {
             opacity: 0;
         }
-        .arco-steps-item-tail {
+        .pc-steps-item-tail {
             left: 7.5px !important; top: 22px !important;
         }
-        .arco-steps-item-title {
+        .pc-steps-item-title {
             font-size: 14px; font-weight: bold;
         }
-        .arco-steps-item-content {
+        .pc-steps-item-content {
             position: relative; top: -6px; flex: 1; overflow: hidden;
         }
         .succss-box {
-            .arco-steps-item-icon {
+            .pc-steps-item-icon {
                 background: url(@/assets/images/task_center/success-green.svg) no-repeat 0 0;
             }
             .sp-options {
@@ -295,7 +295,7 @@
             }
         }
         .succss-gray-box {
-            .arco-steps-item-icon {
+            .pc-steps-item-icon {
                 background: url(@/assets/images/task_center/success-green.svg) no-repeat 0 0;
             }
             .sp-options {
@@ -303,7 +303,7 @@
             }
         }
         .back-box {
-            .arco-steps-item-icon {
+            .pc-steps-item-icon {
                 background: url(@/assets/images/task_center/back-red.svg) no-repeat 0 0;
             }
             .sp-options {
@@ -311,15 +311,15 @@
             }
         }
         .refuse-box {
-            .arco-steps-item-icon {
+            .pc-steps-item-icon {
                 background: url(@/assets/images/task_center/refuse-red.svg) no-repeat 0 0;
             }
             .sp-options {
                 color: red; font-weight: bold;
             }
         }
-        .arco-steps-item-process {
-            .arco-steps-item-icon {
+        .pc-steps-item-process {
+            .pc-steps-item-icon {
                 background: url(@/assets/images/task_center/process-blue.svg) no-repeat 0 0;
                 background-size: 85%;
                 background-position-x: 1px;
@@ -331,8 +331,8 @@
                 }
             }
         }
-        .arco-steps-item-wait {
-            .arco-steps-item-icon {
+        .pc-steps-item-wait {
+            .pc-steps-item-icon {
                 background: url(@/assets/images/task_center/pending-gray.svg) no-repeat 0 0;
             }
             .sp-options {
@@ -343,15 +343,15 @@
 }
 // 各个page 特殊的样式
 .created-radio-group {
-    .arco-btn-text {
+    .pc-btn-text {
         color: rgba(78, 89, 105, 1);
         &.rdo-checked {
             color: rgb(var(--primary-6));
         }
     }
-    .arco-radio {
+    .pc-radio {
         margin: 0 2px; padding: 0;
-        & + .arco-radio {
+        & + .pc-radio {
             &::before {
                 content: ''; position: absolute; height: 50%; left: -2px; top: 25%;
                 width: 2px; border-left: 1px solid rgba(78, 89, 105, 1);
@@ -359,19 +359,19 @@
         }
     }
     &.task-proxy-radio {
-        .arco-btn-size-default {
+        .pc-btn-size-default {
             padding: 0;
         }
-        .arco-radio {
+        .pc-radio {
             margin: 0 16px;
             &:first-child {
                 margin-left: 0;
             }
-            &  + .arco-radio::before {
+            &  + .pc-radio::before {
                 left: -15px;
             }
         }
-        .arco-btn.arco-btn-text:hover {
+        .pc-btn.pc-btn-text:hover {
             background: none;
         }
     }
