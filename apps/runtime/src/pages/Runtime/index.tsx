@@ -136,7 +136,6 @@ const Runtime: React.FC = () => {
     const req: ListApplicationMenuReq = {
       applicationId: appID
     };
-    console.log('req: ', req);
     const res = await runtimeListApplicationMenu(req);
     console.log(res);
     const bpmRes = await runtimeListApplicationBPMMenu(req);
