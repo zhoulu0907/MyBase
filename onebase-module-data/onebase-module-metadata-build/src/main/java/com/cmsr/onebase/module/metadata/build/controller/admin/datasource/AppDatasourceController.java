@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,7 +36,6 @@ public class AppDatasourceController {
 
     @PostMapping("/create-relation")
     @Operation(summary = "创建应用与数据源的关联关系")
-    @PreAuthorize("@ss.hasPermission('metadata:datasource:create')")
     public CommonResult<String> createRelation(
             @Parameter(name = "applicationId", description = "应用ID", required = false, example = "1")
             @RequestParam(value = "applicationId", required = false) Long applicationId,
@@ -55,7 +53,6 @@ public class AppDatasourceController {
 
     @PostMapping("/delete-relation")
     @Operation(summary = "删除应用与数据源的关联关系")
-    @PreAuthorize("@ss.hasPermission('metadata:datasource:delete')")
     public CommonResult<Boolean> deleteRelation(
             @Parameter(name = "applicationId", description = "应用ID", required = false, example = "1")
             @RequestParam(value = "applicationId", required = false) Long applicationId,
@@ -69,7 +66,6 @@ public class AppDatasourceController {
 
     @PostMapping("/list-by-app")
     @Operation(summary = "根据应用ID获取关联的数据源列表")
-    @PreAuthorize("@ss.hasPermission('metadata:datasource:query')")
     public CommonResult<List<DatasourceRespVO>> getDatasourcesByApplicationId(
             @Parameter(name = "applicationId", description = "应用ID", required = false, example = "1")
             @RequestParam(value = "applicationId", required = false) Long applicationId) {
@@ -84,7 +80,6 @@ public class AppDatasourceController {
 
     @PostMapping("/list-apps-by-datasource")
     @Operation(summary = "根据数据源ID获取关联的应用ID列表")
-    @PreAuthorize("@ss.hasPermission('metadata:datasource:query')")
     public CommonResult<List<Long>> getApplicationIdsByDatasourceId(
             @Parameter(name = "datasourceId", description = "数据源ID", required = true, example = "1024")
             @RequestParam("datasourceId") Long datasourceId) {
@@ -95,7 +90,6 @@ public class AppDatasourceController {
 
     @PostMapping("/check-relation")
     @Operation(summary = "检查应用和数据源是否已关联")
-    @PreAuthorize("@ss.hasPermission('metadata:datasource:query')")
     public CommonResult<Boolean> checkRelation(
             @Parameter(name = "applicationId", description = "应用ID", required = false, example = "1")
             @RequestParam(value = "applicationId", required = false) Long applicationId,
@@ -109,7 +103,6 @@ public class AppDatasourceController {
 
     @PostMapping("/list-by-app-uid")
     @Operation(summary = "根据应用UID获取关联的数据源列表")
-    @PreAuthorize("@ss.hasPermission('metadata:datasource:query')")
     public CommonResult<List<DatasourceRespVO>> getDatasourcesByAppUid(
             @Parameter(name = "appUid", description = "应用UID", required = true, example = "app-123")
             @RequestParam("appUid") String appUid) {
@@ -123,7 +116,6 @@ public class AppDatasourceController {
 
     @PostMapping("/delete-relations-by-app")
     @Operation(summary = "根据应用ID删除所有关联关系")
-    @PreAuthorize("@ss.hasPermission('metadata:datasource:delete')")
     public CommonResult<Long> deleteRelationsByApplicationId(
             @Parameter(name = "applicationId", description = "应用ID", required = false, example = "1")
             @RequestParam(value = "applicationId", required = false) Long applicationId) {
@@ -135,7 +127,6 @@ public class AppDatasourceController {
 
     @PostMapping("/delete-relations-by-datasource")
     @Operation(summary = "根据数据源ID删除所有关联关系")
-    @PreAuthorize("@ss.hasPermission('metadata:datasource:delete')")
     public CommonResult<Long> deleteRelationsByDatasourceId(
             @Parameter(name = "datasourceId", description = "数据源ID", required = true, example = "1024")
             @RequestParam("datasourceId") Long datasourceId) {

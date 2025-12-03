@@ -8,6 +8,7 @@ import com.cmsr.onebase.module.flow.context.graph.JsonGraphNode;
 import com.cmsr.onebase.module.flow.context.graph.nodes.ScriptNodeData;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowConnectorScriptRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowConnectorScriptDO;
+import com.mybatisflex.core.tenant.TenantManager;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -78,7 +79,7 @@ public class FlowGraphBuilder {
 
     private void recursivelyComplementNode(JsonGraphNode node) {
         if (node.getData() instanceof ScriptNodeData scriptNodeData) {
-            FlowConnectorScriptDO connectorScriptDO = connectorScriptRepository.getById(scriptNodeData.getActionId());
+            FlowConnectorScriptDO connectorScriptDO = TenantManager.withoutTenantCondition(() -> connectorScriptRepository.getById(scriptNodeData.getActionId()));
             scriptNodeData.setScript(connectorScriptDO.getRawScript());
         }
         if (CollectionUtils.isNotEmpty(node.getBlocks())) {
