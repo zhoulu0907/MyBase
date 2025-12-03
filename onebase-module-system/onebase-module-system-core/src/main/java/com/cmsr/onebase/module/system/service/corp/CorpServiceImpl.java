@@ -31,11 +31,11 @@ import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppRelationPageReqV
 import com.mzt.logapi.context.LogRecordContext;
 import com.mzt.logapi.starter.annotation.LogRecord;
 import jakarta.annotation.Resource;
+import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.DataRow;
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -189,8 +189,8 @@ public class CorpServiceImpl implements CorpService {
             throw exception(CORP_NO_EXISTS, reqVO.getCorpName());
         }
 
-        // todo 检查1：不能小于企业已有开启状态的用户实际数量
-
+        //  检查1：不能小于企业已有开启状态的用户实际数量
+        validCorpExistUserCount(reqVO.getUserLimit());
         // 检查2：不能大于空间下可用的用户数量
         validCorpUserCountLimit(reqVO.getUserLimit(), reqVO.getId());
 
@@ -202,6 +202,18 @@ public class CorpServiceImpl implements CorpService {
 
         LogRecordContext.putVariable("loginUser", loginUser);
         LogRecordContext.putVariable("corp", corpDO);
+    }
+
+    private void validCorpExistUserCount(Integer userLimit) {
+        List<Long> tenantIds=new ArrayList<>();
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+        tenantIds.add(loginUser.getTenantId());
+        // 获取已存在的空间用户数
+        Map<Long, Integer> existUserCountMap = userService.getTenantExistUserCountByIds(tenantIds);
+        Integer existUserCount= existUserCountMap.get(loginUser.getTenantId())==null?CorpConstant.ZERO:existUserCountMap.get(loginUser.getTenantId());
+        if (userLimit < existUserCount) {
+            throw exception(CORP_USER_EXITES_LIMIT_COUNT_CHECK, existUserCount);
+        }
     }
 
     @Transactional(rollbackFor = Exception.class)
