@@ -195,8 +195,7 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         // 使用账号密码，进行登录
         AdminUserDO user = authenticate(reqVO.getUsername(), reqVO.getPassword());
         AuthLoginRespVO authLoginRespVO = createAfterLoginSuccess(user.getUserType(), user.getCorpId(), reqVO.getAppId(), user.getId(), reqVO.getUsername(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_USERNAME);
-        // 设置是否管理员
-        authLoginRespVO.setAdminFlag(findAdminFlag(user.getId(), reqVO.getAppId()));
+
         LogRecordContext.putVariable("user", user);
         return authLoginRespVO;
 
@@ -228,8 +227,7 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         // 使用手机密码，进行登录
         AdminUserDO user = mobileAuthenticate(reqVO.getMobile(), reqVO.getPassword());
         AuthLoginRespVO authLoginRespVO = createAfterLoginSuccess(user.getUserType(), user.getCorpId(), reqVO.getAppId(), user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE);
-        // 设置是否管理员
-        authLoginRespVO.setAdminFlag(findAdminFlag(user.getId(), reqVO.getAppId()));
+
         LogRecordContext.putVariable("user", user);
         return authLoginRespVO;
 
