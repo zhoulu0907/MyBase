@@ -154,7 +154,7 @@ public class EtlDatasourceServiceImpl implements EtlDatasourceService {
         DatabaseType databaseType = DatasourceFactory.parseDatabaseType(datasourceType);
         Map connectionProperties = JsonUtils.parseObject(datasourceDO.getConfig(), Map.class);
         String connectMode = (String) connectionProperties.getOrDefault("connectMode", "default");
-        if (StringUtils.equalsIgnoreCase(connectMode, "default")) {
+        if (!StringUtils.equalsIgnoreCase(connectMode, "default")) {
             return;
         }
         connectionProperties.put("driver", databaseType.driver());
