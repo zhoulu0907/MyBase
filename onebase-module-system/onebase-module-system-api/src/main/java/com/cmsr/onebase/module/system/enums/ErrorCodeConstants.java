@@ -52,8 +52,7 @@ public interface ErrorCodeConstants {
     ErrorCode USER_PASSWORD_NOT_ALLOW_DEL = new ErrorCode(1_002_003_012, "内置用户不允许删除，只允许修改密码");
     ErrorCode LICENSE_USER_COUNT_NOT_ENOUGH = new ErrorCode(1_002_003_013, "可分配人员数量不足，人员上限是{}, 剩余{}");
     ErrorCode LICENSE_TENANT_COUNT_NOT_ENOUGH = new ErrorCode(1_002_003_014, "租户数量已达上限");
-    ErrorCode LENANT_ALLOCATE_PERSON_COUNT_LESS_THEN_ALLOCATED = new ErrorCode(1_002_003_014,
-            "租户内已使用用户数量为({})，分配的用户数量不能低于此数量");
+    ErrorCode LENANT_ALLOCATE_PERSON_COUNT_LESS_THEN_ALLOCATED = new ErrorCode(1_002_003_014, "分配的用户数量不能低于空间内已有用户数：{}");
     ErrorCode USER_TYPE_EXCEPTION = new ErrorCode(1_002_003_015, "用户类型异常:{}");
 
     // ========== 部门模块 1-002-004-000 ==========
@@ -190,6 +189,6 @@ public interface ErrorCodeConstants {
     ErrorCode AUTH_LOGIN_CORP_DELETE_OR_DISABLE = new ErrorCode(1_002_025_010, "你的的账号所属企业已被删除或禁用，暂时无法登录。");
     ErrorCode AUTH_LOGIN_TENANT_DELETE_OR_DISABLE = new ErrorCode(1_002_025_011, "你的的账号所属空间已被删除或禁用，暂时无法登录。");
     ErrorCode CORP_USER_LIMIT_COUNT_CHECK = new ErrorCode(1_002_003_013, "空间可分配人员数量不足，人员上限是{}, 剩余{}");
-    ErrorCode CORP_USER_EXITES_LIMIT_COUNT_CHECK = new ErrorCode(1_002_003_014, "空间内已使用用户数量为({})，分配的用户数量不能低于此数量");
+    ErrorCode CORP_USER_EXITES_LIMIT_COUNT_CHECK = new ErrorCode(1_002_003_014, "分配的用户数量不能低于企业内已有用户数：{}");
 
 }
