@@ -60,9 +60,9 @@ public enum RoleCodeEnum {
         add("tenant:app"); // 应用管理
         add("tenant:app:create"); // 应用新增
         add("tenant:app:delete"); // 应用删除
-        add("tenant:app:enable");  // 应用禁用
         add("tenant:app:query");  //应用查看
-        add("tenant:app:update"); // 应用修改system/user/
+        add("tenant:app:update"); // 应用修改
+        add("tenant:app:publish"); // 应用发布
 
         add("tenant:profile"); // 个人中心
         add("tenant:profile:query");  // 个人中心查看
