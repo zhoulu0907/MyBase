@@ -8,13 +8,20 @@ import { cloneDeep } from 'lodash-es';
 import { FIELD_TAG_TYPE, FIELD_TYPE } from '@onebase/ui-kit';
 
 interface VariableListProps {
+  variableLoading: boolean;
   variables: VariablesList[]; //变量数组，包含所有可展示的变量
   searchValue: string; // 搜索框的值，用于过滤变量列表
   onSearchChange: (value: string) => void; // 搜索框值变化回调，用于更新搜索值
   onInsertVariable: (variable: ChildVariablesField) => void; // 插入变量回调，用于将选中的变量插入到公式编辑器中
 }
 
-export function VariableList({ variables, searchValue, onSearchChange, onInsertVariable }: VariableListProps) {
+export function VariableList({
+  variables,
+  searchValue,
+  variableLoading,
+  onSearchChange,
+  onInsertVariable
+}: VariableListProps) {
   const [filteredVariables, setFilteredVariables] = useState<VariablesList[]>([]);
 
   // 文件、图片、位置、关联关系、密码、加密字段类型的不适合在函数公式中进行计算
@@ -108,7 +115,7 @@ export function VariableList({ variables, searchValue, onSearchChange, onInsertV
         onChange={handleSearchChange}
         className={styles.searchInput}
       />
-      {!variables.length ? (
+      {variableLoading ? (
         <div className={styles.loadingVariables}>
           <Spin size={18} tip="加载变量列表..."></Spin>
         </div>
