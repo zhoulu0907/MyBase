@@ -129,11 +129,11 @@ public enum RoleCodeEnum {
      * 企业全部用户的默认权限(建议未来迁移到数据库配置)
      */
     public static final Set<String> corpDefaultPermissionCodes = new HashSet<>() {{
-        add("tenant"); // 一级
-        add("tenant:app"); // 应用管理
-        add("tenant:app:query");  //应用查看
 
         add("corp"); // 一级
+
+        add("corp:app-auth"); // 二级 应用授权
+        add("corp:app-auth:query"); // 三级 应用授权查看
 
         add("corp:user"); // 二级 用户
         add("corp:user:query"); // 三级 用户查看
