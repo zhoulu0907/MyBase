@@ -1,7 +1,6 @@
-package com.cmsr.onebase.framework.security.build.filter;
+package com.cmsr.onebase.framework.security.runtime.filter;
 
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
-import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,24 +14,25 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 /**
- * Token 过滤器，验证 token 的有效性
- * 验证通过后，获得 {@link LoginUser} 信息，并加入到 Spring Security 上下文
+ *
  */
 @RequiredArgsConstructor
 @Slf4j
 @Component
-public class BuildApplicationContextHeaderFilter extends OncePerRequestFilter {
+public class RuntimeApplicationContextHeaderFilter extends OncePerRequestFilter {
 
     private static final String X_APPLICATION_ID = "X-Application-Id";
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
-        String applicationIdHeader = request.getHeader(X_APPLICATION_ID);
-        Long applicationId = NumberUtils.toLong(applicationIdHeader, -1L);
-        // TODO: 在这里判断用户是否有权限访问该应用
-        ApplicationManager.setApplicationId(applicationId);
-        ApplicationManager.setVersionTag(0L);
+        Long applicationId = ApplicationManager.getApplicationId();
+        if (applicationId == null) {
+            String applicationIdHeader = request.getHeader(X_APPLICATION_ID);
+            applicationId = NumberUtils.toLong(applicationIdHeader, -1L);
+            // TODO: 在这里判断用户是否有权限访问该应用
+            ApplicationManager.setApplicationId(applicationId);
+        }
         chain.doFilter(request, response);
     }
 }
