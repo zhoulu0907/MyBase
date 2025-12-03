@@ -104,7 +104,7 @@ const XLoadMore = memo(
               const dataFieldInfo = mainMetaData.parentFields.find(
                 (field: AppEntityField) => field.fieldId === column.id
               );
-              const result = item[dataFieldInfo.fieldName] || '';
+              const result = item[dataFieldInfo?.fieldName] || '';
               if (!result) return '';
               if (typeof result === 'object') {
                 return JSON.stringify(result);

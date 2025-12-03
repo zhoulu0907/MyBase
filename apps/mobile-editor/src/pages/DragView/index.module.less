@@ -1,58 +1,6 @@
-@import '../../variables.module.less';
-
-// 定义表单编辑器工作区头部高度变量
 @workspace-header-height: 32px;
 @workspace-padding: 20px;
-
-.editorWorkspace {
-  flex: 1 1 0%;
-  width: auto;
-  height: calc(100vh - var(--editor-header-height));
-  box-sizing: border-box;
-  background-color: #f2f3f5;
-  display: flex;
-  flex-direction: column;
-
-  .workspaceHeader {
-    height: @workspace-header-height;
-    background-color: white;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    margin: 0 1px;
-    padding: 0 20px;
-
-    .workspaceHeaderLeft {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: flex-start;
-    }
-
-    .workspaceHeaderRight {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: flex-end;
-    }
-
-    .editorStepCtrl,
-    .pageModeCtrl {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      gap: 8px;
-
-      .pageModeIcon {
-        width: 16px;
-        height: 16px;
-        box-sizing: border-box;
-        cursor: pointer;
-      }
-    }
-  }
-
+.mobileFromWrapper {
   .workspaceBody {
     height: calc(100vh - var(--editor-header-height) - @workspace-header-height - @workspace-padding);
     display: flex;
@@ -60,8 +8,6 @@
     box-sizing: border-box;
     position: relative;
     overflow-y: auto;
-    width: 490px;
-    margin: 0 auto;
 
     /* 自定义滚动条样式 */
     &::-webkit-scrollbar {
@@ -91,13 +37,6 @@
       flex-direction: row;
       flex-wrap: wrap;
       align-content: flex-start;
-
-      background-color: #F7F8FA;
-      box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
-       padding: 0;
-      & > div {
-        width: calc(100% - 8px) !important;
-      }
 
       /* 自定义滚动条样式 */
       &::-webkit-scrollbar {
@@ -228,8 +167,4 @@
       border: 1px dashed rgba(17, 31, 44, 0.2);
     }
   }
-}
-
-.ghostClass {
-  max-width: 442px;
 }

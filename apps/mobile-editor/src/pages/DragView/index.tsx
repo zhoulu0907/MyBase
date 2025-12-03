@@ -1,25 +1,32 @@
-import { getDictDataListByType, getDictDetail } from '@onebase/platform-center';
-import {
-  EDITOR_TYPES,
-  FORM_COMPONENT_TYPES,
-  STATUS_OPTIONS,
-  STATUS_VALUES,
-  COLOR_MODE_TYPES,
-  DEFAULT_VALUE_TYPES
-} from '@onebase/ui-kit';
-import { cloneDeep } from 'lodash-es';
-import { useEffect, useState, useRef } from 'react';
+import type { EditorProps } from '@/common/props';
+import { Form as MobileForm } from '@arco-design/mobile-react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
+import { ENTITY_TYPE, ENTITY_TYPE_VALUE, type AppEntityField } from '@onebase/app';
 import { v4 as uuidv4 } from 'uuid';
+import EmptyIcon from '@/assets/images/empty.svg';
+import CompDeleteIcon from '@/assets/images/app_delete.svg';
+import CompCopyIcon from '@/assets/images/copy_comp_icon.svg';
+import CompShowIcon from '@/assets/images/eye_off_icon.svg';
+import { getDictDataListByType, getDictDetail } from '@onebase/platform-center';
+import { cloneDeep } from 'lodash-es';
 
 import {
+  FORM_COMPONENT_TYPES,
+  COLOR_MODE_TYPES,
+  DEFAULT_VALUE_TYPES,
+  EDITOR_TYPES,
+  getComponentWidth,
+  STATUS_OPTIONS,
+  STATUS_VALUES,
+  useFormEditorSignal,
+  useListEditorSignal,
   COMPONENT_GROUP_NAME,
   COMPONENT_MAP,
   EditRender,
   ENTITY_COMPONENT_TYPES,
   getComponentConfig,
   getComponentSchema,
-  getComponentWidth,
   useAppEntityStore,
   usePageEditorSignal,
   WIDTH_OPTIONS,
@@ -27,48 +34,25 @@ import {
   DEFAULT_OPTIONS_TYPE,
   type GridItem
 } from '@onebase/ui-kit';
-import EmptyIcon from '@/assets/images/empty.svg';
-import MobileIcon from '@/assets/images/mobile_icon.svg';
-import MobileActiveIcon from '@/assets/images/mobile_icon_active.svg';
-import PCIcon from '@/assets/images/pc_icon.svg';
-import PCActiveIcon from '@/assets/images/pc_icon_active.svg';
+import {
+  PreviewRender
+} from '@onebase/ui-kit-mobile';
 
-import NextIcon from '@/assets/images/next_icon.svg';
-import PrevActiveIcon from '@/assets/images/prev_icon_active.svg';
-
-import CompDeleteIcon from '@/assets/images/app_delete.svg';
-import CompCopyIcon from '@/assets/images/copy_comp_icon.svg';
-import CompShowIcon from '@/assets/images/eye_off_icon.svg';
-import { EditMode } from '@onebase/common';
-import { currentEditorSignal } from '@onebase/ui-kit/src/signals/current_editor';
-import { loadMicroApp, initGlobalState, type MicroApp } from "qiankun";
-
-import { Divider, Form } from '@arco-design/web-react';
-import { ENTITY_TYPE, ENTITY_TYPE_VALUE, type AppEntityField } from '@onebase/app';
-import { getHashQueryParam } from '@onebase/common';
-import { useSignals } from '@preact/signals-react/runtime';
-import 'react-grid-layout/css/styles.css';
-import View from '../view';
 import styles from './index.module.less';
+import { List } from '@arco-design/web-react';
 
-export default function EditorWorkspace() {
-  const [showEmpty, setShowEmpty] = useState(true);
-  const [isFormEditor, setIsFormEditor] = useState(false);
-  const [pageSetId, setPageSetId] = useState('');
+interface FormEditorProps {
+  props: EditorProps & {drag: boolean};
+}
 
-  useEffect(() => {
-    const pageSetId = getHashQueryParam('pageSetId');
-    if (pageSetId) {
-      setPageSetId(pageSetId);
-    }
-    // 默认进入清除已选择组件
-    clearCurComponentID();
-  }, []);
-
-  useSignals();
-
+const DragView: React.FC<FormEditorProps> = ({ props }) => {
+  //   useEffect(() => {
+  //     console.log('form editor props', eidtProps.value);
+  //   }, [eidtProps.value]);
+   const [showEmpty, setShowEmpty] = useState(true);
+ console.warn('ssdf===11===', props);
   const { mainEntity, subEntities } = useAppEntityStore();
-
+  
   const {
     curComponentID,
     setCurComponentID,
@@ -93,75 +77,16 @@ export default function EditorWorkspace() {
     delSubTableComponents,
     batchDelSubTableComponents
   } = usePageEditorSignal();
-
-  const [pageMode, setPageMode] = useState<string>('pc');
-  const { editMode, setEditMode } = currentEditorSignal;
-  const mobileEditorDragRef = useRef<MicroApp | null>(null);
   
-  const qiankunActions = initGlobalState({
-    drag: true,
-    editMode,
-    setEditMode,
-    curComponentID,
-    setCurComponentID,
-    clearCurComponentID,
-    setCurComponentSchema,
-    pageComponentSchemas,
-    setPageComponentSchemas,
-    delPageComponentSchemas,
-    components,
-    addComponents,
-    setComponents,
-    delComponents,
-    showDeleteButton,
-    setShowDeleteButton,
-    layoutSubComponents,
-    setLayoutSubComponents,
-    delLayoutSubComponents,
-    batchDelPageComponentSchemas,
-    batchDelLayoutSubComponents,
-    subTableComponents,
-    setSubTableComponents,
-    delSubTableComponents,
-    batchDelSubTableComponents
-  })
+  // const { components, pageComponentSchemas } = props;
   useEffect(() => {
-      console.log("loading mobile-editor-drag-list11", editMode.value);
-    if (editMode.value !== EditMode.MOBILE) {
-      return;
-    }
-      console.log("loading mobile-editor-drag-list");
-  
-      const mobileEditorDrag = loadMicroApp({
-        name: "mobile-editor-drag-list",
-        entry: "//localhost:4401",
-        container:  "#mobile-editor-drag-list",
-        props: {
-          onGlobalStateChange: qiankunActions.onGlobalStateChange,
-          setGlobalState: qiankunActions.setGlobalState,
-          offGlobalStateChange: qiankunActions.offGlobalStateChange,
-        },
-      });
-      mobileEditorDragRef.current = mobileEditorDrag;
-  
-      return () => {
-        mobileEditorDrag?.unmount();
-      };
-    }, [editMode.value]);
-
-  useEffect(() => {
+    console.warn('components向下1======1=1====', components);
     if (components.length === 0) {
       setShowEmpty(true);
     } else {
       setShowEmpty(false);
     }
   }, [components]);
-
-  const hash = window.location.hash;
-  useEffect(() => {
-    setIsFormEditor(hash.includes(EDITOR_TYPES.FORM_EDITOR));
-  }, [hash]);
-
   // 取消隐藏组件
   const handleShowComponent = (componentId: string) => {
     const schema = pageComponentSchemas[componentId];
@@ -172,7 +97,7 @@ export default function EditorWorkspace() {
     setCurComponentSchema(schema);
     setShowDeleteButton(false);
   };
-
+  
   // 复制组件
   const handleCopyComponent = (comp: any, originId: string) => {
     addComponents(comp);
@@ -315,39 +240,10 @@ export default function EditorWorkspace() {
       clearCurComponentID();
     }
   };
-
-  return editMode.value === EditMode.MOBILE ? <div id="mobile-editor-drag-list" className={styles.mobileeditordraglist}></div> : (
-    <div className={styles.editorWorkspace}>
-      <div className={styles.workspaceHeader}>
-        <div className={styles.workspaceHeaderLeft}>{isFormEditor && pageSetId && <View pageSetId={pageSetId} />}</div>
-        <div className={styles.workspaceHeaderRight}>
-          {/* TODO 撤回重做 */}
-          <div className={styles.editorStepCtrl}>
-            <img className={styles.pageModeIcon} src={PrevActiveIcon} />
-            <img className={styles.pageModeIcon} src={NextIcon} />
-          </div>
-          <Divider type="vertical" />
-          <div className={styles.pageModeCtrl}>
-            {editMode.value !== EditMode.MOBILE && (
-              <>
-                <img className={styles.pageModeIcon} src={PCActiveIcon} />
-                <img className={styles.pageModeIcon} src={MobileIcon} onClick={() => setEditMode(EditMode.MOBILE)} />
-              </>
-            )}
-            {editMode.value === EditMode.MOBILE && (
-              <>
-                <img className={styles.pageModeIcon} src={PCIcon} onClick={() => setEditMode(EditMode.PC)} />
-                <img className={styles.pageModeIcon} src={MobileActiveIcon} />
-              </>
-            )}
-          </div>
-        </div>
-      </div>
-
-      <Form
-        labelCol={{
-          style: { flex: 'unset' }
-        }}
+    console.warn('components向下1======1=2221====', components);
+  return (
+    <MobileForm
+      className={styles.mobileFromWrapper}
       >
         <div
           className={styles.workspaceBody}
@@ -618,7 +514,6 @@ export default function EditorWorkspace() {
               setComponents(entityList);
             }}
             onAdd={async (e) => {
-              console.warn('onS000000000onAddonAddonAdd000000000tart', e);
               let cpID = e.item.id || e.item.getAttribute('data-cp-id');
               const itemType = e.item.getAttribute('data-cp-type');
               const itemDisplayName = e.item.getAttribute('data-cp-displayname');
@@ -751,7 +646,6 @@ export default function EditorWorkspace() {
             forceFallback={true}
             className={styles.workspaceContent}
             onStart={(e) => {
-              console.warn('onS000000000000000000tart', e);
               const cpID = e.item.getAttribute('data-cp-id') || '';
               setCurComponentID(cpID);
               const curComponentSchema = pageComponentSchemas[cpID] || {};
@@ -814,7 +708,7 @@ export default function EditorWorkspace() {
                           >
                             <img src={CompShowIcon} alt="component show" />
                           </div>
-                          <Divider className={styles.divider} type="vertical" />
+                          <div className={styles.divider} />
                         </>
                       )}
 
@@ -828,7 +722,7 @@ export default function EditorWorkspace() {
                       >
                         <img src={CompCopyIcon} alt="component copy" />
                       </div>
-                      <Divider className={styles.divider} type="vertical" />
+                      <div className={styles.divider} />
                       {/* 删除按钮 */}
                       {/* TODO(mickey): 组件继续封装，和layout中的共用一套 */}
                       <div
@@ -858,7 +752,9 @@ export default function EditorWorkspace() {
             </div>
           )}
         </div>
-      </Form>
-    </div>
-  );
-}
+      </MobileForm>
+  )
+  
+};
+
+export { DragView };

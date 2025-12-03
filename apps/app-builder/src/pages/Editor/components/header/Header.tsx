@@ -594,11 +594,11 @@ export default function EditorHeader() {
             创建流程
           </Button>
         )}
-        <PartPreview
+        {partPreviewVisible && <PartPreview
           pageType={activeTab}
           visible={partPreviewVisible}
           setVisible={() => setPartPreviewVisible(false)}
-        />
+        />}
       </div>
 
       {/* 重命名弹窗 */}

@@ -4,6 +4,7 @@ import { HashRouter } from 'react-router-dom';
 import { qiankunWindow, renderWithQiankun } from 'vite-plugin-qiankun/dist/helper';
 import App from './App.tsx';
 import './index.css';
+document.documentElement.style.fontSize = '48px';
 
 const containerMap = new WeakMap<HTMLElement, Root>();
 
@@ -13,17 +14,19 @@ async function bootstrap() {
 
 async function mount(props: any) {
   console.log('sub-app mount', props);
+  console.log('sub-app mount11', props.container);
 
   const container = props?.container ? props.container : document.getElementById('root')!;
-
-  const containerElement = container.querySelector('#root') || container;
-
+ const containerElement = document.createElement('div');
+  // const containerElement = container.querySelector('#root') || container;
+  containerElement.id = props.name || `subapp-instance-${Date.now()}`;
+  container.appendChild(containerElement);
   const root = createRoot(containerElement);
 
   root.render(
     <StrictMode>
       <HashRouter>
-        <App props={props} />
+        <App instanceId={containerElement.id} props={props} />
       </HashRouter>
     </StrictMode>
   );
