@@ -34,4 +34,10 @@ public class UpdateFlowConnectorScriptReqVO {
     @Schema(description = "输出参数配置")
     private JsonNode outputParameter;
 
+    @Schema(description = "输入定义")
+    private JsonNode inputSchema;
+
+    @Schema(description = "输出定义")
+    private JsonNode outputSchema;
+
 }
