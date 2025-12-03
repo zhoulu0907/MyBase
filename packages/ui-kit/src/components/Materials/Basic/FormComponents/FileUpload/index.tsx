@@ -127,7 +127,7 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
         field={fieldId}
         layout={layout}
         tooltip={tooltip}
-        rules={[{ required: verify?.required, message:`${label.text}是必填项` }]}
+        rules={[{ required: verify?.required, message: `${label.text}是必填项` }]}
         wrapperCol={{ style: { flex: 1 } }}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
@@ -184,27 +184,29 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
           }}
           renderUploadList={renderUploadList}
         >
-          <div className="uplaodTrigger">
-            {uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT] && (
-              <Button type={buttonType || 'primary'} >
-                <IconUpload />
-                <span>{buttonName || '点击上传'}</span>
-              </Button>
-            )}
-            {uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.LIST] && (
-              <div className="uplaodTriggerList">
-                <div className="uplaodTriggerList-content">
+          {!detailMode && (
+            <div className="uplaodTrigger">
+              {uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT] && (
+                <Button type={buttonType || 'primary'} >
                   <IconUpload />
-                  <div className="uplaodTriggerList-tips">{buttonName || '点击或拖拽文件到此处上传'}</div>
-                  <div className="uplaodTriggerList-describe">支持{verify?.fileFormat}格式</div>
-                  <div className="uplaodTriggerList-describe">
-                    最多上传{verify?.maxCount && verify?.maxCount > 0 ? verify?.maxCount : 1}
-                    个文件，单个文件不超过{verify?.maxSize || 10}MB
+                  <span>{buttonName || '点击上传'}</span>
+                </Button>
+              )}
+              {uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.LIST] && (
+                <div className="uplaodTriggerList">
+                  <div className="uplaodTriggerList-content">
+                    <IconUpload />
+                    <div className="uplaodTriggerList-tips">{buttonName || '点击或拖拽文件到此处上传'}</div>
+                    <div className="uplaodTriggerList-describe">支持{verify?.fileFormat}格式</div>
+                    <div className="uplaodTriggerList-describe">
+                      最多上传{verify?.maxCount && verify?.maxCount > 0 ? verify?.maxCount : 1}
+                      个文件，单个文件不超过{verify?.maxSize || 10}MB
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          )}
         </Upload>
       </Form.Item>
     </div>
