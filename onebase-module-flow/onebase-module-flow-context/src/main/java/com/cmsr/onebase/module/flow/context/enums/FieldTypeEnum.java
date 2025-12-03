@@ -53,15 +53,12 @@ public enum FieldTypeEnum {
     }
 
     public static FieldTypeEnum getByName(String name) {
-        if (StringUtils.isEmpty(name)) {
-            throw new IllegalArgumentException("Invalid FieldTypeEnum name: " + name);
-        }
         for (FieldTypeEnum typeEnum : values()) {
             if (typeEnum.name().equalsIgnoreCase(name)) {
                 return typeEnum;
             }
         }
-        throw new IllegalArgumentException("Invalid FieldTypeEnum name: " + name);
+        return null;
     }
 
 }
