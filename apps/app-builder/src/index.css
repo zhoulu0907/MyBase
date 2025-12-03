@@ -9,28 +9,28 @@
 
 /* tab下划线隐藏 */
 .createAppTabs {
-  .arco-tabs-header {
+  .pc-tabs-header {
     display: flex;
     gap: 10px;
 
-    .arco-tabs-header-ink {
+    .pc-tabs-header-ink {
       display: none;
     }
   }
 
-  .arco-tabs-header-title {
-    .arco-tabs-header-title-text {
+  .pc-tabs-header-title {
+    .pc-tabs-header-title-text {
       color: #272e3b;
       font-weight: 400;
     }
-    &:hover .arco-tabs-header-title-text {
+    &:hover .pc-tabs-header-title-text {
       &::before {
         background-color: transparent;
       }
     }
   }
 
-  .arco-tabs-header-title-active .arco-tabs-header-title-text {
+  .pc-tabs-header-title-active .pc-tabs-header-title-text {
     font-weight: 500;
     color: rgb(var(--primary-6));
   }
@@ -38,11 +38,11 @@
 
 /* 菜单隐藏样式 */
 .menuTree {
-  .arco-tree-node-is-leaf .arco-tree-node-switcher {
+  .pc-tree-node-is-leaf .pc-tree-node-switcher {
     display: none;
   }
 
-  .arco-tree-node-switcher {
+  .pc-tree-node-switcher {
     position: absolute;
     right: 0;
     top: 50%;
@@ -53,19 +53,19 @@
     height: 16px;
     margin-right: 12px;
 
-    .arco-tree-node-icon-hover:hover::before {
+    .pc-tree-node-icon-hover:hover::before {
       background-color: transparent;
     }
   }
-  .arco-tree-node-title {
+  .pc-tree-node-title {
     padding: 0;
     margin: 0;
   }
-  .arco-tree-node {
+  .pc-tree-node {
     padding: 0;
   }
 }
 
-.buttonShowInput .arco-input-inner-wrapper {
+.buttonShowInput .pc-input-inner-wrapper {
   background-color: #fff;
 }
