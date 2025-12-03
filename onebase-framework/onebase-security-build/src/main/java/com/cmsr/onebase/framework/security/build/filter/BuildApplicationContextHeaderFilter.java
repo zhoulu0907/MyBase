@@ -35,6 +35,7 @@ public class BuildApplicationContextHeaderFilter extends OncePerRequestFilter {
         // TODO: 在这里判断用户是否有权限访问该应用
 
         ApplicationManager.setApplicationId(applicationId);
+        ApplicationManager.setVersionTag(0L);
 
         chain.doFilter(request, response);
     }
