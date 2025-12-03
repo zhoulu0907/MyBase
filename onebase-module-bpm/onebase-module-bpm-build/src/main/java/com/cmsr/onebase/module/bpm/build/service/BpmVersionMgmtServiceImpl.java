@@ -197,9 +197,17 @@ public class BpmVersionMgmtServiceImpl implements BpmVersionMgmtService {
                     .collect(Collectors.toMap(AdminUserRespDTO::getId, user -> user));
             for (FlowDefinition definition : pageResult.getRecords()) {
                 BpmDefVersionMgtVO vo = new BpmDefVersionMgtVO();
+                String defaultVersionAlias = "流程版本V" + definition.getVersion();
+
                 vo.setId(definition.getId());
                 vo.setBpmVersion("V" + definition.getVersion());
-                vo.setBpmVersionAlias(definition.getBpmVersionAlias());
+
+                if (StringUtils.isBlank(definition.getBpmVersionAlias())) {
+                    vo.setBpmVersionAlias(defaultVersionAlias);
+                } else {
+                    vo.setBpmVersionAlias(definition.getBpmVersionAlias());
+                }
+
                 VersionStatusEnum versionStatusEnum = VersionStatusEnum.toVersionStatusEnum(definition.getIsPublish());
                 vo.setBpmVersionStatus(versionStatusEnum.getCode());
                 vo.setCreateTime(definition.getCreateTime());
