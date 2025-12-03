@@ -104,7 +104,7 @@ const TaskList = memo(
 
     // 行点击事件
     const handleRowClick = (record: any) => {
-      
+
     };
 
     const [form] = useForm();
@@ -204,14 +204,14 @@ const TaskList = memo(
 
     return (
       <div className="task-list-wrapper">
-            <CustomNav
-              title={title}
-              style={{ background: '#fff' }}
-            />
+        <CustomNav
+          title={title}
+          style={{ background: '#fff' }}
+        />
         <Sticky topOffset={0.88 * window.ROOT_FONT_SIZE} className="list-search-header">
-            <SearchBar actionButton={null} placeholder={`请输入查询内容`} />
-            <img className="filter-icon" src={filterIcon} alt="" onClick={() => setShowDropdown(true)} />
-            {filterDropdown()}
+          <SearchBar actionButton={null} placeholder={`请输入查询内容`} />
+          <img className="filter-icon" src={filterIcon} alt="" onClick={() => setShowDropdown(true)} />
+          {filterDropdown()}
         </Sticky>
         <div className="list-body-wrapper">
           {
