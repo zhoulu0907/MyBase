@@ -111,7 +111,7 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
           title: '个人中心',
           icon: <img src={userInfoSVG} />,
           path: `/onebase/${tenantId}/setting/profile`,
-          permissionKey: TENANT_MENUS.INFO
+          permissionKey: TENANT_MENUS.PROFILE
         }
       ]
     },

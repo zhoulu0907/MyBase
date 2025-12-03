@@ -5,6 +5,7 @@
     "build:admin-console": "pnpm build:packages && pnpm --filter ./apps/admin-console... devops_build",
     "build:app-builder": "pnpm build:packages && pnpm --filter ./apps/app-builder... devops_build",
     "build:mobile-editor": "pnpm build:packages && pnpm --filter ./apps/mobile-editor... devops_build",
-    "build:runtime": "pnpm build:packages && pnpm --filter ./apps/runtime... devops_build"
+    "build:runtime": "pnpm build:packages && pnpm --filter ./apps/runtime... devops_build",
+    "build:mobile-runtime": "pnpm build:packages && pnpm --filter ./apps/mobile-runtime... devops_build"
   }
 }

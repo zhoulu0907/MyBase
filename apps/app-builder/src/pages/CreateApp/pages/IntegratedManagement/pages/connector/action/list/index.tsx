@@ -70,7 +70,6 @@ const ScriptActionListPage: React.FC = () => {
         setPageNo
       );
 
-      console.log('res :', res);
       if (res) {
         setActionList(res.list || []);
         setTotal(res.total || 0);
