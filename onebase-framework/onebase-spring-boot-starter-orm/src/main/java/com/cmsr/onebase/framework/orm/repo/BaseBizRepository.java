@@ -18,16 +18,12 @@ import java.util.List;
 public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity> extends ServiceImpl<M, T> {
 
     protected void injectQueryFilter(QueryWrapper queryWrapper) {
-        if (ApplicationManager.isIgnoreApplicationCondition() && ApplicationManager.isIgnoreVersionTagCondition()) {
-            return;
-        }
-        List<QueryTable> queryTables = CPI.getQueryTables(queryWrapper);
-        if (CollectionUtils.isNotEmpty(queryTables) && queryTables.size() > 1) {
-            log.warn("查询条件包含多个表，跳过条件注入");
+        if (!canFilter(queryWrapper)) {
             return;
         }
         QueryColumn applicationColumn;
         QueryColumn versionTagColumn;
+        List<QueryTable> queryTables = CPI.getQueryTables(queryWrapper);
         if (CollectionUtils.isEmpty(queryTables)) {
             applicationColumn = new QueryColumn(BaseBizEntity.APPLICATION_ID);
             versionTagColumn = new QueryColumn(BaseBizEntity.VERSION_TAG);
@@ -39,6 +35,30 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
         Long versionTag = ApplicationManager.getVersionTag();
         queryWrapper.and(applicationColumn.eq(applicationId).when(!ApplicationManager.isIgnoreApplicationCondition()));
         queryWrapper.and(versionTagColumn.eq(versionTag).when(!ApplicationManager.isIgnoreVersionTagCondition()));
+    }
+
+    private boolean canFilter(QueryWrapper queryWrapper) {
+        if (ApplicationManager.isIgnoreApplicationCondition() && ApplicationManager.isIgnoreVersionTagCondition()) {
+            return false;
+        }
+        // 不处理UNION类型
+        List<UnionWrapper> unions = CPI.getUnions(queryWrapper);
+        if (CollectionUtils.isNotEmpty(unions)) {
+
+            return false;
+        }
+        // 不处理子查询
+        List<QueryWrapper> childSelect = CPI.getChildSelect(queryWrapper);
+        if (CollectionUtils.isNotEmpty(childSelect)) {
+            return false;
+        }
+        List<QueryTable> queryTables = CPI.getQueryTables(queryWrapper);
+        if (CollectionUtils.isNotEmpty(queryTables) && queryTables.size() > 1) {
+            log.warn("查询条件包含多个表，跳过条件注入");
+            return false;
+        }
+        // 需要处理
+        return true;
     }
 
     //region ===== 查询（查）操作 =====
