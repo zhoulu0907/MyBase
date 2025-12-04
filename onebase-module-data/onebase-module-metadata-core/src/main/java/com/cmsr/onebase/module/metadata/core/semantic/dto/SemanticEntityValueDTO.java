@@ -12,7 +12,7 @@ import java.util.HashMap;
 @Schema(description = "值模型 DTO")
 @Data
 public class SemanticEntityValueDTO {
-    @Schema(description = "主实体ID")
+    @Schema(description = "主实体值ID的值")
     private Object id;
 
     @Schema(description = "主实体字段值")

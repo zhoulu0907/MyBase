@@ -26,6 +26,7 @@ import jakarta.validation.Valid;
  * @date 2025-12-01
  */
 @Tag(name = "动态数据方法 API")
+@Deprecated
 public interface SemanticDynamicDataApi {
 
 
