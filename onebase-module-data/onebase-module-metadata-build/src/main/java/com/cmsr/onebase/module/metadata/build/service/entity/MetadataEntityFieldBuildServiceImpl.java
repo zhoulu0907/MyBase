@@ -1222,12 +1222,22 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
     }
 
     private void validateEntityFieldNameUnique(String id, String entityId, String fieldName) {
+        // 将entityId转换为entityUuid（兼容ID和UUID两种格式）
+        String entityUuid = idUuidConverter.toEntityUuid(entityId);
+        if (entityUuid == null || entityUuid.isEmpty()) {
+            log.warn("无法解析实体标识: {}", entityId);
+            return;
+        }
+        
         QueryWrapper queryWrapper = QueryWrapper.create()
-                .eq(MetadataEntityFieldDO::getEntityUuid, entityId)
+                .eq(MetadataEntityFieldDO::getEntityUuid, entityUuid)
                 .eq(MetadataEntityFieldDO::getFieldName, fieldName);
         if (id != null && !id.trim().isEmpty()) {
-            Long longId = Long.valueOf(id.trim());
-            queryWrapper.ne(MetadataEntityFieldDO::getId, longId);
+            // id可能是数字ID或UUID，需要兼容处理
+            String fieldUuid = idUuidConverter.toFieldUuid(id.trim());
+            if (fieldUuid != null && !fieldUuid.isEmpty()) {
+                queryWrapper.ne(MetadataEntityFieldDO::getFieldUuid, fieldUuid);
+            }
         }
 
         long count = metadataEntityFieldRepository.count(queryWrapper);
@@ -1257,13 +1267,22 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             return;
         }
 
-        Long longEntityId = Long.valueOf(entityId);
+        // 将entityId转换为entityUuid（兼容ID和UUID两种格式）
+        String entityUuid = idUuidConverter.toEntityUuid(entityId);
+        if (entityUuid == null || entityUuid.isEmpty()) {
+            log.warn("无法解析实体标识: {}", entityId);
+            return;
+        }
+        
         QueryWrapper queryWrapper = QueryWrapper.create()
-                .eq(MetadataEntityFieldDO::getEntityUuid, entityId)
+                .eq(MetadataEntityFieldDO::getEntityUuid, entityUuid)
                 .eq(MetadataEntityFieldDO::getDisplayName, displayName.trim());
         if (id != null && !id.trim().isEmpty()) {
-            Long longId = Long.valueOf(id.trim());
-            queryWrapper.ne(MetadataEntityFieldDO::getId, longId);
+            // id可能是数字ID或UUID，需要兼容处理
+            String fieldUuid = idUuidConverter.toFieldUuid(id.trim());
+            if (fieldUuid != null && !fieldUuid.isEmpty()) {
+                queryWrapper.ne(MetadataEntityFieldDO::getFieldUuid, fieldUuid);
+            }
         }
 
         long count = metadataEntityFieldRepository.count(queryWrapper);
