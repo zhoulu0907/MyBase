@@ -1,3 +1,4 @@
+import { Message } from '@arco-design/web-react';
 import '@icon-park/react/styles/index.css';
 import { NotFoundPage } from '@onebase/common';
 import { Navigate, Route, HashRouter as Router, Routes } from 'react-router-dom';
@@ -5,9 +6,14 @@ import Login from './pages/Login';
 import MyAppPage from './pages/MyApp';
 import Runtime from './pages/Runtime';
 import SettingPage from './pages/Setting';
-// import Runtime from './pages/Runtime';
 
 function AppContent() {
+  Message.config({
+    duration: 3000,
+    maxCount: 1,
+    getContainer: () => document.body
+  });
+
   return (
     <Routes>
       {/* 登录页面不需要认证 */}

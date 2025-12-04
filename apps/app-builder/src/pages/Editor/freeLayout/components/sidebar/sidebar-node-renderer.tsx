@@ -12,7 +12,7 @@ import Launch from './components/launch';
 import CcRecipientsDreawer from './components/ccRecipients/index';
 import Conditional from './components/conditional';
 import Parallel from './components/parallel';
-import Sink from './components/sink'
+import Sink from './components/sink';
 import { WorkflowNodeType } from '../../nodes/constants';
 export function SidebarNodeRenderer(props: { node: FlowNodeEntity }) {
   const { node } = props;
@@ -27,7 +27,6 @@ export function SidebarNodeRenderer(props: { node: FlowNodeEntity }) {
   const handleSubmit = (data: any, nodeName: string) => {
     nodeName && (data.name = nodeName);
     nodeRender.updateData(Object.assign({}, nodeRender.data, data));
-    console.log(nodeRender.data, '更新后的data');
   };
 
   return (
@@ -51,9 +50,9 @@ export function SidebarNodeRenderer(props: { node: FlowNodeEntity }) {
         {nodeRender?.type === WorkflowNodeType.CCRECIPIENTS && (
           <CcRecipientsDreawer handleConfigSubmit={handleSubmit} configData={nodeRender.data} />
         )}
-        {nodeRender?.type === WorkflowNodeType.CONDITIONAL_BRANCH && <Conditional />}
+        {nodeRender?.type === WorkflowNodeType.CONDITIONAL_BRANCH && <Conditional node={node} />}
         {nodeRender?.type === WorkflowNodeType.PARALLEL_BRANCH && <Parallel />}
-         {nodeRender?.type === WorkflowNodeType.SINK_NODE_BRANCH && <Sink />}
+        {nodeRender?.type === WorkflowNodeType.SINK_NODE_BRANCH && <Sink />}
       </div>
     </NodeRenderContext.Provider>
   );

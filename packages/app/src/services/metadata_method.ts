@@ -8,6 +8,7 @@ export const dataMethodInsert = (params: InsertMethodParams) => {
 };
 
 export const dataMethodPage = (params: PageMethodParam) => {
+  // TODO(mickey): 等新版运行态curd接口完善后改造
   const env = getEnv();
   if (env !== 'runtime') {
     return {

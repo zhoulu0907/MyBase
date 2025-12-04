@@ -1,5 +1,6 @@
 import { Button, Form, Grid, Input, InputNumber, Select, Switch, type FormInstance } from '@arco-design/web-react';
 import { IconDelete, IconPlus } from '@arco-design/web-react/icon';
+import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
 import React from 'react';
 
 const Row = Grid.Row;
@@ -12,66 +13,50 @@ interface SchemaFormProps {
   level?: number;
 }
 
+// 从 ENTITY_FIELD_TYPE 中提取需要的字段类型
 const FIELD_TYPES = [
-  { label: '字符串', value: 'string' },
-  { label: '数字', value: 'number' },
-  { label: '布尔值', value: 'boolean' },
-  { label: '对象', value: 'object' },
-  { label: '数组', value: 'array' },
-  { label: '空值', value: 'null' }
-];
+  ENTITY_FIELD_TYPE.ID,
+  ENTITY_FIELD_TYPE.EMAIL,
+  ENTITY_FIELD_TYPE.PHONE,
+  ENTITY_FIELD_TYPE.URL,
+  ENTITY_FIELD_TYPE.ADDRESS,
+  ENTITY_FIELD_TYPE.NUMBER,
+  ENTITY_FIELD_TYPE.DATE,
+  ENTITY_FIELD_TYPE.DATETIME,
+  ENTITY_FIELD_TYPE.LONG_TEXT,
+  ENTITY_FIELD_TYPE.TEXT,
+  ENTITY_FIELD_TYPE.BOOLEAN
+].map((field) => ({
+  label: field.LABEL,
+  value: field.VALUE
+}));
 
 /**
- * 根据新类型转换值
- * @param value 原始值
- * @param newType 新类型
- * @param oldType 旧类型
- * @returns 转换后的值
+ * 判断类型是否为字符串类型
  */
-const convertValueByType = (value: any, newType: string, oldType: string): any => {
-  // 如果值已经是 null 或 undefined，直接返回
-  if (value === null || value === undefined) {
-    return null;
-  }
+const isStringType = (type: string): boolean => {
+  return ['ID', 'TEXT', 'EMAIL', 'PHONE', 'URL', 'ADDRESS', 'LONG_TEXT'].includes(type);
+};
 
-  // 如果新旧类型相同，直接返回原值
-  if (newType === oldType) {
-    return value;
-  }
+/**
+ * 判断类型是否为数字类型
+ */
+const isNumberType = (type: string): boolean => {
+  return ['NUMBER'].includes(type);
+};
 
-  // 如果新类型是 object 或 array，返回 null（因为这些类型不需要 value 字段）
-  if (newType === 'object' || newType === 'array') {
-    return undefined; // 返回 undefined 表示不设置 value
-  }
+/**
+ * 判断类型是否为日期类型
+ */
+const isDateType = (type: string): boolean => {
+  return ['DATE', 'DATETIME'].includes(type);
+};
 
-  // 如果旧类型是 object 或 array，新类型是基本类型，返回 null
-  if (oldType === 'object' || oldType === 'array') {
-    return null;
-  }
-
-  // 类型转换逻辑
-  try {
-    switch (newType) {
-      case 'string':
-        return String(value);
-      case 'number':
-        // 尝试转换为数字
-        const num = Number(value);
-        return isNaN(num) ? null : num;
-      case 'boolean':
-        // 转换布尔值
-        if (typeof value === 'string') {
-          return value.toLowerCase() === 'true' || value === '1';
-        }
-        return Boolean(value);
-      case 'null':
-        return null;
-      default:
-        return value;
-    }
-  } catch (e) {
-    return null;
-  }
+/**
+ * 判断类型是否为布尔类型
+ */
+const isBooleanType = (type: string): boolean => {
+  return type === 'BOOLEAN';
 };
 
 // 对象类型字段项组件
@@ -87,7 +72,7 @@ interface ObjectFieldItemProps {
 const ObjectFieldItem: React.FC<ObjectFieldItemProps> = ({ field, index, form, level, onAdd, onRemove }) => {
   const fieldName = field.field;
   const fieldType = Form.useWatch(`${fieldName}.type`, form);
-  const fieldSchema = Form.useWatch(`${fieldName}.schema`, form) || { type: fieldType || 'string' };
+  const fieldSchema = Form.useWatch(`${fieldName}.schema`, form) || { type: fieldType || 'TEXT' };
 
   return (
     <div
@@ -119,49 +104,47 @@ const ObjectFieldItem: React.FC<ObjectFieldItemProps> = ({ field, index, form, l
               onChange={(value) => {
                 // 获取当前字段的完整数据
                 const currentFieldData = form.getFieldValue(fieldName);
-                const oldType = currentFieldData?.type || 'string';
-                const oldValue = currentFieldData?.value;
 
                 const newSchema = {
                   type: value,
                   ...(value === 'object' ? { properties: {} } : {}),
                   ...(value === 'array' ? { items: {} } : {})
                 };
-                form.setFieldValue(`${fieldName}.schema`, newSchema);
-                form.setFieldValue(`${fieldName}.type`, value);
 
-                // 如果新类型是 object 或 array，清空子字段和 value
-                if (value === 'object' || value === 'array') {
-                  form.setFieldValue(`${fieldName}.children`, undefined);
-                  form.setFieldValue(`${fieldName}.value`, undefined);
-                } else {
-                  // 如果新类型是基本类型，尝试转换并保留值
-                  form.setFieldValue(`${fieldName}.children`, undefined);
-                  const convertedValue = convertValueByType(oldValue, value, oldType);
-                  // 只有当转换后的值不为 undefined 时才设置（undefined 表示不设置 value）
-                  if (convertedValue !== undefined) {
-                    form.setFieldValue(`${fieldName}.value`, convertedValue);
-                  } else {
-                    form.setFieldValue(`${fieldName}.value`, null);
-                  }
+                // 构建新的字段数据
+                const updatedFieldData: any = {
+                  schema: newSchema,
+                  type: value,
+                  children: undefined
+                };
+
+                updatedFieldData.value = undefined;
+
+                // 保留字段名称
+                if (currentFieldData?.name !== undefined) {
+                  updatedFieldData.name = currentFieldData.name;
                 }
+
+                // 一次性更新整个字段数据
+                form.setFieldValue(fieldName, updatedFieldData);
               }}
             />
           </Form.Item>
         </Col>
+        {/* 默认值 */}
         <Col span={9}>
           {/* 根据字段类型显示不同的默认值输入控件 */}
-          {(fieldType === 'string' || !fieldType) && (
+          {(!fieldType || isStringType(fieldType) || isDateType(fieldType)) && (
             <Form.Item field={`${fieldName}.value`} style={{ marginBottom: 0 }}>
-              <Input placeholder="默认值（字符串）" />
+              <Input placeholder="默认值" />
             </Form.Item>
           )}
-          {fieldType === 'number' && (
+          {isNumberType(fieldType) && (
             <Form.Item field={`${fieldName}.value`} style={{ marginBottom: 0 }}>
               <InputNumber placeholder="默认值（数字）" style={{ width: '100%' }} />
             </Form.Item>
           )}
-          {fieldType === 'boolean' && (
+          {isBooleanType(fieldType) && (
             <Form.Item field={`${fieldName}.value`} triggerPropName="checked" style={{ marginBottom: 0 }}>
               <Switch checkedText="true" uncheckedText="false" />
             </Form.Item>
@@ -222,9 +205,10 @@ const ArrayFormList: React.FC<ArrayFormListProps> = ({ fieldPrefix, form, level,
       const currentValue = form.getFieldValue(listFieldName);
       if (!currentValue || currentValue.length === 0) {
         // 初始化一个默认项
+        const itemsType = itemsSchema.type || 'TEXT';
         form.setFieldValue(listFieldName, [
           {
-            type: itemsSchema.type || 'string',
+            type: itemsType,
             schema: itemsSchema
           }
         ]);
@@ -273,8 +257,8 @@ interface ArrayFieldItemProps {
 
 const ArrayFieldItem: React.FC<ArrayFieldItemProps> = ({ field, index, form, level, itemsSchema, onRemove }) => {
   const fieldName = field.field;
-  const itemType = Form.useWatch(`${fieldName}.type`, form);
-  const itemSchema = Form.useWatch(`${fieldName}.schema`, form) || itemsSchema || { type: itemType || 'string' };
+  let itemType = Form.useWatch(`${fieldName}.type`, form);
+  const itemSchema = Form.useWatch(`${fieldName}.schema`, form) || itemsSchema || { type: itemType || 'TEXT' };
 
   return (
     <div style={{ marginBottom: 16, paddingLeft: 12, borderLeft: '2px solid #e5e6eb' }}>
@@ -294,49 +278,53 @@ const ArrayFieldItem: React.FC<ArrayFieldItemProps> = ({ field, index, form, lev
               onChange={(value) => {
                 // 获取当前数组项的完整数据
                 const currentItemData = form.getFieldValue(fieldName);
-                const oldType = currentItemData?.type || 'string';
-                const oldValue = currentItemData?.value;
+                const oldType = currentItemData?.type;
 
                 const newSchema = {
                   type: value,
                   ...(value === 'object' ? { properties: {} } : {}),
                   ...(value === 'array' ? { items: {} } : {})
                 };
-                form.setFieldValue(`${fieldName}.schema`, newSchema);
-                form.setFieldValue(`${fieldName}.type`, value);
 
-                // 如果新类型是 object 或 array，清空子字段和 value
-                if (value === 'object' || value === 'array') {
-                  form.setFieldValue(`${fieldName}.children`, undefined);
+                // 只要类型值发生变化（包括 FIELD_TYPES 中的类型变化，如 ADDRESS 转 URL），就清空默认值
+                const typeChanged = oldType !== value;
+
+                // 构建新的字段数据
+                const updatedItemData: any = {
+                  schema: newSchema,
+                  type: value,
+                  children: undefined
+                };
+
+                // 如果类型变化了，清空默认值；如果新类型是 object 或 array，也清空 value
+                if (typeChanged || value === 'object' || value === 'array') {
+                  updatedItemData.value = undefined;
+                  // 显式清空表单中的 value 字段
                   form.setFieldValue(`${fieldName}.value`, undefined);
                 } else {
-                  // 如果新类型是基本类型，尝试转换并保留值
-                  form.setFieldValue(`${fieldName}.children`, undefined);
-                  const convertedValue = convertValueByType(oldValue, value, oldType);
-                  // 只有当转换后的值不为 undefined 时才设置（undefined 表示不设置 value）
-                  if (convertedValue !== undefined) {
-                    form.setFieldValue(`${fieldName}.value`, convertedValue);
-                  } else {
-                    form.setFieldValue(`${fieldName}.value`, null);
-                  }
+                  // 类型没变化，保留原有的 value
+                  updatedItemData.value = currentItemData?.value;
                 }
+
+                // 一次性更新整个字段数据
+                form.setFieldValue(fieldName, updatedItemData);
               }}
             />
           </Form.Item>
         </Col>
         <Col span={9}>
           {/* 根据字段类型显示不同的默认值输入控件 */}
-          {(itemType === 'string' || !itemType) && (
+          {(!itemType || isStringType(itemType) || isDateType(itemType)) && (
             <Form.Item field={`${fieldName}.value`} style={{ marginBottom: 0 }}>
-              <Input placeholder="默认值（字符串）" />
+              <Input placeholder="默认值" />
             </Form.Item>
           )}
-          {itemType === 'number' && (
+          {isNumberType(itemType) && (
             <Form.Item field={`${fieldName}.value`} style={{ marginBottom: 0 }}>
               <InputNumber placeholder="默认值（数字）" style={{ width: '100%' }} />
             </Form.Item>
           )}
-          {itemType === 'boolean' && (
+          {isBooleanType(itemType) && (
             <Form.Item field={`${fieldName}.value`} triggerPropName="checked" style={{ marginBottom: 0 }}>
               <Switch checkedText="true" uncheckedText="false" />
             </Form.Item>
@@ -396,8 +384,8 @@ const SchemaForm: React.FC<SchemaFormProps> = ({ form, schema, fieldPrefix = 'sc
           form.setFieldValue(listFieldName, [
             {
               name: '',
-              type: 'string',
-              schema: { type: 'string' }
+              type: 'TEXT',
+              schema: { type: 'TEXT' }
             }
           ]);
         }
@@ -423,8 +411,8 @@ const SchemaForm: React.FC<SchemaFormProps> = ({ form, schema, fieldPrefix = 'sc
                       add(
                         {
                           name: '',
-                          type: 'string',
-                          schema: { type: 'string' }
+                          type: 'TEXT',
+                          schema: { type: 'TEXT' }
                         },
                         currentIndex + 1
                       );

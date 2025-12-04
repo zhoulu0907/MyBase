@@ -2,7 +2,7 @@ import { listToTree } from '@/utils/tree';
 import { Form, Grid, Input, Modal, Select, TreeSelect } from '@arco-design/web-react';
 import { CORP_USER_QUERY, hasPermission } from '@onebase/common';
 import type { DeptForm, UserVO } from '@onebase/platform-center';
-import { getCorpSimpleDeptList, getSimpleUserPageInCorp } from '@onebase/platform-center';
+import { getCorpSimpleDeptList, getSimpleUserList } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
 
 const { Row, Col } = Grid;
@@ -47,7 +47,7 @@ const DepartmentModal: React.FC<DepartmentModalProps> = (props) => {
   }, [visible, initialValues, form]);
 
   const fetchUserList = async () => {
-    const users = await getSimpleUserPageInCorp();
+    const users = await getSimpleUserList(true);
     setUserList(users);
   };
 

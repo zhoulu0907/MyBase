@@ -300,7 +300,7 @@ export default function EditorWorkspace() {
 
       <Form
         labelCol={{
-          style: { width: 200, flex: 'unset' }
+          style: { flex: 'unset' }
         }}
       >
         <div

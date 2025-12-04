@@ -1,0 +1,102 @@
+.sidebarLineHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px;
+  padding-right: 8px;
+  border-bottom: 1px solid #e5e6eb;
+  margin: 0 10px;
+  .leftTitle {
+    display: flex;
+    align-items: center;
+    .title {
+      color: #1d2129;
+      font-family: 'PingFang SC';
+      font-size: 20px;
+      font-style: normal;
+      font-weight: 600;
+      margin: 0 8px;
+    }
+  }
+  .close {
+    cursor: pointer;
+  }
+}
+.sidebarLineContent {
+  margin-top: 24px;
+  padding: 0 32px;
+  .directionRow,
+  .directionColumn {
+    margin-bottom: 24px;
+    :global(.pc-form-label-item) {
+      text-align: left;
+      width: fit-content;
+      flex: none;
+      label {
+        font-weight: 600;
+        color: #000;
+        font-size: 16px;
+      }
+    }
+  }
+  .directionColumn {
+    display: flex;
+    flex-direction: column;
+    :global(.pc-form-item-wrapper) {
+      width: 100%;
+      margin-top: 16px;
+    }
+    .conditionRule {
+      border-radius: 4px;
+      border: 1px solid #e5e6eb;
+      padding: 16px;
+      .conditionRuleItem {
+        border-radius: 4px;
+        background: #f2f3f5;
+        padding: 8px;
+        margin-bottom: 8px;
+        .conditionRuleItemLine {
+          margin-bottom: 8px;
+          .ruleItemSelect {
+            margin-right: 8px;
+            :global(.pc-select-view) {
+              background-color: #fff !important;
+            }
+          }
+          .ruleItemInputNumber {
+            :global(.pc-input-inner-wrapper) {
+              background-color: #fff !important;
+            }
+          }
+          .ruleItemInput {
+            background: #fff !important;
+            margin-right: 8px;
+            height: 32px !important;
+          }
+          .ruleItemButton {
+            background: #fff !important;
+            height: 32px !important;
+          }
+          .ruleItemTreeSelect {
+            background: #fff !important;
+            height: 32px !important;
+          }
+        }
+        .addAndRule {
+          color: #4e5969;
+          cursor: pointer;
+          width: 40px;
+        }
+      }
+    }
+  }
+
+  .formTips {
+    color: #86909c;
+    font-size: 12px;
+    margin-left: 8px;
+    position: absolute;
+    top: 8px;
+    left: 114px;
+  }
+}

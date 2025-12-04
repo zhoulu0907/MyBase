@@ -69,7 +69,7 @@
   }
 
   .entityListWrapper {
-    :global(.arco-collapse-item-active) > :global(.arco-collapse-item-header) {
+    :global(.pc-collapse-item-active) > :global(.pc-collapse-item-header) {
       background-color: #4fae7b33 !important;
     }
 

@@ -210,6 +210,7 @@ export async function startSavePageSet(params: SavePageSetParams, onSuccess?: Fu
 
 export interface LoadPageSetParams {
   pageSetId: string;
+  runtime?: boolean;
 }
 
 export async function startLoadPageSet(params: LoadPageSetParams) {

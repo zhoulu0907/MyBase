@@ -67,7 +67,11 @@ export class HttpClient {
           }
         }
 
-        const appId = getHashQueryParam('appId');
+        let appId = getHashQueryParam('appId');
+        if (!appId) {
+          appId = TokenManager.getCurAppId();
+        }
+
         // 如果获取到 appId 且 header 中未设置，则自动添加
         if (appId && !config.headers['X-Application-Id']) {
           config.headers['X-Application-Id'] = appId;
@@ -108,7 +112,7 @@ export class HttpClient {
         const { data } = response;
         if (data && typeof data === 'object') {
           if (data.code !== 0) {
-            Message.error(data.msg || '请求失败');
+            Message.error({ id: 'http-error', content: data.msg || '请求失败' });
             if (data.code === 401) {
               const loginURL = TokenManager.getTokenInfo()?.loginURL;
 

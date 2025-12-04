@@ -6,7 +6,7 @@ import { WorkflowNodeType } from '../constants';
 
 export const ConditionalBranchNodeRegistry: FlowNodeRegistry = {
   type: WorkflowNodeType.CONDITIONAL_BRANCH,
-  name: '并行分支',
+  name: '条件分支',
   category: 'interaction',
   meta: {
     isStart: false,
@@ -34,7 +34,7 @@ export const ConditionalBranchNodeRegistry: FlowNodeRegistry = {
   onAdd() {
     return {
       id: `conditional_branch_${nanoid(5)}`,
-      type: WorkflowNodeType.BRANCH_IN,
+      type: WorkflowNodeType.CONDITIONAL_BRANCH,
       data: {
         name: '条件分支'
       }

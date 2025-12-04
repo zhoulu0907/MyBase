@@ -247,6 +247,9 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId, data
                           <Select
                             disabled={form.getFieldValue(item.field + '.fieldId') == undefined}
                             options={valueTypeOptions}
+                            onChange={() => {
+                              form.setFieldValue(item.field + '.value', undefined);
+                            }}
                           />
                         </Form.Item>
                       </Grid.Col>

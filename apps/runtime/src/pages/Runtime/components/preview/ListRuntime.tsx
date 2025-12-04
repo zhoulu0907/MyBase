@@ -3,8 +3,6 @@ import {
   getComponentWidth,
   PreviewRender,
   startLoadPageSet,
-  STATUS_OPTIONS,
-  STATUS_VALUES,
   useListEditorSignal,
   type GridItem
 } from '@onebase/ui-kit';
@@ -26,7 +24,7 @@ const ListRuntime: React.FC<ListRuntimeProps> = ({ pageSetId, runtime, showFromP
 
   useEffect(() => {
     if (pageSetId) {
-      startLoadPageSet({ pageSetId });
+      startLoadPageSet({ pageSetId, runtime: true });
     }
   }, [pageSetId]);
 
@@ -35,7 +33,7 @@ const ListRuntime: React.FC<ListRuntimeProps> = ({ pageSetId, runtime, showFromP
       {listComponents.value.map((cp: GridItem) => {
         const schema = listPageComponentSchemas.value[cp.id];
         const sanitizedSchema = {
-          ...schema,
+          ...schema
         };
         return (
           <Fragment key={cp.id}>
