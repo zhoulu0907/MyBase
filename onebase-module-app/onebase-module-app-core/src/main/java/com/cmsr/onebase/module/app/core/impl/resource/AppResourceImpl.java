@@ -12,6 +12,7 @@ import com.cmsr.onebase.module.app.core.dal.dataobject.AppMenuDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePageDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetDO;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -44,6 +45,16 @@ public class AppResourceImpl implements AppResourceApi {
         AppResourcePagesetDO pagesetDO = pageSetRepository.getById(pageSetId);
         // 读取页面集中的页面
         List<AppResourcePageDO> pageDOS = pageRepository.findAllFormPageByAppIdAndPageSetUuid(pagesetDO.getApplicationId(), pagesetDO.getPageSetUuid());
+        return BeanUtils.toBean(pageDOS, PageRespDTO.class);
+    }
+
+    @Override
+    public List<PageRespDTO> findPageListByPageSetUuidAndAppId(String pageSetUuid, Long applicationId) {
+        if (StringUtils.isBlank(pageSetUuid)) {
+            throw new IllegalArgumentException("页面集UUID不能为空");
+        }
+        // 读取页面集中的页面
+        List<AppResourcePageDO> pageDOS = pageRepository.findAllFormPageByAppIdAndPageSetUuid(applicationId, pageSetUuid);
         return BeanUtils.toBean(pageDOS, PageRespDTO.class);
     }
 

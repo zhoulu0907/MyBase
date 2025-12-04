@@ -21,6 +21,15 @@ public interface AppResourceApi {
     List<PageRespDTO> findPageListByPageSetId(Long pageSetId);
 
     /**
+     * 根据页面集UUID查询页面
+     *
+     * @param pageSetUuid    页面集UUID
+     * @param applicationId 应用ID
+     * @return 页面列表
+     */
+    List<PageRespDTO> findPageListByPageSetUuidAndAppId(String pageSetUuid, Long applicationId);
+
+    /**
      * 根据菜单UUID查询页面集
      *
      * @param menuUuid       菜单UUID

@@ -1,12 +1,16 @@
 package com.cmsr.onebase.module.bpm.runtime.service.instance.predict.impl;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
+import com.cmsr.onebase.module.app.api.appresource.AppResourceApi;
+import com.cmsr.onebase.module.app.api.appresource.dto.AppMenuRespDTO;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
 import com.cmsr.onebase.module.bpm.core.enums.BpmNodeTypeEnum;
 import com.cmsr.onebase.module.bpm.core.dal.database.ext.BpmFlowDefinitionRepositoryExt;
+import com.cmsr.onebase.module.bpm.core.validator.BpmAppResourceValidator;
 import com.cmsr.onebase.module.bpm.runtime.service.common.permission.BpmPermissionResolver;
 import com.cmsr.onebase.module.bpm.runtime.service.instance.predict.BpmPredictService;
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmPredictReqVO;
@@ -51,13 +55,31 @@ public class BpmPredictServiceImpl implements BpmPredictService {
     @Resource
     private AdminUserApi adminUserApi;
 
+    @Resource
+    private AppResourceApi appResourceApi;
+
+    @Resource
+    private BpmAppResourceValidator bpmAppResourceValidator;
+
     @Override
     public List<BpmPredictRespVO.NodeInfo> flowPredict(BpmPredictReqVO reqVO) {
-        String businessId = reqVO.getBusinessId();
+        Long businessId = reqVO.getBusinessId();
         Long loginUserId = WebFrameworkUtils.getLoginUserId();
         List<BpmPredictRespVO.NodeInfo> nodes = new ArrayList<>();
 
-        Definition definition = defExtService.getByFormPathAndStatus(businessId, PublishStatus.PUBLISHED.getKey());
+        Long applicationId = ApplicationManager.getApplicationId();
+
+        if (applicationId == null) {
+            throw exception(ErrorCodeConstants.MISSING_APPLICATION_ID);
+        }
+
+        // 校验菜单
+        AppMenuRespDTO appMenuRespDTO = appResourceApi.getAppMenuById(businessId);
+        bpmAppResourceValidator.validateMenuAndPageset(appMenuRespDTO, applicationId);
+
+        String menuUuid = appMenuRespDTO.getMenuUuid();
+
+        Definition definition = defExtService.getByFormPathAndStatus(menuUuid, PublishStatus.PUBLISHED.getKey());
         if (definition == null) {
             log.error(ErrorCodeConstants.PUBLISHED_FLOW_NOT_EXISTS.getMsg());
             throw exception(ErrorCodeConstants.PUBLISHED_FLOW_NOT_EXISTS);

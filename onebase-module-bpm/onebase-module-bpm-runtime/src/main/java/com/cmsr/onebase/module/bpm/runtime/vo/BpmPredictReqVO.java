@@ -15,7 +15,7 @@ import lombok.Data;
 public class BpmPredictReqVO {
     @Schema(description = "业务ID")
     @NotNull(message = "业务ID不能为空")
-    private String businessId;
+    private Long businessId;
 
     /**
      * 实体信息

@@ -33,7 +33,10 @@ public class BpmAppResourceValidator {
         Long currAppId = applicationId != null ? applicationId : ApplicationManager.getApplicationId();
 
         validateMenu(menuDTO, currAppId);
-        validatePageset(menuDTO, currAppId);
+
+        AppPagesetRespDTO pagesetDTO = appResourceApi.getPageSetByMenuUuidAndAppId(menuDTO.getMenuUuid(), currAppId);
+
+        validatePageset(pagesetDTO, currAppId);
     }
 
     /**
@@ -57,19 +60,22 @@ public class BpmAppResourceValidator {
     /**
      * 校验菜单绑定的页面集类型是否为BPM类型
      *
-     * @param menuDTO 菜单DTO
+     * @param pagesetDTO 页面集DTO
      * @param applicationId 应用ID（可为空，为空时从ApplicationManager获取）
      */
-    public void validatePageset(AppMenuRespDTO menuDTO, Long applicationId) {
+    public void validatePageset(AppPagesetRespDTO pagesetDTO, Long applicationId) {
         Long currAppId = applicationId != null ? applicationId : ApplicationManager.getApplicationId();
 
-        AppPagesetRespDTO pagesetDTO = appResourceApi.getPageSetByMenuUuidAndAppId(menuDTO.getMenuUuid(), currAppId);
         if (pagesetDTO == null) {
             throw exception(ErrorCodeConstants.MENU_NOT_BIND_PAGESET);
         }
 
         if (!Objects.equals(pagesetDTO.getPageSetType(), BpmConstants.PAGESET_TYPE_BPM)) {
             throw exception(ErrorCodeConstants.UNSUPPORT_PAGESET_TYPE);
+        }
+
+        if (!Objects.equals(pagesetDTO.getApplicationId(), currAppId)) {
+            throw exception(ErrorCodeConstants.APPLICATION_ID_MISMATCH);
         }
     }
 }
