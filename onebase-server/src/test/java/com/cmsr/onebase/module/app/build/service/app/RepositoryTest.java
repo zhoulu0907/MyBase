@@ -150,4 +150,9 @@ public class RepositoryTest {
         AppAuthPermissionDO result = appAuthPermissionRepository.findByQuery(reqVO);
         System.out.println(result);
     }
+
+    @Test
+    public void test13() {
+        var res = appMenuRepository.findPagesByMenuId(1L);
+    }
 }
