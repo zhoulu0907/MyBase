@@ -65,8 +65,8 @@ public class AppApplicationApiImpl implements AppApplicationApi {
     }
 
     @Override
-    public ApplicationDTO findAppApplicationByTenantIdAndAppId(Long tenantId, Long appId) {
-        AppApplicationDO applicationDO = TenantManager.withoutTenantCondition(() -> appApplicationRepository.findByTenantIdAndAppId(tenantId, appId));
+    public ApplicationDTO findAppApplicationById( Long appId) {
+        AppApplicationDO applicationDO = TenantManager.withoutTenantCondition(() -> appApplicationRepository.getById(appId));
         return convertToDTO(applicationDO);
     }
 

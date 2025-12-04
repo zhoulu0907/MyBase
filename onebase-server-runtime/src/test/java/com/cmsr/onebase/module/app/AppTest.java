@@ -94,7 +94,7 @@ public class AppTest {
 
     @Test
     public void testGraph5() throws IOException {
-        ApplicationDTO result = appApplicationApi.findAppApplicationByTenantIdAndAppId(160864959456706560L, 163852177939464192L);
+        ApplicationDTO result = appApplicationApi.findAppApplicationById(163852177939464192L);
         System.out.println(result);
     }
 
