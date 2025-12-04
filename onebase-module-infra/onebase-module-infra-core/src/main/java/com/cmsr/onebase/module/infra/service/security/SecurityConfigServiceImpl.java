@@ -323,13 +323,13 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
         String securityConfigKey= SecurityConfigKey.enableScenarios.getConfigKey();
         SecurityConfigDO config = securityConfigDataRepository.findByTenantIdAndKey(tenantId, securityConfigKey);
         if (null==config ) {
-            return false;
-        }
-        String login=SecurityConfigKey.EnableScenariosOption.login.getKey();
-        if(config.getConfigValue().contains(login)){
             return true;
         }
-        return false;
+        String login=SecurityConfigKey.EnableScenariosOption.login.getKey();
+        if(!config.getConfigValue().contains(login)){
+            return false;
+        }
+        return true;
     }
 
 }

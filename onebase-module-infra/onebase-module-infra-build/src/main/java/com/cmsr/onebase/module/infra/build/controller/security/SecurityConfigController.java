@@ -85,7 +85,7 @@ public class SecurityConfigController {
 
 
     @PostMapping("/check-login-captcha")
-    @Operation(summary = "检查登录验证码")
+    @Operation(summary = "检查登录验证码", description = "返回值true 需要验证码,false 不需要")
     @PermitAll
     public CommonResult<Boolean> checkLoginCaptcha() {
         return success(securityConfigService.checkLoginCaptcha());

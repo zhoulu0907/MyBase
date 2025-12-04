@@ -1,0 +1,9 @@
+
+
+
+### 请求 /check-login-captcha 接口 => 成功
+POST {{baseUrl}}/infra/security-config/check-login-captcha
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: 158088726951460864
+
