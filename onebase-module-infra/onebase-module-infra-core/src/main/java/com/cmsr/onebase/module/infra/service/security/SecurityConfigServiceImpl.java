@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.infra.service.security;
 
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.module.infra.convert.security.SecurityConfigCategoryConvert;
 import com.cmsr.onebase.module.infra.dal.database.SecurityConfigCategoryDataRepository;
 import com.cmsr.onebase.module.infra.dal.database.SecurityConfigDataRepository;
@@ -10,6 +11,7 @@ import com.cmsr.onebase.module.infra.dal.dataobject.security.SecurityConfigTempl
 import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigCategoryRespVO;
 import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigItemRespVO;
 import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigUpdateReqVO;
+import com.cmsr.onebase.module.infra.enums.security.SecurityConfigKey;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -313,6 +315,21 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
             }
         }
         return null;
+    }
+
+    @Override
+    public Boolean checkLoginCaptcha() {
+        Long tenantId = TenantContextHolder.getTenantId();
+        String securityConfigKey= SecurityConfigKey.enableScenarios.getConfigKey();
+        SecurityConfigDO config = securityConfigDataRepository.findByTenantIdAndKey(tenantId, securityConfigKey);
+        if (null==config ) {
+            return false;
+        }
+        String login=SecurityConfigKey.EnableScenariosOption.login.getKey();
+        if(config.getConfigValue().contains(login)){
+            return true;
+        }
+        return false;
     }
 
 }

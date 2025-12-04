@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
+import jakarta.annotation.security.PermitAll;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -82,4 +83,11 @@ public class SecurityConfigController {
         return success(true);
     }
 
+
+    @PostMapping("/check-login-captcha")
+    @Operation(summary = "检查登录验证码")
+    @PermitAll
+    public CommonResult<Boolean> checkLoginCaptcha() {
+        return success(securityConfigService.checkLoginCaptcha());
+    }
 }

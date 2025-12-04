@@ -56,5 +56,10 @@ public interface SecurityConfigService {
      * @return 配置值，如果不存在或解析失败返回null
      */
     Integer getIntConfig(Long tenantId, String configKey);
-
+    /**
+     * 获取布尔类型的配置值
+     *
+     * @return 配置值，如果不存在或解析失败返回null
+     */
+    Boolean checkLoginCaptcha();
 }
