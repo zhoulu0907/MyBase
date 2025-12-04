@@ -150,18 +150,13 @@ public class PageSetServiceImpl implements PageSetService {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public String copyPageSet(CopyPageSetDTO copyPageSetDTO) {
         Long oldMenuId = copyPageSetDTO.getMenuId();
-        AppMenuDO appMenuDO = appMenuRepository.getById(oldMenuId);
-        return copyPageSet(copyPageSetDTO, appMenuDO);
-    }
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public String copyPageSet(CopyPageSetDTO copyPageSetDTO, AppMenuDO appMenuDO) {
-        Long applicationId = appMenuDO.getApplicationId();
-        AppResourcePagesetDO oldPageSetDO = pageSetRepository.findPageSetByAppIdAndMenuUuid(applicationId, appMenuDO.getMenuUuid());
+        Long newMenuId = copyPageSetDTO.getNewMenuId();
+        AppMenuDO oldMenuDO = appMenuRepository.getById(oldMenuId);
+        AppMenuDO newMenuDO = appMenuRepository.getById(newMenuId);
+        Long applicationId = oldMenuDO.getApplicationId();
+        AppResourcePagesetDO oldPageSetDO = pageSetRepository.findPageSetByAppIdAndMenuUuid(applicationId, oldMenuDO.getMenuUuid());
         if (oldPageSetDO == null) {
             throw ServiceExceptionUtil.exception(AppResourceErrorCodeConstants.PAGE_SET_NOT_EXIST);
         }
@@ -170,7 +165,7 @@ public class PageSetServiceImpl implements PageSetService {
         newPageSetDO.setId(null);
         newPageSetDO.setPageSetUuid(UuidUtils.getUuid());
         newPageSetDO.setPageSetCode(UUID.randomUUID().toString());
-        newPageSetDO.setMenuUuid(UuidUtils.getUuid());
+        newPageSetDO.setMenuUuid(newMenuDO.getMenuUuid());
         pageSetRepository.save(newPageSetDO);
 
         // 复制页面其余内容
@@ -179,18 +174,18 @@ public class PageSetServiceImpl implements PageSetService {
             return newPageSetDO.getPageSetCode();
         }
         for (Long pageId : pageIdList) {
-            AppResourcePageDO pageDO = pageRepository.getById(pageId);
-            if (pageDO == null) {
+            AppResourcePageDO oldPageDO = pageRepository.getById(pageId);
+            if (oldPageDO == null) {
                 throw ServiceExceptionUtil.exception(AppResourceErrorCodeConstants.PAGE_NOT_EXIST);
             }
-            AppResourcePageDO newPageDO = BeanUtils.toBean(pageDO, AppResourcePageDO.class);
+            AppResourcePageDO newPageDO = BeanUtils.toBean(oldPageDO, AppResourcePageDO.class);
             newPageDO.setId(null);
             newPageDO.setApplicationId(applicationId);
             newPageDO.setPageUuid(UuidUtils.getUuid());
             newPageDO.setPageSetUuid(newPageSetDO.getPageSetUuid());
             pageRepository.save(newPageDO);
 
-            List<AppResourceComponentDO> componentDOs = componentRepository.findByAppIdAndPageUuid(applicationId, pageDO.getPageUuid());
+            List<AppResourceComponentDO> componentDOs = componentRepository.findByAppIdAndPageUuid(applicationId, oldPageDO.getPageUuid());
             if (CollectionUtils.isEmpty(componentDOs)) {
                 continue;
             }
