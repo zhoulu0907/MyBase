@@ -16,7 +16,7 @@ const App: React.FC<AppProps & { instanceId: string }> = ({ instanceId, props })
   //   useSignals();
 
   const [previewProps, setPreviewProps] = useState<EditorProps>({} as EditorProps);
-  const [dragProps, setDragProps] = useState<EditorProps & {drag: boolean}>({ drag: true } as EditorProps & {drag: boolean});
+  const [dragProps, setDragProps] = useState<EditorProps & { drag: boolean }>({ drag: true } as EditorProps & { drag: boolean });
 
   useEffect(() => {
     if (props?.onGlobalStateChange) {
@@ -40,7 +40,7 @@ const App: React.FC<AppProps & { instanceId: string }> = ({ instanceId, props })
   useEffect(() => {
     console.log('dragProps change: ', dragProps);
   }, [dragProps]);
-  
+
   const propsData = (instanceId.indexOf('preview') !== -1 ? previewProps : dragProps) || {};
   return (
     <>

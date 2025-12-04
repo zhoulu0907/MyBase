@@ -97,7 +97,7 @@ export default function EditorWorkspace() {
   const [pageMode, setPageMode] = useState<string>('pc');
   const { editMode, setEditMode } = currentEditorSignal;
   const mobileEditorDragRef = useRef<MicroApp | null>(null);
-  
+
   const qiankunActions = initGlobalState({
     drag: true,
     editMode,
@@ -126,28 +126,28 @@ export default function EditorWorkspace() {
     batchDelSubTableComponents
   })
   useEffect(() => {
-      console.log("loading mobile-editor-drag-list11", editMode.value);
+    console.log("loading mobile-editor-drag-list11", editMode.value);
     if (editMode.value !== EditMode.MOBILE) {
       return;
     }
-      console.log("loading mobile-editor-drag-list");
-  
-      const mobileEditorDrag = loadMicroApp({
-        name: "mobile-editor-drag-list",
-        entry: "//localhost:4401",
-        container:  "#mobile-editor-drag-list",
-        props: {
-          onGlobalStateChange: qiankunActions.onGlobalStateChange,
-          setGlobalState: qiankunActions.setGlobalState,
-          offGlobalStateChange: qiankunActions.offGlobalStateChange,
-        },
-      });
-      mobileEditorDragRef.current = mobileEditorDrag;
-  
-      return () => {
-        mobileEditorDrag?.unmount();
-      };
-    }, [editMode.value]);
+    console.log("loading mobile-editor-drag-list");
+
+    const mobileEditorDrag = loadMicroApp({
+      name: "mobile-editor-drag-list",
+      entry: "//localhost:4401",
+      container: "#mobile-editor-drag-list",
+      props: {
+        onGlobalStateChange: qiankunActions.onGlobalStateChange,
+        setGlobalState: qiankunActions.setGlobalState,
+        offGlobalStateChange: qiankunActions.offGlobalStateChange,
+      },
+    });
+    mobileEditorDragRef.current = mobileEditorDrag;
+
+    return () => {
+      mobileEditorDrag?.unmount();
+    };
+  }, [editMode.value]);
 
   useEffect(() => {
     if (components.length === 0) {

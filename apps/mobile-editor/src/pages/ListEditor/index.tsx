@@ -1,6 +1,7 @@
 import type { EditorProps } from '@/common/props';
 import { Form as MobileForm } from '@arco-design/mobile-react';
 import React, { Fragment } from 'react';
+import { EditorPanel } from '@onebase/ui-kit';
 
 import {
   STATUS_OPTIONS,
@@ -15,10 +16,10 @@ import styles from './index.module.less';
 import EditorWorkspace from '../../components/workspace/Workspace';
 
 interface FormEditorProps {
-  props: EditorProps & {drag: boolean};
+  props: EditorProps & { drag: boolean };
 }
 
-const ListEditor: React.FC<FormEditorProps & {instanceId: string}> = ({instanceId, props }) => {
+const ListEditor: React.FC<FormEditorProps & { instanceId: string }> = ({ instanceId, props }) => {
   if (!props.components) {
     return null;
   }
@@ -60,12 +61,17 @@ const ListEditor: React.FC<FormEditorProps & {instanceId: string}> = ({instanceI
       </MobileForm>
     );
   }
+
   return (
-    <EditorWorkspace
-      props={props}
-    />
-  )
-  
+    <div className={styles.formEditorPage}>
+      {props.editMode?.value === 'mobile' && (
+        <>
+          <EditorPanel />
+          <EditorWorkspace props={props} />
+        </>
+      )}
+    </div>
+  );
 };
 
 export { ListEditor };

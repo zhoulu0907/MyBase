@@ -100,20 +100,20 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
         <div className={styles.content}>
           {pageType == EDITOR_TYPES.LIST_EDITOR &&
             (
-            editMode.value === EditMode.MOBILE ? (
-              <div id="mobile-editor-preview-list" style={{ width: '100%' }}></div>
-            ) :
-            listComponents.value.map((cp: GridItem) => (
-              <Fragment key={cp.id}>
-                {listPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
-                  <div
-                    key={cp.id}
-                    className={styles.componentItem}
-                    style={{
-                      width: `calc(${getComponentWidth(listPageComponentSchemas.value[cp.id], cp.type)} - 8px)`,
-                      margin: '4px'
-                    }}
-                  >
+              editMode.value === EditMode.MOBILE ? (
+                <div id="mobile-editor-preview-list" style={{ width: '100%' }}></div>
+              ) :
+                listComponents.value.map((cp: GridItem) => (
+                  <Fragment key={cp.id}>
+                    {listPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+                      <div
+                        key={cp.id}
+                        className={styles.componentItem}
+                        style={{
+                          width: `calc(${getComponentWidth(listPageComponentSchemas.value[cp.id], cp.type)} - 8px)`,
+                          margin: '4px'
+                        }}
+                      >
                         <PreviewRender
                           cpId={cp.id}
                           cpType={cp.type}
@@ -121,18 +121,16 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
                           runtime={true}
                           preview={true}
                         />
-                  </div>
-                )}
-              </Fragment>
-            )))}
+                      </div>
+                    )}
+                  </Fragment>
+                )))}
 
           {pageType == EDITOR_TYPES.FORM_EDITOR && (
             <div className={styles.fromContain}>
               <div className={styles.previewForm}>
                 {editMode.value === EditMode.MOBILE ? (
-                  <Form layout="inline">
-                    {getFormContent()}
-                  </Form>
+                  <div id="mobile-editor-preview-list" style={{ width: '100%' }}></div>
                 ) : (
                   <Form layout="inline">
                     {getFormContent()}

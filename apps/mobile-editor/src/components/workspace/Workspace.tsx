@@ -51,6 +51,7 @@ import { getEntityFieldOptions, type AppEntityField, type EntityFieldOption } fr
 import { ENTITY_TYPE, ENTITY_TYPE_VALUE } from '@onebase/app';
 import { EditMode, getHashQueryParam } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
+import View from '../view';
 import 'react-grid-layout/css/styles.css';
 import styles from './index.module.less';
 
@@ -62,7 +63,7 @@ const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({ props }) => {
   useSignals();
 
   const {
-    editMode, 
+    editMode,
     setEditMode,
     curComponentID,
     setCurComponentID,
@@ -280,7 +281,7 @@ const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({ props }) => {
             <img className={styles.pageModeIcon} src={PrevActiveIcon} />
             <img className={styles.pageModeIcon} src={NextIcon} />
           </div>
-          <span>|</span>
+          <span className={styles.pageModeDivider} />
           <div className={styles.pageModeCtrl}>
             {editMode?.value !== EditMode.MOBILE && (
               <>

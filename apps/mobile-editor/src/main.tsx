@@ -17,7 +17,7 @@ async function mount(props: any) {
   console.log('sub-app mount11', props.container);
 
   const container = props?.container ? props.container : document.getElementById('root')!;
- const containerElement = document.createElement('div');
+  const containerElement = document.createElement('div');
   // const containerElement = container.querySelector('#root') || container;
   containerElement.id = props.name || `subapp-instance-${Date.now()}`;
   container.appendChild(containerElement);
