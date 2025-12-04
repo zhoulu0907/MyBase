@@ -32,6 +32,7 @@ class FlinkExecutorControllerTest {
     void preview001() throws Exception {
         String json = IOUtils.resourceToString("/workflow.json", StandardCharsets.UTF_8);
         ExecuteRequest executeRequest = new ExecuteRequest();
+        executeRequest.setApplicationId(163860905313009664L);
         executeRequest.setPreviewWorkflow(json);
         executeRequest.setPreviewNodeId("sql_7577ef7b741a4b3085bdaadf7702b094");
         WorkFlowExecutor executor = new WorkFlowExecutor(executeRequest, dataSource);
