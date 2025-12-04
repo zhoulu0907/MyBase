@@ -56,10 +56,16 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({
     if (!config) {
       return '';
     }
-    const numberingMethodText = config.numberMode === AUTO_CODE_NUMBER_MODE.NATURAL ? '自然数编号' : '指定位数编号';
-    const digitsText = config.digitWidth ? `${config.digitWidth}位数` : '';
-    const resetText = config.resetCycle === AUTO_CODE_RESET_CYCLE.NONE ? '不自动重置' : '自动重置';
-    return `${numberingMethodText},${digitsText},${resetText}`;
+    const sequenceConfig = config || rules.find((rule) => rule.itemType === AUTO_CODE_RULE_TYPE.SEQUENCE)?.config;
+    if (!sequenceConfig) {
+      return '';
+    }
+    const numberingMethodText =
+      sequenceConfig.numberMode === AUTO_CODE_NUMBER_MODE.NATURAL ? '自然数编号' : '指定位数编号';
+    const digitsText =
+      sequenceConfig.numberMode === AUTO_CODE_NUMBER_MODE.NATURAL ? '' : `${sequenceConfig.digitWidth}位数`;
+    const resetText = sequenceConfig.resetCycle === AUTO_CODE_RESET_CYCLE.NONE ? '不自动重置' : '自动重置';
+    return `${numberingMethodText},${digitsText ? digitsText + ',' : ''}${resetText}`;
   };
   const [displayText, setDisplayText] = useState(getDisplayText(configs[autoCodeKey]));
 
@@ -300,7 +306,7 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({
       <Form.Item layout="vertical" label={'编号规则配置'} className={styles.formItem}>
         <ReactSortable
           list={rules}
-          setList={() => { }}
+          setList={() => {}}
           sort={!configs[autoCodeDisabledKey]}
           handle=".autocode-item-handle"
           forceFallback={true}

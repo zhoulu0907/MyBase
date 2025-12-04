@@ -43,6 +43,7 @@ const CreateScriptActionPage: React.FC<CreateScriptActionPageProps> = ({ onSucce
 
   const [inputSchema, setInputSchema] = useState<any>({});
   const [outputSchema, setOutputSchema] = useState<any>({});
+
   // 缓存文本模式下的 JSON 值
   const [cachedInputParameter, setCachedInputParameter] = useState<string>('');
   const [cachedOutputParameter, setCachedOutputParameter] = useState<string>('');
@@ -62,7 +63,9 @@ const CreateScriptActionPage: React.FC<CreateScriptActionPageProps> = ({ onSucce
         description: res.description || '',
         inputParameter: res.inputParameter || '',
         outputParameter: res.outputParameter || '',
-        rawScript: res.rawScript || ''
+        rawScript: res.rawScript || '',
+        inputSchema: res.inputSchema || [],
+        outputSchema: res.outputSchema || []
       });
     }
   };
@@ -78,18 +81,41 @@ const CreateScriptActionPage: React.FC<CreateScriptActionPageProps> = ({ onSucce
 
     // 如果当前是图形模式，需要将表单数据转换回 JSON 字符串
     let inputParameterValue = form.getFieldValue('inputParameter');
+    let inputSchemaValue = form.getFieldValue('inputSchema');
     if (inputEditType === EditTypeEnum.Visual) {
-      const formData = form.getFieldValue('inputParameterSchema');
+      const formData = form.getFieldValue('inputSchema');
       if (formData && formData.length > 0) {
         try {
           const jsonObj = formDataToJson(formData);
           inputParameterValue = JSON.stringify(jsonObj, null, 2);
+          inputSchemaValue = formData;
         } catch (e) {
           Message.error('表单数据转换失败，请检查字段配置');
           return;
         }
       } else {
         inputParameterValue = '{}';
+        inputSchemaValue = [];
+      }
+    }
+
+    // 处理输出参数
+    let outputParameterValue = form.getFieldValue('outputParameter');
+    let outputSchemaValue = form.getFieldValue('outputSchema');
+    if (outputEditType === EditTypeEnum.Visual) {
+      const formData = form.getFieldValue('outputSchema');
+      if (formData && formData.length > 0) {
+        try {
+          const jsonObj = formDataToJson(formData);
+          outputParameterValue = JSON.stringify(jsonObj, null, 2);
+          outputSchemaValue = formData;
+        } catch (e) {
+          Message.error('输出参数表单数据转换失败，请检查字段配置');
+          return;
+        }
+      } else {
+        outputParameterValue = '{}';
+        outputSchemaValue = [];
       }
     }
 
@@ -99,8 +125,10 @@ const CreateScriptActionPage: React.FC<CreateScriptActionPageProps> = ({ onSucce
         scriptName: form.getFieldValue('scriptName'),
         description: form.getFieldValue('description'),
         inputParameter: inputParameterValue || '',
-        outputParameter: form.getFieldValue('outputParameter') || '',
-        rawScript: form.getFieldValue('rawScript') || ''
+        outputParameter: outputParameterValue || '',
+        rawScript: form.getFieldValue('rawScript') || '',
+        inputSchema: inputSchemaValue,
+        outputSchema: outputSchemaValue
       };
 
       const res = await updateScriptAction(req);
@@ -114,9 +142,11 @@ const CreateScriptActionPage: React.FC<CreateScriptActionPageProps> = ({ onSucce
         connectorId: id || '',
         scriptName: form.getFieldValue('scriptName'),
         description: form.getFieldValue('description'),
-        inputParameter: form.getFieldValue('inputParameter'),
-        outputParameter: form.getFieldValue('outputParameter'),
-        rawScript: form.getFieldValue('rawScript')
+        inputParameter: inputParameterValue || '',
+        outputParameter: outputParameterValue || '',
+        rawScript: form.getFieldValue('rawScript'),
+        inputSchema: inputSchemaValue,
+        outputSchema: outputSchemaValue
       };
 
       const res = await createScriptAction(req);
@@ -168,8 +198,25 @@ const CreateScriptActionPage: React.FC<CreateScriptActionPageProps> = ({ onSucce
       setCachedInputParameter(currentTextValue);
 
       setInputEditType(EditTypeEnum.Visual);
-      // 将 JSON 字符串转换为 schema 并初始化表单数据
-      if (inputParameter) {
+
+      // 优先使用已保存的 schema（在编辑模式下）
+      const savedSchema = form.getFieldValue('inputSchema');
+      const savedFormData = Array.isArray(savedSchema) ? savedSchema : null;
+
+      // 如果已有保存的表单数据，直接使用
+      if (savedFormData && savedFormData.length > 0) {
+        // 使用保存的 schema（从表单数据中恢复）
+        // schema 信息已包含在 formData 的每个字段的 schema 属性中
+        // 需要重建 schema 对象
+        const existingSchema = inputSchema || {
+          $schema: 'http://json-schema.org/draft-07/schema#',
+          type: 'object',
+          properties: {}
+        };
+        setInputSchema(existingSchema);
+        form.setFieldValue('inputSchema', savedFormData);
+      } else if (inputParameter) {
+        // 如果没有保存的表单数据，从 JSON 字符串转换
         try {
           const jsonObj = JSON.parse(inputParameter);
           const schema = jsonToJsonSchema(inputParameter);
@@ -177,7 +224,7 @@ const CreateScriptActionPage: React.FC<CreateScriptActionPageProps> = ({ onSucce
           setInputSchema(schema);
           // 初始化表单数据，传入原始 JSON 对象以保留值
           const formData = schemaToFormData(schema, jsonObj);
-          form.setFieldValue('inputParameterSchema', formData);
+          form.setFieldValue('inputSchema', formData);
         } catch (e) {
           Message.error('无效的 JSON 字符串，无法转换为图形化表单');
           setInputEditType(EditTypeEnum.Json);
@@ -190,12 +237,12 @@ const CreateScriptActionPage: React.FC<CreateScriptActionPageProps> = ({ onSucce
           properties: {}
         };
         setInputSchema(emptySchema);
-        form.setFieldValue('inputParameterSchema', []);
+        form.setFieldValue('inputSchema', []);
       }
     } else {
       // 切回文本模式：将表单数据转换回 JSON 字符串
       setInputEditType(EditTypeEnum.Json);
-      const formData = form.getFieldValue('inputParameterSchema');
+      const formData = form.getFieldValue('inputSchema');
       if (formData && formData.length > 0) {
         try {
           const jsonObj = formDataToJson(formData);
@@ -220,15 +267,30 @@ const CreateScriptActionPage: React.FC<CreateScriptActionPageProps> = ({ onSucce
       setCachedOutputParameter(currentTextValue);
 
       setOutputEditType(EditTypeEnum.Visual);
-      // 将 JSON 字符串转换为 schema 并初始化表单数据
-      if (outputParameter) {
+
+      // 优先使用已保存的 schema（在编辑模式下）
+      const savedSchema = form.getFieldValue('outputSchema');
+      const savedFormData = Array.isArray(savedSchema) ? savedSchema : null;
+
+      // 如果已有保存的表单数据，直接使用
+      if (savedFormData && savedFormData.length > 0) {
+        // 使用保存的 schema
+        const existingSchema = outputSchema || {
+          $schema: 'http://json-schema.org/draft-07/schema#',
+          type: 'object',
+          properties: {}
+        };
+        setOutputSchema(existingSchema);
+        form.setFieldValue('outputSchema', savedFormData);
+      } else if (outputParameter) {
+        // 如果没有保存的表单数据，从 JSON 字符串转换
         try {
           const jsonObj = JSON.parse(outputParameter);
           const schema = jsonToJsonSchema(outputParameter);
           setOutputSchema(schema);
           // 初始化表单数据，传入原始 JSON 对象以保留值
           const formData = schemaToFormData(schema, jsonObj);
-          form.setFieldValue('outputParameterSchema', formData);
+          form.setFieldValue('outputSchema', formData);
         } catch (e) {
           Message.error('无效的 JSON 字符串，无法转换为图形化表单');
           setOutputEditType(EditTypeEnum.Json);
@@ -241,12 +303,12 @@ const CreateScriptActionPage: React.FC<CreateScriptActionPageProps> = ({ onSucce
           properties: {}
         };
         setOutputSchema(emptySchema);
-        form.setFieldValue('outputParameterSchema', []);
+        form.setFieldValue('outputSchema', []);
       }
     } else {
       // 切回文本模式：将表单数据转换回 JSON 字符串
       setOutputEditType(EditTypeEnum.Json);
-      const formData = form.getFieldValue('outputParameterSchema');
+      const formData = form.getFieldValue('outputSchema');
       if (formData && formData.length > 0) {
         try {
           const jsonObj = formDataToJson(formData);
@@ -351,8 +413,8 @@ const CreateScriptActionPage: React.FC<CreateScriptActionPageProps> = ({ onSucce
         )}
         {inputEditType === EditTypeEnum.Visual && inputSchema && (
           <Row>
-            <Form.Item field="inputParameterSchema">
-              <SchemaForm form={form} schema={inputSchema} fieldPrefix="inputParameterSchema" level={0} />
+            <Form.Item field="inputSchema">
+              <SchemaForm form={form} schema={inputSchema} fieldPrefix="inputSchema" level={0} />
             </Form.Item>
           </Row>
         )}
@@ -396,8 +458,8 @@ const CreateScriptActionPage: React.FC<CreateScriptActionPageProps> = ({ onSucce
         )}
         {outputEditType === EditTypeEnum.Visual && outputSchema && (
           <Row>
-            <Form.Item field="outputParameterSchema">
-              <SchemaForm form={form} schema={outputSchema} fieldPrefix="outputParameterSchema" level={0} />
+            <Form.Item field="outputSchema">
+              <SchemaForm form={form} schema={outputSchema} fieldPrefix="outputSchema" level={0} />
             </Form.Item>
           </Row>
         )}

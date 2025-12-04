@@ -79,7 +79,17 @@ const Runtime: React.FC = () => {
   const { appId, tenantId } = useParams();
 
   useEffect(() => {
+    if (appId) {
+      TokenManager.setCurAppId(appId);
+    }
+
     if (appId && tenantId) {
+      const curIdentifyId = TokenManager.getCurIdentifyId();
+      // 如果缓存中已有 tenantId，且与当前路径id（tenantId）一致，则不再设置 curIdentifyId
+      if (curIdentifyId == tenantId) {
+        return;
+      }
+
       TokenManager.setCurIdentifyId(`${appId}_${tenantId}`);
     } else {
       if (appId) {

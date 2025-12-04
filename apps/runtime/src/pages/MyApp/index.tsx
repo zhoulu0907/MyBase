@@ -131,10 +131,10 @@ const MyAppPage: React.FC = () => {
     debouncedUpdate(value);
   };
 
-  const nagivateToDataFactory = (appId: string) => {
+  const nagivateToRuntimeApp = (appId: string) => {
     setCurAppId(appId);
     const tenantId = TokenManager.getTenantInfo()?.tenantId || '';
-    navigate(`/onebase/runtime/${appId}/${tenantId}`);
+    navigate(`/onebase/${appId}/${tenantId}/runtime?`);
   };
 
   const handleOptionVisibleChange = (v: boolean, id: string) => {
@@ -336,7 +336,7 @@ const MyAppPage: React.FC = () => {
                         type="outline"
                         long
                         onClick={() => {
-                          nagivateToDataFactory(item.id);
+                          nagivateToRuntimeApp(item.id);
                         }}
                       >
                         进入应用
