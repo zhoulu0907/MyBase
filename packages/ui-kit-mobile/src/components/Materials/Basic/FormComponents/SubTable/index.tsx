@@ -122,7 +122,7 @@ const XSubTable = memo(
             />
           ))}
           <div
-            className={styles.onAdd}
+            className={styles.onAddOBMobile}
             onClick={handleAdd}
             style={{ pointerEvents: runtime ? 'unset' : 'none' }}>
             <IconAdd style={{ marginRight: '0.16rem' }} />
