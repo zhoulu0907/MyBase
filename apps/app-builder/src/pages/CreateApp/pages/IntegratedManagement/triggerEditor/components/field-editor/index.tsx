@@ -155,7 +155,8 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId, data
         NodeType.START_ENTITY,
         NodeType.START_FORM,
         NodeType.DATA_CALC,
-        NodeType.MODAL
+        NodeType.MODAL,
+        NodeType.JAVASCRIPT
       ];
 
       const fieldId = form.getFieldValue(item.field + '.fieldId');
