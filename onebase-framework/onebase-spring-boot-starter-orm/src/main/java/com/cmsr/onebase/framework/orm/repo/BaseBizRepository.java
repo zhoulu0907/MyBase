@@ -21,13 +21,9 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
         if (!canFilter(queryWrapper)) {
             return;
         }
-        List<QueryTable> queryTables = CPI.getQueryTables(queryWrapper);
-        if (CollectionUtils.isNotEmpty(queryTables) && queryTables.size() > 1) {
-            log.warn("查询条件包含多个表，跳过条件注入");
-            return;
-        }
         QueryColumn applicationColumn;
         QueryColumn versionTagColumn;
+        List<QueryTable> queryTables = CPI.getQueryTables(queryWrapper);
         if (CollectionUtils.isEmpty(queryTables)) {
             applicationColumn = new QueryColumn(BaseBizEntity.APPLICATION_ID);
             versionTagColumn = new QueryColumn(BaseBizEntity.VERSION_TAG);
@@ -54,6 +50,11 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
         // 不处理子查询
         List<QueryWrapper> childSelect = CPI.getChildSelect(queryWrapper);
         if (CollectionUtils.isNotEmpty(childSelect)) {
+            return false;
+        }
+        List<QueryTable> queryTables = CPI.getQueryTables(queryWrapper);
+        if (CollectionUtils.isNotEmpty(queryTables) && queryTables.size() > 1) {
+            log.warn("查询条件包含多个表，跳过条件注入");
             return false;
         }
         // 需要处理
