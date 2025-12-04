@@ -51,10 +51,8 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -151,15 +149,13 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
     }
 
 
-    private Long checkApplicationStatus(Long appId) {
-        Set<Long> appIds = new HashSet<>();
-        appIds.add(appId);
-        List<ApplicationDTO> applicationDTOS = TenantManager.withoutTenantCondition(() -> appApplicationApi.findAppApplicationByAppIds(appIds));
+    private Long checkAppAndGetTenantId(Long appId) {
+        ApplicationDTO applicationDTO = TenantManager.withoutTenantCondition(() -> appApplicationApi.findAppApplicationById(appId));
 
-        if (applicationDTOS.isEmpty()) {
+        if (applicationDTO == null) {
             throw exception(AUTH_LOGIN_APP_DELETE_OR_DISABLE);
         }
-        return applicationDTOS.get(0).getTenantId();
+        return applicationDTO.getTenantId();
     }
 
     private void checkPasswordMatched(String password, AdminUserDO user, String account, LoginLogTypeEnum logTypeEnum) {
@@ -181,13 +177,11 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         // 校验验证码
         validateCaptcha(reqVO);
 
-        // 验证应用是否存在
-        Long tenanId = checkApplicationStatus(reqVO.getAppId());
+        // 验证应用是否存在,同时获取租户ID
+        Long tenanId = checkAppAndGetTenantId(reqVO.getAppId());
 
         AtomicReference<AuthLoginRespVO> authLoginRespVO = new AtomicReference<>();
-
-        // 设置租户环境，mybatis flex是否需要换一种方式
-
+        // 设置应用所在的租户环境
         TenantUtils.execute(tenanId, () -> {
             // 检查平台租户是否允许创建应用
             // checkPlatformAdminEnableAppCreate();
@@ -223,15 +217,21 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         mobileValidateCaptcha(reqVO);
 
         // 验证应用是否存在
-        checkApplicationStatus(reqVO.getAppId());
+        Long tenanId = checkAppAndGetTenantId(reqVO.getAppId());
 
-        checkPlatformAdminEnableAppCreate();
-        // 使用手机密码，进行登录
-        AdminUserDO user = mobileAuthenticate(reqVO.getMobile(), reqVO.getPassword());
-        AuthLoginRespVO authLoginRespVO = createAfterLoginSuccess(user.getUserType(), user.getCorpId(), reqVO.getAppId(), user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE);
+        AtomicReference<AuthLoginRespVO> authLoginRespVO = new AtomicReference<>();
+        // 设置应用所在的租户环境
+        TenantUtils.execute(tenanId, () -> {
+            // 检查平台租户是否允许创建应用
+            // checkPlatformAdminEnableAppCreate();
 
-        LogRecordContext.putVariable("user", user);
-        return authLoginRespVO;
+            // 使用手机密码，进行登录
+            AdminUserDO user = mobileAuthenticate(reqVO.getMobile(), reqVO.getPassword());
+            authLoginRespVO.set(createAfterLoginSuccess(user.getUserType(), user.getCorpId(), reqVO.getAppId(), user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE));
+            LogRecordContext.putVariable("user", user);
+        });
+
+        return authLoginRespVO.get();
 
     }
 
