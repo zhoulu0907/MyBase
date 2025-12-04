@@ -112,7 +112,7 @@ const XSubTable = memo(
                           detailMode={detailMode}
                           pageComponentSchema={pageSchema}
                           runtime={true}
-                          // showFromPageData={showFromPageData}
+                        // showFromPageData={showFromPageData}
                         />
                       </Cell>
                     );
@@ -121,8 +121,11 @@ const XSubTable = memo(
               }
             />
           ))}
-          <div className={styles.onAddOBMobile} onClick={handleAdd}>
-            <IconAdd />
+          <div
+            className={styles.onAdd}
+            onClick={handleAdd}
+            style={{ pointerEvents: runtime ? 'unset' : 'none' }}>
+            <IconAdd style={{ marginRight: '0.16rem' }} />
             新增一项
           </div>
         </>

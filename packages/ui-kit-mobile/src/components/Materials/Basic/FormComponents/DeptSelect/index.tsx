@@ -1,13 +1,13 @@
-import { memo, useCallback, useEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useState, useTransition } from 'react';
 import { debounce } from 'lodash-es';
 import { IconArrowBack } from '@arco-design/mobile-react/esm/icon';
-import { PopupSwiper, Cell, SearchBar, Radio, Button, Checkbox, Avatar, Form } from '@arco-design/mobile-react';
+import { PopupSwiper, Cell, SearchBar, Radio, Button, Checkbox, Avatar, Form, Loading, Ellipsis } from '@arco-design/mobile-react';
 import { getDeptWithSearch, type DeptListWithSearchReq } from '@onebase/platform-center';
 import IconSquareChecked from '@arco-design/mobile-react/esm/icon/IconSquareChecked';
 import IconSquareUnchecked from '@arco-design/mobile-react/esm/icon/IconSquareUnchecked';
 import IconSquareDisabled from '@arco-design/mobile-react/esm/icon/IconSquareDisabled';
 
-import { formatDeptAndUsers } from './const';
+import { formatDeptAndUsers, getDeptData, parseDeptName } from './const';
 import deptIcon from '@/assets/images/dept_icon.svg';
 
 import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, FormSchema } from '@onebase/ui-kit';
@@ -22,12 +22,14 @@ const squareIcon = {
   activeDisabled: <IconSquareChecked />
 }
 
-const XDeptSelect = memo((props: XDeptSelectConfig & { runtime?: boolean; detailMode?: boolean }) => {
-  const { label, dataField, status, verify, layout, runtime = true, form } = props;
+const XDeptSelect = memo((props: XDeptSelectConfig & { runtime?: boolean; detailMode?: boolean; isMultiple: boolean; }) => {
+  const { label, dataField, status, verify, layout, runtime = true, form, isMultiple = false } = props;
 
   const [visible, setVisible] = useState(false);
   const [popupDirection] = useState<'bottom' | 'top' | 'left' | 'right'>('bottom');
 
+  const [loading, setLoading] = useState(false);
+  const [isPending, startTransition] = useTransition();
   // 选中值（单选）
   const [deptData, setDeptData] = useState<any>(); // 部门数据
   const [selectedMembers, setSelectedMembers] = useState<any[]>([]); // 已经选中的数据
@@ -36,17 +38,17 @@ const XDeptSelect = memo((props: XDeptSelectConfig & { runtime?: boolean; detail
   });
 
   const renderData = formatDeptAndUsers(deptData);
-  const isMultiple = false; // todo 多选
 
   const fieldId = dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.DEPT_SELECT}_${props.id}`;
   const formData = form?.getFieldValue(fieldId);
 
   useEffect(() => {
-    getDeptUsers({});
-  }, []);
+    visible && getDeptUsers({});
+  }, [visible]);
 
   useEffect(() => {
-    setSelectedKeys([formData?.deptID]);
+    console.log('formData?.deptID', formData?.deptID);
+    visible && formData?.deptID && setSelectedKeys([formData?.deptID]);
   }, [selectedMembers, visible]);
 
   const handleCancel = (e: any) => {
@@ -55,13 +57,13 @@ const XDeptSelect = memo((props: XDeptSelectConfig & { runtime?: boolean; detail
     setSelectedKeys([]);
   };
 
+  // TODO 待完善：多选模式选择部门数据后，进入下级勾选其它数据会清除上级数据
   const handleConfirm = (e: any) => {
     e.stopPropagation();
     if (!selectedKeys.length) return;
-    const curSelectDept = {
-      deptID: selectedKeys[0],
-      deptName: deptData?.deptList.find(v => v.id === selectedKeys[0])?.name
-    };
+
+    const curSelectDept = getDeptData(deptData?.deptList, selectedKeys);
+    console.log({ isMultiple, selectedKeys, curSelectDept });
     form?.setFieldValue(fieldId, curSelectDept);
     setVisible(false);
   };
@@ -83,8 +85,10 @@ const XDeptSelect = memo((props: XDeptSelectConfig & { runtime?: boolean; detail
         deptId,
         keywords
       };
+      setLoading(true);
       const res = await getDeptWithSearch(params);
-      setDeptData(res);
+      setLoading(false);
+      startTransition(() => setDeptData(res));
     } catch (error) {
       console.error('获取部门信息 error:', error);
     } finally {
@@ -108,6 +112,9 @@ const XDeptSelect = memo((props: XDeptSelectConfig & { runtime?: boolean; detail
     await getDeptUsers({});
   };
 
+  const LoadingComp = () => <div className={styles.loading}><Loading type="circle" color="rgb(var(--primary-6))" /></div>
+  const selectedParseDeptName = parseDeptName(deptData?.deptList, selectedKeys);
+
   return (
     <Form.Item
       className="inputTextWrapperOBMobile inputDeptSelectOBMobile"
@@ -120,14 +127,12 @@ const XDeptSelect = memo((props: XDeptSelectConfig & { runtime?: boolean; detail
       }}
     >
       <Cell
-        text={deptData?.deptList.find(v => v.id === selectedKeys[0])?.name}
+        className={styles.deptCell}
         onClick={() => setVisible(true)}
       >
+        {!!selectedParseDeptName ? <Ellipsis text={selectedParseDeptName} maxLine={1} /> : <div style={{ color: '#c9cdd4', fontSize: '0.32rem' }}>请选择</div>}
         <PopupSwiper visible={visible} close={(e) => handleCancel(e)} direction={popupDirection}>
-          <div
-            className="inputDeptSelectOBMobile"
-            style={{ height: '100vh', width: '100vw', background: '#fff' }}
-          >
+          <div className={styles.inputDeptSelectPopupContainer}>
             <div className={styles.popupHeaderOBMobile}>
               <IconArrowBack style={{ fontSize: '0.32rem' }} onClick={(e) => handleCancel(e)} />
               <span>{label?.text}</span>
@@ -152,8 +157,11 @@ const XDeptSelect = memo((props: XDeptSelectConfig & { runtime?: boolean; detail
             </div>
 
             <div className={styles.container}>
-              {renderData?.children.length === 0 && <div className={styles.empty}>暂无数据</div>}
-              {renderData?.children?.map((item: any) =>
+              {(isPending || loading) && <LoadingComp />}
+              {!loading && !isPending && renderData?.children?.length === 0 && (
+                <div className={styles.empty}>暂无数据</div>
+              )}
+              {!loading && !isPending && renderData?.children?.length > 0 && renderData?.children.map((item: any) =>
                 <div
                   key={`dept-${item.key}`}
                   className={styles.item}

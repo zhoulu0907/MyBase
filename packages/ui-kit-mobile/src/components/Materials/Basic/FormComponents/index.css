@@ -25,6 +25,7 @@
   }
 
   .arco-form-item-control {
+    display: unset;
     padding: 0;
     justify-content: flex-end;
   }
@@ -63,4 +64,33 @@
   .arco-cell.without-group {
     padding: 0;
   }
+}
+
+.arco-cell.without-group {
+  background-color: transparent !important;
+}
+
+/* 插入符颜色 */
+.arco-input,
+.arco-textarea {
+  caret-color: rgb(var(--primary-6)) !important;
+}
+
+/* 按钮主题色 */
+.arco-switch.type-android.checked,
+.arco-button.arco-button-type-primary {
+  background-color: rgb(var(--primary-6)) !important;
+}
+
+/* popup左右按钮颜色 */
+.arco-radio .radio-icon.checked,
+.arco-checkbox .checkbox-icon.checked,
+.arco-picker-header-btn.left,
+.arco-picker-header-btn.right {
+  color: rgb(var(--primary-6)) !important;
+}
+
+.arco-cell.without-group.bordered::before,
+.arco-cell.without-group.bordered::after {
+  border: none !important;
 }

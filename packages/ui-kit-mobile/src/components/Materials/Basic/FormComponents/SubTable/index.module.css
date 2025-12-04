@@ -2,6 +2,7 @@
   :global(.arco-collapse-header) {
     flex-direction: row-reverse;
     justify-content: flex-end;
+    background-color: transparent !important;
 
     &::after {
       display: none;
