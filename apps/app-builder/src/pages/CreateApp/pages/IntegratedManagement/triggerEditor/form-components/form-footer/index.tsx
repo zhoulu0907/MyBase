@@ -113,7 +113,7 @@ export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
             break;
           }
 
-          case NodeType.JavaScript: {
+          case NodeType.JAVASCRIPT: {
             const noChange = formInfo.inputParameterFields.every((item: any) => {
               return originalNodeData.inputParameterFields?.find(
                 (ele: any) => ele.name === item.name && ele.type === item.type
@@ -293,16 +293,13 @@ export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
             });
           updateModalOutputs(curNode.id, modalFields);
           break;
-        case NodeType.JavaScript:
-          const outputParameter = JSON.parse(formInfo.outputParameter || '{}');
-          const schema = jsonToJsonSchema(formInfo.outputParameter || '{}');
-          const newFormData = schemaToFormData(schema, outputParameter);
-          const jsFields: ConditionField[] = newFormData.map((item: any) => {
-            // ? 类型处理
+        case NodeType.JAVASCRIPT:
+          const outputParameter = JSON.parse(formInfo.outputParameter || '[]');
+          const jsFields: ConditionField[] = outputParameter.map((item: any) => {
             return {
               label: item.name,
               value: item.name,
-              fieldType: item.type === 'number' ? ENTITY_FIELD_TYPE.NUMBER.VALUE : ENTITY_FIELD_TYPE.TEXT.VALUE
+              fieldType: item.type || ENTITY_FIELD_TYPE.TEXT.VALUE
             };
           });
           updateJavascriptOutputs(curNode.id, jsFields);
