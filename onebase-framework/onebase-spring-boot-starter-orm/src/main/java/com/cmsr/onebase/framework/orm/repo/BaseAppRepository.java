@@ -13,12 +13,11 @@ import org.apache.commons.collections4.CollectionUtils;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity> extends ServiceImpl<M, T> {
 
-    protected QueryWrapper injectBizFilter(QueryWrapper queryWrapper) {
+    protected QueryWrapper injectQueryFilter(QueryWrapper queryWrapper) {
         List<QueryTable> queryTables = CPI.getQueryTables(queryWrapper);
         if (CollectionUtils.isNotEmpty(queryTables) && queryTables.size() > 1) {
             log.warn("查询条件包含多个表，跳过条件注入");
@@ -45,7 +44,7 @@ public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity>
      */
     @Override
     public T getOne(QueryWrapper query) {
-        QueryWrapper queryWrapper = this.injectBizFilter(query);
+        QueryWrapper queryWrapper = this.injectQueryFilter(query);
         return getMapper().selectOneByQuery(queryWrapper);
     }
 
@@ -70,7 +69,7 @@ public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity>
      */
     @Override
     public <R> R getOneAs(QueryWrapper query, Class<R> asType) {
-        QueryWrapper queryWrapper = this.injectBizFilter(query);
+        QueryWrapper queryWrapper = this.injectQueryFilter(query);
         return getMapper().selectOneByQueryAs(queryWrapper, asType);
     }
 
@@ -94,7 +93,7 @@ public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity>
      */
     @Override
     public Object getObj(QueryWrapper query) {
-        QueryWrapper queryWrapper = this.injectBizFilter(query);
+        QueryWrapper queryWrapper = this.injectQueryFilter(query);
         return getMapper().selectObjectByQuery(queryWrapper);
     }
 
@@ -107,7 +106,7 @@ public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity>
      */
     @Override
     public <R> R getObjAs(QueryWrapper query, Class<R> asType) {
-        QueryWrapper queryWrapper = this.injectBizFilter(query);
+        QueryWrapper queryWrapper = this.injectQueryFilter(query);
         return getMapper().selectObjectByQueryAs(queryWrapper, asType);
     }
 
@@ -119,7 +118,7 @@ public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity>
      */
     @Override
     public List<Object> objList(QueryWrapper query) {
-        QueryWrapper queryWrapper = this.injectBizFilter(query);
+        QueryWrapper queryWrapper = this.injectQueryFilter(query);
         return getMapper().selectObjectListByQuery(queryWrapper);
     }
 
@@ -132,7 +131,7 @@ public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity>
      */
     @Override
     public <R> List<R> objListAs(QueryWrapper query, Class<R> asType) {
-        QueryWrapper queryWrapper = this.injectBizFilter(query);
+        QueryWrapper queryWrapper = this.injectQueryFilter(query);
         return getMapper().selectObjectListByQueryAs(queryWrapper, asType);
     }
 
@@ -144,7 +143,7 @@ public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity>
      */
     @Override
     public List<T> list(QueryWrapper query) {
-        QueryWrapper queryWrapper = this.injectBizFilter(query);
+        QueryWrapper queryWrapper = this.injectQueryFilter(query);
         return getMapper().selectListByQuery(queryWrapper);
     }
 
@@ -157,7 +156,7 @@ public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity>
      */
     @Override
     public <R> List<R> listAs(QueryWrapper query, Class<R> asType) {
-        QueryWrapper queryWrapper = this.injectBizFilter(query);
+        QueryWrapper queryWrapper = this.injectQueryFilter(query);
         return getMapper().selectListByQueryAs(queryWrapper, asType);
     }
 
@@ -169,7 +168,7 @@ public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity>
      */
     @Override
     public List<T> listByIds(Collection<? extends Serializable> ids) {
-        QueryWrapper queryWrapper = this.injectBizFilter(QueryWrapper.create().in("id", ids));
+        QueryWrapper queryWrapper = this.injectQueryFilter(QueryWrapper.create().in("id", ids));
         return getMapper().selectListByQuery(queryWrapper);
     }
     //endregion ===== 查询（查）操作 =====
@@ -184,7 +183,7 @@ public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity>
      */
     @Override
     public boolean exists(QueryWrapper query) {
-        QueryWrapper queryWrapper = this.injectBizFilter(query);
+        QueryWrapper queryWrapper = this.injectQueryFilter(query);
         return exists(CPI.getWhereQueryCondition(queryWrapper));
     }
 
@@ -198,7 +197,7 @@ public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity>
     public boolean exists(QueryCondition condition) {
         // 根据查询条件构建 SQL 语句
         // SELECT 1 FROM table WHERE ... LIMIT 1
-        QueryWrapper queryWrapper = this.injectBizFilter(QueryMethods.selectOne().where(condition).limit(1));
+        QueryWrapper queryWrapper = this.injectQueryFilter(QueryMethods.selectOne().where(condition).limit(1));
         // 获取数据集合，空集合：[] 不存在数据，有一个元素的集合：[1] 存在数据
         List<Object> objects = getMapper().selectObjectListByQuery(queryWrapper);
         // 判断是否存在数据
@@ -213,7 +212,7 @@ public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity>
      */
     @Override
     public long count(QueryWrapper query) {
-        QueryWrapper queryWrapper = this.injectBizFilter(query);
+        QueryWrapper queryWrapper = this.injectQueryFilter(query);
         return getMapper().selectCountByQuery(queryWrapper);
     }
     //endregion ===== 数量查询操作 =====
@@ -230,7 +229,7 @@ public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity>
      */
     @Override
     public <R> Page<R> pageAs(Page<R> page, QueryWrapper query, Class<R> asType) {
-        QueryWrapper queryWrapper = this.injectBizFilter(query);
+        QueryWrapper queryWrapper = this.injectQueryFilter(query);
         return getMapper().paginateAs(page, queryWrapper, asType);
     }
     //endregion ===== 分页查询操作 =====
