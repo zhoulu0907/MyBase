@@ -136,7 +136,7 @@ export default function Conditional({ node }: { node: FlowNodeEntity }) {
       if (matchingLine) {
         matchingLine.lineData = {
           ...matchingLine.lineData,
-          priority: tableItem.priority // 直接使用表格中的优先级
+          priority: tableItem.priority
         };
       }
     });
