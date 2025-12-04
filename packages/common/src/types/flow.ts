@@ -29,7 +29,7 @@ export enum NodeType {
   DATA_QUERY_MULTIPLE = 'dataQueryMultiple',
   DATA_UPDATE = 'dataUpdate',
 
-  JavaScript = 'javascript',
+  JAVASCRIPT = 'javascript',
   JSON = 'json',
   LOG = 'log',
   MESSAGE = 'message',
