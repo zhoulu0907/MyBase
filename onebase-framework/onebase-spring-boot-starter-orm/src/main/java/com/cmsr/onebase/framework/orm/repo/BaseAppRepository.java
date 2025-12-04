@@ -18,6 +18,9 @@ import java.util.List;
 public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity> extends ServiceImpl<M, T> {
 
     protected void injectQueryFilter(QueryWrapper queryWrapper) {
+        if (!canFilter(queryWrapper)) {
+            return;
+        }
         List<QueryTable> queryTables = CPI.getQueryTables(queryWrapper);
         if (CollectionUtils.isNotEmpty(queryTables) && queryTables.size() > 1) {
             log.warn("查询条件包含多个表，跳过条件注入");
@@ -30,7 +33,26 @@ public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity>
             applicationColumn = new QueryColumn(queryTables.get(0), BaseAppEntity.APPLICATION_ID);
         }
         Long applicationId = ApplicationManager.getApplicationId();
-        queryWrapper.and(applicationColumn.eq(applicationId).when(!ApplicationManager.isIgnoreApplicationCondition()));
+        queryWrapper.and(applicationColumn.eq(applicationId));
+    }
+
+    private boolean canFilter(QueryWrapper queryWrapper) {
+        if (ApplicationManager.isIgnoreApplicationCondition()) {
+            return false;
+        }
+        // 不处理UNION类型
+        List<UnionWrapper> unions = CPI.getUnions(queryWrapper);
+        if (CollectionUtils.isNotEmpty(unions)) {
+
+            return false;
+        }
+        // 不处理子查询
+        List<QueryWrapper> childSelect = CPI.getChildSelect(queryWrapper);
+        if (CollectionUtils.isNotEmpty(childSelect)) {
+            return false;
+        }
+        // 需要处理
+        return true;
     }
 
     //region ===== 查询（查）操作 =====
