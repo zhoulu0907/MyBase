@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.metadata.build.service.entity;
 
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.util.string.UuidUtils;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.IdUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
@@ -172,6 +173,11 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
         if (BusinessEntityTypeEnum.needCreatePhysicalTable(createReqVO.getEntityType())) {
             // 同步创建物理表，确保事务原子性
             createPhysicalTableForEntitySync(businessEntity, createReqVO, systemFields);
+        }
+
+        // 生成实体UUID（如果为空）
+        if (businessEntity.getEntityUuid() == null || businessEntity.getEntityUuid().isEmpty()) {
+            businessEntity.setEntityUuid(UuidUtils.getUuid());
         }
 
         // 插入业务实体到数据库，如果前面创建物理表失败，这里不会执行
