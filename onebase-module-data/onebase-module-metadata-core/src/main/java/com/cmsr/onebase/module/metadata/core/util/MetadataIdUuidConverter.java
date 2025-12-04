@@ -253,6 +253,68 @@ public class MetadataIdUuidConverter {
         return datasource.getDatasourceUuid();
     }
 
+    /**
+     * 自动解析业务实体标识符为UUID
+     * <p>
+     * 支持传入Long类型ID的字符串形式或UUID，自动识别并转换为UUID。
+     * 判断逻辑：纯数字 → 视为ID，查库转换；非纯数字 → 直接作为UUID返回
+     *
+     * @param identifier 标识符（可以是Long ID的字符串形式或UUID）
+     * @return 实体UUID
+     * @throws ServiceException 当标识符为空或对应的实体不存在时抛出异常
+     */
+    public String toEntityUuid(String identifier) {
+        if (CharSequenceUtil.isBlank(identifier)) {
+            log.warn("业务实体标识符为空");
+            throw new ServiceException(ENTITY_ID_OR_UUID_REQUIRED);
+        }
+
+        // 非纯数字 -> 直接作为UUID
+        if (!isNumeric(identifier)) {
+            return identifier;
+        }
+
+        // 纯数字 -> 视为ID，查库转换
+        MetadataBusinessEntityDO entity = entityRepository.getBusinessEntityById(identifier);
+        if (entity == null) {
+            log.warn("通过ID查询业务实体失败，实体不存在: id={}", identifier);
+            throw new ServiceException(BUSINESS_ENTITY_NOT_EXISTS);
+        }
+        log.debug("业务实体ID转UUID成功: id={} -> uuid={}", identifier, entity.getEntityUuid());
+        return entity.getEntityUuid();
+    }
+
+    /**
+     * 自动解析实体字段标识符为UUID
+     * <p>
+     * 支持传入Long类型ID的字符串形式或UUID，自动识别并转换为UUID。
+     * 判断逻辑：纯数字 → 视为ID，查库转换；非纯数字 → 直接作为UUID返回
+     *
+     * @param identifier 标识符（可以是Long ID的字符串形式或UUID）
+     * @return 字段UUID
+     * @throws ServiceException 当标识符为空或对应的字段不存在时抛出异常
+     */
+    public String toFieldUuid(String identifier) {
+        if (CharSequenceUtil.isBlank(identifier)) {
+            log.warn("实体字段标识符为空");
+            throw new ServiceException(FIELD_ID_OR_UUID_REQUIRED);
+        }
+
+        // 非纯数字 -> 直接作为UUID
+        if (!isNumeric(identifier)) {
+            return identifier;
+        }
+
+        // 纯数字 -> 视为ID，查库转换
+        MetadataEntityFieldDO field = fieldRepository.findById(Long.valueOf(identifier));
+        if (field == null) {
+            log.warn("通过ID查询实体字段失败，字段不存在: id={}", identifier);
+            throw new ServiceException(ENTITY_FIELD_NOT_EXISTS);
+        }
+        log.debug("实体字段ID转UUID成功: id={} -> uuid={}", identifier, field.getFieldUuid());
+        return field.getFieldUuid();
+    }
+
     // ====================== 双参数方法（VO层使用） ======================
 
     /**
