@@ -96,7 +96,7 @@ export default function EditorWorkspace() {
 
   const [pageMode, setPageMode] = useState<string>('pc');
   const { editMode, setEditMode } = currentEditorSignal;
-  
+
   useEffect(() => {
     if (editMode.value === EditMode.MOBILE) {
       document.documentElement.style.fontSize = '48px';
