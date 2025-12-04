@@ -12,6 +12,7 @@ import com.cmsr.onebase.framework.common.enums.RunModeEnum;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
+import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
 import com.cmsr.onebase.module.app.api.security.AppAuthSecurityApi;
@@ -38,6 +39,7 @@ import com.cmsr.onebase.module.system.vo.CaptchaVerificationReqVO;
 import com.cmsr.onebase.module.system.vo.auth.*;
 import com.cmsr.onebase.module.system.vo.corp.CorpRespVO;
 import com.google.common.annotations.VisibleForTesting;
+import com.mybatisflex.core.tenant.TenantManager;
 import com.mzt.logapi.context.LogRecordContext;
 import com.mzt.logapi.starter.annotation.LogRecord;
 import jakarta.annotation.Resource;
@@ -49,10 +51,9 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
@@ -148,13 +149,13 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
     }
 
 
-    private void checkApplicationStatus(Long appId) {
-        Set<Long> appIds = new HashSet<Long>();
-        appIds.add(appId);
-        List<ApplicationDTO> applicationDTOS = appApplicationApi.findAppApplicationByAppIds(appIds);
-        if (applicationDTOS.isEmpty()) {
-            throw exception(AUTH_LOGIN_CORP_DELETE_OR_DISABLE);
+    private Long checkAppAndGetTenantId(Long appId) {
+        ApplicationDTO applicationDTO = TenantManager.withoutTenantCondition(() -> appApplicationApi.findAppApplicationById(appId));
+
+        if (applicationDTO == null) {
+            throw exception(AUTH_LOGIN_APP_DELETE_OR_DISABLE);
         }
+        return applicationDTO.getTenantId();
     }
 
     private void checkPasswordMatched(String password, AdminUserDO user, String account, LoginLogTypeEnum logTypeEnum) {
@@ -176,18 +177,23 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         // 校验验证码
         validateCaptcha(reqVO);
 
-        // 验证应用是否存在
-        checkApplicationStatus(reqVO.getAppId());
+        // 验证应用是否存在,同时获取租户ID
+        Long tenanId = checkAppAndGetTenantId(reqVO.getAppId());
 
-        // 增加日志输出，便于调试
-        checkPlatformAdminEnableAppCreate();
+        AtomicReference<AuthLoginRespVO> authLoginRespVO = new AtomicReference<>();
+        // 设置应用所在的租户环境
+        TenantUtils.execute(tenanId, () -> {
+            // 检查平台租户是否允许创建应用
+            // checkPlatformAdminEnableAppCreate();
 
-        // 使用账号密码，进行登录
-        AdminUserDO user = authenticate(reqVO.getUsername(), reqVO.getPassword());
-        AuthLoginRespVO authLoginRespVO = createAfterLoginSuccess(user.getUserType(), user.getCorpId(), reqVO.getAppId(), user.getId(), reqVO.getUsername(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_USERNAME);
+            // 使用账号密码，进行登录
+            AdminUserDO user = authenticate(reqVO.getUsername(), reqVO.getPassword());
+            authLoginRespVO.set(createAfterLoginSuccess(user.getUserType(), user.getCorpId(), reqVO.getAppId(), user.getId(), reqVO.getUsername(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_USERNAME));
 
-        LogRecordContext.putVariable("user", user);
-        return authLoginRespVO;
+            LogRecordContext.putVariable("user", user);
+        });
+
+        return authLoginRespVO.get();
 
     }
 
@@ -211,15 +217,21 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         mobileValidateCaptcha(reqVO);
 
         // 验证应用是否存在
-        checkApplicationStatus(reqVO.getAppId());
+        Long tenanId = checkAppAndGetTenantId(reqVO.getAppId());
 
-        checkPlatformAdminEnableAppCreate();
-        // 使用手机密码，进行登录
-        AdminUserDO user = mobileAuthenticate(reqVO.getMobile(), reqVO.getPassword());
-        AuthLoginRespVO authLoginRespVO = createAfterLoginSuccess(user.getUserType(), user.getCorpId(), reqVO.getAppId(), user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE);
+        AtomicReference<AuthLoginRespVO> authLoginRespVO = new AtomicReference<>();
+        // 设置应用所在的租户环境
+        TenantUtils.execute(tenanId, () -> {
+            // 检查平台租户是否允许创建应用
+            // checkPlatformAdminEnableAppCreate();
 
-        LogRecordContext.putVariable("user", user);
-        return authLoginRespVO;
+            // 使用手机密码，进行登录
+            AdminUserDO user = mobileAuthenticate(reqVO.getMobile(), reqVO.getPassword());
+            authLoginRespVO.set(createAfterLoginSuccess(user.getUserType(), user.getCorpId(), reqVO.getAppId(), user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE));
+            LogRecordContext.putVariable("user", user);
+        });
+
+        return authLoginRespVO.get();
 
     }
 

@@ -66,8 +66,7 @@ public class ApplicationDTO {
     private LocalDateTime createTime;
 
     /**
-     * 租户id
+     * 租户ID
      */
     private Long tenantId;
-
 }
