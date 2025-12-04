@@ -128,6 +128,9 @@ public class OneBaseTenantAutoConfiguration {
                                                                                    WebProperties webProperties,
                                                                                    GlobalExceptionHandler globalExceptionHandler,
                                                                                    TenantFrameworkService tenantFrameworkService) {
+        // 增加忽略的 URL
+        addIgnoreUrls(tenantProperties);
+
         FilterRegistrationBean<TenantSecurityWebFilter> registrationBean = new FilterRegistrationBean<>();
         registrationBean.setFilter(new TenantSecurityWebFilter(tenantProperties, webProperties,
                 globalExceptionHandler, tenantFrameworkService));
