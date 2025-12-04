@@ -14,7 +14,8 @@ import {
   type DataMethodParam,
   type GetPageSetIdReq,
   type InsertMethodParams,
-  type UpdateMethodParams
+  type UpdateMethodParams,
+  getEntityFieldsWithChildren
 } from '@onebase/app';
 import { fetchSubmitInstance } from '@onebase/app/src/services/app_runtime';
 import { pagesRuntimeSignal } from '@onebase/common';
@@ -74,11 +75,11 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     console.log('mainMetaData: ', mainMetaData);
     setMainMetaData(mainMetaData);
 
-    // const entityWithChildren = await getEntityFieldsWithChildren(mainMetaData);
-    // console.log('当前主表及所有子表数据: ', entityWithChildren);
+    const entityWithChildren = await getEntityFieldsWithChildren(mainMetaData, true);
+    console.log('当前主表及所有子表数据: ', entityWithChildren);
 
-    // setMainMetaDataFields(entityWithChildren.parentFields);
-    // setSubEntities(entityWithChildren.childEntities);
+    setMainMetaDataFields(entityWithChildren.parentFields);
+    setSubEntities(entityWithChildren.childEntities);
   };
 
   useEffect(() => {

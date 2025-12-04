@@ -9,7 +9,7 @@ import {
   UpdateFieldReqVO,
   UpdateRelationReqVO
 } from '../types';
-import { metadataService } from './clients';
+import { metadataService, runtimeMetadataService } from './clients';
 
 /**
  * 获取实体分页列表
@@ -219,8 +219,10 @@ export const getRelationById = (id: string) => {
  * @param entityId 实体ID
  * @returns 实体名称及其关联的子表信息
  */
-export const getEntityFieldsWithChildren = (entityId: string) => {
-  return metadataService.post('/entity-relationship/entity-with-children?entityId=' + entityId);
+export const getEntityFieldsWithChildren = (entityId: string, runtime?: boolean) => {
+  return (runtime ? runtimeMetadataService : metadataService).post(
+    '/entity-relationship/entity-with-children?entityId=' + entityId
+  );
 };
 
 /**
@@ -285,6 +287,6 @@ export const getEntityFieldOptions = (fieldId: string) => {
  * fieldId
  * @returns 自动编号配置规则
  */
-export const getAutoNumberConfig = (fieldId:string) =>{
+export const getAutoNumberConfig = (fieldId: string) => {
   return metadataService.post(`/auto-number/config/get?fieldId=${fieldId}`);
-}
+};
