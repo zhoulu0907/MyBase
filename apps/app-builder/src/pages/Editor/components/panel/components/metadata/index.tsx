@@ -30,8 +30,10 @@ interface FieldItem {
   displayName: string;
   label: string;
   type: string;
-  fieldID: string;
-  entityID: string;
+  //   fieldID: string;
+  //   entityID: string;
+  fieldName: string;
+  entityName: string;
 }
 
 interface GroupedSection {
@@ -67,8 +69,13 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
             displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[cpType] || '',
             label: field.displayName,
             type: cpType,
-            fieldID: field.fieldId,
-            entityID: mainEntity.entityId,
+
+            // TODO(mickey): 使用entityName和fieldName，后续移除entityID、fieldID
+            // fieldID: field.fieldId,
+            // entityID: mainEntity.entityId,
+
+            entityName: mainEntity.entityName,
+            fieldName: field.fieldName,
             isSystemField: field.isSystemField
           };
         })
@@ -113,8 +120,13 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
             // displayName: field.displayName,
             label: field.displayName,
             type: cpType,
-            fieldID: field.fieldId,
-            entityID: subEntity.entityId,
+
+            // TODO(mickey): 使用entityName和fieldName，后续移除entityID、fieldID
+            // fieldID: field.fieldId,
+            // entityID: mainEntity.entityId,
+
+            entityName: mainEntity.entityName,
+            fieldName: field.fieldName,
             isSystemField: field.isSystemField
           };
         })
@@ -329,8 +341,10 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
                           displayName={item.displayName}
                           label={item.label}
                           type={item.type}
-                          fieldID={item.fieldID}
-                          entityID={item.entityID}
+                          entityName={item.entityName}
+                          fieldName={item.fieldName}
+                          //   fieldID={item.fieldID}
+                          //   entityID={item.entityID}
                         />
                       ))}
                     </ReactSortable>

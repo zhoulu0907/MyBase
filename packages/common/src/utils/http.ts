@@ -1,6 +1,7 @@
 import { Message } from '@arco-design/web-react';
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { BaseResponse, RequestConfig, RequestInterceptor, ResponseInterceptor } from '../types';
+import { getEnv } from './env';
 import { getHashQueryParam } from './router';
 import TokenManager from './token';
 
@@ -115,6 +116,7 @@ export class HttpClient {
             Message.error({ id: 'http-error', content: data.msg || '请求失败' });
             if (data.code === 401) {
               const loginURL = TokenManager.getTokenInfo()?.loginURL;
+              const tenantId = TokenManager.getTokenInfo()?.tenantId;
 
               TokenManager.clearToken();
 
@@ -124,7 +126,17 @@ export class HttpClient {
               } else {
                 const redirectURL = getHashQueryParam('redirectURL') || window.location.href;
                 //   window.location.href = '/#/login';
-                window.location.href = `/#/login?redirectURL=${redirectURL}`;
+                const env = getEnv();
+
+                if (env === 'platform') {
+                  window.location.href = `/#/login`;
+                } else if (env === 'builder') {
+                  window.location.href = `/#/tenant/${tenantId}/?redirectURL=${redirectURL}`;
+                } else if (env === 'runtime') {
+                  window.location.href = `/#/login?redirectURL=${redirectURL}`;
+                } else {
+                  window.location.href = `/#/login?redirectURL=${redirectURL}`;
+                }
               }
             }
             return Promise.reject(new Error(data.msg || '请求失败'));

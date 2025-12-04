@@ -1,34 +1,34 @@
-import React from 'react';
+import CompDeleteIcon from '@/assets/images/app_delete.svg';
+import CompCopyIcon from '@/assets/images/copy_comp_icon.svg';
+import CompShowIcon from '@/assets/images/eye_off_icon.svg';
+import { Divider } from '@arco-design/web-react';
+import { ENTITY_TYPE, ENTITY_TYPE_VALUE, type AppEntityField } from '@onebase/app';
+import { getDictDataListByType, getDictDetail } from '@onebase/platform-center';
 import { useSignals } from '@preact/signals-react/runtime';
-import { useAppEntityStore } from 'src/signals/store_entity';
-import { usePageEditorSignal } from 'src/hooks/useSignal';
+import { cloneDeep } from 'lodash-es';
+import React from 'react';
 import { ReactSortable, type SortableEvent } from 'react-sortablejs';
-import EditRender from 'src/components/render/EditRender';
-import { type GridItem } from 'src/utils/const';
-import { getComponentConfig, getComponentWidth, getComponentSchema } from 'src/components/Materials/schema';
 import {
-  STATUS_OPTIONS,
-  STATUS_VALUES,
-  WIDTH_VALUES,
-  WIDTH_OPTIONS,
-  COLOR_MODE_TYPES,
-  DEFAULT_OPTIONS_TYPE,
-  DEFAULT_VALUE_TYPES
-} from 'src/components/Materials/constants';
-import {
-  ENTITY_COMPONENT_TYPES,
   ALL_COMPONENT_TYPES,
+  ENTITY_COMPONENT_TYPES,
   FORM_COMPONENT_TYPES
 } from 'src/components/Materials/componentTypes';
 import { COMPONENT_MAP } from 'src/components/Materials/componentsMap';
-import { ENTITY_TYPE, ENTITY_TYPE_VALUE, type AppEntityField } from '@onebase/app';
-import { getDictDataListByType, getDictDetail } from '@onebase/platform-center';
-import { Divider } from '@arco-design/web-react';
-import { cloneDeep } from 'lodash-es';
+import {
+  COLOR_MODE_TYPES,
+  DEFAULT_OPTIONS_TYPE,
+  DEFAULT_VALUE_TYPES,
+  STATUS_OPTIONS,
+  STATUS_VALUES,
+  WIDTH_OPTIONS,
+  WIDTH_VALUES
+} from 'src/components/Materials/constants';
+import { getComponentConfig, getComponentSchema, getComponentWidth } from 'src/components/Materials/schema';
+import EditRender from 'src/components/render/EditRender';
+import { usePageEditorSignal } from 'src/hooks/useSignal';
+import { useAppEntityStore } from 'src/signals/store_entity';
+import { type GridItem } from 'src/utils/const';
 import { v4 as uuidv4 } from 'uuid';
-import CompShowIcon from '@/assets/images/eye_off_icon.svg';
-import CompCopyIcon from '@/assets/images/copy_comp_icon.svg';
-import CompDeleteIcon from '@/assets/images/app_delete.svg';
 import './index.css';
 
 interface LayoutReactSortableProps {
@@ -69,12 +69,16 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
     const cpID = e.item.id || e.item.getAttribute('data-cp-id');
     const itemType = e.item.getAttribute('data-cp-type');
     const itemDisplayName = e.item.getAttribute('data-cp-displayname');
-    const entityID = e.item.getAttribute('data-entity-id');
-    const fieldId = e.item.getAttribute('data-field-id');
+
+    // const entityID = e.item.getAttribute('data-entity-id');
+    // const fieldId = e.item.getAttribute('data-field-id');
+
+    const entityName = e.item.getAttribute('data-entity-name');
+    const fieldName = e.item.getAttribute('data-field-name');
 
     // 子表字段不允许
     if (
-      (entityID && entityID !== mainEntity.entityId) ||
+      (entityName && entityName !== mainEntity.entityName) ||
       itemType === ENTITY_COMPONENT_TYPES.MAIN_ENTITY ||
       itemType === ENTITY_COMPONENT_TYPES.SUB_ENTITY
     ) {
@@ -88,7 +92,8 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
     schema.config = schemaConfig;
     schema.config.cpName = itemDisplayName;
     schema.config.id = cpID;
-    schema.config.dataField = entityID && fieldId ? [entityID, fieldId] : [];
+    // schema.config.dataField = entityID && fieldId ? [entityID, fieldId] : [];
+    schema.config.dataField = entityName && fieldName ? [entityName, fieldName] : [];
 
     const props = {
       id: cpID,
@@ -180,7 +185,8 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
 
           schema.config.cpName = field.displayName;
           schema.config.id = cpID;
-          schema.config.dataField = [item.entityId, field.fieldId];
+          //   schema.config.dataField = [item.entityId, field.fieldId];
+          schema.config.dataField = [item.entityName, field.fieldName];
           schema.config.label.text = field.displayName;
           const props = {
             id: cpID,
@@ -299,7 +305,8 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
           subSchema.config.label.text = ele.displayName;
           subSchema.config.label.display = false;
           subSchema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT];
-          subSchema.config.dataField = [item.entityId, ele.fieldId];
+          // subSchema.config.dataField = [item.entityId, ele.fieldId];
+          subSchema.config.dataField = [item.entityName, ele.fieldName];
           subSchema.config.width = WIDTH_VALUES[WIDTH_OPTIONS.FULL];
           const subProps = {
             id: subId,
