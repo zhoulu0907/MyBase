@@ -66,7 +66,14 @@ public class AppApplicationRepository extends ServiceImpl<AppApplicationMapper, 
 
     public Long countByTenantId(Long tenantId) {
         QueryWrapper queryWrapper = this.query().eq(AppApplicationDO::getTenantId, tenantId);
-        return TenantManager.withoutTenantCondition(() -> this.count(queryWrapper));
+        return this.count(queryWrapper);
+    }
+
+    public AppApplicationDO findByTenantIdAndAppId(Long tenantId, Long appId) {
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_APPLICATION.TENANT_ID.eq(tenantId))
+                .and(APP_APPLICATION.ID.eq(appId));
+        return this.getOne(queryWrapper);
     }
 
     public List<AppApplicationDO> getSimpleAppList(Integer status) {
@@ -120,4 +127,6 @@ public class AppApplicationRepository extends ServiceImpl<AppApplicationMapper, 
                 .eq(AppApplicationDO::getId, appId)
                 .update();
     }
+
+
 }
