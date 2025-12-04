@@ -7,19 +7,18 @@
 - 安全与校验遵循 OWASP 最佳实践：严格输入验证、类型与结构校验、统一错误码
 
 ## 路由与承载
-- 路径资源：`/{entityCode}` 表示主实体类型，由后端解析实体ID
+- 路径资源：`/runtime/metadata/{tableName}` 表示主实体表名，由后端解析实体模型
 - 查询参数：`menuId` 必填，用于权限检测
 - 请求头：`X-Trace-Id` 可选，用于链路追踪
 - 响应头：`X-Trace-Id` 返回，用于链路追踪
 - 请求体：仅保留 `data`，承载主字段、关系与子表数据
 
 参考控制器位置：
-- 创建：`src/main/java/com/cmsr/onebase/module/metadata/runtime/controller/datamethod/DynamicDataController.java:44-53`
-- 更新：`src/main/java/com/cmsr/onebase/module/metadata/runtime/controller/datamethod/DynamicDataController.java:55-64`
-- 删除：`src/main/java/com/cmsr/onebase/module/metadata/runtime/controller/datamethod/DynamicDataController.java:66-75`
-- 详情：`src/main/java/com/cmsr/onebase/module/metadata/runtime/controller/datamethod/DynamicDataController.java:77-86`
-- 分页：`src/main/java/com/cmsr/onebase/module/metadata/runtime/controller/datamethod/DynamicDataController.java:88-97`
-- 实体解析：`src/main/java/com/cmsr/onebase/module/metadata/runtime/controller/datamethod/DynamicDataController.java:99-105`
+- 创建：`onebase-module-data/onebase-module-metadata-runtime/src/main/java/com/cmsr/onebase/module/metadata/runtime/semantic/controller/SemanticDynamicDataController.java:42`
+- 更新：`onebase-module-data/onebase-module-metadata-runtime/src/main/java/com/cmsr/onebase/module/metadata/runtime/semantic/controller/SemanticDynamicDataController.java:70`
+- 删除：`onebase-module-data/onebase-module-metadata-runtime/src/main/java/com/cmsr/onebase/module/metadata/runtime/semantic/controller/SemanticDynamicDataController.java:96`
+- 详情：`onebase-module-data/onebase-module-metadata-runtime/src/main/java/com/cmsr/onebase/module/metadata/runtime/semantic/controller/SemanticDynamicDataController.java:122`
+- 分页：`onebase-module-data/onebase-module-metadata-runtime/src/main/java/com/cmsr/onebase/module/metadata/runtime/semantic/controller/SemanticDynamicDataController.java:148`
 
 ## 请求体结构
 - 顶层仅保留：
@@ -49,7 +48,7 @@
 ## 接口文档
 
 ### 创建
-- 方法：`POST /metadata/{entityCode}/create?menuId={menuId}`
+- 方法：`POST /runtime/metadata/{tableName}/create?menuId={menuId}`
 - 头：`X-Trace-Id` 可选, `Content-Type: application/json`
 - 体：
 ```json
@@ -74,7 +73,7 @@
 - 响应：`CommonResult<DynamicDataRespVO>`（返回主实体 `id` 与回显）
 
 ### 更新
-- 方法：`POST /metadata/{entityCode}/update?menuId={menuId}`
+- 方法：`POST /runtime/metadata/{tableName}/update?menuId={menuId}`
 - 头：`X-Trace-Id` 可选
 - 体：
 ```json
@@ -92,42 +91,32 @@
 ```
 - 响应：`CommonResult<DynamicDataRespVO>`
 
-### 删除
-- 方法：`POST /metadata/{entityCode}/remove?menuId={menuId}`
+- 方法：`POST /runtime/metadata/{tableName}/delete?menuId={menuId}`
 - 头：`X-Trace-Id` 可选
 - 体：
 ```json
 {
-  "data": { "id": 123456 }
+  "id": 123456,
+  "methodCode": "SOFT_DELETE"
 }
 ```
 - 响应：`CommonResult<Boolean>`
 
 ### 详情
-- 方法：`POST /metadata/{entityCode}/detail?menuId={menuId}`
+- 方法：`POST /runtime/metadata/{tableName}/detail?menuId={menuId}`
 - 头：`X-Trace-Id` 可选
 - 体：
 ```json
 {
-  "data": { "id": 123456 },
-  // "containSubTable": true,
-  // "containRelation": true
-  // "relationContext": [{
-  //   "relationName": "customer_profile",
-  //   "relationAttr": ["profile_city", "profile_major"]
-  // }, {
-  //   "relationName": "customer_tags",
-  //   "relationAttr": ["tag_name", "tag_level"]
-  // }, {
-  //   "relationName": "orders",
-  //   "relationAttr": ["order_no", "amount", "status"]
-  // }]
+  "id": 123456,
+  "containSubTable": true,
+  "containRelation": true
 }
 ```
 - 响应：`CommonResult<DynamicDataRespVO>`
 
 ### 分页
-- 方法：`POST /metadata/{entityCode}/page?menuId={menuId}`
+- 方法：`POST /runtime/metadata/{tableName}/page?menuId={menuId}`
 - 头：`X-Trace-Id` 可选
 - 体（兼容现有分页VO字段传体内）：
 ```json
@@ -142,17 +131,13 @@
 ```
 - 响应：`CommonResult<PageResult<DynamicDataRespVO>>`
 
-## 控制器传输逻辑（到现有服务）
-- 从路径 `{entityCode}` 解析 `entityId`：`DynamicDataController.java:99-105`
-- 从查询参数读取 `menuId` 并传入旧 VO
-- 从请求头读取 `X-Trace-Id` 并传入旧 VO
-- `data` 拆分：
-  - 业务字段键 → 主实体字段（旧版 `DynamicDataCreateReqVO#data`）
-  - 语义化键 → 依据元数据识别关系/子表并转换为旧版子表VO（对象→单行，数组→多行）
-- 删除优先执行，后续更新/新增
+## 控制器传输逻辑
+- 路由解析：`{tableName}` 由服务层解析实体模型
+- 上下文：查询参数 `menuId` 必填；请求头 `X-Trace-Id` 若缺失则由控制器生成并在响应头返回
+- 委派执行：控制器薄层，业务语义装配、权限与校验在服务层完成
 
 ## 校验与错误码
-- 必填：`menuId`、`data`（参考 `vo/DynamicDataCreateNewReqVO.java:28`）
+- 必填：`menuId`；删除/详情需 `id`
 - 类型：一对一为对象，一对多/子表为数组；业务字段键必须为合法字段
 - 未知键：拒绝并返回业务错误码
 - 典型错误：

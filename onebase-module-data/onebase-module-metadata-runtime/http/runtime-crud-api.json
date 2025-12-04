@@ -15,7 +15,7 @@
     { "name": "动态数据(语义)" }
   ],
   "paths": {
-    "/metadata/{tableName}/create": {
+    "/runtime/metadata/{tableName}/create": {
       "post": {
         "tags": ["动态数据(语义)"],
         "summary": "创建",
@@ -160,7 +160,7 @@
         }
       }
     },
-    "/metadata/{tableName}/update": {
+    "/runtime/metadata/{tableName}/update": {
       "post": {
         "tags": ["动态数据(语义)"],
         "summary": "更新",
@@ -226,7 +226,7 @@
         }
       }
     },
-    "/metadata/{tableName}/delete": {
+    "/runtime/metadata/{tableName}/delete": {
       "post": {
         "tags": ["动态数据(语义)"],
         "summary": "删除",
@@ -271,7 +271,7 @@
         }
       }
     },
-    "/metadata/{tableName}/detail": {
+    "/runtime/metadata/{tableName}/detail": {
       "post": {
         "tags": ["动态数据(语义)"],
         "summary": "详情",
@@ -332,7 +332,7 @@
         }
       }
     },
-    "/metadata/{tableName}/page": {
+    "/runtime/metadata/{tableName}/page": {
       "post": {
         "tags": ["动态数据(语义)"],
         "summary": "分页",
