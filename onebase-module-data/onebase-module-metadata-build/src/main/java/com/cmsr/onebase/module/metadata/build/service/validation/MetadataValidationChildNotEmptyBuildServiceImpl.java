@@ -27,13 +27,13 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
     @Resource private MetadataValidationRuleGroupBuildService ruleGroupService; // 其他服务
 
     @Override
-    public MetadataValidationChildNotEmptyDO getByFieldId(Long fieldId) {
-        return childNotEmptyRepository.findOneByFieldId(fieldId);
+    public MetadataValidationChildNotEmptyDO getByFieldId(String fieldUuid) {
+        return childNotEmptyRepository.findOneByFieldUuid(fieldUuid);
     }
 
     @Override
-    public ValidationChildNotEmptyRespVO getByFieldIdWithRgName(Long fieldId) {
-        MetadataValidationChildNotEmptyDO validationDO = childNotEmptyRepository.findOneByFieldId(fieldId);
+    public ValidationChildNotEmptyRespVO getByFieldIdWithRgName(String fieldUuid) {
+        MetadataValidationChildNotEmptyDO validationDO = childNotEmptyRepository.findOneByFieldUuid(fieldUuid);
         if (validationDO == null) {
             return null;
         }
@@ -42,8 +42,8 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
         ValidationChildNotEmptyRespVO respVO = BeanUtils.toBean(validationDO, ValidationChildNotEmptyRespVO.class);
 
         // 获取规则组信息，包括提示语等字段
-        if (validationDO.getGroupId() != null) {
-            MetadataValidationRuleGroupDO ruleGroup = ruleGroupService.getValidationRuleGroup(validationDO.getGroupId());
+        if (validationDO.getGroupUuid() != null) {
+            MetadataValidationRuleGroupDO ruleGroup = ruleGroupService.getValidationRuleGroupByUuid(validationDO.getGroupUuid());
             if (ruleGroup != null) {
                 respVO.setRgName(ruleGroup.getRgName());
                 respVO.setPromptMessage(ruleGroup.getPopPrompt());
@@ -59,7 +59,7 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
         if (validationDO == null) {
             var group = ruleGroupService.getValidationRuleGroup(id);
             if (group != null) {
-                var list = childNotEmptyRepository.findByGroupId(group.getId());
+                var list = childNotEmptyRepository.findByGroupUuid(group.getGroupUuid());
                 if (!list.isEmpty()) {
                     validationDO = list.get(0);
                 }
@@ -73,8 +73,8 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
         ValidationChildNotEmptyRespVO respVO = BeanUtils.toBean(validationDO, ValidationChildNotEmptyRespVO.class);
 
         // 获取规则组信息，包括提示语等字段
-        if (validationDO.getGroupId() != null) {
-            MetadataValidationRuleGroupDO ruleGroup = ruleGroupService.getValidationRuleGroup(validationDO.getGroupId());
+        if (validationDO.getGroupUuid() != null) {
+            MetadataValidationRuleGroupDO ruleGroup = ruleGroupService.getValidationRuleGroupByUuid(validationDO.getGroupUuid());
             if (ruleGroup != null) {
                 respVO.setRgName(ruleGroup.getRgName());
                 respVO.setPromptMessage(ruleGroup.getPopPrompt());
@@ -89,28 +89,33 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
     public void deleteById(Long id) {
         // 先尝试按主键ID查找记录
         MetadataValidationChildNotEmptyDO existing = childNotEmptyRepository.getById(id);
+        String groupUuidToDelete = null;
         Long groupIdToDelete = null;
         
         if (existing != null) {
             // 按主键ID找到了记录
-            groupIdToDelete = existing.getGroupId();
+            groupUuidToDelete = existing.getGroupUuid();
             childNotEmptyRepository.removeById(id);
         } else {
-            // 按主键ID未找到，尝试按groupId查找
-            var list = childNotEmptyRepository.findByGroupId(id);
-            if (!list.isEmpty()) {
-                if (list.size() > 1) {
-                    throw new IllegalStateException("数据异常：同一组存在多条子表非空校验规则(组ID=" + id + ")");
+            // 按主键ID未找到，尝试通过groupId查询groupUuid再查找
+            var group = ruleGroupService.getValidationRuleGroup(id);
+            if (group != null) {
+                var list = childNotEmptyRepository.findByGroupUuid(group.getGroupUuid());
+                if (!list.isEmpty()) {
+                    if (list.size() > 1) {
+                        throw new IllegalStateException("数据异常：同一组存在多条子表非空校验规则(组UUID=" + group.getGroupUuid() + ")");
+                    }
+                    MetadataValidationChildNotEmptyDO validationDO = list.get(0);
+                    childNotEmptyRepository.removeById(validationDO.getId());
                 }
-                MetadataValidationChildNotEmptyDO validationDO = list.get(0);
-                childNotEmptyRepository.removeById(validationDO.getId());
+                groupIdToDelete = id;
             }
-            // 将id作为groupId删除
-            groupIdToDelete = id;
         }
         
         // 无论子表是否存在，都要删除主表作为兜底（防止脏数据）
-        if (groupIdToDelete != null) {
+        if (groupUuidToDelete != null) {
+            ruleGroupService.safeDeleteGroupDirect(groupUuidToDelete);
+        } else if (groupIdToDelete != null) {
             ruleGroupService.safeDeleteGroupDirect(groupIdToDelete);
         }
     }
@@ -119,31 +124,31 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
     @Transactional(rollbackFor = Exception.class)
     public Long create(ValidationChildNotEmptySaveReqVO vo) {
         Assert.notNull(vo, "vo不能为空");
-        Assert.notNull(vo.getEntityId(), "父实体ID不能为空");
-        Assert.notNull(vo.getChildEntityId(), "子实体ID不能为空");
+        Assert.notNull(vo.getEntityUuid(), "父实体UUID不能为空");
+        Assert.notNull(vo.getChildEntityUuid(), "子实体UUID不能为空");
         Assert.hasText(vo.getRgName(), "规则组名称不能为空");
 
         // 检查同一父实体和子实体是否已存在子表非空校验规则
         QueryWrapper queryWrapper = childNotEmptyRepository.query()
-                .eq(MetadataValidationChildNotEmptyDO::getEntityId, vo.getEntityId())
-                .eq(MetadataValidationChildNotEmptyDO::getChildEntityId, vo.getChildEntityId());
+                .eq(MetadataValidationChildNotEmptyDO::getEntityUuid, vo.getEntityUuid())
+                .eq(MetadataValidationChildNotEmptyDO::getChildEntityUuid, vo.getChildEntityUuid());
         List<MetadataValidationChildNotEmptyDO> existingRules = childNotEmptyRepository.list(queryWrapper);
         if (!existingRules.isEmpty()) {
             throw new IllegalStateException("该父子实体关系已存在子表非空校验规则，同一关系只能有一条子表非空校验规则");
         }
 
         // 处理规则组：先查找，不存在则创建；存在但已被其他实体复用则新建
-        Long groupId = null;
+        String groupUuid = null;
         var existingGroup = ruleGroupService.getByName(vo.getRgName());
         boolean needCreateGroup = false;
         if (existingGroup != null) {
-            var groupList = childNotEmptyRepository.findByGroupId(existingGroup.getId());
-            boolean reused = groupList.stream().anyMatch(u -> !u.getEntityId().equals(vo.getEntityId()) 
-                    || !u.getChildEntityId().equals(vo.getChildEntityId()));
+            var groupList = childNotEmptyRepository.findByGroupUuid(existingGroup.getGroupUuid());
+            boolean reused = groupList.stream().anyMatch(u -> !u.getEntityUuid().equals(vo.getEntityUuid()) 
+                    || !u.getChildEntityUuid().equals(vo.getChildEntityUuid()));
             if (reused) {
                 needCreateGroup = true;
             } else {
-                groupId = existingGroup.getId();
+                groupUuid = existingGroup.getGroupUuid();
             }
         } else {
             needCreateGroup = true;
@@ -159,18 +164,21 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
             groupVO.setPopPrompt(vo.getPopPrompt());
             groupVO.setPopType(vo.getPopType());
             groupVO.setValidationType("CHILD_NOT_EMPTY");
-            // 同步entityId到规则组
-            groupVO.setEntityId(vo.getEntityId());
-            groupId = ruleGroupService.createValidationRuleGroup(groupVO);
+            // 同步entityUuid到规则组
+            groupVO.setEntityUuid(vo.getEntityUuid());
+            Long groupId = ruleGroupService.createValidationRuleGroup(groupVO);
+            // 获取创建后的规则组UUID
+            MetadataValidationRuleGroupDO createdGroup = ruleGroupService.getValidationRuleGroup(groupId);
+            groupUuid = createdGroup != null ? createdGroup.getGroupUuid() : null;
         }
 
         // 转换VO为DO并设置必要字段
         MetadataValidationChildNotEmptyDO data = BeanUtils.toBean(vo, MetadataValidationChildNotEmptyDO.class);
-        data.setEntityId(vo.getEntityId());
-        data.setChildEntityId(vo.getChildEntityId());
-        data.setGroupId(groupId);
-        // fieldId设置为null，不再使用
-        data.setFieldId(null);
+        data.setEntityUuid(vo.getEntityUuid());
+        data.setChildEntityUuid(vo.getChildEntityUuid());
+        data.setGroupUuid(groupUuid);
+        // fieldUuid设置为null，不再使用
+        data.setFieldUuid(null);
         // applicationId暂时设置为null，如果需要可以从其他地方获取
         data.setApplicationId(null);
         
@@ -193,40 +201,41 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
     public void update(ValidationChildNotEmptyUpdateReqVO vo) {
         Assert.notNull(vo, "vo不能为空");
         Assert.notNull(vo.getId(), "规则组ID不能为空");
-        Assert.notNull(vo.getEntityId(), "父实体ID不能为空");
-        Assert.notNull(vo.getChildEntityId(), "子实体ID不能为空");
+        Assert.notNull(vo.getEntityUuid(), "父实体UUID不能为空");
+        Assert.notNull(vo.getChildEntityUuid(), "子实体UUID不能为空");
         
         Long groupIdParam = vo.getId();
-        var list = childNotEmptyRepository.findByGroupId(groupIdParam);
-        Assert.notEmpty(list, "当前子表非空校验规则不存在(组ID=" + groupIdParam + ")");
+        var group = ruleGroupService.getValidationRuleGroup(groupIdParam);
+        Assert.notNull(group, "当前子表非空校验规则不存在(组ID=" + groupIdParam + ")");
+        var list = childNotEmptyRepository.findByGroupUuid(group.getGroupUuid());
+        Assert.notEmpty(list, "当前子表非空校验规则不存在(组UUID=" + group.getGroupUuid() + ")");
         if (list.size() > 1) { 
-            throw new IllegalStateException("数据异常：同一组存在多条子表非空校验规则(组ID=" + groupIdParam + ")"); 
+            throw new IllegalStateException("数据异常：同一组存在多条子表非空校验规则(组UUID=" + group.getGroupUuid() + ")"); 
         }
         MetadataValidationChildNotEmptyDO existing = list.get(0);
-        Long targetGroupId = groupIdParam;
-        var groupDO = ruleGroupService.getValidationRuleGroup(groupIdParam);
-        if (groupDO != null) {
+        String targetGroupUuid = group.getGroupUuid();
+        if (group != null) {
             boolean needGroupUpdate = false;
             ValidationRuleGroupSaveReqVO updateGroupVO = new ValidationRuleGroupSaveReqVO();
-            updateGroupVO.setId(groupDO.getId());
-            updateGroupVO.setRgName(groupDO.getRgName());
-            updateGroupVO.setRgDesc(groupDO.getRgDesc());
-            updateGroupVO.setRgStatus(groupDO.getRgStatus());
-            updateGroupVO.setValidationType(groupDO.getValidationType());
-            updateGroupVO.setEntityId(groupDO.getEntityId());
-            if (vo.getPopPrompt() != null && !vo.getPopPrompt().equals(groupDO.getPopPrompt())) { updateGroupVO.setPopPrompt(vo.getPopPrompt()); needGroupUpdate = true; }
-            if (vo.getValMethod() != null && !vo.getValMethod().equals(groupDO.getValMethod())) { updateGroupVO.setValMethod(vo.getValMethod()); needGroupUpdate = true; }
-            if (vo.getPopType() != null && !vo.getPopType().equals(groupDO.getPopType())) { updateGroupVO.setPopType(vo.getPopType()); needGroupUpdate = true; }
+            updateGroupVO.setId(group.getId());
+            updateGroupVO.setRgName(group.getRgName());
+            updateGroupVO.setRgDesc(group.getRgDesc());
+            updateGroupVO.setRgStatus(group.getRgStatus());
+            updateGroupVO.setValidationType(group.getValidationType());
+            updateGroupVO.setEntityUuid(group.getEntityUuid());
+            if (vo.getPopPrompt() != null && !vo.getPopPrompt().equals(group.getPopPrompt())) { updateGroupVO.setPopPrompt(vo.getPopPrompt()); needGroupUpdate = true; }
+            if (vo.getValMethod() != null && !vo.getValMethod().equals(group.getValMethod())) { updateGroupVO.setValMethod(vo.getValMethod()); needGroupUpdate = true; }
+            if (vo.getPopType() != null && !vo.getPopType().equals(group.getPopType())) { updateGroupVO.setPopType(vo.getPopType()); needGroupUpdate = true; }
             if (needGroupUpdate) { ruleGroupService.updateValidationRuleGroup(updateGroupVO); }
         }
         MetadataValidationChildNotEmptyDO updateObj = BeanUtils.toBean(vo, MetadataValidationChildNotEmptyDO.class);
         updateObj.setId(existing.getId());
-        updateObj.setEntityId(vo.getEntityId());
-        updateObj.setChildEntityId(vo.getChildEntityId());
+        updateObj.setEntityUuid(vo.getEntityUuid());
+        updateObj.setChildEntityUuid(vo.getChildEntityUuid());
         updateObj.setApplicationId(existing.getApplicationId());
-        updateObj.setGroupId(targetGroupId);
-        // fieldId保持不变，设置为null或保留原值
-        updateObj.setFieldId(null);
+        updateObj.setGroupUuid(targetGroupUuid);
+        // fieldUuid保持不变，设置为null或保留原值
+        updateObj.setFieldUuid(null);
         // 提示信息
         updateObj.setPromptMessage(vo.getPopPrompt());
         childNotEmptyRepository.updateById(updateObj);
@@ -234,16 +243,16 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void deleteByFieldId(Long fieldId) {
+    public void deleteByFieldId(String fieldUuid) {
         // 先获取要删除的记录，以便后续删除关联的校验规则分组
-        MetadataValidationChildNotEmptyDO recordToDelete = childNotEmptyRepository.findOneByFieldId(fieldId);
+        MetadataValidationChildNotEmptyDO recordToDelete = childNotEmptyRepository.findOneByFieldUuid(fieldUuid);
         
         // 删除子表非空校验记录
-        childNotEmptyRepository.deleteByFieldId(fieldId);
+        childNotEmptyRepository.deleteByFieldUuid(fieldUuid);
         
         // 删除关联的校验规则分组
-        if (recordToDelete != null && recordToDelete.getGroupId() != null) {
-            ruleGroupService.safeDeleteGroupDirect(recordToDelete.getGroupId());
+        if (recordToDelete != null && recordToDelete.getGroupUuid() != null) {
+            ruleGroupService.safeDeleteGroupDirect(recordToDelete.getGroupUuid());
         }
     }
 }

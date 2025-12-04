@@ -18,23 +18,26 @@ public class MetadataEntityRelationshipDTO {
     @Schema(description = "主键ID")
     private Long id;
 
+    @Schema(description = "关系UUID")
+    private String relationshipUuid;
+
     @Schema(description = "关系名称")
     private String relationName;
 
-    @Schema(description = "源实体ID")
-    private Long sourceEntityId;
+    @Schema(description = "源实体UUID")
+    private String sourceEntityUuid;
 
-    @Schema(description = "目标实体ID")
-    private Long targetEntityId;
+    @Schema(description = "目标实体UUID")
+    private String targetEntityUuid;
 
     @Schema(description = "关系类型")
     private String relationshipType;
 
-    @Schema(description = "源字段id")
-    private String sourceFieldId;
+    @Schema(description = "源字段UUID")
+    private String sourceFieldUuid;
 
-    @Schema(description = "目标字段id")
-    private String targetFieldId;
+    @Schema(description = "目标字段UUID")
+    private String targetFieldUuid;
 
     @Schema(description = "级联操作类型")
     private String cascadeType;

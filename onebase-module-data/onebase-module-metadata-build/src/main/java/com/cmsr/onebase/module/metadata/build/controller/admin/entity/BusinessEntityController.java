@@ -87,19 +87,19 @@ public class BusinessEntityController {
 
     @PostMapping("/list-by-datasource")
     @Operation(summary = "根据数据源获得业务实体列表")
-    @Parameter(name = "datasourceId", description = "数据源ID", required = true, example = "1024")
+    @Parameter(name = "datasourceUuid", description = "数据源UUID", required = true, example = "01onal1s-0000-0000-0000-000000000001")
     @PreAuthorize("@ss.hasPermission('metadata:business-entity:query')")
-    public CommonResult<List<BusinessEntityRespVO>> getBusinessEntityListByDatasourceId(@RequestParam("datasourceId") Long datasourceId) {
-        List<BusinessEntityRespVO> result = businessEntityService.getBusinessEntityListByDatasourceIdWithRelationType(datasourceId);
+    public CommonResult<List<BusinessEntityRespVO>> getBusinessEntityListByDatasourceUuid(@RequestParam("datasourceUuid") String datasourceUuid) {
+        List<BusinessEntityRespVO> result = businessEntityService.getBusinessEntityListByDatasourceUuidWithRelationType(datasourceUuid);
         return success(result);
     }
 
     @PostMapping("/er-diagram")
-    @Operation(summary = "根据数据源ID获取ER图数据", description = "获取指定数据源下所有实体信息、字段信息以及实体间的关联关系，用于前端绘制ER图")
-    @Parameter(name = "datasourceId", description = "数据源ID", required = true, example = "1024")
+    @Operation(summary = "根据数据源UUID获取ER图数据", description = "获取指定数据源下所有实体信息、字段信息以及实体间的关联关系，用于前端绘制ER图")
+    @Parameter(name = "datasourceUuid", description = "数据源UUID", required = true, example = "01onal1s-0000-0000-0000-000000000001")
     @PreAuthorize("@ss.hasPermission('metadata:business-entity:query')")
-    public CommonResult<ERDiagramRespVO> getERDiagramByDatasourceId(@RequestParam("datasourceId") Long datasourceId) {
-        ERDiagramRespVO result = businessEntityService.getERDiagramByDatasourceId(datasourceId);
+    public CommonResult<ERDiagramRespVO> getERDiagramByDatasourceUuid(@RequestParam("datasourceUuid") String datasourceUuid) {
+        ERDiagramRespVO result = businessEntityService.getERDiagramByDatasourceUuid(datasourceUuid);
         return success(result);
     }
 

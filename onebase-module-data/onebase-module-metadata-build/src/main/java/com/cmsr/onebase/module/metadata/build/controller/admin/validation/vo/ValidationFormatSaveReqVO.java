@@ -16,9 +16,9 @@ import lombok.Data;
 @Data
 public class ValidationFormatSaveReqVO {
 
-    @Schema(description = "字段ID", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "字段ID不能为空")
-    private Long fieldId;
+    @Schema(description = "字段UUID", requiredMode = Schema.RequiredMode.REQUIRED, example = "01onal1s-0000-0000-0000-000000000003")
+    @NotNull(message = "字段UUID不能为空")
+    private String fieldUuid;
 
     @Schema(description = "是否启用(0/1)", example = "1")
     private Integer isEnabled;

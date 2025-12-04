@@ -476,3 +476,44 @@ public class RowValueDTO {
 ## 迁移策略
 - Controller 内实现 `RecordDTO` → 旧版 VO 的转换，Core/Service 保持不变
 - 允许兼容期：读取旧客户端体内 `menuId`，但建议统一到查询参数
+## 语义动态数据 API（服务接口）
+
+### 条件更新
+- 方法：`SemanticDynamicDataApi#updateDataByCondition`
+- 体：
+```json
+{
+  "tableName": "customer",
+  "semanticConditionDTO": {
+    "fieldName": "status",
+    "operator": "EQ",
+    "fieldValue": [1]
+  },
+  "updateProperties": {
+    "mobile": "13900000000",
+    "status": 2
+  }
+}
+```
+- 行为：
+- 仅更新实体模型中存在的合法字段；忽略未知键
+- 自动填充系统字段占位：`updated_time`/`updater`（由数据层统一处理）
+- 返回：更新后的语义值列表（已执行引用解析与字段权限过滤）
+
+### 条件删除
+- 方法：`SemanticDynamicDataApi#deleteDataByCondition`
+- 体：
+```json
+{
+  "tableName": "customer",
+  "semanticConditionDTO": {
+    "fieldName": "deleted",
+    "operator": "EQ",
+    "fieldValue": [0]
+  }
+}
+```
+- 行为：
+- 若存在 `deleted` 字段则执行软删除，否则物理删除
+- 为避免误删全表，条件必填且需包含字段与值
+- 返回：影响行数（整数）

@@ -15,8 +15,8 @@ import java.util.List;
 @Data
 public class ERDiagramRespVO {
 
-    @Schema(description = "数据源ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
-    private Long datasourceId;
+    @Schema(description = "数据源UUID", requiredMode = Schema.RequiredMode.REQUIRED, example = "01onal1s-0000-0000-0000-000000000001")
+    private String datasourceId;
 
     @Schema(description = "数据源名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "用户数据库")
     private String datasourceName;

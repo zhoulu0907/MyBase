@@ -7,6 +7,8 @@ import com.mybatisflex.spring.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -20,56 +22,73 @@ import java.util.List;
 public class MetadataValidationRequiredRepository extends ServiceImpl<MetadataValidationRequiredMapper, MetadataValidationRequiredDO> {
 
     /**
-     * 根据字段ID查询单条必填验证规则
+     * 根据字段UUID查询单条必填验证规则
      *
-     * @param fieldId 字段ID
+     * @param fieldUuid 字段UUID
      * @return 必填验证规则
      */
-    public MetadataValidationRequiredDO findOneByFieldId(Long fieldId) {
+    public MetadataValidationRequiredDO findOneByFieldUuid(String fieldUuid) {
         QueryWrapper queryWrapper = query()
-                .eq(MetadataValidationRequiredDO::getFieldId, fieldId);
+                .eq(MetadataValidationRequiredDO::getFieldUuid, fieldUuid);
         return getOne(queryWrapper);
     }
 
     /**
-     * 根据字段ID查询必填验证规则列表
+     * 根据字段UUID查询必填验证规则列表
      *
-     * @param fieldId 字段ID
+     * @param fieldUuid 字段UUID
      * @return 必填验证规则列表
      */
-    public List<MetadataValidationRequiredDO> findByFieldId(Long fieldId) {
+    public List<MetadataValidationRequiredDO> findByFieldUuid(String fieldUuid) {
         QueryWrapper queryWrapper = query()
-                .eq(MetadataValidationRequiredDO::getFieldId, fieldId);
+                .eq(MetadataValidationRequiredDO::getFieldUuid, fieldUuid);
         return list(queryWrapper);
     }
 
     /**
-     * 根据组ID查询必填验证规则列表
+     * 根据组UUID查询必填验证规则列表
      *
-     * @param groupId 组ID
+     * @param groupUuid 组UUID
      * @return 必填验证规则列表
      */
-    public List<MetadataValidationRequiredDO> findByGroupId(Long groupId) {
+    public List<MetadataValidationRequiredDO> findByGroupUuid(String groupUuid) {
         QueryWrapper queryWrapper = query()
-                .eq(MetadataValidationRequiredDO::getGroupId, groupId);
+                .eq(MetadataValidationRequiredDO::getGroupUuid, groupUuid);
         return list(queryWrapper);
     }
 
     /**
-     * 根据字段ID删除必填验证规则
+     * 根据字段UUID删除必填验证规则
      *
-     * @param fieldId 字段ID
+     * @param fieldUuid 字段UUID
      */
-    public void deleteByFieldId(Long fieldId) {
-        for (var item : findByFieldId(fieldId)) {
+    public void deleteByFieldUuid(String fieldUuid) {
+        for (var item : findByFieldUuid(fieldUuid)) {
             removeById(item.getId());
         }
     }
 
-    public List<MetadataValidationRequiredDO> findByFieldIds(java.util.Collection<Long> fieldIds) {
-        if (fieldIds == null || fieldIds.isEmpty()) { return java.util.Collections.emptyList(); }
+    /**
+     * 根据字段UUID查询必填验证规则列表
+     *
+     * @param fieldUuids 字段UUID列表
+     * @return 必填验证规则列表
+     */
+    public List<MetadataValidationRequiredDO> findByFieldUuids(Collection<String> fieldUuids) {
+        if (fieldUuids == null || fieldUuids.isEmpty()) { return Collections.emptyList(); }
         QueryWrapper queryWrapper = query()
-                .in(MetadataValidationRequiredDO::getFieldId, fieldIds);
+                .in(MetadataValidationRequiredDO::getFieldUuid, fieldUuids);
         return list(queryWrapper);
+    }
+
+    // ====== 兼容旧代码的方法 ======
+
+    /**
+     * 根据组ID查询必填验证规则列表（兼容旧代码）
+     * @deprecated 请使用 findByGroupUuid()
+     */
+    @Deprecated
+    public List<MetadataValidationRequiredDO> findByGroupId(Long groupId) {
+        return findByGroupUuid(String.valueOf(groupId));
     }
 }

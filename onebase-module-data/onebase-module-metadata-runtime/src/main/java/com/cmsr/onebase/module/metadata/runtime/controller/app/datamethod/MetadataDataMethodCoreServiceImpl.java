@@ -169,7 +169,7 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
 //        // 移除多表查询逻辑，直接使用单表分页
         MetadataBusinessEntityDO entity = validateEntityExists(entityId);
         List<MetadataEntityFieldDO> fields = getEntityFields(entityId);
-        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
+        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceUuid());
         if (datasource == null) {
             throw exception(DATASOURCE_NOT_EXISTS);
         }
@@ -343,7 +343,7 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
 
         MetadataBusinessEntityDO entity = validateEntityExists(entityId);
         List<MetadataEntityFieldDO> fields = getEntityFields(entityId);
-        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
+        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceUuid());
         if (datasource == null) { throw exception(DATASOURCE_NOT_EXISTS); }
         AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
         log.info("成功切换到数据源：{}", datasource.getCode());

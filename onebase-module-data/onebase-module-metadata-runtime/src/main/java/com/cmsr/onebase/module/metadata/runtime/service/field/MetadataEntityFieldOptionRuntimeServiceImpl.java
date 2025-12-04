@@ -30,18 +30,18 @@ public class MetadataEntityFieldOptionRuntimeServiceImpl implements MetadataEnti
     private MetadataEntityFieldOptionRepository optionRepository;
 
     @Override
-    public List<MetadataEntityFieldOptionDO> listByFieldId(Long fieldId) {
-        return optionRepository.findAllByFieldId(fieldId);
+    public List<MetadataEntityFieldOptionDO> listByFieldUuid(String fieldUuid) {
+        return optionRepository.findAllByFieldUuid(fieldUuid);
     }
 
     @Override
-    public Map<Long, List<MetadataEntityFieldOptionDO>> listByFieldIds(Collection<Long> fieldIds) {
-        List<MetadataEntityFieldOptionDO> all = optionRepository.findAllByFieldIds(fieldIds);
-        Map<Long, java.util.List<MetadataEntityFieldOptionDO>> map = new HashMap<>();
+    public Map<String, List<MetadataEntityFieldOptionDO>> listByFieldUuids(List<String> fieldUuids) {
+        List<MetadataEntityFieldOptionDO> all = optionRepository.findAllByFieldUuids(fieldUuids);
+        Map<String, java.util.List<MetadataEntityFieldOptionDO>> map = new HashMap<>();
         if (all != null) {
             for (MetadataEntityFieldOptionDO o : all) {
-                if (o == null || o.getFieldId() == null) continue;
-                map.computeIfAbsent(o.getFieldId(), k -> new ArrayList<>()).add(o);
+                if (o == null || o.getFieldUuid() == null) continue;
+                map.computeIfAbsent(o.getFieldUuid(), k -> new ArrayList<>()).add(o);
             }
         }
         return map;
@@ -87,8 +87,8 @@ public class MetadataEntityFieldOptionRuntimeServiceImpl implements MetadataEnti
     }
 
     @Override
-    public List<FieldOptionRespVO> getFieldOptionList(Long fieldId) {
-        List<MetadataEntityFieldOptionDO> list = listByFieldId(fieldId);
+    public List<FieldOptionRespVO> getFieldOptionList(String fieldUuid) {
+        List<MetadataEntityFieldOptionDO> list = listByFieldUuid(fieldUuid);
         return list.stream().map(this::convertToRespVO).collect(Collectors.toList());
     }
 

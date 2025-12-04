@@ -14,13 +14,13 @@ import lombok.Data;
 @Data
 public class ValidationChildNotEmptySaveReqVO {
 
-    @Schema(description = "父实体ID", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "父实体ID不能为空")
-    private Long entityId;
+    @Schema(description = "父实体UUID", requiredMode = Schema.RequiredMode.REQUIRED, example = "01onal1s-0000-0000-0000-000000000002")
+    @NotNull(message = "父实体UUID不能为空")
+    private String entityUuid;
 
-    @Schema(description = "子实体ID", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "子实体ID不能为空")
-    private Long childEntityId;
+    @Schema(description = "子实体UUID", requiredMode = Schema.RequiredMode.REQUIRED, example = "01onal1s-0000-0000-0000-000000000013")
+    @NotNull(message = "子实体UUID不能为空")
+    private String childEntityUuid;
 
     @Schema(description = "是否启用(0/1)", example = "1")
     private Integer isEnabled;

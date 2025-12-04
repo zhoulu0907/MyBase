@@ -47,7 +47,7 @@ public class MetadataValidationRuleDefinitionBuildServiceImpl implements Metadat
             } else {
                 ruleDefinition = BeanUtils.toBean(valueRule, MetadataValidationRuleDefinitionDO.class);
             }
-            ruleDefinition.setGroupId(groupId);
+            ruleDefinition.setGroupUuid(String.valueOf(groupId));
             validationRuleDefinitionRepository.saveOrUpdate(ruleDefinition);
         }
     }

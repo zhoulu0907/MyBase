@@ -22,14 +22,14 @@ import java.util.List;
 public class MetadataValidationRuleRepository extends ServiceImpl<MetadataValidationRuleDefinitionMapper, MetadataValidationRuleDefinitionDO> {
 
     /**
-     * 根据字段ID获取验证规则列表
+     * 根据字段UUID获取验证规则列表
      *
-     * @param fieldId 字段ID
+     * @param fieldUuid 字段UUID
      * @return 验证规则列表
      */
-    public List<MetadataValidationRuleDefinitionDO> getValidationRulesByFieldId(Long fieldId) {
+    public List<MetadataValidationRuleDefinitionDO> getValidationRulesByFieldUuid(String fieldUuid) {
         QueryWrapper queryWrapper = this.query()
-                .eq(MetadataValidationRuleDefinitionDO::getFieldId, fieldId)
+                .eq(MetadataValidationRuleDefinitionDO::getFieldUuid, fieldUuid)
                 .orderBy(MetadataValidationRuleDefinitionDO::getCreateTime, false);
         return list(queryWrapper);
     }
@@ -48,15 +48,15 @@ public class MetadataValidationRuleRepository extends ServiceImpl<MetadataValida
     }
 
     /**
-     * 根据字段ID和逻辑类型获取验证规则
+     * 根据字段UUID和逻辑类型获取验证规则
      *
-     * @param fieldId 字段ID
+     * @param fieldUuid 字段UUID
      * @param logicType 逻辑类型
      * @return 验证规则对象
      */
-    public MetadataValidationRuleDefinitionDO getValidationRuleByFieldAndType(Long fieldId, String logicType) {
+    public MetadataValidationRuleDefinitionDO getValidationRuleByFieldAndType(String fieldUuid, String logicType) {
         QueryWrapper queryWrapper = this.query()
-                .eq(MetadataValidationRuleDefinitionDO::getFieldId, fieldId)
+                .eq(MetadataValidationRuleDefinitionDO::getFieldUuid, fieldUuid)
                 .eq(MetadataValidationRuleDefinitionDO::getLogicType, logicType);
         return getOne(queryWrapper);
     }

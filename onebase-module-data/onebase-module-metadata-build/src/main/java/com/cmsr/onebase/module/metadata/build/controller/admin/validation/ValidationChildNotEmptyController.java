@@ -25,11 +25,11 @@ public class ValidationChildNotEmptyController {
     @Resource private MetadataValidationChildNotEmptyBuildService childNotEmptyService;
 
     @PostMapping("/get-by-field")
-    @Operation(summary = "根据字段ID获取子表非空校验")
-    @Parameter(name = "id", description = "字段ID", required = true)
+    @Operation(summary = "根据字段UUID获取子表非空校验")
+    @Parameter(name = "id", description = "字段UUID", required = true)
     @PreAuthorize("@ss.hasPermission('metadata:validation-child-not-empty:query')")
-    public CommonResult<ValidationChildNotEmptyRespVO> getByField(@RequestParam("id") Long id) {
-        return success(childNotEmptyService.getByFieldIdWithRgName(id));
+    public CommonResult<ValidationChildNotEmptyRespVO> getByField(@RequestParam("id") String fieldUuid) {
+        return success(childNotEmptyService.getByFieldIdWithRgName(fieldUuid));
     }
 
     @GetMapping("/get")
@@ -56,11 +56,11 @@ public class ValidationChildNotEmptyController {
     }
 
     @PostMapping("/delete-by-field")
-    @Operation(summary = "按字段删除子表非空校验")
-    @Parameter(name = "id", description = "字段ID", required = true)
+    @Operation(summary = "按字段UUID删除子表非空校验")
+    @Parameter(name = "id", description = "字段UUID", required = true)
     @PreAuthorize("@ss.hasPermission('metadata:validation-child-not-empty:delete')")
-    public CommonResult<Boolean> deleteByField(@RequestParam("id") Long id) {
-        childNotEmptyService.deleteByFieldId(id);
+    public CommonResult<Boolean> deleteByField(@RequestParam("id") String fieldUuid) {
+        childNotEmptyService.deleteByFieldId(fieldUuid);
         return success(true);
     }
 

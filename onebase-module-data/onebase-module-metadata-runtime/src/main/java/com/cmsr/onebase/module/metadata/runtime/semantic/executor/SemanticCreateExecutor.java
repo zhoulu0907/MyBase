@@ -1,16 +1,16 @@
 package com.cmsr.onebase.module.metadata.runtime.semantic.executor;
 
 import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
-import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticRecordDTO;
-import com.cmsr.onebase.module.metadata.runtime.semantic.dto.enums.SemanticMethodCodeEnum;
-import com.cmsr.onebase.module.metadata.runtime.semantic.service.impl.SemanticDataCrudService;
-import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticDataIntegrityValidator;
-import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.validation.SemanticValidationManager;
-import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticPermissionValidator;
-import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticProcessLogger;
-import com.cmsr.onebase.module.metadata.runtime.semantic.vo.SemanticMergeBodyVO;
-import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticMergeRecordAssembler;
-import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticPermissionContextLoader;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticRecordDTO;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticMethodCodeEnum;
+import com.cmsr.onebase.module.metadata.core.semantic.service.SemanticDataCrudService;
+import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticDataIntegrityValidator;
+import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticMergeRecordAssembler;
+import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticPermissionContextLoader;
+import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticPermissionValidator;
+import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticProcessLogger;
+import com.cmsr.onebase.module.metadata.core.semantic.strategy.validation.SemanticValidationManager;
+import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticMergeBodyVO;
 import com.cmsr.onebase.framework.uid.UidGenerator;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;

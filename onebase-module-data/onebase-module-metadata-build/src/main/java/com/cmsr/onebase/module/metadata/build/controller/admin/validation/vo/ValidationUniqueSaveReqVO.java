@@ -15,15 +15,15 @@ import lombok.Data;
 public class ValidationUniqueSaveReqVO {
 
     /**
-     * 业务实体ID
+     * 业务实体UUID
      */
-    @Schema(description = "业务实体ID", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "业务实体ID不能为空")
-    private Long entityId;
+    @Schema(description = "业务实体UUID", requiredMode = Schema.RequiredMode.REQUIRED, example = "01onal1s-0000-0000-0000-000000000002")
+    @NotNull(message = "业务实体UUID不能为空")
+    private String entityUuid;
 
-    @Schema(description = "字段ID", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "字段ID不能为空")
-    private Long fieldId;
+    @Schema(description = "字段UUID", requiredMode = Schema.RequiredMode.REQUIRED, example = "01onal1s-0000-0000-0000-000000000003")
+    @NotNull(message = "字段UUID不能为空")
+    private String fieldUuid;
 
     @Schema(description = "是否启用(0/1)")
     private Integer isEnabled;

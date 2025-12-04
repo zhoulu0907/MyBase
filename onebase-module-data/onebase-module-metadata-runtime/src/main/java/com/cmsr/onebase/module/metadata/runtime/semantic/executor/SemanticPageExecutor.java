@@ -3,19 +3,19 @@ package com.cmsr.onebase.module.metadata.runtime.semantic.executor;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
-import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticRecordDTO;
-import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticSortRuleDTO;
-import com.cmsr.onebase.module.metadata.runtime.semantic.dto.enums.SemanticMethodCodeEnum;
-import com.cmsr.onebase.module.metadata.runtime.semantic.dto.SemanticFieldSchemaDTO;
-import com.cmsr.onebase.module.metadata.runtime.semantic.service.impl.SemanticDataCrudService;
-import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticPermissionContextLoader;
-import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticDataIntegrityValidator;
-import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticPermissionValidator;
-import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticProcessLogger;
-import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.permission.SemanticQueryPermissionHelper;
-import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticMergeRecordAssembler;
-import com.cmsr.onebase.module.metadata.runtime.semantic.strategy.SemanticQueryConditionBuilder;
-import com.cmsr.onebase.module.metadata.runtime.semantic.vo.SemanticPageBodyVO;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticRecordDTO;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticSortRuleDTO;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticMethodCodeEnum;
+import com.cmsr.onebase.module.metadata.core.semantic.service.SemanticDataCrudService;
+import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticDataIntegrityValidator;
+import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticMergeRecordAssembler;
+import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticPermissionContextLoader;
+import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticPermissionValidator;
+import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticProcessLogger;
+import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticQueryConditionBuilder;
+import com.cmsr.onebase.module.metadata.core.semantic.strategy.permission.SemanticQueryPermissionHelper;
+import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticPageBodyVO;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO;
 import com.mybatisflex.core.query.QueryWrapper;
 
 import jakarta.annotation.Resource;
@@ -92,9 +92,9 @@ public class SemanticPageExecutor {
     private QueryWrapper buildPageQueryWrapper(SemanticRecordDTO recordDTO, QueryWrapper queryWrapper) {
         if (queryWrapper == null) { queryWrapper = QueryWrapper.create(); }
         List<SemanticFieldSchemaDTO> fields = recordDTO.getEntitySchema().getFields();
-        Map<String, Object> filters = recordDTO.getRecordContext().getFilters();
+        var condition = recordDTO.getRecordContext().getFilters();
         List<SemanticSortRuleDTO> sortBy = recordDTO.getRecordContext().getSortBy();
-        semanticQueryConditionBuilder.apply(queryWrapper, fields, filters, sortBy);
+        semanticQueryConditionBuilder.apply(queryWrapper, fields, condition, sortBy);
         return queryWrapper;
     }
 }

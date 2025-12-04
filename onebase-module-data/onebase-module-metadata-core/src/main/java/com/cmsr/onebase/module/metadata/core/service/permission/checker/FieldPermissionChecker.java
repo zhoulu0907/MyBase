@@ -146,7 +146,7 @@ public class FieldPermissionChecker implements PermissionChecker {
         MetadataBusinessEntityDO entity = context.getEntity();
 
         // 1. 查询原始数据
-        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
+        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasourceByUuid(entity.getDatasourceUuid());
         if (datasource == null) {
             throw exception(DATASOURCE_NOT_EXISTS);
         }

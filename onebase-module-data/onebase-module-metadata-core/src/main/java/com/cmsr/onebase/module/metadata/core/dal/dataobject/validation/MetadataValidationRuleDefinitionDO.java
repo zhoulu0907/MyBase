@@ -19,28 +19,36 @@ import lombok.EqualsAndHashCode;
 public class MetadataValidationRuleDefinitionDO extends BaseTenantEntity {
 
     /**
-     * 所属规则组ID，关联metadata_validation_rule_group表的id
+     * 规则定义UUID
+     * <p>
+     * 用于跨应用、跨版本的唯一标识，与 application_id、version_tag 组成联合唯一约束
      */
-    @Column(value = "group_id", comment = "所属规则组ID")
-    private Long groupId;
+    @Column(value = "definition_uuid", comment = "规则定义UUID")
+    private String definitionUuid;
 
     /**
-     * 父规则ID，用于层级关系；顶级规则为NULL
+     * 所属规则组UUID，关联metadata_validation_rule_group表的group_uuid
      */
-    @Column(value = "parent_rule_id", comment = "父规则ID")
-    private Long parentRuleId;
+    @Column(value = "group_uuid", comment = "所属规则组UUID")
+    private String groupUuid;
 
     /**
-     * 关联的业务实体ID，关联metadata_business_entity表的id
+     * 父规则UUID，用于层级关系；顶级规则为NULL
      */
-    @Column(value = "entity_id", comment = "关联的业务实体ID")
-    private Long entityId;
+    @Column(value = "parent_rule_uuid", comment = "父规则UUID")
+    private String parentRuleUuid;
 
     /**
-     * 关联的实体字段ID，关联metadata_entity_field表的id
+     * 关联的业务实体UUID，关联metadata_business_entity表的entity_uuid
      */
-    @Column(value = "field_id", comment = "关联的实体字段ID")
-    private Long fieldId;
+    @Column(value = "entity_uuid", comment = "关联的业务实体UUID")
+    private String entityUuid;
+
+    /**
+     * 关联的实体字段UUID，关联metadata_entity_field表的field_uuid
+     */
+    @Column(value = "field_uuid", comment = "关联的实体字段UUID")
+    private String fieldUuid;
 
     /**
      * 逻辑类型："LOGIC"（逻辑操作符）/"CONDITION"（条件判断）
@@ -84,5 +92,19 @@ public class MetadataValidationRuleDefinitionDO extends BaseTenantEntity {
      */
     @Column(value = "status", comment = "状态：1-激活，0-非激活")
     private Integer status;
+
+    /**
+     * 应用ID
+     */
+    @Column(value = "application_id", comment = "应用ID")
+    private Long applicationId;
+
+    /**
+     * 版本标识
+     * <p>
+     * 用于跨应用、跨版本的唯一标识，与 application_id 组成联合唯一约束
+     */
+    @Column(value = "version_tag", comment = "版本标识")
+    private Long versionTag;
 
 }

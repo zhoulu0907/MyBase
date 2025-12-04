@@ -24,6 +24,14 @@ import lombok.NoArgsConstructor;
 public class MetadataDatasourceDO extends BaseTenantEntity {
 
     /**
+     * 数据源UUID
+     * <p>
+     * 用于跨应用、跨版本的唯一标识，与 application_id、version_tag 组成联合唯一约束
+     */
+    @Column(value = "datasource_uuid", comment = "数据源UUID")
+    private String datasourceUuid;
+
+    /**
      * 数据源名称
      */
     @Column(value = "datasource_name", comment = "数据源名称")

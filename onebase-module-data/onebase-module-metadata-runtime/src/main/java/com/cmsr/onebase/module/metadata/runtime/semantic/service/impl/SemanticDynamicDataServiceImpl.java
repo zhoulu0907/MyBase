@@ -7,9 +7,9 @@ import com.cmsr.onebase.module.metadata.runtime.semantic.executor.SemanticUpdate
 import com.cmsr.onebase.module.metadata.runtime.semantic.executor.SemanticDeleteExecutor;
 import com.cmsr.onebase.module.metadata.runtime.semantic.executor.SemanticDetailExecutor;
 import com.cmsr.onebase.module.metadata.runtime.semantic.executor.SemanticPageExecutor;
-import com.cmsr.onebase.module.metadata.runtime.semantic.vo.SemanticMergeBodyVO;
-import com.cmsr.onebase.module.metadata.runtime.semantic.vo.SemanticTargetBodyVO;
-import com.cmsr.onebase.module.metadata.runtime.semantic.vo.SemanticPageBodyVO;
+import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticMergeBodyVO;
+import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticTargetBodyVO;
+import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticPageBodyVO;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 

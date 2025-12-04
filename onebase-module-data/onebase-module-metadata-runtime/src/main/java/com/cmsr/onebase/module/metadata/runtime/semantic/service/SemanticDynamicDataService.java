@@ -1,12 +1,11 @@
 package com.cmsr.onebase.module.metadata.runtime.semantic.service;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.metadata.runtime.semantic.vo.SemanticMergeBodyVO;
-import com.cmsr.onebase.module.metadata.runtime.semantic.vo.SemanticTargetBodyVO;
-import com.cmsr.onebase.module.metadata.runtime.semantic.vo.SemanticPageBodyVO;
+import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticMergeBodyVO;
+import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticTargetBodyVO;
+import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticPageBodyVO;
 
 /**
  * 语义动态数据服务接口

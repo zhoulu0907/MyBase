@@ -253,8 +253,8 @@ public class MetadataDatasourceBuildServiceImpl implements MetadataDatasourceBui
         // 使用 core 模块基础服务创建数据源
         Long datasourceId = createDatasource(datasource);
 
-        // 创建应用与数据源的关联关系
-        metadataDatasourceCoreService.createAppDatasourceRelation(appId, datasourceId,
+        // 创建应用与数据源的关联关系（使用datasourceUuid）
+        metadataDatasourceCoreService.createAppDatasourceRelation(appId, datasource.getDatasourceUuid(),
                 datasource.getDatasourceType(), appUid);
 
         log.info("创建数据源成功,ID: {},应用ID: {},应用UID: {}", datasourceId, appId, appUid);
@@ -274,9 +274,9 @@ public class MetadataDatasourceBuildServiceImpl implements MetadataDatasourceBui
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void createAppDatasourceRelation(Long appId, Long datasourceId, String datasourceType, String appUid) {
+    public void createAppDatasourceRelation(Long appId, String datasourceUuid, String datasourceType, String appUid) {
         // 使用 core 模块的基础服务
-        metadataDatasourceCoreService.createAppDatasourceRelation(appId, datasourceId, datasourceType, appUid);
+        metadataDatasourceCoreService.createAppDatasourceRelation(appId, datasourceUuid, datasourceType, appUid);
     }
 
     @Override
@@ -346,13 +346,17 @@ public class MetadataDatasourceBuildServiceImpl implements MetadataDatasourceBui
         // 如果 appUid 发生变化，同步更新关联表（使用之前安全转换的id和appId）
         String newAppUid = updateReqVO.getAppUid();
 
-        // 获取当前关联关系
+        // 获取当前关联关系（需要先获取datasourceUuid）
         if (appId != null) {
-            MetadataAppAndDatasourceDO currentRelation = appAndDatasourceService.getRelation(appId, id);
-            if (currentRelation != null && !newAppUid.equals(currentRelation.getAppUid())) {
-                // appUid 发生变化，更新关联表
-                log.info("数据源{}的appUid从{}更新为{}，同步更新关联表", id, currentRelation.getAppUid(), newAppUid);
-                appAndDatasourceService.updateRelationAppUid(appId, id, newAppUid);
+            MetadataDatasourceDO currentDatasource = metadataDatasourceRepository.getById(id);
+            if (currentDatasource != null) {
+                String datasourceUuid = currentDatasource.getDatasourceUuid();
+                MetadataAppAndDatasourceDO currentRelation = appAndDatasourceService.getRelation(appId, datasourceUuid);
+                if (currentRelation != null && !newAppUid.equals(currentRelation.getAppUid())) {
+                    // appUid 发生变化，更新关联表
+                    log.info("数据源{}的appUid从{}更新为{}，同步更新关联表", id, currentRelation.getAppUid(), newAppUid);
+                    appAndDatasourceService.updateRelationAppUid(appId, datasourceUuid, newAppUid);
+                }
             }
         }
 
@@ -365,9 +369,13 @@ public class MetadataDatasourceBuildServiceImpl implements MetadataDatasourceBui
         // 校验存在
         validateDatasourceExists(id);
 
-        // 删除数据源关联关系
-        long deletedRelations = appAndDatasourceService.deleteRelationsByDatasourceId(id);
-        log.info("删除数据源{}相关联的关系数量: {}", id, deletedRelations);
+        // 获取datasourceUuid用于删除关联关系
+        MetadataDatasourceDO datasource = metadataDatasourceRepository.getById(id);
+        if (datasource != null && datasource.getDatasourceUuid() != null) {
+            // 删除数据源关联关系
+            long deletedRelations = appAndDatasourceService.deleteRelationsByDatasourceUuid(datasource.getDatasourceUuid());
+            log.info("删除数据源{}相关联的关系数量: {}", id, deletedRelations);
+        }
 
         // 删除数据源
         metadataDatasourceRepository.removeById(id);
@@ -398,6 +406,12 @@ public class MetadataDatasourceBuildServiceImpl implements MetadataDatasourceBui
     public MetadataDatasourceDO getDatasource(Long id) {
         // 使用 core 模块的基础服务
         return metadataDatasourceCoreService.getDatasource(id);
+    }
+
+    @Override
+    public MetadataDatasourceDO getDatasourceByUuid(String datasourceUuid) {
+        // 使用 core 模块的基础服务
+        return metadataDatasourceCoreService.getDatasourceByUuid(datasourceUuid);
     }
 
     @Override

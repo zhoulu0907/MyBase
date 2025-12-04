@@ -2,10 +2,11 @@ package com.cmsr.onebase.module.metadata.runtime.semantic.controller;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticMergeBodyVO;
+import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticPageBodyVO;
+import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticTargetBodyVO;
 import com.cmsr.onebase.module.metadata.runtime.semantic.service.SemanticDynamicDataService;
-import com.cmsr.onebase.module.metadata.runtime.semantic.vo.SemanticMergeBodyVO;
-import com.cmsr.onebase.module.metadata.runtime.semantic.vo.SemanticTargetBodyVO;
-import com.cmsr.onebase.module.metadata.runtime.semantic.vo.SemanticPageBodyVO;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;

@@ -23,9 +23,9 @@ public interface MetadataEntityFieldOptionRuntimeService {
      * @param fieldId 字段ID
      * @return 选项DO列表
      */
-    List<MetadataEntityFieldOptionDO> listByFieldId(Long fieldId);
+    List<MetadataEntityFieldOptionDO> listByFieldUuid(String fieldUuid);
 
-    Map<Long, List<MetadataEntityFieldOptionDO>> listByFieldIds(Collection<Long> fieldIds);
+    Map<String, List<MetadataEntityFieldOptionDO>> listByFieldUuids(List<String> fieldUuids);
 
     /**
      * 创建字段选项
@@ -70,7 +70,7 @@ public interface MetadataEntityFieldOptionRuntimeService {
      * @param fieldId 字段ID
      * @return 选项列表响应VO
      */
-    List<FieldOptionRespVO> getFieldOptionList(Long fieldId);
+    List<FieldOptionRespVO> getFieldOptionList(String fieldUuid);
 
     /**
      * 创建字段选项

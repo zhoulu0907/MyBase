@@ -47,6 +47,21 @@ public class MetadataBusinessEntityRepository extends ServiceImpl<MetadataBusine
     }
 
     /**
+     * 根据实体UUID获取业务实体
+     *
+     * @param entityUuid 实体UUID
+     * @return 业务实体对象
+     */
+    public MetadataBusinessEntityDO getByEntityUuid(String entityUuid) {
+        if (entityUuid == null || entityUuid.trim().isEmpty()) {
+            return null;
+        }
+        QueryWrapper queryWrapper = this.query()
+                .eq(MetadataBusinessEntityDO::getEntityUuid, entityUuid);
+        return getOne(queryWrapper);
+    }
+
+    /**
      * 根据编码获取业务实体
      *
      * @param code 实体编码
@@ -82,14 +97,14 @@ public class MetadataBusinessEntityRepository extends ServiceImpl<MetadataBusine
     }
 
     /**
-     * 根据数据源ID获取业务实体列表
+     * 根据数据源UUID获取业务实体列表
      *
-     * @param datasourceId 数据源ID
+     * @param datasourceUuid 数据源UUID
      * @return 业务实体列表
      */
-    public List<MetadataBusinessEntityDO> getBusinessEntityListByDatasourceId(Long datasourceId) {
+    public List<MetadataBusinessEntityDO> getBusinessEntityListByDatasourceUuid(String datasourceUuid) {
         QueryWrapper queryWrapper = this.query()
-                .eq(MetadataBusinessEntityDO::getDatasourceId, datasourceId)
+                .eq(MetadataBusinessEntityDO::getDatasourceUuid, datasourceUuid)
                 .orderBy(MetadataBusinessEntityDO::getCreateTime, false);
         return list(queryWrapper);
     }

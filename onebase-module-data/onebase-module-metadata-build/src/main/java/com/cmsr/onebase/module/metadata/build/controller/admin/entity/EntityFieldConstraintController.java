@@ -30,10 +30,10 @@ public class EntityFieldConstraintController {
     private MetadataEntityFieldConstraintBuildService constraintService;
 
     @PostMapping("/get")
-    @Operation(summary = "按字段ID获取约束配置")
+    @Operation(summary = "按字段UUID获取约束配置")
     @PreAuthorize("@ss.hasPermission('metadata:entity-field-constraint:query')")
-    public CommonResult<FieldConstraintRespVO> get(@RequestParam("fieldId") Long fieldId) {
-        FieldConstraintRespVO result = constraintService.getFieldConstraintConfig(fieldId);
+    public CommonResult<FieldConstraintRespVO> get(@RequestParam("fieldId") String fieldUuid) {
+        FieldConstraintRespVO result = constraintService.getFieldConstraintConfig(fieldUuid);
         return success(result);
     }
 
@@ -48,9 +48,9 @@ public class EntityFieldConstraintController {
     @PostMapping("/delete")
     @Operation(summary = "删除某类型约束")
     @PreAuthorize("@ss.hasPermission('metadata:entity-field-constraint:delete')")
-    public CommonResult<Boolean> delete(@RequestParam("fieldId") Long fieldId,
+    public CommonResult<Boolean> delete(@RequestParam("fieldId") String fieldUuid,
                                         @RequestParam("constraintType") String type) {
-        constraintService.delete(fieldId, type);
+        constraintService.delete(fieldUuid, type);
         return success(true);
     }
 }

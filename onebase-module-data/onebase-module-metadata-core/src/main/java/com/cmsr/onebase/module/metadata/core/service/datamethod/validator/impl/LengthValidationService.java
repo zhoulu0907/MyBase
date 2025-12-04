@@ -31,13 +31,13 @@ public class LengthValidationService implements ValidationService {
     }
 
     @Override
-    public void validate(Long entityId, Long fieldId, MetadataEntityFieldDO field, Object value, Map<String, Object> data, List<MetadataDataMethodSubEntityContext> subEntities) {
+    public void validate(String entityUuid, String fieldUuid, MetadataEntityFieldDO field, Object value, Map<String, Object> data, List<MetadataDataMethodSubEntityContext> subEntities) {
         if (value == null) {
             return; // 空值不校验长度
         }
 
         // 查询长度规则
-        List<MetadataValidationLengthDO> rules = lengthRepository.findByFieldId(fieldId);
+        List<MetadataValidationLengthDO> rules = lengthRepository.findByFieldUuid(fieldUuid);
 
         if (rules.isEmpty()) {
             return; // 没有长度规则，跳过校验

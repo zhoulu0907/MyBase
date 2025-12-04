@@ -33,10 +33,10 @@ public class EntityFieldOptionController {
     private MetadataEntityFieldOptionBuildService optionService;
 
     @PostMapping("/list")
-    @Operation(summary = "按字段ID获取选项列表")
+    @Operation(summary = "按字段UUID获取选项列表")
     @PreAuthorize("@ss.hasPermission('metadata:entity-field-option:query')")
-    public CommonResult<List<FieldOptionRespVO>> list(@RequestParam("fieldId") Long fieldId) {
-        List<FieldOptionRespVO> result = optionService.getFieldOptionList(fieldId);
+    public CommonResult<List<FieldOptionRespVO>> list(@RequestParam("fieldId") String fieldUuid) {
+        List<FieldOptionRespVO> result = optionService.getFieldOptionList(fieldUuid);
         return success(result);
     }
 

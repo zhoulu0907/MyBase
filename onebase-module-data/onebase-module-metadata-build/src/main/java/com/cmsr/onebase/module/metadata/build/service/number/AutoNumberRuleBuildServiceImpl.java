@@ -1,6 +1,8 @@
 package com.cmsr.onebase.module.metadata.build.service.number;
 
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.number.MetadataAutoNumberConfigDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.number.MetadataAutoNumberRuleItemDO;
+import com.cmsr.onebase.module.metadata.core.dal.database.MetadataAutoNumberConfigRepository;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataAutoNumberRuleItemRepository;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +23,9 @@ public class AutoNumberRuleBuildServiceImpl implements AutoNumberRuleBuildServic
 
     @Resource
     private MetadataAutoNumberRuleItemRepository ruleItemRepository;
+
+    @Resource
+    private MetadataAutoNumberConfigRepository configRepository;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -43,13 +48,22 @@ public class AutoNumberRuleBuildServiceImpl implements AutoNumberRuleBuildServic
 
     @Override
     public List<MetadataAutoNumberRuleItemDO> listByConfigId(Long configId) {
-        return ruleItemRepository.listByConfig(configId);
+        // 先获取config
+        MetadataAutoNumberConfigDO config = configRepository.getById(configId);
+        if (config != null) {
+            return ruleItemRepository.listByConfigUuid(config.getConfigUuid());
+        }
+        return List.of();
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteByConfigId(Long configId) {
-        ruleItemRepository.deleteByConfigId(configId);
+        // 先获取config
+        MetadataAutoNumberConfigDO config = configRepository.getById(configId);
+        if (config != null) {
+            ruleItemRepository.deleteByConfigUuid(config.getConfigUuid());
+        }
     }
 
     @Override

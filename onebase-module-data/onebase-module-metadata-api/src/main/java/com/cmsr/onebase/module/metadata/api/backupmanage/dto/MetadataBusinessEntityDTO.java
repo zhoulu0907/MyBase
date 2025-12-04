@@ -18,6 +18,9 @@ public class MetadataBusinessEntityDTO {
     @Schema(description = "主键ID")
     private Long id;
 
+    @Schema(description = "实体UUID")
+    private String entityUuid;
+
     @Schema(description = "实体名称")
     private String displayName;
 
@@ -30,8 +33,8 @@ public class MetadataBusinessEntityDTO {
     @Schema(description = "实体描述")
     private String description;
 
-    @Schema(description = "数据源ID")
-    private Long datasourceId;
+    @Schema(description = "数据源UUID")
+    private String datasourceUuid;
 
     @Schema(description = "对应数据表名")
     private String tableName;
