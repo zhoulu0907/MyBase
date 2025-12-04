@@ -6,12 +6,14 @@ import {
   dataMethodInsert,
   dataMethodUpdate,
   getEntityFieldsWithChildren,
+  getPageSetId,
   getPageSetMetaData,
   PageType,
   queryFlowExecForm,
   TRIGGER_EVENTS,
   type AppEntityField,
   type DataMethodParam,
+  type GetPageSetIdReq,
   type InsertMethodParams,
   type UpdateMethodParams
 } from '@onebase/app';
@@ -102,9 +104,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
   const handleGetPageSetId = async (menuId: string) => {
     // TODO(mickey多租户): 待runtime接口提供后打开
-    // const req: GetPageSetIdReq = { menuId: menuId };
-    // const res = await getPageSetId(req);
-    // setPageSetId(res);
+    const req: GetPageSetIdReq = { menuId: menuId };
+    const res = await getPageSetId(req);
+    setPageSetId(res);
   };
 
   // 信息收集弹窗

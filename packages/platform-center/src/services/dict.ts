@@ -1,3 +1,4 @@
+import { isRuntimeEnv } from '@onebase/common';
 import { PageParam, PageResult } from '../types/common';
 import { BatchConfigDictDataParams, DictData, DictDataForm, DictForm, DictItem } from '../types/dict';
 import { runtimeService, systemService } from './clients';
@@ -104,9 +105,5 @@ export const batchConfigDictData = (data: BatchConfigDictDataParams): Promise<vo
  * 根据dict type获得字典数据列表
  */
 export const getDictDataByType = (id: string): DictData[] => {
-  return systemService.get(`/dict-data/simple-list-by-type?id=${id}`);
-};
-
-export const runtimeGetDictDataByType = (id: string): DictData[] => {
-  return runtimeService.get(`/dict-data/simple-list-by-type?id=${id}`);
+  return (isRuntimeEnv() ? runtimeService : systemService).get(`/dict-data/simple-list-by-type?id=${id}`);
 };

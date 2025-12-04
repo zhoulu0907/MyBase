@@ -4,6 +4,7 @@ import { Button, Dropdown, Input, Menu, Message, Modal, Space, Table, Tabs, Tag 
 import { IconMore } from '@arco-design/web-react/icon';
 import { TokenManager, formatTimeYMDHMS } from '@onebase/common';
 import {
+  type authAppStatusParams,
   type corpAppListParams,
   getCorpAuthorizedAppListApiInCorp,
   updateAuthAppStatusInCorp
@@ -152,7 +153,7 @@ const AuthorizedApplication = () => {
 
   const handleDisabled = async (record: any) => {
     if (record.showStatus === 2) {
-      const params = { id: record.id, status: 1 };
+      const params: authAppStatusParams = { id: record.id, status: '1' };
       try {
         await updateAuthAppStatusInCorp(params);
         await fetchCorpAuthorizedList(pageInation.current, pageInation.pageSize);
@@ -160,7 +161,7 @@ const AuthorizedApplication = () => {
         Message.error('启用失败');
       }
     } else {
-      const params = { id: record.id, status: 0 };
+      const params: authAppStatusParams = { id: record.id, status: '0' };
       return Modal.confirm({
         title: `禁用应用(${record.applicationName})? `,
         content: '禁用状态下，企业用户无法使用该应用，再次启用时用户可恢复正常使用',
