@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.metadata.build.service.entity;
 import com.cmsr.onebase.framework.aynline.AnylineDdlHelper;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.framework.common.util.string.UuidUtils;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.flow.context.enums.FieldTypeEnum;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.*;
@@ -27,6 +28,7 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusin
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.relationship.MetadataEntityRelationshipDO;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityFieldRepository;
+import com.cmsr.onebase.module.metadata.core.dal.database.MetadataBusinessEntityRepository;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationFormatRepository;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationLengthRepository;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationRequiredRepository;
@@ -103,6 +105,8 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
     @Resource
     private MetadataEntityFieldRepository metadataEntityFieldRepository;
+    @Resource
+    private MetadataBusinessEntityRepository metadataBusinessEntityRepository;
     @Resource
     private TemporaryDatasourceService temporaryDatasourceService;
     @Resource
@@ -356,6 +360,10 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             entityField.setApplicationId(reqVO.getApplicationId() != null ? Long.parseLong(reqVO.getApplicationId()) : null);
             // 设置默认运行模式，防止后续约束/自动编号处理中出现空指针
             entityField.setVersionTag(0L);
+            // 生成字段UUID（如果为空）
+            if (entityField.getFieldUuid() == null || entityField.getFieldUuid().isEmpty()) {
+                entityField.setFieldUuid(UuidUtils.getUuid());
+            }
 
             metadataEntityFieldRepository.save(entityField);
             fieldIds.add(entityField.getId().toString());
@@ -606,19 +614,24 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
     @Override
     @Transactional(rollbackFor = Exception.class)
     public EntityFieldBatchSaveRespVO batchSaveEntityFields(@Valid EntityFieldBatchSaveReqVO reqVO) {
-        // ID转UUID兼容处理：支持前端传入entityId(实际为reqVO.getEntityId())或entityUuid
-        // 注意：reqVO.getEntityId()字段名虽然叫entityId，但实际可能传入UUID或Long ID
-        String resolvedEntityUuid = idUuidConverter.resolveEntityUuid(reqVO.getEntityId(), null);
-        reqVO.setEntityId(resolvedEntityUuid);
+        // ID/UUID兼容处理：支持前端传入Long ID或UUID，自动识别并转换为Long ID
+        Long resolvedEntityId = idUuidConverter.resolveEntityId(reqVO.getEntityId());
 
         EntityFieldBatchSaveRespVO resp = new EntityFieldBatchSaveRespVO();
 
-        // 1. 获取实体与数据源
-        MetadataBusinessEntityDO businessEntity = metadataBusinessEntityCoreService
-                .getBusinessEntityByUuid(reqVO.getEntityId());
+        // 1. 获取实体与数据源（通过ID查询，兼容entity_uuid为null的情况）
+        MetadataBusinessEntityDO businessEntity = metadataBusinessEntityRepository.getById(resolvedEntityId);
         if (businessEntity == null) {
             throw new IllegalArgumentException("业务实体不存在");
         }
+        // 使用实体的entityUuid（可能为null），后续操作需要兼容处理
+        String entityUuidForField = businessEntity.getEntityUuid();
+        // 如果entityUuid为空，使用ID的字符串形式作为标识（兼容旧数据）
+        if (entityUuidForField == null || entityUuidForField.trim().isEmpty()) {
+            entityUuidForField = String.valueOf(resolvedEntityId);
+        }
+        reqVO.setEntityId(entityUuidForField);
+        
         MetadataDatasourceDO datasource = null;
         if (businessEntity.getTableName() != null && !businessEntity.getTableName().trim().isEmpty()) {
             datasource = metadataDatasourceBuildService.getDatasourceByUuid(businessEntity.getDatasourceUuid());
@@ -851,6 +864,10 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 toCreate.setIsPrimaryKey(StatusEnumUtil.NO);
                 toCreate.setVersionTag(0L);
                 toCreate.setDictTypeId(item.getDictTypeId());
+                // 生成字段UUID（如果为空）
+                if (toCreate.getFieldUuid() == null || toCreate.getFieldUuid().isEmpty()) {
+                    toCreate.setFieldUuid(UuidUtils.getUuid());
+                }
 
                 metadataEntityFieldRepository.save(toCreate);
 
@@ -1054,6 +1071,10 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         if (entityField.getFieldCode() == null || entityField.getFieldCode().trim().isEmpty()) {
             entityField.setFieldCode(generateFieldCode(createReqVO.getFieldName()));
         }
+        // 生成字段UUID（如果为空）
+        if (entityField.getFieldUuid() == null || entityField.getFieldUuid().isEmpty()) {
+            entityField.setFieldUuid(UuidUtils.getUuid());
+        }
 
         metadataEntityFieldRepository.save(entityField);
 
@@ -1079,6 +1100,10 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
     @Override
     public Long createEntityFieldInternal(MetadataEntityFieldDO entityField) {
+        // 生成字段UUID（如果为空）
+        if (entityField.getFieldUuid() == null || entityField.getFieldUuid().isEmpty()) {
+            entityField.setFieldUuid(UuidUtils.getUuid());
+        }
         metadataEntityFieldRepository.save(entityField);
         return entityField.getId();
     }
@@ -1340,8 +1365,15 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
     @Override
     public List<MetadataEntityFieldDO> getEntityFieldListByEntityId(String entityId) {
+        // 将entityId转换为entityUuid（兼容ID和UUID两种格式）
+        String entityUuid = idUuidConverter.toEntityUuid(entityId);
+        if (entityUuid == null || entityUuid.isEmpty()) {
+            log.warn("无法解析实体标识: {}", entityId);
+            return java.util.Collections.emptyList();
+        }
+        
         QueryWrapper queryWrapper = QueryWrapper.create()
-                .eq(MetadataEntityFieldDO::getEntityUuid, entityId.trim())
+                .eq(MetadataEntityFieldDO::getEntityUuid, entityUuid.trim())
                 .orderBy(MetadataEntityFieldDO::getSortOrder, true)
                 .orderBy(MetadataEntityFieldDO::getCreateTime, false);
         return metadataEntityFieldRepository.list(queryWrapper);

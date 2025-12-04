@@ -19,7 +19,7 @@ public interface AppApplicationApi {
 
     List<ApplicationDTO> findAppApplicationByAppIds(Collection<Long> appIds);
 
-    ApplicationDTO findAppApplicationByTenantIdAndAppId(Long tenantId, Long appId);
+    ApplicationDTO findAppApplicationById(Long appId);
 
     Map<Long, Integer> countAppByTenantId();
 

@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Data
 public class ApplicationDTO {
 
-    private  Long id;
+    private Long id;
     /**
      * 应用uid(自动生成短码)
      */
