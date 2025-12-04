@@ -22,10 +22,6 @@ public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity>
             return;
         }
         List<QueryTable> queryTables = CPI.getQueryTables(queryWrapper);
-        if (CollectionUtils.isNotEmpty(queryTables) && queryTables.size() > 1) {
-            log.warn("查询条件包含多个表，跳过条件注入");
-            return;
-        }
         QueryColumn applicationColumn;
         if (CollectionUtils.isEmpty(queryTables)) {
             applicationColumn = new QueryColumn(BaseAppEntity.APPLICATION_ID);
@@ -49,6 +45,10 @@ public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity>
         // 不处理子查询
         List<QueryWrapper> childSelect = CPI.getChildSelect(queryWrapper);
         if (CollectionUtils.isNotEmpty(childSelect)) {
+            return false;
+        }
+        List<QueryTable> queryTables = CPI.getQueryTables(queryWrapper);
+        if (CollectionUtils.isNotEmpty(queryTables) && queryTables.size() > 1) {
             return false;
         }
         // 需要处理

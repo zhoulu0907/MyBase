@@ -31,12 +31,14 @@ tag: {{tag}}
 ### 请求 /login 接口 => 成功
 POST {{baseUrl}}/system/auth/app-login
 Content-Type: application/json
-tenant-id: {{adminTenantId}}
+#tenant-id: {{adminTenantId}}
+tenant-id: 160864959456706560
 tag: {{tag}}
 
-{"password":"AdminChina2025!","username":"admin","appId":"155296070483476480",
-"captchaVerification":"B/IPY56Fitizbk+iaZMFreS2ac6WF9boqPZOLwDxtq82tjAZwPxJLNKBWDemjc+LACdFcc61IbKV8FbsVueG1rys88pb749urZsNI1olDlA=",
-"deviceId":"50dddd1e2dcbb0f792b0fe3e9028890b"}
+#{"password":"AdminChina2025!","username":"admin","appId":"155296070483476480",
+#"captchaVerification":"B/IPY56Fitizbk+iaZMFreS2ac6WF9boqPZOLwDxtq82tjAZwPxJLNKBWDemjc+LACdFcc61IbKV8FbsVueG1rys88pb749urZsNI1olDlA=",
+#"deviceId":"50dddd1e2dcbb0f792b0fe3e9028890b"}
+{"password":"AdminChina2025\u0021","username":"wangshaoqing","appId":"163852177939464192","captchaVerification":"3oJFZk4xdNNjawBg8JwIwkbZv6hhC6yKrjtBq7D7tbCABbnNmu8f0T5qf/LeSpLu1dhHwA+5nS1w+uD7AK6k72E8KSX5zeXQoO1BnNR7iJ0=","deviceId":"f3b000916478e376e7253f5694a8d1e8"}
 
 > {%
     // 登录成功后自动更新token到环境变量

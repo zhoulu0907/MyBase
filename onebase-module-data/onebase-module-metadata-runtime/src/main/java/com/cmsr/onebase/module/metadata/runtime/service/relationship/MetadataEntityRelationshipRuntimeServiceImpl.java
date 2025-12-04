@@ -155,6 +155,7 @@ public class MetadataEntityRelationshipRuntimeServiceImpl implements MetadataEnt
      */
     private EntityFieldInfoRespVO convertToFieldInfo(MetadataEntityFieldDO fieldDO) {
         return BeanUtils.toBean(fieldDO, EntityFieldInfoRespVO.class, fieldInfo -> {
+            fieldInfo.setFieldId(String.valueOf(fieldDO.getId()));
             fieldInfo.setFieldUuid(fieldDO.getFieldUuid());
         });
     }
