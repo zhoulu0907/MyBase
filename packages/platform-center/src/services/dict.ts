@@ -103,10 +103,6 @@ export const batchConfigDictData = (data: BatchConfigDictDataParams): Promise<vo
 /**
  * 根据dict type获得字典数据列表
  */
-export const getDictDataByType = (id: string): DictData[] => {
-  return systemService.get(`/dict-data/simple-list-by-type?id=${id}`);
-};
-
-export const runtimeGetDictDataByType = (id: string): DictData[] => {
-  return runtimeService.get(`/dict-data/simple-list-by-type?id=${id}`);
+export const getDictDataByType = (id: string, runtime?: boolean): DictData[] => {
+  return (runtime ? runtimeService : systemService).get(`/dict-data/simple-list-by-type?id=${id}`);
 };

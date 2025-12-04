@@ -16,12 +16,7 @@ import {
 import { IconCamera, IconEdit } from '@arco-design/web-react/icon';
 import { CORP_INFO_PERMISSION as ACTIONS, Cropper, hasPermission, TokenManager } from '@onebase/common';
 import type { CorpDetailResponse, DictData } from '@onebase/platform-center';
-import {
-  getCorpDetailByIdApiInCorp,
-  runtimeGetDictDataByType,
-  runtimeUploadFile,
-  updateCorpApiInCorp
-} from '@onebase/platform-center';
+import { getCorpDetailByIdApiInCorp, getDictDataByType, updateCorpApi, uploadFile } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
 
@@ -60,7 +55,7 @@ const SpaceInfo: React.FC = () => {
 
   const fetchIndustryDict = async (id: string) => {
     try {
-      const res = await runtimeGetDictDataByType(id);
+      const res = await getDictDataByType(id, true);
       setIndustryDict(res);
     } catch (error) {
       console.error('字典数据列表错误', error);
@@ -88,15 +83,18 @@ const SpaceInfo: React.FC = () => {
     }
 
     try {
-      await updateCorpApiInCorp({
-        id: enterpriseInfo.id!,
-        corpName: newName,
-        corpCode: enterpriseInfo.corpCode,
-        industryType: +enterpriseInfo.industryType!,
-        status: enterpriseInfo.status,
-        address: enterpriseInfo.address!,
-        userLimit: enterpriseInfo.userLimit!
-      });
+      await updateCorpApi(
+        {
+          id: enterpriseInfo.id!,
+          corpName: newName,
+          corpCode: enterpriseInfo.corpCode,
+          industryType: +enterpriseInfo.industryType!,
+          status: enterpriseInfo.status,
+          address: enterpriseInfo.address!,
+          userLimit: enterpriseInfo.userLimit!
+        },
+        true
+      );
 
       setEnterpriseInfo({
         ...enterpriseInfo,
@@ -124,7 +122,7 @@ const SpaceInfo: React.FC = () => {
         }
       : undefined;
 
-    const res = await runtimeUploadFile(formData, progressAdapter);
+    const res = await uploadFile(formData, progressAdapter, true);
     return res;
   };
 

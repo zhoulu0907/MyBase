@@ -3,16 +3,16 @@ import { useI18n } from '@/hooks/useI18n';
 import { Input, Layout, Tree } from '@arco-design/web-react';
 import { IconDown, IconSearch } from '@arco-design/web-react/icon';
 import {
+  listApplicationMenu,
   menuSignal,
   MenuType,
   runtimeListApplicationBPMMenu,
-  runtimeListApplicationMenu,
   VisibleType,
   type ApplicationMenu,
   type ListApplicationMenuReq
 } from '@onebase/app';
 import { TokenManager, UserPermissionManager } from '@onebase/common';
-import { runtimeGetPermissionInfo } from '@onebase/platform-center';
+import { getPermissionInfo } from '@onebase/platform-center';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
@@ -112,7 +112,7 @@ const Runtime: React.FC = () => {
   }, []);
 
   const getUserInfo = async () => {
-    const res = await runtimeGetPermissionInfo();
+    const res = await getPermissionInfo(true);
     UserPermissionManager.setUserPermissionInfo(res);
     setNickname(res.user.nickname);
   };
@@ -136,7 +136,7 @@ const Runtime: React.FC = () => {
     const req: ListApplicationMenuReq = {
       applicationId: appID
     };
-    const res = await runtimeListApplicationMenu(req);
+    const res = await listApplicationMenu(req, true);
     console.log(res);
     const bpmRes = await runtimeListApplicationBPMMenu(req);
     console.log(bpmRes);

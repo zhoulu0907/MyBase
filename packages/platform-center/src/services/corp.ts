@@ -8,7 +8,7 @@ import {
   createCorpParams,
   updateCorpParams
 } from '../types';
-import { systemService } from './clients';
+import { runtimeCorpService, systemService } from './clients';
 
 // 创建企业
 export const createCorpApi = (data: createCorpParams) => systemService.post('/corp/create', data);
@@ -21,7 +21,8 @@ export const checkCorpAdminUserApi = (data: checkCorpAdminUserParams) =>
   systemService.post('/corp/check-corp-admin-user', data);
 
 //更新企业
-export const updateCorpApi = (data: updateCorpParams) => systemService.post('/corp/update', data);
+export const updateCorpApi = (data: updateCorpParams, runtime?: boolean) =>
+  (runtime ? runtimeCorpService : systemService).post('/corp/update', data);
 
 //禁用/启用企业
 export const disabledCorpApi = (data: corpStatusParams) =>

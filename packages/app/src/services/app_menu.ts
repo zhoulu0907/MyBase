@@ -9,12 +9,8 @@ import {
 } from '../types/app_menu';
 import { appService, runtimeAppService } from './clients';
 
-export const listApplicationMenu = (params: ListApplicationMenuReq) => {
-  return appService.get('/menu/list', params);
-};
-
-export const runtimeListApplicationMenu = (params: ListApplicationMenuReq) => {
-  return runtimeAppService.get('/menu/list', params);
+export const listApplicationMenu = (params: ListApplicationMenuReq, runtime?: boolean) => {
+  return (runtime ? runtimeAppService : appService).get('/menu/list', params);
 };
 
 export const createApplicationMenu = (params: CreateApplicationMenuReq) => {

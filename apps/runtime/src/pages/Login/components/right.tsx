@@ -3,7 +3,7 @@ import { DynamicIcon } from '@/components/DynamicIcon';
 import { appInfoSignal } from '@/store/app';
 import { Button, Checkbox, Form, Input, Message, Space, Typography } from '@arco-design/web-react';
 import { IconLock, IconMobile, IconUser } from '@arco-design/web-react/icon';
-import { runtimeGetApplication } from '@onebase/app';
+import { getApplication } from '@onebase/app';
 import {
   getHashQueryParam,
   getOrCreateDeviceInfo,
@@ -116,7 +116,7 @@ const Right: React.FC = () => {
 
   const handleGetApplication = async () => {
     if (appId) {
-      const res = await runtimeGetApplication({ id: appId });
+      const res = await getApplication({ id: appId }, true);
       if (res) {
         setCurAppInfo(res);
       }
@@ -192,7 +192,6 @@ const Right: React.FC = () => {
 
       if (response && response.accessToken) {
         // 使用 TokenManager 存储 token 信息
-
 
         if (appId && tenantId) {
           TokenManager.setCurIdentifyId(`${appId}_${tenantId}`);
