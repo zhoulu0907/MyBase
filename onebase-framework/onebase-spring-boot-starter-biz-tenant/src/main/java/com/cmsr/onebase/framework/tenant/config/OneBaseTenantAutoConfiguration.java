@@ -10,7 +10,6 @@ import com.cmsr.onebase.framework.tenant.core.redis.TenantRedisCacheManager;
 import com.cmsr.onebase.framework.tenant.core.security.TenantSecurityWebFilter;
 import com.cmsr.onebase.framework.tenant.core.service.TenantFrameworkService;
 import com.cmsr.onebase.framework.tenant.core.service.TenantFrameworkServiceImpl;
-import com.cmsr.onebase.framework.tenant.core.web.TenantContextWebFilter;
 import com.cmsr.onebase.framework.tenant.core.web.TenantVisitContextInterceptor;
 import com.cmsr.onebase.framework.web.config.WebProperties;
 import com.cmsr.onebase.framework.web.core.handler.GlobalExceptionHandler;
@@ -68,15 +67,14 @@ public class OneBaseTenantAutoConfiguration {
     }
 
     // ========== WEB ==========
-
-    @Bean
-    public FilterRegistrationBean<TenantContextWebFilter> tenantContextWebFilter(TenantProperties tenantProperties) {
-        FilterRegistrationBean<TenantContextWebFilter> registrationBean = new FilterRegistrationBean<>();
-        registrationBean.setFilter(new TenantContextWebFilter());
-        registrationBean.setOrder(WebFilterOrderEnum.TENANT_CONTEXT_FILTER);
-        addIgnoreUrls(tenantProperties);
-        return registrationBean;
-    }
+    // @Bean
+    // public FilterRegistrationBean<TenantContextWebFilter> tenantContextWebFilter(TenantProperties tenantProperties) {
+    //     FilterRegistrationBean<TenantContextWebFilter> registrationBean = new FilterRegistrationBean<>();
+    //     registrationBean.setFilter(new TenantContextWebFilter());
+    //     registrationBean.setOrder(WebFilterOrderEnum.TENANT_CONTEXT_FILTER);
+    //     addIgnoreUrls(tenantProperties);
+    //     return registrationBean;
+    // }
 
     /**
      * 如果 Controller 接口上，有 {@link TenantIgnore} 注解，那么添加到忽略的 URL 中

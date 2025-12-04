@@ -12,6 +12,7 @@ import com.cmsr.onebase.framework.common.enums.RunModeEnum;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
+import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
 import com.cmsr.onebase.module.app.api.security.AppAuthSecurityApi;
@@ -38,6 +39,7 @@ import com.cmsr.onebase.module.system.vo.CaptchaVerificationReqVO;
 import com.cmsr.onebase.module.system.vo.auth.*;
 import com.cmsr.onebase.module.system.vo.corp.CorpRespVO;
 import com.google.common.annotations.VisibleForTesting;
+import com.mybatisflex.core.tenant.TenantManager;
 import com.mzt.logapi.context.LogRecordContext;
 import com.mzt.logapi.starter.annotation.LogRecord;
 import jakarta.annotation.Resource;
@@ -53,6 +55,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
@@ -148,13 +151,15 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
     }
 
 
-    private void checkApplicationStatus(Long appId) {
-        Set<Long> appIds = new HashSet<Long>();
+    private Long checkApplicationStatus(Long appId) {
+        Set<Long> appIds = new HashSet<>();
         appIds.add(appId);
-        List<ApplicationDTO> applicationDTOS = appApplicationApi.findAppApplicationByAppIds(appIds);
+        List<ApplicationDTO> applicationDTOS = TenantManager.withoutTenantCondition(() -> appApplicationApi.findAppApplicationByAppIds(appIds));
+
         if (applicationDTOS.isEmpty()) {
-            throw exception(AUTH_LOGIN_CORP_DELETE_OR_DISABLE);
+            throw exception(AUTH_LOGIN_APP_DELETE_OR_DISABLE);
         }
+        return applicationDTOS.get(0).getTenantId();
     }
 
     private void checkPasswordMatched(String password, AdminUserDO user, String account, LoginLogTypeEnum logTypeEnum) {
@@ -177,17 +182,24 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         validateCaptcha(reqVO);
 
         // 验证应用是否存在
-        checkApplicationStatus(reqVO.getAppId());
+        Long tenanId = checkApplicationStatus(reqVO.getAppId());
 
-        // 增加日志输出，便于调试
-        checkPlatformAdminEnableAppCreate();
+        AtomicReference<AuthLoginRespVO> authLoginRespVO = new AtomicReference<>();
 
-        // 使用账号密码，进行登录
-        AdminUserDO user = authenticate(reqVO.getUsername(), reqVO.getPassword());
-        AuthLoginRespVO authLoginRespVO = createAfterLoginSuccess(user.getUserType(), user.getCorpId(), reqVO.getAppId(), user.getId(), reqVO.getUsername(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_USERNAME);
+        // 设置租户环境，mybatis flex是否需要换一种方式
 
-        LogRecordContext.putVariable("user", user);
-        return authLoginRespVO;
+        TenantUtils.execute(tenanId, () -> {
+            // 检查平台租户是否允许创建应用
+            // checkPlatformAdminEnableAppCreate();
+
+            // 使用账号密码，进行登录
+            AdminUserDO user = authenticate(reqVO.getUsername(), reqVO.getPassword());
+            authLoginRespVO.set(createAfterLoginSuccess(user.getUserType(), user.getCorpId(), reqVO.getAppId(), user.getId(), reqVO.getUsername(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_USERNAME));
+
+            LogRecordContext.putVariable("user", user);
+        });
+
+        return authLoginRespVO.get();
 
     }
 
