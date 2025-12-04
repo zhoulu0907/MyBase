@@ -2,15 +2,13 @@ package com.cmsr.onebase.module.bpm.runtime.service.instance.detail.strategy.imp
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
-import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowInsBizExtRepository;
-import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowInsBizExtDO;
 import com.cmsr.onebase.module.bpm.core.dto.PageViewGroupDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.FieldPermCfgDTO;
+import com.cmsr.onebase.module.bpm.core.enums.BpmConstants;
 import com.cmsr.onebase.module.bpm.core.enums.FieldPermTypeEnum;
 import com.cmsr.onebase.module.bpm.core.enums.FieldUiShowModeEnum;
 import com.cmsr.onebase.module.bpm.runtime.service.instance.detail.strategy.InstanceDetailStrategy;
-import com.cmsr.onebase.module.bpm.runtime.utils.PageViewUtil;
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmTaskDetailRespVO;
 import com.cmsr.onebase.module.metadata.api.entity.MetadataEntityFieldApi;
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldQueryReqDTO;
@@ -20,7 +18,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.warm.flow.core.entity.Instance;
-import com.cmsr.onebase.module.bpm.core.enums.BpmConstants;
 
 import java.util.*;
 
@@ -35,12 +32,6 @@ import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionU
 public abstract class AbstractInstanceDetailStrategy<T extends BaseNodeExtDTO> implements InstanceDetailStrategy<T> {
     @Resource
     protected MetadataEntityFieldApi metadataEntityFieldApi;
-
-    @Resource
-    protected PageViewUtil pageViewUtil;
-
-    @Resource
-    protected BpmFlowInsBizExtRepository bpmFlowInsBizExtRepository;
 
     /**
      * 填充按钮配置（节点类型相关）
@@ -75,21 +66,21 @@ public abstract class AbstractInstanceDetailStrategy<T extends BaseNodeExtDTO> i
         // 查询实体的所有字段
         List<EntityFieldRespDTO> entityFields = metadataEntityFieldApi.getEntityFieldList(queryReqDTO);
 
-        Map<Long, EntityFieldRespDTO> entityFieldMap = new HashMap<>();
-        Map<Long, String> fieldPermMap = new HashMap<>();
-        Map<Long, String> fieldIdNameMap = new HashMap<>();
+        Map<String, EntityFieldRespDTO> entityFieldMap = new HashMap<>();
+        Map<String, String> fieldPermMap = new HashMap<>();
+        Map<String, String> fieldUuidNameMap = new HashMap<>();
 
         // 默认所有字段都为只读
         for (EntityFieldRespDTO entityField : entityFields) {
-            entityFieldMap.put(entityField.getId(), entityField);
-            fieldPermMap.put(entityField.getId(), FieldUiShowModeEnum.READ.getCode());
-            fieldIdNameMap.put(entityField.getId(), entityField.getFieldName());
+            entityFieldMap.put(entityField.getFieldUuid(), entityField);
+            fieldPermMap.put(entityField.getFieldUuid(), FieldUiShowModeEnum.READ.getCode());
+            fieldUuidNameMap.put(entityField.getFieldUuid(), entityField.getFieldName());
         }
 
         vo.getFormData().put("fieldPerm", fieldPermMap);
 
         // 这里只是为了方便查看id和name的关联关系，业务上暂时没用上
-        vo.getFormData().put("fieldIdName", fieldIdNameMap);
+        vo.getFormData().put("fieldIdName", fieldUuidNameMap);
 
         // 没有配置字段权限，则返回只读权限
         if (!CollectionUtils.isNotEmpty(fieldPermConfig.getFieldConfigs())) {
@@ -101,7 +92,7 @@ public abstract class AbstractInstanceDetailStrategy<T extends BaseNodeExtDTO> i
         // 处理节点配置的字段权限 todo: 处理子表字段权限
         for (FieldPermCfgDTO.FieldConfigDTO fieldConfig : fieldPermConfig.getFieldConfigs()) {
             // 在实体字段中不存在的，直接跳过
-            EntityFieldRespDTO entityField = entityFieldMap.get(fieldConfig.getFieldId());
+            EntityFieldRespDTO entityField = entityFieldMap.get(fieldConfig.getFieldUuid());
             if (entityField == null) {
                 continue;
             }
@@ -110,15 +101,15 @@ public abstract class AbstractInstanceDetailStrategy<T extends BaseNodeExtDTO> i
             if (Objects.equals(FieldPermTypeEnum.HIDDEN.getCode(), fieldConfig.getFieldPermType())) {
                 // 这里才是字段的英文名
                 hiddenFieldNames.add(entityField.getFieldName());
-                fieldPermMap.put(fieldConfig.getFieldId(), FieldUiShowModeEnum.HIDDEN.getCode());
+                fieldPermMap.put(fieldConfig.getFieldUuid(), FieldUiShowModeEnum.HIDDEN.getCode());
             } else if (Objects.equals(FieldPermTypeEnum.READ.getCode(), fieldConfig.getFieldPermType())) {
-                fieldPermMap.put(fieldConfig.getFieldId(), FieldUiShowModeEnum.READ.getCode());
+                fieldPermMap.put(fieldConfig.getFieldUuid(), FieldUiShowModeEnum.READ.getCode());
             } else if (Objects.equals(FieldPermTypeEnum.WRITE.getCode(), fieldConfig.getFieldPermType())) {
                 if (isTodo) {
-                    fieldPermMap.put(fieldConfig.getFieldId(), FieldUiShowModeEnum.WRITE.getCode());
+                    fieldPermMap.put(fieldConfig.getFieldUuid(), FieldUiShowModeEnum.WRITE.getCode());
                 } else {
                     // 非待办的情况下，都是只读
-                    fieldPermMap.put(fieldConfig.getFieldId(), FieldUiShowModeEnum.READ.getCode());
+                    fieldPermMap.put(fieldConfig.getFieldUuid(), FieldUiShowModeEnum.READ.getCode());
                 }
             }
         }
@@ -138,48 +129,22 @@ public abstract class AbstractInstanceDetailStrategy<T extends BaseNodeExtDTO> i
      *
      * @param instance 流程实例
      */
-    protected void fillPageViewInfo(BpmTaskDetailRespVO vo, Instance instance, Long pageSetId, boolean isTodo) {
-        PageViewGroupDTO viewGroupDTO = getPageViewGroupDTO(instance, pageSetId);
+    protected void fillPageViewInfo(BpmTaskDetailRespVO vo, Instance instance, boolean isTodo) {
+        PageViewGroupDTO viewGroupDTO = getPageViewGroupDTO(instance);
 
+        // todo 更新最新的pageId
         // 默认获取详情视图
         vo.setPageView(viewGroupDTO.getDetailPageView());
     }
 
-    protected PageViewGroupDTO getPageViewGroupDTO(Instance instance, Long pageSetId) {
-        PageViewGroupDTO viewGroupDTO;
-
+    protected PageViewGroupDTO getPageViewGroupDTO(Instance instance) {
         String pageViewGroupJsonStr = MapUtils.getString(instance.getVariableMap(), BpmConstants.VAR_PAGE_VIEW_GROUP_KEY);
 
         if (StringUtils.isNotBlank(pageViewGroupJsonStr)) {
             return JsonUtils.parseObject(pageViewGroupJsonStr, PageViewGroupDTO.class);
         }
 
-        // todo: 此处为了兼容旧数据，尝试获取最新页面视图，理论上应该是从实例里获取
-        viewGroupDTO = pageViewUtil.findPageViewGroup(pageSetId);
-
-        if (viewGroupDTO == null) {
-            throw exception(ErrorCodeConstants.MISSING_EDIT_OR_DETAIL_PAGE_VIEW);
-        }
-
-        return viewGroupDTO;
-    }
-
-    protected Long getPageSetId(Instance instance) {
-        Long pageSetId = MapUtils.getLong(instance.getVariableMap(), BpmConstants.VAR_BINDING_VIEW_ID_KEY);
-        if (pageSetId == null) {
-            // 兼容旧数据，再去查一次instanceExt表
-            BpmFlowInsBizExtDO bizExtDO = bpmFlowInsBizExtRepository.findOneByInstanceId(instance.getId());
-
-            if (bizExtDO != null) {
-                pageSetId = Long.valueOf(bizExtDO.getBindingViewId());
-            }
-        }
-
-        if (pageSetId == null) {
-            throw exception(ErrorCodeConstants.MISSING_BINDING_VIEW_ID);
-        }
-
-        return pageSetId;
+        throw exception(ErrorCodeConstants.MISSING_EDIT_OR_DETAIL_PAGE_VIEW);
     }
 
     /**
@@ -198,8 +163,6 @@ public abstract class AbstractInstanceDetailStrategy<T extends BaseNodeExtDTO> i
             throw exception(ErrorCodeConstants.FLOW_NOT_BIND_ENTITY_ID);
         }
 
-        Long pageSetId = getPageSetId(instance);
-
         // 非当前待办，则没有按钮，且字段权限全部为只读
         if (isTodo) {
             // 填充按钮信息（节点类型相关）
@@ -207,7 +170,7 @@ public abstract class AbstractInstanceDetailStrategy<T extends BaseNodeExtDTO> i
         }
 
         // 填充视图页面信息
-        fillPageViewInfo(vo, instance, pageSetId, isTodo);
+        fillPageViewInfo(vo, instance, isTodo);
 
         // 填充字段权限信息（节点类型相关）
         fillFieldPermConfig(vo, extDTO, entityId, isTodo);

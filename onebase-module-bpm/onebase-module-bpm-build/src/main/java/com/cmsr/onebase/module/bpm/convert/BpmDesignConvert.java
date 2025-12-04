@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.bpm.convert;
 import com.cmsr.onebase.module.bpm.build.vo.design.BpmDesignRespVO;
 import com.cmsr.onebase.module.bpm.build.vo.design.BpmDesignSaveReqVO;
 import org.dromara.warm.flow.core.dto.DefJson;
+import org.dromara.warm.flow.core.entity.Definition;
 
 /**
  * @author liyang
@@ -29,9 +30,9 @@ public interface BpmDesignConvert {
      * 复制通用字段数据，如version
      *
      * @param destDefJson 目标流程定义JSON
-     * @param sourceDefJson 源流程定义JSON
+     * @param definition 源流程定义实体
      *
      * @return 流程定义JSON
      */
-    void copyCommonField(DefJson destDefJson, DefJson sourceDefJson);
+    void copyCommonField(DefJson destDefJson, Definition definition);
 }

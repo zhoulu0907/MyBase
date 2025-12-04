@@ -59,19 +59,16 @@ public class FlowInstance extends WarmFlowBaseEntity implements Instance {
     @Column(value = "ext", comment = "扩展字段，预留给业务系统使用")
     private String ext;
 
-    /* ==================== 以下为非数据库字段 ==================== */
-
-    /**
-     *  审批表单是否自定义（Y是 N否）
-     *  */
-    @Column(ignore = true)
+    /** 审批表单是否自定义（Y/N） */
+    @Column(value = "form_custom", comment = "审批表单是否自定义（Y/N）")
     private String formCustom;
 
-    /**
-     * 审批表单路径
-     * */
-    @Column(ignore = true)
+    /** 审批表单路径 */
+    @Column(value = "form_path", comment = "审批表单路径")
     private String formPath;
+
+    /* ==================== 以下为非数据库字段 ==================== */
+
 
     /**
      * 流程名称

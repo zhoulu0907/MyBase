@@ -119,6 +119,16 @@ public interface ErrorCodeConstants {
 
     ErrorCode AGENT_END_TIME_BEFORE_NOW = new ErrorCode(1_009_002_035, "代理失效时间必须大于当前时间");
 
+    ErrorCode MENU_NOT_EXISTS = new ErrorCode(1_009_002_036, "菜单不存在");
+
+    ErrorCode MENU_NOT_BIND_PAGESET = new ErrorCode(1_009_002_037, "菜单未绑定页面集");
+
+    ErrorCode APPLICATION_ID_MISMATCH = new ErrorCode(1_009_002_038, "应用ID与请求应用ID不一致");
+
+    ErrorCode UNSUPPORT_PAGESET_TYPE = new ErrorCode(1_009_002_039, "不支持的页面集类型");
+
+    ErrorCode MISSING_APPLICATION_ID = new ErrorCode(1_009_002_039, "缺少应用ID");
+
     // ============= 系统相关错误 =============
 
     ErrorCode DEPT_API_CALL_FAILED = new ErrorCode(1_009_003_001, "部门接口调用失败");

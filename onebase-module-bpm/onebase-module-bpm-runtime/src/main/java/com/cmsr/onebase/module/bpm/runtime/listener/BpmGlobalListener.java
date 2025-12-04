@@ -20,6 +20,7 @@ import org.dromara.warm.flow.core.entity.Instance;
 import org.dromara.warm.flow.core.entity.Node;
 import org.dromara.warm.flow.core.entity.Task;
 import org.dromara.warm.flow.core.entity.User;
+import org.dromara.warm.flow.core.enums.NodeType;
 import org.dromara.warm.flow.core.listener.GlobalListener;
 import org.dromara.warm.flow.core.listener.ListenerVariable;
 import org.dromara.warm.flow.core.service.InsService;
@@ -61,10 +62,17 @@ public class BpmGlobalListener implements GlobalListener {
 
     @Override
     public void start(ListenerVariable listenerVariable) {
-        // 获取节点ext信息
+        Node node = listenerVariable.getNode();
 
+        // 刚发起流程，节点类型为开始节点
+        if (NodeType.isStart(node.getNodeType())) {
+            log.info("开始启动流程，节点nodeCode：{}", node.getNodeCode());
+            return;
+        }
+
+        // 获取节点ext信息
         String ext = listenerVariable.getNode().getExt();
-        log.info("开始启动流程，节点ext信息：{}", ext);
+        log.info("任务开始，节点ext信息：{}", ext);
         BaseNodeExtDTO nodeExtDTO = BpmUtil.getNodeExtDTOByNodeCode(listenerVariable.getNode().getNodeCode(), listenerVariable.getInstance().getDefJson());
 
         // 处理未操作的用户

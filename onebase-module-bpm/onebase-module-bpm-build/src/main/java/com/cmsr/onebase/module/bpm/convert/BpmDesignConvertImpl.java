@@ -18,6 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.dromara.warm.flow.core.dto.DefJson;
 import org.dromara.warm.flow.core.dto.NodeJson;
 import org.dromara.warm.flow.core.dto.SkipJson;
+import org.dromara.warm.flow.core.entity.Definition;
 import org.dromara.warm.flow.core.enums.NodeType;
 import org.dromara.warm.flow.core.enums.PublishStatus;
 import org.dromara.warm.flow.core.enums.SkipType;
@@ -56,7 +57,7 @@ public class BpmDesignConvertImpl implements BpmDesignConvert {
         respVO.setFlowName(defJson.getFlowName());
         respVO.setId(defJson.getId());
 
-        respVO.setBusinessId(defJson.getFormPath());
+        respVO.setBusinessUuid(defJson.getFormPath());
         respVO.setBpmVersion("V" + defJson.getVersion());
 
         Integer isPublish = defJson.getIsPublish();
@@ -117,7 +118,8 @@ public class BpmDesignConvertImpl implements BpmDesignConvert {
         defJson.setId(flowDesignVO.getId());
         defJson.setFlowCode(flowDesignVO.getFlowCode());
         defJson.setFlowName(flowDesignVO.getFlowName());
-        defJson.setFormPath(flowDesignVO.getBusinessId());
+        defJson.setFormPath(flowDesignVO.getBusinessUuid());
+        defJson.setApplicationId(flowDesignVO.getAppId());
 
         // 构建ext
         BpmDefinitionExtDTO extDto = new BpmDefinitionExtDTO();
@@ -143,18 +145,18 @@ public class BpmDesignConvertImpl implements BpmDesignConvert {
      * @param sourceDefJson 源流程定义JSON
      */
     @Override
-    public void copyCommonField(DefJson destDefJson, DefJson sourceDefJson) {
-        if (destDefJson == null || sourceDefJson == null) {
+    public void copyCommonField(DefJson destDefJson, Definition definition) {
+        if (destDefJson == null || definition == null) {
             return;
         }
 
-        String sourceVersion = sourceDefJson.getVersion();
+        String sourceVersion = definition.getVersion();
 
         // 保持version不变
         destDefJson.setVersion(sourceVersion);
 
         // flowcode保持不变
-        destDefJson.setFlowCode(sourceDefJson.getFlowCode());
+        destDefJson.setFlowCode(definition.getFlowCode());
 
         // 节点也使用相同的version
         for (NodeJson nodeJson : destDefJson.getNodeList()) {
@@ -249,7 +251,7 @@ public class BpmDesignConvertImpl implements BpmDesignConvert {
             NodeJson nodeJson = new NodeJson();
             nodeJson.setNodeCode(nodeVO.getId());
             nodeJson.setNodeName(nodeVO.getName());
-            nodeJson.setFormPath(flowDesignVO.getBusinessId());
+            nodeJson.setFormPath(flowDesignVO.getBusinessUuid());
 
             // 设置节点类型
             BpmNodeTypeEnum bpmNodeType = BpmNodeTypeEnum.getByCode(nodeVO.getType());

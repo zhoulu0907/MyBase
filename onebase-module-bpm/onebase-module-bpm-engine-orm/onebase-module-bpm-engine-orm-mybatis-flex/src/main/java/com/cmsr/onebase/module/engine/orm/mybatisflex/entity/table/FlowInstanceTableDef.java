@@ -110,6 +110,16 @@ public class FlowInstanceTableDef extends TableDef {
     public final QueryColumn ACTIVITY_STATUS = new QueryColumn(this, "activity_status");
 
     /**
+     * 审批表单是否自定义（Y是 N否）
+     */
+    public final QueryColumn FORM_CUSTOM = new QueryColumn(this, "form_custom");
+
+    /**
+     * 审批表单路径
+     */
+    public final QueryColumn FORM_PATH = new QueryColumn(this, "form_path");
+
+    /**
      * 所有字段。
      */
     public final QueryColumn ALL_COLUMNS = new QueryColumn(this, "*");
@@ -117,7 +127,7 @@ public class FlowInstanceTableDef extends TableDef {
     /**
      * 默认字段，不包含逻辑删除或者 large 等字段。
      */
-    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, DEFINITION_ID, BUSINESS_ID, NODE_TYPE, NODE_CODE, NODE_NAME, VARIABLE, FLOW_STATUS, ACTIVITY_STATUS, DEF_JSON, LOCK_VERSION, CREATOR, CREATE_TIME, UPDATER, UPDATE_TIME, EXT, DELETED, TENANT_ID};
+    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, DEFINITION_ID, BUSINESS_ID, NODE_TYPE, NODE_CODE, NODE_NAME, VARIABLE, FLOW_STATUS, ACTIVITY_STATUS, DEF_JSON, LOCK_VERSION, CREATOR, CREATE_TIME, UPDATER, UPDATE_TIME, EXT, DELETED, TENANT_ID, FORM_PATH, FORM_CUSTOM};
 
     public FlowInstanceTableDef() {
         super("", "bpm_flow_instance");

@@ -2,7 +2,10 @@ package com.cmsr.onebase.module.bpm.build.service;
 
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
+import com.cmsr.onebase.module.app.api.appresource.AppResourceApi;
+import com.cmsr.onebase.module.app.api.appresource.dto.AppMenuRespDTO;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
+import com.cmsr.onebase.module.bpm.core.validator.BpmAppResourceValidator;
 import com.cmsr.onebase.module.bpm.build.vo.design.BpmDesignRespVO;
 import com.cmsr.onebase.module.bpm.build.vo.design.BpmDesignSaveReqVO;
 import com.cmsr.onebase.module.bpm.build.vo.design.BpmPublishReqVO;
@@ -55,6 +58,12 @@ public class BpmDesignServiceImpl implements BpmDesignService {
     @Resource
     private Validator validator;
 
+    @Resource
+    private AppResourceApi appResourceApi;
+
+    @Resource
+    private BpmAppResourceValidator bpmAppResourceValidator;
+
     private String generateFlowCode() {
         return "fc_" + UUID.randomUUID().toString().replace("-", "").substring(0, 10);
     }
@@ -80,22 +89,104 @@ public class BpmDesignServiceImpl implements BpmDesignService {
         return bpmDefJsonVO;
     }
 
+    private Long createBpmFlow(BpmDesignSaveReqVO flowDesignVO) {
+        Long businessId = flowDesignVO.getBusinessId();
+        String businessUuid = flowDesignVO.getBusinessUuid();
+        Long applicationId = flowDesignVO.getAppId();
+
+        // 流程编码代表流程唯一标识，流程的多个版本编码也一样；只有多流程的场景才会有不同编码，暂时忽略
+        String flowCode = flowDesignVO.getFlowCode();
+
+        // 流程新增才需要业务ID
+        if (businessId == null && StringUtils.isBlank(businessUuid)) {
+            throw new IllegalArgumentException("业务ID和业务UUID不能同时为空");
+        }
+
+        AppMenuRespDTO menuDTO;
+
+        // 校验
+        if (StringUtils.isNotBlank(businessUuid)) {
+            menuDTO = appResourceApi.getAppMenuByUuidAndAppId(businessUuid, applicationId);
+        } else {
+            menuDTO = appResourceApi.getAppMenuById(businessId);
+        }
+
+        bpmAppResourceValidator.validateMenuAndPageset(menuDTO, applicationId);
+
+        // 设置UUID到Vo
+        flowDesignVO.setBusinessUuid(menuDTO.getMenuUuid());
+
+        // 先查询是否存在已经设计中的流程
+        Definition existDef = defExtService.getByFormPathAndStatus(businessUuid, PublishStatus.UNPUBLISHED.getKey());
+
+        // 只能存在一个设计态的流程
+        if (existDef != null) {
+            throw exception(ErrorCodeConstants.DESIGNING_FLOW_EXISTS);
+        }
+
+        // 转换JSON
+        DefJson defJson = bpmDesignConvert.toDefJson(flowDesignVO);
+
+        // 查询对应表单下任意一个流程
+        Definition anyDef = defExtService.getByFormPath(businessUuid);
+
+        if (anyDef == null) {
+            // 检测flowCode
+            if (StringUtils.isBlank(flowCode)) {
+                // 前端没传则随机生成一个
+                flowCode = generateFlowCode();
+                defJson.setFlowCode(flowCode);
+            }
+        } else {
+            // 使用现有的流程编码
+            defJson.setFlowCode(anyDef.getFlowCode());
+        }
+
+        // 新增流程
+        Definition def = defService.importDef(defJson);
+        return def.getId();
+    }
+
+    private Long updateBpmFlow(BpmDesignSaveReqVO flowDesignVO) {
+        // 流程不存在时，直接查询defJson结构会报错，先查Definition表
+        Definition definition = defService.getById(flowDesignVO.getId());
+
+        if (definition == null) {
+            throw exception(ErrorCodeConstants.FLOW_NOT_EXISTS);
+        }
+
+        if (!Objects.equals(definition.getIsPublish(), PublishStatus.UNPUBLISHED.getKey())) {
+            throw exception(ErrorCodeConstants.SAVE_FLOW_FAILED_FOR_NOT_DESIGN_STATUS);
+        }
+
+        flowDesignVO.setBusinessUuid(definition.getFormPath());
+
+        // 转换JSON
+        DefJson defJson = bpmDesignConvert.toDefJson(flowDesignVO);
+
+        bpmDesignConvert.copyCommonField(defJson, definition);
+
+        // 更新流程
+        try {
+            defService.saveDef(defJson, false);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        return flowDesignVO.getId();
+    }
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long save(BpmDesignSaveReqVO flowDesignVO) {
         Long flowId = flowDesignVO.getId();
-        String businessId = flowDesignVO.getBusinessId();
-
         Long applicationId = ApplicationManager.getApplicationId();
 
         if (applicationId == null) {
-            throw new IllegalArgumentException("应用ID为空");
+            throw exception(ErrorCodeConstants.MISSING_APPLICATION_ID);
         }
 
         flowDesignVO.setAppId(applicationId);
-
-        // 流程编码代表流程唯一标识，流程的多个版本编码也一样；只有多流程的场景才会有不同编码，暂时忽略
-        String flowCode = flowDesignVO.getFlowCode();
 
         // 前端暂时用不到流程名称字段，如果流程名称为空则使用默认名称“业务流程”
         if (StringUtils.isBlank(flowDesignVO.getFlowName())) {
@@ -106,60 +197,11 @@ public class BpmDesignServiceImpl implements BpmDesignService {
         BpmDefJsonVO bpmDefJsonVO = validateBpmDefJsonVO(flowDesignVO.getBpmDefJson());
         flowDesignVO.setBpmDefJsonVO(bpmDefJsonVO);
 
-        // 转换JSON
-        DefJson defJson = bpmDesignConvert.toDefJson(flowDesignVO);
-
-        // 数据校验和转换
         if (flowId == null) {
-            // 先查询是否存在已经设计中的流程
-            Definition existDef = defExtService.getByFormPathAndStatus(businessId, PublishStatus.UNPUBLISHED.getKey());
-
-            // 只能存在一个设计态的流程
-            if (existDef != null) {
-                throw exception(ErrorCodeConstants.DESIGNING_FLOW_EXISTS);
-            }
-
-            // 查询对应表单下任意一个流程
-            Definition anyDef = defExtService.getByFormPath(businessId);
-
-            if (anyDef == null) {
-                // 检测flowCode
-                if (StringUtils.isBlank(flowCode)) {
-                    // 前端没传则随机生成一个
-                    flowCode = generateFlowCode();
-                    defJson.setFlowCode(flowCode);
-                }
-            } else {
-                // 使用现有的流程编码
-                defJson.setFlowCode(anyDef.getFlowCode());
-            }
-
-            // 新增流程
-            Definition def = defService.importDef(defJson);
-            flowId = def.getId();
+            return createBpmFlow(flowDesignVO);
         } else {
-            // 更新流程 校验流程是否存在
-            DefJson existDef = defService.queryDesign(flowId);
-
-            if (existDef == null) {
-                throw exception(ErrorCodeConstants.FLOW_NOT_EXISTS);
-            }
-
-            if (!Objects.equals(existDef.getIsPublish(), PublishStatus.UNPUBLISHED.getKey())) {
-                throw exception(ErrorCodeConstants.SAVE_FLOW_FAILED_FOR_NOT_DESIGN_STATUS);
-            }
-
-            bpmDesignConvert.copyCommonField(defJson, existDef);
-
-            // 更新流程
-            try {
-                defService.saveDef(defJson, false);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            return updateBpmFlow(flowDesignVO);
         }
-
-        return flowId;
     }
 
     @Override
@@ -171,6 +213,13 @@ public class BpmDesignServiceImpl implements BpmDesignService {
             throw exception(ErrorCodeConstants.FLOW_NOT_EXISTS);
         }
 
+        Long applicationId = definition.getApplicationId();
+
+        // 校验应用是否一致
+        if (!Objects.equals(applicationId, ApplicationManager.getApplicationId())) {
+            throw exception(ErrorCodeConstants.APPLICATION_ID_MISMATCH);
+        }
+
         // 获取defJson结构
         DefJson defJson = defService.queryDesign(id);
         defJson.setId(id);
@@ -178,8 +227,24 @@ public class BpmDesignServiceImpl implements BpmDesignService {
         return bpmDesignConvert.toDesignRespVO(defJson);
     }
 
+    public BpmDesignRespVO queryByBusinessId(Long businessId) {
+        AppMenuRespDTO menuDTO = appResourceApi.getAppMenuById(businessId);
+
+        bpmAppResourceValidator.validateMenuAndPageset(menuDTO, ApplicationManager.getApplicationId());
+
+        return queryByMenuUuid(menuDTO.getMenuUuid());
+    }
+
     @Override
-    public BpmDesignRespVO queryByMenuUuid(String menuUuid) {
+    public BpmDesignRespVO queryByBusinessUuid(String businessUuid) {
+        AppMenuRespDTO menuDTO = appResourceApi.getAppMenuByUuidAndAppId(businessUuid, ApplicationManager.getApplicationId());
+
+        bpmAppResourceValidator.validateMenuAndPageset(menuDTO, ApplicationManager.getApplicationId());
+
+        return queryByMenuUuid(businessUuid);
+    }
+
+    private BpmDesignRespVO queryByMenuUuid(String menuUuid) {
         // 通过业务ID查询流程定义
         // todo：通过业务ID查询流程定义，按创建时间降序查询最新的流程，后续要改成优先查询已发布的流程定义
         // 按创建时间降序排序，获取最新的流程定义
@@ -215,6 +280,13 @@ public class BpmDesignServiceImpl implements BpmDesignService {
 
         if (existDef == null) {
             throw exception(ErrorCodeConstants.FLOW_NOT_EXISTS);
+        }
+
+        Long applicationId = existDef.getApplicationId();
+
+        // 校验应用是否一致
+        if (!Objects.equals(applicationId, ApplicationManager.getApplicationId())) {
+            throw exception(ErrorCodeConstants.APPLICATION_ID_MISMATCH);
         }
 
         // 已发布，直接返回

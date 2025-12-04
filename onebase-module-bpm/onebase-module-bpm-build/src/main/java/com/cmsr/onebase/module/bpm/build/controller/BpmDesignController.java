@@ -46,9 +46,17 @@ public class BpmDesignController {
 
     @GetMapping("/get-by-business-id")
     @Operation(summary = "根据业务ID查询默认流程")
-    public CommonResult<BpmDesignRespVO> queryByBusinessId(@RequestParam("businessId") String businessId) {
+    public CommonResult<BpmDesignRespVO> queryByBusinessId(@RequestParam("businessId") Long businessId) {
         log.info("查询流程: {}", businessId);
-        BpmDesignRespVO flowDesignVO = bpmDesignService.queryByMenuUuid(businessId);
+        BpmDesignRespVO flowDesignVO = bpmDesignService.queryByBusinessId(businessId);
+        return CommonResult.success(flowDesignVO);
+    }
+
+    @GetMapping("/get-by-business-uuid")
+    @Operation(summary = "根据业务UUID查询默认流程")
+    public CommonResult<BpmDesignRespVO> queryByBusinessUuid(@RequestParam("businessUuid") String businessUuid) {
+        log.info("查询流程: {}", businessUuid);
+        BpmDesignRespVO flowDesignVO = bpmDesignService.queryByBusinessUuid(businessUuid);
         return CommonResult.success(flowDesignVO);
     }
 
