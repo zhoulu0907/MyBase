@@ -13,9 +13,7 @@ import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticPageBodyVO;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 /**

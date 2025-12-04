@@ -19,6 +19,8 @@ public interface AppApplicationApi {
 
     List<ApplicationDTO> findAppApplicationByAppIds(Collection<Long> appIds);
 
+    ApplicationDTO findAppApplicationById(Long appId);
+
     Map<Long, Integer> countAppByTenantId();
 
     void updateAppTimeById(Long appId);

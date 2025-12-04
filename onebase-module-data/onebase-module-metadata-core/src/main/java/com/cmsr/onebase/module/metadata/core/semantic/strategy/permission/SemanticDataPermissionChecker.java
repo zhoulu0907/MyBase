@@ -110,7 +110,7 @@ public class SemanticDataPermissionChecker implements SemanticRuntimePermissionC
         for (DataPermissionTag tag: scopeTags) {
             switch (tag) {
                 case ALL_DATA -> { return true; }
-                case OWN_SUBMIT -> { Object creator = dataRow.get("creator"); if (creator != null && String.valueOf(creator).equals(String.valueOf(currentUser.getId()))) { return true; } }
+                case OWN_SUBMIT -> { Object creator = dataRow.get("owner"); if (creator != null && String.valueOf(creator).equals(String.valueOf(currentUser.getId()))) { return true; } }
                 case DEPARTMENT_SUBMIT -> { if (checkDepartmentMatch(dataRow, currentUser.getDeptId())) { return true; } }
                 case SUB_DEPARTMENT_SUBMIT -> { if (checkSubDepartmentMatch(dataRow, currentUser.getDeptId())) { return true; } }
                 case CUSTOM_CONDITION -> { return checkScopeLevel(group, dataRow, currentUser, fields); }
