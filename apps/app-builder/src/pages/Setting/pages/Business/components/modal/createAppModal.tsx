@@ -6,6 +6,11 @@ import styles from "./index.module.less";
 
 export const CreateAppModal:React.FC<ICreateAppModal> = ({visible, dropdownList, tableData, onCloseAppModal, onSaveAppData}) => {
     const [createNewAppForm] = Form.useForm();
+    const currentDate = new Date();
+    // 年份+1，保持月、日、时、分、秒、毫秒与当前时间一致
+    currentDate.setFullYear(currentDate.getFullYear() + 1);
+    const expiresTime = currentDate.getTime();
+
     const handleCancel = () => {
         onCloseAppModal();
         createNewAppForm.resetFields();
@@ -40,7 +45,12 @@ export const CreateAppModal:React.FC<ICreateAppModal> = ({visible, dropdownList,
             onCancel={handleCancel}
             onOk={handleSaveModal}
             >
-            <Form form={createNewAppForm}>
+            <Form form={createNewAppForm} initialValues={{
+                appTime: {
+                    authorizationTime: new Date().getTime(),
+                    expiresTime: expiresTime
+                }
+            }}>
                 <Form.Item
                     label="选择应用"
                     field="applicationIdList"
@@ -74,7 +84,6 @@ export const CreateAppModal:React.FC<ICreateAppModal> = ({visible, dropdownList,
                 <Form.Item
                     label="授权时间"
                     field="appTime"
-                    rules={[{ required: true, message: '请选择授权时间' }]}
                     normalize={(value) => {
                     return {
                         authorizationTime: value && value[0],

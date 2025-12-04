@@ -34,7 +34,6 @@ export const EditAuthorizedTime:React.FC<IEditAuthorizedModal> = ({initialFormDa
                 <Form.Item
                     label="授权时间"
                     field="appTime"
-                    rules={[{ required: true, message: '请选择授权时间' }]}
                     normalize={(value) => {
                     return {
                         authorizationTime: value && value[0],

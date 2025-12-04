@@ -8,6 +8,7 @@ import dayjs from 'dayjs';
 import React from 'react';
 import { ApplicationStatus, ApplicationStatusLabel, defaultTheme, TagColor, ThemeColorMap } from '../../const';
 import styles from './index.module.less';
+import type { developUser } from '@onebase/app/src/types';
 
 const AvatarGroup = Avatar.Group;
 
@@ -137,8 +138,15 @@ const AppCard: React.FC<AppCardProps> = ({
         <div className={styles.footerLeft}>
           {item?.userPhotoList && item?.userPhotoList.length > 0 && (
             <>
-              <AvatarGroup size={24} maxCount={4} zIndexAscend>
-                {item?.userPhotoList?.map((item, index) => {
+              <AvatarGroup
+                size={24}
+                maxCount={5}
+                zIndexAscend
+                maxPopoverTriggerProps={{
+                  disabled: true
+                }}
+              >
+                {item?.userPhotoList?.map((item: developUser, index: number) => {
                   return item.avatar ? (
                     <Avatar key={index}>
                       <img src={item.avatar} alt="avatar" />
@@ -149,15 +157,15 @@ const AppCard: React.FC<AppCardProps> = ({
                     </Avatar>
                   );
                 })}
-                {(item?.userPhotoList?.length > 1 && (
-                  <>
-                    <Avatar>{item?.userPhotoList?.length}</Avatar>
-                    <Typography.Text type="secondary">
-                      {item?.createUser}等{item?.userPhotoList?.length}人开发
-                    </Typography.Text>
-                  </>
-                )) || <Typography.Text type="secondary">{item?.createUser}</Typography.Text>}
+                <Avatar>{item?.userPhotoList?.length}</Avatar>
               </AvatarGroup>
+              {(item?.userPhotoList?.length > 1 && (
+                <>
+                  <Typography.Text type="secondary">
+                    {item?.createUser}等{item?.userPhotoList?.length}人开发
+                  </Typography.Text>
+                </>
+              )) || <Typography.Text type="secondary">{item?.createUser}</Typography.Text>}
             </>
           )}
         </div>
