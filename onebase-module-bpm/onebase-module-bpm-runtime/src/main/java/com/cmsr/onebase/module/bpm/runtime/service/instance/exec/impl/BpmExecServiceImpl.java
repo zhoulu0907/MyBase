@@ -119,6 +119,8 @@ public class BpmExecServiceImpl implements BpmExecService {
     public void execTask(ExecTaskReqVO reqVO) {
         Long taskId = reqVO.getTaskId();
 
+        // todo 是否要校验是否跨应用执行
+
         BpmActionButtonEnum buttonEnum = BpmActionButtonEnum.getByCode(reqVO.getButtonType());
         if (buttonEnum == null) {
             throw exception(ErrorCodeConstants.UNSUPPORT_ACTION_BUTTON_TYPE);

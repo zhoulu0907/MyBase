@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,24 +39,28 @@ public class AppApplicationController {
 
     @GetMapping("/page")
     @Operation(summary = "获得应用列表")
+    @PreAuthorize("@ss.hasPermission('tenant:app:query')")
     public CommonResult<PageResult<ApplicationRespVO>> getApplicationPage(@Validated ApplicationPageReqVO pageReqVO) {
         return CommonResult.success(appApplicationService.getApplicationPage(pageReqVO));
     }
 
     @GetMapping("/get")
     @Operation(summary = "获得应用")
+    @PreAuthorize("@ss.hasPermission('tenant:app:query')")
     public CommonResult<ApplicationRespVO> getApplication(@RequestParam("id") Long id) {
         return CommonResult.success(appApplicationService.getApplication(id));
     }
 
     @PostMapping("/create")
     @Operation(summary = "创建应用")
+    @PreAuthorize("@ss.hasPermission('tenant:app:create')")
     public CommonResult<ApplicationCreateRespVO> createApplication(@Validated @RequestBody ApplicationCreateReqVO applicationCreateReqVO) {
         return CommonResult.success(appApplicationService.createApplication(applicationCreateReqVO));
     }
 
     @PostMapping("/update")
     @Operation(summary = "更新应用")
+    @PreAuthorize("@ss.hasPermission('tenant:app:update')")
     public CommonResult<Boolean> updateApplication(@Validated @RequestBody ApplicationCreateReqVO applicationCreateReqVO) {
         appApplicationService.updateApplication(applicationCreateReqVO);
         return CommonResult.success(true);
@@ -63,6 +68,7 @@ public class AppApplicationController {
 
     @PostMapping("/update-name")
     @Operation(summary = "更新应用名称")
+    @PreAuthorize("@ss.hasPermission('tenant:app:update')")
     public CommonResult<Boolean> updateApplicationName(@RequestParam("id") Long id,
                                                        @RequestParam("name") String name) {
         appApplicationService.updateApplicationName(id, name);
@@ -71,6 +77,7 @@ public class AppApplicationController {
 
     @PostMapping("/delete")
     @Operation(summary = "删除应用")
+    @PreAuthorize("@ss.hasPermission('tenant:app:delete')")
     public CommonResult<Boolean> deleteApplication(@RequestParam("id") Long id,
                                                    @RequestParam("name") String name) {
         appApplicationService.deleteApplication(id, name);
@@ -84,6 +91,7 @@ public class AppApplicationController {
     }
 
     @GetMapping(value = {"/simple-list"})
+    @PreAuthorize("@ss.hasPermission('tenant:app:query')")
     @Operation(summary = "获取应用精简信息列表-不分页", description = "只包含被开启的应用，主要用于前端的下拉选项")
     public CommonResult<List<ApplicationSimpleRespVO>> getSimpleAppList() {
         List<AppApplicationDO> list = appApplicationService.getSimpleAppList(ApplicationStatusEnum.PUBLISHED.getValue());
@@ -91,6 +99,7 @@ public class AppApplicationController {
     }
 
     @GetMapping(value = {"/simple-list-by-name"})
+    @PreAuthorize("@ss.hasPermission('tenant:app:query')")
     @Operation(summary = "获取我创建的应用列表-不分页", description = "获取我创建的应用列表")
     public CommonResult<List<ApplicationSimpleRespVO>> getSimpleAppListByName(@RequestParam(value = "appName", required = false) String appName) {
         List<AppApplicationDO> list = appApplicationService.getMySimpleAppListByName(appName);

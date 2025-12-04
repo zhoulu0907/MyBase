@@ -34,8 +34,8 @@ public class FieldPermCfgDTO {
         /**
          * 字段ID
          */
-        @NotNull(message = "字段ID不能为空")
-        private Long fieldId;
+        @NotNull(message = "字段UUID不能为空")
+        private String fieldUuid;
 
         /**
          * 字段名

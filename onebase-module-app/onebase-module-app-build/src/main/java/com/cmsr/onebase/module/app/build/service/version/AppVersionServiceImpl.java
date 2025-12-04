@@ -2,7 +2,6 @@ package com.cmsr.onebase.module.app.build.service.version;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.orm.entity.BaseEntity;
 import com.cmsr.onebase.framework.uid.UidGenerator;
@@ -15,12 +14,13 @@ import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageSetRepository;
 import com.cmsr.onebase.module.app.core.dal.database.version.AppVersionRepository;
-import com.cmsr.onebase.module.app.core.dal.database.version.AppVersionResourceRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.*;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppMenuDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePageDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppVersionDO;
 import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
-import com.cmsr.onebase.module.app.core.enums.version.ResTypeEnum;
-import jakarta.annotation.Resource;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -38,31 +38,28 @@ import java.util.stream.Collectors;
 @Validated
 public class AppVersionServiceImpl implements AppVersionService {
 
-    @Resource
+    @Autowired
     private AppVersionRepository versionRepository;
 
-    @Resource
-    private AppVersionResourceRepository versionResourceRepository;
-
-    @Resource
+    @Autowired
     private AppApplicationRepository applicationRepository;
 
-    @Resource
+    @Autowired
     private AppMenuRepository menuRepository;
 
-    @Resource
+    @Autowired
     private AppCommonService appCommonService;
 
-    @Resource
+    @Autowired
     private AppPageSetRepository pageSetRepository;
 
-//    @Resource
+//    @Autowired
 //    private AppPageSetPageRepository pageSetPageRepository;
 
-    @Resource
+    @Autowired
     private AppPageRepository pageRepository;
 
-    @Resource
+    @Autowired
     private UidGenerator uidGenerator;
 
     @Override
@@ -109,12 +106,7 @@ public class AppVersionServiceImpl implements AppVersionService {
 
     private List<Long> backupMenu(Long applicationId, Long versionId) {
         List<AppMenuDO> menuDOS = menuRepository.findByApplicationId(applicationId);
-        AppVersionResourceDO versionResourceDO = new AppVersionResourceDO();
-        versionResourceDO.setApplicationId(applicationId);
-        versionResourceDO.setVersionId(versionId);
-        versionResourceDO.setResType(ResTypeEnum.MENU.getValue());
-        versionResourceDO.setResData(JsonUtils.toJsonString(menuDOS));
-        versionResourceRepository.save(versionResourceDO);
+
         return menuDOS.stream().map(BaseEntity::getId).toList();
     }
 
@@ -144,12 +136,7 @@ public class AppVersionServiceImpl implements AppVersionService {
 
     private List<Long> backupPage(Long applicationId, Long versionId, List<Long> pageIds) {
         List<AppResourcePageDO> pageDOs = pageRepository.listByIds(pageIds);
-        AppVersionResourceDO versionResourceDO = new AppVersionResourceDO();
-        versionResourceDO.setApplicationId(applicationId);
-        versionResourceDO.setVersionId(versionId);
-        versionResourceDO.setResType(ResTypeEnum.PAGE.name());
-        versionResourceDO.setResData(JsonUtils.toJsonString(pageDOs));
-        versionResourceRepository.save(versionResourceDO);
+
         return pageDOs.stream().map(BaseEntity::getId).toList();
     }
 
@@ -169,12 +156,7 @@ public class AppVersionServiceImpl implements AppVersionService {
     private void restoreMenu(Long applicationId, Long versionId) {
         // 删除相关数据
         menuRepository.deleteByApplicationId(applicationId);
-        // 恢复菜单
-        AppVersionResourceDO resourceDOS = versionResourceRepository
-                .findByApplicationIdAndVersionIdAndResType(applicationId, versionId, ResTypeEnum.MENU.getValue());
-        List<AppMenuDO> menuDOS = JsonUtils.parseArray(resourceDOS.getResData(), AppMenuDO.class);
-        prepareForBackup(menuDOS);
-        menuRepository.saveBatch(menuDOS);
+
     }
 
     private void prepareForBackup(List<? extends BaseEntity> list) {
@@ -193,7 +175,6 @@ public class AppVersionServiceImpl implements AppVersionService {
     @Override
     public void deleteApplicationVersion(Long versionId) {
         versionRepository.removeById(versionId);
-        versionResourceRepository.deleteByVersionId(versionId);
     }
 
     @Override

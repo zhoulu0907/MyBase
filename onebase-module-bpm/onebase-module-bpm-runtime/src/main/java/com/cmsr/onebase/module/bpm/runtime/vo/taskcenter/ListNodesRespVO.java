@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.bpm.runtime.vo;
+package com.cmsr.onebase.module.bpm.runtime.vo.taskcenter;
 
 import lombok.Data;
 

@@ -33,7 +33,7 @@ public class EntityRelationshipRuntimeController {
     @Resource
     private MetadataIdUuidConverter idUuidConverter;
 
-    @PostMapping("/entity-children")
+    @PostMapping("/entity-with-children")
     @Operation(summary = "根据实体ID查询实体名称及其关联的子表信息（运行态）")
     @Parameter(name = "entityId", description = "实体ID或UUID", required = true, example = "1001")
     @Parameter(name = "relationshipType", description = "关系类型筛选（ONE_TO_ONE-一对一, ONE_TO_MANY-一对多）", required = false, example = "ONE_TO_MANY")

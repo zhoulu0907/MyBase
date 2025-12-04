@@ -4,6 +4,9 @@ import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
+import com.cmsr.onebase.module.app.api.appresource.AppResourceApi;
+import com.cmsr.onebase.module.app.api.appresource.dto.AppMenuRespDTO;
+import com.cmsr.onebase.module.app.api.appresource.dto.AppPagesetRespDTO;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowInsBizExtRepository;
 import com.cmsr.onebase.module.bpm.core.dal.database.ext.BpmFlowDefinitionRepositoryExt;
@@ -12,10 +15,8 @@ import com.cmsr.onebase.module.bpm.core.dto.BpmDefinitionExtDTO;
 import com.cmsr.onebase.module.bpm.core.dto.BpmGlobalConfigDTO;
 import com.cmsr.onebase.module.bpm.core.dto.PageViewGroupDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
-import com.cmsr.onebase.module.bpm.core.enums.BpmBusinessStatusEnum;
-import com.cmsr.onebase.module.bpm.core.enums.BpmEleRunStatusEnum;
-import com.cmsr.onebase.module.bpm.core.enums.BpmNodeApproveStatusEnum;
-import com.cmsr.onebase.module.bpm.core.enums.BpmNodeTypeEnum;
+import com.cmsr.onebase.module.bpm.core.enums.*;
+import com.cmsr.onebase.module.bpm.core.validator.BpmAppResourceValidator;
 import com.cmsr.onebase.module.bpm.core.vo.design.BpmDefJsonVO;
 import com.cmsr.onebase.module.bpm.core.vo.design.edge.base.BaseEdgeVO;
 import com.cmsr.onebase.module.bpm.runtime.service.BpmInstanceService;
@@ -51,7 +52,6 @@ import org.dromara.warm.flow.core.enums.SkipType;
 import org.dromara.warm.flow.core.service.DefService;
 import org.dromara.warm.flow.core.service.InsService;
 import org.dromara.warm.flow.core.service.TaskService;
-import com.cmsr.onebase.module.bpm.core.enums.BpmConstants;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -109,6 +109,11 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
     @Resource
     private BpmExecServiceImpl bpmExecService;
 
+    @Resource
+    private AppResourceApi appResourceApi;
+
+    @Resource
+    private BpmAppResourceValidator bpmAppResourceValidator;
 
     private String buildFormSummary(EntityVO entityVO, BpmDefinitionExtDTO defExtDTO) {
         StringBuilder sb = new StringBuilder();
@@ -171,10 +176,20 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         Long applicationId = ApplicationManager.getApplicationId();
 
         if (applicationId == null) {
-            throw new IllegalArgumentException("缺少应用ID");
+            throw exception(ErrorCodeConstants.MISSING_APPLICATION_ID);
         }
 
-        Definition def = defExtService.getByFormPathAndStatus(String.valueOf(reqVO.getBusinessId()), PublishStatus.PUBLISHED.getKey());
+        // 校验菜单
+        AppMenuRespDTO appMenuRespDTO = appResourceApi.getAppMenuById(reqVO.getBusinessId());
+        bpmAppResourceValidator.validateMenu(appMenuRespDTO, applicationId);
+
+        String menuUuid = appMenuRespDTO.getMenuUuid();
+
+        // 校验页面集
+        AppPagesetRespDTO appPagesetRespDTO = appResourceApi.getPageSetByMenuUuidAndAppId(menuUuid, applicationId);
+        bpmAppResourceValidator.validatePageset(appPagesetRespDTO, applicationId);
+
+        Definition def = defExtService.getByFormPathAndStatus(menuUuid, PublishStatus.PUBLISHED.getKey());
         if (def == null) {
             throw exception(ErrorCodeConstants.PUBLISHED_FLOW_NOT_EXISTS);
         }
@@ -188,7 +203,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         }
 
         // 详情视图页面和编辑视图页面
-        PageViewGroupDTO pageViewGroupDTO = pageViewUtil.findPageViewGroup(reqVO.getBusinessId());
+        PageViewGroupDTO pageViewGroupDTO = pageViewUtil.findPageViewGroupByPageSetUuid(appPagesetRespDTO.getPageSetUuid());
 
         if (pageViewGroupDTO == null) {
             throw exception(ErrorCodeConstants.MISSING_EDIT_OR_DETAIL_PAGE_VIEW);
@@ -228,7 +243,6 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         // 传应用ID和实体ID
         BpmDefinitionExtDTO extDto = JsonUtils.parseObject(def.getExt(), BpmDefinitionExtDTO.class);
         variables.put(BpmConstants.VAR_ENTITY_ID_KEY, entityId);
-        variables.put(BpmConstants.VAR_BINDING_VIEW_ID_KEY, reqVO.getBusinessId());
         variables.put(BpmConstants.VAR_PAGE_VIEW_GROUP_KEY, JsonUtils.toJsonString(pageViewGroupDTO));
 
         entityVO.getData().forEach((key, value) -> variables.put(String.valueOf(key), value));
@@ -354,6 +368,17 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         Long instanceId = reqVO.getInstanceId();
         Long businessId = reqVO.getBusinessId();
 
+        Long applicationId = ApplicationManager.getApplicationId();
+        if (applicationId == null) {
+            throw exception(ErrorCodeConstants.MISSING_APPLICATION_ID);
+        }
+
+        // 校验菜单
+        AppMenuRespDTO appMenuRespDTO = appResourceApi.getAppMenuById(businessId);
+        bpmAppResourceValidator.validateMenuAndPageset(appMenuRespDTO, applicationId);
+
+        String menuUuid = appMenuRespDTO.getMenuUuid();
+
         BpmPreviewRespVO respVO = new BpmPreviewRespVO();
 
         // 抛参数异常
@@ -380,7 +405,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
             defJson = FlowEngine.jsonConvert.strToBean(defJsonStr, DefJson.class);
         } else {
             // 查询已发布的流程定义
-            Definition definition = defExtService.getByFormPathAndStatus(String.valueOf(businessId), PublishStatus.PUBLISHED.getKey());
+            Definition definition = defExtService.getByFormPathAndStatus(menuUuid, PublishStatus.PUBLISHED.getKey());
             if (definition == null) {
                 log.error(ErrorCodeConstants.PUBLISHED_FLOW_NOT_EXISTS.getMsg());
                 throw exception(ErrorCodeConstants.PUBLISHED_FLOW_NOT_EXISTS);
@@ -450,9 +475,9 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
             }
         }
 
-        respVO.setBusinessId(Long.valueOf(defJson.getFormPath()));
+        respVO.setBusinessUuid(defJson.getFormPath());
         respVO.setFlowName(defJson.getFlowName());
-        respVO.setVersion("V" + defJson.getVersion());
+        respVO.setBpmVersion("V" + defJson.getVersion());
         respVO.setBpmDefJson(JsonUtils.toJsonString(bpmDefJsonVO));
 
         return respVO;
