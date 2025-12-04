@@ -45,4 +45,16 @@ public class FileDataRepository extends DataRepository<FileDO> {
         configStore.order(FileDO.CREATE_TIME, Order.TYPE.DESC);
         return findPageWithConditions(configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());
     }
+
+    /**
+     * 根据MD5查找文件
+     *
+     * @param md5 MD5值
+     * @return 文件信息
+     */
+    public FileDO findByMd5(String md5) {
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.eq(FileDO.COLUMN_MD5, md5);
+        return findOne(configStore);
+    }
 }

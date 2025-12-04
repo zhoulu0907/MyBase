@@ -6,7 +6,9 @@ import com.cmsr.onebase.module.infra.api.file.dto.FileCreateReqDTO;
 import com.cmsr.onebase.module.infra.api.file.dto.FileListRespDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
@@ -29,7 +31,7 @@ public interface FileApi {
      * @return 文件路径
      */
     default String createFile(byte[] content) {
-        return createFile(content, null, null, null);
+        return createFile(content, null, null, null, null);
     }
 
     /**
@@ -40,7 +42,7 @@ public interface FileApi {
      * @return 文件路径
      */
     default String createFile(byte[] content, String name) {
-        return createFile(content, name, null, null);
+        return createFile(content, name, null, null, null);
     }
 
     /**
@@ -53,8 +55,8 @@ public interface FileApi {
      * @return 文件路径
      */
     default String createFile(@NotEmpty(message = "文件内容不能为空") byte[] content,
-                              String name, String directory, String type) {
-        return createFile(new FileCreateReqDTO().setName(name).setDirectory(directory).setType(type).setContent(content)).getCheckedData();
+                              String name, String directory, String type, String envFlag) {
+        return createFile(new FileCreateReqDTO().setName(name).setDirectory(directory).setType(type).setContent(content).setEnvFlag(envFlag)).getCheckedData();
     }
 
     @PostMapping(PREFIX + "/create")
@@ -68,7 +70,10 @@ public interface FileApi {
 
     @GetMapping(PREFIX + "/download/{id}")
     @Operation(summary = "获取文件内容")
-    @Parameter(name = "id", description = "文件编号", required = true)
-    void getFileContent(@PathVariable("id") Long id, HttpServletResponse response) throws Exception;
+    @Parameters({
+            @Parameter(name = "id", description = "文件编号", required = true),
+            @Parameter(name = "envFlag", description = "文件环境标识")
+    })
+    void getFileContent(@PathVariable("id") Long id, @RequestParam("envFlag") String envFlag, HttpServletRequest request, HttpServletResponse response) throws Exception;
 
 }

@@ -22,4 +22,7 @@ public class FileCreateReqDTO {
     @NotEmpty(message = "文件内容不能为空")
     private byte[] content;
 
+    @Schema(description = "文件保存环境标识",example = "public-公开访问，build-编辑态,runtime-运行态,platform-平台端", requiredMode = Schema.RequiredMode.REQUIRED)
+    private String envFlag;
+
 }

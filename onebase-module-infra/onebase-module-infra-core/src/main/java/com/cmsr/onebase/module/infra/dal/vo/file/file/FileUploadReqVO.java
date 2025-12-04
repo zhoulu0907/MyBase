@@ -16,4 +16,7 @@ public class FileUploadReqVO {
     @Schema(description = "文件目录", example = "可选，也可指定路径如：XXX/YYY")
     private String directory;
 
+    @Schema(description = "文件保存环境标识",example = "public-公开访问，build-编辑态,runtime-运行态,platform-平台端", requiredMode = Schema.RequiredMode.REQUIRED)
+    private String envFlag;
+
 }

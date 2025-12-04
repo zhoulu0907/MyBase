@@ -29,8 +29,10 @@ public class FileDO extends BaseDO {
     public static final String COLUMN_URL = "url";
     public static final String COLUMN_TYPE = "type";
     public static final String COLUMN_SIZE = "size";
+    public static final String COLUMN_MD5 = "md5";
+    public static final String COLUMN_ENV_FLAG = "env_flag";
 
-    public FileDO setId(Long id){
+    public FileDO setId(Long id) {
         super.setId(id);
         return this;
     }
@@ -67,5 +69,17 @@ public class FileDO extends BaseDO {
      */
     @Column(name = COLUMN_SIZE)
     private Integer size;
+
+    /**
+     * 文件 MD5值
+     */
+    @Column(name = COLUMN_MD5)
+    private String md5;
+
+    /**
+     * 文件 环境标识
+     */
+    @Column(name = COLUMN_ENV_FLAG)
+    private String envFlag;
 
 }

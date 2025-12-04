@@ -4,8 +4,13 @@ import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import cn.hutool.core.io.IoUtil;
 import com.cmsr.onebase.module.infra.dal.vo.file.file.*;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
+import jakarta.annotation.security.PermitAll;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +35,17 @@ public class PlatformFileController {
         MultipartFile file = uploadReqVO.getFile();
         byte[] content = IoUtil.readBytes(file.getInputStream());
         return success(fileService.createFile(content, file.getOriginalFilename(),
-                uploadReqVO.getDirectory(), file.getContentType()));
+                uploadReqVO.getDirectory(), file.getContentType(), uploadReqVO.getEnvFlag()));
+    }
+
+    @GetMapping("/download/{id}")
+    @Operation(summary = "获取文件内容")
+    @PermitAll
+    @Parameters({
+            @Parameter(name = "id", description = "文件编号", required = true),
+            @Parameter(name = "envFlag", description = "文件环境标识")
+    })
+    public void getFileContent(@PathVariable("id") Long id, @RequestParam("envFlag") String envFlag, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        fileService.getFileContent(id, envFlag,request, response);
     }
 }

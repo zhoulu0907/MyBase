@@ -7,6 +7,7 @@ import com.cmsr.onebase.module.infra.api.file.dto.FileCreateReqDTO;
 import com.cmsr.onebase.module.infra.api.file.dto.FileListRespDTO;
 import com.cmsr.onebase.module.infra.service.file.FileService;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,7 +27,7 @@ public class FileApiImpl implements FileApi {
     @Override
     public CommonResult<String> createFile(FileCreateReqDTO createReqDTO) {
         return success(fileService.createFile(createReqDTO.getContent(), createReqDTO.getName(),
-                createReqDTO.getDirectory(), createReqDTO.getType()));
+                createReqDTO.getDirectory(), createReqDTO.getType(), createReqDTO.getEnvFlag()));
     }
 
     @Override
@@ -35,8 +36,8 @@ public class FileApiImpl implements FileApi {
     }
 
     @Override
-    public void getFileContent(Long id, HttpServletResponse response) throws Exception {
-        fileService.getFileContent(id, response);
+    public void getFileContent(Long id, String envFlag, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        fileService.getFileContent(id, envFlag,request, response);
     }
 
 }
