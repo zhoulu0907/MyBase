@@ -220,6 +220,39 @@ public class MetadataIdUuidConverter {
         return NUMERIC_PATTERN.matcher(str).matches();
     }
 
+    // ====================== 单参数自动识别转UUID方法（Controller层使用） ======================
+
+    /**
+     * 自动解析数据源标识符为UUID
+     * <p>
+     * 支持传入Long类型ID的字符串形式或UUID，自动识别并转换为UUID。
+     * 判断逻辑：纯数字 → 视为ID，查库转换；非纯数字 → 直接作为UUID返回
+     *
+     * @param identifier 标识符（可以是Long ID的字符串形式或UUID）
+     * @return 数据源UUID
+     * @throws ServiceException 当标识符为空或对应的数据源不存在时抛出异常
+     */
+    public String toDatasourceUuid(String identifier) {
+        if (CharSequenceUtil.isBlank(identifier)) {
+            log.warn("数据源标识符为空");
+            throw new ServiceException(DATASOURCE_ID_OR_UUID_REQUIRED);
+        }
+
+        // 非纯数字 -> 直接作为UUID
+        if (!isNumeric(identifier)) {
+            return identifier;
+        }
+
+        // 纯数字 -> 视为ID，查库转换
+        MetadataDatasourceDO datasource = datasourceRepository.getDatasourceById(identifier);
+        if (datasource == null) {
+            log.warn("通过ID查询数据源失败，数据源不存在: id={}", identifier);
+            throw new ServiceException(DATASOURCE_NOT_EXISTS);
+        }
+        log.debug("数据源ID转UUID成功: id={} -> uuid={}", identifier, datasource.getDatasourceUuid());
+        return datasource.getDatasourceUuid();
+    }
+
     // ====================== 双参数方法（VO层使用） ======================
 
     /**
