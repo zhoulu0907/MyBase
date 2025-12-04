@@ -127,16 +127,15 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         queryPageVO.setAppId(appId);
     }
 
-    private void fillBusinessUuid(BpmInsExtQueryPageVO queryPageVO) {
-        if (queryPageVO.getBusinessId() == null) {
+    private void validateBusinessUuid(BpmInsExtQueryPageVO queryPageVO) {
+        String businessUuid = queryPageVO.getBusinessUuid();
+
+        if (StringUtils.isBlank(businessUuid)) {
             return;
         }
 
-        AppMenuRespDTO appMenuRespDTO = appResourceApi.getAppMenuById(queryPageVO.getBusinessId());
-
+        AppMenuRespDTO appMenuRespDTO = appResourceApi.getAppMenuByUuidAndAppId(businessUuid, queryPageVO.getAppId());
         bpmAppResourceValidator.validateMenuAndPageset(appMenuRespDTO, queryPageVO.getAppId());
-
-        queryPageVO.setBusinessUuid(appMenuRespDTO.getMenuUuid());
     }
 
     /**
@@ -151,7 +150,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         String loginUserStrId = String.valueOf(loginUserId);
 
         fillAppId(pageReqVO);
-        fillBusinessUuid(pageReqVO);
+        validateBusinessUuid(pageReqVO);
 
         // 处理节点编码参数
         pageReqVO.setNodeCodeList(splitToList(pageReqVO.getNodeCode()));
@@ -193,7 +192,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         String loginUserStrId = String.valueOf(loginUserId);
 
         fillAppId(pageReqVO);
-        fillBusinessUuid(pageReqVO);
+        validateBusinessUuid(pageReqVO);
 
         // 处理节点编码参数
         pageReqVO.setNodeCodeList(splitToList(pageReqVO.getNodeCode()));
@@ -229,7 +228,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         Long loginUserId = WebFrameworkUtils.getLoginUserId();
 
         fillAppId(pageReqVO);
-        fillBusinessUuid(pageReqVO);
+        validateBusinessUuid(pageReqVO);
 
         // 处理节点编码参数
         pageReqVO.setNodeCodeList(splitToList(pageReqVO.getNodeCode()));
@@ -277,11 +276,11 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         return new PageResult<>(list, pageResult.getTotal());
     }
 
-    @Override
-    public List<ListNodesRespVO.NodeVO> listNodes(Long businessId) {
+     @Override
+    public List<ListNodesRespVO.NodeVO> listNodes(String businessUuid) {
         List<ListNodesRespVO.NodeVO> nodeVOs = new ArrayList<>();
 
-        AppMenuRespDTO appMenuRespDTO = appResourceApi.getAppMenuById(businessId);
+        AppMenuRespDTO appMenuRespDTO = appResourceApi.getAppMenuByUuidAndAppId(businessUuid, ApplicationManager.getApplicationId());
 
         bpmAppResourceValidator.validateMenuAndPageset(appMenuRespDTO, ApplicationManager.getApplicationId());
 
@@ -327,7 +326,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         String loginUserStrId = String.valueOf(loginUserId);
 
         fillAppId(pageReqVO);
-        fillBusinessUuid(pageReqVO);
+        validateBusinessUuid(pageReqVO);
 
         // 处理节点编码参数
         pageReqVO.setNodeCodeList(splitToList(pageReqVO.getNodeCode()));

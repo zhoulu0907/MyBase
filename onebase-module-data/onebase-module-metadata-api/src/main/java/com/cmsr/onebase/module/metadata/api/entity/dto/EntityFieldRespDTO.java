@@ -18,6 +18,9 @@ public class EntityFieldRespDTO {
     @Schema(description = "字段ID", example = "1024")
     private Long id;
 
+    @Schema(description = "字段UUID", example = "1")
+    private String fieldUuid;
+
     @Schema(description = "实体ID", example = "1")
     private Long entityId;
 

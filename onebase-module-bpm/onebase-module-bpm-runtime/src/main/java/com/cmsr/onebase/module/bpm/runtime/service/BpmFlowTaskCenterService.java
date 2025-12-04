@@ -38,10 +38,10 @@ public interface BpmFlowTaskCenterService {
     /**
      * 获取流程节点列表
      *
-     * @param businessId 业务Id
+     * @param businessUuid 业务UUID
      * @return
      */
-    List<ListNodesRespVO.NodeVO> listNodes(Long businessId);
+    List<ListNodesRespVO.NodeVO> listNodes(String businessUuid);
 
     /**
      * 获取流程抄送我的流程

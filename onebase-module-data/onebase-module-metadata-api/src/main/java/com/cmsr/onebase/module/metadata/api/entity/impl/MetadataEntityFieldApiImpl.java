@@ -177,6 +177,7 @@ public class MetadataEntityFieldApiImpl implements MetadataEntityFieldApi {
         dto.setFieldType(f.getFieldType());
         dto.setDecimalPlaces(f.getDecimalPlaces());
         dto.setDefaultValue(f.getDefaultValue());
+        dto.setFieldUuid(f.getFieldUuid());
         dto.setDescription(f.getDescription());
         dto.setIsRequired(f.getIsRequired());
         dto.setIsUnique(f.getIsUnique());

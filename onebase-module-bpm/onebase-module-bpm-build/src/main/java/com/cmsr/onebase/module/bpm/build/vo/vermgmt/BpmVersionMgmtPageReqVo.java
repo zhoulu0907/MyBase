@@ -15,9 +15,9 @@ import lombok.Data;
 @Data
 public class BpmVersionMgmtPageReqVo extends PageParam {
 
-    @Schema(description = "业务ID", required = true, example = "113771690916872193")
-    @NotNull(message = "业务ID不能为空")
-    private Long businessId;
+    @Schema(description = "业务UUID", required = true, example = "113771690916872193")
+    @NotNull(message = "业务UUID不能为空")
+    private String businessUuid;
 
     @Schema(description = "流程版本备注")
     private String bpmVersionAlias;

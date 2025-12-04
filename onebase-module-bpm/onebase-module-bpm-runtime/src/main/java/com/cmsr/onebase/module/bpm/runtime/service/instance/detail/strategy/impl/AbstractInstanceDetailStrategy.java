@@ -66,21 +66,21 @@ public abstract class AbstractInstanceDetailStrategy<T extends BaseNodeExtDTO> i
         // 查询实体的所有字段
         List<EntityFieldRespDTO> entityFields = metadataEntityFieldApi.getEntityFieldList(queryReqDTO);
 
-        Map<Long, EntityFieldRespDTO> entityFieldMap = new HashMap<>();
-        Map<Long, String> fieldPermMap = new HashMap<>();
-        Map<Long, String> fieldIdNameMap = new HashMap<>();
+        Map<String, EntityFieldRespDTO> entityFieldMap = new HashMap<>();
+        Map<String, String> fieldPermMap = new HashMap<>();
+        Map<String, String> fieldUuidNameMap = new HashMap<>();
 
         // 默认所有字段都为只读
         for (EntityFieldRespDTO entityField : entityFields) {
-            entityFieldMap.put(entityField.getId(), entityField);
-            fieldPermMap.put(entityField.getId(), FieldUiShowModeEnum.READ.getCode());
-            fieldIdNameMap.put(entityField.getId(), entityField.getFieldName());
+            entityFieldMap.put(entityField.getFieldUuid(), entityField);
+            fieldPermMap.put(entityField.getFieldUuid(), FieldUiShowModeEnum.READ.getCode());
+            fieldUuidNameMap.put(entityField.getFieldUuid(), entityField.getFieldName());
         }
 
         vo.getFormData().put("fieldPerm", fieldPermMap);
 
         // 这里只是为了方便查看id和name的关联关系，业务上暂时没用上
-        vo.getFormData().put("fieldIdName", fieldIdNameMap);
+        vo.getFormData().put("fieldIdName", fieldUuidNameMap);
 
         // 没有配置字段权限，则返回只读权限
         if (!CollectionUtils.isNotEmpty(fieldPermConfig.getFieldConfigs())) {
@@ -92,7 +92,7 @@ public abstract class AbstractInstanceDetailStrategy<T extends BaseNodeExtDTO> i
         // 处理节点配置的字段权限 todo: 处理子表字段权限
         for (FieldPermCfgDTO.FieldConfigDTO fieldConfig : fieldPermConfig.getFieldConfigs()) {
             // 在实体字段中不存在的，直接跳过
-            EntityFieldRespDTO entityField = entityFieldMap.get(fieldConfig.getFieldId());
+            EntityFieldRespDTO entityField = entityFieldMap.get(fieldConfig.getFieldUuid());
             if (entityField == null) {
                 continue;
             }
@@ -101,15 +101,15 @@ public abstract class AbstractInstanceDetailStrategy<T extends BaseNodeExtDTO> i
             if (Objects.equals(FieldPermTypeEnum.HIDDEN.getCode(), fieldConfig.getFieldPermType())) {
                 // 这里才是字段的英文名
                 hiddenFieldNames.add(entityField.getFieldName());
-                fieldPermMap.put(fieldConfig.getFieldId(), FieldUiShowModeEnum.HIDDEN.getCode());
+                fieldPermMap.put(fieldConfig.getFieldUuid(), FieldUiShowModeEnum.HIDDEN.getCode());
             } else if (Objects.equals(FieldPermTypeEnum.READ.getCode(), fieldConfig.getFieldPermType())) {
-                fieldPermMap.put(fieldConfig.getFieldId(), FieldUiShowModeEnum.READ.getCode());
+                fieldPermMap.put(fieldConfig.getFieldUuid(), FieldUiShowModeEnum.READ.getCode());
             } else if (Objects.equals(FieldPermTypeEnum.WRITE.getCode(), fieldConfig.getFieldPermType())) {
                 if (isTodo) {
-                    fieldPermMap.put(fieldConfig.getFieldId(), FieldUiShowModeEnum.WRITE.getCode());
+                    fieldPermMap.put(fieldConfig.getFieldUuid(), FieldUiShowModeEnum.WRITE.getCode());
                 } else {
                     // 非待办的情况下，都是只读
-                    fieldPermMap.put(fieldConfig.getFieldId(), FieldUiShowModeEnum.READ.getCode());
+                    fieldPermMap.put(fieldConfig.getFieldUuid(), FieldUiShowModeEnum.READ.getCode());
                 }
             }
         }

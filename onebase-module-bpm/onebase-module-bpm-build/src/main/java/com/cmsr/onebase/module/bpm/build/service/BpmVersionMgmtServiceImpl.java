@@ -145,7 +145,7 @@ public class BpmVersionMgmtServiceImpl implements BpmVersionMgmtService {
         }
 
         // 校验菜单是否存在
-        AppMenuRespDTO appMenu = appResourceApi.getAppMenuById(reqVo.getBusinessId());
+        AppMenuRespDTO appMenu = appResourceApi.getAppMenuByUuidAndAppId(reqVo.getBusinessUuid(), currAppId);
         bpmAppResourceValidator.validateMenuAndPageset(appMenu, currAppId);
 
         QueryWrapper queryWrapper = QueryWrapper.create();

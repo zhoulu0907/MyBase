@@ -25,9 +25,6 @@ public class BpmInsExtQueryPageVO extends PageParam  {
     @Schema(description = "应用ID", example = "1332334434343")
     private Long appId;
 
-    @Schema(description = "业务id，实际对应menuId", example = "32636263636323")
-    private Long businessId;
-
     @Schema(description = "业务uuid，实际对应menuUuid", example = "32636263636323")
     private String businessUuid;
 
