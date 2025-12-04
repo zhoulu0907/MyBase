@@ -33,32 +33,32 @@ public class FlowGraphBuilder {
 
     public JsonGraph build(String json) {
         JsonGraph jsonGraph = JsonUtils.parseObject(json, JsonGraph.class);
-        addJsonGraphLoopVariable(jsonGraph);
-        complementJsonGraphNodeData(jsonGraph);
+        addLoopContextToNodes(jsonGraph);
+        enrichNodeData(jsonGraph);
         FieldTypeProvider fieldTypeProvider = objectProvider.getObject();
         fieldTypeProvider.completeFieldType(jsonGraph);
         return jsonGraph;
     }
 
-    private void addJsonGraphLoopVariable(JsonGraph jsonGraph) {
+    private void addLoopContextToNodes(JsonGraph jsonGraph) {
         if (jsonGraph == null || jsonGraph.getNodes() == null) {
             return;
         }
         for (JsonGraphNode node : jsonGraph.getNodes()) {
-            recursiveNode(node, new InLoopDepth());
+            traverseNodeAndAddLoopContext(node, new InLoopDepth());
         }
     }
 
-    private void complementJsonGraphNodeData(JsonGraph jsonGraph) {
+    private void enrichNodeData(JsonGraph jsonGraph) {
         if (jsonGraph == null || jsonGraph.getNodes() == null) {
             return;
         }
         for (JsonGraphNode node : jsonGraph.getNodes()) {
-            recursivelyComplementNode(node);
+            traverseNodeAndEnrichData(node);
         }
     }
 
-    private void recursiveNode(JsonGraphNode node, InLoopDepth loopDeepMap) {
+    private void traverseNodeAndAddLoopContext(JsonGraphNode node, InLoopDepth loopDeepMap) {
         if (StringUtils.equals(node.getType(), "loop")) {
             loopDeepMap = new InLoopDepth(loopDeepMap);
             for (String key : loopDeepMap.keySet()) {
@@ -72,12 +72,12 @@ public class FlowGraphBuilder {
         }
         if (CollectionUtils.isNotEmpty(node.getBlocks())) {
             for (JsonGraphNode childNode : node.getBlocks()) {
-                recursiveNode(childNode, loopDeepMap);
+                traverseNodeAndAddLoopContext(childNode, loopDeepMap);
             }
         }
     }
 
-    private void recursivelyComplementNode(JsonGraphNode node) {
+    private void traverseNodeAndEnrichData(JsonGraphNode node) {
         if (node.getData() instanceof ScriptNodeData scriptNodeData) {
             FlowConnectorScriptDO connectorScriptDO = TenantManager.withoutTenantCondition(() -> connectorScriptRepository.findById(scriptNodeData.getActionId()));
             scriptNodeData.setScript(connectorScriptDO.getRawScript());
@@ -86,7 +86,7 @@ public class FlowGraphBuilder {
         }
         if (CollectionUtils.isNotEmpty(node.getBlocks())) {
             for (JsonGraphNode child : node.getBlocks()) {
-                recursivelyComplementNode(child);
+                traverseNodeAndEnrichData(child);
             }
         }
     }

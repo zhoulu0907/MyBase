@@ -28,11 +28,16 @@ public class BuildApplicationContextHeaderFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
-        String applicationIdHeader = request.getHeader(X_APPLICATION_ID);
-        Long applicationId = NumberUtils.toLong(applicationIdHeader, -1L);
-        // TODO: 在这里判断用户是否有权限访问该应用
-        ApplicationManager.setApplicationId(applicationId);
-        ApplicationManager.setVersionTag(0L);
-        chain.doFilter(request, response);
+        try {
+            String applicationIdHeader = request.getHeader(X_APPLICATION_ID);
+            Long applicationId = NumberUtils.toLong(applicationIdHeader, -1L);
+            // TODO: 在这里判断用户是否有权限访问该应用
+            ApplicationManager.setApplicationId(applicationId);
+            ApplicationManager.setVersionTag(0L);
+            chain.doFilter(request, response);
+        } finally {
+            // 清理所有ThreadLocal资源，避免内存泄漏和数据污染
+            ApplicationManager.clearAll();
+        }
     }
 }

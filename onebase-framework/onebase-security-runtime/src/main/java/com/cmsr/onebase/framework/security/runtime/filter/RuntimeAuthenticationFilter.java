@@ -88,7 +88,6 @@ public class RuntimeAuthenticationFilter extends OncePerRequestFilter {
             }
             // 设置当前用户
             if (loginUser != null) {
-                ApplicationManager.setApplicationId(loginUser.getApplicationId());
                 SecurityFrameworkUtils.setLoginUser(loginUser, request);
                 TenantContextHolder.setTenantId(loginUser.getTenantId());
                 // 会话空闲检查：排除登录和登出请求
@@ -101,8 +100,6 @@ public class RuntimeAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
         }
-        //TODO 临时设置版本号, 等发布做完后，再切换
-        ApplicationManager.setVersionTag(0L);
         // 继续过滤链
         chain.doFilter(request, response);
     }
