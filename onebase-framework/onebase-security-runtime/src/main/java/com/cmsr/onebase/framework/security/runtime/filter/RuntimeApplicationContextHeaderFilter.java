@@ -1,6 +1,8 @@
 package com.cmsr.onebase.framework.security.runtime.filter;
 
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
+import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.common.security.dto.RuntimeLoginUser;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,13 +28,22 @@ public class RuntimeApplicationContextHeaderFilter extends OncePerRequestFilter 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
-        Long applicationId = ApplicationManager.getApplicationId();
-        if (applicationId == null) {
-            String applicationIdHeader = request.getHeader(X_APPLICATION_ID);
-            applicationId = NumberUtils.toLong(applicationIdHeader, -1L);
-            // TODO: 在这里判断用户是否有权限访问该应用
-            ApplicationManager.setApplicationId(applicationId);
+        try {
+            //TODO 临时设置版本号, 等发布做完后，再切换
+            ApplicationManager.setVersionTag(0L);
+            RuntimeLoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+            if (loginUser != null && loginUser.getApplicationId() != null) {
+                ApplicationManager.setApplicationId(loginUser.getApplicationId());
+            } else if (loginUser != null) {
+                //企业账号可以登录多个application，所以要从头里面获取
+                String applicationIdHeader = request.getHeader(X_APPLICATION_ID);
+                Long applicationId = NumberUtils.toLong(applicationIdHeader, -1L);
+                ApplicationManager.setApplicationId(applicationId);
+                // TODO: 在这里判断用户是否有权限访问该应用
+            }
+            chain.doFilter(request, response);
+        } finally {
+            ApplicationManager.clearAll();
         }
-        chain.doFilter(request, response);
     }
 }
