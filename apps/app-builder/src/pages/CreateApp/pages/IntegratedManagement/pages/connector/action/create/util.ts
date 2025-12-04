@@ -1,6 +1,8 @@
+import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
+
 /**
  * 将输入的 JSON 字符串转换为 JSON Schema，
- * 支持 object、string、array、number、boolean 类型，并自动推断 required 字段。
+ * 支持 string、array、number、boolean 类型，并自动推断 required 字段。
  *
  * @param jsonStr 输入的 JSON 字符串
  * @returns 对应的 JSON Schema
@@ -14,56 +16,32 @@ export function jsonToJsonSchema(jsonStr: string): any {
     throw new Error('无效的JSON字符串');
   }
 
+  /**
+   * 获取字段类型 默认返回文本
+   * @param val
+   * @returns
+   */
   function inferType(val: any): string {
-    if (Array.isArray(val)) return 'array';
-    if (val === null) return 'null';
-    return typeof val;
+    // 数组 默认多选
+    if (Array.isArray(val)) return ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE;
+    if (val === null) return ENTITY_FIELD_TYPE.TEXT.VALUE;
+    if (typeof val === 'number' || typeof val === 'bigint') return ENTITY_FIELD_TYPE.NUMBER.VALUE;
+    if (typeof val === 'boolean') return ENTITY_FIELD_TYPE.BOOLEAN.VALUE;
+    return ENTITY_FIELD_TYPE.TEXT.VALUE;
   }
 
-  function generateSchema(value: any): any {
-    const valueType = inferType(value);
+  // name type value
+  const keys = Object.keys(jsonObj);
 
-    switch (valueType) {
-      case 'object':
-        if (value === null) {
-          // treat null as empty
-          return { type: 'null' };
-        }
-        const properties: Record<string, any> = {};
-        const required: string[] = [];
-        for (const key in value) {
-          properties[key] = generateSchema(value[key]);
-          // 只要 key 存在，就标记为 required
-          required.push(key);
-        }
-        return {
-          type: 'object',
-          properties,
-          required: required.length > 0 ? required : undefined
-        };
-      case 'array':
-        // 简单推断 items；如数组为空，items 为{}
-        return {
-          type: 'array',
-          items: value.length > 0 ? generateSchema(value[0]) : {}
-        };
-      case 'string':
-        return { type: 'string' };
-      case 'number':
-        return { type: 'number' };
-      case 'boolean':
-        return { type: 'boolean' };
-      default:
-        return {};
-    }
-  }
+  const schema = keys.map((key) => {
+    const fieldType = inferType(jsonObj[key]);
+    return {
+      name: key,
+      type: fieldType
+    };
+  });
 
-  const schema = generateSchema(jsonObj);
-
-  return {
-    $schema: 'http://json-schema.org/draft-07/schema#',
-    ...schema
-  };
+  return schema;
 }
 
 /**
