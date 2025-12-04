@@ -1,0 +1,13 @@
+### 环境配置说明
+# 使用全局环境配置文件 http-client.env.json
+# 请在IntelliJ IDEA中选择对应环境: local/dev/test/gateway
+# 确保先在AuthController.http中登录获取token
+
+
+
+
+### 获得租户详情 /admin-api/system/tenant/get
+GET {{baseUrl}}/system/tenant/get?id=1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
