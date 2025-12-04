@@ -70,17 +70,20 @@ public class AppMenuRepository extends BaseBizRepository<AppMenuMapper, AppMenuD
         return (int) count(queryWrapper);
     }
 
-    public List<AppMenuDO> findVisibleByAppId(Long applicationId) {
-        QueryWrapper queryWrapper = this.query().eq(AppMenuDO::getApplicationId, applicationId)
-                .eq(AppMenuDO::getIsVisible, 1);
+    public List<AppMenuDO> findVisibleByAppId(Long applicationId, Set<Integer> menuTypes) {
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_MENU.APPLICATION_ID.eq(applicationId))
+                .where(APP_MENU.IS_VISIBLE.eq(1))
+                .where(APP_MENU.MENU_TYPE.in(menuTypes));
         return list(queryWrapper);
     }
 
-    public List<AppMenuDO> findVisibleByAppIdAndMenuIds(Long applicationId, Set<String> menuUuids) {
+    public List<AppMenuDO> findVisibleByAppIdAndMenuIds(Long applicationId, Set<String> menuUuids, Set<Integer> menuTypes) {
         QueryWrapper queryWrapper = this.query()
                 .where(APP_MENU.APPLICATION_ID.eq(applicationId))
                 .where(APP_MENU.MENU_UUID.in(menuUuids))
-                .where(APP_MENU.IS_VISIBLE.eq(1));
+                .where(APP_MENU.IS_VISIBLE.eq(1))
+                .where(APP_MENU.MENU_TYPE.in(menuTypes));
         return list(queryWrapper);
     }
 

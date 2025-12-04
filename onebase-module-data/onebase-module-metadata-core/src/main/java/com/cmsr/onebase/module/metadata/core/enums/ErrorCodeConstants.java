@@ -33,6 +33,11 @@ public interface ErrorCodeConstants {
     ErrorCode DATASOURCE_NAME_DUPLICATE = new ErrorCode(1_003_004_001, "数据源名称已存在");
     ErrorCode DATASOURCE_CONNECTION_FAILED = new ErrorCode(1_003_004_002, "数据源连接失败");
     ErrorCode DATASOURCE_CODE_DUPLICATE = new ErrorCode(1_003_004_003, "数据源编码已存在");
+    ErrorCode DATASOURCE_ID_OR_UUID_REQUIRED = new ErrorCode(1_003_004_004, "数据源标识为空，datasourceUuid和datasourceId至少需要提供一个");
+
+    // ========== ID/UUID转换相关 1-003-010-000 ==========
+    ErrorCode ENTITY_ID_OR_UUID_REQUIRED = new ErrorCode(1_003_010_000, "业务实体标识为空，entityUuid和entityId至少需要提供一个");
+    ErrorCode FIELD_ID_OR_UUID_REQUIRED = new ErrorCode(1_003_010_001, "实体字段标识为空，fieldUuid和fieldId至少需要提供一个");
 
     // ========== 实体关系相关 1-003-007-000 ==========
     ErrorCode ENTITY_RELATIONSHIP_NOT_EXISTS = new ErrorCode(1_003_007_000, "实体关系不存在");

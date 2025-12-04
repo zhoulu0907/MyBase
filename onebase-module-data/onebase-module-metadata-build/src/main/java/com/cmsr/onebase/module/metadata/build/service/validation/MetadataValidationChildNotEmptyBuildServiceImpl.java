@@ -8,6 +8,7 @@ import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.Val
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationChildNotEmptyRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationChildNotEmptyDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRuleGroupDO;
+import com.cmsr.onebase.module.metadata.core.util.MetadataIdUuidConverter;
 import com.cmsr.onebase.module.metadata.core.util.StatusEnumUtil;
 import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
@@ -25,6 +26,7 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
 
     @Resource private MetadataValidationChildNotEmptyRepository childNotEmptyRepository; // 自身仓库
     @Resource private MetadataValidationRuleGroupBuildService ruleGroupService; // 其他服务
+    @Resource private MetadataIdUuidConverter idUuidConverter; // ID转UUID工具
 
     @Override
     public MetadataValidationChildNotEmptyDO getByFieldId(String fieldUuid) {
@@ -124,8 +126,9 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
     @Transactional(rollbackFor = Exception.class)
     public Long create(ValidationChildNotEmptySaveReqVO vo) {
         Assert.notNull(vo, "vo不能为空");
-        Assert.notNull(vo.getEntityUuid(), "父实体UUID不能为空");
-        Assert.notNull(vo.getChildEntityUuid(), "子实体UUID不能为空");
+        // ID与UUID兼容处理：优先使用UUID，若为空则通过ID转换
+        vo.setEntityUuid(idUuidConverter.resolveEntityUuid(vo.getEntityUuid(), vo.getEntityId()));
+        vo.setChildEntityUuid(idUuidConverter.resolveEntityUuid(vo.getChildEntityUuid(), vo.getChildEntityId()));
         Assert.hasText(vo.getRgName(), "规则组名称不能为空");
 
         // 检查同一父实体和子实体是否已存在子表非空校验规则

@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,7 +30,6 @@ public class EntityFieldConstraintController {
 
     @PostMapping("/get")
     @Operation(summary = "按字段UUID获取约束配置")
-    @PreAuthorize("@ss.hasPermission('metadata:entity-field-constraint:query')")
     public CommonResult<FieldConstraintRespVO> get(@RequestParam("fieldId") String fieldUuid) {
         FieldConstraintRespVO result = constraintService.getFieldConstraintConfig(fieldUuid);
         return success(result);
@@ -39,7 +37,6 @@ public class EntityFieldConstraintController {
 
     @PostMapping("/upsert")
     @Operation(summary = "保存/更新约束配置")
-    @PreAuthorize("@ss.hasPermission('metadata:entity-field-constraint:update')")
     public CommonResult<Boolean> upsert(@Valid @RequestBody FieldConstraintSaveReqVO req) {
         constraintService.saveFieldConstraintConfig(req);
         return success(true);
@@ -47,7 +44,6 @@ public class EntityFieldConstraintController {
 
     @PostMapping("/delete")
     @Operation(summary = "删除某类型约束")
-    @PreAuthorize("@ss.hasPermission('metadata:entity-field-constraint:delete')")
     public CommonResult<Boolean> delete(@RequestParam("fieldId") String fieldUuid,
                                         @RequestParam("constraintType") String type) {
         constraintService.delete(fieldUuid, type);

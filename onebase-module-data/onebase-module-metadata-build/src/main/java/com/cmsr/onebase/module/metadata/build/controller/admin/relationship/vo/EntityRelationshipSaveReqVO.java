@@ -2,7 +2,6 @@ package com.cmsr.onebase.module.metadata.build.controller.admin.relationship.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
@@ -26,28 +25,39 @@ public class EntityRelationshipSaveReqVO {
     @Size(max = 100, message = "关系名称长度不能超过100个字符")
     private String relationName;
 
-    @Schema(description = "源实体UUID", requiredMode = Schema.RequiredMode.REQUIRED, example = "01onal1s-0000-0000-0000-000000000002")
-    @NotNull(message = "源实体UUID不能为空")
+    @Schema(description = "源实体UUID", example = "01onal1s-0000-0000-0000-000000000002")
     private String sourceEntityUuid;
 
-    @Schema(description = "目标实体UUID", requiredMode = Schema.RequiredMode.REQUIRED, example = "01onal1s-0000-0000-0000-000000000003")
-    @NotNull(message = "目标实体UUID不能为空")
+    @Schema(description = "源实体ID（兼容旧版，与sourceEntityUuid二选一）", example = "164329365983232001")
+    private String sourceEntityId;
+
+    @Schema(description = "目标实体UUID", example = "01onal1s-0000-0000-0000-000000000003")
     private String targetEntityUuid;
+
+    @Schema(description = "目标实体ID（兼容旧版，与targetEntityUuid二选一）", example = "164329365983232002")
+    private String targetEntityId;
 
     @Schema(description = "关系类型", requiredMode = Schema.RequiredMode.REQUIRED, example = "ONE_TO_MANY")
     @NotBlank(message = "关系类型不能为空")
     private String relationshipType;
 
-    @Schema(description = "源字段UUID", requiredMode = Schema.RequiredMode.REQUIRED, example = "01onal1s-0000-0000-0000-000000000010")
-    @NotNull(message = "源字段UUID不能为空")
+    @Schema(description = "源字段UUID", example = "01onal1s-0000-0000-0000-000000000010")
     private String sourceFieldUuid;
 
-    @Schema(description = "目标字段UUID", requiredMode = Schema.RequiredMode.REQUIRED, example = "01onal1s-0000-0000-0000-000000000011")
-    @NotNull(message = "目标字段UUID不能为空")
+    @Schema(description = "源字段ID（兼容旧版，与sourceFieldUuid二选一）", example = "164329365983232010")
+    private String sourceFieldId;
+
+    @Schema(description = "目标字段UUID", example = "01onal1s-0000-0000-0000-000000000011")
     private String targetFieldUuid;
+
+    @Schema(description = "目标字段ID（兼容旧版，与targetFieldUuid二选一）", example = "164329365983232011")
+    private String targetFieldId;
 
     @Schema(description = "选择字段UUID（数据选择关系类型时使用，表示关联表中用于展示给用户的字段UUID）", example = "01onal1s-0000-0000-0000-000000000012")
     private String selectFieldUuid;
+
+    @Schema(description = "选择字段ID（兼容旧版，与selectFieldUuid二选一）", example = "164329365983232012")
+    private String selectFieldId;
 
     @Schema(description = "级联类型", example = "READ")
     private String cascadeType;

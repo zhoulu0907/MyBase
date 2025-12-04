@@ -72,7 +72,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "TEXT(2025-11-19,'D')" }
+{ "formula": "TEXT(TODAY(), 'MM/DD HH:MM')" }
 
 ### UPPER
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -120,7 +120,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "RMBCAP(-1)" }
+{ "formula": "RMBCAP(10.5)" }
 
 ### UUID
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -157,7 +157,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "REGEXEXTRACT('a1b2c13812345679','\\\\d{11}')" }
+{ "formula": "REGEXEXTRACT('我的电话号码是13655587478','\\\\d{11}')"}
 
 ### REGEXEXTRACTALL
 POST {{baseUrl}}/formula/engine/debug-formula
@@ -165,7 +165,12 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "REGEXEXTRACTALL('小明的电话号码是 13812345679，13812345678','1[3-9]\\\\d{9}')" }
+{ "formula": "REGEXEXTRACTALL(text,reg)",
+  "parameters": {
+    "text": "小明的电话号码是 13812345678, 小红的电话号码是13987654321",
+    "reg": "\\d{11}"
+  }
+}
 
 ### ENCODEURL
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -366,7 +371,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "SUMIF('[1,2,3,4]','>'+'2','[1,2,3,4]')" }
+{ "formula": "SUMIF(['A','A','B','A'],'=A',[1,3,5,7])"}
 
 ### TAN
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -478,7 +483,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "COUNTIF([1,2,3,4],'>'+'2')" }
+{ "formula": "COUNTIF([1,1,2,3,4],'<>3')" }
 
 ### DAY
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -590,7 +595,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "EDATE('2025-11-18',3)" }
+{ "formula": "EDATE('2025-12-31',-1)" }
 
 ### WORKDAY
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -630,7 +635,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "DATEDIF('2024-11-18 09:23:50','2025-11-18 09:23:55','d')" }
+{ "formula": "DATEDIF('2024-11-18 09:23:50','2025-11-18 09:23:55','n')" }
 
 ### NOT
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -694,7 +699,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "IF(AND(GT(5,3), OR1(GT(2,3), EQ(a,4))), 'OK', 'NO')" }
+{ "formula": "IF(数学成绩>90)" }
 
 ### RANDOMBETWEEN
 POST {{baseUrl}}/formula/engine/execute-formula

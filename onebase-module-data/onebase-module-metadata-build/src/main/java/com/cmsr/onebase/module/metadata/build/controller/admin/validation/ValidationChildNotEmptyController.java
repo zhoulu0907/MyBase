@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,7 +26,6 @@ public class ValidationChildNotEmptyController {
     @PostMapping("/get-by-field")
     @Operation(summary = "根据字段UUID获取子表非空校验")
     @Parameter(name = "id", description = "字段UUID", required = true)
-    @PreAuthorize("@ss.hasPermission('metadata:validation-child-not-empty:query')")
     public CommonResult<ValidationChildNotEmptyRespVO> getByField(@RequestParam("id") String fieldUuid) {
         return success(childNotEmptyService.getByFieldIdWithRgName(fieldUuid));
     }
@@ -35,21 +33,18 @@ public class ValidationChildNotEmptyController {
     @GetMapping("/get")
     @Operation(summary = "根据主键ID获取子表非空校验")
     @Parameter(name = "id", description = "校验规则ID", required = true)
-    @PreAuthorize("@ss.hasPermission('metadata:validation-child-not-empty:query')")
-    public CommonResult<ValidationChildNotEmptyRespVO> get(@RequestParam("id") Long id) {
-        return success(childNotEmptyService.getById(id));
+    public CommonResult<ValidationChildNotEmptyRespVO> get(@RequestParam("id") String id) {
+        return success(childNotEmptyService.getById(Long.parseLong(id)));
     }
 
     @PostMapping("/create")
     @Operation(summary = "创建子表非空校验")
-    @PreAuthorize("@ss.hasPermission('metadata:validation-child-not-empty:create')")
     public CommonResult<Long> create(@Valid @RequestBody ValidationChildNotEmptySaveReqVO vo) {
         return success(childNotEmptyService.create(vo));
     }
 
     @PostMapping("/update")
     @Operation(summary = "更新子表非空校验")
-    @PreAuthorize("@ss.hasPermission('metadata:validation-child-not-empty:update')")
     public CommonResult<Boolean> update(@Valid @RequestBody ValidationChildNotEmptyUpdateReqVO vo) {
         childNotEmptyService.update(vo);
         return success(true);
@@ -58,7 +53,6 @@ public class ValidationChildNotEmptyController {
     @PostMapping("/delete-by-field")
     @Operation(summary = "按字段UUID删除子表非空校验")
     @Parameter(name = "id", description = "字段UUID", required = true)
-    @PreAuthorize("@ss.hasPermission('metadata:validation-child-not-empty:delete')")
     public CommonResult<Boolean> deleteByField(@RequestParam("id") String fieldUuid) {
         childNotEmptyService.deleteByFieldId(fieldUuid);
         return success(true);
@@ -67,9 +61,8 @@ public class ValidationChildNotEmptyController {
     @PostMapping("/delete")
     @Operation(summary = "根据主键ID删除子表非空校验")
     @Parameter(name = "id", description = "校验规则ID", required = true)
-    @PreAuthorize("@ss.hasPermission('metadata:validation-child-not-empty:delete')")
-    public CommonResult<Boolean> delete(@RequestParam("id") Long id) {
-        childNotEmptyService.deleteById(id);
+    public CommonResult<Boolean> delete(@RequestParam("id") String id) {
+        childNotEmptyService.deleteById(Long.parseLong(id));
         return success(true);
     }
 }

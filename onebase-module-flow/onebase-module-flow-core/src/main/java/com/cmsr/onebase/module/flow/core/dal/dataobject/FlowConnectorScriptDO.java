@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.flow.core.dal.dataobject;
 
 import com.cmsr.onebase.framework.orm.entity.BaseAppEntity;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
 import lombok.Data;
@@ -31,5 +32,11 @@ public class FlowConnectorScriptDO extends BaseAppEntity {
 
     @Column(value = "output_parameter")
     private String outputParameter;
+
+    @Column(value = "input_schema")
+    private String inputSchema;
+
+    @Column(value = "output_schema")
+    private String outputSchema;
 
 }

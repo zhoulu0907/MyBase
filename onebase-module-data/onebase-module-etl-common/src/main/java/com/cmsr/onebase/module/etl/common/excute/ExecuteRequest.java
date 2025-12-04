@@ -17,6 +17,8 @@ public class ExecuteRequest {
 
     private String jdbcPassword;
 
+    private Long applicationId;
+
     private Long workflowId;
 
     private String previewWorkflow;

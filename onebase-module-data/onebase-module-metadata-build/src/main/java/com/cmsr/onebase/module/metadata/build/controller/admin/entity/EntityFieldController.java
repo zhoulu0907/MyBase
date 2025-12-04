@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.metadata.build.controller.admin.entity;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
+import com.cmsr.onebase.module.metadata.core.util.MetadataIdUuidConverter;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.EntityFieldBatchCreateReqVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.EntityFieldBatchCreateRespVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.EntityFieldBatchSortReqVO;
@@ -25,7 +26,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -51,6 +51,9 @@ public class EntityFieldController {
     @Resource
     private ModelMapper modelMapper;
 
+    @Resource
+    private MetadataIdUuidConverter idUuidConverter;
+
     @PostMapping("/field-types")
     @Operation(summary = "获取系统支持的字段类型列表")
     public CommonResult<List<FieldTypeConfigRespVO>> getFieldTypes() {
@@ -59,7 +62,6 @@ public class EntityFieldController {
     }
     @PostMapping("/batch-create")
     @Operation(summary = "批量为业务实体创建字段")
-    @PreAuthorize("@ss.hasPermission('metadata:entity-field:create')")
     public CommonResult<EntityFieldBatchCreateRespVO> batchCreateEntityFields(@Valid @RequestBody EntityFieldBatchCreateReqVO reqVO) {
         // 从请求头获取应用ID
         reqVO.setApplicationId(String.valueOf(ApplicationManager.getApplicationId()));
@@ -69,7 +71,6 @@ public class EntityFieldController {
 
     @PostMapping("/create")
     @Operation(summary = "为业务实体创建新字段")
-    @PreAuthorize("@ss.hasPermission('metadata:entity-field:create')")
     public CommonResult<EntityFieldRespVO> createEntityField(@Valid @RequestBody EntityFieldSaveReqVO reqVO) {
         // 从请求头获取应用ID
         reqVO.setApplicationId(String.valueOf(ApplicationManager.getApplicationId()));
@@ -78,7 +79,6 @@ public class EntityFieldController {
     }
     @PostMapping("/list")
     @Operation(summary = "查询指定实体的字段列表")
-    @PreAuthorize("@ss.hasPermission('metadata:entity-field:query')")
     public CommonResult<List<EntityFieldRespVO>> getEntityFieldList(@Valid @RequestBody EntityFieldQueryReqVO reqVO) {
         List<EntityFieldRespVO> result = entityFieldService.getEntityFieldListWithRelated(reqVO);
         return success(result);
@@ -86,7 +86,6 @@ public class EntityFieldController {
 
     @PostMapping("/page")
     @Operation(summary = "分页查询指定实体的字段列表")
-    @PreAuthorize("@ss.hasPermission('metadata:entity-field:query')")
     public CommonResult<PageResult<EntityFieldRespVO>> getEntityFieldPage(@Valid @RequestBody EntityFieldPageReqVO pageReqVO) {
         PageResult<EntityFieldRespVO> result = entityFieldService.getEntityFieldPageWithRelated(pageReqVO);
         return success(result);
@@ -95,21 +94,18 @@ public class EntityFieldController {
     @PostMapping("/get")
     @Operation(summary = "根据ID获取字段详细信息")
     @Parameter(name = "id", description = "字段ID", required = true, example = "1024")
-    @PreAuthorize("@ss.hasPermission('metadata:entity-field:query')")
     public CommonResult<EntityFieldDetailRespVO> getEntityField(@RequestParam("id") String id) {
         EntityFieldDetailRespVO entityField = entityFieldService.getEntityFieldDetailWithFullConfig(id);
         return success(entityField);
     }
     @PostMapping("/batch-update")
     @Operation(summary = "批量更新实体字段信息")
-    @PreAuthorize("@ss.hasPermission('metadata:entity-field:update')")
     public CommonResult<EntityFieldBatchUpdateRespVO> batchUpdateEntityFields(@Valid @RequestBody EntityFieldBatchUpdateReqVO reqVO) {
         EntityFieldBatchUpdateRespVO result = entityFieldService.batchUpdateEntityFields(reqVO);
         return success(result);
     }
     @PostMapping("/update")
     @Operation(summary = "更新实体字段信息")
-    @PreAuthorize("@ss.hasPermission('metadata:entity-field:update')")
     public CommonResult<Boolean> updateEntityField(@Valid @RequestBody EntityFieldSaveReqVO reqVO) {
         // 从请求头获取应用ID
         reqVO.setApplicationId(String.valueOf(ApplicationManager.getApplicationId()));
@@ -118,23 +114,21 @@ public class EntityFieldController {
     }
     @PostMapping("/delete")
     @Operation(summary = "软删除实体字段")
-    @Parameter(name = "id", description = "字段ID", required = true, example = "1024")
-    @PreAuthorize("@ss.hasPermission('metadata:entity-field:delete')")
-    public CommonResult<Boolean> deleteEntityField(@RequestParam("id") Long id) {
-        entityFieldService.deleteEntityField(String.valueOf(id));
+    @Parameter(name = "id", description = "字段ID或UUID", required = true, example = "1024")
+    public CommonResult<Boolean> deleteEntityField(@RequestParam("id") String id) {
+        Long resolvedId = idUuidConverter.resolveFieldId(id);
+        entityFieldService.deleteEntityField(String.valueOf(resolvedId));
         return success(true);
     }
 
     @PostMapping("/batch-sort")
     @Operation(summary = "批量更新字段排序")
-    @PreAuthorize("@ss.hasPermission('metadata:entity-field:update')")
     public CommonResult<Boolean> batchSortEntityFields(@Valid @RequestBody EntityFieldBatchSortReqVO reqVO) {
         entityFieldService.batchSortEntityFields(reqVO);
         return success(true);
     }
     @PostMapping("/batch-save")
     @Operation(summary = "批量保存实体字段（增删改）")
-    @PreAuthorize("@ss.hasPermission('metadata:entity-field:update')")
     public CommonResult<EntityFieldBatchSaveRespVO> batchSave(@Valid @RequestBody EntityFieldBatchSaveReqVO reqVO) {
         // 从请求头获取应用ID
         reqVO.setApplicationId(String.valueOf(ApplicationManager.getApplicationId()));
@@ -144,7 +138,6 @@ public class EntityFieldController {
 
     @PostMapping("/validation-types/query")
     @Operation(summary = "批量查询字段可选校验类型")
-    @PreAuthorize("@ss.hasPermission('metadata:entity-field:query')")
     public CommonResult<List<EntityFieldValidationTypesRespVO>> getFieldValidationTypes(
             @Valid @RequestBody EntityFieldValidationTypesReqVO reqVO) {
         List<EntityFieldValidationTypesRespVO> result = entityFieldService.getFieldValidationTypes(reqVO);

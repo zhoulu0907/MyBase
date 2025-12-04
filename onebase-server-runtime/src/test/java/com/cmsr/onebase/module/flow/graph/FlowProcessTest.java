@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.flow.graph;
 
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.module.flow.api.FlowProcessExecApiImpl;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerReqDTO;
@@ -8,8 +9,8 @@ import com.cmsr.onebase.module.flow.api.dto.TriggerEventEnum;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
-import com.cmsr.onebase.module.flow.core.flow.RemoteCallRequest;
 import com.cmsr.onebase.module.flow.core.flow.FlowRemoteCallExecutor;
+import com.cmsr.onebase.module.flow.core.flow.RemoteCallRequest;
 import com.cmsr.onebase.module.flow.core.graph.FlowChainBuilder;
 import com.cmsr.onebase.module.flow.core.graph.FlowGraphBuilder;
 import com.cmsr.onebase.module.flow.runtime.service.FlowProcessExecService;
@@ -69,14 +70,16 @@ public class FlowProcessTest {
 
     @Test
     public void testSimple2() throws IOException {
+        ApplicationManager.ignoreApplicationCondition();
+        ApplicationManager.ignoreVersionTagCondition();
         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
         reqDTO.setTraceId(UUID.randomUUID().toString());
-        reqDTO.setEntityId(46999363287089152L);
+        reqDTO.setEntityId(162955646465703936L);
         reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_CREATE);
         reqDTO.setFieldData(Map.of(
-                "46999569445519360", "6年级3班",
-                "50026937276661762", LocalDate.now().minusYears(10),
-                "50028191407505411", 30
+//                "46999569445519360", "6年级3班",
+//                "50026937276661762", LocalDate.now().minusYears(10),
+//                "50028191407505411", 30
         ));
         //reqDTO.setChangedFieldIds(List.of(46999569445519360L));
         EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);

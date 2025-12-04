@@ -75,11 +75,14 @@ public class WorkBenchPageSetServiceImpl implements WorkBenchPageSetService {
     private AppResourceWorkbenchPageDO buildEmptyWorkbenchPage(AppResourcePagesetDO pageSetDO) {
         String pageName = StringUtils.isBlank(pageSetDO.getDisplayName()) ? pageSetDO.getPageSetName() : pageSetDO.getDisplayName();
         AppResourceWorkbenchPageDO workBenchPageDO = new AppResourceWorkbenchPageDO();
+        workBenchPageDO.setApplicationId(pageSetDO.getApplicationId());
         workBenchPageDO.setPageUuid(UuidUtils.getUuid());
         workBenchPageDO.setPageSetUuid(pageSetDO.getPageSetUuid());
         workBenchPageDO.setPageName(pageName);
         workBenchPageDO.setTitle(pageName);
         workBenchPageDO.setPageType(PageEnum.WORKBENCH.getValue());
+        // 设置applicationId，从pageSetDO继承
+        workBenchPageDO.setApplicationId(pageSetDO.getApplicationId());
         //补全必填字段
         workBenchPageDO.setLayout("horizontal");
         workBenchPageDO.setWidth("auto");

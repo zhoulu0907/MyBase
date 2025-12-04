@@ -39,7 +39,6 @@ public class FormulaEngineRuntimeController {
 
     @PostMapping("/execute-formula1")
     @Operation(summary = "执行公式计算")
-    @PreAuthorize("@ss.hasPermission('formula:engine:execute')")
     public CommonResult<FormulaExecuteRespDTO> executeFormula(@Valid @RequestBody FormulaExecuteReqDTO reqDTO) {
         long startTime = System.currentTimeMillis();
         log.info("############: "+reqDTO.getFormula());

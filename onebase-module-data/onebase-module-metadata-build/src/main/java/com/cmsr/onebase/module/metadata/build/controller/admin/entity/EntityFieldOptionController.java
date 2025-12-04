@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,7 +33,6 @@ public class EntityFieldOptionController {
 
     @PostMapping("/list")
     @Operation(summary = "按字段UUID获取选项列表")
-    @PreAuthorize("@ss.hasPermission('metadata:entity-field-option:query')")
     public CommonResult<List<FieldOptionRespVO>> list(@RequestParam("fieldId") String fieldUuid) {
         List<FieldOptionRespVO> result = optionService.getFieldOptionList(fieldUuid);
         return success(result);
@@ -42,7 +40,6 @@ public class EntityFieldOptionController {
 
     @PostMapping("/create")
     @Operation(summary = "创建选项")
-    @PreAuthorize("@ss.hasPermission('metadata:entity-field-option:create')")
     public CommonResult<Long> create(@Valid @RequestBody FieldOptionSaveReqVO req) {
         Long id = optionService.createFieldOption(req);
         return success(id);
@@ -50,7 +47,6 @@ public class EntityFieldOptionController {
 
     @PostMapping("/update")
     @Operation(summary = "更新选项")
-    @PreAuthorize("@ss.hasPermission('metadata:entity-field-option:update')")
     public CommonResult<Boolean> update(@Valid @RequestBody FieldOptionSaveReqVO req) {
         optionService.updateFieldOption(req);
         return success(true);
@@ -58,7 +54,6 @@ public class EntityFieldOptionController {
 
     @PostMapping("/delete")
     @Operation(summary = "删除选项")
-    @PreAuthorize("@ss.hasPermission('metadata:entity-field-option:delete')")
     public CommonResult<Boolean> delete(@RequestParam("id") Long id) {
         optionService.deleteById(id);
         return success(true);
@@ -66,7 +61,6 @@ public class EntityFieldOptionController {
 
     @PostMapping("/batch-sort")
     @Operation(summary = "批量排序选项")
-    @PreAuthorize("@ss.hasPermission('metadata:entity-field-option:update')")
     public CommonResult<Boolean> batchSort(@Valid @RequestBody FieldOptionBatchSortReqVO req) {
         optionService.batchSortFieldOptions(req);
         return success(true);

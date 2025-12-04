@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,21 +25,18 @@ public class AutoNumberRuleController {
 
     @PostMapping("/list")
     @Operation(summary = "按配置ID获取规则项列表")
-    @PreAuthorize("@ss.hasPermission('metadata:auto-number:query')")
     public CommonResult<List<MetadataAutoNumberRuleItemDO>> list(@RequestParam("configId") Long configId) {
         return success(ruleService.listByConfig(configId));
     }
 
     @PostMapping("/add")
     @Operation(summary = "添加规则项")
-    @PreAuthorize("@ss.hasPermission('metadata:auto-number:update')")
     public CommonResult<Long> add(@Valid @RequestBody MetadataAutoNumberRuleItemDO req) {
         return success(ruleService.add(req));
     }
 
     @PostMapping("/update")
     @Operation(summary = "更新规则项")
-    @PreAuthorize("@ss.hasPermission('metadata:auto-number:update')")
     public CommonResult<Boolean> update(@Valid @RequestBody MetadataAutoNumberRuleItemDO req) {
         ruleService.update(req);
         return success(true);
@@ -48,7 +44,6 @@ public class AutoNumberRuleController {
 
     @PostMapping("/delete")
     @Operation(summary = "删除规则项")
-    @PreAuthorize("@ss.hasPermission('metadata:auto-number:update')")
     public CommonResult<Boolean> delete(@RequestParam("id") Long id) {
         ruleService.delete(id);
         return success(true);
@@ -56,7 +51,6 @@ public class AutoNumberRuleController {
 
     @PostMapping("/sort")
     @Operation(summary = "批量排序规则项")
-    @PreAuthorize("@ss.hasPermission('metadata:auto-number:update')")
     public CommonResult<Boolean> sort(@RequestParam("configId") Long configId,
                                       @RequestBody List<MetadataAutoNumberRuleItemDO> items) {
         ruleService.batchSort(configId, items);

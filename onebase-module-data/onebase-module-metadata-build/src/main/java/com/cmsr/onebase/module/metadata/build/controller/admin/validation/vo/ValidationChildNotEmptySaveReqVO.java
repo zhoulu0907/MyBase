@@ -2,7 +2,6 @@ package com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 /**
@@ -14,13 +13,17 @@ import lombok.Data;
 @Data
 public class ValidationChildNotEmptySaveReqVO {
 
-    @Schema(description = "父实体UUID", requiredMode = Schema.RequiredMode.REQUIRED, example = "01onal1s-0000-0000-0000-000000000002")
-    @NotNull(message = "父实体UUID不能为空")
+    @Schema(description = "父实体UUID", example = "01onal1s-0000-0000-0000-000000000002")
     private String entityUuid;
 
-    @Schema(description = "子实体UUID", requiredMode = Schema.RequiredMode.REQUIRED, example = "01onal1s-0000-0000-0000-000000000013")
-    @NotNull(message = "子实体UUID不能为空")
+    @Schema(description = "父实体ID（兼容旧版，与entityUuid二选一）", example = "164329365983232001")
+    private String entityId;
+
+    @Schema(description = "子实体UUID", example = "01onal1s-0000-0000-0000-000000000013")
     private String childEntityUuid;
+
+    @Schema(description = "子实体ID（兼容旧版，与childEntityUuid二选一）", example = "164329365983232013")
+    private String childEntityId;
 
     @Schema(description = "是否启用(0/1)", example = "1")
     private Integer isEnabled;

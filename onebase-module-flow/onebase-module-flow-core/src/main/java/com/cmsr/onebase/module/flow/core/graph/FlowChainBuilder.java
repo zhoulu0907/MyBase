@@ -50,7 +50,7 @@ public class FlowChainBuilder {
     private ELWrapper nodeDefine(JsonGraphNode node) {
         if (StringUtils.equalsAny(node.getType(),
                 "dataAdd", "dataCalc", "dataDelete", "dataQueryMultiple", "dataQuery", "dataUpdate",
-                "modal", "refresh", "navigate",
+                "modal", "refresh", "navigate", "javascript",
                 "startDateField", "startForm", "startEntity", "startTime", "startAPI", "startBPM",
                 "end", "log")) {
             return toDefine(node);

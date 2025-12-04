@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -36,7 +35,6 @@ public class MetadataBackupController {
 
     @PostMapping("/backup")
     @Operation(summary = "备份元数据", description = "根据应用ID备份所有相关的元数据信息")
-    @PreAuthorize("@ss.hasPermission('metadata:backup:backup')")
     public CommonResult<MetadataBackupRespVO> backupMetadata(@Valid @RequestBody MetadataBackupReqVO backupReqVO) {
         Long applicationId = ApplicationManager.getApplicationId();
         log.info("收到备份元数据请求，应用ID: {}", applicationId);
@@ -49,7 +47,6 @@ public class MetadataBackupController {
 
     @PostMapping("/restore")
     @Operation(summary = "恢复元数据", description = "将备份的元数据恢复到指定应用中")
-    @PreAuthorize("@ss.hasPermission('metadata:backup:restore')")
     public CommonResult<Boolean> restoreMetadata(@Valid @RequestBody MetadataRestoreReqVO restoreReqVO) {
         Long targetApplicationId = ApplicationManager.getApplicationId();
         log.info("收到恢复元数据请求，目标应用ID: {}", targetApplicationId);

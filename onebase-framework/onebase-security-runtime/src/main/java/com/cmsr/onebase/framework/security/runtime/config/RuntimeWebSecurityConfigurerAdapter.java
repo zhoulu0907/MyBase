@@ -1,6 +1,7 @@
 package com.cmsr.onebase.framework.security.runtime.config;
 
 import com.cmsr.onebase.framework.security.runtime.filter.RemoteCallAuthenticationFilter;
+import com.cmsr.onebase.framework.security.runtime.filter.RuntimeApplicationContextHeaderFilter;
 import com.cmsr.onebase.framework.security.runtime.filter.RuntimeAuthenticationFilter;
 import com.cmsr.onebase.framework.web.config.WebProperties;
 import jakarta.annotation.Resource;
@@ -52,6 +53,9 @@ public class RuntimeWebSecurityConfigurerAdapter {
     private RemoteCallAuthenticationFilter remoteCallAuthenticationFilter;
 
     @Resource
+    private RuntimeApplicationContextHeaderFilter runtimeApplicationContextHeaderFilter;
+
+    @Resource
     private WebProperties webProperties;
 
     /**
@@ -91,8 +95,9 @@ public class RuntimeWebSecurityConfigurerAdapter {
                         .accessDeniedHandler(runtimeAccessDeniedHandler));
 
         // 添加 Token Filter
-        httpSecurity.addFilterBefore(runtimeAuthenticationTokenFilter, UsernamePasswordAuthenticationFilter.class);
-        httpSecurity.addFilterBefore(remoteCallAuthenticationFilter, RuntimeAuthenticationFilter.class);
+        httpSecurity.addFilterBefore(remoteCallAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        httpSecurity.addFilterAfter(runtimeAuthenticationTokenFilter, RemoteCallAuthenticationFilter.class);
+        httpSecurity.addFilterAfter(runtimeApplicationContextHeaderFilter, RuntimeAuthenticationFilter.class);
         return httpSecurity.build();
     }
 

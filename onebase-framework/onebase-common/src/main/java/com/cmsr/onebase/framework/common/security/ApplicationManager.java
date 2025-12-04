@@ -11,23 +11,34 @@ public class ApplicationManager {
     private ApplicationManager() {
     }
 
-    private static final ThreadLocal<Long> applicationIds = new ThreadLocal<>();
+    private static final ThreadLocal<Long> applicationIdHolder = new ThreadLocal<>();
 
-    private static final ThreadLocal<Boolean> applicationIdHolder = new ThreadLocal<>();
+    private static final ThreadLocal<Boolean> applicationIdBooleanHolder = new ThreadLocal<>();
 
-    private static final ThreadLocal<Long> versionTags = new ThreadLocal<>();
+    private static final ThreadLocal<Long> versionTagHolder = new ThreadLocal<>();
 
-    private static final ThreadLocal<Boolean> versionTagHolder = new ThreadLocal<>();
+    private static final ThreadLocal<Boolean> versionTagBooleanHolder = new ThreadLocal<>();
 
     public static void setApplicationId(Long applicationId) {
-        applicationIds.set(applicationId);
+        applicationIdHolder.set(applicationId);
+    }
+
+    public static Long getRequiredApplicationId() {
+        if (isIgnoreApplicationCondition()) {
+            return null;
+        }
+        Long id = applicationIdHolder.get();
+        if (id == null) {
+            throw new RuntimeException("未设置应用ID");
+        }
+        return id;
     }
 
     public static Long getApplicationId() {
         if (isIgnoreApplicationCondition()) {
             return null;
         }
-        return applicationIds.get();
+        return applicationIdHolder.get();
     }
 
     public static <T> T withoutApplicationCondition(Supplier<T> supplier) {
@@ -49,26 +60,26 @@ public class ApplicationManager {
     }
 
     public static void ignoreApplicationCondition() {
-        applicationIdHolder.set(Boolean.TRUE);
+        applicationIdBooleanHolder.set(Boolean.TRUE);
     }
 
     public static boolean isIgnoreApplicationCondition() {
-        return Boolean.TRUE.equals(applicationIdHolder.get());
+        return Boolean.TRUE.equals(applicationIdBooleanHolder.get());
     }
 
-    public static void restoreApplicationCondition() {
-        applicationIdHolder.remove();
+    private static void restoreApplicationCondition() {
+        applicationIdBooleanHolder.remove();
     }
 
     public static void setVersionTag(Long versionTag) {
-        versionTags.set(versionTag);
+        versionTagHolder.set(versionTag);
     }
 
     public static Long getVersionTag() {
         if (isIgnoreVersionTagCondition()) {
             return null;
         }
-        return versionTags.get();
+        return versionTagHolder.get();
     }
 
     public static <T> T withoutVersionTagCondition(Supplier<T> supplier) {
@@ -90,14 +101,14 @@ public class ApplicationManager {
     }
 
     public static void ignoreVersionTagCondition() {
-        versionTagHolder.set(Boolean.TRUE);
+        versionTagBooleanHolder.set(Boolean.TRUE);
     }
 
     public static boolean isIgnoreVersionTagCondition() {
-        return Boolean.TRUE.equals(versionTagHolder.get());
+        return Boolean.TRUE.equals(versionTagBooleanHolder.get());
     }
 
-    public static void restoreVersionTagCondition() {
-        versionTagHolder.remove();
+    private static void restoreVersionTagCondition() {
+        versionTagBooleanHolder.remove();
     }
 }
