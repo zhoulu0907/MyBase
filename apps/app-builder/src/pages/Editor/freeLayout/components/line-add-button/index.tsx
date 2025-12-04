@@ -118,7 +118,7 @@ export const LineAddButton = (props: LineRenderProps) => {
   };
 
   useEffect(() => {
-    if (selected && !selectLine && line.id.includes('branch')) {
+    if (selected && !selectLine && line.info.from.includes('branch')) {
       setLineData(line);
     }
     setSelectLine(false);

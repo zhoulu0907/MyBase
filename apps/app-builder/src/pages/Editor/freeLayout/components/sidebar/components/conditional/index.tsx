@@ -75,7 +75,7 @@ export default function Conditional({ node }: { node: FlowNodeEntity }) {
     <SortableWrapper
       useDragHandle
       onSortEnd={onSortEnd}
-      helperContainer={() => document.querySelector('.pc-drag-table-container-2 table tbody')}
+      helperContainer={() => document.querySelector('.arco-drag-table-container-2 table tbody')}
       updateBeforeSortStart={({ node }) => {
         const tds = node.querySelectorAll('td');
         tds.forEach((td) => {
@@ -127,12 +127,23 @@ export default function Conditional({ node }: { node: FlowNodeEntity }) {
   };
 
   function handleSubmit() {
-    // handleConfigSubmit(data);
+    const allLines = ctx.document.linesManager
+      .getAllLines()
+      .filter((line) => line.info.from === node.id && line.lineData);
+
+    data.forEach((tableItem) => {
+      const matchingLine = allLines.find((line) => line.lineData.name === tableItem.name);
+      if (matchingLine) {
+        matchingLine.lineData = {
+          ...matchingLine.lineData,
+          priority: tableItem.priority // 直接使用表格中的优先级
+        };
+      }
+    });
   }
 
-  useEffect(() => {
+  const sortLineData = () => {
     const allLines = ctx.document.linesManager.getAllLines();
-
     const nodeOutputNodes = allLines.filter((line) => line.info.from === node.id && line.lineData);
     const tableData = nodeOutputNodes
       .map((line) => {
@@ -149,6 +160,9 @@ export default function Conditional({ node }: { node: FlowNodeEntity }) {
         return priorityA - priorityB;
       });
     setData(tableData);
+  };
+  useEffect(() => {
+    sortLineData();
   }, []);
   return (
     <>
@@ -164,6 +178,7 @@ export default function Conditional({ node }: { node: FlowNodeEntity }) {
             columns={columns}
             data={data}
             pagination={false}
+            rowKey="name"
             rowSelection={{
               type: 'checkbox'
             }}
