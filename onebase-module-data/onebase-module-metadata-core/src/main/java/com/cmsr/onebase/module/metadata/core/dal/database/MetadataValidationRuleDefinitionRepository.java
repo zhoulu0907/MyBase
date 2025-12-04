@@ -7,6 +7,8 @@ import com.mybatisflex.spring.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -81,6 +83,13 @@ public class MetadataValidationRuleDefinitionRepository extends ServiceImpl<Meta
                 .eq(MetadataValidationRuleDefinitionDO::getGroupUuid, groupUuid)
                 .isNull(MetadataValidationRuleDefinitionDO::getParentRuleUuid)
                 .orderBy(MetadataValidationRuleDefinitionDO::getId, true);
+        return list(queryWrapper);
+    }
+
+    public List<MetadataValidationRuleDefinitionDO> selectByGroupUuids(Collection<String> groupUuids) {
+        if (groupUuids == null || groupUuids.isEmpty()) { return Collections.emptyList(); }
+        QueryWrapper queryWrapper = this.query()
+                .in(MetadataValidationRuleDefinitionDO::getGroupUuid, groupUuids);
         return list(queryWrapper);
     }
 

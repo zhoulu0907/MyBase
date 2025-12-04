@@ -3,7 +3,6 @@ package com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.datam
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
-import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import com.cmsr.onebase.module.flow.api.FlowProcessExecApiImpl;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerReqDTO;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerRespDTO;
@@ -143,7 +142,7 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
                     case "owner_id":
                     case "ownerid":
                         // 设置为当前登录用户ID
-                        Long currentUserId = WebFrameworkUtils.getLoginUserId();
+                        Long currentUserId = SecurityFrameworkUtils.getLoginUserId();
                         if (currentUserId != null) {
                             processedData.put(fieldName, currentUserId);
                         } else {
@@ -169,7 +168,7 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
                         break;
                     case "creator":
                         // 设置为当前登录用户ID
-                        Long creatorUserId = WebFrameworkUtils.getLoginUserId();
+                        Long creatorUserId = SecurityFrameworkUtils.getLoginUserId();
                         if (creatorUserId != null) {
                             processedData.put(fieldName, creatorUserId);
                         } else {
@@ -179,7 +178,7 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
                         break;
                     case "updater":
                         // 设置为当前登录用户ID
-                        Long updaterUserId = WebFrameworkUtils.getLoginUserId();
+                        Long updaterUserId = SecurityFrameworkUtils.getLoginUserId();
                         if (updaterUserId != null) {
                             processedData.put(fieldName, updaterUserId);
                         } else {

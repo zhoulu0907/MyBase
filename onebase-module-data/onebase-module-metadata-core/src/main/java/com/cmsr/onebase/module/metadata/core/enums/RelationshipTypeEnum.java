@@ -196,4 +196,10 @@ public enum RelationshipTypeEnum {
         RelationshipTypeEnum type = getByType(relationshipType);
         return type == DEFINE_MANY_TO_MANY || type == DATA_SELECT_MULTI;
     }
+
+    public static boolean isConnectorRelationTable(String relationshipType) {
+        RelationshipTypeEnum type = getByType(relationshipType);
+        return type == DEFINE_ONE_TO_ONE || type == DEFINE_ONE_TO_MANY
+                || type == DEFINE_MANY_TO_ONE || type == DEFINE_MANY_TO_MANY;
+    }
 }

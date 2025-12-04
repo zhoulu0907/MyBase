@@ -7,6 +7,7 @@ import com.mybatisflex.spring.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -64,6 +65,19 @@ public class MetadataValidationFormatRepository extends ServiceImpl<MetadataVali
     public List<MetadataValidationFormatDO> findByGroupUuid(String groupUuid) {
         QueryWrapper queryWrapper = query()
                 .eq(MetadataValidationFormatDO::getGroupUuid, groupUuid);
+        return list(queryWrapper);
+    }
+
+    /**
+     * 根据字段UUID查询格式验证规则列表
+     *
+     * @param fieldUuids 字段UUID列表
+     * @return 格式验证规则列表
+     */
+    public List<MetadataValidationFormatDO> findByFieldUuids(Collection<String> fieldUuids) {
+        if (fieldUuids == null || fieldUuids.isEmpty()) { return java.util.Collections.emptyList(); }
+        QueryWrapper queryWrapper = query()
+                .in(MetadataValidationFormatDO::getFieldUuid, fieldUuids);
         return list(queryWrapper);
     }
 

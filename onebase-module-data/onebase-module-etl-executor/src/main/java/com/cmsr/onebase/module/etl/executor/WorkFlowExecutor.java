@@ -39,13 +39,13 @@ public class WorkFlowExecutor implements Closeable {
 
     private BeanManager beanManager;
 
-    private EtlWorkflow etlWorkflow;
-
     private WorkflowGraph workflowGraph;
 
     private TableEnvironment tableEnv;
 
     private LocalDateTime execStartTime;
+
+    private Long applicationId;
 
     public WorkFlowExecutor(ExecuteRequest executeRequest) throws Exception {
         this(executeRequest, null);
@@ -60,30 +60,38 @@ public class WorkFlowExecutor implements Closeable {
     }
 
     private void initializeWorkflowGraph(DataSource dataSource) throws Exception {
-        beanManager = dataSource == null ? new BeanManager(executeRequest) : new BeanManager(executeRequest, dataSource);
+        this.beanManager = dataSource == null ? new BeanManager(executeRequest) : new BeanManager(executeRequest, dataSource);
         WorkflowProvider workflowProvider = beanManager.getWorkflowDao();
         QueryProvider queryProvider = beanManager.getQueryProvider();
         if (executeRequest.getWorkflowId() != null) {
-            etlWorkflow = queryProvider.findWorkflowConfig(executeRequest.getWorkflowId());
+            EtlWorkflow etlWorkflow = queryProvider.findWorkflowConfig(executeRequest.getWorkflowId());
             checkWorkflow(etlWorkflow);
-            workflowGraph = workflowProvider.createWorkflowGraph(etlWorkflow.getConfig());
+            this.applicationId = etlWorkflow.getApplicationId();
+            this.workflowGraph = workflowProvider.createWorkflowGraph(etlWorkflow.getApplicationId(), etlWorkflow.getConfig());
         } else {
-            workflowGraph = workflowProvider.createSubWorkflowGraph(executeRequest.getPreviewWorkflow(), executeRequest.getPreviewNodeId());
+            this.applicationId = executeRequest.getApplicationId();
+            this.workflowGraph = workflowProvider.createSubWorkflowGraph(executeRequest.getApplicationId(), executeRequest.getPreviewWorkflow(), executeRequest.getPreviewNodeId());
         }
     }
 
     private void checkWorkflow(EtlWorkflow etlWorkflow) throws Exception {
-        if (etlWorkflow.getWorkflowId() == null) {
+        if (etlWorkflow == null) {
             throw new Exception("未找到工作流");
         }
+        if (etlWorkflow.getApplicationId() == null) {
+            throw new Exception("未找到工作流ApplicationId");
+        }
+        if (etlWorkflow.getWorkflowId() == null) {
+            throw new Exception("未找到工作流WorkflowId");
+        }
         if (etlWorkflow.getConfig() == null) {
-            throw new Exception("未找到工作流配置");
+            throw new Exception("未找到工作流配置Config");
         }
     }
 
     public void execute() throws Exception {
         EtlExecutionLog executionLog = new EtlExecutionLog();
-        executionLog.setApplicationId(etlWorkflow.getApplicationId());
+        executionLog.setApplicationId(applicationId);
         executionLog.setWorkflowId(executeRequest.getWorkflowId());
         executionLog.setStartTime(execStartTime);
         try {

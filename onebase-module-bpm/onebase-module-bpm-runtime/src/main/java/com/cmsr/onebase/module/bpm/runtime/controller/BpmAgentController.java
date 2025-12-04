@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.bpm.runtime.controller;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.bpm.runtime.service.BpmAgentService;
-import com.cmsr.onebase.module.bpm.runtime.vo.*;
+import com.cmsr.onebase.module.bpm.runtime.vo.agent.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;

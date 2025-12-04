@@ -1,11 +1,9 @@
 package com.cmsr.onebase.module.metadata.api.datamethod.impl;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import com.cmsr.onebase.module.metadata.api.datamethod.DataMethodApi;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.*;
-import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityFieldRepository;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityRelationshipRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
@@ -16,7 +14,6 @@ import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
 import com.cmsr.onebase.module.metadata.core.enums.OpEnum;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
 import com.cmsr.onebase.module.metadata.core.service.entity.impl.MetadataEntityFieldCoreServiceImpl;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import com.cmsr.onebase.module.metadata.core.service.datamethod.MetadataDataMethodCoreService;

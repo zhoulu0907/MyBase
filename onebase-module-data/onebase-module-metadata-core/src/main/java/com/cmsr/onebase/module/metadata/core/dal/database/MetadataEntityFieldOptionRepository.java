@@ -7,6 +7,7 @@ import com.mybatisflex.spring.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -32,6 +33,17 @@ public class MetadataEntityFieldOptionRepository extends ServiceImpl<MetadataEnt
                 .orderBy(MetadataEntityFieldOptionDO::getCreateTime, true);
         return list(queryWrapper);
     }
+
+    public List<MetadataEntityFieldOptionDO> findAllByFieldUuids(Collection<String> fieldUuids) {
+        if (fieldUuids == null || fieldUuids.isEmpty()) {
+            return java.util.Collections.emptyList();
+        }
+        QueryWrapper queryWrapper = this.query()
+                .in(MetadataEntityFieldOptionDO::getFieldUuid, fieldUuids)
+                .orderBy(MetadataEntityFieldOptionDO::getCreateTime, true);
+        return list(queryWrapper);
+    }
+
 
     /**
      * 根据字段UUID删除字段选项
@@ -97,5 +109,4 @@ public class MetadataEntityFieldOptionRepository extends ServiceImpl<MetadataEnt
         deleteByFieldUuid(fieldId != null ? String.valueOf(fieldId) : null);
     }
 }
-
 

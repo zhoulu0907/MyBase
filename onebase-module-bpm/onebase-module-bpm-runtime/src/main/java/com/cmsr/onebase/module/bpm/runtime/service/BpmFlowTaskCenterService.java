@@ -5,7 +5,7 @@ import com.cmsr.onebase.module.bpm.core.vo.BpmCcTaskPageReqVO;
 import com.cmsr.onebase.module.bpm.core.vo.BpmDoneTaskPageReqVO;
 import com.cmsr.onebase.module.bpm.core.vo.BpmMyCreatedPageReqVO;
 import com.cmsr.onebase.module.bpm.core.vo.BpmTodoTaskPageReqVO;
-import com.cmsr.onebase.module.bpm.runtime.vo.*;
+import com.cmsr.onebase.module.bpm.runtime.vo.taskcenter.*;
 
 import java.util.List;
 
@@ -38,10 +38,11 @@ public interface BpmFlowTaskCenterService {
     /**
      * 获取流程节点列表
      *
-     * @param bindingViewId 绑定视图Id
+     * @param businessUuid 业务UUID
      * @return
      */
-    List<ListNodesRespVO.NodeVO> listNodes(Long bindingViewId);
+    List<ListNodesRespVO.NodeVO> listNodes(String businessUuid);
+
     /**
      * 获取流程抄送我的流程
      *

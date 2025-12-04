@@ -2,10 +2,7 @@ package com.cmsr.onebase.framework.orm.config;
 
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
-import com.cmsr.onebase.framework.orm.entity.BaseAppEntity;
-import com.cmsr.onebase.framework.orm.entity.BaseBizEntity;
-import com.cmsr.onebase.framework.orm.entity.BaseEntity;
-import com.cmsr.onebase.framework.orm.entity.WarmFlowBaseEntity;
+import com.cmsr.onebase.framework.orm.entity.*;
 import com.mybatisflex.annotation.InsertListener;
 import com.mybatisflex.annotation.UpdateListener;
 
@@ -48,6 +45,17 @@ public class DefaultEntityListener implements InsertListener, UpdateListener {
                 bizEntity.setApplicationId(applicationId);
             }
         }
+
+        if (o instanceof WarmFlowBizEntity wfBizEntity) {
+            Long versionTag = ApplicationManager.getVersionTag();
+            if (wfBizEntity.getVersionTag() == null && versionTag != null) {
+                wfBizEntity.setVersionTagByListener(versionTag);
+            }
+            Long applicationId = ApplicationManager.getApplicationId();
+            if (wfBizEntity.getApplicationId() == null && applicationId != null) {
+                wfBizEntity.setApplicationIdByListener(applicationId);
+            }
+        }
     }
 
     @Override
@@ -55,6 +63,11 @@ public class DefaultEntityListener implements InsertListener, UpdateListener {
         if (o instanceof BaseEntity baseEntity) {
             baseEntity.setUpdater(SecurityFrameworkUtils.getLoginUserId());
             baseEntity.setUpdateTime(LocalDateTime.now());
+        }
+
+        if (o instanceof WarmFlowBaseEntity wfBaseEntity) {
+            wfBaseEntity.setUpdater(SecurityFrameworkUtils.getLoginUserId());
+            wfBaseEntity.setUpdateTimeByListener(LocalDateTime.now());
         }
     }
 }

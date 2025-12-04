@@ -5,10 +5,10 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.framework.common.util.collection.MapUtils;
 import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
 import com.cmsr.onebase.module.system.api.user.dto.UserByDeptPageReqDTO;
 import com.cmsr.onebase.module.system.api.user.dto.UserSimpleRespDTO;
-import com.cmsr.onebase.module.system.convert.user.UserConvert;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.service.dept.DeptService;
@@ -72,7 +72,12 @@ public class AdminUserApiImpl implements AdminUserApi {
         List<AdminUserDO> users = userService.getUserList(ids);
         // 拼接数据
         Map<Long, DeptDO> deptMap = deptService.getDeptMap(convertList(users, AdminUserDO::getDeptId));
-        return success(UserConvert.INSTANCE.convert2DTOList(users, deptMap));
+        List<AdminUserRespDTO> dtos = convertList(users, user -> {
+            AdminUserRespDTO dto = BeanUtils.toBean(user, AdminUserRespDTO.class);
+            MapUtils.findAndThen(deptMap, user.getDeptId(), dept -> dto.setDeptName(dept.getName()));
+            return dto;
+        });
+        return success(dtos);
     }
 
     @Override

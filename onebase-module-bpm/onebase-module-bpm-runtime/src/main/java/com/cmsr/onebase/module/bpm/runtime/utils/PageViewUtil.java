@@ -1,11 +1,13 @@
 package com.cmsr.onebase.module.bpm.runtime.utils;
 
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.module.app.api.appresource.AppResourceApi;
 import com.cmsr.onebase.module.app.api.appresource.dto.PageRespDTO;
 import com.cmsr.onebase.module.bpm.core.dto.PageViewDTO;
 import com.cmsr.onebase.module.bpm.core.dto.PageViewGroupDTO;
 import com.cmsr.onebase.module.bpm.core.enums.PageViewModeEnum;
 import jakarta.annotation.Resource;
+import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -22,13 +24,25 @@ public class PageViewUtil {
     @Resource
     private AppResourceApi appResourceApi;
 
+    public PageViewGroupDTO findPageViewGroupByPageSetUuid(String pageSetUuid) {
+        Long applicationId = ApplicationManager.getApplicationId();
+        // 查出页面列表
+        List<PageRespDTO> pageRespDTOs = appResourceApi.findPageListByPageSetUuidAndAppId(pageSetUuid, applicationId);
+
+        return buildPageViewGroup(pageRespDTOs);
+    }
+
     public PageViewGroupDTO findPageViewGroup(Long pageSetId){
+        // 查出页面列表
+        List<PageRespDTO> pageRespDTOs = appResourceApi.findPageListByPageSetId(pageSetId);
+
+        return buildPageViewGroup(pageRespDTOs);
+    }
+
+    private PageViewGroupDTO buildPageViewGroup(List<PageRespDTO> pageRespDTOs){
         // 详情视图页面和编辑视图页面
         PageViewDTO editPageView = null;
         PageViewDTO detailPageView = null;
-
-        // 查出页面列表
-        List<PageRespDTO> pageRespDTOs = appResourceApi.findPageListByPageSetId(pageSetId);
 
         for (PageRespDTO pageRespDTO : pageRespDTOs) {
             // 只取表单类型
@@ -36,17 +50,19 @@ public class PageViewUtil {
                 continue;
             }
 
-            if (Objects.equals(pageRespDTO.getIsDefaultEditViewMode(), 1)) {
+            if (BooleanUtils.toBoolean(pageRespDTO.getIsDefaultEditViewMode())) {
                 editPageView = new PageViewDTO();
                 editPageView.setViewName(pageRespDTO.getPageName());
                 editPageView.setViewId(pageRespDTO.getId());
+                editPageView.setViewUuid(pageRespDTO.getPageUuid());
                 editPageView.setViewMode(PageViewModeEnum.EDIT.getCode());
             }
 
-            if (Objects.equals(pageRespDTO.getIsDefaultDetailViewMode(), 1)) {
+            if (BooleanUtils.toBoolean(pageRespDTO.getIsDefaultDetailViewMode())) {
                 detailPageView = new PageViewDTO();
                 detailPageView.setViewName(pageRespDTO.getPageName());
                 detailPageView.setViewId(pageRespDTO.getId());
+                detailPageView.setViewUuid(pageRespDTO.getPageUuid());
                 detailPageView.setViewMode(PageViewModeEnum.DETAIL.getCode());
             }
 

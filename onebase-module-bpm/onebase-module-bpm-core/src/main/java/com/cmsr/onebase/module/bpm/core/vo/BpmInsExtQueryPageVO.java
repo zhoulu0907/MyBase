@@ -2,7 +2,6 @@ package com.cmsr.onebase.module.bpm.core.vo;
 
 import com.cmsr.onebase.framework.common.pojo.PageParam;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -24,11 +23,10 @@ public class BpmInsExtQueryPageVO extends PageParam  {
     private String keyword;
 
     @Schema(description = "应用ID", example = "1332334434343")
-    @NotNull(message = "应用ID不能为空")
     private Long appId;
 
-    @Schema(description = "业务id，实际对应pageSetId", example = "32636263636323")
-    private String businessId;
+    @Schema(description = "业务uuid，实际对应menuUuid", example = "32636263636323")
+    private String businessUuid;
 
     @Schema(description = "排序方式：desc-最新处理的, asc-最早处理的",
             example = "desc", defaultValue = "desc")

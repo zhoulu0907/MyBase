@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 
 /**
  * 自动编号核心服务
@@ -89,6 +90,19 @@ public class AutoNumberService {
 
         // 2. 预览编号
         return generator.preview(config, contextData);
+    }
+
+    public Map<String, String> generateDataNumbers(List<Long> fieldIds, Map<String, Object> contextData) {
+        Map<String, String> result = new HashMap<>();
+        if (fieldIds == null || fieldIds.isEmpty()) {
+            return result;
+        }
+        List<MetadataAutoNumberConfigDO> configs = configRepository.listEnabledByFieldIds(fieldIds);
+        for (MetadataAutoNumberConfigDO config : configs) {
+            String number = generator.generate(config, contextData);
+            result.put(config.getFieldUuid(), number);
+        }
+        return result;
     }
 
     /**

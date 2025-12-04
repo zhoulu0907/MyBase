@@ -112,6 +112,7 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
             groupVO.setValidationType("REQUIRED");
             // 修复：同步entityId到规则组
             groupVO.setEntityId(field.getEntityUuid());
+            groupVO.setEntityUuid(field.getEntityUuid());
             groupId = validationRuleGroupService.createValidationRuleGroup(groupVO);
         }
 

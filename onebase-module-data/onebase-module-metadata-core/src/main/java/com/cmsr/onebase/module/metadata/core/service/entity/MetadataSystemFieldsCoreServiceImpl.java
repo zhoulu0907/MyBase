@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.metadata.core.service.entity;
 
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataSystemFieldsDO;
+import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataSystemFieldsRepository;
 import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
@@ -24,6 +25,14 @@ public class MetadataSystemFieldsCoreServiceImpl implements MetadataSystemFields
 
     @Override
     public List<MetadataSystemFieldsDO> findAllByConfig(QueryWrapper queryWrapper) {
+        return metadataSystemFieldsRepository.list(queryWrapper);
+    }
+
+    @Override
+    public List<MetadataSystemFieldsDO> findAllEnabeldSystemFields() {
+        QueryWrapper queryWrapper = QueryWrapper.create().select(MetadataSystemFieldsDO::getId, MetadataSystemFieldsDO::getFieldName, MetadataSystemFieldsDO::getDefaultValue)
+                .eq(MetadataSystemFieldsDO::getIsEnabled, CommonStatusEnum.ENABLE.getStatus())
+                .orderBy(MetadataSystemFieldsDO::getId, true);
         return metadataSystemFieldsRepository.list(queryWrapper);
     }
 }

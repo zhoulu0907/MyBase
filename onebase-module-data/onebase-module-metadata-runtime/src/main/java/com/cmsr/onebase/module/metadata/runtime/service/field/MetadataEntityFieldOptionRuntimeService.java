@@ -5,7 +5,9 @@ import com.cmsr.onebase.module.metadata.runtime.controller.app.entity.vo.FieldOp
 import com.cmsr.onebase.module.metadata.runtime.controller.app.entity.vo.FieldOptionSaveReqVO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.field.MetadataEntityFieldOptionDO;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 字段选项 Runtime Service 接口
@@ -21,7 +23,9 @@ public interface MetadataEntityFieldOptionRuntimeService {
      * @param fieldId 字段ID
      * @return 选项DO列表
      */
-    List<MetadataEntityFieldOptionDO> listByFieldId(Long fieldId);
+    List<MetadataEntityFieldOptionDO> listByFieldUuid(String fieldUuid);
+
+    Map<String, List<MetadataEntityFieldOptionDO>> listByFieldUuids(List<String> fieldUuids);
 
     /**
      * 创建字段选项
@@ -66,7 +70,7 @@ public interface MetadataEntityFieldOptionRuntimeService {
      * @param fieldId 字段ID
      * @return 选项列表响应VO
      */
-    List<FieldOptionRespVO> getFieldOptionList(Long fieldId);
+    List<FieldOptionRespVO> getFieldOptionList(String fieldUuid);
 
     /**
      * 创建字段选项
@@ -90,4 +94,3 @@ public interface MetadataEntityFieldOptionRuntimeService {
      */
     void batchSortFieldOptions(FieldOptionBatchSortReqVO req);
 }
-

@@ -77,4 +77,17 @@ public class MetadataValidationUniqueRepository extends ServiceImpl<MetadataVali
     public List<MetadataValidationUniqueDO> findByGroupId(Long groupId) {
         return findByGroupUuid(groupId != null ? String.valueOf(groupId) : null);
     }
+
+    /**
+     * 根据字段UUID查询唯一性验证规则列表
+     *
+     * @param fieldUuids 字段UUID列表
+     * @return 唯一性验证规则列表
+     */
+    public List<MetadataValidationUniqueDO> findByFieldUuids(java.util.Collection<String> fieldUuids) {
+        if (fieldUuids == null || fieldUuids.isEmpty()) { return java.util.Collections.emptyList(); }
+        QueryWrapper queryWrapper = query()
+                .in(MetadataValidationUniqueDO::getFieldUuid, fieldUuids);
+        return list(queryWrapper);
+    }
 }

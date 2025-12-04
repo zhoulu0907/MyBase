@@ -21,6 +21,11 @@
     <dependencies>
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-common</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-project-base</artifactId>
             <version>${revision}</version>
         </dependency>

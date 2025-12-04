@@ -2,10 +2,14 @@ package com.cmsr.onebase.module.bpm.runtime.service.impl;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
+import com.cmsr.onebase.module.app.api.appresource.AppResourceApi;
+import com.cmsr.onebase.module.app.api.appresource.dto.AppMenuRespDTO;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowCcRecordRepository;
+import com.cmsr.onebase.module.bpm.core.dal.database.ext.BpmFlowDefinitionRepositoryExt;
 import com.cmsr.onebase.module.bpm.core.dal.mapper.BpmTaskCenterMapper;
 import com.cmsr.onebase.module.bpm.core.dto.BpmCcRecordDTO;
 import com.cmsr.onebase.module.bpm.core.dto.BpmDoneTaskDTO;
@@ -13,11 +17,12 @@ import com.cmsr.onebase.module.bpm.core.dto.BpmMyInstanceDTO;
 import com.cmsr.onebase.module.bpm.core.dto.BpmTodoTaskDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
 import com.cmsr.onebase.module.bpm.core.enums.BpmBusinessStatusEnum;
-import com.cmsr.onebase.module.bpm.core.dal.database.ext.BpmFlowDefinitionRepositoryExt;
+import com.cmsr.onebase.module.bpm.core.enums.BpmConstants;
+import com.cmsr.onebase.module.bpm.core.validator.BpmAppResourceValidator;
 import com.cmsr.onebase.module.bpm.core.vo.*;
 import com.cmsr.onebase.module.bpm.runtime.convert.BpmTaskCenterConvert;
 import com.cmsr.onebase.module.bpm.runtime.service.BpmFlowTaskCenterService;
-import com.cmsr.onebase.module.bpm.runtime.vo.*;
+import com.cmsr.onebase.module.bpm.runtime.vo.taskcenter.*;
 import com.cmsr.onebase.module.system.api.user.AdminUserApi;
 import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
 import com.github.pagehelper.PageHelper;
@@ -35,7 +40,6 @@ import org.dromara.warm.flow.core.enums.PublishStatus;
 import org.dromara.warm.flow.core.service.DefService;
 import org.dromara.warm.flow.core.service.TaskService;
 import org.dromara.warm.flow.core.service.UserService;
-import com.cmsr.onebase.module.bpm.core.enums.BpmConstants;
 import org.dromara.warm.flow.core.utils.StreamUtils;
 import org.springframework.stereotype.Service;
 
@@ -57,6 +61,9 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
     private AdminUserApi adminUserApi;
 
     @Resource
+    private AppResourceApi appResourceApi;
+
+    @Resource
     private BpmFlowDefinitionRepositoryExt defExtService;
 
     @Resource(name = "bpmDefService")
@@ -67,6 +74,9 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
 
     @Resource
     private BpmTaskCenterMapper bpmTaskCenterMapper;
+
+    @Resource
+    private BpmAppResourceValidator bpmAppResourceValidator;
 
     private final BpmTaskCenterConvert bpmTaskCenterConvert = BpmTaskCenterConvert.INSTANCE;
 
@@ -106,6 +116,28 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
                 .collect(Collectors.toList());
     }
 
+    private void fillAppId(BpmInsExtQueryPageVO queryPageVO) {
+        // todo: 后续放到全局的Repository中
+        Long appId = ApplicationManager.getApplicationId();
+
+        if (appId == null) {
+            throw exception(ErrorCodeConstants.MISSING_APPLICATION_ID);
+        }
+
+        queryPageVO.setAppId(appId);
+    }
+
+    private void validateBusinessUuid(BpmInsExtQueryPageVO queryPageVO) {
+        String businessUuid = queryPageVO.getBusinessUuid();
+
+        if (StringUtils.isBlank(businessUuid)) {
+            return;
+        }
+
+        AppMenuRespDTO appMenuRespDTO = appResourceApi.getAppMenuByUuidAndAppId(businessUuid, queryPageVO.getAppId());
+        bpmAppResourceValidator.validateMenuAndPageset(appMenuRespDTO, queryPageVO.getAppId());
+    }
+
     /**
      * 获取流程待办分页
      *
@@ -116,6 +148,9 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
     public PageResult<BpmFlowTodoTaskVO> getTodoPage(BpmTodoTaskPageReqVO pageReqVO) {
         Long loginUserId = WebFrameworkUtils.getLoginUserId();
         String loginUserStrId = String.valueOf(loginUserId);
+
+        fillAppId(pageReqVO);
+        validateBusinessUuid(pageReqVO);
 
         // 处理节点编码参数
         pageReqVO.setNodeCodeList(splitToList(pageReqVO.getNodeCode()));
@@ -156,6 +191,9 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         Long loginUserId = WebFrameworkUtils.getLoginUserId();
         String loginUserStrId = String.valueOf(loginUserId);
 
+        fillAppId(pageReqVO);
+        validateBusinessUuid(pageReqVO);
+
         // 处理节点编码参数
         pageReqVO.setNodeCodeList(splitToList(pageReqVO.getNodeCode()));
 
@@ -188,6 +226,9 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
      */
     public PageResult<BpmMyCreatedVO> getMyCreatedPage(BpmMyCreatedPageReqVO pageReqVO) {
         Long loginUserId = WebFrameworkUtils.getLoginUserId();
+
+        fillAppId(pageReqVO);
+        validateBusinessUuid(pageReqVO);
 
         // 处理节点编码参数
         pageReqVO.setNodeCodeList(splitToList(pageReqVO.getNodeCode()));
@@ -235,11 +276,15 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         return new PageResult<>(list, pageResult.getTotal());
     }
 
-    @Override
-    public List<ListNodesRespVO.NodeVO> listNodes(Long bindingViewId) {
+     @Override
+    public List<ListNodesRespVO.NodeVO> listNodes(String businessUuid) {
         List<ListNodesRespVO.NodeVO> nodeVOs = new ArrayList<>();
 
-        Definition def = defExtService.getByFormPathAndStatus(String.valueOf(bindingViewId), PublishStatus.PUBLISHED.getKey());
+        AppMenuRespDTO appMenuRespDTO = appResourceApi.getAppMenuByUuidAndAppId(businessUuid, ApplicationManager.getApplicationId());
+
+        bpmAppResourceValidator.validateMenuAndPageset(appMenuRespDTO, ApplicationManager.getApplicationId());
+
+        Definition def = defExtService.getByFormPathAndStatus(appMenuRespDTO.getMenuUuid(), PublishStatus.PUBLISHED.getKey());
         if (def == null) {
             // todo：无发布状态的定义，返回空列表，是否要返回历史状态的流程定义数据
             return nodeVOs;
@@ -279,6 +324,9 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
     public PageResult<BpmCcTaskPageResVO> getCcPage(BpmCcTaskPageReqVO pageReqVO) {
         Long loginUserId = WebFrameworkUtils.getLoginUserId();
         String loginUserStrId = String.valueOf(loginUserId);
+
+        fillAppId(pageReqVO);
+        validateBusinessUuid(pageReqVO);
 
         // 处理节点编码参数
         pageReqVO.setNodeCodeList(splitToList(pageReqVO.getNodeCode()));

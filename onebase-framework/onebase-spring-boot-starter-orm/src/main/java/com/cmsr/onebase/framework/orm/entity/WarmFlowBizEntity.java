@@ -22,5 +22,13 @@ public class WarmFlowBizEntity extends WarmFlowBaseEntity {
     @Getter
     @Column(value = "version_tag", comment = "版本标签")
     protected Long versionTag;
+
+    public void setApplicationIdByListener(Long applicationId) {
+        this.applicationId = applicationId;
+    }
+
+    public void setVersionTagByListener(Long versionTag) {
+        this.versionTag = versionTag;
+    }
 }
 

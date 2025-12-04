@@ -4,7 +4,12 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.number.MetadataAutoN
 import com.cmsr.onebase.module.metadata.core.dal.mapper.MetadataAutoNumberConfigMapper;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
+
+import java.util.List;
+
 import org.springframework.stereotype.Repository;
+
+
 
 /**
  * 自动编号-配置 仓储
@@ -25,6 +30,13 @@ public class MetadataAutoNumberConfigRepository extends ServiceImpl<MetadataAuto
         QueryWrapper queryWrapper = this.query()
                 .eq(MetadataAutoNumberConfigDO::getFieldUuid, fieldUuid);
         return getOne(queryWrapper);
+    }
+
+    public List<MetadataAutoNumberConfigDO> listEnabledByFieldUuids(List<String> fieldUuids) {
+        QueryWrapper queryWrapper = this.query()
+                .in(MetadataAutoNumberConfigDO::getFieldUuid, fieldUuids)
+                .eq(MetadataAutoNumberConfigDO::getIsEnabled, "1");
+        return list(queryWrapper);
     }
 
     /**
@@ -71,6 +83,13 @@ public class MetadataAutoNumberConfigRepository extends ServiceImpl<MetadataAuto
         return findByFieldUuid(fieldId != null ? String.valueOf(fieldId) : null);
     }
 
+    @Deprecated
+    public List<MetadataAutoNumberConfigDO> listEnabledByFieldIds(List<Long> fieldIds) {
+        QueryWrapper queryWrapper = this.query()
+                .in(MetadataAutoNumberConfigDO::getFieldUuid, fieldIds.stream().map(String::valueOf).toList())
+                .eq(MetadataAutoNumberConfigDO::getIsEnabled, "1");
+        return list(queryWrapper);
+    }
     /**
      * 根据字段ID删除自动编号配置（兼容旧代码）
      * @deprecated 请使用 deleteByFieldUuid(String)
@@ -81,5 +100,4 @@ public class MetadataAutoNumberConfigRepository extends ServiceImpl<MetadataAuto
         deleteByFieldUuid(fieldId != null ? String.valueOf(fieldId) : null);
     }
 }
-
 

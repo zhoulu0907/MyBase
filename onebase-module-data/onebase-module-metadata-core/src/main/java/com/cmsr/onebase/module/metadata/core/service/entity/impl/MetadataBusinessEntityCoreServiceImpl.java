@@ -132,4 +132,14 @@ public class MetadataBusinessEntityCoreServiceImpl implements MetadataBusinessEn
             throw exception(BUSINESS_ENTITY_NOT_EXISTS);
         }
     }
+
+    @Override
+    public MetadataBusinessEntityDO getBusinessEntityByTableName(String tableName) {
+        if (tableName == null || tableName.trim().isEmpty()) {
+            return null;
+        }
+        QueryWrapper queryWrapper = metadataBusinessEntityRepository.query()
+                .eq(MetadataBusinessEntityDO::getTableName, tableName.trim());
+        return metadataBusinessEntityRepository.getOne(queryWrapper);
+    }
 }

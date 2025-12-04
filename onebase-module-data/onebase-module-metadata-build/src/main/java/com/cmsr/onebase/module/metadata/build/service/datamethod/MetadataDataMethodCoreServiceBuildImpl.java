@@ -9,6 +9,12 @@ import com.cmsr.onebase.module.metadata.core.enums.ClientTypeEnum;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.AbstractMetadataDataMethodCoreService;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.MetadataDataMethodCoreService;
 import lombok.extern.slf4j.Slf4j;
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
+import com.cmsr.onebase.module.metadata.core.enums.BooleanStatusEnum;
+import com.cmsr.onebase.module.metadata.core.service.datamethod.strategy.FieldValueTransformMode;
+import org.springframework.util.StringUtils;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.stereotype.Service;
 
@@ -184,5 +190,68 @@ public class MetadataDataMethodCoreServiceBuildImpl extends AbstractMetadataData
         } else {
             log.warn("编辑态未获取到登录用户信息");
         }
+    }
+
+    @Override
+    protected java.util.Map<String, Object> processDataAndSetDefaults(java.util.Map<String, Object> data,
+                                                                      java.util.List<MetadataEntityFieldDO> fields) {
+        java.util.Map<String, Object> processedData = convertFieldIdToFieldName(data, fields);
+
+        String realPrimaryKey = getPrimaryKeyFieldName(fields);
+        LocalDateTime dateTime = LocalDateTime.now();
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String now = dateTime.format(dateTimeFormatter);
+
+        for (MetadataEntityFieldDO field : fields) {
+            String fieldName = field.getFieldName();
+            if (fieldName == null) {
+                continue;
+            }
+
+            if (fieldName.equalsIgnoreCase(realPrimaryKey)) {
+                if (!processedData.containsKey(fieldName)) {
+                    processedData.put(fieldName, uidGenerator.getUID());
+                }
+                continue;
+            }
+
+            if (BooleanStatusEnum.isYes(field.getIsSystemField())) {
+                switch (fieldName.toLowerCase()) {
+                    case "created_time":
+                    case "createtime":
+                        if (!processedData.containsKey(fieldName)) {
+                            processedData.put(fieldName, now);
+                        }
+                        break;
+                    case "updated_time":
+                    case "updatetime":
+                        processedData.put(fieldName, now);
+                        break;
+                    case "deleted":
+                        if (!processedData.containsKey(fieldName)) {
+                            processedData.put(fieldName, 0);
+                        }
+                        break;
+                    case "lock_version":
+                    case "lockversion":
+                        if (!processedData.containsKey(fieldName)) {
+                            processedData.put(fieldName, 0);
+                        }
+                        break;
+                    default:
+                        if (!processedData.containsKey(fieldName) && StringUtils.hasText(field.getDefaultValue())) {
+                            processedData.put(fieldName, field.getDefaultValue());
+                        }
+                        break;
+                }
+            } else {
+                if (!processedData.containsKey(fieldName) && StringUtils.hasText(field.getDefaultValue())) {
+                    processedData.put(fieldName, field.getDefaultValue());
+                }
+            }
+        }
+
+        applyFieldStorageStrategies(processedData, fields, FieldValueTransformMode.STORE);
+        return processedData;
     }
 }

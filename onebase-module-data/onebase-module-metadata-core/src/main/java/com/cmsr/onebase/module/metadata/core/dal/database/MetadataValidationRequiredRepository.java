@@ -7,6 +7,8 @@ import com.mybatisflex.spring.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -64,6 +66,19 @@ public class MetadataValidationRequiredRepository extends ServiceImpl<MetadataVa
         for (var item : findByFieldUuid(fieldUuid)) {
             removeById(item.getId());
         }
+    }
+
+    /**
+     * 根据字段UUID查询必填验证规则列表
+     *
+     * @param fieldUuids 字段UUID列表
+     * @return 必填验证规则列表
+     */
+    public List<MetadataValidationRequiredDO> findByFieldUuids(Collection<String> fieldUuids) {
+        if (fieldUuids == null || fieldUuids.isEmpty()) { return Collections.emptyList(); }
+        QueryWrapper queryWrapper = query()
+                .in(MetadataValidationRequiredDO::getFieldUuid, fieldUuids);
+        return list(queryWrapper);
     }
 
     // ====== 兼容旧代码的方法 ======

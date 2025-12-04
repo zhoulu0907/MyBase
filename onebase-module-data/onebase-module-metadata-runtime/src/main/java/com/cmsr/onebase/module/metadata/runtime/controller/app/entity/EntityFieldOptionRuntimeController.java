@@ -24,7 +24,7 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
  */
 @Tag(name = "运行态 - 实体字段选项管理")
 @RestController
-@RequestMapping("/metadata-runtime/entity-field/option")
+@RequestMapping("/metadata/entity-field/option")
 @Validated
 public class EntityFieldOptionRuntimeController {
 
@@ -39,8 +39,8 @@ public class EntityFieldOptionRuntimeController {
      */
     @PostMapping("/list")
     @Operation(summary = "按字段ID获取选项列表")
-    public CommonResult<List<FieldOptionRespVO>> list(@RequestParam("fieldId") Long fieldId) {
-        List<FieldOptionRespVO> result = optionService.getFieldOptionList(fieldId);
+    public CommonResult<List<FieldOptionRespVO>> list(@RequestParam("fieldUuid") String fieldUuid) {
+        List<FieldOptionRespVO> result = optionService.getFieldOptionList(fieldUuid);
         return success(result);
     }
 

@@ -11,7 +11,6 @@ import com.cmsr.onebase.module.app.build.service.auth.AppAuthRoleService;
 import com.cmsr.onebase.module.app.build.service.menu.AppMenuService;
 import com.cmsr.onebase.module.app.build.service.version.AppVersionService;
 import com.cmsr.onebase.module.app.build.util.AppUtils;
-import com.cmsr.onebase.module.app.build.util.VersionUtils;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateReqVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateRespVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationRespVO;
@@ -24,7 +23,6 @@ import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.database.tag.AppApplicationTagRepository;
 import com.cmsr.onebase.module.app.core.dal.database.tag.AppTagRepository;
 import com.cmsr.onebase.module.app.core.dal.database.version.AppVersionRepository;
-import com.cmsr.onebase.module.app.core.dal.database.version.AppVersionResourceRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationDO;
 import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.core.enums.app.ApplicationStatusEnum;
@@ -33,7 +31,6 @@ import com.cmsr.onebase.module.app.core.vo.app.ApplicationPageReqVO;
 import com.cmsr.onebase.module.metadata.api.datasource.MetadataDatasourceApi;
 import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceCreateDefaultReqDTO;
 import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceSaveReqDTO;
-import jakarta.annotation.Resource;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -58,49 +55,46 @@ import java.util.stream.Collectors;
 @Slf4j
 public class AppApplicationServiceImpl implements AppApplicationService {
 
-    @Resource
+    @Autowired
     private UidGenerator uidGenerator;
 
-    @Resource
+    @Autowired
     private AppApplicationRepository applicationRepository;
 
-    @Resource
+    @Autowired
     private AppApplicationTagRepository applicationTagRepository;
 
-    @Resource
+    @Autowired
     private AppTagRepository tagRepository;
 
-    @Resource
+    @Autowired
     private AppMenuRepository menuRepository;
 
-    @Resource
+    @Autowired
     private AppVersionRepository versionRepository;
 
-    @Resource
-    private AppVersionResourceRepository versionResourceRepository;
-
-    @Resource
+    @Autowired
     private AppCommonService appCommonService;
 
-    @Resource
+    @Autowired
     private AppAuthRoleService authRoleService;
 
-    @Resource
+    @Autowired
     private MetadataDatasourceApi metadataDatasourceApi;
 
-    @Resource
+    @Autowired
     private AppAuthRoleUserRepository appAuthRoleUserRepository;
 
-    @Resource
+    @Autowired
     private AppAuthRoleRepository appAuthRoleRepository;
 
     @Autowired
     private AppSqlQueryRepository appSqlQueryRepository;
 
-    @Resource
+    @Autowired
     private AppVersionService appVersionService;
 
-    @Resource
+    @Autowired
     private AppMenuService appMenuService;
 
     @Override
@@ -163,7 +157,6 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         AppApplicationDO applicationDO = BeanUtils.toBean(createReqVO, AppApplicationDO.class);
         applicationDO.setId(null);
         applicationDO.setAppUid(findAndCreateAppUid());
-//        applicationDO.setVersionNumber(VersionUtils.INIT_VERSION);
         applicationDO.setAppStatus(ApplicationStatusEnum.EDITING.getValue());
         if (StringUtils.isNoneBlank(createReqVO.getAppCode())) {
             applicationDO.setAppCode(createReqVO.getAppCode());
@@ -236,7 +229,6 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         if (applicationDO == null) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_NOT_EXIST);
         }
-//        applicationDO.setVersionNumber(versionNumber);
         applicationDO.setVersionUrl(versionUrl);
         applicationRepository.updateById(applicationDO);
     }
@@ -252,7 +244,6 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         applicationRepository.removeById(id);
         menuRepository.deleteByApplicationId(id);
         versionRepository.deleteByApplicationId(id);
-        versionResourceRepository.deleteByApplicationId(id);
     }
 
     @Override

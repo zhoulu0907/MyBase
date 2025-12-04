@@ -7,6 +7,8 @@ import com.mybatisflex.spring.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -66,6 +68,13 @@ public class MetadataValidationLengthRepository extends ServiceImpl<MetadataVali
         return list(queryWrapper);
     }
 
+    public List<MetadataValidationLengthDO> findByFieldUuids(Collection<String> fieldUuids) {
+        if (fieldUuids == null || fieldUuids.isEmpty()) { return Collections.emptyList(); }
+        QueryWrapper queryWrapper = query()
+                .in(MetadataValidationLengthDO::getFieldUuid, fieldUuids);
+        return list(queryWrapper);
+    }
+
     /**
      * 根据组ID查询长度验证规则列表（兼容旧代码）
      *
@@ -76,5 +85,13 @@ public class MetadataValidationLengthRepository extends ServiceImpl<MetadataVali
     @Deprecated
     public List<MetadataValidationLengthDO> findByGroupId(Long groupId) {
         return findByGroupUuid(groupId != null ? String.valueOf(groupId) : null);
+    }
+
+    @Deprecated
+    public List<MetadataValidationLengthDO> findByFieldIds(Collection<Long> fieldIds) {
+        if (fieldIds == null || fieldIds.isEmpty()) { return Collections.emptyList(); }
+        QueryWrapper queryWrapper = query()
+                .in(MetadataValidationLengthDO::getFieldUuid, fieldIds);
+        return list(queryWrapper);
     }
 }

@@ -67,4 +67,17 @@ public class MetadataValidationRangeRepository extends ServiceImpl<MetadataValid
         // 返回空列表以保持兼容性
         return java.util.Collections.emptyList();
     }
+
+    /**
+     * 根据字段UUID查询范围验证规则列表
+     *
+     * @param fieldUuids 字段UUID列表
+     * @return 范围验证规则列表
+     */
+    public List<MetadataValidationRangeDO> findByFieldUuids(java.util.Collection<String> fieldUuids) {
+        if (fieldUuids == null || fieldUuids.isEmpty()) { return java.util.Collections.emptyList(); }
+        QueryWrapper queryWrapper = query()
+                .in(MetadataValidationRangeDO::getFieldUuid, fieldUuids);
+        return list(queryWrapper);
+    }
 }
