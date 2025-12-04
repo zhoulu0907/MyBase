@@ -141,19 +141,37 @@ public class PageSetServiceImpl implements PageSetService {
         if (appMenuDO == null) {
             return;
         }
-        appMenuRepository.removeById(appMenuDO);
-        // 删除页面集关联的页面
+        deletePageSetByMenu(appMenuDO);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deletePageSetByMenu(AppMenuDO appMenuDO) {
         AppResourcePagesetDO pageSetDO = pageSetRepository.findPageSetByAppIdAndMenuUuid(appMenuDO.getApplicationId(), appMenuDO.getMenuUuid());
         if (pageSetDO == null) {
             return;
         }
-        pageSetRepository.removeById(pageSetDO);
-        // 删除页面
-        List<Long> pageIds = pageRepository.findIdsByAppIdAndPageSetUuid(appMenuDO.getApplicationId(), pageSetDO.getPageSetUuid());
-        if (CollectionUtils.isEmpty(pageIds)) {
-            return;
+        List<AppResourcePageDO> pages = pageRepository.findByPageSetUuid(appMenuDO.getApplicationId(), pageSetDO.getPageSetUuid());
+        List<String> pageUuids = null;
+        if (CollectionUtils.isNotEmpty(pages)) {
+            pageUuids = pages.stream().map(AppResourcePageDO::getPageUuid).toList();
         }
-        pageRepository.removeByIds(pageIds);
+        List<AppResourceComponentDO> componentDOS = null;
+        if (CollectionUtils.isNotEmpty(pageUuids)) {
+            componentDOS = componentRepository.findByAppIdAndPageUuids(appMenuDO.getApplicationId(), pageUuids);
+        }
+        //删除组件
+        if (CollectionUtils.isNotEmpty(componentDOS)) {
+            componentRepository.removeByIds(componentDOS.stream().map(AppResourceComponentDO::getId).toList());
+        }
+        // 删除页面
+        if (CollectionUtils.isNotEmpty(pages)) {
+            pageRepository.removeByIds(pages.stream().map(AppResourcePageDO::getId).toList());
+        }
+        // 删除页面集关联的页面
+        if (pageSetDO != null) {
+            pageSetRepository.removeById(pageSetDO);
+        }
     }
 
     @Override
