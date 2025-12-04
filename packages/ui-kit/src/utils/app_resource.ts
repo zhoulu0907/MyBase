@@ -240,7 +240,7 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
   const loadPageSetReq: LoadPageSetReq = {
     id: pageSetId
   };
-  const pageSet = await loadPageSet(loadPageSetReq, params.runtime);
+  const pageSet = await loadPageSet(loadPageSetReq);
   setCurPage(pageSet);
   console.log('载入页面集数据: ', pageSet);
 
