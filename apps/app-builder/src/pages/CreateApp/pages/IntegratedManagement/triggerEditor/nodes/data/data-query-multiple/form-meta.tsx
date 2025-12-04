@@ -31,8 +31,7 @@ const ALLOW_DATANODE_TYPES = [
   NodeType.IF,
   NodeType.IF_BLOCK,
   NodeType.CASE,
-  NodeType.CASE_DEFAULT,
-  NodeType.JAVASCRIPT
+  NodeType.CASE_DEFAULT
 ];
 
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
