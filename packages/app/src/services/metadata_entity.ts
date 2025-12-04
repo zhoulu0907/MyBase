@@ -1,4 +1,5 @@
 // 实体管理服务
+import { isRuntimeEnv } from '@onebase/common';
 import {
   CreateEntityReqVO,
   CreateFieldReqVO,
@@ -219,8 +220,8 @@ export const getRelationById = (id: string) => {
  * @param entityId 实体ID
  * @returns 实体名称及其关联的子表信息
  */
-export const getEntityFieldsWithChildren = (entityId: string, runtime?: boolean) => {
-  return (runtime ? runtimeMetadataService : metadataService).post(
+export const getEntityFieldsWithChildren = (entityId: string) => {
+  return (isRuntimeEnv() ? runtimeMetadataService : metadataService).post(
     '/entity-relationship/entity-with-children?entityId=' + entityId
   );
 };

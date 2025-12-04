@@ -1,4 +1,5 @@
 //企业管理
+import { isRuntimeEnv } from '@onebase/common';
 import {
   checkCorpAdminUserParams,
   checkCorpParams,
@@ -21,8 +22,8 @@ export const checkCorpAdminUserApi = (data: checkCorpAdminUserParams) =>
   systemService.post('/corp/check-corp-admin-user', data);
 
 //更新企业
-export const updateCorpApi = (data: updateCorpParams, runtime?: boolean) =>
-  (runtime ? runtimeCorpService : systemService).post('/corp/update', data);
+export const updateCorpApi = (data: updateCorpParams) =>
+  (isRuntimeEnv() ? runtimeCorpService : systemService).post('/corp/update', data);
 
 //禁用/启用企业
 export const disabledCorpApi = (data: corpStatusParams) =>

@@ -5,17 +5,17 @@ import {
   dataMethodData,
   dataMethodInsert,
   dataMethodUpdate,
-  PageType,
-  queryFlowExecForm,
+  getEntityFieldsWithChildren,
   getPageSetId,
   getPageSetMetaData,
+  PageType,
+  queryFlowExecForm,
   TRIGGER_EVENTS,
   type AppEntityField,
   type DataMethodParam,
   type GetPageSetIdReq,
   type InsertMethodParams,
-  type UpdateMethodParams,
-  getEntityFieldsWithChildren
+  type UpdateMethodParams
 } from '@onebase/app';
 import { fetchSubmitInstance } from '@onebase/app/src/services/app_runtime';
 import { pagesRuntimeSignal } from '@onebase/common';
@@ -71,11 +71,11 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
   // 获取主表字段和子表字段
   const getMainMetaData = async (pageSetId: string) => {
-    const mainMetaData = await getPageSetMetaData({ pageSetId: pageSetId}, true);
+    const mainMetaData = await getPageSetMetaData({ pageSetId: pageSetId });
     console.log('mainMetaData: ', mainMetaData);
     setMainMetaData(mainMetaData);
 
-    const entityWithChildren = await getEntityFieldsWithChildren(mainMetaData, true);
+    const entityWithChildren = await getEntityFieldsWithChildren(mainMetaData);
     console.log('当前主表及所有子表数据: ', entityWithChildren);
 
     setMainMetaDataFields(entityWithChildren.parentFields);
@@ -105,7 +105,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   const handleGetPageSetId = async (menuId: string) => {
     // TODO(mickey多租户): 待runtime接口提供后打开
     const req: GetPageSetIdReq = { menuId: menuId };
-    const res = await getPageSetId(req, true);
+    const res = await getPageSetId(req);
     setPageSetId(res);
   };
 

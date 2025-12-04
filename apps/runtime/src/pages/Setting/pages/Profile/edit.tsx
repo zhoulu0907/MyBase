@@ -63,7 +63,7 @@ const EditPage: React.FC<IEditPageProps> = ({ avatarUrl, setAvatarUrl }) => {
         }
       : undefined;
 
-    const res = await uploadFile(formData, progressAdapter, true);
+    const res = await uploadFile(formData, progressAdapter);
     return res;
   };
 

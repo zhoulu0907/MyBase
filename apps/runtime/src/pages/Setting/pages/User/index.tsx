@@ -31,7 +31,7 @@ export default function UserPage() {
   };
 
   const getUserContent = async () => {
-    const resq = await getUserPage({ pageNo: 1, pageSize: 10 }, true);
+    const resq = await getUserPage({ pageNo: 1, pageSize: 10 });
     return resq.total;
   };
 

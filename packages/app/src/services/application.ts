@@ -1,5 +1,6 @@
 // 应用服务
 
+import { isRuntimeEnv } from '@onebase/common';
 import {
   type CreateApplicationReq,
   type DeleteApplicationReq,
@@ -14,8 +15,8 @@ export const listApplication = (params: PageParam) => {
   return appService.get('/application/page', params);
 };
 
-export const getApplication = (params: GetApplicationReq, runtime?: boolean) => {
-  return (runtime ? runtimeAppService : appService).get(`/application/get?id=${params.id}`);
+export const getApplication = (params: GetApplicationReq) => {
+  return (isRuntimeEnv() ? runtimeAppService : appService).get(`/application/get?id=${params.id}`);
 };
 
 export const createApplication = (params: CreateApplicationReq) => {

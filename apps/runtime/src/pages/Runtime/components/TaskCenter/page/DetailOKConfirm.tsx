@@ -61,7 +61,7 @@ const DetailOKConfirm: FC = forwardRef((props: any, ref: any) => {
         }
       : undefined;
 
-    const res = await uploadFile(formData, progressAdapter, true);
+    const res = await uploadFile(formData, progressAdapter);
     return res;
   };
 

@@ -55,7 +55,7 @@ const SpaceInfo: React.FC = () => {
 
   const fetchIndustryDict = async (id: string) => {
     try {
-      const res = await getDictDataByType(id, true);
+      const res = await getDictDataByType(id);
       setIndustryDict(res);
     } catch (error) {
       console.error('字典数据列表错误', error);
@@ -83,18 +83,15 @@ const SpaceInfo: React.FC = () => {
     }
 
     try {
-      await updateCorpApi(
-        {
-          id: enterpriseInfo.id!,
-          corpName: newName,
-          corpCode: enterpriseInfo.corpCode,
-          industryType: +enterpriseInfo.industryType!,
-          status: enterpriseInfo.status,
-          address: enterpriseInfo.address!,
-          userLimit: enterpriseInfo.userLimit!
-        },
-        true
-      );
+      await updateCorpApi({
+        id: enterpriseInfo.id!,
+        corpName: newName,
+        corpCode: enterpriseInfo.corpCode,
+        industryType: +enterpriseInfo.industryType!,
+        status: enterpriseInfo.status,
+        address: enterpriseInfo.address!,
+        userLimit: enterpriseInfo.userLimit!
+      });
 
       setEnterpriseInfo({
         ...enterpriseInfo,
@@ -122,7 +119,7 @@ const SpaceInfo: React.FC = () => {
         }
       : undefined;
 
-    const res = await uploadFile(formData, progressAdapter, true);
+    const res = await uploadFile(formData, progressAdapter);
     return res;
   };
 

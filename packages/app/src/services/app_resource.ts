@@ -1,3 +1,4 @@
+import { isRuntimeEnv } from '@onebase/common';
 import {
   CreatePageSetReq,
   CreatePageViewParams,
@@ -14,16 +15,16 @@ import {
 } from '../types';
 import { appService, runtimeAppService } from './clients';
 
-export const getPageSetId = (params: GetPageSetIdReq, runtime?: boolean) => {
-  return (runtime ? runtimeAppService : appService).get('/resource/page_set/id', params);
+export const getPageSetId = (params: GetPageSetIdReq) => {
+  return (isRuntimeEnv() ? runtimeAppService : appService).get('/resource/page_set/id', params);
 };
 
 export const savePageSet = (params: SavePageSetReq) => {
   return appService.post('/resource/page_set/save', params);
 };
 
-export const loadPageSet = (params: LoadPageSetReq, runtime?: boolean) => {
-  return (runtime ? runtimeAppService : appService).post('/resource/page_set/load', params);
+export const loadPageSet = (params: LoadPageSetReq) => {
+  return (isRuntimeEnv() ? runtimeAppService : appService).post('/resource/page_set/load', params);
 };
 
 export const createPageSet = (params: CreatePageSetReq) => {
@@ -38,8 +39,8 @@ export const getAppIdByPageSetId = (params: GetAppIdByPageSetIdReq) => {
   return appService.get('/resource/page_set/app_id', params);
 };
 
-export const getPageSetMetaData = (params: GetPageSetMainMetaDataReq, runtime?: boolean) => {
-  return (runtime ? runtimeAppService : appService).get('/resource/page_set/main_metadata', params);
+export const getPageSetMetaData = (params: GetPageSetMainMetaDataReq) => {
+  return (isRuntimeEnv() ? runtimeAppService : appService).get('/resource/page_set/main_metadata', params);
 };
 
 export const getPageListByAppId = (params: GetPageListByAppIdReq) => {
@@ -58,6 +59,6 @@ export const createPageView = (params: CreatePageViewParams) => {
   return appService.post('/resource/page/view/create', params);
 };
 
-export const listPageView = (params: ListPageViewParams, runtime?: boolean) => {
-  return (runtime ? runtimeAppService : appService).post('/resource/page/view/list', params);
+export const listPageView = (params: ListPageViewParams) => {
+  return (isRuntimeEnv() ? runtimeAppService : appService).post('/resource/page/view/list', params);
 };

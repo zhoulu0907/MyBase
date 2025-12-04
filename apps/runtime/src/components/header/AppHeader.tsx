@@ -69,7 +69,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   };
 
   const getInfo = async () => {
-    const res = await getPermissionInfo(CodeType.CORP, true);
+    const res = await getPermissionInfo(CodeType.CORP);
     UserPermissionManager.setUserPermissionInfo(res);
     const mobile = res.user?.mobile;
     const formatMobile = maskMobile(mobile);

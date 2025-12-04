@@ -27,7 +27,7 @@ const ProfilePage: React.FC = () => {
       const res = await getLoginedUser(true);
       setUserInfo(res);
       if (res?.id) {
-        await getDictDataByType(res.id, true);
+        await getDictDataByType(res.id);
       }
     } finally {
       setLoading(false);

@@ -1,3 +1,4 @@
+import { isRuntimeEnv } from '@onebase/common';
 import { BatchUpdateSecurityConfigsParams } from '../types';
 import { infraService, platformInfraService, runtimeInfraService } from './clients';
 
@@ -6,8 +7,8 @@ export interface UploadProgressCallback {
 }
 
 // build
-export const uploadFile = (data: any, onProgress?: UploadProgressCallback, runtime?: boolean) => {
-  return (runtime ? runtimeInfraService : infraService).post('/file/upload', data, {
+export const uploadFile = (data: any, onProgress?: UploadProgressCallback) => {
+  return (isRuntimeEnv() ? runtimeInfraService : infraService).post('/file/upload', data, {
     headers: {
       'Content-Type': 'multipart/form-data'
     },

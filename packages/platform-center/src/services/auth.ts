@@ -1,4 +1,4 @@
-import { type Captcha, type CaptchaCheck } from '@onebase/common';
+import { isRuntimeEnv, type Captcha, type CaptchaCheck } from '@onebase/common';
 import {
   CodeType,
   Headers,
@@ -18,9 +18,8 @@ export const tenantLogin = (req: TenantLoginRequest, headers: Headers) => {
   return systemService.post('/auth/tenant-login', req, { headers });
 };
 
-export const getPermissionInfo = (code?: CodeType, runtime?: boolean) => {
-  return (runtime ? runtimeService : systemService).get(`/auth/get-permission-info?code=${code}`);
-  return systemService.get(`/auth/get-permission-info?code=${code}`);
+export const getPermissionInfo = (code?: CodeType) => {
+  return (isRuntimeEnv() ? runtimeService : systemService).get(`/auth/get-permission-info?code=${code}`);
 };
 
 export const adminLogin = (req: LoginRequest, headers: Headers) => {

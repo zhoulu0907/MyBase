@@ -105,7 +105,7 @@ export default function UserTable({
       };
       if (selectedDeptId) params.deptId = selectedDeptId;
       if (searchValue) params.nickname = searchValue;
-      const res = await getUserPage(params, true);
+      const res = await getUserPage(params);
       setData(res.list || []);
       setTotal(res.total || 0);
     },
@@ -176,7 +176,7 @@ export default function UserTable({
 
     try {
       setResetPasswordModalVisible(false);
-      await resetUserPassword(resetPasswordUser.id, password, true);
+      await resetUserPassword(resetPasswordUser.id, password);
 
       Message.success('密码已重置');
     } catch (error) {
@@ -195,7 +195,7 @@ export default function UserTable({
       content: newStatus === StatusEnum.DISABLE ? '禁用状态下，用户无法登录系统，再次启用时用户可恢复正常使用' : '',
       okButtonProps: { status: 'danger' },
       onOk: async () => {
-        await updateUserStatus(record.id, newStatus, true);
+        await updateUserStatus(record.id, newStatus);
         Message.success(`${newLabel}成功`);
         getUserList();
       }
@@ -209,7 +209,7 @@ export default function UserTable({
       content: '删除用户后，用户将无法登录，用户数据将被永久删除，请谨慎操作。',
       okButtonProps: { status: 'danger' },
       onOk: async () => {
-        await deleteUser(record.id, true);
+        await deleteUser(record.id);
         Message.success('删除成功');
         onRefreshDept();
         getUserList();
@@ -364,7 +364,7 @@ export default function UserTable({
     setMemberLoading(true);
     try {
       if (!selectedDeptId) return;
-      const res = await getSimpleUser(keywords, true);
+      const res = await getSimpleUser(keywords);
       setUsertData({ userList: res });
     } catch (error) {
       console.error('获取部门用户信息失败 error:', error);

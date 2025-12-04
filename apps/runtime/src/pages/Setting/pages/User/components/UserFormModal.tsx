@@ -61,7 +61,7 @@ export default function UserFormModal({
 
     // 在编辑模式下获取用户信息并设置角色ID为初始值
     if (mode === 'edit' && initialValues?.id) {
-      getUser(initialValues.id, true).then((user: UserVO) => {
+      getUser(initialValues.id).then((user: UserVO) => {
         form.setFieldsValue({ roleIds: user.roles?.map((item: SimpleRoleVO) => item.id) });
       });
     }
@@ -79,11 +79,11 @@ export default function UserFormModal({
       const params = { ...values, status: statusCheckedValue ? StatusEnum.ENABLE : StatusEnum.DISABLE };
       setLoading(true);
       if (mode === 'create') {
-        await createUser(params, true);
+        await createUser(params);
         Message.success('新建成功');
         onRefreshDept();
       } else {
-        await updateUser({ ...params, id: initialValues?.id }, true);
+        await updateUser({ ...params, id: initialValues?.id });
         Message.success('编辑成功');
         onRefreshDept();
       }

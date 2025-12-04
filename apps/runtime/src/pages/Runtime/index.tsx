@@ -112,7 +112,7 @@ const Runtime: React.FC = () => {
   }, []);
 
   const getUserInfo = async () => {
-    const res = await getPermissionInfo(true);
+    const res = await getPermissionInfo();
     UserPermissionManager.setUserPermissionInfo(res);
     setNickname(res.user.nickname);
   };
@@ -136,7 +136,7 @@ const Runtime: React.FC = () => {
     const req: ListApplicationMenuReq = {
       applicationId: appID
     };
-    const res = await listApplicationMenu(req, true);
+    const res = await listApplicationMenu(req);
     console.log(res);
     const bpmRes = await runtimeListApplicationBPMMenu(req);
     console.log(bpmRes);
