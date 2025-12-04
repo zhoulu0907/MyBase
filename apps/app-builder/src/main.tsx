@@ -4,7 +4,6 @@ import '@onebase/ui-kit/src/theme.less';
 
 import { ConfigProvider } from '@arco-design/web-react';
 import { ErrorPage } from '@onebase/common';
-import { getPopupContainer } from '@onebase/ui-kit';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ErrorBoundary } from 'react-error-boundary';
@@ -14,7 +13,7 @@ import './index.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ConfigProvider prefixCls="pc" getPopupContainer={getPopupContainer}>
+    <ConfigProvider prefixCls="pc">
       <ErrorBoundary FallbackComponent={ErrorPage}>
         <App />
       </ErrorBoundary>
