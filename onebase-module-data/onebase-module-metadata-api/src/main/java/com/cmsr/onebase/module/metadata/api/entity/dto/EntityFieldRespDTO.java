@@ -66,7 +66,7 @@ public class EntityFieldRespDTO {
     @Schema(description = "版本标识", example = "0")
     private Long versionTag;
 
-    @Schema(description = "应用ID", example = "1")
+    @Schema(description = "应用ID", example = "1001")
     private Long applicationId;
 
     @Schema(description = "创建时间")

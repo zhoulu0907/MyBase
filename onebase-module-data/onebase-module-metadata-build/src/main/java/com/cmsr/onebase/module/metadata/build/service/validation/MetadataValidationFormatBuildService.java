@@ -9,8 +9,8 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataV
  * 格式校验 Service 接口（正则/枚举）
  */
 public interface MetadataValidationFormatBuildService {
-    MetadataValidationFormatDO getRegexByFieldId(Long fieldId);
-    ValidationFormatRespVO getRegexByFieldIdWithRgName(Long fieldId);
+    MetadataValidationFormatDO getRegexByFieldId(String fieldUuid);
+    ValidationFormatRespVO getRegexByFieldIdWithRgName(String fieldUuid);
     
     // 新增：通过主键ID操作的方法
     ValidationFormatRespVO getById(Long id);
@@ -18,5 +18,5 @@ public interface MetadataValidationFormatBuildService {
     
     Long create(ValidationFormatSaveReqVO vo);
     void update(ValidationFormatUpdateReqVO reqVO);
-    void deleteByFieldId(Long fieldId);
+    void deleteByFieldId(String fieldUuid);
 }

@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.app.core.dal.dataobject;
 
+import com.cmsr.onebase.framework.orm.entity.BaseBizEntity;
 import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
@@ -9,21 +10,24 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Table(value = "app_resource_workbench_component")
-public class AppResourceWorkbenchComponentDO extends BaseTenantEntity {
+public class AppResourceWorkbenchComponentDO extends BaseBizEntity {
 
+    @Column("component_uuid")
+    private String componentUuid;
 
+    @Column("page_uuid")
+    private String pageUuid;
+
+    /**
+     * 组件索引
+     */
+    @Column(value = "component_index", comment = "组件索引")
+    private Integer componentIndex;
     /**
      * 组件编码
      */
     @Column(value = "component_code", comment = "组件编码")
     private String componentCode;
-
-    /**
-     * 页面编码
-     */
-    @Column(value = "page_id", comment = "页面ID")
-    private Long pageId;
-
     /**
      * 组件类型
      */
@@ -56,11 +60,5 @@ public class AppResourceWorkbenchComponentDO extends BaseTenantEntity {
      */
     @Column(value = "container_index", comment = "容器索引")
     private Integer containerIndex;
-
-    /**
-     * 组件索引
-     */
-    @Column(value = "component_index", comment = "组件索引")
-    private Integer componentIndex;
 
 }

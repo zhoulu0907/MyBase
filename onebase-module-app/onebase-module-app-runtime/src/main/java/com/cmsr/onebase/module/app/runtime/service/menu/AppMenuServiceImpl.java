@@ -3,7 +3,6 @@ package com.cmsr.onebase.module.app.runtime.service.menu;
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.security.runtime.RTSecurityContext;
-import com.cmsr.onebase.module.app.api.security.bo.OperationPermission;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthViewRepository;
 import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthPermissionDO;
@@ -13,15 +12,14 @@ import com.cmsr.onebase.module.app.core.enums.menu.MenuTypeEnum;
 import com.cmsr.onebase.module.app.core.impl.auth.AppAuthSecurityApiImpl;
 import com.cmsr.onebase.module.app.core.provider.auth.AppAuthPermissionProvider;
 import com.cmsr.onebase.module.app.core.provider.auth.AppAuthRoleProvider;
-import com.cmsr.onebase.module.app.core.utils.CacheUtils;
 import com.cmsr.onebase.module.app.core.utils.MenuUtils;
-import com.cmsr.onebase.module.app.runtime.vo.menu.MenuListRespVO;
+import com.cmsr.onebase.module.app.core.vo.menu.MenuListRespVO;
 import com.cmsr.onebase.module.app.runtime.vo.menu.MenuPermissionVO;
 import jakarta.annotation.Resource;
 import lombok.Setter;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -78,93 +76,106 @@ public class AppMenuServiceImpl implements AppMenuService {
 
     @Override
     public List<MenuListRespVO> listApplicationMenu() {
-        Long userId = RTSecurityContext.getUserId();
-        Long applicationId = ApplicationManager.getApplicationId();
+        Long userId = RTSecurityContext.getRequiredUserId();
+        Long applicationId = ApplicationManager.getRequiredApplicationId();
         UserRoleDTO userRoleDTO = appAuthRoleProvider.findUserRoleByApplication(userId, applicationId);
         List<AppMenuDO> menuDOS;
         if (userRoleDTO.isAdminRole()) {
-            menuDOS = appMenuRepository.findVisibleByAppId(applicationId);
+            menuDOS = appMenuRepository.findVisibleByAppId(applicationId,
+                    Set.of(MenuTypeEnum.PAGE.getValue(), MenuTypeEnum.GROUP.getValue()));
         } else {
-            Set<Long> menuIds = findVisibleMenuIds(applicationId, userRoleDTO.getRoleIds());
-            menuDOS = appMenuRepository.findVisibleByAppIdAndMenuIds(applicationId, menuIds);
+            Set<String> menuUuids = findVisibleMenuUuids(applicationId, userRoleDTO.getRoleIds());
+            if (CollectionUtils.isEmpty(menuUuids)) {
+                return Collections.emptyList();
+            }
+            menuDOS = appMenuRepository.findVisibleByAppIdAndMenuIds(applicationId, menuUuids,
+                    Set.of(MenuTypeEnum.PAGE.getValue(), MenuTypeEnum.GROUP.getValue()));
         }
+        if (CollectionUtils.isEmpty(menuDOS)) {
+            return Collections.emptyList();
+        }
+        return convertToMenuListRespVOS(menuDOS);
+    }
+
+    private List<MenuListRespVO> convertToMenuListRespVOS(List<AppMenuDO> menuDOS) {
         List<MenuListRespVO> menuListRespList = new ArrayList<>();
         // 把第一层的菜单添加到列表中
         LinkedList<MenuListRespVO> levelOneMenus = menuDOS.stream()
-                .filter(v -> MenuUtils.ROOT_MENU_ID.equals(v.getParentId()))
+                .filter(v -> MenuUtils.ROOT_MENU_UUID.equals(v.getParentUuid()))
                 .map(v -> BeanUtils.toBean(v, MenuListRespVO.class))
                 .collect(Collectors.toCollection(LinkedList::new));
         menuListRespList.addAll(levelOneMenus);
         // 递归实现每个菜单的子菜单
         for (MenuListRespVO respVO : menuListRespList) {
-            LinkedList<MenuListRespVO> children = recursiveGetChildren(respVO.getId(), menuDOS);
+            LinkedList<MenuListRespVO> children = recursiveGetChildren(respVO.getMenuUuid(), menuDOS);
             respVO.setChildren(children);
         }
         return menuListRespList;
     }
 
-    private LinkedList<MenuListRespVO> recursiveGetChildren(Long parentId, List<AppMenuDO> menuDOS) {
+    private LinkedList<MenuListRespVO> recursiveGetChildren(String parentUuid, List<AppMenuDO> menuDOS) {
         LinkedList<MenuListRespVO> children = new LinkedList<>();
         for (AppMenuDO menuDO : menuDOS) {
-            if (Objects.equals(menuDO.getParentId(), parentId)) {
+            if (Objects.equals(menuDO.getParentUuid(), parentUuid)) {
                 // 只有父菜单的uuid等于当前菜单的父菜单的uuid时，才添加子菜单，继续递归
                 MenuListRespVO child = BeanUtils.toBean(menuDO, MenuListRespVO.class);
-                child.setChildren(recursiveGetChildren(child.getId(), menuDOS));
+                child.setChildren(recursiveGetChildren(child.getMenuUuid(), menuDOS));
                 children.add(child);
             }
         }
         return children.isEmpty() ? null : children;
     }
 
-    private Set<Long> findVisibleMenuIds(Long applicationId, Set<Long> roleIds) {
+    private Set<String> findVisibleMenuUuids(Long applicationId, Set<Long> roleIds) {
         List<AppAuthPermissionDO> permissions = appAuthPermissionProvider.findPermissions(applicationId, roleIds);
-        Set<Long> result = new HashSet<>();
+        Set<String> result = new HashSet<>();
         for (AppAuthPermissionDO permission : permissions) {
             if (NumberUtils.INTEGER_ONE.equals(permission.getIsPageAllowed()))
-                result.add(permission.getMenuId());
+                result.add(permission.getMenuUuid());
         }
         return result;
     }
 
     @Override
     public MenuPermissionVO getMenuPermission(Long menuId) {
-        Long userId = RTSecurityContext.getUserId();
+        Long userId = RTSecurityContext.getRequiredUserId();
         Long applicationId = ApplicationManager.getApplicationId();
         MenuPermissionVO menuPermissionVO = new MenuPermissionVO();
         menuPermissionVO.setOperationPermission(appAuthSecurityApi.getMenuOperationPermission(userId, applicationId, menuId));
         menuPermissionVO.setFieldPermission(appAuthSecurityApi.getMenuFieldPermission(userId, applicationId, menuId));
-        menuPermissionVO.setViewIds(findMenuViews(userId, applicationId, menuId));
+        menuPermissionVO.setViewUuids(findMenuViews(userId, applicationId, menuId));
         return menuPermissionVO;
     }
 
     /**
      * 要缓存
      */
-    public Set<Long> findMenuViews(Long userId, Long applicationId, Long menuId) {
-        String redisKey = CacheUtils.keyForPagePermission(userId, applicationId, menuId);
-        RBucket<Set<Long>> bucket = redissonClient.getBucket(redisKey, CacheUtils.KRYO5_CODEC);
-        if (bucket.isExists()) {
-            return bucket.get();
-        }
+    public Set<String> findMenuViews(Long userId, Long applicationId, Long menuId) {
+//        String redisKey = CacheUtils.keyForPagePermission(userId, applicationId, menuId);
+//        RBucket<Set<String>> bucket = redissonClient.getBucket(redisKey, CacheUtils.KRYO5_CODEC);
+//        if (bucket.isExists()) {
+//            return bucket.get();
+//        }
         //
-        UserRoleDTO userRoleDTO = appAuthRoleProvider.findUserRoleByApplication(userId, applicationId);
-        if (userRoleDTO.isAdminRole()) {
-            return findMenuAllViews(applicationId, menuId);
-        }
-        OperationPermission menuOperationPermission = appAuthSecurityApi.getMenuOperationPermission(userId, applicationId, menuId);
-        if (menuOperationPermission.isAllFieldsAllowed()) {
-            return findMenuAllViews(applicationId, menuId);
-        }
-        Set<Long> roleIds = userRoleDTO.getRoleIds();
-        Set<Long> result = appAuthViewRepository.findByAppIdAndRoleIdsAndMenuId(applicationId, roleIds, menuId)
-                .stream().map(viewDO -> viewDO.getViewId()).collect(Collectors.toSet());
+//        UserRoleDTO userRoleDTO = appAuthRoleProvider.findUserRoleByApplication(userId, applicationId);
+//        if (userRoleDTO.isAdminRole()) {
+//            return findMenuAllViews(applicationId, menuId);
+//        }
+//        OperationPermission menuOperationPermission = appAuthSecurityApi.getMenuOperationPermission(userId, applicationId, menuId);
+//        if (menuOperationPermission.isAllFieldsAllowed()) {
+//            return findMenuAllViews(applicationId, menuId);
+//        }
+//        Set<Long> roleIds = userRoleDTO.getRoleIds();
+//        Set<Long> result = appAuthViewRepository.findByAppIdAndRoleIdsAndMenuId(applicationId, roleIds, menuId)
+//                .stream().map(viewDO -> viewDO.getViewId()).collect(Collectors.toSet());
         //
-        bucket.set(result, CacheUtils.CACHE_EXPIRE_TIME);
-        return result;
+//        bucket.set(result, CacheUtils.CACHE_EXPIRE_TIME);
+//        return result;
+        return Collections.emptySet();
     }
 
-    private Set<Long> findMenuAllViews(Long applicationId, Long menuId) {
-        return appMenuRepository.findPageIdsByAppIdAndMenuId(applicationId, menuId);
-    }
+//    private Set<String> findMenuAllViews(Long applicationId, Long menuId) {
+//        return appMenuRepository.findPageIdsByAppIdAndMenuId(applicationId, menuId);
+//    }
 
 }

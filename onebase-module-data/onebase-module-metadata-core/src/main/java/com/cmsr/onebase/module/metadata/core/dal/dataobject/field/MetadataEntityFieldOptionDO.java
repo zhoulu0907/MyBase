@@ -20,10 +20,18 @@ import lombok.EqualsAndHashCode;
 public class MetadataEntityFieldOptionDO extends BaseTenantEntity {
 
     /**
-     * 关联字段ID（metadata_entity_field.id）
+     * 选项UUID
+     * <p>
+     * 用于跨应用、跨版本的唯一标识，与 application_id、version_tag 组成联合唯一约束
      */
-    @Column(value = "field_id", comment = "关联字段ID")
-    private Long fieldId;
+    @Column(value = "option_uuid", comment = "选项UUID")
+    private String optionUuid;
+
+    /**
+     * 关联字段UUID（metadata_entity_field.field_uuid）
+     */
+    @Column(value = "field_uuid", comment = "关联字段UUID")
+    private String fieldUuid;
 
     /**
      * 选项显示名称
@@ -60,6 +68,14 @@ public class MetadataEntityFieldOptionDO extends BaseTenantEntity {
      */
     @Column(value = "application_id", comment = "应用ID")
     private Long applicationId;
-}
 
+    /**
+     * 版本标识
+     * <p>
+     * 用于跨应用、跨版本的唯一标识，与 application_id 组成联合唯一约束
+     */
+    @Column(value = "version_tag", comment = "版本标识")
+    private Long versionTag;
+
+}
 

@@ -316,8 +316,6 @@ public class UserServiceImpl implements UserService {
         // 1. 校验正确性
         AdminUserDO oldUser = validateUserForCreateOrUpdate(updateReqVO.getId(), updateReqVO.getUsername(),
                 updateReqVO.getMobile(), updateReqVO.getEmail(), updateReqVO.getDeptId(), updateReqVO.getPostIds());
-        // 1.1 校验角色权限
-        validateRoleIds(updateReqVO.getRoleIds());
         if (updateReqVO.getStatus() != null) {
 
             if (updateReqVO.getStatus() != oldUser.getStatus() && updateReqVO.getStatus() == CommonStatusEnum.ENABLE.getStatus()) {
@@ -340,8 +338,6 @@ public class UserServiceImpl implements UserService {
         userDataRepository.update(updateObj);
         // 2.2 更新岗位
         updateUserPost(updateReqVO, updateObj);
-        // 2.3 更新用户角色关联
-        permissionService.assignUserRoles(updateReqVO.getId(), updateReqVO.getRoleIds());
 
         // 3. 记录操作日志上下文
         LogRecordContext.putVariable(DiffParseFunction.OLD_OBJECT, BeanUtils.toBean(oldUser, UserInsertReqVO.class));
@@ -938,6 +934,19 @@ public class UserServiceImpl implements UserService {
                         Collectors.summingInt(user -> 1)
                 ));
     }
+
+
+    @Override
+    public Map<Long, Integer> getCorpExistUserCountByCorpIds(List<Long> corpIds) {
+        List<AdminUserDO> userlist = userDataRepository.getCorpExistUserCountByCorpIds(corpIds);
+        // 按租户ID分组并统计数量
+        return userlist.stream()
+                .collect(Collectors.groupingBy(
+                        AdminUserDO::getCorpId,
+                        Collectors.summingInt(user -> 1)
+                ));
+    }
+
 
     /**
      * 校验角色ID列表的有效性

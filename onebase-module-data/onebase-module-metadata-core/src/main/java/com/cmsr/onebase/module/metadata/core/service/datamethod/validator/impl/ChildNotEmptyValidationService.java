@@ -22,29 +22,31 @@ public class ChildNotEmptyValidationService implements ValidationService {
     private MetadataValidationChildNotEmptyRepository childNotEmptyRepository;
 
     @Override
-    public void validate(Long entityId, Long fieldId, MetadataEntityFieldDO field, Object value, Map<String, Object> data, List<MetadataDataMethodSubEntityContext> subEntities) {
+    public void validate(String entityUuid, String fieldUuid, MetadataEntityFieldDO field, Object value, Map<String, Object> data, List<MetadataDataMethodSubEntityContext> subEntities) {
 
         QueryWrapper queryWrapper = childNotEmptyRepository.query()
-                .eq(MetadataValidationChildNotEmptyDO::getEntityId, entityId)
+                .eq(MetadataValidationChildNotEmptyDO::getEntityUuid, entityUuid)
                 .eq(MetadataValidationChildNotEmptyDO::getIsEnabled, 1);
         List<MetadataValidationChildNotEmptyDO> rules = childNotEmptyRepository.list(queryWrapper);
         if(ObjectUtils.isEmpty(rules)){
-            log.info("该实体未配置子表空行校验，跳过校验，主实体ID：" + entityId);
+            log.info("该实体未配置子表空行校验，跳过校验，主实体UUID：" + entityUuid);
         }else{
             for(MetadataValidationChildNotEmptyDO rule : rules){
-                Long childChildEntityId = rule.getChildEntityId();
+                String childEntityUuid = rule.getChildEntityUuid();
                 if(ObjectUtils.isEmpty(subEntities)){
                     String errorMessage = rule.getPromptMessage() != null && !rule.getPromptMessage().trim().isEmpty()
                             ? rule.getPromptMessage()
-                            : "子表[" + childChildEntityId + "]数据行不能为空";
+                            : "子表[" + childEntityUuid + "]数据行不能为空";
                     throw new IllegalArgumentException(errorMessage);
                 }
+                // 注意：这里需要修改MetadataDataMethodSubEntityContext使用entityUuid
+                // 暂时保持使用entityId进行匹配，后续需要统一改造
                 boolean childNotEmpty = subEntities.stream().anyMatch(metadataDataMethodSubEntityContext ->
-                        childChildEntityId.equals(metadataDataMethodSubEntityContext.getEntityId()) && !ObjectUtils.isEmpty(metadataDataMethodSubEntityContext.getSubData()));
+                        childEntityUuid.equals(metadataDataMethodSubEntityContext.getEntityUuid()) && !ObjectUtils.isEmpty(metadataDataMethodSubEntityContext.getSubData()));
                 if(!childNotEmpty){
                     String errorMessage = rule.getPromptMessage() != null && !rule.getPromptMessage().trim().isEmpty()
                             ? rule.getPromptMessage()
-                            : "子表[" + childChildEntityId + "]数据行不能为空";
+                            : "子表[" + childEntityUuid + "]数据行不能为空";
                     throw new IllegalArgumentException(errorMessage);
                 }
             }

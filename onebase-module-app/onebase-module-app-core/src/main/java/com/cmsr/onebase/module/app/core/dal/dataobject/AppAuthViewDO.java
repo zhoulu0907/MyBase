@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.app.core.dal.dataobject;
 
-import com.cmsr.onebase.framework.orm.entity.BaseAppEntity;
+import com.cmsr.onebase.framework.orm.entity.BaseBizEntity;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
 import lombok.Data;
@@ -11,16 +11,16 @@ import lombok.Data;
  */
 @Data
 @Table(value = "app_auth_view")
-public class AppAuthViewDO extends BaseAppEntity {
+public class AppAuthViewDO extends BaseBizEntity {
 
-    @Column(value = "role_id", comment = "角色id")
-    private Long roleId;
+    @Column(value = "role_uuid", comment = "角色id")
+    private String roleUuid;
 
-    @Column(value = "menu_id", comment = "菜单id")
-    private Long menuId;
+    @Column(value = "menu_uuid", comment = "菜单id")
+    private String menuUuid;
 
-    @Column(value = "view_id", comment = "实体id")
-    private Long viewId;
+    @Column(value = "view_uuid", comment = "实体id")
+    private String viewUuid;
 
     @Column(value = "is_allowed", comment = "是否可访问")
     private Integer isAllowed;

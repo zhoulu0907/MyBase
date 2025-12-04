@@ -11,24 +11,36 @@ public class ApplicationManager {
     private ApplicationManager() {
     }
 
-    private static final ThreadLocal<Long> applicationIds = new ThreadLocal<>();
+    private static final ThreadLocal<Long> applicationIdHolder = new ThreadLocal<>();
 
-    private static final ThreadLocal<Boolean> ignoreFlags = new ThreadLocal<>();
+    private static final ThreadLocal<Boolean> applicationIdBooleanHolder = new ThreadLocal<>();
+
+    private static final ThreadLocal<Long> versionTagHolder = new ThreadLocal<>();
+
+    private static final ThreadLocal<Boolean> versionTagBooleanHolder = new ThreadLocal<>();
 
     public static void setApplicationId(Long applicationId) {
-        applicationIds.set(applicationId);
+        applicationIdHolder.set(applicationId);
+    }
+
+    public static Long getRequiredApplicationId() {
+        if (isIgnoreApplicationCondition()) {
+            return null;
+        }
+        Long id = applicationIdHolder.get();
+        if (id == null) {
+            throw new RuntimeException("未设置应用ID");
+        }
+        return id;
     }
 
     public static Long getApplicationId() {
         if (isIgnoreApplicationCondition()) {
             return null;
         }
-        return applicationIds != null ? applicationIds.get() : null;
+        return applicationIdHolder.get();
     }
 
-    /**
-     * 忽略 tenant 条件
-     */
     public static <T> T withoutApplicationCondition(Supplier<T> supplier) {
         try {
             ignoreApplicationCondition();
@@ -38,9 +50,6 @@ public class ApplicationManager {
         }
     }
 
-    /**
-     * 忽略 tenant 条件
-     */
     public static void withoutApplicationCondition(Runnable runnable) {
         try {
             ignoreApplicationCondition();
@@ -50,27 +59,56 @@ public class ApplicationManager {
         }
     }
 
-
-    /**
-     * 忽略 tenant 条件
-     */
     public static void ignoreApplicationCondition() {
-        ignoreFlags.set(Boolean.TRUE);
+        applicationIdBooleanHolder.set(Boolean.TRUE);
     }
 
-    /**
-     * 是否忽略 tenant 条件
-     */
     public static boolean isIgnoreApplicationCondition() {
-        return Boolean.TRUE.equals(ignoreFlags.get());
+        return Boolean.TRUE.equals(applicationIdBooleanHolder.get());
     }
 
-    /**
-     * 恢复 tenant 条件
-     */
-    public static void restoreApplicationCondition() {
-        ignoreFlags.remove();
+    private static void restoreApplicationCondition() {
+        applicationIdBooleanHolder.remove();
     }
 
+    public static void setVersionTag(Long versionTag) {
+        versionTagHolder.set(versionTag);
+    }
 
+    public static Long getVersionTag() {
+        if (isIgnoreVersionTagCondition()) {
+            return null;
+        }
+        return versionTagHolder.get();
+    }
+
+    public static <T> T withoutVersionTagCondition(Supplier<T> supplier) {
+        try {
+            ignoreApplicationCondition();
+            return supplier.get();
+        } finally {
+            restoreApplicationCondition();
+        }
+    }
+
+    public static void withoutVersionTagCondition(Runnable runnable) {
+        try {
+            ignoreApplicationCondition();
+            runnable.run();
+        } finally {
+            restoreApplicationCondition();
+        }
+    }
+
+    public static void ignoreVersionTagCondition() {
+        versionTagBooleanHolder.set(Boolean.TRUE);
+    }
+
+    public static boolean isIgnoreVersionTagCondition() {
+        return Boolean.TRUE.equals(versionTagBooleanHolder.get());
+    }
+
+    private static void restoreVersionTagCondition() {
+        versionTagBooleanHolder.remove();
+    }
 }

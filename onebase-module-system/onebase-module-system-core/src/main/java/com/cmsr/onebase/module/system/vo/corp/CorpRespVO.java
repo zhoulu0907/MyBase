@@ -26,8 +26,12 @@ public class CorpRespVO {
     @Schema(description = "企业编码", example = "ALIBABA")
     private String corpCode;
 
+    // 存储的数据字典Data的ID
     @Schema(description = "行业类型", example = "1")
     private Long industryType;
+
+    @Schema(description = "行业类型名称", example = "1")
+    private String industryTypeName;
 
     @Schema(description = "状态", example = "1")
     private Integer status;
@@ -59,6 +63,4 @@ public class CorpRespVO {
     @Schema(description = "创建时间")
     private LocalDateTime createTime;
 
-    @Schema(description = "行业类型名称", example = "1")
-    private String industryTypeName;
 }

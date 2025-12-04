@@ -66,7 +66,7 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
         Map<String, Object> convertedData = convertFieldIdToFieldName(data, fields);
 
         List<String> toDeletedKeys = new ArrayList<>();
-        
+
         // 更新时不校验必填，只校验数据类型等
         for (Map.Entry<String, Object> entry : convertedData.entrySet()) {
             String fieldName = entry.getKey();
@@ -85,7 +85,7 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
             }
 
             // 不允许更新自动编号字段
-            if (autoNumberService.hasAutoNumber(field.getId())) {
+            if (autoNumberService.hasAutoNumber(field.getFieldUuid())) {
                 //忽略自动更新字段，不报错，允许继续更新： 删除key为 fieldName 的数据
                 toDeletedKeys.add(fieldName);
 //                throw invalidParamException("不允许更新自动编号字段[{}]", field.getDisplayName());
@@ -145,16 +145,16 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
         for (MetadataEntityFieldDO field : fields) {
             String fieldName = field.getFieldName();
             String fieldType = field.getFieldType();
-            
+
             if (fieldName == null || fieldType == null) {
                 continue;
             }
-            
+
             Object fieldValue = processedData.get(fieldName);
             if (fieldValue == null) {
                 continue;
             }
-            
+
             // 判断是否需要JSON序列化的字段类型
             if (needsJsonSerialization(fieldType, fieldValue)) {
                 try {
@@ -172,7 +172,7 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
 
     /**
      * 判断字段类型是否需要JSON序列化
-     * 
+     *
      * @param fieldType 字段类型
      * @param fieldValue 字段值
      * @return 是否需要序列化
@@ -181,9 +181,9 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
         if (fieldType == null) {
             return false;
         }
-        
+
         String upperFieldType = fieldType.toUpperCase();
-        
+
         // 字段类型包含以下关键字的需要JSON序列化
         boolean isComplexType = upperFieldType.contains("SELECT") ||       // 选择类型（包括SELECT、MULTI_SELECT、DATA_SELECTION等）
                                 upperFieldType.contains("MULTI") ||        // 多选类型（包括MULTI_USER、MULTI_DEPARTMENT等）
@@ -198,10 +198,10 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
                                 upperFieldType.contains("GEO") ||           // 地理位置（简写）
                                 upperFieldType.equals("JSONB") ||           // JSONB类型
                                 upperFieldType.equals("JSON");              // JSON类型
-        
+
         // 同时判断值是否为复杂对象（List或Map）
         boolean isComplexValue = fieldValue instanceof List || fieldValue instanceof Map;
-        
+
         return isComplexType && isComplexValue;
     }
 
@@ -268,20 +268,20 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
         //查询子表和主表的关联字段 构建关联条件
         List<MetadataDataMethodSubEntityContext> subEntityVos = context.getSubEntities();
         for(MetadataDataMethodSubEntityContext subEntityContext: subEntityVos) {
-            Long subEntityId = subEntityContext.getEntityId();
+            String subEntityUuid = subEntityContext.getEntityUuid();
             List<Map<Long, Object>> subData = subEntityContext.getSubData();
 
-            String parentRelFieldId = relationshipDOS.stream().filter(relationshipDO ->
-                            (subEntityId).equals(relationshipDO.getTargetEntityId())).
-                    map(MetadataEntityRelationshipDO::getSourceFieldId).findFirst().orElse(null);
-            MetadataEntityFieldDO parentEntityFieldDO = entityFieldRepository.findById(Long.valueOf(parentRelFieldId));
+            String parentRelFieldUuid = relationshipDOS.stream().filter(relationshipDO ->
+                            (subEntityUuid).equals(relationshipDO.getTargetEntityUuid())).
+                    map(MetadataEntityRelationshipDO::getSourceFieldUuid).findFirst().orElse(null);
+            MetadataEntityFieldDO parentEntityFieldDO = entityFieldRepository.getByFieldUuid(parentRelFieldUuid);
             String parentFiledName = parentEntityFieldDO.getFieldName();// 主表关联字段名称
 
 
-            String subRelFieldId = relationshipDOS.stream().filter(relationshipDO ->
-                            (subEntityId).equals(relationshipDO.getTargetEntityId())).
-                    map(MetadataEntityRelationshipDO::getTargetFieldId).findFirst().orElse(null);
-            MetadataEntityFieldDO subEntityFieldDO = entityFieldRepository.findById(Long.valueOf(subRelFieldId));
+            String subRelFieldUuid = relationshipDOS.stream().filter(relationshipDO ->
+                            (subEntityUuid).equals(relationshipDO.getTargetEntityUuid())).
+                    map(MetadataEntityRelationshipDO::getTargetFieldUuid).findFirst().orElse(null);
+            MetadataEntityFieldDO subEntityFieldDO = entityFieldRepository.getByFieldUuid(subRelFieldUuid);
             String subRelFieldName = subEntityFieldDO.getFieldName();// 子表关联字段名称
 
             Object parentValue = new Object();
@@ -291,10 +291,10 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
                 parentValue = parentData.get(parentFiledName);
             }
 
-            List<MetadataEntityFieldDO> subEntityFields = getEntityFields(subEntityId);
-            MetadataBusinessEntityDO subEntity = validateEntityExists(subEntityId);
+            List<MetadataEntityFieldDO> subEntityFields = getEntityFields(subEntityUuid);
+            MetadataBusinessEntityDO subEntity = validateEntityExists(subEntityUuid);
 
-            List<MetadataEntityFieldDO> subFields = entityFieldRepository.getEntityFieldListByEntityId(subEntityId);
+            List<MetadataEntityFieldDO> subFields = entityFieldRepository.getEntityFieldListByEntityUuid(subEntityUuid);
             String primaryKeyFieldName = getPrimaryKeyFieldName(subFields);// 子表的主键字段名
 
             List<String> processedIds = new ArrayList<String>();// 存放新增数据的id，修改已有数据的id集合
@@ -321,7 +321,7 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
 
                     ProcessedSubEntityVo processedSubEntityVo = new ProcessedSubEntityVo();
                     processedSubEntityVo.setTraceId(context.getTraceId());
-                    processedSubEntityVo.setSubEntityId(subEntityId);
+                    processedSubEntityVo.setSubEntityId(subEntityUuid);
                     processedSubEntityVo.setId(primaryKeyFieldValue.toString());
                     processedSubEntityVo.setSubData(nameValueParis);
 
@@ -335,7 +335,7 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
 
                     ProcessedSubEntityVo processedSubEntityVo = new ProcessedSubEntityVo();
                     processedSubEntityVo.setTraceId(context.getTraceId());
-                    processedSubEntityVo.setSubEntityId(subEntityId);
+                    processedSubEntityVo.setSubEntityId(subEntityUuid);
                     processedSubEntityVo.setSubData(nameValueParis);
 
                     Map<String, Object> resultData = metadataDataMethodSubEntityCrudImpl.doInsert(processedSubEntityVo);
@@ -364,7 +364,7 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
 
                 ProcessedSubEntityVo processedSubEntityVo = new ProcessedSubEntityVo();
                 processedSubEntityVo.setTraceId(context.getTraceId());
-                processedSubEntityVo.setSubEntityId(subEntityId);
+                processedSubEntityVo.setSubEntityId(subEntityUuid);
                 processedSubEntityVo.setId(id.toString());
 
                 metadataDataMethodSubEntityCrudImpl.doDelete(processedSubEntityVo);
@@ -384,7 +384,7 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
         Object id = context.getId();
         configStore.and(primaryKeyField, id);
         configStore.and("deleted", 0);
-        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
+        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceUuid());
         if (datasource == null) {
             throw exception(DATASOURCE_NOT_EXISTS);
         }
@@ -426,7 +426,7 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
         configStore.and(primaryKeyField, id);
         configStore.and("deleted",0);
 
-        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
+        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceUuid());
         if (datasource == null) {
             throw exception(DATASOURCE_NOT_EXISTS);
         }

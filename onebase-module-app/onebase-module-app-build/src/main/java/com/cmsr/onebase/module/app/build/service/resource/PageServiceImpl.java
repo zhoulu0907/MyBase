@@ -1,62 +1,60 @@
 package com.cmsr.onebase.module.app.build.service.resource;
 
-import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.module.app.build.util.PageUtils;
 import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageRepository;
-import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageSetPageRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageSetRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePageDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetPageDO;
-import com.cmsr.onebase.module.app.core.dto.appresource.*;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetDO;
+import com.cmsr.onebase.module.app.core.dto.appresource.CreatePageViewDTO;
+import com.cmsr.onebase.module.app.core.dto.appresource.PageDTO;
+import com.cmsr.onebase.module.app.core.dto.appresource.UpdatePageNameDTO;
 import com.cmsr.onebase.module.app.core.enums.appresource.PageEnum;
 import com.cmsr.onebase.module.app.core.enums.appresource.ViewEnmu;
 import com.cmsr.onebase.module.app.core.provider.resource.PageServiceProvider;
-import jakarta.annotation.Resource;
+import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
 
+@Setter
 @Service
 public class PageServiceImpl implements PageService {
 
-    @Resource
+    @Autowired
     private AppPageRepository pageRepository;
 
-    @Resource
-    private AppPageSetPageRepository pageSetPageRepository;
-
-    @Resource
+    @Autowired
     private AppPageSetRepository pageSetRepository;
 
-    @Resource(name = "appMenuRepository")
+    @Autowired
     private AppMenuRepository menuDataRepository;
 
-    @Resource
+    @Autowired
     private PageServiceProvider pageServiceProvider;
 
     @Override
-    public PageRespDTO getPage(Long pageId) {
-        return pageServiceProvider.getPage(pageId);
-    }
-
-    @Override
-    public Long createPage(CreatePageDTO createPageDTO) {
-        AppResourcePageDO pageDO = BeanUtils.toBean(createPageDTO, AppResourcePageDO.class);
-        pageRepository.save(pageDO);
-        return pageDO.getId();
-    }
-
-    @Override
     public Long createPageView(CreatePageViewDTO createPageViewDTO) {
-        String formPageCode = UUID.randomUUID().toString();
+        AppResourcePagesetDO pagesetDO = pageSetRepository.getById(createPageViewDTO.getPageSetId());
+        String pageSetUuid = pagesetDO.getPageSetUuid();
+
+        Long applicationId = ApplicationManager.getApplicationId();
         String formPageName = createPageViewDTO.getViewName();
+        //TODO formPageCode formRouterPath 这两个可以删除
+        String formPageCode = UUID.randomUUID().toString();
         String formRouterPath = formPageCode + "/form";
         String formPageType = PageEnum.FORM.getValue();
         Boolean formOpenViewMode = false;
-        AppResourcePageDO formPageDO = PageUtils.initPage(createPageViewDTO.getPageSetId(), formPageName, formRouterPath, formPageType, formOpenViewMode);
+        AppResourcePageDO formPageDO = PageUtils.initPage(
+                applicationId,
+                pageSetUuid,
+                formPageName,
+                formRouterPath,
+                formPageType,
+                formOpenViewMode);
 
         String viewType = createPageViewDTO.getViewType();
 
@@ -70,34 +68,13 @@ public class PageServiceImpl implements PageService {
         if (viewType.equals(ViewEnmu.DETAIL.getValue())) {
             formPageDO.setDetailViewMode(1);
         }
-
         pageRepository.save(formPageDO);
-
-        AppResourcePagesetPageDO formPageSetPageDO = new AppResourcePagesetPageDO();
-        formPageSetPageDO.setPageSetId(createPageViewDTO.getPageSetId());
-        formPageSetPageDO.setPageType(formPageType);
-        formPageSetPageDO.setPageId(formPageDO.getId());
-        formPageSetPageDO.setIsDefault(0);
-        formPageSetPageDO.setDefaultSeq(1);
-
-        pageSetPageRepository.save(formPageSetPageDO);
-
         return formPageDO.getId();
     }
 
     @Override
     public Boolean updatePageName(UpdatePageNameDTO updatePageNameDTO) {
         pageRepository.updatePageName(updatePageNameDTO.getPageId(), updatePageNameDTO.getPageName());
-        return true;
-    }
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public Boolean deletePage(Long pageId) {
-        // 删除页面集关联的页面
-        pageSetPageRepository.deleteByPageId(pageId);
-        // 删除页面
-        pageRepository.removeById(pageId);
         return true;
     }
 

@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,50 +24,44 @@ public class ValidationUniqueController {
     @Resource private MetadataValidationUniqueBuildService uniqueService;
 
     @PostMapping("/get-by-field")
-    @Operation(summary = "根据字段ID获取唯一性校验")
-    @Parameter(name = "id", description = "字段ID", required = true)
-    @PreAuthorize("@ss.hasPermission('metadata:validation-unique:query')")
-    public CommonResult<ValidationUniqueRespVO> getByField(@RequestParam("id") Long id) {
-        return success(uniqueService.getByFieldIdWithRgName(id));
+    @Operation(summary = "根据字段UUID获取唯一性校验")
+    @Parameter(name = "id", description = "字段UUID", required = true)
+    public CommonResult<ValidationUniqueRespVO> getByField(@RequestParam("id") String fieldUuid) {
+        return success(uniqueService.getByFieldIdWithRgName(fieldUuid));
     }
     @PostMapping("/create")
     @Operation(summary = "创建唯一性校验")
-    @PreAuthorize("@ss.hasPermission('metadata:validation-unique:create')")
     public CommonResult<Long> create(@Valid @RequestBody ValidationUniqueSaveReqVO vo) {
         return success(uniqueService.create(vo));
     }
 
     @PostMapping("/update")
     @Operation(summary = "更新唯一性校验")
-    @PreAuthorize("@ss.hasPermission('metadata:validation-unique:update')")
     public CommonResult<Boolean> update(@Valid @RequestBody ValidationUniqueUpdateReqVO vo) {
         uniqueService.update(vo);
         return success(true);
     }
 
     @PostMapping("/delete-by-field")
-    @Operation(summary = "按字段删除唯一性校验")
-    @Parameter(name = "id", description = "字段ID", required = true)
-    @PreAuthorize("@ss.hasPermission('metadata:validation-unique:delete')")
-    public CommonResult<Boolean> deleteByField(@RequestParam("id") Long id) {
-        uniqueService.deleteByFieldId(id);
+    @Operation(summary = "按字段UUID删除唯一性校验")
+    @Parameter(name = "id", description = "字段UUID", required = true)
+    public CommonResult<Boolean> deleteByField(@RequestParam("id") String fieldUuid) {
+        uniqueService.deleteByFieldId(fieldUuid);
         return success(true);
     }
 
     @GetMapping("/get")
     @Operation(summary = "根据主键ID获取唯一性校验")
     @Parameter(name = "id", description = "唯一性校验规则主键ID", required = true)
-    @PreAuthorize("@ss.hasPermission('metadata:validation-unique:query')")
-    public CommonResult<ValidationUniqueRespVO> get(@RequestParam("id") Long id) {
-        return success(uniqueService.getById(id));
+    public CommonResult<ValidationUniqueRespVO> get(@RequestParam("id") String id) {
+        return success(uniqueService.getById(Long.parseLong(id)));
     }
 
     @PostMapping("/delete")
     @Operation(summary = "按主键ID删除唯一性校验")
     @Parameter(name = "id", description = "唯一性校验规则主键ID", required = true)
-    @PreAuthorize("@ss.hasPermission('metadata:validation-unique:delete')")
-    public CommonResult<Boolean> delete(@RequestParam("id") Long id) {
-        uniqueService.deleteById(id);
+    public CommonResult<Boolean> delete(@RequestParam("id") String id) {
+        uniqueService.deleteById(Long.parseLong(id));
         return success(true);
     }
 }

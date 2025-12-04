@@ -20,10 +20,20 @@ import lombok.EqualsAndHashCode;
 public class MetadataAutoNumberConfigDO extends BaseTenantEntity {
 
     /**
-     * 字段ID
+     * 配置UUID
+     * <p>
+     * 用于跨应用、跨版本的唯一标识，与 application_id、version_tag 组成联合唯一约束
      */
-    @Column(value = "field_id", comment = "字段ID")
-    private Long fieldId;
+    @Column(value = "config_uuid", comment = "配置UUID")
+    private String configUuid;
+
+    /**
+     * 字段UUID
+     * <p>
+     * 关联 metadata_entity_field.field_uuid
+     */
+    @Column(value = "field_uuid", comment = "字段UUID")
+    private String fieldUuid;
 
     /**
      * 编号模式
@@ -78,6 +88,6 @@ public class MetadataAutoNumberConfigDO extends BaseTenantEntity {
      */
     @Column(value = "application_id", comment = "应用ID")
     private Long applicationId;
-}
 
+}
 

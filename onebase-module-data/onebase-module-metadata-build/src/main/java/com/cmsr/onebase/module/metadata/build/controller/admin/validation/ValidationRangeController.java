@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,51 +24,45 @@ public class ValidationRangeController {
     @Resource private MetadataValidationRangeBuildService rangeService;
 
     @PostMapping("/get-by-field")
-    @Operation(summary = "根据字段ID获取范围校验")
-    @Parameter(name = "id", description = "字段ID", required = true)
-    @PreAuthorize("@ss.hasPermission('metadata:validation-range:query')")
-    public CommonResult<ValidationRangeRespVO> getByField(@RequestParam("id") Long id) {
-        return success(rangeService.getByFieldIdWithRgName(id));
+    @Operation(summary = "根据字段UUID获取范围校验")
+    @Parameter(name = "id", description = "字段UUID", required = true)
+    public CommonResult<ValidationRangeRespVO> getByField(@RequestParam("id") String fieldUuid) {
+        return success(rangeService.getByFieldIdWithRgName(fieldUuid));
     }
 
     @PostMapping("/create")
     @Operation(summary = "创建范围校验")
-    @PreAuthorize("@ss.hasPermission('metadata:validation-range:create')")
     public CommonResult<Long> create(@Valid @RequestBody ValidationRangeSaveReqVO vo) {
         return success(rangeService.create(vo));
     }
 
     @PostMapping("/update")
     @Operation(summary = "更新范围校验")
-    @PreAuthorize("@ss.hasPermission('metadata:validation-range:update')")
     public CommonResult<Boolean> update(@Valid @RequestBody ValidationRangeUpdateReqVO vo) {
         rangeService.update(vo);
         return success(true);
     }
 
     @PostMapping("/delete-by-field")
-    @Operation(summary = "按字段删除范围校验")
-    @Parameter(name = "id", description = "字段ID", required = true)
-    @PreAuthorize("@ss.hasPermission('metadata:validation-range:delete')")
-    public CommonResult<Boolean> deleteByField(@RequestParam("id") Long id) {
-        rangeService.deleteByFieldId(id);
+    @Operation(summary = "按字段UUID删除范围校验")
+    @Parameter(name = "id", description = "字段UUID", required = true)
+    public CommonResult<Boolean> deleteByField(@RequestParam("id") String fieldUuid) {
+        rangeService.deleteByFieldId(fieldUuid);
         return success(true);
     }
 
     @GetMapping("/get")
     @Operation(summary = "根据主键ID获取范围校验")
     @Parameter(name = "id", description = "范围校验规则主键ID", required = true)
-    @PreAuthorize("@ss.hasPermission('metadata:validation-range:query')")
-    public CommonResult<ValidationRangeRespVO> get(@RequestParam("id") Long id) {
-        return success(rangeService.getById(id));
+    public CommonResult<ValidationRangeRespVO> get(@RequestParam("id") String id) {
+        return success(rangeService.getById(Long.parseLong(id)));
     }
 
     @PostMapping("/delete")
     @Operation(summary = "按主键ID删除范围校验")
     @Parameter(name = "id", description = "范围校验规则主键ID", required = true)
-    @PreAuthorize("@ss.hasPermission('metadata:validation-range:delete')")
-    public CommonResult<Boolean> delete(@RequestParam("id") Long id) {
-        rangeService.deleteById(id);
+    public CommonResult<Boolean> delete(@RequestParam("id") String id) {
+        rangeService.deleteById(Long.parseLong(id));
         return success(true);
     }
 }

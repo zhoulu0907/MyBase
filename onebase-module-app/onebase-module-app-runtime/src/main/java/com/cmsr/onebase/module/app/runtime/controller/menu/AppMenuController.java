@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.app.runtime.controller.menu;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.module.app.runtime.service.menu.AppMenuService;
-import com.cmsr.onebase.module.app.runtime.vo.menu.MenuListRespVO;
+import com.cmsr.onebase.module.app.core.vo.menu.MenuListRespVO;
 import com.cmsr.onebase.module.app.runtime.vo.menu.MenuPermissionVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

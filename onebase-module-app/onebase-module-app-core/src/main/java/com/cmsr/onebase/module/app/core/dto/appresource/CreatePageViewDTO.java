@@ -4,6 +4,7 @@ import lombok.Data;
 
 @Data
 public class CreatePageViewDTO {
+
     private Long pageSetId;
 
     private String viewType;

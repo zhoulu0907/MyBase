@@ -134,6 +134,14 @@ public interface MetadataDatasourceBuildService {
     MetadataDatasourceDO getDatasourceByCode(String code);
 
     /**
+     * 根据UUID获得数据源
+     *
+     * @param datasourceUuid 数据源UUID
+     * @return 数据源
+     */
+    MetadataDatasourceDO getDatasourceByUuid(String datasourceUuid);
+
+    /**
      * 创建默认数据源，使用配置文件中 default.datasource 配置
      *
      * @param appId 应用ID

@@ -220,7 +220,7 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter {
         CommonResult<String> deviceIdResult = securityConfigApi.findDeviceIdByToken(loginUser.getTenantId(), loginUser.getId(), token);
 
         if (deviceIdResult == null || StrUtil.isBlank(deviceIdResult.getData())) {
-            log.warn("[checkAndUpdateSessionIdle][无法反查deviceId，跳过会话空闲检查] userId={}, token={}", loginUser.getId(), token);
+            log.debug("[checkAndUpdateSessionIdle][无法反查deviceId，跳过会话空闲检查] userId={}, token={}", loginUser.getId(), token);
             return true;
         }
 

@@ -1,13 +1,13 @@
 package com.cmsr.onebase.module.app.build.controller.resource;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.module.app.core.dto.appresource.ComponentDTO;
-import com.cmsr.onebase.module.app.core.vo.resource.GetComponentListByPageIdReqVO;
-import com.cmsr.onebase.module.app.core.vo.resource.GetComponentPageListByPageIdRespVO;
 import com.cmsr.onebase.module.app.build.service.resource.ComponentService;
+import com.cmsr.onebase.module.app.core.dto.appresource.ComponentDTO;
+import com.cmsr.onebase.module.app.core.vo.resource.QueryComponentListReqVO;
+import com.cmsr.onebase.module.app.core.vo.resource.QueryComponentListRespVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.annotation.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,16 +27,17 @@ import java.util.List;
 @RequestMapping("/app/resource/component")
 @Validated
 public class ComponentController {
-    @Resource
+
+    @Autowired
     private ComponentService componentService;
 
     @PostMapping("/list")
-    @Operation(summary = "根据page_id获取表单字段")
-    public CommonResult<GetComponentPageListByPageIdRespVO> getFormPageListByAppId(@RequestBody GetComponentListByPageIdReqVO getComponentListByPageIdReqVO) {
-        List<ComponentDTO> components = componentService.listComponent(getComponentListByPageIdReqVO.getPageId());
+    @Operation(summary = "根据page_uuid获取表单字段")
+    public CommonResult<QueryComponentListRespVO> getComponentListByPageUuid(@RequestBody QueryComponentListReqVO queryComponentListReqVO) {
+        List<ComponentDTO> components = componentService.listComponent(queryComponentListReqVO.getPageId());
 
-        GetComponentPageListByPageIdRespVO getComponentPageListByPageIdRespVO = new GetComponentPageListByPageIdRespVO();
-        getComponentPageListByPageIdRespVO.setList(components);
-        return CommonResult.success(getComponentPageListByPageIdRespVO);
+        QueryComponentListRespVO queryComponentListRespVO = new QueryComponentListRespVO();
+        queryComponentListRespVO.setList(components);
+        return CommonResult.success(queryComponentListRespVO);
     }
 }

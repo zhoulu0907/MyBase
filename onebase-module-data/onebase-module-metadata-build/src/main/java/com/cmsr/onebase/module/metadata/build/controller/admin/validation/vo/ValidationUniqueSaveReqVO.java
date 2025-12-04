@@ -2,7 +2,6 @@ package com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 /**
@@ -15,15 +14,19 @@ import lombok.Data;
 public class ValidationUniqueSaveReqVO {
 
     /**
-     * 业务实体ID
+     * 业务实体UUID
      */
-    @Schema(description = "业务实体ID", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "业务实体ID不能为空")
-    private Long entityId;
+    @Schema(description = "业务实体UUID", example = "01onal1s-0000-0000-0000-000000000002")
+    private String entityUuid;
 
-    @Schema(description = "字段ID", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "字段ID不能为空")
-    private Long fieldId;
+    @Schema(description = "业务实体ID（兼容旧版，与entityUuid二选一）", example = "164329365983232001")
+    private String entityId;
+
+    @Schema(description = "字段UUID", example = "01onal1s-0000-0000-0000-000000000003")
+    private String fieldUuid;
+
+    @Schema(description = "字段ID（兼容旧版，与fieldUuid二选一）", example = "164329365983232003")
+    private String fieldId;
 
     @Schema(description = "是否启用(0/1)")
     private Integer isEnabled;

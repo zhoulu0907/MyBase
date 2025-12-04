@@ -101,6 +101,8 @@ public class RuntimeAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
         }
+        //TODO 临时设置版本号, 等发布做完后，再切换
+        ApplicationManager.setVersionTag(0L);
         // 继续过滤链
         chain.doFilter(request, response);
     }

@@ -1,14 +1,16 @@
 package com.cmsr.onebase.module.app.core.provider.auth;
 
+import com.cmsr.onebase.module.app.core.dal.database.AppSqlQueryRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleDeptRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleRepository;
-import com.cmsr.onebase.module.app.core.dal.database.AppSqlQueryRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthRoleDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthRoleDeptDO;
 import com.cmsr.onebase.module.app.core.dto.auth.UserRoleDTO;
 import com.cmsr.onebase.module.app.core.enums.auth.AuthRoleTypeEnum;
+import com.mybatisflex.core.tenant.TenantManager;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,11 +38,15 @@ public class AppAuthRoleProvider {
     public UserRoleDTO findUserRoleByApplication(Long userId, Long applicationId) {
         List<AppAuthRoleDO> authRoleDOS = new ArrayList<>();
 
-        List<AppAuthRoleDO> userAuthRoleDOS = appAuthRoleRepository.findByUserIdAndApplicationId(userId, applicationId);
-        authRoleDOS.addAll(userAuthRoleDOS);
+        List<AppAuthRoleDO> userAuthRoleDOS = TenantManager.withoutTenantCondition(() -> appAuthRoleRepository.findByUserIdAndApplicationId(userId, applicationId));
+        if (CollectionUtils.isNotEmpty(userAuthRoleDOS)) {
+            authRoleDOS.addAll(userAuthRoleDOS);
+        }
 
         List<AppAuthRoleDO> deptAuthRoleDOS = findRolesByDept(userId, applicationId);
-        authRoleDOS.addAll(deptAuthRoleDOS);
+        if (CollectionUtils.isNotEmpty(deptAuthRoleDOS)) {
+            authRoleDOS.addAll(deptAuthRoleDOS);
+        }
 
         UserRoleDTO userRoleDTO = new UserRoleDTO();
         userRoleDTO.setAdminRole(false);
@@ -57,12 +63,12 @@ public class AppAuthRoleProvider {
 
     private List<AppAuthRoleDO> findRolesByDept(Long userId, Long applicationId) {
         // 获取用户的部门层次（包含用户所在部门及其所有上级部门）
-        List<Long> deptTree = appSqlQueryRepository.findDeptHierarchyByUserId(userId);
+        List<Long> deptTree = TenantManager.withoutTenantCondition(() -> appSqlQueryRepository.findDeptHierarchyByUserId(userId));
         if (deptTree == null || deptTree.isEmpty()) {
             return Collections.emptyList();
         }
         // 获取该应用下的部门角色关系
-        List<AppAuthRoleDeptDO> authRoleDeptDOS = appAuthRoleDeptRepository.findByApplicationId(applicationId);
+        List<AppAuthRoleDeptDO> authRoleDeptDOS = TenantManager.withoutTenantCondition(() -> appAuthRoleDeptRepository.findByApplicationId(applicationId));
         if (authRoleDeptDOS == null || authRoleDeptDOS.isEmpty()) {
             return Collections.emptyList();
         }
@@ -71,7 +77,7 @@ public class AppAuthRoleProvider {
         if (roleIds.isEmpty()) {
             return Collections.emptyList();
         }
-        return appAuthRoleRepository.listByIds(roleIds);
+        return TenantManager.withoutTenantCondition(() -> appAuthRoleRepository.listByIds(roleIds));
     }
 
     private Set<Long> findRolesByDept(List<AppAuthRoleDeptDO> authRoleDeptDOS, List<Long> deptTree) {

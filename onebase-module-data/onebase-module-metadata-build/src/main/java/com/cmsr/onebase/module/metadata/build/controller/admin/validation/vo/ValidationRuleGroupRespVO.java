@@ -19,6 +19,9 @@ public class ValidationRuleGroupRespVO {
     @Schema(description = "规则组编号", example = "1024")
     private Long id;
 
+    @Schema(description = "规则组UUID", example = "01onal1s-0000-0000-0000-000000000006")
+    private String groupUuid;
+
     @Schema(description = "规则组名称", example = "客户信用评级规则")
     private String rgName;
 

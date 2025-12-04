@@ -23,6 +23,9 @@ public class AutoNumberConfigRespVO {
     @Schema(description = "字段ID", example = "1")
     private Long fieldId;
 
+    @Schema(description = "字段UUID", example = "01onal1s-0000-0000-0000-000000000003")
+    private String fieldUuid;
+
     @Schema(description = "编号方式", example = "NATURAL")
     private String numberMode;
 

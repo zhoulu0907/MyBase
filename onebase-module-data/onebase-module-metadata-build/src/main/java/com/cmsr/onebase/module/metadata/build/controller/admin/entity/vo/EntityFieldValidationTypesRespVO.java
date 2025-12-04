@@ -14,8 +14,8 @@ import java.util.List;
 @Data
 public class EntityFieldValidationTypesRespVO {
 
-    @Schema(description = "字段ID")
-    private String fieldId;
+    @Schema(description = "字段UUID")
+    private String fieldUuid;
 
     @Schema(description = "字段类型编码（来自 metadata_entity_field.field_type 与 metadata_component_field_type.field_type_code 对应）")
     private String fieldTypeCode;

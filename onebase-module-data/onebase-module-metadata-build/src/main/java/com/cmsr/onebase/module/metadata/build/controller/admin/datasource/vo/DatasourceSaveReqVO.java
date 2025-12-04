@@ -15,6 +15,9 @@ public class DatasourceSaveReqVO {
     @Schema(description = "数据源编号", example = "1024")
     private String id;
 
+    @Schema(description = "数据源UUID（更新时可用于定位记录）", example = "01onal1s-0000-0000-0000-000000000001")
+    private String datasourceUuid;
+
     @Schema(description = "数据源名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "用户数据库")
     @NotBlank(message = "数据源名称不能为空")
     @Size(max = 256, message = "数据源名称长度不能超过256个字符")
@@ -40,8 +43,7 @@ public class DatasourceSaveReqVO {
     @Schema(description = "版本标识", example = "0")
     private Long versionTag;
 
-    @Schema(description = "应用ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
-    @NotNull(message = "应用ID不能为空")
+    @Schema(description = "应用ID", example = "1")
     private String applicationId;
 
     @Schema(description = "应用唯一UID（用于与数据源建立关联时的外部标识，可选）", example = "app_8df0f2a6")

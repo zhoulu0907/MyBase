@@ -8,7 +8,7 @@ import com.mybatisflex.core.table.TableDef;
  * 数据权限-权限组配置表 表定义层。
  *
  * @author HuangJie
- * @since 2025-11-26
+ * @since 2025-12-01
  */
 public class AppAuthDataGroupTableDef extends TableDef {
 
@@ -24,16 +24,6 @@ public class AppAuthDataGroupTableDef extends TableDef {
      */
     public final QueryColumn ID = new QueryColumn(this, "id");
 
-    /**
-     * 菜单id
-     */
-    public final QueryColumn MENU_ID = new QueryColumn(this, "menu_id");
-
-    /**
-     * 角色id
-     */
-    public final QueryColumn ROLE_ID = new QueryColumn(this, "role_id");
-
     
     public final QueryColumn CREATOR = new QueryColumn(this, "creator");
 
@@ -42,6 +32,12 @@ public class AppAuthDataGroupTableDef extends TableDef {
 
     
     public final QueryColumn UPDATER = new QueryColumn(this, "updater");
+
+    
+    public final QueryColumn MENU_UUID = new QueryColumn(this, "menu_uuid");
+
+    
+    public final QueryColumn ROLE_UUID = new QueryColumn(this, "role_uuid");
 
     
     public final QueryColumn TENANT_ID = new QueryColumn(this, "tenant_id");
@@ -80,6 +76,9 @@ public class AppAuthDataGroupTableDef extends TableDef {
     
     public final QueryColumn UPDATE_TIME = new QueryColumn(this, "update_time");
 
+    
+    public final QueryColumn VERSION_TAG = new QueryColumn(this, "version_tag");
+
     /**
      * 描述
      */
@@ -91,7 +90,7 @@ public class AppAuthDataGroupTableDef extends TableDef {
     /**
      * 关联业务实体字段id
      */
-    public final QueryColumn SCOPE_FIELD_ID = new QueryColumn(this, "scope_field_id");
+    public final QueryColumn SCOPE_FIELD_UUID = new QueryColumn(this, "scope_field_uuid");
 
     /**
      * 应用id
@@ -111,7 +110,7 @@ public class AppAuthDataGroupTableDef extends TableDef {
     /**
      * 默认字段，不包含逻辑删除或者 large 等字段。
      */
-    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, APPLICATION_ID, ROLE_ID, MENU_ID, GROUP_NAME, GROUP_ORDER, DESCRIPTION, SCOPE_TAGS, SCOPE_FIELD_ID, SCOPE_LEVEL, SCOPE_VALUE, DATA_FILTER, OPERATION_TAGS, LOCK_VERSION, CREATOR, CREATE_TIME, UPDATER, UPDATE_TIME, DELETED, TENANT_ID};
+    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, APPLICATION_ID, VERSION_TAG, ROLE_UUID, MENU_UUID, GROUP_NAME, GROUP_ORDER, DESCRIPTION, SCOPE_TAGS, SCOPE_FIELD_UUID, SCOPE_LEVEL, SCOPE_VALUE, DATA_FILTER, OPERATION_TAGS, LOCK_VERSION, CREATOR, CREATE_TIME, UPDATER, UPDATE_TIME, DELETED, TENANT_ID};
 
     public AppAuthDataGroupTableDef() {
         super("", "app_auth_data_group");

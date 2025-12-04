@@ -74,11 +74,6 @@ public class DefJson {
     private String version;
 
     /**
-     * 流程版本备注
-     */
-    private String versionAlias;
-
-    /**
      * 是否发布（0未开启 1开启）
      */
     private Integer isPublish;
@@ -148,6 +143,17 @@ public class DefJson {
     private List<Tree> categoryList;
 
 
+    /**
+     * 流程版本备注
+     */
+    private String versionAlias;
+
+    /**
+     * 应用ID
+     */
+    private Long applicationId;
+
+
     public String getModelValue() {
         if (StringUtils.isEmpty(modelValue)) {
             modelValue = "CLASSICS";
@@ -162,6 +168,7 @@ public class DefJson {
                 .setModelValue(definition.getModelValue())
                 .setVersion(definition.getVersion())
                 .setVersionAlias(definition.getVersionAlias())
+                .setApplicationId(definition.getApplicationId())
                 .setIsPublish(definition.getIsPublish())
                 .setCategory(definition.getCategory())
                 .setFormCustom(definition.getFormCustom())
@@ -226,6 +233,7 @@ public class DefJson {
                 .setModelValue(defJson.getModelValue())
                 .setVersion(defJson.getVersion())
                 .setVersionAlias(defJson.getVersionAlias())
+                .setApplicationId(defJson.getApplicationId())
                 .setCategory(defJson.getCategory())
                 .setFormCustom(defJson.getFormCustom())
                 .setFormPath(defJson.getFormPath())

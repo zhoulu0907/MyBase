@@ -2,17 +2,18 @@ package com.cmsr.onebase.module.metadata.build.controller.admin.datasource;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.module.metadata.build.controller.admin.datasource.vo.*;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
 import com.cmsr.onebase.module.metadata.build.service.datasource.MetadataDatasourceBuildService;
 import com.cmsr.onebase.module.metadata.build.service.datasource.vo.ColumnQueryVO;
 import com.cmsr.onebase.module.metadata.build.service.datasource.vo.TableQueryVO;
+import com.cmsr.onebase.module.metadata.core.util.MetadataIdUuidConverter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,6 +36,9 @@ public class DatasourceController {
     @Resource
     private MetadataDatasourceBuildService datasourceBuildService;
 
+    @Resource
+    private MetadataIdUuidConverter idUuidConverter;
+
     @PostMapping("/types")
     @Operation(summary = "获取所有支持的数据源类型")
     public CommonResult<List<DatasourceTypeRespVO>> getDatasourceTypes() {
@@ -44,7 +48,6 @@ public class DatasourceController {
 
     @PostMapping("/tables")
     @Operation(summary = "根据数据源ID查询表名列表")
-    @PreAuthorize("@ss.hasPermission('metadata:datasource:query')")
     public CommonResult<List<TableInfoRespVO>> getTablesByDatasourceId(@Valid TableQueryReqVO reqVO) {
         // 将Controller层的VO转换为Service层的VO
         TableQueryVO queryVO = new TableQueryVO(reqVO.getDatasourceId(), reqVO.getSchemaName(), reqVO.getKeyword());
@@ -54,7 +57,6 @@ public class DatasourceController {
 
     @PostMapping("/columns")
     @Operation(summary = "根据表名查询字段信息")
-    @PreAuthorize("@ss.hasPermission('metadata:datasource:query')")
     public CommonResult<List<ColumnInfoRespVO>> getColumnsByTableName(@Valid ColumnQueryReqVO reqVO) {
         // 将Controller层的VO转换为Service层的VO
         ColumnQueryVO queryVO = new ColumnQueryVO(reqVO.getDatasourceId(), reqVO.getTableName(), reqVO.getSchemaName());
@@ -64,41 +66,42 @@ public class DatasourceController {
 
     @PostMapping("/create")
     @Operation(summary = "新增数据源")
-    @PreAuthorize("@ss.hasPermission('metadata:datasource:create')")
     public CommonResult<String> createDatasource(@Valid @RequestBody DatasourceSaveReqVO reqVO) {
+        // 从请求头获取应用ID
+        reqVO.setApplicationId(String.valueOf(ApplicationManager.getApplicationId()));
         Long id = datasourceBuildService.createDatasource(reqVO);
         return success(id.toString());
     }
 
     @PostMapping("/update")
     @Operation(summary = "修改数据源")
-    @PreAuthorize("@ss.hasPermission('metadata:datasource:update')")
     public CommonResult<Boolean> updateDatasource(@Valid @RequestBody DatasourceSaveReqVO reqVO) {
+        // 从请求头获取应用ID
+        reqVO.setApplicationId(String.valueOf(ApplicationManager.getApplicationId()));
         datasourceBuildService.updateDatasource(reqVO);
         return success(true);
     }
 
     @PostMapping("/delete")
     @Operation(summary = "删除数据源")
-    @Parameter(name = "id", description = "编号", required = true, example = "1024")
-    @PreAuthorize("@ss.hasPermission('metadata:datasource:delete')")
-    public CommonResult<Boolean> deleteDatasource(@RequestParam("id") Long id) {
-        datasourceBuildService.deleteDatasource(id);
+    @Parameter(name = "id", description = "数据源标识（支持Long ID或UUID）", required = true, example = "1024")
+    public CommonResult<Boolean> deleteDatasource(@RequestParam("id") String id) {
+        Long datasourceId = idUuidConverter.resolveDatasourceId(id);
+        datasourceBuildService.deleteDatasource(datasourceId);
         return success(true);
     }
 
     @PostMapping("/get")
     @Operation(summary = "获得数据源详情")
-    @Parameter(name = "id", description = "编号", required = true, example = "1024")
-    @PreAuthorize("@ss.hasPermission('metadata:datasource:query')")
-    public CommonResult<DatasourceRespVO> getDatasource(@RequestParam("id") Long id) {
-        MetadataDatasourceDO datasource = datasourceBuildService.getDatasource(id);
+    @Parameter(name = "id", description = "数据源标识（支持Long ID或UUID）", required = true, example = "1024")
+    public CommonResult<DatasourceRespVO> getDatasource(@RequestParam("id") String id) {
+        Long datasourceId = idUuidConverter.resolveDatasourceId(id);
+        MetadataDatasourceDO datasource = datasourceBuildService.getDatasource(datasourceId);
         return success(datasourceBuildService.buildDatasourceRespVO(datasource));
     }
 
     @PostMapping("/page")
     @Operation(summary = "获得数据源分页列表")
-    @PreAuthorize("@ss.hasPermission('metadata:datasource:query')")
     public CommonResult<PageResult<DatasourceRespVO>> getDatasourcePage(@Valid @RequestBody DatasourcePageReqVO pageReqVO) {
         PageResult<MetadataDatasourceDO> pageResult = datasourceBuildService.getDatasourcePage(pageReqVO);
         PageResult<DatasourceRespVO> convertedResult = new PageResult<>();
@@ -109,13 +112,13 @@ public class DatasourceController {
 
     @PostMapping("/list")
     @Operation(summary = "获得数据源列表")
-    @PreAuthorize("@ss.hasPermission('metadata:datasource:query')")
     public CommonResult<List<DatasourceRespVO>> getDatasourceList(@Valid @RequestBody DatasourceListReqVO reqVO) {
         List<MetadataDatasourceDO> list;
 
-        // 根据是否传入appId来决定查询方式
-        if (reqVO.getApplicationId() != null && !reqVO.getApplicationId().trim().isEmpty()) {
-            list = datasourceBuildService.getDatasourceListByAppId(Long.valueOf(reqVO.getApplicationId()));
+        // 使用请求头中的应用ID
+        Long applicationId = ApplicationManager.getApplicationId();
+        if (applicationId != null) {
+            list = datasourceBuildService.getDatasourceListByAppId(applicationId);
         } else {
             list = datasourceBuildService.getDatasourceList();
         }
@@ -127,7 +130,6 @@ public class DatasourceController {
     @PostMapping("/get-by-code")
     @Operation(summary = "根据编码获得数据源")
     @Parameter(name = "code", description = "数据源编码", required = true, example = "user_db")
-    @PreAuthorize("@ss.hasPermission('metadata:datasource:query')")
     public CommonResult<DatasourceRespVO> getDatasourceByCode(@RequestParam("code") String code) {
         MetadataDatasourceDO datasource = datasourceBuildService.getDatasourceByCode(code);
         return success(datasourceBuildService.buildDatasourceRespVO(datasource));
@@ -135,7 +137,6 @@ public class DatasourceController {
 
     @PostMapping("/test-connection")
     @Operation(summary = "测试数据源连接")
-    @PreAuthorize("@ss.hasPermission('metadata:datasource:test')")
     public CommonResult<DatasourceTestConnectionRespVO> testConnection(@Valid @RequestBody DatasourceTestConnectionReqVO reqVO) {
         return success(datasourceBuildService.testConnection(reqVO));
     }

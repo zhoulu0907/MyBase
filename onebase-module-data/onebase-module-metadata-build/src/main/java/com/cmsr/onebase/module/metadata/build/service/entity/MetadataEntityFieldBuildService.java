@@ -104,6 +104,14 @@ public interface MetadataEntityFieldBuildService {
     MetadataEntityFieldDO getEntityField(String id);
 
     /**
+     * 获得实体字段（根据UUID）
+     *
+     * @param fieldUuid 字段UUID
+     * @return 实体字段
+     */
+    MetadataEntityFieldDO getEntityFieldByUuid(String fieldUuid);
+
+    /**
      * 创建实体字段（内部使用）
      *
      * @param entityField 实体字段DO

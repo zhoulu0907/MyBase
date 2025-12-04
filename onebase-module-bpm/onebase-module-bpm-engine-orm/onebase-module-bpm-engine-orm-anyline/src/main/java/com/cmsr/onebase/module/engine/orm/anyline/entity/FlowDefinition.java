@@ -86,6 +86,12 @@ public class FlowDefinition extends BaseEntity implements Definition {
     @Column(name = "version_alias", length = 500)
     private String versionAlias;
 
+    /**
+     * 应用ID
+     */
+    @Column(name = "application_id", nullable = false)
+    private Long applicationId;
+
 
     /* ==================== 以下为非数据库字段 ==================== */
 

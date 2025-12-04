@@ -1,22 +1,21 @@
 package com.cmsr.onebase.module.app.build.controller.resource;
 
+import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.app.build.service.resource.PageService;
 import com.cmsr.onebase.module.app.core.dto.appresource.CreatePageViewDTO;
 import com.cmsr.onebase.module.app.core.dto.appresource.PageDTO;
+import com.cmsr.onebase.module.app.core.dto.appresource.UpdatePageNameDTO;
 import com.cmsr.onebase.module.app.core.vo.resource.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.Resource;
+import lombok.Setter;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.module.app.core.dto.appresource.UpdatePageNameDTO;
-import com.cmsr.onebase.module.app.build.service.resource.PageService;
-
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.annotation.Resource;
 
 import java.util.List;
 
@@ -26,6 +25,7 @@ import java.util.List;
  * @Author mickey
  * @Date 2025/8/4 10:17
  */
+@Setter
 @Tag(name = "应用资源管理-页面管理")
 @RestController
 @RequestMapping("/app/resource/page")
@@ -42,18 +42,18 @@ public class PageController {
         UpdatePageNameDTO updatePageDTO = new UpdatePageNameDTO();
         updatePageDTO.setPageId(updatePageNameReqVO.getId());
         updatePageDTO.setPageName(updatePageNameReqVO.getPageName());
-        pageService.updatePageName(updatePageDTO);
+        Boolean updated = pageService.updatePageName(updatePageDTO);
 
-        return CommonResult.success(true);
+        return CommonResult.success(updated);
     }
 
     @PostMapping("/form/app_id")
     @Operation(summary = "根据app_id获取表单页面")
     public CommonResult<GetFormPageListByAppIdRespVO> getFormPageListByAppId(@RequestBody GetFormPageListByAppIdReqVO getFormPageListByAppIdReqVO) {
-        List<PageDTO> pages = pageService.getFormPageListByAppId(getFormPageListByAppIdReqVO.getAppId());
+        List<PageDTO> pageDtoList = pageService.getFormPageListByAppId(getFormPageListByAppIdReqVO.getAppId());
 
         GetFormPageListByAppIdRespVO getFormPageListByAppIdRespVO = new GetFormPageListByAppIdRespVO();
-        getFormPageListByAppIdRespVO.setPages(pages);
+        getFormPageListByAppIdRespVO.setPages(pageDtoList);
         return CommonResult.success(getFormPageListByAppIdRespVO);
     }
 

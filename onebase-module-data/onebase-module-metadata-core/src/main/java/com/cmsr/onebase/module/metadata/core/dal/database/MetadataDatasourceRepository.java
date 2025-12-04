@@ -59,6 +59,21 @@ public class MetadataDatasourceRepository extends ServiceImpl<MetadataDatasource
     }
 
     /**
+     * 根据UUID获取数据源
+     *
+     * @param datasourceUuid 数据源UUID
+     * @return 数据源对象
+     */
+    public MetadataDatasourceDO getDatasourceByUuid(String datasourceUuid) {
+        if (datasourceUuid == null || datasourceUuid.trim().isEmpty()) {
+            return null;
+        }
+        QueryWrapper queryWrapper = this.query()
+                .eq(MetadataDatasourceDO::getDatasourceUuid, datasourceUuid);
+        return getOne(queryWrapper);
+    }
+
+    /**
      * 获取数据源列表
      *
      * @return 数据源列表

@@ -37,7 +37,6 @@ public class FormulaFunctionController {
 
     @PostMapping("create")
     @Operation(summary = "创建函数")
-    @PreAuthorize("@ss.hasPermission('formula:function:create')")
     public CommonResult<Long> createFunction(@Valid @RequestBody FunctionInsertReqVO createReqVO) {
         Long functionId = functionService.createFunction(createReqVO);
         return success(functionId);
@@ -45,7 +44,6 @@ public class FormulaFunctionController {
 
     @PostMapping("update")
     @Operation(summary = "更新函数")
-    @PreAuthorize("@ss.hasPermission('formula:function:update')")
     public CommonResult<Boolean> updateFunction(@Valid @RequestBody FunctionUpdateReqVO updateReqVO) {
         functionService.updateFunction(updateReqVO);
         return success(true);
@@ -54,7 +52,6 @@ public class FormulaFunctionController {
     @PostMapping("delete")
     @Operation(summary = "删除函数")
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
-    @PreAuthorize("@ss.hasPermission('formula:function:delete')")
     public CommonResult<Boolean> deleteFunction(@RequestParam("id") Long id) {
         functionService.deleteFunction(id);
         return success(true);
@@ -63,7 +60,6 @@ public class FormulaFunctionController {
     @GetMapping("/get")
     @Operation(summary = "获得函数信息")
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
-    @PreAuthorize("@ss.hasPermission('formula:function:query')")
     public CommonResult<FunctionRespVO> getFunction(@RequestParam("id") Long id) {
         FunctionDO function = functionService.getFunction(id);
         return success(BeanUtils.toBean(function, FunctionRespVO.class));
@@ -71,7 +67,6 @@ public class FormulaFunctionController {
 
     @GetMapping("/list")
     @Operation(summary = "获取函数列表")
-    @PreAuthorize("@ss.hasPermission('formula:function:query')")
     public CommonResult<List<FunctionRespVO>> getFunctionList(FunctionListReqVO reqVO) {
         List<FunctionDO> list = functionService.getFunctionList(reqVO);
         return success(BeanUtils.toBean(list, FunctionRespVO.class));
@@ -79,7 +74,6 @@ public class FormulaFunctionController {
 
     @GetMapping("/page")
     @Operation(summary = "获取函数分页")
-    @PreAuthorize("@ss.hasPermission('formula:function:query')")
     public CommonResult<PageResult<FunctionRespVO>> getFunctionPage(@Valid FunctionPageReqVO reqVO) {
         PageResult<FunctionDO> pageResult = functionService.getFunctionPage(reqVO);
         return success(BeanUtils.toBean(pageResult, FunctionRespVO.class));
@@ -91,6 +85,13 @@ public class FormulaFunctionController {
         List<FunctionDO> list = functionService.getFunctionList(
                 new FunctionListReqVO().setStatus(CommonStatusEnum.ENABLE.getStatus()));
         return success(BeanUtils.toBean(list, FunctionSimpleRespVO.class));
+    }
+
+    @GetMapping("/list-group-by-type")
+    @Operation(summary = "根据类型获取函数分组列表")
+    public CommonResult<List<FunctionGroupRespVo>> getFunctionListGroupByType(@Valid FunctionListReqVO reqVO) {
+        List<FunctionGroupRespVo> functionListGroupByType = functionService.getFunctionListGroupByType(reqVO);
+        return success(functionListGroupByType);
     }
 
 }

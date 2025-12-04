@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.app.core.dal.dataobject;
 
+import com.cmsr.onebase.framework.orm.entity.BaseBizEntity;
 import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
@@ -13,16 +14,13 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Table(value = "app_resource_workbench_page")
-public class AppResourceWorkbenchPageDO extends BaseTenantEntity {
+public class AppResourceWorkbenchPageDO extends BaseBizEntity {
 
-    @Column(value = "pageset_id", comment = "页面集ID")
-    private Long pageSetId;
+    @Column("page_uuid")
+    private String pageUuid;
 
-    @Column(value = "page_name", comment = "页面名称")
-    private String pageName;
-
-    @Column(value = "page_type", comment = "页面类型 workbench")
-    private String pageType;
+    @Column("pageset_uuid")
+    private String pageSetUuid;
 
     @Column(value = "edit_view_mode", comment = "编辑模式")
     private Integer editViewMode;
@@ -38,6 +36,12 @@ public class AppResourceWorkbenchPageDO extends BaseTenantEntity {
 
     @Column(value = "is_latest_updated", comment = "最新更新的视图")
     private Integer isLatestUpdated;
+
+    @Column(value = "page_name", comment = "页面名称")
+    private String pageName;
+
+    @Column(value = "page_type", comment = "页面类型 workbench")
+    private String pageType;
 
     /**
      * 页面标题

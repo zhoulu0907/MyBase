@@ -15,15 +15,26 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class MetadataAutoNumberConfigRepository extends ServiceImpl<MetadataAutoNumberConfigMapper, MetadataAutoNumberConfigDO> {
 
-    public MetadataAutoNumberConfigDO findByFieldId(Long fieldId) {
+    /**
+     * 根据字段UUID查询自动编号配置
+     *
+     * @param fieldUuid 字段UUID
+     * @return 自动编号配置
+     */
+    public MetadataAutoNumberConfigDO findByFieldUuid(String fieldUuid) {
         QueryWrapper queryWrapper = this.query()
-                .eq(MetadataAutoNumberConfigDO::getFieldId, fieldId);
+                .eq(MetadataAutoNumberConfigDO::getFieldUuid, fieldUuid);
         return getOne(queryWrapper);
     }
 
-    public void deleteByFieldId(Long fieldId) {
+    /**
+     * 根据字段UUID删除自动编号配置
+     *
+     * @param fieldUuid 字段UUID
+     */
+    public void deleteByFieldUuid(String fieldUuid) {
         QueryWrapper queryWrapper = this.query()
-                .eq(MetadataAutoNumberConfigDO::getFieldId, fieldId);
+                .eq(MetadataAutoNumberConfigDO::getFieldUuid, fieldUuid);
         remove(queryWrapper);
     }
 
@@ -45,6 +56,29 @@ public class MetadataAutoNumberConfigRepository extends ServiceImpl<MetadataAuto
      */
     public boolean update(MetadataAutoNumberConfigDO config) {
         return updateById(config);
+    }
+
+    // ==================== 向后兼容方法 ====================
+
+    /**
+     * 根据字段ID查询自动编号配置（兼容旧代码）
+     * @deprecated 请使用 findByFieldUuid(String)
+     * @param fieldId 字段ID
+     * @return 自动编号配置
+     */
+    @Deprecated
+    public MetadataAutoNumberConfigDO findByFieldId(Long fieldId) {
+        return findByFieldUuid(fieldId != null ? String.valueOf(fieldId) : null);
+    }
+
+    /**
+     * 根据字段ID删除自动编号配置（兼容旧代码）
+     * @deprecated 请使用 deleteByFieldUuid(String)
+     * @param fieldId 字段ID
+     */
+    @Deprecated
+    public void deleteByFieldId(Long fieldId) {
+        deleteByFieldUuid(fieldId != null ? String.valueOf(fieldId) : null);
     }
 }
 

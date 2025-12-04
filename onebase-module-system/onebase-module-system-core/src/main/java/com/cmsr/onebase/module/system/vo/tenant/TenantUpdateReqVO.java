@@ -47,8 +47,7 @@ public class TenantUpdateReqVO {
     private String logoUrl;
 
     @Schema(description = "管理员集合")
-    private List<TenantAdminUserUpdateReqVO> tenantAdminUserUpdateReqVOSList;
-
+    private List<TenantAdminUserReqVO> tenantAdminUserUpdateReqVOSList;
 
     @Schema(description = "saas功能是否开启默认inner，开启saas")
     @InEnum(value = CommonPublishModelEnum.class, message = "返回值类型必须是 {value}")

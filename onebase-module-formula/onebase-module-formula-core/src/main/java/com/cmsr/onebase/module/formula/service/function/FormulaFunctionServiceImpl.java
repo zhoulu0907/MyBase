@@ -3,13 +3,16 @@ package com.cmsr.onebase.module.formula.service.function;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjUtil;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
+import com.cmsr.onebase.framework.common.enums.FunctionTypeEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.formula.dal.database.FunctionDataRepository;
 import com.cmsr.onebase.module.formula.dal.dataobject.FunctionDO;
+import com.cmsr.onebase.module.formula.vo.function.FunctionGroupRespVo;
 import com.cmsr.onebase.module.formula.vo.function.FunctionInsertReqVO;
 import com.cmsr.onebase.module.formula.vo.function.FunctionListReqVO;
 import com.cmsr.onebase.module.formula.vo.function.FunctionPageReqVO;
+import com.cmsr.onebase.module.formula.vo.function.FunctionRespVO;
 import com.cmsr.onebase.module.formula.vo.function.FunctionUpdateReqVO;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Resource;
@@ -20,10 +23,8 @@ import org.anyline.entity.PageNavi;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.formula.enums.ErrorCodeConstants.*;
@@ -90,6 +91,38 @@ public class FormulaFunctionServiceImpl implements FormulaFunctionService {
     @Override
     public List<FunctionDO> getFunctionList(FunctionListReqVO reqVO) {
         return functionDataRepository.findAllByConditions(reqVO.getType(), reqVO.getName(), reqVO.getStatus());
+    }
+
+    @Override
+    public List<FunctionGroupRespVo> getFunctionListGroupByType(FunctionListReqVO reqVO) {
+        List<FunctionDO> functionDOList = functionDataRepository.findAllByConditions(reqVO.getType(), reqVO.getName(), reqVO.getStatus());
+        // 按照类型分组
+        Map<String, List<FunctionDO>> groupedFunctions = functionDOList.stream()
+                .collect(Collectors.groupingBy(FunctionDO::getType));
+        
+        // 定义类型排序顺序
+        List<String> typeOrder = Arrays.asList(FunctionTypeEnum.COMMON.getValue(), FunctionTypeEnum.TEXT.getValue(),
+                FunctionTypeEnum.NUMBER.getValue(), FunctionTypeEnum.LOGIC.getValue(),FunctionTypeEnum.DATE.getValue(),
+                FunctionTypeEnum.USER.getValue());
+
+        // 转换为FunctionGroupRespVo列表并按指定顺序排序
+        return groupedFunctions.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey((type1, type2) -> {
+                    int index1 = typeOrder.indexOf(type1);
+                    int index2 = typeOrder.indexOf(type2);
+                    // 如果类型不在预定义顺序中，排在最后
+                    if (index1 == -1) index1 = Integer.MAX_VALUE;
+                    if (index2 == -1) index2 = Integer.MAX_VALUE;
+                    return Integer.compare(index1, index2);
+                }))
+                .map(entry -> {
+                    FunctionGroupRespVo groupRespVo = new FunctionGroupRespVo();
+                    groupRespVo.setType(entry.getKey());
+                    List<FunctionRespVO> functionRespVOList = BeanUtils.toBean(entry.getValue(), FunctionRespVO.class);
+                    groupRespVo.setFunctions(functionRespVOList);
+                    return groupRespVo;
+                })
+                .collect(Collectors.toList());
     }
 
     @Override

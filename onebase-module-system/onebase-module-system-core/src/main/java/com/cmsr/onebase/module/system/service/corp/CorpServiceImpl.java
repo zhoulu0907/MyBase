@@ -7,8 +7,8 @@ import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
@@ -17,9 +17,13 @@ import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
 import com.cmsr.onebase.module.system.dal.database.CorpDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.corp.CorpDO;
 import com.cmsr.onebase.module.system.dal.dataobject.corpapprelation.CorpAppRelationDO;
+import com.cmsr.onebase.module.system.dal.dataobject.dict.DictDataDO;
+import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.corp.CorpConstant;
 import com.cmsr.onebase.module.system.service.corpapprelation.CorpAppRelationService;
+import com.cmsr.onebase.module.system.service.dict.DictDataService;
+import com.cmsr.onebase.module.system.service.tenant.TenantService;
 import com.cmsr.onebase.module.system.service.user.UserService;
 import com.cmsr.onebase.module.system.vo.corp.*;
 import com.cmsr.onebase.module.system.vo.corpapprelation.AppAuthTimeReqVO;
@@ -31,12 +35,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.DataRow;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.*;
@@ -81,6 +84,13 @@ public class CorpServiceImpl implements CorpService {
     @Resource
     private DictDataCommonApi dictDataApi;
 
+    @Resource
+    private DictDataService dictDataService;
+
+    @Resource
+    @Lazy
+    private TenantService tenantService;
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     @LogRecord(type = SYSTEM_CORP_TYPE, subType = SYSTEM_CORP_CREATE_SUB_TYPE, bizNo = "{{#corpId}}",
@@ -113,7 +123,7 @@ public class CorpServiceImpl implements CorpService {
 
     public Long createCorp(CorpReqVO reqVO) {
         // 验证企业基本信息
-        validCorp(reqVO);
+        validCreateCorp(reqVO);
 
         CorpDO corpDO = BeanUtils.toBean(reqVO, CorpDO.class);
         corpDO.setTenantId(TenantContextHolder.getTenantId());
@@ -121,9 +131,29 @@ public class CorpServiceImpl implements CorpService {
         return corpDataRepository.insert(corpDO).getId();
     }
 
-    private void validCorpUserCountDuplicate(Integer userCount) {
+    private Integer getExistUserLimitExcludeCorp(Long corpId) {
+        List<CorpDO> corpList = corpDataRepository.getAllEnableCorp();
+        return corpList.stream()
+                .filter(corp -> !Objects.equals(corp.getId(), corpId))
+                .filter(corp -> corp.getUserLimit() != null)
+                .mapToInt(CorpDO::getUserLimit)
+                .sum();
+    }
+
+    private void validCorpUserMaxCountLimit(Integer userCount, Long corpId) {
         if (userCount != null && userCount > CorpConstant.USER_LIMIT) {
             throw exception(CORP_USER_LIMIT_COUNT, userCount);
+        }
+        // 验证同一空间内企业数据是否超出限制
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+        TenantDO tenantDO = tenantService.getTenant(loginUser.getTenantId());
+        // 空间用户总数
+        Integer tenantUserLimit = tenantDO.getAccountCount();
+        // 获取企业已存在数量
+        Integer existUserLimit = getExistUserLimitExcludeCorp(corpId);
+        if (existUserLimit + userCount > tenantUserLimit) {
+            Integer remainingCount = tenantUserLimit - existUserLimit;
+            throw exception(CORP_USER_LIMIT_COUNT_CHECK, tenantUserLimit, remainingCount);
         }
     }
 
@@ -152,11 +182,16 @@ public class CorpServiceImpl implements CorpService {
     @LogRecord(type = SYSTEM_CORP_TYPE, subType = SYSTEM_CORP_UPDATE_SUB_TYPE, bizNo = "{{#corp.id}}",
             success = SYSTEM_CORP_UPDATE_SUCCESS)
     public void updateCorp(CorpUpdateReqVO reqVO) {
-        validCorpUserCountDuplicate(reqVO.getUserLimit());
         CorpDO checkCorp = corpDataRepository.findById(reqVO.getId());
         if (checkCorp == null) {
             throw exception(CORP_NO_EXISTS, reqVO.getCorpName());
         }
+
+        //  检查1：用户数下限，不能小于企业已有开启状态的用户实际数量
+        validCorpUserMinCountLimit(reqVO.getUserLimit(), reqVO.getId());
+        // 检查2：用户数上限，不能大于空间下可用的用户数量
+        validCorpUserMaxCountLimit(reqVO.getUserLimit(), reqVO.getId());
+
         CorpDO corpDO = BeanUtils.toBean(reqVO, CorpDO.class);
         corpDataRepository.update(corpDO);
 
@@ -165,6 +200,16 @@ public class CorpServiceImpl implements CorpService {
 
         LogRecordContext.putVariable("loginUser", loginUser);
         LogRecordContext.putVariable("corp", corpDO);
+    }
+
+    private void validCorpUserMinCountLimit(Integer userLimit, Long corpId) {
+        // 获取已存在的空间用户数
+        Map<Long, Integer> existUserCountMap = userService.getCorpExistUserCountByCorpIds(CollectionUtils.list(corpId));
+        Integer existUserCountInt = existUserCountMap.get(corpId);
+        int existUserCount = existUserCountInt != null ? existUserCountInt : 0;
+        if (userLimit < existUserCount) {
+            throw exception(CORP_USER_EXITES_LIMIT_COUNT_CHECK, existUserCount);
+        }
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -326,6 +371,11 @@ public class CorpServiceImpl implements CorpService {
         Long userCountLong = userService.getUserCountByCorpId(id);
         Integer userCount = (userCountLong != null) ? userCountLong.intValue() : 0;
         respVO.setUserCount(userCount);
+
+        DictDataDO dictData = dictDataService.getDictData(respVO.getIndustryType());
+        if (null != dictData) {
+            respVO.setIndustryTypeName(dictData.getLabel());
+        }
         return respVO;
     }
 
@@ -394,19 +444,19 @@ public class CorpServiceImpl implements CorpService {
         return corpDataRepository.getSimpleCorpList(staus);
     }
 
-    public void validCorp(CorpReqVO corpReqVO){
+    public void validCreateCorp(CorpReqVO corpReqVO) {
         // 用于校验企业名称是否已存在
         validCorpNameDuplicate(corpReqVO.getCorpName());
         // 用于校验企业ID是否已存在
         validCorpIdDuplicate(corpReqVO.getCorpCode());
         // 用于校验企业用户数量是否超过限制（如大于500）
-        validCorpUserCountDuplicate(corpReqVO.getUserLimit());
+        validCorpUserMaxCountLimit(corpReqVO.getUserLimit(), null);
     }
 
 
     @Override
     public void checkCorp(CorpReqVO corpReqVO) {
-        validCorp(corpReqVO);
+        validCreateCorp(corpReqVO);
     }
 
     @Override

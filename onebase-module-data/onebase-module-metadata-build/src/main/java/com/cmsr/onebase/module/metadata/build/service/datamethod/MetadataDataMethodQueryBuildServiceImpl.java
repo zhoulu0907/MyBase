@@ -18,6 +18,12 @@ import com.cmsr.onebase.module.metadata.core.service.datamethod.MetadataDataSyst
 import com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants;
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 
+/**
+ * 构建端 - 数据方法查询服务实现
+ *
+ * @author matianyu
+ * @date 2025-09-10
+ */
 @Service
 @Slf4j
 public class MetadataDataMethodQueryBuildServiceImpl implements MetadataDataMethodQueryBuildService {
@@ -33,8 +39,8 @@ public class MetadataDataMethodQueryBuildServiceImpl implements MetadataDataMeth
 
     @Override
     public List<DataMethodRespVO> getDataMethodList(DataMethodQueryVO queryVO) {
-        // 校验实体存在
-        MetadataBusinessEntityDO entity = metadataBusinessEntityCoreService.getBusinessEntity(queryVO.getEntityId());
+        // 校验实体存在（优先使用entityUuid）
+        MetadataBusinessEntityDO entity = metadataBusinessEntityCoreService.getBusinessEntityByUuid(queryVO.getEntityUuid());
         if (entity == null) {
             throw exception(ErrorCodeConstants.BUSINESS_ENTITY_NOT_EXISTS);
         }
@@ -52,9 +58,9 @@ public class MetadataDataMethodQueryBuildServiceImpl implements MetadataDataMeth
     }
 
     @Override
-    public DataMethodDetailRespVO getDataMethodDetail(Long entityId, String methodCode) {
+    public DataMethodDetailRespVO getDataMethodDetail(String entityUuid, String methodCode) {
         // 校验实体存在
-        MetadataBusinessEntityDO entity = metadataBusinessEntityCoreService.getBusinessEntity(entityId);
+        MetadataBusinessEntityDO entity = metadataBusinessEntityCoreService.getBusinessEntityByUuid(entityUuid);
         if (entity == null) {
             throw exception(ErrorCodeConstants.BUSINESS_ENTITY_NOT_EXISTS);
         }

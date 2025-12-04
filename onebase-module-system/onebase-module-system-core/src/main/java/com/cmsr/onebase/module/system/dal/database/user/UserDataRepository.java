@@ -55,7 +55,7 @@ public class UserDataRepository extends DataRepository<AdminUserDO> {
      *
      * @return
      */
-    public String getSceneByUserType(){
+    public String getSceneByUserType() {
         String userSceneType = SecurityFrameworkUtils.getSceneByUserType();
         if (StringUtils.isBlank(userSceneType)) {
             throw exception(USER_TYPE_EXCEPTION, SecurityFrameworkUtils.getLoginUserType());
@@ -76,7 +76,7 @@ public class UserDataRepository extends DataRepository<AdminUserDO> {
         if (XFromSceneTypeEnum.PLATFORM.getCode().equals(fromSceneType)) {
             configStore.and(Compare.EQUAL, AdminUserDO.USER_TYPE, UserTypeEnum.PLATFORM.getValue());
         } else if (XFromSceneTypeEnum.TENANT.getCode().equals(fromSceneType)) {
-             configStore.and(Compare.EQUAL, AdminUserDO.USER_TYPE, UserTypeEnum.TENANT.getValue());
+            configStore.and(Compare.EQUAL, AdminUserDO.USER_TYPE, UserTypeEnum.TENANT.getValue());
         } else if (XFromSceneTypeEnum.CORP.getCode().equals(fromSceneType)) {
             Long corpId = loginUser.getCorpId();
             if (null == corpId) {
@@ -200,7 +200,7 @@ public class UserDataRepository extends DataRepository<AdminUserDO> {
     /**
      * 根据corpId统计用户数量
      *
-     * @param corpId  企业id
+     * @param corpId 企业id
      * @return 用户数量
      */
     public long getUserCountByCorpId(Long corpId) {
@@ -223,8 +223,8 @@ public class UserDataRepository extends DataRepository<AdminUserDO> {
         // 根据关键词模糊查询
         if (reqVO.getKeyword() != null && !reqVO.getKeyword().trim().isEmpty()) {
             configStore.and(new DefaultConfigStore()
-                    .or(Compare.LIKE, AdminUserDO.USERNAME, reqVO.getKeyword())
-                    .or(Compare.LIKE, AdminUserDO.EMAIL, reqVO.getKeyword()))
+                            .or(Compare.LIKE, AdminUserDO.USERNAME, reqVO.getKeyword())
+                            .or(Compare.LIKE, AdminUserDO.EMAIL, reqVO.getKeyword()))
                     .or(Compare.LIKE, AdminUserDO.MOBILE, reqVO.getKeyword())
                     .or(Compare.LIKE, AdminUserDO.NICKNAME, reqVO.getKeyword());
         }
@@ -326,7 +326,7 @@ public class UserDataRepository extends DataRepository<AdminUserDO> {
         return findPageWithConditions(configStore, reqVO.getPageNo(), reqVO.getPageSize());
     }
 
-    public List<AdminUserDO> findEnableUserByIds(Set<Long> userIds,String keyword,Integer status) {
+    public List<AdminUserDO> findEnableUserByIds(Set<Long> userIds, String keyword, Integer status) {
         DefaultConfigStore configStore = buildUserConfigStore();
         configStore.in(AdminUserDO.ID, userIds)
                 .eq(AdminUserDO.STATUS, status)
@@ -352,9 +352,22 @@ public class UserDataRepository extends DataRepository<AdminUserDO> {
 
 
     public List<AdminUserDO> getTenantExistUserCountByIds(List<Long> tenantIds) {
-        DefaultConfigStore configStore = buildUserConfigStore();
-        configStore.in(AdminUserDO.TENANT_ID, tenantIds)
+        // 平台获取用户统计，不需要分用户类型
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore
+                .eq(AdminUserDO.STATUS, UserStatusEnum.NORMAL.getStatus())
+                .in(AdminUserDO.TENANT_ID, tenantIds)
                 .order(AdminUserDO.ADMIN_TYPE, Order.TYPE.ASC)
+                .order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
+        return findAllByConfig(configStore);
+    }
+
+    public List<AdminUserDO> getCorpExistUserCountByCorpIds(List<Long> corpIds) {
+        // 平台获取用户统计，不需要分用户类型
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore
+                .eq(AdminUserDO.STATUS, UserStatusEnum.NORMAL.getStatus())
+                .in(AdminUserDO.CORP_ID, corpIds)
                 .order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
         return findAllByConfig(configStore);
     }

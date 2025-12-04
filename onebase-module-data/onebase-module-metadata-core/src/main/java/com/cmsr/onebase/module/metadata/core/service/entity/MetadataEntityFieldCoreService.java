@@ -47,12 +47,28 @@ public interface MetadataEntityFieldCoreService {
     MetadataEntityFieldDO getEntityField(Long id);
 
     /**
-     * 获得实体字段列表
+     * 根据UUID获得实体字段
+     *
+     * @param fieldUuid 实体字段UUID
+     * @return 实体字段DO
+     */
+    MetadataEntityFieldDO getEntityFieldByUuid(String fieldUuid);
+
+    /**
+     * 获得实体字段列表（兼容方法，建议使用 getEntityFieldListByEntityUuid）
      *
      * @param entityId 实体编号
      * @return 实体字段列表
      */
     List<MetadataEntityFieldDO> getEntityFieldListByEntityId(Long entityId);
+
+    /**
+     * 根据实体UUID获得实体字段列表
+     *
+     * @param entityUuid 实体UUID
+     * @return 实体字段列表
+     */
+    List<MetadataEntityFieldDO> getEntityFieldListByEntityUuid(String entityUuid);
 
     /**
      * 根据字段ID列表批量获取实体字段

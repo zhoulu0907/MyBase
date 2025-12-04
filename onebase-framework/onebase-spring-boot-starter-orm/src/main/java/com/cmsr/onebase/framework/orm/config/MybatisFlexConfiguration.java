@@ -8,6 +8,7 @@ import com.mybatisflex.annotation.UpdateListener;
 import com.mybatisflex.core.FlexGlobalConfig;
 import com.mybatisflex.core.audit.AuditManager;
 import com.mybatisflex.core.keygen.KeyGeneratorFactory;
+import com.mybatisflex.core.query.QueryColumnBehavior;
 import com.mybatisflex.spring.boot.MyBatisFlexCustomizer;
 import lombok.Setter;
 import org.slf4j.Logger;
@@ -36,6 +37,8 @@ public class MybatisFlexConfiguration implements MyBatisFlexCustomizer {
 
     @Override
     public void customize(FlexGlobalConfig defaultConfig) {
+        // 不忽略任何条件，默认行为，容易隐藏深层次的问题
+        QueryColumnBehavior.setIgnoreFunction(o -> false);
         // logic delete
         defaultConfig.setLogicDeleteColumn("deleted");
         defaultConfig.setNormalValueOfLogicDelete(0);

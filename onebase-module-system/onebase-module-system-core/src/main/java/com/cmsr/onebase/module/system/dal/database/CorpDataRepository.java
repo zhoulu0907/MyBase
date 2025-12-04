@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.system.dal.database;
 
 import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.OwnerTagEnum;
 import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.framework.common.security.dto.LoginUser;
@@ -22,7 +23,8 @@ import java.util.List;
  * @date 2025-08-20
  */
 @Repository
-public class CorpDataRepository extends DataRepository<CorpDO> {
+public class
+CorpDataRepository extends DataRepository<CorpDO> {
 
     public CorpDataRepository() {
         super(CorpDO.class);
@@ -84,6 +86,12 @@ public class CorpDataRepository extends DataRepository<CorpDO> {
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.eq(CorpDO.STATUS, staus)
                 .order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
+        return findAllByConfig(configStore);
+    }
+
+    public  List<CorpDO> getAllEnableCorp() {
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.eq(CorpDO.STATUS, CommonStatusEnum.ENABLE.getStatus());
         return findAllByConfig(configStore);
     }
 }

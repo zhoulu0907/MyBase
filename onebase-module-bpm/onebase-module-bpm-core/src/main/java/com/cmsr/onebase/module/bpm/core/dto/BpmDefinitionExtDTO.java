@@ -11,11 +11,6 @@ import lombok.Data;
 @Data
 public class BpmDefinitionExtDTO {
     /**
-     * 应用ID
-     */
-    private Long appId;
-
-    /**
      * 流程定义JSON，完整存储前端定义的JSON数据
      */
     private String bpmDefJson;

@@ -251,6 +251,7 @@ public class TenantServiceImpl implements TenantService {
             reqVO.setUsername(adminUserReqVO.getAdminUserName());
             reqVO.setNickname(adminUserReqVO.getAdminNickName());
             reqVO.setMobile(adminUserReqVO.getAdminMobile());
+            reqVO.setEmail(adminUserReqVO.getAdminEmail());
             reqVO.setAdminType(AdminTypeEnum.SYSTEM.getType());
             reqVO.setPassword(TENANT_ADMIN_PASSWORD);
             reqVO.setPlatformUserId(adminUserReqVO.getPlatformUserId());
@@ -375,7 +376,7 @@ public class TenantServiceImpl implements TenantService {
                         .collect(Collectors.toMap(AdminUserDO::getUsername, AdminUserDO::getId));
                 // 删除处理
                 Map<String, String> adminUsernameMap = updateReqVO.getTenantAdminUserUpdateReqVOSList().stream()
-                        .collect(Collectors.toMap(TenantAdminUserUpdateReqVO::getAdminUserName, TenantAdminUserUpdateReqVO::getAdminUserName));
+                        .collect(Collectors.toMap(TenantAdminUserReqVO::getAdminUserName, TenantAdminUserReqVO::getAdminUserName));
 
                 // 获取需要删除的用户（在现有用户中但不在新管理员列表中的用户）
                 Map<String, Long> usersToDelete = usernameIdMap.entrySet().stream()
@@ -402,6 +403,7 @@ public class TenantServiceImpl implements TenantService {
                         userInsertReqVO.setUsername(adminUserReqVO.getAdminUserName());
                         userInsertReqVO.setNickname(adminUserReqVO.getAdminNickName());
                         userInsertReqVO.setMobile(adminUserReqVO.getAdminMobile());
+                        userInsertReqVO.setEmail(adminUserReqVO.getAdminEmail());
                         userInsertReqVO.setAdminType(AdminTypeEnum.SYSTEM.getType());
                         userInsertReqVO.setPassword(TENANT_ADMIN_PASSWORD);
                         userInsertReqVO.setPlatformUserId(adminUserReqVO.getPlatformUserId());
@@ -581,6 +583,7 @@ public class TenantServiceImpl implements TenantService {
                                 .setAdminMobile(uservo.getMobile())
                                 .setAdminUserId(uservo.getId())
                                 .setAdminNickName(uservo.getNickname())
+                                .setAdminEmail(uservo.getEmail())
                                 .setPlatformUserId(uservo.getPlatformUserId())
 
                         )
