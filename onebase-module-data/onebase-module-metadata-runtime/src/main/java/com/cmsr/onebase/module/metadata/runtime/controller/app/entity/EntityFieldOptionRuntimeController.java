@@ -24,7 +24,7 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
  */
 @Tag(name = "运行态 - 实体字段选项管理")
 @RestController
-@RequestMapping("/metadata-runtime/entity-field/option")
+@RequestMapping("/metadata/entity-field/option")
 @Validated
 public class EntityFieldOptionRuntimeController {
 

@@ -21,7 +21,7 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
  */
 @Tag(name = "运行态 - 自动编号配置")
 @RestController
-@RequestMapping("/metadata-runtime/auto-number/config")
+@RequestMapping("/metadata/auto-number/config")
 @Validated
 public class AutoNumberConfigRuntimeController {
 

@@ -22,7 +22,7 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
  */
 @Tag(name = "运行态 - 实体关系管理")
 @RestController
-@RequestMapping("/metadata-runtime/entity-relationship")
+@RequestMapping("/metadata/entity-relationship")
 @Validated
 @Slf4j
 public class EntityRelationshipRuntimeController {
