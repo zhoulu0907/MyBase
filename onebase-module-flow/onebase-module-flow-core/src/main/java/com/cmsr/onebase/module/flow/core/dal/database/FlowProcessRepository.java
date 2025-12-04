@@ -57,13 +57,13 @@ public class FlowProcessRepository extends BaseBizRepository<FlowProcessMapper, 
 
     public List<FlowProcessDO> findAllByEnableStatus(Integer status) {
         QueryWrapper query = this.query().where(FLOW_PROCESS.ENABLE_STATUS.eq(status));
-        return list(query);
+        return getMapper().selectListByQuery(query);
     }
 
-    public List<FlowProcessDO> findByApplicationId(Long applicationId) {
-        QueryWrapper query = this.query().where(FLOW_PROCESS.APPLICATION_ID.eq(applicationId));
-        return list(query);
-    }
+//    public List<FlowProcessDO> findByApplicationId(Long applicationId) {
+//        QueryWrapper query = this.query().where(FLOW_PROCESS.APPLICATION_ID.eq(applicationId));
+//        return list(query);
+//    }
 
     public List<FlowProcessDO> findByApplicationIdAndEnableStatus(Long applicationId, Integer status) {
         QueryWrapper query = this.query()
@@ -72,12 +72,12 @@ public class FlowProcessRepository extends BaseBizRepository<FlowProcessMapper, 
         return list(query);
     }
 
-    public String findProcessNameById(Long id) {
-        QueryWrapper query = this.query()
-                .select(FLOW_PROCESS.PROCESS_NAME)
-                .where(FLOW_PROCESS.ID.eq(id));
-        return getObjAs(query, String.class);
-    }
+//    public String findProcessNameById(Long id) {
+//        QueryWrapper query = this.query()
+//                .select(FLOW_PROCESS.PROCESS_NAME)
+//                .where(FLOW_PROCESS.ID.eq(id));
+//        return getObjAs(query, String.class);
+//    }
 
 
 }
