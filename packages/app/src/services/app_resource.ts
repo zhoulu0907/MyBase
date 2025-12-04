@@ -1,3 +1,4 @@
+import { isRuntimeEnv } from '@onebase/common';
 import {
   CreatePageSetReq,
   CreatePageViewParams,
@@ -12,10 +13,10 @@ import {
   LoadPageSetReq,
   SavePageSetReq
 } from '../types';
-import { appService } from './clients';
+import { appService, runtimeAppService } from './clients';
 
 export const getPageSetId = (params: GetPageSetIdReq) => {
-  return appService.get('/resource/page_set/id', params);
+  return (isRuntimeEnv() ? runtimeAppService : appService).get('/resource/page_set/id', params);
 };
 
 export const savePageSet = (params: SavePageSetReq) => {
@@ -23,7 +24,7 @@ export const savePageSet = (params: SavePageSetReq) => {
 };
 
 export const loadPageSet = (params: LoadPageSetReq) => {
-  return appService.post('/resource/page_set/load', params);
+  return (isRuntimeEnv() ? runtimeAppService : appService).post('/resource/page_set/load', params);
 };
 
 export const createPageSet = (params: CreatePageSetReq) => {
@@ -39,7 +40,7 @@ export const getAppIdByPageSetId = (params: GetAppIdByPageSetIdReq) => {
 };
 
 export const getPageSetMetaData = (params: GetPageSetMainMetaDataReq) => {
-  return appService.get('/resource/page_set/main_metadata', params);
+  return (isRuntimeEnv() ? runtimeAppService : appService).get('/resource/page_set/main_metadata', params);
 };
 
 export const getPageListByAppId = (params: GetPageListByAppIdReq) => {
@@ -59,5 +60,5 @@ export const createPageView = (params: CreatePageViewParams) => {
 };
 
 export const listPageView = (params: ListPageViewParams) => {
-  return appService.post('/resource/page/view/list', params);
+  return (isRuntimeEnv() ? runtimeAppService : appService).post('/resource/page/view/list', params);
 };

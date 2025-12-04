@@ -8,6 +8,7 @@ import DynamicIcon from '@/components/DynamicIcon';
 
 import { useI18n } from '@/hooks/useI18n';
 import { useAppStore } from '@/store/store_app';
+import { logout } from '@/utils/session';
 import { Button, Layout, Menu, Tabs, Tooltip } from '@arco-design/web-react';
 import { IconArrowLeft } from '@arco-design/web-react/icon';
 import { AppStatus, getApplication, menuSignal, type GetApplicationReq } from '@onebase/app';
@@ -81,7 +82,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     TokenManager.clearToken();
     UserPermissionManager.clearUserPermissionInfo();
     // 跳转到登录页
-    navigate('/login', { replace: true });
+    logout(navigate);
   };
 
   // 用户菜单
