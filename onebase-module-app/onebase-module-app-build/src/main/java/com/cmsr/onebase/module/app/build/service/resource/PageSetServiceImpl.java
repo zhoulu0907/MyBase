@@ -138,15 +138,22 @@ public class PageSetServiceImpl implements PageSetService {
     @Transactional(rollbackFor = Exception.class)
     public void deletePageSetByMenuId(Long menuId) {
         AppMenuDO appMenuDO = appMenuRepository.getById(menuId);
-        // 找到页面集
-        AppResourcePagesetDO pageSetDO = pageSetRepository.findPageSetByAppIdAndMenuUuid(appMenuDO.getApplicationId(), appMenuDO.getMenuUuid());
+        if (appMenuDO == null) {
+            return;
+        }
+        appMenuRepository.removeById(appMenuDO);
         // 删除页面集关联的页面
-        List<Long> pageIds = pageRepository.findIdsByAppIdAndPageSetUuid(appMenuDO.getApplicationId(), pageSetDO.getPageSetUuid());
-        // 删除页面集
+        AppResourcePagesetDO pageSetDO = pageSetRepository.findPageSetByAppIdAndMenuUuid(appMenuDO.getApplicationId(), appMenuDO.getMenuUuid());
+        if (pageSetDO == null) {
+            return;
+        }
         pageSetRepository.removeById(pageSetDO);
         // 删除页面
+        List<Long> pageIds = pageRepository.findIdsByAppIdAndPageSetUuid(appMenuDO.getApplicationId(), pageSetDO.getPageSetUuid());
+        if (CollectionUtils.isEmpty(pageIds)) {
+            return;
+        }
         pageRepository.removeByIds(pageIds);
-
     }
 
     @Override
