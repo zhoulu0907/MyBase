@@ -21,6 +21,7 @@ import jakarta.validation.Valid;
  * @date 2025-10-23
  */
 @Tag(name = "数据方法 API")
+@Deprecated
 public interface DataMethodApi {
 
     /**

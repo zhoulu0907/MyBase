@@ -98,6 +98,7 @@ public class SemanticValueAssembler {
      */
     public SemanticEntityValueDTO toEntityValue(SemanticEntitySchemaDTO entity, Row row) {
         SemanticEntityValueDTO resultVal = new SemanticEntityValueDTO();
+        resultVal.setId(row.get("id"));
         Map<String, SemanticFieldValueDTO<Object>> fvMap = new HashMap<>();
         List<SemanticFieldSchemaDTO> schemaFields = entity.getFields();
         if (schemaFields != null) {

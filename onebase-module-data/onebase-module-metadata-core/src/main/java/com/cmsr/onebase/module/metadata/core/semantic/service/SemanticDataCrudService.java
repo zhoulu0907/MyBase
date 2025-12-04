@@ -355,16 +355,16 @@ public class SemanticDataCrudService {
     /**
      * 条件更新主表数据并返回更新后的结果列表
      */
-    public java.util.List<java.util.Map<String, Object>> updateByCondition(SemanticRecordDTO recordDTO, java.util.Map<String, Object> updates) {
+    public List<Map<String, Object>> updateByCondition(SemanticRecordDTO recordDTO, Map<String, Object> updates) {
         semanticWorkflowExecutor.preExecute(recordDTO);
         SemanticEntitySchemaDTO entity = recordDTO.getEntitySchema();
         List<SemanticFieldSchemaDTO> fields = entity.getFields();
-        if (updates == null || updates.isEmpty()) { return java.util.List.of(); }
+        if (updates == null || updates.isEmpty()) { return List.of(); }
         SemanticConditionDTO cond = recordDTO.getRecordContext() == null ? null : recordDTO.getRecordContext().getFilters();
         boolean noCond = cond == null
                 || (((cond.getFieldName() == null || cond.getFieldName().isBlank()) && cond.getFieldUuid() == null))
                 || cond.getFieldValue() == null || cond.getFieldValue().isEmpty();
-        if (noCond) { return java.util.List.of(); }
+        if (noCond) { return List.of(); }
 
         QueryWrapper qw = QueryWrapper.create();
         semanticQueryConditionBuilder.apply(qw, fields, cond, null);
@@ -388,7 +388,7 @@ public class SemanticDataCrudService {
         });
         if (hasUpdater && !updateRow.containsKey("updater")) { updateRow.put("updater", null); }
         if (hasUpdatedTime && !updateRow.containsKey("updated_time")) { updateRow.put("updated_time", null); }
-        if (updateRow.isEmpty()) { return java.util.List.of(); }
+        if (updateRow.isEmpty()) { return List.of(); }
 
         dynamicMetadataRepository.updateByQuery(entity.getTableName(), updateRow, qw);
 
@@ -396,7 +396,7 @@ public class SemanticDataCrudService {
         List<SemanticEntityValueDTO> values = new ArrayList<>();
         for (Row row : rows) { values.add(semanticValueAssembler.toEntityValue(entity, row)); }
         semanticRefResolver.enrichBatch(entity, values);
-        List<java.util.Map<String, Object>> result = new ArrayList<>();
+        List<Map<String, Object>> result = new ArrayList<>();
         for (SemanticEntityValueDTO val : values) { result.add(val.getGlobalRawMapForJson()); }
         result = semanticQueryPermissionHelper.filterQueryResultList(result, recordDTO.getRecordContext().getPermissionContext(), fields);
         semanticWorkflowExecutor.postExecute(recordDTO);

@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.app.core.dal.database.menu;
 
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.orm.repo.BaseBizRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppMenuDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePageDO;

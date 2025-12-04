@@ -75,6 +75,17 @@ public class ApplicationManager {
         versionTagHolder.set(versionTag);
     }
 
+    public static Long getRequiredVersionTag() {
+        if (isIgnoreVersionTagCondition()) {
+            return null;
+        }
+        Long versionTag = versionTagHolder.get();
+        if (versionTag == null) {
+            throw new RuntimeException("未设置版本号");
+        }
+        return versionTag;
+    }
+
     public static Long getVersionTag() {
         if (isIgnoreVersionTagCondition()) {
             return null;

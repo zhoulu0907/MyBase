@@ -11,6 +11,7 @@ import com.cmsr.onebase.module.app.core.dal.database.tag.AppTagRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationTagDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppTagDO;
+import com.mybatisflex.core.tenant.TenantManager;
 import jakarta.annotation.Resource;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
@@ -43,7 +44,7 @@ public class AppApplicationApiImpl implements AppApplicationApi {
 
     @Override
     public Long countApplicationByTenantId(Long tenantId) {
-        Long count = appApplicationRepository.countByTenantId(tenantId);
+        Long count = TenantManager.withoutTenantCondition(() -> appApplicationRepository.countByTenantId(tenantId));
         return count;
     }
 
@@ -61,6 +62,12 @@ public class AppApplicationApiImpl implements AppApplicationApi {
         return applicationList.stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public ApplicationDTO findAppApplicationById( Long appId) {
+        AppApplicationDO applicationDO = TenantManager.withoutTenantCondition(() -> appApplicationRepository.getById(appId));
+        return convertToDTO(applicationDO);
     }
 
     private ApplicationDTO convertToDTO(AppApplicationDO applicationDO) {

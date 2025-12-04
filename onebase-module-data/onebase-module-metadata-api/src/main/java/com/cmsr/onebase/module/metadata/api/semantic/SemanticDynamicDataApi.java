@@ -9,7 +9,7 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntitySchemaDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntityValueDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO;
-import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticMergeBodyVO;
+import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanicMergeConditionVO;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticPageConditionVO;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticTargetBodyVO;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanicTargetConditionVO;
@@ -148,13 +148,13 @@ public interface SemanticDynamicDataApi {
     /**
      * 插入实体数据（编辑态调用）
      *
-     * - `SemanticMergeBodyVO` 顶层键为业务字段或连接器名称
+     * - `SemanicMergeConditionVO` 顶层键为业务字段或连接器名称
      * - 自动编号、系统字段由实现层统一处理
      *
      * @param body 合并请求体（主字段 + 连接器值）
      * @return 插入后的语义值（包含展示值与必要回显）
      */
-    SemanticEntityValueDTO insertData(@Valid @RequestBody SemanticMergeBodyVO body);
+    SemanticEntityValueDTO insertData(@Valid @RequestBody SemanicMergeConditionVO body);
 
     /**
      * 根据主键更新实体数据
@@ -165,6 +165,6 @@ public interface SemanticDynamicDataApi {
      * @param body 合并请求体（含主键与更新内容）
      * @return 更新后的语义值
      */
-    SemanticEntityValueDTO updateDataById(@Valid @RequestBody SemanticMergeBodyVO body);
+    SemanticEntityValueDTO updateDataById(@Valid @RequestBody SemanicMergeConditionVO body);
     
 }
