@@ -138,6 +138,7 @@ public class WorkBenchPageSetServiceImpl implements WorkBenchPageSetService {
             List<AppResourceWorkbenchComponentDO> componentDOs = new ArrayList<>();
             for (int idx = 0; idx < page.getComponents().size(); idx++) {
                 AppResourceWorkbenchComponentDO componentDO = BeanUtils.toBean(page.getComponents().get(idx), AppResourceWorkbenchComponentDO.class);
+                componentDO.setComponentUuid(UuidUtils.getUuid());
                 componentDO.setPageUuid(finalPageDO.getPageUuid());
                 componentDO.setComponentIndex(idx);
                 componentDOs.add(componentDO);
