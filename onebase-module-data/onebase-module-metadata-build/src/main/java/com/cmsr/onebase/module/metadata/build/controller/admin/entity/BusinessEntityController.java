@@ -87,16 +87,20 @@ public class BusinessEntityController {
 
     @PostMapping("/list-by-datasource")
     @Operation(summary = "根据数据源获得业务实体列表")
-    @Parameter(name = "datasourceUuid", description = "数据源UUID", required = true, example = "01onal1s-0000-0000-0000-000000000001")
-    public CommonResult<List<BusinessEntityRespVO>> getBusinessEntityListByDatasourceUuid(@RequestParam("datasourceUuid") String datasourceUuid) {
+    @Parameter(name = "datasourceId", description = "数据源ID或UUID", required = true, example = "165345881671991301")
+    public CommonResult<List<BusinessEntityRespVO>> getBusinessEntityListByDatasourceUuid(
+            @RequestParam("datasourceId") String datasourceId) {
+        String datasourceUuid = idUuidConverter.toDatasourceUuid(datasourceId);
         List<BusinessEntityRespVO> result = businessEntityService.getBusinessEntityListByDatasourceUuidWithRelationType(datasourceUuid);
         return success(result);
     }
 
     @PostMapping("/er-diagram")
     @Operation(summary = "根据数据源UUID获取ER图数据", description = "获取指定数据源下所有实体信息、字段信息以及实体间的关联关系，用于前端绘制ER图")
-    @Parameter(name = "datasourceUuid", description = "数据源UUID", required = true, example = "01onal1s-0000-0000-0000-000000000001")
-    public CommonResult<ERDiagramRespVO> getERDiagramByDatasourceUuid(@RequestParam("datasourceUuid") String datasourceUuid) {
+    @Parameter(name = "datasourceId", description = "数据源ID或UUID", required = true, example = "165345881671991301")
+    public CommonResult<ERDiagramRespVO> getERDiagramByDatasourceUuid(
+            @RequestParam("datasourceId") String datasourceId) {
+        String datasourceUuid = idUuidConverter.toDatasourceUuid(datasourceId);
         ERDiagramRespVO result = businessEntityService.getERDiagramByDatasourceUuid(datasourceUuid);
         return success(result);
     }
