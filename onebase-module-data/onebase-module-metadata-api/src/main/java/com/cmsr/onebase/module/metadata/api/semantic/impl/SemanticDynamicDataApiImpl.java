@@ -23,6 +23,7 @@ import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticMergeBodyVO;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticPageBodyVO;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticTargetBodyVO;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticPageConditionVO;
+import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanicMergeConditionVO;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanicTargetConditionVO;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataEntityFieldCoreService;
@@ -216,15 +217,21 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
     }
 
     @Override
-    public SemanticEntityValueDTO insertData(SemanticMergeBodyVO body) {
+    public SemanticEntityValueDTO insertData(SemanicMergeConditionVO body) {
         String tableName = null;
-        if (body != null && body.any() != null) {
-            Object t = body.any().get("tableName");
+        if (body != null && body.getData() != null) {
+            Object t = body.getTableName();
             if (t != null) { tableName = String.valueOf(t); }
         }
         if (tableName == null || tableName.isBlank()) { return null; }
         // 1) 构建 RecordDTO（合并请求体）
-        SemanticRecordDTO record = semanticMergeRecordAssembler.assembleMergeBody(tableName, body, null, null,
+        SemanticMergeBodyVO mergeBody = new SemanticMergeBodyVO();
+        if (body != null && body.getData() != null) {
+            for (Map.Entry<String, Object> e : body.getData().entrySet()) {
+                mergeBody.set(e.getKey(), e.getValue());
+            }
+        }
+        SemanticRecordDTO record = semanticMergeRecordAssembler.assembleMergeBody(tableName, mergeBody, null, null,
                 SemanticMethodCodeEnum.CREATE, MetadataDataMethodOpEnum.CREATE);
         // 2) 权限上下文初始化
         semanticPermissionContextLoader.loadPermissionContext(record);
@@ -240,15 +247,17 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
     }
 
     @Override
-    public SemanticEntityValueDTO updateDataById(SemanticMergeBodyVO body) {
-        String tableName = null;
-        if (body != null && body.any() != null) {
-            Object t = body.any().get("tableName");
-            if (t != null) { tableName = String.valueOf(t); }
-        }
+    public SemanticEntityValueDTO updateDataById(SemanicMergeConditionVO body) {
+        String tableName = body == null ? null : body.getTableName();
         if (tableName == null || tableName.isBlank()) { return null; }
         // 1) 构建 RecordDTO（合并请求体）
-        SemanticRecordDTO record = semanticMergeRecordAssembler.assembleMergeBody(tableName, body, null, null,
+        SemanticMergeBodyVO mergeBody = new SemanticMergeBodyVO();
+        if (body != null && body.getData() != null) {
+            for (Map.Entry<String, Object> e : body.getData().entrySet()) {
+                mergeBody.set(e.getKey(), e.getValue());
+            }
+        }
+        SemanticRecordDTO record = semanticMergeRecordAssembler.assembleMergeBody(tableName, mergeBody, null, null,
                 SemanticMethodCodeEnum.UPDATE, MetadataDataMethodOpEnum.UPDATE);
         // 2) 权限上下文初始化
         semanticPermissionContextLoader.loadPermissionContext(record);
@@ -309,11 +318,12 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
                 SemanticMethodCodeEnum.GET_PAGE, MetadataDataMethodOpEnum.GET_PAGE);
     }
 
+    //TODO: 查询不需要数据权限检验
     private QueryWrapper buildPageQuery(SemanticRecordDTO record) {
-        QueryWrapper qw = semanticQueryPermissionHelper.applyQueryPermissionFilter(null,
-                record.getRecordContext().getPermissionContext(),
-                record.getEntitySchema().getFields());
-        return buildPageQueryWrapper(record, qw);
+        // QueryWrapper qw = semanticQueryPermissionHelper.applyQueryPermissionFilter(null,
+        //         record.getRecordContext().getPermissionContext(),
+        //         record.getEntitySchema().getFields());
+        return buildPageQueryWrapper(record, new QueryWrapper());
     }
 
     private List<SemanticEntityValueDTO> convertToValues(SemanticEntitySchemaDTO entity, List<Map<String, Object>> list) {
