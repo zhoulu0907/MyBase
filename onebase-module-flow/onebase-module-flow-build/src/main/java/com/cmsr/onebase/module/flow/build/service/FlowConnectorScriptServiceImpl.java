@@ -82,7 +82,7 @@ public class FlowConnectorScriptServiceImpl implements FlowConnectorScriptServic
         connectorScriptDO.setInputParameter(jsonNodeToString(createVO.getInputParameter()));
         connectorScriptDO.setOutputParameter(jsonNodeToString(createVO.getOutputParameter()));
         connectorScriptDO.setInputSchema(jsonNodeToString(createVO.getInputSchema()));
-        connectorScriptDO.setOutputSchema(jsonNodeToString(createVO.getOutputParameter()));
+        connectorScriptDO.setOutputSchema(jsonNodeToString(createVO.getOutputSchema()));
 
         connectorScriptRepository.save(connectorScriptDO);
         return connectorScriptDO.getId();
@@ -102,7 +102,7 @@ public class FlowConnectorScriptServiceImpl implements FlowConnectorScriptServic
         oldDO.setInputParameter(jsonNodeToString(updateVO.getInputParameter()));
         oldDO.setOutputParameter(jsonNodeToString(updateVO.getOutputParameter()));
         oldDO.setInputSchema(jsonNodeToString(updateVO.getInputSchema()));
-        oldDO.setOutputSchema(jsonNodeToString(updateVO.getOutputParameter()));
+        oldDO.setOutputSchema(jsonNodeToString(updateVO.getOutputSchema()));
 
         connectorScriptRepository.updateById(oldDO);
     }
