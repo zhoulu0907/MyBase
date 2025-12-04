@@ -13,7 +13,10 @@ import lombok.Data;
 @Data
 public class EntityFieldInfoRespVO {
 
-    @Schema(description = "字段UUID", example = "uuid-1001")
+    @Schema(description = "字段ID（兼容旧接口）", example = "165890174290853889")
+    private String fieldId;
+
+    @Schema(description = "字段UUID", example = "019ae8db-5443-7175-b816-6c3a5b1441f2")
     private String fieldUuid;
 
     @Schema(description = "字段名称", example = "用户名")
@@ -25,16 +28,6 @@ public class EntityFieldInfoRespVO {
     @Schema(description = "是否系统字段：0-是，1-不是", example = "1")
     private Integer isSystemField;
 
-
     @Schema(description = "显示名称", example = "用户名")
     private String displayName;
-
-    /**
-     * 设置字段ID（兼容旧代码）
-     * @deprecated 请使用 setFieldUuid()
-     */
-    @Deprecated
-    public void setFieldId(String fieldId) {
-        this.fieldUuid = fieldId;
-    }
 }
