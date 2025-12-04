@@ -96,6 +96,11 @@ public class SemanticEntityValueDTO {
         return result;
     }
 
+    /**
+     * 获取全局原始值映射（包含当前实体值与关联对象值）
+     *
+     * @return 全局原始值映射, 复杂类型是 RefType
+     */
     public Map<String, Object> getGlobalRawMap() {
         Map<String, Object> result = new LinkedHashMap<>();
         Map<String, Object> self = getCurrentEntityRawMap();

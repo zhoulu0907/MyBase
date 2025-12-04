@@ -8,7 +8,6 @@ import com.cmsr.onebase.module.metadata.core.domain.query.LoginUserCtx;
 import com.cmsr.onebase.module.metadata.core.domain.query.MetadataPermissionContext;
 
 import java.util.List;
-import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticConditionDTO;
 
 @Schema(description = "记录上下文 DTO")
 @Data

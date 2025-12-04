@@ -1,14 +1,16 @@
-package com.cmsr.onebase.module.flow.graph;
+package com.cmsr.onebase.module.app;
 
-import com.cmsr.onebase.framework.security.runtime.RTSecurityContext;
 import com.cmsr.onebase.framework.common.security.TenantContextHolder;
+import com.cmsr.onebase.framework.security.runtime.RTSecurityContext;
+import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
+import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
 import com.cmsr.onebase.module.app.api.security.bo.FieldPermission;
 import com.cmsr.onebase.module.app.api.security.bo.OperationPermission;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthDataGroupRepository;
 import com.cmsr.onebase.module.app.core.impl.auth.AppAuthSecurityApiImpl;
 import com.cmsr.onebase.module.app.core.provider.auth.AppAuthDataGroupProvider;
-import com.cmsr.onebase.module.app.runtime.service.menu.AppMenuService;
 import com.cmsr.onebase.module.app.core.vo.menu.MenuListRespVO;
+import com.cmsr.onebase.module.app.runtime.service.menu.AppMenuService;
 import com.cmsr.onebase.module.app.runtime.vo.menu.MenuPermissionVO;
 import com.cmsr.onebase.server.runtime.OneBaseServerRuntimeApplication;
 import lombok.Setter;
@@ -40,6 +42,9 @@ public class AppTest {
 
     @Autowired
     private AppMenuService appMenuService;
+
+    @Autowired
+    private AppApplicationApi appApplicationApi;
 
     @Test
     public void testSimple() throws IOException {
@@ -85,6 +90,12 @@ public class AppTest {
         RTSecurityContext.mockLoginUser(3386012505007460352L, 46699591748616192L);
         FieldPermission fieldPermission = RTSecurityContext.getMenuFieldPermission(47012574606491648L);
         System.out.println(fieldPermission);
+    }
+
+    @Test
+    public void testGraph5() throws IOException {
+        ApplicationDTO result = appApplicationApi.findAppApplicationByTenantIdAndAppId(160864959456706560L, 163852177939464192L);
+        System.out.println(result);
     }
 
 }

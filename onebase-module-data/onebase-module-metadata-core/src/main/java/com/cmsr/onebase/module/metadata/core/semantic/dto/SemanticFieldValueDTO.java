@@ -174,6 +174,10 @@ public class SemanticFieldValueDTO<T> {
         return getValueAsList(type);
     }
 
+    /**
+     * 获取最终给数据库的存储值
+     * @return 存储值
+     */
     public Object getStoreValue() {
         if (fieldTypeEnum == null) return rawValue;
         if (fieldTypeEnum.isListType()) {
@@ -231,6 +235,10 @@ public class SemanticFieldValueDTO<T> {
         return new SemanticFieldValueDTO<>(fieldTypeEnum);
     }
 
+    /**
+     * 设置原始值
+     * @param rawValue 原始值
+     */
     public void setRawValue(T rawValue) {
         if (this.fieldTypeEnum == null) {
             throw new IllegalStateException("fieldTypeEnum 未设置");

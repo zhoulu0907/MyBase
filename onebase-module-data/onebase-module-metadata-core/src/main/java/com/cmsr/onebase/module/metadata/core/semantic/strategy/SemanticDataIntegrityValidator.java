@@ -5,6 +5,7 @@ import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticRecordDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldValueDTO;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -22,9 +23,7 @@ public class SemanticDataIntegrityValidator {
     }
 
     private boolean requiresId(MetadataDataMethodOpEnum op) {
-        return op == MetadataDataMethodOpEnum.UPDATE
-                || op == MetadataDataMethodOpEnum.DELETE
-                || op == MetadataDataMethodOpEnum.GET;
+        return op == MetadataDataMethodOpEnum.GET;
     }
 
     private void validateId(SemanticRecordDTO record) {
@@ -50,7 +49,7 @@ public class SemanticDataIntegrityValidator {
     }
 
     private Map<String, Object> nameValueMapOf(SemanticRecordDTO record) {
-        Map<String, Object> result = new java.util.HashMap<>();
+        Map<String, Object> result = new HashMap<>();
         if (record == null || record.getEntityValue() == null) { return result; }
         Map<String, SemanticFieldValueDTO<Object>> map = record.getEntityValue().getFieldValueMap();
         if (map == null) { return result; }
