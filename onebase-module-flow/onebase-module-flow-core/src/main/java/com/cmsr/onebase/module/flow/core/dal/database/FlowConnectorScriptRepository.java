@@ -29,4 +29,8 @@ public class FlowConnectorScriptRepository extends BaseAppRepository<FlowConnect
         return new PageResult<>(pageData.getRecords(), pageData.getTotalRow());
     }
 
+    public FlowConnectorScriptDO findById(Long id) {
+        return this.getMapper().selectOneById(id);
+    }
+
 }

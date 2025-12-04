@@ -14,6 +14,7 @@ import com.yomahub.liteflow.builder.el.LiteFlowChainELBuilder;
 import com.yomahub.liteflow.flow.FlowBus;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Service;
@@ -83,6 +84,10 @@ public class FlowCacheHandler {
 
     private void onProcessUpdate(FlowProcessDO processDO) {
         log.info("处理流程更新事件：{}", processDO.getId());
+        if (StringUtils.isBlank(processDO.getProcessDefinition())) {
+            log.error("流程定义错误, 未包含内容：{}", processDO);
+            return;
+        }
         JsonGraph jsonGraph = flowGraphBuilder.build(processDO.getProcessDefinition());
         if (jsonGraph == null) {
             log.error("流程定义错误：{}", processDO);
