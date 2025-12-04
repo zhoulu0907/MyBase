@@ -10,10 +10,10 @@ import com.alibaba.nacos.shaded.com.google.gson.Gson;
 import com.alibaba.nacos.shaded.com.google.gson.reflect.TypeToken;
 import com.cmsr.onebase.framework.common.biz.system.oauth2.OAuth2TokenCommonApi;
 import com.cmsr.onebase.framework.common.biz.system.oauth2.dto.OAuth2AccessTokenCheckRespDTO;
-import com.cmsr.onebase.framework.common.enums.RunModeEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.security.TenantContextHolder;
+import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.security.config.SecurityProperties;
 import com.cmsr.onebase.module.infra.dal.database.FileDataRepository;
@@ -22,7 +22,7 @@ import com.cmsr.onebase.module.infra.dal.vo.file.file.FileCreateReqVO;
 import com.cmsr.onebase.module.infra.dal.vo.file.file.FilePageReqVO;
 import com.cmsr.onebase.module.infra.dal.vo.file.file.FilePresignedUrlRespVO;
 import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigItemRespVO;
-import com.cmsr.onebase.module.infra.enums.file.FileEnvFlagEnum;
+import com.cmsr.onebase.module.infra.enums.file.FileVisitModeEnum;
 import com.cmsr.onebase.module.infra.enums.file.FileUploadCheckConstants;
 import com.cmsr.onebase.module.infra.enums.security.SecurityConfigKey;
 import com.cmsr.onebase.module.infra.framework.file.core.client.FileClient;
@@ -43,15 +43,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Type;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.text.Normalizer;
+import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static cn.hutool.core.date.DatePattern.PURE_DATE_PATTERN;
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static com.cmsr.onebase.module.infra.enums.ErrorCodeConstants.FILE_NOT_EXISTS;
+import static com.cmsr.onebase.module.infra.enums.ErrorCodeConstants.*;
 import static com.cmsr.onebase.module.infra.framework.file.core.utils.FileTypeUtils.writeAttachment;
 
 /**
@@ -76,6 +75,12 @@ public class FileServiceImpl implements FileService {
      */
     static boolean PATH_SUFFIX_TIMESTAMP_ENABLE = true;
 
+    /**
+     * 清洗文件名，去除特殊字符并做基本保护处理
+     */
+    private static final Pattern INVALID_FILE_NAME_CHARS =
+            Pattern.compile("[^a-zA-Z0-9\\u4e00-\\u9fa5_.-]");
+
     @Resource
     private FileConfigService fileConfigService;
 
@@ -98,7 +103,7 @@ public class FileServiceImpl implements FileService {
 
     @Override
     @SneakyThrows
-    public String createFile(byte[] content, String name, String directory, String type, String envFlag) {
+    public String createFile(byte[] content, String name, String directory, String type, String visitMode) {
         // 1.1 处理 type 为空的情况
         if (StrUtil.isEmpty(type)) {
             type = FileTypeUtils.getMineType(content, name);
@@ -135,14 +140,20 @@ public class FileServiceImpl implements FileService {
         String url = client.upload(content, path, type);
 
         // 3. 保存到数据库
-        if (StrUtil.isEmpty(envFlag)) {
-            envFlag = FileEnvFlagEnum.PUBLIC.getEnvFlag();
+        if (StrUtil.isEmpty(visitMode)) {
+            visitMode = FileVisitModeEnum.PUBLIC.getValue();
+        }
+        String runMode = null;
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+        if (loginUser != null){
+            runMode = loginUser.getRunMode();
         }
         FileDO fileDO = fileDataRepository.insert(new FileDO().setConfigId(client.getId())
                 .setName(name).setPath(path).setUrl(url)
                 .setType(type).setSize(content.length)
                 .setMd5(md5)
-                .setEnvFlag(envFlag));
+                .setVisitMode(visitMode))
+                .setRunMode(runMode);
         return fileDO.getId().toString();
     }
 
@@ -167,14 +178,13 @@ public class FileServiceImpl implements FileService {
         // 1. 校验文件大小
         long maxSize = getConfiguredMaxFileSize(configMap);
         if (content.length > maxSize) {
-            // TODO 改为：throw exception(FILE_NOT_EXISTS);
-            throw new IllegalArgumentException("文件大小超过限制，最大允许" + (maxSize / 1024 / 1024) + "MB");
+            throw exception(FILE_SIZE_OVERRUN,(maxSize / 1024 / 1024));
         }
 
         // 2. 校验文件名长度
         int maxNameLength = getConfiguredMaxFileNameLength(configMap);
         if (name != null && name.length() > maxNameLength) {
-            throw new IllegalArgumentException("文件名长度超过限制，最大允许" + maxNameLength + "字符");
+            throw exception(FILE_NAME_LENGTH_OVERRUN,maxNameLength);
         }
 
         // 3. 获取文件扩展名
@@ -185,26 +195,26 @@ public class FileServiceImpl implements FileService {
             extension = FileTypeUtils.getExtension(type);
         }
         if (StrUtil.isEmpty(extension)) {
-            throw new IllegalArgumentException("无法识别文件扩展名");
+            throw exception(FILE_EXTENSION_UNIDENTIFIABLE);
         }
         Map<String, FileTypeInfo> configuredFileCheckList = getConfiguredFileCheckList(configMap);
         // 4. 校验文件后缀
         Set<String> extensionSet = configuredFileCheckList.keySet();
         if (!extensionSet.contains(extension)) {
-            throw new IllegalArgumentException("不允许上传该类型的文件");
+            throw exception(FILE_EXTENSION_NOT_ALLOW);
         }
         // 5. 校验MIME类型
         FileTypeInfo fileTypeInfo = configuredFileCheckList.get(extension);
         String mimeType = fileTypeInfo.getMimeType();
         if (StringUtils.isBlank(mimeType)
                 || (!FileUploadCheckConstants.UNCHECK.equalsIgnoreCase(mimeType) && !mimeType.equals(type))) {
-            throw new IllegalArgumentException("文件MIME类型与扩展名不匹配");
+            throw exception(FILE_MIMETYPE_AND_EXTENSION_MISMATCHING);
         }
         // 6. 校验文件头魔数
         String magicNumber = fileTypeInfo.getMagicNumber();
         if (StringUtils.isBlank(magicNumber) || magicNumber.equalsIgnoreCase(FileUploadCheckConstants.DEFAULT)) {
             if (!FileMNValidateUtil.isValidDefaultMagicNumber(content, extension)) {
-                throw new IllegalArgumentException("文件实际格式与扩展名不匹配");
+                throw exception(FILE_FORMAT_AND_EXTENSION_MISMATCHING);
             }
         } else if (!FileUploadCheckConstants.UNCHECK.equalsIgnoreCase(magicNumber)) {
             FileMNValidateUtil.isValidCustomMagicNumber(content, magicNumber, extension);
@@ -213,7 +223,7 @@ public class FileServiceImpl implements FileService {
         // 7. 特殊处理PDF XSS注入问题
         if (FileUploadCheckConstants.PDF.equals(extension)) {
             if (LightweightPdfXssDetector.hasPdfXssContent(content)) {
-                throw new IllegalArgumentException("PDF文件包含非法内容");
+                throw exception(FILE_TYPE_PDF_CONTENT_NOT_STANDARD);
             }
         }
     }
@@ -227,6 +237,9 @@ public class FileServiceImpl implements FileService {
     private long getConfiguredMaxFileSize(Map<String, String> configMap) {
         String configValue = configMap.get(SecurityConfigKey.uploadFileLengthLimit.getConfigKey());
         // 配置值单位为MB
+        if (StrUtil.isEmpty(configValue)){
+            return FileUploadCheckConstants.FILE_DEFAULT_SIZE * 1024 * 1024;
+        }
         int mb = Integer.parseInt(configValue);
         return (long) mb * 1024 * 1024;
     }
@@ -239,6 +252,9 @@ public class FileServiceImpl implements FileService {
      */
     private int getConfiguredMaxFileNameLength(Map<String, String> configMap) {
         String configValue = configMap.get(SecurityConfigKey.uploadFileNameLengthLimit.getConfigKey());
+        if (StrUtil.isEmpty(configValue)){
+            return FileUploadCheckConstants.FILE_NAME_DEFAULT_LENGTH;
+        }
         return Integer.parseInt(configValue);
     }
 
@@ -251,12 +267,52 @@ public class FileServiceImpl implements FileService {
     private Map<String, FileTypeInfo> getConfiguredFileCheckList(Map<String, String> configMap) {
         String configValue = configMap.get(SecurityConfigKey.uploadFileCheckList.getConfigKey());
         if (StrUtil.isEmpty(configValue)) {
-            throw new IllegalArgumentException("文件上传检查项配置不能为空");
+            throw exception(FILE_CHECK_LIST_NOT_EXISTS);
         }
         Gson gson = new Gson();
         Type type = new TypeToken<Map<String, FileTypeInfo>>() {
         }.getType();
         return gson.fromJson(configValue, type);
+    }
+
+    /**
+     * 对上传的文件名进行清洗：
+     * 1. Unicode 规范化（NFKC）
+     * 2. 替换路径分隔符，防止路径穿越
+     * 3. 合并连续的点号，移除非法字符
+     * 4. 避免以点号开头
+     *
+     * @param name 原始文件名
+     * @return 清洗后的文件名（不会为 null）
+     */
+    private String sanitizeFileName(String name) {
+        if (name == null) {
+            return "";
+        }
+
+        // 1. Unicode 规范化，避免某些特殊字符通过组合字符绕过校验
+        name = Normalizer.normalize(name, Normalizer.Form.NFKC);
+
+        // 2. 移除路径分隔符，替换为下划线，避免目录穿越
+        name = name.replaceAll("[/\\\\]+", "_");
+
+        // 3. 合并连续点（例如 ".." -> "."），然后移除非法字符
+        name = name.replaceAll("\\.{2,}", ".");
+        name = INVALID_FILE_NAME_CHARS.matcher(name).replaceAll("");
+
+        // 4. 去除首尾空白
+        name = name.trim();
+
+        // 5. 避免以点号开头（隐藏/特殊文件），改为下划线前缀
+        if (name.startsWith(".")) {
+            name = "_" + (name.length() > 1 ? name.substring(1) : "");
+        }
+
+        // 若清洗后为空，返回默认名
+        if (name.isEmpty()) {
+            return FileUploadCheckConstants.DEFAULT_FILE_NAME;
+        }
+        return name;
     }
 
 
@@ -268,9 +324,12 @@ public class FileServiceImpl implements FileService {
      * @param directory 目录
      * @return 上传路径
      */
-    // todo 文件名称去除特殊字符
     @VisibleForTesting
     String generateUploadPath(String name, String directory) {
+
+        // 文件名称去除特殊字符
+        name = sanitizeFileName(name);
+
         // 1. 生成前缀、后缀
         String prefix = null;
         if (PATH_PREFIX_DATE_ENABLE) {
@@ -357,35 +416,31 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public void getFileContent(Long id, String envFlag, HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public void getFileContent(Long id, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
-        if (StrUtil.isEmpty(envFlag)) {
-            envFlag = FileEnvFlagEnum.PUBLIC.getEnvFlag();
-        }
-
-        if (!envFlag.equals(FileEnvFlagEnum.PUBLIC.getEnvFlag())) {
-            String token = SecurityFrameworkUtils.obtainAuthorization(request,
-                    securityProperties.getTokenHeader(), securityProperties.getTokenParameter());
-            // 校验访问令牌
-            // TODO 直接通过tokne获取tokenDO数据，将其runMode和文件的runMode进行对比
-            // 提示词：未登录；无权限获取文件：环境标识不匹配
-            OAuth2AccessTokenCheckRespDTO accessToken = oauth2TokenApi.checkAccessToken(RunModeEnum.RUNTIME.getValue(), token).getCheckedData();
-            if (accessToken == null) {
-                throw new IllegalArgumentException("无效的访问令牌，无法下载该文件");
-            }
-        }
         // 获取文件信息
         FileDO file = fileDataRepository.findById(id);
         if (file == null) {
             throw exception(FILE_NOT_EXISTS);
         }
 
-        if (StrUtil.isNotEmpty(file.getEnvFlag()) && !file.getEnvFlag().equals(envFlag)) {
-            throw new IllegalArgumentException("文件环境标识不匹配，无法下载该文件");
+        if (file.getVisitMode().equals(FileVisitModeEnum.PRIVATE.getValue())) {
+            String token = SecurityFrameworkUtils.obtainAuthorization(request,
+                    securityProperties.getTokenHeader(), securityProperties.getTokenParameter());
+            // 校验访问令牌
+            OAuth2AccessTokenCheckRespDTO accessToken = oauth2TokenApi.getAccessToken(token).getCheckedData();
+            if (accessToken == null) {
+                throw exception(FILE_DOWNLOAD_NOT_LOGIN);
+            }
+
+            if (StrUtil.isNotEmpty(file.getRunMode()) && !accessToken.getRunMode().equals(file.getRunMode())) {
+                throw exception(FILE_NOT_PERMISSION);
+            }
         }
 
+
         if (StrUtil.isEmpty(file.getPath())) {
-            throw new IllegalArgumentException("文件路径为空，该文件无法下载");
+            throw exception(FILE_PATH_NOT_EXISTS);
         }
         // 解码，解决中文路径的问题 https://gitee.com/zhijiantianya/onebase_v3/pulls/807/
         String path = URLUtil.decode(file.getPath());

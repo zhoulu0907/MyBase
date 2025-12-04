@@ -55,8 +55,8 @@ public interface FileApi {
      * @return 文件路径
      */
     default String createFile(@NotEmpty(message = "文件内容不能为空") byte[] content,
-                              String name, String directory, String type, String envFlag) {
-        return createFile(new FileCreateReqDTO().setName(name).setDirectory(directory).setType(type).setContent(content).setEnvFlag(envFlag)).getCheckedData();
+                              String name, String directory, String type, String visitMode) {
+        return createFile(new FileCreateReqDTO().setName(name).setDirectory(directory).setType(type).setContent(content).setVisitMode(visitMode)).getCheckedData();
     }
 
     @PostMapping(PREFIX + "/create")
@@ -70,10 +70,7 @@ public interface FileApi {
 
     @GetMapping(PREFIX + "/download/{id}")
     @Operation(summary = "获取文件内容")
-    @Parameters({
-            @Parameter(name = "id", description = "文件编号", required = true),
-            @Parameter(name = "envFlag", description = "文件环境标识")
-    })
-    void getFileContent(@PathVariable("id") Long id, @RequestParam("envFlag") String envFlag, HttpServletRequest request, HttpServletResponse response) throws Exception;
+    @Parameter(name = "id", description = "文件编号", required = true)
+    void getFileContent(@PathVariable("id") Long id, HttpServletRequest request, HttpServletResponse response) throws Exception;
 
 }

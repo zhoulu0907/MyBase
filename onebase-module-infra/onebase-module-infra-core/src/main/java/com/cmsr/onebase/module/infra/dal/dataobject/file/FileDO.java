@@ -30,7 +30,8 @@ public class FileDO extends BaseDO {
     public static final String COLUMN_TYPE = "type";
     public static final String COLUMN_SIZE = "size";
     public static final String COLUMN_MD5 = "md5";
-    public static final String COLUMN_ENV_FLAG = "env_flag";
+    public static final String COLUMN_VISIT_MODE = "visit_mode";
+    public static final String COLUMN_RUN_MODE = "run_mode";
 
     public FileDO setId(Long id) {
         super.setId(id);
@@ -79,7 +80,13 @@ public class FileDO extends BaseDO {
     /**
      * 文件 环境标识
      */
-    @Column(name = COLUMN_ENV_FLAG)
-    private String envFlag;
+    @Column(name = COLUMN_VISIT_MODE)
+    private String visitMode;
+
+    /**
+     * 文件 环境标识
+     */
+    @Column(name = COLUMN_RUN_MODE)
+    private String runMode;
 
 }

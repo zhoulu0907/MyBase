@@ -27,7 +27,7 @@ public class FileApiImpl implements FileApi {
     @Override
     public CommonResult<String> createFile(FileCreateReqDTO createReqDTO) {
         return success(fileService.createFile(createReqDTO.getContent(), createReqDTO.getName(),
-                createReqDTO.getDirectory(), createReqDTO.getType(), createReqDTO.getEnvFlag()));
+                createReqDTO.getDirectory(), createReqDTO.getType(), createReqDTO.getVisitMode()));
     }
 
     @Override
@@ -36,8 +36,8 @@ public class FileApiImpl implements FileApi {
     }
 
     @Override
-    public void getFileContent(Long id, String envFlag, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        fileService.getFileContent(id, envFlag,request, response);
+    public void getFileContent(Long id, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        fileService.getFileContent(id, request, response);
     }
 
 }

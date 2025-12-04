@@ -36,7 +36,7 @@ public interface FileService {
      * @return 文件路径
      */
     String createFile(@NotEmpty(message = "文件内容不能为空") byte[] content,
-                      String name, String directory, String type, String envFlag);
+                      String name, String directory, String type, String visitMode);
 
     /**
      * 生成文件预签名地址信息
@@ -86,6 +86,6 @@ public interface FileService {
      * @param id 文件 ID
      * @return 文件信息
      */
-    void getFileContent(Long id, String envFlag, HttpServletRequest request, HttpServletResponse response) throws Exception;
+    void getFileContent(Long id, HttpServletRequest request, HttpServletResponse response) throws Exception;
 
 }

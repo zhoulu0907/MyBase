@@ -1,5 +1,7 @@
 package com.cmsr.onebase.module.infra.api.file.dto;
 
+import com.cmsr.onebase.framework.common.validation.InEnum;
+import com.cmsr.onebase.module.infra.api.file.enums.FileVisitModeEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -22,7 +24,8 @@ public class FileCreateReqDTO {
     @NotEmpty(message = "文件内容不能为空")
     private byte[] content;
 
-    @Schema(description = "文件保存环境标识",example = "public-公开访问，build-编辑态,runtime-运行态,platform-平台端", requiredMode = Schema.RequiredMode.REQUIRED)
-    private String envFlag;
+    @Schema(description = "文件保存标识",example = "public-公开访问，private-各runMode私有访问", requiredMode = Schema.RequiredMode.REQUIRED)
+    @InEnum(value = FileVisitModeEnum.class, message = "访问标识 {value}")
+    private String visitMode;
 
 }
