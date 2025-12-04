@@ -320,13 +320,13 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
     @Override
     public Boolean checkLoginCaptcha() {
         Long tenantId = TenantContextHolder.getTenantId();
-        String securityConfigKey= SecurityConfigKey.enableScenarios.getConfigKey();
+        String securityConfigKey = SecurityConfigKey.enableScenarios.getConfigKey();
         SecurityConfigDO config = securityConfigDataRepository.findByTenantIdAndKey(tenantId, securityConfigKey);
-        if (null==config ) {
+        if (null == config) {
             return true;
         }
-        String login=SecurityConfigKey.EnableScenariosOption.login.getKey();
-        if(!config.getConfigValue().contains(login)){
+        String login = SecurityConfigKey.EnableScenariosOption.login.getKey();
+        if (!config.getConfigValue().contains(login)) {
             return false;
         }
         return true;
