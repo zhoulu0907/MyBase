@@ -381,10 +381,10 @@ public class AppMenuServiceImpl implements AppMenuService {
                 && validateMenuGroupHasChildren(menuDO.getApplicationId(), menuDO.getMenuUuid())) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_MENU_GROUP_HAS_CHILDREN);
         }
+        // 删除页面
+        pageSetService.deletePageSetByMenu(menuDO);
         // 删除菜单
         appMenuRepository.removeById(id);
-        // 删除页面
-        pageSetService.deletePageSetByMenuId(menuDO.getId());
     }
 
     private boolean validateMenuGroupHasChildren(Long applicationId, String menuUuid) {
