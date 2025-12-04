@@ -117,7 +117,7 @@ public class FileController {
             @Parameter(name = "envFlag", description = "文件环境标识")
     })
     public void getFileContent(@PathVariable("id") Long id, @RequestParam("envFlag") String envFlag, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        fileService.getFileContent(id, envFlag,request, response);
+        fileService.getFileContent(id, envFlag, request, response);
     }
 
 }
