@@ -66,7 +66,7 @@ public class FileServiceImpl implements FileService {
      * <p>
      * 目的：按照日期，进行分目录
      */
-    static boolean PATH_PREFIX_DATE_ENABLE      = true;
+    static boolean PATH_PREFIX_DATE_ENABLE = true;
     /**
      * 上传文件的后缀，是否包含时间戳
      * <p>
