@@ -119,6 +119,12 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
                 createReqVO.getDatasourceUuid(), createReqVO.getDatasourceId());
         createReqVO.setDatasourceUuid(resolvedDatasourceUuid);
 
+        // 如果entityType为空，默认设置为自建表类型(1)
+        if (createReqVO.getEntityType() == null) {
+            createReqVO.setEntityType(BusinessEntityTypeEnum.SELF_BUILT.getCode());
+            log.info("实体类型未指定，默认设置为自建表类型(1)");
+        }
+
         // 预先获取系统字段信息，避免在事务中查询
         List<MetadataSystemFieldsDO> systemFields = null;
         if (BusinessEntityTypeEnum.needCreatePhysicalTable(createReqVO.getEntityType())) {
