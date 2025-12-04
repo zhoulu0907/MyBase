@@ -10,7 +10,7 @@ import { Divider, Dropdown, Layout, Menu, Typography } from '@arco-design/web-re
 import { IconExport } from '@arco-design/web-react/icon';
 import { getApplication, type GetApplicationReq } from '@onebase/app';
 import { TokenManager, UserPermissionManager } from '@onebase/common';
-import { CodeType, runtimeGetPermissionInfo } from '@onebase/platform-center';
+import { CodeType, getPermissionInfo } from '@onebase/platform-center';
 import { appIconMap } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -69,7 +69,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   };
 
   const getInfo = async () => {
-    const res = await runtimeGetPermissionInfo(CodeType.CORP);
+    const res = await getPermissionInfo(CodeType.CORP);
     UserPermissionManager.setUserPermissionInfo(res);
     const mobile = res.user?.mobile;
     const formatMobile = maskMobile(mobile);

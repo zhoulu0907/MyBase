@@ -210,6 +210,7 @@ export async function startSavePageSet(params: SavePageSetParams, onSuccess?: Fu
 
 export interface LoadPageSetParams {
   pageSetId: string;
+  runtime?: boolean;
 }
 
 export async function startLoadPageSet(params: LoadPageSetParams) {
@@ -363,9 +364,12 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
   });
 
   // 载入视图
-  const res = await listPageView({
-    pageSetId: pageSetId
-  });
+  const res = await listPageView(
+    {
+      pageSetId: pageSetId
+    },
+    params.runtime
+  );
 
   if (res && res.pages) {
     // 如果没有视图选中，就选中默认视图

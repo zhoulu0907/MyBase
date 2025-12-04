@@ -2,7 +2,7 @@ import { emailValidator, phoneValidator } from '@/utils/validator';
 import { Button, Form, Grid, Input, Message, Modal, Switch, TreeSelect } from '@arco-design/web-react';
 import { CORP_DEPT_QUERY, hasPermission } from '@onebase/common';
 import type { SimpleRoleVO, UserVO } from '@onebase/platform-center';
-import { createUserInCorp, getUserInCorp, StatusEnum, updateUserInCorp } from '@onebase/platform-center';
+import { createUser, getUser, StatusEnum, updateUser } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
 
 const Row = Grid.Row;
@@ -61,7 +61,7 @@ export default function UserFormModal({
 
     // 在编辑模式下获取用户信息并设置角色ID为初始值
     if (mode === 'edit' && initialValues?.id) {
-      getUserInCorp(initialValues.id).then((user: UserVO) => {
+      getUser(initialValues.id).then((user: UserVO) => {
         form.setFieldsValue({ roleIds: user.roles?.map((item: SimpleRoleVO) => item.id) });
       });
     }
@@ -79,11 +79,11 @@ export default function UserFormModal({
       const params = { ...values, status: statusCheckedValue ? StatusEnum.ENABLE : StatusEnum.DISABLE };
       setLoading(true);
       if (mode === 'create') {
-        await createUserInCorp(params);
+        await createUser(params);
         Message.success('新建成功');
         onRefreshDept();
       } else {
-        await updateUserInCorp({ ...params, id: initialValues?.id });
+        await updateUser({ ...params, id: initialValues?.id });
         Message.success('编辑成功');
         onRefreshDept();
       }

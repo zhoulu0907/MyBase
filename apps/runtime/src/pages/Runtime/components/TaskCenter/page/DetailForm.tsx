@@ -1,4 +1,3 @@
-import React, { Fragment, useEffect, useState, forwardRef, useImperativeHandle } from 'react';
 import { Form } from '@arco-design/web-react';
 import { getEntityFieldsWithChildren, getPageSetMetaData, type AppEntityField } from '@onebase/app';
 import { pagesRuntimeSignal } from '@onebase/common';
@@ -14,6 +13,7 @@ import {
   type GridItem
 } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
+import { forwardRef, Fragment, useEffect, useImperativeHandle, useState } from 'react';
 
 interface PreviewProps {
   pageSetId: string;
@@ -211,7 +211,7 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
   };
 
   const parseData = () => {
-    startLoadPageSet({ pageSetId: pageSetId });
+    startLoadPageSet({ pageSetId: pageSetId, runtime: true });
   };
 
   useEffect(() => {
