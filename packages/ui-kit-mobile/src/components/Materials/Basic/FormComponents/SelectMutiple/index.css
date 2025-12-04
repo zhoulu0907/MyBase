@@ -5,4 +5,8 @@
     box-sizing: border-box;
     justify-content: flex-end;
   }
+
+  .arco-checkbox-group {
+    display: block;
+  }
 }

@@ -28,8 +28,8 @@ const XUserSelect = memo((props: XUserSelectConfig & { runtime?: boolean; detail
     : `${FORM_COMPONENT_TYPES.INPUT_TEXT}_${nanoid()}`;
 
   useEffect(() => {
-    fetchUserData();
-  }, []);
+    userData.length === 0 && fetchUserData();
+  }, [userData]);
 
   const fetchUserData = async () => {
     const res = await getSimpleUserList();
