@@ -1365,8 +1365,15 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
     @Override
     public List<MetadataEntityFieldDO> getEntityFieldListByEntityId(String entityId) {
+        // 将entityId转换为entityUuid（兼容ID和UUID两种格式）
+        String entityUuid = idUuidConverter.toEntityUuid(entityId);
+        if (entityUuid == null || entityUuid.isEmpty()) {
+            log.warn("无法解析实体标识: {}", entityId);
+            return java.util.Collections.emptyList();
+        }
+        
         QueryWrapper queryWrapper = QueryWrapper.create()
-                .eq(MetadataEntityFieldDO::getEntityUuid, entityId.trim())
+                .eq(MetadataEntityFieldDO::getEntityUuid, entityUuid.trim())
                 .orderBy(MetadataEntityFieldDO::getSortOrder, true)
                 .orderBy(MetadataEntityFieldDO::getCreateTime, false);
         return metadataEntityFieldRepository.list(queryWrapper);
