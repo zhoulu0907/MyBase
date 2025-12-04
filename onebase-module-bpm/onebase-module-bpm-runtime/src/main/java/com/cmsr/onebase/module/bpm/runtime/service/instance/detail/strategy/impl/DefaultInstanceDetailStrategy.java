@@ -15,10 +15,8 @@ import org.springframework.stereotype.Component;
 public class DefaultInstanceDetailStrategy  extends AbstractInstanceDetailStrategy<BaseNodeExtDTO> {
     @Override
     public void fillDetail(BpmTaskDetailRespVO vo, BaseNodeExtDTO extDTO, Instance instance, Long loginUserId, boolean isTodo) {
-        Long pageSetId = getPageSetId(instance);
-
         // 默认策略始终返回详情视图
-        fillPageViewInfo(vo, instance, pageSetId, false);
+        fillPageViewInfo(vo, instance, false);
     }
 
     @Override

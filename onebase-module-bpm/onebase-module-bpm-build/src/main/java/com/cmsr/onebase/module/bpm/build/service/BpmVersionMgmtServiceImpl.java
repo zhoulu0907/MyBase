@@ -2,7 +2,11 @@ package com.cmsr.onebase.module.bpm.build.service;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
+import com.cmsr.onebase.module.app.api.appresource.AppResourceApi;
+import com.cmsr.onebase.module.app.api.appresource.dto.AppMenuRespDTO;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
+import com.cmsr.onebase.module.bpm.core.validator.BpmAppResourceValidator;
 import com.cmsr.onebase.module.bpm.build.vo.vermgmt.BpmDefVersionMgtVO;
 import com.cmsr.onebase.module.bpm.build.vo.vermgmt.BpmDeleteReqVo;
 import com.cmsr.onebase.module.bpm.build.vo.vermgmt.BpmUpdateReqVo;
@@ -67,6 +71,12 @@ public class BpmVersionMgmtServiceImpl implements BpmVersionMgmtService {
     @Resource
     private AdminUserApi adminUserApi;
 
+    @Resource
+    private AppResourceApi appResourceApi;
+
+    @Resource
+    private BpmAppResourceValidator bpmAppResourceValidator;
+
     /**
      * 可对指定的流程版本进行删除，但已发布版本及含有尚未完结的历史版本流程无法删除。
      *
@@ -82,7 +92,11 @@ public class BpmVersionMgmtServiceImpl implements BpmVersionMgmtService {
         Definition existDef = defService.getById(reqVo.getId());
 
         if (existDef == null) {
-            return;
+            throw exception(ErrorCodeConstants.FLOW_NOT_EXISTS);
+        }
+
+        if (!Objects.equals(existDef.getApplicationId(), ApplicationManager.getApplicationId())) {
+            throw exception(ErrorCodeConstants.APPLICATION_ID_MISMATCH);
         }
 
         // 已发布流程无法删除
@@ -124,8 +138,19 @@ public class BpmVersionMgmtServiceImpl implements BpmVersionMgmtService {
             reqVo.setSortType("update_time");
         }
 
+        Long currAppId = ApplicationManager.getApplicationId();
+
+        if (currAppId == null) {
+            throw exception(ErrorCodeConstants.MISSING_APPLICATION_ID);
+        }
+
+        // 校验菜单是否存在
+        AppMenuRespDTO appMenu = appResourceApi.getAppMenuByUuidAndAppId(reqVo.getBusinessUuid(), currAppId);
+        bpmAppResourceValidator.validateMenuAndPageset(appMenu, currAppId);
+
         QueryWrapper queryWrapper = QueryWrapper.create();
-        queryWrapper.eq(FlowDefinition::getFormPath, reqVo.getBusinessId());
+        queryWrapper.eq(FlowDefinition::getFormPath, appMenu.getMenuUuid());
+        queryWrapper.eq(FlowDefinition::getApplicationId, currAppId);
 
         if (StringUtils.isNotBlank(reqVo.getBpmVersionStatus())) {
             VersionStatusEnum versionStatusEnum = VersionStatusEnum.getByCode(reqVo.getBpmVersionStatus());
@@ -147,9 +172,8 @@ public class BpmVersionMgmtServiceImpl implements BpmVersionMgmtService {
                 versionKeyWord = versionAlias.substring(1);
             }
 
-            QueryCondition orCondition = QueryCondition.createEmpty();
-            orCondition.or(FLOW_DEFINITION.BPM_VERSION_ALIAS.like(versionAlias));
-            orCondition.or(FLOW_DEFINITION.BPM_VERSION.like(versionKeyWord));
+            QueryCondition orCondition = FLOW_DEFINITION.BPM_VERSION_ALIAS.like(versionAlias)
+                    .or(FLOW_DEFINITION.BPM_VERSION.like(versionKeyWord));
 
             queryWrapper.and(orCondition);
         }
@@ -174,6 +198,10 @@ public class BpmVersionMgmtServiceImpl implements BpmVersionMgmtService {
 
         if (definition == null) {
             throw exception(ErrorCodeConstants.FLOW_NOT_EXISTS);
+        }
+
+        if (!Objects.equals(definition.getApplicationId(), ApplicationManager.getApplicationId())) {
+            throw exception(ErrorCodeConstants.APPLICATION_ID_MISMATCH);
         }
 
         definition.setVersionAlias(reqVo.getBpmVersionAlias());

@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.bpm.runtime.vo;
+package com.cmsr.onebase.module.bpm.runtime.vo.taskcenter;
 
 import com.cmsr.onebase.module.bpm.core.vo.UserBasicInfoVO;
 import io.swagger.v3.oas.annotations.media.Schema;

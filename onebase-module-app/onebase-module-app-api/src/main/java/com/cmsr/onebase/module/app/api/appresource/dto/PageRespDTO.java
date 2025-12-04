@@ -9,6 +9,8 @@ import lombok.Data;
 public class PageRespDTO {
     private Long id;
 
+    private String pageUuid;
+
     private String pageName;
 
     private String pageType;

@@ -149,21 +149,21 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
 
             // 使用节点配置，则根据字段配置来更新数据
             if (useNodeConfig) {
-                Map<Long, Boolean> fieldMap = new HashMap<>();
+                Map<String, Boolean> fieldMap = new HashMap<>();
 
                 // 重置，待过滤出可编辑的字段
                 updateEntityData = new HashMap<>();
 
                 for (FieldPermCfgDTO.FieldConfigDTO fieldConfig : fieldPermConfig.getFieldConfigs()) {
-                    Long fieldId = fieldConfig.getFieldId();
+                    String fieldUuid = fieldConfig.getFieldUuid();
 
                     // 只保留可编辑的字段
                     if (Objects.equals(fieldConfig.getFieldPermType(), FieldPermTypeEnum.WRITE.getCode())) {
-                        fieldMap.put(fieldId, true);
+                        fieldMap.put(fieldUuid, true);
                     }
                 }
 
-                // 审批节点默认所有字段都为只读
+                // 审批节点默认所有字段都为只读 todo: 待完善
                 entityVO.getData().forEach((key, value) -> {
                     if (fieldMap.containsKey(key)) {
                         updateEntityData.put(key, value);

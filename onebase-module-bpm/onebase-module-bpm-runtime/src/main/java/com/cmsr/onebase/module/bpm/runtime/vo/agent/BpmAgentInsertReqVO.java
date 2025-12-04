@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.bpm.runtime.vo;
+package com.cmsr.onebase.module.bpm.runtime.vo.agent;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -9,7 +9,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-import org.springframework.format.annotation.DateTimeFormat;
+
 import java.time.LocalDateTime;
 
 import static com.cmsr.onebase.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
@@ -18,7 +18,6 @@ import static com.cmsr.onebase.framework.common.util.date.DateUtils.FORMAT_YEAR_
 @Data
 public class BpmAgentInsertReqVO {
     @Schema(description = "应用ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
-    @NotNull(message = "应用ID不能为空")
     private Long appId;
 
     @Schema(description = "代理人ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")

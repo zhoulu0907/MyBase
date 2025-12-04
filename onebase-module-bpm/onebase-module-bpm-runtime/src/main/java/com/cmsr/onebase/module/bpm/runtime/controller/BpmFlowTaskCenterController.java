@@ -7,7 +7,7 @@ import com.cmsr.onebase.module.bpm.core.vo.BpmDoneTaskPageReqVO;
 import com.cmsr.onebase.module.bpm.core.vo.BpmMyCreatedPageReqVO;
 import com.cmsr.onebase.module.bpm.core.vo.BpmTodoTaskPageReqVO;
 import com.cmsr.onebase.module.bpm.runtime.service.BpmFlowTaskCenterService;
-import com.cmsr.onebase.module.bpm.runtime.vo.*;
+import com.cmsr.onebase.module.bpm.runtime.vo.taskcenter.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
@@ -59,9 +59,9 @@ public class BpmFlowTaskCenterController {
 
     @GetMapping("/list-nodes")
     @Operation(summary = "查询节点列表信息")
-    public CommonResult<List<ListNodesRespVO.NodeVO>> listNodes(@RequestParam("businessId") Long bindingViewId) {
-        log.info("查询节点列表信息: {}", bindingViewId);
-        List<ListNodesRespVO.NodeVO> nodes = flowTaskCenterService.listNodes(bindingViewId);
+    public CommonResult<List<ListNodesRespVO.NodeVO>> listNodes(@RequestParam("businessUuid") String businessUuid) {
+        log.info("查询节点列表信息: {}", businessUuid);
+        List<ListNodesRespVO.NodeVO> nodes = flowTaskCenterService.listNodes(businessUuid);
         return success(nodes);
     }
     @GetMapping("/cc/page")

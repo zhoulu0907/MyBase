@@ -9,6 +9,9 @@ package com.cmsr.onebase.module.bpm.core.enums;
 public interface BpmConstants {
     String SYS_USER_ID = "-1";
 
+    /**  BPM的页面集类型：流程设计 */
+    Integer PAGESET_TYPE_BPM = 2;
+
     /**  节点审批人列表最多100个用户 */
     Integer MAX_NODE_APPROVER_USERS = 100;
 

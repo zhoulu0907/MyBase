@@ -64,9 +64,9 @@
                 )
             </if>
 
-            <!-- businessId -->
-            <if test="queryVO != null and queryVO.businessId != null and queryVO.businessId != ''">
-                AND t3.binding_view_id = #{queryVO.businessId}
+            <!-- businessUuid -->
+            <if test="queryVO != null and queryVO.businessUuid != null and queryVO.businessUuid != ''">
+                AND t3.binding_view_id = #{queryVO.businessUuid}
             </if>
 
             <!-- flowStatusList -->
@@ -171,9 +171,9 @@
             )
         </if>
 
-        <!-- businessId -->
-        <if test="queryVO != null and queryVO.businessId != null and queryVO.businessId != ''">
-            AND t3.binding_view_id = #{queryVO.businessId}
+        <!-- businessUuid -->
+        <if test="queryVO != null and queryVO.businessUuid != null and queryVO.businessUuid != ''">
+            AND t3.binding_view_id = #{queryVO.businessUuid}
         </if>
 
         <!-- flowStatusList -->
@@ -266,9 +266,9 @@
                 )
             </if>
 
-            <!-- businessId -->
-            <if test="queryVO != null and queryVO.businessId != null and queryVO.businessId != ''">
-                AND t3.binding_view_id = #{queryVO.businessId}
+            <!-- businessUuid -->
+            <if test="queryVO != null and queryVO.businessUuid != null and queryVO.businessUuid != ''">
+                AND t3.binding_view_id = #{queryVO.businessUuid}
             </if>
 
             <!-- flowStatusList -->
