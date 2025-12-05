@@ -78,7 +78,7 @@ export interface OpOptions {
 
 export interface ConditionRule {
   fieldScope: string;
-  fieldId: string;
+  fieldUuid: string;
   op: string;
   operatorType: string;
   value: any;

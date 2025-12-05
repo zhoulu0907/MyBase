@@ -65,7 +65,7 @@ const ScriptActionListPage: React.FC = () => {
       };
 
       const res = await getCommonPaginationList(
-        (param) => listScriptAction(param as ListScriptActionReq),
+        (param:any) => listScriptAction(param as ListScriptActionReq),
         req,
         setPageNo
       );

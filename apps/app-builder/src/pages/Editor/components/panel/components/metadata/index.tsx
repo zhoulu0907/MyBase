@@ -30,8 +30,8 @@ interface FieldItem {
   displayName: string;
   label: string;
   type: string;
-  fieldID: string;
-  entityID: string;
+  fieldName: string;
+  tableName: string;
 }
 
 interface GroupedSection {
@@ -67,8 +67,9 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
             displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[cpType] || '',
             label: field.displayName,
             type: cpType,
-            fieldID: field.fieldId,
-            entityID: mainEntity.entityId,
+
+            tableName: mainEntity.tableName,
+            fieldName: field.fieldName,
             isSystemField: field.isSystemField
           };
         })
@@ -113,8 +114,9 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
             // displayName: field.displayName,
             label: field.displayName,
             type: cpType,
-            fieldID: field.fieldId,
-            entityID: subEntity.entityId,
+
+            tableName: subEntity.tableName,
+            fieldName: field.fieldName,
             isSystemField: field.isSystemField
           };
         })
@@ -201,6 +203,7 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
                         onClick={() => setActiveEntityID(mainEntity.entityId)}
                         data-cp-type={ENTITY_COMPONENT_TYPES.MAIN_ENTITY}
                         data-entity-id={mainEntity.entityId}
+                        data-table-name={mainEntity.tableName}
                       >
                         <div className={styles.mainEntityHeaderIcon}>主</div>
                         {mainEntity.entityName || '无'}
@@ -245,6 +248,7 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
                         onClick={() => setActiveEntityID(subEntity.entityId)}
                         data-cp-type={ENTITY_COMPONENT_TYPES.SUB_ENTITY}
                         data-entity-id={subEntity.entityId}
+                        data-table-name={subEntity.tableName}
                       >
                         <div className={styles.subEntityHeaderIcon}>子</div>
                         {subEntity.entityName || '无'}
@@ -329,8 +333,8 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
                           displayName={item.displayName}
                           label={item.label}
                           type={item.type}
-                          fieldID={item.fieldID}
-                          entityID={item.entityID}
+                          tableName={item.tableName}
+                          fieldName={item.fieldName}
                         />
                       ))}
                     </ReactSortable>
