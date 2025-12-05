@@ -30,6 +30,7 @@ import com.github.pagehelper.PageHelper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.warm.flow.core.dto.DefJson;
 import org.dromara.warm.flow.core.dto.NodeJson;
@@ -93,7 +94,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
     }
 
     private List<Long> splitToLongList(String str) {
-       return splitToList(str).stream()
+        return splitToList(str).stream()
                 .map(Long::valueOf)
                 .collect(Collectors.toList());
     }
@@ -139,6 +140,21 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         bpmAppResourceValidator.validateMenuAndPageset(appMenuRespDTO, queryPageVO.getAppId());
     }
 
+    private Map<String, AppPagesetRespDTO> buildPageSetMap(Set<String> menuUuids, Long applicationId) {
+        if (CollectionUtils.isEmpty(menuUuids))  {
+            return null;
+        }
+
+        List<AppPagesetRespDTO> pageSetList = appResourceApi.findPageSetListByMenuUuidsAndAppId(menuUuids.stream().toList(), applicationId);
+
+        if (CollectionUtils.isEmpty(pageSetList)) {
+            return null;
+        }
+
+        return pageSetList.stream()
+                    .collect(Collectors.toMap(AppPagesetRespDTO::getMenuUuid, v -> v));
+    }
+
     /**
      * 获取流程待办分页
      *
@@ -179,20 +195,15 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
             menuUuids.add(todoTaskVO.getBusinessUuid());
         }
 
-        if (CollectionUtils.isNotEmpty(menuUuids)) {
-            Long applicationId = pageReqVO.getAppId();
-            List<AppPagesetRespDTO> pageSetList = appResourceApi.findPageSetListByMenuUuidsAndAppId(menuUuids.stream().toList(), applicationId);
+        // 处理页面集Id
+        Map<String, AppPagesetRespDTO> pageSetMap = buildPageSetMap(menuUuids, pageReqVO.getAppId());
 
-            if (CollectionUtils.isNotEmpty(pageSetList)) {
-                Map<String, AppPagesetRespDTO> pageSetMap = pageSetList.stream()
-                        .collect(Collectors.toMap(AppPagesetRespDTO::getMenuUuid, v -> v));
+        if (MapUtils.isNotEmpty(pageSetMap)) {
+            for (BpmFlowTodoTaskVO todoTaskVO : todoTaskList) {
+                AppPagesetRespDTO pageSet = pageSetMap.get(todoTaskVO.getBusinessUuid());
 
-                for (BpmFlowTodoTaskVO todoTaskVO : todoTaskList) {
-                    AppPagesetRespDTO pageSet = pageSetMap.get(todoTaskVO.getBusinessUuid());
-
-                    if (pageSet != null) {
-                        todoTaskVO.setPageSetId(pageSet.getId());
-                    }
+                if (pageSet != null) {
+                    todoTaskVO.setPageSetId(pageSet.getId());
                 }
             }
         }
@@ -240,20 +251,15 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
             menuUuids.add(doneTaskVO.getBusinessUuid());
         }
 
-        if (CollectionUtils.isNotEmpty(menuUuids)) {
-            Long applicationId = pageReqVO.getAppId();
-            List<AppPagesetRespDTO> pageSetList = appResourceApi.findPageSetListByMenuUuidsAndAppId(menuUuids.stream().toList(), applicationId);
+        // 处理页面集Id
+        Map<String, AppPagesetRespDTO> pageSetMap = buildPageSetMap(menuUuids, pageReqVO.getAppId());
 
-            if (CollectionUtils.isNotEmpty(pageSetList)) {
-                Map<String, AppPagesetRespDTO> pageSetMap = pageSetList.stream()
-                        .collect(Collectors.toMap(AppPagesetRespDTO::getMenuUuid, v -> v));
+        if (MapUtils.isNotEmpty(pageSetMap)) {
+            for (BpmFlowDoneTaskVO doneTaskVO : doneTaskList) {
+                AppPagesetRespDTO pageSet = pageSetMap.get(doneTaskVO.getBusinessUuid());
 
-                for (BpmFlowDoneTaskVO doneTaskVO : doneTaskList) {
-                    AppPagesetRespDTO pageSet = pageSetMap.get(doneTaskVO.getBusinessUuid());
-
-                    if (pageSet != null) {
-                        doneTaskVO.setPageSetId(pageSet.getId());
-                    }
+                if (pageSet != null) {
+                    doneTaskVO.setPageSetId(pageSet.getId());
                 }
             }
         }
@@ -319,20 +325,15 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
             list.add(bpmMyCreatedVO);
         }
 
-        if (CollectionUtils.isNotEmpty(menuUuids)) {
-            Long applicationId = pageReqVO.getAppId();
-            List<AppPagesetRespDTO> pageSetList = appResourceApi.findPageSetListByMenuUuidsAndAppId(menuUuids.stream().toList(), applicationId);
+        // 处理页面集Id
+        Map<String, AppPagesetRespDTO> pageSetMap = buildPageSetMap(menuUuids, pageReqVO.getAppId());
 
-            if (CollectionUtils.isNotEmpty(pageSetList)) {
-                Map<String, AppPagesetRespDTO> pageSetMap = pageSetList.stream()
-                        .collect(Collectors.toMap(AppPagesetRespDTO::getMenuUuid, v -> v));
+        if (MapUtils.isNotEmpty(pageSetMap)) {
+            for (BpmMyCreatedVO bpmMyCreatedVO : list) {
+                AppPagesetRespDTO pageSet = pageSetMap.get(bpmMyCreatedVO.getBusinessUuid());
 
-                for (BpmMyCreatedVO bpmMyCreatedVO : list) {
-                    AppPagesetRespDTO pageSet = pageSetMap.get(bpmMyCreatedVO.getBusinessUuid());
-
-                    if (pageSet != null) {
-                        bpmMyCreatedVO.setPageSetId(pageSet.getId());
-                    }
+                if (pageSet != null) {
+                    bpmMyCreatedVO.setPageSetId(pageSet.getId());
                 }
             }
         }
@@ -418,20 +419,15 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
             menuUuids.add(ccTaskVO.getBusinessUuid());
         }
 
-        if (CollectionUtils.isNotEmpty(menuUuids)) {
-            Long applicationId = pageReqVO.getAppId();
-            List<AppPagesetRespDTO> pageSetList = appResourceApi.findPageSetListByMenuUuidsAndAppId(menuUuids.stream().toList(), applicationId);
+        // 处理页面集Id
+        Map<String, AppPagesetRespDTO> pageSetMap = buildPageSetMap(menuUuids, pageReqVO.getAppId());
 
-            if (CollectionUtils.isNotEmpty(pageSetList)) {
-                Map<String, AppPagesetRespDTO> pageSetMap = pageSetList.stream()
-                        .collect(Collectors.toMap(AppPagesetRespDTO::getMenuUuid, v -> v));
+        if (MapUtils.isNotEmpty(pageSetMap)) {
+            for (BpmCcTaskPageResVO ccTaskVO : copyTaskList) {
+                AppPagesetRespDTO pageSet = pageSetMap.get(ccTaskVO.getBusinessUuid());
 
-                for (BpmCcTaskPageResVO ccTaskVO : copyTaskList) {
-                    AppPagesetRespDTO pageSet = pageSetMap.get(ccTaskVO.getBusinessUuid());
-
-                    if (pageSet != null) {
-                        ccTaskVO.setPageSetId(pageSet.getId());
-                    }
+                if (pageSet != null) {
+                    ccTaskVO.setPageSetId(pageSet.getId());
                 }
             }
         }
