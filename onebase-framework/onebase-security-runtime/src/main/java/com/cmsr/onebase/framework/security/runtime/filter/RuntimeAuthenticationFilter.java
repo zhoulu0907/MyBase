@@ -7,7 +7,6 @@ import com.cmsr.onebase.framework.common.biz.system.oauth2.dto.OAuth2AccessToken
 import com.cmsr.onebase.framework.common.enums.RunModeEnum;
 import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.common.security.dto.LoginUser;
@@ -101,7 +100,12 @@ public class RuntimeAuthenticationFilter extends OncePerRequestFilter {
             }
         }
         // 继续过滤链
-        chain.doFilter(request, response);
+        try {
+            chain.doFilter(request, response);
+        } finally {
+            // 清理租户信息
+            TenantContextHolder.clear();
+        }
     }
 
     private RuntimeLoginUser buildLoginUserByToken(String token) {
