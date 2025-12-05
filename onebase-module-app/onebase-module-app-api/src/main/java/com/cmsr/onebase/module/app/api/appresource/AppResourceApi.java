@@ -32,6 +32,15 @@ public interface AppResourceApi {
     /**
      * 根据菜单UUID查询页面集
      *
+     * @param menuUuids       菜单UUID列表
+     * @param applicationId 应用ID
+     * @return 页面集列表
+     */
+    List<AppPagesetRespDTO> findPageSetListByMenuUuidsAndAppId(List<String> menuUuids, Long applicationId);
+
+    /**
+     * 根据菜单UUID查询页面集
+     *
      * @param menuUuid       菜单UUID
      * @param applicationId 应用ID
      * @return 页面集
