@@ -5,6 +5,7 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.number.MetadataAutoN
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.number.MetadataAutoNumberStateDO;
 import com.cmsr.onebase.module.metadata.core.enums.CommonStatusEnum;
 import com.cmsr.onebase.module.metadata.core.enums.BooleanStatusEnum;
+import com.cmsr.onebase.module.metadata.core.dal.database.MetadataAutoNumberConfigRepository;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataAutoNumberResetLogRepository;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataAutoNumberStateRepository;
 import jakarta.annotation.Resource;
@@ -21,7 +22,7 @@ public class AutoNumberStateBuildServiceImpl implements AutoNumberStateBuildServ
     @Resource
     private MetadataAutoNumberResetLogRepository resetLogRepository;
     @Resource
-    private com.cmsr.onebase.module.metadata.core.dal.database.MetadataAutoNumberConfigRepository configRepository;
+    private MetadataAutoNumberConfigRepository configRepository;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
