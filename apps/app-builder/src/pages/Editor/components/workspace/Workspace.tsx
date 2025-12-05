@@ -592,7 +592,7 @@ export default function EditorWorkspace() {
                   }
                   setSubTableComponents(cpID, subFieldComponents);
                   entityList.push({ displayName: cpName, id: cpID, type: cpType });
-                } else if (item.entityName && item.entityName !== mainEntity.entityName) {
+                } else if (item.entityId && item.entityId !== mainEntity.entityId) {
                   // 子表 数据字段  不做任何操作
                 } else {
                   // 主表字段、普通字段
@@ -628,7 +628,6 @@ export default function EditorWorkspace() {
               const itemDisplayName = e.item.getAttribute('data-cp-displayname');
 
               const tableName = e.item.getAttribute('data-table-name');
-
               const fieldName = e.item.getAttribute('data-field-name');
               const dataLabel = e.item.getAttribute('data-label');
 

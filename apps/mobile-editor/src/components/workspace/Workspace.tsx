@@ -275,7 +275,7 @@ const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({ props }) => {
   return (
     <div className={styles.editorWorkspace}>
       <div className={styles.workspaceHeader}>
-        <div className={styles.workspaceHeaderLeft}>{isFormEditor && pageSetId && 
+        <div className={styles.workspaceHeaderLeft}>{isFormEditor && pageSetId &&
           <View
             pageSetId={pageSetId}
             components={components}
@@ -296,8 +296,8 @@ const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({ props }) => {
           </div>
           <span className={styles.pageModeDivider} />
           <div className={styles.pageModeCtrl}>
-                <img className={styles.pageModeIcon} src={PCIcon} onClick={() => setEditMode(EditMode.PC)} />
-                <img className={styles.pageModeIcon} src={MobileActiveIcon} />
+            <img className={styles.pageModeIcon} src={PCIcon} onClick={() => setEditMode(EditMode.PC)} />
+            <img className={styles.pageModeIcon} src={MobileActiveIcon} />
           </div>
         </div>
       </div>
@@ -408,7 +408,7 @@ const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({ props }) => {
 
                     schema.config.cpName = field.displayName;
                     schema.config.id = cpID;
-                    schema.config.dataField = [item.entityName, field.fieldName];
+                    schema.config.dataField = [item.tableName, field.fieldName];
                     schema.config.label.text = field.displayName;
                     const props = {
                       id: cpID,
@@ -530,7 +530,7 @@ const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({ props }) => {
                     subSchema.config.label.text = ele.displayName;
                     subSchema.config.label.display = false;
                     subSchema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT];
-                    subSchema.config.dataField = [item.entityName, ele.fieldName];
+                    subSchema.config.dataField = [item.tableName, ele.fieldName];
                     subSchema.config.width = WIDTH_VALUES[WIDTH_OPTIONS.FULL];
                     const subProps = {
                       id: subId,
@@ -542,7 +542,7 @@ const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({ props }) => {
                   }
                   setSubTableComponents(cpID, subFieldComponents);
                   entityList.push({ displayName: cpName, id: cpID, type: cpType });
-                } else if (item.entityName && item.entityName !== mainEntity.entityName) {
+                } else if (item.entityId && item.entityId !== mainEntity.entityId) {
                   // 子表 数据字段  不做任何操作
                 } else {
                   // 主表字段、普通字段
@@ -577,8 +577,8 @@ const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({ props }) => {
               const itemType = e.item.getAttribute('data-cp-type');
               const itemDisplayName = e.item.getAttribute('data-cp-displayname');
 
-              const fieldName = e.item.getAttribute('data-field-id');
-              const entityName = e.item.getAttribute('data-entity-id');
+              const tableName = e.item.getAttribute('data-table-name');
+              const fieldName = e.item.getAttribute('data-field-name');
               const dataLabel = e.item.getAttribute('data-label');
 
               console.log(`拖入组件 ${cpID},类型 ${itemType}, 名称 ${itemDisplayName} 组件名称 ${dataLabel}`);
@@ -597,18 +597,18 @@ const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({ props }) => {
 
               // 子表字段不允许
               if (
-                (entityName && entityName !== mainEntity.entityName) ||
+                (tableName && tableName !== mainEntity.tableName) ||
                 itemType === ENTITY_COMPONENT_TYPES.MAIN_ENTITY ||
                 itemType === ENTITY_COMPONENT_TYPES.SUB_ENTITY
               ) {
-                console.log('entity id', entityName);
+                console.log('tableName name', tableName);
               } else {
                 const schema = getComponentSchema(itemType as any);
                 schema.config.cpName = itemDisplayName;
                 schema.config.id = cpID;
 
                 // 主表 字段组件
-                if (entityName && fieldName) {
+                if (tableName && fieldName) {
                   // 获取当前字段数据源配置
                   const currentField = mainEntity.fields?.find((ele: AppEntityField) => ele.fieldName === fieldName);
                   if (currentField) {
@@ -679,7 +679,7 @@ const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({ props }) => {
                     }
                     // 关联的字典类型ID    dictTypeId
                   }
-                  schema.config.dataField = [entityName, fieldName];
+                  schema.config.dataField = [tableName, fieldName];
                   schema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT];
                 }
 
