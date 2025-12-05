@@ -17,7 +17,11 @@ public class DataUpdateNodeData extends NodeData implements Serializable {
 
     private Long mainEntityId;
 
+    private String mainEntityName;
+
     private Long subEntityId;
+
+    private String subEntityName;
 
     /**
      * 更新类型

@@ -23,7 +23,11 @@ public class DataQueryNodeData extends NodeData implements Serializable {
 
     private Long mainEntityId;
 
+    private String mainEntityName;
+
     private Long subEntityId;
+
+    private String subEntityName;
 
     /**
      * all

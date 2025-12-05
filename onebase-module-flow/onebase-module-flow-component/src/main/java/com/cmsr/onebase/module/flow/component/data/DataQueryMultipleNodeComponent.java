@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.flow.component.data;
 
+import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
-import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.flow.component.SkippableNodeComponent;
 import com.cmsr.onebase.module.flow.component.utils.VariableProvider;
 import com.cmsr.onebase.module.flow.context.ConditionsProvider;
@@ -11,8 +11,8 @@ import com.cmsr.onebase.module.flow.context.condition.Conditions;
 import com.cmsr.onebase.module.flow.context.express.OrExpression;
 import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
 import com.cmsr.onebase.module.flow.context.graph.nodes.DataQueryMultipleNodeData;
-import com.cmsr.onebase.module.metadata.api.datamethod.dto.EntityFieldDataRespDTO;
 import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntityValueDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticPageConditionVO;
 import com.yomahub.liteflow.annotation.LiteflowComponent;
 import lombok.Setter;
@@ -65,10 +65,10 @@ public class DataQueryMultipleNodeComponent extends SkippableNodeComponent {
         reqDTO.setSortBy(DataMethodApiHelper.processSortCondition(nodeData.getSortBy()));
         reqDTO.setPageNo(1);
         reqDTO.setPageSize(nodeData.getMaxCountWithDefault(500));
-        List<List<EntityFieldDataRespDTO>> fieldDataRespDTOSS = ApplicationManager.withApplicationId(,() -> semanticDynamicDataApi.getDataByCondition(reqDTO));
-        executeContext.addLog("数据查询节点（多条），查询返回数据量: " + fieldDataRespDTOSS.size());
-        if (CollectionUtils.isNotEmpty(fieldDataRespDTOSS)) {
-            variableContext.putNodeVariables(this.getTag(), DataMethodApiHelper.convertToListMap(fieldDataRespDTOSS));
+        PageResult<SemanticEntityValueDTO> fieldDataRespDTOSS = ApplicationManager.withApplicationId(executeContext.getApplicationId(), () -> semanticDynamicDataApi.getDataByCondition(reqDTO));
+        executeContext.addLog("数据查询节点（多条），查询返回数据量: " + fieldDataRespDTOSS.getTotal());
+        if (CollectionUtils.isNotEmpty(fieldDataRespDTOSS.getList())) {
+            variableContext.putNodeVariables(this.getTag(), DataMethodApiHelper.convertToListMap(fieldDataRespDTOSS.getList()));
         }
     }
 
