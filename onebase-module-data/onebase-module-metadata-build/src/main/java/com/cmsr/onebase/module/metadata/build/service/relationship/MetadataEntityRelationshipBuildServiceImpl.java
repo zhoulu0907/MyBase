@@ -186,9 +186,9 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
     public PageResult<EntityRelationshipRespVO> getEntityRelationshipPage(EntityRelationshipPageReqVO pageReqVO) {
         QueryWrapper queryWrapper = entityRelationshipRepository.query();
 
-        // 添加查询条件
-        if (pageReqVO.getApplicationId() != null) {
-            queryWrapper.eq(MetadataEntityRelationshipDO::getApplicationId, pageReqVO.getApplicationId());
+        // 添加查询条件 - applicationId需要转换为Long类型
+        if (StringUtils.hasText(pageReqVO.getApplicationId())) {
+            queryWrapper.eq(MetadataEntityRelationshipDO::getApplicationId, Long.parseLong(pageReqVO.getApplicationId().trim()));
         }
 
         // 添加调试日志，查看 entityId 的值
@@ -203,10 +203,9 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
             String entityUuid = idUuidConverter.toEntityUuid(pageReqVO.getEntityId().trim());
             log.info("解析实体: 原始值={}, 转换后entityUuid={}", pageReqVO.getEntityId(), entityUuid);
 
-            // 使用 OR 条件：(source_entity_uuid = entityUuid OR target_entity_uuid = entityUuid)
+            // 使用MyBatis-Flex链式写法：(source_entity_uuid = ? OR target_entity_uuid = ?)
             queryWrapper.where(MetadataEntityRelationshipDO::getSourceEntityUuid).eq(entityUuid)
                     .or(MetadataEntityRelationshipDO::getTargetEntityUuid).eq(entityUuid);
-
             log.info("查询实体相关关系，entityUuid: {}", entityUuid);
         } else {
             // 如果没有传入 entityId，则使用精确的源实体UUID和目标实体UUID查询
