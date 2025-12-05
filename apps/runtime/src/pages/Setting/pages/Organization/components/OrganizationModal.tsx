@@ -116,9 +116,9 @@ const DepartmentModal: React.FC<DepartmentModalProps> = (props) => {
           </Col>
 
           <Col span={12}>
-            <FormItem label="管理员" field="adminUserId">
+            <FormItem label="部门接口人" field="adminUserId">
               <Select
-                placeholder={hasUserQueryPermission ? '请选择管理员' : '无权限'}
+                placeholder={hasUserQueryPermission ? '请选择部门接口人' : '无权限'}
                 allowClear
                 showSearch
                 disabled={!hasUserQueryPermission}
