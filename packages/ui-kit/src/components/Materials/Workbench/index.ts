@@ -34,3 +34,6 @@ export type { WorkbenchComponentSchema } from './schema';
 
 // 模板导出
 export { workbenchTemplate, WORKBENCH_COMPONENT_TYPE_DISPLAY_NAME_MAP } from './template';
+
+// 类型导出
+export { IDataConfigConfigType } from './types';

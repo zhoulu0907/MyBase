@@ -2,6 +2,7 @@
  * Workbench 类型定义
  * 优先复用 Materials 的通用类型，只定义 Workbench 特有的类型
  */
+import { IBooleanConfigType } from '../types';
 import { WORKBENCH_CONFIG_TYPES } from './constants';
 
 /**
@@ -80,7 +81,7 @@ export interface QuickEntryPropsConfig {
 }
 
 /**
- * 快捷入口配置类型
+ * 快捷入口-配置类型
  */
 export interface IQuickEntryConfigType {
   key: string;
@@ -88,10 +89,18 @@ export interface IQuickEntryConfigType {
   type: typeof WORKBENCH_CONFIG_TYPES.QUICK_ENTRY;
 }
 
-// 工作台轮播内容配置
+// 轮播-内容配置
 export interface ICarouselContentConfigType {
   key: string;
   name: string;
   type: typeof WORKBENCH_CONFIG_TYPES.CAROUSEL_CONTENT;
   meta?: Record<string, any>;
+}
+
+// 待办中心-数据内容配置
+export interface IDataConfigConfigType {
+  key: string;
+  name: string;
+  type: typeof WORKBENCH_CONFIG_TYPES.DATA_CONFIG;
+  range: IBooleanConfigType[];
 }

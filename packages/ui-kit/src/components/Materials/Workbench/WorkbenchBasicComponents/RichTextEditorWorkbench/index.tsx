@@ -12,7 +12,8 @@ const XRichText = memo((props: XRichTextConfig & { runtime?: boolean; detailMode
     label,
     runtime = true,
     WbRichTextContent = '',
-    WbColor = '#FFFFFF'
+    WbColor = '#FFFFFF',
+    status
   } = props;
 
   const fieldName = `WbRichTextContent_${id || 'field'}`;

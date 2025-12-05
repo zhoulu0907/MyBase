@@ -7,6 +7,7 @@ import { type XCarouselConfig } from './schema';
 
 const XCarousel = memo((props: XCarouselConfig & { runtime?: boolean }) => {
   const {
+    id,
     label,
     verify,
     // status,

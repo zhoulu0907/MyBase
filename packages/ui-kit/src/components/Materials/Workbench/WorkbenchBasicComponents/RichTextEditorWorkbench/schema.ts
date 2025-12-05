@@ -15,12 +15,14 @@ import type {
   IDataFieldConfigType,
   ILabelConfigType,
   TBooleanDefaultType,
+  TRadioDefaultType,
   TSelectDefaultType,
   TTextDefaultType,
   IDefaultValueConfigType
 } from '../../../types';
 import type {TWbColorDefaultType} from '../../types';
-import { WORKBENCH_CONFIG_TYPES } from '../../constants';
+import { WORKBENCH_CONFIG_TYPES, WORKBENCH_STATUS_OPTIONS, WORKBENCH_STATUS_VALUES } from '../../constants';
+import type { TWorkbenchStatusSelectKeyType } from '../../workbenchShared';
 
 export interface XRichTextSchema {
   editData: TXRichTextEditData;
@@ -63,6 +65,12 @@ export interface XRichTextConfig extends ICommonBaseType {
    * 字段宽度
    */
   width: TSelectDefaultType<TWidthSelectKeyType>;
+
+  /**
+   * 组件状态：可用、隐藏、只读
+   * 可选值: 'default' | 'hidden' | 'readonly'
+   */
+  status?: TRadioDefaultType<TWorkbenchStatusSelectKeyType>;
 }
 
 const XRichText: XRichTextSchema = {
@@ -70,7 +78,7 @@ const XRichText: XRichTextSchema = {
     ...baseConfig,
     {
       key: 'label',
-      name: '标题',
+      name: '标题名称',
       type: WORKBENCH_CONFIG_TYPES.LABEL_INPUT
     },
     {
@@ -100,7 +108,8 @@ const XRichText: XRichTextSchema = {
       customValue: ''
     },
     WbColor: '#ffffff',
-    WbRichTextContent: ''
+    WbRichTextContent: '',
+    status: WORKBENCH_STATUS_VALUES[WORKBENCH_STATUS_OPTIONS.DEFAULT]
   }
 };
 

@@ -23,12 +23,12 @@ import {
 import { ILabelConfigType, IBooleanConfigType, TBooleanDefaultType, TTextDefaultType } from '../../../types';
 import { IDataConfigConfigType } from '../../types';
 
-export interface XTodoCenterSchema {
-  editData: TXTodoCenterEditData;
-  config: XTodoCenterConfig;
+export interface XTodoListSchema {
+  editData: TXTodoListEditData;
+  config: XTodoListConfig;
 }
 
-export type TXTodoCenterEditData = Array<
+export type TXTodoListEditData = Array<
   | ILabelConfigType
   | ITextConfigType
   | IStatusConfigType<TWorkbenchStatusSelectKeyType>
@@ -37,7 +37,7 @@ export type TXTodoCenterEditData = Array<
   | IDataConfigConfigType
 >;
 
-export interface XTodoCenterConfig extends ICommonBaseWorkbenchType {
+export interface XTodoListConfig extends ICommonBaseWorkbenchType {
   componentName: string;
   label: {
     text: TTextDefaultType;
@@ -53,7 +53,7 @@ export interface XTodoCenterConfig extends ICommonBaseWorkbenchType {
   width: TSelectDefaultType<TWorkbenchWidthSelectKeyType>;
 }
 
-const XTodoCenter: XTodoCenterSchema = {
+const XTodoList: XTodoListSchema = {
   editData: [...workbenchBaseConfig, workbenchStatusConfig, workbenchWidthConfig, {
     key: 'label',
     name: '标题名称',
@@ -83,5 +83,5 @@ const XTodoCenter: XTodoCenterSchema = {
   }
 };
 
-export default XTodoCenter;
+export default XTodoList;
 

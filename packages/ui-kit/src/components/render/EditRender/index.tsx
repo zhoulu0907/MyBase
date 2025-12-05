@@ -9,7 +9,10 @@ import {
   ListComp,
   SHOW_COMPONENT_TYPES,
   ShowComp,
-  getComponentConfig
+  getComponentConfig,
+  getWorkbenchComponentConfig,
+  WorkbenchComponentType,
+  hasWorkbenchComponentSchema
 } from 'src/components/Materials';
 
 import React from 'react';
@@ -33,8 +36,11 @@ interface ComponentRenderProps {
  * 用于渲染传入的组件，支持适配各类组件
  */
 const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pageComponentSchema, runtime }) => {
+  // 判断是否为工作台组件类型
+  const isWorkbenchType = hasWorkbenchComponentSchema(cpType);
+  
   // 获取组件配置
-  const componentConfig = getComponentConfig(pageComponentSchema, cpType);
+  const componentConfig = isWorkbenchType ? getWorkbenchComponentConfig(pageComponentSchema, cpType as WorkbenchComponentType) : getComponentConfig(pageComponentSchema, cpType);
 
   // 渲染对应的组件
   const renderComponent = () => {

@@ -4,11 +4,17 @@ import type { WorkbenchComponentType } from '../componentTypes';
 import XQuickEntry from './QuickEntry';
 import XTodoCenter from './TodoCenter';
 import XRichTextEditorWorkbench from './RichTextEditorWorkbench';
+import XInformationList from './InformationList';
+import XTodoList from './TodoList';
+import XWelcomeCard from './WelcomeCard';
 
 export const WorkbenchBasicComp = {
   XQuickEntry,
   XTodoCenter,
-  XRichTextEditorWorkbench
+  XRichTextEditorWorkbench,
+  XInformationList,
+  XTodoList,
+  XWelcomeCard
 } satisfies Record<WorkbenchComponentType, ComponentType<any>>;
 
 export { QUICK_ENTRY_THEME_OPTIONS, QUICK_ENTRY_THEME_VALUES } from './constants';

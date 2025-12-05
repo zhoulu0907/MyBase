@@ -1,6 +1,7 @@
 import { Tabs } from '@arco-design/web-react';
 import { IconRight } from '@arco-design/web-react/icon';
 import type { CSSProperties } from 'react';
+import { nanoid } from 'nanoid';
 import { memo } from 'react';
 import { WORKBENCH_STATUS_OPTIONS, WORKBENCH_STATUS_VALUES } from '../../constants';
 import { QUICK_ENTRY_THEME_OPTIONS, QUICK_ENTRY_THEME_VALUES } from '../constants';
@@ -20,7 +21,7 @@ const defaultQuickEntryProps: QuickEntryPropsConfig = {
 };
 
 const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; detailMode?: boolean }) => {
-  const { status, width, props: quickEntryProps, runtime } = props;
+  const { id, status, width, props: quickEntryProps, runtime } = props;
 
   const { titleConfig, styleConfig, groupConfig } = quickEntryProps || defaultQuickEntryProps;
 

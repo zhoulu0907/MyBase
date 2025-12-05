@@ -5,7 +5,7 @@ import {
   type TLayoutSelectKeyType,
   type TStatusSelectKeyType
 } from '../../../common';
-import { WORKBENCH_CONFIG_TYPES } from '../../constants';
+import { WORKBENCH_CONFIG_TYPES, WORKBENCH_STATUS_OPTIONS, WORKBENCH_STATUS_VALUES } from '../../constants';
 import type {
   IBooleanConfigType,
   ILabelConfigType,
@@ -18,8 +18,10 @@ import type {
   IVerifyConfigType,
   TBooleanDefaultType,
   TNumberDefaultType,
+  TRadioDefaultType,
   TTextDefaultType
 } from '../../../types';
+import type { TWorkbenchStatusSelectKeyType } from '../../workbenchShared';
 import type { ICarouselContentConfigType } from '../../types';
 import SlideOne from '@/assets/workbench/carousel/slide-1.svg';
 import SlideTwo from '@/assets/workbench/carousel/slide-2.svg';
@@ -37,7 +39,7 @@ export type TXCarouselEditData = Array<
   | ICarouselContentConfigType
   | IVerifyConfigType
   | TTextDefaultType
-  | IStatusConfigType<TStatusSelectKeyType>
+  | IStatusConfigType<TWorkbenchStatusSelectKeyType>
   | ILayoutConfigType<TLayoutSelectKeyType>
   | ITextAreaConfigType
   | ILabelConfigType
@@ -103,6 +105,11 @@ export interface XCarouselConfig extends ICommonBaseType {
    * 显示条数
    */
   displayCount: number;
+  /**
+   * 组件状态：可用、隐藏、只读
+   * 可选值: 'default' | 'hidden' | 'readonly'
+   */
+  status?: TRadioDefaultType<TWorkbenchStatusSelectKeyType>;
 }
 
 const DEFAULT_CAROUSEL_CONTENT: Images[] = [
@@ -180,7 +187,8 @@ const XCarousel: XCarouselSchema = {
     imageField: '',
     linkField: '',
     filterCondition: [],
-    displayCount: DEFAULT_CAROUSEL_CONTENT.length
+    displayCount: DEFAULT_CAROUSEL_CONTENT.length,
+    status: WORKBENCH_STATUS_VALUES[WORKBENCH_STATUS_OPTIONS.DEFAULT]
   }
 };
 
