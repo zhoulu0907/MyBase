@@ -58,8 +58,10 @@ public class MetadataEntityRelationshipRuntimeServiceImpl implements MetadataEnt
         }
 
         // 3. 创建响应VO
+        final String finalEntityUuidForResult = entityUuid;
         EntityWithChildrenRespVO result = BeanUtils.toBean(entity, EntityWithChildrenRespVO.class, res -> {
             res.setEntityId(entity.getId());
+            res.setEntityUuid(finalEntityUuidForResult);
             res.setEntityName(entity.getDisplayName());
             res.setEntityCode(entity.getCode());
             res.setTableName(entity.getTableName());
@@ -111,7 +113,8 @@ public class MetadataEntityRelationshipRuntimeServiceImpl implements MetadataEnt
         }
         
         ChildEntityInfoRespVO childInfo = BeanUtils.toBean(relationshipDO, ChildEntityInfoRespVO.class, info -> {
-            info.setChildEntityId(relationshipDO.getTargetEntityUuid());
+            info.setChildEntityId(targetEntity.getId());
+            info.setChildEntityUuid(relationshipDO.getTargetEntityUuid());
             info.setRelationshipId(String.valueOf(relationshipDO.getId()));
             info.setRelationshipName(relationshipDO.getRelationName());
             info.setRelationshipType(relationshipDO.getRelationshipType());
