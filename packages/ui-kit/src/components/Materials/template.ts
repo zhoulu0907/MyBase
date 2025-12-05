@@ -43,6 +43,7 @@ export const COMPONENT_TYPE_DISPLAY_NAME_MAP: Record<string, string> = {
   [FORM_COMPONENT_TYPES.CAROUSEL_FORM]: '轮播图',
   [FORM_COMPONENT_TYPES.SUB_TABLE]: '子表单',
   [FORM_COMPONENT_TYPES.DATA_SELECT]: '数据选择',
+  [FORM_COMPONENT_TYPES.FORMDIVIDER]: '分割线',
 
   // 列表组件
   [LIST_COMPONENT_TYPES.TABLE]: '表格',
@@ -294,7 +295,15 @@ const allTemplate = {
           displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.DATA_SELECT],
           icon: 'data_select_cp.svg',
           category: 'base'
-        }
+        },
+        {
+          type: FORM_COMPONENT_TYPES.FORMDIVIDER,
+          h: 36,
+          w: 118,
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.FORMDIVIDER],
+          icon: 'divider_cp.svg',
+          category: 'base'
+        },
       ]
     },
     {

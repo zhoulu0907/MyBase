@@ -308,6 +308,14 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
             detailMode={detailMode}
           />
         );
+      case FORM_COMPONENT_TYPES.FORMDIVIDER:
+        return (
+          <FormComp.XFormDivider
+            cpName={cpId}
+            id={cpId}
+            {...componentConfig}
+          />
+        );  
 
       //  布局组件
       case LAYOUT_COMPONENT_TYPES.COLUMN_LAYOUT:

@@ -489,3 +489,17 @@ export interface IDefaultValueConfigType {
   name: string;
   type: typeof CONFIG_TYPES.DEFAULT_VALUE;
 }
+
+// 分割线字段描述
+export interface IFormDividerTooltipConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.FORM_DIVIDER_TOOLTIP_INPUT;
+}
+
+// 分割线样式
+export interface IFormDividerStyleTypeConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.FORM_DIVIDER_STYLE_TYPE;
+}

@@ -23,6 +23,8 @@ import XSwitch from './Switch';
 import XTimePicker from './TimePicker';
 import XUserSelect from './UserSelect';
 import XSubTable from './SubTable';
+import XFormDivider from './Divider';
+
 
 import XAutoCodeSchema from './AutoCode/schema';
 import XCarouselFormSchema from './Carousel/schema';
@@ -49,6 +51,7 @@ import XSwitchSchema from './Switch/schema';
 import XTimePickerSchema from './TimePicker/schema';
 import XUserSelectSchema from './UserSelect/schema';
 import XSubTableSchema from './SubTable/schema';
+import XFormDividerSchema from './Divider/schema';
 
 export const FormComp = {
   XInputText,
@@ -75,7 +78,8 @@ export const FormComp = {
   XRichText,
   XCarouselForm,
   XSubTable,
-  XDataSelect
+  XDataSelect,
+  XFormDivider
 };
 
 export const FormSchema = {
@@ -103,5 +107,6 @@ export const FormSchema = {
   XRichTextSchema,
   XCarouselFormSchema,
   XSubTableSchema,
-  XDataSelectSchema
+  XDataSelectSchema,
+  XFormDividerSchema
 };

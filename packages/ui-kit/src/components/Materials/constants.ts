@@ -112,6 +112,10 @@ export const CONFIG_TYPES = {
   DEPT_SELECT_SCOPE: 'deptSelectScope',
   // 数据选择方式
   DATA_SELECT_MODE: 'DataSelectMode',
+  // 分割线组件提示输入
+  FORM_DIVIDER_TOOLTIP_INPUT: 'FormDividerTooltipInput',
+  // 分割线样式
+  FORM_DIVIDER_STYLE_TYPE: 'FormDividerStyleType',
 } as const;
 
 // 状态选项常量
