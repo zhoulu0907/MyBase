@@ -8,6 +8,7 @@ import com.cmsr.onebase.framework.security.runtime.service.RTPermissionService;
 import com.cmsr.onebase.module.app.api.security.bo.DataPermission;
 import com.cmsr.onebase.module.app.api.security.bo.FieldPermission;
 import com.cmsr.onebase.module.app.api.security.bo.OperationPermission;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -29,11 +30,11 @@ public class RTSecurityContext {
     public static Long getRequiredUserId() {
         LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
         if (loginUser == null) {
-            throw new RuntimeException("用户未登录");
+            throw new AuthenticationServiceException("用户未登录");
         }
         Long userId = loginUser.getId();
         if (userId == null) {
-            throw new RuntimeException("用户未登录");
+            throw new AuthenticationServiceException("用户未登录");
         }
         return userId;
     }

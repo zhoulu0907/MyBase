@@ -23,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.util.Assert;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
@@ -115,8 +116,12 @@ public class GlobalExceptionHandler {
         if (ex instanceof AccessDeniedException) {
             return accessDeniedExceptionHandler(request, (AccessDeniedException) ex);
         }
+        if (ex instanceof AuthenticationException) {
+            return authenticationExceptionHandler(request, (AuthenticationException) ex);
+        }
         return defaultExceptionHandler(request, ex);
     }
+
 
     /**
      * 处理 SpringMVC 请求参数缺失
@@ -323,6 +328,12 @@ public class GlobalExceptionHandler {
         log.warn("[accessDeniedExceptionHandler][userId({}) 无法访问 url({})]", SecurityFrameworkUtils.getLoginUserId(),
                 req.getRequestURL(), ex);
         return CommonResult.error(FORBIDDEN);
+    }
+
+    private CommonResult<?> authenticationExceptionHandler(HttpServletRequest request, AuthenticationException ex) {
+        log.warn("[authenticationExceptionHandler][userId({}) 访问 url({}) 发生异常]", SecurityFrameworkUtils.getLoginUserId(),
+                request.getRequestURI(), ex);
+        return CommonResult.error(UNAUTHORIZED);
     }
 
     /**
