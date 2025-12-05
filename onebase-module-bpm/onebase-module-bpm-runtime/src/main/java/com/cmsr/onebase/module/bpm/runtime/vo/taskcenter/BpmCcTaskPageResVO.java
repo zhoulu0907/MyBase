@@ -38,6 +38,9 @@ public class BpmCcTaskPageResVO  {
     @Schema(description = "流程表单，对应menuUuid")
     private String businessUuid;
 
+    @Schema(description = "页面集Id")
+    private Long pageSetId;
+
     @Schema(description = "已阅 0，否 1，是")
     private boolean viewed;
 }
