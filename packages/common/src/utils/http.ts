@@ -112,9 +112,10 @@ export class HttpClient {
         const { data } = response;
         if (data && typeof data === 'object') {
           if (data.code !== 0) {
-            Message.error(data.msg || '请求失败');
+            Message.error({ id: 'http-error', content: data.msg || '请求失败' });
             if (data.code === 401) {
               const loginURL = TokenManager.getTokenInfo()?.loginURL;
+              const tenantId = TokenManager.getTokenInfo()?.tenantId;
 
               TokenManager.clearToken();
 

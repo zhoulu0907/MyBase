@@ -1,20 +1,26 @@
 import { getDictDataListByType, getDictDetail } from '@onebase/platform-center';
 import {
+  COLOR_MODE_TYPES,
+  DEFAULT_VALUE_TYPES,
   EDITOR_TYPES,
   FORM_COMPONENT_TYPES,
   STATUS_OPTIONS,
-  STATUS_VALUES,
-  COLOR_MODE_TYPES,
-  DEFAULT_VALUE_TYPES
+  STATUS_VALUES
 } from '@onebase/ui-kit';
 import { cloneDeep } from 'lodash-es';
 import { useEffect, useState, useRef } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import { v4 as uuidv4 } from 'uuid';
 
+import EmptyIcon from '@/assets/images/empty.svg';
+import MobileIcon from '@/assets/images/mobile_icon.svg';
+import MobileActiveIcon from '@/assets/images/mobile_icon_active.svg';
+import PCIcon from '@/assets/images/pc_icon.svg';
+import PCActiveIcon from '@/assets/images/pc_icon_active.svg';
 import {
   COMPONENT_GROUP_NAME,
   COMPONENT_MAP,
+  DEFAULT_OPTIONS_TYPE,
   EditRender,
   ENTITY_COMPONENT_TYPES,
   getComponentConfig,
@@ -28,11 +34,6 @@ import {
   usePageViewEditorSignal,
   type GridItem
 } from '@onebase/ui-kit';
-import EmptyIcon from '@/assets/images/empty.svg';
-import MobileIcon from '@/assets/images/mobile_icon.svg';
-import MobileActiveIcon from '@/assets/images/mobile_icon_active.svg';
-import PCIcon from '@/assets/images/pc_icon.svg';
-import PCActiveIcon from '@/assets/images/pc_icon_active.svg';
 
 import NextIcon from '@/assets/images/next_icon.svg';
 import PrevActiveIcon from '@/assets/images/prev_icon_active.svg';
@@ -627,8 +628,8 @@ export default function EditorWorkspace() {
               const itemType = e.item.getAttribute('data-cp-type');
               const itemDisplayName = e.item.getAttribute('data-cp-displayname');
 
-              const fieldName = e.item.getAttribute('data-field-id');
-              const entityName = e.item.getAttribute('data-entity-id');
+              const entityName = e.item.getAttribute('data-entity-name');
+              const fieldName = e.item.getAttribute('data-field-name');
               const dataLabel = e.item.getAttribute('data-label');
 
               console.log(`拖入组件 ${cpID},类型 ${itemType}, 名称 ${itemDisplayName} 组件名称 ${dataLabel}`);
@@ -651,7 +652,7 @@ export default function EditorWorkspace() {
                 itemType === ENTITY_COMPONENT_TYPES.MAIN_ENTITY ||
                 itemType === ENTITY_COMPONENT_TYPES.SUB_ENTITY
               ) {
-                console.log('entity id', entityName);
+                console.log('entity name', entityName);
               } else {
                 const schema = getComponentSchema(itemType as any);
                 schema.config.cpName = itemDisplayName;
