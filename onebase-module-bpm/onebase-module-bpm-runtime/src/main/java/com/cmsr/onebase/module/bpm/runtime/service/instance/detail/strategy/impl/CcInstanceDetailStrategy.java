@@ -21,10 +21,10 @@ public class CcInstanceDetailStrategy extends AbstractInstanceDetailStrategy<CcN
     }
 
     @Override
-    protected void fillFieldPermConfig(BpmTaskDetailRespVO vo, CcNodeExtDTO extDTO, Long entityId, boolean isTodo) {
+    protected void fillFieldPermConfig(BpmTaskDetailRespVO vo, CcNodeExtDTO extDTO, String tableName, boolean isTodo) {
         FieldPermCfgDTO fieldPermConfig = extDTO.getFieldPermConfig();
 
-        fillFieldPermFromConfig(vo, fieldPermConfig, entityId, isTodo);
+        fillFieldPermFromConfig(vo, fieldPermConfig, tableName, isTodo);
     }
 }
 

@@ -1,7 +1,6 @@
 package com.cmsr.onebase.framework.orm.config;
 
-import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
-import com.cmsr.onebase.framework.common.security.dto.LoginUser;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.mybatisflex.core.tenant.TenantFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -19,12 +18,12 @@ public class DefaultTenantFactory implements TenantFactory {
 
     @Override
     public Object[] getTenantIds(String tableName) {
-        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
-        if (loginUser == null || loginUser.getTenantId() == null) {
+        Long tenantId = TenantContextHolder.getTenantId();
+        if (tenantId == null) {
             log.warn("未获取到租户编号，使用默认租户编号!");
             return new Object[]{DEFAULT_TENANT_ID};
         } else {
-            return new Object[]{loginUser.getTenantId()};
+            return new Object[]{tenantId};
         }
     }
 

@@ -8,8 +8,9 @@ import com.cmsr.onebase.module.bpm.core.dto.node.base.FieldPermCfgDTO;
 import com.cmsr.onebase.module.bpm.core.enums.*;
 import com.cmsr.onebase.module.bpm.runtime.vo.EntityVO;
 import com.cmsr.onebase.module.bpm.runtime.vo.ExecTaskReqVO;
-import com.cmsr.onebase.module.metadata.api.datamethod.dto.ConditionDTO;
-import com.cmsr.onebase.module.metadata.api.datamethod.dto.UpdateDataReqDTO;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntitySchemaDTO;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO;
+import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanicMergeConditionVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
@@ -145,11 +146,11 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
                 useNodeConfig = true;
             }
 
-            Map<Long, Object> updateEntityData;
+            Map<String, Object> updateEntityData;
 
             // 使用节点配置，则根据字段配置来更新数据
             if (useNodeConfig) {
-                Map<String, Boolean> fieldMap = new HashMap<>();
+                Map<String, Boolean> fieldUuidMap = new HashMap<>();
 
                 // 重置，待过滤出可编辑的字段
                 updateEntityData = new HashMap<>();
@@ -159,14 +160,34 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
 
                     // 只保留可编辑的字段
                     if (Objects.equals(fieldConfig.getFieldPermType(), FieldPermTypeEnum.WRITE.getCode())) {
-                        fieldMap.put(fieldUuid, true);
+                        fieldUuidMap.put(fieldUuid, true);
                     }
+                }
+
+                // todo: 处理子表字段
+                SemanticEntitySchemaDTO entitySchema = semanticDynamicDataApi.buildEntitySchemaByTableName(entityVO.getTableName());
+                Map<String, SemanticFieldSchemaDTO> fieldSchemaMap = new HashMap<>();
+
+                for (SemanticFieldSchemaDTO schemaDTO : entitySchema.getFields()) {
+                    fieldSchemaMap.put(schemaDTO.getFieldName(), schemaDTO);
                 }
 
                 // 审批节点默认所有字段都为只读 todo: 待完善
                 entityVO.getData().forEach((key, value) -> {
-                    if (fieldMap.containsKey(key)) {
+                    // id字段，直接保留
+                    if ("id".equalsIgnoreCase(key)) {
                         updateEntityData.put(key, value);
+                    } else {
+                        // 字段权限配置
+                        SemanticFieldSchemaDTO fieldSchema = fieldSchemaMap.get(key);
+
+                        if (fieldSchema == null) {
+                            return;
+                        }
+
+                        if (fieldUuidMap.containsKey(fieldSchema.getFieldUuid())) {
+                            updateEntityData.put(key, value);
+                        }
                     }
                 });
             } else {
@@ -176,15 +197,10 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
 
             // 更新数据
             if (!updateEntityData.isEmpty()) {
-                UpdateDataReqDTO updateDataReqDTO = new UpdateDataReqDTO();
-                updateDataReqDTO.setEntityId(entityVO.getEntityId());
-                updateDataReqDTO.setData(List.of(updateEntityData));
-
-                // 构建条件
-                ConditionDTO conditionDTO = buildIdCondition(entityVO.getEntityId(), entityVO.getId());
-                updateDataReqDTO.setConditionDTO(List.of(List.of(conditionDTO)));
-
-                dataMethodApi.updateData(updateDataReqDTO);
+                SemanicMergeConditionVO conditionVO = new SemanicMergeConditionVO();
+                conditionVO.setData(updateEntityData);
+                conditionVO.setTableName(entityVO.getTableName());
+                semanticDynamicDataApi.updateDataById(conditionVO);
             }
         }
     }

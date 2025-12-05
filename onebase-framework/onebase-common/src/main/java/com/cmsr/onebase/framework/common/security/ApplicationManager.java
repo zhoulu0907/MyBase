@@ -75,11 +75,32 @@ public class ApplicationManager {
         versionTagHolder.set(versionTag);
     }
 
+    public static Long getRequiredVersionTag() {
+        if (isIgnoreVersionTagCondition()) {
+            return null;
+        }
+        Long versionTag = versionTagHolder.get();
+        if (versionTag == null) {
+            throw new RuntimeException("未设置版本号");
+        }
+        return versionTag;
+    }
+
     public static Long getVersionTag() {
         if (isIgnoreVersionTagCondition()) {
             return null;
         }
         return versionTagHolder.get();
+    }
+
+    /**
+     * 清理所有ThreadLocal资源
+     */
+    public static void clearAll() {
+        applicationIdHolder.remove();
+        applicationIdBooleanHolder.remove();
+        versionTagHolder.remove();
+        versionTagBooleanHolder.remove();
     }
 
     public static <T> T withoutVersionTagCondition(Supplier<T> supplier) {
@@ -111,4 +132,18 @@ public class ApplicationManager {
     private static void restoreVersionTagCondition() {
         versionTagBooleanHolder.remove();
     }
+
+    public static <T> T withRuntimeApplicationId(Long applicationId, Supplier<T> supplier) {
+        Long previousApplicationId = getApplicationId();
+        Long previousVersionTag = getVersionTag();
+        try {
+            setApplicationId(applicationId);
+            setVersionTag(1L);
+            return supplier.get();
+        } finally {
+            setApplicationId(previousApplicationId);
+            setVersionTag(previousVersionTag);
+        }
+    }
+
 }

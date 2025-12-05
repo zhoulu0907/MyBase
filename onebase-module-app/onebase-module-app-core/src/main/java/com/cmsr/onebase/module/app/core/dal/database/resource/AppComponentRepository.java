@@ -27,4 +27,11 @@ public class AppComponentRepository extends BaseBizRepository<AppResourceCompone
                 .orderBy(APP_RESOURCE_COMPONENT.COMPONENT_INDEX, true);
         return this.list(queryWrapper);
     }
+
+    public List<AppResourceComponentDO> findByAppIdAndPageUuids(Long applicationId, List<String> pageUuids) {
+        QueryWrapper queryWrapper = query()
+                .where(APP_RESOURCE_COMPONENT.APPLICATION_ID.eq(applicationId))
+                .where(APP_RESOURCE_COMPONENT.PAGE_UUID.in(pageUuids));
+        return this.list(queryWrapper);
+    }
 }

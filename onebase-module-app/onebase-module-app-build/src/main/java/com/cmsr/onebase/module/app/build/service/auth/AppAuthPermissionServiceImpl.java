@@ -393,25 +393,6 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
         }).toList();
     }
 
-//    //TODO 查询所有表单页面
-//    private List<AppResourcePageDO> queryAlFormPages(Long menuId) {
-//        List<AppResourcePagesetDO> pageSetDOS = appPageSetRepository.findByMenuIds(List.of(menuId));
-//        if (CollectionUtils.isEmpty(pageSetDOS)) {
-//            return Collections.emptyList();
-//        }
-//        List<Long> pageSetIds = pageSetDOS.stream().map(pageSetDO -> pageSetDO.getId()).toList();
-//        List<AppResourcePagesetPageDO> pageSetPageDOS = appPageSetPageRepository.findByPageSetIds(pageSetIds);
-//        if (CollectionUtils.isEmpty(pageSetPageDOS)) {
-//            return Collections.emptyList();
-//        }
-//        List<Long> pageIds = pageSetPageDOS.stream().map(pageSetPageDO -> pageSetPageDO.getPageId()).toList();
-//        List<AppResourcePageDO> pageDOS = appPageRepository.listByIds(pageIds);
-//        if (CollectionUtils.isEmpty(pageDOS)) {
-//            return Collections.emptyList();
-//        }
-//        return pageDOS.stream().filter(pageDO -> "form".equals(pageDO.getPageType())).toList();
-//    }
-
     private Pair<List<AuthFieldVO>, List<AuthFieldVO>> queryAuthFields(String entityUuid, AuthPermissionReq reqVO) {
         List<EntityFieldRespDTO> entityFieldRespDTOS = getEntityFieldRespDTOS(entityUuid);
         List<AppAuthFieldDO> authFieldDOS = authFieldRepository.findByQuery(reqVO);

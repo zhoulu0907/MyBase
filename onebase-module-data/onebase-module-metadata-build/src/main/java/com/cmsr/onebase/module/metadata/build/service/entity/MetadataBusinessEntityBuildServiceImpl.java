@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.metadata.build.service.entity;
 
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.util.string.UuidUtils;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.IdUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
@@ -118,6 +119,12 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
                 createReqVO.getDatasourceUuid(), createReqVO.getDatasourceId());
         createReqVO.setDatasourceUuid(resolvedDatasourceUuid);
 
+        // 如果entityType为空，默认设置为自建表类型(1)
+        if (createReqVO.getEntityType() == null) {
+            createReqVO.setEntityType(BusinessEntityTypeEnum.SELF_BUILT.getCode());
+            log.info("实体类型未指定，默认设置为自建表类型(1)");
+        }
+
         // 预先获取系统字段信息，避免在事务中查询
         List<MetadataSystemFieldsDO> systemFields = null;
         if (BusinessEntityTypeEnum.needCreatePhysicalTable(createReqVO.getEntityType())) {
@@ -172,6 +179,11 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
         if (BusinessEntityTypeEnum.needCreatePhysicalTable(createReqVO.getEntityType())) {
             // 同步创建物理表，确保事务原子性
             createPhysicalTableForEntitySync(businessEntity, createReqVO, systemFields);
+        }
+
+        // 生成实体UUID（如果为空）
+        if (businessEntity.getEntityUuid() == null || businessEntity.getEntityUuid().isEmpty()) {
+            businessEntity.setEntityUuid(UuidUtils.getUuid());
         }
 
         // 插入业务实体到数据库，如果前面创建物理表失败，这里不会执行
@@ -1075,13 +1087,23 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
 
         ERRelationshipVO relationship = BeanUtils.toBean(relationshipDO, ERRelationshipVO.class, rel -> {
             rel.setRelationshipId(relationshipDO.getId().toString());
-            rel.setSourceEntityId(relationshipDO.getSourceEntityUuid());
+            // 源实体：同时设置ID和UUID
+            rel.setSourceEntityId(sourceEntity.getId().toString());
+            rel.setSourceEntityUuid(relationshipDO.getSourceEntityUuid());
             rel.setSourceEntityName(sourceEntity.getDisplayName());
-            rel.setSourceFieldId(relationshipDO.getSourceFieldUuid());
+            // 源字段：同时设置ID和UUID
+            rel.setSourceFieldUuid(relationshipDO.getSourceFieldUuid());
+            Long sourceFieldId = idUuidConverter.resolveFieldId(relationshipDO.getSourceFieldUuid());
+            rel.setSourceFieldId(sourceFieldId != null ? sourceFieldId.toString() : null);
             rel.setSourceFieldName(getFieldNameByUuid(relationshipDO.getSourceFieldUuid()));
-            rel.setTargetEntityId(relationshipDO.getTargetEntityUuid());
+            // 目标实体：同时设置ID和UUID
+            rel.setTargetEntityId(targetEntity.getId().toString());
+            rel.setTargetEntityUuid(relationshipDO.getTargetEntityUuid());
             rel.setTargetEntityName(targetEntity.getDisplayName());
-            rel.setTargetFieldId(relationshipDO.getTargetFieldUuid());
+            // 目标字段：同时设置ID和UUID
+            rel.setTargetFieldUuid(relationshipDO.getTargetFieldUuid());
+            Long targetFieldId = idUuidConverter.resolveFieldId(relationshipDO.getTargetFieldUuid());
+            rel.setTargetFieldId(targetFieldId != null ? targetFieldId.toString() : null);
             rel.setTargetFieldName(getFieldNameByUuid(relationshipDO.getTargetFieldUuid()));
         });
 
