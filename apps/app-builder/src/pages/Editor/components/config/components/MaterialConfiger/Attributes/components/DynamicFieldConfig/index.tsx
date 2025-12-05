@@ -76,8 +76,10 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
         label: field.displayName
       }));
 
+    console.log('mainEntityTree', mainEntityTree);
+
     const subEntityTree = subEntities.entities.map((entity: AppEntity) => ({
-      value: entity.entityName,
+      value: entity.tableName,
       label: entity.entityName,
       children: entity.fields
         .filter((field: AppEntityField) => !FilterEntityFields.includes(field.fieldName))
@@ -90,7 +92,7 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
 
     setEntityTree([
       {
-        value: mainEntity.entityName,
+        value: mainEntity.tableName,
         label: mainEntity.entityName,
         children: mainEntityTree
       },
@@ -124,9 +126,9 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
   const handleDefaultOptions = async (value: (string | string[])[]) => {
     const type = components.find((ele: any) => ele.id === configs.id)?.type;
 
-    const isMainEntity = value?.includes(mainEntity.entityName);
+    const isMainEntity = value?.includes(mainEntity.tableName);
     const currentMainField = mainEntity.fields?.find((ele: AppEntityField) => value.includes(ele.fieldName));
-    const isSubEntity = subEntities.entities?.find((ele: any) => value?.includes(ele.entityName));
+    const isSubEntity = subEntities.entities?.find((ele: any) => value?.includes(ele.tableName));
     const currentSubField = isSubEntity?.fields.find((ele: AppEntityField) => value.includes(ele.fieldName));
 
     if (isMainEntity && currentMainField) {
@@ -227,8 +229,8 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
         }}
         options={
           isInSubTable
-            ? entityTree.filter((ele) => ele.value !== mainEntity.entityName)
-            : entityTree.filter((ele) => ele.value === mainEntity.entityName)
+            ? entityTree.filter((ele) => ele.value !== mainEntity.tableName)
+            : entityTree.filter((ele) => ele.value === mainEntity.tableName)
         }
         onChange={(value) => {
           handleDataFieldChange(value);

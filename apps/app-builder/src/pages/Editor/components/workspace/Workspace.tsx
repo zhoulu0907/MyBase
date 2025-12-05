@@ -406,7 +406,7 @@ export default function EditorWorkspace() {
 
                     schema.config.cpName = field.displayName;
                     schema.config.id = cpID;
-                    schema.config.dataField = [item.entityId, field.fieldId];
+                    schema.config.dataField = [item.tableName, field.fieldName];
                     schema.config.label.text = field.displayName;
                     const props = {
                       id: cpID,
@@ -528,7 +528,7 @@ export default function EditorWorkspace() {
                     subSchema.config.label.text = ele.displayName;
                     subSchema.config.label.display = false;
                     subSchema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT];
-                    subSchema.config.dataField = [item.entityId, ele.fieldId];
+                    subSchema.config.dataField = [item.tableName, ele.fieldName];
                     subSchema.config.width = WIDTH_VALUES[WIDTH_OPTIONS.FULL];
                     const subProps = {
                       id: subId,
@@ -575,7 +575,8 @@ export default function EditorWorkspace() {
               const itemType = e.item.getAttribute('data-cp-type');
               const itemDisplayName = e.item.getAttribute('data-cp-displayname');
 
-              const entityName = e.item.getAttribute('data-entity-name');
+              const tableName = e.item.getAttribute('data-table-name');
+
               const fieldName = e.item.getAttribute('data-field-name');
               const dataLabel = e.item.getAttribute('data-label');
 
@@ -595,18 +596,18 @@ export default function EditorWorkspace() {
 
               // 子表字段不允许
               if (
-                (entityName && entityName !== mainEntity.entityName) ||
+                (tableName && tableName !== mainEntity.tableName) ||
                 itemType === ENTITY_COMPONENT_TYPES.MAIN_ENTITY ||
                 itemType === ENTITY_COMPONENT_TYPES.SUB_ENTITY
               ) {
-                console.log('entity name', entityName);
+                console.log('tableName name', tableName);
               } else {
                 const schema = getComponentSchema(itemType as any);
                 schema.config.cpName = itemDisplayName;
                 schema.config.id = cpID;
 
                 // 主表 字段组件
-                if (entityName && fieldName) {
+                if (tableName && fieldName) {
                   // 获取当前字段数据源配置
                   const currentField = mainEntity.fields?.find((ele: AppEntityField) => ele.fieldName === fieldName);
                   if (currentField) {
@@ -677,7 +678,7 @@ export default function EditorWorkspace() {
                     }
                     // 关联的字典类型ID    dictTypeId
                   }
-                  schema.config.dataField = [entityName, fieldName];
+                  schema.config.dataField = [tableName, fieldName];
                   schema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT];
                 }
 
