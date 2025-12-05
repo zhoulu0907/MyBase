@@ -16,26 +16,38 @@ public class ERRelationshipVO {
     @Schema(description = "关联关系ID", example = "1024")
     private String relationshipId;
 
-    @Schema(description = "源实体ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "1001")
+    @Schema(description = "源实体ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "165890174290853888")
     private String sourceEntityId;
+
+    @Schema(description = "源实体UUID", example = "019ae8db-5443-7175-b816-6c3a5b1441f2")
+    private String sourceEntityUuid;
 
     @Schema(description = "源实体名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "用户表")
     private String sourceEntityName;
 
-    @Schema(description = "源字段ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "2001")
+    @Schema(description = "源字段ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "165890174290853889")
     private String sourceFieldId;
+
+    @Schema(description = "源字段UUID", example = "019ae8db-5443-7175-b816-6c3a5b1441f3")
+    private String sourceFieldUuid;
 
     @Schema(description = "源字段名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "user_id")
     private String sourceFieldName;
 
-    @Schema(description = "目标实体ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "1002")
+    @Schema(description = "目标实体ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "165890174290853890")
     private String targetEntityId;
+
+    @Schema(description = "目标实体UUID", example = "019ae8db-5443-7175-b816-6c3a5b1441f4")
+    private String targetEntityUuid;
 
     @Schema(description = "目标实体名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "角色表")
     private String targetEntityName;
 
-    @Schema(description = "目标字段ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "2002")
+    @Schema(description = "目标字段ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "165890174290853891")
     private String targetFieldId;
+
+    @Schema(description = "目标字段UUID", example = "019ae8db-5443-7175-b816-6c3a5b1441f5")
+    private String targetFieldUuid;
 
     @Schema(description = "目标字段名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "role_id")
     private String targetFieldName;

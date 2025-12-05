@@ -1087,13 +1087,23 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
 
         ERRelationshipVO relationship = BeanUtils.toBean(relationshipDO, ERRelationshipVO.class, rel -> {
             rel.setRelationshipId(relationshipDO.getId().toString());
-            rel.setSourceEntityId(relationshipDO.getSourceEntityUuid());
+            // 源实体：同时设置ID和UUID
+            rel.setSourceEntityId(sourceEntity.getId().toString());
+            rel.setSourceEntityUuid(relationshipDO.getSourceEntityUuid());
             rel.setSourceEntityName(sourceEntity.getDisplayName());
-            rel.setSourceFieldId(relationshipDO.getSourceFieldUuid());
+            // 源字段：同时设置ID和UUID
+            rel.setSourceFieldUuid(relationshipDO.getSourceFieldUuid());
+            Long sourceFieldId = idUuidConverter.resolveFieldId(relationshipDO.getSourceFieldUuid());
+            rel.setSourceFieldId(sourceFieldId != null ? sourceFieldId.toString() : null);
             rel.setSourceFieldName(getFieldNameByUuid(relationshipDO.getSourceFieldUuid()));
-            rel.setTargetEntityId(relationshipDO.getTargetEntityUuid());
+            // 目标实体：同时设置ID和UUID
+            rel.setTargetEntityId(targetEntity.getId().toString());
+            rel.setTargetEntityUuid(relationshipDO.getTargetEntityUuid());
             rel.setTargetEntityName(targetEntity.getDisplayName());
-            rel.setTargetFieldId(relationshipDO.getTargetFieldUuid());
+            // 目标字段：同时设置ID和UUID
+            rel.setTargetFieldUuid(relationshipDO.getTargetFieldUuid());
+            Long targetFieldId = idUuidConverter.resolveFieldId(relationshipDO.getTargetFieldUuid());
+            rel.setTargetFieldId(targetFieldId != null ? targetFieldId.toString() : null);
             rel.setTargetFieldName(getFieldNameByUuid(relationshipDO.getTargetFieldUuid()));
         });
 
