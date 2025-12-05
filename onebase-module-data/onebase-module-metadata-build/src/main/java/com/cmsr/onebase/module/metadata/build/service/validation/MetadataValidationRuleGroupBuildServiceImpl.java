@@ -16,6 +16,7 @@ import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationChil
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityFieldRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRuleDefinitionDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRuleGroupDO;
+import com.cmsr.onebase.module.metadata.core.util.MetadataIdUuidConverter;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -71,6 +72,9 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
 
     @Resource
     private MetadataValidationChildNotEmptyBuildService childNotEmptyService;
+
+    @Resource
+    private MetadataIdUuidConverter idUuidConverter;
 
     // 注入各种校验Repository用于查询
     @Resource
@@ -189,10 +193,10 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
 
     @Override
     public PageResult<MetadataValidationRuleGroupDO> getValidationRuleGroupPage(ValidationRuleGroupPageReqVO pageReqVO) {
-        // 优先使用entityUuid，若为空则使用entityId
+        // 优先使用entityUuid，若为空则使用entityId（转换为UUID）
         String entityUuid = pageReqVO.getEntityUuid();
         if (entityUuid == null && pageReqVO.getEntityId() != null) {
-            entityUuid = pageReqVO.getEntityId();
+            entityUuid = idUuidConverter.toEntityUuid(pageReqVO.getEntityId());
         }
         return validationRuleGroupRepository.selectPage(
                 pageReqVO.getPageNo(),
@@ -204,10 +208,10 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
 
     @Override
     public PageResult<ValidationRuleGroupSimpleRespVO> getValidationRuleGroupPageSimple(ValidationRuleGroupPageReqVO pageReqVO) {
-        // 优先使用entityUuid，若为空则使用entityId
+        // 优先使用entityUuid，若为空则使用entityId（转换为UUID）
         String entityUuid = pageReqVO.getEntityUuid();
         if (entityUuid == null && pageReqVO.getEntityId() != null) {
-            entityUuid = pageReqVO.getEntityId();
+            entityUuid = idUuidConverter.toEntityUuid(pageReqVO.getEntityId());
         }
         PageResult<MetadataValidationRuleGroupDO> page = validationRuleGroupRepository.selectPage(
                 pageReqVO.getPageNo(),
