@@ -14,15 +14,15 @@ import DynamicIcon from '@/components/DynamicIcon';
 import { iconMap } from '@/utils/const';
 import { IconPlus, IconRefresh } from '@arco-design/web-react/icon';
 import {
-  dataMethodDelete,
+  dataMethodDeleteV2,
   dataMethodPageV2,
+  DeleteMethodV2Params,
   getEntityFieldsWithChildren,
   menuSignal,
   PageMethodV2Params,
-  type AppEntityField,
-  type DeleteMethodParam
+  type AppEntityField
 } from '@onebase/app';
-import { pagesRuntimeSignal } from '@onebase/common';
+import { isRuntimeEnv, pagesRuntimeSignal } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
 import PreviewRender from 'src/components/render/PreviewRender';
 import { useFormEditorSignal } from 'src/signals/page_editor';
@@ -403,7 +403,8 @@ const XTable = memo(
     };
 
     const handlePage = async () => {
-      if (!runtime || !metaData) {
+      console.log('isRuntimeEnv(): ', isRuntimeEnv());
+      if (!runtime || !metaData || !isRuntimeEnv()) {
         return;
       }
 
@@ -499,15 +500,17 @@ const XTable = memo(
         return;
       }
       console.log('删除数据 id: ', id);
-      const req: DeleteMethodParam = {
-        menuId: curMenu.value?.id,
-        entityId: metaData,
+
+      const req: DeleteMethodV2Params = {
         id: id
       };
-      const res = await dataMethodDelete(req);
+
+      const res = await dataMethodDeleteV2(tableName, curMenu.value?.id, req);
+
       if (res) {
         Message.success('删除成功');
       }
+
       handlePage();
     };
 

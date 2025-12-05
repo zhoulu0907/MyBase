@@ -9,7 +9,6 @@ export interface UpdateMethodV2Params {
 
 export interface DeleteMethodV2Params {
   id: string;
-  [key: string]: any;
 }
 
 export interface DetailMethodV2Params {
