@@ -12,6 +12,7 @@ export * from './flow';
 export * from './formula';
 export * from './metadata_entity';
 export * from './metadata_method';
+export * from './metadata_method_v2';
 export * from './permission';
 export * from './role';
 export * from './tag';
