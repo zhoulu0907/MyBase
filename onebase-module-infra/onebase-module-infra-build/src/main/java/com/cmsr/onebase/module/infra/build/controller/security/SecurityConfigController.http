@@ -5,11 +5,5 @@
 POST {{baseUrl}}/infra/security-config/check-login-captcha
 Content-Type: application/json
 Authorization: Bearer {{token}}
-tenant-id: {{adminTenantId}}
+tenant-id: 1580887269514608641
 
-{
-    "username": "test123",
-    "nickname": "企业管理员",
-    "email": "corp_admin1@test.com",
-    "mobile": "13800001111"
-}
