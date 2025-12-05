@@ -63,7 +63,7 @@ public class BpmPredictServiceImpl implements BpmPredictService {
 
     @Override
     public List<BpmPredictRespVO.NodeInfo> flowPredict(BpmPredictReqVO reqVO) {
-        Long businessId = reqVO.getBusinessId();
+        String businessUuid = reqVO.getBusinessUuid();
         Long loginUserId = WebFrameworkUtils.getLoginUserId();
         List<BpmPredictRespVO.NodeInfo> nodes = new ArrayList<>();
 
@@ -74,7 +74,7 @@ public class BpmPredictServiceImpl implements BpmPredictService {
         }
 
         // 校验菜单
-        AppMenuRespDTO appMenuRespDTO = appResourceApi.getAppMenuById(businessId);
+        AppMenuRespDTO appMenuRespDTO = appResourceApi.getAppMenuByUuidAndAppId(businessUuid, applicationId);
         bpmAppResourceValidator.validateMenuAndPageset(appMenuRespDTO, applicationId);
 
         String menuUuid = appMenuRespDTO.getMenuUuid();

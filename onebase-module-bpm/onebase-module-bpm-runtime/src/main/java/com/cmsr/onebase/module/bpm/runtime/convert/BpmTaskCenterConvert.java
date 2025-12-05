@@ -39,7 +39,7 @@ public interface BpmTaskCenterConvert {
     @Mapping(target = "submitTime", source = "submitTime")
     @Mapping(target = "formSummary", source = "formSummary")
     @Mapping(target = "arrivalTime", source = "createTime")
-    @Mapping(target = "businessId", source = "bindingViewId")
+    @Mapping(target = "businessUuid", source = "bindingViewId")
     @Mapping(target = "initiator", ignore = true)
     BpmFlowTodoTaskVO toTodoTaskVO(BpmTodoTaskDTO todoTaskDTO);
 
@@ -56,7 +56,7 @@ public interface BpmTaskCenterConvert {
     @Mapping(target = "formSummary", source = "formSummary")
     @Mapping(target = "handleTime", source = "updateTime")
     @Mapping(target = "taskStatus", source = "taskFlowStatus")
-    @Mapping(target = "businessId", source = "bindingViewId")
+    @Mapping(target = "businessUuid", source = "bindingViewId")
     @Mapping(target = "initiator", ignore = true)
     BpmFlowDoneTaskVO toDoneTaskVO(BpmDoneTaskDTO doneTaskDTO);
 
@@ -74,7 +74,7 @@ public interface BpmTaskCenterConvert {
     @Mapping(target = "createTime", source = "createTime")
     @Mapping(target = "updateTime", source = "updateTime")
     @Mapping(target = "instanceId", source = "id")
-    @Mapping(target = "businessId", source = "bindingViewId")
+    @Mapping(target = "businessUuid", source = "bindingViewId")
     BpmMyCreatedVO toMyCreatedVO(BpmMyInstanceDTO myInstanceDTO);
 
     /**
@@ -89,7 +89,7 @@ public interface BpmTaskCenterConvert {
     @Mapping(target = "arrivalTime", source = "createTime")
     @Mapping(target = "taskId", source = "taskId")
     @Mapping(target = "instanceId", source = "instanceId")
-    @Mapping(target = "businessId", source = "bindingViewId")
+    @Mapping(target = "businessUuid", source = "bindingViewId")
     @Mapping(target = "viewed", source = "viewed", qualifiedByName = "intToBoolean")
     @Mapping(target = "initiator", ignore = true)
     BpmCcTaskPageResVO toCcTaskVO(BpmCcRecordDTO ccRecord);

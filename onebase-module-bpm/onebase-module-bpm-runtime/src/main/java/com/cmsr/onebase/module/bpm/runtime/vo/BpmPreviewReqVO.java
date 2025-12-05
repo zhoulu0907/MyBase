@@ -16,5 +16,5 @@ public class BpmPreviewReqVO {
     private Long instanceId;
 
     @Schema(description = "业务ID")
-    private Long businessId;
+    private String businessUuid;
 }
