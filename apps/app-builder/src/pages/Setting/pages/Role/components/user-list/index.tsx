@@ -130,6 +130,12 @@ const UserList: React.FC<UserListProps> = ({ selectedRoleId = undefined }: UserL
         width: 140,
         ellipsis: true
       },
+      {
+        title: '账号',
+        dataIndex: 'username',
+        width: 140,
+        ellipsis: true
+      },
       { title: '手机号', dataIndex: 'mobile', width: 140 },
       { title: '邮箱', dataIndex: 'email', placeholder: '-', ellipsis: true },
       { title: '部门', dataIndex: 'deptName', placeholder: '-', ellipsis: true },
