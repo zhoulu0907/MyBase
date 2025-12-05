@@ -42,6 +42,9 @@ public class BpmFlowTodoTaskVO {
     @Schema(description = "流程表单，对应menuUuid")
     private String businessUuid;
 
+    @Schema(description = "页面集Id")
+    private Long pageSetId;
+
     @Schema(description = "流程节点编码")
     private String nodeCode;
 }

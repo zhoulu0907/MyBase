@@ -3,8 +3,8 @@ package com.cmsr.onebase.module.app.core.impl.resource;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.api.appresource.AppResourceApi;
 import com.cmsr.onebase.module.app.api.appresource.dto.AppMenuRespDTO;
-import com.cmsr.onebase.module.app.api.appresource.dto.PageRespDTO;
 import com.cmsr.onebase.module.app.api.appresource.dto.AppPagesetRespDTO;
+import com.cmsr.onebase.module.app.api.appresource.dto.PageRespDTO;
 import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageSetRepository;
@@ -12,6 +12,7 @@ import com.cmsr.onebase.module.app.core.dal.dataobject.AppMenuDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePageDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetDO;
 import lombok.Setter;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -56,6 +57,17 @@ public class AppResourceImpl implements AppResourceApi {
         // 读取页面集中的页面
         List<AppResourcePageDO> pageDOS = pageRepository.findAllFormPageByAppIdAndPageSetUuid(applicationId, pageSetUuid);
         return BeanUtils.toBean(pageDOS, PageRespDTO.class);
+    }
+
+    @Override
+    public List<AppPagesetRespDTO> findPageSetListByMenuUuidsAndAppId(List<String> menuUuids, Long applicationId) {
+        if (CollectionUtils.isEmpty(menuUuids)) {
+            return new ArrayList<>();
+        }
+
+        // 读取页面集中的页面
+        List<AppResourcePagesetDO> pagesetDOS = pageSetRepository.findByMenuUuids(applicationId, menuUuids);
+        return BeanUtils.toBean(pagesetDOS, AppPagesetRespDTO.class);
     }
 
     @Override
