@@ -18,9 +18,9 @@ export interface FilterParams {
   nodeCode?: string;
   dateRange?: [Date, Date];
   keyword?: string;
-  sortType?:string;
+  sortType?: string;
   // 发起人
-  initiatorId?:string;
+  initiatorId?: string;
 }
 
 export interface OptionItem {
@@ -63,17 +63,16 @@ const TableSearch: FC<any> = ({
   const [loadingSecond, setLoadingSecond] = useState(false);
   const [loadingThird, setLoadingThird] = useState(false);
   const [operator, setOperator] = useState<string>(selectType.EQUAL);
-  const handleSortItem=(key: string)=> {
+  const handleSortItem = (key: string) => {
     setSortCheck(key);
-    handleFilterChange('sortType', key)
-     const newFilters = {
-       ...filters,
-       sortType: key
-     };
-     const newParams = parseParams(newFilters);
-     onFilterChange(newParams);
-  }
-
+    handleFilterChange('sortType', key);
+    const newFilters = {
+      ...filters,
+      sortType: key
+    };
+    const newParams = parseParams(newFilters);
+    onFilterChange(newParams);
+  };
 
   useEffect(() => {
     if (filters.businessUuid) {
@@ -122,20 +121,22 @@ const TableSearch: FC<any> = ({
       pageNo: 1,
       pageSize: 100
     };
-    getUserPage(params).then((res:any) => {
-      if (Array.isArray(res?.list)) {
-        const selectArr: any[] = [];
-        res.list?.forEach((item: any) => {
-          selectArr.push({
-            value: item.id,
-            label: item.nickname
+    getUserPage(params)
+      .then((res: any) => {
+        if (Array.isArray(res?.list)) {
+          const selectArr: any[] = [];
+          res.list?.forEach((item: any) => {
+            selectArr.push({
+              value: item.id,
+              label: item.nickname
+            });
           });
-        });
-        setStartManArr(selectArr);
-      }
-    }).catch((err:any) => {
-      console.info('Api getUserPage Error:', err)
-    })
+          setStartManArr(selectArr);
+        }
+      })
+      .catch((err: any) => {
+        console.info('Api getUserPage Error:', err);
+      });
   }
 
   const handleReset = useCallback(() => {
@@ -144,13 +145,13 @@ const TableSearch: FC<any> = ({
       businessUuid: undefined,
       nodeCode: undefined,
       dateRange: undefined,
-      keyword:undefined,
-      sortType:undefined,
+      keyword: undefined,
+      sortType: undefined,
       initiatorId: undefined
     };
     setFilters(resetFilters);
     setNodeOptions([]);
-    onReset()
+    onReset();
   }, []);
 
   const parseParams = (params: any) => {
@@ -196,7 +197,7 @@ const TableSearch: FC<any> = ({
 
   useEffect(() => {
     loadFormOptions();
-    initUserData()
+    initUserData();
   }, []);
   return (
     <div className="title-rgt-tb-search">
@@ -290,7 +291,7 @@ const TableSearch: FC<any> = ({
                     allowClear
                   >
                     {formOptions.map((option: any) => (
-                      <Option key={option.id} value={option.id}>
+                      <Option key={option.menuUuid} value={option.menuUuid}>
                         {option.pageSetName}
                       </Option>
                     ))}
@@ -325,17 +326,18 @@ const TableSearch: FC<any> = ({
                   </Select>
                 </div>
                 <Divider />
-                {uiConfig.hasFilter?.hasStartMan && <div className="filter-line">
-                  <InputTag
-                    className="fisrt-input-tag"
-                    style={{ width: 150 }}
-                    addBefore={<IconCheck />}
-                    allowClear
-                    readOnly
-                    inputValue="发起人"
-                  />
-                  <div className="min-text">等于</div>
-                  <Select
+                {uiConfig.hasFilter?.hasStartMan && (
+                  <div className="filter-line">
+                    <InputTag
+                      className="fisrt-input-tag"
+                      style={{ width: 150 }}
+                      addBefore={<IconCheck />}
+                      allowClear
+                      readOnly
+                      inputValue="发起人"
+                    />
+                    <div className="min-text">等于</div>
+                    <Select
                       className="end-select"
                       placeholder="请选择发起人"
                       style={{ flex: 1 }}
@@ -350,8 +352,9 @@ const TableSearch: FC<any> = ({
                           {option.label}
                         </Option>
                       ))}
-                  </Select>
-                </div>}
+                    </Select>
+                  </div>
+                )}
                 <div className="filter-line">
                   <InputTag
                     className="fisrt-input-tag"
