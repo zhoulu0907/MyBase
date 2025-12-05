@@ -21,6 +21,8 @@ import com.cmsr.onebase.module.metadata.core.service.datasource.MetadataDatasour
 import com.cmsr.onebase.module.metadata.core.dal.database.TemporaryDatasourceService;
 import com.cmsr.onebase.module.metadata.core.service.number.AutoNumberService;
 import com.cmsr.onebase.module.metadata.core.enums.BooleanStatusEnum;
+import com.cmsr.onebase.module.metadata.core.service.permission.PermissionManager;
+import com.cmsr.onebase.module.metadata.core.service.permission.PermissionQueryHelper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.entity.DataRow;
@@ -72,9 +74,9 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
     @Resource
     protected ValidationManager validationManager;
     @Resource
-    protected com.cmsr.onebase.module.metadata.core.service.permission.PermissionManager permissionManager;
+    protected PermissionManager permissionManager;
     @Resource
-    protected com.cmsr.onebase.module.metadata.core.service.permission.PermissionQueryHelper permissionQueryHelper;
+    protected PermissionQueryHelper permissionQueryHelper;
     @Resource
     protected FieldValueStorageStrategyFactory fieldValueStorageStrategyFactory;
 
@@ -100,7 +102,7 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
 
     /**
      * 校验实体存在 - 通过UUID
-     * 
+     *
      * @param entityUuid 实体UUID
      * @return 业务实体DO
      */
@@ -125,7 +127,7 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
 
     /**
      * 获取实体字段 - 通过UUID
-     * 
+     *
      * @param entityUuid 实体UUID
      * @return 实体字段列表
      */
@@ -559,8 +561,8 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
      * 2. 功能权限校验
      */
     protected void validatePermission(ProcessContext context) {
-        log.info("开始执行权限校验：entityId={}, operationType={}", 
-                context.getEntityId(), 
+        log.info("开始执行权限校验：entityId={}, operationType={}",
+                context.getEntityId(),
                 context.getOperationType());
 
         // 使用权限管理器执行完整的权限校验流程
@@ -805,7 +807,7 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
 
     /**
      * 应用查询权限过滤
-     * 
+     *
      * 在查询前调用，向 ConfigStore 添加数据权限过滤条件
      * 供子类在 queryData、getData 等查询方法中使用
      *
@@ -829,7 +831,7 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
 
     /**
      * 过滤查询结果中的字段
-     * 
+     *
      * 在查询后调用，移除用户无权读取的字段
      * 供子类在 getData 等单条查询方法中使用
      *
@@ -852,7 +854,7 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
 
     /**
      * 批量过滤查询结果列表中的字段
-     * 
+     *
      * 在查询后调用，移除用户无权读取的字段
      * 供子类在 queryData 等列表查询方法中使用
      *

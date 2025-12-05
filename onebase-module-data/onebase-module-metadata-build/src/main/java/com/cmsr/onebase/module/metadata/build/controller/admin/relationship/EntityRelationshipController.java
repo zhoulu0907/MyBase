@@ -119,12 +119,14 @@ public class EntityRelationshipController {
 
     @PostMapping("/entity-with-children")
     @Operation(summary = "根据实体ID查询实体名称及其关联的子表信息")
-    @Parameter(name = "entityId", description = "实体ID", required = true, example = "1001")
+    @Parameter(name = "entityId", description = "实体ID或UUID", required = true, example = "1001")
     @Parameter(name = "relationshipType", description = "关系类型筛选（ONE_TO_ONE-一对一, ONE_TO_MANY-一对多）", required = false, example = "ONE_TO_MANY")
     public CommonResult<EntityWithChildrenRespVO> getEntityWithChildren(
-            @RequestParam("entityId") Long entityId,
+            @RequestParam("entityId") String entityId,
             @RequestParam(value = "relationshipType", required = false) String relationshipType) {
-        EntityWithChildrenRespVO result = entityRelationshipService.getEntityWithChildrenById(entityId, relationshipType);
+        // 兼容ID和UUID两种格式
+        Long resolvedEntityId = idUuidConverter.resolveEntityId(entityId);
+        EntityWithChildrenRespVO result = entityRelationshipService.getEntityWithChildrenById(resolvedEntityId, relationshipType);
         return success(result);
     }
 
