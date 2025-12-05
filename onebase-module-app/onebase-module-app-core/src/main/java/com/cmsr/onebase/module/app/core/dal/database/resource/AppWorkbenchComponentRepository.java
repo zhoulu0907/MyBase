@@ -13,12 +13,18 @@ import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppResourceW
 @Repository
 public class AppWorkbenchComponentRepository extends BaseBizRepository<AppResourceWorkbenchComponentMapper, AppResourceWorkbenchComponentDO> {
 
-
-//    public void deleteComponentByPageUuid(String pageUuid) {
-//        this.updateChain()
-//                .where(APP_RESOURCE_WORKBENCH_COMPONENT.PAGE_UUID.eq(pageUuid))
-//                .remove();
-//    }
+    /**
+     * 根据applicationId和pageUuid删除工作台组件
+     *
+     * @param applicationId 应用ID
+     * @param pageUuid 页面UUID
+     */
+    public void deleteByPageUuid(Long applicationId, String pageUuid) {
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_RESOURCE_WORKBENCH_COMPONENT.APPLICATION_ID.eq(applicationId))
+                .where(APP_RESOURCE_WORKBENCH_COMPONENT.PAGE_UUID.eq(pageUuid));
+        this.remove(queryWrapper);
+    }
 
     public List<AppResourceWorkbenchComponentDO> findByPageUuid(Long applicationId, String pageUuid) {
         QueryWrapper queryWrapper = this.query()

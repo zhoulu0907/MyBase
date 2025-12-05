@@ -30,6 +30,9 @@ public interface BpmConstants {
     /**  flow variable 中entityId的key */
     String VAR_ENTITY_ID_KEY = "entityId";
 
+    /**  flow variable 中entityId的key */
+    String VAR_ENTITY_TABLE_NAME_KEY = "entityTableName";
+
     /**  flow variable 中editPageView的key */
     String VAR_EDIT_PAGE_VIEW_KEY = "editPageView";
 

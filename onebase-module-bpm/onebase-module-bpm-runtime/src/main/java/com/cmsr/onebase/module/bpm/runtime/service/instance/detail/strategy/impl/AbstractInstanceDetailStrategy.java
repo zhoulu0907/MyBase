@@ -10,9 +10,9 @@ import com.cmsr.onebase.module.bpm.core.enums.FieldPermTypeEnum;
 import com.cmsr.onebase.module.bpm.core.enums.FieldUiShowModeEnum;
 import com.cmsr.onebase.module.bpm.runtime.service.instance.detail.strategy.InstanceDetailStrategy;
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmTaskDetailRespVO;
-import com.cmsr.onebase.module.metadata.api.entity.MetadataEntityFieldApi;
-import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldQueryReqDTO;
-import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldRespDTO;
+import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntitySchemaDTO;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO;
 import jakarta.annotation.Resource;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -31,7 +31,7 @@ import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionU
  */
 public abstract class AbstractInstanceDetailStrategy<T extends BaseNodeExtDTO> implements InstanceDetailStrategy<T> {
     @Resource
-    protected MetadataEntityFieldApi metadataEntityFieldApi;
+    protected SemanticDynamicDataApi semanticDynamicDataApi;
 
     /**
      * 填充按钮配置（节点类型相关）
@@ -50,37 +50,34 @@ public abstract class AbstractInstanceDetailStrategy<T extends BaseNodeExtDTO> i
      * @param extDTO 节点扩展信息
      * @param entityId 实体ID
      */
-    protected void fillFieldPermConfig(BpmTaskDetailRespVO vo, T extDTO, Long entityId, boolean isTodo) {
+    protected void fillFieldPermConfig(BpmTaskDetailRespVO vo, T extDTO, String tableName, boolean isTodo) {
         // 由子类实现，默认什么都不做
     }
 
-    protected void fillFieldPermFromConfig(BpmTaskDetailRespVO vo, FieldPermCfgDTO fieldPermConfig, Long entityId, boolean isTodo) {
+    protected void fillFieldPermFromConfig(BpmTaskDetailRespVO vo, FieldPermCfgDTO fieldPermConfig, String tableName, boolean isTodo) {
         // 审批节点未配置字段权限，或未开启节点配置，则返回，使用表单默认权限
         if (fieldPermConfig == null || !fieldPermConfig.getUseNodeConfig()) {
             return;
         }
 
-        EntityFieldQueryReqDTO queryReqDTO = new EntityFieldQueryReqDTO();
-        queryReqDTO.setEntityId(entityId);
+        SemanticEntitySchemaDTO entitySchema = semanticDynamicDataApi.buildEntitySchemaByTableName(tableName);
+        List<SemanticFieldSchemaDTO> entityFields = entitySchema.getFields();
 
-        // 查询实体的所有字段
-        List<EntityFieldRespDTO> entityFields = metadataEntityFieldApi.getEntityFieldList(queryReqDTO);
-
-        Map<String, EntityFieldRespDTO> entityFieldMap = new HashMap<>();
+        Map<String, SemanticFieldSchemaDTO> entityFieldMap = new HashMap<>();
         Map<String, String> fieldPermMap = new HashMap<>();
         Map<String, String> fieldUuidNameMap = new HashMap<>();
 
         // 默认所有字段都为只读
-        for (EntityFieldRespDTO entityField : entityFields) {
+        for (SemanticFieldSchemaDTO entityField : entityFields) {
             entityFieldMap.put(entityField.getFieldUuid(), entityField);
             fieldPermMap.put(entityField.getFieldUuid(), FieldUiShowModeEnum.READ.getCode());
             fieldUuidNameMap.put(entityField.getFieldUuid(), entityField.getFieldName());
         }
 
-        vo.getFormData().put("fieldPerm", fieldPermMap);
+        vo.getFormData().setFieldPermMap(fieldPermMap);
 
-        // 这里只是为了方便查看id和name的关联关系，业务上暂时没用上
-        vo.getFormData().put("fieldIdName", fieldUuidNameMap);
+        // 这里只是为了方便查看uuid和name的关联关系，业务上暂时没用上
+        vo.getFormData().setFieldUuidName(fieldUuidNameMap);
 
         // 没有配置字段权限，则返回只读权限
         if (!CollectionUtils.isNotEmpty(fieldPermConfig.getFieldConfigs())) {
@@ -92,7 +89,7 @@ public abstract class AbstractInstanceDetailStrategy<T extends BaseNodeExtDTO> i
         // 处理节点配置的字段权限 todo: 处理子表字段权限
         for (FieldPermCfgDTO.FieldConfigDTO fieldConfig : fieldPermConfig.getFieldConfigs()) {
             // 在实体字段中不存在的，直接跳过
-            EntityFieldRespDTO entityField = entityFieldMap.get(fieldConfig.getFieldUuid());
+            SemanticFieldSchemaDTO entityField = entityFieldMap.get(fieldConfig.getFieldUuid());
             if (entityField == null) {
                 continue;
             }
@@ -115,11 +112,9 @@ public abstract class AbstractInstanceDetailStrategy<T extends BaseNodeExtDTO> i
         }
 
         // 移除隐藏字段在表单数据中的值
-        Object entityData = vo.getFormData().get("data");
-
-        if (CollectionUtils.isNotEmpty(hiddenFieldNames) && entityData instanceof Map<?, ?> entityDataMap) {
+        if (CollectionUtils.isNotEmpty(hiddenFieldNames)) {
             for (String hiddenFieldName : hiddenFieldNames) {
-                entityDataMap.remove(hiddenFieldName);
+                vo.getFormData().getData().remove(hiddenFieldName);
             }
         }
     }
@@ -158,9 +153,9 @@ public abstract class AbstractInstanceDetailStrategy<T extends BaseNodeExtDTO> i
      */
     @Override
     public void fillDetail(BpmTaskDetailRespVO vo, T extDTO, Instance instance, Long loginUserId, boolean isTodo) {
-        Long entityId = MapUtils.getLong(instance.getVariableMap(), BpmConstants.VAR_ENTITY_ID_KEY);
-        if (entityId == null) {
-            throw exception(ErrorCodeConstants.FLOW_NOT_BIND_ENTITY_ID);
+        String tableName = MapUtils.getString(instance.getVariableMap(), BpmConstants.VAR_ENTITY_TABLE_NAME_KEY);
+        if (tableName == null) {
+            throw exception(ErrorCodeConstants.FLOW_NOT_BIND_ENTITY);
         }
 
         // 非当前待办，则没有按钮，且字段权限全部为只读
@@ -173,7 +168,7 @@ public abstract class AbstractInstanceDetailStrategy<T extends BaseNodeExtDTO> i
         fillPageViewInfo(vo, instance, isTodo);
 
         // 填充字段权限信息（节点类型相关）
-        fillFieldPermConfig(vo, extDTO, entityId, isTodo);
+        fillFieldPermConfig(vo, extDTO, tableName, isTodo);
     }
 }
 

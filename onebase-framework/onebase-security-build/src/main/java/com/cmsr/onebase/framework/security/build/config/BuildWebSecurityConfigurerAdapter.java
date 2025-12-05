@@ -48,7 +48,6 @@ import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.
 
 /**
  * 自定义的 Spring Security 配置适配器实现
- *
  */
 @AutoConfiguration
 @AutoConfigureOrder(-1) // 目的：先于 Spring Security 自动配置，避免一键改包后，org.* 基础包无法生效
@@ -165,8 +164,8 @@ public class BuildWebSecurityConfigurerAdapter {
                         .anyRequest().authenticated());
 
         // 添加 Token Filter
-        httpSecurity.addFilterBefore(applicationContextHeaderFilter, UsernamePasswordAuthenticationFilter.class);
         httpSecurity.addFilterBefore(authenticationTokenFilter, UsernamePasswordAuthenticationFilter.class);
+        httpSecurity.addFilterAfter(applicationContextHeaderFilter, BuildAuthenticationFilter.class);
         return httpSecurity.build();
     }
 
