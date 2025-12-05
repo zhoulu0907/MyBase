@@ -14,6 +14,8 @@ import java.util.List;
  * 元数据系统字段仓储类
  * <p>
  * 提供系统字段相关的数据库操作接口，继承自ServiceImpl获得基础的CRUD能力
+ * <p>
+ * 注意：metadata_system_fields表结构简单，所有记录均为系统字段，无需is_system_field字段区分
  *
  * @author matianyu
  * @date 2025-08-11
@@ -23,13 +25,12 @@ import java.util.List;
 public class MetadataSystemFieldsRepository extends ServiceImpl<MetadataSystemFieldsMapper, MetadataSystemFieldsDO> {
 
     /**
-     * 获取系统字段列表
+     * 获取系统字段列表（启用状态的）
      *
      * @return 系统字段列表
      */
     public List<MetadataSystemFieldsDO> getSystemFields() {
         QueryWrapper queryWrapper = this.query()
-                .eq(MetadataSystemFieldsDO::getIsSystemField, true)
                 .eq(MetadataSystemFieldsDO::getIsEnabled, CommonStatusEnum.ENABLE.getStatus());
         return list(queryWrapper);
     }
@@ -41,8 +42,7 @@ public class MetadataSystemFieldsRepository extends ServiceImpl<MetadataSystemFi
      */
     public List<MetadataSystemFieldsDO> getAllSystemFields() {
         QueryWrapper queryWrapper = this.query()
-                .eq(MetadataSystemFieldsDO::getIsSystemField, true)
-                .orderBy(MetadataSystemFieldsDO::getCreateTime, false);
+                .orderBy(MetadataSystemFieldsDO::getId, false);
         return list(queryWrapper);
     }
 
@@ -54,21 +54,7 @@ public class MetadataSystemFieldsRepository extends ServiceImpl<MetadataSystemFi
      */
     public MetadataSystemFieldsDO getSystemFieldByName(String fieldName) {
         QueryWrapper queryWrapper = this.query()
-                .eq(MetadataSystemFieldsDO::getFieldName, fieldName)
-                .eq(MetadataSystemFieldsDO::getIsSystemField, true);
-        return getOne(queryWrapper);
-    }
-
-    /**
-     * 根据字段编码获取系统字段
-     *
-     * @param fieldCode 字段编码
-     * @return 系统字段对象
-     */
-    public MetadataSystemFieldsDO getSystemFieldByCode(String fieldCode) {
-        QueryWrapper queryWrapper = this.query()
-                .eq(MetadataSystemFieldsDO::getFieldCode, fieldCode)
-                .eq(MetadataSystemFieldsDO::getIsSystemField, true);
+                .eq(MetadataSystemFieldsDO::getFieldName, fieldName);
         return getOne(queryWrapper);
     }
 }
