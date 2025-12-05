@@ -58,7 +58,8 @@
   .decor-title-style5 {
     border-left: 4px solid #e5e6eb;
     padding-left: 4px;
-    line-height: 22px;
+    line-height: 14px;
+    margin: 4px 0;
   }
 
   .decor-style6 {
@@ -72,16 +73,34 @@
     margin-bottom: 2px;
   }
 
-  .decor-style7 {
-    height: 28px;
-    border-radius: 16px;
-    background: #f2f3f5;
+  /* 字段标题容器 */
+  .field-title {
+    height: 24px;
+    border-bottom: 2px solid #52c41a;
+    display: flex;
   }
 
-  .decor-style8 {
-    height: 28px;
-    border-radius: 16px;
-    background: #f2f3f5;
+  /* 标题标签 */
+  .field-title .label {
+    position: absolute;
+    top: 35%;
+    transform: translateY(-50%);
+    background-color: #52c41a;
+    padding: 0 24px 0 8px;
+    line-height: 26px;
+    clip-path: polygon(0 0, 80% 0, 100% 100%, 0 100%);
+  }
+
+  .decorator {
+    height: 22px;
+    left: 15px;
+    opacity: 0.9;
+    position: absolute;
+    top: 0;
+    -webkit-transform: skew(26deg) translateX(-50%);
+    transform: skew(26deg) translateX(-50%);
+    width: 8px;
+    background-color: #52c41a;
   }
 }
 .dividerColorPicker {
