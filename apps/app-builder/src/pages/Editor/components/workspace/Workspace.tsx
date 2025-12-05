@@ -25,6 +25,7 @@ import {
   WIDTH_OPTIONS,
   WIDTH_VALUES,
   DEFAULT_OPTIONS_TYPE,
+  usePageViewEditorSignal,
   type GridItem
 } from '@onebase/ui-kit';
 import EmptyIcon from '@/assets/images/empty.svg';
@@ -39,13 +40,12 @@ import PrevActiveIcon from '@/assets/images/prev_icon_active.svg';
 import CompDeleteIcon from '@/assets/images/app_delete.svg';
 import CompCopyIcon from '@/assets/images/copy_comp_icon.svg';
 import CompShowIcon from '@/assets/images/eye_off_icon.svg';
-import { EditMode } from '@onebase/common';
 import { currentEditorSignal } from '@onebase/ui-kit/src/signals/current_editor';
 import { loadMicroApp, initGlobalState, type MicroApp } from "qiankun";
 
 import { Divider, Form } from '@arco-design/web-react';
 import { ENTITY_TYPE, ENTITY_TYPE_VALUE, type AppEntityField } from '@onebase/app';
-import { getHashQueryParam } from '@onebase/common';
+import { getHashQueryParam, EditMode } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
 import 'react-grid-layout/css/styles.css';
 import View from '../view';
@@ -93,6 +93,7 @@ export default function EditorWorkspace() {
     delSubTableComponents,
     batchDelSubTableComponents
   } = usePageEditorSignal();
+  const { pageViews, curViewId, setCurViewId, updatePageViewName } = usePageViewEditorSignal;
 
   const [pageMode, setPageMode] = useState<string>('pc');
   const { editMode, setEditMode } = currentEditorSignal;
@@ -100,6 +101,10 @@ export default function EditorWorkspace() {
 
   const qiankunActions = initGlobalState({
     drag: true,
+    pageViews,
+    curViewId,
+    setCurViewId,
+    updatePageViewName,
     editMode,
     setEditMode,
     curComponentID,
@@ -618,7 +623,6 @@ export default function EditorWorkspace() {
               setComponents(entityList);
             }}
             onAdd={async (e) => {
-              console.warn('onS000000000onAddonAddonAdd000000000tart', e);
               let cpID = e.item.id || e.item.getAttribute('data-cp-id');
               const itemType = e.item.getAttribute('data-cp-type');
               const itemDisplayName = e.item.getAttribute('data-cp-displayname');
@@ -751,7 +755,6 @@ export default function EditorWorkspace() {
             forceFallback={true}
             className={styles.workspaceContent}
             onStart={(e) => {
-              console.warn('onS000000000000000000tart', e);
               const cpID = e.item.getAttribute('data-cp-id') || '';
               setCurComponentID(cpID);
               const curComponentSchema = pageComponentSchemas[cpID] || {};

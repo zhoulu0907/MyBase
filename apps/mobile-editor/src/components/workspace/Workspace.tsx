@@ -63,6 +63,10 @@ const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({ props }) => {
   useSignals();
 
   const {
+    pageViews,
+    curViewId,
+    setCurViewId,
+    updatePageViewName,
     editMode,
     setEditMode,
     curComponentID,
@@ -94,7 +98,6 @@ const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({ props }) => {
   const [isFormEditor, setIsFormEditor] = useState(false);
   const [pageSetId, setPageSetId] = useState('');
 
-  console.warn('ss==ss222===', props)
   useEffect(() => {
     const pageSetId = getHashQueryParam('pageSetId');
     if (pageSetId) {
@@ -269,12 +272,22 @@ const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({ props }) => {
     }
   };
 
-  console.warn('b-112-1--', editMode)
-
   return (
     <div className={styles.editorWorkspace}>
       <div className={styles.workspaceHeader}>
-        <div className={styles.workspaceHeaderLeft}></div>
+        <div className={styles.workspaceHeaderLeft}>{isFormEditor && pageSetId && 
+          <View
+            pageSetId={pageSetId}
+            components={components}
+            pageComponentSchemas={pageComponentSchemas}
+            layoutSubComponents={layoutSubComponents}
+            pageViews={pageViews}
+            curViewId={curViewId}
+            setCurViewId={setCurViewId}
+            subTableComponents={subTableComponents}
+            updatePageViewName={updatePageViewName}
+          />
+        }</div>
         <div className={styles.workspaceHeaderRight}>
           {/* TODO 撤回重做 */}
           <div className={styles.editorStepCtrl}>
@@ -283,18 +296,8 @@ const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({ props }) => {
           </div>
           <span className={styles.pageModeDivider} />
           <div className={styles.pageModeCtrl}>
-            {editMode?.value !== EditMode.MOBILE && (
-              <>
-                <img className={styles.pageModeIcon} src={PCActiveIcon} />
-                <img className={styles.pageModeIcon} src={MobileIcon} onClick={() => setEditMode(EditMode.MOBILE)} />
-              </>
-            )}
-            {editMode?.value === EditMode.MOBILE && (
-              <>
                 <img className={styles.pageModeIcon} src={PCIcon} onClick={() => setEditMode(EditMode.PC)} />
                 <img className={styles.pageModeIcon} src={MobileActiveIcon} />
-              </>
-            )}
           </div>
         </div>
       </div>
@@ -570,7 +573,6 @@ const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({ props }) => {
               setComponents(entityList);
             }}
             onAdd={async (e) => {
-              console.warn('onSta============onAddonAddonAdd==========rt', e);
               let cpID = e.item.id || e.item.getAttribute('data-cp-id');
               const itemType = e.item.getAttribute('data-cp-type');
               const itemDisplayName = e.item.getAttribute('data-cp-displayname');
@@ -704,7 +706,6 @@ const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({ props }) => {
             forceFallback={true}
             className={styles.workspaceContent}
             onStart={(e) => {
-              console.warn('onSta======================rt', e);
               const cpID = e.item.getAttribute('data-cp-id') || '';
               setCurComponentID(cpID);
               const curComponentSchema = pageComponentSchemas[cpID] || {};
