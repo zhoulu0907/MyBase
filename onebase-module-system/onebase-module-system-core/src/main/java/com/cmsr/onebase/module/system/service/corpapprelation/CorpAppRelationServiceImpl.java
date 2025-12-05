@@ -11,6 +11,7 @@ import com.cmsr.onebase.module.app.api.app.dto.TagVO;
 import com.cmsr.onebase.module.system.dal.database.CorpAppRelationDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.corp.CorpDO;
 import com.cmsr.onebase.module.system.dal.dataobject.corpapprelation.CorpAppRelationDO;
+import com.cmsr.onebase.module.system.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.system.vo.corp.CorpApplicationRespVO;
 import com.cmsr.onebase.module.system.vo.corpapprelation.*;
 import jakarta.annotation.Resource;
@@ -31,6 +32,7 @@ import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.APPLICATION_AUTH_TENANT_NOT_EXISTS;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.CORP_NAME_EXISTS;
 
 /**
  * 企业应用关联表 Service 实现类
@@ -263,6 +265,20 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
                 .filter(app -> !relatedAppIds.contains(app.getId()))
                 .collect(Collectors.toList());
         return filteredList;
+    }
+
+    @Override
+    public void validCorpAppRelationStatusOrExpire(Long corpId, Long appId) {
+        List<CorpAppRelationDO>  corpAppRelationDOList= corpAppRelationRepository.findApplicationByCordIdAndAppId(corpId,appId);
+        // 未查出来数据，说明已过期
+        if (CollectionUtils.isEmpty(corpAppRelationDOList)){
+            throw exception(ErrorCodeConstants.AUTH_LOGIN_APP_EXPIRE);
+        }
+        // 查看状态是否禁用
+        CorpAppRelationDO corpAppRelationDO=corpAppRelationDOList.get(0);
+        if (CorpStatusEnum.DISABLE.getValue().equals(corpAppRelationDO.getStatus())){
+            throw exception(ErrorCodeConstants.AUTH_LOGIN_APP_DELETE_OR_DISABLE);
+        }
     }
 }
 
