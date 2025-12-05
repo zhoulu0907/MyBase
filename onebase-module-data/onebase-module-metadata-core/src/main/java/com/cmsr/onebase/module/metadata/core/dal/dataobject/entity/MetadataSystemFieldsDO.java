@@ -26,10 +26,23 @@ public class MetadataSystemFieldsDO extends BaseEntity {
     private String fieldName;
 
     /**
+     * 字段编码
+     */
+    @Column(value = "field_code", comment = "字段编码")
+    private String fieldCode;
+
+    /**
      * 字段类型
      */
     @Column(value = "field_type", comment = "字段类型")
     private String fieldType;
+
+    /**
+     * 是否为系统字段：1-是，0-否
+     * @see BooleanStatusEnum
+     */
+    @Column(value = "is_system_field", comment = "是否为系统字段：1-是，0-否")
+    private Integer isSystemField;
 
     /**
      * 是否为雪花ID：1-是，0-否

@@ -29,7 +29,7 @@ public class MetadataSystemFieldsRepository extends ServiceImpl<MetadataSystemFi
      */
     public List<MetadataSystemFieldsDO> getSystemFields() {
         QueryWrapper queryWrapper = this.query()
-                .eq("is_system_field", true)
+                .eq(MetadataSystemFieldsDO::getIsSystemField, true)
                 .eq(MetadataSystemFieldsDO::getIsEnabled, CommonStatusEnum.ENABLE.getStatus());
         return list(queryWrapper);
     }
@@ -41,7 +41,7 @@ public class MetadataSystemFieldsRepository extends ServiceImpl<MetadataSystemFi
      */
     public List<MetadataSystemFieldsDO> getAllSystemFields() {
         QueryWrapper queryWrapper = this.query()
-                .eq("is_system_field", true)
+                .eq(MetadataSystemFieldsDO::getIsSystemField, true)
                 .orderBy(MetadataSystemFieldsDO::getCreateTime, false);
         return list(queryWrapper);
     }
@@ -55,7 +55,7 @@ public class MetadataSystemFieldsRepository extends ServiceImpl<MetadataSystemFi
     public MetadataSystemFieldsDO getSystemFieldByName(String fieldName) {
         QueryWrapper queryWrapper = this.query()
                 .eq(MetadataSystemFieldsDO::getFieldName, fieldName)
-                .eq("is_system_field", true);
+                .eq(MetadataSystemFieldsDO::getIsSystemField, true);
         return getOne(queryWrapper);
     }
 
@@ -67,8 +67,8 @@ public class MetadataSystemFieldsRepository extends ServiceImpl<MetadataSystemFi
      */
     public MetadataSystemFieldsDO getSystemFieldByCode(String fieldCode) {
         QueryWrapper queryWrapper = this.query()
-                .eq("field_code", fieldCode)
-                .eq("is_system_field", true);
+                .eq(MetadataSystemFieldsDO::getFieldCode, fieldCode)
+                .eq(MetadataSystemFieldsDO::getIsSystemField, true);
         return getOne(queryWrapper);
     }
 }
