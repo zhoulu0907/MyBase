@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Route, Routes, Navigate } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 import type { EditorProps } from './common/props';
 import { FormEditor } from './pages/FormEditor';
 import { ListEditor } from './pages/ListEditor';

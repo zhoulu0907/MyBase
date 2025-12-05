@@ -41,11 +41,11 @@
         const baseSize = 100;
         const baseWidth = 750;
         const pcBreakpoint = 900; // PC端断点
-        
+
         function setRem() {
           const width = document.documentElement.clientWidth;
           let scale;
-          
+
           if (width > pcBreakpoint) {
             scale = pcBreakpoint / baseWidth; // PC端限制最大计算基准
           } else {
@@ -53,7 +53,7 @@
           }
           document.documentElement.style.fontSize = baseSize * Math.min(scale, 2) + 'px';
         }
-        
+
         setRem();
         window.addEventListener('resize', setRem);
         window.addEventListener('orientationchange', setRem);

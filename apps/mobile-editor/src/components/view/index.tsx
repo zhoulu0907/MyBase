@@ -7,9 +7,11 @@ import {
   createPageEditorSignal,
   useEditorSignalMap,
   useFormEditorSignal,
+  usePageEditorSignal,
   usePageViewEditorSignal,
   type EditConfig
 } from '@onebase/ui-kit';
+import { useSignals } from '@preact/signals-react/runtime';
 import React, { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import styles from './index.module.less';
@@ -18,19 +20,19 @@ const { useForm } = Form;
 
 interface ViewProps {
   pageSetId: string;
-
   components: EditConfig[];
   pageComponentSchemas: { [key: string]: EditConfig };
   layoutSubComponents: { [key: string]: any[][] };
 
   pageViews: { [key: string]: PageView };
   curViewId: string;
+  subTableComponents: { [key: string]: EditConfig[] };
   setCurViewId: (id: string) => void;
   updatePageViewName: (id: string, name: string) => void;
 }
 
 // 视图组件
-const View: React.FC<ViewProps> = ({
+const View: React.FC<ViewProps> = ({ 
   pageSetId,
   components,
   pageComponentSchemas,
@@ -38,8 +40,12 @@ const View: React.FC<ViewProps> = ({
   pageViews,
   curViewId,
   setCurViewId,
+  subTableComponents,
   updatePageViewName
 }) => {
+  useSignals();
+
+
   const [createForm] = useForm();
   const [createViewModalVisible, setCreateViewModalVisible] = useState(false);
   const [dropListVisible, setDropListVisible] = useState(false);
@@ -64,10 +70,11 @@ const View: React.FC<ViewProps> = ({
 
   const handleSelectView = (id: string) => {
     // 保存当前配置到editorSignalMap，切换视图后，载入新的配置到useFormEditorSignal
-    useEditorSignalMap.get(curViewId)!.setComponents(components);
+    useEditorSignalMap.get(curViewId.value)!.setComponents(components);
 
-    useEditorSignalMap.get(curViewId)!.loadPageComponentSchemas(pageComponentSchemas);
-    useEditorSignalMap.get(curViewId)!.loadLayoutSubComponents(layoutSubComponents);
+    useEditorSignalMap.get(curViewId.value)!.loadPageComponentSchemas(pageComponentSchemas);
+    useEditorSignalMap.get(curViewId.value)!.loadLayoutSubComponents(layoutSubComponents);
+    useEditorSignalMap.get(curViewId.value)!.loadSubTableComponents(subTableComponents);
 
     // 切换到新视图
     switchToView(id);
@@ -78,11 +85,12 @@ const View: React.FC<ViewProps> = ({
     console.log('copy view: ', id);
 
     // 保存当前配置到editorSignalMap
-    useEditorSignalMap.get(curViewId)!.setComponents(components);
-    useEditorSignalMap.get(curViewId)!.loadPageComponentSchemas(pageComponentSchemas);
-    useEditorSignalMap.get(curViewId)!.loadLayoutSubComponents(layoutSubComponents);
+    useEditorSignalMap.get(curViewId.value)!.setComponents(components);
+    useEditorSignalMap.get(curViewId.value)!.loadPageComponentSchemas(pageComponentSchemas);
+    useEditorSignalMap.get(curViewId.value)!.loadLayoutSubComponents(layoutSubComponents);
+    useEditorSignalMap.get(curViewId.value)!.loadSubTableComponents(subTableComponents);
 
-    const view = pageViews[id];
+    const view = pageViews.value[id];
     if (!view) {
       return;
     }
@@ -90,6 +98,7 @@ const View: React.FC<ViewProps> = ({
     const newId = await generateId();
     const newView = {
       ...view,
+      created: true,
       id: newId,
       isDefaultEditViewMode: 0,
       isDefaultDetailViewMode: 0,
@@ -102,6 +111,8 @@ const View: React.FC<ViewProps> = ({
     const newPageComponentSchemas = {} as { [key: string]: EditConfig };
     const oldLayoutSubComponents = useEditorSignalMap.get(id)?.layoutSubComponents.value;
     const newLayoutSubComponents = {} as { [key: string]: any[][] };
+    const oldSubTableComponents = useEditorSignalMap.get(id)?.subTableComponents.value;
+    const newSubTableComponents = {} as { [key: string]: any[] };
 
     // 创建一个 string-string 的 map
     const idMap: { [key: string]: string } = {};
@@ -153,6 +164,16 @@ const View: React.FC<ViewProps> = ({
       newLayoutSubComponents[newCpID] = newSubComponents;
     });
 
+    // 替换 subTableComponents 的id
+    Object.entries(oldSubTableComponents).forEach((item: any) => {
+      if (!idMap[item.id]) {
+        return;
+      }
+      const newCpID = idMap[item.id];
+      const newSubComponents = { ...item, id: newCpID };
+      newLayoutSubComponents[newCpID] = newSubComponents;
+    });
+
     // 创建视图副本
     usePageViewEditorSignal.addPageView(newView);
     // 复制组件
@@ -160,6 +181,7 @@ const View: React.FC<ViewProps> = ({
     useEditorSignalMap.get(newId)!.setComponents(newComponents);
     useEditorSignalMap.get(newId)!.loadPageComponentSchemas(newPageComponentSchemas);
     useEditorSignalMap.get(newId)!.loadLayoutSubComponents(newLayoutSubComponents);
+    useEditorSignalMap.get(newId)!.loadSubTableComponents(newSubTableComponents);
 
     // 切换到新视图
     switchToView(newId);
@@ -170,6 +192,7 @@ const View: React.FC<ViewProps> = ({
     useFormEditorSignal.setComponents(useEditorSignalMap.get(id)!.components.value);
     useFormEditorSignal.loadPageComponentSchemas(useEditorSignalMap.get(id)!.pageComponentSchemas.value);
     useFormEditorSignal.loadLayoutSubComponents(useEditorSignalMap.get(id)!.layoutSubComponents.value);
+    useFormEditorSignal.loadSubTableComponents(useEditorSignalMap.get(id)!.subTableComponents.value);
   };
 
   const dropList = (
@@ -179,11 +202,11 @@ const View: React.FC<ViewProps> = ({
           setDropListVisible(false);
         }}
       >
-        {Object.entries(pageViews).map(([id, view]: [string, any]) => {
+        {Object.entries(pageViews.value).map(([id, view]: [string, any]) => {
           return (
             <Menu.Item key={id} onClick={() => handleSelectView(id)}>
               <div key={id} className={styles.dropItem}>
-                {view.id === curViewId ? (
+                {view.id === curViewId.value ? (
                   <img className={styles.dropItemIcon} src={TickSVG} alt="tick" />
                 ) : (
                   <div style={{ width: '16px', height: '16px' }}></div>
@@ -226,12 +249,12 @@ const View: React.FC<ViewProps> = ({
           pageType: 'form',
           editViewMode:
             createForm.getFieldValue('viewType') === ViewType.EDIT ||
-              createForm.getFieldValue('viewType') === ViewType.MIX
+            createForm.getFieldValue('viewType') === ViewType.MIX
               ? 1
               : 0,
           detailViewMode:
             createForm.getFieldValue('viewType') === ViewType.DETAIL ||
-              createForm.getFieldValue('viewType') === ViewType.MIX
+            createForm.getFieldValue('viewType') === ViewType.MIX
               ? 1
               : 0,
           isDefaultEditViewMode: 0,
@@ -255,7 +278,7 @@ const View: React.FC<ViewProps> = ({
   let oldPageViewName = '';
   const pageViewNameBlur = (e: any) => {
     if (e.currentTarget.value === '') {
-      updatePageViewName(curViewId, oldPageViewName);
+      updatePageViewName(curViewId.value, oldPageViewName);
     }
     setEditViewName(false);
     oldPageViewName = '';
@@ -267,25 +290,26 @@ const View: React.FC<ViewProps> = ({
         <Input
           size="small"
           autoFocus
-          defaultValue={pageViews[curViewId]?.pageName}
+          defaultValue={pageViews.value[curViewId.value]?.pageName}
           onChange={(e: any) => {
-            updatePageViewName(curViewId, e);
+            updatePageViewName(curViewId.value, e);
           }}
           onPressEnter={pageViewNameBlur}
           onBlur={pageViewNameBlur}
           onFocus={(e) => {
             oldPageViewName = e.currentTarget.value;
           }}
-          style={{ maxWidth: '200px' }}
+          style={{ maxWidth: '200px', height: '28px' }}
         />
       ) : (
         <div className={styles.viewTitle} onClick={() => setEditViewName(true)}>
-          <div className={styles.viewTitleText}>{pageViews[curViewId]?.pageName}</div> <IconEdit />
+          <div className={styles.viewTitleText}>{pageViews.value[curViewId.value]?.pageName}</div> <IconEdit />
         </div>
       )}
 
       <Dropdown
         droplist={dropList}
+        getPopupContainer={(triggerNode: HTMLElement) => triggerNode.parentElement}
         position="bl"
         trigger="click"
         popupVisible={dropListVisible}
@@ -294,7 +318,7 @@ const View: React.FC<ViewProps> = ({
         }}
       >
         <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          {showViewType(pageViews[curViewId])}
+          {showViewType(pageViews.value[curViewId.value])}
           <IconDown />
         </span>
       </Dropdown>
