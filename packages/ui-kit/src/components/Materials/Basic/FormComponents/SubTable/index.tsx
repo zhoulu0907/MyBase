@@ -97,7 +97,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
     const cpID = e.item.getAttribute('data-cp-id') || e.item.getAttribute('data-id') || e.item.id;
     const itemType = e.item.getAttribute('data-cp-type');
     const fieldName = e.item.getAttribute('data-field-name');
-    const entityName = e.item.getAttribute('data-entity-name');
+    const tableName = e.item.getAttribute('data-table-name');
 
     // 不允许拖拽主、子表嵌套、主表字段
     if (
@@ -105,7 +105,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
       itemType === ENTITY_TYPE_VALUE.SUB ||
       itemType == ENTITY_COMPONENT_TYPES.MAIN_ENTITY ||
       itemType == ENTITY_COMPONENT_TYPES.SUB_ENTITY ||
-      (entityName && entityName === mainEntity.entityName)
+      (tableName && tableName === mainEntity.tableName)
     ) {
       return;
     }
@@ -124,10 +124,10 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
     }
 
     // 拖拽的子表项必须是同一个子表
-    if (entityName) {
+    if (tableName) {
       const sameField = subTableComponents[id]?.every((ele) => {
         const dataField = pageComponentSchemas[ele.id].config.dataField;
-        return !dataField || dataField?.[0] === entityName;
+        return !dataField || dataField?.[0] === tableName;
       });
       if (!sameField) {
         return;
@@ -141,7 +141,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
     schema.config = schemaConfig;
 
     // 当前实体
-    const currentEntity = subEntities.entities?.find((ele) => ele.entityName === entityName);
+    const currentEntity = subEntities.entities?.find((ele) => ele.tableName === tableName);
     // 当前字段
     const currentField = currentEntity?.fields?.find((ele) => ele.fieldName === fieldName);
     if (currentField) {
@@ -213,7 +213,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
     schema.config.cpName = itemDisplayName;
     schema.config.label.text = itemDisplayName;
     schema.config.label.display = false;
-    schema.config.dataField = entityName ? [entityName, fieldName] : [];
+    schema.config.dataField = tableName ? [tableName, fieldName] : [];
     schema.config.id = cpID;
     const props = {
       id: cpID,

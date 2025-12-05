@@ -1,9 +1,8 @@
-import { getPopupContainer, useAppEntityStore } from '@onebase/ui-kit';
 import { Form, Select, Space } from '@arco-design/web-react';
+import { CONFIG_TYPES, getPopupContainer, useAppEntityStore } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
 import styles from '../../index.module.less';
 import { registerConfigRenderer } from '../../registry';
-import { CONFIG_TYPES } from '@onebase/ui-kit';
 
 const FormItem = Form.Item;
 
@@ -28,10 +27,10 @@ const DynamicRelatedFormConfig: React.FC<DynamicRelatedFormConfigProps> = ({ han
 
   // 初始化实体选项
   const initEntityOptions = async () => {
-    const entityList = appEntities.entities?.filter((entity) => entity.entityID !== mainEntity.entityID);
+    const entityList = appEntities.entities?.filter((entity) => entity.entityId !== mainEntity.entityId);
 
     const newEntityOptions = entityList?.map((entity) => ({
-      value: entity.entityID,
+      value: entity.entityId,
       label: entity.entityName
     }));
 
@@ -44,10 +43,10 @@ const DynamicRelatedFormConfig: React.FC<DynamicRelatedFormConfigProps> = ({ han
     setSelectedField(''); // 清空字段选择
 
     // 找到对应的实体并设置字段选项
-    const selectedEntityData = appEntities.entities.find((entity) => entity.entityID === entityId);
+    const selectedEntityData = appEntities.entities.find((entity) => entity.entityId === entityId);
     if (selectedEntityData) {
       const newFieldOptions = selectedEntityData.fields.map((field) => ({
-        value: field.fieldID,
+        value: field.fieldId,
         label: field.displayName
       }));
       setFieldOptions(newFieldOptions);
@@ -76,10 +75,10 @@ const DynamicRelatedFormConfig: React.FC<DynamicRelatedFormConfigProps> = ({ han
       //   setSelectedField(fieldId);
 
       // 设置字段选项
-      const selectedEntityData = appEntities.entities.find((entity) => entity.entityID === entityId);
+      const selectedEntityData = appEntities.entities.find((entity) => entity.entityId === entityId);
       if (selectedEntityData) {
         const newFieldOptions = selectedEntityData.fields.map((field) => ({
-          value: field.fieldID,
+          value: field.fieldId,
           label: field.displayName
         }));
         setFieldOptions(newFieldOptions);
