@@ -81,4 +81,11 @@ public interface CorpAppRelationService {
      * @return
      */
     List<ApplicationDTO> getCorpNoRelationAppList(CorpRelationAppReqVO relationAppReqVO);
+
+    /**
+     * 验证应用是否过期，是否禁用
+     * @param corpId
+     * @param appId
+     */
+    void validCorpAppRelationStatusOrExpire(Long corpId, Long appId);
 }
