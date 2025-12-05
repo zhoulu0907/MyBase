@@ -15,16 +15,16 @@ const NodeConfigPage: React.FC<DrawerInitPageProps> = ({ refWrapper }) => {
   const { curNode, nodeData, setCurNode, clearCurNode } = etlEditorSignal;
   const configRef = useRef<(() => void) | null>(null);
 
-  const handleOk = (title: string) => {
+  const handleOk = async (title: string) => {
     // 直接调用当前 config 的保存方法
     try {
-      configRef.current?.();
+      await configRef.current?.();
       etlEditorSignal.nodeData.value = {
         ...nodeData.value,
         [curNode.value.id]: {
           ...(nodeData.value[curNode.value.id] || {}),
-          title,
-        },
+          title
+        }
       };
       // 保存成功后再关 Drawer
       etlEditorSignal.clearCurNode();
