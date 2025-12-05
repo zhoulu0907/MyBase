@@ -51,7 +51,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   const [pageSetId, setPageSetId] = useState('');
   const [pageType, setPageType] = useState('');
   const [mainMetaData, setMainMetaData] = useState<string>('');
-  const [entityName, setEntityName] = useState<string>('');
+  const [tableName, setTableName] = useState<string>('');
   const [submitLoading, setSubmitLoading] = useState<boolean>(false);
 
   const [editTargetId, setEditTargetId] = useState('');
@@ -77,7 +77,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     const entityWithChildren = await getEntityFieldsWithChildren(mainMetaDataId);
     console.log('当前主表及所有子表数据: ', entityWithChildren);
 
-    setEntityName(entityWithChildren.entityName);
+    setTableName(entityWithChildren.tableName);
 
     setMainMetaDataFields(entityWithChildren.parentFields);
     setSubEntities(entityWithChildren.childEntities);
@@ -91,11 +91,11 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   }, [menuId]);
 
   useEffect(() => {
-    if (editTargetId && entityName && mainMetaDataFields.value.length > 0) {
+    if (editTargetId && tableName && mainMetaDataFields.value.length > 0) {
       // TODO(mickey): mainMetaData 换成 entityName
       //   handleGetData(mainMetaData, editTargetId);
     }
-  }, [entityName, mainMetaDataFields.value]);
+  }, [tableName, mainMetaDataFields.value]);
 
   useEffect(() => {
     if (pageSetId) {
@@ -232,7 +232,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
           const req: InsertMethodV2Params = { ...formData };
           console.log(req);
 
-          res = await dataMethodCreateV2(entityName, menuId, req);
+          res = await dataMethodCreateV2(tableName, menuId, req);
           console.log(res);
 
           //   res = await dataMethodInsert(req);
