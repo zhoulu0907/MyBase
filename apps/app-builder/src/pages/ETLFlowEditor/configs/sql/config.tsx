@@ -3,6 +3,7 @@ import { Popover, Select, Tree } from '@arco-design/web-react';
 import {
   flinkFunctionList,
   flinkFunctionTypeList,
+  getETLFlowData,
   type ELTColumn,
   type FlinkFunction,
   type FlinkFunctionListReq
@@ -110,7 +111,46 @@ const SQLConfig: React.FC<SQLConfigProps> = ({ onRegisterSave }) => {
     setNewPayload(payload);
   }, [showSQLValue, sqlVariables]);
 
-  const handleSaveInner = () => {
+  const handleSaveInner = async () => {
+    // Get SQL node output
+    const nodes = graphData.value.nodes?.map((node: any) => {
+      return {
+        id: node.id,
+        title: nodeData.value[node.id].title || '',
+        description: nodeData.value[node.id].description || '',
+        type: node.type,
+        config: nodeData.value[node.id].config || {},
+        output: nodeData.value[node.id].output || {},
+        meta: node.meta || {}
+      };
+    });
+
+    const edges = graphData.value.edges?.map((edge: any) => {
+      return {
+        sourceNodeId: edge.sourceNodeID,
+        targetNodeId: edge.targetNodeID
+      };
+    });
+    const res = await getETLFlowData({
+      nodeId: curNode.value.id,
+      workflow: {
+        nodes: nodes,
+        edges: edges
+      }
+    });
+
+    const outputFields = res.map((field: any) => ({
+      fieldFqn: `${curNode.value.id}.${field.fieldName}`,
+      fieldName: field.fieldName,
+      fieldType: field.fieldType
+    }));
+
+    newPayload.output = {
+      verified: true,
+      fields: outputFields
+    };
+
+    setNewPayload(newPayload);
     setNodeData(curNode.value.id, newPayload);
   };
 
