@@ -1,13 +1,15 @@
 package com.cmsr.onebase.module.flow.component.data;
 
 import com.cmsr.onebase.module.flow.context.condition.SortItem;
-import com.cmsr.onebase.module.flow.context.enums.JdbcTypeConvertor;
 import com.cmsr.onebase.module.flow.context.express.AndExpression;
 import com.cmsr.onebase.module.flow.context.express.ExpressionItem;
 import com.cmsr.onebase.module.flow.context.express.OrExpression;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.ConditionDTO;
-import com.cmsr.onebase.module.metadata.api.datamethod.dto.EntityFieldDataRespDTO;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.OrderDto;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticConditionDTO;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntityValueDTO;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldValueDTO;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticSortRuleDTO;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import java.util.ArrayList;
@@ -29,7 +31,7 @@ public class DataMethodApiHelper {
      *
      * @return 转换后的条件DTO列表
      */
-    public static List<List<ConditionDTO>> processFilterCondition(OrExpression orExpression) {
+    public static SemanticConditionDTO processFilterCondition(OrExpression orExpression) {
         if (orExpression == null || orExpression.getAndExpressions() == null || orExpression.getAndExpressions().isEmpty()) {
             return null;
         }
@@ -58,7 +60,7 @@ public class DataMethodApiHelper {
     /**
      * 处理排序条件
      */
-    public static List<OrderDto> processSortCondition(List<SortItem> sortBy) {
+    public static List<SemanticSortRuleDTO> processSortCondition(List<SortItem> sortBy) {
         if (sortBy == null || sortBy.isEmpty()) {
             return null;
         }
@@ -79,19 +81,19 @@ public class DataMethodApiHelper {
     }
 
 
-    public static Map<String, Object> convertToMap(List<EntityFieldDataRespDTO> fieldDataRespDTOS) {
+    public static Map<String, Object> convertToMap(SemanticEntityValueDTO fieldDataRespDTOS) {
         Map<String, Object> map = new HashMap<>();
-        for (EntityFieldDataRespDTO fieldDataRespDTO : fieldDataRespDTOS) {
-            String key = String.valueOf(fieldDataRespDTO.getFieldId());
-            Object value = JdbcTypeConvertor.convert(fieldDataRespDTO.getJdbcType(), fieldDataRespDTO.getFieldValue());
+        for (SemanticFieldValueDTO fieldDataRespDTO : fieldDataRespDTOS.getFieldValueMap().values()) {
+            String key = fieldDataRespDTO.getFieldName();
+            Object value = fieldDataRespDTO.getRawValue();
             map.put(key, value);
         }
         return map;
     }
 
-    public static List<Map<String, Object>> convertToListMap(List<List<EntityFieldDataRespDTO>> fieldDataRespDTOSS) {
+    public static List<Map<String, Object>> convertToListMap(List<SemanticEntityValueDTO> fieldDataRespDTOSS) {
         List<Map<String, Object>> list = new ArrayList<>();
-        for (List<EntityFieldDataRespDTO> fieldDataRespDTOS : fieldDataRespDTOSS) {
+        for (SemanticEntityValueDTO fieldDataRespDTOS : fieldDataRespDTOSS) {
             Map<String, Object> map = convertToMap(fieldDataRespDTOS);
             list.add(map);
         }

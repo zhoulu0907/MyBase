@@ -23,7 +23,11 @@ public class DataQueryMultipleNodeData extends NodeData implements Serializable 
 
     private Long mainEntityId;
 
+    private String mainEntityName;
+
     private Long subEntityId;
+
+    private String subEntityName;
 
     private Integer maxCount;
 

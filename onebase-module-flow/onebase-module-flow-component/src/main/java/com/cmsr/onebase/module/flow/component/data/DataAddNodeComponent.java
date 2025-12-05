@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.flow.component.data;
 
-import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.module.flow.component.SkippableNodeComponent;
 import com.cmsr.onebase.module.flow.component.utils.VariableProvider;
 import com.cmsr.onebase.module.flow.context.ConditionsProvider;
@@ -10,15 +10,14 @@ import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
 import com.cmsr.onebase.module.flow.context.express.ExpressionItem;
 import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
 import com.cmsr.onebase.module.flow.context.graph.nodes.DataAddNodeData;
-import com.cmsr.onebase.module.metadata.api.datamethod.DataMethodApi;
-import com.cmsr.onebase.module.metadata.api.datamethod.dto.EntityFieldDataRespDTO;
-import com.cmsr.onebase.module.metadata.api.datamethod.dto.InsertDataReqDTO;
+import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntityValueDTO;
+import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanicMergeConditionVO;
 import com.yomahub.liteflow.annotation.LiteflowComponent;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -36,7 +35,7 @@ import java.util.Map;
 public class DataAddNodeComponent extends SkippableNodeComponent {
 
     @Autowired
-    private DataMethodApi dataMethodApi;
+    private SemanticDynamicDataApi semanticDynamicDataApi;
 
     @Autowired
     private ConditionsProvider conditionsProvider;
@@ -52,32 +51,36 @@ public class DataAddNodeComponent extends SkippableNodeComponent {
         Map<String, Object> expressionContext = VariableProvider.resolveLoopVariables(this, inLoopDepth, variableContext.getNodeVariables());
 
         // 执行数据添加操作
-        InsertDataReqDTO reqDTO = new InsertDataReqDTO();
+        SemanicMergeConditionVO reqDTO = new SemanicMergeConditionVO();
         reqDTO.setTraceId(executeContext.getTraceId());
         //
         if (StringUtils.equalsIgnoreCase("mainEntity", nodeData.getAddType())) {
-            reqDTO.setEntityId(nodeData.getMainEntityId());
+            reqDTO.setTableName(nodeData.getMainEntityName());
         } else if (StringUtils.equalsIgnoreCase("subEntity", nodeData.getAddType())) {
-            reqDTO.setEntityId(nodeData.getSubEntityId());
+            reqDTO.setTableName(nodeData.getSubEntityName());
         } else {
             throw new IllegalArgumentException("数据添加addType类型错误: " + nodeData.getAddType());
         }
         boolean batchType = nodeData.getBatchType();
         List<ConditionItem> conditionItems = nodeData.getFields();
-        List<Map<Long, Object>> reqData;
+        List<Map<String, Object>> reqDataList;
         if (batchType) {
-            reqData = buildBatchReqData(nodeData, variableContext, conditionItems);
+            reqDataList = buildBatchReqData(nodeData, variableContext, conditionItems);
         } else {
-            reqData = buildSingleReqData(conditionItems, expressionContext);
+            reqDataList = buildSingleReqData(conditionItems, expressionContext);
         }
-        if (CollectionUtils.isEmpty(reqData)) {
+        if (CollectionUtils.isEmpty(reqDataList)) {
             executeContext.addLog("数据添加节点结束执行, 未包含请求数据");
             return;
         }
-        reqDTO.setData(reqData);
+        List<SemanticEntityValueDTO> respDTOSS = new ArrayList<SemanticEntityValueDTO>();
         try {
             executeContext.addLog("数据添加节点开始执行");
-            List<List<EntityFieldDataRespDTO>> respDTOSS = TenantUtils.executeIgnore(() -> dataMethodApi.insertData(reqDTO));
+            for (Map<String, Object> reqData : reqDataList) {
+                reqDTO.setData(reqData);
+                SemanticEntityValueDTO respDTO = ApplicationManager.withApplicationId(executeContext.getApplicationId(), () -> semanticDynamicDataApi.insertData(reqDTO));
+                respDTOSS.add(respDTO);
+            }
             executeContext.addLog("数据添加节点结束执行, 响应结果数量: " + respDTOSS.size());
             // 处理响应结果
             processResponse(respDTOSS, variableContext, batchType);
@@ -86,26 +89,26 @@ public class DataAddNodeComponent extends SkippableNodeComponent {
         }
     }
 
-    private List<Map<Long, Object>> buildSingleReqData(List<ConditionItem> conditionItems, Map<String, Object> expressionContext) {
-        List<Map<Long, Object>> reqData = new ArrayList<>();
+    private List<Map<String, Object>> buildSingleReqData(List<ConditionItem> conditionItems, Map<String, Object> expressionContext) {
+        List<Map<String, Object>> reqData = new ArrayList<>();
         List<ExpressionItem> expressionItems = conditionsProvider.formatConditionItemsForValue(conditionItems, expressionContext);
-        Map<Long, Object> data = new HashMap<>();
+        Map<String, Object> data = new HashMap<>();
         for (ExpressionItem expressionItem : expressionItems) {
-            data.put(NumberUtils.toLong(expressionItem.getKey().toString()), expressionItem.getValue());
+            data.put(expressionItem.getKey(), expressionItem.getValue());
         }
         reqData.add(data);
         return reqData;
     }
 
-    private List<Map<Long, Object>> buildBatchReqData(DataAddNodeData nodeData, VariableContext variableContext, List<ConditionItem> conditionItems) {
+    private List<Map<String, Object>> buildBatchReqData(DataAddNodeData nodeData, VariableContext variableContext, List<ConditionItem> conditionItems) {
         String dataNodeId = nodeData.getDataNodeId();
         List<Map<String, Object>> dataList = variableContext.getListVariableByTag(dataNodeId);
-        List<Map<Long, Object>> reqData = new ArrayList<>();
+        List<Map<String, Object>> reqData = new ArrayList<>();
         for (Map<String, Object> dataMap : dataList) {
-            Map<Long, Object> data = new HashMap<>();
+            Map<String, Object> data = new HashMap<>();
             for (ConditionItem conditionItem : conditionItems) {
                 ExpressionItem expressionItem = conditionsProvider.formatConditionItemForValue(conditionItem, dataMap);
-                data.put(NumberUtils.toLong(expressionItem.getKey().toString()), expressionItem.getValue());
+                data.put(expressionItem.getKey(), expressionItem.getValue());
             }
             reqData.add(data);
         }
@@ -115,7 +118,7 @@ public class DataAddNodeComponent extends SkippableNodeComponent {
     /**
      * 处理响应结果
      */
-    private void processResponse(List<List<EntityFieldDataRespDTO>> respDTOSS, VariableContext variableContext, boolean batchType) {
+    private void processResponse(List<SemanticEntityValueDTO> respDTOSS, VariableContext variableContext, boolean batchType) {
         if (CollectionUtils.isEmpty(respDTOSS)) {
             log.warn("DataAddNodeComponent processResponse - 响应结果为空");
             return;

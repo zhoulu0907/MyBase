@@ -14,9 +14,9 @@ import java.util.List;
 @Data
 public class DataDeleteeNodeData extends NodeData implements Serializable {
 
-    private Long mainEntityId;
+    private String mainEntityName;
 
-    private Long subEntityId;
+    private String subEntityName;
 
     /**
      * mainEntity

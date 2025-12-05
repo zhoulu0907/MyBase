@@ -133,7 +133,7 @@ public class ApplicationManager {
         versionTagBooleanHolder.remove();
     }
 
-    public static <T> T withRuntimeApplicationId(Long applicationId, Supplier<T> supplier) {
+    public static <T> T withApplicationId(Long applicationId, Supplier<T> supplier) {
         Long previousApplicationId = getApplicationId();
         Long previousVersionTag = getVersionTag();
         try {

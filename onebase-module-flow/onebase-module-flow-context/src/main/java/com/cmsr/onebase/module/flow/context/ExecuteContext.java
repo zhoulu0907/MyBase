@@ -30,6 +30,9 @@ public class ExecuteContext implements Serializable {
     @Getter
     private String executionUuid;
 
+    @Setter
+    @Getter
+    private Long applicationId;
 
     @Setter
     @Getter

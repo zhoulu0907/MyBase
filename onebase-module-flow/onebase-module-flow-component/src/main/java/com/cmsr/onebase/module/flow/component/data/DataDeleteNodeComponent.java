@@ -10,8 +10,9 @@ import com.cmsr.onebase.module.flow.context.condition.Conditions;
 import com.cmsr.onebase.module.flow.context.express.OrExpression;
 import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
 import com.cmsr.onebase.module.flow.context.graph.nodes.DataDeleteeNodeData;
-import com.cmsr.onebase.module.metadata.api.datamethod.DataMethodApi;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.DeleteDataReqDTO;
+import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
+import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanicTargetConditionVO;
 import com.yomahub.liteflow.annotation.LiteflowComponent;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +32,7 @@ import java.util.Map;
 public class DataDeleteNodeComponent extends SkippableNodeComponent {
 
     @Autowired
-    private DataMethodApi dataMethodApi;
+    private SemanticDynamicDataApi semanticDynamicDataApi;
 
     @Autowired
     private ConditionsProvider conditionsProvider;
@@ -48,19 +49,19 @@ public class DataDeleteNodeComponent extends SkippableNodeComponent {
         List<Conditions> conditions = nodeData.getFilterCondition();
         OrExpression orExpression = conditionsProvider.formatConditionsForValue(conditions, expressionContext);
 
-        DeleteDataReqDTO reqDTO = new DeleteDataReqDTO();
+        SemanicTargetConditionVO reqDTO = new SemanicTargetConditionVO();
         reqDTO.setTraceId(executeContext.getTraceId());
         if (StringUtils.equalsIgnoreCase("mainEntity", nodeData.getDataType())) {
-            reqDTO.setEntityId(nodeData.getMainEntityId());
+            reqDTO.setTableName(nodeData.getMainEntityName());
         } else if (StringUtils.equalsIgnoreCase("subEntity", nodeData.getDataType())) {
-            reqDTO.setEntityId(nodeData.getSubEntityId());
+            reqDTO.setTableName(nodeData.getSubEntityName());
         } else {
             throw new IllegalArgumentException("dataType 类型错误: " + nodeData.getDataType());
         }
         if (!StringUtils.equalsIgnoreCase("all", nodeData.getFilterType())) {
-            reqDTO.setConditionDTO(DataMethodApiHelper.processFilterCondition(orExpression));
+            reqDTO.setSemanticConditionDTO(DataMethodApiHelper.processFilterCondition(orExpression));
         }
-        Integer result = TenantUtils.executeIgnore(() -> dataMethodApi.deleteDataByCondition(reqDTO));
+        Integer result = TenantUtils.executeIgnore(() -> semanticDynamicDataApi.deleteDataByCondition(reqDTO));
         executeContext.addLog("数据删除节点, 删除数量: " + result);
     }
 
