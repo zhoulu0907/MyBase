@@ -172,13 +172,13 @@ const Right: React.FC = () => {
         };
         response = await innerLogin(innerloginData, headers);
       } else if (!appId) {
-        const innerloginData: RuntimeCorpLoginRequest = {
+        const corploginData: RuntimeCorpLoginRequest = {
           password: values.password!,
           mobile: (values as RuntimeCorpLoginRequest).mobile!,
           captchaVerification: captchaVerification,
           deviceId: deviceId
         };
-        response = await runtimeCorpLogin(innerloginData, headers);
+        response = await runtimeCorpLogin(corploginData, headers);
       } else {
         const loginData: LoginRequest = {
           username: (values as LoginRequest).username!,

@@ -48,6 +48,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
 
   const columnsKey = 'columns';
   const searchItemsKey = 'searchItems';
+  const tableNameKey = 'tableName';
 
   const [columnsConfig, setColumnsConfig] = useState<any[]>(configs[columnsKey] || []);
   const [searchItemsConfig, setSearchItemsConfig] = useState<any[]>(configs[searchItemsKey] || []);
@@ -62,6 +63,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
     }
 
     if (configs[item.key]) {
+      console.log('configs[item.key]', item.key);
       setEntityId(configs[item.key]);
     }
   }, []);
@@ -79,6 +81,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
     if (mainEntity) {
       newEntityList.push({
         entityId: mainEntity.entityId,
+        tableName: mainEntity.tableName,
         entityName: mainEntity.entityName
       });
     }
@@ -86,6 +89,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
       newEntityList.push(
         ...subEntities.entities.map((entity: any) => ({
           entityId: entity.entityId,
+          tableName: entity.tableName,
           entityName: entity.entityName
         }))
       );
@@ -97,7 +101,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
   // 设置允许的列
   useEffect(() => {
     const res = fieldList.some(
-      (item: MetadataEntityField) => !columnsConfig.some((col: any) => col.dataIndex == item.id)
+      (item: MetadataEntityField) => !columnsConfig.some((col: any) => col.dataIndex == item.fieldName)
     );
 
     setEnableAddColumn(res);
@@ -136,9 +140,9 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
     const newColumns = newFieldListNotSystemField.map((item: MetadataEntityField) => ({
       // 保留已有的命名，如果没有则使用字段展示名称
       title:
-        configs[columnsKey].find((col: any) => col.dataIndex === item.id && configs.metaData === entityId)?.title ||
+        configs[columnsKey].find((col: any) => col.dataIndex === item.fieldName && configs.metaData === entityId)?.title ||
         item.displayName,
-      dataIndex: item.id,
+      dataIndex: item.fieldName,
       disabled: item.disabled,
       id: item.id
     }));
@@ -157,6 +161,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
           onChange={(value) => {
             handleMultiPropsChange([
               { key: item.key, value: value },
+              { key: tableNameKey, value: entityList.find((item) => item.entityId === value)?.tableName || '' },
               { key: searchItemsKey, value: [] },
               { key: columnsKey, value: [] }
             ]);
@@ -298,14 +303,14 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
                   <Menu>
                     {fieldList
                       .filter(
-                        (item: MetadataEntityField) => !columnsConfig.some((col: any) => col.dataIndex === item.id)
+                        (item: MetadataEntityField) => !columnsConfig.some((col: any) => col.dataIndex === item.fieldName)
                       )
                       .map((item: MetadataEntityField) => (
                         <Menu.Item
                           key={item.fieldName}
                           disabled={item?.disabled}
                           onClick={() => {
-                            const newList = [...columnsConfig, { title: item.displayName, dataIndex: item.id }];
+                            const newList = [...columnsConfig, { title: item.displayName, dataIndex: item.fieldName }];
                             setColumnsConfig(newList);
                             handlePropsChange(columnsKey, newList);
                           }}
