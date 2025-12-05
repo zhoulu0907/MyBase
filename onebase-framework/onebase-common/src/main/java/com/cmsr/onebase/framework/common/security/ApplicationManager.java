@@ -93,6 +93,16 @@ public class ApplicationManager {
         return versionTagHolder.get();
     }
 
+    /**
+     * 清理所有ThreadLocal资源
+     */
+    public static void clearAll() {
+        applicationIdHolder.remove();
+        applicationIdBooleanHolder.remove();
+        versionTagHolder.remove();
+        versionTagBooleanHolder.remove();
+    }
+
     public static <T> T withoutVersionTagCondition(Supplier<T> supplier) {
         try {
             ignoreApplicationCondition();
@@ -122,4 +132,18 @@ public class ApplicationManager {
     private static void restoreVersionTagCondition() {
         versionTagBooleanHolder.remove();
     }
+
+    public static <T> T withRuntimeApplicationId(Long applicationId, Supplier<T> supplier) {
+        Long previousApplicationId = getApplicationId();
+        Long previousVersionTag = getVersionTag();
+        try {
+            setApplicationId(applicationId);
+            setVersionTag(1L);
+            return supplier.get();
+        } finally {
+            setApplicationId(previousApplicationId);
+            setVersionTag(previousVersionTag);
+        }
+    }
+
 }

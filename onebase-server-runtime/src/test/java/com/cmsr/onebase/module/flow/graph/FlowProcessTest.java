@@ -74,7 +74,7 @@ public class FlowProcessTest {
         ApplicationManager.ignoreVersionTagCondition();
         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
         reqDTO.setTraceId(UUID.randomUUID().toString());
-        reqDTO.setEntityId(162955646465703936L);
+        reqDTO.setEntityId(165637750471655424L);
         reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_CREATE);
         reqDTO.setFieldData(Map.of(
 //                "46999569445519360", "6年级3班",

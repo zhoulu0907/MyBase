@@ -61,7 +61,7 @@ public class ScriptNodeComponent extends SkippableNodeComponent {
         // 3. 执行Http调用
         JsRequest jsRequest = new JsRequest();
         jsRequest.setScript(nodeData.getScript());
-        PropertyDefine inputDef = JsonUtils.parseObject(nodeData.getInputSchema(), PropertyDefine.class);
+        List<PropertyDefine> inputDef = JsonUtils.parseArray(nodeData.getInputSchema(), PropertyDefine.class);
         Map<String, Object> parsedInputParams = SchemaParser.parseBySchemaDef(inputData, inputDef);
         jsRequest.setInputJson(JsonUtils.toJsonString(parsedInputParams));
 
@@ -73,11 +73,11 @@ public class ScriptNodeComponent extends SkippableNodeComponent {
                 .asJson();
 
         if (nodeHttpResponse.isSuccess()) {
-            System.out.println("node服务器调用成功");
             JSONObject result = nodeHttpResponse.getBody().getObject().getJSONObject("data");
-            PropertyDefine outputDef = JsonUtils.parseObject(nodeData.getOutputSchema(), PropertyDefine.class);
+            List<PropertyDefine> outputDef = JsonUtils.parseArray(nodeData.getOutputSchema(), PropertyDefine.class);
             Map<String, Object> resultMap = result.toMap();
             Map<String, Object> parsedResult = SchemaParser.parseBySchemaDef(resultMap, outputDef);
+            executeContext.addLog("脚本节点执行成功，输出: " + JsonUtils.toJsonString(parsedResult));
             variableContext.putNodeVariables(this.getTag(), parsedResult);
         } else {
             int httpStatus = nodeHttpResponse.getStatus();
@@ -97,13 +97,8 @@ public class ScriptNodeComponent extends SkippableNodeComponent {
 
     @Data
     public static class JsRequest {
-
         private String inputJson;
-
         private String script;
-
-        private String outputJson;
-
     }
 
 
