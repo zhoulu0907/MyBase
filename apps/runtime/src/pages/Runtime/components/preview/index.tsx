@@ -376,8 +376,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid })
           formData[field.fieldId] = value || '';
         }
       });
+
       setEntityParam({
-        entityId: mainMetaData,
+        tableName,
         data: formData
       });
       setPredictVisible(true);
@@ -433,7 +434,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid })
           autoFocus={false}
           focusLock={true}
         >
-          <FlowPredict businessId={curPage?.value?.id} entityParam={entityParam} />
+          <FlowPredict businessId={curPage?.value?.id} entityParam={entityParam} businessUuid={menuUuid} />
         </Modal>
       )}
     </div>
