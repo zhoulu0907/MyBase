@@ -30,7 +30,6 @@ import {
   usePageEditorSignal,
   WIDTH_OPTIONS,
   WIDTH_VALUES,
-  DEFAULT_OPTIONS_TYPE,
   usePageViewEditorSignal,
   type GridItem
 } from '@onebase/ui-kit';

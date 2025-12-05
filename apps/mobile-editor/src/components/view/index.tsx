@@ -32,7 +32,7 @@ interface ViewProps {
 }
 
 // 视图组件
-const View: React.FC<ViewProps> = ({ 
+const View: React.FC<ViewProps> = ({
   pageSetId,
   components,
   pageComponentSchemas,
@@ -249,12 +249,12 @@ const View: React.FC<ViewProps> = ({
           pageType: 'form',
           editViewMode:
             createForm.getFieldValue('viewType') === ViewType.EDIT ||
-            createForm.getFieldValue('viewType') === ViewType.MIX
+              createForm.getFieldValue('viewType') === ViewType.MIX
               ? 1
               : 0,
           detailViewMode:
             createForm.getFieldValue('viewType') === ViewType.DETAIL ||
-            createForm.getFieldValue('viewType') === ViewType.MIX
+              createForm.getFieldValue('viewType') === ViewType.MIX
               ? 1
               : 0,
           isDefaultEditViewMode: 0,
