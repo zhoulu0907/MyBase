@@ -3,6 +3,7 @@ import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { BaseResponse, RequestConfig, RequestInterceptor, ResponseInterceptor } from '../types';
 import { getHashQueryParam } from './router';
 import TokenManager from './token';
+import { isPlatformEnv, isBuilderEnv, isRuntimeEnv } from './env';
 
 /**
  * 拼接域名和服务路径
@@ -112,9 +113,10 @@ export class HttpClient {
         const { data } = response;
         if (data && typeof data === 'object') {
           if (data.code !== 0) {
-            Message.error(data.msg || '请求失败');
+            Message.error({ id: 'http-error', content: data.msg || '请求失败' });
             if (data.code === 401) {
               const loginURL = TokenManager.getTokenInfo()?.loginURL;
+              const tenantId = TokenManager.getTokenInfo()?.tenantId;
 
               TokenManager.clearToken();
 
@@ -123,8 +125,16 @@ export class HttpClient {
                 window.location.href = loginURL;
               } else {
                 const redirectURL = getHashQueryParam('redirectURL') || window.location.href;
-                //   window.location.href = '/#/login';
-                window.location.href = `/#/login?redirectURL=${redirectURL}`;
+                const pathURL = window.location.pathname;
+                if (isPlatformEnv()) {
+                  window.location.href = `${pathURL}#/login`;
+                } else if (isBuilderEnv()) {
+                  window.location.href = `${pathURL}#/tenant/${tenantId}/?redirectURL=${redirectURL}`;
+                } else if (isRuntimeEnv()) {
+                  window.location.href = `${pathURL}#/login?redirectURL=${redirectURL}`;
+                } else {
+                  window.location.href = `${pathURL}#/login?redirectURL=${redirectURL}`;
+                }
               }
             }
             return Promise.reject(new Error(data.msg || '请求失败'));

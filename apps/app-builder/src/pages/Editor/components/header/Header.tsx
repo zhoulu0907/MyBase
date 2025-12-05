@@ -1,10 +1,10 @@
 import editPageNameSVG from '@/assets/images/edit_page_name_icon.svg';
+import activeFlowDesignSVG from '@/assets/images/flow-active-icon.svg';
+import defaultFlowDesignSVG from '@/assets/images/flow-default-icon.svg';
 import activeFormDesignSVG from '@/assets/images/form_design_active_icon.svg';
 import defaultFormDesignSVG from '@/assets/images/form_design_default_icon.svg';
 import activeListDesignSVG from '@/assets/images/list_design_active_icon.svg';
 import defaultListDesignSVG from '@/assets/images/list_design_default_icon.svg';
-import defaultFlowDesignSVG from '@/assets/images/flow-default-icon.svg';
-import activeFlowDesignSVG from '@/assets/images/flow-active-icon.svg'
 import activePageSettingSVG from '@/assets/images/page_setting_active_icon.svg';
 import defaultPageSettingSVG from '@/assets/images/page_setting_default_icon.svg';
 import activeWorkbenchDesignSVG from '@/assets/images/workbench_design_active_icon.svg';
@@ -27,7 +27,6 @@ import {
   getAppIdByPageSetId,
   getApplication,
   getDatasourceList,
-  getEntityFields,
   getEntityFieldsWithChildren,
   getPageSetMetaData,
   PageType,
@@ -319,27 +318,34 @@ export default function EditorHeader() {
 
     const entityWithChildren = await getEntityFieldsWithChildren(mainMetaData);
 
+    console.log('entityWithChildren: ', entityWithChildren);
+
     // 主表数据
-    const parentFields = await getEntityFields({ entityId: entityWithChildren.entityId });
+
+    const parentFields = entityWithChildren.parentFields;
+
+    console.log('parentFields: ', parentFields);
 
     if (entityWithChildren) {
       setMainEntity({
         entityId: entityWithChildren.entityId,
+        tableName: entityWithChildren.tableName,
         entityName: entityWithChildren.entityName,
         entityType: ENTITY_TYPE.MAIN,
-        fields: parentFields.map((item: any) => ({ ...item, fieldId: item.id }))
+
+        fields: parentFields
       });
 
       if (entityWithChildren.childEntities && entityWithChildren.childEntities.length > 0) {
         // 返回新Promise对象，当所有输入Promise成功时返回结果数组（顺序与输入一致）
         const allChildFields = await Promise.all(
           entityWithChildren.childEntities.map(async (entity: ChildEntity) => {
-            const childFields = await getEntityFields({ entityId: entity.childEntityId });
-            return childFields.map((item: any) => ({ ...item, fieldId: item.id }));
+            return entity.childFields;
           })
         );
         const subEntities = entityWithChildren.childEntities.map((entity: ChildEntity, index: number) => ({
           entityId: entity.childEntityId,
+          tableName: entity.childTableName,
           entityName: entity.childEntityName,
           entityType: ENTITY_TYPE.SUB,
           fields: allChildFields[index]

@@ -32,6 +32,7 @@ const Right: React.FC = () => {
 
   const hash = window.location.hash;
   const match = hash.match(/\/tenant\/([^\/]+)/);
+
   const tenantId = match ? match[1] : '1';
 
   // 使用记住我hook
