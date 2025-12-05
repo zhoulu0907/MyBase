@@ -63,7 +63,6 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
     }
 
     if (configs[item.key]) {
-      console.log('configs[item.key]', item.key);
       setEntityId(configs[item.key]);
     }
   }, []);
@@ -140,8 +139,8 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
     const newColumns = newFieldListNotSystemField.map((item: MetadataEntityField) => ({
       // 保留已有的命名，如果没有则使用字段展示名称
       title:
-        configs[columnsKey].find((col: any) => col.dataIndex === item.fieldName && configs.metaData === entityId)?.title ||
-        item.displayName,
+        configs[columnsKey].find((col: any) => col.dataIndex === item.fieldName && configs.metaData === entityId)
+          ?.title || item.displayName,
       dataIndex: item.fieldName,
       disabled: item.disabled,
       id: item.id
@@ -303,7 +302,8 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
                   <Menu>
                     {fieldList
                       .filter(
-                        (item: MetadataEntityField) => !columnsConfig.some((col: any) => col.dataIndex === item.fieldName)
+                        (item: MetadataEntityField) =>
+                          !columnsConfig.some((col: any) => col.dataIndex === item.fieldName)
                       )
                       .map((item: MetadataEntityField) => (
                         <Menu.Item
