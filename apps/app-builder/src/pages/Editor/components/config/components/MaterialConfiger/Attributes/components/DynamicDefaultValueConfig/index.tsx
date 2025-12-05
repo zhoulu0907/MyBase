@@ -30,7 +30,12 @@ const DynamicDefaultValueConfig: React.FC<DynamicDefaultValueConfigProps> = ({
   const [formulaVisible, setFormulaVisible] = useState<boolean>(false);
 
   useEffect(() => {
-    setDefaultValueConfig((prev) => ({ ...prev, ...configs[defaultValueConfigKey] }));
+    if (item.valueType === 'boolean') {
+      const newValue = configs[defaultValueConfigKey].customValue === true ? 'true' : 'false';
+      setDefaultValueConfig((prev) => ({ ...prev, ...configs[defaultValueConfigKey], customValue: newValue }));
+    } else {
+      setDefaultValueConfig((prev) => ({ ...prev, ...configs[defaultValueConfigKey] }));
+    }
   }, [configs[defaultValueConfigKey]]);
 
   const handleChange = (key: string, value: boolean | string) => {
@@ -46,7 +51,7 @@ const DynamicDefaultValueConfig: React.FC<DynamicDefaultValueConfigProps> = ({
   // 公式编辑器弹窗确定
   const handleFormulaConfirm = (formulaData: string) => {
     setFormulaVisible(false);
-    handleChange('formulaValue', formulaData)
+    handleChange('formulaValue', formulaData);
   };
 
   return (
@@ -67,10 +72,21 @@ const DynamicDefaultValueConfig: React.FC<DynamicDefaultValueConfigProps> = ({
       {defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM && (
         <Form.Item layout="vertical" className={styles.formItem}>
           {item.valueType === 'boolean' && (
-            <Switch
-              checked={defaultValueConfig?.customValue}
-              onChange={(value) => handleChange('customValue', value)}
-            />
+            // <Switch
+            //   checked={defaultValueConfig?.customValue}
+            //   onChange={(value) => handleChange('customValue', value)}
+            // />
+            <Select
+              options={[
+                { label: '开启', value: 'true' },
+                { label: '关闭', value: 'false' }
+              ]}
+              getPopupContainer={getPopupContainer}
+              onChange={(value) => {
+                const newValue = value === 'true' ? true : false;
+                handleChange('customValue', newValue);
+              }}
+            ></Select>
           )}
           {item.valueType === 'string' && (
             <Input
@@ -108,7 +124,7 @@ const DynamicDefaultValueConfig: React.FC<DynamicDefaultValueConfigProps> = ({
       )}
       {/* 公式计算 */}
       {defaultValueConfig?.type === DEFAULT_VALUE_TYPES.FORMULA && (
-        <Button onClick={openFormulaEditor} long style={{marginBottom:'20px'}}>
+        <Button onClick={openFormulaEditor} long style={{ marginBottom: '20px' }}>
           {defaultValueConfig?.formulaValue ? (
             <>
               <span>已设置公式</span>
