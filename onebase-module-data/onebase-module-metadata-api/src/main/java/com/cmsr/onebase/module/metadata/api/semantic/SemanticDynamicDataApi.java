@@ -60,7 +60,7 @@ public interface SemanticDynamicDataApi {
      * @return 字段语义模型列表
      */
     @Operation(summary = "根据字段 UUID 列表构建字段语义模型列表")
-    public List<SemanticFieldSchemaDTO> buildEntityFieldsSchemaByTableName(List<String> fieldUuids);
+    public List<SemanticFieldSchemaDTO> buildEntityFieldsSchemaByUuids(List<String> fieldUuids);
 
     /**
      * 根据表名与字段名-值映射构建实体值模型

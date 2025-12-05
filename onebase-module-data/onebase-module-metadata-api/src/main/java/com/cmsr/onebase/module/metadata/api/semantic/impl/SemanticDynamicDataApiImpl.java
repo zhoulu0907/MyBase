@@ -296,7 +296,7 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
     }
 
     @Override
-    public List<SemanticFieldSchemaDTO> buildEntityFieldsSchemaByTableName(List<String> fieldUuids) {
+    public List<SemanticFieldSchemaDTO> buildEntityFieldsSchemaByUuids(List<String> fieldUuids) {
         // 1) 初始化字段模型列表
         List<SemanticFieldSchemaDTO> list = new ArrayList<>();
         if (fieldUuids == null || fieldUuids.isEmpty()) { return list; }
