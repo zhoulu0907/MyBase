@@ -199,39 +199,24 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
 
         // 优先处理 entityId 参数 - 查询与该实体相关的所有关系（无论作为源实体还是目标实体）
         if (StringUtils.hasText(pageReqVO.getEntityId())) {
-            Long entityIdLong = Long.valueOf(pageReqVO.getEntityId());
-            log.info("解析实体ID: 字符串={}, Long={}", pageReqVO.getEntityId(), entityIdLong);
-
-            // 先检查该实体是否存在任何关联关系
-            List<MetadataEntityRelationshipDO> existingRelations = entityRelationshipRepository.getRelationshipsByEntityId(entityIdLong);
-
-            // 如果需要过滤appId
-            if (StringUtils.hasText(pageReqVO.getApplicationId())) {
-                Long appId = Long.valueOf(pageReqVO.getApplicationId());
-                existingRelations = existingRelations.stream()
-                        .filter(r -> appId.equals(r.getApplicationId()))
-                        .toList();
-            }
-
-            if (existingRelations.isEmpty()) {
-                // 如果找不到任何相关记录，直接返回空结果
-                log.info("未找到实体相关关系，实体ID: {}，返回空结果", pageReqVO.getEntityId());
-                return new PageResult<>(List.of(), 0L);
-            }
+            // 将entityId转换为entityUuid（兼容前端传入数字ID或UUID）
+            String entityUuid = idUuidConverter.toEntityUuid(pageReqVO.getEntityId().trim());
+            log.info("解析实体: 原始值={}, 转换后entityUuid={}", pageReqVO.getEntityId(), entityUuid);
 
             // 使用 OR 条件：(source_entity_uuid = entityUuid OR target_entity_uuid = entityUuid)
-            String entityUuid = pageReqVO.getEntityId();
             queryWrapper.where(MetadataEntityRelationshipDO::getSourceEntityUuid).eq(entityUuid)
                     .or(MetadataEntityRelationshipDO::getTargetEntityUuid).eq(entityUuid);
 
-            log.info("查询实体相关关系，实体ID: {}，找到 {} 条相关记录", pageReqVO.getEntityId(), existingRelations.size());
+            log.info("查询实体相关关系，entityUuid: {}", entityUuid);
         } else {
             // 如果没有传入 entityId，则使用精确的源实体UUID和目标实体UUID查询
             if (StringUtils.hasText(pageReqVO.getSourceEntityId())) {
-                queryWrapper.eq(MetadataEntityRelationshipDO::getSourceEntityUuid, pageReqVO.getSourceEntityId());
+                String sourceEntityUuid = idUuidConverter.toEntityUuid(pageReqVO.getSourceEntityId().trim());
+                queryWrapper.eq(MetadataEntityRelationshipDO::getSourceEntityUuid, sourceEntityUuid);
             }
             if (StringUtils.hasText(pageReqVO.getTargetEntityId())) {
-                queryWrapper.eq(MetadataEntityRelationshipDO::getTargetEntityUuid, pageReqVO.getTargetEntityId());
+                String targetEntityUuid = idUuidConverter.toEntityUuid(pageReqVO.getTargetEntityId().trim());
+                queryWrapper.eq(MetadataEntityRelationshipDO::getTargetEntityUuid, targetEntityUuid);
             }
         }
 

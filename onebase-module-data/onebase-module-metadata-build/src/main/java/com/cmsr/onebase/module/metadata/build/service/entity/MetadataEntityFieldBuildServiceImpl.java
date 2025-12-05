@@ -390,8 +390,11 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
     public List<MetadataEntityFieldDO> getEntityFieldListByConditions(EntityFieldQueryVO queryVO) {
         QueryWrapper queryWrapper = QueryWrapper.create();
 
+        // 将entityId转换为entityUuid（兼容前端传入数字ID或UUID）
+        String entityUuid = null;
         if (queryVO.getEntityId() != null && !queryVO.getEntityId().trim().isEmpty()) {
-            queryWrapper.eq(MetadataEntityFieldDO::getEntityUuid, queryVO.getEntityId().trim());
+            entityUuid = idUuidConverter.toEntityUuid(queryVO.getEntityId().trim());
+            queryWrapper.eq(MetadataEntityFieldDO::getEntityUuid, entityUuid);
         }
         if (queryVO.getKeyword() != null && !queryVO.getKeyword().trim().isEmpty()) {
             queryWrapper.like(MetadataEntityFieldDO::getFieldName, queryVO.getKeyword())
@@ -412,7 +415,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         if (queryVO.getIsPerson() != null && queryVO.getIsPerson() == 1) {
             // 限定字段类型为 USER
             QueryWrapper personWrapper = QueryWrapper.create();
-            personWrapper.eq(MetadataEntityFieldDO::getEntityUuid, queryVO.getEntityId().trim());
+            personWrapper.eq(MetadataEntityFieldDO::getEntityUuid, entityUuid);
             personWrapper.eq(MetadataEntityFieldDO::getFieldType, "USER");
             // 透传其它条件
             if (queryVO.getKeyword() != null && !queryVO.getKeyword().trim().isEmpty()) {
@@ -428,8 +431,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             baseList = metadataEntityFieldRepository.list(personWrapper);
 
             // 追加 creator、updater 系统字段（若存在）并去重
-            if (queryVO.getEntityId() != null) {
-                String entityUuid = queryVO.getEntityId().trim();
+            if (entityUuid != null) {
                 LinkedHashMap<String, MetadataEntityFieldDO> map = new LinkedHashMap<>();
                 for (MetadataEntityFieldDO f : baseList) {
                     String key = f.getId() != null ? String.valueOf(f.getId()) : f.getFieldName();
@@ -1309,9 +1311,10 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
     public PageResult<MetadataEntityFieldDO> getEntityFieldPage(EntityFieldPageReqVO pageReqVO) {
         QueryWrapper queryWrapper = QueryWrapper.create();
 
-        // 添加查询条件
+        // 添加查询条件 - 将entityId转换为entityUuid（兼容前端传入数字ID或UUID）
         if (pageReqVO.getEntityId() != null && !pageReqVO.getEntityId().trim().isEmpty()) {
-            queryWrapper.eq(MetadataEntityFieldDO::getEntityUuid, pageReqVO.getEntityId().trim());
+            String entityUuid = idUuidConverter.toEntityUuid(pageReqVO.getEntityId().trim());
+            queryWrapper.eq(MetadataEntityFieldDO::getEntityUuid, entityUuid);
         }
         if (pageReqVO.getFieldName() != null && !pageReqVO.getFieldName().trim().isEmpty()) {
             queryWrapper.like(MetadataEntityFieldDO::getFieldName, pageReqVO.getFieldName());
