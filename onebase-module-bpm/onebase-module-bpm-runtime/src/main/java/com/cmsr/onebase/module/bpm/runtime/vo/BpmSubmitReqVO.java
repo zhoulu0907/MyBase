@@ -24,10 +24,10 @@ public class BpmSubmitReqVO {
     private boolean isDraft;
 
     /**
-     * 业务ID
+     * 业务UUID
      */
-    @NotNull(message = "业务ID不能为空")
-    private Long businessId;
+    @NotNull(message = "业务UUID不能为空")
+    private String businessUuid;
 
     /**
      * 表单名称

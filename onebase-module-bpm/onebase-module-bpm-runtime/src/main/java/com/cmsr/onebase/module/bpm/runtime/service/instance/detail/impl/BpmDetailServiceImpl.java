@@ -9,6 +9,7 @@ import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowAgentInsDO;
 import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowCcRecordDO;
 import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowInsBizExtDO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
+import com.cmsr.onebase.module.bpm.core.enums.BpmConstants;
 import com.cmsr.onebase.module.bpm.core.enums.BpmViewSourceEnum;
 import com.cmsr.onebase.module.bpm.core.utils.BpmUtil;
 import com.cmsr.onebase.module.bpm.core.vo.UserBasicInfoVO;
@@ -18,6 +19,9 @@ import com.cmsr.onebase.module.bpm.runtime.service.instance.detail.strategy.Inst
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmTaskDetailReqVO;
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmTaskDetailRespVO;
 import com.cmsr.onebase.module.engine.orm.mybatisflex.entity.FlowHisTask;
+import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntityValueDTO;
+import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticTargetBodyVO;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.MetadataDataMethodCoreService;
 import jakarta.annotation.Resource;
 import lombok.Data;
@@ -33,12 +37,14 @@ import org.dromara.warm.flow.core.service.HisTaskService;
 import org.dromara.warm.flow.core.service.InsService;
 import org.dromara.warm.flow.core.service.TaskService;
 import org.dromara.warm.flow.core.service.UserService;
-import com.cmsr.onebase.module.bpm.core.enums.BpmConstants;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -79,6 +85,9 @@ public class BpmDetailServiceImpl implements BpmDetailService {
     @Resource
     private InstanceDetailStrategyManager instanceDetailStrategyManager;
 
+    @Resource
+    private SemanticDynamicDataApi semanticDynamicDataApi;
+
     /**
      * 流程详情上下文
      * 用于在方法间传递流程详情相关的数据
@@ -103,7 +112,7 @@ public class BpmDetailServiceImpl implements BpmDetailService {
         /**
          * 实体ID
          */
-        private Long entityId;
+        private String entityTableName;
 
         /**
          * 当前待办任务
@@ -173,16 +182,16 @@ public class BpmDetailServiceImpl implements BpmDetailService {
         }
 
         // 获取实体ID
-        Long entityId = MapUtils.getLong(instance.getVariableMap(), BpmConstants.VAR_ENTITY_ID_KEY);
-        if (entityId == null) {
-            throw exception(ErrorCodeConstants.FLOW_NOT_BIND_ENTITY_ID);
+        String tableName = MapUtils.getString(instance.getVariableMap(), BpmConstants.VAR_ENTITY_TABLE_NAME_KEY);
+        if (tableName == null) {
+            throw exception(ErrorCodeConstants.FLOW_NOT_BIND_ENTITY);
         }
 
         InsDetailContext context = new InsDetailContext();
         context.setInstance(instance);
         context.setLoginUserId(loginUserId);
         context.setSource(source);
-        context.setEntityId(entityId);
+        context.setEntityTableName(tableName);
 
         // CREATED 来源需要校验创建人权限（基于实例信息，无需任务信息）
         if (source == BpmViewSourceEnum.CREATED) {
@@ -249,7 +258,7 @@ public class BpmDetailServiceImpl implements BpmDetailService {
         fillBpmBizExt(respVO, instance.getId());
 
         // 填充表单数据
-        fillFormData(respVO, instance, context.getEntityId());
+        fillFormData(respVO, instance, context.getEntityTableName());
 
         // 设置任务ID和节点扩展信息
         Task task = context.getTask();
@@ -653,18 +662,33 @@ public class BpmDetailServiceImpl implements BpmDetailService {
      *
      * @param vo       详情VO
      * @param instance 流程实例
-     * @param entityId 实体ID
+     * @param tableName 实体ID
      */
-    private void fillFormData(BpmTaskDetailRespVO vo, Instance instance, Long entityId) {
+    private void fillFormData(BpmTaskDetailRespVO vo, Instance instance, String tableName) {
         String entityDataId = instance.getBusinessId();
         if (entityDataId == null) {
             throw exception(ErrorCodeConstants.FLOW_ENTITY_DATA_ID_NOT_EXISTS);
         }
 
-        Map<String, Object> data = metadataDataMethodCoreService.getData(entityId, entityDataId, null, null);
-        if (data != null && !data.isEmpty()) {
-            vo.setFormData(data);
-        }
+        SemanticTargetBodyVO reqVO = new SemanticTargetBodyVO();
+        reqVO.setTableName(tableName);
+        reqVO.setId(entityDataId);
+
+        SemanticEntityValueDTO respVO = semanticDynamicDataApi.getDataById(reqVO);
+
+        BpmTaskDetailRespVO.FormData formData = new BpmTaskDetailRespVO.FormData();
+
+        // 填充实体数据
+        formData.setData(respVO.getGlobalRawMap());
+
+        formData.setFieldType(new HashMap<>());
+
+        // 填充实体字段类型
+        respVO.getFieldValueMap().forEach((fieldName, fieldValue) -> {
+            formData.getFieldType().put(fieldName, fieldValue.getFieldTypeEnum().getCode());
+        });
+
+        vo.setFormData(formData);
     }
 
     private BpmPermissionUserContext findPermissionUserContext(Long taskId, String loginUserId) {

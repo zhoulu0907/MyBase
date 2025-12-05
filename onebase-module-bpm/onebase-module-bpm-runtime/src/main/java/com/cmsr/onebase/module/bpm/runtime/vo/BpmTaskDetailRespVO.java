@@ -52,7 +52,7 @@ public class BpmTaskDetailRespVO {
     List<BaseNodeBtnCfgDTO> buttonConfigs;
 
     @Schema(description = "form信息")
-    private Map<String, Object> formData;
+    private FormData formData;
 
     @Schema(description = "页面视图信息")
     private PageViewDTO pageView;
@@ -65,4 +65,27 @@ public class BpmTaskDetailRespVO {
 
     @Schema(description = "代理人ID")
     private String agentId;
+
+    @Data
+    public static class FormData {
+        /**
+         * 实体数据
+         */
+        private Map<String, Object> data;
+
+        /**
+         * 实体字段权限
+         */
+        private Map<String, String> fieldPermMap;
+
+        /**
+         * 实体fieldUuid和name映射关系
+         */
+        private Map<String, String> fieldUuidName;
+
+        /**
+         * 实体类型
+         */
+        private Map<String, Object> fieldType;
+    }
 }
