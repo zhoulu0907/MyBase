@@ -403,6 +403,58 @@ public class SemanticDataCrudService {
         return result;
     }
 
+    public Integer deleteByQuery(SemanticRecordDTO recordDTO, QueryWrapper qw) {
+        semanticWorkflowExecutor.preExecute(recordDTO);
+        SemanticEntitySchemaDTO entity = recordDTO.getEntitySchema();
+        List<SemanticFieldSchemaDTO> fields = entity.getFields();
+        if (qw == null) { qw = QueryWrapper.create(); }
+        int affected = hasDeletedField(fields)
+                ? dynamicMetadataRepository.softDeleteByQuery(entity.getTableName(), qw)
+                : dynamicMetadataRepository.deleteByQuery(entity.getTableName(), qw);
+        semanticWorkflowExecutor.postExecute(recordDTO);
+        return affected;
+    }
+
+    public List<Map<String, Object>> updateByQuery(SemanticRecordDTO recordDTO, Map<String, Object> updates, QueryWrapper qw) {
+        semanticWorkflowExecutor.preExecute(recordDTO);
+        SemanticEntitySchemaDTO entity = recordDTO.getEntitySchema();
+        List<SemanticFieldSchemaDTO> fields = entity.getFields();
+        if (updates == null || updates.isEmpty()) { return List.of(); }
+        if (qw == null) { qw = QueryWrapper.create(); }
+
+        Row updateRow = new Row();
+        for (SemanticFieldSchemaDTO f : fields) {
+            String name = f.getFieldName();
+            if (name != null && updates.containsKey(name)) {
+                Object v = updates.get(name);
+                if (v != null) { updateRow.put(name, v); }
+            }
+        }
+        boolean hasUpdater = fields.stream().anyMatch(f -> {
+            String n = f.getFieldName();
+            return n != null && ("updater".equalsIgnoreCase(n));
+        });
+        boolean hasUpdatedTime = fields.stream().anyMatch(f -> {
+            String n = f.getFieldName();
+            return n != null && ("updated_time".equalsIgnoreCase(n) || "updatetime".equalsIgnoreCase(n));
+        });
+        if (hasUpdater && !updateRow.containsKey("updater")) { updateRow.put("updater", null); }
+        if (hasUpdatedTime && !updateRow.containsKey("updated_time")) { updateRow.put("updated_time", null); }
+        if (updateRow.isEmpty()) { return List.of(); }
+
+        dynamicMetadataRepository.updateByQuery(entity.getTableName(), updateRow, qw);
+
+        List<Row> rows = dynamicMetadataRepository.selectListByQuery(entity.getTableName(), qw);
+        List<SemanticEntityValueDTO> values = new ArrayList<>();
+        for (Row row : rows) { values.add(semanticValueAssembler.toEntityValue(entity, row)); }
+        semanticRefResolver.enrichBatch(entity, values);
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (SemanticEntityValueDTO val : values) { result.add(val.getGlobalRawMapForJson()); }
+        result = semanticQueryPermissionHelper.filterQueryResultList(result, recordDTO.getRecordContext().getPermissionContext(), fields);
+        semanticWorkflowExecutor.postExecute(recordDTO);
+        return result;
+    }
+
     /**
      * 构建分页查询条件
      *
