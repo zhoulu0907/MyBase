@@ -1,27 +1,33 @@
-import { Divider, Layout, Form, Button, Table } from '@arco-design/web-react';
-import { IconPlus, IconDelete } from '@arco-design/web-react/icon';
-import { nanoid } from 'nanoid';
-import { type XSubTableConfig } from './schema';
-import { useSignals } from '@preact/signals-react/runtime';
-import { usePageEditorSignal } from 'src/hooks/useSignal';
-import { ReactSortable } from 'react-sortablejs';
-import { getComponentConfig } from 'src/components/Materials/schema';
-import { getComponentSchema } from '../../../schema';
-import { FORM_COMPONENT_TYPES, ENTITY_COMPONENT_TYPES } from '../../../componentTypes';
-import EditRender from 'src/components/render/EditRender';
-import { COMPONENT_GROUP_NAME, EDITOR_TYPES, type GridItem } from 'src/utils/const';
-import { STATUS_OPTIONS, STATUS_VALUES, COLOR_MODE_TYPES, DEFAULT_OPTIONS_TYPE, DEFAULT_VALUE_TYPES } from '../../../constants';
-import { v4 as uuidv4 } from 'uuid';
 import CompDeleteIcon from '@/assets/images/app_delete.svg';
 import CompCopyIcon from '@/assets/images/copy_comp_icon.svg';
 import CompShowIcon from '@/assets/images/eye_off_icon.svg';
-import { useEffect, useState } from 'react';
-import PreviewRender from 'src/components/render/PreviewRender';
-import { pagesRuntimeSignal } from '@onebase/common';
+import { Button, Divider, Form, Layout, Table } from '@arco-design/web-react';
+import { IconDelete, IconPlus } from '@arco-design/web-react/icon';
 import { ENTITY_TYPE_VALUE } from '@onebase/app';
+import { pagesRuntimeSignal } from '@onebase/common';
+import { getDictDataListByType, getDictDetail } from '@onebase/platform-center';
+import { useSignals } from '@preact/signals-react/runtime';
+import { nanoid } from 'nanoid';
+import { useEffect, useState } from 'react';
+import { ReactSortable } from 'react-sortablejs';
+import { getComponentConfig } from 'src/components/Materials/schema';
+import EditRender from 'src/components/render/EditRender';
+import PreviewRender from 'src/components/render/PreviewRender';
+import { usePageEditorSignal } from 'src/hooks/useSignal';
 import { useAppEntityStore } from 'src/signals/store_entity';
-import { getDictDetail, getDictDataListByType } from '@onebase/platform-center';
+import { COMPONENT_GROUP_NAME, EDITOR_TYPES, type GridItem } from 'src/utils/const';
+import { v4 as uuidv4 } from 'uuid';
+import { ENTITY_COMPONENT_TYPES, FORM_COMPONENT_TYPES } from '../../../componentTypes';
+import {
+  COLOR_MODE_TYPES,
+  DEFAULT_OPTIONS_TYPE,
+  DEFAULT_VALUE_TYPES,
+  STATUS_OPTIONS,
+  STATUS_VALUES
+} from '../../../constants';
+import { getComponentSchema } from '../../../schema';
 import './index.css';
+import { type XSubTableConfig } from './schema';
 
 const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: boolean }) => {
   useSignals();
@@ -90,8 +96,8 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
   const onSubAdd = async (e: any) => {
     const cpID = e.item.getAttribute('data-cp-id') || e.item.getAttribute('data-id') || e.item.id;
     const itemType = e.item.getAttribute('data-cp-type');
-    const fieldId = e.item.getAttribute('data-field-id');
-    const entityId = e.item.getAttribute('data-entity-id');
+    const fieldName = e.item.getAttribute('data-field-name');
+    const tableName = e.item.getAttribute('data-table-name');
 
     // 不允许拖拽主、子表嵌套、主表字段
     if (
@@ -99,7 +105,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
       itemType === ENTITY_TYPE_VALUE.SUB ||
       itemType == ENTITY_COMPONENT_TYPES.MAIN_ENTITY ||
       itemType == ENTITY_COMPONENT_TYPES.SUB_ENTITY ||
-      (entityId && entityId === mainEntity.entityId)
+      (tableName && tableName === mainEntity.tableName)
     ) {
       return;
     }
@@ -118,10 +124,10 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
     }
 
     // 拖拽的子表项必须是同一个子表
-    if (entityId) {
+    if (tableName) {
       const sameField = subTableComponents[id]?.every((ele) => {
         const dataField = pageComponentSchemas[ele.id].config.dataField;
-        return !dataField || dataField?.[0] === entityId;
+        return !dataField || dataField?.[0] === tableName;
       });
       if (!sameField) {
         return;
@@ -135,9 +141,9 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
     schema.config = schemaConfig;
 
     // 当前实体
-    const currentEntity = subEntities.entities?.find((ele) => ele.entityId === entityId);
+    const currentEntity = subEntities.entities?.find((ele) => ele.tableName === tableName);
     // 当前字段
-    const currentField = currentEntity?.fields?.find((ele) => ele.fieldId === fieldId);
+    const currentField = currentEntity?.fields?.find((ele) => ele.fieldName === fieldName);
     if (currentField) {
       // 数据长度 dataLength
       // 小数位数 decimalPlaces
@@ -207,7 +213,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
     schema.config.cpName = itemDisplayName;
     schema.config.label.text = itemDisplayName;
     schema.config.label.display = false;
-    schema.config.dataField = entityId ? [entityId, fieldId] : [];
+    schema.config.dataField = tableName ? [tableName, fieldName] : [];
     schema.config.id = cpID;
     const props = {
       id: cpID,
@@ -297,7 +303,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
         fixed: '',
         headerCellStyle: { textAlign: 'center' },
         bodyCellStyle: { padding: '0 4px', textAlign: 'center' },
-        render: (_: any, __: any, index: number) => (index + 1)
+        render: (_: any, __: any, index: number) => index + 1
       };
       tableColumns.push(indexColumn);
     }
@@ -455,9 +461,11 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
           </>
         ) : (
           <div style={{ width: '100%', display: 'flex' }}>
-            {subTableConfig?.showIndex && <div className="componentItem2" style={{ width: '62px', paddingTop: '18px' }}>
-              <div className="simulate-header-item">序号</div>
-            </div>}
+            {subTableConfig?.showIndex && (
+              <div className="componentItem2" style={{ width: '62px', paddingTop: '18px' }}>
+                <div className="simulate-header-item">序号</div>
+              </div>
+            )}
 
             <ReactSortable
               id={`workspace-content-subtable-${id}`}
@@ -474,7 +482,10 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                  */
                 const newSubList = (newList || []).filter((ele) => {
                   // 主表、子表
-                  const isTable = ele.type === ENTITY_TYPE_VALUE.MAIN || ele.type === ENTITY_TYPE_VALUE.SUB || ele.type === 'XSubTable';
+                  const isTable =
+                    ele.type === ENTITY_TYPE_VALUE.MAIN ||
+                    ele.type === ENTITY_TYPE_VALUE.SUB ||
+                    ele.type === 'XSubTable';
                   // 主表数据
                   const isMain = ele.entityID === mainEntity.entityId;
                   // 同一个子表
@@ -495,9 +506,14 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
               swapThreshold={0.65}
               className="XSubTable-content"
               onStart={onSubStart}
-              style={{ backgroundImage: subTableComponents[id]?.length ? 'none' : 'linear-gradient(180deg, #f2f3f5 0%, #f2f3f5 100%)' }}
+              style={{
+                backgroundImage: subTableComponents[id]?.length
+                  ? 'none'
+                  : 'linear-gradient(180deg, #f2f3f5 0%, #f2f3f5 100%)'
+              }}
             >
-              {subTableComponents && subTableComponents[id] &&
+              {subTableComponents &&
+                subTableComponents[id] &&
                 subTableComponents[id].map((cp: GridItem, index: number) => (
                   <div
                     key={cp.id}
@@ -516,7 +532,8 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                       {pageComponentSchemas[cp.id]?.config?.verify?.required ? (
                         <span style={{ color: 'red', paddingRight: '4px' }}>*</span>
                       ) : null}
-                      {pageComponentSchemas[cp.id]?.config.label.text || pageComponentSchemas[cp.id]?.config.displayName}
+                      {pageComponentSchemas[cp.id]?.config.label.text ||
+                        pageComponentSchemas[cp.id]?.config.displayName}
                     </div>
                     <EditRender
                       runtime={runtime}
@@ -571,10 +588,11 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                   </div>
                 ))}
             </ReactSortable>
-            {subTableConfig?.showOperate && <div className="componentItem2" style={{ width: '64px', paddingTop: '18px' }}>
-              <div className="simulate-header-item">操作</div>
-            </div>}
-
+            {subTableConfig?.showOperate && (
+              <div className="componentItem2" style={{ width: '64px', paddingTop: '18px' }}>
+                <div className="simulate-header-item">操作</div>
+              </div>
+            )}
           </div>
         )}
       </Form.Item>

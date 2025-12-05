@@ -7,6 +7,8 @@ import { placeholdersPlugin } from '../utils/placeholders';
 import styles from './FormulaInput.module.less';
 import { defaultExtenstion } from '../utils/defaultLine';
 import type { VariablesList } from '@onebase/app';
+import { lintGutter, linter, type Diagnostic } from '@codemirror/lint';
+import { validateFormula } from '../utils/formula';
 
 interface FormulaInputProps {
   value: string; // 当前公式的值
@@ -40,7 +42,13 @@ export function FormulaInput({
 }: FormulaInputProps) {
   const editorRef = useRef<any>(null);
   const updateRef = useRef<any>(null);
-  const [errors, setErrors] = useState<FormulaError[]>([]);
+  const [errors, setErrors] = useState<Diagnostic[]>([]);
+
+  const customLinter = linter((view: EditorView) => {
+    const code = view.state.doc.toString();
+    const diagnostics = validateFormula(code);
+    return diagnostics;
+  });
 
   //插入内容到指定位置，使用[[${id}.${label}]]的格式
   /**
@@ -181,6 +189,10 @@ export function FormulaInput({
    */
   useEffect(() => {
     checkFormulaSyntax(value);
+    const diagnostics = validateFormula(value);
+    if (diagnostics.length > 0) {
+      setErrors(diagnostics);
+    }
   }, [value, checkFormulaSyntax]);
 
   /**
@@ -274,6 +286,8 @@ export function FormulaInput({
 
   // 自定义扩展
   const extensions = [
+    lintGutter(), //左侧错误标记
+    customLinter,
     //调试模式只读
     isDebugMode ? EditorView.editable.of(false) : EditorView.editable.of(true),
     //设置首行-显示单行文本和两个按钮

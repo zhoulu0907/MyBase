@@ -5,7 +5,7 @@ import { generateNodeId } from '../../utils';
 import { formMeta } from './form-meta';
 
 export const JavascriptNodeRegistry: FlowNodeRegistry = {
-  type: NodeType.JavaScript,
+  type: NodeType.JAVASCRIPT,
   title: 'JS节点',
   category: 'other',
   meta: {
@@ -29,8 +29,8 @@ export const JavascriptNodeRegistry: FlowNodeRegistry = {
   },
   onAdd(ctx, from) {
     return {
-      id: generateNodeId(NodeType.JavaScript),
-      type: NodeType.JavaScript,
+      id: generateNodeId(NodeType.JAVASCRIPT),
+      type: NodeType.JAVASCRIPT,
       data: {
         title: 'JS脚本节点'
       }
