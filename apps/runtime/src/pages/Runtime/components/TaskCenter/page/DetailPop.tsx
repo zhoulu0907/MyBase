@@ -256,7 +256,7 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
           </Row>
           <div className="draw-content">
             <div className="draw-left">
-              <PreviewContainer ref={formRef} pageSetId={rowData?.businessId} detailData={detailData} />
+              <PreviewContainer ref={formRef} pageSetId={rowData?.businessUuid} detailData={detailData} />
             </div>
             {isShowRight ? (
               <div className="draw-right">
@@ -282,7 +282,7 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
         visible={flowViewVisible}
         setVisible={setFlowViewVisible}
         instanceId={rowData?.instanceId}
-        businessId={rowData?.businessId}
+        businessUuid={rowData?.businessUuid}
       />
     </section>
   );
