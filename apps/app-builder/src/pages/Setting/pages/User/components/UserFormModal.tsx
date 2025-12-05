@@ -1,9 +1,23 @@
 import { emailValidator, phoneValidator } from '@/utils/validator';
-import { Button, Form, Grid, Input, Message, Modal, Switch, TreeSelect } from '@arco-design/web-react';
-import { hasPermission, TENANT_DEPT_QUERY } from '@onebase/common';
+import {
+  Avatar,
+  Button,
+  Form,
+  Grid,
+  Image,
+  Input,
+  Message,
+  Modal,
+  Space,
+  Switch,
+  TreeSelect,
+  Upload
+} from '@arco-design/web-react';
+import { IconUpload } from '@arco-design/web-react/icon';
+import { Cropper, hasPermission, TENANT_DEPT_QUERY } from '@onebase/common';
 import type { SimpleRoleVO, UserVO } from '@onebase/platform-center';
-import { createUser, getUser, StatusEnum, updateUser } from '@onebase/platform-center';
-import React, { useEffect, useState } from 'react';
+import { createUser, getUser, StatusEnum, updateUser, uploadFile } from '@onebase/platform-center';
+import React, { useEffect, useRef, useState } from 'react';
 
 const Row = Grid.Row;
 const Col = Grid.Col;
@@ -35,12 +49,15 @@ export default function UserFormModal({
   const [loading, setLoading] = React.useState(false);
   const [statusCheckedValue, setStatusCheckedValue] = useState(false);
   const [hasDeptQueryPermission, setHasDeptQueryPermission] = useState(true);
+  const uploadRef = useRef(null);
+  const [avatarUrl, setAvatarUrl] = useState<string>();
 
   useEffect(() => {
     if (visible) {
       form.resetFields();
       if (initialValues) {
         form.setFieldsValue(initialValues);
+        setAvatarUrl(initialValues.avatar);
         setStatusCheckedValue(initialValues.status === StatusEnum.ENABLE ? true : false);
       } else {
         // 创建时用户状态默认为开启
@@ -67,6 +84,23 @@ export default function UserFormModal({
     }
   }, [visible, mode, initialValues, form]);
 
+  const handleUpload = async (file: File, onProgress?: (percent: number, event?: ProgressEvent) => void) => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const progressAdapter = onProgress
+      ? (progressEvent: ProgressEvent) => {
+          if (progressEvent.lengthComputable) {
+            const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            onProgress(percent, progressEvent);
+          }
+        }
+      : undefined;
+
+    const res = await uploadFile(formData, progressAdapter);
+    return res;
+  };
+
   const handleSubmit = async () => {
     if (isDetail) {
       // 详情模式下直接关闭
@@ -76,7 +110,11 @@ export default function UserFormModal({
 
     try {
       const values = await form.validate();
-      const params = { ...values, status: statusCheckedValue ? StatusEnum.ENABLE : StatusEnum.DISABLE };
+      const params = {
+        ...values,
+        avatar: avatarUrl,
+        status: statusCheckedValue ? StatusEnum.ENABLE : StatusEnum.DISABLE
+      };
       setLoading(true);
       if (mode === 'create') {
         await createUser(params);
@@ -93,6 +131,33 @@ export default function UserFormModal({
     }
   };
 
+  const defaultNickName = form.getFieldValue('nickname')?.charAt(0) || 'U';
+
+  const renderEditModeAvatar = () => {
+    if (avatarUrl) {
+      return (
+        <Image
+          width={80}
+          height={80}
+          src={avatarUrl}
+          alt="头像"
+          style={{
+            width: 80,
+            height: 80,
+            borderRadius: '50%',
+            objectFit: 'cover',
+            display: 'block'
+          }}
+        />
+      );
+    } else {
+      return (
+        <Avatar size={40} style={{ marginBottom: '12px', backgroundColor: '#009e9e' }}>
+          {defaultNickName}
+        </Avatar>
+      );
+    }
+  };
   return (
     <Modal
       title={
@@ -117,6 +182,83 @@ export default function UserFormModal({
     >
       <Form form={form} layout="vertical" autoComplete="off" disabled={isDetail}>
         <Row gutter={24}>
+          <Col span={24}>
+            <Form.Item label="头像" field="avatar">
+              <Space direction="vertical" style={{ margin: 0 }}>
+                {mode === 'edit' && <>{renderEditModeAvatar()}</>}
+                <Upload
+                  ref={uploadRef}
+                  limit={1}
+                  accept="image/*"
+                  listType="picture-card"
+                  showUploadList={false}
+                  customRequest={async (option) => {
+                    const { onProgress, onError, onSuccess, file } = option;
+                    try {
+                      const uploadImgUrl = await handleUpload(file, onProgress);
+                      if (uploadImgUrl !== '') {
+                        setAvatarUrl(uploadImgUrl);
+                        onSuccess(uploadImgUrl);
+                      } else {
+                        onError({
+                          status: 'error',
+                          msg: '上传失败'
+                        });
+                      }
+                    } catch (error) {
+                      onError({
+                        status: 'error',
+                        msg: '上传失败'
+                      });
+                    }
+                  }}
+                  beforeUpload={(file) => {
+                    return new Promise((resolve) => {
+                      const modal = Modal.confirm({
+                        title: '裁剪图片',
+                        onCancel: () => {
+                          Message.info('取消上传');
+                          resolve(false);
+                          modal.close();
+                        },
+                        simple: false,
+                        content: (
+                          <Cropper
+                            aspect={1 / 1}
+                            file={file}
+                            onOK={(file: any) => {
+                              resolve(file);
+                              modal.close();
+                            }}
+                            onCancel={() => {
+                              resolve(false);
+                              Message.info('取消上传');
+                              modal.close();
+                            }}
+                          />
+                        ),
+                        footer: null
+                      });
+                    });
+                  }}
+                  style={{
+                    display: 'none'
+                  }}
+                ></Upload>
+                <Space>
+                  <Button
+                    type="outline"
+                    icon={<IconUpload />}
+                    onClick={() => {
+                      uploadRef.current?.getRootDOMNode()?.querySelector('input[type="file"]').click();
+                    }}
+                  >
+                    {mode === 'edit' ? '修改头像' : '上传头像'}
+                  </Button>
+                </Space>
+              </Space>
+            </Form.Item>
+          </Col>
           <Col span={12}>
             <Form.Item label="姓名" field="nickname" rules={[{ required: true, message: '请输入姓名' }]}>
               <Input placeholder="请输入" />

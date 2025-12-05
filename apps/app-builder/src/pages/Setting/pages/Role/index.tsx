@@ -182,7 +182,7 @@ export default function RolePage() {
 
                   <TabPane key="permission" title="关联权限">
                     <PlaceholderPanel hasPermission={hasPermission(ACTIONS.PERMISSION)}>
-                      <PermissionList selectedRoleId={activeRoleId} />
+                      <PermissionList selectedRoleId={activeRoleId} type={activeRole?.type}/>
                     </PlaceholderPanel>
                   </TabPane>
                 </Tabs>

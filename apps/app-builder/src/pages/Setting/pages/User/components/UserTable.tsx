@@ -22,6 +22,7 @@ import { useCallback, useEffect, useState } from 'react';
 import s from '../index.module.less';
 import PasswordModal from './PasswordModal';
 import UserFormModal from './UserFormModal';
+import UserProfileAvatar from '@/components/UserProfileAvatar';
 
 interface DataItem {
   id: string;
@@ -232,10 +233,11 @@ export default function UserTable({
       {
         title: '姓名',
         dataIndex: 'nickname',
-        width: 120,
+        width: 180,
         ellipsis: true,
         render: (_: any, record: UserRecord) => (
           <>
+            <UserProfileAvatar adminInfo={record} size={25}/>
             <span className={s.tableColumnUsername} onClick={() => handleViewDetail(record)}>
               {record.nickname}
             </span>
