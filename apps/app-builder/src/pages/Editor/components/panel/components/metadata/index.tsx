@@ -30,8 +30,8 @@ interface FieldItem {
   displayName: string;
   label: string;
   type: string;
-  fieldID: string;
-  entityID: string;
+  fieldName: string;
+  entityName: string;
 }
 
 interface GroupedSection {
@@ -67,8 +67,9 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
             displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[cpType] || '',
             label: field.displayName,
             type: cpType,
-            fieldID: field.fieldId,
-            entityID: mainEntity.entityId,
+
+            entityName: mainEntity.entityName,
+            fieldName: field.fieldName,
             isSystemField: field.isSystemField
           };
         })
@@ -113,8 +114,9 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
             // displayName: field.displayName,
             label: field.displayName,
             type: cpType,
-            fieldID: field.fieldId,
-            entityID: subEntity.entityId,
+
+            entityName: mainEntity.entityName,
+            fieldName: field.fieldName,
             isSystemField: field.isSystemField
           };
         })
@@ -329,8 +331,8 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
                           displayName={item.displayName}
                           label={item.label}
                           type={item.type}
-                          fieldID={item.fieldID}
-                          entityID={item.entityID}
+                          entityName={item.entityName}
+                          fieldName={item.fieldName}
                         />
                       ))}
                     </ReactSortable>
