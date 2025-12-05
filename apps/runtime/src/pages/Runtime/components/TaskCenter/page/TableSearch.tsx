@@ -14,7 +14,7 @@ import { getUserPage, type PageParam } from '@onebase/platform-center';
 
 export interface FilterParams {
   flowStatus?: FLOWSTATUS_TYPE;
-  businessId?: string;
+  businessUuid?: string;
   nodeCode?: string;
   dateRange?: [Date, Date];
   keyword?: string;
@@ -76,13 +76,13 @@ const TableSearch: FC<any> = ({
 
 
   useEffect(() => {
-    if (filters.businessId) {
-      loadNodeOptions(filters.businessId);
+    if (filters.businessUuid) {
+      loadNodeOptions(filters.businessUuid);
     } else {
       setNodeOptions([]);
       setFilters((prev) => ({ ...prev, nodeCode: undefined }));
     }
-  }, [filters.businessId]);
+  }, [filters.businessUuid]);
   const loadFormOptions = useCallback(async () => {
     setLoadingSecond(true);
     try {
@@ -97,7 +97,7 @@ const TableSearch: FC<any> = ({
   const loadNodeOptions = useCallback(async (formValue: string) => {
     setLoadingThird(true);
     try {
-      const data = await getListNodes({ businessId: formValue });
+      const data = await getListNodes({ businessUuid: formValue });
       setNodeOptions(data);
     } catch (error) {
       setNodeOptions([]);
@@ -113,7 +113,7 @@ const TableSearch: FC<any> = ({
     setFilters((prev) => ({
       ...prev,
       [key]: value,
-      ...(key === 'businessId' && { nodeCode: undefined })
+      ...(key === 'businessUuid' && { nodeCode: undefined })
     }));
   };
 
@@ -141,7 +141,7 @@ const TableSearch: FC<any> = ({
   const handleReset = useCallback(() => {
     const resetFilters: FilterParams = {
       flowStatus: undefined,
-      businessId: undefined,
+      businessUuid: undefined,
       nodeCode: undefined,
       dateRange: undefined,
       keyword:undefined,
@@ -155,8 +155,8 @@ const TableSearch: FC<any> = ({
 
   const parseParams = (params: any) => {
     const result: any = {};
-    if (params.businessId) {
-      result.businessId = params.businessId;
+    if (params.businessUuid) {
+      result.businessUuid = params.businessUuid;
     }
     if (params.nodeCode) {
       result.nodeCode = params.nodeCode;
@@ -283,8 +283,8 @@ const TableSearch: FC<any> = ({
                   <Select
                     placeholder="请选择流程表单"
                     className="end-select"
-                    value={filters.businessId}
-                    onChange={(value: any) => handleFilterChange('businessId', value)}
+                    value={filters.businessUuid}
+                    onChange={(value: any) => handleFilterChange('businessUuid', value)}
                     style={{ flex: 1 }}
                     loading={loadingSecond}
                     allowClear
@@ -309,11 +309,11 @@ const TableSearch: FC<any> = ({
 
                   <Select
                     className="end-select"
-                    placeholder={filters.businessId ? '请选择当前节点' : '请先选择表单'}
+                    placeholder={filters.businessUuid ? '请选择当前节点' : '请先选择表单'}
                     value={filters.nodeCode}
                     onChange={(value: any) => handleFilterChange('nodeCode', value)}
                     loading={loadingThird}
-                    disabled={!filters.businessId}
+                    disabled={!filters.businessUuid}
                     style={{ flex: 1 }}
                     allowClear
                   >
