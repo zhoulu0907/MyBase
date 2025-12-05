@@ -1,7 +1,6 @@
 import { Message } from '@arco-design/web-react';
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { BaseResponse, RequestConfig, RequestInterceptor, ResponseInterceptor } from '../types';
-import { getEnv } from './env';
 import { getHashQueryParam } from './router';
 import TokenManager from './token';
 
@@ -126,17 +125,7 @@ export class HttpClient {
               } else {
                 const redirectURL = getHashQueryParam('redirectURL') || window.location.href;
                 //   window.location.href = '/#/login';
-                const env = getEnv();
-
-                if (env === 'platform') {
-                  window.location.href = `/#/login`;
-                } else if (env === 'builder') {
-                  window.location.href = `/#/tenant/${tenantId}/?redirectURL=${redirectURL}`;
-                } else if (env === 'runtime') {
-                  window.location.href = `/#/login?redirectURL=${redirectURL}`;
-                } else {
-                  window.location.href = `/#/login?redirectURL=${redirectURL}`;
-                }
+                window.location.href = `/#/login?redirectURL=${redirectURL}`;
               }
             }
             return Promise.reject(new Error(data.msg || '请求失败'));

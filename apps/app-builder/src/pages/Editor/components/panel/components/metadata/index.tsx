@@ -30,8 +30,6 @@ interface FieldItem {
   displayName: string;
   label: string;
   type: string;
-  //   fieldID: string;
-  //   entityID: string;
   fieldName: string;
   entityName: string;
 }
@@ -69,10 +67,6 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
             displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[cpType] || '',
             label: field.displayName,
             type: cpType,
-
-            // TODO(mickey): 使用entityName和fieldName，后续移除entityID、fieldID
-            // fieldID: field.fieldId,
-            // entityID: mainEntity.entityId,
 
             entityName: mainEntity.entityName,
             fieldName: field.fieldName,
@@ -120,10 +114,6 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
             // displayName: field.displayName,
             label: field.displayName,
             type: cpType,
-
-            // TODO(mickey): 使用entityName和fieldName，后续移除entityID、fieldID
-            // fieldID: field.fieldId,
-            // entityID: mainEntity.entityId,
 
             entityName: mainEntity.entityName,
             fieldName: field.fieldName,
@@ -343,8 +333,6 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
                           type={item.type}
                           entityName={item.entityName}
                           fieldName={item.fieldName}
-                          //   fieldID={item.fieldID}
-                          //   entityID={item.entityID}
                         />
                       ))}
                     </ReactSortable>

@@ -92,7 +92,6 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
     schema.config = schemaConfig;
     schema.config.cpName = itemDisplayName;
     schema.config.id = cpID;
-    // schema.config.dataField = entityID && fieldId ? [entityID, fieldId] : [];
     schema.config.dataField = entityName && fieldName ? [entityName, fieldName] : [];
 
     const props = {
@@ -185,7 +184,6 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
 
           schema.config.cpName = field.displayName;
           schema.config.id = cpID;
-          //   schema.config.dataField = [item.entityId, field.fieldId];
           schema.config.dataField = [item.entityName, field.fieldName];
           schema.config.label.text = field.displayName;
           const props = {
@@ -305,7 +303,6 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
           subSchema.config.label.text = ele.displayName;
           subSchema.config.label.display = false;
           subSchema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT];
-          // subSchema.config.dataField = [item.entityId, ele.fieldId];
           subSchema.config.dataField = [item.entityName, ele.fieldName];
           subSchema.config.width = WIDTH_VALUES[WIDTH_OPTIONS.FULL];
           const subProps = {

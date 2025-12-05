@@ -575,9 +575,6 @@ export default function EditorWorkspace() {
               const itemType = e.item.getAttribute('data-cp-type');
               const itemDisplayName = e.item.getAttribute('data-cp-displayname');
 
-              //   const fieldID = e.item.getAttribute('data-field-id');
-              //   const entityID = e.item.getAttribute('data-entity-id');
-
               const entityName = e.item.getAttribute('data-entity-name');
               const fieldName = e.item.getAttribute('data-field-name');
               const dataLabel = e.item.getAttribute('data-label');

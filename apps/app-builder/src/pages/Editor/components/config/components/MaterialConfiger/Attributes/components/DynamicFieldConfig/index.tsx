@@ -64,8 +64,7 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
   };
 
   const initTreeData = async () => {
-    // 根据不同组件类型匹配不同的可选择字段, 从pageComponentSchemas中获取全部字段，原先components中没有布局内的子元素
-    // const fieldType = components.find((ele: any) => ele.id === configs.id)?.type;
+    // 根据不同组件类型匹配不同的可选择字段, 从pageComponentSchemas中获取全部字段
     const fieldType = pageComponentSchemas[configs.id]?.type;
 
     const cpTypes = COMPONENT_FIELD_MAP[fieldType];
@@ -73,20 +72,17 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
       .filter((field: AppEntityField) => !FilterEntityFields.includes(field.fieldName))
       .filter((field: AppEntityField) => !cpTypes || cpTypes.length === 0 || cpTypes.includes(field.fieldType))
       .map((field: AppEntityField) => ({
-        // value: field.fieldId,
         value: field.fieldName,
         label: field.displayName
       }));
 
     const subEntityTree = subEntities.entities.map((entity: AppEntity) => ({
-      // value: entity.entityId,
       value: entity.entityName,
       label: entity.entityName,
       children: entity.fields
         .filter((field: AppEntityField) => !FilterEntityFields.includes(field.fieldName))
         .filter((field: AppEntityField) => !cpTypes || cpTypes.length === 0 || cpTypes.includes(field.fieldType))
         .map((field: AppEntityField) => ({
-          //   value: field.fieldId,
           value: field.fieldName,
           label: field.displayName
         }))
@@ -94,7 +90,6 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
 
     setEntityTree([
       {
-        // value: mainEntity.entityId,
         value: mainEntity.entityName,
         label: mainEntity.entityName,
         children: mainEntityTree
@@ -128,10 +123,6 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
 
   const handleDefaultOptions = async (value: (string | string[])[]) => {
     const type = components.find((ele: any) => ele.id === configs.id)?.type;
-    // const isMainEntity = value?.includes(mainEntity.entityId);
-    // const currentMainField = mainEntity.fields?.find((ele: AppEntityField) => value.includes(ele.fieldId));
-    // const isSubEntity = subEntities.entities?.find((ele:any) => value?.includes(ele.entityId));
-    // const currentSubField = isSubEntity?.fields.find((ele: AppEntityField) => value.includes(ele.fieldId));
 
     const isMainEntity = value?.includes(mainEntity.entityName);
     const currentMainField = mainEntity.fields?.find((ele: AppEntityField) => value.includes(ele.fieldName));
@@ -236,9 +227,7 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
         }}
         options={
           isInSubTable
-            ? // ? entityTree.filter((ele) => ele.value !== mainEntity.entityId)
-              // : entityTree.filter((ele) => ele.value === mainEntity.entityId)
-              entityTree.filter((ele) => ele.value !== mainEntity.entityName)
+            ? entityTree.filter((ele) => ele.value !== mainEntity.entityName)
             : entityTree.filter((ele) => ele.value === mainEntity.entityName)
         }
         onChange={(value) => {

@@ -321,7 +321,6 @@ export default function EditorHeader() {
     console.log('entityWithChildren: ', entityWithChildren);
 
     // 主表数据
-    // const parentFields = await getEntityFields({ entityId: entityWithChildren.entityId });
 
     const parentFields = entityWithChildren.parentFields;
 
@@ -333,8 +332,6 @@ export default function EditorHeader() {
         entityName: entityWithChildren.entityName,
         entityType: ENTITY_TYPE.MAIN,
 
-        // TODO(mickey): 新版接口提供了fieldId，需要替换
-        // fields: parentFields.map((item: any) => ({ ...item, fieldId: item.id }))
         fields: parentFields
       });
 
@@ -342,9 +339,6 @@ export default function EditorHeader() {
         // 返回新Promise对象，当所有输入Promise成功时返回结果数组（顺序与输入一致）
         const allChildFields = await Promise.all(
           entityWithChildren.childEntities.map(async (entity: ChildEntity) => {
-            // TODO(mickey): 新版接口提供了fieldId，需要替换
-            // const childFields = await getEntityFields({ entityId: entity.childEntityId });
-            // return childFields.map((item: any) => ({ ...item, fieldId: item.id }));
             return entity.childFields;
           })
         );

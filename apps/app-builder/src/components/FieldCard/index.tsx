@@ -6,33 +6,19 @@ interface FieldCardProps {
   displayName: string;
   type: string;
   id: string;
-  //TODO(mickey): 使用entityName和fieldName，后续移除entityID、fieldID
-  //   fieldID: string;
-  //   entityID: string;
 
   entityName: string;
   fieldName: string;
   label: string;
 }
 
-const FieldCard: React.FC<FieldCardProps> = ({
-  displayName,
-  type,
-  id,
-  //   fieldID,
-  //   entityID,
-  entityName,
-  fieldName,
-  label
-}) => {
+const FieldCard: React.FC<FieldCardProps> = ({ displayName, type, id, entityName, fieldName, label }) => {
   return (
     <div
       className={styles.fieldCard}
       data-cp-type={type}
       data-cp-displayname={displayName}
       data-cp-id={id}
-      //   data-field-id={fieldID}
-      //   data-entity-id={entityID}
       data-entity-name={entityName}
       data-field-name={fieldName}
       data-label={label}
