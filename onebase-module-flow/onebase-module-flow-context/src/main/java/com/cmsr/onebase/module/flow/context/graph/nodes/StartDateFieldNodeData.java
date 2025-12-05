@@ -30,7 +30,7 @@ public class StartDateFieldNodeData extends NodeData implements Serializable {
      */
     private Long processId;
 
-    private Long entityId;
+    private String entityName;
 
     /**
      * 偏移字段ID

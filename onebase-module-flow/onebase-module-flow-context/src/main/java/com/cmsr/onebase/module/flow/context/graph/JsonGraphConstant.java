@@ -16,10 +16,6 @@ public class JsonGraphConstant {
 
     public static final String START_DATE_FIELD = "startDateField";
 
-    public static final String PAGE_ID = "pageId";
-
-    public static final String ENTITY_ID = "entityId";
-
     public static final String PROCESS_ID = "processId";
 
     public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");

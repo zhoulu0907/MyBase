@@ -16,7 +16,7 @@ import lombok.Data;
 @Data
 public class ConditionItem implements java.io.Serializable {
 
-    @JsonAlias(value = {"field", "fieldId", "name", "fieldUuid"})
+    @JsonAlias(value = {"field", "name", "fieldUuid"})
     private String fieldUuid;
 
     private String fieldName;

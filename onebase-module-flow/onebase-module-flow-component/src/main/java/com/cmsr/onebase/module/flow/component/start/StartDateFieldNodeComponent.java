@@ -1,5 +1,7 @@
 package com.cmsr.onebase.module.flow.component.start;
 
+import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.flow.component.data.DataMethodApiHelper;
 import com.cmsr.onebase.module.flow.component.utils.VariableProvider;
@@ -12,13 +14,13 @@ import com.cmsr.onebase.module.flow.context.enums.OpEnum;
 import com.cmsr.onebase.module.flow.context.express.OrExpression;
 import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
 import com.cmsr.onebase.module.flow.context.graph.nodes.StartDateFieldNodeData;
-import com.cmsr.onebase.module.metadata.api.datamethod.DataMethodApi;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.ConditionDTO;
-import com.cmsr.onebase.module.metadata.api.datamethod.dto.EntityFieldDataReqDTO;
-import com.cmsr.onebase.module.metadata.api.datamethod.dto.EntityFieldDataRespDTO;
 import com.cmsr.onebase.module.metadata.api.entity.MetadataEntityFieldApi;
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldJdbcTypeReqDTO;
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldJdbcTypeRespDTO;
+import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntityValueDTO;
+import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticPageConditionVO;
 import com.yomahub.liteflow.annotation.LiteflowComponent;
 import com.yomahub.liteflow.core.NodeComponent;
 import lombok.Setter;
@@ -42,7 +44,7 @@ import java.util.Map;
 public class StartDateFieldNodeComponent extends NodeComponent {
 
     @Autowired
-    private DataMethodApi dataMethodApi;
+    private SemanticDynamicDataApi semanticDynamicDataApi;
 
     @Autowired
     private ConditionsProvider conditionsProvider;
@@ -62,8 +64,8 @@ public class StartDateFieldNodeComponent extends NodeComponent {
 
         JdbcTypeEnum fieldJdbcType = queryFieldType(nodeData.getOffsetFiledId());
 
-        EntityFieldDataReqDTO reqDTO = new EntityFieldDataReqDTO();
-        reqDTO.setEntityId(nodeData.getEntityId());
+        SemanticPageConditionVO reqDTO = new SemanticPageConditionVO();
+        reqDTO.setTableName(nodeData.getEntityName());
         if (fieldJdbcType == JdbcTypeEnum.TIMESTAMP) {
             List<String> values = nodeData.calculateOffTime(LocalDateTime.now());
             List<ConditionDTO> andConditionDTO = new ArrayList<>();
@@ -99,12 +101,13 @@ public class StartDateFieldNodeComponent extends NodeComponent {
             reqDTO.setConditionDTO(DataMethodApiHelper.processFilterCondition(orExpression));
         }
         if (nodeData.isBatchMode()) {
-            reqDTO.setNum(nodeData.getBatchSize());
+            reqDTO.setPageNo(1);
+            reqDTO.setPageSize(nodeData.getBatchSize());
         }
         executeContext.addLog("时间字段触发开始查询数据");
-        List<List<EntityFieldDataRespDTO>> fieldDataRespDTOS = TenantUtils.executeIgnore(() -> dataMethodApi.getDataByCondition(reqDTO));
-        executeContext.addLog("时间字段触发查询返回数据量: " + fieldDataRespDTOS.size());
-        variableContext.putNodeVariables(this.getTag(), DataMethodApiHelper.convertToListMap(fieldDataRespDTOS));
+        PageResult<SemanticEntityValueDTO> fieldDataRespDTOS = ApplicationManager.withApplicationId(nodeData.getApplicationId(), () -> semanticDynamicDataApi.getDataByCondition(reqDTO));
+        executeContext.addLog("时间字段触发查询返回数据量: " + fieldDataRespDTOS.getTotal());
+        variableContext.putNodeVariables(this.getTag(), DataMethodApiHelper.convertToListMap(fieldDataRespDTOS.getList()));
     }
 
     private JdbcTypeEnum queryFieldType(Long filedId) {

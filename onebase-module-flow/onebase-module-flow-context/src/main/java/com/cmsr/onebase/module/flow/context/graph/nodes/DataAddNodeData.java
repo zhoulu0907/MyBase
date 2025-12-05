@@ -20,11 +20,7 @@ public class DataAddNodeData extends NodeData implements Serializable {
      */
     private String addType;
 
-    private Long mainEntityId;
-
     private String mainEntityName;
-
-    private Long subEntityId;
 
     private String subEntityName;
 
