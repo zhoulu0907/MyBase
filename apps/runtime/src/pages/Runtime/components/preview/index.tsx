@@ -130,7 +130,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     console.log('menuId: ', menuId);
 
     const formData = {} as any;
-    const subFormData = [] as any;
+    const subFormData: Record<string, any[]> = {};
     Object.entries(fields).forEach(([key, value]) => {
       console.log('key: ', key, '   value: ', value);
 
@@ -146,6 +146,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
         const subEntityId = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[key]?.config
           ?.subTable;
 
+        //   TODO(mickey): 换成uuid, 等后端接口
+        const subTableName = subEntities.value.find((ele: any) => ele.childEntityId == subEntityId)?.childTableName;
+
         //   过滤空行
         const subTableRows = [] as any;
         for (const item of value) {
@@ -160,10 +163,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
           }
           subTableRows.push(temp);
         }
-        subFormData.push({
-          subEntityId: subEntityId,
-          subData: subTableRows
-        });
+        subFormData[subTableName] = subTableRows;
       }
     });
 
@@ -221,7 +221,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
           setPageType(EDITOR_TYPES.FORM_EDITOR);
         } else {
           console.log(formData);
-          const req: InsertMethodV2Params = { ...formData };
+          const req: InsertMethodV2Params = { ...formData, ...subFormData };
+
           console.log(req);
 
           res = await dataMethodCreateV2(tableName, menuId, req);
