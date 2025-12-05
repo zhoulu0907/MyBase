@@ -68,6 +68,8 @@ public class BpmTaskDetailRespVO {
 
     @Data
     public static class FormData {
+        private String tableName;
+
         /**
          * 实体数据
          */
