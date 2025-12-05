@@ -48,7 +48,7 @@ public class AppMenuRepository extends BaseBizRepository<AppMenuMapper, AppMenuD
     public long countByParentId(Long applicationId, String menuUuid) {
         QueryWrapper queryWrapper = this.query()
                 .where(APP_MENU.APPLICATION_ID.eq(applicationId))
-                .where(APP_MENU.MENU_UUID.eq(menuUuid));
+                .where(APP_MENU.PARENT_UUID.eq(menuUuid));
         return count(queryWrapper);
     }
 
