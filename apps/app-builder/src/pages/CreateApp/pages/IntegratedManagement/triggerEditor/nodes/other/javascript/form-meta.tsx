@@ -38,7 +38,7 @@ export const renderForm = ({}: FormRenderProps<FlowNodeJSON['data']>) => {
   const [selectedActionId, setSelectedActionId] = useState<string>(
     triggerEditorSignal.nodeData.value[node.id]?.actionId || ''
   );
-  const [inputParameter, setInputParameter] = useState<string>('{}');
+  const [inputParameter, setInputParameter] = useState<any[]>([]);
   const [onSwap, setOnSwap] = useState(false);
 
   const [payloadForm] = Form.useForm();
@@ -114,12 +114,13 @@ export const renderForm = ({}: FormRenderProps<FlowNodeJSON['data']>) => {
     const res = await getScriptAction(scriptId);
     console.log(res);
     if (res) {
-      if (res.inputParameter) {
-        setInputParameter(res.inputParameter);
+      if (res.inputSchema) {
+        setInputParameter(res.inputSchema || []);
       } else {
-        setInputParameter('{}');
+        setInputParameter([]);
       }
-      payloadForm.setFieldValue('outputParameter', res.outputParameter || '{}');
+      const outputSchema = JSON.stringify(res.outputSchema || [])
+      payloadForm.setFieldValue('outputParameter', outputSchema);
     }
   };
 

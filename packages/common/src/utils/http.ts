@@ -115,6 +115,7 @@ export class HttpClient {
             Message.error({ id: 'http-error', content: data.msg || '请求失败' });
             if (data.code === 401) {
               const loginURL = TokenManager.getTokenInfo()?.loginURL;
+              const tenantId = TokenManager.getTokenInfo()?.tenantId;
 
               TokenManager.clearToken();
 

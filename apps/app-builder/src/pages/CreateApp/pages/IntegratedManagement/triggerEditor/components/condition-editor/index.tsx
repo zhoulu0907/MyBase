@@ -278,7 +278,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
         NodeType.DATA_CALC,
         NodeType.LOOP,
         NodeType.MODAL,
-        NodeType.JavaScript
+        NodeType.JAVASCRIPT
       ]),
     []
   );
@@ -307,7 +307,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
         NodeType.START_BPM,
         NodeType.LOOP,
         NodeType.MODAL,
-        NodeType.JavaScript
+        NodeType.JAVASCRIPT
       ];
 
       const fieldId = form.getFieldValue(item.field + '.fieldId');

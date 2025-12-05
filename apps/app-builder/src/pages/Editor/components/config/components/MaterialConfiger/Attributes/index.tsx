@@ -1,6 +1,6 @@
 import { Form, Input, Tooltip } from '@arco-design/web-react';
 import { IconCopy } from '@arco-design/web-react/icon';
-import { usePageEditorSignal, getComponentSchema, hasComponentSchema } from '@onebase/ui-kit';
+import { getComponentSchema, hasComponentSchema, usePageEditorSignal } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useState } from 'react';
 import styles from './index.module.less';
@@ -17,7 +17,6 @@ interface ConfigsProps {
 }
 
 const Attributes = ({ cpID }: ConfigsProps) => {
-
   useSignals();
   const { curComponentID, curComponentSchema, setCurComponentSchema, setPageComponentSchemas, subTableComponents } =
     usePageEditorSignal();
