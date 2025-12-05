@@ -43,7 +43,7 @@ export default function FieldConfig({ setCcRecipientsConfigData, fieldPermConfig
 
   function handleSave(row: any) {
     const newData = [...tbData];
-    const index = newData.findIndex((item) => row.fieldId === item.fieldId);
+    const index = newData.findIndex((item) => row.fieldUuid === item.fieldUuid);
     newData.splice(index, 1, { ...newData[index], ...row });
     setTbData(newData);
   }
@@ -78,10 +78,10 @@ export default function FieldConfig({ setCcRecipientsConfigData, fieldPermConfig
   ];
 
   const setTableData = (v: any) => {
-    const tableMap = new Map<string, any>(tbData?.map((item: any) => [item.fieldId, item]));
+    const tableMap = new Map<string, any>(tbData?.map((item: any) => [item.fieldUuid, item]));
     const addType = v?.map((item: any) => ({
       ...item,
-      fieldPermType: tableMap.has(item.fieldId) ? tableMap.get(item.fieldId).fieldPermType : 'read'
+      fieldPermType: tableMap.has(item.fieldUuid) ? tableMap.get(item.fieldUuid).fieldPermType : 'read'
     }));
     setTbData(addType);
   };

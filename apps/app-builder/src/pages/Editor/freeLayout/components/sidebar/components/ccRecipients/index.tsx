@@ -78,6 +78,8 @@ export default function CcRecipientsDreawer({ handleConfigSubmit, configData }) 
   };
 
   function handleSubmit() {
+    console.log(ccRecipientsConfigData,'123123');
+    return
     let errorMsg = '';
     const { users = [], roles = [] } = ccRecipientsConfigData.copyReceiverConfig || {};
     if (!users.length && !roles.length) {

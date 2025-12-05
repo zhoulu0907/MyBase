@@ -4,11 +4,23 @@ import dayjs from 'dayjs';
 import type { TableColumnProps } from '@arco-design/web-react';
 import type { VersionData } from './indexType';
 
+// enum VersionStatus {
+//   DESIGNING = '设计中',
+//   PUBLISHED = '已发布',
+//   HISTORY = '历史版本'
+// }
+
 enum VersionStatus {
-  DESIGNING = '设计中',
-  PUBLISHED = '已发布',
-  HISTORY = '历史版本'
+  PUBLISHED = 'published',
+  DESIGNING = 'designing',
+  HISTORY = 'previous'
 }
+
+const VersionStatusText = {
+  [VersionStatus.PUBLISHED]: '已发布',
+  [VersionStatus.DESIGNING]: '设计中',
+  [VersionStatus.HISTORY]: '历史'
+} as const;
 
 export const getVersionColumns = (
   handleView: (record: VersionData) => void,
@@ -16,23 +28,27 @@ export const getVersionColumns = (
   handleDelete: (record: VersionData) => void
 ): TableColumnProps<VersionData>[] => [
   {
-    key: 'version',
+    key: 'bpmVersion',
     title: '流程版本号',
-    dataIndex: 'version'
+    dataIndex: 'bpmVersion'
   },
   {
-    key: 'versionAlias',
+    key: 'bpmVersionAlias',
     title: '流程版本备注',
-    dataIndex: 'versionAlias'
+    dataIndex: 'bpmVersionAlias'
   },
   {
-    key: 'versionStatus',
+    key: 'bpmVersionStatus',
     title: '状态',
-    dataIndex: 'versionStatus',
+    dataIndex: 'bpmVersionStatus',
     render: (text: string) => {
-      const classNameSelf =
-        text === VersionStatus.PUBLISHED ? 'published' : text === VersionStatus.DESIGNING ? 'designing' : 'history';
-      return <span className={`${styles.versionStatus} ${styles[classNameSelf]}`}>{text}</span>;
+      // const classNameSelf =
+      //   text === VersionStatus.PUBLISHED ? 'published' : text === VersionStatus.DESIGNING ? 'designing' : 'history';
+      return (
+        <span className={`${styles.versionStatus} ${styles[text]}`}>
+          {VersionStatusText[text as keyof typeof VersionStatusText]}
+        </span>
+      );
     }
   },
   {
@@ -92,7 +108,7 @@ export const getVersionColumns = (
           修改备注
         </Button>
 
-        {record.versionStatus !== VersionStatus.PUBLISHED && (
+        {record.bpmVersionStatus !== VersionStatus.PUBLISHED && (
           <>
             <Popconfirm title="确定要删除此流程版本吗？" onOk={() => handleDelete(record)} focusLock>
               <Divider type="vertical" />

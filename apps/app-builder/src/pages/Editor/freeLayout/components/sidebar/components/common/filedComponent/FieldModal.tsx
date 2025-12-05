@@ -26,13 +26,13 @@ export default function FieldModal({
   const [checkedItem, setCheckedItem] = useState([]);
 
   const invertKey = invert?.map((item: any) => {
-    return item.fieldId;
+    return item.fieldUuid;
   });
   const useCkOptions = ckOptions?.map((item: any) => {
     return {
       label: item.displayName,
-      value: item.fieldId,
-      disabled: invertKey.includes(item.fieldId)
+      value: item.fieldUuid,
+      disabled: invertKey.includes(item.fieldUuid)
     };
   });
 
@@ -58,7 +58,7 @@ export default function FieldModal({
 
       checkedItem.forEach((item: any) => {
         resData.push({
-          fieldId: item.value,
+          fieldUuid: item.value,
           fieldName: item.label,
         });
       });

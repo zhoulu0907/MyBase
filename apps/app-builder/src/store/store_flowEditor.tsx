@@ -4,10 +4,10 @@ export interface FlowData {
   id?: string;
   flowCode?: string;
   flowName?: string;
-  version?: string;
-  versionAlias?: string;
-  versionStatus?: string;
-  businessId?: string;
+  bpmVersion?: string;
+  bpmVersionAlias?: string;
+  bpmVersionStatus?: string;
+  businessUuid?: string;
 }
 
 export interface FieldConfig {

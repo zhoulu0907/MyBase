@@ -10,10 +10,10 @@ interface PreviewModalProps {
   visible: boolean;
   setVisible: (visible: boolean) => void;
   instanceId?: string;
-  businessId?: string;
+  businessUuid?: string;
 }
 
-const FlowView: React.FC<PreviewModalProps> = ({ visible, setVisible, instanceId = '', businessId = '' }) => {
+const FlowView: React.FC<PreviewModalProps> = ({ visible, setVisible, instanceId = '', businessUuid = '' }) => {
   const [isModalReady, setIsModalReady] = useState(false);
   const [preViewData, setPreviewData] = useState<any>({});
   const afterOpen = () => {
@@ -40,7 +40,7 @@ const FlowView: React.FC<PreviewModalProps> = ({ visible, setVisible, instanceId
   };
 
   const getFlowPreviewData = async () => {
-    const res = await getFlowPreview({ instanceId, businessId });
+    const res = await getFlowPreview({ instanceId, businessUuid });
     try {
       const parseData = normalizeNodes(JSON.parse(res.bpmDefJson));
       setPreviewData(parseData);
