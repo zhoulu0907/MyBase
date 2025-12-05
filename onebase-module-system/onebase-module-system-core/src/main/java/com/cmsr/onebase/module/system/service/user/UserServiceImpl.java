@@ -753,8 +753,19 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<AdminUserDO> getUserListByStatus(Integer status, String userNickName) {
-        return userDataRepository.findAllByStatus(status, userNickName);
+    public List<AdminUserDO> getUserListByStatus(Integer status, String userNickName, Long deptId) {
+
+        // 获取部门条件：查询指定部门的子部门编号们，包括自身
+        if (null != deptId) {
+            Set<Long> deptIds = getDeptCondition(deptId);
+            List<AdminUserDO>  adminUserDOList = userDataRepository.findAllByStatus(status, userNickName);
+            return adminUserDOList.stream()
+                    .filter(user -> user.getDeptId() != null && deptIds.contains(user.getDeptId()))
+                    .collect(Collectors.toList());
+        } else {
+            return userDataRepository.findAllByStatus(status, userNickName);
+        }
+
     }
 
     @Override
