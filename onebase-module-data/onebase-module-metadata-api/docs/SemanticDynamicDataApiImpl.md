@@ -174,6 +174,70 @@
 }
 ```
 
+### 嵌套条件示例
+
+- 分页查询（AND + OR 嵌套）：
+```json
+{
+  "tableName": "customer",
+  "pageNo": 1,
+  "pageSize": 20,
+  "sortBy": [{ "field": "id", "direction": "DESC"}],
+  "semanticConditionDTO": {
+    "nodeType": "GROUP",
+    "combinator": "AND",
+    "children": [
+      { "nodeType": "CONDITION", "fieldName": "status", "operator": "EQ", "fieldValue": [1] },
+      {
+        "nodeType": "GROUP",
+        "combinator": "OR",
+        "children": [
+          { "nodeType": "CONDITION", "fieldName": "name", "operator": "LIKE", "fieldValue": ["张"] },
+          { "nodeType": "CONDITION", "fieldName": "mobile", "operator": "LIKE", "fieldValue": ["139"] }
+        ]
+      }
+    ]
+  }
+}
+```
+
+- 条件删除（AND 组合 + 子组 OR）：
+```json
+{
+  "tableName": "customer",
+  "semanticConditionDTO": {
+    "nodeType": "GROUP",
+    "combinator": "AND",
+    "children": [
+      { "nodeType": "CONDITION", "fieldName": "deleted", "operator": "EQ", "fieldValue": [0] },
+      {
+        "nodeType": "GROUP",
+        "combinator": "OR",
+        "children": [
+          { "nodeType": "CONDITION", "fieldName": "status", "operator": "IN", "fieldValue": [1,2] },
+          { "nodeType": "CONDITION", "fieldName": "owner_dept", "operator": "EQ", "fieldValue": [1001] }
+        ]
+      }
+    ]
+  }
+}
+```
+
+- 条件更新（AND 组合 + 多字段匹配）：
+```json
+{
+  "tableName": "customer",
+  "semanticConditionDTO": {
+    "nodeType": "GROUP",
+    "combinator": "AND",
+    "children": [
+      { "nodeType": "CONDITION", "fieldName": "status", "operator": "EQ", "fieldValue": [1] },
+      { "nodeType": "CONDITION", "fieldName": "city", "operator": "LIKE", "fieldValue": ["广州"] }
+    ]
+  },
+  "updateProperties": { "mobile": "13900000000", "status": 2 }
+}
+```
 ## 接口入参/出参示例（逐方法）
 
 ### buildEntitySchemaByUuid
