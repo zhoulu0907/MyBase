@@ -4,7 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import com.cmsr.onebase.framework.security.build.filter.BuildApplicationContextHeaderFilter;
 import com.cmsr.onebase.framework.security.config.AuthorizeRequestsCustomizer;
 import com.cmsr.onebase.framework.security.config.SecurityProperties;
-import com.cmsr.onebase.framework.security.core.filter.BuildAuthenticationFilter;
+import com.cmsr.onebase.framework.security.build.filter.BuildAuthenticationFilter;
 import com.cmsr.onebase.framework.web.config.WebProperties;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
@@ -55,7 +55,7 @@ import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.
 public class BuildWebSecurityConfigurerAdapter {
 
     @Resource
-    private WebProperties webProperties;
+    private WebProperties      webProperties;
     @Resource
     private SecurityProperties securityProperties;
 
@@ -63,12 +63,12 @@ public class BuildWebSecurityConfigurerAdapter {
      * 认证失败处理类 Bean
      */
     @Resource
-    private AuthenticationEntryPoint authenticationEntryPoint;
+    private AuthenticationEntryPoint  authenticationEntryPoint;
     /**
      * 权限不够处理器 Bean
      */
     @Resource
-    private AccessDeniedHandler accessDeniedHandler;
+    private AccessDeniedHandler       accessDeniedHandler;
     /**
      * Token 认证过滤器 Bean
      */
@@ -83,7 +83,7 @@ public class BuildWebSecurityConfigurerAdapter {
      * @see #filterChain(HttpSecurity)
      */
     @Resource
-    private List<AuthorizeRequestsCustomizer> authorizeRequestsCustomizers;
+    private List<AuthorizeRequestsCustomizer>   authorizeRequestsCustomizers;
 
     @Resource
     private ApplicationContext applicationContext;
@@ -117,26 +117,20 @@ public class BuildWebSecurityConfigurerAdapter {
      */
     @Bean
     protected SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-        RequestMatcher buildApiMatcher = new OrRequestMatcher(
-                new AntPathRequestMatcher(webProperties.getBuildApi().getPrefix() + "/**"),
+        RequestMatcher buildApiMatcher = new OrRequestMatcher(new AntPathRequestMatcher(webProperties.getBuildApi().getPrefix() + "/**"),
                 // 平台管理暂不独立部署，platform相关接口同步初始化
-                new AntPathRequestMatcher(webProperties.getPlatformApi().getPrefix() + "/**")
-        );
+                new AntPathRequestMatcher(webProperties.getPlatformApi().getPrefix() + "/**"));
         httpSecurity.securityMatcher(buildApiMatcher);
 
-        // 登出
         httpSecurity
                 // 开启跨域
                 .cors(Customizer.withDefaults())
                 // CSRF 禁用，因为不使用 Session
                 .csrf(AbstractHttpConfigurer::disable)
                 // 基于 token 机制，所以不需要 Session
-                .sessionManagement(c -> c.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .headers(c -> c.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
+                .sessionManagement(c -> c.sessionCreationPolicy(SessionCreationPolicy.STATELESS)).headers(c -> c.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
                 // 一堆自定义的 Spring Security 处理器
-                .exceptionHandling(c -> c.authenticationEntryPoint(authenticationEntryPoint)
-                        .accessDeniedHandler(accessDeniedHandler));
-        // 登录、登录暂时不使用 Spring Security 的拓展点，主要考虑一方面拓展多用户、多种登录方式相对复杂，一方面用户的学习成本较高
+                .exceptionHandling(c -> c.authenticationEntryPoint(authenticationEntryPoint).accessDeniedHandler(accessDeniedHandler));
 
         // 获得 @PermitAll 带来的 URL 列表，免登录
         Multimap<HttpMethod, String> permitAllUrls = getPermitAllUrlsFromAnnotations();
@@ -149,18 +143,12 @@ public class BuildWebSecurityConfigurerAdapter {
                         // 1.2 设置 @PermitAll 无需认证
                         .requestMatchers(HttpMethod.GET, permitAllUrls.get(HttpMethod.GET).toArray(new String[0])).permitAll()
                         .requestMatchers(HttpMethod.POST, permitAllUrls.get(HttpMethod.POST).toArray(new String[0])).permitAll()
-                        .requestMatchers(HttpMethod.PUT, permitAllUrls.get(HttpMethod.PUT).toArray(new String[0])).permitAll()
-                        .requestMatchers(HttpMethod.DELETE, permitAllUrls.get(HttpMethod.DELETE).toArray(new String[0])).permitAll()
-                        .requestMatchers(HttpMethod.HEAD, permitAllUrls.get(HttpMethod.HEAD).toArray(new String[0])).permitAll()
-                        .requestMatchers(HttpMethod.PATCH, permitAllUrls.get(HttpMethod.PATCH).toArray(new String[0])).permitAll()
                         // 1.3 基于 onebase.security.permit-all-urls 无需认证
-                        .requestMatchers(securityProperties.getPermitAllUrls().toArray(new String[0])).permitAll()
-                )
+                        .requestMatchers(securityProperties.getPermitAllUrls().toArray(new String[0])).permitAll())
                 // ②：每个项目的自定义规则
                 .authorizeHttpRequests(c -> authorizeRequestsCustomizers.forEach(customizer -> customizer.customize(c)))
                 // ③：兜底规则，必须认证
-                .authorizeHttpRequests(c -> c
-                        .dispatcherTypeMatchers(DispatcherType.ASYNC).permitAll() // WebFlux 异步请求，无需认证，目的：SSE 场景
+                .authorizeHttpRequests(c -> c.dispatcherTypeMatchers(DispatcherType.ASYNC).permitAll() // WebFlux 异步请求，无需认证，目的：SSE 场景
                         .anyRequest().authenticated());
 
         // 添加 Token Filter
@@ -169,15 +157,14 @@ public class BuildWebSecurityConfigurerAdapter {
         return httpSecurity.build();
     }
 
-    private String buildAppApi(String url) {
-        return webProperties.getRuntimeApi().getPrefix() + url;
-    }
-
+    /**
+     * 解析和获取免登接口
+     * @return
+     */
     private Multimap<HttpMethod, String> getPermitAllUrlsFromAnnotations() {
         Multimap<HttpMethod, String> result = HashMultimap.create();
         // 获得接口对应的 HandlerMethod 集合
-        RequestMappingHandlerMapping requestMappingHandlerMapping = (RequestMappingHandlerMapping)
-                applicationContext.getBean("requestMappingHandlerMapping");
+        RequestMappingHandlerMapping requestMappingHandlerMapping = (RequestMappingHandlerMapping) applicationContext.getBean("requestMappingHandlerMapping");
         Map<RequestMappingInfo, HandlerMethod> handlerMethodMap = requestMappingHandlerMapping.getHandlerMethods();
         // 获得有 @PermitAll 注解的接口
         for (Map.Entry<RequestMappingInfo, HandlerMethod> entry : handlerMethodMap.entrySet()) {
@@ -201,10 +188,6 @@ public class BuildWebSecurityConfigurerAdapter {
             if (CollUtil.isEmpty(methods)) {
                 result.putAll(HttpMethod.GET, urls);
                 result.putAll(HttpMethod.POST, urls);
-                result.putAll(HttpMethod.PUT, urls);
-                result.putAll(HttpMethod.DELETE, urls);
-                result.putAll(HttpMethod.HEAD, urls);
-                result.putAll(HttpMethod.PATCH, urls);
                 continue;
             }
             // 根据请求方法，添加到 result 结果
@@ -215,18 +198,6 @@ public class BuildWebSecurityConfigurerAdapter {
                         break;
                     case POST:
                         result.putAll(HttpMethod.POST, urls);
-                        break;
-                    case PUT:
-                        result.putAll(HttpMethod.PUT, urls);
-                        break;
-                    case DELETE:
-                        result.putAll(HttpMethod.DELETE, urls);
-                        break;
-                    case HEAD:
-                        result.putAll(HttpMethod.HEAD, urls);
-                        break;
-                    case PATCH:
-                        result.putAll(HttpMethod.PATCH, urls);
                         break;
                 }
             });

@@ -1,4 +1,4 @@
-package com.cmsr.onebase.framework.security.core.filter;
+package com.cmsr.onebase.framework.security.build.filter;
 
 import com.cmsr.onebase.framework.common.biz.system.oauth2.OAuth2TokenCommonApi;
 import com.cmsr.onebase.framework.common.biz.system.oauth2.dto.OAuth2AccessTokenCheckRespDTO;
