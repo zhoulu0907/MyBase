@@ -15,7 +15,6 @@ import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticMergeReco
 import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticPermissionContextLoader;
 import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticPermissionValidator;
 import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticDataIntegrityValidator;
-import com.cmsr.onebase.module.metadata.core.semantic.strategy.permission.SemanticQueryPermissionHelper;
 import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticQueryConditionBuilder;
 import com.cmsr.onebase.module.metadata.core.semantic.service.SemanticDataCrudService;
 import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticValueAssembler;
@@ -55,8 +54,6 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
     @Resource
     private SemanticPermissionValidator semanticPermissionValidator;
     @Resource
-    private SemanticQueryPermissionHelper semanticQueryPermissionHelper;
-    @Resource
     private SemanticQueryConditionBuilder semanticQueryConditionBuilder;
     @Resource
     private SemanticDataCrudService semanticDataCrudService;
@@ -69,28 +66,34 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
 
     @Override
     public SemanticEntitySchemaDTO buildEntitySchemaByUuid(String entityUuid) {
+        // 1) 按实体UUID构建实体模型
         return semanticMergeRecordAssembler.buildEntitySchemaByUuid(entityUuid);
     }
 
     @Override
     public SemanticEntitySchemaDTO buildEntitySchemaByTableName(String entityTableName) {
+        // 1) 按主表名构建实体模型
         return semanticMergeRecordAssembler.buildEntitySchemaByTableName(entityTableName);
     }
 
     @Override
     public SemanticEntityValueDTO buildEntityValueByName(String tableName, Map<String, Object> fieldNameValues) {
+        // 1) 通过表名与字段名-值直接构建实体值
         return semanticMergeRecordAssembler.buildEntityValueByNames(tableName, fieldNameValues);
     }
 
     @Override
     public SemanticEntityValueDTO buildEntityValueByUuid(String entityUuid, Map<String, Object> fieldUuidValues) {
+        // 1) 读取实体字段列表
         List<MetadataEntityFieldDO> fields = fieldCoreService.getEntityFieldListByEntityUuid(entityUuid);
+        // 2) 构建字段UUID到字段名的映射
         Map<String, String> uuidToName = new HashMap<>();
         if (fields != null) {
             for (MetadataEntityFieldDO f : fields) {
                 if (f.getFieldUuid() != null && f.getFieldName() != null) { uuidToName.put(f.getFieldUuid(), f.getFieldName()); }
             }
         }
+        // 3) 将 uuid->value 转换为 name->value
         Map<String, Object> nameValues = new HashMap<>();
         if (fieldUuidValues != null) {
             for (Map.Entry<String, Object> e : fieldUuidValues.entrySet()) {
@@ -98,8 +101,10 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
                 nameValues.put(name != null ? name : e.getKey(), e.getValue());
             }
         }
+        // 4) 获取实体并校验
         MetadataBusinessEntityDO entity = businessEntityCoreService.getBusinessEntityByUuid(entityUuid);
         if (entity == null) { return null; }
+        // 5) 通过表名与 name->value 构建实体值
         return buildEntityValueByName(entity.getTableName(), nameValues);
     }
 
@@ -111,14 +116,18 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
         SemanticRecordDTO record = buildPageRecord(body);
         // 2) 权限上下文初始化
         semanticPermissionContextLoader.loadPermissionContext(record);
-        // 3) 数据完整性，因为内部逻辑流调用，忽略功能权限校验
+        // 3) 数据完整性校验（内部调用忽略功能权限）
         semanticDataIntegrityValidator.validate(record);
-        // 4) 构建查询条件（权限过滤 + 过滤/排序）
-        QueryWrapper qw = buildPageQuery(record);
+        // 4) 构建查询条件（仅条件与排序，不应用数据权限）
+        List<SemanticFieldSchemaDTO> fields = record.getEntitySchema().getFields();
+        SemanticConditionDTO condition = record.getRecordContext().getFilters();
+        List<SemanticSortRuleDTO> sortBy = record.getRecordContext().getSortBy();
+        QueryWrapper qw = QueryWrapper.create();
+        semanticQueryConditionBuilder.apply(qw, fields, condition, sortBy);
         // 5) 执行分页查询并转换结果
         PageResult<Map<String, Object>> page = semanticDataCrudService.queryPage(record, qw);
         List<SemanticEntityValueDTO> values = convertToValues(record.getEntitySchema(), page.getList());
-        // 6) 执行分页查询并转换结果
+        // 6) 记录过程日志并返回
         semanticProcessLogger.log(record);
         return new PageResult<>(values, page.getTotal());
     }
@@ -133,7 +142,7 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
                 MetadataDataMethodOpEnum.GET);
         // 2) 权限上下文初始化
         semanticPermissionContextLoader.loadPermissionContext(record);
-        // 3) 数据完整性
+        // 3) 数据完整性校验
         semanticDataIntegrityValidator.validate(record);
         // 4) 查询详情数据
         semanticDataCrudService.readById(record);
@@ -152,7 +161,7 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
                 MetadataDataMethodOpEnum.DELETE);
         // 2) 权限上下文初始化
         semanticPermissionContextLoader.loadPermissionContext(record);
-        // 3) 数据完整性
+        // 3) 数据完整性校验
         semanticDataIntegrityValidator.validate(record);
         // 4) 执行删除（软删优先）
         int resultCount = semanticDataCrudService.delete(record);
@@ -165,10 +174,15 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
     public Integer deleteDataByCondition(SemanicTargetConditionVO body) {
         String tableName = body == null ? null : body.getTableName();
         if (tableName == null || tableName.isBlank()) { return 0; }
+        // 1) 构建 RecordDTO（目标请求体 + 过滤条件）
         SemanticRecordDTO record = buildDeleteRecord(body);
+        // 2) 权限上下文初始化
         semanticPermissionContextLoader.loadPermissionContext(record);
+        // 3) 数据完整性校验
         semanticDataIntegrityValidator.validate(record);
+        // 4) 功能权限校验
         semanticPermissionValidator.validate(record);
+        // 5) 条件安全校验，避免误删全表
         SemanticConditionDTO cond = body.getSemanticConditionDTO();
         boolean noCond = cond == null
                 || (((cond.getFieldName() == null || cond.getFieldName().isBlank()) && cond.getFieldUuid() == null))
@@ -176,7 +190,12 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
         if (noCond) { 
             throw new IllegalArgumentException("deleteDataByCondition: 为了避免删除全表数据，必须指定删除条件");
          }
-        int affected = semanticDataCrudService.deleteByCondition(record);
+        // 6) 构建条件查询包装器（仅条件，不应用数据权限）
+        List<SemanticFieldSchemaDTO> fields = record.getEntitySchema().getFields();
+        QueryWrapper qw = QueryWrapper.create();
+        semanticQueryConditionBuilder.apply(qw, fields, cond, null);
+        int affected = semanticDataCrudService.deleteByQuery(record, qw);
+        // 7) 记录过程日志并返回
         semanticProcessLogger.log(record);
         return affected;
     }
@@ -202,11 +221,14 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
         // 3) 权限上下文初始化
         semanticPermissionContextLoader.loadPermissionContext(record);
 
-        // 4) 数据完整性
+        // 4) 数据完整性校验
         semanticDataIntegrityValidator.validate(record);
 
-        // 5) 调用服务层：条件更新并返回更新后的结果列表（Map）
-        List<Map<String, Object>> result = semanticDataCrudService.updateByCondition(record, updates);
+        // 5) 构建条件查询包装器（仅条件，不应用数据权限）
+        List<SemanticFieldSchemaDTO> fields = record.getEntitySchema().getFields();
+        QueryWrapper qw = QueryWrapper.create();
+        semanticQueryConditionBuilder.apply(qw, fields, cond, null);
+        List<Map<String, Object>> result = semanticDataCrudService.updateByQuery(record, updates, qw);
 
         // 6) 转换为语义值对象列表
         List<SemanticEntityValueDTO> values = convertToValues(record.getEntitySchema(), result);
@@ -275,11 +297,14 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
 
     @Override
     public List<SemanticFieldSchemaDTO> buildEntityFieldsSchemaByTableName(List<String> fieldUuids) {
+        // 1) 初始化字段模型列表
         List<SemanticFieldSchemaDTO> list = new ArrayList<>();
         if (fieldUuids == null || fieldUuids.isEmpty()) { return list; }
+        // 2) 遍历字段UUID列表并查询字段信息
         for (String uuid : fieldUuids) {
             MetadataEntityFieldDO f = fieldCoreService.getEntityFieldByUuid(uuid);
             if (f == null) { continue; }
+            // 3) 构建字段模型并加入列表
             SemanticFieldSchemaDTO s = new SemanticFieldSchemaDTO();
             s.setId(f.getId());
             s.setFieldUuid(f.getFieldUuid());
@@ -296,39 +321,41 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
             s.setDictTypeId(f.getDictTypeId());
             list.add(s);
         }
+        // 4) 返回字段模型列表
         return list;
     }
 
     private QueryWrapper buildPageQueryWrapper(SemanticRecordDTO recordDTO, QueryWrapper queryWrapper) {
+        // 1) 初始化 QueryWrapper
         if (queryWrapper == null) { queryWrapper = QueryWrapper.create(); }
+        // 2) 提取字段、过滤条件与排序规则
         List<SemanticFieldSchemaDTO> fields = recordDTO.getEntitySchema().getFields();
         SemanticConditionDTO condition = recordDTO.getRecordContext().getFilters();
         List<SemanticSortRuleDTO> sortBy = recordDTO.getRecordContext().getSortBy();
+        // 3) 应用过滤与排序到查询包装器
         semanticQueryConditionBuilder.apply(queryWrapper, fields, condition, sortBy);
+        // 4) 返回构建完成的 QueryWrapper
         return queryWrapper;
     }
 
     private SemanticRecordDTO buildPageRecord(SemanticPageConditionVO body) {
+        // 1) 构建分页请求体 VO
         SemanticPageBodyVO pageBody = new SemanticPageBodyVO();
+        // 2) 填充分页与排序参数
         pageBody.setPageNo(body.getPageNo());
         pageBody.setPageSize(body.getPageSize());
         pageBody.setSortBy(body.getSortBy());
         pageBody.setFilters(body.getSemanticConditionDTO());
+        // 3) 组装 RecordDTO（包含权限上下文与操作类型）
         return semanticMergeRecordAssembler.assemblePageBody(body.getTableName(), pageBody, null, null,
                 SemanticMethodCodeEnum.GET_PAGE, MetadataDataMethodOpEnum.GET_PAGE);
     }
 
-    //TODO: 查询不需要数据权限检验
-    private QueryWrapper buildPageQuery(SemanticRecordDTO record) {
-        // QueryWrapper qw = semanticQueryPermissionHelper.applyQueryPermissionFilter(null,
-        //         record.getRecordContext().getPermissionContext(),
-        //         record.getEntitySchema().getFields());
-        return buildPageQueryWrapper(record, new QueryWrapper());
-    }
-
     private List<SemanticEntityValueDTO> convertToValues(SemanticEntitySchemaDTO entity, List<Map<String, Object>> list) {
+        // 1) 初始化结果集合
         List<SemanticEntityValueDTO> values = new ArrayList<>();
         if (list == null) { return values; }
+        // 2) 遍历原始结果行并构建 Row
         for (Map<String, Object> m : list) {
             Row r = new Row();
             if (entity != null && entity.getFields() != null) {
@@ -337,17 +364,23 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
                     if (name != null && m.containsKey(name)) { r.put(name, m.get(name)); }
                 }
             }
+            // 3) 转换 Row 为语义值对象并加入结果
             values.add(semanticValueAssembler.toEntityValue(entity, r));
         }
+        // 4) 返回语义值对象集合
         return values;
     }
 
     private SemanticRecordDTO buildDeleteRecord(SemanicTargetConditionVO body) {
+        // 1) 构建目标请求体 VO
         SemanticTargetBodyVO target = new SemanticTargetBodyVO();
+        // 2) 组装 RecordDTO（包含操作类型与权限上下文）
         SemanticRecordDTO record = semanticMergeRecordAssembler.assembleTargetBody(body.getTableName(), target, null, null,
                 SemanticMethodCodeEnum.DELETE,
                 MetadataDataMethodOpEnum.DELETE);
+        // 3) 设置过滤条件到上下文
         record.getRecordContext().setFilters(body.getSemanticConditionDTO());
+        // 4) 返回构建完成的 RecordDTO
         return record;
     }
 
