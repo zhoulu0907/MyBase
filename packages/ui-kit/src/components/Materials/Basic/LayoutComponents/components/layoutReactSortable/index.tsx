@@ -70,12 +70,12 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
     const itemType = e.item.getAttribute('data-cp-type');
     const itemDisplayName = e.item.getAttribute('data-cp-displayname');
 
-    const entityName = e.item.getAttribute('data-entity-name');
+    const tableName = e.item.getAttribute('data-table-name');
     const fieldName = e.item.getAttribute('data-field-name');
 
     // 子表字段不允许
     if (
-      (entityName && entityName !== mainEntity.entityName) ||
+      (tableName && tableName !== mainEntity.tableName) ||
       itemType === ENTITY_COMPONENT_TYPES.MAIN_ENTITY ||
       itemType === ENTITY_COMPONENT_TYPES.SUB_ENTITY
     ) {
@@ -89,7 +89,7 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
     schema.config = schemaConfig;
     schema.config.cpName = itemDisplayName;
     schema.config.id = cpID;
-    schema.config.dataField = entityName && fieldName ? [entityName, fieldName] : [];
+    schema.config.dataField = tableName && fieldName ? [tableName, fieldName] : [];
 
     const props = {
       id: cpID,
@@ -181,7 +181,7 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
 
           schema.config.cpName = field.displayName;
           schema.config.id = cpID;
-          schema.config.dataField = [item.entityName, field.fieldName];
+          schema.config.dataField = [item.tableName, field.fieldName];
           schema.config.label.text = field.displayName;
           const props = {
             id: cpID,
@@ -196,7 +196,7 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
         }
       } else if (item.type == ENTITY_TYPE_VALUE.SUB || item.entityType === ENTITY_TYPE.SUB) {
         // 子表业务实体
-        const cpName = item.entityName || '子表单';
+        const cpName = item.tableName || '子表单';
         const cpType = FORM_COMPONENT_TYPES.SUB_TABLE;
         const cpID = `${cpType}-${uuidv4()}`;
 
@@ -300,7 +300,7 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
           subSchema.config.label.text = ele.displayName;
           subSchema.config.label.display = false;
           subSchema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT];
-          subSchema.config.dataField = [item.entityName, ele.fieldName];
+          subSchema.config.dataField = [item.tableName, ele.fieldName];
           subSchema.config.width = WIDTH_VALUES[WIDTH_OPTIONS.FULL];
           const subProps = {
             id: subId,

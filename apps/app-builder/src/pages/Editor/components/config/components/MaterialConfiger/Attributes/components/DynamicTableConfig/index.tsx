@@ -1,12 +1,11 @@
 import { Button, Checkbox, Dropdown, Form, Input, InputNumber, Menu, Message, Select } from '@arco-design/web-react';
 import { IconDelete, IconDragDotVertical } from '@arco-design/web-react/icon';
 import { FilterEntityFields, getEntityFields, type MetadataEntityField, type MetadataEntityPair } from '@onebase/app';
-import { ENTITY_FIELD_TYPE, getPopupContainer, useAppEntityStore } from '@onebase/ui-kit';
+import { CONFIG_TYPES, ENTITY_FIELD_TYPE, getPopupContainer, useAppEntityStore } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
-import { registerConfigRenderer } from '../../registry';
-import { CONFIG_TYPES } from '@onebase/ui-kit';
 import { ReactSortable } from 'react-sortablejs';
 import styles from '../../index.module.less';
+import { registerConfigRenderer } from '../../registry';
 
 const FormItem = Form.Item;
 export interface DynamicTableConfigProps {
@@ -182,7 +181,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
             <div className={styles.tableColumnList}>
               <ReactSortable
                 list={configs[columnsKey]}
-                setList={() => {}}
+                setList={() => { }}
                 group={{
                   name: 'table-col-item'
                 }}
@@ -462,5 +461,11 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
 export default DynamicTableConfig;
 
 registerConfigRenderer(CONFIG_TYPES.TABLE_DATA, ({ id, handleMultiPropsChange, handlePropsChange, item, configs }) => (
-  <DynamicTableConfig id={id} handleMultiPropsChange={handleMultiPropsChange} handlePropsChange={handlePropsChange} item={item} configs={configs} />
+  <DynamicTableConfig
+    id={id}
+    handleMultiPropsChange={handleMultiPropsChange}
+    handlePropsChange={handlePropsChange}
+    item={item}
+    configs={configs}
+  />
 ));

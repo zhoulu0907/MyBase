@@ -1,12 +1,10 @@
 // import ExecuteFlows from '@/utils/flow';
 import { Button, Form, PopupSwiper, Toast } from '@arco-design/mobile-react';
 import { useForm } from '@arco-design/mobile-react/esm/form';
-
 import {
   CATEGORY_TYPE,
+  dataMethodCreateV2,
   dataMethodData,
-  dataMethodInsert,
-  dataMethodUpdate,
   getEntityFieldsWithChildren,
   getPageSetId,
   getPageSetMetaData,
@@ -16,8 +14,7 @@ import {
   type AppEntityField,
   type DataMethodParam,
   type GetPageSetIdReq,
-  type InsertMethodParams,
-  type UpdateMethodParams
+  type InsertMethodV2Params
 } from '@onebase/app';
 import { pagesRuntimeSignal } from '@onebase/common';
 
@@ -76,7 +73,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   const [pageSetId, setPageSetId] = useState('');
   const [pageType, setPageType] = useState('');
   const [mainMetaData, setMainMetaData] = useState<string>('');
-
+  const [tableName, setTableName] = useState<string>('');
   const [editTargetId, setEditTargetId] = useState('');
 
   // 当前时间戳
@@ -91,12 +88,14 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
   // 获取主表字段和子表字段
   const getMainMetaData = async (pageSetId: string) => {
-    const mainMetaData = await getPageSetMetaData({ pageSetId: pageSetId });
-    console.log('mainMetaData: ', mainMetaData);
+    const mainMetaDataId = await getPageSetMetaData({ pageSetId: pageSetId });
+    console.log('mainMetaDataId: ', mainMetaDataId);
     setMainMetaData(mainMetaData);
 
-    const entityWithChildren = await getEntityFieldsWithChildren(mainMetaData);
+    const entityWithChildren = await getEntityFieldsWithChildren(mainMetaDataId);
     console.log('当前主表及所有子表数据: ', entityWithChildren);
+
+    setTableName(entityWithChildren.tableName);
 
     setMainMetaDataFields(entityWithChildren.parentFields);
     setSubEntities(entityWithChildren.childEntities);
@@ -110,10 +109,11 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   }, [menuId]);
 
   useEffect(() => {
-    if (editTargetId && mainMetaData && mainMetaDataFields.value.length > 0) {
-      handleGetData(mainMetaData, editTargetId);
+    if (editTargetId && tableName && mainMetaDataFields.value.length > 0) {
+      // TODO: mainMetaData 换成 entityName
+      //   handleGetData(mainMetaData, editTargetId);
     }
-  }, [mainMetaData, mainMetaDataFields.value]);
+  }, [tableName, mainMetaDataFields.value]);
 
   useEffect(() => {
     if (pageSetId) {
@@ -155,11 +155,11 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       console.log('key: ', key, '   value: ', value);
 
       // 处理主表逻辑
-      const field = (mainMetaDataFields.value || []).find((f: AppEntityField) => f.fieldId == key);
+      const field = (mainMetaDataFields.value || []).find((f: AppEntityField) => f.fieldName == key);
       // listPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN]
       if (field) {
         // console.log('field: ', field);
-        formData[field.fieldId] = value;
+        formData[field.fieldName] = value;
         const filterType = ['IMAGE', 'FILE'];
         if (filterType.includes(field.fieldType) && Array.isArray(value)) {
           formData[field.fieldId] = value.map((item: any) => {
@@ -226,24 +226,26 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     console.log('editTargetId: ', editTargetId);
 
     if (editTargetId) {
-      const req: UpdateMethodParams = {
-        menuId: menuId,
-        entityId: mainMetaData,
-        id: editTargetId,
-        data: formData,
-        subEntities: subFormData
-      };
-      const res = await dataMethodUpdate(req);
-      console.log(res);
+      // TODO: mainMetaData 换成 entityName, 接口用V2的
+
+      // const req: UpdateMethodParams = {
+      //   menuId: menuId,
+      //   entityId: mainMetaData,
+      //   id: editTargetId,
+      //   data: formData,
+      //   subEntities: subFormData
+      // };
+      // const res = await dataMethodUpdate(req);
+      // console.log(res);
 
       const updateFlows = (flowRes || []).filter(
         (ele: any) => ele.recordTriggerEvents && ele.recordTriggerEvents.includes(TRIGGER_EVENTS.UPDATE)
       );
       setFlows(updateFlows);
-      if (res) {
-        Toast.success('更新成功');
-        setPageType(EDITOR_TYPES.LIST_EDITOR);
-      }
+      // if (res) {
+      //   Toast.success('更新成功');
+      //   setPageType(EDITOR_TYPES.LIST_EDITOR);
+      // }
       setEditTargetId('');
       setDrawerVisible(false);
       setRefresh(Date.now());
@@ -263,15 +265,22 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
           res = await fetchSubmitInstance(reqFlow);
           setPageType(EDITOR_TYPES.FORM_EDITOR);
         } else {
-          const req: InsertMethodParams = {
-            menuId: menuId,
-            entityId: mainMetaData,
-            data: formData,
-            subEntities: subFormData
-          };
-          res = await dataMethodInsert(req);
+          // const req: InsertMethodParams = {
+          //   menuId: menuId,
+          //   entityId: mainMetaData,
+          //   data: formData,
+          //   subEntities: subFormData
+          // };
+          console.log(formData);
+          const req: InsertMethodV2Params = { ...formData };
+          console.log(req);
 
-          setPageType(EDITOR_TYPES.LIST_EDITOR);
+          res = await dataMethodCreateV2(tableName, menuId, req);
+          console.log(res);
+
+          // res = await dataMethodInsert(req);
+
+          // setPageType(EDITOR_TYPES.LIST_EDITOR);
         }
 
         const createFlows = (flowRes || []).filter(

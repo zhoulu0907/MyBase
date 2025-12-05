@@ -329,6 +329,7 @@ export default function EditorHeader() {
     if (entityWithChildren) {
       setMainEntity({
         entityId: entityWithChildren.entityId,
+        tableName: entityWithChildren.tableName,
         entityName: entityWithChildren.entityName,
         entityType: ENTITY_TYPE.MAIN,
 
@@ -344,6 +345,7 @@ export default function EditorHeader() {
         );
         const subEntities = entityWithChildren.childEntities.map((entity: ChildEntity, index: number) => ({
           entityId: entity.childEntityId,
+          tableName: entity.childTableName,
           entityName: entity.childEntityName,
           entityType: ENTITY_TYPE.SUB,
           fields: allChildFields[index]
@@ -598,11 +600,11 @@ export default function EditorHeader() {
             创建流程
           </Button>
         )}
-        {partPreviewVisible && <PartPreview
+        <PartPreview
           pageType={activeTab}
           visible={partPreviewVisible}
           setVisible={() => setPartPreviewVisible(false)}
-        />}
+        />
       </div>
 
       {/* 重命名弹窗 */}
