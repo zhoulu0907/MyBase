@@ -138,14 +138,14 @@ public class BpmExecServiceImpl implements BpmExecService {
         }
 
         if (instance.getBusinessId() == null) {
-            throw exception(ErrorCodeConstants.FLOW_NOT_BIND_ENTITY_ID);
+            throw exception(ErrorCodeConstants.FLOW_NOT_BIND_ENTITY);
         }
 
         Long entityDataId = Long.parseLong(instance.getBusinessId());
 
         // 忽略前端传的entityDataId，使用流程实例绑定的实体数据ID
         if (reqVO.getEntity() != null) {
-            reqVO.getEntity().setId(entityDataId);
+            reqVO.getEntity().getData().put("id", entityDataId);
         }
 
         String taskNodeCode = task.getNodeCode();
@@ -155,16 +155,16 @@ public class BpmExecServiceImpl implements BpmExecService {
             throw exception(ErrorCodeConstants.FLOW_NODE_NOT_EXISTS);
         }
 
-        // 校验实体ID
+        // 校验实体表名
         if (reqVO.getEntity() != null) {
-            Long entityId = MapUtils.getLong(instance.getVariableMap(), BpmConstants.VAR_ENTITY_ID_KEY);
+            String tableName = MapUtils.getString(instance.getVariableMap(), BpmConstants.VAR_ENTITY_TABLE_NAME_KEY);
 
-            if (entityId == null) {
-                throw exception(ErrorCodeConstants.FLOW_NOT_BIND_ENTITY_ID);
+            if (tableName == null) {
+                throw exception(ErrorCodeConstants.FLOW_NOT_BIND_ENTITY);
             }
 
-            if (!entityId.equals(reqVO.getEntity().getEntityId())) {
-                throw exception(ErrorCodeConstants.INVALID_ENTITY_ID);
+            if (!tableName.equals(reqVO.getEntity().getTableName())) {
+                throw exception(ErrorCodeConstants.INVALID_ENTITY_TABLE_NAME);
             }
         }
 

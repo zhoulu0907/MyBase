@@ -75,9 +75,9 @@ public interface ErrorCodeConstants {
 
     ErrorCode FLOW_TASK_NOT_EXISTS = new ErrorCode(1_009_002_013, "流程任务不存在或已被处理");
 
-    ErrorCode FLOW_NOT_BIND_ENTITY_ID = new ErrorCode(1_009_002_014, "流程未绑定实体ID");
+    ErrorCode FLOW_NOT_BIND_ENTITY = new ErrorCode(1_009_002_014, "流程未绑定实体");
 
-    ErrorCode INVALID_ENTITY_ID = new ErrorCode(1_009_002_015, "无效的实体ID");
+    ErrorCode INVALID_ENTITY_TABLE_NAME = new ErrorCode(1_009_002_015, "无效的实体表名");
 
     ErrorCode APPROVER_NODE_REQUIRED_ENABLED_BTN = new ErrorCode(1_009_002_016, "审批节点至少开启一个按钮");
 

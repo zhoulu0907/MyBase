@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.bpm.core.dto.node.base;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -26,6 +27,7 @@ public class FieldPermCfgDTO {
     /**
      * 字段配置列表
      */
+    @Valid
     private List<FieldConfigDTO> fieldConfigs;
 
     @Schema(description = "字段配置视图")
