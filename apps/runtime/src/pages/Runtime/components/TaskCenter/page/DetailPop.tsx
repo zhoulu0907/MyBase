@@ -256,7 +256,7 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
           </Row>
           <div className="draw-content">
             <div className="draw-left">
-              <PreviewContainer ref={formRef} pageSetId={rowData?.businessUuid} detailData={detailData} />
+              <PreviewContainer ref={formRef} pageSetId={rowData?.pageSetId} detailData={detailData} />
             </div>
             {isShowRight ? (
               <div className="draw-right">
