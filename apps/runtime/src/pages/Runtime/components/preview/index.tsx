@@ -29,9 +29,10 @@ import ListRuntime from './ListRuntime';
 interface PreviewProps {
   menuId: string;
   runtime: boolean;
+  menuUuid: string;
 }
 
-const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
+const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid }) => {
   useSignals();
 
   const [form] = Form.useForm();
@@ -213,9 +214,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
           const reqFlow = {
             isDraft: isSave,
             formName: curPage?.value?.pages?.find((page: any) => page.pageType === CATEGORY_TYPE.FORM)?.pageName || '',
-            businessId: curPage?.value?.id,
+            businessUuid: menuUuid,
             entity: {
-              entityId: mainMetaData,
+              tableName: tableName,
               data: formData
             }
           };
