@@ -252,9 +252,9 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
             }
 
             // 应用数据权限过滤
-            if (permissionContext != null && loginUserCtx != null) {
+/*            if (permissionContext != null && loginUserCtx != null) {
                 permissionQueryHelper.applyQueryPermissionFilter(configs, permissionContext, loginUserCtx, fields);
-            }
+            }*/
 
             Set<String> fieldNames = fields.stream().map(MetadataEntityFieldDO::getFieldName).collect(Collectors.toSet());
             if (StringUtils.hasText(sortField) && fieldNames.contains(sortField)) {
@@ -316,9 +316,9 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
             }
 
             // 应用数据权限过滤到 count 查询
-            if (permissionContext != null && loginUserCtx != null) {
+/*            if (permissionContext != null && loginUserCtx != null) {
                 permissionQueryHelper.applyQueryPermissionFilter(countConfigs, permissionContext, loginUserCtx, fields);
-            }
+            }*/
 
             long total = temporaryService.count(quoteTableName(entity.getTableName()), countConfigs);
             DataSet dataSet = temporaryService.querys(quoteTableName(entity.getTableName()), configs);
