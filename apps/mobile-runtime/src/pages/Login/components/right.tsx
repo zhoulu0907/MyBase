@@ -18,13 +18,14 @@ import {
 import { getApplication } from '@onebase/app';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { DynamicIcon, menuIconList, PUBLISH_MODULE } from '@onebase/common';
+import { DynamicIcon, PUBLISH_MODULE } from '@onebase/common';
 import { useI18n } from '../../../hooks/useI18n';
 import { useRememberMe } from '../../../hooks/useRememberMe';
 import styles from '../index.module.less';
 import { ValidatorType } from '@arco-design/mobile-utils';
 import logoIcon from '../../../assets/images/logo-icon.svg';
 import { IconEyeInvisible, IconEyeVisible } from '@arco-design/mobile-react/esm/icon';
+import { appIconMap } from '@onebase/ui-kit';
 
 interface APP_INFO {
   appName: string;
@@ -355,7 +356,7 @@ const Right: React.FC = () => {
     }
     return (
       <DynamicIcon
-        IconComponent={menuIconList.find((icon) => icon.code === appInfo.iconName)?.icon}
+        IconComponent={appIconMap[appInfo.iconName as keyof typeof appIconMap]}
         theme="filled"
         size="0.88rem"
         fill="#fff"
