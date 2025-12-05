@@ -91,9 +91,10 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   }, [menuId]);
 
   useEffect(() => {
+    // 获取详情数据
     if (editTargetId && tableName && mainMetaDataFields.value.length > 0) {
-      // TODO(mickey): mainMetaData 换成 entityName
-      //   handleGetData(mainMetaData, editTargetId);
+      // TODO(mickey): 获取详情数据
+      // handleGetData(mainMetaData, editTargetId);
     }
   }, [tableName, mainMetaDataFields.value]);
 

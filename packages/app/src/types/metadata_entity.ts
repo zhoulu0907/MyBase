@@ -12,7 +12,7 @@ export const ENTITY_TYPE_VALUE = {
 
 export interface MetadataEntityPair {
   entityId: string;
-
+  tableName: string;
   entityName: string;
 }
 
