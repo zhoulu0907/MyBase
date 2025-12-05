@@ -311,7 +311,7 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
         TenantUtils.executeIgnore(() -> {
 
             // 先应用存储策略（不包含需要 recordId 的策略，如 DATA_SELECTION）
-            applyFieldStorageStrategies(processedData, fields, FieldValueTransformMode.STORE, null);
+//            applyFieldStorageStrategies(processedData, fields, FieldValueTransformMode.STORE, null);
 
             // 7. 执行插入
             log.info("准备插入数据，processedData: {}", processedData);
@@ -355,7 +355,7 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
                 if (primaryKeyValue != null) {
                     context.setId(primaryKeyValue);
                     // 现在可以处理需要 recordId 的策略（如 DATA_SELECTION）
-                    applyFieldStorageStrategies(processedData, fields, FieldValueTransformMode.STORE, context);
+//                    applyFieldStorageStrategies(processedData, fields, FieldValueTransformMode.STORE, context);
                 }
                 super.storeData(context);// 子表处理创建嵌套内部事务
                 log.info("子表处理完成，准备提交事务");
