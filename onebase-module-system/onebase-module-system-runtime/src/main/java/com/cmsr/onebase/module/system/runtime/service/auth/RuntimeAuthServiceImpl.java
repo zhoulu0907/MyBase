@@ -233,7 +233,7 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
             AdminUserDO user = mobileAuthenticate(reqVO.getMobile(), reqVO.getPassword());
 
             // 验证企业下，应用是否禁用，是否过期
-            corpAppRelationService.validCorpAppRelationStatusOrExpire(user.getCorpId(),reqVO.getAppId());
+            corpAppRelationService.validCorpAppRelationStatusOrExpireTime(user.getCorpId(),reqVO.getAppId());
 
             authLoginRespVO.set(createAfterLoginSuccess(user.getUserType(), user.getCorpId(), reqVO.getAppId(), user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE));
             LogRecordContext.putVariable("user", user);

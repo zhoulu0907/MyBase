@@ -268,7 +268,7 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
     }
 
     @Override
-    public void validCorpAppRelationStatusOrExpire(Long corpId, Long appId) {
+    public void validCorpAppRelationStatusOrExpireTime(Long corpId, Long appId) {
         List<CorpAppRelationDO>  corpAppRelationDOList= corpAppRelationRepository.findApplicationByCordIdAndAppId(corpId,appId);
         // 未查出来数据，说明已过期
         if (CollectionUtils.isEmpty(corpAppRelationDOList)){

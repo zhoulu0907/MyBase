@@ -87,5 +87,5 @@ public interface CorpAppRelationService {
      * @param corpId
      * @param appId
      */
-    void validCorpAppRelationStatusOrExpire(Long corpId, Long appId);
+    void validCorpAppRelationStatusOrExpireTime(Long corpId, Long appId);
 }
