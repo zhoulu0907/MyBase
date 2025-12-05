@@ -4,7 +4,7 @@ import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
 import com.cmsr.onebase.framework.common.biz.system.permission.PermissionCommonApi;
 import com.cmsr.onebase.framework.security.config.SecurityProperties;
 import com.cmsr.onebase.framework.security.core.context.TransmittableThreadLocalSecurityContextHolderStrategy;
-import com.cmsr.onebase.framework.security.core.filter.BuildAuthenticationFilter;
+import com.cmsr.onebase.framework.security.build.filter.BuildAuthenticationFilter;
 import com.cmsr.onebase.framework.security.core.handler.AccessDeniedHandlerImpl;
 import com.cmsr.onebase.framework.security.core.handler.AuthenticationEntryPointImpl;
 import com.cmsr.onebase.framework.security.service.SystemPermissionService;
