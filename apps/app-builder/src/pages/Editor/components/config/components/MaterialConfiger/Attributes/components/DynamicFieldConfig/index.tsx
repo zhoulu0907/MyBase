@@ -76,6 +76,8 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
         label: field.displayName
       }));
 
+    console.log('mainEntityTree', mainEntityTree);
+
     const subEntityTree = subEntities.entities.map((entity: AppEntity) => ({
       value: entity.tableName,
       label: entity.entityName,
