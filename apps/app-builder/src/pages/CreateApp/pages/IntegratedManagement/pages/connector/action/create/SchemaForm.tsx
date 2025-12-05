@@ -11,7 +11,7 @@ import {
   type FormInstance
 } from '@arco-design/web-react';
 import { IconDelete, IconPlus } from '@arco-design/web-react/icon';
-import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
+import { ENTITY_FIELD_TYPE, getPopupContainer } from '@onebase/ui-kit';
 import { useEffect } from 'react';
 
 interface SchemaFormProps {
@@ -30,6 +30,7 @@ const SchemaForm: React.FC<SchemaFormProps> = ({ form, schema, fieldPrefix = 'sc
     ENTITY_FIELD_TYPE.NUMBER,
     ENTITY_FIELD_TYPE.DATE,
     ENTITY_FIELD_TYPE.DATETIME,
+    ENTITY_FIELD_TYPE.TIME,
     ENTITY_FIELD_TYPE.LONG_TEXT,
     ENTITY_FIELD_TYPE.TEXT,
     ENTITY_FIELD_TYPE.BOOLEAN
@@ -65,19 +66,35 @@ const SchemaForm: React.FC<SchemaFormProps> = ({ form, schema, fieldPrefix = 'sc
       case ENTITY_FIELD_TYPE.DATE.VALUE:
         return (
           <Form.Item field={field.field + '.value'}>
-            <DatePicker format="YYYY-MM-DD" style={{ width: '100%' }} placeholder="默认值" />
+            <DatePicker
+              getPopupContainer={getPopupContainer}
+              format="YYYY-MM-DD"
+              style={{ width: '100%' }}
+              placeholder="默认值"
+            />
           </Form.Item>
         );
       case ENTITY_FIELD_TYPE.DATETIME.VALUE:
         return (
           <Form.Item field={field.field + '.value'}>
-            <DatePicker showTime format="YYYY-MM-DD HH:mm:ss" style={{ width: '100%' }} placeholder="默认值" />
+            <DatePicker
+              getPopupContainer={getPopupContainer}
+              showTime
+              format="YYYY-MM-DD HH:mm:ss"
+              style={{ width: '100%' }}
+              placeholder="默认值"
+            />
           </Form.Item>
         );
       case ENTITY_FIELD_TYPE.TIME.VALUE:
         return (
           <Form.Item field={field.field + '.value'}>
-            <TimePicker format="HH:mm:ss" style={{ width: '100%' }} placeholder="默认值" />
+            <TimePicker
+              getPopupContainer={getPopupContainer}
+              format="HH:mm:ss"
+              style={{ width: '100%' }}
+              placeholder="默认值"
+            />
           </Form.Item>
         );
       case ENTITY_FIELD_TYPE.BOOLEAN.VALUE:
@@ -124,6 +141,7 @@ const SchemaForm: React.FC<SchemaFormProps> = ({ form, schema, fieldPrefix = 'sc
                 <Grid.Col span={7}>
                   <Form.Item field={field.field + '.type'}>
                     <Select
+                      getPopupContainer={getPopupContainer}
                       placeholder="字段类型"
                       options={FIELD_TYPES}
                       onChange={() => {
