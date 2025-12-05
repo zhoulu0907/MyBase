@@ -128,10 +128,10 @@ public class DataMethodApiHelper {
         return condition;
     }
 
-    private static SemanticConditionDTO extractFromOperator(OpEnum operator, List<Object> valueArray) {
+    public static SemanticConditionDTO extractFromOperator(OpEnum operator, List<?> valueArray) {
         SemanticConditionDTO condition = new SemanticConditionDTO();
         condition.setNodeType(SemanticConditionNodeTypeEnum.CONDITION);
-        condition.setFieldValue(valueArray);
+        condition.setFieldValue((List<Object>) valueArray);
         switch (operator) {
             case EQUALS -> { // K = V
                 condition.setOperator(SemanticOperatorEnum.EQ);
@@ -199,11 +199,11 @@ public class DataMethodApiHelper {
                 SemanticConditionDTO ltCondition = new SemanticConditionDTO();
                 ltCondition.setNodeType(SemanticConditionNodeTypeEnum.CONDITION);
                 ltCondition.setOperator(SemanticOperatorEnum.LT);
-                ltCondition.setFieldValue(List.of(valueArray.get(0)));
+                ltCondition.setFieldValue(List.of(valueArray.get(1)));
                 SemanticConditionDTO gtCondition = new SemanticConditionDTO();
                 gtCondition.setNodeType(SemanticConditionNodeTypeEnum.CONDITION);
                 gtCondition.setOperator(SemanticOperatorEnum.GT);
-                gtCondition.setFieldValue(List.of(valueArray.get(1)));
+                gtCondition.setFieldValue(List.of(valueArray.get(0)));
                 condition.setChildren(List.of(ltCondition, gtCondition));
             }
         }
