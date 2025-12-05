@@ -98,7 +98,12 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter {
         }
 
         // 继续过滤链
-        chain.doFilter(request, response);
+        try {
+            chain.doFilter(request, response);
+        } finally {
+            // 清理租户信息
+            TenantContextHolder.clear();
+        }
     }
 
     private LoginUser buildLoginUserByToken(String runMode, String token) {
