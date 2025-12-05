@@ -186,9 +186,9 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
     public PageResult<EntityRelationshipRespVO> getEntityRelationshipPage(EntityRelationshipPageReqVO pageReqVO) {
         QueryWrapper queryWrapper = entityRelationshipRepository.query();
 
-        // 添加查询条件
-        if (pageReqVO.getApplicationId() != null) {
-            queryWrapper.eq(MetadataEntityRelationshipDO::getApplicationId, pageReqVO.getApplicationId());
+        // 添加查询条件 - applicationId需要转换为Long类型
+        if (StringUtils.hasText(pageReqVO.getApplicationId())) {
+            queryWrapper.eq(MetadataEntityRelationshipDO::getApplicationId, Long.parseLong(pageReqVO.getApplicationId().trim()));
         }
 
         // 添加调试日志，查看 entityId 的值
