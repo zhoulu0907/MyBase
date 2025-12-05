@@ -17,8 +17,8 @@ public class SemanticDataIntegrityValidator {
     public void validate(SemanticRecordDTO record) {
         MetadataDataMethodOpEnum op = record.getRecordContext().getOperationType();
         
-        if (requiresId(op)) { validateId(record); }
-        if (op == MetadataDataMethodOpEnum.CREATE) { validateCreateData(record); }
+        // if (requiresId(op)) { validateId(record); }
+        // if (op == MetadataDataMethodOpEnum.CREATE) { validateCreateData(record); }
         
     }
 

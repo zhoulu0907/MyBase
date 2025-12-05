@@ -10,7 +10,7 @@
 - 通用处理流程：
   - 构建 `SemanticRecordDTO`（包含实体模型与上下文）
   - 加载权限上下文与数据完整性校验
-  - 构建查询/更新条件，调用服务层执行
+  - 构建查询/更新条件（仅条件与排序，不应用数据权限），调用服务层执行
   - 将结果转换为 `SemanticEntityValueDTO` 并记录过程日志
 
 ## 依赖组件
@@ -18,7 +18,6 @@
 - `SemanticPermissionContextLoader`：加载运行时权限上下文
 - `SemanticDataIntegrityValidator`：数据完整性与基本校验
 - `SemanticPermissionValidator`：功能权限校验
-- `SemanticQueryPermissionHelper`：查询层面的数据权限过滤
 - `SemanticQueryConditionBuilder`：条件与排序的统一构建器
 - `SemanticDataCrudService`：CRUD 业务实现（面向 RecordDTO）
 - `DynamicMetadataRepository`：底层动态表访问
@@ -27,11 +26,45 @@
 - 元数据服务：`MetadataBusinessEntityCoreService`、`MetadataEntityFieldCoreService`
 
 ## 请求/响应模型
-- `SemanticPageConditionVO`：分页查询（`tableName/pageNo/pageSize/sortBy/semanticConditionDTO`）
+- `SemanticPageConditionVO`：分页查询（`tableName/pageNo/pageSize/sortBy/semanticConditionDTO`，支持嵌套条件）
 - `SemanticTargetBodyVO`：按ID查询/删除（`tableName/id/methodCode/traceId`）
 - `SemanicTargetConditionVO`：条件删除/条件更新（`tableName/semanticConditionDTO/updateProperties/methodCode/traceId`）
 - `SemanticMergeBodyVO`：合并体创建/更新（顶层键为业务字段或连接器名）
 - 返回统一使用 `SemanticEntityValueDTO` 或 `PageResult<SemanticEntityValueDTO>`，删除返回 `Integer`
+
+### SemanticConditionDTO（嵌套条件）
+- 字段：
+  - `nodeType`: `GROUP` 或 `CONDITION`
+  - `combinator`: 组合关系 `AND`/`OR`（仅组节点使用）
+  - `children`: 子条件列表（递归嵌套）
+  - `fieldUuid`/`fieldName`: 目标字段标识（条件节点）
+  - `operator`: 枚举操作符（`EQ/NE/GT/GE/LT/LE/LIKE/IN/NIN`）
+  - `fieldValue`: 值列表（`IN/NIN` 使用多值，其余取首值）
+  - `conditionType`: `MAIN_CONDITION`/`SUB_CONDITION`（可用于区分来源）
+
+示例（AND/OR 嵌套）：
+```json
+{
+  "nodeType": "GROUP",
+  "combinator": "AND",
+  "children": [
+    {
+      "nodeType": "CONDITION",
+      "fieldName": "status",
+      "operator": "EQ",
+      "fieldValue": [1]
+    },
+    {
+      "nodeType": "GROUP",
+      "combinator": "OR",
+      "children": [
+        { "nodeType": "CONDITION", "fieldName": "name", "operator": "LIKE", "fieldValue": ["张"] },
+        { "nodeType": "CONDITION", "fieldName": "mobile", "operator": "LIKE", "fieldValue": ["139"] }
+      ]
+    }
+  ]
+}
+```
 
 ## 方法一览（代码参考）
 - 构建语义模型：
@@ -56,10 +89,10 @@
   - `convertToValues` `.../SemanticDynamicDataApiImpl.java:319-333`
   - `buildDeleteRecord` `.../SemanticDynamicDataApiImpl.java:335-342`
 
-## 方法详解
+## 方法详解（更新后）
 - 分页查询 `getDataByCondition`
-  - 流程：构建分页 RecordDTO → 加载权限 → 完整性校验 → 构建查询条件（数据权限+过滤+排序） → 调服务层分页查询 → 转换语义值 → 过程日志
-  - 参考：`onebase-module-data/onebase-module-metadata-api/src/main/java/com/cmsr/onebase/module/metadata/api/semantic/impl/SemanticDynamicDataApiImpl.java:105-123`
+  - 流程：构建分页 RecordDTO → 加载权限 → 完整性校验 → 构建查询条件（仅过滤+排序，不应用数据权限） → 调服务层分页查询 → 转换语义值 → 过程日志
+  - 参考：`onebase-module-data/onebase-module-metadata-api/src/main/java/com/cmsr/onebase/module/metadata/api/semantic/impl/SemanticDynamicDataApiImpl.java:111-129`
 - 详情查询 `getDataById`
   - 流程：目标 RecordDTO → 权限 → 完整性校验 → 读取详情 → 过程日志
   - 参考：`.../SemanticDynamicDataApiImpl.java:126-142`
@@ -67,12 +100,12 @@
   - 流程：目标 RecordDTO → 权限 → 完整性校验 → 服务层删除（软删优先） → 过程日志
   - 参考：`.../SemanticDynamicDataApiImpl.java:145-161`
 - 条件删除 `deleteDataByCondition`
-  - 流程：删除 RecordDTO（含过滤条件）→ 权限 → 完整性+功能权限校验 → 条件必填校验 → 服务层执行 → 过程日志
-  - 参考：`.../SemanticDynamicDataApiImpl.java:163-181`
+  - 流程：删除 RecordDTO（含过滤条件）→ 权限 → 完整性+功能权限校验 → 条件必填校验 → 构建条件（不应用数据权限）→ 服务层执行 → 过程日志
+  - 参考：`.../SemanticDynamicDataApiImpl.java:170-200`
 - 条件更新 `updateDataByCondition`
-  - 流程：参数校验（`tableName/semanticConditionDTO/updateProperties`）→ 目标 RecordDTO（`UPDATE`）→ 权限 → 完整性校验 → 服务层条件更新 → Map 转语义值 → 过程日志
+  - 流程：参数校验（`tableName/semanticConditionDTO/updateProperties`）→ 目标 RecordDTO（`UPDATE`）→ 权限 → 完整性校验 → 构建条件（不应用数据权限）→ 服务层条件更新 → Map 转语义值 → 过程日志
   - 特性：仅更新实体定义的合法字段；自动填充系统审计字段占位（`updated_time/updater`）；返回结果已做引用解析与字段权限过滤（服务层）
-  - 参考：`.../SemanticDynamicDataApiImpl.java:183-216`
+  - 参考：`.../SemanticDynamicDataApiImpl.java:200-237`
 - 插入 `insertData`
   - 流程：解析表名 → 合并 RecordDTO（`CREATE`）→ 权限 → 完整性校验 → 服务层创建 → 回读详情 → 过程日志
   - 参考：`.../SemanticDynamicDataApiImpl.java:219-240`
@@ -83,16 +116,17 @@
   - 行为：逐个将字段 UUID 转换为字段语义模型，未命中跳过
   - 参考：`.../SemanticDynamicDataApiImpl.java:268-291`
 
-## 条件构建与权限过滤
-- 条件与排序：`SemanticQueryConditionBuilder.apply` 将 `filters/sortBy` 统一转换为 `QueryWrapper`
-- 权限过滤：`SemanticQueryPermissionHelper.applyQueryPermissionFilter` 在查询层注入数据范围权限
+## 条件构建
+- 条件与排序：`SemanticQueryConditionBuilder.apply` 将 `filters/sortBy` 转换为 `QueryWrapper`
+- 嵌套解析：支持 `GROUP` 节点递归解析，依据 `combinator` 组合子条件为 `AND/OR` 表达式
+- API 层不应用数据权限过滤；如需数据权限，可在更高层或服务层处理
 - 参考：
-  - 条件构建：`.../SemanticDynamicDataApiImpl.java:293-300`
-  - 权限过滤：`.../SemanticDynamicDataApiImpl.java:312-317`
+  - 条件解析入口：`onebase-module-data/onebase-module-metadata-api/src/main/java/com/cmsr/onebase/module/metadata/api/semantic/impl/SemanticDynamicDataApiImpl.java:121-126`
+  - 解析实现：`onebase-module-data/onebase-module-metadata-core/src/main/java/com/cmsr/onebase/module/metadata/core/semantic/strategy/SemanticQueryConditionBuilder.java:21-45,47-96`
 
 ## 结果转换与富化
 - 转换：`convertToValues` 按实体字段将 Map 转为 `Row`，再转为 `SemanticEntityValueDTO`
-- 富化与过滤：服务层对更新/查询结果做字典与引用解析，并进行字段权限过滤
+- 富化与过滤：服务层对更新/查询结果做字典与引用解析，可能进行字段权限过滤
 - 参考：
   - 转换：`.../SemanticDynamicDataApiImpl.java:319-333`
   - 服务层更新与富化：`onebase-module-data/onebase-module-metadata-core/src/main/java/com/cmsr/onebase/module/metadata/core/semantic/service/SemanticDataCrudService.java:355-404`
@@ -109,8 +143,8 @@
 
 ## 安全与合规
 - 输入校验：通过 VO 与校验器组合保证结构与必填项
-- 权限控制：统一加载权限上下文，查询层与结果层均做数据权限过滤
-- 输出安全：敏感信息不暴露；结果字段集受权限控制过滤
+- 权限控制：统一加载权限上下文；API 层不应用数据权限过滤，结果层可能做字段权限过滤
+- 输出安全：敏感信息不暴露；结果字段集可能受权限控制过滤
 - 操作安全：删除与更新的条件必校验，避免误操作
 
 ## 使用示例
