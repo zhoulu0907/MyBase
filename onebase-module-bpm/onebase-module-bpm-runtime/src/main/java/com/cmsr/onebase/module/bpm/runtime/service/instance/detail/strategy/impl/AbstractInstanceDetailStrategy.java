@@ -74,6 +74,11 @@ public abstract class AbstractInstanceDetailStrategy<T extends BaseNodeExtDTO> i
         nonSystemFields.forEach((key, val) -> {
             fieldPermMap.putIfAbsent(key, new HashMap<>());
 
+            // 如果是子表，再加上子表本身的权限
+            if (!Objects.equals(key, tableName)) {
+                fieldPermMap.get(key).put(key, FieldUiShowModeEnum.READ.getCode());
+            }
+
             for (String s : val) {
                 fieldPermMap.get(key).put(s, FieldUiShowModeEnum.READ.getCode());
             }

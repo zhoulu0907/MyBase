@@ -74,11 +74,6 @@ public class BpmTaskDetailRespVO {
         private String tableName;
 
         /**
-         * 页面集ID
-         */
-        private Long pageSetId;
-
-        /**
          * 实体数据
          */
         private Map<String, Object> data;
