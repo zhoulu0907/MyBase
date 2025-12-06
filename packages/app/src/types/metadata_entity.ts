@@ -15,6 +15,7 @@ export const RELATION_TYPE = {
   SLAVE: 'SLAVE',
   NONE: 'NONE'
 };
+
 export interface MetadataEntityPair {
   entityId: string;
   entityUuid: string;

@@ -138,7 +138,7 @@ export interface UpdateETLFlowReq {
 
 export interface UpdateWorkflowScheduleInfoReq {
   applicationId: string;
-  workflowId: string;
+  flowUuid: string;
   flowName: string;
   scheduleStrategy: string;
   config: any;
