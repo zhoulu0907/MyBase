@@ -219,7 +219,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid })
             businessUuid: menuUuid,
             entity: {
               tableName: tableName,
-              data: formData
+              data: {...formData,...subFormData}
             }
           };
           res = await fetchSubmitInstance(reqFlow);
