@@ -307,7 +307,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       const componentSchemas = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value;
 
       for (const subEntity of subEntities.value) {
-        console.log('subEntity: ', subEntity);
         // 判断 res 对象内的 key 是否等于 subEntity.childTableName
 
         if (

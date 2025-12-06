@@ -1,19 +1,20 @@
 // 应用服务
 
+import { isRuntimeEnv } from '@onebase/common';
 import {
-  type ListRoleReq,
   type CreateRoleReq,
-  type RenameRoleReq,
-  type RoleAddUserReq,
-  type RoleDeleteUserReq,
   type DeleteRoleReq,
   type GerRoleUserReq,
   type GetDeptUserReq,
   getRoleMembersReq,
+  type ListRoleReq,
+  type RenameRoleReq,
+  RoleAddDeptReq,
+  type RoleAddUserReq,
   RoleDeleteMemberReq,
-  RoleAddDeptReq
+  type RoleDeleteUserReq
 } from '../types/role';
-import { appService } from './clients';
+import { appService, runtimeAppService } from './clients';
 
 //获取角色列表
 export const listRole = (params: ListRoleReq) => {
@@ -63,7 +64,7 @@ export const getRoleUser = (params: GerRoleUserReq) => {
 
 // 获取部门用户列表
 export const getDeptUser = (params: GetDeptUserReq) => {
-  return appService.get('/auth-role/list-dept-users', params);
+  return (isRuntimeEnv() ? runtimeAppService : appService).get('/auth-role/list-dept-users', params);
 };
 
 // 获取角色成员列表

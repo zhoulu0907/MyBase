@@ -127,6 +127,7 @@ const XTable = memo(
       headerCellStyle: { textAlign: 'center' },
       //TODO: zhoumingji ,基础组件上不要写这种样式，最好能放到样式文件里
       bodyCellStyle: { padding: '0 8px', textAlign: 'center' },
+      // TODO: mickey, 这段重构，现在太长了
       render: (_: any, record: any) => {
         if (advancedButtonPermission === BUTTON_VALUES[BUTTON_OPTIONS.HIDDEN] && !hasOperationPermission) return;
         const isDisabled =
@@ -268,7 +269,8 @@ const XTable = memo(
             bodyCellStyle: { padding: '0 12px' },
             render: (_text: any, _record: any, index: number) => {
               const componentSchemasKeys = Object.keys(fromPageComponentSchemas.value || {});
-              const columnId = column.id || column.dataIndex;
+              const columnId = column.dataIndex;
+
               const cpId = componentSchemasKeys.find((ele) => {
                 return fromPageComponentSchemas.value[ele]?.config?.dataField?.includes(columnId);
               });
@@ -455,31 +457,16 @@ const XTable = memo(
               }
             }
 
-            // 人员选择单选 TODO
-            const userSelectField = mainMetaData.parentFields.find(
-              (field: AppEntityField) => field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.USER.VALUE
-            );
-            if (userSelectField && newItem[key]) {
-              if (newItem[key]) {
-                if (typeof newItem[key] === 'string') {
-                  newItem[key] = {
-                    userID: newItem[key],
-                    userName: newItem[key]
-                  };
-                }
-              }
-            }
-
-            // 部门选择单选 TODO
-            const deptSelectField = mainMetaData.parentFields.find(
-              (field: AppEntityField) =>
-                field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.DEPARTMENT.VALUE
-            );
-            if (deptSelectField && newItem[key]) {
-              if (newItem[key]) {
-                newItem[key] = newItem[key]?.deptName || '';
-              }
-            }
+            // // 部门选择单选 TODO
+            // const deptSelectField = mainMetaData.parentFields.find(
+            //   (field: AppEntityField) =>
+            //     field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.DEPARTMENT.VALUE
+            // );
+            // if (deptSelectField && newItem[key]) {
+            //   if (newItem[key]) {
+            //     newItem[key] = newItem[key]?.deptName || '';
+            //   }
+            // }
           }
         });
 

@@ -257,14 +257,17 @@ export default function EditorHeader() {
   }, [pageInfo]);
 
   useEffect(() => {
-    if (!isEditMode && pageSetId != '') {
-      loadPageSetInfo(pageSetId);
-      setIsEditMode(true);
+    if (pageSetId != '') {
       handleGetAppInfo(pageSetId);
 
-      // 工作台设计页不获取主表数据
-      if (activeTab !== EDITOR_TYPES.WORKBENCH_EDITOR) {
-        getMainMetaData(pageSetId);
+      if (!isEditMode) {
+        loadPageSetInfo(pageSetId);
+        setIsEditMode(true);
+
+        // 工作台设计页不获取主表数据
+        if (activeTab !== EDITOR_TYPES.WORKBENCH_EDITOR) {
+          getMainMetaData(pageSetId);
+        }
       }
     }
   }, [pageSetId]);
@@ -282,6 +285,7 @@ export default function EditorHeader() {
     };
 
     const appResp = await getApplication(appReq);
+    console.log('appResp: ', appResp);
     if (appResp) {
       if (appResp.iconName) {
         setAppIcon(appResp.iconName);
