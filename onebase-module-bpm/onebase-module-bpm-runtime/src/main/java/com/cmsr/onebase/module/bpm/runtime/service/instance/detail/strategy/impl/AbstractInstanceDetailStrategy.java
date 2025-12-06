@@ -8,12 +8,11 @@ import com.cmsr.onebase.module.bpm.core.dto.node.base.FieldPermCfgDTO;
 import com.cmsr.onebase.module.bpm.core.enums.BpmConstants;
 import com.cmsr.onebase.module.bpm.core.enums.FieldPermTypeEnum;
 import com.cmsr.onebase.module.bpm.core.enums.FieldUiShowModeEnum;
+import com.cmsr.onebase.module.bpm.runtime.helper.BpmEntityHelper;
 import com.cmsr.onebase.module.bpm.runtime.service.instance.detail.strategy.InstanceDetailStrategy;
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmTaskDetailRespVO;
 import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntitySchemaDTO;
-import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO;
-import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticRelationSchemaDTO;
 import jakarta.annotation.Resource;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -33,6 +32,9 @@ import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionU
 public abstract class AbstractInstanceDetailStrategy<T extends BaseNodeExtDTO> implements InstanceDetailStrategy<T> {
     @Resource
     protected SemanticDynamicDataApi semanticDynamicDataApi;
+
+    @Resource
+    protected BpmEntityHelper bpmEntityHelper;
 
     /**
      * 填充按钮配置（节点类型相关）
@@ -63,101 +65,103 @@ public abstract class AbstractInstanceDetailStrategy<T extends BaseNodeExtDTO> i
         }
 
         SemanticEntitySchemaDTO entitySchema = semanticDynamicDataApi.buildEntitySchemaByTableName(tableName);
-        List<SemanticFieldSchemaDTO> entityFields = entitySchema.getFields();
-
-        // 构建字段映射：fieldName -> SemanticFieldSchemaDTO
-        Map<String, Map<String, SemanticFieldSchemaDTO>> entityFieldMap = new HashMap<>();
         Map<String, Map<String, String>> fieldPermMap = new HashMap<>();
 
-        // 默认所有字段都为只读
-        // 先处理主表
-        Map<String, String> mainFieldPermMap = new HashMap<>();
-        Map<String, SemanticFieldSchemaDTO> mainEntityFieldMap = new HashMap<>();
+        // 非系统字段
+        Map<String, Set<String>> nonSystemFields = bpmEntityHelper.getNonSystemFields(entitySchema);
 
-        for (SemanticFieldSchemaDTO entityField : entityFields) {
-            mainEntityFieldMap.put(entityField.getFieldName(), entityField);
-            mainFieldPermMap.put(entityField.getFieldName(), FieldUiShowModeEnum.READ.getCode());
-        }
+        // 默认都readonly
+        nonSystemFields.forEach((key, val) -> {
+            fieldPermMap.putIfAbsent(key, new HashMap<>());
 
-        fieldPermMap.put(tableName, mainFieldPermMap);
-        entityFieldMap.put(tableName, mainEntityFieldMap);
-
-        // 再处理子表
-        for (SemanticRelationSchemaDTO connector : entitySchema.getConnectors()) {
-            String subTableName = connector.getTargetEntityTableName();
-            Map<String, String> subFieldPermMap = new HashMap<>();
-            // 构建子表字段映射
-            Map<String, SemanticFieldSchemaDTO> subEntityFieldMap = new HashMap<>();
-
-            for (SemanticFieldSchemaDTO subField : connector.getRelationAttributes()) {
-                subEntityFieldMap.put(subField.getFieldName(), subField);
-                subFieldPermMap.put(subField.getFieldName(), FieldUiShowModeEnum.READ.getCode());
+            for (String s : val) {
+                fieldPermMap.get(key).put(s, FieldUiShowModeEnum.READ.getCode());
             }
-
-            fieldPermMap.put(subTableName, subFieldPermMap);
-            entityFieldMap.put(subTableName, subEntityFieldMap);
-        }
+        });
 
         vo.getFormData().setFieldPermMap(fieldPermMap);
 
         // 没有配置字段权限，则返回只读权限
-        if (!CollectionUtils.isNotEmpty(fieldPermConfig.getFieldConfigs())) {
+        if (CollectionUtils.isEmpty(fieldPermConfig.getFieldConfigs())) {
             return;
         }
 
-        Map<String, String> hiddenFieldNameMap = new HashMap<>();
+        // 隐藏字段
+        Map<String, Set<String>> hiddenFieldNameMap = new HashMap<>();
 
-        // 处理节点配置的字段权限，todo: 先按照平铺处理，待优化
         for (FieldPermCfgDTO.FieldConfigDTO fieldConfig : fieldPermConfig.getFieldConfigs()) {
-            String currTableName = fieldConfig.getTableName();
+            String permTableName = fieldConfig.getTableName();
 
-            // 通过 tableName 查找实体Map
-            Map<String, SemanticFieldSchemaDTO> currEntityFieldMap = entityFieldMap.get(currTableName);
-            if (MapUtils.isEmpty(currEntityFieldMap)) {
+            // 通过 tableName 查找权限Map
+            Map<String, String> currFieldPermMap = fieldPermMap.get(permTableName);
+            if (MapUtils.isEmpty(currFieldPermMap)) {
                 continue;
             }
 
-            // 通过 tableName 查找权限权限Map
-            Map<String, String> currFildPermMap = fieldPermMap.get(currTableName);
-            if (MapUtils.isEmpty(currFildPermMap)) {
-                continue;
-            }
+            String permFieldName = fieldConfig.getFieldName();
 
-            // 查找到对应的field
-            SemanticFieldSchemaDTO entityField = currEntityFieldMap.get(fieldConfig.getFieldName());
-
-            if (entityField == null) {
+            // 实体本身不存在字段则直接跳过
+            if (!currFieldPermMap.containsKey(permFieldName)) {
                 continue;
             }
 
             // 处理隐藏字段
             if (Objects.equals(FieldPermTypeEnum.HIDDEN.getCode(), fieldConfig.getFieldPermType())) {
-                hiddenFieldNameMap.put(currTableName, entityField.getFieldName());
-                currFildPermMap.put(fieldConfig.getFieldName(), FieldUiShowModeEnum.HIDDEN.getCode());
+                hiddenFieldNameMap.putIfAbsent(permTableName, new HashSet<>());
+                hiddenFieldNameMap.get(permTableName).add(permFieldName);
+
+                currFieldPermMap.put(permFieldName, FieldUiShowModeEnum.HIDDEN.getCode());
             } else if (Objects.equals(FieldPermTypeEnum.READ.getCode(), fieldConfig.getFieldPermType())) {
-                currFildPermMap.put(fieldConfig.getFieldName(), FieldUiShowModeEnum.READ.getCode());
+                currFieldPermMap.put(permFieldName, FieldUiShowModeEnum.READ.getCode());
             } else if (Objects.equals(FieldPermTypeEnum.WRITE.getCode(), fieldConfig.getFieldPermType())) {
                 if (isTodo) {
-                    currFildPermMap.put(fieldConfig.getFieldName(), FieldUiShowModeEnum.WRITE.getCode());
+                    currFieldPermMap.put(permFieldName, FieldUiShowModeEnum.WRITE.getCode());
                 } else {
                     // 非待办的情况下，都是只读
-                    currFildPermMap.put(fieldConfig.getFieldName(), FieldUiShowModeEnum.READ.getCode());
+                    currFieldPermMap.put(permFieldName, FieldUiShowModeEnum.READ.getCode());
                 }
             }
         }
 
         // 移除隐藏字段在表单数据中的值
         if (MapUtils.isNotEmpty(hiddenFieldNameMap)) {
+            Map<String, Object> entityData = vo.getFormData().getData();
+
             hiddenFieldNameMap.forEach((k, v) -> {
                 // 主表
                 if (Objects.equals(k, tableName)) {
-                    vo.getFormData().getData().remove(v);
+                    // 移除主表的隐藏字段值
+                    for (String s : v) {
+                        entityData.remove(s);
+                    }
                 } else {
                     // 子表
-                    Object subTableData = vo.getFormData().getData().get(k);
+                    Object subTableData = entityData.get(k);
 
-                    if (subTableData instanceof Map<?, ?> subTableMap) {
-                        subTableMap.remove(v);
+                    // 子表需要是列表类型，否则直接返回
+                    if (!(subTableData instanceof List<?> subTableList)) {
+                        return;
+                    }
+
+                    // 子表为空也不用处理
+                    if (CollectionUtils.isEmpty(subTableList)) {
+                        return;
+                    }
+
+                    Set<String> nonSystemFieldNames = nonSystemFields.get(k);
+
+                    // 子表如果所有字段全部非系统字段全部隐藏，则直接移除数据
+                    if (v.containsAll(nonSystemFieldNames)) {
+                        entityData.remove(k);
+                    } else {
+                        // 移除指定的字段值
+                        for (Object subTableItem : subTableList) {
+                            if (subTableItem instanceof Map<?, ?> subTableItemMap) {
+                                for (String s : v) {
+                                    subTableItemMap.remove(s);
+                                }
+                            }
+                        }
                     }
                 }
             });
@@ -172,7 +176,6 @@ public abstract class AbstractInstanceDetailStrategy<T extends BaseNodeExtDTO> i
     protected void fillPageViewInfo(BpmTaskDetailRespVO vo, Instance instance, boolean isTodo) {
         PageViewGroupDTO viewGroupDTO = getPageViewGroupDTO(instance);
 
-        // todo 更新最新的pageId
         // 默认获取详情视图
         vo.setPageView(viewGroupDTO.getDetailPageView());
     }
