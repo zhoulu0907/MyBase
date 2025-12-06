@@ -3,7 +3,6 @@ package com.cmsr.onebase.module.flow.component.data;
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.module.flow.component.SkippableNodeComponent;
 import com.cmsr.onebase.module.flow.component.utils.VariableProvider;
-import com.cmsr.onebase.module.flow.context.ConditionsProvider;
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
 import com.cmsr.onebase.module.flow.context.VariableContext;
 import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
@@ -12,6 +11,7 @@ import com.cmsr.onebase.module.flow.context.express.ExpressionItem;
 import com.cmsr.onebase.module.flow.context.express.OrExpression;
 import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
 import com.cmsr.onebase.module.flow.context.graph.nodes.DataUpdateNodeData;
+import com.cmsr.onebase.module.flow.context.provider.ConditionsProvider;
 import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntityValueDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticTargetConditionVO;
@@ -51,10 +51,10 @@ public class DataUpdateNodeComponent extends SkippableNodeComponent {
         //
         SemanticTargetConditionVO reqDTO = new SemanticTargetConditionVO();
         reqDTO.setTraceId(executeContext.getTraceId());
-        if (StringUtils.equalsIgnoreCase("mainEntity", nodeData.getUpdateType())) {
-            reqDTO.setTableName(nodeData.getMainEntityName());
-        } else if (StringUtils.equalsIgnoreCase("subEntity", nodeData.getUpdateType())) {
-            reqDTO.setTableName(nodeData.getSubEntityName());
+        if (StringUtils.equalsIgnoreCase("mainTable", nodeData.getUpdateType())) {
+            reqDTO.setTableName(nodeData.getMainTableName());
+        } else if (StringUtils.equalsIgnoreCase("subTable", nodeData.getUpdateType())) {
+            reqDTO.setTableName(nodeData.getSubTableName());
         } else {
             throw new IllegalArgumentException("updateType 类型错误: " + nodeData.getUpdateType());
         }
@@ -78,7 +78,7 @@ public class DataUpdateNodeComponent extends SkippableNodeComponent {
         List<ExpressionItem> expressionItems = conditionsProvider.formatConditionItemsForValue(conditionItems, vars);
         Map<String, Object> data = new HashMap<>();
         for (ExpressionItem expressionItem : expressionItems) {
-            data.put(expressionItem.getKey(), expressionItem.getValue());
+            data.put(expressionItem.getFieldKey(), expressionItem.getFieldValue());
         }
         return data;
     }

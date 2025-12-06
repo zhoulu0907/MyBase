@@ -24,6 +24,7 @@ public class FieldTypeConvertor {
 
 
     /**
+     *
      */
     public static Object convert(SemanticFieldTypeEnum fieldType, Object value) {
         if (value == null) {
@@ -32,9 +33,9 @@ public class FieldTypeConvertor {
         if (fieldType == null) {
             return value;
         }
-        
+
         Class<?> rawJavaType = fieldType.getRawJavaType();
-        
+
         if (rawJavaType == String.class) {
             return convertVarchar(value);
         } else if (rawJavaType == Long.class) {
@@ -48,7 +49,6 @@ public class FieldTypeConvertor {
         } else if (rawJavaType == BigDecimal.class) {
             return convertDecimal(value);
         }
-        
         return value;
     }
 
@@ -149,12 +149,5 @@ public class FieldTypeConvertor {
         return new BigDecimal(value.toString());
     }
 
-    private static Object convertLongVarchar(Object value) {
-        return value.toString();
-    }
 
-    private static Object convertNumeric(Object value) {
-        // NUMERIC和DECIMAL处理方式相同
-        return convertDecimal(value);
-    }
 }

@@ -31,11 +31,6 @@ public class StartFormNodeData extends NodeData implements Serializable {
 
     private String pageUuid;
 
-    /**
-     * 前端组件的Id，所以是字符串
-     */
-    private String fieldId;
-
     private Boolean isChildTriggerAllowed;
 
     private List<Conditions> filterCondition;

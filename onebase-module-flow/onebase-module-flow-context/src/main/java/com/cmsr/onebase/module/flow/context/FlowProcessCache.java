@@ -83,15 +83,20 @@ public class FlowProcessCache {
         return startDateFieldNodeDataCache.get(processId);
     }
 
-    public static List<StartEntityNodeData> findStartEntityNodeDataByEntityName(String entityName) {
+    public static List<StartEntityNodeData> findStartEntityNodeDataByEntityName(Long applicationId, String entityName) {
         return startEntityNodeDataCache.values().stream()
-                .filter(startEntityNodeData -> startEntityNodeData.getEntityName().equals(entityName))
+                .filter(startEntityNodeData ->
+                        startEntityNodeData.getApplicationId().equals(applicationId)
+                                && startEntityNodeData.getTableName().equals(entityName)
+                )
                 .toList();
     }
 
-    public static List<StartFormNodeData> findStartFormNodeDataByPageUuid(String pageUuid) {
+    public static List<StartFormNodeData> findStartFormNodeDataByPageUuid(Long applicationId, String pageUuid) {
         return startFormNodeDataCache.values().stream()
-                .filter(startFormNodeData -> startFormNodeData.getPageUuid().equals(pageUuid))
+                .filter(startFormNodeData ->
+                        startFormNodeData.getApplicationId().equals(applicationId)
+                                && startFormNodeData.getPageUuid().equals(pageUuid))
                 .toList();
     }
 

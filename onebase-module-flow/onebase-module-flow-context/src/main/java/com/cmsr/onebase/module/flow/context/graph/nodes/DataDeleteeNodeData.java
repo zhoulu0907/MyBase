@@ -14,13 +14,13 @@ import java.util.List;
 @Data
 public class DataDeleteeNodeData extends NodeData implements Serializable {
 
-    private String mainEntityName;
+    private String mainTableName;
 
-    private String subEntityName;
+    private String subTableName;
 
     /**
-     * mainEntity
-     * subEntity
+     * mainTable
+     * subTable
      */
     private String dataType;
 

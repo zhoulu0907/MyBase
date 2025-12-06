@@ -1,8 +1,7 @@
-package com.cmsr.onebase.module.flow.component.utils;
+package com.cmsr.onebase.module.flow.component.impl;
 
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.module.flow.context.ConditionsProvider;
 import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
 import com.cmsr.onebase.module.flow.context.condition.Conditions;
 import com.cmsr.onebase.module.flow.context.condition.ConditionsSupport;
@@ -12,6 +11,7 @@ import com.cmsr.onebase.module.flow.context.enums.OperatorTypeEnum;
 import com.cmsr.onebase.module.flow.context.express.AndExpression;
 import com.cmsr.onebase.module.flow.context.express.ExpressionItem;
 import com.cmsr.onebase.module.flow.context.express.OrExpression;
+import com.cmsr.onebase.module.flow.context.provider.ConditionsProvider;
 import com.cmsr.onebase.module.formula.api.formula.FormulaEngineApi;
 import com.cmsr.onebase.module.formula.api.formula.dto.FormulaExecuteReqDTO;
 import com.cmsr.onebase.module.formula.api.formula.dto.FormulaExecuteRespDTO;
@@ -92,22 +92,20 @@ public class ConditionsProviderImpl implements ConditionsProvider {
     }
 
     private void formatRuleItemForExpression(ExpressionItem expressionItem, Map<String, Object> vars) {
-        String fieldId = expressionItem.getKey().toString();
-        expressionItem.setKey(fieldId);
         if (expressionItem.getOperatorType() == OperatorTypeEnum.VALUE) {
             formatExpressionItemValue(expressionItem);
         } else if (expressionItem.getOperatorType() == OperatorTypeEnum.VARIABLE) {
-            Object value = expressionItem.getValue().toString();
-            expressionItem.setValue(value);
+            Object value = expressionItem.getFieldValue().toString();
+            expressionItem.setFieldValue(value);
         } else if (expressionItem.getOperatorType() == OperatorTypeEnum.FORMULA) {
-            Map valueMap = (Map) expressionItem.getValue();
+            Map valueMap = (Map) expressionItem.getFieldValue();
             String formula = MapUtils.getString(valueMap, "formula");
             Map parameters = MapUtils.getMap(valueMap, "parameters");
             FormulaExecuteReqDTO reqDTO = new FormulaExecuteReqDTO();
             reqDTO.setFormula(formula);
             reqDTO.setParameters(parameters);
             reqDTO.setContextData(vars);
-            expressionItem.setValue(callFormula(reqDTO, expressionItem.getFieldType()));
+            expressionItem.setFieldValue(callFormula(reqDTO, expressionItem.getFieldTypeEnum()));
         }
     }
 
@@ -130,18 +128,18 @@ public class ConditionsProviderImpl implements ConditionsProvider {
         if (expressionItem.getOperatorType() == OperatorTypeEnum.VALUE) {
             formatExpressionItemValue(expressionItem);
         } else if (expressionItem.getOperatorType() == OperatorTypeEnum.VARIABLE) {
-            String exp = expressionItem.getValue().toString();
+            String exp = expressionItem.getFieldValue().toString();
             Object value = getVariableByExpression(exp, vars);
-            expressionItem.setValue(value);
+            expressionItem.setFieldValue(value);
         } else if (expressionItem.getOperatorType() == OperatorTypeEnum.FORMULA) {
-            Map valueMap = (Map) expressionItem.getValue();
+            Map valueMap = (Map) expressionItem.getFieldValue();
             String formula = MapUtils.getString(valueMap, "formula");
             Map parameters = MapUtils.getMap(valueMap, "parameters");
             FormulaExecuteReqDTO reqDTO = new FormulaExecuteReqDTO();
             reqDTO.setFormula(formula);
             reqDTO.setParameters(parameters);
             reqDTO.setContextData(vars);
-            expressionItem.setValue(callFormula(reqDTO, expressionItem.getFieldType()));
+            expressionItem.setFieldValue(callFormula(reqDTO, expressionItem.getFieldTypeEnum()));
         }
     }
 
@@ -169,27 +167,27 @@ public class ConditionsProviderImpl implements ConditionsProvider {
         } else if (expressionItem.getOperatorType() == OperatorTypeEnum.VARIABLE) {
             String exp = conditionItem.getValue().toString();
             Object value = getVariableByExpression(exp, dataMap);
-            expressionItem.setValue(value);
+            expressionItem.setFieldValue(value);
         } else if (expressionItem.getOperatorType() == OperatorTypeEnum.FORMULA) {
-            Map valueMap = (Map) expressionItem.getValue();
+            Map valueMap = (Map) expressionItem.getFieldValue();
             String formula = MapUtils.getString(valueMap, "formula");
             Map parameters = MapUtils.getMap(valueMap, "parameters");
             FormulaExecuteReqDTO reqDTO = new FormulaExecuteReqDTO();
             reqDTO.setFormula(formula);
             reqDTO.setParameters(parameters);
             reqDTO.setContextData(dataMap);
-            expressionItem.setValue(callFormula(reqDTO, conditionItem.getFieldType()));
+            expressionItem.setFieldValue(callFormula(reqDTO, conditionItem.getFieldTypeEnum()));
         }
         return expressionItem;
     }
 
     private void formatExpressionItemValue(ExpressionItem expressionItem) {
         if (expressionItem.getOp() == OpEnum.RANGE
-                && (expressionItem.getFieldType() == SemanticFieldTypeEnum.DATE || expressionItem.getFieldType() == SemanticFieldTypeEnum.DATETIME)
-                && expressionItem.getValue() instanceof Map) {
-            String begin = MapUtils.getString((Map) expressionItem.getValue(), "begin");
-            String end = MapUtils.getString((Map) expressionItem.getValue(), "end");
-            expressionItem.setValue(List.of(begin, end));
+                && (expressionItem.getFieldTypeEnum() == SemanticFieldTypeEnum.DATE || expressionItem.getFieldTypeEnum() == SemanticFieldTypeEnum.DATETIME)
+                && expressionItem.getFieldValue() instanceof Map) {
+            String begin = MapUtils.getString((Map) expressionItem.getFieldValue(), "begin");
+            String end = MapUtils.getString((Map) expressionItem.getFieldValue(), "end");
+            expressionItem.setFieldValue(List.of(begin, end));
         }
     }
 

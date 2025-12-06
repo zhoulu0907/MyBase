@@ -33,8 +33,10 @@ public class FlowProcessExecController {
 
     @GetMapping("/form/query")
     @Operation(summary = "查询页面触发列表")
-    public CommonResult<List<QueryFormTriggerRespVO>> queryFormTrigger(@RequestParam("pageUuid") String pageUuid) {
-        List<QueryFormTriggerRespVO> result = flowProcessExecService.queryFormTrigger(pageUuid);
+    public CommonResult<List<QueryFormTriggerRespVO>> queryFormTrigger(
+            @RequestParam("applicationId") Long applicationId,
+            @RequestParam("pageUuid") String pageUuid) {
+        List<QueryFormTriggerRespVO> result = flowProcessExecService.queryFormTrigger(applicationId, pageUuid);
         return CommonResult.success(result);
     }
 

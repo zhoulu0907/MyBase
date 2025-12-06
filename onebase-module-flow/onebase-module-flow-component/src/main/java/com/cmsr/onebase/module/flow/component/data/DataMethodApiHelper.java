@@ -111,9 +111,9 @@ public class DataMethodApiHelper {
         if (expressionItem == null) {
             return null;
         }
-        String fieldName = expressionItem.getKey();
+        String fieldName = expressionItem.getFieldKey();
         OpEnum operator = expressionItem.getOp();
-        Object itemValue = expressionItem.getValue();
+        Object itemValue = expressionItem.getFieldValue();
         List<Object> dataArray = new ArrayList<>();
         // 保持最终的输出值是一个列表对象:
         //        obj => array<obj>

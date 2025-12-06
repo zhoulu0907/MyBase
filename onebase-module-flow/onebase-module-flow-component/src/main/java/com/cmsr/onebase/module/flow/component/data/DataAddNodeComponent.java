@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.flow.component.data;
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.module.flow.component.SkippableNodeComponent;
 import com.cmsr.onebase.module.flow.component.utils.VariableProvider;
-import com.cmsr.onebase.module.flow.context.ConditionsProvider;
+import com.cmsr.onebase.module.flow.context.provider.ConditionsProvider;
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
 import com.cmsr.onebase.module.flow.context.VariableContext;
 import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
@@ -54,10 +54,10 @@ public class DataAddNodeComponent extends SkippableNodeComponent {
         SemanticMergeConditionVO reqDTO = new SemanticMergeConditionVO();
         reqDTO.setTraceId(executeContext.getTraceId());
         //
-        if (StringUtils.equalsIgnoreCase("mainEntity", nodeData.getAddType())) {
-            reqDTO.setTableName(nodeData.getMainEntityName());
-        } else if (StringUtils.equalsIgnoreCase("subEntity", nodeData.getAddType())) {
-            reqDTO.setTableName(nodeData.getSubEntityName());
+        if (StringUtils.equalsIgnoreCase("mainTable", nodeData.getAddType())) {
+            reqDTO.setTableName(nodeData.getMainTableName());
+        } else if (StringUtils.equalsIgnoreCase("subTable", nodeData.getAddType())) {
+            reqDTO.setTableName(nodeData.getSubTableName());
         } else {
             throw new IllegalArgumentException("数据添加addType类型错误: " + nodeData.getAddType());
         }
@@ -97,7 +97,7 @@ public class DataAddNodeComponent extends SkippableNodeComponent {
         List<ExpressionItem> expressionItems = conditionsProvider.formatConditionItemsForValue(conditionItems, expressionContext);
         Map<String, Object> data = new HashMap<>();
         for (ExpressionItem expressionItem : expressionItems) {
-            data.put(expressionItem.getKey(), expressionItem.getValue());
+            data.put(expressionItem.getFieldKey(), expressionItem.getFieldValue());
         }
         reqData.add(data);
         return reqData;
@@ -111,7 +111,7 @@ public class DataAddNodeComponent extends SkippableNodeComponent {
             Map<String, Object> data = new HashMap<>();
             for (ConditionItem conditionItem : conditionItems) {
                 ExpressionItem expressionItem = conditionsProvider.formatConditionItemForValue(conditionItem, dataMap);
-                data.put(expressionItem.getKey(), expressionItem.getValue());
+                data.put(expressionItem.getFieldKey(), expressionItem.getFieldValue());
             }
             reqData.add(data);
         }

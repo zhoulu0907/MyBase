@@ -4,7 +4,7 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.module.flow.component.SkippableNodeComponent;
 import com.cmsr.onebase.module.flow.component.utils.VariableProvider;
-import com.cmsr.onebase.module.flow.context.ConditionsProvider;
+import com.cmsr.onebase.module.flow.context.provider.ConditionsProvider;
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
 import com.cmsr.onebase.module.flow.context.VariableContext;
 import com.cmsr.onebase.module.flow.context.condition.Conditions;
@@ -51,10 +51,10 @@ public class DataQueryMultipleNodeComponent extends SkippableNodeComponent {
         List<Conditions> conditions = nodeData.getFilterCondition();
         // 数据方法参数
         SemanticPageConditionVO reqDTO = new SemanticPageConditionVO();
-        if (StringUtils.equalsIgnoreCase("mainEntity", nodeData.getDataType())) {
-            reqDTO.setTableName(nodeData.getMainEntityName());
-        } else if (StringUtils.equalsIgnoreCase("subEntity", nodeData.getDataType())) {
-            reqDTO.setTableName(nodeData.getSubEntityName());
+        if (StringUtils.equalsIgnoreCase("mainTable", nodeData.getDataType())) {
+            reqDTO.setTableName(nodeData.getMainTableName());
+        } else if (StringUtils.equalsIgnoreCase("subTable", nodeData.getDataType())) {
+            reqDTO.setTableName(nodeData.getSubTableName());
         } else {
             throw new IllegalArgumentException("参数dataType错误: " + nodeData.getDataType());
         }

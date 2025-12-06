@@ -15,14 +15,14 @@ import java.util.List;
 @Data
 public class DataUpdateNodeData extends NodeData implements Serializable {
 
-    private String mainEntityName;
+    private String mainTableName;
 
-    private String subEntityName;
+    private String subTableName;
 
     /**
      * 更新类型
-     * "updateType": "mainEntity"
-     * "updateType": "subEntity",
+     * "updateType": "mainTable"
+     * "updateType": "subTable",
      */
     private String updateType;
 

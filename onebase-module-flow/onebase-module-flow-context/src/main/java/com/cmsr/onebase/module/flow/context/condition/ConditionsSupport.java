@@ -1,7 +1,5 @@
 package com.cmsr.onebase.module.flow.context.condition;
 
-import com.cmsr.onebase.module.flow.context.enums.FieldTypeEnum;
-import com.cmsr.onebase.module.flow.context.enums.JdbcTypeEnum;
 import com.cmsr.onebase.module.flow.context.enums.OpEnum;
 import com.cmsr.onebase.module.flow.context.enums.OperatorTypeEnum;
 import com.cmsr.onebase.module.flow.context.express.AndExpression;
@@ -45,12 +43,11 @@ public class ConditionsSupport {
 
     public static ExpressionItem convertToExpressesItem(ConditionItem conditionItem) {
         ExpressionItem expressionItem = new ExpressionItem();
-        expressionItem.setKey(conditionItem.getFieldId());
+        expressionItem.setFieldKey(conditionItem.getFieldKey());
         expressionItem.setOp(OpEnum.getByName(conditionItem.getOp()));
         expressionItem.setOperatorType(OperatorTypeEnum.getByCode(conditionItem.getOperatorType()));
-        expressionItem.setFieldType(FieldTypeEnum.getByName(conditionItem.getFieldType()));
-        expressionItem.setJdbcType(JdbcTypeEnum.getByCode(conditionItem.getJdbcType()));
-        expressionItem.setValue(conditionItem.getValue());
+        expressionItem.setFieldTypeEnum(conditionItem.getFieldTypeEnum());
+        expressionItem.setFieldValue(conditionItem.getValue());
         return expressionItem;
     }
 }

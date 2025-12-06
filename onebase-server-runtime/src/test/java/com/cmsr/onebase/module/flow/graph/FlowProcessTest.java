@@ -54,7 +54,7 @@ public class FlowProcessTest {
     public void testToFlowChain(Long id) throws IOException {
         FlowProcessDO flowProcessDO = flowProcessRepository.getById(id);
         String json = flowProcessDO.getProcessDefinition();
-        JsonGraph jsonGraph = flowGraphBuilder.build(json);
+        JsonGraph jsonGraph = flowGraphBuilder.build(1L, json);
         String flowChain = FlowChainBuilder.toFlowChain(jsonGraph);
         System.out.println(flowChain);
     }

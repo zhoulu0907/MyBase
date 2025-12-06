@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.flow.component.data;
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.module.flow.component.SkippableNodeComponent;
 import com.cmsr.onebase.module.flow.component.utils.VariableProvider;
-import com.cmsr.onebase.module.flow.context.ConditionsProvider;
+import com.cmsr.onebase.module.flow.context.provider.ConditionsProvider;
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
 import com.cmsr.onebase.module.flow.context.VariableContext;
 import com.cmsr.onebase.module.flow.context.condition.Conditions;
@@ -50,10 +50,10 @@ public class DataDeleteNodeComponent extends SkippableNodeComponent {
 
         SemanticTargetConditionVO reqDTO = new SemanticTargetConditionVO();
         reqDTO.setTraceId(executeContext.getTraceId());
-        if (StringUtils.equalsIgnoreCase("mainEntity", nodeData.getDataType())) {
-            reqDTO.setTableName(nodeData.getMainEntityName());
-        } else if (StringUtils.equalsIgnoreCase("subEntity", nodeData.getDataType())) {
-            reqDTO.setTableName(nodeData.getSubEntityName());
+        if (StringUtils.equalsIgnoreCase("mainTable", nodeData.getDataType())) {
+            reqDTO.setTableName(nodeData.getMainTableName());
+        } else if (StringUtils.equalsIgnoreCase("subTable", nodeData.getDataType())) {
+            reqDTO.setTableName(nodeData.getSubTableName());
         } else {
             throw new IllegalArgumentException("dataType 类型错误: " + nodeData.getDataType());
         }

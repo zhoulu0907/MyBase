@@ -15,14 +15,14 @@ import java.util.List;
 public class DataAddNodeData extends NodeData implements Serializable {
 
     /**
-     * mainEntity
-     * subEntity
+     * mainTable
+     * subTable
      */
     private String addType;
 
-    private String mainEntityName;
+    private String mainTableName;
 
-    private String subEntityName;
+    private String subTableName;
 
     private Boolean batchType;
 

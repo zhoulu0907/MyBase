@@ -23,7 +23,7 @@ public class StartEntityNodeData extends NodeData implements Serializable {
      */
     private Long processId;
 
-    private String entityName;
+    private String tableName;
 
     private List<String> triggerEvents;
 

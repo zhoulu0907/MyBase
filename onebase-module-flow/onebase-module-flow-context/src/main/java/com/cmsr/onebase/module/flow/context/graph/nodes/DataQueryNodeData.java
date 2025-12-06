@@ -16,14 +16,14 @@ import java.util.List;
 public class DataQueryNodeData extends NodeData implements Serializable {
 
     /**
-     * mainEntity
-     * subEntity
+     * mainTable
+     * subTable
      */
     private String dataType;
 
-    private String mainEntityName;
+    private String mainTableName;
 
-    private String subEntityName;
+    private String subTableName;
 
     /**
      * all
