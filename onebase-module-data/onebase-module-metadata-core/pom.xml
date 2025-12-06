@@ -54,6 +54,12 @@
             <artifactId>onebase-common</artifactId>
             <version>${revision}</version>
         </dependency>
+        
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-metadata-common</artifactId>
+            <version>${revision}</version>
+        </dependency>
 
         <!-- MVEL 表达式引擎 -->
         <dependency>

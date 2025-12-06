@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.metadata.core.semantic.strategy;
 
-import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticDataMethodOpEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticRecordDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldValueDTO;
 import org.springframework.stereotype.Component;
@@ -15,15 +15,15 @@ import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.BUS
 public class SemanticDataIntegrityValidator {
 
     public void validate(SemanticRecordDTO record) {
-        MetadataDataMethodOpEnum op = record.getRecordContext().getOperationType();
+        SemanticDataMethodOpEnum op = record.getRecordContext().getOperationType();
         
         // if (requiresId(op)) { validateId(record); }
         // if (op == MetadataDataMethodOpEnum.CREATE) { validateCreateData(record); }
         
     }
 
-    private boolean requiresId(MetadataDataMethodOpEnum op) {
-        return op == MetadataDataMethodOpEnum.GET;
+    private boolean requiresId(SemanticDataMethodOpEnum op) {
+        return op == SemanticDataMethodOpEnum.GET;
     }
 
     private void validateId(SemanticRecordDTO record) {

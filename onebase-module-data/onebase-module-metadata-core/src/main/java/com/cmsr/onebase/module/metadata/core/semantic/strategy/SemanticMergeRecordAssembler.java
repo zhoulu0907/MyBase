@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.metadata.core.semantic.strategy;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.relationship.MetadataEntityRelationshipDO;
-import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticDataMethodOpEnum;
 import com.cmsr.onebase.module.metadata.core.enums.RelationshipTypeEnum;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityRelationshipRepository;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityFieldRepository;
@@ -22,6 +22,7 @@ import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticRelationValueD
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticRowValueDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticConnectorCardinalityEnum;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticRelationshipTypeEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticMethodCodeEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticMergeBodyVO;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticPageBodyVO;
@@ -75,7 +76,7 @@ public class SemanticMergeRecordAssembler {
                                                Long menuId,
                                                String traceId,
                                                SemanticMethodCodeEnum methodCode,
-                                               MetadataDataMethodOpEnum operationType) {
+                                               SemanticDataMethodOpEnum operationType) {
         MetadataBusinessEntityDO entity = businessEntityCoreService.getBusinessEntityByTableName(tableName);
         if (entity == null) { throw exception(BUSINESS_ENTITY_NOT_EXISTS); }
         return parseMerge(entity, body, menuId, traceId, methodCode, operationType);
@@ -85,10 +86,10 @@ public class SemanticMergeRecordAssembler {
      * 按表名装配分页请求体
      */
     public SemanticRecordDTO assemblePageBody(String tableName, SemanticPageBodyVO body, Long menuId, String traceId,
-                                              SemanticMethodCodeEnum methodCode, MetadataDataMethodOpEnum operationType) {
+                                              SemanticMethodCodeEnum methodCode, SemanticDataMethodOpEnum operationType) {
         MetadataBusinessEntityDO entity = businessEntityCoreService.getBusinessEntityByTableName(tableName);
         if (entity == null) { throw exception(BUSINESS_ENTITY_NOT_EXISTS); }
-        MetadataDataMethodOpEnum op = operationType == null ? MetadataDataMethodOpEnum.GET_PAGE : operationType;
+        SemanticDataMethodOpEnum op = operationType == null ? SemanticDataMethodOpEnum.GET_PAGE : operationType;
         SemanticRecordContextDTO context = buildContext(menuId, traceId, SemanticMethodCodeEnum.GET_PAGE, op);
         if (body != null) {
             context.setPageNo(body.getPageNo());
@@ -109,11 +110,11 @@ public class SemanticMergeRecordAssembler {
      */
     public SemanticRecordDTO assembleTargetBody(String tableName, SemanticTargetBodyVO body, Long menuId, String traceId,
                                                 SemanticMethodCodeEnum methodCode,
-                                                MetadataDataMethodOpEnum operationType) {
+                                                SemanticDataMethodOpEnum operationType) {
         MetadataBusinessEntityDO entity = businessEntityCoreService.getBusinessEntityByTableName(tableName);
         if (entity == null) { throw exception(BUSINESS_ENTITY_NOT_EXISTS); }
         SemanticMethodCodeEnum method = methodCode == null ? SemanticMethodCodeEnum.GET : methodCode;
-        MetadataDataMethodOpEnum op = operationType == null ? ((method == SemanticMethodCodeEnum.DELETE) ? MetadataDataMethodOpEnum.DELETE : MetadataDataMethodOpEnum.GET) : operationType;
+        SemanticDataMethodOpEnum op = operationType == null ? ((method == SemanticMethodCodeEnum.DELETE) ? SemanticDataMethodOpEnum.DELETE : SemanticDataMethodOpEnum.GET) : operationType;
         SemanticRecordContextDTO context = buildContext(menuId, traceId, method, op);
         context.setContainSubTable(body == null ? null : body.getContainSubTable());
         context.setContainRelation(body == null ? null : body.getContainRelation());
@@ -161,7 +162,7 @@ public class SemanticMergeRecordAssembler {
                                          Long menuId,
                                          String traceId,
                                          SemanticMethodCodeEnum methodCode,
-                                         MetadataDataMethodOpEnum operationType) {
+                                         SemanticDataMethodOpEnum operationType) {
         SemanticRecordContextDTO context = buildContext(menuId, traceId, methodCode, operationType);
         Map<String, Object> props = body == null ? Map.of() : body.getProperties();
         return parseFromProps(entity, props, context);
@@ -222,7 +223,7 @@ public class SemanticMergeRecordAssembler {
 
     private SemanticRecordContextDTO buildContext(Long menuId, String traceId,
                                                   SemanticMethodCodeEnum methodCode,
-                                                  MetadataDataMethodOpEnum operationType) {
+                                                  SemanticDataMethodOpEnum operationType) {
         SemanticRecordContextDTO context = new SemanticRecordContextDTO();
         context.setMenuId(menuId);
         context.setTraceId(traceId);
@@ -308,7 +309,7 @@ public class SemanticMergeRecordAssembler {
             schema.setSourceKeyFieldUuid(relationship.getSourceFieldUuid());
             schema.setTargetKeyFieldUuid(relationship.getTargetFieldUuid());
             schema.setSelectFieldUuid(relationship.getSelectFieldUuid());
-            schema.setRelationshipType(RelationshipTypeEnum.getByType(relationship.getRelationshipType()));
+            schema.setRelationshipType(SemanticRelationshipTypeEnum.valueOf(relationship.getRelationshipType()));
             schema.setCardinality(resolveCardinality(relationship));
 
             MetadataBusinessEntityDO target = relationship.getTargetEntityUuid() == null ? null : targetEntityMap.get(relationship.getTargetEntityUuid());
@@ -363,7 +364,15 @@ public class SemanticMergeRecordAssembler {
                     SemanticFieldSchemaDTO s = fieldUuid == null ? null : byUuid.get(fieldUuid);
                     if (s == null) { continue; }
                     if (s.getFieldOptions() == null) { s.setFieldOptions(new ArrayList<>()); }
-                    s.getFieldOptions().add(opt);
+                    com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldOptionDTO dto = new com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldOptionDTO();
+                    dto.setOptionUuid(opt.getOptionUuid());
+                    dto.setFieldUuid(opt.getFieldUuid());
+                    dto.setOptionLabel(opt.getOptionLabel());
+                    dto.setOptionValue(opt.getOptionValue());
+                    dto.setOptionOrder(opt.getOptionOrder());
+                    dto.setIsEnabled(opt.getIsEnabled());
+                    dto.setDescription(opt.getDescription());
+                    s.getFieldOptions().add(dto);
                 }
             }
         }

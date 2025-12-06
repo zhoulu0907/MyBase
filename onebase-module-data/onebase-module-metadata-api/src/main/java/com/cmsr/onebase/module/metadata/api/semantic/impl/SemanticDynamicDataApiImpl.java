@@ -10,7 +10,7 @@ import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticSortRuleDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticConditionDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticMethodCodeEnum;
-import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticDataMethodOpEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticMergeRecordAssembler;
 import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticPermissionContextLoader;
 import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticPermissionValidator;
@@ -22,8 +22,8 @@ import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticMergeBodyVO;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticPageBodyVO;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticTargetBodyVO;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticPageConditionVO;
-import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanicMergeConditionVO;
-import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanicTargetConditionVO;
+import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticMergeConditionVO;
+import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticTargetConditionVO;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataEntityFieldCoreService;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
@@ -139,7 +139,7 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
         // 1) 构建 RecordDTO（目标请求体）
         SemanticRecordDTO record = semanticMergeRecordAssembler.assembleTargetBody(tableName, body, null, null,
                 SemanticMethodCodeEnum.GET,
-                MetadataDataMethodOpEnum.GET);
+                SemanticDataMethodOpEnum.GET);
         // 2) 权限上下文初始化
         semanticPermissionContextLoader.loadPermissionContext(record);
         // 3) 数据完整性校验
@@ -158,7 +158,7 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
         // 1) 构建 RecordDTO（目标请求体）
         SemanticRecordDTO record = semanticMergeRecordAssembler.assembleTargetBody(tableName, body, null, null,
                 SemanticMethodCodeEnum.DELETE,
-                MetadataDataMethodOpEnum.DELETE);
+                SemanticDataMethodOpEnum.DELETE);
         // 2) 权限上下文初始化
         semanticPermissionContextLoader.loadPermissionContext(record);
         // 3) 数据完整性校验
@@ -171,7 +171,7 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
     }
 
     @Override
-    public Integer deleteDataByCondition(SemanicTargetConditionVO body) {
+    public Integer deleteDataByCondition(SemanticTargetConditionVO body) {
         String tableName = body == null ? null : body.getTableName();
         if (tableName == null || tableName.isBlank()) { return 0; }
         // 1) 构建 RecordDTO（目标请求体 + 过滤条件）
@@ -201,7 +201,7 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
     }
 
     @Override
-    public List<SemanticEntityValueDTO> updateDataByCondition(SemanicTargetConditionVO body) {
+    public List<SemanticEntityValueDTO> updateDataByCondition(SemanticTargetConditionVO body) {
         // 1) 参数校验
         String tableName = body == null ? null : body.getTableName();
         if (tableName == null || tableName.isBlank()) { return List.of(); }
@@ -215,7 +215,7 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
         // 2) 构建 RecordDTO（目标请求体 + 过滤条件）
         SemanticRecordDTO record = semanticMergeRecordAssembler.assembleTargetBody(tableName, new SemanticTargetBodyVO(), null, null,
                 SemanticMethodCodeEnum.UPDATE,
-                MetadataDataMethodOpEnum.UPDATE);
+                SemanticDataMethodOpEnum.UPDATE);
         record.getRecordContext().setFilters(cond);
 
         // 3) 权限上下文初始化
@@ -239,7 +239,7 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
     }
 
     @Override
-    public SemanticEntityValueDTO insertData(SemanicMergeConditionVO body) {
+    public SemanticEntityValueDTO insertData(SemanticMergeConditionVO body) {
         String tableName = null;
         if (body != null && body.getData() != null) {
             Object t = body.getTableName();
@@ -254,7 +254,7 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
             }
         }
         SemanticRecordDTO record = semanticMergeRecordAssembler.assembleMergeBody(tableName, mergeBody, null, null,
-                SemanticMethodCodeEnum.CREATE, MetadataDataMethodOpEnum.CREATE);
+                SemanticMethodCodeEnum.CREATE, SemanticDataMethodOpEnum.CREATE);
         // 2) 权限上下文初始化
         semanticPermissionContextLoader.loadPermissionContext(record);
         // 3) 数据完整性与功能权限校验
@@ -269,7 +269,7 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
     }
 
     @Override
-    public SemanticEntityValueDTO updateDataById(SemanicMergeConditionVO body) {
+    public SemanticEntityValueDTO updateDataById(SemanticMergeConditionVO body) {
         String tableName = body == null ? null : body.getTableName();
         if (tableName == null || tableName.isBlank()) { return null; }
         // 1) 构建 RecordDTO（合并请求体）
@@ -280,7 +280,7 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
             }
         }
         SemanticRecordDTO record = semanticMergeRecordAssembler.assembleMergeBody(tableName, mergeBody, null, null,
-                SemanticMethodCodeEnum.UPDATE, MetadataDataMethodOpEnum.UPDATE);
+                SemanticMethodCodeEnum.UPDATE, SemanticDataMethodOpEnum.UPDATE);
         // 2) 权限上下文初始化
         semanticPermissionContextLoader.loadPermissionContext(record);
         // 3) 数据完整性与功能权限校验
@@ -348,7 +348,7 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
         pageBody.setFilters(body.getSemanticConditionDTO());
         // 3) 组装 RecordDTO（包含权限上下文与操作类型）
         return semanticMergeRecordAssembler.assemblePageBody(body.getTableName(), pageBody, null, null,
-                SemanticMethodCodeEnum.GET_PAGE, MetadataDataMethodOpEnum.GET_PAGE);
+                SemanticMethodCodeEnum.GET_PAGE, SemanticDataMethodOpEnum.GET_PAGE);
     }
 
     private List<SemanticEntityValueDTO> convertToValues(SemanticEntitySchemaDTO entity, List<Map<String, Object>> list) {
@@ -371,13 +371,13 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
         return values;
     }
 
-    private SemanticRecordDTO buildDeleteRecord(SemanicTargetConditionVO body) {
+    private SemanticRecordDTO buildDeleteRecord(SemanticTargetConditionVO body) {
         // 1) 构建目标请求体 VO
         SemanticTargetBodyVO target = new SemanticTargetBodyVO();
         // 2) 组装 RecordDTO（包含操作类型与权限上下文）
         SemanticRecordDTO record = semanticMergeRecordAssembler.assembleTargetBody(body.getTableName(), target, null, null,
                 SemanticMethodCodeEnum.DELETE,
-                MetadataDataMethodOpEnum.DELETE);
+                SemanticDataMethodOpEnum.DELETE);
         // 3) 设置过滤条件到上下文
         record.getRecordContext().setFilters(body.getSemanticConditionDTO());
         // 4) 返回构建完成的 RecordDTO

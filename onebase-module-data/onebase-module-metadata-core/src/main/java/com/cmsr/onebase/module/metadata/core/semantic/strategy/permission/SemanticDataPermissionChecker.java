@@ -5,10 +5,10 @@ import com.cmsr.onebase.module.app.api.security.bo.DataPermissionGroup;
 import com.cmsr.onebase.module.app.api.security.bo.DataPermissionFilter;
 import com.cmsr.onebase.module.app.api.security.bo.DataPermissionLevel;
 import com.cmsr.onebase.module.app.api.security.bo.DataPermissionTag;
-import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticDataMethodOpEnum;
 import com.cmsr.onebase.module.metadata.core.service.permission.exception.PermissionDeniedException;
-import com.cmsr.onebase.module.metadata.core.domain.query.MetadataPermissionContext;
-import com.cmsr.onebase.module.metadata.core.domain.query.LoginUserCtx;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticPermissionContext;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticLoginUserCtx;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticRecordDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO;
 
@@ -55,8 +55,8 @@ public class SemanticDataPermissionChecker implements SemanticRuntimePermissionC
      * 数据权限在 UPDATE/DELETE/GET 操作时生效
      */
     public boolean supports(SemanticRecordDTO recordDTO) {
-        MetadataDataMethodOpEnum op = recordDTO.getRecordContext().getOperationType();
-        return op == MetadataDataMethodOpEnum.UPDATE || op == MetadataDataMethodOpEnum.DELETE || op == MetadataDataMethodOpEnum.GET;
+        SemanticDataMethodOpEnum op = recordDTO.getRecordContext().getOperationType();
+        return op == SemanticDataMethodOpEnum.UPDATE || op == SemanticDataMethodOpEnum.DELETE || op == SemanticDataMethodOpEnum.GET;
     }
 
     @Override
@@ -67,13 +67,13 @@ public class SemanticDataPermissionChecker implements SemanticRuntimePermissionC
      * 3. 逐组判断操作权限 + 范围标签 + 自定义过滤
      */
     public void check(SemanticRecordDTO recordDTO) {
-        MetadataPermissionContext permissionContext = recordDTO.getRecordContext().getPermissionContext();
+        SemanticPermissionContext permissionContext = recordDTO.getRecordContext().getPermissionContext();
         DataPermission dataPermission = permissionContext.getDataPermission();
         if (dataPermission.isAllDenied()) { throw new PermissionDeniedException(TYPE, "ALL_DENIED", "无权访问数据"); }
         if (dataPermission.isAllAllowed()) { return; }
         List<DataPermissionGroup> groups = dataPermission.getGroups();
-        MetadataDataMethodOpEnum operationType = recordDTO.getRecordContext().getOperationType();
-        LoginUserCtx loginUserContext = recordDTO.getRecordContext().getLoginUserCtx();
+        SemanticDataMethodOpEnum operationType = recordDTO.getRecordContext().getOperationType();
+        SemanticLoginUserCtx loginUserContext = recordDTO.getRecordContext().getLoginUserCtx();
         Map<String,Object> dataRow = recordDTO.getEntityValue().getCurrentEntityRawMap();
         List<SemanticFieldSchemaDTO> fields = recordDTO.getEntitySchema().getFields();
         AdminUserRespDTO currentUser = adminUserApi.getUser(loginUserContext.getUserId()).getCheckedData();

@@ -5,7 +5,7 @@ import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.strategy.validation.SemanticValidationContext;
 import com.cmsr.onebase.module.metadata.core.semantic.strategy.validation.SemanticValidationService;
-import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticDataMethodOpEnum;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -17,12 +17,12 @@ public class SemanticRequiredValidationService implements SemanticValidationServ
     public SemanticRequiredValidationService() { }
 
     @Override
-    public void validateEntity(List<SemanticFieldSchemaDTO> fields, Map<String, Object> data, MetadataDataMethodOpEnum operationType, SemanticValidationContext context) {
+    public void validateEntity(List<SemanticFieldSchemaDTO> fields, Map<String, Object> data, SemanticDataMethodOpEnum operationType, SemanticValidationContext context) {
         for (SemanticFieldSchemaDTO field : fields) {
             if (field.getIsSystemField() != null && field.getIsSystemField()) { continue; }
             if (field.getIsPrimaryKey() != null && field.getIsPrimaryKey()) { continue; }
             Object value = data.get(field.getFieldName());
-            if (operationType == MetadataDataMethodOpEnum.UPDATE && value == null) { continue; }
+            if (operationType == SemanticDataMethodOpEnum.UPDATE && value == null) { continue; }
             if (field.getFieldTypeEnum() == SemanticFieldTypeEnum.AUTO_CODE) { continue; }
             if (!supports(field.getFieldType())) { continue; }
             List<MetadataValidationRequiredDO> rules = context.getRequiredRules().getOrDefault(field.getId(), Collections.emptyList());

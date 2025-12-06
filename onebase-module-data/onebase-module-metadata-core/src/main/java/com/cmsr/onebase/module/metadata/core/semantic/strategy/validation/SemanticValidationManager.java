@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.metadata.core.semantic.strategy.validation;
 
-import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticDataMethodOpEnum;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataEntityFieldCoreService;
 import com.cmsr.onebase.module.metadata.core.service.number.AutoNumberService;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationFormatDO;
@@ -107,7 +107,7 @@ public class SemanticValidationManager {
         if (connectorFields != null && !connectorFields.isEmpty()) { allFields.addAll(connectorFields); }
 
         Map<String, Object> mainData = recordDTO.getEntityValue().getCurrentEntityRawMap();
-        MetadataDataMethodOpEnum operationType = recordDTO.getRecordContext().getOperationType();
+        SemanticDataMethodOpEnum operationType = recordDTO.getRecordContext().getOperationType();
         // 统一在 buildContext 中完成规则查询与上下文构建
         SemanticValidationContext context = buildContext(recordDTO.getEntitySchema(), allFields, mainData);
         validateEntity(mainFields, mainData, operationType, context);
@@ -139,7 +139,7 @@ public class SemanticValidationManager {
      * - 将字段集合与数据、操作类型传递给已注册的所有 {@link SemanticValidationService}
      * - 每个校验服务自行决定支持的字段类型与规则
      */
-    public void validateEntity(List<SemanticFieldSchemaDTO> fields, Map<String, Object> data, MetadataDataMethodOpEnum operationType, SemanticValidationContext context) {
+    public void validateEntity(List<SemanticFieldSchemaDTO> fields, Map<String, Object> data, SemanticDataMethodOpEnum operationType, SemanticValidationContext context) {
         for (SemanticValidationService service : validationServices) {
             service.validateEntity(fields, data, operationType, context);
         }

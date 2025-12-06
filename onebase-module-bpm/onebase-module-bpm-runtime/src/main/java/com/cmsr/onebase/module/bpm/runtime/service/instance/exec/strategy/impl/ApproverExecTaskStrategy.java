@@ -10,7 +10,7 @@ import com.cmsr.onebase.module.bpm.runtime.vo.EntityVO;
 import com.cmsr.onebase.module.bpm.runtime.vo.ExecTaskReqVO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntitySchemaDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO;
-import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanicMergeConditionVO;
+import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticMergeConditionVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
@@ -197,7 +197,7 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
 
             // 更新数据
             if (!updateEntityData.isEmpty()) {
-                SemanicMergeConditionVO conditionVO = new SemanicMergeConditionVO();
+                SemanticMergeConditionVO conditionVO = new SemanticMergeConditionVO();
                 conditionVO.setData(updateEntityData);
                 conditionVO.setTableName(entityVO.getTableName());
                 semanticDynamicDataApi.updateDataById(conditionVO);

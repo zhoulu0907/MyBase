@@ -1,7 +1,6 @@
 package com.cmsr.onebase.module.metadata.core.semantic.vo;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticConditionDTO;
@@ -10,7 +9,7 @@ import lombok.Data;
 
 @Data
 @Schema(description = "指定修改带条件 VO")
-public class SemanicMergeConditionVO {
+public class SemanticMergeConditionVO {
     @Schema(description = "方法编码")
     private String methodCode;
 

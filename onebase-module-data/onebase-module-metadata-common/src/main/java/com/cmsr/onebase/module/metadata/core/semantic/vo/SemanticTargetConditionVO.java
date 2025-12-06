@@ -16,7 +16,7 @@ import lombok.Data;
  */
 @Data
 @Schema(description = "指定查询、删除或更新条件 VO")
-public class SemanicTargetConditionVO {
+public class SemanticTargetConditionVO {
     @Schema(description = "触发链路id")
     private String traceId;
     @Schema(description = "目标表名", requiredMode = Schema.RequiredMode.REQUIRED)

@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.metadata.core.semantic.strategy.permission;
 
 import com.cmsr.onebase.module.app.api.security.bo.FieldPermission;
 import com.cmsr.onebase.module.app.api.security.bo.FieldPermissionItem;
-import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticDataMethodOpEnum;
 import com.cmsr.onebase.module.metadata.core.service.permission.exception.PermissionDeniedException;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticRecordDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldValueDTO;
@@ -38,8 +38,8 @@ public class SemanticFieldPermissionChecker implements SemanticRuntimePermission
      * 仅在 CREATE 或 UPDATE 操作时生效
      */
     public boolean supports(SemanticRecordDTO recordDTO) {
-        return recordDTO.getRecordContext().getOperationType() == MetadataDataMethodOpEnum.CREATE
-                || recordDTO.getRecordContext().getOperationType() == MetadataDataMethodOpEnum.UPDATE;
+        return recordDTO.getRecordContext().getOperationType() == SemanticDataMethodOpEnum.CREATE
+                || recordDTO.getRecordContext().getOperationType() == SemanticDataMethodOpEnum.UPDATE;
     }
 
     @Override

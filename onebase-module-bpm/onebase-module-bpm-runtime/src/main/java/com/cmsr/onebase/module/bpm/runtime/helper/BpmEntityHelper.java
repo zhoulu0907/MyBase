@@ -9,7 +9,7 @@ import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntitySchemaDT
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntityValueDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticRelationSchemaDTO;
-import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanicMergeConditionVO;
+import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticMergeConditionVO;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticTargetBodyVO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -74,7 +74,7 @@ public class BpmEntityHelper {
         String tableName = entityVO.getTableName();
         Map<String, Object> data = entityVO.getData();
 
-        SemanicMergeConditionVO insertDataReqVO = new SemanicMergeConditionVO();
+        SemanticMergeConditionVO insertDataReqVO = new SemanticMergeConditionVO();
         insertDataReqVO.setTableName(tableName);
         insertDataReqVO.setData(data);
 
@@ -127,7 +127,7 @@ public class BpmEntityHelper {
         String tableName = entityVO.getTableName();
         Map<String, Object> data = entityVO.getData();
 
-        SemanicMergeConditionVO updateDataReqVO = new SemanicMergeConditionVO();
+        SemanticMergeConditionVO updateDataReqVO = new SemanticMergeConditionVO();
         updateDataReqVO.setTableName(tableName);
         updateDataReqVO.setData(data);
 

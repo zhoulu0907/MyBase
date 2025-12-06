@@ -4,7 +4,7 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataV
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRuleGroupDO;
 import com.cmsr.onebase.module.metadata.core.enums.OpEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO;
-import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticDataMethodOpEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.strategy.validation.SemanticValidationContext;
 import com.cmsr.onebase.module.metadata.core.semantic.strategy.validation.SemanticValidationService;
@@ -35,7 +35,7 @@ public class SemanticSelfDefinedValidationService implements SemanticValidationS
     }
 
     @Override
-    public void validateEntity(List<SemanticFieldSchemaDTO> fields, Map<String, Object> data, MetadataDataMethodOpEnum operationType, SemanticValidationContext context) {
+    public void validateEntity(List<SemanticFieldSchemaDTO> fields, Map<String, Object> data, SemanticDataMethodOpEnum operationType, SemanticValidationContext context) {
         List<MetadataValidationRuleGroupDO> ruleGroups = context.getSelfDefinedRuleGroups();
         if (ruleGroups.isEmpty()) { return; }
         Map<String, String> fieldUuidToNameMap = context.getFieldUuidToNameMap();
@@ -43,7 +43,7 @@ public class SemanticSelfDefinedValidationService implements SemanticValidationS
             if (field.getIsSystemField() != null && field.getIsSystemField()) { continue; }
             if (field.getIsPrimaryKey() != null && field.getIsPrimaryKey()) { continue; }
             Object value = data.get(field.getFieldName());
-            if (operationType == MetadataDataMethodOpEnum.UPDATE && value == null) { continue; }
+            if (operationType == SemanticDataMethodOpEnum.UPDATE && value == null) { continue; }
             if (field.getFieldTypeEnum() == SemanticFieldTypeEnum.AUTO_CODE) { continue; }
             if (!supports(field.getFieldType())) { continue; }
             Map<String, Object> contextMap = buildCompleteContext(field, value, data, fieldUuidToNameMap);

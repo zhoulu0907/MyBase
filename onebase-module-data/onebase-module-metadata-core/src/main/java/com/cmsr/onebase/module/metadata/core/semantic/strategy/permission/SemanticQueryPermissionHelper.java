@@ -10,8 +10,8 @@ import com.cmsr.onebase.module.system.api.dept.DeptApi;
 import com.cmsr.onebase.module.system.api.dept.dto.DeptRespDTO;
 import com.cmsr.onebase.module.system.api.user.AdminUserApi;
 import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
-import com.cmsr.onebase.module.metadata.core.domain.query.MetadataPermissionContext;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticPermissionContext;
 import com.mybatisflex.core.query.QueryColumn;
 import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
@@ -53,7 +53,7 @@ public class SemanticQueryPermissionHelper {
      */
     public QueryWrapper applyQueryPermissionFilter(
                                             QueryWrapper queryWrapper,
-                                            MetadataPermissionContext permissionContext,
+                                            SemanticPermissionContext permissionContext,
                                             List<SemanticFieldSchemaDTO> fields) {
         if (queryWrapper == null) { queryWrapper = new QueryWrapper(); }
         FieldPermission fieldPermissionEarly = permissionContext == null ? null : permissionContext.getFieldPermission();
@@ -151,7 +151,7 @@ public class SemanticQueryPermissionHelper {
      * @return 过滤后的结果列表
      */
     public List<Map<String, Object>> filterQueryResultList(List<Map<String, Object>> dataList,
-                                                           MetadataPermissionContext permissionContext,
+                                                           SemanticPermissionContext permissionContext,
                                                            List<SemanticFieldSchemaDTO> fields) {
         if (permissionContext == null) { return dataList; }
         FieldPermission fp = permissionContext.getFieldPermission();
