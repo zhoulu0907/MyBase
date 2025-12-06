@@ -120,10 +120,6 @@ export class HttpClient {
               const loginURL = TokenManager.getTokenInfo()?.loginURL;
               const tenantId = TokenManager.getTokenInfo()?.tenantId;
 
-              //   TokenManager.clearToken();
-
-              console.log('tenantId: ', tenantId);
-
               // 跳转到登录页
               if (loginURL) {
                 window.location.href = loginURL;

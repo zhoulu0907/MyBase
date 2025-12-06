@@ -1,10 +1,10 @@
 import editPageNameSVG from '@/assets/images/edit_page_name_icon.svg';
+import activeFlowDesignSVG from '@/assets/images/flow-active-icon.svg';
+import defaultFlowDesignSVG from '@/assets/images/flow-default-icon.svg';
 import activeFormDesignSVG from '@/assets/images/form_design_active_icon.svg';
 import defaultFormDesignSVG from '@/assets/images/form_design_default_icon.svg';
 import activeListDesignSVG from '@/assets/images/list_design_active_icon.svg';
 import defaultListDesignSVG from '@/assets/images/list_design_default_icon.svg';
-import defaultFlowDesignSVG from '@/assets/images/flow-default-icon.svg';
-import activeFlowDesignSVG from '@/assets/images/flow-active-icon.svg';
 import activePageSettingSVG from '@/assets/images/page_setting_active_icon.svg';
 import defaultPageSettingSVG from '@/assets/images/page_setting_default_icon.svg';
 import activeWorkbenchDesignSVG from '@/assets/images/workbench_design_active_icon.svg';
@@ -29,14 +29,14 @@ import {
   getDatasourceList,
   getEntityFieldsWithChildren,
   getPageSetMetaData,
+  listApplicationMenu,
+  menuSignal,
   PageType,
   save,
   updateApplicationMenu,
-  menuSignal,
-  listApplicationMenu,
-  type ListApplicationMenuReq,
   type ChildEntity,
   type GetApplicationReq,
+  type ListApplicationMenuReq,
   type UpdateApplicationMenuNameReq
 } from '@onebase/app';
 import { getHashQueryParam, pagesRuntimeSignal } from '@onebase/common';
@@ -55,7 +55,7 @@ import {
 } from '@onebase/ui-kit';
 import { cloneDeep } from 'lodash-es';
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { VersionStatus } from '../constants';
 import FlowView from '../flowView';
 import PartPreview from '../partPreview';
@@ -204,7 +204,7 @@ export default function EditorHeader() {
 
   const getMenuList = async (keywords?: string) => {
     const searchParams = new URLSearchParams(location.search);
-    const appId = searchParams.get('appId');
+    const appId = searchParams.get('appId') || '';
     const req: ListApplicationMenuReq = {
       applicationId: appId,
       name: keywords
@@ -321,10 +321,9 @@ export default function EditorHeader() {
     }
 
     // 获取数据源ID
-    const params = {
-      appId: appId
-    };
-    const res = await getDatasourceList(params);
+    const res = await getDatasourceList({
+      applicationId: appId
+    });
     if (res?.length > 0) {
       const dataSource = res?.[0];
       // 将数据源ID存储到store中

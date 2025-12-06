@@ -15,12 +15,14 @@ export const RELATION_TYPE = {
   SLAVE: 'SLAVE',
   NONE: 'NONE'
 };
+
 export interface MetadataEntityPair {
   entityId: string;
   entityUuid: string;
   tableName: string;
   entityName: string;
   relationType: (typeof RELATION_TYPE)[keyof typeof RELATION_TYPE];
+  relationshipTypes: string[];
 }
 
 export interface MetadataEntityField {
