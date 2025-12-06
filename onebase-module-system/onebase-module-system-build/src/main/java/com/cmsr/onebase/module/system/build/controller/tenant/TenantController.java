@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.system.build.controller.tenant;
 
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.system.convert.tenant.TenantConvert;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
@@ -81,6 +82,14 @@ public class TenantController {
     @PreAuthorize("@ss.hasPermission('tenant:space:query')")
     public CommonResult<TenantRespVO> getTenant(@RequestParam("id") Long id) {
         return success(tenantService.getTenantWithAppCount(id));
+    }
+
+    @GetMapping("/get-simple-tenant-by-id")
+    @Operation(summary = "获得租户(免登录)")
+    @PermitAll
+    @TenantIgnore
+    public CommonResult<TenantSimpleRespVO> getSimpleTenantById(@RequestParam(value = "id") Long id) {
+        return success( BeanUtils.toBean(tenantService.getTenant(id), TenantSimpleRespVO.class));
     }
 
 }

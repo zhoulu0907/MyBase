@@ -1,5 +1,9 @@
 package com.cmsr.onebase.module.infra.service.security;
 
+import com.alibaba.excel.util.StringUtils;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
+import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.infra.convert.security.SecurityConfigCategoryConvert;
 import com.cmsr.onebase.module.infra.dal.database.SecurityConfigCategoryDataRepository;
 import com.cmsr.onebase.module.infra.dal.database.SecurityConfigDataRepository;
@@ -9,7 +13,9 @@ import com.cmsr.onebase.module.infra.dal.dataobject.security.SecurityConfigDO;
 import com.cmsr.onebase.module.infra.dal.dataobject.security.SecurityConfigTemplateDO;
 import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigCategoryRespVO;
 import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigItemRespVO;
+import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigReqVO;
 import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigUpdateReqVO;
+import com.cmsr.onebase.module.infra.enums.security.SecurityConfigKey;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -23,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -315,4 +322,19 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
         return null;
     }
 
+    @Override
+    @TenantIgnore
+    public Boolean checkScenariosCaptcha(SecurityConfigReqVO configReqVO) {
+        Long tenantId = configReqVO.getTenantId();
+        String scenariosCode = configReqVO.getScenariosCode();
+        if (StringUtils.isBlank(scenariosCode)) {
+            scenariosCode = SecurityConfigKey.EnableScenariosOption.login.getKey();
+        }
+        String securityConfigKey = SecurityConfigKey.enableScenarios.getConfigKey();
+        SecurityConfigDO config = securityConfigDataRepository.findSecurityConfigByTenantIdAndKey(tenantId, securityConfigKey);
+        if (null == config) {
+            return true;
+        }
+        return config.getConfigValue().contains(scenariosCode);
+    }
 }
