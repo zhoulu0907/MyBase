@@ -20,7 +20,7 @@ import lombok.Data;
 public class SecurityConfigReqVO {
 
     @Schema(description = "空间ID", example = "1")
-    @NotEmpty(message = "空间Id不能未空")
+    @NotEmpty(message = "空间Id不能为空")
     private Long tenantId;
 
     @Schema(description = "场景编码")
