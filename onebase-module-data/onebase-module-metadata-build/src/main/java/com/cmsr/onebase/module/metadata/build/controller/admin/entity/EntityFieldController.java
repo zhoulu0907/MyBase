@@ -93,9 +93,10 @@ public class EntityFieldController {
 
     @PostMapping("/get")
     @Operation(summary = "根据ID获取字段详细信息")
-    @Parameter(name = "id", description = "字段ID", required = true, example = "1024")
+    @Parameter(name = "id", description = "字段ID或UUID", required = true, example = "1024")
     public CommonResult<EntityFieldDetailRespVO> getEntityField(@RequestParam("id") String id) {
-        EntityFieldDetailRespVO entityField = entityFieldService.getEntityFieldDetailWithFullConfig(id);
+        Long resolvedId = idUuidConverter.resolveFieldId(id);
+        EntityFieldDetailRespVO entityField = entityFieldService.getEntityFieldDetailWithFullConfig(String.valueOf(resolvedId));
         return success(entityField);
     }
     @PostMapping("/batch-update")

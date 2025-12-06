@@ -19,8 +19,14 @@ public class EntityFieldDetailRespVO {
     @Schema(description = "字段ID", example = "3001")
     private String id;
 
+    @Schema(description = "字段UUID", example = "550e8400-e29b-41d4-a716-446655440000")
+    private String fieldUuid;
+
     @Schema(description = "实体ID", example = "2001")
     private String entityId;
+
+    @Schema(description = "实体UUID", example = "550e8400-e29b-41d4-a716-446655440001")
+    private String entityUuid;
 
     @Schema(description = "实体名称", example = "用户信息")
     private String entityName;

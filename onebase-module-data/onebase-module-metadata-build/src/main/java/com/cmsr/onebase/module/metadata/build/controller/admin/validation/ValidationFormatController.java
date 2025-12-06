@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.metadata.build.controller.admin.validation;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.module.metadata.core.util.MetadataIdUuidConverter;
 import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationFormatRespVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationFormatSaveReqVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationFormatUpdateReqVO;
@@ -21,6 +22,9 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 @Validated
 public class ValidationFormatController {
 
+    @Resource
+    private MetadataIdUuidConverter idUuidConverter;
+
     @Resource private MetadataValidationFormatBuildService formatService;
 
     @PostMapping("/get-regex-by-field")
@@ -32,9 +36,10 @@ public class ValidationFormatController {
 
     @GetMapping("/get")
     @Operation(summary = "根据主键ID获取格式校验")
-    @Parameter(name = "id", description = "校验规则ID", required = true)
+    @Parameter(name = "id", description = "校验规则ID（支持ID或UUID）", required = true)
     public CommonResult<ValidationFormatRespVO> get(@RequestParam("id") String id) {
-        return success(formatService.getById(Long.parseLong(id)));
+        Long resolvedId = idUuidConverter.resolveRuleGroupId(id);
+        return success(formatService.getById(resolvedId));
     }
 
     @PostMapping("/create")
@@ -60,9 +65,10 @@ public class ValidationFormatController {
 
     @PostMapping("/delete")
     @Operation(summary = "根据主键ID删除格式校验")
-    @Parameter(name = "id", description = "校验规则ID", required = true)
+    @Parameter(name = "id", description = "校验规则ID（支持ID或UUID）", required = true)
     public CommonResult<Boolean> delete(@RequestParam("id") String id) {
-        formatService.deleteById(Long.parseLong(id));
+        Long resolvedId = idUuidConverter.resolveRuleGroupId(id);
+        formatService.deleteById(resolvedId);
         return success(true);
     }
 }

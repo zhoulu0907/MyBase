@@ -466,6 +466,9 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         }
 
         EntityFieldDetailRespVO result = BeanUtils.toBean(entityField, EntityFieldDetailRespVO.class);
+        // 设置fieldUuid和entityUuid
+        result.setFieldUuid(entityField.getFieldUuid());
+        result.setEntityUuid(entityField.getEntityUuid());
 
         // 获取实体名称（这里简化处理，实际项目中可能需要关联查询）
         result.setEntityName("实体名称");
