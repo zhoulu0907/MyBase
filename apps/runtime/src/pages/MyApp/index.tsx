@@ -340,7 +340,7 @@ const MyAppPage: React.FC = () => {
                         type="outline"
                         long
                         onClick={() => {
-                          nagivateToRuntimeApp(item.id);
+                          nagivateToRuntimeApp(item.applicationId);
                         }}
                       >
                         进入应用
