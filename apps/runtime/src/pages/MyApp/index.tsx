@@ -139,8 +139,6 @@ const MyAppPage: React.FC = () => {
     console.log('redirectURL: ', redirectURL);
 
     window.open(redirectURL, '_blank');
-
-    // navigate(`/onebase/${appId}/${tenantId}/runtime?`);
   };
 
   const handleOptionVisibleChange = (v: boolean, id: string) => {
