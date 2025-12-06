@@ -117,12 +117,17 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         StringBuilder sb = new StringBuilder();
         int count = 0;
 
-        // 拿到所有的实体字段
-        Map<String, SemanticFieldSchemaDTO> fieldMap = new HashMap<>();
+        Map<String, SemanticFieldSchemaDTO> mainTableFieldMap = new HashMap<>();
 
-        for (SemanticFieldSchemaDTO fieldDto : entitySchemaDTO.getFields()) {
-            fieldMap.put(fieldDto.getFieldUuid(), fieldDto);
+        for (SemanticFieldSchemaDTO field : entitySchemaDTO.getFields()) {
+            mainTableFieldMap.put(field.getFieldName(), field);
         }
+
+        // 拿到所有的实体字段
+        Map<String, Set<String>> nonSystemFields = bpmEntityHelper.getNonSystemFields(entitySchemaDTO);
+
+        // 拿主表的字段名
+        Set<String> mainTableFieldNames = nonSystemFields.get(entitySchemaDTO.getTableName());
 
         BpmGlobalConfigDTO.FormSummaryConfig formSummaryCfg = null;
 
@@ -130,18 +135,29 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
             formSummaryCfg = defExtDTO.getGlobalConfig().getFormSummaryCfg();
         }
 
-        Set<String> formSummaryFieldUuids = new HashSet<>();
+        Set<String> formSummaryFieldNames = new HashSet<>();
 
         if (formSummaryCfg != null && CollectionUtils.isNotEmpty(formSummaryCfg.getFieldConfigs())) {
             for (BpmGlobalConfigDTO.FieldConfigDTO fieldConfig : formSummaryCfg.getFieldConfigs()) {
-                formSummaryFieldUuids.add(fieldConfig.getFieldUuid());
+                // 只取主表的字段，todo：待完善多表的情况
+                if (!Objects.equals(fieldConfig.getTableName(), entitySchemaDTO.getTableName())) {
+                    continue;
+                }
+
+                formSummaryFieldNames.add(fieldConfig.getFieldName());
             }
-        } else {
-            formSummaryFieldUuids = entityVO.getData().keySet();
         }
 
-        for (String id : formSummaryFieldUuids) {
-            SemanticFieldSchemaDTO fieldDto = fieldMap.get(id);
+        if (CollectionUtils.isEmpty(formSummaryFieldNames)) {
+            entityVO.getData().keySet().forEach(fieldName -> {
+                if (mainTableFieldNames.contains(fieldName)) {
+                    formSummaryFieldNames.add(fieldName);
+                }
+            });
+        }
+
+        for (String name : formSummaryFieldNames) {
+            SemanticFieldSchemaDTO fieldDto = mainTableFieldMap.get(name);
 
             if (fieldDto == null) {
                 continue;
