@@ -1,10 +1,8 @@
 package com.cmsr.onebase.module.flow.context.condition;
 
-import com.cmsr.onebase.module.flow.context.enums.FieldTypeEnum;
-import com.cmsr.onebase.module.flow.context.enums.JdbcTypeEnum;
 import com.cmsr.onebase.module.flow.context.enums.OpEnum;
 import com.cmsr.onebase.module.flow.context.enums.OperatorTypeEnum;
-import com.fasterxml.jackson.annotation.JsonAlias;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
 import lombok.Data;
 
 /**
@@ -16,8 +14,8 @@ import lombok.Data;
 @Data
 public class ConditionItem implements java.io.Serializable {
 
-    @JsonAlias(value = {"field", "name", "fieldUuid"})
-    private String fieldUuid;
+//    @JsonAlias(value = {"field", "name", "fieldUuid"})
+//    private String fieldName;
 
     private String fieldName;
 
@@ -34,24 +32,25 @@ public class ConditionItem implements java.io.Serializable {
     private String operatorType;
 
     /**
-     * 根据字段id，查询元数据信息，补充的信息。
-     * 字段类型
-     * {@link JdbcTypeEnum}
-     */
-    private String jdbcType;
-
-    /**
-     * 根据字段id，查询元数据信息，补充的信息。
-     * 字段类型
-     * {@link FieldTypeEnum}
-     */
-    @JsonAlias(value = {"fieldType", "type"})
-    private String fieldType;
-
-    /**
      * 如果是operatorType是值，value可能是字符串，也可能是数组，也可能是Map。
      * 如果是operatorType是变量，value是变字符串
      */
     private Object value;
+
+    /**
+     * 查询元数据信息，补充的信息。
+     * 字段类型
+     * {@link SemanticFieldTypeEnum}
+     */
+    private SemanticFieldTypeEnum fieldType;
+
+//    /**
+//     * 根据字段id，查询元数据信息，补充的信息。
+//     * 字段类型
+//     * {@link FieldTypeEnum}
+//     */
+//    @JsonAlias(value = {"fieldType", "type"})
+//    private String fieldType;
+
 
 }

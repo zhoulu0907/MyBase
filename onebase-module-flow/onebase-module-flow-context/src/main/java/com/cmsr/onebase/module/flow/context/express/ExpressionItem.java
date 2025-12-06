@@ -5,6 +5,7 @@ import com.cmsr.onebase.module.flow.context.enums.FieldTypeEnum;
 import com.cmsr.onebase.module.flow.context.enums.JdbcTypeEnum;
 import com.cmsr.onebase.module.flow.context.enums.OpEnum;
 import com.cmsr.onebase.module.flow.context.enums.OperatorTypeEnum;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -23,7 +24,7 @@ public class ExpressionItem implements Serializable {
         newItem.setValue(item.getValue());
         newItem.setOperatorType(item.getOperatorType());
         newItem.setFieldType(item.getFieldType());
-        newItem.setJdbcType(item.getJdbcType());
+//        newItem.setJdbcType(item.getJdbcType());
         return newItem;
     }
 
@@ -36,7 +37,7 @@ public class ExpressionItem implements Serializable {
 
     private OperatorTypeEnum operatorType;
 
-    private FieldTypeEnum fieldType;
+    private SemanticFieldTypeEnum fieldType;
 
-    private JdbcTypeEnum jdbcType;
+//    private JdbcTypeEnum jdbcType;
 }
