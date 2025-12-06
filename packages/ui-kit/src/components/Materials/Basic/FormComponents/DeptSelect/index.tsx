@@ -1,19 +1,32 @@
+import { FORM_COMPONENT_TYPES } from '@/components/Materials/componentTypes';
+import { getPopupContainer } from '@/utils';
 import { Form, Tooltip, TreeSelect } from '@arco-design/web-react';
+import { listToTree } from '@onebase/common';
+import { getDeptList, getDeptsById, GetDeptsByIdReq } from '@onebase/platform-center';
 import { memo, useEffect, useRef, useState } from 'react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-import type { XInputDeptSelectConfig } from './schema';
-import { FORM_COMPONENT_TYPES } from '@/components/Materials/componentTypes';
-import { getDeptList, getDeptsById, GetDeptsByIdReq } from '@onebase/platform-center';
-import { getPopupContainer } from '@/utils';
 import '../index.css';
-import { listToTree } from '@onebase/common';
+import type { XInputDeptSelectConfig } from './schema';
 
 const XDeptSelect = memo((props: XInputDeptSelectConfig & { runtime?: boolean; detailMode?: boolean }) => {
-  const { label, dataField, tooltip, status, verify, layout, selectScope, defaultDeptValue, labelColSpan = 0, runtime = true, detailMode } = props;
+  const {
+    label,
+    dataField,
+    tooltip,
+    status,
+    verify,
+    layout,
+    selectScope,
+    defaultDeptValue,
+    labelColSpan = 0,
+    runtime = true,
+    detailMode
+  } = props;
 
   const { form } = Form.useFormContext();
 
-  const fieldName = dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.DEPT_SELECT}_${props.id}`;
+  const fieldName =
+    dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.DEPT_SELECT}_${props.id}`;
   const [deptFlatTree, setDeptFlatTree] = useState<any[]>([]);
   const [deptTree, setDeptTree] = useState<any[]>([]);
   const [curDeptTree, setCurDeptTree] = useState<any[]>([]);
@@ -34,7 +47,7 @@ const XDeptSelect = memo((props: XInputDeptSelectConfig & { runtime?: boolean; d
 
   useEffect(() => {
     if (runtime && fieldValue) {
-      setCurrentSelectDept(fieldValue?.deptName);
+      setCurrentSelectDept(fieldValue?.name);
       runtimeEditRef.current = true;
     } else {
       setCurrentSelectDept('');
@@ -44,7 +57,7 @@ const XDeptSelect = memo((props: XInputDeptSelectConfig & { runtime?: boolean; d
 
   useEffect(() => {
     getCurDeptTree(deptTree);
-    if(defaultDeptValue) {
+    if (defaultDeptValue) {
       handleChange(defaultDeptValue);
     } else {
       form.setFieldValue(fieldName, undefined);
@@ -52,7 +65,7 @@ const XDeptSelect = memo((props: XInputDeptSelectConfig & { runtime?: boolean; d
   }, [selectScope]);
 
   useEffect(() => {
-    if(runtime && defaultDeptValue && !fieldValue && !runtimeEditRef.current) {
+    if (runtime && defaultDeptValue && !fieldValue && !runtimeEditRef.current) {
       if (!deptFlatTree || deptFlatTree.length === 0) return; // 等待数据
       handleChange(defaultDeptValue);
     }
@@ -65,26 +78,29 @@ const XDeptSelect = memo((props: XInputDeptSelectConfig & { runtime?: boolean; d
     } else {
       setCurDeptTree(treeData || deptTree);
     }
-  }
+  };
 
-  const buildIndexFromTree = (tree: any[])=> {
+  const buildIndexFromTree = (tree: any[]) => {
     const map = new Map<string, any>();
-    deepFind(map,tree);
+    deepFind(map, tree);
     return map;
-  }
+  };
 
-  const deepFind = (map: Map<string, any>,nodes: any[]) => {
+  const deepFind = (map: Map<string, any>, nodes: any[]) => {
     for (const n of nodes) {
-        map.set(n.id, n);
-        if (n.children) deepFind(map, n.children);
-      }
-  }
+      map.set(n.id, n);
+      if (n.children) deepFind(map, n.children);
+    }
+  };
 
-  const extractFromTree = (tree: any[], ids: any[])=> {
+  const extractFromTree = (tree: any[], ids: any[]) => {
     const map = buildIndexFromTree(tree);
     const clone = (n: any): any => ({ ...n, children: (n.children || []).map((c: any) => clone(c)) });
-    return ids.map(i => map.get(i.key)).filter(Boolean).map(n => clone(n!));
-  }
+    return ids
+      .map((i) => map.get(i.key))
+      .filter(Boolean)
+      .map((n) => clone(n!));
+  };
 
   // 获取部门列表
   const fetchDeptList = async () => {
@@ -93,7 +109,7 @@ const XDeptSelect = memo((props: XInputDeptSelectConfig & { runtime?: boolean; d
     const treeData = listToTree(res, {}, true);
     setDeptTree(treeData);
     getCurDeptTree(treeData);
-    console.log('deptFlatTree',deptFlatTree)
+    console.log('deptFlatTree', deptFlatTree);
   };
 
   const filterTreeNode = (inputText: string, node: any) => {
@@ -101,11 +117,13 @@ const XDeptSelect = memo((props: XInputDeptSelectConfig & { runtime?: boolean; d
   };
 
   const handleChange = (value: string) => {
-    const curSelectDeptObj = deptFlatTree.find(dept => dept.id === value);
-    const curSelectDept = curSelectDeptObj ? {
-        deptID: curSelectDeptObj?.id,
-        deptName: curSelectDeptObj?.name
-      } : undefined;
+    const curSelectDeptObj = deptFlatTree.find((dept) => dept.id === value);
+    const curSelectDept = curSelectDeptObj
+      ? {
+          id: curSelectDeptObj?.id,
+          name: curSelectDeptObj?.name
+        }
+      : undefined;
     setCurrentSelectDept(curSelectDeptObj?.name);
     form.setFieldValue(fieldName, curSelectDept);
   };
@@ -113,20 +131,20 @@ const XDeptSelect = memo((props: XInputDeptSelectConfig & { runtime?: boolean; d
   // hover 获取部门层级
   const fetchDeptData = async (id: string, idType: string) => {
     if (loadingDeptRef.current[id]) return; // 已在加载中，防止重复请求
-  
+
     loadingDeptRef.current[id] = true;
     forceUpdate((s) => s + 1);
-  
+
     try {
       const params: GetDeptsByIdReq = { id, idType };
       const res = await getDeptsById(params);
       const deptListName = buildPathFromFlat(res, id);
       cacheDeptListRef.current[id] = deptListName;
     } catch (err: any) {
-        cacheDeptListRef.current[id] = '加载失败';
+      cacheDeptListRef.current[id] = '加载失败';
     } finally {
-        loadingDeptRef.current[id] = false;
-        forceUpdate((s) => s + 1);
+      loadingDeptRef.current[id] = false;
+      forceUpdate((s) => s + 1);
     }
   };
 
@@ -143,7 +161,7 @@ const XDeptSelect = memo((props: XInputDeptSelectConfig & { runtime?: boolean; d
       cur = map.get(String(parentId));
     }
     return names.reverse().join(sep);
-};
+  };
 
   return (
     <div className="formWrapper">
@@ -156,7 +174,7 @@ const XDeptSelect = memo((props: XInputDeptSelectConfig & { runtime?: boolean; d
         layout={layout}
         tooltip={tooltip}
         labelCol={layout === 'horizontal' ? { style: { width: 200, flex: 'unset' } } : {}}
-        rules={[{ required: verify?.required, message:`${label.text}是必填项` }]}
+        rules={[{ required: verify?.required, message: `${label.text}是必填项` }]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           margin: 0,
@@ -165,36 +183,39 @@ const XDeptSelect = memo((props: XInputDeptSelectConfig & { runtime?: boolean; d
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
           <Tooltip
-          content={
-            loadingDeptRef.current[fieldValue?.deptID] ? '加载中...' : (cacheDeptListRef.current[fieldValue?.deptID] ?? '未加载')
-          }
-          onVisibleChange={(visible) => {
-            // 按当前行的 id 去判断是否需要请求，而不是全局 content
-            if (visible && !cacheDeptListRef.current[fieldValue?.deptID] && !loadingDeptRef.current[fieldValue?.deptID]) {
-              fetchDeptData(fieldValue?.deptID, 'dept');
+            content={
+              loadingDeptRef.current[fieldValue?.id]
+                ? '加载中...'
+                : (cacheDeptListRef.current[fieldValue?.id] ?? '未加载')
             }
-          }}
-        >
-          <span>{currentSelectDept || '--'}</span>
-        </Tooltip>
+            onVisibleChange={(visible) => {
+              // 按当前行的 id 去判断是否需要请求，而不是全局 content
+              if (visible && !cacheDeptListRef.current[fieldValue?.id] && !loadingDeptRef.current[fieldValue?.id]) {
+                fetchDeptData(fieldValue?.id, 'dept');
+              }
+            }}
+          >
+            <span>{currentSelectDept || '--'}</span>
+          </Tooltip>
         ) : (
-        <TreeSelect
-          placeholder="请选择"
-          allowClear
-          showSearch={true}
-          treeData={curDeptTree}
-          filterTreeNode={filterTreeNode}
-          getPopupContainer={getPopupContainer}
-          treeCheckable={false}
-          onChange={handleChange}
-          renderFormat={() => {return (
-            <span>{currentSelectDept}</span>
-          )}}
-          style={{
-            width: '100%',
-            pointerEvents: runtime ? 'unset' : 'none'
-          }}
-        />)}
+          <TreeSelect
+            placeholder="请选择"
+            allowClear
+            showSearch={true}
+            treeData={curDeptTree}
+            filterTreeNode={filterTreeNode}
+            getPopupContainer={getPopupContainer}
+            treeCheckable={false}
+            onChange={handleChange}
+            renderFormat={() => {
+              return <span>{currentSelectDept}</span>;
+            }}
+            style={{
+              width: '100%',
+              pointerEvents: runtime ? 'unset' : 'none'
+            }}
+          />
+        )}
       </Form.Item>
     </div>
   );

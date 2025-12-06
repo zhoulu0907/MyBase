@@ -151,6 +151,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid })
 
         //   过滤空行
         const subTableRows = [] as any;
+        subFormData[subTableName] = subTableRows;
+
         for (const item of value) {
           if (Object.values(item).every((v: any) => v === undefined)) {
             return;
@@ -252,6 +254,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid })
         setSubmitLoading(false);
       }
     }
+
+    // 关闭页面后子表清空
+    pagesRuntimeSignal.resetSubTableDataLength();
   };
 
   const cancelSubmitForm = () => {
@@ -260,6 +265,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid })
     setPageType(EDITOR_TYPES.LIST_EDITOR);
     setDetailMode(true);
     form.resetFields();
+    // 关闭页面后子表清空
+    pagesRuntimeSignal.resetSubTableDataLength();
   };
 
   const showFromPageData = (id: string, toFormPage: boolean = false) => {
@@ -308,7 +315,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid })
       const componentSchemas = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value;
 
       for (const subEntity of subEntities.value) {
-        console.log('subEntity: ', subEntity);
         // 判断 res 对象内的 key 是否等于 subEntity.childTableName
 
         if (
