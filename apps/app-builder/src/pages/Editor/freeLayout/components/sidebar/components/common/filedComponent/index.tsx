@@ -24,7 +24,7 @@ const FieldTable = forwardRef(
       {
         title: '操作',
         width: 95,
-        dataIndex: 'displayName',
+        dataIndex: 'fieldName',
         render: (val: any, row: any) => {
           return (
             <Button type="text" onClick={() => handleDelRow(val)}>
@@ -42,6 +42,8 @@ const FieldTable = forwardRef(
       setFmVisible(true);
     }
     function handleDelRow(fid: any) {
+      console.log(fid,'删除');
+      
       let _data = [...tbData];
       if (typeof fid === 'string') {
         _data = _data.filter((item) => {
@@ -66,7 +68,7 @@ const FieldTable = forwardRef(
       if (Array.isArray(tbData)) {
         let cur_key_arr: any[] = [];
         tbData.forEach((item: any) => {
-          cur_key_arr.push(item.displayName);
+          cur_key_arr.push(item.fieldName);
         });
         setCurKeyArr(cur_key_arr);
       }
@@ -76,6 +78,7 @@ const FieldTable = forwardRef(
     useImperativeHandle(ref, () => ({
       getTbData: () => tbData
     }));
+console.log(tbData);
 
     return (
       <>
@@ -91,7 +94,7 @@ const FieldTable = forwardRef(
         </div>
         <Table
           className="field-table-wrapper"
-          rowKey="displayName"
+          rowKey="fieldName"
           columns={[...(columnsTable || []), ...baseColumns]}
           data={tbData}
           pagination={false}

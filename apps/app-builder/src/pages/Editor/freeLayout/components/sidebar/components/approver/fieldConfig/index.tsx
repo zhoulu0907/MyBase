@@ -25,7 +25,7 @@ const FieldTable = forwardRef(({ editable, onTableChange, value, ckOptions, inve
     {
       title: '操作',
       width: 95,
-      dataIndex: 'fieldUuid',
+      dataIndex: 'displayName',
       render: (val: any, row: any) => {
         return (
           <Button type="text" onClick={() => handleDelRow(val)}>
@@ -47,11 +47,11 @@ const FieldTable = forwardRef(({ editable, onTableChange, value, ckOptions, inve
     let _data = [...tbData];
     if (typeof fid === 'string') {
       _data = _data.filter((item) => {
-        return item.fieldUuid !== fid;
+        return item.displayName !== fid;
       });
     } else if (Array.isArray(fid)) {
       _data = _data.filter((item) => {
-        return fid.indexOf(item.fieldUuid) < 0;
+        return fid.indexOf(item.displayName) < 0;
       });
     }
     setTbData(_data);
@@ -64,7 +64,7 @@ const FieldTable = forwardRef(({ editable, onTableChange, value, ckOptions, inve
     if (Array.isArray(tbData)) {
       let cur_key_arr: any[] = [];
       tbData.forEach((item: any) => {
-        cur_key_arr.push(item.fieldUuid);
+        cur_key_arr.push(item.fieldName);
       });
       setCurKeyArr(cur_key_arr);
     }
@@ -90,7 +90,7 @@ const FieldTable = forwardRef(({ editable, onTableChange, value, ckOptions, inve
       </div>
       <Table
         className="field-table-wrapper"
-        rowKey="fieldUuid"
+        rowKey="displayName"
         columns={columns}
         data={tbData}
         pagination={false}
@@ -119,12 +119,13 @@ interface ChildComponentRef {
   getTbData: () => any[];
 }
 
-export default function FieldConfig({ setApprovalConfigData, fieldPermConfig, ckOptions }: FieldConfigType) {
+export default function FieldConfig({ setApprovalConfigData, fieldPermConfig, ckOptions, tableName }: FieldConfigType) {
   let [nodeSwitch, setNodeSwitch] = useState(fieldPermConfig.useNodeConfig);
   let editRef = useRef<ChildComponentRef>();
   let hiddenRef = useRef<ChildComponentRef>();
   let writeArr: any = [];
   let hiddenArr: any = [];
+  console.log(fieldPermConfig);
 
   if (Array.isArray(fieldPermConfig.fieldConfigs)) {
     fieldPermConfig.fieldConfigs.forEach((item: any) => {
@@ -149,6 +150,11 @@ export default function FieldConfig({ setApprovalConfigData, fieldPermConfig, ck
       useNodeConfig: nodeSwitch,
       fieldConfigs: [...editTable, ...hiddenTable]
     };
+
+    fieldPermConfig?.fieldConfigs.forEach((item: any) => {
+      item.tableName = tableName;
+      item.fieldDisplayName = item.displayName || item.fieldDisplayName;
+    });
     setApprovalConfigData('fieldPermConfig', fieldPermConfig);
   }
 
@@ -162,7 +168,11 @@ export default function FieldConfig({ setApprovalConfigData, fieldPermConfig, ck
         <div className="right-switch">
           <p>节点独立配置</p>
           <p className="switch-outer">
-            <Tooltip position='tr' trigger='hover' content='关闭时，字段权限跟随表单组件状态自动同步；开启后，可独立配置当前节点的字段权限。'>
+            <Tooltip
+              position="tr"
+              trigger="hover"
+              content="关闭时，字段权限跟随表单组件状态自动同步；开启后，可独立配置当前节点的字段权限。"
+            >
               <IconQuestionCircle />
             </Tooltip>
             <Switch onChange={changeNodeSwitch} checked={nodeSwitch} />
