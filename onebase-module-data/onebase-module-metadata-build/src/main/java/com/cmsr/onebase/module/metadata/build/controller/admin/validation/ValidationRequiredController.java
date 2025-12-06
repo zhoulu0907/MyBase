@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.metadata.build.controller.admin.validation;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.module.metadata.core.util.MetadataIdUuidConverter;
 import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationRequiredRespVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationRequiredSaveReqVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationRequiredUpdateReqVO;
@@ -20,6 +21,9 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 @RequestMapping("/metadata/validation/required")
 @Validated
 public class ValidationRequiredController {
+
+    @Resource
+    private MetadataIdUuidConverter idUuidConverter;
 
     @Resource private MetadataValidationRequiredBuildService requiredService;
 
@@ -53,16 +57,18 @@ public class ValidationRequiredController {
 
     @GetMapping("/get")
     @Operation(summary = "根据主键ID获取必填校验")
-    @Parameter(name = "id", description = "必填校验规则主键ID", required = true)
+    @Parameter(name = "id", description = "必填校验规则主键ID（支持ID或UUID）", required = true)
     public CommonResult<ValidationRequiredRespVO> get(@RequestParam("id") String id) {
-        return success(requiredService.getById(Long.parseLong(id)));
+        Long resolvedId = idUuidConverter.resolveRuleGroupId(id);
+        return success(requiredService.getById(resolvedId));
     }
 
     @PostMapping("/delete")
     @Operation(summary = "按主键ID删除必填校验")
-    @Parameter(name = "id", description = "必填校验规则主键ID", required = true)
+    @Parameter(name = "id", description = "必填校验规则主键ID（支持ID或UUID）", required = true)
     public CommonResult<Boolean> delete(@RequestParam("id") String id) {
-        requiredService.deleteById(Long.parseLong(id));
+        Long resolvedId = idUuidConverter.resolveRuleGroupId(id);
+        requiredService.deleteById(resolvedId);
         return success(true);
     }
 }

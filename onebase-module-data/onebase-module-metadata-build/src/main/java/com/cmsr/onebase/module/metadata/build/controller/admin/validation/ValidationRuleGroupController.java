@@ -47,10 +47,11 @@ public class ValidationRuleGroupController {
     }
 
     @PostMapping("/delete")
-    @Operation(summary = "统一删除规则组及其下规则（按ID）")
-    @Parameter(name = "id", description = "规则组ID", required = true)
+    @Operation(summary = "统一删除规则组及其下规则（按ID或UUID）")
+    @Parameter(name = "id", description = "规则组ID或UUID", required = true)
     public CommonResult<Boolean> unifiedDelete(@RequestParam("id") String id) {
-        validationRuleGroupService.deleteValidationRuleGroup(Long.parseLong(id));
+        Long groupId = idUuidConverter.resolveRuleGroupId(id);
+        validationRuleGroupService.deleteValidationRuleGroup(groupId);
         return success(true);
     }
 
