@@ -22,6 +22,7 @@ export interface MetadataEntityPair {
   tableName: string;
   entityName: string;
   relationType: (typeof RELATION_TYPE)[keyof typeof RELATION_TYPE];
+  relationshipTypes: string[];
 }
 
 export interface MetadataEntityField {

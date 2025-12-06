@@ -44,6 +44,7 @@ import { debounce } from 'lodash-es';
 import { useCallback, useEffect, useState, type FC } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
+import { RELATIONSHIP_TYPE } from '../DataFactory/utils/types';
 import CopyModal from './components/Modals/CopyModal';
 import CreateModal from './components/Modals/CreateModal';
 import RenameModal from './components/Modals/RenameModal';
@@ -222,7 +223,13 @@ const PageManagerPage: FC = () => {
     const res: MetadataEntityPair[] = await getEntityListByApp(appId);
 
     const entityOptions = res
-      .filter((entity) => entity.relationType !== RELATION_TYPE.SLAVE)
+      .filter(
+        (entity) =>
+          // 过滤子表
+          entity.relationType !== RELATION_TYPE.SLAVE ||
+          (entity.relationType === RELATION_TYPE.SLAVE &&
+            !entity.relationshipTypes.includes(RELATIONSHIP_TYPE.SUBTABLE_ONE_TO_MANY))
+      )
       .map((entity) => ({
         label: entity.entityName,
         value: entity.entityUuid
