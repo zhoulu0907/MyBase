@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Table, Select, Input, Message } from '@arco-design/web-react';
-import { useFlowEditorStor } from '@/store/index';
 import { getVersionMgmt } from '@onebase/app';
 import { getVersionColumns } from './tableColumn';
 import { VersionStatus, SortType } from './indexType';
@@ -8,14 +7,14 @@ import type { VersionData, VersionModalProps } from './indexType';
 import { versionMgmtDelete } from '@onebase/app/src/services';
 import EditRemarkModal from '../EditRemarkModal';
 import styles from './index.module.less';
-import { update } from 'lodash-es';
 
 export default function VersionModal({
   visible,
   setVisible,
   changeCurrentFlow,
   currentFlowId,
-  getVersonList
+  getVersonList,
+  businessUuid
 }: VersionModalProps) {
   const [activeStatus, setActiveStatus] = useState<VersionStatus>(VersionStatus.ALL);
   const [sortType, setSortType] = useState<SortType>(SortType.UPDATE_TIME);
@@ -23,7 +22,6 @@ export default function VersionModal({
   const [searchKeyword, setSearchKeyword] = useState('');
   const [currentItem, setCurrentItem] = useState<VersionData>({} as VersionData);
   const [editRemarkVisible, setEditRemarkVisible] = useState(false);
-  const { businessId } = useFlowEditorStor();
 
   const handleCloseModal = () => {
     setVisible(false);
@@ -48,10 +46,10 @@ export default function VersionModal({
   const columns = getVersionColumns(handleView, handleEditRemark, handleDelete);
   const getVersionMgmtData = async (deleteId?: string) => {
     const params = {
-      businessId,
+      businessUuid,
       sortType,
-      versionStatus: activeStatus === VersionStatus.ALL ? undefined : activeStatus,
-      versionAlias: searchKeyword || undefined
+      bpmVersionStatus: activeStatus === VersionStatus.ALL ? undefined : activeStatus,
+      bpmVersionAlias: searchKeyword || undefined
     };
     const { list } = await getVersionMgmt(params);
     if (deleteId === currentFlowId) {

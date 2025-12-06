@@ -84,11 +84,14 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
     const buttonType = value?.buttonType;
     const entityData = await formRef.current.getFormData();
     try {
-      const req:FetchExecTaskReq = {
+      const req: FetchExecTaskReq = {
         buttonType,
         taskId: detailData?.taskId,
         instanceId: rowData?.instanceId,
-        entity: entityData
+        entity: {
+          tableName: detailData?.formData?.tableName,
+          data: entityData?.data
+        }
       };
       await fetchExecTask(req);
       onBack && onBack();
@@ -96,7 +99,11 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
   };
 
   const handleConfirmOK = async (value: any) => {
-    const entityData = await formRef.current.getFormData();
+    const fieldData = await formRef.current.getFormData();
+    const entityData = {
+      tableName: detailData?.formData?.tableName,
+      data: fieldData?.data
+    };
 
     if (confirmRef?.current?.childMethod) {
       confirmRef.current.childMethod({ value, entityData });
@@ -256,7 +263,7 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
           </Row>
           <div className="draw-content">
             <div className="draw-left">
-              <PreviewContainer ref={formRef} pageSetId={rowData?.businessId} detailData={detailData} />
+              <PreviewContainer ref={formRef} pageSetId={rowData?.pageSetId} detailData={detailData} />
             </div>
             {isShowRight ? (
               <div className="draw-right">
@@ -282,7 +289,7 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
         visible={flowViewVisible}
         setVisible={setFlowViewVisible}
         instanceId={rowData?.instanceId}
-        businessId={rowData?.businessId}
+        businessUuid={rowData?.businessUuid}
       />
     </section>
   );

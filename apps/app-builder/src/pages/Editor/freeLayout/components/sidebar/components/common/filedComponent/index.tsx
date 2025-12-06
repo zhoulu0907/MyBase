@@ -25,7 +25,7 @@ const FieldTable = forwardRef(
       {
         title: '操作',
         width: 95,
-        dataIndex: 'fieldId',
+        dataIndex: 'fieldUuid',
         render: (val: any, row: any) => {
           return (
             <Button type="text" onClick={() => handleDelRow(val)}>
@@ -46,11 +46,11 @@ const FieldTable = forwardRef(
       let _data = [...tbData];
       if (typeof fid === 'string') {
         _data = _data.filter((item) => {
-          return item.fieldId !== fid;
+          return item.fieldUuid !== fid;
         });
       } else if (Array.isArray(fid)) {
         _data = _data.filter((item) => {
-          return fid.indexOf(item.fieldId) < 0;
+          return fid.indexOf(item.fieldUuid) < 0;
         });
       }
       setTableData(_data);
@@ -67,7 +67,7 @@ const FieldTable = forwardRef(
       if (Array.isArray(tbData)) {
         let cur_key_arr: any[] = [];
         tbData.forEach((item: any) => {
-          cur_key_arr.push(item.fieldId);
+          cur_key_arr.push(item.fieldUuid);
         });
         setCurKeyArr(cur_key_arr);
       }
@@ -92,7 +92,7 @@ const FieldTable = forwardRef(
         </div>
         <Table
           className="field-table-wrapper"
-          rowKey="fieldId"
+          rowKey="fieldUuid"
           columns={[...(columnsTable || []), ...baseColumns]}
           data={tbData}
           pagination={false}

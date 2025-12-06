@@ -31,9 +31,10 @@ import ListRuntime from './ListRuntime';
 interface PreviewProps {
   menuId: string;
   runtime: boolean;
+  menuUuid: string;
 }
 
-const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
+const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid }) => {
   useSignals();
 
   const [form] = Form.useForm();
@@ -213,9 +214,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
           const reqFlow = {
             isDraft: isSave,
             formName: curPage?.value?.pages?.find((page: any) => page.pageType === CATEGORY_TYPE.FORM)?.pageName || '',
-            businessId: curPage?.value?.id,
+            businessUuid: menuUuid,
             entity: {
-              entityId: mainMetaData,
+              tableName: tableName,
               data: formData
             }
           };
@@ -359,8 +360,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
           formData[field.fieldId] = value || '';
         }
       });
+
       setEntityParam({
-        entityId: mainMetaData,
+        tableName,
         data: formData
       });
       setPredictVisible(true);
@@ -416,7 +418,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
           autoFocus={false}
           focusLock={true}
         >
-          <FlowPredict businessId={curPage?.value?.id} entityParam={entityParam} />
+          <FlowPredict businessId={curPage?.value?.id} entityParam={entityParam} businessUuid={menuUuid} />
         </Modal>
       )}
     </div>
