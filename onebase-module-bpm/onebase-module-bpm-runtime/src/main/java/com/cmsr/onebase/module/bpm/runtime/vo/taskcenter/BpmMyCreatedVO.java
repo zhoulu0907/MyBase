@@ -42,4 +42,7 @@ public class BpmMyCreatedVO {
 
     @Schema(description = "流程表单，对应menuUuid")
     private String businessUuid;
+
+    @Schema(description = "页面集Id")
+    private Long pageSetId;
 }

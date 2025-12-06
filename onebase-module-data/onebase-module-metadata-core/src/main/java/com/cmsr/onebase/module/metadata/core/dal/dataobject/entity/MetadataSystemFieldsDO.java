@@ -1,23 +1,30 @@
 package com.cmsr.onebase.module.metadata.core.dal.dataobject.entity;
 
-import com.cmsr.onebase.framework.orm.entity.BaseEntity;
 import com.cmsr.onebase.module.metadata.core.enums.BooleanStatusEnum;
 import com.cmsr.onebase.module.metadata.core.enums.CommonStatusEnum;
 import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Id;
+import com.mybatisflex.annotation.KeyType;
 import com.mybatisflex.annotation.Table;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 /**
  * 元数据系统字段维护表 DO
+ * <p>
+ * 注意：此表结构简单，不继承BaseEntity，因为数据库表没有creator/updater/deleted等基础字段
  *
  * @author bty418
  * @date 2025-09-03
  */
 @Table(value = "metadata_system_fields")
 @Data
-@EqualsAndHashCode(callSuper = true)
-public class MetadataSystemFieldsDO extends BaseEntity {
+public class MetadataSystemFieldsDO {
+
+    /**
+     * 主键ID
+     */
+    @Id(keyType = KeyType.Auto)
+    private Long id;
 
     /**
      * 字段名

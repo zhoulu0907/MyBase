@@ -42,7 +42,7 @@ public class RuntimeSecurityAutoConfiguration {
      * 认证失败处理类 Bean
      */
     @Bean
-    public AuthenticationEntryPoint runtimeAuthenticationEntryPoint() {
+    public AuthenticationEntryPoint authenticationEntryPoint() {
         return new AuthenticationEntryPointImpl();
     }
 
@@ -50,7 +50,7 @@ public class RuntimeSecurityAutoConfiguration {
      * 权限不够处理器 Bean
      */
     @Bean
-    public AccessDeniedHandler runtimeAccessDeniedHandler() {
+    public AccessDeniedHandler accessDeniedHandler() {
         return new AccessDeniedHandlerImpl();
     }
 
@@ -61,7 +61,7 @@ public class RuntimeSecurityAutoConfiguration {
      * @see <a href="http://stackabuse.com/password-encoding-with-spring-security/">Password Encoding with Spring Security</a>
      */
     @Bean
-    public PasswordEncoder runtimePasswordEncoder() {
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(securityProperties.getPasswordEncoderLength());
     }
 
@@ -75,9 +75,9 @@ public class RuntimeSecurityAutoConfiguration {
      * Token 认证过滤器 Bean
      */
     @Bean
-    public RuntimeAuthenticationFilter runtimeAuthenticationTokenFilter(GlobalExceptionHandler globalExceptionHandler,
-                                                                        OAuth2TokenCommonApi oauth2TokenApi,
-                                                                        SecurityConfigApi securityConfigApi) {
+    public RuntimeAuthenticationFilter authenticationTokenFilter(GlobalExceptionHandler globalExceptionHandler,
+                                                                 OAuth2TokenCommonApi oauth2TokenApi,
+                                                                 SecurityConfigApi securityConfigApi) {
         return new RuntimeAuthenticationFilter(securityProperties, globalExceptionHandler, oauth2TokenApi, securityConfigApi);
     }
 
@@ -91,7 +91,7 @@ public class RuntimeSecurityAutoConfiguration {
      * 设置使用 {@link TransmittableThreadLocalSecurityContextHolderStrategy} 作为 Security 的上下文策略
      */
     @Bean
-    public MethodInvokingFactoryBean runtimeSecurityContextHolderMethodInvokingFactoryBean() {
+    public MethodInvokingFactoryBean securityContextHolderMethodInvokingFactoryBean() {
         MethodInvokingFactoryBean methodInvokingFactoryBean = new MethodInvokingFactoryBean();
         methodInvokingFactoryBean.setTargetClass(SecurityContextHolder.class);
         methodInvokingFactoryBean.setTargetMethod("setStrategyName");

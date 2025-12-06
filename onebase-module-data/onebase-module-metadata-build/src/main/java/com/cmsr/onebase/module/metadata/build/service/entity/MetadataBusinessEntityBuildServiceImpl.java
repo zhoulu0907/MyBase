@@ -25,6 +25,7 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.field.MetadataEntity
 import com.cmsr.onebase.module.metadata.build.service.field.MetadataEntityFieldOptionBuildService;
 import com.cmsr.onebase.module.metadata.core.enums.BooleanStatusEnum;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataBusinessEntityRepository;
+import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityRelationshipRepository;
 import com.cmsr.onebase.module.metadata.build.service.datasource.MetadataDatasourceBuildService;
 import com.cmsr.onebase.module.metadata.core.service.datasource.MetadataAppAndDatasourceCoreService;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataSystemFieldsCoreService;
@@ -65,6 +66,8 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
     private ModelMapper modelMapper;
     @Resource
     private MetadataBusinessEntityRepository metadataBusinessEntityRepository;
+    @Resource
+    private MetadataEntityRelationshipRepository metadataEntityRelationshipRepository;
     @Resource
     private MetadataDatasourceBuildService metadataDatasourceBuildService;
     @Resource
@@ -919,6 +922,7 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
     private EREntityVO convertToEREntity(MetadataBusinessEntityDO entity) {
         return BeanUtils.toBean(entity, EREntityVO.class, erEntity -> {
             erEntity.setEntityId(entity.getId().toString());
+            erEntity.setEntityUuid(entity.getEntityUuid());
             erEntity.setEntityName(entity.getDisplayName());
             erEntity.setTableName(entity.getTableName());
             erEntity.setDescription(entity.getDescription());
@@ -1129,6 +1133,37 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
                 .map(this::convertToSimpleEntity)
                 .toList();
 
+        // 3. 查询应用下的所有关系，判断主子表类型
+        List<MetadataEntityRelationshipDO> relationships = metadataEntityRelationshipRepository.findByApplicationId(appId);
+        
+        // 提取所有作为源实体的UUID集合
+        Set<String> sourceEntityUuids = relationships.stream()
+                .map(MetadataEntityRelationshipDO::getSourceEntityUuid)
+                .collect(Collectors.toSet());
+        
+        // 提取所有作为目标实体的UUID集合
+        Set<String> targetEntityUuids = relationships.stream()
+                .map(MetadataEntityRelationshipDO::getTargetEntityUuid)
+                .collect(Collectors.toSet());
+
+        // 遍历实体列表，设置关系类型
+        for (SimpleEntityRespVO entity : result) {
+            String uuid = entity.getEntityUuid();
+            boolean isSource = sourceEntityUuids.contains(uuid);
+            boolean isTarget = targetEntityUuids.contains(uuid);
+
+            if (isSource && !isTarget) {
+                // 只在source出现且未在target出现 -> 主表
+                entity.setRelationType("MASTER");
+            } else if (isTarget) {
+                // 只要在target出现 -> 子表
+                entity.setRelationType("SLAVE");
+            } else {
+                // 都没有 -> 无关系
+                entity.setRelationType("NONE");
+            }
+        }
+
         log.info("查询应用实体列表完成，应用ID: {}, 实体数量: {}", appId, result.size());
         return result;
     }
@@ -1142,6 +1177,7 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
     private SimpleEntityRespVO convertToSimpleEntity(MetadataBusinessEntityDO entityDO) {
         return BeanUtils.toBean(entityDO, SimpleEntityRespVO.class, simpleEntity -> {
             simpleEntity.setEntityId(entityDO.getId());
+            simpleEntity.setEntityUuid(entityDO.getEntityUuid());
             simpleEntity.setEntityName(entityDO.getDisplayName());
             // 设置实际表名
             simpleEntity.setTableName(entityDO.getTableName());

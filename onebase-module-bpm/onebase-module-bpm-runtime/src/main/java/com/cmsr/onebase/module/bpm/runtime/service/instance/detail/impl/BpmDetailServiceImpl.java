@@ -679,6 +679,8 @@ public class BpmDetailServiceImpl implements BpmDetailService {
         BpmTaskDetailRespVO.FormData formData = new BpmTaskDetailRespVO.FormData();
 
         // 填充实体数据
+        formData.setTableName(tableName);
+
         formData.setData(respVO.getGlobalRawMap());
 
         formData.setFieldType(new HashMap<>());

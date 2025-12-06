@@ -54,6 +54,7 @@ import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionU
 import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.DATASOURCE_NOT_EXISTS;
 import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.DATASOURCE_CODE_DUPLICATE;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataAppAndDatasourceDO;
+import com.cmsr.onebase.module.metadata.core.util.MetadataIdUuidConverter;
 
 /**
  * 数据源构建模块服务实现类 - 提供面向VO的业务操作
@@ -79,6 +80,8 @@ public class MetadataDatasourceBuildServiceImpl implements MetadataDatasourceBui
     private MetadataDatasourceCoreService metadataDatasourceCoreService;
     @Resource
     private AdminUserApi adminUserApi;
+    @Resource
+    private MetadataIdUuidConverter idUuidConverter;
 
     @Override
     public List<DatasourceTypeRespVO> getDatasourceTypes() {
@@ -316,8 +319,13 @@ public class MetadataDatasourceBuildServiceImpl implements MetadataDatasourceBui
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateDatasource(@Valid DatasourceSaveReqVO updateReqVO) {
-        // 安全转换ID和AppID
-        Long id = (updateReqVO.getId() != null && !updateReqVO.getId().trim().isEmpty()) ? Long.valueOf(updateReqVO.getId()) : null;
+        // 使用idUuidConverter解析ID（支持Long ID或UUID）
+        Long id = null;
+        if (updateReqVO.getId() != null && !updateReqVO.getId().trim().isEmpty()) {
+            id = idUuidConverter.resolveDatasourceId(updateReqVO.getId());
+        } else if (updateReqVO.getDatasourceUuid() != null && !updateReqVO.getDatasourceUuid().trim().isEmpty()) {
+            id = idUuidConverter.resolveDatasourceId(updateReqVO.getDatasourceUuid());
+        }
         Long appId = (updateReqVO.getApplicationId() != null && !updateReqVO.getApplicationId().trim().isEmpty()) ? Long.valueOf(updateReqVO.getApplicationId()) : null;
 
         // 校验存在

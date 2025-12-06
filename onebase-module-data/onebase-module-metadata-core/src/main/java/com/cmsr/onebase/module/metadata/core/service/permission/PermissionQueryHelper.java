@@ -7,9 +7,9 @@ import com.cmsr.onebase.module.metadata.core.domain.query.LoginUserCtx;
 import com.cmsr.onebase.module.metadata.core.domain.query.MetadataPermissionContext;
 import com.cmsr.onebase.module.metadata.core.service.permission.filter.DataPermissionFilterBuilder;
 import com.cmsr.onebase.module.metadata.core.service.permission.filter.FieldPermissionFilter;
+import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.ConfigStore;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -35,16 +35,16 @@ public class PermissionQueryHelper {
     private FieldPermissionFilter fieldPermissionFilter;
 
     /**
-     * 应用查询权限过滤
+     * 应用查询权限过滤（MyBatis-Flex QueryWrapper版本）
      * 
-     * 在查询前调用，向 ConfigStore 添加数据权限过滤条件
+     * 在查询前调用，向 QueryWrapper 添加数据权限过滤条件
      *
-     * @param configStore Anyline 查询配置
+     * @param queryWrapper MyBatis-Flex 查询包装器
      * @param permissionContext 权限上下文
      * @param loginUserCtx 当前登录用户
      * @param fields 实体字段列表
      */
-    public void applyQueryPermissionFilter(ConfigStore configStore,
+    public void applyQueryPermissionFilter(QueryWrapper queryWrapper,
                                             MetadataPermissionContext permissionContext,
                                             LoginUserCtx loginUserCtx,
                                             List<MetadataEntityFieldDO> fields) {
@@ -57,7 +57,7 @@ public class PermissionQueryHelper {
         DataPermission dataPermission = permissionContext.getDataPermission();
         if (dataPermission != null) {
             dataPermissionFilterBuilder.applyDataPermissionFilter(
-                    configStore, dataPermission, loginUserCtx, fields);
+                    queryWrapper, dataPermission, loginUserCtx, fields);
         }
 
         log.debug("查询权限过滤已应用");

@@ -42,4 +42,7 @@ public class BpmFlowDoneTaskVO {
 
     @Schema(description = "流程表单，对应menuUuid")
     private String businessUuid;
+
+    @Schema(description = "流程表单，对应menuUuid")
+    private Long pageSetId;
 }

@@ -7,6 +7,7 @@ import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import com.cmsr.onebase.module.app.api.appresource.AppResourceApi;
 import com.cmsr.onebase.module.app.api.appresource.dto.AppMenuRespDTO;
+import com.cmsr.onebase.module.app.api.appresource.dto.AppPagesetRespDTO;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowCcRecordRepository;
 import com.cmsr.onebase.module.bpm.core.dal.database.ext.BpmFlowDefinitionRepositoryExt;
@@ -29,6 +30,7 @@ import com.github.pagehelper.PageHelper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.warm.flow.core.dto.DefJson;
 import org.dromara.warm.flow.core.dto.NodeJson;
@@ -92,7 +94,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
     }
 
     private List<Long> splitToLongList(String str) {
-       return splitToList(str).stream()
+        return splitToList(str).stream()
                 .map(Long::valueOf)
                 .collect(Collectors.toList());
     }
@@ -138,6 +140,21 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         bpmAppResourceValidator.validateMenuAndPageset(appMenuRespDTO, queryPageVO.getAppId());
     }
 
+    private Map<String, AppPagesetRespDTO> buildPageSetMap(Set<String> menuUuids, Long applicationId) {
+        if (CollectionUtils.isEmpty(menuUuids))  {
+            return null;
+        }
+
+        List<AppPagesetRespDTO> pageSetList = appResourceApi.findPageSetListByMenuUuidsAndAppId(menuUuids.stream().toList(), applicationId);
+
+        if (CollectionUtils.isEmpty(pageSetList)) {
+            return null;
+        }
+
+        return pageSetList.stream()
+                    .collect(Collectors.toMap(AppPagesetRespDTO::getMenuUuid, v -> v));
+    }
+
     /**
      * 获取流程待办分页
      *
@@ -166,6 +183,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
                 .doSelectPage(() -> bpmTaskCenterMapper.getTodoTaskPage(pageReqVO, loginUserStrId));
 
         List<BpmFlowTodoTaskVO> todoTaskList = new ArrayList<>();
+        Set<String> menuUuids = new HashSet<>();
 
         for (BpmTodoTaskDTO flowTaskExt : pageResult.getResult()) {
             BpmFlowTodoTaskVO todoTaskVO = bpmTaskCenterConvert.toTodoTaskVO(flowTaskExt);
@@ -173,6 +191,21 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
             // 处理代理逻辑
             handleAgentLogic(todoTaskVO, flowTaskExt.getAgentId(), flowTaskExt.getBpmTitle(), loginUserId);
             todoTaskList.add(todoTaskVO);
+
+            menuUuids.add(todoTaskVO.getBusinessUuid());
+        }
+
+        // 处理页面集Id
+        Map<String, AppPagesetRespDTO> pageSetMap = buildPageSetMap(menuUuids, pageReqVO.getAppId());
+
+        if (MapUtils.isNotEmpty(pageSetMap)) {
+            for (BpmFlowTodoTaskVO todoTaskVO : todoTaskList) {
+                AppPagesetRespDTO pageSet = pageSetMap.get(todoTaskVO.getBusinessUuid());
+
+                if (pageSet != null) {
+                    todoTaskVO.setPageSetId(pageSet.getId());
+                }
+            }
         }
 
         // 返回新的PageResult
@@ -208,11 +241,27 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
                 .doSelectPage(() -> bpmTaskCenterMapper.getDoneTaskPage(pageReqVO, loginUserStrId));
 
         List<BpmFlowDoneTaskVO> doneTaskList = new ArrayList<>();
+        Set<String> menuUuids = new HashSet<>();
         for (BpmDoneTaskDTO doneTaskDTO : pageResult.getResult()) {
             BpmFlowDoneTaskVO doneTaskVO = bpmTaskCenterConvert.toDoneTaskVO(doneTaskDTO);
             // 处理代理逻辑
             handleAgentLogic(doneTaskVO, doneTaskDTO.getAgentId(), doneTaskDTO.getBpmTitle(), loginUserId);
             doneTaskList.add(doneTaskVO);
+
+            menuUuids.add(doneTaskVO.getBusinessUuid());
+        }
+
+        // 处理页面集Id
+        Map<String, AppPagesetRespDTO> pageSetMap = buildPageSetMap(menuUuids, pageReqVO.getAppId());
+
+        if (MapUtils.isNotEmpty(pageSetMap)) {
+            for (BpmFlowDoneTaskVO doneTaskVO : doneTaskList) {
+                AppPagesetRespDTO pageSet = pageSetMap.get(doneTaskVO.getBusinessUuid());
+
+                if (pageSet != null) {
+                    doneTaskVO.setPageSetId(pageSet.getId());
+                }
+            }
         }
 
         return new PageResult<>(doneTaskList, pageResult.getTotal());
@@ -241,6 +290,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
                 .doSelectPage(() -> bpmTaskCenterMapper.getMyCreatePage(pageReqVO, loginUserId));
 
         List<BpmMyCreatedVO> list = new ArrayList<>();
+        Set<String> menuUuids = new HashSet<>();
         for (BpmMyInstanceDTO flowInstance : pageResult.getResult()) {
             BpmMyCreatedVO bpmMyCreatedVO = bpmTaskCenterConvert.toMyCreatedVO(flowInstance);
 
@@ -270,7 +320,22 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
                 bpmMyCreatedVO.setCurrentNodeHandler(currentNodeHandler);
             }
 
+            menuUuids.add(bpmMyCreatedVO.getBusinessUuid());
+
             list.add(bpmMyCreatedVO);
+        }
+
+        // 处理页面集Id
+        Map<String, AppPagesetRespDTO> pageSetMap = buildPageSetMap(menuUuids, pageReqVO.getAppId());
+
+        if (MapUtils.isNotEmpty(pageSetMap)) {
+            for (BpmMyCreatedVO bpmMyCreatedVO : list) {
+                AppPagesetRespDTO pageSet = pageSetMap.get(bpmMyCreatedVO.getBusinessUuid());
+
+                if (pageSet != null) {
+                    bpmMyCreatedVO.setPageSetId(pageSet.getId());
+                }
+            }
         }
 
         return new PageResult<>(list, pageResult.getTotal());
@@ -343,12 +408,28 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
 
         // 转换 BpmCcRecordDTO 列表为 BpmCopyTaskPageResVO 列表
         List<BpmCcTaskPageResVO> copyTaskList = new ArrayList<>();
+        Set<String> menuUuids = new HashSet<>();
 
         for (BpmCcRecordDTO ccRecord : pageResult.getResult()) {
             BpmCcTaskPageResVO ccTaskVO = bpmTaskCenterConvert.toCcTaskVO(ccRecord);
             // 处理代理逻辑
             handleAgentLogic(ccTaskVO, ccRecord.getAgentId(), ccRecord.getBpmTitle(), loginUserId);
             copyTaskList.add(ccTaskVO);
+
+            menuUuids.add(ccTaskVO.getBusinessUuid());
+        }
+
+        // 处理页面集Id
+        Map<String, AppPagesetRespDTO> pageSetMap = buildPageSetMap(menuUuids, pageReqVO.getAppId());
+
+        if (MapUtils.isNotEmpty(pageSetMap)) {
+            for (BpmCcTaskPageResVO ccTaskVO : copyTaskList) {
+                AppPagesetRespDTO pageSet = pageSetMap.get(ccTaskVO.getBusinessUuid());
+
+                if (pageSet != null) {
+                    ccTaskVO.setPageSetId(pageSet.getId());
+                }
+            }
         }
 
         return new PageResult<>(copyTaskList, pageResult.getTotal());
@@ -374,5 +455,4 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
             }
         }
     }
-
 }

@@ -123,19 +123,23 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
                 updateReqVO.getSelectFieldUuid(), updateReqVO.getSelectFieldId()));
 
         // 校验ID不能为空
-        if (!StringUtils.hasText(updateReqVO.getId())) {
-            throw new IllegalArgumentException("更新操作必须提供实体关系ID");
+        if (!StringUtils.hasText(updateReqVO.getId()) && !StringUtils.hasText(updateReqVO.getRelationshipUuid())) {
+            throw new IllegalArgumentException("更新操作必须提供实体关系ID或UUID");
         }
+        
+        // ID/UUID兼容处理：支持传入id或relationshipUuid
+        Long relationshipId = idUuidConverter.resolveRelationshipId(
+                StringUtils.hasText(updateReqVO.getId()) ? updateReqVO.getId() : updateReqVO.getRelationshipUuid());
         
         // 校验关系类型必须是枚举中定义的值
         validateRelationshipType(updateReqVO.getRelationshipType());
         
         // 校验存在
-        validateEntityRelationshipExists(Long.valueOf(updateReqVO.getId()));
+        validateEntityRelationshipExists(relationshipId);
 
         // 更新实体关系
         MetadataEntityRelationshipDO updateObj = BeanUtils.toBean(updateReqVO, MetadataEntityRelationshipDO.class);
-        updateObj.setId(Long.valueOf(updateReqVO.getId()));
+        updateObj.setId(relationshipId);
         
         // 设置 UUID 字段
         updateObj.setSourceEntityUuid(updateReqVO.getSourceEntityUuid());
@@ -530,10 +534,19 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
         
         ParentChildRelationshipRespVO result = new ParentChildRelationshipRespVO();
         result.setId(relationshipId);
+        // 获取关系的UUID
+        MetadataEntityRelationshipDO relationship = entityRelationshipRepository.getById(relationshipId);
+        if (relationship != null) {
+            result.setRelationshipUuid(relationship.getRelationshipUuid());
+        }
         result.setParentEntityId(parentEntityIdLong);
+        result.setParentEntityUuid(parentEntityUuid);
         result.setChildEntityId(childEntityIdLong);
+        result.setChildEntityUuid(childEntityUuidFinal);
         result.setSourceFieldId(parentIdFieldIdLong);
+        result.setSourceFieldUuid(parentIdFieldUuid);
         result.setTargetFieldId(childParentIdFieldIdLong);
+        result.setTargetFieldUuid(childParentIdFieldUuid);
         result.setRelationshipType(RelationshipTypeEnum.SUBTABLE_ONE_TO_MANY.getRelationshipType());
         result.setCascadeType(CascadeTypeEnum.ALL.getCascadeType());
         // applicationId直接转换为Long（不支持UUID格式的applicationId）

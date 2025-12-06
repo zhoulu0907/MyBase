@@ -390,6 +390,7 @@ public class EtlWorkflowServiceImpl implements EtlWorkflowService {
         if (workflow instanceof NullNode) {
             throw new IllegalArgumentException("流程参数为空");
         }
+        executeRequest.setApplicationId(ApplicationManager.getRequiredApplicationId());
         executeRequest.setPreviewWorkflow(workflow.toString());
         executeRequest.setPreviewNodeId(previewReqVO.getNodeId());
         String token = JoseGenerator.generateToken(30);

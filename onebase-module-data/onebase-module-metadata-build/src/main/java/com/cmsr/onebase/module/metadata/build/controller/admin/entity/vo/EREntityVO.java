@@ -18,6 +18,9 @@ public class EREntityVO {
     @Schema(description = "实体ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
     private String entityId;
 
+    @Schema(description = "实体UUID", example = "550e8400-e29b-41d4-a716-446655440000")
+    private String entityUuid;
+
     @Schema(description = "实体名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "用户表")
     private String entityName;
 
