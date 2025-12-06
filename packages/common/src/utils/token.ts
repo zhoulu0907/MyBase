@@ -32,19 +32,19 @@ export class TokenManager {
   }
 
   static setCurIdentifyId(identifyId: string): void {
-    localStorage.setItem(this.CUR_IDENTIFY_ID, identifyId);
+    sessionStorage.setItem(this.CUR_IDENTIFY_ID, identifyId);
   }
 
   static getCurIdentifyId(): string | null {
-    return localStorage.getItem(this.CUR_IDENTIFY_ID);
+    return sessionStorage.getItem(this.CUR_IDENTIFY_ID);
   }
 
   static setCurAppId(appId: string): void {
-    localStorage.setItem(this.addEnv(this.CUR_APP_ID), appId);
+    sessionStorage.setItem(this.addEnv(this.CUR_APP_ID), appId);
   }
 
   static getCurAppId(): string | null {
-    return localStorage.getItem(this.addEnv(this.CUR_APP_ID));
+    return sessionStorage.getItem(this.addEnv(this.CUR_APP_ID));
   }
 
   /**

@@ -220,7 +220,7 @@ const PageManagerPage: FC = () => {
   const getEntityList = async () => {
     const appId: string = curAppId;
     const res: MetadataEntityPair[] = await getEntityListByApp(appId);
-    console.log('res: ', res);
+
     const entityOptions = res
       .filter((entity) => entity.relationType !== RELATION_TYPE.SLAVE)
       .map((entity) => ({
