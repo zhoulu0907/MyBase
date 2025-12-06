@@ -1,7 +1,7 @@
 import CompDeleteIcon from '@/assets/images/app_delete.svg';
 import CompCopyIcon from '@/assets/images/copy_comp_icon.svg';
 import CompShowIcon from '@/assets/images/eye_off_icon.svg';
-import { Button, Divider, Form, Layout, Table } from '@arco-design/web-react';
+import { Button, Divider, Form, Input, Layout, Table } from '@arco-design/web-react';
 import { IconDelete, IconPlus } from '@arco-design/web-react/icon';
 import { ENTITY_TYPE_VALUE } from '@onebase/app';
 import { pagesRuntimeSignal } from '@onebase/common';
@@ -289,6 +289,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
     for (let i = 0; i < subTableDataLength.value[id]; i++) {
       newSubTableData.push({ key: `${i}` });
     }
+
     setSubTableData(newSubTableData);
   }, [subTableDataLength.value]);
 
@@ -308,7 +309,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
       };
       tableColumns.push(indexColumn);
     }
-    for (let column of subTableComponents[id] || []) {
+    for (let [colIdx, column] of (subTableComponents[id] || []).entries()) {
       const displayName = pageComponentSchemas[column.id].config.label.text || column.displayName;
       const required = pageComponentSchemas[column.id].config?.verify?.required;
       const tableColumn = {
@@ -332,19 +333,44 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
           const finalConfig = applySubTableCellOverrides(config, column.type);
           const pageSchema = { ...pageComponentSchemas[column.id], config: finalConfig };
           const editDisabled = (_record.key || _record.key === '0') && !subTableConfig?.editRow;
+
           return (
-            <PreviewRender
-              cpId={column.id}
-              cpType={column.type}
-              detailMode={detailMode || editDisabled}
-              pageComponentSchema={pageSchema}
-              runtime={true}
-            />
+            <>
+              <PreviewRender
+                cpId={column.id}
+                cpType={column.type}
+                detailMode={detailMode || editDisabled}
+                pageComponentSchema={pageSchema}
+                runtime={true}
+              />
+
+              {/* 补充id字段，默认隐藏，TODO(mickey): 完善逻辑，如果子表中有id字段，则不显示 */}
+              {colIdx === 0 && (
+                <Form.Item field={`${id}.${index}.id`} hidden>
+                  <Input />
+                </Form.Item>
+              )}
+            </>
           );
         }
       };
       tableColumns.push(tableColumn);
     }
+
+    // tableColumns.push({
+    //   title: '',
+    //   dataIndex: 'id',
+    //   key: '',
+    //   fixed: '',
+    //   render: (_text: string, _record: any, index: number) => {
+    //     return (
+    //       <Form.Item field={`${id}.${index}.id`}>
+    //         <Input />
+    //       </Form.Item>
+    //     );
+    //   }
+    // });
+
     // 左侧列冻结
     if (subTableConfig?.columnFixed) {
       tableColumns.forEach((ele, index) => {
@@ -353,6 +379,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
         }
       });
     }
+
     // 操作列
     if (runtime && !detailMode && subTableConfig?.showOperate) {
       tableColumns.push({
@@ -379,6 +406,8 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
         }
       });
     }
+
+    console.log('tableColumns: ', tableColumns);
     setSubTableColumns(tableColumns);
   };
 

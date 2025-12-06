@@ -418,9 +418,7 @@ const XTable = memo(
         pageSize: pageSize || 10
       };
 
-      console.log('tableName: ', tableName);
       const res = await dataMethodPageV2(tableName, curMenu.value?.id, req);
-      console.log('res: ', res);
 
       const mainMetaData = await getEntityFieldsWithChildren(metaData);
 

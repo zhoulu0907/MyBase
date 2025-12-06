@@ -47,7 +47,6 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     // match[1] 是 appId, match[2] 是 tenantId
     const match = location.pathname.match(/\/onebase\/(\d+)\/(\d+)\/runtime/);
     if (match && match[1]) {
-      console.log('match[1]: ', match[1]);
       handleGetApplication(match[1]);
     }
   }, []);
