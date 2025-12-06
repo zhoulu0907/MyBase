@@ -53,7 +53,6 @@ export class TokenManager {
    * @param rememberMe 是否记住我
    */
   static setToken(tokenInfo: TokenInfo, rememberMe: boolean = false): void {
-    console.log('curIdentifyId: ', this.getCurIdentifyId());
     try {
       // 根据记住我选项选择存储方式
       if (rememberMe) {
