@@ -1,23 +1,9 @@
 import { emailValidator, phoneValidator } from '@/utils/validator';
-import {
-  Avatar,
-  Button,
-  Form,
-  Grid,
-  Image,
-  Input,
-  Message,
-  Modal,
-  Space,
-  Switch,
-  TreeSelect,
-  Upload
-} from '@arco-design/web-react';
-import { IconUpload } from '@arco-design/web-react/icon';
-import { Cropper, hasPermission, TENANT_DEPT_QUERY } from '@onebase/common';
+import { Button, Form, Grid, Input, Message, Modal, Space, Switch, TreeSelect } from '@arco-design/web-react';
+import { UploadAvatarComponent, hasPermission, TENANT_DEPT_QUERY } from '@onebase/common';
 import type { SimpleRoleVO, UserVO } from '@onebase/platform-center';
 import { createUser, getUser, StatusEnum, updateUser, uploadFile } from '@onebase/platform-center';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 const Row = Grid.Row;
 const Col = Grid.Col;
@@ -49,7 +35,6 @@ export default function UserFormModal({
   const [loading, setLoading] = React.useState(false);
   const [statusCheckedValue, setStatusCheckedValue] = useState(false);
   const [hasDeptQueryPermission, setHasDeptQueryPermission] = useState(true);
-  const uploadRef = useRef(null);
   const [avatarUrl, setAvatarUrl] = useState<string>();
 
   useEffect(() => {
@@ -84,23 +69,6 @@ export default function UserFormModal({
     }
   }, [visible, mode, initialValues, form]);
 
-  const handleUpload = async (file: File, onProgress?: (percent: number, event?: ProgressEvent) => void) => {
-    const formData = new FormData();
-    formData.append('file', file);
-
-    const progressAdapter = onProgress
-      ? (progressEvent: ProgressEvent) => {
-          if (progressEvent.lengthComputable) {
-            const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-            onProgress(percent, progressEvent);
-          }
-        }
-      : undefined;
-
-    const res = await uploadFile(formData, progressAdapter);
-    return res;
-  };
-
   const handleSubmit = async () => {
     if (isDetail) {
       // 详情模式下直接关闭
@@ -133,31 +101,6 @@ export default function UserFormModal({
 
   const defaultNickName = form.getFieldValue('nickname')?.charAt(0) || 'U';
 
-  const renderEditModeAvatar = () => {
-    if (avatarUrl) {
-      return (
-        <Image
-          width={80}
-          height={80}
-          src={avatarUrl}
-          alt="头像"
-          style={{
-            width: 80,
-            height: 80,
-            borderRadius: '50%',
-            objectFit: 'cover',
-            display: 'block'
-          }}
-        />
-      );
-    } else {
-      return (
-        <Avatar size={40} style={{ marginBottom: '12px', backgroundColor: '#009e9e' }}>
-          {defaultNickName}
-        </Avatar>
-      );
-    }
-  };
   return (
     <Modal
       title={
@@ -185,77 +128,15 @@ export default function UserFormModal({
           <Col span={24}>
             <Form.Item label="头像" field="avatar">
               <Space direction="vertical" style={{ margin: 0 }}>
-                {mode === 'edit' && <>{renderEditModeAvatar()}</>}
-                <Upload
-                  ref={uploadRef}
-                  limit={1}
-                  accept="image/*"
-                  listType="picture-card"
-                  showUploadList={false}
-                  customRequest={async (option) => {
-                    const { onProgress, onError, onSuccess, file } = option;
-                    try {
-                      const uploadImgUrl = await handleUpload(file, onProgress);
-                      if (uploadImgUrl !== '') {
-                        setAvatarUrl(uploadImgUrl);
-                        onSuccess(uploadImgUrl);
-                      } else {
-                        onError({
-                          status: 'error',
-                          msg: '上传失败'
-                        });
-                      }
-                    } catch (error) {
-                      onError({
-                        status: 'error',
-                        msg: '上传失败'
-                      });
-                    }
-                  }}
-                  beforeUpload={(file) => {
-                    return new Promise((resolve) => {
-                      const modal = Modal.confirm({
-                        title: '裁剪图片',
-                        onCancel: () => {
-                          Message.info('取消上传');
-                          resolve(false);
-                          modal.close();
-                        },
-                        simple: false,
-                        content: (
-                          <Cropper
-                            aspect={1 / 1}
-                            file={file}
-                            onOK={(file: any) => {
-                              resolve(file);
-                              modal.close();
-                            }}
-                            onCancel={() => {
-                              resolve(false);
-                              Message.info('取消上传');
-                              modal.close();
-                            }}
-                          />
-                        ),
-                        footer: null
-                      });
-                    });
-                  }}
-                  style={{
-                    display: 'none'
-                  }}
-                ></Upload>
-                <Space>
-                  <Button
-                    type="outline"
-                    icon={<IconUpload />}
-                    onClick={() => {
-                      uploadRef.current?.getRootDOMNode()?.querySelector('input[type="file"]').click();
-                    }}
-                  >
-                    {mode === 'edit' ? '修改头像' : '上传头像'}
-                  </Button>
-                </Space>
+                <UploadAvatarComponent
+                  getUploadFile={uploadFile}
+                  avatarUrl={avatarUrl as string}
+                  onUpdateUrl={setAvatarUrl}
+                  defaultPlaceholder={defaultNickName}
+                  buttonName={mode === 'edit' ? '修改头像' : '上传头像'}
+                  size={{ width: 80, height: 80, aspect: 1 / 1 }}
+                  defaultAvatarSize={40}
+                />
               </Space>
             </Form.Item>
           </Col>

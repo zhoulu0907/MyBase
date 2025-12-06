@@ -160,7 +160,7 @@ export interface XTableConfig extends ICommonBaseType {
    */
   labelColSpan?: TNumberDefaultType;
   metaData: TTextDefaultType;
-
+  tableName: TTextDefaultType;
   /**
    * 行点击跳转
    */
@@ -340,6 +340,7 @@ const XTable: XTableSchema = {
     pagePosition: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.BR],
     pageSize: 10,
     metaData: '',
+    tableName: '',
     labelColSpan: 100,
     defaultValue: [],
     columns: [],

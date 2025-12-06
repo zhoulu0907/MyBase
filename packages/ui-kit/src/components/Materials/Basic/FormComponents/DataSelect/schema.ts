@@ -25,6 +25,7 @@ import {
 import type {
   IBooleanConfigType,
   IDataFieldConfigType,
+  IDataSelectModeConfigType,
   ILabelConfigType,
   ILayoutConfigType,
   INumberConfigType,
@@ -32,7 +33,6 @@ import type {
   ISelectConfigType,
   ISelectDataSourceConfigType,
   IStatusConfigType,
-  IDataSelectModeConfigType,
   ITextAreaConfigType,
   ITextConfigType,
   ITooltipConfigType,
@@ -252,6 +252,7 @@ const XDataSelect: XDataSelectSchema = {
         text: '',
         display: true
       },
+      tableName: '',
       stripe: true,
       border: true,
       borderCell: true,
