@@ -1,8 +1,6 @@
 package com.cmsr.onebase.module.bpm.runtime.helper;
 
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
-import com.cmsr.onebase.module.bpm.core.dto.node.base.FieldPermCfgDTO;
-import com.cmsr.onebase.module.bpm.core.enums.FieldPermTypeEnum;
 import com.cmsr.onebase.module.bpm.runtime.vo.EntityVO;
 import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntitySchemaDTO;
@@ -17,7 +15,10 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 
@@ -36,33 +37,6 @@ public class BpmEntityHelper {
 
     @Resource
     private SemanticDynamicDataApi semanticDynamicDataApi;
-
-    /**
-     * 根据表名构建实体元数据 Schema
-     *
-     * @param tableName 表名
-     * @return 实体 Schema
-     */
-    public SemanticEntitySchemaDTO buildSchemaByTableName(String tableName) {
-        return semanticDynamicDataApi.buildEntitySchemaByTableName(tableName);
-    }
-
-    /**
-     * 根据表名构建实体 Schema，并校验实体 UUID 是否与菜单绑定实体一致
-     *
-     * @param tableName         表名
-     * @param expectedEntityUuid 菜单绑定的实体 UUID
-     * @return 实体 Schema
-     */
-    public SemanticEntitySchemaDTO buildAndValidateSchema(String tableName, String expectedEntityUuid) {
-        SemanticEntitySchemaDTO schemaDTO = semanticDynamicDataApi.buildEntitySchemaByTableName(tableName);
-
-        if (schemaDTO == null || !Objects.equals(schemaDTO.getEntityUuid(), expectedEntityUuid)) {
-            throw exception(ErrorCodeConstants.INVALID_ENTITY_TABLE_NAME);
-        }
-
-        return schemaDTO;
-    }
 
     /**
      * 插入实体数据
@@ -132,53 +106,6 @@ public class BpmEntityHelper {
         updateDataReqVO.setData(data);
 
         semanticDynamicDataApi.updateDataById(updateDataReqVO);
-    }
-
-    public void filterEntityData(EntityVO entityVO, FieldPermCfgDTO fieldPermConfig) {
-        String tableName = entityVO.getTableName();
-
-        // 通过 tableName + fieldName 唯一锁定可编辑字段
-        Set<String> writableFieldNames = new HashSet<>();
-
-        // 重置，待过滤出可编辑的字段
-        Map<String, Object> updateEntityData = new HashMap<>();
-
-        for (FieldPermCfgDTO.FieldConfigDTO fieldConfig : fieldPermConfig.getFieldConfigs()) {
-            // 先校验表名是否匹配
-            if (!Objects.equals(fieldConfig.getTableName(), tableName)) {
-                continue;
-            }
-
-            // 只保留可编辑的字段
-            if (Objects.equals(fieldConfig.getFieldPermType(), FieldPermTypeEnum.WRITE.getCode())) {
-                writableFieldNames.add(fieldConfig.getFieldName());
-            }
-        }
-
-        SemanticEntitySchemaDTO entitySchema = semanticDynamicDataApi.buildEntitySchemaByTableName(entityVO.getTableName());
-        Set<String> connectorTableNameSet = new HashSet<>();
-
-        if (CollectionUtils.isNotEmpty(entitySchema.getConnectors())) {
-            for (SemanticRelationSchemaDTO connector : entitySchema.getConnectors()) {
-                connectorTableNameSet.add(connector.getTargetEntityTableName());
-            }
-        }
-
-        // todo: 处理子表字段
-        log.info("connectorTableNameSet: {}", connectorTableNameSet);
-
-        // 审批节点默认所有字段都为只读 todo: 待完善
-        entityVO.getData().forEach((key, value) -> {
-            // id字段，直接保留
-            if ("id".equalsIgnoreCase(key)) {
-                updateEntityData.put(key, value);
-            } else {
-                // 通过 fieldName 判断是否可编辑
-                if (writableFieldNames.contains(key)) {
-                    updateEntityData.put(key, value);
-                }
-            }
-        });
     }
 
     /**
