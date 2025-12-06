@@ -14,7 +14,7 @@ import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
 import com.cmsr.onebase.module.flow.context.graph.nodes.DataUpdateNodeData;
 import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntityValueDTO;
-import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanicTargetConditionVO;
+import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticTargetConditionVO;
 import com.yomahub.liteflow.annotation.LiteflowComponent;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -49,7 +49,7 @@ public class DataUpdateNodeComponent extends SkippableNodeComponent {
         InLoopDepth inLoopDepth = nodeData.getInLoopDepth();
         Map<String, Object> expressionContext = VariableProvider.resolveLoopVariables(this, inLoopDepth, variableContext.getNodeVariables());
         //
-        SemanicTargetConditionVO reqDTO = new SemanicTargetConditionVO();
+        SemanticTargetConditionVO reqDTO = new SemanticTargetConditionVO();
         reqDTO.setTraceId(executeContext.getTraceId());
         if (StringUtils.equalsIgnoreCase("mainEntity", nodeData.getUpdateType())) {
             reqDTO.setTableName(nodeData.getMainEntityName());

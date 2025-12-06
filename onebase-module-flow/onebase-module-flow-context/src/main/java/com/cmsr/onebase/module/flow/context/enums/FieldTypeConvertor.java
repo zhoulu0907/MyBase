@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.flow.context.enums;
 
+import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -15,7 +16,7 @@ import java.time.format.DateTimeParseException;
  * @Author：huangjie
  * @Date：2025/9/8 17:24
  */
-public class JdbcTypeConvertor {
+public class FieldTypeConvertor {
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private static final DateTimeFormatter TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -23,55 +24,32 @@ public class JdbcTypeConvertor {
 
 
     /**
-     * 将数据库类型转换为对应的Java类型
-     * 支持的数据库类型包括：BIGINT, BOOLEAN, DATE, DECIMAL, LONGVARCHAR, NUMERIC, TIMESTAMP, VARCHAR
-     *
-     * <p>转换规则示例：</p>
-     * <ul>
-     *     <li>输入 jdbcType="TIMESTAMP", value="2025-09-08 17:24:00" → 输出 java.time.LocalDateTime</li>
-     *     <li>输入 jdbcType="VARCHAR", value="abc" → 输出 java.lang.String</li>
-     *     <li>输入 jdbcType="BIGINT", value="1234567890" → 输出 java.lang.Long</li>
-     *     <li>输入 jdbcType="BOOLEAN", value="true" → 输出 java.lang.Boolean</li>
-     *     <li>输入 jdbcType="DATE", value="2025-09-08" → 输出 java.time.LocalDate</li>
-     *     <li>输入 jdbcType="DECIMAL", value="123.45" → 输出 java.math.BigDecimal</li>
-     *     <li>输入 jdbcType="LONGVARCHAR", value="long string" → 输出 java.lang.String</li>
-     *     <li>输入 jdbcType="NUMERIC", value="123.45" → 输出 java.math.BigDecimal</li>
-     * </ul>
-     *
-     * @param jdbcType 数据库类型字符串，如"TIMESTAMP"、"VARCHAR"等
-     * @param value    待转换的值，通常为字符串形式的数据库值
-     * @return 转换后的Java对象，类型根据jdbcType和value内容确定
-     * @throws UnsupportedOperationException 当不支持的数据库类型传入时抛出
      */
-    public static Object convert(String jdbcType, Object value) {
+    public static Object convert(SemanticFieldTypeEnum fieldType, Object value) {
         if (value == null) {
             return null;
         }
-
-        if (jdbcType == null) {
-            throw new IllegalArgumentException("jdbcType 不能为空");
+        if (fieldType == null) {
+            return value;
         }
-
-        switch (jdbcType.toUpperCase()) {
-            case "TIMESTAMP":
-                return convertTimestamp(value);
-            case "VARCHAR":
-                return convertVarchar(value);
-            case "BIGINT":
-                return convertBigInt(value);
-            case "BOOLEAN":
-                return convertBoolean(value);
-            case "DATE":
-                return convertDate(value);
-            case "DECIMAL":
-                return convertDecimal(value);
-            case "LONGVARCHAR":
-                return convertLongVarchar(value);
-            case "NUMERIC":
-                return convertNumeric(value);
-            default:
-                return value;
+        
+        Class<?> rawJavaType = fieldType.getRawJavaType();
+        
+        if (rawJavaType == String.class) {
+            return convertVarchar(value);
+        } else if (rawJavaType == Long.class) {
+            return convertBigInt(value);
+        } else if (rawJavaType == Boolean.class) {
+            return convertBoolean(value);
+        } else if (rawJavaType == LocalDate.class) {
+            return convertDate(value);
+        } else if (rawJavaType == LocalDateTime.class) {
+            return convertTimestamp(value);
+        } else if (rawJavaType == BigDecimal.class) {
+            return convertDecimal(value);
         }
+        
+        return value;
     }
 
     private static Object convertTimestamp(Object value) {

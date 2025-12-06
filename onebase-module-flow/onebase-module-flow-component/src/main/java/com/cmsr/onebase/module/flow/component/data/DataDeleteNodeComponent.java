@@ -11,7 +11,7 @@ import com.cmsr.onebase.module.flow.context.express.OrExpression;
 import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
 import com.cmsr.onebase.module.flow.context.graph.nodes.DataDeleteeNodeData;
 import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
-import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanicTargetConditionVO;
+import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticTargetConditionVO;
 import com.yomahub.liteflow.annotation.LiteflowComponent;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -48,7 +48,7 @@ public class DataDeleteNodeComponent extends SkippableNodeComponent {
         List<Conditions> conditions = nodeData.getFilterCondition();
         OrExpression orExpression = conditionsProvider.formatConditionsForValue(conditions, expressionContext);
 
-        SemanicTargetConditionVO reqDTO = new SemanicTargetConditionVO();
+        SemanticTargetConditionVO reqDTO = new SemanticTargetConditionVO();
         reqDTO.setTraceId(executeContext.getTraceId());
         if (StringUtils.equalsIgnoreCase("mainEntity", nodeData.getDataType())) {
             reqDTO.setTableName(nodeData.getMainEntityName());

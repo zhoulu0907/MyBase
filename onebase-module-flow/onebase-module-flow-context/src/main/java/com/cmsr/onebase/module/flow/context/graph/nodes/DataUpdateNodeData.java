@@ -26,8 +26,14 @@ public class DataUpdateNodeData extends NodeData implements Serializable {
      */
     private String updateType;
 
+    /**
+     * 数据透传给API接口，不需要转换类型，因此不需要补充fieldType
+     */
     private List<Conditions> filterCondition;
 
+    /**
+     * 数据透传给API接口，不需要转换类型，因此不需要补充fieldType
+     */
     private List<ConditionItem> fields;
 
 }

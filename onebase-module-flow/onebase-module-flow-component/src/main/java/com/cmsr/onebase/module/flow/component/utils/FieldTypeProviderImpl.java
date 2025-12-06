@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @Author：huangjie
@@ -72,7 +73,6 @@ public class FieldTypeProviderImpl implements FieldTypeProvider {
                     } else {
                         tableName = n.getSubEntityName();
                     }
-                    processForFieldTypeSub(tableName, n.getFields());
                     nodeTableNameMap.put(node.getId(), tableName);
                 } else if (nodeData instanceof DataDeleteeNodeData n) {
                     String tableName;
@@ -81,7 +81,6 @@ public class FieldTypeProviderImpl implements FieldTypeProvider {
                     } else {
                         tableName = n.getSubEntityName();
                     }
-                    processForFieldIdTypeTop(tableName, n.getFilterCondition());
                     nodeTableNameMap.put(node.getId(), tableName);
                 } else if (nodeData instanceof DataQueryMultipleNodeData n) {
                     String tableName;
@@ -90,7 +89,6 @@ public class FieldTypeProviderImpl implements FieldTypeProvider {
                     } else {
                         tableName = n.getSubEntityName();
                     }
-                    processForFieldIdTypeTop(tableName, n.getFilterCondition());
                     nodeTableNameMap.put(node.getId(), tableName);
                 } else if (nodeData instanceof DataQueryNodeData n) {
                     String tableName;
@@ -99,7 +97,6 @@ public class FieldTypeProviderImpl implements FieldTypeProvider {
                     } else {
                         tableName = n.getSubEntityName();
                     }
-                    processForFieldIdTypeTop(tableName, n.getFilterCondition());
                     nodeTableNameMap.put(node.getId(), tableName);
                 } else if (nodeData instanceof DataUpdateNodeData n) {
                     String tableName;
@@ -108,8 +105,6 @@ public class FieldTypeProviderImpl implements FieldTypeProvider {
                     } else {
                         tableName = n.getSubEntityName();
                     }
-                    processForFieldIdTypeTop(tableName, n.getFilterCondition());
-                    processForFieldTypeSub(tableName, n.getFields());
                     nodeTableNameMap.put(node.getId(), tableName);
                 } else if (nodeData instanceof IfCaseNodeData n) {
                     processForFieldIdTypeTop(n.getFilterCondition());
@@ -127,16 +122,22 @@ public class FieldTypeProviderImpl implements FieldTypeProvider {
             }
         }
 
-        private void processForFieldIdTypeTop(String tableName, List<Conditions> filterCondition) {
+        private void processForFieldIdTypeTop(List<Conditions> filterCondition) {
             if (CollectionUtils.isEmpty(filterCondition)) {
                 return;
             }
+            filterCondition.stream().flatMap(conditions -> conditions.getConditions().stream())
+                    .map(conditionItem -> {
+                        String fieldName = conditionItem.getFieldName();
+                        if(fieldName.contains("."))
+
+                    }).collect(Collectors.toSet());
             for (Conditions conditions : filterCondition) {
                 processForFieldTypeSub(conditions.getConditions());
             }
         }
 
-        private void processForFieldTypeSub(String tableName, List<ConditionItem> fields) {
+        private void processForFieldTypeSub(List<ConditionItem> fields) {
             if (CollectionUtils.isEmpty(fields)) {
                 return;
             }

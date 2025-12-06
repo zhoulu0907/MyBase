@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.flow.context.condition;
 import com.cmsr.onebase.module.flow.context.enums.OpEnum;
 import com.cmsr.onebase.module.flow.context.enums.OperatorTypeEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
+import com.fasterxml.jackson.annotation.JsonAlias;
 import lombok.Data;
 
 /**
@@ -14,10 +15,8 @@ import lombok.Data;
 @Data
 public class ConditionItem implements java.io.Serializable {
 
-//    @JsonAlias(value = {"field", "name", "fieldUuid"})
-//    private String fieldName;
-
-    private String fieldName;
+    @JsonAlias(value = {"field", "name"})
+    private String fieldKey;
 
     /**
      * 操作符
@@ -37,20 +36,20 @@ public class ConditionItem implements java.io.Serializable {
      */
     private Object value;
 
+
+    /**
+     * 字段类型
+     * 脚本节点等自定义的类型
+     */
+    private String type;
+
+
     /**
      * 查询元数据信息，补充的信息。
      * 字段类型
      * {@link SemanticFieldTypeEnum}
      */
-    private SemanticFieldTypeEnum fieldType;
-
-//    /**
-//     * 根据字段id，查询元数据信息，补充的信息。
-//     * 字段类型
-//     * {@link FieldTypeEnum}
-//     */
-//    @JsonAlias(value = {"fieldType", "type"})
-//    private String fieldType;
+    private SemanticFieldTypeEnum fieldTypeEnum;
 
 
 }

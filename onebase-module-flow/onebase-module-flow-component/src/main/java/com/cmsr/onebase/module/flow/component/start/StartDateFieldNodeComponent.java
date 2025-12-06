@@ -85,7 +85,10 @@ public class StartDateFieldNodeComponent extends NodeComponent {
             reqDTO.setPageSize(nodeData.getBatchSize());
         }
         executeContext.addLog("时间字段触发开始查询数据");
-        PageResult<SemanticEntityValueDTO> fieldDataRespDTOS = ApplicationManager.withApplicationIdAndVersionTag(nodeData.getApplicationId(), () -> semanticDynamicDataApi.getDataByCondition(reqDTO));
+        PageResult<SemanticEntityValueDTO> fieldDataRespDTOS = ApplicationManager.withApplicationIdAndVersionTag(
+                executeContext.getApplicationId(),
+                executeContext.getVersionTag(),
+                () -> semanticDynamicDataApi.getDataByCondition(reqDTO));
         executeContext.addLog("时间字段触发查询返回数据量: " + fieldDataRespDTOS.getTotal());
         variableContext.putNodeVariables(this.getTag(), DataMethodApiHelper.convertToListMap(fieldDataRespDTOS.getList()));
     }

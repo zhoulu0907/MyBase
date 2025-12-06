@@ -12,7 +12,7 @@ import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
 import com.cmsr.onebase.module.flow.context.graph.nodes.DataAddNodeData;
 import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntityValueDTO;
-import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanicMergeConditionVO;
+import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticMergeConditionVO;
 import com.yomahub.liteflow.annotation.LiteflowComponent;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -51,7 +51,7 @@ public class DataAddNodeComponent extends SkippableNodeComponent {
         Map<String, Object> expressionContext = VariableProvider.resolveLoopVariables(this, inLoopDepth, variableContext.getNodeVariables());
 
         // 执行数据添加操作
-        SemanicMergeConditionVO reqDTO = new SemanicMergeConditionVO();
+        SemanticMergeConditionVO reqDTO = new SemanticMergeConditionVO();
         reqDTO.setTraceId(executeContext.getTraceId());
         //
         if (StringUtils.equalsIgnoreCase("mainEntity", nodeData.getAddType())) {

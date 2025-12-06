@@ -28,5 +28,8 @@ public class DataAddNodeData extends NodeData implements Serializable {
 
     private String dataNodeId;
 
+    /**
+     * 数据透传给API接口，不需要转换类型，因此不需要补充fieldType
+     */
     private List<ConditionItem> fields;
 }

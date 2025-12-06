@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.flow.component.utils;
 
 import com.cmsr.onebase.module.flow.context.enums.FieldTypeEnum;
-import com.cmsr.onebase.module.flow.context.enums.JdbcTypeConvertor;
+import com.cmsr.onebase.module.flow.context.enums.FieldTypeConvertor;
 import com.cmsr.onebase.module.flow.context.enums.JdbcTypeEnum;
 
 import java.util.HashMap;
@@ -31,7 +31,7 @@ public class SchemaParser {
             return parseResult;
         }
         JdbcTypeEnum jdbcType = fieldType.getJdbcType();
-        Object converted = JdbcTypeConvertor.convert(jdbcType.getCode(), rawValue);
+        Object converted = FieldTypeConvertor.convert(jdbcType.getCode(), rawValue);
         parseResult.put(fieldName, converted);
         return parseResult;
     }

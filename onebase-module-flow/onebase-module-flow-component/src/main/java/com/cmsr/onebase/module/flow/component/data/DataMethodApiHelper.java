@@ -5,7 +5,6 @@ import com.cmsr.onebase.module.flow.context.enums.OpEnum;
 import com.cmsr.onebase.module.flow.context.express.AndExpression;
 import com.cmsr.onebase.module.flow.context.express.ExpressionItem;
 import com.cmsr.onebase.module.flow.context.express.OrExpression;
-import com.cmsr.onebase.module.metadata.api.datamethod.dto.OrderDto;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticConditionDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntityValueDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldValueDTO;
@@ -13,6 +12,7 @@ import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticSortRuleDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticCombinatorEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticConditionNodeTypeEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticOperatorEnum;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticSortDirectionEnum;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.ArrayList;
@@ -220,17 +220,17 @@ public class DataMethodApiHelper {
         if (sortBy == null || sortBy.isEmpty()) {
             return null;
         }
-        List<OrderDto> orderDtos = new ArrayList<>();
+        List<SemanticSortRuleDTO> orderDtos = new ArrayList<>();
         // 遍历排序条件数组
         for (SortItem sortItem : sortBy) {
             if (sortItem.getSortField() == null || sortItem.getSortType() == null) {
                 continue;
             }
-            OrderDto orderDto = new OrderDto();
+            SemanticSortRuleDTO orderDto = new SemanticSortRuleDTO();
             // 设置排序字段ID
-            orderDto.setFieldId(sortItem.getSortField().toString());
+            orderDto.setField(sortItem.getSortField().toString());
             // 设置排序顺序
-            orderDto.setSortOrder(sortItem.getSortType());
+            orderDto.setDirection(SemanticSortDirectionEnum.valueOf(sortItem.getSortType()));
             orderDtos.add(orderDto);
         }
         return orderDtos.isEmpty() ? null : orderDtos;

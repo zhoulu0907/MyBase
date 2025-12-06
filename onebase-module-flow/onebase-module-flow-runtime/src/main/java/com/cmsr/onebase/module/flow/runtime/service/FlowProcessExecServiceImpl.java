@@ -4,7 +4,7 @@ import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.flow.context.condition.Conditions;
 import com.cmsr.onebase.module.flow.context.condition.ConditionsSupport;
 import com.cmsr.onebase.module.flow.context.enums.FieldTypeEnum;
-import com.cmsr.onebase.module.flow.context.enums.JdbcTypeConvertor;
+import com.cmsr.onebase.module.flow.context.enums.FieldTypeConvertor;
 import com.cmsr.onebase.module.flow.context.express.ExpressionExecutor;
 import com.cmsr.onebase.module.flow.context.express.OrExpression;
 import com.cmsr.onebase.module.flow.context.graph.nodes.ModalNodeData;
@@ -113,7 +113,7 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
         Map<String, Object> result = new HashMap<>();
         for (ModalNodeData.Field field : inputFields) {
             FieldTypeEnum fieldTypeEnum = FieldTypeEnum.getByName(field.getFieldType());
-            Object value = JdbcTypeConvertor.convert(fieldTypeEnum.getJdbcType().getCode(), field.getValue());
+            Object value = FieldTypeConvertor.convert(fieldTypeEnum.getJdbcType().getCode(), field.getValue());
             result.put(field.getId(), value);
         }
         return result;
@@ -197,7 +197,7 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
             return inputValue;
         }
         try {
-            return JdbcTypeConvertor.convert(fieldInfo.getJdbcType(), inputValue);
+            return FieldTypeConvertor.convert(fieldInfo.getJdbcType(), inputValue);
         } catch (Exception e) {
             log.warn("字段数据转换失败，字段ID: {}, 字段名: {}, JDBC类型: {}, 输入值: {}, 错误: {}",
                     fieldId, fieldInfo.getFieldName(), fieldInfo.getJdbcType(), inputValue, e.getMessage());

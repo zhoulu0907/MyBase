@@ -9,10 +9,10 @@ import com.cmsr.onebase.module.flow.context.ConditionsProvider;
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
 import com.cmsr.onebase.module.flow.context.VariableContext;
 import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
-import com.cmsr.onebase.module.flow.context.enums.JdbcTypeEnum;
 import com.cmsr.onebase.module.flow.context.express.ExpressionItem;
 import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
 import com.cmsr.onebase.module.flow.context.graph.nodes.ScriptNodeData;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
 import com.yomahub.liteflow.annotation.LiteflowComponent;
 import kong.unirest.core.ContentType;
 import kong.unirest.core.HttpResponse;
@@ -90,7 +90,7 @@ public class ScriptNodeComponent extends SkippableNodeComponent {
     private void settingToJdbcType(List<ConditionItem> conditionItems) {
         for (ConditionItem conditionItem : conditionItems) {
             //String fieldType = conditionItem.getFieldType();
-            conditionItem.setJdbcType(JdbcTypeEnum.VARCHAR.getCode());
+            conditionItem.setFieldType(SemanticFieldTypeEnum.TEXT);
         }
     }
 

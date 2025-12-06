@@ -4,14 +4,13 @@ import com.cmsr.onebase.module.flow.component.SkippableNodeComponent;
 import com.cmsr.onebase.module.flow.component.utils.VariableProvider;
 import com.cmsr.onebase.module.flow.context.ConditionsProvider;
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
-import com.cmsr.onebase.module.flow.context.FlowProcessCache;
 import com.cmsr.onebase.module.flow.context.VariableContext;
 import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
-import com.cmsr.onebase.module.flow.context.enums.JdbcTypeEnum;
 import com.cmsr.onebase.module.flow.context.enums.OpEnum;
 import com.cmsr.onebase.module.flow.context.express.ExpressionItem;
 import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
 import com.cmsr.onebase.module.flow.context.graph.nodes.DataCalcNodeData;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
 import com.yomahub.liteflow.annotation.LiteflowComponent;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -40,14 +39,14 @@ public class DataCalcNodeComponent extends SkippableNodeComponent {
         ExecuteContext executeContext = this.getContextBean(ExecuteContext.class);
         executeContext.addLog("数据计算节点开始执行");
         VariableContext variableContext = this.getContextBean(VariableContext.class);
-        DataCalcNodeData nodeData = (DataCalcNodeData) executeContext.getNodeData( this.getTag());
+        DataCalcNodeData nodeData = (DataCalcNodeData) executeContext.getNodeData(this.getTag());
         InLoopDepth inLoopDepth = nodeData.getInLoopDepth();
         Map<String, Object> expressionContext = VariableProvider.resolveLoopVariables(this, inLoopDepth, variableContext.getNodeVariables());
 
         List<ConditionItem> conditionItems = nodeData.getCalRules();
         // 固定是字符串类型
         for (ConditionItem conditionItem : conditionItems) {
-            conditionItem.setJdbcType(JdbcTypeEnum.VARCHAR.getCode());
+            conditionItem.setFieldType(SemanticFieldTypeEnum.TEXT);
             conditionItem.setOp(OpEnum.EQUALS.name());
         }
         List<ExpressionItem> expressionItems = conditionsProvider.formatConditionItemsForValue(conditionItems, expressionContext);

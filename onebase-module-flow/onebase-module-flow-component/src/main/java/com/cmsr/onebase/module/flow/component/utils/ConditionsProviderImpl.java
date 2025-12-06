@@ -6,8 +6,7 @@ import com.cmsr.onebase.module.flow.context.ConditionsProvider;
 import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
 import com.cmsr.onebase.module.flow.context.condition.Conditions;
 import com.cmsr.onebase.module.flow.context.condition.ConditionsSupport;
-import com.cmsr.onebase.module.flow.context.enums.JdbcTypeConvertor;
-import com.cmsr.onebase.module.flow.context.enums.JdbcTypeEnum;
+import com.cmsr.onebase.module.flow.context.enums.FieldTypeConvertor;
 import com.cmsr.onebase.module.flow.context.enums.OpEnum;
 import com.cmsr.onebase.module.flow.context.enums.OperatorTypeEnum;
 import com.cmsr.onebase.module.flow.context.express.AndExpression;
@@ -16,6 +15,7 @@ import com.cmsr.onebase.module.flow.context.express.OrExpression;
 import com.cmsr.onebase.module.formula.api.formula.FormulaEngineApi;
 import com.cmsr.onebase.module.formula.api.formula.dto.FormulaExecuteReqDTO;
 import com.cmsr.onebase.module.formula.api.formula.dto.FormulaExecuteRespDTO;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
 import lombok.Setter;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -107,21 +107,19 @@ public class ConditionsProviderImpl implements ConditionsProvider {
             reqDTO.setFormula(formula);
             reqDTO.setParameters(parameters);
             reqDTO.setContextData(vars);
-            String jdbcType = expressionItem.getJdbcType() == null ? null : expressionItem.getJdbcType().getCode();
-            expressionItem.setValue(callFormula(reqDTO, jdbcType));
+            expressionItem.setValue(callFormula(reqDTO, expressionItem.getFieldType()));
         }
     }
 
 
-    private Object callFormula(FormulaExecuteReqDTO reqDTO, String jdbcType) {
+    private Object callFormula(FormulaExecuteReqDTO reqDTO, SemanticFieldTypeEnum fieldType) {
         CommonResult<FormulaExecuteRespDTO> respDTO = formulaEngineApi.executeFormula(reqDTO);
         if (respDTO.getData() == null) {
             throw new IllegalCallerException("调用公式错误: " + reqDTO.getFormula() + ", 错误信息: " + respDTO.getMsg());
         }
-        //String resultType = respDTO.getData().getResultType();
         Object result = respDTO.getData().getResult();
-        if (StringUtils.isNotBlank(jdbcType)) {
-            return JdbcTypeConvertor.convert(jdbcType, result);
+        if (fieldType != null) {
+            return FieldTypeConvertor.convert(fieldType, result);
         } else {
             return result;
         }
@@ -143,8 +141,7 @@ public class ConditionsProviderImpl implements ConditionsProvider {
             reqDTO.setFormula(formula);
             reqDTO.setParameters(parameters);
             reqDTO.setContextData(vars);
-            String jdbcType = expressionItem.getJdbcType() == null ? null : expressionItem.getJdbcType().getCode();
-            expressionItem.setValue(callFormula(reqDTO, jdbcType));
+            expressionItem.setValue(callFormula(reqDTO, expressionItem.getFieldType()));
         }
     }
 
@@ -181,14 +178,14 @@ public class ConditionsProviderImpl implements ConditionsProvider {
             reqDTO.setFormula(formula);
             reqDTO.setParameters(parameters);
             reqDTO.setContextData(dataMap);
-            expressionItem.setValue(callFormula(reqDTO, conditionItem.getJdbcType()));
+            expressionItem.setValue(callFormula(reqDTO, conditionItem.getFieldType()));
         }
         return expressionItem;
     }
 
     private void formatExpressionItemValue(ExpressionItem expressionItem) {
         if (expressionItem.getOp() == OpEnum.RANGE
-                && (expressionItem.getJdbcType() == JdbcTypeEnum.DATE || expressionItem.getJdbcType() == JdbcTypeEnum.TIMESTAMP)
+                && (expressionItem.getFieldType() == SemanticFieldTypeEnum.DATE || expressionItem.getFieldType() == SemanticFieldTypeEnum.DATETIME)
                 && expressionItem.getValue() instanceof Map) {
             String begin = MapUtils.getString((Map) expressionItem.getValue(), "begin");
             String end = MapUtils.getString((Map) expressionItem.getValue(), "end");

@@ -31,6 +31,9 @@ public class DataQueryNodeData extends NodeData implements Serializable {
      */
     private String filterType;
 
+    /**
+     * 数据透传给API接口，不需要转换类型，因此不需要补充fieldType
+     */
     private List<Conditions> filterCondition;
 
     private List<SortItem> sortBy;
