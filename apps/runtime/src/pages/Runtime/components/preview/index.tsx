@@ -96,7 +96,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid })
   useEffect(() => {
     // 获取详情数据
     if (editTargetId && tableName && mainMetaDataFields.value.length > 0) {
-      // TODO(mickey): 获取详情数据
       handleGetData(editTargetId);
     }
   }, [tableName, mainMetaDataFields.value]);
@@ -342,6 +341,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid })
                     formValues[`${key}.${idx}.${fieldId}`] = subData[idx]?.[fieldId];
                   }
                 }
+                // 补充id
+                formValues[`${key}.${idx}.id`] = subData[idx]?.id;
               }
             }
           });
