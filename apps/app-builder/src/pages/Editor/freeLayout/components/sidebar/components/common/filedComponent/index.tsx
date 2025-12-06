@@ -14,9 +14,8 @@ import './style.less';
  * @param columnsTable 表格配置
  */
 
-
 const FieldTable = forwardRef(
-  ({ onTableChange, title,tbData, setTableData, ckOptions, invert, columnsTable }: any, ref) => {
+  ({ onTableChange, title, tbData, setTableData, ckOptions, invert, columnsTable }: any, ref) => {
     // keyArr是专门给FieldModal弹窗用的，帮助弹窗反选
     const [curKeyArr, setCurKeyArr] = useState<any[]>([]);
     const [selectRowkeyArr, setSelectRowKeyArr] = useState([]);
@@ -25,7 +24,7 @@ const FieldTable = forwardRef(
       {
         title: '操作',
         width: 95,
-        dataIndex: 'fieldUuid',
+        dataIndex: 'fieldName',
         render: (val: any, row: any) => {
           return (
             <Button type="text" onClick={() => handleDelRow(val)}>
@@ -43,14 +42,16 @@ const FieldTable = forwardRef(
       setFmVisible(true);
     }
     function handleDelRow(fid: any) {
+      console.log(fid,'删除');
+      
       let _data = [...tbData];
       if (typeof fid === 'string') {
         _data = _data.filter((item) => {
-          return item.fieldUuid !== fid;
+          return item.displayName !== fid;
         });
       } else if (Array.isArray(fid)) {
         _data = _data.filter((item) => {
-          return fid.indexOf(item.fieldUuid) < 0;
+          return fid.indexOf(item.displayName) < 0;
         });
       }
       setTableData(_data);
@@ -67,7 +68,7 @@ const FieldTable = forwardRef(
       if (Array.isArray(tbData)) {
         let cur_key_arr: any[] = [];
         tbData.forEach((item: any) => {
-          cur_key_arr.push(item.fieldUuid);
+          cur_key_arr.push(item.fieldName);
         });
         setCurKeyArr(cur_key_arr);
       }
@@ -77,6 +78,7 @@ const FieldTable = forwardRef(
     useImperativeHandle(ref, () => ({
       getTbData: () => tbData
     }));
+console.log(tbData);
 
     return (
       <>
@@ -92,7 +94,7 @@ const FieldTable = forwardRef(
         </div>
         <Table
           className="field-table-wrapper"
-          rowKey="fieldUuid"
+          rowKey="fieldName"
           columns={[...(columnsTable || []), ...baseColumns]}
           data={tbData}
           pagination={false}
@@ -117,9 +119,3 @@ const FieldTable = forwardRef(
   }
 );
 export default FieldTable;
-
-
-
-
-
-
