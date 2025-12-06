@@ -4,6 +4,7 @@ import com.cmsr.onebase.module.flow.component.SkippableNodeComponent;
 import com.cmsr.onebase.module.flow.component.utils.VariableProvider;
 import com.cmsr.onebase.module.flow.context.ConditionsProvider;
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
+import com.cmsr.onebase.module.flow.context.FlowProcessCache;
 import com.cmsr.onebase.module.flow.context.VariableContext;
 import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
 import com.cmsr.onebase.module.flow.context.enums.JdbcTypeEnum;
@@ -39,7 +40,7 @@ public class DataCalcNodeComponent extends SkippableNodeComponent {
         ExecuteContext executeContext = this.getContextBean(ExecuteContext.class);
         executeContext.addLog("数据计算节点开始执行");
         VariableContext variableContext = this.getContextBean(VariableContext.class);
-        DataCalcNodeData nodeData = (DataCalcNodeData) executeContext.getNodeData(this.getTag());
+        DataCalcNodeData nodeData = (DataCalcNodeData) executeContext.getNodeData( this.getTag());
         InLoopDepth inLoopDepth = nodeData.getInLoopDepth();
         Map<String, Object> expressionContext = VariableProvider.resolveLoopVariables(this, inLoopDepth, variableContext.getNodeVariables());
 

@@ -1,5 +1,7 @@
 package com.cmsr.onebase.module.flow.core.handler;
 
+import com.cmsr.onebase.framework.common.enums.VersionTagEnum;
+import com.cmsr.onebase.module.flow.context.FlowProcessCache;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
 import com.cmsr.onebase.module.flow.core.config.FlowRuntimeCondition;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
@@ -7,7 +9,6 @@ import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
 import com.cmsr.onebase.module.flow.core.enums.FlowEnableStatusEnum;
 import com.cmsr.onebase.module.flow.core.graph.FlowChainBuilder;
 import com.cmsr.onebase.module.flow.core.graph.FlowGraphBuilder;
-import com.cmsr.onebase.module.flow.core.graph.FlowProcessCache;
 import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
 import com.mybatisflex.core.tenant.TenantManager;
 import com.yomahub.liteflow.builder.el.LiteFlowChainELBuilder;
@@ -45,7 +46,11 @@ public class FlowCacheHandler {
 
 
     public void initAllProcess() {
-        List<FlowProcessDO> flowProcessDOS = TenantManager.withoutTenantCondition(() -> flowProcessRepository.findAllByEnableStatus(FlowEnableStatusEnum.ENABLE.getStatus()));
+        List<FlowProcessDO> flowProcessDOS = TenantManager.withoutTenantCondition(() ->
+                flowProcessRepository.findAllByEnableStatusAndVersionTag(
+                        FlowEnableStatusEnum.ENABLE.getStatus(),
+                        VersionTagEnum.RUNTIME.getValue()
+                ));
         for (FlowProcessDO flowProcessDO : flowProcessDOS) {
             try {
                 onProcessUpdate(flowProcessDO);
@@ -57,7 +62,12 @@ public class FlowCacheHandler {
     }
 
     public String onApplicationChange(Long applicationId) {
-        List<FlowProcessDO> flowProcessDOS = TenantManager.withoutTenantCondition(() -> flowProcessRepository.findByApplicationIdAndEnableStatus(applicationId, FlowEnableStatusEnum.ENABLE.getStatus()));
+        List<FlowProcessDO> flowProcessDOS = TenantManager.withoutTenantCondition(() ->
+                flowProcessRepository.findByApplicationIdAndEnableStatus(
+                        applicationId,
+                        FlowEnableStatusEnum.ENABLE.getStatus(),
+                        VersionTagEnum.RUNTIME.getValue()
+                ));
         Set<Long> oldProcessIds = flowProcessCache.findProcessByApplicationId(applicationId);
         for (FlowProcessDO flowProcessDO : flowProcessDOS) {
             oldProcessIds.remove(flowProcessDO.getId());
@@ -88,7 +98,7 @@ public class FlowCacheHandler {
             log.error("流程定义错误, 未包含内容：{}", processDO);
             return;
         }
-        JsonGraph jsonGraph = flowGraphBuilder.build(processDO.getProcessDefinition());
+        JsonGraph jsonGraph = flowGraphBuilder.build(processDO.getApplicationId(), processDO.getProcessDefinition());
         if (jsonGraph == null) {
             log.error("流程定义错误：{}", processDO);
             return;

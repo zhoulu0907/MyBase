@@ -78,7 +78,10 @@ public class DataAddNodeComponent extends SkippableNodeComponent {
             executeContext.addLog("数据添加节点开始执行");
             for (Map<String, Object> reqData : reqDataList) {
                 reqDTO.setData(reqData);
-                SemanticEntityValueDTO respDTO = ApplicationManager.withApplicationId(executeContext.getApplicationId(), () -> semanticDynamicDataApi.insertData(reqDTO));
+                SemanticEntityValueDTO respDTO = ApplicationManager.withApplicationIdAndVersionTag(
+                        executeContext.getApplicationId(),
+                        executeContext.getVersionTag(),
+                        () -> semanticDynamicDataApi.insertData(reqDTO));
                 respDTOSS.add(respDTO);
             }
             executeContext.addLog("数据添加节点结束执行, 响应结果数量: " + respDTOSS.size());

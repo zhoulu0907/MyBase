@@ -10,14 +10,16 @@ import com.cmsr.onebase.module.flow.context.graph.nodes.*;
 import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
-import com.google.common.collect.Lists;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @Author：huangjie
@@ -30,83 +32,132 @@ public class FieldTypeProviderImpl implements FieldTypeProvider {
     @Autowired
     private SemanticDynamicDataApi semanticDynamicDataApi;
 
+    @Value("${lite-flow.version-tag:1L}")
+    private Long versionTag;
+
+
     @Override
-    public void completeFieldType(JsonGraph jsonGraph) {
-        Set<String> fieldUuids = new HashSet<>();
-        recursionUpdateFieldDataType(jsonGraph.getNodes(), fieldUuids);
-        List<SemanticFieldSchemaDTO> semanticFieldSchemaDTOS = semanticDynamicDataApi.buildEntityFieldsSchemaByTableName(Lists.newArrayList(fieldUuids));
-        HashMap<String, SemanticFieldSchemaDTO> fieldUuidMap = new HashMap<>();
-        for (SemanticFieldSchemaDTO semanticFieldSchemaDTO : semanticFieldSchemaDTOS) {
-            fieldUuidMap.put(semanticFieldSchemaDTO.getFieldUuid(), semanticFieldSchemaDTO);
-        }
-        recursionUpdateFieldDataType(jsonGraph.getNodes(), fieldUuidMap);
+    public void completeFieldType(Long applicationId, JsonGraph jsonGraph) {
+        RecursionUpdateFieldType recursionUpdateFieldDataType = new RecursionUpdateFieldType();
+        recursionUpdateFieldDataType.applicationId = applicationId;
+        recursionUpdateFieldDataType.jsonGraph = jsonGraph;
+        recursionUpdateFieldDataType.doUpdate();
+
     }
 
+    @Setter
+    public static class RecursionUpdateFieldType {
 
-    private void recursionUpdateFieldDataType(List<JsonGraphNode> nodes, Object arg) {
-        if (CollectionUtils.isEmpty(nodes)) {
-            return;
+        private Long applicationId;
+
+        private JsonGraph jsonGraph;
+
+        private Map<String, String> nodeTableNameMap;
+
+        public void doUpdate() {
+            recursionUpdateFieldDataType(jsonGraph.getNodes());
         }
-        for (JsonGraphNode node : nodes) {
-            NodeData nodeData = node.getData();
-            if (nodeData instanceof DataAddNodeData n) {
-                processForFieldTypeSub(n.getFields(), arg);
-            } else if (nodeData instanceof DataDeleteeNodeData n) {
-                processForFieldIdTypeTop(n.getFilterCondition(), arg);
-            } else if (nodeData instanceof DataQueryMultipleNodeData n) {
-                processForFieldIdTypeTop(n.getFilterCondition(), arg);
-            } else if (nodeData instanceof DataQueryNodeData n) {
-                processForFieldIdTypeTop(n.getFilterCondition(), arg);
-            } else if (nodeData instanceof DataUpdateNodeData n) {
-                processForFieldIdTypeTop(n.getFilterCondition(), arg);
-                processForFieldTypeSub(n.getFields(), arg);
-            } else if (nodeData instanceof IfCaseNodeData n) {
-                processForFieldIdTypeTop(n.getFilterCondition(), arg);
-            } else if (nodeData instanceof StartDateFieldNodeData n) {
-                processForFieldIdTypeTop(n.getFilterCondition(), arg);
-            } else if (nodeData instanceof StartEntityNodeData n) {
-                processForFieldIdTypeTop(n.getFilterCondition(), arg);
-            } else if (nodeData instanceof StartFormNodeData n) {
-                processForFieldIdTypeTop(n.getFilterCondition(), arg);
-            } else if (nodeData instanceof SwitchCaseNodeData n) {
-                processForFieldIdTypeTop(n.getFilterCondition(), arg);
+
+
+        private void recursionUpdateFieldDataType(List<JsonGraphNode> nodes) {
+            if (CollectionUtils.isEmpty(nodes)) {
+                return;
             }
-            // 递归处理子节点
-            recursionUpdateFieldDataType(node.getBlocks(), arg);
+            for (JsonGraphNode node : nodes) {
+                NodeData nodeData = node.getData();
+                if (nodeData instanceof DataAddNodeData n) {
+                    String tableName;
+                    if (StringUtils.equals(n.getAddType(), "mainEntity")) {
+                        tableName = n.getMainEntityName();
+                    } else {
+                        tableName = n.getSubEntityName();
+                    }
+                    processForFieldTypeSub(tableName, n.getFields());
+                    nodeTableNameMap.put(node.getId(), tableName);
+                } else if (nodeData instanceof DataDeleteeNodeData n) {
+                    String tableName;
+                    if (StringUtils.equals(n.getDataType(), "mainEntity")) {
+                        tableName = n.getMainEntityName();
+                    } else {
+                        tableName = n.getSubEntityName();
+                    }
+                    processForFieldIdTypeTop(tableName, n.getFilterCondition());
+                    nodeTableNameMap.put(node.getId(), tableName);
+                } else if (nodeData instanceof DataQueryMultipleNodeData n) {
+                    String tableName;
+                    if (StringUtils.equals(n.getDataType(), "mainEntity")) {
+                        tableName = n.getMainEntityName();
+                    } else {
+                        tableName = n.getSubEntityName();
+                    }
+                    processForFieldIdTypeTop(tableName, n.getFilterCondition());
+                    nodeTableNameMap.put(node.getId(), tableName);
+                } else if (nodeData instanceof DataQueryNodeData n) {
+                    String tableName;
+                    if (StringUtils.equals(n.getDataType(), "mainEntity")) {
+                        tableName = n.getMainEntityName();
+                    } else {
+                        tableName = n.getSubEntityName();
+                    }
+                    processForFieldIdTypeTop(tableName, n.getFilterCondition());
+                    nodeTableNameMap.put(node.getId(), tableName);
+                } else if (nodeData instanceof DataUpdateNodeData n) {
+                    String tableName;
+                    if (StringUtils.equals(n.getUpdateType(), "mainEntity")) {
+                        tableName = n.getMainEntityName();
+                    } else {
+                        tableName = n.getSubEntityName();
+                    }
+                    processForFieldIdTypeTop(tableName, n.getFilterCondition());
+                    processForFieldTypeSub(tableName, n.getFields());
+                    nodeTableNameMap.put(node.getId(), tableName);
+                } else if (nodeData instanceof IfCaseNodeData n) {
+                    processForFieldIdTypeTop(n.getFilterCondition());
+                } else if (nodeData instanceof StartDateFieldNodeData n) {
+                    processForFieldIdTypeTop(n.getEntityName(), n.getFilterCondition());
+                } else if (nodeData instanceof StartEntityNodeData n) {
+                    processForFieldIdTypeTop(n.getEntityName(), n.getFilterCondition());
+                } else if (nodeData instanceof StartFormNodeData n) {
+                    processForFieldIdTypeTop(n.getFilterCondition());
+                } else if (nodeData instanceof SwitchCaseNodeData n) {
+                    processForFieldIdTypeTop(n.getFilterCondition());
+                }
+                // 递归处理子节点
+                recursionUpdateFieldDataType(node.getBlocks());
+            }
+        }
+
+        private void processForFieldIdTypeTop(String tableName, List<Conditions> filterCondition) {
+            if (CollectionUtils.isEmpty(filterCondition)) {
+                return;
+            }
+            for (Conditions conditions : filterCondition) {
+                processForFieldTypeSub(conditions.getConditions());
+            }
+        }
+
+        private void processForFieldTypeSub(String tableName, List<ConditionItem> fields) {
+            if (CollectionUtils.isEmpty(fields)) {
+                return;
+            }
+            for (ConditionItem conditionItem : fields) {
+                String fieldUuid = conditionItem.getFieldUuid();
+                if (conditionItem.getFieldUuid().contains(".")) {
+                    fieldUuid = StringUtils.substringAfter(fieldUuid, ".");
+                }
+                if (StringUtils.isEmpty(fieldUuid)) {
+                    continue;
+                }
+                if (arg instanceof Set fieldUuids) {
+                    fieldUuids.add(fieldUuid);
+                } else if (arg instanceof Map fieldUuidMap) {
+                    SemanticFieldSchemaDTO fieldInfo = (SemanticFieldSchemaDTO) fieldUuidMap.get(fieldUuid);
+                    conditionItem.setFieldType(fieldInfo.getFieldType());
+                    SemanticFieldTypeEnum fieldTypeEnum = fieldInfo.getFieldTypeEnum();
+                    //TODO SemanticFieldTypeEnum 要写到 conditionItem里面
+                }
+            }
         }
     }
-
-    private void processForFieldIdTypeTop(List<Conditions> filterCondition, Object arg) {
-        if (CollectionUtils.isEmpty(filterCondition)) {
-            return;
-        }
-        for (Conditions conditions : filterCondition) {
-            processForFieldTypeSub(conditions.getConditions(), arg);
-        }
-    }
-
-    private void processForFieldTypeSub(List<ConditionItem> fields, Object arg) {
-        if (CollectionUtils.isEmpty(fields)) {
-            return;
-        }
-        for (ConditionItem conditionItem : fields) {
-            String fieldUuid = conditionItem.getFieldUuid();
-            if (conditionItem.getFieldUuid().contains(".")) {
-                fieldUuid = StringUtils.substringAfter(fieldUuid, ".");
-            }
-            if (StringUtils.isEmpty(fieldUuid)) {
-                continue;
-            }
-            if (arg instanceof Set fieldUuids) {
-                fieldUuids.add(fieldUuid);
-            } else if (arg instanceof Map fieldUuidMap) {
-                SemanticFieldSchemaDTO fieldInfo = (SemanticFieldSchemaDTO) fieldUuidMap.get(fieldUuid);
-                conditionItem.setFieldType(fieldInfo.getFieldType());
-                SemanticFieldTypeEnum fieldTypeEnum = fieldInfo.getFieldTypeEnum();
-                //TODO SemanticFieldTypeEnum 要写到 conditionItem里面
-            }
-        }
-    }
-
 
 }

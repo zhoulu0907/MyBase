@@ -7,8 +7,6 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -36,16 +34,16 @@ public class ExecuteContext implements Serializable {
 
     @Setter
     @Getter
+    private Long versionTag;
+
+    @Setter
+    @Getter
     private Long processId;
 
     @Setter
     @Getter
     private volatile boolean debugMode = false;
 
-    /**
-     * 节点配置数据
-     */
-    private volatile Map<String, NodeData> nodeDataMap = new HashMap<>();
 
     //节点执行的结果
     private Map<String, Object> nodeProcessHisResults = new ConcurrentHashMap<>();
@@ -88,9 +86,6 @@ public class ExecuteContext implements Serializable {
         this.logs.add(String.format("[%d] %s", stopwatch.elapsed(TimeUnit.MILLISECONDS), "流程执行开始"));
     }
 
-    public void setNodeDataMap(Map<String, NodeData> nodeData) {
-        this.nodeDataMap = Collections.unmodifiableMap(nodeData);
-    }
 
     public void resetNodeProcessResult() {
         nodeProcessHisResults.putAll(nodeProcessCurResults);
@@ -110,7 +105,7 @@ public class ExecuteContext implements Serializable {
     }
 
     public NodeData getNodeData(String nodeTag) {
-        return nodeDataMap.get(nodeTag);
+        return FlowProcessCache.findNodeData(processId, nodeTag);
     }
 
     public void restExecutionEndNodeTag() {

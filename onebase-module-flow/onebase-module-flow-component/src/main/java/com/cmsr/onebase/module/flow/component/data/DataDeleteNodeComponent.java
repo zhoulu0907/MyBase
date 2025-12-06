@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.flow.component.data;
 
-import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.module.flow.component.SkippableNodeComponent;
 import com.cmsr.onebase.module.flow.component.utils.VariableProvider;
 import com.cmsr.onebase.module.flow.context.ConditionsProvider;
@@ -10,7 +10,6 @@ import com.cmsr.onebase.module.flow.context.condition.Conditions;
 import com.cmsr.onebase.module.flow.context.express.OrExpression;
 import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
 import com.cmsr.onebase.module.flow.context.graph.nodes.DataDeleteeNodeData;
-import com.cmsr.onebase.module.metadata.api.datamethod.dto.DeleteDataReqDTO;
 import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanicTargetConditionVO;
 import com.yomahub.liteflow.annotation.LiteflowComponent;
@@ -61,7 +60,10 @@ public class DataDeleteNodeComponent extends SkippableNodeComponent {
         if (!StringUtils.equalsIgnoreCase("all", nodeData.getFilterType())) {
             reqDTO.setSemanticConditionDTO(DataMethodApiHelper.processFilterCondition(orExpression));
         }
-        Integer result = TenantUtils.executeIgnore(() -> semanticDynamicDataApi.deleteDataByCondition(reqDTO));
+        Integer result = ApplicationManager.withApplicationIdAndVersionTag(
+                executeContext.getApplicationId(),
+                executeContext.getVersionTag(),
+                () -> semanticDynamicDataApi.deleteDataByCondition(reqDTO));
         executeContext.addLog("数据删除节点, 删除数量: " + result);
     }
 

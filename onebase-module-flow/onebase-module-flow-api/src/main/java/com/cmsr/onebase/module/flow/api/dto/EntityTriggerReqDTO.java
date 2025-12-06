@@ -16,11 +16,11 @@ public class EntityTriggerReqDTO {
     @Schema(description = "链路ID")
     private String traceId;
 
-    @Schema(description = "实体ID")
-    private Long entityId;
+//    @Schema(description = "实体ID")
+//    private Long entityId;
     
-    @Schema(description = "实体UUID")
-    private String entityUuId;
+//    @Schema(description = "实体UUID")
+//    private String entityUuId;
 
     @Schema(description = "实体类型")
     private String entityTableName;

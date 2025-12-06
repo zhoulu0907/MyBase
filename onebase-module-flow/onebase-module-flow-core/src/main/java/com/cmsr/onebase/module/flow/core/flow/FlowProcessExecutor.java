@@ -8,7 +8,7 @@ import com.cmsr.onebase.module.flow.core.config.FlowRuntimeCondition;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowExecutionLogRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowExecutionLogDO;
 import com.cmsr.onebase.module.flow.core.enums.ExecutionResultEnum;
-import com.cmsr.onebase.module.flow.core.graph.FlowProcessCache;
+import com.cmsr.onebase.module.flow.context.FlowProcessCache;
 import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
 import com.google.common.collect.Lists;
 import com.yomahub.liteflow.core.FlowExecutor;
@@ -20,6 +20,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.redisson.api.RList;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
@@ -55,6 +56,9 @@ public class FlowProcessExecutor {
     @Autowired
     private FlowExecutionLogRepository flowExecutionLogRepository;
 
+    @Value("${lite-flow.version-tag:1L}")
+    private Long versionTag;
+
     /**
      * 执行新流程（基于traceId和输入参数）
      */
@@ -68,6 +72,8 @@ public class FlowProcessExecutor {
         FlowExecutionLogDO executionLog = createNewExecutionLog(processId);
         ExecuteContext executeContext = new ExecuteContext();
         executeContext.setProcessId(processId);
+        executeContext.setVersionTag(versionTag);
+        executeContext.setApplicationId(flowProcessCache.findApplicationByProcessId(processId));
         try {
             //初始化变量上下文
             VariableContext variableContext = new VariableContext();

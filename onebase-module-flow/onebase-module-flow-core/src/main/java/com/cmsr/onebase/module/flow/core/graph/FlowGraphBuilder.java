@@ -28,15 +28,16 @@ public class FlowGraphBuilder {
     @Autowired
     private ObjectProvider<FieldTypeProvider> objectProvider;
 
+    @Setter
     @Autowired
     private FlowConnectorScriptRepository connectorScriptRepository;
 
-    public JsonGraph build(String json) {
+    public JsonGraph build(Long applicationId, String json) {
         JsonGraph jsonGraph = JsonUtils.parseObject(json, JsonGraph.class);
         addLoopContextToNodes(jsonGraph);
         enrichNodeData(jsonGraph);
         FieldTypeProvider fieldTypeProvider = objectProvider.getObject();
-        fieldTypeProvider.completeFieldType(jsonGraph);
+        fieldTypeProvider.completeFieldType(applicationId, jsonGraph);
         return jsonGraph;
     }
 
@@ -79,7 +80,9 @@ public class FlowGraphBuilder {
 
     private void traverseNodeAndEnrichData(JsonGraphNode node) {
         if (node.getData() instanceof ScriptNodeData scriptNodeData) {
-            FlowConnectorScriptDO connectorScriptDO = TenantManager.withoutTenantCondition(() -> connectorScriptRepository.findById(scriptNodeData.getActionId()));
+            FlowConnectorScriptDO connectorScriptDO = TenantManager.withoutTenantCondition(
+                    //TODO 脚本要修改，表结构要修改
+                    () -> connectorScriptRepository.findById(scriptNodeData.getActionId()));
             scriptNodeData.setScript(connectorScriptDO.getRawScript());
             scriptNodeData.setInputSchema(connectorScriptDO.getInputSchema());
             scriptNodeData.setOutputSchema(connectorScriptDO.getOutputSchema());

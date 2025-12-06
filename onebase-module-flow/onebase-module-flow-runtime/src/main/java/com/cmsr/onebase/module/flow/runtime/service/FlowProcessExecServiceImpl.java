@@ -11,7 +11,7 @@ import com.cmsr.onebase.module.flow.context.graph.nodes.ModalNodeData;
 import com.cmsr.onebase.module.flow.context.graph.nodes.StartFormNodeData;
 import com.cmsr.onebase.module.flow.core.flow.ExecutorResult;
 import com.cmsr.onebase.module.flow.core.flow.FlowProcessExecutor;
-import com.cmsr.onebase.module.flow.core.graph.FlowProcessCache;
+import com.cmsr.onebase.module.flow.context.FlowProcessCache;
 import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
 import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerReqVO;
 import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerRespVO;
@@ -55,8 +55,8 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
     private ExpressionExecutor expressionExecutor = new ExpressionExecutor();
 
     @Override
-    public List<QueryFormTriggerRespVO> queryFormTrigger(Long pageId) {
-        List<StartFormNodeData> startFormNodeDataList = flowProcessCache.findStartFormNodeDataByPageId(pageId);
+    public List<QueryFormTriggerRespVO> queryFormTrigger(String pageUuid) {
+        List<StartFormNodeData> startFormNodeDataList = flowProcessCache.findStartFormNodeDataByPageUuid(pageUuid);
         return startFormNodeDataList.stream()
                 .map(startFormNodeData -> BeanUtils.toBean(startFormNodeData, QueryFormTriggerRespVO.class))
                 .toList();

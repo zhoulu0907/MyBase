@@ -65,7 +65,10 @@ public class DataQueryMultipleNodeComponent extends SkippableNodeComponent {
         reqDTO.setSortBy(DataMethodApiHelper.processSortCondition(nodeData.getSortBy()));
         reqDTO.setPageNo(1);
         reqDTO.setPageSize(nodeData.getMaxCountWithDefault(500));
-        PageResult<SemanticEntityValueDTO> fieldDataRespDTOSS = ApplicationManager.withApplicationId(executeContext.getApplicationId(), () -> semanticDynamicDataApi.getDataByCondition(reqDTO));
+        PageResult<SemanticEntityValueDTO> fieldDataRespDTOSS = ApplicationManager.withApplicationIdAndVersionTag(
+                executeContext.getApplicationId(),
+                executeContext.getVersionTag(),
+                () -> semanticDynamicDataApi.getDataByCondition(reqDTO));
         executeContext.addLog("数据查询节点（多条），查询返回数据量: " + fieldDataRespDTOSS.getTotal());
         if (CollectionUtils.isNotEmpty(fieldDataRespDTOSS.getList())) {
             variableContext.putNodeVariables(this.getTag(), DataMethodApiHelper.convertToListMap(fieldDataRespDTOSS.getList()));

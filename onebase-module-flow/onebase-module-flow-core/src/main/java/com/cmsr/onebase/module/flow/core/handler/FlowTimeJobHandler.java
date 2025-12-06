@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.flow.core.handler;
 
+import com.cmsr.onebase.framework.common.enums.VersionTagEnum;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
 import com.cmsr.onebase.module.flow.context.graph.nodes.StartDateFieldNodeData;
 import com.cmsr.onebase.module.flow.context.graph.nodes.StartTimeNodeData;
@@ -65,7 +66,13 @@ public class FlowTimeJobHandler {
     private FlowGraphBuilder flowGraphBuilder;
 
     public void initAllJob() {
-        List<FlowProcessDO> flowProcessDOS = TenantManager.withoutTenantCondition(() -> flowProcessRepository.findAllByEnableStatus(FlowEnableStatusEnum.ENABLE.getStatus()));
+        List<FlowProcessDO> flowProcessDOS = TenantManager.withoutTenantCondition(() ->
+                flowProcessRepository.findAllByEnableStatusAndVersionTagAndTriggerType(
+                        FlowEnableStatusEnum.ENABLE.getStatus(),
+                        VersionTagEnum.RUNTIME.getValue(),
+                        List.of(FlowTriggerTypeEnum.TIME.getType(), FlowTriggerTypeEnum.DATE_FIELD.getType())
+                )
+        );
         for (FlowProcessDO flowProcessDO : flowProcessDOS) {
             try {
                 startJob(flowProcessDO);

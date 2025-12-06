@@ -29,7 +29,7 @@ public class StartFormNodeData extends NodeData implements Serializable {
 
     private String fieldTriggerEvents;
 
-    private Long pageUuid;
+    private String pageUuid;
 
     /**
      * 前端组件的Id，所以是字符串

@@ -12,7 +12,6 @@ import com.cmsr.onebase.module.flow.context.express.ExpressionItem;
 import com.cmsr.onebase.module.flow.context.express.OrExpression;
 import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
 import com.cmsr.onebase.module.flow.context.graph.nodes.DataUpdateNodeData;
-import com.cmsr.onebase.module.metadata.api.datamethod.dto.EntityFieldDataRespDTO;
 import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntityValueDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanicTargetConditionVO;
@@ -49,7 +48,6 @@ public class DataUpdateNodeComponent extends SkippableNodeComponent {
         DataUpdateNodeData nodeData = (DataUpdateNodeData) executeContext.getNodeData(this.getTag());
         InLoopDepth inLoopDepth = nodeData.getInLoopDepth();
         Map<String, Object> expressionContext = VariableProvider.resolveLoopVariables(this, inLoopDepth, variableContext.getNodeVariables());
-
         //
         SemanicTargetConditionVO reqDTO = new SemanicTargetConditionVO();
         reqDTO.setTraceId(executeContext.getTraceId());
@@ -68,7 +66,10 @@ public class DataUpdateNodeComponent extends SkippableNodeComponent {
         List<ConditionItem> fields = nodeData.getFields();
         reqDTO.setUpdateProperties(buildSingleReqData(fields, expressionContext));
         //
-        List<SemanticEntityValueDTO> respDTOSS = ApplicationManager.withApplicationId(executeContext.getApplicationId(), () -> semanticDynamicDataApi.updateDataByCondition(reqDTO));
+        List<SemanticEntityValueDTO> respDTOSS = ApplicationManager.withApplicationIdAndVersionTag(
+                executeContext.getApplicationId(),
+                executeContext.getVersionTag(),
+                () -> semanticDynamicDataApi.updateDataByCondition(reqDTO));
         executeContext.addLog("数据更新节点更新数据量: " + respDTOSS.size());
         variableContext.putNodeVariables(this.getTag(), DataMethodApiHelper.convertToListMap(respDTOSS));
     }

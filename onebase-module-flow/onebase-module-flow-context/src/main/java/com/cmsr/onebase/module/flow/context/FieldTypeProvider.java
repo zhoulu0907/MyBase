@@ -8,6 +8,6 @@ import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
  */
 public interface FieldTypeProvider {
 
-    void completeFieldType(JsonGraph jsonGraph);
+    void completeFieldType(Long applicationId, JsonGraph jsonGraph);
 
 }
