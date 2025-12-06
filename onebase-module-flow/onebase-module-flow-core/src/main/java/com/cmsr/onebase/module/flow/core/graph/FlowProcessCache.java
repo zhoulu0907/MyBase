@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.flow.context;
+package com.cmsr.onebase.module.flow.core.graph;
 
 
 import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
@@ -67,8 +67,8 @@ public class FlowProcessCache {
         return flowNodeDataCache.containsKey(processId);
     }
 
-    public static NodeData findNodeData(Long processId, String nodeId) {
-        return flowNodeDataCache.get(processId).get(nodeId);
+    public static Map<String, NodeData> findNodeData(Long processId) {
+        return flowNodeDataCache.get(processId);
     }
 
     public static StartTimeNodeData findStartTimeNodeDataByProcessId(Long processId) {

@@ -7,6 +7,8 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -44,7 +46,6 @@ public class ExecuteContext implements Serializable {
     @Getter
     private volatile boolean debugMode = false;
 
-
     //节点执行的结果
     private Map<String, Object> nodeProcessHisResults = new ConcurrentHashMap<>();
 
@@ -66,19 +67,24 @@ public class ExecuteContext implements Serializable {
     private volatile String executionEndNodeTag;
 
     /**
+     * 节点配置数据
+     */
+    private transient volatile Map<String, NodeData> nodeDataMap = new HashMap<>();
+
+    /**
      * 是否异常终止
      */
     @Setter
     @Getter
-    private volatile Boolean abnormalTermination = Boolean.FALSE;
+    private transient volatile Boolean abnormalTermination = Boolean.FALSE;
 
     @Setter
     @Getter
-    private volatile String terminationMessage;
+    private transient volatile String terminationMessage;
 
-    private volatile Stopwatch stopwatch;
+    private transient Stopwatch stopwatch;
 
-    private volatile List<String> logs;
+    private transient List<String> logs;
 
     public ExecuteContext() {
         this.stopwatch = Stopwatch.createStarted();
@@ -86,6 +92,9 @@ public class ExecuteContext implements Serializable {
         this.logs.add(String.format("[%d] %s", stopwatch.elapsed(TimeUnit.MILLISECONDS), "流程执行开始"));
     }
 
+    public void setNodeDataMap(Map<String, NodeData> nodeData) {
+        this.nodeDataMap = Collections.unmodifiableMap(nodeData);
+    }
 
     public void resetNodeProcessResult() {
         nodeProcessHisResults.putAll(nodeProcessCurResults);
@@ -105,7 +114,7 @@ public class ExecuteContext implements Serializable {
     }
 
     public NodeData getNodeData(String nodeTag) {
-        return FlowProcessCache.findNodeData(processId, nodeTag);
+        return nodeDataMap.get(nodeTag);
     }
 
     public void restExecutionEndNodeTag() {

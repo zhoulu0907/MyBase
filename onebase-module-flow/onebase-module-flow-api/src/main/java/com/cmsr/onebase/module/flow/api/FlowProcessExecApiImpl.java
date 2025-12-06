@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.flow.api;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerReqDTO;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerRespDTO;
 import com.cmsr.onebase.module.flow.api.dto.TriggerEventEnum;
-import com.cmsr.onebase.module.flow.context.FlowProcessCache;
+import com.cmsr.onebase.module.flow.core.graph.FlowProcessCache;
 import com.cmsr.onebase.module.flow.context.express.ExpressionExecutor;
 import com.cmsr.onebase.module.flow.context.express.OrExpression;
 import com.cmsr.onebase.module.flow.context.graph.nodes.StartEntityNodeData;

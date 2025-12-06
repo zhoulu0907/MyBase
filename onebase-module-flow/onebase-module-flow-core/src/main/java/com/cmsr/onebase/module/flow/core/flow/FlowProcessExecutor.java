@@ -1,7 +1,8 @@
 package com.cmsr.onebase.module.flow.core.flow;
 
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
-import com.cmsr.onebase.module.flow.context.FlowProcessCache;
+import com.cmsr.onebase.module.flow.context.graph.NodeData;
+import com.cmsr.onebase.module.flow.core.graph.FlowProcessCache;
 import com.cmsr.onebase.module.flow.context.VariableContext;
 import com.cmsr.onebase.module.flow.context.provider.ContextProvider;
 import com.cmsr.onebase.module.flow.core.config.FlowProperties;
@@ -75,6 +76,9 @@ public class FlowProcessExecutor {
             VariableContext variableContext = new VariableContext();
             variableContext.setInputParams(inputParams);
             //初始化执行上下文
+            Map<String, NodeData> nodeData = FlowProcessCache.findNodeData(processId);
+            executeContext.setNodeDataMap(nodeData);
+
             executeContext.addLog("检查流程触发次数");
             int callCount = validateTraceIdCallCount(traceId, processId);
             executeContext.addLog("流程触发阈值正常[" + callCount + "]");
@@ -125,6 +129,9 @@ public class FlowProcessExecutor {
             if (variableContext == null) {
                 throw new Exception("执行上下文不存在或已过期: " + executionUuid);
             }
+            Map<String, NodeData> nodeData = FlowProcessCache.findNodeData(processId);
+            executeContext.setNodeDataMap(nodeData);
+
             variableContext.setInputFields(inputFields);
             variableContext.setOutputParams(Collections.emptyMap());
             //初始化执行上下文

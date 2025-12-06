@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.flow.runtime.service;
 
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.flow.context.FlowProcessCache;
+import com.cmsr.onebase.module.flow.core.graph.FlowProcessCache;
 import com.cmsr.onebase.module.flow.context.condition.ConditionsSupport;
 import com.cmsr.onebase.module.flow.context.enums.FieldTypeConvertor;
 import com.cmsr.onebase.module.flow.context.express.ExpressionExecutor;
