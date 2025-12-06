@@ -238,7 +238,7 @@ public interface UserService {
      * @param status 状态
      * @return 用户们
      */
-    List<AdminUserDO> getUserListByStatus(Integer status, String userNickName);
+    List<AdminUserDO> getUserListByStatus(Integer status, String userNickName, Long deptId);
 
     /**
      * 获取所有平台管理员列表

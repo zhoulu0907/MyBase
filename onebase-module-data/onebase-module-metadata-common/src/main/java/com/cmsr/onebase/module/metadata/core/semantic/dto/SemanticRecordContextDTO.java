@@ -3,9 +3,9 @@ package com.cmsr.onebase.module.metadata.core.semantic.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticMethodCodeEnum;
-import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
-import com.cmsr.onebase.module.metadata.core.domain.query.LoginUserCtx;
-import com.cmsr.onebase.module.metadata.core.domain.query.MetadataPermissionContext;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticDataMethodOpEnum;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticLoginUserCtx;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticPermissionContext;
 
 import java.util.List;
 
@@ -28,7 +28,7 @@ public class SemanticRecordContextDTO {
     private SemanticMethodCodeEnum methodCode;
 
     @Schema(description = "操作类型：CREATE/UPDATE/DELETE/GET/GET_PAGE")
-    private MetadataDataMethodOpEnum operationType;
+    private SemanticDataMethodOpEnum operationType;
 
     @Schema(description = "页码")
     private Integer pageNo;
@@ -43,8 +43,8 @@ public class SemanticRecordContextDTO {
     private SemanticConditionDTO filters;
 
     @Schema(description = "权限上下文")
-    private MetadataPermissionContext permissionContext;
+    private SemanticPermissionContext permissionContext;
 
     @Schema(description = "登录用户上下文")
-    private LoginUserCtx loginUserCtx;
+    private SemanticLoginUserCtx loginUserCtx;
 }

@@ -4,7 +4,7 @@ import com.cmsr.onebase.module.flow.api.FlowProcessExecApi;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerReqDTO;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerRespDTO;
 import com.cmsr.onebase.module.flow.api.dto.TriggerEventEnum;
-import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticDataMethodOpEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticRecordDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticRelationSchemaDTO;
 import jakarta.annotation.Resource;
@@ -42,16 +42,16 @@ public class SemanticWorkflowExecutor {
      * - 关联对象：对每个连接器，优先尝试单行（ONE），否则遍历多行（MANY）逐条触发
      */
     public void preExecute(SemanticRecordDTO recordDTO) {
-        MetadataDataMethodOpEnum op = recordDTO.getRecordContext().getOperationType();
+        SemanticDataMethodOpEnum op = recordDTO.getRecordContext().getOperationType();
         String entityId = recordDTO.getEntitySchema().getEntityUuid();
         Map<String, Object> rawData = recordDTO.getEntityValue().getGlobalRawMapForJson();
         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
         reqDTO.setTraceId(recordDTO.getRecordContext().getTraceId());
         reqDTO.setEntityUuId(entityId);
         reqDTO.setEntityTableName(recordDTO.getEntitySchema().getTableName());
-        if (op == MetadataDataMethodOpEnum.CREATE) reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_CREATE);
-        else if (op == MetadataDataMethodOpEnum.UPDATE) reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_UPDATE);
-        else if (op == MetadataDataMethodOpEnum.DELETE) reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_DELETE);
+        if (op == SemanticDataMethodOpEnum.CREATE) reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_CREATE);
+        else if (op == SemanticDataMethodOpEnum.UPDATE) reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_UPDATE);
+        else if (op == SemanticDataMethodOpEnum.DELETE) reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_DELETE);
         else return;
         reqDTO.setColFieldData(rawData);
         EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
@@ -87,15 +87,15 @@ public class SemanticWorkflowExecutor {
      * - 关联对象：同前置流程，按连接器逐条触发
      */
     public void postExecute(SemanticRecordDTO recordDTO) {
-        MetadataDataMethodOpEnum op = recordDTO.getRecordContext().getOperationType();
+        SemanticDataMethodOpEnum op = recordDTO.getRecordContext().getOperationType();
         Map<String, Object> rawData = recordDTO.getEntityValue().getGlobalRawMapForJson();
         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
         reqDTO.setTraceId(recordDTO.getRecordContext().getTraceId());
         reqDTO.setEntityUuId(recordDTO.getEntitySchema().getEntityUuid());
         reqDTO.setEntityTableName(recordDTO.getEntitySchema().getTableName());
-        if (op == MetadataDataMethodOpEnum.CREATE) reqDTO.setTriggerEvent(TriggerEventEnum.AFTER_CREATE);
-        else if (op == MetadataDataMethodOpEnum.UPDATE) reqDTO.setTriggerEvent(TriggerEventEnum.AFTER_UPDATE);
-        else if (op == MetadataDataMethodOpEnum.DELETE) reqDTO.setTriggerEvent(TriggerEventEnum.AFTER_DELETE);
+        if (op == SemanticDataMethodOpEnum.CREATE) reqDTO.setTriggerEvent(TriggerEventEnum.AFTER_CREATE);
+        else if (op == SemanticDataMethodOpEnum.UPDATE) reqDTO.setTriggerEvent(TriggerEventEnum.AFTER_UPDATE);
+        else if (op == SemanticDataMethodOpEnum.DELETE) reqDTO.setTriggerEvent(TriggerEventEnum.AFTER_DELETE);
         else return;
         reqDTO.setColFieldData(rawData);
         EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
@@ -133,20 +133,20 @@ public class SemanticWorkflowExecutor {
      * @param rawData 字段名→原始值的映射（单行数据）
      * @param before 是否为前置事件（true：BEFORE_*；false：AFTER_*）
      */
-    private void triggerConnector(SemanticRecordDTO recordDTO, String entityUuid, MetadataDataMethodOpEnum op, Map<String, Object> rawData, boolean before) {
+    private void triggerConnector(SemanticRecordDTO recordDTO, String entityUuid, SemanticDataMethodOpEnum op, Map<String, Object> rawData, boolean before) {
         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
         reqDTO.setTraceId(recordDTO.getRecordContext().getTraceId());
         reqDTO.setEntityUuId(recordDTO.getEntitySchema().getEntityUuid());
         reqDTO.setEntityTableName(recordDTO.getEntitySchema().getTableName());
         if (before) {
-            if (op == MetadataDataMethodOpEnum.CREATE) reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_CREATE);
-            else if (op == MetadataDataMethodOpEnum.UPDATE) reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_UPDATE);
-            else if (op == MetadataDataMethodOpEnum.DELETE) reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_DELETE);
+            if (op == SemanticDataMethodOpEnum.CREATE) reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_CREATE);
+            else if (op == SemanticDataMethodOpEnum.UPDATE) reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_UPDATE);
+            else if (op == SemanticDataMethodOpEnum.DELETE) reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_DELETE);
             else return;
         } else {
-            if (op == MetadataDataMethodOpEnum.CREATE) reqDTO.setTriggerEvent(TriggerEventEnum.AFTER_CREATE);
-            else if (op == MetadataDataMethodOpEnum.UPDATE) reqDTO.setTriggerEvent(TriggerEventEnum.AFTER_UPDATE);
-            else if (op == MetadataDataMethodOpEnum.DELETE) reqDTO.setTriggerEvent(TriggerEventEnum.AFTER_DELETE);
+            if (op == SemanticDataMethodOpEnum.CREATE) reqDTO.setTriggerEvent(TriggerEventEnum.AFTER_CREATE);
+            else if (op == SemanticDataMethodOpEnum.UPDATE) reqDTO.setTriggerEvent(TriggerEventEnum.AFTER_UPDATE);
+            else if (op == SemanticDataMethodOpEnum.DELETE) reqDTO.setTriggerEvent(TriggerEventEnum.AFTER_DELETE);
             else return;
         }
         reqDTO.setColFieldData(rawData);

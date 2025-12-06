@@ -66,11 +66,13 @@ public class DatasourceController {
 
     @PostMapping("/create")
     @Operation(summary = "新增数据源")
-    public CommonResult<String> createDatasource(@Valid @RequestBody DatasourceSaveReqVO reqVO) {
+    public CommonResult<DatasourceRespVO> createDatasource(@Valid @RequestBody DatasourceSaveReqVO reqVO) {
         // 从请求头获取应用ID
         reqVO.setApplicationId(String.valueOf(ApplicationManager.getApplicationId()));
         Long id = datasourceBuildService.createDatasource(reqVO);
-        return success(id.toString());
+        // 返回完整的数据源信息（包含id和uuid）
+        MetadataDatasourceDO datasource = datasourceBuildService.getDatasource(id);
+        return success(datasourceBuildService.buildDatasourceRespVO(datasource));
     }
 
     @PostMapping("/update")

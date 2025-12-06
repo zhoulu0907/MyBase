@@ -3,8 +3,6 @@ import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTyp
 
 import java.util.List;
 
-import com.cmsr.onebase.module.metadata.core.dal.dataobject.field.MetadataEntityFieldOptionDO;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -54,7 +52,7 @@ public class SemanticFieldSchemaDTO {
     private Long dictTypeId;
 
     @Schema(description = "字段选项列表")
-    private List<MetadataEntityFieldOptionDO> fieldOptions;
+    private List<SemanticFieldOptionDTO> fieldOptions;
 
     public void setFieldType(String fieldType) {
         this.fieldType = fieldType;

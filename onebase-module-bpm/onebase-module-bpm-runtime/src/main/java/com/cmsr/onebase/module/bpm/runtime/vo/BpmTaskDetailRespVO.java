@@ -78,12 +78,7 @@ public class BpmTaskDetailRespVO {
         /**
          * 实体字段权限
          */
-        private Map<String, String> fieldPermMap;
-
-        /**
-         * 实体fieldUuid和name映射关系
-         */
-        private Map<String, String> fieldUuidName;
+        private Map<String, Map<String, String>> fieldPermMap;
 
         /**
          * 实体类型

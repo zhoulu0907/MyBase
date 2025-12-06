@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.metadata.build.controller.admin.validation;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.module.metadata.core.util.MetadataIdUuidConverter;
 import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationChildNotEmptyRespVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationChildNotEmptySaveReqVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationChildNotEmptyUpdateReqVO;
@@ -21,6 +22,9 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 @Validated
 public class ValidationChildNotEmptyController {
 
+    @Resource
+    private MetadataIdUuidConverter idUuidConverter;
+
     @Resource private MetadataValidationChildNotEmptyBuildService childNotEmptyService;
 
     @PostMapping("/get-by-field")
@@ -32,9 +36,10 @@ public class ValidationChildNotEmptyController {
 
     @GetMapping("/get")
     @Operation(summary = "根据主键ID获取子表非空校验")
-    @Parameter(name = "id", description = "校验规则ID", required = true)
+    @Parameter(name = "id", description = "校验规则ID（支持ID或UUID）", required = true)
     public CommonResult<ValidationChildNotEmptyRespVO> get(@RequestParam("id") String id) {
-        return success(childNotEmptyService.getById(Long.parseLong(id)));
+        Long resolvedId = idUuidConverter.resolveRuleGroupId(id);
+        return success(childNotEmptyService.getById(resolvedId));
     }
 
     @PostMapping("/create")
@@ -60,9 +65,10 @@ public class ValidationChildNotEmptyController {
 
     @PostMapping("/delete")
     @Operation(summary = "根据主键ID删除子表非空校验")
-    @Parameter(name = "id", description = "校验规则ID", required = true)
+    @Parameter(name = "id", description = "校验规则ID（支持ID或UUID）", required = true)
     public CommonResult<Boolean> delete(@RequestParam("id") String id) {
-        childNotEmptyService.deleteById(Long.parseLong(id));
+        Long resolvedId = idUuidConverter.resolveRuleGroupId(id);
+        childNotEmptyService.deleteById(resolvedId);
         return success(true);
     }
 }

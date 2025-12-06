@@ -5,7 +5,7 @@ import lombok.Data;
 
 import java.util.List;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticConnectorCardinalityEnum;
-import com.cmsr.onebase.module.metadata.core.enums.RelationshipTypeEnum;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticRelationshipTypeEnum;
 
 @Schema(description = "关联对象模型 DTO")
 @Data
@@ -17,7 +17,7 @@ public class SemanticRelationSchemaDTO {
     private SemanticConnectorCardinalityEnum cardinality;
 
     @Schema(description = "关系类型")
-    private RelationshipTypeEnum relationshipType;
+    private SemanticRelationshipTypeEnum relationshipType;
 
     @Schema(description = "源实体UUID")
     private String sourceEntityUuid;

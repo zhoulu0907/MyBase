@@ -310,7 +310,8 @@ public class EtlWorkflowServiceImpl implements EtlWorkflowService {
 
     @Override
     public void configScheduleStrategy(ScheduleConfigVO scheduleVO) {
-        EtlWorkflowDO workflowDO = getWorkflowById(scheduleVO.getWorkflowId());
+        EtlWorkflowDO workflowDO = workflowRepository.findOneByUuid(scheduleVO.getFlowUuid());
+        workflowDO.setApplicationId(scheduleVO.getApplicationId());
         workflowDO.setWorkflowName(scheduleVO.getFlowName());
         workflowDO.setScheduleStrategy(scheduleVO.getScheduleStrategy().getValue());
         workflowDO.setScheduleConfig(JsonUtils.toJsonString(scheduleVO.getConfig()));
@@ -390,6 +391,7 @@ public class EtlWorkflowServiceImpl implements EtlWorkflowService {
         if (workflow instanceof NullNode) {
             throw new IllegalArgumentException("流程参数为空");
         }
+        executeRequest.setApplicationId(ApplicationManager.getRequiredApplicationId());
         executeRequest.setPreviewWorkflow(workflow.toString());
         executeRequest.setPreviewNodeId(previewReqVO.getNodeId());
         String token = JoseGenerator.generateToken(30);

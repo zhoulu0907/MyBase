@@ -26,4 +26,7 @@ public class TenantSimpleRespVO {
 
     @Schema(description = "管理员id")
     private String adminUserId;
+
+    @Schema(description = "空间图标")
+    private  String logoUrl;
 }

@@ -17,9 +17,9 @@ public class ScheduleConfigVO {
     @NotNull
     private Long applicationId;
 
-    @Schema(description = "ETL ID")
-    @NotNull
-    private Long workflowId;
+    @Schema(description = "ETL Uuid")
+    @NotBlank
+    private String flowUuid;
 
     @Schema(description = "ETL名称")
     @NotBlank

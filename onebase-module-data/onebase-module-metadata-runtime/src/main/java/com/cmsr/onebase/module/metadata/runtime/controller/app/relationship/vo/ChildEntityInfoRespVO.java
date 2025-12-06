@@ -15,8 +15,11 @@ import java.util.List;
 @Data
 public class ChildEntityInfoRespVO {
 
-    @Schema(description = "子表实体UUID", example = "uuid-1002")
-    private String childEntityId;
+    @Schema(description = "子表实体ID", example = "1002")
+    private Long childEntityId;
+
+    @Schema(description = "子表实体UUID", example = "550e8400-e29b-41d4-a716-446655440000")
+    private String childEntityUuid;
 
     @Schema(description = "子表实体名称", example = "订单信息")
     private String childEntityName;

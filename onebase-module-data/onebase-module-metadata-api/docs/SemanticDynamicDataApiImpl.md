@@ -28,7 +28,7 @@
 ## 请求/响应模型
 - `SemanticPageConditionVO`：分页查询（`tableName/pageNo/pageSize/sortBy/semanticConditionDTO`，支持嵌套条件）
 - `SemanticTargetBodyVO`：按ID查询/删除（`tableName/id/methodCode/traceId`）
-- `SemanicTargetConditionVO`：条件删除/条件更新（`tableName/semanticConditionDTO/updateProperties/methodCode/traceId`）
+- `SemanticTargetConditionVO`：条件删除/条件更新（`tableName/semanticConditionDTO/updateProperties/methodCode/traceId`）
 - `SemanticMergeBodyVO`：合并体创建/更新（顶层键为业务字段或连接器名）
 - 返回统一使用 `SemanticEntityValueDTO` 或 `PageResult<SemanticEntityValueDTO>`，删除返回 `Integer`
 
@@ -363,7 +363,7 @@
 ```
 
 ### deleteDataByCondition（条件删除）
-- 入参：`SemanicTargetConditionVO`
+- 入参：`SemanticTargetConditionVO`
 ```json
 {
   "tableName": "customer",
@@ -376,7 +376,7 @@
 ```
 
 ### updateDataByCondition（条件更新，批量）
-- 入参：`SemanicTargetConditionVO`
+- 入参：`SemanticTargetConditionVO`
 ```json
 {
   "tableName": "customer",

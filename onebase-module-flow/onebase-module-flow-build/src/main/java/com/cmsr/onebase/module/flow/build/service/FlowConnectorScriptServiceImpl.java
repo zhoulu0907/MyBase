@@ -4,6 +4,7 @@ import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.framework.common.util.string.UuidUtils;
 import com.cmsr.onebase.module.flow.build.vo.ConnectorScriptVO;
 import com.cmsr.onebase.module.flow.build.vo.CreateFlowConnectorScriptReqVO;
 import com.cmsr.onebase.module.flow.build.vo.UpdateFlowConnectorScriptReqVO;
@@ -77,6 +78,7 @@ public class FlowConnectorScriptServiceImpl implements FlowConnectorScriptServic
         if (connectorDO == null) {
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
         }
+        connectorScriptDO.setScriptUuid(UuidUtils.getUuid());
         connectorScriptDO.setConnectorUuid(connectorDO.getConnectorUuid());
         connectorScriptDO.setApplicationId(connectorDO.getApplicationId());
         connectorScriptDO.setInputParameter(jsonNodeToString(createVO.getInputParameter()));

@@ -11,7 +11,7 @@ import com.cmsr.onebase.module.bpm.core.enums.BpmNodeApproveStatusEnum;
 import com.cmsr.onebase.module.bpm.core.enums.BpmNodeTypeEnum;
 import com.cmsr.onebase.module.bpm.runtime.vo.EntityVO;
 import com.cmsr.onebase.module.bpm.runtime.vo.ExecTaskReqVO;
-import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanicMergeConditionVO;
+import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticMergeConditionVO;
 import org.apache.commons.collections4.MapUtils;
 import org.dromara.warm.flow.core.dto.FlowParams;
 import org.dromara.warm.flow.core.entity.Task;
@@ -89,7 +89,7 @@ public class InitiationExecTaskStrategy extends AbstractExecTaskStrategy<Initiat
 
         // 实体数据更新，发起节点默认有编辑权限
         if (entityVO != null && MapUtils.isNotEmpty(entityVO.getData())) {
-            SemanicMergeConditionVO updateDataReqVO = new SemanicMergeConditionVO();
+            SemanticMergeConditionVO updateDataReqVO = new SemanticMergeConditionVO();
             updateDataReqVO.setData(entityVO.getData());
             updateDataReqVO.setTableName(entityVO.getTableName());
             semanticDynamicDataApi.updateDataById(updateDataReqVO);

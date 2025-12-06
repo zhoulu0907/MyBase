@@ -1,8 +1,8 @@
 package com.cmsr.onebase.module.metadata.core.semantic.strategy.permission;
 
 import com.cmsr.onebase.module.app.api.security.bo.OperationPermission;
-import com.cmsr.onebase.module.metadata.core.domain.query.MetadataPermissionContext;
-import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticPermissionContext;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticDataMethodOpEnum;
 import com.cmsr.onebase.module.metadata.core.service.permission.exception.PermissionDeniedException;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticRecordDTO;
 import org.springframework.stereotype.Component;
@@ -36,9 +36,9 @@ public class SemanticOperationPermissionChecker implements SemanticRuntimePermis
      * - 新增/编辑/删除：对应 canCreate/canEdit/canDelete
      */
     public void check(SemanticRecordDTO recordDTO) {
-        MetadataPermissionContext pc = recordDTO.getRecordContext().getPermissionContext();
+        SemanticPermissionContext pc = recordDTO.getRecordContext().getPermissionContext();
         OperationPermission op = pc.getOperationPermission();
-        MetadataDataMethodOpEnum type = recordDTO.getRecordContext().getOperationType();
+        SemanticDataMethodOpEnum type = recordDTO.getRecordContext().getOperationType();
         if (!op.isPageAllowed()) { throw new PermissionDeniedException(TYPE, "PAGE_ACCESS", "无权访问页面"); }
         switch (type) {
             case CREATE -> { if (!op.isCanCreate()) throw new PermissionDeniedException(TYPE, "CREATE", "无新增权限"); }

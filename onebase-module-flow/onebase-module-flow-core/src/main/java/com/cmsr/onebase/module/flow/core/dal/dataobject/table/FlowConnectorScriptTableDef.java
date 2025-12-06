@@ -5,7 +5,7 @@ import com.mybatisflex.core.table.TableDef;
 
 
 /**
- *  表定义层。
+ * 表定义层。
  *
  * @author HuangJie
  * @since 2025-11-29
@@ -56,6 +56,9 @@ public class FlowConnectorScriptTableDef extends TableDef {
     public final QueryColumn APPLICATION_ID = new QueryColumn(this, "application_id");
 
 
+    public final QueryColumn SCRIPT_UUID = new QueryColumn(this, "script_uuid");
+
+
     public final QueryColumn CONNECTOR_UUID = new QueryColumn(this, "connector_uuid");
 
 
@@ -78,7 +81,7 @@ public class FlowConnectorScriptTableDef extends TableDef {
     /**
      * 默认字段，不包含逻辑删除或者 large 等字段。
      */
-    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, CONNECTOR_UUID, SCRIPT_NAME, SCRIPT_TYPE, DESCRIPTION, RAW_SCRIPT, INPUT_PARAMETER, OUTPUT_PARAMETER, INPUT_SCHEMA, OUTPUT_SCHEMA, APPLICATION_ID, CREATOR, CREATE_TIME, UPDATER, UPDATE_TIME, DELETED, TENANT_ID};
+    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, SCRIPT_UUID, CONNECTOR_UUID, SCRIPT_NAME, SCRIPT_TYPE, DESCRIPTION, RAW_SCRIPT, INPUT_PARAMETER, OUTPUT_PARAMETER, INPUT_SCHEMA, OUTPUT_SCHEMA, APPLICATION_ID, CREATOR, CREATE_TIME, UPDATER, UPDATE_TIME, DELETED, TENANT_ID};
 
     public FlowConnectorScriptTableDef() {
         super("", "flow_connector_script");

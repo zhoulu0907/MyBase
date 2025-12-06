@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.metadata.build.controller.admin.validation;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.module.metadata.core.util.MetadataIdUuidConverter;
 import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationLengthRespVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationLengthSaveReqVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationLengthUpdateReqVO;
@@ -20,6 +21,9 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 @RequestMapping("/metadata/validation/length")
 @Validated
 public class ValidationLengthController {
+
+    @Resource
+    private MetadataIdUuidConverter idUuidConverter;
 
     @Resource private MetadataValidationLengthBuildService lengthService;
 
@@ -53,16 +57,18 @@ public class ValidationLengthController {
 
     @GetMapping("/get")
     @Operation(summary = "根据规则组ID获取长度校验")
-    @Parameter(name = "id", description = "规则组ID (兼容字段: 前端传的就是组ID)", required = true)
+    @Parameter(name = "id", description = "规则组ID（支持ID或UUID）", required = true)
     public CommonResult<ValidationLengthRespVO> get(@RequestParam("id") String id) {
-        return success(lengthService.getById(Long.parseLong(id)));
+        Long resolvedId = idUuidConverter.resolveRuleGroupId(id);
+        return success(lengthService.getById(resolvedId));
     }
 
     @PostMapping("/delete")
     @Operation(summary = "按规则组ID删除长度校验")
-    @Parameter(name = "id", description = "规则组ID (兼容字段: 前端传的就是组ID)", required = true)
+    @Parameter(name = "id", description = "规则组ID（支持ID或UUID）", required = true)
     public CommonResult<Boolean> delete(@RequestParam("id") String id) {
-        lengthService.deleteById(Long.parseLong(id));
+        Long resolvedId = idUuidConverter.resolveRuleGroupId(id);
+        lengthService.deleteById(resolvedId);
         return success(true);
     }
 }

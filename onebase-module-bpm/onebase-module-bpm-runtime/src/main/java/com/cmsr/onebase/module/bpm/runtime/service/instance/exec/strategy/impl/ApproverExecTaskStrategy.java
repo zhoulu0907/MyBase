@@ -9,9 +9,9 @@ import com.cmsr.onebase.module.bpm.core.enums.*;
 import com.cmsr.onebase.module.bpm.runtime.vo.EntityVO;
 import com.cmsr.onebase.module.bpm.runtime.vo.ExecTaskReqVO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntitySchemaDTO;
-import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO;
-import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanicMergeConditionVO;
+import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticMergeConditionVO;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.dromara.warm.flow.core.FlowEngine;
@@ -25,10 +25,7 @@ import org.dromara.warm.flow.core.enums.SkipType;
 import org.dromara.warm.flow.core.utils.StringUtils;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.bpm.core.utils.BpmUtil.getInitiationNodeJson;
@@ -45,6 +42,131 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
     @Override
     public boolean supports(String bizNodeType) {
         return Objects.equals(bizNodeType, BpmNodeTypeEnum.APPROVER.getCode());
+    }
+    private boolean containsField(Map<String, Set<String>> setMap, String tableName, String fieldName) {
+        return MapUtils.isNotEmpty(setMap) && setMap.containsKey(tableName) && setMap.get(tableName).contains(fieldName);
+    }
+
+    private Map<String, Set<String>> buildPermFieldMap(ApproverNodeExtDTO extDTO) {
+        Map<String, Set<String>> writableFieldNamesMap = new HashMap<>();
+
+        FieldPermCfgDTO fieldPermConfig = extDTO.getFieldPermConfig();
+        if (fieldPermConfig == null || CollectionUtils.isEmpty(fieldPermConfig.getFieldConfigs())) {
+            return writableFieldNamesMap;
+        }
+
+        // 遍历字段配置，收集可编辑字段
+        for (FieldPermCfgDTO.FieldConfigDTO fieldConfig : fieldPermConfig.getFieldConfigs()) {
+            // 只保留可编辑的字段
+            if (Objects.equals(fieldConfig.getFieldPermType(), FieldPermTypeEnum.WRITE.getCode())) {
+                writableFieldNamesMap.computeIfAbsent(fieldConfig.getTableName(), k -> new HashSet<>())
+                        .add(fieldConfig.getFieldName());
+            }
+        }
+
+        return writableFieldNamesMap;
+    }
+
+    private Map<String, Object> buildEditableEntityData(EntityVO entityVO, ApproverNodeExtDTO extDTO) {
+        // 不涉及更新
+        if (entityVO == null || MapUtils.isEmpty(entityVO.getData())) {
+            return null;
+        }
+
+        // 重置，待过滤出可编辑的字段
+        Map<String, Object> editableEntityData = new HashMap<>();
+        String tableName = entityVO.getTableName();
+        Map<String, Object> entityData = entityVO.getData();
+
+        FieldPermCfgDTO fieldPermConfig = extDTO.getFieldPermConfig();
+
+        // 未开启节点独立配置
+        if (fieldPermConfig == null || fieldPermConfig.getUseNodeConfig()) {
+            // todo：待完善，未开启字段权限配置，则以表单默认权限为准，此处不做校验
+            editableEntityData = entityVO.getData();
+            return editableEntityData;
+        }
+
+        Object idObj = entityData.get("id");
+
+        if (idObj == null) {
+            throw new IllegalArgumentException("实体ID不能为空");
+        }
+
+        // 查询当前数据
+        Long entityId = Long.valueOf(String.valueOf(idObj));
+        Map<String, Object> existEntityData = bpmEntityHelper.getEntityData(tableName, String.valueOf(entityId));
+
+        if (MapUtils.isEmpty(existEntityData)) {
+            throw exception(ErrorCodeConstants.FLOW_ENTITY_DATA_NOT_EXISTS);
+        }
+
+        // 先查原始数据结构
+        SemanticEntitySchemaDTO entitySchema = semanticDynamicDataApi.buildEntitySchemaByTableName(tableName);
+
+        // 查出非系统字段
+        Map<String, Set<String>> nonSystemFields = bpmEntityHelper.getNonSystemFields(entitySchema);
+
+        // 遍历字段配置，收集可编辑字段
+        Map<String, Set<String>> writableFieldNamesMap = buildPermFieldMap(extDTO);
+
+        // 查出子表名称
+        Set<String> subTableNames = bpmEntityHelper.getSubTableNames(entitySchema);
+
+        // 过滤出可编辑的字段
+        Map<String, Object> finalEditableEntityData = editableEntityData;
+        existEntityData.forEach((fieldName, value) -> {
+            // 先判断是否子表
+            boolean isSubTable = subTableNames.contains(fieldName);
+
+            // 子表处理
+            if (isSubTable) {
+                Set<String> subWritableFieldNames = writableFieldNamesMap.get(fieldName);
+
+                // 无子表操作权限，则不更新该数据
+                if (CollectionUtils.isEmpty(subWritableFieldNames)) {
+                    return;
+                }
+
+                // 类型不匹配，暂不处理
+                if (!(value instanceof List)) {
+                    return;
+                }
+
+                // 子表数据
+                List<Map<String, Object>> subEntityDataList = (List<Map<String, Object>>) value;
+
+                // 过滤出可编辑的子表字段
+                subEntityDataList.forEach(subEntityData -> {
+                    subEntityData.forEach((subFieldName, subValue) -> {
+                        if (subWritableFieldNames.contains(subFieldName)) {
+                            finalEditableEntityData.put(fieldName + "." + subFieldName, subValue);
+                        }
+                    });
+                });
+
+                return;
+            }
+
+            // 主表字段处理
+            Set<String> nonSystemMainFields = nonSystemFields.get(fieldName);
+
+            if (CollectionUtils.isNotEmpty(nonSystemMainFields) && nonSystemMainFields.contains(fieldName)) {
+                // 先塞原数据
+                finalEditableEntityData.put(fieldName, value);
+
+                // 如果有权限
+                if (containsField(writableFieldNamesMap, tableName, fieldName)) {
+                    Object updateValue = entityData.get(fieldName);
+
+                    if (updateValue != null) {
+                        finalEditableEntityData.put(fieldName, updateValue);
+                    }
+                }
+            }
+        });
+
+        return finalEditableEntityData;
     }
 
     @Override
@@ -136,72 +258,14 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
             agentInsRepository.updateById(agentInsDO);
         }
 
-        FieldPermCfgDTO fieldPermConfig = extDTO.getFieldPermConfig();
+        Map<String, Object> updateEntityData = buildEditableEntityData(entityVO, extDTO);
 
-        // 实体数据更新
-        if (entityVO != null && MapUtils.isNotEmpty(entityVO.getData())) {
-            boolean useNodeConfig = false;
-
-            if (fieldPermConfig != null && fieldPermConfig.getUseNodeConfig()) {
-                useNodeConfig = true;
-            }
-
-            Map<String, Object> updateEntityData;
-
-            // 使用节点配置，则根据字段配置来更新数据
-            if (useNodeConfig) {
-                Map<String, Boolean> fieldUuidMap = new HashMap<>();
-
-                // 重置，待过滤出可编辑的字段
-                updateEntityData = new HashMap<>();
-
-                for (FieldPermCfgDTO.FieldConfigDTO fieldConfig : fieldPermConfig.getFieldConfigs()) {
-                    String fieldUuid = fieldConfig.getFieldUuid();
-
-                    // 只保留可编辑的字段
-                    if (Objects.equals(fieldConfig.getFieldPermType(), FieldPermTypeEnum.WRITE.getCode())) {
-                        fieldUuidMap.put(fieldUuid, true);
-                    }
-                }
-
-                // todo: 处理子表字段
-                SemanticEntitySchemaDTO entitySchema = semanticDynamicDataApi.buildEntitySchemaByTableName(entityVO.getTableName());
-                Map<String, SemanticFieldSchemaDTO> fieldSchemaMap = new HashMap<>();
-
-                for (SemanticFieldSchemaDTO schemaDTO : entitySchema.getFields()) {
-                    fieldSchemaMap.put(schemaDTO.getFieldName(), schemaDTO);
-                }
-
-                // 审批节点默认所有字段都为只读 todo: 待完善
-                entityVO.getData().forEach((key, value) -> {
-                    // id字段，直接保留
-                    if ("id".equalsIgnoreCase(key)) {
-                        updateEntityData.put(key, value);
-                    } else {
-                        // 字段权限配置
-                        SemanticFieldSchemaDTO fieldSchema = fieldSchemaMap.get(key);
-
-                        if (fieldSchema == null) {
-                            return;
-                        }
-
-                        if (fieldUuidMap.containsKey(fieldSchema.getFieldUuid())) {
-                            updateEntityData.put(key, value);
-                        }
-                    }
-                });
-            } else {
-                // todo：待完善，未开启字段权限配置，则以表单默认权限为准，此处不做校验
-                updateEntityData = entityVO.getData();
-            }
-
-            // 更新数据
-            if (!updateEntityData.isEmpty()) {
-                SemanicMergeConditionVO conditionVO = new SemanicMergeConditionVO();
-                conditionVO.setData(updateEntityData);
-                conditionVO.setTableName(entityVO.getTableName());
-                semanticDynamicDataApi.updateDataById(conditionVO);
-            }
+        // 更新数据
+        if (!MapUtils.isNotEmpty(updateEntityData)) {
+            SemanticMergeConditionVO conditionVO = new SemanticMergeConditionVO();
+            conditionVO.setData(updateEntityData);
+            conditionVO.setTableName(entityVO.getTableName());
+            semanticDynamicDataApi.updateDataById(conditionVO);
         }
     }
 }
