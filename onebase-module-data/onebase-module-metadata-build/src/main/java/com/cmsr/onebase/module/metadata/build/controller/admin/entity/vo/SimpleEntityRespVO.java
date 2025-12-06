@@ -3,6 +3,8 @@ package com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+import java.util.Set;
+
 /**
  * 管理后台 - 简单实体信息 Response VO
  *
@@ -27,4 +29,7 @@ public class SimpleEntityRespVO {
 
     @Schema(description = "关系类型：MASTER(主表)/SLAVE(子表)/NONE(无关系)", example = "MASTER")
     private String relationType;
+
+    @Schema(description = "关联关系类型列表（数据库原始值去重）", example = "[\"ONE_TO_MANY\", \"MANY_TO_ONE\"]")
+    private Set<String> relationshipTypes;
 }
