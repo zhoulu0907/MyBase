@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.metadata.build.controller.admin.validation;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.module.metadata.core.util.MetadataIdUuidConverter;
 import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationUniqueRespVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationUniqueSaveReqVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationUniqueUpdateReqVO;
@@ -20,6 +21,9 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 @RequestMapping("/metadata/validation/unique")
 @Validated
 public class ValidationUniqueController {
+
+    @Resource
+    private MetadataIdUuidConverter idUuidConverter;
 
     @Resource private MetadataValidationUniqueBuildService uniqueService;
 
@@ -52,16 +56,18 @@ public class ValidationUniqueController {
 
     @GetMapping("/get")
     @Operation(summary = "根据主键ID获取唯一性校验")
-    @Parameter(name = "id", description = "唯一性校验规则主键ID", required = true)
+    @Parameter(name = "id", description = "唯一性校验规则主键ID（支持ID或UUID）", required = true)
     public CommonResult<ValidationUniqueRespVO> get(@RequestParam("id") String id) {
-        return success(uniqueService.getById(Long.parseLong(id)));
+        Long resolvedId = idUuidConverter.resolveRuleGroupId(id);
+        return success(uniqueService.getById(resolvedId));
     }
 
     @PostMapping("/delete")
     @Operation(summary = "按主键ID删除唯一性校验")
-    @Parameter(name = "id", description = "唯一性校验规则主键ID", required = true)
+    @Parameter(name = "id", description = "唯一性校验规则主键ID（支持ID或UUID）", required = true)
     public CommonResult<Boolean> delete(@RequestParam("id") String id) {
-        uniqueService.deleteById(Long.parseLong(id));
+        Long resolvedId = idUuidConverter.resolveRuleGroupId(id);
+        uniqueService.deleteById(resolvedId);
         return success(true);
     }
 }

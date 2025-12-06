@@ -1,7 +1,6 @@
 package com.cmsr.onebase.module.flow.core.dal.dataobject;
 
 import com.cmsr.onebase.framework.orm.entity.BaseAppEntity;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
 import lombok.Data;
@@ -11,6 +10,9 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @Table(value = "flow_connector_script")
 public class FlowConnectorScriptDO extends BaseAppEntity {
+
+    @Column(value = "script_uuid")
+    private String scriptUuid;
 
     @Column(value = "connector_uuid")
     private String connectorUuid;

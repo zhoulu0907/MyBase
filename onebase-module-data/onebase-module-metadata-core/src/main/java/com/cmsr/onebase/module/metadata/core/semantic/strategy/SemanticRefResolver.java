@@ -10,7 +10,7 @@ import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticRowValueDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.type.RefType;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
-import com.cmsr.onebase.module.metadata.core.dal.dataobject.field.MetadataEntityFieldOptionDO;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldOptionDTO;
 import com.cmsr.onebase.module.metadata.core.enums.RelationshipTypeEnum;
 import com.cmsr.onebase.module.system.api.user.AdminUserApi;
 import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
@@ -95,7 +95,7 @@ public class SemanticRefResolver {
         // 构建字段Schema缓存（主实体字段与关系属性），用于字典解析等场景
         Map<Long, MetadataEntityFieldDO> fieldSchemaMap = buildFieldSchemaMap(entity);
         // 构建字段选项缓存（仅针对 SELECT/MULTI_SELECT 且未绑定系统字典的字段）
-        Map<Long, List<MetadataEntityFieldOptionDO>> fieldOptionsCache = buildOptionsCacheFromEntity(entity, selectFieldIds);
+        Map<Long, List<SemanticFieldOptionDTO>> fieldOptionsCache = buildOptionsCacheFromEntity(entity, selectFieldIds);
         // 构建字典标签缓存（按字段ID聚合系统字典的 id/value -> label 映射）
         Map<Long, Map<String, String>> dictLabelCacheByFieldId = buildDictLabelCacheByFieldId(entity, selectFieldIds, fieldSchemaMap);
         // 构建数据选择上下文（关系元信息 + 主数据缓存），供 DATA_SELECTION/MULTI_DATA_SELECTION 解析
@@ -128,7 +128,7 @@ public class SemanticRefResolver {
         Map<Long, AdminUserRespDTO> users = buildUserCache(userIds);
         Map<Long, DeptRespDTO> depts = buildDeptCache(deptIds);
         Map<Long, MetadataEntityFieldDO> fieldSchemaMap = buildFieldSchemaMap(entity);
-        Map<Long, List<MetadataEntityFieldOptionDO>> fieldOptionsCache = buildOptionsCacheFromEntity(entity, selectFieldIds);
+        Map<Long, List<SemanticFieldOptionDTO>> fieldOptionsCache = buildOptionsCacheFromEntity(entity, selectFieldIds);
         Map<Long, Map<String, String>> dictLabelCacheByFieldId = buildDictLabelCacheByFieldId(entity, selectFieldIds, fieldSchemaMap);
         DataSelectionContext dataSelection = buildDataSelectionContext(entity, values.get(0));
         Map<Long, FileListRespDTO> files = buildFileCache(fileIds);
@@ -168,8 +168,8 @@ public class SemanticRefResolver {
      * @param selectFieldIds 需要解析的字典字段ID集合
      * @return 字段ID到其选项列表的映射
      */
-    private Map<Long, List<MetadataEntityFieldOptionDO>> buildOptionsCacheFromEntity(SemanticEntitySchemaDTO entity, Set<Long> selectFieldIds) {
-        Map<Long, List<MetadataEntityFieldOptionDO>> map = new HashMap<>();
+    private Map<Long, List<SemanticFieldOptionDTO>> buildOptionsCacheFromEntity(SemanticEntitySchemaDTO entity, Set<Long> selectFieldIds) {
+        Map<Long, List<SemanticFieldOptionDTO>> map = new HashMap<>();
         if (entity != null && entity.getFields() != null) {
             for (SemanticFieldSchemaDTO f : entity.getFields()) {
                 if (f == null || f.getId() == null) continue;
@@ -636,7 +636,7 @@ public class SemanticRefResolver {
      *   <li>未绑定系统字典：从字段选项缓存中匹配 `option_value -> option_label`</li>
      * </ul>
      */
-    private void applyDict(SemanticFieldValueDTO<Object> v, Map<Long, MetadataEntityFieldDO> fieldSchemaMap, Map<Long, List<MetadataEntityFieldOptionDO>> fieldOptionsCache, Map<Long, Map<String, String>> dictLabelCacheByFieldId) {
+    private void applyDict(SemanticFieldValueDTO<Object> v, Map<Long, MetadataEntityFieldDO> fieldSchemaMap, Map<Long, List<SemanticFieldOptionDTO>> fieldOptionsCache, Map<Long, Map<String, String>> dictLabelCacheByFieldId) {
         Long fieldId = v.getFieldId();
         MetadataEntityFieldDO field = fieldId == null ? null : fieldSchemaMap.get(fieldId);
         Long dictTypeId = field == null ? null : field.getDictTypeId();
@@ -717,7 +717,7 @@ public class SemanticRefResolver {
      *   <li>字段选项：从缓存中匹配并返回 `option_label`</li>
      * </ul>
      */
-    private String resolveDictLabelOrOption(Long dictTypeId, Long fieldId, Object idOrVal, Map<Long, List<MetadataEntityFieldOptionDO>> fieldOptionsCache, Map<Long, Map<String, String>> dictLabelCacheByFieldId) {
+    private String resolveDictLabelOrOption(Long dictTypeId, Long fieldId, Object idOrVal, Map<Long, List<SemanticFieldOptionDTO>> fieldOptionsCache, Map<Long, Map<String, String>> dictLabelCacheByFieldId) {
         if (idOrVal == null) return null;
         if (dictTypeId != null) {
             Map<String, String> labelMap = fieldId == null ? null : dictLabelCacheByFieldId.get(fieldId);
@@ -728,10 +728,10 @@ public class SemanticRefResolver {
             return null;
         }
         if (fieldId != null) {
-            List<MetadataEntityFieldOptionDO> options = fieldOptionsCache.get(fieldId);
+            List<SemanticFieldOptionDTO> options = fieldOptionsCache.get(fieldId);
             if (options == null || options.isEmpty()) return null;
             String valueStr = String.valueOf(idOrVal);
-            for (MetadataEntityFieldOptionDO opt : options) {
+            for (SemanticFieldOptionDTO opt : options) {
                 if (opt.getOptionValue() != null && opt.getOptionValue().equals(valueStr)) {
                     return opt.getOptionLabel();
                 }
@@ -793,7 +793,7 @@ public class SemanticRefResolver {
         final Map<Long, AdminUserRespDTO> users;
         final Map<Long, DeptRespDTO> depts;
         final Map<Long, MetadataEntityFieldDO> fieldSchemaMap;
-        final Map<Long, List<MetadataEntityFieldOptionDO>> fieldOptionsCache;
+        final Map<Long, List<SemanticFieldOptionDTO>> fieldOptionsCache;
         final Map<Long, Map<String, String>> dictLabelCacheByFieldId;
         final Map<String, DataSelectMeta> dataSelectMetaBySourceFieldUuid;
         final Map<String, Map<Object, Row>> mainsByTable;
@@ -802,7 +802,7 @@ public class SemanticRefResolver {
         ResolveContext(Map<Long, AdminUserRespDTO> users,
                        Map<Long, DeptRespDTO> depts,
                        Map<Long, MetadataEntityFieldDO> fieldSchemaMap,
-                       Map<Long, List<MetadataEntityFieldOptionDO>> fieldOptionsCache,
+                       Map<Long, List<SemanticFieldOptionDTO>> fieldOptionsCache,
                        Map<Long, Map<String, String>> dictLabelCacheByFieldId,
                        Map<String, DataSelectMeta> dataSelectMetaBySourceFieldUuid,
                        Map<String, Map<Object, Row>> mainsByTable,

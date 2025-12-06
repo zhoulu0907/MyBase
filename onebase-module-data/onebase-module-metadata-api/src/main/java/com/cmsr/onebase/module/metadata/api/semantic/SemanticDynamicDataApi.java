@@ -9,10 +9,10 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntitySchemaDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntityValueDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO;
-import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanicMergeConditionVO;
+import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticMergeConditionVO;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticPageConditionVO;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticTargetBodyVO;
-import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanicTargetConditionVO;
+import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticTargetConditionVO;
 
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -60,7 +60,7 @@ public interface SemanticDynamicDataApi {
      * @return 字段语义模型列表
      */
     @Operation(summary = "根据字段 UUID 列表构建字段语义模型列表")
-    public List<SemanticFieldSchemaDTO> buildEntityFieldsSchemaByTableName(List<String> fieldUuids);
+    public List<SemanticFieldSchemaDTO> buildEntityFieldsSchemaByUuids(List<String> fieldUuids);
 
     /**
      * 根据表名与字段名-值映射构建实体值模型
@@ -131,7 +131,7 @@ public interface SemanticDynamicDataApi {
      * @param body 条件请求体（表名 + 过滤条件）
      * @return 删除影响行数
      */
-    Integer deleteDataByCondition(@Valid @RequestBody SemanicTargetConditionVO body);
+    Integer deleteDataByCondition(@Valid @RequestBody SemanticTargetConditionVO body);
 
     /**
      * 根据条件批量更新实体数据并返回更新后的结果
@@ -143,18 +143,18 @@ public interface SemanticDynamicDataApi {
      * @param body 条件与更新内容请求体（`tableName` + `semanticConditionDTO` + `updateProperties`）
      * @return 更新后的语义值列表
      */
-    List<SemanticEntityValueDTO> updateDataByCondition(@Valid @RequestBody SemanicTargetConditionVO body);
+    List<SemanticEntityValueDTO> updateDataByCondition(@Valid @RequestBody SemanticTargetConditionVO body);
 
     /**
      * 插入实体数据（编辑态调用）
      *
-     * - `SemanicMergeConditionVO` 顶层键为业务字段或连接器名称
+     * - `SemanticMergeConditionVO` 顶层键为业务字段或连接器名称
      * - 自动编号、系统字段由实现层统一处理
      *
      * @param body 合并请求体（主字段 + 连接器值）
      * @return 插入后的语义值（包含展示值与必要回显）
      */
-    SemanticEntityValueDTO insertData(@Valid @RequestBody SemanicMergeConditionVO body);
+    SemanticEntityValueDTO insertData(@Valid @RequestBody SemanticMergeConditionVO body);
 
     /**
      * 根据主键更新实体数据
@@ -165,6 +165,6 @@ public interface SemanticDynamicDataApi {
      * @param body 合并请求体（含主键与更新内容）
      * @return 更新后的语义值
      */
-    SemanticEntityValueDTO updateDataById(@Valid @RequestBody SemanicMergeConditionVO body);
+    SemanticEntityValueDTO updateDataById(@Valid @RequestBody SemanticMergeConditionVO body);
     
 }

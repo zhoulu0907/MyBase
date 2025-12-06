@@ -3,8 +3,8 @@ package com.cmsr.onebase.module.metadata.core.service.permission.builder;
 import com.cmsr.onebase.module.app.api.security.bo.DataPermission;
 import com.cmsr.onebase.module.app.api.security.bo.FieldPermission;
 import com.cmsr.onebase.module.app.api.security.bo.OperationPermission;
-import com.cmsr.onebase.module.metadata.core.domain.query.LoginUserCtx;
-import com.cmsr.onebase.module.metadata.core.domain.query.MetadataPermissionContext;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticLoginUserCtx;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticPermissionContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -41,7 +41,7 @@ public class PermissionContextBuilder {
      * @param entityId 实体ID
      * @return 权限上下文
      */
-    public MetadataPermissionContext buildPermissionContext(LoginUserCtx loginUserCtx, 
+    public SemanticPermissionContext buildPermissionContext(SemanticLoginUserCtx loginUserCtx, 
                                                              Long menuId, 
                                                              Long entityId) {
         if (loginUserCtx == null) {
@@ -55,7 +55,7 @@ public class PermissionContextBuilder {
         log.debug("开始构建权限上下文：userId={}, applicationId={}, menuId={}, entityId={}", 
                 userId, applicationId, menuId, entityId);
 
-        MetadataPermissionContext permissionContext = new MetadataPermissionContext();
+        SemanticPermissionContext permissionContext = new SemanticPermissionContext();
 
         // 1. 加载操作权限
         OperationPermission operationPermission = loadOperationPermission(userId, applicationId, menuId);
@@ -166,5 +166,4 @@ public class PermissionContextBuilder {
         return permission;
     }
 }
-
 

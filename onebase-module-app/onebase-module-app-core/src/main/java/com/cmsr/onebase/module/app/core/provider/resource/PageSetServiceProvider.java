@@ -67,6 +67,9 @@ public class PageSetServiceProvider {
 
     public String getMainMetadata(Long pageSetId) {
         AppResourcePagesetDO pageSetDO = appPageSetRepository.getById(pageSetId);
+        if (pageSetDO == null) {
+            throw ServiceExceptionUtil.exception(AppResourceErrorCodeConstants.PAGE_SET_NOT_EXIST);
+        }
         return pageSetDO.getMainMetadata();
     }
 

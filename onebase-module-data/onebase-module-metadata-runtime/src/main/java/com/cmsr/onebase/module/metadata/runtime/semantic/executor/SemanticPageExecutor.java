@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.metadata.runtime.semantic.executor;
 
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticDataMethodOpEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticRecordDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticSortRuleDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticMethodCodeEnum;
@@ -61,7 +61,7 @@ public class SemanticPageExecutor {
         try {
             // 1) 构建 RecordDTO（包含分页排序过滤上下文）
             SemanticRecordDTO record = semanticMergeRecordAssembler.assemblePageBody(tableName, body, menuId, traceId,
-                    SemanticMethodCodeEnum.GET_PAGE, MetadataDataMethodOpEnum.GET_PAGE);
+                    SemanticMethodCodeEnum.GET_PAGE, SemanticDataMethodOpEnum.GET_PAGE);
 
             // 2) 权限上下文初始化：当前类 initializeContext
             semanticPermissionContextLoader.loadPermissionContext(record);
