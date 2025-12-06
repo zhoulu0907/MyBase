@@ -99,9 +99,10 @@ public class MultiDeviceSessionServiceImpl implements MultiDeviceSessionService 
         }
 
         // 5. 如果同设备有旧token且不同，加入移除列表
-        if (StrUtil.isNotBlank(oldTokenFromSameDevice)) {
-            removedTokens.add(oldTokenFromSameDevice);
-        }
+        // 移除同设备互踢，同一用户在同时登录空间（编辑态）和应用（运行态）时，会导致互踢
+        // if (StrUtil.isNotBlank(oldTokenFromSameDevice)) {
+        //     removedTokens.add(oldTokenFromSameDevice);
+        // }
 
         // 6. 添加新设备
         stringRedisTemplate.opsForHash().put(redisKey, deviceId, buildDeviceInfo(newAccessToken, System.currentTimeMillis()));
