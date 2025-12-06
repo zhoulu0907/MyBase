@@ -131,7 +131,8 @@ public class DataMethodApiHelper {
     public static SemanticConditionDTO extractFromOperator(OpEnum operator, List<?> valueArray) {
         SemanticConditionDTO condition = new SemanticConditionDTO();
         condition.setNodeType(SemanticConditionNodeTypeEnum.CONDITION);
-        condition.setFieldValue((List<Object>) valueArray);
+        List<Object> dataArray = new ArrayList<>(valueArray);
+        condition.setFieldValue(dataArray);
         switch (operator) {
             case EQUALS -> { // K = V
                 condition.setOperator(SemanticOperatorEnum.EQ);
