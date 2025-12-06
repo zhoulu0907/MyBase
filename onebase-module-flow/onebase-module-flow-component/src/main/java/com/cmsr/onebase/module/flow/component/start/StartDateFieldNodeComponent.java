@@ -14,11 +14,11 @@ import com.cmsr.onebase.module.flow.context.enums.OpEnum;
 import com.cmsr.onebase.module.flow.context.express.OrExpression;
 import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
 import com.cmsr.onebase.module.flow.context.graph.nodes.StartDateFieldNodeData;
-import com.cmsr.onebase.module.metadata.api.datamethod.dto.ConditionDTO;
 import com.cmsr.onebase.module.metadata.api.entity.MetadataEntityFieldApi;
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldJdbcTypeReqDTO;
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldJdbcTypeRespDTO;
 import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticConditionDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntityValueDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticPageConditionVO;
 import com.yomahub.liteflow.annotation.LiteflowComponent;
@@ -30,7 +30,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -68,37 +67,18 @@ public class StartDateFieldNodeComponent extends NodeComponent {
         reqDTO.setTableName(nodeData.getEntityName());
         if (fieldJdbcType == JdbcTypeEnum.TIMESTAMP) {
             List<String> values = nodeData.calculateOffTime(LocalDateTime.now());
-            List<ConditionDTO> andConditionDTO = new ArrayList<>();
-            {
-                ConditionDTO conditionDTO = new ConditionDTO();
-                conditionDTO.setFieldId(nodeData.getOffsetFiledId());
-                conditionDTO.setOperator(OpEnum.GREATER_EQUALS.name());
-                conditionDTO.setFieldValue(List.of(values.get(0)));
-                andConditionDTO.add(conditionDTO);
-            }
-            {
-                ConditionDTO conditionDTO = new ConditionDTO();
-                conditionDTO.setFieldId(nodeData.getOffsetFiledId());
-                conditionDTO.setOperator(OpEnum.LESS_EQUALS.name());
-                conditionDTO.setFieldValue(List.of(values.get(1)));
-                andConditionDTO.add(conditionDTO);
-            }
-            reqDTO.setAndConditionDTO(andConditionDTO);
+            SemanticConditionDTO rangeCondition = DataMethodApiHelper.extractFromOperator(OpEnum.RANGE, values);
+            reqDTO.setSemanticConditionDTO(rangeCondition);
         } else if (fieldJdbcType == JdbcTypeEnum.DATE) {
             String value = nodeData.calculateOffTime(LocalDate.now());
-            List<ConditionDTO> andConditionDTO = new ArrayList<>();
-            ConditionDTO conditionDTO = new ConditionDTO();
-            conditionDTO.setFieldId(nodeData.getOffsetFiledId());
-            conditionDTO.setOperator(OpEnum.EQUALS.name());
-            conditionDTO.setFieldValue(List.of(value));
-            andConditionDTO.add(conditionDTO);
-            reqDTO.setAndConditionDTO(andConditionDTO);
+            SemanticConditionDTO eqCondition = DataMethodApiHelper.extractFromOperator(OpEnum.EQUALS, List.of(value));
+            reqDTO.setSemanticConditionDTO(eqCondition);
         }
 
         if (CollectionUtils.isNotEmpty(nodeData.getFilterCondition())) {
             List<Conditions> conditions = nodeData.getFilterCondition();
             OrExpression orExpression = conditionsProvider.formatConditionsForValue(conditions, expressionContext);
-            reqDTO.setConditionDTO(DataMethodApiHelper.processFilterCondition(orExpression));
+            reqDTO.setSemanticConditionDTO(DataMethodApiHelper.processFilterCondition(orExpression));
         }
         if (nodeData.isBatchMode()) {
             reqDTO.setPageNo(1);
