@@ -25,7 +25,7 @@ const FieldTable = forwardRef(({ editable, onTableChange, value, ckOptions, inve
     {
       title: '操作',
       width: 95,
-      dataIndex: 'displayName',
+      dataIndex: 'fieldName',
       render: (val: any, row: any) => {
         return (
           <Button type="text" onClick={() => handleDelRow(val)}>
@@ -47,11 +47,11 @@ const FieldTable = forwardRef(({ editable, onTableChange, value, ckOptions, inve
     let _data = [...tbData];
     if (typeof fid === 'string') {
       _data = _data.filter((item) => {
-        return item.displayName !== fid;
+        return item.fieldName !== fid;
       });
     } else if (Array.isArray(fid)) {
       _data = _data.filter((item) => {
-        return fid.indexOf(item.displayName) < 0;
+        return fid.indexOf(item.fieldName) < 0;
       });
     }
     setTbData(_data);
@@ -125,8 +125,6 @@ export default function FieldConfig({ setApprovalConfigData, fieldPermConfig, ck
   let hiddenRef = useRef<ChildComponentRef>();
   let writeArr: any = [];
   let hiddenArr: any = [];
-  console.log(fieldPermConfig);
-
   if (Array.isArray(fieldPermConfig.fieldConfigs)) {
     fieldPermConfig.fieldConfigs.forEach((item: any) => {
       if (item.fieldPermType === 'write') {

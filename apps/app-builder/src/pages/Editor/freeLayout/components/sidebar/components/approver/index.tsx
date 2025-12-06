@@ -50,7 +50,6 @@ export default function ApproveDreawer({ handleConfigSubmit, configData }: Appro
         }
       };
     }
-    console.log(initData);
     
     const keys = Object.keys(initData);
     if (keys.length === 2 && keys.includes('name') && keys.includes('errorMsg')) {
@@ -81,8 +80,6 @@ export default function ApproveDreawer({ handleConfigSubmit, configData }: Appro
           ...data
         } as FieldPermConfigType;
 
-        console.log(newData,data);
-        
       } else if (key === 'advancedConfig') {
         newData.advancedConfig = data as AdvancedConfigType;
       }

@@ -29,7 +29,7 @@ export default function FieldModal({
     return item.fieldName;
   });
   const useCkOptions = ckOptions
-    // .filter((item: any) => item.isSystemField === 0)
+    .filter((item: any) => item.isSystemField === 0)
     .map((item: any) => {
       return {
         label: item.displayName,

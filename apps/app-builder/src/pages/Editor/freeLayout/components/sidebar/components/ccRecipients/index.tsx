@@ -87,9 +87,8 @@ export default function CcRecipientsDreawer({ handleConfigSubmit, configData }) 
     }
     ccRecipientsConfigData?.fieldPermConfig?.fieldConfigs?.forEach((item: any) => {
       item.tableName = tbaleName;
-      item.fieldDisplayName = item.displayName;
+      item.fieldDisplayName = item.displayName || item.fieldDisplayName;
     });
-
     ccRecipientsConfigData.errorMsg = errorMsg;
     handleConfigSubmit && handleConfigSubmit(ccRecipientsConfigData, editValue);
   }

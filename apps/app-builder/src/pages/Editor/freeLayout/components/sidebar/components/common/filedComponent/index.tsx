@@ -42,16 +42,14 @@ const FieldTable = forwardRef(
       setFmVisible(true);
     }
     function handleDelRow(fid: any) {
-      console.log(fid,'删除');
-      
       let _data = [...tbData];
       if (typeof fid === 'string') {
         _data = _data.filter((item) => {
-          return item.displayName !== fid;
+          return item.fieldName !== fid;
         });
       } else if (Array.isArray(fid)) {
         _data = _data.filter((item) => {
-          return fid.indexOf(item.displayName) < 0;
+          return fid.indexOf(item.fieldName) < 0;
         });
       }
       setTableData(_data);
@@ -78,8 +76,7 @@ const FieldTable = forwardRef(
     useImperativeHandle(ref, () => ({
       getTbData: () => tbData
     }));
-console.log(tbData);
-
+    
     return (
       <>
         <div className="flex-btw">
