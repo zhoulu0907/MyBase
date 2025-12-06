@@ -31,20 +31,16 @@ import java.util.Map;
 public class FlowProcessExecApiImpl implements FlowProcessExecApi {
 
     @Autowired
-    private FlowProcessCache flowProcessCache;
-
-    @Autowired
     private FlowProcessExecutor flowProcessExecutor;
 
     @Autowired
     private ConditionsProvider conditionsProvider;
 
-
     private ExpressionExecutor expressionExecutor = new ExpressionExecutor();
 
     @Override
     public EntityTriggerRespDTO entityTrigger(EntityTriggerReqDTO reqDTO) {
-        List<StartEntityNodeData> entityNodeDataList = flowProcessCache.findStartEntityNodeDataByEntityName(reqDTO.getApplicationId(), reqDTO.getTableName());
+        List<StartEntityNodeData> entityNodeDataList = FlowProcessCache.findStartEntityNodeDataByEntityName(reqDTO.getApplicationId(), reqDTO.getTableName());
         if (CollectionUtils.isEmpty(entityNodeDataList)) {
             EntityTriggerRespDTO respDTO = new EntityTriggerRespDTO(reqDTO.getTraceId());
             respDTO.setSuccess(true);

@@ -62,10 +62,6 @@ public class FlowCacheHandler {
 
     @Setter
     @Autowired
-    private FlowProcessCache flowProcessCache;
-
-    @Setter
-    @Autowired
     private FlowGraphBuilder flowGraphBuilder;
 
     @Setter
@@ -104,7 +100,7 @@ public class FlowCacheHandler {
                         FlowEnableStatusEnum.ENABLE.getStatus(),
                         VersionTagEnum.RUNTIME.getValue()
                 ));
-        Set<Long> oldProcessIds = flowProcessCache.findProcessByApplicationId(applicationId);
+        Set<Long> oldProcessIds = FlowProcessCache.findProcessByApplicationId(applicationId);
         for (FlowProcessDO flowProcessDO : flowProcessDOS) {
             oldProcessIds.remove(flowProcessDO.getId());
         }
@@ -119,11 +115,11 @@ public class FlowCacheHandler {
 
     @SneakyThrows
     public String onApplicationDelete(Long applicationId) {
-        Set<Long> ids = flowProcessCache.findProcessByApplicationId(applicationId);
+        Set<Long> ids = FlowProcessCache.findProcessByApplicationId(applicationId);
         ids.forEach(id -> {
             String chainId = FlowUtils.toFlowChainId(id);
             FlowBus.removeChain(chainId);
-            flowProcessCache.deleteByProcessId(id);
+            FlowProcessCache.deleteByProcessId(id);
         });
         stopApplicationJob(applicationId);
         return "删除：" + ids;
@@ -156,7 +152,7 @@ public class FlowCacheHandler {
         String chainId = FlowUtils.toFlowChainId(processDO.getId());
         LiteFlowChainELBuilder.createChain().setChainId(chainId).setEL(flowChain).build();
         //
-        flowProcessCache.update(processDO.getApplicationId(), processDO.getId(), jsonGraph);
+        FlowProcessCache.update(processDO.getApplicationId(), processDO.getId(), jsonGraph);
         startTimeJob(processDO);
     }
 
@@ -165,7 +161,7 @@ public class FlowCacheHandler {
         String chainId = FlowUtils.toFlowChainId(processId);
         FlowBus.removeChain(chainId);
         //
-        flowProcessCache.deleteByProcessId(processId);
+        FlowProcessCache.deleteByProcessId(processId);
         //
         stopJob(processId);
     }

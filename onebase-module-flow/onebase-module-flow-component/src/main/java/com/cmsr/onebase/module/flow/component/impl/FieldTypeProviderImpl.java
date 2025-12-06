@@ -8,6 +8,7 @@ import com.cmsr.onebase.module.flow.context.graph.JsonGraphNode;
 import com.cmsr.onebase.module.flow.context.graph.NodeData;
 import com.cmsr.onebase.module.flow.context.graph.nodes.*;
 import com.cmsr.onebase.module.flow.context.provider.FieldTypeProvider;
+import com.cmsr.onebase.module.flow.core.config.FlowProperties;
 import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntitySchemaDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO;
@@ -16,7 +17,6 @@ import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -32,8 +32,8 @@ public class FieldTypeProviderImpl implements FieldTypeProvider {
     @Autowired
     private SemanticDynamicDataApi semanticDynamicDataApi;
 
-    @Value("${lite-flow.version-tag:1L}")
-    private Long versionTag;
+    @Autowired
+    private FlowProperties flowProperties;
 
 
     @Override
@@ -124,7 +124,7 @@ public class FieldTypeProviderImpl implements FieldTypeProvider {
         for (String tableName : tableNames) {
             SemanticEntitySchemaDTO semanticEntitySchemaDTO = ApplicationManager.withApplicationIdAndVersionTag(
                     applicationId,
-                    versionTag,
+                    flowProperties.getVersionTag(),
                     () -> semanticDynamicDataApi.buildEntitySchemaByTableName(tableName)
             );
             List<SemanticFieldSchemaDTO> fields = semanticEntitySchemaDTO.getFields();
