@@ -15,7 +15,7 @@ import {
 } from '@arco-design/web-react';
 import { IconEmpty, IconMoreVertical, IconSearch } from '@arco-design/web-react/icon';
 import { type PageParam } from '@onebase/app';
-import { getCommonPaginationList, TokenManager } from '@onebase/common';
+import { getCommonPaginationList, getRuntimeURL, TokenManager } from '@onebase/common';
 import { getCorpAuthorizedAppListApiInCorp } from '@onebase/platform-center';
 import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -134,7 +134,11 @@ const MyAppPage: React.FC = () => {
   const nagivateToRuntimeApp = (appId: string) => {
     setCurAppId(appId);
     const tenantId = TokenManager.getTenantInfo()?.tenantId || '';
-    navigate(`/onebase/${appId}/${tenantId}/runtime?`);
+
+    const redirectURL = `${getRuntimeURL()}/#/onebase/${appId}/${tenantId}/runtime`;
+    console.log('redirectURL: ', redirectURL);
+
+    window.open(redirectURL, '_blank');
   };
 
   const handleOptionVisibleChange = (v: boolean, id: string) => {

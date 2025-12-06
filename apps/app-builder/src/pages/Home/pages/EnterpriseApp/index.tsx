@@ -131,7 +131,7 @@ const EnterpriseAppPage: React.FC = () => {
     debouncedUpdate(value);
   };
 
-  const nagivateToDataFactory = (appId: string) => {
+  const nagivateToRuntime = (appId: string) => {
     setCurAppId(appId);
     const tenantId = TokenManager.getTenantInfo()?.tenantId || '';
 
@@ -389,7 +389,7 @@ const EnterpriseAppPage: React.FC = () => {
                       type="outline"
                       long
                       onClick={() => {
-                        nagivateToDataFactory(item.id);
+                        nagivateToRuntime(item.id);
                       }}
                       // disabled={item.publishModel === "saas"}
                     >
