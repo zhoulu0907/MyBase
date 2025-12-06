@@ -1,9 +1,9 @@
 import { Message } from '@arco-design/web-react';
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { BaseResponse, RequestConfig, RequestInterceptor, ResponseInterceptor } from '../types';
+import { isBuilderEnv, isPlatformEnv, isRuntimeEnv } from './env';
 import { getHashQueryParam } from './router';
 import TokenManager from './token';
-import { isPlatformEnv, isBuilderEnv, isRuntimeEnv } from './env';
 
 /**
  * 拼接域名和服务路径
@@ -115,10 +115,14 @@ export class HttpClient {
           if (data.code !== 0) {
             Message.error({ id: 'http-error', content: data.msg || '请求失败' });
             if (data.code === 401) {
+              console.log(TokenManager.getTokenInfo());
+
               const loginURL = TokenManager.getTokenInfo()?.loginURL;
               const tenantId = TokenManager.getTokenInfo()?.tenantId;
 
-              TokenManager.clearToken();
+              //   TokenManager.clearToken();
+
+              console.log('tenantId: ', tenantId);
 
               // 跳转到登录页
               if (loginURL) {

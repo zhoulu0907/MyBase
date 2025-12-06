@@ -32,19 +32,19 @@ export class TokenManager {
   }
 
   static setCurIdentifyId(identifyId: string): void {
-    sessionStorage.setItem(this.CUR_IDENTIFY_ID, identifyId);
+    localStorage.setItem(this.CUR_IDENTIFY_ID, identifyId);
   }
 
   static getCurIdentifyId(): string | null {
-    return sessionStorage.getItem(this.CUR_IDENTIFY_ID);
+    return localStorage.getItem(this.CUR_IDENTIFY_ID);
   }
 
   static setCurAppId(appId: string): void {
-    sessionStorage.setItem(this.addEnv(this.CUR_APP_ID), appId);
+    localStorage.setItem(this.addEnv(this.CUR_APP_ID), appId);
   }
 
   static getCurAppId(): string | null {
-    return sessionStorage.getItem(this.addEnv(this.CUR_APP_ID));
+    return localStorage.getItem(this.addEnv(this.CUR_APP_ID));
   }
 
   /**
@@ -53,6 +53,7 @@ export class TokenManager {
    * @param rememberMe 是否记住我
    */
   static setToken(tokenInfo: TokenInfo, rememberMe: boolean = false): void {
+    console.log('curIdentifyId: ', this.getCurIdentifyId());
     try {
       // 根据记住我选项选择存储方式
       if (rememberMe) {

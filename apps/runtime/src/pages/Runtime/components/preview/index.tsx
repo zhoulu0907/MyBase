@@ -150,6 +150,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
         //   过滤空行
         const subTableRows = [] as any;
+        subFormData[subTableName] = subTableRows;
+
         for (const item of value) {
           if (Object.values(item).every((v: any) => v === undefined)) {
             return;
@@ -251,6 +253,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
         setSubmitLoading(false);
       }
     }
+
+    // 关闭页面后子表清空
+    pagesRuntimeSignal.resetSubTableDataLength();
   };
 
   const cancelSubmitForm = () => {
@@ -259,6 +264,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     setPageType(EDITOR_TYPES.LIST_EDITOR);
     setDetailMode(true);
     form.resetFields();
+    // 关闭页面后子表清空
+    pagesRuntimeSignal.resetSubTableDataLength();
   };
 
   const showFromPageData = (id: string, toFormPage: boolean = false) => {

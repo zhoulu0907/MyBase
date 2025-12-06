@@ -31,6 +31,7 @@ import { type XSubTableConfig } from './schema';
 
 const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: boolean }) => {
   useSignals();
+
   const { id, label, tooltip, status, subTableConfig, verify, runtime = true, detailMode, pageType } = props;
   const { mainEntity, subEntities } = useAppEntityStore();
 

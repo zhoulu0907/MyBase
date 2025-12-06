@@ -373,8 +373,6 @@ const XTable = memo(
         newColumns = [indexColumn, ...newColumns];
       }
 
-      console.log('newColumns: ', newColumns);
-
       setFinalColumns(newColumns);
     };
 
@@ -405,7 +403,6 @@ const XTable = memo(
     };
 
     const handlePage = async () => {
-      console.log('isRuntimeEnv(): ', isRuntimeEnv());
       if (!runtime || !metaData || !isRuntimeEnv()) {
         return;
       }
