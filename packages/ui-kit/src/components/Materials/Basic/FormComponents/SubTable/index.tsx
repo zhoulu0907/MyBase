@@ -357,20 +357,6 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
       tableColumns.push(tableColumn);
     }
 
-    // tableColumns.push({
-    //   title: '',
-    //   dataIndex: 'id',
-    //   key: '',
-    //   fixed: '',
-    //   render: (_text: string, _record: any, index: number) => {
-    //     return (
-    //       <Form.Item field={`${id}.${index}.id`}>
-    //         <Input />
-    //       </Form.Item>
-    //     );
-    //   }
-    // });
-
     // 左侧列冻结
     if (subTableConfig?.columnFixed) {
       tableColumns.forEach((ele, index) => {
@@ -407,7 +393,6 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
       });
     }
 
-    console.log('tableColumns: ', tableColumns);
     setSubTableColumns(tableColumns);
   };
 
