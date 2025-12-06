@@ -142,9 +142,9 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
     schema.config = schemaConfig;
 
     // 当前实体
-    const currentEntity = subEntities.entities?.find((ele) => ele.tableName === tableName);
+    const currentEntity = subEntities.entities?.find((ele: any) => ele.tableName === tableName);
     // 当前字段
-    const currentField = currentEntity?.fields?.find((ele) => ele.fieldName === fieldName);
+    const currentField = currentEntity?.fields?.find((ele: any) => ele.fieldName === fieldName);
     if (currentField) {
       // 数据长度 dataLength
       // 小数位数 decimalPlaces
@@ -189,7 +189,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
           }
         } else if (currentField.options?.length) {
           const newDefaultOptionsConfig = {
-            defaultOptions: currentField.options.map((e) => ({
+            defaultOptions: currentField.options.map((e: any) => ({
               label: e.optionLabel,
               value: e.optionValue
             }))
