@@ -82,7 +82,7 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
 
   const fetchExec = async (value: any) => {
     const buttonType = value?.buttonType;
-    const entityData = await formRef.current.getFormData();
+    const fieldData = await formRef.current.getFormData();
     try {
       const req: FetchExecTaskReq = {
         buttonType,
@@ -90,7 +90,7 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
         instanceId: rowData?.instanceId,
         entity: {
           tableName: detailData?.formData?.tableName,
-          data: entityData?.data
+          data: fieldData
         }
       };
       await fetchExecTask(req);
@@ -102,9 +102,8 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
     const fieldData = await formRef.current.getFormData();
     const entityData = {
       tableName: detailData?.formData?.tableName,
-      data: fieldData?.data
+      data: fieldData
     };
-
     if (confirmRef?.current?.childMethod) {
       confirmRef.current.childMethod({ value, entityData });
     }
