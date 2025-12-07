@@ -11,7 +11,6 @@ import {
   getFieldCheckTypeApi,
   type AppEntityField,
   type ChildEntity,
-  type ConditionField,
   type EntityFieldValidationTypes,
   type MetadataEntityPair
 } from '@onebase/app';
@@ -77,7 +76,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const init = async () => {
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
     if (nodeData) {
-      if (nodeData.dataType === DATA_SOURCE_TYPE.FORM || nodeData.dataType === DATA_SOURCE_TYPE.SUBFORM) {
+      if (nodeData.dataType === DATA_SOURCE_TYPE.MAIN_TABLE || nodeData.dataType === DATA_SOURCE_TYPE.SUB_TABLE) {
         if (!nodeData?.mainEntityId) {
           return;
         }
@@ -139,7 +138,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   };
 
   const getEntityList = async (curDateType?: DATA_SOURCE_TYPE) => {
-    if (curDateType === DATA_SOURCE_TYPE.FORM || curDateType === undefined) {
+    if (curDateType === DATA_SOURCE_TYPE.MAIN_TABLE || curDateType === undefined) {
       // 从主表中查询  FORM
       const res = await getEntityListByApp(curAppId);
       setMainEntityList(res);
@@ -148,7 +147,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       // 从关联表单中查询  ASSOCIA_FORM
     }
 
-    if (curDateType === DATA_SOURCE_TYPE.SUBFORM || curDateType === undefined) {
+    if (curDateType === DATA_SOURCE_TYPE.SUB_TABLE || curDateType === undefined) {
       // 从子表中查询  SUBFORM
       const res = await getEntityListByApp(curAppId);
       setMainEntityList(res);
@@ -225,10 +224,10 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   };
 
   const conditionFieldsData = useMemo((): TreeSelectDataType[] => {
-    if (dataType === DATA_SOURCE_TYPE.FORM) {
+    if (dataType === DATA_SOURCE_TYPE.MAIN_TABLE) {
       return [mainEntityFields];
     }
-    if (dataType === DATA_SOURCE_TYPE.SUBFORM) {
+    if (dataType === DATA_SOURCE_TYPE.SUB_TABLE) {
       const curSubEntityFields = subEntityFields.find((item) => item.key === subEntityId);
       if (curSubEntityFields) {
         return [mainEntityFields, curSubEntityFields];
@@ -255,13 +254,13 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
             <Form.Item label="删除方式" field="dataType" required>
               <Radio.Group direction="vertical" onChange={handleDataTypeChange}>
-                <Radio value={DATA_SOURCE_TYPE.FORM}>删除主表数据</Radio>
-                <Radio value={DATA_SOURCE_TYPE.SUBFORM}>删除子表数据</Radio>
+                <Radio value={DATA_SOURCE_TYPE.MAIN_TABLE}>删除主表数据</Radio>
+                <Radio value={DATA_SOURCE_TYPE.SUB_TABLE}>删除子表数据</Radio>
               </Radio.Group>
             </Form.Item>
 
             {/* 从主表中查询 */}
-            {dataType === DATA_SOURCE_TYPE.FORM && (
+            {dataType === DATA_SOURCE_TYPE.MAIN_TABLE && (
               <Grid.Row>
                 <Grid.Col span={1} style={{ textAlign: 'center', lineHeight: '32px' }}>
                   从
@@ -284,7 +283,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             )}
 
             {/* 从子表中查询 */}
-            {dataType === DATA_SOURCE_TYPE.SUBFORM && (
+            {dataType === DATA_SOURCE_TYPE.SUB_TABLE && (
               <Grid.Row>
                 <Grid.Col span={1} style={{ textAlign: 'center', lineHeight: '32px' }}>
                   从

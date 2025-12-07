@@ -9,7 +9,8 @@ import {
   getFieldCheckTypeApi,
   type AppEntityField,
   type ConditionField,
-  type EntityFieldValidationTypes
+  type EntityFieldValidationTypes,
+  type MetadataEntityPair
 } from '@onebase/app';
 import { getHashQueryParam } from '@onebase/common';
 import { useEffect, useState } from 'react';
@@ -66,9 +67,9 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const [conditionFields, setConditionFields] = useState<TreeSelectDataType[]>([]);
   const [validationTypes, setValidationTypes] = useState<EntityFieldValidationTypes[]>([]);
 
-  const [entityList, setEntityList] = useState<any[]>([]);
+  const [entityList, setEntityList] = useState<MetadataEntityPair[]>([]);
 
-  const entityId = Form.useWatch('entityId', payloadForm);
+  const tableName = Form.useWatch('tableName', payloadForm);
   const triggerType = Form.useWatch('triggerType', payloadForm);
 
   useEffect(() => {
@@ -79,48 +80,54 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   }, []);
 
   useEffect(() => {
-    if (entityId) {
-      handleGetEntityFieldList(entityId);
+    if (entityList.length > 0 && tableName) {
+      const eid = entityList.find((item) => item.tableName === tableName)?.entityId;
+      if (eid) {
+        setNodeData(eid);
+      }
     }
-  }, [entityId]);
+  }, [entityList, tableName]);
 
   const handleGetEntityListByApp = async (appId: string) => {
     const res = await getEntityListByApp(appId);
     setEntityList(res);
   };
 
-  const handleGetEntityFieldList = async (eId: string) => {
-    const res = await getEntityFieldsWithChildren(eId);
+  const setNodeData = async (eid: string) => {
+    const res = await getEntityFieldsWithChildren(eid);
 
     if (res && res.parentFields) {
       console.log(res);
 
       const conditions: ConditionField[] = [];
       const fieldIds: string[] = [];
-      const fieldList: any[] = [];
 
       res.parentFields.forEach((item: AppEntityField) => {
         fieldIds.push(item.fieldId);
-        fieldList.push({
-          label: item.displayName,
-          value: item.fieldId
-        });
 
         conditions.push({
           label: item.displayName,
-          value: item.fieldId,
+          value: `${res.tableName}.${item.fieldName}`,
           fieldType: item.fieldType
         });
       });
 
       if (fieldIds?.length) {
         const newValidationTypes = await getFieldCheckTypeApi(fieldIds);
+
+        //   TODO(mickey): 需要卞老师补充fieldName字段
+        newValidationTypes.forEach((item: EntityFieldValidationTypes) => {
+          const fieldName =
+            res.parentFields.find((field: AppEntityField) => field.fieldId == item.fieldId)?.fieldName || '';
+          item.fieldKey = `${res.tableName}.${fieldName}`;
+        });
+
         setValidationTypes(newValidationTypes);
       }
 
       setConditionFields([
         {
-          key: res.entityId,
+          key: res.tableName,
           title: res.entityName,
           children: conditions.map((item) => {
             return {
@@ -164,10 +171,10 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             </Grid.Row>
 
             <Grid.Row>
-              <Form.Item label="实体" field="entityId">
+              <Form.Item label="实体" field="tableName">
                 <Select disabled={true}>
                   {entityList?.map((item) => (
-                    <Option key={item.entityId} value={item.entityId}>
+                    <Option key={item.entityUuid} value={item.tableName}>
                       {item.entityName}
                     </Option>
                   ))}

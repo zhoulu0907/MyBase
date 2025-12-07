@@ -42,8 +42,8 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId, data
     setSelectedFields(fields);
   }, [form, fieldList]);
 
-  const StaticValueComponent = (fieldName: string, fieldId: string) => {
-    const targetField = fieldList.find((cc) => cc.fieldId == fieldId);
+  const StaticValueComponent = (fieldName: string, fieldKey: string) => {
+    const targetField = fieldList.find((cc) => cc.fieldKey == fieldKey);
 
     if (
       targetField?.fieldType == ENTITY_FIELD_TYPE.TEXT.VALUE ||
@@ -159,8 +159,8 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId, data
         NodeType.JAVASCRIPT
       ];
 
-      const fieldId = form.getFieldValue(item.field + '.fieldId');
-      const targetField = fieldList.find((ele) => ele.fieldId == fieldId);
+      const fieldKey = form.getFieldValue(item.field + '.fieldKey');
+      const targetField = fieldList.find((ele) => ele.fieldKey == fieldKey);
       const fieldType = targetField?.fieldType;
 
       let nodes = getPrecedingNodes(nodeId, triggerEditorSignal.nodes.value, nodeTypes);
@@ -224,12 +224,12 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId, data
                   return (
                     <Grid.Row gutter={8} key={item.key} align="center">
                       <Grid.Col span={6}>
-                        <Form.Item field={item.field + '.fieldId'} rules={[{ required: true, message: '请选择字段' }]}>
+                        <Form.Item field={item.field + '.fieldKey'} rules={[{ required: true, message: '请选择字段' }]}>
                           <Select
-                            options={fieldList.map((field) => ({
+                            options={fieldList.map((field: AppEntityField) => ({
                               label: field.displayName,
-                              value: field.fieldId,
-                              disabled: selectedFields?.some((f) => f?.fieldId === field.fieldId)
+                              value: field.fieldKey || '',
+                              disabled: selectedFields?.some((f) => f?.fieldKey === field.fieldKey)
                             }))}
                             onChange={(_value) => {
                               setSelectedFields(form.getFieldValue('fields'));
@@ -246,7 +246,7 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId, data
                       <Grid.Col span={5}>
                         <Form.Item field={item.field + '.operatorType'}>
                           <Select
-                            disabled={form.getFieldValue(item.field + '.fieldId') == undefined}
+                            disabled={form.getFieldValue(item.field + '.fieldKey') == undefined}
                             options={valueTypeOptions}
                             onChange={() => {
                               form.setFieldValue(item.field + '.value', undefined);
@@ -263,7 +263,7 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId, data
                         )}
 
                         {form.getFieldValue(item.field + '.operatorType') == FieldType.VALUE &&
-                          StaticValueComponent(item.field + '.value', form.getFieldValue(item.field + '.fieldId'))}
+                          StaticValueComponent(item.field + '.value', form.getFieldValue(item.field + '.fieldKey'))}
 
                         {form.getFieldValue(item.field + '.operatorType') == FieldType.VARIABLES && (
                           <Form.Item field={item.field + '.value'}>

@@ -85,7 +85,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const init = async () => {
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
     if (nodeData) {
-      if (nodeData.updateType === DATA_SOURCE_TYPE.FORM || nodeData.updateType === DATA_SOURCE_TYPE.SUBFORM) {
+      if (nodeData.updateType === DATA_SOURCE_TYPE.MAIN_TABLE || nodeData.updateType === DATA_SOURCE_TYPE.SUB_TABLE) {
         if (!nodeData?.mainEntityId) {
           return;
         }
@@ -118,7 +118,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             children: fields
           });
 
-          if (nodeData.updateType === DATA_SOURCE_TYPE.FORM) {
+          if (nodeData.updateType === DATA_SOURCE_TYPE.MAIN_TABLE) {
             setFieldDataList(res.parentFields);
           }
         }
@@ -146,7 +146,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
           const newValidationTypes = await getFieldCheckTypeApi(fieldIds);
           setValidationTypes(newValidationTypes);
 
-          if (nodeData.updateType === DATA_SOURCE_TYPE.SUBFORM) {
+          if (nodeData.updateType === DATA_SOURCE_TYPE.SUB_TABLE) {
             const newFieldDataList: any[] = [];
 
             subFields
@@ -167,13 +167,13 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   };
 
   const getEntityList = async (curDateType?: DATA_SOURCE_TYPE) => {
-    if (curDateType === DATA_SOURCE_TYPE.FORM || curDateType === undefined) {
+    if (curDateType === DATA_SOURCE_TYPE.MAIN_TABLE || curDateType === undefined) {
       // 从主表中查询  FORM
       const res = await getEntityListByApp(curAppId);
       setMainEntityList(res);
     }
 
-    if (curDateType === DATA_SOURCE_TYPE.SUBFORM || curDateType === undefined) {
+    if (curDateType === DATA_SOURCE_TYPE.SUB_TABLE || curDateType === undefined) {
       // 从子表中查询  SUBFORM
       const res = await getEntityListByApp(curAppId);
       setMainEntityList(res);
@@ -266,10 +266,10 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   };
 
   const conditionFieldsData = useMemo((): TreeSelectDataType[] => {
-    if (updateType === DATA_SOURCE_TYPE.FORM) {
+    if (updateType === DATA_SOURCE_TYPE.MAIN_TABLE) {
       return [mainEntityFields];
     }
-    if (updateType === DATA_SOURCE_TYPE.SUBFORM) {
+    if (updateType === DATA_SOURCE_TYPE.SUB_TABLE) {
       const curSubEntityFields = subEntityFields.find((item) => item.key === subEntityId);
       if (curSubEntityFields) {
         return [mainEntityFields, curSubEntityFields];
@@ -281,7 +281,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   }, [updateType, mainEntityFields, subEntityFields, subEntityId]);
 
   const conditionFieldsForEditor = useMemo((): ConditionField[] => {
-    if (updateType === DATA_SOURCE_TYPE.FORM) {
+    if (updateType === DATA_SOURCE_TYPE.MAIN_TABLE) {
       return (
         (mainEntityFields.children || [])?.map((item) => ({
           label: item.title as string,
@@ -290,7 +290,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
         })) || []
       );
     }
-    if (updateType === DATA_SOURCE_TYPE.SUBFORM) {
+    if (updateType === DATA_SOURCE_TYPE.SUB_TABLE) {
       const curSubEntityFields = subEntityFields.find((item) => item.key === subEntityId);
       if (curSubEntityFields) {
         return (
@@ -324,13 +324,13 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
             <Form.Item label="更新方式" field="updateType" rules={[{ required: true, message: '请选择更新方式' }]}>
               <Radio.Group direction="vertical" onChange={handleDataTypeChange}>
-                <Radio value={DATA_SOURCE_TYPE.FORM}>更新主表数据</Radio>
-                <Radio value={DATA_SOURCE_TYPE.SUBFORM}>更新子表数据</Radio>
+                <Radio value={DATA_SOURCE_TYPE.MAIN_TABLE}>更新主表数据</Radio>
+                <Radio value={DATA_SOURCE_TYPE.SUB_TABLE}>更新子表数据</Radio>
               </Radio.Group>
             </Form.Item>
 
             {/* 从主表中查询 */}
-            {updateType === DATA_SOURCE_TYPE.FORM && (
+            {updateType === DATA_SOURCE_TYPE.MAIN_TABLE && (
               <Grid.Row>
                 <Grid.Col span={1} style={{ textAlign: 'center', lineHeight: '32px' }}>
                   更新
@@ -357,7 +357,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             )}
 
             {/* 从子表中查询 */}
-            {updateType === DATA_SOURCE_TYPE.SUBFORM && (
+            {updateType === DATA_SOURCE_TYPE.SUB_TABLE && (
               <Grid.Row>
                 <Grid.Col span={1} style={{ textAlign: 'center', lineHeight: '32px' }}>
                   从

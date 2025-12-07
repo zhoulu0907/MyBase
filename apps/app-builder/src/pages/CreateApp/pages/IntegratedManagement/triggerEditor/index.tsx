@@ -109,7 +109,7 @@ const TriggerEditor = () => {
           setInitData(StartEntityInitData);
           const entityInitialData = {
             ...StartEntityInitData.nodes[0].data.initialData,
-            entityId: res.triggerConfig.entityId
+            tableName: res.triggerConfig.tableName
           };
           setNodeData(StartEntityInitData.nodes[0].id, entityInitialData);
           setNodeData(StartEntityInitData.nodes[1].id, StartEntityInitData.nodes[1].data.initialData);

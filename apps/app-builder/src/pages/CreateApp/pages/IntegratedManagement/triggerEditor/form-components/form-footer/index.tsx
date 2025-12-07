@@ -1,7 +1,3 @@
-import {
-  jsonToJsonSchema,
-  schemaToFormData
-} from '@/pages/CreateApp/pages/IntegratedManagement/pages/connector/action/create/util';
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { Button } from '@arco-design/web-react';
 import { getNodeForm, useClientContext } from '@flowgram.ai/fixed-layout-editor';
@@ -148,7 +144,7 @@ export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
           break;
         case NodeType.DATA_ADD:
           const mainDataSource =
-            formInfo.addType === DATA_SOURCE_TYPE.FORM ? formInfo.mainEntityId : formInfo.subEntityId;
+            formInfo.addType === DATA_SOURCE_TYPE.MAIN_TABLE ? formInfo.mainEntityId : formInfo.subEntityId;
           if (mainDataSource) {
             const res = await getEntityFields({ entityId: mainDataSource });
             const newConditionFields: ConditionField[] = (res || []).map((item: any) => {
@@ -179,7 +175,7 @@ export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
         case NodeType.DATA_QUERY:
           const dataQueryRes = await getEntityFieldsWithChildren(formInfo.mainEntityId);
           const dataQueryConditionFields = (): ConditionField[] => {
-            if (formInfo.dataType === DATA_SOURCE_TYPE.FORM) {
+            if (formInfo.dataType === DATA_SOURCE_TYPE.MAIN_TABLE) {
               return (dataQueryRes?.parentFields || []).map((item: any) => {
                 return {
                   value: item.fieldId,
@@ -188,7 +184,7 @@ export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
                 };
               });
             }
-            if (formInfo.dataType === DATA_SOURCE_TYPE.SUBFORM) {
+            if (formInfo.dataType === DATA_SOURCE_TYPE.SUB_TABLE) {
               const subEntity = dataQueryRes?.childEntities?.find(
                 (item: any) => item.childEntityId === formInfo.subEntityId
               );
@@ -217,7 +213,7 @@ export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
         case NodeType.DATA_QUERY_MULTIPLE:
           const dataQueryMultipleRes = await getEntityFieldsWithChildren(formInfo.mainEntityId);
           const dataQueryMultipleConditionFields = (): ConditionField[] => {
-            if (formInfo.dataType === DATA_SOURCE_TYPE.FORM) {
+            if (formInfo.dataType === DATA_SOURCE_TYPE.MAIN_TABLE) {
               return (dataQueryMultipleRes?.parentFields || []).map((item: any) => {
                 return {
                   value: item.fieldId,
@@ -226,7 +222,7 @@ export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
                 };
               });
             }
-            if (formInfo.dataType === DATA_SOURCE_TYPE.SUBFORM) {
+            if (formInfo.dataType === DATA_SOURCE_TYPE.SUB_TABLE) {
               const subEntity = dataQueryMultipleRes?.childEntities?.find(
                 (item: any) => item.childEntityId === formInfo.subEntityId
               );
@@ -255,7 +251,7 @@ export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
         case NodeType.DATA_UPDATE:
           const dataUpdateRes = await getEntityFieldsWithChildren(formInfo.mainEntityId);
           const dataUpdateConditionFields = (): ConditionField[] => {
-            if (formInfo.dataType === DATA_SOURCE_TYPE.FORM) {
+            if (formInfo.dataType === DATA_SOURCE_TYPE.MAIN_TABLE) {
               return (dataUpdateRes?.parentFields || []).map((item: any) => {
                 return {
                   value: item.fieldId,
@@ -264,7 +260,7 @@ export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
                 };
               });
             }
-            if (formInfo.dataType === DATA_SOURCE_TYPE.SUBFORM) {
+            if (formInfo.dataType === DATA_SOURCE_TYPE.SUB_TABLE) {
               const subEntity = dataUpdateRes?.childEntities?.find(
                 (item: any) => item.childEntityId === formInfo.subEntityId
               );

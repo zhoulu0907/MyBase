@@ -207,27 +207,27 @@ export const getDataNodeSource = (nodeId: string): string => {
       case NodeType.START_ENTITY:
         return nodeData.entityId;
       case NodeType.DATA_ADD:
-        if (nodeData.addType === DATA_SOURCE_TYPE.FORM) {
+        if (nodeData.addType === DATA_SOURCE_TYPE.MAIN_TABLE) {
           return nodeData.mainEntityId;
         }
-        if (nodeData.addType === DATA_SOURCE_TYPE.SUBFORM) {
+        if (nodeData.addType === DATA_SOURCE_TYPE.SUB_TABLE) {
           return nodeData.subEntityId;
         }
         break;
       case NodeType.DATA_UPDATE:
-        if (nodeData.updateType === DATA_SOURCE_TYPE.FORM) {
+        if (nodeData.updateType === DATA_SOURCE_TYPE.MAIN_TABLE) {
           return nodeData.mainEntityId;
         }
-        if (nodeData.updateType === DATA_SOURCE_TYPE.SUBFORM) {
+        if (nodeData.updateType === DATA_SOURCE_TYPE.SUB_TABLE) {
           return nodeData.subEntityId;
         }
         break;
 
       case NodeType.DATA_QUERY:
-        if (nodeData.dataType === DATA_SOURCE_TYPE.FORM) {
+        if (nodeData.dataType === DATA_SOURCE_TYPE.MAIN_TABLE) {
           return nodeData.mainEntityId;
         }
-        if (nodeData.dataType === DATA_SOURCE_TYPE.SUBFORM) {
+        if (nodeData.dataType === DATA_SOURCE_TYPE.SUB_TABLE) {
           return nodeData.subEntityId;
         }
         if (nodeData.dataType === DATA_SOURCE_TYPE.DATA_NODE) {
@@ -236,10 +236,10 @@ export const getDataNodeSource = (nodeId: string): string => {
         break;
 
       case NodeType.DATA_QUERY_MULTIPLE:
-        if (nodeData.dataType === DATA_SOURCE_TYPE.FORM) {
+        if (nodeData.dataType === DATA_SOURCE_TYPE.MAIN_TABLE) {
           return nodeData.mainEntityId;
         }
-        if (nodeData.dataType === DATA_SOURCE_TYPE.SUBFORM) {
+        if (nodeData.dataType === DATA_SOURCE_TYPE.SUB_TABLE) {
           return nodeData.subEntityId;
         }
         if (nodeData.dataType === DATA_SOURCE_TYPE.DATA_NODE) {
