@@ -1,8 +1,9 @@
 import { useEffect, useState, forwardRef, useImperativeHandle, useRef } from 'react';
-import { Switch, Button, Table, type TableColumnProps, Tooltip } from '@arco-design/web-react';
+import { Switch, Button, Table, type TableColumnProps, Tooltip, Radio } from '@arco-design/web-react';
 import { IconQuestionCircle, IconPlus } from '@arco-design/web-react/icon';
 import FieldModal from './FieldModal';
 import { type FieldConfigType } from '../constant';
+import FieldTable from '../../common/filedComponent/index';
 import './style.less';
 /**
  * @param editable 是否可编辑
@@ -11,108 +12,6 @@ import './style.less';
  * @param ckOptions 字段配置
  * @param invert 排除数据 为了弹窗数据去重
  */
-const FieldTable = forwardRef(({ editable, onTableChange, value, ckOptions, invert }: any, ref) => {
-  // keyArr是专门给FieldModal弹窗用的，帮助弹窗反选
-  const [curKeyArr, setCurKeyArr] = useState<any[]>([]);
-  const [selectRowkeyArr, setSelectRowKeyArr] = useState([]);
-  const [fmVisible, setFmVisible] = useState(false);
-
-  const columns: TableColumnProps[] = [
-    {
-      title: '字段名称',
-      dataIndex: 'fieldName'
-    },
-    {
-      title: '操作',
-      width: 95,
-      dataIndex: 'fieldName',
-      render: (val: any, row: any) => {
-        return (
-          <Button type="text" onClick={() => handleDelRow(val)}>
-            删除
-          </Button>
-        );
-      }
-    }
-  ];
-  const [tbData, setTbData] = useState(value);
-
-  function handleTbSelect(keyArr: any, rowArr: any) {
-    setSelectRowKeyArr(keyArr);
-  }
-  function handleAddFiled() {
-    setFmVisible(true);
-  }
-  function handleDelRow(fid: any) {
-    let _data = [...tbData];
-    if (typeof fid === 'string') {
-      _data = _data.filter((item) => {
-        return item.fieldName !== fid;
-      });
-    } else if (Array.isArray(fid)) {
-      _data = _data.filter((item) => {
-        return fid.indexOf(item.fieldName) < 0;
-      });
-    }
-    setTbData(_data);
-  }
-  function mergeDataToTable(arr: Array<any>) {
-    setTbData(arr);
-  }
-
-  useEffect(() => {
-    if (Array.isArray(tbData)) {
-      let cur_key_arr: any[] = [];
-      tbData.forEach((item: any) => {
-        cur_key_arr.push(item.fieldName);
-      });
-      setCurKeyArr(cur_key_arr);
-    }
-    onTableChange();
-  }, [tbData]);
-
-  useImperativeHandle(ref, () => ({
-    getTbData: () => tbData
-  }));
-
-  return (
-    <>
-      <p style={{ paddingBottom: '6px' }}>{editable ? '可编辑字段' : '隐藏字段'}</p>
-      <div className="flex-btw">
-        <Button onClick={handleAddFiled} type="primary" icon={<IconPlus />}>
-          添加字段
-        </Button>
-        {selectRowkeyArr?.length > 0 && (
-          <Button type="primary" className="gray-btn" onClick={() => handleDelRow(selectRowkeyArr)}>
-            批量删除
-          </Button>
-        )}
-      </div>
-      <Table
-        className="field-table-wrapper"
-        rowKey="displayName"
-        columns={columns}
-        data={tbData}
-        pagination={false}
-        rowSelection={{
-          type: 'checkbox',
-          onChange: (keyArr: any, rowArr: any) => handleTbSelect(keyArr, rowArr)
-        }}
-      />
-      {fmVisible && (
-        <FieldModal
-          fmVisible={fmVisible}
-          ckOptions={ckOptions}
-          setFmVisible={setFmVisible}
-          isEdit={editable}
-          curKeyArr={curKeyArr}
-          invert={invert}
-          mergeDataToTable={mergeDataToTable}
-        />
-      )}
-    </>
-  );
-});
 
 // 定义 ref 的类型接口
 interface ChildComponentRef {
@@ -121,6 +20,8 @@ interface ChildComponentRef {
 
 export default function FieldConfig({ setApprovalConfigData, fieldPermConfig, ckOptions, tableName }: FieldConfigType) {
   let [nodeSwitch, setNodeSwitch] = useState(fieldPermConfig.useNodeConfig);
+  const [tbData, setTbData] = useState(fieldPermConfig?.fieldConfigs || []);
+  const [curKeyArr, setCurKeyArr] = useState<any[]>([]);
   let editRef = useRef<ChildComponentRef>();
   let hiddenRef = useRef<ChildComponentRef>();
   let writeArr: any = [];
@@ -142,19 +43,93 @@ export default function FieldConfig({ setApprovalConfigData, fieldPermConfig, ck
   }, [nodeSwitch]);
 
   function saveData() {
-    const editTable: any = editRef?.current?.getTbData() || [];
-    const hiddenTable: any = hiddenRef?.current?.getTbData() || [];
     const fieldPermConfig = {
       useNodeConfig: nodeSwitch,
-      fieldConfigs: [...editTable, ...hiddenTable]
+      fieldConfigs: tbData.map((item: any) => {
+        item.fieldDisplayName = item.displayName || item.fieldDisplayName;
+        return {
+          ...item,
+          tableName
+        };
+      })
     };
-
-    fieldPermConfig?.fieldConfigs.forEach((item: any) => {
-      item.tableName = tableName;
-      item.fieldDisplayName = item.displayName || item.fieldDisplayName;
-    });
     setApprovalConfigData('fieldPermConfig', fieldPermConfig);
   }
+
+  const columnsTable: TableColumnProps[] = [
+    {
+      title: '字段名称',
+      dataIndex: 'fieldName'
+    },
+    {
+      title: '只读',
+      dataIndex: 'batchApproval',
+      render: (val: any, row: any) => {
+        return (
+          <Radio
+            checked={row.fieldPermType === 'read'}
+            onChange={(checked: boolean) => handleSwitchChange(row, 'batchApproval', checked)}
+          />
+        );
+      }
+    },
+    {
+      title: '隐藏',
+      dataIndex: 'index',
+      render: (_: any, row: any) => (
+        <Radio
+          checked={row.fieldPermType === 'hidden'}
+          onChange={(checked: boolean) => handleSwitchChange(row, 'hideFlag', checked)}
+        />
+      )
+    }
+  ];
+
+  const onTableChange = () => {
+    saveData();
+  };
+
+  const setTableData = (v: any) => {
+    const tableMap = new Map<string, any>(tbData?.map((item: any) => [item.fieldName, item]));
+    const addType = v?.map((item: any) => ({
+      ...item,
+      fieldPermType: tableMap.has(item.fieldName) ? tableMap.get(item.fieldName).fieldPermType : 'read'
+    }));
+    setTbData(addType);
+  };
+
+  function handleSwitchChange(row: any, type: string, flag: boolean) {
+    let permType = '';
+    if (type === 'batchApproval') {
+      permType = 'read';
+    } else if (type === 'hideFlag') {
+      permType = 'hidden';
+    }
+
+    if (flag) {
+      let _row = { ...row };
+      _row.fieldPermType = permType;
+      handleSave(_row);
+    }
+  }
+
+  function handleSave(row: any) {
+    const newData = [...tbData];
+    const index = newData.findIndex((item) => row.fieldName === item.fieldName);
+    newData.splice(index, 1, { ...newData[index], ...row });
+    setTbData(newData);
+  }
+
+  useEffect(() => {
+    if (Array.isArray(tbData)) {
+      let cur_key_arr: any[] = [];
+      tbData.forEach((item: any) => {
+        cur_key_arr.push(item.fieldName);
+      });
+      setCurKeyArr(cur_key_arr);
+    }
+    onTableChange();
+  }, [tbData]);
 
   return (
     <div className="field-config">
@@ -177,26 +152,17 @@ export default function FieldConfig({ setApprovalConfigData, fieldPermConfig, ck
           </p>
         </div>
       </div>
+
       {nodeSwitch && (
-        <>
-          <FieldTable
-            editable={true}
-            ref={editRef}
-            onTableChange={saveData}
-            value={writeArr}
-            invert={hiddenArr}
-            ckOptions={ckOptions}
-          />
-          <div style={{ height: 24 }}></div>
-          <FieldTable
-            editable={false}
-            ref={hiddenRef}
-            onTableChange={saveData}
-            value={hiddenArr}
-            invert={writeArr}
-            ckOptions={ckOptions}
-          />
-        </>
+        <FieldTable
+          onTableChange={onTableChange}
+          ckOptions={ckOptions}
+          columnsTable={columnsTable}
+          tbData={tbData}
+          setTableData={setTableData}
+          title={'添加隐藏字段'}
+          curKeyArr={curKeyArr}
+        />
       )}
     </div>
   );

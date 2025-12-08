@@ -76,8 +76,6 @@ const FieldTable = forwardRef(
     useImperativeHandle(ref, () => ({
       getTbData: () => tbData
     }));
-    console.log(tbData);
-
     return (
       <>
         <div className="flex-btw">

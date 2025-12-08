@@ -119,8 +119,6 @@ export default function ApproveDreawer({ handleConfigSubmit, configData }: Appro
   };
 
   function handleSubmit() {
-    console.log('approverConfigData ===', approverConfigData);
-    //error
     let errorMsg = '';
     const { users = [], roles = [] } = approverConfigData.approverConfig || {};
     if (!users.length && !roles.length) {
