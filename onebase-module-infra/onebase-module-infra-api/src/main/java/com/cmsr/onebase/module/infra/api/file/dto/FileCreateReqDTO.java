@@ -1,7 +1,5 @@
 package com.cmsr.onebase.module.infra.api.file.dto;
 
-import com.cmsr.onebase.framework.common.validation.InEnum;
-import com.cmsr.onebase.module.infra.api.file.enums.FileVisitModeEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 

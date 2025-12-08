@@ -419,13 +419,9 @@ public class FileServiceImpl implements FileService {
     public void getFileContent(Long id, HttpServletRequest request, HttpServletResponse response, String visitMode) throws Exception {
 
         // 获取文件信息
-        FileDO file = fileDataRepository.findById(id);
+        FileDO file = fileDataRepository.findByIdAndVisitMode(id, visitMode);
         if (file == null) {
             throw exception(FILE_NOT_EXISTS);
-        }
-
-        if (StrUtil.isNotEmpty(visitMode) && !visitMode.equals(file.getVisitMode())){
-            throw exception(FILE_NOT_PERMISSION);
         }
 
         if (FileVisitModeEnum.AUTHEN.getValue().equals(file.getVisitMode())) {

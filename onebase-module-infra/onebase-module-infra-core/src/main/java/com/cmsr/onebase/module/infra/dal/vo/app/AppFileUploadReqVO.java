@@ -18,8 +18,8 @@ public class AppFileUploadReqVO {
     @Schema(description = "文件目录", example = "可选，也可指定路径如：XXX/YYY")
     private String directory;
 
-    @Schema(description = "文件保存标识",example = "public-公开访问，private-各runMode私有访问", requiredMode = Schema.RequiredMode.REQUIRED)
-    @InEnum(value = FileVisitModeEnum.class, message = "访问标识 {value}")
+    @Schema(description = "文件保存标识",example = "public-公开访问，authen-文件需登录鉴权,permission-内部调用", requiredMode = Schema.RequiredMode.REQUIRED)
+    @InEnum(value = FileVisitModeEnum.class, message = "访问标识必须是 {value}")
     private String visitMode;
 
 }

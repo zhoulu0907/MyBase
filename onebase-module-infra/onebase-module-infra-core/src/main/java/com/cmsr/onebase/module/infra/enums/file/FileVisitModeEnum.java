@@ -25,6 +25,8 @@ public enum FileVisitModeEnum implements ArrayValuable<String> {
 
     PERMISSION("permission","内部调用");
 
+    public static final String[] ARRAYS = Arrays.stream(values()).map(FileVisitModeEnum::getValue).toArray(String[]::new);
+
     /**
      * 值
      */
@@ -34,8 +36,6 @@ public enum FileVisitModeEnum implements ArrayValuable<String> {
      * 名
      */
     private final String name;
-
-    public static final String[] ARRAYS = Arrays.stream(values()).map(FileVisitModeEnum::getValue).toArray(String[]::new);
 
     @Override
     public String[] array() {

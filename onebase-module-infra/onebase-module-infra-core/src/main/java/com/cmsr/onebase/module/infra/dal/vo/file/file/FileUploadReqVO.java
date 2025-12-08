@@ -21,7 +21,7 @@ public class FileUploadReqVO {
 
 
     @Schema(description = "文件保存标识",example = "public-公开访问，authen-文件需登录鉴权,permission-内部调用", requiredMode = Schema.RequiredMode.REQUIRED)
-    @InEnum(value = FileVisitModeEnum.class, message = "访问标识 {value}")
+    @InEnum(value = FileVisitModeEnum.class, message = "访问标识必须是 {value}")
     private String visitMode;
 
 }

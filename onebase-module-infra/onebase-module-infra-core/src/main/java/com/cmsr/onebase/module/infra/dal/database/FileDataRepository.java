@@ -1,11 +1,14 @@
 package com.cmsr.onebase.module.infra.dal.database;
 
+import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.infra.dal.dataobject.file.FileDO;
 
 import com.cmsr.onebase.module.infra.dal.vo.file.file.FilePageReqVO;
+import com.cmsr.onebase.module.infra.enums.file.FileVisitModeEnum;
 import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.Compare;
 import org.anyline.entity.Order;
 import org.springframework.stereotype.Repository;
 
@@ -55,6 +58,24 @@ public class FileDataRepository extends DataRepository<FileDO> {
     public FileDO findByMd5(String md5) {
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.eq(FileDO.COLUMN_MD5, md5);
+        return findOne(configStore);
+    }
+
+    /**
+     * 根据id与visitMode查找文件
+     *
+     * @param id 文件id
+     * @param visitMode 文件权限标识
+     * @return 文件信息
+     */
+    public FileDO findByIdAndVisitMode(Long id, String visitMode) {
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.eq(FileDO.ID, id);
+        if (StrUtil.isEmpty(visitMode)){
+            configStore.and(Compare.NOT_EQUAL, FileDO.COLUMN_VISIT_MODE, FileVisitModeEnum.PERMISSION.getValue());
+        } else {
+            configStore.eq(FileDO.COLUMN_VISIT_MODE, visitMode);
+        }
         return findOne(configStore);
     }
 }

@@ -11,6 +11,7 @@ import jakarta.annotation.Resource;
 import jakarta.annotation.security.PermitAll;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -32,7 +33,7 @@ public class PlatformFileController {
 
     @PostMapping("/upload")
     @Operation(summary = "上传文件", description = "模式一：后端上传文件")
-    public CommonResult<String> uploadFile(FileUploadReqVO uploadReqVO) throws Exception {
+    public CommonResult<String> uploadFile(@Valid FileUploadReqVO uploadReqVO) throws Exception {
         if (FileVisitModeEnum.PERMISSION.getValue().equals(uploadReqVO.getVisitMode())){
             return CommonResult.error(BAD_REQUEST);
         }
