@@ -49,5 +49,9 @@ public interface OAuth2TokenCommonApi {
     })
     CommonResult<OAuth2AccessTokenRespDTO> refreshAccessToken(@RequestParam("refreshToken") String refreshToken,
                                                               @RequestParam("clientId") String clientId);
+    @GetMapping(PREFIX + "/get")
+    @Operation(summary = "获取访问令牌")
+    @Parameter(name = "accessToken", description = "访问令牌", required = true, example = "tudou")
+    CommonResult<OAuth2AccessTokenCheckRespDTO> getAccessToken(@RequestParam("accessToken") String accessToken);
 
 }

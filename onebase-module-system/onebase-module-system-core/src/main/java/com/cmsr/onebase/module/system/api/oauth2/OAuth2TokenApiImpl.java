@@ -48,4 +48,11 @@ public class OAuth2TokenApiImpl implements OAuth2TokenCommonApi {
         return success(BeanUtils.toBean(accessTokenDO, OAuth2AccessTokenRespDTO.class));
     }
 
+    @Override
+    @TenantIgnore // 访问令牌时，无需传递租户编号；主要解决上传文件的场景，前端不会传递 tenant-id
+    public CommonResult<OAuth2AccessTokenCheckRespDTO> getAccessToken(String accessToken) {
+        OAuth2AccessTokenDO accessTokenDO = oauth2TokenService.getAccessToken(accessToken);
+        return success(BeanUtils.toBean(accessTokenDO, OAuth2AccessTokenCheckRespDTO.class));
+    }
+
 }
