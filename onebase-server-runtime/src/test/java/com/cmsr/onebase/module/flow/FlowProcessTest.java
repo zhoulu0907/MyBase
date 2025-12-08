@@ -83,7 +83,7 @@ public class FlowProcessTest {
         reqDTO.setTableName("wcq9_student");
         SemanticFieldValueDTO name = SemanticFieldValueDTO.ofType(SemanticFieldTypeEnum.TEXT);
         name.setFieldName("name");
-        name.setRawValue("小小朋友");
+        name.setRawValue("小");
         SemanticFieldValueDTO age = SemanticFieldValueDTO.ofType(SemanticFieldTypeEnum.NUMBER);
         age.setFieldName("age");
         age.setRawValue(18);

@@ -12,7 +12,11 @@ import lombok.Data;
  */
 @Data
 public class GetMetadataByPageIdReqVO {
-    @Schema(description = "pageId", requiredMode = Schema.RequiredMode.REQUIRED, example = "xxx")
-    @NotNull(message = "页面id不能为空")
+
+    @Schema(description = "pageId",  example = "xxx")
     private Long pageId;
+
+    @Schema(description = "pageUuid",  example = "xxx")
+    private String pageUuid;
+
 }
