@@ -3,20 +3,12 @@ package com.cmsr.onebase.module.app.build.service.version;
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.framework.orm.entity.BaseEntity;
-import com.cmsr.onebase.framework.uid.UidGenerator;
 import com.cmsr.onebase.module.app.build.service.AppCommonService;
 import com.cmsr.onebase.module.app.build.vo.version.VersionCreateReqVO;
 import com.cmsr.onebase.module.app.build.vo.version.VersionPageReqVo;
 import com.cmsr.onebase.module.app.build.vo.version.VersionPageRespVO;
-import com.cmsr.onebase.module.app.core.dal.database.app.AppApplicationRepository;
-import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
-import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageRepository;
-import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageSetRepository;
 import com.cmsr.onebase.module.app.core.dal.database.version.AppVersionRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.AppMenuDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePageDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppVersionDO;
 import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
 import lombok.Setter;
@@ -42,25 +34,10 @@ public class AppVersionServiceImpl implements AppVersionService {
     private AppVersionRepository versionRepository;
 
     @Autowired
-    private AppApplicationRepository applicationRepository;
-
-    @Autowired
-    private AppMenuRepository menuRepository;
-
-    @Autowired
     private AppCommonService appCommonService;
 
     @Autowired
-    private AppPageSetRepository pageSetRepository;
-
-//    @Autowired
-//    private AppPageSetPageRepository pageSetPageRepository;
-
-    @Autowired
-    private AppPageRepository pageRepository;
-
-    @Autowired
-    private UidGenerator uidGenerator;
+    private AppDataManager appDataManager;
 
     @Override
     public PageResult<VersionPageRespVO> getApplicationVersionPage(VersionPageReqVo listReqVo) {
@@ -82,94 +59,61 @@ public class AppVersionServiceImpl implements AppVersionService {
         AppApplicationDO applicationDO = appCommonService.validateApplicationExist(createReqVO.getApplicationId());
         // 先备份老的相关数据
         // 创建新版本
+        final Long applicationId = applicationDO.getId();
+        final Long runtimeVersionId = applicationId;
         final AppVersionDO versionDO = new AppVersionDO();
-        versionDO.setApplicationId(applicationDO.getId());
+        versionDO.setId(runtimeVersionId);
+        versionDO.setApplicationId(applicationId);
         versionDO.setVersionName(createReqVO.getVersionName());
         versionDO.setVersionNumber(createReqVO.getVersionNumber());
         versionDO.setVersionDescription(createReqVO.getVersionDescription());
         versionDO.setVersionURL(UUID.randomUUID().toString().replace("-", ""));
         versionDO.setOperationType(createReqVO.getOperationType());
         versionDO.setEnvironment(createReqVO.getEnvironment());
-        versionRepository.save(versionDO);
-        Long applicationId = applicationDO.getId();
-        Long versionId = versionDO.getId();
-        // 备份 Menu
-        List<Long> menuIds = backupMenu(applicationId, versionId);
-        // 备份 pageset
-        List<Long> pageSetCodes = backupPageSet(applicationId, versionId, menuIds);
-        // 备份 PageSet Page
-        List<Long> pageCodes = backupPageSetPage(applicationId, versionId, pageSetCodes);
-        // 备份 page
-        backupPage(applicationId, versionId, pageCodes);
-        // 备份 page ref router
-    }
 
-    private List<Long> backupMenu(Long applicationId, Long versionId) {
-        List<AppMenuDO> menuDOS = menuRepository.findByApplicationId(applicationId);
-
-        return menuDOS.stream().map(BaseEntity::getId).toList();
-    }
-
-    private List<Long> backupPageSet(Long applicationId, Long versionId, List<Long> menuIds) {
-//        List<AppResourcePagesetDO> pageSetDOS = pageSetRepository.findByMenuIds(menuIds);
-//        AppVersionResourceDO versionResourceDO = new AppVersionResourceDO();
-//        versionResourceDO.setApplicationId(applicationId);
-//        versionResourceDO.setVersionId(versionId);
-//        versionResourceDO.setResType(ResTypeEnum.PAGE_SET.getValue());
-//        versionResourceDO.setResData(JsonUtils.toJsonString(pageSetDOS));
-//        versionResourceRepository.save(versionResourceDO);
-//        return pageSetDOS.stream().map(BaseEntity::getId).toList();
-        return null;
-    }
-
-    private List<Long> backupPageSetPage(Long applicationId, Long versionId, List<Long> pageSetIds) {
-        return null;
-        //            List<AppResourcePagesetPageDO> pageSetPageDOs = pageSetPageRepository.findByPageSetIds(pageSetIds);
-//            AppVersionResourceDO versionResourceDO = new AppVersionResourceDO();
-//            versionResourceDO.setApplicationId(applicationId);
-//            versionResourceDO.setVersionId(versionId);
-//            versionResourceDO.setResType(ResTypeEnum.PAGE_SET_PAGE.getValue());
-//            versionResourceDO.setResData(JsonUtils.toJsonString(pageSetPageDOs));
-//            versionResourceRepository.save(versionResourceDO);
-//            return pageSetPageDOs.stream().map(BaseEntity::getId).toList();
-    }
-
-    private List<Long> backupPage(Long applicationId, Long versionId, List<Long> pageIds) {
-        List<AppResourcePageDO> pageDOs = pageRepository.listByIds(pageIds);
-
-        return pageDOs.stream().map(BaseEntity::getId).toList();
+        this.saveVersion(applicationId, versionDO);
+        // 因为第一次不存在versionTag=1，所以可以直接向下执行，不需要多做判断
+        // 1. move runtime to history
+        appDataManager.moveRuntimeToHistory(applicationId, runtimeVersionId);
+        // 2. copy edit to runtime
+        appDataManager.copyEditToRuntime(applicationId);
     }
 
     @Transactional
     @Override
     public void restoreApplicationVersion(Long versionId) {
-//        AppVersionDO applicationVersionDO = validateApplicationVersionExist(versionId);
-//        Long applicationId = applicationVersionDO.getApplicationId();
-//        // 更新到主表
-//        AppApplicationDO applicationDO = applicationRepository.getById(applicationId);
-//        applicationDO.setVersionNumber(applicationVersionDO.getVersionNumber());
-//        applicationRepository.updateById(applicationDO);
-//        // 恢复菜单
-//        restoreMenu(applicationDO.getId(), versionId);
+        AppVersionDO targetVersionDO = versionRepository.getById(versionId);
+        if (targetVersionDO == null) {
+            throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_VERSION_NOT_EXIST);
+        }
+        final Long applicationId = targetVersionDO.getApplicationId();
+        final Long runtimeVersionId = applicationId;
+        if (versionId == runtimeVersionId) {
+            throw new IllegalArgumentException("当前已是最新版本");
+        }
+        saveVersion(applicationId, targetVersionDO);
+        // 1. backup runtime
+        appDataManager.moveRuntimeToHistory(applicationId, runtimeVersionId);
+        // 2. publish history
+        appDataManager.copyHistoryToRuntime(applicationId, versionId);
     }
 
-    private void restoreMenu(Long applicationId, Long versionId) {
-        // 删除相关数据
-        menuRepository.deleteByApplicationId(applicationId);
-
-    }
-
-    private void prepareForBackup(List<? extends BaseEntity> list) {
-        list.forEach(v -> {
-            // TODO clean方法待完善
-            v.setId(null);
-            v.setUpdater(null);
-            v.setUpdateTime(null);
-            v.setCreator(null);
-            v.setCreateTime(null);
-            v.setDeleted(null);
-            //v.setLockVersion(null);
-        });
+    private void saveVersion(Long applicationId, AppVersionDO newVersion) {
+        // 0. 查询是否存在老版本
+        final AppVersionDO currentVersion = versionRepository.findCurrentVersion(applicationId);
+        // 1.
+        if (currentVersion == null) {
+            // 1.1. 不存在老版本
+            // 直接保存版本数据
+            versionRepository.save(newVersion);
+        } else {
+            // 1.2. 存在老版本
+            // 1.2.1. 将老版本另存为
+            currentVersion.setId(null);
+            versionRepository.save(currentVersion);
+            // 1.2.2. 将新版本保存
+            versionRepository.updateById(newVersion);
+        }
     }
 
     @Override
