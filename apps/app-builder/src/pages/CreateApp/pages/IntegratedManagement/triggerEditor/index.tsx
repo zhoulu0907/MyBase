@@ -48,7 +48,9 @@ const TriggerEditor = () => {
   const handleGetAppEntities = async (appId: string) => {
     const res = await getAppEntities(appId);
 
+    // TODO(mickey): 需要优化,
     if (res && res.entities) {
+      console.log('res.entities: ', res.entities);
       setMainEntities(
         res.entities.filter(
           (entity: any) => entity.entityType === ENTITY_TYPE.MAIN || entity.entityType === ENTITY_TYPE.INDEP
@@ -109,7 +111,7 @@ const TriggerEditor = () => {
           setInitData(StartEntityInitData);
           const entityInitialData = {
             ...StartEntityInitData.nodes[0].data.initialData,
-            entityId: res.triggerConfig.entityId
+            tableName: res.triggerConfig.tableName
           };
           setNodeData(StartEntityInitData.nodes[0].id, entityInitialData);
           setNodeData(StartEntityInitData.nodes[1].id, StartEntityInitData.nodes[1].data.initialData);

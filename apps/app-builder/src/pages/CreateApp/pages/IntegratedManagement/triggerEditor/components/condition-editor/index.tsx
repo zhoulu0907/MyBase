@@ -413,7 +413,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
                                     // 字段id
                                     <Grid.Row key={item.key} gutter={8} align="center">
                                       <Grid.Col span={8}>
-                                        <Form.Item field={item.field + '.fieldId'}>
+                                        <Form.Item field={item.field + '.fieldKey'}>
                                           <TreeSelect
                                             treeData={fields}
                                             className={styles.itemSelect}
@@ -435,16 +435,16 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
                                         <Form.Item field={item.field + '.op'}>
                                           <Select
                                             className={styles.itemSelect}
-                                            disabled={form.getFieldValue(item.field + '.fieldId') == undefined}
+                                            disabled={form.getFieldValue(item.field + '.fieldKey') == undefined}
                                             onChange={(_value) => {
                                               form.setFieldValue(item.field + '.operatorType', undefined);
                                               form.setFieldValue(item.field + '.value', undefined);
                                             }}
                                           >
-                                            {form.getFieldValue(item.field)?.fieldId &&
+                                            {form.getFieldValue(item.field)?.fieldKey &&
                                               entityFieldValidationTypes &&
                                               entityFieldValidationTypes
-                                                .find((cc) => cc.fieldId == form.getFieldValue(item.field).fieldId)
+                                                .find((cc) => cc.fieldKey == form.getFieldValue(item.field).fieldKey)
                                                 ?.validationTypes.map((operator: ValidationTypeItem) => (
                                                   <Option key={operator.code} value={operator.code}>
                                                     {operator.name}
