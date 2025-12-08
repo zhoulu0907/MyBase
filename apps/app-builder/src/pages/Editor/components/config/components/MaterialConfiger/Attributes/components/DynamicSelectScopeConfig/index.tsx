@@ -1,10 +1,11 @@
 import { Button, Form, Switch } from '@arco-design/web-react';
-import { getDeptUser, type AuthRoleUsersPageRespVO, type DeptAndUsersRespDTO, type GetDeptUserReq } from '@onebase/app';
+import { type AuthRoleUsersPageRespVO, type DeptAndUsersRespDTO } from '@onebase/app';
 import { AddMembers } from '@onebase/common';
 import { debounce } from 'lodash-es';
 import { useCallback, useEffect, useState } from 'react';
 import { CONFIG_TYPES } from '@onebase/ui-kit';
 import { registerConfigRenderer } from '../../registry';
+import { getDeptUser, type GetDeptUserReq } from '@onebase/platform-center';
 
 export interface DynamicSelectScopeConfigProps {
   handlePropsChange: (key: string, value: string | number | boolean | any[]) => void;
@@ -45,9 +46,7 @@ const DynamicSelectScopeConfig: React.FC<DynamicSelectScopeConfigProps> = ({
   const getDeptUsers = async ({ deptId, keywords }: { deptId?: string; keywords?: string }) => {
     setDeptLoading(true);
     try {
-      // if (!roleInfo?.id) return;
       const params: GetDeptUserReq = {
-        roleId: '37775560235057153', //TODO
         deptId,
         keywords
       };
