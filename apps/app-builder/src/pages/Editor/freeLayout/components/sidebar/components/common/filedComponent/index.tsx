@@ -24,10 +24,10 @@ const FieldTable = forwardRef(
       {
         title: '操作',
         width: 95,
-        dataIndex: 'fieldName',
+        dataIndex: 'tableName',
         render: (val: any, row: any) => {
           return (
-            <Button type="text" onClick={() => handleDelRow(val)}>
+            <Button type="text" onClick={() => handleDelRow(row.fieldName)}>
               删除
             </Button>
           );
@@ -76,7 +76,6 @@ const FieldTable = forwardRef(
     useImperativeHandle(ref, () => ({
       getTbData: () => tbData
     }));
-    
     return (
       <>
         <div className="flex-btw">
