@@ -442,6 +442,8 @@ public class SemanticMergeRecordAssembler {
             Object fieldRawValue = entry.getValue();
             if ("id".equals(fieldName)) {
                 rowValue.setId(fieldRawValue);
+                MetadataEntityFieldDO fieldMeta = targetFieldMetaByName.get(fieldName);
+                rowFieldValues.put(fieldName, toFieldValue(fieldRawValue, fieldMeta, fieldName));
             } else if ("deleted".equals(fieldName)) {
                 rowValue.setDeleted(fieldRawValue == null ? null : Boolean.valueOf(String.valueOf(fieldRawValue)));
             } else {

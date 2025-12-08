@@ -3,7 +3,10 @@ package com.cmsr.onebase.module.flow.api.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+import java.util.List;
 import java.util.Map;
+
+import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldValueDTO;
 
 /**
  * @Author：huangjie
@@ -16,22 +19,27 @@ public class EntityTriggerReqDTO {
     @Schema(description = "链路ID")
     private String traceId;
 
-    @Schema(description = "实体ID")
-    private Long entityId;
-    
-    @Schema(description = "实体UUID")
-    private String entityUuId;
+    @Schema(description = "应用ID")
+    private Long applicationId;
 
     @Schema(description = "实体类型")
-    private String entityTableName;
+    private String tableName;
 
     @Schema(description = "触发事件，beforeCreate,afterCreate,beforeUpdate,afterUpdate,beforeDelete,afterDelete")
     private TriggerEventEnum triggerEvent;
 
-    @Schema(description = "数据，字段名称和字段数据, key是字段的uuid, value是字段值")
-    @Deprecated
-    private Map<String, Object> fieldData;
-
     @Schema(description = "数据，字段名称和字段数据, key是字段的columnName, value是字段值")
-    private Map<String, Object> colFieldData;
+    private List<SemanticFieldValueDTO<Object>> fieldData;
+
+   @Deprecated
+   @Schema(description = "数据，字段名称和字段数据, key是字段的columnName, value是字段值")
+   private Map<String, Object> colFieldData;
+
+    public void setTableName(String tableName) {
+        //TODO 要修改 使用 tableName
+    }
+
+    public void setFieldData(List<SemanticFieldValueDTO<Object>> fieldData) {
+        //TODO 要修改 fieldData
+    }
 }

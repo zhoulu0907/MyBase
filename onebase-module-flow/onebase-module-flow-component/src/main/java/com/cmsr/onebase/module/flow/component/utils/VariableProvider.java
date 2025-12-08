@@ -13,6 +13,14 @@ import java.util.Map;
  */
 public class VariableProvider {
 
+    /**
+     * 处理完循环下标后，当前变量的值Map。
+     *
+     * @param nodeComponent
+     * @param inLoopDepth
+     * @param nodeVariables
+     * @return
+     */
     public static Map<String, Object> resolveLoopVariables(NodeComponent nodeComponent, InLoopDepth inLoopDepth, Map<String, Object> nodeVariables) {
         Map<String, Object> result = new HashMap<>();
         Map<String, Integer> loopIndexMap = loopIndexMap(nodeComponent, inLoopDepth);
@@ -34,6 +42,13 @@ public class VariableProvider {
         return result;
     }
 
+    /**
+     * 返回的key是节点id，value是循环的下标值
+     *
+     * @param nodeComponent
+     * @param inLoopDepth
+     * @return
+     */
     private static Map<String, Integer> loopIndexMap(NodeComponent nodeComponent, InLoopDepth inLoopDepth) {
         Map<String, Integer> result = new HashMap<>();
         for (Map.Entry<String, Integer> entry : inLoopDepth.entrySet()) {
