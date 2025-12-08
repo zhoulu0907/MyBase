@@ -22,4 +22,9 @@ public class TenantAdminUserResVO {
 
     @Schema(description = "来自平台克隆的用户id", requiredMode = Schema.RequiredMode.REQUIRED, example = "platformUserId")
     private Long platformUserId;
+
+    @Schema(description = "管理员头像", example = "")
+    private String adminAvatar;
+
+
 }

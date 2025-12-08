@@ -103,6 +103,17 @@ public interface MetadataEntityRelationshipBuildService {
     EntityWithChildrenRespVO getEntityWithChildrenById(Long entityId, String relationshipType);
 
     /**
+     * 根据实体ID查询实体名称及其关联的子表信息
+     *
+     * @param entityId 实体ID
+     * @param relationshipType 关系类型筛选（ONE_TO_ONE-一对一, ONE_TO_MANY-一对多），为null时查询所有类型
+     * @param fieldType 字段类型（可选）
+     * @param operator 操作符（可选）
+     * @return 实体及其关联子表信息
+     */
+    EntityWithChildrenRespVO getEntityWithChildrenById(Long entityId, String relationshipType, String fieldType, String operator);
+
+    /**
      * 根据应用ID查询所有实体及字段信息
      * 首先根据appId查询datasourceId，如果有多个datasource，默认用第一个
      * 然后再查询相关的实体表和实体字段表

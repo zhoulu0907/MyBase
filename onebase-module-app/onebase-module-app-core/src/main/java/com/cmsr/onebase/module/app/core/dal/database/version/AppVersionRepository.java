@@ -11,6 +11,8 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppVersionTableDef.APP_VERSION;
+
 /**
  * @Author：huangjie
  * @Date：2025/8/6 14:42
@@ -46,5 +48,12 @@ public class AppVersionRepository extends BaseAppRepository<AppVersionMapper, Ap
                 .orderBy(AppVersionDO::getUpdateTime, false)
                 .orderBy(AppVersionDO::getCreateTime, false);
         return this.list(queryWrapper);
+    }
+
+    public AppVersionDO findCurrentVersion(Long applicationId) {
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_VERSION.APPLICATION_ID.eq(applicationId))
+                .where(APP_VERSION.ID.eq(applicationId));
+        return this.getOne(queryWrapper);
     }
 }

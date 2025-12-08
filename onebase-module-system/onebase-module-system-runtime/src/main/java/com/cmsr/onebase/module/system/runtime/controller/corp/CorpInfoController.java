@@ -39,7 +39,7 @@ public class CorpInfoController {
 
     @PostMapping("/update")
     @Operation(summary = "更新企业")
-    @PreAuthorize("@ss.hasPermission('tenant:info:update')")
+    @PreAuthorize("@ss.hasPermission('corp:info:update')")
     public CommonResult<Boolean> updateCorp(@RequestBody @Valid CorpUpdateReqVO reqVO) {
         corpService.updateCorp(reqVO);
         return success(true);

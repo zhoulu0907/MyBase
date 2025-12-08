@@ -407,6 +407,8 @@ public class TenantServiceImpl implements TenantService {
                         userInsertReqVO.setAdminType(AdminTypeEnum.SYSTEM.getType());
                         userInsertReqVO.setPassword(TENANT_ADMIN_PASSWORD);
                         userInsertReqVO.setPlatformUserId(adminUserReqVO.getPlatformUserId());
+                        // 新增的都是空间管理员
+                        userInsertReqVO.setUserType(UserTypeEnum.TENANT.getValue());
                         // 创建用户
                         Long userId = userService.createUser(userInsertReqVO);
                         // 分配管理员权限
@@ -585,6 +587,7 @@ public class TenantServiceImpl implements TenantService {
                                 .setAdminNickName(uservo.getNickname())
                                 .setAdminEmail(uservo.getEmail())
                                 .setPlatformUserId(uservo.getPlatformUserId())
+                                .setAdminAvatar(uservo.getAvatar())
 
                         )
                         .collect(Collectors.toList());

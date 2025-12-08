@@ -58,6 +58,20 @@ import java.util.Optional;
 @Service
 @Slf4j
 public class SemanticDataCrudService {
+    /**
+     * 主表批量操作最大处理条数
+     * 使用范围：
+     * - 仅主表的批量删除与批量更新（deleteByQuery、updateByQuery）
+     * - 查询统一通过 selectPageByQuery，取第 1 页，pageSize = MAX_BATCH_LIMIT
+     * 不适用范围：
+     * - 子表和关联表的读取与 upsert，不受该限制
+     * 设计意图：
+     * - 控制单次批处理的资源消耗与锁风险
+     * - 保留逐条执行的工作流、权限与级联逻辑
+     * 调整建议：
+     * - 后续可改为可配置项（如 application 配置），支持不同接口覆盖
+     */
+    private static final int MAX_BATCH_LIMIT = 100;
 
     @Resource
     private MetadataEntityFieldCoreService metadataEntityFieldCoreService;
@@ -245,7 +259,7 @@ public class SemanticDataCrudService {
                 recordDTO.getRecordContext().getOperationType(),
                 recordDTO.getRecordContext().getTraceId(),
                 entity.getTableName(),
-                value.getFieldValueMap().values().stream().toList(),
+                value.getFieldValueMap() == null ? List.of() : value.getFieldValueMap().values().stream().toList(),
                 List.of()
         );
         // 确定主键字段名并解析 id
@@ -259,14 +273,29 @@ public class SemanticDataCrudService {
         if (hasDeletedField(entity.getFields())) {
             resultCount = dynamicMetadataRepository.softDeleteByQuery(entity.getTableName(), qw);
         } else {
-            // dynamicMetadataRepository.deleteByQuery(entity.getTableName(), qw);
+            resultCount = dynamicMetadataRepository.deleteByQuery(entity.getTableName(), qw);
+        }
+        List<SemanticRelationSchemaDTO> connectors = entity.getConnectors();
+        if (connectors != null && !connectors.isEmpty()) {
+            for (SemanticRelationSchemaDTO c : connectors) {
+                if (c == null || c.getTargetEntityTableName() == null) { continue; }
+                if (RelationshipTypeEnum.isSubtableRelationship(c.getRelationshipType().getRelationshipType())) { 
+                    QueryWrapper cq = QueryWrapper.create().where(new QueryColumn("parent_id").eq(String.valueOf(id)));
+                    boolean hasDel = hasDeletedField(c.getRelationAttributes());
+                    if (hasDel) {
+                        dynamicMetadataRepository.softDeleteByQuery(c.getTargetEntityTableName(), cq);
+                    } else {
+                        dynamicMetadataRepository.deleteByQuery(c.getTargetEntityTableName(), cq);
+                    }
+                }
+            }
         }
         // 后置工作流：审计、事件发布等
         semanticWorkflowExecutor.postExecute(
                 recordDTO.getRecordContext().getOperationType(),
                 recordDTO.getRecordContext().getTraceId(),
                 entity.getTableName(),
-                value.getFieldValueMap().values().stream().toList(),
+                value.getFieldValueMap() == null ? List.of() : value.getFieldValueMap().values().stream().toList(),
                 List.of()
         );
         return resultCount;
@@ -405,79 +434,82 @@ public class SemanticDataCrudService {
         return new PageResult<>(result, pageRows.getTotal());
     }
 
+    /**
+     * 条件批量删除主表数据（逐条执行）
+     *
+     * 设计与约束：
+     * - 仅处理主表记录；子表与关系表的级联清理在单条删除逻辑中按连接器类型处理
+     * - 使用分页查询（第1页，pageSize=MAX_BATCH_LIMIT）拉取待删记录并逐条调用 {@link #delete(SemanticRecordDTO)}
+     * - 保留工作流钩子与权限过滤等单条删除的行为一致性
+     * - 若实体存在标准软删字段（deleted），则走软删；否则物理删除
+     *
+     * @param recordDTO 语义记录上下文，需包含实体元数据
+     * @param qw 条件包装器；为空时创建默认条件
+     * @return 实际受影响的主表记录数
+     */
     public Integer deleteByQuery(SemanticRecordDTO recordDTO, QueryWrapper qw) {
         SemanticEntitySchemaDTO entity = recordDTO.getEntitySchema();
-        semanticWorkflowExecutor.preExecute(
-                recordDTO.getRecordContext().getOperationType(),
-                recordDTO.getRecordContext().getTraceId(),
-                entity.getTableName(),
-                List.of(),
-                List.of()
-        );
-        List<SemanticFieldSchemaDTO> fields = entity.getFields();
         if (qw == null) { qw = QueryWrapper.create(); }
-        int affected = hasDeletedField(fields)
-                ? dynamicMetadataRepository.softDeleteByQuery(entity.getTableName(), qw)
-                : dynamicMetadataRepository.deleteByQuery(entity.getTableName(), qw);
-        semanticWorkflowExecutor.postExecute(
-                recordDTO.getRecordContext().getOperationType(),
-                recordDTO.getRecordContext().getTraceId(),
-                entity.getTableName(),
-                List.of(),
-                List.of()
-        );
+        int pageSize = MAX_BATCH_LIMIT;
+        int affected = 0;
+        PageResult<Row> pageRows = dynamicMetadataRepository.selectPageByQuery(entity.getTableName(), qw, 1, pageSize);
+        List<Row> rows = pageRows.getList();
+        if (rows != null) {
+            for (Row row : rows) {
+                SemanticEntityValueDTO val = new SemanticEntityValueDTO();
+                val.setId(row.get("id"));
+                recordDTO.setEntityValue(val);
+                Integer r = delete(recordDTO);
+                affected += r == null ? 0 : r;
+            }
+        }
         return affected;
     }
 
+    /**
+     * 条件批量更新主表数据（逐条执行并回读）
+     *
+     * 设计与约束：
+     * - 仅处理主表字段更新；子表与关系表的 upsert 逻辑在单条更新中执行
+     * - 使用分页查询（第1页，pageSize=MAX_BATCH_LIMIT）拉取目标记录，逐条构建更新字段并调用 {@link #update(SemanticRecordDTO)}
+     * - 每条更新后调用 {@link #readById(SemanticRecordDTO)} 回读最新数据，最终返回聚合后的结果列表
+     * - 字段权限过滤在返回前统一处理
+     *
+     * @param recordDTO 语义记录上下文，需包含实体元数据
+     * @param updates 待更新字段的原始值映射（key 为字段名）
+     * @param qw 条件包装器；为空时创建默认条件
+     * @return 批量更新后的主表记录结果集（已做权限过滤）
+     */
     public List<Map<String, Object>> updateByQuery(SemanticRecordDTO recordDTO, Map<String, Object> updates, QueryWrapper qw) {
         SemanticEntitySchemaDTO entity = recordDTO.getEntitySchema();
-        semanticWorkflowExecutor.preExecute(
-                recordDTO.getRecordContext().getOperationType(),
-                recordDTO.getRecordContext().getTraceId(),
-                entity.getTableName(),
-                List.of(),
-                List.of()
-        );
         List<SemanticFieldSchemaDTO> fields = entity.getFields();
         if (updates == null || updates.isEmpty()) { return List.of(); }
         if (qw == null) { qw = QueryWrapper.create(); }
-
-        Row updateRow = new Row();
-        for (SemanticFieldSchemaDTO f : fields) {
-            String name = f.getFieldName();
-            if (name != null && updates.containsKey(name)) {
-                Object v = updates.get(name);
-                if (v != null) { updateRow.put(name, v); }
+        int pageSize = MAX_BATCH_LIMIT;
+        List<Map<String, Object>> result = new ArrayList<>();
+        PageResult<Row> pageRows = dynamicMetadataRepository.selectPageByQuery(entity.getTableName(), qw, 1, pageSize);
+        List<Row> rows = pageRows.getList();
+        if (rows != null) {
+            for (Row row : rows) {
+                SemanticEntityValueDTO val = new SemanticEntityValueDTO();
+                val.setId(row.get("id"));
+                Map<String, SemanticFieldValueDTO<Object>> fvm = new HashMap<>();
+                for (SemanticFieldSchemaDTO f : fields) {
+                    String name = f.getFieldName();
+                    if (name != null && updates.containsKey(name)) {
+                        SemanticFieldValueDTO<Object> fv = SemanticFieldValueDTO.ofType(f.getFieldTypeEnum());
+                        fv.setFieldName(name);
+                        fv.setTableName(entity.getTableName());
+                        fv.setRawValue(updates.get(name));
+                        fvm.put(name, fv);
+                    }
+                }
+                val.setFieldValueMap(fvm);
+                recordDTO.setEntityValue(val);
+                update(recordDTO);
             }
         }
-        boolean hasUpdater = fields.stream().anyMatch(f -> {
-            String n = f.getFieldName();
-            return n != null && ("updater".equalsIgnoreCase(n));
-        });
-        boolean hasUpdatedTime = fields.stream().anyMatch(f -> {
-            String n = f.getFieldName();
-            return n != null && ("updated_time".equalsIgnoreCase(n) || "updatetime".equalsIgnoreCase(n));
-        });
-        if (hasUpdater && !updateRow.containsKey("updater")) { updateRow.put("updater", null); }
-        if (hasUpdatedTime && !updateRow.containsKey("updated_time")) { updateRow.put("updated_time", null); }
-        if (updateRow.isEmpty()) { return List.of(); }
-
-        dynamicMetadataRepository.updateByQuery(entity.getTableName(), updateRow, qw);
-
-        List<Row> rows = dynamicMetadataRepository.selectListByQuery(entity.getTableName(), qw);
-        List<SemanticEntityValueDTO> values = new ArrayList<>();
-        for (Row row : rows) { values.add(semanticValueAssembler.toEntityValue(entity, row)); }
-        semanticRefResolver.enrichBatch(entity, values);
-        List<Map<String, Object>> result = new ArrayList<>();
-        for (SemanticEntityValueDTO val : values) { result.add(val.getGlobalRawMapForJson()); }
         result = semanticQueryPermissionHelper.filterQueryResultList(result, recordDTO.getRecordContext().getPermissionContext(), fields);
-        semanticWorkflowExecutor.postExecute(
-                recordDTO.getRecordContext().getOperationType(),
-                recordDTO.getRecordContext().getTraceId(),
-                entity.getTableName(),
-                List.of(),
-                List.of()
-        );
         return result;
     }
 
