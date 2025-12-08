@@ -1,0 +1,127 @@
+.dividerStyle {
+  :global(.pc-select-view) {
+    min-height: auto; // 不用默认的 32px
+    height: auto !important;
+    line-height: 0 !important;
+  }
+
+  :global(.pc-select-view-value) {
+    margin-top: 4px;
+  }
+}
+.dropdownWrapper {
+  max-height: 260px;
+  margin: 6px 0;
+
+  .previewWrapper {
+    border-radius: 4px;
+    padding: 10px;
+    border: 1px solid #e5e6eb;
+    align-content: center;
+  }
+
+  .title {
+    font-size: 14px;
+    color: #1d2129;
+    line-height: 22px;
+    margin-bottom: 3px;
+  }
+
+  .desc {
+    font-size: 12px;
+    color: #86909c;
+    line-height: 20px;
+    margin-top: 3px;
+  }
+
+  /* 下方装饰条：根据截图画 8 种不同效果 */
+  .decor-style1 {
+    display: none;
+  }
+
+  .decor-style2 {
+    border-top: 1px dashed #e5e6eb;
+  }
+
+  .decor-style3 {
+    border-top: 1px solid #e5e6eb;
+  }
+
+  .decor-style4 {
+    border-top: 2px solid #e5e6eb;
+  }
+
+  .decor-style5 {
+    display: none;
+  }
+
+  .decor-title-style5 {
+    border-left: 4px solid #e5e6eb;
+    padding-left: 4px;
+    line-height: 14px;
+    margin: 4px 0;
+  }
+
+  .decor-style6 {
+    border-top: 1px solid #e5e6eb;
+  }
+
+  .decor-title-style6 {
+    border-bottom: 2px solid #e5e6eb;
+    width: 60px;
+    line-height: 22px;
+    margin-bottom: 2px;
+  }
+
+  /* 字段标题容器 */
+  .decor-title-style7 {
+    height: 22px;
+    border-bottom: 2px solid;
+    display: flex;
+    gap: 2px;
+
+    /* 标题标签 */
+    .label {
+      padding: 0 24px 0 8px;
+      line-height: 24px;
+      clip-path: polygon(0 0, 80% 0, 100% 100%, 0 100%);
+    }
+
+    .decorator1 {
+      height: 24px;
+      width: 24px;
+      clip-path: polygon(0% 0%, 40% 0%, 100% 75%, 60% 75%);
+      position: relative;
+      left: -12px;
+    }
+
+    .decorator2 {
+      height: 24px;
+      width: 24px;
+      clip-path: polygon(0% 0%, 40% 0%, 100% 75%, 60% 75%);
+      position: relative;
+      left: -22px;
+      opacity: 0.7;
+    }
+
+    .decorator3 {
+      height: 24px;
+      width: 24px;
+      clip-path: polygon(0% 0%, 40% 0%, 100% 75%, 60% 75%);
+      position: relative;
+      left: -32px;
+      opacity: 0.4;
+    }
+  }
+}
+.dividerColorPicker {
+  width: 100%;
+  padding: 2px 10px;
+  border-radius: 0px;
+
+  :global(.pc-color-picker-preview) {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+  }
+}
