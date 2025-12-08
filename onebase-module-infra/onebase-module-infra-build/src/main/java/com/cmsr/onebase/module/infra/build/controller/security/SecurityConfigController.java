@@ -3,14 +3,17 @@ package com.cmsr.onebase.module.infra.build.controller.security;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigBatchUpdateReqVO;
 import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigCategoryRespVO;
 import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigItemRespVO;
+import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigReqVO;
 import com.cmsr.onebase.module.infra.service.security.SecurityConfigService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
+import jakarta.annotation.security.PermitAll;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -82,4 +85,12 @@ public class SecurityConfigController {
         return success(true);
     }
 
+
+    @PostMapping("/check-scenarios-captcha")
+    @Operation(summary = "检查登录验证码", description = "返回值 true需要验证码,false不需要")
+    @PermitAll
+    @TenantIgnore
+    public CommonResult<Boolean> checkScenariosCaptcha(@Valid @RequestBody SecurityConfigReqVO configReqVO) {
+        return success(securityConfigService.checkScenariosCaptcha(configReqVO));
+    }
 }

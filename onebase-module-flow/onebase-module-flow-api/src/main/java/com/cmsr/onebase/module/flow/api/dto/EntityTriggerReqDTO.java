@@ -16,22 +16,31 @@ public class EntityTriggerReqDTO {
     @Schema(description = "链路ID")
     private String traceId;
 
-    @Schema(description = "实体ID")
-    private Long entityId;
-    
-    @Schema(description = "实体UUID")
-    private String entityUuId;
+    @Schema(description = "应用ID")
+    private Long applicationId;
 
     @Schema(description = "实体类型")
-    private String entityTableName;
+    private String tableName;
 
     @Schema(description = "触发事件，beforeCreate,afterCreate,beforeUpdate,afterUpdate,beforeDelete,afterDelete")
     private TriggerEventEnum triggerEvent;
 
-    @Schema(description = "数据，字段名称和字段数据, key是字段的uuid, value是字段值")
-    @Deprecated
+    @Schema(description = "数据，字段名称和字段数据, key是字段的columnName, value是字段值")
     private Map<String, Object> fieldData;
 
-    @Schema(description = "数据，字段名称和字段数据, key是字段的columnName, value是字段值")
-    private Map<String, Object> colFieldData;
+//    @Deprecated
+//    @Schema(description = "数据，字段名称和字段数据, key是字段的columnName, value是字段值")
+//    private Map<String, Object> colFieldData;
+
+    public void setEntityUuId(String entityId) {
+        //TODO 要修改 使用 tableName
+    }
+
+    public void setEntityId(Long entityId) {
+        //TODO 要修改 使用 tableName
+    }
+
+    public void setColFieldData(Map<String, Object> rawData) {
+        //TODO 要修改 fieldData
+    }
 }

@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.bpm.runtime.service.instance.exec.strategy.impl;
 import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowAgentInsRepository;
 import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowInsBizExtRepository;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
+import com.cmsr.onebase.module.bpm.runtime.helper.BpmEntityHelper;
 import com.cmsr.onebase.module.bpm.runtime.service.instance.exec.strategy.ExecTaskStrategy;
 import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
 import jakarta.annotation.Resource;
@@ -32,6 +33,9 @@ public abstract class AbstractExecTaskStrategy<T extends BaseNodeExtDTO> impleme
 
     @Resource
     protected SemanticDynamicDataApi semanticDynamicDataApi;
+
+    @Resource
+    protected BpmEntityHelper bpmEntityHelper;
 
 //    /**
 //     *  获取实体字段信息的主键ID

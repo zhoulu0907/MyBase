@@ -45,6 +45,7 @@ public class CorpAppRelationDataRepository extends DataRepository<CorpAppRelatio
                 if (status.equals(CorpAppReationStatusEnum.ENABLE.getValue())) {
                     // 查询有效期内的（未过期的）
                     configStore.gt(CorpAppRelationDO.EXPIRES_TIME, java.time.LocalDateTime.now());
+                    configStore.eq(CorpAppRelationDO.STATUS, CorpStatusEnum.ENABLE.getValue());
                 } else if (status.equals(CorpAppReationStatusEnum.EXPIRES.getValue())) {
                     // 查询已过期的
                     configStore.le(CorpAppRelationDO.EXPIRES_TIME, java.time.LocalDateTime.now());
@@ -80,5 +81,16 @@ public class CorpAppRelationDataRepository extends DataRepository<CorpAppRelatio
         ConfigStore configs = new DefaultConfigStore();
         configs.eq(CorpAppRelationDO.CORP_ID, corpId);
         return findAllByConfig(configs);
+    }
+
+    public List<CorpAppRelationDO> findApplicationByCordIdAndAppId(Long corpId, Long appId) {
+        //  查询应用是否过期
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        if (null != corpId) {
+            configStore.eq(CorpAppRelationDO.CORP_ID, corpId);
+        }
+        configStore.eq(CorpAppRelationDO.APPLICATION_ID, appId);
+        configStore.gt(CorpAppRelationDO.EXPIRES_TIME, java.time.LocalDateTime.now());
+        return findAllByConfig(configStore);
     }
 }

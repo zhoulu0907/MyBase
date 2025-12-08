@@ -48,7 +48,7 @@ public class SemanticWorkflowExecutor {
         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
         reqDTO.setTraceId(recordDTO.getRecordContext().getTraceId());
         reqDTO.setEntityUuId(entityId);
-        reqDTO.setEntityTableName(recordDTO.getEntitySchema().getTableName());
+        reqDTO.setTableName(recordDTO.getEntitySchema().getTableName());
         if (op == SemanticDataMethodOpEnum.CREATE) reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_CREATE);
         else if (op == SemanticDataMethodOpEnum.UPDATE) reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_UPDATE);
         else if (op == SemanticDataMethodOpEnum.DELETE) reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_DELETE);
@@ -92,7 +92,7 @@ public class SemanticWorkflowExecutor {
         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
         reqDTO.setTraceId(recordDTO.getRecordContext().getTraceId());
         reqDTO.setEntityUuId(recordDTO.getEntitySchema().getEntityUuid());
-        reqDTO.setEntityTableName(recordDTO.getEntitySchema().getTableName());
+        reqDTO.setTableName(recordDTO.getEntitySchema().getTableName());
         if (op == SemanticDataMethodOpEnum.CREATE) reqDTO.setTriggerEvent(TriggerEventEnum.AFTER_CREATE);
         else if (op == SemanticDataMethodOpEnum.UPDATE) reqDTO.setTriggerEvent(TriggerEventEnum.AFTER_UPDATE);
         else if (op == SemanticDataMethodOpEnum.DELETE) reqDTO.setTriggerEvent(TriggerEventEnum.AFTER_DELETE);
@@ -137,7 +137,7 @@ public class SemanticWorkflowExecutor {
         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
         reqDTO.setTraceId(recordDTO.getRecordContext().getTraceId());
         reqDTO.setEntityUuId(recordDTO.getEntitySchema().getEntityUuid());
-        reqDTO.setEntityTableName(recordDTO.getEntitySchema().getTableName());
+        reqDTO.setTableName(recordDTO.getEntitySchema().getTableName());
         if (before) {
             if (op == SemanticDataMethodOpEnum.CREATE) reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_CREATE);
             else if (op == SemanticDataMethodOpEnum.UPDATE) reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_UPDATE);

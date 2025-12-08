@@ -34,9 +34,7 @@ public class FlowProcessManager implements ApplicationRunner, MessageListener<Ch
     @Autowired
     private FlowCacheHandler flowCacheHandler;
 
-    @Setter
-    @Autowired
-    private FlowTimeJobHandler flowTimeJobHandler;
+
 
     @Setter
     @Autowired
@@ -72,7 +70,7 @@ public class FlowProcessManager implements ApplicationRunner, MessageListener<Ch
     private class UpdateTimeJob implements Runnable {
         @Override
         public void run() {
-            flowTimeJobHandler.initAllJob();
+            flowCacheHandler.checkTimeJob();
         }
     }
 
@@ -113,7 +111,6 @@ public class FlowProcessManager implements ApplicationRunner, MessageListener<Ch
             if (localVersion == null || localVersion < rVersion) {
                 log.info("更新应用自动化工作流：{}", applicationId);
                 flowCacheHandler.onApplicationChange(applicationId);
-                flowTimeJobHandler.onApplicationChange(applicationId);
                 //
                 versionCache.put(applicationId, rVersion);
             }
@@ -126,7 +123,6 @@ public class FlowProcessManager implements ApplicationRunner, MessageListener<Ch
             if (localVersion == null || localVersion < rVersion) {
                 log.info("删除应用自动化工作流：{}", applicationId);
                 flowCacheHandler.onApplicationDelete(applicationId);
-                flowTimeJobHandler.onApplicationDelete(applicationId);
                 //
                 versionCache.put(applicationId, rVersion);
             }

@@ -68,6 +68,9 @@ public class BpmTaskDetailRespVO {
 
     @Data
     public static class FormData {
+        /**
+         * 主表的表名
+         */
         private String tableName;
 
         /**
@@ -78,16 +81,6 @@ public class BpmTaskDetailRespVO {
         /**
          * 实体字段权限
          */
-        private Map<String, String> fieldPermMap;
-
-        /**
-         * 实体fieldUuid和name映射关系
-         */
-        private Map<String, String> fieldUuidName;
-
-        /**
-         * 实体类型
-         */
-        private Map<String, Object> fieldType;
+        private Map<String, Map<String, String>> fieldPermMap;
     }
 }

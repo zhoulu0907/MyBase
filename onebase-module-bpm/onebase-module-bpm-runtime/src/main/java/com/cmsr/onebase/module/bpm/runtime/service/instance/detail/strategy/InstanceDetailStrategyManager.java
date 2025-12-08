@@ -76,6 +76,9 @@ public class InstanceDetailStrategyManager {
 
         InstanceDetailStrategy<BaseNodeExtDTO> typedStrategy = (InstanceDetailStrategy<BaseNodeExtDTO>) strategy;
         typedStrategy.fillDetail(respVO, nodeExtDTO, instance, loginUserId, isTodo);
+
+        // 暂不给前端返回视图ID todo：待完善
+        respVO.getPageView().setViewId(null);
     }
 }
 

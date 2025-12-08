@@ -5,7 +5,7 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.common.util.string.UuidUtils;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
-import com.cmsr.onebase.module.flow.context.enums.FieldTypeEnum;
+//import com.cmsr.onebase.module.flow.context.enums.FieldTypeEnum;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.*;
 import com.cmsr.onebase.module.metadata.build.controller.admin.relationship.vo.EntityRelationshipSaveReqVO;
 import com.cmsr.onebase.module.metadata.build.service.entity.vo.EntityFieldQueryVO;
@@ -43,6 +43,9 @@ import com.cmsr.onebase.module.metadata.build.service.datasource.MetadataDatasou
 import com.cmsr.onebase.module.metadata.build.service.field.MetadataEntityFieldOptionBuildService;
 import com.cmsr.onebase.module.metadata.build.service.field.MetadataEntityFieldConstraintBuildService;
 import com.cmsr.onebase.module.metadata.build.service.number.AutoNumberConfigBuildService;
+import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.EntityFieldValidationTypesReqVO;
+import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.EntityFieldValidationTypesRespVO;
+import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.ValidationTypeItemRespVO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.number.MetadataAutoNumberConfigDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.number.MetadataAutoNumberRuleItemDO;
 import com.cmsr.onebase.module.metadata.core.enums.BusinessEntityTypeEnum;
@@ -156,13 +159,15 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         if (rawFieldIds == null || rawFieldIds.isEmpty()) {
             return new ArrayList<>();
         }
-        // 过滤空/null/纯空白并去重
+        // 支持ID或UUID：过滤空白，逐个解析
         List<Long> fieldIds = rawFieldIds.stream()
                 .filter(s -> s != null && !s.trim().isEmpty())
-                .map(s -> {
+                .map(String::trim)
+                .map(identifier -> {
                     try {
-                        return Long.valueOf(s.trim());
-                    } catch (NumberFormatException e) {
+                        return idUuidConverter.resolveFieldId(identifier);
+                    } catch (Exception ex) {
+                        log.warn("解析字段标识符失败，已跳过: {}", identifier, ex);
                         return null;
                     }
                 })
@@ -174,12 +179,16 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             return new ArrayList<>();
         }
 
-        // 1) 批量查询字段，获取 fieldId -> fieldType 映射
+        // 1) 批量查询字段，获取 fieldId -> fieldType/UUID 映射
         QueryWrapper queryWrapper = QueryWrapper.create()
                 .in(MetadataEntityFieldDO::getId, fieldIds);
         List<MetadataEntityFieldDO> fields = metadataEntityFieldRepository.list(queryWrapper);
-        Map<String, String> fieldIdToType = fields.stream()
-                .collect(Collectors.toMap(f -> String.valueOf(f.getId()), MetadataEntityFieldDO::getFieldType));
+        Map<Long, String> fieldIdToType = fields.stream()
+                .filter(f -> f.getId() != null)
+                .collect(Collectors.toMap(MetadataEntityFieldDO::getId, MetadataEntityFieldDO::getFieldType));
+        Map<Long, String> fieldIdToUuid = fields.stream()
+                .filter(f -> f.getId() != null && f.getFieldUuid() != null)
+                .collect(Collectors.toMap(MetadataEntityFieldDO::getId, MetadataEntityFieldDO::getFieldUuid));
 
         if (fieldIdToType.isEmpty()) {
             return new ArrayList<>();
@@ -194,7 +203,9 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             // 没有可用类型，直接返回空列表结构
             return fieldIdToType.entrySet().stream().map(e -> {
                 EntityFieldValidationTypesRespVO vo = new EntityFieldValidationTypesRespVO();
-                vo.setFieldUuid(e.getKey());
+                Long fieldId = e.getKey();
+                vo.setFieldId(fieldId);
+                vo.setFieldUuid(fieldIdToUuid.get(fieldId));
                 vo.setFieldTypeCode(e.getValue());
                 vo.setValidationTypes(new ArrayList<>());
                 return vo;
@@ -212,7 +223,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                         MetadataComponentFieldTypeDO::getFieldTypeCode
                 ));
 
-        Map<String, List<EntityFieldValidationTypesRespVO.ValidationTypeItem>> typeToValidation = new HashMap<>();
+        Map<String, List<ValidationTypeItemRespVO>> typeToValidation = new HashMap<>();
         if (!typeIdToCode.isEmpty()) {
             // 2.2 查询关联表（字段类型ID -> 校验类型ID + 排序）
             List<MetadataPermitRefOtftDO> relations = permitRefOtftService.listByFieldTypeIds(typeIdToCode.keySet());
@@ -255,7 +266,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                     if (code == null) {
                         continue;
                     }
-                    EntityFieldValidationTypesRespVO.ValidationTypeItem item = new EntityFieldValidationTypesRespVO.ValidationTypeItem();
+                    ValidationTypeItemRespVO item = new ValidationTypeItemRespVO();
                     item.setCode(code);
                     item.setName(vtIdToName.get(vtId));
                     item.setDescription(vtIdToDesc.get(vtId));
@@ -264,7 +275,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 }
 
                 // 2.5 确保每个列表按 sort_order 升序
-                for (List<EntityFieldValidationTypesRespVO.ValidationTypeItem> list : typeToValidation.values()) {
+                for (List<ValidationTypeItemRespVO> list : typeToValidation.values()) {
                     list.sort((a, b) -> {
                         Integer s1 = a.getSortOrder() != null ? a.getSortOrder() : 0;
                         Integer s2 = b.getSortOrder() != null ? b.getSortOrder() : 0;
@@ -276,9 +287,11 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
         // 3) 按 fieldId 组装返回
         List<EntityFieldValidationTypesRespVO> result = new ArrayList<>();
-        for (Map.Entry<String, String> e : fieldIdToType.entrySet()) {
+        for (Map.Entry<Long, String> e : fieldIdToType.entrySet()) {
             EntityFieldValidationTypesRespVO vo = new EntityFieldValidationTypesRespVO();
-            vo.setFieldUuid(e.getKey());
+            Long fieldId = e.getKey();
+            vo.setFieldId(fieldId);
+            vo.setFieldUuid(fieldIdToUuid.get(fieldId));
             vo.setFieldTypeCode(e.getValue());
             vo.setValidationTypes(typeToValidation.getOrDefault(e.getValue(), new ArrayList<>()));
             result.add(vo);

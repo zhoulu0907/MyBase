@@ -29,6 +29,7 @@ import com.cmsr.onebase.module.system.enums.oauth2.OAuth2ClientConstants;
 import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
 import com.cmsr.onebase.module.system.enums.tenant.TenantCodeEnum;
 import com.cmsr.onebase.module.system.service.corp.CorpService;
+import com.cmsr.onebase.module.system.service.corpapprelation.CorpAppRelationService;
 import com.cmsr.onebase.module.system.service.logger.LoginLogService;
 import com.cmsr.onebase.module.system.service.member.MemberService;
 import com.cmsr.onebase.module.system.service.oauth2.OAuth2TokenService;
@@ -114,6 +115,9 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
 
     @Resource
     private RoleService roleService;
+
+    @Resource
+    private CorpAppRelationService corpAppRelationService;
 
     @Override
     public AdminUserDO authenticate(String username, String password) {
@@ -227,6 +231,10 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
 
             // 使用手机密码，进行登录
             AdminUserDO user = mobileAuthenticate(reqVO.getMobile(), reqVO.getPassword());
+
+            // 验证企业下，应用是否禁用，是否过期
+            corpAppRelationService.validCorpAppRelationStatusOrExpireTime(user.getCorpId(),reqVO.getAppId());
+
             authLoginRespVO.set(createAfterLoginSuccess(user.getUserType(), user.getCorpId(), reqVO.getAppId(), user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE));
             LogRecordContext.putVariable("user", user);
         });

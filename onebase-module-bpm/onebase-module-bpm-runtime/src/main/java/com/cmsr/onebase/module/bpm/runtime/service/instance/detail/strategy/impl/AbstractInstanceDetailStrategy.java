@@ -8,11 +8,11 @@ import com.cmsr.onebase.module.bpm.core.dto.node.base.FieldPermCfgDTO;
 import com.cmsr.onebase.module.bpm.core.enums.BpmConstants;
 import com.cmsr.onebase.module.bpm.core.enums.FieldPermTypeEnum;
 import com.cmsr.onebase.module.bpm.core.enums.FieldUiShowModeEnum;
+import com.cmsr.onebase.module.bpm.runtime.helper.BpmEntityHelper;
 import com.cmsr.onebase.module.bpm.runtime.service.instance.detail.strategy.InstanceDetailStrategy;
 import com.cmsr.onebase.module.bpm.runtime.vo.BpmTaskDetailRespVO;
 import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntitySchemaDTO;
-import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO;
 import jakarta.annotation.Resource;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -33,6 +33,9 @@ public abstract class AbstractInstanceDetailStrategy<T extends BaseNodeExtDTO> i
     @Resource
     protected SemanticDynamicDataApi semanticDynamicDataApi;
 
+    @Resource
+    protected BpmEntityHelper bpmEntityHelper;
+
     /**
      * 填充按钮配置（节点类型相关）
      *
@@ -48,7 +51,8 @@ public abstract class AbstractInstanceDetailStrategy<T extends BaseNodeExtDTO> i
      *
      * @param vo 详情VO
      * @param extDTO 节点扩展信息
-     * @param entityId 实体ID
+     * @param tableName 实体ID
+     * isTodo 是否待办
      */
     protected void fillFieldPermConfig(BpmTaskDetailRespVO vo, T extDTO, String tableName, boolean isTodo) {
         // 由子类实现，默认什么都不做
@@ -61,61 +65,111 @@ public abstract class AbstractInstanceDetailStrategy<T extends BaseNodeExtDTO> i
         }
 
         SemanticEntitySchemaDTO entitySchema = semanticDynamicDataApi.buildEntitySchemaByTableName(tableName);
-        List<SemanticFieldSchemaDTO> entityFields = entitySchema.getFields();
+        Map<String, Map<String, String>> fieldPermMap = new HashMap<>();
 
-        Map<String, SemanticFieldSchemaDTO> entityFieldMap = new HashMap<>();
-        Map<String, String> fieldPermMap = new HashMap<>();
-        Map<String, String> fieldUuidNameMap = new HashMap<>();
+        // 非系统字段
+        Map<String, Set<String>> nonSystemFields = bpmEntityHelper.getNonSystemFields(entitySchema);
 
-        // 默认所有字段都为只读
-        for (SemanticFieldSchemaDTO entityField : entityFields) {
-            entityFieldMap.put(entityField.getFieldUuid(), entityField);
-            fieldPermMap.put(entityField.getFieldUuid(), FieldUiShowModeEnum.READ.getCode());
-            fieldUuidNameMap.put(entityField.getFieldUuid(), entityField.getFieldName());
-        }
+        // 默认都readonly
+        nonSystemFields.forEach((key, val) -> {
+            fieldPermMap.putIfAbsent(key, new HashMap<>());
+
+            // 如果是子表，再加上子表本身的权限
+            if (!Objects.equals(key, tableName)) {
+                fieldPermMap.get(key).put(key, FieldUiShowModeEnum.READ.getCode());
+            }
+
+            for (String s : val) {
+                fieldPermMap.get(key).put(s, FieldUiShowModeEnum.READ.getCode());
+            }
+        });
 
         vo.getFormData().setFieldPermMap(fieldPermMap);
 
-        // 这里只是为了方便查看uuid和name的关联关系，业务上暂时没用上
-        vo.getFormData().setFieldUuidName(fieldUuidNameMap);
-
         // 没有配置字段权限，则返回只读权限
-        if (!CollectionUtils.isNotEmpty(fieldPermConfig.getFieldConfigs())) {
+        if (CollectionUtils.isEmpty(fieldPermConfig.getFieldConfigs())) {
             return;
         }
 
-        Set<String> hiddenFieldNames = new HashSet<>();
+        // 隐藏字段
+        Map<String, Set<String>> hiddenFieldNameMap = new HashMap<>();
 
-        // 处理节点配置的字段权限 todo: 处理子表字段权限
         for (FieldPermCfgDTO.FieldConfigDTO fieldConfig : fieldPermConfig.getFieldConfigs()) {
-            // 在实体字段中不存在的，直接跳过
-            SemanticFieldSchemaDTO entityField = entityFieldMap.get(fieldConfig.getFieldUuid());
-            if (entityField == null) {
+            String permTableName = fieldConfig.getTableName();
+
+            // 通过 tableName 查找权限Map
+            Map<String, String> currFieldPermMap = fieldPermMap.get(permTableName);
+            if (MapUtils.isEmpty(currFieldPermMap)) {
+                continue;
+            }
+
+            String permFieldName = fieldConfig.getFieldName();
+
+            // 实体本身不存在字段则直接跳过
+            if (!currFieldPermMap.containsKey(permFieldName)) {
                 continue;
             }
 
             // 处理隐藏字段
             if (Objects.equals(FieldPermTypeEnum.HIDDEN.getCode(), fieldConfig.getFieldPermType())) {
-                // 这里才是字段的英文名
-                hiddenFieldNames.add(entityField.getFieldName());
-                fieldPermMap.put(fieldConfig.getFieldUuid(), FieldUiShowModeEnum.HIDDEN.getCode());
+                hiddenFieldNameMap.putIfAbsent(permTableName, new HashSet<>());
+                hiddenFieldNameMap.get(permTableName).add(permFieldName);
+
+                currFieldPermMap.put(permFieldName, FieldUiShowModeEnum.HIDDEN.getCode());
             } else if (Objects.equals(FieldPermTypeEnum.READ.getCode(), fieldConfig.getFieldPermType())) {
-                fieldPermMap.put(fieldConfig.getFieldUuid(), FieldUiShowModeEnum.READ.getCode());
+                currFieldPermMap.put(permFieldName, FieldUiShowModeEnum.READ.getCode());
             } else if (Objects.equals(FieldPermTypeEnum.WRITE.getCode(), fieldConfig.getFieldPermType())) {
                 if (isTodo) {
-                    fieldPermMap.put(fieldConfig.getFieldUuid(), FieldUiShowModeEnum.WRITE.getCode());
+                    currFieldPermMap.put(permFieldName, FieldUiShowModeEnum.WRITE.getCode());
                 } else {
                     // 非待办的情况下，都是只读
-                    fieldPermMap.put(fieldConfig.getFieldUuid(), FieldUiShowModeEnum.READ.getCode());
+                    currFieldPermMap.put(permFieldName, FieldUiShowModeEnum.READ.getCode());
                 }
             }
         }
 
         // 移除隐藏字段在表单数据中的值
-        if (CollectionUtils.isNotEmpty(hiddenFieldNames)) {
-            for (String hiddenFieldName : hiddenFieldNames) {
-                vo.getFormData().getData().remove(hiddenFieldName);
-            }
+        if (MapUtils.isNotEmpty(hiddenFieldNameMap)) {
+            Map<String, Object> entityData = vo.getFormData().getData();
+
+            hiddenFieldNameMap.forEach((k, v) -> {
+                // 主表
+                if (Objects.equals(k, tableName)) {
+                    // 移除主表的隐藏字段值
+                    for (String s : v) {
+                        entityData.remove(s);
+                    }
+                } else {
+                    // 子表
+                    Object subTableData = entityData.get(k);
+
+                    // 子表需要是列表类型，否则直接返回
+                    if (!(subTableData instanceof List<?> subTableList)) {
+                        return;
+                    }
+
+                    // 子表为空也不用处理
+                    if (CollectionUtils.isEmpty(subTableList)) {
+                        return;
+                    }
+
+                    Set<String> nonSystemFieldNames = nonSystemFields.get(k);
+
+                    // 子表如果所有字段全部非系统字段全部隐藏，则直接移除数据
+                    if (v.containsAll(nonSystemFieldNames)) {
+                        entityData.remove(k);
+                    } else {
+                        // 移除指定的字段值
+                        for (Object subTableItem : subTableList) {
+                            if (subTableItem instanceof Map<?, ?> subTableItemMap) {
+                                for (String s : v) {
+                                    subTableItemMap.remove(s);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
         }
     }
 
@@ -127,7 +181,6 @@ public abstract class AbstractInstanceDetailStrategy<T extends BaseNodeExtDTO> i
     protected void fillPageViewInfo(BpmTaskDetailRespVO vo, Instance instance, boolean isTodo) {
         PageViewGroupDTO viewGroupDTO = getPageViewGroupDTO(instance);
 
-        // todo 更新最新的pageId
         // 默认获取详情视图
         vo.setPageView(viewGroupDTO.getDetailPageView());
     }

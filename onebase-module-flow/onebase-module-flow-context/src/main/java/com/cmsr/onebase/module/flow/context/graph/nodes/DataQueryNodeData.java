@@ -16,14 +16,14 @@ import java.util.List;
 public class DataQueryNodeData extends NodeData implements Serializable {
 
     /**
-     * mainEntity
-     * subEntity
+     * mainTable
+     * subTable
      */
     private String dataType;
 
-    private Long mainEntityId;
+    private String mainTableName;
 
-    private Long subEntityId;
+    private String subTableName;
 
     /**
      * all
@@ -31,6 +31,9 @@ public class DataQueryNodeData extends NodeData implements Serializable {
      */
     private String filterType;
 
+    /**
+     * 数据透传给API接口，不需要转换类型，因此不需要补充fieldType
+     */
     private List<Conditions> filterCondition;
 
     private List<SortItem> sortBy;
