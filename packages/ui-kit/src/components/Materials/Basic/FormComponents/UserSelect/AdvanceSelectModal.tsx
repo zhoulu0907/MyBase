@@ -3,7 +3,7 @@ import TabPane from '@arco-design/web-react/es/Tabs/tab-pane';
 import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useState } from 'react';
 
-import { DeptMember } from '@onebase/common';
+import { DeptMember, isRuntimeEnv } from '@onebase/common';
 import { GetDeptUserReq, getSimpleUserPage, UserVO, getDeptUser } from '@onebase/platform-center';
 
 import './index.css';
@@ -14,9 +14,8 @@ const UserTab = '1';
 const DeptTab = '2';
 
 interface AdvanceSelectModalProps {
-    runtime: boolean | undefined;
     visible: boolean;
-    currentSelectUserID: number | undefined;
+    currentSelectUserID: string | undefined;
     status: string| undefined;
     detailMode: boolean| undefined;
     onCancel: any;
@@ -24,7 +23,6 @@ interface AdvanceSelectModalProps {
 }
 
 const AdvanceSelectModal: React.FC<AdvanceSelectModalProps> = ({
-  runtime,
   visible,
   currentSelectUserID,
   status,
@@ -52,7 +50,7 @@ const AdvanceSelectModal: React.FC<AdvanceSelectModalProps> = ({
   const [finalSelect, setFinalSelect] = useState<any>();
 
     useEffect(() => {
-        if (runtime && status !== STATUS_VALUES[STATUS_OPTIONS.READONLY] && !detailMode) {
+        if (isRuntimeEnv() && status !== STATUS_VALUES[STATUS_OPTIONS.READONLY] && !detailMode) {
           getUserData('');
           getDeptUsers({});
         }
