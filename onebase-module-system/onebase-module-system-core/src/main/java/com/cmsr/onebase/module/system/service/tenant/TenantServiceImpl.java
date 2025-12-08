@@ -585,6 +585,7 @@ public class TenantServiceImpl implements TenantService {
                                 .setAdminNickName(uservo.getNickname())
                                 .setAdminEmail(uservo.getEmail())
                                 .setPlatformUserId(uservo.getPlatformUserId())
+                                .setAdminAvatar(uservo.getAvatar())
 
                         )
                         .collect(Collectors.toList());
