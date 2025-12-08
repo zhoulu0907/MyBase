@@ -22,7 +22,6 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
     dataField,
     tooltip,
     status,
-    placeholder,
     defaultValue,
     verify,
     layout,
@@ -146,7 +145,6 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
     <div className="dataSelectTrigger" onClick={() => internalEvents.openPreview()}>
       <Input
         readOnly
-        placeholder={placeholder}
         value={helpers.getDisplayText(dataState)}
         suffix={
           !!helpers.getDisplayText(dataState) ? (
@@ -178,7 +176,6 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
       <div>
         <Input value={selectedId} hidden />
         <Select
-          placeholder={placeholder}
           showSearch
           allowClear
           value={selectedId}
