@@ -39,9 +39,6 @@ import java.util.Map;
 public class FlowProcessExecServiceImpl implements FlowProcessExecService {
 
     @Autowired
-    private FlowProcessCache flowProcessCache;
-
-    @Autowired
     private FlowProcessExecutor flowProcessExecutor;
 
     private ExpressionExecutor expressionExecutor = new ExpressionExecutor();
@@ -49,16 +46,15 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
     @Override
     public List<QueryFormTriggerRespVO> queryFormTrigger(String pageUuid) {
         Long applicationId = ApplicationManager.getApplicationId();
-        List<StartFormNodeData> startFormNodeDataList = flowProcessCache.findStartFormNodeDataByPageUuid(applicationId, pageUuid);
+        List<StartFormNodeData> startFormNodeDataList = FlowProcessCache.findStartFormNodeDataByPageUuid(applicationId, pageUuid);
         return startFormNodeDataList.stream()
                 .map(startFormNodeData -> BeanUtils.toBean(startFormNodeData, QueryFormTriggerRespVO.class))
                 .toList();
     }
 
-
     @Override
     public FormTriggerRespVO triggerForm(FormTriggerReqVO reqVO) {
-        StartFormNodeData startFormNodeData = flowProcessCache.findStartFormNodeDataByProcessId(reqVO.getProcessId());
+        StartFormNodeData startFormNodeData = FlowProcessCache.findStartFormNodeDataByProcessId(reqVO.getProcessId());
         if (startFormNodeData == null) {
             FormTriggerRespVO vo = formNotTriggerRespVO();
             vo.setMessage("流程不存在");
