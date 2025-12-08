@@ -3,28 +3,32 @@ import TabPane from '@arco-design/web-react/es/Tabs/tab-pane';
 import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useState } from 'react';
 
-import { getDeptUser, GetDeptUserReq } from '@onebase/app';
-import { DeptMember } from '@onebase/common';
-import { getSimpleUserPage, UserVO } from '@onebase/platform-center';
+import { DeptMember, isRuntimeEnv } from '@onebase/common';
+import { GetDeptUserReq, getSimpleUserPage, UserVO, getDeptUser } from '@onebase/platform-center';
 
 import './index.css';
+import { STATUS_OPTIONS, STATUS_VALUES } from '@/components/Materials/constants';
 
 const RadioGroup = Radio.Group;
 const UserTab = '1';
 const DeptTab = '2';
 
 interface AdvanceSelectModalProps {
-  runtime: boolean | undefined;
-  visible: boolean;
-  currentSelectUserID: string | undefined;
-  onCancel: any;
-  onOk: any;
+    runtime: boolean | undefined;
+    visible: boolean;
+    currentSelectUserID: string | undefined;
+    status: string| undefined;
+    detailMode: boolean| undefined;
+    onCancel: any;
+    onOk: any;
 }
 
 const AdvanceSelectModal: React.FC<AdvanceSelectModalProps> = ({
   runtime,
   visible,
   currentSelectUserID,
+  status,
+  detailMode,
   onCancel,
   onOk
 }) => {
@@ -47,12 +51,12 @@ const AdvanceSelectModal: React.FC<AdvanceSelectModalProps> = ({
 
   const [finalSelect, setFinalSelect] = useState<any>();
 
-  useEffect(() => {
-    if (runtime === true) {
-      getUserData('');
-      getDeptUsers({});
-    }
-  }, []);
+    useEffect(() => {
+      if (runtime && status !== STATUS_VALUES[STATUS_OPTIONS.READONLY] && !detailMode) {
+        getUserData('');
+        getDeptUsers({});
+      }
+    }, []);
 
   useEffect(() => {
     let finalSelectValue = undefined;
@@ -151,7 +155,6 @@ const AdvanceSelectModal: React.FC<AdvanceSelectModalProps> = ({
     setMemberLoading(true);
     try {
       const params: GetDeptUserReq = {
-        roleId: '37775560235057153', //TODO
         deptId,
         keywords
       };

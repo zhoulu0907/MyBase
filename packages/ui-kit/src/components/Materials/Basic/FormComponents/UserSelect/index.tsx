@@ -235,6 +235,8 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
         runtime={runtime}
         visible={advanceVisible}
         currentSelectUserID={currentSelectUserID}
+        status={status}
+        detailMode={detailMode}
         onCancel={() => setAdvanceVisible(false)}
         onOk={(value: any) => handleOKModal(value)}
       />
