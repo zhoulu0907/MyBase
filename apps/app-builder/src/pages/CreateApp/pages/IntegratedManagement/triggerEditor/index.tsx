@@ -99,7 +99,7 @@ const TriggerEditor = () => {
           const formInitialData = {
             ...StartFormInitData.nodes[0].data.initialData,
             filterCondition: [],
-            pageId: res.triggerConfig.pageId,
+            pageUuid: res.triggerConfig.pageUuid,
             triggerRange: res.triggerConfig.triggerRange
           };
           setNodeData(StartFormInitData.nodes[0].id, formInitialData);
@@ -129,7 +129,7 @@ const TriggerEditor = () => {
           setInitData(StartDateFieldInitData);
           const dateFieldInitialData = {
             ...StartDateFieldInitData.nodes[0].data.initialData,
-            entityId: res.triggerConfig.entityId
+            tableName: res.triggerConfig.tableName
           };
           setNodeData(StartDateFieldInitData.nodes[0].id, dateFieldInitialData);
           setNodeData(StartDateFieldInitData.nodes[1].id, StartDateFieldInitData.nodes[1].data.initialData);

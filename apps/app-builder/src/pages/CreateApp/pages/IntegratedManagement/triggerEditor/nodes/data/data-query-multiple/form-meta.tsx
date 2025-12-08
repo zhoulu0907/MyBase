@@ -1,29 +1,15 @@
-import { RELATIONSHIP_TYPE } from '@/pages/CreateApp/pages/DataFactory/utils/types';
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
-import { useAppStore } from '@/store/store_app';
 import { Form, Grid, Input, InputNumber, Radio, Select } from '@arco-design/web-react';
 import type { TreeSelectDataType } from '@arco-design/web-react/es/TreeSelect/interface';
 import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
-import {
-  DATA_SOURCE_TYPE,
-  FILTER_TYPE,
-  getEntityFieldsWithChildren,
-  getEntityListByApp,
-  getFieldCheckTypeApi,
-  RELATION_TYPE,
-  type AppEntityField,
-  type ChildEntity,
-  type ConditionField,
-  type EntityFieldValidationTypes,
-  type MetadataEntityPair
-} from '@onebase/app';
+import { DATA_SOURCE_TYPE, FILTER_TYPE, type ConditionField } from '@onebase/app';
 import { NodeType } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useMemo, useState } from 'react';
 import ConditionEditor from '../../../components/condition-editor';
 import SortByEditor from '../../../components/sortby-editor';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
-import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
+import { useEntityFields, useIsSidebar, useMainEntityList, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
 import { getDataNodeSource, getPrecedingNodes, validateNodeForm } from '../../utils';
 
@@ -41,8 +27,21 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   const isSidebar = useIsSidebar();
   const { node } = useNodeRenderContext();
-  // 当前页应用id
-  const { curAppId } = useAppStore();
+  const { mainEntityList } = useMainEntityList();
+  const {
+    subEntityList,
+    mainEntityFields,
+    subEntityFields,
+    dataNodeEntityFields,
+    validationTypes,
+    handleMainTableChange,
+    handleSubTableChange,
+    handleDataNodeChange,
+    resetFields
+  } = useEntityFields();
+
+  const [dataNodeList, setDataNodeList] = useState<any[]>([]);
+  const [conditionFields, setConditionFields] = useState<ConditionField[]>([]);
   const [payloadForm] = Form.useForm();
 
   const dataType = Form.useWatch('dataType', payloadForm);
@@ -50,346 +49,57 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const subTableName = Form.useWatch('subTableName', payloadForm);
   const filterType = Form.useWatch('filterType', payloadForm);
 
-  // 数据源选择
-  const [subEntityList, setSubEntityList] = useState<MetadataEntityPair[]>([]);
-  const [mainEntityList, setMainEntityList] = useState<MetadataEntityPair[]>([]);
-  const [dataNodeList, setDataNodeList] = useState<any[]>([]);
-
-  // 查询规则
-  const [validationTypes, setValidationTypes] = useState<EntityFieldValidationTypes[]>([]);
-
-  const [mainEntityFields, setMainEntityFields] = useState<TreeSelectDataType>([]);
-  const [subEntityFields, setSubEntityFields] = useState<TreeSelectDataType[]>([]);
-  const [dataNodeEntityFields, setDataNodeEntityFields] = useState<TreeSelectDataType>([]);
-
-  const [conditionFields, setConditionFields] = useState<ConditionField[]>([]);
-
   useEffect(() => {
     payloadForm && validateNodeForm(form, payloadForm, true);
   }, [payloadForm]);
 
   useEffect(() => {
-    // 初始化 获取实体和数据节点列表数据，用于下拉菜单
-    getEntityList();
-    // 从缓存中载入节点数据
-    init();
-  }, []);
+    const nodes = triggerEditorSignal.nodes.value;
+    const newDataNodeList = getPrecedingNodes(node.id, nodes, ALLOW_DATANODE_TYPES);
+    setDataNodeList(newDataNodeList);
 
-  /**
-   * 数据查询方式变更（主表、子表、数据节点中查询）
-   * 更新数据源下拉列表，清除已选择数据源
-   * 更新条件过滤
-   * 清除排序字段下拉列表，清除已选择排序字段
-   */
+    const nodeData = triggerEditorSignal.nodeData.value[node.id];
+    if (nodeData?.dataType && mainEntityList.length > 0) {
+      if (
+        (nodeData.dataType === DATA_SOURCE_TYPE.MAIN_TABLE || nodeData.dataType === DATA_SOURCE_TYPE.SUB_TABLE) &&
+        nodeData?.mainTableName
+      ) {
+        handleMainTableChange(nodeData.mainTableName, mainEntityList).then(() => {
+          if (nodeData.dataType === DATA_SOURCE_TYPE.SUB_TABLE && nodeData?.subTableName) {
+            setTimeout(() => {
+              handleSubTableChange(nodeData.subTableName, subEntityList);
+            }, 100);
+          }
+        });
+      } else if (nodeData.dataType === DATA_SOURCE_TYPE.DATA_NODE && nodeData?.dataNodeId) {
+        handleDataNodeChange(nodeData.dataNodeId, getDataNodeSource);
+      }
+    }
+  }, [mainEntityList.length]);
+
+  // 查询方式变更
   const handleDataTypeChange = (curDataType: DATA_SOURCE_TYPE) => {
     payloadForm.clearFields(['mainTableName', 'subTableName', 'filterCondition', 'sortBy']);
-
-    setMainEntityList([]);
-    setSubEntityList([]);
-    setDataNodeList([]);
-    setValidationTypes([]);
-
-    getEntityList(curDataType);
+    resetFields();
   };
 
-  const init = async () => {
-    const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    if (nodeData) {
-      const curEntityList = await getEntityListByApp(curAppId);
-
-      const curMainEntities = curEntityList.filter(
-        (item: MetadataEntityPair) =>
-          item.relationType !== RELATION_TYPE.SLAVE ||
-          (item.relationType === RELATION_TYPE.SLAVE &&
-            !item.relationshipTypes.includes(RELATIONSHIP_TYPE.SUBTABLE_ONE_TO_MANY))
-      );
-
-      if (nodeData.dataType === DATA_SOURCE_TYPE.MAIN_TABLE || nodeData.dataType === DATA_SOURCE_TYPE.SUB_TABLE) {
-        if (!nodeData?.mainTableName) {
-          return;
-        }
-
-        const mainEntityId = curMainEntities.find(
-          (item: MetadataEntityPair) => item.tableName === nodeData.mainTableName
-        )?.entityId;
-
-        if (!mainEntityId) {
-          return;
-        }
-
-        const fieldIds: string[] = [];
-        const res = await getEntityFieldsWithChildren(mainEntityId);
-
-        const newSubEntityList = (res.childEntities || []).map((item: any) => {
-          return {
-            entityId: item.childEntityId,
-            tableName: item.childTableName,
-            entityName: item.childEntityName
-          };
-        });
-
-        setSubEntityList(newSubEntityList);
-
-        if (res.parentFields) {
-          const fields = res.parentFields.map((item: AppEntityField) => {
-            fieldIds.push(item.fieldId);
-            return {
-              key: `${res.tableName}.${item.fieldName}`,
-              title: item.displayName,
-              fieldType: item.fieldType
-            };
-          });
-
-          setMainEntityFields({
-            key: res.entityId,
-            title: res.entityName,
-            children: fields
-          });
-        }
-
-        if (res.childEntities) {
-          const subFields: TreeSelectDataType[] = [];
-          res.childEntities.forEach((subEntity: ChildEntity) => {
-            const fields = subEntity.childFields.map((item: AppEntityField) => {
-              fieldIds.push(item.fieldId);
-              return {
-                key: `${subEntity.childTableName}.${item.fieldName}`,
-                title: item.displayName,
-                fieldType: item.fieldType
-              };
-            });
-            subFields.push({
-              key: subEntity.childEntityId,
-              title: subEntity.childEntityName,
-              children: fields
-            });
-          });
-
-          setSubEntityFields(subFields);
-        }
-
-        const newValidationTypes = await getFieldCheckTypeApi(fieldIds);
-
-        newValidationTypes.forEach((item: EntityFieldValidationTypes) => {
-          const fieldName =
-            [...res.parentFields].find((field: AppEntityField) => field.fieldId == item.fieldId)?.fieldName || '';
-          item.fieldKey = `${res.tableName}.${fieldName}`;
-
-          if (!fieldName) {
-            for (const subEntity of res.childEntities) {
-              const foundField = subEntity.childFields.find((field: AppEntityField) => field.fieldId == item.fieldId);
-              if (foundField) {
-                // 同时返回字段名和子表tableName
-                item.fieldKey = `${subEntity.childTableName}.${foundField.fieldName}`;
-              }
-            }
-          }
-        });
-
-        setValidationTypes(newValidationTypes);
-      }
-
-      if (nodeData.dataType === DATA_SOURCE_TYPE.DATA_NODE) {
-        if (!nodeData?.dataNodeId) {
-          return;
-        }
-
-        const fieldIds: string[] = [];
-
-        const originDataSource = getDataNodeSource(nodeData?.dataNodeId);
-        const entityId = curEntityList.find(
-          (item: MetadataEntityPair) => item.tableName === originDataSource
-        )?.entityId;
-
-        const res = await getEntityFieldsWithChildren(entityId);
-
-        if (res.parentFields) {
-          const fields = res.parentFields.map((item: AppEntityField) => {
-            fieldIds.push(item.fieldId);
-            return {
-              key: `${originDataSource}.${item.fieldName}`,
-              title: item.displayName,
-              fieldType: item.fieldType
-            };
-          });
-
-          setDataNodeEntityFields({
-            key: res.entityId,
-            title: res.entityName,
-            children: fields
-          });
-        }
-
-        const newValidationTypes = await getFieldCheckTypeApi(fieldIds);
-        newValidationTypes.forEach((item: EntityFieldValidationTypes) => {
-          const fieldName =
-            [...res.parentFields].find((field: AppEntityField) => field.fieldId == item.fieldId)?.fieldName || '';
-          item.fieldKey = `${originDataSource}.${fieldName}`;
-        });
-
-        setValidationTypes(newValidationTypes);
-      }
-    }
-  };
-
-  const getEntityList = async (curDateType?: DATA_SOURCE_TYPE) => {
-    if (curDateType === DATA_SOURCE_TYPE.MAIN_TABLE || DATA_SOURCE_TYPE.SUB_TABLE || curDateType === undefined) {
-      // 从主表中查询  FORM
-      const res = await getEntityListByApp(curAppId);
-      setMainEntityList(res);
-    }
-    if (curDateType === DATA_SOURCE_TYPE.ASSOCIA_FORM || curDateType === undefined) {
-      // 从关联表单中查询  ASSOCIA_FORM
-    }
-
-    if (curDateType === DATA_SOURCE_TYPE.DATA_NODE || curDateType === undefined) {
-      // 从上游数据节点查询
-      const nodes = triggerEditorSignal.nodes.value;
-      // 过滤掉当前节点,过滤blocks,并且只能选当前节点之前的节点
-      const newDataNodeList = getPrecedingNodes(node.id, nodes, ALLOW_DATANODE_TYPES);
-      setDataNodeList(newDataNodeList);
-    }
-  };
-
+  // 主表数据变更
   const handleMainTableNameChange = async (curMainTableName: string) => {
     payloadForm.clearFields(['subTableName', 'dataNodeId', 'filterCondition', 'sortBy']);
-
-    setSubEntityList([]);
-    setDataNodeList([]);
-    setValidationTypes([]);
-
-    const fieldIds: string[] = [];
-
-    const mainEntityId = mainEntityList.find((item) => item.tableName === curMainTableName)?.entityId;
-    if (!mainEntityId) {
-      return;
-    }
-
-    const res = await getEntityFieldsWithChildren(mainEntityId);
-    console.log(res);
-
-    const newEntityList = (res.childEntities || []).map((item: any) => {
-      return {
-        entityId: item.childEntityId,
-        entityName: item.childEntityName
-      };
-    });
-
-    setSubEntityList(newEntityList);
-
-    if (res.parentFields) {
-      const fields = res.parentFields.map((item: AppEntityField) => {
-        fieldIds.push(item.fieldId);
-        return {
-          key: `${res.tableName}.${item.fieldName}`,
-          title: item.displayName,
-          fieldType: item.fieldType
-        };
-      });
-      setMainEntityFields({
-        key: res.entityId,
-        title: res.entityName,
-        children: fields
-      });
-    }
-
-    if (res.childEntities) {
-      const subFields: TreeSelectDataType[] = [];
-      res.childEntities.forEach((subEntity: ChildEntity) => {
-        const fields = subEntity.childFields.map((item: AppEntityField) => {
-          fieldIds.push(item.fieldId);
-          return {
-            key: `${subEntity.childTableName}.${item.fieldName}`,
-            title: item.displayName,
-            fieldType: item.fieldType
-          };
-        });
-        subFields.push({
-          key: subEntity.childEntityId,
-          title: subEntity.childEntityName,
-          children: fields
-        });
-      });
-
-      setSubEntityFields(subFields);
-    }
-
-    const newValidationTypes = await getFieldCheckTypeApi(fieldIds);
-    newValidationTypes.forEach((item: EntityFieldValidationTypes) => {
-      const fieldName =
-        [...res.parentFields].find((field: AppEntityField) => field.fieldId == item.fieldId)?.fieldName || '';
-      item.fieldKey = `${res.tableName}.${fieldName}`;
-
-      if (!fieldName) {
-        for (const subEntity of res.childEntities) {
-          const foundField = subEntity.childFields.find((field: AppEntityField) => field.fieldId == item.fieldId);
-          if (foundField) {
-            // 同时返回字段名和子表tableName
-            item.fieldKey = `${subEntity.childTableName}.${foundField.fieldName}`;
-          }
-        }
-      }
-    });
-    setValidationTypes(newValidationTypes);
+    await handleMainTableChange(curMainTableName, mainEntityList);
   };
 
-  const handleSubTableNameChange = (_curSubEntityId: string) => {
+  // 子表数据变更
+  const handleSubTableNameChange = async (curSubTableName: string) => {
     payloadForm.clearFields(['dataNodeId', 'filterCondition', 'sortBy']);
+    await handleSubTableChange(curSubTableName, subEntityList);
   };
 
+  // 数据节点变更
   const handleDateNodeSourceChange = async (dataNodeId: string) => {
     payloadForm.clearFields(['mainTableName', 'subTableName', 'filterCondition', 'sortBy']);
-
-    setMainEntityList([]);
-    setSubEntityList([]);
-    setValidationTypes([]);
-
-    const fieldIds: string[] = [];
-
-    const originDataSource = getDataNodeSource(dataNodeId);
-
-    const curEntityList = await getEntityListByApp(curAppId);
-    const entityId = curEntityList.find((item: MetadataEntityPair) => item.tableName === originDataSource)?.entityId;
-    if (!entityId) {
-      return;
-    }
-
-    const res = await getEntityFieldsWithChildren(originDataSource);
-
-    if (res.parentFields) {
-      const fields = res.parentFields.map((item: AppEntityField) => {
-        fieldIds.push(item.fieldId);
-        return {
-          key: `${res.tableName}.${item.fieldName}`,
-          title: item.displayName,
-          fieldType: item.fieldType
-        };
-      });
-
-      setDataNodeEntityFields({
-        key: res.entityId,
-        title: res.entityName,
-        children: fields
-      });
-    }
-
-    const newValidationTypes = await getFieldCheckTypeApi(fieldIds);
-    newValidationTypes.forEach((item: EntityFieldValidationTypes) => {
-      const fieldName =
-        [...res.parentFields].find((field: AppEntityField) => field.fieldId == item.fieldId)?.fieldName || '';
-      item.fieldKey = `${res.tableName}.${fieldName}`;
-
-      if (!fieldName) {
-        for (const subEntity of res.childEntities) {
-          const foundField = subEntity.childFields.find((field: AppEntityField) => field.fieldId == item.fieldId);
-          if (foundField) {
-            // 同时返回字段名和子表tableName
-            item.fieldKey = `${subEntity.childTableName}.${foundField.fieldName}`;
-          }
-        }
-      }
-    });
-    setValidationTypes(newValidationTypes);
+    resetFields();
+    await handleDataNodeChange(dataNodeId, getDataNodeSource);
   };
 
   const handleFilterTypeChange = (_value: FILTER_TYPE) => {
@@ -410,7 +120,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     if (dataType === DATA_SOURCE_TYPE.DATA_NODE) {
       return [dataNodeEntityFields];
     }
-
     return [];
   }, [dataType, mainEntityFields, subEntityFields, mainTableName, subTableName, dataNodeEntityFields]);
 
@@ -446,13 +155,15 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
         })) || []
       );
     }
-
     return [];
   }, [dataType, mainEntityFields, subEntityFields, mainTableName, subTableName, dataNodeEntityFields]);
 
+  useEffect(() => {
+    setConditionFields(conditionFieldsForEditor);
+  }, [conditionFieldsForEditor]);
+
   const getInitData = () => {
     return {
-      // 初始值写前面,覆写放后面
       maxCount: 500,
       ...triggerEditorSignal.nodeData.value[node.id]
     };
@@ -473,7 +184,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                 <Radio value={DATA_SOURCE_TYPE.MAIN_TABLE}>从主表中查询</Radio>
                 <Radio value={DATA_SOURCE_TYPE.SUB_TABLE}>从子表中查询</Radio>
                 <Radio value={DATA_SOURCE_TYPE.DATA_NODE}>从数据节点中查询</Radio>
-                {/* <Radio value={DATA_SOURCE_TYPE.ASSOCIA_FORM}>从关联表单中查询</Radio> */}
               </Radio.Group>
             </Form.Item>
 
@@ -522,7 +232,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                 </Grid.Col>
                 <Grid.Col span={9}>
                   <Form.Item
-                    field="subEntityId"
+                    field="subTableName"
                     disabled={!mainTableName}
                     rules={[{ required: true, message: '请选择' }]}
                   >
@@ -592,7 +302,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                   data={triggerEditorSignal.nodeData.value[node.id]?.sortBy || []}
                   fields={conditionFields}
                   form={payloadForm}
-                ></SortByEditor>
+                />
               </Form.Item>
             </Grid.Row>
 
