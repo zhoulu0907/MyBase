@@ -135,7 +135,7 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
                 {editMode.value === EditMode.MOBILE ? (
                   <div id="mobile-editor-preview-list" style={{ width: '100%' }}></div>
                 ) : (
-                  <Form layout="inline">
+                  <Form layout="inline" labelCol={{ span: 10 }} wrapperCol={{ span: 14 }}>
                     {getFormContent()}
                   </Form>
                 )}

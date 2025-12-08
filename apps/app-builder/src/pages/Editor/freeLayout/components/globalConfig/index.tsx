@@ -21,7 +21,6 @@ export function GlobalConfig(props = { visible: false, onClose: () => {} }) {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const pageSetId = searchParams.get('pageSetId') || '';
-  console.log(formSummaryOptions);
   
   const initUserData = () => {
     const params: PageParam = {
