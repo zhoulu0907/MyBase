@@ -1,8 +1,7 @@
 import { Carousel, Form } from '@arco-design/web-react';
 import { memo } from 'react';
-import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-// import '../index.css';
-import './index.css';
+import { STATUS_OPTIONS, STATUS_VALUES } from '../../core/constants';
+import styles from './index.module.css';
 import { type XCarouselConfig } from './schema';
 
 const XCarousel = memo((props: XCarouselConfig & { runtime?: boolean }) => {
@@ -11,44 +10,33 @@ const XCarousel = memo((props: XCarouselConfig & { runtime?: boolean }) => {
     label,
     verify,
     // status,
-    interval = 3,
+    interval = 4,
     carouselConfig = [],
     runtime
   } = props;
 
   return (
-    <div className="formWrapper">
-      <Form.Item
-        label={
-          label.display &&
-          label.text && <span>{label.text}</span>
-        }
-        layout="vertical"
-        wrapperCol={{ style: { flex: 1 } }}
-        rules={[{ required: verify?.required, message:`${label.text}是必填项` }]}
-        // hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
-        // style={{
-        //   margin: 0,
-        //   opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
-        // }}
+    <div className={styles.carouselWrapper}>
+      {label.display &&
+      label.text && <div className={styles.title}>{label.text}</div>}
+
+      <Carousel
+        className={styles.carousel}
+        autoPlay={{ 
+          interval: interval * 1000
+        }}
+        style={{
+          pointerEvents: runtime ? 'unset' : 'none'
+        }}
+        indicatorPosition="bottom"
       >
-        <Carousel
-          className="carousel"
-          autoPlay={{
-            interval: interval * 1000
-          }}
-          style={{
-            pointerEvents: runtime ? 'unset' : 'none'
-          }}
-        >
-          {carouselConfig.map((img, index) => (
-            <div className="imageWrapper" key={index} onClick={() => window.open(img.url)}>
-              <img className="image" src={img.image} />
-              <div className="text">{img.text}</div>
-            </div>
-          ))}
-        </Carousel>
-      </Form.Item>
+        {carouselConfig.map((img, index) => (
+          <div className={styles.imageWrapper} key={index} onClick={() => window.open(img.url)}>
+            <img className={styles.image} src={img.image} />
+            {/* <div className={styles.text}>{img.text}</div> */}
+          </div>
+        ))}
+      </Carousel>
     </div>
   );
 });

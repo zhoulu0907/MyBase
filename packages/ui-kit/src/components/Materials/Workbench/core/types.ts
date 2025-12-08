@@ -1,13 +1,42 @@
 /**
  * Workbench 类型定义
- * 优先复用 Materials 的通用类型，只定义 Workbench 特有的类型
+ * 只包含 Workbench 特有的类型，通用类型从 Materials 引用
  */
-import { IBooleanConfigType } from '../types';
-import { WORKBENCH_CONFIG_TYPES } from './constants';
 
-/**
- * Workbench 特有类型定义
- */
+// ========== 从 Materials/types 引用通用类型 ==========
+export type {
+  EditConfig,
+  TTextDefaultType,
+  TNumberDefaultType,
+  TTextAreaDefaultType,
+  TSelectDefaultType,
+  TRadioDefaultType,
+  TBooleanDefaultType,
+  ICommonConfigType,
+  ITextConfigType,
+  INumberConfigType,
+  ITextAreaConfigType,
+  ISelectConfigType,
+  IDynamicSelectConfigType,
+  IDataFieldConfigType,
+  IRelatedFormDataConfigType,
+  ITableDataConfigType,
+  IRadioDataConfigType,
+  ICheckboxDataConfigType,
+  IBooleanConfigType,
+  ILabelConfigType,
+  IPlaceholderConfigType,
+  ITooltipConfigType,
+  IStatusConfigType,
+  IWidthConfigType,
+  ILayoutConfigType,
+  IDefaultValueConfigType,
+  IVerifyConfigType
+} from '../../types';
+
+// ========== Workbench 特有类型 ==========
+
+import { WORKBENCH_CONFIG_TYPES } from './constants';
 
 // 默认值类型
 export type TWbColorDefaultType = string;
@@ -98,6 +127,7 @@ export interface ICarouselContentConfigType {
 }
 
 // 待办中心-数据内容配置
+import type { IBooleanConfigType } from '../../types';
 export interface IDataConfigConfigType {
   key: string;
   name: string;

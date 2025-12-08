@@ -2,7 +2,7 @@ import {
   WORKBENCH_COMPONENT_META,
   type WorkbenchComponentCategory,
   WORKBENCH_COMPONENT_TYPE_DISPLAY_NAME_MAP
-} from './componentTypes';
+} from '../core/componentTypes';
 
 const buildTemplateSection = (category: WorkbenchComponentCategory) => {
   const items = Object.values(WORKBENCH_COMPONENT_META)
@@ -34,3 +34,4 @@ const workbenchTemplate = {
 };
 
 export { workbenchTemplate, WORKBENCH_COMPONENT_TYPE_DISPLAY_NAME_MAP };
+

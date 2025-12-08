@@ -1,16 +1,16 @@
 import {
-  baseConfig,
-  baseDefault,
-  dataFieldConfig,
-  defaultValueConfig,
-  type ICommonBaseType,
-  type TWidthSelectKeyType,
-} from '../../../common';
+  workbenchBaseConfig,
+  workbenchBaseDefault,
+  workbenchDataFieldConfig,
+  workbenchDefaultValueConfig,
+  type ICommonBaseWorkbenchType,
+  type TWorkbenchWidthSelectKeyType,
+} from '../../config/workbenchShared';
 import {
   WIDTH_OPTIONS,
   WIDTH_VALUES,
   DEFAULT_VALUE_TYPES
-} from '../../../constants';
+} from '../../core/constants';
 import type {
   IDataFieldConfigType,
   ILabelConfigType,
@@ -19,10 +19,10 @@ import type {
   TSelectDefaultType,
   TTextDefaultType,
   IDefaultValueConfigType
-} from '../../../types';
-import type {TWbColorDefaultType} from '../../types';
-import { WORKBENCH_CONFIG_TYPES, WORKBENCH_STATUS_OPTIONS, WORKBENCH_STATUS_VALUES } from '../../constants';
-import type { TWorkbenchStatusSelectKeyType } from '../../workbenchShared';
+} from '../../core/types';
+import type {TWbColorDefaultType} from '../../core/types';
+import { WORKBENCH_CONFIG_TYPES, WORKBENCH_STATUS_OPTIONS, WORKBENCH_STATUS_VALUES } from '../../core/constants';
+import type { TWorkbenchStatusSelectKeyType } from '../../config/workbenchShared';
 
 export interface XRichTextSchema {
   editData: TXRichTextEditData;
@@ -35,7 +35,7 @@ export type TXRichTextEditData = Array<
   | IDefaultValueConfigType
 >;
 
-export interface XRichTextConfig extends ICommonBaseType {
+export interface XRichTextConfig extends ICommonBaseWorkbenchType {
   /**
    * 输入框标题
    * text：标题
@@ -64,7 +64,7 @@ export interface XRichTextConfig extends ICommonBaseType {
   /**
    * 字段宽度
    */
-  width: TSelectDefaultType<TWidthSelectKeyType>;
+  width: TSelectDefaultType<TWorkbenchWidthSelectKeyType>;
 
   /**
    * 组件状态：可用、隐藏、只读
@@ -75,7 +75,7 @@ export interface XRichTextConfig extends ICommonBaseType {
 
 const XRichText: XRichTextSchema = {
   editData: [
-    ...baseConfig,
+    ...workbenchBaseConfig,
     {
       key: 'label',
       name: '标题名称',
@@ -92,12 +92,12 @@ const XRichText: XRichTextSchema = {
       type: WORKBENCH_CONFIG_TYPES.WB_RICH_TEXT_CONTENT
     },
     //  数据绑定
-    ...dataFieldConfig,
+    ...workbenchDataFieldConfig,
     // 默认值
-    defaultValueConfig
+    workbenchDefaultValueConfig
   ],
   config: {
-    ...baseDefault,
+    ...workbenchBaseDefault,
     label: {
       text: '富文本',
       display: true

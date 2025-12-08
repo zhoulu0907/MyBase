@@ -11,7 +11,7 @@ import {
   type ICommonBaseWorkbenchType,
   type TWorkbenchStatusSelectKeyType,
   type TWorkbenchWidthSelectKeyType
-} from '../../workbenchShared';
+} from '../../config/workbenchShared';
 import {
   WORKBENCH_STATUS_OPTIONS,
   WORKBENCH_STATUS_VALUES,
@@ -19,9 +19,9 @@ import {
   WORKBENCH_WIDTH_VALUES,
   WORKBENCH_CONFIG_TYPES,
   DATA_CONFIG_RANGE
-} from '../../constants';
-import { ILabelConfigType, IBooleanConfigType, TBooleanDefaultType, TTextDefaultType } from '../../../types';
-import { IDataConfigConfigType } from '../../types';
+} from '../../core/constants';
+import { ILabelConfigType, IBooleanConfigType, TBooleanDefaultType, TTextDefaultType } from '../../core/types';
+import { IDataConfigConfigType } from '../../core/types';
 
 export interface XInformationListSchema {
   editData: TXInformationListEditData;

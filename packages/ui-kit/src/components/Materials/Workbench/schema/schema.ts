@@ -1,10 +1,10 @@
 import { cloneDeep } from 'lodash-es';
 
-import type { WorkbenchComponentSchema } from './componentRegistry';
-export type { WorkbenchComponentSchema } from './componentRegistry';
-import WorkbenchSchemaBasic from './WorkbenchBasicComponents/schema';
-import WorkbenchSchemaAdvanced from './WorkbenchAdvancedComponents/schema';
-import { WORKBENCH_COMPONENT_TYPE_VALUES, type WorkbenchComponentType } from './componentTypes';
+import type { WorkbenchComponentSchema } from '../registry/componentRegistry';
+export type { WorkbenchComponentSchema } from '../registry/componentRegistry';
+import WorkbenchSchemaBasic from '../WorkbenchBasicComponents/schema';
+import WorkbenchSchemaAdvanced from '../WorkbenchAdvancedComponents/schema';
+import { WORKBENCH_COMPONENT_TYPE_VALUES, type WorkbenchComponentType } from '../core/componentTypes';
 
 type WorkbenchComponentSchemaMap = Record<WorkbenchComponentType, WorkbenchComponentSchema>;
 
@@ -91,3 +91,4 @@ export function getWorkbenchComponentConfig(
   const resolvedSchema = schema?.config ? (schema as WorkbenchComponentSchema) : getWorkbenchComponentSchema(itemType);
   return resolvedSchema.config;
 }
+

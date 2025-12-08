@@ -2,7 +2,7 @@ import { Alert } from '@arco-design/web-react';
 import type { CSSProperties } from 'react';
 import { memo } from 'react';
 
-import { WORKBENCH_STATUS_OPTIONS, WORKBENCH_STATUS_VALUES } from '../../constants';
+import { WORKBENCH_STATUS_OPTIONS, WORKBENCH_STATUS_VALUES } from '../../core/constants';
 import type { XTodoListConfig } from './schema';
 
 const containerStyle: CSSProperties = {

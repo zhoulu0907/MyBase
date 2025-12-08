@@ -1,11 +1,11 @@
 import {
-  baseConfig,
-  baseDefault,
-  type ICommonBaseType,
-  type TLayoutSelectKeyType,
-  type TStatusSelectKeyType
-} from '../../../common';
-import { WORKBENCH_CONFIG_TYPES, WORKBENCH_STATUS_OPTIONS, WORKBENCH_STATUS_VALUES } from '../../constants';
+  workbenchBaseConfig,
+  workbenchBaseDefault,
+  type ICommonBaseWorkbenchType,
+  type TWorkbenchLayoutSelectKeyType,
+  type TWorkbenchStatusSelectKeyType
+} from '../../config/workbenchShared';
+import { WORKBENCH_CONFIG_TYPES, WORKBENCH_STATUS_OPTIONS, WORKBENCH_STATUS_VALUES } from '../../core/constants';
 import type {
   IBooleanConfigType,
   ILabelConfigType,
@@ -15,14 +15,12 @@ import type {
   ITextAreaConfigType,
   ITextConfigType,
   ITooltipConfigType,
-  IVerifyConfigType,
   TBooleanDefaultType,
   TNumberDefaultType,
   TRadioDefaultType,
   TTextDefaultType
-} from '../../../types';
-import type { TWorkbenchStatusSelectKeyType } from '../../workbenchShared';
-import type { ICarouselContentConfigType } from '../../types';
+} from '../../core/types';
+import type { ICarouselContentConfigType, IVerifyConfigType } from '../../core/types';
 import SlideOne from '@/assets/workbench/carousel/slide-1.svg';
 import SlideTwo from '@/assets/workbench/carousel/slide-2.svg';
 import SlideThree from '@/assets/workbench/carousel/slide-3.svg';
@@ -40,7 +38,7 @@ export type TXCarouselEditData = Array<
   | IVerifyConfigType
   | TTextDefaultType
   | IStatusConfigType<TWorkbenchStatusSelectKeyType>
-  | ILayoutConfigType<TLayoutSelectKeyType>
+  | ILayoutConfigType<TWorkbenchLayoutSelectKeyType>
   | ITextAreaConfigType
   | ILabelConfigType
   | ITooltipConfigType
@@ -52,7 +50,7 @@ interface Images {
   url?: string;
 }
 
-export interface XCarouselConfig extends ICommonBaseType {
+export interface XCarouselConfig extends ICommonBaseWorkbenchType {
   /**
    * 输入框标题
    * text：标题
@@ -161,7 +159,7 @@ const carouselContentConfig: ICarouselContentConfigType = {
 
 const XCarousel: XCarouselSchema = {
   editData: [
-    ...baseConfig,
+    ...workbenchBaseConfig,
     {
       key: 'label',
       name: '标题名称',
@@ -170,7 +168,7 @@ const XCarousel: XCarouselSchema = {
     carouselContentConfig
   ],
   config: {
-    ...baseDefault,
+    ...workbenchBaseDefault,
     label: {
       text: '轮播图',
       display: true

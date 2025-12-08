@@ -117,3 +117,4 @@ export const WORKBENCH_COMPONENT_TYPE_DISPLAY_NAME_MAP: Record<WorkbenchComponen
 export const WORKBENCH_COMPONENT_TYPE_VALUES = WORKBENCH_COMPONENT_DEFINITIONS.map(
   (def) => def.type as WorkbenchComponentType
 );
+

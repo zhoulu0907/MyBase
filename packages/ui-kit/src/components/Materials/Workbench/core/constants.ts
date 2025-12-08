@@ -1,18 +1,40 @@
+/**
+ * Workbench 常量定义
+ * 只包含 Workbench 特有的常量，通用常量从 Materials 引用
+ */
+import type { IBooleanConfigType } from './types';
+
+// ========== 从 Materials/constants 引用通用常量 ==========
 import {
   CONFIG_TYPES,
-  LAYOUT_OPTIONS,
-  LAYOUT_VALUES,
   STATUS_OPTIONS,
   STATUS_VALUES,
   WIDTH_OPTIONS,
-  WIDTH_VALUES
-} from '../constants';
-import type { IBooleanConfigType } from '../types';
+  WIDTH_VALUES,
+  LAYOUT_OPTIONS,
+  LAYOUT_VALUES,
+  DEFAULT_VALUE_TYPES
+} from '../../constants';
+
+// 重新导出通用常量
+export {
+  CONFIG_TYPES,
+  STATUS_OPTIONS,
+  STATUS_VALUES,
+  WIDTH_OPTIONS,
+  WIDTH_VALUES,
+  LAYOUT_OPTIONS,
+  LAYOUT_VALUES,
+  DEFAULT_VALUE_TYPES
+};
+
+// ========== Workbench 专属配置类型 ==========
 
 /**
  * Workbench 专属配置类型
  * 优先复用 Materials 的通用定义，只添加 Workbench 特有的配置类型
  */
+
 export const WORKBENCH_CONFIG_TYPES = {
   TEXT_INPUT: CONFIG_TYPES.TEXT_INPUT,
   SWITCH_INPUT: CONFIG_TYPES.SWITCH_INPUT,
@@ -41,6 +63,21 @@ export {
   LAYOUT_OPTIONS as WORKBENCH_LAYOUT_OPTIONS,
   LAYOUT_VALUES as WORKBENCH_LAYOUT_VALUES
 };
+
+/**
+ * 快捷入口样式选项
+ */
+export const QUICK_ENTRY_THEME_OPTIONS = {
+  THEME_1: '样式一',
+  THEME_2: '样式二',
+  THEME_3: '样式三'
+} as const;
+
+export const QUICK_ENTRY_THEME_VALUES = {
+  [QUICK_ENTRY_THEME_OPTIONS.THEME_1]: 'theme-one',
+  [QUICK_ENTRY_THEME_OPTIONS.THEME_2]: 'theme-two',
+  [QUICK_ENTRY_THEME_OPTIONS.THEME_3]: 'theme-three'
+} as const;
 
 /**
  * 待办中心-数据内容配置选项
@@ -74,5 +111,3 @@ export const DATA_CONFIG_RANGE: IBooleanConfigType[] = [
     type: WORKBENCH_CONFIG_TYPES.SWITCH_INPUT
   }
 ];
-
-

@@ -3,13 +3,11 @@ import { IconRight } from '@arco-design/web-react/icon';
 import type { CSSProperties } from 'react';
 import { nanoid } from 'nanoid';
 import { memo } from 'react';
-import { WORKBENCH_STATUS_OPTIONS, WORKBENCH_STATUS_VALUES } from '../../constants';
-import { QUICK_ENTRY_THEME_OPTIONS, QUICK_ENTRY_THEME_VALUES } from '../constants';
-import type { QuickEntryPropsConfig } from '../../types';
-import '../index.css';
-import './index.css';
+import { WORKBENCH_STATUS_OPTIONS, WORKBENCH_STATUS_VALUES, QUICK_ENTRY_THEME_OPTIONS, QUICK_ENTRY_THEME_VALUES } from '../../core/constants';
+import type { QuickEntryPropsConfig } from '../../core/types';
 import { type XQuickEntryConfig } from './schema';
 import { getDefaultIcon } from './getDefaultIcon';
+import './index.css';
 
 // 主题三使用的颜色数组（对应 arcoPalette.primary 的颜色，添加 20% 透明度）
 const THEME_THREE_COLORS = ['#24b28f20', '#eb693a20', '#1979ff20', '#7e5aea20', '#009e9e20', '#ebbc0020'];

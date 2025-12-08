@@ -1,4 +1,4 @@
-import { quickEntryConfig } from '../../common';
+import { quickEntryConfig } from '../../config/commonConfig';
 import {
   workbenchBaseConfig,
   workbenchBaseDefault,
@@ -12,15 +12,16 @@ import {
   type TWorkbenchStatusSelectKeyType,
   type TWorkbenchWidthSelectKeyType,
   ITextConfigType
-} from '../../workbenchShared';
+} from '../../config/workbenchShared';
 import {
   WORKBENCH_STATUS_OPTIONS,
   WORKBENCH_STATUS_VALUES,
   WORKBENCH_WIDTH_OPTIONS,
-  WORKBENCH_WIDTH_VALUES
-} from '../../constants';
-import { QUICK_ENTRY_THEME_OPTIONS, QUICK_ENTRY_THEME_VALUES } from '../constants';
-import type { IQuickEntryConfigType, QuickEntryPropsConfig } from '../../types';
+  WORKBENCH_WIDTH_VALUES,
+  QUICK_ENTRY_THEME_OPTIONS,
+  QUICK_ENTRY_THEME_VALUES
+} from '../../core/constants';
+import type { IQuickEntryConfigType, QuickEntryPropsConfig } from '../../core/types';
 export interface XQuickEntrySchema {
   editData: TXQuickEntryEditData;
   config: XQuickEntryConfig;

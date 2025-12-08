@@ -1,9 +1,9 @@
 import type { ComponentType } from 'react';
 
-import { WorkbenchAdvancedComp } from './WorkbenchAdvancedComponents';
-import { WorkbenchBasicComp } from './WorkbenchBasicComponents';
-import { workbenchSchema } from './schema';
-import { WORKBENCH_COMPONENT_TYPE_VALUES, type WorkbenchComponentType } from './componentTypes';
+import { WorkbenchAdvancedComp } from '../WorkbenchAdvancedComponents';
+import { WorkbenchBasicComp } from '../WorkbenchBasicComponents';
+import { workbenchSchema } from '../schema/schema';
+import { WORKBENCH_COMPONENT_TYPE_VALUES, type WorkbenchComponentType } from '../core/componentTypes';
 
 type WorkbenchSchemaCollection = typeof workbenchSchema;
 
