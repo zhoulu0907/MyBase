@@ -175,7 +175,7 @@ const ProfilePage: React.FC = () => {
         placeholder: '-',
         render: (val: string) => {
           const getIndustryTypeName = industryDict?.find((data) => data.id === val)?.label || '-';
-          return <Tag color="cyan">{getIndustryTypeName}</Tag>;
+          return <Tag color="cyan" className={styles.industryWrapper}>{getIndustryTypeName}</Tag>;
         }
       },
       {

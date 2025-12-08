@@ -1,8 +1,9 @@
+import { filterSpace } from '@/utils';
 import { emailValidator, phoneValidator } from '@/utils/validator';
-import { Button, Form, Grid, Input, Message, Modal, Space, Switch, TreeSelect } from '@arco-design/web-react';
+import { Button, Form, Grid, Input, Message, Modal, Select, Space, Switch, TreeSelect } from '@arco-design/web-react';
 import { UploadAvatarComponent, hasPermission, TENANT_DEPT_QUERY } from '@onebase/common';
-import type { SimpleRoleVO, UserVO } from '@onebase/platform-center';
-import { createUser, getUser, StatusEnum, updateUser, uploadFile } from '@onebase/platform-center';
+import type { RoleVO, SimpleRoleVO, UserVO } from '@onebase/platform-center';
+import { createUser, getSimpleRoleList, getUser, StatusEnum, updateUser, uploadFile } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
 
 const Row = Grid.Row;
@@ -36,9 +37,21 @@ export default function UserFormModal({
   const [statusCheckedValue, setStatusCheckedValue] = useState(false);
   const [hasDeptQueryPermission, setHasDeptQueryPermission] = useState(true);
   const [avatarUrl, setAvatarUrl] = useState<string>();
+  const [roleList, setRoleList] = useState<RoleVO[]>([]);
+
+  // 获取角色列表
+  const fetchRoleList = async() => {
+    try {
+      const res = await getSimpleRoleList();
+      setRoleList(res);
+    }catch(error) {
+      console.log("error");
+    }
+  }
 
   useEffect(() => {
     if (visible) {
+      fetchRoleList();
       form.resetFields();
       if (initialValues) {
         form.setFieldsValue(initialValues);
@@ -81,6 +94,8 @@ export default function UserFormModal({
       const params = {
         ...values,
         avatar: avatarUrl,
+        mobile: filterSpace(values.mobile),
+        email: filterSpace(values.email),
         status: statusCheckedValue ? StatusEnum.ENABLE : StatusEnum.DISABLE
       };
       setLoading(true);
@@ -191,16 +206,31 @@ export default function UserFormModal({
             </Form.Item>
           </Col>
         </Row>
-        <Row gutter={24} justify="start">
+        <Row gutter={24}>
           <Col span={12}>
             <Form.Item
               label="启用状态"
               triggerPropName="checked"
-              layout="horizontal"
               labelCol={{ span: 6 }}
               wrapperCol={{ span: 12 }}
             >
               <Switch checked={statusCheckedValue} onChange={setStatusCheckedValue} />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item label="角色" field="roleIds">
+              <Select
+                placeholder="选择角色"
+                mode="multiple"
+                allowClear
+                options={roleList.map((u) => ({
+                  label: u.name,
+                  value: u.id
+                }))}
+                filterOption={(inputValue: any, option: any) => {
+                  return option.props.children?.includes(inputValue);
+                }}
+              ></Select>
             </Form.Item>
           </Col>
         </Row>

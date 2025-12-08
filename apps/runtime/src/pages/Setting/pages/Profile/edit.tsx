@@ -1,4 +1,4 @@
-import { Button, Form,Input, Message, Select, Spin, Tabs } from '@arco-design/web-react';
+import { Button, Form, Input, Message, Select, Spin, Tabs } from '@arco-design/web-react';
 import { UploadAvatarComponent } from '@onebase/common';
 import { getLoginedUser, updateLoginedUser, updateLoginedUserPwd, uploadFile } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
@@ -33,7 +33,7 @@ const EditPage: React.FC<IEditPageProps> = ({ avatarUrl, setAvatarUrl }) => {
       setLoading(true);
       const res = await getLoginedUser();
       setUserInfo(res);
-      setAvatarUrl(res.avatar || "");
+      setAvatarUrl(res.avatar || '');
       form.setFieldsValue({
         nickname: res.nickname,
         username: res.username,
@@ -121,12 +121,12 @@ const EditPage: React.FC<IEditPageProps> = ({ avatarUrl, setAvatarUrl }) => {
             <Form form={form} layout="horizontal" onSubmit={handleSubmit}>
               <FormItem label="头像" field="avatar">
                 <div>
-                   <UploadAvatarComponent
+                  <UploadAvatarComponent
                     getUploadFile={uploadFile}
                     avatarUrl={avatarUrl}
                     onUpdateUrl={setAvatarUrl}
                     defaultPlaceholder={defaultNickName}
-                    buttonName='修改头像'
+                    buttonName="修改头像"
                   />
                 </div>
               </FormItem>
@@ -196,7 +196,7 @@ const EditPage: React.FC<IEditPageProps> = ({ avatarUrl, setAvatarUrl }) => {
                 required
                 rules={[{ required: true, message: '请输入旧密码' }]}
               >
-                <Input placeholder="请输入旧密码" />
+                <Input.Password placeholder="请输入旧密码" />
               </FormItem>
 
               <FormItem
@@ -205,7 +205,7 @@ const EditPage: React.FC<IEditPageProps> = ({ avatarUrl, setAvatarUrl }) => {
                 required
                 rules={[{ required: true, message: '请输入新密码' }]}
               >
-                <Input placeholder="请输入新密码" />
+                <Input.Password placeholder="请输入新密码" />
               </FormItem>
 
               <FormItem
@@ -227,7 +227,7 @@ const EditPage: React.FC<IEditPageProps> = ({ avatarUrl, setAvatarUrl }) => {
                   }
                 ]}
               >
-                <Input placeholder="请再次输入新密码" />
+                <Input.Password placeholder="请再次输入新密码" />
               </FormItem>
 
               <FormItem wrapperCol={{ offset: 5 }}>

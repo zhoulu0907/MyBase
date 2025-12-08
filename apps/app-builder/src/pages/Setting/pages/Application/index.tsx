@@ -154,7 +154,7 @@ const AppManagement: React.FC = () => {
     try {
       const values = await form.validate(); // 等待校验完成并返回数据
       setCreateLoading(true);
-      const { appCode, appName, iconColor, iconName, description, tagIds, themeColor, publish_model } = values;
+      const { appCode, appName, iconColor, iconName, description, tagIds, themeColor, publishModel } = values;
 
       const params: CreateApplicationReq = {
         appCode,
@@ -166,7 +166,7 @@ const AppManagement: React.FC = () => {
         tagIds: tagIds?.map((t: Options) => t.value),
         themeColor,
         datasourceSaveReq: datasource,
-        publish_model: publish_model ? publish_model : 'inner'
+        publishModel: publishModel ? publishModel : 'inner'
       };
       const res = await createApplication(params);
       setCreateVisible(false);

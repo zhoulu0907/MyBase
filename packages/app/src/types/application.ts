@@ -133,7 +133,7 @@ export interface CreateApplicationReq {
    */
   datasourceSaveReq?: DatasourceSaveReqDTO;
 
-  publish_model?: PUBLISH_MODULE;
+  publishModel?: PUBLISH_MODULE;
 }
 
 

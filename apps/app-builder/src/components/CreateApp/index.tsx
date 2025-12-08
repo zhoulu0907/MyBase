@@ -385,7 +385,7 @@ const CreateApp = (props: IProps) => {
             </div>
           </Form.Item>
           {isOpenedSaaS && (
-            <Form.Item field="publish_model" label="发布模式" rules={[{ required: true, message: '请选择发布模式' }]}>
+            <Form.Item field="publishModel" label="发布模式" rules={[{ required: true, message: '请选择发布模式' }]}>
               <Radio.Group>
                 <Radio value={PUBLISH_MODULE.INNER}>内部模式</Radio>
                 <Radio value={PUBLISH_MODULE.SASS}>SaaS模式</Radio>
