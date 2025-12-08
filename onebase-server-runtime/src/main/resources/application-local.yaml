@@ -88,6 +88,7 @@ liteflow:
   enable: true
   print-banner: true
   js-server-address: http://10.0.104.41:28392
+  version-tag: 0
 
 metadata:
   runtime:

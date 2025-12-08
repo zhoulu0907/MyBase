@@ -30,6 +30,13 @@ public class ExecuteContext implements Serializable {
     @Getter
     private String executionUuid;
 
+    @Setter
+    @Getter
+    private Long applicationId;
+
+    @Setter
+    @Getter
+    private Long versionTag;
 
     @Setter
     @Getter
@@ -38,11 +45,6 @@ public class ExecuteContext implements Serializable {
     @Setter
     @Getter
     private volatile boolean debugMode = false;
-
-    /**
-     * 节点配置数据
-     */
-    private volatile Map<String, NodeData> nodeDataMap = new HashMap<>();
 
     //节点执行的结果
     private Map<String, Object> nodeProcessHisResults = new ConcurrentHashMap<>();
@@ -65,19 +67,24 @@ public class ExecuteContext implements Serializable {
     private volatile String executionEndNodeTag;
 
     /**
+     * 节点配置数据
+     */
+    private transient volatile Map<String, NodeData> nodeDataMap = new HashMap<>();
+
+    /**
      * 是否异常终止
      */
     @Setter
     @Getter
-    private volatile Boolean abnormalTermination = Boolean.FALSE;
+    private transient volatile Boolean abnormalTermination = Boolean.FALSE;
 
     @Setter
     @Getter
-    private volatile String terminationMessage;
+    private transient volatile String terminationMessage;
 
-    private volatile Stopwatch stopwatch;
+    private transient Stopwatch stopwatch;
 
-    private volatile List<String> logs;
+    private transient List<String> logs;
 
     public ExecuteContext() {
         this.stopwatch = Stopwatch.createStarted();

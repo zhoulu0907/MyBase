@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.flow.graph;
+package com.cmsr.onebase.module.flow;
 
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.security.TenantContextHolder;
@@ -54,48 +54,35 @@ public class FlowProcessTest {
     public void testToFlowChain(Long id) throws IOException {
         FlowProcessDO flowProcessDO = flowProcessRepository.getById(id);
         String json = flowProcessDO.getProcessDefinition();
-        JsonGraph jsonGraph = flowGraphBuilder.build(json);
+        JsonGraph jsonGraph = flowGraphBuilder.build(1L, json);
         String flowChain = FlowChainBuilder.toFlowChain(jsonGraph);
         System.out.println(flowChain);
     }
 
-    @Test
-    public void testSimple() throws IOException {
-        testSimple2();
-        testSimple2();
-        testSimple2();
-        testSimple2();
-    }
 
 
     @Test
     public void testSimple2() throws IOException {
         ApplicationManager.ignoreApplicationCondition();
         ApplicationManager.ignoreVersionTagCondition();
-        EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
-        reqDTO.setTraceId(UUID.randomUUID().toString());
-        reqDTO.setEntityId(165637750471655424L);
-        reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_CREATE);
-        reqDTO.setFieldData(Map.of(
-//                "46999569445519360", "6年级3班",
-//                "50026937276661762", LocalDate.now().minusYears(10),
-//                "50028191407505411", 30
-        ));
-        //reqDTO.setChangedFieldIds(List.of(46999569445519360L));
-        EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
-        System.out.println(respDTO);
+
+        FormTriggerReqVO reqVO = new FormTriggerReqVO();
+        reqVO.setProcessId(171622357911764992L);
+        reqVO.setInputParams(Map.of());
+        FormTriggerRespVO respVO = flowProcessExecService.triggerForm(reqVO);
+        System.out.println(respVO);
     }
 
     @Test
     public void testSimple22() throws IOException {
         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
-        reqDTO.setTraceId(UUID.randomUUID().toString());
-        reqDTO.setEntityId(101573932216057856L);
-        reqDTO.setTriggerEvent(TriggerEventEnum.AFTER_UPDATE);
-        reqDTO.setFieldData(Map.of(
-                "104845168301834240", "yy",
-                "104951150916075520", "yy"
-        ));
+        // reqDTO.setTraceId(UUID.randomUUID().toString());
+        // reqDTO.setEntityId(101573932216057856L);
+        // reqDTO.setTriggerEvent(TriggerEventEnum.AFTER_UPDATE);
+        // reqDTO.setFieldData(Map.of(
+        //         "104845168301834240", "yy",
+        //         "104951150916075520", "yy"
+        // ));
         EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
         System.out.println(respDTO);
     }
@@ -103,14 +90,14 @@ public class FlowProcessTest {
     @Test
     public void testSimple23() throws IOException {
         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
-        reqDTO.setTraceId(UUID.randomUUID().toString());
-        reqDTO.setEntityId(88576673965670400L);
-        reqDTO.setTriggerEvent(TriggerEventEnum.AFTER_UPDATE);
-        reqDTO.setFieldData(Map.of(
-                "8857773477298176", "测试部门号",
-                "88577773477298181", "测试部门",
-                "88577773477298186", "Manager"
-        ));
+        // reqDTO.setTraceId(UUID.randomUUID().toString());
+        // reqDTO.setEntityId(88576673965670400L);
+        // reqDTO.setTriggerEvent(TriggerEventEnum.AFTER_UPDATE);
+        // reqDTO.setFieldData(Map.of(
+        //         "8857773477298176", "测试部门号",
+        //         "88577773477298181", "测试部门",
+        //         "88577773477298186", "Manager"
+        // ));
         EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
         System.out.println(respDTO);
     }
@@ -140,14 +127,14 @@ public class FlowProcessTest {
     public void testSimple5() throws IOException {
         TenantContextHolder.setIgnore(true);
         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
-        reqDTO.setTraceId(UUID.randomUUID().toString());
-        reqDTO.setEntityId(46999363287089152L);
-        reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_CREATE);
-        reqDTO.setFieldData(Map.of(
-                "46999569445519360", "9年级145班",
-                "50026937276661762", LocalDate.now().minusYears(10),
-                "50028191407505411", 30
-        ));
+        // reqDTO.setTraceId(UUID.randomUUID().toString());
+        // reqDTO.setEntityId(46999363287089152L);
+        // reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_CREATE);
+        // reqDTO.setFieldData(Map.of(
+        //         "46999569445519360", "9年级145班",
+        //         "50026937276661762", LocalDate.now().minusYears(10),
+        //         "50028191407505411", 30
+        // ));
         //reqDTO.setChangedFieldIds(List.of(46999569445519360L));
         EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
         System.out.println(respDTO);

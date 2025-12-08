@@ -1,14 +1,14 @@
 package com.cmsr.onebase.module.flow.core.graph;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
-import com.cmsr.onebase.module.flow.context.FieldTypeProvider;
 import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraphNode;
 import com.cmsr.onebase.module.flow.context.graph.nodes.ScriptNodeData;
+import com.cmsr.onebase.module.flow.context.provider.FieldTypeProvider;
+import com.cmsr.onebase.module.flow.core.config.FlowProperties;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowConnectorScriptRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowConnectorScriptDO;
-import com.mybatisflex.core.tenant.TenantManager;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -28,15 +28,20 @@ public class FlowGraphBuilder {
     @Autowired
     private ObjectProvider<FieldTypeProvider> objectProvider;
 
+    @Setter
     @Autowired
     private FlowConnectorScriptRepository connectorScriptRepository;
 
-    public JsonGraph build(String json) {
+    @Setter
+    @Autowired
+    private FlowProperties flowProperties;
+
+    public JsonGraph build(Long applicationId, String json) {
         JsonGraph jsonGraph = JsonUtils.parseObject(json, JsonGraph.class);
         addLoopContextToNodes(jsonGraph);
-        enrichNodeData(jsonGraph);
+        enrichNodeData(applicationId, jsonGraph);
         FieldTypeProvider fieldTypeProvider = objectProvider.getObject();
-        fieldTypeProvider.completeFieldType(jsonGraph);
+        fieldTypeProvider.completeFieldType(applicationId, jsonGraph);
         return jsonGraph;
     }
 
@@ -49,12 +54,12 @@ public class FlowGraphBuilder {
         }
     }
 
-    private void enrichNodeData(JsonGraph jsonGraph) {
+    private void enrichNodeData(Long applicationId, JsonGraph jsonGraph) {
         if (jsonGraph == null || jsonGraph.getNodes() == null) {
             return;
         }
         for (JsonGraphNode node : jsonGraph.getNodes()) {
-            traverseNodeAndEnrichData(node);
+            traverseNodeAndEnrichData(applicationId, node);
         }
     }
 
@@ -77,16 +82,16 @@ public class FlowGraphBuilder {
         }
     }
 
-    private void traverseNodeAndEnrichData(JsonGraphNode node) {
+    private void traverseNodeAndEnrichData(Long applicationId, JsonGraphNode node) {
         if (node.getData() instanceof ScriptNodeData scriptNodeData) {
-            FlowConnectorScriptDO connectorScriptDO = TenantManager.withoutTenantCondition(() -> connectorScriptRepository.findById(scriptNodeData.getActionId()));
+            FlowConnectorScriptDO connectorScriptDO = connectorScriptRepository.findByApplicationAndUuid(applicationId, scriptNodeData.getActionUuid());
             scriptNodeData.setScript(connectorScriptDO.getRawScript());
             scriptNodeData.setInputSchema(connectorScriptDO.getInputSchema());
             scriptNodeData.setOutputSchema(connectorScriptDO.getOutputSchema());
         }
         if (CollectionUtils.isNotEmpty(node.getBlocks())) {
             for (JsonGraphNode child : node.getBlocks()) {
-                traverseNodeAndEnrichData(child);
+                traverseNodeAndEnrichData(applicationId, child);
             }
         }
     }

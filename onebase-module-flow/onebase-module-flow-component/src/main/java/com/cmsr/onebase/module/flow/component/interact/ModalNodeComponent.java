@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.flow.component.interact;
 
 import com.cmsr.onebase.module.flow.component.NodeActionEnum;
 import com.cmsr.onebase.module.flow.component.SkippableNodeComponent;
-import com.cmsr.onebase.module.flow.context.ContextProvider;
+import com.cmsr.onebase.module.flow.context.provider.ContextProvider;
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
 import com.cmsr.onebase.module.flow.context.VariableContext;
 import com.cmsr.onebase.module.flow.context.graph.nodes.ModalNodeData;

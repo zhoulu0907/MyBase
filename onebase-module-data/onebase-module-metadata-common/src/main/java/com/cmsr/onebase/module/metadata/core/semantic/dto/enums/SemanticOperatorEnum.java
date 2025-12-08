@@ -9,6 +9,15 @@ public enum SemanticOperatorEnum {
     LE,
     LIKE,
     IN,
-    NIN
+    NIN,
+
+    // 以下为补充内容
+
+    // 不相似
+    NOT_LIKE,
+    // 为空
+    IS_NULL,
+    // 不为空
+    IS_NOT_NULL,
 }
 

@@ -8,12 +8,14 @@ import com.cmsr.onebase.module.infra.dal.vo.app.AppFileUploadReqVO;
 import com.cmsr.onebase.module.infra.dal.vo.file.file.FileCreateReqVO;
 import com.cmsr.onebase.module.infra.dal.vo.file.file.FileListRespVO;
 import com.cmsr.onebase.module.infra.dal.vo.file.file.FilePresignedUrlRespVO;
+import com.cmsr.onebase.module.infra.enums.file.FileVisitModeEnum;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.annotation.security.PermitAll;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +27,7 @@ import com.cmsr.onebase.module.infra.service.file.FileService;
 import java.util.Collection;
 import java.util.List;
 
+import static com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstants.BAD_REQUEST;
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
 @Tag(name = "Runtime- 文件服务")
@@ -39,12 +42,14 @@ public class RuntimeFileController {
 
     @PostMapping("/upload")
     @Operation(summary = "上传文件")
-    @PermitAll
-    public CommonResult<String> uploadFile(AppFileUploadReqVO uploadReqVO) throws Exception {
+    public CommonResult<String> uploadFile(@Valid AppFileUploadReqVO uploadReqVO) throws Exception {
+        if (FileVisitModeEnum.PERMISSION.getValue().equals(uploadReqVO.getVisitMode())){
+            return CommonResult.error(BAD_REQUEST);
+        }
         MultipartFile file = uploadReqVO.getFile();
         byte[] content = IoUtil.readBytes(file.getInputStream());
         return success(fileService.createFile(content, file.getOriginalFilename(),
-                uploadReqVO.getDirectory(), file.getContentType()));
+                uploadReqVO.getDirectory(), file.getContentType(),uploadReqVO.getVisitMode()));
     }
 
     @GetMapping("/presigned-url")
@@ -79,7 +84,7 @@ public class RuntimeFileController {
     @Operation(summary = "获取文件内容")
     @PermitAll
     @Parameter(name = "id", description = "文件编号", required = true)
-    public void getFileContent(@PathVariable("id") Long id, HttpServletResponse response) throws Exception {
-        fileService.getFileContent(id, response);
+    public void getFileContent(@PathVariable("id") Long id, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        fileService.getFileContent(id, request, response, null);
     }
 }

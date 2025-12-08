@@ -14,15 +14,16 @@ import java.util.List;
 @Data
 public class DataDeleteeNodeData extends NodeData implements Serializable {
 
-    private Long mainEntityId;
-
-    private Long subEntityId;
-
     /**
-     * mainEntity
-     * subEntity
+     * mainTable
+     * subTable
      */
     private String dataType;
+
+    private String mainTableName;
+
+    private String subTableName;
+
 
     /**
      * all
@@ -30,5 +31,8 @@ public class DataDeleteeNodeData extends NodeData implements Serializable {
      */
     private String filterType;
 
+    /**
+     * 数据透传给API接口，不需要转换类型，因此不需要补充fieldType
+     */
     private List<Conditions> filterCondition;
 }

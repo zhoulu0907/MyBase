@@ -15,18 +15,21 @@ import java.util.List;
 public class DataAddNodeData extends NodeData implements Serializable {
 
     /**
-     * mainEntity
-     * subEntity
+     * mainTable
+     * subTable
      */
     private String addType;
 
-    private Long mainEntityId;
+    private String mainTableName;
 
-    private Long subEntityId;
+    private String subTableName;
 
     private Boolean batchType;
 
     private String dataNodeId;
 
+    /**
+     * 数据透传给API接口，不需要转换类型，因此不需要补充fieldType
+     */
     private List<ConditionItem> fields;
 }

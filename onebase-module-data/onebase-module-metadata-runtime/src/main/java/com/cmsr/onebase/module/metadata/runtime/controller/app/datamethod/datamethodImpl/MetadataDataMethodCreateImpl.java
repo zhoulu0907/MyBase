@@ -455,9 +455,9 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
         Map fieldData = convertNameToId(entityId,processedData == null ? new HashMap<>() : processedData);
         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
         reqDTO.setTraceId(UUID.randomUUID().toString());
-        reqDTO.setEntityId(entityId);
-        reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_CREATE);
-        reqDTO.setFieldData(fieldData);
+        // reqDTO.setEntityId(entityId);
+        // reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_CREATE);
+        // reqDTO.setFieldData(fieldData);
         EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
         if(!respDTO.isTriggered()){
             log.info("BEFORE_CREATE 数据创建前置工作流未触发，实体Id：{} ，参数：{}，原因：{}", entityId,processedData,respDTO.getMessage());
@@ -480,9 +480,9 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
         Map fieldData = convertNameToId(entityId,processedData == null ? new HashMap<>() : processedData);
         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
         reqDTO.setTraceId(UUID.randomUUID().toString());
-        reqDTO.setEntityId(entityId);
-        reqDTO.setTriggerEvent(TriggerEventEnum.AFTER_CREATE);
-        reqDTO.setFieldData(fieldData);
+        // reqDTO.setEntityId(entityId);
+        // reqDTO.setTriggerEvent(TriggerEventEnum.AFTER_CREATE);
+        // reqDTO.setFieldData(fieldData);
         EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
         if(!respDTO.isTriggered()){
             log.info("AFTER_CREATE 数据创建后置工作流未触发，实体Id：{} ，参数：{}，原因：{}", entityId,processedData,respDTO.getMessage());
