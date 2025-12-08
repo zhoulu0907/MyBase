@@ -15,9 +15,6 @@ import java.util.List;
 @Data
 public class DataUpdateNodeData extends NodeData implements Serializable {
 
-    private String mainTableName;
-
-    private String subTableName;
 
     /**
      * 更新类型
@@ -25,6 +22,11 @@ public class DataUpdateNodeData extends NodeData implements Serializable {
      * "updateType": "subTable",
      */
     private String updateType;
+
+    private String mainTableName;
+
+    private String subTableName;
+
 
     /**
      * 数据透传给API接口，不需要转换类型，因此不需要补充fieldType

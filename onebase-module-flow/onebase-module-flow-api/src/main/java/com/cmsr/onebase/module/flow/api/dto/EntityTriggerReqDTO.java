@@ -33,14 +33,14 @@ public class EntityTriggerReqDTO {
 //    private Map<String, Object> colFieldData;
 
     public void setEntityUuId(String entityId) {
-        //TODO 要修改
+        //TODO 要修改 使用 tableName
     }
 
     public void setEntityId(Long entityId) {
-        //TODO 要修改
+        //TODO 要修改 使用 tableName
     }
 
     public void setColFieldData(Map<String, Object> rawData) {
-        //TODO 要修改
+        //TODO 要修改 fieldData
     }
 }

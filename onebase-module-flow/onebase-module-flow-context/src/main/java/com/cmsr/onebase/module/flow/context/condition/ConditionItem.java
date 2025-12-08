@@ -42,7 +42,8 @@ public class ConditionItem implements java.io.Serializable {
      * 字段类型
      * 脚本节点等自定义的类型
      */
-    private String type;
+    @JsonAlias(value = {"fieldType", "type"})
+    private String fieldType;
 
 
     /**

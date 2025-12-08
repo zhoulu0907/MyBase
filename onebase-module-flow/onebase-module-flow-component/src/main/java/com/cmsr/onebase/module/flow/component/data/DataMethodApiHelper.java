@@ -154,11 +154,11 @@ public class DataMethodApiHelper {
             }
             case IS_EMPTY -> { // K IS NULL ;; K = NULL
                 condition.setNodeType(SemanticConditionNodeTypeEnum.CONDITION);
-                condition.setOperator(SemanticOperatorEnum.EMPTY);
+                condition.setOperator(SemanticOperatorEnum.IS_NULL);
                 condition.setFieldValue(null);
             }
             case IS_NOT_EMPTY -> { // K IS NOT NULL ;; K <> NULL
-                condition.setOperator(SemanticOperatorEnum.NOT_EMPTY);
+                condition.setOperator(SemanticOperatorEnum.IS_NOT_NULL);
                 condition.setFieldValue(null);
             }
             case EXISTS_IN -> { // K IN (V...)
@@ -176,21 +176,21 @@ public class DataMethodApiHelper {
             case CONTAINS -> { // K LIKE V
                 condition.setOperator(SemanticOperatorEnum.LIKE);
             }
-            case NOT_CONTAINS -> { // K NOT LIKE V
-                condition.setOperator(SemanticOperatorEnum.NOT_LIKE);
-            }
-            case CONTAINS_ALL -> {
-                condition.setOperator(SemanticOperatorEnum.CONTAINS_ALL);
-            }
-            case NOT_CONTAINS_ALL -> {
-                condition.setOperator(SemanticOperatorEnum.NOT_CONTAINS_ALL);
-            }
-            case CONTAINS_ANY -> {
-                condition.setOperator(SemanticOperatorEnum.CONTAINS_ANY);
-            }
-            case NOT_CONTAINS_ANY -> {
-                condition.setOperator(SemanticOperatorEnum.NOT_CONTAINS_ANY);
-            }
+//            case NOT_CONTAINS -> { // K NOT LIKE V
+//                condition.setOperator(SemanticOperatorEnum.NOT_LIKE);
+//            }
+//            case CONTAINS_ALL -> {
+//                condition.setOperator(SemanticOperatorEnum.CONTAINS_ALL);
+//            }
+//            case NOT_CONTAINS_ALL -> {
+//                condition.setOperator(SemanticOperatorEnum.NOT_CONTAINS_ALL);
+//            }
+//            case CONTAINS_ANY -> {
+//                condition.setOperator(SemanticOperatorEnum.CONTAINS_ANY);
+//            }
+//            case NOT_CONTAINS_ANY -> {
+//                condition.setOperator(SemanticOperatorEnum.NOT_CONTAINS_ANY);
+//            }
             case RANGE -> {
                 if (valueArray.size() != 2) {
                     throw new IllegalArgumentException("范围条件仅接受2个参数，但获得到了" + valueArray.size() + "个," + valueArray);

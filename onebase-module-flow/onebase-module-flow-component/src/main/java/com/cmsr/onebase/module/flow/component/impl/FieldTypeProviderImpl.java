@@ -62,7 +62,7 @@ public class FieldTypeProviderImpl implements FieldTypeProvider {
                 }
                 if (arg instanceof Map fieldInfoMap) {
                     List<SemanticFieldSchemaDTO> fieldSchemaDTOS = (List<SemanticFieldSchemaDTO>) fieldInfoMap.get(n.getTableName());
-                    SemanticFieldTypeEnum fieldTypeEnum = findFieldTypeEnum(n.getOffsetFiledName(), fieldSchemaDTOS);
+                    SemanticFieldTypeEnum fieldTypeEnum = findFieldTypeEnum(n.getOffsetFieldName(), fieldSchemaDTOS);
                     n.setOffsetFiledTypeEnum(fieldTypeEnum);
                 }
             } else if (nodeData instanceof StartEntityNodeData n) {

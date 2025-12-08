@@ -40,11 +40,11 @@ public class StartDateFieldNodeData extends NodeData implements Serializable {
     /**
      * 偏移字段ID
      */
-    private String offsetFiledName;
+    private String offsetFieldName;
 
 
     /**
-     * 偏移字段类型
+     * 偏移字段类型 ！！！ 数据库查询补充
      */
     private SemanticFieldTypeEnum offsetFiledTypeEnum;
 
