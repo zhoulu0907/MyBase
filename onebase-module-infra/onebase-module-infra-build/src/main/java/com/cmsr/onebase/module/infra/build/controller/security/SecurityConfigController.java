@@ -90,7 +90,7 @@ public class SecurityConfigController {
     @Operation(summary = "检查登录验证码", description = "返回值 true需要验证码,false不需要")
     @PermitAll
     @TenantIgnore
-    public CommonResult<Boolean> checkScenariosCaptcha(@Valid @RequestBody SecurityConfigReqVO configReqVO) {
+    public CommonResult<Boolean> checkScenariosCaptcha(@RequestBody SecurityConfigReqVO configReqVO) {
         return success(securityConfigService.checkScenariosCaptcha(configReqVO));
     }
 }
