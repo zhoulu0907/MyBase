@@ -47,10 +47,9 @@ public class ValidationSelfDefinedController {
     @Operation(summary = "创建自定义校验规则组")
     public CommonResult<Long> create(@Valid @RequestBody ValidationRuleGroupSaveReqVO createReqVO) {
         createReqVO.setValidationType("SELF_DEFINED");
-        // 确保 entityUuid 是真正的 UUID
-        if (createReqVO.getEntityUuid() != null) {
-            createReqVO.setEntityUuid(idUuidConverter.toEntityUuid(createReqVO.getEntityUuid()));
-        }
+        // 修复：正确处理 entityId 和 entityUuid 的转换
+        String entityUuid = idUuidConverter.resolveEntityUuid(createReqVO.getEntityUuid(), createReqVO.getEntityId());
+        createReqVO.setEntityUuid(entityUuid);
         return success(validationRuleGroupService.createValidationRuleGroup(createReqVO));
     }
 
@@ -58,9 +57,10 @@ public class ValidationSelfDefinedController {
     @Operation(summary = "更新自定义校验规则组")
     public CommonResult<Boolean> update(@Valid @RequestBody ValidationRuleGroupSaveReqVO updateReqVO) {
         updateReqVO.setValidationType("SELF_DEFINED");
-        // 确保 entityUuid 是真正的 UUID
-        if (updateReqVO.getEntityUuid() != null) {
-            updateReqVO.setEntityUuid(idUuidConverter.toEntityUuid(updateReqVO.getEntityUuid()));
+        // 修复：正确处理 entityId 和 entityUuid 的转换
+        String entityUuid = idUuidConverter.resolveEntityUuidOptional(updateReqVO.getEntityUuid(), updateReqVO.getEntityId());
+        if (entityUuid != null) {
+            updateReqVO.setEntityUuid(entityUuid);
         }
         validationRuleGroupService.updateValidationRuleGroup(updateReqVO);
         return success(true);
