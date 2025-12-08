@@ -457,7 +457,7 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
                   label="条件规则"
                   field="condition"
                 >
-                  <div className={styles.conditionRule}>
+                  <div key={'condition'} className={styles.conditionRule}>
                     {conditionGroups.map((group, groupIndex) => (
                       <>
                         <div key={groupIndex} className={styles.conditionRuleItem}>
