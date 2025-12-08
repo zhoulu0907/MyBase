@@ -10,10 +10,19 @@ export const ENTITY_TYPE_VALUE = {
   INDEP: 'indep'
 };
 
+export const RELATION_TYPE = {
+  MASTER: 'MASTER',
+  SLAVE: 'SLAVE',
+  NONE: 'NONE'
+};
+
 export interface MetadataEntityPair {
   entityId: string;
-
+  entityUuid: string;
+  tableName: string;
   entityName: string;
+  relationType: (typeof RELATION_TYPE)[keyof typeof RELATION_TYPE];
+  relationshipTypes: string[];
 }
 
 export interface MetadataEntityField {

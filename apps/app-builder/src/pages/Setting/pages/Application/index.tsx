@@ -214,11 +214,11 @@ const AppManagement: React.FC = () => {
   };
 
   const nagivateToRuntimeApp = (appId: string) => {
-    const appUrl = `${getRuntimeURL()}/#/login?appId=${appId}&tenantId=${tenantId}`;
+    const appUrl = `${getRuntimeURL()}/#/onebase/runtime/?appId=${appId}&tenantId=${tenantId}`;
 
     const newWindow = window.open('', '_blank');
     if (newWindow) {
-      newWindow.location.href = appUrl;
+      newWindow.location.href = `${getRuntimeURL()}/#/login?redirectURL=${appUrl}`;
     }
   };
 

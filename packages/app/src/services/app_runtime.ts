@@ -1,16 +1,17 @@
+import { isRuntimeEnv } from '@onebase/common';
 import {
-  GetRunTimePageSetIdReq,
   FetchExecTaskReq,
-  GetFormDetailReq,
   GetDonePageList,
-  GetOperatorRecord,
-  SubMitInstanceReq,
-  GetMyCreatePageListReq,
-  GetMyCCPageListReq,
+  GetFormDetailReq,
   GetListNodesReq,
-  GetPageSetListReq
+  GetMyCCPageListReq,
+  GetMyCreatePageListReq,
+  GetOperatorRecord,
+  GetPageSetListReq,
+  GetRunTimePageSetIdReq,
+  SubMitInstanceReq
 } from '../types';
-import { runtimeListdataService, appService } from './clients';
+import { appService, runtimeAppService, runtimeListdataService } from './clients';
 
 export const getTodoPageList = (params: GetRunTimePageSetIdReq) => {
   return runtimeListdataService.get('/task-center/todo/page', params);
@@ -38,7 +39,7 @@ export const fetchFlowPredict = (params: any) => {
 };
 
 export const getPageSetList = (params: GetPageSetListReq) => {
-  return appService.get('/resource/page_set/list', params);
+  return (isRuntimeEnv() ? runtimeAppService : appService).get('/resource/page_set/list', params);
 };
 export const getListNodes = (params: GetListNodesReq) => {
   return runtimeListdataService.get('/task-center/list-nodes', params);

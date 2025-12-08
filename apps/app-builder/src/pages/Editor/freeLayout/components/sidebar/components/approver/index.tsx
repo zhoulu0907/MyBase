@@ -29,6 +29,7 @@ export default function ApproveDreawer({ handleConfigSubmit, configData }: Appro
   const searchParams = new URLSearchParams(location.search);
   const pageSetId = searchParams.get('pageSetId') || '';
   const [ckOptions, setCkOptions] = useState([]);
+  const [tableName, setTableName] = useState('');
   const [useApprover, setApprover] = useState<string>('approver');
   const [approverConfigData, setApproverConfigData] = useState<ApproverConfigDataType>(processInitData(configData));
   function processInitData(initData: any) {
@@ -49,6 +50,7 @@ export default function ApproveDreawer({ handleConfigSubmit, configData }: Appro
         }
       };
     }
+    
     const keys = Object.keys(initData);
     if (keys.length === 2 && keys.includes('name') && keys.includes('errorMsg')) {
       return {
@@ -77,6 +79,7 @@ export default function ApproveDreawer({ handleConfigSubmit, configData }: Appro
           ...newData.fieldPermConfig,
           ...data
         } as FieldPermConfigType;
+
       } else if (key === 'advancedConfig') {
         newData.advancedConfig = data as AdvancedConfigType;
       }
@@ -85,7 +88,8 @@ export default function ApproveDreawer({ handleConfigSubmit, configData }: Appro
   }
   const getMainMetaData = async () => {
     const mainMetaData = await getPageSetMetaData({ pageSetId: pageSetId });
-    const { parentFields } = await getEntityFieldsWithChildren(mainMetaData);
+    const { parentFields, tableName } = await getEntityFieldsWithChildren(mainMetaData);
+    setTableName(tableName);
     setCkOptions(parentFields);
   };
 
@@ -104,6 +108,7 @@ export default function ApproveDreawer({ handleConfigSubmit, configData }: Appro
             setApprovalConfigData={setApprovalConfigData}
             fieldPermConfig={fieldPermConfig || {}}
             ckOptions={ckOptions}
+            tableName={tableName}
           />
         );
       case ApproveDrawerTab.ADVANCED_SETTINGS:

@@ -141,7 +141,6 @@ const AppCard: React.FC<AppCardProps> = ({
               <AvatarGroup
                 size={24}
                 maxCount={5}
-                zIndexAscend
                 maxPopoverTriggerProps={{
                   disabled: true
                 }}
@@ -157,7 +156,6 @@ const AppCard: React.FC<AppCardProps> = ({
                     </Avatar>
                   );
                 })}
-                <Avatar>{item?.userPhotoList?.length}</Avatar>
               </AvatarGroup>
               {(item?.userPhotoList?.length > 1 && (
                 <>

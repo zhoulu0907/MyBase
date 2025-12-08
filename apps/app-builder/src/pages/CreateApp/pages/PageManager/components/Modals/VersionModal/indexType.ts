@@ -16,6 +16,7 @@ export interface VersionModalProps {
   changeCurrentFlow: (id: string) => void;
   currentFlowId: string;
   getVersonList: () => void;
+  businessUuid?: string;
 }
 export interface VersionType {
   createTime: number;
@@ -51,9 +52,9 @@ export interface VersionDataCreator {
 
 export interface VersionData {
   id: string;
-  version: string;
-  versionAlias: string;
-  versionStatus: string;
+  bpmVersion: string;
+  bpmVersionAlias: string;
+  bpmVersionStatus: string;
   creator: VersionDataCreator;
   createTime: string;
   updateTime: string;

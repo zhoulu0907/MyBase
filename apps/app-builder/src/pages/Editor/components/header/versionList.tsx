@@ -1,7 +1,7 @@
 import { useFlowEditorStor } from '@/store/index';
 import { Select } from '@arco-design/web-react';
 import { IconSettings } from '@arco-design/web-react/icon';
-import { getByBusinessId, getVersionMgmt } from '@onebase/app';
+import { getByBusinessUuid, getVersionMgmt } from '@onebase/app';
 import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import type { VersionType } from '../constants';
@@ -11,7 +11,7 @@ import styles from './index.module.less';
 const Option = Select.Option;
 
 export const VersionListSelect = forwardRef(
-  ({ setManageVisible }: { setManageVisible: (value: boolean) => void }, ref) => {
+  ({ setManageVisible, menuUuid }: { setManageVisible: (value: boolean) => void; menuUuid: string }, ref) => {
     const [versionList, setVersionList] = useState<VersionType[]>([]);
     const { setBusinessId, setCurrnetFlowId, currentFlowId } = useFlowEditorStor();
     const location = useLocation();
@@ -20,24 +20,24 @@ export const VersionListSelect = forwardRef(
 
     // 获取版本信息列表
     const getVersionMgmtData = async () => {
-      const params = { businessId: pageSetId, sortType: 'create_time' };
+      const params = { businessUuid: menuUuid, sortType: 'create_time' };
       const { list } = await getVersionMgmt(params);
       setVersionList(list);
     };
 
     // 获取当前版本信息
     const getCurrentVersion = async () => {
-      const { id } = await getByBusinessId({ businessId: pageSetId });
+      const { id } = await getByBusinessUuid({ businessUuid: menuUuid });
       setCurrnetFlowId(id);
     };
     useEffect(() => {
-      getCurrentVersion();
+      menuUuid && getCurrentVersion();
       setBusinessId(pageSetId);
-    }, []);
+    }, [menuUuid]);
 
     useEffect(() => {
-      getVersionMgmtData();
-    }, [currentFlowId]);
+      menuUuid && getVersionMgmtData();
+    }, [currentFlowId, menuUuid]);
 
     const changeCurrentFlow = (value: string) => {
       if (value !== VersionStatus.MANAGE) {

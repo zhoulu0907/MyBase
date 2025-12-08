@@ -47,16 +47,16 @@ export class UserPermissionManager {
         }, {})
       : {};
     Reflect.deleteProperty(userPermissionInfo.permissionMap, '');
-    localStorage.setItem(this.USER_PERMISSION_INFO_KEY, JSON.stringify(userPermissionInfo));
+    sessionStorage.setItem(this.USER_PERMISSION_INFO_KEY, JSON.stringify(userPermissionInfo));
   }
 
   static getUserPermissionInfo(): UserPermissionInfo | null {
-    const userPermissionInfo = localStorage.getItem(this.USER_PERMISSION_INFO_KEY);
+    const userPermissionInfo = sessionStorage.getItem(this.USER_PERMISSION_INFO_KEY);
     return userPermissionInfo ? JSON.parse(userPermissionInfo) : null;
   }
 
   static clearUserPermissionInfo(): void {
-    localStorage.removeItem(this.USER_PERMISSION_INFO_KEY);
+    sessionStorage.removeItem(this.USER_PERMISSION_INFO_KEY);
   }
 
   /**

@@ -21,9 +21,9 @@ export const dataMethodDeleteV2 = (tableName: string, menuId: string, params: De
 };
 
 export const dataMethodDetailV2 = (tableName: string, menuId: string, params: DetailMethodV2Params) => {
-  return runtimeMetadataService.get(`/${tableName}/detail?menuId=${menuId}`, params);
+  return runtimeMetadataService.post(`/${tableName}/detail?menuId=${menuId}`, params);
 };
 
 export const dataMethodPageV2 = (tableName: string, menuId: string, params: PageMethodV2Params) => {
-  return runtimeMetadataService.get(`/${tableName}/page?menuId=${menuId}`, params);
+  return runtimeMetadataService.post(`/${tableName}/page?menuId=${menuId}`, params);
 };
