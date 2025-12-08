@@ -24,10 +24,10 @@ const FieldTable = forwardRef(
       {
         title: '操作',
         width: 95,
-        dataIndex: 'fieldName',
+        dataIndex: 'tableName',
         render: (val: any, row: any) => {
           return (
-            <Button type="text" onClick={() => handleDelRow(val)}>
+            <Button type="text" onClick={() => handleDelRow(row.fieldName)}>
               删除
             </Button>
           );
@@ -76,7 +76,8 @@ const FieldTable = forwardRef(
     useImperativeHandle(ref, () => ({
       getTbData: () => tbData
     }));
-    
+    console.log(tbData);
+
     return (
       <>
         <div className="flex-btw">
@@ -95,10 +96,10 @@ const FieldTable = forwardRef(
           columns={[...(columnsTable || []), ...baseColumns]}
           data={tbData}
           pagination={false}
-          rowSelection={{
-            type: 'checkbox',
-            onChange: (keyArr: any, rowArr: any) => handleTbSelect(keyArr, rowArr)
-          }}
+          // rowSelection={{
+          //   type: 'checkbox',
+          //   onChange: (keyArr: any, rowArr: any) => handleTbSelect(keyArr, rowArr)
+          // }}
         />
         {fmVisible && (
           <FieldModal

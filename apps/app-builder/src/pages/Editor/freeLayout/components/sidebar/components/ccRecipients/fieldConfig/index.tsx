@@ -8,8 +8,6 @@ export default function FieldConfig({ setCcRecipientsConfigData, fieldPermConfig
   const [nodeSwitch, setNodeSwitch] = useState<boolean>(fieldPermConfig?.useNodeConfig || false);
   const [tbData, setTbData] = useState(fieldPermConfig?.fieldConfigs);
 
-  console.log(tbData);
-  
   function changeNodeSwitch(flag: boolean) {
     setNodeSwitch(flag);
   }
