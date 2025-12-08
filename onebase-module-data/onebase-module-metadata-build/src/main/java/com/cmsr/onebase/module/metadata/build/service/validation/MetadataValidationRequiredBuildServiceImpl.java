@@ -110,9 +110,9 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
             groupVO.setPopPrompt(vo.getPopPrompt());
             groupVO.setPopType(vo.getPopType());
             groupVO.setValidationType("REQUIRED");
-            // 修复：同步entityId到规则组
-            groupVO.setEntityId(field.getEntityUuid());
+            // 修复：正确设置entityUuid和applicationId
             groupVO.setEntityUuid(field.getEntityUuid());
+            groupVO.setApplicationId(field.getApplicationId());
             groupId = validationRuleGroupService.createValidationRuleGroup(groupVO);
         }
 
@@ -159,7 +159,8 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
             updateGroupVO.setRgDesc(groupDO.getRgDesc());
             updateGroupVO.setRgStatus(groupDO.getRgStatus());
             updateGroupVO.setValidationType(groupDO.getValidationType());
-            updateGroupVO.setEntityId(groupDO.getEntityUuid());
+            updateGroupVO.setEntityUuid(groupDO.getEntityUuid());
+            updateGroupVO.setApplicationId(groupDO.getApplicationId());
             if (reqVO.getPopPrompt() != null && !reqVO.getPopPrompt().equals(groupDO.getPopPrompt())) {
                 updateGroupVO.setPopPrompt(reqVO.getPopPrompt());
                 needGroupUpdate = true;
