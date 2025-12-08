@@ -7,13 +7,13 @@ import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraphNode;
 import com.cmsr.onebase.module.flow.context.graph.NodeData;
 import com.cmsr.onebase.module.flow.context.graph.nodes.*;
-import com.cmsr.onebase.module.flow.context.provider.AppProvider;
 import com.cmsr.onebase.module.flow.context.provider.FieldTypeProvider;
 import com.cmsr.onebase.module.flow.core.config.FlowProperties;
 import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntitySchemaDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
+import com.mybatisflex.core.tenant.TenantManager;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -69,12 +69,13 @@ public class FlowFieldTypeProviderImpl implements FieldTypeProvider {
                     SemanticFieldTypeEnum fieldTypeEnum = findFieldTypeEnum(n.getOffsetFieldName(), fieldSchemaDTOS);
                     n.setOffsetFiledTypeEnum(fieldTypeEnum);
                 }
+                processConditionList(n.getFilterCondition(), arg, 2);
             } else if (nodeData instanceof StartEntityNodeData n) {
                 processConditionList(n.getFilterCondition(), arg, 2);
             } else if (nodeData instanceof StartFormNodeData n) {
                 processConditionList(n.getFilterCondition(), arg, 2);
                 if (arg instanceof Map fieldInfoMap) {
-
+                    // TODO
                 }
             } else if (nodeData instanceof SwitchCaseNodeData n) {
                 processConditionList(n.getFilterCondition(), arg, 3);
@@ -110,17 +111,18 @@ public class FlowFieldTypeProviderImpl implements FieldTypeProvider {
             if (StringUtils.isEmpty(fieldKey)) {
                 continue;
             }
-            int count = StringUtils.countMatches(fieldKey, '.');
-            if (count != section) {
+            String[] split = StringUtils.split(fieldKey, '.');
+            if (split.length < section) {
                 continue;
             }
-            String[] split = StringUtils.split(fieldKey, '.');
+            String tableName = split[section - 2];
+            String fieldName = split[section - 1];
             if (arg instanceof Set fieldNames) {
-                fieldNames.add(split[section - 2]);
+                fieldNames.add(tableName);
             }
             if (arg instanceof Map fieldInfoMap) {
-                List<SemanticFieldSchemaDTO> fieldSchemaDTOS = (List<SemanticFieldSchemaDTO>) fieldInfoMap.get(split[1]);
-                SemanticFieldTypeEnum fieldTypeEnum = findFieldTypeEnum(split[section - 1], fieldSchemaDTOS);
+                List<SemanticFieldSchemaDTO> fieldSchemaDTOS = (List<SemanticFieldSchemaDTO>) fieldInfoMap.get(tableName);
+                SemanticFieldTypeEnum fieldTypeEnum = findFieldTypeEnum(fieldName, fieldSchemaDTOS);
                 conditionItem.setFieldTypeEnum(fieldTypeEnum);
             }
         }
@@ -129,11 +131,11 @@ public class FlowFieldTypeProviderImpl implements FieldTypeProvider {
     private Map<String, List<SemanticFieldSchemaDTO>> findTableFieldSchema(Long applicationId, Set<String> tableNames) {
         Map<String, List<SemanticFieldSchemaDTO>> fieldInfoMap = new HashMap<>();
         for (String tableName : tableNames) {
-            SemanticEntitySchemaDTO semanticEntitySchemaDTO = ApplicationManager.withApplicationIdAndVersionTag(
+            SemanticEntitySchemaDTO semanticEntitySchemaDTO = TenantManager.withoutTenantCondition(() -> ApplicationManager.withApplicationIdAndVersionTag(
                     applicationId,
                     flowProperties.getVersionTag(),
                     () -> semanticDynamicDataApi.buildEntitySchemaByTableName(tableName)
-            );
+            ));
             List<SemanticFieldSchemaDTO> fields = semanticEntitySchemaDTO.getFields();
             fieldInfoMap.put(tableName, fields);
         }
