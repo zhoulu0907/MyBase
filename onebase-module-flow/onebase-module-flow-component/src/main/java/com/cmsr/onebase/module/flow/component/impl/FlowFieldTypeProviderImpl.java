@@ -27,7 +27,7 @@ import java.util.*;
  */
 @Setter
 @Component
-public class FieldTypeProviderImpl implements FieldTypeProvider {
+public class FlowFieldTypeProviderImpl implements FieldTypeProvider {
 
     @Autowired
     private SemanticDynamicDataApi semanticDynamicDataApi;
