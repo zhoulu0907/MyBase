@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.flow.core.dal.database;
 
+import com.cmsr.onebase.framework.common.enums.VersionTagEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.orm.repo.BaseBizRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
@@ -77,6 +78,15 @@ public class FlowProcessRepository extends BaseBizRepository<FlowProcessMapper, 
                 .where(FLOW_PROCESS.ENABLE_STATUS.eq(status))
                 .where(FLOW_PROCESS.VERSION_TAG.eq(versionTag));
         return getMapper().selectListByQuery(query);
+    }
+
+
+    public void runtimeToHistory(Long applicationId, Long versionTag) {
+        updateChain()
+                .set(FLOW_PROCESS.VERSION_TAG, versionTag)
+                .where(FLOW_PROCESS.APPLICATION_ID.eq(applicationId))
+                .where(FLOW_PROCESS.VERSION_TAG.eq(VersionTagEnum.RUNTIME.getValue()))
+                .update();
     }
 
 

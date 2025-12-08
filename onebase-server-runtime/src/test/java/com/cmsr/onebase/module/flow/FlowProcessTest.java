@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.flow.graph;
+package com.cmsr.onebase.module.flow;
 
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.security.TenantContextHolder;
@@ -59,31 +59,18 @@ public class FlowProcessTest {
         System.out.println(flowChain);
     }
 
-    @Test
-    public void testSimple() throws IOException {
-        testSimple2();
-        testSimple2();
-        testSimple2();
-        testSimple2();
-    }
 
 
     @Test
     public void testSimple2() throws IOException {
         ApplicationManager.ignoreApplicationCondition();
         ApplicationManager.ignoreVersionTagCondition();
-        EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
-//         reqDTO.setTraceId(UUID.randomUUID().toString());
-//         reqDTO.setEntityId(165637750471655424L);
-//         reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_CREATE);
-//         reqDTO.setFieldData(Map.of(
-// //                "46999569445519360", "6年级3班",
-// //                "50026937276661762", LocalDate.now().minusYears(10),
-// //                "50028191407505411", 30
-//         ));
-        //reqDTO.setChangedFieldIds(List.of(46999569445519360L));
-        EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
-        System.out.println(respDTO);
+
+        FormTriggerReqVO reqVO = new FormTriggerReqVO();
+        reqVO.setProcessId(171622357911764992L);
+        reqVO.setInputParams(Map.of());
+        FormTriggerRespVO respVO = flowProcessExecService.triggerForm(reqVO);
+        System.out.println(respVO);
     }
 
     @Test
