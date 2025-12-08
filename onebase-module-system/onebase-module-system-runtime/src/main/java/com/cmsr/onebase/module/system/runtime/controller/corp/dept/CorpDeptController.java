@@ -41,9 +41,6 @@ public class CorpDeptController {
     @Resource
     private DeptService deptService;
 
-    @Resource
-    private UserService userService;
-
     @PostMapping("/create")
     @Operation(summary = "创建部门")
     @PreAuthorize("@ss.hasPermission('corp:dept:create')")
