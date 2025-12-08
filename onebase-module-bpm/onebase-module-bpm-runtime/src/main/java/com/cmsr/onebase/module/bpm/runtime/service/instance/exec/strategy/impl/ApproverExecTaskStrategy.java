@@ -321,7 +321,7 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
             // 获取子表的非系统字段
             Set<String> subTableNonSystemFields = nonSystemFields.get(subTableName);
             if (subTableNonSystemFields == null) {
-                log.info("子表非系统字段不存在，tableName: {}, subTableName: {}", subTableName, subTableName);
+                log.info("子表非系统字段不存在，subTableName: {}", subTableName);
                 continue;
             }
 
@@ -492,29 +492,29 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
             // 3.1 处理新增数据（只设置有权限的字段）
             for (Map<String, Object> newItem : newItems) {
                 Map<String, Object> processedItem = new HashMap<>();
-                // 只设置有权限的字段
-                for (String fieldName : subWritableFieldNames) {
-                    Object value = newItem.get(fieldName);
-                    processedItem.put(fieldName, value);
+                // 只设置有权限的字段（前面已校验新增时 subWritableFieldNames 不为空）
+                if (CollectionUtils.isNotEmpty(subWritableFieldNames)) {
+                    for (String fieldName : subWritableFieldNames) {
+                        Object value = newItem.get(fieldName);
+                        processedItem.put(fieldName, value);
+                    }
                 }
                 finalSubTableList.add(processedItem);
             }
 
             // 3.2 处理更新数据（处理所有更新记录，包括没有实际修改的，以保留所有记录）
-            if (CollectionUtils.isNotEmpty(updateItems)) {
-                if (CollectionUtils.isEmpty(subWritableFieldNames)) {
-                    // 只读权限，直接返回原来的数据
-                    finalSubTableList.addAll(updateItems);
-                } else {
-                    for (Map<String, Object> updateItem : updateItems) {
-                        Object updateId = updateItem.get("id");
-                        String updateIdStr = convertIdToString(updateId);
-                        Integer existIndex = existSubTableIndexMap.get(updateIdStr);
-                        if (existIndex != null) {
-                            Map<String, Object> existItem = existSubTableList.get(existIndex);
-                            Map<String, Object> processedItem = processUpdateSubTableItem(updateItem, existItem, subWritableFieldNames);
-                            finalSubTableList.add(processedItem);
-                        }
+            for (Map<String, Object> updateItem : updateItems) {
+                Object updateId = updateItem.get("id");
+                String updateIdStr = convertIdToString(updateId);
+                Integer existIndex = existSubTableIndexMap.get(updateIdStr);
+                if (existIndex != null) {
+                    Map<String, Object> existItem = existSubTableList.get(existIndex);
+                    if (CollectionUtils.isEmpty(subWritableFieldNames)) {
+                        // 只读权限，返回数据库中的原始数据
+                        finalSubTableList.add(new HashMap<>(existItem));
+                    } else {
+                        Map<String, Object> processedItem = processUpdateSubTableItem(updateItem, existItem, subWritableFieldNames);
+                        finalSubTableList.add(processedItem);
                     }
                 }
             }
@@ -685,7 +685,3 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
         }
     }
 }
-
-
-
-
