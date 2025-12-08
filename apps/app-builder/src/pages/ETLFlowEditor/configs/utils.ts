@@ -140,6 +140,9 @@ export const handlePreviewData = async (
   setPreviewData: (data: any) => void
 ) => {
   const nodes = graphData.nodes?.map((node: any) => {
+    if (node.id === curNode.id) {
+      return curNode;
+    }
     return {
       id: node.id,
       title: nodeData[node.id].title || '',
