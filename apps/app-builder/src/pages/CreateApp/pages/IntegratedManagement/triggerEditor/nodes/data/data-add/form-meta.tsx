@@ -1,22 +1,12 @@
-import { RELATIONSHIP_TYPE } from '@/pages/CreateApp/pages/DataFactory/utils/types';
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
-import { useAppStore } from '@/store/store_app';
 import { Form, Grid, Input, Radio, Select } from '@arco-design/web-react';
 import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
-import {
-  DATA_SOURCE_TYPE,
-  getEntityFields,
-  getEntityFieldsWithChildren,
-  getEntityListByApp,
-  RELATION_TYPE,
-  type AppEntityField,
-  type MetadataEntityPair
-} from '@onebase/app';
+import { DATA_SOURCE_TYPE } from '@onebase/app';
 import { NodeType } from '@onebase/common';
 import { useEffect, useState } from 'react';
 import FieldEditor from '../../../components/field-editor';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
-import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
+import { useEntityFields, useIsSidebar, useMainEntityList, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
 import { getPrecedingNodes, validateNodeForm } from '../../utils';
 
@@ -27,14 +17,17 @@ const ALLOW_DATANODE_TYPES = [NodeType.DATA_QUERY_MULTIPLE, NodeType.DATA_QUERY,
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const isSidebar = useIsSidebar();
   const { node } = useNodeRenderContext();
-  // 当前页应用id
-  const { curAppId } = useAppStore();
-  const [fieldDataList, setFieldDataList] = useState<AppEntityField[]>([]);
-  const [mainEntityList, setMainEntityList] = useState<MetadataEntityPair[]>([]);
-  const [subEntityList, setSubEntityList] = useState<MetadataEntityPair[]>([]);
+  const { mainEntityList } = useMainEntityList();
+  const {
+    subEntityList,
+    fieldDataList,
+    handleMainTableChange,
+    handleSubTableChange,
+    setFieldDataListDirectly,
+    resetFields
+  } = useEntityFields();
 
   const [dataNodeList, setDataNodeList] = useState<any[]>([]);
-
   const [payloadForm] = Form.useForm();
 
   const addType = Form.useWatch('addType', payloadForm);
@@ -47,139 +40,50 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   }, [payloadForm]);
 
   useEffect(() => {
-    init();
-  }, []);
-
-  const init = async () => {
-    const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    if (nodeData) {
-      const res = await getEntityListByApp(curAppId);
-
-      const curMainEntities = res.filter(
-        (item: MetadataEntityPair) =>
-          item.relationType !== RELATION_TYPE.SLAVE ||
-          (item.relationType === RELATION_TYPE.SLAVE &&
-            !item.relationshipTypes.includes(RELATIONSHIP_TYPE.SUBTABLE_ONE_TO_MANY))
-      );
-
-      setMainEntityList(curMainEntities);
-      if (nodeData.addType === DATA_SOURCE_TYPE.MAIN_TABLE) {
-        // 在主表中
-        getFieldList(nodeData?.mainTableName, curMainEntities);
-      }
-      if (nodeData.addType === DATA_SOURCE_TYPE.SUB_TABLE) {
-        if (!nodeData?.mainTableName) {
-          return;
-        }
-
-        const mainEntityId = curMainEntities.find(
-          (item: MetadataEntityPair) => item.tableName === nodeData.mainTableName
-        )?.entityId;
-
-        if (!mainEntityId) {
-          return;
-        }
-        const res = await getEntityFieldsWithChildren(mainEntityId);
-        const curSubEntityList = (res.childEntities || []).map((item: any) => {
-          return {
-            entityId: item.childEntityId,
-            tableName: item.childTableName,
-            entityName: item.childEntityName
-          };
-        });
-
-        setSubEntityList(curSubEntityList);
-        getFieldList(nodeData.subTableName, curSubEntityList);
-      }
-    }
-
     const nodes = triggerEditorSignal.nodes.value;
     const newDataNodeList = getPrecedingNodes(node.id, nodes, ALLOW_DATANODE_TYPES);
     setDataNodeList(newDataNodeList);
-  };
+  }, []);
+
+  useEffect(() => {
+    // 初始化字段数据
+    const nodeData = triggerEditorSignal.nodeData.value[node.id];
+    if (nodeData?.addType === DATA_SOURCE_TYPE.MAIN_TABLE && nodeData?.mainTableName && mainEntityList.length > 0) {
+      setFieldDataListDirectly(nodeData.mainTableName, mainEntityList);
+    } else if (
+      nodeData?.addType === DATA_SOURCE_TYPE.SUB_TABLE &&
+      nodeData?.mainTableName &&
+      mainEntityList.length > 0
+    ) {
+      handleMainTableChange(nodeData.mainTableName, mainEntityList, { onlySubEntityList: true }).then(() => {
+        if (nodeData?.subTableName && subEntityList.length > 0) {
+          handleSubTableChange(nodeData.subTableName, subEntityList);
+        }
+      });
+    }
+  }, [mainEntityList.length, subEntityList.length]);
 
   // 新增方式变更
   const handleDataTypeChange = (curAddType: DATA_SOURCE_TYPE) => {
     payloadForm.clearFields(['mainTableName', 'subTableName', 'dataNodeId', 'fields']);
-    setMainEntityList([]);
-    setSubEntityList([]);
-    setFieldDataList([]);
-    setMainEntityList([]);
-    getEntityList(curAddType);
+    resetFields();
   };
 
-  const getEntityList = async (curAddType?: DATA_SOURCE_TYPE) => {
-    const nodeData = triggerEditorSignal.nodeData.value[node.id];
-
-    const res = await getEntityListByApp(curAppId);
-    const curMainEntities = res.filter(
-      (item: MetadataEntityPair) =>
-        item.relationType !== RELATION_TYPE.SLAVE ||
-        (item.relationType === RELATION_TYPE.SLAVE &&
-          !item.relationshipTypes.includes(RELATIONSHIP_TYPE.SUBTABLE_ONE_TO_MANY))
-    );
-    setMainEntityList(curMainEntities);
-
-    if (curAddType === DATA_SOURCE_TYPE.MAIN_TABLE || curAddType === undefined) {
-      // 从主表中
-      getFieldList(nodeData?.mainTableName, res);
-    }
-    if (curAddType === DATA_SOURCE_TYPE.SUB_TABLE) {
-      // 从子表中
-    }
-  };
   // 主表数据变更
   const handleMainTableNameChange = async (curMainTableName: string) => {
     payloadForm.clearFields(['subTableName', 'dataNodeId', 'fields']);
-    setFieldDataList([]);
 
     if (addType === DATA_SOURCE_TYPE.MAIN_TABLE) {
-      getFieldList(curMainTableName, mainEntityList);
-    }
-    if (addType === DATA_SOURCE_TYPE.SUB_TABLE) {
-      setSubEntityList([]);
-      const mainEntityId = mainEntityList.find((item) => item.tableName === curMainTableName)?.entityId;
-      if (!mainEntityId) {
-        return;
-      }
-
-      const res = await getEntityFieldsWithChildren(mainEntityId);
-
-      const newEntityList = (res.childEntities || []).map((item: any) => {
-        return {
-          entityId: item.childEntityId,
-          tableName: item.childTableName,
-          entityName: item.childEntityName
-        };
-      });
-
-      setSubEntityList(newEntityList);
+      await setFieldDataListDirectly(curMainTableName, mainEntityList);
+    } else if (addType === DATA_SOURCE_TYPE.SUB_TABLE) {
+      await handleMainTableChange(curMainTableName, mainEntityList, { onlySubEntityList: true });
     }
   };
+
   // 子表数据变更
-  const handleSubTableNameChange = (curSubTableName: string) => {
+  const handleSubTableNameChange = async (curSubTableName: string) => {
     payloadForm.clearFields(['dataNodeId', 'fields']);
-    setFieldDataList([]);
-    getFieldList(curSubTableName, subEntityList);
-  };
-
-  // 获取字段下拉列表
-  const getFieldList = async (tableName: string, entityList: MetadataEntityPair[]) => {
-    if (!tableName) {
-      return;
-    }
-    const entityId = [...entityList].find((item) => item.tableName === tableName)?.entityId;
-
-    if (!entityId) {
-      return;
-    }
-
-    const res = await getEntityFields({ entityId: entityId });
-    res.forEach((item: any) => {
-      item.fieldKey = `${tableName}.${item.fieldName}`;
-    });
-
-    setFieldDataList(res);
+    await handleSubTableChange(curSubTableName, subEntityList);
   };
 
   const handleBatchTypeChange = (value: boolean) => {
