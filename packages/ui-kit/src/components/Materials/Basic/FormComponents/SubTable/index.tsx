@@ -500,10 +500,9 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                   const isTable =
                     ele.type === ENTITY_TYPE_VALUE.MAIN ||
                     ele.type === ENTITY_TYPE_VALUE.SUB ||
-                    ele.tableName && ele.tableName === mainEntity.tableName ||
                     ele.type === 'XSubTable';
                   // 主表数据
-                  const isMain = ele.entityID === mainEntity.entityId || ele.tableName && ele.tableName === mainEntity.tableName;
+                  const isMain = ele.tableName && ele.tableName === mainEntity.tableName;
                   // 同一个子表
                   const isSub = !ele.entityID || !dataField || ele.entityID === dataField;
                   return !isTable && !isMain && isSub;
