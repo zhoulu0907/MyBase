@@ -31,7 +31,7 @@ public interface FileApi {
      * @return 文件路径
      */
     default String createFile(byte[] content) {
-        return createFile(content, null, null, null, null);
+        return createFile(content, null, null, null);
     }
 
     /**
@@ -42,7 +42,7 @@ public interface FileApi {
      * @return 文件路径
      */
     default String createFile(byte[] content, String name) {
-        return createFile(content, name, null, null, null);
+        return createFile(content, name, null, null);
     }
 
     /**
@@ -55,8 +55,8 @@ public interface FileApi {
      * @return 文件路径
      */
     default String createFile(@NotEmpty(message = "文件内容不能为空") byte[] content,
-                              String name, String directory, String type, String visitMode) {
-        return createFile(new FileCreateReqDTO().setName(name).setDirectory(directory).setType(type).setContent(content).setVisitMode(visitMode)).getCheckedData();
+                              String name, String directory, String type) {
+        return createFile(new FileCreateReqDTO().setName(name).setDirectory(directory).setType(type).setContent(content)).getCheckedData();
     }
 
     @PostMapping(PREFIX + "/create")

@@ -18,9 +18,12 @@ public enum FileVisitModeEnum implements ArrayValuable<String> {
      */
     PUBLIC("public","可公开下载，无需登录"),
     /**
-     * 各runMode私有访问
+     * 文件需登录鉴权
      */
-    PRIVATE("private","各runMode私有文件,需校验登录信息后方可下载");
+    AUTHEN("authen","需校验登录信息后方可下载"),
+
+
+    PERMISSION("permission","内部调用");
 
     /**
      * 值

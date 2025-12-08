@@ -24,8 +24,4 @@ public class FileCreateReqDTO {
     @NotEmpty(message = "文件内容不能为空")
     private byte[] content;
 
-    @Schema(description = "文件保存标识",example = "public-公开访问，private-各runMode私有访问", requiredMode = Schema.RequiredMode.REQUIRED)
-    @InEnum(value = FileVisitModeEnum.class, message = "访问标识 {value}")
-    private String visitMode;
-
 }

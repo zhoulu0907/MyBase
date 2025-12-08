@@ -8,6 +8,7 @@ import com.cmsr.onebase.module.infra.dal.vo.app.AppFileUploadReqVO;
 import com.cmsr.onebase.module.infra.dal.vo.file.file.FileCreateReqVO;
 import com.cmsr.onebase.module.infra.dal.vo.file.file.FileListRespVO;
 import com.cmsr.onebase.module.infra.dal.vo.file.file.FilePresignedUrlRespVO;
+import com.cmsr.onebase.module.infra.enums.file.FileVisitModeEnum;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -26,6 +27,7 @@ import com.cmsr.onebase.module.infra.service.file.FileService;
 import java.util.Collection;
 import java.util.List;
 
+import static com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstants.BAD_REQUEST;
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
 @Tag(name = "Runtime- 文件服务")
@@ -42,6 +44,9 @@ public class RuntimeFileController {
     @Operation(summary = "上传文件")
     public CommonResult<String> uploadFile(AppFileUploadReqVO uploadReqVO) throws Exception {
         MultipartFile file = uploadReqVO.getFile();
+        if (uploadReqVO.getVisitMode().equals(FileVisitModeEnum.PERMISSION.getValue())){
+            return CommonResult.error(BAD_REQUEST);
+        }
         byte[] content = IoUtil.readBytes(file.getInputStream());
         return success(fileService.createFile(content, file.getOriginalFilename(),
                 uploadReqVO.getDirectory(), file.getContentType(),uploadReqVO.getVisitMode()));

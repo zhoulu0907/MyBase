@@ -20,7 +20,7 @@ public class FileUploadReqVO {
     private String directory;
 
 
-    @Schema(description = "文件保存标识",example = "public-公开访问，private-各runMode私有访问", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "文件保存标识",example = "public-公开访问，authen-文件需登录鉴权,permission-内部调用", requiredMode = Schema.RequiredMode.REQUIRED)
     @InEnum(value = FileVisitModeEnum.class, message = "访问标识 {value}")
     private String visitMode;
 

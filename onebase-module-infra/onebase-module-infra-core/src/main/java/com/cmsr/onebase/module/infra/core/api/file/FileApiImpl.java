@@ -5,6 +5,7 @@ import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.infra.api.file.FileApi;
 import com.cmsr.onebase.module.infra.api.file.dto.FileCreateReqDTO;
 import com.cmsr.onebase.module.infra.api.file.dto.FileListRespDTO;
+import com.cmsr.onebase.module.infra.enums.file.FileVisitModeEnum;
 import com.cmsr.onebase.module.infra.service.file.FileService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,7 +28,7 @@ public class FileApiImpl implements FileApi {
     @Override
     public CommonResult<String> createFile(FileCreateReqDTO createReqDTO) {
         return success(fileService.createFile(createReqDTO.getContent(), createReqDTO.getName(),
-                createReqDTO.getDirectory(), createReqDTO.getType(), createReqDTO.getVisitMode()));
+                createReqDTO.getDirectory(), createReqDTO.getType(), FileVisitModeEnum.PERMISSION.getValue()));
     }
 
     @Override

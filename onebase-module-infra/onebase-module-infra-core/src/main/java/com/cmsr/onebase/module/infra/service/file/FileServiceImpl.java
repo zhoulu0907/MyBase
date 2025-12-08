@@ -424,7 +424,7 @@ public class FileServiceImpl implements FileService {
             throw exception(FILE_NOT_EXISTS);
         }
 
-        if (file.getVisitMode().equals(FileVisitModeEnum.PRIVATE.getValue())) {
+        if (file.getVisitMode().equals(FileVisitModeEnum.AUTHEN.getValue())) {
             String token = SecurityFrameworkUtils.obtainAuthorization(request,
                     securityProperties.getTokenHeader(), securityProperties.getTokenParameter());
             // 校验访问令牌
