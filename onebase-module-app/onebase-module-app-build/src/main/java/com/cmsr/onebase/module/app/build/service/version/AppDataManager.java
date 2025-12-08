@@ -5,12 +5,9 @@ import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.support.TransactionTemplate;
 
 @Component
 public class AppDataManager {
-    @Autowired
-    private TransactionTemplate transactionTemplate;
 
     @Autowired
     private AppWorkbenchComponentRepository workbenchComponentRepository;
@@ -50,19 +47,17 @@ public class AppDataManager {
         // 实现备份逻辑
         // 执行update动作。
         // 1、update：把versionTag为1的数据update为新值（参数`versionTag`）
-        transactionTemplate.executeWithoutResult(transactionStatus -> {
-            workbenchComponentRepository.moveRuntimeToHistory(applicationId, versionTag);
-            resourceComponentRepository.moveRuntimeToHistory(applicationId, versionTag);
-            workbenchPageRepository.moveRuntimeToHistory(applicationId, versionTag);
-            resourcePageRepository.moveRuntimeToHistory(applicationId, versionTag);
-            resourcePageSetRepository.moveRuntimeToHistory(applicationId, versionTag);
-            menuRepository.moveRuntimeToHistory(applicationId, versionTag);
-            authViewRepository.moveRuntimeToHistory(applicationId, versionTag);
-            authFieldRepository.moveRuntimeToHistory(applicationId, versionTag);
-            authDataGroupRepository.moveRuntimeToHistory(applicationId, versionTag);
-            authPermissionRepository.moveRuntimeToHistory(applicationId, versionTag);
-//            authRoleRepository.moveRuntimeToHistory(applicationId, versionTag);
-        });
+        workbenchComponentRepository.moveRuntimeToHistory(applicationId, versionTag);
+        resourceComponentRepository.moveRuntimeToHistory(applicationId, versionTag);
+        workbenchPageRepository.moveRuntimeToHistory(applicationId, versionTag);
+        resourcePageRepository.moveRuntimeToHistory(applicationId, versionTag);
+        resourcePageSetRepository.moveRuntimeToHistory(applicationId, versionTag);
+        menuRepository.moveRuntimeToHistory(applicationId, versionTag);
+        authViewRepository.moveRuntimeToHistory(applicationId, versionTag);
+        authFieldRepository.moveRuntimeToHistory(applicationId, versionTag);
+        authDataGroupRepository.moveRuntimeToHistory(applicationId, versionTag);
+        authPermissionRepository.moveRuntimeToHistory(applicationId, versionTag);
+        authRoleRepository.moveRuntimeToHistory(applicationId, versionTag);
     }
 
     // 2、编辑态数据变成运行态数据
@@ -71,19 +66,17 @@ public class AppDataManager {
         // 执行select 和 insert 动作。
         // 1、select： versionTag为0的数据
         // 2、insert：把第一步查询出来的数据插入为versionTag为1
-        transactionTemplate.executeWithoutResult(transactionStatus -> {
-            workbenchComponentRepository.copyEditToRuntime(applicationId);
-            resourceComponentRepository.copyEditToRuntime(applicationId);
-            workbenchPageRepository.copyEditToRuntime(applicationId);
-            resourcePageRepository.copyEditToRuntime(applicationId);
-            resourcePageSetRepository.copyEditToRuntime(applicationId);
-            menuRepository.copyEditToRuntime(applicationId);
-            authViewRepository.copyEditToRuntime(applicationId);
-            authFieldRepository.copyEditToRuntime(applicationId);
-            authDataGroupRepository.copyEditToRuntime(applicationId);
-            authPermissionRepository.copyEditToRuntime(applicationId);
-//            authRoleRepository.copyEditToRuntime();
-        });
+        workbenchComponentRepository.copyEditToRuntime(applicationId);
+        resourceComponentRepository.copyEditToRuntime(applicationId);
+        workbenchPageRepository.copyEditToRuntime(applicationId);
+        resourcePageRepository.copyEditToRuntime(applicationId);
+        resourcePageSetRepository.copyEditToRuntime(applicationId);
+        menuRepository.copyEditToRuntime(applicationId);
+        authViewRepository.copyEditToRuntime(applicationId);
+        authFieldRepository.copyEditToRuntime(applicationId);
+        authDataGroupRepository.copyEditToRuntime(applicationId);
+        authPermissionRepository.copyEditToRuntime(applicationId);
+        authRoleRepository.copyEditToRuntime(applicationId);
     }
 
     // 3、历史版本数据回滚为运行态数据
