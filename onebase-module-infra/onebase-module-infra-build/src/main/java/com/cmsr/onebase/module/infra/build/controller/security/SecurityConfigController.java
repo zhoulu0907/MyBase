@@ -4,10 +4,7 @@ import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
-import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigBatchUpdateReqVO;
-import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigCategoryRespVO;
-import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigItemRespVO;
-import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigReqVO;
+import com.cmsr.onebase.module.infra.dal.vo.security.*;
 import com.cmsr.onebase.module.infra.service.security.SecurityConfigService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -59,14 +56,25 @@ public class SecurityConfigController {
         return success(items);
     }
 
-    @GetMapping("/tenant-items")
-    @Operation(summary = "获取当前租户的所有安全配置项")
-    @PreAuthorize("@ss.hasPermission('tenant:security:query')")
-    public CommonResult<List<SecurityConfigItemRespVO>> getSecurityConfigsByTenant() {
-        Long tenantId = TenantContextHolder.getTenantId();
-        List<SecurityConfigItemRespVO> items = securityConfigService.getSecurityConfigsByTenant(tenantId);
-        return success(items);
+
+    @GetMapping("/get-tenant-items")
+    @Operation(summary = "根据分类IDS获取获取当前租户的安全配置项")
+    @PermitAll
+    @TenantIgnore
+    public CommonResult<List<SecurityConfigItemRespVO>> getTenantConfigItems(SecurityConfigGetReqVO getReqVO) {
+        // Long tenantId = TenantContextHolder.getTenantId();
+        // List<SecurityConfigItemRespVO> items = securityConfigService.getTenantConfigItems(tenantId, categoryId);
+        return success(null);
     }
+
+    // @GetMapping("/tenant-items")
+    // @Operation(summary = "获取当前租户的所有安全配置项")
+    // @PreAuthorize("@ss.hasPermission('tenant:security:query')")
+    // public CommonResult<List<SecurityConfigItemRespVO>> getSecurityConfigsByTenant() {
+    //     Long tenantId = TenantContextHolder.getTenantId();
+    //     List<SecurityConfigItemRespVO> items = securityConfigService.getSecurityConfigsByTenant(tenantId);
+    //     return success(items);
+    // }
 
     @PostMapping("/batch-update")
     @Operation(summary = "批量更新租户安全配置")
