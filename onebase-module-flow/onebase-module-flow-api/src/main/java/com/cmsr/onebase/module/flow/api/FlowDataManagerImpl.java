@@ -15,13 +15,13 @@ public class FlowDataManagerImpl implements FlowDataManager {
     private FlowProcessRepository flowProcessRepository;
 
     @Override
-    public void runtimeToHistory(Long applicationId, Long versionTag) {
-        flowProcessRepository.runtimeToHistory(applicationId, versionTag);
+    public void moveRuntimeToHistory(Long applicationId, Long versionTag) {
+        flowProcessRepository.moveRuntimeToHistory(applicationId, versionTag);
     }
 
     @Override
-    public void editToRuntime(Long applicationId) {
-
+    public void copyEditToRuntime(Long applicationId) {
+        flowProcessRepository.copyEditToRuntime(applicationId);
     }
 
 }
