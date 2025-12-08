@@ -55,6 +55,9 @@
         background: #f2f3f5;
         padding: 8px;
         margin-bottom: 8px;
+        position: relative;
+        padding-left: 24px;
+        padding-right: 16px;
         .conditionRuleItemLine {
           margin-bottom: 8px;
           .ruleItemSelect {
@@ -87,6 +90,23 @@
           cursor: pointer;
           width: 40px;
         }
+        .andLine {
+          position: absolute;
+          left: -10px;
+          top: calc(50% - 10px);
+          background: #fff;
+          border: 1px solid #e5e6eb;
+          color: #4e5969;
+          padding: 4px;
+          border-radius: 4px;
+        }
+      }
+
+      .orLine {
+        border: 1px solid #e5e6eb;
+        background-color: #fff;
+        padding: 3px 6px;
+        border-radius: 4px;
       }
     }
   }
@@ -98,5 +118,12 @@
     position: absolute;
     top: 8px;
     left: 114px;
+  }
+
+  .conditionalFormItem {
+    :global(.pc-form-item-wrapper) {
+      width: 100%;
+      flex: none;
+    }
   }
 }
