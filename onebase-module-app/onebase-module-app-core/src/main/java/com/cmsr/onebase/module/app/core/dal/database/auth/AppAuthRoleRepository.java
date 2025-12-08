@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.app.core.dal.database.auth;
 
 import com.cmsr.onebase.framework.common.pojo.PageParam;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.orm.repo.BaseAppRepository;
+import com.cmsr.onebase.framework.orm.repo.BaseBizRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthRoleDO;
 import com.cmsr.onebase.module.app.core.dal.mapper.AppAuthRoleMapper;
 import com.cmsr.onebase.module.app.core.dto.auth.RoleMemberDTO;
@@ -30,7 +30,7 @@ import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppAuthRoleU
  * @date 2025-08-05
  */
 @Repository
-public class AppAuthRoleRepository extends BaseAppRepository<AppAuthRoleMapper, AppAuthRoleDO> {
+public class AppAuthRoleRepository extends BaseBizRepository<AppAuthRoleMapper, AppAuthRoleDO> {
 
     public List<AppAuthRoleDO> findByApplicationId(Long applicationId) {
         QueryWrapper queryWrapper = this.query()
