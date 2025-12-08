@@ -10,15 +10,12 @@ import {
   getComponentWidth,
   STATUS_OPTIONS,
   STATUS_VALUES,
-  useFormEditorSignal,
-  useListEditorSignal,
   COMPONENT_GROUP_NAME,
   COMPONENT_MAP,
   ENTITY_COMPONENT_TYPES,
   getComponentConfig,
   getComponentSchema,
   useAppEntityStore,
-  usePageEditorSignal,
   WIDTH_OPTIONS,
   WIDTH_VALUES,
   DEFAULT_OPTIONS_TYPE,
@@ -26,7 +23,6 @@ import {
 } from '@onebase/ui-kit';
 import {
   EditRender,
-  PreviewRender
 } from '@onebase/ui-kit-mobile';
 
 import { cloneDeep } from 'lodash-es';
@@ -34,10 +30,8 @@ import { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import EmptyIcon from '@/assets/images/empty.svg';
 
-import MobileIcon from '@/assets/images/mobile_icon.svg';
 import MobileActiveIcon from '@/assets/images/mobile_icon_active.svg';
 import PCIcon from '@/assets/images/pc_icon.svg';
-import PCActiveIcon from '@/assets/images/pc_icon_active.svg';
 
 import NextIcon from '@/assets/images/next_icon.svg';
 import PrevActiveIcon from '@/assets/images/prev_icon_active.svg';
@@ -47,7 +41,7 @@ import CompCopyIcon from '@/assets/images/copy_comp_icon.svg';
 import CompShowIcon from '@/assets/images/eye_off_icon.svg';
 
 import type { EditorProps } from '@/common/props';
-import { getEntityFieldOptions, type AppEntityField, type EntityFieldOption } from '@onebase/app';
+import { type AppEntityField } from '@onebase/app';
 import { ENTITY_TYPE, ENTITY_TYPE_VALUE } from '@onebase/app';
 import { EditMode, getHashQueryParam } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
@@ -56,18 +50,29 @@ import 'react-grid-layout/css/styles.css';
 import styles from './index.module.less';
 
 interface EditorWorkspaceProps {
-  props: EditorProps;
+  props: EditorProps & {
+    useEditorSignalMap: Map<string, any>;
+    batchDelPageComponentSchemas: (componentIds: Set<string>) => void;
+    batchDelLayoutSubComponents: (componentIds: Set<string>) => void;
+    subTableComponents: Record<string, AppEntityField[]>;
+    setSubTableComponents: (subTableComponentId: string, componentIds: AppEntityField[]) => void;
+    batchDelSubTableComponents: (componentIds: Set<string>) => void;
+    usePageViewEditorSignal: () => Map<string, any>;
+    useFormEditorSignal: () => Map<string, any>;
+  };
 }
 
 const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({ props }) => {
   useSignals();
 
   const {
+    useEditorSignalMap,
     pageViews,
     curViewId,
     setCurViewId,
     updatePageViewName,
-    editMode,
+    usePageViewEditorSignal,
+    useFormEditorSignal,
     setEditMode,
     curComponentID,
     setCurComponentID,
@@ -84,15 +89,13 @@ const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({ props }) => {
     setShowDeleteButton,
     layoutSubComponents,
     setLayoutSubComponents,
-    delLayoutSubComponents,
     batchDelPageComponentSchemas,
     batchDelLayoutSubComponents,
     subTableComponents,
     setSubTableComponents,
-    delSubTableComponents,
     batchDelSubTableComponents
   } = props;
-  const { mainEntity, subEntities } = useAppEntityStore();
+  const { mainEntity } = useAppEntityStore();
 
   const [showEmpty, setShowEmpty] = useState(true);
   const [isFormEditor, setIsFormEditor] = useState(false);
@@ -286,6 +289,9 @@ const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({ props }) => {
             setCurViewId={setCurViewId}
             subTableComponents={subTableComponents}
             updatePageViewName={updatePageViewName}
+            usePageViewEditorSignal={usePageViewEditorSignal}
+            useFormEditorSignal={useFormEditorSignal}
+            useEditorSignalMap={useEditorSignalMap}
           />
         }</div>
         <div className={styles.workspaceHeaderRight}>
