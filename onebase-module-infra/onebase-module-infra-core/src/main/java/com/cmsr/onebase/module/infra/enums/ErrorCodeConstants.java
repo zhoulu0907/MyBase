@@ -25,6 +25,18 @@ public interface ErrorCodeConstants {
     ErrorCode FILE_PATH_EXISTS = new ErrorCode(1_001_003_000, "文件路径已存在");
     ErrorCode FILE_NOT_EXISTS = new ErrorCode(1_001_003_001, "文件不存在");
     ErrorCode FILE_IS_EMPTY = new ErrorCode(1_001_003_002, "文件为空");
+    ErrorCode FILE_SIZE_OVERRUN = new ErrorCode(1_001_003_003, "文件大小超过限制，最大允许[{}]MB");
+    ErrorCode FILE_NAME_LENGTH_OVERRUN = new ErrorCode(1_001_003_004, "文件名称长度超过限制，最大允许[{}]字符");
+    ErrorCode FILE_EXTENSION_UNIDENTIFIABLE = new ErrorCode(1_001_003_005, "无法识别文件扩展名");
+    ErrorCode FILE_EXTENSION_NOT_ALLOW = new ErrorCode(1_001_003_006, "不被允许上传的文件类型");
+    ErrorCode FILE_MIMETYPE_AND_EXTENSION_MISMATCHING = new ErrorCode(1_001_003_007, "文件MIME类型与扩展名不匹配");
+    ErrorCode FILE_FORMAT_AND_EXTENSION_MISMATCHING = new ErrorCode(1_001_003_008, "文件实际格式与扩展名不匹配");
+    ErrorCode FILE_TYPE_PDF_CONTENT_NOT_STANDARD = new ErrorCode(1_001_003_009, "PDF文件包含不合规范内容");
+    ErrorCode FILE_CHECK_LIST_NOT_EXISTS = new ErrorCode(1_001_003_010, "文件上传检查项配置不能为空");
+    ErrorCode FILE_DOWNLOAD_NOT_LOGIN = new ErrorCode(1_001_003_011, "当前用户未登录,无法下载该文件");
+    ErrorCode FILE_NOT_PERMISSION = new ErrorCode(1_001_003_012, "无权限获取文件：权限标识不匹配");
+    ErrorCode FILE_NOT_DOWNLOAD = new ErrorCode(1_001_003_012, "无法获取文件：环境标识不匹配");
+    ErrorCode FILE_PATH_NOT_EXISTS = new ErrorCode(1_001_003_013, "文件路径为空，该文件无法下载");
 
     // ========== 安全相关 1-001-004-000 ==========
     ErrorCode SECURITY_CONFIG_NOT_EXIST = new ErrorCode(1_001_004_000, "配置项[{}]不存在");
@@ -59,6 +71,6 @@ public interface ErrorCodeConstants {
     ErrorCode DATA_SOURCE_CONFIG_NOT_EXISTS = new ErrorCode(1_001_007_000, "数据源配置不存在");
     ErrorCode DATA_SOURCE_CONFIG_NOT_OK = new ErrorCode(1_001_007_001, "数据源配置不正确，无法进行连接");
 
-    ErrorCode AUTH_LOGIN_APP_DELETE_OR_DISABLE = new ErrorCode(1_002_025_012, "该应用已被删除或禁用，暂时无法登录。");
+    ErrorCode APP_DELETE_OR_DISABLE = new ErrorCode(1_002_001_001, "应用已被删除或禁用，ID:{}");
 
 }

@@ -61,8 +61,8 @@ public class SecurityConfigController {
     @Operation(summary = "根据分类IDS获取获取租户的安全配置项（优先通过AppId获取租户ID）")
     @PermitAll
     @TenantIgnore
-    public CommonResult<List<SecurityConfigCategoryGroupRespVO>> getTenantConfigItems( @RequestBody SecurityConfigGetReqVO getReqVO) {
-         List<SecurityConfigCategoryGroupRespVO> items = securityConfigService.getTenantConfigItemsByCategoryCodes(getReqVO);
+    public CommonResult<List<SecurityConfigCategoryGroupRespVO>> getTenantConfigItems(@RequestBody SecurityConfigGetReqVO getReqVO) {
+        List<SecurityConfigCategoryGroupRespVO> items = securityConfigService.getTenantConfigItemsByCategoryCodes(getReqVO);
         return success(items);
     }
 

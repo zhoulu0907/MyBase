@@ -14,9 +14,9 @@ import java.util.Arrays;
 @Getter
 public enum RunModeEnum implements ArrayValuable<String> {
 
-    PLATFORM("platform", "平台"),
-    BUILD("build", "编辑态（空间）"),
-    RUNTIME("runtime", "运行态（应用）"),
+    PLATFORM("platform", "平台端"),
+    BUILD("build", "编辑态"),
+    RUNTIME("runtime", "运行态"),
     ;
 
     public static final String[] ARRAYS = Arrays.stream(values()).map(RunModeEnum::getValue).toArray(String[]::new);

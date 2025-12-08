@@ -95,10 +95,10 @@ public class SecurityConfigTemplateDataRepository extends DataRepository<Securit
      * @return 配置项列表，包含租户配置或模板默认值
      */
     @TenantIgnore
-    public List<SecurityConfigTemplateDO> findByTenantIdAndConfigKey(Long tenantId, List<String> configKeys) {
+    public List<SecurityConfigTemplateDO> findByTenantIdAndCategoryIdList(Long tenantId, List<Long> categoryIds) {
         ConfigStore configs = new DefaultConfigStore();
         configs.param("tenantId", tenantId);
-        configs.param("configKey", configKeys);
+        configs.param("categoryIds", categoryIds);
 
         String sql = """
                 SELECT
@@ -120,7 +120,7 @@ public class SecurityConfigTemplateDataRepository extends DataRepository<Securit
                     ON t.config_key = c.config_key
                     AND c.tenant_id = #{tenantId}
                     AND c.deleted = 0
-                WHERE t.config_key in  (${configKey})
+                WHERE t.category_id in  (${categoryIds})
                     AND t.deleted = 0
                 ORDER BY t.sort_order ASC
                 """;
@@ -215,7 +215,7 @@ public class SecurityConfigTemplateDataRepository extends DataRepository<Securit
             templateDO.setTenantId(dataRow.getLong("tenant_id"));
             return templateDO;
         }).toList();
-        if(volist.size()>0){
+        if(!volist.isEmpty()){
             return volist.get(0);
         }
         return null;
