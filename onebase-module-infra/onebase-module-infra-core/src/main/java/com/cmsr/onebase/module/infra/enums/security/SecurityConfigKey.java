@@ -62,7 +62,12 @@ public enum SecurityConfigKey {
     providerScopes("providerScopes", "权限范围(Scope)"),
     providerUsernameMapping("providerUsernameMapping", "用户名字段映射"),
     providerEmailMapping("providerEmailMapping", "邮箱字段映射"),
-    providerClientAuthenticationMethod("providerClientAuthenticationMethod", "客户端认证方式", ClientAuthMethodOption.class);
+    providerClientAuthenticationMethod("providerClientAuthenticationMethod", "客户端认证方式", ClientAuthMethodOption.class),
+
+    //文件上传校验策略
+    uploadFileLengthLimit("uploadFileLengthLimit", "文件上传大小限制（MB）"),
+    uploadFileNameLengthLimit("uploadFileNameLengthLimit", "文件名长度限制"),
+    uploadFileCheckList("uploadFileCheckList", "上传文件检查项");
 
     @Getter
     private final String configKey;
