@@ -40,14 +40,14 @@ export default function UserFormModal({
   const [roleList, setRoleList] = useState<RoleVO[]>([]);
 
   // 获取角色列表
-  const fetchRoleList = async() => {
+  const fetchRoleList = async () => {
     try {
       const res = await getSimpleRoleList();
       setRoleList(res);
-    }catch(error) {
-      console.log("error");
+    } catch (error) {
+      console.log('error');
     }
-  }
+  };
 
   useEffect(() => {
     if (visible) {
@@ -115,6 +115,29 @@ export default function UserFormModal({
   };
 
   const defaultNickName = form.getFieldValue('nickname')?.charAt(0) || 'U';
+
+  const getNestedTitlePath = (treeData: any[], targetId: string): string => {
+    let titlePath = '';
+
+    // 递归遍历函数：nodes=当前层级节点数组，currentPath=当前已拼接的title路径数组
+    const traverseNodes = (nodes: any[], currentPath: string[]): boolean => {
+      for (const node of nodes) {
+        const newPath = [...currentPath, node.title];
+        if (node.id === targetId) {
+          titlePath = newPath.join('/');
+          return true;
+        }
+        if (node.children?.length > 0) {
+          if (traverseNodes(node.children, newPath)) {
+            return true;
+          }
+        }
+      }
+      return false;
+    };
+    traverseNodes(treeData, []);
+    return titlePath;
+  };
 
   return (
     <Modal
@@ -202,18 +225,16 @@ export default function UserFormModal({
                 treeData={deptTree}
                 loading={deptLoading}
                 disabled={deptLoading || isDetail || !hasDeptQueryPermission}
+                renderFormat={(option: any, value: any) => {
+                  return <span>{getNestedTitlePath(deptTree, value)}</span>;
+                }}
               />
             </Form.Item>
           </Col>
         </Row>
         <Row gutter={24}>
           <Col span={12}>
-            <Form.Item
-              label="启用状态"
-              triggerPropName="checked"
-              labelCol={{ span: 6 }}
-              wrapperCol={{ span: 12 }}
-            >
+            <Form.Item label="启用状态" triggerPropName="checked" labelCol={{ span: 6 }} wrapperCol={{ span: 12 }}>
               <Switch checked={statusCheckedValue} onChange={setStatusCheckedValue} />
             </Form.Item>
           </Col>

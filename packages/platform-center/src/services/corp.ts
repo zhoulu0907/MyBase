@@ -23,7 +23,7 @@ export const checkCorpAdminUserApi = (data: checkCorpAdminUserParams) =>
 
 //更新企业
 export const updateCorpApi = (data: updateCorpParams) =>
-  (isRuntimeEnv() ? runtimeCorpService : systemService).post('/corp/update', data);
+  (isRuntimeEnv() ? runtimeCorpService : systemService).post('/update', data);
 
 //禁用/启用企业
 export const disabledCorpApi = (data: corpStatusParams) =>
