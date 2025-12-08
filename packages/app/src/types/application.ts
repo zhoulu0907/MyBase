@@ -1,5 +1,7 @@
 // 应用类型
 
+import { PUBLISH_MODULE } from "@onebase/common";
+
 export interface Application {
   id: string;
   /**
@@ -130,6 +132,8 @@ export interface CreateApplicationReq {
    * 数据源信息
    */
   datasourceSaveReq?: DatasourceSaveReqDTO;
+
+  publish_model?: PUBLISH_MODULE;
 }
 
 

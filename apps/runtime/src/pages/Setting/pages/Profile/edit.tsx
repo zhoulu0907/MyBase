@@ -59,7 +59,7 @@ const EditPage: React.FC<IEditPageProps> = ({ avatarUrl, setAvatarUrl }) => {
       };
       await updateLoginedUser(req);
       form.resetFields();
-      nav(`/onebase/${tenantId}/setting/tenant`);
+      nav(`/onebase/${tenantId}/setting/profile`);
       Message.success('保存成功');
     } catch (error) {
       console.error('保存失败', error);

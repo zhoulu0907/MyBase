@@ -24,6 +24,7 @@ import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styles from './index.module.less';
+import { displayCorpLogo } from '@/utils';
 
 const TabPane = Tabs.TabPane;
 const { Title, Text } = Typography;
@@ -151,7 +152,7 @@ const ProfilePage: React.FC = () => {
               }}
             />
           ) : (
-            <div className={styles.corpLogo}>{record?.corpName || ''}</div>
+            <div className={styles.corpLogo}>{displayCorpLogo(record?.corpName)}</div>
           );
         }
       },
