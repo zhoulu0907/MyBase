@@ -1,9 +1,8 @@
 package com.cmsr.onebase.module.flow.context.condition;
 
-import com.cmsr.onebase.module.flow.context.enums.FieldTypeEnum;
-import com.cmsr.onebase.module.flow.context.enums.JdbcTypeEnum;
 import com.cmsr.onebase.module.flow.context.enums.OpEnum;
 import com.cmsr.onebase.module.flow.context.enums.OperatorTypeEnum;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import lombok.Data;
 
@@ -16,8 +15,9 @@ import lombok.Data;
 @Data
 public class ConditionItem implements java.io.Serializable {
 
-    @JsonAlias(value = {"field", "fieldId", "name"})
-    private String fieldId;
+    //TODO 查下为什么有这么多别名
+    @JsonAlias(value = {"fieldKey", "field", "name"})
+    private String fieldKey;
 
     /**
      * 操作符
@@ -32,24 +32,26 @@ public class ConditionItem implements java.io.Serializable {
     private String operatorType;
 
     /**
-     * 根据字段id，查询元数据信息，补充的信息。
-     * 字段类型
-     * {@link JdbcTypeEnum}
-     */
-    private String jdbcType;
-
-    /**
-     * 根据字段id，查询元数据信息，补充的信息。
-     * 字段类型
-     * {@link FieldTypeEnum}
-     */
-    @JsonAlias(value = {"fieldType", "type"})
-    private String fieldType;
-
-    /**
      * 如果是operatorType是值，value可能是字符串，也可能是数组，也可能是Map。
      * 如果是operatorType是变量，value是变字符串
      */
     private Object value;
+
+
+    /**
+     * 字段类型
+     * 脚本节点等自定义的类型
+     */
+    @JsonAlias(value = {"fieldType", "type"})
+    private String fieldType;
+
+
+    /**
+     * 查询元数据信息，补充的信息。
+     * 字段类型
+     * {@link SemanticFieldTypeEnum}
+     */
+    private SemanticFieldTypeEnum fieldTypeEnum;
+
 
 }

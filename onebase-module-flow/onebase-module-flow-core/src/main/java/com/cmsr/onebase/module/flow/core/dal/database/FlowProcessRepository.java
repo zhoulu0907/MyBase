@@ -55,29 +55,29 @@ public class FlowProcessRepository extends BaseBizRepository<FlowProcessMapper, 
         return new PageResult(pageData.getRecords(), pageData.getTotalRow());
     }
 
-    public List<FlowProcessDO> findAllByEnableStatus(Integer status) {
-        QueryWrapper query = this.query().where(FLOW_PROCESS.ENABLE_STATUS.eq(status));
+    public List<FlowProcessDO> findAllByEnableStatusAndVersionTag(Integer status, Long versionTag) {
+        QueryWrapper query = this.query()
+                .where(FLOW_PROCESS.ENABLE_STATUS.eq(status))
+                .where(FLOW_PROCESS.VERSION_TAG.eq(versionTag));
         return getMapper().selectListByQuery(query);
     }
 
-//    public List<FlowProcessDO> findByApplicationId(Long applicationId) {
-//        QueryWrapper query = this.query().where(FLOW_PROCESS.APPLICATION_ID.eq(applicationId));
-//        return list(query);
-//    }
-
-    public List<FlowProcessDO> findByApplicationIdAndEnableStatus(Long applicationId, Integer status) {
+    public List<FlowProcessDO> findAllByEnableStatusAndVersionTagAndTriggerType(Integer status, Long versionTag, List<String> triggerTypes) {
         QueryWrapper query = this.query()
-                .where(FLOW_PROCESS.APPLICATION_ID.eq(applicationId))
-                .where(FLOW_PROCESS.ENABLE_STATUS.eq(status));
-        return list(query);
+                .where(FLOW_PROCESS.ENABLE_STATUS.eq(status))
+                .where(FLOW_PROCESS.VERSION_TAG.eq(versionTag))
+                .where(FLOW_PROCESS.TRIGGER_TYPE.in(triggerTypes));
+        return getMapper().selectListByQuery(query);
     }
 
-//    public String findProcessNameById(Long id) {
-//        QueryWrapper query = this.query()
-//                .select(FLOW_PROCESS.PROCESS_NAME)
-//                .where(FLOW_PROCESS.ID.eq(id));
-//        return getObjAs(query, String.class);
-//    }
+
+    public List<FlowProcessDO> findByApplicationIdAndEnableStatus(Long applicationId, Integer status, Long versionTag) {
+        QueryWrapper query = this.query()
+                .where(FLOW_PROCESS.APPLICATION_ID.eq(applicationId))
+                .where(FLOW_PROCESS.ENABLE_STATUS.eq(status))
+                .where(FLOW_PROCESS.VERSION_TAG.eq(versionTag));
+        return getMapper().selectListByQuery(query);
+    }
 
 
 }

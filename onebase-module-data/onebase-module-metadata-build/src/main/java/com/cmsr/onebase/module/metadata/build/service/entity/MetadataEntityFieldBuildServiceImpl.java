@@ -5,7 +5,7 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.common.util.string.UuidUtils;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
-import com.cmsr.onebase.module.flow.context.enums.FieldTypeEnum;
+//import com.cmsr.onebase.module.flow.context.enums.FieldTypeEnum;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.*;
 import com.cmsr.onebase.module.metadata.build.controller.admin.relationship.vo.EntityRelationshipSaveReqVO;
 import com.cmsr.onebase.module.metadata.build.service.entity.vo.EntityFieldQueryVO;

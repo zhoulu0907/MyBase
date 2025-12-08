@@ -17,6 +17,11 @@
     <description>流程模块Flow上下文定义</description>
 
     <dependencies>
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-metadata-common</artifactId>
+            <version>${revision}</version>
+        </dependency>
         <!-- 工具类相关 -->
         <dependency>
             <groupId>org.apache.commons</groupId>

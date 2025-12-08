@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.flow.context.graph.nodes;
+package com.cmsr.onebase.module.flow.context.util;
 
 import org.apache.commons.lang3.StringUtils;
 
