@@ -121,12 +121,16 @@ public class EntityRelationshipController {
     @Operation(summary = "根据实体ID查询实体名称及其关联的子表信息")
     @Parameter(name = "entityId", description = "实体ID或UUID", required = true, example = "1001")
     @Parameter(name = "relationshipType", description = "关系类型筛选（ONE_TO_ONE-一对一, ONE_TO_MANY-一对多）", required = false, example = "ONE_TO_MANY")
+    @Parameter(name = "fieldType", description = "字段类型（用于过滤可选字段）", required = false, example = "TEXT")
+    @Parameter(name = "operator", description = "操作符（用于过滤可选字段）", required = false, example = "EQUALS")
     public CommonResult<EntityWithChildrenRespVO> getEntityWithChildren(
             @RequestParam("entityId") String entityId,
-            @RequestParam(value = "relationshipType", required = false) String relationshipType) {
+            @RequestParam(value = "relationshipType", required = false) String relationshipType,
+            @RequestParam(value = "fieldType", required = false) String fieldType,
+            @RequestParam(value = "operator", required = false) String operator) {
         // 兼容ID和UUID两种格式
         Long resolvedEntityId = idUuidConverter.resolveEntityId(entityId);
-        EntityWithChildrenRespVO result = entityRelationshipService.getEntityWithChildrenById(resolvedEntityId, relationshipType);
+        EntityWithChildrenRespVO result = entityRelationshipService.getEntityWithChildrenById(resolvedEntityId, relationshipType, fieldType, operator);
         return success(result);
     }
 
