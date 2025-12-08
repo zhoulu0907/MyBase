@@ -14,6 +14,7 @@ const UserTab = '1';
 const DeptTab = '2';
 
 interface AdvanceSelectModalProps {
+    runtime: boolean | undefined;
     visible: boolean;
     currentSelectUserID: string | undefined;
     status: string| undefined;
@@ -23,6 +24,7 @@ interface AdvanceSelectModalProps {
 }
 
 const AdvanceSelectModal: React.FC<AdvanceSelectModalProps> = ({
+  runtime,
   visible,
   currentSelectUserID,
   status,
@@ -50,10 +52,10 @@ const AdvanceSelectModal: React.FC<AdvanceSelectModalProps> = ({
   const [finalSelect, setFinalSelect] = useState<any>();
 
     useEffect(() => {
-        if (isRuntimeEnv() && status !== STATUS_VALUES[STATUS_OPTIONS.READONLY] && !detailMode) {
-          getUserData('');
-          getDeptUsers({});
-        }
+      if (runtime && status !== STATUS_VALUES[STATUS_OPTIONS.READONLY] && !detailMode) {
+        getUserData('');
+        getDeptUsers({});
+      }
     }, []);
 
   useEffect(() => {
