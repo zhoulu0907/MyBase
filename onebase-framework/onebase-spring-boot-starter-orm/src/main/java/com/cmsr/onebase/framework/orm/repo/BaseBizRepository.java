@@ -263,7 +263,11 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
         return getMapper().paginateAs(page, query, asType);
     }
 
+    // 1、备份运行态数据为历史版本
     public void moveRuntimeToHistory(Long applicationId, Long versionTag) {
+        // 实现备份逻辑
+        // 执行update动作。
+        // 1、update：把versionTag为1的数据update为新值（参数`versionTag`）
         QueryColumn applicationIdCol = new QueryColumn(BaseBizEntity.APPLICATION_ID);
         QueryColumn versionTagCol = new QueryColumn(BaseBizEntity.VERSION_TAG);
         this.updateChain()
@@ -273,12 +277,36 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
                 .update();
     }
 
+    // 2、编辑态数据变成运行态数据
     public void copyEditToRuntime(Long applicationId) {
+        // 实现发布逻辑
+        // 执行select 和 insert 动作。
+        // 1、select： versionTag为0的数据
+        // 2、insert：把第一步查询出来的数据插入为versionTag为1
         QueryColumn applicationIdCol = new QueryColumn(BaseBizEntity.APPLICATION_ID);
         QueryColumn versionTagCol = new QueryColumn(BaseBizEntity.VERSION_TAG);
         QueryWrapper queryWrapper = QueryWrapper.create()
                 .where(applicationIdCol.eq(applicationId))
                 .where(versionTagCol.eq(VersionTagEnum.BUILD.getValue()));
+        List<T> entities = this.getMapper().selectListByQuery(queryWrapper);
+        entities.forEach(entity -> {
+            entity.setId(null);
+            entity.setVersionTag(VersionTagEnum.RUNTIME.getValue());
+        });
+        this.saveBatch(entities);
+    }
+
+    // 3、历史版本数据回滚为运行态数据
+    public void copyHistoryToRuntime(Long applicationId, Long versionTag) {
+        // 实现回滚逻辑
+        // 执行select、insert 动作。
+        // 1、select：查询versionTag为参数`versionTag`值的数据
+        // 2、insert：插入第一步查询出来的数据，versionTag为1
+        QueryColumn applicationIdCol = new QueryColumn(BaseBizEntity.APPLICATION_ID);
+        QueryColumn versionTagCol = new QueryColumn(BaseBizEntity.VERSION_TAG);
+        QueryWrapper queryWrapper = QueryWrapper.create()
+                .where(applicationIdCol.eq(applicationId))
+                .where(versionTagCol.eq(versionTag));
         List<T> entities = this.getMapper().selectListByQuery(queryWrapper);
         entities.forEach(entity -> {
             entity.setId(null);

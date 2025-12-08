@@ -42,11 +42,8 @@ public class AppDataManager {
     @Autowired
     private AppAuthRoleRepository authRoleRepository;
 
-    // 1、备份运行态数据为历史版本
+
     public void moveRuntimeToHistory(Long applicationId, Long versionTag) {
-        // 实现备份逻辑
-        // 执行update动作。
-        // 1、update：把versionTag为1的数据update为新值（参数`versionTag`）
         workbenchComponentRepository.moveRuntimeToHistory(applicationId, versionTag);
         resourceComponentRepository.moveRuntimeToHistory(applicationId, versionTag);
         workbenchPageRepository.moveRuntimeToHistory(applicationId, versionTag);
@@ -60,12 +57,8 @@ public class AppDataManager {
         authRoleRepository.moveRuntimeToHistory(applicationId, versionTag);
     }
 
-    // 2、编辑态数据变成运行态数据
+
     public void copyEditToRuntime(Long applicationId) {
-        // 实现发布逻辑
-        // 执行select 和 insert 动作。
-        // 1、select： versionTag为0的数据
-        // 2、insert：把第一步查询出来的数据插入为versionTag为1
         workbenchComponentRepository.copyEditToRuntime(applicationId);
         resourceComponentRepository.copyEditToRuntime(applicationId);
         workbenchPageRepository.copyEditToRuntime(applicationId);
