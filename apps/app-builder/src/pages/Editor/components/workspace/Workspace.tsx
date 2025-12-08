@@ -28,9 +28,12 @@ import {
   getComponentWidth,
   useAppEntityStore,
   usePageEditorSignal,
+  useEditorSignalMap,
   WIDTH_OPTIONS,
   WIDTH_VALUES,
   usePageViewEditorSignal,
+  createPageEditorSignal,
+  useFormEditorSignal,
   type GridItem
 } from '@onebase/ui-kit';
 
@@ -101,10 +104,14 @@ export default function EditorWorkspace() {
 
   const qiankunActions = initGlobalState({
     drag: true,
+    useEditorSignalMap,
     pageViews,
     curViewId,
     setCurViewId,
     updatePageViewName,
+    usePageViewEditorSignal,
+    createPageEditorSignal,
+    useFormEditorSignal,
     editMode,
     setEditMode,
     curComponentID,
@@ -131,7 +138,6 @@ export default function EditorWorkspace() {
     batchDelSubTableComponents
   })
   useEffect(() => {
-    console.log("loading mobile-editor-drag-list11", editMode.value);
     if (editMode.value !== EditMode.MOBILE) {
       return;
     }

@@ -34,18 +34,21 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
   const mobileEditorPreviewRef = useRef<MicroApp | null>(null);
 
   const qiankunActions = initGlobalState({
+    drag: false,
     components: pageType === EDITOR_TYPES.FORM_EDITOR ? formComponents.value : listComponents.value,
     pageComponentSchemas: pageType === EDITOR_TYPES.FORM_EDITOR ? formPageComponentSchemas.value : listPageComponentSchemas.value
   })
   useEffect(() => {
     console.log("loading mobile-editor-preview-list");
+    if (editMode.value !== EditMode.MOBILE || !visible) {
+      return;
+    }
 
     const mobileEditorPreview = loadMicroApp({
       name: "mobile-editor-preview-list",
       entry: "//localhost:4401",
       container: "#mobile-editor-preview-list",
       props: {
-        instanceId: "mobile-editor-preview-list",
         onGlobalStateChange: qiankunActions.onGlobalStateChange,
         setGlobalState: qiankunActions.setGlobalState,
         offGlobalStateChange: qiankunActions.offGlobalStateChange,
@@ -56,7 +59,7 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
     return () => {
       mobileEditorPreview?.unmount();
     };
-  }, []);
+  }, [editMode.value, visible]);
 
   const getFormContent = () => {
     return (

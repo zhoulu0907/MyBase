@@ -16,10 +16,20 @@ import styles from './index.module.less';
 import EditorWorkspace from '../../components/workspace/Workspace';
 
 interface FormEditorProps {
-  props: EditorProps & { drag: boolean };
+  props: EditorProps & {
+    useEditorSignalMap: Map<string, any>;
+    batchDelPageComponentSchemas: (componentIds: Set<string>) => void;
+    batchDelLayoutSubComponents: (componentIds: Set<string>) => void;
+    subTableComponents: Record<string, any[]>;
+    setSubTableComponents: (subTableComponentId: string, componentIds: any[]) => void;
+    batchDelSubTableComponents: (componentIds: Set<string>) => void;
+    usePageViewEditorSignal: () => Map<string, any>;
+    useFormEditorSignal: () => Map<string, any>;
+  };
 }
 
 const ListEditor: React.FC<FormEditorProps & { instanceId: string }> = ({ instanceId, props }) => {
+
   if (!props.components) {
     return null;
   }
@@ -28,6 +38,7 @@ const ListEditor: React.FC<FormEditorProps & { instanceId: string }> = ({ instan
       components: listComponents,
       pageComponentSchemas: listPageComponentSchemas
     } = props;
+    
     return (
       listComponents?.map((cp: GridItem) => (
         <Fragment key={cp.id}>
@@ -45,7 +56,6 @@ const ListEditor: React.FC<FormEditorProps & { instanceId: string }> = ({ instan
                 cpType={cp.type}
                 pageComponentSchema={listPageComponentSchemas[cp.id]}
                 runtime={true}
-                preview={true}
               />
             </div>
           )}
@@ -64,12 +74,8 @@ const ListEditor: React.FC<FormEditorProps & { instanceId: string }> = ({ instan
 
   return (
     <div className={styles.formEditorPage}>
-      {props.editMode?.value === 'mobile' && (
-        <>
-          <EditorPanel />
-          <EditorWorkspace props={props} />
-        </>
-      )}
+      <EditorPanel />
+      <EditorWorkspace props={props} />
     </div>
   );
 };
