@@ -90,7 +90,7 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
       }
     },
     selectDropdown: (value: any, option: any) => {
-      const name = (option as any)?.labelTitle ?? '';
+      const name = option?.labelTitle ?? option.children ?? '';
       const nextValue = value ? { id: value, name } : '';
       setDataState(nextValue);
       if (runtime) {
