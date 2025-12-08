@@ -8,12 +8,21 @@ export const ENTITY_TYPE_VALUE = {
   MAIN: 'main',
   SUB: 'sub',
   INDEP: 'indep'
-}
+};
+
+export const RELATION_TYPE = {
+  MASTER: 'MASTER',
+  SLAVE: 'SLAVE',
+  NONE: 'NONE'
+};
 
 export interface MetadataEntityPair {
   entityId: string;
-
+  entityUuid: string;
+  tableName: string;
   entityName: string;
+  relationType: (typeof RELATION_TYPE)[keyof typeof RELATION_TYPE];
+  relationshipTypes: string[];
 }
 
 export interface MetadataEntityField {
@@ -40,7 +49,7 @@ export interface MetadataEntityField {
   disabled?: boolean;
   options?: any[];
   constraints?: any;
-  autoNumberConfig?:any;
+  autoNumberConfig?: any;
 }
 
 export interface AppEntities {
@@ -49,6 +58,7 @@ export interface AppEntities {
 
 export interface AppEntity {
   entityId: string; // 实体ID
+  tableName: string; // 表名
   entityName: string; // 实体名称
   entityType: string; // 实体类型，如“主表”、“子表”、“独立表”、“主子表”
   fields: AppEntityField[];

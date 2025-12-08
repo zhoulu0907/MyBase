@@ -9,6 +9,7 @@ export * from './formula';
 export * from './metadata_dataresource';
 export * from './metadata_entity';
 export * from './metadata_method';
+export * from './metadata_method_v2';
 export * from './metadata_validation';
 export * from './permission';
 export * from './role';

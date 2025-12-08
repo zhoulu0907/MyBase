@@ -3,7 +3,6 @@ export * from './corp';
 export * from './corpApp';
 export * from './corpDept';
 export * from './corpInfo';
-export * from './corpUser';
 export * from './dept';
 export * from './dict';
 export * from './infra';

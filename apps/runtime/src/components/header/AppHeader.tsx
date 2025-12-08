@@ -10,7 +10,7 @@ import { Divider, Dropdown, Layout, Menu, Typography } from '@arco-design/web-re
 import { IconExport } from '@arco-design/web-react/icon';
 import { getApplication, type GetApplicationReq } from '@onebase/app';
 import { TokenManager, UserPermissionManager } from '@onebase/common';
-import { CodeType, runtimeGetPermissionInfo } from '@onebase/platform-center';
+import { CodeType, getPermissionInfo } from '@onebase/platform-center';
 import { appIconMap } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -43,11 +43,10 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
 
   useEffect(() => {
     // 正则匹配 /onebase/runtime/ 后面的两个数字（appId 和 tenantId）
-    // 例子: /onebase/runtime/123944716126027776/141778708868268032
+    // 例子: /onebase/123944716126027776/141778708868268032/runtime
     // match[1] 是 appId, match[2] 是 tenantId
-    const match = location.pathname.match(/\/onebase\/runtime\/(\d+)\/(\d+)/);
+    const match = location.pathname.match(/\/onebase\/(\d+)\/(\d+)\/runtime/);
     if (match && match[1]) {
-      console.log('match[1]: ', match[1]);
       handleGetApplication(match[1]);
     }
   }, []);
@@ -69,7 +68,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   };
 
   const getInfo = async () => {
-    const res = await runtimeGetPermissionInfo(CodeType.CORP);
+    const res = await getPermissionInfo(CodeType.CORP);
     UserPermissionManager.setUserPermissionInfo(res);
     const mobile = res.user?.mobile;
     const formatMobile = maskMobile(mobile);

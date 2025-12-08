@@ -15,6 +15,7 @@ export default function CcRecipientsDreawer({ handleConfigSubmit, configData }) 
   const searchParams = new URLSearchParams(location.search);
   const pageSetId = searchParams.get('pageSetId') || '';
   const [ckOptions, setCkOptions] = useState([]);
+  const [tbaleName, setTbaleName] = useState('');
   const [useCcRecipients, setCcRecipients] = useState<string>('ccRecipients');
   const [editValue, setEditValue] = useState('');
 
@@ -46,7 +47,8 @@ export default function CcRecipientsDreawer({ handleConfigSubmit, configData }) 
   }
   const getMainMetaData = async () => {
     const mainMetaData = await getPageSetMetaData({ pageSetId: pageSetId });
-    const { parentFields } = await getEntityFieldsWithChildren(mainMetaData);
+    const { parentFields, tableName } = await getEntityFieldsWithChildren(mainMetaData);
+    setTbaleName(tableName);
     setCkOptions(parentFields);
   };
 
@@ -83,6 +85,10 @@ export default function CcRecipientsDreawer({ handleConfigSubmit, configData }) 
     if (!users.length && !roles.length) {
       errorMsg = '节点缺少抄送人';
     }
+    ccRecipientsConfigData?.fieldPermConfig?.fieldConfigs?.forEach((item: any) => {
+      item.tableName = tbaleName;
+      item.fieldDisplayName = item.displayName || item.fieldDisplayName;
+    });
     ccRecipientsConfigData.errorMsg = errorMsg;
     handleConfigSubmit && handleConfigSubmit(ccRecipientsConfigData, editValue);
   }

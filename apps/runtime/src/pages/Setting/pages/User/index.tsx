@@ -2,7 +2,7 @@ import PlaceholderPanel from '@/components/PlaceholderPanel';
 import { listToTree } from '@/utils/tree';
 import { Layout } from '@arco-design/web-react';
 import { CORP_USER_QUERY, hasPermission } from '@onebase/common';
-import { getCorpDeptList, getUserPageInCorp } from '@onebase/platform-center';
+import { getCorpDeptList, getUserPage } from '@onebase/platform-center';
 import { useEffect, useState } from 'react';
 import DeptTreeCmp from './components/DeptTree';
 import UserTable from './components/UserTable';
@@ -31,7 +31,7 @@ export default function UserPage() {
   };
 
   const getUserContent = async () => {
-    const resq = await getUserPageInCorp({ pageNo: 1, pageSize: 10 });
+    const resq = await getUserPage({ pageNo: 1, pageSize: 10 });
     return resq.total;
   };
 

@@ -1,3 +1,4 @@
+import { isRuntimeEnv } from '@onebase/common';
 import {
   type CopyApplicationMenuReq,
   type CreateApplicationMenuReq,
@@ -10,11 +11,7 @@ import {
 import { appService, runtimeAppService } from './clients';
 
 export const listApplicationMenu = (params: ListApplicationMenuReq) => {
-  return appService.get('/menu/list', params);
-};
-
-export const runtimeListApplicationMenu = (params: ListApplicationMenuReq) => {
-  return runtimeAppService.get('/menu/list', params);
+  return (isRuntimeEnv() ? runtimeAppService : appService).get('/menu/list', params);
 };
 
 export const createApplicationMenu = (params: CreateApplicationMenuReq) => {

@@ -14,25 +14,22 @@ import DynamicIcon from '@/components/DynamicIcon';
 import { iconMap } from '@/utils/const';
 import { IconPlus, IconRefresh } from '@arco-design/web-react/icon';
 import {
-  dataMethodDelete,
-  dataMethodPage,
+  dataMethodDeleteV2,
+  dataMethodPageV2,
+  DeleteMethodV2Params,
   getEntityFieldsWithChildren,
   menuSignal,
-  type AppEntityField,
-  type DeleteMethodParam,
-  type PageMethodParam
+  PageMethodV2Params,
+  type AppEntityField
 } from '@onebase/app';
-import { pagesRuntimeSignal } from '@onebase/common';
+import { isRuntimeEnv, pagesRuntimeSignal } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
 import PreviewRender from 'src/components/render/PreviewRender';
 import { useFormEditorSignal } from 'src/signals/page_editor';
 import { ENTITY_FIELD_TYPE } from '../../../../DataFactory/const';
-import { COMPONENT_MAP } from '../../../componentsMap';
-import { getComponentSchema } from '../../../schema';
 import './index.css';
 import type { XTableConfig } from './schema';
 import TableSearch from './tableSerach';
-import { Record } from '@icon-park/react';
 
 const leftPanelWidth = 318;
 const rightPanelWidth = 310;
@@ -58,7 +55,6 @@ const renderCellText = (v: any) => {
   return v as any;
 };
 
-
 const XTable = memo(
   (
     props: XTableConfig & {
@@ -83,6 +79,7 @@ const XTable = memo(
       status,
       defaultValue,
       metaData,
+      tableName,
       searchItems,
       columns,
       hover,
@@ -130,6 +127,7 @@ const XTable = memo(
       headerCellStyle: { textAlign: 'center' },
       //TODO: zhoumingji ,基础组件上不要写这种样式，最好能放到样式文件里
       bodyCellStyle: { padding: '0 8px', textAlign: 'center' },
+      // TODO: mickey, 这段重构，现在太长了
       render: (_: any, record: any) => {
         if (advancedButtonPermission === BUTTON_VALUES[BUTTON_OPTIONS.HIDDEN] && !hasOperationPermission) return;
         const isDisabled =
@@ -248,7 +246,7 @@ const XTable = memo(
       if (finalColumns && metaData) {
         handlePage();
       }
-    // finalColumns 改变不应该刷新
+      // finalColumns 改变不应该刷新
     }, [tablePageNo, metaData, sortByObject]);
 
     useEffect(() => {
@@ -271,7 +269,8 @@ const XTable = memo(
             bodyCellStyle: { padding: '0 12px' },
             render: (_text: any, _record: any, index: number) => {
               const componentSchemasKeys = Object.keys(fromPageComponentSchemas.value || {});
-              const columnId = column.id || column.dataIndex;
+              const columnId = column.dataIndex;
+
               const cpId = componentSchemasKeys.find((ele) => {
                 return fromPageComponentSchemas.value[ele]?.config?.dataField?.includes(columnId);
               });
@@ -280,24 +279,29 @@ const XTable = memo(
               if (cpId) {
                 // 组件类型
                 const cpType = components.value?.find((ele) => ele.id === cpId)?.type;
+
                 // 当前组件配置
                 const currentComponentSchemas = fromPageComponentSchemas.value[cpId];
                 // 覆盖配置
                 let dataField: string[] = [];
                 if (Array.isArray(mainMetaData?.parentFields)) {
                   const dataFieldInfo = mainMetaData.parentFields.find(
-                    (field: AppEntityField) => field.fieldId === columnId
+                    (field: AppEntityField) => field.fieldName === columnId
                   );
+
                   if (dataFieldInfo && _record[dataFieldInfo.fieldName]) {
-                    dataField = [mainMetaData.entityId, `${id}.${index}.${dataFieldInfo.fieldName}`];
+                    dataField = [mainMetaData.tableName, `${id}.${index}.${dataFieldInfo.fieldName}`];
                   }
                 }
+
                 const componentConfig = {
                   ...currentComponentSchemas,
                   config: {
                     ...currentComponentSchemas.config,
                     dataField:
-                      dataField?.length > 0 ? dataField : [mainMetaData.entityId, `${id}.${index}.${column.id}`],
+                      dataField?.length > 0
+                        ? dataField
+                        : [mainMetaData.tableName, `${id}.${index}.${column.dataIndex}`],
                     label: {
                       display: false,
                       text: ''
@@ -399,30 +403,29 @@ const XTable = memo(
     };
 
     const handlePage = async () => {
-      if (!runtime || !metaData) {
+      if (!runtime || !metaData || !isRuntimeEnv()) {
         return;
       }
 
-      const req: PageMethodParam = {
-        menuId: curMenu.value?.id,
-        entityId: metaData,
+      // TODO(mickey): 后续调试
+      // if (sortByObject?.fieldName) {
+      //   req.sortField = sortByObject.fieldName;
+      //   req.sortDirection = sortByObject.sortBy === 1 ? 'asc' : 'desc';
+      // }
+
+      const req: PageMethodV2Params = {
         pageNo: tablePageNo,
-        pageSize: pageSize || 10,
-        filters: queryData
+        pageSize: pageSize || 10
       };
 
-      if (sortByObject?.fieldName) {
-        req.sortField = sortByObject.fieldName;
-        req.sortDirection = sortByObject.sortBy === 1 ? 'asc' : 'desc';
-      }
-      const res = await dataMethodPage(req);
+      const res = await dataMethodPageV2(tableName, curMenu.value?.id, req);
 
       const mainMetaData = await getEntityFieldsWithChildren(metaData);
 
       const { list, total } = res;
 
       const newTableData = (list || []).map((item: any) => {
-        const newItem = item.data;
+        const newItem = item;
         Object.entries(newItem).forEach(([key, value]) => {
           // 优化：减少重复查找，提升可读性和性能
           if (Array.isArray(mainMetaData?.parentFields)) {
@@ -449,31 +452,16 @@ const XTable = memo(
               }
             }
 
-            // 人员选择单选 TODO
-            const userSelectField = mainMetaData.parentFields.find(
-              (field: AppEntityField) => field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.USER.VALUE
-            );
-            if (userSelectField && newItem[key]) {
-              if (newItem[key]) {
-                if (typeof newItem[key] === 'string') {
-                  newItem[key] = {
-                    userID: newItem[key],
-                    userName: newItem[key]
-                  };
-                }
-              }
-            }
-
-            // 部门选择单选 TODO
-            const deptSelectField = mainMetaData.parentFields.find(
-              (field: AppEntityField) =>
-                field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.DEPARTMENT.VALUE
-            );
-            if (deptSelectField && newItem[key]) {
-              if (newItem[key]) {
-                newItem[key] = newItem[key]?.deptName || '';
-              }
-            }
+            // // 部门选择单选 TODO
+            // const deptSelectField = mainMetaData.parentFields.find(
+            //   (field: AppEntityField) =>
+            //     field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.DEPARTMENT.VALUE
+            // );
+            // if (deptSelectField && newItem[key]) {
+            //   if (newItem[key]) {
+            //     newItem[key] = newItem[key]?.deptName || '';
+            //   }
+            // }
           }
         });
 
@@ -494,15 +482,17 @@ const XTable = memo(
         return;
       }
       console.log('删除数据 id: ', id);
-      const req: DeleteMethodParam = {
-        menuId: curMenu.value?.id,
-        entityId: metaData,
+
+      const req: DeleteMethodV2Params = {
         id: id
       };
-      const res = await dataMethodDelete(req);
+
+      const res = await dataMethodDeleteV2(tableName, curMenu.value?.id, req);
+
       if (res) {
         Message.success('删除成功');
       }
+
       handlePage();
     };
 
@@ -537,7 +527,6 @@ const XTable = memo(
     };
 
     const [form] = Form.useForm();
-
 
     return (
       <div
@@ -615,8 +604,7 @@ const XTable = memo(
         </div>
       </div>
     );
-  });
+  }
+);
 
 export default XTable;
-
-    

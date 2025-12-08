@@ -1,8 +1,4 @@
 import { FormulaEditor } from '@/components/FormulaEditor';
-import {
-  jsonToJsonSchema,
-  schemaToFormData
-} from '@/pages/CreateApp/pages/IntegratedManagement/pages/connector/action/create/util';
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { triggerNodeOutputSignal } from '@/store/singals/trigger_node_output';
 import type { FormInstance } from '@arco-design/web-react';
@@ -13,19 +9,10 @@ import { FieldType, type ConditionField } from '@onebase/app';
 import { NodeType } from '@onebase/common';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { getPrecedingNodes } from '../../../nodes/utils';
+import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
 
 const Row = Grid.Row;
 const Col = Grid.Col;
-
-// 字段类型标签映射
-const FIELD_TYPE_LABELS: Record<string, string> = {
-  string: '字符串',
-  number: '数字',
-  boolean: '布尔值',
-  object: '对象',
-  array: '数组',
-  null: '空值'
-};
 
 // 值类型选项
 const valueTypeOptions = [
@@ -53,9 +40,18 @@ export const InputParameterFieldItem: React.FC<InputParameterFieldItemProps> = (
   showTriggerElement
 }) => {
   const fieldName = field.field;
-  const fieldType = Form.useWatch(`${fieldName}.type`, form) || 'string';
+  const fieldType = Form.useWatch(`${fieldName}.type`, form) || ENTITY_FIELD_TYPE.TEXT.VALUE;
   const operatorType = Form.useWatch(`${fieldName}.operatorType`, form);
   const variableOptions = getVariableOptions();
+
+  // 字段类型下拉
+  const typeOptions = Object.keys(ENTITY_FIELD_TYPE).map((ele) => {
+    const item = ENTITY_FIELD_TYPE[ele as keyof typeof ENTITY_FIELD_TYPE];
+    return {
+      label: item.LABEL,
+      value: item.VALUE
+    };
+  });
 
   return (
     <Row gutter={8} align="center" style={{ marginBottom: 12 }}>
@@ -69,12 +65,12 @@ export const InputParameterFieldItem: React.FC<InputParameterFieldItemProps> = (
       {/* 第二列：字段类型（不可编辑） */}
       <Col span={6}>
         <Form.Item field={`${fieldName}.type`} style={{ marginBottom: 0 }}>
-          <Input readOnly value={FIELD_TYPE_LABELS[fieldType] || fieldType} style={{ width: '190px' }} />
+          <Select disabled options={typeOptions} style={{ width: '190px' }}></Select>
         </Form.Item>
       </Col>
 
       <Col span={5}>
-        <Form.Item field={`${fieldName}.operatorType`} style={{ marginBottom: 0 }}>
+        <Form.Item field={`${fieldName}.operatorType`} style={{ marginBottom: 0 }} initialValue={FieldType.VALUE}>
           <Select
             placeholder="选择类型"
             options={valueTypeOptions}
@@ -160,7 +156,7 @@ const renderStaticValueComponent = (fieldName: string, fieldType: string) => {
 };
 
 export interface InputParameterFormProps {
-  inputParameter: string;
+  inputParameter: any[];
   form: FormInstance;
   nodeId: string;
 }
@@ -304,17 +300,13 @@ export const InputParameterForm: React.FC<InputParameterFormProps> = ({ inputPar
 
   // 初始化表单数据：当 inputParameter 变化时，合并已保存的数据
   useEffect(() => {
-    if (inputParameter && inputParameter !== '{}') {
+    if (inputParameter?.length) {
       try {
-        const inputParameterObj = JSON.parse(inputParameter);
-        const schema = jsonToJsonSchema(inputParameter);
-        const newFormData = schemaToFormData(schema, inputParameterObj);
-
         // 获取已保存的表单数据（可能来自 initialValues）
         const savedFormData = form.getFieldValue('inputParameterFields') || [];
 
         // 合并已保存的数据和新生成的数据
-        const mergedFormData = mergeFormData(savedFormData, newFormData);
+        const mergedFormData = mergeFormData(savedFormData, inputParameter);
 
         if (mergedFormData.length > 0) {
           // 只有当合并后的数据与当前数据不同时才更新，避免不必要的更新
@@ -346,15 +338,6 @@ export const InputParameterForm: React.FC<InputParameterFormProps> = ({ inputPar
     setFormulaData(currentValue?.formulaData || '');
     setFormulaFieldKey(fieldKey);
   };
-
-  // 验证 inputParameter 格式
-  if (inputParameter && inputParameter !== '{}') {
-    try {
-      JSON.parse(inputParameter);
-    } catch (e) {
-      return <div>参数格式错误</div>;
-    }
-  }
 
   return (
     <div style={{ padding: '16px 0', width: '100%' }}>

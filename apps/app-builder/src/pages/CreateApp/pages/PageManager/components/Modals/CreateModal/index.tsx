@@ -169,7 +169,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
             <TreeSelect treeData={treeData} placeholder="请选择父级页面" allowClear />
           </Form.Item>
           {visibleCreateForm === 'page' && (
-            <Form.Item label="数据资产" field="entityId" rules={[{ required: true, message: '请选择数据资产' }]}>
+            <Form.Item label="数据资产" field="entityUuid" rules={[{ required: true, message: '请选择数据资产' }]}>
               <Select options={entityListOptions} placeholder="请选择数据资产" allowClear />
             </Form.Item>
           )}

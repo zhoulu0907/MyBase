@@ -27,6 +27,7 @@ import { TopHeader } from './components/topHeader';
 import styles from './index.module.less';
 import { type corpApplicationListProps, type cropItem, type industryTypeOption } from './types/appItem';
 import { convertName } from './utils';
+import type { ColumnProps } from '@arco-design/web-react/es/Table';
 const AvatarGroup = Avatar.Group;
 
 const BusinessPage: React.FC = () => {
@@ -131,11 +132,20 @@ const BusinessPage: React.FC = () => {
       <>
         {applicationList?.length > 0 ? (
           <div style={{ display: 'flex', alignItems: 'flex-end' }}>
-            <AvatarGroup size={24}>
-              {applicationList?.map((item) => {
-                return <Avatar style={{ backgroundColor: item.iconColor }}>{item.iconName}</Avatar>;
+            <AvatarGroup
+              size={24}
+              maxCount={5}
+              maxPopoverTriggerProps={{
+                disabled: true
+              }}
+            >
+              {applicationList?.map((item, index) => {
+                return (
+                  <Avatar key={index} style={{ backgroundColor: item.iconColor }}>
+                    {item.iconName}
+                  </Avatar>
+                );
               })}
-              <Avatar>{applicationList.length}</Avatar>
             </AvatarGroup>
           </div>
         ) : (
@@ -327,18 +337,18 @@ const BusinessPage: React.FC = () => {
           onAdd={handleCreateBusiness}
           setSearchInputValue={handleSearchChange}
         />
-        <Table
-          loading={loading}
-          columns={businessManageColumns}
-          data={displayData}
-          pagination={{
-            ...pagination,
-            showTotal: true,
-            onChange: handlePageChange
-          }}
-          rowKey="id"
-          border={false}
-        />
+          <Table
+            loading={loading}
+            columns={businessManageColumns as ColumnProps<cropItem>[]}
+            data={displayData}
+            pagination={{
+              ...pagination,
+              showTotal: true,
+              onChange: handlePageChange
+            }}
+            rowKey="id"
+            border={false}
+          />
       </div>
     );
   };

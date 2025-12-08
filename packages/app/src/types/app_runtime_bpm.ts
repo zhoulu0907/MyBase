@@ -58,7 +58,7 @@ export interface GetPageSetListReq {
   pageSetType?: string;
 }
 export interface GetListNodesReq {
-  businessId: string;
+  businessUuid: string;
 }
 
 export enum FLOWSTATUS_TYPE {
