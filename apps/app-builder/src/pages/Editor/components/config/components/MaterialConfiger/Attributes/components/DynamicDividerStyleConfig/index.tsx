@@ -25,8 +25,8 @@ const fieldStyles = [
   { value: 'style3', label: '样式3' },
   { value: 'style4', label: '样式4' },
   { value: 'style5', label: '样式5' },
-  { value: 'style6', label: '样式6' }
-  //   { value: 'style7', label: '样式7' }
+  { value: 'style6', label: '样式6' },
+  { value: 'style7', label: '样式7' }
   //   { value: 'style8', label: '样式8' }
 ];
 
@@ -55,6 +55,30 @@ const DynamicDividerStyleConfig = ({ handlePropsChange, item, configs }: Props) 
     handlePropsChange(key, value);
   };
 
+  const optionRender = (option: any, index: number) => {
+    if (index < 6) {
+      return (
+        <div
+          className={[4, 5].includes(index) ? styles[`decor-title-${option.value}`] : styles.title}
+          style={{ color: `${titleColor}`, borderLeftColor: `${color}`, borderBottomColor: `${color}` }}
+        >
+          字段标题
+        </div>
+      );
+    } else if (index === 6) {
+      return (
+        <div className={styles[`decor-title-${option.value}`]} style={{ borderBottomColor: `${color}` }}>
+          <div className={styles['label']} style={{ backgroundColor: `${color}`, color: `${titleColor}` }}>
+            字段标题
+          </div>
+          <div className={styles['decorator1']} style={{ backgroundColor: `${color}` }}></div>
+          <div className={styles['decorator2']} style={{ backgroundColor: `${color}` }}></div>
+          <div className={styles['decorator3']} style={{ backgroundColor: `${color}` }}></div>
+        </div>
+      );
+    }
+  };
+
   return (
     <>
       <Form.Item className={styles.formItem} label={item.name}>
@@ -68,21 +92,7 @@ const DynamicDividerStyleConfig = ({ handlePropsChange, item, configs }: Props) 
             label: (
               <div className={styles.dropdownWrapper}>
                 <div className={styles.previewWrapper}>
-                  {index < 6 && (
-                    <div
-                      className={[4, 5].includes(index) ? styles[`decor-title-${option.value}`] : styles.title}
-                      style={{ color: `${titleColor}`, borderLeftColor: `${color}`, borderBottomColor: `${color}` }}
-                    >
-                      字段标题
-                    </div>
-                  )}
-
-                  {index === 6 && (
-                    <div className={styles['field-title']}>
-                      <div className={styles['label']}>字段标题</div>
-                      <div className={styles['decorator']}></div>
-                    </div>
-                  )}
+                  {optionRender(option, index)}
                   {/* 不同风格的装饰条 */}
                   <div className={styles[`decor-${option.value}`]} style={{ borderColor: `${color}` }} />
                   <div className={styles.desc} style={{ color: `${descriptionColor}` }}>

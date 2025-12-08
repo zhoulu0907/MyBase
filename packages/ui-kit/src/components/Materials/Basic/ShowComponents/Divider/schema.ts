@@ -1,48 +1,20 @@
 import {
-  alignConfig,
-  baseConfig,
   baseDefault,
-  dataFieldConfig,
-  defaultValueConfig,
-  layoutConfig,
-  statusConfig,
   widthConfig,
   type ICommonBaseType,
-  type TAlignSelectKeyType,
-  type TLayoutSelectKeyType,
-  type TStatusSelectKeyType,
   type TWidthSelectKeyType
 } from '../../../common';
 import {
-  ALIGN_OPTIONS,
-  ALIGN_VALUES,
   CONFIG_TYPES,
-  LAYOUT_OPTIONS,
-  LAYOUT_VALUES,
-  STATUS_OPTIONS,
-  STATUS_VALUES,
   WIDTH_OPTIONS,
-  WIDTH_VALUES,
-  DEFAULT_VALUE_TYPES
+  WIDTH_VALUES
 } from '../../../constants';
 import type {
-  IAlignConfigType,
-  IDataFieldConfigType,
   ILabelConfigType,
-  ILayoutConfigType,
-  IPlaceholderConfigType,
-  ISecurityConfigType,
-  IStatusConfigType,
-  ITooltipConfigType,
-  IVerifyConfigType,
   IWidthConfigType,
   TBooleanDefaultType,
-  TSelectDefaultType,
-  TTextAreaDefaultType,
   TTextDefaultType,
   TRadioDefaultType,
-  IDefaultValueConfigType,
-  ITextConfigType,
   IDividerTooltipConfigType,
   IDividerStyleTypeConfigType
 } from '../../../types';

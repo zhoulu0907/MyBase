@@ -74,33 +74,44 @@
   }
 
   /* 字段标题容器 */
-  .field-title {
-    height: 24px;
-    border-bottom: 2px solid #52c41a;
-    display: flex;
-  }
-
-  /* 标题标签 */
-  .field-title .label {
-    position: absolute;
-    top: 35%;
-    transform: translateY(-50%);
-    background-color: #52c41a;
-    padding: 0 24px 0 8px;
-    line-height: 26px;
-    clip-path: polygon(0 0, 80% 0, 100% 100%, 0 100%);
-  }
-
-  .decorator {
+  .decor-title-style7 {
     height: 22px;
-    left: 15px;
-    opacity: 0.9;
-    position: absolute;
-    top: 0;
-    -webkit-transform: skew(26deg) translateX(-50%);
-    transform: skew(26deg) translateX(-50%);
-    width: 8px;
-    background-color: #52c41a;
+    border-bottom: 2px solid;
+    display: flex;
+    gap: 2px;
+
+    /* 标题标签 */
+    .label {
+      padding: 0 24px 0 8px;
+      line-height: 24px;
+      clip-path: polygon(0 0, 80% 0, 100% 100%, 0 100%);
+    }
+
+    .decorator1 {
+      height: 24px;
+      width: 24px;
+      clip-path: polygon(0% 0%, 40% 0%, 100% 75%, 60% 75%);
+      position: relative;
+      left: -12px;
+    }
+
+    .decorator2 {
+      height: 24px;
+      width: 24px;
+      clip-path: polygon(0% 0%, 40% 0%, 100% 75%, 60% 75%);
+      position: relative;
+      left: -22px;
+      opacity: 0.7;
+    }
+
+    .decorator3 {
+      height: 24px;
+      width: 24px;
+      clip-path: polygon(0% 0%, 40% 0%, 100% 75%, 60% 75%);
+      position: relative;
+      left: -32px;
+      opacity: 0.4;
+    }
   }
 }
 .dividerColorPicker {
@@ -111,5 +122,6 @@
   :global(.pc-color-picker-preview) {
     width: 18px;
     height: 18px;
+    border-radius: 4px;
   }
 }

@@ -56,4 +56,53 @@
     line-height: 22px;
     margin-bottom: 2px;
   }
+
+  /* 样式7 */
+  /* 字段标题容器 */
+  .decor-title-style7 {
+    height: 22px;
+    border-bottom: 2px solid;
+    display: flex;
+    gap: 2px;
+
+    /* 标题标签 */
+   .label {
+      padding: 0 0 0 8px;
+      line-height: 24px;
+    }
+
+    .decorator {
+      height: 24px;
+      width: 24px;
+      clip-path: polygon(0% 0%, 20% 0%, 100% 100%, 0% 100%);
+      position: relative;
+      left: -3px;
+    }
+
+    .decorator1 {
+      height: 24px;
+      width: 24px;
+      clip-path: polygon(0% 0%, 40% 0%, 100% 75%, 60% 75%);
+      position: relative;
+      left: -16px;
+    }
+
+    .decorator2 {
+      height: 24px;
+      width: 24px;
+      clip-path: polygon(0% 0%, 40% 0%, 100% 75%, 60% 75%);
+      position: relative;
+      left: -26px;
+      opacity: 0.7;
+    }
+
+    .decorator3 {
+      height: 24px;
+      width: 24px;
+      clip-path: polygon(0% 0%, 40% 0%, 100% 75%, 60% 75%);
+      position: relative;
+      left: -36px;
+      opacity: 0.4;
+    }
+  }
 }
