@@ -186,7 +186,7 @@ public class CorpServiceImpl implements CorpService {
         if (checkCorp == null) {
             throw exception(CORP_NO_EXISTS, reqVO.getCorpName());
         }
-        if(null != reqVO.getUserLimit()) {
+        if (null != reqVO.getUserLimit()) {
             //  检查1：用户数下限，不能小于企业已有开启状态的用户实际数量
             validCorpUserMinCountLimit(reqVO.getUserLimit(), reqVO.getId());
             // 检查2：用户数上限，不能大于空间下可用的用户数量
