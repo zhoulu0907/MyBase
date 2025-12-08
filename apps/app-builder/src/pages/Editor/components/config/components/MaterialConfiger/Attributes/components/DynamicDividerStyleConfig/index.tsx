@@ -155,6 +155,6 @@ const DynamicDividerStyleConfig = ({ handlePropsChange, item, configs }: Props) 
 
 export default DynamicDividerStyleConfig;
 
-registerConfigRenderer(CONFIG_TYPES.FORM_DIVIDER_STYLE_TYPE, ({ handlePropsChange, item, configs }) => (
+registerConfigRenderer(CONFIG_TYPES.DIVIDER_STYLE_TYPE, ({ handlePropsChange, item, configs }) => (
   <DynamicDividerStyleConfig handlePropsChange={handlePropsChange} item={item} configs={configs} />
 ));

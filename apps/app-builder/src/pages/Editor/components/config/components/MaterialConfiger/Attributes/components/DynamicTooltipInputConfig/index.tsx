@@ -48,6 +48,6 @@ registerConfigRenderer(CONFIG_TYPES.TOOLTIP_INPUT, ({ handlePropsChange, item, c
   <DynamicTooltipInputConfig handlePropsChange={handlePropsChange} item={item} configs={configs} />
 ));
 
-registerConfigRenderer(CONFIG_TYPES.FORM_DIVIDER_TOOLTIP_INPUT, ({ handlePropsChange, item, configs }) => (
+registerConfigRenderer(CONFIG_TYPES.DIVIDER_TOOLTIP_INPUT, ({ handlePropsChange, item, configs }) => (
   <DynamicTooltipInputConfig handlePropsChange={handlePropsChange} item={item} configs={configs} isDivider={true} />
 ));

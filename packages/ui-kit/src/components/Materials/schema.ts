@@ -34,7 +34,6 @@ const componentSchemaMap: Partial<Record<ComponentType, ComponentSchema>> = {
   [ALL_COMPONENT_TYPES.CAROUSEL_FORM]: BasicSchema.XCarouselForm,
   [ALL_COMPONENT_TYPES.SUB_TABLE]: BasicSchema.XSubTable,
   [ALL_COMPONENT_TYPES.DATA_SELECT]: BasicSchema.XDataSelect,
-  [ALL_COMPONENT_TYPES.FORMDIVIDER]: BasicSchema.XFormDivider,
 
   [ALL_COMPONENT_TYPES.COLUMN_LAYOUT]: BasicSchema.XColumnLayout,
   [ALL_COMPONENT_TYPES.TABS_LAYOUT]: BasicSchema.XTabsLayout,

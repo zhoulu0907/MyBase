@@ -491,15 +491,15 @@ export interface IDefaultValueConfigType {
 }
 
 // 分割线字段描述
-export interface IFormDividerTooltipConfigType {
+export interface IDividerTooltipConfigType {
   key: string;
   name: string;
-  type: typeof CONFIG_TYPES.FORM_DIVIDER_TOOLTIP_INPUT;
+  type: typeof CONFIG_TYPES.DIVIDER_TOOLTIP_INPUT;
 }
 
 // 分割线样式
-export interface IFormDividerStyleTypeConfigType {
+export interface IDividerStyleTypeConfigType {
   key: string;
   name: string;
-  type: typeof CONFIG_TYPES.FORM_DIVIDER_STYLE_TYPE;
+  type: typeof CONFIG_TYPES.DIVIDER_STYLE_TYPE;
 }

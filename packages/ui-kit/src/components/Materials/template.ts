@@ -43,7 +43,6 @@ export const COMPONENT_TYPE_DISPLAY_NAME_MAP: Record<string, string> = {
   [FORM_COMPONENT_TYPES.CAROUSEL_FORM]: '轮播图',
   [FORM_COMPONENT_TYPES.SUB_TABLE]: '子表单',
   [FORM_COMPONENT_TYPES.DATA_SELECT]: '数据选择',
-  [FORM_COMPONENT_TYPES.FORMDIVIDER]: '分割线',
 
   // 列表组件
   [LIST_COMPONENT_TYPES.TABLE]: '表格',
@@ -54,7 +53,7 @@ export const COMPONENT_TYPE_DISPLAY_NAME_MAP: Record<string, string> = {
   [LIST_COMPONENT_TYPES.LIST]: '画布列表',
 
   // 展示组件
-  [SHOW_COMPONENT_TYPES.DIVIDER]: '分隔符',
+  [SHOW_COMPONENT_TYPES.DIVIDER]: '分割线',
   [SHOW_COMPONENT_TYPES.INFO_NOTICE]: '信息公告',
   [SHOW_COMPONENT_TYPES.TEXT]: '静态文本',
   [SHOW_COMPONENT_TYPES.IMAGE]: '静态图片',
@@ -295,15 +294,7 @@ const allTemplate = {
           displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.DATA_SELECT],
           icon: 'data_select_cp.svg',
           category: 'base'
-        },
-        {
-          type: FORM_COMPONENT_TYPES.FORMDIVIDER,
-          h: 36,
-          w: 118,
-          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.FORMDIVIDER],
-          icon: 'divider_cp.svg',
-          category: 'base'
-        },
+        }
       ]
     },
     {

@@ -31,8 +31,7 @@ export const FORM_COMPONENT_TYPES = {
   RICH_TEXT: 'XRichText',
   CAROUSEL_FORM: 'XCarouselForm',
   SUB_TABLE: 'XSubTable',
-  DATA_SELECT: 'XDataSelect',
-  FORMDIVIDER: 'XFormDivider'
+  DATA_SELECT: 'XDataSelect'
 } as const;
 
 // 布局组件类型
