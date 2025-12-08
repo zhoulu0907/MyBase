@@ -54,7 +54,7 @@ const XSelectMutiple = memo((props: XSelectMutipleConfig & { runtime?: boolean; 
 
   return (
     <Form.Item
-      className="inputTextWrapperOBMobile"
+      className="inputTextWrapperOBMobile selectMultipleWrapper"
       label={label.display && label.text}
       field={fieldId}
       rules={rules}

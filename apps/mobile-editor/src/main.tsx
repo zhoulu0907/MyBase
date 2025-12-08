@@ -14,7 +14,6 @@ async function bootstrap() {
 
 async function mount(props: any) {
   console.log('sub-app mount', props);
-  console.log('sub-app mount11', props.container);
 
   const container = props?.container ? props.container : document.getElementById('root')!;
   const containerElement = document.createElement('div');
