@@ -504,8 +504,8 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                   // 主表数据
                   const isMain = ele.tableName && ele.tableName === mainEntity.tableName;
                   // 同一个子表
-                  const isSub = !ele.entityID || !dataField || ele.entityID === dataField;
-                  return !isTable && !isMain && isSub;
+                  const isSameSub = !ele.tableName || !dataField || ele.tableName === dataField;
+                  return !isTable && !isMain && isSameSub;
                 });
 
                 // setTimeout(() => {
