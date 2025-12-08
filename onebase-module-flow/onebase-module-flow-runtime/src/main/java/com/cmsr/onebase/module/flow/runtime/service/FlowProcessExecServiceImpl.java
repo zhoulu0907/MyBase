@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.flow.runtime.service;
 
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.flow.core.graph.FlowProcessCache;
 import com.cmsr.onebase.module.flow.context.condition.ConditionsSupport;
 import com.cmsr.onebase.module.flow.context.enums.FieldTypeConvertor;
 import com.cmsr.onebase.module.flow.context.express.ExpressionExecutor;
@@ -10,6 +10,7 @@ import com.cmsr.onebase.module.flow.context.graph.nodes.ModalNodeData;
 import com.cmsr.onebase.module.flow.context.graph.nodes.StartFormNodeData;
 import com.cmsr.onebase.module.flow.core.flow.ExecutorResult;
 import com.cmsr.onebase.module.flow.core.flow.FlowProcessExecutor;
+import com.cmsr.onebase.module.flow.core.graph.FlowProcessCache;
 import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
 import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerReqVO;
 import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerRespVO;
@@ -43,11 +44,11 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
     @Autowired
     private FlowProcessExecutor flowProcessExecutor;
 
-
     private ExpressionExecutor expressionExecutor = new ExpressionExecutor();
 
     @Override
-    public List<QueryFormTriggerRespVO> queryFormTrigger(Long applicationId, String pageUuid) {
+    public List<QueryFormTriggerRespVO> queryFormTrigger(String pageUuid) {
+        Long applicationId = ApplicationManager.getApplicationId();
         List<StartFormNodeData> startFormNodeDataList = flowProcessCache.findStartFormNodeDataByPageUuid(applicationId, pageUuid);
         return startFormNodeDataList.stream()
                 .map(startFormNodeData -> BeanUtils.toBean(startFormNodeData, QueryFormTriggerRespVO.class))
