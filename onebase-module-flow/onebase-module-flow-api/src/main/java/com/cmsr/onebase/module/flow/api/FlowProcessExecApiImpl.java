@@ -75,7 +75,7 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
 
     private EntityTriggerRespDTO entityTrigger(EntityTriggerReqDTO reqDTO, StartEntityNodeData nodeData) {
         Map<String, Object> inputData = new HashMap<>();
-        for (Map.Entry<?, Object> entry : reqDTO.getFieldData().entrySet()) {
+        for (Map.Entry<?, Object> entry : reqDTO.getColFieldData().entrySet()) {
             inputData.put(entry.getKey().toString(), entry.getValue());
         }
         EntityTriggerRespDTO respDTO = new EntityTriggerRespDTO(reqDTO.getTraceId(), nodeData.getProcessId());

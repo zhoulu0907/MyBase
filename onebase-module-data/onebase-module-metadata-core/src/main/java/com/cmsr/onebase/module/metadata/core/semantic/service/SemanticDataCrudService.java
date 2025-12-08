@@ -117,14 +117,17 @@ public class SemanticDataCrudService {
      * - 自动编号由 AutoNumberService 根据字段策略生成并应用
      */
     public void create(SemanticRecordDTO recordDTO) {
-        
-        // 前置工作流：用于校验、默认值填充、上下文准备等
-        semanticWorkflowExecutor.preExecute(recordDTO);
-
-        // 提取实体与值
         SemanticEntitySchemaDTO entity = recordDTO.getEntitySchema();
         SemanticEntityValueDTO value = recordDTO.getEntityValue();
         if (entity == null || value == null) { return; }
+        // 前置工作流：用于校验、默认值填充、上下文准备等
+        semanticWorkflowExecutor.preExecute(
+                recordDTO.getRecordContext().getOperationType(),
+                recordDTO.getRecordContext().getTraceId(),
+                entity.getTableName(),
+                value.getFieldValueMap().values().stream().toList(),
+                buildConnectorFieldValueBatches(recordDTO)
+        );
         List<SemanticFieldSchemaDTO> fields = entity.getFields();
         // 根据字段配置生成并回填自动编号/系统字段（如编码、创建人等）
         generateAndApplyAutoNumbers(fields, value);
@@ -153,7 +156,13 @@ public class SemanticDataCrudService {
         }
 
         // 后置工作流：可做审计、事件发布、缓存刷新等
-        semanticWorkflowExecutor.postExecute(recordDTO);
+        semanticWorkflowExecutor.postExecute(
+                recordDTO.getRecordContext().getOperationType(),
+                recordDTO.getRecordContext().getTraceId(),
+                entity.getTableName(),
+                value.getFieldValueMap().values().stream().toList(),
+                buildConnectorFieldValueBatches(recordDTO)
+        );
 
     }
 
@@ -172,11 +181,17 @@ public class SemanticDataCrudService {
      * - 为防止误更新主键，显式从 Row 中移除主键字段
      */
     public void update(SemanticRecordDTO recordDTO) {
-        // 前置工作流：参数校验、权限校验、上下文准备
-        semanticWorkflowExecutor.preExecute(recordDTO);
         SemanticEntitySchemaDTO entity = recordDTO.getEntitySchema();
         SemanticEntityValueDTO value = recordDTO.getEntityValue();
         if (entity == null || value == null) { return; }
+        // 前置工作流：参数校验、权限校验、上下文准备
+        semanticWorkflowExecutor.preExecute(
+                recordDTO.getRecordContext().getOperationType(),
+                recordDTO.getRecordContext().getTraceId(),
+                entity.getTableName(),
+                value.getFieldValueMap().values().stream().toList(),
+                buildConnectorFieldValueBatches(recordDTO)
+        );
         // 根据元数据字段列表确定主键字段名
         String pkField = getPrimaryKeyFieldName(entity.getFields());
         // 优先使用 DTO 中的 id；否则从原始 Map 中提取
@@ -199,7 +214,13 @@ public class SemanticDataCrudService {
             upsertRelationConnectors(recordDTO, parentId);
         }
         // 后置工作流：审计、事件发布等
-        semanticWorkflowExecutor.postExecute(recordDTO);
+        semanticWorkflowExecutor.postExecute(
+                recordDTO.getRecordContext().getOperationType(),
+                recordDTO.getRecordContext().getTraceId(),
+                entity.getTableName(),
+                value.getFieldValueMap().values().stream().toList(),
+                buildConnectorFieldValueBatches(recordDTO)
+        );
     }
 
     /**
@@ -216,11 +237,17 @@ public class SemanticDataCrudService {
      * 4. 清理数据源并执行后置工作流
      */
     public Integer delete(SemanticRecordDTO recordDTO) {
-        // 前置工作流：权限校验、审计记录准备等
-        semanticWorkflowExecutor.preExecute(recordDTO);
         SemanticEntitySchemaDTO entity = recordDTO.getEntitySchema();
         SemanticEntityValueDTO value = recordDTO.getEntityValue();
         if (entity == null || value == null) { return 0; }
+        // 前置工作流：权限校验、审计记录准备等
+        semanticWorkflowExecutor.preExecute(
+                recordDTO.getRecordContext().getOperationType(),
+                recordDTO.getRecordContext().getTraceId(),
+                entity.getTableName(),
+                value.getFieldValueMap().values().stream().toList(),
+                List.of()
+        );
         // 确定主键字段名并解析 id
         String pkField = getPrimaryKeyFieldName(entity.getFields());
         Object id = value.getId() != null ? value.getId() : value.getCurrentEntityRawMap().get(pkField);
@@ -235,7 +262,13 @@ public class SemanticDataCrudService {
             // dynamicMetadataRepository.deleteByQuery(entity.getTableName(), qw);
         }
         // 后置工作流：审计、事件发布等
-        semanticWorkflowExecutor.postExecute(recordDTO);
+        semanticWorkflowExecutor.postExecute(
+                recordDTO.getRecordContext().getOperationType(),
+                recordDTO.getRecordContext().getTraceId(),
+                entity.getTableName(),
+                value.getFieldValueMap().values().stream().toList(),
+                List.of()
+        );
         return resultCount;
     }
 
@@ -243,8 +276,14 @@ public class SemanticDataCrudService {
      * 条件删除主表数据（软删优先，物理删回退）
      */
     public Integer deleteByCondition(SemanticRecordDTO recordDTO) {
-        semanticWorkflowExecutor.preExecute(recordDTO);
         SemanticEntitySchemaDTO entity = recordDTO.getEntitySchema();
+        semanticWorkflowExecutor.preExecute(
+                recordDTO.getRecordContext().getOperationType(),
+                recordDTO.getRecordContext().getTraceId(),
+                entity.getTableName(),
+                List.of(),
+                List.of()
+        );
         List<SemanticFieldSchemaDTO> fields = entity.getFields();
         SemanticConditionDTO cond = recordDTO.getRecordContext() == null ? null : recordDTO.getRecordContext().getFilters();
         boolean noCond = cond == null
@@ -257,7 +296,13 @@ public class SemanticDataCrudService {
         int affected = hasDeletedField(fields)
                 ? dynamicMetadataRepository.softDeleteByQuery(entity.getTableName(), qw)
                 : dynamicMetadataRepository.deleteByQuery(entity.getTableName(), qw);
-        semanticWorkflowExecutor.postExecute(recordDTO);
+        semanticWorkflowExecutor.postExecute(
+                recordDTO.getRecordContext().getOperationType(),
+                recordDTO.getRecordContext().getTraceId(),
+                entity.getTableName(),
+                List.of(),
+                List.of()
+        );
         return affected;
     }
 
@@ -361,20 +406,38 @@ public class SemanticDataCrudService {
     }
 
     public Integer deleteByQuery(SemanticRecordDTO recordDTO, QueryWrapper qw) {
-        semanticWorkflowExecutor.preExecute(recordDTO);
         SemanticEntitySchemaDTO entity = recordDTO.getEntitySchema();
+        semanticWorkflowExecutor.preExecute(
+                recordDTO.getRecordContext().getOperationType(),
+                recordDTO.getRecordContext().getTraceId(),
+                entity.getTableName(),
+                List.of(),
+                List.of()
+        );
         List<SemanticFieldSchemaDTO> fields = entity.getFields();
         if (qw == null) { qw = QueryWrapper.create(); }
         int affected = hasDeletedField(fields)
                 ? dynamicMetadataRepository.softDeleteByQuery(entity.getTableName(), qw)
                 : dynamicMetadataRepository.deleteByQuery(entity.getTableName(), qw);
-        semanticWorkflowExecutor.postExecute(recordDTO);
+        semanticWorkflowExecutor.postExecute(
+                recordDTO.getRecordContext().getOperationType(),
+                recordDTO.getRecordContext().getTraceId(),
+                entity.getTableName(),
+                List.of(),
+                List.of()
+        );
         return affected;
     }
 
     public List<Map<String, Object>> updateByQuery(SemanticRecordDTO recordDTO, Map<String, Object> updates, QueryWrapper qw) {
-        semanticWorkflowExecutor.preExecute(recordDTO);
         SemanticEntitySchemaDTO entity = recordDTO.getEntitySchema();
+        semanticWorkflowExecutor.preExecute(
+                recordDTO.getRecordContext().getOperationType(),
+                recordDTO.getRecordContext().getTraceId(),
+                entity.getTableName(),
+                List.of(),
+                List.of()
+        );
         List<SemanticFieldSchemaDTO> fields = entity.getFields();
         if (updates == null || updates.isEmpty()) { return List.of(); }
         if (qw == null) { qw = QueryWrapper.create(); }
@@ -408,7 +471,13 @@ public class SemanticDataCrudService {
         List<Map<String, Object>> result = new ArrayList<>();
         for (SemanticEntityValueDTO val : values) { result.add(val.getGlobalRawMapForJson()); }
         result = semanticQueryPermissionHelper.filterQueryResultList(result, recordDTO.getRecordContext().getPermissionContext(), fields);
-        semanticWorkflowExecutor.postExecute(recordDTO);
+        semanticWorkflowExecutor.postExecute(
+                recordDTO.getRecordContext().getOperationType(),
+                recordDTO.getRecordContext().getTraceId(),
+                entity.getTableName(),
+                List.of(),
+                List.of()
+        );
         return result;
     }
 
@@ -687,6 +756,26 @@ public class SemanticDataCrudService {
             SemanticFieldValueDTO<Object> v = fields.get(e.getKey());
             if (v != null) { v.setRawValue(e.getValue()); }
         }
+    }
+
+    private List<List<SemanticFieldValueDTO<Object>>> buildConnectorFieldValueBatches(SemanticRecordDTO recordDTO) {
+        SemanticEntitySchemaDTO entity = recordDTO.getEntitySchema();
+        List<SemanticRelationSchemaDTO> connectors = entity == null ? null : entity.getConnectors();
+        List<List<SemanticFieldValueDTO<Object>>> batches = new ArrayList<>();
+        if (connectors == null) { return batches; }
+        for (SemanticRelationSchemaDTO c : connectors) {
+            if (c == null || c.getTargetEntityTableName() == null) { continue; }
+            String name = c.getTargetEntityTableName();
+            Map<String, SemanticFieldValueDTO<Object>> obj = recordDTO.getEntityValue() == null ? null : recordDTO.getEntityValue().getConnectorDTOObject(name);
+            if (obj != null && !obj.isEmpty()) { batches.add(obj.values().stream().toList()); }
+            List<Map<String, SemanticFieldValueDTO<Object>>> list = recordDTO.getEntityValue() == null ? null : recordDTO.getEntityValue().getConnectorDTOList(name);
+            if (list != null) {
+                for (Map<String, SemanticFieldValueDTO<Object>> m : list) {
+                    if (m != null && !m.isEmpty()) { batches.add(m.values().stream().toList()); }
+                }
+            }
+        }
+        return batches;
     }
 
     private void upsertSubtableConnectors(SemanticRecordDTO recordDTO, Long parentId) {

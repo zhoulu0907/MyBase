@@ -164,12 +164,10 @@ POST {{base}}/metadata/{{tableName}}/update?menuId={{menuId}}
 Content-Type: application/json
 X-Trace-Id: {{traceId}}
 X-Tenant-Id: {{tenantId}}
-login-user: {"id":"155019577667616820","applicationId":"156456639374295040","tenantId":"153935442021842944"}
+login-user: {"id":"155019577667616820","applicationId":"165725642682662912","tenantId":"160864959456706560"}
 
-{
-  "id": 162745519484436480,
-  "text": "企业客户基础信息A"
-}
+{"id":"167556724686127104","ggname":"x02","age":3,"r40c_kedou":[{"kdname":"xx02444","age":21}]}
+
 
 ### 语义删除（data 中包含 id）
 POST {{base}}/metadata/{{tableName}}/delete?menuId={{menuId}}

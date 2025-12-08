@@ -399,9 +399,9 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
 
         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
         reqDTO.setTraceId(context.getRequestContext().getTraceId());
-        reqDTO.setEntityId(entityId);
-        reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_UPDATE);
-        reqDTO.setFieldData(data);
+        // reqDTO.setEntityId(entityId);
+        // reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_UPDATE);
+        // reqDTO.setFieldData(data);
         EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
         if(!respDTO.isTriggered()){
             log.info("BEFORE_UPDATE 数据更新前置工作流未触发，实体Id：{} ，参数：{}，原因：{}", entityId,data,respDTO.getMessage());
@@ -441,9 +441,9 @@ public class MetadataDataMethodUpdateImpl extends AbstractMetadataDataMethodCore
 
         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
         reqDTO.setTraceId(context.getRequestContext().getTraceId());
-        reqDTO.setEntityId(entityId);
-        reqDTO.setTriggerEvent(TriggerEventEnum.AFTER_UPDATE);
-        reqDTO.setFieldData(data);
+        // reqDTO.setEntityId(entityId);
+        // reqDTO.setTriggerEvent(TriggerEventEnum.AFTER_UPDATE);
+        // reqDTO.setFieldData(data);
         EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
         if(!respDTO.isTriggered()){
             log.info("AFTER_UPDATE 数据更新后置工作流未触发，实体Id：{} ，参数：{}，原因：{}", entityId,data,respDTO.getMessage());
