@@ -1488,6 +1488,19 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                     return null;
                 }
 
+                // 根据数据库类型选择不同的策略
+                String datasourceType = datasource.getDatasourceType();
+                DatabaseType dbType = DatabaseType.valueOf(datasourceType);
+
+                if (dbType == DatabaseType.PostgreSQL || dbType == DatabaseType.KingBase) {
+                    // PostgreSQL/KingBase：使用手动 DDL（解决保留字和类型兼容性问题）
+                    String ddl = generateAddColumnDDL(tableName, field);
+                    AnylineDdlHelper.executeDDL(service, ddl);
+                    AnylineDdlHelper.clearMetadataCache();
+                    log.info("成功为表 {} 添加列: {} (使用自定义DDL)", tableName, field.getFieldName());
+                    return null;
+                }
+
                 // 使用 Anyline 原生 API 构建 Column 对象
                 String columnType = mapFieldType(field.getFieldType(), field.getDataLength());
                 boolean nullable = field.getIsRequired() == null || !BooleanStatusEnum.isYes(field.getIsRequired());
@@ -1597,16 +1610,21 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 }
 
                 // 检查列是否存在，避免元数据与物理表不一致导致的问题
-                boolean columnExists = AnylineDdlHelper.columnExists(service, tableName, field.getFieldName());
+                String fieldName = field.getFieldName();
+                // 修复 PostgreSQL 保留字 user 导致的问题
+                if ("user".equalsIgnoreCase(fieldName)) {
+                    fieldName = "\"" + fieldName + "\"";
+                }
+                boolean columnExists = AnylineDdlHelper.columnExists(service, tableName, fieldName);
 
                 if (!columnExists) {
                     // 列不存在，应该使用ADD操作而非ALTER
                     log.warn("准备修改表 {} 的列 {} 时发现列不存在（字段ID: {}），将改为新增列操作",
-                            tableName, field.getFieldName(), field.getId());
+                            tableName, fieldName, field.getId());
                     addColumnToTable(datasource, tableName, field);
                 } else {
                     // 列存在，正常执行ALTER操作
-                    log.info("准备修改表 {} 的列: {}, 字段ID: {}", tableName, field.getFieldName(), field.getId());
+                    log.info("准备修改表 {} 的列: {}, 字段ID: {}", tableName, fieldName, field.getId());
 
                     // 根据数据库类型选择不同的策略
                     String datasourceType = datasource.getDatasourceType();
@@ -1618,10 +1636,10 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                     } else {
                         // PostgreSQL/KingBase：使用手动 DDL（需要 USING 子句处理类型转换）
                         String alterColumnDDL = generateAlterColumnDDL(datasourceType, tableName, field);
-                        AnylineDdlHelper.alterColumnWithDDL(service, tableName, field.getFieldName(), alterColumnDDL);
+                        AnylineDdlHelper.alterColumnWithDDL(service, tableName, fieldName, alterColumnDDL);
                     }
 
-                    log.info("成功修改表 {} 的列: {}", tableName, field.getFieldName());
+                    log.info("成功修改表 {} 的列: {}", tableName, fieldName);
                 }
                 return null;
             });
