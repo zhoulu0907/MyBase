@@ -327,9 +327,6 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
     public Boolean checkScenariosCaptcha(SecurityConfigReqVO configReqVO) {
         Long tenantId = configReqVO.getTenantId();
         String scenariosCode = configReqVO.getScenariosCode();
-        if (StringUtils.isBlank(scenariosCode)) {
-            scenariosCode = SecurityConfigKey.EnableScenariosOption.login.getKey();
-        }
         String securityConfigKey = SecurityConfigKey.enableScenarios.getConfigKey();
         SecurityConfigDO config = securityConfigDataRepository.findSecurityConfigByTenantIdAndKey(tenantId, securityConfigKey);
         if (null == config) {
