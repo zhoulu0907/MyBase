@@ -11,15 +11,19 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
   const { label, dataField, tooltip, status, verify, layout, defaultOptionsConfig, runtime = true, detailMode } = props;
 
   const { form } = Form.useFormContext();
-  const [fieldId, setFieldId] = useState('');
+  const fieldId = dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.CHECKBOX}_${nanoid()}`
 
   const fieldValue = Form.useWatch(fieldId, form);
 
-  useEffect(() => {
-    if (dataField.length > 0) {
-      setFieldId(dataField[dataField.length - 1]);
-    }
-  }, [dataField]);
+
+  const handleSelectChange = (value: string) => {
+    const name = defaultOptionsConfig?.defaultOptions.find((item) => item.value === value)?.label;
+
+    form.setFieldValue(fieldId, {
+      id:value,
+      name
+    });
+  };
 
   return (
     <div className="formWrapper">
@@ -28,11 +32,11 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
           label.display &&
           label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
         }
-        field={fieldId ? fieldId : `${FORM_COMPONENT_TYPES.SELECT_ONE}_${nanoid()}`}
+        field={fieldId}
         layout={layout}
         tooltip={tooltip}
         labelCol={layout === 'horizontal' ? { style: { width: 200, flex: 'unset' } } : {}}
-        rules={[{ required: verify?.required, message:`${label.text}是必填项` }]}
+        rules={[{ required: verify?.required, message: `${label.text}是必填项` }]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           margin: 0,
@@ -42,7 +46,7 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
           <div>
-            {(fieldValue && defaultOptionsConfig?.defaultOptions?.find((op) => op.value === fieldValue)?.label) || '--'}
+            {fieldValue?.name || '--'}
           </div>
         ) : (
           <Select
@@ -53,9 +57,16 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
             allowClear
             options={defaultOptionsConfig?.defaultOptions}
             getPopupContainer={getPopupContainer}
+            onChange={(value) => handleSelectChange(value)}
             style={{
               width: '100%',
               pointerEvents: runtime ? 'unset' : 'none'
+            }}
+            renderFormat={(option) => {
+              if (typeof fieldValue === 'object' && fieldValue) {
+                return fieldValue?.name ?? '--';
+              }
+              return <span>{option?.children}</span>
             }}
           />
         )}
