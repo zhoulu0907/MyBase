@@ -1,3 +1,4 @@
+import { RELATIONSHIP_TYPE } from '@/pages/CreateApp/pages/DataFactory/utils/types';
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { useAppStore } from '@/store/store_app';
 import { Form, Grid, Input, Radio, Select } from '@arco-design/web-react';
@@ -5,9 +6,11 @@ import type { TreeSelectDataType } from '@arco-design/web-react/es/TreeSelect/in
 import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
 import {
   DATA_SOURCE_TYPE,
+  getEntityFields,
   getEntityFieldsWithChildren,
   getEntityListByApp,
   getFieldCheckTypeApi,
+  RELATION_TYPE,
   type AppEntityField,
   type ChildEntity,
   type ConditionField,
@@ -36,8 +39,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   const updateType = Form.useWatch('updateType', payloadForm);
 
-  const mainEntityId = Form.useWatch('mainEntityId', payloadForm);
-  const subEntityId = Form.useWatch('subEntityId', payloadForm);
+  const mainTableName = Form.useWatch('mainTableName', payloadForm);
+  const subTableName = Form.useWatch('subTableName', payloadForm);
 
   // 数据源选择
   const [subEntityList, setSubEntityList] = useState<MetadataEntityPair[]>([]);
@@ -71,7 +74,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
    * 清除排序字段下拉列表，清除已选择排序字段
    */
   const handleDataTypeChange = (curUpdateType: DATA_SOURCE_TYPE) => {
-    payloadForm.clearFields(['mainEntityId', 'subEntityId', 'filterCondition', 'fields']);
+    payloadForm.clearFields(['mainTableName', 'subTableName', 'filterCondition', 'fields']);
 
     setMainEntityList([]);
     setSubEntityList([]);
@@ -85,17 +88,35 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const init = async () => {
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
     if (nodeData) {
+      const res = await getEntityListByApp(curAppId);
+
+      const curMainEntities = res.filter(
+        (item: MetadataEntityPair) =>
+          item.relationType !== RELATION_TYPE.SLAVE ||
+          (item.relationType === RELATION_TYPE.SLAVE &&
+            !item.relationshipTypes.includes(RELATIONSHIP_TYPE.SUBTABLE_ONE_TO_MANY))
+      );
+
       if (nodeData.updateType === DATA_SOURCE_TYPE.MAIN_TABLE || nodeData.updateType === DATA_SOURCE_TYPE.SUB_TABLE) {
-        if (!nodeData?.mainEntityId) {
+        if (!nodeData?.mainTableName) {
+          return;
+        }
+
+        const mainEntityId = curMainEntities.find(
+          (item: MetadataEntityPair) => item.tableName === nodeData.mainTableName
+        )?.entityId;
+
+        if (!mainEntityId) {
           return;
         }
 
         const fieldIds: string[] = [];
-        const res = await getEntityFieldsWithChildren(nodeData?.mainEntityId);
+        const res = await getEntityFieldsWithChildren(mainEntityId);
 
         const newSubEntityList = (res.childEntities || []).map((item: any) => {
           return {
             entityId: item.childEntityId,
+            tableName: item.childTableName,
             entityName: item.childEntityName
           };
         });
@@ -106,7 +127,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
           const fields = res.parentFields.map((item: AppEntityField) => {
             fieldIds.push(item.fieldId);
             return {
-              key: item.fieldId,
+              key: `${res.tableName}.${item.fieldName}`,
               title: item.displayName,
               fieldType: item.fieldType
             };
@@ -119,40 +140,42 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
           });
 
           if (nodeData.updateType === DATA_SOURCE_TYPE.MAIN_TABLE) {
+            res.parentFields.forEach((item: AppEntityField) => {
+              item.fieldKey = `${res.tableName}.${item.fieldName}`;
+            });
             setFieldDataList(res.parentFields);
           }
         }
 
         if (res.childEntities) {
           const subFields: TreeSelectDataType[] = [];
-          res.childEntities.forEach((item: ChildEntity) => {
-            const fields = item.childFields.map((item: AppEntityField) => {
+          res.childEntities.forEach((subEntity: ChildEntity) => {
+            const fields = subEntity.childFields.map((item: AppEntityField) => {
               fieldIds.push(item.fieldId);
               return {
-                key: item.fieldId,
+                key: `${subEntity.childTableName}.${item.fieldName}`,
                 title: item.displayName,
+                fieldName: item.fieldName,
                 fieldType: item.fieldType
               };
             });
             subFields.push({
-              key: item.childEntityId,
-              title: item.childEntityName,
+              key: subEntity.childTableName,
+              title: subEntity.childEntityName,
               children: fields
             });
           });
 
           setSubEntityFields(subFields);
 
-          const newValidationTypes = await getFieldCheckTypeApi(fieldIds);
-          setValidationTypes(newValidationTypes);
-
           if (nodeData.updateType === DATA_SOURCE_TYPE.SUB_TABLE) {
             const newFieldDataList: any[] = [];
 
             subFields
-              .find((item) => item.key == nodeData.subEntityId)
+              .find((subEntity) => subEntity.key == nodeData.subTableName)
               ?.children?.forEach((item) => {
                 newFieldDataList.push({
+                  fieldKey: `${nodeData.subTableName}.${item.fieldName}`,
                   fieldId: item.key,
                   displayName: item.title,
                   fieldType: item.fieldType
@@ -162,29 +185,56 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             setFieldDataList(newFieldDataList);
           }
         }
+
+        const newValidationTypes = await getFieldCheckTypeApi(fieldIds);
+        newValidationTypes.forEach((item: EntityFieldValidationTypes) => {
+          const fieldName =
+            [...res.parentFields].find((field: AppEntityField) => field.fieldId == item.fieldId)?.fieldName || '';
+          item.fieldKey = `${res.tableName}.${fieldName}`;
+
+          if (!fieldName) {
+            for (const subEntity of res.childEntities) {
+              const foundField = subEntity.childFields.find((field: AppEntityField) => field.fieldId == item.fieldId);
+              if (foundField) {
+                // 同时返回字段名和子表tableName
+                item.fieldKey = `${subEntity.childTableName}.${foundField.fieldName}`;
+              }
+            }
+          }
+        });
+        setValidationTypes(newValidationTypes);
       }
     }
   };
 
   const getEntityList = async (curDateType?: DATA_SOURCE_TYPE) => {
-    if (curDateType === DATA_SOURCE_TYPE.MAIN_TABLE || curDateType === undefined) {
+    if (
+      curDateType === DATA_SOURCE_TYPE.MAIN_TABLE ||
+      curDateType === DATA_SOURCE_TYPE.SUB_TABLE ||
+      curDateType === undefined
+    ) {
       // 从主表中查询  FORM
       const res = await getEntityListByApp(curAppId);
-      setMainEntityList(res);
-    }
+      const curMainEntities = res.filter(
+        (item: MetadataEntityPair) =>
+          item.relationType !== RELATION_TYPE.SLAVE ||
+          (item.relationType === RELATION_TYPE.SLAVE &&
+            !item.relationshipTypes.includes(RELATIONSHIP_TYPE.SUBTABLE_ONE_TO_MANY))
+      );
 
-    if (curDateType === DATA_SOURCE_TYPE.SUB_TABLE || curDateType === undefined) {
-      // 从子表中查询  SUBFORM
-      const res = await getEntityListByApp(curAppId);
-      setMainEntityList(res);
+      setMainEntityList(curMainEntities);
     }
   };
 
-  const handleMainEntityIdChange = async (curMainEntityId: string) => {
-    if (!curMainEntityId) {
+  const handleMainTableNameChange = async (curMainTableName: string) => {
+    const mainEntityId = mainEntityList.find((item) => item.tableName === curMainTableName)?.entityId;
+    if (!mainEntityId) {
       return;
     }
-    payloadForm.clearFields(['subEntityId', 'filterCondition', 'fields']);
+    if (!mainEntityId) {
+      return;
+    }
+    payloadForm.clearFields(['subTableName', 'filterCondition', 'fields']);
 
     setSubEntityList([]);
     setValidationTypes([]);
@@ -192,10 +242,11 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     setConditionFields([]);
 
     const fieldIds: string[] = [];
-    const res = await getEntityFieldsWithChildren(curMainEntityId);
+    const res = await getEntityFieldsWithChildren(mainEntityId);
     const newEntityList = (res.childEntities || []).map((item: any) => {
       return {
         entityId: item.childEntityId,
+        tableName: item.childTableName,
         entityName: item.childEntityName
       };
     });
@@ -206,7 +257,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       const fields = res.parentFields.map((item: AppEntityField) => {
         fieldIds.push(item.fieldId);
         return {
-          key: item.fieldId,
+          key: `${res.tableName}.${item.fieldName}`,
           title: item.displayName,
           fieldType: item.fieldType
         };
@@ -217,52 +268,67 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
         children: fields
       });
 
+      res.parentFields.forEach((item: AppEntityField) => {
+        item.fieldKey = `${res.tableName}.${item.fieldName}`;
+      });
+
       setFieldDataList(res.parentFields);
     }
 
     if (res.childEntities) {
       const subFields: TreeSelectDataType[] = [];
-      res.childEntities.forEach((item: ChildEntity) => {
-        const fields = item.childFields.map((item: AppEntityField) => {
+      res.childEntities.forEach((subEntity: ChildEntity) => {
+        const fields = subEntity.childFields.map((item: AppEntityField) => {
           fieldIds.push(item.fieldId);
           return {
-            key: item.fieldId,
+            key: `${subEntity.childTableName}.${item.fieldName}`,
             title: item.displayName,
             fieldType: item.fieldType
           };
         });
         subFields.push({
-          key: item.childEntityId,
-          title: item.childEntityName,
+          key: subEntity.childTableName,
+          title: subEntity.childEntityName,
           children: fields
         });
       });
 
       setSubEntityFields(subFields);
-
-      const newValidationTypes = await getFieldCheckTypeApi(fieldIds);
-      setValidationTypes(newValidationTypes);
     }
+
+    const newValidationTypes = await getFieldCheckTypeApi(fieldIds);
+    newValidationTypes.forEach((item: EntityFieldValidationTypes) => {
+      const fieldName =
+        [...res.parentFields].find((field: AppEntityField) => field.fieldId == item.fieldId)?.fieldName || '';
+      item.fieldKey = `${res.tableName}.${fieldName}`;
+
+      if (!fieldName) {
+        for (const subEntity of res.childEntities) {
+          const foundField = subEntity.childFields.find((field: AppEntityField) => field.fieldId == item.fieldId);
+          if (foundField) {
+            // 同时返回字段名和子表tableName
+            item.fieldKey = `${subEntity.childTableName}.${foundField.fieldName}`;
+          }
+        }
+      }
+    });
+    setValidationTypes(newValidationTypes);
   };
 
-  const handleSubEntityIdChange = (_curSubEntityId: string) => {
+  const handleSubTableNameChange = async (curSubTableName: string) => {
     payloadForm.clearFields(['filterCondition', 'fields']);
-
+    const subEntityId = subEntityList.find((item) => item.tableName === curSubTableName)?.entityId;
+    if (!subEntityId) {
+      return;
+    }
     setConditionFields([]);
 
-    const newFieldDataList: any[] = [];
+    const res = await getEntityFields({ entityId: subEntityId });
+    res.forEach((item: any) => {
+      item.fieldKey = `${curSubTableName}.${item.fieldName}`;
+    });
 
-    subEntityFields
-      .find((item) => item.key == _curSubEntityId)
-      ?.children?.forEach((item) => {
-        newFieldDataList.push({
-          fieldId: item.key,
-          displayName: item.title,
-          fieldType: item.fieldType
-        });
-      }) || [];
-
-    setFieldDataList(newFieldDataList);
+    setFieldDataList(res);
   };
 
   const conditionFieldsData = useMemo((): TreeSelectDataType[] => {
@@ -270,7 +336,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       return [mainEntityFields];
     }
     if (updateType === DATA_SOURCE_TYPE.SUB_TABLE) {
-      const curSubEntityFields = subEntityFields.find((item) => item.key === subEntityId);
+      const curSubEntityFields = subEntityFields.find((item) => item.key === subTableName);
       if (curSubEntityFields) {
         return [mainEntityFields, curSubEntityFields];
       }
@@ -278,7 +344,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     }
 
     return [];
-  }, [updateType, mainEntityFields, subEntityFields, subEntityId]);
+  }, [updateType, mainEntityFields, subEntityFields, subTableName]);
 
   const conditionFieldsForEditor = useMemo((): ConditionField[] => {
     if (updateType === DATA_SOURCE_TYPE.MAIN_TABLE) {
@@ -291,7 +357,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       );
     }
     if (updateType === DATA_SOURCE_TYPE.SUB_TABLE) {
-      const curSubEntityFields = subEntityFields.find((item) => item.key === subEntityId);
+      const curSubEntityFields = subEntityFields.find((item) => item.key === subTableName);
       if (curSubEntityFields) {
         return (
           (curSubEntityFields.children || [])?.map((item) => ({
@@ -306,7 +372,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     }
 
     return [];
-  }, [updateType, mainEntityFields, subEntityFields, subEntityId]);
+  }, [updateType, mainEntityFields, subEntityFields, subTableName]);
 
   const getInitData = () => {
     return { ...triggerEditorSignal.nodeData.value[node.id] };
@@ -337,13 +403,13 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                 </Grid.Col>
                 <Grid.Col span={19}>
                   <Form.Item
-                    field="mainEntityId"
+                    field="mainTableName"
                     disabled={!updateType}
                     rules={[{ required: true, message: '请选择' }]}
                   >
-                    <Select onChange={handleMainEntityIdChange} allowClear>
+                    <Select onChange={handleMainTableNameChange} allowClear>
                       {mainEntityList.map((item) => (
-                        <Select.Option key={item.entityId} value={item.entityId}>
+                        <Select.Option key={item.tableName} value={item.tableName}>
                           {item.entityName}
                         </Select.Option>
                       ))}
@@ -364,13 +430,13 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                 </Grid.Col>
                 <Grid.Col span={9}>
                   <Form.Item
-                    field="mainEntityId"
+                    field="mainTableName"
                     disabled={!updateType}
                     rules={[{ required: true, message: '请选择' }]}
                   >
-                    <Select allowClear onChange={handleMainEntityIdChange}>
+                    <Select allowClear onChange={handleMainTableNameChange}>
                       {mainEntityList.map((item) => (
-                        <Select.Option key={item.entityId} value={item.entityId}>
+                        <Select.Option key={item.tableName} value={item.tableName}>
                           {item.entityName}
                         </Select.Option>
                       ))}
@@ -382,13 +448,13 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                 </Grid.Col>
                 <Grid.Col span={9}>
                   <Form.Item
-                    field="subEntityId"
-                    disabled={!mainEntityId}
+                    field="subTableName"
+                    disabled={!mainTableName}
                     rules={[{ required: true, message: '请选择' }]}
                   >
-                    <Select allowClear onChange={handleSubEntityIdChange}>
+                    <Select allowClear onChange={handleSubTableNameChange}>
                       {subEntityList.map((item) => (
-                        <Select.Option key={item.entityId} value={item.entityId}>
+                        <Select.Option key={item.tableName} value={item.tableName}>
                           {item.entityName}
                         </Select.Option>
                       ))}

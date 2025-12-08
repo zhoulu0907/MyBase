@@ -118,8 +118,18 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
         //   TODO(mickey): 需要卞老师补充fieldName字段
         newValidationTypes.forEach((item: EntityFieldValidationTypes) => {
           const fieldName =
-            res.parentFields.find((field: AppEntityField) => field.fieldId == item.fieldId)?.fieldName || '';
+            [...res.parentFields].find((field: AppEntityField) => field.fieldId == item.fieldId)?.fieldName || '';
           item.fieldKey = `${res.tableName}.${fieldName}`;
+
+          if (!fieldName) {
+            for (const subEntity of res.childEntities) {
+              const foundField = subEntity.childFields.find((field: AppEntityField) => field.fieldId == item.fieldId);
+              if (foundField) {
+                // 同时返回字段名和子表tableName
+                item.fieldKey = `${subEntity.childTableName}.${foundField.fieldName}`;
+              }
+            }
+          }
         });
 
         setValidationTypes(newValidationTypes);

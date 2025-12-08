@@ -39,7 +39,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   const addType = Form.useWatch('addType', payloadForm);
   const mainTableName = Form.useWatch('mainTableName', payloadForm);
-  const subTableName = Form.useWatch('subTableName', payloadForm);
   const batchType = Form.useWatch('batchType', payloadForm);
   const dataNodeId = Form.useWatch('dataNodeId', payloadForm);
 
@@ -69,27 +68,28 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
         getFieldList(nodeData?.mainTableName, curMainEntities);
       }
       if (nodeData.addType === DATA_SOURCE_TYPE.SUB_TABLE) {
-        // 在子表中
-        if (nodeData?.mainTableName) {
-          const mainEntityId = curMainEntities.find(
-            (item: MetadataEntityPair) => item.tableName === nodeData.mainTableName
-          )?.entityId;
-
-          if (!mainEntityId) {
-            return;
-          }
-          const res = await getEntityFieldsWithChildren(mainEntityId);
-          const curSubEntityList = (res.childEntities || []).map((item: any) => {
-            return {
-              entityId: item.childEntityId,
-              tableName: item.childTableName,
-              entityName: item.childEntityName
-            };
-          });
-
-          setSubEntityList(curSubEntityList);
-          getFieldList(nodeData.subTableName, curSubEntityList);
+        if (!nodeData?.mainTableName) {
+          return;
         }
+
+        const mainEntityId = curMainEntities.find(
+          (item: MetadataEntityPair) => item.tableName === nodeData.mainTableName
+        )?.entityId;
+
+        if (!mainEntityId) {
+          return;
+        }
+        const res = await getEntityFieldsWithChildren(mainEntityId);
+        const curSubEntityList = (res.childEntities || []).map((item: any) => {
+          return {
+            entityId: item.childEntityId,
+            tableName: item.childTableName,
+            entityName: item.childEntityName
+          };
+        });
+
+        setSubEntityList(curSubEntityList);
+        getFieldList(nodeData.subTableName, curSubEntityList);
       }
     }
 
@@ -112,7 +112,13 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
 
     const res = await getEntityListByApp(curAppId);
-    setMainEntityList(res);
+    const curMainEntities = res.filter(
+      (item: MetadataEntityPair) =>
+        item.relationType !== RELATION_TYPE.SLAVE ||
+        (item.relationType === RELATION_TYPE.SLAVE &&
+          !item.relationshipTypes.includes(RELATIONSHIP_TYPE.SUBTABLE_ONE_TO_MANY))
+    );
+    setMainEntityList(curMainEntities);
 
     if (curAddType === DATA_SOURCE_TYPE.MAIN_TABLE || curAddType === undefined) {
       // 从主表中
