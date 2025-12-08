@@ -5,7 +5,7 @@
 import { useEffect, useState, useCallback, startTransition, useContext } from 'react';
 import { useLocation } from 'react-router-dom';
 import { type WorkflowLineEntity } from '@flowgram.ai/free-layout-editor';
-import { Form, Switch, Input, Select, Button, Message } from '@arco-design/web-react';
+import { Form, Switch, Input, Select, Button, Message, Divider } from '@arco-design/web-react';
 import { useClientContext } from '@flowgram.ai/free-layout-editor';
 import { IconClose } from '@arco-design/web-react/icon';
 import close from '../../assets/close.svg';
@@ -80,70 +80,76 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
   }, []);
   const handleSubmit = () => {
     form.validate(['name']).then((values) => {
-      const isValid = conditionGroups.every((group) =>
-        group.every((item) => {
-          if (item.op === Operator.IS_EMPTY || item.op === Operator.IS_NOT_EMPTY) {
-            return item.fieldScope && item.fieldUuid && item.op;
-          }
-          return item.fieldScope && item.fieldUuid && item.op && item.operatorType && item.value;
-        })
-      );
-      if (!isValid) {
-        form.setFields({
-          condition: {
-            error: {
-              message: '请检查条件规则是否填写完整',
-              type: 'error'
+      let fromIsDefault = form.getFieldValue('isDefault');
+
+      let isValid = false;
+      if (!fromIsDefault) {
+        isValid = conditionGroups.every((group) =>
+          group.every((item) => {
+            if (item.op === Operator.IS_EMPTY || item.op === Operator.IS_NOT_EMPTY) {
+              return item.fieldScope && item.fieldUuid && item.op;
             }
-          }
-        });
-        return;
-      } else {
+            return item.fieldScope && item.fieldUuid && item.op && item.operatorType && item.value;
+          })
+        );
+      }
+
+      if (!fromIsDefault) {
+        if (!isValid) {
+          form.setFields({
+            condition: {
+              error: {
+                message: '请检查条件规则是否填写完整',
+                type: 'error'
+              }
+            }
+          });
+          return;
+        }
         form.setFields({
           condition: {
             value: conditionGroups
           }
         });
-        const fromValue = form.getFieldsValue();
-        let priority = line.lineData?.priority;
-        if (!priority) {
-          const allLines = ctx.document.linesManager.getAllLines();
-          const conditionalBranchLines = allLines.filter((lineItem: any) =>
-            lineItem.info.from.includes(line.info.from)
-          );
-          const existingDefaultBranch = conditionalBranchLines.find(
-            (lineItem) => lineItem.lineData?.isDefault && lineItem.id !== line.id
-          );
-          const maxPriority = conditionalBranchLines.length;
+      }
+      const fromValue = form.getFieldsValue();
+      let priority = line.lineData?.priority;
+      if (!priority) {
+        const allLines = ctx.document.linesManager.getAllLines();
+        const conditionalBranchLines = allLines.filter((lineItem: any) => lineItem.info.from.includes(line.info.from));
+        const existingDefaultBranch = conditionalBranchLines.find(
+          (lineItem) => lineItem.lineData?.isDefault && lineItem.id !== line.id
+        );
+        const maxPriority = conditionalBranchLines.length;
 
-          if (fromValue.isDefault) {
-            if (existingDefaultBranch) {
-              existingDefaultBranch.lineData = {
-                ...existingDefaultBranch.lineData,
-                priority: maxPriority - 1,
-                isDefault: false
-              };
-            }
-            priority = maxPriority;
+        if (fromValue.isDefault) {
+          if (existingDefaultBranch) {
+            existingDefaultBranch.lineData = {
+              ...existingDefaultBranch.lineData,
+              priority: maxPriority - 1,
+              isDefault: false
+            };
+          }
+          priority = maxPriority;
+        } else {
+          if (existingDefaultBranch) {
+            existingDefaultBranch.lineData = {
+              ...existingDefaultBranch.lineData,
+              priority: maxPriority
+            };
+            priority = maxPriority - 1;
           } else {
-            if (existingDefaultBranch) {
-              existingDefaultBranch.lineData = {
-                ...existingDefaultBranch.lineData,
-                priority: maxPriority
-              };
-              priority = maxPriority - 1;
-            } else {
-              priority = conditionalBranchLines.length;
-            }
+            priority = conditionalBranchLines.length;
           }
         }
-        line.lineData = {
-          ...fromValue,
-          priority
-        };
-        Message.success('保存成功');
-        handleClose();
       }
+      line.lineData = {
+        ...fromValue,
+        priority
+      };
+
+      Message.success('保存成功');
+      handleClose();
     });
   };
   // 规则改变
@@ -388,14 +394,15 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
       !(rangeTypes.includes(item.fieldType as FieldType) && item.op === Operator.RANGE)
     );
   };
-
   useEffect(() => {
     getFormSummaryData();
+
     if (line.lineData) {
       form.setFieldsValue(line.lineData);
-      setConditionGroups(line.lineData.condition);
+      line.lineData.condition && setConditionGroups(line.lineData.condition);
     }
   }, []);
+
   return (
     <div
       style={{
@@ -434,98 +441,128 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
           >
             <Input placeholder="请输入分支名称" />
           </FormItem>
+
           <FormItem
-            rules={[{ required: true, message: '请填写条件规则' }]}
-            className={styles.directionColumn}
-            label="条件规则"
-            field="condition"
+            className={styles.conditionalFormItem}
+            shouldUpdate={(prevValues, curValues) => prevValues.isDefault !== curValues.isDefault}
           >
-            <div className={styles.conditionRule}>
-              {conditionGroups.map((group, groupIndex) => (
-                <div key={groupIndex} className={styles.conditionRuleItem}>
-                  {group.map((item, index) => {
-                    return (
-                      <div className={styles.conditionRuleItemLine} key={index}>
-                        <Select
-                          className={styles.ruleItemSelect}
-                          value={item.fieldScope}
-                          style={{ width: 152 }}
-                          onChange={(value) => handleRuleChange(groupIndex, index, 'fieldScope', value)}
-                        >
-                          <Option value={'pre_node'}>上个审批节点属性</Option>
-                          <Option value={'instance'}>流程实例属性</Option>
-                          <Option value={'entity'}>表单字段</Option>
-                        </Select>
-                        {/* 业务字段 */}
-                        <Select
-                          className={styles.ruleItemSelect}
-                          value={item.fieldUuid}
-                          style={{ width: 120 }}
-                          disabled={!item.fieldScope}
-                          onChange={(value) => handleRuleChange(groupIndex, index, 'fieldUuid', value, item)}
-                        >
-                          {renderFieldIdOptions(item).map((option: any) => (
-                            <Option key={option.value} value={option.value}>
-                              {option.label}
-                            </Option>
-                          ))}
-                        </Select>
-                        {/* 比较操作符 */}
-                        <Select
-                          className={styles.ruleItemSelect}
-                          value={item.op}
-                          style={{ width: 100 }}
-                          disabled={!item.fieldScope || !item.fieldUuid}
-                          onChange={(value) => handleRuleChange(groupIndex, index, 'op', value)}
-                        >
-                          {renderOpOptions(item)}
-                        </Select>
+            {(values) => {
+              if (values.isDefault) return null;
+              return (
+                <FormItem
+                  rules={[{ required: true, message: '请填写条件规则' }]}
+                  className={styles.directionColumn}
+                  label="条件规则"
+                  field="condition"
+                >
+                  <div key={'condition'} className={styles.conditionRule}>
+                    {conditionGroups.map((group, groupIndex) => (
+                      <>
+                        <div key={groupIndex} className={styles.conditionRuleItem}>
+                          {group.map((item, index) => {
+                            return (
+                              <div className={styles.conditionRuleItemLine} key={`conditionRuleItemLine_${index}`}>
+                                <Select
+                                  className={styles.ruleItemSelect}
+                                  value={item.fieldScope}
+                                  style={{ width: 142 }}
+                                  onChange={(value) => handleRuleChange(groupIndex, index, 'fieldScope', value)}
+                                >
+                                  <Option key={'pre_node'} value={'pre_node'}>
+                                    上个审批节点属性
+                                  </Option>
+                                  <Option key={'instance'} value={'instance'}>
+                                    流程实例属性
+                                  </Option>
+                                  <Option key={'entity'} value={'entity'}>
+                                    表单字段
+                                  </Option>
+                                </Select>
+                                {/* 业务字段 */}
+                                <Select
+                                  className={styles.ruleItemSelect}
+                                  value={item.fieldUuid}
+                                  style={{ width: 120 }}
+                                  disabled={!item.fieldScope}
+                                  onChange={(value) => handleRuleChange(groupIndex, index, 'fieldUuid', value, item)}
+                                >
+                                  {renderFieldIdOptions(item).map((option: any) => (
+                                    <Option key={option.value} value={option.value}>
+                                      {option.label}
+                                    </Option>
+                                  ))}
+                                </Select>
+                                {/* 比较操作符 */}
+                                <Select
+                                  className={styles.ruleItemSelect}
+                                  value={item.op}
+                                  style={{ width: 100 }}
+                                  disabled={!item.fieldScope || !item.fieldUuid}
+                                  onChange={(value) => handleRuleChange(groupIndex, index, 'op', value)}
+                                >
+                                  {renderOpOptions(item)}
+                                </Select>
 
-                        {item.op !== 'IS_EMPTY' && item.op !== 'IS_NOT_EMPTY' && (
-                          <>
-                            {/* 值的来源类型 */}
-                            <Select
-                              className={styles.ruleItemSelect}
-                              value={item.operatorType}
-                              style={{ width: 85 }}
-                              disabled={!item.fieldScope || !item.fieldScope || !item.op}
-                              onChange={(value) => handleRuleChange(groupIndex, index, 'operatorType', value)}
-                            >
-                              {item.fieldType !== FieldType.GEOGRAPHY && <Option value={'value'}>静态值</Option>}
-                              {renderVariables(item) && <Option value={'variables'}>变量</Option>}
+                                {item.op !== 'IS_EMPTY' && item.op !== 'IS_NOT_EMPTY' && (
+                                  <>
+                                    {/* 值的来源类型 */}
+                                    <Select
+                                      className={styles.ruleItemSelect}
+                                      value={item.operatorType}
+                                      style={{ width: 85 }}
+                                      disabled={!item.fieldScope || !item.fieldScope || !item.op}
+                                      onChange={(value) => handleRuleChange(groupIndex, index, 'operatorType', value)}
+                                    >
+                                      {item.fieldType !== FieldType.GEOGRAPHY && (
+                                        <Option value={'value'}>静态值</Option>
+                                      )}
+                                      {renderVariables(item) && <Option value={'variables'}>变量</Option>}
 
-                              {renderFormula(item) && <Option value={'formula'}>公式</Option>}
-                            </Select>
-                            {
-                              <RenderElement
-                                item={item}
-                                index={index}
-                                groupIndex={groupIndex}
-                                isDisabled={!item.fieldScope || !item.fieldUuid || !item.op || !item.operatorType}
-                                onRuleChange={handleRuleChange}
-                                onOpenFormula={() => openFormulaEditor(item, groupIndex, index)}
-                                formSummaryOptions={formSummaryOptions}
-                              />
-                            }
-                          </>
+                                      {renderFormula(item) && <Option value={'formula'}>公式</Option>}
+                                    </Select>
+                                    {
+                                      <RenderElement
+                                        item={item}
+                                        index={index}
+                                        groupIndex={groupIndex}
+                                        isDisabled={
+                                          !item.fieldScope || !item.fieldUuid || !item.op || !item.operatorType
+                                        }
+                                        onRuleChange={handleRuleChange}
+                                        onOpenFormula={() => openFormulaEditor(item, groupIndex, index)}
+                                        formSummaryOptions={formSummaryOptions}
+                                      />
+                                    }
+                                  </>
+                                )}
+                                <IconClose
+                                  onClick={() => handleDeleteRule(groupIndex, index)}
+                                  style={{ marginLeft: '8px', cursor: 'pointer' }}
+                                />
+                              </div>
+                            );
+                          })}
+                          <div className={styles.addAndRule} onClick={() => handleAddRule(groupIndex)}>
+                            +并且
+                          </div>
+                          <div className={styles.andLine}>且</div>
+                        </div>
+
+                        {groupIndex < conditionGroups.length - 1 && (
+                          <Divider orientation="center">
+                            <div className={styles.orLine}>或</div>
+                          </Divider>
                         )}
-                        <IconClose
-                          onClick={() => handleDeleteRule(groupIndex, index)}
-                          style={{ marginLeft: '8px', cursor: 'pointer' }}
-                        />
-                      </div>
-                    );
-                  })}
-                  <div className={styles.addAndRule} onClick={() => handleAddRule(groupIndex)}>
-                    +并且
-                  </div>
-                </div>
-              ))}
+                      </>
+                    ))}
 
-              <Button type="outline" onClick={handleAddGroup}>
-                + 或者
-              </Button>
-            </div>
+                    <Button type="outline" onClick={handleAddGroup}>
+                      + 或者
+                    </Button>
+                  </div>
+                </FormItem>
+              );
+            }}
           </FormItem>
         </Form>
       </div>
