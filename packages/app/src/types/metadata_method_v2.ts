@@ -9,7 +9,6 @@ export interface UpdateMethodV2Params {
 
 export interface DeleteMethodV2Params {
   id: string;
-  [key: string]: any;
 }
 
 export interface DetailMethodV2Params {
@@ -17,11 +16,11 @@ export interface DetailMethodV2Params {
 }
 
 export interface PageMethodV2Params {
-  data: any;
-  pageNo: number;
-  pageSize: number;
+  data?: any;
+  pageNo?: number;
+  pageSize?: number;
   sortField?: string;
   /** 排序方向，仅支持 'ASC' 或 'DESC' */
   sortDirection?: 'ASC' | 'DESC';
-  filters: any;
+  filters?: any;
 }

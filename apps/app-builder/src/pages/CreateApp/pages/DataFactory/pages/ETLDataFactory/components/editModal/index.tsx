@@ -69,11 +69,10 @@ const EditModal: React.FC<EditModalProps> = ({ initData, visible, onOk, onCancel
     // 在这里处理表单提交逻辑
     // 校验后提交数据
     // submitData(formData).then(() => closeModal());
-
     const req: UpdateWorkflowScheduleInfoReq = {
       applicationId: initData.applicationId,
       flowName: form.getFieldValue('flowName'),
-      workflowId: initData.workflowId,
+      flowUuid: initData.flowUuid,
       scheduleStrategy: form.getFieldValue('scheduleStrategy'),
       config: form.getFieldsValue(),
       enableStatus: form.getFieldValue('enableStatus') ? ETL_FLOW_STATUS.ENABLED : ETL_FLOW_STATUS.DISABLED

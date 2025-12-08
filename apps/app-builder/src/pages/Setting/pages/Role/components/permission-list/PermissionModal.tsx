@@ -6,12 +6,14 @@ import type { Permission } from '@onebase/platform-center';
 import { getAllPermissions } from '@onebase/platform-center';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styles from '../../index.module.less';
+import { RoleType } from '@onebase/platform-center/src/types/role';
 
 const Search = Input.Search;
 const CheckboxGroup = Checkbox.Group;
 
 interface PermissionConfigModalProps {
   visible: boolean;
+  type?: number;
   onCancel: () => void;
   onConfirm: (values: any) => void;
   confirmLoading?: boolean;
@@ -20,6 +22,7 @@ interface PermissionConfigModalProps {
 
 const PermissionConfigModal: React.FC<PermissionConfigModalProps> = ({
   visible,
+  type,
   onCancel,
   onConfirm,
   confirmLoading = false,
@@ -186,6 +189,7 @@ const PermissionConfigModal: React.FC<PermissionConfigModalProps> = ({
               style={{ marginRight: 8 }}
               indeterminate={headerCheckState.indeterminate}
               checked={headerCheckState.checked}
+              disabled={type === RoleType.SYSTEM}
               onChange={(checked) => handleHeaderCheckAllChange(checked as boolean)}
             />
             权限功能
@@ -199,6 +203,7 @@ const PermissionConfigModal: React.FC<PermissionConfigModalProps> = ({
               style={{ marginRight: 8 }}
               indeterminate={indeterminateMap[record.id]}
               checked={checkAllMap[record.id]}
+              disabled={type === RoleType.SYSTEM}
               onChange={(checked) => handleCheckAllChange(record.id, checked as boolean)}
             />
             {record.name}
@@ -213,6 +218,7 @@ const PermissionConfigModal: React.FC<PermissionConfigModalProps> = ({
         render: (_, record) => (
           <div>
             <CheckboxGroup
+              disabled={type === RoleType.SYSTEM}
               value={selectedActions[record.id] || []}
               onChange={(value) => handleActionChange(record.id, value as string[])}
               options={(record.children || []).map((action) => ({

@@ -1,3 +1,4 @@
+import { previewETLFlowData } from '@onebase/app';
 import { etlEditorSignal, ETLNodeType } from '@onebase/common';
 
 /**
@@ -125,4 +126,49 @@ export const setNodeDataAndResetDownstream = (
 
   setNodeData(curNodeId, payload);
   clearDownStreamNodeConfig(curNodeId, graphDataValue, nodeDataValue);
+};
+
+export interface PreviewData {
+  columns: any[];
+  data: any[];
+}
+
+export const handlePreviewData = async (
+  graphData: any,
+  nodeData: any,
+  curNode: any,
+  setPreviewData: (data: any) => void
+) => {
+  const nodes = graphData.nodes?.map((node: any) => {
+    return {
+      id: node.id,
+      title: nodeData[node.id].title || '',
+      description: nodeData[node.id].description || '',
+      type: node.type,
+      config: nodeData[node.id].config || {},
+      output: nodeData[node.id].output || {},
+      meta: node.meta || {}
+    };
+  });
+
+  const edges = graphData.edges?.map((edge: any) => {
+    return {
+      sourceNodeId: edge.sourceNodeID,
+      targetNodeId: edge.targetNodeID
+    };
+  });
+
+  const res = await previewETLFlowData({
+    nodeId: curNode.id,
+    workflow: {
+      nodes: nodes,
+      edges: edges
+    }
+  });
+
+  console.log('res: ', res);
+
+  if (res) {
+    setPreviewData(res);
+  }
 };

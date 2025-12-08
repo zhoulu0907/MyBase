@@ -9,8 +9,8 @@ import {
   AgentPage,
   AgentCreate
   } from '../types/app_bpm';
-export const getByBusinessId = (params:GetByBusinessId) => {
-  return bpmService.get('/design/get-by-business-id', params);
+export const getByBusinessUuid = (params:GetByBusinessId) => {
+  return bpmService.get('/design/get-by-business-uuid', params);
 };
 export const getDataById = (id: {id: string}) => {
   return bpmService.get('/design/get', id);

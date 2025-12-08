@@ -11,10 +11,10 @@ import {
 import { etlEditorSignal } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
 import CodeMirror, { EditorView } from '@uiw/react-codemirror';
+import { cloneDeep } from 'lodash-es';
 import React, { useEffect, useState } from 'react';
 import { getSourceNodeIdsByTarget } from '../utils';
 import styles from './index.module.less';
-import { cloneDeep } from 'lodash-es';
 
 type SQLConfigProps = {
   onRegisterSave?: (fn: () => void) => void;
@@ -83,7 +83,6 @@ const SQLConfig: React.FC<SQLConfigProps> = ({ onRegisterSave }) => {
         }
       }
       setFieldList(tmpFieldList);
-      console.log('xxxx: ', tmpSqlVariables);
       setSqlVariables(tmpSqlVariables);
     }
   }, [nodeData, curNode]);
@@ -107,13 +106,20 @@ const SQLConfig: React.FC<SQLConfigProps> = ({ onRegisterSave }) => {
       fields: []
     };
 
-    console.log('save:  ', curNode.value.id, '-', sqlValue);
+    console.log('payload: ', payload);
     setNewPayload(payload);
   }, [showSQLValue, sqlVariables]);
 
   const handleSaveInner = async () => {
     // Get SQL node output
     const nodes = graphData.value.nodes?.map((node: any) => {
+      if (node.id === curNode.value.id) {
+        return {
+          description: nodeData.value[node.id].description || '',
+          meta: node.meta || {},
+          ...newPayload
+        };
+      }
       return {
         id: node.id,
         title: nodeData.value[node.id].title || '',
@@ -125,12 +131,15 @@ const SQLConfig: React.FC<SQLConfigProps> = ({ onRegisterSave }) => {
       };
     });
 
+    // 将当前 node 的 payload 数据替换为最新生成的数据
+
     const edges = graphData.value.edges?.map((edge: any) => {
       return {
         sourceNodeId: edge.sourceNodeID,
         targetNodeId: edge.targetNodeID
       };
     });
+
     const res = await getETLFlowData({
       nodeId: curNode.value.id,
       workflow: {

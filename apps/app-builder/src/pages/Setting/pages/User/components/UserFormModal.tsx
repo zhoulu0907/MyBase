@@ -1,8 +1,8 @@
 import { emailValidator, phoneValidator } from '@/utils/validator';
-import { Button, Form, Grid, Input, Message, Modal, Switch, TreeSelect } from '@arco-design/web-react';
-import { hasPermission, TENANT_DEPT_QUERY } from '@onebase/common';
+import { Button, Form, Grid, Input, Message, Modal, Space, Switch, TreeSelect } from '@arco-design/web-react';
+import { UploadAvatarComponent, hasPermission, TENANT_DEPT_QUERY } from '@onebase/common';
 import type { SimpleRoleVO, UserVO } from '@onebase/platform-center';
-import { createUser, getUser, StatusEnum, updateUser } from '@onebase/platform-center';
+import { createUser, getUser, StatusEnum, updateUser, uploadFile } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
 
 const Row = Grid.Row;
@@ -35,12 +35,14 @@ export default function UserFormModal({
   const [loading, setLoading] = React.useState(false);
   const [statusCheckedValue, setStatusCheckedValue] = useState(false);
   const [hasDeptQueryPermission, setHasDeptQueryPermission] = useState(true);
+  const [avatarUrl, setAvatarUrl] = useState<string>();
 
   useEffect(() => {
     if (visible) {
       form.resetFields();
       if (initialValues) {
         form.setFieldsValue(initialValues);
+        setAvatarUrl(initialValues.avatar);
         setStatusCheckedValue(initialValues.status === StatusEnum.ENABLE ? true : false);
       } else {
         // 创建时用户状态默认为开启
@@ -76,7 +78,11 @@ export default function UserFormModal({
 
     try {
       const values = await form.validate();
-      const params = { ...values, status: statusCheckedValue ? StatusEnum.ENABLE : StatusEnum.DISABLE };
+      const params = {
+        ...values,
+        avatar: avatarUrl,
+        status: statusCheckedValue ? StatusEnum.ENABLE : StatusEnum.DISABLE
+      };
       setLoading(true);
       if (mode === 'create') {
         await createUser(params);
@@ -92,6 +98,8 @@ export default function UserFormModal({
       setLoading(false);
     }
   };
+
+  const defaultNickName = form.getFieldValue('nickname')?.charAt(0) || 'U';
 
   return (
     <Modal
@@ -117,6 +125,21 @@ export default function UserFormModal({
     >
       <Form form={form} layout="vertical" autoComplete="off" disabled={isDetail}>
         <Row gutter={24}>
+          <Col span={24}>
+            <Form.Item label="头像" field="avatar">
+              <Space direction="vertical" style={{ margin: 0 }}>
+                <UploadAvatarComponent
+                  getUploadFile={uploadFile}
+                  avatarUrl={avatarUrl as string}
+                  onUpdateUrl={setAvatarUrl}
+                  defaultPlaceholder={defaultNickName}
+                  buttonName={mode === 'edit' ? '修改头像' : '上传头像'}
+                  size={{ width: 80, height: 80, aspect: 1 / 1 }}
+                  defaultAvatarSize={40}
+                />
+              </Space>
+            </Form.Item>
+          </Col>
           <Col span={12}>
             <Form.Item label="姓名" field="nickname" rules={[{ required: true, message: '请输入姓名' }]}>
               <Input placeholder="请输入" />

@@ -5,9 +5,10 @@ import styles from './index.module.less';
 interface IUserProfileAvatar {
   adminInfo: IAdminInfo | null;
   avatarUrl?: string;
+  size?: number;
 }
 
-const UserProfileAvatar: React.FC<IUserProfileAvatar> = ({ adminInfo, avatarUrl }) => {
+const UserProfileAvatar: React.FC<IUserProfileAvatar> = ({ adminInfo, avatarUrl, size = 32 }) => {
   const defaultNickName = adminInfo?.nickname?.charAt(0) || 'U';
 
   const getAvatar = () => {
@@ -21,7 +22,7 @@ const UserProfileAvatar: React.FC<IUserProfileAvatar> = ({ adminInfo, avatarUrl 
   };
 
   return (
-    <Avatar size={32} className={adminInfo?.avatar ? '' : styles.avatarBackground}>
+    <Avatar size={size} className={adminInfo?.avatar ? '' : styles.avatarBackground}>
       {getAvatar()}
     </Avatar>
   );

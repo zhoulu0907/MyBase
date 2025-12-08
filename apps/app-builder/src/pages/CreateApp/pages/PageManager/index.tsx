@@ -19,6 +19,7 @@ import {
   menuSignal,
   MenuType,
   PageType,
+  RELATION_TYPE,
   RootParentPage,
   updateApplicationMenu,
   updateApplicationMenuOrder,
@@ -37,18 +38,19 @@ import {
 } from '@onebase/app';
 import { pagesRuntimeSignal } from '@onebase/common';
 import { EDITOR_TYPES } from '@onebase/ui-kit';
+import { currentEditorSignal } from '@onebase/ui-kit/src/signals/current_editor';
 import { useSignals } from '@preact/signals-react/runtime';
 import { debounce } from 'lodash-es';
 import { useCallback, useEffect, useState, type FC } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
+import { RELATIONSHIP_TYPE } from '../DataFactory/utils/types';
 import CopyModal from './components/Modals/CopyModal';
 import CreateModal from './components/Modals/CreateModal';
 import RenameModal from './components/Modals/RenameModal';
 import MyMenuItem from './components/MyMenuItem';
 import TaskCenterPage from './components/TaskCenter/TaskCenterPage';
 import TaskCenterSide from './components/TaskCenter/taskTreeSide';
-import { currentEditorSignal } from '@onebase/ui-kit/src/signals/current_editor';
 import styles from './index.module.less';
 
 const TreeNode = Tree.Node;
@@ -219,10 +221,19 @@ const PageManagerPage: FC = () => {
   const getEntityList = async () => {
     const appId: string = curAppId;
     const res: MetadataEntityPair[] = await getEntityListByApp(appId);
-    const entityOptions = res.map((entity) => ({
-      label: entity.entityName,
-      value: entity.entityId
-    }));
+
+    const entityOptions = res
+      .filter(
+        (entity) =>
+          // 过滤子表
+          entity.relationType !== RELATION_TYPE.SLAVE ||
+          (entity.relationType === RELATION_TYPE.SLAVE &&
+            !entity.relationshipTypes.includes(RELATIONSHIP_TYPE.SUBTABLE_ONE_TO_MANY))
+      )
+      .map((entity) => ({
+        label: entity.entityName,
+        value: entity.entityUuid
+      }));
     setEntityListOptions(entityOptions);
   };
 
@@ -339,7 +350,7 @@ const PageManagerPage: FC = () => {
         menuName: createForm.getFieldValue('menuName'),
         menuType: MenuType.PAGE,
         menuIcon: createForm.getFieldValue('menuIcon'),
-        entityId: visibleCreateForm === 'page' ? createForm.getFieldValue('entityId') : ''
+        entityUuid: visibleCreateForm === 'page' ? createForm.getFieldValue('entityUuid') : ''
       };
 
       if (visibleCreateForm === 'page') {

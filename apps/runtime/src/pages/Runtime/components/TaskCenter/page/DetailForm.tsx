@@ -73,7 +73,7 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
   const [newCompents, setNewCompents] = useState<any>();
 
   const pageComponentSchemas = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value;
-  const fieldPerm = detailData?.formData?.fieldPerm;
+  const fieldPerm = detailData?.formData?.fieldPermMap;
 
   useImperativeHandle(ref, () => ({
     getFormData: () => {
@@ -98,10 +98,11 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
       } = {};
       Object.keys(pageComponentSchemas).forEach((key) => {
         const originalItem = pageComponentSchemas[key];
+        const secondDataTableName = originalItem?.config?.dataField?.[0];
         const secondDataField = originalItem?.config?.dataField?.[1];
         let newStatus = originalItem?.config?.status;
         if (secondDataField) {
-          const nodeConfig = fieldPerm?.[secondDataField];
+          const nodeConfig = fieldPerm?.[secondDataTableName]?.[secondDataField];
           const formConfig = originalItem?.config?.status;
           const viewMode = ViewModeMap[detailData?.pageView?.viewMode as keyof typeof ViewModeMap];
           newStatus = parseStatus(nodeConfig, formConfig, viewMode);
@@ -115,6 +116,7 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
           }
         };
       });
+      console.log(updatedData)
       setNewCompents(updatedData);
     }
   };
@@ -123,38 +125,49 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
     const res = detailData?.formData;
     const formValues: Record<string, any> = {};
     if (res && res.data) {
-      const fieldIdNameMap: Record<string, string> = {};
-      (mainMetaDataFields.value || []).forEach((field: AppEntityField) => {
-        fieldIdNameMap[field.fieldName] = field.fieldId;
-      });
-      const dataItem = Array.isArray(res.data) ? res.data[0] : res.data;
+      const dataItem = res?.data;
+      //   主表渲染逻辑
       if (dataItem && typeof dataItem === 'object') {
         Object.entries(dataItem).forEach(([fieldName, value]) => {
-          const fieldID = fieldIdNameMap[fieldName];
-          if (fieldID) {
-            formValues[fieldID] = value;
-          }
+          formValues[fieldName] = value;
         });
       }
-    }
 
-    if (res && res.subEntities) {
+      //   子表渲染逻辑
+
       const componentSchemas = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value;
-      for (const subEntity of res.subEntities) {
-        const targetSubEntity = subEntities.value.find((ele: any) => ele.childEntityId == subEntity.subEntityId);
-        if (targetSubEntity) {
+
+      for (const subEntity of subEntities.value) {
+        console.log('subEntity: ', subEntity);
+        // 判断 res 对象内的 key 是否等于 subEntity.childTableName
+
+        if (
+          dataItem &&
+          subEntity.childTableName &&
+          Object.prototype.hasOwnProperty.call(dataItem, subEntity.childTableName)
+        ) {
+          console.log(`找到子表 ${subEntity.childTableName} 数据:`, dataItem[subEntity.childTableName]);
+
+          const subData = dataItem[subEntity.childTableName];
+
           Object.entries(componentSchemas).forEach(([key, schema]: [string, any]) => {
-            if (key.startsWith(FORM_COMPONENT_TYPES.SUB_TABLE) && schema?.config?.subTable == subEntity.subEntityId) {
-              pagesRuntimeSignal.setSubTableDataLength(key, (subEntity.subData || []).length);
-              for (let idx = 0; idx < (subEntity.subData || []).length; idx++) {
-                const keys = Object.keys((subEntity.subData || [])[idx]);
+            if (
+              key.startsWith(FORM_COMPONENT_TYPES.SUB_TABLE) &&
+              schema?.config?.subTable == subEntity.childEntityUuid
+            ) {
+              pagesRuntimeSignal.setSubTableDataLength(key, (subData || []).length);
+
+              for (let idx = 0; idx < (subData || []).length; idx++) {
+                const keys = Object.keys((subData || [])[idx]);
                 for (let ele in componentSchemas) {
                   const config = componentSchemas[ele]?.config;
                   const fieldId = config?.dataField?.[1];
                   if (keys.includes(fieldId)) {
-                    formValues[`${key}.${idx}.${fieldId}`] = subEntity.subData[idx]?.[fieldId];
+                    formValues[`${key}.${idx}.${fieldId}`] = subData[idx]?.[fieldId];
                   }
                 }
+                // 补充id
+                formValues[`${key}.${idx}.id`] = subData[idx]?.id;
               }
             }
           });
@@ -162,7 +175,7 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
       }
     }
 
-    console.log('formValues: ', formValues, form);
+    console.log('formValues: ', formValues);
     form.setFieldsValue(formValues);
   };
   // 提交表单
@@ -172,15 +185,16 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
     const subFormData = [] as any;
     Object.entries(fields).forEach(([key, value]) => {
       // 处理主表逻辑
-      const field = (mainMetaDataFields.value || []).find((f: AppEntityField) => f.fieldId == key);
+      const field = (mainMetaDataFields.value || []).find((f: AppEntityField) => f.fieldName == key);
       if (field) {
         console.log('field: ', field);
-        formData[field.fieldId] = value;
+        formData[field.fieldName] = value||'';
       }
 
       if (key.startsWith(FORM_COMPONENT_TYPES.SUB_TABLE)) {
-        const subEntityId = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[key]?.config
+        const subEntityUuid = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[key]?.config
           ?.subTable;
+        const subTableName = subEntities.value.find((ele: any) => ele.childEntityUuid == subEntityUuid)?.childTableName;
 
         //   过滤空行
         const subTableRows = [] as any;
@@ -196,16 +210,15 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
           }
           subTableRows.push(temp);
         }
-        subFormData.push({
-          subEntityId: subEntityId,
-          subData: subTableRows
-        });
+        subFormData[subTableName] = subTableRows;
+
       }
     });
+    console.log('formData:   ', formData);
+    console.log('subFormData:   ', subFormData);
     const dataObj = {
-      entityId: mainMetaData,
-      data: formData,
-      subEntities: subFormData
+      ...formData,
+      ...subFormData
     };
     return dataObj;
   };

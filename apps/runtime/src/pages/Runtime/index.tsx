@@ -251,7 +251,7 @@ const Runtime: React.FC = () => {
             <TaskCenterPage curMenuCode={curMenu.value.menuCode} />
           ) : (
             <div className={styles.contentBody}>
-              <PreviewContainer menuId={curMenu.value?.id || ''} runtime={true} />
+              <PreviewContainer menuId={curMenu.value?.id || ''} runtime={true} menuUuid={curMenu.value?.menuUuid} />
             </div>
           )}
         </Content>

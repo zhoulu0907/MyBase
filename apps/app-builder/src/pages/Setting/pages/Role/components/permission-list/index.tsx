@@ -8,9 +8,10 @@ import PermissionConfigModal from './PermissionModal';
 
 interface PermissionListProps {
   selectedRoleId?: number;
+  type?: number;
 }
 
-const PermissionList: React.FC<PermissionListProps> = ({ selectedRoleId }) => {
+const PermissionList: React.FC<PermissionListProps> = ({ selectedRoleId, type }) => {
   const [permissions, setPermissions] = useState<Permission[]>([]);
   const [configModalVisible, setConfigModalVisible] = useState(false);
   const [configLoading, setConfigLoading] = useState(false);
@@ -159,6 +160,7 @@ const PermissionList: React.FC<PermissionListProps> = ({ selectedRoleId }) => {
           onConfirm={handleConfigConfirm}
           configuredPermissions={permissions}
           confirmLoading={configLoading}
+          type={type}
         />
       )}
     </>
