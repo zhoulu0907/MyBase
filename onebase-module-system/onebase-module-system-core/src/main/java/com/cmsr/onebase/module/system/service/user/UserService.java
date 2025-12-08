@@ -238,7 +238,7 @@ public interface UserService {
      * @param status 状态
      * @return 用户们
      */
-    List<AdminUserDO> getUserListByStatus(Integer status, String userNickName, Long deptId);
+    List<AdminUserDO> getUserListByStatus(Integer status, String userNickName);
 
     /**
      * 获取所有平台管理员列表
@@ -314,4 +314,12 @@ public interface UserService {
     void checkCorpAdminUser(AdminUserDO corpAdminReqVO);
 
     Map<Long, Integer> getCorpExistUserCountByCorpIds(List<Long> corpIds);
+
+    /**
+     * 获取指定部门的直属用户简要信息（不分页）
+     *
+     * @param
+     * @return 用户简要信息分页列表
+     */
+    List<AdminUserDO> getUserListByStatusAndDeptId(Integer status, Long deptId);
 }
