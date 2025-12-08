@@ -47,7 +47,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -1146,6 +1149,22 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
                 .map(MetadataEntityRelationshipDO::getTargetEntityUuid)
                 .collect(Collectors.toSet());
 
+        // 构建实体UUID到关系类型的映射
+        Map<String, Set<String>> entityRelationshipTypesMap = new HashMap<>();
+        for (MetadataEntityRelationshipDO rel : relationships) {
+            String type = rel.getRelationshipType();
+            if (type != null) {
+                // 作为源实体
+                if (rel.getSourceEntityUuid() != null) {
+                    entityRelationshipTypesMap.computeIfAbsent(rel.getSourceEntityUuid(), k -> new HashSet<>()).add(type);
+                }
+                // 作为目标实体
+                if (rel.getTargetEntityUuid() != null) {
+                    entityRelationshipTypesMap.computeIfAbsent(rel.getTargetEntityUuid(), k -> new HashSet<>()).add(type);
+                }
+            }
+        }
+
         // 遍历实体列表，设置关系类型
         for (SimpleEntityRespVO entity : result) {
             String uuid = entity.getEntityUuid();
@@ -1162,6 +1181,9 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
                 // 都没有 -> 无关系
                 entity.setRelationType("NONE");
             }
+            
+            // 设置关联关系类型列表
+            entity.setRelationshipTypes(entityRelationshipTypesMap.getOrDefault(uuid, new HashSet<>()));
         }
 
         log.info("查询应用实体列表完成，应用ID: {}, 实体数量: {}", appId, result.size());

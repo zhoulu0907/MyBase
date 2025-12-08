@@ -680,15 +680,7 @@ public class BpmDetailServiceImpl implements BpmDetailService {
 
         // 填充实体数据
         formData.setTableName(tableName);
-
         formData.setData(respVO.getGlobalRawMap());
-
-        formData.setFieldType(new HashMap<>());
-
-        // 填充实体字段类型
-        respVO.getFieldValueMap().forEach((fieldName, fieldValue) -> {
-            formData.getFieldType().put(fieldName, fieldValue.getFieldTypeEnum().getCode());
-        });
 
         vo.setFormData(formData);
     }

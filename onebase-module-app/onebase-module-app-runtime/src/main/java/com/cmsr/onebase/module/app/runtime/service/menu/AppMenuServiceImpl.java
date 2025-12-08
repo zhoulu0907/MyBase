@@ -5,8 +5,10 @@ import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.security.runtime.RTSecurityContext;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthViewRepository;
 import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
+import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageSetRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthPermissionDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppMenuDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetDO;
 import com.cmsr.onebase.module.app.core.dto.auth.UserRoleDTO;
 import com.cmsr.onebase.module.app.core.enums.menu.MenuTypeEnum;
 import com.cmsr.onebase.module.app.core.impl.auth.AppAuthSecurityApiImpl;
@@ -39,6 +41,9 @@ public class AppMenuServiceImpl implements AppMenuService {
 
     @Resource
     private AppMenuRepository appMenuRepository;
+
+    @Resource
+    private AppPageSetRepository appPageSetRepository;
 
     @Autowired
     private AppAuthRoleProvider appAuthRoleProvider;
@@ -98,28 +103,47 @@ public class AppMenuServiceImpl implements AppMenuService {
     }
 
     private List<MenuListRespVO> convertToMenuListRespVOS(List<AppMenuDO> menuDOS) {
+        // 批量查询 pagesetType
+        Long applicationId = ApplicationManager.getApplicationId();
+        List<String> menuUuids = menuDOS.stream().map(AppMenuDO::getMenuUuid).collect(Collectors.toList());
+        Map<String, Integer> pagesetTypeMap = new HashMap<>();
+        if (CollectionUtils.isNotEmpty(menuUuids)) {
+            List<AppResourcePagesetDO> pagesets = appPageSetRepository.findByMenuUuids(applicationId, menuUuids);
+            if (CollectionUtils.isNotEmpty(pagesets)) {
+                pagesetTypeMap = pagesets.stream()
+                        .filter(p -> p.getMenuUuid() != null && p.getPageSetType() != null)
+                        .collect(Collectors.toMap(AppResourcePagesetDO::getMenuUuid, AppResourcePagesetDO::getPageSetType, (v1, v2) -> v1));
+            }
+        }
+
         List<MenuListRespVO> menuListRespList = new ArrayList<>();
+        final Map<String, Integer> finalPagesetTypeMap = pagesetTypeMap;
         // 把第一层的菜单添加到列表中
         LinkedList<MenuListRespVO> levelOneMenus = menuDOS.stream()
                 .filter(v -> MenuUtils.ROOT_MENU_UUID.equals(v.getParentUuid()))
-                .map(v -> BeanUtils.toBean(v, MenuListRespVO.class))
+                .map(v -> {
+                    MenuListRespVO vo = BeanUtils.toBean(v, MenuListRespVO.class);
+                    vo.setPagesetType(finalPagesetTypeMap.get(v.getMenuUuid()));
+                    return vo;
+                })
                 .collect(Collectors.toCollection(LinkedList::new));
         menuListRespList.addAll(levelOneMenus);
         // 递归实现每个菜单的子菜单
         for (MenuListRespVO respVO : menuListRespList) {
-            LinkedList<MenuListRespVO> children = recursiveGetChildren(respVO.getMenuUuid(), menuDOS);
+            LinkedList<MenuListRespVO> children = recursiveGetChildren(respVO.getMenuUuid(), menuDOS, finalPagesetTypeMap);
             respVO.setChildren(children);
         }
         return menuListRespList;
     }
 
-    private LinkedList<MenuListRespVO> recursiveGetChildren(String parentUuid, List<AppMenuDO> menuDOS) {
+    private LinkedList<MenuListRespVO> recursiveGetChildren(String parentUuid, List<AppMenuDO> menuDOS, Map<String, Integer> pagesetTypeMap) {
         LinkedList<MenuListRespVO> children = new LinkedList<>();
         for (AppMenuDO menuDO : menuDOS) {
             if (Objects.equals(menuDO.getParentUuid(), parentUuid)) {
                 // 只有父菜单的uuid等于当前菜单的父菜单的uuid时，才添加子菜单，继续递归
                 MenuListRespVO child = BeanUtils.toBean(menuDO, MenuListRespVO.class);
-                child.setChildren(recursiveGetChildren(child.getMenuUuid(), menuDOS));
+                child.setPagesetType(pagesetTypeMap.get(menuDO.getMenuUuid()));
+                child.setChildren(recursiveGetChildren(child.getMenuUuid(), menuDOS, pagesetTypeMap));
                 children.add(child);
             }
         }

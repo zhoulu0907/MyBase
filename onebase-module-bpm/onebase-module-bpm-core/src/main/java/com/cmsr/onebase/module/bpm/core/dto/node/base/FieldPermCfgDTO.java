@@ -33,17 +33,20 @@ public class FieldPermCfgDTO {
     @Schema(description = "字段配置视图")
     @Data
     public static class FieldConfigDTO {
-        /**
-         * 字段ID
-         */
-        @NotNull(message = "字段UUID不能为空")
-        private String fieldUuid;
+        @NotBlank(message = "表名不能为空")
+        private String tableName;
 
         /**
          * 字段名
          */
         @NotBlank(message = "字段名不能为空")
         private String fieldName;
+
+        /**
+         * 字段显示名
+         */
+        @NotBlank(message = "字段显示名不能为空")
+        private String fieldDisplayName;
 
         /**
          * 字段权限类型
