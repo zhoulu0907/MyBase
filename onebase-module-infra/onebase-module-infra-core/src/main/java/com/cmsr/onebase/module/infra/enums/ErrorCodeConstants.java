@@ -59,5 +59,6 @@ public interface ErrorCodeConstants {
     ErrorCode DATA_SOURCE_CONFIG_NOT_EXISTS = new ErrorCode(1_001_007_000, "数据源配置不存在");
     ErrorCode DATA_SOURCE_CONFIG_NOT_OK = new ErrorCode(1_001_007_001, "数据源配置不正确，无法进行连接");
 
+    ErrorCode AUTH_LOGIN_APP_DELETE_OR_DISABLE = new ErrorCode(1_002_025_012, "该应用已被删除或禁用，暂时无法登录。");
 
 }

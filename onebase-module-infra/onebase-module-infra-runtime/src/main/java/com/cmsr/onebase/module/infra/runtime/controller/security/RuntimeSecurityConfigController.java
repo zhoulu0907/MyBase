@@ -1,21 +1,13 @@
 package com.cmsr.onebase.module.infra.runtime.controller.security;
 
-import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
-import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigBatchUpdateReqVO;
-import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigCategoryRespVO;
-import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigItemRespVO;
-import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigReqVO;
+import com.cmsr.onebase.module.infra.dal.vo.security.*;
 import com.cmsr.onebase.module.infra.service.security.SecurityConfigService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.annotation.security.PermitAll;
-import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,12 +30,12 @@ public class RuntimeSecurityConfigController {
     @Resource
     private SecurityConfigService securityConfigService;
 
-
-    @PostMapping("/check-scenarios-captcha")
-    @Operation(summary = "检查登录验证码", description = "返回值true 需要验证码,false 不需要")
+    @PostMapping("/get-tenant-items")
+    @Operation(summary = "根据分类IDS获取获取租户的安全配置项（优先通过AppId获取租户ID）")
     @PermitAll
     @TenantIgnore
-    public CommonResult<Boolean> checkScenariosCaptcha(SecurityConfigReqVO configReqVO) {
-        return success(securityConfigService.checkScenariosCaptcha(configReqVO));
+    public CommonResult<List<SecurityConfigCategoryGroupRespVO>> getTenantConfigItems(@RequestBody SecurityConfigGetReqVO getReqVO) {
+        List<SecurityConfigCategoryGroupRespVO> items = securityConfigService.getTenantConfigItemsByCategoryCodes(getReqVO);
+        return success(items);
     }
 }

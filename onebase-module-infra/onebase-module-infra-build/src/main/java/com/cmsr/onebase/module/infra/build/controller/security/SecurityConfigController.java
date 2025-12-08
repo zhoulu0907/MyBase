@@ -57,14 +57,13 @@ public class SecurityConfigController {
     }
 
 
-    @GetMapping("/get-tenant-items")
+    @PostMapping("/get-tenant-items")
     @Operation(summary = "根据分类IDS获取获取租户的安全配置项（优先通过AppId获取租户ID）")
     @PermitAll
     @TenantIgnore
-    public CommonResult<List<SecurityConfigItemRespVO>> getTenantConfigItems(SecurityConfigGetReqVO getReqVO) {
-        // Long tenantId = TenantContextHolder.getTenantId();
-        // List<SecurityConfigItemRespVO> items = securityConfigService.getTenantConfigItems(tenantId, categoryId);
-        return success(null);
+    public CommonResult<List<SecurityConfigCategoryGroupRespVO>> getTenantConfigItems( @RequestBody SecurityConfigGetReqVO getReqVO) {
+         List<SecurityConfigCategoryGroupRespVO> items = securityConfigService.getTenantConfigItemsByCategoryCodes(getReqVO);
+        return success(items);
     }
 
     // @GetMapping("/tenant-items")
@@ -91,14 +90,5 @@ public class SecurityConfigController {
     public CommonResult<Boolean> checkWeakPassword(@RequestParam("password") String password) {
         securityConfigApi.validatePassword(password);
         return success(true);
-    }
-
-
-    @PostMapping("/check-scenarios-captcha")
-    @Operation(summary = "检查登录验证码", description = "返回值 true需要验证码,false不需要")
-    @PermitAll
-    @TenantIgnore
-    public CommonResult<Boolean> checkScenariosCaptcha(@RequestBody SecurityConfigReqVO configReqVO) {
-        return success(securityConfigService.checkScenariosCaptcha(configReqVO));
     }
 }

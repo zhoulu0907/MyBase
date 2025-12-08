@@ -11,10 +11,9 @@ import com.cmsr.onebase.module.infra.dal.database.SecurityConfigTemplateDataRepo
 import com.cmsr.onebase.module.infra.dal.dataobject.security.SecurityConfigCategoryDO;
 import com.cmsr.onebase.module.infra.dal.dataobject.security.SecurityConfigDO;
 import com.cmsr.onebase.module.infra.dal.dataobject.security.SecurityConfigTemplateDO;
-import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigCategoryRespVO;
-import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigItemRespVO;
-import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigReqVO;
-import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigUpdateReqVO;
+import com.cmsr.onebase.module.infra.dal.vo.app.AppTenantVO;
+import com.cmsr.onebase.module.infra.dal.vo.security.*;
+import com.cmsr.onebase.module.infra.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.infra.enums.security.SecurityConfigKey;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -29,8 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
+ import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.infra.enums.ErrorCodeConstants.*;
@@ -153,6 +151,25 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
         // 使用新的带兜底策略的SQL查询方法
         // 该方法会自动处理：如果租户配置存在则使用租户配置值，否则使用模板默认值
         List<SecurityConfigTemplateDO> templates = templateDataRepository.findByTenantIdAndCategoryId(tenantId, categoryId);
+        if (templates.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // 组装返回数据：defaultValue=模板默认值；configValue=租户有效值（租户配置或默认值）
+        List<SecurityConfigItemRespVO> configItems = new ArrayList<>();
+        for (SecurityConfigTemplateDO template : templates) {
+            SecurityConfigItemRespVO itemVO = SecurityConfigCategoryConvert.INSTANCE.convert(template);
+            configItems.add(itemVO);
+        }
+
+        return configItems;
+    }
+
+
+    private List<SecurityConfigItemRespVO> findSecurityConfigItemListByTenantIdAndConfigKey(Long tenantId, List<String> codes) {
+        // 使用新的带兜底策略的SQL查询方法
+        // 该方法会自动处理：如果租户配置存在则使用租户配置值，否则使用模板默认值
+        List<SecurityConfigTemplateDO> templates = templateDataRepository.findByTenantIdAndConfigKey(tenantId, codes);
         if (templates.isEmpty()) {
             return new ArrayList<>();
         }
@@ -324,14 +341,37 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
 
     @Override
     @TenantIgnore
-    public Boolean checkScenariosCaptcha(SecurityConfigReqVO configReqVO) {
+    public List<SecurityConfigCategoryGroupRespVO> getTenantConfigItemsByCategoryCodes(SecurityConfigGetReqVO configReqVO) {
+        Long appID= configReqVO.getAppId();
         Long tenantId = configReqVO.getTenantId();
-        String scenariosCode = configReqVO.getScenariosCode();
-        String securityConfigKey = SecurityConfigKey.enableScenarios.getConfigKey();
-        SecurityConfigDO config = securityConfigDataRepository.findSecurityConfigByTenantIdAndKey(tenantId, securityConfigKey);
-        if (null == config) {
-            return true;
+        if (null != appID) {
+            tenantId = checkAppAndGetTenantId(appID);
         }
-        return config.getConfigValue().contains(scenariosCode);
+        configReqVO.setTenantId(tenantId);
+        List<SecurityConfigItemRespVO> configItems =  findSecurityConfigItemListByTenantIdAndConfigKey(tenantId,configReqVO.getCategoryCode());
+        Map<String, List<SecurityConfigItemRespVO>> groupedByConfigKey = configItems.stream()
+                .collect(Collectors.groupingBy(SecurityConfigItemRespVO::getConfigKey));
+
+        return groupedByConfigKey.entrySet().stream()
+                .map(entry -> {
+                    SecurityConfigCategoryGroupRespVO groupVO = new SecurityConfigCategoryGroupRespVO();
+                    groupVO.setCategoryCode(entry.getKey());
+                    groupVO.setSecurityConfigItemRespVO(entry.getValue());
+                    return groupVO;
+                })
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 通过appid 获取租户id
+     * @param appId
+     * @return
+     */
+    private Long checkAppAndGetTenantId(Long appId) {
+        AppTenantVO app = templateDataRepository.findAppTenantIdById(appId);
+        if (null != app) {
+            return app.getTenantId();
+        }
+        throw exception(ErrorCodeConstants.AUTH_LOGIN_APP_DELETE_OR_DISABLE);
     }
 }
