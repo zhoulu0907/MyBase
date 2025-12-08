@@ -105,7 +105,7 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({ form, isAdd, submitLoading, o
       }
     >
       <div style={{ height: '100%' }}>
-        <Form layout="inline" form={form} onValuesChange={handleFormValuesChange}>
+        <Form layout="inline" labelCol={{ span: 10 }} wrapperCol={{ span: 14 }} form={form} onValuesChange={handleFormValuesChange}>
           {useEditorSignalMap.get(editPageViewId.value)?.components.value.map((cp: GridItem) => (
             <Fragment key={cp.id}>
               {hiddenState(cp.id) && (
