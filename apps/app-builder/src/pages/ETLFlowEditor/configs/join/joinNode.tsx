@@ -86,7 +86,15 @@ export const JoinNodeConfig: React.FC<JoinNodeConfigProps> = ({ onRegisterSave }
     }
 
     if (curDrawerTab.value == ETLDrawerTab.DATA_PREVIEW) {
-      handlePreviewData(graphData.value, nodeData.value, curNode.value, setPreviewData);
+      handlePreviewData(
+        graphData.value,
+        nodeData.value,
+        {
+          ...curNode.value,
+          ...newPayload
+        },
+        setPreviewData
+      );
     }
   }, [curDrawerTab.value]);
 
