@@ -86,6 +86,6 @@ public interface FileService {
      * @param id 文件 ID
      * @return 文件信息
      */
-    void getFileContent(Long id, HttpServletRequest request, HttpServletResponse response) throws Exception;
+    void getFileContent(Long id, HttpServletRequest request, HttpServletResponse response, String visitMode) throws Exception;
 
 }

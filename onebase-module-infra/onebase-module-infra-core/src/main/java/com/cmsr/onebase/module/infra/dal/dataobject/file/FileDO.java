@@ -78,7 +78,7 @@ public class FileDO extends BaseDO {
     private String md5;
 
     /**
-     * 文件 环境标识
+     * 文件 权限标识
      */
     @Column(name = COLUMN_VISIT_MODE)
     private String visitMode;

@@ -43,10 +43,10 @@ public class RuntimeFileController {
     @PostMapping("/upload")
     @Operation(summary = "上传文件")
     public CommonResult<String> uploadFile(AppFileUploadReqVO uploadReqVO) throws Exception {
-        MultipartFile file = uploadReqVO.getFile();
-        if (uploadReqVO.getVisitMode().equals(FileVisitModeEnum.PERMISSION.getValue())){
+        if (FileVisitModeEnum.PERMISSION.getValue().equals(uploadReqVO.getVisitMode())){
             return CommonResult.error(BAD_REQUEST);
         }
+        MultipartFile file = uploadReqVO.getFile();
         byte[] content = IoUtil.readBytes(file.getInputStream());
         return success(fileService.createFile(content, file.getOriginalFilename(),
                 uploadReqVO.getDirectory(), file.getContentType(),uploadReqVO.getVisitMode()));
@@ -85,6 +85,6 @@ public class RuntimeFileController {
     @PermitAll
     @Parameter(name = "id", description = "文件编号", required = true)
     public void getFileContent(@PathVariable("id") Long id, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        fileService.getFileContent(id, request, response);
+        fileService.getFileContent(id, request, response, null);
     }
 }

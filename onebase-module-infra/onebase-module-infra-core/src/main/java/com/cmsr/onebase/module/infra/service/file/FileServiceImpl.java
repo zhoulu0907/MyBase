@@ -416,7 +416,7 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public void getFileContent(Long id, HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public void getFileContent(Long id, HttpServletRequest request, HttpServletResponse response, String visitMode) throws Exception {
 
         // 获取文件信息
         FileDO file = fileDataRepository.findById(id);
@@ -424,7 +424,11 @@ public class FileServiceImpl implements FileService {
             throw exception(FILE_NOT_EXISTS);
         }
 
-        if (file.getVisitMode().equals(FileVisitModeEnum.AUTHEN.getValue())) {
+        if (StrUtil.isNotEmpty(visitMode) && !visitMode.equals(file.getVisitMode())){
+            throw exception(FILE_NOT_PERMISSION);
+        }
+
+        if (FileVisitModeEnum.AUTHEN.getValue().equals(file.getVisitMode())) {
             String token = SecurityFrameworkUtils.obtainAuthorization(request,
                     securityProperties.getTokenHeader(), securityProperties.getTokenParameter());
             // 校验访问令牌
@@ -433,8 +437,8 @@ public class FileServiceImpl implements FileService {
                 throw exception(FILE_DOWNLOAD_NOT_LOGIN);
             }
 
-            if (StrUtil.isNotEmpty(file.getRunMode()) && !accessToken.getRunMode().equals(file.getRunMode())) {
-                throw exception(FILE_NOT_PERMISSION);
+            if (StrUtil.isNotEmpty(file.getRunMode()) && !file.getRunMode().equals(accessToken.getRunMode())) {
+                throw exception(FILE_NOT_DOWNLOAD);
             }
         }
 

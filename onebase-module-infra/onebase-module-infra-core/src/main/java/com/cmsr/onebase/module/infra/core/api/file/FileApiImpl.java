@@ -38,7 +38,7 @@ public class FileApiImpl implements FileApi {
 
     @Override
     public void getFileContent(Long id, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        fileService.getFileContent(id, request, response);
+        fileService.getFileContent(id, request, response, FileVisitModeEnum.PERMISSION.getValue());
     }
 
 }

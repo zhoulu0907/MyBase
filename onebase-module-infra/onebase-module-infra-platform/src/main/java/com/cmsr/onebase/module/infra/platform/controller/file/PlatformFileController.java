@@ -6,7 +6,6 @@ import com.cmsr.onebase.module.infra.dal.vo.file.file.*;
 import com.cmsr.onebase.module.infra.enums.file.FileVisitModeEnum;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.annotation.security.PermitAll;
@@ -34,7 +33,7 @@ public class PlatformFileController {
     @PostMapping("/upload")
     @Operation(summary = "上传文件", description = "模式一：后端上传文件")
     public CommonResult<String> uploadFile(FileUploadReqVO uploadReqVO) throws Exception {
-        if (uploadReqVO.getVisitMode().equals(FileVisitModeEnum.PERMISSION.getValue())){
+        if (FileVisitModeEnum.PERMISSION.getValue().equals(uploadReqVO.getVisitMode())){
             return CommonResult.error(BAD_REQUEST);
         }
         MultipartFile file = uploadReqVO.getFile();
@@ -48,6 +47,6 @@ public class PlatformFileController {
     @PermitAll
     @Parameter(name = "id", description = "文件编号", required = true)
     public void getFileContent(@PathVariable("id") Long id, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        fileService.getFileContent(id, request, response);
+        fileService.getFileContent(id, request, response, null);
     }
 }
