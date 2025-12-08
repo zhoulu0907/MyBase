@@ -3,10 +3,8 @@ package com.cmsr.onebase.module.bpm.runtime.helper;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.runtime.vo.EntityVO;
 import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
-import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntitySchemaDTO;
-import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntityValueDTO;
-import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO;
-import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticRelationSchemaDTO;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.*;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticMergeConditionVO;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticTargetBodyVO;
 import jakarta.annotation.Resource;
@@ -15,10 +13,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 
@@ -148,6 +143,42 @@ public class BpmEntityHelper {
         }
 
         return nonSystemFieldMap;
+    }
+
+    public SemanticFieldTypeEnum findFieldType(SemanticEntitySchemaDTO entitySchema, String tableName, String fieldName) {
+        if (entitySchema == null || CollectionUtils.isEmpty(entitySchema.getFields())) {
+            return null;
+        }
+
+        // 主表
+        if (Objects.equals(entitySchema.getTableName(), tableName)) {
+            for (SemanticFieldSchemaDTO field : entitySchema.getFields()) {
+                if (Objects.equals(fieldName, field.getFieldName())) {
+                    return field.getFieldTypeEnum();
+                }
+            }
+
+            return null;
+        }
+
+        // 判断子表
+        if (CollectionUtils.isEmpty(entitySchema.getConnectors())) {
+            return null;
+        }
+
+        for (SemanticRelationSchemaDTO connector : entitySchema.getConnectors()) {
+            if (!Objects.equals(connector.getTargetEntityTableName(), tableName)) {
+               continue;
+            }
+
+            for (SemanticFieldSchemaDTO field : connector.getRelationAttributes()) {
+                if (Objects.equals(fieldName, field.getFieldName())) {
+                    return field.getFieldTypeEnum();
+                }
+            }
+        }
+
+        return null;
     }
 
     public Set<String> getSubTableNames(SemanticEntitySchemaDTO entitySchema) {
