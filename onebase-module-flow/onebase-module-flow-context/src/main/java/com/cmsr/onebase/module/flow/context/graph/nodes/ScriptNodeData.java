@@ -15,9 +15,9 @@ public class ScriptNodeData extends NodeData implements Serializable {
      */
     private String script;
 
-    private Long instanceId;
+    private String instanceUuid;
 
-    private Long actionId;
+    private String actionUuid;
 
     private String title;
 
