@@ -371,4 +371,13 @@ public class UserDataRepository extends DataRepository<AdminUserDO> {
                 .order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
         return findAllByConfig(configStore);
     }
+
+    public List<AdminUserDO> findAllByStatusAndDeptIds(Integer status, Set<Long> deptIds) {
+        DefaultConfigStore configStore = buildUserConfigStore();
+        configStore.eq(AdminUserDO.STATUS, status)
+                .in(AdminUserDO.DEPT_ID, deptIds)
+                .order(AdminUserDO.ADMIN_TYPE, Order.TYPE.ASC)
+                .order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
+        return findAllByConfig(configStore);
+    }
 }

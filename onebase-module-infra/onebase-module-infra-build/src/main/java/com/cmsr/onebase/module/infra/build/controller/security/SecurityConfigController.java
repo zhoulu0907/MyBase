@@ -4,10 +4,7 @@ import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
-import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigBatchUpdateReqVO;
-import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigCategoryRespVO;
-import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigItemRespVO;
-import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigReqVO;
+import com.cmsr.onebase.module.infra.dal.vo.security.*;
 import com.cmsr.onebase.module.infra.service.security.SecurityConfigService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -59,14 +56,24 @@ public class SecurityConfigController {
         return success(items);
     }
 
-    @GetMapping("/tenant-items")
-    @Operation(summary = "获取当前租户的所有安全配置项")
-    @PreAuthorize("@ss.hasPermission('tenant:security:query')")
-    public CommonResult<List<SecurityConfigItemRespVO>> getSecurityConfigsByTenant() {
-        Long tenantId = TenantContextHolder.getTenantId();
-        List<SecurityConfigItemRespVO> items = securityConfigService.getSecurityConfigsByTenant(tenantId);
+
+    @PostMapping("/get-tenant-items")
+    @Operation(summary = "根据分类IDS获取获取租户的安全配置项（优先通过AppId获取租户ID）")
+    @PermitAll
+    @TenantIgnore
+    public CommonResult<List<SecurityConfigCategoryGroupRespVO>> getTenantConfigItems(@RequestBody SecurityConfigGetReqVO getReqVO) {
+        List<SecurityConfigCategoryGroupRespVO> items = securityConfigService.getTenantConfigItemsByCategoryCodes(getReqVO);
         return success(items);
     }
+
+    // @GetMapping("/tenant-items")
+    // @Operation(summary = "获取当前租户的所有安全配置项")
+    // @PreAuthorize("@ss.hasPermission('tenant:security:query')")
+    // public CommonResult<List<SecurityConfigItemRespVO>> getSecurityConfigsByTenant() {
+    //     Long tenantId = TenantContextHolder.getTenantId();
+    //     List<SecurityConfigItemRespVO> items = securityConfigService.getSecurityConfigsByTenant(tenantId);
+    //     return success(items);
+    // }
 
     @PostMapping("/batch-update")
     @Operation(summary = "批量更新租户安全配置")
@@ -83,14 +90,5 @@ public class SecurityConfigController {
     public CommonResult<Boolean> checkWeakPassword(@RequestParam("password") String password) {
         securityConfigApi.validatePassword(password);
         return success(true);
-    }
-
-
-    @PostMapping("/check-scenarios-captcha")
-    @Operation(summary = "检查登录验证码", description = "返回值 true需要验证码,false不需要")
-    @PermitAll
-    @TenantIgnore
-    public CommonResult<Boolean> checkScenariosCaptcha(@Valid @RequestBody SecurityConfigReqVO configReqVO) {
-        return success(securityConfigService.checkScenariosCaptcha(configReqVO));
     }
 }

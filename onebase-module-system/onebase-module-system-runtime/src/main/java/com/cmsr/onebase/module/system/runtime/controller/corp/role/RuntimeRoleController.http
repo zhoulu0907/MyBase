@@ -1,0 +1,10 @@
+### 默认环境变量配置（直接使用local环境配置）
+#@baseUrl = http://localhost:48080/admin-api
+#@adminTenantId = 1
+#@token = 1952f31dd1564d3e9889dd789d50e27c
+#@tag = OneBase.local
+
+
+### /role/delete 删除
+GET {{baseUrl}}/corp/role/simple-list
+Authorization: Bearer {{token}}
