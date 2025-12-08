@@ -12,8 +12,18 @@ import {
   PreviewRender
 } from '@onebase/ui-kit-mobile';
 import { Form as MobileForm } from '@arco-design/mobile-react';
+import type { AppEntityField } from '@onebase/app';
 interface FormEditorProps {
-  props: EditorProps;
+  props: EditorProps & {
+    useEditorSignalMap: Map<string, any>;
+    batchDelPageComponentSchemas: (componentIds: Set<string>) => void;
+    batchDelLayoutSubComponents: (componentIds: Set<string>) => void;
+    subTableComponents: Record<string, AppEntityField[]>;
+    setSubTableComponents: (subTableComponentId: string, componentIds: AppEntityField[]) => void;
+    batchDelSubTableComponents: (componentIds: Set<string>) => void;
+    usePageViewEditorSignal: () => Map<string, any>;
+    useFormEditorSignal: () => Map<string, any>;
+  };
 }
 
 const FormEditor: React.FC<FormEditorProps & { instanceId: string }> = ({ instanceId, props }) => {
@@ -42,7 +52,6 @@ const FormEditor: React.FC<FormEditorProps & { instanceId: string }> = ({ instan
                 cpType={cp.type}
                 pageComponentSchema={formPageComponentSchemas[cp.id]}
                 runtime={true}
-                preview={true}
               />
             </div>
           )}
@@ -61,12 +70,8 @@ const FormEditor: React.FC<FormEditorProps & { instanceId: string }> = ({ instan
 
   return (
     <div className={styles.formEditorPage}>
-      {props.editMode?.value === 'mobile' && (
-        <Fragment>
-          <EditorPanel />
-          <EditorWorkspace props={props} />
-        </Fragment>
-      )}
+      <EditorPanel />
+      <EditorWorkspace props={props} />
     </div>
   );
 };

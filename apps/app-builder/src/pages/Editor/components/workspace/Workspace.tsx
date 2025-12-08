@@ -138,7 +138,6 @@ export default function EditorWorkspace() {
     batchDelSubTableComponents
   })
   useEffect(() => {
-    console.log("loading mobile-editor-drag-list11", editMode.value);
     if (editMode.value !== EditMode.MOBILE) {
       return;
     }

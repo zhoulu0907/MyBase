@@ -10,3 +10,8 @@
     display: block;
   }
 }
+.selectMultipleWrapper {
+  .arco-form-item-control {
+    text-align: right;
+  }
+}

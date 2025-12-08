@@ -331,7 +331,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       id: id
     };
     const res = await dataMethodData(req);
-    // console.log('xxx=====', res);
 
     // 遍历 res.data，将数据回填到表单
     const formValues: Record<string, any> = {};
