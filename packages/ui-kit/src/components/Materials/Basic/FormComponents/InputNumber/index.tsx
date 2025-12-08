@@ -95,7 +95,7 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
         field={fieldId ? fieldId : `${FORM_COMPONENT_TYPES.INPUT_NUMBER}_${nanoid()}`}
         layout={layout}
         tooltip={tooltip}
-        labelCol={layout === 'horizontal' ? { style: { width: 200, flex: 'unset' } } : {}}
+        labelCol={layout === 'horizontal' ? { span: 10 } : {}}
         rules={[
           {
             required: verify?.required,

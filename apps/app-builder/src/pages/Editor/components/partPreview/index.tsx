@@ -115,7 +115,7 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
                     {getFormContent()}
                   </Form>
                 ) : (
-                  <Form layout="inline">
+                  <Form layout="inline" labelCol={{ span: 10 }} wrapperCol={{ span: 14 }}>
                     {getFormContent()}
                   </Form>
                 )}
