@@ -7,10 +7,9 @@ import {
   getCorpAuthorizedAppListApi,
   type checkCorpAdminUserParams,
   type checkCorpParams,
+  type corpAppListParams,
   type CorpAppParams,
-  type corpListParams,
   type createCorpParams,
-  type updatedParams
 } from '@onebase/platform-center';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
@@ -20,7 +19,7 @@ import { BasicInformation } from './components/createApp/basicInformation';
 import { CreateSuccess } from './components/createApp/createSuccess';
 import { steps } from './constants';
 import styles from './createBusiness.module.less';
-import type { AppItem, OutletContextType, successData } from './types/appItem';
+import type { AppItem, OutletContextType, successData, updatedParams } from './types/appItem';
 
 const CreateBusinessPage: React.FC = () => {
   const [basicValues, setBasicData] = useState<Record<string, any>>({});
@@ -46,7 +45,7 @@ const CreateBusinessPage: React.FC = () => {
 
   const fetchCorpAuthorizedList = async (pageNo = 1, pageSize = 10) => {
     setLoading(true);
-    const params: corpListParams = {
+    const params: corpAppListParams = {
       pageNo,
       pageSize
     };

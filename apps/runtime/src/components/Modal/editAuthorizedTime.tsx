@@ -1,5 +1,5 @@
+import type { AppItem } from "@/types";
 import { DatePicker, Form, Modal } from "@arco-design/web-react";
-import type { AppItem } from "../../types/appItem";
 
 interface IEditAuthorizedModal {
     visible: boolean;

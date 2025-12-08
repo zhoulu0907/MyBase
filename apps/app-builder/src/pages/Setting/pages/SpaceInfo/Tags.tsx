@@ -12,6 +12,7 @@ interface IProps {
     adminMobile?: string;
     adminEmail?: string;
     adminDept?: string;
+    adminAvatar?: string;
   }[];
 }
 const Tags = ({ data }: IProps) => {
@@ -21,7 +22,7 @@ const Tags = ({ data }: IProps) => {
         <Popover
           title={
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: 16 }}>
-              <Avatar size={40} style={{ marginRight: 4 }}>{tag.adminNickName?.slice(0, 1)}</Avatar>
+              <Avatar size={40} style={{ marginRight: 4 }}>{tag.adminAvatar ? tag.adminAvatar: tag.adminNickName?.slice(0, 1)}</Avatar>
               <div>{tag.adminNickName || '-'}</div>
             </div>
           }
