@@ -804,6 +804,7 @@ public class SemanticDataCrudService {
                 Object cid = extractIdFromConnectorDto(dto);
                 String cidStr = cid == null ? null : String.valueOf(cid);
                 if (cidStr != null) { incomingIds.add(cidStr); }
+                log.info("子表连接器 upsert 子表记录，子表记录 ID：{}，存在IDs：{}", cidStr, existingById);
                 if (cidStr != null && existingById.containsKey(cidStr)) {
                     Row updateRow = buildConnectorUpdateRow(attrs, dto, childPk);
                     QueryWrapper uq = QueryWrapper.create().where(new QueryColumn(childPk).eq(cidStr));
