@@ -283,8 +283,11 @@ const DynamicSelectConfig: React.FC<DynamicSelectConfigProps> = ({ handlePropsCh
                   <Button
                     type="outline"
                     onClick={() => {
-                      const newLabel = `新选项_${Array.from({ length: 6 }, () => String.fromCharCode(97 + Math.floor(Math.random() * 26))).join('')}`;
-                      const newValue = _fields?.[_fields.length]?.field || `${configs.id}-${selectKey}[0]`;
+                      const code = Array.from({ length: 6 }, () =>
+                        String.fromCharCode(97 + Math.floor(Math.random() * 26))
+                      ).join('');
+                      const newLabel = `新选项_${code}`;
+                      const newValue = `${configs.id}-${selectKey}-${code}`;
                       const newList = [
                         ...configs[selectKey].defaultOptions,
                         {
@@ -293,11 +296,7 @@ const DynamicSelectConfig: React.FC<DynamicSelectConfigProps> = ({ handlePropsCh
                           isChosen: false,
                           colorType: ''
                         }
-                      ].map((ele, index) => {
-                        // 防止删除后新增，value重复
-                        const value = `${configs.id}-${selectKey}[${index}]`;
-                        return { ...ele, value };
-                      });
+                      ];
                       add({ label: item.displayName || newLabel, value: item.fieldName || newValue });
                       const newConfig = { ...configs[selectKey], defaultOptions: newList };
                       handlePropsChange(selectKey, newConfig);
