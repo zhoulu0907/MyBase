@@ -5,8 +5,10 @@ import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.infra.api.file.FileApi;
 import com.cmsr.onebase.module.infra.api.file.dto.FileCreateReqDTO;
 import com.cmsr.onebase.module.infra.api.file.dto.FileListRespDTO;
+import com.cmsr.onebase.module.infra.enums.file.FileVisitModeEnum;
 import com.cmsr.onebase.module.infra.service.file.FileService;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,7 +28,7 @@ public class FileApiImpl implements FileApi {
     @Override
     public CommonResult<String> createFile(FileCreateReqDTO createReqDTO) {
         return success(fileService.createFile(createReqDTO.getContent(), createReqDTO.getName(),
-                createReqDTO.getDirectory(), createReqDTO.getType()));
+                createReqDTO.getDirectory(), createReqDTO.getType(), FileVisitModeEnum.PERMISSION.getValue()));
     }
 
     @Override
@@ -35,8 +37,8 @@ public class FileApiImpl implements FileApi {
     }
 
     @Override
-    public void getFileContent(Long id, HttpServletResponse response) throws Exception {
-        fileService.getFileContent(id, response);
+    public void getFileContent(Long id, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        fileService.getFileContent(id, request, response, FileVisitModeEnum.PERMISSION.getValue());
     }
 
 }
