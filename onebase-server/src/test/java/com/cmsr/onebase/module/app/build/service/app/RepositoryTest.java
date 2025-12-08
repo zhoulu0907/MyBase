@@ -17,9 +17,11 @@ import com.cmsr.onebase.module.app.core.impl.auth.AppAuthRoleUserImpl;
 import com.cmsr.onebase.module.app.core.vo.app.AppUserPhotoDTO;
 import com.cmsr.onebase.module.app.core.vo.app.ApplicationPageReqVO;
 import com.cmsr.onebase.module.app.core.vo.auth.AuthPermissionReq;
+import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
 import com.cmsr.onebase.server.OneBaseServerApplication;
 import com.github.pagehelper.PageHelper;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -33,12 +35,16 @@ import java.util.Set;
  * @Author：huangjie
  * @Date：2025/11/4 14:33
  */
+@Slf4j
 @Setter
 @SpringBootTest(classes = OneBaseServerApplication.class)
 public class RepositoryTest {
 
     @Autowired
     private AppSqlQueryRepository appSqlQueryRepository;
+
+    @Autowired
+    private FlowProcessRepository flowProcessRepository;
 
     @Autowired
     private AppAuthRoleUserImpl appAuthRoleUser;
@@ -152,7 +158,23 @@ public class RepositoryTest {
     }
 
     @Test
-    public void test13() {
-        var res = appMenuRepository.findPagesByMenuId(1L);
+    public void testMoveToHis() {
+        long versionTag = System.currentTimeMillis();
+        //171622357911764992
+        TenantContextHolder.setTenantId(153935442021842944L);
+        LoginUser loginUser = new LoginUser();
+        loginUser.setId(155019577667616800L);
+        SecurityFrameworkUtils.setLoginUser(loginUser, new MockHttpServletRequest());
+        flowProcessRepository.moveRuntimeToHistory(166945945974013952L, versionTag);
+    }
+
+    @Test
+    public void testEditToRuntime() {
+        //171622357911764992
+        TenantContextHolder.setTenantId(153935442021842944L);
+        LoginUser loginUser = new LoginUser();
+        loginUser.setId(155019577667616800L);
+        SecurityFrameworkUtils.setLoginUser(loginUser, new MockHttpServletRequest());
+        flowProcessRepository.copyEditToRuntime(166945945974013952L);
     }
 }
