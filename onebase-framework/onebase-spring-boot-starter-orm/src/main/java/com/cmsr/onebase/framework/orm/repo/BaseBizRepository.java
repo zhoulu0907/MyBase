@@ -1,5 +1,6 @@
 package com.cmsr.onebase.framework.orm.repo;
 
+import com.cmsr.onebase.framework.common.enums.VersionTagEnum;
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.orm.entity.BaseBizEntity;
 import com.mybatisflex.core.BaseMapper;
@@ -260,6 +261,30 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
     public <R> Page<R> pageAs(Page<R> page, QueryWrapper query, Class<R> asType) {
         this.injectQueryFilter(query);
         return getMapper().paginateAs(page, query, asType);
+    }
+
+    public void moveRuntimeToHistory(Long applicationId, Long versionTag) {
+        QueryColumn applicationIdCol = new QueryColumn(BaseBizEntity.APPLICATION_ID);
+        QueryColumn versionTagCol = new QueryColumn(BaseBizEntity.VERSION_TAG);
+        this.updateChain()
+                .set(versionTagCol, versionTag)
+                .where(applicationIdCol.eq(applicationId))
+                .where(versionTagCol.eq(VersionTagEnum.RUNTIME.getValue()))
+                .update();
+    }
+
+    public void copyEditToRuntime(Long applicationId) {
+        QueryColumn applicationIdCol = new QueryColumn(BaseBizEntity.APPLICATION_ID);
+        QueryColumn versionTagCol = new QueryColumn(BaseBizEntity.VERSION_TAG);
+        QueryWrapper queryWrapper = QueryWrapper.create()
+                .where(applicationIdCol.eq(applicationId))
+                .where(versionTagCol.eq(VersionTagEnum.BUILD.getValue()));
+        List<T> entities = this.getMapper().selectListByQuery(queryWrapper);
+        entities.forEach(entity -> {
+            entity.setId(null);
+            entity.setVersionTag(VersionTagEnum.RUNTIME.getValue());
+        });
+        this.saveBatch(entities);
     }
     //endregion ===== 分页查询操作 =====
 }
