@@ -58,7 +58,7 @@ public class SecurityConfigController {
 
 
     @GetMapping("/get-tenant-items")
-    @Operation(summary = "根据分类IDS获取获取当前租户的安全配置项")
+    @Operation(summary = "根据分类IDS获取获取租户的安全配置项（优先通过AppId获取租户ID）")
     @PermitAll
     @TenantIgnore
     public CommonResult<List<SecurityConfigItemRespVO>> getTenantConfigItems(SecurityConfigGetReqVO getReqVO) {
