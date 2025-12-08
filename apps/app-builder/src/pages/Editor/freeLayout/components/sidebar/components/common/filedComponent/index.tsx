@@ -96,10 +96,10 @@ const FieldTable = forwardRef(
           columns={[...(columnsTable || []), ...baseColumns]}
           data={tbData}
           pagination={false}
-          // rowSelection={{
-          //   type: 'checkbox',
-          //   onChange: (keyArr: any, rowArr: any) => handleTbSelect(keyArr, rowArr)
-          // }}
+          rowSelection={{
+            type: 'checkbox',
+            onChange: (keyArr: any, rowArr: any) => handleTbSelect(keyArr, rowArr)
+          }}
         />
         {fmVisible && (
           <FieldModal
