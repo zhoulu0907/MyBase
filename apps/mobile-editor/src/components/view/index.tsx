@@ -5,10 +5,6 @@ import { IconDown, IconEdit, IconPlus } from '@arco-design/web-react/icon';
 import { generateId, ViewType, type PageView } from '@onebase/app';
 import {
   createPageEditorSignal,
-  useEditorSignalMap,
-  useFormEditorSignal,
-  usePageEditorSignal,
-  usePageViewEditorSignal,
   type EditConfig
 } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
@@ -29,11 +25,15 @@ interface ViewProps {
   subTableComponents: { [key: string]: EditConfig[] };
   setCurViewId: (id: string) => void;
   updatePageViewName: (id: string, name: string) => void;
+  useEditorSignalMap: Map<string, any>;
+  useFormEditorSignal: any;
+  usePageViewEditorSignal: any;
+
 }
 
 // 视图组件
 const View: React.FC<ViewProps> = ({
-  pageSetId,
+  useEditorSignalMap,
   components,
   pageComponentSchemas,
   layoutSubComponents,
@@ -41,7 +41,9 @@ const View: React.FC<ViewProps> = ({
   curViewId,
   setCurViewId,
   subTableComponents,
-  updatePageViewName
+  updatePageViewName,
+  usePageViewEditorSignal,
+  useFormEditorSignal
 }) => {
   useSignals();
 
@@ -83,7 +85,6 @@ const View: React.FC<ViewProps> = ({
   const handleCopyView = async (e: React.MouseEvent<HTMLImageElement>, id: string) => {
     e.stopPropagation();
     console.log('copy view: ', id);
-
     // 保存当前配置到editorSignalMap
     useEditorSignalMap.get(curViewId.value)!.setComponents(components);
     useEditorSignalMap.get(curViewId.value)!.loadPageComponentSchemas(pageComponentSchemas);
@@ -182,6 +183,7 @@ const View: React.FC<ViewProps> = ({
     useEditorSignalMap.get(newId)!.loadPageComponentSchemas(newPageComponentSchemas);
     useEditorSignalMap.get(newId)!.loadLayoutSubComponents(newLayoutSubComponents);
     useEditorSignalMap.get(newId)!.loadSubTableComponents(newSubTableComponents);
+    // usePageViewEditorSignal.pageViews.value[newId] = newView;
 
     // 切换到新视图
     switchToView(newId);
