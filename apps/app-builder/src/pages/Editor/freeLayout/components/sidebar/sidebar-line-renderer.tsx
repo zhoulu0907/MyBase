@@ -396,14 +396,12 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
   };
   useEffect(() => {
     getFormSummaryData();
-    console.log(line.lineData);
 
     if (line.lineData) {
       form.setFieldsValue(line.lineData);
       line.lineData.condition && setConditionGroups(line.lineData.condition);
     }
   }, []);
-  console.log(conditionGroups, 'conditionGroups');
 
   return (
     <div
