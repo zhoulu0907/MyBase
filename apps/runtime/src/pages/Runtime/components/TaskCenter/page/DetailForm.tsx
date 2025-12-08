@@ -166,6 +166,8 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
                     formValues[`${key}.${idx}.${fieldId}`] = subData[idx]?.[fieldId];
                   }
                 }
+                // 补充id
+                formValues[`${key}.${idx}.id`] = subData[idx]?.id;
               }
             }
           });
