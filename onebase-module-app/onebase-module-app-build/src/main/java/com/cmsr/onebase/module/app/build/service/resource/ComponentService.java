@@ -8,6 +8,8 @@ import java.util.List;
 @Service
 public interface ComponentService {
 
-    List<ComponentDTO> listComponent(Long pageId);
+    List<ComponentDTO> listComponentByPageId(Long pageId);
+
+    List<ComponentDTO> listComponentByPageUuid(String pageUuid);
 
 }

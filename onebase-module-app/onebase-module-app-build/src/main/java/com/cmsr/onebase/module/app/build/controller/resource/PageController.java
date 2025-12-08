@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.app.build.controller.resource;
 
+import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.build.service.resource.PageService;
@@ -60,7 +61,14 @@ public class PageController {
     @PostMapping("/metadata")
     @Operation(summary = "根据page_id获取页面绑定的元数据id")
     public CommonResult<GetMetadataByPageIdRespVO> getMetadataByPageId(@RequestBody GetMetadataByPageIdReqVO getMetadataByPageIdReqVO) {
-        String metadata = pageService.getMetadataByPageId(getMetadataByPageIdReqVO.getPageId());
+        String metadata;
+        if (getMetadataByPageIdReqVO.getPageId() != null) {
+            metadata = pageService.getMetadataByPageId(getMetadataByPageIdReqVO.getPageId());
+        } else if (getMetadataByPageIdReqVO.getPageUuid() != null) {
+            metadata = pageService.getMetadataByPageUuid(getMetadataByPageIdReqVO.getPageUuid());
+        } else {
+            throw ServiceExceptionUtil.invalidParamException("page_id或page_uuid不能同时为空");
+        }
 
         GetMetadataByPageIdRespVO getMetadataByPageIdRespVO = new GetMetadataByPageIdRespVO();
         getMetadataByPageIdRespVO.setMetadata(metadata);

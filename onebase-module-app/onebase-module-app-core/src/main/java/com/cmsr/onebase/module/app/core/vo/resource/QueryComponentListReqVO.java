@@ -1,7 +1,6 @@
 package com.cmsr.onebase.module.app.core.vo.resource;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 /**
@@ -13,8 +12,10 @@ import lombok.Data;
 @Data
 public class QueryComponentListReqVO {
 
-    @Schema(description = "PageId", requiredMode = Schema.RequiredMode.REQUIRED, example = "xxx")
-    @NotNull(message = "页面id不能为空")
+    @Schema(description = "PageId", example = "xxx")
     private Long pageId;
+
+    @Schema(description = "PageUuid", example = "xxx")
+    private String pageUuid;
 
 }

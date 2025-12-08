@@ -34,7 +34,7 @@ import java.util.Map;
  */
 @Setter
 @Component
-public class ConditionsProviderImpl implements ConditionsProvider {
+public class FlowConditionsProviderImpl implements ConditionsProvider {
 
 
     @Autowired
