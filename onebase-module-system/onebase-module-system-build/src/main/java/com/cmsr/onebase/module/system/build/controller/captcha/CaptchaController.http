@@ -22,3 +22,16 @@ Authorization: Bearer {{token}}
   "pointJson": "{\"x\":120,\"y\":50}",
   "token": "f845c053193f493380d3b7485d2b9e52"
 }
+
+
+### 获得验证码 /admin-api/system/captcha/send-captcha-code
+POST {{baseUrl}}/system/captcha/send-captcha-code
+Content-Type: application/json
+
+{
+  "userName": "1111",
+  "userMobile": "2322",
+  "sendType": "emai1111l",
+  "socialCode": "888888"
+
+}
