@@ -87,6 +87,12 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- 插件运行时 -->
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-plugin-runtime</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>

@@ -1,0 +1,21 @@
+# =========================================
+# OneBase 插件系统配置示例
+# =========================================
+
+# 是否启用插件系统
+onebase.plugin.enabled=true
+
+# 插件目录路径（相对路径或绝对路径）
+onebase.plugin.plugins-dir=plugins
+
+# 是否自动加载插件
+onebase.plugin.auto-load=true
+
+# 是否自动启动已加载的插件
+onebase.plugin.auto-start=true
+
+# 是否启用开发模式（用于调试）
+onebase.plugin.dev-mode=false
+
+# 插件扫描间隔（毫秒），0表示禁用自动扫描
+onebase.plugin.scan-interval=0
