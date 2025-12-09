@@ -155,25 +155,54 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
     @Override
     public List<EntityFieldValidationTypesRespVO> getFieldValidationTypes(
             @Valid EntityFieldValidationTypesReqVO reqVO) {
-        List<String> rawFieldIds = reqVO.getFieldIdList();
-        if (rawFieldIds == null || rawFieldIds.isEmpty()) {
-            return new ArrayList<>();
+        // 1. 根据tableName或fieldIdList获取fieldIds
+        List<Long> fieldIds = new ArrayList<>();
+        
+        // 1.1 如果传入了tableName，根据tableName查询该表所有字段
+        if (reqVO.getTableName() != null && !reqVO.getTableName().trim().isEmpty()) {
+            String tableName = reqVO.getTableName().trim();
+            // 根据tableName查询实体
+            QueryWrapper entityQueryWrapper = metadataBusinessEntityRepository.query()
+                    .eq(MetadataBusinessEntityDO::getTableName, tableName);
+            MetadataBusinessEntityDO entity = metadataBusinessEntityRepository.getOne(entityQueryWrapper);
+            
+            if (entity == null) {
+                log.warn("根据tableName查询实体失败，实体不存在: tableName={}", tableName);
+                return new ArrayList<>();
+            }
+            
+            // 查询该实体的所有字段
+            QueryWrapper fieldQueryWrapper = metadataEntityFieldRepository.query()
+                    .eq(MetadataEntityFieldDO::getEntityUuid, entity.getEntityUuid());
+            List<MetadataEntityFieldDO> fields = metadataEntityFieldRepository.list(fieldQueryWrapper);
+            fieldIds = fields.stream()
+                    .map(MetadataEntityFieldDO::getId)
+                    .filter(Objects::nonNull)
+                    .distinct()
+                    .collect(Collectors.toList());
+        } else {
+            // 1.2 如果没有传入tableName，使用fieldIdList
+            List<String> rawFieldIds = reqVO.getFieldIdList();
+            if (rawFieldIds == null || rawFieldIds.isEmpty()) {
+                return new ArrayList<>();
+            }
+            // 支持ID或UUID：过滤空白，逐个解析
+            fieldIds = rawFieldIds.stream()
+                    .filter(s -> s != null && !s.trim().isEmpty())
+                    .map(String::trim)
+                    .map(identifier -> {
+                        try {
+                            return idUuidConverter.resolveFieldId(identifier);
+                        } catch (Exception ex) {
+                            log.warn("解析字段标识符失败，已跳过: {}", identifier, ex);
+                            return null;
+                        }
+                    })
+                    .filter(Objects::nonNull)
+                    .distinct()
+                    .collect(Collectors.toList());
         }
-        // 支持ID或UUID：过滤空白，逐个解析
-        List<Long> fieldIds = rawFieldIds.stream()
-                .filter(s -> s != null && !s.trim().isEmpty())
-                .map(String::trim)
-                .map(identifier -> {
-                    try {
-                        return idUuidConverter.resolveFieldId(identifier);
-                    } catch (Exception ex) {
-                        log.warn("解析字段标识符失败，已跳过: {}", identifier, ex);
-                        return null;
-                    }
-                })
-                .filter(Objects::nonNull)
-                .distinct()
-                .collect(Collectors.toList());
+        
         if (fieldIds.isEmpty()) {
             // 没有任何有效字段ID，直接返回空
             return new ArrayList<>();
@@ -2722,13 +2751,19 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         dataSelectionConfig.setTargetFieldUuid(relationship.getSelectFieldUuid());
         
         // 同时提供ID格式，兼容前端
+        // 通过UUID查询对应的实体和字段,获取其ID
         try {
-            Long targetEntityId = idUuidConverter.toEntityId(relationship.getTargetEntityUuid());
-            Long targetFieldId = idUuidConverter.toFieldId(relationship.getSelectFieldUuid());
-            dataSelectionConfig.setTargetEntityId(targetEntityId);
-            dataSelectionConfig.setTargetFieldId(targetFieldId);
+            MetadataBusinessEntityDO targetEntity = metadataBusinessEntityRepository.getByEntityUuid(relationship.getTargetEntityUuid());
+            if (targetEntity != null) {
+                dataSelectionConfig.setTargetEntityId(targetEntity.getId());
+            }
+            
+            MetadataEntityFieldDO selectField = metadataEntityFieldRepository.getByFieldUuid(relationship.getSelectFieldUuid());
+            if (selectField != null) {
+                dataSelectionConfig.setTargetFieldId(selectField.getId());
+            }
         } catch (Exception e) {
-            log.warn("转换UUID到ID失败: {}", e.getMessage());
+            log.warn("查询UUID对应的ID失败: {}", e.getMessage());
         }
         
         return dataSelectionConfig;
