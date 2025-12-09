@@ -34,7 +34,6 @@ public interface ErrorCodeConstants {
     ErrorCode FILE_TYPE_PDF_CONTENT_NOT_STANDARD = new ErrorCode(1_001_003_009, "PDF文件包含不合规范内容");
     ErrorCode FILE_CHECK_LIST_NOT_EXISTS = new ErrorCode(1_001_003_010, "文件上传检查项配置不能为空");
     ErrorCode FILE_DOWNLOAD_NOT_LOGIN = new ErrorCode(1_001_003_011, "当前用户未登录,无法下载该文件");
-    ErrorCode FILE_NOT_PERMISSION = new ErrorCode(1_001_003_012, "无权限获取文件：权限标识不匹配");
     ErrorCode FILE_NOT_DOWNLOAD = new ErrorCode(1_001_003_012, "无法获取文件：环境标识不匹配");
     ErrorCode FILE_PATH_NOT_EXISTS = new ErrorCode(1_001_003_013, "文件路径为空，该文件无法下载");
 
