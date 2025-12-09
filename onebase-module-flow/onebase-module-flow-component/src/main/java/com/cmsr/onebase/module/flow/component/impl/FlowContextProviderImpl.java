@@ -19,7 +19,7 @@ import java.time.temporal.ChronoUnit;
  */
 @Setter
 @Component
-public class ContextProviderImpl implements ContextProvider {
+public class FlowContextProviderImpl implements ContextProvider {
 
     public static final String EXECUTE_CONTEXT = "flow:executeContext:";
     public static final String VARIABLE_CONTEXT = "flow:variableContext:";

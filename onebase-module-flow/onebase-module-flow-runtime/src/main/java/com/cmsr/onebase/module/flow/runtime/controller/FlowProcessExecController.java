@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -36,9 +35,8 @@ public class FlowProcessExecController {
     @Operation(summary = "查询页面触发列表")
     public CommonResult<List<QueryFormTriggerRespVO>> queryFormTrigger(
             @RequestParam("pageId") Long pageId) {
-//        List<QueryFormTriggerRespVO> result = flowProcessExecService.queryFormTrigger(pageUuid);
-//        return CommonResult.success(result);
-        return CommonResult.success(Collections.emptyList());
+        List<QueryFormTriggerRespVO> result = flowProcessExecService.queryFormTrigger(pageId);
+        return CommonResult.success(result);
     }
 
     @PostMapping("/form/trigger")

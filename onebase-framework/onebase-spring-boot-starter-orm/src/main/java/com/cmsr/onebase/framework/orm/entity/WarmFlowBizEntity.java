@@ -14,6 +14,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class WarmFlowBizEntity extends WarmFlowBaseEntity {
+    public static final String APPLICATION_ID = "application_id";
+
+    public static final String VERSION_TAG = "version_tag";
+
 
     @Getter
     @Column(value = "application_id", comment = "应用ID")

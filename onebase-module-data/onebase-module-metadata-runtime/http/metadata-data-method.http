@@ -4,7 +4,7 @@
 
 @base = http://{{host}}:{{port}}{{prefix}}
 
-@appToken = 3788c7803faa4ed1830fcb591dc62d03
+@applicationId = 165601586846826496
 
 @tableName = r40c_guagua
 @tenantId = 160864959456706560
@@ -214,5 +214,30 @@ login-user: {"id":"155019577667616820","applicationId":"156456639374295040","ten
   }
 }
 
-# 示例 filters 结构：
-# { "id": 162745519484436480, "status": 1, "name": "客户", "updated_time": "2025-11-28", "amount": 100.00 }
+
+#### 语义创建（illt_main_table，外部环境示例）
+POST {{base}}/metadata/i1lt_main_table/create?menuId=167119376753917952
+Accept: application/json
+Content-Type: application/json
+X-Application-Id: 165601586846826496
+X-Tenant-Id: 153935442021842944
+login-user: {"id":"155019577667616820","applicationId":"165601586846826496","tenantId":"153935442021842944"}
+
+{
+  "describe": "",
+  "dataselect": { "id": "171333736107573248", "name": "数据源4" },
+  "name": "张三",
+  "age": 23,
+  "sex": "男"
+}
+
+
+### 语义创建（qxjh_personnel，本地环境示例）
+POST {{base}}/metadata/qxjh_personnel/create?menuId=172842180167696384
+Accept: application/json
+Content-Type: application/json
+login-user: {"id":"155019577667616820","applicationId":"167176259300786176","tenantId":"161009562416906240"}
+X-Application-Id: 167176259300786176
+X-Tenant-Id: 161009562416906240
+
+{"username":"6666666"}

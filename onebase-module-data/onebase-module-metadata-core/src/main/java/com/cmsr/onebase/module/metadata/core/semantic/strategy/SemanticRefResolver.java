@@ -19,6 +19,7 @@ import com.cmsr.onebase.module.system.api.dept.DeptApi;
 import com.cmsr.onebase.module.system.api.dept.dto.DeptRespDTO;
 import com.cmsr.onebase.module.system.api.dict.DictDataApi;
 import com.cmsr.onebase.framework.common.biz.system.dict.dto.DictDataRespDTO;
+import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.infra.api.file.FileApi;
 import com.cmsr.onebase.module.infra.api.file.dto.FileListRespDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dal.DynamicMetadataRepository;
@@ -464,6 +465,7 @@ public class SemanticRefResolver {
         Map<String, Set<Object>> idsByTable = collectDataSelectIdsByTable(value, metaByFieldUuid);
         Map<String, String> pkFieldByTable = buildPkFieldByTableFromMeta(metaByFieldUuid);
         Map<String, Map<Object, Row>> mainsByTable = buildMainsByTable(idsByTable, pkFieldByTable);
+        log.info("mainsByTable: {} , pkFieldByTable: {}, metaByFieldUuid: {}, idsByTable: {}", mainsByTable , pkFieldByTable, metaByFieldUuid, idsByTable);
         return new DataSelectionContext(metaByFieldUuid, mainsByTable);
     }
 
@@ -626,6 +628,11 @@ public class SemanticRefResolver {
         DataSelectionContext(Map<String, DataSelectMeta> metaByFieldUuid, Map<String, Map<Object, Row>> mainsByTable) {
             this.metaByFieldUuid = metaByFieldUuid;
             this.mainsByTable = mainsByTable;
+        }
+
+        @Override
+        public String toString() {
+            return JsonUtils.toJsonPrettyString(this);
         }
     }
 

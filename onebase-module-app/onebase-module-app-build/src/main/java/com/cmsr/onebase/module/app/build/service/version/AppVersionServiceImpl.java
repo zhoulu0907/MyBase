@@ -11,6 +11,8 @@ import com.cmsr.onebase.module.app.core.dal.database.version.AppVersionRepositor
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppVersionDO;
 import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
+import com.cmsr.onebase.module.bpm.api.datamanager.BpmDataManager;
+import com.cmsr.onebase.module.flow.api.FlowDataManager;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,6 +40,12 @@ public class AppVersionServiceImpl implements AppVersionService {
 
     @Autowired
     private AppDataManager appDataManager;
+
+    @Autowired
+    private BpmDataManager bpmDataManager;
+
+    @Autowired
+    private FlowDataManager flowDataManager;
 
     @Override
     public PageResult<VersionPageRespVO> getApplicationVersionPage(VersionPageReqVo listReqVo) {
@@ -75,8 +83,15 @@ public class AppVersionServiceImpl implements AppVersionService {
         // 因为第一次不存在versionTag=1，所以可以直接向下执行，不需要多做判断
         // 1. move runtime to history
         appDataManager.moveRuntimeToHistory(applicationId, runtimeVersionId);
+        bpmDataManager.moveRuntimeToHistory(applicationId, runtimeVersionId);
+        flowDataManager.moveRuntimeToHistory(applicationId, runtimeVersionId);
         // 2. copy edit to runtime
         appDataManager.copyEditToRuntime(applicationId);
+        bpmDataManager.copyEditToRuntime(applicationId);
+        flowDataManager.copyEditToRuntime(applicationId);
+
+        // 3. online services that required
+        flowDataManager.onlineRuntimeData(applicationId);
     }
 
     @Transactional
@@ -94,6 +109,7 @@ public class AppVersionServiceImpl implements AppVersionService {
         saveVersion(applicationId, targetVersionDO);
         // 1. backup runtime
         appDataManager.moveRuntimeToHistory(applicationId, runtimeVersionId);
+//        bpmDataManager.moveRuntimeToHistory(applicationId, runtimeVersionId);
         // 2. publish history
         appDataManager.copyHistoryToRuntime(applicationId, versionId);
     }

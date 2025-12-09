@@ -7,6 +7,7 @@ import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraphNode;
 import com.cmsr.onebase.module.flow.context.graph.NodeData;
 import com.cmsr.onebase.module.flow.context.graph.nodes.*;
+import com.cmsr.onebase.module.flow.context.provider.AppProvider;
 import com.cmsr.onebase.module.flow.context.provider.FieldTypeProvider;
 import com.cmsr.onebase.module.flow.core.config.FlowProperties;
 import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
@@ -27,13 +28,16 @@ import java.util.*;
  */
 @Setter
 @Component
-public class FieldTypeProviderImpl implements FieldTypeProvider {
+public class FlowFieldTypeProviderImpl implements FieldTypeProvider {
 
     @Autowired
     private SemanticDynamicDataApi semanticDynamicDataApi;
 
     @Autowired
     private FlowProperties flowProperties;
+
+//    @Autowired
+//    private AppProvider appProvider;
 
 
     @Override
@@ -69,6 +73,9 @@ public class FieldTypeProviderImpl implements FieldTypeProvider {
                 processConditionList(n.getFilterCondition(), arg, 2);
             } else if (nodeData instanceof StartFormNodeData n) {
                 processConditionList(n.getFilterCondition(), arg, 2);
+                if (arg instanceof Map fieldInfoMap) {
+
+                }
             } else if (nodeData instanceof SwitchCaseNodeData n) {
                 processConditionList(n.getFilterCondition(), arg, 3);
             }

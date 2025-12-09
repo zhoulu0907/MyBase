@@ -1,10 +1,10 @@
 package com.cmsr.onebase.module.flow.core.handler;
 
 import com.cmsr.onebase.framework.common.enums.VersionTagEnum;
-import com.cmsr.onebase.module.flow.core.graph.FlowProcessCache;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
 import com.cmsr.onebase.module.flow.context.graph.nodes.StartDateFieldNodeData;
 import com.cmsr.onebase.module.flow.context.graph.nodes.StartTimeNodeData;
+import com.cmsr.onebase.module.flow.core.config.FlowProperties;
 import com.cmsr.onebase.module.flow.core.config.FlowRuntimeCondition;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessDateFieldRepository;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
@@ -18,6 +18,7 @@ import com.cmsr.onebase.module.flow.core.enums.FlowTriggerTypeEnum;
 import com.cmsr.onebase.module.flow.core.flow.RemoteCallRequest;
 import com.cmsr.onebase.module.flow.core.graph.FlowChainBuilder;
 import com.cmsr.onebase.module.flow.core.graph.FlowGraphBuilder;
+import com.cmsr.onebase.module.flow.core.graph.FlowProcessCache;
 import com.cmsr.onebase.module.flow.core.job.JobClient;
 import com.cmsr.onebase.module.flow.core.job.JobCreateRequest;
 import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
@@ -68,6 +69,9 @@ public class FlowCacheHandler {
     @Autowired
     private RedissonClient redissonClient;
 
+    @Setter
+    @Autowired
+    private FlowProperties flowProperties;
 
     @Setter
     @Autowired
@@ -77,7 +81,7 @@ public class FlowCacheHandler {
         List<FlowProcessDO> flowProcessDOS = TenantManager.withoutTenantCondition(() ->
                 flowProcessRepository.findAllByEnableStatusAndVersionTag(
                         FlowEnableStatusEnum.ENABLE.getStatus(),
-                        VersionTagEnum.RUNTIME.getValue()
+                        flowProperties.getVersionTag()
                 ));
         for (FlowProcessDO flowProcessDO : flowProcessDOS) {
             try {
