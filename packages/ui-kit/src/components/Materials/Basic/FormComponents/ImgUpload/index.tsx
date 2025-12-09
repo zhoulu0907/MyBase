@@ -252,9 +252,10 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
             const { onProgress, onError, onSuccess, file } = option;
             try {
               const uploadImgUrl = await handleUpload(file, onProgress);
+              // TODO 文件上传文件id
               if (uploadImgUrl !== '') {
                 setImgUrl(uploadImgUrl);
-                onSuccess(uploadImgUrl);
+                onSuccess({fileId: uploadImgUrl});
               } else {
                 onError({
                   status: 'error',

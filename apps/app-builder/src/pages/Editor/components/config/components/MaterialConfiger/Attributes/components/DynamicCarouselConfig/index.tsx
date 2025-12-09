@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Input, Upload, Message, Popover } from '@arco-design/web-react';
 import { IconEdit, IconDelete } from '@arco-design/web-react/icon';
-import { uploadFile } from '@onebase/platform-center';
+import { uploadFile, getFileDetailById } from '@onebase/platform-center';
 import styles from '../../index.module.less';
 import { CONFIG_TYPES } from '@onebase/ui-kit';
 import { registerConfigRenderer } from '../../registry';
@@ -109,16 +109,17 @@ const DynamicCarouselConfig: React.FC<DynamicCarouselConfigProps> = ({ handlePro
             customRequest={async (option) => {
               const { onProgress, onError, onSuccess, file } = option;
               try {
-                const uploadImgUrl = await handleUpload(file, onProgress);
+                const fileId = await handleUpload(file, onProgress);
+                const uploadImgUrl = getFileDetailById(fileId);
                 if (uploadImgUrl !== '') {
                   const newImageInfo = {
-                    image: uploadImgUrl,
-                    tetx: '',
+                    fileId,
+                    text: file.name,
                     url: ''
                   };
                   setCarouselConfig((prev) => [...prev, newImageInfo]);
                   handlePropsChange(carouselKey, [...carouselConfig, newImageInfo]);
-                  onSuccess(uploadImgUrl);
+                  onSuccess(newImageInfo);
                 } else {
                   onError({
                     status: 'error',
@@ -148,7 +149,7 @@ const DynamicCarouselConfig: React.FC<DynamicCarouselConfigProps> = ({ handlePro
             content={
               <div className={styles.imagesForm}>
                 <FormItem label="图片">
-                  <img className={styles.uploadedImage} src={item.image} />
+                  <img className={styles.uploadedImage} src={getFileDetailById(item.fileId)} />
                 </FormItem>
                 <FormItem label="显示文案">
                   <Input.TextArea defaultValue={item.text} onChange={(value) => handleTextChange(value, index)} />
@@ -160,7 +161,7 @@ const DynamicCarouselConfig: React.FC<DynamicCarouselConfigProps> = ({ handlePro
             }
           >
             <div className={styles.imageBox}>
-              <img src={item.image} />
+              <img src={getFileDetailById(item.fileId)} />
               <IconEdit
                 className={styles.icon}
                 style={{
@@ -188,9 +189,6 @@ const DynamicCarouselConfig: React.FC<DynamicCarouselConfigProps> = ({ handlePro
 
 export default DynamicCarouselConfig;
 
-registerConfigRenderer(
-  CONFIG_TYPES.CAROUSEL,
-  ({ id, handlePropsChange, item, configs }) => (
-    <DynamicCarouselConfig id={id} handlePropsChange={handlePropsChange} item={item} configs={configs} />
-  )
-);
+registerConfigRenderer(CONFIG_TYPES.CAROUSEL, ({ id, handlePropsChange, item, configs }) => (
+  <DynamicCarouselConfig id={id} handlePropsChange={handlePropsChange} item={item} configs={configs} />
+));
