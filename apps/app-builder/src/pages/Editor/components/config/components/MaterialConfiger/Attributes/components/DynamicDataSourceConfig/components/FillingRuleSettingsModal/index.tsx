@@ -58,7 +58,14 @@ const FillingRuleSettingsModal: React.FC<FillingRuleSettingsModalProps> = ({
   useEffect(() => {
     const refactFieldOptions = [...fieldOptions].reduce((newOptions, item) => {
       const cpType = COMPONENT_MAP[item.fieldType];
-      const targetComponents = components.filter((item) => item.type === cpType);
+      console.log(Object.entries(pageComponentSchemas))
+      
+      const targetComponents = Object.entries(pageComponentSchemas).filter(([key,value]) => value.type === cpType).map(([key,value])=>{
+        return {
+          id: value.id,
+          displayName: value.config?.label?.text,
+        }
+      });
       newOptions.push({
         ...item,
         targetComponents,
@@ -323,9 +330,8 @@ const FillingRuleSettingsModal: React.FC<FillingRuleSettingsModalProps> = ({
                   getPopupContainer={getPopupContainer}
                   onChange={(v) => handleComChange(index, v)}
                   options={item.targetComponents.map((opt: any) => {
-                    const displayName = pageComponentSchemas[opt.id]?.config?.label?.text || opt.displayName;
                     return {
-                      label: displayName,
+                      label: opt.displayName,
                       value: opt.id
                     };
                   })}

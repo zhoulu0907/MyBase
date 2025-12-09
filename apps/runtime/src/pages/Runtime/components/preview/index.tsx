@@ -135,7 +135,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid })
         if (field.fieldType === ENTITY_FIELD_TYPE.IMAGE.VALUE || field.fieldType === ENTITY_FIELD_TYPE.FILE.VALUE) {
           // 图片、文件上传 数据处理 转换成后端需要的数据
           formData[field.fieldName] = (value || []).map((ele: any) => {
-            return { name: ele.name, id: ele.reponse?.fileId };
+            return { name: ele.name, id: ele.response?.fileId };
           });
         } else {
           formData[field.fieldName] = value || '';
@@ -169,7 +169,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid })
             ) {
               // 图片、文件上传 数据处理 转换成后端需要的数据
               temp[newKey] = (item[key] || []).map((ele: any) => {
-                return { name: ele.name, id: ele.reponse?.fileId };
+                return { name: ele.name, id: ele.response?.fileId };
               });
             } else {
               temp[newKey] = item[key];
