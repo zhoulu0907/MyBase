@@ -23,35 +23,12 @@ spring:
           connectionMinimumIdleSize: 2
           connectionPoolSize: 5
           database: 0
-  # Redis 配置。Redisson 默认的配置足够使用，一般不需要进行调优
-  data:
-    redis:
-      host: 10.0.104.38 # 地址
-      #host: 127.0.0.1 # 地址
-      port: 6379 # 端口
-      database: 0 # 数据库索引
-      #    password: dev # 密码，建议生产环境开启
-      timeout: 30000ms # 超时时间
-      connect-timeout: 30000 # 连接超时时间
-      lettuce:
-        pool:
-          max-active: 24    # 最大连接数，与错误信息中的24保持一致
-          max-idle: 2      # 最大空闲连接
-          min-idle: 2       # 最小空闲连接
-          max-wait: 10000ms # 最大等待时间
-          time-between-eviction-runs: 30s # 空闲连接检查间隔
 
 --- #################### 服务保障相关配置 ####################
-
 # Lock4j 配置项
 lock4j:
   acquire-timeout: 3000 # 获取分布式锁超时时间，默认为 3000 毫秒
   expire: 30000 # 分布式锁的超时时间，默认为 30 毫秒
-
-# 日志文件配置
-logging:
-  file:
-    name: ${user.home}/logs/${spring.application.name}.log # 日志文件名，全路径
 
 debug: false
 
