@@ -13,8 +13,8 @@ type TreeDataType = {
 };
 
 interface DeptTreeProps {
-  selectedDeptId?: number;
-  onDeptSelect: (deptId?: number) => void;
+  selectedDeptId?: string;
+  onDeptSelect: (deptId?: string) => void;
   totalUserCount?: number;
   treeData: DeptTree[];
   deptLoading?: boolean;
@@ -33,7 +33,7 @@ const DeptTreeCmp: React.FC<DeptTreeProps> = ({ selectedDeptId, onDeptSelect, to
   }, [selectedDeptId]);
 
   const handleSelect = (keys: string[]) => {
-    const deptId = keys.length > 0 ? Number(keys[0]) : undefined;
+    const deptId = keys.length > 0 ? keys[0] : undefined;
     onDeptSelect(deptId);
   };
 
