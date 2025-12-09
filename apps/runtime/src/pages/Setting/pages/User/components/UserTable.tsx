@@ -31,7 +31,7 @@ interface DataItem {
 }
 
 interface UserTableProps {
-  selectedDeptId?: number;
+  selectedDeptId?: string;
   deptTree: DataItem[]; // 部门树数据
   deptLoading: boolean; // 部门数据加载状态
   onRefreshDept: () => void;

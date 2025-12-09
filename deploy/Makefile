@@ -1,7 +1,7 @@
 # Docker 镜像配置
 REGISTRY ?=
 IMAGE_PREFIX ?= onebase-v3-fe
-VERSION ?= latest
+VERSION ?= v3.0.1
 SAVE_DIR ?= ./images
 PLATFORM ?= linux/arm64
 

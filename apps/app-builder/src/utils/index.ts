@@ -3,5 +3,5 @@ export const displayCorpLogo = (logoName?: string) => {
 };
 
 export const filterSpace = (value: string) => {
-  return value.replace(/\s+/g, '');
+  return value ? value.replace(/\s+/g, '') : '';
 };

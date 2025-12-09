@@ -1,7 +1,7 @@
 import { type ReactNode } from 'react';
 
 export const filterSpace = (value: string) => {
-  return value.replace(/\s+/g, '');
+  return value ? value.replace(/\s+/g, '') : '';
 };
 
 export const phoneReg = /^1[3-9]\d{9}$/;

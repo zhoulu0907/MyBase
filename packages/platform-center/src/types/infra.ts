@@ -10,5 +10,5 @@ export interface SecurityConfigItem {
 export interface GetTenantSecurityConfigParams {
   appId?: string;
   tenantId?: string;
-  categoryCode?: string;
+  categoryCode?: string[];
 }

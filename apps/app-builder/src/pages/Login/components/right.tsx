@@ -16,7 +16,8 @@ import {
   getTenantSecurityConfig,
   tenantLogin,
   type LoginRequest,
-  type TenantLoginResponse
+  type TenantLoginResponse,
+  type TenantSecurityConfig
 } from '@onebase/platform-center';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -65,10 +66,24 @@ const Right: React.FC = () => {
   const handleGetTenantSecurityConfig = async () => {
     const req = {
       tenantId: tenantId,
-      categoryCode: SECURITY_CATEGORY_MFA
+      categoryCode: [SECURITY_CATEGORY_MFA]
     };
-    const res = await getTenantSecurityConfig(req);
-    console.log(res);
+    const securityConfigs = await getTenantSecurityConfig(req);
+    console.log(securityConfigs);
+
+    if (securityConfigs) {
+      (securityConfigs as TenantSecurityConfig[]).forEach((config) => {
+        if (config.categoryCode === SECURITY_CATEGORY_MFA && config.securityConfigItemRespVO.length > 0) {
+          const securityConfigItem = config.securityConfigItemRespVO[0];
+          if (securityConfigItem.configValue.includes('phone')) {
+            console.log('phone');
+          }
+          if (securityConfigItem.configValue.includes('email')) {
+            console.log('email');
+          }
+        }
+      });
+    }
   };
 
   // 处理记住我状态变化

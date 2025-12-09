@@ -16,3 +16,7 @@ export const SECURITY_CATEGORY_MFA = 'MFA';
 export const SECURITY_CATEGORY_OAUTH2 = 'OAUTH2';
 /** 文件安全配置 */
 export const SECURITY_CATEGORY_FILE_SECURITY = 'FILE_SECURITY';
+
+export const SECURITY_CATEGORY_MFA_CODE_BACKUP_CODE_COUNT = 'backupCodeCount';
+export const SECURITY_CATEGORY_MFA_CODE_TRIGGER_SCENARIOS = 'triggerScenarios';
+export const SECURITY_CATEGORY_MFA_CODE_SUPPORTED_TYPES = 'supportedTypes';
