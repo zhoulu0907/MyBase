@@ -1,3 +1,6 @@
+import type { NodeInstance } from '@arco-design/web-react/es/Tree/interface';
+import type { DeptTree } from '@onebase/platform-center';
+
 export interface TreeNode {
   key?: number | string; // arco-design default tree props
   title?: string; // arco-design default tree props
@@ -109,4 +112,42 @@ export const treeFilter = <T = any>(
   }
 
   return loop(data);
+};
+
+export const renderDraggedTree = (
+  dragNode: NodeInstance | null,
+  dropNode: NodeInstance | null,
+  dropPosition: number,
+  treeData: DeptTree[]
+) => {
+  let data: DeptTree[] = treeData;
+  let dragItem: any;
+  const loop = (data: DeptTree[], key: string, callback: any) => {
+    data.some((item, index, arr) => {
+      if (item.key === key) {
+        callback(item, index, arr);
+        return true;
+      }
+      if (item.children) {
+        return loop(item.children, key, callback);
+      }
+    });
+  };
+  loop(data, dragNode?.props._key || '', (item: DeptTree, index: number, arr: DeptTree[]) => {
+    arr.splice(index, 1);
+    dragItem = item;
+    dragItem.className = 'tree-node-dropover';
+  });
+
+  if (dropPosition === 0) {
+    loop(data, dropNode?.props._key || '', (item: DeptTree) => {
+      item.children = item.children || [];
+      item.children.push(dragItem);
+    });
+  } else {
+    loop(data, dropNode?.props._key || '', (item: DeptTree, index: number, arr: DeptTree[]) => {
+      arr.splice(dropPosition < 0 ? index : index + 1, 0, dragItem);
+    });
+  }
+  return { data, dragItem };
 };
