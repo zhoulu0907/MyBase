@@ -4,7 +4,7 @@ import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import '../index.css';
 import styles from './index.module.css';
 import { type XCarouselConfig } from './schema';
-import { getFileDetailById } from '@onebase/platform-center';
+import { getFileUrlById } from '@onebase/platform-center';
 
 const XCarousel = memo((props: XCarouselConfig & { runtime?: boolean }) => {
   const {
@@ -50,7 +50,7 @@ const XCarousel = memo((props: XCarouselConfig & { runtime?: boolean }) => {
         >
           {carouselConfig.map((img, index) => (
             <div className={styles.imageWrapper} key={index} onClick={() => window.open(img.url)}>
-              <img className={styles.image} src={getFileDetailById(img.fileId)} style={{ objectFit: fillStyle }} />
+              <img className={styles.image} src={getFileUrlById(img.fileId)} style={{ objectFit: fillStyle }} />
               <div className={styles.text}>{img.text}</div>
             </div>
           ))}

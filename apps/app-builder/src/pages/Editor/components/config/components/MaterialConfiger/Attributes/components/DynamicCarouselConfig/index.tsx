@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Input, Upload, Message, Popover } from '@arco-design/web-react';
 import { IconEdit, IconDelete } from '@arco-design/web-react/icon';
-import { uploadFile, getFileDetailById } from '@onebase/platform-center';
+import { uploadFile, getFileUrlById } from '@onebase/platform-center';
 import styles from '../../index.module.less';
 import { CONFIG_TYPES } from '@onebase/ui-kit';
 import { registerConfigRenderer } from '../../registry';
@@ -110,7 +110,7 @@ const DynamicCarouselConfig: React.FC<DynamicCarouselConfigProps> = ({ handlePro
               const { onProgress, onError, onSuccess, file } = option;
               try {
                 const fileId = await handleUpload(file, onProgress);
-                const uploadImgUrl = getFileDetailById(fileId);
+                const uploadImgUrl = getFileUrlById(fileId);
                 if (uploadImgUrl !== '') {
                   const newImageInfo = {
                     fileId,
@@ -149,7 +149,7 @@ const DynamicCarouselConfig: React.FC<DynamicCarouselConfigProps> = ({ handlePro
             content={
               <div className={styles.imagesForm}>
                 <FormItem label="图片">
-                  <img className={styles.uploadedImage} src={getFileDetailById(item.fileId)} />
+                  <img className={styles.uploadedImage} src={getFileUrlById(item.fileId)} />
                 </FormItem>
                 <FormItem label="显示文案">
                   <Input.TextArea defaultValue={item.text} onChange={(value) => handleTextChange(value, index)} />
@@ -161,7 +161,7 @@ const DynamicCarouselConfig: React.FC<DynamicCarouselConfigProps> = ({ handlePro
             }
           >
             <div className={styles.imageBox}>
-              <img src={getFileDetailById(item.fileId)} />
+              <img src={getFileUrlById(item.fileId)} />
               <IconEdit
                 className={styles.icon}
                 style={{

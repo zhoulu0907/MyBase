@@ -1,6 +1,6 @@
 import { Form, Message, Upload } from '@arco-design/web-react';
 import { IconDelete } from '@arco-design/web-react/icon';
-import { uploadFile, getFileDetailById } from '@onebase/platform-center';
+import { uploadFile, getFileUrlById } from '@onebase/platform-center';
 import { CONFIG_TYPES } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
 import styles from '../../index.module.less';
@@ -24,7 +24,7 @@ const DynamicImageConfig: React.FC<DynamicImageConfigProps> = ({ handlePropsChan
 
   useEffect(() => {
     if (configs[imageKey]) {
-      const uploadImgUrl = getFileDetailById(configs[imageKey]);
+      const uploadImgUrl = getFileUrlById(configs[imageKey]);
       setImageConfig(uploadImgUrl);
     }
   }, [configs[imageKey]]);
@@ -74,7 +74,7 @@ const DynamicImageConfig: React.FC<DynamicImageConfigProps> = ({ handlePropsChan
 
                 try {
                   const fileId = await handleUpload(file, onProgress);
-                  const uploadImgUrl = getFileDetailById(fileId);
+                  const uploadImgUrl = getFileUrlById(fileId);
                   if (uploadImgUrl !== '') {
                     setImageConfig(uploadImgUrl);
                     handlePropsChange(imageKey, fileId);

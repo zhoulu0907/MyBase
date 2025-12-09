@@ -26,7 +26,7 @@ export const getFileListByIds = (ids: string[]) => {
   return envService.get(`/file/list-by-ids?ids=${ids}`);
 };
 // 获取文件内容
-export const getFileDetailById = (id: string) => {
+export const getFileUrlById = (id: string) => {
   const fileDetailUrl = (window as any).global_config?.FILE_DETAIL_URL;
   return `${fileDetailUrl}/${id}`;
 };

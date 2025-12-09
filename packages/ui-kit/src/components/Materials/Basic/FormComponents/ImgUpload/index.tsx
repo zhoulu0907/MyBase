@@ -1,9 +1,8 @@
 import { Form, Message, Upload, Progress, Modal, Grid, Card, Watermark } from '@arco-design/web-react';
 import { type UploadItem, type UploadListProps } from '@arco-design/web-react/lib/Upload';
 import { IconPlus, IconDelete, IconImage, IconEye, IconDownload, IconClose } from '@arco-design/web-react/icon';
-import { uploadFile } from '@onebase/platform-center';
+import { uploadFile, getFileUrlById } from '@onebase/platform-center';
 import { nanoid } from 'nanoid';
-import { downloadFileByUrl } from 'src/utils/downloadFile';
 import { memo, useEffect, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { STATUS_OPTIONS, STATUS_VALUES, UPLOAD_VALUES, UPLOAD_OPTIONS } from '../../../constants';
@@ -111,7 +110,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
                   <IconDownload
                     onClick={() => {
                       if (file.url && file.name) {
-                        downloadFileByUrl(file.url, file.name);
+                        // todo
                       }
                     }}
                   />

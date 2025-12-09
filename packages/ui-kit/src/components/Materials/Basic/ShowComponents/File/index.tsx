@@ -3,13 +3,13 @@ import { memo } from 'react';
 import { downloadFileByUrl } from 'src/utils/downloadFile';
 import './index.css';
 import { type XFileConfig } from './schema';
-import { getFileDetailById } from '@onebase/platform-center';
+import { getFileUrlById } from '@onebase/platform-center';
 
 const XFile = memo((props: XFileConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const { status, fillStyle, maxHeight, runtime = true, fileConfig } = props;
 
   const downloadFile = async (item: any) => {
-    const fileUrl = getFileDetailById(item.fileId)
+    const fileUrl = getFileUrlById(item.fileId)
     window.open(fileUrl,'_blank')
   };
 
