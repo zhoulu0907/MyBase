@@ -1,6 +1,7 @@
+import { isRuntimeEnv } from '@onebase/common';
 import { type PageParam } from '../types/common';
 import type { Permission, RoleForm, RoleVO, UpdateStatusForm } from '../types/role';
-import { systemService } from './clients';
+import { runtimeCorpService, systemService } from './clients';
 
 // 查询角色列表
 export const getRolePage = (params: PageParam) => {
@@ -9,7 +10,7 @@ export const getRolePage = (params: PageParam) => {
 
 // 查询角色（精简)列表
 export const getSimpleRoleList = (): Promise<RoleVO[]> => {
-  return systemService.get('/role/simple-list');
+  return (isRuntimeEnv() ? runtimeCorpService : systemService).get('/role/simple-list');
 };
 
 // 查询角色详情
