@@ -53,15 +53,4 @@ public class RuntimeCaptchaController {
         }
         return request.getRemoteAddr() + ua;
     }
-
-
-    @PostMapping({"/send-captcha-code"})
-    @Operation(summary = "向邮箱/手机发送验证码")
-    @PermitAll
-    @TenantIgnore
-    public CommonResult<Boolean> sendCaptchaCode(@RequestBody CaptchaReqVO reqVO) {
-
-        return success(true);
-    }
-
 }
