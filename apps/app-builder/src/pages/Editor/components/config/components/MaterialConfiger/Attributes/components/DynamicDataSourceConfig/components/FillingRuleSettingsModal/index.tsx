@@ -106,7 +106,7 @@ const FillingRuleSettingsModal: React.FC<FillingRuleSettingsModalProps> = ({
 
       // 当前优先选 componentID
       let componentID =
-        selectRule.find((rule) => rule.fieldId === select)?.componentID || option.targetComponents?.[0]?.id;
+        selectRule.find((rule) => rule.fieldId === select)?.selectComponentID || option.targetComponents?.[0]?.id;
 
       // 如果已被用过，则找同类型未用过的
       if (componentID && usedComponentIDs.has(componentID)) {
