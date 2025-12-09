@@ -41,7 +41,7 @@ public class FileController {
     @PostMapping("/upload")
     @Operation(summary = "上传文件", description = "模式一：后端上传文件")
     public CommonResult<String> uploadFile(@Valid FileUploadReqVO uploadReqVO) throws Exception {
-        if (FileVisitModeEnum.PERMISSION.getValue().equals(uploadReqVO.getVisitMode())){
+        if (FileVisitModeEnum.PERMISSION.getValue().equals(uploadReqVO.getVisitMode())) {
             return CommonResult.error(BAD_REQUEST);
         }
         MultipartFile file = uploadReqVO.getFile();

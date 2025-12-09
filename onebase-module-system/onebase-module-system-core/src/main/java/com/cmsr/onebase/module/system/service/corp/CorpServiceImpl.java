@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.system.service.corp;
 
-import com.alibaba.nacos.common.utils.CollectionUtils;
 import com.cmsr.onebase.framework.common.biz.system.dict.DictDataCommonApi;
 import com.cmsr.onebase.framework.common.biz.system.dict.dto.DictDataRespDTO;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
@@ -34,6 +33,7 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.DataRow;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -204,7 +204,7 @@ public class CorpServiceImpl implements CorpService {
 
     private void validCorpUserMinCountLimit(Integer userLimit, Long corpId) {
         // 获取已存在的空间用户数
-        Map<Long, Integer> existUserCountMap = userService.getCorpExistUserCountByCorpIds(CollectionUtils.list(corpId));
+        Map<Long, Integer> existUserCountMap = userService.getCorpExistUserCountByCorpIds(List.of(corpId));
         Integer existUserCountInt = existUserCountMap.get(corpId);
         int existUserCount = existUserCountInt != null ? existUserCountInt : 0;
         if (userLimit < existUserCount) {
