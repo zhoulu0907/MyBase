@@ -407,7 +407,7 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
             entityField.setValidationRules(null); // 系统字段暂不设置校验规则
             entityField.setVersionTag(0L); // 默认编辑态
             entityField.setApplicationId(appId);
-            entityField.setStatus(0); // 默认开启
+            entityField.setStatus(1); // 默认启用：1-启用，0-禁用
             entityField.setFieldCode(generateFieldCode(systemField.getFieldName())); // 生成字段编码
 
             metadataEntityFieldBuildService.createEntityFieldInternal(entityField);
@@ -956,6 +956,8 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
             ERFieldVO erField = BeanUtils.toBean(field, ERFieldVO.class, result -> {
                 // 手动设置 fieldId，因为数据库实体中是 id，而 VO 中是 fieldId
                 result.setFieldId(field.getId());
+                // 设置 fieldUuid
+                result.setFieldUuid(field.getFieldUuid());
             });
             
             // 填充选项信息（单选、多选字段）
