@@ -5,6 +5,7 @@ import { IconLock, IconUser } from '@arco-design/web-react/icon';
 import {
   getHashQueryParam,
   getOrCreateDeviceInfo,
+  SECURITY_CATEGORY_MFA,
   SliderCaptcha,
   TokenManager,
   type SliderCaptchaRef
@@ -12,6 +13,7 @@ import {
 import {
   checkCaptchaApi,
   getCaptchaApi,
+  getTenantSecurityConfig,
   tenantLogin,
   type LoginRequest,
   type TenantLoginResponse
@@ -47,6 +49,8 @@ const Right: React.FC = () => {
       accountForm.setFieldValue('account', savedAccount);
     }
 
+    // handleGetTenantSecurityConfig();
+
     // 如果已经登录了就自动跳转到首页
     // if (TokenManager.isTokenValid()) {
     //   const redirectURL = getHashQueryParam('redirectURL');
@@ -57,6 +61,15 @@ const Right: React.FC = () => {
     //   }
     // }
   }, []);
+
+  const handleGetTenantSecurityConfig = async () => {
+    const req = {
+      tenantId: tenantId,
+      categoryCode: SECURITY_CATEGORY_MFA
+    };
+    const res = await getTenantSecurityConfig(req);
+    console.log(res);
+  };
 
   // 处理记住我状态变化
   const handleRememberMeChange = (checked: boolean) => {
@@ -95,8 +108,6 @@ const Right: React.FC = () => {
       if (response.accessToken) {
         TokenManager.setCurIdentifyId(tenantId);
 
-        // 使用 TokenManager 存储 token 信息
-        console.log('response: ', response);
         TokenManager.setToken(
           {
             userId: response.userId,

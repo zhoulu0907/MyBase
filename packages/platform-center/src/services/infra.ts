@@ -1,5 +1,5 @@
 import { isRuntimeEnv } from '@onebase/common';
-import { BatchUpdateSecurityConfigsParams } from '../types';
+import { BatchUpdateSecurityConfigsParams, GetTenantSecurityConfigParams } from '../types';
 import { infraService, platformInfraService, runtimeInfraService } from './clients';
 
 export interface UploadProgressCallback {
@@ -35,4 +35,8 @@ export const getSecurityConfigItems = (categoryId: string) => {
 
 export const batchUpdateSecurityConfigs = (params: BatchUpdateSecurityConfigsParams) => {
   return infraService.post('/security-config/batch-update', params);
+};
+
+export const getTenantSecurityConfig = (params: GetTenantSecurityConfigParams) => {
+  return (isRuntimeEnv() ? runtimeInfraService : infraService).get('/security-config/get-tenant-items', params);
 };
