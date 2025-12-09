@@ -65,7 +65,6 @@ public class MetadataDatasourceCoreServiceImpl implements MetadataDatasourceCore
         datasource.setDatasourceType(datasourceType);
         datasource.setConfig(configJson);
         datasource.setDescription("系统默认数据源");
-        datasource.setVersionTag(1L);
         datasource.setDatasourceOrigin(0);
         datasource.setApplicationId(appId);
 

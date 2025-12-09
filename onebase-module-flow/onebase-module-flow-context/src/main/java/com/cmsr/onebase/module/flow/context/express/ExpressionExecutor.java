@@ -42,17 +42,16 @@ public class ExpressionExecutor implements Serializable {
      */
     public boolean evaluate(OrExpression orExpression, Map<String, Object> vars) {
         String fullExpression = null;
-        JexlExpression expression = null;
         try {
             fullExpression = buildConditionExpression(orExpression);
-            expression = jexlEngine.createExpression(fullExpression);
+            JexlExpression expression = jexlEngine.createExpression(fullExpression);
             MapContext jc = new MapContext(vars);
             Object result = expression.evaluate(jc);
             return result instanceof Boolean ? (Boolean) result : Boolean.FALSE;
         } catch (Exception e) {
             String msg = "表达式执行异常, 执行表达式:" + orExpression
                     + ", 输入条件:" + vars
-                    + ", 完整表达式:" + Objects.toString(expression, "");
+                    + ", 完整表达式:" + Objects.toString(fullExpression, "");
             throw new RuntimeException(msg, e);
         }
     }
@@ -261,7 +260,7 @@ public class ExpressionExecutor implements Serializable {
             return "null";
         }
         if (expressionItem.getOperatorType() == OperatorTypeEnum.VARIABLE) {
-            return expressionItem.getFieldValue().toString();
+            return formatItemKey(expressionItem.getFieldValue().toString());
         }
         if (expressionItem.getFieldValue() instanceof Collection) {
             return formatCollectionValue((Collection<?>) expressionItem.getFieldValue(), expressionItem);

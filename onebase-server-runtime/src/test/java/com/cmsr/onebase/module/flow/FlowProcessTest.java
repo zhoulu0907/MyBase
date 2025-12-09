@@ -79,14 +79,14 @@ public class FlowProcessTest {
         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
         reqDTO.setTraceId(UUID.randomUUID().toString());
         reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_CREATE);
-        reqDTO.setApplicationId(166945945974013952L);
-        reqDTO.setTableName("wcq9_student");
+        reqDTO.setApplicationId(173020283873034240L);
+        reqDTO.setTableName("xzqd_student");
         SemanticFieldValueDTO name = SemanticFieldValueDTO.ofType(SemanticFieldTypeEnum.TEXT);
         name.setFieldName("name");
         name.setRawValue("小");
         SemanticFieldValueDTO age = SemanticFieldValueDTO.ofType(SemanticFieldTypeEnum.NUMBER);
         age.setFieldName("age");
-        age.setRawValue(18);
+        age.setRawValue(8);
 
         reqDTO.setFieldData(List.of(name, age));
         EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
