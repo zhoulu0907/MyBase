@@ -51,9 +51,15 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
   useEffect(() => {
     let flag = false;
     const newFieldValue = (fieldValue || []).map((ele: any) => {
-      if (ele.url !== ele.response) {
+      if (ele.id) {
         flag = true;
-        return { ...ele, url: ele.response };
+        return {
+          uid: ele.id,
+          name: ele.name,
+          response: { fileId: ele.id },
+          url: { fileId: ele.id },
+          size: ele.size
+        };
       }
       return { ...ele };
     });
@@ -63,7 +69,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
   }, [fieldValue]);
 
   // 自定义文件列表展示
-  const renderUploadList = (filesList: UploadItem[], fileProps: UploadListProps) => {
+  const renderUploadList = (filesList: any[], fileProps: UploadListProps) => {
     if (listType == UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT]) {
       return (
         <div className="uplaodList-text">
@@ -73,7 +79,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
                 gap={[20, 20]}
                 content={imageHandle?.addWatermark && imageHandle.watermarkText ? imageHandle.watermarkText : ''}
               >
-                <img className="uplaodList-text-item-img" src={file.url} alt="" />
+                <img className="uplaodList-text-item-img" src={getFileUrlById(file.response?.fileId)} alt="" />
               </Watermark>
               <div className="uplaodList-text-item-name">{file.name}</div>
               {file.percent && file.percent !== 100 ? (
@@ -101,7 +107,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
                               imageHandle?.addWatermark && imageHandle.watermarkText ? imageHandle.watermarkText : ''
                             }
                           >
-                            <img src={file.url} width="100%" alt="" />
+                            <img src={getFileUrlById(file.response?.fileId)} width="100%" alt="" />
                           </Watermark>
                         )
                       });
@@ -139,7 +145,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
                     gap={[20, 20]}
                     content={imageHandle?.addWatermark && imageHandle.watermarkText ? imageHandle.watermarkText : ''}
                   >
-                    <img className="uplaodList-list-item-img" src={file.url} alt="" />
+                    <img className="uplaodList-list-item-img" src={getFileUrlById(file.response?.fileId)} alt="" />
                   </Watermark>
                   <div className="uplaodList-list-item-content">
                     <div className="uplaodList-list-item-name">{file.name}</div>
@@ -178,7 +184,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
                     gap={[20, 20]}
                     content={imageHandle?.addWatermark && imageHandle.watermarkText ? imageHandle.watermarkText : ''}
                   >
-                    <img src={file.url} alt="" />
+                    <img src={getFileUrlById(file.response?.fileId)} alt="" />
                   </Watermark>
                 </div>
               }
@@ -250,11 +256,12 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
           customRequest={async (option) => {
             const { onProgress, onError, onSuccess, file } = option;
             try {
-              const uploadImgUrl = await handleUpload(file, onProgress);
-              // TODO 文件上传文件id
+              const fileId = await handleUpload(file, onProgress);
+              const uploadImgUrl = await getFileUrlById(fileId);
+              // 文件上传文件id
               if (uploadImgUrl !== '') {
                 setImgUrl(uploadImgUrl);
-                onSuccess({fileId: uploadImgUrl});
+                onSuccess({ fileId: fileId });
               } else {
                 onError({
                   status: 'error',
