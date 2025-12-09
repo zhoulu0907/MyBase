@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.app.core.dal.database.resource;
 
 import com.cmsr.onebase.framework.orm.repo.BaseBizRepository;
+import com.cmsr.onebase.module.app.api.appresource.dto.PageRespDTO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePageDO;
 import com.cmsr.onebase.module.app.core.dal.mapper.AppResourcePageMapper;
 import com.cmsr.onebase.module.app.core.enums.appresource.PageEnum;
@@ -91,4 +92,10 @@ public class AppPageRepository extends BaseBizRepository<AppResourcePageMapper, 
         return getOne(queryWrapper);
     }
 
+    public PageRespDTO getByUuidInApplication(Long applicationId, String pageUuid) {
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_RESOURCE_PAGE.APPLICATION_ID.eq(applicationId))
+                .where(APP_RESOURCE_PAGE.PAGE_UUID.eq(pageUuid));
+        return this.getOneAs(queryWrapper, PageRespDTO.class);
+    }
 }

@@ -55,7 +55,7 @@ public class AppPageSetRepository extends BaseBizRepository<AppResourcePagesetMa
 //        remove(queryWrapper);
 //    }
 
-    public List<AppResourcePagesetDO> findByMenuUuidAndType(Long applicationId,List<String> menuUuids, Integer pageSetType) {
+    public List<AppResourcePagesetDO> findByMenuUuidAndType(Long applicationId, List<String> menuUuids, Integer pageSetType) {
         QueryWrapper queryWrapper = this.query()
                 .where(APP_RESOURCE_PAGESET.APPLICATION_ID.eq(applicationId))
                 .where(APP_RESOURCE_PAGESET.MENU_UUID.in(menuUuids))
@@ -69,5 +69,12 @@ public class AppPageSetRepository extends BaseBizRepository<AppResourcePagesetMa
                 .where(APP_RESOURCE_PAGESET.APPLICATION_ID.eq(applicationId))
                 .where(APP_RESOURCE_PAGESET.PAGESET_UUID.eq(pageSetUuid));
         return this.getObjAs(queryWrapper, String.class);
+    }
+
+    public AppResourcePagesetDO findByUuidInApplication(Long applicationId, String pageSetUuid) {
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_RESOURCE_PAGESET.APPLICATION_ID.eq(applicationId))
+                .where(APP_RESOURCE_PAGESET.PAGESET_UUID.eq(pageSetUuid));
+        return this.getOne(queryWrapper);
     }
 }
