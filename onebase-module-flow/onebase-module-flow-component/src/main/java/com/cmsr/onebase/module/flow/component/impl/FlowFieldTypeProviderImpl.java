@@ -8,6 +8,7 @@ import com.cmsr.onebase.module.flow.context.graph.JsonGraphNode;
 import com.cmsr.onebase.module.flow.context.graph.NodeData;
 import com.cmsr.onebase.module.flow.context.graph.nodes.*;
 import com.cmsr.onebase.module.flow.context.provider.FieldTypeProvider;
+import com.cmsr.onebase.module.flow.context.provider.FlowAppProvider;
 import com.cmsr.onebase.module.flow.core.config.FlowProperties;
 import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntitySchemaDTO;
@@ -36,52 +37,89 @@ public class FlowFieldTypeProviderImpl implements FieldTypeProvider {
     @Autowired
     private FlowProperties flowProperties;
 
-//    @Autowired
-//    private AppProvider appProvider;
+    @Autowired
+    private FlowAppProvider flowAppProvider;
 
 
     @Override
     public void completeFieldType(Long applicationId, JsonGraph jsonGraph) {
         Set<String> tableNames = new HashSet<>();
-        recursionUpdateFieldDataType(jsonGraph.getNodes(), tableNames);
+        recursionUpdateFieldDataType(applicationId, jsonGraph.getNodes(), tableNames);
         if (tableNames.isEmpty()) {
             return;
         }
-        Map<String, List<SemanticFieldSchemaDTO>> fieldInfoMap = findTableFieldSchema(applicationId, tableNames);
-        recursionUpdateFieldDataType(jsonGraph.getNodes(), fieldInfoMap);
+        Map<String, Map<String, SemanticFieldSchemaDTO>> fieldInfoMap = findTableFieldSchema(applicationId, tableNames);
+        recursionUpdateFieldDataType(applicationId, jsonGraph.getNodes(), fieldInfoMap);
     }
 
 
-    private void recursionUpdateFieldDataType(List<JsonGraphNode> nodes, Object arg) {
+    private void recursionUpdateFieldDataType(Long applicationId, List<JsonGraphNode> nodes, Object arg) {
         if (CollectionUtils.isEmpty(nodes)) {
             return;
         }
         for (JsonGraphNode node : nodes) {
             NodeData nodeData = node.getData();
-            if (nodeData instanceof IfCaseNodeData n) {
+            if (nodeData instanceof DataAddNodeData n) {
+                if (arg instanceof Set fieldNames) {
+                    fieldNames.add(n.resolveTargetTableName());
+                }
+            } else if (nodeData instanceof DataDeleteeNodeData n) {
+                if (arg instanceof Set fieldNames) {
+                    fieldNames.add(n.resolveTargetTableName());
+                }
+            } else if (nodeData instanceof DataQueryMultipleNodeData n) {
+                if (arg instanceof Set fieldNames) {
+                    fieldNames.add(n.resolveTargetTableName());
+                }
+            } else if (nodeData instanceof DataQueryNodeData n) {
+                if (arg instanceof Set fieldNames) {
+                    fieldNames.add(n.resolveTargetTableName());
+                }
+            } else if (nodeData instanceof DataUpdateNodeData n) {
+                if (arg instanceof Set fieldNames) {
+                    fieldNames.add(n.resolveTargetTableName());
+                }
+            } else if (nodeData instanceof IfCaseNodeData n) {
                 processConditionList(n.getFilterCondition(), arg, 3);
             } else if (nodeData instanceof StartDateFieldNodeData n) {
                 if (arg instanceof Set fieldNames) {
                     fieldNames.add(n.getTableName());
                 }
                 if (arg instanceof Map fieldInfoMap) {
-                    List<SemanticFieldSchemaDTO> fieldSchemaDTOS = (List<SemanticFieldSchemaDTO>) fieldInfoMap.get(n.getTableName());
-                    SemanticFieldTypeEnum fieldTypeEnum = findFieldTypeEnum(n.getOffsetFieldName(), fieldSchemaDTOS);
+                    SemanticFieldTypeEnum fieldTypeEnum = findFieldTypeEnum(n.getTableName(), n.getOffsetFieldName(), fieldInfoMap);
                     n.setOffsetFiledTypeEnum(fieldTypeEnum);
                 }
                 processConditionList(n.getFilterCondition(), arg, 2);
             } else if (nodeData instanceof StartEntityNodeData n) {
+                if (arg instanceof Set fieldNames) {
+                    fieldNames.add(n.getTableName());
+                }
                 processConditionList(n.getFilterCondition(), arg, 2);
             } else if (nodeData instanceof StartFormNodeData n) {
-                processConditionList(n.getFilterCondition(), arg, 2);
-                if (arg instanceof Map fieldInfoMap) {
-                    // TODO
+                if (n.getPageId() == null) {
+                    String pageUuid = n.getPageUuid();
+                    Long pageId = flowAppProvider.findPageIdByAppIdAndPageUuid(applicationId, pageUuid);
+                    n.setPageId(pageId);
                 }
+                if (n.getTableName() == null) {
+                    String pageUuid = n.getPageUuid();
+                    String tableName = flowAppProvider.findTableUuidByAppIdAndPageUuid(applicationId, pageUuid);
+                    n.setTableName(tableName);
+                }
+                if (arg instanceof Set fieldNames) {
+                    fieldNames.add(n.getTableName());
+                }
+                if (arg instanceof Map fieldInfoMap) {
+                    Map<String, SemanticFieldSchemaDTO> fieldSchemaMap = (Map<String, SemanticFieldSchemaDTO>) fieldInfoMap.get(n.getTableName());
+                    n.setFieldSchemaMap(fieldSchemaMap);
+                }
+                processConditionList(n.getFilterCondition(), arg, 2);
+
             } else if (nodeData instanceof SwitchCaseNodeData n) {
                 processConditionList(n.getFilterCondition(), arg, 3);
             }
             // 递归处理子节点
-            recursionUpdateFieldDataType(node.getBlocks(), arg);
+            recursionUpdateFieldDataType(applicationId, node.getBlocks(), arg);
         }
     }
 
@@ -117,19 +155,15 @@ public class FlowFieldTypeProviderImpl implements FieldTypeProvider {
             }
             String tableName = split[section - 2];
             String fieldName = split[section - 1];
-            if (arg instanceof Set fieldNames) {
-                fieldNames.add(tableName);
-            }
             if (arg instanceof Map fieldInfoMap) {
-                List<SemanticFieldSchemaDTO> fieldSchemaDTOS = (List<SemanticFieldSchemaDTO>) fieldInfoMap.get(tableName);
-                SemanticFieldTypeEnum fieldTypeEnum = findFieldTypeEnum(fieldName, fieldSchemaDTOS);
+                SemanticFieldTypeEnum fieldTypeEnum = findFieldTypeEnum(tableName, fieldName, fieldInfoMap);
                 conditionItem.setFieldTypeEnum(fieldTypeEnum);
             }
         }
     }
 
-    private Map<String, List<SemanticFieldSchemaDTO>> findTableFieldSchema(Long applicationId, Set<String> tableNames) {
-        Map<String, List<SemanticFieldSchemaDTO>> fieldInfoMap = new HashMap<>();
+    private Map<String, Map<String, SemanticFieldSchemaDTO>> findTableFieldSchema(Long applicationId, Set<String> tableNames) {
+        Map<String, Map<String, SemanticFieldSchemaDTO>> fieldInfoMap = new HashMap<>();
         for (String tableName : tableNames) {
             SemanticEntitySchemaDTO semanticEntitySchemaDTO = TenantManager.withoutTenantCondition(() -> ApplicationManager.withApplicationIdAndVersionTag(
                     applicationId,
@@ -137,18 +171,25 @@ public class FlowFieldTypeProviderImpl implements FieldTypeProvider {
                     () -> semanticDynamicDataApi.buildEntitySchemaByTableName(tableName)
             ));
             List<SemanticFieldSchemaDTO> fields = semanticEntitySchemaDTO.getFields();
-            fieldInfoMap.put(tableName, fields);
+            Map<String, SemanticFieldSchemaDTO> fieldMap = new HashMap<>();
+            for (SemanticFieldSchemaDTO field : fields) {
+                fieldMap.put(field.getFieldName(), field);
+            }
+            fieldInfoMap.put(tableName, fieldMap);
         }
         return fieldInfoMap;
     }
 
-    private SemanticFieldTypeEnum findFieldTypeEnum(String fieldName, List<SemanticFieldSchemaDTO> fieldSchemaDTOS) {
-        for (SemanticFieldSchemaDTO fieldSchemaDTO : fieldSchemaDTOS) {
-            if (fieldSchemaDTO.getFieldName().equals(fieldName)) {
-                return fieldSchemaDTO.getFieldTypeEnum();
-            }
+    private SemanticFieldTypeEnum findFieldTypeEnum(String tableName, String fieldName, Map<String, Map<String, SemanticFieldSchemaDTO>> fieldInfoMap) {
+        Map<String, SemanticFieldSchemaDTO> fieldSchemaMap = fieldInfoMap.get(tableName);
+        if (fieldSchemaMap == null) {
+            return SemanticFieldTypeEnum.TEXT;
         }
-        return SemanticFieldTypeEnum.TEXT;
+        SemanticFieldSchemaDTO semanticFieldSchemaDTO = fieldSchemaMap.get(fieldName);
+        if (semanticFieldSchemaDTO == null) {
+            return SemanticFieldTypeEnum.TEXT;
+        }
+        return semanticFieldSchemaDTO.getFieldTypeEnum();
     }
 
 }
