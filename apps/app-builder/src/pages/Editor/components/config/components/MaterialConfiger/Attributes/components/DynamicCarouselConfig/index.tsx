@@ -114,7 +114,7 @@ const DynamicCarouselConfig: React.FC<DynamicCarouselConfigProps> = ({ handlePro
                 if (uploadImgUrl !== '') {
                   const newImageInfo = {
                     fileId,
-                    text: file.name,
+                    text: '',
                     url: ''
                   };
                   setCarouselConfig((prev) => [...prev, newImageInfo]);
