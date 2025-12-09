@@ -1,3 +1,4 @@
+import { FormulaEditor } from '@/components/FormulaEditor';
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { triggerNodeOutputSignal } from '@/store/singals/trigger_node_output';
 import {
@@ -13,7 +14,7 @@ import {
   type FormInstance
 } from '@arco-design/web-react';
 import type { TreeSelectDataType } from '@arco-design/web-react/es/TreeSelect/interface';
-import { IconDelete, IconPlus } from '@arco-design/web-react/icon';
+import { IconDelete, IconLaunch, IconPlus } from '@arco-design/web-react/icon';
 import { FieldType, type AppEntityField, type ConditionField } from '@onebase/app';
 import { NodeType } from '@onebase/common';
 import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
@@ -30,11 +31,16 @@ export interface FieldEditorProps {
 
 const valueTypeOptions = [
   { label: '值', value: FieldType.VALUE },
-  { label: '变量', value: FieldType.VARIABLES }
+  { label: '变量', value: FieldType.VARIABLES },
+  { label: '公式', value: FieldType.FORMULA }
 ];
 
 const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId, dataNodeId }) => {
   const [selectedFields, setSelectedFields] = useState<any[]>();
+  const [formulaVisible, setFormulaVisible] = useState<boolean>(false);
+  const [formulaFieldKey, setFormulaFieldKey] = useState<string>('');
+  const [formulaData, setFormulaData] = useState<string>('');
+  const [currentFieldName, setCurrentFieldName] = useState<string>('');
 
   const fields = Form.useWatch('fields', form);
 
@@ -213,6 +219,20 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId, data
     return '';
   };
 
+  const handleFormulaConfirm = (formulaData: any, formattedFormula: string, params: any) => {
+    setFormulaVisible(false);
+    form.setFieldValue(formulaFieldKey, { formulaData: formulaData, formula: formattedFormula, parameters: params });
+    setFormulaData('');
+    setFormulaFieldKey('');
+  };
+
+  const openFormulaEditor = (fieldKey: string) => {
+    setCurrentFieldName(form.getFieldValue(fieldKey)?.field);
+    setFormulaVisible(true);
+    setFormulaData(form.getFieldValue(fieldKey)?.value?.formulaData);
+    setFormulaFieldKey(`${fieldKey}.value`);
+  };
+
   return (
     <div className={styles.conditionWrapper}>
       <Form.Item validateTrigger={['onChange']}>
@@ -280,6 +300,14 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId, data
                             />
                           </Form.Item>
                         )}
+                        {form.getFieldValue(item.field + '.operatorType') == FieldType.FORMULA && (
+                          <Form.Item field={item.field + '.value'}>
+                            <Button onClick={() => openFormulaEditor(item.field)} long>
+                              {form.getFieldValue(item.field + '.value') ? '已设置公式' : 'ƒx 编辑公式'}
+                              {form.getFieldValue(item.field + '.value') ? <IconLaunch /> : ''}
+                            </Button>
+                          </Form.Item>
+                        )}
                       </Grid.Col>
 
                       <Grid.Col span={2}>
@@ -312,6 +340,14 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId, data
           }}
         </Form.List>
       </Form.Item>
+
+      <FormulaEditor
+        fieldName={currentFieldName}
+        initialFormula={formulaData}
+        visible={formulaVisible}
+        onCancel={() => setFormulaVisible(false)}
+        onConfirm={handleFormulaConfirm}
+      />
     </div>
   );
 };
