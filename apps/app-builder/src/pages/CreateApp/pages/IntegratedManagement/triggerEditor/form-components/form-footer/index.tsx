@@ -148,10 +148,11 @@ export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
       switch (curNode.type) {
         case NodeType.LOOP:
           const originDataSource = getDataNodeSource(formInfo.dataNodeId);
+          console.log('originDataSource: ', originDataSource);
           const handleSetConditionFields = (conditionFields: ConditionField[]) => {
             updateLoopOutputs(curNode.id, conditionFields);
           };
-          getEntityFieldList(originDataSource, handleSetConditionFields, () => {});
+          getEntityFieldList(curAppId, originDataSource, handleSetConditionFields, () => {});
           break;
         case NodeType.DATA_ADD:
           const mainDataSource =
