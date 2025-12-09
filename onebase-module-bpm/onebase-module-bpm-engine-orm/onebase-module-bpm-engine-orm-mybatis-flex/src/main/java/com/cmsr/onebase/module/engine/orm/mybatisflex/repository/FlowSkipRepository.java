@@ -1,8 +1,8 @@
 package com.cmsr.onebase.module.engine.orm.mybatisflex.repository;
 
+import com.cmsr.onebase.framework.orm.repo.WarmFlowBaseBizRepository;
 import com.cmsr.onebase.module.engine.orm.mybatisflex.entity.FlowSkip;
 import com.cmsr.onebase.module.engine.orm.mybatisflex.mapper.FlowSkipMapper;
-import com.mybatisflex.spring.service.impl.ServiceImpl;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
  * @date 2025-09-29
  */
 @Repository
-public class FlowSkipRepository extends ServiceImpl<FlowSkipMapper, FlowSkip> {
+public class FlowSkipRepository extends WarmFlowBaseBizRepository<FlowSkipMapper, FlowSkip> {
 
 }
 
