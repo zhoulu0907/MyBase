@@ -3,21 +3,21 @@ package com.cmsr.onebase.module.flow.component.data;
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.module.flow.component.SkippableNodeComponent;
 import com.cmsr.onebase.module.flow.component.utils.VariableProvider;
-import com.cmsr.onebase.module.flow.context.provider.ConditionsProvider;
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
 import com.cmsr.onebase.module.flow.context.VariableContext;
 import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
 import com.cmsr.onebase.module.flow.context.express.ExpressionItem;
 import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
 import com.cmsr.onebase.module.flow.context.graph.nodes.DataAddNodeData;
+import com.cmsr.onebase.module.flow.context.provider.ConditionsProvider;
 import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntityValueDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticMergeConditionVO;
+import com.mybatisflex.core.tenant.TenantManager;
 import com.yomahub.liteflow.annotation.LiteflowComponent;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -53,14 +53,7 @@ public class DataAddNodeComponent extends SkippableNodeComponent {
         // 执行数据添加操作
         SemanticMergeConditionVO reqDTO = new SemanticMergeConditionVO();
         reqDTO.setTraceId(executeContext.getTraceId());
-        //
-        if (StringUtils.equalsIgnoreCase("mainTable", nodeData.getAddType())) {
-            reqDTO.setTableName(nodeData.getMainTableName());
-        } else if (StringUtils.equalsIgnoreCase("subTable", nodeData.getAddType())) {
-            reqDTO.setTableName(nodeData.getSubTableName());
-        } else {
-            throw new IllegalArgumentException("数据添加addType类型错误: " + nodeData.getAddType());
-        }
+        reqDTO.setTableName(nodeData.resolveTargetTableName());
         boolean batchType = nodeData.getBatchType();
         List<ConditionItem> conditionItems = nodeData.getFields();
         List<Map<String, Object>> reqDataList;
@@ -78,10 +71,10 @@ public class DataAddNodeComponent extends SkippableNodeComponent {
             executeContext.addLog("数据添加节点开始执行");
             for (Map<String, Object> reqData : reqDataList) {
                 reqDTO.setData(reqData);
-                SemanticEntityValueDTO respDTO = ApplicationManager.withApplicationIdAndVersionTag(
+                SemanticEntityValueDTO respDTO = TenantManager.withoutTenantCondition(() -> ApplicationManager.withApplicationIdAndVersionTag(
                         executeContext.getApplicationId(),
                         executeContext.getVersionTag(),
-                        () -> semanticDynamicDataApi.insertData(reqDTO));
+                        () -> semanticDynamicDataApi.insertData(reqDTO)));
                 respDTOSS.add(respDTO);
             }
             executeContext.addLog("数据添加节点结束执行, 响应结果数量: " + respDTOSS.size());
@@ -127,9 +120,11 @@ public class DataAddNodeComponent extends SkippableNodeComponent {
             return;
         }
         if (batchType) {
-            variableContext.putNodeVariables(this.getTag(), DataMethodApiHelper.convertToListMap(respDTOSS));
+            List<Map<String, Object>> result = DataMethodApiHelper.convertToListMap(respDTOSS);
+            variableContext.putNodeVariables(this.getTag(), result);
         } else {
-            variableContext.putNodeVariables(this.getTag(), DataMethodApiHelper.convertToMap(respDTOSS.get(0)));
+            Map<String, Object> result = DataMethodApiHelper.convertToMap(respDTOSS.get(0));
+            variableContext.putNodeVariables(this.getTag(), result);
         }
         log.debug("DataAddNodeComponent processResponse - 响应结果已添加到变量上下文中");
     }

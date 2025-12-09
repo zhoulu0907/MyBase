@@ -15,10 +15,10 @@ import com.cmsr.onebase.module.flow.context.provider.ConditionsProvider;
 import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntityValueDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticTargetConditionVO;
+import com.mybatisflex.core.tenant.TenantManager;
 import com.yomahub.liteflow.annotation.LiteflowComponent;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashMap;
@@ -51,13 +51,7 @@ public class DataUpdateNodeComponent extends SkippableNodeComponent {
         //
         SemanticTargetConditionVO reqDTO = new SemanticTargetConditionVO();
         reqDTO.setTraceId(executeContext.getTraceId());
-        if (StringUtils.equalsIgnoreCase("mainTable", nodeData.getUpdateType())) {
-            reqDTO.setTableName(nodeData.getMainTableName());
-        } else if (StringUtils.equalsIgnoreCase("subTable", nodeData.getUpdateType())) {
-            reqDTO.setTableName(nodeData.getSubTableName());
-        } else {
-            throw new IllegalArgumentException("updateType 类型错误: " + nodeData.getUpdateType());
-        }
+        reqDTO.setTableName(nodeData.resolveTargetTableName());
         //
         List<Conditions> conditions = nodeData.getFilterCondition();
         OrExpression orExpression = conditionsProvider.formatConditionsForValue(conditions, expressionContext);
@@ -66,10 +60,11 @@ public class DataUpdateNodeComponent extends SkippableNodeComponent {
         List<ConditionItem> fields = nodeData.getFields();
         reqDTO.setUpdateProperties(buildSingleReqData(fields, expressionContext));
         //
-        List<SemanticEntityValueDTO> respDTOSS = ApplicationManager.withApplicationIdAndVersionTag(
+        List<SemanticEntityValueDTO> respDTOSS = TenantManager.withoutTenantCondition(() -> ApplicationManager.withApplicationIdAndVersionTag(
                 executeContext.getApplicationId(),
                 executeContext.getVersionTag(),
-                () -> semanticDynamicDataApi.updateDataByCondition(reqDTO));
+                () -> semanticDynamicDataApi.updateDataByCondition(reqDTO)
+        ));
         executeContext.addLog("数据更新节点更新数据量: " + respDTOSS.size());
         variableContext.putNodeVariables(this.getTag(), DataMethodApiHelper.convertToListMap(respDTOSS));
     }

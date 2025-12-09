@@ -98,7 +98,15 @@ public enum SemanticOperatorEnum {
      * @Description: 不为空操作符
      * 用于判断某个字段是否不为空，类似于 SQL 中的 "IS NOT NULL" 或者 <> ''
      */
-    IS_NOT_EMPTY("不为空");
+    IS_NOT_EMPTY("不为空"),
+
+    /**
+     * 范围
+     * @Description: 范围操作符
+     * 用于判断某个字段是否在某个范围之内，类似于 SQL 中的 "BETWEEN" 或者 ">=" 和 "<="
+     */
+    RANGE("范围")
+    ;
 
     private final String description;
 

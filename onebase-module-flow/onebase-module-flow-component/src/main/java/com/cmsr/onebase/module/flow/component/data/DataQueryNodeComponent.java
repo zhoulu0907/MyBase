@@ -48,14 +48,9 @@ public class DataQueryNodeComponent extends SkippableNodeComponent {
         DataQueryNodeData nodeData = (DataQueryNodeData) executeContext.getNodeData(this.getTag());
         InLoopDepth inLoopDepth = nodeData.getInLoopDepth();
         Map<String, Object> expressionContext = VariableProvider.resolveLoopVariables(this, inLoopDepth, variableContext.getNodeVariables());
-
         // 转换成数据方法参数
         SemanticPageConditionVO reqDTO = new SemanticPageConditionVO();
-        if (StringUtils.equalsIgnoreCase("mainTable", nodeData.getDataType())) {
-            reqDTO.setTableName(nodeData.getMainTableName());
-        } else if (StringUtils.equalsIgnoreCase("subTable", nodeData.getDataType())) {
-            reqDTO.setTableName(nodeData.getSubTableName());
-        }
+        reqDTO.setTableName(nodeData.resolveTargetTableName());
         if (!StringUtils.equalsIgnoreCase("all", nodeData.getFilterType())) {
             List<Conditions> conditions = nodeData.getFilterCondition();
             OrExpression orExpression = conditionsProvider.formatConditionsForValue(conditions, expressionContext);

@@ -151,6 +151,7 @@ public class FlowCacheHandler {
             return;
         }
         String flowChain = FlowChainBuilder.toFlowChain(jsonGraph);
+        log.debug("flowChain:{}", flowChain);
         String chainId = FlowUtils.toFlowChainId(processDO.getId());
         LiteFlowChainELBuilder.createChain().setChainId(chainId).setEL(flowChain).build();
         //
