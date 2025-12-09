@@ -35,7 +35,7 @@ public class MetadataAutoNumberConfigRepository extends BaseBizRepository<Metada
     public List<MetadataAutoNumberConfigDO> listEnabledByFieldUuids(List<String> fieldUuids) {
         QueryWrapper queryWrapper = this.query()
                 .in(MetadataAutoNumberConfigDO::getFieldUuid, fieldUuids)
-                .eq(MetadataAutoNumberConfigDO::getIsEnabled, "1");
+                .eq(MetadataAutoNumberConfigDO::getIsEnabled, 1);
         return list(queryWrapper);
     }
 
@@ -86,8 +86,8 @@ public class MetadataAutoNumberConfigRepository extends BaseBizRepository<Metada
     @Deprecated
     public List<MetadataAutoNumberConfigDO> listEnabledByFieldIds(List<Long> fieldIds) {
         QueryWrapper queryWrapper = this.query()
-                .in(MetadataAutoNumberConfigDO::getFieldUuid, fieldIds.stream().map(String::valueOf).toList())
-                .eq(MetadataAutoNumberConfigDO::getIsEnabled, "1");
+                .in(MetadataAutoNumberConfigDO::getId, fieldIds)
+                .eq(MetadataAutoNumberConfigDO::getIsEnabled, 1);
         return list(queryWrapper);
     }
     /**

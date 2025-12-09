@@ -4,6 +4,7 @@ import cn.hutool.core.io.IoUtil;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.infra.dal.dataobject.file.FileDO;
 import com.cmsr.onebase.module.infra.dal.vo.file.file.FilePageReqVO;
 import com.cmsr.onebase.module.infra.dal.vo.file.file.FileRespVO;
@@ -40,7 +41,7 @@ public class FileController {
     @PostMapping("/upload")
     @Operation(summary = "上传文件", description = "模式一：后端上传文件")
     public CommonResult<String> uploadFile(@Valid FileUploadReqVO uploadReqVO) throws Exception {
-        if (FileVisitModeEnum.PERMISSION.getValue().equals(uploadReqVO.getVisitMode())){
+        if (FileVisitModeEnum.PERMISSION.getValue().equals(uploadReqVO.getVisitMode())) {
             return CommonResult.error(BAD_REQUEST);
         }
         MultipartFile file = uploadReqVO.getFile();
@@ -95,6 +96,7 @@ public class FileController {
     @GetMapping("/download/{id}")
     @Operation(summary = "获取文件内容")
     @PermitAll
+    @TenantIgnore
     @Parameter(name = "id", description = "文件编号", required = true)
     public void getFileContent(@PathVariable("id") Long id, HttpServletRequest request, HttpServletResponse response) throws Exception {
         fileService.getFileContent(id, request, response, null);
