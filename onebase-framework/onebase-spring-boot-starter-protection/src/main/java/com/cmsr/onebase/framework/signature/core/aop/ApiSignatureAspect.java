@@ -1,19 +1,19 @@
 package com.cmsr.onebase.framework.signature.core.aop;
 
-import com.cmsr.onebase.framework.common.exception.ServiceException;
-import com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstants;
-import cn.hutool.core.lang.Assert;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.DigestUtil;
+import com.cmsr.onebase.framework.common.exception.ServiceException;
+import com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstants;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.signature.core.annotation.ApiSignature;
 import com.cmsr.onebase.framework.signature.core.redis.ApiSignatureRedisDAO;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
@@ -37,6 +37,9 @@ public class ApiSignatureAspect {
 
     private final ApiSignatureRedisDAO signatureRedisDAO;
 
+    public static final String APP_KEY    = "onebase";
+    public static final String APP_SECRET = "ac47af767231f0d08e3787b7d032443a2c7baedaeee07d596cff4525b94ce6a7";
+
     @Before("@annotation(signature)")
     public void beforePointCut(JoinPoint joinPoint, ApiSignature signature) {
         // 1. 验证通过，直接结束
@@ -57,23 +60,22 @@ public class ApiSignatureAspect {
             return false;
         }
         // 1.2 校验 appId 是否能获取到对应的 appSecret
-        String appId = request.getHeader(signature.appId());
-        String appSecret = signatureRedisDAO.getAppSecret(appId);
-        Assert.notNull(appSecret, "[appId({})] 找不到对应的 appSecret", appId);
+        String appKey = APP_KEY;
+        String appSecret = APP_SECRET;
 
         // 2. 校验签名【重要！】
         String clientSignature = request.getHeader(signature.sign()); // 客户端签名
         String serverSignatureString = buildSignatureString(signature, request, appSecret); // 服务端签名字符串
         String serverSignature = DigestUtil.sha256Hex(serverSignatureString); // 服务端签名
         if (ObjUtil.notEqual(clientSignature, serverSignature)) {
-            return false;
+            throw new ServiceException(BAD_REQUEST.getCode(),"请求签名不正确");
         }
 
-        // 3. 将 nonce 记入缓存，防止重复使用（重点二：此处需要将 ttl 设定为允许 timestamp 时间差的值 x 2 ）
+        // 3. 将 nonce 记入缓存，防止重复使用（此处将 ttl 设定为允许 timestamp 时间差的值 x 2 ）
         String nonce = request.getHeader(signature.nonce());
-        if (BooleanUtil.isFalse(signatureRedisDAO.setNonce(appId, nonce, signature.timeout() * 2, signature.timeUnit()))) {
+        if (BooleanUtil.isFalse(signatureRedisDAO.setNonce(appKey, nonce, signature.timeout() * 2, signature.timeUnit()))) {
             String timestamp = request.getHeader(signature.timestamp());
-            log.info("[verifySignature][appId({}) timestamp({}) nonce({}) sign({}) 存在重复请求]", appId, timestamp, nonce, clientSignature);
+            log.info("[verifySignature][appId({}) timestamp({}) nonce({}) sign({}) 存在重复请求]", appKey, timestamp, nonce, clientSignature);
             throw new ServiceException(GlobalErrorCodeConstants.REPEATED_REQUESTS.getCode(), "存在重复请求");
         }
         return true;
@@ -93,33 +95,36 @@ public class ApiSignatureAspect {
      */
     private boolean verifyHeaders(ApiSignature signature, HttpServletRequest request) {
         // 1. 非空校验
-        String appId = request.getHeader(signature.appId());
-        if (StrUtil.isBlank(appId)) {
-            return false;
-        }
-        String timestamp = request.getHeader(signature.timestamp());
-        if (StrUtil.isBlank(timestamp)) {
-            return false;
-        }
-        String nonce = request.getHeader(signature.nonce());
-        if (StrUtil.length(nonce) < 10) {
-            return false;
-        }
+
+
         String sign = request.getHeader(signature.sign());
         if (StrUtil.isBlank(sign)) {
-            return false;
+            throw new ServiceException(BAD_REQUEST.getCode(),"API签名为空");
         }
 
-        // 2. 检查 timestamp 是否超出允许的范围 （重点一：此处需要取绝对值）
+        // 2. 检查 timestamp 是否超出允许的范围 （此处需要取绝对值）
+        String timestamp = request.getHeader(signature.timestamp());
+        if (StrUtil.isBlank(timestamp)) {
+            throw new ServiceException(BAD_REQUEST.getCode(),"请求时间为空");
+        }
         long expireTime = signature.timeUnit().toMillis(signature.timeout());
         long requestTimestamp = Long.parseLong(timestamp);
         long timestampDisparity = Math.abs(System.currentTimeMillis() - requestTimestamp);
         if (timestampDisparity > expireTime) {
-            return false;
+            throw new ServiceException(BAD_REQUEST.getCode(),"请求时间已过期");
         }
 
         // 3. 检查 nonce 是否存在，有且仅能使用一次
-        return signatureRedisDAO.getNonce(appId, nonce) == null;
+        String appId = APP_KEY;
+        String nonce = request.getHeader(signature.nonce());
+        if (StrUtil.length(nonce) < 10) {
+            throw new ServiceException(BAD_REQUEST.getCode(),"请求随机数过短");
+        }
+        String existNonce =  signatureRedisDAO.getNonce(appId, nonce);
+        if(StringUtils.isNotBlank(existNonce)){
+            throw new ServiceException(BAD_REQUEST.getCode(),"请求重复");
+        }
+        return true;
     }
 
     /**
@@ -151,7 +156,7 @@ public class ApiSignatureAspect {
      */
     private static SortedMap<String, String> getRequestHeaderMap(ApiSignature signature, HttpServletRequest request) {
         SortedMap<String, String> sortedMap = new TreeMap<>();
-        sortedMap.put(signature.appId(), request.getHeader(signature.appId()));
+        sortedMap.put(signature.appKey(), request.getHeader(signature.appKey()));
         sortedMap.put(signature.timestamp(), request.getHeader(signature.timestamp()));
         sortedMap.put(signature.nonce(), request.getHeader(signature.nonce()));
         return sortedMap;
