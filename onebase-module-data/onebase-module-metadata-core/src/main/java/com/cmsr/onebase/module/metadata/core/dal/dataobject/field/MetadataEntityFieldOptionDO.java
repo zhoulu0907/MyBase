@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.core.dal.dataobject.field;
 
+import com.cmsr.onebase.framework.orm.entity.BaseBizEntity;
 import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
@@ -17,7 +18,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Table(value = "metadata_entity_field_option")
-public class MetadataEntityFieldOptionDO extends BaseTenantEntity {
+public class MetadataEntityFieldOptionDO extends BaseBizEntity {
 
     /**
      * 选项UUID

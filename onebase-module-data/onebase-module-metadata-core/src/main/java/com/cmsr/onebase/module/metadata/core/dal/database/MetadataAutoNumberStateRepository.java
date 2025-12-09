@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.core.dal.database;
 
+import com.cmsr.onebase.framework.orm.repo.BaseBizRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.number.MetadataAutoNumberStateDO;
 import com.cmsr.onebase.module.metadata.core.dal.mapper.MetadataAutoNumberStateMapper;
 import com.mybatisflex.core.query.QueryWrapper;
@@ -13,7 +14,7 @@ import org.springframework.stereotype.Repository;
  * @date 2025-11-28
  */
 @Repository
-public class MetadataAutoNumberStateRepository extends ServiceImpl<MetadataAutoNumberStateMapper, MetadataAutoNumberStateDO> {
+public class MetadataAutoNumberStateRepository extends BaseBizRepository<MetadataAutoNumberStateMapper, MetadataAutoNumberStateDO> {
 
     /**
      * 根据配置UUID和周期键查询状态
