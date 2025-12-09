@@ -39,14 +39,6 @@
             <artifactId>onebase-spring-boot-starter-rpc</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.alibaba.cloud</groupId>
-            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.alibaba.cloud</groupId>
-            <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
@@ -70,19 +62,19 @@
             <scope>compile</scope>
         </dependency>
         <!--        <dependency>-->
-<!--            <groupId>com.cmsr.onebase</groupId>-->
-<!--            <artifactId>onebase-module-flow-core</artifactId>-->
-<!--            <version>${revision}</version>-->
-<!--        </dependency>-->
+        <!--            <groupId>com.cmsr.onebase</groupId>-->
+        <!--            <artifactId>onebase-module-flow-core</artifactId>-->
+        <!--            <version>${revision}</version>-->
+        <!--        </dependency>-->
     </dependencies>
 
     <build>
-    <finalName>${project.artifactId}</finalName>
-    <!-- 说明：runtime 模块作为被 onebase-server 聚合引用的普通业务模块，
-         不需要再次使用 spring-boot-maven-plugin 生成可执行 fat jar；
-         否则其产物为嵌套 Boot Jar(类位于内层 BOOT-INF/classes)，
-         被主应用打包后无法直接通过类路径扫描到 Controller，
-         导致 /admin-api/metadata/data-method/data/page 等接口在运行时缺失。
-         因此移除 repackage，仅输出普通依赖 jar。 -->
+        <finalName>${project.artifactId}</finalName>
+        <!-- 说明：runtime 模块作为被 onebase-server 聚合引用的普通业务模块，
+             不需要再次使用 spring-boot-maven-plugin 生成可执行 fat jar；
+             否则其产物为嵌套 Boot Jar(类位于内层 BOOT-INF/classes)，
+             被主应用打包后无法直接通过类路径扫描到 Controller，
+             导致 /admin-api/metadata/data-method/data/page 等接口在运行时缺失。
+             因此移除 repackage，仅输出普通依赖 jar。 -->
     </build>
 </project>

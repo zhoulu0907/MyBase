@@ -23,19 +23,24 @@
             <artifactId>onebase-module-app-core</artifactId>
             <version>${revision}</version>
         </dependency>
-         <dependency>
+        <dependency>
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-module-system-api</artifactId>
             <version>${revision}</version>
         </dependency>
-       <!-- <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-module-infra-api</artifactId>
-            <version>${revision}</version>
-        </dependency>-->
+        <!-- <dependency>
+             <groupId>com.cmsr.onebase</groupId>
+             <artifactId>onebase-module-infra-api</artifactId>
+             <version>${revision}</version>
+         </dependency>-->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-module-metadata-api</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-bpm-api</artifactId>
             <version>${revision}</version>
         </dependency>
 

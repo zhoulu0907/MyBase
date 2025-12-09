@@ -1,7 +1,9 @@
 package com.cmsr.onebase.module.flow.runtime.service;
 
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.flow.core.graph.FlowProcessCache;
+import com.cmsr.onebase.module.app.api.appresource.AppResourceApi;
+import com.cmsr.onebase.module.app.api.appresource.dto.PageRespDTO;
 import com.cmsr.onebase.module.flow.context.condition.ConditionsSupport;
 import com.cmsr.onebase.module.flow.context.enums.FieldTypeConvertor;
 import com.cmsr.onebase.module.flow.context.express.ExpressionExecutor;
@@ -10,6 +12,7 @@ import com.cmsr.onebase.module.flow.context.graph.nodes.ModalNodeData;
 import com.cmsr.onebase.module.flow.context.graph.nodes.StartFormNodeData;
 import com.cmsr.onebase.module.flow.core.flow.ExecutorResult;
 import com.cmsr.onebase.module.flow.core.flow.FlowProcessExecutor;
+import com.cmsr.onebase.module.flow.core.graph.FlowProcessCache;
 import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
 import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerReqVO;
 import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerRespVO;
@@ -38,26 +41,27 @@ import java.util.Map;
 public class FlowProcessExecServiceImpl implements FlowProcessExecService {
 
     @Autowired
-    private FlowProcessCache flowProcessCache;
-
-    @Autowired
     private FlowProcessExecutor flowProcessExecutor;
 
+    @Autowired
+    private AppResourceApi appResourceApi;
 
     private ExpressionExecutor expressionExecutor = new ExpressionExecutor();
 
     @Override
-    public List<QueryFormTriggerRespVO> queryFormTrigger(Long applicationId, String pageUuid) {
-        List<StartFormNodeData> startFormNodeDataList = flowProcessCache.findStartFormNodeDataByPageUuid(applicationId, pageUuid);
+    public List<QueryFormTriggerRespVO> queryFormTrigger(Long pageId) {
+        Long applicationId = ApplicationManager.getApplicationId();
+        PageRespDTO pageRespDTO = appResourceApi.findPageByPageId(pageId);
+        String pageUuid = pageRespDTO.getPageUuid();
+        List<StartFormNodeData> startFormNodeDataList = FlowProcessCache.findStartFormNodeDataByPageUuid(applicationId, pageUuid);
         return startFormNodeDataList.stream()
                 .map(startFormNodeData -> BeanUtils.toBean(startFormNodeData, QueryFormTriggerRespVO.class))
                 .toList();
     }
 
-
     @Override
     public FormTriggerRespVO triggerForm(FormTriggerReqVO reqVO) {
-        StartFormNodeData startFormNodeData = flowProcessCache.findStartFormNodeDataByProcessId(reqVO.getProcessId());
+        StartFormNodeData startFormNodeData = FlowProcessCache.findStartFormNodeDataByProcessId(reqVO.getProcessId());
         if (startFormNodeData == null) {
             FormTriggerRespVO vo = formNotTriggerRespVO();
             vo.setMessage("流程不存在");

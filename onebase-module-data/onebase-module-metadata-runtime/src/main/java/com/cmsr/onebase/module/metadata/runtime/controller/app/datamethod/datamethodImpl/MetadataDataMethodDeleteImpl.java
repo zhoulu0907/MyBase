@@ -403,9 +403,9 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
 
         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
         reqDTO.setTraceId(UUID.randomUUID().toString());
-        reqDTO.setEntityId(entityId);
-        reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_DELETE);
-        reqDTO.setFieldData(data);
+        // reqDTO.setEntityId(entityId);
+        // reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_DELETE);
+        // reqDTO.setFieldData(data);
         EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
         if(!respDTO.isTriggered()){
             log.info("BEFORE_DELETE 数据删除前置工作流未触发，实体Id：{} ，参数：{}，原因：{}", entityId,data,respDTO.getMessage());
@@ -429,9 +429,9 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
 
         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
         reqDTO.setTraceId(UUID.randomUUID().toString());
-        reqDTO.setEntityId(entityId);
-        reqDTO.setTriggerEvent(TriggerEventEnum.AFTER_DELETE);
-        reqDTO.setFieldData(data);
+        // reqDTO.setEntityId(entityId);
+        // reqDTO.setTriggerEvent(TriggerEventEnum.AFTER_DELETE);
+        // reqDTO.setFieldData(data);
         EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
         if(!respDTO.isTriggered()){
             log.info("AFTER_DELETE 数据删除后置工作流未触发，实体Id：{} ，参数：{}，原因：{}", entityId,data,respDTO.getMessage());

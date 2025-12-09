@@ -34,6 +34,7 @@ import java.util.stream.Collectors;
 @Setter
 @LiteflowComponent("javascript")
 public class ScriptNodeComponent extends SkippableNodeComponent {
+
     private static final String INVOKE_SUFFIX_URI = "/api/exec";
 
     @Value("${liteflow.js-server-address}")

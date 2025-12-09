@@ -16,15 +16,15 @@ import com.cmsr.onebase.module.app.core.dal.dataobject.*;
 import com.cmsr.onebase.module.app.core.enums.auth.AuthDefaultFactory;
 import com.cmsr.onebase.module.app.core.provider.AppCacheProvider;
 import com.cmsr.onebase.module.app.core.vo.auth.AuthPermissionReq;
-import com.cmsr.onebase.module.metadata.api.entity.MetadataEntityFieldApi;
-import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldQueryReqDTO;
-import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldRespDTO;
+import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntitySchemaDTO;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO;
 import com.fasterxml.jackson.core.type.TypeReference;
-import jakarta.annotation.Resource;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,34 +40,37 @@ import java.util.Objects;
 @Service
 public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
 
-    @Resource
+    @Autowired
     private AppAuthDataGroupRepository authDataGroupRepository;
 
-    @Resource
+    @Autowired
     private AppAuthPermissionRepository authPermissionRepository;
 
-    @Resource
+    @Autowired
     private AppAuthFieldRepository authFieldRepository;
 
-    @Resource
+    @Autowired
     private AppAuthViewRepository authViewRepository;
 
-    @Resource
+    @Autowired
     private AppPageSetRepository appPageSetRepository;
 
-    @Resource
+    @Autowired
     private AppPageRepository appPageRepository;
 
-    @Resource
+    @Autowired
     private AppCommonService appCommonService;
 
-    @Resource
-    private MetadataEntityFieldApi metadataEntityFieldApi;
+//    @Autowired
+//    private MetadataEntityFieldApi metadataEntityFieldApi;
 
-    @Resource
+    @Autowired
+    private SemanticDynamicDataApi semanticDynamicDataApi;
+
+    @Autowired
     private AppCacheProvider appCacheProvider;
 
-    @Resource
+    @Autowired
     private AppMenuRepository appMenuRepository;
 
     @Override
@@ -394,18 +397,16 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
     }
 
     private Pair<List<AuthFieldVO>, List<AuthFieldVO>> queryAuthFields(String entityUuid, AuthPermissionReq reqVO) {
-        List<EntityFieldRespDTO> entityFieldRespDTOS = getEntityFieldRespDTOS(entityUuid);
+        List<SemanticFieldSchemaDTO> entityFieldRespDTOS = getEntityFieldRespDTOS(entityUuid);
         List<AppAuthFieldDO> authFieldDOS = authFieldRepository.findByQuery(reqVO);
-        List<Pair<EntityFieldRespDTO, AppAuthFieldDO>> pairs = AuthUtils.leftOuterJoin(entityFieldRespDTOS, authFieldDOS,
-                //TODO 匹配字段用UUID
-                (entityFieldRespDTO, authFieldDO) -> Objects.equals(entityFieldRespDTO.getId().toString(), authFieldDO.getFieldUuid()));
+        List<Pair<SemanticFieldSchemaDTO, AppAuthFieldDO>> pairs = AuthUtils.leftOuterJoin(entityFieldRespDTOS, authFieldDOS,
+                (entityFieldRespDTO, authFieldDO) -> Objects.equals(entityFieldRespDTO.getFieldUuid(), authFieldDO.getFieldUuid()));
         List<AuthFieldVO> fieldVOS = pairs.stream().map(pair -> {
-            EntityFieldRespDTO entityField = pair.getLeft();
+            SemanticFieldSchemaDTO entityField = pair.getLeft();
             AppAuthFieldDO authFieldDO = pair.getRight();
             //
             AuthFieldVO authFieldVO = new AuthFieldVO();
-            //TODO 匹配字段用UUID
-            authFieldVO.setFieldUuid(entityField.getId().toString());
+            authFieldVO.setFieldUuid(entityField.getFieldUuid());
             authFieldVO.setFieldType(entityField.getFieldType());
             authFieldVO.setFieldDisplayName(entityField.getDisplayName());
             if (authFieldDO != null) {
@@ -425,13 +426,17 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
         return Pair.of(authFieldsRD, authFieldsDL);
     }
 
-    private List<EntityFieldRespDTO> getEntityFieldRespDTOS(String entityUuid) {
-        EntityFieldQueryReqDTO reqDTO = new EntityFieldQueryReqDTO();
-        //TODO 匹配字段用UUID
-        reqDTO.setEntityId(Long.parseLong(entityUuid));
-        reqDTO.setIsSystemField(0);
-        List<EntityFieldRespDTO> entityFieldRespDTOS = metadataEntityFieldApi.getEntityFieldList(reqDTO);
-        return entityFieldRespDTOS;
+    private List<SemanticFieldSchemaDTO> getEntityFieldRespDTOS(String entityUuid) {
+//        EntityFieldQueryReqDTO reqDTO = new EntityFieldQueryReqDTO();
+//        //TODO 匹配字段用UUID
+//        reqDTO.setEntityId(Long.parseLong(entityUuid));
+//        reqDTO.setIsSystemField(0);
+//        List<EntityFieldRespDTO> entityFieldRespDTOS = metadataEntityFieldApi.getEntityFieldList(reqDTO);
+//        return entityFieldRespDTOS;
+
+        SemanticEntitySchemaDTO semanticEntitySchemaDTO = semanticDynamicDataApi.buildEntitySchemaByUuid(entityUuid);
+        return semanticEntitySchemaDTO.getFields();
+
     }
 
 

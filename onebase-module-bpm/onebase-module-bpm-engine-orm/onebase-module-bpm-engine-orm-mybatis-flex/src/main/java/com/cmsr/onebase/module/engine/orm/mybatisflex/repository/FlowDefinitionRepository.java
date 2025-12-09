@@ -1,8 +1,8 @@
 package com.cmsr.onebase.module.engine.orm.mybatisflex.repository;
 
+import com.cmsr.onebase.framework.orm.repo.WarmFlowBaseBizRepository;
 import com.cmsr.onebase.module.engine.orm.mybatisflex.entity.FlowDefinition;
 import com.cmsr.onebase.module.engine.orm.mybatisflex.mapper.FlowDefinitionMapper;
-import com.mybatisflex.spring.service.impl.ServiceImpl;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
  * @date 2025-09-29
  */
 @Repository
-public class FlowDefinitionRepository extends ServiceImpl<FlowDefinitionMapper, FlowDefinition> {
+public class FlowDefinitionRepository extends WarmFlowBaseBizRepository<FlowDefinitionMapper, FlowDefinition> {
 
 }
 

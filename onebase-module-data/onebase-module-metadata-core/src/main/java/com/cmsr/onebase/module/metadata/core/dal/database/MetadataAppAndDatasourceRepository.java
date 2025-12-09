@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.core.dal.database;
 
+import com.cmsr.onebase.framework.orm.repo.BaseBizRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataAppAndDatasourceDO;
 import com.cmsr.onebase.module.metadata.core.dal.mapper.MetadataAppAndDatasourceMapper;
 import com.mybatisflex.core.query.QueryWrapper;
@@ -19,7 +20,7 @@ import java.util.List;
  */
 @Repository
 @Slf4j
-public class MetadataAppAndDatasourceRepository extends ServiceImpl<MetadataAppAndDatasourceMapper, MetadataAppAndDatasourceDO> {
+public class MetadataAppAndDatasourceRepository extends BaseBizRepository<MetadataAppAndDatasourceMapper, MetadataAppAndDatasourceDO> {
 
     /**
      * 根据应用ID获取关联的数据源UUID列表

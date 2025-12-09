@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.core.dal.database;
 
+import com.cmsr.onebase.framework.orm.repo.BaseBizRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationLengthDO;
 import com.cmsr.onebase.module.metadata.core.dal.mapper.MetadataValidationLengthMapper;
 import com.mybatisflex.core.query.QueryWrapper;
@@ -19,7 +20,7 @@ import java.util.List;
  */
 @Repository
 @Slf4j
-public class MetadataValidationLengthRepository extends ServiceImpl<MetadataValidationLengthMapper, MetadataValidationLengthDO> {
+public class MetadataValidationLengthRepository extends BaseBizRepository<MetadataValidationLengthMapper, MetadataValidationLengthDO> {
 
     /**
      * 根据字段UUID查询单条长度验证规则

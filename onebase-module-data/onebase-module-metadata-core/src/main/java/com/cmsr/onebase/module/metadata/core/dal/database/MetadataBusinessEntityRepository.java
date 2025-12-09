@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.metadata.core.dal.database;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.orm.repo.BaseBizRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.core.dal.mapper.MetadataBusinessEntityMapper;
 import com.mybatisflex.core.paginate.Page;
@@ -21,7 +22,7 @@ import java.util.List;
  */
 @Repository
 @Slf4j
-public class MetadataBusinessEntityRepository extends ServiceImpl<MetadataBusinessEntityMapper, MetadataBusinessEntityDO> {
+public class MetadataBusinessEntityRepository extends BaseBizRepository<MetadataBusinessEntityMapper, MetadataBusinessEntityDO> {
 
     /**
      * 根据ID获取业务实体

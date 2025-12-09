@@ -1,9 +1,9 @@
 package com.cmsr.onebase.module.metadata.core.dal.database;
 
+import com.cmsr.onebase.framework.orm.repo.BaseBizRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.number.MetadataAutoNumberConfigDO;
 import com.cmsr.onebase.module.metadata.core.dal.mapper.MetadataAutoNumberConfigMapper;
 import com.mybatisflex.core.query.QueryWrapper;
-import com.mybatisflex.spring.service.impl.ServiceImpl;
 
 import java.util.List;
 
@@ -18,7 +18,7 @@ import org.springframework.stereotype.Repository;
  * @date 2025-11-28
  */
 @Repository
-public class MetadataAutoNumberConfigRepository extends ServiceImpl<MetadataAutoNumberConfigMapper, MetadataAutoNumberConfigDO> {
+public class MetadataAutoNumberConfigRepository extends BaseBizRepository<MetadataAutoNumberConfigMapper, MetadataAutoNumberConfigDO> {
 
     /**
      * 根据字段UUID查询自动编号配置
@@ -35,7 +35,7 @@ public class MetadataAutoNumberConfigRepository extends ServiceImpl<MetadataAuto
     public List<MetadataAutoNumberConfigDO> listEnabledByFieldUuids(List<String> fieldUuids) {
         QueryWrapper queryWrapper = this.query()
                 .in(MetadataAutoNumberConfigDO::getFieldUuid, fieldUuids)
-                .eq(MetadataAutoNumberConfigDO::getIsEnabled, "1");
+                .eq(MetadataAutoNumberConfigDO::getIsEnabled, 1);
         return list(queryWrapper);
     }
 
@@ -86,8 +86,8 @@ public class MetadataAutoNumberConfigRepository extends ServiceImpl<MetadataAuto
     @Deprecated
     public List<MetadataAutoNumberConfigDO> listEnabledByFieldIds(List<Long> fieldIds) {
         QueryWrapper queryWrapper = this.query()
-                .in(MetadataAutoNumberConfigDO::getFieldUuid, fieldIds.stream().map(String::valueOf).toList())
-                .eq(MetadataAutoNumberConfigDO::getIsEnabled, "1");
+                .in(MetadataAutoNumberConfigDO::getId, fieldIds)
+                .eq(MetadataAutoNumberConfigDO::getIsEnabled, 1);
         return list(queryWrapper);
     }
     /**

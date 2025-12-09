@@ -89,6 +89,11 @@ public class PageServiceImpl implements PageService {
     }
 
     @Override
+    public String getMetadataByPageUuid(String pageUuid) {
+        return pageServiceProvider.getMetadataByPageUuid(pageUuid);
+    }
+
+    @Override
     public List<PageDTO> listPageView(Long pageSetId) {
         return pageServiceProvider.listPageView(pageSetId);
     }

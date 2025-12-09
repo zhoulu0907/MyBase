@@ -79,5 +79,4 @@ public class FlowProcessRepository extends BaseBizRepository<FlowProcessMapper, 
         return getMapper().selectListByQuery(query);
     }
 
-
 }

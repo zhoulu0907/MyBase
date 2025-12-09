@@ -12,6 +12,8 @@ import java.util.List;
  */
 public interface AppResourceApi {
 
+    PageRespDTO findPageByPageId(Long pageId);
+
     /**
      * 根据页面集ID查询页面
      *
@@ -63,4 +65,6 @@ public interface AppResourceApi {
      * @return 菜单
      */
     AppMenuRespDTO getAppMenuByUuidAndAppId(String menuUuid, Long applicationId);
+
+
 }

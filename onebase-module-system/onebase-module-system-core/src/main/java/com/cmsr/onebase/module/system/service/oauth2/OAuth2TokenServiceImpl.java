@@ -167,6 +167,7 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
         if (accessTokenDO == null) {
             throw exception(GlobalErrorCodeConstants.UNAUTHORIZED.getCode(), "访问令牌不存在");
         }
+        // 运行模式验证，不同环境TOKEN隔离，例如：空间的 token，不能访问平台的接口
         if(StringUtils.isNotBlank(runMode) && !runMode.equalsIgnoreCase(accessTokenDO.getRunMode())){
             throw exception(GlobalErrorCodeConstants.UNAUTHORIZED.getCode(), "访问令牌不存在(模式不匹配)");
         }

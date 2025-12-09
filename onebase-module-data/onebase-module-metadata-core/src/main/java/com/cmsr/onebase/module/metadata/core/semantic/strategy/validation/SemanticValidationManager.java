@@ -26,6 +26,7 @@ import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntityValueDTO
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticRelationSchemaDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticConnectorCardinalityEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.strategy.validation.impl.SemanticUniqueValidationService;
+import com.cmsr.onebase.module.metadata.core.semantic.strategy.validation.impl.SemanticChildNotEmptyValidationService;
 
 import jakarta.annotation.Resource;
 import com.mybatisflex.core.query.QueryWrapper;
@@ -111,6 +112,11 @@ public class SemanticValidationManager {
         // 统一在 buildContext 中完成规则查询与上下文构建
         SemanticValidationContext context = buildContext(recordDTO.getEntitySchema(), allFields, mainData);
         validateEntity(mainFields, mainData, operationType, context);
+
+        SemanticChildNotEmptyValidationService childService = getChildNotEmptyService();
+        if (childService != null) {
+            childService.validateChildEntities(recordDTO.getEntitySchema(), recordDTO.getEntityValue());
+        }
 
         Map<String, Object> row;
         SemanticEntityValueDTO value = recordDTO.getEntityValue();
@@ -222,6 +228,15 @@ public class SemanticValidationManager {
             }
         }
         return new SemanticUniqueValidationService();
+    }
+
+    private SemanticChildNotEmptyValidationService getChildNotEmptyService() {
+        for (SemanticValidationService s : validationServices) {
+            if (s instanceof SemanticChildNotEmptyValidationService c) {
+                return c;
+            }
+        }
+        return null;
     }
 
     /**

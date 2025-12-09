@@ -24,11 +24,11 @@ public class StartDateFieldNodeData extends NodeData implements Serializable {
     public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     /**
-     * 应用ID，后补充
+     * 应用ID，!!!后补充!!!
      */
     private Long applicationId;
     /**
-     * 流程ID，后补充
+     * 流程ID，!!!后补充!!!
      */
     private Long processId;
 
@@ -44,7 +44,7 @@ public class StartDateFieldNodeData extends NodeData implements Serializable {
 
 
     /**
-     * 偏移字段类型 ！！！ 数据库查询补充
+     * 偏移字段类型，!!!后补充!!!
      */
     private SemanticFieldTypeEnum offsetFiledTypeEnum;
 

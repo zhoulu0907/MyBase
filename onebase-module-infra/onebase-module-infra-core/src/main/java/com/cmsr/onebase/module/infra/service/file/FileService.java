@@ -5,6 +5,7 @@ import com.cmsr.onebase.module.infra.dal.dataobject.file.FileDO;
 import com.cmsr.onebase.module.infra.dal.vo.file.file.FileCreateReqVO;
 import com.cmsr.onebase.module.infra.dal.vo.file.file.FilePageReqVO;
 import com.cmsr.onebase.module.infra.dal.vo.file.file.FilePresignedUrlRespVO;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.NotEmpty;
 
@@ -35,7 +36,7 @@ public interface FileService {
      * @return 文件路径
      */
     String createFile(@NotEmpty(message = "文件内容不能为空") byte[] content,
-                      String name, String directory, String type);
+                      String name, String directory, String type, String visitMode);
 
     /**
      * 生成文件预签名地址信息
@@ -85,6 +86,6 @@ public interface FileService {
      * @param id 文件 ID
      * @return 文件信息
      */
-    void getFileContent(Long id, HttpServletResponse response) throws Exception;
+    void getFileContent(Long id, HttpServletRequest request, HttpServletResponse response, String visitMode) throws Exception;
 
 }

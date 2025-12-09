@@ -155,8 +155,9 @@ public abstract class AbstractInstanceDetailStrategy<T extends BaseNodeExtDTO> i
 
                     Set<String> nonSystemFieldNames = nonSystemFields.get(k);
 
-                    // 子表如果所有字段全部非系统字段全部隐藏，则直接移除数据
-                    if (v.containsAll(nonSystemFieldNames)) {
+                    // 子表如果所有非系统字段全部隐藏，则直接移除数据
+                    // 或者子表本身就是隐藏的，则直接移除数据
+                    if (v.containsAll(nonSystemFieldNames) || v.contains(k)) {
                         entityData.remove(k);
                     } else {
                         // 移除指定的字段值
