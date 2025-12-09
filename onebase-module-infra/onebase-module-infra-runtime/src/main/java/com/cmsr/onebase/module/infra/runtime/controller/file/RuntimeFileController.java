@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.infra.runtime.controller.file;
 import cn.hutool.core.io.IoUtil;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.infra.dal.dataobject.file.FileDO;
 import com.cmsr.onebase.module.infra.dal.vo.app.AppFileUploadReqVO;
 import com.cmsr.onebase.module.infra.dal.vo.file.file.FileListRespVO;
@@ -80,6 +81,7 @@ public class RuntimeFileController {
     @GetMapping("/download/{id}")
     @Operation(summary = "获取文件内容")
     @PermitAll
+    @TenantIgnore
     @Parameter(name = "id", description = "文件编号", required = true)
     public void getFileContent(@PathVariable("id") Long id, HttpServletRequest request, HttpServletResponse response) throws Exception {
         fileService.getFileContent(id, request, response, null);

@@ -95,6 +95,7 @@ public class FileController {
     @GetMapping("/download/{id}")
     @Operation(summary = "获取文件内容")
     @PermitAll
+    @TenantIgnore
     @Parameter(name = "id", description = "文件编号", required = true)
     public void getFileContent(@PathVariable("id") Long id, HttpServletRequest request, HttpServletResponse response) throws Exception {
         fileService.getFileContent(id, request, response, null);
