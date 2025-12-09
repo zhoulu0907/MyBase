@@ -129,6 +129,14 @@ public interface ErrorCodeConstants {
 
     ErrorCode MISSING_APPLICATION_ID = new ErrorCode(1_009_002_039, "缺少应用ID");
 
+    ErrorCode SUB_TABLE_NO_EDIT_PERMISSION_FIELDS = new ErrorCode(1_009_002_040, "子表没有编辑字段权限");
+
+    ErrorCode SUB_TABLE_NO_EDIT_PERMISSION = new ErrorCode(1_009_002_040, "子表没有编辑权限，无法新增或删除数据");
+
+    ErrorCode SUB_TABLE_DATA_ID_NOT_EXISTS = new ErrorCode(1_009_002_041, "子表数据ID不存在");
+
+    ErrorCode MAIN_TABLE_FIELD_NO_EDIT_PERMISSION = new ErrorCode(1_009_002_042, "主表字段没有编辑权限");
+
     // ============= 系统相关错误 =============
 
     ErrorCode DEPT_API_CALL_FAILED = new ErrorCode(1_009_003_001, "部门接口调用失败");

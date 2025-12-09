@@ -5,7 +5,7 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.common.util.string.UuidUtils;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
-import com.cmsr.onebase.module.flow.context.enums.FieldTypeEnum;
+//import com.cmsr.onebase.module.flow.context.enums.FieldTypeEnum;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.*;
 import com.cmsr.onebase.module.metadata.build.controller.admin.relationship.vo.EntityRelationshipSaveReqVO;
 import com.cmsr.onebase.module.metadata.build.service.entity.vo.EntityFieldQueryVO;
@@ -932,11 +932,31 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         }
 
         Long relationId = item.getDataSelectionConfig().getRelationId();
+        Long targetEntityId = item.getDataSelectionConfig().getTargetEntityId();
+        Long targetFieldId = item.getDataSelectionConfig().getTargetFieldId();
         String targetEntityUuid = item.getDataSelectionConfig().getTargetEntityUuid();
         String targetFieldUuid = item.getDataSelectionConfig().getTargetFieldUuid();
         
-        if (targetEntityUuid == null || targetFieldUuid == null) {
-            log.warn("数据选择配置不完整，跳过处理关系。sourceEntityUuid={}, fieldId={}", full.getEntityUuid(), fieldId);
+        // 兼容处理：优先使用UUID，如果UUID为空或空字符串则通过ID转换为UUID
+        if (targetEntityUuid == null || targetEntityUuid.trim().isEmpty()) {
+            if (targetEntityId != null) {
+                targetEntityUuid = idUuidConverter.toEntityUuid(targetEntityId.toString());
+                log.debug("通过targetEntityId={}转换得到targetEntityUuid={}", targetEntityId, targetEntityUuid);
+            }
+        }
+        
+        if (targetFieldUuid == null || targetFieldUuid.trim().isEmpty()) {
+            if (targetFieldId != null) {
+                targetFieldUuid = idUuidConverter.toFieldUuid(targetFieldId.toString());
+                log.debug("通过targetFieldId={}转换得到targetFieldUuid={}", targetFieldId, targetFieldUuid);
+            }
+        }
+        
+        // 检查转换后的UUID是否仍为空
+        if (targetEntityUuid == null || targetEntityUuid.trim().isEmpty() || 
+            targetFieldUuid == null || targetFieldUuid.trim().isEmpty()) {
+            log.warn("数据选择配置不完整，跳过处理关系。sourceEntityUuid={}, fieldId={}, targetEntityId={}, targetFieldId={}, targetEntityUuid={}, targetFieldUuid={}", 
+                    full.getEntityUuid(), fieldId, targetEntityId, targetFieldId, targetEntityUuid, targetFieldUuid);
             return;
         }
 
@@ -947,13 +967,14 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             existingRelation = metadataEntityRelationshipBuildService.findById(relationId);
         } else {
             // 如果没有传入relationId，则根据 sourceEntityUuid 和 sourceFieldUuid 查询（新增场景）
+            // 注意：现在sourceEntityUuid是当前实体，sourceFieldUuid是当前字段
             List<MetadataEntityRelationshipDO> existingRelations = 
-                    metadataEntityRelationshipBuildService.findBySourceEntityUuidAndTargetEntityUuid(null, full.getEntityUuid());
+                    metadataEntityRelationshipBuildService.findBySourceEntityUuidAndTargetEntityUuid(full.getEntityUuid(), null);
             if (existingRelations != null && !existingRelations.isEmpty()) {
-                // 过滤出 targetFieldUuid 匹配的关系
+                // 过滤出 sourceFieldUuid 匹配的关系
                 String fieldUuid = full.getFieldUuid();
                 for (MetadataEntityRelationshipDO rel : existingRelations) {
-                    if (rel.getTargetFieldUuid() != null && rel.getTargetFieldUuid().equals(fieldUuid)) {
+                    if (rel.getSourceFieldUuid() != null && rel.getSourceFieldUuid().equals(fieldUuid)) {
                         existingRelation = rel;
                         break;
                     }
@@ -969,23 +990,36 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             relationshipType = RelationshipTypeEnum.DATA_SELECT.getRelationshipType();
         }
 
+        // 查询目标实体的主键字段UUID
+        String targetEntityPrimaryKeyUuid = getPrimaryKeyFieldUuid(targetEntityUuid);
+        if (targetEntityPrimaryKeyUuid == null || targetEntityPrimaryKeyUuid.trim().isEmpty()) {
+            log.warn("目标实体没有主键字段，无法创建数据选择关系。targetEntityUuid={}", targetEntityUuid);
+            return;
+        }
+
         // 构建新的关系数据
+        // 数据选择关系的正确映射：
+        // - sourceEntityUuid: 当前实体（包含数据选择字段的实体）
+        // - targetEntityUuid: 被选择的实体（前端传入的targetEntityUuid）
+        // - sourceFieldUuid: 当前实体的数据选择字段UUID（full.getFieldUuid()）
+        // - targetFieldUuid: 被选择实体的主键字段UUID
+        // - selectFieldUuid: 被选择实体中用于展示的字段UUID（前端传入的targetFieldUuid）
         EntityRelationshipSaveReqVO r = new EntityRelationshipSaveReqVO();
         r.setRelationName("数据选择关系");
-        r.setSourceEntityUuid(targetEntityUuid);
-        r.setTargetEntityUuid(full.getEntityUuid());
+        r.setSourceEntityUuid(full.getEntityUuid());
+        r.setTargetEntityUuid(targetEntityUuid);
         r.setRelationshipType(relationshipType);
-        r.setSourceFieldUuid(targetFieldUuid);
-        r.setTargetFieldUuid(full.getFieldUuid());
+        r.setSourceFieldUuid(full.getFieldUuid());
+        r.setTargetFieldUuid(targetEntityPrimaryKeyUuid);
+        r.setSelectFieldUuid(targetFieldUuid);  // 前端传入的选择字段存到selectFieldUuid
         r.setCascadeType("READ");
         r.setDescription("数据选择关系");
         r.setApplicationId(appId);
 
         // 比较数据：如果数据库中的关系和请求的数据一样，则忽略
-        // 注意：前端传的targetEntityUuid/targetFieldUuid实际存储在关系的sourceEntityUuid/sourceFieldUuid字段中
         if (existingRelation != null) {
-            boolean isSame = Objects.equals(existingRelation.getSourceEntityUuid(), targetEntityUuid)
-                    && Objects.equals(existingRelation.getSourceFieldUuid(), targetFieldUuid);
+            boolean isSame = Objects.equals(existingRelation.getTargetEntityUuid(), targetEntityUuid)
+                    && Objects.equals(existingRelation.getSelectFieldUuid(), targetFieldUuid);
             
             if (isSame) {
                 log.debug("数据选择关系未变化，忽略更新。currentEntityUuid={}, fieldId={}, targetEntityUuid={}, targetFieldUuid={}",
@@ -993,17 +1027,48 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 return;
             } else {
                 // 数据不同，更新关系
-                log.info("数据选择关系已变化，更新关系。currentEntityUuid={}, fieldId={}, 原targetEntityUuid={}, 原targetFieldUuid={}, 新targetEntityUuid={}, 新targetFieldUuid={}",
-                        full.getEntityUuid(), fieldId, existingRelation.getSourceEntityUuid(), existingRelation.getSourceFieldUuid(),
+                log.info("数据选择关系已变化，更新关系。currentEntityUuid={}, fieldId={}, 原targetEntityUuid={}, 原selectFieldUuid={}, 新targetEntityUuid={}, 新selectFieldUuid={}",
+                        full.getEntityUuid(), fieldId, existingRelation.getTargetEntityUuid(), existingRelation.getSelectFieldUuid(),
                         targetEntityUuid, targetFieldUuid);
                 r.setId(existingRelation.getId().toString());
                 metadataEntityRelationshipBuildService.updateEntityRelationship(r);
             }
         } else {
             // 不存在关系，创建新关系
-            log.info("创建新的数据选择关系。sourceEntityUuid={}, fieldId={}, targetEntityUuid={}, targetFieldUuid={}",
-                    full.getEntityUuid(), fieldId, targetEntityUuid, targetFieldUuid);
+            log.info("创建新的数据选择关系。sourceEntityUuid={}, sourceFieldUuid={}, targetEntityUuid={}, targetFieldUuid={}, selectFieldUuid={}",
+                    full.getEntityUuid(), full.getFieldUuid(), targetEntityUuid, targetEntityPrimaryKeyUuid, targetFieldUuid);
             metadataEntityRelationshipBuildService.createEntityRelationship(r);
+        }
+    }
+
+    /**
+     * 获取实体的主键字段UUID
+     *
+     * @param entityUuid 实体UUID
+     * @return 主键字段UUID，如果没有主键则返回null
+     */
+    private String getPrimaryKeyFieldUuid(String entityUuid) {
+        try {
+            // 查询该实体的所有字段
+            QueryWrapper queryWrapper = QueryWrapper.create()
+                    .eq(MetadataEntityFieldDO::getEntityUuid, entityUuid)
+                    .eq(MetadataEntityFieldDO::getIsPrimaryKey, StatusEnumUtil.YES)  // 1表示是主键
+                    .orderBy(MetadataEntityFieldDO::getSortOrder, true);
+
+            List<MetadataEntityFieldDO> primaryKeyFields = metadataEntityFieldRepository.list(queryWrapper);
+            
+            if (primaryKeyFields != null && !primaryKeyFields.isEmpty()) {
+                // 返回第一个主键字段的UUID
+                String pkUuid = primaryKeyFields.get(0).getFieldUuid();
+                log.debug("找到实体{}的主键字段UUID: {}", entityUuid, pkUuid);
+                return pkUuid;
+            } else {
+                log.warn("实体{}没有主键字段", entityUuid);
+                return null;
+            }
+        } catch (Exception e) {
+            log.error("获取实体{}的主键字段UUID失败: {}", entityUuid, e.getMessage(), e);
+            return null;
         }
     }
 
@@ -1488,6 +1553,19 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                     return null;
                 }
 
+                // 根据数据库类型选择不同的策略
+                String datasourceType = datasource.getDatasourceType();
+                DatabaseType dbType = DatabaseType.valueOf(datasourceType);
+
+                if (dbType == DatabaseType.PostgreSQL || dbType == DatabaseType.KingBase) {
+                    // PostgreSQL/KingBase：使用手动 DDL（解决保留字和类型兼容性问题）
+                    String ddl = generateAddColumnDDL(tableName, field);
+                    AnylineDdlHelper.executeDDL(service, ddl);
+                    AnylineDdlHelper.clearMetadataCache();
+                    log.info("成功为表 {} 添加列: {} (使用自定义DDL)", tableName, field.getFieldName());
+                    return null;
+                }
+
                 // 使用 Anyline 原生 API 构建 Column 对象
                 String columnType = mapFieldType(field.getFieldType(), field.getDataLength());
                 boolean nullable = field.getIsRequired() == null || !BooleanStatusEnum.isYes(field.getIsRequired());
@@ -1597,16 +1675,21 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 }
 
                 // 检查列是否存在，避免元数据与物理表不一致导致的问题
-                boolean columnExists = AnylineDdlHelper.columnExists(service, tableName, field.getFieldName());
+                String fieldName = field.getFieldName();
+                // 修复 PostgreSQL 保留字 user 导致的问题
+                if ("user".equalsIgnoreCase(fieldName)) {
+                    fieldName = "\"" + fieldName + "\"";
+                }
+                boolean columnExists = AnylineDdlHelper.columnExists(service, tableName, fieldName);
 
                 if (!columnExists) {
                     // 列不存在，应该使用ADD操作而非ALTER
                     log.warn("准备修改表 {} 的列 {} 时发现列不存在（字段ID: {}），将改为新增列操作",
-                            tableName, field.getFieldName(), field.getId());
+                            tableName, fieldName, field.getId());
                     addColumnToTable(datasource, tableName, field);
                 } else {
                     // 列存在，正常执行ALTER操作
-                    log.info("准备修改表 {} 的列: {}, 字段ID: {}", tableName, field.getFieldName(), field.getId());
+                    log.info("准备修改表 {} 的列: {}, 字段ID: {}", tableName, fieldName, field.getId());
 
                     // 根据数据库类型选择不同的策略
                     String datasourceType = datasource.getDatasourceType();
@@ -1618,10 +1701,10 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                     } else {
                         // PostgreSQL/KingBase：使用手动 DDL（需要 USING 子句处理类型转换）
                         String alterColumnDDL = generateAlterColumnDDL(datasourceType, tableName, field);
-                        AnylineDdlHelper.alterColumnWithDDL(service, tableName, field.getFieldName(), alterColumnDDL);
+                        AnylineDdlHelper.alterColumnWithDDL(service, tableName, fieldName, alterColumnDDL);
                     }
 
-                    log.info("成功修改表 {} 的列: {}", tableName, field.getFieldName());
+                    log.info("成功修改表 {} 的列: {}", tableName, fieldName);
                 }
                 return null;
             });

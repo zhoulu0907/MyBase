@@ -8,7 +8,6 @@ import com.mybatisflex.core.query.QueryWrapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Repository;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -84,5 +83,12 @@ public class AppPageRepository extends BaseBizRepository<AppResourcePageMapper, 
         return this.objListAs(queryWrapper, Long.class);
     }
 
+
+    public AppResourcePageDO findByAppIdAndPageUuid(Long applicationId, String pageUuid) {
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_RESOURCE_PAGE.APPLICATION_ID.eq(applicationId))
+                .where(APP_RESOURCE_PAGE.PAGE_UUID.eq(pageUuid));
+        return getOne(queryWrapper);
+    }
 
 }

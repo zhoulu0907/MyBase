@@ -15,13 +15,16 @@ import java.util.List;
 public class StartFormNodeData extends NodeData implements Serializable {
 
     /**
-     * 应用ID
+     * 应用ID，!!!后补充!!!
      */
     private Long applicationId;
     /**
-     * 流程ID，后补充
+     * 流程ID，!!!后补充!!!
      */
     private Long processId;
+
+
+
 
     private String triggerRange;
 
@@ -29,12 +32,7 @@ public class StartFormNodeData extends NodeData implements Serializable {
 
     private String fieldTriggerEvents;
 
-    private Long pageId;
-
-    /**
-     * 前端组件的Id，所以是字符串
-     */
-    private String fieldId;
+    private String pageUuid;
 
     private Boolean isChildTriggerAllowed;
 

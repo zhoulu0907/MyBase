@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.core.dal.database;
 
+import com.cmsr.onebase.framework.orm.repo.BaseBizRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationChildNotEmptyDO;
 import com.cmsr.onebase.module.metadata.core.dal.mapper.MetadataValidationChildNotEmptyMapper;
 import com.mybatisflex.core.query.QueryWrapper;
@@ -17,7 +18,7 @@ import java.util.List;
  */
 @Repository
 @Slf4j
-public class MetadataValidationChildNotEmptyRepository extends ServiceImpl<MetadataValidationChildNotEmptyMapper, MetadataValidationChildNotEmptyDO> {
+public class MetadataValidationChildNotEmptyRepository extends BaseBizRepository<MetadataValidationChildNotEmptyMapper, MetadataValidationChildNotEmptyDO> {
 
     /**
      * 根据字段UUID查询单条子记录非空验证规则

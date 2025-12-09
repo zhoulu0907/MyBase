@@ -1,14 +1,10 @@
 package com.cmsr.onebase.module.bpm.runtime.helper;
 
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
-import com.cmsr.onebase.module.bpm.core.dto.node.base.FieldPermCfgDTO;
-import com.cmsr.onebase.module.bpm.core.enums.FieldPermTypeEnum;
 import com.cmsr.onebase.module.bpm.runtime.vo.EntityVO;
 import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
-import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntitySchemaDTO;
-import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntityValueDTO;
-import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO;
-import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticRelationSchemaDTO;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.*;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticMergeConditionVO;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticTargetBodyVO;
 import jakarta.annotation.Resource;
@@ -36,33 +32,6 @@ public class BpmEntityHelper {
 
     @Resource
     private SemanticDynamicDataApi semanticDynamicDataApi;
-
-    /**
-     * 根据表名构建实体元数据 Schema
-     *
-     * @param tableName 表名
-     * @return 实体 Schema
-     */
-    public SemanticEntitySchemaDTO buildSchemaByTableName(String tableName) {
-        return semanticDynamicDataApi.buildEntitySchemaByTableName(tableName);
-    }
-
-    /**
-     * 根据表名构建实体 Schema，并校验实体 UUID 是否与菜单绑定实体一致
-     *
-     * @param tableName         表名
-     * @param expectedEntityUuid 菜单绑定的实体 UUID
-     * @return 实体 Schema
-     */
-    public SemanticEntitySchemaDTO buildAndValidateSchema(String tableName, String expectedEntityUuid) {
-        SemanticEntitySchemaDTO schemaDTO = semanticDynamicDataApi.buildEntitySchemaByTableName(tableName);
-
-        if (schemaDTO == null || !Objects.equals(schemaDTO.getEntityUuid(), expectedEntityUuid)) {
-            throw exception(ErrorCodeConstants.INVALID_ENTITY_TABLE_NAME);
-        }
-
-        return schemaDTO;
-    }
 
     /**
      * 插入实体数据
@@ -134,53 +103,6 @@ public class BpmEntityHelper {
         semanticDynamicDataApi.updateDataById(updateDataReqVO);
     }
 
-    public void filterEntityData(EntityVO entityVO, FieldPermCfgDTO fieldPermConfig) {
-        String tableName = entityVO.getTableName();
-
-        // 通过 tableName + fieldName 唯一锁定可编辑字段
-        Set<String> writableFieldNames = new HashSet<>();
-
-        // 重置，待过滤出可编辑的字段
-        Map<String, Object> updateEntityData = new HashMap<>();
-
-        for (FieldPermCfgDTO.FieldConfigDTO fieldConfig : fieldPermConfig.getFieldConfigs()) {
-            // 先校验表名是否匹配
-            if (!Objects.equals(fieldConfig.getTableName(), tableName)) {
-                continue;
-            }
-
-            // 只保留可编辑的字段
-            if (Objects.equals(fieldConfig.getFieldPermType(), FieldPermTypeEnum.WRITE.getCode())) {
-                writableFieldNames.add(fieldConfig.getFieldName());
-            }
-        }
-
-        SemanticEntitySchemaDTO entitySchema = semanticDynamicDataApi.buildEntitySchemaByTableName(entityVO.getTableName());
-        Set<String> connectorTableNameSet = new HashSet<>();
-
-        if (CollectionUtils.isNotEmpty(entitySchema.getConnectors())) {
-            for (SemanticRelationSchemaDTO connector : entitySchema.getConnectors()) {
-                connectorTableNameSet.add(connector.getTargetEntityTableName());
-            }
-        }
-
-        // todo: 处理子表字段
-        log.info("connectorTableNameSet: {}", connectorTableNameSet);
-
-        // 审批节点默认所有字段都为只读 todo: 待完善
-        entityVO.getData().forEach((key, value) -> {
-            // id字段，直接保留
-            if ("id".equalsIgnoreCase(key)) {
-                updateEntityData.put(key, value);
-            } else {
-                // 通过 fieldName 判断是否可编辑
-                if (writableFieldNames.contains(key)) {
-                    updateEntityData.put(key, value);
-                }
-            }
-        });
-    }
-
     /**
      * 从实体 schema 中提取所有表（主表 + 子表）的非系统字段名称集合。
      * <p>
@@ -221,6 +143,42 @@ public class BpmEntityHelper {
         }
 
         return nonSystemFieldMap;
+    }
+
+    public SemanticFieldTypeEnum findFieldType(SemanticEntitySchemaDTO entitySchema, String tableName, String fieldName) {
+        if (entitySchema == null || CollectionUtils.isEmpty(entitySchema.getFields())) {
+            return null;
+        }
+
+        // 主表
+        if (Objects.equals(entitySchema.getTableName(), tableName)) {
+            for (SemanticFieldSchemaDTO field : entitySchema.getFields()) {
+                if (Objects.equals(fieldName, field.getFieldName())) {
+                    return field.getFieldTypeEnum();
+                }
+            }
+
+            return null;
+        }
+
+        // 判断子表
+        if (CollectionUtils.isEmpty(entitySchema.getConnectors())) {
+            return null;
+        }
+
+        for (SemanticRelationSchemaDTO connector : entitySchema.getConnectors()) {
+            if (!Objects.equals(connector.getTargetEntityTableName(), tableName)) {
+               continue;
+            }
+
+            for (SemanticFieldSchemaDTO field : connector.getRelationAttributes()) {
+                if (Objects.equals(fieldName, field.getFieldName())) {
+                    return field.getFieldTypeEnum();
+                }
+            }
+        }
+
+        return null;
     }
 
     public Set<String> getSubTableNames(SemanticEntitySchemaDTO entitySchema) {

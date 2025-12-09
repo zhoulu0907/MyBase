@@ -123,3 +123,4 @@ LOG_FILE_IS_UNDEFINED
 /onebase-module-data/onebase-module-metadata-api/src/main/java/com/cmsr/onebase/module/metadata/api/datamethod/entity/BizField.java
 /onebase-module-data/onebase-module-metadata-api/src/main/java/com/cmsr/onebase/module/metadata/api/datamethod/entity/BizRecord.java
 /onebase-module-data/onebase-module-metadata-api/src/main/java/com/cmsr/onebase/module/metadata/api/datamethod/entity/FieldTypeEnum.java
+/sql/metadata_field_comparison_rules.sql

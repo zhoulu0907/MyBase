@@ -1,9 +1,9 @@
 package com.cmsr.onebase.module.app.core.dal.database.tag;
 
-import com.cmsr.onebase.framework.orm.repo.BaseAppRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationTagDO;
 import com.cmsr.onebase.module.app.core.dal.mapper.AppApplicationTagMapper;
 import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.spring.service.impl.ServiceImpl;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -13,7 +13,7 @@ import java.util.List;
  * @Date：2025/8/6 14:15
  */
 @Repository
-public class AppApplicationTagRepository extends BaseAppRepository<AppApplicationTagMapper, AppApplicationTagDO> {
+public class AppApplicationTagRepository extends ServiceImpl<AppApplicationTagMapper, AppApplicationTagDO> {
 
     public List<AppApplicationTagDO> findTagIdsByApplicationIds(List<Long> applicationIds) {
         QueryWrapper queryWrapper = this.query()

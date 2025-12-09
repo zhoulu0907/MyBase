@@ -1,14 +1,15 @@
 package com.cmsr.onebase.module.flow.core.flow;
 
-import com.cmsr.onebase.module.flow.context.ContextProvider;
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
-import com.cmsr.onebase.module.flow.context.VariableContext;
 import com.cmsr.onebase.module.flow.context.graph.NodeData;
+import com.cmsr.onebase.module.flow.core.graph.FlowProcessCache;
+import com.cmsr.onebase.module.flow.context.VariableContext;
+import com.cmsr.onebase.module.flow.context.provider.ContextProvider;
+import com.cmsr.onebase.module.flow.core.config.FlowProperties;
 import com.cmsr.onebase.module.flow.core.config.FlowRuntimeCondition;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowExecutionLogRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowExecutionLogDO;
 import com.cmsr.onebase.module.flow.core.enums.ExecutionResultEnum;
-import com.cmsr.onebase.module.flow.core.graph.FlowProcessCache;
 import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
 import com.google.common.collect.Lists;
 import com.yomahub.liteflow.core.FlowExecutor;
@@ -44,9 +45,6 @@ public class FlowProcessExecutor {
     private FlowExecutor flowExecutor;
 
     @Autowired
-    private FlowProcessCache flowProcessCache;
-
-    @Autowired
     private ContextProvider contextProvider;
 
     @Autowired
@@ -55,6 +53,9 @@ public class FlowProcessExecutor {
     @Autowired
     private FlowExecutionLogRepository flowExecutionLogRepository;
 
+    @Autowired
+    private FlowProperties flowProperties;
+
     /**
      * 执行新流程（基于traceId和输入参数）
      */
@@ -62,18 +63,20 @@ public class FlowProcessExecutor {
         if (StringUtils.isEmpty(traceId)) {
             return ExecutorResult.error(processId, "traceId不能为空");
         }
-        if (!flowProcessCache.isProcessExist(processId)) {
+        if (!FlowProcessCache.isProcessExist(processId)) {
             return ExecutorResult.error(processId, "流程不存在: " + processId);
         }
         FlowExecutionLogDO executionLog = createNewExecutionLog(processId);
         ExecuteContext executeContext = new ExecuteContext();
         executeContext.setProcessId(processId);
+        executeContext.setVersionTag(flowProperties.getVersionTag());
+        executeContext.setApplicationId(FlowProcessCache.findApplicationByProcessId(processId));
         try {
             //初始化变量上下文
             VariableContext variableContext = new VariableContext();
             variableContext.setInputParams(inputParams);
             //初始化执行上下文
-            Map<String, NodeData> nodeData = flowProcessCache.findNodeData(processId);
+            Map<String, NodeData> nodeData = FlowProcessCache.findNodeData(processId);
             executeContext.setNodeDataMap(nodeData);
 
             executeContext.addLog("检查流程触发次数");
@@ -113,7 +116,7 @@ public class FlowProcessExecutor {
      * 理论上可以根据trace id 恢复完整的执行情况
      */
     public ExecutorResult execute(Long processId, String executionUuid, Map<String, Object> inputFields) {
-        if (!flowProcessCache.isProcessExist(processId)) {
+        if (!FlowProcessCache.isProcessExist(processId)) {
             return ExecutorResult.error(processId, "流程不存在: " + processId);
         }
         FlowExecutionLogDO executionLog = createNewExecutionLog(processId);
@@ -126,7 +129,7 @@ public class FlowProcessExecutor {
             if (variableContext == null) {
                 throw new Exception("执行上下文不存在或已过期: " + executionUuid);
             }
-            Map<String, NodeData> nodeData = flowProcessCache.findNodeData(processId);
+            Map<String, NodeData> nodeData = FlowProcessCache.findNodeData(processId);
             executeContext.setNodeDataMap(nodeData);
 
             variableContext.setInputFields(inputFields);
@@ -197,7 +200,7 @@ public class FlowProcessExecutor {
      * 创建新的执行日志
      */
     private FlowExecutionLogDO createNewExecutionLog(Long processId) {
-        Long applicationId = flowProcessCache.findApplicationByProcessId(processId);
+        Long applicationId = FlowProcessCache.findApplicationByProcessId(processId);
         FlowExecutionLogDO log = new FlowExecutionLogDO();
         log.setApplicationId(applicationId);
         log.setProcessId(processId);

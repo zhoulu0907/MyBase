@@ -219,7 +219,7 @@ public class BpmGlobalListener implements GlobalListener {
         }
 
         // todo：确保appId不为空
-        Long appId = listenerVariable.getDefinition().getId();
+        Long appId = listenerVariable.getDefinition().getApplicationId();
 
         List<BpmFlowAgentDO> activeAgents = agentRepository.findAllActiveAgent(appId, approvalUserIds);
 

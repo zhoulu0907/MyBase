@@ -3,10 +3,10 @@ package com.cmsr.onebase.module.flow.api;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerReqDTO;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerRespDTO;
 import com.cmsr.onebase.module.flow.api.dto.TriggerEventEnum;
-import com.cmsr.onebase.module.flow.context.ConditionsProvider;
 import com.cmsr.onebase.module.flow.context.express.ExpressionExecutor;
 import com.cmsr.onebase.module.flow.context.express.OrExpression;
 import com.cmsr.onebase.module.flow.context.graph.nodes.StartEntityNodeData;
+import com.cmsr.onebase.module.flow.context.provider.ConditionsProvider;
 import com.cmsr.onebase.module.flow.core.flow.ExecutorResult;
 import com.cmsr.onebase.module.flow.core.flow.FlowProcessExecutor;
 import com.cmsr.onebase.module.flow.core.graph.FlowProcessCache;
@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -31,25 +30,36 @@ import java.util.Map;
 public class FlowProcessExecApiImpl implements FlowProcessExecApi {
 
     @Autowired
-    private FlowProcessCache flowProcessCache;
-
-    @Autowired
     private FlowProcessExecutor flowProcessExecutor;
 
     @Autowired
     private ConditionsProvider conditionsProvider;
 
-
     private ExpressionExecutor expressionExecutor = new ExpressionExecutor();
 
     @Override
     public EntityTriggerRespDTO entityTrigger(EntityTriggerReqDTO reqDTO) {
-        List<StartEntityNodeData> entityNodeDataList = flowProcessCache.findStartEntityNodeDataByEntityId(reqDTO.getEntityId());
+        if (reqDTO.getApplicationId() == null) {
+            EntityTriggerRespDTO respDTO = new EntityTriggerRespDTO(reqDTO.getTraceId());
+            respDTO.setSuccess(false);
+            respDTO.setTriggered(false);
+            respDTO.setMessage("应用ID不能为空");
+            return respDTO;
+        }
+        if (reqDTO.getTableName() == null) {
+            EntityTriggerRespDTO respDTO = new EntityTriggerRespDTO(reqDTO.getTraceId());
+            respDTO.setSuccess(false);
+            respDTO.setTriggered(false);
+            respDTO.setMessage("实体名称不能为空");
+            return respDTO;
+        }
+
+        List<StartEntityNodeData> entityNodeDataList = FlowProcessCache.findStartEntityNodeDataByEntityName(reqDTO.getApplicationId(), reqDTO.getTableName());
         if (CollectionUtils.isEmpty(entityNodeDataList)) {
             EntityTriggerRespDTO respDTO = new EntityTriggerRespDTO(reqDTO.getTraceId());
             respDTO.setSuccess(true);
             respDTO.setTriggered(false);
-            respDTO.setMessage("实体未配置流程:" + reqDTO.getEntityId());
+            respDTO.setMessage("实体未配置流程:" + reqDTO.getTableName());
             return respDTO;
         }
         List<EntityTriggerRespDTO> respDTOS = new ArrayList<>();
@@ -78,10 +88,7 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
     }
 
     private EntityTriggerRespDTO entityTrigger(EntityTriggerReqDTO reqDTO, StartEntityNodeData nodeData) {
-        Map<String, Object> inputData = new HashMap<>();
-        for (Map.Entry<?, Object> entry : reqDTO.getFieldData().entrySet()) {
-            inputData.put(entry.getKey().toString(), entry.getValue());
-        }
+        Map<String, Object> inputData = reqDTO.toInputData();
         EntityTriggerRespDTO respDTO = new EntityTriggerRespDTO(reqDTO.getTraceId(), nodeData.getProcessId());
         try {
             if (!triggerEventContains(nodeData.getTriggerEvents(), reqDTO.getTriggerEvent())) {

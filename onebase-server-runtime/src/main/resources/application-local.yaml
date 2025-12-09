@@ -1,5 +1,5 @@
 server:
-  port: 48080
+  port: 48081
 
 --- #################### 数据库相关配置 ####################
 spring:
@@ -31,10 +31,6 @@ lock4j:
   expire: 30000 # 分布式锁的超时时间，默认为 30 毫秒
 
 # 日志文件配置
-logging:
-  file:
-    name: ${user.home}/logs/${spring.application.name}.log # 日志文件名，全路径
-
 debug: false
 
 --- #################### OneBase相关配置 ####################
@@ -67,27 +63,11 @@ justauth:
     prefix: 'social_auth_state:' # 缓存前缀，目前只对 Redis 缓存生效，默认 JUSTAUTH::STATE::
     timeout: 24h # 超时时长，目前只对 Redis 缓存生效，默认 3 分钟
 
-wx:
-  mp: # 参见 https://github.com/Wechat-Group/WxJava/blob/develop/spring-boot-starters/wx-java-mp-spring-boot-starter/README.md 文档
-    app-id: wx5b23ba7a5589ecbb # 测试号（自己的）
-    secret: 2a7b3b20c537e52e74afd395eb85f61f
-    # 存储配置，解决 AccessToken 的跨节点的共享
-    config-storage:
-      type: RedisTemplate # 采用 RedisTemplate 操作 Redis，会自动从 Spring 中获取
-      key-prefix: wx # Redis Key 的前缀
-      http-client-type: HttpClient # 采用 HttpClient 请求微信公众号平台
-  miniapp: # 参见 https://github.com/Wechat-Group/WxJava/blob/develop/spring-boot-starters/wx-java-miniapp-spring-boot-starter/README.md 文档
-    appid: wxc4598c446f8a9cb3 # 测试号（Kongdy 提供的）
-    secret: 4a1a04e07f6a4a0751b39c3064a92c8b
-    config-storage:
-      type: RedisTemplate # 采用 RedisTemplate 操作 Redis，会自动从 Spring 中获取
-      key-prefix: wa # Redis Key 的前缀
-    http-client-type: HttpClient # 采用 HttpClient 请求微信公众号平台
-
 liteflow:
   enable: true
   print-banner: true
   js-server-address: http://10.0.104.41:28392
+  version-tag: 0
 
 metadata:
   runtime:

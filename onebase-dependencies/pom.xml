@@ -40,8 +40,6 @@
         <anyline.version>8.7.2-jdk17-20250818</anyline.version>
         <jakarta.persistence-api.version>3.2.0</jakarta.persistence-api.version>
         <jakarta.validation-api.version>3.1.1</jakarta.validation-api.version>
-        <!-- RPC 相关 -->
-
         <!-- 服务保障相关 -->
         <lock4j.version>2.2.7</lock4j.version>
         <!-- Test 测试相关 -->
@@ -56,16 +54,12 @@
         <mapstruct.version>1.6.3</mapstruct.version>
         <modelmapper.version>3.2.4</modelmapper.version>
         <jexl3.version>3.5.0</jexl3.version>
-        <!--        <hutool-5.version>5.8.35</hutool-5.version>-->
-        <!--        <hutool-6.version>6.0.0-M19</hutool-6.version>-->
         <mvel2.version>2.4.14.Final</mvel2.version>
         <hutool.version>5.8.35</hutool.version>
         <easyexcel.version>4.0.3</easyexcel.version>
         <guava.version>33.4.8-jre</guava.version>
         <gson.version>2.13.2</gson.version>
         <transmittable-thread-local.version>2.14.5</transmittable-thread-local.version>
-        <commons-net.version>3.11.1</commons-net.version>
-        <commons-collections4.version>4.5.0</commons-collections4.version>
         <unirest.version>4.5.0</unirest.version>
         <jsch.version>0.1.55</jsch.version>
         <tika-core.version>3.1.0</tika-core.version>
@@ -77,6 +71,9 @@
         <jackson.version>2.18.3</jackson.version>
         <rocketmq-client.version>5.0.8</rocketmq-client.version>
         <!-- 三方云服务相关 -->
+        <commons-lang3.version>3.20.0</commons-lang3.version>
+        <commons-collections4.version>4.5.0</commons-collections4.version>
+        <commons-net.version>3.11.1</commons-net.version>
         <commons-io.version>2.17.0</commons-io.version>
         <commons-compress.version>1.27.1</commons-compress.version>
         <commons-text.version>1.10.0</commons-text.version>
@@ -141,13 +138,6 @@
                 <artifactId>onebase-spring-boot-starter-biz-tenant</artifactId>
                 <version>${revision}</version>
             </dependency>
-
-            <!--            <dependency>-->
-            <!--                <groupId>org.bouncycastle</groupId>-->
-            <!--                <artifactId>bcprov-jdk15on</artifactId>-->
-            <!--                <version>${bouncycastle.version}</version>-->
-            <!--            </dependency>-->
-
             <!-- Spring 核心 -->
             <dependency>
                 <!-- 用于生成自定义的 Spring @ConfigurationProperties 配置类的说明文件 -->
@@ -395,12 +385,7 @@
 
             <dependency>
                 <groupId>org.mapstruct</groupId>
-                <artifactId>mapstruct</artifactId> <!-- use mapstruct-jdk8 for Java 8 or higher -->
-                <version>${mapstruct.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.mapstruct</groupId>
-                <artifactId>mapstruct-jdk8</artifactId>
+                <artifactId>mapstruct</artifactId>
                 <version>${mapstruct.version}</version>
             </dependency>
             <dependency>
@@ -474,6 +459,16 @@
                 <version>${easyexcel.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${commons-lang3.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-net</groupId>
+                <artifactId>commons-net</artifactId> <!-- 解决 ftp 连接 -->
+                <version>${commons-net.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
                 <version>${commons-io.version}</version>
@@ -489,11 +484,6 @@
                 <version>${commons-collections4.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.mvel</groupId>
-                <artifactId>mvel2</artifactId>
-                <version>${mvel2.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-jexl3</artifactId>
                 <version>${jexl3.version}</version>
@@ -503,6 +493,12 @@
                 <artifactId>commons-text</artifactId>
                 <version>${commons-text.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.mvel</groupId>
+                <artifactId>mvel2</artifactId>
+                <version>${mvel2.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>org.apache.tika</groupId>
                 <artifactId>tika-core</artifactId> <!-- 文件类型的识别 -->
@@ -526,11 +522,6 @@
             </dependency>
 
             <dependency>
-                <groupId>commons-net</groupId>
-                <artifactId>commons-net</artifactId> <!-- 解决 ftp 连接 -->
-                <version>${commons-net.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>com.jcraft</groupId>
                 <artifactId>jsch</artifactId> <!-- 解决 sftp 连接 -->
                 <version>${jsch.version}</version>
@@ -553,22 +544,6 @@
                 <groupId>software.amazon.awssdk</groupId>
                 <artifactId>s3</artifactId>
                 <version>${awssdk.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.github.binarywang</groupId>
-                <artifactId>weixin-java-pay</artifactId>
-                <version>${weixin-java.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.github.binarywang</groupId>
-                <artifactId>wx-java-mp-spring-boot-starter</artifactId>
-                <version>${weixin-java.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.github.binarywang</groupId>
-                <artifactId>wx-java-miniapp-spring-boot-starter</artifactId>
-                <version>${weixin-java.version}</version>
             </dependency>
 
             <dependency>

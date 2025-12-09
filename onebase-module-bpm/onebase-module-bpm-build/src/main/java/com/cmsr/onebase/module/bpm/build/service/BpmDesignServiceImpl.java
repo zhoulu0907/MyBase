@@ -135,8 +135,12 @@ public class BpmDesignServiceImpl implements BpmDesignService {
             if (StringUtils.isBlank(flowCode)) {
                 // 前端没传则随机生成一个
                 flowCode = generateFlowCode();
-                defJson.setFlowCode(flowCode);
+            } else {
+               // 传了也加前缀，保证唯一
+                flowCode = generateFlowCode() + flowCode;
             }
+
+            defJson.setFlowCode(flowCode);
         } else {
             // 使用现有的流程编码
             defJson.setFlowCode(anyDef.getFlowCode());

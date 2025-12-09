@@ -36,4 +36,17 @@ public class SecurityConfigCategoryDataRepository extends DataRepository<Securit
         return findAllByConfig(configStore);
     }
 
+    /**
+     * 根据分类编码列表，查询所有有效的分类，按排序号升序
+     *
+     * @return 分类列表
+     */
+    @TenantIgnore
+    public List<SecurityConfigCategoryDO> findActiveByCodes(List<String> categoryCodes) {
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.in(SecurityConfigCategoryDO.CATEGORY_CODE, categoryCodes);
+        configStore.order(SecurityConfigCategoryDO.SORT_ORDER, "ASC");
+        return findAllByConfig(configStore);
+    }
+
 }

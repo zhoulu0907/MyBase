@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.core.dal.dataobject.validation;
 
+import com.cmsr.onebase.framework.orm.entity.BaseBizEntity;
 import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
 import com.cmsr.onebase.module.metadata.core.enums.ValidationStatusEnum;
 import com.mybatisflex.annotation.Column;
@@ -16,7 +17,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Table(value = "metadata_validation_rule_definition")
-public class MetadataValidationRuleDefinitionDO extends BaseTenantEntity {
+public class MetadataValidationRuleDefinitionDO extends BaseBizEntity {
 
     /**
      * 规则定义UUID

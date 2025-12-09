@@ -3,19 +3,19 @@ package com.cmsr.onebase.framework.base.anyline;
 import com.cmsr.onebase.framework.common.consts.DeleteConstant;
 import com.cmsr.onebase.framework.common.exception.DatabaseAccessErrorCodes;
 import com.cmsr.onebase.framework.common.exception.DatabaseAccessException;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.framework.data.base.BaseEntity;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
-import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
 import com.cmsr.onebase.framework.uid.UidGenerator;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
+import com.mybatisflex.core.tenant.TenantManager;
 import jakarta.annotation.Resource;
 import jakarta.persistence.Column;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.listener.DMListener;
-import org.anyline.service.AnylineService;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.prepare.RunPrepare;
 import org.anyline.data.run.Run;
@@ -25,6 +25,7 @@ import org.anyline.entity.DataRow;
 import org.anyline.entity.DataSet;
 import org.anyline.metadata.ACTION.SWITCH;
 import org.anyline.metadata.Table;
+import org.anyline.service.AnylineService;
 import org.anyline.util.ConfigTable;
 import org.springframework.stereotype.Component;
 
@@ -39,10 +40,10 @@ public class AnyLineDBInfoListener implements DMListener {
 
     // 需要忽略租户过滤的表名列表
     private static final Set<String> TENANT_IGNORE_TABLES = new HashSet<>();
-    
+
     @Resource
     private UidGenerator uidGenerator;
-    
+
     @Resource
     private AnylineService anylineService;
 
@@ -117,7 +118,7 @@ public class AnyLineDBInfoListener implements DMListener {
 
         // 加入创建时间和创建人等基础信息
         injectBaseInfoToEntity(object);
-        
+
         // 检测并处理Map/List字段:转换为DataRow并序列化
         if (hasComplexFields(object)) {
             try {
@@ -134,7 +135,7 @@ public class AnyLineDBInfoListener implements DMListener {
                 // 降级:继续原Entity插入
             }
         }
-        
+
         return SWITCH.CONTINUE;
     }
 
@@ -302,7 +303,7 @@ public class AnyLineDBInfoListener implements DMListener {
 
         // 只有在不忽略租户的情况下才添加租户条件
         // 检查当前查询的表是否需要忽略租户过滤
-        boolean shouldIgnore = isTableTenantIgnored(prepare) || TenantContextHolder.isIgnore();
+        boolean shouldIgnore = isTableTenantIgnored(prepare) || TenantContextHolder.isIgnore() || TenantManager.isIgnoreTenantCondition();
         if (ConfigTable.IS_DEBUG) {
             log.info("prepareQuery--------------> isTableTenantIgnored: {}", shouldIgnore);
         }
@@ -582,7 +583,7 @@ public class AnyLineDBInfoListener implements DMListener {
 
     /**
      * 检测Entity是否有需要序列化的Map/List字段
-     * 
+     *
      * @param entity 实体对象
      * @return 是否包含Map/List类型的字段
      */
@@ -590,7 +591,7 @@ public class AnyLineDBInfoListener implements DMListener {
         if (entity == null) {
             return false;
         }
-        
+
         // 处理集合的情况
         if (entity instanceof Collection) {
             Collection<?> collection = (Collection<?>) entity;
@@ -600,38 +601,38 @@ public class AnyLineDBInfoListener implements DMListener {
             // 检查集合中第一个元素
             return hasComplexFields(collection.iterator().next());
         }
-        
+
         Class<?> clazz = entity.getClass();
         java.lang.reflect.Field[] fields = clazz.getDeclaredFields();
-        
+
         for (java.lang.reflect.Field field : fields) {
             // 只检查带@Column注解的字段(表示需要持久化)
             if (!field.isAnnotationPresent(Column.class)) {
                 continue;
             }
-            
+
             Class<?> fieldType = field.getType();
             // 检查是否是Map或List类型
             if (Map.class.isAssignableFrom(fieldType) || List.class.isAssignableFrom(fieldType)) {
                 return true;
             }
         }
-        
+
         return false;
     }
 
     /**
      * 将Entity转换为DataRow,并对Map/List字段进行JSON序列化
-     * 
+     *
      * @param entity 实体对象
-     * @param table 表信息
+     * @param table  表信息
      * @return 转换后的DataRow
      * @throws Exception 转换异常
      */
     private DataRow convertEntityToDataRowWithSerialization(Object entity, Table table) throws Exception {
         DataRow dataRow = new DataRow();
         Class<?> clazz = entity.getClass();
-        
+
         // 获取所有字段,包括父类字段
         List<java.lang.reflect.Field> allFields = new ArrayList<>();
         Class<?> currentClass = clazz;
@@ -639,17 +640,17 @@ public class AnyLineDBInfoListener implements DMListener {
             allFields.addAll(Arrays.asList(currentClass.getDeclaredFields()));
             currentClass = currentClass.getSuperclass();
         }
-        
+
         for (java.lang.reflect.Field field : allFields) {
             try {
                 // 跳过没有@Column注解的字段
                 if (!field.isAnnotationPresent(Column.class)) {
                     continue;
                 }
-                
+
                 field.setAccessible(true);
                 Object value = field.get(entity);
-                
+
                 // 获取列名
                 Column columnAnnotation = field.getAnnotation(Column.class);
                 String columnName = columnAnnotation.name();
@@ -657,24 +658,24 @@ public class AnyLineDBInfoListener implements DMListener {
                     // 如果@Column没有指定name,使用字段名
                     columnName = field.getName();
                 }
-                
+
                 // 处理Map/List字段:序列化为JSON字符串
                 if (value != null && (value instanceof Map || value instanceof List)) {
                     String jsonString = JsonUtils.toJsonString(value);
                     dataRow.put(columnName, jsonString);
-                    log.info("序列化字段 {}.{} : {} -> JSON字符串(长度:{})", 
-                        clazz.getSimpleName(), columnName, value.getClass().getSimpleName(), jsonString.length());
+                    log.info("序列化字段 {}.{} : {} -> JSON字符串(长度:{})",
+                            clazz.getSimpleName(), columnName, value.getClass().getSimpleName(), jsonString.length());
                 } else {
                     // 其他字段直接设置
                     dataRow.put(columnName, value);
                 }
-                
+
             } catch (Exception e) {
                 log.error("转换字段失败: {}", field.getName(), e);
                 // 继续处理其他字段
             }
         }
-        
+
         log.info("Entity转DataRow完成,表:{}, 字段数:{}", table.getName(), dataRow.size());
         return dataRow;
     }

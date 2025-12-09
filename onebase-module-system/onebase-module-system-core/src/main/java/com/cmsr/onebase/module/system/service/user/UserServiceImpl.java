@@ -37,6 +37,7 @@ import com.cmsr.onebase.module.system.service.permission.RoleService;
 import com.cmsr.onebase.module.system.service.post.PostService;
 import com.cmsr.onebase.module.system.service.tenant.TenantService;
 import com.cmsr.onebase.module.system.vo.auth.AuthRegisterReqVO;
+import com.cmsr.onebase.module.system.vo.dept.DeptSimpleListRespVO;
 import com.cmsr.onebase.module.system.vo.role.RoleInsertReqVO;
 import com.cmsr.onebase.module.system.vo.user.*;
 import com.google.common.annotations.VisibleForTesting;
@@ -80,19 +81,19 @@ public class UserServiceImpl implements UserService {
     static final String USER_REGISTER_ENABLED_KEY = "system.user.register-enabled";
 
     @Resource
-    private DeptService       deptService;
+    private DeptService deptService;
     @Resource
-    private PostService       postService;
+    private PostService postService;
     @Resource
     private PermissionService permissionService;
     @Resource
-    private PasswordEncoder   passwordEncoder;
+    private PasswordEncoder passwordEncoder;
     @Resource
     @Lazy // 延迟，避免循环依赖报错
-    private TenantService     tenantService;
+    private TenantService tenantService;
 
     @Resource
-    private ConfigApi   configApi;
+    private ConfigApi configApi;
     @Lazy
     @Resource
     private RoleService roleService;
@@ -108,7 +109,7 @@ public class UserServiceImpl implements UserService {
 
     @Resource
     private AppAuthRoleUser appAuthRoleUser;
-    
+
     @Resource
     private UserDataRepository userDataRepository;
 
@@ -163,7 +164,7 @@ public class UserServiceImpl implements UserService {
             // 立即失败，抛出异常，防止数据越权
             throw exception(USER_NOT_EXISTS);
         }
-        if(UserTypeEnum.CORP.getValue().equals(user.getUserType())){
+        if (UserTypeEnum.CORP.getValue().equals(user.getUserType())) {
             user.setCorpId(loginUser.getCorpId());
         }
         userDataRepository.insert(user);
@@ -186,7 +187,7 @@ public class UserServiceImpl implements UserService {
         return user.getId();
     }
 
-    public  void validateCorpAdminUser(AdminUserDO userDO){
+    public void validateCorpAdminUser(AdminUserDO userDO) {
         // 校验用户名唯一
         validateUsernameUnique(null, userDO.getUsername());
         // 校验手机号唯一
@@ -757,22 +758,29 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<AdminUserDO> getUserListByStatus(Integer status, String userNickName, Long deptId) {
+    public List<AdminUserDO> getUserListByStatus(Integer status, String userNickName) {
+        return userDataRepository.findAllByStatus(status, userNickName);
+    }
 
+
+    @Override
+    public List<AdminUserDO> getUserListByStatusAndDeptId(DeptSimpleListRespVO reqVO) {
         // 获取部门条件：查询指定部门的子部门编号们，包括自身
-        if (null != deptId) {
-            Set<Long> deptIds = getDeptCondition(deptId);
-            List<AdminUserDO> adminUserDOList = userDataRepository.findAllByStatus(status, userNickName);
-            return adminUserDOList.stream()
-                    .filter(user -> user.getDeptId() != null && deptIds.contains(user.getDeptId()))
-                    .collect(Collectors.toList());
-        } else {
-            return userDataRepository.findAllByStatus(status, userNickName);
+        Long deptId=reqVO.getDeptId();
+        boolean directFlag= reqVO.getDirectFlag() == null || reqVO.getDirectFlag();
+        Set<Long> deptIds =new HashSet<>();
+        if (directFlag){
+             deptIds.add(deptId);
+        }else{
+             deptIds=  getDeptCondition(deptId);
         }
+        return userDataRepository.findAllByStatusAndDeptIds(CommonStatusEnum.ENABLE.getStatus(), deptIds);
+
+
     }
 
     @Override
-        public List<AdminUserDO> getPlatformAdminListByStatus(UserSearchReqVO userSearchReqVO) {
+    public List<AdminUserDO> getPlatformAdminListByStatus(UserSearchReqVO userSearchReqVO) {
         // 获取平台管理员角色
         RoleDO platformAdminRole = roleService.getRoleIdsByCode(RoleCodeEnum.SUPER_ADMIN.getCode());
         if (platformAdminRole == null) {
@@ -786,7 +794,7 @@ public class UserServiceImpl implements UserService {
         Set<Long> platformAdminUserIds = convertSet(userRoles, UserRoleDO::getUserId);
 
         // 获取所有指定状态的用户
-        List<AdminUserDO> users = userDataRepository.findEnableUserByIds(platformAdminUserIds,userSearchReqVO.getKeyword(),userSearchReqVO.getStatus());
+        List<AdminUserDO> users = userDataRepository.findEnableUserByIds(platformAdminUserIds, userSearchReqVO.getKeyword(), userSearchReqVO.getStatus());
         return users;
     }
 
@@ -802,7 +810,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Long getUserCountByCorpId(Long corpId) {
-        return    userDataRepository.getUserCountByCorpId(corpId);
+        return userDataRepository.getUserCountByCorpId(corpId);
     }
 
     @Override

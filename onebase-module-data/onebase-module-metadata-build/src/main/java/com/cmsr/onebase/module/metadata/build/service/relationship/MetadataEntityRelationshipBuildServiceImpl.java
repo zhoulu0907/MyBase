@@ -1,6 +1,12 @@
 package com.cmsr.onebase.module.metadata.build.service.relationship;
 
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityRelationshipRepository;
+import com.cmsr.onebase.module.metadata.core.dal.database.MetadataFieldComparisonRulesRepository;
+import com.cmsr.onebase.module.metadata.core.dal.database.MetadataComponentFieldTypeRepository;
+import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationTypeRepository;
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataComponentFieldTypeDO;
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationTypeDO;
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataFieldComparisonRulesDO;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.common.util.string.UuidUtils;
@@ -26,7 +32,6 @@ import com.cmsr.onebase.module.metadata.core.util.MetadataIdUuidConverter;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
 import com.cmsr.onebase.module.metadata.build.service.entity.MetadataBusinessEntityBuildService;
 import com.cmsr.onebase.module.metadata.build.service.entity.MetadataEntityFieldBuildService;
-import com.cmsr.onebase.module.metadata.build.service.entity.vo.EntityFieldQueryVO;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
@@ -65,6 +70,15 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
 
     @Resource
     private MetadataIdUuidConverter idUuidConverter;
+
+    @Resource
+    private MetadataFieldComparisonRulesRepository fieldComparisonRulesRepository;
+
+    @Resource
+    private MetadataComponentFieldTypeRepository componentFieldTypeRepository;
+
+    @Resource
+    private MetadataValidationTypeRepository validationTypeRepository;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -390,28 +404,6 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
     }
 
     /**
-     * 根据实体ID获取实体名称
-     *
-     * @param entityId 实体ID
-     * @return 实体名称
-     * @deprecated 请使用 {@link #getEntityNameByUuid(String)} 代替
-     */
-    @Deprecated
-    private String getEntityNameById(Long entityId) {
-        if (entityId == null) {
-            return null;
-        }
-
-        try {
-            MetadataBusinessEntityDO entity = businessEntityService.getBusinessEntity(entityId);
-            return entity != null ? entity.getDisplayName() : null;
-        } catch (Exception e) {
-            log.warn("获取实体名称失败，实体ID: {}, 错误: {}", entityId, e.getMessage());
-            return null;
-        }
-    }
-
-    /**
      * 根据实体UUID获取实体名称
      *
      * @param entityUuid 实体UUID
@@ -647,66 +639,8 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
         throw new IllegalArgumentException("子表实体未找到parent_id字段，请先为子表添加parent_id字段，实体UUID: " + childEntityUuid);
     }
 
-    /**
-     * 获取实体的id字段ID
-     *
-     * @param entityId 实体ID
-     * @return id字段ID
-     * @deprecated 使用 {@link #getEntityIdFieldUuid(String)} 替代
-     */
-    @Deprecated
-    private Long getEntityIdField(Long entityId) {
-        // 构建查询条件，查找指定实体的id字段
-        EntityFieldQueryVO queryVO = new EntityFieldQueryVO();
-        queryVO.setEntityId(String.valueOf(entityId));
-        queryVO.setKeyword("id"); // 使用关键字搜索id字段
-
-        List<MetadataEntityFieldDO> fields = entityFieldService.getEntityFieldListByConditions(queryVO);
-
-        // 查找字段名为"id"的字段
-        MetadataEntityFieldDO idField = fields.stream()
-                .filter(field -> "id".equals(field.getFieldName()))
-                .findFirst()
-                .orElse(null);
-
-        if (idField == null) {
-            throw new IllegalArgumentException("主表实体未找到id字段，实体ID: " + entityId);
-        }
-
-        return idField.getId();
-    }
-
-    /**
-     * 获取或创建parent_id字段
-     *
-     * @param childEntityId 子表实体ID
-     * @return parent_id字段ID
-     * @deprecated 使用 {@link #getOrCreateParentIdFieldUuid(String)} 替代
-     */
-    @Deprecated
-    private Long getOrCreateParentIdField(Long childEntityId) {
-        // 构建查询条件，查找指定实体的parent_id字段
-        EntityFieldQueryVO queryVO = new EntityFieldQueryVO();
-        queryVO.setEntityId(String.valueOf(childEntityId));
-        queryVO.setKeyword("parent_id"); // 使用关键字搜索parent_id字段
-
-        List<MetadataEntityFieldDO> fields = entityFieldService.getEntityFieldListByConditions(queryVO);
-
-        // 查找字段名为"parent_id"的字段
-        MetadataEntityFieldDO parentIdField = fields.stream()
-                .filter(field -> "parent_id".equals(field.getFieldName()))
-                .findFirst()
-                .orElse(null);
-
-        if (parentIdField != null) {
-            return parentIdField.getId();
-        }
-
-        throw new IllegalArgumentException("子表实体未找到parent_id字段，请先为子表添加parent_id字段，实体ID: " + childEntityId);
-    }
-
     @Override
-    public EntityWithChildrenRespVO getEntityWithChildrenById(Long entityId, String relationshipType) {
+    public EntityWithChildrenRespVO getEntityWithChildrenById(Long entityId, String relationshipType, String fieldType, String operator) {
         // 1. 获取实体基本信息
         MetadataBusinessEntityDO entity = businessEntityService.getBusinessEntity(entityId);
         if (entity == null) {
@@ -716,6 +650,7 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
         // 2. 创建响应VO
         EntityWithChildrenRespVO result = BeanUtils.toBean(entity, EntityWithChildrenRespVO.class, res -> {
             res.setEntityId(entity.getId());
+            res.setEntityUuid(entity.getEntityUuid());
             res.setEntityName(entity.getDisplayName());
             res.setEntityCode(entity.getCode());
             // 设置实际表名
@@ -735,11 +670,18 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
 
         // 4. 填充父表字段信息
         List<EntityFieldInfoRespVO> parentFields = getEntityFields(entity.getEntityUuid());
+        
+        // 过滤父表字段
+        if (StringUtils.hasText(fieldType) && StringUtils.hasText(operator)) {
+            parentFields = filterFields(parentFields, fieldType, operator);
+        }
+        
         result.setParentFields(parentFields);
 
         // 5. 转换为子表信息列表
         List<ChildEntityInfoRespVO> childEntities = relationships.stream()
-                .map(this::convertToChildEntityInfo).filter(Objects::nonNull)
+                .map(rel -> convertToChildEntityInfo(rel, fieldType, operator))
+                .filter(Objects::nonNull)
                 .toList();
 
         result.setChildEntities(childEntities);
@@ -749,13 +691,61 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
         return result;
     }
 
+    @Override
+    public EntityWithChildrenRespVO getEntityWithChildrenById(Long entityId, String relationshipType) {
+        return getEntityWithChildrenById(entityId, relationshipType, null, null);
+    }
+
+    /**
+     * 根据字段类型和操作符过滤字段
+     */
+    private List<EntityFieldInfoRespVO> filterFields(List<EntityFieldInfoRespVO> fields, String fieldType, String operator) {
+        // 1. 获取源字段类型ID
+        MetadataComponentFieldTypeDO fieldTypeDO = componentFieldTypeRepository.getOne(
+                QueryWrapper.create().eq(MetadataComponentFieldTypeDO::getFieldTypeCode, fieldType));
+        if (fieldTypeDO == null) {
+            return fields;
+        }
+
+        // 2. 获取操作符ID
+        MetadataValidationTypeDO validationTypeDO = validationTypeRepository.getOne(
+                QueryWrapper.create().eq(MetadataValidationTypeDO::getValidationCode, operator));
+        if (validationTypeDO == null) {
+            return fields;
+        }
+
+        // 3. 查询规则
+        List<MetadataFieldComparisonRulesDO> rules = fieldComparisonRulesRepository.list(
+                QueryWrapper.create()
+                        .eq(MetadataFieldComparisonRulesDO::getSourceFieldTypeId, fieldTypeDO.getId())
+                        .eq(MetadataFieldComparisonRulesDO::getValidationTypeId, validationTypeDO.getId()));
+        
+        if (rules == null || rules.isEmpty()) {
+            return List.of();
+        }
+
+        List<Long> targetTypeIds = rules.stream()
+                .map(MetadataFieldComparisonRulesDO::getTargetFieldTypeId)
+                .toList();
+        
+        // 4. 过滤字段
+        return fields.stream().filter(field -> {
+            // 根据字段类型编码查询ID
+            MetadataComponentFieldTypeDO targetFieldTypeDO = componentFieldTypeRepository.getOne(
+                    QueryWrapper.create().eq(MetadataComponentFieldTypeDO::getFieldTypeCode, field.getFieldType()));
+            return targetFieldTypeDO != null && targetTypeIds.contains(targetFieldTypeDO.getId());
+        }).collect(Collectors.toList());
+    }
+
     /**
      * 转换关系DO为子表信息
      *
      * @param relationshipDO 关系DO
+     * @param fieldType 字段类型（可选）
+     * @param operator 操作符（可选）
      * @return 子表信息
      */
-    private ChildEntityInfoRespVO convertToChildEntityInfo(MetadataEntityRelationshipDO relationshipDO) {
+    private ChildEntityInfoRespVO convertToChildEntityInfo(MetadataEntityRelationshipDO relationshipDO, String fieldType, String operator) {
         // 获取目标实体信息（使用UUID查询）
         MetadataBusinessEntityDO targetEntity = businessEntityService.getBusinessEntityByUuid(relationshipDO.getTargetEntityUuid());
         // 关联的目标实体为空（不存在或被删除）直接跳过后续处理
@@ -779,6 +769,12 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
 
         // 填充子表字段信息
         List<EntityFieldInfoRespVO> childFields = getEntityFields(relationshipDO.getTargetEntityUuid());
+        
+        // 过滤子表字段
+        if (StringUtils.hasText(fieldType) && StringUtils.hasText(operator)) {
+            childFields = filterFields(childFields, fieldType, operator);
+        }
+        
         childInfo.setChildFields(childFields);
 
         return childInfo;
@@ -840,11 +836,16 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
      * @return 实体类型
      */
     private String determineEntityType(Long entityId) {
+        MetadataBusinessEntityDO entity = businessEntityService.getBusinessEntity(entityId);
+        if (entity == null) {
+            return "独立表";
+        }
+        
         // 检查是否存在以该实体为源实体的关系（即该实体作为主表）
-        List<MetadataEntityRelationshipDO> asSourceRelationships = entityRelationshipRepository.getRelationshipsByMasterEntityId(entityId);
+        List<MetadataEntityRelationshipDO> asSourceRelationships = entityRelationshipRepository.getRelationshipsByMasterEntityUuid(entity.getEntityUuid());
 
         // 检查是否存在以该实体为目标实体的关系（即该实体作为子表）
-        List<MetadataEntityRelationshipDO> asTargetRelationships = entityRelationshipRepository.getRelationshipsBySlaveEntityId(entityId);
+        List<MetadataEntityRelationshipDO> asTargetRelationships = entityRelationshipRepository.getRelationshipsBySlaveEntityUuid(entity.getEntityUuid());
 
         if (!asSourceRelationships.isEmpty() && asTargetRelationships.isEmpty()) {
             return "主表";

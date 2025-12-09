@@ -47,7 +47,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -404,7 +407,7 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
             entityField.setValidationRules(null); // 系统字段暂不设置校验规则
             entityField.setVersionTag(0L); // 默认编辑态
             entityField.setApplicationId(appId);
-            entityField.setStatus(0); // 默认开启
+            entityField.setStatus(1); // 默认启用：1-启用，0-禁用
             entityField.setFieldCode(generateFieldCode(systemField.getFieldName())); // 生成字段编码
 
             metadataEntityFieldBuildService.createEntityFieldInternal(entityField);
@@ -953,6 +956,8 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
             ERFieldVO erField = BeanUtils.toBean(field, ERFieldVO.class, result -> {
                 // 手动设置 fieldId，因为数据库实体中是 id，而 VO 中是 fieldId
                 result.setFieldId(field.getId());
+                // 设置 fieldUuid
+                result.setFieldUuid(field.getFieldUuid());
             });
             
             // 填充选项信息（单选、多选字段）
@@ -1146,6 +1151,22 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
                 .map(MetadataEntityRelationshipDO::getTargetEntityUuid)
                 .collect(Collectors.toSet());
 
+        // 构建实体UUID到关系类型的映射
+        Map<String, Set<String>> entityRelationshipTypesMap = new HashMap<>();
+        for (MetadataEntityRelationshipDO rel : relationships) {
+            String type = rel.getRelationshipType();
+            if (type != null) {
+                // 作为源实体
+                if (rel.getSourceEntityUuid() != null) {
+                    entityRelationshipTypesMap.computeIfAbsent(rel.getSourceEntityUuid(), k -> new HashSet<>()).add(type);
+                }
+                // 作为目标实体
+                if (rel.getTargetEntityUuid() != null) {
+                    entityRelationshipTypesMap.computeIfAbsent(rel.getTargetEntityUuid(), k -> new HashSet<>()).add(type);
+                }
+            }
+        }
+
         // 遍历实体列表，设置关系类型
         for (SimpleEntityRespVO entity : result) {
             String uuid = entity.getEntityUuid();
@@ -1162,6 +1183,9 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
                 // 都没有 -> 无关系
                 entity.setRelationType("NONE");
             }
+            
+            // 设置关联关系类型列表
+            entity.setRelationshipTypes(entityRelationshipTypesMap.getOrDefault(uuid, new HashSet<>()));
         }
 
         log.info("查询应用实体列表完成，应用ID: {}, 实体数量: {}", appId, result.size());

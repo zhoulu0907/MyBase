@@ -2,6 +2,8 @@ package com.cmsr.onebase.module.flow.context.graph.nodes;
 
 import com.cmsr.onebase.module.flow.context.condition.Conditions;
 import com.cmsr.onebase.module.flow.context.graph.NodeData;
+import com.cmsr.onebase.module.flow.context.util.Cron;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -22,20 +24,30 @@ public class StartDateFieldNodeData extends NodeData implements Serializable {
     public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     /**
-     * 应用ID，后补充
+     * 应用ID，!!!后补充!!!
      */
     private Long applicationId;
     /**
-     * 流程ID，后补充
+     * 流程ID，!!!后补充!!!
      */
     private Long processId;
 
-    private Long entityId;
+    /**
+     * 表名
+     */
+    private String tableName;
 
     /**
      * 偏移字段ID
      */
-    private Long offsetFiledId;
+    private String offsetFieldName;
+
+
+    /**
+     * 偏移字段类型，!!!后补充!!!
+     */
+    private SemanticFieldTypeEnum offsetFiledTypeEnum;
+
 
     /**
      * 偏移模式  before  after

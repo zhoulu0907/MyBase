@@ -20,7 +20,7 @@ public class JsonFileGraphTest {
         ClassPathResource resource = new ClassPathResource("graphjson/" + fileName);
         String json = StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8);
 
-        JsonGraph jsonGraph = flowGraphBuilder.build(json);
+        JsonGraph jsonGraph = flowGraphBuilder.build(1L, json);
         String flowChain = FlowChainBuilder.toFlowChain(jsonGraph);
         System.out.println(flowChain);
     }
