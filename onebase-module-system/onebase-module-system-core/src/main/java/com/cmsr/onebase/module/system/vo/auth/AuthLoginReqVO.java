@@ -24,4 +24,7 @@ public class AuthLoginReqVO extends UserLoginReqVO {
     @Schema(description = "state", requiredMode = Schema.RequiredMode.REQUIRED, example = "9b2ffbc1-7425-4155-9894-9d5c08541d62")
     private String socialState;
 
+    @Schema(description = "验证码",  example = "10")
+    private String captchaCode;
+
 }

@@ -8,8 +8,7 @@ import lombok.Data;
 @Data
 public class CorpAuthLoginReqVO  extends MobileLoginReqVO {
 
-/*    @Schema(description = "企业ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "10")
-    @NotNull(message = "企业ID不能为空")
-    private Long corpId;*/
+     @Schema(description = "验证码",  example = "10")
+     private String captchaCode;
 
 }

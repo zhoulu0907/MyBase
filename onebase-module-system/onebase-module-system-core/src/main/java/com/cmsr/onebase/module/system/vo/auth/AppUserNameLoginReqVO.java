@@ -12,4 +12,7 @@ public class AppUserNameLoginReqVO extends UserLoginReqVO {
     @NotNull(message = "应用ID不能为空")
     private Long appId;
 
+    @Schema(description = "验证码",  example = "10")
+    private String captchaCode;
+
 }
