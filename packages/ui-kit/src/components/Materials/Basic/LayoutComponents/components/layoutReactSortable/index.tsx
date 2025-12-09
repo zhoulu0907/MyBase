@@ -469,7 +469,7 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
             className="componentItem"
             style={{
               width: `calc(${getComponentWidth(pageComponentSchemas[cp.id], cp.type)} - 8px)`,
-              borderColor: curComponentID === cp.id ? '#4FAE7B' : 'transparent',
+              borderColor: curComponentID === cp.id ? 'rgb(var(--primary-6))' : 'transparent',
               borderStyle: curComponentID === cp.id ? 'solid' : 'dashed',
               margin: '4px'
             }}
