@@ -1,9 +1,6 @@
 package com.cmsr.onebase.module.infra.service.security;
 
-import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigCategoryRespVO;
-import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigItemRespVO;
-import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigReqVO;
-import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigUpdateReqVO;
+import com.cmsr.onebase.module.infra.dal.vo.security.*;
 
 import java.util.List;
 
@@ -58,9 +55,9 @@ public interface SecurityConfigService {
      */
     Integer getIntConfig(Long tenantId, String configKey);
     /**
-     * 获取布尔类型的配置值
-     *
-     * @return 配置值，如果不存在或解析失败返回null
+     *  获取配置项通过分类code
+     * @param getReqVO
+     * @return
      */
-    Boolean checkScenariosCaptcha(SecurityConfigReqVO reqVO);
+    List<SecurityConfigCategoryGroupRespVO> getTenantConfigItemsByCategoryCodes(SecurityConfigGetReqVO getReqVO);
 }

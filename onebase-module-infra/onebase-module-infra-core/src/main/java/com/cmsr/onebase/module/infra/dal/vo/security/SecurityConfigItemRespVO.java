@@ -39,6 +39,9 @@ public class SecurityConfigItemRespVO {
     @Schema(description = "分类ID", example = "1")
     private Long categoryId;
 
+    @Schema(description = "分类Code", example = "1")
+    private String categoryCode;
+
     @Schema(description = "全量选项", example = "描述1,描述2")
     private String options;
 
