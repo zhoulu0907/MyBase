@@ -1,0 +1,134 @@
+@import '../../../variables.less';
+
+@sider-width: 220px;
+
+.pageManagerPage {
+  width: 100vw;
+  height: calc(100vh - @header-height);
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+
+  .sider {
+    width: @sider-width;
+    height: 100%;
+    box-sizing: border-box;
+
+    .siderTitle {
+      color: #1d2129;
+      font-family: 'PingFang SC';
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 500;
+      line-height: 24px;
+      padding: 8px 12px;
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .siderHeader {
+      width: 100%;
+      padding: 0 12px 4px;
+      box-sizing: border-box;
+      margin-top: 16px;
+
+      .siderHeaderInput {
+        border-radius: 16px;
+
+        & span {
+          border-radius: 16px;
+        }
+      }
+    }
+  }
+
+  .content {
+    background-color: transparent;
+    width: calc(100vw - @sider-width);
+    height: 100%;
+    box-sizing: border-box;
+    overflow-y: auto;
+
+    .guide {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      .guideImg {
+        width: 1200px;
+        min-width: 1200px;
+        height: 700px;
+        position: relative;
+      }
+
+      .guideButton {
+        width: 132px;
+        height: 50px;
+        cursor: pointer;
+        transform: translate(461px, 275px);
+      }
+    }
+
+    .contentEmpty {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .contentHeader {
+      width: 100%;
+      height: @content-header-height;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      box-sizing: border-box;
+      background-color: #fff;
+      border-bottom: 0.5px solid #e5e5e5;
+
+      .contentTitle {
+        font-size: 18px;
+      }
+
+      .editButton {
+        display: flex;
+        align-items: center;
+
+        & > img {
+          margin-right: 8px;
+          filter: brightness(0) invert(1);
+        }
+      }
+    }
+
+    .contentBody {
+      width: 100%;
+      height: calc(100vh - @header-height - @content-header-height);
+      background-color: #f2f3f5;
+    }
+  }
+}
+
+.createItem {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #272e3b;
+
+  .customSvg {
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+
+    div {
+      display: flex;
+    }
+  }
+}

@@ -5,6 +5,7 @@ import CreateAppPage from '../CreateApp';
 import AppSettingPage from '../CreateApp/pages/AppSetting';
 import DataFactoryPage from '../CreateApp/pages/DataFactory';
 import IntegratedManagementPage from '../CreateApp/pages/IntegratedManagement';
+import ScreenPort from '../CreateApp/pages/ScreenPort';
 import PageManagerPage from '../CreateApp/pages/PageManager';
 import { AppHeader } from './components/header';
 import styles from './index.module.less';
@@ -40,6 +41,7 @@ const Home: React.FC = () => {
                   <Route path="page-manager" element={<PageManagerPage />} />
                   <Route path="integrated-management/*" element={<IntegratedManagementPage />} />
                   <Route path="data-factory" element={<DataFactoryPage />} />
+                  <Route path="screen-port/*" element={<ScreenPort />} />
                   <Route path="app-setting" element={<AppSettingPage />} />
                 </Route>
               </Routes>

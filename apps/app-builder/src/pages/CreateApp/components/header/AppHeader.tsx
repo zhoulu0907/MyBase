@@ -25,7 +25,7 @@ interface HeaderProps {
 }
 
 // tabs标题顺序，获取当前选型卡下标；
-const tabsList = ['data-factory', 'page-manager', 'integrated-management', 'app-setting'];
+const tabsList = ['data-factory', 'page-manager', 'integrated-management', 'screen-port', 'app-setting'];
 
 const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   const navigate = useNavigate();
@@ -41,6 +41,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     if (pathname.includes(`onebase/${tenantId}/home/create-app/integrated-management`)) return 'integrated-management';
     if (pathname.includes(`onebase/${tenantId}/home/create-app/data-factory`)) return 'data-factory';
     if (pathname.includes(`onebase/${tenantId}/home/create-app/app-setting`)) return 'app-setting';
+    if (pathname.includes(`onebase/${tenantId}/home/create-app/screen-port`)) return 'screen-port';
     return 'page-manager';
   };
   const [activeTab, setActiveTab] = useState(() => getTabKeyFromPath(location.pathname));
@@ -190,6 +191,9 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
             case 'app-setting':
               navigate(`/onebase/${tenantId}/home/create-app/app-setting?appId=${curAppId}`);
               break;
+            case 'screen-port':
+              navigate(`/onebase/${tenantId}/home/create-app/screen-port?appId=${curAppId}`);
+              break;
             default:
               break;
           }
@@ -235,6 +239,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
         <Tabs.TabPane key="data-factory" title={t('createApp.dataFactory')} />
         <Tabs.TabPane key="page-manager" title={t('createApp.pageManager')} />
         <Tabs.TabPane key="integrated-management" title={t('createApp.integratedManagement')} />
+        <Tabs.TabPane key="screen-port" title={t('createApp.largeScreenReport')} />
         <Tabs.TabPane key="app-setting" title={t('createApp.appRelease')} />
       </Tabs>
     </Header>
