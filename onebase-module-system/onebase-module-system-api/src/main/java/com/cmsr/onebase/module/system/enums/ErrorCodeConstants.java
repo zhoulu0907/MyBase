@@ -20,6 +20,9 @@ public interface ErrorCodeConstants {
     ErrorCode AUTH_LOGIN_PLATFORM_TENANT_ERROR = new ErrorCode(1_002_000_010, "登录失败，平台租户不可登录。");
     ErrorCode AUTH_LOGIN_NO_EXISTS = new ErrorCode(1_002_000_011, "登录失败，当前账号不存在。");
 
+    ErrorCode AUTH_VERIFY_CODE_NULL = new ErrorCode(1_002_000_100, "验证码为空");
+    ErrorCode AUTH_VERIFY_CODE_ERROR = new ErrorCode(1_002_000_100, "验证码错误");
+
     // ========== 菜单模块 1-002-001-000 ==========
     ErrorCode MENU_NAME_DUPLICATE = new ErrorCode(1_002_001_000, "已经存在该名字的菜单");
     ErrorCode MENU_PARENT_NOT_EXISTS = new ErrorCode(1_002_001_001, "父菜单不存在");

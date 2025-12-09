@@ -90,6 +90,7 @@ public class FileController {
     @PreAuthorize("@ss.hasPermission('infra:file:query')")
     public CommonResult<PageResult<FileRespVO>> getFilePage(@Valid FilePageReqVO pageVO) {
         PageResult<FileDO> pageResult = fileService.getFilePage(pageVO);
+
         return success(BeanUtils.toBean(pageResult, FileRespVO.class));
     }
 
