@@ -9,6 +9,7 @@ import com.cmsr.onebase.module.flow.context.graph.nodes.StartDateFieldNodeData;
 import com.cmsr.onebase.module.flow.context.graph.nodes.StartEntityNodeData;
 import com.cmsr.onebase.module.flow.context.graph.nodes.StartFormNodeData;
 import com.cmsr.onebase.module.flow.context.graph.nodes.StartTimeNodeData;
+import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
 
 import java.util.List;
 import java.util.Map;
@@ -22,7 +23,7 @@ import java.util.stream.Collectors;
  */
 public class FlowProcessCache {
 
-    private static ConcurrentHashMap<Long, Long> processApplicationCache = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<Long, FlowProcessDO> processCache = new ConcurrentHashMap<>();
 
     private static ConcurrentHashMap<Long, Map<String, NodeData>> flowNodeDataCache = new ConcurrentHashMap<>();
 
@@ -34,7 +35,10 @@ public class FlowProcessCache {
 
     private static ConcurrentHashMap<Long, StartDateFieldNodeData> startDateFieldNodeDataCache = new ConcurrentHashMap<>();
 
-    public static void update(Long applicationId, Long processId, JsonGraph jsonGraph) {
+    public static void update(FlowProcessDO processDO, JsonGraph jsonGraph) {
+        Long processId = processDO.getId();
+        Long applicationId = processDO.getApplicationId();
+        //
         Map<String, NodeData> flowNodeData = jsonGraph.getNodeData();
         flowNodeDataCache.put(processId, flowNodeData);
         JsonGraphNode startNode = jsonGraph.getStartNode();
@@ -59,7 +63,11 @@ public class FlowProcessCache {
             nodeData.setProcessId(processId);
             startDateFieldNodeDataCache.put(processId, nodeData);
         }
-        processApplicationCache.put(processId, applicationId);
+        //几个大字段太占内存了也没用处，所以置空
+        processDO.setProcessDefinition(null);
+        processDO.setProcessDescription(null);
+        processDO.setTriggerConfig(null);
+        processCache.put(processId, processDO);
     }
 
 
@@ -101,7 +109,7 @@ public class FlowProcessCache {
     }
 
     public static Set<Long> findProcessByApplicationId(Long applicationId) {
-        return processApplicationCache.entrySet().stream()
+        return processCache.entrySet().stream()
                 .filter(entry -> entry.getValue().equals(applicationId))
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toSet());
@@ -113,14 +121,16 @@ public class FlowProcessCache {
         startFormNodeDataCache.remove(processId);
         startDateFieldNodeDataCache.remove(processId);
         startEntityNodeDataCache.remove(processId);
-        processApplicationCache.remove(processId);
+        processCache.remove(processId);
     }
 
     public static Long findApplicationByProcessId(Long processId) {
-        return processApplicationCache.get(processId);
+        FlowProcessDO flowProcessDO = processCache.get(processId);
+        return flowProcessDO != null ? flowProcessDO.getApplicationId() : null;
     }
 
-    public static Set<Long> getAllApplicationId() {
-        return processApplicationCache.values().stream().collect(Collectors.toSet());
+    public static FlowProcessDO findProcessByProcessId(Long processId) {
+        return processCache.get(processId);
     }
+
 }

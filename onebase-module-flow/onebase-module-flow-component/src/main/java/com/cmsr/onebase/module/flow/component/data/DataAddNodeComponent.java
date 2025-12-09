@@ -67,30 +67,28 @@ public class DataAddNodeComponent extends SkippableNodeComponent {
             return;
         }
         List<SemanticEntityValueDTO> respDTOSS = new ArrayList<SemanticEntityValueDTO>();
-        try {
-            executeContext.addLog("数据添加节点开始执行");
-            for (Map<String, Object> reqData : reqDataList) {
-                reqDTO.setData(reqData);
-                SemanticEntityValueDTO respDTO = TenantManager.withoutTenantCondition(() -> ApplicationManager.withApplicationIdAndVersionTag(
-                        executeContext.getApplicationId(),
-                        executeContext.getVersionTag(),
-                        () -> semanticDynamicDataApi.insertData(reqDTO)));
-                respDTOSS.add(respDTO);
-            }
-            executeContext.addLog("数据添加节点结束执行, 响应结果数量: " + respDTOSS.size());
-            // 处理响应结果
-            processResponse(respDTOSS, variableContext, batchType);
-        } catch (Exception e) {
-            throw e; // 重新抛出异常，保持原有行为
+
+        executeContext.addLog("数据添加节点开始执行");
+        for (Map<String, Object> reqData : reqDataList) {
+            reqDTO.setData(reqData);
+            SemanticEntityValueDTO respDTO = TenantManager.withoutTenantCondition(() -> ApplicationManager.withApplicationIdAndVersionTag(
+                    executeContext.getApplicationId(),
+                    executeContext.getVersionTag(),
+                    () -> semanticDynamicDataApi.insertData(reqDTO)));
+            respDTOSS.add(respDTO);
         }
+        executeContext.addLog("数据添加节点执行结束, 响应结果数量: " + respDTOSS.size());
+        // 处理响应结果
+        processResponse(respDTOSS, variableContext, batchType);
     }
+
 
     private List<Map<String, Object>> buildSingleReqData(List<ConditionItem> conditionItems, Map<String, Object> expressionContext) {
         List<Map<String, Object>> reqData = new ArrayList<>();
         List<ExpressionItem> expressionItems = conditionsProvider.formatConditionItemsForValue(conditionItems, expressionContext);
         Map<String, Object> data = new HashMap<>();
         for (ExpressionItem expressionItem : expressionItems) {
-            data.put(expressionItem.getFieldKey(), expressionItem.getFieldValue());
+            data.put(DataMethodApiHelper.convertToFieldName(expressionItem.getFieldKey()), expressionItem.getFieldValue());
         }
         reqData.add(data);
         return reqData;
@@ -104,7 +102,7 @@ public class DataAddNodeComponent extends SkippableNodeComponent {
             Map<String, Object> data = new HashMap<>();
             for (ConditionItem conditionItem : conditionItems) {
                 ExpressionItem expressionItem = conditionsProvider.formatConditionItemForValue(conditionItem, dataMap);
-                data.put(expressionItem.getFieldKey(), expressionItem.getFieldValue());
+                data.put(DataMethodApiHelper.convertToFieldName(expressionItem.getFieldKey()), expressionItem.getFieldValue());
             }
             reqData.add(data);
         }

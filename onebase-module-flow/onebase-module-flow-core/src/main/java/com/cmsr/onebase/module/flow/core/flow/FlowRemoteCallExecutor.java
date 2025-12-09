@@ -1,9 +1,10 @@
 package com.cmsr.onebase.module.flow.core.flow;
 
-import com.cmsr.onebase.module.flow.core.graph.FlowProcessCache;
 import com.cmsr.onebase.module.flow.context.graph.nodes.StartDateFieldNodeData;
 import com.cmsr.onebase.module.flow.context.graph.nodes.StartTimeNodeData;
 import com.cmsr.onebase.module.flow.core.config.FlowRuntimeCondition;
+import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
+import com.cmsr.onebase.module.flow.core.graph.FlowProcessCache;
 import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -40,8 +41,13 @@ public class FlowRemoteCallExecutor {
                 return result;
             }
             log.info("处理流程消息: {}", jobMessage);
-            executorResult = flowProcessExecutor.execute(FlowUtils.generateTraceId(), jobMessage.getProcessId(), inputParams);
-            log.error("执行流程结果：{}", executorResult);
+            FlowProcessDO flowProcessDO = FlowProcessCache.findProcessByProcessId(jobMessage.getProcessId());
+            if (flowProcessDO == null) {
+                executorResult = ExecutorResult.error(jobMessage.getProcessId(), "流程不存在:" + jobMessage.getProcessId());
+            } else {
+                executorResult = flowProcessExecutor.execute(FlowUtils.generateTraceId(), jobMessage.getProcessId(), inputParams, flowProcessDO.getCreator());
+                log.error("执行流程结果：{}", executorResult);
+            }
         } catch (Exception e) {
             log.error("处理流程消息异常：{}", e.getMessage(), e);
             executorResult = new ExecutorResult();

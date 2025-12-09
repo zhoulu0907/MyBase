@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.flow.runtime.service;
 
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
+import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.flow.context.condition.ConditionsSupport;
 import com.cmsr.onebase.module.flow.context.enums.FieldTypeConvertor;
@@ -77,13 +78,15 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
                     vo.setMessage("表单不满足触发条件");
                     return vo;
                 } else {
-                    ExecutorResult executorResult = flowProcessExecutor.execute(FlowUtils.generateTraceId(), reqVO.getProcessId(), inputMap);
+                    Long loginUserId = SecurityFrameworkUtils.getLoginUserId();
+                    ExecutorResult executorResult = flowProcessExecutor.execute(FlowUtils.generateTraceId(), reqVO.getProcessId(), inputMap, loginUserId);
                     return formTriggerRespVO(executorResult);
                 }
             } else {
                 // 前端二次触发，用于表单信息收集等节点流程的继续执行
+                Long loginUserId = SecurityFrameworkUtils.getLoginUserId();
                 Map<String, Object> inputMap = convertInputFieldsData(reqVO.getInputFields());
-                ExecutorResult executorResult = flowProcessExecutor.execute(reqVO.getProcessId(), reqVO.getExecutionUuid(), inputMap);
+                ExecutorResult executorResult = flowProcessExecutor.execute(reqVO.getProcessId(), reqVO.getExecutionUuid(), inputMap, loginUserId);
                 return formTriggerRespVO(executorResult);
             }
         } catch (Exception e) {

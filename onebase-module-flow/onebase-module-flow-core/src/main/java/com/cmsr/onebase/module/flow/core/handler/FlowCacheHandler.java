@@ -155,7 +155,7 @@ public class FlowCacheHandler {
         String chainId = FlowUtils.toFlowChainId(processDO.getId());
         LiteFlowChainELBuilder.createChain().setChainId(chainId).setEL(flowChain).build();
         //
-        FlowProcessCache.update(processDO.getApplicationId(), processDO.getId(), jsonGraph);
+        FlowProcessCache.update(processDO, jsonGraph);
         threadPoolTaskScheduler.submit(() -> {
             startSchedulingJob(processDO);
         });

@@ -26,6 +26,9 @@ public class ExecuteContext implements Serializable {
     @Getter
     private String traceId;
 
+    /**
+     * 执行唯一标识，二次触发执行需要
+     */
     @Setter
     @Getter
     private String executionUuid;
@@ -82,6 +85,8 @@ public class ExecuteContext implements Serializable {
     @Getter
     private transient volatile String terminationMessage;
 
+    @Getter
+    @Setter
     private transient Stopwatch stopwatch;
 
     private transient List<String> logs;

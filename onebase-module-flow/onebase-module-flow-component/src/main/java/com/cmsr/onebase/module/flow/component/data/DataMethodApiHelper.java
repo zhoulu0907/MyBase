@@ -136,7 +136,7 @@ public class DataMethodApiHelper {
         return condition;
     }
 
-    private static String convertToFieldName(String fieldKey) {
+    public static String convertToFieldName(String fieldKey) {
         return StringUtils.substringAfter(fieldKey, ".");
     }
 
