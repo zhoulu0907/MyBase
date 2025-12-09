@@ -14,6 +14,7 @@ import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticDataMeth
 import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticMergeRecordAssembler;
 import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticPermissionContextLoader;
 import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticPermissionValidator;
+import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticProcessLogger;
 import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticDataIntegrityValidator;
 import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticQueryConditionBuilder;
 import com.cmsr.onebase.module.metadata.core.semantic.service.SemanticDataCrudService;
@@ -62,7 +63,7 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
     @Resource
     private SemanticValueAssembler semanticValueAssembler;
     @Resource
-    private com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticProcessLogger semanticProcessLogger;
+    private SemanticProcessLogger semanticProcessLogger;
 
     @Override
     public SemanticEntitySchemaDTO buildEntitySchemaByUuid(String entityUuid) {
