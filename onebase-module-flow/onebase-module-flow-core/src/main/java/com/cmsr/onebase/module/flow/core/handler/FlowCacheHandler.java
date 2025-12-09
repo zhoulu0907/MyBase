@@ -33,6 +33,8 @@ import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Conditional;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -45,37 +47,37 @@ import java.util.concurrent.TimeUnit;
  * @Date：2025/11/1 18:27
  */
 @Slf4j
+@Setter
 @Service
 @Conditional(FlowRuntimeCondition.class)
 public class FlowCacheHandler {
 
-    @Setter
+
     @Autowired
     private FlowProcessRepository flowProcessRepository;
 
-    @Setter
+
     @Autowired
     private FlowProcessTimeRepository flowProcessTimeRepository;
 
-    @Setter
+
     @Autowired
     private FlowProcessDateFieldRepository flowProcessDateFieldRepository;
 
-    @Setter
     @Autowired
     private FlowGraphBuilder flowGraphBuilder;
 
-    @Setter
     @Autowired
     private RedissonClient redissonClient;
 
-    @Setter
     @Autowired
     private FlowProperties flowProperties;
 
-    @Setter
     @Autowired
     private JobClient jobClient;
+
+    @Autowired
+    private ThreadPoolTaskScheduler threadPoolTaskScheduler;
 
     public void initAllProcess() {
         List<FlowProcessDO> flowProcessDOS = TenantManager.withoutTenantCondition(() ->
@@ -153,7 +155,9 @@ public class FlowCacheHandler {
         LiteFlowChainELBuilder.createChain().setChainId(chainId).setEL(flowChain).build();
         //
         FlowProcessCache.update(processDO.getApplicationId(), processDO.getId(), jsonGraph);
-        startSchedulingJob(processDO);
+        threadPoolTaskScheduler.submit(() -> {
+            startSchedulingJob(processDO);
+        });
     }
 
     private void onProcessDelete(Long processId) {

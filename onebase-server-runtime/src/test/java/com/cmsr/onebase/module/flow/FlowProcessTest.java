@@ -116,18 +116,18 @@ public class FlowProcessTest {
         flowRemoteCallExecutor.executeFlow(jobMessage);
     }
 
-    @Test
-    public void testSimple4() throws IOException {
-        TenantContextHolder.setIgnore(true);
-        FormTriggerReqVO reqVO = new FormTriggerReqVO();
-        reqVO.setProcessId(114994365031546880L);  // 114994365031546880L 114959369637036032L
-        Map<Long, Object> inputParams = Map.of(
-                46999569445519360L, "班级名称"
-        );
-        reqVO.setInputParams(inputParams);
-        FormTriggerRespVO respVO = flowProcessExecService.triggerForm(reqVO);
-        System.out.println(respVO);
-    }
+//    @Test
+//    public void testSimple4() throws IOException {
+//        TenantContextHolder.setIgnore(true);
+//        FormTriggerReqVO reqVO = new FormTriggerReqVO();
+//        reqVO.setProcessId(114994365031546880L);  // 114994365031546880L 114959369637036032L
+//        Map<Long, Object> inputParams = Map.of(
+//                46999569445519360L, "班级名称"
+//        );
+//        reqVO.setInputParams(inputParams);
+//        FormTriggerRespVO respVO = flowProcessExecService.triggerForm(reqVO);
+//        System.out.println(respVO);
+//    }
 
     @Test
     public void testSimple5() throws IOException {

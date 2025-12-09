@@ -70,7 +70,8 @@ public class DataQueryNodeComponent extends SkippableNodeComponent {
                 () -> semanticDynamicDataApi.getDataByCondition(reqDTO)));
         executeContext.addLog("数据查询节点（单条）返回数据量: " + fieldDataRespDTOS.getTotal());
         if (CollectionUtils.isNotEmpty(fieldDataRespDTOS.getList())) {
-            variableContext.putNodeVariables(this.getTag(), DataMethodApiHelper.convertToMap(fieldDataRespDTOS.getList().get(0)));
+            Map<String, Object> result = DataMethodApiHelper.convertToMap(fieldDataRespDTOS.getList().get(0));
+            variableContext.putNodeVariables(this.getTag(), result);
         }
     }
 

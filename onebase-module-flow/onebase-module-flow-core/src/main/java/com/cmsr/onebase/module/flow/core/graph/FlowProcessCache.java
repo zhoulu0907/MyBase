@@ -92,11 +92,11 @@ public class FlowProcessCache {
                 .toList();
     }
 
-    public static List<StartFormNodeData> findStartFormNodeDataByPageUuid(Long applicationId, String pageUuid) {
+    public static List<StartFormNodeData> findStartFormNodeDataByPageId(Long applicationId, Long pageId) {
         return startFormNodeDataCache.values().stream()
                 .filter(startFormNodeData ->
                         startFormNodeData.getApplicationId().equals(applicationId)
-                                && startFormNodeData.getPageUuid().equals(pageUuid))
+                                && startFormNodeData.getPageId().equals(pageId))
                 .toList();
     }
 

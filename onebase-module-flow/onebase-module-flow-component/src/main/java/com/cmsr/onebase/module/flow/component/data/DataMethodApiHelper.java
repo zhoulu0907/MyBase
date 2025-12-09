@@ -240,7 +240,7 @@ public class DataMethodApiHelper {
     public static Map<String, Object> convertToMap(SemanticEntityValueDTO fieldDataRespDTOS) {
         Map<String, Object> map = new HashMap<>();
         for (SemanticFieldValueDTO fieldDataRespDTO : fieldDataRespDTOS.getFieldValueMap().values()) {
-            String key = fieldDataRespDTO.getFieldName();
+            String key = fieldDataRespDTO.getTableName() + "." + fieldDataRespDTO.getFieldName();
             Object value = fieldDataRespDTO.getRawValue();
             map.put(key, value);
         }

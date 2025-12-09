@@ -103,7 +103,8 @@ public class FlowFieldTypeProviderImpl implements FieldTypeProvider {
                 }
                 if (n.getTableName() == null) {
                     String pageUuid = n.getPageUuid();
-                    String tableName = flowAppProvider.findTableUuidByAppIdAndPageUuid(applicationId, pageUuid);
+                    String tableUuid = flowAppProvider.findTableUuidByAppIdAndPageUuid(applicationId, pageUuid);
+                    String tableName = findTableNameByUuid(applicationId, tableUuid);
                     n.setTableName(tableName);
                 }
                 if (arg instanceof Set fieldNames) {
@@ -190,6 +191,15 @@ public class FlowFieldTypeProviderImpl implements FieldTypeProvider {
             return SemanticFieldTypeEnum.TEXT;
         }
         return semanticFieldSchemaDTO.getFieldTypeEnum();
+    }
+
+    private String findTableNameByUuid(Long applicationId, String entityUuid) {
+        SemanticEntitySchemaDTO semanticEntitySchemaDTO = TenantManager.withoutTenantCondition(() -> ApplicationManager.withApplicationIdAndVersionTag(
+                applicationId,
+                flowProperties.getVersionTag(),
+                () -> semanticDynamicDataApi.buildEntitySchemaByUuid(entityUuid)
+        ));
+        return semanticEntitySchemaDTO.getTableName();
     }
 
 }
