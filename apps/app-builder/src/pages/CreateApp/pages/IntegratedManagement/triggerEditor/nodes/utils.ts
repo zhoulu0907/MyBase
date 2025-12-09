@@ -1,12 +1,6 @@
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import type { FlowNodeEntity, FlowNodeJSON } from '@flowgram.ai/fixed-layout-editor';
-import {
-  DATA_SOURCE_TYPE,
-  getEntityFields,
-  getFieldCheckTypeApi,
-  type ConditionField,
-  type EntityFieldValidationTypes
-} from '@onebase/app';
+import { DATA_SOURCE_TYPE, getEntityFields, type ConditionField, type EntityFieldValidationTypes } from '@onebase/app';
 import { getEntityListByApp } from '@onebase/app/src/services';
 import { NodeType } from '@onebase/common';
 import { v4 as uuidv4 } from 'uuid';
@@ -321,46 +315,13 @@ export const getEntityFieldList = async (
     fieldIds.push(item.id);
     newConditionFields.push({
       label: item.displayName,
-      value: item.id,
+      value: `${dataSource}.${item.fieldName}`,
       fieldType: item.fieldType
     });
   });
 
+  console.log('newConditionFields: ', newConditionFields);
   setConditionFields(newConditionFields);
-  //   if (fieldIds?.length) {
-  //     // TODO(mickey): 需要卞老师补充字段类型
-  //     const newValidationTypes = await getFieldCheckTypeApi(fieldIds);
-  //     setValidationTypes(newValidationTypes);
-  //   }
-};
-
-export const getEntityFieldListV2 = async (
-  dataSource: string,
-  entityName: string,
-  setConditionFields: (entityID: string, entityName: string, fields: ConditionField[]) => void,
-  setValidationTypes: (types: EntityFieldValidationTypes[]) => void
-) => {
-  if (!dataSource) {
-    return;
-  }
-  const fieldIds: string[] = [];
-  const newConditionFields: ConditionField[] = [];
-
-  const res = await getEntityFields({ entityId: dataSource });
-  res.forEach((item: any) => {
-    fieldIds.push(item.id);
-    newConditionFields.push({
-      label: item.displayName,
-      value: item.id,
-      fieldType: item.fieldType
-    });
-  });
-
-  setConditionFields(dataSource, entityName, newConditionFields);
-  if (fieldIds?.length) {
-    const newValidationTypes = await getFieldCheckTypeApi(fieldIds);
-    setValidationTypes(newValidationTypes);
-  }
 };
 
 // 判断是否在循环节点内

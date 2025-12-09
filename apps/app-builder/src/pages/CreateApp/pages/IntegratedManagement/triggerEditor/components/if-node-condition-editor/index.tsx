@@ -297,8 +297,6 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
   const getEntityFieldValidationTypes = (nodeId: string): string[] => {
     const nodes = getPrecedingNodes(nodeId, triggerEditorSignal.nodes.value, ALLOW_NODE_TYPES);
 
-    console.log('nodes: ', nodes);
-
     const fielValues: string[] = [];
 
     nodes.forEach((node) => {
