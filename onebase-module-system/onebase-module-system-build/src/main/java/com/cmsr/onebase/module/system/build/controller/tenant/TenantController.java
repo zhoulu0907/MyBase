@@ -69,7 +69,7 @@ public class TenantController {
 
     @PostMapping("/update")
     @Operation(summary = "更新租户")
-    @PreAuthorize("@ss.hasPermission('tenant:space:update')")
+    @PreAuthorize("@ss.hasPermission('tenant:info:update')")
     public CommonResult<Boolean> updateTenant(@Valid @RequestBody TenantUpdateReqVO updateReqVO) {
         tenantService.updateTenant(updateReqVO);
         return success(true);
@@ -79,7 +79,7 @@ public class TenantController {
     @GetMapping("/get")
     @Operation(summary = "获得租户(安全考虑仅获取用户所属租户)")
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
-    @PreAuthorize("@ss.hasPermission('tenant:space:query')")
+    @PreAuthorize("@ss.hasPermission('tenant:info:query')")
     public CommonResult<TenantRespVO> getTenant(@RequestParam("id") Long id) {
         return success(tenantService.getTenantWithAppCount(id));
     }
