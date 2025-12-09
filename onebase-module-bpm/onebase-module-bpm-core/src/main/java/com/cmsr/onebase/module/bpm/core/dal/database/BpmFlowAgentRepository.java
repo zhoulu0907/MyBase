@@ -1,11 +1,11 @@
 package com.cmsr.onebase.module.bpm.core.dal.database;
 
+import com.cmsr.onebase.framework.orm.repo.BaseBizRepository;
 import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowAgentDO;
 import com.cmsr.onebase.module.bpm.core.dal.mapper.BpmFlowAgentMapper;
 import com.cmsr.onebase.module.bpm.core.enums.BpmAgentStatus;
 import com.mybatisflex.core.query.QueryCondition;
 import com.mybatisflex.core.query.QueryWrapper;
-import com.mybatisflex.spring.service.impl.ServiceImpl;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -22,7 +22,7 @@ import static com.cmsr.onebase.module.bpm.core.dal.dataobject.table.BpmFlowAgent
  * @date 2025-11-10
  */
 @Repository
-public class BpmFlowAgentRepository extends ServiceImpl<BpmFlowAgentMapper, BpmFlowAgentDO> {
+public class BpmFlowAgentRepository extends BaseBizRepository<BpmFlowAgentMapper, BpmFlowAgentDO> {
     public QueryCondition buildConditionByAgentStatus(BpmAgentStatus agentStatus) {
         QueryCondition condition = null;
         LocalDateTime now = LocalDateTime.now();

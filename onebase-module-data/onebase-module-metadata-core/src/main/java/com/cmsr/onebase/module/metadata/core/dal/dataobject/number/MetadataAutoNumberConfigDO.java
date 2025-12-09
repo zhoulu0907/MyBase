@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.core.dal.dataobject.number;
 
+import com.cmsr.onebase.framework.orm.entity.BaseBizEntity;
 import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
@@ -17,7 +18,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Table(value = "metadata_auto_number_config")
-public class MetadataAutoNumberConfigDO extends BaseTenantEntity {
+public class MetadataAutoNumberConfigDO extends BaseBizEntity {
 
     /**
      * 配置UUID
@@ -76,18 +77,6 @@ public class MetadataAutoNumberConfigDO extends BaseTenantEntity {
      */
     @Column(value = "is_enabled", comment = "是否启用：1-启用，0-禁用")
     private Integer isEnabled;
-
-    /**
-     * 版本标识
-     */
-    @Column(value = "version_tag", comment = "版本标识")
-    private Long versionTag;
-
-    /**
-     * 应用ID
-     */
-    @Column(value = "application_id", comment = "应用ID")
-    private Long applicationId;
 
 }
 

@@ -16,6 +16,8 @@ public interface PageService {
 
     String getMetadataByPageId(Long pageId);
 
+    String getMetadataByPageUuid(String pageUuid);
+
     List<PageDTO> listPageView(Long pageSetId);
 
 }

@@ -4,6 +4,7 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import cn.hutool.core.collection.CollUtil;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.module.system.vo.auth.AuthRegisterReqVO;
+import com.cmsr.onebase.module.system.vo.dept.DeptSimpleListRespVO;
 import com.cmsr.onebase.module.system.vo.user.UserProfileUpdatePasswordReqVO;
 import com.cmsr.onebase.module.system.vo.user.UserProfileUpdateReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
@@ -321,5 +322,5 @@ public interface UserService {
      * @param
      * @return 用户简要信息分页列表
      */
-    List<AdminUserDO> getUserListByStatusAndDeptId(Integer status, Long deptId);
+    List<AdminUserDO> getUserListByStatusAndDeptId(DeptSimpleListRespVO reqVO);
 }

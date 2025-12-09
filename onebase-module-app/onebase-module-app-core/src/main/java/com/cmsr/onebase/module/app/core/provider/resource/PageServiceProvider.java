@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.app.core.provider.resource;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageRepository;
@@ -68,6 +69,13 @@ public class PageServiceProvider {
         return mainMetadata;
     }
 
+    public String getMetadataByPageUuid(String pageUuid) {
+        Long applicationId = ApplicationManager.getApplicationId();
+        AppResourcePageDO pageDO = pageRepository.findByAppIdAndPageUuid(applicationId, pageUuid);
+        String pageSetUuid = pageDO.getPageSetUuid();
+        String mainMetadata = pageSetRepository.getMainMetadataByAppIdAndUuid(applicationId, pageSetUuid);
+        return mainMetadata;
+    }
 
     public List<PageDTO> listPageView(Long pageSetId) {
         AppResourcePagesetDO pageSetDO = pageSetRepository.getById(pageSetId);
@@ -78,7 +86,7 @@ public class PageServiceProvider {
         // 根据页面集类型查询不同的表
         if (PageTypeSetEnum.isWorkBenchType(pageSetType)) {
             // 工作台类型，查询工作台页面表
-            List<AppResourceWorkbenchPageDO> workbenchPageDOList = workbenchPageRepository.findByPageSetUuid(applicationId,pageSetUuid);
+            List<AppResourceWorkbenchPageDO> workbenchPageDOList = workbenchPageRepository.findByPageSetUuid(applicationId, pageSetUuid);
             return BeanUtils.toBean(workbenchPageDOList, PageDTO.class);
         } else {
             // 普通表单或流程表单类型，查询普通页面表

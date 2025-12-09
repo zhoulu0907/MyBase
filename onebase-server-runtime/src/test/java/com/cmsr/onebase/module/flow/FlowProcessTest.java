@@ -16,6 +16,8 @@ import com.cmsr.onebase.module.flow.core.graph.FlowGraphBuilder;
 import com.cmsr.onebase.module.flow.runtime.service.FlowProcessExecService;
 import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerReqVO;
 import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerRespVO;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldValueDTO;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
 import com.cmsr.onebase.server.runtime.OneBaseServerRuntimeApplication;
 import lombok.Setter;
 import org.junit.jupiter.api.Test;
@@ -23,7 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.IOException;
-import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -60,29 +62,33 @@ public class FlowProcessTest {
     }
 
 
-
     @Test
-    public void testSimple2() throws IOException {
+    public void testFormTriggerReqVO01() throws IOException {
         ApplicationManager.ignoreApplicationCondition();
         ApplicationManager.ignoreVersionTagCondition();
 
         FormTriggerReqVO reqVO = new FormTriggerReqVO();
-        reqVO.setProcessId(171622357911764992L);
+        reqVO.setProcessId(171999834000031744L);
         reqVO.setInputParams(Map.of());
         FormTriggerRespVO respVO = flowProcessExecService.triggerForm(reqVO);
         System.out.println(respVO);
     }
 
     @Test
-    public void testSimple22() throws IOException {
+    public void testEntityTriggerReqDTO01() throws IOException {
         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
-        // reqDTO.setTraceId(UUID.randomUUID().toString());
-        // reqDTO.setEntityId(101573932216057856L);
-        // reqDTO.setTriggerEvent(TriggerEventEnum.AFTER_UPDATE);
-        // reqDTO.setFieldData(Map.of(
-        //         "104845168301834240", "yy",
-        //         "104951150916075520", "yy"
-        // ));
+        reqDTO.setTraceId(UUID.randomUUID().toString());
+        reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_CREATE);
+        reqDTO.setApplicationId(166945945974013952L);
+        reqDTO.setTableName("wcq9_student");
+        SemanticFieldValueDTO name = SemanticFieldValueDTO.ofType(SemanticFieldTypeEnum.TEXT);
+        name.setFieldName("name");
+        name.setRawValue("小");
+        SemanticFieldValueDTO age = SemanticFieldValueDTO.ofType(SemanticFieldTypeEnum.NUMBER);
+        age.setFieldName("age");
+        age.setRawValue(18);
+
+        reqDTO.setFieldData(List.of(name, age));
         EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
         System.out.println(respDTO);
     }

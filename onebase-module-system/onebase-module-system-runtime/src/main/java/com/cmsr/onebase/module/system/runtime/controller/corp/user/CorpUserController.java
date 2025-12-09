@@ -9,6 +9,7 @@ import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.service.dept.DeptService;
 import com.cmsr.onebase.module.system.service.user.UserService;
+import com.cmsr.onebase.module.system.vo.dept.DeptSimpleListRespVO;
 import com.cmsr.onebase.module.system.vo.user.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -147,8 +148,8 @@ public class CorpUserController {
     @GetMapping("/simple-list-by-dept-id")
     @PreAuthorize("@ss.hasPermission('corp:user:query')")
     @Operation(summary = "通过部门id获取用户精简信息列表", description = "只包含开启的用户，主要用于前端的下拉选项")
-    public CommonResult<List<UserDeptSimpleRespVO>> getSimpleUserListByDeptId (@RequestParam(value = "deptId") Long deptId) {
-        List<AdminUserDO> list = userService.getUserListByStatusAndDeptId(CommonStatusEnum.ENABLE.getStatus(),  deptId);
+    public CommonResult<List<UserDeptSimpleRespVO>> getSimpleUserListByDeptId (@Valid DeptSimpleListRespVO respVO) {
+        List<AdminUserDO> list = userService.getUserListByStatusAndDeptId(respVO);
         // 拼接数据
         Map<Long, DeptDO> deptMap = deptService.getDeptMap(convertList(list, AdminUserDO::getDeptId));
         return success(UserConvert.INSTANCE.convertSimpleList(list, deptMap));

@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.metadata.core.dal.database;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.orm.repo.BaseBizRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRuleGroupDO;
 import com.cmsr.onebase.module.metadata.core.dal.mapper.MetadataValidationRuleGroupMapper;
 import com.mybatisflex.core.paginate.Page;
@@ -20,7 +21,7 @@ import org.springframework.util.StringUtils;
  */
 @Repository
 @Slf4j
-public class MetadataValidationRuleGroupRepository extends ServiceImpl<MetadataValidationRuleGroupMapper, MetadataValidationRuleGroupDO> {
+public class MetadataValidationRuleGroupRepository extends BaseBizRepository<MetadataValidationRuleGroupMapper, MetadataValidationRuleGroupDO> {
 
     /**
      * 分页查询校验规则分组，支持按名称和业务实体UUID过滤

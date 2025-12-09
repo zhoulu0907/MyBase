@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.core.dal.database;
 
+import com.cmsr.onebase.framework.orm.repo.BaseBizRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.number.MetadataAutoNumberRuleItemDO;
 import com.cmsr.onebase.module.metadata.core.dal.mapper.MetadataAutoNumberRuleItemMapper;
 import com.mybatisflex.core.query.QueryWrapper;
@@ -15,7 +16,7 @@ import java.util.List;
  * @date 2025-11-28
  */
 @Repository
-public class MetadataAutoNumberRuleItemRepository extends ServiceImpl<MetadataAutoNumberRuleItemMapper, MetadataAutoNumberRuleItemDO> {
+public class MetadataAutoNumberRuleItemRepository extends BaseBizRepository<MetadataAutoNumberRuleItemMapper, MetadataAutoNumberRuleItemDO> {
 
     /**
      * 根据配置UUID获取规则项列表

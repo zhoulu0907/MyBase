@@ -2,6 +2,8 @@ package com.cmsr.onebase.module.flow.runtime.service;
 
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.app.api.appresource.AppResourceApi;
+import com.cmsr.onebase.module.app.api.appresource.dto.PageRespDTO;
 import com.cmsr.onebase.module.flow.context.condition.ConditionsSupport;
 import com.cmsr.onebase.module.flow.context.enums.FieldTypeConvertor;
 import com.cmsr.onebase.module.flow.context.express.ExpressionExecutor;
@@ -41,11 +43,16 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
     @Autowired
     private FlowProcessExecutor flowProcessExecutor;
 
+    @Autowired
+    private AppResourceApi appResourceApi;
+
     private ExpressionExecutor expressionExecutor = new ExpressionExecutor();
 
     @Override
-    public List<QueryFormTriggerRespVO> queryFormTrigger(String pageUuid) {
+    public List<QueryFormTriggerRespVO> queryFormTrigger(Long pageId) {
         Long applicationId = ApplicationManager.getApplicationId();
+        PageRespDTO pageRespDTO = appResourceApi.findPageByPageId(pageId);
+        String pageUuid = pageRespDTO.getPageUuid();
         List<StartFormNodeData> startFormNodeDataList = FlowProcessCache.findStartFormNodeDataByPageUuid(applicationId, pageUuid);
         return startFormNodeDataList.stream()
                 .map(startFormNodeData -> BeanUtils.toBean(startFormNodeData, QueryFormTriggerRespVO.class))
