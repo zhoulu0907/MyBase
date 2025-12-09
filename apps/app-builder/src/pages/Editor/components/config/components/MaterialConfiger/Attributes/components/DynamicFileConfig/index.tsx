@@ -3,7 +3,7 @@ import { registerConfigRenderer } from '../../registry';
 import { CONFIG_TYPES } from '@onebase/ui-kit';
 import { Form, Upload, Message } from '@arco-design/web-react';
 import { IconDelete } from '@arco-design/web-react/icon';
-import { uploadFile } from '@onebase/platform-center';
+import { uploadFile, getFileDetailById } from '@onebase/platform-center';
 import styles from '../../index.module.less';
 
 export interface DynamicFileConfigProps {
@@ -57,16 +57,16 @@ const DynamicFileConfig: React.FC<DynamicFileConfigProps> = ({ handlePropsChange
               customRequest={async (option) => {
                 const { onProgress, onError, onSuccess, file } = option;
                 try {
-                  const uploadImgUrl = await handleUpload(file, onProgress);
+                  const fileId = await handleUpload(file, onProgress);
+                  const uploadImgUrl = getFileDetailById(fileId);
                   if (uploadImgUrl !== '') {
                     const newFileInfo = {
-                      file: uploadImgUrl,
+                      fileId,
                       name: file.name,
-                      url: uploadImgUrl
                     };
                     setFileConfig((prev) => [...prev, newFileInfo]);
                     handlePropsChange(fileKey, [...fileConfig, newFileInfo]);
-                    onSuccess(uploadImgUrl);
+                    onSuccess(newFileInfo);
                   } else {
                     onError({
                       status: 'error',
