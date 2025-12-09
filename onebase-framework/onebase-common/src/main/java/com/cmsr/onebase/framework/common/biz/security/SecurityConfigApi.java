@@ -25,6 +25,9 @@ import java.util.List;
 @FeignClient(name = "infra-service")
 public interface SecurityConfigApi {
 
+    List<Boolean> getTenantConfigItems(Long tenantId, String categoryCode);
+
+
     /**
      * 校验密码强度
      * 

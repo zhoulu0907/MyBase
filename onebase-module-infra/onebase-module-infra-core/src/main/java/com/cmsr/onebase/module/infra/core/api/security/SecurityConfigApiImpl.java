@@ -9,6 +9,7 @@ import com.cmsr.onebase.module.infra.dal.database.SecurityRecordDataRepository;
 import com.cmsr.onebase.module.infra.dal.dataobject.security.SecurityRecordDO;
 import com.cmsr.onebase.module.infra.enums.security.SecurityRecordTypeEnum;
 import com.cmsr.onebase.module.infra.service.security.AntiBruteForceService;
+import com.cmsr.onebase.module.infra.service.security.SecurityConfigService;
 import com.cmsr.onebase.module.infra.service.security.dto.LoginFailureResult;
 import com.cmsr.onebase.module.infra.service.security.manager.PasswordPolicyManager;
 import com.cmsr.onebase.module.infra.service.security.validator.PasswordValidator;
@@ -52,6 +53,10 @@ public class SecurityConfigApiImpl implements SecurityConfigApi {
     @Resource
     private AntiBruteForceService antiBruteForceService;
 
+
+    @Resource
+    private SecurityConfigService securityConfigService;
+
     @Resource
     private com.cmsr.onebase.module.infra.service.security.MultiDeviceSessionServiceImpl multiDeviceSessionService;
 
@@ -59,6 +64,12 @@ public class SecurityConfigApiImpl implements SecurityConfigApi {
     private com.cmsr.onebase.module.infra.service.security.SessionIdleService sessionIdleService;
 
     private final PasswordValidator passwordValidator = new PasswordValidator();
+
+    @Override
+    public List<Boolean> getTenantConfigItems(Long tenantId, String categoryCode) {
+        // securityConfigService.getTenantConfigItems(tenantId, );
+        return List.of();
+    }
 
     @Override
     @Operation(summary = "校验密码强度")
