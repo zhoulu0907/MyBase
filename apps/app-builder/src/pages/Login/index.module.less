@@ -183,3 +183,48 @@
     }
   }
 }
+
+.verifyModalTitle {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.verifyModalContent {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 16px;
+
+  .verifyModalContentText {
+    gap: 10px;
+    font-family: PingFang SC;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 22px;
+    letter-spacing: 0%;
+    color: #272e3b;
+  }
+}
+
+.getVerifyCodeBtn {
+  white-space: nowrap;
+  padding: 0 4px;
+  font-size: 14px;
+  background-color: transparent;
+
+  &:disabled {
+    opacity: 0.6;
+  }
+}
+
+.verifyModalFooter {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
