@@ -19,7 +19,7 @@ import {
   getPlatformTenantAdminListApi,
   PlatformTenantPublishMode,
   PlatformTenantStatus,
-  platformUploadFile,
+  uploadFile,
   type CreateTenantParams,
   type UserVO
 } from '@onebase/platform-center';
@@ -134,7 +134,7 @@ const CreateSpace = () => {
         }
       : undefined;
 
-    const res = await platformUploadFile(formData, progressAdapter);
+    const res = await uploadFile(formData, progressAdapter);
     return res;
   };
 

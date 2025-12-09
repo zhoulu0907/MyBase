@@ -1,25 +1,25 @@
-import { Message, Modal, Grid } from '@arco-design/web-react';
+import { getPrecedingNodes } from '@/pages/CreateApp/pages/IntegratedManagement/triggerEditor/nodes/utils';
+import { useAppStore } from '@/store';
+import { triggerEditorSignal } from '@/store/singals/trigger_editor';
+import { triggerNodeOutputSignal } from '@/store/singals/trigger_node_output';
+import { Grid, Message, Modal } from '@arco-design/web-react';
+import { IconLeft } from '@arco-design/web-react/icon';
 import {
+  getEntityFields,
+  getEntityListByApp,
   getFormulaById,
   getFormulaFunctionSimpleList,
-  type VariablesList,
-  type variableItem,
-  getEntityListByApp,
-  getEntityFields,
   type ChildVariablesField,
-  type fieldListWithNodeData
+  type fieldListWithNodeData,
+  type variableItem,
+  type VariablesList
 } from '@onebase/app';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { triggerEditorSignal } from '@/store/singals/trigger_editor';
-import { FormulaInput, FunctionList, InfoPanel, VariableList, DebuggedFormula } from './components';
-import styles from './index.module.less';
-import type { FormulaEditorProps, functionGroup, FunctionItem, info } from './utils/types';
-import { useAppStore } from '@/store';
-import { IconLeft } from '@arco-design/web-react/icon';
 import { NodeType } from '@onebase/common';
-import { getPrecedingNodes } from '@/pages/CreateApp/pages/IntegratedManagement/triggerEditor/nodes/utils';
-import { triggerNodeOutputSignal } from '@/store/singals/trigger_node_output';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { DebuggedFormula, FormulaInput, FunctionList, InfoPanel, VariableList } from './components';
+import styles from './index.module.less';
 import { functionType } from './utils/formula';
+import type { FormulaEditorProps, functionGroup, FunctionItem, info } from './utils/types';
 
 const Row = Grid.Row;
 const Col = Grid.Col;
@@ -74,7 +74,13 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
   /**
    * 获取变量一级列表
    */
-  const nodeTypes = [NodeType.START_FORM, NodeType.START_ENTITY, NodeType.DATA_QUERY, NodeType.DATA_QUERY_MULTIPLE, NodeType.DATA_CALC];
+  const nodeTypes = [
+    NodeType.START_FORM,
+    NodeType.START_ENTITY,
+    NodeType.DATA_QUERY,
+    NodeType.DATA_QUERY_MULTIPLE,
+    NodeType.DATA_CALC
+  ];
 
   const retrievedEntityListByApp = async () => {
     const nodes = getPrecedingNodes(curAppId, triggerEditorSignal.nodes.value, nodeTypes);
@@ -122,7 +128,7 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
             tableName: ''
           });
         });
-        console.log('result', result);
+
         setVariables(result as any);
       }
     } catch (error) {
@@ -186,9 +192,10 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
     if (!functionSearch) return funcList;
     let filteredData: functionGroup[] = [];
     funcList?.forEach((item: functionGroup) => {
-      const functionIndex: number = item.functions?.findIndex((f) =>
-        f.name.toLowerCase().includes(functionSearch.toLowerCase())||
-        f.summary.toLowerCase().includes(functionSearch.toLowerCase())
+      const functionIndex: number = item.functions?.findIndex(
+        (f) =>
+          f.name.toLowerCase().includes(functionSearch.toLowerCase()) ||
+          f.summary.toLowerCase().includes(functionSearch.toLowerCase())
       );
       if (functionIndex >= 0) {
         filteredData.push({

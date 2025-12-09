@@ -8,6 +8,7 @@ interface IUploadProps {
     aspect?: number;
     onUpdateUrl: (value: string) => void;
     getUploadFile: Function;
+    imagePreview?: boolean;
 }
 
 const UploadCommonComponent:React.FC<IUploadProps> = ({size, aspect, uploadRef, getUploadFile,onUpdateUrl}) => {

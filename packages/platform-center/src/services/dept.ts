@@ -1,7 +1,7 @@
 import { isRuntimeEnv } from '@onebase/common';
 import { type PageParam } from '../types/common';
-import { GetDeptsByIdReq, type DeptForm, type DeptVO, type UpdateAdminOrDirectorReq } from '../types/dept';
-import { runtimeService, systemService } from './clients';
+import { GetDeptsByIdReq, GetDeptUserReq, type DeptForm, type DeptVO, type UpdateAdminOrDirectorReq } from '../types/dept';
+import { runtimeCorpService, runtimeService, systemService } from './clients';
 
 // 查询部门（精简)列表
 export const getSimpleDeptList = (): Promise<Partial<DeptVO>[]> => {
@@ -56,4 +56,9 @@ export const getDeptsById = (params: GetDeptsByIdReq) => {
 // 指定/搜索获取部门和用户信息
 export const getDeptWithSearch = (params: UpdateAdminOrDirectorReq) => {
   return systemService.get('/dept/get-dept-users', params);
+};
+
+// 查询部门列表
+export const getDeptUser = (params?: GetDeptUserReq) => {
+  return (isRuntimeEnv() ? runtimeCorpService : systemService).get('/dept/get-dept-users', params);
 };

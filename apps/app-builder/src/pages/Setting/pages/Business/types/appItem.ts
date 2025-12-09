@@ -4,45 +4,45 @@ export interface AppItem {
   applicationId?: string;
   applicationUid?: string;
   applicationCode: string;
-  authorizationTime: string;
-  versionNumber:string;
-  expiresTime: string;
+  authorizationTime: number;
+  versionNumber: string;
+  expiresTime: number;
   statusDesc: string;
 }
 
 export interface AuthorizedAppRef {
   addNewApp: (newData: AppItem) => void;
-};
+}
 
 export interface updatedParams {
-    id: string;
-    applicationId: string;
-    corpId: string;
-    authorizationTime: string;
-    expiresTime: string;
+  id: string;
+  applicationId: string;
+  corpId: string;
+  authorizationTime: number;
+  expiresTime: number;
 }
 
 export interface CorpAppParams {
-    corpId: string;
-    applicationIdList: string[];
-    authorizationTime: string;
-    expiresTime: string;
+  corpId: string;
+  applicationIdList: string[];
+  authorizationTime: number;
+  expiresTime: number;
 }
 
 export interface IAuthorizedAppProps {
-    loading: boolean;
-    tableData: AppItem[];
-    addAppModalVisible: boolean;
-    pageination: any;
-    className?: string;
-    visible: boolean;
-    setVisible: (value: boolean) =>void;
-    onSearch: (value: string) => void;
-    onChange: (pageNo: number, pageSize: number) => void;
-    onUpdateTime:(values: updatedParams) => void;
-    onRemoveAuthorizedApp: (id: string) => void;
-    onSubmit: (data: CorpAppParams) => void;
-    setAddAppModalVisible:(value: boolean) => void;
+  loading: boolean;
+  tableData: AppItem[];
+  addAppModalVisible: boolean;
+  pageination: any;
+  className?: string;
+  visible: boolean;
+  setVisible: (value: boolean) => void;
+  onSearch: (value: string) => void;
+  onChange: (pageNo: number, pageSize: number) => void;
+  onUpdateTime: (values: updatedParams) => void;
+  onRemoveAuthorizedApp: (id: string) => void;
+  onSubmit: (data: CorpAppParams) => void;
+  setAddAppModalVisible: (value: boolean) => void;
 }
 
 export interface statusProps {
@@ -61,13 +61,13 @@ export interface corpApplicationListProps {
 export interface cropItem {
   id: string;
   address: string;
-  corpCode: string;
+  corpCode?: string;
   corpName: string;
-  createTime:number;
+  createTime: number;
   industryType: string;
   industryTypeName: string;
   status: number;
-  userLimit:number;
+  userLimit: number;
   adminName: string;
   adminMobile: string;
   corpApplicationList: corpApplicationListProps[];
@@ -76,23 +76,23 @@ export interface cropItem {
 export interface OutletContextType {
   currentId: string;
   editable?: boolean;
-  industryOptions: industryTypeOption[]
+  industryOptions: industryTypeOption[];
 }
 
 export interface authorizedTime {
-  authorizationTime: string;
-  expiresTime: string;
+  authorizationTime: number;
+  expiresTime: number;
 }
 export interface authorizedTimeGroup {
-  appTime: authorizedTime
+  appTime: authorizedTime;
 }
 
 export interface ICreateAppModal {
-    visible: boolean;
-    tableData?: AppItem[];
-    dropdownList: authorizedAppList[];
-    onCloseAppModal: () =>void;
-    onSaveAppData: (data: any)=>void;
+  visible: boolean;
+  tableData?: AppItem[];
+  dropdownList: authorizedAppList[];
+  onCloseAppModal: () => void;
+  onSaveAppData: (data: any) => void;
 }
 
 export interface authorizedAppList extends corpApplicationListProps {
@@ -107,8 +107,8 @@ export interface industryTypeOption {
   dictType: string;
   id: string;
   label: string;
-  sort:number;
-  status: number; 
+  sort: number;
+  status: number;
   value: string;
 }
 

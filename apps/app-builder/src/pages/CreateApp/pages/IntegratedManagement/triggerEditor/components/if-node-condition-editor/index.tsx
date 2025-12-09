@@ -446,7 +446,7 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
       const options: TreeSelectDataType[] = [];
       let fieldType = '';
       if (item) {
-        const fieldId = form.getFieldValue(item.field + '.fieldId');
+        const fieldId = form.getFieldValue(item.field + '.fieldKey');
         for (let ele of fieldOptions) {
           const targetField = ele.children?.find((e) => e.key?.indexOf(fieldId) !== -1);
           if (targetField) {
@@ -544,7 +544,7 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
                                     // 字段id
                                     <Grid.Row key={item.key} gutter={8} align="center">
                                       <Grid.Col span={8}>
-                                        <Form.Item field={item.field + '.fieldId'}>
+                                        <Form.Item field={item.field + '.fieldKey'}>
                                           <TreeSelect
                                             className={styles.itemSelect}
                                             treeData={fieldOptions}
@@ -570,14 +570,14 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
                                         <Form.Item field={item.field + '.op'}>
                                           <Select
                                             className={styles.itemSelect}
-                                            disabled={form.getFieldValue(item.field + '.fieldId') == undefined}
+                                            disabled={form.getFieldValue(item.field + '.fieldKey') == undefined}
                                             onChange={(_value) => {
                                               form.setFieldValue(item.field + '.operatorType', undefined);
                                               form.setFieldValue(item.field + '.value', undefined);
                                             }}
                                           >
                                             {(() => {
-                                              const fieldId = form.getFieldValue(item.field)?.fieldId;
+                                              const fieldId = form.getFieldValue(item.field)?.fieldKey;
                                               let options: ValidationTypeItem[] | undefined;
                                               if (fieldId && entityFieldValidationTypes) {
                                                 const found = entityFieldValidationTypes.find(
@@ -636,7 +636,7 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
                                               {form.getFieldValue(item.field + '.operatorType') == FieldType.VALUE &&
                                                 StaticValueComponent(
                                                   item.field + '.value',
-                                                  form.getFieldValue(item.field + '.fieldId'),
+                                                  form.getFieldValue(item.field + '.fieldKey'),
                                                   form.getFieldValue(item.field + '.op')
                                                 )}
 

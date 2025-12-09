@@ -184,7 +184,7 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
           }}
           renderUploadList={renderUploadList}
         >
-          {!detailMode && (
+          {detailMode ? null : (
             <div className="uplaodTrigger">
               {uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT] && (
                 <Button type={buttonType || 'primary'} >

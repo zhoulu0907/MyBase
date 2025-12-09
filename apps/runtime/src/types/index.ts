@@ -4,9 +4,9 @@ export interface AppItem {
   applicationId?: string;
   applicationUid?: string;
   applicationCode: string;
-  authorizationTime: string;
+  authorizationTime: number;
   versionNumber:string;
-  expiresTime: string;
+  expiresTime: number;
   statusDesc: string;
 }
 
@@ -27,11 +27,12 @@ export interface ApplicationList {
   tags?: TagProps[];
   description: string;
   themeColor: string;
+  showStatus?: number;
 }
 
 export interface authorizedTime {
-  authorizationTime: string;
-  expiresTime: string;
+  authorizationTime: number;
+  expiresTime: number;
 }
 
 export interface authorizedTimeGroup {
