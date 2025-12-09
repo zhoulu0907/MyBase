@@ -5,6 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.security.config.SecurityProperties;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.system.enums.logger.LoginLogTypeEnum;
 import com.cmsr.onebase.module.system.runtime.service.auth.RuntimeAuthService;
 import com.cmsr.onebase.module.system.service.permission.PermissionService;
@@ -29,7 +30,7 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
  * @author matianyu
  * @date 2025-11
  */
-@Tag(name = "Runtime - 登录/认证")
+@Tag(name = "Runtime - 登录&认证")
 @RestController
 @RequestMapping("/system/auth")
 @Validated
@@ -81,13 +82,23 @@ public class RuntimeAuthController {
         return success(true);
     }
 
+    @PostMapping("/send-verify-code")
+    @PermitAll
+    @TenantIgnore
+    @Operation(summary = "发送邮箱/手机验证码")
+    public CommonResult<Boolean> sendVerifyCode(@RequestBody @Valid VerifyCodeSendReqVO reqVO) {
+        // authService.sendSmsCode(reqVO);
+        return success(true);
+    }
+
     // @PostMapping("/refresh-token")
     // @Operation(summary = "刷新令牌")
     // @Parameter(name = "refreshToken", description = "刷新令牌", required = true)
-    @PermitAll
-    public CommonResult<AuthLoginRespVO> refreshToken(@RequestParam("refreshToken") String refreshToken) {
-        return success(runtimeAuthService.refreshToken(refreshToken));
-    }
+    // @PermitAll
+    // public CommonResult<AuthLoginRespVO> refreshToken(@RequestParam("refreshToken") String refreshToken) {
+    //     return success(runtimeAuthService.refreshToken(refreshToken));
+    // }
+
 
     @PostMapping("/reset-password")
     @Operation(summary = "重置密码")

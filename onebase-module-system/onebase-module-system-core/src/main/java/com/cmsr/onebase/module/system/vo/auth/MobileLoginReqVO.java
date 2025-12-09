@@ -1,10 +1,10 @@
 package com.cmsr.onebase.module.system.vo.auth;
+
 import com.cmsr.onebase.module.system.vo.CaptchaVerificationReqVO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
-import org.hibernate.validator.constraints.Length;
 @Schema(description = "管理后台 - 手机密码登录 Request VO")
 @Data
 public class MobileLoginReqVO extends CaptchaVerificationReqVO {
@@ -17,4 +17,7 @@ public class MobileLoginReqVO extends CaptchaVerificationReqVO {
     @Schema(description = "密码", requiredMode = Schema.RequiredMode.REQUIRED, example = "buzhidao")
     @NotEmpty(message = "密码不能为空")
     private String password;
+
+    @Schema(description = "短信/邮箱验证码",  example = "10")
+    private String verifyCode;
 }
