@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.system.dal.database.dept;
 
-import com.alibaba.cloud.commons.lang.StringUtils;
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.enums.XFromSceneTypeEnum;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
@@ -9,6 +8,7 @@ import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.enums.dept.DeptTypeEnum;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
