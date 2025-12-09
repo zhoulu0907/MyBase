@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.core.dal.dataobject.number;
 
+import com.cmsr.onebase.framework.orm.entity.BaseBizEntity;
 import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
@@ -18,7 +19,7 @@ import java.time.LocalDateTime;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Table(value = "metadata_auto_number_state")
-public class MetadataAutoNumberStateDO extends BaseTenantEntity {
+public class MetadataAutoNumberStateDO extends BaseBizEntity {
 
     /**
      * 状态UUID

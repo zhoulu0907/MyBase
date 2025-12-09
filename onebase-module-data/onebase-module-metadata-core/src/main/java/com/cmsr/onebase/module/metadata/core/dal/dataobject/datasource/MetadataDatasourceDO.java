@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource;
 
+import com.cmsr.onebase.framework.orm.entity.BaseBizEntity;
 import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
@@ -21,7 +22,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MetadataDatasourceDO extends BaseTenantEntity {
+public class MetadataDatasourceDO extends BaseBizEntity {
 
     /**
      * 数据源UUID

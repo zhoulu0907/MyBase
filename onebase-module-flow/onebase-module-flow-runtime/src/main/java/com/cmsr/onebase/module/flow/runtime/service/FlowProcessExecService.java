@@ -12,7 +12,7 @@ import java.util.List;
  */
 public interface FlowProcessExecService {
 
-    List<QueryFormTriggerRespVO> queryFormTrigger( String pageUuid);
+    List<QueryFormTriggerRespVO> queryFormTrigger(Long pageId);
 
     FormTriggerRespVO triggerForm(FormTriggerReqVO reqVO);
 

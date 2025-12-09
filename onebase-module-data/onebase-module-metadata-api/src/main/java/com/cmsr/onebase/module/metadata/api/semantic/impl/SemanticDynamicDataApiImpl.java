@@ -14,6 +14,7 @@ import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticDataMeth
 import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticMergeRecordAssembler;
 import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticPermissionContextLoader;
 import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticPermissionValidator;
+import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticProcessLogger;
 import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticDataIntegrityValidator;
 import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticQueryConditionBuilder;
 import com.cmsr.onebase.module.metadata.core.semantic.service.SemanticDataCrudService;
@@ -62,7 +63,7 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
     @Resource
     private SemanticValueAssembler semanticValueAssembler;
     @Resource
-    private com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticProcessLogger semanticProcessLogger;
+    private SemanticProcessLogger semanticProcessLogger;
 
     @Override
     public SemanticEntitySchemaDTO buildEntitySchemaByUuid(String entityUuid) {
@@ -114,8 +115,8 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
         if (tableName == null || tableName.isBlank()) { return new PageResult<>(new ArrayList<>(), 0L); }
         // 1) 构建 RecordDTO（分页请求体与过滤条件）
         SemanticRecordDTO record = buildPageRecord(body);
-        // 2) 权限上下文初始化
-        semanticPermissionContextLoader.loadPermissionContext(record);
+        // 2) 考虑后台调用，暂不初始化权限上下文初始化
+        // semanticPermissionContextLoader.loadPermissionContext(record);
         // 3) 数据完整性校验（内部调用忽略功能权限）
         semanticDataIntegrityValidator.validate(record);
         // 4) 构建查询条件（仅条件与排序，不应用数据权限）
@@ -140,8 +141,8 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
         SemanticRecordDTO record = semanticMergeRecordAssembler.assembleTargetBody(tableName, body, null, null,
                 SemanticMethodCodeEnum.GET,
                 SemanticDataMethodOpEnum.GET);
-        // 2) 权限上下文初始化
-        semanticPermissionContextLoader.loadPermissionContext(record);
+        // 2) 考虑后台调用，暂不初始化权限上下文初始化
+        // semanticPermissionContextLoader.loadPermissionContext(record);
         // 3) 数据完整性校验
         semanticDataIntegrityValidator.validate(record);
         // 4) 查询详情数据
@@ -159,7 +160,7 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
         SemanticRecordDTO record = semanticMergeRecordAssembler.assembleTargetBody(tableName, body, null, null,
                 SemanticMethodCodeEnum.DELETE,
                 SemanticDataMethodOpEnum.DELETE);
-        // 2) 权限上下文初始化
+        // 2) 考虑后台调用，暂不初始化权限上下文初始化
         semanticPermissionContextLoader.loadPermissionContext(record);
         // 3) 数据完整性校验
         semanticDataIntegrityValidator.validate(record);
@@ -176,8 +177,8 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
         if (tableName == null || tableName.isBlank()) { return 0; }
         // 1) 构建 RecordDTO（目标请求体 + 过滤条件）
         SemanticRecordDTO record = buildDeleteRecord(body);
-        // 2) 权限上下文初始化
-        semanticPermissionContextLoader.loadPermissionContext(record);
+        // 2) 考虑后台调用，暂不初始化权限上下文初始化
+        // semanticPermissionContextLoader.loadPermissionContext(record);
         // 3) 数据完整性校验
         semanticDataIntegrityValidator.validate(record);
         // 4) 功能权限校验
@@ -218,8 +219,8 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
                 SemanticDataMethodOpEnum.UPDATE);
         record.getRecordContext().setFilters(cond);
 
-        // 3) 权限上下文初始化
-        semanticPermissionContextLoader.loadPermissionContext(record);
+        // 3) 考虑后台调用，暂不初始化权限上下文初始化
+        // semanticPermissionContextLoader.loadPermissionContext(record);
 
         // 4) 数据完整性校验
         semanticDataIntegrityValidator.validate(record);
@@ -255,8 +256,8 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
         }
         SemanticRecordDTO record = semanticMergeRecordAssembler.assembleMergeBody(tableName, mergeBody, null, null,
                 SemanticMethodCodeEnum.CREATE, SemanticDataMethodOpEnum.CREATE);
-        // 2) 权限上下文初始化
-        semanticPermissionContextLoader.loadPermissionContext(record);
+        // 2) 考虑后台调用，暂不初始化权限上下文初始化
+        // semanticPermissionContextLoader.loadPermissionContext(record);
         // 3) 数据完整性与功能权限校验
         semanticDataIntegrityValidator.validate(record);
         // 4) 执行创建
@@ -281,8 +282,8 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
         }
         SemanticRecordDTO record = semanticMergeRecordAssembler.assembleMergeBody(tableName, mergeBody, null, null,
                 SemanticMethodCodeEnum.UPDATE, SemanticDataMethodOpEnum.UPDATE);
-        // 2) 权限上下文初始化
-        semanticPermissionContextLoader.loadPermissionContext(record);
+        // 2) 考虑后台调用，暂不初始化权限上下文初始化
+        // semanticPermissionContextLoader.loadPermissionContext(record);
         // 3) 数据完整性与功能权限校验
         semanticDataIntegrityValidator.validate(record);
         semanticPermissionValidator.validate(record);

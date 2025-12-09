@@ -4,16 +4,17 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.module.flow.component.SkippableNodeComponent;
 import com.cmsr.onebase.module.flow.component.utils.VariableProvider;
-import com.cmsr.onebase.module.flow.context.provider.ConditionsProvider;
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
 import com.cmsr.onebase.module.flow.context.VariableContext;
 import com.cmsr.onebase.module.flow.context.condition.Conditions;
 import com.cmsr.onebase.module.flow.context.express.OrExpression;
 import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
 import com.cmsr.onebase.module.flow.context.graph.nodes.DataQueryNodeData;
+import com.cmsr.onebase.module.flow.context.provider.ConditionsProvider;
 import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntityValueDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticPageConditionVO;
+import com.mybatisflex.core.tenant.TenantManager;
 import com.yomahub.liteflow.annotation.LiteflowComponent;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -63,10 +64,10 @@ public class DataQueryNodeComponent extends SkippableNodeComponent {
         reqDTO.setSortBy(DataMethodApiHelper.processSortCondition(nodeData.getSortBy()));
         reqDTO.setPageNo(1);
         reqDTO.setPageSize(1);
-        PageResult<SemanticEntityValueDTO> fieldDataRespDTOS = ApplicationManager.withApplicationIdAndVersionTag(
+        PageResult<SemanticEntityValueDTO> fieldDataRespDTOS = TenantManager.withoutTenantCondition(() -> ApplicationManager.withApplicationIdAndVersionTag(
                 executeContext.getApplicationId(),
                 executeContext.getVersionTag(),
-                () -> semanticDynamicDataApi.getDataByCondition(reqDTO));
+                () -> semanticDynamicDataApi.getDataByCondition(reqDTO)));
         executeContext.addLog("数据查询节点（单条）返回数据量: " + fieldDataRespDTOS.getTotal());
         if (CollectionUtils.isNotEmpty(fieldDataRespDTOS.getList())) {
             variableContext.putNodeVariables(this.getTag(), DataMethodApiHelper.convertToMap(fieldDataRespDTOS.getList().get(0)));

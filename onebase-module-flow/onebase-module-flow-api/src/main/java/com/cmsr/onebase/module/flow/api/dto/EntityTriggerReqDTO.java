@@ -1,12 +1,12 @@
 package com.cmsr.onebase.module.flow.api.dto;
 
+import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldValueDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldValueDTO;
 
 /**
  * @Author：huangjie
@@ -31,15 +31,11 @@ public class EntityTriggerReqDTO {
     @Schema(description = "数据，字段名称和字段数据, key是字段的columnName, value是字段值")
     private List<SemanticFieldValueDTO<Object>> fieldData;
 
-   @Deprecated
-   @Schema(description = "数据，字段名称和字段数据, key是字段的columnName, value是字段值")
-   private Map<String, Object> colFieldData;
-
-    public void setTableName(String tableName) {
-        //TODO 要修改 使用 tableName
-    }
-
-    public void setFieldData(List<SemanticFieldValueDTO<Object>> fieldData) {
-        //TODO 要修改 fieldData
+    public Map<String, Object> toInputData() {
+        Map<String, Object> inputData = new HashMap<>();
+        for (SemanticFieldValueDTO<?> fieldValueDTO : fieldData) {
+            inputData.put(fieldValueDTO.getFieldName(), fieldValueDTO.getRawValue());
+        }
+        return inputData;
     }
 }

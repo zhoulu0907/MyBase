@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.app.build.controller.resource;
 
+import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.module.app.build.service.resource.ComponentService;
 import com.cmsr.onebase.module.app.core.dto.appresource.ComponentDTO;
@@ -34,8 +35,14 @@ public class ComponentController {
     @PostMapping("/list")
     @Operation(summary = "根据page_uuid获取表单字段")
     public CommonResult<QueryComponentListRespVO> getComponentListByPageUuid(@RequestBody QueryComponentListReqVO queryComponentListReqVO) {
-        List<ComponentDTO> components = componentService.listComponent(queryComponentListReqVO.getPageId());
-
+        List<ComponentDTO> components;
+        if (queryComponentListReqVO.getPageId() != null) {
+            components = componentService.listComponentByPageId(queryComponentListReqVO.getPageId());
+        } else if (queryComponentListReqVO.getPageUuid() != null) {
+            components = componentService.listComponentByPageUuid(queryComponentListReqVO.getPageUuid());
+        } else {
+            throw ServiceExceptionUtil.invalidParamException("page_id或page_uuid不能同时为空");
+        }
         QueryComponentListRespVO queryComponentListRespVO = new QueryComponentListRespVO();
         queryComponentListRespVO.setList(components);
         return CommonResult.success(queryComponentListRespVO);

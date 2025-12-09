@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.core.dal.dataobject.entity;
 
+import com.cmsr.onebase.framework.orm.entity.BaseBizEntity;
 import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
 import com.cmsr.onebase.module.metadata.core.enums.BooleanStatusEnum;
 import com.cmsr.onebase.module.metadata.core.enums.CommonStatusEnum;
@@ -17,7 +18,7 @@ import lombok.EqualsAndHashCode;
 @Table(value = "metadata_entity_field")
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class MetadataEntityFieldDO extends BaseTenantEntity {
+public class MetadataEntityFieldDO extends BaseBizEntity {
 
     /**
      * 字段UUID

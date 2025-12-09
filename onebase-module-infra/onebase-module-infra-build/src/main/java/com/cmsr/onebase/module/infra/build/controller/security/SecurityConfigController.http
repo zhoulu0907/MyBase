@@ -1,16 +1,12 @@
 
 
 
-### 请求 /check-scenarios-captcha 接口 => 成功
+### 请求 /get-tenant-items 接口 => 成功
 POST {{baseUrl}}/infra/security-config/get-tenant-items
 Content-Type: application/json
-Authorization: Bearer {{token}}
+#Authorization: Bearer {{token}}
 
 {
   "appId": 171603906732228608,
-
-  "categoryCode": ["supportedTypes"],
-
-
-
+  "categoryCode": ["MFA"]
 }

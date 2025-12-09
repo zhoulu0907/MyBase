@@ -38,6 +38,12 @@ public class AppResourceImpl implements AppResourceApi {
     private AppMenuRepository appMenuRepository;
 
     @Override
+    public PageRespDTO findPageByPageId(Long pageId) {
+        AppResourcePageDO pageDO = pageRepository.getById(pageId);
+        return BeanUtils.toBean(pageDO, PageRespDTO.class);
+    }
+
+    @Override
     public List<PageRespDTO> findPageListByPageSetId(Long pageSetId) {
         List<PageRespDTO> pageRespDTOs = new ArrayList<>();
         if (pageSetId == null) {
