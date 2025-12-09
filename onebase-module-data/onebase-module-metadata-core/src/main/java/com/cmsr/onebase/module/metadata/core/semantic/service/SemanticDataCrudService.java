@@ -23,6 +23,7 @@ import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticRefResolv
 import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticValueAssembler;
 import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticWorkflowExecutor;
 import com.cmsr.onebase.module.metadata.core.semantic.strategy.permission.SemanticQueryPermissionHelper;
+import com.cmsr.onebase.module.metadata.core.semantic.constants.SystemFieldConstants;
 import com.mybatisflex.core.query.QueryColumn;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.row.Row;
@@ -556,16 +557,16 @@ public class SemanticDataCrudService {
             }
             boolean hasUpdatedTime = fieldsDto.stream().anyMatch(f -> {
                 String n = f.getFieldName();
-                return n != null && ("updated_time".equalsIgnoreCase(n) || "updatetime".equalsIgnoreCase(n));
+                return n != null && (SystemFieldConstants.OPTIONAL.UPDATED_TIME.equalsIgnoreCase(n));
             });
             boolean hasUpdater = fieldsDto.stream().anyMatch(f -> {
                 String n = f.getFieldName();
-                return n != null && ("updater".equalsIgnoreCase(n));
+                return n != null && (SystemFieldConstants.REQUIRE.UPDATER.equalsIgnoreCase(n));
             });
             if (hasUpdatedTime) {
-                if (!row.containsKey("updated_time")) { row.put("updated_time", null); }
+                if (!row.containsKey(SystemFieldConstants.OPTIONAL.UPDATED_TIME)) { row.put(SystemFieldConstants.OPTIONAL.UPDATED_TIME, null); }
             }
-            if (hasUpdater && !row.containsKey("updater")) { row.put("updater", null); }
+            if (hasUpdater && !row.containsKey(SystemFieldConstants.REQUIRE.UPDATER)) { row.put(SystemFieldConstants.REQUIRE.UPDATER, null); }
         }
         return row;
     }
@@ -655,7 +656,7 @@ public class SemanticDataCrudService {
      */
     private boolean hasDeletedField(List<SemanticFieldSchemaDTO> fields) {
         if (fields == null) { return false; }
-        return fields.stream().anyMatch(f -> "deleted".equalsIgnoreCase(f.getFieldName()));
+        return fields.stream().anyMatch(f -> SystemFieldConstants.OPTIONAL.DELETED.equalsIgnoreCase(f.getFieldName()));
     }
 
     /**
@@ -927,14 +928,14 @@ public class SemanticDataCrudService {
         }
         boolean hasUpdatedTime = attrs.stream().anyMatch(f -> {
             String n = f.getFieldName();
-            return n != null && ("updated_time".equalsIgnoreCase(n) || "updatetime".equalsIgnoreCase(n));
+            return n != null && SystemFieldConstants.OPTIONAL.UPDATED_TIME.equalsIgnoreCase(n);
         });
         boolean hasUpdater = attrs.stream().anyMatch(f -> {
             String n = f.getFieldName();
-            return n != null && ("updater".equalsIgnoreCase(n));
+            return n != null && (SystemFieldConstants.REQUIRE.UPDATER.equalsIgnoreCase(n));
         });
-        if (hasUpdatedTime && !row.containsKey("updated_time")) { row.put("updated_time", null); }
-        if (hasUpdater && !row.containsKey("updater")) { row.put("updater", null); }
+        if (hasUpdatedTime && !row.containsKey(SystemFieldConstants.OPTIONAL.UPDATED_TIME)) { row.put(SystemFieldConstants.OPTIONAL.UPDATED_TIME, null); }
+        if (hasUpdater && !row.containsKey(SystemFieldConstants.REQUIRE.UPDATER)) { row.put(SystemFieldConstants.REQUIRE.UPDATER, null); }
         return row;
     }
 
