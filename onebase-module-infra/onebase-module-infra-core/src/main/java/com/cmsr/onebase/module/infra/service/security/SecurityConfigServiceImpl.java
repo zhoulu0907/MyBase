@@ -169,6 +169,13 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
         if (CollectionUtils.isEmpty(categoryDOS)) {
             return new ArrayList<>();
         }
+
+        Map<Long, String> idCodeMap = categoryDOS.stream()
+                .collect(Collectors.toMap(
+                        SecurityConfigCategoryDO::getId,    // key mapper (id)
+                        SecurityConfigCategoryDO::getCategoryCode   // value mapper (code)
+                ));
+
         // 将categoryDOS转换为 categoryIds
         List<Long> categoryIds = categoryDOS.stream().map(SecurityConfigCategoryDO::getId).collect(Collectors.toList());
 
@@ -182,6 +189,7 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
         List<SecurityConfigItemRespVO> configItems = new ArrayList<>();
         for (SecurityConfigTemplateDO template : templates) {
             SecurityConfigItemRespVO itemVO = SecurityConfigCategoryConvert.INSTANCE.convert(template);
+            itemVO.setCategoryCode(idCodeMap.get(template.getCategoryId()));
             configItems.add(itemVO);
         }
 
@@ -356,7 +364,7 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
 
         List<SecurityConfigItemRespVO> configItems = findSecurityConfigItemsByTenantAndCatCodes(tenantId, configReqVO.getCategoryCode());
         Map<String, List<SecurityConfigItemRespVO>> groupedByConfigKey = configItems.stream()
-                .collect(Collectors.groupingBy(SecurityConfigItemRespVO::getConfigKey));
+                .collect(Collectors.groupingBy(SecurityConfigItemRespVO::getCategoryCode));
 
         return groupedByConfigKey.entrySet().stream()
                 .map(entry -> {
