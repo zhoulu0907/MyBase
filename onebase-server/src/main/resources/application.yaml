@@ -49,6 +49,8 @@ springdoc:
 
 # Spring Data Redis 配置
 spring:
+  redis:
+    key-prefix: obn-
   data:
     redis:
       repositories:
