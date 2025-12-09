@@ -1,25 +1,14 @@
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
-import { useAppStore } from '@/store/store_app';
 import { Form, Grid, Input, Radio, Select } from '@arco-design/web-react';
 import type { TreeSelectDataType } from '@arco-design/web-react/es/TreeSelect/interface';
 import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
-import {
-  DATA_SOURCE_TYPE,
-  getEntityFieldsWithChildren,
-  getEntityListByApp,
-  getFieldCheckTypeApi,
-  type AppEntityField,
-  type ChildEntity,
-  type ConditionField,
-  type EntityFieldValidationTypes,
-  type MetadataEntityPair
-} from '@onebase/app';
+import { DATA_SOURCE_TYPE } from '@onebase/app';
 import { useSignals } from '@preact/signals-react/runtime';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import ConditionEditor from '../../../components/condition-editor';
 import FieldEditor from '../../../components/field-editor';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
-import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
+import { useEntityFields, useIsSidebar, useMainEntityList, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
 import { validateNodeForm } from '../../utils';
 
@@ -30,283 +19,72 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   const isSidebar = useIsSidebar();
   const { node } = useNodeRenderContext();
-  // 当前页应用id
-  const { curAppId } = useAppStore();
+  const { mainEntityList } = useMainEntityList();
+  const {
+    subEntityList,
+    mainEntityFields,
+    subEntityFields,
+    validationTypes,
+    fieldDataList,
+    handleMainTableChange,
+    handleSubTableChange,
+    resetFields
+  } = useEntityFields();
+
   const [payloadForm] = Form.useForm();
 
   const updateType = Form.useWatch('updateType', payloadForm);
-
-  const mainEntityId = Form.useWatch('mainEntityId', payloadForm);
-  const subEntityId = Form.useWatch('subEntityId', payloadForm);
-
-  // 数据源选择
-  const [subEntityList, setSubEntityList] = useState<MetadataEntityPair[]>([]);
-  const [mainEntityList, setMainEntityList] = useState<MetadataEntityPair[]>([]);
-
-  // 查询规则
-  const [validationTypes, setValidationTypes] = useState<EntityFieldValidationTypes[]>([]);
-
-  const [mainEntityFields, setMainEntityFields] = useState<TreeSelectDataType>([]);
-  const [subEntityFields, setSubEntityFields] = useState<TreeSelectDataType[]>([]);
-
-  const [conditionFields, setConditionFields] = useState<ConditionField[]>([]);
-
-  const [fieldDataList, setFieldDataList] = useState<AppEntityField[]>([]);
+  const mainTableName = Form.useWatch('mainTableName', payloadForm);
+  const subTableName = Form.useWatch('subTableName', payloadForm);
 
   useEffect(() => {
     payloadForm && validateNodeForm(form, payloadForm, true);
   }, [payloadForm]);
 
   useEffect(() => {
-    // 初始化 获取实体和数据节点列表数据，用于下拉菜单
-    getEntityList();
-    // 从缓存中载入节点数据
-    init();
-  }, []);
-
-  /**
-   * 数据查询方式变更（主表、子表、数据节点中查询）
-   * 更新数据源下拉列表，清除已选择数据源
-   * 更新条件过滤
-   * 清除排序字段下拉列表，清除已选择排序字段
-   */
-  const handleDataTypeChange = (curUpdateType: DATA_SOURCE_TYPE) => {
-    payloadForm.clearFields(['mainEntityId', 'subEntityId', 'filterCondition', 'fields']);
-
-    setMainEntityList([]);
-    setSubEntityList([]);
-    setFieldDataList([]);
-    setConditionFields([]);
-    setValidationTypes([]);
-
-    getEntityList(curUpdateType);
-  };
-
-  const init = async () => {
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    if (nodeData) {
-      if (nodeData.updateType === DATA_SOURCE_TYPE.FORM || nodeData.updateType === DATA_SOURCE_TYPE.SUBFORM) {
-        if (!nodeData?.mainEntityId) {
-          return;
+    if (nodeData?.updateType && nodeData?.mainTableName && mainEntityList.length > 0) {
+      handleMainTableChange(nodeData.mainTableName, mainEntityList).then(() => {
+        if (nodeData.updateType === DATA_SOURCE_TYPE.SUB_TABLE && nodeData?.subTableName) {
+          setTimeout(() => {
+            handleSubTableChange(nodeData.subTableName, subEntityList);
+          }, 100);
         }
-
-        const fieldIds: string[] = [];
-        const res = await getEntityFieldsWithChildren(nodeData?.mainEntityId);
-
-        const newSubEntityList = (res.childEntities || []).map((item: any) => {
-          return {
-            entityId: item.childEntityId,
-            entityName: item.childEntityName
-          };
-        });
-
-        setSubEntityList(newSubEntityList);
-
-        if (res.parentFields) {
-          const fields = res.parentFields.map((item: AppEntityField) => {
-            fieldIds.push(item.fieldId);
-            return {
-              key: item.fieldId,
-              title: item.displayName,
-              fieldType: item.fieldType
-            };
-          });
-
-          setMainEntityFields({
-            key: res.entityId,
-            title: res.entityName,
-            children: fields
-          });
-
-          if (nodeData.updateType === DATA_SOURCE_TYPE.FORM) {
-            setFieldDataList(res.parentFields);
-          }
-        }
-
-        if (res.childEntities) {
-          const subFields: TreeSelectDataType[] = [];
-          res.childEntities.forEach((item: ChildEntity) => {
-            const fields = item.childFields.map((item: AppEntityField) => {
-              fieldIds.push(item.fieldId);
-              return {
-                key: item.fieldId,
-                title: item.displayName,
-                fieldType: item.fieldType
-              };
-            });
-            subFields.push({
-              key: item.childEntityId,
-              title: item.childEntityName,
-              children: fields
-            });
-          });
-
-          setSubEntityFields(subFields);
-
-          const newValidationTypes = await getFieldCheckTypeApi(fieldIds);
-          setValidationTypes(newValidationTypes);
-
-          if (nodeData.updateType === DATA_SOURCE_TYPE.SUBFORM) {
-            const newFieldDataList: any[] = [];
-
-            subFields
-              .find((item) => item.key == nodeData.subEntityId)
-              ?.children?.forEach((item) => {
-                newFieldDataList.push({
-                  fieldId: item.key,
-                  displayName: item.title,
-                  fieldType: item.fieldType
-                });
-              }) || [];
-
-            setFieldDataList(newFieldDataList);
-          }
-        }
-      }
+      });
     }
+  }, [mainEntityList.length]);
+
+  // 更新方式变更
+  const handleDataTypeChange = (curUpdateType: DATA_SOURCE_TYPE) => {
+    payloadForm.clearFields(['mainTableName', 'subTableName', 'filterCondition', 'fields']);
+    resetFields();
   };
 
-  const getEntityList = async (curDateType?: DATA_SOURCE_TYPE) => {
-    if (curDateType === DATA_SOURCE_TYPE.FORM || curDateType === undefined) {
-      // 从主表中查询  FORM
-      const res = await getEntityListByApp(curAppId);
-      setMainEntityList(res);
-    }
-
-    if (curDateType === DATA_SOURCE_TYPE.SUBFORM || curDateType === undefined) {
-      // 从子表中查询  SUBFORM
-      const res = await getEntityListByApp(curAppId);
-      setMainEntityList(res);
-    }
+  // 主表数据变更
+  const handleMainTableNameChange = async (curMainTableName: string) => {
+    payloadForm.clearFields(['subTableName', 'filterCondition', 'fields']);
+    await handleMainTableChange(curMainTableName, mainEntityList);
   };
 
-  const handleMainEntityIdChange = async (curMainEntityId: string) => {
-    if (!curMainEntityId) {
-      return;
-    }
-    payloadForm.clearFields(['subEntityId', 'filterCondition', 'fields']);
-
-    setSubEntityList([]);
-    setValidationTypes([]);
-    setFieldDataList([]);
-    setConditionFields([]);
-
-    const fieldIds: string[] = [];
-    const res = await getEntityFieldsWithChildren(curMainEntityId);
-    const newEntityList = (res.childEntities || []).map((item: any) => {
-      return {
-        entityId: item.childEntityId,
-        entityName: item.childEntityName
-      };
-    });
-
-    setSubEntityList(newEntityList);
-
-    if (res.parentFields) {
-      const fields = res.parentFields.map((item: AppEntityField) => {
-        fieldIds.push(item.fieldId);
-        return {
-          key: item.fieldId,
-          title: item.displayName,
-          fieldType: item.fieldType
-        };
-      });
-      setMainEntityFields({
-        key: res.entityId,
-        title: res.entityName,
-        children: fields
-      });
-
-      setFieldDataList(res.parentFields);
-    }
-
-    if (res.childEntities) {
-      const subFields: TreeSelectDataType[] = [];
-      res.childEntities.forEach((item: ChildEntity) => {
-        const fields = item.childFields.map((item: AppEntityField) => {
-          fieldIds.push(item.fieldId);
-          return {
-            key: item.fieldId,
-            title: item.displayName,
-            fieldType: item.fieldType
-          };
-        });
-        subFields.push({
-          key: item.childEntityId,
-          title: item.childEntityName,
-          children: fields
-        });
-      });
-
-      setSubEntityFields(subFields);
-
-      const newValidationTypes = await getFieldCheckTypeApi(fieldIds);
-      setValidationTypes(newValidationTypes);
-    }
-  };
-
-  const handleSubEntityIdChange = (_curSubEntityId: string) => {
+  // 子表数据变更
+  const handleSubTableNameChange = async (curSubTableName: string) => {
     payloadForm.clearFields(['filterCondition', 'fields']);
-
-    setConditionFields([]);
-
-    const newFieldDataList: any[] = [];
-
-    subEntityFields
-      .find((item) => item.key == _curSubEntityId)
-      ?.children?.forEach((item) => {
-        newFieldDataList.push({
-          fieldId: item.key,
-          displayName: item.title,
-          fieldType: item.fieldType
-        });
-      }) || [];
-
-    setFieldDataList(newFieldDataList);
+    await handleSubTableChange(curSubTableName, subEntityList);
   };
 
   const conditionFieldsData = useMemo((): TreeSelectDataType[] => {
-    if (updateType === DATA_SOURCE_TYPE.FORM) {
+    if (updateType === DATA_SOURCE_TYPE.MAIN_TABLE) {
       return [mainEntityFields];
     }
-    if (updateType === DATA_SOURCE_TYPE.SUBFORM) {
-      const curSubEntityFields = subEntityFields.find((item) => item.key === subEntityId);
+    if (updateType === DATA_SOURCE_TYPE.SUB_TABLE) {
+      const curSubEntityFields = subEntityFields.find((item) => item.key === subTableName);
       if (curSubEntityFields) {
         return [mainEntityFields, curSubEntityFields];
       }
       return [mainEntityFields];
     }
-
     return [];
-  }, [updateType, mainEntityFields, subEntityFields, subEntityId]);
-
-  const conditionFieldsForEditor = useMemo((): ConditionField[] => {
-    if (updateType === DATA_SOURCE_TYPE.FORM) {
-      return (
-        (mainEntityFields.children || [])?.map((item) => ({
-          label: item.title as string,
-          value: item.key as string,
-          fieldType: item.fieldType
-        })) || []
-      );
-    }
-    if (updateType === DATA_SOURCE_TYPE.SUBFORM) {
-      const curSubEntityFields = subEntityFields.find((item) => item.key === subEntityId);
-      if (curSubEntityFields) {
-        return (
-          (curSubEntityFields.children || [])?.map((item) => ({
-            label: item.title as string,
-            value: item.key as string,
-            fieldType: item.fieldType
-          })) || []
-        );
-      }
-
-      return [];
-    }
-
-    return [];
-  }, [updateType, mainEntityFields, subEntityFields, subEntityId]);
+  }, [updateType, mainEntityFields, subEntityFields, subTableName]);
 
   const getInitData = () => {
     return { ...triggerEditorSignal.nodeData.value[node.id] };
@@ -324,26 +102,26 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
             <Form.Item label="更新方式" field="updateType" rules={[{ required: true, message: '请选择更新方式' }]}>
               <Radio.Group direction="vertical" onChange={handleDataTypeChange}>
-                <Radio value={DATA_SOURCE_TYPE.FORM}>更新主表数据</Radio>
-                <Radio value={DATA_SOURCE_TYPE.SUBFORM}>更新子表数据</Radio>
+                <Radio value={DATA_SOURCE_TYPE.MAIN_TABLE}>更新主表数据</Radio>
+                <Radio value={DATA_SOURCE_TYPE.SUB_TABLE}>更新子表数据</Radio>
               </Radio.Group>
             </Form.Item>
 
-            {/* 从主表中查询 */}
-            {updateType === DATA_SOURCE_TYPE.FORM && (
+            {/* 更新主表 */}
+            {updateType === DATA_SOURCE_TYPE.MAIN_TABLE && (
               <Grid.Row>
                 <Grid.Col span={1} style={{ textAlign: 'center', lineHeight: '32px' }}>
                   更新
                 </Grid.Col>
                 <Grid.Col span={19}>
                   <Form.Item
-                    field="mainEntityId"
+                    field="mainTableName"
                     disabled={!updateType}
                     rules={[{ required: true, message: '请选择' }]}
                   >
-                    <Select onChange={handleMainEntityIdChange} allowClear>
+                    <Select onChange={handleMainTableNameChange} allowClear>
                       {mainEntityList.map((item) => (
-                        <Select.Option key={item.entityId} value={item.entityId}>
+                        <Select.Option key={item.tableName} value={item.tableName}>
                           {item.entityName}
                         </Select.Option>
                       ))}
@@ -356,21 +134,21 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
               </Grid.Row>
             )}
 
-            {/* 从子表中查询 */}
-            {updateType === DATA_SOURCE_TYPE.SUBFORM && (
+            {/* 更新子表 */}
+            {updateType === DATA_SOURCE_TYPE.SUB_TABLE && (
               <Grid.Row>
                 <Grid.Col span={1} style={{ textAlign: 'center', lineHeight: '32px' }}>
                   从
                 </Grid.Col>
                 <Grid.Col span={9}>
                   <Form.Item
-                    field="mainEntityId"
+                    field="mainTableName"
                     disabled={!updateType}
                     rules={[{ required: true, message: '请选择' }]}
                   >
-                    <Select allowClear onChange={handleMainEntityIdChange}>
+                    <Select allowClear onChange={handleMainTableNameChange}>
                       {mainEntityList.map((item) => (
-                        <Select.Option key={item.entityId} value={item.entityId}>
+                        <Select.Option key={item.tableName} value={item.tableName}>
                           {item.entityName}
                         </Select.Option>
                       ))}
@@ -382,13 +160,13 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                 </Grid.Col>
                 <Grid.Col span={9}>
                   <Form.Item
-                    field="subEntityId"
-                    disabled={!mainEntityId}
+                    field="subTableName"
+                    disabled={!mainTableName}
                     rules={[{ required: true, message: '请选择' }]}
                   >
-                    <Select allowClear onChange={handleSubEntityIdChange}>
+                    <Select allowClear onChange={handleSubTableNameChange}>
                       {subEntityList.map((item) => (
-                        <Select.Option key={item.entityId} value={item.entityId}>
+                        <Select.Option key={item.tableName} value={item.tableName}>
                           {item.entityName}
                         </Select.Option>
                       ))}

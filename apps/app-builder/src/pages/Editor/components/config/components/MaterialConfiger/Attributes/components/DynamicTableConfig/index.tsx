@@ -18,7 +18,6 @@ export interface DynamicTableConfigProps {
 
 // 暂时不能在表格展示的数据类型
 export const hiddenFieldTypes = [
-  ENTITY_FIELD_TYPE.DATA_SELECTION.VALUE,
   ENTITY_FIELD_TYPE.RELATION.VALUE,
   ENTITY_FIELD_TYPE.STRUCTURE.VALUE,
   ENTITY_FIELD_TYPE.ARRAY.VALUE,

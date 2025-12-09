@@ -1,8 +1,8 @@
 export interface CorpAppParams {
   corpId: string;
   applicationIdList: string[];
-  authorizationTime: string;
-  expiresTime: string;
+  authorizationTime: number;
+  expiresTime: number;
 }
 
 export interface corpAppListParams {
@@ -16,8 +16,8 @@ export interface updateAppParams {
   id: string;
   applicationId: string;
   corpId: string;
-  authorizationTime: string;
-  expiresTime: string;
+  authorizationTime: number;
+  expiresTime: number;
 }
 
 export interface authAppStatusParams {

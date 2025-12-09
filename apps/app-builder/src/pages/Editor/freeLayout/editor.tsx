@@ -20,7 +20,6 @@ import LeftNavBar from './components/left-nav-bar/index';
 import { getDataById, save } from '@onebase/app';
 import { useLocation } from 'react-router-dom';
 import type { WorkflowJSON } from './editorType';
-import { getAppIdByPageSetId } from '@onebase/app';
 import { useFlowEditorStor } from '@/store/index';
 import { debounce } from 'lodash-es';
 import { useRefresh } from '@flowgram.ai/fixed-layout-editor';
@@ -40,8 +39,6 @@ export const Editor = () => {
     try {
       let currentJsonData = {};
       const res = await getDataById({ id: currentFlowId });
-      console.log(JSON.parse(res.bpmDefJson));
-
       if (res.globalConfig) {
         setConfigData(res.globalConfig);
       }
@@ -50,9 +47,8 @@ export const Editor = () => {
       } else {
         const bpmDefJson = JSON.parse(res.bpmDefJson);
         currentJsonData = normalizeNodes(bpmDefJson);
-        console.log(currentJsonData);
       }
-      if (res.businessId) {
+      if (res.businessUuid) {
         setFlowData(res);
       }
       ref?.current?.document.clear();
@@ -112,19 +108,17 @@ export const Editor = () => {
   const editorProps = useEditorProps({ nodes: [], edges: [] }, nodeRegistries);
 
   const onSave = async () => {
-    const appId = await getAppIdByPageSetId({ pageSetId });
     const data = ref?.current?.document.toJSON();
     const currentJsonData = normalizeNodes(data);
-    const { id, flowCode, flowName, version, versionAlias, versionStatus, businessId } = flowData;
+    const { id, flowCode, flowName, bpmVersion, bpmVersionAlias, bpmVersionStatus, businessUuid } = flowData;
     const params = {
       id: id || '',
       flowCode: flowCode || '',
       flowName: flowName || '',
-      version: version || '',
-      versionAlias: versionAlias || '',
-      versionStatus: versionStatus || '',
-      businessId: businessId || pageSetId,
-      appId,
+      bpmVersion: bpmVersion || '',
+      bpmVersionAlias: bpmVersionAlias || '',
+      bpmVersionStatus: bpmVersionStatus || '',
+      businessUuid: businessUuid || '',
       bpmDefJson: JSON.stringify(currentJsonData),
       globalConfig: configData
     };
@@ -145,12 +139,12 @@ export const Editor = () => {
     return () => toDispose?.dispose();
   }, []);
 
-  useEffect(() => {
-    const dispose = ref?.current?.document.linesManager.onAvailableLinesChange((e) => {
-      console.log(e, '这里监听线条的新增和删除');
-    });
-    return () => dispose?.dispose();
-  }, []);
+  // useEffect(() => {
+  //   const dispose = ref?.current?.document.linesManager.onAvailableLinesChange((e) => {
+  //     console.log(e, '这里监听线条的新增和删除');
+  //   });
+  //   return () => dispose?.dispose();
+  // }, []);
 
   return (
     <div className="doc-free-feature-overview">

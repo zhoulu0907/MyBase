@@ -297,11 +297,7 @@ export default function EditorWorkspace() {
         </div>
       </div>
 
-      <Form
-        labelCol={{
-          style: { flex: 'unset' }
-        }}
-      >
+      <Form labelCol={{ span: 10 }} wrapperCol={{ span: 14 }}>
         <div
           className={styles.workspaceBody}
           id="workspace-body"

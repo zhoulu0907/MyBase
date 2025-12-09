@@ -17,7 +17,7 @@ export default function FieldModal({
   fmVisible,
   setFmVisible,
   curKeyArr,
-  title='添加隐藏字段',
+  title = '添加隐藏字段',
   mergeDataToTable,
   ckOptions = [],
   invert = []
@@ -26,15 +26,17 @@ export default function FieldModal({
   const [checkedItem, setCheckedItem] = useState([]);
 
   const invertKey = invert?.map((item: any) => {
-    return item.fieldId;
+    return item.displayName;
   });
-  const useCkOptions = ckOptions?.map((item: any) => {
-    return {
-      label: item.displayName,
-      value: item.fieldId,
-      disabled: invertKey.includes(item.fieldId)
-    };
-  });
+  const useCkOptions = ckOptions
+    ?.filter((item: any) => item.isSystemField === 0)
+    .map((item: any) => {
+      return {
+        label: item.displayName,
+        value: item.fieldName,
+        disabled: invertKey.includes(item.displayName)
+      };
+    });
 
   function handleCheckChange(keyArr: Array<any>) {
     setCkedKey(keyArr);
@@ -54,12 +56,10 @@ export default function FieldModal({
   function handleSubmit() {
     if (Array.isArray(checkedItem)) {
       let resData: Array<any> = [];
-
-
       checkedItem.forEach((item: any) => {
         resData.push({
-          fieldId: item.value,
-          fieldName: item.label,
+          fieldName: item.value,
+          displayName: item.label
         });
       });
       mergeDataToTable && mergeDataToTable(resData);
@@ -87,13 +87,13 @@ export default function FieldModal({
       <div className="out-line-box flex-btw">
         <section className="left-part">
           <div>字段列表</div>
-          <div className='left-checkbox'>
+          <div className="left-checkbox">
             <Checkbox
               indeterminate={ckedKey.length > 0 && ckedKey.length < useCkOptions.length}
               checked={ckedKey.length === useCkOptions.length}
-              onChange={(e:boolean) => {
+              onChange={(e: boolean) => {
                 if (e) {
-                  handleCheckChange(useCkOptions?.map((item:any) => item.value));
+                  handleCheckChange(useCkOptions?.map((item: any) => item.value));
                 } else {
                   handleCheckChange([]);
                 }

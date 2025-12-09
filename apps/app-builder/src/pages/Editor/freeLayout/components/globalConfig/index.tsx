@@ -16,10 +16,12 @@ export function GlobalConfig(props = { visible: false, onClose: () => {} }) {
   const { configData, setConfigData } = useFlowEditorStor();
   const [userOptions, setUserOptions] = useState<any[]>([]);
   const [formSummaryOptions, setFormSummaryOptions] = useState<any[]>([]);
+  const [tableName, setTableName] = useState<string>('');
   const [useConfigData, setUseConfigData] = useState<GlobalConfigData>(configData);
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const pageSetId = searchParams.get('pageSetId') || '';
+  
   const initUserData = () => {
     const params: PageParam = {
       pageNo: 1,
@@ -46,7 +48,8 @@ export function GlobalConfig(props = { visible: false, onClose: () => {} }) {
   // 表单摘要数据获取
   const getFormSummaryData = async () => {
     const mainMetaData = await getPageSetMetaData({ pageSetId: pageSetId });
-    const { parentFields } = await getEntityFieldsWithChildren(mainMetaData);
+    const { parentFields, tableName } = await getEntityFieldsWithChildren(mainMetaData);
+    setTableName(tableName);
     setFormSummaryOptions(parentFields);
   };
 
@@ -328,16 +331,16 @@ export function GlobalConfig(props = { visible: false, onClose: () => {} }) {
                   mode="multiple"
                   maxTagCount={10}
                   placeholder="选择表单字段"
-                  value={useConfigData.formSummaryCfg?.fieldConfigs.map((field) => field.fieldId)}
+                  value={useConfigData.formSummaryCfg?.fieldConfigs.map((field) => field.fieldName)}
                   onChange={(value) =>
                     dataChange(
                       {
                         fieldConfigs: value.map((fieldId: string) => {
-                          const field = formSummaryOptions.find((f) => f.fieldId === fieldId);
+                          const field = formSummaryOptions.find((f) => f.fieldName === fieldId);
                           return {
-                            fieldId,
                             fieldName: field?.fieldName || '',
-                            displayName: field?.displayName || ''
+                            fieldDisplayName: field?.displayName || '',
+                            tableName
                           };
                         })
                       },
@@ -349,11 +352,11 @@ export function GlobalConfig(props = { visible: false, onClose: () => {} }) {
                 >
                   {formSummaryOptions.map((option) => (
                     <Option
-                      key={option.fieldId}
-                      value={option.fieldId}
+                      key={option.fieldName}
+                      value={option.fieldName}
                       disabled={
                         useConfigData.formSummaryCfg?.fieldConfigs.length >= 3 &&
-                        !useConfigData.formSummaryCfg?.fieldConfigs.some((field) => field.fieldId === option.fieldId)
+                        !useConfigData.formSummaryCfg?.fieldConfigs.some((field) => field.fieldName === option.fieldName)
                       }
                     >
                       {option.displayName}

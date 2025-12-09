@@ -1,13 +1,14 @@
-import React, { useEffect, useState } from 'react';
 import { Checkbox, Form, Input, Layout, Table } from '@arco-design/web-react';
 import useForm from '@arco-design/web-react/es/Form/useForm';
-import { useSignals } from '@preact/signals-react/runtime';
 import { ETLDrawerTab, etlEditorSignal } from '@onebase/common';
+import { useSignals } from '@preact/signals-react/runtime';
+import { cloneDeep } from 'lodash-es';
+import React, { useEffect, useState } from 'react';
+import DataPreview from '../../components/dataPreview';
+import DataRemark from '../../components/dataRemark';
+import { handlePreviewData, setNodeDataAndResetDownstream, type PreviewData } from '../utils';
 import JoinRow from './components/joinRow';
 import styles from './index.module.less';
-import DataRemark from '../../components/dataRemark';
-import { setNodeDataAndResetDownstream } from '../utils';
-import { cloneDeep } from 'lodash-es';
 
 type Row = {
   isSelected?: boolean;
@@ -83,7 +84,24 @@ export const JoinNodeConfig: React.FC<JoinNodeConfigProps> = ({ onRegisterSave }
 
       setCurNodeData(allFieldList);
     }
+
+    if (curDrawerTab.value == ETLDrawerTab.DATA_PREVIEW) {
+      handlePreviewData(
+        graphData.value,
+        nodeData.value,
+        {
+          ...curNode.value,
+          ...newPayload
+        },
+        setPreviewData
+      );
+    }
   }, [curDrawerTab.value]);
+
+  const [previewData, setPreviewData] = useState<PreviewData>({
+    columns: [],
+    data: []
+  });
 
   // 同步表单变化到本地 rows（用于 Table 渲染）
   const onValuesChange = (_: any, allValues: any) => {
@@ -238,6 +256,9 @@ export const JoinNodeConfig: React.FC<JoinNodeConfigProps> = ({ onRegisterSave }
             </Form.List>
           </Form>
         </div>
+      )}
+      {curDrawerTab.value === ETLDrawerTab.DATA_PREVIEW && (
+        <DataPreview data={previewData.data} columns={previewData.columns} />
       )}
       {curDrawerTab.value === ETLDrawerTab.NODE_REMARK && <DataRemark />}
     </Layout>

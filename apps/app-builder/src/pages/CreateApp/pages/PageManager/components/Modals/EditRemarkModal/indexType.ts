@@ -6,9 +6,9 @@ export interface VersionDataCreator {
 
 export interface VersionData {
   id: string;
-  version: string;
-  versionAlias: string;
-  versionStatus: string;
+  bpmVersion: string;
+  bpmVersionAlias: string;
+  bpmVersionStatus: string;
   creator: VersionDataCreator;
   createTime: string;
   updateTime: string;

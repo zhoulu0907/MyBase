@@ -29,11 +29,14 @@ import {
   getDatasourceList,
   getEntityFieldsWithChildren,
   getPageSetMetaData,
+  listApplicationMenu,
+  menuSignal,
   PageType,
   save,
   updateApplicationMenu,
   type ChildEntity,
   type GetApplicationReq,
+  type ListApplicationMenuReq,
   type UpdateApplicationMenuNameReq
 } from '@onebase/app';
 import { getHashQueryParam, pagesRuntimeSignal } from '@onebase/common';
@@ -52,7 +55,7 @@ import {
 } from '@onebase/ui-kit';
 import { cloneDeep } from 'lodash-es';
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { VersionStatus } from '../constants';
 import FlowView from '../flowView';
 import PartPreview from '../partPreview';
@@ -112,6 +115,7 @@ interface VersionListSelectRef {
 }
 
 export default function EditorHeader() {
+  const location = useLocation();
   const selectRef = useRef<VersionListSelectRef>(null);
   const { curPage } = pagesRuntimeSignal;
   const { t } = useI18n();
@@ -144,7 +148,7 @@ export default function EditorHeader() {
   } = useListEditorSignal;
 
   const { setMainEntity, /* setAppEntities, */ setSubEntities } = useAppEntityStore();
-
+  const { curMenu, setCurMenu } = menuSignal;
   const { curAppId, setCurAppId } = useAppStore();
 
   const { setCurDataSourceId } = useResourceStore();
@@ -169,7 +173,6 @@ export default function EditorHeader() {
   const pageInfo = JSON.parse(sessionData);
   const { currentFlowId, setCurrnetFlowId, editorRef, flowData, configData } = useFlowEditorStor();
   const onFlowSave = async (isCreate?: boolean) => {
-    const appId = await getAppIdByPageSetId({ pageSetId });
     const data = editorRef?.document.toJSON();
     const currentJsonData = normalizeNodes(data);
     currentJsonData.edges?.forEach((item) => {
@@ -177,19 +180,19 @@ export default function EditorHeader() {
         item.name = item.data.name;
       }
     });
-    const { id, flowCode, flowName, version, versionAlias, versionStatus, businessId } = flowData;
+    const { id, flowCode, flowName, bpmVersionAlias, businessUuid } = flowData;
     const params = {
       id: isCreate ? '' : id || '',
       flowCode: flowCode || '',
       flowName: flowName || '',
-      version: version || '',
-      versionAlias: versionAlias || '',
-      versionStatus: versionStatus || '',
-      businessId: businessId || pageSetId,
-      appId,
+      bpmVersionAlias: bpmVersionAlias || '',
+      businessUuid: businessUuid || curMenu.value.menuUuid,
       bpmDefJson: JSON.stringify(currentJsonData),
       globalConfig: configData
     };
+
+    console.log(flowData);
+
     return save(params).then((res: any) => {
       setFlowId(res);
       Message.success(isCreate ? '创建成功' : '保存成功');
@@ -198,6 +201,22 @@ export default function EditorHeader() {
       }
     });
   };
+
+  const getMenuList = async (keywords?: string) => {
+    const searchParams = new URLSearchParams(location.search);
+    const appId = searchParams.get('appId') || '';
+    const req: ListApplicationMenuReq = {
+      applicationId: appId,
+      name: keywords
+    };
+    const res = await listApplicationMenu(req);
+    res.forEach((item: any) => {
+      if (item.menuName === pageInfo?.name) {
+        setCurMenu(item);
+      }
+    });
+  };
+
   const getVersonList = () => {
     selectRef.current && selectRef.current.getVersionMgmtData();
   };
@@ -244,6 +263,7 @@ export default function EditorHeader() {
     if (pageSetId) {
       setPageSetId(pageSetId);
     }
+    getMenuList();
   }, []);
 
   useEffect(() => {
@@ -257,14 +277,16 @@ export default function EditorHeader() {
   }, [pageInfo]);
 
   useEffect(() => {
-    if (!isEditMode && pageSetId != '') {
-      loadPageSetInfo(pageSetId);
-      setIsEditMode(true);
+    if (pageSetId != '') {
       handleGetAppInfo(pageSetId);
-
       // 工作台设计页不获取主表数据
       if (activeTab !== EDITOR_TYPES.WORKBENCH_EDITOR) {
         getMainMetaData(pageSetId);
+      }
+
+      if (!isEditMode) {
+        loadPageSetInfo(pageSetId);
+        setIsEditMode(true);
       }
     }
   }, [pageSetId]);
@@ -298,10 +320,9 @@ export default function EditorHeader() {
     }
 
     // 获取数据源ID
-    const params = {
-      appId: appId
-    };
-    const res = await getDatasourceList(params);
+    const res = await getDatasourceList({
+      applicationId: appId
+    });
     if (res?.length > 0) {
       const dataSource = res?.[0];
       // 将数据源ID存储到store中
@@ -554,7 +575,7 @@ export default function EditorHeader() {
 
       <div className={styles.right}>
         {activeTab === EDITOR_TYPES.FLOW_EDITOR && (
-          <VersionListSelect ref={selectRef} setManageVisible={setManageVisible} />
+          <VersionListSelect menuUuid={curMenu.value.menuUuid} ref={selectRef} setManageVisible={setManageVisible} />
         )}
 
         {appStatus === AppStatus.DEVELOPING && <div className={styles.editorStatusDeveloping}>未保存</div>}
@@ -615,13 +636,14 @@ export default function EditorHeader() {
         setVisible={setVisibleRenameForm}
         form={renameForm}
       />
-      <FlowView visible={flowViewVisible} setVisible={setFlowViewVisible} businessId={flowData?.businessId} />
+      <FlowView visible={flowViewVisible} setVisible={setFlowViewVisible} businessUuid={flowData?.businessUuid} />
       <VersionModal
         visible={manageVisible}
         setVisible={setManageVisible}
         changeCurrentFlow={changeCurrentFlow}
         currentFlowId={currentFlowId}
         getVersonList={getVersonList}
+        businessUuid={flowData?.businessUuid}
       />
     </div>
   );

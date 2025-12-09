@@ -1,0 +1,108 @@
+.formDivider{
+   .title {
+    font-size: 14px;
+    color: #1d2129;
+    line-height: 22px;
+    margin-bottom: 3px;
+    display: inline-block;
+  }
+
+  .desc {
+    font-size: 12px;
+    color: #86909c;
+    line-height: 20px;
+    margin-top: 3px;
+    display: block;
+  }
+
+/* 下方装饰条：根据截图画 8 种不同效果 */
+  .decor{
+    margin: 2px 0;
+  }
+
+  .decor-style1 {
+    display: none;
+  }
+
+  .decor-style2 {
+    border-top: 1px dashed;
+  }
+
+  .decor-style3 {
+    border-top: 1px solid;
+  }
+
+  .decor-style4 {
+    border-top: 2px solid;
+  }
+
+  .decor-style5 {
+    display: none;
+  }
+
+  .decor-style6 {
+    border-top: 1px solid;
+  }
+
+  .decor-title-style5 {
+    border-left: 4px solid;
+    line-height: 14px;
+    margin-bottom: 4px;
+    padding-left: 4px;
+  }
+  
+  .decor-title-style6 {
+    border-bottom: 2px solid;
+    line-height: 22px;
+    margin-bottom: 2px;
+  }
+
+  /* 样式7 */
+  /* 字段标题容器 */
+  .decor-title-style7 {
+    height: 22px;
+    border-bottom: 2px solid;
+    display: flex;
+    gap: 2px;
+
+    /* 标题标签 */
+   .label {
+      padding: 0 0 0 8px;
+      line-height: 24px;
+    }
+
+    .decorator {
+      height: 24px;
+      width: 24px;
+      clip-path: polygon(0% 0%, 20% 0%, 100% 100%, 0% 100%);
+      position: relative;
+      left: -3px;
+    }
+
+    .decorator1 {
+      height: 24px;
+      width: 24px;
+      clip-path: polygon(0% 0%, 40% 0%, 100% 75%, 60% 75%);
+      position: relative;
+      left: -16px;
+    }
+
+    .decorator2 {
+      height: 24px;
+      width: 24px;
+      clip-path: polygon(0% 0%, 40% 0%, 100% 75%, 60% 75%);
+      position: relative;
+      left: -26px;
+      opacity: 0.7;
+    }
+
+    .decorator3 {
+      height: 24px;
+      width: 24px;
+      clip-path: polygon(0% 0%, 40% 0%, 100% 75%, 60% 75%);
+      position: relative;
+      left: -36px;
+      opacity: 0.4;
+    }
+  }
+}

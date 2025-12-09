@@ -1,11 +1,15 @@
-import {
-  jsonToJsonSchema,
-  schemaToFormData
-} from '@/pages/CreateApp/pages/IntegratedManagement/pages/connector/action/create/util';
+import { useAppStore } from '@/store';
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { Button } from '@arco-design/web-react';
 import { getNodeForm, useClientContext } from '@flowgram.ai/fixed-layout-editor';
-import { type ConditionField, DATA_SOURCE_TYPE, getEntityFields, getEntityFieldsWithChildren } from '@onebase/app';
+import {
+  type ConditionField,
+  DATA_SOURCE_TYPE,
+  getEntityFields,
+  getEntityFieldsWithChildren,
+  getEntityListByApp,
+  type MetadataEntityPair
+} from '@onebase/app';
 import { NodeType } from '@onebase/common';
 import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
 import { updateLoopOutputs } from '../../nodes/control/loop/output';
@@ -28,6 +32,7 @@ import styles from './index.module.less';
 
 export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
   const { nodeId, nodeData, nodes, setNodeId, setNodeData } = triggerEditorSignal;
+  const { curAppId } = useAppStore();
   // 流程数据文档 (固定布局), 存储流程的所有节点数据
   const ctx = useClientContext();
 
@@ -61,8 +66,8 @@ export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
           case NodeType.DATA_QUERY: {
             if (
               originalNodeData.dataType != formInfo.dataType ||
-              originalNodeData.mainEntityId != formInfo.mainEntityId ||
-              originalNodeData.subEntityId != formInfo.subEntityId ||
+              originalNodeData.mainTableName != formInfo.mainTableName ||
+              originalNodeData.subTableName != formInfo.subTableName ||
               originalNodeData.dataNodeId != formInfo.dataNodeId
             ) {
               clearDataOriginNodeId(nodeId.value);
@@ -74,8 +79,8 @@ export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
           case NodeType.DATA_ADD: {
             if (
               originalNodeData.addType != formInfo.addType ||
-              originalNodeData.mainEntityId != formInfo.mainEntityId ||
-              originalNodeData.subEntityId != formInfo.subEntityId ||
+              originalNodeData.mainTableName != formInfo.mainTableName ||
+              originalNodeData.subTableName != formInfo.subTableName ||
               originalNodeData.dataNodeId != formInfo.dataNodeId
             ) {
               clearDataOriginNodeId(nodeId.value);
@@ -86,8 +91,8 @@ export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
           case NodeType.DATA_DELETE: {
             if (
               originalNodeData.dataType != formInfo.dataType ||
-              originalNodeData.mainEntityId != formInfo.mainEntityId ||
-              originalNodeData.subEntityId != formInfo.subEntityId
+              originalNodeData.mainTableName != formInfo.mainTableName ||
+              originalNodeData.subTableName != formInfo.subTableName
             ) {
               clearDataOriginNodeId(nodeId.value);
             }
@@ -97,8 +102,8 @@ export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
           case NodeType.DATA_UPDATE: {
             if (
               originalNodeData.updateType != formInfo.updateType ||
-              originalNodeData.mainEntityId != formInfo.mainEntityId ||
-              originalNodeData.subEntityId != formInfo.subEntityId ||
+              originalNodeData.mainTableName != formInfo.mainTableName ||
+              originalNodeData.subTableName != formInfo.subTableName ||
               originalNodeData.dataNodeId != formInfo.dataNodeId
             ) {
               clearDataOriginNodeId(nodeId.value);
@@ -137,6 +142,8 @@ export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
         }
       }
 
+      const entityList = await getEntityListByApp(curAppId);
+
       // 更新outputs
       switch (curNode.type) {
         case NodeType.LOOP:
@@ -148,7 +155,7 @@ export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
           break;
         case NodeType.DATA_ADD:
           const mainDataSource =
-            formInfo.addType === DATA_SOURCE_TYPE.FORM ? formInfo.mainEntityId : formInfo.subEntityId;
+            formInfo.addType === DATA_SOURCE_TYPE.MAIN_TABLE ? formInfo.mainTableName : formInfo.subTableName;
           if (mainDataSource) {
             const res = await getEntityFields({ entityId: mainDataSource });
             const newConditionFields: ConditionField[] = (res || []).map((item: any) => {
@@ -177,24 +184,41 @@ export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
           updateDataDeleteOutputs(curNode.id);
           break;
         case NodeType.DATA_QUERY:
-          const dataQueryRes = await getEntityFieldsWithChildren(formInfo.mainEntityId);
+          let dataQueryMainEntityId = entityList.find(
+            (item: MetadataEntityPair) => item.tableName === formInfo.mainTableName
+          )?.entityId;
+
+          let dataQueryOriginDataSource: string = '';
+          if (formInfo.dataType === DATA_SOURCE_TYPE.DATA_NODE) {
+            dataQueryOriginDataSource = getDataNodeSource(formInfo.dataNodeId);
+            dataQueryMainEntityId = entityList.find(
+              (item: MetadataEntityPair) => item.tableName === dataQueryOriginDataSource
+            )?.entityId;
+          }
+
+          if (!dataQueryMainEntityId) {
+            return;
+          }
+
+          const dataQueryRes = await getEntityFieldsWithChildren(dataQueryMainEntityId);
+
           const dataQueryConditionFields = (): ConditionField[] => {
-            if (formInfo.dataType === DATA_SOURCE_TYPE.FORM) {
+            if (formInfo.dataType === DATA_SOURCE_TYPE.MAIN_TABLE) {
               return (dataQueryRes?.parentFields || []).map((item: any) => {
                 return {
-                  value: item.fieldId,
+                  value: `${formInfo.mainTableName}.${item.fieldName}`,
                   label: item.displayName,
                   fieldType: item.fieldType
                 };
               });
             }
-            if (formInfo.dataType === DATA_SOURCE_TYPE.SUBFORM) {
+            if (formInfo.dataType === DATA_SOURCE_TYPE.SUB_TABLE) {
               const subEntity = dataQueryRes?.childEntities?.find(
-                (item: any) => item.childEntityId === formInfo.subEntityId
+                (item: any) => item.childTableName === formInfo.subTableName
               );
               return (subEntity?.childFields || []).map((item: any) => {
                 return {
-                  value: item.fieldId,
+                  value: `${formInfo.subTableName}.${item.fieldName}`,
                   label: item.displayName,
                   fieldType: item.fieldType
                 };
@@ -203,7 +227,7 @@ export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
             if (formInfo.dataType === DATA_SOURCE_TYPE.DATA_NODE) {
               return (dataQueryRes?.parentFields || []).map((item: any) => {
                 return {
-                  value: item.fieldId,
+                  value: `${dataQueryOriginDataSource}.${item.fieldName}`,
                   label: item.displayName,
                   fieldType: item.fieldType
                 };
@@ -215,24 +239,40 @@ export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
           updateDataQueryOutputs(curNode.id, dataQueryFields);
           break;
         case NodeType.DATA_QUERY_MULTIPLE:
-          const dataQueryMultipleRes = await getEntityFieldsWithChildren(formInfo.mainEntityId);
+          let dataQueryMultiMainEntityId = entityList.find(
+            (item: MetadataEntityPair) => item.tableName === formInfo.mainTableName
+          )?.entityId;
+
+          let dataQueryMultiOriginDataSource: string = '';
+          if (formInfo.dataType === DATA_SOURCE_TYPE.DATA_NODE) {
+            dataQueryMultiOriginDataSource = getDataNodeSource(formInfo.dataNodeId);
+            dataQueryMultiMainEntityId = entityList.find(
+              (item: MetadataEntityPair) => item.tableName === dataQueryOriginDataSource
+            )?.entityId;
+          }
+
+          if (!dataQueryMultiMainEntityId) {
+            return;
+          }
+
+          const dataQueryMultipleRes = await getEntityFieldsWithChildren(dataQueryMultiMainEntityId);
           const dataQueryMultipleConditionFields = (): ConditionField[] => {
-            if (formInfo.dataType === DATA_SOURCE_TYPE.FORM) {
+            if (formInfo.dataType === DATA_SOURCE_TYPE.MAIN_TABLE) {
               return (dataQueryMultipleRes?.parentFields || []).map((item: any) => {
                 return {
-                  value: item.fieldId,
+                  value: `${formInfo.mainTableName}.${item.fieldName}`,
                   label: item.displayName,
                   fieldType: item.fieldType
                 };
               });
             }
-            if (formInfo.dataType === DATA_SOURCE_TYPE.SUBFORM) {
+            if (formInfo.dataType === DATA_SOURCE_TYPE.SUB_TABLE) {
               const subEntity = dataQueryMultipleRes?.childEntities?.find(
-                (item: any) => item.childEntityId === formInfo.subEntityId
+                (item: any) => item.childTableName === formInfo.subTableName
               );
               return (subEntity?.childFields || []).map((item: any) => {
                 return {
-                  value: item.fieldId,
+                  value: `${formInfo.subTableName}.${item.fieldName}`,
                   label: item.displayName,
                   fieldType: item.fieldType
                 };
@@ -241,7 +281,7 @@ export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
             if (formInfo.dataType === DATA_SOURCE_TYPE.DATA_NODE) {
               return (dataQueryMultipleRes?.parentFields || []).map((item: any) => {
                 return {
-                  value: item.fieldId,
+                  value: `${dataQueryOriginDataSource}.${item.fieldName}`,
                   label: item.displayName,
                   fieldType: item.fieldType
                 };
@@ -253,24 +293,33 @@ export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
           updateDataQueryMultipleOutputs(curNode.id, dataQueryMultipleFields);
           break;
         case NodeType.DATA_UPDATE:
-          const dataUpdateRes = await getEntityFieldsWithChildren(formInfo.mainEntityId);
+          let dataUpdateMainEntityId = entityList.find(
+            (item: MetadataEntityPair) => item.tableName === formInfo.mainTableName
+          )?.entityId;
+
+          if (!dataUpdateMainEntityId) {
+            return;
+          }
+
+          const dataUpdateRes = await getEntityFieldsWithChildren(dataUpdateMainEntityId);
           const dataUpdateConditionFields = (): ConditionField[] => {
-            if (formInfo.dataType === DATA_SOURCE_TYPE.FORM) {
+            if (formInfo.updateType === DATA_SOURCE_TYPE.MAIN_TABLE) {
               return (dataUpdateRes?.parentFields || []).map((item: any) => {
                 return {
-                  value: item.fieldId,
+                  value: `${formInfo.mainTableName}.${item.fieldName}`,
                   label: item.displayName,
                   fieldType: item.fieldType
                 };
               });
             }
-            if (formInfo.dataType === DATA_SOURCE_TYPE.SUBFORM) {
+            if (formInfo.updateType === DATA_SOURCE_TYPE.SUB_TABLE) {
               const subEntity = dataUpdateRes?.childEntities?.find(
-                (item: any) => item.childEntityId === formInfo.subEntityId
+                (item: any) => item.childTableName === formInfo.subTableName
               );
+
               return (subEntity?.childFields || []).map((item: any) => {
                 return {
-                  value: item.fieldId,
+                  value: `${formInfo.subTableName}.${item.fieldName}`,
                   label: item.displayName,
                   fieldType: item.fieldType
                 };
@@ -278,6 +327,7 @@ export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
             }
             return [];
           };
+
           const dataUpdateFields = dataUpdateConditionFields();
           updateDataUpdateOutputs(curNode.id, dataUpdateFields);
           break;

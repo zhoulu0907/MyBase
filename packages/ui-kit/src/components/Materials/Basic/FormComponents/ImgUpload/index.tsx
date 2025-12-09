@@ -220,7 +220,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
         field={fieldId}
         layout={layout}
         tooltip={tooltip}
-        labelCol={layout === 'horizontal' ? { style: { width: 200, flex: 'unset' } } : {}}
+        labelCol={layout === 'horizontal' ? { span: 10 } : {}}
         rules={[{ required: verify?.required, message: `${label.text}是必填项` }]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
@@ -279,7 +279,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
           drag={uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.LIST]}
           renderUploadList={renderUploadList}
         >
-          {!detailMode && (
+          {detailMode ? null : (
             <div className="uplaodTrigger">
               {uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT] && (
                 <div className="uplaodTriggerText">

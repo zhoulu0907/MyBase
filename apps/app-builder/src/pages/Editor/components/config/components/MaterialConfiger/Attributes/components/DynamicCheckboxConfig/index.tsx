@@ -330,8 +330,11 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
                   <Button
                     type="outline"
                     onClick={() => {
-                      const newLabel = `新选项_${Array.from({ length: 6 }, () => String.fromCharCode(97 + Math.floor(Math.random() * 26))).join('')}`;
-                      const newValue = _fields?.[_fields.length - 1]?.field || `${configs.id}-${checkboxKey}[0]`;
+                      const code = Array.from({ length: 6 }, () =>
+                        String.fromCharCode(97 + Math.floor(Math.random() * 26))
+                      ).join('');
+                      const newLabel = `新选项_${code}`;
+                      const newValue = `${configs.id}-${checkboxKey}-${code}`;
                       const newList = [
                         ...configs[checkboxKey].defaultOptions,
                         {

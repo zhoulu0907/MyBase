@@ -31,9 +31,10 @@ import ListRuntime from './ListRuntime';
 interface PreviewProps {
   menuId: string;
   runtime: boolean;
+  menuUuid: string;
 }
 
-const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
+const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid }) => {
   useSignals();
 
   const [form] = Form.useForm();
@@ -95,7 +96,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   useEffect(() => {
     // 获取详情数据
     if (editTargetId && tableName && mainMetaDataFields.value.length > 0) {
-      // TODO(mickey): 获取详情数据
       handleGetData(editTargetId);
     }
   }, [tableName, mainMetaDataFields.value]);
@@ -150,6 +150,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
         //   过滤空行
         const subTableRows = [] as any;
+        subFormData[subTableName] = subTableRows;
+
         for (const item of value) {
           if (Object.values(item).every((v: any) => v === undefined)) {
             return;
@@ -213,10 +215,10 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
           const reqFlow = {
             isDraft: isSave,
             formName: curPage?.value?.pages?.find((page: any) => page.pageType === CATEGORY_TYPE.FORM)?.pageName || '',
-            businessId: curPage?.value?.id,
+            businessUuid: menuUuid,
             entity: {
-              entityId: mainMetaData,
-              data: formData
+              tableName: tableName,
+              data: {...formData,...subFormData}
             }
           };
           res = await fetchSubmitInstance(reqFlow);
@@ -251,6 +253,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
         setSubmitLoading(false);
       }
     }
+
+    // 关闭页面后子表清空
+    pagesRuntimeSignal.resetSubTableDataLength();
   };
 
   const cancelSubmitForm = () => {
@@ -259,6 +264,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     setPageType(EDITOR_TYPES.LIST_EDITOR);
     setDetailMode(true);
     form.resetFields();
+    // 关闭页面后子表清空
+    pagesRuntimeSignal.resetSubTableDataLength();
   };
 
   const showFromPageData = (id: string, toFormPage: boolean = false) => {
@@ -307,7 +314,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       const componentSchemas = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value;
 
       for (const subEntity of subEntities.value) {
-        console.log('subEntity: ', subEntity);
         // 判断 res 对象内的 key 是否等于 subEntity.childTableName
 
         if (
@@ -335,6 +341,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                     formValues[`${key}.${idx}.${fieldId}`] = subData[idx]?.[fieldId];
                   }
                 }
+                // 补充id
+                formValues[`${key}.${idx}.id`] = subData[idx]?.id;
               }
             }
           });
@@ -359,8 +367,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
           formData[field.fieldId] = value || '';
         }
       });
+
       setEntityParam({
-        entityId: mainMetaData,
+        tableName,
         data: formData
       });
       setPredictVisible(true);
@@ -416,7 +425,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
           autoFocus={false}
           focusLock={true}
         >
-          <FlowPredict businessId={curPage?.value?.id} entityParam={entityParam} />
+          <FlowPredict businessId={curPage?.value?.id} entityParam={entityParam} businessUuid={menuUuid} />
         </Modal>
       )}
     </div>
