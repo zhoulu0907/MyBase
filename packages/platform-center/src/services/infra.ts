@@ -1,5 +1,5 @@
-import { isRuntimeEnv, isPlatformEnv } from '@onebase/common';
-import { BatchUpdateSecurityConfigsParams } from '../types';
+import { isPlatformEnv, isRuntimeEnv } from '@onebase/common';
+import { BatchUpdateSecurityConfigsParams, GetTenantSecurityConfigParams } from '../types';
 import { infraService, platformInfraService, runtimeInfraService } from './clients';
 
 export interface UploadProgressCallback {
@@ -12,7 +12,7 @@ export interface UploadProgressCallback {
  * directory 文件目录
  * visitMode 文件保存标识 public-公开访问，authen-文件需登录鉴权,permission-内部调用
  */
-const envService = (isRuntimeEnv() ? runtimeInfraService : (isPlatformEnv() ? platformInfraService : infraService))
+const envService = isRuntimeEnv() ? runtimeInfraService : isPlatformEnv() ? platformInfraService : infraService;
 export const uploadFile = (data: any, onProgress?: UploadProgressCallback) => {
   return envService.post('/file/upload', data, {
     headers: {
@@ -23,7 +23,7 @@ export const uploadFile = (data: any, onProgress?: UploadProgressCallback) => {
 };
 // 根据文件 ID 列表获取文件详情列表
 export const getFileListByIds = (ids: string[]) => {
-  return envService.get(`/file/list-by-ids?ids=${ids}`,);
+  return envService.get(`/file/list-by-ids?ids=${ids}`);
 };
 // 获取文件内容
 export const getFileDetailById = (id: string) => {
@@ -40,4 +40,8 @@ export const getSecurityConfigItems = (categoryId: string) => {
 
 export const batchUpdateSecurityConfigs = (params: BatchUpdateSecurityConfigsParams) => {
   return infraService.post('/security-config/batch-update', params);
+};
+
+export const getTenantSecurityConfig = (params: GetTenantSecurityConfigParams) => {
+  return envService.post('/security-config/get-tenant-items', params);
 };

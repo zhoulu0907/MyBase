@@ -27,7 +27,7 @@ import {
   type TenantAdminUserResVO,
   type UpdateTenantParams,
   type UserVO
-} from '@onebase/platform-center'; 
+} from '@onebase/platform-center';
 import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import styles from './index.module.less';
@@ -167,15 +167,6 @@ const EditTenant = () => {
     setSaaSChecked(value);
   };
 
-  /* 获取当前管理员集合 */
-  const findMatchingItemsById = (arrA: any[], targetArr: any[]) => {
-    if (!Array.isArray(targetArr)) return;
-    const cutAdminList = targetArr.map((item) => item.platformUserId);
-    const result = arrA.filter((item) => cutAdminList.includes(item.id));
-
-    return result;
-  };
-
   return (
     <div className={styles.editPage}>
       <Tabs defaultActiveTab="1" destroyOnHide={false} style={{ width: '100%' }}>
@@ -245,11 +236,11 @@ const EditTenant = () => {
                         });
                       }}
                     >
-                    {logoUrl ? (
-                      <Image className={styles.tenantLogo} preview width={160} height={80} src={logoUrl} />
-                    ) : (
-                      <div className={styles.tenantLogo}>{tenantInfo?.name.slice(0, 6)}</div>
-                    )}
+                      {logoUrl ? (
+                        <Image className={styles.tenantLogo} preview width={160} height={80} src={logoUrl} />
+                      ) : (
+                        <div className={styles.tenantLogo}>{tenantInfo?.name.slice(0, 6)}</div>
+                      )}
                     </Upload>
                     {isEdit && (
                       <Space>
