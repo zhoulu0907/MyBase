@@ -53,7 +53,7 @@
     </appender>
 
     <springProfile name="local,dameng,kingbase,sit">
-        <root level="DEBUG">
+        <root level="INFO">
             <appender-ref ref="STDOUT"/>
             <appender-ref ref="ASYNC"/>
         </root>

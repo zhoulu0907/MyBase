@@ -16,12 +16,13 @@
 package com.cmsr.onebase.framework.uid.worker;
 
 import com.cmsr.onebase.framework.uid.utils.DockerUtils;
-import com.cmsr.onebase.framework.uid.utils.NetUtils;
 import com.cmsr.onebase.framework.uid.worker.dao.WorkerNodeDAO;
 import com.cmsr.onebase.framework.uid.worker.entity.WorkerNodeEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.net.InetAddress;
 
 /**
  * Represents an implementation of {@link WorkerIdAssigner},
@@ -50,7 +51,6 @@ public class DisposableWorkerIdAssigner implements WorkerIdAssigner {
     public long assignWorkerId() {
         // build worker node entity
         WorkerNodeEntity workerNodeEntity = buildWorkerNode();
-
         // add worker node for new (ignore the same IP + PORT)
         workerNodeDAO.addWorkerNode(workerNodeEntity);
         LOGGER.info("Add worker node:{}", workerNodeEntity);
@@ -69,8 +69,11 @@ public class DisposableWorkerIdAssigner implements WorkerIdAssigner {
             workerNodeEntity.setWorkerPort(DockerUtils.getDockerPort());
         } else {
             workerNodeEntity.setNodeType(WorkerNodeType.ACTUAL.value());
-            workerNodeEntity.setWorkerHost(NetUtils.getLocalAddress());
-            workerNodeEntity.setWorkerPort(NetUtils.getLocalHostName());
+            try {
+                workerNodeEntity.setWorkerHost(InetAddress.getLocalHost().getHostAddress());
+                workerNodeEntity.setWorkerPort(InetAddress.getLocalHost().getHostName());
+            } catch (Exception ignored) {
+            }
         }
         return workerNodeEntity;
     }
