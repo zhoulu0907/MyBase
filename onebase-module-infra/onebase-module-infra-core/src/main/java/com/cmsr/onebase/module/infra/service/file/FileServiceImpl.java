@@ -6,8 +6,6 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import cn.hutool.crypto.digest.DigestUtil;
-import com.alibaba.nacos.shaded.com.google.gson.Gson;
-import com.alibaba.nacos.shaded.com.google.gson.reflect.TypeToken;
 import com.cmsr.onebase.framework.common.biz.system.oauth2.OAuth2TokenCommonApi;
 import com.cmsr.onebase.framework.common.biz.system.oauth2.dto.OAuth2AccessTokenCheckRespDTO;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
@@ -33,6 +31,8 @@ import com.cmsr.onebase.module.infra.framework.file.core.utils.LightweightPdfXss
 import com.cmsr.onebase.module.infra.service.file.dto.FileTypeInfo;
 import com.cmsr.onebase.module.infra.service.security.SecurityConfigService;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
