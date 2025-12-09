@@ -123,6 +123,8 @@ public enum RoleCodeEnum {
         add("tenant:info"); // 空间信息
         add("tenant:info:query"); // 空间信息查看
 
+        add("tenant:dict:query"); // 数据字典查看
+
     }};
 
     /**

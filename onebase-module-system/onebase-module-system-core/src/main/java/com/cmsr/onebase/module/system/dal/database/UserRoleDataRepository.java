@@ -134,4 +134,10 @@ public class UserRoleDataRepository extends DataRepository<UserRoleDO> {
         configStore.eq(UserRoleDO.USER_ID, userId);
         return findAllByConfig(configStore);
     }
+
+    public List<UserRoleDO> getRoleByUserIds(List<Long> userIds) {
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.eq(UserRoleDO.USER_ID, userIds);
+        return findAllByConfig(configStore);
+    }
 }
