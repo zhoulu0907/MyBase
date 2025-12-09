@@ -31,9 +31,7 @@ public class CaptchaController {
     @Resource
     private CaptchaService captchaService;
 
-    @Resource
-    @Lazy // 延迟，避免循环依赖报错
-    private UserService userService;
+
 
     @PostMapping({"/get"})
     @Operation(summary = "获得验证码")

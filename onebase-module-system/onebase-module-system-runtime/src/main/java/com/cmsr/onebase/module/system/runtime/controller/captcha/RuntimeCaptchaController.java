@@ -7,6 +7,7 @@ import com.anji.captcha.service.CaptchaService;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
+import com.cmsr.onebase.module.system.vo.captcha.CaptchaReqVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
@@ -51,6 +52,16 @@ public class RuntimeCaptchaController {
             return ip + ua;
         }
         return request.getRemoteAddr() + ua;
+    }
+
+
+    @PostMapping({"/send-captcha-code"})
+    @Operation(summary = "向邮箱/手机发送验证码")
+    @PermitAll
+    @TenantIgnore
+    public CommonResult<Boolean> sendCaptchaCode(@RequestBody CaptchaReqVO reqVO) {
+
+        return success(true);
     }
 
 }
