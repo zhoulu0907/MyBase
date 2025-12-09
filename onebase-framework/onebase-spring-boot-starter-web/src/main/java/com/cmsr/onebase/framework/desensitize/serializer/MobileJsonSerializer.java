@@ -19,6 +19,13 @@ public class MobileJsonSerializer extends JsonSerializer<String> {
      */
     @Override
     public void serialize(String value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+
+        // boolean mobileDesensitize = true;
+        // if(!mobileDesensitize){
+        //     gen.writeString(value);
+        //     return;
+        // }
+
         if (StringUtils.isEmpty(value)) {
             gen.writeString(value);
             return;
