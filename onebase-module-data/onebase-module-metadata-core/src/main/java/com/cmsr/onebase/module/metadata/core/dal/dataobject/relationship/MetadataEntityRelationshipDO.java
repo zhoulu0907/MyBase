@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.core.dal.dataobject.relationship;
 
+import com.cmsr.onebase.framework.orm.entity.BaseBizEntity;
 import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
@@ -15,7 +16,7 @@ import lombok.EqualsAndHashCode;
 @Table(value = "metadata_entity_relationship")
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class MetadataEntityRelationshipDO extends BaseTenantEntity {
+public class MetadataEntityRelationshipDO extends BaseBizEntity {
 
     /**
      * 源实体UUID字段名常量

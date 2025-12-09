@@ -135,46 +135,46 @@ public class DataMethodApiHelper {
         condition.setFieldValue(dataArray);
         switch (operator) {
             case EQUALS -> { // K = V
-                condition.setOperator(SemanticOperatorEnum.EQ);
+                condition.setOperator(SemanticOperatorEnum.EQUALS);
             }
             case NOT_EQUALS -> { // K <> V
-                condition.setOperator(SemanticOperatorEnum.NE);
+                condition.setOperator(SemanticOperatorEnum.NOT_EQUALS);
             }
             case GREATER_THAN -> { // K > V
-                condition.setOperator(SemanticOperatorEnum.GT);
+                condition.setOperator(SemanticOperatorEnum.GREATER_THAN);
             }
             case GREATER_EQUALS -> { // K >= V
-                condition.setOperator(SemanticOperatorEnum.GE);
+                condition.setOperator(SemanticOperatorEnum.GREATER_EQUALS);
             }
             case LESS_THAN -> { // K < V
-                condition.setOperator(SemanticOperatorEnum.LT);
+                condition.setOperator(SemanticOperatorEnum.LESS_THAN);
             }
             case LESS_EQUALS -> { // K <= V
-                condition.setOperator(SemanticOperatorEnum.LE);
+                condition.setOperator(SemanticOperatorEnum.LESS_EQUALS);
             }
             case IS_EMPTY -> { // K IS NULL ;; K = NULL
                 condition.setNodeType(SemanticConditionNodeTypeEnum.CONDITION);
-                condition.setOperator(SemanticOperatorEnum.IS_NULL);
+                condition.setOperator(SemanticOperatorEnum.IS_EMPTY);
                 condition.setFieldValue(null);
             }
             case IS_NOT_EMPTY -> { // K IS NOT NULL ;; K <> NULL
-                condition.setOperator(SemanticOperatorEnum.IS_NOT_NULL);
+                condition.setOperator(SemanticOperatorEnum.IS_NOT_EMPTY);
                 condition.setFieldValue(null);
             }
             case EXISTS_IN -> { // K IN (V...)
-                condition.setOperator(SemanticOperatorEnum.IN);
+                condition.setOperator(SemanticOperatorEnum.EXISTS_IN);
             }
             case NOT_EXISTS_IN -> { // K NOT IN (V...)
-                condition.setOperator(SemanticOperatorEnum.NIN);
+                condition.setOperator(SemanticOperatorEnum.NOT_EXISTS_IN);
             }
             case LATER_THAN -> { // K<TIMESTAMP> > V
-                condition.setOperator(SemanticOperatorEnum.GT);
+                condition.setOperator(SemanticOperatorEnum.GREATER_THAN);
             }
             case EARLIER_THAN -> { // K<TIMESTAMP> < V
-                condition.setOperator(SemanticOperatorEnum.LT);
+                condition.setOperator(SemanticOperatorEnum.LESS_THAN);
             }
             case CONTAINS -> { // K LIKE V
-                condition.setOperator(SemanticOperatorEnum.LIKE);
+                condition.setOperator(SemanticOperatorEnum.CONTAINS);
             }
 //            case NOT_CONTAINS -> { // K NOT LIKE V
 //                condition.setOperator(SemanticOperatorEnum.NOT_LIKE);
@@ -199,11 +199,11 @@ public class DataMethodApiHelper {
                 condition.setCombinator(SemanticCombinatorEnum.AND);
                 SemanticConditionDTO ltCondition = new SemanticConditionDTO();
                 ltCondition.setNodeType(SemanticConditionNodeTypeEnum.CONDITION);
-                ltCondition.setOperator(SemanticOperatorEnum.LT);
+                ltCondition.setOperator(SemanticOperatorEnum.LESS_THAN);
                 ltCondition.setFieldValue(List.of(valueArray.get(1)));
                 SemanticConditionDTO gtCondition = new SemanticConditionDTO();
                 gtCondition.setNodeType(SemanticConditionNodeTypeEnum.CONDITION);
-                gtCondition.setOperator(SemanticOperatorEnum.GT);
+                gtCondition.setOperator(SemanticOperatorEnum.GREATER_THAN);
                 gtCondition.setFieldValue(List.of(valueArray.get(0)));
                 condition.setChildren(List.of(ltCondition, gtCondition));
             }

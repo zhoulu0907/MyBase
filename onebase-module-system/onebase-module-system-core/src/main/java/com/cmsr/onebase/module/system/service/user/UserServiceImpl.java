@@ -37,6 +37,7 @@ import com.cmsr.onebase.module.system.service.permission.RoleService;
 import com.cmsr.onebase.module.system.service.post.PostService;
 import com.cmsr.onebase.module.system.service.tenant.TenantService;
 import com.cmsr.onebase.module.system.vo.auth.AuthRegisterReqVO;
+import com.cmsr.onebase.module.system.vo.dept.DeptSimpleListRespVO;
 import com.cmsr.onebase.module.system.vo.role.RoleInsertReqVO;
 import com.cmsr.onebase.module.system.vo.user.*;
 import com.google.common.annotations.VisibleForTesting;
@@ -763,10 +764,17 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public List<AdminUserDO> getUserListByStatusAndDeptId(Integer status, Long deptId) {
+    public List<AdminUserDO> getUserListByStatusAndDeptId(DeptSimpleListRespVO reqVO) {
         // 获取部门条件：查询指定部门的子部门编号们，包括自身
-        Set<Long> deptIds = getDeptCondition(deptId);
-        return userDataRepository.findAllByStatusAndDeptIds(status, deptIds);
+        Long deptId=reqVO.getDeptId();
+        boolean directFlag= reqVO.getDirectFlag() == null || reqVO.getDirectFlag();
+        Set<Long> deptIds =new HashSet<>();
+        if (directFlag){
+             deptIds.add(deptId);
+        }else{
+             deptIds=  getDeptCondition(deptId);
+        }
+        return userDataRepository.findAllByStatusAndDeptIds(CommonStatusEnum.ENABLE.getStatus(), deptIds);
 
 
     }

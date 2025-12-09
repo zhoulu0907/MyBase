@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.core.dal.database;
 
+import com.cmsr.onebase.framework.orm.repo.BaseBizRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationFormatDO;
 import com.cmsr.onebase.module.metadata.core.dal.mapper.MetadataValidationFormatMapper;
 import com.mybatisflex.core.query.QueryWrapper;
@@ -18,7 +19,7 @@ import java.util.List;
  */
 @Repository
 @Slf4j
-public class MetadataValidationFormatRepository extends ServiceImpl<MetadataValidationFormatMapper, MetadataValidationFormatDO> {
+public class MetadataValidationFormatRepository extends BaseBizRepository<MetadataValidationFormatMapper, MetadataValidationFormatDO> {
 
     /**
      * 根据字段UUID查询格式验证规则列表

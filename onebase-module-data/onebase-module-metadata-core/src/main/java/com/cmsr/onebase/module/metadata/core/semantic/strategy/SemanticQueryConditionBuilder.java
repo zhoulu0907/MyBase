@@ -4,7 +4,9 @@ import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticConditionDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticSortRuleDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticSortDirectionEnum;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticCombinatorEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticConditionNodeTypeEnum;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticOperatorEnum;
 import com.mybatisflex.core.query.QueryColumn;
 import com.mybatisflex.core.query.QueryCondition;
 import com.mybatisflex.core.query.QueryWrapper;
@@ -50,7 +52,7 @@ public class SemanticQueryConditionBuilder {
         boolean markedGroup = cond.getNodeType() == SemanticConditionNodeTypeEnum.GROUP;
         if (markedGroup || (children != null && !children.isEmpty())) {
             QueryCondition group = null;
-            boolean and = cond.getCombinator() == null || cond.getCombinator() == com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticCombinatorEnum.AND;
+            boolean and = cond.getCombinator() == null || cond.getCombinator() == SemanticCombinatorEnum.AND;
             for (SemanticConditionDTO child : children == null ? Collections.<SemanticConditionDTO>emptyList() : children) {
                 QueryCondition childCond = buildQueryCondition(child, fields);
                 if (childCond == null) { continue; }
@@ -66,30 +68,41 @@ public class SemanticQueryConditionBuilder {
         if (name == null) { return null; }
         boolean exists = fields != null && fields.stream().anyMatch(f -> name.equals(f.getFieldName()));
         if (!exists) { return null; }
-        com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticOperatorEnum op = cond.getOperator();
+        SemanticOperatorEnum op = cond.getOperator();
         if (op == null) {
             if (val == null) { return null; }
             return (val instanceof String) ? new QueryColumn(name).like(val) : new QueryColumn(name).eq(val);
-        } else if (op == com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticOperatorEnum.EQ) {
+        } else if (op == SemanticOperatorEnum.EQUALS) {
             return new QueryColumn(name).eq(val);
-        } else if (op == com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticOperatorEnum.NE) {
+        } else if (op == SemanticOperatorEnum.NOT_EQUALS) {
             return new QueryColumn(name).ne(val);
-        } else if (op == com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticOperatorEnum.GT) {
+        } else if (op == SemanticOperatorEnum.GREATER_THAN) {
             return new QueryColumn(name).gt(val);
-        } else if (op == com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticOperatorEnum.GE) {
+        } else if (op == SemanticOperatorEnum.GREATER_EQUALS) {
             return new QueryColumn(name).ge(val);
-        } else if (op == com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticOperatorEnum.LT) {
+        } else if (op == SemanticOperatorEnum.LESS_THAN) {
             return new QueryColumn(name).lt(val);
-        } else if (op == com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticOperatorEnum.LE) {
+        } else if (op == SemanticOperatorEnum.LESS_EQUALS) {
             return new QueryColumn(name).le(val);
-        } else if (op == com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticOperatorEnum.LIKE) {
+        } else if (op == SemanticOperatorEnum.CONTAINS) {
             return new QueryColumn(name).like(val);
-        } else if (op == com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticOperatorEnum.IN) {
+        } else if (op == SemanticOperatorEnum.EXISTS_IN) {
             if (values != null && !values.isEmpty()) { return new QueryColumn(name).in(values); }
             return null;
-        } else if (op == com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticOperatorEnum.NIN) {
+        } else if (op == SemanticOperatorEnum.NOT_EXISTS_IN) {
             if (values != null && !values.isEmpty()) { return new QueryColumn(name).notIn(values); }
             return null;
+        } else if (op == SemanticOperatorEnum.NOT_CONTAINS) {
+            if (val == null) { return null; }
+            return new QueryColumn(name).notLike(val);
+        } else if (op == SemanticOperatorEnum.IS_EMPTY) {
+            QueryCondition c1 = new QueryColumn(name).isNull();
+            QueryCondition c2 = new QueryColumn(name).eq("");
+            return c1.or(c2);
+        } else if (op == SemanticOperatorEnum.IS_NOT_EMPTY) {
+            QueryCondition c1 = new QueryColumn(name).isNotNull();
+            QueryCondition c2 = new QueryColumn(name).ne("");
+            return c1.and(c2);
         } else {
             if (val == null) { return null; }
             return (val instanceof String) ? new QueryColumn(name).like(val) : new QueryColumn(name).eq(val);

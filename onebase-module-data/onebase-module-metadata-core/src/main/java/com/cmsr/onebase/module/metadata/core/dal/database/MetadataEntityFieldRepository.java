@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.core.dal.database;
 
+import com.cmsr.onebase.framework.orm.repo.BaseBizRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.mapper.MetadataEntityFieldMapper;
 import com.mybatisflex.core.query.QueryWrapper;
@@ -19,7 +20,7 @@ import java.util.List;
  */
 @Repository
 @Slf4j
-public class MetadataEntityFieldRepository extends ServiceImpl<MetadataEntityFieldMapper, MetadataEntityFieldDO> {
+public class MetadataEntityFieldRepository extends BaseBizRepository<MetadataEntityFieldMapper, MetadataEntityFieldDO> {
 
     /**
      * 根据ID查询实体字段

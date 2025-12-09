@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.infra.platform.controller.file;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import cn.hutool.core.io.IoUtil;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.infra.dal.vo.file.file.*;
 import com.cmsr.onebase.module.infra.enums.file.FileVisitModeEnum;
 import io.swagger.v3.oas.annotations.Operation;
@@ -46,6 +47,7 @@ public class PlatformFileController {
     @GetMapping("/download/{id}")
     @Operation(summary = "获取文件内容")
     @PermitAll
+    @TenantIgnore
     @Parameter(name = "id", description = "文件编号", required = true)
     public void getFileContent(@PathVariable("id") Long id, HttpServletRequest request, HttpServletResponse response) throws Exception {
         fileService.getFileContent(id, request, response, null);
