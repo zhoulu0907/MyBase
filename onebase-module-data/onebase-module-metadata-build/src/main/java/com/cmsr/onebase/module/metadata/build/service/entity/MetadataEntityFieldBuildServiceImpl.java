@@ -2672,8 +2672,9 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             vo.setAutoNumberConfig(full);
         }
 
-        // 填充数据选择配置
-        if ("DATA_SELECTION".equalsIgnoreCase(field.getFieldType())) {
+        // 填充数据选择配置（单选和多选都需要）
+        if ("DATA_SELECTION".equalsIgnoreCase(field.getFieldType()) || 
+            "MULTI_DATA_SELECTION".equalsIgnoreCase(field.getFieldType())) {
             DataSelectionConfig dataSelectionConfig = buildDataSelectionConfig(field);
             if (dataSelectionConfig != null) {
                 vo.setDataSelectionConfig(dataSelectionConfig);
@@ -2693,28 +2694,43 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         }
 
         // 使用 findBySourceEntityUuidAndTargetEntityUuid 方法查询关系
+        // 当前实体是source，查询以当前实体为source的关系
         List<MetadataEntityRelationshipDO> relationships = metadataEntityRelationshipBuildService
-                .findBySourceEntityUuidAndTargetEntityUuid(null, field.getEntityUuid());
+                .findBySourceEntityUuidAndTargetEntityUuid(field.getEntityUuid(), null);
         
-        // 过滤出 targetFieldId 匹配的关系
+        // 过滤出 sourceFieldUuid 匹配当前字段的关系
         MetadataEntityRelationshipDO relationship = null;
         if (relationships != null) {
             for (MetadataEntityRelationshipDO rel : relationships) {
-                if (rel.getTargetFieldUuid() != null && rel.getTargetFieldUuid().equals(field.getFieldUuid())) {
+                if (rel.getSourceFieldUuid() != null && rel.getSourceFieldUuid().equals(field.getFieldUuid())) {
                     relationship = rel;
                     break;
                 }
             }
         }
         
-        if (relationship == null || relationship.getSourceEntityUuid() == null || relationship.getSourceFieldUuid() == null) {
+        if (relationship == null || relationship.getTargetEntityUuid() == null || relationship.getSelectFieldUuid() == null) {
             return null;
         }
 
+        // 构建返回数据
+        // 关系存储：source=当前实体, target=被选择实体, selectField=展示字段
+        // 前端需要：targetEntityUuid=被选择实体, targetFieldUuid=展示字段
         DataSelectionConfig dataSelectionConfig = new DataSelectionConfig();
         dataSelectionConfig.setRelationId(relationship.getId());
-        dataSelectionConfig.setTargetEntityUuid(relationship.getSourceEntityUuid());
-        dataSelectionConfig.setTargetFieldUuid(relationship.getSourceFieldUuid());
+        dataSelectionConfig.setTargetEntityUuid(relationship.getTargetEntityUuid());
+        dataSelectionConfig.setTargetFieldUuid(relationship.getSelectFieldUuid());
+        
+        // 同时提供ID格式，兼容前端
+        try {
+            Long targetEntityId = idUuidConverter.toEntityId(relationship.getTargetEntityUuid());
+            Long targetFieldId = idUuidConverter.toFieldId(relationship.getSelectFieldUuid());
+            dataSelectionConfig.setTargetEntityId(targetEntityId);
+            dataSelectionConfig.setTargetFieldId(targetFieldId);
+        } catch (Exception e) {
+            log.warn("转换UUID到ID失败: {}", e.getMessage());
+        }
+        
         return dataSelectionConfig;
     }
 
