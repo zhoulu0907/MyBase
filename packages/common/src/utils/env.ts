@@ -20,3 +20,7 @@ export const getSignatureConfig = (): { appKey: string; appSecret: string } => {
   const appSecret = (window as any).global_config?.APP_SECRET;
   return { appKey, appSecret };
 };
+
+export const getPublicKey = (): string => {
+  return (window as any).global_config?.PUBLIC_KEY;
+};

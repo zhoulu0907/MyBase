@@ -6,6 +6,7 @@ import {
   RuntimeAccountLoginRequest,
   RuntimeCorpLoginRequest,
   RuntimeMobileLoginRequest,
+  SendVerifyCodeRequest,
   TenantLoginRequest
 } from '../types';
 import { platformService, runtimeService, systemService } from './clients';
@@ -38,6 +39,8 @@ export const runtimeCorpLogin = (req: RuntimeCorpLoginRequest, headers: Headers)
   return runtimeService.post('/auth/corp-login', req, { headers });
 };
 
+// TODO(mickey): 重构合并
+
 export const platformLogout = () => {
   return platformService.post('/auth/logout');
 };
@@ -48,6 +51,10 @@ export const systemLogout = () => {
 
 export const runtimeLogout = () => {
   return runtimeService.post('/auth/logout');
+};
+
+export const sendVerifyCodeApi = (data: SendVerifyCodeRequest) => {
+  return systemService.post('/auth/send-verify-code', data);
 };
 
 // 获取验证码 /system/captcha/get

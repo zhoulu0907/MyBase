@@ -1,4 +1,5 @@
 export * from './base';
+export * from './crypto';
 export * from './date';
 export * from './env';
 export * from './fingerprint';

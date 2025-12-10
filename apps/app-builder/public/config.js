@@ -12,5 +12,8 @@ window.global_config = {
   // BASE_URL: 'http://s25029301301.sit.internal.virtueit.net:81/v1-snapshot/onebaseserver/admin-api',
   // RUNTIME_BASE_URL: 'http://s25029301301.sit.internal.virtueit.net:81/v1-snapshot/onebaseserverruntime/runtime',
   RUNTIME_URL: 'http://localhost:9527',
-  MOBILE_EDITOR_URL: '//localhost:4400'
+  MOBILE_EDITOR_URL: '//localhost:4400',
+
+  PUBLIC_KEY:
+    '045efee7520c3ed4b3c6bb75424a3ae25039e25bd859731a1f6464cb7e5f7dfb419bcba55cc6adfb7f3e224a6e8949709a3664ff2dc4b822f50ee77bbd64ce3946'
 };

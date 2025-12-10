@@ -8,6 +8,9 @@ window.global_config = {
   PLATFORM_BASE_URL: 'http://s25029301301.dev.internal.virtueit.net:81/v1-snapshot/onebaseserver/platform',
   RESOURCE_URL:
     'http://s25029301301.dev.internal.virtueit.net:81/v1-snapshot/onebaseserver/platform/infra/file/download',
-  PLATFORM_FE_URL: 'http://localhost:4399'
+  PLATFORM_FE_URL: 'http://localhost:4399',
   //   PLATFORM_FE_URL: 'http://s25029301301.dev.internal.virtueit.net:81/v0/obappbuilder/'
+
+  PUBLIC_KEY:
+    '045efee7520c3ed4b3c6bb75424a3ae25039e25bd859731a1f6464cb7e5f7dfb419bcba55cc6adfb7f3e224a6e8949709a3664ff2dc4b822f50ee77bbd64ce3946'
 };
