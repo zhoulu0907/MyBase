@@ -221,13 +221,14 @@ const XLoadMore = memo(
               }
             }
 
-            // 人员选择单选 TODO
+            // 人员选择单选
             const userSelectField = mainMetaData.parentFields.find(
-              (field: AppEntityField) => field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.USER.VALUE
+              (field: AppEntityField) =>
+                field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.USER.VALUE
             );
             if (userSelectField && newItem[key]) {
               if (newItem[key]) {
-                newItem[key] = newItem[key].userName;
+                newItem[key] = newItem[key].name;
               }
             }
 
@@ -237,7 +238,7 @@ const XLoadMore = memo(
                 field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.DEPARTMENT.VALUE
             );
             if (departmentField && newItem[key]) {
-              newItem[key] = newItem[key].deptName || '-';
+              newItem[key] = newItem[key].name || '-';
             }
 
             // 开关
@@ -255,7 +256,7 @@ const XLoadMore = memo(
                 field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.SELECT.VALUE
             );
             if (selectField) {
-              newItem[key] = newItem[key].name || '-'
+              newItem[key] = newItem[key].id || '-'
             }
           }
         });

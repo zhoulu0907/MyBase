@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useState, useTransition } from 'react';
+import { memo, useCallback, useEffect, useState } from 'react';
 import { debounce } from 'lodash-es';
 import { IconArrowBack } from '@arco-design/mobile-react/esm/icon';
 import { PopupSwiper, Cell, SearchBar, Radio, Button, Checkbox, Avatar, Form, Loading, Ellipsis } from '@arco-design/mobile-react';
@@ -23,13 +23,12 @@ const squareIcon = {
 }
 
 const XDeptSelect = memo((props: XDeptSelectConfig & { runtime?: boolean; detailMode?: boolean; isMultiple: boolean; form?: any;}) => {
-  const { label, dataField, status, verify, layout, runtime = true, form, isMultiple = false } = props;
-
+  const { label, dataField, status, verify, layout, runtime = true, isMultiple = false, form } = props;
   const [visible, setVisible] = useState(false);
   const [popupDirection] = useState<'bottom' | 'top' | 'left' | 'right'>('bottom');
 
   const [loading, setLoading] = useState(false);
-  const [isPending, startTransition] = useTransition();
+
   // 选中值（单选）
   const [deptData, setDeptData] = useState<any>(); // 部门数据
   const [selectedMembers, setSelectedMembers] = useState<any[]>([]); // 已经选中的数据
@@ -40,16 +39,17 @@ const XDeptSelect = memo((props: XDeptSelectConfig & { runtime?: boolean; detail
   const renderData = formatDeptAndUsers(deptData);
 
   const fieldId = dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.DEPT_SELECT}_${props.id}`;
-  const formData = form?.getFieldValue(fieldId);
 
   useEffect(() => {
-    visible && getDeptUsers({});
-  }, [visible]);
+    !deptData && getDeptUsers({});
+  }, [deptData]);
 
   useEffect(() => {
-    console.log('formData', formData);
-    visible && formData && setSelectedKeys([formData]);
-  }, [selectedMembers, visible]);
+    setTimeout(() => {
+      const formData = form?.getFieldValue(fieldId);
+      formData && setSelectedKeys([formData.id]);
+    }, 500);
+  }, [selectedMembers]);
 
   const handleCancel = (e: any) => {
     e.stopPropagation();
@@ -62,7 +62,7 @@ const XDeptSelect = memo((props: XDeptSelectConfig & { runtime?: boolean; detail
     if (!selectedKeys.length) return;
 
     const curSelectDept = getDeptData(deptData?.deptList, selectedKeys);
-    console.log({ isMultiple, selectedKeys, curSelectDept });
+    // console.log({ isMultiple, selectedKeys, curSelectDept, fieldId });
     form?.setFieldValue(fieldId, curSelectDept);
     setVisible(false);
   };
@@ -86,8 +86,8 @@ const XDeptSelect = memo((props: XDeptSelectConfig & { runtime?: boolean; detail
       };
       setLoading(true);
       const res = await getDeptUser(params);
+      setDeptData(res);
       setLoading(false);
-      startTransition(() => setDeptData(res));
     } catch (error) {
       console.error('获取部门信息 error:', error);
     } finally {
@@ -129,7 +129,7 @@ const XDeptSelect = memo((props: XDeptSelectConfig & { runtime?: boolean; detail
         className={styles.deptCell}
         onClick={() => setVisible(true)}
       >
-        {!!selectedParseDeptName ? <Ellipsis className={styles.selectValue} text={selectedParseDeptName} maxLine={1} /> : <div style={{ color: '#c9cdd4', fontSize: '0.32rem', textAlign: 'right' }}>请选择</div>}
+        {selectedParseDeptName ? <Ellipsis className={styles.selectValue} text={selectedParseDeptName} maxLine={1} /> : <div style={{ color: '#c9cdd4', fontSize: '0.32rem', textAlign: 'right' }}>请选择</div>}
         <PopupSwiper visible={visible} close={(e) => handleCancel(e)} direction={popupDirection}>
           <div className={styles.inputDeptSelectPopupContainer}>
             <div className={styles.popupHeaderOBMobile}>
@@ -156,11 +156,11 @@ const XDeptSelect = memo((props: XDeptSelectConfig & { runtime?: boolean; detail
             </div>
 
             <div className={styles.container}>
-              {(isPending || loading) && <LoadingComp />}
-              {!loading && !isPending && renderData?.children?.length === 0 && (
+              {loading && <LoadingComp />}
+              {!loading && renderData?.children?.length === 0 && (
                 <div className={styles.empty}>暂无数据</div>
               )}
-              {!loading && !isPending && renderData?.children?.length > 0 && renderData?.children.map((item: any) =>
+              {!loading && renderData?.children?.length > 0 && renderData?.children.map((item: any) =>
                 <div
                   key={`dept-${item.key}`}
                   className={styles.item}

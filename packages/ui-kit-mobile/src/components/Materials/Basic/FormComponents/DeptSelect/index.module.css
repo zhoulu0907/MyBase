@@ -1,7 +1,9 @@
 .deptCell {
+  padding-right: 0;
   .selectValue {
     text-align: right;
   }
+
   :global(.cell-content) {
     display: block;
   }

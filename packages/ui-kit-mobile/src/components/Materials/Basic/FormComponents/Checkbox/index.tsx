@@ -33,7 +33,7 @@ const XCheckbox = memo((props: XCheckboxConfig & { runtime?: boolean; detailMode
     detailMode
   } = props;
 
-  const fieldId = dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.SELECT_MUTIPLE}_${nanoid()}`
+  const fieldId = dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.CHECKBOX}_${nanoid()}`
 
   // 根据是否为只读模式确定内容
   const renderContent = () => {

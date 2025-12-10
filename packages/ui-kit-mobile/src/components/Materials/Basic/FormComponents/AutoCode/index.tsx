@@ -20,7 +20,7 @@ const XautoCode = memo((props: XautoCodeConfig & { runtime?: boolean; detailMode
   // 生成唯一的字段ID
   const fieldId = dataField && dataField.length > 0
     ? dataField[dataField.length - 1]
-    : `${FORM_COMPONENT_TYPES.INPUT_EMAIL}_${nanoid()}`;
+    : `${FORM_COMPONENT_TYPES.AUTO_CODE}_${nanoid()}`;
 
   return (
       <Form.Item

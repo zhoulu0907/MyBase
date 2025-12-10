@@ -7,7 +7,7 @@ import { FORM_COMPONENT_TYPES, DATE_OPTIONS, DATE_VALUES, STATUS_OPTIONS, STATUS
 type XDatePickerConfig = typeof FormSchema.XDatePickerSchema.config;
 import '../index.css';
 
-const XDatePicker = memo((props: XDatePickerConfig & { runtime?: boolean; detailMode?: boolean; form?: any }) => {
+const XDatePicker = memo((props: XDatePickerConfig & { runtime?: boolean; detailMode?: boolean; }) => {
   const {
     label,
     dataField,
@@ -18,13 +18,12 @@ const XDatePicker = memo((props: XDatePickerConfig & { runtime?: boolean; detail
     layout,
     runtime = true,
     detailMode,
-    form,
     defaultValueConfig
   } = props;
   console.warn('XDatePicker====props====', props);
 
   // 生成唯一的字段ID
-    const fieldId = dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.DATE_PICKER}_${nanoid()}`
+  const fieldId = dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.DATE_PICKER}_${nanoid()}`
 
   const currentDateType = dateType || DATE_VALUES[DATE_OPTIONS.DATE];
 

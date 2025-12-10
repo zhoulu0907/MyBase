@@ -27,7 +27,7 @@ const XDateRangePicker = memo((props: XDateRangePickerConfig & { runtime?: boole
   // 生成唯一的字段ID
   const fieldId = dataField && dataField.length > 0
     ? dataField[dataField.length - 1]
-    : `${FORM_COMPONENT_TYPES.INPUT_TEXT}_${nanoid()}`;
+    : `${FORM_COMPONENT_TYPES.DATE_RANGE_PICKER}_${nanoid()}`;
 
   // 根据是否为只读模式确定内容
   const renderContent = () => {

@@ -145,7 +145,7 @@ export default function EditorWorkspace() {
 
     const mobileEditorDrag = loadMicroApp({
       name: "mobile-editor-drag-list",
-      entry: "//localhost:4401",
+      entry: window.global_config.MOBILE_EDITOR_URL,
       container: "#mobile-editor-drag-list",
       props: {
         onGlobalStateChange: qiankunActions.onGlobalStateChange,
