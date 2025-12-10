@@ -49,7 +49,7 @@ public class FlowProcessRepository extends BaseBizRepository<FlowProcessMapper, 
                 .where(FLOW_PROCESS.PROCESS_NAME.like(reqVO.getProcessName()).when(StringUtils.isNotEmpty(reqVO.getProcessName())))
                 .where(FLOW_PROCESS.ENABLE_STATUS.eq(reqVO.getEnableStatus()).when(reqVO.getEnableStatus() != null))
                 .where(FLOW_PROCESS.TRIGGER_TYPE.eq(reqVO.getTriggerType()).when(StringUtils.isNotEmpty(reqVO.getTriggerType())))
-                .orderBy(FLOW_PROCESS.UPDATE_TIME, false);
+                .orderBy(FLOW_PROCESS.PROCESS_NAME, true);
         Page page = new Page<>(reqVO.getPageNo(), reqVO.getPageSize());
         Page<FlowProcessDO> pageData = this.page(page, query);
         return new PageResult(pageData.getRecords(), pageData.getTotalRow());

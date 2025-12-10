@@ -86,8 +86,12 @@ public class AppAuthSecurityApiImpl implements AppAuthSecurityApi {
             operationPermission.allDeny();
             return operationPermission;
         }
-        Set<Long> roleIds = userRoleDTO.getRoleIds();
-        List<AppAuthPermissionDO> permissionDOs = appAuthPermissionProvider.findPermissions(applicationId, roleIds, menuId);
+        //
+        Set<String> roleUuids = userRoleDTO.getRoleUuids();
+        AppMenuDO appMenuDO = appMenuProvider.findByMenuId(menuId);
+        String menuUuid = appMenuDO.getMenuUuid();
+        //
+        List<AppAuthPermissionDO> permissionDOs = appAuthPermissionProvider.findPermissions(applicationId, roleUuids, menuUuid);
         for (AppAuthPermissionDO permissionDO : permissionDOs) {
             if (NumberUtils.INTEGER_ONE.equals(permissionDO.getIsPageAllowed())) {
                 operationPermission.setPageAllowed(true);
@@ -140,8 +144,11 @@ public class AppAuthSecurityApiImpl implements AppAuthSecurityApi {
             return dataPermission;
         }
         //
-        Set<Long> roleIds = userRoleDTO.getRoleIds();
-        List<DataPermissionGroup> dataGroups = appAuthDataGroupProvider.findDataGroups(applicationId, roleIds, menuId);
+        Set<String> roleUuids = userRoleDTO.getRoleUuids();
+        AppMenuDO appMenuDO = appMenuProvider.findByMenuId(menuId);
+        String menuUuid = appMenuDO.getMenuUuid();
+        //
+        List<DataPermissionGroup> dataGroups = appAuthDataGroupProvider.findDataGroups(applicationId, roleUuids, menuUuid);
         dataPermission.setGroups(dataGroups);
         dataPermission.setAllAllowed(false);
         dataPermission.setAllDenied(false);
@@ -181,8 +188,12 @@ public class AppAuthSecurityApiImpl implements AppAuthSecurityApi {
             fieldPermission.setAllDenied(true);
             return fieldPermission;
         }
-        Set<Long> roleIds = userRoleDTO.getRoleIds();
-        List<FieldPermissionItem> fields = appAuthFieldProvider.findFields(applicationId, roleIds, menuId);
+        //
+        Set<String> roleUuids = userRoleDTO.getRoleUuids();
+        AppMenuDO appMenuDO = appMenuProvider.findByMenuId(menuId);
+        String menuUuid = appMenuDO.getMenuUuid();
+        //
+        List<FieldPermissionItem> fields = appAuthFieldProvider.findFields(applicationId, roleUuids, menuUuid);
         fieldPermission.setAllAllowed(false);
         fieldPermission.setAllDenied(false);
         fieldPermission.setFields(fields);

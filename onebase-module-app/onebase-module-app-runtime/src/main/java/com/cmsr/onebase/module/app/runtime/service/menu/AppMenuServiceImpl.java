@@ -21,6 +21,7 @@ import jakarta.annotation.Resource;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,17 +85,11 @@ public class AppMenuServiceImpl implements AppMenuService {
         Long userId = RTSecurityContext.getRequiredUserId();
         Long applicationId = ApplicationManager.getRequiredApplicationId();
         UserRoleDTO userRoleDTO = appAuthRoleProvider.findUserRoleByApplication(userId, applicationId);
-        List<AppMenuDO> menuDOS;
-        if (userRoleDTO.isAdminRole()) {
-            menuDOS = appMenuRepository.findVisibleByAppId(applicationId,
-                    Set.of(MenuTypeEnum.PAGE.getValue(), MenuTypeEnum.GROUP.getValue()));
-        } else {
-            Set<String> menuUuids = findVisibleMenuUuids(applicationId, userRoleDTO.getRoleIds());
-            if (CollectionUtils.isEmpty(menuUuids)) {
-                return Collections.emptyList();
-            }
-            menuDOS = appMenuRepository.findVisibleByAppIdAndMenuIds(applicationId, menuUuids,
-                    Set.of(MenuTypeEnum.PAGE.getValue(), MenuTypeEnum.GROUP.getValue()));
+        List<AppMenuDO> menuDOS = appMenuRepository.findVisibleByAppId(applicationId,
+                Set.of(MenuTypeEnum.PAGE.getValue(), MenuTypeEnum.GROUP.getValue()));
+        if (!userRoleDTO.isAdminRole()) {
+            Set<String> blackMenuUuids = findBlackMenuUuids(applicationId, userRoleDTO.getRoleUuids());
+            menuDOS = menuDOS.stream().filter(v -> !blackMenuUuids.contains(v.getMenuUuid())).toList();
         }
         if (CollectionUtils.isEmpty(menuDOS)) {
             return Collections.emptyList();
@@ -150,11 +145,12 @@ public class AppMenuServiceImpl implements AppMenuService {
         return children.isEmpty() ? null : children;
     }
 
-    private Set<String> findVisibleMenuUuids(Long applicationId, Set<Long> roleIds) {
-        List<AppAuthPermissionDO> permissions = appAuthPermissionProvider.findPermissions(applicationId, roleIds);
+    private Set<String> findBlackMenuUuids(Long applicationId, Set<String> roleUuids) {
+        List<AppAuthPermissionDO> permissions = appAuthPermissionProvider.findPermissions(applicationId, roleUuids);
         Set<String> result = new HashSet<>();
         for (AppAuthPermissionDO permission : permissions) {
-            if (NumberUtils.INTEGER_ONE.equals(permission.getIsPageAllowed()))
+            if (NumberUtils.INTEGER_ZERO.equals(permission.getIsPageAllowed())
+                    && StringUtils.isNotEmpty(permission.getMenuUuid()))
                 result.add(permission.getMenuUuid());
         }
         return result;

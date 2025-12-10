@@ -3,15 +3,16 @@ package com.cmsr.onebase.module.flow.component.data;
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.module.flow.component.SkippableNodeComponent;
 import com.cmsr.onebase.module.flow.component.utils.VariableProvider;
-import com.cmsr.onebase.module.flow.context.provider.ConditionsProvider;
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
 import com.cmsr.onebase.module.flow.context.VariableContext;
 import com.cmsr.onebase.module.flow.context.condition.Conditions;
 import com.cmsr.onebase.module.flow.context.express.OrExpression;
 import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
 import com.cmsr.onebase.module.flow.context.graph.nodes.DataDeleteeNodeData;
+import com.cmsr.onebase.module.flow.context.provider.ConditionsProvider;
 import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticTargetConditionVO;
+import com.mybatisflex.core.tenant.TenantManager;
 import com.yomahub.liteflow.annotation.LiteflowComponent;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -47,23 +48,18 @@ public class DataDeleteNodeComponent extends SkippableNodeComponent {
         //
         List<Conditions> conditions = nodeData.getFilterCondition();
         OrExpression orExpression = conditionsProvider.formatConditionsForValue(conditions, expressionContext);
-
+        //
         SemanticTargetConditionVO reqDTO = new SemanticTargetConditionVO();
         reqDTO.setTraceId(executeContext.getTraceId());
-        if (StringUtils.equalsIgnoreCase("mainTable", nodeData.getDataType())) {
-            reqDTO.setTableName(nodeData.getMainTableName());
-        } else if (StringUtils.equalsIgnoreCase("subTable", nodeData.getDataType())) {
-            reqDTO.setTableName(nodeData.getSubTableName());
-        } else {
-            throw new IllegalArgumentException("dataType 类型错误: " + nodeData.getDataType());
-        }
+        reqDTO.setTableName(nodeData.resolveTargetTableName());
         if (!StringUtils.equalsIgnoreCase("all", nodeData.getFilterType())) {
             reqDTO.setSemanticConditionDTO(DataMethodApiHelper.processFilterCondition(orExpression));
         }
-        Integer result = ApplicationManager.withApplicationIdAndVersionTag(
+        Integer result = TenantManager.withoutTenantCondition(() -> ApplicationManager.withApplicationIdAndVersionTag(
                 executeContext.getApplicationId(),
                 executeContext.getVersionTag(),
-                () -> semanticDynamicDataApi.deleteDataByCondition(reqDTO));
+                () -> semanticDynamicDataApi.deleteDataByCondition(reqDTO)
+        ));
         executeContext.addLog("数据删除节点, 删除数量: " + result);
     }
 

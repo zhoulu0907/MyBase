@@ -1,15 +1,15 @@
 package com.cmsr.onebase.module.flow.runtime.service;
 
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
+import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.app.api.appresource.AppResourceApi;
-import com.cmsr.onebase.module.app.api.appresource.dto.PageRespDTO;
 import com.cmsr.onebase.module.flow.context.condition.ConditionsSupport;
 import com.cmsr.onebase.module.flow.context.enums.FieldTypeConvertor;
 import com.cmsr.onebase.module.flow.context.express.ExpressionExecutor;
 import com.cmsr.onebase.module.flow.context.express.OrExpression;
 import com.cmsr.onebase.module.flow.context.graph.nodes.ModalNodeData;
 import com.cmsr.onebase.module.flow.context.graph.nodes.StartFormNodeData;
+import com.cmsr.onebase.module.flow.core.flow.ExecutorInput;
 import com.cmsr.onebase.module.flow.core.flow.ExecutorResult;
 import com.cmsr.onebase.module.flow.core.flow.FlowProcessExecutor;
 import com.cmsr.onebase.module.flow.core.graph.FlowProcessCache;
@@ -17,10 +17,12 @@ import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
 import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerReqVO;
 import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerRespVO;
 import com.cmsr.onebase.module.flow.runtime.vo.QueryFormTriggerRespVO;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,17 +45,13 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
     @Autowired
     private FlowProcessExecutor flowProcessExecutor;
 
-    @Autowired
-    private AppResourceApi appResourceApi;
 
     private ExpressionExecutor expressionExecutor = new ExpressionExecutor();
 
     @Override
     public List<QueryFormTriggerRespVO> queryFormTrigger(Long pageId) {
         Long applicationId = ApplicationManager.getApplicationId();
-        PageRespDTO pageRespDTO = appResourceApi.findPageByPageId(pageId);
-        String pageUuid = pageRespDTO.getPageUuid();
-        List<StartFormNodeData> startFormNodeDataList = FlowProcessCache.findStartFormNodeDataByPageUuid(applicationId, pageUuid);
+        List<StartFormNodeData> startFormNodeDataList = FlowProcessCache.findStartFormNodeDataByPageId(applicationId, pageId);
         return startFormNodeDataList.stream()
                 .map(startFormNodeData -> BeanUtils.toBean(startFormNodeData, QueryFormTriggerRespVO.class))
                 .toList();
@@ -67,12 +65,10 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
             vo.setMessage("流程不存在");
             return vo;
         }
-        Map<String, Object> inputMap = Collections.emptyMap();
-        if (CollectionUtils.isNotEmpty(reqVO.getInputFields())) {
-            inputMap = convertInputFieldsData(reqVO.getInputFields());
-        }
         try {
             if (StringUtils.isEmpty(reqVO.getExecutionUuid())) {
+                // 前端正常的触发逻辑用于表单数据 提交数据前触发
+                Map<String, Object> inputMap = convertInputParamsData(reqVO.getInputParams(), startFormNodeData.getFieldSchemaMap());
                 boolean isTrigger = true;
                 if (CollectionUtils.isNotEmpty(startFormNodeData.getFilterCondition())) {
                     OrExpression orExpression = ConditionsSupport.convertToOrExpresses(startFormNodeData.getFilterCondition());
@@ -83,12 +79,25 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
                     vo.setMessage("表单不满足触发条件");
                     return vo;
                 } else {
-                    //TODO 增加记录调用的用户id
-                    ExecutorResult executorResult = flowProcessExecutor.execute(FlowUtils.generateTraceId(), reqVO.getProcessId(), inputMap);
+                    Long loginUserId = SecurityFrameworkUtils.getLoginUserId();
+                    ExecutorInput executorInput = new ExecutorInput();
+                    executorInput.setTraceId(FlowUtils.generateTraceId());
+                    executorInput.setProcessId(reqVO.getProcessId());
+                    executorInput.setInputParams(inputMap);
+                    executorInput.setTriggerUserId(loginUserId);
+                    ExecutorResult executorResult = flowProcessExecutor.startExecution(executorInput);
                     return formTriggerRespVO(executorResult);
                 }
             } else {
-                ExecutorResult executorResult = flowProcessExecutor.execute(reqVO.getProcessId(), reqVO.getExecutionUuid(), inputMap);
+                // 前端二次触发，用于表单信息收集等节点流程的继续执行
+                Long loginUserId = SecurityFrameworkUtils.getLoginUserId();
+                Map<String, Object> inputMap = convertInputFieldsData(reqVO.getInputFields());
+                ExecutorInput executorInput = new ExecutorInput();
+                executorInput.setProcessId(reqVO.getProcessId());
+                executorInput.setExecutionUuid(reqVO.getExecutionUuid());
+                executorInput.setInputParams(inputMap);
+                executorInput.setTriggerUserId(loginUserId);
+                ExecutorResult executorResult = flowProcessExecutor.resumeExecution(executorInput);
                 return formTriggerRespVO(executorResult);
             }
         } catch (Exception e) {
@@ -100,7 +109,31 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
         }
     }
 
+    private Map<String, Object> convertInputParamsData(Map<String, Object> inputParams, Map<String, SemanticFieldSchemaDTO> fieldSchemaMap) {
+        if (MapUtils.isEmpty(inputParams)) {
+            return Collections.emptyMap();
+        }
+        Map<String, Object> result = new HashMap<>();
+        for (Map.Entry<String, Object> entry : inputParams.entrySet()) {
+            String fieldName = entry.getKey();
+            Object value = entry.getValue();
+            SemanticFieldSchemaDTO fieldSchema = fieldSchemaMap.get(fieldName);
+            SemanticFieldTypeEnum fieldTypeEnum;
+            if (fieldSchema == null) {
+                fieldTypeEnum = SemanticFieldTypeEnum.TEXT;
+            } else {
+                fieldTypeEnum = fieldSchema.getFieldTypeEnum();
+            }
+            Object convertValue = FieldTypeConvertor.convert(fieldTypeEnum, value);
+            result.put(fieldName, convertValue);
+        }
+        return result;
+    }
+
     private Map<String, Object> convertInputFieldsData(List<ModalNodeData.Field> inputFields) {
+        if (CollectionUtils.isEmpty(inputFields)) {
+            return Collections.emptyMap();
+        }
         Map<String, Object> result = new HashMap<>();
         for (ModalNodeData.Field field : inputFields) {
             SemanticFieldTypeEnum fieldTypeEnum = SemanticFieldTypeEnum.ofCode(field.getFieldType());

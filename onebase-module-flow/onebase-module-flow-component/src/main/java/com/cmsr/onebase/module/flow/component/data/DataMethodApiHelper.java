@@ -1,10 +1,12 @@
 package com.cmsr.onebase.module.flow.component.data;
 
+import com.cmsr.onebase.module.flow.context.ExecuteContext;
 import com.cmsr.onebase.module.flow.context.condition.SortItem;
 import com.cmsr.onebase.module.flow.context.enums.OpEnum;
 import com.cmsr.onebase.module.flow.context.express.AndExpression;
 import com.cmsr.onebase.module.flow.context.express.ExpressionItem;
 import com.cmsr.onebase.module.flow.context.express.OrExpression;
+import com.cmsr.onebase.module.metadata.core.semantic.constants.SystemFieldConstants;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticConditionDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntityValueDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldValueDTO;
@@ -14,6 +16,8 @@ import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticConditio
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticOperatorEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticSortDirectionEnum;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang.StringUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -111,105 +115,101 @@ public class DataMethodApiHelper {
         if (expressionItem == null) {
             return null;
         }
-        String fieldName = expressionItem.getFieldKey();
+        String fieldName = convertToFieldName(expressionItem.getFieldKey());
         OpEnum operator = expressionItem.getOp();
         Object itemValue = expressionItem.getFieldValue();
-        List<Object> dataArray = new ArrayList<>();
+        List<Object> fieldValue = new ArrayList<>();
         // 保持最终的输出值是一个列表对象:
         //        obj => array<obj>
         // array<obj> => array<obj>
-        if (itemValue instanceof List<?> itemArray) {
-            dataArray.addAll(itemArray);
-        } else {
-            dataArray.add(itemValue);
+        if (itemValue != null) {
+            if (itemValue instanceof List<?> valueList) {
+                fieldValue.addAll(valueList);
+            } else {
+                fieldValue.add(itemValue);
+            }
         }
-        SemanticConditionDTO condition = extractFromOperator(operator, dataArray);
+        SemanticOperatorEnum operatorEnum = extractFromOperator(operator);
+
+        SemanticConditionDTO condition = new SemanticConditionDTO();
+        condition.setNodeType(SemanticConditionNodeTypeEnum.CONDITION);
         condition.setFieldName(fieldName);
+        condition.setFieldValue(fieldValue);
+        condition.setOperator(operatorEnum);
         return condition;
     }
 
-    public static SemanticConditionDTO extractFromOperator(OpEnum operator, List<?> valueArray) {
-        SemanticConditionDTO condition = new SemanticConditionDTO();
-        condition.setNodeType(SemanticConditionNodeTypeEnum.CONDITION);
-        List<Object> dataArray = new ArrayList<>(valueArray);
-        condition.setFieldValue(dataArray);
-        switch (operator) {
-            case EQUALS -> { // K = V
-                condition.setOperator(SemanticOperatorEnum.EQUALS);
-            }
-            case NOT_EQUALS -> { // K <> V
-                condition.setOperator(SemanticOperatorEnum.NOT_EQUALS);
-            }
-            case GREATER_THAN -> { // K > V
-                condition.setOperator(SemanticOperatorEnum.GREATER_THAN);
-            }
-            case GREATER_EQUALS -> { // K >= V
-                condition.setOperator(SemanticOperatorEnum.GREATER_EQUALS);
-            }
-            case LESS_THAN -> { // K < V
-                condition.setOperator(SemanticOperatorEnum.LESS_THAN);
-            }
-            case LESS_EQUALS -> { // K <= V
-                condition.setOperator(SemanticOperatorEnum.LESS_EQUALS);
-            }
-            case IS_EMPTY -> { // K IS NULL ;; K = NULL
-                condition.setNodeType(SemanticConditionNodeTypeEnum.CONDITION);
-                condition.setOperator(SemanticOperatorEnum.IS_EMPTY);
-                condition.setFieldValue(null);
-            }
-            case IS_NOT_EMPTY -> { // K IS NOT NULL ;; K <> NULL
-                condition.setOperator(SemanticOperatorEnum.IS_NOT_EMPTY);
-                condition.setFieldValue(null);
-            }
-            case EXISTS_IN -> { // K IN (V...)
-                condition.setOperator(SemanticOperatorEnum.EXISTS_IN);
-            }
-            case NOT_EXISTS_IN -> { // K NOT IN (V...)
-                condition.setOperator(SemanticOperatorEnum.NOT_EXISTS_IN);
-            }
-            case LATER_THAN -> { // K<TIMESTAMP> > V
-                condition.setOperator(SemanticOperatorEnum.GREATER_THAN);
-            }
-            case EARLIER_THAN -> { // K<TIMESTAMP> < V
-                condition.setOperator(SemanticOperatorEnum.LESS_THAN);
-            }
-            case CONTAINS -> { // K LIKE V
-                condition.setOperator(SemanticOperatorEnum.CONTAINS);
-            }
-//            case NOT_CONTAINS -> { // K NOT LIKE V
-//                condition.setOperator(SemanticOperatorEnum.NOT_LIKE);
-//            }
-//            case CONTAINS_ALL -> {
-//                condition.setOperator(SemanticOperatorEnum.CONTAINS_ALL);
-//            }
-//            case NOT_CONTAINS_ALL -> {
-//                condition.setOperator(SemanticOperatorEnum.NOT_CONTAINS_ALL);
-//            }
-//            case CONTAINS_ANY -> {
-//                condition.setOperator(SemanticOperatorEnum.CONTAINS_ANY);
-//            }
-//            case NOT_CONTAINS_ANY -> {
-//                condition.setOperator(SemanticOperatorEnum.NOT_CONTAINS_ANY);
-//            }
-            case RANGE -> {
-                if (valueArray.size() != 2) {
-                    throw new IllegalArgumentException("范围条件仅接受2个参数，但获得到了" + valueArray.size() + "个," + valueArray);
-                }
-                condition.setNodeType(SemanticConditionNodeTypeEnum.GROUP);
-                condition.setCombinator(SemanticCombinatorEnum.AND);
-                SemanticConditionDTO ltCondition = new SemanticConditionDTO();
-                ltCondition.setNodeType(SemanticConditionNodeTypeEnum.CONDITION);
-                ltCondition.setOperator(SemanticOperatorEnum.LESS_THAN);
-                ltCondition.setFieldValue(List.of(valueArray.get(1)));
-                SemanticConditionDTO gtCondition = new SemanticConditionDTO();
-                gtCondition.setNodeType(SemanticConditionNodeTypeEnum.CONDITION);
-                gtCondition.setOperator(SemanticOperatorEnum.GREATER_THAN);
-                gtCondition.setFieldValue(List.of(valueArray.get(0)));
-                condition.setChildren(List.of(ltCondition, gtCondition));
-            }
+    public static String convertToFieldName(String fieldKey) {
+        return StringUtils.substringAfter(fieldKey, ".");
+    }
+
+    public static SemanticOperatorEnum extractFromOperator(OpEnum operator) {
+        if (operator == null) {
+            return null;
         }
 
-        return condition;
+        switch (operator) {
+            case EQUALS -> { // K = V
+                return SemanticOperatorEnum.EQUALS;
+            }
+            case NOT_EQUALS -> { // K <> V
+                return SemanticOperatorEnum.NOT_EQUALS;
+            }
+            case GREATER_THAN -> { // K > V
+                return SemanticOperatorEnum.GREATER_THAN;
+            }
+            case GREATER_EQUALS -> { // K >= V
+                return SemanticOperatorEnum.GREATER_EQUALS;
+            }
+            case LESS_THAN -> { // K < V
+                return SemanticOperatorEnum.LESS_THAN;
+            }
+            case LESS_EQUALS -> { // K <= V
+                return SemanticOperatorEnum.LESS_EQUALS;
+            }
+            case IS_EMPTY -> { // K IS NULL ;; K = NULL
+                return SemanticOperatorEnum.IS_EMPTY;
+            }
+            case IS_NOT_EMPTY -> { // K IS NOT NULL ;; K <> NULL
+                return SemanticOperatorEnum.IS_NOT_EMPTY;
+            }
+            case EXISTS_IN -> { // K IN (V...)
+                return SemanticOperatorEnum.EXISTS_IN;
+            }
+            case NOT_EXISTS_IN -> { // K NOT IN (V...)
+                return SemanticOperatorEnum.NOT_EXISTS_IN;
+            }
+            case LATER_THAN -> { // K<TIMESTAMP> > V
+                return SemanticOperatorEnum.GREATER_THAN;
+            }
+            case EARLIER_THAN -> { // K<TIMESTAMP> < V
+                return SemanticOperatorEnum.LESS_THAN;
+            }
+            case CONTAINS -> { // K LIKE V
+                return SemanticOperatorEnum.CONTAINS;
+            }
+            case NOT_CONTAINS -> { // K NOT LIKE V
+                return SemanticOperatorEnum.NOT_CONTAINS;
+            }
+//            case CONTAINS_ALL -> {
+//                return SemanticOperatorEnum.CONTAINS_ALL;
+//            }
+//            case NOT_CONTAINS_ALL -> {
+//                return SemanticOperatorEnum.NOT_CONTAINS_ALL;
+//            }
+//            case CONTAINS_ANY -> {
+//                return SemanticOperatorEnum.CONTAINS_ANY;
+//            }
+//            case NOT_CONTAINS_ANY -> {
+//                return SemanticOperatorEnum.NOT_CONTAINS_ANY;
+//            }
+            case RANGE -> {
+                return SemanticOperatorEnum.RANGE;
+            }
+            default -> {
+                return null;
+            }
+        }
     }
 
 
@@ -228,19 +228,28 @@ public class DataMethodApiHelper {
             }
             SemanticSortRuleDTO orderDto = new SemanticSortRuleDTO();
             // 设置排序字段ID
-            orderDto.setField(sortItem.getSortField().toString());
+            orderDto.setField(convertToFieldName(sortItem.getSortField()));
             // 设置排序顺序
-            orderDto.setDirection(SemanticSortDirectionEnum.valueOf(sortItem.getSortType()));
+            orderDto.setDirection(convertToSortDirectionEnum(sortItem.getSortType()));
             orderDtos.add(orderDto);
         }
         return orderDtos.isEmpty() ? null : orderDtos;
     }
 
+    private static SemanticSortDirectionEnum convertToSortDirectionEnum(String sortType) {
+        if (StringUtils.equalsIgnoreCase(sortType, "ASC")) {
+            return SemanticSortDirectionEnum.ASC;
+        } else if (StringUtils.equalsIgnoreCase(sortType, "DESC")) {
+            return SemanticSortDirectionEnum.DESC;
+        } else {
+            throw new IllegalArgumentException("不支持的排序类型: " + sortType);
+        }
+    }
 
     public static Map<String, Object> convertToMap(SemanticEntityValueDTO fieldDataRespDTOS) {
         Map<String, Object> map = new HashMap<>();
         for (SemanticFieldValueDTO fieldDataRespDTO : fieldDataRespDTOS.getFieldValueMap().values()) {
-            String key = fieldDataRespDTO.getFieldName();
+            String key = fieldDataRespDTO.getTableName() + "." + fieldDataRespDTO.getFieldName();
             Object value = fieldDataRespDTO.getRawValue();
             map.put(key, value);
         }
@@ -256,5 +265,17 @@ public class DataMethodApiHelper {
         return list;
     }
 
+
+    public static Map<String, String> extractSystemFields(ExecuteContext executeContext) {
+        Map<String, String> systemFields = executeContext.getSystemFields();
+        if (MapUtils.isNotEmpty(systemFields)) {
+            return systemFields;
+        }
+        systemFields = new HashMap<>();
+        systemFields.put(SystemFieldConstants.REQUIRE.CREATOR, String.valueOf(executeContext.getTriggerUserId()));
+        systemFields.put(SystemFieldConstants.REQUIRE.UPDATER, String.valueOf(executeContext.getTriggerUserId()));
+        systemFields.put(SystemFieldConstants.REQUIRE.OWNER_ID, String.valueOf(executeContext.getTriggerUserId()));
+        return systemFields;
+    }
 
 }

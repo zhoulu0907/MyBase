@@ -33,6 +33,8 @@ import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Conditional;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -45,37 +47,37 @@ import java.util.concurrent.TimeUnit;
  * @Date：2025/11/1 18:27
  */
 @Slf4j
+@Setter
 @Service
 @Conditional(FlowRuntimeCondition.class)
 public class FlowCacheHandler {
 
-    @Setter
+
     @Autowired
     private FlowProcessRepository flowProcessRepository;
 
-    @Setter
+
     @Autowired
     private FlowProcessTimeRepository flowProcessTimeRepository;
 
-    @Setter
+
     @Autowired
     private FlowProcessDateFieldRepository flowProcessDateFieldRepository;
 
-    @Setter
     @Autowired
     private FlowGraphBuilder flowGraphBuilder;
 
-    @Setter
     @Autowired
     private RedissonClient redissonClient;
 
-    @Setter
     @Autowired
     private FlowProperties flowProperties;
 
-    @Setter
     @Autowired
     private JobClient jobClient;
+
+    @Autowired
+    private ThreadPoolTaskScheduler threadPoolTaskScheduler;
 
     public void initAllProcess() {
         List<FlowProcessDO> flowProcessDOS = TenantManager.withoutTenantCondition(() ->
@@ -86,10 +88,6 @@ public class FlowCacheHandler {
         for (FlowProcessDO flowProcessDO : flowProcessDOS) {
             try {
                 onProcessUpdate(flowProcessDO);
-                FlowTriggerTypeEnum triggerType = FlowTriggerTypeEnum.getByType(flowProcessDO.getTriggerType());
-                if (triggerType == FlowTriggerTypeEnum.TIME || triggerType == FlowTriggerTypeEnum.DATE_FIELD) {
-                    startJob(flowProcessDO);
-                }
                 log.info("加载flowProcess流程成功：{}", flowProcessDO.getId());
             } catch (Exception e) {
                 log.error("初始化flowProcessDO异常：{}, {}", flowProcessDO, e.getMessage(), e);
@@ -153,11 +151,14 @@ public class FlowCacheHandler {
             return;
         }
         String flowChain = FlowChainBuilder.toFlowChain(jsonGraph);
+        log.debug("flowChain:{}", flowChain);
         String chainId = FlowUtils.toFlowChainId(processDO.getId());
         LiteFlowChainELBuilder.createChain().setChainId(chainId).setEL(flowChain).build();
         //
-        FlowProcessCache.update(processDO.getApplicationId(), processDO.getId(), jsonGraph);
-        startTimeJob(processDO);
+        FlowProcessCache.update(processDO, jsonGraph);
+        threadPoolTaskScheduler.submit(() -> {
+            startSchedulingJob(processDO);
+        });
     }
 
     private void onProcessDelete(Long processId) {
@@ -167,11 +168,11 @@ public class FlowCacheHandler {
         //
         FlowProcessCache.deleteByProcessId(processId);
         //
-        stopJob(processId);
+        stopSchedulingJob(processId);
     }
 
     @SneakyThrows
-    private void stopJob(Long processId) {
+    private void stopSchedulingJob(Long processId) {
         RLock lock = redissonClient.getLock(FlowUtils.toRedisProcessLockKey(processId));
         if (lock.tryLock(120, TimeUnit.SECONDS)) {
             try {
@@ -183,17 +184,24 @@ public class FlowCacheHandler {
     }
 
     @SneakyThrows
-    private void startJob(FlowProcessDO flowProcessDO) {
-        RLock lock = redissonClient.getLock(FlowUtils.toRedisProcessLockKey(flowProcessDO.getId()));
-        if (lock.tryLock(60, TimeUnit.SECONDS)) {
-            try {
-                if (FlowTriggerTypeEnum.isTime(flowProcessDO.getTriggerType())) {
+    private void startSchedulingJob(FlowProcessDO flowProcessDO) {
+        if (FlowTriggerTypeEnum.isTime(flowProcessDO.getTriggerType())) {
+            RLock lock = redissonClient.getLock(FlowUtils.toRedisProcessLockKey(flowProcessDO.getId()));
+            if (lock.tryLock(60, TimeUnit.SECONDS)) {
+                try {
                     startTimeJob(flowProcessDO);
-                } else if (FlowTriggerTypeEnum.isDateField(flowProcessDO.getTriggerType())) {
-                    startDateFieldJob(flowProcessDO);
+                } finally {
+                    lock.unlock();
                 }
-            } finally {
-                lock.unlock();
+            }
+        } else if (FlowTriggerTypeEnum.isDateField(flowProcessDO.getTriggerType())) {
+            RLock lock = redissonClient.getLock(FlowUtils.toRedisProcessLockKey(flowProcessDO.getId()));
+            if (lock.tryLock(60, TimeUnit.SECONDS)) {
+                try {
+                    startDateFieldJob(flowProcessDO);
+                } finally {
+                    lock.unlock();
+                }
             }
         }
     }
@@ -284,7 +292,7 @@ public class FlowCacheHandler {
                 )
         );
         for (FlowProcessDO flowProcessDO : flowProcessDOS) {
-            startJob(flowProcessDO);
+            startSchedulingJob(flowProcessDO);
         }
     }
 }

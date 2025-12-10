@@ -79,14 +79,14 @@ public class FlowProcessTest {
         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
         reqDTO.setTraceId(UUID.randomUUID().toString());
         reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_CREATE);
-        reqDTO.setApplicationId(166945945974013952L);
-        reqDTO.setTableName("wcq9_student");
+        reqDTO.setApplicationId(173020283873034240L);
+        reqDTO.setTableName("xzqd_student");
         SemanticFieldValueDTO name = SemanticFieldValueDTO.ofType(SemanticFieldTypeEnum.TEXT);
         name.setFieldName("name");
         name.setRawValue("小");
         SemanticFieldValueDTO age = SemanticFieldValueDTO.ofType(SemanticFieldTypeEnum.NUMBER);
         age.setFieldName("age");
-        age.setRawValue(18);
+        age.setRawValue(8);
 
         reqDTO.setFieldData(List.of(name, age));
         EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
@@ -116,18 +116,18 @@ public class FlowProcessTest {
         flowRemoteCallExecutor.executeFlow(jobMessage);
     }
 
-    @Test
-    public void testSimple4() throws IOException {
-        TenantContextHolder.setIgnore(true);
-        FormTriggerReqVO reqVO = new FormTriggerReqVO();
-        reqVO.setProcessId(114994365031546880L);  // 114994365031546880L 114959369637036032L
-        Map<Long, Object> inputParams = Map.of(
-                46999569445519360L, "班级名称"
-        );
-        reqVO.setInputParams(inputParams);
-        FormTriggerRespVO respVO = flowProcessExecService.triggerForm(reqVO);
-        System.out.println(respVO);
-    }
+//    @Test
+//    public void testSimple4() throws IOException {
+//        TenantContextHolder.setIgnore(true);
+//        FormTriggerReqVO reqVO = new FormTriggerReqVO();
+//        reqVO.setProcessId(114994365031546880L);  // 114994365031546880L 114959369637036032L
+//        Map<Long, Object> inputParams = Map.of(
+//                46999569445519360L, "班级名称"
+//        );
+//        reqVO.setInputParams(inputParams);
+//        FormTriggerRespVO respVO = flowProcessExecService.triggerForm(reqVO);
+//        System.out.println(respVO);
+//    }
 
     @Test
     public void testSimple5() throws IOException {

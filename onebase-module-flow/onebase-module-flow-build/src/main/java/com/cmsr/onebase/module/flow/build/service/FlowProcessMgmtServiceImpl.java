@@ -44,7 +44,6 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
     @Autowired
     private FlowProcessTimeRepository flowProcessTimeRepository;
 
-
     @Resource
     private AppApplicationApi appApplicationApi;
 

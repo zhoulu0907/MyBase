@@ -19,7 +19,7 @@ import java.util.Map;
 public class LoopNodeComponent extends NodeForComponent {
 
     @Override
-    public int processFor() throws Exception {
+    public int processFor() {
         ExecuteContext executeContext = this.getContextBean(ExecuteContext.class);
         executeContext.addLog("循环节点开始执行");
         VariableContext variableContext = this.getContextBean(VariableContext.class);

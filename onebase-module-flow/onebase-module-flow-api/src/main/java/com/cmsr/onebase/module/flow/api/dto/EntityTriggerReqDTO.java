@@ -37,7 +37,7 @@ public class EntityTriggerReqDTO {
     public Map<String, Object> toInputData() {
         Map<String, Object> inputData = new HashMap<>();
         for (SemanticFieldValueDTO<?> fieldValueDTO : fieldData) {
-            inputData.put(fieldValueDTO.getFieldName(), fieldValueDTO.getRawValue());
+            inputData.put(tableName + "." + fieldValueDTO.getFieldName(), fieldValueDTO.getRawValue());
         }
         return inputData;
     }
