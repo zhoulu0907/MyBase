@@ -19,7 +19,7 @@ import {
 } from '@onebase/app';
 import { fetchSubmitInstance } from '@onebase/app/src/services/app_runtime';
 import { pagesRuntimeSignal } from '@onebase/common';
-import { EDITOR_TYPES, FORM_COMPONENT_TYPES, useEditorSignalMap } from '@onebase/ui-kit';
+import { EDITOR_TYPES, FORM_COMPONENT_TYPES, ENTITY_FIELD_TYPE, useEditorSignalMap } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
 import DetailRuntime from './DetailRuntime';
@@ -125,20 +125,21 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid })
     await form.validate();
     !isSave && setSubmitLoading(true);
     const fields = form.getFieldsValue();
-    console.log('fields: ', fields);
-    console.log('mainMetaDataFields: ', mainMetaDataFields.value);
-    console.log('menuId: ', menuId);
 
     const formData = {} as any;
     const subFormData: Record<string, any[]> = {};
     Object.entries(fields).forEach(([key, value]) => {
-      console.log('key: ', key, '   value: ', value);
-
       // 处理主表逻辑
       const field = (mainMetaDataFields.value || []).find((f: AppEntityField) => f.fieldName == key);
       if (field) {
-        console.log('field: ', field);
-        formData[field.fieldName] = value || '';
+        if (field.fieldType === ENTITY_FIELD_TYPE.IMAGE.VALUE || field.fieldType === ENTITY_FIELD_TYPE.FILE.VALUE) {
+          // 图片、文件上传 数据处理 转换成后端需要的数据
+          formData[field.fieldName] = (value || []).map((ele: any) => {
+            return { name: ele.name, id: ele.response?.fileId };
+          });
+        } else {
+          formData[field.fieldName] = value || '';
+        }
       }
 
       // 处理子表逻辑
@@ -146,7 +147,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid })
         const subEntityUuid = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[key]?.config
           ?.subTable;
 
-        const subTableName = subEntities.value.find((ele: any) => ele.childEntityUuid == subEntityUuid)?.childTableName;
+        const subEntity = subEntities.value.find((ele: any) => ele.childEntityUuid == subEntityUuid);
+        const subTableName = subEntity?.childTableName;
 
         //   过滤空行
         const subTableRows = [] as any;
@@ -160,7 +162,18 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid })
           let temp: any = {};
           for (let key of keys) {
             const newKey = key.slice(key.lastIndexOf('.') + 1);
-            temp[newKey] = item[key];
+            const subField = (subEntity?.childFields || []).find((f: AppEntityField) => f.fieldName == key);
+            if (
+              subField?.fieldType === ENTITY_FIELD_TYPE.IMAGE.VALUE ||
+              subField?.fieldType === ENTITY_FIELD_TYPE.FILE.VALUE
+            ) {
+              // 图片、文件上传 数据处理 转换成后端需要的数据
+              temp[newKey] = (item[key] || []).map((ele: any) => {
+                return { name: ele.name, id: ele.response?.fileId };
+              });
+            } else {
+              temp[newKey] = item[key];
+            }
           }
           subTableRows.push(temp);
         }
@@ -218,7 +231,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid })
             businessUuid: menuUuid,
             entity: {
               tableName: tableName,
-              data: {...formData,...subFormData}
+              data: { ...formData, ...subFormData }
             }
           };
           res = await fetchSubmitInstance(reqFlow);

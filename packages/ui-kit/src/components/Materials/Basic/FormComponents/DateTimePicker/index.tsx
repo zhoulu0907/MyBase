@@ -60,6 +60,17 @@ const XDateTimePicker = memo((props: XInputDateTimePickerConfig & { runtime?: bo
           return true
         }
       }
+
+      // 变量
+      if (dateRange.earliestType === DATE_EXTREME_TYPE.VARIABLE && dateRange.earliestVariableValue) {
+        const earliestVariableValue = form.getFieldValue(dateRange.earliestDynamicValue);
+        if (earliestVariableValue) {
+          const earliestTime = new Date(earliestVariableValue).getTime()
+          if (currentTime < earliestTime) {
+            return true
+          }
+        }
+      }
     }
 
     // 最晚可选日期时间
@@ -78,6 +89,17 @@ const XDateTimePicker = memo((props: XInputDateTimePickerConfig & { runtime?: bo
         const latestTime = todatTime + (DATE_DYNAMIC_VALUE[dateRange.latestDynamicValue as keyof typeof DATE_DYNAMIC_VALUE] || 0) * 24 * 3600 * 1000
         if (currentTime > latestTime) {
           return true
+        }
+      }
+
+      // 变量
+      if (dateRange.latestType === DATE_EXTREME_TYPE.VARIABLE && dateRange.latestVariableValue) {
+        const latestVariableValue = form.getFieldValue(dateRange.latestVariableValue)
+        if (latestVariableValue) {
+          const latestTime = new Date(latestVariableValue).getTime()
+          if (currentTime > latestTime) {
+            return true
+          }
         }
       }
     }

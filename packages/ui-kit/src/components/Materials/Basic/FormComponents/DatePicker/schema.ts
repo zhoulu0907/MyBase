@@ -123,12 +123,12 @@ export interface XInputDatePickerConfig extends ICommonBaseType {
     earliestType: string;
     earliestStaticValue: string;
     earliestDynamicValue: string;
-    earliestVariableValue: string[];
+    earliestVariableValue: string;
     latestLimit: boolean;
     latestType: string;
     latestStaticValue: string;
     latestDynamicValue: string;
-    latestVariableValue: string[];
+    latestVariableValue: string;
   };
 
   /**
@@ -255,12 +255,12 @@ const XDatePicker: XInputDatePickerSchema = {
       earliestType: DATE_EXTREME_TYPE.DYNAMIC,
       earliestStaticValue: '',
       earliestDynamicValue: DATE_DYNAMIC_TYPE.TODAY,
-      earliestVariableValue: [],
+      earliestVariableValue: '',
       latestLimit: false,
       latestType: DATE_EXTREME_TYPE.DYNAMIC,
       latestStaticValue: '',
       latestDynamicValue: DATE_DYNAMIC_TYPE.TODAY,
-      latestVariableValue: []
+      latestVariableValue: ''
     },
     verify: {
       required: false,

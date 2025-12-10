@@ -4,7 +4,13 @@ import { v4 as uuidv4 } from 'uuid';
 
 import styles from '../../index.module.less';
 import { IconDelete, IconPlus } from '@arco-design/web-react/icon';
-import { COMPONENT_TYPE_DISPLAY_NAME_MAP, getComponentSchema, usePageEditorSignal, COMPONENT_MAP, getPopupContainer } from '@onebase/ui-kit';
+import {
+  COMPONENT_TYPE_DISPLAY_NAME_MAP,
+  getComponentSchema,
+  usePageEditorSignal,
+  COMPONENT_MAP,
+  getPopupContainer
+} from '@onebase/ui-kit';
 
 interface FillingRuleSettingsModalProps {
   visible: boolean;
@@ -34,8 +40,14 @@ const FillingRuleSettingsModal: React.FC<FillingRuleSettingsModalProps> = ({
   onCancel,
   onOk
 }) => {
-  const { setCurComponentSchema, setPageComponentSchemas, components, setComponents, setShowDeleteButton } =
-    usePageEditorSignal();
+  const {
+    setCurComponentSchema,
+    setPageComponentSchemas,
+    pageComponentSchemas,
+    components,
+    setComponents,
+    setShowDeleteButton
+  } = usePageEditorSignal();
 
   const [selected, setSelected] = useState<string[]>([]);
   const [fillOption, setFillOption] = useState<number>(1);
@@ -46,7 +58,14 @@ const FillingRuleSettingsModal: React.FC<FillingRuleSettingsModalProps> = ({
   useEffect(() => {
     const refactFieldOptions = [...fieldOptions].reduce((newOptions, item) => {
       const cpType = COMPONENT_MAP[item.fieldType];
-      const targetComponents = components.filter((item) => item.type === cpType);
+      console.log(Object.entries(pageComponentSchemas))
+      
+      const targetComponents = Object.entries(pageComponentSchemas).filter(([key,value]) => value.type === cpType).map(([key,value])=>{
+        return {
+          id: value.id,
+          displayName: value.config?.label?.text,
+        }
+      });
       newOptions.push({
         ...item,
         targetComponents,
@@ -87,7 +106,7 @@ const FillingRuleSettingsModal: React.FC<FillingRuleSettingsModalProps> = ({
 
       // 当前优先选 componentID
       let componentID =
-        selectRule.find((rule) => rule.fieldId === select)?.componentID || option.targetComponents?.[0]?.id;
+        selectRule.find((rule) => rule.fieldId === select)?.selectComponentID || option.targetComponents?.[0]?.id;
 
       // 如果已被用过，则找同类型未用过的
       if (componentID && usedComponentIDs.has(componentID)) {
@@ -292,11 +311,7 @@ const FillingRuleSettingsModal: React.FC<FillingRuleSettingsModalProps> = ({
         ) : (
           <div className={styles.nextStepContainer}>
             <span className={styles.titleSpan}>选择数据后，将按以下规则将所选字段的值填充到当前表单字段。</span>
-            <Dropdown
-              droplist={droplist}
-              trigger="click"
-              getPopupContainer={getPopupContainer}
-            >
+            <Dropdown droplist={droplist} trigger="click" getPopupContainer={getPopupContainer}>
               <Button type="text">
                 <IconPlus />
                 选择字段
@@ -314,10 +329,12 @@ const FillingRuleSettingsModal: React.FC<FillingRuleSettingsModalProps> = ({
                   value={item.selectComponentID}
                   getPopupContainer={getPopupContainer}
                   onChange={(v) => handleComChange(index, v)}
-                  options={item.targetComponents.map((opt: any) => ({
-                    label: opt.displayName,
-                    value: opt.id
-                  }))}
+                  options={item.targetComponents.map((opt: any) => {
+                    return {
+                      label: opt.displayName,
+                      value: opt.id
+                    };
+                  })}
                 />
                 {/* 删除按钮 */}
                 <Button
