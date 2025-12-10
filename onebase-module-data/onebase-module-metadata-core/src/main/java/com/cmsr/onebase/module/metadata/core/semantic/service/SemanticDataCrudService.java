@@ -220,7 +220,8 @@ public class SemanticDataCrudService {
         row.remove(pkField);
         // 切换到目标数据源
         // 按主键条件更新主表记录
-        QueryWrapper qw = QueryWrapper.create().where(new QueryColumn(pkField).eq(String.valueOf(id)));
+        Object v = toLongIfNotEmpty(id);
+        QueryWrapper qw = QueryWrapper.create().where(new QueryColumn(pkField).eq(v != null ? v : id));
         dynamicMetadataRepository.updateByQuery(entity.getTableName(), row, qw);
 
         Long parentId = null;
@@ -271,7 +272,8 @@ public class SemanticDataCrudService {
         if (id == null) { return 0; }
         
         // 构建主键条件并执行删除（软删优先）
-        QueryWrapper qw = QueryWrapper.create().where(new QueryColumn(pkField).eq(String.valueOf(id)));
+        Object dv = toLongIfNotEmpty(id);
+        QueryWrapper qw = QueryWrapper.create().where(new QueryColumn(pkField).eq(dv != null ? dv : id));
         int resultCount = 0;
         if (hasDeletedField(entity.getFields())) {
             resultCount = dynamicMetadataRepository.softDeleteByQuery(entity.getTableName(), qw);
@@ -283,7 +285,8 @@ public class SemanticDataCrudService {
             for (SemanticRelationSchemaDTO c : connectors) {
                 if (c == null || c.getTargetEntityTableName() == null) { continue; }
                 if (RelationshipTypeEnum.isSubtableRelationship(c.getRelationshipType().getRelationshipType())) { 
-                    QueryWrapper cq = QueryWrapper.create().where(new QueryColumn("parent_id").eq(String.valueOf(id)));
+                    Object pv = toLongIfNotEmpty(id);
+                    QueryWrapper cq = QueryWrapper.create().where(new QueryColumn("parent_id").eq(pv != null ? pv : id));
                     boolean hasDel = hasDeletedField(c.getRelationAttributes());
                     if (hasDel) {
                         dynamicMetadataRepository.softDeleteByQuery(c.getTargetEntityTableName(), cq);
@@ -837,7 +840,8 @@ public class SemanticDataCrudService {
             Map<String, Row> existingById = new HashMap<>();
             for (Row r : existing) {
                 Object rid = r.get(childPk);
-                if (rid != null) { existingById.put(String.valueOf(rid), r); }
+                Object rv = toLongIfNotEmpty(rid);
+                if (rv != null) { existingById.put(String.valueOf(rv), r); }
             }
 
             List<Map<String, SemanticFieldValueDTO<Object>>> incoming = new ArrayList<>();
@@ -847,11 +851,12 @@ public class SemanticDataCrudService {
             List<String> incomingIds = new ArrayList<>();
             for (Map<String, SemanticFieldValueDTO<Object>> dto : incoming) {
                 Object cid = extractIdFromConnectorDto(dto);
-                String cidStr = cid == null ? null : String.valueOf(cid);
-                if (cidStr != null) { incomingIds.add(cidStr); }
-                if (cidStr != null && existingById.containsKey(cidStr)) {
+                Object cv = toLongIfNotEmpty(cid);
+                String keyStr = cv == null ? null : String.valueOf(cv);
+                if (keyStr != null) { incomingIds.add(keyStr); }
+                if (keyStr != null && existingById.containsKey(keyStr)) {
                     Row updateRow = buildConnectorUpdateRow(attrs, dto, childPk);
-                    QueryWrapper uq = QueryWrapper.create().where(new QueryColumn(childPk).eq(cidStr));
+                    QueryWrapper uq = QueryWrapper.create().where(new QueryColumn(childPk).eq(cv != null ? cv : cid));
                     dynamicMetadataRepository.updateByQuery(table, updateRow, uq);
                 } else {
                     Row insertRow = semanticValueAssembler.buildSubRow(dto, parentId, uidGenerator);
@@ -863,8 +868,8 @@ public class SemanticDataCrudService {
             List<String> toDelete = existingIds.stream().filter(x -> !incomingIds.contains(x)).toList();
             if (!toDelete.isEmpty()) {
                 QueryWrapper dq = QueryWrapper.create()
-                        .where(new QueryColumn("parent_id").eq(String.valueOf(parentId)))
-                        .and(new QueryColumn(childPk).in(toDelete));
+                        .where(new QueryColumn("parent_id").eq(parentId))
+                        .and(new QueryColumn(childPk).in(toLongListForIn(toDelete)));
                 if (hasDeletedField(attrs)) { dynamicMetadataRepository.softDeleteByQuery(table, dq); }
                 else { dynamicMetadataRepository.deleteByQuery(table, dq); }
             }
@@ -885,7 +890,8 @@ public class SemanticDataCrudService {
             Map<String, Row> existingById = new HashMap<>();
             for (Row r : existing) {
                 Object rid = r.get(pk);
-                if (rid != null) { existingById.put(String.valueOf(rid), r); }
+                Object rv = toLongIfNotEmpty(rid);
+                if (rv != null) { existingById.put(String.valueOf(rv), r); }
             }
 
             List<Map<String, SemanticFieldValueDTO<Object>>> incoming = new ArrayList<>();
@@ -900,11 +906,12 @@ public class SemanticDataCrudService {
             List<String> incomingIds = new ArrayList<>();
             for (Map<String, SemanticFieldValueDTO<Object>> dto : incoming) {
                 Object rid = extractIdFromConnectorDto(dto);
-                String ridStr = rid == null ? null : String.valueOf(rid);
-                if (ridStr != null) { incomingIds.add(ridStr); }
-                if (ridStr != null && existingById.containsKey(ridStr)) {
+                Object rv = toLongIfNotEmpty(rid);
+                String keyStr = rv == null ? null : String.valueOf(rv);
+                if (keyStr != null) { incomingIds.add(keyStr); }
+                if (keyStr != null && existingById.containsKey(keyStr)) {
                     Row updateRow = buildConnectorUpdateRow(attrs, dto, pk);
-                    QueryWrapper uq = QueryWrapper.create().where(new QueryColumn(pk).eq(ridStr));
+                    QueryWrapper uq = QueryWrapper.create().where(new QueryColumn(pk).eq(rv != null ? rv : rid));
                     dynamicMetadataRepository.updateByQuery(table, updateRow, uq);
                 } else {
                     Row insertRow = semanticValueAssembler.buildRelationRow(dto, uidGenerator);
@@ -917,8 +924,8 @@ public class SemanticDataCrudService {
             List<String> toDelete = existingIds.stream().filter(x -> !incomingIds.contains(x)).toList();
             if (!toDelete.isEmpty()) {
                 QueryWrapper dq = QueryWrapper.create()
-                        .where(new QueryColumn("parent_id").eq(String.valueOf(parentId)))
-                        .and(new QueryColumn(pk).in(toDelete));
+                        .where(new QueryColumn("parent_id").eq(parentId))
+                        .and(new QueryColumn(pk).in(toLongListForIn(toDelete)));
                 if (hasDeletedField(attrs)) { dynamicMetadataRepository.softDeleteByQuery(table, dq); }
                 else { dynamicMetadataRepository.deleteByQuery(table, dq); }
             }
@@ -970,5 +977,21 @@ public class SemanticDataCrudService {
             }
         }
         return null;
+    }
+    private List<Object> toLongListForIn(List<?> ids) {
+        if (ids == null || ids.isEmpty()) { return java.util.List.of(); }
+        java.util.List<Object> out = new java.util.ArrayList<>(ids.size());
+        for (Object id : ids) {
+            Object v = toLongIfNotEmpty(id);
+            if (v != null) { out.add(v); }
+        }
+        return out;
+    }
+
+    private Object toLongIfNotEmpty(Object value) {
+        if (value == null) { return null; }
+        String s = String.valueOf(value).trim();
+        if (s.isEmpty()) { return null; }
+        try { return Long.parseLong(s); } catch (Exception ignored) { return value; }
     }
 }

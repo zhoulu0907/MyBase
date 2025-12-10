@@ -266,3 +266,99 @@ X-Application-Id: 174251943057752064
 X-Tenant-Id: 153935442021842944
 
 {"pageNo":1,"pageSize":10}
+
+### 语义创建（jkx6_student_info_01）
+POST {{base}}/metadata/jkx6_student_info_01/create?menuId=174256719061385216
+Accept: application/json
+Content-Type: application/json
+Accept-Language: zh-CN,zh;q=0.9
+Access-Control-Allow-Origin: *
+login-user: {"id":"155019577667616816","applicationId":"174251943057752064","tenantId":"153935442021842944"}
+X-Application-Id: 174251943057752064
+X-Tenant-Id: 153935442021842944
+
+{
+  "name": "张三",
+  "age": 12
+}
+
+### 语义更新（jkx6_student_info_01）
+POST {{base}}/metadata/jkx6_student_info_01/update?menuId=174256719061385216
+Accept: application/json
+Content-Type: application/json
+Accept-Language: zh-CN,zh;q=0.9
+Access-Control-Allow-Origin: *
+login-user: {"id":"155019577667616816","applicationId":"174251943057752064","tenantId":"153935442021842944"}
+X-Application-Id: 174251943057752064
+X-Tenant-Id: 153935442021842944
+
+{
+  "id": "175082847438110720",
+  "name": "李四",
+  "age": 13
+}
+
+### 语义更新（jkx6_student_info_01）-卞天宇
+POST {{base}}/metadata/jkx6_student_info_01/update?menuId=174256719061385216
+Accept: application/json
+Content-Type: application/json
+Accept-Language: zh-CN,zh;q=0.9
+Access-Control-Allow-Origin: *
+login-user: {"id":"155019577667616796","applicationId":"174251943057752064","tenantId":"153935442021842944"}
+X-Application-Id: 174251943057752064
+X-Tenant-Id: 153935442021842944
+
+{
+  "id": "175082847438110720",
+  "name": "李四",
+  "age": 13
+}
+
+
+### 语义删除（jkx6_student_info_01）
+POST {{base}}/metadata/jkx6_student_info_01/delete?menuId=174256719061385216
+Accept: application/json
+Content-Type: application/json
+Accept-Language: zh-CN,zh;q=0.9
+Access-Control-Allow-Origin: *
+login-user: {"id":"155019577667616816","applicationId":"174251943057752064","tenantId":"153935442021842944"}
+X-Application-Id: 174251943057752064
+X-Tenant-Id: 153935442021842944
+
+{
+  "id": "175050618003390464"
+}
+
+### 语义详情（jkx6_student_info_01）
+POST {{base}}/metadata/jkx6_student_info_01/detail?menuId=174256719061385216
+Accept: application/json
+Content-Type: application/json
+Accept-Language: zh-CN,zh;q=0.9
+Access-Control-Allow-Origin: *
+login-user: {"id":"155019577667616816","applicationId":"174251943057752064","tenantId":"153935442021842944"}
+X-Application-Id: 174251943057752064
+X-Tenant-Id: 153935442021842944
+
+{
+  "id": "175050618003390464"
+}
+
+### 语义分页（jkx6_student_info_01）
+POST {{base}}/metadata/jkx6_student_info_01/page?menuId=174256719061385216
+Accept: application/json
+Content-Type: application/json
+Accept-Language: zh-CN,zh;q=0.9
+Access-Control-Allow-Origin: *
+login-user: {"id":"155019577667616816","applicationId":"174251943057752064","tenantId":"153935442021842944"}
+X-Application-Id: 174251943057752064
+X-Tenant-Id: 153935442021842944
+
+{
+  "data": {},
+  "pageNo": 1,
+  "pageSize": 10,
+  "sortBy": [
+    { "field": "id", "direction": "DESC" }
+  ],
+  "filters": {}
+}
