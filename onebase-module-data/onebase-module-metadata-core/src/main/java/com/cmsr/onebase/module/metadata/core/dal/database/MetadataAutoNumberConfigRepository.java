@@ -84,9 +84,9 @@ public class MetadataAutoNumberConfigRepository extends BaseBizRepository<Metada
     }
 
     @Deprecated
-    public List<MetadataAutoNumberConfigDO> listEnabledByFieldIds(List<Long> fieldIds) {
+    public List<MetadataAutoNumberConfigDO> listEnabledByFieldIds(List<String> fieldIds) {
         QueryWrapper queryWrapper = this.query()
-                .in(MetadataAutoNumberConfigDO::getId, fieldIds)
+                .in(MetadataAutoNumberConfigDO::getFieldUuid, fieldIds)
                 .eq(MetadataAutoNumberConfigDO::getIsEnabled, 1);
         return list(queryWrapper);
     }
