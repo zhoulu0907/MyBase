@@ -1,6 +1,9 @@
 .deptCell {
+  .selectValue {
+    text-align: right;
+  }
   :global(.cell-content) {
-    justify-content: flex-end;
+    display: block;
   }
 }
 

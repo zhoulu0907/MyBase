@@ -217,8 +217,7 @@ const XLoadMore = memo(
             );
             if (multiSelectField && newItem[key]) {
               if (Array.isArray(newItem[key])) {
-                newItem[key] =
-                  newItem[key].length > 1 ? newItem[key].map((item: string) => item).join(', ') : newItem[key];
+                newItem[key] = newItem[key].map((item: any) => item?.id).join(', ');
               }
             }
 
@@ -248,6 +247,15 @@ const XLoadMore = memo(
             );
             if (switchField && typeof newItem[key] === 'boolean') {
               newItem[key] = newItem[key] ? '是' : '否'
+            }
+
+            // 单选列表
+            const selectField = mainMetaData.parentFields.find(
+              (field: AppEntityField) =>
+                field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.SELECT.VALUE
+            );
+            if (selectField) {
+              newItem[key] = newItem[key].name || '-'
             }
           }
         });

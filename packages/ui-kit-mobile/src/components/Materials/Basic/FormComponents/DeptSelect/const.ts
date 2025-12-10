@@ -22,8 +22,8 @@ export const getDeptData = (data: any[], deptIds: string[]) => {
     .map(id => map.get(id))
     ?.filter(Boolean)
     .map(item => ({
-      deptId: item.id,
-      deptName: item.name,
+      id: item.id,
+      name: item.name,
     }));
   return deptIds.length === 1 ? result[0] : result;
 };

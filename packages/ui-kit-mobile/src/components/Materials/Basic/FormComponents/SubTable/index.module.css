@@ -9,6 +9,11 @@
     }
   }
 
+   :global(.cell-content) {
+    display: block;
+    text-align: right;
+  }
+
   :global(.arco-collapse-content-container) {
     padding-top: 0;
     padding-bottom: 0;

@@ -1,6 +1,7 @@
 // import ExecuteFlows from '@/utils/flow';
 import { Button, Form, PopupSwiper, Toast } from '@arco-design/mobile-react';
 import { useForm } from '@arco-design/mobile-react/esm/form';
+import dayjs from 'dayjs';
 import {
   CATEGORY_TYPE,
   dataMethodCreateV2,
@@ -159,10 +160,10 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       const field = (mainMetaDataFields.value || []).filter(f => f.isSystemField !== 1).find((f: AppEntityField) => f.fieldName == key);
       if (field) {
         console.log('field: ', field);
-        formData[field.fieldName] = value;
-        const filterType = ['IMAGE', 'FILE'];
-        if (filterType.includes(field.fieldType) && Array.isArray(value)) {
-          formData[field.fieldId] = value.map((item: any) => {
+        const filterByUpload = ['IMAGE', 'FILE'];
+
+        if (filterByUpload.includes(field.fieldType) && Array.isArray(value)) {
+          formData[field.fieldName] = value.map((item: any) => {
             if (item.response && item.url) {
               return {
                 ...item,
@@ -171,6 +172,30 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
             }
             return item;
           });
+        }
+        if (field.fieldType === 'DATE') {
+          formData[field.fieldName] = value ? dayjs(value).format('YYYY-MM-DD') : '';
+        } else if (field.fieldType === 'DATETIME') {
+          formData[field.fieldName] = value ? dayjs(value).format('YYYY-MM-DD hh:mm:ss') : '';
+        } else if (field.fieldType === 'SELECT') {
+          formData[field.fieldName] = {
+            id: value[0],
+            name: value[0]
+          };
+        } else if (field.fieldType === 'USER') {
+          if (Array.isArray(value)) {
+            formData[field.fieldName] = {
+              id: value[0],
+              name: value[0]
+            };
+          } else {
+            formData[field.fieldName] = {
+              id: value.id,
+              name: value.name
+            };
+          }
+        } else {
+          formData[field.fieldName] = value;
         }
       }
       !(typeof value === 'object') &&
@@ -215,6 +240,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
     console.log('formData:   ', formData);
     console.log('subFormData:   ', subFormData);
+    // return;
 
     // 接口判断 页面触发
     const curFormPage = curPage.value?.pages?.find((ele: any) => ele.pageType === CATEGORY_TYPE.FORM);
@@ -337,29 +363,32 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
       // 只处理第一个数据对象（通常为单条数据）
       // const dataItem = Array.isArray(res.data) ? res.data[0] : res.data;
-      const arrayType = [
-        'DATE'
-        // 'DATETIME',
-        // 'SELECT',
-        // 'MULTI_SELECT',
+      const dateType = [
+        'DATE',
+        'DATETIME'
         // 'MULTI_DEPARTMENT',
         // 'DATA_SELECTION',
         // 'MULTI_DATA_SELECTION',
         // 'MULTI_USER',
-        // 'USER'
       ]; // 表单回显需要数组格式数据；
 
       if (dataItem && typeof dataItem === 'object') {
         Object.entries(dataItem).forEach(([fieldName, value]) => {
           const fieldType = mainMetaDataFields.value.find((v) => v.fieldId === fieldIdNameMap[fieldName])?.fieldType;
           if (fieldType) {
-            if (arrayType.includes(fieldType)) {
+            if (dateType.includes(fieldType)) {
+              formValues[fieldName] = dayjs(value).valueOf();
+            } else if (fieldType === 'SELECT') {
+              formValues[fieldName] = Object.entries(value).length > 0 ? [value.id] : value;
+            } else if (fieldType === 'MULTI_SELECT') {
+              formValues[fieldName] = value.map(v => v.id);
+            } else if (fieldType === 'USER') {
+              formValues[fieldName] = Object.entries(value).length > 0 ? [value.name] : value;
+            } else if (fieldType === 'DEPARTMENT') {
+              formValues[fieldName] = value.id;
+            } else {
               formValues[fieldName] = value;
-              // console.log('fieldIdNameMap: ', fieldIdNameMap, fieldName, fieldType);
-              return;
             }
-            formValues[fieldName] = value;
-            // console.warn('fieldID:', 'fieldName:', fieldName, '    value:', value);
           }
         });
       }
