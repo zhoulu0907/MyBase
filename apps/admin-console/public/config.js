@@ -6,7 +6,8 @@ window.global_config = {
   //   BASE_URL: 'http://192.168.0.4:48080/admin-api',
   BASE_URL: 'http://s25029301301.dev.internal.virtueit.net:81/v1-snapshot/onebaseserver/admin-api',
   PLATFORM_BASE_URL: 'http://s25029301301.dev.internal.virtueit.net:81/v1-snapshot/onebaseserver/platform',
-  FILE_DETAIL_URL: 'http://s25029301301.dev.internal.virtueit.net:81/v1-snapshot/onebaseserver/platform/infra/file/download',
+  RESOURCE_URL:
+    'http://s25029301301.dev.internal.virtueit.net:81/v1-snapshot/onebaseserver/platform/infra/file/download',
   PLATFORM_FE_URL: 'http://localhost:4399'
   //   PLATFORM_FE_URL: 'http://s25029301301.dev.internal.virtueit.net:81/v0/obappbuilder/'
 };
