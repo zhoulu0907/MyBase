@@ -60,6 +60,11 @@ public class DefServiceImpl extends WarmServiceImpl<FlowDefinitionDao<Definition
     }
 
     @Override
+    public boolean save(Definition definition) {
+        return super.save(definition);
+    }
+
+    @Override
     public Definition importIs(InputStream is) {
         StringBuilder stringBuilder = new StringBuilder();
         try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(is))) {
@@ -107,6 +112,7 @@ public class DefServiceImpl extends WarmServiceImpl<FlowDefinitionDao<Definition
 
         Node startNode = FlowEngine.newNode()
             .setDefinitionId(definition.getId())
+            .setDefinitionUuid(definition.getDefinitionUuid())
             .setNodeCode(NodeType.START.getValue())
             .setNodeName("开始")
             .setNodeType(NodeType.START.getKey())
@@ -117,6 +123,7 @@ public class DefServiceImpl extends WarmServiceImpl<FlowDefinitionDao<Definition
 
         Node betweenOneNode = FlowEngine.newNode()
             .setDefinitionId(definition.getId())
+            .setDefinitionUuid(definition.getDefinitionUuid())
             .setNodeCode("submit")
             .setNodeName("中间节点-或签1")
             .setNodeType(NodeType.BETWEEN.getKey())
@@ -127,6 +134,7 @@ public class DefServiceImpl extends WarmServiceImpl<FlowDefinitionDao<Definition
 
         Node betweenTwoNode = FlowEngine.newNode()
             .setDefinitionId(definition.getId())
+            .setDefinitionUuid(definition.getDefinitionUuid())
             .setNodeCode("approval")
             .setNodeName("中间节点-或签2")
             .setNodeType(NodeType.BETWEEN.getKey())
@@ -137,6 +145,7 @@ public class DefServiceImpl extends WarmServiceImpl<FlowDefinitionDao<Definition
 
         Node endNode = FlowEngine.newNode()
             .setDefinitionId(definition.getId())
+            .setDefinitionUuid(definition.getDefinitionUuid())
             .setNodeCode(NodeType.END.getValue())
             .setNodeName("结束")
             .setNodeType(NodeType.END.getKey())
@@ -147,6 +156,7 @@ public class DefServiceImpl extends WarmServiceImpl<FlowDefinitionDao<Definition
 
         skipList.add(FlowEngine.newSkip()
             .setDefinitionId(definition.getId())
+            .setDefinitionUuid(definition.getDefinitionUuid())
             .setNowNodeCode(startNode.getNodeCode())
             .setNowNodeType(startNode.getNodeType())
             .setNextNodeCode(betweenOneNode.getNodeCode())
@@ -156,6 +166,7 @@ public class DefServiceImpl extends WarmServiceImpl<FlowDefinitionDao<Definition
 
         skipList.add(FlowEngine.newSkip()
             .setDefinitionId(definition.getId())
+            .setDefinitionUuid(definition.getDefinitionUuid())
             .setNowNodeCode(betweenOneNode.getNodeCode())
             .setNowNodeType(betweenOneNode.getNodeType())
             .setNextNodeCode(betweenTwoNode.getNodeCode())
@@ -165,6 +176,7 @@ public class DefServiceImpl extends WarmServiceImpl<FlowDefinitionDao<Definition
 
         skipList.add(FlowEngine.newSkip()
             .setDefinitionId(definition.getId())
+            .setDefinitionUuid(definition.getDefinitionUuid())
             .setNowNodeCode(betweenTwoNode.getNodeCode())
             .setNowNodeType(betweenTwoNode.getNodeType())
             .setNextNodeCode(endNode.getNodeCode())
@@ -345,10 +357,13 @@ public class DefServiceImpl extends WarmServiceImpl<FlowDefinitionDao<Definition
         List<Skip> skipList = FlowEngine.skipService().getByDefId(id).stream().map(Skip::copy).collect(Collectors.toList());
         FlowEngine.dataFillHandler().idFill(definition);
 
-        nodeList.forEach(node -> node.setDefinitionId(definition.getId()).setVersion(definition.getVersion()));
+        nodeList.forEach(node -> node.setDefinitionId(definition.getId())
+            .setDefinitionUuid(definition.getDefinitionUuid())
+            .setVersion(definition.getVersion()));
         FlowEngine.nodeService().saveBatch(nodeList);
 
-        skipList.forEach(skip -> skip.setDefinitionId(definition.getId()));
+        skipList.forEach(skip -> skip.setDefinitionId(definition.getId())
+            .setDefinitionUuid(definition.getDefinitionUuid()));
         FlowEngine.skipService().saveBatch(skipList);
         return save(definition);
     }
@@ -434,7 +449,7 @@ public class DefServiceImpl extends WarmServiceImpl<FlowDefinitionDao<Definition
         // 便利一个流程中的各个节点
         int startNum = 0;
         for (Node node : allNodes) {
-            FlowConfigUtil.initNodeAndCondition(node, definition.getId(), definition.getVersion());
+            FlowConfigUtil.initNodeAndCondition(node, definition.getId(), definition.getDefinitionUuid(), definition.getVersion());
             startNum = FlowConfigUtil.checkStartAndSame(node, startNum, flowName, nodeCodeSet);
         }
         AssertUtil.isTrue(startNum == 0, "[" + flowName + "]" + ExceptionCons.LOST_START_NODE);
@@ -444,4 +459,8 @@ public class DefServiceImpl extends WarmServiceImpl<FlowDefinitionDao<Definition
         FlowConfigUtil.validaIsExistDestNode(allSkips, nodeCodeSet);
     }
 
+    @Override
+    public Definition getByDefUuid(String defUuid) {
+        return getOne(FlowEngine.newDef().setDefinitionUuid(defUuid));
+    }
 }

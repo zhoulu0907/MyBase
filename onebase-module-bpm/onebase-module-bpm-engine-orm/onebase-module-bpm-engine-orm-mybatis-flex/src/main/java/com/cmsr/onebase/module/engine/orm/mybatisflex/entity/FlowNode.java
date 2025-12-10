@@ -31,6 +31,10 @@ public class FlowNode extends WarmFlowBizEntity implements Node {
     @Column(value = "definition_id", comment = "流程定义ID")
     private Long definitionId;
 
+    /** 流程定义UUID（备用） */
+    @Column(value = "definition_uuid", comment = "流程定义UUID")
+    private String definitionUuid;
+
     /** 节点编码 */
     @Column(value = "node_code", comment = "节点编码")
     private String nodeCode;
@@ -179,6 +183,11 @@ public class FlowNode extends WarmFlowBizEntity implements Node {
 
     public Node setVersionTag(Long versionTag) {
         this.versionTag = versionTag;
+        return this;
+    }
+
+    public Node setDefinitionUuid(String definitionUuid) {
+        this.definitionUuid = definitionUuid;
         return this;
     }
 }

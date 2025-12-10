@@ -23,6 +23,10 @@ public class FlowInstance extends WarmFlowBaseEntity implements Instance {
     @Column(value = "definition_id", comment = "对应flow_definition表的id")
     private Long definitionId;
 
+    /** 流程定义UUID（主关联） */
+    @Column(value = "definition_uuid", comment = "流程定义UUID")
+    private String definitionUuid;
+
     /** 业务id */
     @Column(value = "business_id", comment = "业务id")
     private String businessId;
@@ -138,6 +142,11 @@ public class FlowInstance extends WarmFlowBaseEntity implements Instance {
             this.deleted = null;
         }
 
+        return this;
+    }
+
+    public Instance setDefinitionUuid(String definitionUuid) {
+        this.definitionUuid = definitionUuid;
         return this;
     }
 }

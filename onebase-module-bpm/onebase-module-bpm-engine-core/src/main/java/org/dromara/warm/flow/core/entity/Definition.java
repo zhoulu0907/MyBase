@@ -186,10 +186,24 @@ public interface Definition extends RootEntity {
 
     Definition setApplicationId(Long applicationId);
 
+    /**
+     * 获取流程定义UUID
+     * @return 流程定义UUID
+     */
+    String getDefinitionUuid();
+
+    /**
+     * 设置流程定义UUID
+     * @param definitionUuid definitionUuid
+     * @return Definition
+     */
+    Definition setDefinitionUuid(String definitionUuid);
+
     default Definition copy() {
         return FlowEngine.newDef()
             .setTenantId(String.valueOf(this.getTenantId()))
             .setDelFlag(this.getDelFlag())
+            .setDefinitionUuid(this.getDefinitionUuid())
             .setFlowCode(this.getFlowCode())
             .setFlowName(this.getFlowName())
             .setModelValue(this.getModelValue())
