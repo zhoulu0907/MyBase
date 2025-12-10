@@ -370,7 +370,7 @@ CREATE TABLE bpm_flow_instance_biz_ext
     binding_view_id              varchar(100) NOT NULL,
     bpm_title                    varchar(500) NOT NULL,
     "application_id" int8 NOT NULL,
-    initiator_id            varchar(80) NOT NULL,         NULL,
+    initiator_id            varchar(80) NOT NULL,
     initiator_name          varchar(100) NULL,
     initiator_avatar        varchar(500) NULL,
     initiator_dept_id       int8         NULL,

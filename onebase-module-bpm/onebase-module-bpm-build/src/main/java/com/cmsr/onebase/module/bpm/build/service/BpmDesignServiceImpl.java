@@ -89,6 +89,14 @@ public class BpmDesignServiceImpl implements BpmDesignService {
         return bpmDefJsonVO;
     }
 
+    private void validateApplicationId() {
+        Long applicationId = ApplicationManager.getApplicationId();
+
+        if (applicationId == null) {
+            throw exception(ErrorCodeConstants.MISSING_APPLICATION_ID);
+        }
+    }
+
     private Long createBpmFlow(BpmDesignSaveReqVO flowDesignVO) {
         Long businessId = flowDesignVO.getBusinessId();
         String businessUuid = flowDesignVO.getBusinessUuid();
@@ -176,14 +184,11 @@ public class BpmDesignServiceImpl implements BpmDesignService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long save(BpmDesignSaveReqVO flowDesignVO) {
+        validateApplicationId();
+
         Long flowId = flowDesignVO.getId();
-        Long applicationId = ApplicationManager.getApplicationId();
 
-        if (applicationId == null) {
-            throw exception(ErrorCodeConstants.MISSING_APPLICATION_ID);
-        }
-
-        flowDesignVO.setAppId(applicationId);
+        flowDesignVO.setAppId(ApplicationManager.getApplicationId());
 
         // 前端暂时用不到流程名称字段，如果流程名称为空则使用默认名称“业务流程”
         if (StringUtils.isBlank(flowDesignVO.getFlowName())) {
@@ -203,6 +208,8 @@ public class BpmDesignServiceImpl implements BpmDesignService {
 
     @Override
     public BpmDesignRespVO queryById(Long id) {
+        validateApplicationId();
+
         // 流程不存在时，直接查询defJson结构会报错，先查Definition表
         Definition definition = defService.getById(id);
 
@@ -225,6 +232,8 @@ public class BpmDesignServiceImpl implements BpmDesignService {
     }
 
     public BpmDesignRespVO queryByBusinessId(Long businessId) {
+        validateApplicationId();
+
         AppMenuRespDTO menuDTO = appResourceApi.getAppMenuById(businessId);
 
         bpmAppResourceValidator.validateMenuAndPageset(menuDTO, ApplicationManager.getApplicationId());
@@ -234,6 +243,8 @@ public class BpmDesignServiceImpl implements BpmDesignService {
 
     @Override
     public BpmDesignRespVO queryByBusinessUuid(String businessUuid) {
+        validateApplicationId();
+
         AppMenuRespDTO menuDTO = appResourceApi.getAppMenuByUuidAndAppId(businessUuid, ApplicationManager.getApplicationId());
 
         bpmAppResourceValidator.validateMenuAndPageset(menuDTO, ApplicationManager.getApplicationId());
@@ -270,6 +281,8 @@ public class BpmDesignServiceImpl implements BpmDesignService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void publish(BpmPublishReqVO reqVo) {
+        validateApplicationId();
+
         Long id = reqVo.getId();
 
         // 校验流程是否存在
