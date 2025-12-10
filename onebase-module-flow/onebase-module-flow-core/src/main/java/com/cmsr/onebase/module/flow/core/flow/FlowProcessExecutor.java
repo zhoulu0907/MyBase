@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.flow.core.flow;
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
 import com.cmsr.onebase.module.flow.context.VariableContext;
 import com.cmsr.onebase.module.flow.context.graph.NodeData;
-import com.cmsr.onebase.module.flow.context.provider.ContextProvider;
+import com.cmsr.onebase.module.flow.context.provider.FlowContextProvider;
 import com.cmsr.onebase.module.flow.core.config.FlowProperties;
 import com.cmsr.onebase.module.flow.core.config.FlowRuntimeCondition;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowExecutionLogRepository;
@@ -45,7 +45,7 @@ public class FlowProcessExecutor {
     private FlowExecutor flowExecutor;
 
     @Autowired
-    private ContextProvider contextProvider;
+    private FlowContextProvider flowContextProvider;
 
     @Autowired
     private RedissonClient redissonClient;
@@ -114,6 +114,7 @@ public class FlowProcessExecutor {
         executeContext.setTraceId(executorInput.getTraceId());
         executeContext.setExecutionUuid(UUID.randomUUID().toString());
         executeContext.setTriggerUserId(executorInput.getTriggerUserId());
+        executeContext.setTriggerUserDeptId(executorInput.getTriggerUserDeptId());
         executeContext.setSystemFields(executorInput.getSystemFields());
         return executeContext;
     }
@@ -136,14 +137,14 @@ public class FlowProcessExecutor {
             //初始化变量上下文
             String executionUuid = executeContext.getExecutionUuid();
             tmpExecuteContext.addLog("恢复变量上下文");
-            VariableContext variableContext = contextProvider.restoreVariableContext(executionUuid);
+            VariableContext variableContext = flowContextProvider.restoreVariableContext(executionUuid);
             tmpExecuteContext.addLog("恢复变量上下文结束");
             if (variableContext == null) {
                 throw new Exception("执行上下文不存在或已过期: " + executionUuid);
             }
             //初始化执行上下文
             tmpExecuteContext.addLog("恢复执行上下文");
-            executeContext = contextProvider.restoreExecuteContext(executionUuid);
+            executeContext = flowContextProvider.restoreExecuteContext(executionUuid);
             tmpExecuteContext.addLog("恢复执行上下文结束");
             if (tmpExecuteContext == null) {
                 throw new Exception("执行上下文不存在或已过期: " + executionUuid);

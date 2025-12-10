@@ -5,7 +5,7 @@ import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraphNode;
 import com.cmsr.onebase.module.flow.context.graph.nodes.ScriptNodeData;
-import com.cmsr.onebase.module.flow.context.provider.FieldTypeProvider;
+import com.cmsr.onebase.module.flow.context.provider.FlowFieldTypeProvider;
 import com.cmsr.onebase.module.flow.core.config.FlowProperties;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowConnectorScriptRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowConnectorScriptDO;
@@ -27,7 +27,7 @@ public class FlowGraphBuilder {
 
     @Setter
     @Autowired
-    private ObjectProvider<FieldTypeProvider> objectProvider;
+    private ObjectProvider<FlowFieldTypeProvider> objectProvider;
 
     @Setter
     @Autowired
@@ -41,8 +41,8 @@ public class FlowGraphBuilder {
         JsonGraph jsonGraph = JsonUtils.parseObject(json, JsonGraph.class);
         addLoopContextToNodes(jsonGraph);
         enrichNodeData(applicationId, jsonGraph);
-        FieldTypeProvider fieldTypeProvider = objectProvider.getObject();
-        fieldTypeProvider.completeFieldType(applicationId, jsonGraph);
+        FlowFieldTypeProvider flowFieldTypeProvider = objectProvider.getObject();
+        flowFieldTypeProvider.completeFieldType(applicationId, jsonGraph);
         return jsonGraph;
     }
 

@@ -6,7 +6,7 @@ import com.cmsr.onebase.module.flow.api.dto.TriggerEventEnum;
 import com.cmsr.onebase.module.flow.context.express.ExpressionExecutor;
 import com.cmsr.onebase.module.flow.context.express.OrExpression;
 import com.cmsr.onebase.module.flow.context.graph.nodes.StartEntityNodeData;
-import com.cmsr.onebase.module.flow.context.provider.ConditionsProvider;
+import com.cmsr.onebase.module.flow.context.provider.FlowConditionsProvider;
 import com.cmsr.onebase.module.flow.core.flow.ExecutorInput;
 import com.cmsr.onebase.module.flow.core.flow.ExecutorResult;
 import com.cmsr.onebase.module.flow.core.flow.FlowProcessExecutor;
@@ -36,7 +36,7 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
     private FlowProcessExecutor flowProcessExecutor;
 
     @Autowired
-    private ConditionsProvider conditionsProvider;
+    private FlowConditionsProvider flowConditionsProvider;
 
     private ExpressionExecutor expressionExecutor = new ExpressionExecutor();
 
@@ -101,7 +101,7 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
                 return respDTO;
             }
             if (CollectionUtils.isNotEmpty(nodeData.getFilterCondition())) {
-                OrExpression orExpression = conditionsProvider.formatConditionsForExpression(nodeData.getFilterCondition(), inputData);
+                OrExpression orExpression = flowConditionsProvider.formatConditionsForExpression(nodeData.getFilterCondition(), inputData);
                 boolean isMatch = expressionExecutor.evaluate(orExpression, inputData);
                 if (!isMatch) {
                     respDTO.setSuccess(true);

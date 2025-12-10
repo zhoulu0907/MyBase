@@ -30,7 +30,6 @@ public class AppAuthViewRepository extends BaseBizRepository<AppAuthViewMapper, 
     }
 
 
-
     public void deleteByQuery(AuthPermissionReq reqVO) {
         this.updateChain()
                 .where(APP_AUTH_VIEW.APPLICATION_ID.eq(reqVO.getApplicationId()))
@@ -39,11 +38,12 @@ public class AppAuthViewRepository extends BaseBizRepository<AppAuthViewMapper, 
                 .remove();
     }
 
-//    public List<AppAuthViewDO> findByAppIdAndRoleIdsAndMenuId(Long applicationId, Set<Long> roleIds, Long menuId) {
-//        QueryWrapper queryWrapper = this.query()
-//                .eq(AppAuthViewDO::getApplicationId, applicationId)
-//                .in(AppAuthViewDO::getRoleId, roleIds)
-//                .eq(AppAuthViewDO::getMenuId, menuId);
-//        return this.list(queryWrapper);
-//    }
+    public List<AppAuthViewDO> findByAppIdAndRoleUuidsAndMenuUuid(Long applicationId, Set<String> roleUuids, String menuUuid) {
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_AUTH_VIEW.APPLICATION_ID.eq(applicationId))
+                .where(APP_AUTH_VIEW.ROLE_UUID.in(roleUuids))
+                .where(APP_AUTH_VIEW.MENU_UUID.eq(menuUuid));
+        return this.list(queryWrapper);
+    }
+
 }

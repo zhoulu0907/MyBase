@@ -10,7 +10,7 @@ import com.cmsr.onebase.module.flow.context.condition.Conditions;
 import com.cmsr.onebase.module.flow.context.express.OrExpression;
 import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
 import com.cmsr.onebase.module.flow.context.graph.nodes.DataQueryMultipleNodeData;
-import com.cmsr.onebase.module.flow.context.provider.ConditionsProvider;
+import com.cmsr.onebase.module.flow.context.provider.FlowConditionsProvider;
 import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntityValueDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticPageConditionVO;
@@ -38,7 +38,7 @@ public class DataQueryMultipleNodeComponent extends SkippableNodeComponent {
     private SemanticDynamicDataApi semanticDynamicDataApi;
 
     @Autowired
-    private ConditionsProvider conditionsProvider;
+    private FlowConditionsProvider flowConditionsProvider;
 
     @Override
     public void process() throws Exception {
@@ -54,7 +54,7 @@ public class DataQueryMultipleNodeComponent extends SkippableNodeComponent {
         SemanticPageConditionVO reqDTO = new SemanticPageConditionVO();
         reqDTO.setTableName(nodeData.resolveTargetTableName());
         if (!StringUtils.equalsIgnoreCase("all", nodeData.getFilterType())) {
-            OrExpression orExpression = conditionsProvider.formatConditionsForValue(conditions, expressionContext);
+            OrExpression orExpression = flowConditionsProvider.formatConditionsForValue(conditions, expressionContext);
             reqDTO.setSemanticConditionDTO(DataMethodApiHelper.processFilterCondition(orExpression));
         }
         reqDTO.setSortBy(DataMethodApiHelper.processSortCondition(nodeData.getSortBy()));

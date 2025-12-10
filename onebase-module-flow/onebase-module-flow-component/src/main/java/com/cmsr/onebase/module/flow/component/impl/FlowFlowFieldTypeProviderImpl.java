@@ -7,7 +7,7 @@ import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraphNode;
 import com.cmsr.onebase.module.flow.context.graph.NodeData;
 import com.cmsr.onebase.module.flow.context.graph.nodes.*;
-import com.cmsr.onebase.module.flow.context.provider.FieldTypeProvider;
+import com.cmsr.onebase.module.flow.context.provider.FlowFieldTypeProvider;
 import com.cmsr.onebase.module.flow.context.provider.FlowAppProvider;
 import com.cmsr.onebase.module.flow.core.config.FlowProperties;
 import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
@@ -29,7 +29,7 @@ import java.util.*;
  */
 @Setter
 @Component
-public class FlowFieldTypeProviderImpl implements FieldTypeProvider {
+public class FlowFlowFieldTypeProviderImpl implements FlowFieldTypeProvider {
 
     @Autowired
     private SemanticDynamicDataApi semanticDynamicDataApi;

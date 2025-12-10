@@ -3,17 +3,17 @@ package com.cmsr.onebase.module.app.runtime.service.menu;
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.security.runtime.RTSecurityContext;
+import com.cmsr.onebase.module.app.api.security.bo.OperationPermission;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthViewRepository;
 import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageSetRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthPermissionDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.AppMenuDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.*;
 import com.cmsr.onebase.module.app.core.dto.auth.UserRoleDTO;
 import com.cmsr.onebase.module.app.core.enums.menu.MenuTypeEnum;
 import com.cmsr.onebase.module.app.core.impl.auth.AppAuthSecurityApiImpl;
 import com.cmsr.onebase.module.app.core.provider.auth.AppAuthPermissionProvider;
 import com.cmsr.onebase.module.app.core.provider.auth.AppAuthRoleProvider;
+import com.cmsr.onebase.module.app.core.utils.CacheUtils;
 import com.cmsr.onebase.module.app.core.utils.MenuUtils;
 import com.cmsr.onebase.module.app.core.vo.menu.MenuListRespVO;
 import com.cmsr.onebase.module.app.runtime.vo.menu.MenuPermissionVO;
@@ -23,6 +23,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -171,31 +172,34 @@ public class AppMenuServiceImpl implements AppMenuService {
      * 要缓存
      */
     public Set<String> findMenuViews(Long userId, Long applicationId, Long menuId) {
-//        String redisKey = CacheUtils.keyForPagePermission(userId, applicationId, menuId);
-//        RBucket<Set<String>> bucket = redissonClient.getBucket(redisKey, CacheUtils.KRYO5_CODEC);
-//        if (bucket.isExists()) {
-//            return bucket.get();
-//        }
+        String redisKey = CacheUtils.keyForPagePermission(userId, applicationId, menuId);
+        RBucket<Set<String>> bucket = redissonClient.getBucket(redisKey, CacheUtils.KRYO5_CODEC);
+        if (bucket.isExists()) {
+            return bucket.get();
+        }
+
+        UserRoleDTO userRoleDTO = appAuthRoleProvider.findUserRoleByApplication(userId, applicationId);
+        if (userRoleDTO.isAdminRole()) {
+            return findMenuAllViews(applicationId, menuId);
+        }
+        OperationPermission menuOperationPermission = appAuthSecurityApi.getMenuOperationPermission(userId, applicationId, menuId);
+        if (menuOperationPermission.isAllFieldsAllowed()) {
+            return findMenuAllViews(applicationId, menuId);
+        }
         //
-//        UserRoleDTO userRoleDTO = appAuthRoleProvider.findUserRoleByApplication(userId, applicationId);
-//        if (userRoleDTO.isAdminRole()) {
-//            return findMenuAllViews(applicationId, menuId);
-//        }
-//        OperationPermission menuOperationPermission = appAuthSecurityApi.getMenuOperationPermission(userId, applicationId, menuId);
-//        if (menuOperationPermission.isAllFieldsAllowed()) {
-//            return findMenuAllViews(applicationId, menuId);
-//        }
-//        Set<Long> roleIds = userRoleDTO.getRoleIds();
-//        Set<Long> result = appAuthViewRepository.findByAppIdAndRoleIdsAndMenuId(applicationId, roleIds, menuId)
-//                .stream().map(viewDO -> viewDO.getViewId()).collect(Collectors.toSet());
+        Set<String> roleUuids = userRoleDTO.getRoleUuids();
+        AppMenuDO menuDO = appMenuRepository.getById(menuId);
+        String menuUuid = menuDO.getMenuUuid();
         //
-//        bucket.set(result, CacheUtils.CACHE_EXPIRE_TIME);
-//        return result;
-        return Collections.emptySet();
+        List<AppAuthViewDO> authViewDOS = appAuthViewRepository.findByAppIdAndRoleUuidsAndMenuUuid(applicationId, roleUuids, menuUuid);
+        Set<String> result = authViewDOS.stream().map(AppAuthViewDO::getViewUuid).collect(Collectors.toSet());
+        bucket.set(result, CacheUtils.CACHE_EXPIRE_TIME);
+        return result;
     }
 
-//    private Set<String> findMenuAllViews(Long applicationId, Long menuId) {
-//        return appMenuRepository.findPageIdsByAppIdAndMenuId(applicationId, menuId);
-//    }
+    private Set<String> findMenuAllViews(Long applicationId, Long menuId) {
+        List<AppResourcePageDO> pages = appMenuRepository.findPagesByMenuId(menuId);
+        return pages.stream().map(AppResourcePageDO::getPageUuid).collect(Collectors.toSet());
+    }
 
 }

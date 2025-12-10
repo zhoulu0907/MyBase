@@ -9,7 +9,7 @@ import com.cmsr.onebase.module.flow.context.condition.Conditions;
 import com.cmsr.onebase.module.flow.context.express.OrExpression;
 import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
 import com.cmsr.onebase.module.flow.context.graph.nodes.DataDeleteeNodeData;
-import com.cmsr.onebase.module.flow.context.provider.ConditionsProvider;
+import com.cmsr.onebase.module.flow.context.provider.FlowConditionsProvider;
 import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticTargetConditionVO;
 import com.mybatisflex.core.tenant.TenantManager;
@@ -35,7 +35,7 @@ public class DataDeleteNodeComponent extends SkippableNodeComponent {
     private SemanticDynamicDataApi semanticDynamicDataApi;
 
     @Autowired
-    private ConditionsProvider conditionsProvider;
+    private FlowConditionsProvider flowConditionsProvider;
 
     @Override
     public void process() throws Exception {
@@ -47,7 +47,7 @@ public class DataDeleteNodeComponent extends SkippableNodeComponent {
         Map<String, Object> expressionContext = VariableProvider.resolveLoopVariables(this, inLoopDepth, variableContext.getNodeVariables());
         //
         List<Conditions> conditions = nodeData.getFilterCondition();
-        OrExpression orExpression = conditionsProvider.formatConditionsForValue(conditions, expressionContext);
+        OrExpression orExpression = flowConditionsProvider.formatConditionsForValue(conditions, expressionContext);
         //
         SemanticTargetConditionVO reqDTO = new SemanticTargetConditionVO();
         reqDTO.setTraceId(executeContext.getTraceId());

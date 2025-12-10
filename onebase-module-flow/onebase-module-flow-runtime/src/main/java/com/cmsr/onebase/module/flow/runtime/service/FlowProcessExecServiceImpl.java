@@ -45,7 +45,6 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
     @Autowired
     private FlowProcessExecutor flowProcessExecutor;
 
-
     private ExpressionExecutor expressionExecutor = new ExpressionExecutor();
 
     @Override
@@ -79,24 +78,15 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
                     vo.setMessage("表单不满足触发条件");
                     return vo;
                 } else {
-                    Long loginUserId = SecurityFrameworkUtils.getLoginUserId();
-                    ExecutorInput executorInput = new ExecutorInput();
-                    executorInput.setTraceId(FlowUtils.generateTraceId());
-                    executorInput.setProcessId(reqVO.getProcessId());
-                    executorInput.setInputParams(inputMap);
-                    executorInput.setTriggerUserId(loginUserId);
+                    ExecutorInput executorInput = buildExecutorInput(reqVO.getProcessId(), inputMap);
                     ExecutorResult executorResult = flowProcessExecutor.startExecution(executorInput);
                     return formTriggerRespVO(executorResult);
                 }
             } else {
                 // 前端二次触发，用于表单信息收集等节点流程的继续执行
-                Long loginUserId = SecurityFrameworkUtils.getLoginUserId();
                 Map<String, Object> inputMap = convertInputFieldsData(reqVO.getInputFields());
-                ExecutorInput executorInput = new ExecutorInput();
-                executorInput.setProcessId(reqVO.getProcessId());
+                ExecutorInput executorInput = buildExecutorInput(reqVO.getProcessId(), inputMap);
                 executorInput.setExecutionUuid(reqVO.getExecutionUuid());
-                executorInput.setInputParams(inputMap);
-                executorInput.setTriggerUserId(loginUserId);
                 ExecutorResult executorResult = flowProcessExecutor.resumeExecution(executorInput);
                 return formTriggerRespVO(executorResult);
             }
@@ -108,6 +98,21 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
             return vo;
         }
     }
+
+    private ExecutorInput buildExecutorInput(Long processId, Map<String, Object> inputParams) {
+        Long loginUserId = SecurityFrameworkUtils.getLoginUserId();
+        Long userDeptId = SecurityFrameworkUtils.getLoginUserDeptId();
+
+        ExecutorInput executorInput = new ExecutorInput();
+        executorInput.setTraceId(FlowUtils.generateTraceId());
+        executorInput.setProcessId(processId);
+        executorInput.setInputParams(inputParams);
+        executorInput.setTriggerUserId(loginUserId);
+        executorInput.setTriggerUserDeptId(userDeptId);
+
+        return executorInput;
+    }
+
 
     private Map<String, Object> convertInputParamsData(Map<String, Object> inputParams, Map<String, SemanticFieldSchemaDTO> fieldSchemaMap) {
         if (MapUtils.isEmpty(inputParams)) {

@@ -12,7 +12,7 @@ import java.util.Map;
  * @Author：huangjie
  * @Date：2025/11/4 12:13
  */
-public interface ConditionsProvider {
+public interface FlowConditionsProvider {
 
     OrExpression formatConditionsForExpression(List<Conditions> conditions, Map<String, Object> vars);
 

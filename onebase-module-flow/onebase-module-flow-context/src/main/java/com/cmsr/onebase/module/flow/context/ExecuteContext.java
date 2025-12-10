@@ -46,6 +46,13 @@ public class ExecuteContext implements Serializable {
     private Long triggerUserId;
 
     /**
+     * 触发用户部门ID
+     * 界面触发：登录用户
+     * 后台触发： 创建人部门
+     */
+    private Long triggerUserDeptId;
+
+    /**
      * 元数据接口调用传递过来的，也原样传递回去
      * SystemFieldConstants
      */
