@@ -41,7 +41,7 @@ public class ApiSignatureRedisDAO {
     }
 
     public Boolean setNonce(String appId, String nonce, int time, TimeUnit timeUnit) {
-        return stringRedisTemplate.opsForValue().setIfAbsent(formatNonceKey(appId, nonce), "", time, timeUnit);
+        return stringRedisTemplate.opsForValue().setIfAbsent(formatNonceKey(appId, nonce), "onebase", time, timeUnit);
     }
 
     private static String formatNonceKey(String appId, String nonce) {

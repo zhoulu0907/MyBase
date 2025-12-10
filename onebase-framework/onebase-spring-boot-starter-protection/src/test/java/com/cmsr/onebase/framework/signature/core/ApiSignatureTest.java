@@ -47,7 +47,7 @@ public class ApiSignatureTest {
 
         // 准备参数
         ApiSignature apiSignature = mock(ApiSignature.class);
-        when(apiSignature.appId()).thenReturn("appId");
+        when(apiSignature.appKey()).thenReturn("appId");
         when(apiSignature.timestamp()).thenReturn("timestamp");
         when(apiSignature.nonce()).thenReturn("nonce");
         when(apiSignature.sign()).thenReturn("sign");
