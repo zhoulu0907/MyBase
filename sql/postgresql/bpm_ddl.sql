@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS bpm_flow_definition;
+
 CREATE TABLE bpm_flow_definition
 (
     id              int8         NOT NULL,
@@ -54,6 +56,8 @@ COMMENT ON COLUMN bpm_flow_definition."version_tag" IS '版本标签';
 COMMENT ON COLUMN bpm_flow_definition."definition_uuid" IS '流程定义uuid';
 
 CREATE INDEX idx_bpm_flow_definition_uuid ON bpm_flow_definition(definition_uuid);
+
+DROP TABLE IF EXISTS bpm_flow_node;
 
 CREATE TABLE bpm_flow_node
 (
@@ -118,6 +122,8 @@ COMMENT ON COLUMN bpm_flow_node.version_tag IS '版本标签';
 
 CREATE INDEX idx_bpm_flow_node_def_uuid ON bpm_flow_node(definition_uuid);
 
+DROP TABLE IF EXISTS bpm_flow_skip;
+
 CREATE TABLE bpm_flow_skip
 (
     id             int8         NOT NULL,
@@ -171,6 +177,8 @@ COMMENT ON COLUMN bpm_flow_skip.version_tag IS '版本标签';
 
 CREATE INDEX idx_bpm_flow_skip_def_uuid ON bpm_flow_skip(definition_uuid);
 
+DROP TABLE IF EXISTS bpm_flow_instance;
+
 CREATE TABLE bpm_flow_instance
 (
     id              int8         NOT NULL,
@@ -222,6 +230,8 @@ COMMENT ON COLUMN bpm_flow_instance.tenant_id IS '租户id';
 
 CREATE INDEX idx_bpm_flow_instance_def_uuid ON bpm_flow_instance(definition_uuid);
 
+DROP TABLE IF EXISTS bpm_flow_task;
+
 CREATE TABLE bpm_flow_task
 (
     id            int8         NOT NULL,
@@ -264,6 +274,8 @@ COMMENT ON COLUMN bpm_flow_task.deleted IS '删除标志';
 COMMENT ON COLUMN bpm_flow_task.tenant_id IS '租户id';
 
 CREATE INDEX idx_bpm_flow_task_def_uuid ON bpm_flow_task(definition_uuid);
+
+DROP TABLE IF EXISTS bpm_flow_his_task;
 
 CREATE TABLE bpm_flow_his_task
 (
@@ -326,6 +338,8 @@ COMMENT ON COLUMN bpm_flow_his_task.tenant_id IS '租户id';
 
 CREATE INDEX idx_bpm_flow_his_task_def_uuid ON bpm_flow_his_task(definition_uuid);
 
+DROP TABLE IF EXISTS bpm_flow_user;
+
 CREATE TABLE bpm_flow_user
 (
     id           int8        NOT NULL,
@@ -360,6 +374,8 @@ COMMENT ON COLUMN bpm_flow_user.tenant_id IS '租户id';
 
 -- 流程实例扩展信息表
 -- 与流程实例表一一对应，扩展流程相关信息
+
+DROP TABLE IF EXISTS bpm_flow_instance_biz_ext;
 
 CREATE TABLE bpm_flow_instance_biz_ext
 (
@@ -424,6 +440,8 @@ CREATE INDEX idx_bpm_flow_instance_biz_ext_deleted ON bpm_flow_instance_biz_ext(
 -- 唯一索引：一个流程实例只对应一条扩展信息（未删除的记录）
 CREATE UNIQUE INDEX uk_bpm_flow_instance_biz_ext_instance_id ON bpm_flow_instance_biz_ext(instance_id) WHERE deleted = 0;
 
+DROP TABLE IF EXISTS bpm_flow_agent;
+
 CREATE TABLE bpm_flow_agent
 (
     id                      int8         NOT NULL,
@@ -471,6 +489,8 @@ COMMENT ON COLUMN bpm_flow_agent.principal_name IS '被代理人用户名称';
 COMMENT ON COLUMN bpm_flow_agent.application_id IS '应用ID';
 COMMENT ON COLUMN bpm_flow_agent.version_tag IS '版本标签';
 
+DROP TABLE IF EXISTS bpm_flow_cc_record;
+
 CREATE TABLE bpm_flow_cc_record
 (
     id               int8        NOT NULL,
@@ -504,6 +524,8 @@ COMMENT ON COLUMN bpm_flow_cc_record.update_time IS '更新时间';
 COMMENT ON COLUMN bpm_flow_cc_record.updater IS '更新人';
 COMMENT ON COLUMN bpm_flow_cc_record.deleted IS '删除标志';
 COMMENT ON COLUMN bpm_flow_cc_record.tenant_id IS '租户id';
+
+DROP TABLE IF EXISTS bpm_flow_agent_ins;
 
 CREATE TABLE bpm_flow_agent_ins
 (
