@@ -150,8 +150,8 @@ const XCheckbox: XInputCheckboxSchema = {
     ...dataFieldConfig,
     // 选项
     checkboxDataConfig,
-    directionConfig,
     // 选项分布方式
+    directionConfig,
     {
       key: 'verify',
       name: '校验',

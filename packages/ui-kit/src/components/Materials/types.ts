@@ -488,6 +488,17 @@ export interface IDefaultValueConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.DEFAULT_VALUE;
+  valueType?: string;
+}
+// 电话类型
+export interface IPhoneType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.PHONE_TYPE;
+  range?: Array<{
+    label: string;
+    value: string;
+  }>;
 }
 
 // 分割线字段描述
