@@ -302,7 +302,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
         dataIndex: 'index',
         width: '62px',
         align: 'center',
-        fixed: '',
+        fixed: undefined as any,
         headerCellStyle: { textAlign: 'center' },
         bodyCellStyle: { padding: '0 4px', textAlign: 'center' },
         render: (_: any, __: any, index: number) => index + 1
@@ -321,7 +321,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
         ),
         dataIndex: column.id,
         key: column.id,
-        fixed: '',
+        fixed: undefined as any,
         bodyCellStyle: {
           padding: '4px 0'
         },
