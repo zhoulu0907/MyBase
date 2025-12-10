@@ -29,7 +29,7 @@ const XDateTimePicker = memo((props: XDateTimePickerConfig & { runtime?: boolean
   // 生成唯一的字段ID
   const fieldId = dataField && dataField.length > 0
     ? dataField[dataField.length - 1]
-    : `${FORM_COMPONENT_TYPES.INPUT_TEXT}_${nanoid()}`;
+    : `${FORM_COMPONENT_TYPES.DATE_TIME_PICKER}_${nanoid()}`;
 
   const rules: ITypeRules<ValidatorType.Custom>[] = [
     {
@@ -61,7 +61,8 @@ const XDateTimePicker = memo((props: XDateTimePickerConfig & { runtime?: boolean
         <DatePicker
           title={label.text}
           maskClosable
-          typeArr={['year', 'month', 'date', 'hour', 'minute']}
+          // typeArr={['year', 'month', 'date', 'hour', 'minute']}
+          mode='datetime'
           formatter={(value, type) => {
             const map = {
               year: '年',

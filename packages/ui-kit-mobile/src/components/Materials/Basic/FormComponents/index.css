@@ -64,6 +64,11 @@
   .arco-cell.without-group {
     padding: 0;
   }
+
+  .arco-cell-inner {
+    height: auto;
+    min-height: 1.08rem;
+  }
 }
 
 .arco-cell.without-group {

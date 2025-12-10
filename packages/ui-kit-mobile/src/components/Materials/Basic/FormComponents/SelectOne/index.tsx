@@ -24,7 +24,7 @@ const XSelectOne = memo((props: XSelectOneConfig & { runtime?: boolean; detailMo
   // 生成唯一的字段ID
   const fieldId = dataField && dataField.length > 0
     ? dataField[dataField.length - 1]
-    : `${FORM_COMPONENT_TYPES.INPUT_TEXT}_${nanoid()}`;
+    : `${FORM_COMPONENT_TYPES.SELECT_ONE}_${nanoid()}`;
 
   const rules: ITypeRules<ValidatorType.Custom>[] = [
     {

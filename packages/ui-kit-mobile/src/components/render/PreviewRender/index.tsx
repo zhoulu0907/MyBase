@@ -172,6 +172,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
             {...componentConfig}
             runtime={runtime}
             detailMode={detailMode}
+            form={form}
           />
         );
       case FORM_COMPONENT_TYPES.USER_MULTIPLE_SELECT:
@@ -182,6 +183,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
             {...componentConfig}
             runtime={runtime}
             detailMode={detailMode}
+            form={form}
             isMultiple
           />
         );

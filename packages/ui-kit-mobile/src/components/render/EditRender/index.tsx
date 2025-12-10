@@ -28,13 +28,14 @@ interface ComponentRenderProps {
   pageComponentSchema: any;
   /** 组件预览状态 */
   runtime: boolean;
+  form?: any;
 }
 
 /**
  * ComponentRender 组件
  * 用于渲染传入的组件，支持适配各类组件
  */
-const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pageComponentSchema, runtime }) => {
+const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pageComponentSchema, runtime, form }) => {
   // 获取组件配置
 
   const componentConfig = getComponentConfig(pageComponentSchema, cpType);
@@ -80,13 +81,13 @@ const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pag
       case FORM_COMPONENT_TYPES.AUTO_CODE:
         return <FormComp.XAutoCode cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case FORM_COMPONENT_TYPES.DEPT_SELECT:
-        return <FormComp.XDeptSelect cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+        return <FormComp.XDeptSelect cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} form={form} />;
       case FORM_COMPONENT_TYPES.DEPT_MULTIPLE_SELECT:
-        return <FormComp.XDeptSelect cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} isMultiple />;
+        return <FormComp.XDeptSelect cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} form={form} isMultiple />;
       case FORM_COMPONENT_TYPES.USER_SELECT:
-        return <FormComp.XUserSelect cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+        return <FormComp.XUserSelect cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} form={form} />;
       case FORM_COMPONENT_TYPES.USER_MULTIPLE_SELECT:
-        return <FormComp.XUserSelect cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} isMultiple />;
+        return <FormComp.XUserSelect cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} form={form} isMultiple />;
       case FORM_COMPONENT_TYPES.SUB_TABLE:
         return <FormComp.XSubTable cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
 
