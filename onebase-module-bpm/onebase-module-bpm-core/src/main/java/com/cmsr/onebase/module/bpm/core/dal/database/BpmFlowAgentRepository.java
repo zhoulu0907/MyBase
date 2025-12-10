@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.bpm.core.dal.database;
 
-import com.cmsr.onebase.framework.orm.repo.BaseBizRepository;
+import com.cmsr.onebase.framework.orm.repo.BaseAppRepository;
 import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowAgentDO;
 import com.cmsr.onebase.module.bpm.core.dal.mapper.BpmFlowAgentMapper;
 import com.cmsr.onebase.module.bpm.core.enums.BpmAgentStatus;
@@ -22,7 +22,7 @@ import static com.cmsr.onebase.module.bpm.core.dal.dataobject.table.BpmFlowAgent
  * @date 2025-11-10
  */
 @Repository
-public class BpmFlowAgentRepository extends BaseBizRepository<BpmFlowAgentMapper, BpmFlowAgentDO> {
+public class BpmFlowAgentRepository extends BaseAppRepository<BpmFlowAgentMapper, BpmFlowAgentDO> {
     public QueryCondition buildConditionByAgentStatus(BpmAgentStatus agentStatus) {
         QueryCondition condition = null;
         LocalDateTime now = LocalDateTime.now();

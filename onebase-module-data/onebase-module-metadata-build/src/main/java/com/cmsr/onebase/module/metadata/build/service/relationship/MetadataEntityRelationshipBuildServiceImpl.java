@@ -650,6 +650,7 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
         // 2. 创建响应VO
         EntityWithChildrenRespVO result = BeanUtils.toBean(entity, EntityWithChildrenRespVO.class, res -> {
             res.setEntityId(entity.getId());
+            res.setEntityUuid(entity.getEntityUuid());
             res.setEntityName(entity.getDisplayName());
             res.setEntityCode(entity.getCode());
             // 设置实际表名

@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.bpm.core.dal.dataobject;
 
-import com.cmsr.onebase.framework.orm.entity.BaseBizEntity;
+import com.cmsr.onebase.framework.orm.entity.BaseAppEntity;
 import com.mybatisflex.annotation.Table;
 import lombok.Data;
 
@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
  */
 @Data
 @Table("bpm_flow_agent")
-public class BpmFlowAgentDO extends BaseBizEntity implements Serializable {
+public class BpmFlowAgentDO extends BaseAppEntity implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;

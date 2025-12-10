@@ -130,6 +130,11 @@ public class FlowNodeTableDef extends TableDef {
     public final QueryColumn DEFINITION_ID = new QueryColumn(this, "definition_id");
 
     /**
+     * 流程定义UUID
+     */
+    public final QueryColumn DEFINITION_UUID = new QueryColumn(this, "definition_uuid");
+
+    /**
      * 监听器路径
      */
     public final QueryColumn LISTENER_PATH = new QueryColumn(this, "listener_path");
@@ -157,7 +162,7 @@ public class FlowNodeTableDef extends TableDef {
     /**
      * 默认字段，不包含逻辑删除或者 large 等字段。
      */
-    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, NODE_TYPE, DEFINITION_ID, NODE_CODE, NODE_NAME, PERMISSION_FLAG, NODE_RATIO, COORDINATE, ANY_NODE_SKIP, LISTENER_TYPE, LISTENER_PATH, HANDLER_TYPE, HANDLER_PATH, FORM_CUSTOM, FORM_PATH, BPM_VERSION, LOCK_VERSION, CREATOR, CREATE_TIME, UPDATER, UPDATE_TIME, EXT, DELETED, TENANT_ID, APPLICATION_ID, VERSION_TAG};
+    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, NODE_TYPE, DEFINITION_ID, DEFINITION_UUID, NODE_CODE, NODE_NAME, PERMISSION_FLAG, NODE_RATIO, COORDINATE, ANY_NODE_SKIP, LISTENER_TYPE, LISTENER_PATH, HANDLER_TYPE, HANDLER_PATH, FORM_CUSTOM, FORM_PATH, BPM_VERSION, LOCK_VERSION, CREATOR, CREATE_TIME, UPDATER, UPDATE_TIME, EXT, DELETED, TENANT_ID, APPLICATION_ID, VERSION_TAG};
 
     public FlowNodeTableDef() {
         super("", "bpm_flow_node");

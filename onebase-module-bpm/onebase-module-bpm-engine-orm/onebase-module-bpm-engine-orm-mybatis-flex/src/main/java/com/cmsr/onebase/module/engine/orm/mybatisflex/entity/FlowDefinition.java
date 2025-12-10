@@ -23,6 +23,10 @@ import java.util.List;
 @Accessors(chain = true)
 @Table(value = "bpm_flow_definition")
 public class FlowDefinition extends WarmFlowBizEntity implements Definition {
+    /** 流程定义UUID */
+    @Column(value = "definition_uuid", comment = "流程定义UUID")
+    private String definitionUuid;
+
     /** 流程编码 */
     @Column(value = "flow_code", comment = "流程编码")
     private String flowCode;
@@ -182,6 +186,11 @@ public class FlowDefinition extends WarmFlowBizEntity implements Definition {
 
     public Definition setVersionTag(Long versionTag) {
         this.versionTag = versionTag;
+        return this;
+    }
+
+    public Definition setDefinitionUuid(String definitionUuid) {
+        this.definitionUuid = definitionUuid;
         return this;
     }
 }

@@ -67,6 +67,19 @@ public interface HisTask extends RootEntity {
 
     HisTask setDefinitionId(Long definitionId);
 
+    /**
+     * 获取流程定义UUID（主关联）
+     * @return 流程定义UUID
+     */
+    String getDefinitionUuid();
+
+    /**
+     * 设置流程定义UUID（主关联）
+     * @param definitionUuid definitionUuid
+     * @return HisTask
+     */
+    HisTask setDefinitionUuid(String definitionUuid);
+
     String getFlowName();
 
     HisTask setFlowName(String flowName);

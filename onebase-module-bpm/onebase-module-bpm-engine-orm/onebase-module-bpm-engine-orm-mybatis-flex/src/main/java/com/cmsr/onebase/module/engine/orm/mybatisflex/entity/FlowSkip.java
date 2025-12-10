@@ -23,6 +23,10 @@ public class FlowSkip extends WarmFlowBizEntity implements Skip {
     @Column(value = "definition_id", comment = "流程定义ID")
     private Long definitionId;
 
+    /** 流程定义UUID（备用） */
+    @Column(value = "definition_uuid", comment = "流程定义UUID")
+    private String definitionUuid;
+
     /** 当前节点编码 */
     @Column(value = "now_node_code", comment = "当前节点编码")
     private String nowNodeCode;
@@ -144,6 +148,11 @@ public class FlowSkip extends WarmFlowBizEntity implements Skip {
 
     public Skip setVersionTag(Long versionTag) {
         this.versionTag = versionTag;
+        return this;
+    }
+
+    public Skip setDefinitionUuid(String definitionUuid) {
+        this.definitionUuid = definitionUuid;
         return this;
     }
 }

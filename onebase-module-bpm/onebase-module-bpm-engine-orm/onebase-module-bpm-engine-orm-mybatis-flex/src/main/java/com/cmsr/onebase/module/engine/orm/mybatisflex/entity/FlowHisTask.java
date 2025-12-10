@@ -24,6 +24,10 @@ public class FlowHisTask extends WarmFlowBaseEntity implements HisTask {
     @Column(value = "definition_id", comment = "流程定义ID")
     private Long definitionId;
 
+    /** 流程定义UUID（主关联） */
+    @Column(value = "definition_uuid", comment = "流程定义UUID")
+    private String definitionUuid;
+
     /** 流程实例ID */
     @Column(value = "instance_id", comment = "流程实例ID")
     private Long instanceId;
@@ -174,6 +178,11 @@ public class FlowHisTask extends WarmFlowBaseEntity implements HisTask {
             this.deleted = null;
         }
 
+        return this;
+    }
+
+    public HisTask setDefinitionUuid(String definitionUuid) {
+        this.definitionUuid = definitionUuid;
         return this;
     }
 }
