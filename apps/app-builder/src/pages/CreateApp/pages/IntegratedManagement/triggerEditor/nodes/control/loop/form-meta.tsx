@@ -9,12 +9,7 @@ import { BreakMode } from '../../../components/const';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
-import {
-  getDataNodeSource,
-  getEntityFieldList,
-  getPrecedingNodes,
-  validateNodeForm
-} from '../../utils';
+import { getPrecedingNodes, validateNodeForm } from '../../utils';
 
 const ALLOW_DATANODE_TYPES = [NodeType.DATA_QUERY_MULTIPLE];
 
@@ -42,18 +37,18 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     setDataNodeList(newDataNodeList);
   };
 
-  const handleDateNodeSourceChange = async (dataNodeId: string) => {
-    const nodes = triggerEditorSignal.nodes.value;
+  //   const handleDateNodeSourceChange = async (dataNodeId: string) => {
+  //     const nodes = triggerEditorSignal.nodes.value;
 
-    const newDataNodeList = getPrecedingNodes(node.id, nodes, [NodeType.DATA_QUERY_MULTIPLE]);
-    setDataNodeList(newDataNodeList);
+  //     const newDataNodeList = getPrecedingNodes(node.id, nodes, [NodeType.DATA_QUERY_MULTIPLE]);
+  //     setDataNodeList(newDataNodeList);
 
-    const originDataSource = getDataNodeSource(dataNodeId);
-    console.log('originDataSource: ', originDataSource);
+  //     const originDataSource = getDataNodeSource(dataNodeId);
+  //     console.log('originDataSource: ', originDataSource);
 
-    getEntityFieldList(originDataSource, handleSetConditionFields, () => {});
+  //     getEntityFieldList(originDataSource, handleSetConditionFields, () => {});
 
-  };
+  //   };
 
   const handleSetConditionFields = (conditionFields: ConditionField[]) => {
     console.log(conditionFields);

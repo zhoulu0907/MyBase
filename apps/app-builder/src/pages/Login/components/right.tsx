@@ -5,6 +5,7 @@ import { IconLock, IconUser } from '@arco-design/web-react/icon';
 import {
   getHashQueryParam,
   getOrCreateDeviceInfo,
+  SECURITY_CATEGORY_MFA,
   SliderCaptcha,
   TokenManager,
   type SliderCaptchaRef
@@ -12,15 +13,18 @@ import {
 import {
   checkCaptchaApi,
   getCaptchaApi,
+  getTenantSecurityConfig,
   tenantLogin,
   type LoginRequest,
-  type TenantLoginResponse
+  type TenantLoginResponse,
+  type TenantSecurityConfig
 } from '@onebase/platform-center';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useI18n } from '../../../hooks/useI18n';
 import { useRememberMe } from '../../../hooks/useRememberMe';
 import styles from '../index.module.less';
+import { VerifyModal } from './verify';
 
 const { Paragraph } = Typography;
 
@@ -41,11 +45,21 @@ const Right: React.FC = () => {
   // 状态管理
   const [loading, setLoading] = useState(false);
 
+  // 新增用于校验手机号和校验邮箱的状态
+  const [mfaVerifyStatus, setMfaVerifyStatus] = useState<string>('');
+  const [showVerifyModal, setShowVerifyModal] = useState(false);
+
+  const [verifyCode, setVerifyCode] = useState<string>('');
+  // 保存当前的 captchaVerification，用于 MFA 验证后登录
+  const savedCaptchaVerificationRef = useRef<string>('');
+
   // 组件初始化时设置保存的账号
   useEffect(() => {
     if (savedAccount) {
       accountForm.setFieldValue('account', savedAccount);
     }
+
+    // handleGetTenantSecurityConfig();
 
     // 如果已经登录了就自动跳转到首页
     // if (TokenManager.isTokenValid()) {
@@ -58,23 +72,69 @@ const Right: React.FC = () => {
     // }
   }, []);
 
+  const handleGetTenantSecurityConfig = async () => {
+    const req = {
+      tenantId: tenantId,
+      categoryCode: [SECURITY_CATEGORY_MFA]
+    };
+    const securityConfigs = await getTenantSecurityConfig(req);
+    console.log(securityConfigs);
+
+    if (securityConfigs) {
+      (securityConfigs as TenantSecurityConfig[]).forEach((config) => {
+        if (config.categoryCode === SECURITY_CATEGORY_MFA && config.securityConfigItemRespVO.length > 0) {
+          const securityConfigItem = config.securityConfigItemRespVO[0];
+
+          if (securityConfigItem.configValue.includes('email')) {
+            setMfaVerifyStatus('email');
+          }
+          if (securityConfigItem.configValue.includes('phone')) {
+            setMfaVerifyStatus('phone');
+          }
+        }
+      });
+    }
+  };
+
   // 处理记住我状态变化
   const handleRememberMeChange = (checked: boolean) => {
     const account = accountForm.getFieldValue('account') || '';
     saveRememberMe(account, checked);
   };
 
+  // 清除登录验证码相关状态
+  const clearLoginVerification = () => {
+    savedCaptchaVerificationRef.current = '';
+    accountForm.setFieldValue('captchaVerification', '');
+    setVerifyCode('');
+  };
+
   // 账号密码登录
-  const handleAccountLogin = async (values: LoginRequest) => {
+  const handleAccountLogin = async (values: LoginRequest, mfaCode?: string) => {
     setLoading(true);
 
     try {
-      const captchaVerification = values.captchaVerification;
+      // 优先使用传入的 captchaVerification，如果没有则使用保存的
+      const captchaVerification = values.captchaVerification || savedCaptchaVerificationRef.current;
+
       // 如果没有验证码token，则先进行验证码验证
       if (!captchaVerification) {
         // 显示滑块验证码
         sliderCaptchaRef.current?.showCaptcha();
+        setLoading(false);
         return;
+      }
+
+      // 保存 captchaVerification 到 ref，以便后续使用
+      savedCaptchaVerificationRef.current = captchaVerification;
+
+      if (mfaVerifyStatus === 'phone' || mfaVerifyStatus === 'email') {
+        const codeToUse = mfaCode || verifyCode;
+        if (!codeToUse || codeToUse === '') {
+          setShowVerifyModal(true);
+          setLoading(false);
+          return;
+        }
       }
 
       const headers = {
@@ -90,13 +150,19 @@ const Right: React.FC = () => {
         deviceId: deviceId
       };
 
+      // 如果有 MFA 验证码，添加到登录数据中
+      // 注意：如果后端需要单独的字段，可能需要扩展 LoginRequest 类型
+      const codeToUse = mfaCode || verifyCode;
+      if (codeToUse) {
+        (loginData as any).verifyCode = codeToUse;
+        (loginData as any).verifyType = mfaVerifyStatus;
+      }
+
       const response: TenantLoginResponse = await tenantLogin(loginData, headers);
 
       if (response.accessToken) {
         TokenManager.setCurIdentifyId(tenantId);
 
-        // 使用 TokenManager 存储 token 信息
-        console.log('response: ', response);
         TokenManager.setToken(
           {
             userId: response.userId,
@@ -114,6 +180,11 @@ const Right: React.FC = () => {
 
         Message.success(t('auth.loginSuccess'));
 
+        // 登录成功，清除验证码相关状态
+        savedCaptchaVerificationRef.current = '';
+        accountForm.setFieldValue('captchaVerification', '');
+        setVerifyCode('');
+
         const redirectURL = getHashQueryParam('redirectURL');
         if (redirectURL) {
           window.location.href = redirectURL;
@@ -124,9 +195,13 @@ const Right: React.FC = () => {
         return;
       } else {
         Message.error(t('auth.loginFailed'));
+        // 登录失败，清除验证码，下次需要重新验证
+        clearLoginVerification();
       }
     } catch (error: any) {
       console.error('登录失败:', error);
+      // 登录失败，清除验证码，下次需要重新验证
+      clearLoginVerification();
     } finally {
       setLoading(false);
     }
@@ -140,6 +215,10 @@ const Right: React.FC = () => {
   // 验证码验证成功回调
   const handleCaptchaSuccess = async (token: string) => {
     const deviceId = await getOrCreateDeviceInfo();
+
+    // 保存 captchaVerification 到表单和 ref
+    accountForm.setFieldValue('captchaVerification', token);
+    savedCaptchaVerificationRef.current = token;
 
     const values = await accountForm.getFieldsValue();
     handleSubmit({
@@ -252,6 +331,37 @@ const Right: React.FC = () => {
           <span>《用户协议》</span>和<span>《隐私政策》</span>
         </Paragraph>
       </div>
+
+      <VerifyModal
+        verifyType={mfaVerifyStatus}
+        visible={showVerifyModal}
+        onCancel={() => {
+          setShowVerifyModal(false);
+          setLoading(false);
+        }}
+        onOk={async (values: { verifyCode: string; verifyType: string }) => {
+          // 关闭弹窗
+          setShowVerifyModal(false);
+
+          // 获取表单数据并调用登录接口，直接传递验证码
+          const formValues = await accountForm.getFieldsValue();
+          const deviceId = await getOrCreateDeviceInfo();
+
+          // 使用保存的 captchaVerification 或表单中的值
+          const captchaVerification = savedCaptchaVerificationRef.current || formValues.captchaVerification;
+
+          // 调用登录接口，直接传递验证码
+          await handleAccountLogin(
+            {
+              username: formValues.username,
+              password: formValues.password,
+              captchaVerification: captchaVerification,
+              deviceId: deviceId
+            },
+            values.verifyCode
+          );
+        }}
+      />
     </div>
   );
 };

@@ -195,7 +195,7 @@ const ProfileEditPage: React.FC<IEditPageProps> = ({ avatarUrl, setAvatarUrl }) 
                 required
                 rules={[{ required: true, message: '请输入旧密码' }]}
               >
-                <Input placeholder="请输入旧密码" />
+                <Input.Password placeholder="请输入旧密码" />
               </FormItem>
 
               <FormItem
@@ -204,7 +204,7 @@ const ProfileEditPage: React.FC<IEditPageProps> = ({ avatarUrl, setAvatarUrl }) 
                 required
                 rules={[{ required: true, message: '请输入新密码' }]}
               >
-                <Input placeholder="请输入新密码" />
+                <Input.Password placeholder="请输入新密码" />
               </FormItem>
 
               <FormItem
@@ -226,7 +226,7 @@ const ProfileEditPage: React.FC<IEditPageProps> = ({ avatarUrl, setAvatarUrl }) 
                   }
                 ]}
               >
-                <Input placeholder="请再次输入新密码" />
+                <Input.Password placeholder="请再次输入新密码" />
               </FormItem>
 
               <FormItem wrapperCol={{ offset: 5 }}>

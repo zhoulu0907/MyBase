@@ -28,6 +28,7 @@ import styles from './index.module.less';
 import { type corpApplicationListProps, type cropItem, type industryTypeOption } from './types/appItem';
 import { convertName } from './utils';
 import type { ColumnProps } from '@arco-design/web-react/es/Table';
+import { displayCorpLogo } from '@/utils';
 const AvatarGroup = Avatar.Group;
 
 const BusinessPage: React.FC = () => {
@@ -42,7 +43,7 @@ const BusinessPage: React.FC = () => {
           {data ? (
             <Image src={data} width={72} height={36} />
           ) : (
-            <div className={styles.corpLogo}>{record?.corpName || ''}</div>
+            <div className={styles.corpLogo}>{displayCorpLogo(record?.corpName)}</div>
           )}
         </>
       )
@@ -337,18 +338,18 @@ const BusinessPage: React.FC = () => {
           onAdd={handleCreateBusiness}
           setSearchInputValue={handleSearchChange}
         />
-          <Table
-            loading={loading}
-            columns={businessManageColumns as ColumnProps<cropItem>[]}
-            data={displayData}
-            pagination={{
-              ...pagination,
-              showTotal: true,
-              onChange: handlePageChange
-            }}
-            rowKey="id"
-            border={false}
-          />
+        <Table
+          loading={loading}
+          columns={businessManageColumns as ColumnProps<cropItem>[]}
+          data={displayData}
+          pagination={{
+            ...pagination,
+            showTotal: true,
+            onChange: handlePageChange
+          }}
+          rowKey="id"
+          border={false}
+        />
       </div>
     );
   };

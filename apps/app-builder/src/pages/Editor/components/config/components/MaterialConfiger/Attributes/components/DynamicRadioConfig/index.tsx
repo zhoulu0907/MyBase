@@ -331,8 +331,11 @@ const DynamicRadioConfig: React.FC<DynamicRadioConfigProps> = ({ handlePropsChan
                   <Button
                     type="outline"
                     onClick={() => {
-                      const newLabel = `新选项_${Array.from({ length: 6 }, () => String.fromCharCode(97 + Math.floor(Math.random() * 26))).join('')}`;
-                      const newValue = _fields?.[_fields.length - 1]?.field || `${configs.id}-${selectKey}[0]`;
+                      const code = Array.from({ length: 6 }, () =>
+                        String.fromCharCode(97 + Math.floor(Math.random() * 26))
+                      ).join('');
+                      const newLabel = `新选项_${code}`;
+                      const newValue = `${configs.id}-${selectKey}-${code}`;
                       const newList = [
                         ...configs[selectKey].defaultOptions,
                         {

@@ -1,21 +1,10 @@
-import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
-
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { Checkbox, Form, Grid, Input, Radio, Select } from '@arco-design/web-react';
-import type { TreeSelectDataType } from '@arco-design/web-react/es/TreeSelect/interface';
-import {
-  getEntityFieldsWithChildren,
-  getEntityListByApp,
-  getFieldCheckTypeApi,
-  type AppEntityField,
-  type ConditionField,
-  type EntityFieldValidationTypes
-} from '@onebase/app';
-import { getHashQueryParam } from '@onebase/common';
-import { useEffect, useState } from 'react';
+import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
+import { useEffect } from 'react';
 import ConditionEditor from '../../../components/condition-editor';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
-import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
+import { useIsSidebar, useNodeRenderContext, useStartEntityFields } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
 import { updateStartEntityOutputs } from './output';
 
@@ -24,123 +13,42 @@ const CheckboxGroup = Checkbox.Group;
 const RadioGroup = Radio.Group;
 
 const beforeTriggerEvents = [
-  {
-    label: '创建前',
-    value: 'beforeCreate'
-  },
-  {
-    label: '修改前',
-    value: 'beforeUpdate'
-  },
-  {
-    label: '删除前',
-    value: 'beforeDelete'
-  }
+  { label: '创建前', value: 'beforeCreate' },
+  { label: '修改前', value: 'beforeUpdate' },
+  { label: '删除前', value: 'beforeDelete' }
 ];
 
 const afterTriggerEvents = [
-  {
-    label: '创建后',
-    value: 'afterCreate'
-  },
-  {
-    label: '修改后',
-    value: 'afterUpdate'
-  },
-  {
-    label: '删除后',
-    value: 'afterDelete'
-  }
+  { label: '创建后', value: 'afterCreate' },
+  { label: '修改后', value: 'afterUpdate' },
+  { label: '删除后', value: 'afterDelete' }
 ];
 
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const isSidebar = useIsSidebar();
   const { node } = useNodeRenderContext();
-
-  const handlePropsOnChange = (values: any) => {
-    triggerEditorSignal.setNodeData(node.id, values);
-  };
+  const { entityList, conditionFields, validationTypes, loadEntityFields } = useStartEntityFields();
 
   const [payloadForm] = Form.useForm();
-
-  const [conditionFields, setConditionFields] = useState<TreeSelectDataType[]>([]);
-  const [validationTypes, setValidationTypes] = useState<EntityFieldValidationTypes[]>([]);
-
-  const [entityList, setEntityList] = useState<any[]>([]);
-
-  const entityId = Form.useWatch('entityId', payloadForm);
+  const tableName = Form.useWatch('tableName', payloadForm);
   const triggerType = Form.useWatch('triggerType', payloadForm);
 
   useEffect(() => {
-    const appId = getHashQueryParam('appId');
-    if (appId) {
-      handleGetEntityListByApp(appId);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (entityId) {
-      handleGetEntityFieldList(entityId);
-    }
-  }, [entityId]);
-
-  const handleGetEntityListByApp = async (appId: string) => {
-    const res = await getEntityListByApp(appId);
-    setEntityList(res);
-  };
-
-  const handleGetEntityFieldList = async (eId: string) => {
-    const res = await getEntityFieldsWithChildren(eId);
-
-    if (res && res.parentFields) {
-      console.log(res);
-
-      const conditions: ConditionField[] = [];
-      const fieldIds: string[] = [];
-      const fieldList: any[] = [];
-
-      res.parentFields.forEach((item: AppEntityField) => {
-        fieldIds.push(item.fieldId);
-        fieldList.push({
-          label: item.displayName,
-          value: item.fieldId
+    if (entityList.length > 0 && tableName) {
+      const entityId = entityList.find((item) => item.tableName === tableName)?.entityId;
+      if (entityId) {
+        loadEntityFields(entityId, tableName).then(({ conditions }) => {
+          if (conditions.length > 0) {
+            updateStartEntityOutputs(node.id, conditions);
+          }
         });
-
-        conditions.push({
-          label: item.displayName,
-          value: item.fieldId,
-          fieldType: item.fieldType
-        });
-      });
-
-      if (fieldIds?.length) {
-        const newValidationTypes = await getFieldCheckTypeApi(fieldIds);
-        setValidationTypes(newValidationTypes);
       }
-
-      setConditionFields([
-        {
-          key: res.entityId,
-          title: res.entityName,
-          children: conditions.map((item) => {
-            return {
-              key: item.value,
-              title: item.label,
-              fieldType: item.fieldType
-            };
-          })
-        }
-      ]);
-
-      // 更新节点输出配置
-      updateStartEntityOutputs(node.id, conditions);
     }
-  };
+  }, [entityList, tableName]);
 
-  // 触发类型
   const handleTriggerTypeChange = () => {
     payloadForm.clearFields('triggerEvents');
-    handlePropsOnChange({
+    triggerEditorSignal.setNodeData(node.id, {
       ...triggerEditorSignal.nodeData.value[node.id],
       triggerEvents: []
     });
@@ -164,10 +72,10 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             </Grid.Row>
 
             <Grid.Row>
-              <Form.Item label="实体" field="entityId">
+              <Form.Item label="实体" field="tableName">
                 <Select disabled={true}>
                   {entityList?.map((item) => (
-                    <Option key={item.entityId} value={item.entityId}>
+                    <Option key={item.entityUuid} value={item.tableName}>
                       {item.entityName}
                     </Option>
                   ))}
@@ -186,14 +94,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                   onChange={handleTriggerTypeChange}
                   direction="horizontal"
                   options={[
-                    {
-                      label: '前置',
-                      value: 'before'
-                    },
-                    {
-                      label: '后置',
-                      value: 'after'
-                    }
+                    { label: '前置', value: 'before' },
+                    { label: '后置', value: 'after' }
                   ]}
                 />
               </Form.Item>
@@ -238,12 +140,4 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
 export const formMeta: FormMeta<FlowNodeJSON['data']> = {
   render: renderForm
-  //   validateTrigger: ValidateTrigger.onChange,
-  //   validate: {
-  //     title: ({ value }: { value: string }) => (value ? undefined : 'Title is required')
-  //   },
-  //   effect: {
-  //     title: syncVariableTitle,
-  //     outputs: provideJsonSchemaOutputs
-  //   }
 };

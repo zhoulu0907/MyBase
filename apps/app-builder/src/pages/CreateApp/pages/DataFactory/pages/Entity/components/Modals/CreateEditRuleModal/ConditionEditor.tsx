@@ -41,6 +41,43 @@ const opCodeOptions = [
   }
 ];
 
+const addRules = {
+  fieldId: [{ required: true, message: '请选择字段' }],
+  range: [
+    {
+      validator: (list: any[] | undefined, callback: (msg?: string) => void) => {
+        if (Array.isArray(list) && list.length === 2) {
+          const [first, second] = list;
+          // 只校验有值的情况
+          if (first !== undefined && second !== undefined && first !== null && second !== null && second <= first) {
+            callback();
+            return;
+          }
+        }
+        callback();
+      }
+    }
+  ],
+  variables: [
+    {
+      required: true,
+      message: '请选择变量'
+    }
+  ],
+  op: [
+    {
+      required: true,
+      message: '请选择操作符'
+    }
+  ],
+  formula: [
+    {
+      required: true,
+      message: '请设置公式'
+    }
+  ]
+};
+
 /**
  * ConditionEditor 组件的 props 类型定义
  */
@@ -113,30 +150,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
       if (op == VALIDATION_TYPE.RANGE) {
         return (
           <Form.Item style={{ height: '12px' }}>
-            <Form.List
-              field={fieldName}
-              rules={[
-                {
-                  validator: (list: any[] | undefined, callback: (msg?: string) => void) => {
-                    if (Array.isArray(list) && list.length === 2) {
-                      const [first, second] = list;
-                      // 只校验有值的情况
-                      if (
-                        first !== undefined &&
-                        second !== undefined &&
-                        first !== null &&
-                        second !== null &&
-                        second <= first
-                      ) {
-                        callback();
-                        return;
-                      }
-                    }
-                    callback();
-                  }
-                }
-              ]}
-            >
+            <Form.List field={fieldName} rules={addRules.range}>
               {(list) => {
                 return (
                   <div className={styles.inputNumberWrapper}>
@@ -224,7 +238,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
     }
 
     return (
-      <Form.Item field={fieldName}>
+      <Form.Item field={fieldName} style={{ marginBottom: 0 }}>
         <Input placeholder="请输入静态值" />
       </Form.Item>
     );
@@ -305,7 +319,10 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
                                     // 字段id
                                     <Grid.Row key={item.key} gutter={8} align="center">
                                       <Grid.Col span={8}>
-                                        <Form.Item field={item.field + '.fieldId'}>
+                                        <Form.Item
+                                          field={item.field + '.fieldId'}
+                                          rules={required ? addRules.fieldId : []}
+                                        >
                                           <TreeSelect
                                             treeData={fields}
                                             className={styles.itemSelect}
@@ -324,7 +341,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
 
                                       {/* 操作符 */}
                                       <Grid.Col span={4}>
-                                        <Form.Item field={item.field + '.op'}>
+                                        <Form.Item field={item.field + '.op'} rules={required ? addRules.op : []}>
                                           <Select
                                             className={styles.itemSelect}
                                             disabled={form.getFieldValue(item.field + '.fieldId') == undefined}
@@ -351,7 +368,32 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
                                         form.getFieldValue(item.field + '.op') != VALIDATION_TYPE.IS_NOT_EMPTY && (
                                           <>
                                             <Grid.Col span={3}>
-                                              <Form.Item field={item.field + '.operatorType'}>
+                                              <Form.Item
+                                                field={item.field + '.operatorType'}
+                                                rules={
+                                                  required
+                                                    ? [
+                                                        {
+                                                          validator: (value, cb) => {
+                                                            const currentOp = form.getFieldValue(item.field + '.op');
+                                                            if (
+                                                              currentOp === VALIDATION_TYPE.IS_EMPTY ||
+                                                              currentOp === VALIDATION_TYPE.IS_NOT_EMPTY
+                                                            ) {
+                                                              cb();
+                                                              return;
+                                                            }
+                                                            if (value === undefined || value === null) {
+                                                              cb('请选择');
+                                                              return;
+                                                            }
+                                                            cb();
+                                                          }
+                                                        }
+                                                      ]
+                                                    : []
+                                                }
+                                              >
                                                 <Select
                                                   className={styles.itemSelect}
                                                   disabled={form.getFieldValue(item.field + '.op') == undefined}
@@ -375,16 +417,50 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
                                                   <Input placeholder="请输入" disabled />
                                                 </Form.Item>
                                               )}
-                                              {form.getFieldValue(item.field + '.operatorType') == FieldType.VALUE &&
-                                                StaticValueComponent(
-                                                  item.field + '.value',
-                                                  form.getFieldValue(item.field + '.fieldId'),
-                                                  form.getFieldValue(item.field + '.op')
-                                                )}
+                                              {form.getFieldValue(item.field + '.operatorType') == FieldType.VALUE && (
+                                                <Form.Item
+                                                  field={item.field + '.value'}
+                                                  rules={[
+                                                    {
+                                                      validator: (value, cb) => {
+                                                        const op = form.getFieldValue(item.field + '.op');
+                                                        if (op === VALIDATION_TYPE.RANGE) {
+                                                          if (
+                                                            Array.isArray(value) &&
+                                                            value.length === 2 &&
+                                                            value.every(
+                                                              (val) => val !== undefined && val !== null && val !== ''
+                                                            )
+                                                          ) {
+                                                            cb();
+                                                            return;
+                                                          }
+                                                          cb('请输入完整的范围值');
+                                                          return;
+                                                        }
+                                                        if (value === undefined || value === null || value === '') {
+                                                          cb('请输入值');
+                                                          return;
+                                                        }
+                                                        cb();
+                                                      }
+                                                    }
+                                                  ]}
+                                                >
+                                                  {StaticValueComponent(
+                                                    item.field + '.value',
+                                                    form.getFieldValue(item.field + '.fieldId'),
+                                                    form.getFieldValue(item.field + '.op')
+                                                  )}
+                                                </Form.Item>
+                                              )}
 
                                               {form.getFieldValue(item.field + '.operatorType') ==
                                                 FieldType.VARIABLES && (
-                                                <Form.Item field={item.field + '.value'}>
+                                                <Form.Item
+                                                  field={item.field + '.value'}
+                                                  rules={required ? addRules.variables : []}
+                                                >
                                                   <TreeSelect
                                                     treeData={getVariableOptions(nodeId, item)}
                                                     triggerElement={(params) => {
@@ -404,7 +480,10 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
 
                                               {form.getFieldValue(item.field + '.operatorType') ==
                                                 FieldType.FORMULA && (
-                                                <Form.Item field={item.field + '.value'}>
+                                                <Form.Item
+                                                  field={item.field + '.value'}
+                                                  rules={required ? addRules.formula : []}
+                                                >
                                                   <Button onClick={() => openFormulaEditor(item.field + '.value')} long>
                                                     {form.getFieldValue(item.field + '.value')
                                                       ? '已设置公式'

@@ -1,5 +1,6 @@
 import { ETLDrawerTab, etlEditorSignal } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
+import { cloneDeep } from 'lodash-es';
 import React, { useEffect, useRef, useState } from 'react';
 import DataPreview from '../../components/dataPreview';
 import { handlePreviewData, type PreviewData } from '../utils';
@@ -19,9 +20,19 @@ export const UnionNodeConfig: React.FC<UnionNodeConfigProps> = ({ onRegisterSave
     data: []
   });
 
+  const [newPayload, setNewPayload] = useState<any>(cloneDeep(nodeData.value[curNode.value.id]));
+
   useEffect(() => {
     if (curDrawerTab.value == ETLDrawerTab.DATA_PREVIEW) {
-      handlePreviewData(graphData.value, nodeData.value, curNode.value, setPreviewData);
+      handlePreviewData(
+        graphData.value,
+        nodeData.value,
+        {
+          ...curNode.value,
+          ...newPayload
+        },
+        setPreviewData
+      );
     }
   }, [curDrawerTab.value]);
 
@@ -32,7 +43,9 @@ export const UnionNodeConfig: React.FC<UnionNodeConfigProps> = ({ onRegisterSave
 
   return (
     <div className={styles.config}>
-      {curDrawerTab.value === ETLDrawerTab.DATA_CONFIG && <UnionConfig onRegisterSave={handleRegisterFromChild} />}
+      {curDrawerTab.value === ETLDrawerTab.DATA_CONFIG && (
+        <UnionConfig onRegisterSave={handleRegisterFromChild} newPayload={newPayload} setNewPayload={setNewPayload} />
+      )}
       {curDrawerTab.value === ETLDrawerTab.DATA_PREVIEW && (
         <DataPreview data={previewData.data} columns={previewData.columns} />
       )}

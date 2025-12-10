@@ -1,5 +1,9 @@
 import { type ReactNode } from 'react';
 
+export const filterSpace = (value: string) => {
+  return value ? value.replace(/\s+/g, '') : '';
+};
+
 export const phoneReg = /^1[3-9]\d{9}$/;
 export const phoneValidator = (value: string | undefined, callback: (error?: ReactNode) => void) => {
   if (value && !phoneReg.test(value)) {

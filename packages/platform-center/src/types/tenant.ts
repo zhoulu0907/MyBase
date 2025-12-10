@@ -19,6 +19,6 @@ export interface TenantInfo {
 }
 
 export interface updateTenantParams {
-  id: number;
+  id: string;
   name: string;
 }

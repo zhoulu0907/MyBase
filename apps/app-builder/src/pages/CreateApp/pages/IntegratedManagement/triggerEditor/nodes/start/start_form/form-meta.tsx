@@ -1,8 +1,7 @@
-import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
-
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { Checkbox, Form, Grid, Input, Radio, Select } from '@arco-design/web-react';
 import type { TreeSelectDataType } from '@arco-design/web-react/es/TreeSelect/interface';
+import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
 import {
   getComponentListByPageId,
   getEntityFieldsWithChildren,
@@ -33,19 +32,12 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const { node } = useNodeRenderContext();
 
   const [pageList, setPageList] = useState<any[]>([]);
-
   const [componentList, setComponentList] = useState<any[]>([]);
   const [conditionFields, setConditionFields] = useState<TreeSelectDataType[]>([]);
   const [validationTypes, setValidationTypes] = useState<EntityFieldValidationTypes[]>([]);
 
-  const handlePropsOnChange = (values: any) => {
-    triggerEditorSignal.setNodeData(node.id, values);
-  };
-
   const [payloadForm] = Form.useForm();
-
-  const pageId = Form.useWatch('pageId', payloadForm);
-
+  const pageUuid = Form.useWatch('pageUuid', payloadForm);
   const triggerRange = Form.useWatch('triggerRange', payloadForm);
 
   useEffect(() => {
@@ -56,16 +48,16 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   }, []);
 
   useEffect(() => {
-    if (pageId) {
-      handleGetComponentList(pageId);
-      handleGetFieldList(pageId);
+    if (pageUuid) {
+      handleGetComponentList(pageUuid);
+      handleGetFieldList(pageUuid);
     }
-  }, [pageId]);
+  }, [pageUuid]);
 
   useEffect(() => {
     if (triggerRange === TriggerRange.Record || triggerRange === TriggerRange.Field) {
       payloadForm.setFieldsValue({
-        pageId: triggerEditorSignal.nodeData.value[node.id].pageId
+        pageUuid: triggerEditorSignal.nodeData.value[node.id].pageUuid
       });
     }
   }, [triggerRange]);
@@ -86,61 +78,63 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     });
   };
 
-  const handleGetFieldList = async (id: string) => {
-    const res = await getPageMetadata({ pageId: id });
+  const handleGetFieldList = async (pageUuid: string) => {
+    const res = await getPageMetadata({ pageUuid: pageUuid });
     if (res && res.metadata) {
-      console.log(res);
-
       const entityWithChildren = await getEntityFieldsWithChildren(res.metadata);
-      console.log(entityWithChildren);
 
       const conditions: ConditionField[] = [];
       const fieldIds: string[] = [];
-      const fieldList: any[] = [];
 
       entityWithChildren.parentFields.forEach((item: AppEntityField) => {
         fieldIds.push(item.fieldId);
-        fieldList.push({
-          label: item.displayName,
-          value: item.fieldId
-        });
-
         conditions.push({
           label: item.displayName,
-          value: item.fieldId,
+          value: `${entityWithChildren.tableName}.${item.fieldName}`,
           fieldType: item.fieldType
         });
       });
 
       if (fieldIds?.length) {
         const newValidationTypes = await getFieldCheckTypeApi(fieldIds);
+        newValidationTypes.forEach((item: EntityFieldValidationTypes) => {
+          const fieldName =
+            [...entityWithChildren.parentFields].find((field: AppEntityField) => field.fieldId == item.fieldId)
+              ?.fieldName || '';
+          item.fieldKey = `${entityWithChildren.tableName}.${fieldName}`;
+
+          if (!fieldName) {
+            for (const subEntity of entityWithChildren.childEntities) {
+              const foundField = subEntity.childFields.find((field: AppEntityField) => field.fieldId == item.fieldId);
+              if (foundField) {
+                item.fieldKey = `${subEntity.childTableName}.${foundField.fieldName}`;
+              }
+            }
+          }
+        });
         setValidationTypes(newValidationTypes);
       }
 
       setConditionFields([
         {
-          key: entityWithChildren.entityId,
+          key: entityWithChildren.tableName,
           title: entityWithChildren.entityName,
-          children: conditions.map((item) => {
-            return {
-              key: item.value,
-              title: item.label,
-              fieldType: item.fieldType
-            };
-          })
+          children: conditions.map((item) => ({
+            key: item.value,
+            title: item.label,
+            fieldType: item.fieldType
+          }))
         }
       ]);
 
-      // 更新节点输出配置
       updateStartFormOutputs(node.id, conditions);
     }
   };
 
-  const handleGetComponentList = async (id: string) => {
-    const res = await getComponentListByPageId({ pageId: id });
+  const handleGetComponentList = async (pageUuid: string) => {
+    const res = await getComponentListByPageId({ pageUuid: pageUuid });
     if (res && res.list) {
       const newComponentList: any[] = [];
-
       res.list.forEach((item: ComponentConfig) => {
         const cpConfig = JSON.parse(item.config);
         if (cpConfig.dataField && cpConfig.dataField.length > 1) {
@@ -151,8 +145,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
           });
         }
       });
-
-      console.log(newComponentList);
       setComponentList(newComponentList);
     }
   };
@@ -164,9 +156,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
         <FormContent>
           <Form
             form={payloadForm}
-            initialValues={{
-              ...triggerEditorSignal.nodeData.value[node.id]
-            }}
+            initialValues={{ ...triggerEditorSignal.nodeData.value[node.id] }}
             layout="vertical"
             requiredSymbol={{ position: 'end' }}
           >
@@ -192,10 +182,10 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                     <div style={{ textAlign: 'center', lineHeight: '32px' }}>在</div>
                   </Grid.Col>
                   <Grid.Col span={21}>
-                    <Form.Item field="pageId" rules={[{ required: true, message: '请选择表单' }]} layout="vertical">
+                    <Form.Item field="pageUuid" rules={[{ required: true, message: '请选择表单' }]} layout="vertical">
                       <Select disabled style={{ width: '100%' }}>
                         {pageList?.map((item) => (
-                          <Option key={item.id} value={item.id}>
+                          <Option key={item.pageUuid} value={item.pageUuid}>
                             {item.pageName}
                           </Option>
                         ))}
@@ -213,10 +203,10 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                     在
                   </Grid.Col>
                   <Grid.Col span={10}>
-                    <Form.Item field="pageId" rules={[{ required: true, message: '请选择表单' }]} layout="vertical">
+                    <Form.Item field="pageUuid" rules={[{ required: true, message: '请选择表单' }]} layout="vertical">
                       <Select disabled style={{ width: '100%' }}>
                         {pageList?.map((item) => (
-                          <Option key={item.id} value={item.id}>
+                          <Option key={item.pageUuid} value={item.pageUuid}>
                             {item.pageName}
                           </Option>
                         ))}
@@ -255,18 +245,9 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                   <CheckboxGroup
                     direction="horizontal"
                     options={[
-                      {
-                        label: '记录创建',
-                        value: TRIGGER_EVENTS.CREATE
-                      },
-                      {
-                        label: '记录修改',
-                        value: TRIGGER_EVENTS.UPDATE
-                      },
-                      {
-                        label: '记录删除',
-                        value: TRIGGER_EVENTS.DELETE
-                      }
+                      { label: '记录创建', value: TRIGGER_EVENTS.CREATE },
+                      { label: '记录修改', value: TRIGGER_EVENTS.UPDATE },
+                      { label: '记录删除', value: TRIGGER_EVENTS.DELETE }
                     ]}
                   />
                 </Form.Item>
@@ -312,12 +293,4 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
 export const formMeta: FormMeta<FlowNodeJSON['data']> = {
   render: renderForm
-  //   validateTrigger: ValidateTrigger.onChange,
-  //   validate: {
-  //     title: ({ value }: { value: string }) => (value ? undefined : 'Title is required')
-  //   },
-  //   effect: {
-  //     title: syncVariableTitle,
-  //     outputs: provideJsonSchemaOutputs
-  //   }
 };
