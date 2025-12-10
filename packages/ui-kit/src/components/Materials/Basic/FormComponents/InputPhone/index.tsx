@@ -93,6 +93,7 @@ const XInputPhone = memo((props: XInputPhoneConfig & { runtime?: boolean; detail
         ) : (
           <Input
             prefix={phoneType === PHONE_TYPE.MOBILE ? '+86' : null}
+            maxLength={phoneType === PHONE_TYPE.MOBILE ? 11 : 15}
             style={{
               width: '100%',
               textAlign: align,
