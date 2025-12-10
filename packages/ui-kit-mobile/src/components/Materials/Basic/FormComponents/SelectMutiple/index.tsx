@@ -32,7 +32,7 @@ const XSelectMutiple = memo((props: XSelectMutipleConfig & { runtime?: boolean; 
   // 生成唯一的字段ID
   const fieldId = dataField && dataField.length > 0
     ? dataField[dataField.length - 1]
-    : `${FORM_COMPONENT_TYPES.INPUT_TEXT}_${nanoid()}`;
+    : `${FORM_COMPONENT_TYPES.SELECT_MUTIPLE}_${nanoid()}`;
 
   const options = defaultOptionsConfig?.defaultOptions?.map(({ label, value }: { label: string; value: string | number }) => ({ label, value }));
 
@@ -54,7 +54,7 @@ const XSelectMutiple = memo((props: XSelectMutipleConfig & { runtime?: boolean; 
 
   return (
     <Form.Item
-      className="inputTextWrapperOBMobile"
+      className="inputTextWrapperOBMobile selectMultipleWrapper"
       label={label.display && label.text}
       field={fieldId}
       rules={rules}

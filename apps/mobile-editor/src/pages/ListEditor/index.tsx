@@ -1,9 +1,9 @@
-import React, { Fragment } from 'react';
 import type { EditorProps } from '@/common/props';
-import EditorWorkspace from '@/components/workspace/Workspace';
-import styles from './index.module.less';
+import { Form as MobileForm } from '@arco-design/mobile-react';
+import React, { Fragment } from 'react';
+import { EditorPanel } from '@onebase/ui-kit';
+
 import {
-  EditorPanel,
   STATUS_OPTIONS,
   STATUS_VALUES,
   type GridItem
@@ -11,34 +11,38 @@ import {
 import {
   PreviewRender
 } from '@onebase/ui-kit-mobile';
-import { Form as MobileForm } from '@arco-design/mobile-react';
-import type { AppEntityField } from '@onebase/app';
+
+import styles from './index.module.less';
+import EditorWorkspace from '../../components/workspace/Workspace';
+
 interface FormEditorProps {
   props: EditorProps & {
     useEditorSignalMap: Map<string, any>;
     batchDelPageComponentSchemas: (componentIds: Set<string>) => void;
     batchDelLayoutSubComponents: (componentIds: Set<string>) => void;
-    subTableComponents: Record<string, AppEntityField[]>;
-    setSubTableComponents: (subTableComponentId: string, componentIds: AppEntityField[]) => void;
+    subTableComponents: Record<string, any[]>;
+    setSubTableComponents: (subTableComponentId: string, componentIds: any[]) => void;
     batchDelSubTableComponents: (componentIds: Set<string>) => void;
     usePageViewEditorSignal: () => Map<string, any>;
     useFormEditorSignal: () => Map<string, any>;
   };
 }
 
-const FormEditor: React.FC<FormEditorProps & { instanceId: string }> = ({ instanceId, props }) => {
+const ListEditor: React.FC<FormEditorProps & { instanceId: string }> = ({ instanceId, props }) => {
+
   if (!props.components) {
     return null;
   }
   const getFormContent = () => {
     const {
-      components: formComponents,
-      pageComponentSchemas: formPageComponentSchemas
+      components: listComponents,
+      pageComponentSchemas: listPageComponentSchemas
     } = props;
+    
     return (
-      formComponents?.map((cp: GridItem) => (
+      listComponents?.map((cp: GridItem) => (
         <Fragment key={cp.id}>
-          {formPageComponentSchemas[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+          {listPageComponentSchemas[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
             <div
               key={cp.id}
               className={styles.componentItem}
@@ -50,7 +54,7 @@ const FormEditor: React.FC<FormEditorProps & { instanceId: string }> = ({ instan
               <PreviewRender
                 cpId={cp.id}
                 cpType={cp.type}
-                pageComponentSchema={formPageComponentSchemas[cp.id]}
+                pageComponentSchema={listPageComponentSchemas[cp.id]}
                 runtime={true}
               />
             </div>
@@ -76,4 +80,4 @@ const FormEditor: React.FC<FormEditorProps & { instanceId: string }> = ({ instan
   );
 };
 
-export { FormEditor };
+export { ListEditor };

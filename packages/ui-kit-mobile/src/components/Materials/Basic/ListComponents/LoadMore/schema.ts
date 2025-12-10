@@ -160,6 +160,7 @@ export interface XLoadMoreConfig extends ICommonBaseType {
    */
   labelColSpan?: TNumberDefaultType;
   metaData: TTextDefaultType;
+  tableName: TTextDefaultType;
 
   /**
    * 行点击跳转
@@ -304,11 +305,11 @@ const XLoadMore: XLoadMoreSchema = {
       name: '固定操作项',
       type: CONFIG_TYPES.SWITCH_INPUT
     },
-    {
-      key: 'saveWithHidden',
-      name: '隐藏时提交数据',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
+    // {
+    //   key: 'saveWithHidden',
+    //   name: '隐藏时提交数据',
+    //   type: CONFIG_TYPES.SWITCH_INPUT
+    // },
     widthConfig,
     statusConfig,
     {
@@ -340,6 +341,7 @@ const XLoadMore: XLoadMoreSchema = {
     pagePosition: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.BR],
     pageSize: 10,
     metaData: '',
+    tableName: '',
     labelColSpan: 200,
     defaultValue: [],
     columns: [],

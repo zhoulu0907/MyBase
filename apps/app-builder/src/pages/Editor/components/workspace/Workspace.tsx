@@ -8,7 +8,7 @@ import {
   STATUS_VALUES
 } from '@onebase/ui-kit';
 import { cloneDeep } from 'lodash-es';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -28,8 +28,12 @@ import {
   getComponentWidth,
   useAppEntityStore,
   usePageEditorSignal,
+  useEditorSignalMap,
   WIDTH_OPTIONS,
   WIDTH_VALUES,
+  usePageViewEditorSignal,
+  createPageEditorSignal,
+  useFormEditorSignal,
   type GridItem
 } from '@onebase/ui-kit';
 
@@ -39,12 +43,12 @@ import PrevActiveIcon from '@/assets/images/prev_icon_active.svg';
 import CompDeleteIcon from '@/assets/images/app_delete.svg';
 import CompCopyIcon from '@/assets/images/copy_comp_icon.svg';
 import CompShowIcon from '@/assets/images/eye_off_icon.svg';
-import { EditMode } from '@onebase/common';
 import { currentEditorSignal } from '@onebase/ui-kit/src/signals/current_editor';
+import { loadMicroApp, initGlobalState, type MicroApp } from "qiankun";
 
 import { Divider, Form } from '@arco-design/web-react';
 import { ENTITY_TYPE, ENTITY_TYPE_VALUE, type AppEntityField } from '@onebase/app';
-import { getHashQueryParam } from '@onebase/common';
+import { getHashQueryParam, EditMode } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
 import 'react-grid-layout/css/styles.css';
 import View from '../view';
@@ -92,14 +96,68 @@ export default function EditorWorkspace() {
     delSubTableComponents,
     batchDelSubTableComponents
   } = usePageEditorSignal();
+  const { pageViews, curViewId, setCurViewId, updatePageViewName } = usePageViewEditorSignal;
 
   const [pageMode, setPageMode] = useState<string>('pc');
   const { editMode, setEditMode } = currentEditorSignal;
+  const mobileEditorDragRef = useRef<MicroApp | null>(null);
 
+  const qiankunActions = initGlobalState({
+    drag: true,
+    useEditorSignalMap,
+    pageViews,
+    curViewId,
+    setCurViewId,
+    updatePageViewName,
+    usePageViewEditorSignal,
+    createPageEditorSignal,
+    useFormEditorSignal,
+    editMode,
+    setEditMode,
+    curComponentID,
+    setCurComponentID,
+    clearCurComponentID,
+    setCurComponentSchema,
+    pageComponentSchemas,
+    setPageComponentSchemas,
+    delPageComponentSchemas,
+    components,
+    addComponents,
+    setComponents,
+    delComponents,
+    showDeleteButton,
+    setShowDeleteButton,
+    layoutSubComponents,
+    setLayoutSubComponents,
+    delLayoutSubComponents,
+    batchDelPageComponentSchemas,
+    batchDelLayoutSubComponents,
+    subTableComponents,
+    setSubTableComponents,
+    delSubTableComponents,
+    batchDelSubTableComponents
+  })
   useEffect(() => {
-    if (editMode.value === EditMode.MOBILE) {
-      document.documentElement.style.fontSize = '48px';
+    if (editMode.value !== EditMode.MOBILE) {
+      return;
     }
+    console.log("loading mobile-editor-drag-list");
+
+    const mobileEditorDrag = loadMicroApp({
+      name: "mobile-editor-drag-list",
+      entry: window.global_config.MOBILE_EDITOR_URL,
+      container: "#mobile-editor-drag-list",
+      props: {
+        onGlobalStateChange: qiankunActions.onGlobalStateChange,
+        setGlobalState: qiankunActions.setGlobalState,
+        offGlobalStateChange: qiankunActions.offGlobalStateChange,
+      },
+    });
+    mobileEditorDragRef.current = mobileEditorDrag;
+
+    return () => {
+      mobileEditorDrag?.unmount();
+    };
   }, [editMode.value]);
 
   useEffect(() => {
@@ -269,7 +327,7 @@ export default function EditorWorkspace() {
     }
   };
 
-  return (
+  return editMode.value === EditMode.MOBILE ? <div id="mobile-editor-drag-list" className={styles.mobileeditordraglist}></div> : (
     <div className={styles.editorWorkspace}>
       <div className={styles.workspaceHeader}>
         <div className={styles.workspaceHeaderLeft}>{isFormEditor && pageSetId && <View pageSetId={pageSetId} />}</div>
@@ -536,7 +594,7 @@ export default function EditorWorkspace() {
                   }
                   setSubTableComponents(cpID, subFieldComponents);
                   entityList.push({ displayName: cpName, id: cpID, type: cpType });
-                } else if (item.entityID && item.entityID !== mainEntity.entityId) {
+                } else if (item.entityId && item.entityId !== mainEntity.entityId) {
                   // 子表 数据字段  不做任何操作
                 } else {
                   // 主表字段、普通字段
@@ -572,7 +630,6 @@ export default function EditorWorkspace() {
               const itemDisplayName = e.item.getAttribute('data-cp-displayname');
 
               const tableName = e.item.getAttribute('data-table-name');
-
               const fieldName = e.item.getAttribute('data-field-name');
               const dataLabel = e.item.getAttribute('data-label');
 

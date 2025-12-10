@@ -13,7 +13,7 @@ import {
 type XDateTimePickerConfig = typeof FormSchema.XDateTimePickerSchema.config;
 import '../index.css';
 
-const XDateTimePicker = memo((props: XDateTimePickerConfig & { runtime?: boolean; detailMode?: boolean }) => {
+const XDateTimePicker = memo((props: XDateTimePickerConfig & { runtime?: boolean; detailMode?: boolean; form?: any }) => {
   const {
     label,
     dataField,
@@ -23,13 +23,14 @@ const XDateTimePicker = memo((props: XDateTimePickerConfig & { runtime?: boolean
     verify,
     layout,
     runtime = true,
-    detailMode
+    detailMode,
+    form
   } = props;
 
   // 生成唯一的字段ID
   const fieldId = dataField && dataField.length > 0
     ? dataField[dataField.length - 1]
-    : `${FORM_COMPONENT_TYPES.INPUT_TEXT}_${nanoid()}`;
+    : `${FORM_COMPONENT_TYPES.DATE_TIME_PICKER}_${nanoid()}`;
 
   const rules: ITypeRules<ValidatorType.Custom>[] = [
     {
@@ -48,7 +49,7 @@ const XDateTimePicker = memo((props: XDateTimePickerConfig & { runtime?: boolean
       label={label.display && label.text}
       field={fieldId}
       rules={rules}
-      initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : ''}
+      initialValue={form.getFieldValue(fieldId)}
       style={{
         textAlign: 'right',
         pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
@@ -61,7 +62,8 @@ const XDateTimePicker = memo((props: XDateTimePickerConfig & { runtime?: boolean
         <DatePicker
           title={label.text}
           maskClosable
-          typeArr={['year', 'month', 'date', 'hour', 'minute']}
+          // typeArr={['year', 'month', 'date', 'hour', 'minute']}
+          mode='datetime'
           formatter={(value, type) => {
             const map = {
               year: '年',
