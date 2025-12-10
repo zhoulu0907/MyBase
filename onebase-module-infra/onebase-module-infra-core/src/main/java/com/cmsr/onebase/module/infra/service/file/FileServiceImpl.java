@@ -8,6 +8,7 @@ import cn.hutool.core.util.URLUtil;
 import cn.hutool.crypto.digest.DigestUtil;
 import com.cmsr.onebase.framework.common.biz.system.oauth2.OAuth2TokenCommonApi;
 import com.cmsr.onebase.framework.common.biz.system.oauth2.dto.OAuth2AccessTokenCheckRespDTO;
+import com.cmsr.onebase.framework.common.enums.SecurityCategoryCodeEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.security.TenantContextHolder;
@@ -19,6 +20,8 @@ import com.cmsr.onebase.module.infra.dal.dataobject.file.FileDO;
 import com.cmsr.onebase.module.infra.dal.vo.file.file.FileCreateReqVO;
 import com.cmsr.onebase.module.infra.dal.vo.file.file.FilePageReqVO;
 import com.cmsr.onebase.module.infra.dal.vo.file.file.FilePresignedUrlRespVO;
+import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigCategoryGroupRespVO;
+import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigGetReqVO;
 import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigItemRespVO;
 import com.cmsr.onebase.module.infra.enums.file.FileVisitModeEnum;
 import com.cmsr.onebase.module.infra.enums.file.FileUploadCheckConstants;
@@ -167,8 +170,19 @@ public class FileServiceImpl implements FileService {
     private void validateFile(byte[] content, String name, String type) {
         // 获取租户配置项
         Long tenantId = TenantContextHolder.getTenantId();
-        List<SecurityConfigItemRespVO> configs = securityConfigService.getTenantConfigItems(
-                tenantId, FileUploadCheckConstants.FILE_UPLOAD_CATEGORY); // 假设文件上传配置在默认分类中
+        ArrayList<String> categoryCodes = new ArrayList<>();
+        categoryCodes.add(SecurityCategoryCodeEnum.FILE_SECURITY.getValue());
+        List<SecurityConfigCategoryGroupRespVO> tenantConfigItemsByCategoryCodes = securityConfigService.getTenantConfigItemsByCategoryCodes(new SecurityConfigGetReqVO().setTenantId(tenantId).setCategoryCode(categoryCodes));
+        List<SecurityConfigItemRespVO> configs = new ArrayList<>();
+        for (SecurityConfigCategoryGroupRespVO tenantConfigItemsByCategoryCode : tenantConfigItemsByCategoryCodes) {
+            if (SecurityCategoryCodeEnum.FILE_SECURITY.getValue().equals(tenantConfigItemsByCategoryCode.getCategoryCode())){
+                configs = securityConfigService.getTenantConfigItems(
+                        tenantId, FileUploadCheckConstants.FILE_UPLOAD_CATEGORY);
+            }
+        }
+        if (configs.isEmpty()){
+            throw exception(FILE_CHECK_LIST_NOT_EXISTS);
+        }
 
         // 从配置中获取参数
         Map<String, String> configMap = configs.stream()
