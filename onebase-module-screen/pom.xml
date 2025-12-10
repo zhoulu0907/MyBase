@@ -10,7 +10,12 @@
     </parent>
 
     <artifactId>onebase-module-screen</artifactId>
-
+    <modules>
+        <module>onebase-module-screen-api</module>
+        <module>onebase-module-screen-core</module>
+        <module>onebase-module-screen-runtime</module>
+        <module>onebase-module-screen-build</module>
+    </modules>
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
