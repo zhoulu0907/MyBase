@@ -302,7 +302,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
         dataIndex: 'index',
         width: '62px',
         align: 'center',
-        fixed: '',
+        fixed: undefined as any,
         headerCellStyle: { textAlign: 'center' },
         bodyCellStyle: { padding: '0 4px', textAlign: 'center' },
         render: (_: any, __: any, index: number) => index + 1
@@ -321,7 +321,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
         ),
         dataIndex: column.id,
         key: column.id,
-        fixed: '',
+        fixed: undefined as any,
         bodyCellStyle: {
           padding: '4px 0'
         },
@@ -425,26 +425,26 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
     <Layout className="XSubTable" style={runtime ? { border: 'none' } : {}}>
       <Form.Item
         label={
-          label.display &&
-          label.text && (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+            {label.display && label.text && (
               <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>
                 {verify?.required ? <span style={{ color: 'red', paddingRight: '4px' }}>*</span> : null}
                 {label.text}
               </span>
-              {!detailMode && (
-                <Button
-                  type="outline"
-                  size="small"
-                  icon={<IconPlus />}
-                  style={{ pointerEvents: runtime ? 'unset' : 'none' }}
-                  onClick={handleAdd}
-                >
-                  新增一项
-                </Button>
-              )}
-            </div>
-          )
+            )}
+
+            {!detailMode && (
+              <Button
+                type="outline"
+                size="small"
+                icon={<IconPlus />}
+                style={{ pointerEvents: runtime ? 'unset' : 'none', marginLeft: 'auto' }}
+                onClick={handleAdd}
+              >
+                新增一项
+              </Button>
+            )}
+          </div>
         }
         labelCol={{ span: 24 }}
         layout="vertical"
