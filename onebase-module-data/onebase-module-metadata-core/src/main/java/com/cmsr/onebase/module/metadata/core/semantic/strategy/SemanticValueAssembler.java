@@ -48,7 +48,6 @@ public class SemanticValueAssembler {
     public Row buildMainRow(SemanticEntitySchemaDTO entity, SemanticEntityValueDTO value, UidGenerator uidGenerator) {
         Row row = new Row();
         List<SemanticFieldSchemaDTO> fields = entity.getFields();
-        log.info("构建主表数据行。entity={}, value={}", entity, value);
         if (fields != null) {
             for (SemanticFieldSchemaDTO field : fields) {
                 SemanticFieldValueDTO fieldValue = value.getFieldValueByTableAndField(entity.getTableName(), field.getFieldName());
