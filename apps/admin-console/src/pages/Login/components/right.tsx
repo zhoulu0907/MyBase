@@ -1,7 +1,14 @@
 import LogoSVG from '@/assets/images/ob_logo.svg';
 import { Button, Checkbox, Form, Input, Message, Space, Typography } from '@arco-design/web-react';
 import { IconLock, IconUser } from '@arco-design/web-react/icon';
-import { getOrCreateDeviceInfo, SliderCaptcha, TokenManager, type SliderCaptchaRef } from '@onebase/common';
+import {
+  getOrCreateDeviceInfo,
+  getPublicKey,
+  SliderCaptcha,
+  sm2Encrypt,
+  TokenManager,
+  type SliderCaptchaRef
+} from '@onebase/common';
 import { adminLogin, checkCaptchaApi, getCaptchaApi, type LoginRequest } from '@onebase/platform-center';
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -59,6 +66,8 @@ const Right: React.FC = () => {
       const headers = {
         'X-Tenant-Id': tenantId
       };
+
+      values.password = await sm2Encrypt(getPublicKey(), values.password);
       const loginResp = await adminLogin(values, headers);
       // 显示成功消息并跳转
       console.log('loginResp: ', loginResp);
@@ -110,19 +119,6 @@ const Right: React.FC = () => {
     try {
       // 先验证表单
       await accountForm.validate();
-
-      if (accountForm.getFieldValue('captchaVerification')) {
-        // TODO(mickey): refactor
-        const deviceId = await getOrCreateDeviceInfo();
-
-        handleAccountLogin({
-          username: accountForm.getFieldValue('username'),
-          password: accountForm.getFieldValue('password'),
-          captchaVerification: accountForm.getFieldValue('captchaVerification'),
-          deviceId: deviceId
-        });
-        return;
-      }
 
       // 显示滑块验证码
       sliderCaptchaRef.current?.showCaptcha();

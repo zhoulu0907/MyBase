@@ -86,6 +86,7 @@
     "react-sortablejs": "^6.1.4",
     "react-svg": "^16.3.0",
     "sm-crypto": "^0.3.13",
+    "sm-crypto-v2": "^1.15.1",
     "sortablejs": "^1.15.6",
     "styled-components": "^6.1.19",
     "tailwind-scrollbar-hide": "^4.0.0",
