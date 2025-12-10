@@ -22,14 +22,13 @@
 
   .title {
     font-size: 14px;
-    color: #1d2129;
     line-height: 22px;
     margin-bottom: 3px;
+    font-weight: 600;
   }
 
   .desc {
     font-size: 12px;
-    color: #86909c;
     line-height: 20px;
     margin-top: 3px;
   }
@@ -40,15 +39,15 @@
   }
 
   .decor-style2 {
-    border-top: 1px dashed #e5e6eb;
+    border-top: 1px dashed;
   }
 
   .decor-style3 {
-    border-top: 1px solid #e5e6eb;
+    border-top: 1px solid;
   }
 
   .decor-style4 {
-    border-top: 2px solid #e5e6eb;
+    border-top: 2px solid;
   }
 
   .decor-style5 {
@@ -60,6 +59,7 @@
     padding-left: 4px;
     line-height: 14px;
     margin: 4px 0;
+    font-weight: 600;
   }
 
   .decor-style6 {
@@ -71,6 +71,7 @@
     width: 60px;
     line-height: 22px;
     margin-bottom: 2px;
+    font-weight: 600;
   }
 
   /* 字段标题容器 */
@@ -85,6 +86,7 @@
       padding: 0 24px 0 8px;
       line-height: 24px;
       clip-path: polygon(0 0, 80% 0, 100% 100%, 0 100%);
+      font-weight: 600;
     }
 
     .decorator1 {
@@ -101,7 +103,7 @@
       clip-path: polygon(0% 0%, 40% 0%, 100% 75%, 60% 75%);
       position: relative;
       left: -22px;
-      opacity: 0.7;
+      opacity: 0.6;
     }
 
     .decorator3 {
@@ -110,10 +112,116 @@
       clip-path: polygon(0% 0%, 40% 0%, 100% 75%, 60% 75%);
       position: relative;
       left: -32px;
-      opacity: 0.4;
+      opacity: 0.3;
     }
   }
+
+  .decor-style8 {
+    height: 24px;
+    border-radius: 12px 0 0 0;
+    display: flex;
+
+    .decor-title-style8 {
+      border-radius: 12px 0 12px 0;
+      line-height: 24px;
+      padding: 0px 10px;
+      font-weight: 600;
+    }
+  }
+
+  .decor-style10 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .center {
+      padding: 0 30px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      clip-path: polygon(10% 0%, 90% 0%, 98% 52%, 90% 100%, 10% 100%, 2% 52%);
+    }
+
+    /* 左侧箭头组 */
+    .leftArrows,
+    .rightArrows {
+      position: relative;
+      height: 24px;
+    }
+
+    /* ---------------- 左侧箭头 ---------------- */
+
+    .leftArrows span {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+    }
+
+    .leftArrow1,
+    .leftArrow2 {
+      width: 30px;
+      clip-path: polygon(100% 0%, 70% 0%, 40% 50%, 70% 100%, 100% 100%, 70% 50%);
+    }
+    .leftArrow1 {
+      right: -3px;
+    }
+
+    .leftArrow2 {
+      right: 12px;
+    }
+
+    /* ---------------- 右侧箭头 ---------------- */
+
+    .rightArrows span {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+    }
+
+    /* 右侧的箭头，形状反过来 */
+    .rightArrow1,
+    .rightArrow2 {
+      width: 30px;
+      clip-path: polygon(0% 0%, 30% 0%, 62% 50%, 30% 100%, 0% 100%, 32% 50%);
+    }
+
+    .rightArrow1 {
+      left: -3px;
+    }
+
+    .rightArrow2 {
+      left: 12px;
+    }
+  }
+
+  .tabBase {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    height: 20px;
+    padding: 0 24px;
+    border-radius: 10px 10px 0 0;
+    box-sizing: border-box;
+  }
+
+  .tabActive {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 22px;
+    font-weight: 600;
+    height: 24px;
+    padding: 0 16px;
+    margin-top: -6px;
+    box-sizing: border-box;
+    border-radius: 0 0 50px 50px;
+    clip-path: polygon(0% 0%, 100% 0%, 89% 100%, 11% 100%);
+  }
 }
+
 .dividerColorPicker {
   width: 100%;
   padding: 2px 10px;

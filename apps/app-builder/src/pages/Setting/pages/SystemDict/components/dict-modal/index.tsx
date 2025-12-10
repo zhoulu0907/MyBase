@@ -74,11 +74,11 @@ export default function DictionaryTypeModal({
       autoFocus={false}
     >
       <Form form={form} layout="vertical">
-        <Form.Item label="字典编码" field="type" rules={rules.type}>
-          <Input placeholder="请输入字母、数字或下划线" maxLength={50} allowClear />
-        </Form.Item>
         <Form.Item label="字典名称" field="name" rules={rules.name}>
           <Input placeholder="请输入字典名称" maxLength={30} allowClear />
+        </Form.Item>
+        <Form.Item label="字典编码" field="type" rules={[{ required: true, message: '请输入字母、数字或下划线' }]}>
+          <Input placeholder="请输入字典编码" maxLength={50} allowClear />
         </Form.Item>
         <Form.Item label="字典描述" field="remark">
           <Input.TextArea placeholder="请输入字典描述" maxLength={100} allowClear />

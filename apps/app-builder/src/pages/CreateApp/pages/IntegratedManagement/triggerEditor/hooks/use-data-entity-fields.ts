@@ -140,6 +140,7 @@ export const useEntityFields = () => {
         }
       }
     });
+
     setValidationTypes(newValidationTypes);
   };
 

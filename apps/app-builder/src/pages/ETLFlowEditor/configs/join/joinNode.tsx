@@ -179,29 +179,6 @@ export const JoinNodeConfig: React.FC<JoinNodeConfigProps> = ({ onRegisterSave }
 
           <Form form={form} className={styles.content} initialValues={newPayload?.config}>
             <JoinRow finalNodeList={finalNodeList} form={form} payload={newPayload} setPayload={setNewPayload} />
-            {/* <Form.List field="joinList">
-              {(joinList, { add: addRow }) => {
-                return (
-                  <>
-                    {joinList.map((item, index) => {
-                      return <JoinRow key={index} row={item} finalNodeList={finalNodeList} form={form} />;
-                    })}
-                    <Grid.Row>
-                  <Grid.Col span={18} className={styles.addConnectionBox}>
-                    <Button
-                      type="text"
-                      onClick={() => {
-                        addRow();
-                      }}
-                    >
-                      + 添加连接
-                    </Button>
-                  </Grid.Col>
-                </Grid.Row>
-                  </>
-                );
-              }}
-            </Form.List> */}
           </Form>
         </div>
       )}

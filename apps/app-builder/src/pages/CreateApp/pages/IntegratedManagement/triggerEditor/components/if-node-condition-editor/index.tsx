@@ -141,11 +141,15 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
   const getFieldOptions = async (nodeId: string) => {
     const newFieldOptions = getVariableOptions(nodeId);
     setFieldOptions(newFieldOptions);
+    console.log('newFieldOptions: ', newFieldOptions);
 
-    const fieldIds = getEntityFieldValidationTypes(nodeId);
+    const fieldValues = getEntityFieldValidationTypes(nodeId);
+    console.log('fieldValues: ', fieldValues);
 
-    if (fieldIds?.length) {
-      const newValidationTypes = await getFieldCheckTypeApi(fieldIds);
+    if (fieldValues?.length) {
+      // TODO(mickey): 需要卞老师补充字段名称
+      const newValidationTypes = await getFieldCheckTypeApi(fieldValues);
+      console.log('newValidationTypes: ', newValidationTypes);
       setEntityFieldValidationTypes(newValidationTypes);
     }
   };
@@ -293,10 +297,11 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
   const getEntityFieldValidationTypes = (nodeId: string): string[] => {
     const nodes = getPrecedingNodes(nodeId, triggerEditorSignal.nodes.value, ALLOW_NODE_TYPES);
 
-    const fieldIds: string[] = [];
+    const fielValues: string[] = [];
 
     nodes.forEach((node) => {
       const nodeOutput = triggerNodeOutputSignal.getTriggerNodeOutput(node.id);
+      console.log('nodeOutput: ', nodeOutput);
 
       switch (node.type) {
         case NodeType.START_FORM:
@@ -304,7 +309,7 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
 
           startFormFields &&
             startFormFields.forEach((field: any) => {
-              fieldIds.push(field.value);
+              fielValues.push(field.value);
             });
 
           break;
@@ -313,7 +318,7 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
 
           startEntityFields &&
             startEntityFields.forEach((field: any) => {
-              fieldIds.push(field.value);
+              fielValues.push(field.value);
             });
 
           break;
@@ -324,7 +329,7 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
 
           startDateFields &&
             startDateFields.forEach((field: any) => {
-              fieldIds.push(field.value);
+              fielValues.push(field.value);
             });
 
           break;
@@ -336,7 +341,7 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
           const dataAddFields = nodeOutput.conditionFields;
           dataAddFields &&
             dataAddFields.forEach((field: any) => {
-              fieldIds.push(field.value);
+              fielValues.push(field.value);
             });
 
           break;
@@ -346,7 +351,7 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
           const dataQueryFields = nodeOutput.conditionFields;
           dataQueryFields &&
             dataQueryFields.forEach((field: any) => {
-              fieldIds.push(field.value);
+              fielValues.push(field.value);
             });
 
           break;
@@ -354,7 +359,7 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
           const dataQueryMultipleFields = nodeOutput.conditionFields;
           dataQueryMultipleFields &&
             dataQueryMultipleFields.forEach((field: any) => {
-              fieldIds.push(field.value);
+              fielValues.push(field.value);
             });
 
           break;
@@ -362,7 +367,7 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
           const dataUpdateFields = nodeOutput.conditionFields;
           dataUpdateFields &&
             dataUpdateFields.forEach((field: any) => {
-              fieldIds.push(field.value);
+              fielValues.push(field.value);
             });
 
           break;
@@ -372,7 +377,7 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
           const loopFields = nodeOutput.conditionFields;
           loopFields &&
             loopFields.forEach((field: any) => {
-              fieldIds.push(field.value);
+              fielValues.push(field.value);
             });
 
           break;
@@ -380,14 +385,14 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
           const modalFields = nodeOutput.conditionFields;
           modalFields &&
             modalFields.forEach((field: any) => {
-              fieldIds.push(field.value);
+              fielValues.push(field.value);
             });
 
           break;
       }
     });
 
-    return fieldIds;
+    return fielValues;
   };
 
   // 提取公共的字段处理逻辑

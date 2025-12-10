@@ -245,7 +245,15 @@ const CreateSpace = () => {
           field="accountCount"
           rules={[
             { required: true, message: '请输入用户上限' },
-            { type: 'number', min: 1, message: '必须大于0' }
+            { type: 'number', min: 1, message: '必须大于0' },
+            {
+              validator(value, cb) {
+                if (value > 500000) {
+                  return cb('用户上限最高500,000');
+                }
+                return cb();
+              }
+            }
           ]}
         >
           <InputNumber placeholder="请输入用户上限数量" min={1} />

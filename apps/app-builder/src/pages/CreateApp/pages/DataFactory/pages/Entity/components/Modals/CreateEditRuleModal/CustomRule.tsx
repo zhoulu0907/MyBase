@@ -225,7 +225,7 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
           <ConditionEditor
             nodeId={entity.id}
             label="条件设置"
-            required
+            required={true}
             form={form}
             fields={parentOptions}
             entityFieldValidationTypes={filterFieldCheckType}
