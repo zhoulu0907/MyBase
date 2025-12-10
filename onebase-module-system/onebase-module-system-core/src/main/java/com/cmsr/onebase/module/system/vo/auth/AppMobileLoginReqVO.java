@@ -11,5 +11,4 @@ public class AppMobileLoginReqVO extends MobileLoginReqVO {
     @Schema(description = "应用ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "10")
     @NotNull(message = "应用ID不能为空")
     private Long appId;
-
 }

@@ -444,6 +444,7 @@ public class SemanticRefResolver {
             List<Object> ids = new ArrayList<>(e.getValue());
             if (ids.isEmpty()) continue;
             List<Row> mains = dynamicMetadataRepository.selectMainByIds(table, pk, ids);
+            
             Map<Object, Row> rowById = new HashMap<>();
             for (Row r : mains) { rowById.put(r.get(pk), r); }
             mainsByTable.put(table, rowById);
@@ -564,12 +565,14 @@ public class SemanticRefResolver {
             String pkField = getPrimaryKeyNameFromConnector(c);
             String selectFieldUuid = c.getSelectFieldUuid() == null ? null : c.getSelectFieldUuid();
             String selectFieldName = getFieldNameByUuidFromConnector(c, selectFieldUuid);
+            String sourceKeyFieldUuid = c.getSourceKeyFieldUuid() == null ? null : c.getSourceKeyFieldUuid();
             if (selectFieldUuid == null || pkField == null) continue;
             DataSelectMeta meta = new DataSelectMeta();
             meta.tableName = c.getTargetEntityTableName();
             meta.pkField = pkField;
             meta.selectFieldName = selectFieldName;
-            map.put(selectFieldUuid, meta);
+            map.put(sourceKeyFieldUuid, meta);
+            log.info("tableName is {}, pkField is {}, selectFieldName is {}", meta.tableName, meta.pkField, meta.selectFieldName);
         }
         return map;
     }
@@ -590,6 +593,7 @@ public class SemanticRefResolver {
                 SemanticFieldTypeEnum t = v.getFieldTypeEnum();
                 if (t != SemanticFieldTypeEnum.DATA_SELECTION && t != SemanticFieldTypeEnum.MULTI_DATA_SELECTION) continue;
                 String fieldUuid = v.getFieldUuid();
+                log.info("fieldUuid is {}", fieldUuid);
                 DataSelectMeta meta = fieldUuid == null ? null : metaByFieldId.get(fieldUuid);
                 if (meta == null || meta.tableName == null) continue;
                 if (v.isListType()) {
@@ -614,6 +618,11 @@ public class SemanticRefResolver {
         String tableName;
         String pkField;
         String selectFieldName;
+
+        @Override
+        public String toString() {
+            return JsonUtils.toJsonPrettyString(this);
+        }
     }
 
     /**

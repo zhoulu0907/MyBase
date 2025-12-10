@@ -49,5 +49,5 @@ Authorization: Bearer {{token}}
 
 ### 请求 /infra/file/page 接口 => 成功
 GET {{baseUrl}}/infra/file/download/172736111653617664
-tenant-id: {{adminTenantId}}
-Authorization: Bearer {{token}}
+#tenant-id: {{adminTenantId}}
+#Authorization: Bearer {{token}}
