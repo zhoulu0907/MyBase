@@ -5,14 +5,14 @@
 
 
 ### 请求 /login 密文登录 => 成功
-POST {{baseUrl}}/system/auth/login-v2
+POST {{baseUrl}}/system/auth/login
 Content-Type: application/json
 tenant-id: {{adminTenantId}}
 tag: {{tag}}
 
 {
   "username": "admin",
-  "password": "5219584fb796f14b38cdda92798f47ac2f5cb6e17f2124856ddabea835eac1a7eb36295b0063484608867b78ca1d5c1de8b54640160c29940821f2f6ae352d7988499a503069c7a492da4ca24596e357ab10370f21b656cd14721a0e863f2aa33c980ac321bc396e",
+  "password": "7345defb867fe3a679491771c92697b09d2d28bb6f9f8685cbe4425b7ff381330e288bbdb2809aef25680195bca76cb2756e69dd75bfe0dfce0aa0eb112ae73bffaf098ddc675e066cbb8e0776fe8e30e42e4ae80f9748dad6e6d0ebd3767ccc7ed24a6f21daea45",
   "deviceId":666
 }
 

@@ -54,14 +54,6 @@ public class PlatformAuthController {
         return success(platformAuthService.login(reqVO));
     }
 
-
-    @PostMapping("/login-v2")
-    @PermitAll
-    @Operation(summary = "使用账号密码登录")
-    public CommonResult<AuthLoginRespVO> loginV2(@RequestBody @Valid AuthLoginReqVO reqVO) {
-        return success(platformAuthService.loginV2(reqVO));
-    }
-
     @PostMapping("/logout")
     @PermitAll
     @Operation(summary = "登出系统")
