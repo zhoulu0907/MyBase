@@ -494,15 +494,19 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
             List<Map<String, Object>> finalSubTableList = new ArrayList<>();
 
             // 3.1 处理新增数据（只设置有权限的字段）
+            // 前面已校验新增时 subWritableFieldNames 不为空且至少包含一个非子表本身的字段
             for (Map<String, Object> newItem : newItems) {
                 Map<String, Object> processedItem = new HashMap<>();
-                // 只设置有权限的字段（前面已校验新增时 subWritableFieldNames 不为空）
-                if (CollectionUtils.isNotEmpty(subWritableFieldNames)) {
-                    for (String fieldName : subWritableFieldNames) {
-                        Object value = newItem.get(fieldName);
-                        processedItem.put(fieldName, value);
+                // 只设置子表字段，不设置子表本身（subTableName 在 subWritableFieldNames 中表示可新增/删除权限）
+                for (String subFieldName : subTableNonSystemFields) {
+                    if (!subWritableFieldNames.contains(subFieldName)) {
+                        continue;
                     }
+
+                    Object value = newItem.get(subFieldName);
+                    processedItem.put(subFieldName, value);
                 }
+
                 finalSubTableList.add(processedItem);
             }
 
