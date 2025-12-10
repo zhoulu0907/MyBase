@@ -1,4 +1,5 @@
 import { AxiosRequestConfig, Method } from 'axios';
+import SHA256 from 'crypto-js/sha256';
 import { getSignatureConfig } from './env';
 
 export interface SignatureOptions {
@@ -66,16 +67,8 @@ function toPrimitiveString(value: unknown): string {
   return String(value);
 }
 
-async function sha256Hex(input: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(input);
-  if (globalThis.crypto?.subtle) {
-    const digest = await globalThis.crypto.subtle.digest('SHA-256', data);
-    return Array.from(new Uint8Array(digest))
-      .map((byte) => byte.toString(16).padStart(2, '0'))
-      .join('');
-  }
-  throw new Error('当前环境不支持 SHA-256 计算，请在支持 WebCrypto 的环境中运行');
+function sha256Hex(input: string): string {
+  return SHA256(input).toString();
 }
 
 function generateNonce(length = 16): string {
@@ -217,7 +210,7 @@ function prepareRequestBody(
   }
 }
 
-async function generateApiSignature(options: SignatureOptions): Promise<SignatureResult> {
+function generateApiSignature(options: SignatureOptions): SignatureResult {
   const { appKey, appSecret } = options;
 
   if (!appKey) {
@@ -239,7 +232,8 @@ async function generateApiSignature(options: SignatureOptions): Promise<Signatur
     nonce
   });
 
-  const sign = await sha256Hex(signatureBase);
+  const sign = sha256Hex(signatureBase);
+  console.log('sign: ', sign);
 
   return {
     timestamp,
@@ -258,7 +252,7 @@ async function generateApiSignature(options: SignatureOptions): Promise<Signatur
   };
 }
 
-export const generateSignature = async (config: AxiosRequestConfig) => {
+export const generateSignature = (config: AxiosRequestConfig) => {
   const { appKey, appSecret } = getSignatureConfig();
 
   const parsedQuery = parseJsonObject(JSON.stringify(config.params), 'Query 参数');
@@ -268,7 +262,7 @@ export const generateSignature = async (config: AxiosRequestConfig) => {
 
   const bodyPrep = prepareRequestBody(config.method as Method, config.data);
 
-  const signature = await generateApiSignature({
+  const signature = generateApiSignature({
     appKey: appKey,
     appSecret: appSecret,
     queryParams: mergedQuery,
