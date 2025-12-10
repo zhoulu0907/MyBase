@@ -65,6 +65,17 @@ const XDatePicker = memo((props: XInputDatePickerConfig & { runtime?: boolean; d
           return true
         }
       }
+
+      // 变量
+      if (dateRange.earliestType === DATE_EXTREME_TYPE.VARIABLE && dateRange.earliestVariableValue) {
+        const earliestVariableValue = form.getFieldValue(dateRange.earliestDynamicValue);
+        if (earliestVariableValue) {
+          const earliestTime = new Date(earliestVariableValue).getTime()
+          if (currentTime < earliestTime) {
+            return true
+          }
+        }
+      }
     }
 
     // 最晚可选日期时间
@@ -83,6 +94,17 @@ const XDatePicker = memo((props: XInputDatePickerConfig & { runtime?: boolean; d
         const latestTime = todatTime + (DATE_DYNAMIC_VALUE[dateRange.latestDynamicValue as keyof typeof DATE_DYNAMIC_VALUE] || 0) * 24 * 3600 * 1000
         if (currentTime > latestTime) {
           return true
+        }
+      }
+
+      // 变量
+      if (dateRange.latestType === DATE_EXTREME_TYPE.VARIABLE && dateRange.latestVariableValue) {
+        const latestVariableValue = form.getFieldValue(dateRange.latestVariableValue)
+        if (latestVariableValue) {
+          const latestTime = new Date(latestVariableValue).getTime()
+          if (currentTime > latestTime) {
+            return true
+          }
         }
       }
     }
@@ -111,8 +133,8 @@ const XDatePicker = memo((props: XInputDatePickerConfig & { runtime?: boolean; d
     }
   };
 
-  const renderTime = ()=>{
-    if(!fieldValue){
+  const renderTime = () => {
+    if (!fieldValue) {
       return '--'
     }
     switch (currentDateType) {
@@ -141,7 +163,7 @@ const XDatePicker = memo((props: XInputDatePickerConfig & { runtime?: boolean; d
         layout={layout}
         tooltip={tooltip}
         labelCol={layout === 'horizontal' ? { span: 10 } : {}}
-        rules={[{ required: verify?.required, message:`${label.text}是必填项` }]}
+        rules={[{ required: verify?.required, message: `${label.text}是必填项` }]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           margin: 0,
