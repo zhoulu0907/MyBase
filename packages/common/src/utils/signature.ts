@@ -233,7 +233,6 @@ function generateApiSignature(options: SignatureOptions): SignatureResult {
   });
 
   const sign = sha256Hex(signatureBase);
-  console.log('sign: ', sign);
 
   return {
     timestamp,
