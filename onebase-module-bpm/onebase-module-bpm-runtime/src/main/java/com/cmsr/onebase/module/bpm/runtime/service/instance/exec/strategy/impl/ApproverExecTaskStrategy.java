@@ -517,7 +517,7 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
                         // 只读权限，返回数据库中的原始数据
                         finalSubTableList.add(new HashMap<>(existItem));
                     } else {
-                        Map<String, Object> processedItem = processUpdateSubTableItem(updateItem, existItem, subWritableFieldNames);
+                        Map<String, Object> processedItem = processUpdateSubTableItem(updateItem, existItem, subTableNonSystemFields, subWritableFieldNames);
                         finalSubTableList.add(processedItem);
                     }
                 }
@@ -552,15 +552,23 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
      */
     private Map<String, Object> processUpdateSubTableItem(Map<String, Object> updateItem,
                                                           Map<String, Object> existItem,
+                                                          Set<String> subTableNonSystemFields,
                                                           Set<String> subWritableFieldNames) {
         Map<String, Object> mergedItem = new HashMap<>();
         // 先设置 id，确保记录能正确更新
         Object existId = existItem.get("id");
+
         if (existId != null) {
             mergedItem.put("id", existId);
         }
+
         // 只设置有权限的字段
-        for (String fieldName : subWritableFieldNames) {
+        for (String fieldName : subTableNonSystemFields) {
+            // 没有权限的字段，跳过
+            if (!subWritableFieldNames.contains(fieldName)) {
+                continue;
+            }
+
             // 使用 containsKey 区分 key 不存在和值为 null
             if (updateItem.containsKey(fieldName)) {
                 // 如果 key 存在，无论值是否为 null，都使用 updateItem 的值（包括 null）
