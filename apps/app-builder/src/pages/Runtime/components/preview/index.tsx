@@ -10,13 +10,16 @@ import { getHashQueryParam, pagesRuntimeSignal } from '@onebase/common';
 import {
   EDITOR_TYPES,
   getComponentWidth,
+  getWorkbenchComponentWidth,
   PreviewRender,
   startLoadPageSet,
   STATUS_OPTIONS,
   STATUS_VALUES,
   useEditorSignalMap,
   useListEditorSignal,
-  type GridItem
+  useWorkbenchEditorSignal,
+  type GridItem,
+  type WorkbenchComponentType
 } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { Fragment, useCallback, useEffect, useState } from 'react';
@@ -38,6 +41,13 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     clearComponents,
     clearPageComponentSchemas
   } = useListEditorSignal;
+
+  const {
+    components: workbenchComponents,
+    pageComponentSchemas: workbenchPageComponentSchemas,
+    clearComponents: clearWorkbenchComponents,
+    clearPageComponentSchemas: clearWorkbenchPageComponentSchemas
+  } = useWorkbenchEditorSignal;
 
   const { editPageViewId } = pagesRuntimeSignal;
 
@@ -62,11 +72,18 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     console.log('mainMetaData: ', mainMetaData);
     setMainMetaData(mainMetaData);
 
-    const entityWithChildren = await getEntityFieldsWithChildren(mainMetaData);
-    console.log('当前主表及所有子表数据: ', entityWithChildren);
+    // 工作台页面不获取子表数据
+    if (mainMetaData && mainMetaData !== 'null') {
+      const entityWithChildren = await getEntityFieldsWithChildren(mainMetaData);
+      console.log('当前主表及所有子表数据: ', entityWithChildren);
 
-    setTableName(entityWithChildren.tableName);
-    setMainMetaDataFields(entityWithChildren.parentFields);
+      setTableName(entityWithChildren.tableName);
+      setMainMetaDataFields(entityWithChildren.parentFields);
+      // TODO: 根据 pagesetType 设置
+      setPageType(EDITOR_TYPES.LIST_EDITOR);
+    } else {
+      setPageType(EDITOR_TYPES.WORKBENCH_EDITOR);
+    }
   };
 
   const handleGetPageSetId = useCallback(async (menuId: string) => {
@@ -88,6 +105,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       // 清空全局 signals 中的组件和 schemas
       clearComponents();
       clearPageComponentSchemas();
+      clearWorkbenchComponents();
+      clearWorkbenchPageComponentSchemas();
 
       // 然后加载新的数据
       handleGetPageSetId(menuId);
@@ -107,7 +126,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       getMainMetaData(pageSetId);
     }
     // 优先切换到列表页
-    setPageType(EDITOR_TYPES.LIST_EDITOR);
+    // setPageType(EDITOR_TYPES.LIST_EDITOR);
   }, [pageSetId]);
 
   const loadPageSetInfo = async (pageSetId: string) => {
@@ -235,6 +254,36 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                 取消
               </Button>
             </div>
+          </Form>
+        )}
+
+        {pageType == EDITOR_TYPES.WORKBENCH_EDITOR && (
+          <Form layout="inline" form={form}>
+            {workbenchComponents.value.map((cp: GridItem) => (
+              <Fragment key={cp.id}>
+                {workbenchPageComponentSchemas.value[cp.id]?.config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+                  <div
+                    key={cp.id}
+                    className={styles.componentItem}
+                    style={{
+                      width: `calc(${getWorkbenchComponentWidth(
+                        workbenchPageComponentSchemas.value[cp.id],
+                        cp.type as WorkbenchComponentType
+                      )} - 8px)`,
+                      margin: '4px'
+                    }}
+                  >
+                    <PreviewRender
+                      cpId={cp.id}
+                      cpType={cp.type}
+                      pageComponentSchema={workbenchPageComponentSchemas.value[cp.id]}
+                      runtime={runtime}
+                      preview={preview}
+                    />
+                  </div>
+                )}
+              </Fragment>
+            ))}
           </Form>
         )}
       </div>

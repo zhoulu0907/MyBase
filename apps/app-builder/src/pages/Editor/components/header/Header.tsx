@@ -8,7 +8,7 @@ import defaultListDesignSVG from '@/assets/images/list_design_default_icon.svg';
 import activePageSettingSVG from '@/assets/images/page_setting_active_icon.svg';
 import defaultPageSettingSVG from '@/assets/images/page_setting_default_icon.svg';
 import activeWorkbenchDesignSVG from '@/assets/images/workbench_design_active_icon.svg';
-// import defaultWorkbenchDesignSVG from '@/assets/images/workbench_design_default_icon.svg';
+import defaultWorkbenchDesignSVG from '@/assets/images/workbench_design_default_icon.svg';
 import previewSVG from '@/assets/images/preview_icon.svg';
 import DynamicIcon from '@/components/DynamicIcon';
 import { useI18n } from '@/hooks/useI18n';
@@ -51,6 +51,7 @@ import {
   useListEditorSignal,
   usePageEditorSignal,
   usePageViewEditorSignal,
+  useWorkbenchEditorSignal,
   type SavePageSetParams
 } from '@onebase/ui-kit';
 import { cloneDeep } from 'lodash-es';
@@ -91,7 +92,7 @@ const baseTabData = [
     key: EDITOR_TYPES.WORKBENCH_EDITOR,
     title: '工作台设计',
     alt: 'workbench Setting',
-    defaultIcon: defaultPageSettingSVG, // TODO: 待UI补充后替换
+    defaultIcon: defaultWorkbenchDesignSVG,
     activeIcon: activeWorkbenchDesignSVG
   },
   {
@@ -146,6 +147,13 @@ export default function EditorHeader() {
     layoutSubComponents: listLayoutSubComponents,
     clearLayoutSubComponents: clearListLayoutSubComponents
   } = useListEditorSignal;
+
+  const {
+    components: workbenchComponents,
+    pageComponentSchemas: workbenchPageComponentSchemas,
+    clearComponents: clearWorkbenchComponents,
+    clearPageComponentSchemas: clearWorkbenchPageComponentSchemas
+  } = useWorkbenchEditorSignal;
 
   const { setMainEntity, /* setAppEntities, */ setSubEntities } = useAppEntityStore();
   const { curMenu, setCurMenu } = menuSignal;
@@ -395,7 +403,9 @@ export default function EditorHeader() {
       fromSubTableComponentsMap: cloneDeep(fromSubTableComponents.value),
       listComponents: listComponents.value,
       listPageComponentSchemas: new Map(Object.entries(cloneDeep(listPageComponentSchemas.value))),
-      listColComponentsMap: { colComponents: new Map(Object.entries(cloneDeep(listLayoutSubComponents.value))) }
+      listColComponentsMap: { colComponents: new Map(Object.entries(cloneDeep(listLayoutSubComponents.value))) },
+      workbenchComponents: workbenchComponents.value,
+      workbenchPageComponentSchemas: new Map(Object.entries(cloneDeep(workbenchPageComponentSchemas.value || {})))
     };
 
     console.log('savePageSetParams: ', savePageSetParams);
@@ -419,8 +429,10 @@ export default function EditorHeader() {
     clearListLayoutSubComponents();
     clearFormComponents();
     clearListComponents();
+    clearWorkbenchComponents();
     clearFromPageComponentSchemas();
     clearListPageComponentSchemas();
+    clearWorkbenchPageComponentSchemas();
   };
 
   const backToPageManager = async () => {
