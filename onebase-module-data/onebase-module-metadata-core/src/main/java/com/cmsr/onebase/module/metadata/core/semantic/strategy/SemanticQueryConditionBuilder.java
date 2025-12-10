@@ -95,6 +95,54 @@ public class SemanticQueryConditionBuilder {
         } else if (op == SemanticOperatorEnum.NOT_CONTAINS) {
             if (val == null) { return null; }
             return new QueryColumn(name).notLike(val);
+        } else if (op == SemanticOperatorEnum.LATER_THAN) {
+            return new QueryColumn(name).gt(val);
+        } else if (op == SemanticOperatorEnum.EARLIER_THAN) {
+            return new QueryColumn(name).lt(val);
+        } else if (op == SemanticOperatorEnum.RANGE) {
+            if (values == null || values.isEmpty()) { return null; }
+            Object start = values.size() > 0 ? values.get(0) : null;
+            Object end = values.size() > 1 ? values.get(1) : null;
+            QueryCondition c = null;
+            if (start != null) { c = new QueryColumn(name).ge(start); }
+            if (end != null) { c = (c == null) ? new QueryColumn(name).le(end) : c.and(new QueryColumn(name).le(end)); }
+            return c;
+        } else if (op == SemanticOperatorEnum.CONTAINS_ALL) {
+            if (values == null || values.isEmpty()) { return null; }
+            QueryCondition c = null;
+            for (Object v : values) {
+                if (v == null) { continue; }
+                QueryCondition likeCond = new QueryColumn(name).like(v);
+                c = (c == null) ? likeCond : c.and(likeCond);
+            }
+            return c;
+        } else if (op == SemanticOperatorEnum.CONTAINS_ANY) {
+            if (values == null || values.isEmpty()) { return null; }
+            QueryCondition c = null;
+            for (Object v : values) {
+                if (v == null) { continue; }
+                QueryCondition likeCond = new QueryColumn(name).like(v);
+                c = (c == null) ? likeCond : c.or(likeCond);
+            }
+            return c;
+        } else if (op == SemanticOperatorEnum.NOT_CONTAINS_ALL) {
+            if (values == null || values.isEmpty()) { return null; }
+            QueryCondition c = null;
+            for (Object v : values) {
+                if (v == null) { continue; }
+                QueryCondition notLikeCond = new QueryColumn(name).notLike(v);
+                c = (c == null) ? notLikeCond : c.or(notLikeCond);
+            }
+            return c;
+        } else if (op == SemanticOperatorEnum.NOT_CONTAINS_ANY) {
+            if (values == null || values.isEmpty()) { return null; }
+            QueryCondition c = null;
+            for (Object v : values) {
+                if (v == null) { continue; }
+                QueryCondition notLikeCond = new QueryColumn(name).notLike(v);
+                c = (c == null) ? notLikeCond : c.and(notLikeCond);
+            }
+            return c;
         } else if (op == SemanticOperatorEnum.IS_EMPTY) {
             QueryCondition c1 = new QueryColumn(name).isNull();
             QueryCondition c2 = new QueryColumn(name).eq("");

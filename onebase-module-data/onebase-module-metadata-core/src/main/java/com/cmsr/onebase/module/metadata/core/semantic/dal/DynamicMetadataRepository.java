@@ -13,6 +13,7 @@ import com.cmsr.onebase.framework.uid.UidGenerator;
 import com.cmsr.onebase.module.metadata.core.config.ApplicationDataSourceManager;
 
 import org.springframework.stereotype.Repository;
+import com.cmsr.onebase.module.metadata.core.semantic.constants.SystemFieldConstants;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -33,24 +34,19 @@ public class DynamicMetadataRepository {
             Long userId = SecurityFrameworkUtils.getLoginUserId();
             Long userDeptId = SecurityFrameworkUtils.getLoginUserDeptId() != null ? SecurityFrameworkUtils.getLoginUserDeptId() : 0L;
 
-            if (row.containsKey("created_time")) { row.set("created_time", now); }
-            if (row.containsKey("createtime")) { row.set("createtime", now); }
-            if (row.containsKey("updated_time")) { row.set("updated_time", now); }
-            if (row.containsKey("updatetime")) { row.set("updatetime", now); }
-            if (row.containsKey("deleted")) { row.set("deleted", 0); }
-            if (row.containsKey("lock_version")) { row.set("lock_version", 0); }
-            if (row.containsKey("lockversion")) { row.set("lockversion", 0); }
+            if (row.containsKey(SystemFieldConstants.OPTIONAL.CREATED_TIME)) { row.set(SystemFieldConstants.OPTIONAL.CREATED_TIME, now); }
+            if (row.containsKey(SystemFieldConstants.OPTIONAL.UPDATED_TIME)) { row.set(SystemFieldConstants.OPTIONAL.UPDATED_TIME, now); }
+            if (row.containsKey(SystemFieldConstants.OPTIONAL.DELETED)) { row.set(SystemFieldConstants.OPTIONAL.DELETED, 0); }
+            if (row.containsKey(SystemFieldConstants.OPTIONAL.LOCK_VERSION)) { row.set(SystemFieldConstants.OPTIONAL.LOCK_VERSION, 0); }
 
             if (userId != null) {
-                if (row.containsKey("owner_id") && row.get("owner_id") == null) { row.set("owner_id", userId); }
-                if (row.containsKey("ownerid") && row.get("ownerid") == null) { row.set("ownerid", userId); }
-                if (row.containsKey("creator") && row.get("creator") == null) { row.set("creator", userId); }
-                if (row.containsKey("updater") && row.get("updater") == null) { row.set("updater", userId); }
+                if (row.containsKey(SystemFieldConstants.REQUIRE.OWNER_ID) && row.get(SystemFieldConstants.REQUIRE.OWNER_ID) == null) { row.set(SystemFieldConstants.REQUIRE.OWNER_ID, userId); }
+                if (row.containsKey(SystemFieldConstants.REQUIRE.CREATOR) && row.get(SystemFieldConstants.REQUIRE.CREATOR) == null) { row.set(SystemFieldConstants.REQUIRE.CREATOR, userId); }
+                if (row.containsKey(SystemFieldConstants.REQUIRE.UPDATER) && row.get(SystemFieldConstants.REQUIRE.UPDATER) == null) { row.set(SystemFieldConstants.REQUIRE.UPDATER, userId); }
             }
 
             if (userDeptId != null) {
-                if (row.containsKey("owner_dept") && row.get("owner_dept") == null) { row.set("owner_dept", userDeptId); }
-                if (row.containsKey("ownerdept") && row.get("ownerdept") == null) { row.set("ownerdept", userDeptId); }
+                if (row.containsKey(SystemFieldConstants.REQUIRE.OWNER_DEPT) && row.get(SystemFieldConstants.REQUIRE.OWNER_DEPT) == null) { row.set(SystemFieldConstants.REQUIRE.OWNER_DEPT, userDeptId); }
             }
 
             return Db.insert(tableName, row);
@@ -98,10 +94,9 @@ public class DynamicMetadataRepository {
         try {
             String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
             Long userId = SecurityFrameworkUtils.getLoginUserId();
-            if (row.containsKey("updated_time")) { row.set("updated_time", now); }
-            if (row.containsKey("updatetime")) { row.set("updatetime", now); }
+            if (row.containsKey(SystemFieldConstants.OPTIONAL.UPDATED_TIME)) { row.set(SystemFieldConstants.OPTIONAL.UPDATED_TIME, now); }
             if (userId != null) {
-                if (row.containsKey("updater") && row.get("updater") == null) { row.set("updater", userId); }
+                if (row.containsKey(SystemFieldConstants.REQUIRE.UPDATER) && row.get(SystemFieldConstants.REQUIRE.UPDATER) == null) { row.set(SystemFieldConstants.REQUIRE.UPDATER, userId); }
             }
             return Db.updateByQuery(tableName, row, qw);
         } finally {

@@ -2,6 +2,11 @@ package com.cmsr.onebase.module.metadata.core.semantic.dto.enums;
 
 import org.apache.commons.lang3.StringUtils;
 
+/**
+ * 操作符枚举
+ *
+ * 与流程上下文中的操作符定义保持一致，涵盖字符串、数值、集合与日期等比较语义。
+ */
 public enum SemanticOperatorEnum {
 
     /**
@@ -98,7 +103,56 @@ public enum SemanticOperatorEnum {
      * @Description: 不为空操作符
      * 用于判断某个字段是否不为空，类似于 SQL 中的 "IS NOT NULL" 或者 <> ''
      */
-    IS_NOT_EMPTY("不为空");
+    IS_NOT_EMPTY("不为空"),
+
+    /**
+     * 晚于
+     *
+     * 通常用于日期比较，表示某个日期在另一个日期之后，类似于 ">"
+     */
+    LATER_THAN("晚于"),
+
+    /**
+     * 早于
+     *
+     * 通常用于日期比较，表示某个日期在另一个日期之前，类似于 "<"
+     */
+    EARLIER_THAN("早于"),
+
+    /**
+     * 范围
+     *
+     * 表示某个值在两个边界值之间，类似于 SQL 中的 "BETWEEN ... AND ..."
+     */
+    RANGE("范围"),
+
+    /**
+     * 包含全部
+     *
+     * 判断字段是否包含全部指定的值（如集合包含性），可用 like 组合实现
+     */
+    CONTAINS_ALL("包含全部"),
+
+    /**
+     * 不包含全部
+     *
+     * 判断字段是否不包含全部指定的值，可用 not like 组合实现
+     */
+    NOT_CONTAINS_ALL("不包含全部"),
+
+    /**
+     * 包含任一
+     *
+     * 判断字段是否包含任意一个指定的值，可用 like 组合实现
+     */
+    CONTAINS_ANY("包含任一"),
+
+    /**
+     * 不包含任一
+     *
+     * 判断字段是否不包含任意一个指定的值，可用 not like 组合实现
+     */
+    NOT_CONTAINS_ANY("不包含任一");
 
     private final String description;
 
