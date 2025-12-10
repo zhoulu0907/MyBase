@@ -137,7 +137,8 @@ const getBlockNode = (targetNodeId: string, blocks: FlowNodeJSON[], nodeTypes: N
 
       if (hasCurNode == JudgeStatus.FOUND || hasCurNode == JudgeStatus.INCLUDE) {
         if (nodeTypes.includes(ele.type as NodeType)) {
-          blockNode.push({ ...ele, blocks: [] });
+          blockNode.push(ele);
+          //   blockNode.push({ ...ele, blocks: [] });
         }
 
         const newBlocks = getBlockNode(targetNodeId, ele.blocks, nodeTypes);
@@ -145,10 +146,10 @@ const getBlockNode = (targetNodeId: string, blocks: FlowNodeJSON[], nodeTypes: N
         blockNode.push(...newBlocks);
       }
     } else {
-      // 没有 blocks 的节点，如果类型匹配则添加
-      if (nodeTypes.includes(ele.type as NodeType)) {
-        blockNode.push(ele);
-      }
+      //   // 没有 blocks 的节点，如果类型匹配则添加
+      //   if (nodeTypes.includes(ele.type as NodeType)) {
+      //     blockNode.push(ele);
+      //   }
     }
   }
 
@@ -322,6 +323,13 @@ export const getEntityFieldList = async (
 
   console.log('newConditionFields: ', newConditionFields);
   setConditionFields(newConditionFields);
+
+  // TODO(mickey): remove
+  //   if (fieldIds?.length) {
+  //     // TODO(mickey): 需要卞老师补充字段类型
+  //     const newValidationTypes = await getFieldCheckTypeApi(fieldIds);
+  //     setValidationTypes(newValidationTypes);
+  //   }
 };
 
 // 判断是否在循环节点内
