@@ -50,7 +50,7 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
           title: '应用管理',
           icon: <img src={appLicationManageSVG} />,
           path: `/onebase/${tenantId}/setting/application`,
-          permissionKey: TENANT_MENUS.INFO
+          permissionKey: TENANT_MENUS.APP
         }
       ]
     },

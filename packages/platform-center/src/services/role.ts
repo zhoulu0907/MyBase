@@ -34,27 +34,27 @@ export const updateRoleStatus = (data: UpdateStatusForm) => {
 };
 
 // 删除角色
-export const deleteRole = (id: number) => {
+export const deleteRole = (id: string) => {
   return systemService.post(`/role/delete?id=${id}`);
 };
 
 // 批量删除角色
-export const deleteRoleList = (ids: number[]) => {
+export const deleteRoleList = (ids: string[]) => {
   return systemService.post('/role/delete-list', { ids });
 };
 
 // 移除角色下的用户
-export const removeRoleUsers = (roleId: number, userIds: number[]) => {
+export const removeRoleUsers = (roleId: string, userIds: string[]) => {
   return systemService.post('/permission/delete-role-users', { roleId, userIds });
 };
 
 // 为角色下增加用户
-export const addRoleUsers = (roleId: number, userIds: number[]) => {
+export const addRoleUsers = (roleId: string, userIds: string[]) => {
   return systemService.post('/permission/add-role-users', { roleId, userIds });
 };
 
 // 移除某角色下的权限
-export const removeRolePermission = (roleId: number, menuIds: string[]) => {
+export const removeRolePermission = (roleId: string, menuIds: string[]) => {
   return systemService.post('/permission/delete-role-menus', {
     roleId,
     menuIds
@@ -62,7 +62,7 @@ export const removeRolePermission = (roleId: number, menuIds: string[]) => {
 };
 
 // 为某角色配置权限
-export const configureRolePermissions = (roleId: number, menuIds: string[]) => {
+export const configureRolePermissions = (roleId: string, menuIds: string[]) => {
   return systemService.post('/permission/assign-role-menu', {
     roleId,
     menuIds
@@ -75,6 +75,6 @@ export const getAllPermissions = (code?: string): Promise<Permission[]> => {
 };
 
 // 获取角色下已配置权限
-export const getConfiguredPermissions = (roleId: number): Promise<Permission[]> => {
+export const getConfiguredPermissions = (roleId: string): Promise<Permission[]> => {
   return systemService.get('/permission/list-role-menus', { roleId });
 };

@@ -7,7 +7,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import PermissionConfigModal from './PermissionModal';
 
 interface PermissionListProps {
-  selectedRoleId?: number;
+  selectedRoleId?: string;
   type?: number;
 }
 
