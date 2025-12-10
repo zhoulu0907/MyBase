@@ -63,7 +63,7 @@ CREATE TABLE bpm_flow_node
     definition_uuid varchar(64)  NOT NULL,
     node_code       varchar(100)  NOT NULL,
     node_name       varchar(100)  NULL,
-    permission_flag varchar(200)  NULL,
+    permission_flag text  NULL,
     node_ratio      numeric(6, 3) NULL,
     coordinate      varchar(100)  NULL,
     any_node_skip   varchar(100)  NULL,
@@ -427,7 +427,6 @@ CREATE UNIQUE INDEX uk_bpm_flow_instance_biz_ext_instance_id ON bpm_flow_instanc
 CREATE TABLE bpm_flow_agent
 (
     id                      int8         NOT NULL,
-    app_id                  int8         NOT NULL,
     principal_id            varchar(80)         NOT NULL,
     principal_name          varchar(64)  NOT NULL,
     agent_id             varchar(80)         NOT NULL,
@@ -454,7 +453,6 @@ COMMENT ON TABLE bpm_flow_agent IS '流程代理表';
 
 -- 字段注释
 COMMENT ON COLUMN bpm_flow_agent.id IS '主键ID';
-COMMENT ON COLUMN bpm_flow_agent.app_id IS '应用ID';
 COMMENT ON COLUMN bpm_flow_agent.principal_id IS '被代理人用户ID，代理关系的发起方';
 COMMENT ON COLUMN bpm_flow_agent.agent_id IS '代理人用户ID，代理关系的接受方';
 COMMENT ON COLUMN bpm_flow_agent.start_time IS '代理生效开始时间';
