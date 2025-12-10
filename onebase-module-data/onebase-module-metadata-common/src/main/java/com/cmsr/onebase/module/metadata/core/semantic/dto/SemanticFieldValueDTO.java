@@ -52,7 +52,7 @@ public class SemanticFieldValueDTO<T> {
         return rawValue;
     }
 
-    private SemanticFieldValueDTO(SemanticFieldTypeEnum fieldTypeEnum) {
+    public SemanticFieldValueDTO(SemanticFieldTypeEnum fieldTypeEnum) {
         this.fieldTypeEnum = Objects.requireNonNull(fieldTypeEnum, "fieldTypeEnum 不能为空");
     }
 

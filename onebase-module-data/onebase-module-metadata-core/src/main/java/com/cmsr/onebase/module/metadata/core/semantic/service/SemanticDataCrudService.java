@@ -42,6 +42,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum.AUTO_CODE;
 
 /**
  * 动态数据 CRUD 服务（运行态，基于 RecordDTO）
@@ -664,14 +667,28 @@ public class SemanticDataCrudService {
      * @param value 当前值对象
      */
     private void generateAndApplyAutoNumbers(List<SemanticFieldSchemaDTO> fields, SemanticEntityValueDTO value) {
-        List<Long> fieldIds = fields.stream()
-                .filter(f -> Objects.equals(f.getFieldTypeEnum(), SemanticFieldTypeEnum.AUTO_CODE))
-                .map(SemanticFieldSchemaDTO::getId)
+        List<String> fieldIds = fields.stream()
+                .filter(f -> Objects.equals(f.getFieldTypeEnum(), AUTO_CODE))
+                .map(SemanticFieldSchemaDTO::getFieldUuid)
                 .toList();
         Map<String, String> autoNumbers = autoNumberService.generateDataNumbers(fieldIds, value.getCurrentEntityRawMap());
-        value.getFieldValueMap().forEach((key, fieldVaue) -> {
-            if (autoNumbers.containsKey(key)) { fieldVaue.setRawValue(autoNumbers.get(key)); }
-        });
+        for(String key : autoNumbers.keySet()){
+            String filedName = fields.stream().filter(semanticFieldSchemaDTO ->
+                semanticFieldSchemaDTO.getFieldUuid().equals(key)
+            ).map(SemanticFieldSchemaDTO::getFieldName).findFirst().orElse("");
+
+//            Long filedId = fields.stream().filter(semanticFieldSchemaDTO ->
+//                    semanticFieldSchemaDTO.getFieldUuid().equals(key)
+//            ).map(SemanticFieldSchemaDTO::getId).findFirst().orElse(0l);
+
+            SemanticFieldValueDTO<java.lang.Object> semanticFieldValueDTO = new SemanticFieldValueDTO<java.lang.Object>(AUTO_CODE);
+            semanticFieldValueDTO.setFieldId(null);
+            semanticFieldValueDTO.setFieldUuid(key);
+            semanticFieldValueDTO.setFieldName(filedName);
+            semanticFieldValueDTO.setRawValue(autoNumbers.get(key).toString());
+            value.getFieldValueMap().put(filedName,semanticFieldValueDTO);
+        }
+
     }
 
     /**
@@ -769,9 +786,9 @@ public class SemanticDataCrudService {
         if (connector == null || fields == null) { return; }
         List<SemanticFieldSchemaDTO> attrs = connector.getRelationAttributes();
         if (attrs == null || attrs.isEmpty()) { return; }
-        List<Long> fieldIds = attrs.stream()
-                .filter(f -> Objects.equals(f.getFieldTypeEnum(), SemanticFieldTypeEnum.AUTO_CODE))
-                .map(SemanticFieldSchemaDTO::getId)
+        List<String> fieldIds = attrs.stream()
+                .filter(f -> Objects.equals(f.getFieldTypeEnum(), AUTO_CODE))
+                .map(SemanticFieldSchemaDTO::getFieldUuid)
                 .toList();
         if (fieldIds.isEmpty()) { return; }
         Map<String, Object> raw = new HashMap<>();
