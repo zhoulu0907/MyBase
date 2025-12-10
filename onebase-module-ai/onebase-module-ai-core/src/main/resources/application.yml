@@ -1,0 +1,39 @@
+server:
+  port: 18080
+  ##项目名字配置
+  servlet:
+    context-path: /de2api/
+
+spring:
+  profiles:
+    active: dev,promt,dsltemplate,rlzydsl,dzswdsl,znkf,kjrj
+  application:
+    name: onebase-ai-server
+  messages:
+    encoding: UTF-8
+    basename: i18n/lic,i18n/core,i18n/permissions,i18n/xpack,i18n/sync
+  ai:
+    dashscope:
+      api-key: sk-6eacbb6a60e743449be2d831e7ae9cb8
+  cloud:
+    alicloud:
+      access-key: LTAI5tNqcnnGfoJrzzxq5U3b
+      secret-key: LQutAYMXzRVu9TA6ShWbsfSBgkxgVl
+      oss:
+          endpoint: oss-cn-shanghai.aliyuncs.com
+          bucket: gulimall-gsp
+
+logging:
+  level:
+    root: INFO
+    com.cmsr: DEBUG
+  file:
+    name: /data/backend/data-ai-app.log  # 日志文件路径（默认生成在项目根目录或指定路径）
+
+#data_address: |
+#  http://127.0.0.1:8100/de2api
+
+data_address: |
+  http://10.0.104.38:8100/de2api
+
+

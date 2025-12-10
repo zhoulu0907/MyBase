@@ -23,6 +23,11 @@
         <module>onebase-module-flow</module>
         <module>onebase-module-formula</module>
         <module>onebase-module-bpm</module>
+        <module>onebase-module-ai</module>
+        <module>onebase-module-ai/onebase-module-ai-api</module>
+        <module>onebase-module-ai/onebase-module-ai-build</module>
+        <module>onebase-module-ai/onebase-module-ai-runtime</module>
+        <module>onebase-module-ai/onebase-module-ai-core</module>
     </modules>
 
     <name>${project.artifactId}</name>
