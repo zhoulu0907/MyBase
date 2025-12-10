@@ -17,6 +17,8 @@ const DynamicNumberInputConfig = ({ handlePropsChange, item, configs }: Props) =
         value={configs[item.key]}
         min={item.min}
         max={item.max}
+        step={item.step}
+        precision={item.precision}
         onChange={(value) => {
           if (value >= 0) {
             handlePropsChange(item.key, value);

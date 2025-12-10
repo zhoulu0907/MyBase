@@ -119,7 +119,6 @@ export interface LoginResponse {
   expiresTime: number; // 令牌过期时间（时间戳，毫秒）
   tenantId: string; // 租户id
   tenantWebsite: string; // 租户网址
-  adminFlag: boolean; // 是否是管理员
   corpId: string; // 企业id
 }
 

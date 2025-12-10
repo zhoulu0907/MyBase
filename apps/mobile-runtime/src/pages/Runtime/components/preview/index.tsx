@@ -30,6 +30,7 @@ import {
   STATUS_VALUES,
   type GridItem
 } from '@onebase/ui-kit';
+import { getFileUrlById } from '@onebase/platform-center';
 
 import CustomNav from '@/pages/components/Nav';
 import { fetchSubmitInstance } from '@onebase/app/src/services/app_runtime';
@@ -79,6 +80,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   const [mainMetaData, setMainMetaData] = useState<string>('');
   const [tableName, setTableName] = useState<string>('');
   const [editTargetId, setEditTargetId] = useState('');
+  const [editLoading, setEditLoading] = useState(false);
 
   // 当前时间戳
   const [detailMode, setDetailMode] = useState(true);
@@ -165,16 +167,16 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
         if (filterByUpload.includes(field.fieldType) && Array.isArray(value)) {
           formData[field.fieldName] = value.map((item: any) => {
-            if (item.response && item.url) {
+            if ((item.response || item.id) && item.name) {
+              console.log('item=====11111====: ', item);
               return {
-                ...item,
-                url: item.response
+                name: item.name,
+                id: item.response || item.id,
               };
             }
             return item;
           });
-        }
-        if (field.fieldType === 'DATE') {
+        } else if (field.fieldType === 'DATE') {
           formData[field.fieldName] = value ? dayjs(value).format('YYYY-MM-DD') : '';
         } else if (field.fieldType === 'DATETIME') {
           formData[field.fieldName] = value ? dayjs(value).format('YYYY-MM-DD hh:mm:ss') : '';
@@ -310,6 +312,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       }
       setEditTargetId('');
       setDrawerVisible(false);
+      setPageType(EDITOR_TYPES.LIST_EDITOR);
       setRefresh(Date.now());
     } else {
       try {
@@ -345,6 +348,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
         if (res) {
           Toast.success('创建成功');
         }
+        setPageType(EDITOR_TYPES.LIST_EDITOR);
       } catch (error) {
         Toast.error('创建失败');
       }
@@ -385,6 +389,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   };
 
   const handleGetData = async (id: string) => {
+    setEditLoading(true);
     const req: DetailMethodV2Params = {
       id: id
     };
@@ -415,6 +420,16 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
               formValues[fieldName] = Object.entries(value).length > 0 ? [value.name] : value;
             } else if (fieldType === ENTITY_FIELD_TYPE.DEPARTMENT.VALUE) {
               formValues[fieldName] = value;
+            } else if (fieldType === ENTITY_FIELD_TYPE.IMAGE.VALUE || fieldType === ENTITY_FIELD_TYPE.FILE.VALUE) {
+              formValues[fieldName] = value.map((item: any) => {
+                return {
+                  ...item,
+                  name: item.name,
+                  id: item.id,
+                  response: item.response || item.id,
+                  url: getFileUrlById(item.id)
+                };
+              });
             } else {
               formValues[fieldName] = value;
             }
@@ -483,7 +498,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
     console.log('formValues: ', formValues);
     form.setFieldsValue(formValues);
-
+    setTimeout(() => {
+      setEditLoading(false);
+    }, 60);
     return res;
   };
 
@@ -546,6 +563,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                         pageComponentSchema={
                           useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id]
                         }
+                        editLoading={editLoading}
                         form={form}
                         runtime={true}
                         showFromPageData={() => {

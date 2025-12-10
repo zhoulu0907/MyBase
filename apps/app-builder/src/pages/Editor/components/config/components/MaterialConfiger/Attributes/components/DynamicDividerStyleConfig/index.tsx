@@ -112,7 +112,16 @@ const DynamicDividerStyleConfig = ({ handlePropsChange, item, configs }: Props) 
       );
     } else if (index === 8) {
       return (
-        <div className={styles.tabBase} style={{ backgroundColor: hexToRgba(color, 0.2) }}>
+        <div
+          className={styles[`decor-${option.value}`]}
+          style={
+            {
+              backgroundColor: hexToRgba(color, 0.2),
+              '--before-bg': hexToRgba(color, 0.6),
+              '--after-bg': hexToRgba(color, 0.6)
+            } as React.CSSProperties
+          }
+        >
           <div className={styles.tabActive} style={{ backgroundColor: `${color}`, color: `${titleColor}` }}>
             字段标题
           </div>

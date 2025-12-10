@@ -12,7 +12,6 @@ export interface TokenInfo {
   expiresTime: number; // 令牌过期时间（时间戳，毫秒）
   tenantId?: string; // 租户id
   corpId?: string; // 企业id
-  adminFlag?: boolean; // 是否是管理员
   loginURL?: string;
 }
 

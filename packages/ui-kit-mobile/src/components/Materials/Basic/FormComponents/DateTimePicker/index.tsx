@@ -13,7 +13,7 @@ import {
 type XDateTimePickerConfig = typeof FormSchema.XDateTimePickerSchema.config;
 import '../index.css';
 
-const XDateTimePicker = memo((props: XDateTimePickerConfig & { runtime?: boolean; detailMode?: boolean }) => {
+const XDateTimePicker = memo((props: XDateTimePickerConfig & { runtime?: boolean; detailMode?: boolean; form?: any }) => {
   const {
     label,
     dataField,
@@ -23,7 +23,8 @@ const XDateTimePicker = memo((props: XDateTimePickerConfig & { runtime?: boolean
     verify,
     layout,
     runtime = true,
-    detailMode
+    detailMode,
+    form
   } = props;
 
   // 生成唯一的字段ID
@@ -48,7 +49,7 @@ const XDateTimePicker = memo((props: XDateTimePickerConfig & { runtime?: boolean
       label={label.display && label.text}
       field={fieldId}
       rules={rules}
-      initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : ''}
+      initialValue={form.getFieldValue(fieldId)}
       style={{
         textAlign: 'right',
         pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',

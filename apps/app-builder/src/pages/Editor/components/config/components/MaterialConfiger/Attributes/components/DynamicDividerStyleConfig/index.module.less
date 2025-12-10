@@ -129,6 +129,69 @@
     }
   }
 
+  .decor-style9 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    height: 20px;
+    padding: 0 24px;
+    border-radius: 10px 10px 0 0;
+    box-sizing: border-box;
+
+    .tabActive {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 22px;
+      font-weight: 600;
+      height: 24px;
+      padding: 0 16px;
+      margin-top: -5px;
+      box-sizing: border-box;
+      border-radius: 0 0 18px 18px;
+      clip-path: polygon(
+        0% 0%,
+        100% 0%,
+
+        100% 0%,
+        93% 67%,
+        90% 85%,
+        88% 92%,
+        84% 100%,
+
+        16% 100%,
+        12% 92%,
+        10% 85%,
+        6% 60%,
+        0% 0%
+      );
+    }
+  }
+
+  /* 左右撑开的留白，不做剪裁 */
+  .decor-style9::before {
+    content: '';
+    height: 4px;
+    background-color: var(--before-bg);
+    width: 6px;
+    border-radius: 4px 0 0 0;
+    position: relative;
+    top: -12px;
+    right: -2px;
+  }
+
+  .decor-style9::after {
+    content: '';
+    height: 4px;
+    background-color: var(--after-bg);
+    width: 6px;
+    border-radius: 0 4px 0 0;
+    position: relative;
+    top: -12px;
+    left: -2px;
+  }
+
   .decor-style10 {
     display: flex;
     align-items: center;
@@ -194,31 +257,6 @@
     .rightArrow2 {
       left: 12px;
     }
-  }
-
-  .tabBase {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    height: 20px;
-    padding: 0 24px;
-    border-radius: 10px 10px 0 0;
-    box-sizing: border-box;
-  }
-
-  .tabActive {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 22px;
-    font-weight: 600;
-    height: 24px;
-    padding: 0 16px;
-    margin-top: -6px;
-    box-sizing: border-box;
-    border-radius: 0 0 50px 50px;
-    clip-path: polygon(0% 0%, 100% 0%, 89% 100%, 11% 100%);
   }
 }
 

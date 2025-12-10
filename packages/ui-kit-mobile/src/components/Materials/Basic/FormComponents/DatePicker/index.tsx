@@ -20,6 +20,7 @@ const XDatePicker = memo((props: XDatePickerConfig & { runtime?: boolean; detail
     detailMode,
     defaultValueConfig
   } = props;
+  console.warn('XDatePicker====props====', props);
 
   // 生成唯一的字段ID
   const fieldId = dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.DATE_PICKER}_${nanoid()}`
@@ -83,7 +84,7 @@ const XDatePicker = memo((props: XDatePickerConfig & { runtime?: boolean; detail
       field={fieldId}
       rules={rules}
       label={label.display && label.text}
-      initialValue={defaultValueConfig.customValue}
+      initialValue={form.getFieldValue(fieldId)}
       style={{
         textAlign: align,
         pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
