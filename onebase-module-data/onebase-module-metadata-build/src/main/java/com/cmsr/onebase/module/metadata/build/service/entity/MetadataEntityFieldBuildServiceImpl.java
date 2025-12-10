@@ -3273,4 +3273,92 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         log.debug("字段【{}】(UUID: {})的校验规则唯一性检查通过", fieldDisplayName, fieldUuid);
     }
 
+    @Override
+    public List<FieldTypeValidationTypesRespVO> getValidationTypesByFieldTypes(@Valid FieldTypeValidationTypesReqVO reqVO) {
+        List<String> fieldTypeCodes = reqVO.getFieldTypeCodes();
+        
+        if (fieldTypeCodes == null || fieldTypeCodes.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // 1. 查询字段类型（根据 field_type_code）
+        QueryWrapper typeQueryWrapper = componentFieldTypeRepository.query()
+                .where(MetadataComponentFieldTypeDO::getFieldTypeCode).in(fieldTypeCodes);
+        List<MetadataComponentFieldTypeDO> fieldTypes = componentFieldTypeRepository.list(typeQueryWrapper);
+        
+        if (fieldTypes.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // 构建 字段类型ID -> 字段类型信息 的映射
+        Map<Long, MetadataComponentFieldTypeDO> typeIdToInfo = fieldTypes.stream()
+                .filter(ft -> ft.getId() != null)
+                .collect(Collectors.toMap(
+                        MetadataComponentFieldTypeDO::getId,
+                        ft -> ft
+                ));
+
+        // 2. 查询关联表 metadata_permit_ref_otft（字段类型ID -> 校验类型ID）
+        List<MetadataPermitRefOtftDO> relations = permitRefOtftService.listByFieldTypeIds(typeIdToInfo.keySet());
+
+        // 收集所有用到的校验类型ID
+        Set<Long> validationTypeIds = relations.stream()
+                .map(MetadataPermitRefOtftDO::getValidationTypeId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        Map<Long, MetadataValidationTypeDO> validationTypeMap = new HashMap<>();
+        if (!validationTypeIds.isEmpty()) {
+            // 3. 查询校验类型详情
+            validationTypeMap = validationTypeService.getByIds(validationTypeIds);
+        }
+
+        // 4. 按字段类型ID分组组装校验类型列表
+        Map<Long, List<ValidationTypeItemRespVO>> typeIdToValidations = new HashMap<>();
+        for (MetadataPermitRefOtftDO rel : relations) {
+            Long ftId = rel.getFieldTypeId();
+            Long vtId = rel.getValidationTypeId();
+            Integer sort = rel.getSortOrder();
+            
+            if (ftId == null || vtId == null) {
+                continue;
+            }
+            
+            MetadataValidationTypeDO validationType = validationTypeMap.get(vtId);
+            if (validationType == null) {
+                continue;
+            }
+            
+            ValidationTypeItemRespVO item = new ValidationTypeItemRespVO();
+            item.setCode(validationType.getValidationCode());
+            item.setName(validationType.getValidationName());
+            item.setDescription(validationType.getValidationDesc());
+            item.setSortOrder(sort);
+            
+            typeIdToValidations.computeIfAbsent(ftId, k -> new ArrayList<>()).add(item);
+        }
+
+        // 5. 确保每个列表按 sort_order 升序
+        for (List<ValidationTypeItemRespVO> list : typeIdToValidations.values()) {
+            list.sort((a, b) -> {
+                Integer s1 = a.getSortOrder() != null ? a.getSortOrder() : 0;
+                Integer s2 = b.getSortOrder() != null ? b.getSortOrder() : 0;
+                return Integer.compare(s1, s2);
+            });
+        }
+
+        // 6. 组装返回结果，按字段类型编码分组
+        List<FieldTypeValidationTypesRespVO> result = new ArrayList<>();
+        for (MetadataComponentFieldTypeDO fieldType : fieldTypes) {
+            FieldTypeValidationTypesRespVO vo = new FieldTypeValidationTypesRespVO();
+            vo.setFieldTypeCode(fieldType.getFieldTypeCode());
+            vo.setFieldTypeName(fieldType.getFieldTypeName());
+            vo.setFieldTypeDesc(fieldType.getFieldTypeDesc());
+            vo.setValidationTypes(typeIdToValidations.getOrDefault(fieldType.getId(), new ArrayList<>()));
+            result.add(vo);
+        }
+        
+        return result;
+    }
+
 }
