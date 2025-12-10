@@ -29,7 +29,7 @@ public class EntityTriggerReqDTO {
     private TriggerEventEnum triggerEvent;
 
     @Schema(description = "流程上下文，key是上下文变量名，value是上下文变量值, 现在包含SystemFieldConstants REQUIRE中的常量")
-    private HashMap<String, String> flowContext;
+    private Map<String, String> flowContext;
 
     @Schema(description = "数据，字段名称和字段数据, key是字段的columnName, value是字段值")
     private List<SemanticFieldValueDTO<Object>> fieldData;

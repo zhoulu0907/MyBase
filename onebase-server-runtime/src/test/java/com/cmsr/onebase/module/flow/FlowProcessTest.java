@@ -1,7 +1,6 @@
 package com.cmsr.onebase.module.flow;
 
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
-import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.module.flow.api.FlowProcessExecApiImpl;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerReqDTO;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerRespDTO;
@@ -10,12 +9,12 @@ import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
 import com.cmsr.onebase.module.flow.core.flow.FlowRemoteCallExecutor;
-import com.cmsr.onebase.module.flow.core.flow.RemoteCallRequest;
 import com.cmsr.onebase.module.flow.core.graph.FlowChainBuilder;
 import com.cmsr.onebase.module.flow.core.graph.FlowGraphBuilder;
 import com.cmsr.onebase.module.flow.runtime.service.FlowProcessExecService;
 import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerReqVO;
 import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerRespVO;
+import com.cmsr.onebase.module.metadata.core.semantic.constants.SystemFieldConstants;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldValueDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
 import com.cmsr.onebase.server.runtime.OneBaseServerRuntimeApplication;
@@ -81,6 +80,13 @@ public class FlowProcessTest {
         reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_CREATE);
         reqDTO.setApplicationId(173020283873034240L);
         reqDTO.setTableName("xzqd_student");
+        reqDTO.setFlowContext(Map.of(
+                SystemFieldConstants.REQUIRE.CREATOR, "155019577667616800",
+                SystemFieldConstants.REQUIRE.UPDATER, "155019577667616800",
+                SystemFieldConstants.REQUIRE.OWNER_ID, "155019577667616800",
+                SystemFieldConstants.REQUIRE.OWNER_DEPT, "101"
+                ));
+
         SemanticFieldValueDTO name = SemanticFieldValueDTO.ofType(SemanticFieldTypeEnum.TEXT);
         name.setFieldName("name");
         name.setRawValue("小");
@@ -93,56 +99,4 @@ public class FlowProcessTest {
         System.out.println(respDTO);
     }
 
-    @Test
-    public void testSimple23() throws IOException {
-        EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
-        // reqDTO.setTraceId(UUID.randomUUID().toString());
-        // reqDTO.setEntityId(88576673965670400L);
-        // reqDTO.setTriggerEvent(TriggerEventEnum.AFTER_UPDATE);
-        // reqDTO.setFieldData(Map.of(
-        //         "8857773477298176", "测试部门号",
-        //         "88577773477298181", "测试部门",
-        //         "88577773477298186", "Manager"
-        // ));
-        EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
-        System.out.println(respDTO);
-    }
-
-    @Test
-    public void testSimple3() throws IOException {
-        RemoteCallRequest jobMessage = new RemoteCallRequest();
-        jobMessage.setJobType("fld");
-        jobMessage.setProcessId(89995954500108288L);
-        flowRemoteCallExecutor.executeFlow(jobMessage);
-    }
-
-//    @Test
-//    public void testSimple4() throws IOException {
-//        TenantContextHolder.setIgnore(true);
-//        FormTriggerReqVO reqVO = new FormTriggerReqVO();
-//        reqVO.setProcessId(114994365031546880L);  // 114994365031546880L 114959369637036032L
-//        Map<Long, Object> inputParams = Map.of(
-//                46999569445519360L, "班级名称"
-//        );
-//        reqVO.setInputParams(inputParams);
-//        FormTriggerRespVO respVO = flowProcessExecService.triggerForm(reqVO);
-//        System.out.println(respVO);
-//    }
-
-    @Test
-    public void testSimple5() throws IOException {
-        TenantContextHolder.setIgnore(true);
-        EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
-        // reqDTO.setTraceId(UUID.randomUUID().toString());
-        // reqDTO.setEntityId(46999363287089152L);
-        // reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_CREATE);
-        // reqDTO.setFieldData(Map.of(
-        //         "46999569445519360", "9年级145班",
-        //         "50026937276661762", LocalDate.now().minusYears(10),
-        //         "50028191407505411", 30
-        // ));
-        //reqDTO.setChangedFieldIds(List.of(46999569445519360L));
-        EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
-        System.out.println(respDTO);
-    }
 }

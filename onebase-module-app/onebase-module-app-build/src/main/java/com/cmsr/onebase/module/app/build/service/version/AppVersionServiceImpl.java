@@ -67,9 +67,9 @@ public class AppVersionServiceImpl implements AppVersionService {
         AppApplicationDO applicationDO = appCommonService.validateApplicationExist(createReqVO.getApplicationId());
         // 先备份老的相关数据
         // 创建新版本
-        final Long applicationId = applicationDO.getId();
-        final Long runtimeVersionId = applicationId;
-        final AppVersionDO versionDO = new AppVersionDO();
+        Long applicationId = applicationDO.getId();
+        Long runtimeVersionId = applicationId;
+        AppVersionDO versionDO = new AppVersionDO();
         versionDO.setId(runtimeVersionId);
         versionDO.setApplicationId(applicationId);
         versionDO.setVersionName(createReqVO.getVersionName());
@@ -116,7 +116,7 @@ public class AppVersionServiceImpl implements AppVersionService {
 
     private void saveVersion(Long applicationId, AppVersionDO newVersion) {
         // 0. 查询是否存在老版本
-        final AppVersionDO currentVersion = versionRepository.findCurrentVersion(applicationId);
+          AppVersionDO currentVersion = versionRepository.findCurrentVersion(applicationId);
         // 1.
         if (currentVersion == null) {
             // 1.1. 不存在老版本

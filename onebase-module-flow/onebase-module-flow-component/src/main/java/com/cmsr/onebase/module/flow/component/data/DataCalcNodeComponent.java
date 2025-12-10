@@ -9,7 +9,7 @@ import com.cmsr.onebase.module.flow.context.enums.OpEnum;
 import com.cmsr.onebase.module.flow.context.express.ExpressionItem;
 import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
 import com.cmsr.onebase.module.flow.context.graph.nodes.DataCalcNodeData;
-import com.cmsr.onebase.module.flow.context.provider.ConditionsProvider;
+import com.cmsr.onebase.module.flow.context.provider.FlowConditionsProvider;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
 import com.yomahub.liteflow.annotation.LiteflowComponent;
 import lombok.Setter;
@@ -31,7 +31,7 @@ public class DataCalcNodeComponent extends SkippableNodeComponent {
 
 
     @Autowired
-    private ConditionsProvider conditionsProvider;
+    private FlowConditionsProvider flowConditionsProvider;
 
     @Override
     public void process() throws Exception {
@@ -49,7 +49,7 @@ public class DataCalcNodeComponent extends SkippableNodeComponent {
             conditionItem.setFieldTypeEnum(SemanticFieldTypeEnum.TEXT);
             conditionItem.setOp(OpEnum.EQUALS.name());
         }
-        List<ExpressionItem> expressionItems = conditionsProvider.formatConditionItemsForValue(conditionItems, expressionContext);
+        List<ExpressionItem> expressionItems = flowConditionsProvider.formatConditionItemsForValue(conditionItems, expressionContext);
         Map<String, Object> dataMap = expressionItems.stream().collect(Collectors.toMap(ExpressionItem::getFieldKey, ExpressionItem::getFieldValue));
         executeContext.addLog("数据计算节点执行返回数据：" + dataMap.size());
         variableContext.putNodeVariables(this.getTag(), dataMap);

@@ -10,7 +10,7 @@ import com.cmsr.onebase.module.flow.context.condition.Conditions;
 import com.cmsr.onebase.module.flow.context.express.OrExpression;
 import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
 import com.cmsr.onebase.module.flow.context.graph.nodes.StartDateFieldNodeData;
-import com.cmsr.onebase.module.flow.context.provider.ConditionsProvider;
+import com.cmsr.onebase.module.flow.context.provider.FlowConditionsProvider;
 import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticConditionDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntityValueDTO;
@@ -46,7 +46,7 @@ public class StartDateFieldNodeComponent extends NodeComponent {
     private SemanticDynamicDataApi semanticDynamicDataApi;
 
     @Autowired
-    private ConditionsProvider conditionsProvider;
+    private FlowConditionsProvider flowConditionsProvider;
 
     @Override
     public void process() throws Exception {
@@ -64,7 +64,7 @@ public class StartDateFieldNodeComponent extends NodeComponent {
         andSections.add(timeCondition);
         if (CollectionUtils.isNotEmpty(nodeData.getFilterCondition())) {
             List<Conditions> conditions = nodeData.getFilterCondition();
-            OrExpression orExpression = conditionsProvider.formatConditionsForValue(conditions, expressionContext);
+            OrExpression orExpression = flowConditionsProvider.formatConditionsForValue(conditions, expressionContext);
             SemanticConditionDTO filterCondition = DataMethodApiHelper.processFilterCondition(orExpression);
             andSections.add(filterCondition);
         }
