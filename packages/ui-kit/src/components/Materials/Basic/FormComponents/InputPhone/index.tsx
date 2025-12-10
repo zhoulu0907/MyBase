@@ -62,7 +62,7 @@ const XInputPhone = memo((props: XInputPhoneConfig & { runtime?: boolean; detail
         }
         layout={layout}
         tooltip={tooltip}
-        labelCol={layout === 'horizontal' ? { style: { width: 200, flex: 'unset' } } : {}}
+        labelCol={layout === 'horizontal' ? { span: 10 } : {}}
         rules={[
           { required: verify?.required, message:`${label.text}是必填项` },
           {
@@ -93,6 +93,7 @@ const XInputPhone = memo((props: XInputPhoneConfig & { runtime?: boolean; detail
         ) : (
           <Input
             prefix={phoneType === PHONE_TYPE.MOBILE ? '+86' : null}
+            maxLength={phoneType === PHONE_TYPE.MOBILE ? 11 : 15}
             style={{
               width: '100%',
               textAlign: align,

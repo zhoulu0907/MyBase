@@ -158,7 +158,7 @@ const SpaceInfo: React.FC = () => {
               <div className={styles.infoCardPrimaryLeft}>
                 <div className={styles.avatarSection}>
                   <Tooltip content="修改Logo">
-                    {corpLogo ? (
+                    {
                       <Upload
                         limit={1}
                         accept="image/*"
@@ -212,23 +212,25 @@ const SpaceInfo: React.FC = () => {
                           });
                         }}
                       >
-                        <Image
-                          className={styles.reUploadLogo}
-                          src={corpLogo}
-                          width={160}
-                          height={80}
-                          preview={false}
-                          actions={[<IconCamera />]}
-                        />
+                        {corpLogo ? (
+                          <Image
+                            className={styles.reUploadLogo}
+                            src={corpLogo}
+                            width={160}
+                            height={80}
+                            preview={false}
+                            actions={[<IconCamera />]}
+                          />
+                        ) : (
+                          <Avatar
+                            shape="square"
+                            style={{ width: 160, height: 80, backgroundColor: '#F7F8FA', borderRadius: 12 }}
+                          >
+                            <span className={styles.avatarText}>{enterpriseInfo.corpName?.slice(0, 6)}</span>
+                          </Avatar>
+                        )}
                       </Upload>
-                    ) : (
-                      <Avatar
-                        shape="square"
-                        style={{ width: 160, height: 80, backgroundColor: '#F7F8FA', borderRadius: 12 }}
-                      >
-                        <span className={styles.avatarText}>{enterpriseInfo.corpName?.slice(0, 6)}</span>
-                      </Avatar>
-                    )}
+                    }
                   </Tooltip>
                 </div>
                 {/* 名称 & ID */}

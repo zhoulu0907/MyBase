@@ -19,7 +19,7 @@ import type { PlatformTenantInfo } from '@onebase/platform-center';
 import {
   getTenantInfo,
   PlatformTenantPublishMode,
-  updatePlatformTenantApi,
+  updateTenant,
   uploadFile
 } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
@@ -99,10 +99,9 @@ const SpaceInfo: React.FC = () => {
     }
 
     try {
-      await updatePlatformTenantApi({
-        id: spaceInfo.id,
+      await updateTenant({
+        id: spaceInfo.id || "",
         name: newName,
-        tenantAdminUserUpdateReqVOSList: spaceInfo.tenantAdminUserList
       });
 
       setSpaceInfo({

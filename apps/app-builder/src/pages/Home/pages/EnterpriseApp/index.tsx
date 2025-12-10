@@ -26,7 +26,7 @@ import emptyApplicationSVG from '@/assets/images/tenantNoContent.svg';
 import DynamicIcon from '@/components/DynamicIcon';
 import { PermissionButton } from '@/components/PermissionControl';
 
-import { TENANT_DEPT_PERMISSION as ACTIONS } from '@onebase/common';
+import { TENANT_APP_PERMISSION as ACTIONS } from '@onebase/common';
 import { appIconMap } from '@onebase/ui-kit';
 import TagModal from './components/tagModal';
 import {
@@ -131,7 +131,7 @@ const EnterpriseAppPage: React.FC = () => {
     debouncedUpdate(value);
   };
 
-  const nagivateToDataFactory = (appId: string) => {
+  const nagivateToRuntime = (appId: string) => {
     setCurAppId(appId);
     const tenantId = TokenManager.getTenantInfo()?.tenantId || '';
 
@@ -389,7 +389,7 @@ const EnterpriseAppPage: React.FC = () => {
                       type="outline"
                       long
                       onClick={() => {
-                        nagivateToDataFactory(item.id);
+                        nagivateToRuntime(item.id);
                       }}
                       // disabled={item.publishModel === "saas"}
                     >

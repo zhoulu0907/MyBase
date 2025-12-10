@@ -7,7 +7,7 @@ import styles from './index.module.less';
 export default function EditRemarkModal({ visible, setVisible, currentItem, getVersionMgmtData,getVersonList }: EditRemarkModal) {
   const [remark, setRemark] = useState<string>('');
   const submit = () => {
-    updateVersionAlias({ id: currentItem.id, versionAlias: remark }).then((res: any) => {
+    updateVersionAlias({ id: currentItem.id, bpmVersionAlias: remark }).then((res: any) => {
       Message.success('修改成功');
       getVersionMgmtData();
       setVisible(false)
@@ -16,7 +16,7 @@ export default function EditRemarkModal({ visible, setVisible, currentItem, getV
   };
 
   useEffect(() => {
-    setRemark(currentItem.versionAlias);
+    setRemark(currentItem.bpmVersionAlias);
   }, [visible]);
   return (
     <Modal

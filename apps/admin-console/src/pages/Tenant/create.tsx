@@ -19,7 +19,7 @@ import {
   getPlatformTenantAdminListApi,
   PlatformTenantPublishMode,
   PlatformTenantStatus,
-  platformUploadFile,
+  uploadFile,
   type CreateTenantParams,
   type UserVO
 } from '@onebase/platform-center';
@@ -52,7 +52,7 @@ const CreateSpace = () => {
     });
   }, [adminList]);
 
-  // 生成租户编码
+  // 生成空间编码
   const generateTenantCode = () => {
     const timestamp = generateTimestampString();
     return `tenant_${timestamp}`;
@@ -71,7 +71,7 @@ const CreateSpace = () => {
   };
 
   /**
-   * 创建新租户
+   * 创建新空间
    */
   const createTenant = async (values: any) => {
     try {
@@ -97,10 +97,10 @@ const CreateSpace = () => {
         logoUrl
       };
       await addPlatformTenantApi(newTenantData);
-      Message.success('创建租户成功');
+      Message.success('创建空间成功');
       nav('/onebase/tenant');
     } catch (error: any) {
-      console.error('创建租户失败:', error);
+      console.error('创建空间失败:', error);
     }
   };
 
@@ -110,7 +110,7 @@ const CreateSpace = () => {
       const values = await form.validate();
       console.log('提交数据:', values);
 
-      // 创建租户
+      // 创建空间
       await createTenant(values);
     } catch (error) {
       console.log('表单验证失败', error);
@@ -134,7 +134,7 @@ const CreateSpace = () => {
         }
       : undefined;
 
-    const res = await platformUploadFile(formData, progressAdapter);
+    const res = await uploadFile(formData, progressAdapter);
     return res;
   };
 
@@ -245,7 +245,15 @@ const CreateSpace = () => {
           field="accountCount"
           rules={[
             { required: true, message: '请输入用户上限' },
-            { type: 'number', min: 1, message: '必须大于0' }
+            { type: 'number', min: 1, message: '必须大于0' },
+            {
+              validator(value, cb) {
+                if (value > 500000) {
+                  return cb('用户上限最高500,000');
+                }
+                return cb();
+              }
+            }
           ]}
         >
           <InputNumber placeholder="请输入用户上限数量" min={1} />

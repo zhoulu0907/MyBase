@@ -1,12 +1,7 @@
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import type { FlowNodeEntity, FlowNodeJSON } from '@flowgram.ai/fixed-layout-editor';
-import {
-  DATA_SOURCE_TYPE,
-  getEntityFields,
-  getFieldCheckTypeApi,
-  type ConditionField,
-  type EntityFieldValidationTypes
-} from '@onebase/app';
+import { DATA_SOURCE_TYPE, getEntityFields, type ConditionField, type EntityFieldValidationTypes } from '@onebase/app';
+import { getEntityListByApp } from '@onebase/app/src/services';
 import { NodeType } from '@onebase/common';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -86,6 +81,25 @@ const judge = (targetNodeId: string, blocks: FlowNodeJSON[], depth: number): Jud
   return status;
 };
 
+// 获取所有匹配节点类型的节点（用于处理目标节点之前的节点，这些节点内部不包含目标节点）
+const getAllMatchingNodes = (blocks: FlowNodeJSON[], nodeTypes: NodeType[]): FlowNodeJSON[] => {
+  let nodes: FlowNodeJSON[] = [];
+  for (let ele of blocks) {
+    if (ele.blocks?.length) {
+      if (nodeTypes.includes(ele.type as NodeType)) {
+        nodes.push({ ...ele, blocks: [] });
+      }
+      const nestedNodes = getAllMatchingNodes(ele.blocks, nodeTypes);
+      nodes.push(...nestedNodes);
+    } else {
+      if (nodeTypes.includes(ele.type as NodeType)) {
+        nodes.push(ele);
+      }
+    }
+  }
+  return nodes;
+};
+
 const getBlockNode = (targetNodeId: string, blocks: FlowNodeJSON[], nodeTypes: NodeType[]): FlowNodeJSON[] => {
   let blockNode: FlowNodeJSON[] = [];
 
@@ -97,7 +111,23 @@ const getBlockNode = (targetNodeId: string, blocks: FlowNodeJSON[], nodeTypes: N
         newBlocks = blocks.slice(0, curIndex);
       }
 
-      blockNode.push(...newBlocks);
+      // 过滤并处理目标节点之前的节点
+      newBlocks.forEach((node) => {
+        if (node.blocks?.length) {
+          // 如果节点有 blocks，先添加节点本身（如果类型匹配），然后递归处理 blocks 内部的所有节点
+          if (nodeTypes.includes(node.type as NodeType)) {
+            blockNode.push({ ...node, blocks: [] });
+          }
+          // 递归处理 blocks 内部的所有节点（目标节点不在这些 blocks 内部，所以返回所有匹配的节点）
+          const nestedNodes = getAllMatchingNodes(node.blocks, nodeTypes);
+          blockNode.push(...nestedNodes);
+        } else {
+          // 普通节点，检查是否在允许的类型中
+          if (nodeTypes.includes(node.type as NodeType)) {
+            blockNode.push(node);
+          }
+        }
+      });
 
       break;
     }
@@ -108,12 +138,18 @@ const getBlockNode = (targetNodeId: string, blocks: FlowNodeJSON[], nodeTypes: N
       if (hasCurNode == JudgeStatus.FOUND || hasCurNode == JudgeStatus.INCLUDE) {
         if (nodeTypes.includes(ele.type as NodeType)) {
           blockNode.push(ele);
+          //   blockNode.push({ ...ele, blocks: [] });
         }
 
         const newBlocks = getBlockNode(targetNodeId, ele.blocks, nodeTypes);
 
         blockNode.push(...newBlocks);
       }
+    } else {
+      //   // 没有 blocks 的节点，如果类型匹配则添加
+      //   if (nodeTypes.includes(ele.type as NodeType)) {
+      //     blockNode.push(ele);
+      //   }
     }
   }
 
@@ -159,6 +195,10 @@ export function getPrecedingNodes(
 
         return nodes;
       } else if (hasCurNode == JudgeStatus.INCLUDE) {
+        // 如果循环节点本身在允许的节点类型中，先添加循环节点本身
+        if (nodeTypes.includes(ele.type as NodeType)) {
+          nodes.push({ ...ele, blocks: [] });
+        }
         // 在当前节点的下游blocks中
         const blocks = getBlockNode(targetNodeId, ele.blocks, nodeTypes);
         nodes.push(...blocks);
@@ -207,28 +247,28 @@ export const getDataNodeSource = (nodeId: string): string => {
       case NodeType.START_ENTITY:
         return nodeData.entityId;
       case NodeType.DATA_ADD:
-        if (nodeData.addType === DATA_SOURCE_TYPE.FORM) {
-          return nodeData.mainEntityId;
+        if (nodeData.addType === DATA_SOURCE_TYPE.MAIN_TABLE) {
+          return nodeData.mainTableName;
         }
-        if (nodeData.addType === DATA_SOURCE_TYPE.SUBFORM) {
-          return nodeData.subEntityId;
+        if (nodeData.addType === DATA_SOURCE_TYPE.SUB_TABLE) {
+          return nodeData.subTableName;
         }
         break;
       case NodeType.DATA_UPDATE:
-        if (nodeData.updateType === DATA_SOURCE_TYPE.FORM) {
-          return nodeData.mainEntityId;
+        if (nodeData.updateType === DATA_SOURCE_TYPE.MAIN_TABLE) {
+          return nodeData.mainTableName;
         }
-        if (nodeData.updateType === DATA_SOURCE_TYPE.SUBFORM) {
-          return nodeData.subEntityId;
+        if (nodeData.updateType === DATA_SOURCE_TYPE.SUB_TABLE) {
+          return nodeData.subTableName;
         }
         break;
 
       case NodeType.DATA_QUERY:
-        if (nodeData.dataType === DATA_SOURCE_TYPE.FORM) {
-          return nodeData.mainEntityId;
+        if (nodeData.dataType === DATA_SOURCE_TYPE.MAIN_TABLE) {
+          return nodeData.mainTableName;
         }
-        if (nodeData.dataType === DATA_SOURCE_TYPE.SUBFORM) {
-          return nodeData.subEntityId;
+        if (nodeData.dataType === DATA_SOURCE_TYPE.SUB_TABLE) {
+          return nodeData.subTableName;
         }
         if (nodeData.dataType === DATA_SOURCE_TYPE.DATA_NODE) {
           return getDataNodeSource(nodeData.dataNodeId);
@@ -236,11 +276,11 @@ export const getDataNodeSource = (nodeId: string): string => {
         break;
 
       case NodeType.DATA_QUERY_MULTIPLE:
-        if (nodeData.dataType === DATA_SOURCE_TYPE.FORM) {
-          return nodeData.mainEntityId;
+        if (nodeData.dataType === DATA_SOURCE_TYPE.MAIN_TABLE) {
+          return nodeData.mainTableName;
         }
-        if (nodeData.dataType === DATA_SOURCE_TYPE.SUBFORM) {
-          return nodeData.subEntityId;
+        if (nodeData.dataType === DATA_SOURCE_TYPE.SUB_TABLE) {
+          return nodeData.subTableName;
         }
         if (nodeData.dataType === DATA_SOURCE_TYPE.DATA_NODE) {
           return getDataNodeSource(nodeData.dataNodeId);
@@ -256,6 +296,7 @@ export const getDataNodeSource = (nodeId: string): string => {
 };
 
 export const getEntityFieldList = async (
+  appId: string,
   dataSource: string,
   setConditionFields: (fields: ConditionField[]) => void,
   setValidationTypes: (types: EntityFieldValidationTypes[]) => void
@@ -266,50 +307,29 @@ export const getEntityFieldList = async (
   const fieldIds: string[] = [];
   const newConditionFields: ConditionField[] = [];
 
-  const res = await getEntityFields({ entityId: dataSource });
+  const entityList = await getEntityListByApp(appId);
+
+  const entityId = entityList.find((item: any) => item.tableName === dataSource)?.entityId;
+
+  const res = await getEntityFields({ entityId: entityId });
   res.forEach((item: any) => {
     fieldIds.push(item.id);
     newConditionFields.push({
       label: item.displayName,
-      value: item.id,
+      value: `${dataSource}.${item.fieldName}`,
       fieldType: item.fieldType
     });
   });
 
+  console.log('newConditionFields: ', newConditionFields);
   setConditionFields(newConditionFields);
-  if (fieldIds?.length) {
-    const newValidationTypes = await getFieldCheckTypeApi(fieldIds);
-    setValidationTypes(newValidationTypes);
-  }
-};
 
-export const getEntityFieldListV2 = async (
-  dataSource: string,
-  entityName: string,
-  setConditionFields: (entityID: string, entityName: string, fields: ConditionField[]) => void,
-  setValidationTypes: (types: EntityFieldValidationTypes[]) => void
-) => {
-  if (!dataSource) {
-    return;
-  }
-  const fieldIds: string[] = [];
-  const newConditionFields: ConditionField[] = [];
-
-  const res = await getEntityFields({ entityId: dataSource });
-  res.forEach((item: any) => {
-    fieldIds.push(item.id);
-    newConditionFields.push({
-      label: item.displayName,
-      value: item.id,
-      fieldType: item.fieldType
-    });
-  });
-
-  setConditionFields(dataSource, entityName, newConditionFields);
-  if (fieldIds?.length) {
-    const newValidationTypes = await getFieldCheckTypeApi(fieldIds);
-    setValidationTypes(newValidationTypes);
-  }
+  // TODO(mickey): remove
+  //   if (fieldIds?.length) {
+  //     // TODO(mickey): 需要卞老师补充字段类型
+  //     const newValidationTypes = await getFieldCheckTypeApi(fieldIds);
+  //     setValidationTypes(newValidationTypes);
+  //   }
 };
 
 // 判断是否在循环节点内

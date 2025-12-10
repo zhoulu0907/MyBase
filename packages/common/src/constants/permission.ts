@@ -17,17 +17,15 @@ export enum PERMISSION_TYPES {
 
 /** 菜单-空间管理 */
 export const TENANT_MENUS = {
-  APP: 'tenant:app', // todo
-  USER: 'tenant:user',
-  ROLE: 'tenant:role',
-  DEPT: 'tenant:dept',
-  DICT: 'tenant:dict',
-  SECURITY: 'tenant:security',
-  INFO: 'tenant:info',
-  BUSINESS: 'tenant:business',
-  AUTHORIZED: 'tenant:authorized',
-  CORP: 'tenant:corp',
-  PROFILE: 'tenant:profile'
+  APP: 'tenant:app',//应用管理
+  USER: 'tenant:user', //用户管理
+  ROLE: 'tenant:role', //角色管理
+  DEPT: 'tenant:dept', //组织管理
+  DICT: 'tenant:dict', //数据字典管理
+  SECURITY: 'tenant:security', //安全设置
+  INFO: 'tenant:info',  //空间信息
+  CORP: 'tenant:corp', //企业管理
+  PROFILE: 'tenant:profile' //个人中心
 };
 
 /** 空间管理-用户管理 */
@@ -36,7 +34,7 @@ export const TENANT_USER_CREATE = 'tenant:user:create'; // 增加用户
 export const TENANT_USER_UPDATE = 'tenant:user:update'; // 修改用户
 export const TENANT_USER_DELETE = 'tenant:user:delete'; // 删除用户
 export const TENANT_USER_STATUS = 'tenant:user:enable'; // 启用/禁用用户
-export const TENANT_USER_RESET = 'tenant:user:reset'; // 重置密码
+export const TENANT_USER_RESET = 'tenant:user:update-password'; // 重置密码
 export const TENANT_USER_IMPORT = 'tenant:user:import'; // 数据导入 // todo
 export const TENANT_USER_EXPORT = 'tenant:user:import'; // 数据导出 // todo
 export const TENANT_USER_PERMISSION = {
@@ -48,6 +46,18 @@ export const TENANT_USER_PERMISSION = {
   STATUS: TENANT_USER_STATUS,
   IMPORT: TENANT_USER_IMPORT,
   EXPORT: TENANT_USER_EXPORT
+};
+
+/** 租户管理-应用管理 */
+export const TENANT_APP_QUERY = 'tenant:app:query'; // 查询应用
+export const TENANT_APP_CREATE = 'tenant:app:create'; // 新增应用
+export const TENANT_APP_UPDATE = 'tenant:app:update'; // 修改应用
+export const TENANT_APP_DELETE = 'tenant:app:delete'; // 删除应用
+export const TENANT_APP_PERMISSION = {
+  QUERY: TENANT_APP_QUERY,
+  CREATE: TENANT_APP_CREATE,
+  UPDATE: TENANT_APP_UPDATE,
+  DELETE: TENANT_APP_DELETE,
 };
 
 /** 租户管理-角色管理 */
@@ -143,11 +153,11 @@ export enum PUBLISH_MODULE {
 
 /** 菜单-企业管理 */
 export const CORP_MENUS = {
-  USER: 'corp:user',
-  DEPT: 'corp:dept',
-  PROFILE: 'corp:profile',
-  AUTHORIZED: 'corp:app-auth',
-  CORP_INFO: 'corp:info'
+  USER: 'corp:user', //用户
+  DEPT: 'corp:dept',   //组织管理
+  PROFILE: 'corp:profile', //个人中心
+  AUTHORIZED: 'corp:app-auth', //授权应用
+  CORP_INFO: 'corp:info' //企业信息
 };
 
 /** 企业管理-用户管理 */
@@ -156,7 +166,7 @@ export const CORP_USER_CREATE = 'corp:user:create'; // 增加用户
 export const CORP_USER_UPDATE = 'corp:user:update'; // 修改用户
 export const CORP_USER_DELETE = 'corp:user:delete'; // 删除用户
 export const CORP_USER_STATUS = 'corp:user:enable'; // 启用/禁用用户
-export const CORP_USER_RESET = 'corp:user:reset'; // 重置密码
+export const CORP_USER_RESET = 'corp:user:reset-pwd'; // 重置密码
 export const CORP_USER_IMPORT = 'corp:user:import'; // 数据导入 // todo
 export const CORP_USER_EXPORT = 'corp:user:import'; // 数据导出 // todo
 export const CORP_USER_PERMISSION = {

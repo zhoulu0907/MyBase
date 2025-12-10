@@ -2,16 +2,16 @@
  * 流程设计
  */
 export interface GetByBusinessId {
-  businessId: string;
+  businessUuid: string;
 }
 export interface SaveRequest {
   bpmDefJson: string;
-  businessId: string;
+  businessUuid: string;
   flowCode: string;
   flowName: string;
-  version: string;
-  versionAlias: string;
-  versionStatus: string;
+  bpmVersion?: string;
+  bpmVersionAlias: string;
+  bpmVersionStatus?: string;
   id: string;
 }
 export interface PublishRequest {
@@ -19,7 +19,7 @@ export interface PublishRequest {
 }
 export interface UpdateVersionAlias {
    id: string;
-   versionAlias:string
+   bpmVersionAlias:string
 }
 export interface VersionMgmtRequest {
     /**
@@ -49,7 +49,7 @@ export interface VersionMgmtRequest {
 }
 export interface GetFlowPreview {
   instanceId: string;
-  businessId: string;
+  businessUuid: string;
 }
 
 export interface AgentPage {

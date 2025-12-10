@@ -1,7 +1,7 @@
 import { Form, Message, Upload, Progress, Button } from '@arco-design/web-react';
 import { type UploadItem, type UploadListProps } from '@arco-design/web-react/lib/Upload';
 import { IconPlus, IconDelete, IconClose, IconDownload, IconFile, IconUpload } from '@arco-design/web-react/icon';
-import { uploadFile } from '@onebase/platform-center';
+import { uploadFile, getFileUrlById } from '@onebase/platform-center';
 import { nanoid } from 'nanoid';
 import { memo, useState, useEffect } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
@@ -53,9 +53,15 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
   useEffect(() => {
     let flag = false;
     const newFieldValue = (fieldValue || []).map((ele: any) => {
-      if (ele.url !== ele.response) {
+      if (ele.id) {
         flag = true;
-        return { ...ele, url: ele.response };
+        return {
+          uid: ele.id,
+          name: ele.name,
+          response: { fileId: ele.id },
+          url: { fileId: ele.id },
+          size: ele.size
+        };
       }
       return { ...ele };
     });
@@ -65,7 +71,7 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
   }, [fieldValue]);
 
   // 自定义文件列表展示
-  const renderUploadList = (filesList: UploadItem[], props: UploadListProps) => {
+  const renderUploadList = (filesList: any[], props: UploadListProps) => {
     const getFileIcon = (file: UploadItem) => {
       if (file?.name) {
         // todo  根据文件类型展示不同icon
@@ -96,9 +102,8 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
               <div className="uplaodList-text-item-opera">
                 {showDownload && <IconDownload
                   onClick={() => {
-                    if (file.url && file.name) {
-                      downloadFileByUrl(file.url, file.name);
-                    }
+                    const fileUrl = getFileUrlById(file.response?.fileId);
+                    window.open(fileUrl,'_blank')
                   }}
                 />}
 
@@ -127,7 +132,7 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
         field={fieldId}
         layout={layout}
         tooltip={tooltip}
-        labelCol={layout === 'horizontal' ? { style: { width: 200, flex: 'unset' } } : {}}
+        labelCol={layout === 'horizontal' ? { span: 10 } : {}}
         rules={[{ required: verify?.required, message: `${label.text}是必填项` }]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
@@ -157,10 +162,12 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
           customRequest={async (option) => {
             const { onProgress, onError, onSuccess, file } = option;
             try {
-              const uploadFileUrl = await handleUpload(file, onProgress);
+              const fileId = await handleUpload(file, onProgress);
+              const uploadFileUrl = await getFileUrlById(fileId);
+              // 文件上传文件id
               if (uploadFileUrl !== '') {
                 setFileUrl(uploadFileUrl);
-                onSuccess(uploadFileUrl);
+                onSuccess({ fileId: fileId });
               } else {
                 onError({
                   status: 'error',
@@ -184,7 +191,7 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
           }}
           renderUploadList={renderUploadList}
         >
-          {!detailMode && (
+          {detailMode ? null : (
             <div className="uplaodTrigger">
               {uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT] && (
                 <Button type={buttonType || 'primary'} >

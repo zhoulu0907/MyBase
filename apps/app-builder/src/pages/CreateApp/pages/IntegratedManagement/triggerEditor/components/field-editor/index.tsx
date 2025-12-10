@@ -1,3 +1,4 @@
+import { FormulaEditor } from '@/components/FormulaEditor';
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { triggerNodeOutputSignal } from '@/store/singals/trigger_node_output';
 import {
@@ -13,7 +14,7 @@ import {
   type FormInstance
 } from '@arco-design/web-react';
 import type { TreeSelectDataType } from '@arco-design/web-react/es/TreeSelect/interface';
-import { IconDelete, IconPlus } from '@arco-design/web-react/icon';
+import { IconDelete, IconLaunch, IconPlus } from '@arco-design/web-react/icon';
 import { FieldType, type AppEntityField, type ConditionField } from '@onebase/app';
 import { NodeType } from '@onebase/common';
 import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
@@ -30,11 +31,16 @@ export interface FieldEditorProps {
 
 const valueTypeOptions = [
   { label: '值', value: FieldType.VALUE },
-  { label: '变量', value: FieldType.VARIABLES }
+  { label: '变量', value: FieldType.VARIABLES },
+  { label: '公式', value: FieldType.FORMULA }
 ];
 
 const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId, dataNodeId }) => {
   const [selectedFields, setSelectedFields] = useState<any[]>();
+  const [formulaVisible, setFormulaVisible] = useState<boolean>(false);
+  const [formulaFieldKey, setFormulaFieldKey] = useState<string>('');
+  const [formulaData, setFormulaData] = useState<string>('');
+  const [currentFieldName, setCurrentFieldName] = useState<string>('');
 
   const fields = Form.useWatch('fields', form);
 
@@ -42,8 +48,8 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId, data
     setSelectedFields(fields);
   }, [form, fieldList]);
 
-  const StaticValueComponent = (fieldName: string, fieldId: string) => {
-    const targetField = fieldList.find((cc) => cc.fieldId == fieldId);
+  const StaticValueComponent = (fieldName: string, fieldKey: string) => {
+    const targetField = fieldList.find((cc) => cc.fieldKey == fieldKey);
 
     if (
       targetField?.fieldType == ENTITY_FIELD_TYPE.TEXT.VALUE ||
@@ -159,8 +165,8 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId, data
         NodeType.JAVASCRIPT
       ];
 
-      const fieldId = form.getFieldValue(item.field + '.fieldId');
-      const targetField = fieldList.find((ele) => ele.fieldId == fieldId);
+      const fieldKey = form.getFieldValue(item.field + '.fieldKey');
+      const targetField = fieldList.find((ele) => ele.fieldKey == fieldKey);
       const fieldType = targetField?.fieldType;
 
       let nodes = getPrecedingNodes(nodeId, triggerEditorSignal.nodes.value, nodeTypes);
@@ -213,6 +219,20 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId, data
     return '';
   };
 
+  const handleFormulaConfirm = (formulaData: any, formattedFormula: string, params: any) => {
+    setFormulaVisible(false);
+    form.setFieldValue(formulaFieldKey, { formulaData: formulaData, formula: formattedFormula, parameters: params });
+    setFormulaData('');
+    setFormulaFieldKey('');
+  };
+
+  const openFormulaEditor = (fieldKey: string) => {
+    setCurrentFieldName(form.getFieldValue(fieldKey)?.field);
+    setFormulaVisible(true);
+    setFormulaData(form.getFieldValue(fieldKey)?.value?.formulaData);
+    setFormulaFieldKey(`${fieldKey}.value`);
+  };
+
   return (
     <div className={styles.conditionWrapper}>
       <Form.Item validateTrigger={['onChange']}>
@@ -224,12 +244,12 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId, data
                   return (
                     <Grid.Row gutter={8} key={item.key} align="center">
                       <Grid.Col span={6}>
-                        <Form.Item field={item.field + '.fieldId'} rules={[{ required: true, message: '请选择字段' }]}>
+                        <Form.Item field={item.field + '.fieldKey'} rules={[{ required: true, message: '请选择字段' }]}>
                           <Select
-                            options={fieldList.map((field) => ({
+                            options={fieldList.map((field: AppEntityField) => ({
                               label: field.displayName,
-                              value: field.fieldId,
-                              disabled: selectedFields?.some((f) => f?.fieldId === field.fieldId)
+                              value: field.fieldKey || '',
+                              disabled: selectedFields?.some((f) => f?.fieldKey === field.fieldKey)
                             }))}
                             onChange={(_value) => {
                               setSelectedFields(form.getFieldValue('fields'));
@@ -246,7 +266,7 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId, data
                       <Grid.Col span={5}>
                         <Form.Item field={item.field + '.operatorType'}>
                           <Select
-                            disabled={form.getFieldValue(item.field + '.fieldId') == undefined}
+                            disabled={form.getFieldValue(item.field + '.fieldKey') == undefined}
                             options={valueTypeOptions}
                             onChange={() => {
                               form.setFieldValue(item.field + '.value', undefined);
@@ -263,7 +283,7 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId, data
                         )}
 
                         {form.getFieldValue(item.field + '.operatorType') == FieldType.VALUE &&
-                          StaticValueComponent(item.field + '.value', form.getFieldValue(item.field + '.fieldId'))}
+                          StaticValueComponent(item.field + '.value', form.getFieldValue(item.field + '.fieldKey'))}
 
                         {form.getFieldValue(item.field + '.operatorType') == FieldType.VARIABLES && (
                           <Form.Item field={item.field + '.value'}>
@@ -278,6 +298,14 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId, data
                                 );
                               }}
                             />
+                          </Form.Item>
+                        )}
+                        {form.getFieldValue(item.field + '.operatorType') == FieldType.FORMULA && (
+                          <Form.Item field={item.field + '.value'}>
+                            <Button onClick={() => openFormulaEditor(item.field)} long>
+                              {form.getFieldValue(item.field + '.value') ? '已设置公式' : 'ƒx 编辑公式'}
+                              {form.getFieldValue(item.field + '.value') ? <IconLaunch /> : ''}
+                            </Button>
                           </Form.Item>
                         )}
                       </Grid.Col>
@@ -312,6 +340,14 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId, data
           }}
         </Form.List>
       </Form.Item>
+
+      <FormulaEditor
+        fieldName={currentFieldName}
+        initialFormula={formulaData}
+        visible={formulaVisible}
+        onCancel={() => setFormulaVisible(false)}
+        onConfirm={handleFormulaConfirm}
+      />
     </div>
   );
 };

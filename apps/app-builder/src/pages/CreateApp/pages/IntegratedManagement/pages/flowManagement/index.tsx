@@ -119,8 +119,8 @@ const FlowManagementPage: React.FC = () => {
         processDescription: form.getFieldValue('processDescription') || '',
         triggerType: form.getFieldValue('triggerType'),
         triggerConfig: {
-          pageId: form.getFieldValue('pageId') || undefined,
-          entityId: form.getFieldValue('entityId') || undefined
+          pageUuid: form.getFieldValue('pageUuid') || undefined,
+          tableName: form.getFieldValue('tableName') || undefined
         }
       };
 
@@ -148,8 +148,8 @@ const FlowManagementPage: React.FC = () => {
     form.setFieldsValue({ processDescription: res.processDescription });
     form.setFieldsValue({ triggerType: res.triggerType });
 
-    res.triggerConfig && res.triggerConfig.pageId && form.setFieldsValue({ pageId: res.triggerConfig.pageId });
-    res.triggerConfig && res.triggerConfig.entityId && form.setFieldsValue({ entityId: res.triggerConfig.entityId });
+    res.triggerConfig && res.triggerConfig.pageUuid && form.setFieldsValue({ pageUuid: res.triggerConfig.pageUuid });
+    res.triggerConfig && res.triggerConfig.tableName && form.setFieldsValue({ tableName: res.triggerConfig.tableName });
 
     setModalVisible('update');
   };
@@ -168,8 +168,8 @@ const FlowManagementPage: React.FC = () => {
         processDescription: form.getFieldValue('processDescription') || '',
         triggerType: form.getFieldValue('triggerType'),
         triggerConfig: {
-          pageId: form.getFieldValue('pageId') || undefined,
-          entityId: form.getFieldValue('entityId') || undefined
+          pageUuid: form.getFieldValue('pageUuid') || undefined,
+          tableName: form.getFieldValue('tableName') || undefined
         }
       };
 
@@ -380,7 +380,12 @@ const FlowManagementPage: React.FC = () => {
           </FormItem>
 
           <FormItem label="流程定义" field="triggerType" rules={[{ required: true, message: '请选择流程定义' }]}>
-            <Select disabled={modalVisible == 'update'}>
+            <Select
+              disabled={modalVisible == 'update'}
+              onChange={(value) => {
+                form.resetFields(['pageUuid', 'tableName']);
+              }}
+            >
               {getTriggerTypeList().map((item) => (
                 <Option key={item.value} value={item.value}>
                   {item.label}
@@ -390,10 +395,10 @@ const FlowManagementPage: React.FC = () => {
           </FormItem>
 
           {triggerType == TriggerType.FORM && (
-            <FormItem label="表单ID" field="pageId" rules={[{ required: true, message: '请选择表单ID' }]}>
+            <FormItem label="表单" field="pageUuid" rules={[{ required: true, message: '请选择表单' }]}>
               <Select disabled={modalVisible == 'update'}>
                 {pageList?.map((item) => (
-                  <Option key={item.id} value={item.id}>
+                  <Option key={item.id} value={item.pageUuid}>
                     {item.pageName}
                   </Option>
                 ))}
@@ -402,10 +407,10 @@ const FlowManagementPage: React.FC = () => {
           )}
 
           {(triggerType == TriggerType.ENTITY || triggerType == TriggerType.DATE_FIELD) && (
-            <FormItem label="实体ID" field="entityId" rules={[{ required: true, message: '请选择实体ID' }]}>
+            <FormItem label="实体" field="tableName" rules={[{ required: true, message: '请选择实体' }]}>
               <Select disabled={modalVisible == 'update'}>
                 {entityList?.map((item) => (
-                  <Option key={item.entityId} value={item.entityId}>
+                  <Option key={item.id} value={item.tableName}>
                     {item.entityName}
                   </Option>
                 ))}

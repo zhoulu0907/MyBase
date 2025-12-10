@@ -60,7 +60,7 @@ const XRelatedForm = memo((props: XRelatedFormConfig & { runtime?: boolean; deta
         }
         layout={layout}
         tooltip={tooltip}
-        labelCol={layout === 'horizontal' ? { style: { width: 200, flex: 'unset' } } : {}}
+        labelCol={layout === 'horizontal' ? { span: 10 } : {}}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           margin: 0,

@@ -6,9 +6,10 @@ import { debounce } from 'lodash-es';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import UserSelectModal from './UserSelectModal';
 import styles from '../../index.module.less';
+import UserProfileAvatar from '@/components/UserProfileAvatar';
 
 interface UserListProps {
-  selectedRoleId?: number;
+  selectedRoleId?: string;
 }
 
 type UserRecord = Pick<UserVO, 'id' | 'username' | 'nickname'> & Partial<UserVO>;
@@ -72,7 +73,7 @@ const UserList: React.FC<UserListProps> = ({ selectedRoleId = undefined }: UserL
   };
 
   // 添加用户确认
-  const handleUserSelectOk = async (selectedUserIds: number[]) => {
+  const handleUserSelectOk = async (selectedUserIds: string[]) => {
     if (!selectedRoleId) {
       Message.error('角色ID不存在');
       return;
@@ -128,7 +129,13 @@ const UserList: React.FC<UserListProps> = ({ selectedRoleId = undefined }: UserL
         title: '姓名',
         dataIndex: 'nickname',
         width: 140,
-        ellipsis: true
+        ellipsis: true,
+        render: (_: any, record: UserRecord) => (
+          <div>
+            <UserProfileAvatar adminInfo={record} size={25} />
+            <span style={{ marginLeft: '4px' }}>{record.nickname} </span>
+          </div>
+        )
       },
       {
         title: '账号',

@@ -14,3 +14,9 @@ export const isBuilderEnv = (): boolean => {
 export const isRuntimeEnv = (): boolean => {
   return getEnv() === 'runtime';
 };
+
+export const getSignatureConfig = (): { appKey: string; appSecret: string } => {
+  const appKey = (window as any).global_config?.APP_KEY;
+  const appSecret = (window as any).global_config?.APP_SECRET;
+  return { appKey, appSecret };
+};

@@ -64,7 +64,8 @@ export interface CreateApplicationMenuReq {
   menuName: string;
   menuType: MenuType;
   menuIcon: string;
-  entityId?: string;
+  //   entityId?: string;
+  entityUuid?: string;
   pageType?: string;
 }
 

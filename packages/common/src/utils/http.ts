@@ -1,9 +1,10 @@
 import { Message } from '@arco-design/web-react';
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { BaseResponse, RequestConfig, RequestInterceptor, ResponseInterceptor } from '../types';
+import { isBuilderEnv, isPlatformEnv, isRuntimeEnv } from './env';
 import { getHashQueryParam } from './router';
+import { generateSignature } from './signature';
 import TokenManager from './token';
-import { isPlatformEnv, isBuilderEnv, isRuntimeEnv } from './env';
 
 /**
  * 拼接域名和服务路径
@@ -68,6 +69,12 @@ export class HttpClient {
           }
         }
 
+        // =========================== 签名校验开始 ===========================
+        const signature = generateSignature(config);
+        // // 将签名信息添加到请求头
+        Object.assign(config.headers, signature.headers);
+        // =========================== 签名校验结束 ===========================
+
         let appId = getHashQueryParam('appId');
         if (!appId) {
           appId = TokenManager.getCurAppId();
@@ -115,10 +122,10 @@ export class HttpClient {
           if (data.code !== 0) {
             Message.error({ id: 'http-error', content: data.msg || '请求失败' });
             if (data.code === 401) {
+              console.log(TokenManager.getTokenInfo());
+
               const loginURL = TokenManager.getTokenInfo()?.loginURL;
               const tenantId = TokenManager.getTokenInfo()?.tenantId;
-
-              TokenManager.clearToken();
 
               // 跳转到登录页
               if (loginURL) {

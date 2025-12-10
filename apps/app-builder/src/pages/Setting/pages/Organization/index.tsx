@@ -27,7 +27,7 @@ const OrganizationPage: React.FC = () => {
       dataIndex: 'name'
     },
     {
-      title: '管理员',
+      title: '部门接口人',
       dataIndex: 'adminUserName',
       placeholder: '-'
     },

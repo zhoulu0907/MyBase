@@ -1,4 +1,4 @@
-import { Form, Grid, Input, Popconfirm, Select, type FormInstance } from '@arco-design/web-react';
+import { Form, Grid, Input, Popconfirm, Radio, Select, type FormInstance } from '@arco-design/web-react';
 import { useEffect, useRef, useState } from 'react';
 
 import {
@@ -24,7 +24,7 @@ import DynamicIcon from '../DynamicIcon';
 import { appIcon, appIconColor, appThemeColor, type Options } from './const';
 import styles from './index.module.less';
 import { appIconMap } from '@onebase/ui-kit';
-
+import { hasPermission, PUBLISH_MODULE, TENANT_MENUS } from '@onebase/common';
 
 type AppStatus = 'create' | 'update';
 type CloseReason = 'confirm' | 'cancel' | 'outside' | 'esc';
@@ -42,7 +42,7 @@ interface IProps {
 // 创建/修改应用
 const CreateApp = (props: IProps) => {
   const { previewBgColor, form, data, status, style, dataSourceCreated, isOwnDatasource, onCreateDatasource } = props;
-
+  const isOpenedSaaS = hasPermission(TENANT_MENUS.CORP);
   const [tagList, setTagList] = useState<ListTagReq[]>([]); // 标签列表
   const [iconName, setIconName] = useState<Application['iconName']>();
   const [iconColor, setIconColor] = useState<Application['iconColor']>();
@@ -384,6 +384,14 @@ const CreateApp = (props: IProps) => {
               </div>
             </div>
           </Form.Item>
+          {isOpenedSaaS && (
+            <Form.Item field="publishModel" label="发布模式" rules={[{ required: true, message: '请选择发布模式' }]}>
+              <Radio.Group>
+                <Radio value={PUBLISH_MODULE.INNER}>内部模式</Radio>
+                <Radio value={PUBLISH_MODULE.SASS}>SaaS模式</Radio>
+              </Radio.Group>
+            </Form.Item>
+          )}
         </Form>
       </div>
     </div>
