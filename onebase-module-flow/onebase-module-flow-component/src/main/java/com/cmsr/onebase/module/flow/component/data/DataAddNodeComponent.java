@@ -9,7 +9,7 @@ import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
 import com.cmsr.onebase.module.flow.context.express.ExpressionItem;
 import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
 import com.cmsr.onebase.module.flow.context.graph.nodes.DataAddNodeData;
-import com.cmsr.onebase.module.flow.context.provider.ConditionsProvider;
+import com.cmsr.onebase.module.flow.context.provider.FlowConditionsProvider;
 import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntityValueDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticMergeConditionVO;
@@ -38,7 +38,7 @@ public class DataAddNodeComponent extends SkippableNodeComponent {
     private SemanticDynamicDataApi semanticDynamicDataApi;
 
     @Autowired
-    private ConditionsProvider conditionsProvider;
+    private FlowConditionsProvider flowConditionsProvider;
 
     @Override
     public void process() throws Exception {
@@ -87,7 +87,7 @@ public class DataAddNodeComponent extends SkippableNodeComponent {
 
     private List<Map<String, Object>> buildSingleReqData(List<ConditionItem> conditionItems, Map<String, Object> expressionContext) {
         List<Map<String, Object>> reqData = new ArrayList<>();
-        List<ExpressionItem> expressionItems = conditionsProvider.formatConditionItemsForValue(conditionItems, expressionContext);
+        List<ExpressionItem> expressionItems = flowConditionsProvider.formatConditionItemsForValue(conditionItems, expressionContext);
         Map<String, Object> data = new HashMap<>();
         for (ExpressionItem expressionItem : expressionItems) {
             data.put(DataMethodApiHelper.convertToFieldName(expressionItem.getFieldKey()), expressionItem.getFieldValue());
@@ -103,7 +103,7 @@ public class DataAddNodeComponent extends SkippableNodeComponent {
         for (Map<String, Object> dataMap : dataList) {
             Map<String, Object> data = new HashMap<>();
             for (ConditionItem conditionItem : conditionItems) {
-                ExpressionItem expressionItem = conditionsProvider.formatConditionItemForValue(conditionItem, dataMap);
+                ExpressionItem expressionItem = flowConditionsProvider.formatConditionItemForValue(conditionItem, dataMap);
                 data.put(DataMethodApiHelper.convertToFieldName(expressionItem.getFieldKey()), expressionItem.getFieldValue());
             }
             reqData.add(data);

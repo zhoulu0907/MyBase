@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.flow.component.impl;
 
-import com.cmsr.onebase.module.flow.context.provider.ContextProvider;
+import com.cmsr.onebase.module.flow.context.provider.FlowContextProvider;
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
 import com.cmsr.onebase.module.flow.context.VariableContext;
 import lombok.Setter;
@@ -19,7 +19,7 @@ import java.time.temporal.ChronoUnit;
  */
 @Setter
 @Component
-public class FlowContextProviderImpl implements ContextProvider {
+public class FlowFlowContextProviderImpl implements FlowContextProvider {
 
     public static final String EXECUTE_CONTEXT = "flow:executeContext:";
     public static final String VARIABLE_CONTEXT = "flow:variableContext:";

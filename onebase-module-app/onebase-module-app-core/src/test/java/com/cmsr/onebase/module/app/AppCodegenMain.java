@@ -8,7 +8,7 @@ import com.zaxxer.hikari.HikariDataSource;
 public class AppCodegenMain {
     //修改下面的各种参数
     private static final String DB_DRIVER = "org.postgresql.Driver";
-    private static final String DB_URL = "jdbc:postgresql://10.0.104.38:5432/onebase_flex";
+    private static final String DB_URL = "jdbc:postgresql://10.0.104.38:5432/onebase_cloud_v3";
     private static final String DB_USERNAME = "postgres";
     private static final String DB_PASSWORD = "onebase@2025";
 

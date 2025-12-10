@@ -275,6 +275,7 @@ public class DataMethodApiHelper {
         systemFields.put(SystemFieldConstants.REQUIRE.CREATOR, String.valueOf(executeContext.getTriggerUserId()));
         systemFields.put(SystemFieldConstants.REQUIRE.UPDATER, String.valueOf(executeContext.getTriggerUserId()));
         systemFields.put(SystemFieldConstants.REQUIRE.OWNER_ID, String.valueOf(executeContext.getTriggerUserId()));
+        systemFields.put(SystemFieldConstants.REQUIRE.OWNER_DEPT, String.valueOf(executeContext.getTriggerUserDeptId()));
         return systemFields;
     }
 

@@ -81,10 +81,11 @@ public class FlowProcessTest {
         reqDTO.setApplicationId(173020283873034240L);
         reqDTO.setTableName("xzqd_student");
         reqDTO.setFlowContext(Map.of(
-                SystemFieldConstants.REQUIRE.OWNER_ID, "155019577667616800",
                 SystemFieldConstants.REQUIRE.CREATOR, "155019577667616800",
-                SystemFieldConstants.REQUIRE.UPDATER, "155019577667616800"
-        ));
+                SystemFieldConstants.REQUIRE.UPDATER, "155019577667616800",
+                SystemFieldConstants.REQUIRE.OWNER_ID, "155019577667616800",
+                SystemFieldConstants.REQUIRE.OWNER_DEPT, "101"
+                ));
 
         SemanticFieldValueDTO name = SemanticFieldValueDTO.ofType(SemanticFieldTypeEnum.TEXT);
         name.setFieldName("name");

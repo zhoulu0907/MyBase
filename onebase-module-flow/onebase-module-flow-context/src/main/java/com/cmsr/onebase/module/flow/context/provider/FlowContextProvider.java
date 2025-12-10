@@ -8,7 +8,7 @@ import com.cmsr.onebase.module.flow.context.VariableContext;
  * @Date：2025/10/11 21:33
  */
 
-public interface ContextProvider {
+public interface FlowContextProvider {
 
     void storeExecuteContext(String executionUuid, ExecuteContext executeContext);
 

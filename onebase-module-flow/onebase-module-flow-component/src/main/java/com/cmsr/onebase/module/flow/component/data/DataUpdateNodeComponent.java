@@ -11,7 +11,7 @@ import com.cmsr.onebase.module.flow.context.express.ExpressionItem;
 import com.cmsr.onebase.module.flow.context.express.OrExpression;
 import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
 import com.cmsr.onebase.module.flow.context.graph.nodes.DataUpdateNodeData;
-import com.cmsr.onebase.module.flow.context.provider.ConditionsProvider;
+import com.cmsr.onebase.module.flow.context.provider.FlowConditionsProvider;
 import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntityValueDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticTargetConditionVO;
@@ -38,7 +38,7 @@ public class DataUpdateNodeComponent extends SkippableNodeComponent {
     private SemanticDynamicDataApi semanticDynamicDataApi;
 
     @Autowired
-    private ConditionsProvider conditionsProvider;
+    private FlowConditionsProvider flowConditionsProvider;
 
     @Override
     public void process() throws Exception {
@@ -54,7 +54,7 @@ public class DataUpdateNodeComponent extends SkippableNodeComponent {
         reqDTO.setTableName(nodeData.resolveTargetTableName());
         //
         List<Conditions> conditions = nodeData.getFilterCondition();
-        OrExpression orExpression = conditionsProvider.formatConditionsForValue(conditions, expressionContext);
+        OrExpression orExpression = flowConditionsProvider.formatConditionsForValue(conditions, expressionContext);
         reqDTO.setSemanticConditionDTO(DataMethodApiHelper.processFilterCondition(orExpression));
         //
         List<ConditionItem> fields = nodeData.getFields();
@@ -70,7 +70,7 @@ public class DataUpdateNodeComponent extends SkippableNodeComponent {
     }
 
     private Map<String, Object> buildSingleReqData(List<ConditionItem> conditionItems, Map<String, Object> vars, ExecuteContext executeContext) {
-        List<ExpressionItem> expressionItems = conditionsProvider.formatConditionItemsForValue(conditionItems, vars);
+        List<ExpressionItem> expressionItems = flowConditionsProvider.formatConditionItemsForValue(conditionItems, vars);
         Map<String, Object> data = new HashMap<>();
         for (ExpressionItem expressionItem : expressionItems) {
             data.put(expressionItem.getFieldKey(), expressionItem.getFieldValue());
