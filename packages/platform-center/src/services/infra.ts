@@ -27,8 +27,8 @@ export const getFileListByIds = (ids: string[]) => {
 };
 // 获取文件内容
 export const getFileUrlById = (id: string) => {
-  const fileDetailUrl = (window as any).global_config?.FILE_DETAIL_URL;
-  return `${fileDetailUrl}/${id}`;
+  const resourceUrl = (window as any).global_config?.RESOURCE_URL;
+  return `${resourceUrl}/${id}`;
 };
 
 export const getSecurityConfigCategories = () => {
