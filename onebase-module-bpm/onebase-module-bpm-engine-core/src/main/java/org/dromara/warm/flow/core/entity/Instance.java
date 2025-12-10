@@ -79,6 +79,19 @@ public interface Instance extends RootEntity {
     Instance setDefinitionId(Long definitionId);
 
     /**
+     * 获取流程定义UUID（主关联）
+     * @return 流程定义UUID
+     */
+    String getDefinitionUuid();
+
+    /**
+     * 设置流程定义UUID（主关联）
+     * @param definitionUuid definitionUuid
+     * @return Instance
+     */
+    Instance setDefinitionUuid(String definitionUuid);
+
+    /**
      * 流程名称
      * @return 流程名称
      */

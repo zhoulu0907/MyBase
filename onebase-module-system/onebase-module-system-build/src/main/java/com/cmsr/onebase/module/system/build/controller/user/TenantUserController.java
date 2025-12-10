@@ -96,9 +96,8 @@ public class TenantUserController {
         if (CollUtil.isEmpty(pageResult.getList())) {
             return success(new PageResult<>(pageResult.getTotal()));
         }
-        // 拼接数据
-        Map<Long, DeptDO> deptMap = deptService.getDeptMap(convertList(pageResult.getList(), AdminUserDO::getDeptId));
-        return success(new PageResult<>(UserConvert.INSTANCE.convertList(pageResult.getList(), deptMap), pageResult.getTotal()));
+        List<UserRespVO> userRespVOList =userService.getConvertUserPage(pageResult);
+        return success(new PageResult<>(userRespVOList, pageResult.getTotal()));
     }
 
     @GetMapping("/simple-page")

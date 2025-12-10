@@ -80,18 +80,22 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
             return writableFieldsMap;
         }
 
-        // 第一步：先取出 writable 的子表，放到 Set<String> 里
+        // 第一步：先取出 writable和hidden 的子表，放到 Set<String> 里
         Set<String> writableSubTables = new HashSet<>();
+        Set<String> hiddenSubTables = new HashSet<>();
+
         for (FieldPermCfgDTO.FieldConfigDTO fieldConfig : fieldPermConfig.getFieldConfigs()) {
             String tableName = fieldConfig.getTableName();
             String fieldName = fieldConfig.getFieldName();
             String fieldPermType = fieldConfig.getFieldPermType();
 
             // 如果子表本身是 WRITE（tableName = fieldName 且不是主表），添加到 writableSubTables
-            if (Objects.equals(fieldPermType, FieldPermTypeEnum.WRITE.getCode())
-                    && Objects.equals(tableName, fieldName)
-                    && !Objects.equals(tableName, mainTableName)) {
-                writableSubTables.add(tableName);
+            if (Objects.equals(tableName, fieldName) && !Objects.equals(tableName, mainTableName)) {
+                if (Objects.equals(fieldPermType, FieldPermTypeEnum.WRITE.name())) {
+                    writableSubTables.add(tableName);
+                } else if (Objects.equals(fieldPermType, FieldPermTypeEnum.HIDDEN.name())) {
+                    hiddenSubTables.add(tableName);
+                }
             }
         }
 
@@ -101,8 +105,8 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
             String fieldName = fieldConfig.getFieldName();
             String fieldPermType = fieldConfig.getFieldPermType();
 
-            // 如果是子表且子表本身不是可编辑权限，跳过其字段权限
-            if (!Objects.equals(tableName, mainTableName) && !writableSubTables.contains(tableName)) {
+            // 如果是子表且子表本身是隐藏权限，跳过其字段权限
+            if (!Objects.equals(tableName, mainTableName) && hiddenSubTables.contains(tableName)) {
                 continue;
             }
 

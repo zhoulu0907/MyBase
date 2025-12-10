@@ -73,6 +73,19 @@ public interface Skip extends RootEntity {
 
     Skip setDefinitionId(Long definitionId);
 
+    /**
+     * 获取流程定义UUID（备用）
+     * @return 流程定义UUID
+     */
+    String getDefinitionUuid();
+
+    /**
+     * 设置流程定义UUID（备用）
+     * @param definitionUuid definitionUuid
+     * @return Skip
+     */
+    Skip setDefinitionUuid(String definitionUuid);
+
     Long getNodeId();
 
     Skip setNodeId(Long nodeId);
@@ -122,6 +135,7 @@ public interface Skip extends RootEntity {
             .setTenantId(getTenantId())
             .setDelFlag(getDelFlag())
             .setDefinitionId(getDefinitionId())
+            .setDefinitionUuid(getDefinitionUuid())
             .setNowNodeCode(getNowNodeCode())
             .setNowNodeType(getNowNodeType())
             .setNextNodeCode(getNextNodeCode())
