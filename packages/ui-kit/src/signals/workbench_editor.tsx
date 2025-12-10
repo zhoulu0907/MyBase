@@ -1,4 +1,4 @@
-import { signal } from '@preact/signals-react';
+// import { signal } from '@preact/signals-react';
 import { createPageEditorSignal } from './page_editor';
 
 const normalizeIds = (ids: Set<string> | string[]) => {
@@ -7,20 +7,28 @@ const normalizeIds = (ids: Set<string> | string[]) => {
 
 export const createWorkbenchEditorSignal = () => {
   const baseSignal = createPageEditorSignal();
+  const workbenchComponents = baseSignal.components;
 
-  const workbenchComponents = signal<any[]>([]);
+  // 后续看是否要独立维护一个 signal
+  // const workbenchComponents = signal<any[]>([]);
 
   const setWorkbenchComponents = (components: any[]) => {
-    workbenchComponents.value = components;
+    // workbenchComponents.value = components;
+
+    baseSignal.setComponents(components);
   };
 
   const loadWorkbenchComponents = (components: any[]) => {
-    workbenchComponents.value = components;
+    // workbenchComponents.value = components;
+
+    baseSignal.setComponents(components);
   };
 
   const delWorkbenchComponents = (cpId: string) => {
-    workbenchComponents.value = workbenchComponents.value.filter((component) => component.id !== cpId);
-  };
+    // workbenchComponents.value = workbenchComponents.value.filter((component) => component.id !== cpId);
+
+    baseSignal.delComponents(cpId);
+  };  
 
   const batchDelWorkbenchComponents = (ids: Set<string> | string[]) => {
     const idSet = normalizeIds(ids);
@@ -28,7 +36,9 @@ export const createWorkbenchEditorSignal = () => {
   };
 
   const clearWorkbenchComponents = () => {
-    workbenchComponents.value = [];
+    // workbenchComponents.value = [];
+
+    baseSignal.clearComponents();
   };
 
   return {

@@ -16,14 +16,18 @@ import {
   COMPONENT_TYPE_DISPLAY_NAME_MAP,
   EditConfig,
   FORM_COMPONENT_TYPES,
-  LAYOUT_COMPONENT_TYPES
+  LAYOUT_COMPONENT_TYPES,
+  WORKBENCH_COMPONENT_TYPE_DISPLAY_NAME_MAP
 } from 'src/components';
 import {
   createPageEditorSignal,
+  createWorkbenchEditorSignal,
+  isWorkbenchEditorSignal,
   useEditorSignalMap,
   useFormEditorSignal,
   useListEditorSignal,
-  usePageViewEditorSignal
+  usePageViewEditorSignal,
+  useWorkbenchEditorSignal
 } from 'src/signals';
 
 export interface SavePageSetParams {
@@ -37,6 +41,8 @@ export interface SavePageSetParams {
   listColComponentsMap: {
     colComponents: Map<string, any[][]>;
   };
+  workbenchComponents?: any[];
+  workbenchPageComponentSchemas?: Map<string, EditConfig>;
 }
 
 export async function startSavePageSet(params: SavePageSetParams, onSuccess?: Function) {
@@ -48,7 +54,9 @@ export async function startSavePageSet(params: SavePageSetParams, onSuccess?: Fu
     fromColComponentsMap,
     fromSubTableComponentsMap,
     listColComponentsMap,
-    pageSetId
+    pageSetId,
+    workbenchComponents = [],
+    workbenchPageComponentSchemas = {}
   } = params;
 
   const { curViewId, pageViews } = usePageViewEditorSignal;
@@ -58,6 +66,11 @@ export async function startSavePageSet(params: SavePageSetParams, onSuccess?: Fu
   useEditorSignalMap.get(curViewId.value)!.loadPageComponentSchemas(formPageComponentSchemas);
   useEditorSignalMap.get(curViewId.value)!.loadLayoutSubComponents(fromColComponentsMap);
   useEditorSignalMap.get(curViewId.value)!.loadSubTableComponents(fromSubTableComponentsMap);
+
+  const currentEditorSignal = useEditorSignalMap.get(curViewId.value);
+  if (isWorkbenchEditorSignal(currentEditorSignal)) {
+    currentEditorSignal.loadWorkbenchComponents(workbenchComponents);
+  }
 
   // 过滤出 pageViews 中 created 为 true 的元素
   const createdPageViews = Object.entries(pageViews.value)
@@ -188,10 +201,35 @@ export async function startSavePageSet(params: SavePageSetParams, onSuccess?: Fu
       });
 
       loadPagesetResp.pages[index].components.push(...colComponents);
+    } else if (_page.pageType === CATEGORY_TYPE.WORKBENCH) {
+      const normalizedComponents = workbenchComponents.map((component) => {
+        const schema = (workbenchPageComponentSchemas as Map<string, any>).get(component.id) || { config: {}, editData: [] };
+        return {
+          componentCode: component.id,
+          componentType: component.type,
+          config: JSON.stringify(schema.config || {}),
+          editData: JSON.stringify(schema.editData || {}),
+          parentCode: '',
+          blockIndex: 0,
+          containerIndex: 0
+        } as ComponentConfig;
+      });
+
+      loadPagesetResp.pages[index] = {
+        ...loadPagesetResp.pages[index],
+        components: normalizedComponents
+      };
+
+      // 更新视图名称
+      loadPagesetResp.pages[index].pageName = pageViews.value[_page.id]?.pageName;
+
+      if (_page.id === curViewId.value) {
+        loadPagesetResp.pages[index].isLatestUpdated = 1;
+      } else {
+        loadPagesetResp.pages[index].isLatestUpdated = 0;
+      }
     }
   });
-
-  console.log(loadPagesetResp);
 
   const savePageSetReq: SavePageSetReq = {
     id: pageSetId,
@@ -237,6 +275,13 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
     setSubTableComponents: setListSubTableComponents
   } = useListEditorSignal;
 
+  const {
+    setWorkbenchComponents,
+    loadWorkbenchComponents,
+    setPageComponentSchemas: setWorkbenchPageComponentSchemas,
+    loadPageComponentSchemas: loadWorkbenchPageComponentSchemas
+  } = useWorkbenchEditorSignal;
+
   const loadPageSetReq: LoadPageSetReq = {
     id: pageSetId
   };
@@ -245,7 +290,9 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
   console.log('载入页面集数据: ', pageSet);
 
   pageSet.pages.forEach((page: PageSet) => {
-    useEditorSignalMap.set(page.id, createPageEditorSignal());
+    const editorSignal =
+      page.pageType === CATEGORY_TYPE.WORKBENCH ? createWorkbenchEditorSignal() : createPageEditorSignal();
+    useEditorSignalMap.set(page.id, editorSignal);
   });
 
   pageSet.pages.forEach((page: PageSet) => {
@@ -253,6 +300,12 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
     let newPageComponentSchemas = new Map<string, any>();
     let newColComponentsMap = new Map<string, any[][]>();
     let newSubTableComponentsMap = new Map<string, any[]>();
+    const displayNameMap = (
+      page.pageType === CATEGORY_TYPE.WORKBENCH
+        ? WORKBENCH_COMPONENT_TYPE_DISPLAY_NAME_MAP
+        : COMPONENT_TYPE_DISPLAY_NAME_MAP
+    ) as Record<string, string>;
+    const getDisplayName = (componentType: string) => displayNameMap[componentType] || '';
 
     page.components.forEach((component: ComponentConfig) => {
       if (component.parentCode == '' || component.parentCode == null) {
@@ -261,7 +314,7 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
           chosen: false,
           selected: false,
           type: component.componentType,
-          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[component.componentType] || ''
+          displayName: getDisplayName(component.componentType)
         });
 
         newPageComponentSchemas.set(component.componentCode, {
@@ -360,6 +413,15 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
       newPageComponentSchemas.forEach((config, componentId) => {
         setListPageComponentSchemas(componentId, config);
       });
+    } else if (page.pageType === CATEGORY_TYPE.WORKBENCH) {
+      const editorSignal = useEditorSignalMap.get(page.id);
+      if (!isWorkbenchEditorSignal(editorSignal)) {
+        return;
+      }
+      editorSignal.setWorkbenchComponents(newComponents);
+      newPageComponentSchemas.forEach((config, componentId) => {
+        editorSignal.setPageComponentSchemas(componentId, config);
+      });
     }
   });
 
@@ -382,8 +444,21 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
       setFormComponents(useEditorSignalMap.get(newCurViewId)!.components.value);
       loadFormPageComponentSchemas(useEditorSignalMap.get(newCurViewId)!.pageComponentSchemas.value);
       loadFormLayoutSubComponents(useEditorSignalMap.get(newCurViewId)!.layoutSubComponents.value);
-      loadFormSubTableComponents(useEditorSignalMap.get(newCurViewId)!.subTableComponents.value);
+      loadFormSubTableComponents(useEditorSignalMap.get(newCurViewId)!.subTableComponents.value);      
     }
+
+    // 工作台没有视图配置
+    const wbViewId = res.pages.find((item: PageView) => item.pageType == CATEGORY_TYPE.WORKBENCH)?.id;
+    if (wbViewId) {
+      const targetEditorSignal = useEditorSignalMap.get(wbViewId)!;
+      if (isWorkbenchEditorSignal(targetEditorSignal)) {
+        loadWorkbenchComponents(targetEditorSignal.workbenchComponents.value);
+        loadWorkbenchPageComponentSchemas(targetEditorSignal.pageComponentSchemas.value);
+      } else {
+        loadWorkbenchComponents([]);
+      }
+    }
+    
 
     // 规则string转对象
     res.pages.forEach((item: any, index: number) => {

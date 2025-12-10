@@ -1,6 +1,7 @@
 import { EDITOR_TYPES } from 'src/utils';
 import { currentEditorSignal } from '../signals/current_editor';
 import { useFormEditorSignal, useListEditorSignal } from '../signals/page_editor';
+import { useWorkbenchEditorSignal } from '../signals/workbench_editor';
 
 import { useLocation } from 'react-router-dom';
 
@@ -100,6 +101,68 @@ export function usePageEditorSignal(pageType?:string) {
   const clearSubTableComponents = useList
     ? useListEditorSignal.clearSubTableComponents
     : useFormEditorSignal.clearSubTableComponents;
+
+  // 工作台逻辑独立处理，尽量不影响原有实现
+  const isWorkbenchEditor =
+    (pageType && pageType.indexOf(EDITOR_TYPES.WORKBENCH_EDITOR) !== -1) ||
+    path.endsWith(`/${EDITOR_TYPES.WORKBENCH_EDITOR}`);
+  
+  if (isWorkbenchEditor) {
+    const {
+      components,
+      setComponents,
+      addComponents,
+      delComponents,
+      clearComponents,
+      pageComponentSchemas,
+      loadPageComponentSchemas,
+      setPageComponentSchemas,
+      delPageComponentSchemas,
+      batchDelPageComponentSchemas,
+      clearPageComponentSchemas,
+      workbenchComponents,
+      setWorkbenchComponents,
+      delWorkbenchComponents,
+      batchDelWorkbenchComponents,
+      clearWorkbenchComponents
+    } = useWorkbenchEditorSignal;
+
+    const baseState = {
+      components: components?.value,
+      setComponents,
+      addComponents,
+      delComponents,
+      clearComponents,
+      pageComponentSchemas: pageComponentSchemas?.value,
+      loadPageComponentSchemas,
+      setPageComponentSchemas,
+      delPageComponentSchemas,
+      batchDelPageComponentSchemas,
+      clearPageComponentSchemas,
+    };
+
+    const normalizedWorkbenchComponents = workbenchComponents?.value ?? baseState.components ?? [];
+
+    return {
+      curComponentID: currentEditorSignal.curComponentID.value,
+      setCurComponentID,
+      clearCurComponentID,
+      curComponentSchema: currentEditorSignal.curComponentSchema.value,
+      setCurComponentSchema,
+      showDeleteButton: currentEditorSignal.showDeleteButton.value,
+      setShowDeleteButton,
+      ...baseState,
+      components: normalizedWorkbenchComponents,
+      setComponents: setWorkbenchComponents,
+      delComponents: delWorkbenchComponents,
+      clearComponents: clearWorkbenchComponents,
+      workbenchComponents: normalizedWorkbenchComponents,
+      setWorkbenchComponents,
+      delWorkbenchComponents,
+      batchDelWorkbenchComponents,
+      clearWorkbenchComponents
+    };
+  }
 
 
   return {
