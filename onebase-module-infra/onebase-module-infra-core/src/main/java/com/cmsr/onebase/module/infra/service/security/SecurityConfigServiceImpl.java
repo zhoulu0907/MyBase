@@ -122,7 +122,7 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
     private void updateSingleConfig(Long tenantId, SecurityConfigUpdateReqVO updateReqVO) {
         SecurityConfigDO config = securityConfigDataRepository.findByTenantIdAndKey(tenantId, updateReqVO.getConfigKey());
 
-        if (SecurityConfigKey.desensitizedField.getConfigKey().equals(updateReqVO.getConfigKey()) && StrUtil.isEmpty(updateReqVO.getConfigValue())){
+        if (SecurityConfigKey.desensitizedField.getConfigKey().equals(updateReqVO.getConfigKey()) && StrUtil.isBlank(updateReqVO.getConfigValue())){
             updateReqVO.setConfigValue(" ");
         }
 
