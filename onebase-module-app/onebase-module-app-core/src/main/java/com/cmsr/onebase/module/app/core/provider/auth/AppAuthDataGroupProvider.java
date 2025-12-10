@@ -36,8 +36,8 @@ public class AppAuthDataGroupProvider {
         List<AppAuthDataGroupDO> authDataGroupDOS = appAuthDataGroupRepository.findByAppIdAndRoleIdsAndMenuId(applicationId, roleIds, menuId);
         return authDataGroupDOS.stream().map(authDataGroupDO -> {
             DataPermissionGroup dataPermissionGroup = new DataPermissionGroup();
-            if (authDataGroupDO.getId() == null) {
-                authDataGroupDO = AuthDefaultFactory.createAuthDataGroupDO();
+            if (authDataGroupDO == null || authDataGroupDO.getId() == null) {
+                authDataGroupDO = AuthDefaultFactory.createDefaultAuthDataGroupDO();
             }
             dataPermissionGroup.setScopTags(toDataPermissionTags(authDataGroupDO.getScopeTags()));
             dataPermissionGroup.setScopeFieldUuid(authDataGroupDO.getScopeFieldUuid());

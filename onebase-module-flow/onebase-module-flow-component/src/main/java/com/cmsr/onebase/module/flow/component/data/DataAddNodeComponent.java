@@ -59,14 +59,16 @@ public class DataAddNodeComponent extends SkippableNodeComponent {
         List<Map<String, Object>> reqDataList;
         if (batchType) {
             reqDataList = buildBatchReqData(nodeData, variableContext, conditionItems);
+            enrichWithSystemFields(reqDataList, executeContext);
         } else {
             reqDataList = buildSingleReqData(conditionItems, expressionContext);
+            enrichWithSystemFields(reqDataList, executeContext);
         }
         if (CollectionUtils.isEmpty(reqDataList)) {
             executeContext.addLog("数据添加节点结束执行, 未包含请求数据");
             return;
         }
-        List<SemanticEntityValueDTO> respDTOSS = new ArrayList<SemanticEntityValueDTO>();
+        List<SemanticEntityValueDTO> respDTOSS = new ArrayList<>();
 
         executeContext.addLog("数据添加节点开始执行");
         for (Map<String, Object> reqData : reqDataList) {
@@ -107,6 +109,13 @@ public class DataAddNodeComponent extends SkippableNodeComponent {
             reqData.add(data);
         }
         return reqData;
+    }
+
+    private void enrichWithSystemFields(List<Map<String, Object>> reqDataList, ExecuteContext executeContext) {
+        Map<String, String> systemFields = DataMethodApiHelper.extractSystemFields(executeContext);
+        for (Map<String, Object> row : reqDataList) {
+            row.putAll(systemFields);
+        }
     }
 
     /**

@@ -1,10 +1,12 @@
 package com.cmsr.onebase.module.flow.component.data;
 
+import com.cmsr.onebase.module.flow.context.ExecuteContext;
 import com.cmsr.onebase.module.flow.context.condition.SortItem;
 import com.cmsr.onebase.module.flow.context.enums.OpEnum;
 import com.cmsr.onebase.module.flow.context.express.AndExpression;
 import com.cmsr.onebase.module.flow.context.express.ExpressionItem;
 import com.cmsr.onebase.module.flow.context.express.OrExpression;
+import com.cmsr.onebase.module.metadata.core.semantic.constants.SystemFieldConstants;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticConditionDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntityValueDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldValueDTO;
@@ -14,6 +16,7 @@ import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticConditio
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticOperatorEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticSortDirectionEnum;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.ArrayList;
@@ -262,5 +265,17 @@ public class DataMethodApiHelper {
         return list;
     }
 
+
+    public static Map<String, String> extractSystemFields(ExecuteContext executeContext) {
+        Map<String, String> systemFields = executeContext.getSystemFields();
+        if (MapUtils.isNotEmpty(systemFields)) {
+            return systemFields;
+        }
+        systemFields = new HashMap<>();
+        systemFields.put(SystemFieldConstants.REQUIRE.CREATOR, String.valueOf(executeContext.getTriggerUserId()));
+        systemFields.put(SystemFieldConstants.REQUIRE.UPDATER, String.valueOf(executeContext.getTriggerUserId()));
+        systemFields.put(SystemFieldConstants.REQUIRE.OWNER_ID, String.valueOf(executeContext.getTriggerUserId()));
+        return systemFields;
+    }
 
 }

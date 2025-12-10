@@ -7,12 +7,15 @@ import com.cmsr.onebase.module.flow.context.express.ExpressionExecutor;
 import com.cmsr.onebase.module.flow.context.express.OrExpression;
 import com.cmsr.onebase.module.flow.context.graph.nodes.StartEntityNodeData;
 import com.cmsr.onebase.module.flow.context.provider.ConditionsProvider;
+import com.cmsr.onebase.module.flow.core.flow.ExecutorInput;
 import com.cmsr.onebase.module.flow.core.flow.ExecutorResult;
 import com.cmsr.onebase.module.flow.core.flow.FlowProcessExecutor;
 import com.cmsr.onebase.module.flow.core.graph.FlowProcessCache;
+import com.cmsr.onebase.module.metadata.core.semantic.constants.SystemFieldConstants;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -108,10 +111,14 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
                 }
             }
             respDTO.setTriggered(true);
-            ExecutorResult executorResult = flowProcessExecutor.execute(
-                    reqDTO.getTraceId(),
-                    nodeData.getProcessId(),
-                    inputData, 0L);
+            ExecutorInput executorInput = new ExecutorInput();
+            executorInput.setTraceId(reqDTO.getTraceId());
+            executorInput.setProcessId(nodeData.getProcessId());
+            executorInput.setInputParams(inputData);
+            executorInput.setTriggerUserId(MapUtils.getLong(reqDTO.getFlowContext(), SystemFieldConstants.REQUIRE.CREATOR));
+            executorInput.setSystemFields(reqDTO.getFlowContext());
+
+            ExecutorResult executorResult = flowProcessExecutor.startExecution(executorInput);
             respDTO.setSuccess(executorResult.isSuccess());
             respDTO.setCode(executorResult.getCode());
             respDTO.setMessage(executorResult.getMessage());

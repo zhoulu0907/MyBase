@@ -45,7 +45,12 @@ public class FlowRemoteCallExecutor {
             if (flowProcessDO == null) {
                 executorResult = ExecutorResult.error(jobMessage.getProcessId(), "流程不存在:" + jobMessage.getProcessId());
             } else {
-                executorResult = flowProcessExecutor.execute(FlowUtils.generateTraceId(), jobMessage.getProcessId(), inputParams, flowProcessDO.getCreator());
+                ExecutorInput executorInput = new ExecutorInput();
+                executorInput.setTraceId(FlowUtils.generateTraceId());
+                executorInput.setProcessId(jobMessage.getProcessId());
+                executorInput.setInputParams(inputParams);
+                executorInput.setTriggerUserId(flowProcessDO.getCreator());
+                executorResult = flowProcessExecutor.startExecution(executorInput);
                 log.error("执行流程结果：{}", executorResult);
             }
         } catch (Exception e) {

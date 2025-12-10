@@ -58,7 +58,7 @@ public class DataUpdateNodeComponent extends SkippableNodeComponent {
         reqDTO.setSemanticConditionDTO(DataMethodApiHelper.processFilterCondition(orExpression));
         //
         List<ConditionItem> fields = nodeData.getFields();
-        reqDTO.setUpdateProperties(buildSingleReqData(fields, expressionContext));
+        reqDTO.setUpdateProperties(buildSingleReqData(fields, expressionContext, executeContext));
         //
         List<SemanticEntityValueDTO> respDTOSS = TenantManager.withoutTenantCondition(() -> ApplicationManager.withApplicationIdAndVersionTag(
                 executeContext.getApplicationId(),
@@ -69,12 +69,14 @@ public class DataUpdateNodeComponent extends SkippableNodeComponent {
         variableContext.putNodeVariables(this.getTag(), DataMethodApiHelper.convertToListMap(respDTOSS));
     }
 
-    private Map<String, Object> buildSingleReqData(List<ConditionItem> conditionItems, Map<String, Object> vars) {
+    private Map<String, Object> buildSingleReqData(List<ConditionItem> conditionItems, Map<String, Object> vars, ExecuteContext executeContext) {
         List<ExpressionItem> expressionItems = conditionsProvider.formatConditionItemsForValue(conditionItems, vars);
         Map<String, Object> data = new HashMap<>();
         for (ExpressionItem expressionItem : expressionItems) {
             data.put(expressionItem.getFieldKey(), expressionItem.getFieldValue());
         }
+        Map<String, String> systemFields = DataMethodApiHelper.extractSystemFields(executeContext);
+        data.putAll(systemFields);
         return data;
     }
 

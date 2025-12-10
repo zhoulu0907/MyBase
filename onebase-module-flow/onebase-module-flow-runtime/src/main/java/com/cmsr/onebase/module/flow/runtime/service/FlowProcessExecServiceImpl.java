@@ -9,6 +9,7 @@ import com.cmsr.onebase.module.flow.context.express.ExpressionExecutor;
 import com.cmsr.onebase.module.flow.context.express.OrExpression;
 import com.cmsr.onebase.module.flow.context.graph.nodes.ModalNodeData;
 import com.cmsr.onebase.module.flow.context.graph.nodes.StartFormNodeData;
+import com.cmsr.onebase.module.flow.core.flow.ExecutorInput;
 import com.cmsr.onebase.module.flow.core.flow.ExecutorResult;
 import com.cmsr.onebase.module.flow.core.flow.FlowProcessExecutor;
 import com.cmsr.onebase.module.flow.core.graph.FlowProcessCache;
@@ -79,14 +80,24 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
                     return vo;
                 } else {
                     Long loginUserId = SecurityFrameworkUtils.getLoginUserId();
-                    ExecutorResult executorResult = flowProcessExecutor.execute(FlowUtils.generateTraceId(), reqVO.getProcessId(), inputMap, loginUserId);
+                    ExecutorInput executorInput = new ExecutorInput();
+                    executorInput.setTraceId(FlowUtils.generateTraceId());
+                    executorInput.setProcessId(reqVO.getProcessId());
+                    executorInput.setInputParams(inputMap);
+                    executorInput.setTriggerUserId(loginUserId);
+                    ExecutorResult executorResult = flowProcessExecutor.startExecution(executorInput);
                     return formTriggerRespVO(executorResult);
                 }
             } else {
                 // 前端二次触发，用于表单信息收集等节点流程的继续执行
                 Long loginUserId = SecurityFrameworkUtils.getLoginUserId();
                 Map<String, Object> inputMap = convertInputFieldsData(reqVO.getInputFields());
-                ExecutorResult executorResult = flowProcessExecutor.execute(reqVO.getProcessId(), reqVO.getExecutionUuid(), inputMap, loginUserId);
+                ExecutorInput executorInput = new ExecutorInput();
+                executorInput.setProcessId(reqVO.getProcessId());
+                executorInput.setExecutionUuid(reqVO.getExecutionUuid());
+                executorInput.setInputParams(inputMap);
+                executorInput.setTriggerUserId(loginUserId);
+                ExecutorResult executorResult = flowProcessExecutor.resumeExecution(executorInput);
                 return formTriggerRespVO(executorResult);
             }
         } catch (Exception e) {

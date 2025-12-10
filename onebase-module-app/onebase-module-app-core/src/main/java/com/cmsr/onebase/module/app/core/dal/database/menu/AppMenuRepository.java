@@ -78,14 +78,14 @@ public class AppMenuRepository extends BaseBizRepository<AppMenuMapper, AppMenuD
         return list(queryWrapper);
     }
 
-    public List<AppMenuDO> findVisibleByAppIdAndMenuIds(Long applicationId, Set<String> menuUuids, Set<Integer> menuTypes) {
-        QueryWrapper queryWrapper = this.query()
-                .where(APP_MENU.APPLICATION_ID.eq(applicationId))
-                .where(APP_MENU.MENU_UUID.in(menuUuids))
-                .where(APP_MENU.IS_VISIBLE.eq(1))
-                .where(APP_MENU.MENU_TYPE.in(menuTypes));
-        return list(queryWrapper);
-    }
+//    public List<AppMenuDO> findVisibleByAppIdAndMenuIds(Long applicationId, Set<String> menuUuids, Set<Integer> menuTypes) {
+//        QueryWrapper queryWrapper = this.query()
+//                .where(APP_MENU.APPLICATION_ID.eq(applicationId))
+//                .where(APP_MENU.MENU_UUID.in(menuUuids))
+//                .where(APP_MENU.IS_VISIBLE.eq(1))
+//                .where(APP_MENU.MENU_TYPE.in(menuTypes));
+//        return list(queryWrapper);
+//    }
 
 //    public List<AppResourcePagesetPageDO> findPagesetPageByMenuId(Long menuId) {
 //        QueryWrapper queryWrapper = QueryWrapper.create()

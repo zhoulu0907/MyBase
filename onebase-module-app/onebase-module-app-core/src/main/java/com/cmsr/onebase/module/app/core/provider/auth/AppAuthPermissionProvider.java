@@ -31,8 +31,8 @@ public class AppAuthPermissionProvider {
         }
         List<AppAuthPermissionDO> permissionDOS = appAuthPermissionRepository.findByAppIdAndRoleIds(applicationId, roleIds);
         return permissionDOS.stream().map(permissionDO -> {
-            if (permissionDO.getId() == null) {
-                return AuthDefaultFactory.createAuthPermissionDO();
+            if (permissionDO == null || permissionDO.getId() == null) {
+                return AuthDefaultFactory.createDefaultAuthPermissionDO();
             } else {
                 return permissionDO;
             }
@@ -45,8 +45,8 @@ public class AppAuthPermissionProvider {
         }
         List<AppAuthPermissionDO> permissionDOS = appAuthPermissionRepository.findByAppIdAndRoleIdsAndMenuId(applicationId, roleIds, menuId);
         return permissionDOS.stream().map(permissionDO -> {
-            if (permissionDO.getId() == null) {
-                return AuthDefaultFactory.createAuthPermissionDO();
+            if (permissionDO == null || permissionDO.getId() == null) {
+                return AuthDefaultFactory.createDefaultAuthPermissionDO();
             } else {
                 return permissionDO;
             }
