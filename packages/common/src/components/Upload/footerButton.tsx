@@ -7,7 +7,7 @@ interface IFooterButtonProps {
 
 export const FooterButton:React.FC<IFooterButtonProps> = ({ uploadRef }) => {
     return (
-       <Space>
+        <Space>
             <Button
             type="outline"
             icon={<IconUpload />}

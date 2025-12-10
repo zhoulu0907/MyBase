@@ -21,30 +21,85 @@ const XDivider = memo((props: XDividerConfig) => {
   // ===== 外部 props end =====
 
   // ===== 内部状态 & 回显begin =====
+    const hexToRgba = (hex: any, alpha = 1) => {
+    const cleaned = hex.replace('#', '');
+    const full =
+      cleaned.length === 3
+        ? cleaned
+            .split('')
+            .map((c: any) => c + c)
+            .join('')
+        : cleaned;
+
+    const r = parseInt(full.slice(0, 2), 16);
+    const g = parseInt(full.slice(2, 4), 16);
+    const b = parseInt(full.slice(4, 6), 16);
+
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  };
+
   const titleRender = () => {
     if(!label.display) return null;
 
-    if(styleType !== 'style7') {
+    if(styleType === 'style7') {
       return (
+        <div className={`decor-title-${styleType}`} style={{ borderBottomColor: `${color}` }}>
+          <div className={'label'} style={{ backgroundColor: `${color}`,color: `${titleColor}` }}>
+              {label.text}
+          </div>
+          <div className={'decorator'} style={{ backgroundColor: `${color}` }}></div>
+          <div className={'decorator1'} style={{ backgroundColor: `${color}` }}></div>
+          <div className={'decorator2'} style={{ backgroundColor: `${color}` }}></div>
+          <div className={'decorator3'} style={{ backgroundColor: `${color}` }}></div>
+        </div>
+      )
+    }
+
+    if(styleType === 'style8') {
+      return (
+        <div className={`decor-${styleType}`} style={{ backgroundColor: hexToRgba(color, 0.2) }}>
+          <span
+            className={`decor-title-${styleType}`}
+            style={{ backgroundColor: `${color}`, color: `${titleColor}` }}
+          >
+            {label.text}
+          </span>
+        </div>
+      )
+    }
+
+    if(styleType === 'style10') {
+      return (
+        <div className={`decor-${styleType}`}>
+          <div className={'leftArrows'}>
+            <div className={'leftArrow2'} style={{ backgroundColor: hexToRgba(color, 0.2) }} ></div>
+            <div className={'leftArrow1'} style={{ backgroundColor: hexToRgba(color, 0.6) }} ></div>
+            <div className={'leftArrow'} style={{ backgroundColor: `${color}` }} ></div>
+          </div>
+
+          <div className={'center'} style={{ backgroundColor: `${color}`, color: `${titleColor}` }}>
+            {label.text}
+          </div>
+
+          <div className={'rightArrows'}>
+            <div className={'rightArrow'} style={{ backgroundColor: `${color}` }} ></div>
+            <div className={'rightArrow1'} style={{ backgroundColor: hexToRgba(color, 0.6) }} ></div>
+            <div className={'rightArrow2'} style={{ backgroundColor: hexToRgba(color, 0.2) }} ></div>
+          </div>
+        </div>
+      )
+    }
+
+    return (
+      <>
         <span className={['style5','style6'].includes(styleType) ? `decor-title-${styleType} title` : 'title'}
             style={{borderLeftColor: `${color}`, 
                     borderBottomColor: `${color}`, 
                     color: `${titleColor}`}}>
             {label.text}
         </span>
-      )
-    }
-
-    return (
-      <div className={`decor-title-${styleType}`} style={{ borderBottomColor: `${color}` }}>
-        <div className={'label'} style={{ backgroundColor: `${color}`,color: `${titleColor}` }}>
-            {label.text}
-        </div>
-        <div className={'decorator'} style={{ backgroundColor: `${color}` }}></div>
-        <div className={'decorator1'} style={{ backgroundColor: `${color}` }}></div>
-        <div className={'decorator2'} style={{ backgroundColor: `${color}` }}></div>
-        <div className={'decorator3'} style={{ backgroundColor: `${color}` }}></div>
-      </div>
+        <div className={`decor-${styleType}`} style={{borderTopColor: `${color}`}}></div>
+      </>
     )
   }
 
@@ -58,8 +113,7 @@ const XDivider = memo((props: XDividerConfig) => {
     <div className="formWrapper">
         <div className='formDivider'>
           {titleRender()}
-          <div className={`decor-${styleType}`} style={{borderTopColor: `${color}`}}></div>
-            {tooltip?.display && <span className='desc' 
+          {tooltip?.display && <span className='desc' 
                 style={{ color: `${descriptionColor}` }}>{tooltip.text}</span>}
         </div>
     </div>

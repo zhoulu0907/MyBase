@@ -202,7 +202,7 @@ const DynamicSelectMutipleConfig: React.FC<DynamicSelectMutipleConfigProps> = ({
             <div className={styles.tableColumnList}>
               <ReactSortable
                 list={configs[selectMutipleKey].defaultOptions}
-                setList={() => { }}
+                setList={() => {}}
                 group={{
                   name: 'table-col-item'
                 }}
@@ -323,8 +323,11 @@ const DynamicSelectMutipleConfig: React.FC<DynamicSelectMutipleConfigProps> = ({
                   <Button
                     type="outline"
                     onClick={() => {
-                      const newLabel = `新选项_${Array.from({ length: 6 }, () => String.fromCharCode(97 + Math.floor(Math.random() * 26))).join('')}`;
-                      const newValue = _fields?.[_fields.length - 1]?.field || `${configs.id}-${selectMutipleKey}[0]`;
+                      const code = Array.from({ length: 6 }, () =>
+                        String.fromCharCode(97 + Math.floor(Math.random() * 26))
+                      ).join('');
+                      const newLabel = `新选项_${code}`;
+                      const newValue = `${configs.id}-${selectMutipleKey}-${code}`;
                       const newList = [
                         ...configs[selectMutipleKey].defaultOptions,
                         {

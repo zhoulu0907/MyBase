@@ -267,7 +267,7 @@ const TableColumns = ({
         </>
       ),
       dataIndex: 'fieldType',
-      width: 130,
+      width: 140,
       align: 'center',
       render: (_: unknown, record: FieldFormValues, index: number) => (
         <Space>
@@ -280,7 +280,7 @@ const TableColumns = ({
             getFieldIndex,
             <Select
               options={fieldTypeOptions}
-              style={{ width: 90 }}
+              style={{ width: 100 }}
               size="mini"
               showSearch
               filterOption={(input, option) => {
@@ -322,7 +322,7 @@ const TableColumns = ({
     {
       title: '字段描述',
       dataIndex: 'description',
-      width: 160,
+      width: 150,
       align: 'center',
       ellipsis: true,
       render: (_: unknown, record: FieldFormValues, index: number) =>

@@ -279,7 +279,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
           drag={uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.LIST]}
           renderUploadList={renderUploadList}
         >
-          {!detailMode && (
+          {detailMode ? null : (
             <div className="uplaodTrigger">
               {uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT] && (
                 <div className="uplaodTriggerText">

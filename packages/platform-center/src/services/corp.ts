@@ -23,7 +23,7 @@ export const checkCorpAdminUserApi = (data: checkCorpAdminUserParams) =>
 
 //更新企业
 export const updateCorpApi = (data: updateCorpParams) =>
-  (isRuntimeEnv() ? runtimeCorpService : systemService).post('/corp/update', data);
+  (isRuntimeEnv() ? runtimeCorpService : systemService).post('/update', data);
 
 //禁用/启用企业
 export const disabledCorpApi = (data: corpStatusParams) =>
@@ -39,4 +39,4 @@ export const getCorpListApi = (data: corpListParams) => systemService.get('/corp
 export const getCorpSimpleDetailsListApi = () => systemService.get('/corp/simple-list');
 
 //获得详情
-export const getCorpDetailByIdApi = (id: number): CorpDetailResponse => systemService.get(`/corp/get?id=${id}`);
+export const getCorpDetailByIdApi = (id: string): CorpDetailResponse => systemService.get(`/corp/get?id=${id}`);

@@ -42,3 +42,14 @@ export interface UpdateAdminOrDirectorReq {
    */
   userId: string;
 }
+
+export interface GetDeptUserReq {
+  /**
+   * 部门Id
+   */
+  deptId?: string;
+  /**
+   * keywords
+   */
+  keywords?: string;
+}

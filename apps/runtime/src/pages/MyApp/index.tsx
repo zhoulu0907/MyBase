@@ -1,4 +1,3 @@
-import { useI18n } from '@/hooks/useI18n';
 import { useAppStore } from '@/store';
 import {
   Button,
@@ -19,13 +18,12 @@ import { getCommonPaginationList, getRuntimeURL, TokenManager } from '@onebase/c
 import { getCorpAuthorizedAppListApiInCorp } from '@onebase/platform-center';
 import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 import noContentSVG from '@/assets/images/noContent.svg';
 import { DynamicIcon } from '@/components/DynamicIcon';
 
 import { AppHeader } from '@/components/header';
-import { StatusEnumLabel } from '@/constants';
+import { StatusEnum, StatusEnumLabel } from '@/constants';
 import type { ApplicationList, TagProps } from '@/types';
 import { appIconMap } from '@onebase/ui-kit';
 import TagModal from './components/tagModal';
@@ -43,8 +41,6 @@ import styles from './index.module.less';
 const Option = Select.Option;
 
 const MyAppPage: React.FC = () => {
-  const { t } = useI18n();
-  const navigate = useNavigate();
   const [pageSize, setPageSize] = useState<number>();
   const [pageNo, setPageNo] = useState(1);
   const [dataList, setDataList] = useState<ApplicationList[]>();
@@ -342,6 +338,7 @@ const MyAppPage: React.FC = () => {
                         onClick={() => {
                           nagivateToRuntimeApp(item.applicationId);
                         }}
+                        disabled={item.showStatus === StatusEnum.DISABLE}
                       >
                         进入应用
                       </Button>

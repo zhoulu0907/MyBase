@@ -32,7 +32,7 @@ interface DataItem {
 }
 
 interface UserTableProps {
-  selectedDeptId?: number;
+  selectedDeptId?: string;
   deptTree: DataItem[]; // 部门树数据
   deptLoading: boolean; // 部门数据加载状态
   onRefreshDept: () => void;
@@ -74,7 +74,7 @@ export default function UserTable({
   selectedDeptId = undefined,
   deptTree,
   deptLoading,
-  onRefreshDept
+  onRefreshDept,
 }: UserTableProps) {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -237,7 +237,7 @@ export default function UserTable({
         ellipsis: true,
         render: (_: any, record: UserRecord) => (
           <>
-            <UserProfileAvatar adminInfo={record} size={25}/>
+            <UserProfileAvatar adminInfo={record} size={25} />
             <span className={s.tableColumnUsername} onClick={() => handleViewDetail(record)}>
               {record.nickname}
             </span>
@@ -249,17 +249,27 @@ export default function UserTable({
           </>
         )
       },
+      {
+        title: '账号',
+        dataIndex: 'username',
+        width: 140,
+        placeholder: '-',
+        ellipsis: true
+      },
+      // {
+      //   title: '角色',
+      //   dataIndex: 'roleIds',
+      //   width: 140,
+      //   placeholder: '-',
+      //   ellipsis: true,
+      //   render: (val: string[]) => {
+      //     <span>{val.join(",")}</span>
+      //   }
+      // },
       { title: '手机号', dataIndex: 'mobile', width: 140 },
       {
         title: '邮箱',
         dataIndex: 'email',
-        width: 180,
-        placeholder: '-',
-        ellipsis: true
-      },
-      {
-        title: '账号',
-        dataIndex: 'username',
         width: 180,
         placeholder: '-',
         ellipsis: true
@@ -280,7 +290,7 @@ export default function UserTable({
       {
         title: '操作',
         dataIndex: 'op',
-        width: 180,
+        width: 200,
         render: (_: any, record: any) => (
           <Space>
             <Button permission={ACTIONS.UPDATE} type="text" onClick={() => handleEdit(record)}>
@@ -379,7 +389,6 @@ export default function UserTable({
   const handleAddUser = async (selectedMembers: any[]) => {
     console.log('添加成员 selectedMembers:', selectedMembers);
     if (!selectedDeptId || !managerTypeModalVisible) return;
-    if (selectedMembers.length !== 1) return Message.warning(`只能设置一个${RoleLabelMap[managerTypeModalVisible]}`);
     const params: UpdateAdminOrDirectorReq = {
       deptId: `${selectedDeptId}`,
       updateType: managerTypeModalVisible,
