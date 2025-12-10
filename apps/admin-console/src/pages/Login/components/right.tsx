@@ -70,7 +70,6 @@ const Right: React.FC = () => {
       values.password = await sm2Encrypt(getPublicKey(), values.password);
       const loginResp = await adminLogin(values, headers);
       // 显示成功消息并跳转
-      console.log('loginResp: ', loginResp);
       if (loginResp.accessToken) {
         Message.success(t('auth.loginSuccess'));
         // 存储 token 信息（需要导入相应的 token 管理工具）
