@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.system.platform.controller.platform;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.framework.signature.core.annotation.ApiSignature;
+import com.cmsr.onebase.framework.signature.core.annotation.ApiSignIgnore;
 import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.permission.AdminTypeEnum;
@@ -34,6 +34,7 @@ import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.USER_PASSW
 @RestController
 @RequestMapping("/system/platform")
 @Tag(name = "平台信息管理")
+@ApiSignIgnore
 public class PlatformInfoController {
 
     @Resource
@@ -79,7 +80,7 @@ public class PlatformInfoController {
     @GetMapping("/admin/page")
     @Operation(summary = "获得平台管理员列表分页")
     @PreAuthorize("@ss.hasPermission('tenant:user:query')")
-    @ApiSignature
+    @ApiSignIgnore
     public CommonResult<PageResult<UserRespVO>> getPlatformAdminPage(@Valid UserPageReqVO pageReqVO) {
         // 获得用户分页列表
         PageResult<AdminUserDO> pageResult = userService.getUserPage(pageReqVO);
@@ -89,7 +90,6 @@ public class PlatformInfoController {
     @PostMapping("/admin/update-email")
     @Operation(summary = "修改平台管理员邮箱")
     @PreAuthorize("@ss.hasPermission('tenant:user:update')")
-    @ApiSignature
     public CommonResult<Boolean> updatePlatformAdmin(@Valid @RequestBody UserUpdateEmailReqVO reqVO) {
         userService.updatePlatformUserEmail(reqVO.getId(), reqVO.getEmail());
         return success(true);

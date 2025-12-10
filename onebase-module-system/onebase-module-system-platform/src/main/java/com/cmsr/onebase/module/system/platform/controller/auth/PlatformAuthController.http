@@ -12,7 +12,7 @@ tag: {{tag}}
 
 {
   "username": "admin",
-  "password": "7345defb867fe3a679491771c92697b09d2d28bb6f9f8685cbe4425b7ff381330e288bbdb2809aef25680195bca76cb2756e69dd75bfe0dfce0aa0eb112ae73bffaf098ddc675e066cbb8e0776fe8e30e42e4ae80f9748dad6e6d0ebd3767ccc7ed24a6f21daea45",
+  "password": "b2b3091d8090ff1a3bfdf0ee1c5505ccd501c717a70fbe135475d7e53bc82b0b86ade391a640937c2c93a0fb7f8a9227a963434f9a78d4b09fd0d3a8551960cc2d2770a52345b1cc03654d9315ac974675e4600d9fd7f698bd15d548a6d2f4a100cdb7d3c62b85ca",
   "deviceId":666
 }
 
@@ -27,61 +27,6 @@ tag: {{tag}}
     }
 %}
 
-### 请求 /login 接口 => 成功
-POST {{baseUrl}}/system/auth/login
-Content-Type: application/json
-tenant-id: {{adminTenantId}}
-tag: {{tag}}
-
-{
-  "username": "admin",
-  "password": "admin123",
-    "deviceId":666
-}
-
-> {%
-// 登录成功后自动更新token到环境变量
-if (response.status === 200) {
-    const responseData = response.body;
-    if (responseData.code === 0 && responseData.data && responseData.data.accessToken) {
-        client.global.set("token", responseData.data.accessToken);
-        console.log("Token已更新: " + responseData.data.accessToken);
-    }
-}
-%}
-
-### 请求 /admin-login 接口 => 成功
-POST {{baseUrl}}/system/auth/admin-login
-Content-Type: application/json
-tenant-id: {{adminTenantId}}
-tag: {{tag}}
-
-{
-  "username": "admin",
-  "password": "admin123"
-}
-
-> {%
-// 管理员登录成功后自动更新token到环境变量
-if (response.status === 200) {
-    const responseData = response.body;
-    if (responseData.code === 0 && responseData.data && responseData.data.accessToken) {
-        client.global.set("token", responseData.data.accessToken);
-        console.log("Admin Token已更新: " + responseData.data.accessToken);
-    }
-}
-%}
-
-### 请求 /admin-login 接口 => 失败
-POST {{baseUrl}}/system/auth/admin-login
-Content-Type: application/json
-tenant-id: {{adminTenantId}}
-tag: {{tag}}
-
-{
-  "username": "test",
-  "password": "test"
-}
 
 ### 请求 /list-menus 接口 => 成功
 GET {{baseUrl}}/system/list-menus
