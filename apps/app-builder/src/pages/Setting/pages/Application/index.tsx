@@ -1,6 +1,5 @@
 import { useAppStore } from '@/store/store_app';
 import {
-  Button,
   Divider,
   Form,
   Input,
@@ -23,7 +22,7 @@ import {
   type DeleteApplicationReq,
   type PageParam
 } from '@onebase/app';
-import { getCommonPaginationList, getRuntimeURL } from '@onebase/common';
+import { getCommonPaginationList, getRuntimeURL, TENANT_APP_PERMISSION as ACTIONS } from '@onebase/common';
 import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -35,6 +34,7 @@ import CreateDataSource, { type DataSourceHandle } from '@/components/CreateData
 import AppCard from './components/AppCard';
 import { appOptions, calculateMaxItems, createTimeOptions, statusOptions } from './const';
 import styles from './index.module.less';
+import { PermissionButton as Button } from '@/components/PermissionControl';
 
 const Option = Select.Option;
 
@@ -259,6 +259,7 @@ const AppManagement: React.FC = () => {
             <Button
               type="primary"
               size="large"
+              permission={ACTIONS.CREATE}
               icon={<IconPlus fontSize={16} />}
               onClick={() => {
                 setCreateVisible(true);
@@ -328,7 +329,7 @@ const AppManagement: React.FC = () => {
                 <div className={styles.applicationEmpty}>
                   <img src={emptyApplicationSVG} alt="暂无应用" />
                   <Typography.Text type="secondary">还没有应用</Typography.Text>
-                  <Button className={styles.goCreateApplication} onClick={() => setCreateVisible(true)}>
+                  <Button className={styles.goCreateApplication} permission={ACTIONS.CREATE} onClick={() => setCreateVisible(true)}>
                     去创建
                     <IconRight style={{ marginLeft: '4px' }} />
                   </Button>

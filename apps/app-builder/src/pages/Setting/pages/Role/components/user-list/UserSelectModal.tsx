@@ -10,9 +10,9 @@ type UserRecord = Pick<UserVO, 'id' | 'username' | 'nickname'> & Partial<UserVO>
 interface UserSelectModalProps {
   visible: boolean;
   onCancel: () => void;
-  onOk: (selectedUserIds: number[]) => void;
+  onOk: (selectedUserIds: string[]) => void;
   currentRoleUsers: UserRecord[];
-  selectedRoleId?: number;
+  selectedRoleId?: string;
 }
 
 const UserSelectModal: React.FC<UserSelectModalProps> = ({
@@ -23,7 +23,7 @@ const UserSelectModal: React.FC<UserSelectModalProps> = ({
   selectedRoleId
 }) => {
   const [userList, setUserList] = useState<UserRecord[]>([]);
-  const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
+  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [searchValue, setSearchValue] = useState('');
   const [modalLoading, setModalLoading] = useState(false);
   const [page, setPage] = useState(1);
@@ -94,7 +94,7 @@ const UserSelectModal: React.FC<UserSelectModalProps> = ({
   );
 
   // 处理用户选择
-  const handleUserSelect = (userId: number, checked: boolean) => {
+  const handleUserSelect = (userId: string, checked: boolean) => {
     if (checked) {
       setSelectedUserIds((prev) => [...prev, userId]);
     } else {
