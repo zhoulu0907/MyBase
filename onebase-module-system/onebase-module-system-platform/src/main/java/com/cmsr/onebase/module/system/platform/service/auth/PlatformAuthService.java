@@ -21,8 +21,6 @@ public interface PlatformAuthService {
      */
     AdminUserDO authenticate(String username, String password);
 
-    AuthLoginRespVO loginV2(AuthLoginReqVO reqVO);
-
     /**
      * 账号登录
      *

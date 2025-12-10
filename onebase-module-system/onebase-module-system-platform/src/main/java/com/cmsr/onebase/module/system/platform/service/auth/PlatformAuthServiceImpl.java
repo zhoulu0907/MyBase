@@ -1,7 +1,5 @@
 package com.cmsr.onebase.module.system.platform.service.auth;
 
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.crypto.asymmetric.SM2;
 import com.anji.captcha.model.common.ResponseModel;
 import com.anji.captcha.model.vo.CaptchaVO;
 import com.anji.captcha.service.CaptchaService;
@@ -37,7 +35,6 @@ import jakarta.annotation.Resource;
 import jakarta.validation.Validator;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.bouncycastle.crypto.engines.SM2Engine;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
@@ -126,38 +123,6 @@ public class PlatformAuthServiceImpl implements PlatformAuthService {
             createLoginLog(userId, account, logTypeEnum, LoginResultEnum.USER_DISABLED);
             throw exception(AUTH_LOGIN_USER_DISABLED);
         }
-    }
-
-
-
-    @Override
-    public AuthLoginRespVO loginV2(AuthLoginReqVO reqVO) {
-        // 解密密码（前端使用 SM2 公钥加密，这里使用私钥解密）
-        if (reqVO == null || StrUtil.isBlank(reqVO.getPassword())) {
-            throw exception(AUTH_LOGIN_BAD_CREDENTIALS, "密码为空");
-        }
-
-        // 测试用，临时解密字符串，实际使用时请从前端获取
-        String cipherText = reqVO.getPassword();
-        try {
-            // 使用指定私钥初始化 SM2（后续可从配置中心或密钥管理系统加载）
-            String privateKey = "deec05ae2b47efce4553372d172027b5fe5b6c72087bb8378efbb6c1fb2f98ae";
-            // 明确指定使用 C1C3C2 模式，与前端保持一致
-            SM2 sm2 = new SM2(privateKey, null);
-            // 使用 C1C3C2 模式解密
-            sm2.setMode(SM2Engine.Mode.C1C3C2);
-            // 将十六进制字符串转换为字节数组
-            byte[] hexBytes = cn.hutool.core.util.HexUtil.decodeHex(cipherText);
-            byte[] plainBytes = sm2.decrypt(hexBytes);
-            String plainPassword = new String(plainBytes, java.nio.charset.StandardCharsets.UTF_8);
-            reqVO.setPassword(plainPassword);
-        } catch (Exception e) {
-            log.error("SM2 密码解密失败", e);
-            // 为避免泄露加解密细节，对外统一表现为账号或密码错误
-            throw exception(AUTH_LOGIN_BAD_CREDENTIALS, "无效密码");
-        }
-
-        return login(reqVO);
     }
 
     @Override

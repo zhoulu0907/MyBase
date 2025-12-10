@@ -25,8 +25,9 @@ public class PwdEnHelper {
     public boolean isEecryptEnabled() {
         // 从redis中读取配置
         // stringRedisTemplate.opsForValue().set("system:security:pwd-encrypt-enabled", "true");
-        String enable = stringRedisTemplate.opsForValue().get("system:security:pwd-encrypt-enabled");
-        return "true".equalsIgnoreCase(enable);
+        String enable = stringRedisTemplate.opsForValue().get("system:security:pwd-encrypt-enable");
+        // 非false(含空、其他值)即为打开
+        return !"false".equalsIgnoreCase(enable);
     }
 
     public String decryptHexStr(String pwd) {

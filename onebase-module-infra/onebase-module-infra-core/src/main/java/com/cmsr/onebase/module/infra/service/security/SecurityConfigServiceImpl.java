@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.infra.service.security;
 
+import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.enums.SecurityCategoryCodeEnum;
 import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
@@ -121,6 +122,10 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
     private void updateSingleConfig(Long tenantId, SecurityConfigUpdateReqVO updateReqVO) {
         SecurityConfigDO config = securityConfigDataRepository.findByTenantIdAndKey(tenantId, updateReqVO.getConfigKey());
 
+        if (SecurityConfigKey.desensitizedField.getConfigKey().equals(updateReqVO.getConfigKey()) && StrUtil.isBlank(updateReqVO.getConfigValue())){
+            updateReqVO.setConfigValue(" ");
+        }
+
         if (config == null) {
             // 如果不存在，创建新配置
             config = SecurityConfigDO.builder()
@@ -155,6 +160,9 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
         List<SecurityConfigItemRespVO> configItems = new ArrayList<>();
         for (SecurityConfigTemplateDO template : templates) {
             SecurityConfigItemRespVO itemVO = SecurityConfigCategoryConvert.INSTANCE.convert(template);
+            if (SecurityConfigKey.desensitizedField.getConfigKey().equals(itemVO.getConfigKey())){
+                itemVO.setConfigValue(itemVO.getConfigValue().trim());
+            }
             configItems.add(itemVO);
         }
 
