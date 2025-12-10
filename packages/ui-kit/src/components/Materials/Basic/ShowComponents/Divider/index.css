@@ -124,10 +124,101 @@
   }
 
   /* 样式9 */
+  .decor-style9 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    height: 20px;
+    padding: 0 24px;
+    border-radius: 10px 10px 0 0;
+    box-sizing: border-box;
+
+    .tabContent {
+      height: 28px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      .tabActive {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 22px;
+      font-weight: 600;
+      height: 24px;
+      padding: 0 16px;
+      margin-top: -5px;
+    }
+
+    .tabLeft {
+      height: 25px;
+      width: 16px;
+      border-radius: 0 0 0 8px;
+      margin-bottom: 6px;
+      margin-right: -1px;
+      clip-path: polygon(
+        0% 0%,        
+        100% 0%,        
+        100% 100%,
+        77% 96%,        
+        50% 82%,        
+        36% 69%,        
+        32% 64%,        
+        0% 0%
+      );
+    }
+
+    .tabRight {
+      height: 25px;
+      width: 16px;
+      border-radius: 0 0 8px 0;
+      margin-bottom: 6px;
+      margin-left: -1px;
+      clip-path: polygon(
+        0% 0%,                
+        100% 0%,                
+        77% 60%,                
+        59% 80%,                
+        49% 86%,                
+        16% 100%,         
+        0% 100% 
+      );
+    }
+    }
+  }
+
+  /* 左右撑开的留白，不做剪裁 */
+  .decor-style9::before {
+    content: '';
+    height: 4px;
+    background-color: var(--before-bg);
+    width: 6px;
+    border-radius: 4px 0 0 0;
+    position: relative;
+    top: -12px;
+    right: -2px;
+  }
+
+  .decor-style9::after {
+    content: '';
+    height: 4px;
+    background-color: var(--after-bg);
+    width: 6px;
+    border-radius: 0 4px 0 0;
+    position: relative;
+    top: -12px;
+    left: -2px;
+  }
+
+  /* 样式10 */
   .decor-style10 {
     display: flex;
     align-items: center;
     justify-content: center;
+    height: 24px;
+    overflow: hidden;
 
     .center {
       padding: 0px 16px;
@@ -142,7 +233,7 @@
     .leftArrows,
     .rightArrows {
       display: flex;
-      height: 24px;
+      height: 25px;
     }
 
     /* ---------------- 左侧箭头 ---------------- */
